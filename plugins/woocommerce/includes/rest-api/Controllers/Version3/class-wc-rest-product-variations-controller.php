@@ -8,7 +8,11 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 defined( 'ABSPATH' ) || exit;
+
+use Automattic\Jetpack\Constants;
 
 /**
  * REST API variations controller class.
@@ -24,6 +28,33 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @var string
 	 */
 	protected $namespace = 'wc/v3';
+
+	/**
+	 * Register the routes for products.
+	 */
+	public function register_routes() {
+		parent::register_routes();
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/generate',
+			array(
+				'args'   => array(
+					'product_id' => array(
+						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'generate' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+	}
 
 	/**
 	 * Prepare a single variation output for response.
@@ -412,9 +443,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$weight_unit    = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
-		$schema         = array(
+		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
+		$schema               = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => $this->post_type,
 			'type'       => 'object',
@@ -614,7 +645,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				),
 				'weight'                => array(
 					/* translators: %s: weight unit */
-					'description' => sprintf( __( 'Variation weight (%s).', 'woocommerce' ), $weight_unit ),
+					'description' => sprintf( __( 'Variation weight (%s).', 'woocommerce' ), $weight_unit_label ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -625,19 +656,19 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'properties'  => array(
 						'length' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Variation length (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Variation length (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'width'  => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Variation width (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Variation width (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'height' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Variation height (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Variation height (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -780,6 +811,22 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Set post_status.
 		$args['post_status'] = $request['status'];
 
+		// Filter by local attributes.
+		if ( ! empty( $request['local_attributes'] ) && is_array( $request['local_attributes'] ) ) {
+			foreach ( $request['local_attributes'] as $attribute ) {
+				if ( ! isset( $attribute['attribute'] ) || ! isset( $attribute['term'] ) ) {
+					continue;
+				}
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					$args,
+					array(
+						'key'   => 'attribute_' . $attribute['attribute'],
+						'value' => $attribute['term'],
+					)
+				);
+			}
+		}
+
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
 			$skus = explode( ',', $request['sku'] );
@@ -876,5 +923,31 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Generate all variations for a given product.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function generate( $request ) {
+		$product_id = (int) $request['product_id'];
+
+		if ( 'product' !== get_post_type( $product_id ) ) {
+			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		wc_maybe_define_constant( 'WC_MAX_LINKED_VARIATIONS', 50 );
+		wc_set_time_limit( 0 );
+
+		$response          = array();
+		$product           = wc_get_product( $product_id );
+		$data_store        = $product->get_data_store();
+		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) );
+
+		$data_store->sort_all_product_variations( $product->get_id() );
+
+		return rest_ensure_response( $response );
 	}
 }

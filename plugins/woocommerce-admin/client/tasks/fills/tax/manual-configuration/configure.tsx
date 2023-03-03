@@ -6,21 +6,19 @@ import { Button } from '@wordpress/components';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { SETTINGS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { SettingsSelector, TaxChildProps } from '../utils';
+import { TaxChildProps } from '../utils';
 
 export const Configure: React.FC<
 	Pick< TaxChildProps, 'isPending' | 'onManual' >
 > = ( { isPending, onManual } ) => {
 	const { generalSettings } = useSelect( ( select ) => {
-		const { getSettings } = select(
-			SETTINGS_STORE_NAME
-		) as SettingsSelector;
+		const { getSettings } = select( SETTINGS_STORE_NAME );
 
 		return {
 			generalSettings: getSettings( 'general' )?.general,
@@ -41,7 +39,7 @@ export const Configure: React.FC<
 				{ __( 'Configure', 'woocommerce' ) }
 			</Button>
 			<p>
-				{ generalSettings.woocommerce_calc_taxes !== 'yes' &&
+				{ generalSettings?.woocommerce_calc_taxes !== 'yes' &&
 					interpolateComponents( {
 						mixedString: __(
 							/*eslint-disable max-len*/

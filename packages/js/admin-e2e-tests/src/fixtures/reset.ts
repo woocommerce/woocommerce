@@ -1,11 +1,12 @@
 /**
+ * External dependencies
+ */
+import { utils } from '@woocommerce/e2e-utils';
+/**
  * Internal dependencies
  */
 import { httpClient } from './http-client';
 import { deactivateAndDeleteAllPlugins } from './plugins';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { utils } = require( '@woocommerce/e2e-utils' );
 
 const { PLUGIN_NAME } = process.env;
 
@@ -21,6 +22,7 @@ const skippedPlugins = [
 	'woocommerce-reset',
 	'basic-auth',
 	'wp-mail-logging',
+	'woocommerce-enable-cot',
 	pluginNameSlug,
 ];
 

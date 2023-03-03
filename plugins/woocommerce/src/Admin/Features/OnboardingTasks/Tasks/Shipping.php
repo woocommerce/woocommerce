@@ -24,13 +24,8 @@ class Shipping extends Task {
 		// wp_ajax_woocommerce_shipping_zone_methods_save_changes
 		// and wp_ajax_woocommerce_shipping_zones_save_changes get fired
 		// when a new zone is added or an existing one has been changed.
-		// Delete the zone count transient used in has_shipping_zones() method
-		// to refresh the cache.
-		$delete_transient = function() {
-			delete_transient( self::ZONE_COUNT_TRANSIENT_NAME );
-		};
-		add_action( 'wp_ajax_woocommerce_shipping_zones_save_changes', $delete_transient, 9 );
-		add_action( 'wp_ajax_woocommerce_shipping_zone_methods_save_changes', $delete_transient, 9 );
+		add_action( 'wp_ajax_woocommerce_shipping_zones_save_changes', array( __CLASS__, 'delete_zone_count_transient' ), 9 );
+		add_action( 'wp_ajax_woocommerce_shipping_zone_methods_save_changes', array( __CLASS__, 'delete_zone_count_transient' ), 9 );
 	}
 
 	/**
@@ -48,9 +43,6 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
-			return __( 'Select how to ship your products', 'woocommerce' );
-		}
 		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
 			if ( $this->is_complete() ) {
 				return __( 'You added shipping costs', 'woocommerce' );
@@ -66,9 +58,6 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_content() {
-		if ( count( $this->task_list->get_sections() ) > 0 ) {
-			return __( 'Set delivery costs and enable extra features, like shipping label printing.', 'woocommerce' );
-		}
 		return __(
 			"Set your store location and where you'll ship to.",
 			'woocommerce'
@@ -131,7 +120,7 @@ class Shipping extends Task {
 				return true;
 			}
 
-			return in_array( $store_country, array( 'AU', 'CA', 'GB' ), true );
+			return in_array( $store_country, array( 'CA', 'AU', 'GB', 'ES', 'IT', 'DE', 'FR', 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT', 'NL', 'AT', 'BE' ), true );
 		}
 
 		return self::has_physical_products();
@@ -175,6 +164,14 @@ class Shipping extends Task {
 		$product_types = isset( $profiler_data['product_types'] ) ? $profiler_data['product_types'] : array();
 
 		return in_array( 'physical', $product_types, true );
+	}
+
+	/**
+	 * Delete the zone count transient used in has_shipping_zones() method
+	 * to refresh the cache.
+	 */
+	public static function delete_zone_count_transient() {
+		delete_transient( self::ZONE_COUNT_TRANSIENT_NAME );
 	}
 
 	/**

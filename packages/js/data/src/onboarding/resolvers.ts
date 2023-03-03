@@ -92,10 +92,16 @@ export function* getTask() {
 	yield resolveSelect( STORE_NAME, 'getTaskLists' );
 }
 
-export function* getPaymentGatewaySuggestions() {
+export function* getPaymentGatewaySuggestions(
+	forceDefaultSuggestions = false
+) {
+	let path = WC_ADMIN_NAMESPACE + '/payment-gateway-suggestions';
+	if ( forceDefaultSuggestions ) {
+		path += '?force_default_suggestions=true';
+	}
 	try {
 		const results: Plugin[] = yield apiFetch( {
-			path: WC_ADMIN_NAMESPACE + '/payment-gateway-suggestions',
+			path,
 			method: 'GET',
 		} );
 

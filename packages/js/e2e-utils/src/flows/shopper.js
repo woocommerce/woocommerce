@@ -267,11 +267,11 @@ const shopper = {
 		// Single search results may go directly to product page
 		if ( await page.waitForSelector( 'h2.entry-title' ) ) {
 			await expect( page ).toMatchElement( 'h2.entry-title', {
-        text: prouductName
-      } );
-			await expect( page ).toClick( 'h2.entry-title > a' , {
-        text: prouductName
-      } );
+				text: prouductName,
+			} );
+			await expect( page ).toClick( 'h2.entry-title > a', {
+				text: prouductName,
+			} );
 		}
 		await page.waitForSelector( 'h1.entry-title' );
 		await expect( page.title() ).resolves.toMatch( prouductName );

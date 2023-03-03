@@ -1,8 +1,18 @@
-import { sleep, check, group } from "k6";
-import http from "k6/http";
-import { Trend } from "k6/metrics";
-import { randomIntBetween } from "https://jslib.k6.io/k6-utils/1.1.0/index.js";
-import { findBetween } from "https://jslib.k6.io/k6-utils/1.1.0/index.js";
+/* eslint-disable no-shadow */
+/* eslint-disable import/no-unresolved */
+/**
+ * External dependencies
+ */
+import { sleep, check, group } from 'k6';
+import http from 'k6/http';
+import {
+	randomIntBetween,
+	findBetween,
+} from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
+
+/**
+ * Internal dependencies
+ */
 import {
 	base_url,
 	customer_username,
@@ -27,7 +37,7 @@ import {
 	payment_method,
 	think_time_min,
 	think_time_max,
-} from "../../config.js";
+} from '../../config.js';
 import {
 	htmlRequestHeader,
 	jsonRequestHeader,
@@ -36,15 +46,7 @@ import {
 	commonGetRequestHeaders,
 	commonPostRequestHeaders,
 	commonNonStandardHeaders,
-} from "../../headers.js";
-
-// Custom metrics to add to standard results output.
-let proceedCheckoutTrend1 = new Trend("wc_get_checkout");
-let proceedCheckoutTrend2 = new Trend("wc_post_wc-ajax_update_order_review");
-let checkoutLoginTrend = new Trend("wc_post_checkout");
-let placeOrderTrend = new Trend("wc_post_wc-ajax_checkout");
-let orderReceivedTrend1 = new Trend("wc_get_order_received");
-let orderReceivedTrend2 = new Trend("wc_post_wc-ajax_get_refreshed_fragments");
+} from '../../headers.js';
 
 export function checkoutCustomerLogin() {
 	let response;
@@ -53,37 +55,41 @@ export function checkoutCustomerLogin() {
 	let update_order_review_nonce_guest;
 	let update_order_review_nonce_customer;
 
-	group("Proceed to checkout", function () {
-		var requestHeaders = Object.assign({},
+	group( 'Proceed to checkout', function () {
+		const requestHeaders = Object.assign(
+			{},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
 			commonNonStandardHeaders
 		);
 
-		response = http.get(`${base_url}/checkout`, {
+		response = http.get( `${ base_url }/checkout`, {
 			headers: requestHeaders,
-		});
-		proceedCheckoutTrend1.add(response.timings.duration);
-		check(response, {
-			"is status 200": (r) => r.status === 200,
-			"body contains checkout class": (response) =>
-				response.body.includes('class="checkout woocommerce-checkout"'),
-		});
+			tags: { name: 'Shopper - View Checkout' },
+		} );
+		check( response, {
+			'is status 200': ( r ) => r.status === 200,
+			'body contains checkout class': ( response ) =>
+				response.body.includes(
+					'class="checkout woocommerce-checkout"'
+				),
+		} );
 
 		// Correlate nonce values for use in subsequent requests.
 		woocommerce_login_nonce = response
 			.html()
-			.find("input[name=woocommerce-login-nonce]")
+			.find( 'input[name=woocommerce-login-nonce]' )
 			.first()
-			.attr("value");
+			.attr( 'value' );
 		update_order_review_nonce_guest = findBetween(
 			response.body,
 			'update_order_review_nonce":"',
 			'","apply_coupon_nonce'
 		);
 
-		var requestHeaders = Object.assign({},
+		const requestHeadersPost = Object.assign(
+			{},
 			allRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
@@ -91,38 +97,39 @@ export function checkoutCustomerLogin() {
 		);
 
 		response = http.post(
-			`${base_url}/?wc-ajax=update_order_review`,
+			`${ base_url }/?wc-ajax=update_order_review`,
 			{
-				security: `${update_order_review_nonce_guest}`,
-				payment_method: `${payment_method}`,
-				country: `${addresses_guest_billing_country}`,
-				state: `${addresses_guest_billing_state}`,
-				postcode: `${addresses_guest_billing_postcode}`,
-				city: `${addresses_guest_billing_city}`,
-				address: `${addresses_guest_billing_address_1}`,
-				address_2: `${addresses_guest_billing_address_2}`,
-				s_country: `${addresses_guest_billing_country}`,
-				s_state: `${addresses_guest_billing_state}`,
-				s_postcode: `${addresses_guest_billing_postcode}`,
-				s_city: `${addresses_guest_billing_city}`,
-				s_address: `${addresses_guest_billing_address_1}`,
-				s_address_2: `${addresses_guest_billing_address_2}`,
-				has_full_address: "true",
+				security: `${ update_order_review_nonce_guest }`,
+				payment_method: `${ payment_method }`,
+				country: `${ addresses_guest_billing_country }`,
+				state: `${ addresses_guest_billing_state }`,
+				postcode: `${ addresses_guest_billing_postcode }`,
+				city: `${ addresses_guest_billing_city }`,
+				address: `${ addresses_guest_billing_address_1 }`,
+				address_2: `${ addresses_guest_billing_address_2 }`,
+				s_country: `${ addresses_guest_billing_country }`,
+				s_state: `${ addresses_guest_billing_state }`,
+				s_postcode: `${ addresses_guest_billing_postcode }`,
+				s_city: `${ addresses_guest_billing_city }`,
+				s_address: `${ addresses_guest_billing_address_1 }`,
+				s_address_2: `${ addresses_guest_billing_address_2 }`,
+				has_full_address: 'true',
 			},
 			{
-				headers: requestHeaders,
+				headers: requestHeadersPost,
+				tags: { name: 'Shopper - wc-ajax=update_order_review' },
 			}
 		);
-		proceedCheckoutTrend2.add(response.timings.duration);
-		check(response, {
-			"is status 200": (r) => r.status === 200,
-		});
-	});
+		check( response, {
+			'is status 200': ( r ) => r.status === 200,
+		} );
+	} );
 
-	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 
-	group("Login on checkout", function () {
-		var requestHeaders = Object.assign({},
+	group( 'Login on checkout', function () {
+		const requestHeaders = Object.assign(
+			{},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
@@ -130,39 +137,38 @@ export function checkoutCustomerLogin() {
 		);
 
 		response = http.post(
-			`${base_url}/checkout`,
+			`${ base_url }/checkout`,
 			{
-				username: `${customer_username}`,
-				password: `${customer_password}`,
-				"woocommerce-login-nonce": `${woocommerce_login_nonce}`,
-				_wp_http_referer: "%2Fcheckout",
-				redirect: `${base_url}/checkout`,
-				login: "Login",
+				username: `${ customer_username }`,
+				password: `${ customer_password }`,
+				'woocommerce-login-nonce': `${ woocommerce_login_nonce }`,
+				_wp_http_referer: '%2Fcheckout',
+				redirect: `${ base_url }/checkout`,
+				login: 'Login',
 			},
 			{
-				headers: {
-					headers: requestHeaders,
-				},
+				headers: requestHeaders,
+				tags: { name: 'Shopper - Login to Checkout' },
 			}
 		);
-		checkoutLoginTrend.add(response.timings.duration);
-		check(response, {
-			"is status 200": (r) => r.status === 200,
-		});
+		check( response, {
+			'is status 200': ( r ) => r.status === 200,
+		} );
 
 		// Correlate nonce values for use in subsequent requests.
 		woocommerce_process_checkout_nonce_customer = response
 			.html()
-			.find("input[name=woocommerce-process-checkout-nonce]")
+			.find( 'input[name=woocommerce-process-checkout-nonce]' )
 			.first()
-			.attr("value");
+			.attr( 'value' );
 		update_order_review_nonce_customer = findBetween(
 			response.body,
 			'update_order_review_nonce":"',
 			'","apply_coupon_nonce'
 		);
 
-		var requestHeaders = Object.assign({},
+		const requestHeadersPost = Object.assign(
+			{},
 			allRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
@@ -170,38 +176,39 @@ export function checkoutCustomerLogin() {
 		);
 
 		response = http.post(
-			`${base_url}/?wc-ajax=update_order_review`,
+			`${ base_url }/?wc-ajax=update_order_review`,
 			{
-				security: `${update_order_review_nonce_customer}`,
-				payment_method: `${payment_method}`,
-				country: `${addresses_customer_billing_country}`,
-				state: `${addresses_customer_billing_state}`,
-				postcode: `${addresses_customer_billing_postcode}`,
-				city: `${addresses_customer_billing_city}`,
-				address: `${addresses_customer_billing_address_1}`,
-				address_2: `${addresses_customer_billing_address_2}`,
-				s_country: `${addresses_customer_billing_country}`,
-				s_state: `${addresses_customer_billing_state}`,
-				s_postcode: `${addresses_customer_billing_postcode}`,
-				s_city: `${addresses_customer_billing_city}`,
-				s_address: `${addresses_customer_billing_address_1}`,
-				s_address_2: `${addresses_customer_billing_address_2}`,
-				has_full_address: "true",
+				security: `${ update_order_review_nonce_customer }`,
+				payment_method: `${ payment_method }`,
+				country: `${ addresses_customer_billing_country }`,
+				state: `${ addresses_customer_billing_state }`,
+				postcode: `${ addresses_customer_billing_postcode }`,
+				city: `${ addresses_customer_billing_city }`,
+				address: `${ addresses_customer_billing_address_1 }`,
+				address_2: `${ addresses_customer_billing_address_2 }`,
+				s_country: `${ addresses_customer_billing_country }`,
+				s_state: `${ addresses_customer_billing_state }`,
+				s_postcode: `${ addresses_customer_billing_postcode }`,
+				s_city: `${ addresses_customer_billing_city }`,
+				s_address: `${ addresses_customer_billing_address_1 }`,
+				s_address_2: `${ addresses_customer_billing_address_2 }`,
+				has_full_address: 'true',
 			},
 			{
-				headers: requestHeaders,
+				headers: requestHeadersPost,
+				tags: { name: 'Shopper - wc-ajax=update_order_review' },
 			}
 		);
-		proceedCheckoutTrend2.add(response.timings.duration);
-		check(response, {
-			"is status 200": (r) => r.status === 200,
-		});
-	});
+		check( response, {
+			'is status 200': ( r ) => r.status === 200,
+		} );
+	} );
 
-	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 
-	group("Place Order", function () {
-		var requestHeaders = Object.assign({},
+	group( 'Place Order', function () {
+		const requestHeaders = Object.assign(
+			{},
 			jsonRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
@@ -209,76 +216,81 @@ export function checkoutCustomerLogin() {
 		);
 
 		response = http.post(
-			`${base_url}/?wc-ajax=checkout`,
+			`${ base_url }/?wc-ajax=checkout`,
 			{
-				billing_first_name: `${addresses_customer_billing_first_name}`,
-				billing_last_name: `${addresses_customer_billing_last_name}`,
-				billing_company: `${addresses_customer_billing_company}`,
-				billing_country: `${addresses_customer_billing_country}`,
-				billing_address_1: `${addresses_customer_billing_address_1}`,
-				billing_address_2: `${addresses_customer_billing_address_2}`,
-				billing_city: `${addresses_customer_billing_city}`,
-				billing_state: `${addresses_customer_billing_state}`,
-				billing_postcode: `${addresses_customer_billing_postcode}`,
-				billing_phone: `${addresses_customer_billing_phone}`,
-				billing_email: `${addresses_customer_billing_email}`,
-				order_comments: "",
-				payment_method: `${payment_method}`,
-				"woocommerce-process-checkout-nonce": `${woocommerce_process_checkout_nonce_customer}`,
-				_wp_http_referer: "%2F%3Fwc-ajax%3Dupdate_order_review",
+				billing_first_name: `${ addresses_customer_billing_first_name }`,
+				billing_last_name: `${ addresses_customer_billing_last_name }`,
+				billing_company: `${ addresses_customer_billing_company }`,
+				billing_country: `${ addresses_customer_billing_country }`,
+				billing_address_1: `${ addresses_customer_billing_address_1 }`,
+				billing_address_2: `${ addresses_customer_billing_address_2 }`,
+				billing_city: `${ addresses_customer_billing_city }`,
+				billing_state: `${ addresses_customer_billing_state }`,
+				billing_postcode: `${ addresses_customer_billing_postcode }`,
+				billing_phone: `${ addresses_customer_billing_phone }`,
+				billing_email: `${ addresses_customer_billing_email }`,
+				order_comments: '',
+				payment_method: `${ payment_method }`,
+				'woocommerce-process-checkout-nonce': `${ woocommerce_process_checkout_nonce_customer }`,
+				_wp_http_referer: '%2F%3Fwc-ajax%3Dupdate_order_review',
 			},
 			{
 				headers: requestHeaders,
+				tags: { name: 'Shopper - wc-ajax=checkout' },
 			}
 		);
-		placeOrderTrend.add(response.timings.duration);
-		check(response, {
-			"is status 200": (r) => r.status === 200,
-			"body contains: order-received": (response) =>
-				response.body.includes("order-received"),
-		});
-	});
+		check( response, {
+			'is status 200': ( r ) => r.status === 200,
+			'body contains: order-received': ( response ) =>
+				response.body.includes( 'order-received' ),
+		} );
+	} );
 
-	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 
-	group("Order received", function () {
-		var requestHeaders = Object.assign({},
+	group( 'Order received', function () {
+		const requestHeaders = Object.assign(
+			{},
 			htmlRequestHeader,
 			commonRequestHeaders,
 			commonGetRequestHeaders,
 			commonNonStandardHeaders
 		);
 
-		response = http.get(`${base_url}/checkout/order-received/`, {
-			headers: requestheaders,
-		});
-		check(response, {
+		response = http.get( `${ base_url }/checkout/order-received/`, {
+			headers: requestHeaders,
+			tags: { name: 'Shopper - Order Received' },
+		} );
+		check( response, {
 			"body contains: 'Thank you. Your order has been received.'": (
 				response
 			) =>
 				response.body.includes(
-					"Thank you. Your order has been received."
+					'Thank you. Your order has been received.'
 				),
-		});
-		orderReceivedTrend1.add(response.timings.duration);
+		} );
 
-		var requestheaders = Object.assign({},
+		const requestHeadersPost = Object.assign(
+			{},
 			allRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
 			commonNonStandardHeaders
 		);
 
-		response = http.post(`${base_url}/?wc-ajax=get_refreshed_fragments`, {
-			headers: requestHeaders,
-		});
-		orderReceivedTrend2.add(response.timings.duration);
-		check(response, {
-			"is status 200": (r) => r.status === 200,
-		});
-	});
+		response = http.post(
+			`${ base_url }/?wc-ajax=get_refreshed_fragments`,
+			{
+				headers: requestHeadersPost,
+				tags: { name: 'Shopper - wc-ajax=get_refreshed_fragments' },
+			}
+		);
+		check( response, {
+			'is status 200': ( r ) => r.status === 200,
+		} );
+	} );
 
-	sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`));
+	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 }
 
 export default function () {

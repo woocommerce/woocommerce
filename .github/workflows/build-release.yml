@@ -2,24 +2,22 @@ name: Build release asset
 on: 
   release:
     types: [published]
+
+permissions: {}
+
 jobs:
   build:
     name: Build release asset
     runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/cache-deps
+      
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
         with:
-          workflow_name: build-release
-          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-      - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
+          build: false
 
       - name: Build zip
         working-directory: plugins/woocommerce
@@ -34,6 +32,8 @@ jobs:
           asset_path: plugins/woocommerce/woocommerce.zip
           asset_name: woocommerce.zip
           asset_content_type: application/zip
+
+
   update-code-reference:
     if: github.event.release.prerelease == false && github.event.release.draft == false && github.repository_owner == 'woocommerce'
     name: Update Code Reference
@@ -47,32 +47,4 @@ jobs:
           repo: woocommerce/code-reference
           token: ${{ secrets.CUSTOM_GH_TOKEN }}
           ref: refs/heads/trunk
-          inputs: '{ "version": "${{ github.event.release.tag_name }}" }'
-  run-release-smoke-tests:
-    name: Execute Smoke test release
-    needs: build
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Invoke release smoke testing workflow
-        uses: aurelien-baudet/workflow-dispatch@v2
-        with:
-          workflow: Smoke test release
-          repo: ${{ github.repository }}
-          token: ${{ secrets.E2E_WORKFLOW_GH_TOKEN }}
-          ref: refs/heads/trunk
-          inputs: '{ "release_id": "${{ github.event.release.id }}" }'
-  send-release-notification:
-    if: github.event.release.prerelease == true && github.event.release.draft == false && github.event.release.tag_name != 'nightly' 
-    name: Send Release Notification
-    needs: build
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Invoke Pre-Release Event
-        uses: aurelien-baudet/workflow-dispatch@v2
-        with:
-          workflow: ${{ secrets.CD_RELEASE_NOTIFICATION_WORKFLOW }}
-          repo: ${{ secrets.CD_NOTIFICATION_REPO }}
-          token: ${{ secrets.CD_GH_TOKEN }}
-          ref: refs/heads/trunk
-          inputs: '{ "tag_name": "${{ github.event.release.tag_name }}" }'
-
+          inputs: '{ "version": "${{ github.event.release.tag_name }}" }'    

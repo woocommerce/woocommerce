@@ -15,6 +15,10 @@
 
 		.wooocommerce-task-card__header {
 			display: flex;
+
+			.components-text + .woocommerce-badge {
+				margin-left: 16px;
+			}
 		}
 
 		.woocommerce-list__item-text {
@@ -234,9 +238,11 @@
 	margin-top: $gap;
 }
 
-.woocommerce-task-list__setup_experiment_1 {
-	.woocommerce-experimental-list .woocommerce-experimental-list__item.complete {
+.woocommerce-task-list__setup {
+	.woocommerce-experimental-list
+	.woocommerce-experimental-list__item.complete {
 		text-decoration: line-through;
+		color: var(--wp-admin-theme-color);
 
 		.woocommerce-task-list__item-title {
 			color: var(--wp-admin-theme-color);

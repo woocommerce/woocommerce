@@ -25,6 +25,7 @@ export type TaskType = {
 	isActioned: boolean;
 	eventPrefix: string;
 	level: number;
+	recordViewEvent: boolean;
 	additionalData?: {
 		woocommerceTaxCountries?: string[];
 		taxJarActivated?: boolean;
@@ -53,15 +54,6 @@ export type DeprecatedTaskType = {
 	type?: string;
 };
 
-export type TaskListSection = {
-	id: string;
-	title: string;
-	description: string;
-	image: string;
-	tasks: string[];
-	isComplete: boolean;
-};
-
 export type TaskListType = {
 	id: string;
 	title: string;
@@ -73,7 +65,6 @@ export type TaskListType = {
 	displayProgressHeader: boolean;
 	keepCompletedTaskList: 'yes' | 'no';
 	showCESFeedback?: boolean;
-	sections?: TaskListSection[];
 	isToggleable?: boolean;
 	isCollapsible?: boolean;
 	isExpandable?: boolean;
@@ -126,22 +117,23 @@ export type RevenueTypeSlug =
 	| 'more-than-250000';
 
 export type ProfileItems = {
-	business_extensions: [] | null;
-	completed: boolean | null;
-	industry: Industry[] | null;
-	number_employees: string | null;
-	other_platform: OtherPlatformSlug | null;
-	other_platform_name: string | null;
-	product_count: ProductCount | null;
-	product_types: ProductTypeSlug[] | null;
-	revenue: RevenueTypeSlug | null;
-	selling_venues: string | null;
-	setup_client: boolean | null;
-	skipped: boolean | null;
-	theme: string | null;
-	wccom_connected: boolean | null;
-	is_agree_marketing: boolean | null;
-	store_email: string | null;
+	business_extensions?: [] | null;
+	completed?: boolean | null;
+	industry?: Industry[] | null;
+	number_employees?: string | null;
+	other_platform?: OtherPlatformSlug | null;
+	other_platform_name?: string | null;
+	product_count?: ProductCount | null;
+	product_types?: ProductTypeSlug[] | null;
+	revenue?: RevenueTypeSlug | null;
+	selling_venues?: string | null;
+	setup_client?: boolean | null;
+	skipped?: boolean | null;
+	theme?: string | null;
+	wccom_connected?: boolean | null;
+	is_agree_marketing?: boolean | null;
+	store_email?: string | null;
+	is_store_country_set?: boolean | null;
 };
 
 export type FieldLocale = {

@@ -10,6 +10,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
+
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name, can't change without breaking backward compat.
 /**
  * REST API Orders controller class.
  *
@@ -18,6 +23,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
+	// phpcs:enable
 	/**
 	 * Endpoint namespace.
 	 *
@@ -216,10 +222,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Add SKU, PRICE, and IMAGE to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
-			$data['sku']       = $item->get_product() ? $item->get_product()->get_sku() : null;
-			$data['price']     = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
+			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku() : null;
+			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 
-			$image_id = $item->get_product() ? $item->get_product()->get_image_id() : 0;
+			$image_id      = $item->get_product() ? $item->get_product()->get_image_id() : 0;
 			$data['image'] = array(
 				'id'  => $image_id,
 				'src' => $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '',
@@ -314,7 +320,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( array_key_exists( $meta_item->id, $formatted_meta_data ) ) {
 			$formatted_meta_item = $formatted_meta_data[ $meta_item->id ];
 
-			$result['display_key'] = wc_clean( $formatted_meta_item->display_key );
+			$result['display_key']   = wc_clean( $formatted_meta_item->display_key );
 			$result['display_value'] = wc_clean( $formatted_meta_item->display_value );
 		}
 
@@ -330,9 +336,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $order ) {
-		$extra_fields      = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds', 'payment_url', 'is_editable', 'needs_payment', 'needs_processing' );
-		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
-		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
+		$extra_fields   = array( 'meta_data', 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines', 'refunds', 'payment_url', 'is_editable', 'needs_payment', 'needs_processing' );
+		$format_decimal = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
+		$format_date    = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
 		// These fields are dependent on other fields.
 		$dependent_fields = array(
 			'date_created_gmt'   => 'date_created',
@@ -346,14 +352,14 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		// Only fetch fields that we need.
 		$fields = $this->get_fields_for_response( $this->request );
 		foreach ( $dependent_fields as $field_key => $dependency ) {
-			if ( in_array( $field_key, $fields ) && ! in_array( $dependency, $fields ) ) {
+			if ( in_array( $field_key, $fields, true ) && ! in_array( $dependency, $fields, true ) ) {
 				$fields[] = $dependency;
 			}
 		}
 
-		$extra_fields      = array_intersect( $extra_fields, $fields );
-		$format_decimal    = array_intersect( $format_decimal, $fields );
-		$format_date       = array_intersect( $format_date, $fields );
+		$extra_fields   = array_intersect( $extra_fields, $fields );
+		$format_decimal = array_intersect( $format_decimal, $fields );
+		$format_date    = array_intersect( $format_date, $fields );
 
 		$format_line_items = array_intersect( $format_line_items, $fields );
 
@@ -363,7 +369,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		foreach ( $extra_fields as $field ) {
 			switch ( $field ) {
 				case 'meta_data':
-					$data['meta_data'] = $order->get_meta_data();
+					$meta_data         = $order->get_meta_data();
+					$data['meta_data'] = $this->get_meta_data_for_response( $this->request, $meta_data );
 					break;
 				case 'line_items':
 					$data['line_items'] = $order->get_items( 'line_item' );
@@ -505,6 +512,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param WP_REST_Request  $request  Request object.
+		 *
+		 * @since 4.5.0
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -593,7 +602,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Search.
-		if ( ! empty( $args['s'] ) ) {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() && ! empty( $args['s'] ) ) {
 			$order_ids = wc_order_search( $args['s'] );
 
 			if ( ! empty( $order_ids ) ) {
@@ -609,6 +618,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 *
 		 * @param array           $args    Key value array of query var to query value.
 		 * @param WP_REST_Request $request The request used.
+		 *
+		 * @since 4.5.0.
 		 */
 		$args = apply_filters( 'woocommerce_rest_orders_prepare_object_query', $args, $request );
 
@@ -692,6 +703,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @param WC_Data         $order    Object object.
 		 * @param WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
+		 *
+		 * @since 4.5.0.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
 	}
@@ -933,7 +946,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$item = is_null( $item ) ? new WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
-			if ( empty( $posted['code'] ) ) {
+			$coupon_code = ArrayUtil::get_value_or_default( $posted, 'code' );
+			if ( StringUtil::is_null_or_whitespace( $coupon_code ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 		}
@@ -978,6 +992,14 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		// Prepare item data.
 		$item = $this->$method( $posted, $action, $item );
 
+		/**
+		 * Allow extensions be notified before the item before is saved.
+		 *
+		 * @param WC_Order_Item $item The item object.
+		 * @param array         $posted The item data.
+		 *
+		 * @since 4.5.0.
+		 */
 		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
 
 		// If creating the order, add the item to it.
@@ -1511,19 +1533,16 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 								'properties'  => array(
-									'type'       => 'object',
-									'properties' => array(
-										'id'                => array(
-											'description' => __( 'Image ID.', 'woocommerce' ),
-											'type'        => 'integer',
-											'context'     => array( 'view', 'edit' ),
-										),
-										'src'               => array(
-											'description' => __( 'Image URL.', 'woocommerce' ),
-											'type'        => 'string',
-											'format'      => 'uri',
-											'context'     => array( 'view', 'edit' ),
-										),
+									'id'  => array(
+										'description' => __( 'Image ID.', 'woocommerce' ),
+										'type'        => 'integer',
+										'context'     => array( 'view', 'edit' ),
+									),
+									'src' => array(
+										'description' => __( 'Image URL.', 'woocommerce' ),
+										'type'        => 'string',
+										'format'      => 'uri',
+										'context'     => array( 'view', 'edit' ),
 									),
 								),
 							),
@@ -1929,7 +1948,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
 
-		$params['status']   = array(
+		$params['status']                  = array(
 			'default'           => 'any',
 			'description'       => __( 'Limit result set to orders assigned a specific status.', 'woocommerce' ),
 			'type'              => 'string',
@@ -1937,19 +1956,19 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['customer'] = array(
+		$params['customer']                = array(
 			'description'       => __( 'Limit result set to orders assigned a specific customer.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['product']  = array(
+		$params['product']                 = array(
 			'description'       => __( 'Limit result set to orders assigned a specific product.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['dp']       = array(
+		$params['dp']                      = array(
 			'default'           => wc_get_price_decimals(),
 			'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
 			'type'              => 'integer',
@@ -1957,13 +1976,60 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['order_item_display_meta'] = array(
-			'default' => false,
-			'description' => __( 'Only show meta which is meant to be displayed for an order.', 'woocommerce' ),
-			'type' => 'boolean',
+			'default'           => false,
+			'description'       => __( 'Only show meta which is meant to be displayed for an order.', 'woocommerce' ),
+			'type'              => 'boolean',
 			'sanitize_callback' => 'rest_sanitize_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		$params['include_meta']            = array(
+			'default'           => array(),
+			'description'       => __( 'Limit meta_data to specific keys.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'string',
+			),
+			'sanitize_callback' => 'wp_parse_list',
+		);
+		$params['exclude_meta']            = array(
+			'default'           => array(),
+			'description'       => __( 'Ensure meta_data excludes specific keys.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'string',
+			),
+			'sanitize_callback' => 'wp_parse_list',
+		);
 
 		return $params;
+	}
+
+	/**
+	 * Get objects.
+	 *
+	 * @param  array $query_args Query args.
+	 * @return array
+	 */
+	protected function get_objects( $query_args ) {
+		// Do not use WC_Order_Query for the CPT datastore.
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return parent::get_objects( $query_args );
+		}
+
+		$query   = new \WC_Order_Query(
+			array_merge(
+				$query_args,
+				array(
+					'paginate' => true,
+				)
+			)
+		);
+		$results = $query->get_orders();
+
+		return array(
+			'objects' => $results->orders,
+			'total'   => $results->total,
+			'pages'   => $results->max_num_pages,
+		);
 	}
 }

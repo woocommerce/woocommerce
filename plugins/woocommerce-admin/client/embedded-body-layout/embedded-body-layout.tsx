@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { applyFilters } from '@wordpress/hooks';
+import { useEffect } from '@wordpress/element';
 import QueryString, { parse } from 'qs';
 
 /**
@@ -10,7 +11,9 @@ import QueryString, { parse } from 'qs';
 import { PaymentRecommendations } from '../payments';
 import { ShippingRecommendations } from '../shipping';
 import { EmbeddedBodyProps } from './embedded-body-props';
+import { StoreAddressTour } from '../guided-tours/store-address-tour';
 import './style.scss';
+import { triggerExitPageCesSurvey } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 
 type QueryParams = EmbeddedBodyProps;
 
@@ -23,6 +26,7 @@ function isWPPage(
 const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
 	PaymentRecommendations,
 	ShippingRecommendations,
+	StoreAddressTour,
 ];
 
 /**
@@ -32,6 +36,10 @@ const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
  * Each Fill component receives QueryParams, consisting of a page, tab, and section string.
  */
 export const EmbeddedBodyLayout = () => {
+	useEffect( () => {
+		triggerExitPageCesSurvey();
+	}, [] );
+
 	const query = parse( location.search.substring( 1 ) );
 	let queryParams: QueryParams = { page: '', tab: '' };
 	if ( isWPPage( query ) ) {

@@ -1,18 +1,18 @@
 /**
+ * External dependencies
+ */
+import {
+	clearAndFillInput,
+	verifyCheckboxIsSet,
+	verifyCheckboxIsUnset,
+} from '@woocommerce/e2e-utils';
+import config from 'config';
+/**
  * Internal dependencies
  */
 import { DropdownTypeaheadField } from '../../elements/DropdownTypeaheadField';
 import { BasePage } from '../../pages/BasePage';
 import { waitForElementByText } from '../../utils/actions';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const {
-	clearAndFillInput,
-	verifyCheckboxIsSet,
-	verifyCheckboxIsUnset,
-} = require( '@woocommerce/e2e-utils' );
-const config = require( 'config' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 export interface StoreDetails {
 	addressLine1?: string;
@@ -42,12 +42,6 @@ export class StoreDetailsSection extends BasePage {
 		await this.fillAddress(
 			storeDetails.addressLine1 ||
 				config.get( 'addresses.admin.store.addressfirstline' )
-		);
-
-		// Fill store's address - second line
-		await this.fillAddressLineTwo(
-			storeDetails.addressLine2 ||
-				config.get( 'addresses.admin.store.addresssecondline' )
 		);
 
 		// Type the requested country/region substring or 'cali' in the
@@ -87,10 +81,6 @@ export class StoreDetailsSection extends BasePage {
 		await clearAndFillInput( '#inspector-text-control-0', address );
 	}
 
-	async fillAddressLineTwo( address: string ): Promise< void > {
-		await clearAndFillInput( '#inspector-text-control-1', address );
-	}
-
 	async selectCountry( search: string, selector: string ): Promise< void > {
 		await this.countryDropdown.search( search );
 		await this.countryDropdown.select( selector );
@@ -105,11 +95,11 @@ export class StoreDetailsSection extends BasePage {
 	}
 
 	async fillPostalCode( postalCode: string ): Promise< void > {
-		await clearAndFillInput( '#inspector-text-control-3', postalCode );
+		await clearAndFillInput( '#inspector-text-control-1', postalCode );
 	}
 
 	async fillEmailAddress( email: string ): Promise< void > {
-		await clearAndFillInput( '#inspector-text-control-4', email );
+		await clearAndFillInput( '#inspector-text-control-3', email );
 	}
 
 	async checkMarketingCheckbox( selected: boolean ): Promise< void > {

@@ -87,9 +87,9 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		$has_task_list_previously_completed = ( new TaskList( array( 'id' => 'setup' ) ) )->has_previously_completed();
+		$payments = $this->task_list->get_task( 'payments' );
 
-		return ! $has_task_list_previously_completed && // Do not re-display the task if the task list has already been completed.
+		return ! $payments->is_complete() && // Do not re-display the task if the "add payments" task has already been completed.
 			self::is_installed() &&
 			self::is_supported() &&
 			( $this->get_parent_id() !== 'setup_two_column' || ! self::is_connected() );

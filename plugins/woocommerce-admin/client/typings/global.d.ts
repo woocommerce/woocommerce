@@ -1,5 +1,7 @@
 declare global {
 	interface Window {
+		pagenow: string;
+		adminpage: string;
 		wcSettings: {
 			preloadOptions: Record< string, unknown >;
 			adminUrl: string;
@@ -9,15 +11,16 @@ declare global {
 			analytics: boolean;
 			coupons: boolean;
 			'customer-effort-score-tracks': boolean;
-			'experimental-products-task': boolean;
 			homescreen: boolean;
 			marketing: boolean;
 			'minified-js': boolean;
 			'mobile-app-banner': boolean;
 			navigation: boolean;
+			'new-product-management-experience': boolean;
 			onboarding: boolean;
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
+			'product-variation-management': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
@@ -27,9 +30,22 @@ declare global {
 			'transient-notices': boolean;
 			'wc-pay-promotion': boolean;
 			'wc-pay-welcome-page': boolean;
-			'wc-pay-subscriptions-page': boolean;
+			'woo-mobile-welcome': boolean;
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
+		};
+		wp: {
+			autosave?: {
+				server: {
+					postChanged: () => boolean;
+				};
+			};
+		};
+		tinymce?: {
+			get: ( name: string ) => {
+				isHidden: () => boolean;
+				isDirty: () => boolean;
+			};
 		};
 	}
 }

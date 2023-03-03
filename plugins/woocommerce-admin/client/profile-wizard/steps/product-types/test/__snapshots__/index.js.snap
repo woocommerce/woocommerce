@@ -128,6 +128,7 @@ you can purchase and install it later.
           data-wp-component="CardFooter"
         >
           <button
+            aria-disabled="true"
             class="components-button is-primary"
             disabled=""
             type="button"
@@ -323,6 +324,7 @@ you can purchase and install it later.
           data-wp-component="CardFooter"
         >
           <button
+            aria-disabled="true"
             class="components-button is-primary"
             disabled=""
             type="button"

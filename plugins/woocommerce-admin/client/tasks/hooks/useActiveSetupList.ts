@@ -8,15 +8,9 @@ export const useActiveSetupTasklist = () => {
 	const { activeSetuplist } = useSelect( ( select ) => {
 		const taskLists = select( ONBOARDING_STORE_NAME ).getTaskLists();
 
-		const visibleSetupList = taskLists
-			.filter( ( list ) => list.isVisible )
-			.filter( ( list ) =>
-				[
-					'setup_experiment_1',
-					'setup_experiment_2',
-					'setup',
-				].includes( list.id )
-			);
+		const visibleSetupList = taskLists.filter(
+			( list ) => list.id === 'setup' && list.isVisible
+		);
 
 		return {
 			activeSetuplist: visibleSetupList.length

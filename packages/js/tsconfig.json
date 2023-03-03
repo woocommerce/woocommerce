@@ -21,6 +21,7 @@
 		"**/build-types",
 		"**/test/*",
 		"**/jest.config.js",
-		"**/webpack.*.js"
+		"**/webpack.*.js",
+		"**/babel.config.js"
 	]
 }

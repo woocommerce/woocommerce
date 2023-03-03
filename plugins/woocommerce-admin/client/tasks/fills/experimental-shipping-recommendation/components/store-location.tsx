@@ -3,14 +3,14 @@
  */
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { getCountryCode } from '~/dashboard/utils';
-import { hasCompleteAddress, SettingsSelector } from '../../tax/utils';
+import { hasCompleteAddress } from '../../tax/utils';
 import { default as StoreLocationForm } from '~/tasks/fills/steps/location';
 
 export const StoreLocation: React.FC< {
@@ -21,9 +21,8 @@ export const StoreLocation: React.FC< {
 	const { updateAndPersistSettingsForGroup } =
 		useDispatch( SETTINGS_STORE_NAME );
 	const { generalSettings, isResolving } = useSelect( ( select ) => {
-		const { getSettings, hasFinishedResolution } = select(
-			SETTINGS_STORE_NAME
-		) as SettingsSelector;
+		const { getSettings, hasFinishedResolution } =
+			select( SETTINGS_STORE_NAME );
 
 		return {
 			generalSettings: getSettings( 'general' )?.general,
@@ -34,7 +33,7 @@ export const StoreLocation: React.FC< {
 	} );
 
 	useEffect( () => {
-		if ( isResolving || ! hasCompleteAddress( generalSettings ) ) {
+		if ( isResolving || ! hasCompleteAddress( generalSettings || {} ) ) {
 			return;
 		}
 		onLocationComplete();

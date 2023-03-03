@@ -13,9 +13,6 @@ project.properties
 *.sublime-workspace
 .sublimelinterrc
 
-# Excluded IDE Files for developer experience tooling within workspace
-!.vscode/tasks.json
-
 # Grunt
 none
 
@@ -75,8 +72,8 @@ yarn.lock
 # Editors
 nbproject/private/
 
-# Test Results
-test-results.json
+# E2E and API Test Results
+test-results
 
 # Admin Feature config
 plugins/woocommerce/includes/react-admin/feature-config.php
@@ -88,10 +85,12 @@ phpcs-report.xml
 allure-report
 allure-results
 
-# Playwright output & working files
-/plugins/woocommerce/e2e/output
-/plugins/woocommerce/e2e/report
-/plugins/woocommerce/e2e/storage
+# Code analyzer output and env
+changes.json
+.env
 
 # Turborepo
 .turbo
+
+# Support .gitkeep Files
+!.gitkeep

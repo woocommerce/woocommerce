@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { HTTPClient } from '../../../http';
 import { ModelRepository } from '../../../framework';
 import {
@@ -66,9 +69,8 @@ export function productVariationRESTRepository(
 		...shipping,
 	];
 
-	const transformer = createProductDataTransformer< ProductVariation >(
-		transformations
-	);
+	const transformer =
+		createProductDataTransformer< ProductVariation >( transformations );
 
 	return new ModelRepository(
 		restListChild< ProductVariationRepositoryParams >(

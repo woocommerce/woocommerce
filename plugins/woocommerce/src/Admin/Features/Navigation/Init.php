@@ -34,7 +34,6 @@ class Init {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
-		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
 		add_action( 'update_option_' . self::TOGGLE_OPTION_NAME, array( $this, 'reload_page_on_toggle' ), 10, 2 );
 		add_action( 'woocommerce_settings_saved', array( $this, 'maybe_reload_page' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_opt_out_scripts' ) );
@@ -49,34 +48,12 @@ class Init {
 	/**
 	 * Add the feature toggle to the features settings.
 	 *
+	 * @deprecated 7.0 The WooCommerce Admin features are now handled by the WooCommerce features engine (see the FeaturesController class).
+	 *
 	 * @param array $features Feature sections.
 	 * @return array
 	 */
 	public static function add_feature_toggle( $features ) {
-		$description  = __(
-			'Adds the new WooCommerce navigation experience to the dashboard',
-			'woocommerce'
-		);
-		$update_text  = '';
-		$needs_update = version_compare( get_bloginfo( 'version' ), '5.6', '<' );
-		if ( $needs_update && current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
-			$update_text = sprintf(
-				/* translators: 1: line break tag, 2: open link to WordPress update link, 3: close link tag. */
-				__( '%1$s %2$sUpdate WordPress to enable the new navigation%3$s', 'woocommerce' ),
-				'<br/>',
-				'<a href="' . self_admin_url( 'update-core.php' ) . '" target="_blank">',
-				'</a>'
-			);
-		}
-
-		$features[] = array(
-			'title' => __( 'Navigation', 'woocommerce' ),
-			'desc'  => $description . $update_text,
-			'id'    => self::TOGGLE_OPTION_NAME,
-			'type'  => 'checkbox',
-			'class' => $needs_update ? 'disabled' : '',
-		);
-
 		return $features;
 	}
 
@@ -142,7 +119,7 @@ class Init {
 	 * Enqueue the opt out scripts.
 	 */
 	public function maybe_enqueue_opt_out_scripts() {
-		if ( 'yes' !== get_option( 'woocommerce_navigation_show_opt_out', 'no' ) ) {
+		if ( get_option( 'woocommerce_navigation_show_opt_out', 'no' ) !== 'yes' ) {
 			return;
 		}
 
@@ -154,17 +131,7 @@ class Init {
 			WCAdminAssets::get_file_version( 'css' )
 		);
 
-		$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'navigation-opt-out' );
-		$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
-
-		wp_enqueue_script(
-			'wc-admin-navigation-opt-out',
-			WCAdminAssets::get_url( 'wp-admin-scripts/navigation-opt-out', 'js' ),
-			array_merge( array( WC_ADMIN_APP ), $script_assets ['dependencies'] ),
-			WCAdminAssets::get_file_version( 'js' ),
-			true
-		);
-
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'navigation-opt-out', true );
 		wp_localize_script(
 			'wc-admin-navigation-opt-out',
 			'surveyData',
@@ -172,7 +139,6 @@ class Init {
 				'url' => Survey::get_url( '/new-navigation-opt-out' ),
 			)
 		);
-
 		delete_option( 'woocommerce_navigation_show_opt_out' );
 	}
 }

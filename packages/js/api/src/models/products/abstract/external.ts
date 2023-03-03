@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from '../../model';
 
 /**
@@ -19,4 +22,4 @@ abstract class AbstractProductExternal extends Model {
 	public readonly externalUrl: string = '';
 }
 
-export interface IProductExternal extends AbstractProductExternal {}
+export type IProductExternal = AbstractProductExternal;

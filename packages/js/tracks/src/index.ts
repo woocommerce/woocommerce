@@ -4,6 +4,11 @@
 import debug from 'debug';
 
 /**
+ * Internal dependencies
+ */
+import { isDevelopmentMode } from './utils';
+
+/**
  * Module variables
  */
 const tracksDebug = debug( 'wc-admin:tracks' );
@@ -31,7 +36,7 @@ export function recordEvent(
 	tracksDebug( 'recordevent %s %o', 'wcadmin_' + eventName, eventProperties, {
 		_tqk: window._tkq,
 		shouldRecord:
-			process.env.NODE_ENV !== 'development' &&
+			! isDevelopmentMode &&
 			!! window._tkq &&
 			!! window.wcTracks &&
 			!! window.wcTracks.isEnabled,
@@ -39,9 +44,13 @@ export function recordEvent(
 
 	if (
 		! window.wcTracks ||
-		typeof window.wcTracks.recordEvent !== 'function' ||
-		process.env.NODE_ENV === 'development'
+		typeof window.wcTracks.recordEvent !== 'function'
 	) {
+		return false;
+	}
+
+	if ( isDevelopmentMode ) {
+		window.wcTracks.validateEvent( eventName, eventProperties );
 		return false;
 	}
 

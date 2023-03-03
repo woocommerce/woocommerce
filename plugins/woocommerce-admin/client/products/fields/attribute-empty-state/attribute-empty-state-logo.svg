@@ -1,0 +1,19 @@
+<svg width="151" height="72" viewBox="0 0 151 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="45.8291" y="25.2363" width="78.4945" height="45.2637" rx="3.7381" fill="#F6F7F7" stroke="#DDDDDD" stroke-width="3" stroke-dasharray="4 3"/>
+<rect x="2.3125" y="1.5" width="78.4945" height="69" rx="3.7381" fill="white" stroke="#DDDDDD" stroke-width="3"/>
+<line x1="11.3516" y1="9.94922" x2="33.6702" y2="9.94922" stroke="#DDDDDD" stroke-width="3" stroke-linecap="round"/>
+<line x1="11.0156" y1="55.4668" x2="33.3343" y2="55.4668" stroke="#DDDDDD" stroke-width="3" stroke-linecap="round"/>
+<line x1="11.0156" y1="61.0054" x2="26.2134" y2="61.0054" stroke="#DDDDDD" stroke-width="3" stroke-linecap="round"/>
+<rect x="11.0156" y="41.0605" width="27.0659" height="8.07692" rx="1.5" stroke="#DDDDDD" stroke-width="3"/>
+<line x1="45.0361" y1="55.4673" x2="67.3548" y2="55.4673" stroke="#DDDDDD" stroke-width="3" stroke-linecap="round"/>
+<line x1="45.0361" y1="61.0054" x2="60.2339" y2="61.0054" stroke="#DDDDDD" stroke-width="3" stroke-linecap="round"/>
+<rect x="45.0361" y="41.0605" width="27.0659" height="8.07692" rx="1.5" stroke="#DDDDDD" stroke-width="3"/>
+<rect x="11.0156" y="18.1152" width="61.0879" height="14.4066" rx="1.5" stroke="#DDDDDD" stroke-width="3"/>
+<path d="M58.5703 23.7363L61.4236 26.5897C61.8142 26.9802 62.4473 26.9802 62.8379 26.5897L65.6912 23.7363" stroke="#DDDDDD" stroke-width="3" stroke-linecap="round"/>
+<line x1="17.5" y1="25" x2="39.8187" y2="25" stroke="#DDDDDD" stroke-width="3" stroke-linecap="round"/>
+<path d="M149.188 42.6308L134.977 30.1968" stroke="#DDDDDD" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle r="18.0392" transform="matrix(-1 0 0 1 122.541 19.5392)" fill="white" stroke="#DDDDDD" stroke-width="3" stroke-linejoin="round"/>
+<path d="M121.297 15.834H131.667M121.297 24.0007H131.667" stroke="#DDDDDD" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="114.333" cy="23.9993" rx="2.33333" ry="2.33333" fill="#DDDDDD"/>
+<ellipse cx="114.333" cy="15.8333" rx="2.33333" ry="2.33333" fill="#DDDDDD"/>
+</svg>

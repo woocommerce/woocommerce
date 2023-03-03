@@ -1,63 +1,39 @@
 {
 	"name": "code-analyzer",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "A tool to analyze code changes in WooCommerce Monorepo.",
 	"author": "Automattic",
-	"bin": {
-		"code-analyzer": "./bin/run"
-	},
 	"homepage": "https://github.com/woocommerce/woocommerce",
 	"license": "GPLv2",
-	"main": "dist/index.js",
 	"repository": "woocommerce/woocommerce",
-	"files": [
-		"/bin",
-		"/dist",
-		"/npm-shrinkwrap.json",
-		"/oclif.manifest.json"
-	],
 	"dependencies": {
-		"@oclif/core": "^1",
-		"@oclif/plugin-help": "^5",
-		"@oclif/plugin-plugins": "^2.0.1",
+		"@actions/core": "^1.10.0",
+		"@commander-js/extra-typings": "^0.1.0",
+		"@oclif/core": "^2.4.0",
+		"@tsconfig/node16": "^1.0.3",
 		"@types/uuid": "^8.3.4",
+		"cli-core": "workspace:*",
+		"commander": "^9.4.0",
+		"dotenv": "^10.0.0",
 		"simple-git": "^3.10.0",
 		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
 		"@types/node": "^16.9.4",
-		"eslint": "^7.32.0",
-		"globby": "^11",
-		"oclif": "^2",
-		"shx": "^0.3.3",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"eslint": "^8.32.0",
 		"ts-node": "^10.2.1",
 		"tslib": "^2.3.1",
-		"typescript": "^4.4.3"
-	},
-	"oclif": {
-		"bin": "code-analyzer",
-		"dirname": "code-analyzer",
-		"commands": "./dist/commands",
-		"plugins": [
-			"@oclif/plugin-help",
-			"@oclif/plugin-plugins"
-		],
-		"topicSeparator": " ",
-		"topics": {
-			"analyzer": {
-				"description": "Analyzes code changes in the monorepo."
-			}
-		}
+		"typescript": "^4.8.3"
 	},
 	"scripts": {
-		"build": "shx rm -rf dist && tsc -b",
-		"lint": "eslint . --ext .ts --config .eslintrc",
-		"postpack": "shx rm -f oclif.manifest.json",
+		"lint": "eslint . --ext .ts",
 		"posttest": "pnpm lint",
-		"prepack": "pnpm build && oclif manifest"
+		"analyzer": "node -r ts-node/register ./src/commands/analyzer/index.ts"
 	},
 	"engines": {
-		"node": ">=12.0.0"
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
 	},
 	"types": "dist/index.d.ts"
 }

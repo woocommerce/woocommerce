@@ -9,13 +9,10 @@ import { getSetting } from '@woocommerce/settings';
  */
 import './style.scss';
 
-const exampleDataFromSettings = getSetting( '{{slug}}_data' );
-
-/**
- * Internal dependencies
- */
 import { registerFilters } from './filters';
 import { ExampleComponent } from './ExampleComponent';
+
+const exampleDataFromSettings = getSetting( '{{slug}}_data' );
 
 const render = () => {
 	return (

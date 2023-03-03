@@ -24,6 +24,11 @@ export type ProductState = {
 	productsCount: Record< string, number >;
 	errors: Record< string, unknown >;
 	data: Record< number, PartialProduct >;
+	pending: {
+		createProduct?: boolean;
+		updateProduct?: Record< number, boolean >;
+		deleteProduct?: Record< number, boolean >;
+	};
 };
 
 const reducer: Reducer< ProductState, Actions > = (
@@ -32,11 +37,29 @@ const reducer: Reducer< ProductState, Actions > = (
 		productsCount: {},
 		errors: {},
 		data: {},
+		pending: {},
 	},
 	payload
 ) => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
+			case TYPES.CREATE_PRODUCT_START:
+				return {
+					...state,
+					pending: {
+						createProduct: true,
+					},
+				};
+			case TYPES.UPDATE_PRODUCT_START:
+				return {
+					...state,
+					pending: {
+						updateProduct: {
+							...( state.pending.updateProduct || {} ),
+							[ payload.id ]: true,
+						},
+					},
+				};
 			case TYPES.CREATE_PRODUCT_SUCCESS:
 			case TYPES.GET_PRODUCT_SUCCESS:
 			case TYPES.UPDATE_PRODUCT_SUCCESS:
@@ -48,6 +71,13 @@ const reducer: Reducer< ProductState, Actions > = (
 						[ payload.id ]: {
 							...( productData[ payload.id ] || {} ),
 							...payload.product,
+						},
+					},
+					pending: {
+						createProduct: false,
+						updateProduct: {
+							...( state.pending.updateProduct || {} ),
+							[ payload.id ]: false,
 						},
 					},
 				};
@@ -88,6 +118,13 @@ const reducer: Reducer< ProductState, Actions > = (
 					},
 				};
 			case TYPES.GET_PRODUCT_ERROR:
+				return {
+					...state,
+					errors: {
+						...state.errors,
+						[ payload.productId ]: payload.error,
+					},
+				};
 			case TYPES.GET_PRODUCTS_ERROR:
 			case TYPES.GET_PRODUCTS_TOTAL_COUNT_ERROR:
 			case TYPES.CREATE_PRODUCT_ERROR:
@@ -98,6 +135,9 @@ const reducer: Reducer< ProductState, Actions > = (
 						[ getProductResourceName( payload.query ) ]:
 							payload.error,
 					},
+					pending: {
+						createProduct: false,
+					},
 				};
 			case TYPES.UPDATE_PRODUCT_ERROR:
 				return {
@@ -107,12 +147,28 @@ const reducer: Reducer< ProductState, Actions > = (
 						[ `update/${ payload.id }` ]: payload.error,
 					},
 				};
+			case TYPES.DELETE_PRODUCT_START:
+				return {
+					...state,
+					pending: {
+						deleteProduct: {
+							...( state.pending.deleteProduct || {} ),
+							[ payload.id ]: true,
+						},
+					},
+				};
 			case TYPES.DELETE_PRODUCT_ERROR:
 				return {
 					...state,
 					errors: {
 						...state.errors,
 						[ `delete/${ payload.id }` ]: payload.error,
+					},
+					pending: {
+						deleteProduct: {
+							...( state.pending.deleteProduct || {} ),
+							[ payload.id ]: false,
+						},
 					},
 				};
 			case TYPES.DELETE_PRODUCT_SUCCESS:
@@ -125,6 +181,12 @@ const reducer: Reducer< ProductState, Actions > = (
 							...( prData[ payload.id ] || {} ),
 							...payload.product,
 							status: payload.force ? 'deleted' : 'trash',
+						},
+					},
+					pending: {
+						deleteProduct: {
+							...( state.pending.deleteProduct || {} ),
+							[ payload.id ]: false,
 						},
 					},
 				};

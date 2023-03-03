@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\ProductReviews;
 
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WP_Comment_Query;
 
 /**
@@ -9,35 +10,17 @@ use WP_Comment_Query;
  */
 class ReviewsCommentsOverrides {
 
+	use AccessiblePrivateMethods;
+
 	const REVIEWS_MOVED_NOTICE_ID = 'product_reviews_moved';
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-
-		add_action(
-			'admin_notices',
-			function() {
-				$this->display_notices();
-			}
-		);
-
-		add_filter(
-			'woocommerce_dismiss_admin_notice_capability',
-			function( $default_capability, $notice_name ) {
-				return $this->get_dismiss_capability( $default_capability, $notice_name );
-			},
-			10,
-			2
-		);
-
-		add_filter(
-			'comments_list_table_query_args',
-			function( $args ) {
-				return $this->exclude_reviews_from_comments( $args );
-			}
-		);
+		self::add_action( 'admin_notices', array( $this, 'display_notices' ) );
+		self::add_filter( 'woocommerce_dismiss_admin_notice_capability', array( $this, 'get_dismiss_capability' ), 10, 2 );
+		self::add_filter( 'comments_list_table_query_args', array( $this, 'exclude_reviews_from_comments' ) );
 	}
 
 	/**
@@ -46,7 +29,7 @@ class ReviewsCommentsOverrides {
 	protected function display_notices() : void {
 		$screen = get_current_screen();
 
-		if ( empty( $screen ) || 'edit-comments' !== $screen->base ) {
+		if ( empty( $screen ) || $screen->base !== 'edit-comments' ) {
 			return;
 		}
 
@@ -123,7 +106,7 @@ class ReviewsCommentsOverrides {
 	 * @return string
 	 */
 	protected function get_dismiss_capability( $default_capability, $notice_name ) {
-		return self::REVIEWS_MOVED_NOTICE_ID === $notice_name ? Reviews::get_capability() : $default_capability;
+		return $notice_name === self::REVIEWS_MOVED_NOTICE_ID ? Reviews::get_capability() : $default_capability;
 	}
 
 	/**
@@ -134,7 +117,7 @@ class ReviewsCommentsOverrides {
 	 */
 	protected function exclude_reviews_from_comments( $args ) : array {
 
-		if ( ! empty( $args['post_type'] ) && 'any' !== $args['post_type'] ) {
+		if ( ! empty( $args['post_type'] ) && $args['post_type'] !== 'any' ) {
 			$post_types = (array) $args['post_type'];
 		} else {
 			$post_types = get_post_types();
@@ -142,7 +125,7 @@ class ReviewsCommentsOverrides {
 
 		$index = array_search( 'product', $post_types );
 
-		if ( false !== $index ) {
+		if ( $index !== false ) {
 			unset( $post_types[ $index ] );
 		}
 

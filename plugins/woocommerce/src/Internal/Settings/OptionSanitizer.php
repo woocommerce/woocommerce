@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\Settings;
 
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -13,6 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * @since 6.6.0
  */
 class OptionSanitizer {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * OptionSanitizer constructor.
@@ -27,11 +31,9 @@ class OptionSanitizer {
 		);
 
 		foreach ( $color_options as $option_name ) {
-			add_filter(
+			self::add_filter(
 				"woocommerce_admin_settings_sanitize_option_{$option_name}",
-				function( $value, $option ) {
-					return $this->sanitize_color_option( $value, $option );
-				},
+				array( $this, 'sanitize_color_option' ),
 				10,
 				2
 			);
@@ -62,5 +64,4 @@ class OptionSanitizer {
 
 		return (string) $value;
 	}
-
 }

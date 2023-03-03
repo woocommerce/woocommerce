@@ -101,9 +101,8 @@ describe( 'Products API tests: CRUD', () => {
 		expect( body.id ).toEqual( productId );
 
 		// Verify that the product can no longer be retrieved.
-		const {
-			status: retrieveDeletedProductStatus,
-		} = await productsApi.retrieve.product( productId );
+		const { status: retrieveDeletedProductStatus } =
+			await productsApi.retrieve.product( productId );
 		expect( retrieveDeletedProductStatus ).toEqual( 404 );
 	} );
 
@@ -156,6 +155,7 @@ describe( 'Products API tests: CRUD', () => {
 
 			// Verify that the regular price of each product was updated
 			for ( let i = 0; i < actualUpdatedProducts.length; i++ ) {
+				// eslint-disable-next-line
 				const { id, regular_price } = actualUpdatedProducts[ i ];
 
 				expect( id ).toEqual( expectedProducts[ i ].id );
@@ -186,6 +186,7 @@ describe( 'Products API tests: CRUD', () => {
 
 			// Verify that the deleted product ID's can no longer be retrieved
 			for ( const id of idsToDelete ) {
+				// eslint-disable-next-line
 				const { status } = await productsApi.retrieve.product( id );
 
 				expect( status ).toEqual( 404 );

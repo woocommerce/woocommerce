@@ -428,8 +428,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					case 'Completed':
 						/* translators: 1: Amount, 2: Authorization ID, 3: Transaction ID */
 						$order->add_order_note( sprintf( __( 'Payment of %1$s was captured - Auth ID: %2$s, Transaction ID: %3$s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
-						update_post_meta( $order->get_id(), '_paypal_status', $result->PAYMENTSTATUS );
-						update_post_meta( $order->get_id(), '_transaction_id', $result->TRANSACTIONID );
+						$order->update_meta_data( '_paypal_status', $result->PAYMENTSTATUS );
+						$order->set_transaction_id( $result->TRANSACTIONID );
+						$order->save();
 						break;
 					default:
 						/* translators: 1: Authorization ID, 2: Payment status */

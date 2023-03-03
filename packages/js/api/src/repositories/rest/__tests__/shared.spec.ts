@@ -1,4 +1,3 @@
-import { mocked } from 'ts-jest/utils';
 import { HTTPClient, HTTPResponse } from '../../../http';
 import { ModelTransformer, ModelRepositoryParams } from '../../../framework';
 import { DummyModel } from '../../../__test_data__/dummy-model';
@@ -55,7 +54,7 @@ describe( 'Shared REST Functions', () => {
 	} );
 
 	it( 'restList', async () => {
-		mocked( mockClient.get ).mockResolvedValue(
+		jest.mocked( mockClient.get ).mockResolvedValue(
 			new HTTPResponse( 200, {}, [
 				{
 					id: 'Test-1',
@@ -67,7 +66,7 @@ describe( 'Shared REST Functions', () => {
 				},
 			] )
 		);
-		mocked( mockTransformer.toModel ).mockReturnValue(
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
 			new DummyModel( { name: 'Test' } )
 		);
 
@@ -101,7 +100,7 @@ describe( 'Shared REST Functions', () => {
 	} );
 
 	it( 'restListChildren', async () => {
-		mocked( mockClient.get ).mockResolvedValue(
+		jest.mocked( mockClient.get ).mockResolvedValue(
 			new HTTPResponse( 200, {}, [
 				{
 					id: 'Test-1',
@@ -113,7 +112,7 @@ describe( 'Shared REST Functions', () => {
 				},
 			] )
 		);
-		mocked( mockTransformer.toModel ).mockReturnValue(
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
 			new DummyChildModel( { name: 'Test' } )
 		);
 
@@ -147,7 +146,7 @@ describe( 'Shared REST Functions', () => {
 	} );
 
 	it( 'restCreate', async () => {
-		mocked( mockClient.post ).mockResolvedValue(
+		jest.mocked( mockClient.post ).mockResolvedValue(
 			new HTTPResponse(
 				200,
 				{},
@@ -157,10 +156,10 @@ describe( 'Shared REST Functions', () => {
 				}
 			)
 		);
-		mocked( mockTransformer.fromModel ).mockReturnValue( {
+		jest.mocked( mockTransformer.fromModel ).mockReturnValue( {
 			name: 'From-Test',
 		} );
-		mocked( mockTransformer.toModel ).mockReturnValue(
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
 			new DummyModel( { name: 'Test' } )
 		);
 
@@ -187,7 +186,7 @@ describe( 'Shared REST Functions', () => {
 	} );
 
 	it( 'restRead', async () => {
-		mocked( mockClient.get ).mockResolvedValue(
+		jest.mocked( mockClient.get ).mockResolvedValue(
 			new HTTPResponse(
 				200,
 				{},
@@ -197,7 +196,7 @@ describe( 'Shared REST Functions', () => {
 				}
 			)
 		);
-		mocked( mockTransformer.toModel ).mockReturnValue(
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
 			new DummyModel( { name: 'Test' } )
 		);
 
@@ -219,7 +218,7 @@ describe( 'Shared REST Functions', () => {
 	} );
 
 	it( 'restReadChildren', async () => {
-		mocked( mockClient.get ).mockResolvedValue(
+		jest.mocked( mockClient.get ).mockResolvedValue(
 			new HTTPResponse(
 				200,
 				{},
@@ -229,7 +228,7 @@ describe( 'Shared REST Functions', () => {
 				}
 			)
 		);
-		mocked( mockTransformer.toModel ).mockReturnValue(
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
 			new DummyChildModel( { name: 'Test' } )
 		);
 
@@ -251,7 +250,7 @@ describe( 'Shared REST Functions', () => {
 	} );
 
 	it( 'restUpdate', async () => {
-		mocked( mockClient.patch ).mockResolvedValue(
+		jest.mocked( mockClient.patch ).mockResolvedValue(
 			new HTTPResponse(
 				200,
 				{},
@@ -261,10 +260,10 @@ describe( 'Shared REST Functions', () => {
 				}
 			)
 		);
-		mocked( mockTransformer.fromModel ).mockReturnValue( {
+		jest.mocked( mockTransformer.fromModel ).mockReturnValue( {
 			name: 'From-Test',
 		} );
-		mocked( mockTransformer.toModel ).mockReturnValue(
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
 			new DummyModel( { name: 'Test' } )
 		);
 
@@ -291,7 +290,7 @@ describe( 'Shared REST Functions', () => {
 	} );
 
 	it( 'restUpdateChildren', async () => {
-		mocked( mockClient.patch ).mockResolvedValue(
+		jest.mocked( mockClient.patch ).mockResolvedValue(
 			new HTTPResponse(
 				200,
 				{},
@@ -301,10 +300,10 @@ describe( 'Shared REST Functions', () => {
 				}
 			)
 		);
-		mocked( mockTransformer.fromModel ).mockReturnValue( {
+		jest.mocked( mockTransformer.fromModel ).mockReturnValue( {
 			name: 'From-Test',
 		} );
-		mocked( mockTransformer.toModel ).mockReturnValue(
+		jest.mocked( mockTransformer.toModel ).mockReturnValue(
 			new DummyChildModel( { name: 'Test' } )
 		);
 
@@ -335,7 +334,7 @@ describe( 'Shared REST Functions', () => {
 	} );
 
 	it( 'restDelete', async () => {
-		mocked( mockClient.delete ).mockResolvedValue(
+		jest.mocked( mockClient.delete ).mockResolvedValue(
 			new HTTPResponse( 200, {}, {} )
 		);
 
@@ -351,7 +350,7 @@ describe( 'Shared REST Functions', () => {
 	} );
 
 	it( 'restDeleteChildren', async () => {
-		mocked( mockClient.delete ).mockResolvedValue(
+		jest.mocked( mockClient.delete ).mockResolvedValue(
 			new HTTPResponse( 200, {}, {} )
 		);
 

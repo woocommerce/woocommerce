@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Configured wp-env test environment for Playwright tests. Also updated tests to work with the either wp-env or e2e-environment.

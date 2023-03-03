@@ -399,8 +399,9 @@ class WC_Tracker {
 		$order_counts   = self::get_order_counts();
 		$order_totals   = self::get_order_totals();
 		$order_gateways = self::get_orders_by_gateway();
+		$order_origin   = self::get_orders_origins();
 
-		return array_merge( $order_dates, $order_counts, $order_totals, $order_gateways );
+		return array_merge( $order_dates, $order_counts, $order_totals, $order_gateways, $order_origin );
 	}
 
 	/**
@@ -543,6 +544,37 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Get orders origin details.
+	 *
+	 * @return array
+	 */
+	private static function get_orders_origins() {
+		global $wpdb;
+
+		$orders_origin = $wpdb->get_results(
+			"
+			SELECT
+				meta_value as origin, COUNT( DISTINCT ( orders.id ) ) as count
+			FROM
+				$wpdb->posts orders
+			LEFT JOIN
+				$wpdb->postmeta order_meta ON order_meta.post_id = orders.id
+			WHERE
+				meta_key = '_created_via'
+			GROUP BY
+				meta_value;
+			"
+		);
+
+		$orders_by_origin = array();
+		foreach ( $orders_origin as $origin ) {
+			$orders_by_origin[ $origin->origin ] = (int) $origin->count;
+		}
+
+		return array( 'created_via' => $orders_by_origin );
+	}
+
+	/**
 	 * Get review counts for different statuses.
 	 *
 	 * @return array
@@ -658,6 +690,11 @@ class WC_Tracker {
 			'enable_myaccount_registration'         => get_option( 'woocommerce_enable_myaccount_registration' ),
 			'registration_generate_username'        => get_option( 'woocommerce_registration_generate_username' ),
 			'registration_generate_password'        => get_option( 'woocommerce_registration_generate_password' ),
+			'hpos_enabled'                          => get_option( 'woocommerce_feature_custom_order_tables_enabled' ),
+			'hpos_sync_enabled'                     => get_option( 'woocommerce_custom_orders_table_data_sync_enabled' ),
+			'hpos_cot_authoritative'                => get_option( 'woocommerce_custom_orders_table_enabled' ),
+			'hpos_transactions_enabled'             => get_option( 'woocommerce_use_db_transactions_for_custom_orders_table_data_sync' ),
+			'hpos_transactions_level'               => get_option( 'woocommerce_db_transactions_isolation_level_for_custom_orders_table_data_sync' ),
 		);
 	}
 
@@ -754,6 +791,31 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Get tracker data for a pickup location method.
+	 *
+	 * @return array Associative array of tracker data with keys:
+	 * - pickup_location_enabled
+	 * - pickup_locations_count
+	 */
+	public static function get_pickup_location_data() {
+		$pickup_location_enabled = false;
+		$pickup_locations_count  = count( get_option( 'pickup_location_pickup_locations', array() ) );
+
+		// Get the available shipping methods.
+		$shipping_methods = WC()->shipping()->get_shipping_methods();
+
+		// Check if the desired shipping method is enabled.
+		if ( isset( $shipping_methods['pickup_location'] ) && $shipping_methods['pickup_location']->is_enabled() ) {
+			$pickup_location_enabled = true;
+		}
+
+		return array(
+			'pickup_location_enabled' => $pickup_location_enabled,
+			'pickup_locations_count'  => $pickup_locations_count,
+		);
+	}
+
+	/**
 	 * Get info about the cart & checkout pages.
 	 *
 	 * @return array
@@ -764,6 +826,8 @@ class WC_Tracker {
 
 		$cart_block_data     = self::get_block_tracker_data( 'woocommerce/cart', 'cart' );
 		$checkout_block_data = self::get_block_tracker_data( 'woocommerce/checkout', 'checkout' );
+
+		$pickup_location_data = self::get_pickup_location_data();
 
 		return array(
 			'cart_page_contains_cart_shortcode'         => self::post_contains_text(
@@ -779,6 +843,7 @@ class WC_Tracker {
 			'cart_block_attributes'                     => $cart_block_data['block_attributes'],
 			'checkout_page_contains_checkout_block'     => $checkout_block_data['page_contains_block'],
 			'checkout_block_attributes'                 => $checkout_block_data['block_attributes'],
+			'pickup_location'                           => $pickup_location_data,
 		);
 	}
 

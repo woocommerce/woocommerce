@@ -12,7 +12,7 @@ mkdir -p "$DEST_PATH"
 echo "Installing PHP and JS dependencies..."
 pnpm install
 echo "Running JS Build..."
-pnpm -w exec turbo run build --filter=woocommerce-beta-tester || exit "$?"
+pnpm -w run build --filter=woocommerce-beta-tester || exit "$?"
 
 echo "Syncing files..."
 rsync -rc --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PATH/" --delete --delete-excluded

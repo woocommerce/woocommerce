@@ -9,6 +9,10 @@
 		"woocommerce",
 		"data"
 	],
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/data/README.md",
 	"repository": {
 		"type": "git",
@@ -27,7 +31,7 @@
 		"@wordpress/api-fetch": "^6.0.1",
 		"@wordpress/compose": "^5.1.2",
 		"@wordpress/core-data": "^4.1.2",
-		"@wordpress/data": "^6.3.0",
+		"@wordpress/data": "^6.15.0",
 		"@wordpress/data-controls": "^2.3.2",
 		"@wordpress/deprecated": "^3.3.1",
 		"@wordpress/element": "^4.1.1",
@@ -48,37 +52,43 @@
 		"@babel/runtime": "^7.17.2",
 		"@testing-library/react": "^12.1.3",
 		"@testing-library/react-hooks": "^7.0.2",
+		"@types/dompurify": "^2.3.3",
+		"@types/jest": "^27.4.1",
+		"@types/lodash": "^4.14.182",
 		"@types/md5": "^2.3.2",
+		"@types/qs": "^6.9.7",
+		"@types/react": "^17.0.2",
 		"@types/wordpress__compose": "^4.0.1",
 		"@types/wordpress__core-data": "^2.4.5",
 		"@types/wordpress__data": "^6.0.0",
 		"@types/wordpress__data-controls": "^2.2.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.12.0",
+		"eslint": "^8.32.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
 		"redux": "^4.1.0",
-		"require-turbo": "workspace:*",
 		"rimraf": "^3.0.2",
 		"ts-jest": "^27.1.3",
-		"typescript": "^4.6.2"
+		"typescript": "^4.8.3"
 	},
 	"peerDependencies": {
 		"@wordpress/core-data": "^4.1.0",
 		"moment": "^2.18.1",
-		"react": "^17.0.0",
-		"react-dom": "^17.0.0"
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
 	},
 	"scripts": {
+		"turbo:build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"turbo:test": "jest --config ./jest.config.json",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
-		"build": "node ./node_modules/require-turbo && tsc --build ./tsconfig.json ./tsconfig-cjs.json",
-		"start": "tsc --build --watch",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"lint": "eslint src",
+		"start": "tsc --build --watch ./tsconfig.json ./tsconfig-cjs.json",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint": "node ./node_modules/require-turbo && eslint src",
 		"lint:fix": "eslint src --fix",
-		"test": "node ./node_modules/require-turbo && jest --config ./jest.config.json",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
 	},
 	"lint-staged": {

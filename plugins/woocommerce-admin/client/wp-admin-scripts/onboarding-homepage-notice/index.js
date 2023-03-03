@@ -82,7 +82,7 @@ const onboardingHomepageNotice = () => {
 								'tasklist_appearance_continue_setup',
 								{}
 							);
-							window.location = getAdminLink(
+							window.location.href = getAdminLink(
 								'admin.php?page=wc-admin&task=appearance'
 							);
 						},

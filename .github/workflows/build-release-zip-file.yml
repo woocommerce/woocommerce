@@ -6,25 +6,22 @@ on:
         description: 'By default the zip file is generated from the branch the workflow runs from, but you can specify an explicit reference to use instead here (e.g. refs/tags/tag_name or refs/heads/release/x.x). The resulting file will be available as an artifact on the workflow run.'
         required: false
         default: ''
+
+permissions: {}
+
 jobs:
   build:
     name: Build release zip file
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ./.github/actions/cache-deps
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
         with:
-          workflow_name: build-release-zip-file
-          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-      - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
+          build: false
 
       - name: Build zip
         working-directory: plugins/woocommerce

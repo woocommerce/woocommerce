@@ -14,10 +14,8 @@ module.exports = {
 			__dirname,
 			'../../../plugins/woocommerce-admin/client/$1'
 		),
-		'\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': path.resolve(
-			__dirname,
-			'build/mocks/static'
-		),
+		'\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+			path.resolve( __dirname, 'build/mocks/static' ),
 		'\\.(scss|css)$': path.resolve(
 			__dirname,
 			'build/mocks/style-mock.js'
@@ -42,8 +40,12 @@ module.exports = {
 		'<rootDir>/.*/build-module/',
 		'<rootDir>/tests/e2e/',
 	],
-	transformIgnorePatterns: [ '/node_modules', '/build/' ],
+	transformIgnorePatterns: [
+		`node_modules/(?!.pnpm/is-plain-obj|is-plain-obj)`,
+		'/build/',
+	],
 	transform: {
+		'^.+\\is-plain-obj/index\\.js$': 'babel-jest',
 		'^.+\\.[jt]sx?$': 'ts-jest',
 	},
 	testEnvironment: 'jest-environment-jsdom',

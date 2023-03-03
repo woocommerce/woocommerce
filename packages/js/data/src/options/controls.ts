@@ -31,6 +31,8 @@ export const controls = {
 			setTimeout( function () {
 				if (
 					fetches.hasOwnProperty( optionName ) &&
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore TODO - this type bug needs to be fixed.
 					fetches[ optionName ]
 				) {
 					return fetches[ optionName ].then( ( result ) => {

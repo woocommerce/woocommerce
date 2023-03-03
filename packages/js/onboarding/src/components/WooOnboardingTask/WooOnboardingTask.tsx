@@ -20,9 +20,8 @@ export const trackView = async ( taskId: string, variant?: string ) => {
 		.select( 'wc/admin/plugins' )
 		.getInstalledPlugins();
 
-	const isJetpackConnected: boolean = wp.data
-		.select( 'wc/admin/plugins' )
-		.isJetpackConnected();
+	const isJetpackConnected: boolean =
+		wp.data.select( 'wc/admin/plugins' ).isJetpackConnected() || false;
 
 	recordEvent( 'task_view', {
 		task_name: taskId,
@@ -35,7 +34,6 @@ export const trackView = async ( taskId: string, variant?: string ) => {
 	} );
 };
 
-let experimentalVariant: string | undefined;
 type WooOnboardingTaskProps = {
 	id: string;
 	variant?: string;
@@ -57,37 +55,15 @@ type WooOnboardingTaskSlotProps = Slot.Props & {
  */
 const WooOnboardingTask: React.FC< WooOnboardingTaskProps > & {
 	Slot: React.VFC< WooOnboardingTaskSlotProps >;
-} = ( { id, variant, ...props } ) => {
-	useEffect( () => {
-		if ( id === 'products' ) {
-			experimentalVariant = variant;
-		}
-	}, [ id, variant ] );
-
+} = ( { id, ...props } ) => {
 	return <Fill name={ 'woocommerce_onboarding_task_' + id } { ...props } />;
-};
-
-// We need this here just in case the experiment assignment takes awhile to load, so that we don't fire trackView with a blank experimentalVariant
-// Remove all of the code in this file related to experiments and variants when the product task experiment concludes and never speak of the existence of this code to anyone
-const pollForExperimentalVariant = ( id: string, count: number ) => {
-	if ( count > 20 ) {
-		trackView( id, 'experiment_timed_out' ); // if we can't fetch experiment after 4 seconds, give up
-	} else if ( experimentalVariant ) {
-		trackView( id, experimentalVariant );
-	} else {
-		setTimeout( () => pollForExperimentalVariant( id, count + 1 ), 200 );
-	}
 };
 
 WooOnboardingTask.Slot = ( { id, fillProps } ) => {
 	// The Slot is a React component and this hook works as expected.
 	// eslint-disable-next-line react-hooks/rules-of-hooks
 	useEffect( () => {
-		if ( id === 'products' ) {
-			pollForExperimentalVariant( id, 0 );
-		} else {
-			trackView( id );
-		}
+		trackView( id );
 	}, [ id ] );
 
 	return (

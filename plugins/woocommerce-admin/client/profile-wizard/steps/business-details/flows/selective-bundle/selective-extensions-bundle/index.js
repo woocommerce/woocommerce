@@ -1,16 +1,15 @@
 /**
  * External dependencies
  */
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { Button, Card, CheckboxControl, Spinner } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import { Link } from '@woocommerce/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
-import { pluginNames, ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { pluginNames } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -23,10 +22,12 @@ import { getCountryCode } from '../../../../../../dashboard/utils';
 
 const ALLOWED_PLUGIN_CATEGORIES = [ 'obw/basics', 'obw/grow' ];
 
-const FreeBadge = () => {
+const FreeBadge = ( props ) => {
 	return (
 		<div className="woocommerce-admin__business-details__free-badge">
-			{ __( 'Free', 'woocommerce' ) }
+			{ props.isFreeTrial
+				? __( 'Free Trial', 'woocommerce' )
+				: __( 'Free', 'woocommerce' ) }
 		</div>
 	);
 };
@@ -134,7 +135,13 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 	);
 };
 
-const BundleExtensionCheckbox = ( { onChange, description, isChecked } ) => {
+const BundleExtensionCheckbox = ( {
+	onChange,
+	description,
+	isChecked,
+	extensionKey,
+} ) => {
+	const isFreeTrial = extensionKey === 'codistoconnect';
 	const recordProductLinkClick = ( event ) => {
 		const link = event.target.closest( 'a' );
 		if (
@@ -170,7 +177,10 @@ const BundleExtensionCheckbox = ( { onChange, description, isChecked } ) => {
 				onClick={ recordProductLinkClick }
 			/>
 			{ /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */ }
-			<FreeBadge />
+			<FreeBadge
+				isFreeTrial={ isFreeTrial }
+				extensionKey={ extensionKey }
+			/>
 		</div>
 	);
 };
@@ -202,6 +212,7 @@ export const ExtensionSection = ( {
 			{ extensions.map( ( { description, key } ) => (
 				<BundleExtensionCheckbox
 					key={ key }
+					extensionKey={ key }
 					description={ description }
 					isChecked={ installExtensionOptions[ key ] }
 					onChange={ onCheckboxChange( key ) }
@@ -234,55 +245,38 @@ export const createInstallExtensionOptions = (
 	}, prevInstallExtensionOptions );
 };
 
+export const getInstallableExtensions = ( {
+	freeExtensionBundleByCategory,
+	country,
+	productTypes,
+} ) => {
+	return freeExtensionBundleByCategory.filter( ( extensionBundle ) => {
+		if (
+			window.wcAdminFeatures &&
+			window.wcAdminFeatures.subscriptions &&
+			getCountryCode( country ) === 'US'
+		) {
+			if ( productTypes.includes( 'subscriptions' ) ) {
+				extensionBundle.plugins = extensionBundle.plugins.filter(
+					( extension ) =>
+						extension.key !== 'woocommerce-payments' ||
+						( extension.key === 'woocommerce-payments' &&
+							! extension.is_activated )
+				);
+			}
+		}
+		return ALLOWED_PLUGIN_CATEGORIES.includes( extensionBundle.key );
+	} );
+};
+
 export const SelectiveExtensionsBundle = ( {
 	isInstallingActivating,
 	onSubmit,
-	country,
-	productTypes,
-	industry,
 	setInstallExtensionOptions,
+	installableExtensions,
 	installExtensionOptions = { install_extensions: true },
 } ) => {
 	const [ showExtensions, setShowExtensions ] = useState( false );
-	const { freeExtensions: freeExtensionBundleByCategory, isResolving } =
-		useSelect( ( select ) => {
-			const { getFreeExtensions, hasFinishedResolution } = select(
-				ONBOARDING_STORE_NAME
-			);
-			return {
-				freeExtensions: getFreeExtensions(),
-				isResolving: ! hasFinishedResolution( 'getFreeExtensions' ),
-			};
-		} );
-
-	const { invalidateResolutionForStoreSelector } = useDispatch(
-		ONBOARDING_STORE_NAME
-	);
-
-	useEffect( () => {
-		invalidateResolutionForStoreSelector( 'getFreeExtensions' );
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ country, industry ] );
-
-	const installableExtensions = useMemo( () => {
-		return freeExtensionBundleByCategory.filter( ( extensionBundle ) => {
-			if (
-				window.wcAdminFeatures &&
-				window.wcAdminFeatures.subscriptions &&
-				getCountryCode( country ) === 'US'
-			) {
-				if ( productTypes.includes( 'subscriptions' ) ) {
-					extensionBundle.plugins = extensionBundle.plugins.filter(
-						( extension ) =>
-							extension.key !== 'woocommerce-payments' ||
-							( extension.key === 'woocommerce-payments' &&
-								! extension.is_activated )
-					);
-				}
-			}
-			return ALLOWED_PLUGIN_CATEGORIES.includes( extensionBundle.key );
-		} );
-	}, [ freeExtensionBundleByCategory, productTypes, country ] );
 
 	useEffect( () => {
 		if ( isInstallingActivating || installableExtensions.length === 0 ) {
@@ -401,8 +395,8 @@ export const SelectiveExtensionsBundle = ( {
 								installableExtensions
 							);
 						} }
-						isBusy={ isInstallingActivating || isResolving }
-						disabled={ isInstallingActivating || isResolving }
+						isBusy={ isInstallingActivating }
+						disabled={ isInstallingActivating }
 						isPrimary
 					>
 						{ __( 'Continue', 'woocommerce' ) }

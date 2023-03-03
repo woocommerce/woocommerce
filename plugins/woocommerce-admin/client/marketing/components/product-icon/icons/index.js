@@ -7,6 +7,8 @@ export { default as woocommerceAmazonEbayIntegration } from './library/amazon-eb
 // AutomateWoo
 export { default as automatewoo } from './library/automatewoo';
 export { default as automatewooAlt } from './library/automatewoo-alt';
+export { default as automatewooReferrals } from './library/automatewoo';
+export { default as automatewooBirthdays } from './library/automatewoo';
 
 // Facebook
 export { default as facebook } from './library/facebook';
@@ -28,6 +30,27 @@ export { default as mailchimpForWoocommerce } from './library/mailchimp';
 
 // MailPoet
 export { default as mailpoet } from './library/mailpoet';
+
+// Creative Mail by Constant Contact
+export { default as creativeMailByConstantContact } from './library/creative-mail';
+
+// Jetpack CRM
+export { default as zeroBsCrm } from './library/jetpack-crm';
+
+// Salesforce
+export { default as integrationWithSalesforce } from './library/salesforce';
+
+// TikTok
+export { default as tiktokForBusiness } from './library/tiktok';
+
+// Zapier
+export { default as woocommerceZapier } from './library/zapier';
+
+// Vimeo
+export { default as vimeo } from './library/vimeo';
+
+// Trustpilot
+export { default as trustpilotReviews } from './library/trustpilot';
 
 // Coupons
 export { default as woocommerceStoreCredit } from './library/currency-dollar';

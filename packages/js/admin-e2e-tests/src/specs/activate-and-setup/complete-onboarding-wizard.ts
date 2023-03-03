@@ -1,4 +1,10 @@
 /**
+ * External dependencies
+ */
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
+import { verifyValueOfInputField } from '@woocommerce/e2e-utils';
+import config from 'config';
+/**
  * Internal dependencies
  */
 import { OnboardingWizard } from '../../pages/OnboardingWizard';
@@ -9,23 +15,10 @@ import { WcSettings } from '../../pages/WcSettings';
 import { ProductsSetup } from '../../pages/ProductsSetup';
 import { resetWooCommerceState } from '../../fixtures/reset';
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-const {
-	afterAll,
-	beforeAll,
-	describe,
-	it,
-	expect,
-} = require( '@jest/globals' );
-const config = require( 'config' );
-
-const { verifyValueOfInputField } = require( '@woocommerce/e2e-utils' );
-/* eslint-enable @typescript-eslint/no-var-requires */
-
 /**
  * This tests a default, happy path for the onboarding wizard.
  */
-const testAdminOnboardingWizard = () => {
+export const testAdminOnboardingWizard = () => {
 	describe( 'Store owner can complete onboarding wizard', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
@@ -127,7 +120,7 @@ const testAdminOnboardingWizard = () => {
 	} );
 };
 
-const testSelectiveBundleWCPay = () => {
+export const testSelectiveBundleWCPay = () => {
 	describe( 'A japanese store can complete the selective bundle install but does not include WCPay.', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
@@ -229,7 +222,7 @@ const testSelectiveBundleWCPay = () => {
 	} );
 };
 
-const testDifferentStoreCurrenciesWCPay = () => {
+export const testDifferentStoreCurrenciesWCPay = () => {
 	const testCountryCurrencyPairs = [
 		{
 			countryRegionSubstring: 'australia',
@@ -359,7 +352,7 @@ const testDifferentStoreCurrenciesWCPay = () => {
 	} );
 };
 
-const testSubscriptionsInclusion = () => {
+export const testSubscriptionsInclusion = () => {
 	describe( 'A non-US store will not see the Subscriptions inclusion', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
@@ -442,7 +435,7 @@ const testSubscriptionsInclusion = () => {
 	} );
 	describe( 'A US store will see the Subscriptions inclusion', () => {
 		const profileWizard = new OnboardingWizard( page );
-		const login = new Login( page );
+		new Login( page );
 
 		beforeAll( async () => {
 			await resetWooCommerceState();
@@ -521,7 +514,7 @@ const testSubscriptionsInclusion = () => {
 	} );
 };
 
-const testBusinessDetailsForm = () => {
+export const testBusinessDetailsForm = () => {
 	describe( 'A store that is selling elsewhere will see the "Number of employees” dropdown menu', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const login = new Login( page );
@@ -595,7 +588,7 @@ const testBusinessDetailsForm = () => {
 	} );
 };
 
-const testAdminHomescreen = () => {
+export const testAdminHomescreen = () => {
 	describe( 'Homescreen', () => {
 		const profileWizard = new OnboardingWizard( page );
 		const homeScreen = new WcHomescreen( page );
@@ -619,13 +612,4 @@ const testAdminHomescreen = () => {
 			);
 		} );
 	} );
-};
-
-module.exports = {
-	testAdminOnboardingWizard,
-	testSelectiveBundleWCPay,
-	testDifferentStoreCurrenciesWCPay,
-	testSubscriptionsInclusion,
-	testBusinessDetailsForm,
-	testAdminHomescreen,
 };

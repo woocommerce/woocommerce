@@ -234,15 +234,17 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->assertEquals( $order->get_billing_email(), $db_order->billing_email );
 		$this->assertEquals( $order->get_payment_method(), $db_order->payment_method );
 		$this->assertEquals(
-			$order->get_date_created()->date( DATE_ISO8601 ),
-			( new WC_DateTime( $db_order->date_created_gmt ) )->date( DATE_ISO8601 )
+			$order->get_date_created()->date( DATE_ATOM ),
+			( new WC_DateTime( $db_order->date_created_gmt ) )->date( DATE_ATOM )
 		);
-		$this->assertEquals( $order->get_date_modified()->date( DATE_ISO8601 ), ( new WC_DateTime( $db_order->date_updated_gmt ) )->date( DATE_ISO8601 ) );
+		$this->assertEquals( $order->get_date_modified()->date( DATE_ATOM ), ( new WC_DateTime( $db_order->date_updated_gmt ) )->date( DATE_ATOM ) );
 		$this->assertEquals( $order->get_parent_id(), $db_order->parent_order_id );
 		$this->assertEquals( $order->get_payment_method_title(), $db_order->payment_method_title );
 		$this->assertEquals( $order->get_transaction_id(), $db_order->transaction_id );
 		$this->assertEquals( $order->get_customer_ip_address(), $db_order->ip_address );
 		$this->assertEquals( $order->get_customer_user_agent(), $db_order->user_agent );
+		$this->assertEquals( $order->get_type(), $db_order->type );
+		$this->assertEquals( $order->get_customer_note(), $db_order->customer_note );
 	}
 
 	/**

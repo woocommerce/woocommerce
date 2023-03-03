@@ -21,6 +21,11 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->user = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
 		delete_option( 'woocommerce_show_marketplace_suggestions' );
 		add_filter(
 			'transient_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
@@ -52,12 +57,14 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	 */
 	public function get_mock_specs() {
 		return array(
-			array(
-				'id'         => 'mock-gateway',
-				'is_visible' => (object) array(
-					'type'      => 'base_location_country',
-					'value'     => 'ZA',
-					'operation' => '=',
+			'en_US' => array(
+				array(
+					'id'         => 'mock-gateway',
+					'is_visible' => (object) array(
+						'type'      => 'base_location_country',
+						'value'     => 'ZA',
+						'operation' => '=',
+					),
 				),
 			),
 		);
@@ -87,11 +94,13 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		set_transient(
 			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
 			array(
-				array(
-					'id' => 'mock-gateway1',
-				),
-				array(
-					'id' => 'mock-gateway2',
+				'en_US' => array(
+					array(
+						'id' => 'mock-gateway1',
+					),
+					array(
+						'id' => 'mock-gateway2',
+					),
 				),
 			)
 		);
@@ -126,33 +135,33 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the transient is deleted on locale change.
+	 * Test that matched locale specs are read from cache.
 	 */
-	public function test_delete_transient_on_locale_change() {
+	public function test_specs_locale_transient() {
 		set_transient(
 			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
 			array(
-				array(
-					'id' => 'mock-gateway',
+				'en_US' => array(
+					array(
+						'id' => 'mock-gateway',
+					),
+				),
+				'zh_TW' => array(
+					array(
+						'id' => 'default-gateway',
+					),
 				),
 			)
 		);
 
 		add_filter(
-			'get_available_languages',
-			function( $languages ) {
-				$languages[] = 'zh_TW';
-				return $languages;
+			'locale',
+			function( $_locale ) {
+				return 'zh_TW';
 			}
 		);
 
-		$wp_locale_switcher = new WP_Locale_switcher();
-		$wp_locale_switcher->switch_to_locale( 'zh_TW' );
-
 		$suggestions = PaymentGatewaySuggestions::get_suggestions();
-
-		$wp_locale_switcher->switch_to_locale( 'en_US' );
-
 		$this->assertEquals( 'default-gateway', $suggestions[0]->id );
 	}
 

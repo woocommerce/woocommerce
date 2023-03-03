@@ -97,10 +97,20 @@ export const TaskListCompletedHeader: React.FC<
 		}
 	}, [ hasSubmittedScore ] );
 
-	const submitScore = ( recordedScore: number, comments?: string ) => {
+	const submitScore = ( {
+		firstScore,
+		secondScore,
+		comments,
+	}: {
+		firstScore: number;
+		secondScore?: number;
+		comments?: string;
+	} ) => {
 		recordEvent( 'ces_feedback', {
 			action: CUSTOMER_EFFORT_SCORE_ACTION,
-			score: recordedScore,
+			score: firstScore,
+			score_second_question: secondScore ?? null,
+			score_combined: firstScore + ( secondScore ?? 0 ),
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
 		} );
@@ -116,7 +126,7 @@ export const TaskListCompletedHeader: React.FC<
 	const recordScore = ( recordedScore: number ) => {
 		if ( recordedScore > 2 ) {
 			setScore( recordedScore );
-			submitScore( recordedScore );
+			submitScore( { firstScore: recordedScore } );
 		} else {
 			setScore( recordedScore );
 			setShowCesModal( true );
@@ -127,9 +137,13 @@ export const TaskListCompletedHeader: React.FC<
 		}
 	};
 
-	const recordModalScore = ( recordedScore: number, comments: string ) => {
+	const recordModalScore = (
+		firstScore: number,
+		secondScore: number,
+		comments: string
+	) => {
 		setShowCesModal( false );
-		submitScore( recordedScore, comments );
+		submitScore( { firstScore, secondScore, comments } );
 	};
 
 	return (
@@ -230,7 +244,15 @@ export const TaskListCompletedHeader: React.FC<
 			</div>
 			{ showCesModal ? (
 				<CustomerFeedbackModal
-					label={ __( 'How was your experience?', 'woocommerce' ) }
+					title={ __( 'How was your experience?', 'woocommerce' ) }
+					firstQuestion={ __(
+						'The store setup is easy to complete.',
+						'woocommerce'
+					) }
+					secondQuestion={ __(
+						'The store setup process meets my needs.',
+						'woocommerce'
+					) }
 					defaultScore={ score }
 					recordScoreCallback={ recordModalScore }
 					onCloseModal={ () => {

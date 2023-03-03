@@ -9,6 +9,7 @@ import {
 	CardBody,
 	CardFooter,
 	CheckboxControl,
+	Spinner,
 } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { filter, find, findIndex, get } from 'lodash';
@@ -26,11 +27,27 @@ import { getAdminSetting } from '~/utils/admin-settings';
 
 const onboarding = getAdminSetting( 'onboarding', {} );
 
+const Loader = ( props ) => {
+	if ( props.isLoading ) {
+		return (
+			<div
+				className="woocommerce-admin__industry__spinner"
+				style={ { textAlign: 'center' } }
+			>
+				<Spinner />
+			</div>
+		);
+	}
+
+	return <Industry { ...props } />;
+};
+
 class Industry extends Component {
 	constructor( props ) {
 		const profileItems = get( props, 'profileItems', {} );
-		let selected = profileItems.industry || [];
-
+		let selected = Array.isArray( profileItems.industry )
+			? [ ...profileItems.industry ]
+			: [];
 		/**
 		 * @todo Remove block on `updateProfileItems` refactor to wp.data dataStores.
 		 *
@@ -275,6 +292,9 @@ class Industry extends Component {
 							disabled={
 								! selected.length || isProfileItemsRequesting
 							}
+							aria-disabled={
+								! selected.length || isProfileItemsRequesting
+							}
 						>
 							{ __( 'Continue', 'woocommerce' ) }
 						</Button>
@@ -287,9 +307,16 @@ class Industry extends Component {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getProfileItems, getOnboardingError, isOnboardingRequesting } =
-			select( ONBOARDING_STORE_NAME );
-		const { getSettings } = select( SETTINGS_STORE_NAME );
+		const {
+			getProfileItems,
+			getOnboardingError,
+			isOnboardingRequesting,
+			hasFinishedResolution: hasOnboardingFinishedResolution,
+		} = select( ONBOARDING_STORE_NAME );
+		const {
+			getSettings,
+			hasFinishedResolution: hasSettingsFinishedResolution,
+		} = select( SETTINGS_STORE_NAME );
 		const { general: locationSettings = {} } = getSettings( 'general' );
 
 		return {
@@ -298,6 +325,9 @@ export default compose(
 			locationSettings,
 			isProfileItemsRequesting:
 				isOnboardingRequesting( 'updateProfileItems' ),
+			isLoading:
+				! hasOnboardingFinishedResolution( 'getProfileItems', [] ) ||
+				! hasSettingsFinishedResolution( 'getSettings', [ 'general' ] ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
@@ -309,4 +339,4 @@ export default compose(
 			updateProfileItems,
 		};
 	} )
-)( Industry );
+)( Loader );

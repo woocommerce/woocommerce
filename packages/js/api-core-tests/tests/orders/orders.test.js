@@ -162,6 +162,7 @@ describe( 'Orders API tests', () => {
 				per_page: 10,
 			} );
 			expect( allOrders.statusCode ).toEqual( 200 );
+			// eslint-disable-next-line
 			const allOrdersIds = allOrders.body.map( ( order ) => order.id );
 			expect( allOrdersIds ).toHaveLength( ORDERS_COUNT );
 
@@ -286,6 +287,7 @@ describe( 'Orders API tests', () => {
 			} );
 			expect( result1.statusCode ).toEqual( 200 );
 			expect( result1.body ).toHaveLength( 5 );
+			// eslint-disable-next-line
 			result1.body.forEach( ( order ) =>
 				expect( order ).toEqual(
 					expect.objectContaining( {
@@ -299,6 +301,7 @@ describe( 'Orders API tests', () => {
 			} );
 			expect( result2.statusCode ).toEqual( 200 );
 			expect( result2.body ).toHaveLength( 3 );
+			// eslint-disable-next-line
 			result2.body.forEach( ( order ) =>
 				expect( order ).toEqual(
 					expect.objectContaining( {
@@ -317,6 +320,7 @@ describe( 'Orders API tests', () => {
 			} );
 			expect( result1.statusCode ).toEqual( 200 );
 			expect( result1.body ).toHaveLength( 2 );
+			// eslint-disable-next-line
 			result1.body.forEach( ( order ) =>
 				expect( order ).toEqual(
 					expect.objectContaining( {
@@ -340,6 +344,7 @@ describe( 'Orders API tests', () => {
 				);
 			};
 
+			// eslint-disable-next-line
 			const verifyOrderPrecision = ( order, dp ) => {
 				expectPrecisionToMatch( order.discount_total, dp );
 				expectPrecisionToMatch( order.discount_tax, dp );
@@ -413,6 +418,7 @@ describe( 'Orders API tests', () => {
 			} );
 			expect( result1.statusCode ).toEqual( 200 );
 			expect( result1.body ).toHaveLength( 7 );
+			// eslint-disable-next-line
 			result1.body.forEach( ( order ) =>
 				expect( order.billing.email ).toContain( 'example.com' )
 			);
@@ -439,6 +445,7 @@ describe( 'Orders API tests', () => {
 			} );
 			expect( result4.statusCode ).toEqual( 200 );
 			expect( result4.body ).toHaveLength( 5 );
+			// eslint-disable-next-line
 			result4.body.forEach( ( order ) =>
 				expect( order.billing.last_name ).toEqual( 'Doe' )
 			);
@@ -449,6 +456,7 @@ describe( 'Orders API tests', () => {
 			} );
 			expect( result5.statusCode ).toEqual( 200 );
 			expect( result5.body ).toHaveLength( 2 );
+			// eslint-disable-next-line
 			result5.body.forEach( ( order ) =>
 				expect( order ).toEqual(
 					expect.objectContaining( {
@@ -472,7 +480,9 @@ describe( 'Orders API tests', () => {
 
 				// Verify all dates are in descending order.
 				let lastDate = Date.now();
+				// eslint-disable-next-line
 				result.body.forEach( ( { date_created } ) => {
+					// eslint-disable-next-line
 					const created = Date.parse( date_created + '.000Z' );
 					expect( lastDate ).toBeGreaterThanOrEqual( created );
 					lastDate = created;
@@ -488,7 +498,9 @@ describe( 'Orders API tests', () => {
 
 				// Verify all dates are in ascending order.
 				let lastDate = 0;
+				// eslint-disable-next-line
 				result.body.forEach( ( { date_created } ) => {
+					// eslint-disable-next-line
 					const created = Date.parse( date_created + '.000Z' );
 					expect( created ).toBeGreaterThanOrEqual( lastDate );
 					lastDate = created;

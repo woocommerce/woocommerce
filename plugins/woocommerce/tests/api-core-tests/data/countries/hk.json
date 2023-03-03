@@ -1,0 +1,30 @@
+{
+    "code": "HK",
+    "name": "Hong Kong",
+    "states": [
+        {
+            "code": "HONG KONG",
+            "name": "Hong Kong Island"
+        },
+        {
+            "code": "KOWLOON",
+            "name": "Kowloon"
+        },
+        {
+            "code": "NEW TERRITORIES",
+            "name": "New Territories"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/hk"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

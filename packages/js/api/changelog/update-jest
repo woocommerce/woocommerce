@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update `jest` and `ts-jest` to `^27` from `^25`.

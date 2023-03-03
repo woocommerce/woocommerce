@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ModelTransformation, TransformationOrder } from '../model-transformer';
 import { Model } from '../../models';
 
@@ -15,7 +18,8 @@ type KeyChanges< T extends Model > = {
  * other transformations to prevent the changed key from causing problems.
  */
 export class KeyChangeTransformation< T extends Model >
-implements ModelTransformation {
+	implements ModelTransformation
+{
 	/**
 	 * Ensure that this transformation always happens at the very end since it changes the keys
 	 * in the transformed object.

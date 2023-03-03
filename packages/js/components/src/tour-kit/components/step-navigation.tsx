@@ -24,7 +24,8 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 } ) => {
 	const isFirstStep = currentStepIndex === 0;
 	const isLastStep = currentStepIndex === steps.length - 1;
-	const { primaryButton = { text: '', isDisabled: false } } =
+
+	const { primaryButton = { text: '', isDisabled: false, isHidden: false } } =
 		steps[ currentStepIndex ].meta;
 
 	const NextButton = (
@@ -49,14 +50,12 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 	);
 
 	const renderButtons = () => {
-		if ( isFirstStep ) {
-			return <div>{ NextButton }</div>;
-		}
-
 		if ( isLastStep ) {
 			return (
 				<div>
-					{ BackButton }
+					{
+						! isFirstStep ? BackButton : null // For 1 step tours, isFirstStep and isLastStep can be true simultaneously.
+					}
 					<Button
 						isPrimary
 						disabled={ primaryButton.isDisabled }
@@ -69,6 +68,10 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 			);
 		}
 
+		if ( isFirstStep ) {
+			return <div>{ NextButton }</div>;
+		}
+
 		return (
 			<div>
 				{ BackButton }
@@ -77,15 +80,21 @@ const StepNavigation: React.FunctionComponent< Props > = ( {
 		);
 	};
 
+	if ( primaryButton.isHidden ) {
+		return null;
+	}
+
 	return (
 		<div className="woocommerce-tour-kit-step-navigation">
 			<div className="woocommerce-tour-kit-step-navigation__step">
-				{ sprintf(
-					/* translators: current progress in tour, eg: "Step 2 of 4" */
-					__( 'Step %1$d of %2$d', 'woocommerce' ),
-					currentStepIndex + 1,
-					steps.length
-				) }
+				{ steps.length > 1
+					? sprintf(
+							/* translators: current progress in tour, eg: "Step 2 of 4" */
+							__( 'Step %1$d of %2$d', 'woocommerce' ),
+							currentStepIndex + 1,
+							steps.length
+					  )
+					: null }
 			</div>
 			{ renderButtons() }
 		</div>

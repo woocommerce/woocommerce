@@ -24,8 +24,8 @@ type DynamicFormProps = {
 	isBusy?: boolean;
 	onSubmit?: ( values: Record< string, string > ) => void;
 	onChange?: (
-		value: Record< string, string >,
-		values: Record< string, string >[],
+		value: { name: string; value: unknown },
+		values: Record< string, string >,
 		result: boolean
 	) => void;
 	submitLabel?: string;
@@ -67,7 +67,8 @@ export const DynamicForm: React.FC< DynamicFormProps > = ( {
 	);
 
 	return (
-		<Form
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		<Form< Record< string, any > >
 			initialValues={ initialValues }
 			onChange={ onChange }
 			onSubmit={ onSubmit }

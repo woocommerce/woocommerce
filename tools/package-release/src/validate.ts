@@ -146,7 +146,7 @@ export const isValidUpdate = ( name: string ): boolean => {
 		return false;
 	}
 
-	const npmVersion = execSync( 'pnpm view @woocommerce/number version', {
+	const npmVersion = execSync( `pnpm view ${ name } version`, {
 		encoding: 'utf-8',
 	} );
 

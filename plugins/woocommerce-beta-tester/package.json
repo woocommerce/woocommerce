@@ -7,27 +7,40 @@
 		"url": "git://github.com/woocommerce/woocommerce-beta-tester.git"
 	},
 	"title": "WooCommerce Beta Tester",
-	"version": "2.1.0",
+	"version": "2.2.0",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"devDependencies": {
+		"@types/react": "^17.0.2",
+		"@types/react-dom": "^18.0.6",
+		"@types/wordpress__components": "^19.10.1",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/env": "^4.8.0",
+		"@wordpress/prettier-config": "^2.5.0",
 		"@wordpress/scripts": "^19.2.4",
-		"eslint": "5.16.0",
-		"require-turbo": "workspace:*",
+		"eslint": "^8.32.0",
+		"prettier": "npm:wp-prettier@^2.6.2",
+		"ts-loader": "^9.4.1",
+		"typescript": "^4.8.3",
 		"uglify-js": "^3.5.3"
 	},
 	"dependencies": {
+		"@emotion/react": "^11.10.4",
 		"@types/prop-types": "^15.7.4",
+		"@woocommerce/components": "workspace:*",
 		"@woocommerce/data": "workspace:*",
-		"@wordpress/api-fetch": "^3.21.5",
-		"@wordpress/components": "^12.0.7",
+		"@wordpress/api-fetch": "^3.23.1",
+		"@wordpress/components": "^12.0.9",
 		"@wordpress/compose": "^3.24.4",
 		"@wordpress/data": "^4.26.7",
 		"@wordpress/data-controls": "^1.20.7",
-		"@wordpress/element": "^2.19.1",
-		"@wordpress/hooks": "^2.11.1"
+		"@wordpress/element": "^4.18.0",
+		"@wordpress/hooks": "^2.11.1",
+		"prop-types": "^15.8.1"
+	},
+	"peerDependencies": {
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
 	},
 	"assets": {
 		"js": {
@@ -38,7 +51,8 @@
 	"scripts": {
 		"postinstall": "composer install",
 		"changelog": "composer exec -- changelogger",
-		"build": "node ./node_modules/require-turbo && pnpm run build:admin && pnpm run uglify",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"turbo:build": "pnpm run build:admin && pnpm run uglify",
 		"build:admin": "wp-scripts build",
 		"build:zip": "./bin/build-zip.sh",
 		"build:dev": "pnpm run lint:js && pnpm run build",
@@ -59,8 +73,8 @@
 		"test:unit": "wp-scripts test-unit-js"
 	},
 	"engines": {
-		"node": ">=10.15.0",
-		"npm": ">=6.4.1"
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
 	},
 	"woorelease": {
 		"svn_reauth": "true",

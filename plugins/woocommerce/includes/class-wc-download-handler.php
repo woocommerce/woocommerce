@@ -522,7 +522,7 @@ class WC_Download_Handler {
 		header( 'X-Robots-Tag: noindex, nofollow', true );
 		header( 'Content-Type: ' . self::get_download_content_type( $file_path ) );
 		header( 'Content-Description: File Transfer' );
-		header( 'Content-Disposition: attachment; filename="' . $filename . '";' );
+		header( 'Content-Disposition: ' . self::get_content_disposition() . '; filename="' . $filename . '";' );
 		header( 'Content-Transfer-Encoding: binary' );
 
 		$file_size = @filesize( $file_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
@@ -576,6 +576,22 @@ class WC_Download_Handler {
 		} else {
 			@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 		}
+	}
+
+	/**
+	 *
+	 * Get selected content disposition
+	 *
+	 * Defaults to attachment if `woocommerce_downloads_deliver_inline` setting is not selected.
+	 *
+	 * @return string Content disposition value.
+	 */
+	private static function get_content_disposition() : string {
+		$disposition = 'attachment';
+		if ( 'yes' === get_option( 'woocommerce_downloads_deliver_inline' ) ) {
+			$disposition = 'inline';
+		}
+		return $disposition;
 	}
 
 	/**

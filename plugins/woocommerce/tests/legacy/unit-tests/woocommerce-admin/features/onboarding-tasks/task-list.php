@@ -5,6 +5,9 @@
  * @package WooCommerce\Admin\Tests\OnboardingTasks
  */
 
+/**
+ * Test task fixture.
+ */
 require_once __DIR__ . '/test-task.php';
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
@@ -28,11 +31,23 @@ class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+
 		$this->list = new TaskList(
 			array(
 				'id' => 'setup',
 			)
 		);
+	}
+
+	/**
+	 * Tear down test data. Called after every test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
+		WC_Tracks_Footer_Pixel::clear_events();
 	}
 
 	/**
@@ -75,6 +90,7 @@ class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 	public function test_hide() {
 		$this->list->hide();
 		$this->assertTrue( $this->list->is_hidden() );
+		$this->assertRecordedTracksEvent( 'wcadmin_setup_tasklist_completed' );
 	}
 
 	/**
@@ -197,6 +213,8 @@ class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertTrue( $this->list->is_complete() );
+		$this->list->get_json();
+		$this->assertRecordedTracksEvent( 'wcadmin_setup_tasklist_tasks_completed' );
 	}
 
 	/**
@@ -221,8 +239,10 @@ class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 				)
 			)
 		);
+		$this->assertNotRecordedTracksEvent( 'wcadmin_setup_tasklist_tasks_completed' );
 		$this->assertFalse( $this->list->has_previously_completed() );
 		$this->list->get_json();
+		$this->assertRecordedTracksEvent( 'wcadmin_setup_tasklist_tasks_completed' );
 		$this->assertTrue( $this->list->has_previously_completed() );
 	}
 
@@ -400,5 +420,33 @@ class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 	 */
 	public function test_record_tracks_event() {
 		$this->assertEquals( 'setup_tasklist_test_event', $this->list->record_tracks_event( 'test_event' ) );
+	}
+
+	/**
+	 * Test explicit behavior of defaulting to two_column layout after setup tasklist is hidden.
+	 */
+	public function test_default_layout_after_hide_setup_tasklist() {
+		$list = new TaskList(
+			array(
+				'id' => 'setup',
+			)
+		);
+		$list->hide();
+		$this->assertEquals( get_option( 'woocommerce_default_homepage_layout', null ), 'two_columns' );
+		delete_option( 'woocommerce_default_homepage_layout' );
+	}
+
+	/**
+	 * Test explicit behavior of defaulting to two_column layout after setup tasklist is completed.
+	 */
+	public function test_default_layout_after_complete_setup_tasklist() {
+		$list = new TaskList(
+			array(
+				'id' => 'setup',
+			)
+		);
+		$list->possibly_track_completion();
+		$this->assertEquals( get_option( 'woocommerce_default_homepage_layout', null ), 'two_columns' );
+		delete_option( 'woocommerce_default_homepage_layout' );
 	}
 }

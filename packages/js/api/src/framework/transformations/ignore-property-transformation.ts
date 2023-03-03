@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ModelTransformation, TransformationOrder } from '../model-transformer';
 
 export class IgnorePropertyTransformation implements ModelTransformation {

@@ -1,17 +1,13 @@
 /**
  * External dependencies
  */
+import config from 'config';
 import { ElementHandle } from 'puppeteer';
 
 /**
  * Internal dependencies
  */
 import { Login } from '../pages/Login';
-
-/* eslint-disable @typescript-eslint/no-var-requires */
-const { expect } = require( '@jest/globals' );
-const config = require( 'config' );
-/* eslint-enable @typescript-eslint/no-var-requires */
 
 /**
  * Wait for UI blocking to end.
@@ -56,7 +52,9 @@ const verifyPublishAndTrash = async (
 	if ( button === '.order_actions li .save_order' ) {
 		await expect( page ).toMatchElement(
 			'#select2-order_status-container',
-			{ text: 'Processing' }
+			{
+				text: 'Processing',
+			}
 		);
 		await expect( page ).toMatchElement(
 			'#woocommerce-order-notes .note_content',

@@ -49,6 +49,10 @@ export default class PackagePrepare extends Command {
 			default: false,
 			description: 'Perform prepare function on all packages.',
 		} ),
+		initialRelease: Flags.boolean( {
+			default: false,
+			description: "Create a package's first release to NPM",
+		} ),
 	};
 
 	/**
@@ -62,17 +66,23 @@ export default class PackagePrepare extends Command {
 		}
 
 		if ( flags.all ) {
-			this.preparePackages( getAllPackges() );
+			await this.preparePackages( getAllPackges() );
 			return;
 		}
 
 		const packages = args.packages.split( ',' );
 
+		if ( flags.initialRelease && packages.length > 1 ) {
+			this.error(
+				'Please release only a single package when making an initial release'
+			);
+		}
+
 		packages.forEach( ( name: string ) =>
 			validatePackage( name, ( e: string ): void => this.error( e ) )
 		);
 
-		this.preparePackages( packages );
+		await this.preparePackages( packages, flags.initialRelease );
 	}
 
 	/**
@@ -80,28 +90,44 @@ export default class PackagePrepare extends Command {
 	 *
 	 * @param {Array<string>} packages Packages to prepare.
 	 */
-	private preparePackages( packages: Array< string > ) {
-		packages.forEach( ( name ) => {
+	private async preparePackages(
+		packages: Array< string >,
+		initialRelease?: boolean
+	) {
+		packages.forEach( async ( name ) => {
 			CliUx.ux.action.start( `Preparing ${ name }` );
 
 			try {
 				if ( hasValidChangelogs( name ) ) {
 					validateChangelogEntries( name );
-					const nextVersion = getNextVersion( name );
-					writeChangelog( name );
+					let nextVersion = getNextVersion( name );
 					if ( nextVersion ) {
-						this.bumpPackageVersion( name, nextVersion );
+						writeChangelog( name );
+					} else {
+						if ( initialRelease ) {
+							nextVersion = '1.0.0';
+						} else {
+							throw new Error(
+								`Error reading version number for ${ name }. Check that a Changelog file exists and has a version number. If making an initial release, pass the --initialRelease flag.`
+							);
+						}
+
+						writeChangelog( name, nextVersion );
 					}
+
+					this.bumpPackageVersion( name, nextVersion );
+
+					CliUx.ux.action.stop();
 				} else {
-					this.log( `Skipping ${ name }, no changelogs available.` );
+					CliUx.ux.action.stop(
+						`Skipping ${ name }. No changes available for a release.`
+					);
 				}
 			} catch ( e ) {
 				if ( e instanceof Error ) {
 					this.error( e.message );
 				}
 			}
-
-			CliUx.ux.action.stop();
 		} );
 	}
 

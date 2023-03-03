@@ -349,4 +349,43 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
 		}
 	}
+
+	/**
+	 * Get recorded tracks event by name.
+	 *
+	 * @param string $event_name Event name.
+	 * @return WC_Tracks_Event|null
+	 */
+	public function get_tracks_events( $event_name ) {
+		$events  = WC_Tracks_Footer_Pixel::get_events();
+		$matches = array();
+
+		foreach ( $events as $event ) {
+			if ( $event->_en === $event_name ) {
+				$matches[] = $event;
+			}
+		}
+
+		return $matches;
+	}
+
+	/**
+	 * Assert that a valid tracks event has been recorded.
+	 *
+	 * @param string $event_name Event name.
+	 */
+	public function assertRecordedTracksEvent( $event_name ): void {
+		$events = self::get_tracks_events( $event_name );
+		$this->assertNotEmpty( $events );
+	}
+
+	/**
+	 * Assert that a tracks event has not been recorded.
+	 *
+	 * @param string $event_name Event name.
+	 */
+	public function assertNotRecordedTracksEvent( $event_name ): void {
+		$events = self::get_tracks_events( $event_name );
+		$this->assertEmpty( $events );
+	}
 }

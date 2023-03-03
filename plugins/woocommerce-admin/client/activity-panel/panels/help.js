@@ -342,8 +342,8 @@ function getListItems( props ) {
 		),
 		before: <Icon icon={ page } />,
 		after: <Icon icon={ chevronRight } />,
-		linkType: 'external',
-		target: '_blank',
+		linkType: item.linkType ?? 'external',
+		target: item.target ?? '_blank',
 		href: item.link,
 		onClick,
 	} ) );

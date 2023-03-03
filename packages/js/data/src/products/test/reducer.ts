@@ -15,6 +15,7 @@ const defaultState: ProductState = {
 	productsCount: {},
 	errors: {},
 	data: {},
+	pending: {},
 };
 
 describe( 'products reducer', () => {
@@ -40,6 +41,7 @@ describe( 'products reducer', () => {
 				1: { id: 1, name: 'Donkey', status: 'draft' },
 				2: { id: 2, name: 'Sauce', status: 'publish' },
 			},
+			pending: {},
 		};
 		const update: PartialProduct = {
 			id: 2,
@@ -188,14 +190,23 @@ describe( 'products reducer', () => {
 			status: 'draft',
 		};
 
-		const state = reducer( defaultState, {
-			type: TYPES.CREATE_PRODUCT_SUCCESS,
-			id: update.id,
-			product: update,
-		} );
+		const state = reducer(
+			{
+				...defaultState,
+				pending: {
+					createProduct: true,
+				},
+			},
+			{
+				type: TYPES.CREATE_PRODUCT_SUCCESS,
+				id: update.id,
+				product: update,
+			}
+		);
 
 		expect( state.data[ 2 ].name ).toEqual( update.name );
 		expect( state.data[ 2 ].status ).toEqual( update.status );
+		expect( state.pending.createProduct ).toEqual( false );
 	} );
 
 	it( 'should handle CREATE_PRODUCT_ERROR', () => {
@@ -209,6 +220,14 @@ describe( 'products reducer', () => {
 		} );
 
 		expect( state.errors[ resourceName ] ).toBe( error );
+	} );
+
+	it( 'should handle CREATE_PRODUCT_START', () => {
+		const state = reducer( defaultState, {
+			type: TYPES.CREATE_PRODUCT_START,
+		} );
+
+		expect( state.pending.createProduct ).toEqual( true );
 	} );
 
 	it( 'should handle UPDATE_PRODUCT_SUCCESS', () => {
@@ -226,6 +245,12 @@ describe( 'products reducer', () => {
 			data: {
 				1: { id: 1, name: 'Donkey', status: 'draft' },
 				2: { id: 2, name: 'Sauce', status: 'publish' },
+			},
+			pending: {
+				updateProduct: {
+					1: false,
+					2: true,
+				},
 			},
 		};
 		const product: PartialProduct = {
@@ -247,6 +272,10 @@ describe( 'products reducer', () => {
 		expect( state.data[ 2 ].id ).toEqual( initialState.data[ 2 ].id );
 		expect( state.data[ 2 ].title ).toEqual( initialState.data[ 2 ].title );
 		expect( state.data[ 2 ].name ).toEqual( product.name );
+		expect( ( state.pending.updateProduct || {} )[ product.id ] ).toEqual(
+			false
+		);
+		expect( ( state.pending.updateProduct || {} )[ 1 ] ).toEqual( false );
 	} );
 
 	it( 'should handle UPDATE_PRODUCT_ERROR', () => {
@@ -259,6 +288,16 @@ describe( 'products reducer', () => {
 		} );
 
 		expect( state.errors[ `update/${ id }` ] ).toBe( error );
+	} );
+
+	it( 'should handle UPDATE_PRODUCT_START', () => {
+		const id = 1;
+		const state = reducer( defaultState, {
+			type: TYPES.UPDATE_PRODUCT_START,
+			id,
+		} );
+
+		expect( ( state.pending.updateProduct || {} )[ id ] ).toEqual( true );
 	} );
 
 	it( 'should handle DELETE_PRODUCT_SUCCESS', () => {
@@ -276,6 +315,12 @@ describe( 'products reducer', () => {
 			data: {
 				1: { id: 1, name: 'Donkey', status: 'draft' },
 				2: { id: 2, name: 'Sauce', status: 'publish' },
+			},
+			pending: {
+				deleteProduct: {
+					1: true,
+					2: true,
+				},
 			},
 		};
 		const product: PartialProduct = {
@@ -304,6 +349,12 @@ describe( 'products reducer', () => {
 
 		expect( state.data[ 1 ].status ).toEqual( 'trash' );
 		expect( state.data[ 2 ].status ).toEqual( 'deleted' );
+		expect( ( state.pending.deleteProduct || {} )[ product.id ] ).toEqual(
+			false
+		);
+		expect(
+			( state.pending.deleteProduct || {} )[ anotherProduct.id ]
+		).toEqual( false );
 	} );
 
 	it( 'should handle DELETE_PRODUCT_ERROR', () => {
@@ -316,5 +367,15 @@ describe( 'products reducer', () => {
 		} );
 
 		expect( state.errors[ `delete/${ id }` ] ).toBe( error );
+	} );
+
+	it( 'should handle DELETE_PRODUCT_START', () => {
+		const id = 1;
+		const state = reducer( defaultState, {
+			type: TYPES.DELETE_PRODUCT_START,
+			id,
+		} );
+
+		expect( ( state.pending.deleteProduct || {} )[ id ] ).toEqual( true );
 	} );
 } );

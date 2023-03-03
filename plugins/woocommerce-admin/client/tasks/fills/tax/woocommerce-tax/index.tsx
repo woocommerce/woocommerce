@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { difference } from 'lodash';
 import { useSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
@@ -13,7 +12,6 @@ import { PLUGINS_STORE_NAME, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import {
 	AUTOMATION_PLUGINS,
 	hasCompleteAddress,
-	SettingsSelector,
 	TaxChildProps,
 } from '../utils';
 import { AutomatedTaxes } from './automated-taxes';
@@ -31,9 +29,7 @@ export const WooCommerceTax: React.FC< TaxChildProps > = ( {
 		isResolving,
 		pluginsToActivate,
 	} = useSelect( ( select ) => {
-		const { getSettings } = select(
-			SETTINGS_STORE_NAME
-		) as SettingsSelector;
+		const { getSettings } = select( SETTINGS_STORE_NAME );
 		const { getActivePlugins, hasFinishedResolution } =
 			select( PLUGINS_STORE_NAME );
 		const activePlugins = getActivePlugins();
@@ -55,7 +51,7 @@ export const WooCommerceTax: React.FC< TaxChildProps > = ( {
 
 	const canAutomateTaxes = () => {
 		return (
-			hasCompleteAddress( generalSettings ) &&
+			hasCompleteAddress( generalSettings || {} ) &&
 			! pluginsToActivate.length &&
 			isJetpackConnected
 		);

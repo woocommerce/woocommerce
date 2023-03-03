@@ -596,4 +596,46 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		);
 		return $this->_fields;
 	}
+
+	/**
+	 * Limit the contents of the meta_data property based on certain request parameters.
+	 *
+	 * Note that if both `include_meta` and `exclude_meta` are present in the request,
+	 * `include_meta` will take precedence.
+	 *
+	 * @param \WP_REST_Request $request   The request.
+	 * @param array            $meta_data All of the meta data for an object.
+	 *
+	 * @return array
+	 */
+	protected function get_meta_data_for_response( $request, $meta_data ) {
+		$fields = $this->get_fields_for_response( $request );
+		if ( ! in_array( 'meta_data', $fields, true ) ) {
+			return array();
+		}
+
+		$include = (array) $request['include_meta'];
+		$exclude = (array) $request['exclude_meta'];
+
+		if ( ! empty( $include ) ) {
+			$meta_data = array_filter(
+				$meta_data,
+				function( WC_Meta_Data $item ) use ( $include ) {
+					$data = $item->get_data();
+					return in_array( $data['key'], $include, true );
+				}
+			);
+		} elseif ( ! empty( $exclude ) ) {
+			$meta_data = array_filter(
+				$meta_data,
+				function( WC_Meta_Data $item ) use ( $exclude ) {
+					$data = $item->get_data();
+					return ! in_array( $data['key'], $exclude, true );
+				}
+			);
+		}
+
+		// Ensure the array indexes are reset so it doesn't get converted to an object in JSON.
+		return array_values( $meta_data );
+	}
 }

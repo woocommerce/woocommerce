@@ -1,37 +1,34 @@
 name: Run smoke tests against pull request.
 on:
     pull_request:
+        paths-ignore:
+            - '**/changelog/**'
         branches:
             - trunk
         types:
             - labeled
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions: {}
 
 jobs:
     prcheck:
         name: Smoke test a pull request.
         if: "${{ contains(github.event.label.name, 'run: smoke tests') }}"
         runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+            pull-requests: write
         steps:
             - uses: actions/checkout@v3
 
-            - uses: ./.github/actions/cache-deps
-              with:
-                workflow_name: pr-smoke-test
-                workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
             - name: Install Jest
               run: pnpm install -g jest
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                php-version: '7.4'
-
-            - name: Install and Build
-              uses: ./.github/actions/install-build
 
             - name: Run smoke test.
               working-directory: plugins/woocommerce

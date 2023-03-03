@@ -10,6 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 /**
  * System status controller class.
  *
@@ -742,7 +743,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'https://www.paypal.com/cgi-bin/webscr',
 					array(
 						'timeout'     => 10,
-						'user-agent'  => 'WooCommerce/' . WC()->version,
+						'user-agent'  => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 						'httpversion' => '1.1',
 						'body'        => array(
 							'cmd' => '_notify-validate',
@@ -765,7 +766,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$get_response_code = get_transient( 'woocommerce_test_remote_get' );
 
 			if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
-				$response = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
+				$response = wp_safe_remote_get(
+					'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
+					array(
+						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+					)
+				);
 				if ( ! is_wp_error( $response ) ) {
 					$get_response_code = $response['response']['code'];
 				}
@@ -1230,13 +1236,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$product_visibility_terms[ $term->slug ] = strtolower( $term->name );
 		}
 
-		// Check if WooCommerce.com account is connected.
-		$woo_com_connected = 'no';
-		$helper_options    = get_option( 'woocommerce_helper_data', array() );
-		if ( array_key_exists( 'auth', $helper_options ) && ! empty( $helper_options['auth'] ) ) {
-			$woo_com_connected = 'yes';
-		}
-
 		// Return array of useful settings for debugging.
 		return array(
 			'api_enabled'               => 'yes' === get_option( 'woocommerce_api_enabled' ),
@@ -1250,7 +1249,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'geolocation_enabled'       => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ), true ),
 			'taxonomies'                => $term_response,
 			'product_visibility_terms'  => $product_visibility_terms,
-			'woocommerce_com_connected' => $woo_com_connected,
+			'woocommerce_com_connected' => ConnectionHelper::is_connected() ? 'yes' : 'no',
 		);
 	}
 

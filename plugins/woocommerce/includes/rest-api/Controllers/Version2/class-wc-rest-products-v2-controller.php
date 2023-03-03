@@ -8,6 +8,8 @@
  * @since   2.6.0
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -623,7 +625,13 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	protected function api_get_meta_data( $product, $context ) {
-		return $product->get_meta_data();
+		$meta_data = $product->get_meta_data();
+
+		if ( ! isset( $this->request ) || ! $this->request instanceof WP_REST_Request ) {
+			return $meta_data;
+		}
+
+		return $this->get_meta_data_for_response( $this->request, $meta_data );
 	}
 
 	/**
@@ -1657,9 +1665,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$weight_unit    = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
-		$schema         = array(
+		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
+		$schema               = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => $this->post_type,
 			'type'       => 'object',
@@ -1929,7 +1937,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'weight'                => array(
 					/* translators: %s: weight unit */
-					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), $weight_unit ),
+					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), $weight_unit_label ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1940,19 +1948,19 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					'properties'  => array(
 						'length' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'width'  => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'height' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -2355,29 +2363,47 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			);
 		}
 
-		$params['in_stock']  = array(
+		$params['in_stock']     = array(
 			'description'       => __( 'Limit result set to products in stock or out of stock.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['on_sale']   = array(
+		$params['on_sale']      = array(
 			'description'       => __( 'Limit result set to products on sale.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['min_price'] = array(
+		$params['min_price']    = array(
 			'description'       => __( 'Limit result set to products based on a minimum price.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['max_price'] = array(
+		$params['max_price']    = array(
 			'description'       => __( 'Limit result set to products based on a maximum price.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['include_meta'] = array(
+			'default'           => array(),
+			'description'       => __( 'Limit meta_data to specific keys.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'string',
+			),
+			'sanitize_callback' => 'wp_parse_list',
+		);
+		$params['exclude_meta'] = array(
+			'default'           => array(),
+			'description'       => __( 'Ensure meta_data excludes specific keys.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'string',
+			),
+			'sanitize_callback' => 'wp_parse_list',
 		);
 
 		return $params;

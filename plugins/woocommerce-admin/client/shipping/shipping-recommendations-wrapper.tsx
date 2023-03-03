@@ -8,7 +8,6 @@ import { lazy, Suspense } from '@wordpress/element';
  */
 import { EmbeddedBodyProps } from '../embedded-body-layout/embedded-body-props';
 import RecommendationsEligibilityWrapper from '../settings-recommendations/recommendations-eligibility-wrapper';
-import { ShippingTour } from './shipping-tour';
 
 const ShippingRecommendationsLoader = lazy( () => {
 	if ( window.wcAdminFeatures[ 'shipping-smart-defaults' ] ) {
@@ -47,9 +46,6 @@ export const ShippingRecommendations: React.FC< EmbeddedBodyProps > = ( {
 	return (
 		<RecommendationsEligibilityWrapper>
 			<Suspense fallback={ null }>
-				{ window.wcAdminFeatures[ 'shipping-setting-tour' ] && (
-					<ShippingTour />
-				) }
 				<ShippingRecommendationsLoader />
 			</Suspense>
 		</RecommendationsEligibilityWrapper>

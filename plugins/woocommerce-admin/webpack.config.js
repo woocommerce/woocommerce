@@ -5,8 +5,8 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
-const BundleAnalyzerPlugin = require( 'webpack-bundle-analyzer' )
-	.BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 
@@ -36,6 +36,7 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'onboarding',
+	'product-editor',
 ];
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
 // See ./client/wp-admin-scripts/README.md for more details
@@ -56,6 +57,10 @@ const wpAdminScripts = [
 	'category-tracking',
 	'tags-tracking',
 	'product-tour',
+	'wc-addons-tour',
+	'settings-tracking',
+	'order-tracking',
+	'product-import-tracking',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -104,8 +109,8 @@ const webpackConfig = {
 					amd: false,
 				},
 				exclude: [
-					// Exclude node_modules/.pnpm but not node_modules/.pnpm/debug*
-					/node_modules(\/|\\)\.pnpm(\/|\\)(?!(debug))/,
+					// Exclude node_modules/.pnpm
+					/node_modules(\/|\\)\.pnpm(\/|\\)/,
 				],
 				use: {
 					loader: 'babel-loader',
@@ -123,13 +128,14 @@ const webpackConfig = {
 							],
 							[ '@babel/preset-typescript' ],
 						],
+						plugins: [ '@babel/plugin-proposal-class-properties' ],
 					},
 				},
 			},
 			{ test: /\.md$/, use: 'raw-loader' },
 			{
 				test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/,
-				loader: 'url-loader',
+				type: 'asset',
 			},
 			...styleConfig.rules,
 		],

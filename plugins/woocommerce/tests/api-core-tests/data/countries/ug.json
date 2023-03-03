@@ -1,0 +1,530 @@
+{
+    "code": "UG",
+    "name": "Uganda",
+    "states": [
+        {
+            "code": "UG314",
+            "name": "Abim"
+        },
+        {
+            "code": "UG301",
+            "name": "Adjumani"
+        },
+        {
+            "code": "UG322",
+            "name": "Agago"
+        },
+        {
+            "code": "UG323",
+            "name": "Alebtong"
+        },
+        {
+            "code": "UG315",
+            "name": "Amolatar"
+        },
+        {
+            "code": "UG324",
+            "name": "Amudat"
+        },
+        {
+            "code": "UG216",
+            "name": "Amuria"
+        },
+        {
+            "code": "UG316",
+            "name": "Amuru"
+        },
+        {
+            "code": "UG302",
+            "name": "Apac"
+        },
+        {
+            "code": "UG303",
+            "name": "Arua"
+        },
+        {
+            "code": "UG217",
+            "name": "Budaka"
+        },
+        {
+            "code": "UG218",
+            "name": "Bududa"
+        },
+        {
+            "code": "UG201",
+            "name": "Bugiri"
+        },
+        {
+            "code": "UG235",
+            "name": "Bugweri"
+        },
+        {
+            "code": "UG420",
+            "name": "Buhweju"
+        },
+        {
+            "code": "UG117",
+            "name": "Buikwe"
+        },
+        {
+            "code": "UG219",
+            "name": "Bukedea"
+        },
+        {
+            "code": "UG118",
+            "name": "Bukomansimbi"
+        },
+        {
+            "code": "UG220",
+            "name": "Bukwa"
+        },
+        {
+            "code": "UG225",
+            "name": "Bulambuli"
+        },
+        {
+            "code": "UG416",
+            "name": "Buliisa"
+        },
+        {
+            "code": "UG401",
+            "name": "Bundibugyo"
+        },
+        {
+            "code": "UG430",
+            "name": "Bunyangabu"
+        },
+        {
+            "code": "UG402",
+            "name": "Bushenyi"
+        },
+        {
+            "code": "UG202",
+            "name": "Busia"
+        },
+        {
+            "code": "UG221",
+            "name": "Butaleja"
+        },
+        {
+            "code": "UG119",
+            "name": "Butambala"
+        },
+        {
+            "code": "UG233",
+            "name": "Butebo"
+        },
+        {
+            "code": "UG120",
+            "name": "Buvuma"
+        },
+        {
+            "code": "UG226",
+            "name": "Buyende"
+        },
+        {
+            "code": "UG317",
+            "name": "Dokolo"
+        },
+        {
+            "code": "UG121",
+            "name": "Gomba"
+        },
+        {
+            "code": "UG304",
+            "name": "Gulu"
+        },
+        {
+            "code": "UG403",
+            "name": "Hoima"
+        },
+        {
+            "code": "UG417",
+            "name": "Ibanda"
+        },
+        {
+            "code": "UG203",
+            "name": "Iganga"
+        },
+        {
+            "code": "UG418",
+            "name": "Isingiro"
+        },
+        {
+            "code": "UG204",
+            "name": "Jinja"
+        },
+        {
+            "code": "UG318",
+            "name": "Kaabong"
+        },
+        {
+            "code": "UG404",
+            "name": "Kabale"
+        },
+        {
+            "code": "UG405",
+            "name": "Kabarole"
+        },
+        {
+            "code": "UG213",
+            "name": "Kaberamaido"
+        },
+        {
+            "code": "UG427",
+            "name": "Kagadi"
+        },
+        {
+            "code": "UG428",
+            "name": "Kakumiro"
+        },
+        {
+            "code": "UG101",
+            "name": "Kalangala"
+        },
+        {
+            "code": "UG222",
+            "name": "Kaliro"
+        },
+        {
+            "code": "UG122",
+            "name": "Kalungu"
+        },
+        {
+            "code": "UG102",
+            "name": "Kampala"
+        },
+        {
+            "code": "UG205",
+            "name": "Kamuli"
+        },
+        {
+            "code": "UG413",
+            "name": "Kamwenge"
+        },
+        {
+            "code": "UG414",
+            "name": "Kanungu"
+        },
+        {
+            "code": "UG206",
+            "name": "Kapchorwa"
+        },
+        {
+            "code": "UG236",
+            "name": "Kapelebyong"
+        },
+        {
+            "code": "UG126",
+            "name": "Kasanda"
+        },
+        {
+            "code": "UG406",
+            "name": "Kasese"
+        },
+        {
+            "code": "UG207",
+            "name": "Katakwi"
+        },
+        {
+            "code": "UG112",
+            "name": "Kayunga"
+        },
+        {
+            "code": "UG407",
+            "name": "Kibaale"
+        },
+        {
+            "code": "UG103",
+            "name": "Kiboga"
+        },
+        {
+            "code": "UG227",
+            "name": "Kibuku"
+        },
+        {
+            "code": "UG432",
+            "name": "Kikuube"
+        },
+        {
+            "code": "UG419",
+            "name": "Kiruhura"
+        },
+        {
+            "code": "UG421",
+            "name": "Kiryandongo"
+        },
+        {
+            "code": "UG408",
+            "name": "Kisoro"
+        },
+        {
+            "code": "UG305",
+            "name": "Kitgum"
+        },
+        {
+            "code": "UG319",
+            "name": "Koboko"
+        },
+        {
+            "code": "UG325",
+            "name": "Kole"
+        },
+        {
+            "code": "UG306",
+            "name": "Kotido"
+        },
+        {
+            "code": "UG208",
+            "name": "Kumi"
+        },
+        {
+            "code": "UG333",
+            "name": "Kwania"
+        },
+        {
+            "code": "UG228",
+            "name": "Kween"
+        },
+        {
+            "code": "UG123",
+            "name": "Kyankwanzi"
+        },
+        {
+            "code": "UG422",
+            "name": "Kyegegwa"
+        },
+        {
+            "code": "UG415",
+            "name": "Kyenjojo"
+        },
+        {
+            "code": "UG125",
+            "name": "Kyotera"
+        },
+        {
+            "code": "UG326",
+            "name": "Lamwo"
+        },
+        {
+            "code": "UG307",
+            "name": "Lira"
+        },
+        {
+            "code": "UG229",
+            "name": "Luuka"
+        },
+        {
+            "code": "UG104",
+            "name": "Luwero"
+        },
+        {
+            "code": "UG124",
+            "name": "Lwengo"
+        },
+        {
+            "code": "UG114",
+            "name": "Lyantonde"
+        },
+        {
+            "code": "UG223",
+            "name": "Manafwa"
+        },
+        {
+            "code": "UG320",
+            "name": "Maracha"
+        },
+        {
+            "code": "UG105",
+            "name": "Masaka"
+        },
+        {
+            "code": "UG409",
+            "name": "Masindi"
+        },
+        {
+            "code": "UG214",
+            "name": "Mayuge"
+        },
+        {
+            "code": "UG209",
+            "name": "Mbale"
+        },
+        {
+            "code": "UG410",
+            "name": "Mbarara"
+        },
+        {
+            "code": "UG423",
+            "name": "Mitooma"
+        },
+        {
+            "code": "UG115",
+            "name": "Mityana"
+        },
+        {
+            "code": "UG308",
+            "name": "Moroto"
+        },
+        {
+            "code": "UG309",
+            "name": "Moyo"
+        },
+        {
+            "code": "UG106",
+            "name": "Mpigi"
+        },
+        {
+            "code": "UG107",
+            "name": "Mubende"
+        },
+        {
+            "code": "UG108",
+            "name": "Mukono"
+        },
+        {
+            "code": "UG334",
+            "name": "Nabilatuk"
+        },
+        {
+            "code": "UG311",
+            "name": "Nakapiripirit"
+        },
+        {
+            "code": "UG116",
+            "name": "Nakaseke"
+        },
+        {
+            "code": "UG109",
+            "name": "Nakasongola"
+        },
+        {
+            "code": "UG230",
+            "name": "Namayingo"
+        },
+        {
+            "code": "UG234",
+            "name": "Namisindwa"
+        },
+        {
+            "code": "UG224",
+            "name": "Namutumba"
+        },
+        {
+            "code": "UG327",
+            "name": "Napak"
+        },
+        {
+            "code": "UG310",
+            "name": "Nebbi"
+        },
+        {
+            "code": "UG231",
+            "name": "Ngora"
+        },
+        {
+            "code": "UG424",
+            "name": "Ntoroko"
+        },
+        {
+            "code": "UG411",
+            "name": "Ntungamo"
+        },
+        {
+            "code": "UG328",
+            "name": "Nwoya"
+        },
+        {
+            "code": "UG331",
+            "name": "Omoro"
+        },
+        {
+            "code": "UG329",
+            "name": "Otuke"
+        },
+        {
+            "code": "UG321",
+            "name": "Oyam"
+        },
+        {
+            "code": "UG312",
+            "name": "Pader"
+        },
+        {
+            "code": "UG332",
+            "name": "Pakwach"
+        },
+        {
+            "code": "UG210",
+            "name": "Pallisa"
+        },
+        {
+            "code": "UG110",
+            "name": "Rakai"
+        },
+        {
+            "code": "UG429",
+            "name": "Rubanda"
+        },
+        {
+            "code": "UG425",
+            "name": "Rubirizi"
+        },
+        {
+            "code": "UG431",
+            "name": "Rukiga"
+        },
+        {
+            "code": "UG412",
+            "name": "Rukungiri"
+        },
+        {
+            "code": "UG111",
+            "name": "Sembabule"
+        },
+        {
+            "code": "UG232",
+            "name": "Serere"
+        },
+        {
+            "code": "UG426",
+            "name": "Sheema"
+        },
+        {
+            "code": "UG215",
+            "name": "Sironko"
+        },
+        {
+            "code": "UG211",
+            "name": "Soroti"
+        },
+        {
+            "code": "UG212",
+            "name": "Tororo"
+        },
+        {
+            "code": "UG113",
+            "name": "Wakiso"
+        },
+        {
+            "code": "UG313",
+            "name": "Yumbe"
+        },
+        {
+            "code": "UG330",
+            "name": "Zombo"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/ug"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

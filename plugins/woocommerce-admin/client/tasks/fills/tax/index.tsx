@@ -24,11 +24,7 @@ import { WooOnboardingTask } from '@woocommerce/onboarding';
 /**
  * Internal dependencies
  */
-import {
-	redirectToTaxSettings,
-	SettingsSelector,
-	supportsAvalara,
-} from './utils';
+import { redirectToTaxSettings, supportsAvalara } from './utils';
 import { Card as AvalaraCard } from './avalara/card';
 import { Card as WooCommerceTaxCard } from './woocommerce-tax/card';
 import { createNoticesFromResponse } from '../../../lib/notices';
@@ -59,10 +55,8 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		useDispatch( SETTINGS_STORE_NAME );
 	const { generalSettings, isResolving, taxSettings } = useSelect(
 		( select ) => {
-			const { getSettings, hasFinishedResolution } = select(
-				SETTINGS_STORE_NAME
-			) as SettingsSelector;
-
+			const { getSettings, hasFinishedResolution } =
+				select( SETTINGS_STORE_NAME );
 			return {
 				generalSettings: getSettings( 'general' ).general,
 				isResolving: ! hasFinishedResolution( 'getSettings', [
@@ -75,7 +69,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 
 	const onManual = useCallback( async () => {
 		setIsPending( true );
-		if ( generalSettings.woocommerce_calc_taxes !== 'yes' ) {
+		if ( generalSettings?.woocommerce_calc_taxes !== 'yes' ) {
 			updateAndPersistSettingsForGroup( 'tax', {
 				tax: {
 					...taxSettings,
@@ -88,7 +82,6 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 					woocommerce_calc_taxes: 'yes',
 				},
 			} )
-				// @ts-expect-error updateAndPersistSettingsForGroup returns a Promise, but it is not typed in source.
 				.then( () => redirectToTaxSettings() )
 				.catch( ( error: unknown ) => {
 					setIsPending( false );
@@ -99,20 +92,34 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		}
 	}, [] );
 
-	const onAutomate = useCallback( () => {
+	const onAutomate = useCallback( async () => {
 		setIsPending( true );
-		updateAndPersistSettingsForGroup( 'tax', {
-			tax: {
-				...taxSettings,
-				wc_connect_taxes_enabled: 'yes',
-			},
-		} );
-		updateAndPersistSettingsForGroup( 'general', {
-			general: {
-				...generalSettings,
-				woocommerce_calc_taxes: 'yes',
-			},
-		} );
+		try {
+			await Promise.all( [
+				updateAndPersistSettingsForGroup( 'tax', {
+					tax: {
+						...taxSettings,
+						wc_connect_taxes_enabled: 'yes',
+					},
+				} ),
+				updateAndPersistSettingsForGroup( 'general', {
+					general: {
+						...generalSettings,
+						woocommerce_calc_taxes: 'yes',
+					},
+				} ),
+			] );
+		} catch ( error: unknown ) {
+			setIsPending( false );
+			createNotice(
+				'error',
+				__(
+					'There was a problem setting up automated taxes. Please try again.',
+					'woocommerce'
+				)
+			);
+			return;
+		}
 
 		createNotice(
 			'success',

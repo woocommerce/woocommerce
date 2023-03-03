@@ -183,6 +183,7 @@ class Options extends \WC_REST_Data_Controller {
 			'wc_connect_options',
 			'woocommerce_admin_created_default_shipping_zones',
 			'woocommerce_admin_reviewed_default_shipping_zones',
+			'woocommerce_admin_reviewed_store_location_settings',
 		);
 
 		$theme_permissions = array(

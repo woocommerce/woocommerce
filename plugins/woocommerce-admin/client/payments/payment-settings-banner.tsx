@@ -9,13 +9,18 @@ import {
 	WCPayBannerBody,
 	WCPayBannerFooter,
 } from '@woocommerce/onboarding';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import './payment-recommendations.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { usePaymentExperiment } from './use-payments-experiment';
+import { usePaymentsBanner } from './use-payments-banner';
+
+const recordTrack = () => {
+	recordEvent( 'settings_payments_banner_connect_click' );
+};
 
 const WCPaySettingBanner = () => {
 	const WC_PAY_SETUP_URL = getAdminLink(
@@ -28,7 +33,11 @@ const WCPaySettingBanner = () => {
 			<WCPayBannerBody
 				textPosition="right"
 				actionButton={
-					<Button href={ WC_PAY_SETUP_URL } isPrimary>
+					<Button
+						href={ WC_PAY_SETUP_URL }
+						isPrimary
+						onClick={ recordTrack }
+					>
 						{ __( 'Get started', 'woocommerce' ) }
 					</Button>
 				}
@@ -53,13 +62,9 @@ const DefaultPaymentMethodsHeaderText = () => (
 );
 
 export const PaymentsBannerWrapper = () => {
-	const { isLoadingExperiment, experimentAssignment } =
-		usePaymentExperiment();
+	const { hasFinishedResolution, shouldShowBanner } = usePaymentsBanner();
 
-	if (
-		! isLoadingExperiment &&
-		experimentAssignment?.variationName === 'treatment'
-	) {
+	if ( hasFinishedResolution && shouldShowBanner ) {
 		return <WCPaySettingBanner />;
 	}
 	return <DefaultPaymentMethodsHeaderText />;

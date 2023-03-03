@@ -1,44 +1,54 @@
 name: Run code sniff on PR
 on:
-  pull_request
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
 defaults:
-  run:
-    shell: bash
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    run:
+        shell: bash
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+env:
+    PHPCS: ./plugins/woocommerce/vendor/bin/phpcs # Run WooCommerce phpcs setup in phpcs-changed instead of default
+
+permissions: {}
+
 jobs:
-  test:
-    name: Code sniff (PHP 7.4, WP Latest)
-    timeout-minutes: 15
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    test:
+        name: Code sniff (PHP 7.4, WP Latest)
+        timeout-minutes: 15
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 7.4
-          tools: composer
+            - name: Get Changed Files
+              id: changed-files
+              uses: tj-actions/changed-files@v32
+              with:
+                  files: |
+                      **/*.php
 
-      - name: Tool versions
-        run: |
-          php --version
-          composer --version
+            - name: Setup WooCommerce Monorepo
+              if: steps.changed-files.outputs.any_changed == 'true'
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build: false
 
-      - uses: ./.github/actions/cache-deps
-        with:
-          workflow_name: pr-code-sniff
-          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+            - name: Tool versions
+              if: steps.changed-files.outputs.any_changed == 'true'
+              run: |
+                  php --version
+                  composer --version
+                  phpcs-changed --version
 
-      - name: Install and Build
-        uses: ./.github/actions/install-build
-
-      - name: Run code sniffer
-        uses: thenabeel/action-phpcs@v8
-        with:
-          files: "**.php"
-          phpcs_path: plugins/woocommerce/vendor/bin/phpcs
-          standard: phpcs.xml
+            - name: Run PHPCS
+              if: steps.changed-files.outputs.any_changed == 'true'
+              run: |
+                  HEAD_REF=$(git rev-parse HEAD)
+                  git checkout $HEAD_REF
+                  phpcs-changed -s --git --git-base ${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}

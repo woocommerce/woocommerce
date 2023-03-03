@@ -3,7 +3,6 @@
  */
 import { render, act, cleanup, waitFor } from '@testing-library/react';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useExperiment } from '@woocommerce/explat';
 import { recordEvent } from '@woocommerce/tracks';
 import userEvent from '@testing-library/user-event';
 
@@ -91,7 +90,7 @@ describe( 'Task', () => {
 			expect( queryByText( 'task-list:main' ) ).toBeInTheDocument();
 			expect( queryByText( 'task-list:extended' ) ).toBeInTheDocument();
 			expect(
-				queryByText( 'two-column-list:setup_experiment_1' )
+				queryByText( 'two-column-list:setup' )
 			).not.toBeInTheDocument();
 		} );
 	} );
@@ -161,32 +160,6 @@ describe( 'Task', () => {
 			expect( updateOptions ).toHaveBeenCalledWith( {
 				woocommerce_task_list_prompt_shown: true,
 			} );
-		} );
-	} );
-
-	it( 'should render the two column set up task list when id is setup_experiment_1', () => {
-		( useSelect as jest.Mock ).mockImplementation( () => ( {
-			isResolving: false,
-			taskLists: [
-				{
-					id: 'setup_experiment_1',
-					eventPrefix: 'main_tasklist_',
-					isVisible: true,
-					tasks: [ { id: 'main-task-1' }, { id: 'main-task-2' } ],
-				},
-				{ id: 'extended', isVisible: true, tasks: [] },
-			],
-		} ) );
-		const { queryByText } = render(
-			<div>
-				<Tasks query={ {} } />
-			</div>
-		);
-		waitFor( () => {
-			expect(
-				queryByText( 'two-column-list:setup_experiment_1' )
-			).toBeInTheDocument();
-			expect( queryByText( 'task-list:extended' ) ).toBeInTheDocument();
 		} );
 	} );
 

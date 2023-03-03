@@ -1,11 +1,9 @@
-# All CSS
-/assets/css/**
-/assets/css/*.css
+# Built CSS
+/assets/css/*
 
-# All JS
-/assets/js/**
-/assets/js/*.js
-/assets/client
+# Built JS
+/assets/js/*
+/assets/client/*
 
 # Behat/CLI Tests
 tests/cli/installer
@@ -14,12 +12,10 @@ tests/cli/composer.lock
 tests/cli/composer.json
 tests/cli/vendor
 
-# Unit tests
+# Unit Tests
 /tests/bin/tmp
 /tests/e2e/config/local-*.json
 /tests/e2e/config/local.json
-/tests/e2e/config/default.json
-/tests/e2e/docker
 /tests/e2e/screenshots
 /tests/e2e/plugins
 .phpunit.result.cache

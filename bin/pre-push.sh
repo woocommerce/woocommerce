@@ -22,3 +22,18 @@ if [ $PROTECTED_BRANCH = $CURRENT_BRANCH ]; then
 	echo
 	exit 1
 fi
+
+pnpm exec syncpack -- list-mismatches
+
+if [ $? -ne 0 ]; then
+	echo "You must sync the dependencies listed above before you can push this branch."
+	echo "This can usually be accomplished automatically by updating the pinned version in `.syncpackrc` and then running \`pnpm run sync-dependencies\`."
+	exit 1
+fi
+
+# Ensure both branches are tracked or check-changelogger-use will fail. Note we pass hooksPath
+# to avoid running the pre-commit hook.
+git -c core.hooksPath=/dev/null checkout $PROTECTED_BRANCH --quiet
+git -c core.hooksPath=/dev/null checkout $CURRENT_BRANCH --quiet
+
+php tools/monorepo/check-changelogger-use.php $PROTECTED_BRANCH $CURRENT_BRANCH

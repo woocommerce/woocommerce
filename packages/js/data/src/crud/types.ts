@@ -6,6 +6,7 @@ import {
 	getItem,
 	getItemError,
 	getItems,
+	getItemsTotalCount,
 	getItemsError,
 	getItemCreateError,
 	getItemDeleteError,
@@ -14,6 +15,13 @@ import {
 
 export type IdType = number | string;
 
+export type IdQuery =
+	| IdType
+	| {
+			id: IdType;
+			[ key: string ]: IdType;
+	  };
+
 export type Item = {
 	id: IdType;
 	[ key: string ]: unknown;
@@ -21,6 +29,11 @@ export type Item = {
 
 export type ItemQuery = BaseQueryParams & {
 	[ key: string ]: unknown;
+	parent_id?: IdType;
+};
+
+export type Params = {
+	[ key: string ]: IdType;
 };
 
 type WithRequiredProperty< Type, Key extends keyof Type > = Type & {
@@ -63,7 +76,7 @@ export type CrudSelectors<
 		'': WPDataSelector< typeof getItem >;
 	},
 	ResourceName,
-	IdType,
+	IdQuery,
 	ItemType
 > &
 	MapSelectors<
@@ -73,7 +86,7 @@ export type CrudSelectors<
 			UpdateError: WPDataSelector< typeof getItemUpdateError >;
 		},
 		ResourceName,
-		IdType,
+		IdQuery,
 		unknown
 	> &
 	MapSelectors<
@@ -83,6 +96,14 @@ export type CrudSelectors<
 		PluralResourceName,
 		ItemQueryType,
 		ItemType[]
+	> &
+	MapSelectors<
+		{
+			TotalCount: WPDataSelector< typeof getItemsTotalCount >;
+		},
+		PluralResourceName,
+		ItemQueryType,
+		number
 	> &
 	MapSelectors<
 		{

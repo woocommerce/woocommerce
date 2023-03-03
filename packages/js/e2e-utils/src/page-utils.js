@@ -122,9 +122,9 @@ export const backboneUnblocked = async () => {
 /**
  * Conditionally wait for a selector without throwing an error.
  *
- * @param  selector
- * @param  timeoutInSeconds
- * @return {Promise<boolean>}
+ * @param {string} selector
+ * @param {number} timeoutInSeconds
+ * @return {Promise<boolean>} True if selector is found, false otherwise.
  */
 export const waitForSelectorWithoutThrow = async (
 	selector,
@@ -292,7 +292,7 @@ export const searchForOrder = async ( value, orderId, customerName ) => {
  * Apply a coupon code within cart or checkout.
  * Method will try to apply a coupon in the checkout, otherwise will try to apply in the cart.
  *
- * @param  couponCode string
+ * @param {string} couponCode string
  * @return {Promise<void>}
  */
 export const applyCoupon = async ( couponCode ) => {
@@ -318,7 +318,7 @@ export const applyCoupon = async ( couponCode ) => {
 /**
  * Remove one coupon within cart or checkout.
  *
- * @param  couponCode Coupon name.
+ * @param {string} couponCode Coupon name.
  * @return {Promise<void>}
  */
 export const removeCoupon = async ( couponCode ) => {
@@ -375,9 +375,9 @@ export const clickAndWaitForSelector = async (
  * Behavior can be modified with @param options. Possible keys: `visible`, `hidden`, `timeout`.
  * More details at: https://pptr.dev/#?product=Puppeteer&show=api-pagewaitforselectorselector-options
  *
- * @param {Puppeteer.Page} page     Puppeteer representation of the page.
- * @param {string}         selector CSS selector of the element
- * @param {Object}         options  Custom options to modify function behavior.
+ * @param {Object} page     Puppeteer representation of the page.
+ * @param {string} selector CSS selector of the element
+ * @param {Object} options  Custom options to modify function behavior.
  */
 export async function waitForSelector( page, selector, options = {} ) {
 	// set up default options
@@ -394,11 +394,12 @@ export async function waitForSelector( page, selector, options = {} ) {
  *
  * @param {string} selector  Selector of the element you want to get the attribute from.
  * @param {string} attribute The desired HTML attribute.
- * @return {Promise<string>}
+ * @return {Promise<string>} Promise resolving to the attribute value.
  */
 export async function getSelectorAttribute( selector, attribute ) {
 	return await page.$eval(
 		selector,
+		// eslint-disable-next-line no-shadow
 		( element, attribute ) => element.getAttribute( attribute ),
 		attribute
 	);

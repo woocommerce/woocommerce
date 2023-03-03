@@ -1,25 +1,19 @@
 /**
+ * External dependencies
+ */
+import {
+	clearAndFillInput,
+	verifyValueOfInputField,
+} from '@woocommerce/e2e-utils';
+import { afterAll, beforeAll, describe, it } from '@jest/globals';
+/**
  * Internal dependencies
  */
 import { WcSettings } from '../../pages/WcSettings';
 import { WpSettings } from '../../pages/WpSettings';
 import { Login } from '../../pages/Login';
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-const {
-	clearAndFillInput,
-	verifyValueOfInputField,
-} = require( '@woocommerce/e2e-utils' );
-const {
-	afterAll,
-	beforeAll,
-	describe,
-	it,
-	expect,
-} = require( '@jest/globals' );
-/* eslint-enable @typescript-eslint/no-var-requires */
-
-const testAdminBasicSetup = () => {
+export const testAdminBasicSetup = () => {
 	describe( 'Store owner can finish initial store setup', () => {
 		const wcSettings = new WcSettings( page );
 		const wpSettings = new WpSettings( page );
@@ -80,5 +74,3 @@ const testAdminBasicSetup = () => {
 		} );
 	} );
 };
-
-module.exports = { testAdminBasicSetup };

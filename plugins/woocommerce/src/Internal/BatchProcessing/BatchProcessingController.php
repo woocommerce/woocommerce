@@ -134,6 +134,10 @@ class BatchProcessingController {
 	 * @throws \Exception If error occurred during batch processing.
 	 */
 	private function process_next_batch_for_single_processor( string $processor_class_name ): void {
+		if ( ! $this->is_enqueued( $processor_class_name ) ) {
+			return;
+		}
+
 		$batch_processor      = $this->get_processor_instance( $processor_class_name );
 		$pending_count_before = $batch_processor->get_total_pending_count();
 		$error                = $this->process_next_batch_for_single_processor_core( $batch_processor );
@@ -323,11 +327,34 @@ class BatchProcessingController {
 	}
 
 	/**
+	 * Dequeue and de-schedule a processor instance so that it won't be processed anymore.
+	 *
+	 * @param string $processor_class_name Fully qualified class name of the processor.
+	 * @return bool True if the processor has been dequeued, false if the processor wasn't enqueued (so nothing has been done).
+	 */
+	public function remove_processor( string $processor_class_name ): bool {
+		$enqueued_processors = $this->get_enqueued_processors();
+		if ( ! in_array( $processor_class_name, $enqueued_processors, true ) ) {
+			return false;
+		}
+
+		$enqueued_processors = array_diff( $enqueued_processors, array( $processor_class_name ) );
+		if ( empty( $enqueued_processors ) ) {
+			$this->force_clear_all_processes();
+		} else {
+			update_option( self::ENQUEUED_PROCESSORS_OPTION_NAME, $enqueued_processors, false );
+			as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME, array( $processor_class_name ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Dequeues and de-schedules all the processors.
 	 */
 	public function force_clear_all_processes(): void {
 		as_unschedule_all_actions( self::PROCESS_SINGLE_BATCH_ACTION_NAME );
-		as_unschedule_action( self::WATCHDOG_ACTION_NAME );
+		as_unschedule_all_actions( self::WATCHDOG_ACTION_NAME );
 		update_option( self::ENQUEUED_PROCESSORS_OPTION_NAME, array(), false );
 	}
 

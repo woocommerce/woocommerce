@@ -70,9 +70,9 @@ if ( $verbose ) {
 	 */
 	function debug( ...$args ) {
 		if ( getenv( 'CI' ) ) {
-			$args[0] = "\e[34m${args[0]}\e[0m\n";
+			$args[0] = "\e[34m{$args[0]}\e[0m\n";
 		} else {
-			$args[0] = "\e[1;30m${args[0]}\e[0m\n";
+			$args[0] = "\e[1;30m{$args[0]}\e[0m\n";
 		}
 		fprintf( STDERR, ...$args );
 	}
@@ -128,6 +128,11 @@ foreach ( $composer_projects as $project_path ) {
 	$changelogger_projects[ $project_path ] = $data;
 }
 
+// Support centralizing the changelogs for multiple components and validating them together.
+$project_component_map = array(
+	'plugins/woocommerce-admin' => 'plugins/woocommerce',
+);
+
 // Process the diff.
 debug( 'Checking diff from %s...%s.', $base, $head );
 $pipes = null;
@@ -152,6 +157,17 @@ while ( ( $line = fgets( $pipes[1] ) ) ) {
 		if ( substr( $line, 0, strlen( $path ) + 1 ) === $path . '/' ) {
 			$project_match = $path;
 			break;
+		}
+	}
+
+	// Also try to match to project components.
+	if ( false === $project_match ) {
+		foreach ( $project_component_map as $path => $project ) {
+			if ( substr( $line, 0, strlen( $path ) + 1 ) === $path . '/' ) {
+				debug( 'Mapping %s to project %s.', $line, $project );
+				$project_match = $project;
+				break;
+			}
 		}
 	}
 
@@ -200,7 +216,7 @@ foreach ( $touched_projects as $slug => $files ) {
 		} elseif ( getenv( 'CI' ) ) {
 			printf( "---\n" ); // Bracket message containing newlines for better visibility in GH's logs.
 			printf(
-				"::error::Project %s is being changed, but no change file in %s is touched!%%0A%%0AUse `pnpm changelog add --filter=%s` to add a change file.\n",
+				"::error::Project %s is being changed, but no change file in %s is touched!%%0A%%0AUse `pnpm --filter=%s run changelog add` to add a change file.\n",
 				$slug,
 				"$slug/{$changelogger_projects[ $slug ]['changes-dir']}/",
 				$slug
@@ -218,7 +234,7 @@ foreach ( $touched_projects as $slug => $files ) {
 	}
 }
 if ( $exit && ! getenv( 'CI' ) && ! $list ) {
-	printf( "\e[32mUse `pnpm changelog add --filter={project}` to add a change file for each project.\e[0m\n" );
+	printf( "\e[32mUse `pnpm --filter={project} run changelog add` to add a change file for each project.\e[0m\n" );
 }
 
 exit( $exit );

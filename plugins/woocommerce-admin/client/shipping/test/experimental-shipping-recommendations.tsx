@@ -28,6 +28,8 @@ const defaultSelectReturn = {
 		},
 	} ),
 	getProfileItems: () => ( {} ),
+	hasFinishedResolution: jest.fn(),
+	getOption: jest.fn(),
 };
 
 describe( 'ShippingRecommendations', () => {

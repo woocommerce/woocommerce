@@ -1,3 +1,5 @@
-const { testAdminHomescreenActivityPanel } = require( '@woocommerce/admin-e2e-tests' );
+const {
+	testAdminHomescreenActivityPanel,
+} = require( '@woocommerce/admin-e2e-tests' );
 
 testAdminHomescreenActivityPanel();

@@ -4,26 +4,22 @@ on:
     branches: ["trunk", "release/**"]
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   build:
     if: github.repository == 'woocommerce/woocommerce'
     name: Build WooCommerce zip
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ./.github/actions/cache-deps
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
         with:
-          workflow_name: mirrors
-          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-      - name: Install PNPM
-        run: npm install -g pnpm@^6.24.2
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
+          build: false
 
       - name: Build zip
         working-directory: plugins/woocommerce
@@ -43,6 +39,8 @@ jobs:
     name: Push to Mirror
     needs: [build]
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     steps:
       - name: Create directories
         run: |

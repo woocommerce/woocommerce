@@ -37,7 +37,11 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => [
 					self::get_plugin( 'mailpoet' ),
+					self::get_plugin( 'codistoconnect' ),
 					self::get_plugin( 'google-listings-and-ads' ),
+					self::get_plugin( 'pinterest-for-woocommerce' ),
+					self::get_plugin( 'facebook-for-woocommerce' ),
+					self::get_plugin( 'tiktok-for-business:alt' ),
 				],
 			],
 			[
@@ -55,7 +59,9 @@ class DefaultFreeExtensions {
 				'plugins' => [
 					self::get_plugin( 'google-listings-and-ads:alt' ),
 					self::get_plugin( 'tiktok-for-business' ),
-					self::get_plugin( 'pinterest-for-woocommerce' ),
+					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
+					self::get_plugin( 'facebook-for-woocommerce:alt' ),
+					self::get_plugin( 'codistoconnect:alt' ),
 				],
 			],
 		];
@@ -80,7 +86,7 @@ class DefaultFreeExtensions {
 					'<a href="https://woocommerce.com/products/google-listings-and-ads" target="_blank">',
 					'</a>'
 				),
-				'image_url'      => plugins_url( '/assets/images/onboarding/google-listings-and-ads.png', WC_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 				'is_visible'     => [
@@ -98,11 +104,34 @@ class DefaultFreeExtensions {
 			'google-listings-and-ads:alt'       => [
 				'name'           => __( 'Google Listings & Ads', 'woocommerce' ),
 				'description'    => __( 'Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.', 'woocommerce' ),
-				'image_url'      => plugins_url( '/assets/images/onboarding/google-listings-and-ads.png', WC_PLUGIN_FILE ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 			],
+			'facebook-for-woocommerce'          => [
+				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woocommerce.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/facebook.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-facebook',
+				'is_visible'     => false,
+				'is_built_by_wc' => false,
+			],
+			'facebook-for-woocommerce:alt'      => [
+				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/facebook.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-facebook',
+				'is_visible'     => false,
+				'is_built_by_wc' => false,
+			],
 			'pinterest-for-woocommerce'         => [
+				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'Get your products in front of Pinners searching for ideas and things to buy.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
+				'is_built_by_wc' => true,
+			],
+			'pinterest-for-woocommerce:alt'     => [
 				'name'           => __( 'Pinterest for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
@@ -129,6 +158,25 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( '/assets/images/onboarding/creative-mail-by-constant-contact.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=creativemail',
 				'is_built_by_wc' => false,
+			],
+			'codistoconnect'                    => [
+				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
+				'description'    => sprintf(
+					/* translators: 1: opening product link tag. 2: closing link tag */
+					__( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce with  %1$sCodisto%2$s', 'woocommerce' ),
+					'<a href="https://woocommerce.com/pt-br/products/amazon-ebay-integration/?quid=c247a85321c9e93e7c3c6f1eb072e6e5" target="_blank">',
+					'</a>'
+				),
+				'image_url'      => plugins_url( '/assets/images/onboarding/codistoconnect.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=codisto-settings',
+				'is_built_by_wc' => true,
+			],
+			'codistoconnect:alt'                => [
+				'name'           => __( 'Codisto for WooCommerce', 'woocommerce' ),
+				'description'    => __( 'Sell on Amazon, eBay, Walmart and more directly from WooCommerce.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/codistoconnect.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=codisto-settings',
+				'is_built_by_wc' => true,
 			],
 			'woocommerce-payments'              => [
 				'description'    => sprintf(
@@ -652,6 +700,19 @@ class DefaultFreeExtensions {
 					],
 				],
 				'is_built_by_wc' => false,
+			],
+			'tiktok-for-business:alt'           => [
+				'name'           => __( 'TikTok for WooCommerce', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/tiktok.svg', WC_PLUGIN_FILE ),
+				'description'    => sprintf(
+					/* translators: 1: opening product link tag. 2: closing link tag */
+					__( 'Create ad campaigns and reach one billion global users with %1$sTikTok for WooCommerce%2$s', 'woocommerce' ),
+					'<a href="https://woocommerce.com/products/tiktok-for-woocommerce" target="_blank">',
+					'</a>'
+				),
+				'manage_url'     => 'admin.php?page=tiktok',
+				'is_built_by_wc' => false,
+				'is_visible'     => false,
 			],
 		);
 

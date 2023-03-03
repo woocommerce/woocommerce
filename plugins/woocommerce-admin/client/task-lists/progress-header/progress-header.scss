@@ -1,20 +1,15 @@
-$progress-complete-color: #007cba;
+$progress-complete-color: var(--wp-admin-theme-color);
 
 .woocommerce-task-progress-header {
 	position: relative;
 	min-height: 28px;
 
-	@at-root .woocommerce-setup-panel & h1 {
-		font-size: 16px;
-		font-weight: 600;
+	.woocommerce-task-progress-header__title {
+		padding-top: 4px;
 	}
 
 	h1 {
 		font-size: 24px;
-	}
-
-	@at-root .woocommerce-setup-panel & p {
-		font-size: 16px;
 	}
 
 	p {
@@ -60,6 +55,24 @@ $progress-complete-color: #007cba;
 	.woocommerce-card__menu {
 		position: absolute;
 		right: 0;
-		top: 7px;
+		top: -7px;
+	}
+
+	// Styles for the activity/setup panel.
+	@at-root .woocommerce-setup-panel & {
+		padding: $gap;
+
+		h1 {
+			font-size: 16px;
+			font-weight: 600;
+		}
+
+		p {
+			font-size: 16px;
+		}
+
+		.woocommerce-card__menu {
+			top: 17px;
+		}
 	}
 }

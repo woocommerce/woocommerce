@@ -12,13 +12,32 @@ import { fetchWithHeaders } from './controls';
 
 export function getResourceName(
 	prefix: string,
-	identifier: Record< string, unknown >
+	identifier: Record< string, unknown > | string
 ) {
 	const identifierString = JSON.stringify(
 		identifier,
 		Object.keys( identifier ).sort()
 	);
 	return `${ prefix }:${ identifierString }`;
+}
+
+/**
+ * Generate a resource name for order totals count.
+ *
+ * It omits query parameters from the identifier that don't affect
+ * totals values like pagination and response field filtering.
+ *
+ * @param {string} prefix Resource name prefix.
+ * @param {Object} query  Query for order totals count.
+ * @return {string} Resource name for order totals.
+ */
+export function getTotalCountResourceName(
+	prefix: string,
+	query: Record< string, unknown >
+) {
+	const { _fields, page, per_page, ...totalsQuery } = query;
+
+	return getResourceName( prefix, totalsQuery );
 }
 
 export function getResourcePrefix( resourceName: string ) {
@@ -52,7 +71,6 @@ export function* request< Query extends BaseQueryParams, DataType >(
 			path: url,
 			method: 'GET',
 		} );
-
 	if ( isUnboundedRequest && ! ( 'data' in response ) ) {
 		return { items: response, totalCount: response.length };
 	}

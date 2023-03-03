@@ -25,7 +25,7 @@ To run the tests, you need to create a test database. You can:
 - Access a database on a server
 - Connect to your local database on your machine
 - Use a solution like VVV - if you are using VVV you might need to `vagrant ssh` first
-- Run a throwaway database in docker with this one-liner: `docker run --rm --name woocommerce_test_db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:5.7.33`. ( Use `tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0` in next step)
+- Run a throwaway database in docker with this one-liner: `docker run --rm --name woocommerce_test_db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:8.0.32`. ( Use `tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0` in next step)
 
 ### Setup instructions
 

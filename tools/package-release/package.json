@@ -31,7 +31,7 @@
 		"shx": "^0.3.3",
 		"ts-node": "^10.2.1",
 		"tslib": "^2.3.1",
-		"typescript": "^4.4.3"
+		"typescript": "^4.8.3"
 	},
 	"oclif": {
 		"bin": "package-release",
@@ -49,14 +49,16 @@
 		}
 	},
 	"scripts": {
-		"build": "shx rm -rf dist && tsc -b",
+		"turbo:build": "shx rm -rf dist && tsc -b",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint . --ext .ts --config .eslintrc",
 		"postpack": "shx rm -f oclif.manifest.json",
 		"posttest": "pnpm lint",
 		"prepack": "pnpm build && oclif manifest"
 	},
 	"engines": {
-		"node": ">=12.0.0"
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
 	},
 	"types": "dist/index.d.ts"
 }

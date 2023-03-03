@@ -4,6 +4,10 @@
 	"description": "Utility build files for e2e packages",
 	"private": true,
 	"main": "build.js",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
 	"bin": {
 		"e2e-builds": "./build.js"
 	},
@@ -17,18 +21,17 @@
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce#readme",
 	"scripts": {
-		"node ./node_modules/require-turbo && lint": "eslint build.js",
+		"lint": "eslint build.js",
 		"lint:fix": "eslint build.js --fix"
 	},
 	"devDependencies": {
 		"@babel/core": "7.12.9",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"chalk": "^4.1.2",
-		"eslint": "^8.12.0",
+		"eslint": "^8.32.0",
 		"glob": "^7.2.0",
-		"mkdirp": "^1.0.4",
 		"lodash": "^4.17.21",
-		"require-turbo": "workspace:*"
+		"mkdirp": "^1.0.4"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
@@ -31,7 +32,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '6.9.0';
+	public $version = '7.6.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -63,6 +64,13 @@ final class WooCommerce {
 	 * @var WC_Query
 	 */
 	public $query = null;
+
+	/**
+	 * API instance
+	 *
+	 * @var WC_API
+	 */
+	public $api;
 
 	/**
 	 * Product factory instance.
@@ -230,6 +238,7 @@ final class WooCommerce {
 		$container->get( CustomOrdersTableController::class );
 		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
+		$container->get( FeaturesController::class );
 	}
 
 	/**
@@ -599,6 +608,9 @@ final class WooCommerce {
 				case 'twentytwentytwo':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-two.php';
 					break;
+				case 'twentytwentythree':
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-three.php';
+					break;
 			}
 		}
 	}
@@ -967,7 +979,7 @@ final class WooCommerce {
 			return;
 		}
 
-		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>pnpm install</code> and then <code>pnpm -- turbo run build --filter=woocommerce</code> to build and minify assets.', 'woocommerce' );
+		$message_one = __( 'You have installed a development version of WooCommerce which requires files to be built and minified. From the plugin directory, run <code>pnpm install</code> and then <code>pnpm run build --filter=woocommerce</code> to build and minify assets.', 'woocommerce' );
 		$message_two = sprintf(
 			/* translators: 1: URL of WordPress.org Repository 2: URL of the GitHub Repository release page */
 			__( 'Or you can download a pre-built version of the plugin from the <a href="%1$s">WordPress.org repository</a> or by visiting <a href="%2$s">the releases page in the GitHub repository</a>.', 'woocommerce' ),

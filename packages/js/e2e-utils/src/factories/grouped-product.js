@@ -4,8 +4,8 @@ import { Factory } from 'fishery';
 /**
  * Creates a new factory for creating grouped products.
  *
- * @param {HTTPClient} httpClient The HTTP client we will give the repository.
- * @return {AsyncFactory} The factory for creating models.
+ * @param {Object} httpClient The HTTP client we will give the repository.
+ * @return {Object} The factory for creating models.
  */
 export function groupedProductFactory( httpClient ) {
 	const repository = GroupedProduct.restRepository( httpClient );

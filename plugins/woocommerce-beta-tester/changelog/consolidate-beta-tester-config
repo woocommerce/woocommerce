@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Move release config in package json into woorelease object.

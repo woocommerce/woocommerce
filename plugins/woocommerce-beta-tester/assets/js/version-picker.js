@@ -14,7 +14,7 @@ jQuery( function ( $ ) {
 		 * Initialize Version Information click
 		 */
 		init() {
-			const instance = this;
+			instance = this;
 			instance.new_version = undefined;
 
 			$( '#wcbt-modal-version-switch-confirm' ).on(
@@ -37,8 +37,6 @@ jQuery( function ( $ ) {
 		 */
 		showConfirmVersionSwitchModal( event ) {
 			event.preventDefault();
-
-			const instance = this;
 
 			if ( ! instance.new_version ) {
 				// eslint-disable-next-line no-undef

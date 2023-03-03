@@ -1,0 +1,57 @@
+<!-- wp:heading -->
+<h2 id="database-changes">Database Changes</h2>
+<!-- /wp:heading -->
+
+<% if (changes.schema.length) { %>
+  <!-- wp:heading -->
+  <h3 id="schema-updates">Schema Updates</h3>
+  <!-- /wp:heading -->
+
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <tbody>
+        <tr>
+          <th><strong>Class Name</strong></th>
+          <th><strong>Code Ref</strong></th>
+        </tr>
+        <% changes.schema.forEach(({areEqual, name, method}) => { %>
+          <% if (!areEqual) { %>
+            <tr>
+              <td><%= name %></td>
+              <td><code><%= method %></code></td>
+            </tr>
+          <% } %>
+        <% }) %>  
+      </tbody>
+    </table>
+  </figure>
+  <!-- /wp:table -->
+<% } %>
+
+<% if (changes.db) { %>
+  <!-- wp:heading -->
+  <h3 id="db-updates">DB Updates</h3>
+  <!-- /wp:heading -->
+
+  <!-- wp:table -->
+  <figure class="wp-block-table">
+    <table>
+      <tbody>
+        <tr>
+          <th>
+            <strong>Function Name</strong>
+          </th>
+        </tr>
+        <tr>
+          <td><code><%= changes.db.functionName %></code></td>
+        </tr>
+      </tbody>
+    </table>
+  </figure>
+  <!-- /wp:table -->
+<% } else { %>
+  <!-- wp:paragraph -->
+  <p>There are no database changes in this release.</p>
+  <!-- /wp:paragraph -->
+<% } %>

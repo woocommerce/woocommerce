@@ -10,9 +10,11 @@
  * @package     WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -48,6 +50,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		'cart_tax'           => 0,
 		'total'              => 0,
 		'total_tax'          => 0,
+	);
+
+	/**
+	 * List of properties that were earlier managed by data store. However, since DataStore is a not a stored entity in itself, they used to store data in metadata of the data object.
+	 * With custom tables, some of these are moved from metadata to their own columns, but existing code will still try to add them to metadata. This array is used to keep track of such properties.
+	 *
+	 * Only reason to add a property here is that you are moving properties from DataStore instance to data object. If you are adding a new property, consider adding it to to $data array instead.
+	 *
+	 * @var array
+	 */
+	protected $legacy_datastore_props = array(
+		'_recorded_coupon_usage_counts',
 	);
 
 	/**
@@ -190,6 +204,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 
 			$this->save_items();
+
+			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+				$order_cache = wc_get_container()->get( OrderCache::class );
+				$order_cache->update_if_cached( $this );
+			}
 
 			/**
 			 * Trigger action after saving to the DB.
@@ -339,6 +358,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get date_modified.
+	 *
+	 * @param  string $context View or edit context.
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 */
+	public function get_date_paid( $context = 'view' ) {
+		return $this->get_prop( 'date_paid', $context );
+	}
+
+	/**
+	 * Get date_modified.
+	 *
+	 * @param  string $context View or edit context.
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 */
+	public function get_date_completed( $context = 'view' ) {
+		return $this->get_prop( 'date_completed', $context );
+	}
+
+
+	/**
 	 * Return the order statuses without wc- internal prefix.
 	 *
 	 * @param  string $context View or edit context.
@@ -405,7 +445,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Gets order grand total. incl. taxes. Used in gateways.
+	 * Gets order grand total including taxes, shipping cost, fees, and coupon discounts. Used in gateways.
 	 *
 	 * @param  string $context View or edit context.
 	 * @return float
@@ -446,7 +486,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Gets order subtotal.
+	 * Gets order subtotal. Order subtotal is the price of all items excluding taxes, fees, shipping cost, and coupon discounts.
+	 * If sale price is set on an item, the subtotal will include this sale discount. E.g. a product with a regular
+	 * price of $100 bought at a 50% discount will represent $50 of the subtotal for the order.
 	 *
 	 * @return float
 	 */
@@ -514,6 +556,29 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_user() {
 		return false;
+	}
+
+	/**
+	 * Gets information about whether coupon counts were updated.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 *
+	 * @return bool True if coupon counts were updated, false otherwise.
+	 */
+	public function get_recorded_coupon_usage_counts( $context = 'view' ) {
+		return wc_string_to_bool( $this->get_prop( 'recorded_coupon_usage_counts', $context ) );
+	}
+
+	/**
+	 * Get basic order data in array format.
+	 *
+	 * @return array
+	 */
+	public function get_base_data() {
+		return array_merge(
+			array( 'id' => $this->get_id() ),
+			$this->data
+		);
 	}
 
 	/*
@@ -706,6 +771,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return $this->legacy_set_total( $value, $deprecated );
 		}
 		$this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
+	}
+
+	/**
+	 * Stores information about whether the coupon usage were counted.
+	 *
+	 * @param bool|string $value True if counted, false if not.
+	 *
+	 * @return void
+	 */
+	public function set_recorded_coupon_usage_counts( $value ) {
+		$this->set_prop( 'recorded_coupon_usage_counts', wc_string_to_bool( $value ) );
 	}
 
 	/*
@@ -1164,6 +1240,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				);
 			}
 		}
+
+		/**
+		 * Action to signal that a coupon has been applied to an order.
+		 *
+		 * @param  WC_Coupon $coupon The applied coupon object.
+		 * @param  WC_Order  $order  The current order object.
+		 *
+		 * @since 7.3
+		 */
+		do_action( 'woocommerce_order_applied_coupon', $coupon, $this );
 
 		$this->set_coupon_discount_amounts( $discounts );
 		$this->save();
@@ -2249,5 +2335,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Get order title.
+	 *
+	 * @return string Order title.
+	 */
+	public function get_title() : string {
+		if ( method_exists( $this->data_store, 'get_title' ) ) {
+			return $this->data_store->get_title( $this );
+		} else {
+			return __( 'Order', 'woocommerce' );
+		}
 	}
 }

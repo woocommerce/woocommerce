@@ -1,46 +1,47 @@
-name: "Pull request post-merge processing"
+name: 'Pull request post-merge processing'
 on:
-  pull_request_target:
-    types: [closed]
+    pull_request_target:
+        types: [closed]
+        paths:
+            - 'packages/**'
+            - 'plugins/woocommerce/**'
+            - 'plugins/woocommerce-admin/**'
+
+permissions: {}
 
 jobs:
-  process-pull-request-after-merge:
-    name: "Process a pull request after it's merged"
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-20.04
-    steps:
-      - name: "Get the action scripts"
-        run: |
-          scripts="assign-milestone-to-merged-pr.php add-post-merge-comment.php post-request-shared.php"
-          for script in $scripts
-          do
-            curl \
-            --silent \
-            --fail \
-            --header 'Authorization: bearer ${{ secrets.GITHUB_TOKEN }}' \
-            --header 'User-Agent: GitHub action to set the milestone for a pull request' \
-            --header 'Accept: application/vnd.github.v3.raw' \
-            --output $script \
-            --location "$GITHUB_API_URL/repos/${{ github.repository }}/contents/.github/workflows/scripts/$script?ref=${{ github.event.pull_request.base.ref }}"
-          done
-        env:
-          GITHUB_API_URL: ${{ env.GITHUB_API_URL }}
-      - name: "Install PHP"
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
-      - name: "Run the script to assign a milestone"
-        if: |
-          contains(github.event.pull_request.labels.*.name, 'plugin: woocommerce') &&
-          !github.event.pull_request.milestone &&
-          github.event.pull_request.base.ref == 'trunk'
-        run: php assign-milestone-to-merged-pr.php
-        env:
-          PULL_REQUEST_ID: ${{ github.event.pull_request.node_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: "Run the script to post a comment with next steps hint"
-        if: "contains(github.event.pull_request.labels.*.name, 'plugin: woocommerce')"
-        run: php add-post-merge-comment.php
-        env:
-          PULL_REQUEST_ID: ${{ github.event.pull_request.node_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    process-pull-request-after-merge:
+        name: "Process a pull request after it's merged"
+        if: github.event.pull_request.merged == true
+        runs-on: ubuntu-20.04
+        permissions:
+            pull-requests: write
+        steps:
+            - name: 'Get the action scripts'
+              run: |
+                  scripts="assign-milestone-to-merged-pr.php add-post-merge-comment.php post-request-shared.php"
+                  for script in $scripts
+                  do
+                    curl \
+                    --silent \
+                    --fail \
+                    --header 'Authorization: bearer ${{ secrets.GITHUB_TOKEN }}' \
+                    --header 'User-Agent: GitHub action to set the milestone for a pull request' \
+                    --header 'Accept: application/vnd.github.v3.raw' \
+                    --output $script \
+                    --location "$GITHUB_API_URL/repos/${{ github.repository }}/contents/.github/workflows/scripts/$script?ref=${{ github.event.pull_request.base.ref }}"
+                  done
+              env:
+                  GITHUB_API_URL: ${{ env.GITHUB_API_URL }}
+            - name: 'Install PHP'
+              uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
+              with:
+                  php-version: '7.4'
+            - name: 'Run the script to assign a milestone'
+              if: |
+                  !github.event.pull_request.milestone &&
+                  github.event.pull_request.base.ref == 'trunk'
+              run: php assign-milestone-to-merged-pr.php
+              env:
+                  PULL_REQUEST_ID: ${{ github.event.pull_request.node_id }}
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

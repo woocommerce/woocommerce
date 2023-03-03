@@ -49,7 +49,7 @@ class WC_Admin_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case 
 
 		// Populate all of the data.
 		$prod_download = new WC_Product_Download();
-		$prod_download->set_file( plugin_dir_url( $this->wc_core_dir ) . 'woocommerce/assets/images/help.png' );
+		$prod_download->set_file( plugin_dir_url( WC_ABSPATH ) . 'woocommerce/assets/images/help.png' );
 		$prod_download->set_id( '1' );
 
 		$product = new WC_Product_Simple();
@@ -136,7 +136,7 @@ class WC_Admin_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case 
 
 		// First set of data.
 		$prod_download = new WC_Product_Download();
-		$prod_download->set_file( plugin_dir_url( $this->wc_core_dir ) . 'woocommerce/assets/images/help.png' );
+		$prod_download->set_file( plugin_dir_url( WC_ABSPATH ) . 'woocommerce/assets/images/help.png' );
 		$prod_download->set_id( '2' );
 
 		$product = new WC_Product_Simple();
@@ -231,7 +231,7 @@ class WC_Admin_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case 
 
 		// Populate all of the data.
 		$prod_download = new WC_Product_Download();
-		$prod_download->set_file( plugin_dir_url( $this->wc_core_dir ) . 'woocommerce/assets/images/help.png' );
+		$prod_download->set_file( plugin_dir_url( WC_ABSPATH ) . 'woocommerce/assets/images/help.png' );
 		$prod_download->set_id( '3' );
 
 		$product = new WC_Product_Simple();

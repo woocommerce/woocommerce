@@ -8,7 +8,8 @@ import { Reducer } from 'redux';
  */
 import { Actions } from './actions';
 import CRUD_ACTIONS from './crud-actions';
-import { getResourceName } from '../utils';
+import { getKey, getRequestIdentifier } from './utils';
+import { getTotalCountResourceName } from '../utils';
 import { IdType, Item, ItemQuery } from './types';
 import { TYPES } from './action-types';
 
@@ -21,7 +22,9 @@ export type ResourceState = {
 		}
 	>;
 	data: Data;
+	itemsCount: Record< string, number >;
 	errors: Record< string, unknown >;
+	requesting: Record< string, boolean >;
 };
 
 export const createReducer = () => {
@@ -29,52 +32,127 @@ export const createReducer = () => {
 		state = {
 			items: {},
 			data: {},
+			itemsCount: {},
 			errors: {},
+			requesting: {},
 		},
 		payload
 	) => {
+		const itemData = state.data || {};
+
 		if ( payload && 'type' in payload ) {
 			switch ( payload.type ) {
 				case TYPES.CREATE_ITEM_ERROR:
+					const createItemErrorRequestId = getRequestIdentifier(
+						payload.errorType,
+						payload.query || {}
+					);
+					return {
+						...state,
+						errors: {
+							...state.errors,
+							[ createItemErrorRequestId ]: payload.error,
+						},
+						requesting: {
+							...state.requesting,
+							[ createItemErrorRequestId ]: false,
+						},
+					};
+				case TYPES.GET_ITEMS_TOTAL_COUNT_ERROR:
 				case TYPES.GET_ITEMS_ERROR:
 					return {
 						...state,
 						errors: {
 							...state.errors,
-							[ getResourceName(
+							[ getRequestIdentifier(
 								payload.errorType,
 								( payload.query || {} ) as ItemQuery
 							) ]: payload.error,
 						},
 					};
+				case TYPES.GET_ITEMS_TOTAL_COUNT_SUCCESS:
+					return {
+						...state,
+						itemsCount: {
+							...state.itemsCount,
+							[ getTotalCountResourceName(
+								CRUD_ACTIONS.GET_ITEMS,
+								( payload.query || {} ) as ItemQuery
+							) ]: payload.totalCount,
+						},
+					};
 
 				case TYPES.CREATE_ITEM_SUCCESS:
-				case TYPES.GET_ITEM_SUCCESS:
-				case TYPES.UPDATE_ITEM_SUCCESS:
-					const itemData = state.data || {};
+					const createItemSuccessRequestId = getRequestIdentifier(
+						CRUD_ACTIONS.CREATE_ITEM,
+						payload.key,
+						payload.query
+					);
 					return {
 						...state,
 						data: {
 							...itemData,
-							[ payload.id ]: {
-								...( itemData[ payload.id ] || {} ),
+							[ payload.key ]: {
+								...( itemData[ payload.key ] || {} ),
+								...payload.item,
+							},
+						},
+						requesting: {
+							...state.requesting,
+							[ createItemSuccessRequestId ]: false,
+						},
+					};
+
+				case TYPES.GET_ITEM_SUCCESS:
+					return {
+						...state,
+						data: {
+							...itemData,
+							[ payload.key ]: {
+								...( itemData[ payload.key ] || {} ),
 								...payload.item,
 							},
 						},
 					};
 
+				case TYPES.UPDATE_ITEM_SUCCESS:
+					const updateItemSuccessRequestId = getRequestIdentifier(
+						CRUD_ACTIONS.UPDATE_ITEM,
+						payload.key,
+						payload.query
+					);
+					return {
+						...state,
+						data: {
+							...itemData,
+							[ payload.key ]: {
+								...( itemData[ payload.key ] || {} ),
+								...payload.item,
+							},
+						},
+						requesting: {
+							...state.requesting,
+							[ updateItemSuccessRequestId ]: false,
+						},
+					};
+
 				case TYPES.DELETE_ITEM_SUCCESS:
-					const itemIds = Object.keys( state.data );
-					const nextData = itemIds.reduce< Data >(
-						( items: Data, id: string ) => {
-							if ( id !== payload.id.toString() ) {
-								items[ id ] = state.data[ id ];
+					const deleteItemSuccessRequestId = getRequestIdentifier(
+						CRUD_ACTIONS.DELETE_ITEM,
+						payload.key,
+						payload.force
+					);
+					const itemKeys = Object.keys( state.data );
+					const nextData = itemKeys.reduce< Data >(
+						( items: Data, key: string ) => {
+							if ( key !== payload.key.toString() ) {
+								items[ key ] = state.data[ key ];
 								return items;
 							}
 							if ( payload.force ) {
 								return items;
 							}
-							items[ id ] = payload.item;
+							items[ key ] = payload.item;
 							return items;
 						},
 						{} as Data
@@ -83,18 +161,57 @@ export const createReducer = () => {
 					return {
 						...state,
 						data: nextData,
+						requesting: {
+							...state.requesting,
+							[ deleteItemSuccessRequestId ]: false,
+						},
 					};
 
 				case TYPES.DELETE_ITEM_ERROR:
-				case TYPES.GET_ITEM_ERROR:
-				case TYPES.UPDATE_ITEM_ERROR:
+					const deleteItemErrorRequestId = getRequestIdentifier(
+						payload.errorType,
+						payload.key,
+						payload.force
+					);
 					return {
 						...state,
 						errors: {
 							...state.errors,
-							[ getResourceName( payload.errorType, {
-								id: payload.id,
-							} ) ]: payload.error,
+							[ deleteItemErrorRequestId ]: payload.error,
+						},
+						requesting: {
+							...state.requesting,
+							[ deleteItemErrorRequestId ]: false,
+						},
+					};
+
+				case TYPES.GET_ITEM_ERROR:
+					return {
+						...state,
+						errors: {
+							...state.errors,
+							[ getRequestIdentifier(
+								payload.errorType,
+								payload.key
+							) ]: payload.error,
+						},
+					};
+
+				case TYPES.UPDATE_ITEM_ERROR:
+					const upateItemErrorRequestId = getRequestIdentifier(
+						payload.errorType,
+						payload.key,
+						payload.query
+					);
+					return {
+						...state,
+						errors: {
+							...state.errors,
+							[ upateItemErrorRequestId ]: payload.error,
+						},
+						requesting: {
+							...state.requesting,
+							[ upateItemErrorRequestId ]: false,
 						},
 					};
 
@@ -104,15 +221,16 @@ export const createReducer = () => {
 					const nextResources = payload.items.reduce<
 						Record< string, Item >
 					>( ( result, item ) => {
-						ids.push( item.id );
-						result[ item.id ] = {
-							...( state.data[ item.id ] || {} ),
+						const key = getKey( item.id, payload.urlParameters );
+						ids.push( key );
+						result[ key ] = {
+							...( state.data[ key ] || {} ),
 							...item,
 						};
 						return result;
 					}, {} );
 
-					const itemQuery = getResourceName(
+					const itemQuery = getRequestIdentifier(
 						CRUD_ACTIONS.GET_ITEMS,
 						( payload.query || {} ) as ItemQuery
 					);
@@ -126,6 +244,44 @@ export const createReducer = () => {
 						data: {
 							...state.data,
 							...nextResources,
+						},
+					};
+
+				case TYPES.CREATE_ITEM_REQUEST:
+					return {
+						...state,
+						requesting: {
+							...state.requesting,
+							[ getRequestIdentifier(
+								CRUD_ACTIONS.CREATE_ITEM,
+								payload.query
+							) ]: true,
+						},
+					};
+
+				case TYPES.DELETE_ITEM_REQUEST:
+					return {
+						...state,
+						requesting: {
+							...state.requesting,
+							[ getRequestIdentifier(
+								CRUD_ACTIONS.DELETE_ITEM,
+								payload.key,
+								payload.force
+							) ]: true,
+						},
+					};
+
+				case TYPES.UPDATE_ITEM_REQUEST:
+					return {
+						...state,
+						requesting: {
+							...state.requesting,
+							[ getRequestIdentifier(
+								CRUD_ACTIONS.UPDATE_ITEM,
+								payload.key,
+								payload.query
+							) ]: true,
 						},
 					};
 

@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Remove `Product` `date_on_sale_from` and `date_on_sale_to` properties. Use `date_on_sale_from_gmt` and `date_on_sale_to_gmt` instead.

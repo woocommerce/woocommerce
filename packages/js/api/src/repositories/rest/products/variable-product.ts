@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { HTTPClient } from '../../../http';
 import { ModelRepository } from '../../../framework';
 import {

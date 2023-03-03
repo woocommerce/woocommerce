@@ -15,6 +15,7 @@ import { useMemo, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
+import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -25,7 +26,8 @@ import { PluginList, PluginListProps } from './PluginList';
 import { PluginProps } from './Plugin';
 import { getPluginSlug } from '../../../utils';
 
-const ALLOWED_PLUGIN_LISTS = [ 'task-list/reach', 'task-list/grow' ];
+// We display the list of plugins ordered by this list.
+const ALLOWED_PLUGIN_LISTS = [ 'task-list/grow', 'task-list/reach' ];
 
 export const transformExtensionToPlugin = (
 	extension: Extension,
@@ -54,45 +56,49 @@ export const getMarketingExtensionLists = (
 ): [ PluginProps[], PluginListProps[] ] => {
 	const installed: PluginProps[] = [];
 	const lists: PluginListProps[] = [];
-	const freeExtensionsRandomized: ExtensionList[] = freeExtensions.sort(
-		() => Math.random() - 0.5
-	); // Randomize the order sections appear.
 
-	freeExtensionsRandomized.forEach( ( list ) => {
-		if ( ! ALLOWED_PLUGIN_LISTS.includes( list.key ) ) {
-			return;
-		}
-
-		const listPlugins: PluginProps[] = [];
-		list.plugins.forEach( ( extension ) => {
-			const plugin = transformExtensionToPlugin(
-				extension,
-				activePlugins,
-				installedPlugins
+	freeExtensions
+		.sort( ( a: ExtensionList, b: ExtensionList ) => {
+			return (
+				ALLOWED_PLUGIN_LISTS.indexOf( a.key ) -
+				ALLOWED_PLUGIN_LISTS.indexOf( b.key )
 			);
-			if ( plugin.isInstalled ) {
-				installed.push( plugin );
+		} )
+		.forEach( ( list ) => {
+			if ( ! ALLOWED_PLUGIN_LISTS.includes( list.key ) ) {
 				return;
 			}
-			listPlugins.push( plugin );
+
+			const listPlugins: PluginProps[] = [];
+			list.plugins.forEach( ( extension ) => {
+				const plugin = transformExtensionToPlugin(
+					extension,
+					activePlugins,
+					installedPlugins
+				);
+				if ( plugin.isInstalled ) {
+					installed.push( plugin );
+					return;
+				}
+				listPlugins.push( plugin );
+			} );
+
+			if ( ! listPlugins.length ) {
+				return;
+			}
+
+			const transformedList: PluginListProps = {
+				...list,
+				plugins: listPlugins,
+			};
+			lists.push( transformedList );
 		} );
-
-		if ( ! listPlugins.length ) {
-			return;
-		}
-
-		const transformedList: PluginListProps = {
-			...list,
-			plugins: listPlugins,
-		};
-		lists.push( transformedList );
-	} );
 
 	return [ installed, lists ];
 };
 
 export type MarketingProps = {
-	onComplete: ( bool?: boolean ) => void;
+	onComplete: ( option?: { redirectPath: string } ) => void;
 };
 
 const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
@@ -144,7 +150,9 @@ const Marketing: React.FC< MarketingProps > = ( { onComplete } ) => {
 
 				createNoticesFromResponse( response );
 				setCurrentPlugin( null );
-				onComplete();
+				onComplete( {
+					redirectPath: getNewPath( { task: 'marketing' } ),
+				} );
 			} )
 			.catch( ( response: { errors: Record< string, string > } ) => {
 				createNoticesFromResponse( response );

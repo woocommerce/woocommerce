@@ -13,9 +13,10 @@ import {
 	__experimentalText as Text,
 	FlexItem,
 	CheckboxControl,
+	Spinner,
 } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { SelectControl, Form, TextControl } from '@woocommerce/components';
+import { Form, TextControl, SelectControl } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
@@ -24,18 +25,21 @@ import {
 import { getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 import classnames from 'classnames';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { CurrencyContext } from '~/lib/currency-context';
 import { createNoticesFromResponse } from '~/lib/notices';
 import { platformOptions } from '../../data/platform-options';
 import { employeeOptions } from '../../data/employee-options';
 import { sellingVenueOptions } from '../../data/selling-venue-options';
 import { getRevenueOptions } from '../../data/revenue-options';
 import { getProductCountOptions } from '../../data/product-options';
-import { SelectiveExtensionsBundle } from './selective-extensions-bundle';
+import {
+	SelectiveExtensionsBundle,
+	getInstallableExtensions,
+} from './selective-extensions-bundle';
 import { getPluginSlug, getPluginTrackKey, getTimeFrame } from '~/utils';
 import './style.scss';
 
@@ -146,6 +150,8 @@ class BusinessDetails extends Component {
 			this.state.savedValues,
 			this.persistValues
 		);
+		// Refetch the free extensions data
+		props.invalidateResolutionForStoreSelector( 'getFreeExtensions' );
 	}
 
 	async onContinue(
@@ -395,6 +401,7 @@ class BusinessDetails extends Component {
 			used_platform: otherPlatform,
 			used_platform_name: otherPlatformName,
 			setup_client: isSetupClient,
+			wp_version: getSetting( 'wpVersion' ),
 		} );
 		recordEvent( 'storeprofiler_step_complete', {
 			step: BUSINESS_DETAILS_TAB_NAME,
@@ -430,13 +437,19 @@ class BusinessDetails extends Component {
 			<Form
 				initialValues={ this.state.savedValues.businessDetailsTab }
 				onSubmit={ ( values ) => {
-					this.setState( {
-						savedValues: {
-							...this.state.savedValues,
-							businessDetailsTab: values,
-						},
-						currentTab: BUSINESS_FEATURES_TAB_NAME,
-					} );
+					if ( this.props.hasInstallableExtensions ) {
+						this.setState( {
+							savedValues: {
+								...this.state.savedValues,
+								businessDetailsTab: values,
+							},
+							currentTab: BUSINESS_FEATURES_TAB_NAME,
+						} );
+					} else {
+						goToNextStep( {
+							step: BUSINESS_FEATURES_TAB_NAME,
+						} );
+					}
 
 					this.trackBusinessDetailsStep( values );
 					recordEvent( 'storeprofiler_step_view', {
@@ -614,6 +627,7 @@ class BusinessDetails extends Component {
 											this.persistProfileItems();
 										} }
 										disabled={ ! isValidForm }
+										aria-disabled={ ! isValidForm }
 										isBusy={ isInstallingActivating }
 									>
 										{ ! hasInstallActivateError
@@ -645,13 +659,10 @@ class BusinessDetails extends Component {
 	}
 
 	renderFreeFeaturesStep() {
-		const { isInstallingActivating, settings, profileItems } = this.props;
+		const { isInstallingActivating } = this.props;
 		const {
 			savedValues: { freeFeaturesTab },
 		} = this.state;
-		const country = settings.woocommerce_default_country
-			? settings.woocommerce_default_country
-			: null;
 
 		return (
 			<>
@@ -681,9 +692,7 @@ class BusinessDetails extends Component {
 				<SelectiveExtensionsBundle
 					isInstallingActivating={ isInstallingActivating }
 					onSubmit={ this.onContinue }
-					country={ country }
-					industry={ profileItems.industry }
-					productTypes={ profileItems.product_types }
+					installableExtensions={ this.props.installableExtensions }
 					installExtensionOptions={
 						freeFeaturesTab.installExtensionOptions
 					}
@@ -700,10 +709,17 @@ class BusinessDetails extends Component {
 						this.setState( {
 							savedValues,
 						} );
-						this.props.updateCurrentStepValues(
-							this.props.step.key,
-							savedValues
-						);
+
+						if (
+							// Only update current step values when current state's installExtensionOptions is not undefined.
+							this.state.savedValues.freeFeaturesTab
+								.installExtensionOptions
+						) {
+							this.props.updateCurrentStepValues(
+								this.props.step.key,
+								savedValues
+							);
+						}
 					} }
 				/>
 			</>
@@ -711,6 +727,36 @@ class BusinessDetails extends Component {
 	}
 
 	render() {
+		const tabs = [];
+		if ( ! this.props.hasFinishedGetFreeExtensionsResolution ) {
+			return (
+				<div className="woocommerce-admin__business-details__spinner">
+					<Spinner />
+				</div>
+			);
+		}
+
+		tabs.push( {
+			name:
+				this.state.currentTab === BUSINESS_DETAILS_TAB_NAME
+					? 'current-tab'
+					: BUSINESS_DETAILS_TAB_NAME,
+			id: BUSINESS_DETAILS_TAB_NAME,
+			title: __( 'Business details', 'woocommerce' ),
+		} );
+
+		if ( this.props.hasInstallableExtensions ) {
+			tabs.push( {
+				name:
+					this.state.currentTab === BUSINESS_FEATURES_TAB_NAME
+						? 'current-tab'
+						: BUSINESS_FEATURES_TAB_NAME,
+				id: BUSINESS_FEATURES_TAB_NAME,
+				title: __( 'Free features', 'woocommerce' ),
+				className: this.state.isValid ? '' : 'is-disabled',
+			} );
+		}
+
 		// There is a hack here to help us manage the selected tab programmatically.
 		// We set the tab name "current-tab". when its the one we want selected. This tricks
 		// the logic in the TabPanel and allows us to switch which tab has the name "current-tab"
@@ -720,7 +766,11 @@ class BusinessDetails extends Component {
 				activeClass="is-active"
 				initialTabName="current-tab"
 				onSelect={ ( tabName ) => {
-					if ( this.state.currentTab !== tabName ) {
+					if (
+						this.state.currentTab !== tabName &&
+						// TabPanel calls onSelect on mount when initialTabName is provided, so we need to check if the tabName is valid.
+						tabName !== 'current-tab'
+					) {
 						this.setState( {
 							currentTab: tabName,
 							savedValues:
@@ -733,25 +783,7 @@ class BusinessDetails extends Component {
 						} );
 					}
 				} }
-				tabs={ [
-					{
-						name:
-							this.state.currentTab === BUSINESS_DETAILS_TAB_NAME
-								? 'current-tab'
-								: BUSINESS_DETAILS_TAB_NAME,
-						id: BUSINESS_DETAILS_TAB_NAME,
-						title: __( 'Business details', 'woocommerce' ),
-					},
-					{
-						name:
-							this.state.currentTab === BUSINESS_FEATURES_TAB_NAME
-								? 'current-tab'
-								: BUSINESS_FEATURES_TAB_NAME,
-						id: BUSINESS_FEATURES_TAB_NAME,
-						title: __( 'Free features', 'woocommerce' ),
-						className: this.state.isValid ? '' : 'is-disabled',
-					},
-				] }
+				tabs={ tabs }
 			>
 				{ ( tab ) => <>{ this.getTab( tab.id ) }</> }
 			</TabPanel>
@@ -771,29 +803,54 @@ BusinessDetails.contextType = CurrencyContext;
 export const BusinessFeaturesList = compose(
 	withSelect( ( select ) => {
 		const { getSettings, getSettingsError } = select( SETTINGS_STORE_NAME );
-		const { getProfileItems, getOnboardingError } = select(
-			ONBOARDING_STORE_NAME
-		);
+		const {
+			getProfileItems,
+			getOnboardingError,
+			getFreeExtensions,
+			hasFinishedResolution,
+		} = select( ONBOARDING_STORE_NAME );
 		const { getPluginsError, isPluginsRequesting } =
 			select( PLUGINS_STORE_NAME );
 		const { general: settings = {} } = getSettings( 'general' );
+
+		const freeExtensions = getFreeExtensions();
+		const profileItems = getProfileItems();
+		const country = settings.woocommerce_default_country
+			? settings.woocommerce_default_country
+			: null;
+
+		const installableExtensions = freeExtensions
+			? getInstallableExtensions( {
+					freeExtensionBundleByCategory: freeExtensions,
+					country,
+					productTypes: profileItems.product_types || [],
+			  } )
+			: [];
+		const hasInstallableExtensions = installableExtensions.some(
+			( { plugins } ) => plugins.length > 0
+		);
 
 		return {
 			hasInstallActivateError:
 				getPluginsError( 'installPlugins' ) ||
 				getPluginsError( 'activatePlugins' ),
+			hasInstallableExtensions,
+			hasFinishedGetFreeExtensionsResolution:
+				hasFinishedResolution( 'getFreeExtensions' ),
+			installableExtensions,
 			isError: Boolean( getOnboardingError( 'updateProfileItems' ) ),
-			profileItems: getProfileItems(),
 			isSettingsError: Boolean( getSettingsError( 'general' ) ),
-			settings,
 			isInstallingActivating:
 				isPluginsRequesting( 'installPlugins' ) ||
 				isPluginsRequesting( 'activatePlugins' ) ||
 				isPluginsRequesting( 'getJetpackConnectUrl' ),
+			profileItems,
+			settings,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateProfileItems } = dispatch( ONBOARDING_STORE_NAME );
+		const { updateProfileItems, invalidateResolutionForStoreSelector } =
+			dispatch( ONBOARDING_STORE_NAME );
 		const { installAndActivatePlugins } = dispatch( PLUGINS_STORE_NAME );
 		const { createNotice } = dispatch( 'core/notices' );
 
@@ -801,6 +858,7 @@ export const BusinessFeaturesList = compose(
 			createNotice,
 			installAndActivatePlugins,
 			updateProfileItems,
+			invalidateResolutionForStoreSelector,
 		};
 	} )
 )( BusinessDetails );

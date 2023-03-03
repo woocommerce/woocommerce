@@ -12,6 +12,9 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use WC_Data_Store;
 use WC_Mock_Payment_Gateway;
 use WC_Order;
 use WC_Product;
@@ -139,9 +142,8 @@ class OrderHelper {
 	 * Helper method to drop custom tables if present.
 	 */
 	public static function delete_order_custom_tables() {
-		$order_table_controller = wc_get_container()
-			->get( CustomOrdersTableController::class );
-		$order_table_controller->show_feature();
+		$features_controller = wc_get_container()->get( Featurescontroller::class );
+		$features_controller->change_feature_enable( 'custom_order_tables', true );
 		$synchronizer = wc_get_container()
 			->get( DataSynchronizer::class );
 		if ( $synchronizer->check_orders_table_exists() ) {
@@ -153,11 +155,10 @@ class OrderHelper {
 	 * Helper method to create custom tables if not present.
 	 */
 	public static function create_order_custom_table_if_not_exist() {
-		$order_table_controller = wc_get_container()
-			->get( CustomOrdersTableController::class );
-		$order_table_controller->show_feature();
-		$synchronizer = wc_get_container()
-			->get( DataSynchronizer::class );
+		$features_controller = wc_get_container()->get( Featurescontroller::class );
+		$features_controller->change_feature_enable( 'custom_order_tables', true );
+
+		$synchronizer = wc_get_container()->get( DataSynchronizer::class );
 		if ( ! $synchronizer->check_orders_table_exists() ) {
 			$synchronizer->create_database_tables();
 		}
@@ -205,6 +206,7 @@ class OrderHelper {
 
 		$order->set_customer_ip_address( '1.1.1.1' );
 		$order->set_customer_user_agent( 'wc_unit_tests' );
+		$order->set_customer_note( 'Please be careful' );
 
 		$order->save();
 
@@ -238,6 +240,96 @@ class OrderHelper {
 		$order->save_meta_data();
 
 		return $order->get_id();
+	}
+
+	/**
+	 * Helper method to allow switching data stores.
+	 *
+	 * @param WC_Order       $order Order object.
+	 * @param \WC_Data_Store $data_store Data store object to switch order to.
+	 */
+	public static function switch_data_store( $order, $data_store ) {
+		$update_data_store_func = function ( $data_store ) {
+			// Each order object contains a reference to its data store, but this reference is itself
+			// held inside of an instance of WC_Data_Store, so we create that first.
+			$data_store_wrapper = WC_Data_Store::load( 'order' );
+
+			// Bind $data_store to our WC_Data_Store.
+			( function ( $data_store ) {
+				$this->current_class_name = get_class( $data_store );
+				$this->instance           = $data_store;
+			} )->call( $data_store_wrapper, $data_store );
+
+			// Finally, update the $order object with our WC_Data_Store( $data_store ) instance.
+			$this->data_store = $data_store_wrapper;
+		};
+
+		$update_data_store_func->call( $order, $data_store );
+	}
+
+	/**
+	 * Creates a complex order with address info, line items, etc.
+	 *
+	 * @param \WC_Data_Store $data_store Data store object to use in creating order.
+	 *
+	 * @return \WC_Order Order object.
+	 */
+	public static function create_complex_data_store_order( $data_store = null ) {
+		$order = new WC_Order();
+		if ( ! $data_store ) {
+			$data_store = wc_get_container()->get( OrdersTableDataStore::class );
+		}
+		self::switch_data_store( $order, $data_store );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+
+		$order->set_status( 'pending' );
+		$order->set_created_via( 'unit-tests' );
+		$order->set_currency( 'COP' );
+		$order->set_customer_ip_address( '127.0.0.1' );
+
+		$item = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => wc_get_price_excluding_tax( $product, array( 'qty' => 2 ) ),
+				'total'    => wc_get_price_excluding_tax( $product, array( 'qty' => 2 ) ),
+			)
+		);
+
+		$order->add_item( $item );
+
+		$order->set_billing_first_name( 'Jeroen' );
+		$order->set_billing_last_name( 'Sormani' );
+		$order->set_billing_company( 'WooCompany' );
+		$order->set_billing_address_1( 'WooAddress' );
+		$order->set_billing_address_2( '' );
+		$order->set_billing_city( 'WooCity' );
+		$order->set_billing_state( 'NY' );
+		$order->set_billing_postcode( '123456' );
+		$order->set_billing_country( 'US' );
+		$order->set_billing_email( 'admin@example.org' );
+		$order->set_billing_phone( '555-32123' );
+
+		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		$order->set_payment_method( $payment_gateways['bacs'] );
+
+		$order->set_shipping_total( 5.0 );
+		$order->set_discount_total( 0.0 );
+		$order->set_discount_tax( 0.0 );
+		$order->set_cart_tax( 0.0 );
+		$order->set_shipping_tax( 0.0 );
+		$order->set_total( 25.0 );
+		$order->save();
+
+		$order->get_data_store()->set_stock_reduced( $order, true, false );
+
+		$order->update_meta_data( 'my_meta', rand( 0, 255 ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.rand_rand
+
+		$order->save();
+
+		return $order;
 	}
 
 }

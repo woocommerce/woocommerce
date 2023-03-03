@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { COUNTRIES_STORE_NAME, Country, Locale } from '@woocommerce/data';
+import { COUNTRIES_STORE_NAME, Country } from '@woocommerce/data';
 import { decodeEntities } from '@wordpress/html-entities';
-import { escapeRegExp, has } from 'lodash';
+import { escapeRegExp } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import { SelectControl, TextControl } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
@@ -26,48 +26,12 @@ const storeAddressFields = [
 type Option = { key: string; label: string };
 
 /**
- * Type guard to ensure that the specified locale object has a .required property
- *
- * @param  fieldName field of Locale
- * @param  locale    unknown object to be checked
- * @return          Boolean indicating if locale has a .required property
- */
-const isLocaleRecord = (
-	fieldName: keyof Locale,
-	locale: unknown
-): locale is Record< keyof Locale, { required: boolean } > => {
-	return !! locale && has( locale, `${ fieldName }.required` );
-};
-
-/**
- * Check if a given address field is required for the locale.
- *
- * @param {string} fieldName Name of the field to check.
- * @param {Object} locale    Locale data.
- * @return {boolean} Field requirement.
- */
-export function isAddressFieldRequired(
-	fieldName: keyof Locale,
-	locale: Locale = {}
-): boolean {
-	if ( isLocaleRecord( fieldName, locale ) ) {
-		return locale[ fieldName ].required;
-	}
-
-	if ( fieldName === 'address_2' ) {
-		return false;
-	}
-
-	return true;
-}
-
-/**
  * Form validation.
  *
- * @param {Object} locale The store locale.
  * @return {Function} Validator function.
  */
-export function getStoreAddressValidator( locale: Locale = {} ) {
+// Note: param was removed because its not used, callers still assume its needed. TODO: Fix this.
+export function getStoreAddressValidator(/* locale: Locale = {} */) {
 	/**
 	 * Form validator.
 	 *
@@ -80,29 +44,11 @@ export function getStoreAddressValidator( locale: Locale = {} ) {
 		const errors: {
 			[ key: string ]: string;
 		} = {};
-		if (
-			isAddressFieldRequired( 'address_1', locale ) &&
-			! values.addressLine1.trim().length
-		) {
-			errors.addressLine1 = __( 'Please add an address', 'woocommerce' );
-		}
 		if ( ! values.countryState.trim().length ) {
 			errors.countryState = __(
 				'Please select a country / region',
 				'woocommerce'
 			);
-		}
-		if (
-			isAddressFieldRequired( 'city', locale ) &&
-			! values.city.trim().length
-		) {
-			errors.city = __( 'Please add a city', 'woocommerce' );
-		}
-		if (
-			isAddressFieldRequired( 'postcode', locale ) &&
-			! values.postCode.trim().length
-		) {
-			errors.postCode = __( 'Please add a post code', 'woocommerce' );
 		}
 
 		return errors;
@@ -407,34 +353,16 @@ export function StoreAddress( {
 
 	return (
 		<div className="woocommerce-store-address-fields">
-			{ ! locale?.address_1?.hidden && (
-				<TextControl
-					label={
-						locale?.address_1?.label ||
-						__( 'Address line 1', 'woocommerce' )
-					}
-					required={ isAddressFieldRequired( 'address_1', locale ) }
-					autoComplete="address-line1"
-					{ ...getInputProps( 'addressLine1' ) }
-				/>
-			) }
-
-			{ ! locale?.address_2?.hidden && (
-				<TextControl
-					label={
-						locale?.address_2?.label ||
-						__( 'Address line 2 (optional)', 'woocommerce' )
-					}
-					required={ isAddressFieldRequired( 'address_2', locale ) }
-					autoComplete="address-line2"
-					{ ...getInputProps( 'addressLine2' ) }
-				/>
-			) }
-
 			<SelectControl
-				label={ __( 'Country / Region', 'woocommerce' ) }
+				label={ __( 'Country / Region', 'woocommerce' ) + ' *' }
 				required
 				autoComplete="new-password" // disable autocomplete and autofill
+				getSearchExpression={ ( query: string ) => {
+					return new RegExp(
+						'(^' + query + '| — (' + query + '))',
+						'i'
+					);
+				} }
 				options={ countryStateOptions }
 				excludeSelectedOptions={ false }
 				showAllOnFocus
@@ -445,12 +373,14 @@ export function StoreAddress( {
 				{ countryStateAutofill }
 			</SelectControl>
 
-			{ ! locale?.city?.hidden && (
+			{ ! locale?.address_1?.hidden && (
 				<TextControl
-					label={ locale?.city?.label || __( 'City', 'woocommerce' ) }
-					required={ isAddressFieldRequired( 'city', locale ) }
-					{ ...getInputProps( 'city' ) }
-					autoComplete="address-level2"
+					label={
+						locale?.address_1?.label ||
+						__( 'Address', 'woocommerce' )
+					}
+					autoComplete="address-line1"
+					{ ...getInputProps( 'addressLine1' ) }
 				/>
 			) }
 
@@ -460,9 +390,16 @@ export function StoreAddress( {
 						locale?.postcode?.label ||
 						__( 'Post code', 'woocommerce' )
 					}
-					required={ isAddressFieldRequired( 'postcode', locale ) }
 					autoComplete="postal-code"
 					{ ...getInputProps( 'postCode' ) }
+				/>
+			) }
+
+			{ ! locale?.city?.hidden && (
+				<TextControl
+					label={ locale?.city?.label || __( 'City', 'woocommerce' ) }
+					{ ...getInputProps( 'city' ) }
+					autoComplete="address-level2"
 				/>
 			) }
 		</div>

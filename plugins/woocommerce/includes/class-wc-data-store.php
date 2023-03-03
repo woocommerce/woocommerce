@@ -160,6 +160,23 @@ class WC_Data_Store {
 	}
 
 	/**
+	 * Reads multiple objects from the data store.
+	 *
+	 * @since 6.9.0
+	 * @param array[WC_Data] $objects Array of object instances to read.
+	 */
+	public function read_multiple( &$objects = array() ) {
+		// If the datastore allows for bulk-reading, use it.
+		if ( is_callable( array( $this->instance, 'read_multiple' ) ) ) {
+			$this->instance->read_multiple( $objects );
+		} else {
+			foreach ( $objects as &$obj ) {
+				$this->read( $obj );
+			}
+		}
+	}
+
+	/**
 	 * Create an object in the data store.
 	 *
 	 * @since 3.0.0
@@ -206,5 +223,16 @@ class WC_Data_Store {
 			$parameters = array_merge( array( &$object ), $parameters );
 			return $this->instance->$method( ...$parameters );
 		}
+	}
+
+	/**
+	 * Check if the data store we are working with has a callable method.
+	 *
+	 * @param string $method Method name.
+	 *
+	 * @return bool Whether the passed method is callable.
+	 */
+	public function has_callable( string $method ) : bool {
+		return is_callable( array( $this->instance, $method ) );
 	}
 }

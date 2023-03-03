@@ -20,44 +20,18 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { DisplayOption } from '~/activity-panel/display-options';
 import { Task } from './task';
-import { TasksPlaceholder, TasksPlaceholderProps } from './placeholder';
+import { TasksPlaceholder } from './placeholder';
 import './tasks.scss';
 import { TaskList } from './task-list';
 import { TaskList as TwoColumnTaskList } from '../two-column-tasks/task-list';
-import { SectionedTaskList } from '../two-column-tasks/sectioned-task-list';
 import TwoColumnTaskListPlaceholder from '../two-column-tasks/placeholder';
 import '../two-column-tasks/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { SectionedTaskListPlaceholder } from '~/two-column-tasks/sectioned-task-list-placeholder';
 
 export type TasksProps = {
 	query: { task?: string };
 	context?: string;
 };
-
-function getTaskListComponent( taskListId: string ) {
-	switch ( taskListId ) {
-		case 'setup_experiment_1':
-			return TwoColumnTaskList;
-		case 'setup_experiment_2':
-			return SectionedTaskList;
-		default:
-			return TaskList;
-	}
-}
-
-function getTaskListPlaceholderComponent(
-	taskListId: string
-): React.FC< TasksPlaceholderProps > {
-	switch ( taskListId ) {
-		case 'setup_experiment_1':
-			return TwoColumnTaskListPlaceholder;
-		case 'setup_experiment_2':
-			return SectionedTaskListPlaceholder;
-		default:
-			return TasksPlaceholder;
-	}
-}
 
 export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 	const { task } = query;
@@ -111,7 +85,7 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 
 	useEffect( () => {
 		// @todo Update this when all task lists have been hidden or completed.
-		const taskListsFinished = false;
+		// const taskListsFinished = false;
 		updateOptions( {
 			woocommerce_task_list_prompt_shown: true,
 		} );
@@ -123,21 +97,22 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 		return null;
 	}
 
-	const taskListIds = getAdminSetting( 'visibleTaskListIds', [] );
-	const TaskListPlaceholderComponent = getTaskListPlaceholderComponent(
-		taskListIds[ 0 ]
-	);
-
-	if ( isResolving ) {
-		return <TaskListPlaceholderComponent query={ query } />;
-	}
-
 	if ( currentTask ) {
 		return (
 			<div className="woocommerce-task-dashboard__container">
 				<Task query={ query } task={ currentTask } />
 			</div>
 		);
+	}
+
+	const taskListIds = getAdminSetting( 'visibleTaskListIds', [] );
+	const TaskListPlaceholderComponent =
+		taskListIds[ 0 ] === 'setup'
+			? TwoColumnTaskListPlaceholder
+			: TasksPlaceholder;
+
+	if ( isResolving ) {
+		return <TaskListPlaceholderComponent query={ query } />;
 	}
 
 	return (
@@ -149,8 +124,9 @@ export const Tasks: React.FC< TasksProps > = ( { query } ) => {
 				.filter( ( { isVisible }: TaskListType ) => isVisible )
 				.map( ( taskList: TaskListType ) => {
 					const { id, isHidden, isToggleable } = taskList;
+					const TaskListComponent =
+						id === 'setup' ? TwoColumnTaskList : TaskList;
 
-					const TaskListComponent = getTaskListComponent( id );
 					return (
 						<Fragment key={ id }>
 							<TaskListComponent

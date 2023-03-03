@@ -10,7 +10,11 @@ jQuery( function( $ ) {
 	 */
 	var WCOrdersTable = function() {
 		$( document )
-			.on( 'click', '.post-type-shop_order .wp-list-table tbody td', this.onRowClick )
+			.on(
+				'click',
+				'.post-type-shop_order .wp-list-table tbody td, .woocommerce_page_wc-orders .wp-list-table.orders tbody td',
+				this.onRowClick
+			)
 			.on( 'click', '.order-preview:not(.disabled)', this.onPreview );
 	};
 

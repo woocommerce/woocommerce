@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { waitFor, render } from '@testing-library/react';
+import { waitFor, render, fireEvent } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
-import { loadExperimentAssignment } from '@woocommerce/explat';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -15,13 +15,7 @@ jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn(),
 } ) );
 jest.mock( '@woocommerce/explat' );
-
-const whenExperimentAssigned = (
-	experimentVariation: 'treatment' | 'control'
-) =>
-	( loadExperimentAssignment as jest.Mock ).mockImplementation( () => {
-		return Promise.resolve( { variationName: experimentVariation } );
-	} );
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 const paymentsBannerShouldBe = async ( status: 'hidden' | 'visible' ) => {
 	const { container } = render( <PaymentsBannerWrapper /> );
@@ -65,27 +59,13 @@ describe( 'Payment Settings Banner', () => {
 
 		whenWcPay( { supported: true, activated: false, installed: true } );
 
-		whenExperimentAssigned( 'treatment' );
-
 		await paymentsBannerShouldBe( 'visible' );
-	} );
-
-	it( 'should not render the banner if treatment is control', async () => {
-		expect.assertions( 1 );
-
-		whenWcPay( { supported: true, activated: false, installed: true } );
-
-		whenExperimentAssigned( 'control' );
-
-		await paymentsBannerShouldBe( 'hidden' );
 	} );
 
 	it( 'should not render anything if woocommerce payments is not supported', async () => {
 		expect.assertions( 1 );
 
 		whenWcPay( { supported: false, activated: false, installed: false } );
-
-		whenExperimentAssigned( 'treatment' );
 
 		await paymentsBannerShouldBe( 'hidden' );
 	} );
@@ -95,8 +75,17 @@ describe( 'Payment Settings Banner', () => {
 
 		whenWcPay( { supported: true, activated: true, installed: true } );
 
-		whenExperimentAssigned( 'treatment' );
-
 		await paymentsBannerShouldBe( 'hidden' );
+	} );
+
+	it( 'should record track when clicking the action button', async () => {
+		whenWcPay( { supported: true, activated: false, installed: true } );
+
+		const { getByText } = render( <PaymentsBannerWrapper /> );
+		fireEvent.click( getByText( 'Get started' ) );
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_payments_banner_connect_click'
+		);
 	} );
 } );

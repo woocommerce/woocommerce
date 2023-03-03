@@ -1,0 +1,28 @@
+.woocommerce-single-image-field {
+	&__gallery {
+		margin-top: $gap-smaller;
+
+		.woocommerce-image-gallery .woocommerce-sortable {
+			margin: 0;
+		}
+	}
+
+	&__drop-zone {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		padding: calc($gap * 2) 0;
+		margin-top: $gap-smaller;
+		gap: calc($gap * 2);
+		isolation: isolate;
+
+		min-height: 144px;
+
+		background: $white;
+		border: 1px dashed $gray-700;
+		border-radius: 2px;
+
+		position: relative;
+	}
+}

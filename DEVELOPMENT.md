@@ -8,7 +8,7 @@ Please refer to [the Getting Started section of the `README.md`](README.md#getti
 
 ## Turborepo Commands
 
-Our repository uses [Turborepo](https://turborepo.org) for `build`, `lint`, and `test` commands. This tool ensures that all dependencies of a plugin, package, or tool are prepared before running a command. When using `pnpm -- turbo run {command}` without any options, it will execute that command against every project in the repository. You can view a list of the commands Turborepo supports in [our turbo.json file](turbo.json).
+Our repository uses [Turborepo](https://turborepo.org) for `build` and `test` commands. This tool ensures that all dependencies of a plugin, package, or tool are prepared before running a command. This is done transparently when running these commands. When using `pnpm run {command}` without any options, it will execute that command against every project in the repository. You can view a list of the commands Turborepo supports in [our turbo.json file](turbo.json).
 
 ### Plugin, Package, and Tool Filtering
 
@@ -18,29 +18,42 @@ If you would like to read more about the syntax, please check out [the Turborepo
 
 ### Examples
 
-Here are some examples of the ways you can use Turborepo commands:
+Here are some examples of the ways you can use Turborepo / pnpm commands:
 
 ```bash
-# Lint and build all plugins, packages, and tools
-pnpm -- turbo run lint build
+# Lint and build all plugins, packages, and tools. Note the use of `-r` for lint,
+# turbo does not run the lint at this time.
+pnpm run -r lint && pnpm run build 
 
 # Build WooCommerce Core and all of its dependencies
-pnpm -- turbo run build --filter='woocommerce'
+pnpm run --filter='woocommerce' build 
 
-# Lint the @woocommerce/components package
-pnpm -- turbo run lint --filter='@woocommerce/components'
+# Lint the @woocommerce/components package - note the different argument order, turbo scripts
+# are not running lints at this point in time.
+pnpm run -r --filter='@woocommerce/components' lint 
 
 # Test all of the @woocommerce scoped packages
-pnpm -- turbo run test --filter='@woocommerce/*'
+pnpm run --filter='@woocommerce/*' test 
 
 # Build all of the JavaScript packages
-pnpm -- turbo run build --filter='./packages/js/*'
+pnpm run --filter='./packages/js/*' build 
 
 # Build everything except WooCommerce Core
-pnpm -- turbo run build --filter='!woocommerce' 
+pnpm run --filter='!woocommerce' build 
 
-# Lint everything that has changed since the last commit
-pnpm -- turbo run build --filter='[HEAD^1]'
+# Build everything that has changed since the last commit
+pnpm run --filter='[HEAD^1]' build 
+```
+
+### Cache busting Turbo
+
+In the event that you need to force turbo not to cache a command you can set the env variable `TURBO_FORCE=true`.
+
+e.g.
+
+```bash
+# Force an uncached build of WooCommerce Core and all of its dependencies
+TURBO_FORCE=true pnpm run --filter='woocommerce' build
 ```
 
 ## Other Commands
@@ -53,10 +66,10 @@ Here are some examples of the commands you will make use of.
 
 ```bash
 # Add a changelog entry for WooCommerce Core
-pnpm changelog add --filter=woocommerce
+pnpm --filter=woocommerce run changelog add
 
 # Create the woocommerce.zip file
-pnpm build:zip --filter=woocommerce
+pnpm --filter=woocommerce run build:zip
 ```
 
 ## Plugin Development Environments

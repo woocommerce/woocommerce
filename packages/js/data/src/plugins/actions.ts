@@ -25,6 +25,7 @@ import {
 	ActivatePluginsResponse,
 	PluginsResponse,
 	PluginNames,
+	JetpackConnectionDataResponse,
 } from './types';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
@@ -113,6 +114,15 @@ export function updateIsJetpackConnected( jetpackConnection: boolean ) {
 	return {
 		type: TYPES.UPDATE_JETPACK_CONNECTION as const,
 		jetpackConnection,
+	};
+}
+
+export function updateJetpackConnectionData(
+	results: JetpackConnectionDataResponse
+) {
+	return {
+		type: TYPES.UPDATE_JETPACK_CONNECTION_DATA as const,
+		results,
 	};
 }
 
@@ -213,10 +223,11 @@ export function* installPlugins( plugins: Partial< PluginNames >[] ) {
 			throw results.errors.errors;
 		}
 
-		yield setIsRequesting( 'installPlugins', false );
 		return results;
 	} catch ( error ) {
 		yield handlePluginAPIError( 'install', plugins, error );
+	} finally {
+		yield setIsRequesting( 'installPlugins', false );
 	}
 }
 
@@ -238,11 +249,11 @@ export function* activatePlugins( plugins: Partial< PluginNames >[] ) {
 			throw results.errors.errors;
 		}
 
-		yield setIsRequesting( 'activatePlugins', false );
-
 		return results;
 	} catch ( error ) {
 		yield handlePluginAPIError( 'activate', plugins, error );
+	} finally {
+		yield setIsRequesting( 'activatePlugins', false );
 	}
 }
 
@@ -374,6 +385,7 @@ export type Actions = ReturnType<
 	| typeof setError
 	| typeof updateIsJetpackConnected
 	| typeof updateJetpackConnectUrl
+	| typeof updateJetpackConnectionData
 	| typeof setPaypalOnboardingStatus
 	| typeof setRecommendedPlugins
 	| typeof createErrorNotice

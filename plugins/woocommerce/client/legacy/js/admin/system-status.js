@@ -1,13 +1,16 @@
 /* global jQuery, woocommerce_admin_system_status, wcSetClipboard, wcClearClipboard */
 jQuery( function ( $ ) {
-
 	/**
 	 * Users country and state fields
 	 */
 	var wcSystemStatus = {
-		init: function() {
+		init: function () {
 			$( document.body )
-				.on( 'click', 'a.help_tip, a.woocommerce-help-tip', this.preventTipTipClick )
+				.on(
+					'click',
+					'a.help_tip, a.woocommerce-help-tip, woocommerce-product-type-tip',
+					this.preventTipTipClick
+				)
 				.on( 'click', 'a.debug-report', this.generateReport )
 				.on( 'click', '#copy-for-support', this.copyReport )
 				.on( 'aftercopy', '#copy-for-support', this.copySuccess )

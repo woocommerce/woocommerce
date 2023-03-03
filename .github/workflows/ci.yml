@@ -12,24 +12,29 @@ defaults:
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions: {}
+
 jobs:
   test:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
     timeout-minutes: 30
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     continue-on-error: ${{ matrix.wp == 'nightly' }}
     strategy:
       fail-fast: false
       matrix:
-        php: [ '7.2', '7.3', '7.4', '8.0' ]
+        php: [ '7.4', '8.0' ]
         wp: [ 'latest' ]
         include:
           - wp: nightly
             php: '7.4'
           - wp: '5.9'
-            php: 7.2
+            php: 7.4
           - wp: '5.8'
-            php: 7.2
+            php: 7.4
     services:
       database:
         image: mysql:5.6
@@ -41,29 +46,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ./.github/actions/cache-deps
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
         with:
-          workflow_name: ci
-          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          tools: composer
-          extensions: mysql
-          coverage: none
+          build-filters: woocommerce
 
       - name: Tool versions
         run: |
           php --version
           composer --version
 
-      - name: Install and Build
-        uses: ./.github/actions/install-build
-
       - name: Build Admin feature config
-        run: pnpm build:feature-config --filter=woocommerce
+        working-directory: plugins/woocommerce
+        run: pnpm run build:feature-config
 
       - name: Add PHP8 Compatibility.
         run: |
@@ -83,4 +78,5 @@ jobs:
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
-        run: pnpm -- turbo run test --filter=woocommerce
+        working-directory: plugins/woocommerce
+        run: pnpm run test --color

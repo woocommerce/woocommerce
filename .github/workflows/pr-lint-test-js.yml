@@ -1,41 +1,29 @@
 name: Lint and tests for JS packages and woocommerce-admin/client
 
 on:
-  pull_request:
-    paths:
-      - 'packages/js/**/**'
-      - 'plugins/woocommerce-admin/client/**'
-      - '!**.md'
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions: {}
 
 jobs:
-  lint-test-js:
-    name: Lint and Test JS
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      
-      - uses: ./.github/actions/cache-deps
-        with:
-          workflow_name: pr-lint-test-js
-          workflow_cache: ${{ secrets.WORKFLOW_CACHE }}
+    lint-test-js:
+        name: Lint and Test JS
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@v3
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
-      - name: Install and Build
-        uses: ./.github/actions/install-build
+            - name: Lint
+              run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
 
-      - name: Lint
-        run: pnpm -- turbo run lint --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api'
-
-      - name: Test
-        run: pnpm -- turbo run test --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api'
+            - name: Test
+              run: pnpm run test --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color

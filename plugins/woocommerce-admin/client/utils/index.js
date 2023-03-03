@@ -1,4 +1,5 @@
 export * from './plugins';
+export * from './slot-fill-ordering';
 
 /**
  * Get the URL params.

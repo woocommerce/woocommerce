@@ -58,7 +58,7 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			),
 			paymentGatewaySuggestions: select(
 				ONBOARDING_STORE_NAME
-			).getPaymentGatewaySuggestions(),
+			).getPaymentGatewaySuggestions( true ),
 			countryCode: getCountryCode( settings.woocommerce_default_country ),
 		};
 	}, [] );
