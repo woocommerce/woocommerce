@@ -190,6 +190,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		}
 
 		// Test clean up.
+		WC()->customer->set_is_vat_exempt( false );
 		WC_Tax::_delete_tax_rate( $tax_rate_id );
 		WC_Helper_Product::delete_product( $product->get_id() );
 		if ( ! $wc_tax_enabled ) {
