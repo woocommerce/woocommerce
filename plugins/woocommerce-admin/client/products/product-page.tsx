@@ -1,19 +1,37 @@
 /**
  * External dependencies
  */
-import { __experimentalEditor as Editor } from '@woocommerce/product-editor';
+import {
+	__experimentalEditor as Editor,
+	AUTO_DRAFT_NAME,
+} from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
+import { useDispatch } from '@wordpress/data';
+import { useEffect, useState } from '@wordpress/element';
+import { Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import './product-page.scss';
 
-const dummyProduct = {
-	name: 'Example product',
-	short_description: 'Short product description content',
-} as Product;
-
 export default function ProductPage() {
-	return <Editor product={ dummyProduct } settings={ {} } />;
+	const { saveEntityRecord } = useDispatch( 'core' );
+	const [ product, setProduct ] = useState< Product | undefined >(
+		undefined
+	);
+
+	useEffect( () => {
+		saveEntityRecord( 'postType', 'product', {
+			title: AUTO_DRAFT_NAME,
+		} ).then( ( autoDraftProduct: Product ) => {
+			setProduct( autoDraftProduct );
+		} );
+	}, [] );
+
+	if ( ! product ) {
+		return <Spinner />;
+	}
+
+	return <Editor product={ product } settings={ {} } />;
 }
