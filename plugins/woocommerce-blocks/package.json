@@ -123,7 +123,7 @@
 		"@types/react": "17.0.47",
 		"@types/react-dom": "18.0.10",
 		"@types/wordpress__block-editor": "6.0.6",
-		"@types/wordpress__blocks": "11.0.7",
+		"@types/wordpress__blocks": "11.0.9",
 		"@types/wordpress__components": "^23.0.0",
 		"@types/wordpress__core-data": "^2.4.5",
 		"@types/wordpress__data": "^6.0.2",
