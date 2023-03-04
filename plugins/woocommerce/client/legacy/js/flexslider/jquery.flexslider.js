@@ -48,6 +48,9 @@
     easeInOutBack:  'cubic-bezier(0.68, -0.6, 0.32, 1.6)' // https://easings.net/#easeInOutBack
   };
 
+  easings['jswing'] = easings['swing'];       // https://github.com/gdsmith/jquery.easing/blob/v1.4.0/jquery.easing.js#L22
+  easings['def']    = easings['easeOutQuad']; // https://github.com/gdsmith/jquery.easing/blob/v1.4.0/jquery.easing.js#L52
+
   //FlexSlider: Object Instance
   $.flexslider = function(el, options) {
     var slider = $(el);
