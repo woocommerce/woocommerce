@@ -6,16 +6,43 @@ import {
 	AUTO_DRAFT_NAME,
 } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { Spinner } from '@wordpress/components';
+import { useParams } from 'react-router-dom';
 
 /**
  * Internal dependencies
  */
 import './product-page.scss';
 
-export default function ProductPage() {
+const ProductEditor: React.FC< { product: Product | undefined } > = ( {
+	product,
+} ) => {
+	if ( ! product ) {
+		return <Spinner />;
+	}
+
+	return <Editor product={ product } settings={ {} } />;
+};
+
+const EditProductEditor: React.FC< { productId: string } > = ( {
+	productId,
+} ) => {
+	const { product } = useSelect( ( select: typeof WPSelect ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore Missing types.
+		const { getEditedEntityRecord } = select( 'core' );
+
+		return {
+			product: getEditedEntityRecord( 'postType', 'product', productId ),
+		};
+	} );
+
+	return <ProductEditor product={ product } />;
+};
+
+const AddProductEditor = () => {
 	const { saveEntityRecord } = useDispatch( 'core' );
 	const [ product, setProduct ] = useState< Product | undefined >(
 		undefined
@@ -24,14 +51,22 @@ export default function ProductPage() {
 	useEffect( () => {
 		saveEntityRecord( 'postType', 'product', {
 			title: AUTO_DRAFT_NAME,
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore Incorrect types.
 		} ).then( ( autoDraftProduct: Product ) => {
 			setProduct( autoDraftProduct );
 		} );
 	}, [] );
 
-	if ( ! product ) {
-		return <Spinner />;
+	return <ProductEditor product={ product } />;
+};
+
+export default function ProductPage() {
+	const { productId } = useParams();
+
+	if ( productId ) {
+		return <EditProductEditor productId={ productId } />;
 	}
 
-	return <Editor product={ product } settings={ {} } />;
+	return <AddProductEditor />;
 }
