@@ -66,7 +66,7 @@
         eventType = "click touchend keyup",
         watchedEvent = "",
         watchedEventClearTimer,
-        easing = easings[slider.vars.easing],
+        easing = easings[slider.vars.easing] || "ease",
         vertical = slider.vars.direction === "vertical",
         reverse = slider.vars.reverse,
         carousel = (slider.vars.itemWidth > 0),
