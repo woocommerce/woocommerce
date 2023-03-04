@@ -12,7 +12,7 @@
   // Default options provided by jQuery are "swing" and "linear"; jQuery easing plugin methods: https://easings.net/
   // We do NOT support easeInElastic, easeOutElastic, easeInOutElastic, easeInBounce, easeOutBounce, and easeInOutBounce
   var easings = {
-    swing: 'cubic-bezier(.02, .01, .47, 1)', // https://stackoverflow.com/a/9245729
+    swing:  'cubic-bezier(.02, .01, .47, 1)', // https://stackoverflow.com/a/9245729
     linear: 'linear',
 
     easeInQuad:     'cubic-bezier(0.11, 0, 0.5, 0)',  // https://easings.net/#easeInQuad
