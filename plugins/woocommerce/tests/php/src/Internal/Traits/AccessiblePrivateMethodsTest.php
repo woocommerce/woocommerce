@@ -419,8 +419,8 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 			use AccessiblePrivateMethods;
 		};
 
-		$method_name        = "add_${action_or_filter}";
-		$proper_method_name = "add_static_${action_or_filter}";
+		$method_name        = "add_{$action_or_filter}";
+		$proper_method_name = "add_static_{$action_or_filter}";
 
 		$this->expectException( \Error::class );
 		$this->expectExceptionMessage( get_class( $sut ) . '::' . "$method_name can't be called statically, did you mean '$proper_method_name'?" );

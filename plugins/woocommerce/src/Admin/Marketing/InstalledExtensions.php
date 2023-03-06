@@ -241,7 +241,7 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/facebook-icon.svg';
 
-		if ( $data['status'] === 'activated' && function_exists( 'facebook_for_woocommerce' ) ) {
+		if ( 'activated' === $data['status'] && function_exists( 'facebook_for_woocommerce' ) ) {
 			$integration = facebook_for_woocommerce()->get_integration();
 
 			if ( $integration->is_configured() ) {
@@ -270,7 +270,6 @@ class InstalledExtensions {
 		$data         = self::get_extension_base_data( $slug );
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/pinterest.svg';
 
-		// TODO: Finalise docs url.
 		$data['docsUrl'] = 'https://woocommerce.com/document/pinterest-for-woocommerce/?utm_medium=product';
 
 		if ( 'activated' === $data['status'] && class_exists( 'Pinterest_For_Woocommerce' ) ) {

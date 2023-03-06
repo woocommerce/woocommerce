@@ -24,7 +24,7 @@ export type HookChangeDescription = {
 	ghLink: string;
 };
 
-export const scanForHookChanges = (
+export const scanForHookChanges = async (
 	content: string,
 	version: string,
 	tmpRepoPath: string
@@ -51,6 +51,7 @@ export const scanForHookChanges = (
 		if ( ! patchWithHook ) {
 			continue;
 		}
+
 		const results = patchWithHook.match( newRegEx );
 
 		if ( ! results ) {
@@ -81,37 +82,40 @@ export const scanForHookChanges = (
 			if ( ! hookName[ 2 ].startsWith( '-' ) ) {
 				let ghLink = '';
 
-				fs.readFile(
-					tmpRepoPath + filePath,
-					'utf-8',
-					function ( err, data ) {
-						if ( err ) {
-							console.error( err );
+				try {
+					const data = await fs.promises.readFile(
+						tmpRepoPath + filePath,
+						'utf-8'
+					);
+
+					const reg = new RegExp( name );
+
+					data.split( '\n' ).forEach( ( line, index ) => {
+						if ( line.match( reg ) ) {
+							const lineNum = index + 1;
+
+							ghLink = `https://github.com/woocommerce/woocommerce/blob/${ version }/${ filePath.replace(
+								/(^\/)/,
+								''
+							) }#L${ lineNum }`;
 						}
+					} );
 
-						const reg = new RegExp( name );
-						data.split( '\n' ).forEach( ( line, index ) => {
-							if ( line.match( reg ) ) {
-								const lineNum = index + 1;
-
-								ghLink = `https://github.com/woocommerce/woocommerce/blob/${ version }/${ filePath.replace(
-									/(^\/)/,
-									''
-								) }#L${ lineNum }`;
-							}
-						} );
-
-						changes.set( filePath, {
-							filePath,
-							name,
-							hookType,
-							description,
-							changeType,
-							version,
-							ghLink,
-						} );
+					changes.set( filePath, {
+						filePath,
+						name,
+						hookType,
+						description,
+						changeType,
+						version,
+						ghLink,
+					} );
+				} catch ( error ) {
+					if ( error ) {
+						// eslint-disable-next-line no-console
+						console.error( error );
 					}
-				);
+				}
 			}
 		}
 	}

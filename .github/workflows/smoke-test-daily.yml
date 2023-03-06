@@ -8,31 +8,31 @@ env:
     API_ARTIFACT: api-daily--run-${{ github.run_number }}
     E2E_ARTIFACT: e2e-daily--run-${{ github.run_number }}
     FORCE_COLOR: 1
-    BRANCH_NAME: ${{ github.ref_name }}
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
-jobs:
-    e2e-tests:
-        name: E2E tests on nightly build
-        runs-on: ubuntu-20.04
-        env:
-            ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-            ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
-            ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
-            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
-            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
-            BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
-            CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
-            CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
-            DEFAULT_TIMEOUT_OVERRIDE: 120000
+permissions: {}
 
+jobs:
+    api-tests:
+        name: API tests on nightly build
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
+            BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+            ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+            ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+            ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
+            CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
+            CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
+            DEFAULT_TIMEOUT_OVERRIDE: 120000
         steps:
             - uses: actions/checkout@v3
-              with:
-                  ref: ${{ env.BRANCH_NAME }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -47,58 +47,14 @@ jobs:
             - name: Run 'Update WooCommerce' test.
               working-directory: plugins/woocommerce
               env:
-                  UPDATE_WC: true
+                  UPDATE_WC: nightly
               run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js update-woocommerce.spec.js
-
-            - name: Run the rest of E2E tests.
-              timeout-minutes: 60
-              working-directory: plugins/woocommerce
-              env:
-                  E2E_MAX_FAILURES: 25
-              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js
-
-            - name: Generate Playwright E2E Test report.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
-
-            - name: Archive E2E test report
-              if: success() || failure()
-              uses: actions/upload-artifact@v3
-              with:
-                  name: ${{ env.E2E_ARTIFACT }}
-                  path: |
-                      ${{ env.ALLURE_RESULTS_DIR }}
-                      ${{ env.ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
-
-    api-tests:
-        name: API tests on nightly build
-        runs-on: ubuntu-20.04
-        needs: [e2e-tests]
-        if: success() || failure()
-        env:
-            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
-            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                  ref: ${{ env.BRANCH_NAME }}
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  install-filters: woocommerce
-                  build: false
 
             - name: Run API tests.
               working-directory: plugins/woocommerce
               env:
-                  BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
                   USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-                  DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello.test.js
 
             - name: Generate API Test report.
@@ -117,15 +73,69 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
+    e2e-tests:
+        name: E2E tests on nightly build
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        needs: [api-tests]
+        env:
+            ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
+            ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+            ADMIN_USER_EMAIL: ${{ secrets.SMOKE_TEST_ADMIN_USER_EMAIL }}
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            BASE_URL: ${{ secrets.SMOKE_TEST_URL }}
+            CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
+            CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
+            DEFAULT_TIMEOUT_OVERRIDE: 120000
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+                  build: false
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+
+            - name: Run E2E tests.
+              timeout-minutes: 60
+              working-directory: plugins/woocommerce
+              env:
+                  E2E_MAX_FAILURES: 25
+                  RESET_SITE: true
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+
+            - name: Generate Playwright E2E Test report.
+              if: success() || failure()
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+            - name: Archive E2E test report
+              if: success() || failure()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: ${{ env.E2E_ARTIFACT }}
+                  path: |
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
+
     k6-tests:
         name: k6 tests on nightly build
         runs-on: ubuntu-20.04
+        permissions:
+            contents: read
         needs: [api-tests]
         if: success() || failure()
         steps:
             - uses: actions/checkout@v3
-              with:
-                  ref: ${{ env.BRANCH_NAME }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -145,7 +155,7 @@ jobs:
                   ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
                   CUSTOMER_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
                   CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-                  UPDATE_WC: true
+                  UPDATE_WC: nightly
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               run: |
                   pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
@@ -163,13 +173,16 @@ jobs:
                   A_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
                   C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
                   C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
-                  P_ID: 274
+                  P_ID: 22733
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
     test-plugins:
         name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        needs: [api-tests]
         env:
             USE_WP_ENV: 1
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
@@ -193,8 +206,6 @@ jobs:
                       repo: 'takayukister/contact-form-7'
         steps:
             - uses: actions/checkout@v3
-              with:
-                  ref: ${{ env.BRANCH_NAME }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -219,7 +230,7 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                   E2E_MAX_FAILURES: 15
-              run: pnpm exec playwright test --config=tests/e2e-pw/daily.playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate E2E Test report.
               if: success() || failure()
@@ -243,7 +254,9 @@ jobs:
             ( success() || failure() ) &&
             ! github.event.pull_request.head.repo.fork
         runs-on: ubuntu-20.04
-        needs: [test-plugins, k6-tests]
+        permissions:
+            contents: read
+        needs: [e2e-tests, test-plugins, k6-tests]
         steps:
             - name: Create dirs
               run: |
@@ -256,7 +269,6 @@ jobs:
               uses: actions/checkout@v3
               with:
                   path: repo
-                  ref: ${{ env.BRANCH_NAME }}
 
             - name: Download API test report artifact
               uses: actions/download-artifact@v3
@@ -299,7 +311,7 @@ jobs:
             ( success() || failure() ) &&
             ! github.event.pull_request.head.repo.fork
         runs-on: ubuntu-20.04
-        needs: [test-plugins, k6-tests]
+        needs: [e2e-tests, test-plugins, k6-tests]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
             RUN_ID: ${{ github.run_id }}

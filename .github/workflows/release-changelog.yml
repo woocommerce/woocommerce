@@ -15,9 +15,14 @@ env:
     GIT_AUTHOR_NAME: 'WooCommerce Bot'
     GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
 
+permissions: {}
+
 jobs:
     create-changelog-prs:
         runs-on: ubuntu-20.04
+        permissions:
+            contents: write
+            pull-requests: write
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -40,6 +45,9 @@ jobs:
 
             - name: 'Generate the changelog file'
               run: pnpm --filter=woocommerce run changelog write --add-pr-num -n -vvv --use-version ${{ inputs.releaseVersion }}
+
+            - name: Checkout pnpm-lock.yaml to prevent issues
+              run: git checkout pnpm-lock.yaml
 
             - name: 'git rm deleted files'
               run: git rm $(git ls-files --deleted)

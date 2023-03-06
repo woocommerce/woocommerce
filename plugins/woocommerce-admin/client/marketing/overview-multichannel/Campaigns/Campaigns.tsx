@@ -13,94 +13,128 @@ import {
 	FlexItem,
 	FlexBlock,
 } from '@wordpress/components';
-import { Icon, megaphone } from '@wordpress/icons';
-import { Pagination, Table } from '@woocommerce/components';
+import { Icon, megaphone, cancelCircleFilled } from '@wordpress/icons';
+import {
+	Pagination,
+	Table,
+	TablePlaceholder,
+	Link,
+} from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { CardHeaderTitle, CenteredSpinner } from '~/marketing/components';
+import { CardHeaderTitle } from '~/marketing/components';
+import { useNewCampaignTypes } from '~/marketing/hooks';
 import { useCampaigns } from './useCampaigns';
+import { CreateNewCampaignModal } from './CreateNewCampaignModal';
 import './Campaigns.scss';
 
+const tableCaption = __( 'Campaigns', 'woocommerce' );
+const tableHeaders = [
+	{
+		key: 'campaign',
+		label: __( 'Campaign', 'woocommerce' ),
+	},
+	{
+		key: 'cost',
+		label: __( 'Cost', 'woocommerce' ),
+		isNumeric: true,
+	},
+];
+
+const perPage = 5;
+
+/**
+ * Card displaying campaigns in a table.
+ *
+ * Pagination will be rendered in the card footer if the total number of campaigns is more than one page.
+ *
+ * If there are no campaigns, there will be no table but an info message instead.
+ *
+ * If there is an error, there will be no table but an error message instead.
+ *
+ * The new campaign types data will also be loaded,
+ * so that when users click on the "Create new campaign" button in the card header,
+ * there will be no loading necessary in the modal.
+ */
 export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
-	const { loading, data } = useCampaigns();
+	const [ open, setOpen ] = useState( false );
+	const {
+		loading: loadingCampaigns,
+		data,
+		meta,
+	} = useCampaigns( page, perPage );
+	const { loading: loadingNewCampaignTypes } = useNewCampaignTypes();
+	const total = meta?.total;
 
-	if ( loading ) {
-		return (
-			<Card>
-				<CardHeader>
-					<CardHeaderTitle>
-						{ __( 'Campaigns', 'woocommerce' ) }
-					</CardHeaderTitle>
-				</CardHeader>
-				<CardBody>
-					<CenteredSpinner />
+	const getContent = () => {
+		if ( loadingNewCampaignTypes || loadingCampaigns ) {
+			return (
+				<TablePlaceholder
+					caption={ tableCaption }
+					headers={ tableHeaders }
+					numberOfRows={ perPage }
+				/>
+			);
+		}
+
+		if ( ! data ) {
+			return (
+				<CardBody className="woocommerce-marketing-campaigns-card__content">
+					<Icon
+						className="woocommerce-marketing-campaigns-card__content-icon woocommerce-marketing-campaigns-card__content-icon--error"
+						icon={ cancelCircleFilled }
+						size={ 32 }
+					/>
+					<div className="woocommerce-marketing-campaigns-card__content-title">
+						{ __( 'An unexpected error occurred.', 'woocommerce' ) }
+					</div>
+					<div className="woocommerce-marketing-campaigns-card-body__content-description">
+						{ __(
+							'Please try again later. Check the logs if the problem persists. ',
+							'woocommerce'
+						) }
+					</div>
 				</CardBody>
-			</Card>
-		);
-	}
+			);
+		}
 
-	if ( data.length === 0 ) {
-		return (
-			<Card className="woocommerce-marketing-campaigns-card">
-				<CardHeader>
-					<CardHeaderTitle>
-						{ __( 'Campaigns', 'woocommerce' ) }
-					</CardHeaderTitle>
-				</CardHeader>
-				<CardBody className="woocommerce-marketing-campaigns-card-body-empty-content">
-					<Icon icon={ megaphone } size={ 32 } />
-					<div className="woocommerce-marketing-campaigns-card-body-empty-content-title">
+		if ( data.length === 0 ) {
+			return (
+				<CardBody className="woocommerce-marketing-campaigns-card__content">
+					<Icon
+						className="woocommerce-marketing-campaigns-card__content-icon woocommerce-marketing-campaigns-card__content-icon--empty"
+						icon={ megaphone }
+						size={ 32 }
+					/>
+					<div className="woocommerce-marketing-campaigns-card__content-title">
 						{ __(
 							'Advertise with marketing campaigns',
 							'woocommerce'
 						) }
 					</div>
-					<div>
+					<div className="woocommerce-marketing-campaigns-card__content-description">
 						{ __(
 							'Easily create and manage marketing campaigns without leaving WooCommerce.',
 							'woocommerce'
 						) }
 					</div>
 				</CardBody>
-			</Card>
-		);
-	}
+			);
+		}
 
-	const perPage = 5;
-	const total = data.length;
-	const start = ( page - 1 ) * perPage;
-	const pagedData = data.slice( start, start + perPage );
-
-	return (
-		<Card className="woocommerce-marketing-campaigns-card">
-			<CardHeader>
-				<CardHeaderTitle>
-					{ __( 'Campaigns', 'woocommerce' ) }
-				</CardHeaderTitle>
-			</CardHeader>
+		return (
 			<Table
-				caption={ __( 'Campaigns', 'woocommerce' ) }
-				headers={ [
-					{
-						key: 'campaign',
-						label: __( 'Campaign', 'woocommerce' ),
-					},
-					{
-						key: 'cost',
-						label: __( 'Cost', 'woocommerce' ),
-						isNumeric: true,
-					},
-				] }
-				ids={ pagedData.map( ( el ) => el.id ) }
-				rows={ pagedData.map( ( el ) => {
+				caption={ tableCaption }
+				headers={ tableHeaders }
+				rows={ data.map( ( el ) => {
 					return [
 						{
 							display: (
 								<Flex gap={ 4 }>
-									<FlexItem className="woocommerce-marketing-campaign-logo">
+									<FlexItem className="woocommerce-marketing-campaigns-card__campaign-logo">
 										<img
 											src={ el.icon }
 											alt={ el.channelName }
@@ -110,14 +144,16 @@ export const Campaigns = () => {
 									</FlexItem>
 									<FlexBlock>
 										<Flex direction="column" gap={ 1 }>
-											<FlexItem className="woocommerce-marketing-campaign-title">
-												<a href={ el.manageUrl }>
+											<FlexItem className="woocommerce-marketing-campaigns-card__campaign-title">
+												<Link href={ el.manageUrl }>
 													{ el.title }
-												</a>
+												</Link>
 											</FlexItem>
-											<FlexItem className="woocommerce-marketing-campaign-description">
-												{ el.description }
-											</FlexItem>
+											{ el.description && (
+												<FlexItem className="woocommerce-marketing-campaigns-card__campaign-description">
+													{ el.description }
+												</FlexItem>
+											) }
 										</Flex>
 									</FlexBlock>
 								</Flex>
@@ -127,17 +163,38 @@ export const Campaigns = () => {
 					];
 				} ) }
 			/>
-			<CardFooter className="woocommerce-marketing-campaigns-card-footer">
-				<Pagination
-					showPerPagePicker={ false }
-					perPage={ 5 }
-					page={ page }
-					total={ total }
-					onPageChange={ ( newPage: number ) => {
-						setPage( newPage );
-					} }
-				/>
-			</CardFooter>
+		);
+	};
+
+	return (
+		<Card className="woocommerce-marketing-campaigns-card">
+			<CardHeader>
+				<CardHeaderTitle>
+					{ __( 'Campaigns', 'woocommerce' ) }
+				</CardHeaderTitle>
+				<Button variant="secondary" onClick={ () => setOpen( true ) }>
+					{ __( 'Create new campaign', 'woocommerce' ) }
+				</Button>
+				{ open && (
+					<CreateNewCampaignModal
+						onRequestClose={ () => setOpen( false ) }
+					/>
+				) }
+			</CardHeader>
+			{ getContent() }
+			{ total && total > perPage && (
+				<CardFooter className="woocommerce-marketing-campaigns-card__footer">
+					<Pagination
+						showPerPagePicker={ false }
+						perPage={ perPage }
+						page={ page }
+						total={ total }
+						onPageChange={ ( newPage: number ) => {
+							setPage( newPage );
+						} }
+					/>
+				</CardFooter>
+			) }
 		</Card>
 	);
 };

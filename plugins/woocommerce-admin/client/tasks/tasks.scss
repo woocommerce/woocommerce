@@ -239,8 +239,10 @@
 }
 
 .woocommerce-task-list__setup {
-	.woocommerce-experimental-list .woocommerce-experimental-list__item.complete {
+	.woocommerce-experimental-list
+	.woocommerce-experimental-list__item.complete {
 		text-decoration: line-through;
+		color: var(--wp-admin-theme-color);
 
 		.woocommerce-task-list__item-title {
 			color: var(--wp-admin-theme-color);

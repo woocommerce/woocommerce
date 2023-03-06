@@ -45,8 +45,9 @@ const Loader = ( props ) => {
 class Industry extends Component {
 	constructor( props ) {
 		const profileItems = get( props, 'profileItems', {} );
-		let selected = profileItems.industry || [];
-
+		let selected = Array.isArray( profileItems.industry )
+			? [ ...profileItems.industry ]
+			: [];
 		/**
 		 * @todo Remove block on `updateProfileItems` refactor to wp.data dataStores.
 		 *

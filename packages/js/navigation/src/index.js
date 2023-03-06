@@ -38,6 +38,41 @@ const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
 export const getPath = () => getHistory().location.pathname;
 
 /**
+ * Get the current query string, parsed into an object, from history.
+ *
+ * @return {Object}  Current query object, defaults to empty object.
+ */
+export function getQuery() {
+	const search = getHistory().location.search;
+	if ( search.length ) {
+		return parse( search.substring( 1 ) ) || {};
+	}
+	return {};
+}
+
+/**
+ * Return a URL with set query parameters.
+ *
+ * @param {Object} query        object of params to be updated.
+ * @param {string} path         Relative path (defaults to current path).
+ * @param {Object} currentQuery object of current query params (defaults to current querystring).
+ * @param {string} page         Page key (defaults to "wc-admin")
+ * @return {string}  Updated URL merging query params into existing params.
+ */
+export function getNewPath(
+	query,
+	path = getPath(),
+	currentQuery = getQuery(),
+	page = 'wc-admin'
+) {
+	const args = { page, ...currentQuery, ...query };
+	if ( path !== '/' ) {
+		args.path = path;
+	}
+	return addQueryArgs( 'admin.php', args );
+}
+
+/**
  * Gets query parameters that should persist between screens or updates
  * to reports, such as filtering.
  *
@@ -76,16 +111,6 @@ export const getQueryExcludedScreens = () =>
 	] );
 
 /**
- * Given a path, return whether it is an excluded screen
- *
- * @param {Object} path Path to check
- *
- * @return {boolean} Boolean representing whether path is excluded
- */
-export const pathIsExcluded = ( path ) =>
-	getQueryExcludedScreens().includes( getScreenFromPath( path ) );
-
-/**
  * Retrieve a string 'name' representing the current screen
  *
  * @param {Object} path Path to resolve, default to current
@@ -101,16 +126,6 @@ export const getScreenFromPath = ( path = getPath() ) => {
  * Get an array of IDs from a comma-separated query parameter.
  *
  * @param {string} [queryString=''] string value extracted from URL.
- * @return {Array<number>} List of IDs converted to an array of unique integers.
- */
-export function getIdsFromQuery( queryString = '' ) {
-	return [ ...getSetOfIdsFromQuery( queryString ) ];
-}
-
-/**
- * Get an array of IDs from a comma-separated query parameter.
- *
- * @param {string} [queryString=''] string value extracted from URL.
  * @return {Set<number>} List of IDs converted to a set of integers.
  */
 export function getSetOfIdsFromQuery( queryString = '' ) {
@@ -120,121 +135,6 @@ export function getSetOfIdsFromQuery( queryString = '' ) {
 			.map( ( id ) => parseInt( id, 10 ) )
 			.filter( ( id ) => ! isNaN( id ) )
 	);
-}
-
-/**
- * Get an array of searched words given a query.
- *
- * @param {Object} query Query object.
- * @return {Array} List of search words.
- */
-export function getSearchWords( query = navUtils.getQuery() ) {
-	if ( typeof query !== 'object' ) {
-		throw new Error(
-			'Invalid parameter passed to getSearchWords, it expects an object or no parameters.'
-		);
-	}
-	const { search } = query;
-	if ( ! search ) {
-		return [];
-	}
-	if ( typeof search !== 'string' ) {
-		throw new Error(
-			"Invalid 'search' type. getSearchWords expects query's 'search' property to be a string."
-		);
-	}
-	return search
-		.split( ',' )
-		.map( ( searchWord ) => searchWord.replace( '%2C', ',' ) );
-}
-
-/**
- * Return a URL with set query parameters.
- *
- * @param {Object} query        object of params to be updated.
- * @param {string} path         Relative path (defaults to current path).
- * @param {Object} currentQuery object of current query params (defaults to current querystring).
- * @param {string} page         Page key (defaults to "wc-admin")
- * @return {string}  Updated URL merging query params into existing params.
- */
-export function getNewPath(
-	query,
-	path = getPath(),
-	currentQuery = getQuery(),
-	page = 'wc-admin'
-) {
-	const args = { page, ...currentQuery, ...query };
-	if ( path !== '/' ) {
-		args.path = path;
-	}
-	return addQueryArgs( 'admin.php', args );
-}
-
-/**
- * Get the current query string, parsed into an object, from history.
- *
- * @return {Object}  Current query object, defaults to empty object.
- */
-export function getQuery() {
-	const search = getHistory().location.search;
-	if ( search.length ) {
-		return parse( search.substring( 1 ) ) || {};
-	}
-	return {};
-}
-
-/**
- * Like getQuery but in useHook format for easy usage in React functional components
- *
- * @return {Record<string, string>} Current query object, defaults to empty object.
- */
-export const useQuery = () => {
-	const [ queryState, setQueryState ] = useState( {} );
-	const [ locationChanged, setLocationChanged ] = useState( true );
-	useLayoutEffect( () => {
-		return addHistoryListener( () => {
-			setLocationChanged( true );
-		} );
-	}, [] );
-
-	useEffect( () => {
-		if ( locationChanged ) {
-			const query = getQuery();
-			setQueryState( query );
-			setLocationChanged( false );
-		}
-	}, [ locationChanged ] );
-	return queryState;
-};
-
-/**
- * This function returns an event handler for the given `param`
- *
- * @param {string} param The parameter in the querystring which should be updated (ex `page`, `per_page`)
- * @param {string} path  Relative path (defaults to current path).
- * @param {string} query object of current query params (defaults to current querystring).
- * @return {Function} A callback which will update `param` to the passed value when called.
- */
-export function onQueryChange( param, path = getPath(), query = getQuery() ) {
-	switch ( param ) {
-		case 'sort':
-			return ( key, dir ) =>
-				updateQueryString( { orderby: key, order: dir }, path, query );
-		case 'compare':
-			return ( key, queryParam, ids ) =>
-				updateQueryString(
-					{
-						[ queryParam ]: `compare-${ key }`,
-						[ key ]: ids,
-						search: undefined,
-					},
-					path,
-					query
-				);
-		default:
-			return ( value ) =>
-				updateQueryString( { [ param ]: value }, path, query );
-	}
 }
 
 /**
@@ -301,6 +201,106 @@ export const addHistoryListener = ( listener ) => {
 };
 
 /**
+ * Given a path, return whether it is an excluded screen
+ *
+ * @param {Object} path Path to check
+ *
+ * @return {boolean} Boolean representing whether path is excluded
+ */
+export const pathIsExcluded = ( path ) =>
+	getQueryExcludedScreens().includes( getScreenFromPath( path ) );
+
+/**
+ * Get an array of IDs from a comma-separated query parameter.
+ *
+ * @param {string} [queryString=''] string value extracted from URL.
+ * @return {Array<number>} List of IDs converted to an array of unique integers.
+ */
+export function getIdsFromQuery( queryString = '' ) {
+	return [ ...getSetOfIdsFromQuery( queryString ) ];
+}
+
+/**
+ * Get an array of searched words given a query.
+ *
+ * @param {Object} query Query object.
+ * @return {Array} List of search words.
+ */
+export function getSearchWords( query = navUtils.getQuery() ) {
+	if ( typeof query !== 'object' ) {
+		throw new Error(
+			'Invalid parameter passed to getSearchWords, it expects an object or no parameters.'
+		);
+	}
+	const { search } = query;
+	if ( ! search ) {
+		return [];
+	}
+	if ( typeof search !== 'string' ) {
+		throw new Error(
+			"Invalid 'search' type. getSearchWords expects query's 'search' property to be a string."
+		);
+	}
+	return search
+		.split( ',' )
+		.map( ( searchWord ) => searchWord.replace( '%2C', ',' ) );
+}
+
+/**
+ * Like getQuery but in useHook format for easy usage in React functional components
+ *
+ * @return {Record<string, string>} Current query object, defaults to empty object.
+ */
+export const useQuery = () => {
+	const [ queryState, setQueryState ] = useState( {} );
+	const [ locationChanged, setLocationChanged ] = useState( true );
+	useLayoutEffect( () => {
+		return addHistoryListener( () => {
+			setLocationChanged( true );
+		} );
+	}, [] );
+
+	useEffect( () => {
+		if ( locationChanged ) {
+			const query = getQuery();
+			setQueryState( query );
+			setLocationChanged( false );
+		}
+	}, [ locationChanged ] );
+	return queryState;
+};
+
+/**
+ * This function returns an event handler for the given `param`
+ *
+ * @param {string} param The parameter in the querystring which should be updated (ex `page`, `per_page`)
+ * @param {string} path  Relative path (defaults to current path).
+ * @param {string} query object of current query params (defaults to current querystring).
+ * @return {Function} A callback which will update `param` to the passed value when called.
+ */
+export function onQueryChange( param, path = getPath(), query = getQuery() ) {
+	switch ( param ) {
+		case 'sort':
+			return ( key, dir ) =>
+				updateQueryString( { orderby: key, order: dir }, path, query );
+		case 'compare':
+			return ( key, queryParam, ids ) =>
+				updateQueryString(
+					{
+						[ queryParam ]: `compare-${ key }`,
+						[ key ]: ids,
+						search: undefined,
+					},
+					path,
+					query
+				);
+		default:
+			return ( value ) =>
+				updateQueryString( { [ param ]: value }, path, query );
+	}
+}
+
+/**
  * Determines if a URL is a WC admin url.
  *
  * @param {*} url - the url to test
@@ -314,7 +314,7 @@ export const isWCAdmin = ( url = window.location.href ) => {
  * Returns a parsed object for an absolute or relative admin URL.
  *
  * @param {*} url - the url to test.
- * @return {Object} - the URL object of the given url.
+ * @return {URL} - the URL object of the given url.
  */
 export const parseAdminUrl = ( url ) => {
 	if ( url.startsWith( 'http' ) ) {

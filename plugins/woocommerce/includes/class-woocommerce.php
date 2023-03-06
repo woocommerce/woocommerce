@@ -32,7 +32,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '7.3.0';
+	public $version = '7.6.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -64,6 +64,13 @@ final class WooCommerce {
 	 * @var WC_Query
 	 */
 	public $query = null;
+
+	/**
+	 * API instance
+	 *
+	 * @var WC_API
+	 */
+	public $api;
 
 	/**
 	 * Product factory instance.

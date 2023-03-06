@@ -7,6 +7,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { waitUntilElementIsPresent } from './utils';
+import { addCustomerEffortScoreExitPageListener } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 
 /**
  * Get the product data.
@@ -134,7 +135,7 @@ const getProductData = () => {
 /**
  * Get the publish date as a string.
  *
- * @param  prefix Prefix for date element selectors.
+ * @param prefix Prefix for date element selectors.
  * @return string
  */
 const getPublishDate = ( prefix = '' ) => {
@@ -185,8 +186,8 @@ const getPublishingWidgetData = () => {
 /**
  * Prefix all object keys with a string.
  *
- * @param  obj    Object to create keys from.
- * @param  prefix Prefix used before all keys.
+ * @param obj    Object to create keys from.
+ * @param prefix Prefix used before all keys.
  * @return object
  */
 const prefixObjectKeys = (
@@ -305,7 +306,7 @@ export const initProductScreenTracks = () => {
 
 	// Product tags
 
-	function deleteTagEventListener( event: Event ) {
+	function deleteTagEventListener(/* event: Event */) {
 		recordEvent( 'product_tags_delete', {
 			page: 'product',
 			tag_list_size:
@@ -329,7 +330,7 @@ export const initProductScreenTracks = () => {
 
 	document
 		.querySelector( '.tagadd' )
-		?.addEventListener( 'click', ( event ) => {
+		?.addEventListener( 'click', (/* event: Event */) => {
 			const tagInput = document.querySelector< HTMLInputElement >(
 				'#new-tag-product_tag'
 			);
@@ -417,10 +418,31 @@ export const initProductScreenTracks = () => {
 				'.woocommerce_attribute'
 			).length;
 			if ( newAttributesCount > attributesCount ) {
+				const local_attributes = [
+					...document.querySelectorAll(
+						'.woocommerce_attribute:not(.pa_glbattr)'
+					),
+				].map( ( attr ) => {
+					const terms =
+						(
+							attr.querySelector(
+								"[name^='attribute_values']"
+							) as HTMLTextAreaElement
+						 )?.value.split( '|' ).length ?? 0;
+					return {
+						name: (
+							attr.querySelector(
+								'[name^="attribute_names"]'
+							) as HTMLInputElement
+						 )?.value,
+						terms,
+					};
+				} );
 				recordEvent( 'product_attributes_add', {
 					page: 'product',
 					enable_archive: '',
 					default_sort_order: '',
+					local_attributes,
 				} );
 			}
 		} );
@@ -444,3 +466,51 @@ export const initProductScreenTracks = () => {
 			} );
 	} );
 };
+
+export function addExitPageListener( pageId: string ) {
+	let productChanged = false;
+	let triggeredDelete = false;
+
+	const deleteButton = document.querySelector( '#submitpost a.submitdelete' );
+
+	if ( deleteButton ) {
+		deleteButton.addEventListener( 'click', function () {
+			triggeredDelete = true;
+		} );
+	}
+
+	function checkIfSubmitButtonsDisabled() {
+		const submitButtonSelectors = [
+			'#submitpost [type="submit"]',
+			'#submitpost #post-preview',
+		];
+		let isDisabled = false;
+		for ( const sel of submitButtonSelectors ) {
+			document.querySelectorAll( sel ).forEach( ( element ) => {
+				if ( element.classList.contains( 'disabled' ) ) {
+					isDisabled = true;
+				}
+			} );
+		}
+		return isDisabled;
+	}
+	window.addEventListener( 'beforeunload', function (/* event */) {
+		// Check if button disabled or triggered delete to see if user saved or deleted the product instead.
+		if ( checkIfSubmitButtonsDisabled() || triggeredDelete ) {
+			productChanged = false;
+			triggeredDelete = false;
+			return;
+		}
+		const editor = window.tinymce && window.tinymce.get( 'content' );
+
+		if ( window.wp.autosave ) {
+			productChanged = window.wp.autosave.server.postChanged();
+		} else if ( editor ) {
+			productChanged = ! editor.isHidden() && editor.isDirty();
+		}
+	} );
+
+	addCustomerEffortScoreExitPageListener( pageId, () => {
+		return productChanged;
+	} );
+}

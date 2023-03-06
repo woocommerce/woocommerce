@@ -1,10 +1,8 @@
 /**
  * External dependencies
  */
-import { PropsWithChildren } from 'react';
 import { render, waitFor, screen, within } from '@testing-library/react';
 import { Fragment } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
 import { Form, FormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -25,8 +23,8 @@ const onDraftCES = jest.fn().mockResolvedValue( {} );
 
 jest.mock( '@wordpress/plugins', () => ( { registerPlugin: jest.fn() } ) );
 
-jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
+jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
 	useDispatch: jest.fn().mockReturnValue( { updateOptions: jest.fn() } ),
 	useSelect: jest.fn().mockReturnValue( { productCESAction: 'hide' } ),
 } ) );
@@ -56,6 +54,12 @@ jest.mock( '../use-product-helper', () => {
 	};
 } );
 jest.mock( '~/hooks/usePreventLeavingPage' );
+jest.mock(
+	'~/customer-effort-score-tracks/use-customer-effort-score-exit-page-tracker',
+	() => ( {
+		useCustomerEffortScoreExitPageTracker: jest.fn(),
+	} )
+);
 
 describe( 'ProductFormActions', () => {
 	beforeEach( () => {

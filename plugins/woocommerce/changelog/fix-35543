@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent possible warning arising from use of woocommerce_wp_* family of functions.

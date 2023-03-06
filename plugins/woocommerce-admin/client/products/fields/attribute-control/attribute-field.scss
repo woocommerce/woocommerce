@@ -1,0 +1,15 @@
+.woocommerce-attribute-field {
+	width: 100%;
+
+	.woocommerce-sortable {
+		margin: 0;
+	}
+
+	.woocommerce-sortable__item:not(:first-child) {
+		margin-top: -1px;
+	}
+	.woocommerce-sortable__item:focus-visible:not(:active) + .woocommerce-sortable__item .woocommerce-attribute-list-item {
+		background: none;
+		border-top: 0;
+	}
+}

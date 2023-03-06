@@ -6,6 +6,8 @@
  * @version  2.4.0
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -16,8 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_screen_ids() {
-
-	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+	$wc_screen_id = 'woocommerce';
 	$screen_ids   = array(
 		'toplevel_page_' . $wc_screen_id,
 		$wc_screen_id . '_page_wc-orders',
@@ -39,12 +40,12 @@ function wc_get_screen_ids() {
 		'edit-product_tag',
 		'profile',
 		'user-edit',
-		wc_get_page_screen_id( 'shop-order' ),
 	);
 
 	foreach ( wc_get_order_types() as $type ) {
 		$screen_ids[] = $type;
 		$screen_ids[] = 'edit-' . $type;
+		$screen_ids[] = wc_get_page_screen_id( $type );
 	}
 
 	$attributes = wc_get_attribute_taxonomies();
@@ -68,11 +69,18 @@ function wc_get_screen_ids() {
  * @return string Page ID. Empty string if resource not found.
  */
 function wc_get_page_screen_id( $for ) {
-	switch ( $for ) {
-		case 'shop-order':
-			return 'woocommerce_page_wc-orders';
+	$screen_id = '';
+	$for       = str_replace( '-', '_', $for );
+
+	if ( in_array( $for, wc_get_order_types( 'admin-menu' ), true ) ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$screen_id = 'woocommerce_page_wc-orders' . ( 'shop_order' === $for ? '' : '--' . $for );
+		} else {
+			$screen_id = $for;
+		}
 	}
-	return '';
+
+	return $screen_id;
 }
 
 /**

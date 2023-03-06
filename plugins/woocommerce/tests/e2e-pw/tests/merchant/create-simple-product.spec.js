@@ -4,9 +4,9 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const virtualProductName = 'Virtual Product Name';
 const nonVirtualProductName = 'Non Virtual Product Name';
 const productPrice = '9.99';
-let shippingZoneId, virtualProductPermalink, nonVirtualProductPermalink;
+let shippingZoneId, virtualProductId, nonVirtualProductId;
 
-test.describe( 'Add New Simple Product Page', () => {
+test.describe.serial( 'Add New Simple Product Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -41,20 +41,9 @@ test.describe( 'Add New Simple Product Page', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		await api.get( 'products' ).then( ( response ) => {
-			const products = response.data;
-			for ( const product of products ) {
-				if (
-					product.name === virtualProductName ||
-					product.name === nonVirtualProductName
-				) {
-					api.delete( `products/${ product.id }`, {
-						force: true,
-					} ).then( () => {
-						// nothing to do here.
-					} );
-				}
-			}
+		await api.delete( `products/${ virtualProductId }`, { force: true } );
+		await api.delete( `products/${ nonVirtualProductId }`, {
+			force: true,
 		} );
 		// delete the shipping zone
 		await api.delete( `shipping/zones/${ shippingZoneId }`, {
@@ -63,7 +52,9 @@ test.describe( 'Add New Simple Product Page', () => {
 	} );
 
 	test( 'can create simple virtual product', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
+		await page.goto( 'wp-admin/post-new.php?post_type=product', {
+			waitUntil: 'networkidle',
+		} );
 		await page.fill( '#title', virtualProductName );
 		await page.fill( '#_regular_price', productPrice );
 		await page.click( '#_virtual' );
@@ -80,19 +71,23 @@ test.describe( 'Add New Simple Product Page', () => {
 			await page.waitForLoadState( 'networkidle' );
 		}
 
-		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
-			'Product published.'
-		);
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Product published.' } )
+		).toBeVisible();
 
-		virtualProductPermalink = await page
-			.locator( '#sample-permalink a' )
-			.getAttribute( 'href' );
+		// Save product ID
+		virtualProductId = page.url().match( /(?<=post=)\d+/ );
+		expect( virtualProductId ).toBeDefined();
 	} );
 
 	test( 'can have a shopper add the simple virtual product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( virtualProductPermalink );
+		await page.goto( `/?post_type=product&p=${ virtualProductId }`, {
+			waitUntil: 'networkidle',
+		} );
 		await expect( page.locator( '.product_title' ) ).toHaveText(
 			virtualProductName
 		);
@@ -107,11 +102,17 @@ test.describe( 'Add New Simple Product Page', () => {
 		await expect(
 			page.locator( 'a.shipping-calculator-button' )
 		).not.toBeVisible();
-		await page.click( 'a.remove' );
+		await page.click( `a.remove[data-product_id='${ virtualProductId }']` );
+		await page.waitForLoadState( 'networkidle' );
+		await expect(
+			page.locator( `a.remove[data-product_id='${ virtualProductId }']` )
+		).not.toBeVisible();
 	} );
 
 	test( 'can create simple non-virtual product', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
+		await page.goto( 'wp-admin/post-new.php?post_type=product', {
+			waitUntil: 'networkidle',
+		} );
 		await page.fill( '#title', nonVirtualProductName );
 		await page.fill( '#_regular_price', productPrice );
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
@@ -128,19 +129,23 @@ test.describe( 'Add New Simple Product Page', () => {
 			await page.waitForLoadState( 'networkidle' );
 		}
 
-		await expect( page.locator( 'div.notice-success > p' ) ).toContainText(
-			'Product published.'
-		);
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Product published.' } )
+		).toBeVisible();
 
-		nonVirtualProductPermalink = await page
-			.locator( '#sample-permalink a' )
-			.getAttribute( 'href' );
+		// Save product ID
+		nonVirtualProductId = page.url().match( /(?<=post=)\d+/ );
+		expect( nonVirtualProductId ).toBeDefined();
 	} );
 
 	test( 'can have a shopper add the simple non-virtual product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( nonVirtualProductPermalink );
+		await page.goto( `/?post_type=product&p=${ nonVirtualProductId }`, {
+			waitUntil: 'networkidle',
+		} );
 		await expect( page.locator( '.product_title' ) ).toHaveText(
 			nonVirtualProductName
 		);
@@ -155,6 +160,14 @@ test.describe( 'Add New Simple Product Page', () => {
 		await expect(
 			page.locator( 'a.shipping-calculator-button' )
 		).toBeVisible();
-		await page.click( 'a.remove' );
+		await page.click(
+			`a.remove[data-product_id='${ nonVirtualProductId }']`
+		);
+		await page.waitForLoadState( 'networkidle' );
+		await expect(
+			page.locator(
+				`a.remove[data-product_id='${ nonVirtualProductId }']`
+			)
+		).not.toBeVisible();
 	} );
 } );

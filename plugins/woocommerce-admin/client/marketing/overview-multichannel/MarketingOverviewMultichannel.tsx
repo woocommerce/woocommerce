@@ -7,6 +7,15 @@ import { ScrollTo } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
+import '~/marketing/data';
+import '~/marketing/data-multichannel';
+import { CenteredSpinner } from '~/marketing/components';
+import {
+	useIntroductionBanner,
+	useRegisteredChannels,
+	useRecommendedChannels,
+	useIsLocationHashAddChannels,
+} from '~/marketing/hooks';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { IntroductionBanner } from './IntroductionBanner';
 import { Campaigns } from './Campaigns';
@@ -14,15 +23,7 @@ import { Channels } from './Channels';
 import { InstalledExtensions } from './InstalledExtensions';
 import { DiscoverTools } from './DiscoverTools';
 import { LearnMarketing } from './LearnMarketing';
-import '~/marketing/data';
-import {
-	useIntroductionBanner,
-	useRegisteredChannels,
-	useRecommendedChannels,
-	useIsLocationHashAddChannels,
-} from '~/marketing/hooks';
 import './MarketingOverviewMultichannel.scss';
-import { CenteredSpinner } from '../components';
 
 export const MarketingOverviewMultichannel: React.FC = () => {
 	const {
@@ -30,8 +31,11 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 		isIntroductionBannerDismissed,
 		dismissIntroductionBanner,
 	} = useIntroductionBanner();
-	const { loading: loadingRegistered, data: dataRegistered } =
-		useRegisteredChannels();
+	const {
+		loading: loadingRegistered,
+		data: dataRegistered,
+		refetch,
+	} = useRegisteredChannels();
 	const { loading: loadingRecommended, data: dataRecommended } =
 		useRecommendedChannels();
 	const isLocationHashAddChannels = useIsLocationHashAddChannels();
@@ -43,8 +47,8 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 
 	if (
 		loadingIntroductionBanner ||
-		loadingRegistered ||
-		loadingRecommended
+		( loadingRegistered && ! dataRegistered ) ||
+		( loadingRecommended && ! dataRecommended )
 	) {
 		return <CenteredSpinner />;
 	}
@@ -53,23 +57,29 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 		<div className="woocommerce-marketing-overview-multichannel">
 			{ ! isIntroductionBannerDismissed && (
 				<IntroductionBanner
-					showButtons={ dataRegistered.length >= 1 }
+					showButtons={
+						!! dataRegistered && dataRegistered.length >= 1
+					}
 					onDismiss={ dismissIntroductionBanner }
 				/>
 			) }
-			{ dataRegistered.length >= 1 && <Campaigns /> }
-			{ ( dataRegistered.length >= 1 || dataRecommended.length >= 1 ) &&
+			{ dataRegistered?.length && <Campaigns /> }
+			{ dataRegistered &&
+				dataRecommended &&
+				( dataRegistered.length || dataRecommended.length ) &&
 				( isLocationHashAddChannels ? (
 					<ScrollTo>
 						<Channels
 							registeredChannels={ dataRegistered }
 							recommendedChannels={ dataRecommended }
+							onInstalledAndActivated={ refetch }
 						/>
 					</ScrollTo>
 				) : (
 					<Channels
 						registeredChannels={ dataRegistered }
 						recommendedChannels={ dataRecommended }
+						onInstalledAndActivated={ refetch }
 					/>
 				) ) }
 			<InstalledExtensions />

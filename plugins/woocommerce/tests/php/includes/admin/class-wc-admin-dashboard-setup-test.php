@@ -165,7 +165,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		);
 
 		foreach ( $required_strings as $required_string ) {
-			$this->assertRegexp( "/${required_string}/", $html );
+			$this->assertRegexp( "/{$required_string}/", $html );
 		}
 	}
 
@@ -191,7 +191,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		if ( $completed_tasks_count === $tasks_count ) {
 			$this->assertEmpty( $this->get_widget_output() );
 		} else {
-			$this->assertRegexp( "/Step ${step_number} of 6/", $this->get_widget_output() );
+			$this->assertRegexp( "/Step {$step_number} of 6/", $this->get_widget_output() );
 		}
 	}
 }

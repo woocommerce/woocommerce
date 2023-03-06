@@ -43,6 +43,7 @@ import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { ProgressTitle } from '../task-lists';
+import { WooHomescreenHeaderBanner } from './header-banner-slot';
 
 const Tasks = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../tasks' ).then( ( module ) => ( {
@@ -126,7 +127,9 @@ export const Layout = ( {
 		return (
 			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
 				{ activeSetupTaskList && isDashboardShown && (
-					<ProgressTitle taskListId={ activeSetupTaskList } />
+					<>
+						<ProgressTitle taskListId={ activeSetupTaskList } />
+					</>
 				) }
 				<Tasks query={ query } />
 			</Suspense>
@@ -135,6 +138,13 @@ export const Layout = ( {
 
 	return (
 		<>
+			{ isDashboardShown && (
+				<WooHomescreenHeaderBanner
+					className={ classnames( 'woocommerce-homescreen', {
+						'woocommerce-homescreen-column': ! twoColumns,
+					} ) }
+				/>
+			) }
 			<div
 				className={ classnames( 'woocommerce-homescreen', {
 					'two-columns': twoColumns,

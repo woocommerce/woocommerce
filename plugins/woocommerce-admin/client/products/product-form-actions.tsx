@@ -12,6 +12,7 @@ import {
 import { chevronDown, check, Icon } from '@wordpress/icons';
 import { registerPlugin } from '@wordpress/plugins';
 import { useFormContext } from '@woocommerce/components';
+import { preventLeavingProductForm } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo } from '@woocommerce/navigation';
@@ -29,6 +30,7 @@ import { WooHeaderItem } from '~/header/utils';
 import { useProductHelper } from './use-product-helper';
 import './product-form-actions.scss';
 import { useProductMVPCESFooter } from '~/customer-effort-score-tracks/use-product-mvp-ces-footer';
+import { useCustomerEffortScoreExitPageTracker } from '~/customer-effort-score-tracks/use-customer-effort-score-exit-page-tracker';
 
 export const ProductFormActions: React.FC = () => {
 	const {
@@ -46,7 +48,12 @@ export const ProductFormActions: React.FC = () => {
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 
-	usePreventLeavingPage( isDirty );
+	usePreventLeavingPage( isDirty, preventLeavingProductForm );
+
+	useCustomerEffortScoreExitPageTracker(
+		! values.id ? 'new_product' : 'editing_new_product',
+		isDirty
+	);
 
 	const { isSmallViewport } = useSelect( ( select ) => {
 		return {

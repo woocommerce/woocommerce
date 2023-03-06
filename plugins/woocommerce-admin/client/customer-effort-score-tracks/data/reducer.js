@@ -7,6 +7,7 @@ const DEFAULT_STATE = {
 	queue: [],
 	cesModalData: undefined,
 	showCESModal: false,
+	showProductMVPFeedbackModal: false,
 };
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
@@ -14,7 +15,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 		case TYPES.SET_CES_SURVEY_QUEUE:
 			return {
 				...state,
-				queue: action.queue,
+				queue: [ ...state.queue, ...action.queue ],
 			};
 		case TYPES.HIDE_CES_MODAL:
 			return {
@@ -25,7 +26,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 		case TYPES.SHOW_CES_MODAL:
 			const cesModalData = {
 				action: action.surveyProps.action,
-				label: action.surveyProps.label,
+				title: action.surveyProps.title,
 				onSubmitLabel: action.onSubmitLabel,
 				firstQuestion: action.surveyProps.firstQuestion,
 				secondQuestion: action.surveyProps.secondQuestion,
@@ -48,8 +49,11 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			const newTrack = {
 				action: action.action,
 				title: action.title,
+				description: action.description,
+				noticeLabel: action.noticeLabel,
 				firstQuestion: action.firstQuestion,
 				secondQuestion: action.secondQuestion,
+				icon: action.icon,
 				pagenow: action.pageNow,
 				adminpage: action.adminPage,
 				onSubmitLabel: action.onSubmitLabel,
@@ -58,6 +62,16 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				queue: [ ...state.queue, newTrack ],
+			};
+		case TYPES.SHOW_PRODUCT_MVP_FEEDBACK_MODAL:
+			return {
+				...state,
+				showProductMVPFeedbackModal: true,
+			};
+		case TYPES.HIDE_PRODUCT_MVP_FEEDBACK_MODAL:
+			return {
+				...state,
+				showProductMVPFeedbackModal: false,
 			};
 
 		default:

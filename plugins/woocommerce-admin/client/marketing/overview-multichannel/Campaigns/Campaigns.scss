@@ -1,37 +1,44 @@
 .woocommerce-marketing-campaigns-card {
-	.woocommerce-marketing-campaigns-card-body-empty-content {
+	&__content {
 		width: 50%;
 		margin: auto;
 		text-align: center;
+	}
 
-		svg {
+	&__content-icon {
+		background-color: $studio-gray-0;
+		border-radius: 28px;
+		margin-bottom: $gap-smallest;
+
+		&--error {
+			fill: $alert-red;
+		}
+
+		&--empty {
 			fill: $studio-woocommerce-purple-50;
-			background-color: #f6f7f7;
-			border-radius: 28px;
-			margin-bottom: $gap-smallest;
-		}
-
-		div.woocommerce-marketing-campaigns-card-body-empty-content-title {
-			font-size: 13px;
-			font-weight: 600;
-			line-height: 16px;
-			color: $gray-900;
-			margin-bottom: $gap-smallest;
-		}
-
-		div {
-			color: $gray-700;
-			margin-bottom: $gap-smallest;
 		}
 	}
 
-	.woocommerce-marketing-campaign-logo {
+	&__content-title {
+		@include font-size( 13 );
+		font-weight: 600;
+		line-height: 16px;
+		color: $gray-900;
+		margin-bottom: $gap-smallest;
+	}
+
+	&__content-description {
+		color: $gray-700;
+		margin-bottom: $gap-smallest;
+	}
+
+	&__campaign-logo {
 		img {
 			display: block;
 		}
 	}
 
-	.woocommerce-marketing-campaign-title {
+	&__campaign-title {
 		a {
 			color: #007cba;
 			font-weight: 600;
@@ -39,11 +46,11 @@
 		}
 	}
 
-	.woocommerce-marketing-campaign-description {
+	&__campaign-description {
 		color: $gray-700;
 	}
 
-	.woocommerce-marketing-campaigns-card-footer {
+	&__footer {
 		justify-content: center;
 
 		// Remove the border-top because the table cells already has a border-bottom.

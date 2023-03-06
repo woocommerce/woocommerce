@@ -26,6 +26,7 @@ class WC_Products_Tracking {
 		add_action( 'edited_product_cat', array( $this, 'track_product_category_updated' ) );
 		add_action( 'add_meta_boxes_product', array( $this, 'track_product_updated_client_side' ), 10 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_product_tracking_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_product_import_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_attribute_tracking_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_tag_tracking_scripts' ) );
 	}
@@ -330,6 +331,11 @@ class WC_Products_Tracking {
 		) {
 			return 'edit';
 		}
+
+		if ( 'product_page_product_importer' === $hook ) {
+			return 'import';
+		}
+
 		// phpcs:enable
 
 		return false;
@@ -354,6 +360,22 @@ class WC_Products_Tracking {
 				'name' => $product_screen,
 			)
 		);
+	}
+
+	/**
+	 * Adds the tracking scripts for product setting pages.
+	 *
+	 * @param string $hook Page hook.
+	 */
+	public function possibly_add_product_import_scripts( $hook ) {
+		$product_screen = $this->get_product_screen( $hook );
+
+		if ( 'import' !== $product_screen ) {
+			return;
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'product-import-tracking', false );
+
 	}
 
 	/**

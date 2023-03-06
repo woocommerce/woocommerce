@@ -72,8 +72,8 @@ yarn.lock
 # Editors
 nbproject/private/
 
-# Test Results
-test-results.json
+# E2E and API Test Results
+test-results
 
 # Admin Feature config
 plugins/woocommerce/includes/react-admin/feature-config.php
@@ -88,13 +88,6 @@ allure-results
 # Code analyzer output and env
 changes.json
 .env
-
-# Playwright output & working files
-/plugins/woocommerce/tests/e2e-pw/output
-/plugins/woocommerce/tests/e2e-pw/report
-/plugins/woocommerce/tests/e2e-pw/storage
-/plugins/woocommerce/tests/e2e-pw/test-results.json
-/plugins/woocommerce/tests/api-core-tests/output
 
 # Turborepo
 .turbo

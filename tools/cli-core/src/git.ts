@@ -21,6 +21,20 @@ export const getFilename = ( str: string ): string => {
 };
 
 /**
+ * Get starting line number from patch
+ *
+ * @param {string} str String to extract starting line number from.
+ * @return {number} line number.
+ */
+export const getStartingLineNumber = ( str: string ): number => {
+	const lineNumber = str.replace( /^@@ -\d+,\d+ \+(\d+),\d+ @@.*?$/, '$1' );
+	if ( ! lineNumber.match( /^\d+$/ ) ) {
+		throw new Error( 'Unable to parse line number from patch' );
+	}
+	return parseInt( lineNumber, 10 );
+};
+
+/**
  * Get patches
  *
  * @param {string} content Patch content.
@@ -118,20 +132,39 @@ export const sparseCheckoutRepo = async (
  * @return {Response<string>} - the simple-git response.
  */
 export const checkoutRef = ( pathToRepo: string, ref: string ) => {
-	const git = simpleGit( { baseDir: pathToRepo } );
+	const git = simpleGit( {
+		baseDir: pathToRepo,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
 	return git.checkout( ref );
 };
 
 /**
  * Do a git diff of 2 commit hashes (or branches)
  *
- * @param {string} baseDir - baseDir that the repo is in
- * @param {string} hashA   - either a git commit hash or a git branch
- * @param {string} hashB   - either a git commit hash or a git branch
+ * @param {string}        baseDir      - baseDir that the repo is in
+ * @param {string}        hashA        - either a git commit hash or a git branch
+ * @param {string}        hashB        - either a git commit hash or a git branch
+ * @param {Array<string>} excludePaths - A list of paths to exclude from the diff
  * @return {Promise<string>} - diff of the changes between the 2 hashes
  */
-export const diffHashes = ( baseDir: string, hashA: string, hashB: string ) => {
+export const diffHashes = (
+	baseDir: string,
+	hashA: string,
+	hashB: string,
+	excludePaths: string[] = []
+) => {
 	const git = simpleGit( { baseDir } );
+
+	if ( excludePaths.length ) {
+		return git.diff( [
+			`${ hashA }..${ hashB }`,
+			'--',
+			'.',
+			...excludePaths.map( ( ps ) => `:^${ ps }` ),
+		] );
+	}
+
 	return git.diff( [ `${ hashA }..${ hashB }` ] );
 };
 
@@ -175,21 +208,102 @@ export const getCommitHash = async ( baseDir: string, ref: string ) => {
 };
 
 /**
+ * Get the commit hash for the last change to a line within a specific file.
+ *
+ * @param {string} baseDir    - the dir of the git repo to get the hash from.
+ * @param {string} filePath   - the relative path to the file to check the commit hash of.
+ * @param {number} lineNumber - the line number from which to get the hash of the last commit.
+ * @return {string} - the commit hash of the last change to filePath at lineNumber.
+ */
+export const getLineCommitHash = async (
+	baseDir: string,
+	filePath: string,
+	lineNumber: number
+) => {
+	// Remove leading slash, if it exists.
+	const adjustedFilePath = filePath.replace( /^\//, '' );
+	try {
+		const git = await simpleGit( { baseDir } );
+		const blame = await git.raw( [
+			'blame',
+			`-L${ lineNumber },${ lineNumber }`,
+			adjustedFilePath,
+		] );
+		const hash = blame.match( /^([a-f0-9]+)\s+/ );
+		if ( ! hash ) {
+			throw new Error(
+				`Unable to git blame ${ adjustedFilePath }:${ lineNumber }`
+			);
+		}
+		return hash[ 1 ];
+	} catch ( e ) {
+		throw new Error(
+			`Unable to git blame ${ adjustedFilePath }:${ lineNumber }`
+		);
+	}
+};
+
+/**
+ * Get the commit hash for the last change to a line within a specific file.
+ *
+ * @param {string} baseDir - the dir of the git repo to get the PR number from.
+ * @param {string} hash    - the hash to get the PR number from.
+ * @return {number} - the pull request number from the given inputs.
+ */
+export const getPullRequestNumberFromHash = async (
+	baseDir: string,
+	hash: string
+) => {
+	try {
+		const git = await simpleGit( {
+			baseDir,
+			config: [ 'core.hooksPath=/dev/null' ],
+		} );
+		const formerHead = await git.revparse( 'HEAD' );
+		await git.checkout( hash );
+		const cmdOutput = await git.raw( [
+			'log',
+			'-1',
+			'--first-parent',
+			'--format=%cI\n%s',
+		] );
+		const cmdLines = cmdOutput.split( '\n' );
+		await git.checkout( formerHead );
+		const prNumber = cmdLines[ 1 ]
+			.trim()
+			.match( /(?:^Merge pull request #(\d+))|(?:\(#(\d+)\)$)/ );
+		if ( prNumber ) {
+			return prNumber[ 1 ]
+				? parseInt( prNumber[ 1 ], 10 )
+				: parseInt( prNumber[ 2 ], 10 );
+		}
+		throw new Error( `Unable to get PR number from hash ${ hash }.` );
+	} catch ( e ) {
+		throw new Error( `Unable to get PR number from hash ${ hash }.` );
+	}
+};
+
+/**
  * generateDiff generates a diff for a given repo and 2 hashes or branch names.
  *
- * @param {string}   tmpRepoPath - filepath to the repo to generate a diff from.
- * @param {string}   hashA       - commit hash or branch name.
- * @param {string}   hashB       - commit hash or branch name.
- * @param {Function} onError     - the handler to call when an error occurs.
+ * @param {string}        tmpRepoPath  - filepath to the repo to generate a diff from.
+ * @param {string}        hashA        - commit hash or branch name.
+ * @param {string}        hashB        - commit hash or branch name.
+ * @param {Function}      onError      - the handler to call when an error occurs.
+ * @param {Array<string>} excludePaths - A list of directories to exclude from the diff.
  */
 export const generateDiff = async (
 	tmpRepoPath: string,
 	hashA: string,
 	hashB: string,
-	onError: ( error: string ) => void
+	onError: ( error: string ) => void,
+	excludePaths: string[] = []
 ) => {
 	try {
-		const git = simpleGit( { baseDir: tmpRepoPath } );
+		const git = simpleGit( {
+			baseDir: tmpRepoPath,
+			config: [ 'core.hooksPath=/dev/null' ],
+		} );
 
 		const validBranches = [ hashA, hashB ].filter(
 			( hash ) => ! refIsHash( hash )
@@ -213,7 +327,12 @@ export const generateDiff = async (
 			throw new Error( 'Not a git repository' );
 		}
 
-		const diff = await diffHashes( tmpRepoPath, commitHashA, commitHashB );
+		const diff = await diffHashes(
+			tmpRepoPath,
+			commitHashA,
+			commitHashB,
+			excludePaths
+		);
 
 		return diff;
 	} catch ( e ) {

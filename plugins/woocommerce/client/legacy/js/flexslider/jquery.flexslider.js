@@ -21,10 +21,9 @@
     slider.vars = $.extend({}, $.flexslider.defaults, options);
 
     var namespace = slider.vars.namespace,
-        msGesture = window.navigator && window.navigator.msPointerEnabled && window.MSGesture,
-        touch = (( "ontouchstart" in window ) || msGesture || window.DocumentTouch && document instanceof DocumentTouch) && slider.vars.touch,
+        touch = (( "ontouchstart" in window ) || window.DocumentTouch && document instanceof DocumentTouch) && slider.vars.touch,
         // deprecating this idea, as devices are being released with both of these events
-        eventType = "click touchend MSPointerUp keyup",
+        eventType = "click touchend keyup",
         watchedEvent = "",
         watchedEventClearTimer,
         vertical = slider.vars.direction === "vertical",
@@ -63,18 +62,8 @@
         slider.started = false;
         slider.startTimeout = null;
         // TOUCH/USECSS:
-        slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS && (function() {
-          var obj = document.createElement('div'),
-              props = ['perspectiveProperty', 'WebkitPerspective', 'MozPerspective', 'OPerspective', 'msPerspective'];
-          for (var i in props) {
-            if ( obj.style[ props[i] ] !== undefined ) {
-              slider.pfx = props[i].replace('Perspective','').toLowerCase();
-              slider.prop = "-" + slider.pfx + "-transform";
-              return true;
-            }
-          }
-          return false;
-        }());
+        slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS;
+        if (slider.transitions) slider.prop = "transform";
         slider.isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
         slider.ensureAnimationEnd = '';
         // CONTROLSCONTAINER:
@@ -132,7 +121,7 @@
         if (slider.vars.pausePlay) { methods.pausePlay.setup(); }
 
         //PAUSE WHEN INVISIBLE
-        if (slider.vars.slideshow && slider.vars.pauseInvisible) { methods.pauseInvisible.init(); }
+        if (slider.vars.slideshow && slider.vars.pauseInvisible) { methods.pauseInvisible(); }
 
         // SLIDSESHOW
         if (slider.vars.slideshow) {
@@ -145,7 +134,7 @@
           }
           // initialize animation
           //If we're visible, or we don't use PageVisibility API
-          if(!slider.vars.pauseInvisible || !methods.pauseInvisible.isHidden()) {
+          if(!slider.vars.pauseInvisible || document.visibilityState === 'visible') {
             (slider.vars.initDelay > 0) ? slider.startTimeout = setTimeout(slider.play, slider.vars.initDelay) : slider.play();
           }
         }
@@ -172,7 +161,6 @@
           slider.animatingTo = Math.floor(slider.currentSlide/slider.move);
           slider.currentItem = slider.currentSlide;
           slider.slides.removeClass(namespace + "active-slide").eq(slider.currentItem).addClass(namespace + "active-slide");
-          if(!msGesture){
               slider.slides.on(eventType, function(e){
                 e.preventDefault();
                 var $slide = $(this),
@@ -192,29 +180,6 @@
                   slider.flexAnimate(target, slider.vars.pauseOnAction, false, true, true);
                 }
               });
-          }else{
-              el._slider = slider;
-              slider.slides.each(function (){
-                  var that = this;
-                  that._gesture = new MSGesture();
-                  that._gesture.target = that;
-                  that.addEventListener("MSPointerDown", function (e){
-                      e.preventDefault();
-                      if(e.currentTarget._gesture) {
-                        e.currentTarget._gesture.addPointer(e.pointerId);
-                      }
-                  }, false);
-                  that.addEventListener("MSGestureTap", function (e){
-                      e.preventDefault();
-                      var $slide = $(this),
-                          target = $slide.index();
-                      if (!$(slider.vars.asNavFor).data('flexslider').animating && !$slide.hasClass('active')) {
-                          slider.direction = (slider.currentItem < target) ? "next" : "prev";
-                          slider.flexAnimate(target, slider.vars.pauseOnAction, false, true, true);
-                      }
-                  });
-              });
-          }
         }
       },
       controlNav: {
@@ -449,11 +414,10 @@
           localY = 0,
           accDx = 0;
 
-        if(!msGesture){
             onTouchStart = function(e) {
               if (slider.animating) {
                 e.preventDefault();
-              } else if ( ( window.navigator.msPointerEnabled ) || e.touches.length === 1 ) {
+              } else if ( e.touches.length === 1 ) {
                 slider.pause();
                 // CAROUSEL:
                 cwidth = (vertical) ? slider.h : slider. w;
@@ -520,92 +484,6 @@
             };
 
             el.addEventListener('touchstart', onTouchStart, false);
-        }else{
-            el.style.msTouchAction = "none";
-            el._gesture = new MSGesture();
-            el._gesture.target = el;
-            el.addEventListener("MSPointerDown", onMSPointerDown, false);
-            el._slider = slider;
-            el.addEventListener("MSGestureChange", onMSGestureChange, false);
-            el.addEventListener("MSGestureEnd", onMSGestureEnd, false);
-
-            function onMSPointerDown(e){
-                e.stopPropagation();
-                if (slider.animating) {
-                    e.preventDefault();
-                }else{
-                    slider.pause();
-                    el._gesture.addPointer(e.pointerId);
-                    accDx = 0;
-                    cwidth = (vertical) ? slider.h : slider. w;
-                    startT = Number(new Date());
-                    // CAROUSEL:
-
-                    offset = (carousel && reverse && slider.animatingTo === slider.last) ? 0 :
-                        (carousel && reverse) ? slider.limit - (((slider.itemW + slider.vars.itemMargin) * slider.move) * slider.animatingTo) :
-                            (carousel && slider.currentSlide === slider.last) ? slider.limit :
-                                (carousel) ? ((slider.itemW + slider.vars.itemMargin) * slider.move) * slider.currentSlide :
-                                    (reverse) ? (slider.last - slider.currentSlide + slider.cloneOffset) * cwidth : (slider.currentSlide + slider.cloneOffset) * cwidth;
-                }
-            }
-
-            function onMSGestureChange(e) {
-                e.stopPropagation();
-                var slider = e.target._slider;
-                if(!slider){
-                    return;
-                }
-                var transX = -e.translationX,
-                    transY = -e.translationY;
-
-                //Accumulate translations.
-                accDx = accDx + ((vertical) ? transY : transX);
-                dx = (slider.vars.rtl?-1:1)*accDx;
-                scrolling = (vertical) ? (Math.abs(accDx) < Math.abs(-transX)) : (Math.abs(accDx) < Math.abs(-transY));
-
-                if(e.detail === e.MSGESTURE_FLAG_INERTIA){
-                    setImmediate(function (){
-                        el._gesture.stop();
-                    });
-
-                    return;
-                }
-
-                if (!scrolling || Number(new Date()) - startT > 500) {
-                    e.preventDefault();
-                    if (!fade && slider.transitions) {
-                        if (!slider.vars.animationLoop) {
-                            dx = accDx / ((slider.currentSlide === 0 && accDx < 0 || slider.currentSlide === slider.last && accDx > 0) ? (Math.abs(accDx) / cwidth + 2) : 1);
-                        }
-                        slider.setProps(offset + dx, "setTouch");
-                    }
-                }
-            }
-
-            function onMSGestureEnd(e) {
-                e.stopPropagation();
-                var slider = e.target._slider;
-                if(!slider){
-                    return;
-                }
-                if (slider.animatingTo === slider.currentSlide && !scrolling && !(dx === null)) {
-                    var updateDx = (reverse) ? -dx : dx,
-                        target = (updateDx > 0) ? slider.getTarget('next') : slider.getTarget('prev');
-
-                    if (slider.canAdvance(target) && (Number(new Date()) - startT < 550 && Math.abs(updateDx) > 50 || Math.abs(updateDx) > cwidth/2)) {
-                        slider.flexAnimate(target, slider.vars.pauseOnAction);
-                    } else {
-                        if (!fade) { slider.flexAnimate(slider.currentSlide, slider.vars.pauseOnAction, true); }
-                    }
-                }
-
-                startX = null;
-                startY = null;
-                dx = null;
-                offset = null;
-                accDx = 0;
-            }
-        }
       },
       resize: function() {
         if (!slider.animating && slider.is(':visible')) {
@@ -654,14 +532,9 @@
         });
         return $clone;
       },
-      pauseInvisible: {
-        visProp: null,
-        init: function() {
-          var visProp = methods.pauseInvisible.getHiddenProp();
-          if (visProp) {
-            var evtname = visProp.replace(/[H|h]idden/,'') + 'visibilitychange';
-            document.addEventListener(evtname, function() {
-              if (methods.pauseInvisible.isHidden()) {
+      pauseInvisible: function() {
+            document.addEventListener('visibilitychange', function() {
+              if (document.visibilityState === 'hidden') {
                 if(slider.startTimeout) {
                   clearTimeout(slider.startTimeout); //If clock is ticking, stop timer and prevent from starting while invisible
                 } else {
@@ -680,30 +553,6 @@
                 }
               }
             });
-          }
-        },
-        isHidden: function() {
-          var prop = methods.pauseInvisible.getHiddenProp();
-          if (!prop) {
-            return false;
-          }
-          return document[prop];
-        },
-        getHiddenProp: function() {
-          var prefixes = ['webkit','moz','ms','o'];
-          // if 'hidden' is natively supported just return it
-          if ('hidden' in document) {
-            return 'hidden';
-          }
-          // otherwise loop over all the known prefixes until we find one
-          for ( var i = 0; i < prefixes.length; i++ ) {
-              if ((prefixes[i] + 'Hidden') in document) {
-                return prefixes[i] + 'Hidden';
-              }
-          }
-          // otherwise it's not supported
-          return null;
-        }
       },
       setToClearWatchedEvent: function() {
         clearTimeout(watchedEventClearTimer);
@@ -798,8 +647,8 @@
             }
 
             // Unbind previous transitionEnd events and re-bind new transitionEnd event
-            slider.container.off("webkitTransitionEnd transitionend");
-            slider.container.on("webkitTransitionEnd transitionend", function() {
+            slider.container.off("transitionend");
+            slider.container.on("transitionend", function() {
               clearTimeout(slider.ensureAnimationEnd);
               slider.wrapup(dimension);
             });
@@ -921,7 +770,6 @@
       if (slider.transitions) {
         target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + (parseInt(target)+'px') + ",0,0)";
         dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
-        slider.container.css("-" + slider.pfx + "-transition-duration", dur);
          slider.container.css("transition-duration", dur);
       }
 
@@ -1000,7 +848,7 @@
               slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).eq(slider.currentSlide).css({"zIndex": 2}).animate({"opacity": 1},slider.vars.animationSpeed,slider.vars.easing);
             }
           } else {
-            slider.slides.css({ "opacity": 0, "display": "block", "webkitTransition": "opacity " + slider.vars.animationSpeed / 1000 + "s ease", "zIndex": 1 }).eq(slider.currentSlide).css({ "opacity": 1, "zIndex": 2});
+            slider.slides.css({ "opacity": 0, "display": "block", "transition": "opacity " + slider.vars.animationSpeed / 1000 + "s ease", "zIndex": 1 }).eq(slider.currentSlide).css({ "opacity": 1, "zIndex": 2});
           }
         }
         // SMOOTH HEIGHT:

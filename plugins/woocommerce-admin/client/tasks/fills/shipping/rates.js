@@ -10,11 +10,7 @@ import { Flag, Form, TextControlWithAffixes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Icon, globe } from '@wordpress/icons';
 import classnames from 'classnames';
-
-/**
- * Internal dependencies
- */
-import { CurrencyContext } from '../../../lib/currency-context';
+import { CurrencyContext } from '@woocommerce/currency';
 
 const ShippingRateIcon = ( { zone } ) => (
 	<div className="woocommerce-shipping-rate__icon">

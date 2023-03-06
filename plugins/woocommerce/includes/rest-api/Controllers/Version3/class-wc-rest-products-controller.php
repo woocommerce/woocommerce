@@ -8,6 +8,8 @@
  * @since   2.6.0
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -804,9 +806,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$weight_unit    = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
-		$schema         = array(
+		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
+		$schema               = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => $this->post_type,
 			'type'       => 'object',
@@ -867,7 +869,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'description' => __( 'Product status (post status).', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'publish',
-					'enum'        => array_merge( array_keys( get_post_statuses() ), array( 'future' ) ),
+					'enum'        => array_merge( array_keys( get_post_statuses() ), array( 'future', 'auto-draft', 'trash' ) ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'featured'              => array(
@@ -1080,7 +1082,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 				'weight'                => array(
 					/* translators: %s: weight unit */
-					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), $weight_unit ),
+					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), $weight_unit_label ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1091,19 +1093,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'properties'  => array(
 						'length' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'width'  => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'height' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
@@ -1421,6 +1423,24 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 			),
 		);
+
+		$post_type_obj = get_post_type_object( $this->post_type );
+		if ( is_post_type_viewable( $post_type_obj ) && $post_type_obj->public ) {
+			$schema['properties']['permalink_template'] = array(
+				'description' => __( 'Permalink template for the product.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'edit' ),
+				'readonly'    => true,
+			);
+
+			$schema['properties']['generated_slug'] = array(
+				'description' => __( 'Slug automatically generated from the product name.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'edit' ),
+				'readonly'    => true,
+			);
+		}
+
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -1462,16 +1482,45 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 */
 	protected function get_product_data( $product, $context = 'view' ) {
 		$data = parent::get_product_data( ...func_get_args() );
-		// Add stock_status if needed.
+
 		if ( isset( $this->request ) ) {
 			$fields = $this->get_fields_for_response( $this->request );
-			if ( in_array( 'stock_status', $fields ) ) {
+
+			// Add stock_status if needed.
+			if ( in_array( 'stock_status', $fields, true ) ) {
 				$data['stock_status'] = $product->get_stock_status( $context );
 			}
-			if ( in_array( 'has_options', $fields ) ) {
+
+			// Add has_options if needed.
+			if ( in_array( 'has_options', $fields, true ) ) {
 				$data['has_options'] = $product->has_options( $context );
 			}
+
+			$post_type_obj = get_post_type_object( $this->post_type );
+			if ( is_post_type_viewable( $post_type_obj ) && $post_type_obj->public ) {
+				$permalink_template_requested = in_array( 'permalink_template', $fields, true );
+				$generated_slug_requested     = in_array( 'generated_slug', $fields, true );
+
+				if ( $permalink_template_requested || $generated_slug_requested ) {
+					if ( ! function_exists( 'get_sample_permalink' ) ) {
+						require_once ABSPATH . 'wp-admin/includes/post.php';
+					}
+
+					$sample_permalink = get_sample_permalink( $product->get_id(), $product->get_name(), '' );
+
+					// Add permalink_template if needed.
+					if ( $permalink_template_requested ) {
+						$data['permalink_template'] = $sample_permalink[0];
+					}
+
+					// Add generated_slug if needed.
+					if ( $generated_slug_requested ) {
+						$data['generated_slug'] = $sample_permalink[1];
+					}
+				}
+			}
 		}
+
 		return $data;
 	}
 }

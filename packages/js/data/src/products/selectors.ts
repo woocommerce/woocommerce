@@ -2,7 +2,6 @@
  * External dependencies
  */
 import createSelector from 'rememo';
-import { createRegistrySelector } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -122,22 +121,10 @@ export const isPending = (
 	return false;
 };
 
-export const getPermalinkParts = createRegistrySelector(
-	( select ) => ( state: ProductState, productId: number ) => {
-		const product = select( 'core' ).getEntityRecord(
-			'postType',
-			'product',
-			productId,
-			// @ts-expect-error query object is not part of the @wordpress/core-data types yet.
-			{
-				_fields: [
-					'id',
-					'permalink_template',
-					'slug',
-					'generated_slug',
-				],
-			}
-		);
+export const getPermalinkParts = createSelector(
+	( state: ProductState, productId: number ) => {
+		const product = state.data[ productId ];
+
 		if ( product && product.permalink_template ) {
 			const postName = product.slug || product.generated_slug;
 
@@ -152,6 +139,9 @@ export const getPermalinkParts = createRegistrySelector(
 			};
 		}
 		return null;
+	},
+	( state, productId ) => {
+		return [ state.data[ productId ] ];
 	}
 );
 
@@ -162,7 +152,5 @@ export type ProductsSelectors = {
 	getProductsTotalCount: WPDataSelector< typeof getProductsTotalCount >;
 	getProductsError: WPDataSelector< typeof getProductsError >;
 	isPending: WPDataSelector< typeof isPending >;
-	getPermalinkParts: (
-		productId: number
-	) => { prefix: string; postName: string; suffix: string } | null;
+	getPermalinkParts: WPDataSelector< typeof getPermalinkParts >;
 } & WPDataSelectors;

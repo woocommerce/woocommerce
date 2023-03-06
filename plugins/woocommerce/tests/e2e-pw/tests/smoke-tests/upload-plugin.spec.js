@@ -14,15 +14,22 @@ const {
 	installPluginThruWpCli,
 } = require( '../../utils/plugin-utils' );
 
+const skipMessage = 'Skipping this test because PLUGIN_REPOSITORY is undefined';
+
 let pluginPath;
 let pluginSlug;
 
-test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
-	test.skip(
-		! PLUGIN_REPOSITORY,
-		`SKIPPED: PLUGIN_REPOSITORY is falsy: ${ PLUGIN_REPOSITORY }`
-	);
+test.skip( () => {
+	const shouldSkip = ! PLUGIN_REPOSITORY;
 
+	if ( shouldSkip ) {
+		console.log( skipMessage );
+	}
+
+	return shouldSkip;
+}, skipMessage );
+
+test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 	test.use( { storageState: ADMINSTATE } );
 
 	test.beforeAll( async ( { playwright, baseURL } ) => {

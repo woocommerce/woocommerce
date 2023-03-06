@@ -27,6 +27,56 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			storeDetails.us.expectedIndustries
 		);
 		await page.click( 'button >> text=Continue' );
+		await expect( page ).toHaveURL( /.*step=product-types/ );
+		await expect(
+			page.locator( '.product-types button >> text=Continue' )
+		).toBeVisible();
+	} );
+
+	// eslint-disable-next-line jest/expect-expect
+	test( 'can save industry changes when navigating back to "Store Details"', async ( {
+		page,
+	} ) => {
+		await onboarding.completeIndustrySection(
+			page,
+			storeDetails.us.industries2,
+			storeDetails.us.expectedIndustries
+		);
+
+		// Navigate back to "Store Details" section
+		await page.click( 'button >> text=Store Details' );
+		await onboarding.handleSaveChangesModal( page, { saveChanges: true } );
+		await page.locator( 'text="Welcome to WooCommerce"' ).waitFor();
+
+		// Navigate back to "Industry" section
+		await page.click( 'button >> text=Industry' );
+		await page.textContent( '.components-checkbox-control__input' );
+		for ( let industry of Object.values( storeDetails.us.industries2 ) ) {
+			await expect( page.getByLabel( industry ) ).toBeChecked();
+		}
+	} );
+
+	// eslint-disable-next-line jest/expect-expect
+	test( 'can discard industry changes when navigating back to "Store Details"', async ( {
+		page,
+	} ) => {
+		await onboarding.completeIndustrySection(
+			page,
+			storeDetails.us.industries,
+			storeDetails.us.expectedIndustries
+		);
+
+		// Navigate back to "Store Details" section
+		await page.click( 'button >> text=Store Details' );
+
+		await onboarding.handleSaveChangesModal( page, { saveChanges: false } );
+
+		// Navigate back to "Industry" section
+		await page.click( 'button >> text=Industry' );
+		await page.textContent( '.components-checkbox-control__input' );
+		for ( let industry of Object.values( storeDetails.us.industries2 ) ) {
+			await expect( page.getByLabel( industry ) ).toBeChecked();
+		}
 	} );
 
 	// eslint-disable-next-line jest/expect-expect

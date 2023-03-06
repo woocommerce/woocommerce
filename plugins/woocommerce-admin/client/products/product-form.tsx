@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { Form, FormRef } from '@woocommerce/components';
+import { Form, FormRef, SlotContextProvider } from '@woocommerce/components';
 import { PartialProduct, Product } from '@woocommerce/data';
+import { PluginArea } from '@wordpress/plugins';
 import { Ref } from 'react';
 
 /**
@@ -10,14 +11,7 @@ import { Ref } from 'react';
  */
 import { ProductFormHeader } from './layout/product-form-header';
 import { ProductFormLayout } from './layout/product-form-layout';
-import { ProductDetailsSection } from './sections/product-details-section';
-import { ProductInventorySection } from './sections/product-inventory-section';
-import { PricingSection } from './sections/pricing-section';
-import { ProductShippingSection } from './sections/product-shipping-section';
-import { ImagesSection } from './sections/images-section';
-import './product-page.scss';
 import { validate } from './product-validation';
-import { AttributesSection } from './sections/attributes-section';
 import { ProductFormFooter } from './layout/product-form-footer';
 
 export const ProductForm: React.FC< {
@@ -25,30 +19,28 @@ export const ProductForm: React.FC< {
 	formRef?: Ref< FormRef< Partial< Product > > >;
 } > = ( { product, formRef } ) => {
 	return (
-		<Form< Partial< Product > >
-			initialValues={
-				product || {
-					reviews_allowed: true,
-					name: '',
-					sku: '',
-					stock_quantity: 0,
-					stock_status: 'instock',
+		<SlotContextProvider>
+			<Form< Partial< Product > >
+				initialValues={
+					product || {
+						backorders: 'no',
+						name: '',
+						reviews_allowed: true,
+						sku: '',
+						stock_quantity: 0,
+						stock_status: 'instock',
+					}
 				}
-			}
-			ref={ formRef }
-			errors={ {} }
-			validate={ validate }
-		>
-			<ProductFormHeader />
-			<ProductFormLayout>
-				<ProductDetailsSection />
-				<PricingSection />
-				<ImagesSection />
-				<ProductInventorySection />
-				<ProductShippingSection product={ product } />
-				<AttributesSection />
-			</ProductFormLayout>
-			<ProductFormFooter />
-		</Form>
+				ref={ formRef }
+				errors={ {} }
+				validate={ validate }
+			>
+				<ProductFormHeader />
+				<ProductFormLayout id="general" product={ product } />
+				<ProductFormFooter />
+				{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+				<PluginArea scope="woocommerce-product-editor" />
+			</Form>
+		</SlotContextProvider>
 	);
 };

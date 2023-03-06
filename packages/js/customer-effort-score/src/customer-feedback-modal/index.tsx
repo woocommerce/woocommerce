@@ -26,32 +26,44 @@ import { __ } from '@wordpress/i18n';
  * @param {Object}   props                     Component props.
  * @param {Function} props.recordScoreCallback Function to call when the results are sent.
  * @param {string}   props.title               Title displayed in the modal.
+ * @param {string}   props.description         Description displayed in the modal.
  * @param {string}   props.firstQuestion       The first survey question.
- * @param {string}   props.secondQuestion      The second survey question.
+ * @param {string}   [props.secondQuestion]    An optional second survey question.
  * @param {string}   props.defaultScore        Default score.
  * @param {Function} props.onCloseModal        Callback for when user closes modal by clicking cancel.
  * @param {Function} props.customOptions       List of custom score options, contains label and value.
+ * @param {Function} props.shouldShowComments  A function to determine whether or not the comments field shown be shown.
  */
 function CustomerFeedbackModal( {
 	recordScoreCallback,
-	title,
+	title = __( 'Please share your feedback', 'woocommerce' ),
+	description,
 	firstQuestion,
 	secondQuestion,
 	defaultScore = NaN,
 	onCloseModal,
 	customOptions,
+	shouldShowComments = ( firstQuestionScore, secondQuestionScore ) =>
+		[ firstQuestionScore, secondQuestionScore ].some(
+			( score ) => score === 1 || score === 2
+		),
 }: {
 	recordScoreCallback: (
 		score: number,
 		secondScore: number,
 		comments: string
 	) => void;
-	title: string;
+	title?: string;
+	description?: string;
 	firstQuestion: string;
-	secondQuestion: string;
+	secondQuestion?: string;
 	defaultScore?: number;
 	onCloseModal?: () => void;
 	customOptions?: { label: string; value: string }[];
+	shouldShowComments?: (
+		firstQuestionScore: number,
+		secondQuestionScore: number
+	) => boolean;
 } ): JSX.Element | null {
 	const options =
 		customOptions && customOptions.length > 0
@@ -107,10 +119,8 @@ function CustomerFeedbackModal( {
 
 	const sendScore = () => {
 		if (
-			! (
-				Number.isInteger( firstQuestionScore ) &&
-				Number.isInteger( secondQuestionScore )
-			)
+			! Number.isInteger( firstQuestionScore ) ||
+			( secondQuestion && ! Number.isInteger( secondQuestionScore ) )
 		) {
 			setShowNoScoreMessage( true );
 			return;
@@ -142,10 +152,11 @@ function CustomerFeedbackModal( {
 				lineHeight="20px"
 				marginBottom="1.5em"
 			>
-				{ __(
-					'Your feedback will help create a better experience for thousands of merchants like you. Please tell us to what extent you agree or disagree with the statements below.',
-					'woocommerce'
-				) }
+				{ description ||
+					__(
+						'Your feedback will help create a better experience for thousands of merchants like you. Please tell us to what extent you agree or disagree with the statements below.',
+						'woocommerce'
+					) }
 			</Text>
 
 			<Text
@@ -171,52 +182,60 @@ function CustomerFeedbackModal( {
 				/>
 			</div>
 
-			<Text
-				variant="subtitle.small"
-				as="p"
-				weight="600"
-				size="14"
-				lineHeight="20px"
-			>
-				{ secondQuestion }
-			</Text>
+			{ secondQuestion && (
+				<Text
+					variant="subtitle.small"
+					as="p"
+					weight="600"
+					size="14"
+					lineHeight="20px"
+				>
+					{ secondQuestion }
+				</Text>
+			) }
 
-			<div className="woocommerce-customer-effort-score__selection">
-				<RadioControl
-					selected={ secondQuestionScore.toString( 10 ) }
-					options={ options }
-					onChange={ ( value ) =>
-						onRadioControlChange(
-							value as string,
-							setSecondQuestionScore
-						)
-					}
-				/>
-			</div>
-
-			{ [ firstQuestionScore, secondQuestionScore ].some(
-				( score ) => score === 1 || score === 2
-			) && (
-				<div className="woocommerce-customer-effort-score__comments">
-					<TextareaControl
-						label={ __(
-							'How is that screen useful to you? What features would you add or change?',
-							'woocommerce'
-						) }
-						help={ __(
-							'Your feedback will go to the WooCommerce development team',
-							'woocommerce'
-						) }
-						value={ comments }
-						placeholder={ __(
-							'Optional, but much apprecated. We love reading your feedback!',
-							'woocommerce'
-						) }
-						onChange={ ( value: string ) => setComments( value ) }
-						rows={ 5 }
+			{ secondQuestion && (
+				<div className="woocommerce-customer-effort-score__selection">
+					<RadioControl
+						selected={ secondQuestionScore.toString( 10 ) }
+						options={ options }
+						onChange={ ( value ) =>
+							onRadioControlChange(
+								value as string,
+								setSecondQuestionScore
+							)
+						}
 					/>
 				</div>
 			) }
+
+			{ typeof shouldShowComments === 'function' &&
+				shouldShowComments(
+					firstQuestionScore,
+					secondQuestionScore
+				) && (
+					<div className="woocommerce-customer-effort-score__comments">
+						<TextareaControl
+							label={ __(
+								'How is that screen useful to you? What features would you add or change?',
+								'woocommerce'
+							) }
+							help={ __(
+								'Your feedback will go to the WooCommerce development team',
+								'woocommerce'
+							) }
+							value={ comments }
+							placeholder={ __(
+								'Optional, but much apprecated. We love reading your feedback!',
+								'woocommerce'
+							) }
+							onChange={ ( value: string ) =>
+								setComments( value )
+							}
+							rows={ 5 }
+						/>
+					</div>
+				) }
 
 			{ showNoScoreMessage && (
 				<div
@@ -246,9 +265,9 @@ function CustomerFeedbackModal( {
 
 CustomerFeedbackModal.propTypes = {
 	recordScoreCallback: PropTypes.func.isRequired,
-	title: PropTypes.string.isRequired,
+	title: PropTypes.string,
 	firstQuestion: PropTypes.string.isRequired,
-	secondQuestion: PropTypes.string.isRequired,
+	secondQuestion: PropTypes.string,
 	defaultScore: PropTypes.number,
 	onCloseModal: PropTypes.func,
 };

@@ -38,7 +38,7 @@ const program = new Command()
 	)
 	.option(
 		'-o, --outputStyle <outputStyle>',
-		'Output style for the results. Options: github, cli. Github output will use ::set-output to set the results as an output variable.',
+		'Output style for the results. Options: github, cli. Github output will set the results as an output variable for Github actions.',
 		'cli'
 	)
 	.option(
@@ -64,6 +64,15 @@ const program = new Command()
 				'TEMPLATES',
 				Logger.notice
 			);
+		} else {
+			Logger.notice( '\n\n## TEMPLATE CHANGES' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
+			Logger.notice( 'No template changes found.' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
 		}
 
 		if ( changes.hooks.size ) {
@@ -72,6 +81,15 @@ const program = new Command()
 				outputStyle,
 				'HOOKS',
 				Logger.notice
+			);
+		} else {
+			Logger.notice( '\n\n## HOOK CHANGES' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
+			Logger.notice( 'No hook changes found.' );
+			Logger.notice(
+				'---------------------------------------------------'
 			);
 		}
 
@@ -82,10 +100,28 @@ const program = new Command()
 				outputStyle,
 				Logger.notice
 			);
+		} else {
+			Logger.notice( '\n\n## SCHEMA CHANGES' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
+			Logger.notice( 'No schema changes found.' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
 		}
 
 		if ( changes.db ) {
 			printDatabaseUpdates( changes.db, outputStyle, Logger.notice );
+		} else {
+			Logger.notice( '\n\n## DB CHANGES' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
+			Logger.notice( 'No db changes found.' );
+			Logger.notice(
+				'---------------------------------------------------'
+			);
 		}
 	} );
 
