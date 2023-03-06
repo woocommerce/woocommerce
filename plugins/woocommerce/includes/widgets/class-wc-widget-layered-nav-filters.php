@@ -59,6 +59,8 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 			/**
 			 * Allow 3rd party developers to add their own filters to start the Layered Navigation Filters Widget.
 			 *
+			 * @since 7.6.0
+			 *
 			 * @param array $args     Arguments.
 			 * @param array $instance Widget instance.
 			 */
@@ -115,6 +117,8 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 
 			/**
 			 * Allow 3rd party developers to add their own filters to end the Layered Navigation Filters Widget.
+			 *
+			 * @since 7.6.0
 			 *
 			 * @param array $args     Arguments.
 			 * @param array $instance Widget instance.
