@@ -114,6 +114,22 @@ class ProductQuery extends AbstractBlock {
 	}
 
 	/**
+	 * Merge tax_queries from various queries.
+	 *
+	 * @param array ...$queries Query arrays to be merged.
+	 * @return array
+	 */
+	private function merge_tax_queries( ...$queries ) {
+		$tax_query = [];
+		foreach ( $queries as $query ) {
+			if ( ! empty( $query['tax_query'] ) ) {
+				$tax_query = array_merge( $tax_query, $query['tax_query'] );
+			}
+		}
+		return [ 'tax_query' => $tax_query ];
+	}
+
+	/**
 	 * Update the query for the product query block in Editor.
 	 *
 	 * @param array           $args    Query args.
@@ -128,8 +144,9 @@ class ProductQuery extends AbstractBlock {
 		$attributes_query = is_array( $woo_attributes ) ? $this->get_product_attributes_query( $woo_attributes ) : array();
 		$stock_query      = is_array( $woo_stock_status ) ? $this->get_stock_status_query( $woo_stock_status ) : array();
 		$visibility_query = $this->get_product_visibility_query( $stock_query );
+		$tax_query        = $this->merge_tax_queries( $attributes_query, $visibility_query );
 
-		return array_merge( $args, $on_sale_query, $orderby_query, $attributes_query, $stock_query, $visibility_query );
+		return array_merge( $args, $on_sale_query, $orderby_query, $stock_query, $tax_query );
 	}
 
 	/**
