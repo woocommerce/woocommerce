@@ -18,7 +18,14 @@
 defined( 'ABSPATH' ) || exit;
 
 ?>
-<?php do_action( 'woocommerce_widget_layered_nav_filters_start', $args ); ?>
+<?php
+/**
+ * Hook: woocommerce_widget_layered_nav_filters_start.
+ *
+ * @param array $filters List of all available filters
+ */
+do_action( 'woocommerce_widget_layered_nav_filters_start', $filters );
+?>
 
 <ul>
 	<?php foreach ( $filters as $filter ) : ?>
@@ -28,4 +35,11 @@ defined( 'ABSPATH' ) || exit;
 	<?php endforeach; ?>
 </ul>
 
-<?php do_action( 'woocommerce_widget_layered_nav_filters_end', $args ); ?>
+<?php
+/**
+ * Hook: woocommerce_widget_layered_nav_filters_end.
+ *
+ * @param array $filters List of all available filters
+ */
+do_action( 'woocommerce_widget_layered_nav_filters_end', $filters );
+
