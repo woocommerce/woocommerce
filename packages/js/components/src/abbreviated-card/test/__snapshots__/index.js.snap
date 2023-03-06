@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AbbreviatedCard it renders correctly 1`] = `
+<div>
+  <div
+    class="components-surface components-card woocommerce-abbreviated-card css-nsno0f-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+    data-wp-c16t="true"
+    data-wp-component="Card"
+  >
+    <div
+      class="css-mgwsf4-View-Content em57xhy0"
+    >
+      <div
+        class="components-card__body components-card-body css-1i4jx7i-View-Body-borderRadius em57xhy0"
+        data-wp-c16t="true"
+        data-wp-component="CardBody"
+      >
+        <a
+          data-link-type="wc-admin"
+          href="#"
+        >
+          <div
+            class="woocommerce-abbreviated-card__icon"
+          >
+            <div
+              size="24"
+            >
+              icon
+            </div>
+          </div>
+          <div
+            class="woocommerce-abbreviated-card__content"
+          >
+            <p>
+              Abbreviated card content
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div
+      aria-hidden="true"
+      class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+      data-wp-c16t="true"
+      data-wp-component="Elevation"
+    />
+    <div
+      aria-hidden="true"
+      class="components-elevation css-91yjwm-View-Elevation-sx-Base-elevationClassName em57xhy0"
+      data-wp-c16t="true"
+      data-wp-component="Elevation"
+    />
+  </div>
+</div>
+`;

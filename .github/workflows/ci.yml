@@ -4,28 +4,37 @@ on:
     branches:
       - trunk
       - 'release/**'
+  workflow_dispatch:
+
 defaults:
   run:
     shell: bash
-    working-directory: plugins/woocommerce
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
 jobs:
   test:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
-    timeout-minutes: 15
-    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     continue-on-error: ${{ matrix.wp == 'nightly' }}
     strategy:
       fail-fast: false
       matrix:
-        php: [ '7.0', '7.1', '7.2', '7.3', '7.4', '8.0' ]
+        php: [ '7.4', '8.0' ]
         wp: [ 'latest' ]
         include:
           - wp: nightly
             php: '7.4'
-          - wp: '5.7'
-            php: 7.2
-          - wp: '5.6'
-            php: 7.2
+          - wp: '5.9'
+            php: 7.4
+          - wp: '5.8'
+            php: 7.4
     services:
       database:
         image: mysql:5.6
@@ -35,52 +44,39 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
         with:
-          php-version: ${{ matrix.php }}
-          tools: composer
-          extensions: mysql
-          coverage: none
+          build-filters: woocommerce
 
       - name: Tool versions
         run: |
           php --version
           composer --version
 
-      - name: Get cached composer directories
-        uses: actions/cache@v2
-        with:
-          path: |
-            ./packages
-            ./vendor
-          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
-
-      - name: Install PNPM and install dependencies
-        run: |
-            npm install -g pnpm
-            pnpm install
-
-      - name: Setup and install composer
-        run: pnpm nx composer-install woocommerce
+      - name: Build Admin feature config
+        working-directory: plugins/woocommerce
+        run: pnpm run build:feature-config
 
       - name: Add PHP8 Compatibility.
         run: |
           if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
+             cd plugins/woocommerce
              curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
              unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
              composer bin phpunit config --unset platform
              composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
              composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
              rm -rf ./vendor/phpunit/
-             pnpm nx composer-dump-autoload woocommerce
+             composer dump-autoload
            fi
 
       - name: Init DB and WP
+        working-directory: plugins/woocommerce
         run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
 
       - name: Run tests
-        run: pnpm nx test-unit woocommerce
+        working-directory: plugins/woocommerce
+        run: pnpm run test --color

@@ -1,0 +1,227 @@
+// Rem output with px fallback
+@mixin font-size( $sizeValue: 16, $lineHeight: false ) {
+	font-size: $sizeValue + px;
+	font-size: math.div( $sizeValue, 16 ) + rem;
+	@if ( $lineHeight ) {
+		line-height: $lineHeight;
+	}
+}
+
+@function url-friendly-colour( $color ) {
+	@return '%23' + str-slice( '#{ $color }', 2, -1 );
+}
+
+@mixin hover-state {
+	&:hover,
+	&:active,
+	&:focus {
+		@content;
+	}
+}
+
+// Adds animation to placeholder section
+@mixin placeholder( $lighten-percentage: 30% ) {
+	animation: loading-fade 1.6s ease-in-out infinite;
+	background-color: $gray-100;
+	color: transparent;
+
+	&::after {
+		content: '\00a0';
+	}
+
+	@media screen and ( prefers-reduced-motion: reduce ) {
+		animation: none;
+	}
+}
+
+// Adds animation to transforms
+@mixin animate-transform( $duration: 0.2s ) {
+	transition: transform ease $duration;
+
+	@media screen and ( prefers-reduced-motion: reduce ) {
+		transition: none;
+	}
+}
+
+// Gutenberg mixins. These are temporary until Gutenberg's mixins are exposed.
+/**
+ * Breakpoint mixins
+ */
+
+@mixin break-huge() {
+	@media (min-width: #{ ($break-huge) }) {
+		@content;
+	}
+}
+
+@mixin break-wide() {
+	@media (min-width: #{ ($break-wide) }) {
+		@content;
+	}
+}
+
+@mixin break-xlarge() {
+	@media (min-width: #{ ($break-xlarge) }) {
+		@content;
+	}
+}
+
+@mixin break-large() {
+	@media (min-width: #{ ($break-large) }) {
+		@content;
+	}
+}
+
+@mixin break-medium() {
+	@media (min-width: #{ ($break-medium) }) {
+		@content;
+	}
+}
+
+@mixin break-small() {
+	@media (min-width: #{ ($break-small) }) {
+		@content;
+	}
+}
+
+@mixin break-mobile() {
+	@media (min-width: #{ ($break-mobile) }) {
+		@content;
+	}
+}
+
+@mixin break-zoomed-in() {
+	@media (min-width: #{ ($break-zoomed-in) }) {
+		@content;
+	}
+}
+
+// Buttons with rounded corners.
+@mixin button-style__disabled {
+	opacity: 0.6;
+	cursor: default;
+}
+
+@mixin button-style__hover {
+	background-color: $studio-white;
+	color: $gray-900;
+	box-shadow: inset 0 0 0 1px $gray-400, inset 0 0 0 2px $studio-white,
+		0 1px 1px rgba( $gray-900, 0.2 );
+}
+
+@mixin button-style__active() {
+	outline: none;
+	background-color: $studio-white;
+	color: $gray-900;
+	box-shadow: inset 0 0 0 1px $gray-400, inset 0 0 0 2px $studio-white;
+}
+
+@mixin button-style__focus-active() {
+	background-color: $studio-white;
+	color: $gray-900;
+	box-shadow: inset 0 0 0 1px $gray-700, inset 0 0 0 2px $studio-white;
+
+	// Windows High Contrast mode will show this outline, but not the box-shadow.
+	outline: 2px solid transparent;
+	outline-offset: -2px;
+}
+
+/* stylelint-disable block-closing-brace-newline-after */
+@mixin reduce-motion( $property: '' ) {
+	@if $property == 'transition' {
+		@media ( prefers-reduced-motion: reduce ) {
+			transition-duration: 0s;
+		}
+	} @else if $property == 'animation' {
+		@media ( prefers-reduced-motion: reduce ) {
+			animation-duration: 1ms;
+		}
+	} @else {
+		@media ( prefers-reduced-motion: reduce ) {
+			transition-duration: 0s;
+			animation-duration: 1ms;
+		}
+	}
+}
+/* stylelint-enable */
+
+// Gutenberg Switch.
+@mixin switch-style__focus-active() {
+	box-shadow: 0 0 0 2px $studio-white, 0 0 0 3px $gray-700;
+
+	// Windows High Contrast mode will show this outline, but not the box-shadow.
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+}
+
+// Sets positions for children of grid elements
+@mixin set-grid-item-position( $wrap-after, $number-of-items ) {
+	@for $i from 1 through $number-of-items {
+		&:nth-child( #{$i} ) {
+			grid-column-start: #{( $i - 1 ) % $wrap-after + 1};
+			grid-column-end: #{( $i - 1 ) % $wrap-after + 2};
+			grid-row-start: #{floor( math.div( $i - 1, $wrap-after ) ) + 1};
+			grid-row-end: #{floor( math.div( $i - 1, $wrap-after ) ) + 2};
+		}
+	}
+}
+
+// Hide an element from sighted users, but availble to screen reader users.
+// @deprecated in favor of screen-reader-only
+@mixin visually-hidden() {
+	clip: rect( 1px, 1px, 1px, 1px );
+	clip-path: inset( 50% );
+	height: 1px;
+	width: 1px;
+	margin: -1px;
+	overflow: hidden;
+	/* Many screen reader and browser combinations announce broken words as they would appear visually. */
+	overflow-wrap: normal !important;
+	word-wrap: normal !important;
+}
+
+@mixin screen-reader-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect( 0, 0, 0, 0 );
+	white-space: nowrap;
+	border-width: 0;
+}
+
+// Unhide a visually hidden element
+// @deprecated in favor of not-screen-reader-only
+@mixin visually-shown() {
+	clip: auto;
+	clip-path: none;
+	height: auto;
+	width: auto;
+	margin: unset;
+	overflow: hidden;
+}
+
+@mixin not-screen-reader-only {
+	position: static;
+	width: auto;
+	height: auto;
+	padding: 0;
+	margin: 0;
+	overflow: visible;
+	clip: auto;
+	white-space: normal;
+}
+
+// Create a string-repeat function
+@function str-repeat( $character, $n ) {
+	@if $n == 0 {
+		@return '';
+	}
+	$c: '';
+	@for $i from 1 through $n {
+		$c: $c + $character;
+	}
+	@return $c;
+}

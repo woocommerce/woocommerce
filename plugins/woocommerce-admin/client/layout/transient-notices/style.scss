@@ -1,0 +1,51 @@
+@import '../../navigation/stylesheets/variables.scss';
+
+.woocommerce-transient-notices {
+	position: fixed;
+	bottom: $gap-small;
+	left: $admin-menu-width + $gap;
+	z-index: calc(z-index('.components-snackbar-list') + 1);
+	width: auto;
+
+	@media ( max-width: 960px ) {
+		left: 50px;
+	}
+
+	@media ( max-width: 782px ) {
+		left: $gap;
+	}
+
+	.woocommerce-profile-wizard__body & {
+		left: unset;
+
+		.components-snackbar {
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+
+	.has-woocommerce-navigation & {
+		left: $navigation-width + $gap;
+	}
+}
+
+.components-snackbar {
+	&.components-snackbar-explicit-dismiss {
+		cursor: default;
+	}
+
+	.components-snackbar__content-with-icon {
+		margin-left: 32px;
+	}
+
+	.components-snackbar__icon {
+		position: absolute;
+		top: 24px;
+		left: 26px;
+	}
+
+	.components-snackbar__dismiss-button {
+		margin-left: 32px;
+		cursor: pointer;
+	}
+}

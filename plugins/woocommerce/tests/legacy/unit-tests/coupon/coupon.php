@@ -15,7 +15,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	/**
 	 * Sets up the test class.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Set a valid address for the customer so shipping rates will calculate.
@@ -27,7 +27,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	/**
 	 * Cleans up after the test class.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		WC()->cart->empty_cart();
 		WC()->cart->remove_coupons();
 

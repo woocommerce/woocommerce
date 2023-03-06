@@ -157,7 +157,7 @@ class WC_REST_Data_Countries_Controller extends WC_REST_Data_Controller {
 		/**
 		 * Filter the states list for a country returned from the API.
 		 *
-		 * Allows modification of the loction data right before it is returned.
+		 * Allows modification of the location data right before it is returned.
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $data     The original country's states list.

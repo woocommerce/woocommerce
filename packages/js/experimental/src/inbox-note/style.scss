@@ -1,0 +1,228 @@
+.woocommerce-inbox-message {
+	position: relative;
+	color: $gray-text;
+	background: $studio-white;
+	border-radius: 2px;
+	@include font-size( 13 );
+	margin: 0 0;
+	-ms-box-orient: horizontal;
+	&.banner {
+		-webkit-flex-direction: column;
+		flex-direction: column;
+		img {
+			width: 100%;
+		}
+	}
+	&.thumbnail {
+		display: flex;
+		-webkit-flex-direction: row-reverse;
+		flex-direction: row-reverse;
+		img {
+			width: 128px;
+			height: 100%;
+		}
+	}
+	&:hover {
+		background: $gray-100;
+	}
+
+	&:not(.message-is-unread) {
+		.woocommerce-inbox-message__title {
+			font-weight: normal;
+			a {
+				font-weight: normal;
+			}
+		}
+	}
+
+	.woocommerce-homepage-column & {
+		margin: 20px 0;
+	}
+
+	&:not(.is-placeholder) {
+		border: 0;
+		border-bottom: 1px solid $gray-200;
+	}
+
+	.line {
+		width: 100%;
+	}
+
+	.third-line {
+		width: 33%;
+	}
+
+	.fifth-line {
+		width: 20%;
+	}
+
+	.sixth-line {
+		width: 16%;
+	}
+}
+
+.woocommerce-inbox-message__content {
+	.woocommerce-inbox-message__title {
+		color: $gray-900;
+		@include font-size( 16 );
+		font-style: normal;
+		line-height: 1.5;
+		font-weight: bold;
+		margin: $gap-smaller 0;
+
+		.is-placeholder & {
+			& > div {
+				@include placeholder();
+				margin: 5px 0;
+			}
+			margin-bottom: 10px;
+		}
+
+		a {
+			@extend .woocommerce-inbox-message__title;
+			color: $gray-900 !important;
+			text-decoration: none !important;
+		}
+	}
+
+	.woocommerce-inbox-message__date {
+		color: $gray-700;
+		@include font-size( 12 );
+		margin-bottom: $gap;
+		font-style: normal;
+		font-weight: normal;
+		line-height: 16px;
+		.is-placeholder & {
+			& > div {
+				@include placeholder();
+			}
+			margin-bottom: 10px;
+		}
+	}
+}
+
+.woocommerce-inbox-message__wrapper .woocommerce-inbox-message__content {
+	padding-bottom: 0;
+}
+
+.woocommerce-inbox-message__text {
+	color: $gray-700;
+	font-style: normal;
+	font-weight: normal;
+	@include font-size( 14 );
+	line-height: 20px;
+	& > p:first-child {
+		margin-top: 0;
+	}
+
+	& > p:last-child {
+		margin-bottom: 0;
+	}
+
+	.is-placeholder & {
+		& > div {
+			@include placeholder();
+			margin: 5px 0;
+		}
+	}
+}
+
+.woocommerce-inbox-message__actions {
+	// Ensures any immediate child with a sibling has space between the items
+	& > * + * {
+		margin-left: 0.5em;
+	}
+
+	a,
+	button {
+		cursor: pointer;
+		&.is-link {
+			text-decoration: none;
+		}
+	}
+
+	&.has-multiple-actions {
+		button.is-link {
+			padding: 6px 12px;
+			border: 1px solid var(--wp-admin-theme-color);
+			margin-right: 0.5em;
+		}
+		a {
+			margin-right: 0.5em;
+		}
+	}
+
+	border-top: 0;
+
+	button.woocommerce-admin-dismiss-notification {
+		color: $gray-700;
+		&:hover {
+			box-shadow: inset 0 0 0 1px $gray-700;
+		}
+		visibility: visible;
+	}
+
+	.components-dropdown {
+		display: inline;
+
+		.components-popover__content {
+			min-width: 195px;
+			ul {
+				text-align: center;
+			}
+			li {
+				margin: 0;
+				cursor: pointer;
+			}
+		}
+	}
+
+	.is-placeholder & {
+		& > div {
+			@include placeholder();
+			float: left;
+			height: 28px;
+			margin-right: 8px;
+		}
+	}
+}
+.woocommerce-inbox-message__wrapper {
+	padding-top: 0;
+}
+
+.woocommerce-inbox-dismiss-confirmation_modal {
+	text-align: left;
+}
+.woocommerce-inbox-dismiss-confirmation_wrapper {
+	p {
+		font-size: 16px;
+		color: $gray-700;
+	}
+	.woocommerce-inbox-dismiss-confirmation_buttons {
+		text-align: right;
+		button {
+			margin-left: 10px;
+		}
+	}
+}
+
+.woocommerce-inbox-message__wrapper > div {
+	padding: $gap $gap-large;
+	.is-placeholder & {
+		padding: 10px 24px;
+		display: flow-root;
+	}
+}
+
+// Tweak to fix dropdown and placeholder in IE 11
+@media all and ( -ms-high-contrast: none ), ( -ms-high-contrast: active ) {
+	.woocommerce-admin-dismiss-dropdown {
+		margin-top: 0;
+	}
+
+	.woocommerce-inbox-message__wrapper {
+		.is-placeholder & {
+			padding-bottom: 10px;
+		}
+	}
+}

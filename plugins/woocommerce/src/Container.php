@@ -8,11 +8,24 @@ namespace Automattic\WooCommerce;
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\AssignDefaultCategoryServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadUtilServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\COTMigrationServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\DownloadPermissionsAdjusterServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\FeaturesServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\MarketingServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersControllersServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderAdminServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrderMetaBoxServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ObjectCacheServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OrdersDataStoreServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\OptionSanitizerServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductAttributesLookupServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductDownloadsServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProductReviewsServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\ProxiesServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\RestockRefundedItemsAdjusterServiceProvider;
 use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\SettingsImportExportServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\UtilsClassesServiceProvider;
+use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\BatchProcessingServiceProvider;
 
 /**
  * PSR11 compliant dependency injection container for WooCommerce.
@@ -31,7 +44,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders\Settin
  * and those should go in the `src\Internal\DependencyManagement\ServiceProviders` folder unless there's a good reason
  * to put them elsewhere. All the service provider class names must be in the `SERVICE_PROVIDERS` constant.
  */
-final class Container implements \Psr\Container\ContainerInterface {
+final class Container {
 	/**
 	 * The list of service provider classes to register.
 	 *
@@ -41,10 +54,23 @@ final class Container implements \Psr\Container\ContainerInterface {
 		AssignDefaultCategoryServiceProvider::class,
 		DownloadPermissionsAdjusterServiceProvider::class,
 		DownloadUtilServiceProvider::class,
+		OptionSanitizerServiceProvider::class,
+		OrdersDataStoreServiceProvider::class,
 		ProductAttributesLookupServiceProvider::class,
+		ProductDownloadsServiceProvider::class,
+		ProductReviewsServiceProvider::class,
 		ProxiesServiceProvider::class,
 		RestockRefundedItemsAdjusterServiceProvider::class,
 		SettingsImportExportServiceProvider::class,
+		UtilsClassesServiceProvider::class,
+		COTMigrationServiceProvider::class,
+		OrdersControllersServiceProvider::class,
+		ObjectCacheServiceProvider::class,
+		BatchProcessingServiceProvider::class,
+		OrderMetaBoxServiceProvider::class,
+		OrderAdminServiceProvider::class,
+		FeaturesServiceProvider::class,
+		MarketingServiceProvider::class,
 	);
 
 	/**
@@ -63,7 +89,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 		// Add ourselves as the shared instance of ContainerInterface,
 		// register everything else using service providers.
 
-		$this->container->share( \Psr\Container\ContainerInterface::class, $this );
+		$this->container->share( __CLASS__, $this );
 
 		foreach ( $this->service_providers as $service_provider_class ) {
 			$this->container->addServiceProvider( $service_provider_class );
@@ -80,7 +106,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 	 *
 	 * @return mixed Entry.
 	 */
-	public function get( $id ) {
+	public function get( string $id ): object {
 		return $this->container->get( $id );
 	}
 
@@ -95,7 +121,7 @@ final class Container implements \Psr\Container\ContainerInterface {
 	 *
 	 * @return bool
 	 */
-	public function has( $id ) {
+	public function has( string $id ): bool {
 		return $this->container->has( $id );
 	}
 }

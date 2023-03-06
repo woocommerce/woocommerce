@@ -14,7 +14,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Products_Controller();
 		$this->user     = $this->factory->user->create(
@@ -188,13 +188,13 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertContains( 'Testing', $data['description'] );
+		$this->assertStringContainsString( 'Testing', $data['description'] );
 		$this->assertEquals( '8', $data['price'] );
 		$this->assertEquals( '8', $data['sale_price'] );
 		$this->assertEquals( '10', $data['regular_price'] );
 		$this->assertEquals( 'FIXED-SKU', $data['sku'] );
-		$this->assertContains( 'Dr1Bczxq4q', $data['images'][0]['src'] );
-		$this->assertContains( 'test upload image', $data['images'][0]['alt'] );
+		$this->assertStringContainsString( 'Dr1Bczxq4q', $data['images'][0]['src'] );
+		$this->assertStringContainsString( 'test upload image', $data['images'][0]['alt'] );
 		$product->delete( true );
 		wp_delete_attachment( $data['images'][0]['id'], true );
 
@@ -454,7 +454,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertContains( 'Updated description.', $data['update'][0]['description'] );
+		$this->assertStringContainsString( 'Updated description.', $data['update'][0]['description'] );
 		$this->assertEquals( 'DUMMY SKU BATCH TEST 1', $data['create'][0]['sku'] );
 		$this->assertEquals( 'DUMMY SKU BATCH TEST 2', $data['create'][1]['sku'] );
 		$this->assertEquals( 'Test Button', $data['create'][0]['button_text'] );

@@ -2,6 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
+	"version": "7.6.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
@@ -13,21 +14,22 @@
 		}
 	],
 	"require": {
-		"php": ">=7.0",
+		"php": ">=7.2",
 		"automattic/jetpack-autoloader": "2.10.1",
 		"automattic/jetpack-constants": "1.5.1",
-		"composer/installers": "~1.7",
-		"maxmind-db/reader": "1.6.0",
-		"pelago/emogrifier": "3.1.0",
-		"psr/container": "1.0.0",
-		"woocommerce/action-scheduler": "3.4.0",
-		"woocommerce/woocommerce-admin": "2.9.1",
-		"woocommerce/woocommerce-blocks": "6.3.3"
+		"composer/installers": "^1.9",
+		"maxmind-db/reader": "^1.11",
+		"pelago/emogrifier": "^6.0",
+		"woocommerce/action-scheduler": "3.5.4",
+		"woocommerce/woocommerce-blocks": "9.6.3"
 	},
 	"require-dev": {
+		"automattic/jetpack-changelogger": "^3.3.0",
 		"bamarni/composer-bin-plugin": "^1.4",
-		"yoast/phpunit-polyfills": "^1.0",
-		"automattic/jetpack-changelogger": "3.0.2"
+		"dms/phpunit-arraysubset-asserts": "^0.4.0",
+		"phpunit/phpunit": "^8.0",
+		"sebastian/comparator": "3.0.3",
+		"yoast/phpunit-polyfills": "^1.0"
 	},
 	"config": {
 		"optimize-autoloader": true,
@@ -38,7 +40,12 @@
 		},
 		"sort-packages": true,
 		"platform": {
-			"php": "7.0.33"
+			"php": "7.2"
+		},
+		"allow-plugins": {
+			"automattic/jetpack-autoloader": true,
+			"composer/installers": true,
+			"bamarni/composer-bin-plugin": true
 		}
 	},
 	"autoload": {
@@ -82,7 +89,7 @@
 			"phpcs -s -p"
 		],
 		"phpcs-pre-commit": [
-			"phpcs -s -p -n"
+			"phpcs-changed --git -s"
 		],
 		"phpcbf": [
 			"phpcbf -p"
@@ -120,7 +127,7 @@
 		},
 		"changelogger": {
 			"formatter": {
-				"filename": "../../tools/changelogger/PluginFormatter.php"
+				"filename": "../../tools/changelogger/class-legacy-core-formatter.php"
 			},
 			"types": {
 				"fix": "Fixes an existing bug",

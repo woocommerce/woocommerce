@@ -6,6 +6,18 @@ if [ $# -lt 3 ]; then
 	exit 1
 fi
 
+function check_command_exists {
+	if ! which "$1" > /dev/null; then
+		echo "It looks as if $1 is not installed. Please ensure it is installed and on the path."
+		exit 1
+	fi
+}
+
+# Basic pre-requisite checks
+check_command_exists "mysqladmin"
+check_command_exists "php"
+check_command_exists "svn"
+
 DB_NAME=$1
 DB_USER=$2
 DB_PASS=$3
@@ -107,17 +119,23 @@ install_test_suite() {
 		mkdir -p $WP_TESTS_DIR
 		svn co --quiet https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/includes/ $WP_TESTS_DIR/includes
 		svn co --quiet https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/data/ $WP_TESTS_DIR/data
+	else
+		echo -e "\nTest suite already installed at:\n\n\t$WP_TESTS_DIR\n\n(If you experience difficulties running the tests, consider removing it then re-running this script.)\n"
 	fi
 
 	if [ ! -f wp-tests-config.php ]; then
 		download https://develop.svn.wordpress.org/${WP_TESTS_TAG}/wp-tests-config-sample.php "$WP_TESTS_DIR"/wp-tests-config.php
 		# remove all forward slashes in the end
-		WP_CORE_DIR=$(echo $WP_CORE_DIR | sed "s:/\+$::")
+		WP_CORE_DIR=$(realpath $(echo $WP_CORE_DIR | sed "s:/\+$::"))
 		sed $ioption -E "s:(__DIR__ . '/src/'|dirname\( __FILE__ \) . '/src/'):'$WP_CORE_DIR/':" "$WP_TESTS_DIR"/wp-tests-config.php
 		sed $ioption "s/youremptytestdbnamehere/$DB_NAME/" "$WP_TESTS_DIR"/wp-tests-config.php
 		sed $ioption "s/yourusernamehere/$DB_USER/" "$WP_TESTS_DIR"/wp-tests-config.php
 		sed $ioption "s/yourpasswordhere/$DB_PASS/" "$WP_TESTS_DIR"/wp-tests-config.php
-		sed $ioption "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
+		if [[ "$DB_HOST" == *.sock ]]; then
+			sed $ioption "s|localhost|:${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
+		else
+			sed $ioption "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
+		fi
 	fi
 
 }
@@ -131,7 +149,7 @@ install_db() {
 	# If we're trying to connect to a socket we want to handle it differently.
 	if [[ "$DB_HOST" == *.sock ]]; then
 		# create database using the socket
-		mysqladmin create $DB_NAME --socket="$DB_HOST"
+		mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS" --socket="$DB_HOST"
 	else
 		# Decide whether or not there is a port.
 		local PARTS=(${DB_HOST//\:/ })

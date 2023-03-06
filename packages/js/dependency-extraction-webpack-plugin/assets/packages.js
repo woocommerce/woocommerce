@@ -1,0 +1,24 @@
+module.exports = [
+	// wc-admin packages
+	'@woocommerce/components',
+	'@woocommerce/csv-export',
+	'@woocommerce/currency',
+	'@woocommerce/customer-effort-score',
+	'@woocommerce/data',
+	'@woocommerce/date',
+	'@woocommerce/dependency-extraction-webpack-plugin',
+	'@woocommerce/eslint-plugin',
+	'@woocommerce/experimental',
+	'@woocommerce/explat',
+	'@woocommerce/extend-cart-checkout-block',
+	'@woocommerce/navigation',
+	'@woocommerce/notices',
+	'@woocommerce/number',
+	'@woocommerce/product-editor',
+	'@woocommerce/tracks',
+	// wc-blocks packages
+	'@woocommerce/blocks-checkout',
+	'@woocommerce/block-data',
+	'@woocommerce/blocks-registry',
+	'@woocommerce/settings',
+];

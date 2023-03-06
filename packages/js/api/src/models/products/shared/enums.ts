@@ -22,7 +22,7 @@ export enum CatalogVisibility {
 	/**
 	 * The product should be hidden everywhere.
 	 */
-	Hidden = 'hidden'
+	Hidden = 'hidden',
 }
 
 /**
@@ -44,7 +44,7 @@ export enum Taxability {
 	/**
 	 * The product and shipping are not taxable.
 	 */
-	None = 'none'
+	None = 'none',
 }
 
 /**
@@ -66,5 +66,5 @@ export enum BackorderStatus {
 	/**
 	 * The product is not allowed to be backordered.
 	 */
-	NotAllowed = 'no'
+	NotAllowed = 'no',
 }

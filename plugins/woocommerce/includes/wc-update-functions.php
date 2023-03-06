@@ -2,7 +2,15 @@
 /**
  * WooCommerce Updates
  *
- * Functions for updating data, used by the background updater.
+ * Functions for updating data, used by the background updater. These functions must be included
+ * in the list returned by WC_Install::get_db_update_callbacks.
+ *
+ * Please note that these functions are invoked when WooCommerce is updated from a previous version,
+ * but NOT when WooCommerce is newly installed.
+ *
+ * Database schema changes must be incorporated to the SQL returned by WC_Install::get_schema, which is applied
+ * via dbDelta at both install and update time. If any other kind of database change is required
+ * at install time (e.g. populating tables), use the 'woocommerce_installed' hook.
  *
  * @package WooCommerce\Functions
  * @version 3.3.0
@@ -10,7 +18,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
+use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 
 /**
  * Update file paths for 2.0
@@ -344,8 +358,6 @@ function wc_update_200_line_items() {
 						$order_tax_row->post_id
 					)
 				);
-
-				unset( $tax_amount );
 			}
 		}
 	}
@@ -2306,7 +2318,7 @@ function wc_update_560_db_version() {
 function wc_update_600_migrate_rate_limit_options() {
 	global $wpdb;
 
-	$rate_limits = $wpdb->get_results(
+	$rate_limits   = $wpdb->get_results(
 		"
 			SELECT option_name, option_value
 			FROM $wpdb->options
@@ -2334,4 +2346,251 @@ function wc_update_600_migrate_rate_limit_options() {
  */
 function wc_update_600_db_version() {
 	WC_Install::update_db_version( '6.0.0' );
+}
+
+/**
+ * Create the product attributes lookup table and initiate its filling,
+ * unless the table had been already created manually (via the tools page).
+ *
+ * @return false Always false, since the LookupDataStore class handles all the data filling process.
+ */
+function wc_update_630_create_product_attributes_lookup_table() {
+	$data_store       = wc_get_container()->get( LookupDataStore::class );
+	$data_regenerator = wc_get_container()->get( DataRegenerator::class );
+
+	/**
+	 * If the table exists and contains data, it was manually created by user before the migration ran.
+	 * If the table exists but is empty, it was likely created right now via dbDelta, so a table regenerations is needed (unless one is in progress already).
+	 */
+	if ( ! $data_store->check_lookup_table_exists() || ( ! $data_store->lookup_table_has_data() && ! $data_store->regeneration_is_in_progress() ) ) {
+		$data_regenerator->initiate_regeneration();
+	}
+
+	return false;
+}
+
+/**
+ *
+ * Update DB version to 6.3.0.
+ */
+function wc_update_630_db_version() {
+	WC_Install::update_db_version( '6.3.0' );
+}
+
+/**
+ * Create the primary key for the product attributes lookup table if it doesn't exist already.
+ *
+ * @return bool Always false.
+ */
+function wc_update_640_add_primary_key_to_product_attributes_lookup_table() {
+	wc_get_container()->get( DataRegenerator::class )->create_table_primary_index();
+
+	return false;
+}
+
+/**
+ *
+ * Update DB version to 6.4.0.
+ */
+function wc_update_640_db_version() {
+	WC_Install::update_db_version( '6.4.0' );
+}
+
+/**
+ * Add the standard WooCommerce upload directories to the Approved Product Download Directories list
+ * and start populating it based on existing product download URLs, but do not enable the feature
+ * (for existing installations, a site admin should review and make a conscious decision to enable).
+ */
+function wc_update_650_approved_download_directories() {
+	$directory_sync = wc_get_container()->get( Download_Directories_Sync::class );
+	$directory_sync->init_hooks();
+	$directory_sync->init_feature( true, false );
+}
+
+/**
+ * In some cases, the approved download directories table may not have been successfully created during the update to
+ * 6.5.0. If this was the case we will need to re-initialize the feature.
+ */
+function wc_update_651_approved_download_directories() {
+	global $wpdb;
+
+	$download_directories = wc_get_container()->get( Download_Directories::class );
+	$directory_sync       = wc_get_container()->get( Download_Directories_Sync::class );
+
+	// Check if at least 1 row exists, without scanning the entire table.
+	$is_populated = (bool) $wpdb->get_var(
+		'SELECT 1 FROM ' . $download_directories->get_table() . ' LIMIT 1'
+	);
+
+	// If the table contains rules (or does not yet, but a sync is in-progress) we should do nothing else at this point.
+	if ( $is_populated || $directory_sync->in_progress() ) {
+		return;
+	}
+
+	// Otherwise, it seems reasonable to assume that the feature was not initialized as expected during the update to
+	// 6.5.0. Let's give that another try.
+	$directory_sync->init_hooks();
+	$directory_sync->init_feature( true, false );
+}
+
+/**
+ * Purges the comments count cache after 6.7.0 split reviews from the comments page.
+ */
+function wc_update_670_purge_comments_count_cache() {
+	if ( ! is_callable( 'WC_Comments::delete_comments_count_cache' ) ) {
+		return;
+	}
+
+	WC_Comments::delete_comments_count_cache();
+}
+/**
+ * Remove unnecessary foreign keys.
+ *
+ * @return void
+ */
+function wc_update_700_remove_download_log_fk() {
+	global $wpdb;
+
+	$results = $wpdb->get_results(
+		"SELECT CONSTRAINT_NAME
+		FROM information_schema.TABLE_CONSTRAINTS
+		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
+		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
+	);
+
+	if ( $results ) {
+		foreach ( $results as $fk ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
+	}
+}
+
+/**
+ * Remove the transient data for recommended marketing extensions.
+ */
+function wc_update_700_remove_recommended_marketing_plugins_transient() {
+	delete_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT );
+}
+
+/**
+ * Update the New Zealand state codes in the database
+ * after they were updated in code to the CLDR standard.
+ */
+function wc_update_721_adjust_new_zealand_states() {
+	return MigrationHelper::migrate_country_states(
+		'NZ',
+		array(
+			'NL' => 'NTL',
+			'AK' => 'AUK',
+			'WA' => 'WKO',
+			'BP' => 'BOP',
+			'TK' => 'TKI',
+			'GI' => 'GIS',
+			'HB' => 'HKB',
+			'MW' => 'MWT',
+			'WE' => 'WGN',
+			'NS' => 'NSN',
+			'MB' => 'MBH',
+			'TM' => 'TAS',
+			'WC' => 'WTC',
+			'CT' => 'CAN',
+			'OT' => 'OTA',
+			'SL' => 'STL',
+		)
+	);
+}
+
+/**
+ * Update the Ukraine state codes in the database
+ * after they were updated in code to the CLDR standard.
+ */
+function wc_update_721_adjust_ukraine_states() {
+	return MigrationHelper::migrate_country_states(
+		'UA',
+		array(
+			'VN' => 'UA05',
+			'LH' => 'UA09',
+			'VL' => 'UA07',
+			'DP' => 'UA12',
+			'DT' => 'UA14',
+			'ZT' => 'UA18',
+			'ZK' => 'UA21',
+			'ZP' => 'UA23',
+			'IF' => 'UA26',
+			'KV' => 'UA32',
+			'KH' => 'UA35',
+			'LV' => 'UA46',
+			'MY' => 'UA48',
+			'OD' => 'UA51',
+			'PL' => 'UA53',
+			'RV' => 'UA56',
+			'SM' => 'UA59',
+			'TP' => 'UA61',
+			'KK' => 'UA63',
+			'KS' => 'UA65',
+			'KM' => 'UA68',
+			'CK' => 'UA71',
+			'CH' => 'UA74',
+			'CV' => 'UA77',
+		)
+	);
+}
+
+/**
+ * Update the New Zealand state codes in the database after they were updated in code to the CLDR standard.
+ *
+ * This is a simple wrapper for the corresponding 7.2.1 update function. The reason we do this (instead of
+ * reusing the original function directly) is for better traceability in the Action Scheduler log, in case
+ * of problems.
+ */
+function wc_update_722_adjust_new_zealand_states() {
+	return wc_update_721_adjust_new_zealand_states();
+}
+
+/**
+ * Update the Ukraine state codes in the database after they were updated in code to the CLDR standard.
+ *
+ * This is a simple wrapper for the corresponding 7.2.1 update function. The reason we do this (instead of
+ * reusing the original function directly) is for better traceability in the Action Scheduler log, in case
+ * of problems.
+ */
+function wc_update_722_adjust_ukraine_states() {
+	return wc_update_721_adjust_ukraine_states();
+}
+
+/**
+ * Add new columns date_paid and date_completed to wp_wc_order_stats table in order to provide the option
+ * of using the dates in the reports
+ */
+function wc_update_750_add_columns_to_order_stats_table() {
+	global $wpdb;
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}wc_order_stats AS order_stats
+		INNER JOIN {$wpdb->postmeta} AS postmeta
+			ON postmeta.post_id = order_stats.order_id
+			and postmeta.meta_key = '_date_paid'
+		SET order_stats.date_paid = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
+	);
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}wc_order_stats AS order_stats
+		INNER JOIN {$wpdb->postmeta} AS postmeta
+			ON postmeta.post_id = order_stats.order_id
+			and postmeta.meta_key = '_date_completed'
+		SET order_stats.date_completed = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
+	);
+
+}
+
+/**
+ * Disable the experimental product management experience.
+ *
+ * @return void
+ */
+function wc_update_750_disable_new_product_management_experience() {
+	if ( 'yes' === get_option( 'woocommerce_new_product_management_enabled' ) ) {
+		update_option( 'woocommerce_new_product_management_enabled', 'no' );
+	}
 }

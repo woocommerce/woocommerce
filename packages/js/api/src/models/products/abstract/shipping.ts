@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from '../../model';
 
 /**
@@ -61,4 +64,4 @@ abstract class AbstractProductShipping extends Model {
 	public readonly shippingClassId: number = 0;
 }
 
-export interface IProductShipping extends AbstractProductShipping {}
+export type IProductShipping = AbstractProductShipping;

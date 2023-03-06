@@ -15,23 +15,23 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	 */
 	private function get_checkout_url() {
 
-		// Get the checkout URL
+		// Get the checkout URL.
 		$checkout_page_id = wc_get_page_id( 'checkout' );
 
 		$checkout_url = '';
 
-		// Check if there is a checkout page
+		// Check if there is a checkout page.
 		if ( $checkout_page_id ) {
 
-			// Get the permalink
+			// Get the permalink.
 			$checkout_url = get_permalink( $checkout_page_id );
 
-			// Force SSL if needed
+			// Force SSL if needed.
 			if ( is_ssl() || 'yes' === get_option( 'woocommerce_force_ssl_checkout' ) ) {
 				$checkout_url = str_replace( 'http:', 'https:', $checkout_url );
 			}
 
-			// Allow filtering of checkout URL
+			// Allow filtering of checkout URL.
 			$checkout_url = apply_filters( 'woocommerce_get_checkout_url', $checkout_url );
 		}
 
@@ -44,10 +44,10 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	 * @since 2.5.0
 	 */
 	public function test_get_checkout_url_regular() {
-		// Make sure pages exist
+		// Make sure pages exist.
 		WC_Install::create_pages();
 
-		// Force SSL checkout
+		// Force SSL checkout.
 		update_option( 'woocommerce_force_ssl_checkout', 'no' );
 
 		$this->assertEquals( $this->get_checkout_url(), wc_get_checkout_url() );
@@ -59,10 +59,10 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	 * @since 2.5.0
 	 */
 	public function test_get_checkout_url_ssl() {
-		// Make sure pages exist
+		// Make sure pages exist.
 		WC_Install::create_pages();
 
-		// Force SSL checkout
+		// Force SSL checkout.
 		update_option( 'woocommerce_force_ssl_checkout', 'yes' );
 
 		$this->assertEquals( $this->get_checkout_url(), wc_get_checkout_url() );
@@ -74,16 +74,16 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3.0
 	 */
 	public function test_wc_empty_cart() {
-		// Create dummy product
+		// Create dummy product.
 		$product = WC_Helper_Product::create_simple_product();
 
-		// Add the product to the cart
+		// Add the product to the cart.
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Empty the cart
+		// Empty the cart.
 		wc_empty_cart();
 
-		// Check if the cart is empty
+		// Check if the cart is empty.
 		$this->assertEquals( 0, WC()->cart->get_cart_contents_count() );
 	}
 
@@ -137,24 +137,25 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	 * Test wc_add_to_cart_message
 	 */
 	public function test_wc_add_to_cart_message() {
-		$product = WC_Helper_Product::create_simple_product();
+		$product         = WC_Helper_Product::create_simple_product();
+		$wp_button_class = esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' );
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 1 ), false, true );
-		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward' . $wp_button_class . '">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 3 ), false, true );
-		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward' . $wp_button_class . '">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 1 ), true, true );
-		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward' . $wp_button_class . '">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 3 ), true, true );
-		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward">View cart</a> 3 &times; &ldquo;Dummy Product&rdquo; have been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward' . $wp_button_class . '">View cart</a> 3 &times; &ldquo;Dummy Product&rdquo; have been added to your cart.', $message );
 
 		$message = wc_add_to_cart_message( $product->get_id(), false, true );
-		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward' . $wp_button_class . '">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 
 		$message = wc_add_to_cart_message( $product->get_id(), true, true );
-		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+		$this->assertEquals( '<a href="http://example.org" tabindex="1" class="button wc-forward' . $wp_button_class . '">View cart</a> &ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 	}
 }

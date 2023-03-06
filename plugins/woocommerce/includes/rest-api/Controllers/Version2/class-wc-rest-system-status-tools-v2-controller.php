@@ -476,13 +476,24 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				break;
 
 			case 'clear_expired_download_permissions':
+				// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+				$wpdb->query(
+					$wpdb->prepare(
+						"DELETE FROM {$wpdb->prefix}wc_download_log
+						WHERE permission_id IN (
+								    SELECT permission_id FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+									WHERE ( downloads_remaining != '' AND downloads_remaining = 0 ) OR ( access_expires IS NOT NULL AND access_expires < %s )
+								    )",
+						current_time( 'Y-m-d' )
+					)
+				);
 				// Delete expired download permissions and ones with 0 downloads remaining.
 				$result = absint(
 					$wpdb->query(
 						$wpdb->prepare(
 							"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
 							WHERE ( downloads_remaining != '' AND downloads_remaining = 0 ) OR ( access_expires IS NOT NULL AND access_expires < %s )",
-							gmdate( 'Y-m-d', current_time( 'timestamp' ) )
+							current_time( 'Y-m-d' )
 						)
 					)
 				);

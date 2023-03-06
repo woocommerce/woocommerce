@@ -1,51 +1,54 @@
 name: Run code sniff on PR
 on:
-  pull_request
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
 defaults:
-  run:
-    shell: bash
-    working-directory: plugins/woocommerce
+    run:
+        shell: bash
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+env:
+    PHPCS: ./plugins/woocommerce/vendor/bin/phpcs # Run WooCommerce phpcs setup in phpcs-changed instead of default
+
+permissions: {}
+
 jobs:
-  test:
-    name: Code sniff (PHP 7.4, WP Latest)
-    timeout-minutes: 15
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 100
+    test:
+        name: Code sniff (PHP 7.4, WP Latest)
+        timeout-minutes: 15
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 7.4
-          tools: composer, cs2pr
+            - name: Get Changed Files
+              id: changed-files
+              uses: tj-actions/changed-files@v32
+              with:
+                  files: |
+                      **/*.php
 
-      - name: Tool versions
-        run: |
-          php --version
-          composer --version
+            - name: Setup WooCommerce Monorepo
+              if: steps.changed-files.outputs.any_changed == 'true'
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build: false
 
-      - name: Get cached composer directories
-        uses: actions/cache@v2
-        with:
-          path: |
-            ./packages
-            ./vendor
-          key: ${{ runner.os }}-${{ hashFiles('./composer.lock') }}
+            - name: Tool versions
+              if: steps.changed-files.outputs.any_changed == 'true'
+              run: |
+                  php --version
+                  composer --version
+                  phpcs-changed --version
 
-      - name: Install PNPM and install dependencies
-        run: |
-            npm install -g pnpm
-            pnpm install
-
-      - name: Setup and install composer
-        run: pnpm nx composer-install woocommerce
-
-      - name: Run code sniff
-        continue-on-error: true
-        run: ./tests/bin/phpcs.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.after }}"
-      
-      - name: Show PHPCS results in PR
-        run: cs2pr ./phpcs-report.xml
+            - name: Run PHPCS
+              if: steps.changed-files.outputs.any_changed == 'true'
+              run: |
+                  HEAD_REF=$(git rev-parse HEAD)
+                  git checkout $HEAD_REF
+                  phpcs-changed -s --git --git-base ${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}

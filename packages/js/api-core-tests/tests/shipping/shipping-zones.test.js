@@ -26,11 +26,10 @@ describe( 'Shipping zones API tests', () => {
 		}
 
 		// Verify that the default shipping zone remains
-		const {
-			body: remainingZones,
-		} = await shippingZonesApi.listAll.shippingZones( {
-			_fields: 'id',
-		} );
+		const { body: remainingZones } =
+			await shippingZonesApi.listAll.shippingZones( {
+				_fields: 'id',
+			} );
 
 		expect( remainingZones ).toHaveLength( 1 );
 		expect( remainingZones[ 0 ].id ).toEqual( 0 );
@@ -106,6 +105,56 @@ describe( 'Shipping zones API tests', () => {
 		expect( body.name ).toEqual( updatedShippingZone.name );
 	} );
 
+	it( 'can add country shipping regions to a shipping zone', async () => {
+		const shippingZoneRegion = [ { code: 'GB' }, { code: 'US' } ];
+
+		const { status, body } =
+			await shippingZonesApi.updateRegion.shippingZone(
+				shippingZone.id,
+				shippingZoneRegion
+			);
+
+		expect( status ).toEqual( shippingZonesApi.updateRegion.responseCode );
+		expect( body[ 0 ].code ).toEqual( 'GB' );
+		expect( body[ 0 ].type ).toEqual( 'country' );
+		expect( body[ 1 ].code ).toEqual( 'US' );
+		expect( body[ 1 ].type ).toEqual( 'country' );
+		expect( body ).toHaveLength( 2 );
+	} );
+
+	it( 'can update shipping regions to state only', async () => {
+		const shippingZoneRegion = [
+			{
+				code: 'BR:SP',
+				type: 'state',
+			},
+		];
+
+		const { status, body } =
+			await shippingZonesApi.updateRegion.shippingZone(
+				shippingZone.id,
+				shippingZoneRegion
+			);
+
+		expect( status ).toEqual( shippingZonesApi.updateRegion.responseCode );
+		expect( body[ 0 ].code ).toEqual( 'BR:SP' );
+		expect( body[ 0 ].type ).toEqual( 'state' );
+		expect( body ).toHaveLength( 1 );
+	} );
+
+	it( 'can clear/delete a shipping regions on a shipping zone', async () => {
+		const shippingZoneRegion = [];
+
+		const { status, body } =
+			await shippingZonesApi.updateRegion.shippingZone(
+				shippingZone.id,
+				shippingZoneRegion
+			);
+
+		expect( status ).toEqual( shippingZonesApi.updateRegion.responseCode );
+		expect( body ).toHaveLength( 0 );
+	} );
+
 	it( 'can delete a shipping zone', async () => {
 		const { status, body } = await shippingZonesApi.delete.shippingZone(
 			shippingZone.id,
@@ -116,9 +165,8 @@ describe( 'Shipping zones API tests', () => {
 		expect( body.id ).toEqual( shippingZone.id );
 
 		// Verify that the shipping zone can no longer be retrieved
-		const {
-			status: retrieveStatus,
-		} = await shippingZonesApi.retrieve.shippingZone( shippingZone.id );
+		const { status: retrieveStatus } =
+			await shippingZonesApi.retrieve.shippingZone( shippingZone.id );
 		expect( retrieveStatus ).toEqual( 404 );
 	} );
 } );

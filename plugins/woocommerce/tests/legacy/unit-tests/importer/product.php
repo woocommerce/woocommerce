@@ -18,19 +18,31 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	protected $csv_file = '';
 
 	/**
+	 * @var WC_Product_CSV_Importer
+	 */
+	private $sut;
+
+	/**
 	 * Load up the importer classes since they aren't loaded by default.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
-
-		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
-		$this->http_responder = array( $this, 'mock_http_responses' );
-
-		$this->csv_file = dirname( __FILE__ ) . '/sample.csv';
 
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
 		require_once $bootstrap->plugin_dir . '/includes/admin/importers/class-wc-product-csv-importer-controller.php';
+
+		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
+		$this->http_responder = array( $this, 'mock_http_responses' );
+		$this->csv_file = dirname( __FILE__ ) . '/sample.csv';
+		$this->sut = new WC_Product_CSV_Importer(
+			$this->csv_file,
+			array(
+				'mapping'          => $this->get_csv_mapped_items(),
+				'parse'            => true,
+				'prevent_timeouts' => false,
+			)
+		);
 	}
 
 	/**
@@ -91,25 +103,39 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test import.
-	 *
-	 * @since 3.1.0
-	 * @requires PHP 5.4
+	 * @testdox Test import as triggered by an admin user.
 	 */
-	public function test_import() {
-		$args = array(
-			'mapping'          => $this->get_csv_mapped_items(),
-			'parse'            => true,
-			'prevent_timeouts' => false,
-		);
+	public function test_import_for_admin_users() {
+		// In most cases, an admin user will run the import.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$results  = $this->sut->import();
 
-		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
-		$results  = $importer->import();
-
-		$this->assertEquals( 7, count( $results['imported'] ) );
 		$this->assertEquals( 0, count( $results['failed'] ) );
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
+		$this->assertEquals(
+			7,
+			count( $results['imported'] ),
+			'One import item references a downloadable file stored in an unapproved location: if the import is triggered by an admin user, that location will be automatically approved.'
+		);
+	}
+
+	/**
+	 * @testdox Test import as triggered by a shop manager (or other non-admin user).
+	 */
+	public function test_import_for_shop_managers() {
+		// In some cases, a shop manager may run the import.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+		$results  = $this->sut->import();
+
+		$this->assertEquals( 0, count( $results['updated'] ) );
+		$this->assertEquals( 0, count( $results['skipped'] ) );
+		$this->assertEquals( 6, count( $results['imported'] ) );
+		$this->assertEquals(
+			1,
+			count( $results['failed'] ),
+			'One import item references a downloadable file stored in an unapproved location: if the import is triggered by a non-admin, that item cannot be imported.'
+		);
 	}
 
 	/**
@@ -668,5 +694,19 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$this->assertTrue( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
 		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/img.jpg' ) );
 		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'file:///srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
+	}
+
+	/**
+	 * Test that directory traversal is prevented.
+	 */
+	public function test_server_path_traversal() {
+		self::file_copy( $this->csv_file, ABSPATH . '../sample.csv' );
+
+		$_POST['file_url'] = '../sample.csv';
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		$import_result     = $import_controller->handle_upload();
+
+		$this->assertTrue( is_wp_error( $import_result ) );
+		$this->assertEquals( $import_result->get_error_code(), 'woocommerce_product_csv_importer_upload_invalid_file' );
 	}
 }

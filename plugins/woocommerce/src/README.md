@@ -23,10 +23,12 @@
   * [Defining new actions and filters](#defining-new-actions-and-filters)
   * [Writing unit tests](#writing-unit-tests)
     + [Mocking dependencies](#mocking-dependencies)
+    + [Additional tools for writing unit tests](#additional-tools-for-writing-unit-tests)
+
 
 This directory is home to new WooCommerce class files under the `Automattic\WooCommerce` namespace using [PSR-4](https://www.php-fig.org/psr/psr-4/) file naming. This is to take full advantage of autoloading.
 
-Ideally, all the new code for WooCommerce should consist of classes following the PSR-4 naming and living in this directory, and the code in [the `includes` directory](https://github.com/woocommerce/woocommerce/tree/trunk/includes/README.md) should receive the minimum amount of changes required for bug fixing. This will not always be possible but that should be the rule of thumb.
+Ideally, all the new code for WooCommerce should consist of classes following the PSR-4 naming and living in this directory, and the code in [the `includes` directory](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/includes/README.md) should receive the minimum amount of changes required for bug fixing. This will not always be possible but that should be the rule of thumb.
 
 A [PSR-11](https://www.php-fig.org/psr/psr-11/) container is in place for registering and resolving the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. There are tools in place to interact with legacy code (and code outside the `src` directory in general) in a way that makes it easy to write unit tests. 
 
@@ -177,13 +179,13 @@ use Automattic\WooCommerce\TheDependencyNamespace\TheDependencyClass;
 
 class TheClassServiceProvider extends AbstractServiceProvider {
 
-	protected $provides = array(
-		TheClass::class
-	);
+    protected $provides = array(
+        TheClass::class
+    );
 
-	public function register() {
-		$this->add( TheClass::class )->addArgument( TheDependencyClass::class );
-	}
+    public function register() {
+        $this->add( TheClass::class )->addArgument( TheDependencyClass::class );
+    }
 }
 ```
 
@@ -209,15 +211,15 @@ use Automattic\WooCommerce\TheDependencyNamespace\TheDependencyClass;
 
 class TheClassServiceProvider extends AbstractServiceProvider {
 
-	protected $provides = array(
-		TheClass::class,
+    protected $provides = array(
+        TheClass::class,
         TheDependencyClass::class
-	);
+    );
 
-	public function register() {
+    public function register() {
         $this->share( TheDependencyClass::class );
-		$this->share_with_auto_arguments( ActionsProxy::class );
-	}
+        $this->share_with_auto_arguments( ActionsProxy::class );
+    }
 }
 ```
 
@@ -281,7 +283,7 @@ What this implies for you as developer depends on what type of contribution are 
 
 Here by "legacy code" we refer mainly to the old WooCommerce code in the `includes` directory, but the mechanisms described in this section are useful for dealing with any code outside the `src` directory.
 
-The code in the `src` directory can for sure interact directly with legacy code. A function needs to be called? Call it. You need an instance of an object? Instantiate it. The problem is that this makes the code difficult to test: it's not easy to mock functions (unless you use [hacks](https://github.com/woocommerce/woocommerce/blob/trunk/tests/Tools/CodeHacking/README.md), or objects that are instantiated directly with `new` or whose instance is retrieved via a `TheClass::instance()` method).
+The code in the `src` directory can for sure interact directly with legacy code. A function needs to be called? Call it. You need an instance of an object? Instantiate it. The problem is that this makes the code difficult to test: it's not easy to mock functions (unless you use [hacks](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/Tools/CodeHacking/README.md), or objects that are instantiated directly with `new` or whose instance is retrieved via a `TheClass::instance()` method).
 
 But we want the WooCommerce code base (and especially the code in `src`) to be well covered by unit tests, and so there are mechanisms in place to interact with legacy code while keeping the code testable.
 
@@ -292,10 +294,11 @@ But we want the WooCommerce code base (and especially the code in `src`) to be w
 * `get_instance_of`: Retrieves an instance of a legacy (non-`src`) class.
 * `call_function`: Calls a standalone function.
 * `call_static`: Calls a static method in a class.
+* `get_global`: Gets the value of a global variable by name.
 
-Whenever a `src` class needs to get an instance of a legacy class, or call a function, or call a static method from another class, and that would make the code difficult to test, it should use the `LegacyProxy` methods instead.
+Whenever a `src` class needs to get an instance of a legacy class, or call a function, or call a static method from another class, or use a global variable, and that would make the code difficult to test, it should use the `LegacyProxy` methods instead.
 
-But how does using `LegacyProxy` help in making the code testable? The trick is that when tests run what is registered instead of `LegacyProxy` is an instance of `MockableLegacyProxy`, a class with the same public surface but with additional methods that allow to easily mock legacy classes, functions and static methods.
+But how does using `LegacyProxy` help in making the code testable? The trick is that when tests run what is registered instead of `LegacyProxy` is an instance of `MockableLegacyProxy`, a class with the same public surface but with additional methods that allow to easily mock legacy classes, functions, static methods and global variables.
 
 ### Using the legacy proxy
 
@@ -336,8 +339,9 @@ When unit tests run the container will return an instance of `MockableLegacyProx
 * `register_class_mocks`: defines mocks for classes that are retrieved via `get_instance_of`.
 * `register_function_mocks`: defines mocks for functions that are invoked via `call_function`.
 * `register_static_mocks`: defines mocks for functions that are invoked via `call_static`.
+* `register_global_mocks`: defines mocks for global variables that are retrieved via `get_global`.
 
-These methods could be accessed via `wc_get_container()->get( LegacyProxy::class )->register...` directly from the tests, but the preferred way is to use the equivalent helper methods offered by the `WC_Unit_Test_Case` class,: `register_legacy_proxy_class_mocks`, `register_legacy_proxy_function_mocks` and `register_legacy_proxy_static_mocks`.
+These methods could be accessed via `wc_get_container()->get( LegacyProxy::class )->register...` directly from the tests, but the preferred way is to use the equivalent helper methods offered by the `WC_Unit_Test_Case` class,: `register_legacy_proxy_class_mocks`, `register_legacy_proxy_function_mocks`, `register_legacy_proxy_static_mocks` and `register_global_mock`.
 
 Here's an example of how function mocks are defined:
 
@@ -355,7 +359,7 @@ $this->register_legacy_proxy_function_mocks(
 
 Of course, for the cases where no mocks are defined `MockableLegacyProxy` works the same way as `LegacyProxy`.
 
-Please see [the code of the MockableLegacyProxy class](https://github.com/woocommerce/woocommerce/blob/trunk/tests/Tools/DependencyManagement/MockableLegacyProxy.php) and [its unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/tests/php/src/Proxies/MockableLegacyProxyTest.php) for more detailed usage instructions and examples.
+Please see [the code of the MockableLegacyProxy class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/Tools/DependencyManagement/MockableLegacyProxy.php) and [its unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/php/src/Proxies/MockableLegacyProxyTest.php) for more detailed usage instructions and examples.
 
 ### But how does `get_instance_of` work?
 
@@ -363,7 +367,7 @@ We use a container to resolve instances of classes in the `src` directory, but h
 
 This is a mostly ad-hoc process. When a class has a special way to be instantiated or retrieved (e.g. a static `instance` method), then that is used; otherwise the method fallbacks to simply creating a new instance of the class using `new`.
 
-This means that the `get_instance_of` method will most likely need to evolve over time to cover additional special cases. Take a look at the method code in [LegacyProxy](https://github.com/woocommerce/woocommerce/blob/trunk/src/Proxies/LegacyProxy.php) for details on how to properly make changes to the method.
+This means that the `get_instance_of` method will most likely need to evolve over time to cover additional special cases. Take a look at the method code in [LegacyProxy](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Proxies/LegacyProxy.php) for details on how to properly make changes to the method.
 
 ### Creating specialized proxies
 
@@ -405,7 +409,7 @@ Unit tests are a fundamental tool to keep the code reliable and reasonably safe 
 
 ### Mocking dependencies
 
-Since all the dependencies for classes in this directory are dependency-injected or retrieved lazily by directly accessing the container, it's easy to mock them by either manually creating a mock class with the same public surface or by using [PHPUnit's test doubles](https://phpunit.readthedocs.io/en/9.2/test-doubles.html):
+Since all the dependencies for classes in this directory are dependency-injected or retrieved lazily by directly accessing the container, it's easy to mock them by either manually creating a mock class with the same public surface or by using [PHPUnit's test doubles](https://phpunit.readthedocs.io/en/9.5/test-doubles.html):
 
 ```php
 $dependency_mock = somehow_create_mock();
@@ -434,3 +438,10 @@ $this->assertEquals( $result, 'the expected result' );
 ```
 
 Note: of course all of this applies to dependencies from the `src` directory, for mocking legacy dependencies [the `MockableLegacyProxy`](#using-the-mockable-proxy-in-tests) should be used instead.
+
+### Additional tools for writing unit tests
+
+[The `tests/Tools` directory](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/Tools) contains additional tools that can help in the task of writing unit tests, notably:
+
+* [The code hacker](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/Tools/CodeHacking#readme), which allows modifying the code before it's tested in order to mock functions, static methods and `final` classes. This is a last resort mechanism when using other mechanisms like [the `LegacyProxy` class](#the-legacyproxy-class) is not an option.
+* [The DynamicDecorator class](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/Tools/DynamicDecorator.php), which wraps an arbitrary object and allows to define replacements its for methods and properties; the decorator is then used in lieu of the original object. This can be useful when extending the class of the original object isn't possible or is too complicated. See [the unis tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/php/src/Proxies/DynamicDecoratorTest.php) for examples of how it's used.

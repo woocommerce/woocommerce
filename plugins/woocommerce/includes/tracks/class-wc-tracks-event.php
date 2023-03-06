@@ -17,12 +17,12 @@ class WC_Tracks_Event {
 	/**
 	 * Event name regex.
 	 */
-	const EVENT_NAME_REGEX = '/^(([a-z0-9]+)_){2}([a-z0-9_]+)$/';
+	public const EVENT_NAME_REGEX = '/^(([a-z0-9]+)_){1}([a-z0-9_]+)$/';
 
 	/**
 	 * Property name regex.
 	 */
-	const PROP_NAME_REGEX = '/^[a-z_][a-z0-9_]*$/';
+	public const PROP_NAME_REGEX = '/^[a-z_][a-z0-9_]*$/';
 
 	/**
 	 * Error message as WP_Error.
@@ -90,6 +90,16 @@ class WC_Tracks_Event {
 		// Make sure we have an event timestamp.
 		if ( ! isset( $_event->_ts ) ) {
 			$_event->_ts = WC_Tracks_Client::build_timestamp();
+		}
+
+		if ( ! self::event_name_is_valid( $_event->_en ) ) {
+			return new WP_Error( 'invalid_event_name', __( 'A valid event name must be specified.', 'woocommerce' ) );
+		}
+
+		foreach ( array_keys( (array) $_event ) as $key ) {
+			if ( ! self::prop_name_is_valid( $key ) && '_en' !== $key ) {
+				return new WP_Error( 'invalid_prop_name', __( 'A valid prop name must be specified', 'woocommerce' ) );
+			}
 		}
 
 		return $_event;

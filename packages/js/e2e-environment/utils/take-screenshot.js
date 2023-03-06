@@ -8,8 +8,9 @@ const { resolveLocalE2ePath } = require( './test-config' );
  * @param message
  * @return {Promise<{filePath: string, title: string}|{filePath: *, title: *}>}
  */
-const takeScreenshotFor = async ( message ) => {
-	const title = message.replace( /\.$/, '' );
+const takeScreenshotFor = async (message) => {
+	let now = new Date();
+	const title = `${message.replace( /\.$/, '' )}-${now.getDate()}${now.getHours()}${now.getMinutes()}${now.getSeconds()}`;
 	const savePath = resolveLocalE2ePath( 'screenshots' );
 	const filePath = path.join(
 		savePath,

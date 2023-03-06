@@ -25,7 +25,7 @@ To run the tests, you need to create a test database. You can:
 - Access a database on a server
 - Connect to your local database on your machine
 - Use a solution like VVV - if you are using VVV you might need to `vagrant ssh` first
-- Run a throwaway database in docker with this one-liner: `docker run --rm --name woocommerce_test_db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:5.7.33`. ( Use `tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0` in next step)
+- Run a throwaway database in docker with this one-liner: `docker run --rm --name woocommerce_test_db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:8.0.32`. ( Use `tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0` in next step)
 
 ### Setup instructions
 
@@ -82,6 +82,19 @@ $ rm -rf /var/folders/qr/3cnz_5_j3j1cljph_246ty1h0000gn/T/wordpress-tests-lib
 $ tests/bin/install.sh woocommerce_tests_1 root root
 ```
 
+Or if you run into this error:
+
+```
+PHP Fatal error:  require_once(): Failed opening required '/var/folders/n_/ksp7kpt9475byx0vs665j6gc0000gn/T/wordpress//wp-includes/PHPMailer/PHPMailer.php' (include_path='.:/usr/local/Cellar/php@7.4/7.4.26_1/share/php@7.4/pear') in /private/var/folders/n_/ksp7kpt9475byx0vs665j6gc0000gn/T/wordpress-tests-lib/includes/mock-mailer.php on line 2]
+```
+
+You will want to delete the wordpress folder
+
+```
+$ rm -rf /var/folders/qr/3cnz_5_j3j1cljph_246ty1h0000gn/T/wordpress
+$ tests/bin/install.sh woocommerce_tests_1 root root
+```
+
 Note that `woocommerce_tests` changed to `woocommerce_tests_1` as the `woocommerce_tests` database already exists due to the prior command.
 
 ### Running tests in PHP 8
@@ -125,7 +138,7 @@ Each test file should correspond to an associated source file and be named accor
         * When testing functions: use one test file per functions group file, for example `wc-formatting-functions-test.php` for code in the `wc-formatting-functions.php` file.
 
 
-See also [the guidelines for writing unit tests for `src` code](https://github.com/woocommerce/woocommerce/tree/trunk/src/README.md#writing-unit-tests) and [the guidelines for `includes` code](https://github.com/woocommerce/woocommerce/tree/trunk/includes/README.md#writing-unit-tests).
+See also [the guidelines for writing unit tests for `src` code](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/README.md#writing-unit-tests) and [the guidelines for `includes` code](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/includes/README.md#writing-unit-tests).
 
 General guidelines for all the unit tests:
 

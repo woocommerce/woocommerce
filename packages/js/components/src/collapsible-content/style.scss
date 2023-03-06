@@ -1,0 +1,23 @@
+.woocommerce-collapsible-content {
+
+	.woocommerce-collapsible-content__toggle {
+		all: unset;
+		font-size: 13px;
+		color: #007CBA;
+		cursor: pointer;
+
+		> div {
+			display: flex;
+			align-items: center;
+		}
+	
+		svg {
+			fill: #007CBA;
+			margin-left: 2px;
+		}
+	}
+
+	.woocommerce-collapsible-content__content {
+		margin-top: $gap-large;
+	}
+}

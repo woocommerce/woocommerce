@@ -1,0 +1,51 @@
+<?php
+/**
+ * Plugin Name:     {{title}}
+{{#description}}
+ * Description:     {{description}}
+{{/description}}
+ * Version:         {{version}}
+{{#author}}
+ * Author:          {{author}}
+{{/author}}
+{{#license}}
+ * License:         {{license}}
+{{/license}}
+{{#licenseURI}}
+ * License URI:     {{{licenseURI}}}
+{{/licenseURI}}
+ * Text Domain:     {{textdomain}}
+ *
+ * @package         {{namespace}}
+ */
+add_action('woocommerce_blocks_loaded', function() {
+    require_once __DIR__ . '/{{slug}}-blocks-integration.php';
+	add_action(
+		'woocommerce_blocks_cart_block_registration',
+		function( $integration_registry ) {
+			$integration_registry->register( new {{slugPascalCase}}_Blocks_Integration() );
+		}
+	);
+	add_action(
+		'woocommerce_blocks_checkout_block_registration',
+		function( $integration_registry ) {
+			$integration_registry->register( new {{slugPascalCase}}_Blocks_Integration() );
+		}
+	);
+});
+
+/**
+ * Registers the slug as a block category with WordPress.
+ */
+function register_{{slugPascalCase}}_block_category( $categories ) {
+    return array_merge(
+        $categories,
+        [
+            [
+                'slug'  => '{{slug}}',
+                'title' => __( '{{slugPascalCase}} Blocks', '{{slug}}' ),
+            ],
+        ]
+    );
+}
+add_action( 'block_categories_all', 'register_{{slugPascalCase}}_block_category', 10, 2 );

@@ -7,6 +7,8 @@
 
 // phpcs:ignore Squiz.Commenting.FileComment.Missing
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
+
 require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
 
 /**
@@ -27,6 +29,11 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 			'inventory',
 			'downloadable',
 		);
+
+		// TODO: Once the lookup table is created in a migration, remove the check and just include 'advanced' in $expected.
+		if ( wc_get_container()->get( LookupDataStore::class )->check_lookup_table_exists() ) {
+			array_push( $expected, 'advanced' );
+		}
 
 		$this->assertEquals( $expected, $section_names );
 	}
@@ -140,6 +147,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_downloads_require_login'              => 'checkbox',
 			'woocommerce_downloads_grant_access_after_payment' => 'checkbox',
 			'woocommerce_downloads_add_hash_to_filename'       => 'checkbox',
+			'woocommerce_downloads_deliver_inline'             => 'checkbox',
 		);
 
 		$this->assertEquals( $expected, $settings_ids_and_types );

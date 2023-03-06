@@ -1,0 +1,35 @@
+{
+	"name": "woocommerce/client/legacy",
+	"version": "1.0.0",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"private": true,
+	"main": "Gruntfile.js",
+	"scripts": {
+		"turbo:build": "grunt assets",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name"
+	},
+	"devDependencies": {
+		"@wordpress/stylelint-config": "19.1.0",
+		"autoprefixer": "9.8.6",
+		"browserslist": "4.19.3",
+		"caniuse-lite": "1.0.30001146",
+		"grunt": "1.3.0",
+		"grunt-contrib-clean": "2.0.0",
+		"grunt-contrib-concat": "1.0.1",
+		"grunt-contrib-copy": "1.0.0",
+		"grunt-contrib-cssmin": "3.0.0",
+		"grunt-contrib-uglify": "4.0.1",
+		"grunt-contrib-watch": "1.1.0",
+		"grunt-move": "1.0.3",
+		"grunt-newer": "1.3.0",
+		"grunt-phpcs": "0.4.0",
+		"grunt-postcss": "0.9.0",
+		"grunt-rtlcss": "2.0.2",
+		"grunt-sass": "3.1.0",
+		"grunt-stylelint": "0.16.0",
+		"gruntify-eslint": "5.0.0",
+		"sass": "^1.45.0",
+		"stylelint": "13.8.0"
+	}
+}

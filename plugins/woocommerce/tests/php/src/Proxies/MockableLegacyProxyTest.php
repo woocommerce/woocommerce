@@ -23,7 +23,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before each test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		$this->sut = new MockableLegacyProxy();
 	}
 
@@ -160,7 +160,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox
+	 * @testdox 'register_static_mocks' throws an exception if invalid parameters are supplied.
 	 *
 	 * @dataProvider data_provider_for_test_register_function_mocks_throws_if_invalid_parameters_supplied
 	 *
@@ -194,6 +194,38 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_global' works as in LegacyProxy if no global replacements are registered.
+	 */
+	public function test_get_global_works_as_regular_legacy_proxy_if_no_mocks_registered() {
+		global $wpdb;
+
+		$result = $this->sut->get_global( 'wpdb' );
+		$this->assertEquals( $wpdb, $result );
+	}
+
+	/**
+	 * @testdox 'get_global' can be used to reigster replacements for globals.
+	 */
+	public function test_register_global_mocks_can_be_used_to_replace_globals() {
+		$replacement_wpdb = new \stdClass();
+
+		$this->sut->register_global_mocks( array( 'wpdb' => $replacement_wpdb ) );
+
+		$result = $this->sut->get_global( 'wpdb' );
+		$this->assertEquals( $replacement_wpdb, $result );
+	}
+
+	/**
+	 * @testdox 'register_global_mocks' throws if invalid parameters are supplied.
+	 */
+	public function test_register_global_mocks_throws_if_invalid_parameters_are_supplied() {
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'MockableLegacyProxy::register_global_mocks: $mocks must be an associative array of global_name => value.' );
+
+		$this->sut->register_global_mocks( array( 1234 => new \stdClass() ) );
+	}
+
+	/**
 	 * @testdox 'reset' can be used to revert the instance to its original state, in which nothing is mocked.
 	 */
 	public function test_reset_can_be_used_to_unregister_all_mocks() {
@@ -217,10 +249,13 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 			)
 		);
 
+		$this->sut->register_global_mocks( array( 'wpdb' => new \stdClass() ) );
+
 		$this->sut->reset();
 
 		$this->test_call_function_works_as_regular_legacy_proxy_if_no_mocks_registered();
 		$this->test_call_static_works_as_regular_legacy_proxy_if_no_mocks_registered();
 		$this->test_call_static_works_as_regular_legacy_proxy_if_no_mocks_registered();
+		$this->test_get_global_works_as_regular_legacy_proxy_if_no_mocks_registered();
 	}
 }

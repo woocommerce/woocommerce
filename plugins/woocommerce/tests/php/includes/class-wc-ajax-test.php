@@ -5,6 +5,9 @@
  * @package WooCommerce\Tests\WC_AJAX.
  */
 
+use Automattic\WooCommerce\Internal\Orders\CouponsController;
+use Automattic\WooCommerce\Internal\Orders\TaxesController;
+
 /**
  * Class WC_AJAX_Test file.
  */
@@ -89,12 +92,14 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * Creating an API Key with too long of a description should report failure.
 	 */
 	public function test_create_api_key_long_description_failure() {
+		$this->skip_on_php_8_1();
+
 		$this->_setRole( 'administrator' );
 
 		$description  = 'This_description_is_really_very_long_and_is_meant_to_exceed_the_database_column_length_of_200_characters_';
 		$description .= $description;
 
-		$_POST['security'] = wp_create_nonce( 'update-api-key' );
+		$_POST['security']    = wp_create_nonce( 'update-api-key' );
 		$_POST['key_id']      = 0;
 		$_POST['user']        = 1;
 		$_POST['permissions'] = 'read';
@@ -111,5 +116,80 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$this->assertFalse( $response['success'] );
 		$this->assertEquals( $response['data']['message'], 'There was an error generating your API Key.' );
+	}
+
+	/**
+	 * Skip the current test on PHP 8.1 and higher.
+	 * TODO: Remove this method and its usages once WordPress is compatible with PHP 8.1. Please note that there are multiple copies of this method.
+	 */
+	protected function skip_on_php_8_1() {
+		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
+			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
+		}
+	}
+
+	/**
+	 * Test coupon and recalculation of totals sequences when product prices are tax inclusive.
+	 */
+	public function test_apply_coupon_with_tax_inclusive_settings() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'base' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'IN:AP' );
+
+		$tax_rate = array(
+			'tax_rate_country' => 'IN',
+			'tax_rate_state'   => '',
+			'tax_rate'         => '20',
+			'tax_rate_name'    => 'tax',
+			'tax_rate_order'   => '1',
+			'tax_rate_class'   => '',
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 120 );
+		$product->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( '10off' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+
+		$container          = wc_get_container();
+		$coupons_controller = $container->get( CouponsController::class );
+		$taxes_controller   = $container->get( TaxesController::class );
+
+		$item        = current( $order->get_items() );
+		$item_id     = $item->get_id();
+		$items_array = array(
+			'order_item_id'  => array( $item_id ),
+			'order_item_qty' => array( $item_id => $item->get_quantity() ),
+			'line_subtotal'  => array( $item_id => $item->get_subtotal() ),
+			'line_total'     => array( $item_id => $item->get_total() ),
+		);
+
+		$calc_taxes_post_variables = array(
+			'order_id' => $order->get_id(),
+			'items'    => http_build_query( $items_array ),
+			'country'  => $tax_rate['tax_rate_country'],
+			'state'    => $tax_rate['tax_rate_state'],
+		);
+
+		$add_coupon_post_variables = array(
+			'order_id' => $order->get_id(),
+			'coupon'   => $coupon->get_code(),
+		);
+
+		$taxes_controller->calc_line_taxes( $calc_taxes_post_variables );
+		$coupons_controller->add_coupon_discount( $add_coupon_post_variables );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 108, $order->get_total() );
 	}
 }

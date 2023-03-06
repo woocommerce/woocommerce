@@ -11,6 +11,7 @@ const {
 	getAppName,
 	getTestConfig,
 	resolveLocalE2ePath,
+	resolvePackagePath,
 } = require( '../utils' );
 
 const dockerArgs = [];
@@ -63,7 +64,7 @@ if ( appPath ) {
 		if ( fs.existsSync( appInitFile ) ) {
 			fs.copyFileSync(
 				appInitFile,
-				path.resolve( __dirname, '../docker/wp-cli/initialize.sh' )
+				resolvePackagePath( 'docker/wp-cli/initialize.sh' )
 			);
 			console.log( 'Initializing ' + appInitFile );
 		}
@@ -90,7 +91,7 @@ if ( ! process.env.WORDPRESS_URL ) {
 }
 
 // Ensure that the first Docker compose file loaded is from our local env.
-dockerArgs.unshift( '-f', path.resolve( __dirname, '../docker-compose.yaml' ) );
+dockerArgs.unshift( '-f', resolvePackagePath( 'docker-compose.yaml' ) );
 
 const dockerProcess = spawnSync( 'docker-compose', dockerArgs, {
 	stdio: 'inherit',

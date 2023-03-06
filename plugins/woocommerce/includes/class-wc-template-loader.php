@@ -101,7 +101,29 @@ class WC_Template_Loader {
 	}
 
 	/**
+	 * Checks whether a block template for a given taxonomy exists.
+	 *
+	 * **Note:** This checks both the `templates` and `block-templates` directories
+	 * as both conventions should be supported.
+	 *
+	 * @param object $taxonomy Object taxonomy to check.
+	 * @return boolean
+	 */
+	private static function taxonomy_has_block_template( $taxonomy ) : bool {
+		if ( taxonomy_is_product_attribute( $taxonomy->taxonomy ) ) {
+			$template_name = 'taxonomy-product_attribute';
+		} else {
+			$template_name = 'taxonomy-' . $taxonomy->taxonomy;
+		}
+
+		return self::has_block_template( $template_name );
+	}
+
+	/**
 	 * Checks whether a block template with that name exists.
+	 *
+	 * **Note: ** This checks both the `templates` and `block-templates` directories
+	 * as both conventions should be supported.
 	 *
 	 * @since  5.5.0
 	 * @param string $template_name Template to check.
@@ -112,7 +134,31 @@ class WC_Template_Loader {
 			return false;
 		}
 
-		$has_template = is_readable( get_stylesheet_directory() . '/block-templates/' . $template_name . '.html' );
+		$has_template            = false;
+		$template_filename       = $template_name . '.html';
+		// Since Gutenberg 12.1.0, the conventions for block templates directories have changed,
+		// we should check both these possible directories for backwards-compatibility.
+		$possible_templates_dirs = array( 'templates', 'block-templates' );
+
+		// Combine the possible root directory names with either the template directory
+		// or the stylesheet directory for child themes, getting all possible block templates
+		// locations combinations.
+		$filepath        = DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $template_filename;
+		$legacy_filepath = DIRECTORY_SEPARATOR . 'block-templates' . DIRECTORY_SEPARATOR . $template_filename;
+		$possible_paths  = array(
+			get_stylesheet_directory() . $filepath,
+			get_stylesheet_directory() . $legacy_filepath,
+			get_template_directory() . $filepath,
+			get_template_directory() . $legacy_filepath,
+		);
+
+		// Check the first matching one.
+		foreach ( $possible_paths as $path ) {
+			if ( is_readable( $path ) ) {
+				$has_template = true;
+				break;
+			}
+		}
 
 		/**
 		 * Filters the value of the result of the block template check.
@@ -132,6 +178,7 @@ class WC_Template_Loader {
 	 * @since  3.0.0
 	 * @since  5.5.0 If a block template with the same name exists, return an
 	 * empty string.
+	 * @since  6.3.0 It checks custom product taxonomies
 	 * @return string
 	 */
 	private static function get_template_loader_default_file() {
@@ -143,14 +190,18 @@ class WC_Template_Loader {
 		} elseif ( is_product_taxonomy() ) {
 			$object = get_queried_object();
 
-			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-				if ( self::has_block_template( 'taxonomy-' . $object->taxonomy ) ) {
-					$default_file = '';
-				} else {
+			if ( self::taxonomy_has_block_template( $object ) ) {
+				$default_file = '';
+			} else {
+				if ( taxonomy_is_product_attribute( $object->taxonomy ) ) {
+					$default_file = 'taxonomy-product-attribute.php';
+				} elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
 					$default_file = 'taxonomy-' . $object->taxonomy . '.php';
+				} elseif ( ! self::has_block_template( 'archive-product' ) ) {
+					$default_file = 'archive-product.php';
+				} else {
+					$default_file = '';
 				}
-			} elseif ( ! self::has_block_template( 'archive-product' ) ) {
-				$default_file = 'archive-product.php';
 			}
 		} elseif (
 			( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) &&
@@ -199,19 +250,25 @@ class WC_Template_Loader {
 		if ( is_product_taxonomy() ) {
 			$object = get_queried_object();
 
-			$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
-			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
-			$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
-			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '.php';
-
-			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-				$cs_taxonomy = str_replace( '_', '-', $object->taxonomy );
-				$cs_default  = str_replace( '_', '-', $default_file );
+			if ( taxonomy_is_product_attribute( $object->taxonomy ) ) {
+				$templates[] = 'taxonomy-product_attribute.php';
+				$templates[] = WC()->template_path() . 'taxonomy-product_attribute.php';
+				$templates[] = $default_file;
+			} else {
 				$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
-				$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '-' . $object->slug . '.php';
+				$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
 				$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
-				$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '.php';
-				$templates[] = $cs_default;
+				$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '.php';
+
+				if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
+					$cs_taxonomy = str_replace( '_', '-', $object->taxonomy );
+					$cs_default  = str_replace( '_', '-', $default_file );
+					$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
+					$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '-' . $object->slug . '.php';
+					$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
+					$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '.php';
+					$templates[] = $cs_default;
+				}
 			}
 		}
 

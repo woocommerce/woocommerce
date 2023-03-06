@@ -1,0 +1,41 @@
+{
+	"name": "@woocommerce/internal-e2e-builds",
+	"version": "0.1.0",
+	"description": "Utility build files for e2e packages",
+	"private": true,
+	"main": "build.js",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
+	"bin": {
+		"e2e-builds": "./build.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/woocommerce/woocommerce.git"
+	},
+	"license": "GPL-3.0+",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce#readme",
+	"scripts": {
+		"lint": "eslint build.js",
+		"lint:fix": "eslint build.js --fix"
+	},
+	"devDependencies": {
+		"@babel/core": "7.12.9",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"chalk": "^4.1.2",
+		"eslint": "^8.32.0",
+		"glob": "^7.2.0",
+		"lodash": "^4.17.21",
+		"mkdirp": "^1.0.4"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	}
+}

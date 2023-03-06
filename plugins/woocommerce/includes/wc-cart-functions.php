@@ -89,7 +89,7 @@ function wc_get_raw_referer() {
  * Add to cart messages.
  *
  * @param int|array $products Product ID list or single product ID.
- * @param bool      $show_qty Should qty's be shown? Added in 2.6.0.
+ * @param bool      $show_qty Should quantities be shown? Added in 2.6.0.
  * @param bool      $return   Return message rather than add it.
  *
  * @return mixed
@@ -118,11 +118,12 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 	$added_text = sprintf( _n( '%s has been added to your cart.', '%s have been added to your cart.', $count, 'woocommerce' ), wc_format_list_of_items( $titles ) );
 
 	// Output success messages.
+	$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wc_get_raw_referer() ? wp_validate_redirect( wc_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
-		$message   = sprintf( '<a href="%s" tabindex="1" class="button wc-forward">%s</a> %s', esc_url( $return_to ), esc_html__( 'Continue shopping', 'woocommerce' ), esc_html( $added_text ) );
+		$message   = sprintf( '<a href="%s" tabindex="1" class="button wc-forward%s">%s</a> %s', esc_url( $return_to ), esc_attr( $wp_button_class ), esc_html__( 'Continue shopping', 'woocommerce' ), esc_html( $added_text ) );
 	} else {
-		$message = sprintf( '<a href="%s" tabindex="1" class="button wc-forward">%s</a> %s', esc_url( wc_get_cart_url() ), esc_html__( 'View cart', 'woocommerce' ), esc_html( $added_text ) );
+		$message = sprintf( '<a href="%s" tabindex="1" class="button wc-forward%s">%s</a> %s', esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), esc_html__( 'View cart', 'woocommerce' ), esc_html( $added_text ) );
 	}
 
 	if ( has_filter( 'wc_add_to_cart_message' ) ) {
@@ -192,7 +193,7 @@ function wc_clear_cart_after_payment() {
 		}
 	}
 }
-add_action( 'get_header', 'wc_clear_cart_after_payment' );
+add_action( 'template_redirect', 'wc_clear_cart_after_payment', 20 );
 
 /**
  * Get the subtotal.

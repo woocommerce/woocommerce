@@ -13,7 +13,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Restore UTC on failure.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 		// @codingStandardsIgnoreStart
 		date_default_timezone_set( 'UTC' );
@@ -51,7 +51,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	 */
 	public function test_get_data() {
 		$object = new WC_Mock_WC_Data();
-		$this->assertInternalType( 'array', $object->get_data() );
+		$this->assertIsArray( $object->get_data() );
 	}
 
 	/**
@@ -86,7 +86,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$result      = $object->set_props( $data_to_set );
 		$this->assertTrue( is_wp_error( $result ) );
 		$this->assertEquals( 'I am also a fish', $object->get_content() );
-		$this->assertNotEquals( 'thisisinvalid', $object->get_bool_value() );
+		$this->assertNotSame( 'thisisinvalid', $object->get_bool_value() );
 	}
 
 	/**

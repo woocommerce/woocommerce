@@ -1,6 +1,6 @@
-# Using an External Container for End to End Testing
+# Using an External Environment for End to End Testing
 
-This document provides general instructions for using `@woocommerce/e2e-environment` with your hosting container. 
+This document provides general instructions for using `@woocommerce/e2e-environment` with your WooCommerce environment. Whether you're using a non-standard Docker configuration, a locally-hosted WC install, or a WC install hosted externally, these instructions should point you to what is needed for configuration.
 
 ## Prerequisites
 
@@ -14,10 +14,11 @@ The test sequencer uses a `ready` page to determine that the testing environment
 wp post create --post_type=page --post_status=publish --post_title='Ready' --post_content='E2E-tests.'
 ```
 
+If you don't have shell access to your test site, simply create a Page with the title `Ready` and the content `E2E-tests.` through the WP Admin.
+
 ### Project Initialization
 
-Each project will have its own begin test state and initialization script. For example, a project might start testing expecting that the [sample products](https://github.com/woocommerce/woocommerce/tree/trunk/sample-data) have already been imported. Below is the WP CLI equivalent initialization script for WooCommerce Core E2E testing:
-
+Each project will have its own begin test state and initialization script. For example, a project might start testing expecting that the [sample products](https://github.com/woocommerce/woocommerce/tree/trunk/sample-data) have already been imported. Below is the WP CLI equivalent initialization script for WooCommerce Core E2E testing (which expects certain users to be present and that WC is installed and active):
 
 ```
 wp core install --url=http://localhost:8084 --admin_user=admin --admin_password=password --admin_email=wooadmin@example.org
@@ -29,6 +30,15 @@ wp user create customer customer@woocommercecoree2etestsuite.com \
 	--first_name='Jane' \
 	--last_name='Smith'
 ```
+
+Again, if you don't have shell access to your test site, through WP Admin ensure that:
+
+1. WooCommerce is installed and activated.
+2. TwentyNineteen is installed and the active theme.
+3. You have an admin user set up (if their credentials differ from u/ `admin` and p/ `password` be sure to update `/plugins/woocommerce/tests/e2e/config/default.json`)
+4. You have a customer user set up named 'Jane Smith'. This user should be a `subscriber` and again make sure their username and password are reflected in `/plugins/woocommerce/tests/e2e/config/default.json`.
+
+You should then be able to run the e2e tests by running `pnpm run e2e --filter=woocommerce`.
 
 ### Test Sequencer Setup
 

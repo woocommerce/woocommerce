@@ -161,7 +161,7 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 
 			$hideprefix = 'true' === $request['all_item_meta'] ? null : '_';
 
-			foreach ( $item->get_formatted_meta_data( $hideprefix, true ) as $meta_key => $formatted_meta ) {
+			foreach ( $item->get_all_formatted_meta_data( $hideprefix ) as $meta_key => $formatted_meta ) {
 				$item_meta[] = array(
 					'key'   => $formatted_meta->key,
 					'label' => $formatted_meta->display_key,

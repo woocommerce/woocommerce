@@ -120,7 +120,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 				array(
 					'title'       => __( 'Header image', 'woocommerce' ),
-					'desc'        => __( 'URL to an image you want to show in the email header. Upload images using the media uploader (Admin > Media).', 'woocommerce' ),
+					'desc'        => __( 'Paste the URL of an image you want to show in the email header. Upload images using the media uploader (Media > Add New).', 'woocommerce' ),
 					'id'          => 'woocommerce_email_header_image',
 					'type'        => 'text',
 					'css'         => 'min-width:400px;',
@@ -146,11 +146,11 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				array(
 					'title'    => __( 'Base color', 'woocommerce' ),
 					/* translators: %s: default color */
-					'desc'     => sprintf( __( 'The base color for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#96588a</code>' ),
+					'desc'     => sprintf( __( 'The base color for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#7f54b3</code>' ),
 					'id'       => 'woocommerce_email_base_color',
 					'type'     => 'color',
 					'css'      => 'width:6em;',
-					'default'  => '#96588a',
+					'default'  => '#7f54b3',
 					'autoload' => false,
 					'desc_tip' => true,
 				),

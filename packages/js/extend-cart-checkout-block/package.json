@@ -1,0 +1,25 @@
+{
+	"name": "@woocommerce/extend-cart-checkout-block",
+	"version": "1.1.0",
+	"description": "",
+	"main": "index.js",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
+	"scripts": {
+		"postinstall": "composer install",
+		"changelog": "composer exec -- changelogger"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/woocommerce/woocommerce.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/extend-cart-checkout-block#readme"
+}

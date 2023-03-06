@@ -5,7 +5,9 @@
 
 namespace Automattic\WooCommerce\Internal\ProductAttributesLookup;
 
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,14 +16,16 @@ defined( 'ABSPATH' ) || exit;
  */
 class LookupDataStore {
 
+	use AccessiblePrivateMethods;
+
 	/**
 	 * Types of updates to perform depending on the current changest
 	 */
 
-	const ACTION_NONE         = 0;
-	const ACTION_INSERT       = 1;
-	const ACTION_UPDATE_STOCK = 2;
-	const ACTION_DELETE       = 3;
+	public const ACTION_NONE         = 0;
+	public const ACTION_INSERT       = 1;
+	public const ACTION_UPDATE_STOCK = 2;
+	public const ACTION_DELETE       = 3;
 
 	/**
 	 * The lookup table name.
@@ -36,7 +40,7 @@ class LookupDataStore {
 	public function __construct() {
 		global $wpdb;
 
-		$this->lookup_table_name  = $wpdb->prefix . 'wc_product_attributes_lookup';
+		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
 
 		$this->init_hooks();
 	}
@@ -45,77 +49,14 @@ class LookupDataStore {
 	 * Initialize the hooks used by the class.
 	 */
 	private function init_hooks() {
-		add_action(
-			'woocommerce_run_product_attribute_lookup_update_callback',
-			function ( $product_id, $action ) {
-				$this->run_update_callback( $product_id, $action );
-			},
-			10,
-			2
-		);
-
-		add_filter(
-			'woocommerce_get_sections_products',
-			function ( $products ) {
-				if ( $this->check_lookup_table_exists() ) {
-					$products['advanced'] = __( 'Advanced', 'woocommerce' );
-				}
-				return $products;
-			},
-			100,
-			1
-		);
-
-		add_filter(
-			'woocommerce_get_settings_products',
-			function ( $settings, $section_id ) {
-				if ( 'advanced' === $section_id && $this->check_lookup_table_exists() ) {
-					$title_item = array(
-						'title' => __( 'Product attributes lookup table', 'woocommerce' ),
-						'type'  => 'title',
-					);
-
-					$regeneration_is_in_progress = $this->regeneration_is_in_progress();
-
-					if ( $regeneration_is_in_progress ) {
-						$title_item['desc'] = __( 'These settings are not available while the lookup table regeneration is in progress.', 'woocommerce' );
-					}
-
-					$settings[] = $title_item;
-
-					if ( ! $regeneration_is_in_progress ) {
-						$settings[] = array(
-							'title'         => __( 'Enable table usage', 'woocommerce' ),
-							'desc'          => __( 'Use the product attributes lookup table for catalog filtering.', 'woocommerce' ),
-							'id'            => 'woocommerce_attribute_lookup_enabled',
-							'default'       => 'no',
-							'type'          => 'checkbox',
-							'checkboxgroup' => 'start',
-						);
-
-						$settings[] = array(
-							'title'         => __( 'Direct updates', 'woocommerce' ),
-							'desc'          => __( 'Update the table directly upon product changes, instead of scheduling a deferred update.', 'woocommerce' ),
-							'id'            => 'woocommerce_attribute_lookup_direct_updates',
-							'default'       => 'no',
-							'type'          => 'checkbox',
-							'checkboxgroup' => 'start',
-						);
-					}
-
-					$settings[] = array( 'type' => 'sectionend' );
-				}
-				return $settings;
-			},
-			100,
-			2
-		);
+		self::add_action( 'woocommerce_run_product_attribute_lookup_update_callback', array( $this, 'run_update_callback' ), 10, 2 );
+		self::add_filter( 'woocommerce_get_sections_products', array( $this, 'add_advanced_section_to_product_settings' ), 100, 1 );
+		self::add_action( 'woocommerce_rest_insert_product', array( $this, 'on_product_created_or_updated_via_rest_api' ), 100, 2 );
+		self::add_filter( 'woocommerce_get_settings_products', array( $this, 'add_product_attributes_lookup_table_settings' ), 100, 2 );
 	}
 
 	/**
 	 * Check if the lookup table exists in the database.
-	 *
-	 * TODO: Remove this method and references to it once the lookup table is created via data migration.
 	 *
 	 * @return bool
 	 */
@@ -155,7 +96,7 @@ class LookupDataStore {
 		}
 
 		$action = $this->get_update_action( $changeset );
-		if ( self::ACTION_NONE !== $action ) {
+		if ( $action !== self::ACTION_NONE ) {
 			$this->maybe_schedule_update( $product->get_id(), $action );
 		}
 	}
@@ -171,7 +112,7 @@ class LookupDataStore {
 	 * @param int $action The action to perform, one of the ACTION_ constants.
 	 */
 	private function maybe_schedule_update( int $product_id, int $action ) {
-		if ( 'yes' === get_option( 'woocommerce_attribute_lookup_direct_updates' ) ) {
+		if ( get_option( 'woocommerce_attribute_lookup_direct_updates' ) === 'yes' ) {
 			$this->run_update_callback( $product_id, $action );
 			return;
 		}
@@ -251,7 +192,7 @@ class LookupDataStore {
 
 		if ( in_array( 'catalog_visibility', $keys, true ) ) {
 			$new_visibility = $changeset['catalog_visibility'];
-			if ( 'visible' === $new_visibility || 'catalog' === $new_visibility ) {
+			if ( $new_visibility === 'visible' || $new_visibility === 'catalog' ) {
 				return self::ACTION_INSERT;
 			} else {
 				return self::ACTION_DELETE;
@@ -492,7 +433,7 @@ class LookupDataStore {
 			$terms               = WC()->call_function(
 				'get_terms',
 				array(
-					'taxonomy'   => $taxonomy,
+					'taxonomy'   => wc_sanitize_taxonomy_name( $taxonomy ),
 					'hide_empty' => false,
 					'fields'     => 'id=>slug',
 				)
@@ -627,12 +568,26 @@ class LookupDataStore {
 	}
 
 	/**
+	 * Handler for the woocommerce_rest_insert_product hook.
+	 * Needed to update the lookup table when the REST API batch insert/update endpoints are used.
+	 *
+	 * @param \WP_Post         $product The post representing the created or updated product.
+	 * @param \WP_REST_Request $request The REST request that caused the hook to be fired.
+	 * @return void
+	 */
+	private function on_product_created_or_updated_via_rest_api( \WP_Post $product, \WP_REST_Request $request ): void {
+		if ( StringUtil::ends_with( $request->get_route(), '/batch' ) ) {
+			$this->on_product_changed( $product->ID );
+		}
+	}
+
+	/**
 	 * Tells if a lookup table regeneration is currently in progress.
 	 *
 	 * @return bool True if a lookup table regeneration is already in progress.
 	 */
 	public function regeneration_is_in_progress() {
-		return 'yes' === get_option( 'woocommerce_attribute_lookup_regeneration_in_progress', null );
+		return get_option( 'woocommerce_attribute_lookup_regeneration_in_progress', null ) === 'yes';
 	}
 
 	/**
@@ -647,5 +602,112 @@ class LookupDataStore {
 	 */
 	public function unset_regeneration_in_progress_flag() {
 		delete_option( 'woocommerce_attribute_lookup_regeneration_in_progress' );
+	}
+
+	/**
+	 * Set a flag indicating that the last lookup table regeneration process started was aborted.
+	 */
+	public function set_regeneration_aborted_flag() {
+		update_option( 'woocommerce_attribute_lookup_regeneration_aborted', 'yes' );
+	}
+
+	/**
+	 * Remove the flag indicating that the last lookup table regeneration process started was aborted.
+	 */
+	public function unset_regeneration_aborted_flag() {
+		delete_option( 'woocommerce_attribute_lookup_regeneration_aborted' );
+	}
+
+	/**
+	 * Tells if the last lookup table regeneration process started was aborted
+	 * (via deleting the 'woocommerce_attribute_lookup_regeneration_in_progress' option).
+	 *
+	 * @return bool True if the last lookup table regeneration process was aborted.
+	 */
+	public function regeneration_was_aborted(): bool {
+		return get_option( 'woocommerce_attribute_lookup_regeneration_aborted' ) === 'yes';
+	}
+
+	/**
+	 * Check if the lookup table contains any entry at all.
+	 *
+	 * @return bool True if the table contains entries, false if the table is empty.
+	 */
+	public function lookup_table_has_data(): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return ( (int) $wpdb->get_var( "SELECT EXISTS (SELECT 1 FROM {$this->lookup_table_name})" ) ) !== 0;
+	}
+
+	/**
+	 * Handler for 'woocommerce_get_sections_products', adds the "Advanced" section to the product settings.
+	 *
+	 * @param array $products Original array of settings sections.
+	 * @return array New array of settings sections.
+	 */
+	private function add_advanced_section_to_product_settings( array $products ): array {
+		if ( $this->check_lookup_table_exists() ) {
+			$products['advanced'] = __( 'Advanced', 'woocommerce' );
+		}
+
+		return $products;
+	}
+
+	/**
+	 * Handler for 'woocommerce_get_settings_products', adds the settings related to the product attributes lookup table.
+	 *
+	 * @param array  $settings Original settings configuration array.
+	 * @param string $section_id Settings section identifier.
+	 * @return array New settings configuration array.
+	 */
+	private function add_product_attributes_lookup_table_settings( array $settings, string $section_id ): array {
+		if ( $section_id === 'advanced' && $this->check_lookup_table_exists() ) {
+			$title_item = array(
+				'title' => __( 'Product attributes lookup table', 'woocommerce' ),
+				'type'  => 'title',
+			);
+
+			$regeneration_is_in_progress = $this->regeneration_is_in_progress();
+
+			if ( $regeneration_is_in_progress ) {
+				$title_item['desc'] = __( 'These settings are not available while the lookup table regeneration is in progress.', 'woocommerce' );
+			}
+
+			$settings[] = $title_item;
+
+			if ( ! $regeneration_is_in_progress ) {
+				$regeneration_aborted_warning =
+					$this->regeneration_was_aborted() ?
+						sprintf(
+							"<p><strong style='color: #E00000'>%s</strong></p><p>%s</p>",
+							__( 'WARNING: The product attributes lookup table regeneration process was aborted.', 'woocommerce' ),
+							__( 'This means that the table is probably in an inconsistent state. It\'s recommended to run a new regeneration process or to resume the aborted process (Status - Tools - Regenerate the product attributes lookup table/Resume the product attributes lookup table regeneration) before enabling the table usage.', 'woocommerce' )
+						) : null;
+
+				$settings[] = array(
+					'title'         => __( 'Enable table usage', 'woocommerce' ),
+					'desc'          => __( 'Use the product attributes lookup table for catalog filtering.', 'woocommerce' ),
+					'desc_tip'      => $regeneration_aborted_warning,
+					'id'            => 'woocommerce_attribute_lookup_enabled',
+					'default'       => 'no',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+				);
+
+				$settings[] = array(
+					'title'         => __( 'Direct updates', 'woocommerce' ),
+					'desc'          => __( 'Update the table directly upon product changes, instead of scheduling a deferred update.', 'woocommerce' ),
+					'id'            => 'woocommerce_attribute_lookup_direct_updates',
+					'default'       => 'no',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+				);
+			}
+
+			$settings[] = array( 'type' => 'sectionend' );
+		}
+
+		return $settings;
 	}
 }

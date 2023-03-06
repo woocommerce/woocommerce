@@ -1,57 +1,71 @@
 {
-  "name": "@woocommerce/api",
-  "version": "0.2.0",
-  "author": "Automattic",
-  "description": "A simple interface for interacting with a WooCommerce installation.",
-  "homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/api/README.md",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/woocommerce/woocommerce.git"
-  },
-  "keywords": [
-    "woocommerce",
-    "e2e"
-  ],
-  "license": "GPL-3.0+",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "/dist/",
-    "!*.ts.map",
-    "!*.tsbuildinfo",
-    "!/dist/**/__tests__/",
-    "!/dist/**/__mocks__/",
-    "!/dist/**/__snapshops__/",
-    "!/dist/**/__test_data__/"
-  ],
-  "sideEffects": false,
-  "scripts": {
-    "preinstall": "npx only-allow pnpm",
-    "clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
-    "compile": "tsc -b",
-    "build": "pnpm run clean && npm run compile",
-    "prepare": "pnpm run build",
-    "lint": "eslint src",
-    "test": "jest"
-  },
-  "dependencies": {
-    "axios": "^0.24.0",
-    "create-hmac": "1.1.7",
-    "oauth-1.0a": "2.2.6"
-  },
-  "devDependencies": {
-    "@types/create-hmac": "1.1.0",
-    "@types/jest": "^27.0.2",
-    "@types/node": "13.13.5",
-    "@typescript-eslint/eslint-plugin": "^5.3.1",
-    "@typescript-eslint/parser": "^5.3.1",
-    "axios-mock-adapter": "^1.20.0",
-    "eslint": "^8.2.0",
-    "jest": "^27.3.1",
-    "ts-jest": "25.5.0",
-    "typescript": "^4.4.4"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+	"name": "@woocommerce/api",
+	"version": "0.2.0",
+	"author": "Automattic",
+	"description": "A simple interface for interacting with a WooCommerce installation.",
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/api/README.md",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"keywords": [
+		"woocommerce",
+		"e2e"
+	],
+	"license": "GPL-3.0+",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"/dist/",
+		"!*.ts.map",
+		"!*.tsbuildinfo",
+		"!/dist/**/__tests__/",
+		"!/dist/**/__mocks__/",
+		"!/dist/**/__snapshops__/",
+		"!/dist/**/__test_data__/"
+	],
+	"sideEffects": false,
+	"scripts": {
+		"turbo:build": "pnpm run clean && npm run compile",
+		"turbo:test": "jest",
+		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
+		"prepare": "composer install",
+		"changelog": "composer exec -- changelogger",
+		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
+		"compile": "tsc -b",
+		"prepack": "pnpm run build",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix"
+	},
+	"dependencies": {
+		"axios": "^0.24.0",
+		"create-hmac": "1.1.7",
+		"oauth-1.0a": "2.2.6"
+	},
+	"devDependencies": {
+		"@types/create-hmac": "1.1.0",
+		"@types/jest": "^27.4.1",
+		"@types/node": "13.13.5",
+		"@typescript-eslint/eslint-plugin": "^5.43.0",
+		"@typescript-eslint/parser": "^5.43.0",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"axios-mock-adapter": "^1.20.0",
+		"eslint": "^8.32.0",
+		"jest": "^27",
+		"ts-jest": "^27",
+		"typescript": "^4.8.3"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	}
 }

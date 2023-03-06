@@ -240,13 +240,8 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	public function delete( &$download, $args = array() ) {
 		global $wpdb;
 
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-				WHERE permission_id = %d",
-				$download->get_id()
-			)
-		);
+		$download_id = $download->get_id();
+		$this->delete_by_id( $download_id );
 
 		$download->set_id( 0 );
 	}
@@ -265,6 +260,50 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 				$id
 			)
 		);
+		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_download_log
+				WHERE permission_id = %d",
+				$id
+			)
+		);
+	}
+
+	/**
+	 * Delete download_log related to download permission via $field with value $value.
+	 *
+	 * @param string           $field Field used to query download permission table with.
+	 * @param string|int|float $value Value to filter the field by.
+	 *
+	 * @return void
+	 */
+	private function delete_download_log_by_field_value( $field, $value ) {
+		global $wpdb;
+
+		$value_placeholder = '';
+		if ( is_int( $value ) ) {
+			$value_placeholder = '%d';
+		} elseif ( is_string( $value ) ) {
+			$value_placeholder = '%s';
+		} elseif ( is_float( $value ) ) {
+			$value_placeholder = '%f';
+		} else {
+			wc_doing_it_wrong( __METHOD__, __( 'Unsupported argument type provided as value.', 'woocommerce' ), '7.0' );
+			// The `prepare` further down would fail if the placeholder was missing, so skip download log removal.
+			return;
+		}
+
+		$query = "DELETE FROM {$wpdb->prefix}wc_download_log
+					WHERE permission_id IN (
+					    SELECT permission_id
+					    FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+					    WHERE {$field} = {$value_placeholder}
+					)";
+
+		$wpdb->query(
+			$wpdb->prepare( $query, $value ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		);
 	}
 
 	/**
@@ -274,6 +313,9 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 */
 	public function delete_by_order_id( $id ) {
 		global $wpdb;
+		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+		$this->delete_download_log_by_field_value( 'order_id', $id );
+
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -290,6 +332,9 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 */
 	public function delete_by_download_id( $id ) {
 		global $wpdb;
+		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+		$this->delete_download_log_by_field_value( 'download_id', $id );
+
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -308,6 +353,9 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 */
 	public function delete_by_user_id( $id ) {
 		global $wpdb;
+		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+		$this->delete_download_log_by_field_value( 'user_id', $id );
+
 		return (bool) $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -326,6 +374,9 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	 */
 	public function delete_by_user_email( $email ) {
 		global $wpdb;
+		// Delete related records in wc_download_log (aka ON DELETE CASCADE).
+		$this->delete_download_log_by_field_value( 'user_email', $email );
+
 		return (bool) $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
@@ -348,7 +399,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 	/**
 	 * Get array of download ids by specified args.
 	 *
-	 * @param  array $args Arguments to filter downloads. $args['return'] accepts the following values: 'objects' (default), 'ids' or a comma separeted list of fields (for example: 'order_id,user_id,user_email').
+	 * @param  array $args Arguments to filter downloads. $args['return'] accepts the following values: 'objects' (default), 'ids' or a comma separated list of fields (for example: 'order_id,user_id,user_email').
 	 * @return array Can be an array of permission_ids, an array of WC_Customer_Download objects or an array of arrays containing specified fields depending on the value of $args['return'].
 	 */
 	public function get_downloads( $args = array() ) {

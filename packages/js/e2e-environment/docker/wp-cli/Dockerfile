@@ -2,10 +2,6 @@ FROM wordpress:cli-2.5.0
 
 USER root
 
-COPY wait-for-it.sh /usr/local/bin/wait-for-it
-RUN chown xfs:xfs /usr/local/bin/wait-for-it && \
-    chmod +x /usr/local/bin/wait-for-it
-
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chown xfs:xfs /usr/local/bin/entrypoint.sh && \
     chmod +x /usr/local/bin/entrypoint.sh

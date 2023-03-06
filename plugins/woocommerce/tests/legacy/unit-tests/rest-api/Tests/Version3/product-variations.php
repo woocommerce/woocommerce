@@ -14,7 +14,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Product_Variations_Controller();
 		$this->user     = $this->factory->user->create(
@@ -209,14 +209,14 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$variation = $response->get_data();
 
 		$this->assertTrue( isset( $variation['description'] ), print_r( $variation, true ) );
-		$this->assertContains( 'O_O', $variation['description'], print_r( $variation, true ) );
+		$this->assertStringContainsString( 'O_O', $variation['description'], print_r( $variation, true ) );
 		$this->assertEquals( '8', $variation['price'], print_r( $variation, true ) );
 		$this->assertEquals( '8', $variation['sale_price'], print_r( $variation, true ) );
 		$this->assertEquals( '10', $variation['regular_price'], print_r( $variation, true ) );
 		$this->assertEquals( 'FIXED-\'SKU', $variation['sku'], print_r( $variation, true ) );
 		$this->assertEquals( 'medium', $variation['attributes'][0]['option'], print_r( $variation, true ) );
-		$this->assertContains( 'Dr1Bczxq4q', $variation['image']['src'], print_r( $variation, true ) );
-		$this->assertContains( 'test upload image', $variation['image']['alt'], print_r( $variation, true ) );
+		$this->assertStringContainsString( 'Dr1Bczxq4q', $variation['image']['src'], print_r( $variation, true ) );
+		$this->assertStringContainsString( 'test upload image', $variation['image']['alt'], print_r( $variation, true ) );
 
 		wp_delete_attachment( $variation['image']['id'], true );
 	}
@@ -290,7 +290,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$response  = $this->server->dispatch( $request );
 		$variation = $response->get_data();
 
-		$this->assertContains( 'A medium size.', $variation['description'] );
+		$this->assertStringContainsString( 'A medium size.', $variation['description'] );
 		$this->assertEquals( '12', $variation['price'] );
 		$this->assertEquals( '12', $variation['regular_price'] );
 		$this->assertTrue( $variation['purchasable'] );
@@ -373,7 +373,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertContains( 'Updated description.', $data['update'][0]['description'] );
+		$this->assertStringContainsString( 'Updated description.', $data['update'][0]['description'] );
 		$this->assertEquals( 'DUMMY SKU VARIABLE MEDIUM', $data['create'][0]['sku'] );
 		$this->assertEquals( 'medium', $data['create'][0]['attributes'][0]['option'] );
 		$this->assertEquals( $children[1], $data['delete'][0]['id'] );

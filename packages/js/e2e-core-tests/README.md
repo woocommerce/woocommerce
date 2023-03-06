@@ -20,6 +20,18 @@ Follow [E2E setup instructions](https://github.com/woocommerce/woocommerce/blob/
 
 ### Setting up core tests
 
+#### Version 0.2.0 or newer
+
+Version 0.2.0 added a test installer that will populate the `tests/e2e/specs` folder with test scripts for all the current core test suite. It also creates sample configuration files including all the configuration data needed to run the core tests.
+
+- Install the e2e-environment `npm install @woocommerce/e2e-environment --save-dev`
+- Run the installer `npx wc-e2e install @woocommerce/e2e-core-tests`
+- Merge the sample configuration files:
+  - `tests/e2e/docker/woocommerce.e2e-core-tests.sh` => `initialize.sh`
+  - `tests/e2e/config/default-woocommerce.e2e-core-tests.json` => `default.json`
+
+#### Version 0.1.X or other test runner
+
 - Create the folder `tests/e2e/specs` in your repository if it does not exist.
 - To add a core test to your test suite, create a new `.test.js` file within `tests/e2e/specs` . Example code to run all the shopper tests:
 ```js
@@ -92,6 +104,7 @@ The functions to access the core tests are:
   - `runCartCalculateShippingTest` - Shopper can calculate shipping in the cart
   - `runCartRedirectionTest` - Shopper is redirected to the cart page after adding to cart
   - `runOrderEmailReceivingTest` - Shopper can receive an email for his order
+  - `runCartAndCheckoutConsistentShippingTest` - Shopper gets consistent shipping information on cart and checkout pages
 
 ### REST API
 
@@ -104,7 +117,7 @@ The functions to access the core tests are:
 
 ## Contributing a new test
 
-- In your branch create a new `example-test-name.test.js` under the `tests/e2e/core-tests/specs` folder.
+- In your branch create a new `example-test-name.test.js` under the appropriate folder in the [`specs`](specs) directory.
 - Jest does not allow its global functions to be accessed outside the jest environment. To allow the test code to be published in a package import any jest global functions used in your test
 ```js
 const {
@@ -130,7 +143,7 @@ const runExampleTestName = () => {
 
 module.exports = runExampleTestName;
 ```
-- Add your test to `tests/e2e/core-tests/specs/index.js`
+- Add your test to [`specs/index.js`](specs/index.js)
 ```js
 const runExampleTestName = require( './grouping/example-test-name.test' );
 // ...

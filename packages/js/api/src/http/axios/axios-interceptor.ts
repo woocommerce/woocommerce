@@ -1,18 +1,21 @@
+/**
+ * External dependencies
+ */
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 /**
  * An object containing the IDs for an interceptor currently applied to a client.
  *
  * @typedef ActiveInterceptor
- * @property {AxiosInstance} client The client the interceptor is tied to.
- * @property {number} requestInterceptorID The ID of the request interceptor callbacks.
- * @property {number} responseInterceptorID The ID of the response interceptor callbacks.
+ * @property {AxiosInstance} client                The client the interceptor is tied to.
+ * @property {number}        requestInterceptorID  The ID of the request interceptor callbacks.
+ * @property {number}        responseInterceptorID The ID of the response interceptor callbacks.
  */
 type ActiveInterceptor = {
 	client: AxiosInstance;
 	requestInterceptorID: number;
 	responseInterceptorID: number;
-}
+};
 
 /**
  * A base class for encapsulating the start and stop functionality required by all Axios interceptors.
@@ -33,13 +36,17 @@ export abstract class AxiosInterceptor {
 	 */
 	public start( client: AxiosInstance ): void {
 		const requestInterceptorID = client.interceptors.request.use(
-			( response ) => this.handleRequest( response ),
+			( response ) => this.handleRequest( response )
 		);
 		const responseInterceptorID = client.interceptors.response.use(
 			( response ) => this.onResponseSuccess( response ),
-			( error ) => this.onResponseRejected( error ),
+			( error ) => this.onResponseRejected( error )
 		);
-		this.activeInterceptors.push( { client, requestInterceptorID, responseInterceptorID } );
+		this.activeInterceptors.push( {
+			client,
+			requestInterceptorID,
+			responseInterceptorID,
+		} );
 	}
 
 	/**
@@ -51,8 +58,12 @@ export abstract class AxiosInterceptor {
 		for ( let i = this.activeInterceptors.length - 1; i >= 0; --i ) {
 			const active = this.activeInterceptors[ i ];
 			if ( client === active.client ) {
-				client.interceptors.request.eject( active.requestInterceptorID );
-				client.interceptors.response.eject( active.responseInterceptorID );
+				client.interceptors.request.eject(
+					active.requestInterceptorID
+				);
+				client.interceptors.response.eject(
+					active.responseInterceptorID
+				);
 				this.activeInterceptors.splice( i, 1 );
 			}
 		}

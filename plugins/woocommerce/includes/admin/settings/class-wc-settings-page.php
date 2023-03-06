@@ -64,7 +64,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Add this page to settings.
 		 *
-		 * @param array $pages The setings array where we'll add ourselves.
+		 * @param array $pages The settings array where we'll add ourselves.
 		 *
 		 * @return mixed
 		 */

@@ -1,0 +1,63 @@
+name: Highlight templates changes
+on:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
+
+permissions: {}
+
+jobs:
+    analyze:
+        name: Check pull request changes to highlight
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        outputs:
+            results: ${{ steps.results.outputs.results }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+            - name: Install prerequisites
+              run: |
+                  npm install -g pnpm
+                  npm -g i @wordpress/env@5.1.0
+                  pnpm install --filter code-analyzer --filter cli-core
+            - name: Run analyzer
+              id: run
+              working-directory: tools/code-analyzer
+              run: |
+                  HEAD_REF=$(git rev-parse HEAD)
+                  version=$(pnpm run analyzer major-minor "$HEAD_REF" "plugins/woocommerce/woocommerce.php" | tail -n 1)
+                  pnpm run analyzer "$HEAD_REF" $version -o "github"
+            - name: Check results
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const template = '${{ steps.run.outputs.templates }}';
+
+                      if ( template === '' ) {
+                        return;
+                      }
+
+                      const templateArr = template.split( '\n' );
+                      const modTemplateArr = [];
+                      let needsVersionBump = false;
+
+                      templateArr.forEach( ( el ) => {
+                        if ( el.match( /NOTICE/ ) ) {
+                          modTemplateArr.pop();
+                          return;
+                        }
+
+                        if ( el.match( /WARNING/ ) ) {
+                          needsVersionBump = true;
+                        }
+
+                        modTemplateArr.push( el );
+                      } );
+
+                      const templateResult = modTemplateArr.join( '\n' );
+
+                      if ( needsVersionBump ) {
+                        core.setFailed( `Templates have changed but template versions were not bumped:\n${ templateResult }` );
+                      }

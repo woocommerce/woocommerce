@@ -1,0 +1,64 @@
+<!-- wp:heading -->
+<h1><%= title %></h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>We are pleased to announce the release of WooCommerce <%= displayVersion %>. This release should be backwards compatible with the previous version.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>This release contains:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list -->
+<ul>
+  <% for ( const packageName in contributors ) { %>    
+    <% const {org, repo, contributors: packageContributors, totalCommits, baseRef, headRef} = contributors[packageName] %>
+    <% if ( packageContributors ) { %>
+      <li>
+        <a target="_blank" href="https://github.com/<%= org %>/<%= repo %>/compare/<%= baseRef %>...<%= headRef %>">
+          <%= totalCommits %> commits from <%= packageContributors.length %> contributors
+        </a> 
+        in <%= packageName %>.
+      </li>
+    <% } %>
+  <% } %>
+</ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>
+  As always, we recommend creating a backup of your site and making sure that your theme and any other plugins are compatible before updating. 
+  You can check out <a href="https://docs.woocommerce.com/document/how-to-update-woocommerce/" target="_blank">this update guide</a> for more information.
+</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading -->
+<h2 id="what-s-new-in-<%= displayVersion %>">What's new in <%= displayVersion %>?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>WHAT'S NEW ITEMS</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>
+  These are just some of the changes that are included in WooCommerce <%= displayVersion %>. 
+  You can find the complete changelog for this release in the <a href="https://github.com/woocommerce/woocommerce/blob/release/<%= displayVersion %>/changelog.txt" target="_blank">changelog.txt file</a>.
+</p>
+<!-- /wp:paragraph -->
+
+
+<!-- release:hooks --><%- include( 'hooks' ) %><!-- /release:hooks -->
+<!-- release:database --><%- include( 'database' ) %><!-- /release:database -->
+<!-- release:templates --><%- include( 'templates' ) %><!-- /release:templates -->
+
+<!-- wp:heading -->
+<h2 id="deprecations">Deprecations</h2>
+<!-- /wp:heading -->
+<!-- wp:paragraph -->
+<p>There are no deprecations in this release.</p>
+<!-- /wp:paragraph -->
+
+<!-- release:contributors--><%- include('contributors') %><!-- /release:contributors -->
+

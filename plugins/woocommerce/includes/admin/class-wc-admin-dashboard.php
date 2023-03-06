@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -127,7 +128,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';
 
-			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false );
+			//phpcs:ignore
+			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! Features::is_enabled( 'analytics' );
 
 			$reports = new WC_Admin_Report();
 
@@ -181,7 +183,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 
 			$this->status_widget_order_rows();
-			$this->status_widget_stock_rows( $is_wc_admin_disabled );
+			if ( get_option( 'woocommerce_manage_stock' ) === 'yes' ) {
+				$this->status_widget_stock_rows( $is_wc_admin_disabled );
+			}
 
 			do_action( 'woocommerce_after_dashboard_status_widget', $reports );
 			echo '</ul>';

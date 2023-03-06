@@ -15,14 +15,14 @@ class WC_Tests_Rate_Limiter extends WC_Unit_Test_Case {
 	/**
 	 * Run setup code for unit tests.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 	}
 
 	/**
 	 * Run tear down code for unit tests.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 	}
 

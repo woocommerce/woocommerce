@@ -392,7 +392,7 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 			// If this is a term slug, get the term's nice name.
 			if ( taxonomy_exists( $name ) ) {
 				$term = get_term_by( 'slug', $value, $name );
-				if ( ! is_wp_error( $term ) && ! empty( $term->name ) ) {
+				if ( ! is_wp_error( $term ) && $term && null !== $term->name && '' !== $term->name ) {
 					$value = $term->name;
 				}
 			}
@@ -788,7 +788,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		}
 
 		$alt_text     = array_filter( $alt_text );
-		$props['alt'] = isset( $alt_text[0] ) ? $alt_text[0] : '';
+		$props['alt'] = $alt_text ? reset( $alt_text ) : '';
 
 		// Large version.
 		$full_size           = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
@@ -915,7 +915,7 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 	);
 
 	$transient     = get_transient( $transient_name );
-	$related_posts = $transient && isset( $transient[ $query_args ] ) ? $transient[ $query_args ] : false;
+	$related_posts = $transient && is_array( $transient ) && isset( $transient[ $query_args ] ) ? $transient[ $query_args ] : false;
 
 	// We want to query related posts if they are not cached, or we don't have enough.
 	if ( false === $related_posts || count( $related_posts ) < $limit ) {
@@ -931,7 +931,7 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 			$related_posts = $data_store->get_related_products( $cats_array, $tags_array, $exclude_ids, $limit + 10, $product_id );
 		}
 
-		if ( $transient ) {
+		if ( $transient && is_array( $transient ) ) {
 			$transient[ $query_args ] = $related_posts;
 		} else {
 			$transient = array( $query_args => $related_posts );
@@ -987,7 +987,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 		)
 	);
 
-	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : $product->get_price();
+	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : (float) $product->get_price();
 	$qty   = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
 
 	if ( '' === $price ) {
@@ -1071,7 +1071,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		)
 	);
 
-	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : $product->get_price();
+	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : (float) $product->get_price();
 	$qty   = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
 
 	if ( '' === $price ) {
@@ -1085,10 +1085,10 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
 		$order       = ArrayUtil::get_value_or_default( $args, 'order' );
 		$customer_id = $order ? $order->get_customer_id() : 0;
-		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) || ! $customer_id ) {
+		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 			$tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 		} else {
-			$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
+			$customer  = $customer_id ? wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id ) : null;
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
 		}
 		$remove_taxes = WC_Tax::calc_tax( $line_price, $tax_rates, true );

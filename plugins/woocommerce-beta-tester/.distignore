@@ -1,0 +1,24 @@
+.distignore
+.editorconfig
+.gitignore
+.travis.yml
+.git/
+.eslintrc
+.eslintignore
+.wordpress-org/
+.turbo/
+composer.json
+composer.lock
+package-lock.json
+package.json
+webpack.config.js
+phpcs.xml
+NEXT_CHANGELOG.md
+README.md
+
+changelog/
+
+# build files
+woocommerce-beta-tester.zip
+node_modules/
+bin/

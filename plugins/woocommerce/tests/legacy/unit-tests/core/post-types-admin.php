@@ -20,7 +20,7 @@ class WC_Test_Admin_Post_Types extends WC_Unit_Test_Case {
 	/**
 	 * Setup. Create a instance to use throughout.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->wc_cpt = new WC_Admin_Post_Types();
 	}

@@ -110,4 +110,18 @@ class WC_Tracks_Footer_Pixel {
 			WC_Tracks_Client::record_event( $event );
 		}
 	}
+
+	/**
+	 * Get all events.
+	 */
+	public static function get_events() {
+		return self::instance()->events;
+	}
+
+	/**
+	 * Clear all queued events.
+	 */
+	public static function clear_events() {
+		self::instance()->events = array();
+	}
 }

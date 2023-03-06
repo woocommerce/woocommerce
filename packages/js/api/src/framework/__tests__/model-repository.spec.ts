@@ -15,7 +15,12 @@ import {
 } from '../model-repository';
 import { DummyModel } from '../../__test_data__/dummy-model';
 
-type DummyModelParams = ModelRepositoryParams< DummyModel, never, { search: string }, 'name' >
+type DummyModelParams = ModelRepositoryParams<
+	DummyModel,
+	never,
+	{ search: string },
+	'name'
+>;
 
 class DummyChildModel extends Model {
 	public childName: string = '';
@@ -25,7 +30,12 @@ class DummyChildModel extends Model {
 		Object.assign( this, partial );
 	}
 }
-type DummyChildParams = ModelRepositoryParams< DummyChildModel, { parent: string }, { childSearch: string }, 'childName' >
+type DummyChildParams = ModelRepositoryParams<
+	DummyChildModel,
+	{ parent: string },
+	{ childSearch: string },
+	'childName'
+>;
 
 describe( 'ModelRepository', () => {
 	it( 'should list', async () => {
@@ -36,7 +46,7 @@ describe( 'ModelRepository', () => {
 			null,
 			null,
 			null,
-			null,
+			null
 		);
 
 		const listed = await repository.list( { search: 'test' } );
@@ -52,12 +62,18 @@ describe( 'ModelRepository', () => {
 			null,
 			null,
 			null,
-			null,
+			null
 		);
 
-		const listed = await repository.list( { parent: 'test' }, { childSearch: 'test' } );
+		const listed = await repository.list(
+			{ parent: 'test' },
+			{ childSearch: 'test' }
+		);
 		expect( listed ).toContain( model );
-		expect( callback ).toHaveBeenCalledWith( { parent: 'test' }, { childSearch: 'test' } );
+		expect( callback ).toHaveBeenCalledWith(
+			{ parent: 'test' },
+			{ childSearch: 'test' }
+		);
 	} );
 
 	it( 'should throw error on list without callback', () => {
@@ -66,7 +82,7 @@ describe( 'ModelRepository', () => {
 			null,
 			null,
 			null,
-			null,
+			null
 		);
 
 		expect( () => repository.list() ).toThrowError( /not supported/i );
@@ -80,7 +96,7 @@ describe( 'ModelRepository', () => {
 			callback,
 			null,
 			null,
-			null,
+			null
 		);
 
 		const created = await repository.create( { name: 'test' } );
@@ -96,12 +112,18 @@ describe( 'ModelRepository', () => {
 			callback,
 			null,
 			null,
-			null,
+			null
 		);
 
-		const created = await repository.create( { parent: 'yes' }, { childName: 'test' } );
+		const created = await repository.create(
+			{ parent: 'yes' },
+			{ childName: 'test' }
+		);
 		expect( created ).toBe( model );
-		expect( callback ).toHaveBeenCalledWith( { parent: 'yes' }, { childName: 'test' } );
+		expect( callback ).toHaveBeenCalledWith(
+			{ parent: 'yes' },
+			{ childName: 'test' }
+		);
 	} );
 
 	it( 'should throw error on create without callback', () => {
@@ -110,10 +132,12 @@ describe( 'ModelRepository', () => {
 			null,
 			null,
 			null,
-			null,
+			null
 		);
 
-		expect( () => repository.create( { name: 'test' } ) ).toThrowError( /not supported/i );
+		expect( () => repository.create( { name: 'test' } ) ).toThrowError(
+			/not supported/i
+		);
 	} );
 
 	it( 'should read', async () => {
@@ -124,7 +148,7 @@ describe( 'ModelRepository', () => {
 			null,
 			callback,
 			null,
-			null,
+			null
 		);
 
 		const created = await repository.read( 1 );
@@ -140,7 +164,7 @@ describe( 'ModelRepository', () => {
 			null,
 			callback,
 			null,
-			null,
+			null
 		);
 
 		const created = await repository.read( { parent: 'yes' }, 1 );
@@ -154,7 +178,7 @@ describe( 'ModelRepository', () => {
 			null,
 			null,
 			null,
-			null,
+			null
 		);
 
 		expect( () => repository.read( 1 ) ).toThrowError( /not supported/i );
@@ -168,7 +192,7 @@ describe( 'ModelRepository', () => {
 			null,
 			null,
 			callback,
-			null,
+			null
 		);
 
 		const updated = await repository.update( 1, { name: 'new-name' } );
@@ -184,12 +208,16 @@ describe( 'ModelRepository', () => {
 			null,
 			null,
 			callback,
-			null,
+			null
 		);
 
-		const updated = await repository.update( { parent: 'test' }, 1, { childName: 'new-name' } );
+		const updated = await repository.update( { parent: 'test' }, 1, {
+			childName: 'new-name',
+		} );
 		expect( updated ).toBe( model );
-		expect( callback ).toHaveBeenCalledWith( { parent: 'test' }, 1, { childName: 'new-name' } );
+		expect( callback ).toHaveBeenCalledWith( { parent: 'test' }, 1, {
+			childName: 'new-name',
+		} );
 	} );
 
 	it( 'should throw error on update without callback', () => {
@@ -198,10 +226,12 @@ describe( 'ModelRepository', () => {
 			null,
 			null,
 			null,
-			null,
+			null
 		);
 
-		expect( () => repository.update( 1, { name: 'new-name' } ) ).toThrowError( /not supported/i );
+		expect( () =>
+			repository.update( 1, { name: 'new-name' } )
+		).toThrowError( /not supported/i );
 	} );
 
 	it( 'should delete', async () => {
@@ -211,7 +241,7 @@ describe( 'ModelRepository', () => {
 			null,
 			null,
 			null,
-			callback,
+			callback
 		);
 
 		const success = await repository.delete( 1 );
@@ -226,7 +256,7 @@ describe( 'ModelRepository', () => {
 			null,
 			null,
 			null,
-			callback,
+			callback
 		);
 
 		const success = await repository.delete( { parent: 'yes' }, 1 );
@@ -240,7 +270,7 @@ describe( 'ModelRepository', () => {
 			null,
 			null,
 			null,
-			null,
+			null
 		);
 
 		expect( () => repository.delete( 1 ) ).toThrowError( /not supported/i );

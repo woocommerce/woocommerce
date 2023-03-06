@@ -6,7 +6,7 @@
  * @since 3.0.0
  */
 class WC_Tests_Log_Handler_DB extends WC_Unit_Test_Case {
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 
 		$this->handler = new WC_Log_Handler_DB( array( 'threshold' => 'debug' ) );

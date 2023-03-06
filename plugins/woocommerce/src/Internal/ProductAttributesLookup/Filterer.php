@@ -212,12 +212,13 @@ class Filterer {
 			{$tax_query_sql['join']} {$meta_query_sql['join']}
 			INNER JOIN {$wpdb->posts} ON {$wpdb->posts}.ID = {$this->lookup_table_name}.product_or_parent_id";
 
-		$term_ids_sql   = $this->get_term_ids_sql( $term_ids );
-		$query['where'] = "
+		$encoded_taxonomy = sanitize_title( $taxonomy );
+		$term_ids_sql     = $this->get_term_ids_sql( $term_ids );
+		$query['where']   = "
 			WHERE {$wpdb->posts}.post_type IN ( 'product' )
 			AND {$wpdb->posts}.post_status = 'publish'
 			{$tax_query_sql['where']} {$meta_query_sql['where']}
-			AND {$this->lookup_table_name}.taxonomy='{$taxonomy}'
+			AND {$this->lookup_table_name}.taxonomy='{$encoded_taxonomy}'
 			AND {$this->lookup_table_name}.term_id IN $term_ids_sql
 			{$in_stock_clause}";
 
@@ -226,17 +227,15 @@ class Filterer {
 
 			if ( ! empty( $attributes_to_filter_by ) ) {
 				$and_term_ids = array();
-				$or_term_ids  = array();
 
 				foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
+					if ( 'and' !== $data['query_type'] ) {
+						continue;
+					}
 					$all_terms             = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 					$term_ids_by_slug      = wp_list_pluck( $all_terms, 'term_id', 'slug' );
 					$term_ids_to_filter_by = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
-					if ( 'and' === $data['query_type'] ) {
-						$and_term_ids = array_merge( $and_term_ids, $term_ids_to_filter_by );
-					} else {
-						$or_term_ids = array_merge( $or_term_ids, $term_ids_to_filter_by );
-					}
+					$and_term_ids          = array_merge( $and_term_ids, $term_ids_to_filter_by );
 				}
 
 				if ( ! empty( $and_term_ids ) ) {
@@ -260,17 +259,6 @@ class Filterer {
 							{$in_stock_clause}
 							AND term_id in {$term_ids_list}
 						) temp )";
-				}
-
-				if ( ! empty( $or_term_ids ) ) {
-					$term_ids_list   = '(' . join( ',', $or_term_ids ) . ')';
-					$query['where'] .= "
-						AND product_or_parent_id IN ( SELECT product_or_parent_id FROM (
-							SELECT product_or_parent_id FROM {$this->lookup_table_name}
-							WHERE term_id in {$term_ids_list}
-							{$in_stock_clause}
-						) temp )";
-
 				}
 			} else {
 				$query['where'] .= $in_stock_clause;

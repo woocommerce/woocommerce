@@ -2,11 +2,35 @@
 
 ## Fixed
 
+- Added the `root: true` flag to `e2e-utils` ESLint config file so that ESLint ignores other ancestor config files when checking that package. This solves a version conflict when running ESLint.
+
+## Added
+
+- `createSimpleDownloadableProduct` component which creates a simple downloadable product, containing four parameters for title, price, download name and download limit.
+- `orderPageSaveChanges()` to save changes in the order page.
+- `productPageSaveChanges()` to save changes in the product page.
+- `getSelectorAttribute( selector, attribute )` to retrieve the desired HTML attribute from an element.
+- `verifyValueOfElementAttribute( selector, attribute, expectedValue )` to check that a specific HTML attribute from an element matches the expected value.
+- `click( selector )` to click an element asserting previously that the element is enabled and can be clicked.
+- `withRestApi.deleteProduct()` that deletes a single product.
+- `withRestApi.deleteOrder()` that deletes a single order.
+- `merchant.addDownloadableProductPermission()` to add a downloadable product permission to an order.
+- `merchant.updateDownloadableProductPermission()` to update the attributes of an existing downloadable product permission.
+- `merchant.revokeDownloadableProductPermission()` to remove the existing downloadable product permission from an order.
+- `merchant.verifyDownloadableProductPermission()` to check that the attributes of an existing downloadable product permission are correct.
+- `merchant.openDownloadLink()` to open the url of a download in a new tab.
+- `merchant.verifyCannotDownloadFromBecause()` to check that a download cannot happen for a specific reason.
+- `merchant.updateVariationDetails( variationDetails )` to update the variation details of a product.
+- `merchant.verifyVariationDetails( expectedVariationDetails )` to check that the variation details of a product were updated successfully.
+
+## Changed
+- Removed `faker` dependency
+
+# 0.1.7
+
+## Fixed
+
 - Identified the default product category using `slug == 'uncategorized'` in `deleteAllProductCategories`
-
-## Changes
-
-- Removed `page.waitForNavigation()` from `shopper.logout()`
 
 ## Added
 
@@ -15,14 +39,14 @@
 - Update `shopper.addToCartFromShopPage()` and `.removeFromCart()` to accept product Id or Title
 - Added `deleteAllProductAttributes()`, `deleteAllProductCategories()`, and `deleteAllProductTags()` to clean up meta data added when products are imported
 - Added `withRestApi.createProductCategory()` that creates a product category and returns the ID
-- `deleteAllProductAttributes()`, `deleteAllProductCategories()`, and `deleteAllProductTags()` to clean up meta data added when products are imported
-- `withRestApi.createProductCategory()` that creates a product category and returns the ID
 - `withRestApi.deleteCoupon()` that deletes a single coupon
 - `withRestApi.addTaxClasses()` that adds an array of tax classes if they do not exist
 - `withRestApi.addTaxRates()` that adds an array of tax rates if they do not exist
 - `clickAndWaitForSelector( buttonSelector, resultSelector, timeout )` to click a button and wait for response
 - Optional parameter `testResponse` to `withRestApi` functions that contain an `expect()`
 - `shopper.logout()` to log out the shopper account
+- `merchant.dismissOnboardingWizard()` to dismiss the onboarding wizard
+- `merchant.collapseAdminMenu()` to expand or collapse the WP admin menu
 
 # 0.1.6
 

@@ -141,11 +141,6 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 			$tax_item_total    = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
 			$tax_item_subtotal = isset( $tax_data['subtotal'][ $tax_item_id ] ) ? $tax_data['subtotal'][ $tax_item_id ] : '';
 
-			if ( '' !== $tax_item_subtotal ) {
-				$round_at_subtotal = 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' );
-				$tax_item_total    = wc_round_tax_total( $tax_item_total, $round_at_subtotal ? wc_get_rounding_precision() : null );
-				$tax_item_subtotal = wc_round_tax_total( $tax_item_subtotal, $round_at_subtotal ? wc_get_rounding_precision() : null );
-			}
 			?>
 			<td class="line_tax" width="1%">
 				<div class="view">

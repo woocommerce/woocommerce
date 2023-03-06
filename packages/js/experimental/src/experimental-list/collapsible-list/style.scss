@@ -1,0 +1,43 @@
+.woocommerce-experimental-list__item.list-item-collapse {
+	overflow: hidden;
+	display: grid;
+	grid-template-columns: auto 48px;
+
+	// IE doesn't support `align-items` on grid container
+	& > * {
+		align-self: center;
+	}
+
+	p {
+		margin: 0;
+		padding: $gap $gap-large;
+	}
+
+	.list-item-collapse__icon-container {
+		justify-content: flex-end;
+	}
+
+	&.woocommerce-list__item-enter {
+		max-height: 0;
+		opacity: 1;
+	}
+
+	&.woocommerce-list__item-enter-active {
+		max-height: 55px;
+		transition: max-height 500ms;
+	}
+
+	&.woocommerce-list__item-exit {
+		max-height: 55px;
+	}
+
+	&.woocommerce-list__item-exit-active {
+		max-height: 0;
+		opacity: 1;
+		transition: max-height 500ms;
+	}
+}
+
+.woocommerce-experimental-list-wrapper {
+	border-top: 1px solid $gray-100;
+}

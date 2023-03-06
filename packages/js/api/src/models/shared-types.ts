@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from './model';
 
 /**
@@ -7,7 +10,9 @@ import { Model } from './model';
  * @alias Function.<T>
  * @template T
  */
-export type ModelConstructor< T extends Model > = new ( properties: Partial< T > ) => T;
+export type ModelConstructor< T extends Model > = new (
+	properties: Partial< T >
+) => T;
 
 /**
  * A post's status.

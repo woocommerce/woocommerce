@@ -45,9 +45,22 @@ final class WC_Cart_Session {
 	 * Register methods for this object on the appropriate WordPress hooks.
 	 */
 	public function init() {
+		/**
+		 * Filters whether hooks should be initialized for the current cart session.
+		 *
+		 * @param bool $must_initialize Will be passed as true, meaning that the cart hooks should be initialized.
+		 * @param bool $session The WC_Cart_Session object that is being initialized.
+		 * @returns bool True if the cart hooks should be actually initialized, false if not.
+		 *
+		 * @since 6.9.0
+		 */
+		if ( ! apply_filters( 'woocommerce_cart_session_initialize', true, $this ) ) {
+			return;
+		}
+
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
 		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
-		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ) );
+		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ), 1000 );
 		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
 
@@ -120,15 +133,35 @@ final class WC_Cart_Session {
 			 *
 			 * @since 3.6.0
 			 *
-			 * @param bool $remove_cart_item_from_session If true, the item will not be added to the cart. Default: false.
-			 * @param string $key Cart item key.
-			 * @param array $values Cart item values e.g. quantity and product_id.
+			 * @param bool       $remove_cart_item_from_session If true, the item will not be added to the cart. Default: false.
+			 * @param string     $key Cart item key.
+			 * @param array      $values Cart item values e.g. quantity and product_id.
+			 * @param WC_Product $product The product being added to the cart.
 			 */
-			if ( apply_filters( 'woocommerce_pre_remove_cart_item_from_session', false, $key, $values ) ) {
+			if ( apply_filters( 'woocommerce_pre_remove_cart_item_from_session', false, $key, $values, $product ) ) {
 				$update_cart_session = true;
-				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
+				/**
+				 * Fires when cart item is removed from the session.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @param string     $key Cart item key.
+				 * @param array      $values Cart item values e.g. quantity and product_id.
+				 * @param WC_Product $product The product being added to the cart.
+				 */
+				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values, $product );
 
-			} elseif ( ! $product->is_purchasable() ) {
+			/**
+			 * Allow 3rd parties to override this item's is_purchasable() result with cart item data.
+			 *
+			 * @param bool       $is_purchasable If false, the item will not be added to the cart. Default: product's is_purchasable() status.
+			 * @param string     $key Cart item key.
+			 * @param array      $values Cart item values e.g. quantity and product_id.
+			 * @param WC_Product $product The product being added to the cart.
+			 *
+			 * @since 7.0.0
+			 */
+			} elseif ( ! apply_filters( 'woocommerce_cart_item_is_purchasable', $product->is_purchasable(), $key, $values, $product ) ) {
 				$update_cart_session = true;
 				/* translators: %s: product name */
 				$message = sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() );
@@ -146,7 +179,9 @@ final class WC_Cart_Session {
 			} elseif ( ! empty( $values['data_hash'] ) && ! hash_equals( $values['data_hash'], wc_get_cart_item_data_hash( $product ) ) ) { // phpcs:ignore PHPCompatibility.PHP.NewFunctions.hash_equalsFound
 				$update_cart_session = true;
 				/* translators: %1$s: product name. %2$s product permalink */
-				wc_add_notice( sprintf( __( '%1$s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%2$s">here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() ), 'notice' );
+				$message = sprintf( __( '%1$s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%2$s">here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() );
+				$message = apply_filters( 'woocommerce_cart_item_removed_because_modified_message', $message, $product );
+				wc_add_notice( $message, 'notice' );
 				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
 			} else {
@@ -371,10 +406,7 @@ final class WC_Cart_Session {
 			}
 
 			foreach ( $item->get_meta_data() as $meta ) {
-				if ( taxonomy_is_product_attribute( $meta->key ) ) {
-					$term                     = get_term_by( 'slug', $meta->value, $meta->key );
-					$variations[ $meta->key ] = $term ? $term->name : $meta->value;
-				} elseif ( meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
+				if ( taxonomy_is_product_attribute( $meta->key ) || meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
 					$variations[ $meta->key ] = $meta->value;
 				}
 			}

@@ -1,14 +1,13 @@
-export const getProductColumnExpression = ( productTitle ) => (
+export const getProductColumnExpression = ( productTitle ) =>
 	'td[@class="product-name" and ' +
 	`a[contains(text(), "${ productTitle }")]` +
-	']'
-);
+	']';
 
-export const getQtyColumnExpression = ( args ) => (
+export const getQtyColumnExpression = ( args ) =>
 	'td[@class="product-quantity" and ' +
-	'.//' + getQtyInputExpression( args ) +
-	']'
-);
+	'.//' +
+	getQtyInputExpression( args ) +
+	']';
 
 export const getQtyInputExpression = ( args = {} ) => {
 	let qtyValue = '';
@@ -20,14 +19,12 @@ export const getQtyInputExpression = ( args = {} ) => {
 	return 'input[contains(@class, "input-text")' + qtyValue + ']';
 };
 
-export const getCartItemExpression = ( productTitle, args ) => (
+export const getCartItemExpression = ( productTitle, args ) =>
 	'//tr[contains(@class, "cart_item") and ' +
 	getProductColumnExpression( productTitle ) +
 	' and ' +
 	getQtyColumnExpression( args ) +
-	']'
-);
+	']';
 
-export const getRemoveExpression = () => (
-	'td[@class="product-remove"]//a[@class="remove"]'
-);
+export const getRemoveExpression = () =>
+	'td[@class="product-remove"]//a[@class="remove"]';

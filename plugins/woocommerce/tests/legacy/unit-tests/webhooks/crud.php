@@ -24,7 +24,7 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 	 */
 	public function test_get_data() {
 		$object = new WC_Webhook();
-		$this->assertInternalType( 'array', $object->get_data() );
+		$this->assertIsArray( $object->get_data() );
 	}
 
 	/**

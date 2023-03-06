@@ -23,7 +23,7 @@ class ClassThatDependsOnLegacyCodeTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before each test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		$container = wc_get_container();
 		$container->add( ClassThatDependsOnLegacyCode::class )->addArgument( LegacyProxy::class );
 		$this->sut = $container->get( ClassThatDependsOnLegacyCode::class );

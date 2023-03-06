@@ -1,0 +1,31 @@
+.woocommerce-image-gallery {
+    img {
+        display: block;
+    }
+
+    .woocommerce-sortable {
+        display: grid;
+        grid-template-columns: inherit;
+        grid-gap: $gap;
+    }
+
+    .woocommerce-sortable__handle {
+        display: block;
+        margin: 0;
+    }
+
+    .woocommerce-sortable__item {
+        &.is-dragging {
+            position: absolute;
+        }
+
+        &.is-dragging-over-before:before {
+            left: calc( $gap / -2 - 1px );
+        }
+
+        &.is-dragging-over-after:after {
+            right: calc( $gap / -2 - 1px );
+        }
+    }
+
+}

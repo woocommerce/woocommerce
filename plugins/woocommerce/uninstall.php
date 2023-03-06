@@ -8,6 +8,10 @@
  * @version 2.3.0
  */
 
+use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Admin\ReportsSync;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
 global $wpdb, $wp_version;
@@ -20,6 +24,9 @@ wp_clear_scheduled_hook( 'woocommerce_cleanup_logs' );
 wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
 wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
+wp_clear_scheduled_hook( 'wc_admin_daily' );
+wp_clear_scheduled_hook( 'generate_category_lookup_table' );
+wp_clear_scheduled_hook( 'wc_admin_unsnooze_admin_notes' );
 
 /*
  * Only remove ALL product and page data if WC_REMOVE_ALL_DATA constant is set to true in user's
@@ -27,11 +34,8 @@ wp_clear_scheduled_hook( 'woocommerce_cleanup_rate_limits' );
  * and to ensure only the site owner can perform this action.
  */
 if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
-	// Drop WC Admin tables.
-	include_once dirname( __FILE__ ) . '/packages/woocommerce-admin/src/Install.php';
-	\Automattic\WooCommerce\Admin\Install::drop_tables();
-
-	include_once dirname( __FILE__ ) . '/includes/class-wc-install.php';
+	// Load WooCommerce so we can access the container, install routines, etc, during uninstall.
+	require_once __DIR__ . '/woocommerce.php';
 
 	// Roles + caps.
 	WC_Install::remove_roles();
@@ -62,15 +66,17 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Delete usermeta.
 	$wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE 'woocommerce\_%';" );
 
-	// Delete posts + data.
+	// Delete our data from the post and post meta tables, and remove any additional tables we created.
 	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );
 	$wpdb->query( "DELETE meta FROM {$wpdb->postmeta} meta LEFT JOIN {$wpdb->posts} posts ON posts.ID = meta.post_id WHERE posts.ID IS NULL;" );
 
 	$wpdb->query( "DELETE FROM {$wpdb->comments} WHERE comment_type IN ( 'order_note' );" );
 	$wpdb->query( "DELETE meta FROM {$wpdb->commentmeta} meta LEFT JOIN {$wpdb->comments} comments ON comments.comment_ID = meta.comment_id WHERE comments.comment_ID IS NULL;" );
 
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_items" );
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_itemmeta" );
+	foreach ( wc_get_container()->get( OrdersTableDataStore::class )->get_all_table_names() as $cot_table ) {
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DROP TABLE IF EXISTS {$cot_table}" );
+	}
 
 	// Delete terms if > WP 4.2 (term splitting was added in 4.2).
 	if ( version_compare( $wp_version, '4.2', '>=' ) ) {

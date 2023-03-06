@@ -11,7 +11,7 @@ class Shipping_Methods_V2 extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Shipping_Methods_Controller();
 		$this->user     = $this->factory->user->create(

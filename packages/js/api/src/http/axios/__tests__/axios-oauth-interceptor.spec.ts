@@ -12,7 +12,7 @@ describe( 'AxiosOAuthInterceptor', () => {
 		adapter = new MockAdapter( axiosInstance );
 		apiAuthInterceptor = new AxiosOAuthInterceptor(
 			'consumer_key',
-			'consumer_secret',
+			'consumer_secret'
 		);
 		apiAuthInterceptor.start( axiosInstance );
 	} );
@@ -39,7 +39,7 @@ describe( 'AxiosOAuthInterceptor', () => {
 		// focus on ensuring that the header looks roughly correct given what we readily know.
 		expect( response.config.headers! ).toHaveProperty( 'Authorization' );
 		expect( response.config.headers!.Authorization ).toMatch(
-			/^OAuth oauth_consumer_key="consumer_key".*oauth_signature_method="HMAC-SHA256".*oauth_version="1.0"/,
+			/^OAuth oauth_consumer_key="consumer_key".*oauth_signature_method="HMAC-SHA256".*oauth_version="1.0"/
 		);
 	} );
 

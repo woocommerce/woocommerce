@@ -7,14 +7,17 @@ import { cartRemoveItem } from '../requests/shopper/cart-remove-item.js';
 import { cartApplyCoupon } from '../requests/shopper/cart-apply-coupon.js';
 import { checkoutGuest } from '../requests/shopper/checkout-guest.js';
 import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-login.js';
+import { coupons } from '../requests/merchant/coupons.js';
 import { myAccount } from '../requests/shopper/my-account.js';
 import { wpLogin } from '../requests/merchant/wp-login.js';
 import { products } from '../requests/merchant/products.js';
 import { addProduct } from '../requests/merchant/add-product.js';
 import { orders } from '../requests/merchant/orders.js';
 import { ordersHeartbeat } from '../requests/merchant/orders-heartbeat.js';
+import { ordersSearch } from '../requests/merchant/orders-search.js';
 import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
 import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant.js';
+import { categoryPage } from '../requests/shopper/category-page.js';
 
 export let options = {
     scenarios: {
@@ -106,8 +109,10 @@ export function merchantAllFlows() {
     myAccountMerchantLogin();
     homeWCAdmin();
     orders();
+	ordersSearch();
     products();
     addProduct();
+	coupons();
 }
 // Use myAccountMerchantLogin() instead of wpLogin() if having issues with login.
 export function merchantHeartbeatFlow() {
@@ -124,6 +129,7 @@ export function shopperBrowsingFlows() {
     cartRemoveItem();
 	cartApplyCoupon();
     myAccount();
+	categoryPage();
 }
 export function checkoutGuestFlow() {
     cart();

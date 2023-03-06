@@ -1,14 +1,26 @@
 # Unreleased
 
+## Fixed
+
+- Updated assertion in the block `can update order details` from the e2e test `order-edit.test.js` that wasn't checking properly the date value when editing an order, allowing the test to return a false positive.
+- Moved `merchant.login()` out of `beforeAll()` block and into test body for retried runs.
+
 ## Added
 
+- Additional Merchant Product Edit tests to increase the variable products coverage.
+- Additional Merchant Order Edit tests to increase the downloadable products coverage.
 - A `specs/data` folder to store page element data.
-- Tests to verify that different top-level menu and their associated sub-menus load successfully.
+- Tests to verify that different top-level menus and their associated sub-menus load successfully.
+- Test scaffolding via `npx wc-e2e install @woocommerce/e2e-core-tests`
+- Tests to check shipping cost calculation consistency between cart and checkout pages.
 
 ## Changed
 
+- The e2e test `update-product-settings.test.js` now covers setting and unsetting the `X-Accel-Redirect/X-Sendfile` download method and `Append a unique string to filename for security` flag.
+- The e2e test `order-edit.test.js` now uses the API to create orders.
 - New coupon test deletes the coupon instead of trashing it.
 - A copy of sample_data.csv is included in the package.
+- Removed `faker` dependency
 
 # 0.1.6
 
@@ -22,7 +34,7 @@
 
 - Support for re-running setup and shopper tests
 - Shopper Order Email Receiving
-- New tests - See [README.md](https://github.com/woocommerce/woocommerce/blob/trunk/tests/e2e/core-tests/README.md) for list of available tests
+- New tests - See [README.md](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/e2e-core-tests/README.md) for list of available tests
 
 ## Fixed
 

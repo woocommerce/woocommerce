@@ -1,136 +1,265 @@
-name: Build zip for PR
-on: pull_request
+name: Run tests against PR
+on:
+    workflow_dispatch:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions: {}
+
 jobs:
-    build:
-        name: Build zip for PR
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
-
-            - name: Build
-              id: build
-              uses: woocommerce/action-build@trunk
-              env:
-                  BUILD_ENV: e2e
-
-            - name: Upload PR zip
-              uses: actions/upload-artifact@v2
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                  name: woocommerce
-                  path: ${{ steps.build.outputs.zip_path }}
-                  retention-days: 7
-
     e2e-tests-run:
         name: Runs E2E tests.
-        runs-on: ubuntu-18.04
-        needs: [build]
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+        outputs:
+            E2E_GRAND_TOTAL: ${{ steps.count_e2e_total.outputs.E2E_GRAND_TOTAL }}
         steps:
-            - name: Create dirs.
-              run: |
-                  mkdir -p code/woocommerce
-                  mkdir -p package/woocommerce
-                  mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
+            - uses: actions/checkout@v3
 
-            - name: Checkout code.
-              uses: actions/checkout@v2
-              with:
-                  path: package/woocommerce
-
-            - name: Install PNPM and install dependencies
-              working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
             - name: Load docker images and start containers.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:up
-
-            - name: Move current directory to code. We will install zip file in this dir later.
-              run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
-
-            - name: Download WooCommerce ZIP.
-              uses: actions/download-artifact@v2
-              with:
-                  name: woocommerce
-                  path: tmp
-
-            - name: Extract and replace WooCommerce zip.
-              working-directory: tmp
-              run: |
-                  unzip woocommerce.zip -d woocommerce
-                  mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
-
-            - name: Install dependencies again
-              working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
-
-            - name: Run tests command.
-              working-directory: package/woocommerce/plugins/woocommerce
+              working-directory: plugins/woocommerce
               env:
-                  WC_E2E_SCREENSHOTS: 1
-                  E2E_SLACK_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
-                  E2E_SLACK_CHANNEL: ${{ secrets.E2E_SLACK_CHANNEL }}
-              run: pnpx wc-e2e test:e2e
-                  
+                  ENABLE_HPOS: 0
+                  WP_ENV_PHP_VERSION: 7.4
+              run: pnpm run env:test
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+
+            - name: Get total number of Playwright E2E tests to be run.
+              id: count_e2e_total
+              working-directory: plugins/woocommerce
+              run: |
+                  TOTAL_STR=$(pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --list | grep "Total:")
+                  NO_PREFIX=${TOTAL_STR#*"Total: "}
+                  COUNT=${NO_PREFIX%" tests in"*}
+                  echo "E2E_GRAND_TOTAL=$COUNT" >> $GITHUB_OUTPUT
+
+            - name: Run Playwright E2E tests.
+              timeout-minutes: 60
+              id: run_playwright_e2e_tests
+              env:
+                  USE_WP_ENV: 1
+                  E2E_MAX_FAILURES: 15
+                  FORCE_COLOR: 1
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+
+            - name: Generate Playwright E2E Test report.
+              id: generate_e2e_report
+              if: |
+                  always() &&
+                  (
+                    steps.run_playwright_e2e_tests.conclusion != 'cancelled' ||
+                    steps.run_playwright_e2e_tests.conclusion != 'skipped' 
+                  )
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+            - name: Archive Playwright E2E test report
+              if: |
+                  always() &&
+                  steps.generate_e2e_report.conclusion == 'success'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: e2e-test-report---pr-${{ github.event.number }}
+                  path: |
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
+
     api-tests-run:
         name: Runs API tests.
-        runs-on: ubuntu-18.04
-        needs: [build]
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
         steps:
-            - name: Create dirs.
-              run: |
-                  mkdir -p code/woocommerce
-                  mkdir -p package/woocommerce
-                  mkdir -p tmp/woocommerce
-                  mkdir -p node_modules
+            - uses: actions/checkout@v3
 
-            - name: Checkout code.
-              uses: actions/checkout@v2
-              with:
-                  path: package/woocommerce
-
-            - name: Install PNPM and install dependencies
-              working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
             - name: Load docker images and start containers.
-              working-directory: package/woocommerce/plugins/woocommerce
-              run: pnpx wc-e2e docker:up
-
-            - name: Move current directory to code. We will install zip file in this dir later.
-              run: mv ./package/woocommerce/plugins/woocommerce/* ./code/woocommerce
-
-            - name: Download WooCommerce ZIP.
-              uses: actions/download-artifact@v2
-              with:
-                  name: woocommerce
-                  path: tmp
-
-            - name: Extract and replace WooCommerce zip.
-              working-directory: tmp
-              run: |
-                  unzip woocommerce.zip -d woocommerce
-                  mv woocommerce/woocommerce/* ../package/woocommerce/plugins/woocommerce/
-
-            - name: Install dependencies again
-              working-directory: package/woocommerce
-              run: |
-                  npm install -g pnpm
-                  pnpm install
-
-            - name: Run tests command.
-              working-directory: package/woocommerce/plugins/woocommerce
+              working-directory: plugins/woocommerce
               env:
-                  BASE_URL: ${{ secrets.PR_E2E_TEST_URL }}
-                  USER_KEY: ${{ secrets.PR_E2E_TEST_ADMIN_USER }}
-                  USER_SECRET: ${{ secrets.PR_E2E_TEST_ADMIN_PASSWORD }}
-              run: pnpx wc-api-tests test api
+                  ENABLE_HPOS: 0
+              run: pnpm env:test --filter=woocommerce
+
+            - name: Run Playwright API tests.
+              id: run_playwright_api_tests
+              working-directory: plugins/woocommerce
+              env:
+                  BASE_URL: http://localhost:8086
+                  USER_KEY: admin
+                  USER_SECRET: password
+              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
+
+            - name: Generate Playwright API Test report.
+              id: generate_api_report
+              if: |
+                  always() &&
+                  (
+                    steps.run_playwright_api_tests.conclusion != 'cancelled' ||
+                    steps.run_playwright_api_tests.conclusion != 'skipped' 
+                  )
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+            - name: Archive Playwright API test report
+              if: |
+                  always() &&
+                  steps.generate_api_report.conclusion == 'success'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: api-test-report---pr-${{ github.event.number }}
+                  path: |
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
+
+    k6-tests-run:
+        name: Runs k6 Performance tests
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+
+            - name: Load docker images and start containers.
+              working-directory: plugins/woocommerce
+              env:
+                  ENABLE_HPOS: 0
+              run: |
+                  pnpm env:dev --filter=woocommerce
+                  pnpm env:performance-init --filter=woocommerce
+
+            - name: Install k6
+              run: |
+                  curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+
+            - name: Run k6 tests
+              run: |
+                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
+
+    test-summary:
+        name: Post test results
+        if: |
+            always() && 
+            ! github.event.pull_request.head.repo.fork &&
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
+        runs-on: ubuntu-20.04
+        needs: [api-tests-run, e2e-tests-run]
+        permissions:
+            contents: read
+            issues: write
+            pull-requests: write
+        env:
+            E2E_GRAND_TOTAL: ${{needs.e2e-tests-run.outputs.E2E_GRAND_TOTAL}}
+        steps:
+            - name: Create dirs
+              run: |
+                  mkdir -p repo
+                  mkdir -p artifacts/api 
+                  mkdir -p artifacts/e2e
+                  mkdir -p output
+
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                  path: repo
+
+            - name: Download API test report artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: api-test-report---pr-${{ github.event.number }}
+                  path: artifacts/api
+
+            - name: Download Playwright E2E test report artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: e2e-test-report---pr-${{ github.event.number }}
+                  path: artifacts/e2e
+
+            - name: Prepare test summary
+              id: prepare-test-summary
+              uses: actions/github-script@v6
+              env:
+                  API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
+                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
+                  PR_NUMBER: ${{ github.event.number }}
+                  SHA: ${{ github.event.pull_request.head.sha }}
+              with:
+                  result-encoding: string
+                  script: |
+                      const script = require( './repo/.github/workflows/scripts/prepare-test-summary.js' )
+                      return await script( { core } )
+
+            - name: Find PR comment by github-actions[bot]
+              uses: peter-evans/find-comment@v2
+              id: find-comment
+              with:
+                  issue-number: ${{ github.event.pull_request.number }}
+                  comment-author: 'github-actions[bot]'
+                  body-includes: Test Results Summary
+
+            - name: Create or update PR comment
+              uses: peter-evans/create-or-update-comment@v2
+              with:
+                  comment-id: ${{ steps.find-comment.outputs.comment-id }}
+                  issue-number: ${{ github.event.pull_request.number }}
+                  body: ${{ steps.prepare-test-summary.outputs.result }}
+                  edit-mode: replace
+
+    publish-test-reports:
+        name: Publish test reports
+        if: |
+            always() && 
+            ! github.event.pull_request.head.repo.fork &&
+            (
+              contains( needs.*.result, 'success' ) ||
+              contains( needs.*.result, 'failure' )
+            )
+        runs-on: ubuntu-20.04
+        needs: [api-tests-run, e2e-tests-run, k6-tests-run]
+        env:
+            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            PR_NUMBER: ${{ github.event.number }}
+            RUN_ID: ${{ github.run_id }}
+            COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        steps:
+            - name: Publish test reports
+              env:
+                  API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
+                  E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
+              run: |
+                  gh workflow run publish-test-reports-pr.yml \
+                    -f run_id=$RUN_ID \
+                    -f api_artifact=$API_ARTIFACT \
+                    -f e2e_artifact=$E2E_ARTIFACT \
+                    -f pr_number=$PR_NUMBER \
+                    -f commit_sha=$COMMIT_SHA \
+                    -f s3_root=public \
+                    --repo woocommerce/woocommerce-test-reports

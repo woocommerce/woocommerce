@@ -1,0 +1,72 @@
+{
+	"name": "@woocommerce/notices",
+	"version": "4.0.1",
+	"description": "State management for notices.",
+	"author": "The WordPress Contributors",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
+	"keywords": [
+		"wordpress",
+		"gutenberg",
+		"notices"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/notices/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerge.git",
+		"directory": "packages/js/notices"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"types": "build-types",
+	"react-native": "src/index",
+	"dependencies": {
+		"@wordpress/a11y": "^3.5.0",
+		"@wordpress/data": "^6.15.0",
+		"@wordpress/notices": "^3.3.2"
+	},
+	"peerDependencies": {
+		"lodash": "^4.17.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"private": true,
+	"scripts": {
+		"turbo:build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
+		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"lint": "eslint src",
+		"start": "tsc --build --watch",
+		"prepack": "pnpm run clean && pnpm run build",
+		"lint:fix": "eslint src --fix"
+	},
+	"devDependencies": {
+		"@automattic/data-stores": "^2.0.1",
+		"@babel/core": "^7.17.5",
+		"@types/lodash": "^4.14.182",
+		"@types/wordpress__data": "^6.0.0",
+		"@types/wordpress__notices": "^3.5.0",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"eslint": "^8.32.0",
+		"jest": "^27.5.1",
+		"jest-cli": "^27.5.1",
+		"redux": "^4.2.0",
+		"rimraf": "^3.0.2",
+		"ts-jest": "^27.1.3",
+		"typescript": "^4.8.3"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix"
+		]
+	}
+}

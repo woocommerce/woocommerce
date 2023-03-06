@@ -54,14 +54,32 @@ export const permalinkSettingsPageSaveChanges = async () => {
 };
 
 /**
+ * Save changes on Order page.
+ */
+export const orderPageSaveChanges = async () => {
+	await expect( page ).toClick( 'button.save_order' );
+	await page.waitForSelector( '#message' );
+};
+
+/**
+ * Save changes on Product page.
+ */
+export const productPageSaveChanges = async () => {
+	await expect( page ).toClick( '#publish' );
+	await page.waitForSelector( '#message' );
+};
+
+/**
  * Set checkbox.
  *
  * @param {string} selector
  */
-export const setCheckbox = async( selector ) => {
+export const setCheckbox = async ( selector ) => {
 	await page.focus( selector );
 	const checkbox = await page.$( selector );
-	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
+	const checkboxStatus = await (
+		await checkbox.getProperty( 'checked' )
+	).jsonValue();
 	if ( checkboxStatus !== true ) {
 		await checkbox.click();
 	}
@@ -72,10 +90,12 @@ export const setCheckbox = async( selector ) => {
  *
  * @param {string} selector
  */
-export const unsetCheckbox = async( selector ) => {
+export const unsetCheckbox = async ( selector ) => {
 	await page.focus( selector );
 	const checkbox = await page.$( selector );
-	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
+	const checkboxStatus = await (
+		await checkbox.getProperty( 'checked' )
+	).jsonValue();
 	if ( checkboxStatus === true ) {
 		await checkbox.click();
 	}
@@ -85,24 +105,31 @@ export const unsetCheckbox = async( selector ) => {
  * Wait for UI blocking to end.
  */
 export const uiUnblocked = async () => {
-	await page.waitForFunction( () => ! Boolean( document.querySelector( '.blockUI' ) ) );
+	await page.waitForFunction(
+		() => ! Boolean( document.querySelector( '.blockUI' ) )
+	);
 };
 
 /**
  * Wait for backbone blocking to end.
  */
 export const backboneUnblocked = async () => {
-	await page.waitForFunction( () => ! Boolean( document.querySelector( '.wc-backbone-modal' ) ) );
+	await page.waitForFunction(
+		() => ! Boolean( document.querySelector( '.wc-backbone-modal' ) )
+	);
 };
 
 /**
  * Conditionally wait for a selector without throwing an error.
  *
- * @param selector
- * @param timeoutInSeconds
- * @returns {Promise<boolean>}
+ * @param {string} selector
+ * @param {number} timeoutInSeconds
+ * @return {Promise<boolean>} True if selector is found, false otherwise.
  */
-export const waitForSelectorWithoutThrow = async ( selector, timeoutInSeconds = 5 ) => {
+export const waitForSelectorWithoutThrow = async (
+	selector,
+	timeoutInSeconds = 5
+) => {
 	let selected = await page.$( selector );
 	for ( let s = 0; s < timeoutInSeconds; s++ ) {
 		if ( selected ) {
@@ -117,12 +144,17 @@ export const waitForSelectorWithoutThrow = async ( selector, timeoutInSeconds = 
 /**
  * Publish, verify that item was published. Trash, verify that item was trashed.
  *
- * @param {string} button (Publish)
+ * @param {string} button              (Publish)
  * @param {string} publishNotice
  * @param {string} publishVerification
  * @param {string} trashVerification
  */
-export const verifyPublishAndTrash = async ( button, publishNotice, publishVerification, trashVerification ) => {
+export const verifyPublishAndTrash = async (
+	button,
+	publishNotice,
+	publishVerification,
+	trashVerification
+) => {
 	const adminEdit = new AdminEdit();
 	await adminEdit.verifyPublish( button, publishNotice, publishVerification );
 
@@ -132,7 +164,9 @@ export const verifyPublishAndTrash = async ( button, publishNotice, publishVerif
 	await page.waitForSelector( '#message' );
 
 	// Verify
-	await expect( page ).toMatchElement( publishNotice, { text: trashVerification } );
+	await expect( page ).toMatchElement( publishNotice, {
+		text: trashVerification,
+	} );
 };
 
 /**
@@ -140,10 +174,12 @@ export const verifyPublishAndTrash = async ( button, publishNotice, publishVerif
  *
  * @param {string} selector Selector of the checkbox that needs to be verified.
  */
-export const verifyCheckboxIsSet = async( selector ) => {
+export const verifyCheckboxIsSet = async ( selector ) => {
 	await page.focus( selector );
 	const checkbox = await page.$( selector );
-	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
+	const checkboxStatus = await (
+		await checkbox.getProperty( 'checked' )
+	).jsonValue();
 	await expect( checkboxStatus ).toBe( true );
 };
 
@@ -152,10 +188,12 @@ export const verifyCheckboxIsSet = async( selector ) => {
  *
  * @param {string} selector Selector of the checkbox that needs to be verified.
  */
-export const verifyCheckboxIsUnset = async( selector ) => {
+export const verifyCheckboxIsUnset = async ( selector ) => {
 	await page.focus( selector );
 	const checkbox = await page.$( selector );
-	const checkboxStatus = ( await ( await checkbox.getProperty( 'checked' ) ).jsonValue() );
+	const checkboxStatus = await (
+		await checkbox.getProperty( 'checked' )
+	).jsonValue();
 	await expect( checkboxStatus ).not.toBe( true );
 };
 
@@ -163,12 +201,12 @@ export const verifyCheckboxIsUnset = async( selector ) => {
  * Verify the value of input field once it was saved (can be used for radio buttons verification as well).
  *
  * @param {string} selector Selector of the input field that needs to be verified.
- * @param {string} value Value of the input field that needs to be verified.
+ * @param {string} value    Value of the input field that needs to be verified.
  */
-export const verifyValueOfInputField = async( selector, value ) => {
+export const verifyValueOfInputField = async ( selector, value ) => {
 	await page.focus( selector );
 	const field = await page.$( selector );
-	const fieldValue = ( await ( await field.getProperty( 'value' ) ).jsonValue() );
+	const fieldValue = await ( await field.getProperty( 'value' ) ).jsonValue();
 	await expect( fieldValue ).toBe( value );
 };
 
@@ -181,7 +219,7 @@ export const clickFilter = async ( selector ) => {
 	await page.waitForSelector( selector );
 	await page.focus( selector );
 	await Promise.all( [
-		page.click( `.subsubsub > ${selector} > a` ),
+		page.click( `.subsubsub > ${ selector } > a` ),
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 	] );
 };
@@ -193,7 +231,10 @@ export const clickFilter = async ( selector ) => {
  */
 export const moveAllItemsToTrash = async () => {
 	await setCheckbox( '#cb-select-all-1' );
-	await expect( page ).toSelect( '#bulk-action-selector-top', 'Move to Trash' );
+	await expect( page ).toSelect(
+		'#bulk-action-selector-top',
+		'Move to Trash'
+	);
 	await Promise.all( [
 		page.click( '#doaction' ),
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
@@ -210,16 +251,19 @@ export const moveAllItemsToTrash = async () => {
 export const evalAndClick = async ( selector ) => {
 	// We use this when `expect(page).toClick()` is unable to find the element
 	// See: https://github.com/puppeteer/puppeteer/issues/1769#issuecomment-637645219
-	page.$eval( selector, elem => elem.click() );
+	page.$eval( selector, ( elem ) => elem.click() );
 };
 
 /**
  * Select a value from select2 search input field.
  *
- * @param {string} value Value of what to be selected
+ * @param {string} value    Value of what to be selected
  * @param {string} selector Selector of the select2 search field
  */
-export const selectOptionInSelect2 = async ( value, selector = 'input.select2-search__field' ) => {
+export const selectOptionInSelect2 = async (
+	value,
+	selector = 'input.select2-search__field'
+) => {
 	await page.waitForSelector( selector );
 	await page.click( selector );
 	await page.type( selector, value );
@@ -230,35 +274,39 @@ export const selectOptionInSelect2 = async ( value, selector = 'input.select2-se
 /**
  * Search by any term for an order
  *
- * @param {string} value Value to be entered into the search field
- * @param {string} orderId Order ID
+ * @param {string} value        Value to be entered into the search field
+ * @param {string} orderId      Order ID
  * @param {string} customerName Customer's full name attached to order ID.
  */
-export const searchForOrder = async ( value, orderId, customerName) => {
+export const searchForOrder = async ( value, orderId, customerName ) => {
 	await clearAndFillInput( '#post-search-input', value );
 	await expect( page ).toMatchElement( '#post-search-input', value );
 	await expect( page ).toClick( '#search-submit' );
 	await page.waitForSelector( '#the-list', { timeout: 10000 } );
-	await expect( page ).toMatchElement( '.order_number > a.order-view', { text: `#${orderId} ${customerName}` } );
+	await expect( page ).toMatchElement( '.order_number > a.order-view', {
+		text: `#${ orderId } ${ customerName }`,
+	} );
 };
 
 /**
  * Apply a coupon code within cart or checkout.
  * Method will try to apply a coupon in the checkout, otherwise will try to apply in the cart.
  *
- * @param couponCode string
- * @returns {Promise<void>}
+ * @param {string} couponCode string
+ * @return {Promise<void>}
  */
 export const applyCoupon = async ( couponCode ) => {
 	try {
-		await Promise.all([
+		await Promise.all( [
 			page.reload(),
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-		]);
-		await expect( page ).toClick( 'a', { text: 'Click here to enter your code' } );
+		] );
+		await expect( page ).toClick( 'a', {
+			text: 'Click here to enter your code',
+		} );
 		await uiUnblocked();
 		await clearAndFillInput( '#coupon_code', couponCode );
-		await expect( page ).toClick( 'button', {text: 'Apply coupon' } );
+		await expect( page ).toClick( 'button', { text: 'Apply coupon' } );
 		await uiUnblocked();
 	} catch ( error ) {
 		await clearAndFillInput( '#coupon_code', couponCode );
@@ -270,17 +318,22 @@ export const applyCoupon = async ( couponCode ) => {
 /**
  * Remove one coupon within cart or checkout.
  *
- * @param couponCode Coupon name.
- * @returns {Promise<void>}
+ * @param {string} couponCode Coupon name.
+ * @return {Promise<void>}
  */
 export const removeCoupon = async ( couponCode ) => {
-	await Promise.all([
+	await Promise.all( [
 		page.reload(),
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-	]);
-	await expect( page ).toClick( '[data-coupon="'+couponCode.toLowerCase()+'"]', {text: '[Remove]' } );
+	] );
+	await expect( page ).toClick(
+		'[data-coupon="' + couponCode.toLowerCase() + '"]',
+		{ text: '[Remove]' }
+	);
 	await uiUnblocked();
-	await expect( page ).toMatchElement( '.woocommerce-message', {text: 'Coupon has been removed.' } );
+	await expect( page ).toMatchElement( '.woocommerce-message', {
+		text: 'Coupon has been removed.',
+	} );
 };
 
 /**
@@ -295,8 +348,7 @@ export const selectOrderAction = async ( action ) => {
 		page.click( '.wc-reload' ),
 		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 	] );
-}
-
+};
 
 /**
  * Evaluate and click a button selector then wait for a result selector.
@@ -304,18 +356,18 @@ export const selectOrderAction = async ( action ) => {
  *
  * @param {string} buttonSelector Selector of button to click
  * @param {string} resultSelector Selector to wait for after click
- * @param {number} timeout Timeout length in milliseconds. Default 5000.
- * @returns {Promise<void>}
+ * @param {number} timeout        Timeout length in milliseconds. Default 5000.
+ * @return {Promise<void>}
  */
-export const clickAndWaitForSelector = async ( buttonSelector, resultSelector, timeout = 5000 ) => {
+export const clickAndWaitForSelector = async (
+	buttonSelector,
+	resultSelector,
+	timeout = 5000
+) => {
 	await evalAndClick( buttonSelector );
-	await waitForSelector(
-		page,
-		resultSelector,
-		{
-			timeout
-		}
-	);
+	await waitForSelector( page, resultSelector, {
+		timeout,
+	} );
 };
 /**
  * Waits for selector to be present in DOM.
@@ -323,9 +375,9 @@ export const clickAndWaitForSelector = async ( buttonSelector, resultSelector, t
  * Behavior can be modified with @param options. Possible keys: `visible`, `hidden`, `timeout`.
  * More details at: https://pptr.dev/#?product=Puppeteer&show=api-pagewaitforselectorselector-options
  *
- * @param {Puppeteer.Page} page Puppeteer representation of the page.
+ * @param {Object} page     Puppeteer representation of the page.
  * @param {string} selector CSS selector of the element
- * @param {Object} options Custom options to modify function behavior.
+ * @param {Object} options  Custom options to modify function behavior.
  */
 export async function waitForSelector( page, selector, options = {} ) {
 	// set up default options
@@ -334,4 +386,52 @@ export async function waitForSelector( page, selector, options = {} ) {
 
 	const element = await page.waitForSelector( selector, options );
 	return element;
+}
+
+/**
+ * Retrieves the desired HTML attribute from a selector.
+ * For example, the 'value' attribute of an input element.
+ *
+ * @param {string} selector  Selector of the element you want to get the attribute from.
+ * @param {string} attribute The desired HTML attribute.
+ * @return {Promise<string>} Promise resolving to the attribute value.
+ */
+export async function getSelectorAttribute( selector, attribute ) {
+	return await page.$eval(
+		selector,
+		// eslint-disable-next-line no-shadow
+		( element, attribute ) => element.getAttribute( attribute ),
+		attribute
+	);
+}
+
+/**
+ * Asserts the value of the desired HTML attribute of a selector.
+ *
+ * @param {string} selector      Selector of the element you want to verify.
+ * @param {string} attribute     The desired HTML attribute.
+ * @param {string} expectedValue The expected value.
+ */
+export async function verifyValueOfElementAttribute(
+	selector,
+	attribute,
+	expectedValue
+) {
+	const actualValue = await getSelectorAttribute( selector, attribute );
+	expect( actualValue ).toBe( expectedValue );
+}
+
+/**
+ * Clicks only if the element is enabled.
+ * Otherwise, it raises an error because element is disabled and therefore not clickable.
+ *
+ * @param {string} selector Selector of the element you want to click.
+ */
+export async function click( selector ) {
+	await waitForSelector( page, selector );
+	const isDisabled =
+		( await getSelectorAttribute( selector, 'disabled' ) ) !== null;
+	expect( isDisabled ).toBeFalsy();
+
+	await expect( page ).toClick( selector );
 }

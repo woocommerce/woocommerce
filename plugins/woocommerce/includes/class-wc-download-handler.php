@@ -31,11 +31,21 @@ class WC_Download_Handler {
 	 * Check if we need to download a file and check validity.
 	 */
 	public static function download_product() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$product_id = absint( $_GET['download_file'] ); // phpcs:ignore WordPress.VIP.SuperGlobalInputUsage.AccessDetected, WordPress.VIP.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		$product    = wc_get_product( $product_id );
+		$downloads  = $product ? $product->get_downloads() : array();
 		$data_store = WC_Data_Store::load( 'customer-download' );
 
-		if ( ! $product || empty( $_GET['key'] ) || empty( $_GET['order'] ) ) { // WPCS: input var ok, CSRF ok.
+		$key = empty( $_GET['key'] ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) );
+
+		if (
+			! $product
+			|| empty( $key )
+			|| empty( $_GET['order'] )
+			|| ! isset( $downloads[ $key ] )
+			|| ! $downloads[ $key ]->get_enabled()
+		) {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
@@ -43,6 +53,7 @@ class WC_Download_Handler {
 		if ( empty( $_GET['email'] ) && empty( $_GET['uid'] ) ) { // WPCS: input var ok, CSRF ok.
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) ); // WPCS: input var ok, CSRF ok.
 		$order    = wc_get_order( $order_id );
@@ -276,9 +287,17 @@ class WC_Download_Handler {
 
 		// Paths that begin with '//' are always remote URLs.
 		if ( '//' === substr( $file_path, 0, 2 ) ) {
+			$file_path = ( is_ssl() ? 'https:' : 'http:' ) . $file_path;
+
+			/**
+			 * Filter the remote filepath for download.
+			 *
+			 * @since 6.5.0
+			 * @param string $file_path File path.
+			 */
 			return array(
 				'remote_file' => true,
-				'file_path'   => is_ssl() ? 'https:' . $file_path : 'http:' . $file_path,
+				'file_path'   => apply_filters( 'woocommerce_download_parse_remote_file_path', $file_path ),
 			);
 		}
 
@@ -297,9 +316,16 @@ class WC_Download_Handler {
 			$file_path   = $parsed_file_path['path'];
 		}
 
+		/**
+		* Filter the filepath for download.
+		*
+		* @since 6.5.0
+		* @param string  $file_path File path.
+		* @param bool $remote_file Remote File Indicator.
+		*/
 		return array(
 			'remote_file' => $remote_file,
-			'file_path'   => $file_path,
+			'file_path'   => apply_filters( 'woocommerce_download_parse_file_path', $file_path, $remote_file ),
 		);
 	}
 
@@ -496,7 +522,7 @@ class WC_Download_Handler {
 		header( 'X-Robots-Tag: noindex, nofollow', true );
 		header( 'Content-Type: ' . self::get_download_content_type( $file_path ) );
 		header( 'Content-Description: File Transfer' );
-		header( 'Content-Disposition: attachment; filename="' . $filename . '";' );
+		header( 'Content-Disposition: ' . self::get_content_disposition() . '; filename="' . $filename . '";' );
 		header( 'Content-Transfer-Encoding: binary' );
 
 		$file_size = @filesize( $file_path ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
@@ -550,6 +576,22 @@ class WC_Download_Handler {
 		} else {
 			@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 		}
+	}
+
+	/**
+	 *
+	 * Get selected content disposition
+	 *
+	 * Defaults to attachment if `woocommerce_downloads_deliver_inline` setting is not selected.
+	 *
+	 * @return string Content disposition value.
+	 */
+	private static function get_content_disposition() : string {
+		$disposition = 'attachment';
+		if ( 'yes' === get_option( 'woocommerce_downloads_deliver_inline' ) ) {
+			$disposition = 'inline';
+		}
+		return $disposition;
 	}
 
 	/**
@@ -639,10 +681,14 @@ class WC_Download_Handler {
 		 * Since we will now render a message instead of serving a download, we should unwind some of the previously set
 		 * headers.
 		 */
-		header( 'Content-Type: ' . get_option( 'html_type' ) . '; charset=' . get_option( 'blog_charset' ) );
-		header_remove( 'Content-Description;' );
-		header_remove( 'Content-Disposition' );
-		header_remove( 'Content-Transfer-Encoding' );
+		if ( headers_sent() ) {
+			wc_get_logger()->log( 'warning', __( 'Headers already sent when generating download error message.', 'woocommerce' ) );
+		} else {
+			header( 'Content-Type: ' . get_option( 'html_type' ) . '; charset=' . get_option( 'blog_charset' ) );
+			header_remove( 'Content-Description;' );
+			header_remove( 'Content-Disposition' );
+			header_remove( 'Content-Transfer-Encoding' );
+		}
 
 		if ( ! strstr( $message, '<a ' ) ) {
 			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';

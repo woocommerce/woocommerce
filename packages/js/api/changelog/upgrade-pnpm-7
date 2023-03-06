@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Adjust build/test scripts to remove -- -- that was required for pnpm 6.

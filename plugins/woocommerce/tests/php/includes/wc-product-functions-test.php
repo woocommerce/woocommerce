@@ -105,6 +105,10 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 				$this->assertEquals( $order->get_customer_id(), $customer_id_passed_to_wc_customer_constructor );
 				$this->assertFalse( $get_base_rates_invoked );
 				$this->assertSame( $customer, $customer_passed_to_get_rates );
+			} elseif ( ! $customer_id && $set_filter ) {
+				$this->assertFalse( $customer_id_passed_to_wc_customer_constructor );
+				$this->assertNull( $customer_passed_to_get_rates );
+				$this->assertFalse( $get_base_rates_invoked );
 			} else {
 				$this->assertFalse( $customer_id_passed_to_wc_customer_constructor );
 				$this->assertFalse( $customer_passed_to_get_rates );
@@ -114,8 +118,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			wc_get_price_excluding_tax( $product );
 
 			$this->assertFalse( $customer_id_passed_to_wc_customer_constructor );
-			$this->assertFalse( $customer_passed_to_get_rates );
-			$this->assertTrue( $get_base_rates_invoked );
+			$this->assertEquals( $set_filter ? null : false, $customer_passed_to_get_rates );
+			$this->assertEquals( ! $set_filter, $get_base_rates_invoked );
 		}
 
 		// phpcs:enable Squiz.Commenting

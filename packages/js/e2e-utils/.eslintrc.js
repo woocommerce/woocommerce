@@ -1,4 +1,5 @@
 module.exports = {
+	root: true,
 	parser: '@typescript-eslint/parser',
 	env: {
 		'jest/globals': true,
@@ -11,7 +12,7 @@ module.exports = {
 		'no-useless-constructor': 'off',
 		'@typescript-eslint/no-useless-constructor': 2,
 	},
-	plugins: [ '@typescript-eslint/eslint-plugin' ],
+	plugins: [ '@typescript-eslint/eslint-plugin', 'jest' ],
 	extends: [ 'plugin:@wordpress/eslint-plugin/recommended-with-formatting' ],
 	overrides: [
 		{
@@ -29,4 +30,8 @@ module.exports = {
 			},
 		},
 	],
+	globals: {
+		page: true,
+		browser: true,
+	},
 };

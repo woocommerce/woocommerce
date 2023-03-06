@@ -26,16 +26,31 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	protected $identity_token;
 
 	/**
+	 * Receiver email address to validate.
+	 *
+	 * @var string Receiver email address.
+	 */
+	protected $receiver_email;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param bool   $sandbox Whether to use sandbox mode or not.
 	 * @param string $identity_token Identity token for PDT support.
 	 */
 	public function __construct( $sandbox = false, $identity_token = '' ) {
-		add_action( 'woocommerce_thankyou_paypal', array( $this, 'check_response' ) );
-
+		add_action( 'woocommerce_thankyou_paypal', array( $this, 'check_response_for_order' ) );
 		$this->identity_token = $identity_token;
 		$this->sandbox        = $sandbox;
+	}
+
+	/**
+	 * Set receiver email to enable more strict validation.
+	 *
+	 * @param string $receiver_email Email to receive PDT notification from.
+	 */
+	public function set_receiver_email( $receiver_email = '' ) {
+		$this->receiver_email = $receiver_email;
 	}
 
 	/**
@@ -82,26 +97,62 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 	}
 
 	/**
-	 * Check Response for PDT.
+	 * Check Response for PDT, taking the order id from the request.
+	 *
+	 * @deprecated 6.4 Use check_response_for_order instead.
 	 */
 	public function check_response() {
-		if ( empty( $_REQUEST['cm'] ) || empty( $_REQUEST['tx'] ) || empty( $_REQUEST['st'] ) ) { // WPCS: Input var ok, CSRF ok, sanitization ok.
+		global $wp;
+		$order_id = apply_filters( 'woocommerce_thankyou_order_id', absint( $wp->query_vars['order-received'] ) );
+
+		$this->check_response_for_order( $order_id );
+	}
+
+	/**
+	 * Check Response for PDT.
+	 *
+	 * @since 6.4
+	 *
+	 * @param mixed $wc_order_id The order id to check the response against.
+	 */
+	public function check_response_for_order( $wc_order_id ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_REQUEST['tx'] ) ) {
 			return;
 		}
 
-		$order_id    = wc_clean( wp_unslash( $_REQUEST['cm'] ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
-		$status      = wc_clean( strtolower( wp_unslash( $_REQUEST['st'] ) ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
-		$amount      = isset( $_REQUEST['amt'] ) ? wc_clean( wp_unslash( $_REQUEST['amt'] ) ) : 0; // WPCS: input var ok, CSRF ok, sanitization ok.
-		$transaction = wc_clean( wp_unslash( $_REQUEST['tx'] ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
-		$order       = $this->get_paypal_order( $order_id );
-
-		if ( ! $order || ! $order->needs_payment() ) {
-			return false;
+		$wc_order = wc_get_order( $wc_order_id );
+		if ( ! $wc_order->needs_payment() ) {
+			return;
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$transaction        = wc_clean( wp_unslash( $_REQUEST['tx'] ) );
 		$transaction_result = $this->validate_transaction( $transaction );
 
 		if ( $transaction_result ) {
+			$status = strtolower( $transaction_result['payment_status'] );
+			$amount = isset( $transaction_result['mc_gross'] ) ? $transaction_result['mc_gross'] : 0;
+			$order  = $this->get_paypal_order( $transaction_result['custom'] );
+
+			if ( ! $order ) {
+				// No valid WC order found on tx data.
+				return;
+			}
+
+			if ( $wc_order->get_id() !== $order->get_id() ) {
+				/* translators: 1: order ID, 2: order ID. */
+				WC_Gateway_Paypal::log( sprintf( __( 'Received PDT notification for order %1$d on endpoint for order %2$d.', 'woocommerce' ), $order->get_id(), $wc_order_id ), 'error' );
+				return;
+			}
+
+			if ( 0 !== strcasecmp( trim( $transaction_result['receiver_email'] ), trim( $this->receiver_email ) ) ) {
+				/* translators: 1: email address, 2: order ID . */
+				WC_Gateway_Paypal::log( sprintf( __( 'Received PDT notification for another account: %1$s. Order ID: %2$d.', 'woocommerce' ), $transaction_result['receiver_email'], $order->get_id() ), 'error' );
+				return;
+			}
+
+			// We have a valid response from PayPal.
 			WC_Gateway_Paypal::log( 'PDT Transaction Status: ' . wc_print_r( $status, true ) );
 
 			$order->add_meta_data( '_paypal_status', $status );

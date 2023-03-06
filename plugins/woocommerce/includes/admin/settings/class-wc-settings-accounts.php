@@ -93,7 +93,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'      => false,
 			),
 			array(
-				'desc'          => __( 'When creating an account, automatically generate an account password', 'woocommerce' ),
+				'desc'          => __( 'When creating an account, send the new user a link to set their password', 'woocommerce' ),
 				'id'            => 'woocommerce_registration_generate_password',
 				'default'       => 'yes',
 				'type'          => 'checkbox',

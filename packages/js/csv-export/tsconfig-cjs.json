@@ -1,0 +1,6 @@
+{
+	"extends": "../tsconfig-cjs",
+	"compilerOptions": {
+		"outDir": "build"
+	}
+}

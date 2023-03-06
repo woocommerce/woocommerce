@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { Model } from '../../model';
 import { ProductDownload } from '../shared';
 
@@ -48,4 +51,4 @@ abstract class AbstractProductDelivery extends Model {
 	public readonly purchaseNote: string = '';
 }
 
-export interface IProductDelivery extends AbstractProductDelivery {}
+export type IProductDelivery = AbstractProductDelivery;

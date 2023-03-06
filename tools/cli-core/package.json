@@ -1,0 +1,26 @@
+{
+	"name": "cli-core",
+	"version": "0.0.1",
+	"description": "Core functionality for CLI tools/commands.",
+	"main": " ",
+	"scripts": {},
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
+	"devDependencies": {
+		"@tsconfig/node16": "^1.0.3",
+		"@types/uuid": "^9.0.0",
+		"typescript": "^4.8.3"
+	},
+	"dependencies": {
+		"chalk": "^4.1.2",
+		"dotenv": "^10.0.0",
+		"ora": "^5.4.1",
+		"simple-git": "^3.10.0",
+		"ts-node": "^10.9.1",
+		"uuid": "^8.3.2"
+	}
+}

@@ -4,7 +4,12 @@ const { spawnSync } = require( 'child_process' );
 const program = require( 'commander' );
 const path = require( 'path' );
 const fs = require( 'fs' );
-const { getAppRoot, resolveLocalE2ePath } = require( '../utils' );
+const {
+	getAppRoot,
+	resolveLocalE2ePath,
+	resolvePackagePath,
+	resolveSingleE2EPath,
+} = require( '../utils' );
 const {
 	WC_E2E_SCREENSHOTS,
 	JEST_PUPPETEER_CONFIG,
@@ -30,7 +35,7 @@ if ( WC_E2E_SCREENSHOTS ) {
 	}
 }
 
-const nodeConfigDirs = [ path.resolve( __dirname, '../config' ) ];
+const nodeConfigDirs = [ resolvePackagePath( 'config' ) ];
 
 if ( appPath ) {
 	nodeConfigDirs.unshift( resolveLocalE2ePath( 'config' ) );
@@ -51,10 +56,7 @@ if ( ! JEST_PUPPETEER_CONFIG ) {
 	// Use local Puppeteer config if there is one.
 	// Load test configuration file into an object.
 	const localJestConfigFile = resolveLocalE2ePath( 'config/jest-puppeteer.config.js' );
-	const jestConfigFile = path.resolve(
-		__dirname,
-		'../config/jest-puppeteer.config.js'
-	);
+	const jestConfigFile = resolvePackagePath( 'config/jest-puppeteer.config.js' );
 
 	testEnvVars.JEST_PUPPETEER_CONFIG = fs.existsSync( localJestConfigFile )
 		? localJestConfigFile
@@ -65,7 +67,7 @@ if ( ! JEST_PUPPETEER_CONFIG ) {
 if ( program.args.length == 1 ) {
 	// Check for both absolute and relative paths
 	const testSpecAbs = path.resolve( program.args[ 0 ] );
-	const testSpecRel = path.resolve( appPath, program.args[ 0 ] );
+	const testSpecRel = resolveSingleE2EPath( program.args[ 0 ] );
 	if ( fs.existsSync( testSpecAbs ) ) {
 		process.env.jest_test_spec = testSpecAbs;
 	} else if ( fs.existsSync( testSpecRel ) ) {
@@ -74,10 +76,13 @@ if ( program.args.length == 1 ) {
 }
 
 let jestCommand = 'jest';
+let outputFile = 'test-results.json';
 const jestArgs = [
 	'--maxWorkers=1',
 	'--rootDir=./',
 	'--verbose',
+	'--json',
+	'--outputFile=' + outputFile,
 	...program.args,
 ];
 
@@ -88,7 +93,7 @@ if ( program.debug ) {
 
 const envVars = Object.assign( {}, process.env, testEnvVars );
 
-let configPath = path.resolve( __dirname, '../config/jest.config.js' );
+let configPath = resolvePackagePath( 'config/jest.config.js' );
 
 // Look for a Jest config in the dependent app's path.
 if ( appPath ) {
@@ -106,6 +111,11 @@ const jestProcess = spawnSync( jestCommand, jestArgs, {
 	env: envVars,
 } );
 
+let results = resolvePackagePath( outputFile );
+if ( fs.existsSync( results ) ) {
+	let localResults = resolveLocalE2ePath( outputFile );
+	fs.copyFileSync( results, localResults );
+}
 console.log( 'Jest exit code: ' + jestProcess.status );
 
 // Pass Jest exit code to npm

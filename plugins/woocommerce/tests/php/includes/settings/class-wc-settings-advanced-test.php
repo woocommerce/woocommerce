@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Settings
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
@@ -32,6 +33,10 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'importexport',
 			'features',
 		);
+
+		if ( wc_get_container()->get( CustomOrdersTableController::class )->is_feature_visible() ) {
+			$expected[] = 'custom_data_stores';
+		}
 
 		$this->assertEquals( $expected, $section_names );
 	}

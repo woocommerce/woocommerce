@@ -1,0 +1,64 @@
+{
+	"name": "woocommerce/woocommerce-beta-tester",
+	"description": "Run the beta versions of WooCommerce.",
+	"homepage": "https://woocommerce.com/",
+	"type": "wordpress-plugin",
+	"license": "GPL-3.0-or-later",
+	"prefer-stable": true,
+	"minimum-stability": "dev",
+	"version": "2.2.0",
+	"require": {
+		"composer/installers": "~1.7"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^6.5 || ^7.5",
+		"woocommerce/woocommerce-sniffs": "^0.1.3",
+		"automattic/jetpack-changelogger": "3.3.0"
+	},
+	"scripts": {
+		"test": [
+			"phpunit"
+		],
+		"phpcs": [
+			"phpcs -s -p"
+		],
+		"phpcs-pre-commit": [
+			"phpcs -s -p -n"
+		],
+		"phpcbf": [
+			"phpcbf -p"
+		]
+	},
+	"extra": {
+		"scripts-description": {
+			"test": "Run unit tests",
+			"phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+			"phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+		},
+		"changelogger": {
+			"formatter": {
+				"filename": "../../tools/changelogger/class-plugin-formatter.php"
+			},
+			"types": {
+				"fix": "Fixes an existing bug",
+				"add": "Adds functionality",
+				"update": "Update existing functionality",
+				"dev": "Development related task",
+				"tweak": "A minor adjustment to the codebase",
+				"performance": "Address performance issues",
+				"enhancement": "Improve existing functionality"
+			},
+			"versioning": "wordpress",
+			"changelog": "CHANGELOG.md"
+		}
+	},
+	"config": {
+		"platform": {
+			"php": "7.2"
+		},
+		"allow-plugins": {
+			"composer/installers": true,
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
+}

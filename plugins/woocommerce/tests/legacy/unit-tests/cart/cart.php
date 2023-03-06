@@ -13,7 +13,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	/**
 	 * tearDown.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		parent::tearDown();
 
 		WC()->cart->empty_cart();

@@ -7,6 +7,8 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,6 +16,8 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Notices Class.
  */
 class WC_Admin_Notices {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * Stores notices.
@@ -28,18 +32,19 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'update'                           => 'update_notice',
-		'template_files'                   => 'template_file_check_notice',
-		'legacy_shipping'                  => 'legacy_shipping_notice',
-		'no_shipping_methods'              => 'no_shipping_methods_notice',
-		'regenerating_thumbnails'          => 'regenerating_thumbnails_notice',
-		'regenerating_lookup_table'        => 'regenerating_lookup_table_notice',
-		'no_secure_connection'             => 'secure_connection_notice',
-		WC_PHP_MIN_REQUIREMENTS_NOTICE     => 'wp_php_min_requirements_notice',
-		'maxmind_license_key'              => 'maxmind_missing_license_key_notice',
-		'redirect_download_method'         => 'redirect_download_method_notice',
-		'uploads_directory_is_unprotected' => 'uploads_directory_is_unprotected_notice',
-		'base_tables_missing'              => 'base_tables_missing_notice',
+		'update'                             => 'update_notice',
+		'template_files'                     => 'template_file_check_notice',
+		'legacy_shipping'                    => 'legacy_shipping_notice',
+		'no_shipping_methods'                => 'no_shipping_methods_notice',
+		'regenerating_thumbnails'            => 'regenerating_thumbnails_notice',
+		'regenerating_lookup_table'          => 'regenerating_lookup_table_notice',
+		'no_secure_connection'               => 'secure_connection_notice',
+		WC_PHP_MIN_REQUIREMENTS_NOTICE       => 'wp_php_min_requirements_notice',
+		'maxmind_license_key'                => 'maxmind_missing_license_key_notice',
+		'redirect_download_method'           => 'redirect_download_method_notice',
+		'uploads_directory_is_unprotected'   => 'uploads_directory_is_unprotected_notice',
+		'base_tables_missing'                => 'base_tables_missing_notice',
+		'download_directories_sync_complete' => 'download_directories_sync_complete',
 	);
 
 	/**
@@ -52,6 +57,8 @@ class WC_Admin_Notices {
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_redirect_download_method_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
+		self::add_action( 'admin_init', array( __CLASS__, 'maybe_remove_php73_required_notice' ) );
+
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
 		// to avoid.
@@ -113,7 +120,52 @@ class WC_Admin_Notices {
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
 		self::add_maxmind_missing_license_key_notice();
+		self::maybe_add_php73_required_notice();
 	}
+
+	// phpcs:disable Generic.Commenting.Todo.TaskFound
+
+	/**
+	 * Add an admin notice about the bump of the required PHP version in WooCommerce 7.7
+	 * if the current PHP version is too old.
+	 *
+	 * TODO: Remove this method in WooCommerce 7.7.
+	 */
+	private static function maybe_add_php73_required_notice() {
+		if ( version_compare( phpversion(), '7.3', '>=' ) ) {
+			return;
+		}
+
+		self::add_custom_notice(
+			'php73_required_in_woo_77',
+			sprintf(
+				'%s%s',
+				sprintf(
+					'<h4>%s</h4>',
+					esc_html__( 'PHP version requirements will change soon', 'woocommerce' )
+				),
+				sprintf(
+					// translators: Placeholder is a URL.
+					wpautop( wp_kses_data( __( 'WooCommerce 7.7, scheduled for <b>May 2023</b>, will require PHP 7.3 or newer to work. Your server is currently running an older version of PHP, so this change will impact your store. Upgrading to at least PHP 8.0 is recommended. <b><a href="%s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
+					'https://developer.woocommerce.com/2023/01/10/new-requirement-for-woocommerce-7-7-php-7-3/'
+				)
+			)
+		);
+	}
+
+	/**
+	 * Remove the admin notice about the bump of the required PHP version in WooCommerce 7.7
+	 * if the current PHP version is good.
+	 *
+	 * TODO: Remove this method in WooCommerce 7.7.
+	 */
+	private static function maybe_remove_php73_required_notice() {
+		if ( version_compare( phpversion(), '7.3', '>=' ) && self::has_notice( 'php73_required_in_woo_77' ) ) {
+			self::remove_notice( 'php73_required_in_woo_77' );
+		}
+	}
+
+	// phpcs:enable Generic.Commenting.Todo.TaskFound
 
 	/**
 	 * Show a notice.
@@ -166,18 +218,37 @@ class WC_Admin_Notices {
 				wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 			}
 
-			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			$notice_name = sanitize_text_field( wp_unslash( $_GET['wc-hide-notice'] ) ); // WPCS: input var ok, CSRF ok.
+
+			/**
+			 * Filter the capability required to dismiss a given notice.
+			 *
+			 * @since 6.7.0
+			 *
+			 * @param string $default_capability The default required capability.
+			 * @param string $notice_name The notice name.
+			 */
+			$required_capability = apply_filters( 'woocommerce_dismiss_admin_notice_capability', 'manage_woocommerce', $notice_name );
+
+			if ( ! current_user_can( $required_capability ) ) {
 				wp_die( esc_html__( 'You don&#8217;t have permission to do this.', 'woocommerce' ) );
 			}
 
-			$hide_notice = sanitize_text_field( wp_unslash( $_GET['wc-hide-notice'] ) ); // WPCS: input var ok, CSRF ok.
-
-			self::remove_notice( $hide_notice );
-
-			update_user_meta( get_current_user_id(), 'dismissed_' . $hide_notice . '_notice', true );
-
-			do_action( 'woocommerce_hide_' . $hide_notice . '_notice' );
+			self::hide_notice( $notice_name );
 		}
+	}
+
+	/**
+	 * Hide a single notice.
+	 *
+	 * @param string $name Notice name.
+	 */
+	private static function hide_notice( $name ) {
+		self::remove_notice( $name );
+
+		update_user_meta( get_current_user_id(), 'dismissed_' . $name . '_notice', true );
+
+		do_action( 'woocommerce_hide_' . $name . '_notice' );
 	}
 
 	/**
@@ -275,7 +346,7 @@ class WC_Admin_Notices {
 	 * @deprecated 4.6.0
 	 */
 	public static function install_notice() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', __( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', esc_html__( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
 	}
 
 	/**
@@ -381,7 +452,7 @@ class WC_Admin_Notices {
 	 * @since 3.6.0
 	 */
 	public static function regenerating_lookup_table_notice() {
-		// See if this is still relevent.
+		// See if this is still relevant.
 		if ( ! wc_update_product_lookup_tables_is_running() ) {
 			self::remove_notice( 'regenerating_lookup_table' );
 			return;
@@ -472,6 +543,24 @@ class WC_Admin_Notices {
 			self::add_notice( 'redirect_download_method' );
 		} else {
 			self::remove_notice( 'redirect_download_method' );
+		}
+	}
+
+	/**
+	 * Notice about the completion of the product downloads sync, with further advice for the site operator.
+	 */
+	public static function download_directories_sync_complete() {
+		$notice_dismissed = apply_filters(
+			'woocommerce_hide_download_directories_sync_complete',
+			get_user_meta( get_current_user_id(), 'download_directories_sync_complete', true )
+		);
+
+		if ( $notice_dismissed ) {
+			self::remove_notice( 'download_directories_sync_complete' );
+		}
+
+		if ( Users::is_site_administrator() ) {
+			include __DIR__ . '/views/html-notice-download-dir-sync-complete.php';
 		}
 	}
 

@@ -40,7 +40,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before each test.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		global $wpdb;
 
 		parent::setUp();
@@ -121,7 +121,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->initiate_regeneration();
 
 		$this->assertEquals( 100, get_option( 'woocommerce_attribute_lookup_last_product_id_to_process' ) );
-		$this->assertEquals( 0, get_option( 'woocommerce_attribute_lookup_last_products_page_processed' ) );
+		$this->assertEquals( 0, get_option( 'woocommerce_attribute_lookup_processed_count' ) );
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_enabled' ) );
 
 		$expected_enqueued = array(
@@ -156,8 +156,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->initiate_regeneration();
 
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_last_product_id_to_process' ) );
-		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_last_products_page_processed' ) );
-		$this->assertEquals( 'no', get_option( 'woocommerce_attribute_lookup_enabled' ) );
+		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_processed_count' ) );
+		$this->assertEquals( 'yes', get_option( 'woocommerce_attribute_lookup_enabled' ) );
 		$this->assertEmpty( $this->queue->get_methods_called() );
 	}
 
@@ -165,15 +165,15 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 * @testdox `initiate_regeneration` processes one chunk of products IDs and enqueues next step if there are more products available.
 	 */
 	public function test_initiate_regeneration_correctly_processes_ids_and_enqueues_next_step() {
-		$requested_products_pages = array();
+		$requested_products_offsets = array();
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_products' => function( $args ) use ( &$requested_products_pages ) {
+				'wc_get_products' => function( $args ) use ( &$requested_products_offsets ) {
 					if ( 'DESC' === current( $args['orderby'] ) ) {
 						return array( 100 );
 					} else {
-						$requested_products_pages[] = $args['page'];
+						$requested_products_offsets[] = $args['offset'];
 						return array( 1, 2, 3 );
 					}
 				},
@@ -186,13 +186,14 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->initiate_regeneration();
 		$this->queue->clear_methods_called();
 
-		update_option( 'woocommerce_attribute_lookup_last_products_page_processed', 7 );
+		update_option( 'woocommerce_attribute_lookup_processed_count', 7 );
 
+		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( array( 1, 2, 3 ), $this->lookup_data_store->passed_products );
-		$this->assertEquals( array( 8 ), $requested_products_pages );
-		$this->assertEquals( 8, get_option( 'woocommerce_attribute_lookup_last_products_page_processed' ) );
+		$this->assertEquals( array( 7 ), $requested_products_offsets );
+		$this->assertEquals( 7 + count( $this->lookup_data_store->passed_products ), get_option( 'woocommerce_attribute_lookup_processed_count' ) );
 
 		$expected_enqueued = array(
 			'method'    => 'schedule_single',
@@ -206,6 +207,51 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Products are processed in groups of whatever the 'woocommerce_attribute_lookup_regeneration_step_size' filter returns, defaulting to PRODUCTS_PER_GENERATION_STEP
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $set_filter Whether to use the filter to change the processing group size or not.
+	 */
+	public function test_regeneration_uses_the_woocommerce_attribute_lookup_regeneration_step_size_filter( bool $set_filter ) {
+		$requested_step_sizes = array();
+
+		if ( $set_filter ) {
+			\add_filter(
+				'woocommerce_attribute_lookup_regeneration_step_size',
+				function( $default_filter_size ) {
+					return 100;
+				}
+			);
+		}
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_products' => function( $args ) use ( &$requested_step_sizes ) {
+					if ( 'DESC' === current( $args['orderby'] ) ) {
+						return array( 100 );
+					} else {
+						$requested_step_sizes[] = $args['limit'];
+						return array( 1, 2, 3 );
+					}
+				},
+			)
+		);
+
+		$this->sut->initiate_regeneration();
+		$this->queue->clear_methods_called();
+
+		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
+
+		remove_all_filters( ' woocommerce_attribute_lookup_regeneration_step_size' );
+
+		$expected_limit_value = $set_filter ? 100 : DataRegenerator::PRODUCTS_PER_GENERATION_STEP;
+		$this->assertEquals( array( $expected_limit_value ), $requested_step_sizes );
+	}
+
+	/**
 	 * @testdox `initiate_regeneration` finishes regeneration when the max product id is reached or no more products are returned.
 	 *
 	 * @testWith [[98,99,100]]
@@ -215,15 +261,12 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 * @param array $product_ids The products ids that wc_get_products will return.
 	 */
 	public function test_initiate_regeneration_finishes_when_no_more_products_available( $product_ids ) {
-		$requested_products_pages = array();
-
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'wc_get_products' => function( $args ) use ( &$requested_products_pages, $product_ids ) {
+				'wc_get_products' => function( $args ) use ( &$requested_products_offsets, $product_ids ) {
 					if ( 'DESC' === current( $args['orderby'] ) ) {
 						return array( 100 );
 					} else {
-						$requested_products_pages[] = $args['page'];
 						return $product_ids;
 					}
 				},
@@ -233,12 +276,37 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->initiate_regeneration();
 		$this->queue->clear_methods_called();
 
+		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( $product_ids, $this->lookup_data_store->passed_products );
 		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_last_product_id_to_process' ) );
-		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_last_products_page_processed' ) );
-		$this->assertEquals( 'no', get_option( 'woocommerce_attribute_lookup_enabled' ) );
+		$this->assertFalse( get_option( 'woocommerce_attribute_lookup_processed_count' ) );
+		$this->assertEquals( 'yes', get_option( 'woocommerce_attribute_lookup_enabled' ) );
 		$this->assertEmpty( $this->queue->get_methods_called() );
+	}
+
+	/**
+	 * @testdox After WooCommerce is installed the table usage is enabled only if it hadn't been explicitly disabled by an admin.
+	 *
+	 * @testWith [null, "yes"]
+	 *           ["yes", "yes"]
+	 *           ["no", "no"]
+	 *
+	 * @param string|null $previous_option_value Initial value of the attribute usage option.
+	 * @param string      $expected_final_option_value Expected final value of the attribute usage option.
+	 */
+	public function test_after_install_table_usage_is_enabled_if_it_wasnt_disabled( ?string $previous_option_value, string $expected_final_option_value ) {
+		if ( null === $previous_option_value ) {
+			delete_option( 'woocommerce_attribute_lookup_enabled' );
+		} else {
+			update_option( 'woocommerce_attribute_lookup_enabled', $previous_option_value );
+		}
+
+		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_installed' );
+
+		$actual_final_option_value = get_option( 'woocommerce_attribute_lookup_enabled' );
+		$this->assertEquals( $expected_final_option_value, $actual_final_option_value );
 	}
 }

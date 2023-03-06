@@ -164,13 +164,13 @@ function wc_load_webhooks( $status = '', $limit = null ) {
 	$loaded     = 0;
 
 	foreach ( $webhooks as $webhook_id ) {
-		$webhook = new WC_Webhook( $webhook_id );
-		$webhook->enqueue();
-		$loaded ++;
-
 		if ( ! is_null( $limit ) && $loaded >= $limit ) {
 			break;
 		}
+
+		$webhook = new WC_Webhook( $webhook_id );
+		$webhook->enqueue();
+		$loaded ++;
 	}
 
 	return 0 < $loaded;

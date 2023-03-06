@@ -401,7 +401,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 	 * @since 5.2
 	 * @param bool
 	 */
-	if ( ! apply_filters( 'woocommerce_product_recount_terms', '__return_true' ) ) {
+	if ( ! apply_filters( 'woocommerce_product_recount_terms', true ) ) {
 		return;
 	}
 
@@ -529,11 +529,14 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 	}
 
 	$o_term_counts = get_transient( 'wc_term_counts' );
-	$term_counts   = $o_term_counts;
+	$term_counts   = false === $o_term_counts ? array() : $o_term_counts;
 
 	foreach ( $terms as &$term ) {
 		if ( is_object( $term ) ) {
-			$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_term_meta( $term->term_id, 'product_count_' . $taxonomies[0], true );
+			$term_counts[ $term->term_id ] =
+				isset( $term_counts[ $term->term_id ] ) ?
+					$term_counts[ $term->term_id ] :
+					get_term_meta( $term->term_id, 'product_count_' . $taxonomies[0], true );
 
 			if ( '' !== $term_counts[ $term->term_id ] ) {
 				$term->count = absint( $term_counts[ $term->term_id ] );

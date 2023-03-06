@@ -1,10 +1,15 @@
-/** @format */
+/**
+ * External dependencies
+ */
+import { bind } from 'jest-each';
+
+/**
+ * Internal dependencies
+ */
 import {
 	sendFailedTestScreenshotToSlack,
 	sendFailedTestMessageToSlack,
 } from '../slack';
-
-import { bind } from 'jest-each';
 const { takeScreenshotFor } = require( '../../utils' );
 
 /**
@@ -21,17 +26,16 @@ const originalIt = global.it;
 
 /**
  * A custom describe function that stores the name of the describe block.
+ *
  * @type {describe}
  */
-global.describe = (() => {
+global.describe = ( () => {
 	const describe = ( blockName, callback ) => {
-
 		try {
 			originalDescribe( blockName, callback );
 		} catch ( e ) {
 			throw e;
 		}
-
 	};
 	const only = ( blockName, callback ) => {
 		originalDescribe.only( blockName, callback );
@@ -47,7 +51,7 @@ global.describe = (() => {
 	describe.skip = skip;
 
 	return describe;
-})();
+} )();
 
 /**
  * A custom it function that wraps the test function in a callback
@@ -55,7 +59,7 @@ global.describe = (() => {
  *
  * @type {function(*=, *=): *}
  */
-global.it = (() => {
+global.it = ( () => {
 	const test = async ( testName, callback ) => {
 		const testCallback = async () => screenshotTest( testName, callback );
 		return originalIt( testName, testCallback );
@@ -74,13 +78,14 @@ global.it = (() => {
 	test.skip = skip;
 
 	return test;
-})();
+} )();
 
 /**
  * Save a screenshot during a test if the test fails.
- * @param testName
- * @param callback
- * @returns {Promise<void>}
+ *
+ * @param {string}   testName
+ * @param {Function} callback
+ * @return {Promise<void>}
  */
 const screenshotTest = async ( testName, callback ) => {
 	try {
@@ -92,6 +97,6 @@ const screenshotTest = async ( testName, callback ) => {
 			await sendFailedTestScreenshotToSlack( filePath );
 		}
 
-		throw ( e );
+		throw e;
 	}
 };

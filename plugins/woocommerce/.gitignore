@@ -1,19 +1,9 @@
-# Editors
-/nbproject/private/
+# Built CSS
+/assets/css/*
 
-# Grunt
-none
-
-# Sass
-.sass-cache/
-
-# All CSS
-/assets/css/**
-/assets/css/*.css
-
-# All JS
-/assets/js/**
-/assets/js/*.js
+# Built JS
+/assets/js/*
+/assets/client/*
 
 # Behat/CLI Tests
 tests/cli/installer
@@ -22,35 +12,21 @@ tests/cli/composer.lock
 tests/cli/composer.json
 tests/cli/vendor
 
-# Unit tests
-/tmp
+# Unit Tests
 /tests/bin/tmp
 /tests/e2e/config/local-*.json
 /tests/e2e/config/local.json
-/tests/e2e/config/default.json
-/tests/e2e/docker
 /tests/e2e/screenshots
 /tests/e2e/plugins
-
-# Logs
-/logs
-
-# TypeScript files
-tsconfig.tsbuildinfo
-
-# Composer
-/vendor/
-/bin/composer/**/vendor/
-/lib/vendor/
-contributors.md
-contributors.html
-
-# Yarn
-yarn.lock
+.phpunit.result.cache
 
 # Packages
 /packages/*
 !/packages/README.md
+!/packages/woocommerce-admin/woocommerce-admin.php
 
 # Language files
 i18n/languages/woocommerce.pot
+
+# Environment files
+.wp-env.override.json

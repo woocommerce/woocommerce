@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import {
 	AbstractProduct,
 	IProductCommon,
@@ -38,19 +41,24 @@ import {
 /**
  * The parameters that simple products can update.
  */
-type SimpleProductUpdateParams = ProductDeliveryUpdateParams
-	& ProductCommonUpdateParams
-	& ProductCrossUpdateParams
-	& ProductInventoryUpdateParams
-	& ProductPriceUpdateParams
-	& ProductSalesTaxUpdateParams
-	& ProductShippingUpdateParams
-	& ProductUpSellUpdateParams;
+type SimpleProductUpdateParams = ProductDeliveryUpdateParams &
+	ProductCommonUpdateParams &
+	ProductCrossUpdateParams &
+	ProductInventoryUpdateParams &
+	ProductPriceUpdateParams &
+	ProductSalesTaxUpdateParams &
+	ProductShippingUpdateParams &
+	ProductUpSellUpdateParams;
 /**
  * The parameters embedded in this generic can be used in the ModelRepository in order to give
  * type-safety in an incredibly granular way.
  */
-export type SimpleProductRepositoryParams = ModelRepositoryParams< SimpleProduct, never, ProductSearchParams, SimpleProductUpdateParams >;
+export type SimpleProductRepositoryParams = ModelRepositoryParams<
+	SimpleProduct,
+	never,
+	ProductSearchParams,
+	SimpleProductUpdateParams
+>;
 
 /**
  * An interface for listing simple products using the repository.
@@ -66,7 +74,8 @@ export type ListsSimpleProducts = ListsModels< SimpleProductRepositoryParams >;
  * @typedef CreatesSimpleProducts
  * @alias CreatesModels.<SimpleProduct>
  */
-export type CreatesSimpleProducts = CreatesModels< SimpleProductRepositoryParams >;
+export type CreatesSimpleProducts =
+	CreatesModels< SimpleProductRepositoryParams >;
 
 /**
  * An interface for reading simple products using the repository.
@@ -82,7 +91,8 @@ export type ReadsSimpleProducts = ReadsModels< SimpleProductRepositoryParams >;
  * @typedef UpdatesSimpleProducts
  * @alias UpdatesModels.<SimpleProduct>
  */
-export type UpdatesSimpleProducts = UpdatesModels< SimpleProductRepositoryParams >;
+export type UpdatesSimpleProducts =
+	UpdatesModels< SimpleProductRepositoryParams >;
 
 /**
  * An interface for deleting simple products using the repository.
@@ -90,29 +100,33 @@ export type UpdatesSimpleProducts = UpdatesModels< SimpleProductRepositoryParams
  * @typedef DeletesSimpleProducts
  * @alias DeletesModels.<SimpleProduct>
  */
-export type DeletesSimpleProducts = DeletesModels< SimpleProductRepositoryParams >;
+export type DeletesSimpleProducts =
+	DeletesModels< SimpleProductRepositoryParams >;
 
 /**
  * The base for the simple product object.
  */
-export class SimpleProduct extends AbstractProduct implements
-	IProductCommon,
-	IProductCrossSells,
-	IProductDelivery,
-	IProductInventory,
-	IProductPrice,
-	IProductSalesTax,
-	IProductShipping,
-	IProductUpSells {
+export class SimpleProduct
+	extends AbstractProduct
+	implements
+		IProductCommon,
+		IProductCrossSells,
+		IProductDelivery,
+		IProductInventory,
+		IProductPrice,
+		IProductSalesTax,
+		IProductShipping,
+		IProductUpSells
+{
 	/**
 	 * @see ./abstracts/cross-sells.ts
 	 */
-	public readonly crossSellIds: Array<number> = [];
+	public readonly crossSellIds: Array< number > = [];
 
 	/**
 	 * @see ./abstracts/upsell.ts
 	 */
-	public readonly upSellIds: Array<number> = [];
+	public readonly upSellIds: Array< number > = [];
 
 	/**
 	 * @see ./abstracts/delivery.ts
@@ -130,10 +144,11 @@ export class SimpleProduct extends AbstractProduct implements
 	public readonly onePerOrder: boolean = false;
 	public readonly trackInventory: boolean = false;
 	public readonly remainingStock: number = -1;
-	public readonly stockStatus: StockStatus = ''
+	public readonly stockStatus: StockStatus = '';
 	public readonly backorderStatus: BackorderStatus = BackorderStatus.Allowed;
 	public readonly canBackorder: boolean = false;
 	public readonly isOnBackorder: boolean = false;
+	public readonly lowStockThreshold: number = -1;
 
 	/**
 	 * @see ./abstracts/price.ts
@@ -179,7 +194,9 @@ export class SimpleProduct extends AbstractProduct implements
 	 *
 	 * @param {HTTPClient} httpClient The client for communicating via HTTP.
 	 */
-	public static restRepository( httpClient: HTTPClient ): ReturnType< typeof simpleProductRESTRepository > {
+	public static restRepository(
+		httpClient: HTTPClient
+	): ReturnType< typeof simpleProductRESTRepository > {
 		return simpleProductRESTRepository( httpClient );
 	}
 }

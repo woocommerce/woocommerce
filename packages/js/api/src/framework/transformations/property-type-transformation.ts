@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { ModelTransformation, TransformationOrder } from '../model-transformer';
 
 /**
@@ -111,25 +114,35 @@ export class PropertyTypeTransformation implements ModelTransformation {
 	/**
 	 * Converts the given value into the requested type.
 	 *
-	 * @param {*} value The value to transform.
-	 * @param {PropertyType} type The type to transform it into.
+	 * @param {*}            value The value to transform.
+	 * @param {PropertyType} type  The type to transform it into.
 	 * @return {*} The converted type.
 	 * @private
 	 */
-	private convertTo( value: any, type: PropertyType ): PropertyTypeTypes | PropertyTypeTypes[] {
+	private convertTo(
+		value: any,
+		type: PropertyType
+	): PropertyTypeTypes | PropertyTypeTypes[] {
 		if ( Array.isArray( value ) ) {
-			return value.map( ( v: string ) => this.convertTo( v, type ) as PropertyTypeTypes );
+			return value.map(
+				( v: string ) => this.convertTo( v, type ) as PropertyTypeTypes
+			);
 		}
 
-		if ( null === value ) {
+		if ( value === null ) {
 			return null;
 		}
 
 		switch ( type ) {
-			case PropertyType.String: return String( value );
-			case PropertyType.Integer: return parseInt( value );
-			case PropertyType.Float: return parseFloat( value );
-			case PropertyType.Boolean: return Boolean( value );
+			case PropertyType.String:
+				return String( value );
+			case PropertyType.Integer:
+				// eslint-disable-next-line
+				return parseInt( value );
+			case PropertyType.Float:
+				return parseFloat( value );
+			case PropertyType.Boolean:
+				return Boolean( value );
 			case PropertyType.Date:
 				return new Date( value );
 		}
@@ -138,17 +151,20 @@ export class PropertyTypeTransformation implements ModelTransformation {
 	/**
 	 * Converts the given type into a string.
 	 *
-	 * @param {*} value The value to transform.
-	 * @param {PropertyType} type The type to transform it into.
+	 * @param {*}            value The value to transform.
+	 * @param {PropertyType} type  The type to transform it into.
 	 * @return {*} The converted type.
 	 * @private
 	 */
-	private convertFrom( value: PropertyTypeTypes | PropertyTypeTypes[], type: PropertyType ): any {
+	private convertFrom(
+		value: PropertyTypeTypes | PropertyTypeTypes[],
+		type: PropertyType
+	): any {
 		if ( Array.isArray( value ) ) {
 			return value.map( ( v ) => this.convertFrom( v, type ) );
 		}
 
-		if ( null === value ) {
+		if ( value === null ) {
 			return null;
 		}
 

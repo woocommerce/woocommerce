@@ -1,0 +1,275 @@
+/* stylelint-disable function-url-quotes */
+/* quotes necessary for the data urls in url(), will shift these resources out to their own files when we enable asset modules */
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+// The welcome modal is presented outside the homescreen class namespace
+.components-guide.woocommerce__mobile-app-welcome-modal {
+	max-width: 964px;
+	min-width: 534px;
+	height: 600px;
+
+	.components-modal__header {
+		height: 0;
+
+		.components-button {
+			color: $white;
+		}
+	}
+
+	.components-guide__container {
+		margin-top: 0;
+	}
+	.components-guide__page {
+		min-height: 575px;
+
+		.mobile-app-modal-layout {
+			display: grid;
+			grid-template-columns: 3fr 2fr;
+			min-height: 575px;
+
+			.mobile-app-modal-content {
+				display: flex;
+
+				.jetpack-installation-content {
+					animation: fadeIn 0.7s ease-in-out; // the jetpack data takes a moment to load, so we animate it to make it less jarring
+					padding: 48px;
+					display: flex;
+					flex-direction: column;
+
+					.modal-layout-header {
+						.modal-header > h1 {
+							line-height: normal;
+						}
+					}
+					.modal-layout-body {
+						flex-grow: 1;
+						.modal-subheader {
+							margin-top: -16px;
+							margin-bottom: 24px;
+							h3 {
+								font-weight: 400;
+								color: #757575;
+								line-height: 1.6rem;
+							}
+						}
+						.modal-subheader.jetpack-already-installed {
+							margin-bottom: 48px; // there's a bit of space so space it out
+						}
+					}
+
+					.modal-layout-footer {
+						.mobile-footer-icons {
+							display: flex;
+							flex-direction: row;
+							margin-bottom: 16px;
+
+							.apple-icon {
+								width: 24px;
+								height: 24px;
+								margin-inline: 4px;
+								background-repeat: no-repeat;
+								background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 21 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19.7928 18.4328C19.4445 19.2374 19.0323 19.978 18.5546 20.659C17.9035 21.5873 17.3704 22.2298 16.9596 22.5866C16.3227 23.1723 15.6404 23.4723 14.9097 23.4893C14.3851 23.4893 13.7525 23.3401 13.0162 23.0373C12.2774 22.7359 11.5984 22.5866 10.9776 22.5866C10.3266 22.5866 9.62829 22.7359 8.8814 23.0373C8.13337 23.3401 7.53077 23.4979 7.07004 23.5135C6.36935 23.5433 5.67093 23.2349 4.97379 22.5866C4.52884 22.1985 3.9723 21.5332 3.30558 20.5907C2.59025 19.5843 2.00215 18.4172 1.54142 17.0866C1.04799 15.6494 0.800637 14.2577 0.800637 12.9103C0.800637 11.3669 1.13414 10.0357 1.80213 8.92023C2.32712 8.02421 3.02553 7.31741 3.89966 6.79854C4.77378 6.27967 5.71827 6.01525 6.7354 5.99834C7.29195 5.99834 8.02178 6.17049 8.92874 6.50882C9.83314 6.84829 10.4139 7.02044 10.6685 7.02044C10.8588 7.02044 11.5039 6.81915 12.5975 6.41784C13.6317 6.04568 14.5046 5.89158 15.2196 5.95228C17.1572 6.10865 18.6129 6.87246 19.581 8.24854C17.8481 9.29851 16.9909 10.7691 17.0079 12.6557C17.0236 14.1252 17.5567 15.348 18.6044 16.3189C19.0792 16.7696 19.6094 17.1178 20.1994 17.3652C20.0714 17.7362 19.9364 18.0916 19.7928 18.4328ZM15.349 0.946082C15.349 2.09785 14.9282 3.17325 14.0895 4.16864C13.0773 5.35195 11.853 6.03572 10.5254 5.92783C10.5085 5.78965 10.4987 5.64422 10.4987 5.49141C10.4987 4.38571 10.9801 3.2024 11.8349 2.23488C12.2616 1.745 12.8044 1.33768 13.4625 1.01275C14.1193 0.692673 14.7405 0.515659 15.3248 0.485352C15.3419 0.639322 15.349 0.793306 15.349 0.946068V0.946082Z' fill='%23BBBBBB'/%3E%3C/svg%3E%0A");
+							}
+							.android-icon {
+								width: 24px;
+								height: 24px;
+								margin-inline: 4px;
+								background-repeat: no-repeat;
+								background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 20 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M14.83 0.86L13.53 2.16C15.03 3.25 16 5.01 16 7H4C4 5.01 4.97 3.26 6.45 2.17L5.14 0.86C4.94 0.66 4.94 0.35 5.14 0.15C5.34 -0.05 5.65 -0.05 5.85 0.15L7.34 1.63C8.14 1.23 9.04 1 10 1C10.95 1 11.85 1.23 12.64 1.63L14.12 0.15C14.32 -0.05 14.63 -0.05 14.83 0.15C15.03 0.35 15.03 0.66 14.83 0.86ZM0 9.5C0 8.67 0.67 8 1.5 8C2.33 8 3 8.67 3 9.5V16.5C3 17.33 2.33 18 1.5 18C0.67 18 0 17.33 0 16.5V9.5ZM5 19C4.45 19 4 18.55 4 18V8H16V18C16 18.55 15.55 19 15 19H14V22.5C14 23.33 13.33 24 12.5 24C11.67 24 11 23.33 11 22.5V19H9V22.5C9 23.33 8.33 24 7.5 24C6.67 24 6 23.33 6 22.5V19H5ZM18.5 8C17.67 8 17 8.67 17 9.5V16.5C17 17.33 17.67 18 18.5 18C19.33 18 20 17.33 20 16.5V9.5C20 8.67 19.33 8 18.5 8ZM8 5H7V4H8V5ZM12 5H13V4H12V5Z' fill='%23BBBBBB'/%3E%3C/svg%3E%0A");
+							}
+						}
+						.mobile-footer-blurb {
+							font-weight: 400;
+							color: #757575;
+						}
+					}
+				}
+			}
+			.mobile-app-modal-illustration {
+				background-color: #674399;
+				background-repeat: no-repeat;
+				background-image: url("data:image/svg+xml,%3Csvg width='341' height='421' viewBox='0 0 341 421' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M-258.536 396.856L-329.719 373.412C-338.484 370.525 -343.249 361.08 -340.362 352.315L-271.987 144.717C-269.1 135.952 -259.655 131.187 -250.89 134.074L-179.707 157.519C-69.5553 193.799 49.1512 133.914 85.431 23.7615L99.9575 -20.3434C102.844 -29.1081 112.29 -33.8731 121.054 -30.9864L328.652 37.3885C337.417 40.2752 342.182 49.7205 339.295 58.4852L324.769 102.59C244.953 344.925 -16.2016 476.672 -258.536 396.856Z' fill='%237F54B3'/%3E%3C/svg%3E");
+
+				padding-top: 36px;
+				overflow: clip;
+
+				img {
+					margin-right: -24px;
+				}
+			}
+		}
+	}
+
+	.components-guide__footer {
+		display: none; // hide the guide component's 'ok, got it' button
+	}
+
+	.fill-theme-color {
+		fill: var(--wp-admin-theme-color);
+	}
+}
+.woo-icon {
+	height: 48px;
+	width: 48px;
+	background-image: url("data:image/svg+xml,%3Csvg width='48' height='48' viewBox='0 0 48 48' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 15.936C0 2.8127 2.8127 0 15.936 0H32.064C45.1873 0 48 2.8127 48 15.936V32.064C48 45.1873 45.1873 48 32.064 48H15.936C2.8127 48 0 45.1873 0 32.064V15.936Z' fill='%237F54B3'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M10.3042 14.666H37.5304C39.2534 14.666 40.6482 16.0683 40.6482 17.8006V28.2493C40.6482 29.9816 39.2534 31.3839 37.5304 31.3839H27.7667L29.1068 34.6835L23.213 31.3839H10.3179C8.59486 31.3839 7.20005 29.9816 7.20005 28.2493V17.8006C7.18638 16.0821 8.58119 14.666 10.3042 14.666Z' fill='white'/%3E%3Cpath d='M8.86843 17.5121C9.05987 17.2509 9.34704 17.1134 9.72993 17.0859C10.4273 17.0309 10.8239 17.3609 10.9196 18.0758C11.3435 20.9492 11.8085 23.3827 12.3008 25.3762L15.2955 19.6431C15.569 19.1207 15.9109 18.8457 16.3211 18.8182C16.9228 18.777 17.292 19.1619 17.4424 19.9731C17.7843 21.8016 18.2219 23.3552 18.7415 24.675C19.097 21.1829 19.6987 18.667 20.5466 17.1134C20.7517 16.7285 21.0525 16.536 21.4491 16.5085C21.7636 16.481 22.0508 16.5772 22.3106 16.7835C22.5704 16.9897 22.7071 17.2509 22.7345 17.5671C22.7482 17.8146 22.7071 18.0208 22.5978 18.227C22.0644 19.2169 21.6269 20.8805 21.2713 23.1902C20.9294 25.4311 20.8064 27.1772 20.8884 28.4283C20.9158 28.772 20.8611 29.0744 20.7243 29.3357C20.5602 29.6381 20.3141 29.8031 19.9996 29.8306C19.644 29.8581 19.2748 29.6931 18.9193 29.3219C17.6475 28.0158 16.6356 26.0636 15.8972 23.4651C15.0083 25.2249 14.352 26.5448 13.928 27.4247C13.1212 28.9782 12.4375 29.7756 11.8632 29.8169C11.494 29.8443 11.1794 29.5281 10.9059 28.8682C10.2085 27.0672 9.45644 23.5889 8.64963 18.4333C8.60861 18.0758 8.67698 17.7596 8.86843 17.5121Z' fill='%237F54B3'/%3E%3Cpath d='M38.2689 19.6705C37.7766 18.8043 37.0519 18.2819 36.081 18.0757C35.8211 18.0207 35.575 17.9932 35.3425 17.9932C34.0298 17.9932 32.9632 18.6806 32.129 20.0554C31.4179 21.224 31.0624 22.5164 31.0624 23.9324C31.0624 24.991 31.2812 25.8984 31.7188 26.6546C32.211 27.5207 32.9358 28.0432 33.9067 28.2494C34.1665 28.3044 34.4127 28.3319 34.6451 28.3319C35.9716 28.3319 37.0382 27.6445 37.8587 26.2696C38.5697 25.0873 38.9253 23.7949 38.9253 22.3789C38.9253 21.3065 38.7065 20.4129 38.2689 19.6705ZM36.5459 23.4787C36.3545 24.3861 36.0126 25.0598 35.5066 25.5135C35.1101 25.8709 34.7409 26.0222 34.399 25.9534C34.0708 25.8847 33.7973 25.596 33.5922 25.0598C33.4281 24.6336 33.346 24.2074 33.346 23.8087C33.346 23.465 33.3734 23.1213 33.4418 22.8051C33.5648 22.2414 33.7973 21.6915 34.1665 21.169C34.6178 20.4954 35.0964 20.2204 35.5887 20.3166C35.9169 20.3854 36.1904 20.6741 36.3955 21.2103C36.5596 21.6365 36.6416 22.0627 36.6416 22.4614C36.6416 22.8188 36.6006 23.1625 36.5459 23.4787Z' fill='%237F54B3'/%3E%3Cpath d='M29.6948 19.6705C29.2025 18.8043 28.4641 18.2819 27.5069 18.0757C27.2471 18.0207 27.0009 17.9932 26.7684 17.9932C25.4557 17.9932 24.3891 18.6806 23.5549 20.0554C22.8438 21.224 22.4883 22.5164 22.4883 23.9324C22.4883 24.991 22.7071 25.8984 23.1447 26.6546C23.6369 27.5207 24.3617 28.0432 25.3326 28.2494C25.5924 28.3044 25.8386 28.3319 26.071 28.3319C27.3975 28.3319 28.4641 27.6445 29.2846 26.2696C29.9957 25.0873 30.3512 23.7949 30.3512 22.3789C30.3512 21.3065 30.1324 20.4129 29.6948 19.6705ZM27.9718 23.4787C27.7804 24.3861 27.4385 25.0598 26.9325 25.5135C26.536 25.8709 26.1668 26.0222 25.8249 25.9534C25.4967 25.8847 25.2232 25.596 25.0181 25.0598C24.854 24.6336 24.7719 24.2074 24.7719 23.8087C24.7719 23.465 24.7993 23.1213 24.8677 22.8051C24.9907 22.2414 25.2232 21.6915 25.5924 21.169C26.0437 20.4954 26.5223 20.2204 27.0146 20.3166C27.3428 20.3854 27.6163 20.6741 27.8214 21.2103C27.9855 21.6365 28.0675 22.0627 28.0675 22.4614C28.0675 22.8188 28.0402 23.1625 27.9718 23.4787Z' fill='%237F54B3'/%3E%3C/svg%3E%0A");
+}
+
+.jetpack-stepper-wrapper {
+	button.install-jetpack-button {
+		// the positioning shenanigans in this button is to keep the button size constant after switching the text to spinner
+		background: #069e08;
+		color: #fff;
+		position: relative;
+
+		.install-jetpack-spinner {
+			position: absolute;
+			background-color: transparent; // default background is blue for some reason
+			// below rules are to center the spinner
+			margin-left: auto;
+			margin-right: auto;
+			left: 0;
+			right: 0;
+		}
+
+		.install-jetpack-button-contents {
+			visibility: hidden;
+			.jetpack-icon {
+				display: inline-block;
+				width: 16px;
+				height: 16px;
+				margin-right: 8px;
+				background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 1.33334C4.33333 1.33334 1.33333 4.33334 1.33333 8.00001C1.33333 11.6667 4.33333 14.6667 8 14.6667C11.6667 14.6667 14.6667 11.6667 14.6667 8.00001C14.6667 4.33334 11.6667 1.33334 8 1.33334ZM7.33333 9.33334H4L7.33333 2.66668V9.33334ZM8.66667 13.3333V6.66668H12L8.66667 13.3333Z' fill='white'/%3E%3C/svg%3E%0A");
+			}
+			.install-jetpack-button-text {
+				display: inline-block;
+				vertical-align: top;
+			}
+		}
+	}
+}
+
+.woocommerce-stepper.is-vertical .woocommerce-stepper__step.is-complete {
+	// default vertical step distance is 36px which is too much and doesn't match the design
+	padding-bottom: 16px;
+}
+
+button.components-button.send-magic-link-button {
+	background: #007cba;
+	color: #fff;
+	position: relative;
+	:hover {
+		// the hover state makes the text invisible so we need to override it
+		color: #fff;
+	}
+
+	.send-magic-link-spinner {
+		position: absolute;
+		background-color: transparent;
+		// below rules are to center the spinner
+		margin-left: auto;
+		margin-right: auto;
+		left: 0;
+		right: 0;
+
+		.woocommerce-spinner__circle {
+			stroke: #fff;
+		}
+	}
+
+	.send-magic-link-button-contents {
+		visibility: hidden;
+		.send-magic-link-button-text {
+			display: inline-block;
+			vertical-align: top;
+		}
+	}
+}
+
+.email-sent-modal-body {
+	padding-block: 40px;
+	padding-inline: 56px;
+	margin: auto; // center the content both vertically and horizontally
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: 495px;
+	animation: fadeIn 0.7s ease-in-out; // fade in the modal content for consistency because the previous content fades in
+
+	.email-sent-title {
+		h1 {
+			font-weight: 400;
+		}
+	}
+
+	.email-sent-illustration {
+		margin-top: 95px;
+		margin-bottom: 40px;
+		background-image: url("data:image/svg+xml,%3Csvg width='84' height='80' viewBox='0 0 84 80' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M14.3876 45.6191L0.525879 29.8193L42 0L83.4741 29.8193L69.3907 45.6191H14.3876Z' fill='%23BBBBBB'/%3E%3Cpath d='M81.4781 31.8226H0.525879V67.3165H81.4781V31.8226Z' fill='%23757575'/%3E%3Cpath d='M81.4781 31.8226H0.525879V67.3165H81.4781V31.8226Z' fill='url(%23paint0_linear_5_40)'/%3E%3Cpath d='M83.4741 80H0.525879V29.8193L42 54.9651L83.4741 29.8193V80Z' fill='%23949494'/%3E%3Cpath d='M0.87554 18.5686L0.545743 18.7302L0.583669 18.6625L0.554725 18.6719L0.595312 18.6417L5.03405 10.716L7.30304 12.6571L9.24955 14.4653L8.69065 14.7392L9.31897 15.8512L0.87554 18.5686Z' fill='%23BBBBBB'/%3E%3Cpath d='M7.0782 12.8635L8.85737 14.5187L0.793213 18.5413L5.08467 13.0225L7.0782 12.8635Z' fill='%23BBBBBB'/%3E%3Cpath d='M7.0782 12.8635L8.85737 14.5187L0.793213 18.5413L5.08467 13.0225L7.0782 12.8635Z' fill='%23BBBBBB'/%3E%3Cpath d='M5.00295 11.0889L0.793213 18.5413L7.0782 12.8635L5.00295 11.0889Z' fill='%23949494'/%3E%3Cpath d='M8.9094 15.8008L0.80198 18.4878L7.57923 13.4118L8.9094 15.8008Z' fill='%23949494'/%3E%3Cpath d='M68.3945 4.30889L66.6183 7.39864L79.6416 9.52639L71.2536 3.66566L68.3945 4.30889Z' fill='%23BBBBBB'/%3E%3Cpath d='M68.3945 4.30889L66.6183 7.39864L79.6416 9.52639L71.2536 3.66566L68.3945 4.30889Z' fill='%23BBBBBB'/%3E%3Cpath d='M70.5334 0.922852L79.6416 9.52639L68.3945 4.30889L70.5334 0.922852Z' fill='%23949494'/%3E%3Cpath d='M67.0988 9.21499L79.6063 9.45477L67.93 5.29341L67.0988 9.21499Z' fill='%23949494'/%3E%3Cdefs%3E%3ClinearGradient id='paint0_linear_5_40' x1='42' y1='80' x2='42' y2='0' gradientUnits='userSpaceOnUse'%3E%3Cstop stop-opacity='0.12'/%3E%3Cstop offset='0.55135' stop-opacity='0.09'/%3E%3Cstop offset='1' stop-opacity='0.02'/%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E%0A");
+		background-repeat: no-repeat;
+		opacity: 0.5;
+		width: 83px;
+		height: 80px;
+	}
+	.email-sent-subheader-spacer {
+		flex-grow: 1;
+		padding-inline: 32px;
+		margin-top: $gap-smallest;
+		.email-sent-subheader {
+			font-weight: 400;
+			font-size: 16px;
+			line-height: 1.5rem;
+			color: #757575;
+			text-align: center;
+		}
+	}
+
+	.email-sent-footer {
+		text-align: center;
+		.email-sent-footer-prompt {
+			font-size: 11px;
+			font-weight: 500;
+			color: #757575;
+		}
+		.email-sent-footer-text {
+			.email-sent-send-another-link {
+				color: #007cba;
+				text-decoration: none;
+				padding: 0;
+				cursor: pointer;
+			}
+		}
+	}
+}
+.wrong-user-connected-modal-body {
+	padding-block: 40px;
+	padding-inline: 56px;
+	margin: auto; // center the content both vertically and horizontally
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: 495px;
+	animation: fadeIn 0.7s ease-in-out; // fade in the modal content for consistency because the previous content fades in
+
+	.wrong-user-connected-title {
+		padding-top: 111px;
+	}
+	.wrong-user-connected-subheader-spacer {
+		flex-grow: 1;
+		padding-inline: 32px;
+		margin-top: 16px;
+		.wrong-user-connected-subheader {
+			font-weight: 400;
+			font-size: 16px;
+			line-height: 1.5rem;
+			color: #757575;
+			text-align: center;
+		}
+	}
+}

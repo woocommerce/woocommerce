@@ -1,0 +1,116 @@
+.woocommerce-pagination {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: center;
+	align-items: center;
+
+	@include breakpoint( '<782px' ) {
+		flex-direction: column;
+	}
+
+	input {
+		border-radius: 4px;
+	}
+}
+
+.woocommerce-pagination__page-arrows {
+	display: flex;
+	flex-direction: row;
+}
+
+.woocommerce-pagination__page-arrows-buttons {
+	display: inline-flex;
+	align-items: baseline;
+	border: 1px solid $button-border;
+	border-radius: 4px;
+	background: $button;
+
+	.components-button {
+		color: $wp-admin-sidebar;
+		height: 30px;
+		width: 32px;
+		justify-content: center;
+	}
+
+	.components-button:not(:disabled):not([aria-disabled='true']):hover {
+		color: $gray-700;
+	}
+
+	button:first-child {
+		border-top-right-radius: 0;
+		border-bottom-right-radius: 0;
+		border-right: 2px solid darken($button, 10%);
+	}
+
+	button:last-child {
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
+	}
+
+	.woocommerce-pagination__link {
+		padding: 4px;
+	}
+}
+
+.woocommerce-pagination__page-arrows-label {
+	margin-top: math.div($spacing, 2);
+	margin-right: math.div($spacing, 2);
+}
+
+.woocommerce-pagination__page-picker {
+	margin-left: $spacing;
+
+	@include breakpoint( '<782px' ) {
+		margin-top: $gap;
+		margin-left: 0;
+	}
+	.woocommerce-pagination__page-picker-input {
+		margin-left: math.div($spacing, 2);
+		width: 60px;
+		height: 34px;
+		box-shadow: none;
+	}
+}
+
+.woocommerce-pagination__per-page-picker {
+	margin-left: $spacing;
+
+	@include breakpoint( '<782px' ) {
+		margin-top: $gap;
+		margin-left: 0;
+	}
+
+	.components-base-control {
+		margin-bottom: 0;
+
+		.components-base-control__field {
+			display: flex;
+			flex-direction: row;
+			align-items: baseline;
+			margin-bottom: 0;
+		}
+
+		.components-select-control__input {
+			width: 60px;
+			height: 34px;
+			box-shadow: none;
+		}
+
+		.components-base-control__label {
+			margin-right: math.div($spacing, 2);
+		}
+
+		label.components-input-control__label {
+			@include font-size(13, 18px);
+			font-weight: 400;
+			text-transform: none;
+		}
+	}
+}
+
+.woocommerce-pagination__page-picker-input.has-error,
+.woocommerce-pagination__page-picker-input.has-error:focus {
+	border-color: $error-red;
+	box-shadow: 0 0 2px $error-red;
+}

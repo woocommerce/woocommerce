@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Admin
  */
 
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
+
 /**
  * Class WC_Admin_Dashboard_Setup_Test
  */
@@ -13,10 +15,20 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	/**
 	 * Set up
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		// Set default country to non-US so that 'payments' task gets added but 'woocommerce-payments' doesn't,
 		// by default it won't be considered completed but we can manually change that as needed.
 		update_option( 'woocommerce_default_country', 'JP' );
+		$password    = wp_generate_password( 8, false, false );
+		$this->admin = wp_insert_user(
+			array(
+				'user_login' => "test_admin$password",
+				'user_pass'  => $password,
+				'user_email' => "admin$password@example.com",
+				'role'       => 'administrator',
+			)
+		);
+		wp_set_current_user( $this->admin );
 
 		parent::setUp();
 	}
@@ -24,7 +36,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	/**
 	 * Tear down
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_available_payment_gateways' );
 
 		parent::tearDown();
@@ -52,36 +64,84 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		return ob_get_clean();
 	}
 
-	/**
-	 * Tests widget does not get rendered when woocommerce_task_list_hidden or woocommerce_task_list_hidden
-	 * is true.
-	 *
-	 * @dataProvider should_display_widget_data_provider
-	 *
-	 * @param array $options a set of options.
-	 */
-	public function test_widget_does_not_get_rendered( array $options ) {
-		global $wp_meta_boxes;
-
-		foreach ( $options as $name => $value ) {
-			update_option( $name, $value );
-		}
-
-		$this->get_widget();
-		$this->assertNull( $wp_meta_boxes );
-	}
 
 	/**
-	 * Given both woocommerce_task_list_hidden and woocommerce_task_list_complete are false
-	 * Then the widget should be added to the $wp_meta_boxes
+	 * Given the task list is not hidden and is not complete, make sure the widget is rendered.
 	 */
-	public function test_widget_gets_rendered_when_both_options_are_false() {
+	public function test_widget_render() {
+		// Force the "payments" task to be considered incomplete.
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			function() {
+				return array();
+			}
+		);
 		global $wp_meta_boxes;
-		update_option( 'woocommerce_task_list_complete', false );
-		update_option( 'woocommerce_task_list_hidden', false );
+		$task_list = $this->get_widget()->get_task_list();
+		$task_list->unhide();
 
 		$this->get_widget();
 		$this->assertArrayHasKey( 'wc_admin_dashboard_setup', $wp_meta_boxes['dashboard']['normal']['high'] );
+	}
+
+	/**
+	 * Tests widget does not display when task list is complete.
+	 */
+	public function test_widget_does_not_display_when_task_list_complete() {
+		// phpcs:disable Squiz.Commenting
+		$task_list = new class() {
+			public function is_complete() {
+				return true;
+			}
+			public function is_hidden() {
+				return false;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+		$widget    = $this->get_widget();
+		$widget->set_task_list( $task_list );
+
+		$this->assertFalse( $widget->should_display_widget() );
+	}
+
+	/**
+	 * Tests widget does not display when task list is hidden.
+	 */
+	public function test_widget_does_not_display_when_task_list_hidden() {
+		$widget = $this->get_widget();
+		$widget->get_task_list()->hide();
+
+		$this->assertFalse( $widget->should_display_widget() );
+	}
+
+	/**
+	 * Tests widget does not display when user cannot manage woocommerce.
+	 */
+	public function test_widget_does_not_display_when_missing_capabilities() {
+		$password  = wp_generate_password( 8, false, false );
+		$author    = wp_insert_user(
+			array(
+				'user_login' => "test_author$password",
+				'user_pass'  => $password,
+				'user_email' => "author$password@example.com",
+				'role'       => 'author',
+			)
+		);
+		wp_set_current_user( $author );
+
+		$widget = $this->get_widget();
+
+		$this->assertFalse( $widget->should_display_widget() );
+	}
+
+	/**
+	 * Tests widget does not display when task list is unavailable.
+	 */
+	public function test_widget_does_not_display_when_no_task_list() {
+		$widget = $this->get_widget();
+		$widget->set_task_list( null );
+
+		$this->assertFalse( $widget->should_display_widget() );
 	}
 
 	/**
@@ -99,14 +159,13 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		$html = $this->get_widget_output();
 
 		$required_strings = array(
-			'Step 0 of 6',
+			'Step \d+ of \d+',
 			'You&#039;re almost there! Once you complete store setup you can start receiving orders.',
 			'Start selling',
-			'admin.php\?page=wc-admin&amp;path=%2Fsetup-wizard',
 		);
 
 		foreach ( $required_strings as $required_string ) {
-			$this->assertRegexp( "/${required_string}/", $html );
+			$this->assertRegexp( "/{$required_string}/", $html );
 		}
 	}
 
@@ -126,42 +185,13 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 			}
 		);
 
-		$completed_tasks = array( 'payments' );
-		$tasks           = $this->get_widget()->get_tasks();
-		$tasks_count     = count( $tasks );
-		unset( $tasks['payments'] ); // That one is completed already.
-		foreach ( $tasks as $key => $task ) {
-			array_push( $completed_tasks, $key );
-			update_option( 'woocommerce_task_list_tracked_completed_tasks', $completed_tasks );
-			$completed_tasks_count = count( $completed_tasks );
-			// When all tasks are completed, assert that the widget output is empty.
-			// As widget won't be rendered when tasks are completed.
-			if ( $completed_tasks_count === $tasks_count ) {
-				$this->assertEmpty( $this->get_widget_output() );
-			} else {
-				$this->assertRegexp( "/Step ${completed_tasks_count} of 6/", $this->get_widget_output() );
-			}
+		$completed_tasks_count = $this->get_widget()->get_completed_tasks_count();
+		$tasks_count           = count( $this->get_widget()->get_tasks() );
+		$step_number           = $completed_tasks_count + 1;
+		if ( $completed_tasks_count === $tasks_count ) {
+			$this->assertEmpty( $this->get_widget_output() );
+		} else {
+			$this->assertRegexp( "/Step {$step_number} of 6/", $this->get_widget_output() );
 		}
-	}
-
-
-	/**
-	 * Provides dataset that controls output of `should_display_widget`
-	 */
-	public function should_display_widget_data_provider() {
-		return array(
-			array(
-				array(
-					'woocommerce_task_list_complete' => 'yes',
-					'woocommerce_task_list_hidden'   => 'no',
-				),
-			),
-			array(
-				array(
-					'woocommerce_task_list_complete' => 'no',
-					'woocommerce_task_list_hidden'   => 'yes',
-				),
-			),
-		);
 	}
 }

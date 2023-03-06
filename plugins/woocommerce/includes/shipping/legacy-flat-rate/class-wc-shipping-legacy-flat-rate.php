@@ -335,7 +335,7 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	 *
 	 * @deprecated 2.4.0
 	 * @param  float  $cost Cost.
-	 * @param  float  $percent_adjustment Percent adjusment.
+	 * @param  float  $percent_adjustment Percent adjustment.
 	 * @param  string $percent_operator Percent operator.
 	 * @param  float  $base_price Base price.
 	 * @return float

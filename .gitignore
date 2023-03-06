@@ -4,7 +4,7 @@ Thumbs.db
 
 # IDE files
 .idea
-.vscode/
+.vscode/*
 project.xml
 project.properties
 .project
@@ -12,6 +12,15 @@ project.properties
 *.sublime-project
 *.sublime-workspace
 .sublimelinterrc
+
+# Grunt
+none
+
+# Sass
+.sass-cache/
+
+# Logs
+logs/
 
 # Eslint Cache
 .eslintcache
@@ -31,6 +40,7 @@ npm-debug.log
 build/
 build-module/
 build-style/
+build-types/
 dist/
 
 # Project files
@@ -47,6 +57,40 @@ package-lock.json
 .wp-env.override.json
 
 # Unit tests
-/tmp
-packages/js/e2e-environment/config/default.json
-packages/js/e2e-environment/docker/wp-cli/initialize.sh
+tmp/
+
+# Composer
+vendor/
+bin/composer/**/vendor/
+lib/vendor/
+contributors.md
+contributors.html
+
+# Yarn
+yarn.lock
+
+# Editors
+nbproject/private/
+
+# E2E and API Test Results
+test-results
+
+# Admin Feature config
+plugins/woocommerce/includes/react-admin/feature-config.php
+
+# PHP lint
+phpcs-report.xml
+
+# Allure directories
+allure-report
+allure-results
+
+# Code analyzer output and env
+changes.json
+.env
+
+# Turborepo
+.turbo
+
+# Support .gitkeep Files
+!.gitkeep

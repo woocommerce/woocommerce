@@ -8,22 +8,18 @@ describe( 'IgnorePropertyTransformation', () => {
 	} );
 
 	it( 'should remove ignored properties', () => {
-		let transformed = transformation.fromModel(
-			{
-				test: 'Test',
-				skip: 'Test',
-			},
-		);
+		let transformed = transformation.fromModel( {
+			test: 'Test',
+			skip: 'Test',
+		} );
 
 		expect( transformed ).toHaveProperty( 'test', 'Test' );
 		expect( transformed ).not.toHaveProperty( 'skip' );
 
-		transformed = transformation.toModel(
-			{
-				test: 'Test',
-				skip: 'Test',
-			},
-		);
+		transformed = transformation.toModel( {
+			test: 'Test',
+			skip: 'Test',
+		} );
 
 		expect( transformed ).toHaveProperty( 'test', 'Test' );
 		expect( transformed ).not.toHaveProperty( 'skip' );

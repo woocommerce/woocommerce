@@ -14,7 +14,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs before all the tests in the class.
 	 */
-	public static function setupBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		global $wpdb, $wp_post_types;
 
 		parent::setUpBeforeClass();
@@ -41,7 +41,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	/**
 	 * Runs after each test.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		global $wpdb;
 
 		parent::tearDown();
@@ -465,7 +465,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		}
 
 		$term_counts = $widget->get_filtered_term_product_counts( $term_ids_by_name, $taxonomy, $filter_type );
-		$this->assertEquals( $expected, $term_counts );
+		$this->assertEqualsCanonicalizing( $expected, $term_counts );
 	}
 
 	/**
@@ -545,16 +545,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		/*
-		 * If a variable product defines an attribute value that isn't used by any variation:
-		 * When using the lookup table: that value is not included in the count.
-		 * When not using the lookup table: the value is included in the count since it is part of the parent product.
-		 */
-		if ( $using_lookup_table && 'or' === $filter_type && array( 'Green' ) === $attributes ) {
-			$expected_to_be_included_in_count = false;
-		} else {
-			$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
-		}
+		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
 
 		$this->assert_counters( 'Color', $expected_to_be_included_in_count ? array( 'Blue', 'Red' ) : array(), $filter_type );
 	}
@@ -822,16 +813,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		/*
-		 * If a variable product defines an attribute value that isn't used by any variation:
-		 * When using the lookup table: that value is not included in the count.
-		 * When not using the lookup table: the value is included in the count since it is part of the parent product.
-		 */
-		if ( $using_lookup_table && 'or' === $filter_type && array( 'Elastic' ) === $attributes ) {
-			$expected_to_be_included_in_count = false;
-		} else {
-			$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
-		}
+		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
 		$this->assert_counters( 'Features', $expected_to_be_included_in_count ? array( 'Washable', 'Ironable' ) : array(), $filter_type );
 	}
 
@@ -1075,16 +1057,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		/*
-		 * If a variable product defines an attribute value that isn't used by any variation:
-		 * When using the lookup table: that value is not included in the count.
-		 * When not using the lookup table: the value is included in the count since it is part of the parent product.
-		 */
-		if ( $using_lookup_table && 'or' === $filter_type && array( 'Green' ) === $attributes ) {
-			$expected_counted_attributes = array();
-		} else {
-			$expected_counted_attributes = 'or' === $filter_type || $expected_to_be_visible ? array( 'Blue', 'Red' ) : array();
-		}
+		$expected_counted_attributes = 'or' === $filter_type || $expected_to_be_visible ? array( 'Blue', 'Red' ) : array();
 
 		$this->assert_counters( 'Color', $expected_counted_attributes, $filter_type );
 	}
@@ -1208,16 +1181,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 			$this->assertEmpty( $filtered_product_ids );
 		}
 
-		/*
-		 * If a variable product defines an attribute value that isn't used by any variation:
-		 * When using the lookup table: that value is not included in the count.
-		 * When not using the lookup table: the value is included in the count since it is part of the parent product.
-		 */
-		if ( $using_lookup_table && 'or' === $filter_type && array( 'White' ) === $attributes ) {
-			$expected_to_be_included_in_count = false;
-		} else {
-			$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
-		}
+		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
 
 		$this->assert_counters( 'Color', $expected_to_be_included_in_count ? array( 'Blue', 'Red', 'Green' ) : array(), $filter_type );
 	}
@@ -1288,7 +1252,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 
 		$filtered_product_ids = $this->do_product_request( array() );
 
-		$this->assertEquals( array( $product_simple_2->get_id(), $product_variable_2['id'] ), $filtered_product_ids );
+		$this->assertEqualsCanonicalizing( array( $product_simple_2->get_id(), $product_variable_2['id'] ), $filtered_product_ids );
 
 		$this->assert_counters( 'Color', $expected_colors_included_in_counters );
 		$this->assert_counters( 'Features', array( 'Ironable' ) );
@@ -1356,9 +1320,12 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		wp_set_object_terms( $product_simple_1->get_id(), $terms, 'product_visibility' );
 		wp_set_object_terms( $product_variable_1['id'], $terms, 'product_visibility' );
 
-		$filtered_product_ids = $this->do_product_request( array() );
+		$actual_filtered_product_ids   = $this->do_product_request( array() );
+		$expected_filtered_product_ids = array( $product_simple_2->get_id(), $product_variable_2['id'] );
+		sort( $actual_filtered_product_ids );
+		sort( $expected_filtered_product_ids );
 
-		$this->assertEquals( array( $product_simple_2->get_id(), $product_variable_2['id'] ), $filtered_product_ids );
+		$this->assertEquals( $expected_filtered_product_ids, $actual_filtered_product_ids );
 
 		$this->assert_counters( 'Color', $expected_colors_included_in_counters );
 		$this->assert_counters( 'Features', array( 'Ironable' ) );

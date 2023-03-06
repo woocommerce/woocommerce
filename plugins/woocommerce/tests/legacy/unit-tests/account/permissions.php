@@ -13,7 +13,7 @@ class WC_Tests_Account_Permissions extends WC_Unit_Test_Case {
 	 * Setup:
 	 * 1. Set current user to zero to simulate not logged in state.
 	 */
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		wp_set_current_user( 0 );
 	}
@@ -22,7 +22,7 @@ class WC_Tests_Account_Permissions extends WC_Unit_Test_Case {
 	 * Teardown:
 	 * 1. Set current user to 0 because we change current user in some tests.
 	 */
-	public function tearDown() {
+	public function tearDown(): void {
 		wp_set_current_user( 0 );
 		parent::tearDown();
 	}

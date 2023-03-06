@@ -1,5 +1,12 @@
+/**
+ * External dependencies
+ */
 const { createReadStream } = require( 'fs' );
 const { WebClient, ErrorCode } = require( '@slack/web-api' );
+
+/**
+ * Internal dependencies
+ */
 const { getTestConfig } = require( '../../utils' );
 const {
 	GITHUB_ACTIONS,
@@ -15,12 +22,14 @@ const {
 	WC_E2E_SCREENSHOTS,
 } = process.env;
 
+/* eslint no-console: off */
+
 let web;
 
 /**
  * Initialize the Slack web client.
  *
- * @returns {WebClient}
+ * @return {WebClient} the Slack WebClient.
  */
 const initializeWeb = () => {
 	if ( ! web ) {
@@ -31,7 +40,8 @@ const initializeWeb = () => {
 
 /**
  * Initialize Slack parameters if tests are running in CI.
- * @returns {Object|boolean}
+ *
+ * @return {Object|boolean} Object with Slack properties. Boolean if fail.
  */
 const initializeSlack = () => {
 	if ( ! WC_E2E_SCREENSHOTS || ! E2E_SLACK_TOKEN ) {
@@ -66,51 +76,58 @@ const initializeSlack = () => {
 /**
  * Post a message to a Slack channel for a failed test.
  *
- * @param testName
- * @returns {Promise<void>}
+ * @param {string} testName
+ * @return {Promise<void>}
  */
 async function sendFailedTestMessageToSlack( testName ) {
 	const { branch, commit, webUrl } = initializeSlack();
 	if ( ! branch ) {
 		return;
 	}
+
+	// eslint-disable-next-line
 	const web = initializeWeb();
 
 	try {
 		// Adding the app does not add the app user to the channel
-		await web.conversations.join({
+		await web.conversations.join( {
 			channel: E2E_SLACK_CHANNEL,
 			token: E2E_SLACK_TOKEN,
-		});
+		} );
 	} catch ( error ) {
 		// Check the code property and log the response
-		if ( error.code === ErrorCode.PlatformError || error.code === ErrorCode.RequestError ||
-			error.code === ErrorCode.RateLimitedError || error.code === ErrorCode.HTTPError ) {
-			if ( error.data.error != 'channel_not_found' ) {
-				console.log(error.data);
+		if (
+			error.code === ErrorCode.PlatformError ||
+			error.code === ErrorCode.RequestError ||
+			error.code === ErrorCode.RateLimitedError ||
+			error.code === ErrorCode.HTTPError
+		) {
+			if ( error.data.error !== 'channel_not_found' ) {
+				console.log( error.data );
 			}
 		} else {
 			// Some other error, oh no!
-			console.log(
-				'Error joining channel',
-				error
-			);
+			console.log( 'Error joining channel', error );
 		}
 	}
 	try {
 		// For details, see: https://api.slack.com/methods/chat.postMessage
-		await web.chat.postMessage({
+		await web.chat.postMessage( {
 			channel: E2E_SLACK_CHANNEL,
 			token: E2E_SLACK_TOKEN,
 			text: `Test failed on *${ branch }* branch. \n
             The commit this build is testing is *${ commit }*. \n
             The name of the test that failed: *${ testName }*. \n
             See screenshot of the failed test below. *Build log* could be found here: ${ webUrl }`,
-		});
+		} );
 	} catch ( error ) {
 		// Check the code property and log the response
-		if ( error.code === ErrorCode.PlatformError || error.code === ErrorCode.RequestError ||
-			error.code === ErrorCode.RateLimitedError || error.code === ErrorCode.HTTPError ) {
+		if (
+			error.code === ErrorCode.PlatformError ||
+			error.code === ErrorCode.RequestError ||
+			error.code === ErrorCode.RateLimitedError ||
+			error.code === ErrorCode.HTTPError
+		) {
 			console.log( error.data );
 		} else {
 			// Some other error, oh no!
@@ -124,33 +141,42 @@ async function sendFailedTestMessageToSlack( testName ) {
 
 /**
  * Post a screenshot to a Slack channel for a failed test.
- * @param screenshotOfFailedTest
- * @returns {Promise<void>}
+ *
+ * @param {string} screenshotOfFailedTest
+ * @return {Promise<void>}
  */
 async function sendFailedTestScreenshotToSlack( screenshotOfFailedTest ) {
 	const pr = initializeSlack();
 	if ( ! pr ) {
 		return;
 	}
+
+	// eslint-disable-next-line
 	const web = initializeWeb();
 	const filename = 'screenshot_of_failed_test.png';
 
 	try {
 		// For details, see: https://api.slack.com/methods/files.upload
-		await web.files.upload({
+		await web.files.upload( {
 			channels: E2E_SLACK_CHANNEL,
 			token: E2E_SLACK_TOKEN,
 			filename,
 			file: createReadStream( screenshotOfFailedTest ),
-		});
+		} );
 	} catch ( error ) {
 		// Check the code property and log the response
-		if ( error.code === ErrorCode.PlatformError || error.code === ErrorCode.RequestError ||
-			error.code === ErrorCode.RateLimitedError || error.code === ErrorCode.HTTPError ) {
+		if (
+			error.code === ErrorCode.PlatformError ||
+			error.code === ErrorCode.RequestError ||
+			error.code === ErrorCode.RateLimitedError ||
+			error.code === ErrorCode.HTTPError
+		) {
 			console.log( error.data );
 		} else {
 			// Some other error, oh no!
-			console.log( 'The error occurred does not match an error we are checking for in this block.' );
+			console.log(
+				'The error occurred does not match an error we are checking for in this block.'
+			);
 		}
 	}
 }

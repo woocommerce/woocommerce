@@ -259,7 +259,7 @@ class WC_Admin_Status {
 		$update_theme_version = 0;
 
 		// Check .org for updates.
-		if ( is_object( $api ) && ! is_wp_error( $api ) ) {
+		if ( is_object( $api ) && ! is_wp_error( $api ) && isset( $api->version ) ) {
 			$update_theme_version = $api->version;
 		} elseif ( strstr( $theme->{'Author URI'}, 'woothemes' ) ) { // Check WooThemes Theme Version.
 			$theme_dir          = substr( strtolower( str_replace( ' ', '', $theme->Name ) ), 0, 45 ); // @codingStandardsIgnoreLine.

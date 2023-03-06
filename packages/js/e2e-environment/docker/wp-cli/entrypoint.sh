@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 set -eu
 
-declare -p WORDPRESS_HOST
-wait-for-it ${WORDPRESS_HOST} -t 120
-
-## if file exists then exit early because initialization already happened.
-if [ -f /var/www/html/.initialized ];
+# If WordPress is installed and the page "ready" exists, we bail the initialization.
+if [ $(wp --allow-root core is-installed) ] && [ $(wp --allow-root post exists $(wp --allow-root post list --format=ids --post_name=ready)) ];
 then
    echo "The environment has already been initialized."
    exit 0
+else
+	echo "Initializing the environment..."
 fi
 
 chown xfs:xfs /var/www/html/wp-content
@@ -29,23 +28,18 @@ declare -p WORDPRESS_PORT
 URL="http://localhost" || \
 URL="http://localhost:${WORDPRESS_PORT}"
 
-if $(wp core is-installed);
-then
-    echo "WordPress is already installed..."
-else
-    declare -p WORDPRESS_TITLE >/dev/null
-    declare -p WORDPRESS_LOGIN >/dev/null
-    declare -p WORDPRESS_PASSWORD >/dev/null
-    declare -p WORDPRESS_EMAIL >/dev/null
-    echo "Installing WordPress..."
-    wp core install \
-        --url=${URL} \
-        --title="$WORDPRESS_TITLE" \
-        --admin_user=${WORDPRESS_LOGIN} \
-        --admin_password=${WORDPRESS_PASSWORD} \
-        --admin_email=${WORDPRESS_EMAIL} \
-        --skip-email
-fi
+declare -p WORDPRESS_TITLE >/dev/null
+declare -p WORDPRESS_LOGIN >/dev/null
+declare -p WORDPRESS_PASSWORD >/dev/null
+declare -p WORDPRESS_EMAIL >/dev/null
+echo "Installing WordPress..."
+wp core install \
+	--url=${URL} \
+	--title="$WORDPRESS_TITLE" \
+	--admin_user=${WORDPRESS_LOGIN} \
+	--admin_password=${WORDPRESS_PASSWORD} \
+	--admin_email=${WORDPRESS_EMAIL} \
+	--skip-email
 
 ## Check for an initialization script.
 declare -r INIT_SCRIPT=$(command -v initialize.sh)
@@ -61,17 +55,11 @@ if ! [[ ${CURRENT_DOMAIN} == ${URL} ]]; then
     wp search-replace ${CURRENT_DOMAIN} ${URL}
 fi
 
-if $(wp post list --post_type=page --name=ready);
-then
-    echo "Ready page already exists..."
-else
-    wp post create \
-        --url=${URL} \
-        --post_type=page \
-        --post_status=publish \
-        --post_title='Ready' \
-        --post_content='E2E-tests.'
-fi
+wp post create \
+	--url=${URL} \
+	--post_type=page \
+	--post_status=publish \
+	--post_title='Ready' \
+	--post_content='E2E-tests.'
 
 echo "Visit $(wp option get siteurl)"
-touch /var/www/html/.initialized

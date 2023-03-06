@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div class="panel-wrap product_data">
 
-	<span class="type_box hidden"> &mdash;
+	<span class="product-data-wrapper type_box hidden"> &mdash;
 		<label for="product-type">
 			<select id="product-type" name="product-type">
 				<optgroup label="<?php esc_attr_e( 'Product Type', 'woocommerce' ); ?>">
@@ -21,6 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php endforeach; ?>
 				</optgroup>
 			</select>
+			<span class="woocommerce-product-type-tip"></span>
 		</label>
 
 		<?php

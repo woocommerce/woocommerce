@@ -9,6 +9,7 @@ usage() {
 	echo 'scripts:'
 	echo '         docker:up [initialization-script] - boot docker container'
 	echo '         docker:down - shut down docker container'
+	echo '         docker:wait - wait for env to be built'
 	echo '         docker:ssh - open SSH shell into docker container'
 	echo '         docker:clear-all - remove all docker containers'
 	echo '         test:e2e [test-script] - run e2e test suite or specific test-script'
@@ -34,7 +35,7 @@ REALPATH=$(readlink "$0")
 cd "$SCRIPTPATH/$(dirname "$REALPATH")/.."
 
 # Set a flag to distinguish between the development repo and npm package
-DEV_PATH=$(echo $0 | rev | cut -f4 -d/ | rev)
+DEV_PATH=$(pwd | rev | cut -f3 -d/ | rev)
 if [ "$DEV_PATH" != "node_modules" ]; then
 	export WC_E2E_WOOCOMMERCE_DEV='true'
 	export WC_E2E_FOLDER='plugins/woocommerce'
@@ -48,7 +49,10 @@ fi
 # Run scripts
 case $1 in
 	'docker:up')
-		./bin/docker-compose.sh up $2
+		./bin/docker-compose.sh up $2 && ./bin/wait-for-build.sh
+		;;
+	'docker:wait')
+		./bin/wait-for-build.sh
 		;;
 	'docker:down')
 		./bin/docker-compose.sh down
@@ -70,6 +74,10 @@ case $1 in
 	'test:e2e-debug')
 		./bin/wait-for-build.sh && ./bin/e2e-test-integration.js --dev --debug $2
 		TESTRESULT=$?
+		;;
+	'install' | \
+	'uninstall')
+		./bin/scaffold.js $@
 		;;
 	*)
 		usage
