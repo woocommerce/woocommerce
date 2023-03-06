@@ -202,7 +202,7 @@ class OrdersTableQuery {
 			// WP_Query legacy.
 			'post_date'           => 'date_created',
 			'post_date_gmt'       => 'date_created_gmt',
-			'post_modified'       => 'date_modified',
+			'post_modified'       => 'date_updated',
 			'post_modified_gmt'   => 'date_updated_gmt',
 			'post_status'         => 'status',
 			'_date_completed'     => 'date_completed',
@@ -270,6 +270,15 @@ class OrdersTableQuery {
 				$this->args['meta_query'] = array( $shortcut_meta_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			}
 		}
+
+		// Date query.
+		if ( isset( $this->args['date_query'] ) && is_array( $this->args['date_query'] ) ) {
+			foreach ( $this->args['date_query'] as $index => $query ) {
+				if ( isset( $query['column'] ) && isset( $mapping[ $query['column'] ] ) ) {
+					$this->args['date_query'][ $index ]['column'] = $mapping[ $query['column'] ];
+				}
+			}
+		}
 	}
 
 	/**
@@ -327,7 +336,28 @@ class OrdersTableQuery {
 		$gmt_date_keys          = array_values( $local_to_gmt_date_keys );
 		$local_date_keys        = array_keys( $local_to_gmt_date_keys );
 
-		foreach ( array_filter( array_merge( $gmt_date_keys, $local_date_keys ), array( $this, 'arg_isset' ) ) as $date_key ) {
+		$valid_date_keys = array_merge( $gmt_date_keys, $local_date_keys );
+		$date_keys       = array_filter( $valid_date_keys, array( $this, 'arg_isset' ) );
+
+		// Process already passed date queries args.
+		if ( $this->arg_isset( 'date_query' ) && is_array( $this->args['date_query'] ) ) {
+			foreach ( $this->args['date_query'] as $index => $query ) {
+				if ( ! isset( $query['column'] ) || ! in_array( $query['column'], $valid_date_keys, true ) ) {
+					unset( $this->args['date_query'][ $index ] );
+					continue;
+				}
+				// Convert any local dates to GMT.
+				if ( isset( $local_to_gmt_date_keys[ $query['column'] ] ) ) {
+					$this->args['date_query'][ $index ]['column'] = $local_to_gmt_date_keys[ $query['column'] ];
+					$op                                        = isset( $query['after'] ) ? 'after' : 'before';
+					$date_value_local                          = $query[ $op ];
+					$date_value_gmt                            = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
+					$this->args['date_query'][ $index ][ $op ] = $this->date_to_date_query_arg( $date_value_gmt, 'UTC' );
+				}
+			}
+		}
+
+		foreach ( $date_keys as $date_key ) {
 			$date_value = $this->args[ $date_key ];
 			$operator   = '=';
 			$dates      = array();
