@@ -2,11 +2,10 @@
  * External dependencies
  */
 import { Slot, Fill } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { createOrderedChildren, sortFillsByOrder } from '~/utils';
+import {
+	createOrderedChildren,
+	sortFillsByOrder,
+} from '@woocommerce/components';
 
 /**
  * Create a Fill for extensions to add items to the WooCommerce Admin header.
@@ -26,14 +25,22 @@ import { createOrderedChildren, sortFillsByOrder } from '~/utils';
  * @param {Array}  param0.children - Node children.
  * @param {Array}  param0.order    - Node order.
  */
-export const WooHeaderItem: React.FC< { order?: number } > & {
+export const WooHeaderItem: React.FC< {
+	children?: React.ReactNode;
+	order?: number;
+} > & {
 	Slot: React.FC< Slot.Props >;
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill name={ 'woocommerce_header_item' }>
-			{ ( fillProps: Fill.Props ) => {
-				return createOrderedChildren( children, order, fillProps );
-			} }
+			{ /* eslint-disable @typescript-eslint/ban-ts-comment */ }
+			{
+				// @ts-ignore It is okay to pass in a function as a render child of Fill
+				( fillProps: Fill.Props ) => {
+					return createOrderedChildren( children, order, fillProps );
+				}
+			}
+			{ /* eslint-enable @typescript-eslint/ban-ts-comment */ }
 		</Fill>
 	);
 };
@@ -63,14 +70,22 @@ WooHeaderItem.Slot = ( { fillProps } ) => (
  * @param {Array}  param0.children - Node children.
  * @param {Array}  param0.order    - Node order.
  */
-export const WooHeaderNavigationItem: React.FC< { order?: number } > & {
+export const WooHeaderNavigationItem: React.FC< {
+	children?: React.ReactNode;
+	order?: number;
+} > & {
 	Slot: React.FC< Slot.Props >;
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill name={ 'woocommerce_header_navigation_item' }>
-			{ ( fillProps: Fill.Props ) => {
-				return createOrderedChildren( children, order, fillProps );
-			} }
+			{ /* eslint-disable @typescript-eslint/ban-ts-comment */ }
+			{
+				// @ts-ignore It is okay to pass in a function as a render child of Fill
+				( fillProps: Fill.Props ) => {
+					return createOrderedChildren( children, order, fillProps );
+				}
+			}
+			{ /* eslint-enable @typescript-eslint/ban-ts-comment */ }
 		</Fill>
 	);
 };
@@ -98,9 +113,13 @@ WooHeaderNavigationItem.Slot = ( { fillProps }: Slot.Props ) => (
  * @param {Object} param0
  * @param {Array}  param0.children - Node children.
  */
-export const WooHeaderPageTitle: React.FC & {
+export const WooHeaderPageTitle: React.FC< {
+	children?: React.ReactNode;
+} > & {
 	Slot: React.FC< Slot.Props >;
 } = ( { children } ) => {
+	// eslint-disable-next-line
+	// @ts-ignore
 	return <Fill name={ 'woocommerce_header_page_title' }>{ children }</Fill>;
 };
 

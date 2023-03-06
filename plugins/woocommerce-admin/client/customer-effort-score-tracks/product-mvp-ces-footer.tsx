@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { closeSmall } from '@wordpress/icons';
+import { WooFooterItem } from '@woocommerce/admin-layout';
 import { Pill } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
@@ -16,7 +17,6 @@ import {
 	ALLOW_TRACKING_OPTION_NAME,
 	SHOWN_FOR_ACTIONS_OPTION_NAME,
 } from './constants';
-import { WooFooterItem } from '~/layout/footer';
 import { STORE_KEY } from './data/constants';
 
 export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =

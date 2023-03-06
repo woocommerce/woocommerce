@@ -2,11 +2,10 @@
  * External dependencies
  */
 import { Slot, Fill } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { createOrderedChildren, sortFillsByOrder } from '../../../utils';
+import {
+	createOrderedChildren,
+	sortFillsByOrder,
+} from '@woocommerce/components';
 
 export const EXPERIMENTAL_WC_MARKETING_OVERVIEW_SECTION_SLOT_NAME =
 	'experimental_woocommerce_marketing_overview_section';
@@ -43,9 +42,14 @@ export const WooMarketingOverviewSection = ( {
 } ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_MARKETING_OVERVIEW_SECTION_SLOT_NAME }>
-			{ ( fillProps: Fill.Props ) => {
-				return createOrderedChildren( children, order, fillProps );
-			} }
+			{ /* eslint-disable @typescript-eslint/ban-ts-comment */ }
+			{
+				// @ts-ignore It is okay to pass in a function as a render child of Fill
+				( fillProps: Fill.Props ) => {
+					return createOrderedChildren( children, order, fillProps );
+				}
+			}
+			{ /* eslint-enable @typescript-eslint/ban-ts-comment */ }
 		</Fill>
 	);
 };
