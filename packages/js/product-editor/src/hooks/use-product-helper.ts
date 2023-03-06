@@ -2,10 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	AUTO_DRAFT_NAME,
-	getDerivedProductType,
-} from '@woocommerce/product-editor';
 import { useDispatch } from '@wordpress/data';
 import { useCallback, useContext, useState } from '@wordpress/element';
 import * as WooNumber from '@woocommerce/number';
@@ -25,11 +21,14 @@ import { CurrencyContext } from '@woocommerce/currency';
 /**
  * Internal dependencies
  */
+import { AUTO_DRAFT_NAME, getDerivedProductType } from '../index';
 import {
 	NUMBERS_AND_DECIMAL_SEPARATOR,
 	ONLY_ONE_DECIMAL_SEPARATOR,
-} from './constants';
-import { ProductVariationsOrder } from './hooks/use-variations-order';
+} from '../constants';
+import { ProductVariationsOrder } from './use-variations-order';
+
+// TODO: Having to add TS ignore comments here, should be able to address with TS config but running into issues.
 
 function removeReadonlyProperties(
 	product: Product
@@ -156,7 +155,11 @@ export function useProductHelper() {
 			},
 			{
 				update: Object.values( variationsOrder )
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
 					.flatMap( Object.entries )
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
 					.map( ( [ id, menu_order ] ) => ( {
 						id,
 						menu_order,
@@ -309,6 +312,8 @@ export function useProductHelper() {
 				'g'
 			);
 			const decimalRegex = new RegExp(
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
 				ONLY_ONE_DECIMAL_SEPARATOR.replaceAll( '%s', decimalSeparator ),
 				'g'
 			);

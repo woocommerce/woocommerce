@@ -45,10 +45,10 @@ function sort(
 	} );
 }
 
-export default function useVariationsOrder( {
+export const useVariationsOrder = ( {
 	variations,
 	currentPage,
-}: UseVariationsOrderInput ): UseVariationsOrderOutput {
+}: UseVariationsOrderInput ): UseVariationsOrderOutput => {
 	const { setValue, values } = useFormContext< ProductVariationsOrder >();
 
 	function onOrderChange( items: JSX.Element[] ) {
@@ -71,7 +71,7 @@ export default function useVariationsOrder( {
 		getVariationKey,
 		onOrderChange,
 	};
-}
+};
 
 export type UseVariationsOrderInput = {
 	variations: ProductVariation[];
