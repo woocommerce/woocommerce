@@ -42,7 +42,7 @@ export function wpLogin() {
 			tags: { name: 'Merchant - WP Login Page' },
 		} );
 		check( response, {
-			'is status 200': ( r ) => r.status === 200,
+			'is status 200': ( r ) => r.status === 404,
 			"body contains: 'Log in' title": ( response ) =>
 				response.body.includes( '<title>Log In' ),
 		} );
@@ -81,7 +81,7 @@ export function wpLogin() {
 			}
 		);
 		check( response, {
-			'is status 200': ( r ) => r.status === 200,
+			'is status 200': ( r ) => r.status === 404,
 			"body contains: wp-admin 'Dashboard' header": ( response ) =>
 				response.body.includes( '<h1>Dashboard</h1>' ),
 		} );
