@@ -76,11 +76,11 @@ jobs:
                   retention-days: 1
 
             - name: Inform Beta Download webhook
-              if: steps.prepare.outputs.plugin-data != '{}'
               env:
                   SECRET: ${{ secrets.WOOBETA_SECRET }}
                   PLUGIN_DATA: ${{ steps.prepare.outputs.plugin-data }}
                   PR: ${{ github.event.number }}
+              if: env.SECRET && steps.prepare.outputs.plugin-data != '{}'
               run: |
                   curl -v --fail -L \
                     --url "https://betadownload.jetpack.me/gh-action.php?run_id=$GITHUB_RUN_ID&pr=$PR&commit=$GITHUB_SHA" \
