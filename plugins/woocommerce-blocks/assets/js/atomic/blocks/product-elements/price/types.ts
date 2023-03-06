@@ -3,4 +3,5 @@ export interface BlockAttributes {
 	className?: string;
 	textAlign?: 'left' | 'center' | 'right';
 	isDescendentOfQueryLoop?: boolean;
+	isDescendentOfSingleProductTemplate?: boolean;
 }
