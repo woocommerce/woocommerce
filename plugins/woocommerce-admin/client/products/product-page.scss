@@ -40,8 +40,8 @@
 		}
 	}
 	.components-toggle-control
-	.components-base-control__field
-	.components-toggle-control__label {
+		.components-base-control__field
+		.components-toggle-control__label {
 		display: flex;
 		align-items: center;
 	}
@@ -135,18 +135,8 @@
 	}
 }
 
-// @todo These are temporary styles and need to be moved into respective folders
-.woocommerce-layout__header {
-	display: none;
-}
-
-.woocommerce-layout__main {
-	.interface-interface-skeleton {
-		top: 0;
-		background-color: $white;
-	}
-
-	.interface-interface-skeleton__sidebar {
-		width: 280px;
+.woocommerce-layout:has( .woocommerce-product-block-editor ) {
+	.woocommerce-layout__header {
+		display: none;
 	}
 }

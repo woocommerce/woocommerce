@@ -41,8 +41,7 @@ export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
 			string,
 			( ...args: string[] ) => boolean
 		>;
-		const _canUserCreateMedia = canUser( 'create', 'media' );
-		return _canUserCreateMedia || _canUserCreateMedia !== false;
+		return canUser( 'create', 'media' ) !== false;
 	}, [] );
 
 	const settings = useMemo( () => {

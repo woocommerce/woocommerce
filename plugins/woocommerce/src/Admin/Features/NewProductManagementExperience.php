@@ -61,7 +61,6 @@ class NewProductManagementExperience {
 		if ( ! PageController::is_admin_or_embed_page() ) {
 			return;
 		}
-		wp_enqueue_style( 'wp-edit-site' );
 		wp_enqueue_style( 'wp-edit-blocks' );
 		wp_enqueue_style( 'wp-format-library' );
 		wp_enqueue_editor();

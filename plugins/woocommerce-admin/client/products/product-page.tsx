@@ -8,7 +8,6 @@ import { Product } from '@woocommerce/data';
  * Internal dependencies
  */
 import './product-page.scss';
-import './fills';
 
 const dummyProduct = {
 	name: 'Example product',
