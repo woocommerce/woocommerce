@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Blocks\Tests\Mocks\ProductQueryMock;
  */
 class ProductQuery extends \WP_UnitTestCase {
 	/**
-	 * This variable holds our cart object.
+	 * This variable holds our Product Query object.
 	 *
 	 * @var ProductQueryMock
 	 */
@@ -71,6 +71,23 @@ class ProductQuery extends \WP_UnitTestCase {
 		$query = build_query_vars_from_query_block( $block, 1 );
 
 		return $this->block_instance->build_query( $query );
+	}
+
+	/**
+	 * Build a simplified request for testing.
+	 *
+	 * @param bool  $woocommerce_on_sale WooCommerce on sale.
+	 * @param array $woocommerce_attributes WooCommerce attributes.
+	 * @param array $woocommerce_stock_status WooCommerce stock status.
+	 * @return WP_REST_Request
+	 */
+	private function build_request( $woocommerce_on_sale = 'false', $woocommerce_attributes = array(), $woocommerce_stock_status = array() ) {
+		$request = new \WP_REST_Request( 'GET', '/wp/v2/product' );
+		$request->set_param( '__woocommerceOnSale', $woocommerce_on_sale );
+		$request->set_param( '__woocommerceAttributes', $woocommerce_attributes );
+		$request->set_param( '__woocommerceStockStatus', $woocommerce_stock_status );
+
+		return $request;
 	}
 
 	/**
@@ -513,5 +530,80 @@ class ProductQuery extends \WP_UnitTestCase {
 		set_query_var( 'min_price', '' );
 		set_query_var( 'filter_stock_status', '' );
 	}
-}
 
+	/**
+	 * Test merging multiple filter queries.
+	 */
+	public function test_updating_rest_query_without_attributes() {
+		$args    = array();
+		$request = $this->build_request();
+
+		$updated_query = $this->block_instance->update_rest_query( $args, $request );
+
+		$this->assertContainsEquals(
+			array(
+				'key'     => '_stock_status',
+				'value'   => array(),
+				'compare' => 'IN',
+			),
+			$updated_query['meta_query'],
+		);
+
+		$this->assertEquals(
+			array(
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'term_taxonomy_id',
+					'terms'    => array( 0 ),
+					'operator' => 'NOT IN',
+				),
+			),
+			$updated_query['tax_query'],
+		);
+	}
+
+	/**
+	 * Test merging multiple filter queries.
+	 */
+	public function test_updating_rest_query_with_attributes() {
+		$args         = array();
+		$on_sale      = 'true';
+		$attributes   = array(
+			array(
+				'taxonomy' => 'pa_test',
+				'termId'   => 1,
+			),
+		);
+		$stock_status = array( 'instock', 'outofstock' );
+		$request      = $this->build_request( $on_sale, $attributes, $stock_status );
+
+		$updated_query = $this->block_instance->update_rest_query( $args, $request );
+
+		$this->assertContainsEquals(
+			array(
+				'key'     => '_stock_status',
+				'value'   => array( 'instock', 'outofstock' ),
+				'compare' => 'IN',
+			),
+			$updated_query['meta_query'],
+		);
+
+		$this->assertEquals(
+			array(
+				array(
+					'taxonomy' => 'pa_test',
+					'field'    => 'term_id',
+					'terms'    => array( 1 ),
+					'operator' => 'IN',
+				),
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'term_taxonomy_id',
+					'terms'    => array( 0 ),
+					'operator' => 'NOT IN',
+				),
+			),
+			$updated_query['tax_query'],
+		);
+	}
+}
