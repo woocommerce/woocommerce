@@ -2,11 +2,10 @@
  * External dependencies
  */
 import { Slot, Fill } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { createOrderedChildren, sortFillsByOrder } from '~/utils';
+import {
+	createOrderedChildren,
+	sortFillsByOrder,
+} from '@woocommerce/components';
 
 export const WC_FOOTER_SLOT_NAME = 'woocommerce_footer_item';
 /**
