@@ -12,7 +12,7 @@ jobs:
     api:
         name: Run API tests
         runs-on: ubuntu-20.04
-        if: (github.event.pull_request.merged == true) && (github.event.pull_request.base.ref == 'test/pr-37033-trunk-lsinger')
+        if: (github.event.pull_request.merged == true) && (github.event.pull_request.base.ref == 'trunk')
         permissions:
             contents: read
         env:

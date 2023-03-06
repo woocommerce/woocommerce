@@ -90,9 +90,6 @@ test.describe('Customers API tests: CRUD', () => {
 		 * unless the role 'all' is passed as a search param 
 		 * but they can be accessed by specific id reference
 		 */
-		test("should intentionally fail", async () => {
-  			test.fail();
-		});
 		test('can retrieve admin user', async ({
 			request
 		}) => {
