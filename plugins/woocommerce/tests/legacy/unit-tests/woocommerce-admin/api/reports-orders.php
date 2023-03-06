@@ -6,7 +6,7 @@
  * @since 3.5.0
  */
 
-use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 
 /**
  * Reports Orders REST API Test Class

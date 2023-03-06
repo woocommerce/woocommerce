@@ -7,9 +7,9 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
-use \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
-use \Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
  * Remote Inbox Notifications engine.

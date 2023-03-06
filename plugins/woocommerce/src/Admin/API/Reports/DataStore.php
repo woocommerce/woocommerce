@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * Admin\API\Reports\DataStore: Common parent for custom report data stores.

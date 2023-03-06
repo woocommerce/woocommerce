@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
-use \WC_Data_Store;
+use WC_Data_Store;
 
 /**
  * Class AdminNotesHelper.
