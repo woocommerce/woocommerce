@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Corrects a imports. Class names should not begin with a backslash.
+Corrects imported classes. Class names should not begin with a backslash.
