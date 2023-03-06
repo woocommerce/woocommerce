@@ -22,6 +22,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Hook: woocommerce_widget_layered_nav_filters_start.
  *
+ * @since 7.5.0
+ *
  * @param array $filters List of all available filters
  */
 do_action( 'woocommerce_widget_layered_nav_filters_start', $filters );
@@ -38,6 +40,8 @@ do_action( 'woocommerce_widget_layered_nav_filters_start', $filters );
 <?php
 /**
  * Hook: woocommerce_widget_layered_nav_filters_end.
+ *
+ * @since 7.5.0
  *
  * @param array $filters List of all available filters
  */

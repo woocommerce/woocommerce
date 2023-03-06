@@ -117,6 +117,8 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 		/**
 		 * Allow plugins to modify layered nav filters.
 		 *
+		 * @since 7.5.0
+		 *
 		 * @param array $filters List of all available filters
 		 */
 		$filters = apply_filters( 'woocommerce_layered_nav_filters', $filters );
