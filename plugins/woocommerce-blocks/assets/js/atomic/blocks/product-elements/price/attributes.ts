@@ -16,6 +16,10 @@ export const blockAttributes: BlockAttributes = {
 		type: 'string',
 		default: '',
 	},
+	isDescendentOfSingleProductTemplate: {
+		type: 'boolean',
+		default: false,
+	},
 };
 
 export default blockAttributes;
