@@ -8,15 +8,16 @@ import {
 	Link,
 	__experimentalTooltip as Tooltip,
 } from '@woocommerce/components';
-import { getCheckboxTracks } from '@woocommerce/product-editor';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { createElement, Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { PRODUCT_DETAILS_SLUG } from '../constants';
+import { getCheckboxTracks } from '../../utils';
+import { PRODUCT_DETAILS_SLUG } from '../../constants';
 
 export const DetailsFeatureField = () => {
 	const { getCheckboxControlProps } = useFormContext< Product >();

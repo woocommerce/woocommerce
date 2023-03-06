@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Button, Modal, Spinner, TextControl } from '@wordpress/components';
 import { useDebounce } from '@wordpress/compose';
-import { useState } from '@wordpress/element';
+import { useState, createElement } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import {
 	__experimentalSelectControl as SelectControl,
@@ -20,7 +20,6 @@ import {
 /**
  * Internal dependencies
  */
-import './create-category-modal.scss';
 import { useCategorySearch } from './use-category-search';
 import { CategoryFieldItem } from './category-field-item';
 

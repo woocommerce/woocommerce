@@ -8,7 +8,7 @@ import {
 } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { BlockInstance, serialize, parse } from '@wordpress/blocks';
-import { useState } from '@wordpress/element';
+import { useState, createElement } from '@wordpress/element';
 
 export const DetailsDescriptionField = () => {
 	const { setValue, values } = useFormContext< Product >();

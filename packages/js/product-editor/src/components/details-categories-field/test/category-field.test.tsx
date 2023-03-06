@@ -5,6 +5,7 @@ import { ReactElement, Component } from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { Form, FormContext } from '@woocommerce/components';
 import { Product, ProductCategory } from '@woocommerce/data';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

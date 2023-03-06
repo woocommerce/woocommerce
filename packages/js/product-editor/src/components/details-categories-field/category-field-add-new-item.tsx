@@ -7,6 +7,7 @@ import { plus } from '@wordpress/icons';
 import classNames from 'classnames';
 import { ProductCategory } from '@woocommerce/data';
 import { __experimentalSelectControlMenuItemProps as MenuItemProps } from '@woocommerce/components';
+import { createElement } from '@wordpress/element';
 
 type CategoryFieldAddNewItemProps = {
 	item: Pick< ProductCategory, 'id' | 'name' >;

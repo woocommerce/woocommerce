@@ -12,13 +12,13 @@ import {
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
 } from '@woocommerce/data';
-import { useState } from '@wordpress/element';
+import { useState, createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { EditProductLinkModal } from '../../shared/edit-product-link-modal';
-import { PRODUCT_DETAILS_SLUG } from '../constants';
+import { PRODUCT_DETAILS_SLUG } from '../../constants';
+import { EditProductLinkModal } from '../edit-product-link-modal';
 
 export const DetailsNameField = ( {} ) => {
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =

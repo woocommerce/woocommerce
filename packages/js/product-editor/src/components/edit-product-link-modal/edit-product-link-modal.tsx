@@ -3,19 +3,18 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Modal, TextControl } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useState, createElement } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Product } from '@woocommerce/data';
 import { useFormContext } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { __experimentalUseProductHelper as useProductHelper } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
  */
-import './edit-product-link-modal.scss';
+import { useProductHelper } from '../../hooks/use-product-helper';
 
 type EditProductLinkModalProps = {
 	product: Product;
