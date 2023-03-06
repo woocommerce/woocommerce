@@ -660,7 +660,7 @@ function wc_create_refund( $args = array() ) {
 			}
 		}
 
-		$order->set_date_modified( $refund->get_date_created() );
+		$order->set_date_modified( time() );
 		$order->save();
 
 		do_action( 'woocommerce_refund_created', $refund->get_id(), $args );
