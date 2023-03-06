@@ -106,8 +106,8 @@
         slider.started = false;
         slider.startTimeout = null;
         // TOUCH/USECSS:
-        slider.transform = !slider.vars.video && !fade && slider.vars.useCSS;
-        if (slider.transform) slider.prop = "transform";
+        slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS;
+        if (slider.transitions) slider.prop = "transform";
         slider.isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
         slider.ensureAnimationEnd = '';
         // CONTROLSCONTAINER:
@@ -496,7 +496,7 @@
 
               if ( ! scrolling || Number( new Date() ) - startT > fxms ) {
                 e.preventDefault();
-                if (!fade && slider.transform) {
+                if (!fade && slider.transitions) {
                   if (!slider.vars.animationLoop) {
                     dx = dx/((slider.currentSlide === 0 && dx < 0 || slider.currentSlide === slider.last && dx > 0) ? (Math.abs(dx)/cwidth+2) : 1);
                   }
@@ -684,12 +684,11 @@
             slideString = (reverse) ? ((slider.count - 1) - target + slider.cloneOffset) * dimension : (target + slider.cloneOffset) * dimension;
           }
           slider.setProps(slideString, "", slider.vars.animationSpeed);
-          if (slider.transform) {
+          if (slider.transitions) {
             if (!slider.vars.animationLoop || !slider.atEnd) {
               slider.animating = false;
               slider.currentSlide = slider.animatingTo;
             }
-          }
 
             // Unbind previous transitionEnd events and re-bind new transitionEnd event
             slider.container.off("transitionend");
@@ -703,6 +702,19 @@
             slider.ensureAnimationEnd = setTimeout(function() {
               slider.wrapup(dimension);
             }, slider.vars.animationSpeed + 100);
+
+          } else {
+            var keyframes = {};
+            keyframes[slider.prop] = [
+              slider.container.css(slider.prop),
+              slider.args[slider.prop]
+            ];
+
+            slider.container[0].animate(keyframes, { duration: slider.vars.animationSpeed, easing: easing }).onfinish = function() {
+              slider.container.css(slider.args);
+              slider.wrapup(dimension);
+            };
+          }
         } else { // FADE:
           if (!touch) {
             slider.slides.eq(slider.currentSlide).css({"zIndex": 1}).animate({"opacity": 0}, slider.vars.animationSpeed, slider.vars.easing);
@@ -806,17 +818,16 @@
             return (posCalc * ((slider.vars.rtl)?1:-1)) + "px";
           }());
 
-      if (slider.transform) {
+      if (slider.transitions) {
         target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + (parseInt(target)+'px') + ",0,0)";
-      } else {
-        // When wishing to use jQuery transitions, we replicate them with CSS3's transition-timing-function instead
-        slider.container.css("transition-timing-function", easing);
-      }
         dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
          slider.container.css("transition-duration", dur);
+      }
 
       slider.args[slider.prop] = target;
-      slider.container.css(slider.args);
+      if (slider.transitions || dur === undefined) { slider.container.css(slider.args); }
+
+      slider.container.css('transform',target);
     };
 
     slider.setup = function(type) {
