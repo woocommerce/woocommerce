@@ -126,7 +126,6 @@ const dirtyProps = <
 const updateCustomerData = debounce( (): void => {
 	const { billingAddress, shippingAddress } = customerData;
 	const validationStore = select( VALIDATION_STORE_KEY );
-	const customerDataToUpdate = {} as Partial< BillingAddressShippingAddress >;
 
 	// Before we push anything, we need to ensure that the data we're pushing (dirty fields) are valid, otherwise we will
 	// abort and wait for the validation issues to be resolved.
@@ -150,6 +149,8 @@ const updateCustomerData = debounce( (): void => {
 	}
 
 	// Find valid data from the list of dirtyProps and prepare to push to the server.
+	const customerDataToUpdate = {} as Partial< BillingAddressShippingAddress >;
+
 	if ( dirtyProps.billingAddress.length ) {
 		customerDataToUpdate.billing_address = pick(
 			billingAddress,
@@ -166,14 +167,31 @@ const updateCustomerData = debounce( (): void => {
 		dirtyProps.shippingAddress = [];
 	}
 
+	// If there is customer data to update, push it to the server.
 	if ( Object.keys( customerDataToUpdate ).length ) {
 		dispatch( STORE_KEY )
 			.updateCustomerData( customerDataToUpdate )
-			.then( () => {
-				removeAllNotices();
-			} )
+			.then( removeAllNotices )
 			.catch( ( response ) => {
 				processErrorResponse( response );
+
+				// Data did not persist due to an error. Make the props dirty again so they get pushed to the server.
+				if ( customerDataToUpdate.billing_address ) {
+					dirtyProps.billingAddress = [
+						...dirtyProps.billingAddress,
+						...( Object.keys(
+							customerDataToUpdate.billing_address
+						) as BaseAddressKey[] ),
+					];
+				}
+				if ( customerDataToUpdate.shipping_address ) {
+					dirtyProps.shippingAddress = [
+						...dirtyProps.shippingAddress,
+						...( Object.keys(
+							customerDataToUpdate.shipping_address
+						) as BaseAddressKey[] ),
+					];
+				}
 			} );
 	}
 }, 1000 );
