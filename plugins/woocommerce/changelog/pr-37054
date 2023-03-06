@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Corrects references for WC_API_Server. It was all uppercase.
