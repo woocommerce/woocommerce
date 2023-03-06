@@ -3,17 +3,6 @@ const { test, expect } = require( '@playwright/test' );
 test.describe(
 	'A basic set of tests to ensure WP, wp-admin and my-account load',
 	() => {
-		test("should intentionally fail #1", async () => {
-		  test.fail();
-		});
-
-		test("should intentionally fail #2", async () => {
-		  test.fail();
-		});
-
-		test("should intentionally fail #3", async () => {
-		  test.fail();
-		});
 		test( 'Load the home page', async ( { page } ) => {
 			await page.goto( '/' );
 			const title = page.locator( 'h1.site-title' );
