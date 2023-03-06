@@ -40,8 +40,8 @@
 		}
 	}
 	.components-toggle-control
-		.components-base-control__field
-		.components-toggle-control__label {
+	.components-base-control__field
+	.components-toggle-control__label {
 		display: flex;
 		align-items: center;
 	}
@@ -135,7 +135,7 @@
 	}
 }
 
-.woocommerce-layout:has( .woocommerce-product-block-editor ) {
+.woocommerce-layout:has(.woocommerce-product-block-editor) {
 	.woocommerce-layout__header {
 		display: none;
 	}
