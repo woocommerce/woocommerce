@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+
 /**
  * WC_Order_Factory_Test Class.
  */
@@ -20,7 +22,7 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->cot_state = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot( false );
+		OrderHelper::toggle_cot( false );
 	}
 
 	/**
@@ -31,15 +33,15 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		wp_cache_flush();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot( $this->cot_state );
+		OrderHelper::toggle_cot( $this->cot_state );
 	}
 
 	/**
 	 * @testDox get_orders should be able to return multiple orders of different types.
 	 */
 	public function test_get_orders_with_multiple_order_type() {
-		$order1 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_complex_wp_post_order();
-		$order2 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_complex_wp_post_order();
+		$order1 = OrderHelper::create_complex_wp_post_order();
+		$order2 = OrderHelper::create_complex_wp_post_order();
 
 		assert( $order1 > 0 );
 		assert( $order2 > 0 );

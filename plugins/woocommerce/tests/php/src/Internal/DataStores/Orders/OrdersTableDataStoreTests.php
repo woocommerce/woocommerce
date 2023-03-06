@@ -1869,7 +1869,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 */
 	public function test_legacy_getters_setters() {
 		$this->toggle_cot( true );
-		$order_id = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_complex_data_store_order( $this->sut );
+		$order_id = OrderHelper::create_complex_data_store_order( $this->sut );
 		$order    = wc_get_order( $order_id );
 		$this->switch_data_store( $order, $this->sut );
 		$bool_props = array(
