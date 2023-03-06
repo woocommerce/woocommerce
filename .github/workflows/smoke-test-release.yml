@@ -1,7 +1,7 @@
 name: Smoke test release
 on:
     release:
-        types: [released, prereleased]
+        types: [released, prereleased, published]
     workflow_dispatch:
         inputs:
             tag:
