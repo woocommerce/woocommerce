@@ -13,7 +13,6 @@ import { Link } from '@woocommerce/components';
  */
 import { PaymentMethodsIcons } from './PaymentMethodsIcons';
 import { WCPayBannerImage } from './WCPayBannerImage';
-import { WCPayBannerImageCut } from './WCPayBannerImageCut';
 
 export const WCPayBannerFooter: React.VFC = () => (
 	<CardFooter className="woocommerce-recommended-payments-banner__footer">

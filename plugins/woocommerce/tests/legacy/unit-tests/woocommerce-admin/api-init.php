@@ -8,7 +8,7 @@
 
 use Automattic\WooCommerce\Internal\Admin\Schedulers\CustomersScheduler;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
-use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 /**

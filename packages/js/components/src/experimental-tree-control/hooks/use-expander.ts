@@ -23,9 +23,17 @@ export function useExpander( {
 		}
 	}, [ item, shouldItemBeExpanded ] );
 
+	function onExpand() {
+		setExpanded( true );
+	}
+
+	function onCollapse() {
+		setExpanded( false );
+	}
+
 	function onToggleExpand() {
 		setExpanded( ( prev ) => ! prev );
 	}
 
-	return { isExpanded, onToggleExpand };
+	return { isExpanded, onExpand, onCollapse, onToggleExpand };
 }

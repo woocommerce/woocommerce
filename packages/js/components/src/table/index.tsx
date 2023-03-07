@@ -27,13 +27,14 @@ import TablePlaceholder from './placeholder';
 import TableSummary, { TableSummaryPlaceholder } from './summary';
 import { TableCardProps } from './types';
 
-const defaultOnQueryChange =
-	( param: string ) => ( path?: string, direction?: string ) => {};
+const defaultOnQueryChange: (
+	param: string
+) => ( path?: string, direction?: string ) => void = () => () => {};
 
-const defaultOnColumnsChange = (
+const defaultOnColumnsChange: (
 	showCols: Array< string >,
 	key?: string
-) => {};
+) => void = () => {};
 /**
  * This is an accessible, sortable, and scrollable table for displaying tabular data (like revenue and other analytics data).
  * It accepts `headers` for column headers, and `rows` for the table content.

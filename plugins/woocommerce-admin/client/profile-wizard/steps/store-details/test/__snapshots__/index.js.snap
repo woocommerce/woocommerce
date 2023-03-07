@@ -130,13 +130,13 @@ Object {
                 </div>
                 <div>
                   <div
-                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                   >
                     <div
-                      class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                      class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                     >
                       <label
-                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                         for="inspector-text-control-0"
                       >
                         Address
@@ -154,13 +154,13 @@ Object {
                 </div>
                 <div>
                   <div
-                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                   >
                     <div
-                      class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                      class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                     >
                       <label
-                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                         for="inspector-text-control-1"
                       >
                         Post code
@@ -178,13 +178,13 @@ Object {
                 </div>
                 <div>
                   <div
-                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                   >
                     <div
-                      class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                      class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                     >
                       <label
-                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                         for="inspector-text-control-2"
                       >
                         City
@@ -203,13 +203,13 @@ Object {
               </div>
               <div>
                 <div
-                  class="components-base-control muriel-component muriel-input-text with-value css-wdf2ti-Wrapper e1puf3u4"
+                  class="components-base-control muriel-component muriel-input-text with-value css-wdf2ti-Wrapper ej5x27r4"
                 >
                   <div
-                    class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                    class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                   >
                     <label
-                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                       for="inspector-text-control-3"
                     >
                       Email address
@@ -445,13 +445,13 @@ Object {
               </div>
               <div>
                 <div
-                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                 >
                   <div
-                    class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                    class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                   >
                     <label
-                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                       for="inspector-text-control-0"
                     >
                       Address
@@ -469,13 +469,13 @@ Object {
               </div>
               <div>
                 <div
-                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                 >
                   <div
-                    class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                    class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                   >
                     <label
-                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                       for="inspector-text-control-1"
                     >
                       Post code
@@ -493,13 +493,13 @@ Object {
               </div>
               <div>
                 <div
-                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                 >
                   <div
-                    class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                    class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                   >
                     <label
-                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                       for="inspector-text-control-2"
                     >
                       City
@@ -518,13 +518,13 @@ Object {
             </div>
             <div>
               <div
-                class="components-base-control muriel-component muriel-input-text with-value css-wdf2ti-Wrapper e1puf3u4"
+                class="components-base-control muriel-component muriel-input-text with-value css-wdf2ti-Wrapper ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <label
-                    class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                    class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                     for="inspector-text-control-3"
                   >
                     Email address

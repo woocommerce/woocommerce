@@ -308,7 +308,7 @@ class WC_Post_Types {
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		$theme_support =  wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
+		$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
 		if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
@@ -365,6 +365,7 @@ class WC_Post_Types {
 					'has_archive'         => $has_archive,
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
+					'rest_namespace'      => 'wp/v3',
 				)
 			)
 		);

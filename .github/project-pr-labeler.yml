@@ -61,7 +61,7 @@
 'plugin: woocommerce':
 - plugins/woocommerce/**/*
 
-'focus: react admin':
+'focus: react admin [team:Ghidorah]':
 - plugins/woocommerce/src/Admin/**/*
 - plugins/woocommerce/src/Internal/Admin/**/*
 - plugins/woocommerce-admin/**/*
