@@ -79,7 +79,7 @@
 		"test:e2e:update": "npm run wp-env:config && cross-env JEST_PUPPETEER_CONFIG=tests/e2e/config/jest-puppeteer.config.js NODE_CONFIG_DIR=tests/e2e/config wp-scripts test-e2e --config tests/e2e/config/jest.config.js --updateSnapshot",
 		"test:help": "wp-scripts test-unit-js --help",
 		"test:performance": "npm run wp-env:config && cross-env NODE_CONFIG_DIR=tests/e2e/config wp-scripts test-e2e --config tests/e2e/config/jest.performance.config.js -- performance",
-		"test:php": "npm run wp-env run phpunit '/var/www/html/wp-content/plugins/$(basename $(pwd))/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/$(basename $(pwd))/phpunit.xml.dist'",
+		"test:php": "npm run wp-env run phpunit '/var/www/html/wp-content/plugins/${PWD##*/}/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/${PWD##*/}/phpunit.xml.dist'",
 		"test:update": "wp-scripts test-unit-js --updateSnapshot --config tests/js/jest.config.json",
 		"test:watch": "npm run test -- --watch",
 		"ts:check": "tsc --build",
