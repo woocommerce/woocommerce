@@ -84,7 +84,11 @@
 				"@wordpress/scripts",
 				"@wordpress/jest-console",
 				"@wordpress/dependency-extraction-webpack-plugin",
-				"@wordpress/e2e-test-utils"
+				"@wordpress/e2e-test-utils",
+				"@wordpress/jest-preset-default",
+				"@wordpress/postcss-plugins-preset",
+				"@wordpress/custom-templated-path-webpack-plugin",
+				"@wordpress/postcss-themes"
 			],
 			"packages": [
 				"**"

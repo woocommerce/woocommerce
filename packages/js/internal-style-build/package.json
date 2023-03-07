@@ -27,7 +27,7 @@
 		"@wordpress/postcss-plugins-preset": "wp-6.0",
 		"css-loader": "^3.6.0",
 		"mini-css-extract-plugin": "^2.6.0",
-		"postcss-loader": "^3.0.0",
+		"postcss-loader": "^4.3.0",
 		"sass-loader": "^10.2.1",
 		"webpack-remove-empty-scripts": "^0.7.3",
 		"webpack-rtl-plugin": "^2.0.0"
