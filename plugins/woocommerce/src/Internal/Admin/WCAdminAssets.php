@@ -357,7 +357,7 @@ class WCAdminAssets {
 		wp_register_style(
 			WC_ADMIN_APP,
 			self::get_url( 'app/style', 'css' ),
-			array( 'wc-components', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
+			array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
 			$css_file_version
 		);
 		wp_style_add_data( WC_ADMIN_APP, 'rtl', 'replace' );
