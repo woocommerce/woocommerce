@@ -34,7 +34,7 @@
 		"@testing-library/react": "^12.1.3",
 		"@wordpress/data": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
-		"@wordpress/jest-console": "wp-6.0",
+		"@wordpress/jest-console": "^5.0.1",
 		"regenerator-runtime": "^0.13.9"
 	},
 	"devDependencies": {

@@ -75,7 +75,16 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/eslint-plugin"
+				"@wordpress/eslint-plugin",
+				"@wordpress/babel-plugin-import-jsx-pragma",
+				"@wordpress/babel-preset-default",
+				"@wordpress/env",
+				"@wordpress/stylelint-config",
+				"@wordpress/prettier-config",
+				"@wordpress/scripts",
+				"@wordpress/jest-console",
+				"@wordpress/dependency-extraction-webpack-plugin",
+				"@wordpress/e2e-test-utils"
 			],
 			"packages": [
 				"**"
