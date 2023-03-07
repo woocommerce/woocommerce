@@ -117,7 +117,6 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 			selectedItems
 		);
 		if (
-			inputValue.length > 0 &&
 			! isSearching &&
 			! filteredItems.find(
 				( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
@@ -205,15 +204,14 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 							isOpen={ isOpen }
 							getMenuProps={ getMenuProps }
 							fixedPositionElement={
-								notCreatedItem ? (
+								notCreatedItem && (
 									<CategoryFieldAddNewItem
-										key={ `${ notCreatedItem.id }` }
 										item={ notCreatedItem }
 										highlightedIndex={ highlightedIndex }
 										items={ items }
 										getItemProps={ getItemProps }
 									/>
-								) : null
+								)
 							}
 							className="woocommerce-category-field-dropdown__menu"
 						>

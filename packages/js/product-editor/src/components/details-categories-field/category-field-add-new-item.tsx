@@ -20,14 +20,11 @@ type CategoryFieldAddNewItemProps = {
 
 export const CategoryFieldAddNewItem: React.FC<
 	CategoryFieldAddNewItemProps
-> = ( { item, highlightedIndex, getItemProps, items } ) => {
+> = ( { item, highlightedIndex, items, getItemProps } ) => {
 	const index = items.findIndex( ( i ) => i.id === item.id );
 	return (
-		<li
-			{ ...getItemProps( {
-				item,
-				index,
-			} ) }
+		<span
+			{ ...getItemProps( { item, index } ) }
 			className={ classNames(
 				'woocommerce-category-field-dropdown__item is-new',
 				{
@@ -41,8 +38,10 @@ export const CategoryFieldAddNewItem: React.FC<
 					icon={ plus }
 					size={ 20 }
 				/>
-				{ sprintf( __( 'Create "%s"', 'woocommerce' ), item.name ) }
+				{ item.name
+					? sprintf( __( 'Create "%s"', 'woocommerce' ), item.name )
+					: __( 'Create new', 'woocommerce' ) }
 			</div>
-		</li>
+		</span>
 	);
 };
