@@ -224,7 +224,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 									</li>
 								) : (
 									rootItems.map( ( item ) => {
-										return item.id === -99 ? null : (
+										return item.id !== -99 ? (
 											<CategoryFieldItem
 												key={ `${ item.id }` }
 												item={
@@ -239,7 +239,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 												items={ items }
 												getItemProps={ getItemProps }
 											/>
-										);
+										) : null;
 									} )
 								) }
 							</>
