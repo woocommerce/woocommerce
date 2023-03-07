@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\WCAdminHelper
  */
 
-use \Automattic\WooCommerce\Admin\WCAdminHelper;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 /**
  * WC_Admin_Tests_Admin_Helper Class

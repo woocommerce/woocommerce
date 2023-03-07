@@ -28,19 +28,34 @@
 		"access": "public"
 	},
 	"dependencies": {
+		"@automattic/interpolate-components": "^1.2.0",
+		"@types/lodash": "^4.14.179",
+		"@types/wordpress__blocks": "^11.0.7",
 		"@woocommerce/components": "workspace:*",
+		"@woocommerce/currency": "workspace:*",
 		"@woocommerce/data": "workspace:^4.1.0",
+		"@woocommerce/number": "workspace:*",
 		"@woocommerce/tracks": "workspace:^1.3.0",
+		"@wordpress/blocks": "^11.17.0",
 		"@wordpress/components": "wp-6.0",
+		"@wordpress/compose": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
+		"@wordpress/html-entities": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
+		"@wordpress/icons": "^8.1.0",
+		"@wordpress/url": "^3.4.1",
+		"classnames": "^2.3.1",
+		"lodash": "^4.17.21",
 		"react-router-dom": "^6.3.0"
 	},
 	"devDependencies": {
+		"@testing-library/react": "^12.1.3",
 		"@types/react": "^17.0.2",
 		"@types/wordpress__components": "^19.10.3",
+		"@types/wordpress__data": "^6.0.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
+		"@wordpress/block-editor": "^9.8.0",
 		"@wordpress/browserslist-config": "wp-6.0",
 		"concurrently": "^7.0.0",
 		"css-loader": "^3.6.0",
@@ -51,6 +66,7 @@
 		"postcss-loader": "^4.3.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
+		"react-hooks^8.0.1": "link:@testing-library/react-hooks^8.0.1",
 		"rimraf": "^3.0.2",
 		"sass-loader": "^10.2.1",
 		"ts-jest": "^27.1.3",
@@ -73,6 +89,8 @@
 	},
 	"peerDependencies": {
 		"@types/react": "^17.0.2",
-		"react": "^17.0.2"
+		"@wordpress/data": "^6.15.0",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
 	}
 }

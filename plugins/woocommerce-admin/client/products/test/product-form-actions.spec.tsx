@@ -43,9 +43,9 @@ jest.mock( '~/header/utils', () => ( {
 		<Fragment { ...props }>{ props.children() }</Fragment>
 	),
 } ) );
-jest.mock( '../use-product-helper', () => {
+jest.mock( '@woocommerce/product-editor', () => {
 	return {
-		useProductHelper: () => ( {
+		__experimentalUseProductHelper: () => ( {
 			createProductWithStatus,
 			updateProductWithStatus,
 			copyProductWithStatus,

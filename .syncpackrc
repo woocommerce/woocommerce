@@ -75,6 +75,7 @@
 		},
 		{
 			"dependencies": [
+				"@wordpress/blocks",
 				"@wordpress/block-editor",
 				"@wordpress/block-library",
 				"@wordpress/eslint-plugin"
