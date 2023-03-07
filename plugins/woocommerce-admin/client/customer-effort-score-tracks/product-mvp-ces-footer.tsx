@@ -7,16 +7,14 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { closeSmall } from '@wordpress/icons';
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { Pill } from '@woocommerce/components';
+import { ALLOW_TRACKING_OPTION_NAME } from '@woocommerce/customer-effort-score';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import './product-mvp-ces-footer.scss';
-import {
-	ALLOW_TRACKING_OPTION_NAME,
-	SHOWN_FOR_ACTIONS_OPTION_NAME,
-} from './constants';
+import { SHOWN_FOR_ACTIONS_OPTION_NAME } from './constants';
 import { STORE_KEY } from './data/constants';
 
 export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =

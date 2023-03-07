@@ -9,6 +9,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { moreVertical } from '@wordpress/icons';
 import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
 import { useFormContext } from '@woocommerce/components';
+import { ALLOW_TRACKING_OPTION_NAME } from '@woocommerce/customer-effort-score';
 
 /**
  * Internal dependencies
@@ -17,7 +18,6 @@ import { ClassicEditorIcon } from './images/classic-editor-icon';
 import { FeedbackIcon } from './images/feedback-icon';
 import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
 import { NEW_PRODUCT_MANAGEMENT } from '~/customer-effort-score-tracks/product-mvp-ces-footer';
-import { ALLOW_TRACKING_OPTION_NAME } from '~/customer-effort-score-tracks/constants';
 import './product-more-menu.scss';
 
 export const ProductMoreMenu = () => {

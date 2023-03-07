@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
+import { addCustomerEffortScoreExitPageListener } from '@woocommerce/customer-effort-score';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { waitUntilElementIsPresent } from './utils';
-import { addCustomerEffortScoreExitPageListener } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 
 /**
  * Get the product data.
@@ -135,7 +135,7 @@ const getProductData = () => {
 /**
  * Get the publish date as a string.
  *
- * @param prefix Prefix for date element selectors.
+ * @param  prefix Prefix for date element selectors.
  * @return string
  */
 const getPublishDate = ( prefix = '' ) => {
@@ -186,8 +186,8 @@ const getPublishingWidgetData = () => {
 /**
  * Prefix all object keys with a string.
  *
- * @param obj    Object to create keys from.
- * @param prefix Prefix used before all keys.
+ * @param  obj    Object to create keys from.
+ * @param  prefix Prefix used before all keys.
  * @return object
  */
 const prefixObjectKeys = (
