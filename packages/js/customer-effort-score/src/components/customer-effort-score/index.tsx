@@ -9,7 +9,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { CustomerFeedbackModal } from './customer-feedback-modal';
+import { CustomerFeedbackModal } from '../customer-feedback-modal';
 
 const noop = () => {};
 
