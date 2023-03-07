@@ -1,6 +1,6 @@
 // Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will likely run into this.
 global.wp = {};
-
+require( '@wordpress/data' );
 // wcSettings is required by @woocommerce/* packages
 global.wcSettings = {
 	adminUrl: 'https://vagrant.local/wp/wp-admin/',
