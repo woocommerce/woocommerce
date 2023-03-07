@@ -1,4 +1,4 @@
 Significance: minor
-Type: update
+Type: add
 
-Make WC_Order::get_tax_location public
+Make WC_Order::get_tax_location accessible publicly through a wrapper function.

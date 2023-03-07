@@ -1619,7 +1619,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param array $args array Override the location.
 	 * @return array
 	 */
-	public function get_tax_location( $args = array() ) {
+	protected function get_tax_location( $args = array() ) {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
 		if ( 'shipping' === $tax_based_on && ! $this->get_shipping_country() ) {
@@ -1668,6 +1668,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return apply_filters( 'woocommerce_order_get_tax_location', $args, $this );
+	}
+
+	/**
+	 * Public wrapper for exposing get_tax_location() method, enabling 3rd parties to get the tax location for an order.
+	 *
+	 * @since 7.6.0
+	 * @param array $args array Override the location.
+	 * @return array
+	 */
+	public function get_taxable_location( $args = array() ) {
+		return $this->get_tax_location( $args );
 	}
 
 	/**
