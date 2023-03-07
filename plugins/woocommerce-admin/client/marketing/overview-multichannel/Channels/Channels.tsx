@@ -27,12 +27,14 @@ import { RegisteredChannelCardBody } from './RegisteredChannelCardBody';
 import './Channels.scss';
 
 type ChannelsProps = {
+	addChannelsButtonRef: React.ForwardedRef< HTMLButtonElement >;
 	registeredChannels: Array< RegisteredChannel >;
 	recommendedChannels: Array< RecommendedChannel >;
 	onInstalledAndActivated?: () => void;
 };
 
 export const Channels: React.FC< ChannelsProps > = ( {
+	addChannelsButtonRef,
 	registeredChannels,
 	recommendedChannels,
 	onInstalledAndActivated,
@@ -81,6 +83,7 @@ export const Channels: React.FC< ChannelsProps > = ( {
 							<CardDivider />
 							<CardBody>
 								<Button
+									ref={ addChannelsButtonRef }
 									variant="link"
 									onClick={ () => setExpanded( ! expanded ) }
 								>

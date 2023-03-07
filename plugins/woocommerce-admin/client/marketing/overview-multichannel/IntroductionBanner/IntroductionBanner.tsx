@@ -10,7 +10,6 @@ import { Icon, trendingUp, megaphone, closeSmall } from '@wordpress/icons';
  * Internal dependencies
  */
 import { CreateNewCampaignModal } from '~/marketing/components';
-import { hashAddChannels } from '~/marketing/overview-multichannel/constants';
 import './IntroductionBanner.scss';
 import wooIconUrl from './woo.svg';
 import illustrationUrl from './illustration.svg';
@@ -19,11 +18,13 @@ import illustrationLargeUrl from './illustration-large.svg';
 type IntroductionBannerProps = {
 	showButtons: boolean;
 	onDismiss: () => void;
+	onAddChannels: () => void;
 };
 
 export const IntroductionBanner = ( {
 	showButtons,
 	onDismiss,
+	onAddChannels,
 }: IntroductionBannerProps ) => {
 	const [ open, setOpen ] = useState( false );
 
@@ -98,7 +99,7 @@ export const IntroductionBanner = ( {
 						>
 							{ __( 'Create a campaign', 'woocommerce' ) }
 						</Button>
-						<Button variant="secondary" href={ hashAddChannels }>
+						<Button variant="secondary" onClick={ onAddChannels }>
 							{ __( 'Add channels', 'woocommerce' ) }
 						</Button>
 					</Flex>

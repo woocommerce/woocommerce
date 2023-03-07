@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
+import { useRef } from '@wordpress/element';
 import { useUser } from '@woocommerce/data';
-import { ScrollTo } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -14,7 +14,6 @@ import {
 	useIntroductionBanner,
 	useRegisteredChannels,
 	useRecommendedChannels,
-	useIsLocationHashAddChannels,
 } from '~/marketing/hooks';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { IntroductionBanner } from './IntroductionBanner';
@@ -38,8 +37,8 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 	} = useRegisteredChannels();
 	const { loading: loadingRecommended, data: dataRecommended } =
 		useRecommendedChannels();
-	const isLocationHashAddChannels = useIsLocationHashAddChannels();
 	const { currentUserCan } = useUser();
+	const addChannelsButtonRef = useRef< HTMLButtonElement >( null );
 
 	const shouldShowExtensions =
 		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
@@ -61,27 +60,24 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 						!! dataRegistered && dataRegistered.length >= 1
 					}
 					onDismiss={ dismissIntroductionBanner }
+					onAddChannels={ () => {
+						addChannelsButtonRef.current?.focus();
+						addChannelsButtonRef.current?.click();
+						addChannelsButtonRef.current?.scrollIntoView();
+					} }
 				/>
 			) }
 			{ dataRegistered?.length && <Campaigns /> }
 			{ dataRegistered &&
 				dataRecommended &&
-				( dataRegistered.length || dataRecommended.length ) &&
-				( isLocationHashAddChannels ? (
-					<ScrollTo>
-						<Channels
-							registeredChannels={ dataRegistered }
-							recommendedChannels={ dataRecommended }
-							onInstalledAndActivated={ refetch }
-						/>
-					</ScrollTo>
-				) : (
+				( dataRegistered.length || dataRecommended.length ) && (
 					<Channels
+						addChannelsButtonRef={ addChannelsButtonRef }
 						registeredChannels={ dataRegistered }
 						recommendedChannels={ dataRecommended }
 						onInstalledAndActivated={ refetch }
 					/>
-				) ) }
+				) }
 			<InstalledExtensions />
 			{ shouldShowExtensions && <DiscoverTools /> }
 			<LearnMarketing />
