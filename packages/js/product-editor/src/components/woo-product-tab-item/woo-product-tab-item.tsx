@@ -49,25 +49,19 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 					name={ `woocommerce_product_tab_${ templateData.name }` }
 					key={ templateData.name }
 				>
-					{ /* eslint-disable @typescript-eslint/ban-ts-comment */ }
-					{
-						// @ts-ignore It is okay to pass in a function as a render child of Fill
-						( fillProps: Fill.Props ) => {
-							return createOrderedChildren< Fill.Props >(
-								children,
-								templateData.order || DEFAULT_TAB_ORDER,
-								{},
-								{
-									tabProps,
-									templateName: templateData.name,
-									order:
-										templateData.order || DEFAULT_TAB_ORDER,
-									...fillProps,
-								}
-							);
-						}
-					}
-					{ /* eslint-enable @typescript-eslint/ban-ts-comment */ }
+					{ ( fillProps: Fill.Props ) => {
+						return createOrderedChildren< Fill.Props >(
+							children,
+							templateData.order || DEFAULT_TAB_ORDER,
+							{},
+							{
+								tabProps,
+								templateName: templateData.name,
+								order: templateData.order || DEFAULT_TAB_ORDER,
+								...fillProps,
+							}
+						);
+					} }
 				</Fill>
 			) ) }
 		</>

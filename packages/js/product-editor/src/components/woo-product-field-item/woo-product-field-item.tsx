@@ -58,28 +58,24 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 			name={ `woocommerce_product_field_${ sectionName }` }
 			key={ fieldId }
 		>
-			{ /* eslint-disable @typescript-eslint/ban-ts-comment */ }
-			{
-				// @ts-ignore It is okay to pass in a function as a render child of Fill
-				( fillProps: Fill.Props ) =>
-					createOrderedChildren<
-						Fill.Props &
-							SlotContextHelpersType & {
-								sectionName: string;
-							},
-						{ _id: string }
-					>(
-						children,
-						order,
-						{
-							sectionName,
-							...fillProps,
-							...getFillHelpers(),
+			{ ( fillProps: Fill.Props ) =>
+				createOrderedChildren<
+					Fill.Props &
+						SlotContextHelpersType & {
+							sectionName: string;
 						},
-						{ _id: fieldId }
-					)
+					{ _id: string }
+				>(
+					children,
+					order,
+					{
+						sectionName,
+						...fillProps,
+						...getFillHelpers(),
+					},
+					{ _id: fieldId }
+				)
 			}
-			{ /* eslint-enable @typescript-eslint/ban-ts-comment */ }
 		</Fill>
 	);
 };

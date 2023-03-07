@@ -33,23 +33,14 @@ export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 					name={ `woocommerce_product_section_${ tabName }` }
 					key={ tabName }
 				>
-					{ /* eslint-disable @typescript-eslint/ban-ts-comment */ }
-					{
-						// @ts-ignore It is okay to pass in a function as a render child of Fill
-						( fillProps: Fill.Props ) => {
-							return createOrderedChildren<
-								Fill.Props & { tabName: string }
-							>(
-								children,
-								sectionOrder || DEFAULT_SECTION_ORDER,
-								{
-									tabName,
-									...fillProps,
-								}
-							);
-						}
-					}
-					{ /* eslint-enable @typescript-eslint/ban-ts-comment */ }
+					{ ( fillProps: Fill.Props ) => {
+						return createOrderedChildren<
+							Fill.Props & { tabName: string }
+						>( children, sectionOrder || DEFAULT_SECTION_ORDER, {
+							tabName,
+							...fillProps,
+						} );
+					} }
 				</Fill>
 			) ) }
 		</>

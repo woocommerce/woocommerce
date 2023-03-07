@@ -33,14 +33,9 @@ export const WooHeaderItem: React.FC< {
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill name={ 'woocommerce_header_item' }>
-			{ /* eslint-disable @typescript-eslint/ban-ts-comment */ }
-			{
-				// @ts-ignore It is okay to pass in a function as a render child of Fill
-				( fillProps: Fill.Props ) => {
-					return createOrderedChildren( children, order, fillProps );
-				}
-			}
-			{ /* eslint-enable @typescript-eslint/ban-ts-comment */ }
+			{ ( fillProps: Fill.Props ) => {
+				return createOrderedChildren( children, order, fillProps );
+			} }
 		</Fill>
 	);
 };
@@ -78,14 +73,9 @@ export const WooHeaderNavigationItem: React.FC< {
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill name={ 'woocommerce_header_navigation_item' }>
-			{ /* eslint-disable @typescript-eslint/ban-ts-comment */ }
-			{
-				// @ts-ignore It is okay to pass in a function as a render child of Fill
-				( fillProps: Fill.Props ) => {
-					return createOrderedChildren( children, order, fillProps );
-				}
-			}
-			{ /* eslint-enable @typescript-eslint/ban-ts-comment */ }
+			{ ( fillProps: Fill.Props ) => {
+				return createOrderedChildren( children, order, fillProps );
+			} }
 		</Fill>
 	);
 };
@@ -118,8 +108,6 @@ export const WooHeaderPageTitle: React.FC< {
 } > & {
 	Slot: React.FC< Slot.Props >;
 } = ( { children } ) => {
-	// eslint-disable-next-line
-	// @ts-ignore
 	return <Fill name={ 'woocommerce_header_page_title' }>{ children }</Fill>;
 };
 

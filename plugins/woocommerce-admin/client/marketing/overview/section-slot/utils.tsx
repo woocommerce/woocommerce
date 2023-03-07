@@ -42,14 +42,9 @@ export const WooMarketingOverviewSection = ( {
 } ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_MARKETING_OVERVIEW_SECTION_SLOT_NAME }>
-			{ /* eslint-disable @typescript-eslint/ban-ts-comment */ }
-			{
-				// @ts-ignore It is okay to pass in a function as a render child of Fill
-				( fillProps: Fill.Props ) => {
-					return createOrderedChildren( children, order, fillProps );
-				}
-			}
-			{ /* eslint-enable @typescript-eslint/ban-ts-comment */ }
+			{ ( fillProps: Fill.Props ) => {
+				return createOrderedChildren( children, order, fillProps );
+			} }
 		</Fill>
 	);
 };
