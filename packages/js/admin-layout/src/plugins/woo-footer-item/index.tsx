@@ -10,6 +10,7 @@ import {
 } from '@woocommerce/components';
 
 export const WC_FOOTER_SLOT_NAME = 'woocommerce_footer_item';
+
 /**
  * Create a Fill for extensions to add items to the WooCommerce Admin footer.
  *
