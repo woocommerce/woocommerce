@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Editor } from '@woocommerce/product-editor';
+import { __experimentalEditor as Editor } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 
 /**

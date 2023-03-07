@@ -10,4 +10,4 @@ export { DetailsFeatureField as __experimentalDetailsFeatureField } from './deta
 export { DetailsCategoriesField as __experimentalDetailsCategoriesField } from './details-categories-field';
 export { DetailsSummaryField as __experimentalDetailsSummaryField } from './details-summary-field';
 export { DetailsDescriptionField as __experimentalDetailsDescriptionField } from './details-description-field';
-export { Editor } from './editor';
+export { Editor as __experimentalEditor } from './editor';

@@ -26,6 +26,8 @@ export const DetailsNameField = ( {} ) => {
 	const { getInputProps, values, touched, errors, setValue } =
 		useFormContext< Product >();
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
