@@ -5,6 +5,11 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
+import {
+	WooHeaderNavigationItem,
+	WooHeaderItem,
+	WooHeaderPageTitle,
+} from '@woocommerce/admin-layout';
 import { getSetting } from '@woocommerce/settings';
 import { Text, useSlot } from '@woocommerce/experimental';
 
@@ -13,11 +18,6 @@ import { Text, useSlot } from '@woocommerce/experimental';
  */
 import './style.scss';
 import useIsScrolled from '../hooks/useIsScrolled';
-import {
-	WooHeaderNavigationItem,
-	WooHeaderItem,
-	WooHeaderPageTitle,
-} from './utils';
 import { TasksReminderBar, useActiveSetupTasklist } from '../tasks';
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
@@ -39,6 +39,19 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const headerItemSlot = useSlot( 'woocommerce_header_item' );
 	const headerItemSlotFills = headerItemSlot?.fills;
 
+	const updateBodyMargin = () => {
+		clearTimeout( debounceTimer );
+		debounceTimer = setTimeout( function () {
+			const wpBody = document.querySelector( '#wpbody' );
+
+			if ( ! wpBody || ! headerElement.current ) {
+				return;
+			}
+
+			wpBody.style.marginTop = `${ headerElement.current.offsetHeight }px`;
+		}, 200 );
+	};
+
 	useLayoutEffect( () => {
 		updateBodyMargin();
 		window.addEventListener( 'resize', updateBodyMargin );
@@ -53,19 +66,6 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 			wpBody.style.marginTop = null;
 		};
 	}, [ headerItemSlotFills ] );
-
-	const updateBodyMargin = () => {
-		clearTimeout( debounceTimer );
-		debounceTimer = setTimeout( function () {
-			const wpBody = document.querySelector( '#wpbody' );
-
-			if ( ! wpBody || ! headerElement.current ) {
-				return;
-			}
-
-			wpBody.style.marginTop = `${ headerElement.current.offsetHeight }px`;
-		}, 200 );
-	};
 
 	useEffect( () => {
 		if ( ! isEmbedded ) {
