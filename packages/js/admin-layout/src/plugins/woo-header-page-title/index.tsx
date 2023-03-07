@@ -5,6 +5,8 @@ import React from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 
+export const WC_HEADER_PAGE_TITLE_SLOT_NAME = 'woocommerce_header_page_title';
+
 /**
  * Create a Fill for extensions to add custom page titles.
  *
@@ -27,11 +29,11 @@ export const WooHeaderPageTitle: React.FC< {
 } > & {
 	Slot: React.FC< Slot.Props >;
 } = ( { children } ) => {
-	return <Fill name={ 'woocommerce_header_page_title' }>{ children }</Fill>;
+	return <Fill name={ WC_HEADER_PAGE_TITLE_SLOT_NAME }>{ children }</Fill>;
 };
 
 WooHeaderPageTitle.Slot = ( { fillProps } ) => (
-	<Slot name={ 'woocommerce_header_page_title' } fillProps={ fillProps }>
+	<Slot name={ WC_HEADER_PAGE_TITLE_SLOT_NAME } fillProps={ fillProps }>
 		{ ( fills ) => {
 			return <>{ [ ...fills ].pop() }</>;
 		} }

@@ -9,6 +9,8 @@ import {
 	sortFillsByOrder,
 } from '@woocommerce/components';
 
+export const WC_HEADER_SLOT_NAME = 'woocommerce_header_item';
+
 /**
  * Create a Fill for extensions to add items to the WooCommerce Admin header.
  *
@@ -34,7 +36,7 @@ export const WooHeaderItem: React.FC< {
 	Slot: React.FC< Slot.Props >;
 } = ( { children, order = 1 } ) => {
 	return (
-		<Fill name={ 'woocommerce_header_item' }>
+		<Fill name={ WC_HEADER_SLOT_NAME }>
 			{ ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
@@ -43,7 +45,7 @@ export const WooHeaderItem: React.FC< {
 };
 
 WooHeaderItem.Slot = ( { fillProps } ) => (
-	<Slot name={ 'woocommerce_header_item' } fillProps={ fillProps }>
+	<Slot name={ WC_HEADER_SLOT_NAME } fillProps={ fillProps }>
 		{ sortFillsByOrder }
 	</Slot>
 );

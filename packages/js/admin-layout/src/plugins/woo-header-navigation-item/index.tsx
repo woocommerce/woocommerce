@@ -9,6 +9,9 @@ import {
 	sortFillsByOrder,
 } from '@woocommerce/components';
 
+export const WC_HEADER_NAVIGATION_SLOT_NAME =
+	'woocommerce_header_navigation_item';
+
 /**
  * Create a Fill for extensions to add items to the WooCommerce Admin
  * navigation area left of the page title.
@@ -35,7 +38,7 @@ export const WooHeaderNavigationItem: React.FC< {
 	Slot: React.FC< Slot.Props >;
 } = ( { children, order = 1 } ) => {
 	return (
-		<Fill name={ 'woocommerce_header_navigation_item' }>
+		<Fill name={ WC_HEADER_NAVIGATION_SLOT_NAME }>
 			{ ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
@@ -44,7 +47,7 @@ export const WooHeaderNavigationItem: React.FC< {
 };
 
 WooHeaderNavigationItem.Slot = ( { fillProps }: Slot.Props ) => (
-	<Slot name={ 'woocommerce_header_navigation_item' } fillProps={ fillProps }>
+	<Slot name={ WC_HEADER_NAVIGATION_SLOT_NAME } fillProps={ fillProps }>
 		{ sortFillsByOrder }
 	</Slot>
 );

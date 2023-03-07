@@ -6,6 +6,8 @@ import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
 import classnames from 'classnames';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
+	WC_HEADER_SLOT_NAME,
+	WC_HEADER_PAGE_TITLE_SLOT_NAME,
 	WooHeaderNavigationItem,
 	WooHeaderItem,
 	WooHeaderPageTitle,
@@ -34,9 +36,9 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		'is-scrolled': isScrolled,
 	} );
 
-	const pageTitleSlot = useSlot( 'woocommerce_header_page_title' );
+	const pageTitleSlot = useSlot( WC_HEADER_PAGE_TITLE_SLOT_NAME );
 	const hasPageTitleFills = Boolean( pageTitleSlot?.fills?.length );
-	const headerItemSlot = useSlot( 'woocommerce_header_item' );
+	const headerItemSlot = useSlot( WC_HEADER_SLOT_NAME );
 	const headerItemSlotFills = headerItemSlot?.fills;
 
 	const updateBodyMargin = () => {
