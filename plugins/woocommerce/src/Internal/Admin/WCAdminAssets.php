@@ -249,6 +249,7 @@ class WCAdminAssets {
 		$css_file_version = self::get_file_version( 'css' );
 
 		$scripts = array(
+			'wc-admin-layout',
 			'wc-explat',
 			'wc-experimental',
 			'wc-customer-effort-score',
@@ -303,6 +304,14 @@ class WCAdminAssets {
 				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__, $script_path_name );
 			}
 		}
+
+		wp_register_style(
+			'wc-admin-layout',
+			self::get_url( 'admin-layout/style', 'css' ),
+			array(),
+			$css_file_version
+		);
+		wp_style_add_data( 'wc-admin-layout', 'rtl', 'replace' );
 
 		wp_register_style(
 			'wc-components',
@@ -368,6 +377,7 @@ class WCAdminAssets {
 	public function inject_wc_settings_dependencies() {
 		if ( wp_script_is( 'wc-settings', 'registered' ) ) {
 			$handles_for_injection = [
+				'wc-admin-layout',
 				'wc-csv',
 				'wc-currency',
 				'wc-customer-effort-score',
