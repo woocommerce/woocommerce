@@ -8,3 +8,4 @@ export { PluginCardBody, SmartPluginCardBody } from './PluginCardBody';
 export { CardHeaderTitle } from './CardHeaderTitle';
 export { CardHeaderDescription } from './CardHeaderDescription';
 export { CenteredSpinner } from './CenteredSpinner';
+export { CreateNewCampaignModal } from './CreateNewCampaignModal';
