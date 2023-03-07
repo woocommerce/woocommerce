@@ -119,7 +119,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 					} ) }
 				</div>
 			</div>
-			{ recommendedChannels?.length && (
+			{ !! recommendedChannels?.length && (
 				<div className="woocommerce-marketing-add-channels">
 					<Flex direction="column">
 						<FlexItem>
