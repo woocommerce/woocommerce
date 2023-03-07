@@ -1,4 +1,4 @@
 Significance: major
 Type: update
 
-FlexSlider always uses CSS3 transitions for "slide" animations.
+FlexSlider always uses Web Animations API for "slide" animations.
