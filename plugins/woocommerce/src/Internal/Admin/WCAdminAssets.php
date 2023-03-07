@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use \_WP_Dependency;
+use _WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;

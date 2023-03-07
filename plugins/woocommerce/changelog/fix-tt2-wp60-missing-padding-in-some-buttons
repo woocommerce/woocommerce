@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add default button padding to TT2 stylesheet to fix some visual issues in WP 5.9 and 6.0

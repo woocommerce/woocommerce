@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\Orders;
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 use Exception;
 
 /**
@@ -58,7 +60,8 @@ class CouponsController {
 			throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 		}
 
-		if ( empty( $post_variables['coupon'] ) ) {
+		$coupon = ArrayUtil::get_value_or_default( $post_variables, 'coupon' );
+		if ( StringUtil::is_null_or_whitespace( $coupon ) ) {
 			throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
 		}
 
@@ -76,7 +79,7 @@ class CouponsController {
 		$order->calculate_taxes( $calculate_tax_args );
 		$order->calculate_totals( false );
 
-		$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $post_variables['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $coupon ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( is_wp_error( $result ) ) {
 			throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );

@@ -74,4 +74,40 @@ class StringUtilTest extends \WC_Unit_Test_Case {
 		$expected  = 'foobar/fizzbuzz.php';
 		$this->assertEquals( $expected, $result );
 	}
+
+	/**
+	 * @testDox 'is_null_or_empty' should return true only if the value is null or an empty string.
+	 *
+	 * @testWith [null, true]
+	 *           ["", true]
+	 *           ["  ", false]
+	 *           ["0", false]
+	 *           ["foo", false]
+	 *           ["  foo  ", false]
+	 *
+	 * @param string $value Value to test.
+	 * @param bool   $expected Expected result from the method.
+	 */
+	public function test_is_null_or_empty( $value, $expected ) {
+		$result = StringUtil::is_null_or_empty( $value );
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * @testDox 'is_null_or_empty' should return true only if the value is null, an empty string, or consists of only whitespace characters.
+	 *
+	 * @testWith [null, true]
+	 *           ["", true]
+	 *           [" \n\r\t\f ", true]
+	 *           ["0", false]
+	 *           ["foo", false]
+	 *           ["  foo  ", false]
+	 *
+	 * @param string $value Value to test.
+	 * @param bool   $expected Expected result from the method.
+	 */
+	public function test_is_null_or_whitespace( $value, $expected ) {
+		$result = StringUtil::is_null_or_whitespace( $value );
+		$this->assertEquals( $expected, $result );
+	}
 }
