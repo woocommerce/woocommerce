@@ -2,12 +2,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 import { Card, Flex, FlexItem, FlexBlock, Button } from '@wordpress/components';
 import { Icon, trendingUp, megaphone, closeSmall } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
+import { CreateNewCampaignModal } from '~/marketing/components';
 import { hashAddChannels } from '~/marketing/overview-multichannel/constants';
 import './IntroductionBanner.scss';
 import wooIconUrl from './woo.svg';
@@ -23,6 +25,8 @@ export const IntroductionBanner = ( {
 	showButtons,
 	onDismiss,
 }: IntroductionBannerProps ) => {
+	const [ open, setOpen ] = useState( false );
+
 	return (
 		<Card className="woocommerce-marketing-introduction-banner">
 			<div className="woocommerce-marketing-introduction-banner-content">
@@ -89,7 +93,7 @@ export const IntroductionBanner = ( {
 						<Button
 							variant="primary"
 							onClick={ () => {
-								// TODO: display create a campaign modal.
+								setOpen( true );
 							} }
 						>
 							{ __( 'Create a campaign', 'woocommerce' ) }
@@ -98,6 +102,11 @@ export const IntroductionBanner = ( {
 							{ __( 'Add channels', 'woocommerce' ) }
 						</Button>
 					</Flex>
+				) }
+				{ open && (
+					<CreateNewCampaignModal
+						onRequestClose={ () => setOpen( false ) }
+					/>
 				) }
 			</div>
 			<div className="woocommerce-marketing-introduction-banner-illustration">
