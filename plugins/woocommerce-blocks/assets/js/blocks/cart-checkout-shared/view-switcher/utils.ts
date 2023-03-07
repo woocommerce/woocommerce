@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { select } from '@wordpress/data';
+import { select, dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -13,6 +13,27 @@ export const getView = (
 	views: View[]
 ): View | undefined => {
 	return views.find( ( view ) => view.view === viewName );
+};
+
+export const selectView = (
+	clientId: string,
+	viewName: string,
+	selectParent = true
+) => {
+	const { updateBlockAttributes, selectBlock } =
+		dispatch( 'core/block-editor' );
+	updateBlockAttributes( clientId, {
+		currentView: viewName,
+	} );
+	if ( selectParent ) {
+		selectBlock(
+			select( 'core/block-editor' )
+				.getBlock( clientId )
+				?.innerBlocks.find(
+					( block: { name: string } ) => block.name === viewName
+				)?.clientId || clientId
+		);
+	}
 };
 
 const defaultView = {
