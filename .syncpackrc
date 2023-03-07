@@ -101,7 +101,8 @@
 			],
 			"packages": [
 				"@woocommerce/product-editor",
-				"woocommerce/client/admin"
+				"woocommerce/client/admin",
+				"@woocommerce/components"
 			],
 			"isIgnored": true
 		},
