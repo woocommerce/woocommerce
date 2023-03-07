@@ -111,6 +111,15 @@
 				"@wordpress/**"
 			],
 			"packages": [
+				"@woocommerce/experimental"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/**"
+			],
+			"packages": [
 				"**"
 			],
 			"pinVersion": "wp-6.0"
