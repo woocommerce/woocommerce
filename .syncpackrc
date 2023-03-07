@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:config|react|react-dom|eslint|typescript|@typescript-eslint|@types/react|@wordpress|postcss|@types/wordpress__components).*$",
+	"filter": "^(?:config|react|react-dom|eslint|typescript|@typescript-eslint|@types/react|@wordpress|@types/wordpress__components|postcss).*$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -75,13 +75,19 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/blocks",
-				"@wordpress/block-editor",
-				"@wordpress/block-library",
 				"@wordpress/eslint-plugin"
 			],
 			"packages": [
 				"**"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/block**"
+			],
+			"packages": [
+				"@woocommerce/product-editor"
 			],
 			"isIgnored": true
 		},
