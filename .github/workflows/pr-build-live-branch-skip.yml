@@ -1,5 +1,5 @@
 # Duplicate workflow that returns success for this check when there is no relevant file change. See https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
-name: Build Live Branch
+name: "Build Live Branch: Skip Changelogs"
 on:
     pull_request:
         paths:
