@@ -7,8 +7,8 @@ namespace Automattic\WooCommerce\Internal\Admin\Schedulers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
-use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 
 /**
  * CustomersScheduler Class.

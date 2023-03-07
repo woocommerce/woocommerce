@@ -95,21 +95,31 @@ class FeaturesController {
 				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental'    => false,
 				'enabled_by_default' => true,
+				'disable_ui'         => false,
 			),
 			'new_navigation'         => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
 				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
+				'disable_ui'      => false,
 			),
 			'new_product_management' => array(
 				'name'            => __( 'New product editor', 'woocommerce' ),
 				'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 				'is_experimental' => true,
+				'disable_ui'      => false,
 			),
 			'custom_order_tables'    => array(
 				'name'            => __( 'High-Performance order storage (COT)', 'woocommerce' ),
 				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
 				'is_experimental' => true,
+				'disable_ui'      => false,
+			),
+			'cart_checkout_blocks'   => array(
+				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+				'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
+				'is_experimental' => false,
+				'disable_ui'      => true,
 			),
 		);
 
@@ -574,6 +584,10 @@ class FeaturesController {
 						'id'    => 'experimental_features_options',
 					);
 				}
+				continue;
+			}
+
+			if ( isset( $features[ $id ]['disable_ui'] ) && $features[ $id ]['disable_ui'] ) {
 				continue;
 			}
 

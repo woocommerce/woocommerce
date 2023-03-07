@@ -41,7 +41,7 @@ const program = new Command()
 
 		const tmpFile = join(
 			tmpdir(),
-			`contributors-${ currentVersion }.html`
+			`contributors-${ currentVersion.replace( '/', '-' ) }.html`
 		);
 
 		await writeFile( tmpFile, html );

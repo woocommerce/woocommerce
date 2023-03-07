@@ -50,7 +50,30 @@ export type RecommendedChannelsState = {
 	error?: ApiFetchError;
 };
 
+export type Campaign = {
+	id: string;
+	channel: string;
+	title: string;
+	manage_url: string;
+	cost: {
+		value: string;
+		currency: string;
+	};
+};
+
+export type CampaignsPage = {
+	data?: Array< Campaign >;
+	error?: ApiFetchError;
+};
+
+export type CampaignsState = {
+	perPage?: number;
+	pages?: Record< number, CampaignsPage >;
+	total?: number;
+};
+
 export type State = {
 	registeredChannels: RegisteredChannelsState;
 	recommendedChannels: RecommendedChannelsState;
+	campaigns: CampaignsState;
 };

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Corrects a variable name in Reports\Stock\Stats. It was missed during the last name change.

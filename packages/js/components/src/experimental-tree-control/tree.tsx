@@ -30,11 +30,12 @@ export const Tree = forwardRef( function ForwardedTree(
 				`experimental-woocommerce-tree--level-${ level }`
 			) }
 		>
-			{ items.map( ( child ) => (
+			{ items.map( ( child, index ) => (
 				<TreeItem
 					{ ...treeItemProps }
 					key={ child.data.value }
 					item={ child }
+					index={ index }
 				/>
 			) ) }
 		</ol>

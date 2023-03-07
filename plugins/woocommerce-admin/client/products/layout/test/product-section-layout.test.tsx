@@ -31,7 +31,7 @@ describe( 'ProductSectionLayout', () => {
 	} );
 
 	it( 'should wrap children in ProductFieldLayout if prop contains onChange', () => {
-		const { queryByText, queryAllByText } = render(
+		const { queryByText } = render(
 			<ProductSectionLayout
 				title="Title"
 				description="This is a description"

@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Customers\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * REST API Reports customers stats controller class.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Trigger event `woocommerce_attributes_saved` following successful product meta box ajax update.

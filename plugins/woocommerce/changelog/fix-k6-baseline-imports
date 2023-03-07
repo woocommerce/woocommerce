@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+add wpLogin import to wc-baseline-load.js

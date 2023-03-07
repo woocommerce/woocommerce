@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Pill } from '@woocommerce/components';
 import { PRODUCTS_STORE_NAME, WCDataSelector } from '@woocommerce/data';

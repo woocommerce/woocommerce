@@ -11,6 +11,7 @@ import {
 import {
 	getProductStockStatus,
 	getProductStockStatusClass,
+	__experimentalUseVariationsOrder as useVariationsOrder,
 } from '@woocommerce/product-editor';
 import {
 	Link,
@@ -22,19 +23,17 @@ import {
 } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { useContext, useState } from '@wordpress/element';
-import { useParams } from 'react-router-dom';
 import { useSelect, useDispatch } from '@wordpress/data';
 import classnames from 'classnames';
 import truncate from 'lodash/truncate';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import { PRODUCT_VARIATION_TITLE_LIMIT } from '~/products/constants';
-import useVariationsOrder from '~/products/hooks/use-variations-order';
 import HiddenIcon from '~/products/images/hidden-icon';
 import VisibleIcon from '~/products/images/visible-icon';
-import { CurrencyContext } from '../../../lib/currency-context';
 import './variations.scss';
 
 /**
