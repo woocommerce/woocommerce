@@ -100,7 +100,8 @@
 				"@wordpress/block**"
 			],
 			"packages": [
-				"@woocommerce/product-editor"
+				"@woocommerce/product-editor",
+				"woocommerce/client/admin"
 			],
 			"isIgnored": true
 		},
