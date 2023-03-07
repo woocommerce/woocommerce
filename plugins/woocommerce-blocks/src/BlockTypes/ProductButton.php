@@ -86,7 +86,9 @@ class ProductButton extends AbstractBlock {
 
 		if ( $product ) {
 			$cart_redirect_after_add       = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
-			$html_element                  = ( ! $product->has_options() && $product->is_purchasable() && $product->is_in_stock() && ! $cart_redirect_after_add ) ? 'button' : 'a';
+			$ajax_add_to_cart_enabled      = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
+			$is_ajax_button                = $ajax_add_to_cart_enabled && ! $cart_redirect_after_add && $product->supports( 'ajax_add_to_cart' ) && $product->is_purchasable() && $product->is_in_stock();
+			$html_element                  = $is_ajax_button ? 'button' : 'a';
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'border_radius', 'font_size', 'font_weight', 'margin', 'padding', 'text_color' ) );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
 			$html_classes                  = implode(
@@ -95,7 +97,8 @@ class ProductButton extends AbstractBlock {
 					array(
 						'wp-block-button__link',
 						'wc-block-components-product-button__button',
-						$product->is_purchasable() && ! $product->has_options() ? 'ajax_add_to_cart add_to_cart_button' : '',
+						$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
+						$is_ajax_button ? 'ajax_add_to_cart' : '',
 						'product_type_' . $product->get_type(),
 						$styles_and_classes['classes'],
 					)
