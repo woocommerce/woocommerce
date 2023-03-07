@@ -9,7 +9,13 @@ import { getQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { ALLOW_TRACKING_OPTION_NAME } from './constants';
+import { ALLOW_TRACKING_OPTION_NAME } from '../constants';
+
+interface AdminWindow extends Window {
+	pagenow?: string;
+	adminpage?: string;
+}
+declare let window: AdminWindow;
 
 const CUSTOMER_EFFORT_SCORE_EXIT_PAGE_KEY = 'customer-effort-score-exit-page';
 
@@ -87,7 +93,7 @@ const eventListeners: Record< string, ( event: BeforeUnloadEvent ) => void > =
 /**
  * Adds unload event listener to add pageId to exit page list incase there were unsaved changes.
  *
- * @param {string}   pageId the page id of the page being exited early.
+ * @param {string}   pageId            the page id of the page being exited early.
  * @param {Function} hasUnsavedChanges callback to check if the page had unsaved changes.
  */
 export const addCustomerEffortScoreExitPageListener = (
