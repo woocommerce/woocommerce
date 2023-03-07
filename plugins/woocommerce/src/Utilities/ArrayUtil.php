@@ -313,5 +313,45 @@ class ArrayUtil {
 
 		return false;
 	}
+
+	/**
+	 * Compare the keys or the values of two associative arrays and return the differences.
+	 * If the first key of the arrays is a string, then the keys of that array are used
+	 * for the comparison; otherwise the array values are used. This allows using "white lists"
+	 * of keys, e.g. all the following are considered as "no differences":
+	 *
+	 * Key_diff(['foo'=>1, 'bar'=>2], ['foo'=>3, 'bar'=>4])
+	 * key_diff(['foo'=>1, 'bar'=>2], ['foo', 'bar'])
+	 * key_diff(['foo', 'bar'], ['foo', 'bar'])
+	 *
+	 * The returned array will have two keys:
+	 * 'extra': keys that are present in the secondary array but not in the main array.
+	 * 'missing': keys that are present in the main array but not in the secondary array.
+	 *
+	 * @param array $main_array The main array, "extra" and "missing" terms are relative to this one.
+	 * @param array $second_array The secondary array.
+	 * @param bool  $null_if_equal If true, when both arrays have the exact same keys null will be returned, instead of an array with empty "extra" and "missing".
+	 * @return array|null Array with the key differences, or null if both arrays have the exact same keys and $null_if_equal is true.
+	 */
+	public static function key_diff( array $main_array, array $second_array, bool $null_if_equal = false ) {
+		if ( is_string( array_key_first( $main_array ) ) ) {
+			$main_array = array_keys( $main_array );
+		}
+
+		if ( is_string( array_key_first( $second_array ) ) ) {
+			$second_array = array_keys( $second_array );
+		}
+
+		$missing_keys = array_diff( $main_array, $second_array );
+		$extra_keys   = array_diff( $second_array, $main_array );
+		if ( $null_if_equal && empty( $extra_keys ) && empty( $missing_keys ) ) {
+			return null;
+		}
+
+		return array(
+			'extra'   => array_Values( $extra_keys ),
+			'missing' => array_values( $missing_keys ),
+		);
+	}
 }
 

@@ -351,4 +351,33 @@ class ArrayUtilTest extends \WC_Unit_Test_Case {
 		);
 		ArrayUtil::ensure_key_is_array( $array, 'bar', true );
 	}
+
+	/**
+	 * @testdox 'test_key_diff' returns the differences in keys between two associative arrays.
+	 *
+	 * @testWith [{}, {}, {"extra": [], "missing": []}]
+	 *           [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"extra": [], "missing": []}]
+	 *           [{"a": 1, "b": 2}, {"a": 3}, {"extra": [], "missing": ["b"]}]
+	 *           [{"a": 1}, {"a": 2, "b": 3}, {"extra": ["b"], "missing": []}]
+	 *           [{"a": 1, "b": 2}, {"a": 3, "c": 3}, {"extra": ["c"], "missing": ["b"]}]
+	 *           [{"a": 1, "b": 2},  ["a", "b"], {"extra": [], "missing": []}]
+	 *           [["a", "b"], {"a": 3, "b": 4}, {"extra": [], "missing": []}]
+	 *           [["a", "b"], ["a", "b"], {"extra": [], "missing": []}]
+	 *
+	 * @param array $main The main array.
+	 * @param array $secondary The secondary array.
+	 * @param array $expected The expected result from the method.
+	 */
+	public function test_key_diff( $main, $secondary, $expected ) {
+		$result = ArrayUtil::key_diff( $main, $secondary );
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * @testdox 'test_key_diff' returns null if there are no differences between the array keys and $null_if_equal is passed as true.
+	 */
+	public function test_key_diff_with_null_on_equals() {
+		$result = ArrayUtil::key_diff( array( 'a' => 1 ), array( 'a' => 2 ), true );
+		$this->assertNull( $result );
+	}
 }
