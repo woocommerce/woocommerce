@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use PHPUnit\Framework\Constraint\IsType;
 
 /**
@@ -387,5 +388,16 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	public function assertNotRecordedTracksEvent( $event_name ): void {
 		$events = self::get_tracks_events( $event_name );
 		$this->assertEmpty( $events );
+	}
+
+	/**
+	 * Mark test skipped when HPOS is enabled.
+	 *
+	 * @param string $message Message to display when test is skipped.
+	 */
+	protected function skip_if_hpos_enabled( $message ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( $message );
+		}
 	}
 }
