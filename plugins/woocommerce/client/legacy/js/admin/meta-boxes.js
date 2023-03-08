@@ -7,17 +7,18 @@ jQuery( function ( $ ) {
 	) {
 		var has_empty_fields = false;
 		attributes_and_variations_data.each( function () {
+			var $this = $( this );
 			// Check if the field is checkbox or a search field.
 			if (
-				$( this ).hasClass( 'checkbox' ) ||
-				-1 < this.className.indexOf( 'search__field' )
+				$this.hasClass( 'checkbox' ) ||
+				$this.filter( '[class*=search__field]' ).length
 			) {
 				return;
 			}
 
-			var is_empty = $( this ).is( 'select' )
-				? $( this ).find( ':selected' ).length === 0
-				: ! $( this ).val();
+			var is_empty = $this.is( 'select' )
+				? $this.find( ':selected' ).length === 0
+				: ! $this.val();
 			if ( is_empty ) {
 				has_empty_fields = true;
 			}
