@@ -12,13 +12,6 @@ import {
 	useStoreEvents,
 	useStoreCart,
 } from '@woocommerce/base-context/hooks';
-import {
-	ProductBackorderBadge,
-	ProductImage,
-	ProductLowStockBadge,
-	ProductMetadata,
-	ProductSaleBadge,
-} from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { applyCheckoutFilter, mustContain } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
@@ -26,6 +19,15 @@ import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
 import { objectHasProp, Currency } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
+
+/**
+ * Internal dependencies
+ */
+import ProductBackorderBadge from '../product-backorder-badge';
+import ProductImage from '../product-image';
+import ProductLowStockBadge from '../product-low-stock-badge';
+import ProductMetadata from '../product-metadata';
+import ProductSaleBadge from '../product-sale-badge';
 
 /**
  * Convert a Dinero object with precision to store currency minor unit.
