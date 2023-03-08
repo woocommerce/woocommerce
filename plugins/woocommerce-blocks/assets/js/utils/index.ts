@@ -1,3 +1,4 @@
+export * from './array-operations';
 export * from './attributes-query';
 export * from './attributes';
 export * from './filters';

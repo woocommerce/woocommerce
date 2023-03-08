@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { sortBy } from 'lodash';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import {
@@ -10,11 +11,10 @@ import {
 } from '@wordpress/block-editor';
 import { Icon, category, external } from '@wordpress/icons';
 import { SearchListControl } from '@woocommerce/editor-components/search-list-control';
-import { sortBy } from 'lodash';
 import { getAdminLink, getSetting } from '@woocommerce/settings';
 import BlockTitle from '@woocommerce/editor-components/block-title';
 import classnames from 'classnames';
-import { SearchListItemsType } from '@woocommerce/editor-components/search-list-control/types';
+import { SearchListItem } from '@woocommerce/editor-components/search-list-control/types';
 import { AttributeSetting } from '@woocommerce/types';
 import {
 	Placeholder,
@@ -103,7 +103,7 @@ const Edit = ( {
 		);
 	};
 
-	const onChange = ( selected: SearchListItemsType ) => {
+	const onChange = ( selected: SearchListItem[] ) => {
 		if ( ! selected || ! selected.length ) {
 			return;
 		}
