@@ -103,7 +103,7 @@ class MiniCart extends AbstractBlock {
 		$script = [
 			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
-			'dependencies' => [ 'wc-blocks-registry' ],
+			'dependencies' => [],
 		];
 		return $key ? $script[ $key ] : $script;
 	}
@@ -282,7 +282,7 @@ class MiniCart extends AbstractBlock {
 				}
 			}
 		}
-		if ( ! $script->src || 'wc-blocks-registry' === $script->handle ) {
+		if ( ! $script->src ) {
 			return;
 		}
 

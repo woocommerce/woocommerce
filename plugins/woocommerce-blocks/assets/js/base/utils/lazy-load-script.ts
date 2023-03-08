@@ -20,6 +20,14 @@ interface AppendScriptAttributesParam {
 	src?: string;
 }
 
+declare global {
+	interface Window {
+		wc: {
+			wcBlocksRegistry: Record< string, unknown >;
+		};
+	}
+}
+
 /**
  * In WP, registered scripts are loaded into the page with an element like this:
  * `<script src='...' id='[SCRIPT_ID]'></script>`
@@ -27,6 +35,16 @@ interface AppendScriptAttributesParam {
  * Useful to know if a script has already been appended to the page.
  */
 const isScriptTagInDOM = ( scriptId: string, src = '' ): boolean => {
+	// If the store is using a plugin to concatenate scripts, we might have some
+	// cases where we don't detect whether a script has already been loaded.
+	// Because of that, we add an extra protection to the wc-blocks-registry-js
+	// script, to avoid ending up with two registries.
+	if ( scriptId === 'wc-blocks-registry-js' ) {
+		if ( typeof window?.wc?.wcBlocksRegistry === 'object' ) {
+			return true;
+		}
+	}
+
 	const srcParts = src.split( '?' );
 	if ( srcParts?.length > 1 ) {
 		src = srcParts[ 0 ];
