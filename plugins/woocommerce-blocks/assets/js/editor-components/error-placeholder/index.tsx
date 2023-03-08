@@ -20,7 +20,7 @@ export interface ErrorObject {
 	/**
 	 * Context in which the error was triggered. That will determine how the error is displayed to the user.
 	 */
-	type: 'api' | 'general';
+	type: 'api' | 'general' | string;
 }
 
 export interface ErrorPlaceholderProps {

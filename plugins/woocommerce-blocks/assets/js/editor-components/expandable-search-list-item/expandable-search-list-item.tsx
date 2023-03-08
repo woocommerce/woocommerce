@@ -1,21 +1,13 @@
 /**
  * External dependencies
  */
-import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
 import { Spinner } from '@wordpress/components';
+import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
+import { renderItemArgs } from '@woocommerce/editor-components/search-list-control/types';
 import classNames from 'classnames';
 
-interface SearchListItem {
-	id: string;
-}
-
-interface ExpandableSearchListItemProps {
-	className?: string;
-	item: SearchListItem;
-	isSelected: boolean;
+interface ExpandableSearchListItemProps extends renderItemArgs {
 	isLoading: boolean;
-	onSelect: () => void;
-	disabled: boolean;
 }
 
 const ExpandableSearchListItem = ( {
@@ -36,7 +28,6 @@ const ExpandableSearchListItem = ( {
 				isSelected={ isSelected }
 				item={ item }
 				onSelect={ onSelect }
-				isSingle
 				disabled={ disabled }
 			/>
 			{ isSelected && isLoading && (

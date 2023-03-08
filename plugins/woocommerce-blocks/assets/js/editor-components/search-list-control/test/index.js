@@ -206,11 +206,14 @@ describe( 'SearchListControl', () => {
 	test( 'should render a search box and list of hierarchical options', () => {
 		const component = render(
 			<SearchListControl
-				instanceId={ 1 }
-				list={ hierarchicalList }
-				selected={ [] }
-				onChange={ noop }
+				isCompact
 				isHierarchical
+				instanceId={ 1 }
+				isSingle={ false }
+				list={ hierarchicalList }
+				onChange={ noop }
+				selected={ [] }
+				type={ 'text' }
 			/>
 		);
 		expect( component ).toMatchSnapshot();

@@ -30,7 +30,7 @@ Object {
     />
     <div>
       <div
-        class="woocommerce-search-list"
+        class="woocommerce-search-list is-compact"
       >
         <div
           class="woocommerce-search-list__selected"
@@ -71,115 +71,40 @@ Object {
           class="woocommerce-search-list__list"
         >
           <li>
-            <label
-              class=" woocommerce-search-list__item depth-0"
-              for="search-list-item-11-1"
+            <div
+              class="woocommerce-search-list__item depth-0 has-children"
+              role="treeitem"
+              tabindex="0"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-11-1"
-                name="search-list-item-11"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Apricots
-                </span>
-              </span>
-            </label>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="inspector-checkbox-control-0"
+                      type="checkbox"
+                      value="1"
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-0"
+                  >
+                    Apricots
+                  </label>
+                </div>
+              </div>
+            </div>
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-1"
-              for="search-list-item-11-2"
-            >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-11-2"
-                name="search-list-item-11"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
-              >
-                <span
-                  class="woocommerce-search-list__item-prefix"
-                >
-                  Apricots
-                </span>
-                <span
-                  class="woocommerce-search-list__item-name"
-                >
-                  Clementine
-                </span>
-              </span>
-            </label>
-          </li>
-          <li>
-            <label
-              class=" woocommerce-search-list__item depth-1"
-              for="search-list-item-11-3"
-            >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-11-3"
-                name="search-list-item-11"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
-              >
-                <span
-                  class="woocommerce-search-list__item-prefix"
-                >
-                  Apricots
-                </span>
-                <span
-                  class="woocommerce-search-list__item-name"
-                >
-                  Elderberry
-                </span>
-              </span>
-            </label>
-          </li>
-          <li>
-            <label
-              class=" woocommerce-search-list__item depth-2"
-              for="search-list-item-11-4"
-            >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-11-4"
-                name="search-list-item-11"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
-              >
-                <span
-                  class="woocommerce-search-list__item-prefix"
-                >
-                  Apricots › Elderberry
-                </span>
-                <span
-                  class="woocommerce-search-list__item-name"
-                >
-                  Guava
-                </span>
-              </span>
-            </label>
-          </li>
-          <li>
-            <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-11-5"
             >
               <input
@@ -202,7 +127,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-11-6"
             >
               <input
@@ -229,7 +154,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="woocommerce-search-list"
+      class="woocommerce-search-list is-compact"
     >
       <div
         class="woocommerce-search-list__selected"
@@ -270,115 +195,40 @@ Object {
         class="woocommerce-search-list__list"
       >
         <li>
-          <label
-            class=" woocommerce-search-list__item depth-0"
-            for="search-list-item-11-1"
+          <div
+            class="woocommerce-search-list__item depth-0 has-children"
+            role="treeitem"
+            tabindex="0"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-11-1"
-              name="search-list-item-11"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Apricots
-              </span>
-            </span>
-          </label>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="inspector-checkbox-control-0"
+                    type="checkbox"
+                    value="1"
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-0"
+                >
+                  Apricots
+                </label>
+              </div>
+            </div>
+          </div>
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-1"
-            for="search-list-item-11-2"
-          >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-11-2"
-              name="search-list-item-11"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
-            >
-              <span
-                class="woocommerce-search-list__item-prefix"
-              >
-                Apricots
-              </span>
-              <span
-                class="woocommerce-search-list__item-name"
-              >
-                Clementine
-              </span>
-            </span>
-          </label>
-        </li>
-        <li>
-          <label
-            class=" woocommerce-search-list__item depth-1"
-            for="search-list-item-11-3"
-          >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-11-3"
-              name="search-list-item-11"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
-            >
-              <span
-                class="woocommerce-search-list__item-prefix"
-              >
-                Apricots
-              </span>
-              <span
-                class="woocommerce-search-list__item-name"
-              >
-                Elderberry
-              </span>
-            </span>
-          </label>
-        </li>
-        <li>
-          <label
-            class=" woocommerce-search-list__item depth-2"
-            for="search-list-item-11-4"
-          >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-11-4"
-              name="search-list-item-11"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
-            >
-              <span
-                class="woocommerce-search-list__item-prefix"
-              >
-                Apricots › Elderberry
-              </span>
-              <span
-                class="woocommerce-search-list__item-name"
-              >
-                Guava
-              </span>
-            </span>
-          </label>
-        </li>
-        <li>
-          <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-11-5"
           >
             <input
@@ -401,7 +251,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-11-6"
           >
             <input
@@ -551,7 +401,7 @@ Object {
         >
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-1"
             >
               <input
@@ -574,7 +424,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-2"
             >
               <input
@@ -597,7 +447,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-3"
             >
               <input
@@ -620,7 +470,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-4"
             >
               <input
@@ -643,7 +493,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-5"
             >
               <input
@@ -666,7 +516,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-6"
             >
               <input
@@ -735,7 +585,7 @@ Object {
       >
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-1"
           >
             <input
@@ -758,7 +608,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-2"
           >
             <input
@@ -781,7 +631,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-3"
           >
             <input
@@ -804,7 +654,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-4"
           >
             <input
@@ -827,7 +677,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-5"
           >
             <input
@@ -850,7 +700,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-6"
           >
             <input
@@ -1000,7 +850,7 @@ Object {
         >
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-1"
             >
               <input
@@ -1023,7 +873,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-2"
             >
               <input
@@ -1046,7 +896,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-3"
             >
               <input
@@ -1069,7 +919,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-4"
             >
               <input
@@ -1092,7 +942,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-5"
             >
               <input
@@ -1115,7 +965,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-6"
             >
               <input
@@ -1184,7 +1034,7 @@ Object {
       >
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-1"
           >
             <input
@@ -1207,7 +1057,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-2"
           >
             <input
@@ -1230,7 +1080,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-3"
           >
             <input
@@ -1253,7 +1103,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-4"
           >
             <input
@@ -1276,7 +1126,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-5"
           >
             <input
@@ -1299,7 +1149,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-6"
           >
             <input
@@ -1694,7 +1544,7 @@ Object {
         >
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-1"
             >
               <input
@@ -1717,7 +1567,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-2"
             >
               <input
@@ -1740,7 +1590,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-3"
             >
               <input
@@ -1763,7 +1613,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-4"
             >
               <input
@@ -1786,7 +1636,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-5"
             >
               <input
@@ -1809,7 +1659,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-6"
             >
               <input
@@ -1878,7 +1728,7 @@ Object {
       >
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-1"
           >
             <input
@@ -1901,7 +1751,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-2"
           >
             <input
@@ -1924,7 +1774,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-3"
           >
             <input
@@ -1947,7 +1797,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-4"
           >
             <input
@@ -1970,7 +1820,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-5"
           >
             <input
@@ -1993,7 +1843,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-6"
           >
             <input
@@ -2360,7 +2210,7 @@ Object {
         >
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-1"
             >
               <input
@@ -2383,7 +2233,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-2"
             >
               <input
@@ -2406,7 +2256,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-3"
             >
               <input
@@ -2429,7 +2279,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-4"
             >
               <input
@@ -2452,7 +2302,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-5"
             >
               <input
@@ -2475,7 +2325,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-6"
             >
               <input
@@ -2544,7 +2394,7 @@ Object {
       >
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-1"
           >
             <input
@@ -2567,7 +2417,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-2"
           >
             <input
@@ -2590,7 +2440,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-3"
           >
             <input
@@ -2613,7 +2463,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-4"
           >
             <input
@@ -2636,7 +2486,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-5"
           >
             <input
@@ -2659,7 +2509,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-6"
           >
             <input
@@ -2809,7 +2659,7 @@ Object {
         >
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-1"
             >
               <input
@@ -2832,7 +2682,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-2"
             >
               <input
@@ -2855,7 +2705,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-3"
             >
               <input
@@ -2878,7 +2728,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-4"
             >
               <input
@@ -2901,7 +2751,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-5"
             >
               <input
@@ -2924,7 +2774,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-6"
             >
               <input
@@ -2993,7 +2843,7 @@ Object {
       >
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-1"
           >
             <input
@@ -3016,7 +2866,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-2"
           >
             <input
@@ -3039,7 +2889,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-3"
           >
             <input
@@ -3062,7 +2912,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-4"
           >
             <input
@@ -3085,7 +2935,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-5"
           >
             <input
@@ -3108,7 +2958,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-6"
           >
             <input
@@ -3258,7 +3108,7 @@ Object {
         >
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-6-3"
             >
               <input
@@ -3285,7 +3135,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-6-6"
             >
               <input
@@ -3358,7 +3208,7 @@ Object {
       >
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-6-3"
           >
             <input
@@ -3385,7 +3235,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-6-6"
           >
             <input
@@ -3590,7 +3440,7 @@ Object {
         >
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-1"
             >
               <input
@@ -3613,7 +3463,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-2"
             >
               <input
@@ -3637,7 +3487,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-3"
             >
               <input
@@ -3660,7 +3510,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-4"
             >
               <input
@@ -3683,7 +3533,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-5"
             >
               <input
@@ -3706,7 +3556,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-6"
             >
               <input
@@ -3826,7 +3676,7 @@ Object {
       >
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-1"
           >
             <input
@@ -3849,7 +3699,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-2"
           >
             <input
@@ -3873,7 +3723,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-3"
           >
             <input
@@ -3896,7 +3746,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-4"
           >
             <input
@@ -3919,7 +3769,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-5"
           >
             <input
@@ -3942,7 +3792,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-6"
           >
             <input
@@ -4185,7 +4035,7 @@ Object {
         >
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-1"
             >
               <input
@@ -4208,7 +4058,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-2"
             >
               <input
@@ -4232,7 +4082,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-3"
             >
               <input
@@ -4255,7 +4105,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-4"
             >
               <input
@@ -4279,7 +4129,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-5"
             >
               <input
@@ -4302,7 +4152,7 @@ Object {
           </li>
           <li>
             <label
-              class=" woocommerce-search-list__item depth-0"
+              class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-6"
             >
               <input
@@ -4464,7 +4314,7 @@ Object {
       >
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-1"
           >
             <input
@@ -4487,7 +4337,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-2"
           >
             <input
@@ -4511,7 +4361,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-3"
           >
             <input
@@ -4534,7 +4384,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-4"
           >
             <input
@@ -4558,7 +4408,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-5"
           >
             <input
@@ -4581,7 +4431,7 @@ Object {
         </li>
         <li>
           <label
-            class=" woocommerce-search-list__item depth-0"
+            class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-6"
           >
             <input

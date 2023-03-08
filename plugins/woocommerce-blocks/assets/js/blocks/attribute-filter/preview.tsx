@@ -2,6 +2,7 @@
  * External dependencies
  */
 import Label from '@woocommerce/base-components/filter-element-label';
+import { AttributeObject } from '@woocommerce/types';
 
 export const previewOptions = [
 	{
@@ -27,9 +28,14 @@ export const previewOptions = [
 	},
 ];
 
-export const previewAttributeObject = {
+export const previewAttributeObject: AttributeObject = {
+	count: 0,
+	has_archives: true,
 	id: 0,
-	name: 'preview',
-	taxonomy: 'preview',
 	label: 'Preview',
+	name: 'preview',
+	order: 'menu_order',
+	parent: 0,
+	taxonomy: 'preview',
+	type: '',
 };

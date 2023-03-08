@@ -2,6 +2,56 @@
 	width: 100%;
 	padding: 0 0 $gap;
 	text-align: left;
+
+	&.is-compact {
+		.woocommerce-search-list__selected {
+			margin: 0 0 $gap;
+			padding: 0;
+			border-top: none;
+			// 54px is the height of 1 row of tags in the sidebar.
+			min-height: 54px;
+		}
+
+		.woocommerce-search-list__search {
+			margin: 0 0 $gap;
+			padding: 0;
+			border-top: none;
+
+			&.is-token {
+				margin-bottom: 0;
+			}
+		}
+	}
+
+	&.is-loading {
+		.woocommerce-search-list__list {
+			padding: $gap-small 0;
+			text-align: center;
+			border: none;
+		}
+
+		.components-form-token-field__remove-token {
+			// We use a placeholder “Loading…” text when loading passed
+			// as a value to the `FormTokenField`, so we hide the “X”.
+			display: none;
+		}
+	}
+
+	&.is-token {
+		.woocommerce-search-list__list {
+			border-top: 0;
+		}
+
+		.woocommerce-search-list__search {
+			margin-bottom: 0;
+
+			.components-form-token-field__input-container {
+				border-bottom-left-radius: 0;
+				border-bottom-right-radius: 0;
+				margin-bottom: 0;
+			}
+		}
+	}
 }
 
 .woocommerce-search-list__selected {
@@ -54,12 +104,6 @@
 
 	li {
 		margin-bottom: 0;
-	}
-
-	&.is-loading {
-		padding: $gap-small 0;
-		text-align: center;
-		border: none;
 	}
 
 	&.is-not-found {
@@ -117,6 +161,31 @@
 			box-shadow: none;
 		}
 
+		&.has-children {
+			cursor: pointer;
+
+			&::after {
+				background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" fill="#{encode-color($gray-700)}" /></svg>');
+				background-position: center right;
+				background-repeat: no-repeat;
+				background-size: contain;
+				content: "";
+				height: $gap-large;
+				margin-left: $gap-smaller;
+				width: $gap-large;
+			}
+
+			&[disabled]::after {
+				background: none;
+				margin-left: 0;
+				width: auto;
+			}
+
+			&.is-expanded::after {
+				background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="#{encode-color($gray-700)}" /></svg>');
+			}
+		}
+
 		.woocommerce-search-list__item-input {
 			margin: 0 $gap-smaller 0 0;
 		}
@@ -151,6 +220,10 @@
 		}
 
 		@for $i from 1 to 5 {
+			&.depth-#{$i} {
+				padding-left: $gap * ( $i + 1 );
+			}
+
 			&.depth-#{$i} .woocommerce-search-list__item-label::before {
 				content: str-repeat("— ", $i);
 			}
@@ -201,6 +274,7 @@
 			border-radius: 12px;
 			font-size: 0.8em;
 			line-height: 1.4;
+			margin-left: auto;
 			color: $gray-700;
 			background: $studio-white;
 			white-space: nowrap;
@@ -209,21 +283,5 @@
 
 	li:last-child .woocommerce-search-list__item {
 		border-bottom: none;
-	}
-}
-
-.woocommerce-search-list.is-compact {
-	.woocommerce-search-list__selected {
-		margin: 0 0 $gap;
-		padding: 0;
-		border-top: none;
-		// 54px is the height of 1 row of tags in the sidebar.
-		min-height: 54px;
-	}
-
-	.woocommerce-search-list__search {
-		margin: 0 0 $gap;
-		padding: 0;
-		border-top: none;
 	}
 }

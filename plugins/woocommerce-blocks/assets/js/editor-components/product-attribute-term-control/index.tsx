@@ -1,40 +1,60 @@
 /**
  * External dependencies
  */
+import classNames from 'classnames';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import {
 	SearchListControl,
 	SearchListItem,
 } from '@woocommerce/editor-components/search-list-control';
 import { SelectControl } from '@wordpress/components';
 import { withInstanceId } from '@wordpress/compose';
-import { withAttributes } from '@woocommerce/block-hocs';
+import useProductAttributes from '@woocommerce/base-context/hooks/use-product-attributes';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
-import classNames from 'classnames';
-import ExpandableSearchListItem from '@woocommerce/editor-components/expandable-search-list-item/expandable-search-list-item.tsx';
+import ExpandableSearchListItem from '@woocommerce/editor-components/expandable-search-list-item/expandable-search-list-item';
+import {
+	renderItemArgs,
+	SearchListControlProps,
+	SearchListItem as SearchListItemProps,
+} from '@woocommerce/editor-components/search-list-control/types';
+import { convertAttributeObjectToSearchItem } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 
+interface Props
+	extends Omit< SearchListControlProps, 'isSingle' | 'list' | 'selected' > {
+	instanceId?: string;
+	/**
+	 * Callback to update the category operator. If not passed in, setting is not used.
+	 */
+	onOperatorChange?: () => void;
+	/**
+	 * Setting for whether products should match all or any selected categories.
+	 */
+	operator: 'all' | 'any';
+	/**
+	 * The list of currently selected attribute ids.
+	 */
+	selected: { id: number }[];
+}
+
 const ProductAttributeTermControl = ( {
-	attributes,
-	error,
-	expandedAttribute,
 	onChange,
-	onExpandAttribute,
 	onOperatorChange,
 	instanceId,
-	isCompact,
-	isLoading,
-	operator,
+	isCompact = false,
+	messages = {},
+	operator = 'any',
 	selected,
-	termsAreLoading,
-	termsList,
-} ) => {
-	const renderItem = ( args ) => {
+	type = 'text',
+}: Props ) => {
+	const { errorLoadingAttributes, isLoadingAttributes, productsAttributes } =
+		useProductAttributes( true );
+
+	const renderItem = ( args: renderItemArgs ) => {
 		const { item, search, depth = 0 } = args;
 		const classes = [
 			'woocommerce-product-attributes__item',
@@ -46,23 +66,13 @@ const ProductAttributeTermControl = ( {
 		];
 
 		if ( ! item.breadcrumbs.length ) {
-			const isSelected = expandedAttribute === item.id;
 			return (
 				<ExpandableSearchListItem
 					{ ...args }
-					className={ classNames( ...classes, {
-						'is-selected': isSelected,
-					} ) }
-					isSelected={ isSelected }
+					className={ classNames( classes ) }
 					item={ item }
-					isLoading={ termsAreLoading }
-					disabled={ item.count === '0' }
-					onSelect={ ( { id } ) => {
-						return () => {
-							onChange( [] );
-							onExpandAttribute( id );
-						};
-					} }
+					isLoading={ isLoadingAttributes }
+					disabled={ item.count === 0 }
 					name={ `attributes-${ instanceId }` }
 					countLabel={ sprintf(
 						/* translators: %d is the count of terms. */
@@ -121,15 +131,21 @@ const ProductAttributeTermControl = ( {
 		);
 	};
 
-	const currentTerms = termsList[ expandedAttribute ] || [];
-	const currentList = [ ...attributes, ...currentTerms ];
+	const list = productsAttributes.reduce( ( acc, curr ) => {
+		const { terms, ...props } = curr;
 
-	const messages = {
+		return [
+			...acc,
+			convertAttributeObjectToSearchItem( props ),
+			...terms.map( convertAttributeObjectToSearchItem ),
+		];
+	}, [] as SearchListItemProps[] );
+
+	messages = {
 		clear: __(
 			'Clear all product attributes',
 			'woo-gutenberg-products-block'
 		),
-		list: __( 'Product Attributes', 'woo-gutenberg-products-block' ),
 		noItems: __(
 			"Your store doesn't have any product attributes.",
 			'woo-gutenberg-products-block'
@@ -138,7 +154,7 @@ const ProductAttributeTermControl = ( {
 			'Search for product attributes',
 			'woo-gutenberg-products-block'
 		),
-		selected: ( n ) =>
+		selected: ( n: number ) =>
 			sprintf(
 				/* translators: %d is the count of attributes selected. */
 				_n(
@@ -153,30 +169,33 @@ const ProductAttributeTermControl = ( {
 			'Product attribute search results updated.',
 			'woo-gutenberg-products-block'
 		),
+		...messages,
 	};
 
-	if ( error ) {
-		return <ErrorMessage error={ error } />;
+	if ( errorLoadingAttributes ) {
+		return <ErrorMessage error={ errorLoadingAttributes } />;
 	}
 
 	return (
 		<>
 			<SearchListControl
 				className="woocommerce-product-attributes"
-				list={ currentList }
-				isLoading={ isLoading }
-				selected={ selected
-					.map( ( { id } ) =>
-						currentList.find(
-							( currentListItem ) => currentListItem.id === id
-						)
-					)
-					.filter( Boolean ) }
-				onChange={ onChange }
-				renderItem={ renderItem }
-				messages={ messages }
 				isCompact={ isCompact }
 				isHierarchical
+				isLoading={ isLoadingAttributes }
+				isSingle={ false }
+				list={ list }
+				messages={ messages }
+				onChange={ onChange }
+				renderItem={ renderItem }
+				selected={
+					selected
+						.map( ( { id } ) =>
+							list.find( ( term ) => term.id === id )
+						)
+						.filter( Boolean ) as SearchListItemProps[]
+				}
+				type={ type }
 			/>
 			{ !! onOperatorChange && (
 				<div hidden={ selected.length < 2 }>
@@ -215,37 +234,4 @@ const ProductAttributeTermControl = ( {
 	);
 };
 
-ProductAttributeTermControl.propTypes = {
-	/**
-	 * Callback to update the selected product attributes.
-	 */
-	onChange: PropTypes.func.isRequired,
-	/**
-	 * Callback to update the category operator. If not passed in, setting is not used.
-	 */
-	onOperatorChange: PropTypes.func,
-	/**
-	 * Setting for whether products should match all or any selected categories.
-	 */
-	operator: PropTypes.oneOf( [ 'all', 'any' ] ),
-	/**
-	 * The list of currently selected attribute slug/ID pairs.
-	 */
-	selected: PropTypes.array.isRequired,
-	// from withAttributes
-	attributes: PropTypes.array,
-	error: PropTypes.object,
-	expandedAttribute: PropTypes.number,
-	onExpandAttribute: PropTypes.func,
-	isCompact: PropTypes.bool,
-	isLoading: PropTypes.bool,
-	termsAreLoading: PropTypes.bool,
-	termsList: PropTypes.object,
-};
-
-ProductAttributeTermControl.defaultProps = {
-	isCompact: false,
-	operator: 'any',
-};
-
-export default withAttributes( withInstanceId( ProductAttributeTermControl ) );
+export default withInstanceId( ProductAttributeTermControl );
