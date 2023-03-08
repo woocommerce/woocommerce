@@ -34,6 +34,9 @@ const AddProductPage = lazy( () =>
 		/* webpackChunkName: "add-product-page" */ '../products/add-product-page'
 	)
 );
+const ProductPage = lazy( () =>
+	import( /* webpackChunkName: "product-page" */ '../products/product-page' )
+);
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
 );
@@ -173,7 +176,7 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures[ 'new-product-management-experience' ] ) {
 		pages.push( {
-			container: AddProductPage,
+			container: ProductPage,
 			path: '/add-product',
 			breadcrumbs: [
 				[ '/add-product', __( 'Product', 'woocommerce' ) ],
@@ -187,7 +190,21 @@ export const getPages = () => {
 		} );
 
 		pages.push( {
-			container: EditProductPage,
+			container: AddProductPage,
+			path: '/add-product-old',
+			breadcrumbs: [
+				[ '/add-product-old', __( 'Product', 'woocommerce' ) ],
+				__( 'Add New Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-add-product-old',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
+
+		pages.push( {
+			container: ProductPage,
 			path: '/product/:productId',
 			breadcrumbs: [
 				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
@@ -195,6 +212,20 @@ export const getPages = () => {
 			],
 			navArgs: {
 				id: 'woocommerce-edit-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
+
+		pages.push( {
+			container: EditProductPage,
+			path: '/product-old/:productId',
+			breadcrumbs: [
+				[ '/edit-product-old', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product (Old)', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-edit-product-old',
 			},
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'manage_woocommerce',

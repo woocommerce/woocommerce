@@ -11,6 +11,14 @@ import { createElement } from '@wordpress/element';
  */
 import { EditProductLinkModal } from '../';
 
+jest.mock( '@woocommerce/product-editor', () => ( {
+	__experimentalUseProductHelper: jest.fn().mockReturnValue( {
+		updateProductWithStatus: jest.fn(),
+		isUpdatingDraft: jest.fn(),
+		isUpdatingPublished: jest.fn(),
+	} ),
+} ) );
+
 describe( 'EditProductLinkModal', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();

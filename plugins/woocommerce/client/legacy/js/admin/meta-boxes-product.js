@@ -652,9 +652,15 @@ jQuery( function ( $ ) {
 				attribute_row_indexes();
 			}
 
+			$parent.remove();
+
 			if (
 				! $( '.woocommerce_attribute_data' ).is( ':visible' ) &&
-				! $( 'div.add-global-attribute-container' ).hasClass( 'hidden' )
+				! $( 'div.add-global-attribute-container' ).hasClass(
+					'hidden'
+				) &&
+				$( '.product_attributes' ).find( 'input, select, textarea' )
+					.length === 0
 			) {
 				toggle_add_global_attribute_layout();
 			}

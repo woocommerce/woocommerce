@@ -1,14 +1,14 @@
 name: Smoke test release
 on:
     release:
-        types: [published]
+        types: [released, prereleased, published]
     workflow_dispatch:
         inputs:
             tag:
                 description: 'WooCommerce Release Tag'
                 required: true
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
+    group: ${{ github.workflow }}-${{ github.event.release.tag_name || inputs.tag }}
     cancel-in-progress: true
 permissions: {}
 env:
@@ -23,31 +23,31 @@ jobs:
             contents: read
         runs-on: ubuntu-20.04
         outputs:
-            tag: ${{ steps.tag.outputs.result }}
+            tag: ${{ steps.get-tag.outputs.tag }}
             created: ${{ steps.created-at.outputs.created }}
         steps:
             - name: Validate tag
               if: ${{ github.event_name == 'workflow_dispatch' }}
               env:
-                  GH_TOKEN: ${{ github.token }}
-              run: gh release view "${{ github.event.inputs.tag }}" --repo=woocommerce/woocommerce
+                  GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+              run: gh release view "${{ inputs.tag }}" --repo=woocommerce/woocommerce
 
-            - name: Get tag
-              uses: actions/github-script@v6
-              id: tag
-              with:
-                  result-encoding: string
-                  script: |
-                      console.log( "${{ github.event_name }}" );
-                      return "${{ github.event.release.tag_name }}" || "${{ github.event.inputs.tag }}"
+            - name: Get tag from triggered event
+              id: get-tag
+              env:
+                  RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+              run: |
+                  echo "Triggered event: ${{ github.event_name }}"
+                  echo "Tag from event: $RELEASE_TAG"
+                  echo "tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
             - name: Verify woocommerce.zip asset
               env:
-                  GITHUB_TOKEN: ${{ github.token }}
-                  RELEASE_TAG: ${{ steps.tag.outputs.result }}
+                  GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+                  RELEASE_TAG: ${{ steps.get-tag.outputs.tag }}
               run: |
-                  gh release download $RELEASE_TAG --repo woocommerce/woocommerce
-                  if [[ -f "woocommerce.zip" ]]
+                  ASSET_NAMES=$(gh release view $RELEASE_TAG --repo woocommerce/woocommerce --json assets --jq ".assets[].name")
+                  if [[ $ASSET_NAMES == *"woocommerce.zip"* ]]
                     then
                       echo "$RELEASE_TAG has a valid woocommerce.zip asset."
                       exit 0
@@ -59,8 +59,8 @@ jobs:
             - name: Get 'created-at' of WooCommerce zip
               id: created-at
               env:
-                  GH_TOKEN: ${{ github.token }}
-              run: echo "created=$(gh release view ${{ steps.tag.outputs.result }} --json assets --jq .assets[0].createdAt --repo woocommerce/woocommerce)" >> $GITHUB_OUTPUT
+                  GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+              run: echo "created=$(gh release view ${{ steps.get-tag.outputs.tag }} --json assets --jq .assets[0].createdAt --repo woocommerce/woocommerce)" >> $GITHUB_OUTPUT
 
     e2e-update-wc:
         name: Test WooCommerce update
@@ -93,6 +93,7 @@ jobs:
                   CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
                   CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
+                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
                   UPDATE_WC: ${{ needs.get-tag.outputs.tag }}
               run: |
                   pnpm exec playwright test \
@@ -106,7 +107,7 @@ jobs:
 
             - name: Configure AWS credentials
               if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1
+              uses: aws-actions/configure-aws-credentials@v1-node16
               with:
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
@@ -183,7 +184,7 @@ jobs:
 
             - name: Configure AWS credentials
               if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1
+              uses: aws-actions/configure-aws-credentials@v1-node16
               with:
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
@@ -284,7 +285,7 @@ jobs:
 
             - name: Configure AWS credentials
               if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1
+              uses: aws-actions/configure-aws-credentials@v1-node16
               with:
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
@@ -393,7 +394,7 @@ jobs:
 
             - name: Download release zip
               env:
-                  GITHUB_TOKEN: ${{ github.token }}
+                  GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
               run: gh release download ${{ needs.get-wp-versions.outputs.tag }} --dir tmp
 
             - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
@@ -427,7 +428,7 @@ jobs:
 
             - name: Configure AWS credentials
               if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1
+              uses: aws-actions/configure-aws-credentials@v1-node16
               with:
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
@@ -567,7 +568,7 @@ jobs:
 
             - name: Download release zip
               env:
-                  GITHUB_TOKEN: ${{ github.token }}
+                  GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
               run: gh release download ${{ needs.get-tag.outputs.tag }} --dir tmp
 
             - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
@@ -587,7 +588,7 @@ jobs:
 
             - name: Configure AWS credentials
               if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1
+              uses: aws-actions/configure-aws-credentials@v1-node16
               with:
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}

@@ -60,7 +60,15 @@ export function useProductHelper() {
 	const {
 		batchUpdateProductVariations,
 		invalidateResolutionForStoreSelector,
-	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+	} = useDispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME ) as {
+		batchUpdateProductVariations< T >(
+			id: Record< string, number >,
+			data: Record< string, unknown >
+		): T;
+		invalidateResolutionForStoreSelector(
+			...args: string[]
+		): Promise< void >;
+	};
 
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isDeleting, setIsDeleting ] = useState( false );
