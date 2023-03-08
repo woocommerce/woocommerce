@@ -6,6 +6,8 @@
  * @version     2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -297,6 +299,64 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function apply_extra_exported_settings( array $extra_settings, bool $verbose, string $mode ) {
 			return 0;
+		}
+
+		/**
+		 * Auxiliary method to apply imported setting items via direct insert or update into the database.
+		 *
+		 * Items to be imported are compared against existing items and database inserts or updates are performed
+		 * accordingly, depending on the passed mode. An error is thrown if one of the imported items has
+		 * no data for any of the database table columns. Items data that don't match a database column are ignored.
+		 *
+		 * The returned array has two keys, 'inserted' and 'updated', each containing a list of item ids
+		 * according to $id_column_name.
+		 *
+		 * @param string $item_name Item type name, used in error messages; e.g. "tax rate".
+		 * @param string $table_name Database table name.
+		 * @param string $id_column_name Name of the table column that uniquely identifies an item.
+		 * @param array  $existing_items An array of objects or associative arrays, each representing an item already existing in the database.
+		 * @param array  $imported_items An array of associative arrays, each representing an item to be imported.
+		 * @param array  $allowed_columns The list of column names for the database table.
+		 * @param string $mode One of 'full', 'replace_only', or 'create_only'.
+		 * @return array[]|string An error message, or an array with information of inserted and updated items.
+		 */
+		protected function maybe_insert_or_update_imported_item( string $item_name, string $table_name, string $id_column_name, array $existing_items, array $imported_items, array $allowed_columns, string $mode ) {
+			global $wpdb;
+
+			$inserted = array();
+			$updated  = array();
+
+			foreach ( $imported_items as $imported_item ) {
+				$key_diff = ArrayUtil::key_diff( $allowed_columns, $imported_item );
+				if ( ! empty( $key_diff['missing'] ) ) {
+					$missing = implode( ',', $key_diff['missing'] );
+					/* translators: %1$s = type of the imported item, %2$s = error message */
+					return sprintf( __( 'Missing keys for imported %1$s: %2$s', 'woocommerce' ), $item_name, $missing );
+				}
+
+				$whitelisted_imported_item = array_intersect_key( $imported_item, array_flip( $allowed_columns ) );
+
+				$existing_item = current(
+					array_filter(
+						$existing_items,
+						function( $item ) use ( $imported_item, $id_column_name ) {
+							return ( (array) $item )[ $id_column_name ] === $imported_item[ $id_column_name ];
+						}
+					)
+				);
+				if ( empty( $existing_item ) && 'replace_only' !== $mode ) {
+					$wpdb->insert( $table_name, $whitelisted_imported_item );
+					$inserted[] = $imported_item;
+				} elseif ( ! empty( $existing_item ) && 'create_only' !== $mode && ! empty( array_diff_assoc( (array) $existing_item, $imported_item ) ) ) {
+					$wpdb->update( $table_name, $whitelisted_imported_item, array( $id_column_name => $imported_item[ $id_column_name ] ) );
+					$updated[] = $imported_item;
+				}
+			}
+
+			return array(
+				'inserted' => $inserted,
+				'updated'  => $updated,
+			);
 		}
 	}
 
