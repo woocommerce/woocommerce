@@ -1,4 +1,5 @@
 export * from './address-form';
+export { default as CartLineItemsTable } from './cart-line-items-table';
 export { default as FormStep } from './form-step';
 export { default as OrderSummary } from './order-summary';
 export { default as PlaceOrderButton } from './place-order-button';
