@@ -26,10 +26,12 @@ import { BlockEditor } from '../block-editor';
 import { initBlocks } from './init-blocks';
 
 initBlocks();
-
+export type ProductEditorSettings = Partial<
+	EditorSettings & EditorBlockListSettings
+>;
 type EditorProps = {
 	product: Product;
-	settings: Partial< EditorSettings & EditorBlockListSettings > | undefined;
+	settings: ProductEditorSettings | undefined;
 };
 
 export function Editor( { product, settings }: EditorProps ) {
