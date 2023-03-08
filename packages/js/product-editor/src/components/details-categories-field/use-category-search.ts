@@ -161,9 +161,9 @@ const productCategoryQueryObject = {
  */
 export const useCategorySearch = () => {
 	const lastSearchValue = useRef( '' );
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { initialCategories, totalCount } = useSelect(
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		( select: WCDataSelector ) => {
 			const { getProductCategories, getProductCategoriesTotalCount } =
 				select( EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME );
