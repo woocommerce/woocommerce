@@ -368,15 +368,18 @@ class AssetDataRegistry {
 			$this->initialize_core_data();
 			$this->execute_lazy_data();
 
-			$data                   = rawurlencode( wp_json_encode( $this->data ) );
-			$preloaded_api_requests = rawurlencode( wp_json_encode( $this->preloaded_api_requests ) );
+			$data                          = rawurlencode( wp_json_encode( $this->data ) );
+			$wc_settings_script            = "var wcSettings = wcSettings || JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
+			$preloaded_api_requests_script = '';
+
+			if ( count( $this->preloaded_api_requests ) > 0 ) {
+				$preloaded_api_requests        = rawurlencode( wp_json_encode( $this->preloaded_api_requests ) );
+				$preloaded_api_requests_script = "wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( JSON.parse( decodeURIComponent( '" . esc_js( $preloaded_api_requests ) . "' ) ) ) );";
+			}
 
 			wp_add_inline_script(
 				$this->handle,
-				"
-				var wcSettings = wcSettings || JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );
-				wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( JSON.parse( decodeURIComponent( '" . esc_js( $preloaded_api_requests ) . "' ) ) ) )
-				",
+				$wc_settings_script . $preloaded_api_requests_script,
 				'before'
 			);
 		}
