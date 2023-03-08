@@ -97,7 +97,8 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/block**"
+				"@wordpress/block**",
+				"@wordpress/viewport"
 			],
 			"packages": [
 				"@woocommerce/product-editor",
