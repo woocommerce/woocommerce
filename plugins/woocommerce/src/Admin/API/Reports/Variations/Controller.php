@@ -17,20 +17,13 @@ use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
  * REST API Reports products controller class.
  *
  * @internal
- * @extends WC_REST_Reports_Controller
+ * @extends ReportsController
  */
 class Controller extends ReportsController implements ExportableInterface {
 	/**
 	 * Exportable traits.
 	 */
 	use ExportableTraits;
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.
