@@ -366,10 +366,13 @@ class WC_Post_Types {
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
 					'rest_namespace'      => 'wp/v3',
-					'template' => array(
-						array( 'core/paragraph', array(
-							'placeholder' => 'Product description',
-						) ),
+					'template'            => array(
+						array(
+							'core/paragraph',
+							array(
+								'placeholder' => 'Product description',
+							),
+						),
 					),
 				)
 			)

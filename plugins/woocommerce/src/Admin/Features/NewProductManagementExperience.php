@@ -78,11 +78,11 @@ class NewProductManagementExperience {
 		$editor_settings = get_block_editor_settings( $editor_settings, $block_editor_context );
 
 		$script_handle = 'wc-admin-edit-product';
-		wp_register_script( $script_handle, '' );
+		wp_register_script( $script_handle, '', array(), '0.1.0' );
 		wp_enqueue_script( $script_handle );
 		wp_add_inline_script(
 			$script_handle,
-			"var productBlockEditorSettings = productBlockEditorSettings || " . wp_json_encode( $editor_settings ) . ";",
+			'var productBlockEditorSettings = productBlockEditorSettings || ' . wp_json_encode( $editor_settings ) . ';',
 			'before'
 		);
 	}
