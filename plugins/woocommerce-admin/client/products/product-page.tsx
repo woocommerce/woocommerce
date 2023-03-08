@@ -51,6 +51,7 @@ const AddProductEditor = () => {
 	useEffect( () => {
 		saveEntityRecord( 'postType', 'product', {
 			title: AUTO_DRAFT_NAME,
+			status: 'auto-draft',
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore Incorrect types.
 		} ).then( ( autoDraftProduct: Product ) => {
