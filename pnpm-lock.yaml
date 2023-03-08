@@ -1315,7 +1315,7 @@ importers:
       '@types/react': ^17.0.2
       '@types/wordpress__block-editor': ^7.0.0
       '@types/wordpress__blocks': ^11.0.7
-      '@types/wordpress__components': ^19.10.1
+      '@types/wordpress__components': ^19.10.3
       '@types/wordpress__data': ^6.0.2
       '@types/wordpress__media-utils': ^3.0.0
       '@woocommerce/components': workspace:*
@@ -1387,7 +1387,7 @@ importers:
       '@testing-library/react': 12.1.4_sfoxds7t5ydpegc3knd667wn6m
       '@types/react': 17.0.50
       '@types/wordpress__block-editor': 7.0.0_sfoxds7t5ydpegc3knd667wn6m
-      '@types/wordpress__components': 19.10.1_sfoxds7t5ydpegc3knd667wn6m
+      '@types/wordpress__components': 19.10.5_sfoxds7t5ydpegc3knd667wn6m
       '@types/wordpress__data': 6.0.2
       '@types/wordpress__media-utils': 3.0.0_sfoxds7t5ydpegc3knd667wn6m
       '@woocommerce/eslint-plugin': link:../eslint-plugin
@@ -1884,7 +1884,7 @@ importers:
       '@emotion/react': ^11.10.4
       '@types/prop-types': ^15.7.4
       '@types/react': ^17.0.2
-      '@types/react-dom': ^18.0.6
+      '@types/react-dom': ^17.0.2
       '@types/wordpress__components': ^19.10.3
       '@woocommerce/components': workspace:*
       '@woocommerce/data': workspace:*
@@ -1925,7 +1925,7 @@ importers:
       react-dom: 17.0.2_react@17.0.2
     devDependencies:
       '@types/react': 17.0.50
-      '@types/react-dom': 18.0.11
+      '@types/react-dom': 17.0.17
       '@types/wordpress__components': 19.10.5_sfoxds7t5ydpegc3knd667wn6m
       '@woocommerce/dependency-extraction-webpack-plugin': link:../../packages/js/dependency-extraction-webpack-plugin
       '@woocommerce/eslint-plugin': link:../../packages/js/eslint-plugin
@@ -3489,7 +3489,7 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.12.9
-      '@babel/helper-plugin-utils': 7.19.0
+      '@babel/helper-plugin-utils': 7.18.9
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -3502,7 +3502,7 @@ packages:
     dependencies:
       '@babel/core': 7.16.12
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.16.12
-      '@babel/helper-plugin-utils': 7.19.0
+      '@babel/helper-plugin-utils': 7.18.9
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -11576,7 +11576,7 @@ packages:
       '@storybook/ui': 6.4.19_hiunvzosbwliizyirxfy6hjyim
       airbnb-js-shims: 2.2.1
       ansi-to-html: 0.6.15
-      core-js: 3.25.5
+      core-js: 3.21.1
       global: 4.4.0
       lodash: 4.17.21
       qs: 6.10.3
@@ -11654,7 +11654,7 @@ packages:
       '@storybook/ui': 6.4.19_sfoxds7t5ydpegc3knd667wn6m
       airbnb-js-shims: 2.2.1
       ansi-to-html: 0.6.15
-      core-js: 3.25.5
+      core-js: 3.21.1
       global: 4.4.0
       lodash: 4.17.21
       qs: 6.10.3
@@ -11693,7 +11693,7 @@ packages:
       '@storybook/ui': 6.4.19_hiunvzosbwliizyirxfy6hjyim
       airbnb-js-shims: 2.2.1
       ansi-to-html: 0.6.15
-      core-js: 3.25.5
+      core-js: 3.21.1
       global: 4.4.0
       lodash: 4.17.21
       qs: 6.10.3
@@ -11915,7 +11915,7 @@ packages:
       util-deprecate: 1.0.2
       watchpack: 2.3.1
       webpack: 4.46.0_webpack-cli@3.3.12
-      ws: 8.5.0
+      ws: 8.12.1
     transitivePeerDependencies:
       - '@types/react'
       - acorn
@@ -11992,7 +11992,7 @@ packages:
       util-deprecate: 1.0.2
       watchpack: 2.3.1
       webpack: 4.46.0
-      ws: 8.5.0
+      ws: 8.12.1
     transitivePeerDependencies:
       - '@types/react'
       - acorn
@@ -12067,7 +12067,7 @@ packages:
       util-deprecate: 1.0.2
       watchpack: 2.3.1
       webpack: 4.46.0_webpack-cli@3.3.12
-      ws: 8.5.0
+      ws: 8.12.1
     transitivePeerDependencies:
       - '@types/react'
       - acorn
@@ -12142,7 +12142,7 @@ packages:
       util-deprecate: 1.0.2
       watchpack: 2.3.1
       webpack: 4.46.0_webpack-cli@3.3.12
-      ws: 8.5.0
+      ws: 8.12.1
     transitivePeerDependencies:
       - '@types/react'
       - acorn
@@ -12219,7 +12219,7 @@ packages:
       util-deprecate: 1.0.2
       watchpack: 2.3.1
       webpack: 4.46.0
-      ws: 8.5.0
+      ws: 8.12.1
     transitivePeerDependencies:
       - '@types/react'
       - acorn
@@ -13444,7 +13444,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.17.7
       '@types/react': 17.0.50
-      '@types/react-dom': 18.0.11
+      '@types/react-dom': 17.0.17
       '@types/react-test-renderer': 17.0.1
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
@@ -13483,7 +13483,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.19.0
       '@testing-library/dom': 8.11.3
-      '@types/react-dom': 18.0.11
+      '@types/react-dom': 17.0.17
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
 
@@ -14106,22 +14106,6 @@ packages:
     transitivePeerDependencies:
       - react
       - react-dom
-
-  /@types/wordpress__components/19.10.1_sfoxds7t5ydpegc3knd667wn6m:
-    resolution: {integrity: sha512-zD+lrwMkh8ttnUQb6EUYZ55q6QGIwqqg0SfD8xX0kdinx/1KMKMUgInMkiVQ8ky56BIzADiYH3+A0Pdh76GAxw==}
-    dependencies:
-      '@types/react': 17.0.50
-      '@types/tinycolor2': 1.4.3
-      '@types/wordpress__components': 19.10.5_sfoxds7t5ydpegc3knd667wn6m
-      '@types/wordpress__notices': 3.5.0
-      '@types/wordpress__rich-text': 3.4.6
-      '@wordpress/element': 4.4.1
-      downshift: 6.1.12_react@17.0.2
-      re-resizable: 6.9.5_sfoxds7t5ydpegc3knd667wn6m
-    transitivePeerDependencies:
-      - react
-      - react-dom
-    dev: true
 
   /@types/wordpress__components/19.10.5_prpqlkd37azqwypxturxi7uyci:
     resolution: {integrity: sha512-0BfLFVB9IxrYH1llVM3LltalJiHn7jyS3k6FEC0wQMoIzs+kXI9w5rSI06faodBcwp9YQDjhK+Bkr49dqx+3dQ==}
@@ -26348,6 +26332,7 @@ packages:
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
+    dev: true
 
   /https-proxy-agent/5.0.1:
     resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
@@ -26357,7 +26342,6 @@ packages:
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
-    dev: false
 
   /human-signals/1.1.1:
     resolution: {integrity: sha512-SEQu7vl8KjNL2eoGBLF3+wAjpsNfA9XMlXAYj/3EdaNfAlxKthD1xjEQfGOUhllCGGJVNY34bRr6lPINhNjyZw==}
@@ -29668,7 +29652,7 @@ packages:
       form-data: 3.0.1
       html-encoding-sniffer: 2.0.1
       http-proxy-agent: 4.0.1
-      https-proxy-agent: 5.0.0
+      https-proxy-agent: 5.0.1
       is-potential-custom-element-name: 1.0.1
       nwsapi: 2.2.0
       parse5: 6.0.1
@@ -30410,7 +30394,7 @@ packages:
       cacache: 16.1.3
       http-cache-semantics: 4.1.0
       http-proxy-agent: 5.0.0
-      https-proxy-agent: 5.0.0
+      https-proxy-agent: 5.0.1
       is-lambda: 1.0.1
       lru-cache: 7.14.0
       minipass: 3.1.6
@@ -30435,7 +30419,7 @@ packages:
       cacache: 15.3.0
       http-cache-semantics: 4.1.0
       http-proxy-agent: 4.0.1
-      https-proxy-agent: 5.0.0
+      https-proxy-agent: 5.0.1
       is-lambda: 1.0.1
       lru-cache: 6.0.0
       minipass: 3.1.6
@@ -40893,20 +40877,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-    dev: false
-
-  /ws/8.5.0:
-    resolution: {integrity: sha512-BWX0SWVgLPzYwF8lTzEy1egjhS4S4OEAHfsO8o65WOVsrnSRGaSiUaa9e0ggGlkMTtBlmOpEXiie9RUcBO86qg==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: ^5.0.2
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-    dev: true
 
   /x-is-string/0.1.0:
     resolution: {integrity: sha1-R0tQhlrzpJqcRlfwWs0UVFj3fYI=}

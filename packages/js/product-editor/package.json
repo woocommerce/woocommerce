@@ -58,7 +58,7 @@
 		"@types/react": "^17.0.2",
 		"@types/wordpress__block-editor": "^7.0.0",
 		"@types/wordpress__blocks": "^11.0.7",
-		"@types/wordpress__components": "^19.10.1",
+		"@types/wordpress__components": "^19.10.3",
 		"@types/wordpress__data": "^6.0.2",
 		"@types/wordpress__media-utils": "^3.0.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
