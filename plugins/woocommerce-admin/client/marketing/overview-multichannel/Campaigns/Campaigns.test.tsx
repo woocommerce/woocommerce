@@ -19,9 +19,15 @@ jest.mock( '~/marketing/hooks', () => ( {
 	useNewCampaignTypes: jest.fn(),
 } ) );
 
-jest.mock( './CreateNewCampaignModal', () => ( {
-	CreateNewCampaignModal: () => <div>Create a new campaign</div>,
-} ) );
+jest.mock( '~/marketing/components', () => {
+	const originalModule = jest.requireActual( '~/marketing/components' );
+
+	return {
+		__esModule: true,
+		...originalModule,
+		CreateNewCampaignModal: () => <div>Create a new campaign</div>,
+	};
+} );
 
 /**
  * Create a test campaign data object.
