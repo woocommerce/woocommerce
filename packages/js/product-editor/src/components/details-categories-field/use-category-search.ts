@@ -33,6 +33,11 @@ function openParents(
 	}
 }
 
+export type ProductCategoryLinkedList = Pick<
+	ProductCategory,
+	'id' | 'name' | 'parent'
+>;
+
 /**
  * Sort function for category tree items, sorts by popularity and then alphabetically.
  */
@@ -256,9 +261,9 @@ export const useCategorySearch = () => {
 	 */
 	const getFilteredItems = useCallback(
 		(
-			allItems: Pick< ProductCategory, 'id' | 'name' >[],
+			allItems: ProductCategoryLinkedList[],
 			inputValue: string,
-			selectedItems: Pick< ProductCategory, 'id' | 'name' >[]
+			selectedItems: ProductCategoryLinkedList[]
 		) => {
 			const searchRegex = new RegExp( escapeRegExp( inputValue ), 'i' );
 			return allItems.filter(

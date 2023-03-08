@@ -8,23 +8,28 @@ import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenuSlot as MenuSlot,
 	__experimentalSelectControlMenu as Menu,
+	__experimentalTreeControl as TreeControl,
 } from '@woocommerce/components';
-import { ProductCategory } from '@woocommerce/data';
+import { Product, ProductCategory } from '@woocommerce/data';
 import { debounce } from 'lodash';
+import { Popover } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { CategoryFieldItem, CategoryTreeItem } from './category-field-item';
-import { useCategorySearch } from './use-category-search';
+import {
+	useCategorySearch,
+	ProductCategoryLinkedList,
+} from './use-category-search';
 import { CreateCategoryModal } from './create-category-modal';
 import { CategoryFieldAddNewItem } from './category-field-add-new-item';
 
 type CategoryFieldProps = {
 	label: string;
 	placeholder: string;
-	value?: Pick< ProductCategory, 'id' | 'name' >[];
-	onChange: ( value: Pick< ProductCategory, 'id' | 'name' >[] ) => void;
+	value?: ProductCategoryLinkedList[];
+	onChange: ( value: ProductCategoryLinkedList[] ) => void;
 };
 
 /**
@@ -32,11 +37,11 @@ type CategoryFieldProps = {
  * if not included already.
  */
 function getSelectedWithParents(
-	selected: Pick< ProductCategory, 'id' | 'name' >[] = [],
+	selected: ProductCategoryLinkedList[] = [],
 	item: ProductCategory,
 	treeKeyValues: Record< number, CategoryTreeItem >
-): Pick< ProductCategory, 'id' | 'name' >[] {
-	selected.push( { id: item.id, name: item.name } );
+): ProductCategoryLinkedList[] {
+	selected.push( { id: item.id, name: item.name, parent: item.parent } );
 
 	const parentId =
 		item.parent !== undefined
@@ -107,10 +112,10 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 	};
 
 	const categoryFieldGetFilteredItems = (
-		allItems: Pick< ProductCategory, 'id' | 'name' >[],
+		allItems: ProductCategoryLinkedList[],
 		inputValue: string,
-		selectedItems: Pick< ProductCategory, 'id' | 'name' >[]
-	) => {
+		selectedItems: ProductCategoryLinkedList[]
+	): ProductCategoryLinkedList[] => {
 		const filteredItems = getFilteredItems(
 			allItems,
 			inputValue,
@@ -128,6 +133,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 				{
 					id: -99,
 					name: inputValue,
+					parent: 0,
 				},
 			];
 		}
@@ -138,7 +144,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 
 	return (
 		<>
-			<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
+			<SelectControl< ProductCategoryLinkedList >
 				className="woocommerce-category-field-dropdown components-base-control"
 				multiple
 				items={ categoriesSelectList }
@@ -155,31 +161,6 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 				onInputChange={ searchDelayed }
 				getFilteredItems={ categoryFieldGetFilteredItems }
 				placeholder={ value.length === 0 ? placeholder : '' }
-				stateReducer={ ( state, actionAndChanges ) => {
-					const { changes, type } = actionAndChanges;
-					switch ( type ) {
-						case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
-							return {
-								...changes,
-								inputValue: state.inputValue,
-							};
-						case selectControlStateChangeTypes.ItemClick:
-							if (
-								changes.selectedItem &&
-								changes.selectedItem.id === -99
-							) {
-								return changes;
-							}
-							return {
-								...changes,
-								isOpen: true,
-								inputValue: state.inputValue,
-								highlightedIndex: state.highlightedIndex,
-							};
-						default:
-							return changes;
-					}
-				} }
 				__experimentalOpenMenuOnFocus
 			>
 				{ ( {
@@ -191,57 +172,28 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 				} ) => {
 					const rootItems =
 						items.length > 0
-							? items.filter(
-									( item ) =>
-										categoryTreeKeyValues[ item.id ]
-											?.parentID === 0 || item.id === -99
+							? items.map( ( i ) =>
+									i.parent
+										? {
+												value: String( i.id ),
+												label: i.name,
+												parent: String( i.parent ),
+										  }
+										: {
+												value: String( i.id ),
+												label: i.name,
+										  }
 							  )
 							: [];
 					return (
-						<Menu
-							isOpen={ isOpen }
-							getMenuProps={ getMenuProps }
-							className="woocommerce-category-field-dropdown__menu"
-						>
-							<>
-								{ isSearching ? (
-									<li className="woocommerce-category-field-dropdown__item">
-										<div className="woocommerce-category-field-dropdown__item-content">
-											<Spinner />
-										</div>
-									</li>
-								) : (
-									rootItems.map( ( item ) => {
-										return item.id === -99 ? (
-											<CategoryFieldAddNewItem
-												key={ `${ item.id }` }
-												item={ item }
-												highlightedIndex={
-													highlightedIndex
-												}
-												items={ items }
-												getItemProps={ getItemProps }
-											/>
-										) : (
-											<CategoryFieldItem
-												key={ `${ item.id }` }
-												item={
-													categoryTreeKeyValues[
-														item.id
-													]
-												}
-												highlightedIndex={
-													highlightedIndex
-												}
-												selectedIds={ selectedIds }
-												items={ items }
-												getItemProps={ getItemProps }
-											/>
-										);
-									} )
-								) }
-							</>
-						</Menu>
+						<Popover tabIndex={ 0 }>
+							{ isOpen && (
+								<TreeControl
+									multiple
+									items={ rootItems }
+								></TreeControl>
+							) }
+						</Popover>
 					);
 				} }
 			</SelectControl>
