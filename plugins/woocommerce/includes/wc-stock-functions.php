@@ -197,7 +197,7 @@ function wc_reduce_stock_levels( $order_id ) {
 		$item->add_meta_data( '_reduced_stock', $qty, true );
 		$item->save();
 
-		$change = array(
+		$change    = array(
 			'product' => $product,
 			'from'    => $new_stock + $qty,
 			'to'      => $new_stock,
@@ -210,7 +210,7 @@ function wc_reduce_stock_levels( $order_id ) {
 		 * @param WC_Order_Item_Product $item Order item data.
 		 * @param array $change  Change Details.
 		 * @param WC_Order $order  Order data.
-		 * @since 7.4.0
+		 * @since 7.6.0
 		 */
 		do_action( 'woocommerce_reduce_order_item_stock', $item, $change, $order );
 	}
