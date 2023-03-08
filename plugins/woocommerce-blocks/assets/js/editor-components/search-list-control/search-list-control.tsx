@@ -4,6 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button,
+	FormTokenField,
 	Spinner,
 	TextControl,
 	withSpokenMessages,
@@ -26,27 +27,19 @@ import { getFilteredList, defaultMessages } from './utils';
 import SearchListItem from './item';
 import Tag from '../tag';
 import type {
-	SearchListItemsType,
-	SearchListItemType,
+	SearchListItem as SearchListItemProps,
 	SearchListControlProps,
 	SearchListMessages,
 	renderItemArgs,
+	ListItemsProps,
+	SearchListItemsContainerProps,
 } from './types';
 
 const defaultRenderListItem = ( args: renderItemArgs ): JSX.Element => {
 	return <SearchListItem { ...args } />;
 };
 
-const ListItems = ( props: {
-	list: SearchListItemsType;
-	selected: SearchListItemsType;
-	renderItem: ( args: renderItemArgs ) => JSX.Element;
-	depth?: number;
-	onSelect: ( item: SearchListItemType ) => () => void;
-	instanceId: string | number;
-	isSingle: boolean;
-	search: string;
-} ): JSX.Element | null => {
+const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 	const {
 		list,
 		selected,
@@ -56,7 +49,11 @@ const ListItems = ( props: {
 		instanceId,
 		isSingle,
 		search,
+		useExpandedPanelId,
 	} = props;
+
+	const [ expandedPanelId ] = useExpandedPanelId;
+
 	if ( ! list ) {
 		return null;
 	}
@@ -64,7 +61,16 @@ const ListItems = ( props: {
 		<>
 			{ list.map( ( item ) => {
 				const isSelected =
-					selected.findIndex( ( { id } ) => id === item.id ) !== -1;
+					item.children?.length && ! isSingle
+						? item.children.every( ( { id } ) =>
+								selected.find(
+									( selectedItem ) => selectedItem.id === id
+								)
+						  )
+						: !! selected.find( ( { id } ) => id === item.id );
+				const isExpanded =
+					item.children?.length && expandedPanelId === item.id;
+
 				return (
 					<Fragment key={ item.id }>
 						<li>
@@ -73,16 +79,20 @@ const ListItems = ( props: {
 								isSelected,
 								onSelect,
 								isSingle,
+								selected,
 								search,
 								depth,
+								useExpandedPanelId,
 								controlId: instanceId,
 							} ) }
 						</li>
-						<ListItems
-							{ ...props }
-							list={ item.children }
-							depth={ depth + 1 }
-						/>
+						{ isExpanded ? (
+							<ListItems
+								{ ...props }
+								list={ item.children as SearchListItemProps[] }
+								depth={ depth + 1 }
+							/>
+						) : null }
 					</Fragment>
 				);
 			} ) }
@@ -142,14 +152,9 @@ const ListItemsContainer = ( {
 	search,
 	onSelect,
 	instanceId,
+	useExpandedPanelId,
 	...props
-}: SearchListControlProps & {
-	messages: SearchListMessages;
-	filteredList: SearchListItemsType;
-	search: string;
-	instanceId: string | number;
-	onSelect: ( item: SearchListItemType ) => () => void;
-} ) => {
+}: SearchListItemsContainerProps ) => {
 	const { messages, renderItem, selected, isSingle } = props;
 	const renderItemCallback = renderItem || defaultRenderListItem;
 
@@ -172,6 +177,7 @@ const ListItemsContainer = ( {
 	return (
 		<ul className="woocommerce-search-list__list">
 			<ListItems
+				useExpandedPanelId={ useExpandedPanelId }
 				list={ filteredList }
 				selected={ selected }
 				renderItem={ renderItemCallback }
@@ -187,9 +193,7 @@ const ListItemsContainer = ( {
 /**
  * Component to display a searchable, selectable list of items.
  */
-export const SearchListControl = (
-	props: SearchListControlProps
-): JSX.Element => {
+export const SearchListControl = ( props: SearchListControlProps ) => {
 	const {
 		className = '',
 		isCompact,
@@ -201,9 +205,12 @@ export const SearchListControl = (
 		onChange,
 		onSearch,
 		selected,
+		type = 'text',
 		debouncedSpeak,
 	} = props;
+
 	const [ search, setSearch ] = useState( '' );
+	const useExpandedPanelId = useState< number >( -1 );
 	const instanceId = useInstanceId( SearchListControl );
 	const messages = useMemo(
 		() => ( { ...defaultMessages, ...customMessages } ),
@@ -242,7 +249,12 @@ export const SearchListControl = (
 	);
 
 	const onSelect = useCallback(
-		( item: SearchListItemType ) => () => {
+		( item: SearchListItemProps | SearchListItemProps[] ) => () => {
+			if ( Array.isArray( item ) ) {
+				onChange( item );
+				return;
+			}
+
 			if ( selected.findIndex( ( { id } ) => id === item.id ) !== -1 ) {
 				onRemove( item.id )();
 				return;
@@ -256,27 +268,69 @@ export const SearchListControl = (
 		[ isSingle, onRemove, onChange, selected ]
 	);
 
+	const onRemoveToken = useCallback(
+		( tokens: Array< SearchListItemProps & { value: string } > ) => {
+			const [ removedItem ] = selected.filter(
+				( item ) => ! tokens.find( ( token ) => item.id === token.id )
+			);
+
+			onRemove( removedItem.id )();
+		},
+		[ onRemove, selected ]
+	);
+
 	return (
 		<div
 			className={ classnames( 'woocommerce-search-list', className, {
 				'is-compact': isCompact,
+				'is-loading': isLoading,
+				'is-token': type === 'token',
 			} ) }
 		>
-			<SelectedListItems
-				{ ...props }
-				onRemove={ onRemove }
-				messages={ messages }
-			/>
-			<div className="woocommerce-search-list__search">
-				<TextControl
-					label={ messages.search }
-					type="search"
-					value={ search }
-					onChange={ ( value ) => setSearch( value ) }
+			{ type === 'text' && (
+				<SelectedListItems
+					{ ...props }
+					onRemove={ onRemove }
+					messages={ messages }
 				/>
+			) }
+			<div className="woocommerce-search-list__search">
+				{ type === 'text' ? (
+					<TextControl
+						label={ messages.search }
+						type="search"
+						value={ search }
+						onChange={ ( value ) => setSearch( value ) }
+					/>
+				) : (
+					<FormTokenField
+						disabled={ isLoading }
+						label={ messages.search }
+						onChange={ onRemoveToken }
+						onInputChange={ ( value ) => setSearch( value ) }
+						suggestions={ [] }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore - Ignoring because `__experimentalValidateInput` is not yet in the type definitions.
+						__experimentalValidateInput={ () => false }
+						value={
+							isLoading
+								? [
+										__(
+											'Loading…',
+											'woo-gutenberg-products-block'
+										),
+								  ]
+								: selected.map( ( token ) => ( {
+										...token,
+										value: token.name,
+								  } ) )
+						}
+						__experimentalShowHowTo={ false }
+					/>
+				) }
 			</div>
 			{ isLoading ? (
-				<div className="woocommerce-search-list__list is-loading">
+				<div className="woocommerce-search-list__list">
 					<Spinner />
 				</div>
 			) : (
@@ -287,6 +341,7 @@ export const SearchListControl = (
 					messages={ messages }
 					onSelect={ onSelect }
 					instanceId={ instanceId }
+					useExpandedPanelId={ useExpandedPanelId }
 				/>
 			) }
 		</div>
