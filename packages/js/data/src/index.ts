@@ -177,13 +177,14 @@ import { ProductAttributeTermsSelectors } from './product-attribute-terms/types'
 import { ProductVariationSelectors } from './product-variations/types';
 import { TaxClassSelectors } from './tax-classes/types';
 import { ProductFormSelectors } from './product-form/selectors';
+import { SettingsSelectors } from './settings/selectors';
 
 // As we add types to all the package selectors we can fill out these unknown types with real ones. See one
 // of the already typed selectors for an example of how you can do this.
 export type WCSelectorType< T > = T extends typeof REVIEWS_STORE_NAME
 	? WPDataSelectors
 	: T extends typeof SETTINGS_STORE_NAME
-	? WPDataSelectors
+	? SettingsSelectors
 	: T extends typeof PLUGINS_STORE_NAME
 	? PluginSelectors
 	: T extends typeof ONBOARDING_STORE_NAME

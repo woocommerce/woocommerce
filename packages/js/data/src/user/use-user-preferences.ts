@@ -118,7 +118,6 @@ export const useUserPreferences = () => {
 	// Get our dispatch methods now - this can't happen inside the callback below.
 	const dispatch = useDispatch( STORE_NAME );
 	const { addEntities, receiveCurrentUser, saveEntityRecord } = dispatch;
-	// @ts-expect-error WP 5.3.x doesn't have the User entity defined.
 	let { saveUser } = dispatch;
 
 	const userData = useSelect( ( select ) => {
@@ -126,11 +125,8 @@ export const useUserPreferences = () => {
 			getCurrentUser,
 			getEntity,
 			getEntityRecord,
-			// @ts-expect-error type definition is missing.
 			getLastEntitySaveError,
-			// @ts-expect-error type definition is missing.
 			hasStartedResolution,
-			// @ts-expect-error type definition is missing.
 			hasFinishedResolution,
 		} = select( STORE_NAME );
 
@@ -154,6 +150,7 @@ export const useUserPreferences = () => {
 		// WP 5.3.x doesn't have the User entity defined.
 		if ( typeof saveUser !== 'function' ) {
 			// Polyfill saveUser() - wrapper of saveEntityRecord.
+			/// @ts-expect-error type definition is missing.
 			saveUser = async ( userToSave: {
 				id: number;
 				woocommerce_meta: { [ key: string ]: boolean };
