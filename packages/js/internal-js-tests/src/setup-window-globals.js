@@ -11,8 +11,10 @@ if ( global.window ) {
 	global.window.cancelAnimationFrame = clearTimeout;
 	global.window.matchMedia = () => ( {
 		matches: false,
-		addListener: () => {},
-		removeListener: () => {},
+		addListener: () => {}, // Deprecated
+		removeListener: () => {}, // Deprecated
+		addEventListener: () => {},
+		removeEventListener: () => {},
 	} );
 
 	// Setup fake localStorage
