@@ -1,4 +1,53 @@
 jQuery( function ( $ ) {
+	/**
+	 * Function to check if the attribute and variation fields are empty.
+	 */
+	jQuery.is_attribute_or_variation_empty = function (
+		attributes_and_variations_data
+	) {
+		var valid = false;
+		attributes_and_variations_data.each( function () {
+			if ( ! $( this ).val() ) {
+				valid = true;
+			}
+		} );
+		return valid;
+	};
+
+	/**
+	 * Function to maybe disable the save button.
+	 */
+	jQuery.maybe_disable_save_button = function () {
+		var $tab = $( '.product_attributes' );
+		var $save_button = $( 'button.save_attributes' );
+		if (
+			$( '.woocommerce_variation_new_attribute_data' ).is( ':visible' )
+		) {
+			$tab = $( '.woocommerce_variation_new_attribute_data' );
+			$save_button = $( 'button.create-variations' );
+		}
+
+		var attributes_and_variations_data = $tab.find(
+			'input, select, textarea'
+		);
+		if (
+			jQuery.is_attribute_or_variation_empty(
+				attributes_and_variations_data
+			)
+		) {
+			if ( ! $save_button.is( ':disabled' ) ) {
+				$save_button.attr( 'disabled', 'disabled' );
+				$save_button.attr(
+					'title',
+					woocommerce_admin_meta_boxes.i18n_save_attribute_variation_tip
+				);
+			}
+			return;
+		}
+		$save_button.removeAttr( 'disabled' );
+		$save_button.removeAttr( 'title' );
+	};
+
 	// Run tipTip
 	function runTipTip() {
 		// Remove any lingering tooltips
@@ -95,46 +144,6 @@ jQuery( function ( $ ) {
 	$( '.product_attributes, .woocommerce_variation_new_attribute_data' ).on(
 		'keyup',
 		'input, textarea',
-		function () {
-			var $tab = $( '.product_attributes' );
-			var $save_button = $( 'button.save_attributes' );
-			if (
-				$( '.woocommerce_variation_new_attribute_data' ).is(
-					':visible'
-				)
-			) {
-				$tab = $( '.woocommerce_variation_new_attribute_data' );
-				$save_button = $( 'button.create-variations' );
-			}
-
-			var attributes_and_variations_data = $tab.find(
-				'input, select, textarea'
-			);
-			if (
-				is_attribute_or_variation_empty(
-					attributes_and_variations_data
-				)
-			) {
-				if ( ! $save_button.is( ':disabled' ) ) {
-					$save_button.attr( 'disabled', 'disabled' );
-					$save_button.attr(
-						'title',
-						woocommerce_admin_meta_boxes.i18n_save_attribute_variation_tip
-					);
-				}
-				return;
-			}
-			$save_button.removeAttr( 'disabled' );
-			$save_button.removeAttr( 'title' );
-		}
+		jQuery.maybe_disable_save_button
 	);
-	function is_attribute_or_variation_empty( attributes_and_variations_data ) {
-		var valid = false;
-		attributes_and_variations_data.each( function () {
-			if ( ! $( this ).val() ) {
-				valid = true;
-			}
-		} );
-		return valid;
-	}
 } );
