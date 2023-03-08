@@ -5,13 +5,24 @@ jQuery( function ( $ ) {
 	jQuery.is_attribute_or_variation_empty = function (
 		attributes_and_variations_data
 	) {
-		var valid = false;
+		var has_empty_fields = false;
 		attributes_and_variations_data.each( function () {
-			if ( ! $( this ).val() ) {
-				valid = true;
+			// Check if the field is checkbox or a search field.
+			if (
+				$( this ).hasClass( 'checkbox' ) ||
+				-1 < this.className.indexOf( 'search__field' )
+			) {
+				return;
+			}
+
+			var is_empty = $( this ).is( 'select' )
+				? $( this ).find( ':selected' ).length === 0
+				: ! $( this ).val();
+			if ( is_empty ) {
+				has_empty_fields = true;
 			}
 		} );
-		return valid;
+		return has_empty_fields;
 	};
 
 	/**
@@ -144,6 +155,12 @@ jQuery( function ( $ ) {
 	$( '.product_attributes, .woocommerce_variation_new_attribute_data' ).on(
 		'keyup',
 		'input, textarea',
+		jQuery.maybe_disable_save_button
+	);
+
+	$( '#product_attributes' ).on(
+		'change',
+		'select.attribute_values',
 		jQuery.maybe_disable_save_button
 	);
 } );
