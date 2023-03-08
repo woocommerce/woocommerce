@@ -31,7 +31,7 @@ export function Edit() {
 				name={ 'woocommerce-product-name' }
 				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
 				onChange={ setName }
-				value={ name }
+				value={ name || '' }
 			/>
 		</div>
 	);

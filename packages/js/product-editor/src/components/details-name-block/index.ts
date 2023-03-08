@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { initBlock } from '../../utils';
-import metadata from './block';
+import metadata from './block.json';
 import { Edit } from './edit';
 
 const { name } = metadata;
