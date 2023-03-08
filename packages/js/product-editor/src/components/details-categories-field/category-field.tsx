@@ -9,6 +9,7 @@ import {
 	__experimentalSelectControlMenuSlot as MenuSlot,
 	__experimentalSelectControlMenu as Menu,
 	__experimentalTreeControl as TreeControl,
+	TreeItem,
 } from '@woocommerce/components';
 import { Product, ProductCategory } from '@woocommerce/data';
 import { debounce } from 'lodash';
@@ -62,6 +63,33 @@ function getSelectedWithParents(
 	}
 
 	return selected;
+}
+
+function mapFromCategoryType(
+	categories: ProductCategoryLinkedList[]
+): TreeItem[] {
+	return categories.map( ( val ) =>
+		val.parent
+			? {
+					value: String( val.id ),
+					label: val.name,
+					parent: String( val.parent ),
+			  }
+			: {
+					value: String( val.id ),
+					label: val.name,
+			  }
+	);
+}
+
+function mapToCategoryType(
+	categories: TreeItem[]
+): ProductCategoryLinkedList[] {
+	return categories.map( ( cat ) => ( {
+		id: +cat.value,
+		name: cat.label,
+		parent: cat.parent ? +cat.parent : 0,
+	} ) );
 }
 
 export const CategoryField: React.FC< CategoryFieldProps > = ( {
@@ -170,7 +198,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 					getItemProps,
 					highlightedIndex,
 				} ) => {
-					const rootItems =
+					const mappedItems =
 						items.length > 0
 							? items.map( ( i ) =>
 									i.parent
@@ -186,11 +214,49 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 							  )
 							: [];
 					return (
-						<Popover tabIndex={ 0 }>
+						<Popover>
 							{ isOpen && (
 								<TreeControl
 									multiple
-									items={ rootItems }
+									className="woocommerce-category-field-dropdown__test"
+									items={ mapFromCategoryType( items ) }
+									selected={ mapFromCategoryType( value ) }
+									onSelect={ ( selectedItems ) => {
+										if ( Array.isArray( selectedItems ) ) {
+											const newItems: ProductCategoryLinkedList[] =
+												mapToCategoryType(
+													selectedItems.filter(
+														( {
+															value: selectedItemValue,
+														} ) =>
+															! value.some(
+																( item ) =>
+																	item.id ===
+																	+selectedItemValue
+															)
+													)
+												);
+											onChange( [
+												...value,
+												...newItems,
+											] );
+										}
+									} }
+									onRemove={ ( removedItems ) => {
+										if ( Array.isArray( removedItems ) ) {
+											const newValues = value.filter(
+												( item ) =>
+													! removedItems.some(
+														( {
+															value: removedValue,
+														} ) =>
+															item.id ===
+															+removedValue
+													)
+											);
+											onChange( newValues );
+										}
+									} }
 								></TreeControl>
 							) }
 						</Popover>
