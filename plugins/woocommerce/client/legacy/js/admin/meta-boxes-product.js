@@ -482,6 +482,7 @@ jQuery( function ( $ ) {
 			$wrapper.unblock();
 
 			$( document.body ).trigger( 'woocommerce_added_attribute' );
+			jQuery.maybe_disable_save_button();
 		} );
 
 		if ( attribute ) {
@@ -664,6 +665,7 @@ jQuery( function ( $ ) {
 			) {
 				toggle_add_global_attribute_layout();
 			}
+			jQuery.maybe_disable_save_button();
 		}
 		return false;
 	} );
