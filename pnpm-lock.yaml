@@ -126,6 +126,51 @@ importers:
       ts-jest: 27.1.3_wfmhell6c5i72vvtgtvpmkkb6i
       typescript: 4.8.4
 
+  packages/js/admin-layout:
+    specifiers:
+      '@types/react': ^17.0.2
+      '@types/wordpress__components': ^19.10.1
+      '@woocommerce/components': workspace:*
+      '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-style-build': workspace:*
+      '@wordpress/browserslist-config': ^4.1.1
+      '@wordpress/components': ^19.5.0
+      '@wordpress/element': ^4.1.1
+      css-loader: ^3.6.0
+      eslint: ^8.32.0
+      jest: ^27.5.1
+      jest-cli: ^27.5.1
+      postcss-loader: ^3.0.0
+      react: ^17.0.2
+      react-dom: ^17.0.2
+      sass-loader: ^10.2.1
+      ts-jest: ^27.1.3
+      typescript: ^4.8.3
+      webpack: ^5.70.0
+      webpack-cli: ^3.3.12
+    dependencies:
+      '@woocommerce/components': link:../components
+      '@wordpress/components': 19.8.5_tufdcic6wklrwyy3rhbsbktylu
+      '@wordpress/element': 4.4.1
+    devDependencies:
+      '@types/react': 17.0.50
+      '@types/wordpress__components': 19.10.5_sfoxds7t5ydpegc3knd667wn6m
+      '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-style-build': link:../internal-style-build
+      '@wordpress/browserslist-config': 4.1.3
+      css-loader: 3.6.0_webpack@5.70.0
+      eslint: 8.32.0
+      jest: 27.5.1
+      jest-cli: 27.5.1
+      postcss-loader: 3.0.0
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+      sass-loader: 10.2.1_webpack@5.70.0
+      ts-jest: 27.1.3_77oryishcckaigojnzbhxsiona
+      typescript: 4.8.4
+      webpack: 5.70.0_webpack-cli@3.3.12
+      webpack-cli: 3.3.12_webpack@5.70.0
+
   packages/js/api:
     specifiers:
       '@types/create-hmac': 1.1.0
@@ -1576,6 +1621,7 @@ importers:
       '@typescript-eslint/eslint-plugin': ^5.54.0
       '@typescript-eslint/parser': ^5.54.0
       '@woocommerce/admin-e2e-tests': workspace:*
+      '@woocommerce/admin-layout': workspace:*
       '@woocommerce/api': ^0.2.0
       '@woocommerce/components': workspace:*
       '@woocommerce/csv-export': workspace:*
@@ -1795,6 +1841,7 @@ importers:
       '@typescript-eslint/eslint-plugin': 5.54.0_odmkqudqazj6zql7bilcklpxhm
       '@typescript-eslint/parser': 5.54.0_yygwinqv3a2io74xmwofqb7uka
       '@woocommerce/admin-e2e-tests': link:../../packages/js/admin-e2e-tests
+      '@woocommerce/admin-layout': link:../../packages/js/admin-layout
       '@woocommerce/components': link:../../packages/js/components
       '@woocommerce/csv-export': link:../../packages/js/csv-export
       '@woocommerce/currency': link:../../packages/js/currency
@@ -2769,32 +2816,6 @@ packages:
       browserslist: 4.21.4
       semver: 6.3.0
 
-  /@babel/helper-compilation-targets/7.17.7_@babel+core@7.12.9:
-    resolution: {integrity: sha512-UFzlz2jjd8kroj0hmCFV5zr+tQPi1dpC2cRsDV/3IEW8bJfCPrPpmcSN6ZS8RqIq4LXcmpipCQFPddyFA5Yc7w==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-    dependencies:
-      '@babel/compat-data': 7.19.3
-      '@babel/core': 7.12.9
-      '@babel/helper-validator-option': 7.18.6
-      browserslist: 4.21.4
-      semver: 6.3.0
-    dev: true
-
-  /@babel/helper-compilation-targets/7.17.7_@babel+core@7.16.12:
-    resolution: {integrity: sha512-UFzlz2jjd8kroj0hmCFV5zr+tQPi1dpC2cRsDV/3IEW8bJfCPrPpmcSN6ZS8RqIq4LXcmpipCQFPddyFA5Yc7w==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-    dependencies:
-      '@babel/compat-data': 7.19.3
-      '@babel/core': 7.16.12
-      '@babel/helper-validator-option': 7.18.6
-      browserslist: 4.21.4
-      semver: 6.3.0
-    dev: false
-
   /@babel/helper-compilation-targets/7.17.7_@babel+core@7.17.8:
     resolution: {integrity: sha512-UFzlz2jjd8kroj0hmCFV5zr+tQPi1dpC2cRsDV/3IEW8bJfCPrPpmcSN6ZS8RqIq4LXcmpipCQFPddyFA5Yc7w==}
     engines: {node: '>=6.9.0'}
@@ -2804,7 +2825,7 @@ packages:
       '@babel/compat-data': 7.19.3
       '@babel/core': 7.17.8
       '@babel/helper-validator-option': 7.18.6
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       semver: 6.3.0
     dev: true
 
@@ -3489,7 +3510,7 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.12.9
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.19.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -3502,7 +3523,7 @@ packages:
     dependencies:
       '@babel/core': 7.16.12
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.16.12
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.19.0
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -4214,7 +4235,7 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.12.9
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.19.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4227,7 +4248,7 @@ packages:
     dependencies:
       '@babel/core': 7.16.12
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.16.12
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.19.0
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -5012,7 +5033,7 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-module-imports': 7.16.7
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.19.0
       '@babel/helper-remap-async-to-generator': 7.16.8
     transitivePeerDependencies:
       - supports-color
@@ -5026,7 +5047,7 @@ packages:
     dependencies:
       '@babel/core': 7.16.12
       '@babel/helper-module-imports': 7.16.7
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.19.0
       '@babel/helper-remap-async-to-generator': 7.16.8
     transitivePeerDependencies:
       - supports-color
@@ -6556,7 +6577,7 @@ packages:
       '@babel/helper-module-imports': 7.16.0
       '@babel/helper-plugin-utils': 7.14.5
       '@babel/plugin-syntax-jsx': 7.16.0_@babel+core@7.16.12
-      '@babel/types': 7.16.0
+      '@babel/types': 7.19.3
     dev: false
 
   /@babel/plugin-transform-react-jsx/7.17.3_@babel+core@7.17.8:
@@ -7327,7 +7348,7 @@ packages:
     dependencies:
       '@babel/compat-data': 7.17.7
       '@babel/core': 7.12.9
-      '@babel/helper-compilation-targets': 7.17.7_@babel+core@7.12.9
+      '@babel/helper-compilation-targets': 7.19.3_@babel+core@7.12.9
       '@babel/helper-plugin-utils': 7.18.9
       '@babel/helper-validator-option': 7.16.7
       '@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression': 7.16.7_@babel+core@7.12.9
@@ -7394,7 +7415,7 @@ packages:
       '@babel/plugin-transform-unicode-escapes': 7.16.7_@babel+core@7.12.9
       '@babel/plugin-transform-unicode-regex': 7.16.7_@babel+core@7.12.9
       '@babel/preset-modules': 0.1.5_@babel+core@7.12.9
-      '@babel/types': 7.17.0
+      '@babel/types': 7.19.3
       babel-plugin-polyfill-corejs2: 0.3.0_@babel+core@7.12.9
       babel-plugin-polyfill-corejs3: 0.5.2_@babel+core@7.12.9
       babel-plugin-polyfill-regenerator: 0.3.0_@babel+core@7.12.9
@@ -7412,7 +7433,7 @@ packages:
     dependencies:
       '@babel/compat-data': 7.17.7
       '@babel/core': 7.16.12
-      '@babel/helper-compilation-targets': 7.17.7_@babel+core@7.16.12
+      '@babel/helper-compilation-targets': 7.19.3_@babel+core@7.16.12
       '@babel/helper-plugin-utils': 7.18.9
       '@babel/helper-validator-option': 7.16.7
       '@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression': 7.16.7_@babel+core@7.16.12
@@ -7479,7 +7500,7 @@ packages:
       '@babel/plugin-transform-unicode-escapes': 7.16.7_@babel+core@7.16.12
       '@babel/plugin-transform-unicode-regex': 7.16.7_@babel+core@7.16.12
       '@babel/preset-modules': 0.1.5_@babel+core@7.16.12
-      '@babel/types': 7.17.0
+      '@babel/types': 7.19.3
       babel-plugin-polyfill-corejs2: 0.3.0_@babel+core@7.16.12
       babel-plugin-polyfill-corejs3: 0.5.2_@babel+core@7.16.12
       babel-plugin-polyfill-regenerator: 0.3.0_@babel+core@7.16.12
@@ -15107,7 +15128,7 @@ packages:
       '@wordpress/browserslist-config': 4.1.3
       '@wordpress/element': 4.20.0
       '@wordpress/warning': 2.28.0
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       core-js: 3.25.5
     transitivePeerDependencies:
       - supports-color
@@ -15167,7 +15188,7 @@ packages:
       '@wordpress/browserslist-config': 5.11.0
       '@wordpress/element': 5.5.0
       '@wordpress/warning': 2.28.0
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       core-js: 3.25.5
     transitivePeerDependencies:
       - supports-color
@@ -19570,7 +19591,7 @@ packages:
     resolution: {integrity: sha512-WHVocJYavUwVgVViC0ORikPHQquXwVh939TaelZ4WDqpWgTX/FsGhl/+P4qBUAGcRvtOgDgC+xftNWWp2RUTAQ==}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001418
+      caniuse-lite: 1.0.30001146
       electron-to-chromium: 1.4.276
     dev: true
 
@@ -19910,14 +19931,13 @@ packages:
   /caniuse-api/3.0.0:
     resolution: {integrity: sha512-bsTwuIg/BZZK/vreVTYYbSWoe2F+71P7K5QGEX+pT250DZbfU1MQ5prOKpPR+LL6uWKK3KMwMCAS74QB3Um1uw==}
     dependencies:
-      browserslist: 4.21.4
-      caniuse-lite: 1.0.30001418
+      browserslist: 4.19.3
+      caniuse-lite: 1.0.30001146
       lodash.memoize: 4.1.2
       lodash.uniq: 4.5.0
 
   /caniuse-lite/1.0.30001146:
     resolution: {integrity: sha512-VAy5RHDfTJhpxnDdp2n40GPPLp3KqNrXz1QqFv4J64HvArKs8nuNMOWkB3ICOaBTU/Aj4rYAo/ytdQDDFF/Pug==}
-    dev: true
 
   /caniuse-lite/1.0.30001352:
     resolution: {integrity: sha512-GUgH8w6YergqPQDGWhJGt8GDRnY0L/iJVQcU3eJ46GYf52R8tk0Wxp0PymuFVZboJYXGiCqwozAYZNRjVj6IcA==}
@@ -20934,7 +20954,7 @@ packages:
   /core-js-compat/3.21.1:
     resolution: {integrity: sha512-gbgX5AUvMb8gwxC7FLVWYT7Kkgu/y7+h/h1X43yJkNqhlK2fuYyQimqvKGNZFAY6CKii/GFKJ2cp/1/42TN36g==}
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       semver: 7.0.0
 
   /core-js-compat/3.25.5:
@@ -22902,7 +22922,7 @@ packages:
       has: 1.0.3
       is-core-module: 2.8.0
       is-glob: 4.0.3
-      minimatch: 3.1.2
+      minimatch: 3.0.4
       object.values: 1.1.5
       resolve: 1.20.0
       tsconfig-paths: 3.14.0
@@ -22933,7 +22953,7 @@ packages:
       has: 1.0.3
       is-core-module: 2.8.0
       is-glob: 4.0.3
-      minimatch: 3.1.2
+      minimatch: 3.0.4
       object.values: 1.1.5
       resolve: 1.20.0
       tsconfig-paths: 3.14.0
@@ -24672,7 +24692,7 @@ packages:
       chalk: 4.1.2
       chokidar: 3.5.3
       cosmiconfig: 6.0.0
-      deepmerge: 4.2.2
+      deepmerge: 4.3.0
       fs-extra: 9.1.0
       glob: 7.2.0
       memfs: 3.3.0
@@ -24735,7 +24755,7 @@ packages:
       chalk: 4.1.2
       chokidar: 3.5.3
       cosmiconfig: 6.0.0
-      deepmerge: 4.2.2
+      deepmerge: 4.3.0
       eslint: 8.32.0
       fs-extra: 9.1.0
       glob: 7.2.0
@@ -24767,7 +24787,7 @@ packages:
       chalk: 4.1.2
       chokidar: 3.5.3
       cosmiconfig: 6.0.0
-      deepmerge: 4.2.2
+      deepmerge: 4.3.0
       fs-extra: 9.1.0
       glob: 7.2.0
       memfs: 3.3.0
@@ -31399,7 +31419,6 @@ packages:
     resolution: {integrity: sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==}
     dependencies:
       brace-expansion: 1.1.11
-    dev: true
 
   /minimatch/3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
@@ -33178,7 +33197,7 @@ packages:
     resolution: {integrity: sha512-WyQFAdDZpExQh32j0U0feWisZ0dmOtPl44qYmJKkq9xFWY3p+4qnRzCHeNrkeRhwPHz9bQ3mo0/yVkaply0MNw==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       color: 3.2.1
       has: 1.0.3
       postcss: 7.0.39
@@ -33190,7 +33209,7 @@ packages:
     peerDependencies:
       postcss: ^8.2.15
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       caniuse-api: 3.0.0
       colord: 2.9.2
       postcss: 8.4.12
@@ -33398,7 +33417,7 @@ packages:
     resolution: {integrity: sha512-U7e3r1SbvYzO0Jr3UT/zKBVgYYyhAz0aitvGIYOYK5CPmkNih+WDSsS5tvPrJ8YMQYlEMvsZIiqmn7HdFUaeEQ==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       caniuse-api: 3.0.0
       cssnano-util-same-parent: 4.0.1
       postcss: 7.0.39
@@ -33411,7 +33430,7 @@ packages:
     peerDependencies:
       postcss: ^8.2.15
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       caniuse-api: 3.0.0
       cssnano-utils: 3.1.0_postcss@8.4.12
       postcss: 8.4.12
@@ -33465,7 +33484,7 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       alphanum-sort: 1.0.2
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       cssnano-util-get-arguments: 4.0.0
       postcss: 7.0.39
       postcss-value-parser: 3.3.1
@@ -33477,7 +33496,7 @@ packages:
     peerDependencies:
       postcss: ^8.2.15
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       cssnano-utils: 3.1.0_postcss@8.4.12
       postcss: 8.4.12
       postcss-value-parser: 4.2.0
@@ -33682,7 +33701,7 @@ packages:
     resolution: {integrity: sha512-od18Uq2wCYn+vZ/qCOeutvHjB5jm57ToxRaMeNuf0nWVHaP9Hua56QyMF6fs/4FSUnVIw0CBPsU0K4LnBPwYwg==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       postcss: 7.0.39
       postcss-value-parser: 3.3.1
 
@@ -33692,7 +33711,7 @@ packages:
     peerDependencies:
       postcss: ^8.2.15
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       postcss: 8.4.12
       postcss-value-parser: 4.2.0
     dev: true
@@ -33757,7 +33776,7 @@ packages:
     resolution: {integrity: sha512-gKWmR5aUulSjbzOfD9AlJiHCGH6AEVLaM0AV+aSioxUDd16qXP1PCh8d1/BGVvpdWn8k/HiK7n6TjeoXN1F7DA==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       caniuse-api: 3.0.0
       has: 1.0.3
       postcss: 7.0.39
@@ -33768,7 +33787,7 @@ packages:
     peerDependencies:
       postcss: ^8.2.15
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       caniuse-api: 3.0.0
       postcss: 8.4.12
     dev: true
@@ -36418,7 +36437,7 @@ packages:
       loader-utils: 2.0.2
       neo-async: 2.6.2
       schema-utils: 3.1.1
-      semver: 7.3.5
+      semver: 7.3.8
       webpack: 5.70.0_webpack-cli@3.3.12
 
   /sass-loader/12.6.0_sass@1.49.9+webpack@5.70.0:
@@ -37556,7 +37575,7 @@ packages:
     resolution: {integrity: sha512-7GlLk9JwlElY4Y6a/rmbH2MhVlTyVmiJd1PfTCqFaIBEGMYNsrO/v3SeGTdhBThLg4Z+NbOk/qFMwCa+J+3p/g==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       postcss: 7.0.39
       postcss-selector-parser: 3.1.2
 
@@ -37566,7 +37585,7 @@ packages:
     peerDependencies:
       postcss: ^8.2.15
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       postcss: 8.4.12
       postcss-selector-parser: 6.0.9
     dev: true
@@ -40363,7 +40382,7 @@ packages:
       '@webassemblyjs/wasm-parser': 1.11.1
       acorn: 8.8.1
       acorn-import-assertions: 1.8.0_acorn@8.8.1
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.9.2
       es-module-lexer: 0.9.3
@@ -40402,7 +40421,7 @@ packages:
       '@webassemblyjs/wasm-parser': 1.11.1
       acorn: 8.8.1
       acorn-import-assertions: 1.8.0_acorn@8.8.1
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.9.2
       es-module-lexer: 0.9.3
@@ -40483,7 +40502,7 @@ packages:
       '@webassemblyjs/wasm-parser': 1.11.1
       acorn: 8.8.1
       acorn-import-assertions: 1.8.0_acorn@8.8.1
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.9.2
       es-module-lexer: 0.9.3
