@@ -5,7 +5,6 @@ import { createElement, useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { Button, Modal } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Provides a modal requesting customer feedback.

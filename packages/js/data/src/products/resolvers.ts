@@ -2,12 +2,17 @@
  * External dependencies
  */
 import { addQueryArgs } from '@wordpress/url';
-import { apiFetch } from '@wordpress/data-controls';
+import {
+	apiFetch,
+	dispatch as deprecatedDispatch,
+	select,
+} from '@wordpress/data-controls';
+import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { WC_PRODUCT_NAMESPACE } from './constants';
+import { STORE_NAME, WC_PRODUCT_NAMESPACE } from './constants';
 import { Product, ProductQuery } from './types';
 import {
 	getProductError,
@@ -18,6 +23,11 @@ import {
 	getProductSuccess,
 } from './actions';
 import { request } from '../utils';
+
+const dispatch =
+	controls && controls.dispatch ? controls.dispatch : deprecatedDispatch;
+const resolveSelect =
+	controls && controls.resolveSelect ? controls.resolveSelect : select;
 
 export function* getProducts( query: Partial< ProductQuery > ) {
 	// id is always required.
@@ -56,6 +66,11 @@ export function* getProduct( productId: number ) {
 		} );
 
 		yield getProductSuccess( productId, product );
+
+		yield dispatch( STORE_NAME, 'finishResolution', 'getPermalinkParts', [
+			productId,
+		] );
+
 		return product;
 	} catch ( error ) {
 		yield getProductError( productId, error );
@@ -80,4 +95,8 @@ export function* getProductsTotalCount( query: Partial< ProductQuery > ) {
 		yield getProductsTotalCountError( query, error );
 		throw error;
 	}
+}
+
+export function* getPermalinkParts( productId: number ) {
+	yield resolveSelect( STORE_NAME, 'getProduct', [ productId ] );
 }

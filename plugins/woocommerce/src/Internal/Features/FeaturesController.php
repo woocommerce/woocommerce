@@ -95,21 +95,31 @@ class FeaturesController {
 				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental'    => false,
 				'enabled_by_default' => true,
+				'disable_ui'         => false,
 			),
 			'new_navigation'         => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
 				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
+				'disable_ui'      => false,
 			),
 			'new_product_management' => array(
 				'name'            => __( 'New product editor', 'woocommerce' ),
 				'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 				'is_experimental' => true,
+				'disable_ui'      => false,
 			),
 			'custom_order_tables'    => array(
 				'name'            => __( 'High-Performance order storage (COT)', 'woocommerce' ),
 				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
 				'is_experimental' => true,
+				'disable_ui'      => false,
+			),
+			'cart_checkout_blocks'   => array(
+				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+				'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
+				'is_experimental' => false,
+				'disable_ui'      => true,
 			),
 		);
 
@@ -577,6 +587,10 @@ class FeaturesController {
 				continue;
 			}
 
+			if ( isset( $features[ $id ]['disable_ui'] ) && $features[ $id ]['disable_ui'] ) {
+				continue;
+			}
+
 			$feature_settings[] = $this->get_setting_for_feature( $id, $features[ $id ], $admin_features_disabled );
 		}
 
@@ -644,7 +658,8 @@ class FeaturesController {
 		}
 
 		if ( 'new_product_management' === $feature_id ) {
-			$desc_tip = __( '⚠ This feature is currently in development and only available for simple products. No extension support yet.', 'woocommerce' );
+			$disabled = true;
+			$desc_tip = __( '⚠ This feature will be available soon. Stay tuned!', 'woocommerce' );
 		}
 
 		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
@@ -750,19 +765,19 @@ class FeaturesController {
 			return $list;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput
 		if ( ! function_exists( 'get_current_screen' ) || get_current_screen() && 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
 			return $list;
 		}
 
-		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id', 'all' );
+		$feature_id = $_GET['feature_id'] ?? 'all';
 		if ( 'all' !== $feature_id && ! $this->feature_exists( $feature_id ) ) {
 			return $list;
 		}
 
 		$incompatibles = array();
 
-		// phpcs:enable WordPress.Security.NonceVerification
+		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
 		foreach ( array_keys( $list ) as $plugin_name ) {
 			if ( ! $this->plugin_util->is_woocommerce_aware_plugin( $plugin_name ) || ! $this->proxy->call_function( 'is_plugin_active', $plugin_name ) ) {
 				continue;
@@ -1039,16 +1054,16 @@ class FeaturesController {
 	 * @return string[] The actual views array to use.
 	 */
 	private function handle_plugins_page_views_list( $views ): array {
-		// phpcs:disable WordPress.Security.NonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
 		if ( 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
 			return $views;
 		}
 
-		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id', 'all' );
+		$feature_id = $_GET['feature_id'] ?? 'all';
 		if ( 'all' !== $feature_id && ! $this->feature_exists( $feature_id ) ) {
 			return $views;
 		}
-		// phpcs:enable WordPress.Security.NonceVerification
+		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
 
 		$all_items = get_plugins();
 

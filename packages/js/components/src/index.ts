@@ -95,3 +95,11 @@ export {
 	SlotContextType,
 	SlotContextHelpersType,
 } from './slot-context';
+export { TreeControl as __experimentalTreeControl } from './experimental-tree-control';
+export { default as TreeSelectControl } from './tree-select-control';
+
+// Exports below can be removed once the @woocommerce/product-editor package is released.
+export {
+	ProductSectionLayout as __experimentalProductSectionLayout,
+	ProductFieldSection as __experimentalProductFieldSection,
+} from './product-section-layout';

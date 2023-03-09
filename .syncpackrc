@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:react|react-dom|eslint|typescript|@typescript-eslint|@types/react).*$",
+	"filter": "^(?:config|react|react-dom|eslint|typescript|@typescript-eslint|@types/react|@wordpress|@types/wordpress__components|postcss).*$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -35,6 +35,15 @@
 		},
 		{
 			"dependencies": [
+				"config"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "3.3.7"
+		},
+		{
+			"dependencies": [
 				"react",
 				"react-dom"
 			],
@@ -63,6 +72,88 @@
 				"**"
 			],
 			"pinVersion": "^8.32.0"
+		},
+		{
+			"dependencies": [
+				"@wordpress/eslint-plugin",
+				"@wordpress/babel-plugin-import-jsx-pragma",
+				"@wordpress/babel-preset-default",
+				"@wordpress/env",
+				"@wordpress/stylelint-config",
+				"@wordpress/prettier-config",
+				"@wordpress/scripts",
+				"@wordpress/jest-console",
+				"@wordpress/dependency-extraction-webpack-plugin",
+				"@wordpress/e2e-test-utils",
+				"@wordpress/jest-preset-default",
+				"@wordpress/postcss-plugins-preset",
+				"@wordpress/custom-templated-path-webpack-plugin",
+				"@wordpress/postcss-themes"
+			],
+			"packages": [
+				"**"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/block**",
+				"@wordpress/viewport"
+			],
+			"packages": [
+				"@woocommerce/product-editor",
+				"woocommerce/client/admin",
+				"@woocommerce/components"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/**"
+			],
+			"packages": [
+				"@woocommerce/experimental"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/**"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "wp-6.0"
+		},
+		{
+			"dependencies": [
+				"@types/wordpress__components"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^19.10.3"
+		},
+		{
+			"dependencies": [
+				"postcss-loader"
+			],
+			"dependencyTypes": [
+				"devDependencies"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^4.3.0"
+		},
+		{
+			"dependencies": [
+				"postcss"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^8.4.7"
 		}
 	]
 }

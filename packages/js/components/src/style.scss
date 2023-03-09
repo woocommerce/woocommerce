@@ -1,7 +1,6 @@
 /**
 * External Dependencies
 */
-@import 'node_modules/@wordpress/base-styles/colors.native';
 @import '@automattic/tour-kit/dist/esm/styles.scss';
 
 /**
@@ -57,3 +56,5 @@
 @import 'collapsible-content/style.scss';
 @import 'form/style.scss';
 @import 'experimental-tree-control/tree.scss';
+@import 'product-section-layout/style.scss';
+@import 'tree-select-control/index.scss';

@@ -145,7 +145,14 @@ export const downloadZip = async ( {
 			Accept: 'application/octet-stream',
 		},
 	};
-	response = await axios( options );
+
+	response = await axios( options ).catch( ( error ) => {
+		if ( error.response ) {
+			console.error( error.response.data );
+		}
+		throw new Error( error.message );
+	} );
+
 	response.data.pipe( fs.createWriteStream( zipFilePath ) );
 
 	return zipFilePath;

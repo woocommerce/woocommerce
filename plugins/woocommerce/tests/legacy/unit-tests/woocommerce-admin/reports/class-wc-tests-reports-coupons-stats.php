@@ -5,8 +5,8 @@
  * @package WooCommerce\Admin\Tests\CouponsStats
  */
 
-use \Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\DataStore as CouponsStatsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\Query as CouponsStatsQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\DataStore as CouponsStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\Query as CouponsStatsQuery;
 
 /**
  * Class WC_Admin_Tests_Reports_Coupons_Stats

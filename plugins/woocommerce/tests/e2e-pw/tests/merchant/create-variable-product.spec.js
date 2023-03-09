@@ -52,7 +52,9 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 
 		// add 3 attributes
 		for ( let i = 0; i < 3; i++ ) {
-			await page.click( 'button.add_attribute' );
+			if ( i > 0 ) {
+				await page.click( 'button.add_attribute' );
+			}
 			await page.fill(
 				`input[name="attribute_names[${ i }]"]`,
 				`attr #${ i + 1 }`
@@ -61,8 +63,8 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 				`textarea[name="attribute_values[${ i }]"]`,
 				'val1 | val2'
 			);
-			await page.click( `input[name="attribute_variation[${ i }]"]` );
 		}
+		await page.keyboard.press( 'ArrowUp' );
 		await page.click( 'text=Save attributes' );
 
 		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
@@ -137,6 +139,7 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		await page.fill( 'input[name="variable_length[2]"]', productLength );
 		await page.fill( 'input[name="variable_width[2]"]', productWidth );
 		await page.fill( 'input[name="variable_height[2]"]', productHeight );
+		await page.keyboard.press( 'ArrowUp' );
 		await page.click( 'button.save-variation-changes' );
 
 		// bulk-edit variations
@@ -199,7 +202,9 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		await page.click( 'a[href="#product_attributes"]' );
 		// add 3 attributes
 		for ( let i = 0; i < 3; i++ ) {
-			await page.click( 'button.add_attribute' );
+			if ( i > 0 ) {
+				await page.click( 'button.add_attribute' );
+			}
 			await page.fill(
 				`input[name="attribute_names[${ i }]"]`,
 				`attr #${ i + 1 }`
@@ -208,7 +213,7 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 				`textarea[name="attribute_values[${ i }]"]`,
 				'val1 | val2'
 			);
-			await page.click( `input[name="attribute_variation[${ i }]"]` );
+			await page.keyboard.press( 'ArrowUp' );
 			await page.click( 'text=Save attributes' );
 			await expect(
 				page

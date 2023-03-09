@@ -5,12 +5,15 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Caching\CacheNameSpaceTrait;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Cache_Helper.
  */
 class WC_Cache_Helper {
+	use CacheNameSpaceTrait;
 
 	/**
 	 * Transients to delete on shutdown.
@@ -42,7 +45,7 @@ class WC_Cache_Helper {
 	 */
 	public static function additional_nocache_headers( $headers ) {
 		global $wp_query;
-		
+
 		$agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$set_cache = false;
@@ -112,44 +115,6 @@ class WC_Cache_Helper {
 				self::queue_delete_transient( 'wc_layered_nav_counts_' . $attribute_key );
 			}
 		}
-	}
-
-	/**
-	 * Get prefix for use with wp_cache_set. Allows all cache in a group to be invalidated at once.
-	 *
-	 * @param  string $group Group of cache to get.
-	 * @return string
-	 */
-	public static function get_cache_prefix( $group ) {
-		// Get cache key - uses cache key wc_orders_cache_prefix to invalidate when needed.
-		$prefix = wp_cache_get( 'wc_' . $group . '_cache_prefix', $group );
-
-		if ( false === $prefix ) {
-			$prefix = microtime();
-			wp_cache_set( 'wc_' . $group . '_cache_prefix', $prefix, $group );
-		}
-
-		return 'wc_cache_' . $prefix . '_';
-	}
-
-	/**
-	 * Increment group cache prefix (invalidates cache).
-	 *
-	 * @param string $group Group of cache to clear.
-	 */
-	public static function incr_cache_prefix( $group ) {
-		wc_deprecated_function( 'WC_Cache_Helper::incr_cache_prefix', '3.9.0', 'WC_Cache_Helper::invalidate_cache_group' );
-		self::invalidate_cache_group( $group );
-	}
-
-	/**
-	 * Invalidate cache group.
-	 *
-	 * @param string $group Group of cache to clear.
-	 * @since 3.9.0
-	 */
-	public static function invalidate_cache_group( $group ) {
-		wp_cache_set( 'wc_' . $group . '_cache_prefix', microtime(), $group );
 	}
 
 	/**

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1c61abfc7c6c9b7795d2c18201e29f08",
+    "content-hash": "f08d44536a1162957e0edb212f042956",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -628,16 +628,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "v9.4.3",
+            "version": "v9.6.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "26feae05d65ff38f0277bdb0c19f9d293d3cbfc4"
+                "reference": "0d316bd6a7edd18a4af6fa55406b1279b18b28a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/26feae05d65ff38f0277bdb0c19f9d293d3cbfc4",
-                "reference": "26feae05d65ff38f0277bdb0c19f9d293d3cbfc4",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/0d316bd6a7edd18a4af6fa55406b1279b18b28a4",
+                "reference": "0d316bd6a7edd18a4af6fa55406b1279b18b28a4",
                 "shasum": ""
             },
             "require": {
@@ -683,24 +683,24 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v9.4.3"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v9.6.5"
             },
-            "time": "2023-02-02T10:50:45+00:00"
+            "time": "2023-03-06T15:42:05+00:00"
         }
     ],
     "packages-dev": [
         {
             "name": "automattic/jetpack-changelogger",
-            "version": "v3.3.0",
+            "version": "v3.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-changelogger.git",
-                "reference": "8f63c829b8d1b0d7b1d5de93510d78523ed18959"
+                "reference": "7cf54b678e9a0e284a772abf01317ccc1b811715"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-changelogger/zipball/8f63c829b8d1b0d7b1d5de93510d78523ed18959",
-                "reference": "8f63c829b8d1b0d7b1d5de93510d78523ed18959",
+                "url": "https://api.github.com/repos/Automattic/jetpack-changelogger/zipball/7cf54b678e9a0e284a772abf01317ccc1b811715",
+                "reference": "7cf54b678e9a0e284a772abf01317ccc1b811715",
                 "shasum": ""
             },
             "require": {
@@ -742,9 +742,9 @@
             ],
             "description": "Jetpack Changelogger tool. Allows for managing changelogs by dropping change files into a changelog directory with each PR.",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-changelogger/tree/v3.3.0"
+                "source": "https://github.com/Automattic/jetpack-changelogger/tree/v3.3.2"
             },
-            "time": "2022-12-26T13:49:01+00:00"
+            "time": "2023-02-20T19:46:43+00:00"
         },
         {
             "name": "bamarni/composer-bin-plugin",

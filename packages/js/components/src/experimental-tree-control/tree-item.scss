@@ -1,12 +1,21 @@
+$control-size: $gap-large;
+
 .experimental-woocommerce-tree-item {
 	margin: 0;
+
+	&--highlighted {
+		> .experimental-woocommerce-tree-item__heading {
+			background-color: $gray-100;
+		}
+	}
 
 	&__heading {
 		display: flex;
 		flex-grow: 1;
 		gap: $gap-smaller;
 		min-height: $gap-largest;
-		padding: 0 $gap-small 0 calc( ( var( --level ) - 1 ) * ( $gap + $gap-small ) + $gap-small );
+		padding: 0 $gap-small 0
+			calc( ( var( --level ) - 1 ) * ( $gap + $gap-small ) + $gap-small );
 		border-radius: 2px;
 
 		&:hover,
@@ -17,9 +26,10 @@
 
 		&:hover,
 		&:focus-within {
-			background-color: $gray-0;
+			background-color: $gray-100;
 		}
 	}
+
 	&__label {
 		display: flex;
 		flex-grow: 1;
@@ -30,13 +40,50 @@
 		> span {
 			display: block;
 		}
+
+		.components-base-control__field {
+			margin: 0;
+		}
+
+		.components-radio-control__input {
+			@include screen-reader-only();
+		}
+
+		.components-checkbox-control__label {
+			display: none;
+		}
+
+		.components-checkbox-control__input-container {
+			display: block;
+			width: $control-size;
+			height: $control-size;
+		}
+
+		svg.components-checkbox-control__checked,
+		svg.components-checkbox-control__indeterminate,
+		.components-checkbox-control__input[type='checkbox'] {
+			position: absolute;
+			border-color: $gray-700;
+			width: $control-size;
+			height: $control-size;
+			top: 0;
+			left: 0;
+			&:focus {
+				outline: none;
+				box-shadow: none;
+			}
+		}
 	}
+
 	&__expander {
 		display: flex;
 		align-items: center;
 
 		.components-button {
 			padding: 0;
+			height: $control-size;
+			width: $control-size;
+			min-width: $control-size;
 		}
 	}
 }

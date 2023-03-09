@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -659,6 +660,9 @@ function wc_create_refund( $args = array() ) {
 			}
 		}
 
+		$order->set_date_modified( time() );
+		$order->save();
+
 		do_action( 'woocommerce_refund_created', $refund->get_id(), $args );
 		do_action( 'woocommerce_order_refunded', $order->get_id(), $refund->get_id() );
 
@@ -926,7 +930,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 	if ( count( $order->get_coupon_codes() ) > 0 ) {
 		foreach ( $order->get_coupon_codes() as $code ) {
-			if ( ! $code ) {
+			if ( StringUtil::is_null_or_whitespace( $code ) ) {
 				continue;
 			}
 

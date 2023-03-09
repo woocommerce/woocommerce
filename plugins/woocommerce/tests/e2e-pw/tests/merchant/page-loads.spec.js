@@ -62,7 +62,7 @@ for ( const currentPage of wcPages ) {
 							'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 						);
 						await page.click( 'text=Skip setup store details' );
-						await page.click( 'text=No thanks' );
+						await page.click( 'button >> text=No thanks' );
 						await page.waitForLoadState( 'networkidle' );
 						await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 					}

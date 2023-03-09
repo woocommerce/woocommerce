@@ -6,7 +6,7 @@ import { registerPlugin } from '@wordpress/plugins';
 import {
 	__experimentalWooProductTabItem as WooProductTabItem,
 	__experimentalWooProductSectionItem as WooProductSectionItem,
-} from '@woocommerce/components';
+} from '@woocommerce/product-editor';
 import { PartialProduct } from '@woocommerce/data';
 
 /**
