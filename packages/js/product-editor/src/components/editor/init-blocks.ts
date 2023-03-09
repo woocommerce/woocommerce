@@ -1,5 +1,8 @@
 /**
  * Internal dependencies
  */
+import { init as initSection } from '../section';
 
-export const initBlocks = () => {};
+export const initBlocks = () => {
+	initSection();
+};
