@@ -41,6 +41,39 @@ export const fetchWpComPost = async (
 	}
 };
 
+export const searchForPostsByCategory = async (
+	siteId: string,
+	search: string,
+	category: string,
+	authToken: string
+) => {
+	try {
+		const post = await fetch(
+			`https://public-api.wordpress.com/rest/v1.1/sites/${ siteId }/posts?${ new URLSearchParams(
+				{ search, category }
+			) }`,
+			{
+				headers: {
+					Authorization: `Bearer ${ authToken }`,
+					'Content-Type': 'application/json',
+				},
+				method: 'GET',
+			}
+		);
+
+		if ( post.status !== 200 ) {
+			const text = await post.text();
+			throw new Error( `Error creating draft post: ${ text }` );
+		}
+
+		return ( await post.json() ).posts;
+	} catch ( e: unknown ) {
+		if ( e instanceof Error ) {
+			Logger.error( e.message );
+		}
+	}
+};
+
 /**
  * Edit a post on wordpress.com
  *
