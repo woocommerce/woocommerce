@@ -7,7 +7,7 @@
 	"category": "woocommerce",
 	"supports": {
 		"align": true,
-		"reusable": false
+		"multiple": false
 	},
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "postId", "postType", "queryId" ],
