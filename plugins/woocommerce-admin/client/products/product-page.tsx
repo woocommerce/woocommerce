@@ -16,6 +16,7 @@ import { useParams } from 'react-router-dom';
  * Internal dependencies
  */
 import './product-page.scss';
+import './product-block-page.scss';
 
 declare const productBlockEditorSettings: ProductEditorSettings;
 

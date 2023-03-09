@@ -6,12 +6,13 @@ import { createElement, useContext, Fragment } from '@wordpress/element';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { useBlockProps } from '@wordpress/block-editor';
-import { useEntityProp } from '@wordpress/core-data';
+import {
+	// @ts-expect-error missing prop.
+	useEntityProp,
+} from '@wordpress/core-data';
 import { CurrencyContext } from '@woocommerce/currency';
 import { getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
-import { useSelect } from '@wordpress/data';
-import { SETTINGS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -22,6 +23,7 @@ import {
  * Internal dependencies
  */
 import { formatCurrencyDisplayValue } from '../../utils';
+import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
 
 export function Edit() {
 	const blockProps = useBlockProps();
@@ -33,40 +35,13 @@ export function Edit() {
 	const context = useContext( CurrencyContext );
 	const { getCurrencyConfig, formatAmount } = context;
 	const currencyConfig = getCurrencyConfig();
-
-	const { isResolving: isTaxSettingsResolving, taxSettings } = useSelect(
-		( select ) => {
-			const { getSettings, hasFinishedResolution } = (
-				select as WCDataSelector
-			 )( SETTINGS_STORE_NAME );
-			return {
-				isResolving: ! hasFinishedResolution( 'getSettings', [
-					'tax',
-				] ),
-				taxSettings: getSettings( 'tax' ).tax || {},
-				taxesEnabled:
-					getSettings( 'general' )?.general
-						?.woocommerce_calc_taxes === 'yes',
-			};
-		},
-		[]
-	);
-
-	const taxIncludedInPriceText = __(
-		'Per your {{link}}store settings{{/link}}, tax is {{strong}}included{{/strong}} in the price.',
-		'woocommerce'
-	);
-	const taxNotIncludedInPriceText = __(
-		'Per your {{link}}store settings{{/link}}, tax is {{strong}}not included{{/strong}} in the price.',
-		'woocommerce'
-	);
-	const pricesIncludeTax =
-		taxSettings.woocommerce_prices_include_tax === 'yes';
+	const inputProps = useCurrencyInputProps( {
+		value: regularPrice,
+		setValue: setRegularPrice,
+	} );
 
 	const taxSettingsElement = interpolateComponents( {
-		mixedString: pricesIncludeTax
-			? taxIncludedInPriceText
-			: taxNotIncludedInPriceText,
+		mixedString: 'Manage more settings in {{link}}Pricing.{{/link}}',
 		components: {
 			link: (
 				<Link
@@ -84,12 +59,11 @@ export function Edit() {
 					<></>
 				</Link>
 			),
-			strong: <strong />,
 		},
 	} );
 
 	return (
-		<>
+		<div { ...blockProps }>
 			<BaseControl id="product_pricing_regular_price" help={ '' }>
 				<InputControl
 					name="regular_price"
@@ -100,13 +74,12 @@ export function Edit() {
 						currencyConfig,
 						formatAmount
 					) }
+					{ ...inputProps }
 				/>
 			</BaseControl>
-			{ ! isTaxSettingsResolving && (
-				<span className="woocommerce-product-form__secondary-text">
-					{ taxSettingsElement }
-				</span>
-			) }
-		</>
+			<span className="woocommerce-product-form__secondary-text">
+				{ taxSettingsElement }
+			</span>
+		</div>
 	);
 }

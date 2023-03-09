@@ -3,7 +3,7 @@ export default {
 	apiVersion: 2,
 	name: 'woocommerce/product-list-price',
 	title: 'Product list price',
-	category: 'widgets',
+	category: 'text',
 	description: 'The product list price.',
 	keywords: [ 'products', 'price' ],
 	textdomain: 'default',
