@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import {
 	Button,
-	CardDivider,
 	Modal,
 	Icon,
 	Flex,
@@ -139,21 +138,13 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 						</FlexItem>
 						{ ! collapsed && (
 							<FlexItem>
-								{ recommendedChannels.map( ( el, idx ) => {
-									return (
-										<Fragment key={ el.plugin }>
-											<SmartPluginCardBody
-												plugin={ el }
-												onInstalledAndActivated={
-													refetch
-												}
-											/>
-											{ idx !==
-												recommendedChannels.length -
-													1 && <CardDivider /> }
-										</Fragment>
-									);
-								} ) }
+								{ recommendedChannels.map( ( el ) => (
+									<SmartPluginCardBody
+										key={ el.plugin }
+										plugin={ el }
+										onInstalledAndActivated={ refetch }
+									/>
+								) ) }
 							</FlexItem>
 						) }
 					</Flex>
