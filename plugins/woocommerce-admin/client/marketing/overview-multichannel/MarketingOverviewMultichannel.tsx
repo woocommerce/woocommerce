@@ -12,6 +12,7 @@ import { CenteredSpinner } from '~/marketing/components';
 import {
 	useRegisteredChannels,
 	useRecommendedChannels,
+	useCampaignTypes,
 } from '~/marketing/hooks';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { Campaigns } from './Campaigns';
@@ -23,24 +24,35 @@ import './MarketingOverviewMultichannel.scss';
 
 export const MarketingOverviewMultichannel: React.FC = () => {
 	const {
+		loading: loadingCampaignTypes,
+		data: dataCampaignTypes,
+		refetch: refetchCampaignTypes,
+	} = useCampaignTypes();
+	const {
 		loading: loadingRegistered,
 		data: dataRegistered,
-		refetch,
+		refetch: refetchRegisteredChannels,
 	} = useRegisteredChannels();
 	const { loading: loadingRecommended, data: dataRecommended } =
 		useRecommendedChannels();
 	const { currentUserCan } = useUser();
 
-	const shouldShowExtensions =
-		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
-		currentUserCan( 'install_plugins' );
-
 	if (
+		( loadingCampaignTypes && ! dataCampaignTypes ) ||
 		( loadingRegistered && ! dataRegistered ) ||
 		( loadingRecommended && ! dataRecommended )
 	) {
 		return <CenteredSpinner />;
 	}
+
+	const shouldShowExtensions =
+		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
+		currentUserCan( 'install_plugins' );
+
+	const refetch = () => {
+		refetchCampaignTypes();
+		refetchRegisteredChannels();
+	};
 
 	return (
 		<div className="woocommerce-marketing-overview-multichannel">
