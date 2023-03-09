@@ -248,7 +248,7 @@ The following function handles the loading of fallback translations for JS/TS fi
  *
  * @return string|false        Path to the translation file to load. False if there isn't one.
  */
-function load_woocommerce_core_json_translation( $file, $handle, $domain ) {
+function load_woocommerce_core_js_translation( $file, $handle, $domain ) {
 	if ( 'woo-gutenberg-products-block' !== $domain ) {
 		return $file;
 	}
@@ -294,5 +294,5 @@ function load_woocommerce_core_json_translation( $file, $handle, $domain ) {
 	return $lang_dir . '/woocommerce-' . $locale . '-' . $core_path_md5 . '.json';
 }
 
-add_filter( 'load_script_translation_file', 'load_woocommerce_core_json_translation', 10, 3 );
+add_filter( 'load_script_translation_file', 'load_woocommerce_core_js_translation', 10, 3 );
 ```

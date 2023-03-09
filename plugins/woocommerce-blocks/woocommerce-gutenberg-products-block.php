@@ -178,7 +178,7 @@ add_action( 'plugins_loaded', array( '\Automattic\WooCommerce\Blocks\Package', '
  *
  * @return string|false        Path to the translation file to load. False if there isn't one.
  */
-function load_woocommerce_core_json_translation( $file, $handle, $domain ) {
+function load_woocommerce_core_js_translation( $file, $handle, $domain ) {
 	if ( 'woo-gutenberg-products-block' !== $domain ) {
 		return $file;
 	}
@@ -224,7 +224,7 @@ function load_woocommerce_core_json_translation( $file, $handle, $domain ) {
 	return $lang_dir . '/woocommerce-' . $locale . '-' . $core_path_md5 . '.json';
 }
 
-add_filter( 'load_script_translation_file', 'load_woocommerce_core_json_translation', 10, 3 );
+add_filter( 'load_script_translation_file', 'load_woocommerce_core_js_translation', 10, 3 );
 
 /**
  * Filter translations so we can retrieve translations from Core when the original and the translated
@@ -307,6 +307,7 @@ add_filter(
  * Load and setup the Interactivity API if enabled.
  */
 function woocommerce_blocks_interactivity_setup() {
+	// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	$is_enabled = apply_filters(
 		'woocommerce_blocks_enable_interactivity_api',
 		false
