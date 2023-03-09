@@ -17,6 +17,7 @@ export function useTreeItem( {
 	item,
 	level,
 	multiple,
+	shouldNotRecursivelySelect,
 	selected,
 	index,
 	getLabel,
@@ -41,6 +42,7 @@ export function useTreeItem( {
 		index,
 		onSelect,
 		onRemove,
+		shouldNotRecursivelySelect,
 	} );
 
 	const highlighter = useHighlighter( {

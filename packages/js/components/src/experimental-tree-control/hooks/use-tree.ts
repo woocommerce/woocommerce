@@ -19,6 +19,7 @@ export function useTree( {
 	shouldItemBeHighlighted,
 	onSelect,
 	onRemove,
+	shouldNotRecursivelySelect,
 	...props
 }: TreeProps ) {
 	return {
@@ -35,6 +36,7 @@ export function useTree( {
 			getLabel: getItemLabel,
 			shouldItemBeExpanded,
 			shouldItemBeHighlighted,
+			shouldNotRecursivelySelect,
 			onSelect,
 			onRemove,
 		},

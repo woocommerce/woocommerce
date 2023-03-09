@@ -14,7 +14,7 @@ export type CheckedStatus = 'checked' | 'unchecked' | 'indeterminate';
 
 type BaseTreeProps = {
 	/**
-	 * It contians one item if `multiple` value is false or
+	 * It contains one item if `multiple` value is false or
 	 * a list of items if it is true.
 	 */
 	selected?: Item | Item[];
@@ -22,6 +22,11 @@ type BaseTreeProps = {
 	 * Whether the tree items are single or multiple selected.
 	 */
 	multiple?: boolean;
+	/**
+	 * In `multiple` mode, when this flag is also set, selecting children does
+	 * not select their parents and selecting parents does not select their children.
+	 */
+	shouldNotRecursivelySelect?: boolean;
 	/**
 	 * When `multiple` is true and a child item is selected, all its
 	 * ancestors and its descendants are also selected. If it's false

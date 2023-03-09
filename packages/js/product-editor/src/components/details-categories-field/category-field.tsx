@@ -218,6 +218,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 							{ isOpen && (
 								<TreeControl
 									multiple
+									shouldNotRecursivelySelect
 									className="woocommerce-category-field-dropdown__test"
 									items={ mapFromCategoryType( items ) }
 									selected={ mapFromCategoryType( value ) }
