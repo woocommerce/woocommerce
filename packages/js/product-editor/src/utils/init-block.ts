@@ -3,11 +3,11 @@
  */
 import { BlockConfiguration, registerBlockType } from '@wordpress/blocks';
 
-interface BlockRepresentation {
+type BlockRepresentation = {
 	name: string;
 	metadata: BlockConfiguration;
 	settings: Partial< BlockConfiguration >;
-}
+};
 
 /**
  * Function to register an individual block.
