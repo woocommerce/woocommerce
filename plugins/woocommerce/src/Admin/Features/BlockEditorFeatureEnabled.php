@@ -27,9 +27,11 @@ class BlockEditorFeatureEnabled {
 	 */
 	public function __construct() {
 		if ( ! Features::is_enabled( 'new-product-management-experience' ) && Features::is_enabled( self::FEATURE_ID ) ) {
-			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 			add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
+		}
+		if ( Features::is_enabled( self::FEATURE_ID ) ) {
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		}
 	}
 
