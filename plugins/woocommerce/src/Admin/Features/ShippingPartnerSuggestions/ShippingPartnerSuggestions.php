@@ -4,8 +4,17 @@ namespace Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions;
 
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
 
+/**
+ * Class ShippingPartnerSuggestions
+ */
 class ShippingPartnerSuggestions {
 
+	/**
+	 * Go through the specs and run them.
+	 *
+	 * @param array|null $specs payment suggestion spec array.
+	 * @return array
+	 */
 	public static function get_suggestions( $specs = null ) {
 		$suggestions = array();
 		if ( null === $specs ) {
@@ -31,15 +40,30 @@ class ShippingPartnerSuggestions {
 	 */
 	public static function get_specs_from_datasource() {
 		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+			/**
+			 * It can be used to modify shipping partner suggestions spec.
+			 *
+			 * @since 7.4.1
+			 */
 			return apply_filters( 'woocommerce_admin_shipping_partner_suggestions_specs', DefaultShippingPartners::get_all() );
 		}
 		$specs = ShippingPartnerSuggestionsDataSourcePoller::get_instance()->get_specs_from_data_sources();
 
 		// Fetch specs if they don't yet exist.
 		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
+			/**
+			 * It can be used to modify shipping partner suggestions spec.
+			 *
+			 * @since 7.4.1
+			 */
 			return apply_filters( 'woocommerce_admin_shipping_partner_suggestions_specs', DefaultShippingPartners::get_all() );
 		}
 
+		/**
+		 * It can be used to modify shipping partner suggestions spec.
+		 *
+		 * @since 7.4.1
+		 */
 		return apply_filters( 'woocommerce_admin_shipping_partner_suggestions_specs', $specs );
 	}
 }
