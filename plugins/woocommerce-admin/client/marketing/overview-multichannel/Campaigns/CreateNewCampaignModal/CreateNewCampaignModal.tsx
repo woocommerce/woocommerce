@@ -46,12 +46,12 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 
 	return (
 		<Modal
+			{ ...restProps }
 			className={ classnames(
 				className,
 				'woocommerce-marketing-create-campaign-modal'
 			) }
 			title={ __( 'Create a new campaign', 'woocommerce' ) }
-			{ ...restProps }
 		>
 			<div className="woocommerce-marketing-new-campaigns">
 				<div className="woocommerce-marketing-new-campaigns__question-label">
