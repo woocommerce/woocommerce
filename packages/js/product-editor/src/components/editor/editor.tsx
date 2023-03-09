@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { createElement, StrictMode } from '@wordpress/element';
 import {
 	EditorSettings,

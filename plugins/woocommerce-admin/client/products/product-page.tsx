@@ -37,15 +37,22 @@ const ProductEditor: React.FC< { product: Product | undefined } > = ( {
 const EditProductEditor: React.FC< { productId: string } > = ( {
 	productId,
 } ) => {
-	const { product } = useSelect( ( select: typeof WPSelect ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore Missing types.
-		const { getEditedEntityRecord } = select( 'core' );
+	const { product } = useSelect(
+		( select: typeof WPSelect ) => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore Missing types.
+			const { getEditedEntityRecord } = select( 'core' );
 
-		return {
-			product: getEditedEntityRecord( 'postType', 'product', productId ),
-		};
-	} );
+			return {
+				product: getEditedEntityRecord(
+					'postType',
+					'product',
+					productId
+				),
+			};
+		},
+		[ productId ]
+	);
 
 	return <ProductEditor product={ product } />;
 };
