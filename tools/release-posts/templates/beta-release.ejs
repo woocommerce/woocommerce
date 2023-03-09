@@ -1,7 +1,3 @@
-<!-- wp:heading -->
-<h1>WooCommerce <%= prettyVersion %></h1>
-<!-- /wp:heading -->
-
 <!-- wp:paragraph -->
 <p>
 	Beta <%= betaNumber %> for the March 2023 release of WooCommerce is now
@@ -80,7 +76,11 @@
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p>We're still on track for our planned March 14 release.</p>
+<p>
+	We're still on track for our planned <%=
+	finalReleaseDate.toLocaleDateString('en-US', {month: 'long', day:
+	'numeric'}) %> release.
+</p>
 <!-- /wp:paragraph -->
 
 <!-- wp:table -->
