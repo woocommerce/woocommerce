@@ -171,12 +171,11 @@ describe( 'Campaigns component', () => {
 
 		render( <Campaigns /> );
 
-		expect( screen.getByText( 'Create new campaign' ) ).toBeInTheDocument();
-
 		await userEvent.click(
 			screen.getByRole( 'button', { name: 'Create new campaign' } )
 		);
 
+		// Modal with "Create a new campaign" should be displayed.
 		expect(
 			screen.getByText( 'Create a new campaign' )
 		).toBeInTheDocument();
