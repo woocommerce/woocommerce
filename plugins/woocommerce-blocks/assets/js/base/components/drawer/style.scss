@@ -116,12 +116,21 @@ $drawer-width-mobile: 100vw;
 	.components-button {
 		@include reset-box();
 		background: transparent;
+		color: inherit;
 		position: absolute;
-		right: 0;
+		opacity: 0.6;
+		// The SVG has some white spacing around, thus we have to set this magic number.
+		right: 8px;
 		top: 0;
 		// Increase clickable area.
 		padding: 1em;
 		margin: -1em;
+
+		&:hover,
+		&:focus,
+		&:active {
+			opacity: 1;
+		}
 
 		> span {
 			@include visually-hidden();
