@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -18,6 +19,7 @@ type UseCampaignTypes = {
 	loading: boolean;
 	data?: Array< CampaignType >;
 	error?: ApiFetchError;
+	refetch: () => void;
 };
 
 const convert = ( campaignType: APICampaignType ): CampaignType => {
@@ -33,14 +35,25 @@ const convert = ( campaignType: APICampaignType ): CampaignType => {
 };
 
 export const useCampaignTypes = (): UseCampaignTypes => {
-	return useSelect( ( select ) => {
-		const { hasFinishedResolution, getCampaignTypes } = select( STORE_KEY );
-		const campaignTypesState = getCampaignTypes< CampaignTypesState >();
+	const { invalidateResolution } = useDispatch( STORE_KEY );
 
-		return {
-			loading: ! hasFinishedResolution( 'getCampaignTypes' ),
-			data: campaignTypesState.data?.map( convert ),
-			error: campaignTypesState.error,
-		};
-	}, [] );
+	const refetch = useCallback( () => {
+		invalidateResolution( 'getCampaignTypes' );
+	}, [ invalidateResolution ] );
+
+	return useSelect< UseCampaignTypes >(
+		( select ) => {
+			const { hasFinishedResolution, getCampaignTypes } =
+				select( STORE_KEY );
+			const campaignTypesState = getCampaignTypes< CampaignTypesState >();
+
+			return {
+				loading: ! hasFinishedResolution( 'getCampaignTypes' ),
+				data: campaignTypesState.data?.map( convert ),
+				error: campaignTypesState.error,
+				refetch,
+			};
+		},
+		[ refetch ]
+	);
 };

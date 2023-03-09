@@ -39,9 +39,15 @@ type CreateCampaignModalProps = Omit< Modal.Props, 'title' | 'children' >;
 export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	const { className, ...restProps } = props;
 	const [ collapsed, setCollapsed ] = useState( true );
-	const { data: campaignTypes } = useCampaignTypes();
+	const { data: campaignTypes, refetch: refetchCampaignTypes } =
+		useCampaignTypes();
+	const { refetch: refetchRegisteredChannels } = useRegisteredChannels();
 	const { data: recommendedChannels } = useRecommendedChannels();
-	const { refetch } = useRegisteredChannels();
+
+	const refetch = () => {
+		refetchCampaignTypes();
+		refetchRegisteredChannels();
+	};
 
 	return (
 		<Modal
