@@ -176,6 +176,7 @@ const program = new Command()
 					releaseDate,
 					betaNumber: prereleaseVersion,
 					version: semverVersion,
+					previousVersion: semverPreviousVersion,
 					prettyVersion: `${ semverVersion.major }.${ semverVersion.minor }.${ semverVersion.patch } Beta ${ prereleaseVersion }`,
 					prettyPreviousVersion: `${ semverPreviousVersion.major }.${
 						semverPreviousVersion.minor
