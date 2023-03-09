@@ -20,7 +20,7 @@ jest.mock( '~/marketing/hooks', () => ( {
 } ) );
 
 jest.mock( './CreateNewCampaignModal', () => ( {
-	CreateNewCampaignModal: () => <div>Create a new campaign</div>,
+	CreateNewCampaignModal: () => <div>Mocked CreateNewCampaignModal</div>,
 } ) );
 
 /**
@@ -175,9 +175,9 @@ describe( 'Campaigns component', () => {
 			screen.getByRole( 'button', { name: 'Create new campaign' } )
 		);
 
-		// Modal with "Create a new campaign" should be displayed.
+		// Mocked CreateNewCampaignModal should be displayed.
 		expect(
-			screen.getByText( 'Create a new campaign' )
+			screen.getByText( 'Mocked CreateNewCampaignModal' )
 		).toBeInTheDocument();
 	} );
 } );
