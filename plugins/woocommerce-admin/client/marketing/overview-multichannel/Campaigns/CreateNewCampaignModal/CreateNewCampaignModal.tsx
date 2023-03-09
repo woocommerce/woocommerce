@@ -20,7 +20,7 @@ import classnames from 'classnames';
  */
 import {
 	useRecommendedChannels,
-	useNewCampaignTypes,
+	useCampaignTypes,
 	useRegisteredChannels,
 } from '~/marketing/hooks';
 import { SmartPluginCardBody } from '~/marketing/components';
@@ -40,7 +40,7 @@ type CreateCampaignModalProps = Omit< Modal.Props, 'title' | 'children' >;
 export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	const { className, ...restProps } = props;
 	const [ collapsed, setCollapsed ] = useState( true );
-	const { data: newCampaignTypes } = useNewCampaignTypes();
+	const { data: campaignTypes } = useCampaignTypes();
 	const { data: recommendedChannels } = useRecommendedChannels();
 	const { refetch } = useRegisteredChannels();
 
@@ -61,7 +61,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 					) }
 				</div>
 				<div>
-					{ newCampaignTypes?.map( ( el ) => {
+					{ campaignTypes?.map( ( el ) => {
 						return (
 							<Flex
 								key={ el.id }

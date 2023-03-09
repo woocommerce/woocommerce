@@ -14,7 +14,7 @@ import {
 } from '~/marketing/data-multichannel/types';
 import { CampaignType } from '~/marketing/types/CampaignType';
 
-type UseNewCampaignTypes = {
+type UseCampaignTypes = {
 	loading: boolean;
 	data?: Array< CampaignType >;
 	error?: ApiFetchError;
@@ -32,7 +32,7 @@ const convert = ( campaignType: APICampaignType ): CampaignType => {
 	};
 };
 
-export const useNewCampaignTypes = (): UseNewCampaignTypes => {
+export const useCampaignTypes = (): UseCampaignTypes => {
 	return useSelect( ( select ) => {
 		const { hasFinishedResolution, getCampaignTypes } = select( STORE_KEY );
 		const campaignTypesState = getCampaignTypes< CampaignTypesState >();

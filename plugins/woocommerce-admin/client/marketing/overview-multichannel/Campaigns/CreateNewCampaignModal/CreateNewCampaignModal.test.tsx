@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import {
-	useNewCampaignTypes,
+	useCampaignTypes,
 	useRecommendedChannels,
 	useRegisteredChannels,
 } from '~/marketing/hooks';
@@ -25,14 +25,14 @@ jest.mock( '@woocommerce/components', () => {
 } );
 
 jest.mock( '~/marketing/hooks', () => ( {
-	useNewCampaignTypes: jest.fn(),
+	useCampaignTypes: jest.fn(),
 	useRecommendedChannels: jest.fn(),
 	useRegisteredChannels: jest.fn(),
 } ) );
 
 describe( 'CreateNewCampaignModal component', () => {
 	it( 'renders new campaign types with recommended channels', async () => {
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			data: [
 				{
 					id: 'google-ads',
@@ -118,7 +118,7 @@ describe( 'CreateNewCampaignModal component', () => {
 	} );
 
 	it( 'does not render recommended channels section when there are no recommended channels', async () => {
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			data: [
 				{
 					id: 'google-ads',

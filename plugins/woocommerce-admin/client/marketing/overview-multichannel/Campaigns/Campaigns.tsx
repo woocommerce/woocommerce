@@ -25,7 +25,7 @@ import {
  * Internal dependencies
  */
 import { CardHeaderTitle } from '~/marketing/components';
-import { useNewCampaignTypes } from '~/marketing/hooks';
+import { useCampaignTypes } from '~/marketing/hooks';
 import { useCampaigns } from './useCampaigns';
 import { CreateNewCampaignModal } from './CreateNewCampaignModal';
 import './Campaigns.scss';
@@ -66,7 +66,7 @@ export const Campaigns = () => {
 		data,
 		meta,
 	} = useCampaigns( page, perPage );
-	const { loading: loadingNewCampaignTypes } = useNewCampaignTypes();
+	const { loading: loadingNewCampaignTypes } = useCampaignTypes();
 	const total = meta?.total;
 
 	const getContent = () => {

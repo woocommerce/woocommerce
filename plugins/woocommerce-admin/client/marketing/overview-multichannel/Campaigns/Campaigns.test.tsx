@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import { useCampaigns } from './useCampaigns';
-import { useNewCampaignTypes } from '~/marketing/hooks';
+import { useCampaignTypes } from '~/marketing/hooks';
 import { Campaigns } from './Campaigns';
 
 jest.mock( './useCampaigns', () => ( {
@@ -16,7 +16,7 @@ jest.mock( './useCampaigns', () => ( {
 } ) );
 
 jest.mock( '~/marketing/hooks', () => ( {
-	useNewCampaignTypes: jest.fn(),
+	useCampaignTypes: jest.fn(),
 } ) );
 
 jest.mock( './CreateNewCampaignModal', () => ( {
@@ -47,7 +47,7 @@ describe( 'Campaigns component', () => {
 			data: undefined,
 			meta: undefined,
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: true,
 		} );
 
@@ -66,7 +66,7 @@ describe( 'Campaigns component', () => {
 			data: undefined,
 			meta: undefined,
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: false,
 		} );
 
@@ -86,7 +86,7 @@ describe( 'Campaigns component', () => {
 				total: 0,
 			},
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: false,
 		} );
 
@@ -106,7 +106,7 @@ describe( 'Campaigns component', () => {
 				total: 1,
 			},
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: false,
 		} );
 
@@ -135,7 +135,7 @@ describe( 'Campaigns component', () => {
 				total: 6,
 			},
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: false,
 		} );
 
@@ -165,7 +165,7 @@ describe( 'Campaigns component', () => {
 				total: 1,
 			},
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: false,
 		} );
 
