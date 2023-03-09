@@ -327,7 +327,8 @@ class BlockTemplatesController {
 				}
 
 				if ( 'single-product' === $template->slug ) {
-					if ( ! is_admin() ) {
+					if ( ! is_admin() && ! BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
+
 						$new_content       = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
 						$template->content = $new_content;
 					}

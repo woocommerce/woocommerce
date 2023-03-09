@@ -19,7 +19,6 @@ class RelatedProducts extends AbstractBlock {
 	 */
 	protected $parsed_block;
 
-
 	/**
 	 * Initialize this block type.
 	 *
@@ -35,7 +34,6 @@ class RelatedProducts extends AbstractBlock {
 			10,
 			2
 		);
-
 	}
 
 	/**
@@ -44,7 +42,6 @@ class RelatedProducts extends AbstractBlock {
 	protected function register_block_type_assets() {
 		return null;
 	}
-
 
 	/**
 	 * Update the query for the product query block.
@@ -70,8 +67,6 @@ class RelatedProducts extends AbstractBlock {
 		}
 	}
 
-
-
 	/**
 	 * Return a custom query based on attributes, filters and global WP_Query.
 	 *
@@ -92,6 +87,4 @@ class RelatedProducts extends AbstractBlock {
 			'post_status' => 'publish',
 		);
 	}
-
-
 }
