@@ -95,14 +95,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 			echo '</div>';
 		} else {
 
-			echo '<p class="form-field show_if_simple show_if_variable">';
-			echo '<label for="_manage_stock_disabled" aria-label="' . esc_attr__( 'Stock management disabled in store settings', 'woocommerce' ) . '">' . esc_attr__( 'Stock management', 'woocommerce' ) . '</label>';
-			echo '<output name="_manage_stock_disabled" id="_manage_stock_disabled" aria-live="off">' . sprintf(
-				/* translators: %s: url for store settings */
-				wp_kses( __( 'Disabled in <a href="%s" aria-label="stock management store settings">store settings</a>.', 'woocommerce' ), 'post' ),
-				esc_url( 'admin.php?page=wc-settings&tab=products&section=inventory' )
-			) . '</output>';
-			echo '</p>';
+			woocommerce_wp_note(
+				array(
+					'id'               => '_manage_stock_disabled',
+					'label'            => __( 'Stock management', 'woocommerce' ),
+					'label-aria-label' => __( 'Stock management disabled in store settings', 'woocommerce' ),
+					'message'          => sprintf(
+						/* translators: %s: url for store settings */
+						__( 'Disabled in <a href="%s" aria-label="stock management store settings">store settings</a>.', 'woocommerce' ),
+						esc_url( 'admin.php?page=wc-settings&tab=products&section=inventory' )
+					),
+					'wrapper_class'    => 'show_if_simple show_if_variable',
+				)
+			);
 
 		}
 
