@@ -42,5 +42,5 @@ export const useNewCampaignTypes = (): UseNewCampaignTypes => {
 			data: campaignTypesState.data?.map( convert ),
 			error: campaignTypesState.error,
 		};
-	} );
+	}, [] );
 };
