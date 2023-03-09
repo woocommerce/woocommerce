@@ -67,59 +67,57 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 						  )
 						: __( 'No campaign types found.', 'woocommerce' ) }
 				</div>
-				<div>
-					{ campaignTypes?.map( ( el ) => (
-						<Flex
-							key={ el.id }
-							className="woocommerce-marketing-new-campaign-type"
-							gap={ 4 }
-						>
-							<FlexItem>
-								<img
-									src={ el.icon }
-									alt={ el.name }
-									width="32"
-									height="32"
-								/>
-							</FlexItem>
-							<FlexBlock>
-								<Flex direction="column" gap={ 1 }>
-									<FlexItem className="woocommerce-marketing-new-campaign-type__name">
-										{ el.name }
+				{ campaignTypes?.map( ( el ) => (
+					<Flex
+						key={ el.id }
+						className="woocommerce-marketing-new-campaign-type"
+						gap={ 4 }
+					>
+						<FlexItem>
+							<img
+								src={ el.icon }
+								alt={ el.name }
+								width="32"
+								height="32"
+							/>
+						</FlexItem>
+						<FlexBlock>
+							<Flex direction="column" gap={ 1 }>
+								<FlexItem className="woocommerce-marketing-new-campaign-type__name">
+									{ el.name }
+								</FlexItem>
+								<FlexItem className="woocommerce-marketing-new-campaign-type__description">
+									{ el.description }
+								</FlexItem>
+							</Flex>
+						</FlexBlock>
+						<FlexItem>
+							<Button
+								variant="secondary"
+								href={ el.createUrl }
+								target={
+									isExternalURL( el.createUrl )
+										? '_blank'
+										: '_self'
+								}
+							>
+								<Flex gap={ 1 }>
+									<FlexItem>
+										{ __( 'Create', 'woocommerce' ) }
 									</FlexItem>
-									<FlexItem className="woocommerce-marketing-new-campaign-type__description">
-										{ el.description }
-									</FlexItem>
-								</Flex>
-							</FlexBlock>
-							<FlexItem>
-								<Button
-									variant="secondary"
-									href={ el.createUrl }
-									target={
-										isExternalURL( el.createUrl )
-											? '_blank'
-											: '_self'
-									}
-								>
-									<Flex gap={ 1 }>
+									{ isExternalURL( el.createUrl ) && (
 										<FlexItem>
-											{ __( 'Create', 'woocommerce' ) }
+											<Icon
+												icon={ external }
+												size={ 16 }
+											/>
 										</FlexItem>
-										{ isExternalURL( el.createUrl ) && (
-											<FlexItem>
-												<Icon
-													icon={ external }
-													size={ 16 }
-												/>
-											</FlexItem>
-										) }
-									</Flex>
-								</Button>
-							</FlexItem>
-						</Flex>
-					) ) }
-				</div>
+									) }
+								</Flex>
+							</Button>
+						</FlexItem>
+					</Flex>
+				) ) }
 			</div>
 			{ !! recommendedChannels?.length && (
 				<div className="woocommerce-marketing-add-channels">
