@@ -482,6 +482,7 @@ jQuery( function ( $ ) {
 			$wrapper.unblock();
 
 			$( document.body ).trigger( 'woocommerce_added_attribute' );
+			jQuery.maybe_disable_save_button();
 		} );
 
 		if ( attribute ) {
@@ -664,6 +665,7 @@ jQuery( function ( $ ) {
 			) {
 				toggle_add_global_attribute_layout();
 			}
+			jQuery.maybe_disable_save_button();
 		}
 		return false;
 	} );
@@ -756,6 +758,7 @@ jQuery( function ( $ ) {
 				opacity: 0.6,
 			},
 		} );
+
 		var original_data = $( '.product_attributes' ).find(
 			'input, select, textarea'
 		);
@@ -829,7 +832,6 @@ jQuery( function ( $ ) {
 				);
 
 				$( document.body ).trigger( 'woocommerce_attributes_saved' );
-
 			}
 		} );
 	} );

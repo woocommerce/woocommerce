@@ -34,7 +34,11 @@ jQuery( function ( $ ) {
 					this.open_modal_to_set_variations_price
 				)
 				.on( 'reload', this.reload )
-				.on( 'click', 'button.create-variations', this.create_variations);
+				.on(
+					'click',
+					'button.create-variations',
+					this.create_variations
+				);
 
 			$(
 				'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock'
@@ -52,18 +56,10 @@ jQuery( function ( $ ) {
 				);
 		},
 
-		create_variations: function() {
+		create_variations: function () {
 			var new_attribute_data = $(
 				'.woocommerce_variation_new_attribute_data'
 			);
-			var attribute_name = new_attribute_data.find( 'input[name^="attribute_names"]' ).val();
-			var attribute_value = new_attribute_data
-				.find( 'textarea[name^="attribute_values"]' )
-				.val();
-
-			if ( ! attribute_name || ! attribute_value ) {
-				return;
-			}
 
 			$( '#variable_product_options' ).block( {
 				message: null,
@@ -110,9 +106,7 @@ jQuery( function ( $ ) {
 								'#variable_product_options_inner'
 							)
 						);
-						$( '#variable_product_options' ).trigger(
-							'reload'
-						);
+						$( '#variable_product_options' ).trigger( 'reload' );
 						$(
 							'#product_attributes > .product_attributes'
 						).replaceWith(
