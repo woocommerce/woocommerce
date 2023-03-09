@@ -60,7 +60,7 @@ const perPage = 5;
  */
 export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
-	const [ open, setOpen ] = useState( false );
+	const [ isModalOpen, setModalOpen ] = useState( false );
 	const {
 		loading: loadingCampaigns,
 		data,
@@ -172,12 +172,15 @@ export const Campaigns = () => {
 				<CardHeaderTitle>
 					{ __( 'Campaigns', 'woocommerce' ) }
 				</CardHeaderTitle>
-				<Button variant="secondary" onClick={ () => setOpen( true ) }>
+				<Button
+					variant="secondary"
+					onClick={ () => setModalOpen( true ) }
+				>
 					{ __( 'Create new campaign', 'woocommerce' ) }
 				</Button>
-				{ open && (
+				{ isModalOpen && (
 					<CreateNewCampaignModal
-						onRequestClose={ () => setOpen( false ) }
+						onRequestClose={ () => setModalOpen( false ) }
 					/>
 				) }
 			</CardHeader>
