@@ -20,19 +20,19 @@ type UseNewCampaignTypes = {
 	error?: ApiFetchError;
 };
 
-export const useNewCampaignTypes = (): UseNewCampaignTypes => {
-	const convert = ( campaignType: APICampaignType ): CampaignType => {
-		return {
-			id: campaignType.id,
-			icon: campaignType.icon_url,
-			name: campaignType.name,
-			description: campaignType.description,
-			createUrl: campaignType.create_url,
-			channelName: campaignType.channel.name,
-			channelSlug: campaignType.channel.slug,
-		};
+const convert = ( campaignType: APICampaignType ): CampaignType => {
+	return {
+		id: campaignType.id,
+		icon: campaignType.icon_url,
+		name: campaignType.name,
+		description: campaignType.description,
+		createUrl: campaignType.create_url,
+		channelName: campaignType.channel.name,
+		channelSlug: campaignType.channel.slug,
 	};
+};
 
+export const useNewCampaignTypes = (): UseNewCampaignTypes => {
 	return useSelect( ( select ) => {
 		const { hasFinishedResolution, getCampaignTypes } = select( STORE_KEY );
 		const campaignTypesState = getCampaignTypes< CampaignTypesState >();
