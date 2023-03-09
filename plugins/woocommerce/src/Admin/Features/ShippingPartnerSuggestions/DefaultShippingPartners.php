@@ -2,8 +2,17 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions;
 
+/**
+ * Default Shipping Partners
+ */
 class DefaultShippingPartners {
 
+	/**
+	 * Go through the specs and run them.
+	 *
+	 * @param array|null $specs payment suggestion spec array.
+	 * @return array
+	 */
 	public static function get_all() {
 		$asset_base_url      = WC()->plugin_url() . 'assets/images/shipping_partners/';
 		$row_layout_features = array(
@@ -217,6 +226,12 @@ class DefaultShippingPartners {
 		);
 	}
 
+	/**
+	 * Get rules that match the store's selling venues.
+	 *
+	 * @param array $selling_venues Array of venues to match.
+	 * @return object Rules to match.
+	 */
 	public static function get_rules_for_countries( $countries ) {
 		$rules = array();
 

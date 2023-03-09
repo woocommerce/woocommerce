@@ -70,11 +70,21 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 		return true;
 	}
 
+	/**
+	 * Check if suggestions should be shown in the settings screen.
+	 *
+	 * @return bool
+	 */
 	private function should_display() {
 		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
 			return false;
 		}
 
+		/**
+		 * The return value can be controlled via woocommerce_allow_shipping_partner_suggestions filter.
+		 *
+		 * @since 7.4.1
+		 */
 		return apply_filters( 'woocommerce_allow_shipping_partner_suggestions', true );
 	}
 
@@ -85,8 +95,8 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
 	public function get_suggestions( $request ) {
-		$should_display       = $this->should_display();
-		$force_default        = $request->get_param( 'force_default_suggestions' );
+		$should_display = $this->should_display();
+		$force_default  = $request->get_param( 'force_default_suggestions' );
 
 		if ( $should_display ) {
 			return Suggestions::get_suggestions();
@@ -95,8 +105,6 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 		}
 
 		return rest_ensure_response( Suggestions::get_suggestions( DefaultShippingPartners::get_all() ) );
-
-		return rest_ensure_response( array() );
 	}
 
 	/**
