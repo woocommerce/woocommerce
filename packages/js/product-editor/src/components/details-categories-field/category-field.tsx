@@ -144,28 +144,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 		inputValue: string,
 		selectedItems: ProductCategoryLinkedList[]
 	): ProductCategoryLinkedList[] => {
-		const filteredItems = getFilteredItems(
-			allItems,
-			inputValue,
-			selectedItems
-		);
-		if (
-			inputValue.length > 0 &&
-			! isSearching &&
-			! filteredItems.find(
-				( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
-			)
-		) {
-			return [
-				...filteredItems,
-				{
-					id: -99,
-					name: inputValue,
-					parent: 0,
-				},
-			];
-		}
-		return filteredItems;
+		return getFilteredItems( allItems, inputValue, selectedItems );
 	};
 
 	const selectedIds = value.map( ( item ) => item.id );
@@ -219,6 +198,11 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 								<TreeControl
 									multiple
 									shouldNotRecursivelySelect
+									allowCreate
+									createValue={ searchValue }
+									onCreateNew={ () => {
+										setShowCreateNewModal( true );
+									} }
 									className="woocommerce-category-field-dropdown__test"
 									items={ mapFromCategoryType( items ) }
 									selected={ mapFromCategoryType( value ) }

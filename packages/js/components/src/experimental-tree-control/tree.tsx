@@ -1,8 +1,11 @@
 /**
  * External dependencies
  */
+import { Button, Icon } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { createElement, forwardRef } from 'react';
+import { createElement, forwardRef, Fragment } from 'react';
+import { plus } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -20,24 +23,39 @@ export const Tree = forwardRef( function ForwardedTree(
 		ref,
 	} );
 
-	if ( ! items.length ) return null;
 	return (
-		<ol
-			{ ...treeProps }
-			className={ classNames(
-				treeProps.className,
-				'experimental-woocommerce-tree',
-				`experimental-woocommerce-tree--level-${ level }`
+		<>
+			<ol
+				{ ...treeProps }
+				className={ classNames(
+					treeProps.className,
+					'experimental-woocommerce-tree',
+					`experimental-woocommerce-tree--level-${ level }`
+				) }
+			>
+				{ items.map( ( child, index ) => (
+					<TreeItem
+						{ ...treeItemProps }
+						key={ child.data.value }
+						item={ child }
+						index={ index }
+					/>
+				) ) }
+			</ol>
+			{ props.allowCreate && (
+				<Button
+					className="experimental-woocommerce-tree__button"
+					onClick={ () => props.onCreateNew && props.onCreateNew() }
+				>
+					<Icon icon={ plus } size={ 20 } />
+					{ props.createValue
+						? sprintf(
+								__( 'Create "%s"', 'woocommerce' ),
+								props.createValue
+						  )
+						: __( 'Create new', 'woocommerce' ) }
+				</Button>
 			) }
-		>
-			{ items.map( ( child, index ) => (
-				<TreeItem
-					{ ...treeItemProps }
-					key={ child.data.value }
-					item={ child }
-					index={ index }
-				/>
-			) ) }
-		</ol>
+		</>
 	);
 } );

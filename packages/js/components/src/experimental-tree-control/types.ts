@@ -27,6 +27,9 @@ type BaseTreeProps = {
 	 * not select their parents and selecting parents does not select their children.
 	 */
 	shouldNotRecursivelySelect?: boolean;
+	allowCreate?: boolean;
+	createValue?: string;
+	onCreateNew?: () => void;
 	/**
 	 * When `multiple` is true and a child item is selected, all its
 	 * ancestors and its descendants are also selected. If it's false
