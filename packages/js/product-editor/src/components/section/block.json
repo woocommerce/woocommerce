@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-section",
+	"title": "Product section",
+	"category": "woocommerce",
+	"description": "The product section.",
+	"keywords": [ "products", "section", "group" ],
+	"textdomain": "default",
+	"attributes": {
+		"title": {
+			"type": "string"
+		},
+		"description": {
+			"type": "string"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false,
+		"lock": false
+	}
+}
