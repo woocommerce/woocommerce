@@ -2,7 +2,6 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
@@ -183,6 +182,31 @@ class MiniCart extends AbstractBlock {
 			'translations' => $this->get_inner_blocks_translations(),
 		);
 
+		$inner_blocks_frontend_scripts = array();
+		$cart                          = $this->get_cart_instance();
+		if ( $cart ) {
+			// Preload inner blocks frontend scripts.
+			$inner_blocks_frontend_scripts = $cart->is_empty() ? array(
+				'empty-cart-frontend',
+				'filled-cart-frontend',
+				'shopping-button-frontend',
+			) : array(
+				'empty-cart-frontend',
+				'filled-cart-frontend',
+				'title-frontend',
+				'items-frontend',
+				'footer-frontend',
+				'products-table-frontend',
+			);
+		}
+		foreach ( $inner_blocks_frontend_scripts as $inner_block_frontend_script ) {
+			$script_data = $this->asset_api->get_script_data( 'build/mini-cart-contents-block/' . $inner_block_frontend_script . '.js' );
+			$this->scripts_to_lazy_load[ 'wc-block-' . $inner_block_frontend_script ] = array(
+				'src'     => $script_data['src'],
+				'version' => $script_data['version'],
+			);
+		}
+
 		$this->asset_data_registry->add(
 			'mini_cart_block_frontend_dependencies',
 			$this->scripts_to_lazy_load,
@@ -309,8 +333,7 @@ class MiniCart extends AbstractBlock {
 			return;
 		}
 
-		$cart_controller     = $this->get_cart_controller();
-		$cart                = $cart_controller->get_cart_instance();
+		$cart                = $this->get_cart_instance();
 		$cart_contents_total = $cart->get_subtotal();
 
 		if ( $cart->display_prices_including_tax() ) {
@@ -327,8 +350,7 @@ class MiniCart extends AbstractBlock {
 	 * @return string
 	 */
 	protected function get_include_tax_label_markup() {
-		$cart_controller     = $this->get_cart_controller();
-		$cart                = $cart_controller->get_cart_instance();
+		$cart                = $this->get_cart_instance();
 		$cart_contents_total = $cart->get_subtotal();
 
 		return ( ! empty( $this->tax_label ) && 0 !== $cart_contents_total ) ? ( "<small class='wc-block-mini-cart__tax-label'>" . esc_html( $this->tax_label ) . '</small>' ) : '';
@@ -360,8 +382,7 @@ class MiniCart extends AbstractBlock {
 			return '';
 		}
 
-		$cart_controller     = $this->get_cart_controller();
-		$cart                = $cart_controller->get_cart_instance();
+		$cart                = $this->get_cart_instance();
 		$cart_contents_count = $cart->get_cart_contents_count();
 		$cart_contents_total = $cart->get_subtotal();
 
@@ -441,12 +462,18 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Return an instace of the CartController class.
+	 * Return the main instance of WC_Cart class.
 	 *
-	 * @return CartController CartController class instance.
+	 * @return \WC_Cart CartController class instance.
 	 */
-	protected function get_cart_controller() {
-		return new CartController();
+	protected function get_cart_instance() {
+		$cart = WC()->cart;
+
+		if ( $cart && $cart instanceof \WC_Cart ) {
+			return $cart;
+		}
+
+		return null;
 	}
 
 	/**
@@ -457,9 +484,9 @@ class MiniCart extends AbstractBlock {
 	 * @return array;
 	 */
 	protected function get_tax_label() {
-		$cart = WC()->cart;
+		$cart = $this->get_cart_instance();
 
-		if ( $cart->display_prices_including_tax() ) {
+		if ( $cart && $cart->display_prices_including_tax() ) {
 			if ( ! wc_prices_include_tax() ) {
 				$tax_label                         = WC()->countries->inc_tax_or_vat();
 				$display_cart_prices_including_tax = true;
