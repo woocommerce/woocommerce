@@ -704,16 +704,19 @@
             }, slider.vars.animationSpeed + 100);
 
           } else {
-            var keyframes = {};
-            keyframes[slider.prop] = [
-              slider.container.css(slider.prop),
-              slider.args[slider.prop]
-            ];
+            slider.container.each(function() {
+              var container = this;
+              var keyframes = {};
+              keyframes[slider.prop] = [
+                window.getComputedStyle(container)[slider.prop],
+                slider.args[slider.prop]
+              ];
 
-            slider.container[0].animate(keyframes, { duration: slider.vars.animationSpeed, easing: easing }).onfinish = function() {
-              slider.container.css(slider.args);
-              slider.wrapup(dimension);
-            };
+              container.animate(keyframes, { duration: slider.vars.animationSpeed, easing: easing }).onfinish = function() {
+                container.style[slider.prop] = slider.args[slider.prop];
+                slider.wrapup(dimension);
+              };
+            });
           }
         } else { // FADE:
           if (!touch) {
