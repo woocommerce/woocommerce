@@ -221,34 +221,34 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * {@inheritdoc}
-	 * 
+	 *
 	 * Log the action to order notes.
 	 *
 	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
 	 * @return true|WP_Error True if applied, error if not.
 	 */
 	public function apply_coupon( $raw_coupon ) {
-		$couponResult = parent::apply_coupon( $raw_coupon );
+		$res = parent::apply_coupon( $raw_coupon );
 
-		if ( !is_wp_error( $couponResult ) ) {
+		if ( ! is_wp_error( $res ) ) {
 			$this->add_order_note( __( 'Coupon applied:', 'woocommerce' ) . ' ' . $raw_coupon, 0, true );
 		}
 
-		return $couponResult;
+		return $res;
 	}
 
 	/**
 	 * {@inheritdoc}
-	 * 
+	 *
 	 * Log the action to order notes.
 	 *
 	 * @param string $code Coupon code.
 	 * @return void
 	 */
-	public function remove_coupon( $coupon ) {
-		if ( wc_get_coupon_id_by_code( $coupon ) ) {
-			parent::remove_coupon( $coupon );
-			$this->add_order_note( __( 'Coupon removed:', 'woocommerce' ) . ' ' . $coupon, 0, true );
+	public function remove_coupon( $code ) {
+		if ( wc_get_coupon_id_by_code( $code ) ) {
+			parent::remove_coupon( $code );
+			$this->add_order_note( __( 'Coupon removed:', 'woocommerce' ) . ' ' . $code, 0, true );
 		}
 	}
 
