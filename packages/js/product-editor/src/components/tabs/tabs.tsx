@@ -12,7 +12,7 @@ import { Slot } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { navigateTo, getNewPath } from '@woocommerce/navigation';
+import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -29,17 +29,24 @@ export type TabsFillProps = {
 
 export function Tabs( { onChange = () => {} }: TabsProps ) {
 	const [ selected, setSelected ] = useState< string | null >( null );
+	const query = getQuery() as Record< string, string >;
+
 	function onClick( tabId: string ) {
 		window.document.documentElement.scrollTop = 0;
 		navigateTo( {
 			url: getNewPath( { tab: tabId } ),
 		} );
-		setSelected( tabId );
 	}
 
 	useEffect( () => {
 		onChange( selected );
 	}, [ selected ] );
+
+	useEffect( () => {
+		if ( query.tab ) {
+			setSelected( query.tab );
+		}
+	}, [ query.tab ] );
 
 	function maybeSetSelected( fills: readonly ( readonly ReactElement[] )[] ) {
 		if ( selected ) {
