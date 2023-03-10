@@ -52,7 +52,7 @@ class OrderController {
 		 * -    While we have a session, our `ShippingController::filter_taxable_address` function uses this hook to set
 		 *      the customer address to the pickup location address if local pickup is the chosen method.
 		 *
-		 * Without this code in place, `$customer->get_taxable_address()` is not used when order taxes are caculated,
+		 * Without this code in place, `$customer->get_taxable_address()` is not used when order taxes are calculated,
 		 * resulting in the wrong taxes being applied with local pickup.
 		 *
 		 * The alternative would be to instead use `woocommerce_order_get_tax_location` to return the pickup location
@@ -63,7 +63,20 @@ class OrderController {
 		add_filter(
 			'woocommerce_order_get_tax_location',
 			function( $location ) {
-				return wc()->customer ? wc()->customer->get_taxable_address() : $location;
+
+				if ( ! is_null( wc()->customer ) ) {
+
+					$taxable_address = wc()->customer->get_taxable_address();
+
+					$location = array(
+						'country'  => $taxable_address[0],
+						'state'    => $taxable_address[1],
+						'postcode' => $taxable_address[2],
+						'city'     => $taxable_address[3],
+					);
+				}
+
+				return $location;
 			}
 		);
 
