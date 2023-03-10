@@ -70,6 +70,9 @@ class MiniCart extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
+		add_action( 'wp_print_footer_scripts', array( $this, 'enqueue_wc_settings' ), 1 );
+		// We need this action to run after the equivalent in AssetDataRegistry.
+		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 3 );
 	}
 
 	/**
@@ -149,6 +152,86 @@ class MiniCart extends AbstractBlock {
 			);
 		}
 
+		$this->asset_data_registry->add(
+			'displayCartPricesIncludingTax',
+			$this->display_cart_prices_including_tax,
+			true
+		);
+
+		$template_part_edit_uri = '';
+
+		if (
+			current_user_can( 'edit_theme_options' ) &&
+			wc_current_theme_is_fse_theme()
+		) {
+			$theme_slug = BlockTemplateUtils::theme_has_template_part( 'mini-cart' ) ? wp_get_theme()->get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
+
+			if ( version_compare( get_bloginfo( 'version' ), '5.9', '<' ) ) {
+				$site_editor_uri = add_query_arg(
+					array( 'page' => 'gutenberg-edit-site' ),
+					admin_url( 'themes.php' )
+				);
+			} else {
+				$site_editor_uri = add_query_arg(
+					array(
+						'canvas' => 'edit',
+						'path'   => '/template-parts/single',
+					),
+					admin_url( 'site-editor.php' )
+				);
+			}
+
+			$template_part_edit_uri = add_query_arg(
+				array(
+					'postId'   => sprintf( '%s//%s', $theme_slug, 'mini-cart' ),
+					'postType' => 'wp_template_part',
+				),
+				$site_editor_uri
+			);
+		}
+
+		$this->asset_data_registry->add(
+			'templatePartEditUri',
+			$template_part_edit_uri,
+			''
+		);
+
+		/**
+		 * Fires after cart block data is registered.
+		 *
+		 * @since 5.8.0
+		 */
+		do_action( 'woocommerce_blocks_cart_enqueue_data' );
+	}
+
+	/**
+	 * Function to enqueue `wc-settings` script and dequeue it later on so when
+	 * AssetDataRegistry runs, it appears enqueued- This allows the necessary
+	 * data to be printed to the page.
+	 */
+	public function enqueue_wc_settings() {
+		// Return early if another block has already enqueued `wc-settings`.
+		if ( wp_script_is( 'wc-settings', 'enqueued' ) ) {
+			return;
+		}
+		// We are lazy-loading `wc-settings`, but we need to enqueue it here so
+		// AssetDataRegistry knows it's going to load.
+		wp_enqueue_script( 'wc-settings' );
+		// After AssetDataRegistry function runs, we dequeue `wc-settings`.
+		add_action( 'wp_print_footer_scripts', array( $this, 'dequeue_wc_settings' ), 4 );
+	}
+
+	/**
+	 * Function to dequeue `wc-settings` script.
+	 */
+	public function dequeue_wc_settings() {
+		wp_dequeue_script( 'wc-settings' );
+	}
+
+	/**
+	 * Prints the variable containing information about the scripts to lazy load.
+	 */
+	public function print_lazy_load_scripts() {
 		$script_data = $this->asset_api->get_script_data( 'build/mini-cart-component-frontend.js' );
 
 		$num_dependencies = count( $script_data['dependencies'] );
@@ -207,62 +290,14 @@ class MiniCart extends AbstractBlock {
 			);
 		}
 
-		$this->asset_data_registry->add(
-			'mini_cart_block_frontend_dependencies',
-			$this->scripts_to_lazy_load,
-			true
+		$data                          = rawurlencode( wp_json_encode( $this->scripts_to_lazy_load ) );
+		$mini_cart_dependencies_script = "var wcBlocksMiniCartFrontendDependencies = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
+
+		wp_add_inline_script(
+			'wc-mini-cart-block-frontend',
+			$mini_cart_dependencies_script,
+			'before'
 		);
-
-		$this->asset_data_registry->add(
-			'displayCartPricesIncludingTax',
-			$this->display_cart_prices_including_tax,
-			true
-		);
-
-		$template_part_edit_uri = '';
-
-		if (
-			current_user_can( 'edit_theme_options' ) &&
-			wc_current_theme_is_fse_theme()
-		) {
-			$theme_slug = BlockTemplateUtils::theme_has_template_part( 'mini-cart' ) ? wp_get_theme()->get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
-
-			if ( version_compare( get_bloginfo( 'version' ), '5.9', '<' ) ) {
-				$site_editor_uri = add_query_arg(
-					array( 'page' => 'gutenberg-edit-site' ),
-					admin_url( 'themes.php' )
-				);
-			} else {
-				$site_editor_uri = add_query_arg(
-					array(
-						'canvas' => 'edit',
-						'path'   => '/template-parts/single',
-					),
-					admin_url( 'site-editor.php' )
-				);
-			}
-
-			$template_part_edit_uri = add_query_arg(
-				array(
-					'postId'   => sprintf( '%s//%s', $theme_slug, 'mini-cart' ),
-					'postType' => 'wp_template_part',
-				),
-				$site_editor_uri
-			);
-		}
-
-		$this->asset_data_registry->add(
-			'templatePartEditUri',
-			$template_part_edit_uri,
-			''
-		);
-
-		/**
-		 * Fires after cart block data is registered.
-		 *
-		 * @since 5.8.0
-		 */
-		do_action( 'woocommerce_blocks_cart_enqueue_data' );
 	}
 
 	/**

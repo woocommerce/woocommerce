@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { getSetting } from '@woocommerce/settings';
 import preloadScript from '@woocommerce/base-utils/preload-script';
 import lazyLoadScript from '@woocommerce/base-utils/lazy-load-script';
 import getNavigationType from '@woocommerce/base-utils/get-navigation-type';
@@ -23,10 +22,10 @@ window.addEventListener( 'load', () => {
 		return;
 	}
 
-	const dependencies = getSetting(
-		'mini_cart_block_frontend_dependencies',
-		{}
-	) as Record< string, dependencyData >;
+	const dependencies = window.wcBlocksMiniCartFrontendDependencies as Record<
+		string,
+		dependencyData
+	>;
 
 	// Preload scripts
 	for ( const dependencyHandle in dependencies ) {
