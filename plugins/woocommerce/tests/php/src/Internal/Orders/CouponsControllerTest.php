@@ -132,6 +132,7 @@ class CouponsControllerTest extends \WC_Unit_Test_Case {
 					if ( $key === $meta_row['key'] ) {
 						$meta_found = true;
 						$this->assertSame( $expected, $meta_row['value'] );
+						break;
 					}
 					$this->assertTrue( $meta_found );
 				}
