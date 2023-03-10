@@ -40,8 +40,8 @@ const program = new Command()
 		'GitHub branch/tag/commit hash to compare against the base branch/tag/commit hash.'
 	)
 	.argument(
-		'<sinceVersion>',
-		'Specify the version used to determine which changes are included (version listed in @since code doc).'
+		'[sinceVersion]',
+		'Specify the version used to determine which changes are included (version listed in @since code doc). Only needed for hook, template, schema changes.'
 	)
 	.option(
 		'-b, --base <base>',
@@ -61,42 +61,59 @@ const program = new Command()
 	.action( async ( scanType, compare, sinceVersion, options ) => {
 		const { source, base, outputStyle } = options;
 
+		if (
+			( scanType === 'hooks' ||
+				scanType === 'templates' ||
+				scanType === 'schema' ) &&
+			! sinceVersion
+		) {
+			throw new Error(
+				`To scan for ${ scanType } changes you must provide the sinceVersion argument.`
+			);
+		}
+
 		switch ( scanType ) {
 			case 'hooks':
-				const hookChanges = await scanChangesForHooks(
-					compare,
-					sinceVersion,
-					base,
-					source
-				);
-
-				if ( hookChanges.length ) {
-					printHookResults(
-						hookChanges,
-						outputStyle,
-						'HOOKS',
-						Logger.notice
+				// We know sinceVersion will exist but TS can't infer that here.
+				if ( sinceVersion ) {
+					const hookChanges = await scanChangesForHooks(
+						compare,
+						sinceVersion,
+						base,
+						source
 					);
-				} else {
-					printEmptyNotice( 'hooks' );
+
+					if ( hookChanges.length ) {
+						printHookResults(
+							hookChanges,
+							outputStyle,
+							'HOOKS',
+							Logger.notice
+						);
+					} else {
+						printEmptyNotice( 'hooks' );
+					}
 				}
 				break;
 			case 'templates':
-				const templateChanges = await scanChangesForTemplates(
-					compare,
-					sinceVersion,
-					base,
-					source
-				);
-				if ( templateChanges && templateChanges.length ) {
-					printTemplateResults(
-						templateChanges,
-						outputStyle,
-						'TEMPLATES',
-						Logger.notice
+				// We know sinceVersion will exist but TS can't infer that here.
+				if ( sinceVersion ) {
+					const templateChanges = await scanChangesForTemplates(
+						compare,
+						sinceVersion,
+						base,
+						source
 					);
-				} else {
-					printEmptyNotice( 'templates' );
+					if ( templateChanges && templateChanges.length ) {
+						printTemplateResults(
+							templateChanges,
+							outputStyle,
+							'TEMPLATES',
+							Logger.notice
+						);
+					} else {
+						printEmptyNotice( 'templates' );
+					}
 				}
 				break;
 			case 'database':
@@ -117,7 +134,7 @@ const program = new Command()
 					base,
 					source
 				);
-				if ( schemaChanges && schemaChanges.length ) {
+				if ( schemaChanges && schemaChanges.length && sinceVersion ) {
 					printSchemaChange(
 						schemaChanges,
 						sinceVersion,
