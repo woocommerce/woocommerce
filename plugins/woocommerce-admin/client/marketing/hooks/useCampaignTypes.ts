@@ -38,7 +38,7 @@ export const useCampaignTypes = (): UseCampaignTypes => {
 	const { invalidateResolution } = useDispatch( STORE_KEY );
 
 	const refetch = useCallback( () => {
-		invalidateResolution( 'getCampaignTypes' );
+		invalidateResolution( 'getCampaignTypes', [] );
 	}, [ invalidateResolution ] );
 
 	return useSelect< UseCampaignTypes >(
@@ -48,7 +48,7 @@ export const useCampaignTypes = (): UseCampaignTypes => {
 			const campaignTypesState = getCampaignTypes< CampaignTypesState >();
 
 			return {
-				loading: ! hasFinishedResolution( 'getCampaignTypes' ),
+				loading: ! hasFinishedResolution( 'getCampaignTypes', [] ),
 				data: campaignTypesState.data?.map( convert ),
 				error: campaignTypesState.error,
 				refetch,
