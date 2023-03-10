@@ -38,7 +38,7 @@ jest.mock(
 		} ),
 	} )
 );
-jest.mock( '~/header/utils', () => ( {
+jest.mock( '@woocommerce/admin-layout', () => ( {
 	WooHeaderItem: ( props: { children: () => React.ReactElement } ) => (
 		<Fragment { ...props }>{ props.children() }</Fragment>
 	),

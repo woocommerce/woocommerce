@@ -11,6 +11,7 @@ import {
 } from '@wordpress/components';
 import { chevronDown, check, Icon } from '@wordpress/icons';
 import { registerPlugin } from '@wordpress/plugins';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
 import { useFormContext } from '@woocommerce/components';
 import {
 	preventLeavingProductForm,
@@ -29,7 +30,6 @@ import { store } from '@wordpress/viewport';
  * Internal dependencies
  */
 import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
-import { WooHeaderItem } from '~/header/utils';
 import './product-form-actions.scss';
 import { useProductMVPCESFooter } from '~/customer-effort-score-tracks/use-product-mvp-ces-footer';
 import { useCustomerEffortScoreExitPageTracker } from '~/customer-effort-score-tracks/use-customer-effort-score-exit-page-tracker';
