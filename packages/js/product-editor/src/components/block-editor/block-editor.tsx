@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { BlockInstance } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
+import { createBlock, BlockInstance } from '@wordpress/blocks';
 import { createElement, useState, useMemo } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
 import { useSelect, select as WPSelect } from '@wordpress/data';
@@ -31,6 +32,8 @@ import {
  */
 import { Sidebar } from '../sidebar';
 import { Tabs } from '../tabs';
+import tabBlock from '../tab/block.json';
+import sectionBlock from '../section/block.json';
 
 type BlockEditorProps = {
 	product: Partial< Product >;
@@ -38,8 +41,66 @@ type BlockEditorProps = {
 };
 
 export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
+	const initialBlocks = [
+		createBlock(
+			tabBlock.name,
+			{
+				id: 'general',
+				title: 'General',
+			},
+			[
+				createBlock(
+					sectionBlock.name,
+					{
+						title: __( 'Product details', 'woocommerce' ),
+						description: __(
+							'This info will be displayed on the product page, category pages, social media, and search results.',
+							'woocommerce'
+						),
+					},
+					[
+						createBlock( 'core/paragraph', {
+							content: 'First paragraph',
+						} ),
+						createBlock( 'core/paragraph', {
+							content: 'Second paragraph',
+						} ),
+					]
+				),
+			]
+		),
+		createBlock(
+			tabBlock.name,
+			{
+				id: 'shipping',
+				title: 'Shipping',
+			},
+			[
+				createBlock(
+					sectionBlock.name,
+					{
+						title: __( 'Shipping details', 'woocommerce' ),
+						description: __(
+							'This info will be displayed on the product page, category pages, social media, and search results.',
+							'woocommerce'
+						),
+					},
+					[
+						createBlock( 'core/paragraph', {
+							content: 'First paragraph',
+						} ),
+						createBlock( 'core/paragraph', {
+							content: 'Second paragraph',
+						} ),
+					]
+				),
+			]
+		),
+	];
+
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
-	const [ blocks, updateBlocks ] = useState< BlockInstance[] >();
+	const [ blocks, updateBlocks ] =
+		useState< BlockInstance[] >( initialBlocks );
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' ) as Record<
