@@ -459,6 +459,20 @@ abstract class WC_Settings_API {
 	}
 
 	/**
+	 * Generates HTML for the 'safe_text' input type (mostly used for gateway-related settings).
+	 *
+	 * @param string $key Field key.
+	 * @param array  $data Field data.
+	 * @return string
+	 *
+	 * @since 7.6.0
+	 */
+	public function generate_safe_text_html( $key, $data ) {
+		$data['type'] = 'text';
+		return $this->generate_text_html( $key, $data );
+	}
+
+	/**
 	 * Generate Price Input HTML.
 	 *
 	 * @param string $key Field key.
