@@ -5,6 +5,8 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\WooCommerce\Internal\Orders\CouponsController;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -162,5 +164,36 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		wp_cache_delete( 'item-' . $item->get_id(), 'order-items' );
 		wp_cache_delete( 'order-items-' . $item->get_order_id(), 'orders' );
 		wp_cache_delete( $item->get_id(), $this->meta_type . '_meta' );
+	}
+
+	/**
+	 * Dehydrate order coupon_data meta then add it to the database.
+	 *
+	 * @since  7.6.0
+	 * @param  WC_Data  $object WC_Data object.
+	 * @param  stdClass $meta (containing ->key and ->value).
+	 * @return int meta ID
+	 */
+	public function add_meta( &$object, $meta ) {
+		if ( $meta->key === 'coupon_data' ) {
+			$meta = wc_get_container()->get( CouponsController::class )->dehydrate_coupon_data( $meta );
+		}
+
+		return parent::add_meta( $object, $meta );
+	}
+
+	/**
+	 * Dehydrate order coupon_data meta then update the database.
+	 *
+	 * @since  7.6.0
+	 * @param  WC_Data  $object WC_Data object.
+	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 */
+	public function update_meta( &$object, $meta ) {
+		if ( $meta->key === 'coupon_data' ) {
+			$meta = wc_get_container()->get( CouponsController::class )->dehydrate_coupon_data( $meta );
+		}
+
+		parent::update_meta( $object, $meta );
 	}
 }
