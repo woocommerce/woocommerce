@@ -1,12 +1,25 @@
 /**
  * External dependencies
  */
-import { BlockConfiguration, registerBlockType } from '@wordpress/blocks';
+import {
+	BlockConfiguration,
+	BlockEditProps,
+	registerBlockType,
+} from '@wordpress/blocks';
+import { ComponentType } from 'react';
 
-type BlockRepresentation = {
+type BlockRepresentation< T extends Record< string, any > = {} > = {
 	name: string;
 	metadata: BlockConfiguration;
-	settings: Partial< BlockConfiguration >;
+	settings: Partial< Omit< BlockConfiguration, 'edit' > > & {
+		readonly edit?:
+			| ComponentType<
+					BlockEditProps< T > & {
+						context?: Record< string, unknown >;
+					}
+			  >
+			| undefined;
+	};
 };
 
 /**
