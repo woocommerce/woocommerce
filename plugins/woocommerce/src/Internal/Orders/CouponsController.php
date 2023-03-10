@@ -86,6 +86,7 @@ class CouponsController {
 			throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );
 		}
 
+		// translators: %s coupon code.
 		$order->add_order_note( sprintf( __( 'Coupon applied: "%s".', 'woocommerce' ), $code ), 0, true );
 
 		return $order;
