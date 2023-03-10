@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update imports of product slot fills to new @woocommerce/product-editor library

@@ -32,6 +32,8 @@ export const scanForChanges = async (
 			? clonedPath
 			: await cloneRepo( source );
 
+	Logger.endTask();
+
 	Logger.notice(
 		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
 	);
@@ -50,9 +52,12 @@ export const scanForChanges = async (
 
 	// Only checkout the compare version if we're in CLI mode.
 	if ( outputStyle === 'cli' ) {
-		execSync( `cd ${ tmpRepoPath } && git checkout ${ compareVersion }`, {
-			stdio: 'pipe',
-		} );
+		execSync(
+			`cd ${ tmpRepoPath } && git -c core.hooksPath=/dev/null checkout ${ compareVersion }`,
+			{
+				stdio: 'pipe',
+			}
+		);
 	}
 
 	const pluginPath = join( tmpRepoPath, 'plugins/woocommerce' );

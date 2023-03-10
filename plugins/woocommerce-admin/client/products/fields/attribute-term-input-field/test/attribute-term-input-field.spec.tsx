@@ -4,7 +4,7 @@
 import { act, render, waitFor, screen } from '@testing-library/react';
 import { useState } from '@wordpress/element';
 import { resolveSelect } from '@wordpress/data';
-import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
+import { ProductAttributeTerm } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -75,80 +75,81 @@ jest.mock( '@woocommerce/components', () => {
 	};
 } );
 
-const attributeList: ProductAttribute[] = [
-	{
-		id: 15,
-		name: 'Automotive',
-		position: 0,
-		visible: true,
-		variation: false,
-		options: [ 'test' ],
-	},
-	{
-		id: 1,
-		name: 'Color',
-		position: 2,
-		visible: true,
-		variation: true,
-		options: [
-			'Beige',
-			'black',
-			'Blue',
-			'brown',
-			'Gray',
-			'Green',
-			'mint',
-			'orange',
-			'pink',
-			'Red',
-			'white',
-			'Yellow',
-		],
-	},
-];
+// Not used - TODO: Remove?
+// const attributeList: ProductAttribute[] = [
+// 	{
+// 		id: 15,
+// 		name: 'Automotive',
+// 		position: 0,
+// 		visible: true,
+// 		variation: false,
+// 		options: [ 'test' ],
+// 	},
+// 	{
+// 		id: 1,
+// 		name: 'Color',
+// 		position: 2,
+// 		visible: true,
+// 		variation: true,
+// 		options: [
+// 			'Beige',
+// 			'black',
+// 			'Blue',
+// 			'brown',
+// 			'Gray',
+// 			'Green',
+// 			'mint',
+// 			'orange',
+// 			'pink',
+// 			'Red',
+// 			'white',
+// 			'Yellow',
+// 		],
+// 	},
+// ];
 
-const attributeTermList: ProductAttributeTerm[] = [
-	{
-		id: 23,
-		name: 'XXS',
-		slug: 'xxs',
-		description: '',
-		menu_order: 1,
-		count: 1,
-	},
-	{
-		id: 22,
-		name: 'XS',
-		slug: 'xs',
-		description: '',
-		menu_order: 2,
-		count: 1,
-	},
-	{
-		id: 17,
-		name: 'S',
-		slug: 's',
-		description: '',
-		menu_order: 3,
-		count: 1,
-	},
-	{
-		id: 18,
-		name: 'M',
-		slug: 'm',
-		description: '',
-		menu_order: 4,
-		count: 1,
-	},
-	{
-		id: 19,
-		name: 'L',
-		slug: 'l',
-		description: '',
-		menu_order: 5,
-		count: 1,
-	},
-];
+// const attributeTermList: ProductAttributeTerm[] = [
+// 	{
+// 		id: 23,
+// 		name: 'XXS',
+// 		slug: 'xxs',
+// 		description: '',
+// 		menu_order: 1,
+// 		count: 1,
+// 	},
+// 	{
+// 		id: 22,
+// 		name: 'XS',
+// 		slug: 'xs',
+// 		description: '',
+// 		menu_order: 2,
+// 		count: 1,
+// 	},
+// 	{
+// 		id: 17,
+// 		name: 'S',
+// 		slug: 's',
+// 		description: '',
+// 		menu_order: 3,
+// 		count: 1,
+// 	},
+// 	{
+// 		id: 18,
+// 		name: 'M',
+// 		slug: 'm',
+// 		description: '',
+// 		menu_order: 4,
+// 		count: 1,
+// 	},
+// 	{
+// 		id: 19,
+// 		name: 'L',
+// 		slug: 'l',
+// 		description: '',
+// 		menu_order: 5,
+// 		count: 1,
+// 	},
+// ];
 
 describe( 'AttributeTermInputField', () => {
 	beforeEach( () => {

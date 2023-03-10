@@ -79,7 +79,7 @@ export const scanForTemplateChanges = async (
 							repositoryPath,
 							commitHash
 						);
-						if ( -1 === pullRequests.indexOf( prNumber ) ) {
+						if ( pullRequests.indexOf( prNumber ) === -1 ) {
 							pullRequests.push( prNumber );
 						}
 					} catch ( e: unknown ) {

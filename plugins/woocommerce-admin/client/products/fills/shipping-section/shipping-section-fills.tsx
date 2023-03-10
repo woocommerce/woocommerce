@@ -6,8 +6,8 @@ import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	__experimentalProductSectionLayout as ProductSectionLayout,
-} from '@woocommerce/components';
-import { registerPlugin } from '@wordpress/plugins';
+	__experimentalUseProductHelper as useProductHelper,
+} from '@woocommerce/product-editor';
 import { PartialProduct, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
@@ -26,21 +26,25 @@ import {
 	DimensionPropsType,
 	ShippingDimensionsPropsType,
 } from './index';
-import {
-	PLUGIN_ID,
-	SHIPPING_SECTION_BASIC_ID,
-	SHIPPING_SECTION_DIMENSIONS_ID,
-	TAB_SHIPPING_ID,
-} from '../constants';
+import { PLUGIN_ID } from '../constants';
 import {
 	ShippingDimensionsImage,
 	ShippingDimensionsImageProps,
 } from '../../fields/shipping-dimensions-image';
-import { useProductHelper } from '../../use-product-helper';
 
 import './shipping-section.scss';
 
-const ShippingSection = () => {
+type ShippingSectionProps = {
+	basicSectionId: string;
+	dimensionsSectionId: string;
+	tabId: string;
+};
+
+export const ShippingSectionFills: React.FC< ShippingSectionProps > = ( {
+	basicSectionId,
+	dimensionsSectionId,
+	tabId,
+} ) => {
 	const [ highlightSide, setHighlightSide ] =
 		useState< ShippingDimensionsImageProps[ 'highlight' ] >();
 	const { parseNumber } = useProductHelper();
@@ -73,10 +77,9 @@ const ShippingSection = () => {
 	return (
 		<>
 			<WooProductSectionItem
-				id={ SHIPPING_SECTION_BASIC_ID }
-				location={ TAB_SHIPPING_ID }
+				id={ basicSectionId }
+				tabs={ [ { name: tabId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 1 }
 			>
 				<ProductSectionLayout
 					title={ __( 'Shipping', 'woocommerce' ) }
@@ -88,7 +91,7 @@ const ShippingSection = () => {
 					<Card>
 						<CardBody className="product-shipping-section__classes">
 							<WooProductFieldItem.Slot
-								section={ SHIPPING_SECTION_BASIC_ID }
+								section={ basicSectionId }
 							/>
 						</CardBody>
 					</Card>
@@ -105,9 +108,7 @@ const ShippingSection = () => {
 								<div className="product-shipping-section__dimensions-body-col">
 									{ hasResolvedUnits && (
 										<WooProductFieldItem.Slot
-											section={
-												SHIPPING_SECTION_DIMENSIONS_ID
-											}
+											section={ dimensionsSectionId }
 											fillProps={
 												{
 													setHighlightSide,
@@ -129,59 +130,48 @@ const ShippingSection = () => {
 				</ProductSectionLayout>
 			</WooProductSectionItem>
 			<WooProductFieldItem
-				id="shipping/class"
-				section={ SHIPPING_SECTION_BASIC_ID }
+				id="class"
+				sections={ [ { name: basicSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 1 }
 			>
 				{ ( { product }: ProductShippingSectionPropsType ) => (
 					<ShippingClassField product={ product } />
 				) }
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id="shipping/dimensions/width"
-				section={ SHIPPING_SECTION_DIMENSIONS_ID }
+				id="width"
+				sections={ [ { name: dimensionsSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 1 }
 			>
 				{ ( { ...props }: ShippingDimensionsPropsType ) => (
 					<ShippingDimensionsWidthField { ...props } />
 				) }
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id="shipping/dimensions/length"
-				section={ SHIPPING_SECTION_DIMENSIONS_ID }
+				id="length"
+				sections={ [ { name: dimensionsSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 3 }
 			>
 				{ ( { ...props }: ShippingDimensionsPropsType ) => (
 					<ShippingDimensionsLengthField { ...props } />
 				) }
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id="shipping/dimensions/height"
-				section={ SHIPPING_SECTION_DIMENSIONS_ID }
+				id="height"
+				sections={ [ { name: dimensionsSectionId, order: 5 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 5 }
 			>
 				{ ( { ...props }: ShippingDimensionsPropsType ) => (
 					<ShippingDimensionsHeightField { ...props } />
 				) }
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id="shipping/dimensions/weight"
-				section={ SHIPPING_SECTION_DIMENSIONS_ID }
+				id="weight"
+				sections={ [ { name: dimensionsSectionId, order: 7 } ] }
 				pluginId={ PLUGIN_ID }
-				order={ 7 }
 			>
 				<ShippingDimensionsWeightField />
 			</WooProductFieldItem>
 		</>
 	);
 };
-
-registerPlugin( 'wc-admin-product-editor-shipping-section', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-editor',
-	render: () => <ShippingSection />,
-} );

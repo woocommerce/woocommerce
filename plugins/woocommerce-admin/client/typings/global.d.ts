@@ -9,6 +9,7 @@ declare global {
 		wcAdminFeatures: {
 			'activity-panels': boolean;
 			analytics: boolean;
+			'block-editor-feature-enabled': boolean;
 			coupons: boolean;
 			'customer-effort-score-tracks': boolean;
 			homescreen: boolean;

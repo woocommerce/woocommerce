@@ -2,12 +2,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { formatCurrencyDisplayValue } from '@woocommerce/product-editor';
 import { useFormContext, Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useContext } from '@wordpress/element';
 import { Product, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
+import { CurrencyContext } from '@woocommerce/currency';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -18,8 +20,6 @@ import {
  * Internal dependencies
  */
 import { CurrencyInputProps } from './pricing-section-fills';
-import { formatCurrencyDisplayValue } from '../../sections/utils';
-import { CurrencyContext } from '../../../lib/currency-context';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 type PricingListFieldProps = {

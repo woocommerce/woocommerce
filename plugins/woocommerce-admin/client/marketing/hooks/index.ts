@@ -1,1 +1,3 @@
 export { useInstalledPlugins } from './useInstalledPlugins';
+export { useRegisteredChannels } from './useRegisteredChannels';
+export { useRecommendedChannels } from './useRecommendedChannels';

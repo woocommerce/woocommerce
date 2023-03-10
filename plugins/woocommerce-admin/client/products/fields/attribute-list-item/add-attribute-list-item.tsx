@@ -2,25 +2,24 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { DragEventHandler } from 'react';
 import { Button } from '@wordpress/components';
 import { ListItem } from '@woocommerce/components';
 
-type AddAttributeListItemProps = {
+type NewAttributeListItemProps = {
 	label?: string;
-	onAddClick?: () => void;
+	onClick?: () => void;
 };
 
-export const AddAttributeListItem: React.FC< AddAttributeListItemProps > = ( {
+export const NewAttributeListItem: React.FC< NewAttributeListItemProps > = ( {
 	label = __( 'Add attribute', 'woocommerce' ),
-	onAddClick,
+	onClick,
 } ) => {
 	return (
 		<ListItem className="woocommerce-add-attribute-list-item">
 			<Button
 				variant="secondary"
 				className="woocommerce-add-attribute-list-item__add-button"
-				onClick={ onAddClick }
+				onClick={ onClick }
 			>
 				{ label }
 			</Button>

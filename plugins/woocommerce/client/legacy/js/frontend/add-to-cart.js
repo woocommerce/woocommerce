@@ -51,7 +51,21 @@ jQuery( function( $ ) {
 			}
 		};
 
-		$.ajax( this.requests[0] );
+		const options = this.requests[0];
+		window.fetch( options.url, {
+			method: options.type,
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+			body: options.data
+		} )
+			.then( response => {
+				if ( !response.ok ) {
+					throw new Error( response.statusText );
+				}
+				return response.json();
+			} )
+			.then( options.success )
+			.catch( error => options.error && options.error() )
+			.finally( () => options.complete && options.complete() );
 	};
 
 	/**
@@ -95,7 +109,7 @@ jQuery( function( $ ) {
 			e.data.addToCartHandler.addRequest({
 				type: 'POST',
 				url: wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'add_to_cart' ),
-				data: data,
+				data: $.param( data ),
 				success: function( response ) {
 					if ( ! response ) {
 						return;
@@ -139,9 +153,9 @@ jQuery( function( $ ) {
 		e.data.addToCartHandler.addRequest({
 			type: 'POST',
 			url: wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_from_cart' ),
-			data: {
+			data: new URLSearchParams( {
 				cart_item_key : $thisbutton.data( 'cart_item_key' )
-			},
+			} ).toString(),
 			success: function( response ) {
 				if ( ! response || ! response.fragments ) {
 					window.location = $thisbutton.attr( 'href' );

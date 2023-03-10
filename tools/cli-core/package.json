@@ -3,7 +3,6 @@
 	"version": "0.0.1",
 	"description": "Core functionality for CLI tools/commands.",
 	"main": " ",
-	"scripts": {},
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {

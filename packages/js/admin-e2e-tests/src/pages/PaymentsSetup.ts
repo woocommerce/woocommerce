@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { waitForElementByText, getElementByText } from '../utils/actions';
+import { waitForElementByText } from '../utils/actions';
 import { BasePage } from './BasePage';
 
 type PaymentMethodWithSetupButton =
@@ -12,7 +12,7 @@ type PaymentMethodWithSetupButton =
 	| 'mollie'
 	| 'bacs';
 
-type PaymentMethod = PaymentMethodWithSetupButton | 'cod';
+//  type PaymentMethod = PaymentMethodWithSetupButton | 'cod';
 
 export class PaymentsSetup extends BasePage {
 	url = 'wp-admin/admin.php?page=wc-admin&task=payments';

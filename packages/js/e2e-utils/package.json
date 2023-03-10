@@ -16,9 +16,9 @@
 	"module": "build-module/index.js",
 	"dependencies": {
 		"@automattic/puppeteer-utils": "github:Automattic/puppeteer-utils#0f3ec50",
-		"@wordpress/deprecated": "^3.2.3",
-		"@wordpress/e2e-test-utils": "wp-5.8",
-		"config": "3.3.3",
+		"@wordpress/deprecated": "wp-6.0",
+		"@wordpress/e2e-test-utils": "wp-6.0",
+		"config": "3.3.7",
 		"fishery": "^1.2.0"
 	},
 	"devDependencies": {
@@ -30,14 +30,14 @@
 		"@babel/plugin-transform-runtime": "^7.16.4",
 		"@babel/polyfill": "7.12.1",
 		"@babel/preset-env": "7.12.7",
-		"@typescript-eslint/eslint-plugin": "^5.43.0",
-		"@typescript-eslint/parser": "^5.43.0",
+		"@typescript-eslint/eslint-plugin": "^5.54.0",
+		"@typescript-eslint/parser": "^5.54.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-e2e-builds": "workspace:*",
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
 		"@wordpress/babel-preset-default": "3.0.2",
-		"@wordpress/browserslist-config": "^4.1.0",
-		"eslint": "^8.1.0",
+		"@wordpress/browserslist-config": "wp-6.0",
+		"eslint": "^8.32.0",
 		"eslint-plugin-jest": "23.20.0"
 	},
 	"peerDependencies": {

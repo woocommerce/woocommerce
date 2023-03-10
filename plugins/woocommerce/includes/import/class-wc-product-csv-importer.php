@@ -6,6 +6,8 @@
  * @version 3.1.0
  */
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -67,6 +69,17 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Convert a string from the input encoding to UTF-8.
+	 *
+	 * @param string $value The string to convert.
+	 * @return string The converted string.
+	 */
+	private function adjust_character_encoding( $value ) {
+		$encoding = $this->params['character_encoding'];
+		return 'UTF-8' === $encoding ? $value : mb_convert_encoding( $value, 'UTF-8', $encoding );
+	}
+
+	/**
 	 * Read file.
 	 */
 	protected function read_file() {
@@ -77,7 +90,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$handle = fopen( $this->file, 'r' ); // @codingStandardsIgnoreLine.
 
 		if ( false !== $handle ) {
-			$this->raw_keys = version_compare( PHP_VERSION, '5.3', '>=' ) ? array_map( 'trim', fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) ) : array_map( 'trim', fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] ) ); // @codingStandardsIgnoreLine
+			$this->raw_keys = array_map( 'trim', fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) ); // @codingStandardsIgnoreLine
+
+			if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
+				$this->raw_keys = array_map( array( $this, 'adjust_character_encoding' ), $this->raw_keys );
+			}
 
 			// Remove line breaks in keys, to avoid mismatch mapping of keys.
 			$this->raw_keys = wc_clean( wp_unslash( $this->raw_keys ) );
@@ -92,9 +109,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			while ( 1 ) {
-				$row = version_compare( PHP_VERSION, '5.3', '>=' ) ? fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) : fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] ); // @codingStandardsIgnoreLine
+				$row = fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ); // @codingStandardsIgnoreLine
 
 				if ( false !== $row ) {
+					if ( ArrayUtil::is_truthy( $this->params, 'character_encoding' ) ) {
+						$row = array_map( array( $this, 'adjust_character_encoding' ), $row );
+					}
+
 					$this->raw_data[]                                 = $row;
 					$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
 
@@ -822,15 +843,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Status is mapped from a special published field.
 		if ( isset( $data['published'] ) ) {
+			$published = $data['published'];
+			if ( is_float( $published ) ) {
+				$published = (int) $published;
+			}
+
 			$statuses       = array(
 				-1 => 'draft',
 				0  => 'private',
 				1  => 'publish',
 			);
-			$data['status'] = isset( $statuses[ $data['published'] ] ) ? $statuses[ $data['published'] ] : 'draft';
+			$data['status'] = $statuses[ $published ] ?? 'draft';
 
 			// Fix draft status of variations.
-			if ( isset( $data['type'] ) && 'variation' === $data['type'] && -1 === $data['published'] ) {
+			if ( 'variation' === ( $data['type'] ?? null ) && -1 === $published ) {
 				$data['status'] = 'publish';
 			}
 
@@ -1005,6 +1031,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			 *
 			 * @param array $parsed_data Parsed data.
 			 * @param WC_Product_Importer $importer Importer instance.
+			 *
+			 * @since
 			 */
 			$this->parsed_data[] = apply_filters( 'woocommerce_product_importer_parsed_data', $this->expand_data( $data ), $this );
 		}

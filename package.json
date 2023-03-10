@@ -29,7 +29,7 @@
 		"@babel/runtime": "^7.17.2",
 		"@types/node": "14.14.33",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/data": "^6.15.0",
+		"@wordpress/data": "wp-6.0",
 		"@wordpress/eslint-plugin": "^11.1.0",
 		"@wordpress/prettier-config": "^1.1.1",
 		"babel-loader": "^8.2.3",
@@ -44,14 +44,14 @@
 		"mkdirp": "^1.0.4",
 		"moment": "^2.29.1",
 		"node-stream-zip": "^1.15.0",
-		"postcss-loader": "^3.0.0",
+		"postcss-loader": "^4.3.0",
 		"prettier": "npm:wp-prettier@^2.2.1-beta-1",
 		"regenerator-runtime": "^0.13.9",
 		"request": "^2.88.2",
 		"sass": "^1.49.9",
 		"sass-loader": "^10.2.1",
-		"syncpack": "^8.3.9",
-		"turbo": "^1.4.5",
+		"syncpack": "^9.8.4",
+		"turbo": "^1.7.0",
 		"typescript": "^4.8.3",
 		"url-loader": "^1.1.2",
 		"webpack": "^5.70.0"
@@ -62,5 +62,11 @@
 		"@wordpress/babel-preset-default": "^6.4.1",
 		"lodash": "^4.17.21",
 		"wp-textdomain": "1.0.1"
+	},
+	"pnpm": {
+		"overrides": {
+			"@types/react": "^17.0.2",
+			"react": "^17.0.2"
+		}
 	}
 }

@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -1785,17 +1786,17 @@ FROM $order_meta_table
 
 			$this->upshift_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
+			$this->delete_items( $order );
 
 			$order->set_id( 0 );
 
-			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
-			if ( $order->get_data_store()->get_current_class_name() !== self::class ) {
-				return;
+			// Only delete post data if the posts table is authoritative and synchronization is enabled.
+			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+			if ( $data_synchronizer->data_sync_is_enabled() && $order->get_data_store()->get_current_class_name() === self::class ) {
+				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+				// Once we stop creating posts for orders, we should do the cleanup here instead.
+				wp_delete_post( $order_id );
 			}
-
-			// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-			// Once we stop creating posts for orders, we should do the cleanup here instead.
-			wp_delete_post( $order_id );
 
 			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		} else {
@@ -1996,6 +1997,7 @@ FROM $order_meta_table
 	 */
 	public function delete_order_data_from_custom_order_tables( $order_id ) {
 		global $wpdb;
+		$order_cache = wc_get_container()->get( OrderCache::class );
 
 		// Delete COT-specific data.
 		foreach ( $this->get_all_table_names() as $table ) {
@@ -2006,6 +2008,7 @@ FROM $order_meta_table
 					: array( 'order_id' => $order_id ),
 				array( '%d' )
 			);
+			$order_cache->remove( $order_id );
 		}
 	}
 

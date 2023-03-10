@@ -11,11 +11,11 @@ import {
 } from '@woocommerce/components';
 import { getPersistedQuery } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { CurrencyContext } from '../../lib/currency-context';
 import {
 	getIndicatorData,
 	getIndicatorValues,

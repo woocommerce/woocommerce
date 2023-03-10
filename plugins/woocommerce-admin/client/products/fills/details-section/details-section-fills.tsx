@@ -3,34 +3,30 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
+	__experimentalProductFieldSection as ProductFieldSection,
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
-	__experimentalProductFieldSection as ProductFieldSection,
-} from '@woocommerce/components';
-import { registerPlugin } from '@wordpress/plugins';
+	__experimentalDetailsNameField as DetailsNameField,
+	__experimentalDetailsFeatureField as DetailsFeatureField,
+	__experimentalDetailsCategoriesField as DetailsCategoriesField,
+	__experimentalDetailsSummaryField as DetailsSummaryField,
+	__experimentalDetailsDescriptionField as DetailsDescriptionField,
+	DETAILS_SECTION_ID,
+	TAB_GENERAL_ID,
+} from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
  */
-import {
-	DetailsNameField,
-	DetailsCategoriesField,
-	DetailsFeatureField,
-	DetailsSummaryField,
-	DetailsDescriptionField,
-} from './index';
-
-import { DETAILS_SECTION_ID, PLUGIN_ID, TAB_GENERAL_ID } from '../constants';
-
+import { PLUGIN_ID } from '../constants';
 import './product-details-section.scss';
 
-const DetailsSection = () => (
+export const DetailsSectionFills = () => (
 	<>
 		<WooProductSectionItem
 			id={ DETAILS_SECTION_ID }
-			location={ TAB_GENERAL_ID }
+			tabs={ [ { name: TAB_GENERAL_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 1 }
 		>
 			<ProductFieldSection
 				id={ DETAILS_SECTION_ID }
@@ -42,50 +38,39 @@ const DetailsSection = () => (
 			/>
 		</WooProductSectionItem>
 		<WooProductFieldItem
-			id="details/name"
-			section={ DETAILS_SECTION_ID }
+			id="name"
+			sections={ [ { name: DETAILS_SECTION_ID, order: 1 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 1 }
 		>
 			<DetailsNameField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/categories"
-			section={ DETAILS_SECTION_ID }
+			id="categories"
+			sections={ [ { name: DETAILS_SECTION_ID, order: 3 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 3 }
 		>
 			<DetailsCategoriesField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/feature"
-			section={ DETAILS_SECTION_ID }
+			id="feature"
+			sections={ [ { name: DETAILS_SECTION_ID, order: 5 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 5 }
 		>
 			<DetailsFeatureField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/summary"
-			section={ DETAILS_SECTION_ID }
+			id="summary"
+			sections={ [ { name: DETAILS_SECTION_ID, order: 7 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 7 }
 		>
 			<DetailsSummaryField />
 		</WooProductFieldItem>
 		<WooProductFieldItem
-			id="details/description"
-			section={ DETAILS_SECTION_ID }
+			id="description"
+			sections={ [ { name: DETAILS_SECTION_ID, order: 9 } ] }
 			pluginId={ PLUGIN_ID }
-			order={ 9 }
 		>
 			<DetailsDescriptionField />
 		</WooProductFieldItem>
 	</>
 );
-
-registerPlugin( 'wc-admin-product-editor-details-section', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-editor',
-	render: () => <DetailsSection />,
-} );

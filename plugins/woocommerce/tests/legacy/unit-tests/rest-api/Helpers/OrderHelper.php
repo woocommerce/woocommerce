@@ -19,10 +19,10 @@ use WC_Data_Store;
 use WC_Mock_Payment_Gateway;
 use WC_Order;
 use WC_Product;
-use \WC_Tax;
-use \WC_Shipping_Rate;
-use \WC_Order_Item_Shipping;
-use \WC_Order_Item_Product;
+use WC_Tax;
+use WC_Shipping_Rate;
+use WC_Order_Item_Shipping;
+use WC_Order_Item_Product;
 
 /**
  * Class OrderHelper.

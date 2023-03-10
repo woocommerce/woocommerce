@@ -14,7 +14,9 @@ import { Product, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import interpolateComponents from '@automattic/interpolate-components';
 import { format as formatDate } from '@wordpress/date';
+import { formatCurrencyDisplayValue } from '@woocommerce/product-editor';
 import moment from 'moment';
+import { CurrencyContext } from '@woocommerce/currency';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -26,8 +28,6 @@ import {
  * Internal dependencies
  */
 import { CurrencyInputProps } from './pricing-section-fills';
-import { formatCurrencyDisplayValue } from '../../sections/utils';
-import { CurrencyContext } from '../../../lib/currency-context';
 
 type PricingListFieldProps = {
 	currencyInputProps: CurrencyInputProps;
@@ -140,6 +140,7 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 										<span>
 											{ formatDate(
 												timeFormat,
+												// @ts-expect-error TODO - fix this type error with moment
 												moment().startOf( 'day' )
 											) }
 										</span>
@@ -148,6 +149,7 @@ export const PricingSaleField: React.FC< PricingListFieldProps > = ( {
 										<span>
 											{ formatDate(
 												timeFormat,
+												// @ts-expect-error TODO - fix this type error with moment
 												moment().endOf( 'day' )
 											) }
 										</span>
