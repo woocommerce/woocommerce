@@ -1322,6 +1322,10 @@ class WC_AJAX {
 					$item_id = absint( $item_id );
 					$item    = $order->get_item( $item_id );
 
+					if ( ! $item ) {
+						continue;
+					}
+
 					// Before deleting the item, adjust any stock values already reduced.
 					if ( $item->is_type( 'line_item' ) ) {
 						$changed_stock = wc_maybe_adjust_line_item_product_stock( $item, 0 );
@@ -1353,7 +1357,7 @@ class WC_AJAX {
 			 * @param bool|array|WP_Error $changed_store Result of wc_maybe_adjust_line_item_product_stock().
 			 * @param bool|WC_Order|WC_Order_Refund $order As returned by wc_get_order().
 			 */
-			do_action( 'woocommerce_ajax_order_items_removed', $item_id, $item, $changed_stock, $order );
+			do_action( 'woocommerce_ajax_order_items_removed', $item_id ?? 0, $item ?? false, $changed_stock ?? false, $order );
 
 			// Get HTML to return.
 			ob_start();
