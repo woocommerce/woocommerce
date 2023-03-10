@@ -34,8 +34,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					'id'            => '_manage_stock',
 					'value'         => $product_object->get_manage_stock( 'edit' ) ? 'yes' : 'no',
 					'wrapper_class' => 'show_if_simple show_if_variable',
-					'label'         => __( 'Manage stock?', 'woocommerce' ),
-					'description'   => __( 'Manage stock level (quantity)', 'woocommerce' ),
+					'label'         => __( 'Stock management', 'woocommerce' ),
+					'description'   => __( 'Track stock quantity for this product', 'woocommerce' ),
 				)
 			);
 
@@ -93,6 +93,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 			do_action( 'woocommerce_product_options_stock_fields' );
 
 			echo '</div>';
+		} else {
+
+			woocommerce_wp_note(
+				array(
+					'id'               => '_manage_stock_disabled',
+					'label'            => __( 'Stock management', 'woocommerce' ),
+					'label-aria-label' => __( 'Stock management disabled in store settings', 'woocommerce' ),
+					'message'          => sprintf(
+						/* translators: %s: url for store settings */
+						__( 'Disabled in <a href="%s" aria-label="stock management store settings">store settings</a>.', 'woocommerce' ),
+						esc_url( 'admin.php?page=wc-settings&tab=products&section=inventory' )
+					),
+					'wrapper_class'    => 'show_if_simple show_if_variable',
+				)
+			);
+
 		}
 
 		woocommerce_wp_select(

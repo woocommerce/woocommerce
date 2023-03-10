@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, ButtonGroup } from '@wordpress/components';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	ProductVariation,
@@ -18,7 +19,6 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
-import { WooHeaderItem } from '~/header/utils';
 import './product-form-actions.scss';
 
 export const ProductVariationFormActions: React.FC = () => {

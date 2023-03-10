@@ -1671,6 +1671,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Public wrapper for exposing get_tax_location() method, enabling 3rd parties to get the tax location for an order.
+	 *
+	 * @since 7.6.0
+	 * @param array $args array Override the location.
+	 * @return array
+	 */
+	public function get_taxable_location( $args = array() ) {
+		return $this->get_tax_location( $args );
+	}
+
+	/**
 	 * Get tax rates for an order. Use order's shipping or billing address, defaults to base location.
 	 *
 	 * @param string $tax_class     Tax class to get rates for.

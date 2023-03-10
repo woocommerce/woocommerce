@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Added woocommerce_reduce_order_item_stock action hook

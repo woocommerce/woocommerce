@@ -122,19 +122,23 @@ export async function getCategoriesTreeWithMissingParents(
 
 	// Retrieve the missing parent objects incase not all of them were included.
 	if ( missingParents.length > 0 ) {
-		return resolveSelect( EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME )
-			.getProductCategories( {
-				include: missingParents,
-			} )
-			.then( ( parentCategories ) => {
-				return getCategoriesTreeWithMissingParents(
-					[
-						...( parentCategories as ProductCategory[] ),
-						...newCategories,
-					],
-					search
-				);
-			} );
+		return (
+			resolveSelect( EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME )
+				.getProductCategories( {
+					include: missingParents,
+				} )
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				.then( ( parentCategories ) => {
+					return getCategoriesTreeWithMissingParents(
+						[
+							...( parentCategories as ProductCategory[] ),
+							...newCategories,
+						],
+						search
+					);
+				} )
+		);
 	}
 	const categoryTreeList = sortCategoryTreeItems(
 		Object.values( items ).filter( ( item ) => item.parentID === 0 )
@@ -158,6 +162,8 @@ const productCategoryQueryObject = {
 export const useCategorySearch = () => {
 	const lastSearchValue = useRef( '' );
 	const { initialCategories, totalCount } = useSelect(
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		( select: WCDataSelector ) => {
 			const { getProductCategories, getProductCategoriesTotalCount } =
 				select( EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME );

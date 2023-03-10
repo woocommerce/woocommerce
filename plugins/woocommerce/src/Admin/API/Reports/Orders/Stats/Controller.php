@@ -20,13 +20,6 @@ use Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
 
 	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
-
-	/**
 	 * Route base.
 	 *
 	 * @var string

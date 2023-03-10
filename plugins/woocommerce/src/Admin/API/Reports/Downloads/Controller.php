@@ -19,12 +19,6 @@ use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
  * @extends Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends ReportsController implements ExportableInterface {
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.

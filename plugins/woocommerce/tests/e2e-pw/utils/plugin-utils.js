@@ -147,6 +147,9 @@ export const downloadZip = async ( {
 	};
 
 	response = await axios( options ).catch( ( error ) => {
+		if ( error.response ) {
+			console.error( error.response.data );
+		}
 		throw new Error( error.message );
 	} );
 
