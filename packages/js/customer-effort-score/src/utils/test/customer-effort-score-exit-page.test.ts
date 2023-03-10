@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { dispatch } from '@wordpress/data';
-import { triggerExitPageCesSurvey } from '@woocommerce/customer-effort-score';
+
+/**
+ * Internal dependencies
+ */
+import { triggerExitPageCesSurvey } from '../customer-effort-score-exit-page';
 
 jest.mock( '@woocommerce/data', () => ( {
 	OPTIONS_STORE_NAME: 'options',
