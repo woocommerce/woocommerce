@@ -14,23 +14,23 @@
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"66.66%","layout":{"type":"default"}} -->
-<div class="wp-block-column" style="flex-basis:66.66%"><!-- wp:woocommerce/product-rating {"isDescendentOfQueryLoop":true,"fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
+<div class="wp-block-column" style="flex-basis:66.66%"><!-- wp:woocommerce/product-rating {"isDescendentOfQueryLoop":true,"fontSize":"small","style":{"spacing":{"margin":{"bottom":"0.75rem"}}}} /-->
 
-<!-- wp:post-terms {"term":"product_cat","style":{"spacing":{"margin":{"top":"0"}}}} /-->
+<!-- wp:post-terms {"term":"product_cat","style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}}} /-->
 
-<!-- wp:post-title {"level":3,"isLink":true,"style":{"spacing":{"margin":{"top":"0"}}},"fontSize":"large"} /-->
+<!-- wp:post-title {"level":3,"isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}},"fontSize":"large","__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
 
-<!-- wp:post-excerpt {"style":{"spacing":{"margin":{"top":"0"}}},"fontSize":"small","__woocommerceNamespace":"woocommerce/product-query/product-summary"} /-->
+<!-- wp:post-excerpt {"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}},"fontSize":"small","__woocommerceNamespace":"woocommerce/product-query/product-summary"} /-->
 
 <!-- wp:woocommerce/product-sku {"isDescendentOfQueryLoop":true} /-->
 
 <!-- wp:columns -->
 <div class="wp-block-columns"><!-- wp:column {"width":"33.33%"} -->
-<div class="wp-block-column" style="flex-basis:33.33%"><!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /--></div>
+<div class="wp-block-column" style="flex-basis:33.33%"><!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"fontSize":"small","style":{"spacing":{"margin":{"bottom":"0.75rem"}}}} /--></div>
 <!-- /wp:column -->
 
 <!-- wp:column {"width":"66.66%"} -->
-<div class="wp-block-column" style="flex-basis:66.66%"><!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /--></div>
+<div class="wp-block-column" style="flex-basis:66.66%"><!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"fontSize":"small","style":{"spacing":{"margin":{"bottom":"0.75rem"}}}} /--></div>
 <!-- /wp:column --></div>
 <!-- /wp:columns --></div>
 <!-- /wp:column --></div>
