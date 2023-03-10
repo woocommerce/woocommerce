@@ -79,11 +79,14 @@ class CouponsController {
 		$order->calculate_taxes( $calculate_tax_args );
 		$order->calculate_totals( false );
 
-		$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $coupon ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$code   = wc_format_coupon_code( wp_unslash( $coupon ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$result = $order->apply_coupon( $code );
 
 		if ( is_wp_error( $result ) ) {
 			throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );
 		}
+
+		$order->add_order_note( sprintf( __( 'Coupon applied: "%s".', 'woocommerce' ), $code ), 0, true );
 
 		return $order;
 	}
