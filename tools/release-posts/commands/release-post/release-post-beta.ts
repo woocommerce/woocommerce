@@ -139,12 +139,13 @@ const program = new Command()
 				`Finding recent release posts with title: ${ versionSearch }`
 			);
 
-			const posts = await searchForPostsByCategory(
-				siteId,
-				versionSearch,
-				'WooCommerce Core',
-				authToken
-			);
+			const posts =
+				( await searchForPostsByCategory(
+					siteId,
+					versionSearch,
+					'WooCommerce Core',
+					authToken
+				) ) || [];
 
 			Logger.endTask();
 
@@ -156,7 +157,7 @@ const program = new Command()
 					: [ 'No posts found - generate default link' ],
 			} );
 
-			const lastReleasePostTitle = await prompt.run();
+			const lastReleasePostTitle: string = await prompt.run();
 			const lastReleasePost = posts.find(
 				( p ) => p.title === lastReleasePostTitle
 			);

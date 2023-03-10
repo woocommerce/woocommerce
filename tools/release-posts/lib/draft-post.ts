@@ -4,6 +4,14 @@
 import fetch from 'node-fetch';
 import { Logger } from 'cli-core/src/logger';
 
+// Typing just the things we need from the WP.com Post object.
+// (which is not the same as WP Post object or API Post object).
+// See example response here: https://developer.wordpress.com/docs/api/1.1/get/sites/%24site/posts/ to add more props.
+type WordpressComPost = {
+	title: string;
+	URL: string;
+};
+
 /**
  * Fetch a post from WordPress.com
  *
@@ -66,7 +74,7 @@ export const searchForPostsByCategory = async (
 			throw new Error( `Error creating draft post: ${ text }` );
 		}
 
-		return ( await post.json() ).posts;
+		return ( await post.json() ).posts as WordpressComPost[];
 	} catch ( e: unknown ) {
 		if ( e instanceof Error ) {
 			Logger.error( e.message );
