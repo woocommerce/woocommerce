@@ -1,0 +1,5 @@
+.wp-block-woocommerce-product-tab__content {
+    &:not(.is-selected) {
+        display: none;
+    }
+}
