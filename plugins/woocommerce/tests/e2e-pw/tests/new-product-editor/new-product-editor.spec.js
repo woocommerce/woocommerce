@@ -1,29 +1,9 @@
 const { test, expect } = require( '@playwright/test' );
 
-const EXPERIMENTAL_FEATURES_SETTINGS_URL =
-	'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features';
 const EDIT_PRODUCT_URL = 'wp-admin/edit.php?post_type=product';
 const NEW_PRODUCT_URL = 'wp-admin/post-new.php?post_type=product';
 
-const NEW_PRODUCT_EDITOR_EXPERIMENTAL_FEATURE_SELECTOR =
-	'#woocommerce_new_product_management_enabled';
-
-async function expectExperimentalFeatureExists( page ) {
-	// make sure the Advanced tab is active
-	await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
-		'Advanced'
-	);
-
-	// make sure the Features sub-tab is active
-	await expect(
-		page.locator( 'ul.subsubsub > li > a.current' )
-	).toContainText( 'Features' );
-
-	// make sure the new product editor experimental feature is shown
-	await expect(
-		page.locator( NEW_PRODUCT_EDITOR_EXPERIMENTAL_FEATURE_SELECTOR )
-	).toBeVisible();
-}
+const isNewEditorEnabled = !! process.env.ENABLE_NEW_PRODUCT_EDITOR;
 
 async function clickAddNewMenuItem( page ) {
 	await page
@@ -35,61 +15,44 @@ async function clickAddNewMenuItem( page ) {
 test.describe( 'New Product Editor', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test( 'is disabled by default', async ( { page } ) => {
-		await page.goto( EXPERIMENTAL_FEATURES_SETTINGS_URL );
-
-		await expectExperimentalFeatureExists( page );
-
-		// make sure the new product editor is unchecked
-		await expect(
-			page.locator( NEW_PRODUCT_EDITOR_EXPERIMENTAL_FEATURE_SELECTOR )
-		).not.toBeChecked();
-	} );
-
-	test( 'is not used when disabled by default', async ( { page } ) => {
+	test( 'is feature flag set appropriately', async ( { page } ) => {
+		// we have to go to a WCAdmin page to get the wcAdminFeatures global
 		await page.goto( EDIT_PRODUCT_URL );
 
-		await clickAddNewMenuItem( page );
+		const wcAdminFeatures = await page.evaluate( 'window.wcAdminFeatures' );
 
-		// make sure the old product editor is shown
-		await expect(
-			page.locator( '#woocommerce-product-data h2' )
-		).toContainText( 'Product data' );
-	} );
-
-	test( 'can be enabled', async ( { page } ) => {
-		await page.goto( EXPERIMENTAL_FEATURES_SETTINGS_URL );
-
-		await expectExperimentalFeatureExists( page );
-
-		// enable the new product editor
-		await page.check( NEW_PRODUCT_EDITOR_EXPERIMENTAL_FEATURE_SELECTOR );
-
-		// save changes
-		await page.click( 'text=Save changes' );
-
-		// make sure settings have been saved
-		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved'
+		expect( !! wcAdminFeatures[ 'new-product-editor-experience' ] ).toBe(
+			isNewEditorEnabled
 		);
-
-		// make sure the new product editor is enabled
-		await expect(
-			page.locator( NEW_PRODUCT_EDITOR_EXPERIMENTAL_FEATURE_SELECTOR )
-		).toBeChecked();
 	} );
 
-	test( 'is used when enabled', async ( { page } ) => {
-		await page.goto( EDIT_PRODUCT_URL );
+	if ( ! isNewEditorEnabled ) {
+		test( 'is not used when disabled', async ( { page } ) => {
+			await page.goto( EDIT_PRODUCT_URL );
 
-		await clickAddNewMenuItem( page );
+			await clickAddNewMenuItem( page );
 
-		// make sure the new product editor is shown
-		await expect(
-			page.locator( '.woocommerce-product-title__wrapper' )
-		).toContainText( 'New product' );
-	} );
+			// make sure the old product editor is shown
+			await expect(
+				page.locator( '#woocommerce-product-data h2' )
+			).toContainText( 'Product data' );
+		} );
+	}
 
+	if ( isNewEditorEnabled ) {
+		test( 'is used when enabled', async ( { page } ) => {
+			await page.goto( EDIT_PRODUCT_URL );
+
+			await clickAddNewMenuItem( page );
+
+			// make sure the new product editor is shown
+			await expect(
+				page.locator( '.woocommerce-product-title__wrapper' )
+			).toContainText( 'New product' );
+		} );
+	}
+
+	/*
 	test( 'can be disabled', async ( { page } ) => {
 		await page.goto( EXPERIMENTAL_FEATURES_SETTINGS_URL );
 
@@ -122,4 +85,5 @@ test.describe( 'New Product Editor', () => {
 			page.locator( '#woocommerce-product-data h2' )
 		).toContainText( 'Product data' );
 	} );
+	*/
 } );
