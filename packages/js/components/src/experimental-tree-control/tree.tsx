@@ -23,6 +23,9 @@ export const Tree = forwardRef( function ForwardedTree(
 		ref,
 	} );
 
+	const createValueExists =
+		items.findIndex( ( i ) => i.data.label === props.createValue ) !== -1;
+
 	return (
 		<>
 			<ol
@@ -42,7 +45,7 @@ export const Tree = forwardRef( function ForwardedTree(
 					/>
 				) ) }
 			</ol>
-			{ props.allowCreate && (
+			{ props.allowCreate && ! createValueExists && (
 				<Button
 					className="experimental-woocommerce-tree__button"
 					onClick={ () => props.onCreateNew && props.onCreateNew() }
