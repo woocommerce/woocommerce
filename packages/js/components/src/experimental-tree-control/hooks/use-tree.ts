@@ -27,6 +27,7 @@ export function useTree( {
 		items,
 		treeProps: {
 			...props,
+			ref,
 			role,
 		},
 		treeItemProps: {

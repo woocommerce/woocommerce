@@ -1,7 +1,14 @@
 /**
  * External dependencies
  */
-import { useMemo, useState, createElement, Fragment } from '@wordpress/element';
+import {
+	useMemo,
+	useState,
+	createElement,
+	Fragment,
+	useRef,
+	useEffect,
+} from '@wordpress/element';
 import {
 	selectControlStateChangeTypes,
 	Spinner,
@@ -149,6 +156,8 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 
 	const selectedIds = value.map( ( item ) => item.id );
 
+	const treeControlRef = useRef< any >();
+
 	return (
 		<>
 			<SelectControl< ProductCategoryLinkedList >
@@ -169,6 +178,41 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 				getFilteredItems={ categoryFieldGetFilteredItems }
 				placeholder={ value.length === 0 ? placeholder : '' }
 				__experimentalOpenMenuOnFocus
+				stateReducer={ ( state, actionAndChanges ) => {
+					const { changes, type } = actionAndChanges;
+					switch ( type ) {
+						case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
+							return {
+								...changes,
+								inputValue: state.inputValue,
+							};
+						case selectControlStateChangeTypes.ItemClick:
+							if (
+								changes.selectedItem &&
+								changes.selectedItem.id === -99
+							) {
+								return changes;
+							}
+							return {
+								...changes,
+								isOpen: true,
+								inputValue: state.inputValue,
+								highlightedIndex: state.highlightedIndex,
+							};
+						case selectControlStateChangeTypes.InputKeyDownEscape:
+							return {
+								...changes,
+								isOpen: false,
+							};
+						case selectControlStateChangeTypes.InputKeyDownArrowDown:
+							treeControlRef.current?.focus();
+							return {
+								...changes,
+							};
+						default:
+							return changes;
+					}
+				} }
 			>
 				{ ( {
 					items,
@@ -177,25 +221,21 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 					getItemProps,
 					highlightedIndex,
 				} ) => {
-					const mappedItems =
-						items.length > 0
-							? items.map( ( i ) =>
-									i.parent
-										? {
-												value: String( i.id ),
-												label: i.name,
-												parent: String( i.parent ),
-										  }
-										: {
-												value: String( i.id ),
-												label: i.name,
-										  }
-							  )
-							: [];
+					const { ref } = getMenuProps();
+					const width = document
+						.querySelector(
+							'.woocommerce-experimental-select-control__combo-box-wrapper'
+						)
+						?.getBoundingClientRect().width; // TODO find a better way?
 					return (
-						<Popover>
-							{ isOpen && (
+						<Popover
+							ref={ ref }
+							// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
+							__unstableSlotName="category-popover"
+						>
+							{
 								<TreeControl
+									ref={ treeControlRef }
 									multiple
 									shouldNotRecursivelySelect
 									allowCreate
@@ -203,7 +243,9 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 									onCreateNew={ () => {
 										setShowCreateNewModal( true );
 									} }
-									className="woocommerce-category-field-dropdown__test"
+									style={ {
+										width,
+									} }
 									items={ mapFromCategoryType( items ) }
 									selected={ mapFromCategoryType( value ) }
 									onSelect={ ( selectedItems ) => {
@@ -243,12 +285,13 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 										}
 									} }
 								></TreeControl>
-							) }
+							}
 						</Popover>
 					);
 				} }
 			</SelectControl>
-			<MenuSlot />
+			{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
+			<Popover.Slot name="category-popover" />
 			{ showCreateNewModal && (
 				<CreateCategoryModal
 					initialCategoryName={ searchValue }
