@@ -1305,7 +1305,7 @@ class WC_AJAX {
 				'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
 			);
 
-			if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
+			if ( is_numeric( $order_item_ids ) ) {
 				$order_item_ids = array( $order_item_ids );
 			}
 
