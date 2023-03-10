@@ -9,7 +9,6 @@
  * @package WooCommerce
  */
 
-
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 
 defined( 'ABSPATH' ) || exit;
@@ -41,7 +40,7 @@ class WC_Meta_Data implements JsonSerializable {
 	 * @param array $meta Data to wrap behind this function.
 	 */
 	public function __construct( $meta = array() ) {
-		if ( $meta['key'] === 'coupon_data' ) {
+		if ( 'coupon_data' === $meta['key'] ) {
 			$meta['value'] = wc_get_container()->get( CouponsController::class )->hydrate_coupon_data( $meta['value'] );
 		}
 

@@ -16,14 +16,14 @@ class CouponsController {
 	 *
 	 * @var array
 	 */
-	protected $datetime_fields = [ 'date_created', 'date_modified', 'date_expires' ];
+	protected $datetime_fields = array( 'date_created', 'date_modified', 'date_expires' );
 
 	/**
 	 * Non-boolean fields in order item `coupon_data` that default to empty.
 	 *
 	 * @var array
 	 */
-	protected $default_empty_fields = [
+	protected $default_empty_fields = array(
 		'description'                 => '',
 		'email_restrictions'          => [],
 		'excluded_product_ids'        => [],
@@ -37,7 +37,7 @@ class CouponsController {
 		'usage_count'                 => 0,
 		'usage_limit'                 => 0,
 		'usage_limit_per_user'        => 0,
-	];
+	);
 
 	/**
 	 * Add order discount via Ajax.
@@ -125,7 +125,7 @@ class CouponsController {
 	 */
 	public function dehydrate_coupon_data( \WC_Meta_Data $meta ): \WC_Meta_Data {
 		$coupon_data = $meta->value;
-		// Convert WC_DateTime fields to strings
+		// Convert WC_DateTime fields to strings.
 		foreach ( $this->datetime_fields as $key ) {
 			if ( empty( $coupon_data[ $key ] ) ) {
 				unset( $coupon_data[ $key ] );
@@ -134,7 +134,7 @@ class CouponsController {
 			}
 		}
 
-		// Reduce meta data
+		// Reduce meta data.
 		if ( ! empty( $coupon_data['meta_data'] ) ) {
 			foreach ( $coupon_data['meta_data'] as $key => $meta_object ) {
 				if ( is_a( $meta_object, \WC_Meta_Data::class ) ) {
@@ -162,7 +162,7 @@ class CouponsController {
 	 * @return array
 	 */
 	public function hydrate_coupon_data( array $meta ): array {
-		// Convert WC_DateTime fields
+		// Convert WC_DateTime fields.
 		foreach ( $this->datetime_fields as $key ) {
 			if ( ! isset( $meta[ $key ] ) ) {
 				$meta[ $key ] = null;

@@ -175,7 +175,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * @return int meta ID
 	 */
 	public function add_meta( &$object, $meta ) {
-		if ( $meta->key === 'coupon_data' ) {
+		if ( 'coupon_data' === $meta->key ) {
 			$meta = wc_get_container()->get( CouponsController::class )->dehydrate_coupon_data( $meta );
 		}
 
@@ -190,7 +190,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 	 * @param  stdClass $meta (containing ->id, ->key and ->value).
 	 */
 	public function update_meta( &$object, $meta ) {
-		if ( $meta->key === 'coupon_data' ) {
+		if ( 'coupon_data' === $meta->key ) {
 			$meta = wc_get_container()->get( CouponsController::class )->dehydrate_coupon_data( $meta );
 		}
 

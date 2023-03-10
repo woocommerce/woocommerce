@@ -13,43 +13,43 @@ class CouponsControllerTest extends \WC_Unit_Test_Case {
 	 * @return array[]
 	 */
 	public function dehydrate_coupon_data_provider() {
-		return [
-			[
+		return array(
+			array(
 				'percentage50',
-				[
+				array(
 					'discount_type' => 'percent',
 					'coupon_amount' => 50,
 					'product_ids'   => '',
-				],
-				[],
-			],
-			[
+				),
+				array(),
+			),
+			array(
 				'fixedcart10',
-				[
+				array(
 					'discount_type'  => 'fixed_cart',
 					'coupon_amount'  => 10,
 					'usage_limit'    => 20,
 					'expiry_date'    => '',
 					'minimum_amount' => '25',
-				],
-				[
-					'tag'            => 'great-deal',
-				],
-			],
-		];
+				),
+				array(
+					'tag' => 'great-deal',
+				),
+			),
+		);
 	}
 
 	/**
 	 * @dataProvider dehydrate_coupon_data_provider
 	 * @param string $code Coupon code.
-	 * @param array $properties Coupon properties.
-	 * @param array $meta Coupon meta.
+	 * @param array  $properties Coupon properties.
+	 * @param array  $meta Coupon meta.
 	 * @return void
-	 * @throws WC_Data_Exception
+	 * @throws WC_Data_Exception When processing invalid date fields.
 	 */
 	public function test_dehydrate_hydrate_coupon_data( string $code, array $properties, array $meta ) {
 		$datefmt = 'Y-m-dTH:i:sO';
-		$product = WC_Helper_Product::create_simple_product( true, [ 'regular_price' => 100 ] );
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
 
 		if ( isset( $properties['product_ids'] ) ) {
 			$properties['product_ids'] = $product->get_id();
@@ -74,13 +74,13 @@ class CouponsControllerTest extends \WC_Unit_Test_Case {
 
 		$order1       = wc_get_order( $order->get_id() );
 		$data         = $order1->get_data();
-		$coupon_lines = $data['coupon_lines'] ?? [];
+		$coupon_lines = $data['coupon_lines'] ?? array();
 		$coupon_data  = false;
 		foreach ( $coupon_lines as $_meta ) {
 			$_data = $_meta->get_data();
 			if ( ! empty( $_data['meta_data'] ) ) {
-				foreach( $_data['meta_data'] as $meta_row ) {
-					if ( $meta_row->key === 'coupon_data' ) {
+				foreach ( $_data['meta_data'] as $meta_row ) {
+					if ( 'coupon_data' === $meta_row->key ) {
 							$coupon_data = $meta_row->value;
 							break 2;
 					}
@@ -91,11 +91,11 @@ class CouponsControllerTest extends \WC_Unit_Test_Case {
 		$this->assertNotFalse( $coupon_data );
 
 		// Test the dates.
-		foreach( [
-					 'date_created'  => 'get_date_created',
-					 'date_modified' => 'get_date_modified',
-					 'date_expires'  => 'get_date_expires',
-				 ] as $key => $callback ) {
+		foreach ( array(
+			'date_created'  => 'get_date_created',
+			'date_modified' => 'get_date_modified',
+			'date_expires'  => 'get_date_expires',
+		) as $key => $callback ) {
 			if ( empty( $coupon_data->$key ) ) {
 				$this->assertFalse( isset( $properties[ $key ] ) );
 			} else {
@@ -106,8 +106,8 @@ class CouponsControllerTest extends \WC_Unit_Test_Case {
 
 		// Test falsey fields.
 		$default_falsey_fields = wc_get_container()->get( CouponsController::class )->get_default_empty_fields();
-		foreach( $default_falsey_fields as $key => $default_value ) {
-			if ( $key === 'meta_data' ) {
+		foreach ( $default_falsey_fields as $key => $default_value ) {
+			if ( 'meta_data' === $key ) {
 				continue;
 			} elseif ( ! isset( $properties[ $key ] ) ) {
 				$this->assertSame( $coupon_data[ $key ], $default_value );
@@ -115,7 +115,7 @@ class CouponsControllerTest extends \WC_Unit_Test_Case {
 				if ( is_array( $default_value ) ) {
 					$expected = is_string( $properties[ $key ] ) ?
 						explode( ',', $properties[ $key ] ) :
-						[ $properties[ $key ] ];
+						array( $properties[ $key ] );
 				} else {
 					$expected = $properties[ $key ];
 				}
