@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Reduces the size of order coupon meta data prior to saving to the database
