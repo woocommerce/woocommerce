@@ -31,6 +31,7 @@ export function TabButton( {
 				const { onClick } = fillProps;
 				return (
 					<Button
+						key={ id }
 						className={ classes }
 						onClick={ () => onClick( id ) }
 					>
