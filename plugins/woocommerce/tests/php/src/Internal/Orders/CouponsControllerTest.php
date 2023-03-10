@@ -134,8 +134,8 @@ class CouponsControllerTest extends \WC_Unit_Test_Case {
 						$this->assertSame( $expected, $meta_row['value'] );
 						break;
 					}
-					$this->assertTrue( $meta_found );
 				}
+				$this->assertTrue( $meta_found );
 			}
 		}
 	}
