@@ -87,9 +87,7 @@
 
 .wp-block-woocommerce-mini-cart-contents {
 	box-sizing: border-box;
-	height: 100vh;
 	height: 100dvh;
-	max-height: -webkit-fill-available;
 	padding: 0;
 	justify-content: center;
 }
@@ -99,9 +97,10 @@
 
 .wp-block-woocommerce-empty-mini-cart-contents-block,
 .wp-block-woocommerce-filled-mini-cart-contents-block {
-	height: 100vh;
-	height: 100dvh;
+	height: 100%;
 	max-height: -webkit-fill-available;
+	max-height: -moz-available;
+	max-height: fill-available;
 	display: flex;
 	flex-direction: column;
 }
@@ -210,11 +209,13 @@ h2.wc-block-mini-cart__title {
 }
 
 .admin-bar .wp-block-woocommerce-mini-cart-contents {
-	margin-top: 32px;
+	margin-top: 46px;
+	height: calc(100dvh - 46px);
 }
 
-.admin-bar .wp-block-woocommerce-mini-cart-contents,
-.admin-bar .wp-block-woocommerce-empty-mini-cart-contents-block,
-.admin-bar .wp-block-woocommerce-filled-mini-cart-contents-block {
-	height: calc(100vh - 32px);
+@media only screen and (min-width: 783px) {
+	.admin-bar .wp-block-woocommerce-mini-cart-contents {
+		margin-top: 32px;
+		height: calc(100dvh - 32px);
+	}
 }
