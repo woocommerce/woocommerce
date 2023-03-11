@@ -704,16 +704,17 @@
             }, slider.vars.animationSpeed + 100);
 
           } else {
+            var prop = slider.prop;
             slider.container.each(function() {
               var container = this;
               var keyframes = {};
-              keyframes[slider.prop] = [
-                window.getComputedStyle(container)[slider.prop],
-                slider.args[slider.prop]
+              keyframes[prop] = [
+                window.getComputedStyle(container)[prop],
+                slider.args[prop]
               ];
 
               container.animate(keyframes, { duration: slider.vars.animationSpeed, easing: easing }).onfinish = function() {
-                container.style[slider.prop] = slider.args[slider.prop];
+                container.style[prop] = slider.args[prop];
                 slider.wrapup(dimension);
               };
             });
