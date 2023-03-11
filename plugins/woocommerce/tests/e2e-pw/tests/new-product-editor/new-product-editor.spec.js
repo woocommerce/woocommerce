@@ -3,7 +3,8 @@ const { test, expect } = require( '@playwright/test' );
 const EDIT_PRODUCT_URL = 'wp-admin/edit.php?post_type=product';
 const NEW_PRODUCT_URL = 'wp-admin/post-new.php?post_type=product';
 
-const isNewEditorEnabled = !! process.env.ENABLE_NEW_PRODUCT_EDITOR;
+const isNewProductEditorSupposedToBeEnabled = !! process.env
+	.ENABLE_NEW_PRODUCT_EDITOR;
 
 async function clickAddNewMenuItem( page ) {
 	await page
@@ -12,22 +13,31 @@ async function clickAddNewMenuItem( page ) {
 		.click();
 }
 
-test.describe( 'New Product Editor', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+test.describe( 'New product editor', () => {
+	test.describe( 'Default (disabled)', () => {
+		test.use( { storageState: process.env.ADMINSTATE } );
 
-	test( 'is feature flag set appropriately', async ( { page } ) => {
-		// we have to go to a WCAdmin page to get the wcAdminFeatures global
-		await page.goto( EDIT_PRODUCT_URL );
-
-		const wcAdminFeatures = await page.evaluate( 'window.wcAdminFeatures' );
-
-		expect( !! wcAdminFeatures[ 'new-product-editor-experience' ] ).toBe(
-			isNewEditorEnabled
+		test.skip(
+			isNewProductEditorSupposedToBeEnabled,
+			'The new product editor is being tested'
 		);
-	} );
 
-	if ( ! isNewEditorEnabled ) {
-		test( 'is not used when disabled', async ( { page } ) => {
+		test( 'is feature flag disabled', async ( { page } ) => {
+			// we have to go to a WCAdmin page to get the wcAdminFeatures global
+			await page.goto( EDIT_PRODUCT_URL );
+
+			const wcAdminFeatures = await page.evaluate(
+				'window.wcAdminFeatures'
+			);
+
+			expect(
+				!! wcAdminFeatures[ 'new-product-management-experience' ]
+			).toBeFalsy();
+		} );
+
+		test( 'is not hooked up to sidebar "Add New" when disabled', async ( {
+			page,
+		} ) => {
 			await page.goto( EDIT_PRODUCT_URL );
 
 			await clickAddNewMenuItem( page );
@@ -37,22 +47,8 @@ test.describe( 'New Product Editor', () => {
 				page.locator( '#woocommerce-product-data h2' )
 			).toContainText( 'Product data' );
 		} );
-	}
 
-	if ( isNewEditorEnabled ) {
-		test( 'is used when enabled', async ( { page } ) => {
-			await page.goto( EDIT_PRODUCT_URL );
-
-			await clickAddNewMenuItem( page );
-
-			// make sure the new product editor is shown
-			await expect(
-				page.locator( '.woocommerce-product-title__wrapper' )
-			).toContainText( 'New product' );
-		} );
-	}
-
-	/*
+		/*
 	test( 'can be disabled', async ( { page } ) => {
 		await page.goto( EXPERIMENTAL_FEATURES_SETTINGS_URL );
 
@@ -86,4 +82,40 @@ test.describe( 'New Product Editor', () => {
 		).toContainText( 'Product data' );
 	} );
 	*/
+	} );
+
+	test.describe( 'Enabled', () => {
+		test.use( { storageState: process.env.ADMINSTATE } );
+
+		test.skip(
+			! isNewProductEditorSupposedToBeEnabled,
+			'The new product editor is not being tested'
+		);
+
+		test( 'is feature flag enabled', async ( { page } ) => {
+			// we have to go to a WCAdmin page to get the wcAdminFeatures global
+			await page.goto( EDIT_PRODUCT_URL );
+
+			const wcAdminFeatures = await page.evaluate(
+				'window.wcAdminFeatures'
+			);
+
+			expect(
+				!! wcAdminFeatures[ 'new-product-management-experience' ]
+			).toBeTruthy();
+		} );
+
+		test( 'is hooked up to sidebar "Add New" when enabled', async ( {
+			page,
+		} ) => {
+			await page.goto( EDIT_PRODUCT_URL );
+
+			await clickAddNewMenuItem( page );
+
+			// make sure the new product editor is shown
+			await expect(
+				page.locator( '.woocommerce-product-title__wrapper' )
+			).toContainText( 'New product' );
+		} );
+	} );
 } );
