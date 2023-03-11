@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockInstance } from '@wordpress/blocks';
+import { BlockInstance, Template, createBlock } from '@wordpress/blocks';
 import {
 	createElement,
 	useState,
@@ -31,12 +31,16 @@ import {
 /**
  * Internal dependencies
  */
-import { parseProductToBlocks } from '../../utils/parse-product-to-blocks';
+import { registerTemplate } from '../../utils';
 import { Sidebar } from '../sidebar';
 
 type BlockEditorProps = {
 	product: Partial< Product >;
-	settings: Partial< EditorSettings & EditorBlockListSettings > | undefined;
+	settings:
+		| ( Partial< EditorSettings & EditorBlockListSettings > & {
+				template?: Template[];
+		  } )
+		| undefined;
 };
 
 export function BlockEditor( {
@@ -90,11 +94,20 @@ export function BlockEditor( {
 	}
 
 	useEffect( () => {
-		handleUpdateBlocks( parseProductToBlocks( product ) );
+		if ( product && settings?.template ) {
+			registerTemplate( { product, template: settings?.template } );
+			handleUpdateBlocks( [
+				createBlock( 'woocommerce/product-template' ),
+			] );
+		}
 	}, [ product ] );
 
 	function handlePersistBlocks( newBlocks: BlockInstance[] ) {
 		updateBlocks( newBlocks );
+	}
+
+	if ( ! blocks ) {
+		return null;
 	}
 
 	return (

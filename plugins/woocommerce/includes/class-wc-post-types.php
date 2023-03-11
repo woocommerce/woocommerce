@@ -368,9 +368,9 @@ class WC_Post_Types {
 					'rest_namespace'      => 'wp/v3',
 					'template'            => array(
 						array(
-							'core/paragraph',
+							'woocommerce/product-name',
 							array(
-								'placeholder' => 'Product description',
+								'name' => 'Product name',
 							),
 						),
 					),
