@@ -966,6 +966,9 @@
 	background-color: #ffffff;
 	> p {
 		width: 85%;
+		a {
+			text-decoration: none;
+		}
 	}
 	.woocommerce-add-variation-price-container {
 		width: 15%;
