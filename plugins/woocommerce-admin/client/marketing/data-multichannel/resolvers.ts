@@ -128,7 +128,5 @@ export function* getCampaignTypes() {
 		if ( isApiFetchError( error ) ) {
 			yield receiveCampaignTypes( error );
 		}
-
-		throw error;
 	}
 }

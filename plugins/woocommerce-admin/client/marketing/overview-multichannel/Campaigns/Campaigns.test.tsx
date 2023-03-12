@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import { useCampaigns } from './useCampaigns';
-import { useNewCampaignTypes } from '~/marketing/hooks';
+import { useCampaignTypes } from '~/marketing/hooks';
 import { Campaigns } from './Campaigns';
 
 jest.mock( './useCampaigns', () => ( {
@@ -16,7 +16,7 @@ jest.mock( './useCampaigns', () => ( {
 } ) );
 
 jest.mock( '~/marketing/hooks', () => ( {
-	useNewCampaignTypes: jest.fn(),
+	useCampaignTypes: jest.fn(),
 } ) );
 
 jest.mock( '~/marketing/components', () => {
@@ -25,7 +25,7 @@ jest.mock( '~/marketing/components', () => {
 	return {
 		__esModule: true,
 		...originalModule,
-		CreateNewCampaignModal: () => <div>Create a new campaign</div>,
+		CreateNewCampaignModal: () => <div>Mocked CreateNewCampaignModal</div>,
 	};
 } );
 
@@ -53,7 +53,7 @@ describe( 'Campaigns component', () => {
 			data: undefined,
 			meta: undefined,
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: true,
 		} );
 
@@ -72,7 +72,7 @@ describe( 'Campaigns component', () => {
 			data: undefined,
 			meta: undefined,
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: false,
 		} );
 
@@ -92,7 +92,7 @@ describe( 'Campaigns component', () => {
 				total: 0,
 			},
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: false,
 		} );
 
@@ -112,7 +112,7 @@ describe( 'Campaigns component', () => {
 				total: 1,
 			},
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: false,
 		} );
 
@@ -141,7 +141,7 @@ describe( 'Campaigns component', () => {
 				total: 6,
 			},
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: false,
 		} );
 
@@ -171,20 +171,19 @@ describe( 'Campaigns component', () => {
 				total: 1,
 			},
 		} );
-		( useNewCampaignTypes as jest.Mock ).mockReturnValue( {
+		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			loading: false,
 		} );
 
 		render( <Campaigns /> );
 
-		expect( screen.getByText( 'Create new campaign' ) ).toBeInTheDocument();
-
 		await userEvent.click(
 			screen.getByRole( 'button', { name: 'Create new campaign' } )
 		);
 
+		// Mocked CreateNewCampaignModal should be displayed.
 		expect(
-			screen.getByText( 'Create a new campaign' )
+			screen.getByText( 'Mocked CreateNewCampaignModal' )
 		).toBeInTheDocument();
 	} );
 } );

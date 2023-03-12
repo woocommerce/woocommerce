@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import {
 	Button,
-	CardDivider,
 	Modal,
 	Icon,
 	Flex,
@@ -20,7 +19,7 @@ import classnames from 'classnames';
  */
 import {
 	useRecommendedChannels,
-	useNewCampaignTypes,
+	useCampaignTypes,
 	useRegisteredChannels,
 } from '~/marketing/hooks';
 import { SmartPluginCardBody } from '~/marketing/components';
@@ -40,84 +39,85 @@ type CreateCampaignModalProps = Omit< Modal.Props, 'title' | 'children' >;
 export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	const { className, ...restProps } = props;
 	const [ collapsed, setCollapsed ] = useState( true );
-	const { data: newCampaignTypes } = useNewCampaignTypes();
+	const { data: campaignTypes, refetch: refetchCampaignTypes } =
+		useCampaignTypes();
+	const { refetch: refetchRegisteredChannels } = useRegisteredChannels();
 	const { data: recommendedChannels } = useRecommendedChannels();
-	const { refetch } = useRegisteredChannels();
+
+	const refetch = () => {
+		refetchCampaignTypes();
+		refetchRegisteredChannels();
+	};
 
 	return (
 		<Modal
+			{ ...restProps }
 			className={ classnames(
 				className,
 				'woocommerce-marketing-create-campaign-modal'
 			) }
 			title={ __( 'Create a new campaign', 'woocommerce' ) }
-			{ ...restProps }
 		>
 			<div className="woocommerce-marketing-new-campaigns">
 				<div className="woocommerce-marketing-new-campaigns__question-label">
-					{ __(
-						'Where would you like to promote your products?',
-						'woocommerce'
-					) }
+					{ !! campaignTypes?.length
+						? __(
+								'Where would you like to promote your products?',
+								'woocommerce'
+						  )
+						: __( 'No campaign types found.', 'woocommerce' ) }
 				</div>
-				<div>
-					{ newCampaignTypes?.map( ( el ) => {
-						return (
-							<Flex
-								key={ el.id }
-								className="woocommerce-marketing-new-campaign-type"
-								gap={ 4 }
-							>
-								<FlexItem>
-									<img
-										src={ el.icon }
-										alt={ el.name }
-										width="32"
-										height="32"
-									/>
+				{ campaignTypes?.map( ( el ) => (
+					<Flex
+						key={ el.id }
+						className="woocommerce-marketing-new-campaign-type"
+						gap={ 4 }
+					>
+						<FlexItem>
+							<img
+								src={ el.icon }
+								alt={ el.name }
+								width="32"
+								height="32"
+							/>
+						</FlexItem>
+						<FlexBlock>
+							<Flex direction="column" gap={ 1 }>
+								<FlexItem className="woocommerce-marketing-new-campaign-type__name">
+									{ el.name }
 								</FlexItem>
-								<FlexBlock>
-									<Flex direction="column" gap={ 1 }>
-										<FlexItem className="woocommerce-marketing-new-campaign-type__name">
-											{ el.name }
-										</FlexItem>
-										<FlexItem className="woocommerce-marketing-new-campaign-type__description">
-											{ el.description }
-										</FlexItem>
-									</Flex>
-								</FlexBlock>
-								<FlexItem>
-									<Button
-										variant="secondary"
-										href={ el.createUrl }
-										target={
-											isExternalURL( el.createUrl )
-												? '_blank'
-												: '_self'
-										}
-									>
-										<Flex gap={ 1 }>
-											<FlexItem>
-												{ __(
-													'Create',
-													'woocommerce'
-												) }
-											</FlexItem>
-											{ isExternalURL( el.createUrl ) && (
-												<FlexItem>
-													<Icon
-														icon={ external }
-														size={ 16 }
-													/>
-												</FlexItem>
-											) }
-										</Flex>
-									</Button>
+								<FlexItem className="woocommerce-marketing-new-campaign-type__description">
+									{ el.description }
 								</FlexItem>
 							</Flex>
-						);
-					} ) }
-				</div>
+						</FlexBlock>
+						<FlexItem>
+							<Button
+								variant="secondary"
+								href={ el.createUrl }
+								target={
+									isExternalURL( el.createUrl )
+										? '_blank'
+										: '_self'
+								}
+							>
+								<Flex gap={ 1 }>
+									<FlexItem>
+										{ __( 'Create', 'woocommerce' ) }
+									</FlexItem>
+									{ isExternalURL( el.createUrl ) && (
+										<FlexItem>
+											<Icon
+												icon={ external }
+												size={ 16 }
+											/>
+										</FlexItem>
+									) }
+								</Flex>
+							</Button>
+						</FlexItem>
+					</Flex>
+				) ) }
 			</div>
 			{ !! recommendedChannels?.length && (
 				<div className="woocommerce-marketing-add-channels">
@@ -139,21 +139,13 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 						</FlexItem>
 						{ ! collapsed && (
 							<FlexItem>
-								{ recommendedChannels.map( ( el, idx ) => {
-									return (
-										<Fragment key={ el.plugin }>
-											<SmartPluginCardBody
-												plugin={ el }
-												onInstalledAndActivated={
-													refetch
-												}
-											/>
-											{ idx !==
-												recommendedChannels.length -
-													1 && <CardDivider /> }
-										</Fragment>
-									);
-								} ) }
+								{ recommendedChannels.map( ( el ) => (
+									<SmartPluginCardBody
+										key={ el.plugin }
+										plugin={ el }
+										onInstalledAndActivated={ refetch }
+									/>
+								) ) }
 							</FlexItem>
 						) }
 					</Flex>
