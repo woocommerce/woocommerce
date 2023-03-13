@@ -42,7 +42,7 @@
 		"@wordpress/compose": "wp-6.0",
 		"@wordpress/core-data": "wp-6.0",
 		"@wordpress/data": "wp-6.0",
-		"@wordpress/editor": "^13.5.0",
+		"@wordpress/editor": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
 		"@wordpress/html-entities": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
