@@ -15,7 +15,7 @@ import {
 	getToggleIdByLabel,
 	switchBlockInspectorTabWhenGutenbergIsInstalled,
 } from '@woocommerce/blocks-test-utils';
-
+import { visitAdminPage } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
@@ -27,6 +27,7 @@ import {
 	SHIPPING_DETAILS,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
 	SIMPLE_VIRTUAL_PRODUCT_NAME,
+	BASE_URL,
 } from '../../../../utils';
 
 import { createCoupon } from '../../../utils';
@@ -35,7 +36,90 @@ let coupon;
 
 describe( 'Shopper → Checkout', () => {
 	beforeAll( async () => {
+		// Check that Woo Collection is enabled.
+		await page.goto(
+			`${ BASE_URL }?check_third_party_local_pickup_method`
+		);
+		// eslint-disable-next-line jest/no-standalone-expect
+		await expect( page ).toMatch( 'Woo Collection' );
+
 		await shopper.block.emptyCart();
+	} );
+
+	describe( 'Local pickup', () => {
+		beforeAll( async () => {
+			// Enable local pickup.
+			await visitAdminPage(
+				'admin.php',
+				'page=wc-settings&tab=shipping&section=pickup_location'
+			);
+
+			const localPickupCheckbox = await page.waitForXPath(
+				'//input[@name="local_pickup_enabled"]'
+			);
+			const isCheckboxChecked = await page.evaluate(
+				( checkbox ) => checkbox.checked,
+				localPickupCheckbox
+			);
+
+			if ( isCheckboxChecked === true ) {
+				return;
+			}
+
+			// eslint-disable-next-line jest/no-standalone-expect
+			await expect( page ).toClick( 'label', {
+				text: 'Enable local pickup',
+			} );
+			// eslint-disable-next-line jest/no-standalone-expect
+			await expect( page ).toClick( 'button', {
+				text: 'Save changes',
+			} );
+		} );
+		afterAll( async () => {
+			// Disable local pickup.
+			await visitAdminPage(
+				'admin.php',
+				'page=wc-settings&tab=shipping&section=pickup_location'
+			);
+
+			const localPickupCheckbox = await page.waitForXPath(
+				'//input[@name="local_pickup_enabled"]'
+			);
+			const isCheckboxChecked = await page.evaluate(
+				( checkbox ) => checkbox.checked,
+				localPickupCheckbox
+			);
+
+			// Skip this if it's already unchecked.
+			if ( isCheckboxChecked === false ) {
+				return;
+			}
+
+			// eslint-disable-next-line jest/no-standalone-expect
+			await expect( page ).toClick( 'label', {
+				text: 'Enable local pickup',
+			} );
+			// eslint-disable-next-line jest/no-standalone-expect
+			await expect( page ).toClick( 'button', {
+				text: 'Save changes',
+			} );
+		} );
+		it( 'The shopper can choose a local pickup option', async () => {
+			await shopper.block.emptyCart();
+			await shopper.block.goToShop();
+			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await shopper.block.goToCheckout();
+			await expect( page ).toClick(
+				'.wc-block-checkout__shipping-method-option-title',
+				{
+					text: 'Local Pickup',
+				}
+			);
+			expect( page ).toMatch( 'Woo Collection' );
+			await shopper.block.fillBillingDetails( BILLING_DETAILS );
+			await shopper.block.placeOrder();
+			await shopper.block.verifyBillingDetails( BILLING_DETAILS );
+		} );
 	} );
 
 	describe( 'Payment Methods', () => {
@@ -94,8 +178,12 @@ describe( 'Shopper → Checkout', () => {
 			await shopper.block.goToShop();
 			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
 			await shopper.block.goToCheckout();
-			await page.waitForSelector( '#checkbox-control-0' );
-			await unsetCheckbox( '#checkbox-control-0' );
+			await page.waitForSelector(
+				'.wc-block-checkout__use-address-for-billing input[type="checkbox"]'
+			);
+			await unsetCheckbox(
+				'.wc-block-checkout__use-address-for-billing input[type="checkbox"]'
+			);
 			await shopper.block.fillShippingDetails( SHIPPING_DETAILS );
 			await shopper.block.fillBillingDetails( BILLING_DETAILS );
 			await shopper.block.placeOrder();

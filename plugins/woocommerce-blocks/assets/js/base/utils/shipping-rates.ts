@@ -6,6 +6,7 @@ import {
 	CartShippingRate,
 } from '@woocommerce/type-defs/cart';
 import { getSetting } from '@woocommerce/settings';
+import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
 
 /**
  * Get the number of packages in a shippingRates array.
@@ -36,6 +37,9 @@ export const isPackageRateCollectable = (
 export const hasCollectableRate = (
 	chosenRates: string[] | string
 ): boolean => {
+	if ( ! LOCAL_PICKUP_ENABLED ) {
+		return false;
+	}
 	if ( Array.isArray( chosenRates ) ) {
 		return !! chosenRates.find( ( rate ) =>
 			collectableMethodIds.includes( rate )

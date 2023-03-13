@@ -6,26 +6,39 @@ import {
 	isPackageRateCollectable,
 } from '@woocommerce/base-utils';
 import { CartShippingRate } from '@woocommerce/type-defs/cart';
+import * as blockSettings from '@woocommerce/block-settings';
 
 jest.mock( '@woocommerce/settings', () => {
 	return {
+		__esModule: true,
 		...jest.requireActual( '@woocommerce/settings' ),
-		getSetting: ( setting: string ) => {
+		getSetting: jest.fn().mockImplementation( ( setting: string ) => {
 			if ( setting === 'collectableMethodIds' ) {
 				return [ 'local_pickup' ];
 			}
 			return jest
 				.requireActual( '@woocommerce/settings' )
 				.getSetting( setting );
-		},
+		} ),
 	};
 } );
+jest.mock( '@woocommerce/block-settings', () => ( {
+	__esModule: true,
+	...jest.requireActual( '@woocommerce/block-settings' ),
+	LOCAL_PICKUP_ENABLED: true,
+} ) );
 describe( 'hasCollectableRate', () => {
 	it( 'correctly identifies if an array contains a collectable rate', () => {
 		const ratesToTest = [ 'flat_rate', 'local_pickup' ];
 		expect( hasCollectableRate( ratesToTest ) ).toBe( true );
 		const ratesToTest2 = [ 'flat_rate', 'free_shipping' ];
 		expect( hasCollectableRate( ratesToTest2 ) ).toBe( false );
+	} );
+	it( 'returns false for all rates if local pickup is disabled', () => {
+		// Attempt to assign to const or readonly variable error on next line is OK because it is mocked by jest
+		blockSettings.LOCAL_PICKUP_ENABLED = false;
+		const ratesToTest = [ 'flat_rate', 'local_pickup' ];
+		expect( hasCollectableRate( ratesToTest ) ).toBe( false );
 	} );
 } );
 

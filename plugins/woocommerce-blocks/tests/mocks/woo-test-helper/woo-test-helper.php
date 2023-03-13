@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Woo Test Helper
  * Description: A helper plugin to control settings within Woo e2e tests.
- * Version: 0.0.1
+ * Version: 0.0.2
  * Author: Automattic
  * Author URI: https://automattic.com
  * Text Domain: woo-test-helper
@@ -125,3 +125,125 @@ function setup_cross_sells() {
 		update_post_meta( $id_product->ID, '_crosssell_ids', wp_list_pluck( $id_cross_sells, 'ID' ) );
 	}
 }
+
+/**
+ * Registers a third party local pickup method, this will have a different ID to the ones we add in the WC Settings.
+ */
+function register_third_party_local_pickup_method() {
+	/**
+	 * This function initialises our local pickup method.
+	 */
+	function woo_collection_shipping_init() {
+
+		/**
+		 * Custom Local Pickup method.
+		 */
+		class Woo_Collection_Shipping_Method extends WC_Shipping_Method {
+
+			/**
+			 * Min amount to be valid.
+			 *
+			 * @var integer
+			 */
+			public $min_amount = 0;
+
+			/**
+			 * Requires option.
+			 *
+			 * @var string
+			 */
+			public $requires = '';
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int $instance_id Shipping method instance.
+			 */
+			public function __construct( $instance_id = 0 ) {
+				$this->id                 = 'woo_collection_shipping';
+				$this->instance_id        = absint( $instance_id );
+				$this->title              = 'Woo Collection';
+				$this->method_title       = __( 'Woo Collection', 'woo-gutenberg-products-block' );
+				$this->method_description = __( 'Get your order shipped to an Woo Collection point.', 'woo-gutenberg-products-block' );
+				$this->supports           = array(
+					'instance-settings',
+					'instance-settings-modal',
+					'local-pickup',
+				);
+
+				$this->init();
+			}
+
+			/**
+			 * Initialize Woo Collection shipping.
+			 */
+			public function init() {
+			}
+
+			/**
+			 * See if Woo Collection shipping is available based on the package and cart.
+			 *
+			 * @param array $package Shipping package.
+			 * @return bool
+			 */
+			public function is_available( $package ) {
+				return true;
+			}
+
+			/**
+			 * Called to calculate shipping rates for this method. Rates can be added using the add_rate() method.
+			 *
+			 * @param array $package Shipping package.
+			 * @uses WC_Shipping_Method::add_rate()
+			 */
+			public function calculate_shipping( $package = array() ) {
+				$this->add_rate(
+					array(
+						'label'   => $this->title,
+						'cost'    => 0,
+						'taxes'   => false,
+						'package' => $package,
+					)
+				);
+			}
+		}
+	}
+
+	// Use this hook to initialize your new custom method.
+	add_action( 'woocommerce_shipping_init', 'woo_collection_shipping_init' );
+
+	/**
+	 * Adds the Woo Collection shipping method to the list of available methods in WooCommerce.
+	 * @param array $methods The current list of methods.
+	 * @return array The modified list of methods.
+	 */
+	function add_woo_collection_shipping( $methods ) {
+		$methods['woo_collection_shipping'] = 'Woo_Collection_Shipping_Method';
+
+		return $methods;
+	}
+	add_filter( 'woocommerce_shipping_methods', 'add_woo_collection_shipping' );
+}
+register_third_party_local_pickup_method();
+
+/**
+ * Define URL endpoint for setting up third party local pickup method.
+ */
+function check_third_party_local_pickup_method() {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	if ( isset( $_GET['check_third_party_local_pickup_method'] ) ) {
+		add_action(
+			'woocommerce_blocks_loaded',
+			function () {
+				$method_titles = array_map(
+					function ( $method ) {
+						return $method->title;
+					},
+					wc()->shipping()->get_shipping_methods()
+				);
+				exit( wp_kses( implode( ', ', $method_titles ), array() ) );
+			}
+		);
+	}
+}
+add_action( 'plugins_loaded', 'check_third_party_local_pickup_method' );
