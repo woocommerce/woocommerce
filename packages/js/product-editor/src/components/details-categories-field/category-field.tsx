@@ -204,11 +204,6 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 								...changes,
 								isOpen: false,
 							};
-						case selectControlStateChangeTypes.InputKeyDownArrowDown:
-							treeControlRef.current?.focus();
-							return {
-								...changes,
-							};
 						default:
 							return changes;
 					}
@@ -233,12 +228,18 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 							// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
 							__unstableSlotName="category-popover"
 						>
-							{
+							{ isOpen && (
 								<TreeControl
 									ref={ treeControlRef }
 									multiple
 									shouldNotRecursivelySelect
 									allowCreate
+									getMenuProps={ getMenuProps }
+									getItemProps={ getItemProps }
+									listToFindOriginalIndex={
+										categoriesSelectList
+									}
+									highlightedIndex={ highlightedIndex }
 									createValue={ searchValue }
 									onCreateNew={ () => {
 										setShowCreateNewModal( true );
@@ -285,7 +286,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 										}
 									} }
 								></TreeControl>
-							}
+							) }
 						</Popover>
 					);
 				} }

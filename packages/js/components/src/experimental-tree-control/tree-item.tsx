@@ -41,6 +41,8 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				{
 					'experimental-woocommerce-tree-item--highlighted':
 						isHighlighted,
+					'experimental-woocommerce-tree-item--focused':
+						props.isFocused,
 				}
 			) }
 		>
@@ -95,7 +97,11 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 			</div>
 
 			{ Boolean( item.children.length ) && isExpanded && (
-				<Tree { ...treeProps } />
+				<Tree
+					{ ...treeProps }
+					getItemProps={ props.getItemProps }
+					listToFindOriginalIndex={ props.listToFindOriginalIndex }
+				/>
 			) }
 		</li>
 	);

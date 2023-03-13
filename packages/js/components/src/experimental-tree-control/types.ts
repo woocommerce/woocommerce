@@ -1,3 +1,12 @@
+/**
+ * Internal dependencies
+ */
+
+import {
+	getMenuPropsType,
+	getItemPropsType,
+} from '../experimental-select-control/types';
+
 export interface Item {
 	parent?: string;
 	value: string;
@@ -30,6 +39,10 @@ type BaseTreeProps = {
 	allowCreate?: boolean;
 	createValue?: string;
 	onCreateNew?: () => void;
+	getMenuProps?: getMenuPropsType;
+	getItemProps?: any;
+	highlightedIndex?: number;
+	listToFindOriginalIndex: any[];
 	/**
 	 * When `multiple` is true and a child item is selected, all its
 	 * ancestors and its descendants are also selected. If it's false
@@ -115,6 +128,7 @@ export type TreeItemProps = BaseTreeProps &
 		level: number;
 		item: LinkedTree;
 		index: number;
+		isFocused?: boolean;
 		getLabel?( item: LinkedTree ): JSX.Element;
 		shouldItemBeExpanded?( item: LinkedTree ): boolean;
 	};
