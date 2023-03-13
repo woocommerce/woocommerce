@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div id="inventory_product_data" class="panel woocommerce_options_panel hidden">
 	<div class="inline notice woocommerce-message show_if_variable">
 		<p>
-			<?php echo esc_html_e( 'Settings below apply to all variations without manual stock management enabled. ', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
+			<?php echo esc_html_e( 'Settings below apply to all variations without manual stock management enabled.', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
 		</p>
 	</div>
 	<div class="options_group">
