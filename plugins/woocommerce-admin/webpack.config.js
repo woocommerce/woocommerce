@@ -101,6 +101,7 @@ const webpackConfig = {
 		uniqueName: '__wcAdmin_webpackJsonp',
 	},
 	module: {
+		parser: styleConfig.parser,
 		rules: [
 			{
 				test: /\.(t|j)sx?$/,
