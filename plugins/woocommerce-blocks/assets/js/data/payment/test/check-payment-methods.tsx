@@ -2,7 +2,8 @@
  * External dependencies
  */
 import * as wpDataFunctions from '@wordpress/data';
-import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
+import { previewCart } from '@woocommerce/resource-previews';
+import { PAYMENT_STORE_KEY, CART_STORE_KEY } from '@woocommerce/block-data';
 import {
 	registerPaymentMethod,
 	registerExpressPaymentMethod,
@@ -23,6 +24,7 @@ const requiredKeyCheck = ( args: CanMakePaymentArgument ) => {
 		'cart',
 		'cartNeedsShipping',
 		'cartTotals',
+		'paymentMethods',
 		'paymentRequirements',
 		'selectedShippingMethods',
 		'shippingAddress',
@@ -133,6 +135,10 @@ const registerMockPaymentMethods = ( savedCards = true ) => {
 	wpDataFunctions
 		.dispatch( PAYMENT_STORE_KEY )
 		.__internalUpdateAvailablePaymentMethods();
+	wpDataFunctions.dispatch( CART_STORE_KEY ).receiveCart( {
+		...previewCart,
+		payment_methods: [ 'cheque', 'bacs', 'credit-card' ],
+	} );
 };
 
 const resetMockPaymentMethods = () => {
