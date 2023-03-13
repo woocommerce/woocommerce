@@ -47,7 +47,7 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 					'args'                => array(
 						'force_default_suggestions' => array(
 							'type'        => 'boolean',
-							'description' => __( 'Return the default shipping partner suggestions when woocommerce_show_shipping_partner_suggestions and woocommerce_setting_payments_recommendations_hidden options are set to no', 'woocommerce' ),
+							'description' => __( 'Return the default shipping partner suggestions when woocommerce_show_marketplace_suggestions option is set to no', 'woocommerce' ),
 						),
 					),
 				),
