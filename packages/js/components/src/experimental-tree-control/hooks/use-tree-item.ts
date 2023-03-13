@@ -26,6 +26,8 @@ export function useTreeItem( {
 	onSelect,
 	onRemove,
 	listToFindOriginalIndex,
+	getItemProps,
+	getMenuProps,
 	...props
 }: TreeItemProps ) {
 	const nextLevel = level + 1;

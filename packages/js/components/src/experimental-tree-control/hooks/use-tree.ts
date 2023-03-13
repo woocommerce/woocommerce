@@ -21,6 +21,8 @@ export function useTree( {
 	onRemove,
 	shouldNotRecursivelySelect,
 	listToFindOriginalIndex,
+	getMenuProps,
+	getItemProps,
 	...props
 }: TreeProps ) {
 	return {

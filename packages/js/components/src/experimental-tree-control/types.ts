@@ -43,6 +43,7 @@ type BaseTreeProps = {
 	getItemProps?: any;
 	highlightedIndex?: number;
 	listToFindOriginalIndex: any[];
+	isExpanded?: boolean;
 	/**
 	 * When `multiple` is true and a child item is selected, all its
 	 * ancestors and its descendants are also selected. If it's false

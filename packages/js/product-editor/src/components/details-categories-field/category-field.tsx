@@ -20,7 +20,7 @@ import {
 } from '@woocommerce/components';
 import { Product, ProductCategory } from '@woocommerce/data';
 import { debounce } from 'lodash';
-import { Popover } from '@wordpress/components';
+import { ComboboxControl, Popover } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -234,12 +234,6 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 									multiple
 									shouldNotRecursivelySelect
 									allowCreate
-									getMenuProps={ getMenuProps }
-									getItemProps={ getItemProps }
-									listToFindOriginalIndex={
-										categoriesSelectList
-									}
-									highlightedIndex={ highlightedIndex }
 									createValue={ searchValue }
 									onCreateNew={ () => {
 										setShowCreateNewModal( true );
