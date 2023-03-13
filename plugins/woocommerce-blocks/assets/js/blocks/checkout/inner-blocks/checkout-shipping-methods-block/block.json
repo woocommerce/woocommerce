@@ -19,6 +19,10 @@
 				"remove": true,
 				"move": true
 			}
+		},
+		"shippingCostRequiresAddress": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"parent": [ "woocommerce/checkout-fields-block" ],

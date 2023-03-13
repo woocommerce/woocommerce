@@ -3,6 +3,8 @@ namespace Automattic\WooCommerce\Blocks\Shipping;
 
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
+use Automattic\WooCommerce\Blocks\Tests\BlockTypes\Cart;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
@@ -51,6 +53,7 @@ class ShippingController {
 			);
 		}
 		$this->asset_data_registry->add( 'collectableMethodIds', array( 'Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils', 'get_local_pickup_method_ids' ), true );
+		$this->asset_data_registry->add( 'shippingCostRequiresAddress', get_option( 'woocommerce_shipping_cost_requires_address', false ) === 'yes' );
 		add_action( 'rest_api_init', [ $this, 'register_settings' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'admin_scripts' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'hydrate_client_settings' ] );
@@ -60,6 +63,105 @@ class ShippingController {
 		add_filter( 'woocommerce_shipping_packages', array( $this, 'filter_shipping_packages' ) );
 		add_filter( 'pre_update_option_woocommerce_pickup_location_settings', array( $this, 'flush_cache' ) );
 		add_filter( 'pre_update_option_pickup_location_pickup_locations', array( $this, 'flush_cache' ) );
+		add_filter( 'woocommerce_shipping_settings', array( $this, 'remove_shipping_settings' ) );
+		add_filter( 'wc_shipping_enabled', array( $this, 'force_shipping_enabled' ), 100, 1 );
+
+		// This is required to short circuit `show_shipping` from class-wc-cart.php - without it, that function
+		// returns based on the option's value in the DB and we can't override it any other way.
+		add_filter( 'option_woocommerce_shipping_cost_requires_address', array( $this, 'override_cost_requires_address_option' ) );
+	}
+
+	/**
+	 * Overrides the option to force shipping calculations NOT to wait until an address is entered, but only if the
+	 * Checkout page contains the Checkout Block.
+	 *
+	 * @param boolean $value Whether shipping cost calculation requires address to be entered.
+	 * @return boolean Whether shipping cost calculation should require an address to be entered before calculating.
+	 */
+	public function override_cost_requires_address_option( $value ) {
+		if ( CartCheckoutUtils::is_checkout_block_default() ) {
+			return 'no';
+		}
+		return $value;
+	}
+
+	/**
+	 * Force shipping to be enabled if the Checkout block is in use on the Checkout page.
+	 *
+	 * @param boolean $enabled Whether shipping is currently enabled.
+	 * @return boolean Whether shipping should continue to be enabled/disabled.
+	 */
+	public function force_shipping_enabled( $enabled ) {
+		if ( CartCheckoutUtils::is_checkout_block_default() ) {
+			return true;
+		}
+		return $enabled;
+	}
+
+	/**
+	 * If the Checkout block Remove shipping settings from WC Core's admin panels that are now block settings.
+	 *
+	 * @param array $settings The default WC shipping settings.
+	 * @return array|mixed The filtered settings with relevant items removed.
+	 */
+	public function remove_shipping_settings( $settings ) {
+
+		// Do not add the "Hide shipping costs until an address is entered" setting if the Checkout block is not used on the WC checkout page.
+		if ( CartCheckoutUtils::is_checkout_block_default() ) {
+			$settings = array_filter(
+				$settings,
+				function( $setting ) {
+					return ! in_array(
+						$setting['id'],
+						array(
+							'woocommerce_shipping_cost_requires_address',
+						),
+						true
+					);
+				}
+			);
+		}
+
+		// Do not add the shipping calculator setting if the Cart block is not used on the WC cart page.
+		if ( CartCheckoutUtils::is_cart_block_default() ) {
+
+			// If the Cart is default, but not the checkout, we should ensure the 'Calculations' title is added to the
+			// `woocommerce_shipping_cost_requires_address` options group, since it is attached to the
+			// `woocommerce_enable_shipping_calc` option that we're going to remove later.
+			if ( ! CartCheckoutUtils::is_checkout_block_default() ) {
+				$calculations_title = '';
+
+				// Get Calculations title so we can add it to 'Hide shipping costs until an address is entered' option.
+				foreach ( $settings as $setting ) {
+					if ( 'woocommerce_enable_shipping_calc' === $setting['id'] ) {
+						$calculations_title = $setting['title'];
+						break;
+					}
+				}
+
+				// Add Calculations title to 'Hide shipping costs until an address is entered' option.
+				foreach ( $settings as $index => $setting ) {
+					if ( 'woocommerce_shipping_cost_requires_address' === $setting['id'] ) {
+						$settings[ $index ]['title']         = $calculations_title;
+						$settings[ $index ]['checkboxgroup'] = 'start';
+						break;
+					}
+				}
+			}
+			$settings = array_filter(
+				$settings,
+				function( $setting ) {
+					return ! in_array(
+						$setting['id'],
+						array(
+							'woocommerce_enable_shipping_calc',
+						),
+						true
+					);
+				}
+			);
+		}
+		return $settings;
 	}
 
 	/**
@@ -223,8 +325,7 @@ class ShippingController {
 	 * Registers the Local Pickup shipping method used by the Checkout Block.
 	 */
 	public function register_local_pickup() {
-		$checkout_page_id = wc_get_page_id( 'checkout' );
-		if ( $checkout_page_id && has_block( 'woocommerce/checkout', $checkout_page_id ) ) {
+		if ( CartCheckoutUtils::is_checkout_block_default() ) {
 			wc()->shipping->register_shipping_method( new PickupLocation() );
 		}
 	}

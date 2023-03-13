@@ -29,7 +29,7 @@ import {
 	SIMPLE_VIRTUAL_PRODUCT_NAME,
 	BASE_URL,
 } from '../../../../utils';
-
+import { merchant as merchantUtils } from '../../../../utils/merchant';
 import { createCoupon } from '../../../utils';
 
 let coupon;
@@ -297,6 +297,44 @@ describe( 'Shopper → Checkout', () => {
 		const NORMAL_SHIPPING_NAME = 'Normal Shipping';
 		const NORMAL_SHIPPING_PRICE = '$20.00';
 
+		afterAll( async () => {
+			await merchant.login();
+			await visitBlockPage( 'Checkout Block' );
+			await openDocumentSettingsSidebar();
+			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
+			await selectBlockByName(
+				'woocommerce/checkout-shipping-methods-block'
+			);
+			const [ label ] = await page.$x(
+				'//label[contains(., "Hide shipping costs until an address is entered")]'
+			);
+			const shippingMethodForValue = await page.evaluate(
+				( passedLabel ) => passedLabel.getAttribute( 'for' ),
+				label
+			);
+			let shippingMethodSettingIsChecked = await page.evaluate(
+				( passedShippingMethodForValue ) =>
+					document.getElementById( passedShippingMethodForValue )
+						.checked,
+				shippingMethodForValue
+			);
+			if ( ! shippingMethodSettingIsChecked ) {
+				await setCheckbox(
+					await getToggleIdByLabel(
+						'Hide shipping costs until an address is entered'
+					)
+				);
+			}
+			shippingMethodSettingIsChecked = await page.evaluate(
+				( passedShippingMethodForValue ) =>
+					document.getElementById( passedShippingMethodForValue )
+						.checked,
+				shippingMethodForValue
+			);
+
+			await merchantUtils.disableLocalPickup();
+		} );
+
 		it( 'User can choose free shipping', async () => {
 			await shopper.block.goToShop();
 			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
@@ -326,11 +364,175 @@ describe( 'Shopper → Checkout', () => {
 			await expect( page ).toMatch( 'Order received' );
 			await expect( page ).toMatch( NORMAL_SHIPPING_NAME );
 		} );
+
+		it( 'User sees the correct shipping options based on block settings', async () => {
+			await preventCompatibilityNotice();
+			await merchant.login();
+			await visitBlockPage( 'Checkout Block' );
+			await openDocumentSettingsSidebar();
+			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
+			await selectBlockByName(
+				'woocommerce/checkout-shipping-methods-block'
+			);
+
+			const [ label ] = await page.$x(
+				'//label[contains(., "Hide shipping costs until an address is entered")]'
+			);
+			const shippingMethodForValue = await page.evaluate(
+				( passedLabel ) => passedLabel.getAttribute( 'for' ),
+				label
+			);
+			let shippingMethodSettingIsChecked = await page.evaluate(
+				( passedShippingMethodForValue ) =>
+					document.getElementById( passedShippingMethodForValue )
+						.checked,
+				shippingMethodForValue
+			);
+			if ( ! shippingMethodSettingIsChecked ) {
+				await setCheckbox(
+					await getToggleIdByLabel(
+						'Hide shipping costs until an address is entered'
+					)
+				);
+			}
+			shippingMethodSettingIsChecked = await page.evaluate(
+				( passedShippingMethodForValue ) =>
+					document.getElementById( passedShippingMethodForValue )
+						.checked,
+				shippingMethodForValue
+			);
+			await expect( shippingMethodSettingIsChecked ).toBe( true );
+			await saveOrPublish();
+			await shopper.block.emptyCart();
+			// Log out to have a fresh empty cart.
+			await shopper.logout();
+			await shopper.block.goToShop();
+			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await shopper.block.goToCheckout();
+			// Expect no shipping options to be shown, but with a friendly message.
+			const shippingOptionsRequireAddressText = await page.$x(
+				'//p[contains(text(), "Shipping options will be displayed here after entering your full shipping address.")]'
+			);
+			expect( shippingOptionsRequireAddressText ).toHaveLength( 1 );
+
+			// Enter the address and expect shipping options to be shown.
+			await shopper.block.fillInCheckoutWithTestData();
+			await expect( page ).toMatchElement(
+				'.wc-block-components-shipping-rates-control'
+			);
+
+			// This sequence will reset the checkout form.
+			await shopper.login();
+			await shopper.logout();
+
+			await preventCompatibilityNotice();
+			await merchant.login();
+			await visitBlockPage( 'Checkout Block' );
+			await openDocumentSettingsSidebar();
+			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
+			await selectBlockByName(
+				'woocommerce/checkout-shipping-methods-block'
+			);
+
+			await unsetCheckbox(
+				await getToggleIdByLabel(
+					'Hide shipping costs until an address is entered'
+				)
+			);
+			await saveOrPublish();
+			await shopper.block.emptyCart();
+
+			await shopper.block.goToShop();
+			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await shopper.block.goToCheckout();
+
+			// Expect the shipping options to be displayed without entering an address.
+			await expect( page ).toMatchElement(
+				'.wc-block-components-shipping-rates-control'
+			);
+		} );
+
+		it( 'User does not see shipping rates until full address is entered', async () => {
+			await preventCompatibilityNotice();
+			await merchant.login();
+
+			await merchantUtils.enableLocalPickup();
+			await merchantUtils.addLocalPickupLocation();
+			await visitBlockPage( 'Checkout Block' );
+			await openDocumentSettingsSidebar();
+			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
+			await selectBlockByName(
+				'woocommerce/checkout-shipping-methods-block'
+			);
+
+			await setCheckbox(
+				await getToggleIdByLabel(
+					'Hide shipping costs until an address is entered'
+				)
+			);
+			await saveOrPublish();
+			await shopper.block.emptyCart();
+			// Log out to have a fresh empty cart.
+			await shopper.logout();
+			await shopper.block.goToShop();
+			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await shopper.block.goToCheckout();
+
+			// Expect no shipping options to be shown, but with a friendly message.
+			const shippingOptionsRequireAddressText = await page.$x(
+				'//p[contains(text(), "Shipping options will be displayed here after entering your full shipping address.")]'
+			);
+
+			expect( shippingOptionsRequireAddressText ).toHaveLength( 1 );
+
+			await expect( page ).toClick(
+				'.wc-block-checkout__shipping-method button',
+				{ text: 'Shipping' }
+			);
+
+			// Enter the address but not city and expect shipping options not to be shown.
+			await shopper.block.fillInCheckoutWithTestData( { city: '' } );
+
+			await expect( page ).not.toMatchElement(
+				'.wc-block-components-shipping-rates-control'
+			);
+
+			// This sequence will reset the checkout form.
+			await shopper.login();
+			await shopper.logout();
+
+			await preventCompatibilityNotice();
+			await merchant.login();
+			await visitBlockPage( 'Checkout Block' );
+			await openDocumentSettingsSidebar();
+			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
+			await selectBlockByName(
+				'woocommerce/checkout-shipping-methods-block'
+			);
+
+			await unsetCheckbox(
+				await getToggleIdByLabel(
+					'Hide shipping costs until an address is entered'
+				)
+			);
+			await saveOrPublish();
+			await shopper.block.emptyCart();
+
+			await shopper.block.goToShop();
+			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await shopper.block.goToCheckout();
+
+			// Expect the shipping options to be displayed without entering an address.
+			await expect( page ).toMatchElement(
+				'.wc-block-components-shipping-rates-control'
+			);
+		} );
 	} );
 
 	describe( 'Coupons', () => {
 		beforeAll( async () => {
 			coupon = await createCoupon( { usageLimit: 1 } );
+			await shopper.logout();
 			await shopper.login();
 		} );
 

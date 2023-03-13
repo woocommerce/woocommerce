@@ -10,6 +10,7 @@ import {
 	AttributeWithTerms,
 	isAttributeTerm,
 } from '@woocommerce/types';
+import { dispatch, select } from '@wordpress/data';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -107,4 +108,36 @@ export const getTaxonomyFromAttributeId = ( attributeId: number ) => {
 	}
 	const attribute = getAttributeFromID( attributeId );
 	return attribute ? attribute.taxonomy : null;
+};
+
+/**
+ * Updates an attribute in a sibling block. Useful if two settings control the same attribute, but you don't want to
+ * have this attribute exist on a parent block.
+ */
+export const updateAttributeInSiblingBlock = (
+	clientId: string,
+	attribute: string,
+	newValue: unknown,
+	siblingBlockName: string
+) => {
+	const store = select( 'core/block-editor' );
+	const actions = dispatch( 'core/block-editor' );
+	const parentBlocks = store.getBlockParents( clientId );
+
+	let shippingMethodsBlockClientId = '';
+
+	// Loop through parent block's children until we find woocommerce/checkout-shipping-methods-block.
+	// Also set this attribute in the woocommerce/checkout-shipping-methods-block.
+	parentBlocks.forEach( ( parent ) => {
+		const childBlock = store
+			.getBlock( parent )
+			.innerBlocks.find( ( child ) => child.name === siblingBlockName );
+		if ( ! childBlock ) {
+			return;
+		}
+		shippingMethodsBlockClientId = childBlock.clientId;
+	} );
+	actions.updateBlockAttributes( shippingMethodsBlockClientId, {
+		[ attribute ]: newValue,
+	} );
 };

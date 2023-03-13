@@ -419,7 +419,14 @@ export const selectShippingRate =
 				},
 				cache: 'no-store',
 			} );
-			dispatch.receiveCart( response );
+			// Remove shipping and billing address from the response, so we don't overwrite what the shopper is
+			// entering in the form if rates suddenly appear mid-edit.
+			const {
+				shipping_address: shippingAddress,
+				billing_address: billingAddress,
+				...rest
+			} = response;
+			dispatch.receiveCart( rest );
 			return response as CartResponse;
 		} catch ( error ) {
 			dispatch.receiveError( error );
@@ -476,6 +483,13 @@ export const updateCustomerData =
 		}
 	};
 
+export const setFullShippingAddressPushed = (
+	fullShippingAddressPushed: boolean
+) => ( {
+	type: types.SET_FULL_SHIPPING_ADDRESS_PUSHED,
+	fullShippingAddressPushed,
+} );
+
 type Actions =
 	| typeof addItemToCart
 	| typeof applyCoupon
@@ -496,6 +510,7 @@ type Actions =
 	| typeof setShippingAddress
 	| typeof shippingRatesBeingSelected
 	| typeof updateCustomerData
+	| typeof setFullShippingAddressPushed
 	| typeof updatingCustomerData;
 
 export type CartAction = ReturnOrGeneratorYieldUnion< Actions | Thunks >;

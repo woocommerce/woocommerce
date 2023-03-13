@@ -24,4 +24,8 @@ export default {
 			remove: true,
 		},
 	},
+	shippingCostRequiresAddress: {
+		type: 'boolean',
+		default: false,
+	},
 };
