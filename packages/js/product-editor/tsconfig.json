@@ -1,10 +1,15 @@
 {
 	"extends": "../tsconfig",
+	"include": [
+		"**/*",
+		"src/**/*.json"
+	],
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "build-module",
 		"declaration": true,
 		"declarationMap": true,
-		"declarationDir": "./build-types"
+		"declarationDir": "./build-types",
+		"resolveJsonModule": true,
 	}
 }

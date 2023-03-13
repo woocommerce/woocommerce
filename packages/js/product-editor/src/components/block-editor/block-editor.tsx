@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { BlockInstance } from '@wordpress/blocks';
-import { createElement, useState, useMemo } from '@wordpress/element';
+import { Template } from '@wordpress/blocks';
+import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
-import { useSelect, select as WPSelect } from '@wordpress/data';
+import { useSelect, select as WPSelect, useDispatch } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -22,6 +22,13 @@ import {
 	WritingFlow,
 	ObserveTyping,
 } from '@wordpress/block-editor';
+// It doesn't seem to notice the External dependency block whn @ts-ignore is added.
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore store should be included.
+	useEntityBlockEditor,
+} from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -30,18 +37,25 @@ import { Sidebar } from '../sidebar';
 
 type BlockEditorProps = {
 	product: Partial< Product >;
-	settings: Partial< EditorSettings & EditorBlockListSettings > | undefined;
+	settings:
+		| ( Partial< EditorSettings & EditorBlockListSettings > & {
+				template?: Template[];
+		  } )
+		| undefined;
 };
 
-export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
-	const [ blocks, updateBlocks ] = useState< BlockInstance[] >();
+export function BlockEditor( {
+	settings: _settings,
+	product,
+}: BlockEditorProps ) {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore __experimentalTearDownEditor is not yet included in types package.
+	const { setupEditor, __experimentalTearDownEditor } =
+		useDispatch( 'core/editor' );
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
-		const { canUser } = select( 'core' ) as Record<
-			string,
-			( ...args: string[] ) => boolean
-		>;
-		return canUser( 'create', 'media' ) !== false;
+		const { canUser } = select( 'core' );
+		return canUser( 'create', 'media', '' ) !== false;
 	}, [] );
 
 	const settings = useMemo( () => {
@@ -68,28 +82,30 @@ export function BlockEditor( { settings: _settings }: BlockEditorProps ) {
 		};
 	}, [ canUserCreateMedia, _settings ] );
 
-	/**
-	 * Wrapper for updating blocks. Required as `onInput` callback passed to
-	 * `BlockEditorProvider` is now called with more than 1 argument. Therefore
-	 * attempting to setState directly via `updateBlocks` will trigger an error
-	 * in React.
-	 *
-	 * @param  _blocks
-	 */
-	function handleUpdateBlocks( _blocks: BlockInstance[] ) {
-		updateBlocks( _blocks );
-	}
+	useLayoutEffect( () => {
+		setupEditor( product, {}, _settings?.template );
 
-	function handlePersistBlocks( newBlocks: BlockInstance[] ) {
-		updateBlocks( newBlocks );
+		return () => {
+			__experimentalTearDownEditor();
+		};
+	}, [] );
+
+	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
+		'postType',
+		'product',
+		{ id: product.id }
+	);
+
+	if ( ! blocks ) {
+		return null;
 	}
 
 	return (
 		<div className="woocommerce-product-block-editor">
 			<BlockEditorProvider
 				value={ blocks }
-				onInput={ handleUpdateBlocks }
-				onChange={ handlePersistBlocks }
+				onInput={ onInput }
+				onChange={ onChange }
 				settings={ settings }
 			>
 				<BlockBreadcrumb />

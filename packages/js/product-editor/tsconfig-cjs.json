@@ -1,6 +1,11 @@
 {
 	"extends": "../tsconfig-cjs",
+	"include": [
+		"**/*",
+		"src/**/*.json"
+	],
 	"compilerOptions": {
-		"outDir": "build"
+		"outDir": "build",
+		"resolveJsonModule": true,
 	}
 }

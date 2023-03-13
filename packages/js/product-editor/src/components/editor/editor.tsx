@@ -11,6 +11,11 @@ import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
+import { EntityProvider } from '@wordpress/core-data';
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
 import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -37,21 +42,23 @@ type EditorProps = {
 export function Editor( { product, settings }: EditorProps ) {
 	return (
 		<StrictMode>
-			<ShortcutProvider>
-				<FullscreenMode isActive={ false } />
-				<SlotFillProvider>
-					<InterfaceSkeleton
-						header={ <Header title={ product.name } /> }
-						sidebar={ <Sidebar /> }
-						content={
-							<BlockEditor
-								settings={ settings }
-								product={ product }
-							/>
-						}
-					/>
-				</SlotFillProvider>
-			</ShortcutProvider>
+			<EntityProvider kind="postType" type="product" id={ product.id }>
+				<ShortcutProvider>
+					<FullscreenMode isActive={ false } />
+					<SlotFillProvider>
+						<InterfaceSkeleton
+							header={ <Header title={ product.name } /> }
+							sidebar={ <Sidebar /> }
+							content={
+								<BlockEditor
+									settings={ settings }
+									product={ product }
+								/>
+							}
+						/>
+					</SlotFillProvider>
+				</ShortcutProvider>
+			</EntityProvider>
 		</StrictMode>
 	);
 }
