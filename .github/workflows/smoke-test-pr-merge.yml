@@ -137,7 +137,7 @@ jobs:
                   test-type: E2E
 
     k6:
-        name: Runs k6 Performance tests
+        name: Run k6 Performance tests
         needs: [api]
         runs-on: ubuntu-20.04
         permissions:
