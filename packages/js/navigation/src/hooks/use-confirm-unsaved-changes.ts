@@ -1,13 +1,9 @@
 /**
  * External dependencies
  */
-import { useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import {
-	Location,
-	UNSAFE_NavigationContext as NavigationContext,
-	useLocation,
-} from 'react-router-dom';
+import { Location } from 'react-router-dom';
+import { useEffect, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
