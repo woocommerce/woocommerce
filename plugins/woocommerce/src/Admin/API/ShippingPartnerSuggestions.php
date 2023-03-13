@@ -101,7 +101,7 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 		if ( $should_display ) {
 			return Suggestions::get_suggestions();
 		} elseif ( false === $should_display && true === $force_default ) {
-			return rest_ensure_response( Suggestions::get_suggestions( DefaultPaymentGateways::get_all() ) );
+			return rest_ensure_response( Suggestions::get_suggestions( DefaultShippingPartners::get_all() ) );
 		}
 
 		return rest_ensure_response( Suggestions::get_suggestions( DefaultShippingPartners::get_all() ) );
