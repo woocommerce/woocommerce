@@ -236,7 +236,7 @@ const getDataForProductTabClickEvent = ( tabName: string ) => {
 	data.product_type = getProductType();
 
 	if ( tabName === 'inventory' ) {
-		data.is_stock_management_enabled =
+		data.is_store_stock_management_enabled =
 			document.querySelector( '#_manage_stock' ) !== null;
 	}
 
