@@ -32,6 +32,12 @@ jest.mock( '../task-headers', () => ( {
 	required: () => <div>required_header</div>,
 	completed: () => <div>completed_header</div>,
 } ) );
+jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
+	useUserPreferences: jest.fn().mockReturnValue( {
+		updateUserPreferences: jest.fn(),
+	} ),
+} ) );
 
 const tasks: { [ key: string ]: TaskType[] } = {
 	setup: [

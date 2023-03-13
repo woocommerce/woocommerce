@@ -23,8 +23,8 @@ const onDraftCES = jest.fn().mockResolvedValue( {} );
 
 jest.mock( '@wordpress/plugins', () => ( { registerPlugin: jest.fn() } ) );
 
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
 	useDispatch: jest.fn().mockReturnValue( { updateOptions: jest.fn() } ),
 	useSelect: jest.fn().mockReturnValue( { productCESAction: 'hide' } ),
 } ) );
