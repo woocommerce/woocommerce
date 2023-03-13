@@ -967,6 +967,7 @@
 	> p {
 		a {
 			text-decoration: none;
+			white-space: nowrap;
 		}
 	}
 	> p:not( :last-child ) {
