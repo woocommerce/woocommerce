@@ -8,13 +8,13 @@ import {
 } from '@wordpress/blocks';
 import { ComponentType } from 'react';
 
-type BlockRepresentation< T extends Record< string, any > = {} > = {
+type BlockRepresentation = {
 	name: string;
 	metadata: BlockConfiguration;
 	settings: Partial< Omit< BlockConfiguration, 'edit' > > & {
 		readonly edit?:
 			| ComponentType<
-					BlockEditProps< T > & {
+					BlockEditProps< object > & {
 						context?: Record< string, unknown >;
 					}
 			  >
