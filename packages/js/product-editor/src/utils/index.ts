@@ -20,7 +20,6 @@ import { preventLeavingProductForm } from './prevent-leaving-product-form';
 export * from './create-ordered-children';
 export * from './sort-fills-by-order';
 export * from './init-blocks';
-export * from './register-template';
 
 export {
 	AUTO_DRAFT_NAME,

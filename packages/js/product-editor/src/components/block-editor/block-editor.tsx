@@ -5,11 +5,6 @@ import { Template } from '@wordpress/blocks';
 import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
 import { useSelect, select as WPSelect, useDispatch } from '@wordpress/data';
-import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore store should be included.
-	useEntityBlockEditor,
-} from '@wordpress/core-data';
 import { uploadMedia } from '@wordpress/media-utils';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -27,6 +22,13 @@ import {
 	WritingFlow,
 	ObserveTyping,
 } from '@wordpress/block-editor';
+// It doesn't seem to notice the External dependency block whn @ts-ignore is added.
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore store should be included.
+	useEntityBlockEditor,
+} from '@wordpress/core-data';
 
 /**
  * Internal dependencies
