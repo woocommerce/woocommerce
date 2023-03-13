@@ -67,20 +67,25 @@ class WC_Order_Factory {
 	 * @throws \Exception When an invalid order is found.
 	 */
 	public static function get_orders( $order_ids = array(), $skip_invalid = false ) {
-		$result    = array();
-		$order_ids = array_filter( array_map( array( __CLASS__, 'get_order_id' ), $order_ids ) );
+		if ( empty( $order_ids ) ) {
+			return array();
+		}
+
+		$result              = array();
+		$order_ids           = array_filter( array_map( array( __CLASS__, 'get_order_id' ), $order_ids ) );
+		$original_order_sort = $order_ids;
+		$order_cache         = wc_get_container()->get( OrderCache::class );
 
 		$already_cached_orders = array();
 		$use_orders_cache      = OrderUtil::orders_cache_usage_is_enabled();
 		if ( $use_orders_cache ) {
 			$uncached_order_ids = array();
-			$order_cache        = wc_get_container()->get( OrderCache::class );
 			foreach ( $order_ids as $order_id ) {
 				$cached_order = $order_cache->get( absint( $order_id ) );
-				if ( is_null( $cached_order ) ) {
-					$uncached_order_ids[] = $order_id;
+				if ( $cached_order instanceof \WC_Abstract_Legacy_Order ) {
+					$already_cached_orders[ $order_id ] = $cached_order;
 				} else {
-					$already_cached_orders[] = $cached_order;
+					$uncached_order_ids[] = $order_id;
 				}
 			}
 			$order_ids = $uncached_order_ids;
@@ -128,17 +133,16 @@ class WC_Order_Factory {
 			}
 		}
 
-		// restore the sort order.
-		$result = array_values( array_replace( array_flip( $order_ids ), $result ) );
-
 		if ( $use_orders_cache ) {
-			foreach ( $result as $order ) {
-				$order_cache->set( $order );
+			foreach ( $result as $order_id => $order ) {
+				$order_cache->set( $order, $order->get_id( $order_id ) );
 			}
-			return array_merge( $already_cached_orders, $result );
-		} else {
-			return $result;
+			$result = array_replace( $result, $already_cached_orders );
 		}
+
+		// restore the sort order.
+		$result = array_values( array_replace( array_flip( $original_order_sort ), $result ) );
+		return $result;
 	}
 
 	/**
