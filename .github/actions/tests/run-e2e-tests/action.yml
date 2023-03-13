@@ -1,5 +1,5 @@
 name: Run E2E tests
-description: Runs the WooCommerce Core E2E tests and generate Allure report.
+description: Runs the WooCommerce Core E2E tests and generates Allure report.
 permissions: {}
 
 inputs:
