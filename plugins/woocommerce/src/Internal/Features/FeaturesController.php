@@ -765,19 +765,19 @@ class FeaturesController {
 			return $list;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput
 		if ( ! function_exists( 'get_current_screen' ) || get_current_screen() && 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
 			return $list;
 		}
 
-		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id', 'all' );
+		$feature_id = $_GET['feature_id'] ?? 'all';
 		if ( 'all' !== $feature_id && ! $this->feature_exists( $feature_id ) ) {
 			return $list;
 		}
 
 		$incompatibles = array();
 
-		// phpcs:enable WordPress.Security.NonceVerification
+		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
 		foreach ( array_keys( $list ) as $plugin_name ) {
 			if ( ! $this->plugin_util->is_woocommerce_aware_plugin( $plugin_name ) || ! $this->proxy->call_function( 'is_plugin_active', $plugin_name ) ) {
 				continue;
@@ -1054,16 +1054,16 @@ class FeaturesController {
 	 * @return string[] The actual views array to use.
 	 */
 	private function handle_plugins_page_views_list( $views ): array {
-		// phpcs:disable WordPress.Security.NonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
 		if ( 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
 			return $views;
 		}
 
-		$feature_id = ArrayUtil::get_value_or_default( $_GET, 'feature_id', 'all' );
+		$feature_id = $_GET['feature_id'] ?? 'all';
 		if ( 'all' !== $feature_id && ! $this->feature_exists( $feature_id ) ) {
 			return $views;
 		}
-		// phpcs:enable WordPress.Security.NonceVerification
+		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
 
 		$all_items = get_plugins();
 

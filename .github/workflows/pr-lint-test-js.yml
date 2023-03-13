@@ -12,6 +12,7 @@ permissions: {}
 
 jobs:
     lint-test-js:
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
         name: Lint and Test JS
         runs-on: ubuntu-20.04
         permissions:

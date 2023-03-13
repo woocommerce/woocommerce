@@ -64,6 +64,7 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 				'val1 | val2'
 			);
 		}
+		await page.keyboard.press( 'ArrowUp' );
 		await page.click( 'text=Save attributes' );
 
 		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
@@ -138,6 +139,7 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		await page.fill( 'input[name="variable_length[2]"]', productLength );
 		await page.fill( 'input[name="variable_width[2]"]', productWidth );
 		await page.fill( 'input[name="variable_height[2]"]', productHeight );
+		await page.keyboard.press( 'ArrowUp' );
 		await page.click( 'button.save-variation-changes' );
 
 		// bulk-edit variations
@@ -211,6 +213,7 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 				`textarea[name="attribute_values[${ i }]"]`,
 				'val1 | val2'
 			);
+			await page.keyboard.press( 'ArrowUp' );
 			await page.click( 'text=Save attributes' );
 			await expect(
 				page

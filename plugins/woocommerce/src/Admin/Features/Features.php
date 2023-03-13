@@ -42,6 +42,7 @@ class Features {
 		'multichannel-marketing',
 		'navigation',
 		'new-product-management-experience',
+		'block-editor-feature-enabled',
 		'settings',
 	);
 

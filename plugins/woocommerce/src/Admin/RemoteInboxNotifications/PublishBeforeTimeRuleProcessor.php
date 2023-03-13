@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\DateTimeProvider\CurrentDateTimeProvider;
+use Automattic\WooCommerce\Admin\DateTimeProvider\CurrentDateTimeProvider;
 
 /**
  * Rule processor for sending before a specified date/time.

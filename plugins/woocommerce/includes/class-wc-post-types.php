@@ -366,6 +366,14 @@ class WC_Post_Types {
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
 					'rest_namespace'      => 'wp/v3',
+					'template'            => array(
+						array(
+							'core/paragraph',
+							array(
+								'placeholder' => 'Product description',
+							),
+						),
+					),
 				)
 			)
 		);
@@ -624,6 +632,15 @@ class WC_Post_Types {
 					'show_in_admin_status_list' => true,
 					/* translators: %s: number of orders */
 					'label_count'               => _n_noop( 'Failed <span class="count">(%s)</span>', 'Failed <span class="count">(%s)</span>', 'woocommerce' ),
+				),
+				'auto-draft'    => array(
+					'label'                     => _x( 'Auto Draft', 'Order status', 'woocommerce' ),
+					'public'                    => false,
+					'exclude_from_search'       => false,
+					'show_in_admin_all_list'    => true,
+					'show_in_admin_status_list' => true,
+					/* translators: %s: number of orders */
+					'label_count'               => _n_noop( 'Auto draft <span class="count">(%s)</span>', 'Auto draft <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 			)
 		);

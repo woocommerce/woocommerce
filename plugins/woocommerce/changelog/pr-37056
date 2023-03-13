@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Corrects class namespaces in Onboarding. It was missed during last restructuring.
