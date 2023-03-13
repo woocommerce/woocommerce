@@ -12,7 +12,7 @@ class ShippingPartnerSuggestions {
 	/**
 	 * Go through the specs and run them.
 	 *
-	 * @param array|null $specs payment suggestion spec array.
+	 * @param array|null $specs shipping partner suggestion spec array.
 	 * @return array
 	 */
 	public static function get_suggestions( $specs = null ) {
