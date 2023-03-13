@@ -112,7 +112,7 @@ class CheckoutSchema extends AbstractSchema {
 				'description' => __( 'The ID of the payment method being used to process the payment.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
-				'enum'        => wc()->payment_gateways->get_payment_gateway_ids(),
+				'enum'        => array_values( wp_list_pluck( WC()->payment_gateways->get_available_payment_gateways(), 'id' ) ),
 			],
 			'create_account'    => [
 				'description' => __( 'Whether to create a new user account as part of order processing.', 'woo-gutenberg-products-block' ),

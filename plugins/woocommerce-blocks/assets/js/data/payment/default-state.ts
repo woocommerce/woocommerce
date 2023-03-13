@@ -18,7 +18,7 @@ export interface PaymentState {
 	status: string;
 	activePaymentMethod: string;
 	activeSavedToken: string;
-	// Avilable payment methods are payment methods which have been validated and can make payment
+	// Available payment methods are payment methods which have been validated and can make payment.
 	availablePaymentMethods: PlainPaymentMethods;
 	availableExpressPaymentMethods: PlainExpressPaymentMethods;
 	savedPaymentMethods:

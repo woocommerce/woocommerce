@@ -7,7 +7,8 @@
 		"../providers/cart-checkout/checkout-events/index.tsx",
 		"../providers/cart-checkout/payment-events/index.tsx",
 		"../providers/cart-checkout/shipping/index.js",
-		"../../../editor-components/utils/*"
+		"../../../editor-components/utils/*",
+		"../../../data/index.ts"
 	],
 	"exclude": [ "**/test/**" ]
 }

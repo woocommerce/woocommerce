@@ -15,6 +15,7 @@ import {
 	EMPTY_CART_ERRORS,
 	EMPTY_SHIPPING_RATES,
 	EMPTY_TAX_LINES,
+	EMPTY_PAYMENT_METHODS,
 	EMPTY_PAYMENT_REQUIREMENTS,
 	EMPTY_EXTENSIONS,
 } from '../constants';
@@ -89,6 +90,7 @@ export const defaultCartState: CartState = {
 			tax_lines: EMPTY_TAX_LINES,
 		},
 		errors: EMPTY_CART_ITEM_ERRORS,
+		paymentMethods: EMPTY_PAYMENT_METHODS,
 		paymentRequirements: EMPTY_PAYMENT_REQUIREMENTS,
 		extensions: EMPTY_EXTENSIONS,
 	},

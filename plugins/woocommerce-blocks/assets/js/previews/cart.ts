@@ -637,6 +637,7 @@ export const previewCart: CartResponse = {
 		],
 	},
 	errors: [],
+	payment_methods: [ 'cod', 'bacs', 'cheque' ],
 	payment_requirements: [ 'products' ],
 	extensions: {},
 };

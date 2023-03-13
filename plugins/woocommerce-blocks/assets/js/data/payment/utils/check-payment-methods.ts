@@ -12,8 +12,6 @@ import {
 	emptyHiddenAddressFields,
 } from '@woocommerce/base-utils';
 import { __, sprintf } from '@wordpress/i18n';
-import { store as noticesStore } from '@wordpress/notices';
-
 import {
 	getExpressPaymentMethods,
 	getPaymentMethods,
@@ -33,10 +31,36 @@ import {
 } from '../../../data/constants';
 import { defaultCartState } from '../../../data/cart/default-state';
 
+const registrationErrorNotice = (
+	paymentMethod:
+		| ExpressPaymentMethodConfigInstance
+		| PaymentMethodConfigInstance,
+	errorMessage: string,
+	express = false
+) => {
+	const { createErrorNotice } = dispatch( 'core/notices' );
+	const noticeContext = express
+		? noticeContexts.EXPRESS_PAYMENTS
+		: noticeContexts.PAYMENTS;
+	const errorText = sprintf(
+		/* translators: %s the id of the payment method being registered (bank transfer, cheque...) */
+		__(
+			`There was an error registering the payment method with id '%s': `,
+			'woo-gutenberg-products-block'
+		),
+		paymentMethod.paymentMethodId
+	);
+	createErrorNotice( `${ errorText } ${ errorMessage }`, {
+		context: noticeContext,
+		id: `wc-${ paymentMethod.paymentMethodId }-registration-error`,
+	} );
+};
+
 export const checkPaymentMethodsCanPay = async ( express = false ) => {
 	const isEditor = !! select( 'core/editor' );
 
 	let availablePaymentMethods = {};
+
 	const paymentMethods = express
 		? getExpressPaymentMethods()
 		: getPaymentMethods();
@@ -52,10 +76,6 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			[ paymentMethod.name ]: { name },
 		};
 	};
-
-	const noticeContext = express
-		? noticeContexts.EXPRESS_PAYMENTS
-		: noticeContexts.PAYMENTS;
 
 	let cartForCanPayArgument: Record< string, unknown > = {};
 	let canPayArgument: Record< string, unknown > = {};
@@ -94,7 +114,6 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			paymentRequirements: cart.paymentRequirements,
 			receiveCart: dispatch( CART_STORE_KEY ).receiveCart,
 		};
-
 		canPayArgument = {
 			cart: cartForCanPayArgument,
 			cartTotals: cart.totals,
@@ -103,6 +122,7 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			billingAddress: cart.billingAddress,
 			shippingAddress: cart.shippingAddress,
 			selectedShippingMethods,
+			paymentMethods: cart.paymentMethods,
 			paymentRequirements: cart.paymentRequirements,
 		};
 	} else {
@@ -139,68 +159,61 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			selectedShippingMethods: deriveSelectedShippingRates(
 				cartForCanPayArgument.shippingRates
 			),
+			paymentMethods: previewCart.payment_methods,
 			paymentRequirements: cartForCanPayArgument.paymentRequirements,
 		};
 	}
 
-	// Order payment methods
-	let paymentMethodsOrder;
-	if ( express ) {
-		paymentMethodsOrder = Object.keys( paymentMethods );
-	} else {
-		paymentMethodsOrder = Array.from(
-			new Set( [
-				...( getSetting( 'paymentGatewaySortOrder', [] ) as [] ),
-				...Object.keys( paymentMethods ),
-			] )
-		);
-	}
+	// Order payment methods.
+	const paymentMethodsOrder = express
+		? Object.keys( paymentMethods )
+		: Array.from(
+				new Set( [
+					...( getSetting( 'paymentGatewaySortOrder', [] ) as [] ),
+					...Object.keys( paymentMethods ),
+				] )
+		  );
+	const cartPaymentMethods = canPayArgument.paymentMethods as string[];
 
 	for ( let i = 0; i < paymentMethodsOrder.length; i++ ) {
 		const paymentMethodName = paymentMethodsOrder[ i ];
 		const paymentMethod = paymentMethods[ paymentMethodName ];
+
 		if ( ! paymentMethod ) {
 			continue;
 		}
 
 		// See if payment method should be available. This always evaluates to true in the editor context.
 		try {
+			const validForCart =
+				isEditor || express
+					? true
+					: cartPaymentMethods.includes( paymentMethodName );
 			const canPay = isEditor
 				? true
-				: await Promise.resolve(
+				: validForCart &&
+				  ( await Promise.resolve(
 						paymentMethod.canMakePayment( canPayArgument )
-				  );
+				  ) );
 
 			if ( canPay ) {
 				if ( typeof canPay === 'object' && canPay.error ) {
 					throw new Error( canPay.error.message );
 				}
-
 				addAvailablePaymentMethod( paymentMethod );
 			}
 		} catch ( e ) {
 			if ( CURRENT_USER_IS_ADMIN || isEditor ) {
-				const { createErrorNotice } = dispatch( noticesStore );
-				const errorText = sprintf(
-					/* translators: %s the id of the payment method being registered (bank transfer, cheque...) */
-					__(
-						`There was an error registering the payment method with id '%s': `,
-						'woo-gutenberg-products-block'
-					),
-					paymentMethod.paymentMethodId
-				);
-				createErrorNotice( `${ errorText } ${ e }`, {
-					context: noticeContext,
-					id: `wc-${ paymentMethod.paymentMethodId }-registration-error`,
-				} );
+				registrationErrorNotice( paymentMethod, e as string, express );
 			}
 		}
 	}
+
+	const availablePaymentMethodNames = Object.keys( availablePaymentMethods );
 	const currentlyAvailablePaymentMethods = express
 		? select( PAYMENT_STORE_KEY ).getAvailableExpressPaymentMethods()
 		: select( PAYMENT_STORE_KEY ).getAvailablePaymentMethods();
 
-	const availablePaymentMethodNames = Object.keys( availablePaymentMethods );
 	if (
 		Object.keys( currentlyAvailablePaymentMethods ).length ===
 			availablePaymentMethodNames.length &&
@@ -216,10 +229,11 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 		__internalSetAvailablePaymentMethods,
 		__internalSetAvailableExpressPaymentMethods,
 	} = dispatch( PAYMENT_STORE_KEY );
-	if ( express ) {
-		__internalSetAvailableExpressPaymentMethods( availablePaymentMethods );
-		return true;
-	}
-	__internalSetAvailablePaymentMethods( availablePaymentMethods );
+
+	const setCallback = express
+		? __internalSetAvailableExpressPaymentMethods
+		: __internalSetAvailablePaymentMethods;
+
+	setCallback( availablePaymentMethods );
 	return true;
 };
