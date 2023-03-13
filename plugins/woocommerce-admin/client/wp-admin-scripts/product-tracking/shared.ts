@@ -262,6 +262,19 @@ const initProductTabsTracks = () => {
 };
 
 /**
+ * Initializes the inventory tab Tracks events.
+ */
+const initInventoryTabTracks = () => {
+	document
+		.querySelector( '#_manage_stock_disabled' )
+		?.addEventListener( 'click', () => {
+			recordEvent(
+				'product_manage_stock_disabled_store_settings_link_click'
+			);
+		} );
+};
+
+/**
  * Initialize all product screen tracks.
  */
 
@@ -529,6 +542,7 @@ export const initProductScreenTracks = () => {
 	} );
 
 	initProductTabsTracks();
+	initInventoryTabTracks();
 };
 
 export function addExitPageListener( pageId: string ) {
