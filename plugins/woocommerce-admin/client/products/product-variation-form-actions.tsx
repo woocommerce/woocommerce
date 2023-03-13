@@ -15,7 +15,6 @@ import { useConfirmUnsavedChanges } from '@woocommerce/navigation';
 import { useFormContext } from '@woocommerce/components';
 import { useParams } from 'react-router-dom';
 import { useState } from '@wordpress/element';
-import { useConfirmUnsavedChanges } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies

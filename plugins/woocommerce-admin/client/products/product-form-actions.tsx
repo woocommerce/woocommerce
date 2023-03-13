@@ -11,10 +11,7 @@ import {
 } from '@wordpress/components';
 import { chevronDown, check, Icon } from '@wordpress/icons';
 import { registerPlugin } from '@wordpress/plugins';
-import {
-	useConfirmUnsavedChanges,
-	WooHeaderItem,
-} from '@woocommerce/admin-layout';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
 import { useFormContext } from '@woocommerce/components';
 import { useCustomerEffortScoreExitPageTracker } from '@woocommerce/customer-effort-score';
 import {
@@ -33,8 +30,6 @@ import { store } from '@wordpress/viewport';
 /**
  * Internal dependencies
  */
-import { WooHeaderItem } from '~/header/utils';
-import { useProductHelper } from './use-product-helper';
 import './product-form-actions.scss';
 import { useProductMVPCESFooter } from '~/customer-effort-score-tracks/use-product-mvp-ces-footer';
 
