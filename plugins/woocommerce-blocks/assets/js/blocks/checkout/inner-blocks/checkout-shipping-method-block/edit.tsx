@@ -23,6 +23,8 @@ import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
+import { Attributes } from '@woocommerce/blocks/checkout/types';
+import { updateAttributeInSiblingBlock } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -152,7 +154,9 @@ const ShippingSelector = ( {
 export const Edit = ( {
 	attributes,
 	setAttributes,
+	clientId,
 }: {
+	clientId: string;
 	attributes: {
 		title: string;
 		description: string;
@@ -163,9 +167,16 @@ export const Edit = ( {
 		showPrice: boolean;
 		showIcon: boolean;
 		className: string;
+		shippingCostRequiresAddress: boolean;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element | null => {
+	const toggleAttribute = ( key: keyof Attributes ): void => {
+		const newAttributes = {} as Partial< Attributes >;
+		newAttributes[ key ] = ! ( attributes[ key ] as boolean );
+		setAttributes( newAttributes );
+	};
+
 	const { setPrefersCollection } = useDispatch( CHECKOUT_STORE_KEY );
 	const { prefersCollection } = useSelect( ( select ) => {
 		const checkoutStore = select( CHECKOUT_STORE_KEY );
@@ -210,6 +221,30 @@ export const Edit = ( {
 			) }
 		>
 			<InspectorControls>
+				<PanelBody
+					title={ __(
+						'Calculations',
+						'woo-gutenberg-products-block'
+					) }
+				>
+					<ToggleControl
+						label={ __(
+							'Hide shipping costs until an address is entered',
+							'woo-gutenberg-products-block'
+						) }
+						checked={ attributes.shippingCostRequiresAddress }
+						onChange={ ( selected ) => {
+							updateAttributeInSiblingBlock(
+								clientId,
+								'shippingCostRequiresAddress',
+								selected,
+								'woocommerce/checkout-shipping-methods-block'
+							);
+
+							toggleAttribute( 'shippingCostRequiresAddress' );
+						} }
+					/>
+				</PanelBody>
 				<PanelBody
 					title={ __( 'Appearance', 'woo-gutenberg-products-block' ) }
 				>

@@ -36,6 +36,7 @@ const StateInput = ( {
 	autoComplete = 'off',
 	value = '',
 	required = false,
+	errorId = '',
 }: StateInputWithStatesProps ): JSX.Element => {
 	const countryStates = states[ country ];
 	const options = useMemo(
@@ -102,6 +103,7 @@ const StateInput = ( {
 					'Please select a state.',
 					'woo-gutenberg-products-block'
 				) }
+				errorId={ errorId }
 				required={ required }
 				autoComplete={ autoComplete }
 			/>

@@ -4,12 +4,14 @@
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { PanelBody, ExternalLink } from '@wordpress/components';
+import { PanelBody, ExternalLink, ToggleControl } from '@wordpress/components';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
+import { Attributes } from '@woocommerce/blocks/checkout/types';
+import { updateAttributeInSiblingBlock } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -32,12 +34,15 @@ type shippingAdminLink = {
 export const Edit = ( {
 	attributes,
 	setAttributes,
+	clientId,
 }: {
+	clientId: string;
 	attributes: {
 		title: string;
 		description: string;
 		showStepNumber: boolean;
 		className: string;
+		shippingCostRequiresAddress: boolean;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element | null => {
@@ -54,6 +59,12 @@ export const Edit = ( {
 		return null;
 	}
 
+	const toggleAttribute = ( key: keyof Attributes ): void => {
+		const newAttributes = {} as Partial< Attributes >;
+		newAttributes[ key ] = ! ( attributes[ key ] as boolean );
+		setAttributes( newAttributes );
+	};
+
 	return (
 		<FormStepBlock
 			attributes={ attributes }
@@ -64,6 +75,29 @@ export const Edit = ( {
 			) }
 		>
 			<InspectorControls>
+				<PanelBody
+					title={ __(
+						'Calculations',
+						'woo-gutenberg-products-block'
+					) }
+				>
+					<ToggleControl
+						label={ __(
+							'Hide shipping costs until an address is entered',
+							'woo-gutenberg-products-block'
+						) }
+						checked={ attributes.shippingCostRequiresAddress }
+						onChange={ ( selected ) => {
+							updateAttributeInSiblingBlock(
+								clientId,
+								'shippingCostRequiresAddress',
+								selected,
+								'woocommerce/checkout-shipping-method-block'
+							);
+							toggleAttribute( 'shippingCostRequiresAddress' );
+						} }
+					/>
+				</PanelBody>
 				{ globalShippingMethods.length > 0 && (
 					<PanelBody
 						title={ __(
@@ -129,7 +163,12 @@ export const Edit = ( {
 				) }
 			</InspectorControls>
 			<Noninteractive>
-				<Block noShippingPlaceholder={ <NoShippingPlaceholder /> } />
+				<Block
+					noShippingPlaceholder={ <NoShippingPlaceholder /> }
+					shippingCostRequiresAddress={
+						attributes.shippingCostRequiresAddress
+					}
+				/>
 			</Noninteractive>
 			<AdditionalFields block={ innerBlockAreas.SHIPPING_METHODS } />
 		</FormStepBlock>

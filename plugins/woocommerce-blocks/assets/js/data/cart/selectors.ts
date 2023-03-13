@@ -222,3 +222,10 @@ export const getItemsPendingQuantityUpdate = ( state: CartState ): string[] => {
 export const getItemsPendingDelete = ( state: CartState ): string[] => {
 	return state.cartItemsPendingDelete;
 };
+
+/**
+ * Whether the address has changes that have not been synced with the server.
+ */
+export const getFullShippingAddressPushed = ( state: CartState ): boolean => {
+	return state.metaData.fullShippingAddressPushed;
+};

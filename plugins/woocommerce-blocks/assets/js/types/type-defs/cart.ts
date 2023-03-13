@@ -210,6 +210,8 @@ export interface CartMeta {
 	isCartDataStale: boolean;
 	applyingCoupon: string;
 	removingCoupon: string;
+	/* Whether the full address has been previously pushed to the server */
+	fullShippingAddressPushed: boolean;
 }
 export interface ExtensionCartUpdateArgs {
 	data: Record< string, unknown >;
