@@ -15,11 +15,11 @@ import { isNull, isObject, objectHasProp } from '@woocommerce/types';
  */
 const returnTrue = (): true => true;
 
-type CheckoutFilterFunction = < T >(
-	value: T,
+type CheckoutFilterFunction< U = unknown > = < T >(
+	value: T | U,
 	extensions: Record< string, unknown >,
 	args?: CheckoutFilterArguments
-) => T;
+) => T | U;
 
 type CheckoutFilterArguments =
 	| ( Record< string, unknown > & {
@@ -32,7 +32,7 @@ let checkoutFilters: Record<
 	Record< string, CheckoutFilterFunction >
 > = {};
 
-const cachedValues: Record< string, T > = {};
+let cachedValues: Record< string, unknown > = {};
 
 /**
  * Register filters for a specific extension.
@@ -53,7 +53,8 @@ export const registerCheckoutFilters = (
 			link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/bb921d21f42e21f38df2b1c87b48e07aa4cb0538/docs/extensibility/available-filters.md#coupons',
 		} );
 	}
-
+	// Clear cached values when registering new filters because otherwise we get outdated results when applying them.
+	cachedValues = {};
 	checkoutFilters = {
 		...checkoutFilters,
 		[ namespace ]: filters,
@@ -220,13 +221,13 @@ export const applyCheckoutFilter = < T >( {
 		! shouldReRunFilters( filterName, arg, extensions, defaultValue ) &&
 		cachedValues[ filterName ] !== undefined
 	) {
-		return cachedValues[ filterName ];
+		return cachedValues[ filterName ] as T;
 	}
 	const filters = getCheckoutFilters( filterName );
 	let value = defaultValue;
 	filters.forEach( ( filter ) => {
 		try {
-			const newValue = filter( value, extensions || {}, arg );
+			const newValue = filter( value, extensions || {}, arg ) as T;
 			if ( typeof newValue !== typeof value ) {
 				throw new Error(
 					sprintf(

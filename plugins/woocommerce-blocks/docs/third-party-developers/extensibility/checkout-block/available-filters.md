@@ -6,8 +6,11 @@
 -   [Order Summary Items](#order-summary-items)
 -   [Totals footer item (in Mini Cart, Cart and Checkout)](#totals-footer-item-in-mini-cart-cart-and-checkout)
 -   [Coupons](#coupons)
+-   [Proceed to Checkout Button Label](#proceed-to-checkout-button-label)
+-   [Proceed to Checkout Button Link](#proceed-to-checkout-button-link)
 -   [Place Order Button Label](#place-order-button-label)
 -   [Examples](#examples)
+    -   [Changing the wording and the link on the "Proceed to Checkout" button when a specific item is in the Cart](#changing-the-wording-and-the-link-on-the--proceed-to-checkout--button-when-a-specific-item-is-in-the-cart)
     -   [Changing the wording of the Totals label in the Mini Cart, Cart and Checkout](#changing-the-wording-of-the-totals-label-in-the-mini-cart-cart-and-checkout)
     -   [Changing the format of the item's single price](#changing-the-format-of-the-items-single-price)
     -   [Change the name of a coupon](#change-the-name-of-a-coupon)
@@ -90,15 +93,70 @@ CartCoupon {
 }
 ```
 
+## Proceed to Checkout Button Label
+
+The Cart block contains a button which is labelled 'Proceed to Checkout' by default. It can be changed using the following filter.
+
+| Filter name                    | Description                                         | Return type |
+|--------------------------------|-----------------------------------------------------| ----------- |
+| `proceedToCheckoutButtonLabel` | The wanted label of the Proceed to Checkout button. | `string`    |
+
+## Proceed to Checkout Button Link
+
+The Cart block contains a button which is labelled 'Proceed to Checkout' and links to the Checkout page by default, but can be changed using the following filter. This filter has the current cart passed to it in the third parameter.
+
+| Filter name                   | Description                                                 | Return type |
+|-------------------------------|-------------------------------------------------------------| ----------- |
+| `proceedToCheckoutButtonLink` | The URL that the Proceed to Checkout button should link to. | `string`    |
+
 ## Place Order Button Label
 
-The Checkout block contains a button which is labelled 'Place Order' by default, but can be changed using the following filter.
+The Checkout block contains a button which is labelled 'Place Order' by default, but can be changed using the following filter. This filter has the current cart passed to it in the third parameter.
 
 | Filter name             | Description                                 | Return type |
 | ----------------------- | ------------------------------------------- | ----------- |
 | `placeOrderButtonLabel` | The wanted label of the Place Order button. | `string`    |
 
 ## Examples
+
+### Changing the wording and the link on the "Proceed to Checkout" button when a specific item is in the Cart
+
+For this example, let's say our store has a checkout page for regular items, and one set up specifically for users purchasing sunglasses. We will use the `wc/store/cart` data store to check whether a specific item (Sunglasses) is in the cart, and if it is, we will change the URL and text on the "Proceed to Checkout" button in the Cart block.
+
+```ts
+registerCheckoutFilters( 'sunglasses-store-extension', {
+	proceedToCheckoutButtonLabel: ( value, extensions, { cart } ) => {
+		if ( ! cart.items ) {
+			return value;
+		}
+		const isSunglassesInCart = cart.items.some(
+			( item ) => item.name === 'Sunglasses'
+		);
+		// Return the default value if sunglasses is not in the cart.
+		if ( ! isSunglassesInCart ) {
+			return value;
+		}
+		return 'Proceed to 😎 checkout';
+	},
+	proceedToCheckoutButtonLink: ( value, extensions, { cart } ) => {
+		if ( ! cart.items ) {
+			return value;
+		}
+		const isSunglassesInCart = cart.items.some(
+			( item ) => item.name === 'Sunglasses'
+		);
+		// Return the default value if sunglasses is not in the cart.
+		if ( ! isSunglassesInCart ) {
+			return value;
+		}
+		return '/sunglasses-checkout';
+	},
+} );
+```
+
+| Before                                                                                                                                    | After |
+|-------------------------------------------------------------------------------------------------------------------------------------------| ----- |
+| <img width="789" alt="image" src="https://user-images.githubusercontent.com/5656702/222575670-a7d1dab8-c93e-477a-b2cc-e463a5de77a6.png">  | <img width="761" alt="image" src="https://user-images.githubusercontent.com/5656702/222572409-de7a6bd6-5a2d-406b-ada9-cc60cc5cca54.png"> |
 
 ### Changing the wording of the Totals label in the Mini Cart, Cart and Checkout
 

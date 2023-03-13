@@ -82,4 +82,38 @@ describe( 'Checkout registry', () => {
 		expect( newValue.current ).toBe( value );
 		spy.console.mockRestore();
 	} );
+
+	it( 'should allow filters to be registered multiple times and return the correct value each time', () => {
+		const value = 'Hello World';
+		registerCheckoutFilters( filterName, {
+			[ filterName ]: ( val, extensions, args ) =>
+				val.toUpperCase() + args?.punctuationSign,
+		} );
+		const { result: newValue } = renderHook( () =>
+			applyCheckoutFilter( {
+				filterName,
+				defaultValue: value,
+				arg: {
+					punctuationSign: '!',
+				},
+			} )
+		);
+		expect( newValue.current ).toBe( 'HELLO WORLD!' );
+		registerCheckoutFilters( filterName, {
+			[ filterName ]: ( val, extensions, args ) =>
+				args?.punctuationSign +
+				val.toUpperCase() +
+				args?.punctuationSign,
+		} );
+		const { result: newValue2 } = renderHook( () =>
+			applyCheckoutFilter( {
+				filterName,
+				defaultValue: value,
+				arg: {
+					punctuationSign: '!',
+				},
+			} )
+		);
+		expect( newValue2.current ).toBe( '!HELLO WORLD!' );
+	} );
 } );
