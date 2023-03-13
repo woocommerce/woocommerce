@@ -8,21 +8,23 @@ import {
 	useCallback,
 	createInterpolateElement,
 } from '@wordpress/element';
-import { useShippingData } from '@woocommerce/base-context/hooks';
+import { useShippingData, useStoreCart } from '@woocommerce/base-context/hooks';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import FormattedMonetaryAmount from '@woocommerce/base-components/formatted-monetary-amount';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
 import { Icon, mapMarker } from '@wordpress/icons';
-import RadioControl from '@woocommerce/base-components/radio-control';
 import type { RadioControlOption } from '@woocommerce/base-components/radio-control/types';
 import { CartShippingPackageShippingRate } from '@woocommerce/types';
 import { isPackageRateCollectable } from '@woocommerce/base-utils';
+import { ExperimentalOrderLocalPickupPackages } from '@woocommerce/blocks-checkout';
+import { LocalPickupSelect } from '@woocommerce/base-components/cart-checkout/local-pickup-select';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import ShippingRatesControlPackage from '../../../../base/components/cart-checkout/shipping-rates-control-package';
 
 const getPickupLocation = (
 	option: CartShippingPackageShippingRate
@@ -133,6 +135,20 @@ const Block = (): JSX.Element | null => {
 		[ selectShippingRate ]
 	);
 
+	// Prepare props to pass to the ExperimentalOrderLocalPickupPackages slot fill.
+	// We need to pluck out receiveCart.
+	// eslint-disable-next-line no-unused-vars
+	const { extensions, receiveCart, ...cart } = useStoreCart();
+	const slotFillProps = {
+		extensions,
+		cart,
+		components: {
+			ShippingRatesControlPackage,
+			LocalPickupSelect,
+		},
+		renderPickupLocation,
+	};
+
 	// Update the selected option if there is no rate selected on mount.
 	useEffect( () => {
 		if ( ! selectedOption && pickupLocations[ 0 ] ) {
@@ -142,16 +158,19 @@ const Block = (): JSX.Element | null => {
 	}, [ onSelectRate, pickupLocations, selectedOption ] );
 
 	return (
-		<RadioControl
-			onChange={ ( value: string ) => {
-				setSelectedOption( value );
-				onSelectRate( value );
-			} }
-			selected={ selectedOption }
-			options={ pickupLocations.map( ( location ) =>
-				renderPickupLocation( location, shippingRates.length )
-			) }
-		/>
+		<>
+			<ExperimentalOrderLocalPickupPackages.Slot { ...slotFillProps } />
+			<ExperimentalOrderLocalPickupPackages>
+				<LocalPickupSelect
+					title={ shippingRates[ 0 ].name }
+					setSelectedOption={ setSelectedOption }
+					onSelectRate={ onSelectRate }
+					selectedOption={ selectedOption }
+					renderPickupLocation={ renderPickupLocation }
+					pickupLocations={ pickupLocations }
+				/>
+			</ExperimentalOrderLocalPickupPackages>
+		</>
 	);
 };
 
