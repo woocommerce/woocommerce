@@ -287,8 +287,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 		$parsed_blocks  = parse_blocks( $template_content );
 		$grouped_blocks = self::group_blocks( $parsed_blocks );
 
-		// @todo Check this list before terminating the Blockfied Single Product Template project.
-		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form' );
+		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/product-meta', 'woocommerce/product-price', 'woocommerce/breadcrumbs' );
 
 		$wrapped_blocks = array_map(
 			function( $blocks ) use ( $single_product_template_blocks ) {
