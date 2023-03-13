@@ -57,6 +57,21 @@ Checkout:
 -   `components`: an object containing components you can use to render your own shipping rates, it contains `ShippingRatesControlPackage`.
 -   `context`, equal to the name of the Block in which the fill is rendered: `woocommerce/cart` or `woocommerce/checkout`
 
+## ExperimentalOrderLocalPickupPackages
+
+This slot renders inside the Checkout Pickup Options block in the Checkout block. It does not render in the Cart block.
+
+Checkout:
+
+![Example of ExperimentalOrderLocalPickupPackages in the Checkout block](https://user-images.githubusercontent.com/5656702/222814945-a449d016-0621-4a70-b0f4-2ae1ce6487f1.png)
+
+### Passed parameters
+
+-   `renderPickupLocation`: a render function that renders the address details of a local pickup option.
+-   `cart`: `wc/store/cart` data but in `camelCase` instead of `snake_case`. [Object breakdown.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/c00da597efe4c16fcf5481c213d8052ec5df3766/assets/js/type-defs/cart.ts#L172-L188)
+-   `extensions`: external data registered by third-party developers using `ExtendSchema`, if you used `ExtendSchema` on `wc/store/cart` you would find your data under your namespace here.
+-   `components`: an object containing components you can use to render your own pickup rates, it contains `ShippingRatesControlPackage` and `RadioControl`.
+
 ## ExperimentalDiscountsMeta
 
 This slot renders below the `CouponCode` input.
