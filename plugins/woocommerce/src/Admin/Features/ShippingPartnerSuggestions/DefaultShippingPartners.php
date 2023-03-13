@@ -101,7 +101,7 @@ class DefaultShippingPartners {
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'MX', 'CO' ) ),
 				),
-				'available_layouts' => array( 'single' ),
+				'available_layouts' => array( 'column' ),
 			),
 			array(
 				'name'              => 'Envia',
@@ -115,7 +115,7 @@ class DefaultShippingPartners {
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ) ),
 				),
-				'available_layouts' => array( 'row' ),
+				'available_layouts' => array( 'column' ),
 			),
 			array(
 				'name'              => 'Sendcloud',
@@ -220,7 +220,7 @@ class DefaultShippingPartners {
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'US' ) ),
 				),
-				'available_layouts' => array( 'row' ),
+				'available_layouts' => array( 'column' ),
 			),
 		);
 	}
