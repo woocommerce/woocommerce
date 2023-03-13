@@ -318,17 +318,17 @@ class Checkout extends AbstractBlock {
 		}
 
 		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'globalPaymentMethods' ) ) {
-			$payment_gateways          = $this->get_enabled_payment_gateways();
+			// These are used to show options in the sidebar. We want to get the full list of enabled payment methods,
+			// not just the ones that are available for the current cart (which may not exist yet).
+			$payment_methods           = $this->get_enabled_payment_gateways();
 			$formatted_payment_methods = array_reduce(
-				$payment_gateways,
+				$payment_methods,
 				function( $acc, $method ) {
-					if ( 'yes' === $method->enabled ) {
-						$acc[] = [
-							'id'          => $method->id,
-							'title'       => $method->method_title,
-							'description' => $method->method_description,
-						];
-					}
+					$acc[] = [
+						'id'          => $method->id,
+						'title'       => $method->method_title,
+						'description' => $method->method_description,
+					];
 					return $acc;
 				},
 				[]

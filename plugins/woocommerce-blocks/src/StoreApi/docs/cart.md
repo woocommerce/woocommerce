@@ -262,6 +262,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 		"tax_lines": []
 	},
 	"errors": [],
+	"payment_methods": [ "cod", "bacs", "cheque" ],
 	"payment_requirements": [ "products" ],
 	"extensions": {}
 }
