@@ -280,6 +280,14 @@ const initInventoryTabTracks = () => {
 				'product_manage_stock_disabled_store_settings_link_click'
 			);
 		} );
+
+	document
+		.querySelector( '#inventory_product_data .notice a' )
+		?.addEventListener( 'click', () => {
+			recordEvent(
+				'product_inventory_variations_notice_learn_more_click'
+			);
+		} );
 };
 
 /**
