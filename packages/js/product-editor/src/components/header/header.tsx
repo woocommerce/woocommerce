@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 import { Product } from '@woocommerce/data';
 
 export type HeaderProps = {
-	product?: Product;
+	product: Product;
 	title: string;
 };
 
@@ -18,19 +18,15 @@ export function Header( { product, title }: HeaderProps ) {
 			const { isSavingEntityRecord } = select( 'core' );
 			const { isPostSavingLocked } = select( 'core/editor' );
 			return {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				isProductLocked: isPostSavingLocked(),
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				isSaving: isSavingEntityRecord(
 					'postType',
 					'product',
-					product?.id
+					product.id
 				),
 			};
 		},
-		[ product?.id ]
+		[ product.id ]
 	);
 
 	const isDisabled = isProductLocked || isSaving;
@@ -38,7 +34,7 @@ export function Header( { product, title }: HeaderProps ) {
 	const { saveEditedEntityRecord } = useDispatch( 'core' );
 
 	function handleSave() {
-		saveEditedEntityRecord( 'postType', 'product', product?.id );
+		saveEditedEntityRecord( 'postType', 'product', product.id );
 	}
 
 	return (
