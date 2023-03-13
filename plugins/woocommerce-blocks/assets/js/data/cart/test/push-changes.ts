@@ -64,6 +64,7 @@ jest.mock( '../utils', () => ( {
 // need to update payment methods, they are not relevant to the tests in this file.
 jest.mock( '../update-payment-methods', () => ( {
 	debouncedUpdatePaymentMethods: jest.fn(),
+	updatePaymentMethods: jest.fn(),
 } ) );
 
 describe( 'pushChanges', () => {

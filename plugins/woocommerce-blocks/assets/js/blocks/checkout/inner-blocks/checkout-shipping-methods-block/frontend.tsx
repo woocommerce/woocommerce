@@ -20,6 +20,7 @@ const FrontendBlock = ( {
 	showStepNumber,
 	children,
 	className,
+	shippingCostRequiresAddress = false,
 }: {
 	title: string;
 	description: string;
@@ -31,6 +32,7 @@ const FrontendBlock = ( {
 	showStepNumber: boolean;
 	children: JSX.Element;
 	className?: string;
+	shippingCostRequiresAddress: boolean;
 } ) => {
 	const checkoutIsProcessing = useSelect( ( select ) =>
 		select( CHECKOUT_STORE_KEY ).isProcessing()
@@ -53,7 +55,9 @@ const FrontendBlock = ( {
 			description={ description }
 			showStepNumber={ showStepNumber }
 		>
-			<Block />
+			<Block
+				shippingCostRequiresAddress={ shippingCostRequiresAddress }
+			/>
 			{ children }
 		</FormStep>
 	);

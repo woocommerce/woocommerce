@@ -17,6 +17,7 @@ import './style.scss';
 import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
 import type { minMaxPrices } from './shared';
 import { defaultLocalPickupText, defaultShippingText } from './constants';
+import { shippingAddressHasValidationErrors } from '../../../../data/cart/utils';
 
 const LocalPickupSelector = ( {
 	checked,
@@ -71,15 +72,19 @@ const ShippingSelector = ( {
 	showPrice,
 	showIcon,
 	toggleText,
+	shippingCostRequiresAddress = false,
 }: {
 	checked: string;
 	rate: minMaxPrices;
 	showPrice: boolean;
 	showIcon: boolean;
+	shippingCostRequiresAddress: boolean;
 	toggleText: string;
 } ) => {
+	const rateShouldBeHidden =
+		shippingCostRequiresAddress && shippingAddressHasValidationErrors();
 	const Price =
-		rate.min === undefined ? (
+		rate.min === undefined || rateShouldBeHidden ? (
 			<span className="wc-block-checkout__shipping-method-option-price">
 				{ __(
 					'calculated with an address',
@@ -122,11 +127,13 @@ const Block = ( {
 	showIcon,
 	localPickupText,
 	shippingText,
+	shippingCostRequiresAddress = false,
 }: {
 	checked: string;
 	onChange: ( value: string ) => void;
 	showPrice: boolean;
 	showIcon: boolean;
+	shippingCostRequiresAddress: boolean;
 	localPickupText: string;
 	shippingText: string;
 } ): JSX.Element | null => {
@@ -145,6 +152,7 @@ const Block = ( {
 				rate={ getShippingPrices( shippingRates[ 0 ]?.shipping_rates ) }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
+				shippingCostRequiresAddress={ shippingCostRequiresAddress }
 				toggleText={ shippingText || defaultShippingText }
 			/>
 			<LocalPickupSelector
