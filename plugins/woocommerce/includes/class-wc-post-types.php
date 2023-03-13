@@ -368,9 +368,61 @@ class WC_Post_Types {
 					'rest_namespace'      => 'wp/v3',
 					'template'            => array(
 						array(
-							'woocommerce/product-name',
+							'woocommerce/product-tab',
 							array(
-								'name' => 'Product name',
+								'id'    => 'general',
+								'title' => __( 'General', 'woocommerce' ),
+							),
+							array(
+								array(
+									'woocommerce/product-section',
+									array(
+										'title'       => __( 'Basic details', 'woocommerce' ),
+										'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
+									),
+									array(
+										array(
+											'woocommerce/product-name',
+											array(
+												'name' => 'Product name',
+											),
+										),
+									),
+								),
+							),
+						),
+						array(
+							'woocommerce/product-tab',
+							array(
+								'id'    => 'pricing',
+								'title' => __( 'Pricing', 'woocommerce' ),
+							),
+						),
+						array(
+							'woocommerce/product-tab',
+							array(
+								'id'    => 'inventory',
+								'title' => __( 'Inventory', 'woocommerce' ),
+							),
+						),
+						array(
+							'woocommerce/product-tab',
+							array(
+								'id'    => 'shipping',
+								'title' => __( 'Shipping', 'woocommerce' ),
+							),
+							array(
+								array(
+									'woocommerce/product-section',
+									array(
+										'title' => __( 'Shipping section', 'woocommerce' ),
+									),
+									array(
+										array(
+											'core/image',
+										),
+									),
+								),
 							),
 						),
 					),

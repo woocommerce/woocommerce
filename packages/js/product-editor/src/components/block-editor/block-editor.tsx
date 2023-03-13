@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { Template } from '@wordpress/blocks';
-import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
+import {
+	createElement,
+	useMemo,
+	useLayoutEffect,
+	useState,
+} from '@wordpress/element';
 import { Product } from '@woocommerce/data';
 import { useSelect, select as WPSelect, useDispatch } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
@@ -10,6 +15,9 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	BlockBreadcrumb,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
+	BlockContextProvider,
 	BlockEditorKeyboardShortcuts,
 	BlockEditorProvider,
 	BlockList,
@@ -34,6 +42,7 @@ import {
  * Internal dependencies
  */
 import { Sidebar } from '../sidebar';
+import { Tabs } from '../tabs';
 
 type BlockEditorProps = {
 	product: Partial< Product >;
@@ -48,6 +57,8 @@ export function BlockEditor( {
 	settings: _settings,
 	product,
 }: BlockEditorProps ) {
+	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
+
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore __experimentalTearDownEditor is not yet included in types package.
 	const { setupEditor, __experimentalTearDownEditor } =
@@ -102,29 +113,32 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			<BlockEditorProvider
-				value={ blocks }
-				onInput={ onInput }
-				onChange={ onChange }
-				settings={ settings }
-			>
-				<BlockBreadcrumb />
-				<Sidebar.InspectorFill>
-					<BlockInspector />
-				</Sidebar.InspectorFill>
-				<div className="editor-styles-wrapper">
-					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-					{ /* @ts-ignore No types for this exist yet. */ }
-					<BlockEditorKeyboardShortcuts.Register />
-					<BlockTools>
-						<WritingFlow>
-							<ObserveTyping>
-								<BlockList className="woocommerce-product-block-editor__block-list" />
-							</ObserveTyping>
-						</WritingFlow>
-					</BlockTools>
-				</div>
-			</BlockEditorProvider>
+			<BlockContextProvider value={ { selectedTab } }>
+				<BlockEditorProvider
+					value={ blocks }
+					onInput={ onInput }
+					onChange={ onChange }
+					settings={ settings }
+				>
+					<Tabs onChange={ setSelectedTab } />
+					<BlockBreadcrumb />
+					<Sidebar.InspectorFill>
+						<BlockInspector />
+					</Sidebar.InspectorFill>
+					<div className="editor-styles-wrapper">
+						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+						{ /* @ts-ignore No types for this exist yet. */ }
+						<BlockEditorKeyboardShortcuts.Register />
+						<BlockTools>
+							<WritingFlow>
+								<ObserveTyping>
+									<BlockList className="woocommerce-product-block-editor__block-list" />
+								</ObserveTyping>
+							</WritingFlow>
+						</BlockTools>
+					</div>
+				</BlockEditorProvider>
+			</BlockContextProvider>
 		</div>
 	);
 }

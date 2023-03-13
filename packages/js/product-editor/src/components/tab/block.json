@@ -1,17 +1,17 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/product-section",
-	"title": "Product section",
+	"name": "woocommerce/product-tab",
+	"title": "Product tab",
 	"category": "woocommerce",
-	"description": "The product section.",
-	"keywords": [ "products", "section", "group" ],
+	"description": "The product tab.",
+	"keywords": [ "products", "tab", "group" ],
 	"textdomain": "default",
 	"attributes": {
-		"title": {
+		"id": {
 			"type": "string"
 		},
-		"description": {
+		"title": {
 			"type": "string"
 		}
 	},
@@ -22,5 +22,6 @@
 		"reusable": false,
 		"inserter": false,
 		"lock": false
-	}
+	},
+	"usesContext": [ "selectedTab" ]
 }
