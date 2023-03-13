@@ -6,6 +6,6 @@
 	],
 	"compilerOptions": {
 		"outDir": "build",
-		"resolveJsonModule": true,
+		"resolveJsonModule": true
 	}
 }
