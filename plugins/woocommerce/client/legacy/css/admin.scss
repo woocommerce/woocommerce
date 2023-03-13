@@ -965,10 +965,12 @@
 	margin: 10px;
 	background-color: #ffffff;
 	> p {
-		width: 85%;
 		a {
 			text-decoration: none;
 		}
+	}
+	> p:not( :last-child ) {
+		width: 85%;
 	}
 	.woocommerce-add-variation-price-container {
 		width: 15%;
