@@ -12,7 +12,7 @@ import Spinner from '@woocommerce/base-components/spinner';
 import './style.scss';
 
 export interface ButtonProps
-	extends Omit< WPButtonType.ButtonProps, 'variant' > {
+	extends Omit< WPButtonType.ButtonProps, 'variant' | 'href' > {
 	/**
 	 * Show spinner
 	 *
@@ -23,6 +23,10 @@ export interface ButtonProps
 	 * Button variant
 	 */
 	variant?: 'text' | 'contained' | 'outlined';
+	/**
+	 * The URL the button should link to.
+	 */
+	href?: string | undefined;
 }
 
 export interface AnchorProps extends Omit< ButtonProps, 'href' > {
