@@ -266,6 +266,14 @@ const initProductTabsTracks = () => {
  */
 const initInventoryTabTracks = () => {
 	document
+		.querySelector( '#_manage_stock' )
+		?.addEventListener( 'click', ( event ) => {
+			recordEvent( 'product_manage_stock_click', {
+				is_enabled: ( event.target as HTMLInputElement )?.checked,
+			} );
+		} );
+
+	document
 		.querySelector( '#_manage_stock_disabled' )
 		?.addEventListener( 'click', () => {
 			recordEvent(
