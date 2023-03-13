@@ -370,14 +370,14 @@ class WC_Post_Types {
 						array(
 							'woocommerce/product-tab',
 							array(
-								'id' => 'general',
+								'id'    => 'general',
 								'title' => __( 'General', 'woocommerce' ),
 							),
 							array(
 								array(
 									'woocommerce/product-section',
 									array(
-										'title' => __( 'Basic details', 'woocommerce' ),
+										'title'       => __( 'Basic details', 'woocommerce' ),
 										'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
 									),
 									array(
@@ -394,21 +394,21 @@ class WC_Post_Types {
 						array(
 							'woocommerce/product-tab',
 							array(
-								'id' => 'pricing',
+								'id'    => 'pricing',
 								'title' => __( 'Pricing', 'woocommerce' ),
 							),
 						),
 						array(
 							'woocommerce/product-tab',
 							array(
-								'id' => 'inventory',
+								'id'    => 'inventory',
 								'title' => __( 'Inventory', 'woocommerce' ),
 							),
 						),
 						array(
 							'woocommerce/product-tab',
 							array(
-								'id' => 'shipping',
+								'id'    => 'shipping',
 								'title' => __( 'Shipping', 'woocommerce' ),
 							),
 							array(
