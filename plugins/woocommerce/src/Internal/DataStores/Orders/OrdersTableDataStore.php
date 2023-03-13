@@ -1790,9 +1790,18 @@ FROM $order_meta_table
 
 			$order->set_id( 0 );
 
-			// Only delete post data if the posts table is authoritative and synchronization is enabled.
+			/** We can delete the post data if:
+			 * 1. If the HPOS table is authoritative and synchronization is enabled.
+			 * 2. If the post record is of type `shop_order_placehold`, since this is created by the HPOS in the first place.
+			 *
+			 * In other words, we do not delete the post record when HPOS table is authoritative and synchronization is disabled but post record is a full record and not just a placeholder, because it implies that the order was created before HPOS was enabled.
+			 */
 			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-			if ( $data_synchronizer->data_sync_is_enabled() && $order->get_data_store()->get_current_class_name() === self::class ) {
+			if (
+				( $data_synchronizer->data_sync_is_enabled() && $order->get_data_store()->get_current_class_name() === self::class ) ||
+				( get_post_type( $order_id ) === 'shop_order_placehold' )
+			) {
+
 				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
 				// Once we stop creating posts for orders, we should do the cleanup here instead.
 				wp_delete_post( $order_id );
