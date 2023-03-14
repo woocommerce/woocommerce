@@ -1101,9 +1101,14 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 }
 
 /**
- * Returns the price including or excluding tax, based on the 'woocommerce_tax_display_shop' setting.
+ * Returns the price including or excluding tax.
+ *
+ * By default it's based on the 'woocommerce_tax_display_shop' setting.
+ * Set `$arg['display_context']` to 'cart' to base on the 'woocommerce_tax_display_cart' setting instead.
  *
  * @since  3.0.0
+ * @since  7.6.0 Added `display_context` argument.
+ *
  * @param  WC_Product $product WC_Product object.
  * @param  array      $args Optional arguments to pass product quantity and price.
  * @return float
@@ -1112,15 +1117,19 @@ function wc_get_price_to_display( $product, $args = array() ) {
 	$args = wp_parse_args(
 		$args,
 		array(
-			'qty'   => 1,
-			'price' => $product->get_price(),
+			'qty'             => 1,
+			'price'           => $product->get_price(),
+			'display_context' => 'shop',
 		)
 	);
 
-	$price = $args['price'];
-	$qty   = $args['qty'];
+	$price       = $args['price'];
+	$qty         = $args['qty'];
+	$tax_display = get_option(
+		'cart' === $args['display_context'] ? 'woocommerce_tax_display_cart' : 'woocommerce_tax_display_shop'
+	);
 
-	return 'incl' === get_option( 'woocommerce_tax_display_shop' ) ?
+	return 'incl' === $tax_display ?
 		wc_get_price_including_tax(
 			$product,
 			array(
