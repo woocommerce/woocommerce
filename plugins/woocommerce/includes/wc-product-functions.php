@@ -1117,16 +1117,16 @@ function wc_get_price_to_display( $product, $args = array() ) {
 	$args = wp_parse_args(
 		$args,
 		array(
-			'qty'              => 1,
-			'price'            => $product->get_price(),
+			'qty'             => 1,
+			'price'           => $product->get_price(),
 			'display_context' => 'shop',
 		)
 	);
 
-	$price          = $args['price'];
-	$qty            = $args['qty'];
-	$tax_display    = get_option(
-		'cart' === $args['display_context'] ?  'woocommerce_tax_display_cart' : 'woocommerce_tax_display_shop'
+	$price       = $args['price'];
+	$qty         = $args['qty'];
+	$tax_display = get_option(
+		'cart' === $args['display_context'] ? 'woocommerce_tax_display_cart' : 'woocommerce_tax_display_shop'
 	);
 
 	return 'incl' === $tax_display ?

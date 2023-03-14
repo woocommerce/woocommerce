@@ -1114,9 +1114,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$price_shop = wc_get_price_to_display(
 			$product,
 			array(
-				'price'            => 100,
-				'qty'              => 1,
-				'display_context'  => 'shop',
+				'price'           => 100,
+				'qty'             => 1,
+				'display_context' => 'shop',
 			)
 		);
 
@@ -1125,9 +1125,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$price_shop = wc_get_price_to_display(
 			$product,
 			array(
-				'price'            => 100,
-				'qty'              => 1,
-				'display_context'  => 'cart',
+				'price'           => 100,
+				'qty'             => 1,
+				'display_context' => 'cart',
 			)
 		);
 
@@ -1140,8 +1140,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$price_shop = wc_get_price_to_display(
 			$product,
 			array(
-				'price'            => 100,
-				'qty'              => 1,
+				'price' => 100,
+				'qty'   => 1,
 			)
 		);
 
@@ -1150,9 +1150,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$price_shop = wc_get_price_to_display(
 			$product,
 			array(
-				'price'            => 100,
-				'qty'              => 1,
-				'display_context'  => 'cart',
+				'price'           => 100,
+				'qty'             => 1,
+				'display_context' => 'cart',
 			)
 		);
 
@@ -1165,9 +1165,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$price_shop = wc_get_price_to_display(
 			$product,
 			array(
-				'price'            => 100,
-				'qty'              => 1,
-				'display_context'  => 'shop',
+				'price'           => 100,
+				'qty'             => 1,
+				'display_context' => 'shop',
 			)
 		);
 
@@ -1176,9 +1176,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$price_shop = wc_get_price_to_display(
 			$product,
 			array(
-				'price'            => 100,
-				'qty'              => 1,
-				'display_context'  => 'cart',
+				'price'           => 100,
+				'qty'             => 1,
+				'display_context' => 'cart',
 			)
 		);
 
@@ -1191,8 +1191,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$price_shop = wc_get_price_to_display(
 			$product,
 			array(
-				'price'            => 100,
-				'qty'              => 1,
+				'price' => 100,
+				'qty'   => 1,
 			)
 		);
 
@@ -1201,9 +1201,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$price_shop = wc_get_price_to_display(
 			$product,
 			array(
-				'price'            => 100,
-				'qty'              => 1,
-				'display_context'  => 'cart',
+				'price'           => 100,
+				'qty'             => 1,
+				'display_context' => 'cart',
 			)
 		);
 
