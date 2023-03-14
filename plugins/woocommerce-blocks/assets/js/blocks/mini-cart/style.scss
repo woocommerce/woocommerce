@@ -224,3 +224,8 @@ h2.wc-block-mini-cart__title {
 		height: calc(100dvh - 32px);
 	}
 }
+
+.wc-block-mini-cart__add-to-cart-behaviour-toggle,
+.wc-block-mini-cart__render-in-cart-and-checkout-toggle {
+	width: 100%;
+}
