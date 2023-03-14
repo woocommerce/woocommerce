@@ -49,6 +49,13 @@ export const BLOCK_ATTRIBUTES = {
 
 export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 	[
+		'core/heading',
+		{
+			level: 2,
+			content: __( 'Related products.', 'woo-gutenberg-products-block' ),
+		},
+	],
+	[
 		'core/post-template',
 		{ __woocommerceNamespace: PRODUCT_TEMPLATE_ID },
 		[
