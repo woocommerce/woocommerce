@@ -15,14 +15,17 @@ export function TabButton( {
 	children,
 	className,
 	id,
+	selected = false,
 }: {
 	children: string | JSX.Element;
 	className?: string;
 	id: string;
+	selected?: boolean;
 } ) {
 	const classes = classnames(
 		'wp-block-woocommerce-product-tab__button',
-		className
+		className,
+		{ 'is-selected': selected }
 	);
 
 	return (
@@ -34,6 +37,9 @@ export function TabButton( {
 						key={ id }
 						className={ classes }
 						onClick={ () => onClick( id ) }
+						id={ `woocommerce-product-tab__${ id }` }
+						aria-controls={ `woocommerce-product-tab__${ id }-content` }
+						aria-selected={ selected }
 					>
 						{ children }
 					</Button>

@@ -30,13 +30,15 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<TabButton
-				id={ id }
-				className={ isSelected ? 'is-selected' : undefined }
-			>
+			<TabButton id={ id } selected={ isSelected }>
 				{ title }
 			</TabButton>
-			<div className={ classes }>
+			<div
+				id={ `woocommerce-product-tab__${ id }-content` }
+				aria-labelledby={ `woocommerce-product-tab__${ id }` }
+				role="tabpanel"
+				className={ classes }
+			>
 				<InnerBlocks templateLock="all" />
 			</div>
 		</div>
