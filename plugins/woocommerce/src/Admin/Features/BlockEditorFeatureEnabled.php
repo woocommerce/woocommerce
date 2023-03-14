@@ -32,7 +32,7 @@ class BlockEditorFeatureEnabled {
 		}
 		if ( Features::is_enabled( self::FEATURE_ID ) ) {
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-			add_filter( 'woocommerce_register_post_type_product', array ( $this, 'add_rest_base_config' ) );
+			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_rest_base_config' ) );
 		}
 	}
 
