@@ -237,6 +237,10 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 
 		$order = OrderHelper::create_order();
 		$order->add_meta_data( 'foo', 'bar' );
+		$order->add_meta_data( 'bar', 'baz' );
+		$order->save_meta_data();
+
+		$order->delete_meta_data( 'bar' );
 		$order->save_meta_data();
 
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
@@ -245,7 +249,13 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			$refreshed_order->get_meta( 'foo' ),
 			'bar',
-			'Meta data persisted via the HPOS datastore is accessible via the CPT datastore'
+			'Meta data persisted via the HPOS datastore is accessible via the CPT datastore.'
+		);
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'bar' ),
+			'',
+			'Meta data deleted from the HPOS datastore should also be deleted from the CPT datastore.'
 		);
 	}
 
@@ -262,6 +272,10 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 
 		$order = OrderHelper::create_order();
 		$order->add_meta_data( 'foo', 'bar' );
+		$order->add_meta_data( 'bar', 'baz' );
+		$order->save_meta_data();
+
+		$order->delete_meta_data( 'bar' );
 		$order->save_meta_data();
 
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
@@ -270,7 +284,13 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			$refreshed_order->get_meta( 'foo' ),
 			'bar',
-			'Meta data persisted via the CPT datastore is accessible via the HPOS datastore'
+			'Meta data persisted via the CPT datastore is accessible via the HPOS datastore.'
+		);
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'bar' ),
+			'',
+			'Meta data deleted from the CPT datastore should also be deleted from the HPOS datastore.'
 		);
 	}
 }
