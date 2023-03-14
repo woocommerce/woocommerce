@@ -1078,4 +1078,136 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $status_options, wc_get_product_stock_status_options() );
 	}
+
+	/**
+	 * Tests `wc_get_price_to_display()` and its `display_context` argument.
+	 */
+	public function test_wc_get_price_to_display() {
+		// Enable taxes.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		$customer_location = WC_Tax::get_tax_location();
+
+		$tax_rate = array(
+			'tax_rate_country'  => $customer_location[0],
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$product = new WC_Product_Simple();
+
+		$product->set_regular_price( '100' );
+
+		// Display price included taxes at shop and cart.
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		update_option( 'woocommerce_tax_display_shop', 'incl' );
+
+		$price_shop = wc_get_price_to_display(
+			$product,
+			array(
+				'price'            => 100,
+				'qty'              => 1,
+				'display_context'  => 'shop',
+			)
+		);
+
+		$this->assertEquals( 120, $price_shop );
+
+		$price_shop = wc_get_price_to_display(
+			$product,
+			array(
+				'price'            => 100,
+				'qty'              => 1,
+				'display_context'  => 'cart',
+			)
+		);
+
+		$this->assertEquals( 120, $price_shop );
+
+		// Display price included taxes only at shop.
+		update_option( 'woocommerce_tax_display_cart', 'excl' );
+		update_option( 'woocommerce_tax_display_shop', 'incl' );
+
+		$price_shop = wc_get_price_to_display(
+			$product,
+			array(
+				'price'            => 100,
+				'qty'              => 1,
+			)
+		);
+
+		$this->assertEquals( 120, $price_shop );
+
+		$price_shop = wc_get_price_to_display(
+			$product,
+			array(
+				'price'            => 100,
+				'qty'              => 1,
+				'display_context'  => 'cart',
+			)
+		);
+
+		$this->assertEquals( 100, $price_shop );
+
+		// Display price included taxes only at cart.
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+		update_option( 'woocommerce_tax_display_shop', 'excl' );
+
+		$price_shop = wc_get_price_to_display(
+			$product,
+			array(
+				'price'            => 100,
+				'qty'              => 1,
+				'display_context'  => 'shop',
+			)
+		);
+
+		$this->assertEquals( 100, $price_shop );
+
+		$price_shop = wc_get_price_to_display(
+			$product,
+			array(
+				'price'            => 100,
+				'qty'              => 1,
+				'display_context'  => 'cart',
+			)
+		);
+
+		$this->assertEquals( 120, $price_shop );
+
+		// Display price excluded taxes at shop and cart.
+		update_option( 'woocommerce_tax_display_cart', 'excl' );
+		update_option( 'woocommerce_tax_display_shop', 'excl' );
+
+		$price_shop = wc_get_price_to_display(
+			$product,
+			array(
+				'price'            => 100,
+				'qty'              => 1,
+			)
+		);
+
+		$this->assertEquals( 100, $price_shop );
+
+		$price_shop = wc_get_price_to_display(
+			$product,
+			array(
+				'price'            => 100,
+				'qty'              => 1,
+				'display_context'  => 'cart',
+			)
+		);
+
+		$this->assertEquals( 100, $price_shop );
+	}
+
 }
