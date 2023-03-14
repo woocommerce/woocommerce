@@ -30,7 +30,6 @@ export const Tree = forwardRef( function ForwardedTree(
 		<>
 			<ol
 				{ ...treeProps }
-				{ ...( props.getMenuProps && props.getMenuProps() ) }
 				className={ classNames(
 					treeProps.className,
 					'experimental-woocommerce-tree',
@@ -40,13 +39,7 @@ export const Tree = forwardRef( function ForwardedTree(
 				{ items.map( ( child, index ) => (
 					<TreeItem
 						{ ...treeItemProps }
-						getMenuProps={ props.getMenuProps }
-						getItemProps={ props.getItemProps }
 						isExpanded={ props.isExpanded }
-						listToFindOriginalIndex={
-							props.listToFindOriginalIndex
-						}
-						highlightedIndex={ props.highlightedIndex }
 						key={ child.data.value }
 						item={ child }
 						index={ index }

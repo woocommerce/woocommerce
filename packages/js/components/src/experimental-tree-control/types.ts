@@ -1,12 +1,3 @@
-/**
- * Internal dependencies
- */
-
-import {
-	getMenuPropsType,
-	getItemPropsType,
-} from '../experimental-select-control/types';
-
 export interface Item {
 	parent?: string;
 	value: string;
@@ -39,10 +30,6 @@ type BaseTreeProps = {
 	allowCreate?: boolean;
 	createValue?: string;
 	onCreateNew?: () => void;
-	getMenuProps?: getMenuPropsType;
-	getItemProps?: any;
-	highlightedIndex?: number;
-	listToFindOriginalIndex: any[];
 	isExpanded?: boolean;
 	/**
 	 * When `multiple` is true and a child item is selected, all its

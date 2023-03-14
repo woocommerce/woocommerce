@@ -32,33 +32,15 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 		ref,
 	} );
 
-	const originalIndex = props.listToFindOriginalIndex.findIndex(
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		( a: any ) => a.id === +item.data.value
-	);
-
 	return (
 		<li
 			{ ...treeItemProps }
-			{ ...( props.getItemProps &&
-				props.getItemProps( {
-					item: {
-						value: item.data.value,
-						label: item.data.label,
-					},
-					index: originalIndex,
-				} ) ) }
-			disabled={ props.isExpanded === false }
 			className={ classNames(
 				treeItemProps.className,
 				'experimental-woocommerce-tree-item',
 				{
 					'experimental-woocommerce-tree-item--highlighted':
 						isHighlighted,
-					'experimental-woocommerce-tree-item--focused':
-						props.highlightedIndex === originalIndex,
-					'experimental-woocommerce-tree-item--hidden':
-						props.isExpanded === false,
 				}
 			) }
 		>
@@ -112,14 +94,8 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				) }
 			</div>
 
-			{ Boolean( item.children.length ) && (
-				<Tree
-					{ ...treeProps }
-					isExpanded={ isExpanded }
-					highlightedIndex={ props.highlightedIndex }
-					getItemProps={ props.getItemProps }
-					listToFindOriginalIndex={ props.listToFindOriginalIndex }
-				/>
+			{ Boolean( item.children.length ) && isExpanded && (
+				<Tree { ...treeProps } />
 			) }
 		</li>
 	);
