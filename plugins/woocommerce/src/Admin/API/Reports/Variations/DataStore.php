@@ -119,12 +119,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function get_order_item_by_attribute_subquery( $query_args ) {
 		$order_product_lookup_table = self::get_db_table_name();
+		$order_items_table = 'orderitems';
 		$attribute_subqueries       = $this->get_attribute_subqueries( $query_args, $order_product_lookup_table );
 
 		if ( $attribute_subqueries['join'] && $attribute_subqueries['where'] ) {
 			// Perform a subquery for DISTINCT order items that match our attribute filters.
 			$attr_subquery = new SqlQuery( $this->context . '_attribute_subquery' );
-			$attr_subquery->add_sql_clause( 'select', "DISTINCT {$order_product_lookup_table}.order_item_id" );
+			$attr_subquery->add_sql_clause( 'select', "DISTINCT {$order_items_table}.order_item_id" );
 			$attr_subquery->add_sql_clause( 'from', $order_product_lookup_table );
 
 			if ( $this->should_exclude_simple_products( $query_args ) ) {
@@ -485,6 +486,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 				$variations_query = $this->subquery->get_query_statement();
 			}
+
+			error_log( $variations_query );
 
 			/* phpcs:disable WordPress.DB.PreparedSQL.NotPrepared */
 			$product_data = $wpdb->get_results(
