@@ -666,9 +666,11 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$this->assertEquals( array( 'SOMEWHERE', 'SOMEWHERE_ELSE' ), $results );
 	}
 
+	/**
+	 * Tests the `display_location` argument in `wc_get_price_to_display()`.
+	 */
 	public function test__price_to_display() {
-
-		// Enable taxes
+		// Enable taxes.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 
@@ -692,7 +694,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$product->set_regular_price( '100' );
 
-		// Display price included taxes at shop and cart
+		// Display price included taxes at shop and cart.
 		update_option( 'woocommerce_tax_display_cart', 'incl' );
 		update_option( 'woocommerce_tax_display_shop', 'incl' );
 
@@ -718,7 +720,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 120, $price_shop );
 
-		// Display price included taxes only at shop
+		// Display price included taxes only at shop.
 		update_option( 'woocommerce_tax_display_cart', 'excl' );
 		update_option( 'woocommerce_tax_display_shop', 'incl' );
 
@@ -744,7 +746,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 100, $price_shop );
 
-		// Display price included taxes only at cart
+		// Display price included taxes only at cart.
 		update_option( 'woocommerce_tax_display_cart', 'incl' );
 		update_option( 'woocommerce_tax_display_shop', 'excl' );
 
@@ -770,7 +772,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 120, $price_shop );
 
-		// Display price excluded taxes at shop and cart
+		// Display price excluded taxes at shop and cart.
 		update_option( 'woocommerce_tax_display_cart', 'excl' );
 		update_option( 'woocommerce_tax_display_shop', 'excl' );
 
