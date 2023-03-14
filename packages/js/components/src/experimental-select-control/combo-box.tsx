@@ -60,12 +60,14 @@ export const ComboBox = ( {
 					<input
 						{ ...inputProps }
 						ref={ ( node ) => {
-							inputRef.current = node;
-							(
-								inputProps.ref as unknown as (
-									node: HTMLInputElement | null
-								) => void
-							 )( node );
+							if ( false ) { // TODO
+								inputRef.current = node;
+								(
+									inputProps.ref as unknown as (
+										node: HTMLInputElement | null
+									) => void
+								 )( node );
+							}
 						} }
 					/>
 				</div>

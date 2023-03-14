@@ -7,20 +7,18 @@ import {
 	createElement,
 	Fragment,
 	useRef,
-	useEffect,
 } from '@wordpress/element';
 import {
 	selectControlStateChangeTypes,
 	Spinner,
 	__experimentalSelectControl as SelectControl,
-	__experimentalSelectControlMenuSlot as MenuSlot,
-	__experimentalSelectControlMenu as Menu,
 	__experimentalTreeControl as TreeControl,
 	TreeItem,
+	SelectTree,
 } from '@woocommerce/components';
-import { Product, ProductCategory } from '@woocommerce/data';
+import { ProductCategory } from '@woocommerce/data';
 import { debounce } from 'lodash';
-import { ComboboxControl, Popover } from '@wordpress/components';
+import { Popover } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -160,6 +158,44 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 
 	return (
 		<>
+			<SelectTree
+				multiple
+				shouldNotRecursivelySelect
+				allowCreate
+				createValue={ searchValue }
+				onCreateNew={ () => {
+					setShowCreateNewModal( true );
+				} }
+				items={ mapFromCategoryType( categoriesSelectList ) }
+				selected={ mapFromCategoryType( value ) }
+				onSelect={ ( selectedItems ) => {
+					if ( Array.isArray( selectedItems ) ) {
+						const newItems: ProductCategoryLinkedList[] =
+							mapToCategoryType(
+								selectedItems.filter(
+									( { value: selectedItemValue } ) =>
+										! value.some(
+											( item ) =>
+												item.id === +selectedItemValue
+										)
+								)
+							);
+						onChange( [ ...value, ...newItems ] );
+					}
+				} }
+				onRemove={ ( removedItems ) => {
+					if ( Array.isArray( removedItems ) ) {
+						const newValues = value.filter(
+							( item ) =>
+								! removedItems.some(
+									( { value: removedValue } ) =>
+										item.id === +removedValue
+								)
+						);
+						onChange( newValues );
+					}
+				} }
+			></SelectTree>
 			<SelectControl< ProductCategoryLinkedList >
 				className="woocommerce-category-field-dropdown components-base-control"
 				multiple

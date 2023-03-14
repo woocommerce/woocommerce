@@ -98,6 +98,7 @@ export {
 export {
 	TreeControl as __experimentalTreeControl,
 	Item as TreeItem,
+	SelectTree,
 } from './experimental-tree-control';
 export { default as TreeSelectControl } from './tree-select-control';
 
