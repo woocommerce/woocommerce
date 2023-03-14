@@ -90,7 +90,7 @@ const paymentGatewaySuggestionsWithoutWCPay = paymentGatewaySuggestions.filter(
 );
 
 describe( 'PaymentGatewaySuggestions', () => {
-	test( 'should render only WCPay if its suggested', () => {
+	test( 'should render all payment gateways, including WCPay', () => {
 		const onComplete = jest.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
@@ -129,7 +129,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		).toBe( true );
 	} );
 
-	test( 'should render all payment gateways if no WCPay', () => {
+	test( 'should render all payment gateways except WCPay', () => {
 		const onComplete = jest.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
