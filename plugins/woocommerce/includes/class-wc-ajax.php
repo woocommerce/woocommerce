@@ -1258,7 +1258,7 @@ class WC_AJAX {
 			$code = wc_format_coupon_code( wp_unslash( $coupon ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			if ( $order->remove_coupon( $code ) ) {
 				// translators: %s coupon code.
-				$order->add_order_note( sprintf( __( 'Coupon removed: "%s".', 'woocommerce' ), $code ), 0, true );
+				$order->add_order_note( esc_html( sprintf( __( 'Coupon removed: "%s".', 'woocommerce' ), $code ) ), 0, true );
 			}
 			$order->calculate_taxes( $calculate_tax_args );
 			$order->calculate_totals( false );
