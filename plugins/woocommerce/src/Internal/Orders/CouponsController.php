@@ -31,6 +31,11 @@ class CouponsController {
 			ob_start();
 			include __DIR__ . '/../../../includes/admin/meta-boxes/views/html-order-items.php';
 			$response['html'] = ob_get_clean();
+
+			ob_start();
+			$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+			include __DIR__ . '/../../../includes/admin/meta-boxes/views/html-order-notes.php';
+			$response['notes_html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
