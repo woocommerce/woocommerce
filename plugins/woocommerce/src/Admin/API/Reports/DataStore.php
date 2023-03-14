@@ -1375,7 +1375,7 @@ class DataStore extends SqlQuery {
 				if ( 'AND' === $match_operator || 1 === count( $sql_clauses['join'] ) ) {
 					$join_idx              = count( $sql_clauses['join'] );
 					$join_alias            = 'orderitemmeta' . $join_idx;
-					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_itemmeta as {$join_alias} ON {$join_alias}.order_item_id = orderitems.order_item_id";
+					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_itemmeta as {$join_alias} ON {$join_alias}.order_item_id = {$table_name}.order_item_id";
 				}
 
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
