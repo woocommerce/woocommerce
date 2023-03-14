@@ -8,7 +8,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { CustomerEffortScore } from '../customer-effort-score';
+import { CustomerEffortScore } from '..';
 
 const noop = () => {};
 

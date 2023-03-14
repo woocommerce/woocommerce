@@ -10,7 +10,7 @@ import {
 	addCustomerEffortScoreExitPageListener,
 	addExitPage,
 	removeCustomerEffortScoreExitPageListener,
-} from './customer-effort-score-exit-page';
+} from '../../utils/customer-effort-score-exit-page';
 
 export const useCustomerEffortScoreExitPageTracker = (
 	pageId: string,

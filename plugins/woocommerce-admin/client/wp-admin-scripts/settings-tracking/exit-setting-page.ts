@@ -1,7 +1,11 @@
 /**
+ * External dependencies
+ */
+import { addCustomerEffortScoreExitPageListener } from '@woocommerce/customer-effort-score';
+
+/**
  * Internal dependencies
  */
-import { addCustomerEffortScoreExitPageListener } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 import { staticFormDataToObject } from '~/utils/static-form-helper';
 
 type FormElements = {

@@ -54,12 +54,9 @@ jest.mock( '@woocommerce/product-editor', () => {
 	};
 } );
 jest.mock( '~/hooks/usePreventLeavingPage' );
-jest.mock(
-	'~/customer-effort-score-tracks/use-customer-effort-score-exit-page-tracker',
-	() => ( {
-		useCustomerEffortScoreExitPageTracker: jest.fn(),
-	} )
-);
+jest.mock( '@woocommerce/customer-effort-score', () => ( {
+	useCustomerEffortScoreExitPageTracker: jest.fn(),
+} ) );
 
 describe( 'ProductFormActions', () => {
 	beforeEach( () => {
