@@ -3,13 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { SelectControl, TextControl } from '@wordpress/components';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import type { PickupLocation } from '../types';
-import StateControl from './state-control';
+import { countryStateOptions, states } from '../utils';
 
 const Form = ( {
 	formRef,
@@ -20,11 +19,7 @@ const Form = ( {
 	values: PickupLocation;
 	setValues: React.Dispatch< React.SetStateAction< PickupLocation > >;
 } ) => {
-	const countries = getSetting< Record< string, string > >( 'countries', [] );
-	const states = getSetting< Record< string, Record< string, string > > >(
-		'countryStates',
-		[]
-	);
+	const { country: selectedCountry, state: selectedState } = values.address;
 	const setLocationField =
 		( field: keyof PickupLocation ) => ( newValue: string | boolean ) => {
 			setValues( ( prevValue: PickupLocation ) => ( {
@@ -44,6 +39,10 @@ const Form = ( {
 				},
 			} ) );
 		};
+
+	const countryHasStates =
+		states[ selectedCountry ] &&
+		Object.keys( states[ selectedCountry ] ).length > 0;
 
 	return (
 		<form ref={ formRef }>
@@ -97,42 +96,77 @@ const Form = ( {
 				onChange={ setLocationAddressField( 'postcode' ) }
 				autoComplete="off"
 			/>
-			<StateControl
-				label={ __( 'State', 'woo-gutenberg-products-block' ) }
-				name={ 'location_state' }
-				hideLabelFromVision={ true }
-				placeholder={ __( 'State', 'woo-gutenberg-products-block' ) }
-				value={ values.address.state }
-				onChange={ setLocationAddressField( 'state' ) }
-				autoComplete="off"
-				states={ states }
-				currentCountry={ values.address.country }
-			/>
+			{ ! countryHasStates && (
+				<TextControl
+					placeholder={ __(
+						'State',
+						'woo-gutenberg-products-block'
+					) }
+					value={ selectedState }
+					onChange={ setLocationAddressField( 'state' ) }
+				/>
+			) }
 			<SelectControl
-				label={ __( 'Country', 'woo-gutenberg-products-block' ) }
-				name={ 'location_country' }
+				name="location_country_state"
+				label={ __(
+					'Country / State',
+					'woo-gutenberg-products-block'
+				) }
 				hideLabelFromVision={ true }
-				placeholder={ __( 'Country', 'woo-gutenberg-products-block' ) }
-				value={ values.address.country }
+				placeholder={ __(
+					'Country / State',
+					'woo-gutenberg-products-block'
+				) }
+				value={ ( () => {
+					if ( ! selectedState && countryHasStates ) {
+						return `${ selectedCountry }:${
+							Object.keys( states[ selectedCountry ] )[ 0 ]
+						}`;
+					}
+
+					return `${ selectedCountry }${
+						selectedState &&
+						states[ selectedCountry ]?.[ selectedState ]
+							? ':' + selectedState
+							: ''
+					}`;
+				} )() }
 				onChange={ ( val: string ) => {
-					setLocationAddressField( 'state' )( '' );
-					setLocationAddressField( 'country' )( val );
+					const [ country, state = '' ] = val.split( ':' );
+					setLocationAddressField( 'country' )( country );
+					setLocationAddressField( 'state' )( state );
 				} }
-				autoComplete="off"
-				options={ [
-					{
-						value: '',
-						disabled: true,
-						label: __( 'Country', 'woo-gutenberg-products-block' ),
-					},
-					...Object.entries( countries ).map(
-						( [ code, country ] ) => ( {
-							value: code,
-							label: country,
-						} )
-					),
-				] }
-			/>
+			>
+				{ countryStateOptions.options.map( ( option ) => {
+					if ( option.label ) {
+						return (
+							<optgroup
+								key={ option.label }
+								label={ option.label }
+							>
+								{ option.options.map( ( subOption ) => (
+									<option
+										key={ subOption.value }
+										value={ subOption.value }
+									>
+										{ subOption.label }
+									</option>
+								) ) }
+							</optgroup>
+						);
+					}
+
+					return (
+						<option
+							key={ option.options[ 0 ].value }
+							value={ option.options[ 0 ].value }
+						>
+							{ option.options[ 0 ].label }
+						</option>
+					);
+				} ) }
+			</SelectControl>
+
 			<TextControl
 				label={ __( 'Pickup details', 'woo-gutenberg-products-block' ) }
 				name={ 'pickup_details' }
