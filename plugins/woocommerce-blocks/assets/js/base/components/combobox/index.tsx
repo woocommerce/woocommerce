@@ -25,7 +25,7 @@ export interface ComboboxProps {
 	autoComplete?: string;
 	className?: string;
 	errorId: string | null;
-	errorMessage?: string;
+	errorMessage?: string | undefined;
 	id: string;
 	instanceId?: string;
 	label: string;

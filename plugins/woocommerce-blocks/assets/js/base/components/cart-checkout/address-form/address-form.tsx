@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ValidatedTextInput } from '@woocommerce/blocks-checkout';
+import { ValidatedTextInput, isPostcode } from '@woocommerce/blocks-checkout';
 import {
 	BillingCountryInput,
 	ShippingCountryInput,
@@ -144,6 +144,35 @@ const AddressForm = ( {
 
 	id = id || instanceId;
 
+	/**
+	 * Custom validation handler for fields with field specific handling.
+	 */
+	const customValidationHandler = (
+		inputObject: HTMLInputElement,
+		field: string,
+		customValues: {
+			country: string;
+		}
+	): boolean => {
+		if (
+			field === 'postcode' &&
+			customValues.country &&
+			! isPostcode( {
+				postcode: inputObject.value,
+				country: customValues.country,
+			} )
+		) {
+			inputObject.setCustomValidity(
+				__(
+					'Please enter a valid postcode',
+					'woo-gutenberg-products-block'
+				)
+			);
+			return false;
+		}
+		return true;
+	};
+
 	return (
 		<div id={ id } className="wc-block-components-address-form">
 			{ addressFormFields.map( ( field ) => {
@@ -229,8 +258,18 @@ const AddressForm = ( {
 						onChange={ ( newValue: string ) =>
 							onChange( {
 								...values,
-								[ field.key ]: newValue,
+								[ field.key ]:
+									field.key === 'postcode'
+										? newValue.trimStart().toUpperCase()
+										: newValue,
 							} )
+						}
+						customValidation={ ( inputObject: HTMLInputElement ) =>
+							customValidationHandler(
+								inputObject,
+								field.key,
+								values
+							)
 						}
 						errorMessage={ field.errorMessage }
 						required={ field.required }
