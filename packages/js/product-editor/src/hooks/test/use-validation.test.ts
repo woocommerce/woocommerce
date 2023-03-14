@@ -70,7 +70,7 @@ describe( 'useValidation', () => {
 
 		it( 'should lock the editor if validate rejects', async () => {
 			const { result, waitForNextUpdate } = renderHook( () =>
-				useValidation( 'product/name', () => Promise.resolve( false ) )
+				useValidation( 'product/name', () => Promise.reject() )
 			);
 
 			await waitForNextUpdate();

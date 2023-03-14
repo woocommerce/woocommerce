@@ -56,6 +56,7 @@ export function useValidation(
 				setIsValid( isValidationValid );
 			} )
 			.catch( () => {
+				lockPostSaving( lockName );
 				setIsValid( false );
 			} );
 	}, [ lockName, validate, lockPostSaving, unlockPostSaving ] );
