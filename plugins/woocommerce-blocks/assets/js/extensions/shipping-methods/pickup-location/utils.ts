@@ -3,6 +3,8 @@
  */
 import { cleanForSlug } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
+import { isObject } from '@woocommerce/types';
+import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
@@ -33,6 +35,7 @@ export const defaultSettings = {
 export const defaultReadyOnlySettings = {
 	hasLegacyPickup: false,
 	storeCountry: '',
+	storeState: '',
 };
 declare global {
 	const hydratedScreenSettings: {
@@ -65,3 +68,60 @@ export const getInitialPickupLocations = (): SortablePickupLocation[] =>
 
 export const readOnlySettings =
 	hydratedScreenSettings.readonlySettings || defaultReadyOnlySettings;
+
+export const countries = getSetting< Record< string, string > >(
+	'countries',
+	[]
+);
+export const states = getSetting< Record< string, Record< string, string > > >(
+	'countryStates',
+	[]
+);
+export const getUserFriendlyAddress = ( address: unknown ) => {
+	const updatedAddress = isObject( address ) && {
+		...address,
+		country:
+			typeof address.country === 'string' && countries[ address.country ],
+		state:
+			typeof address.country === 'string' &&
+			typeof address.state === 'string' &&
+			states[ address.country ]?.[ address.state ]
+				? states[ address.country ][ address.state ]
+				: address.state,
+	};
+
+	return Object.values( updatedAddress )
+		.filter( ( value ) => value !== '' )
+		.join( ', ' );
+};
+
+// Outputs the list of countries and states in a single dropdown select.
+const countryStateDropdownOptions = () => {
+	const countryStateOptions = Object.keys( countries ).map( ( country ) => {
+		const countryStates = states[ country ] || {};
+
+		if ( Object.keys( countryStates ).length === 0 ) {
+			return {
+				options: [
+					{
+						value: country,
+						label: countries[ country ],
+					},
+				],
+			};
+		}
+
+		const stateOptions = Object.keys( countryStates ).map( ( state ) => ( {
+			value: `${ country }:${ state }`,
+			label: `${ countries[ country ] } — ${ countryStates[ state ] }`,
+		} ) );
+		return {
+			label: countries[ country ],
+			options: [ ...stateOptions ],
+		};
+	} );
+	return {
+		options: countryStateOptions,
+	};
+};
+export const countryStateOptions = countryStateDropdownOptions();
