@@ -135,7 +135,7 @@ class WC_Order_Factory {
 
 		if ( $use_orders_cache ) {
 			foreach ( $result as $order_id => $order ) {
-				$order_cache->set( $order, $order->get_id( $order_id ) );
+				$order_cache->set( $order, $order->get_id() );
 			}
 			$result = array_replace( $result, $already_cached_orders );
 		}
