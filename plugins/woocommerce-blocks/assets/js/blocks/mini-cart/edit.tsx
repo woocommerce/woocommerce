@@ -14,6 +14,7 @@ import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { ReactElement } from 'react';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -23,6 +24,7 @@ import QuantityBadge from './quantity-badge';
 interface Attributes {
 	addToCartBehaviour: string;
 	hasHiddenPrice: boolean;
+	cartAndCheckoutRenderStyle: boolean;
 }
 
 interface Props {
@@ -31,10 +33,13 @@ interface Props {
 }
 
 const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
-	const { addToCartBehaviour, hasHiddenPrice } = attributes;
+	const { addToCartBehaviour, hasHiddenPrice, cartAndCheckoutRenderStyle } =
+		attributes;
 	const blockProps = useBlockProps( {
 		className: `wc-block-mini-cart`,
 	} );
+
+	const isSiteEditor = useSelect( 'core/edit-site' ) !== undefined;
 
 	const templatePartEditUri = getSetting(
 		'templatePartEditUri',
@@ -54,6 +59,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					) }
 				>
 					<ToggleGroupControl
+						className="wc-block-mini-cart__add-to-cart-behaviour-toggle"
 						label={ __(
 							'Add-to-Cart behaviour',
 							'woo-gutenberg-products-block'
@@ -98,6 +104,40 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							} )
 						}
 					/>
+					{ isSiteEditor && (
+						<ToggleGroupControl
+							className="wc-block-mini-cart__render-in-cart-and-checkout-toggle"
+							label={ __(
+								'Mini Cart in cart and checkout pages',
+								'woo-gutenberg-products-block'
+							) }
+							value={ cartAndCheckoutRenderStyle }
+							onChange={ ( value ) => {
+								setAttributes( {
+									cartAndCheckoutRenderStyle: value,
+								} );
+							} }
+							help={ __(
+								'Select how the Mini Cart behaves in the Cart and Checkout pages. This might affect the header layout.',
+								'woo-gutenberg-products-block'
+							) }
+						>
+							<ToggleGroupControlOption
+								value={ 'hidden' }
+								label={ __(
+									'Hide',
+									'woo-gutenberg-products-block'
+								) }
+							/>
+							<ToggleGroupControlOption
+								value={ 'removed' }
+								label={ __(
+									'Remove',
+									'woo-gutenberg-products-block'
+								) }
+							/>
+						</ToggleGroupControl>
+					) }
 				</PanelBody>
 				{ templatePartEditUri && (
 					<PanelBody
