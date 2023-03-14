@@ -6,10 +6,7 @@ import { createElement, useContext, Fragment } from '@wordpress/element';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { useBlockProps } from '@wordpress/block-editor';
-import {
-	// @ts-expect-error missing prop.
-	useEntityProp,
-} from '@wordpress/core-data';
+import { useEntityProp } from '@wordpress/core-data';
 import { BlockAttributes } from '@wordpress/blocks';
 import { CurrencyContext } from '@woocommerce/currency';
 import { getSetting } from '@woocommerce/settings';
@@ -29,7 +26,7 @@ import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
 export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	const blockProps = useBlockProps();
 	const { name, label, showPricingSection = false } = attributes;
-	const [ regularPrice, setRegularPrice ] = useEntityProp(
+	const [ regularPrice, setRegularPrice ] = useEntityProp< string >(
 		'postType',
 		'product',
 		name

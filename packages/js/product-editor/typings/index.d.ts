@@ -7,3 +7,12 @@ declare module '@woocommerce/settings' {
 			typeof val !== 'undefined' ? val : fb
 	): T;
 }
+
+declare module '@wordpress/core-data' {
+	function useEntityProp< T = unknown >(
+		kind: string,
+		name: string,
+		prop: string,
+		id?: string
+	): [ T, ( value: T ) => void, T ];
+}

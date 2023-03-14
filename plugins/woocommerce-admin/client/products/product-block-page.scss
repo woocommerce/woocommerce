@@ -1,43 +1,43 @@
 .woocommerce-product-block-editor {
-    .components-input-control {
-        &__prefix {
-            margin-left: $gap-smaller;
-        }
+	.components-input-control {
+		&__prefix {
+			margin-left: $gap-smaller;
+		}
 
-        &__suffix {
-            margin-right: $gap-smaller;
-        }
-    }
+		&__suffix {
+			margin-right: $gap-smaller;
+		}
+	}
 
-    .components-currency-control {
-        .components-input-control__prefix {
-            color: $gray-700;
-        }
+	.components-currency-control {
+		.components-input-control__prefix {
+			color: $gray-700;
+		}
 
-        .components-input-control__input {
-            text-align: right;
-        }
-    }
+		.components-input-control__input {
+			text-align: right;
+		}
+	}
 
-    .woocommerce-product-form {
-        &__custom-label-input {
-            display: flex;
-            flex-direction: column;
+	.woocommerce-product-form {
+		&__custom-label-input {
+			display: flex;
+			flex-direction: column;
 
-            label {
-                display: block;
-                margin-bottom: $gap-smaller;
-            }
-        }
+			label {
+				display: block;
+				margin-bottom: $gap-smaller;
+			}
+		}
 
-        &__optional-input {
-            color: $gray-700;
-        }
+		&__optional-input {
+			color: $gray-700;
+		}
 
-        &__secondary-text {
-            font-size: 12px;
-            color: $gray-700;
-            margin-top: $gap-smaller;
-        }
-    }
+		&__secondary-text {
+			font-size: 12px;
+			color: $gray-700;
+			margin-top: $gap-smaller;
+		}
+	}
 }
