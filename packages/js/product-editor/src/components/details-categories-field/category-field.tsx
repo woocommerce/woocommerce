@@ -10,7 +10,6 @@ import {
 } from '@wordpress/element';
 import {
 	selectControlStateChangeTypes,
-	Spinner,
 	__experimentalSelectControl as SelectControl,
 	__experimentalTreeControl as TreeControl,
 	TreeItem,
@@ -23,13 +22,12 @@ import { Popover } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { CategoryFieldItem, CategoryTreeItem } from './category-field-item';
+import { CategoryTreeItem } from './category-field-item';
 import {
 	useCategorySearch,
 	ProductCategoryLinkedList,
 } from './use-category-search';
 import { CreateCategoryModal } from './create-category-modal';
-import { CategoryFieldAddNewItem } from './category-field-add-new-item';
 
 type CategoryFieldProps = {
 	label: string;
@@ -163,6 +161,10 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 				shouldNotRecursivelySelect
 				allowCreate
 				createValue={ searchValue }
+				label={ label }
+				onInputChange={ searchDelayed }
+				getFilteredItems={ categoryFieldGetFilteredItems }
+				placeholder={ value.length === 0 ? placeholder : '' }
 				onCreateNew={ () => {
 					setShowCreateNewModal( true );
 				} }
