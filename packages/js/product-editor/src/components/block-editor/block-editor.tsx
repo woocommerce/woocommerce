@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { Template } from '@wordpress/blocks';
+import {
+	BlockInstance,
+	synchronizeBlocksWithTemplate,
+	Template,
+} from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -57,6 +61,7 @@ export function BlockEditor( {
 	settings: _settings,
 	product,
 }: BlockEditorProps ) {
+	const [ blocks, updateBlocks ] = useState< BlockInstance[] >();
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
 
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -95,13 +100,16 @@ export function BlockEditor( {
 
 	useLayoutEffect( () => {
 		setupEditor( product, {}, _settings?.template );
+		updateBlocks(
+			synchronizeBlocksWithTemplate( [], _settings?.template )
+		);
 
 		return () => {
 			__experimentalTearDownEditor();
 		};
 	}, [] );
 
-	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
+	const [ , onInput, onChange ] = useEntityBlockEditor(
 		'postType',
 		'product',
 		{ id: product.id }
