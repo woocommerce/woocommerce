@@ -365,7 +365,8 @@ class WC_Post_Types {
 					'has_archive'         => $has_archive,
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
-					'rest_namespace'      => 'wp/v3',
+					'rest_base'           => 'products',
+					'rest_namespace'      => 'wc/v3',
 					'template'            => array(
 						array(
 							'woocommerce/product-tab',
@@ -423,6 +424,12 @@ class WC_Post_Types {
 										),
 									),
 								),
+							),
+						),
+						array(
+							'woocommerce/product-list-price',
+							array(
+								'name' => 'Product list price',
 							),
 						),
 					),
