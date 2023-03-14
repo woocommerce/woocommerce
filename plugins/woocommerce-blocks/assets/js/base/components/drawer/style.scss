@@ -119,6 +119,7 @@ $drawer-width-mobile: 100vw;
 		color: inherit;
 		position: absolute;
 		opacity: 0.6;
+		z-index: 2;
 		// The SVG has some white spacing around, thus we have to set this magic number.
 		right: 8px;
 		top: 0;
