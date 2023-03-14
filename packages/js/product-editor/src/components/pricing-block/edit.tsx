@@ -10,6 +10,7 @@ import {
 	// @ts-expect-error missing prop.
 	useEntityProp,
 } from '@wordpress/core-data';
+import { BlockAttributes } from '@wordpress/blocks';
 import { CurrencyContext } from '@woocommerce/currency';
 import { getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
@@ -25,12 +26,13 @@ import {
 import { formatCurrencyDisplayValue } from '../../utils';
 import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
 
-export function Edit() {
+export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	const blockProps = useBlockProps();
+	const { name, label, showPricingSection = false } = attributes;
 	const [ regularPrice, setRegularPrice ] = useEntityProp(
 		'postType',
 		'product',
-		'regular_price'
+		name
 	);
 	const context = useContext( CurrencyContext );
 	const { getCurrencyConfig, formatAmount } = context;
@@ -40,35 +42,40 @@ export function Edit() {
 		setValue: setRegularPrice,
 	} );
 
-	const taxSettingsElement = interpolateComponents( {
-		mixedString: 'Manage more settings in {{link}}Pricing.{{/link}}',
-		components: {
-			link: (
-				<Link
-					href={ `${ getSetting(
-						'adminUrl'
-					) }admin.php?page=wc-settings&tab=tax` }
-					target="_blank"
-					type="external"
-					onClick={ () => {
-						recordEvent(
-							'product_pricing_list_price_help_tax_settings_click'
-						);
-					} }
-				>
-					<></>
-				</Link>
-			),
-		},
-	} );
+	const taxSettingsElement = showPricingSection
+		? interpolateComponents( {
+				mixedString: __(
+					'Manage more settings in {{link}}Pricing.{{/link}}',
+					'woocommerce'
+				),
+				components: {
+					link: (
+						<Link
+							href={ `${ getSetting(
+								'adminUrl'
+							) }admin.php?page=wc-settings&tab=tax` }
+							target="_blank"
+							type="external"
+							onClick={ () => {
+								recordEvent(
+									'product_pricing_list_price_help_tax_settings_click'
+								);
+							} }
+						>
+							<></>
+						</Link>
+					),
+				},
+		  } )
+		: null;
 
 	return (
 		<div { ...blockProps }>
-			<BaseControl id="product_pricing_regular_price" help={ '' }>
+			<BaseControl id={ 'product_pricing_' + name } help={ '' }>
 				<InputControl
-					name="regular_price"
+					name={ name }
 					onChange={ setRegularPrice }
-					label={ __( 'List price', 'woocommerce' ) }
+					label={ label || __( 'Price', 'woocommerce' ) }
 					value={ formatCurrencyDisplayValue(
 						String( regularPrice ),
 						currencyConfig,
@@ -77,9 +84,11 @@ export function Edit() {
 					{ ...inputProps }
 				/>
 			</BaseControl>
-			<span className="woocommerce-product-form__secondary-text">
-				{ taxSettingsElement }
-			</span>
+			{ taxSettingsElement && (
+				<span className="woocommerce-product-form__secondary-text">
+					{ taxSettingsElement }
+				</span>
+			) }
 		</div>
 	);
 }

@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { initBlock } from '../../utils/init-block';
+import { initBlock } from '../../utils';
 import metadata from './block.json';
 import { Edit } from './edit';
 

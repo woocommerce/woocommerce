@@ -1,15 +1,21 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/product-list-price",
-	"description": "The product list price.",
-	"title": "Product list price",
+	"name": "woocommerce/product-pricing",
+	"description": "A product price block with currency display.",
+	"title": "Product pricing",
 	"category": "widgets",
 	"keywords": [ "products", "price" ],
 	"textdomain": "default",
 	"attributes": {
 		"name": {
 			"type": "string"
+		},
+		"label": {
+			"type": "string"
+		},
+		"showPricingSection": {
+			"type": "boolean"
 		}
 	},
 	"supports": {
