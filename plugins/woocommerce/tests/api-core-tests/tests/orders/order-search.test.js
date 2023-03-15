@@ -58,11 +58,13 @@ const searchParams = [
  */
 test.describe( 'Order Search API tests', () => {
 	test.beforeAll( async ( { request } ) => {
-		//Create a product to be associated with the order
+		// Create a product to be associated with the order
 		const productResponse = await request.post('wp-json/wc/v3/products', {
 			data: simpleProduct,
 		});
 		const productResponseJSON = await productResponse.json();
+
+		// Save the created product id against the order line_items
 		order.line_items[0].product_id = productResponseJSON.id;
 
 		// Create an order and save its ID
