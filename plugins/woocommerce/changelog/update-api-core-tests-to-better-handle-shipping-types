@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update playwright api-core-tests to handle cases where extensions add to shipping methods
