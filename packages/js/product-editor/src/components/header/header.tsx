@@ -13,6 +13,11 @@ import { navigateTo, getNewPath } from '@woocommerce/navigation';
  */
 import { AUTO_DRAFT_NAME, getHeaderTitle } from '../../utils';
 
+/**
+ * Internal dependencies
+ */
+import { MoreMenu } from './more-menu';
+
 export type HeaderProps = {
 	productId: number;
 	productName: string;
@@ -85,6 +90,7 @@ export function Header( { productId, productName }: HeaderProps ) {
 						? __( 'Add', 'woocommerce' )
 						: __( 'Save', 'woocommerce' ) }
 				</Button>
+				<MoreMenu />
 			</div>
 		</div>
 	);

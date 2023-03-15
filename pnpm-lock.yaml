@@ -1372,6 +1372,7 @@ importers:
       '@types/wordpress__data': ^6.0.2
       '@types/wordpress__editor': ^13.0.0
       '@types/wordpress__media-utils': ^3.0.0
+      '@types/wordpress__plugins': ^3.0.0
       '@woocommerce/components': workspace:*
       '@woocommerce/currency': workspace:*
       '@woocommerce/data': workspace:^4.1.0
@@ -1396,6 +1397,7 @@ importers:
       '@wordpress/interface': wp-6.0
       '@wordpress/keyboard-shortcuts': wp-6.0
       '@wordpress/media-utils': wp-6.0
+      '@wordpress/plugins': ^4.4.3
       '@wordpress/url': wp-6.0
       classnames: ^2.3.1
       concurrently: ^7.0.0
@@ -1441,6 +1443,7 @@ importers:
       '@wordpress/interface': 4.5.6_tufdcic6wklrwyy3rhbsbktylu
       '@wordpress/keyboard-shortcuts': 3.4.1_react@17.0.2
       '@wordpress/media-utils': 3.4.1
+      '@wordpress/plugins': 4.4.3_react@17.0.2
       '@wordpress/url': 3.7.1
       classnames: 2.3.1
       lodash: 4.17.21
@@ -1455,6 +1458,7 @@ importers:
       '@types/wordpress__data': 6.0.2
       '@types/wordpress__editor': 13.0.0_sfoxds7t5ydpegc3knd667wn6m
       '@types/wordpress__media-utils': 3.0.0_sfoxds7t5ydpegc3knd667wn6m
+      '@types/wordpress__plugins': 3.0.0_sfoxds7t5ydpegc3knd667wn6m
       '@woocommerce/eslint-plugin': link:../eslint-plugin
       '@woocommerce/internal-style-build': link:../internal-style-build
       '@wordpress/browserslist-config': 4.1.3
@@ -27091,7 +27095,7 @@ packages:
       mute-stream: 0.0.8
       ora: 5.4.1
       run-async: 2.4.1
-      rxjs: 7.5.5
+      rxjs: 7.8.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
       through: 2.3.8
@@ -36816,12 +36820,6 @@ packages:
     engines: {npm: '>=2.0.0'}
     dependencies:
       tslib: 1.14.1
-
-  /rxjs/7.5.5:
-    resolution: {integrity: sha512-sy+H0pQofO95VDmFLzyaw9xNJU4KTRSwQIGM6+iG3SypAtCiLDzpeG8sJrNCWn2Up9km+KhkvTdbkrdy+yzZdw==}
-    dependencies:
-      tslib: 2.5.0
-    dev: true
 
   /rxjs/7.8.0:
     resolution: {integrity: sha512-F2+gxDshqmIub1KdvZkaEfGDwLNpPvk9Fs6LD/MyQxNgMds/WH9OdDDXOmxUZpME+iSK3rQCctkL0DYyytUqMg==}
