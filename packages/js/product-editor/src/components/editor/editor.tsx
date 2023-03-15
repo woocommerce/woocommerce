@@ -26,7 +26,6 @@ import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
  * Internal dependencies
  */
 import { Header } from '../header';
-import { Sidebar } from '../sidebar';
 import { BlockEditor } from '../block-editor';
 import { initBlocks } from './init-blocks';
 
@@ -48,7 +47,6 @@ export function Editor( { product, settings }: EditorProps ) {
 					<SlotFillProvider>
 						<InterfaceSkeleton
 							header={ <Header title={ product.name } /> }
-							sidebar={ <Sidebar /> }
 							content={
 								<BlockEditor
 									settings={ settings }

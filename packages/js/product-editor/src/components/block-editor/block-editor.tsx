@@ -14,9 +14,6 @@ import { uploadMedia } from '@wordpress/media-utils';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
-	BlockBreadcrumb,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
 	BlockContextProvider,
 	BlockEditorKeyboardShortcuts,
 	BlockEditorProvider,
@@ -24,7 +21,6 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	BlockTools,
-	BlockInspector,
 	EditorSettings,
 	EditorBlockListSettings,
 	WritingFlow,
@@ -41,7 +37,6 @@ import {
 /**
  * Internal dependencies
  */
-import { Sidebar } from '../sidebar';
 import { Tabs } from '../tabs';
 
 type BlockEditorProps = {
@@ -115,10 +110,6 @@ export function BlockEditor( {
 					settings={ settings }
 				>
 					<Tabs onChange={ setSelectedTab } />
-					<BlockBreadcrumb />
-					<Sidebar.InspectorFill>
-						<BlockInspector />
-					</Sidebar.InspectorFill>
 					<div className="editor-styles-wrapper">
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 						{ /* @ts-ignore No types for this exist yet. */ }
