@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Replace woocommerce-blocks textdomain in *.ts, *.tsx and *.json files
