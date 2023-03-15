@@ -11,7 +11,9 @@ import * as actions from './actions';
 import * as resolvers from './resolvers';
 import * as selectors from './selectors';
 import reducer from './reducer';
-import { STORE_KEY } from './constants';
+import { QUEUE_OPTION_NAME, STORE_KEY } from './constants';
+
+export { QUEUE_OPTION_NAME, STORE_KEY };
 
 export default registerStore( STORE_KEY, {
 	actions,
