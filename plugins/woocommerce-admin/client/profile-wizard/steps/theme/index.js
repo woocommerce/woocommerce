@@ -83,7 +83,9 @@ class Theme extends Component {
 
 	skipStep() {
 		const { activeTheme = '' } = getAdminSetting( 'onboarding', {} );
-		recordEvent( 'storeprofiler_store_theme_skip_step', { activeTheme } );
+		recordEvent( 'storeprofiler_store_theme_skip_step', {
+			active_theme: activeTheme,
+		} );
 		this.props.goToNextStep();
 	}
 
