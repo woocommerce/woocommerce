@@ -94,7 +94,7 @@ export function useTreeItem( {
 			multiple: selection.multiple,
 			selected: selection.selected,
 			role: 'group',
-			'aria-label': item.data.label,
+			'aria-label': item.data.name,
 			getItemLabel: getLabel,
 			shouldItemBeExpanded,
 			shouldItemBeHighlighted,

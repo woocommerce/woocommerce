@@ -74,13 +74,13 @@ function mapFromCategoryType(
 	return categories.map( ( val ) =>
 		val.parent
 			? {
-					value: String( val.id ),
-					label: val.name,
+					id: String( val.id ),
+					name: val.name,
 					parent: String( val.parent ),
 			  }
 			: {
-					value: String( val.id ),
-					label: val.name,
+					id: String( val.id ),
+					name: val.name,
 			  }
 	);
 }
@@ -89,8 +89,8 @@ function mapToCategoryType(
 	categories: TreeItem[]
 ): ProductCategoryLinkedList[] {
 	return categories.map( ( cat ) => ( {
-		id: +cat.value,
-		name: cat.label,
+		id: +cat.id,
+		name: cat.name,
 		parent: cat.parent ? +cat.parent : 0,
 	} ) );
 }
@@ -175,7 +175,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 						const newItems: ProductCategoryLinkedList[] =
 							mapToCategoryType(
 								selectedItems.filter(
-									( { value: selectedItemValue } ) =>
+									( { id: selectedItemValue } ) =>
 										! value.some(
 											( item ) =>
 												item.id === +selectedItemValue
@@ -190,12 +190,12 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 						? value.filter(
 								( item ) =>
 									! removedItems.some(
-										( { value: removedValue } ) =>
+										( { id: removedValue } ) =>
 											item.id === +removedValue
 									)
 						  )
 						: value.filter(
-								( item ) => item.id !== +removedItems.value
+								( item ) => item.id !== +removedItems.id
 						  );
 					onChange( newValues );
 				} }

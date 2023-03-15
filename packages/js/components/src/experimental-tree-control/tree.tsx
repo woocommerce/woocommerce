@@ -24,7 +24,7 @@ export const Tree = forwardRef( function ForwardedTree(
 	} );
 
 	const createValueExists =
-		items.findIndex( ( i ) => i.data.label === props.createValue ) !== -1;
+		items.findIndex( ( i ) => i.data.name === props.createValue ) !== -1;
 
 	return (
 		<>
@@ -40,7 +40,7 @@ export const Tree = forwardRef( function ForwardedTree(
 					<TreeItem
 						{ ...treeItemProps }
 						isExpanded={ props.isExpanded }
-						key={ child.data.value }
+						key={ child.data.id }
 						item={ child }
 						index={ index }
 					/>
