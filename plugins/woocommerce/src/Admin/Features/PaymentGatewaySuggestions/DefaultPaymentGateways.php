@@ -157,6 +157,17 @@ class DefaultPaymentGateways {
 				'is_offline'  => true,
 			),
 			array(
+				'id'          => 'cod',
+				'title'       => __( 'Cash on delivery', 'woocommerce' ),
+				'content'     => __( 'Take payments in cash upon delivery.', 'woocommerce' ),
+				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/cod.svg',
+				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/cod.png',
+				'is_visible'  => array(
+					self::get_rules_for_cbd( false ),
+				),
+				'is_offline'  => true,
+			),
+			array(
 				'id'                  => 'eway',
 				'title'               => __( 'Eway', 'woocommerce' ),
 				'content'             => __( 'The Eway extension for WooCommerce allows you to take credit card payments directly on your store without redirecting your customers to a third party site to make payment.', 'woocommerce' ),
@@ -521,17 +532,6 @@ class DefaultPaymentGateways {
 					'JP',
 				),
 				'category_additional' => array(),
-			),
-			array(
-				'id'          => 'cod',
-				'title'       => __( 'Cash on delivery', 'woocommerce' ),
-				'content'     => __( 'Take payments in cash upon delivery.', 'woocommerce' ),
-				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/cod.svg',
-				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/cod.png',
-				'is_visible'  => array(
-					self::get_rules_for_cbd( false ),
-				),
-				'is_offline'  => true,
 			),
 			array(
 				'id'                  => 'stripe',
