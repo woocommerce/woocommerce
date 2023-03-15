@@ -29,6 +29,16 @@ class WC_Settings_Tracking {
 	protected $updated_options = array();
 
 	/**
+	 * Toggled options.
+	 *
+	 * @var array
+	 */
+	protected $toggled_options = array(
+		'enabled' => array(),
+		'disabled' => array()
+	);
+
+	/**
 	 * Init tracking.
 	 */
 	public function init() {
@@ -81,6 +91,12 @@ class WC_Settings_Tracking {
 			return;
 		}
 
+		// Check and save toggled options.
+		if ( in_array( $new_value, ['yes', 'no'] ) && in_array( $old_value, ['yes', 'no'] ) ) {
+			$option_state = $new_value === 'yes' ? 'enabled' : 'disabled';
+			$this->toggled_options[ $option_state ][] = $option_name;
+		}
+
 		$this->updated_options[] = $option_name;
 	}
 
@@ -97,6 +113,12 @@ class WC_Settings_Tracking {
 		$properties = array(
 			'settings' => implode( ',', $this->updated_options ),
 		);
+
+		foreach ( $this->toggled_options as $state => $options ) {
+            if ( ! empty( $options ) ) {
+                $properties[ $state ] = implode( ',', $options );
+            }
+        }
 
 		if ( isset( $current_tab ) ) {
 			$properties['tab'] = $current_tab;
