@@ -35,7 +35,7 @@ class WC_Settings_Tracking {
 	 */
 	protected $toggled_options = array(
 		'enabled' => array(),
-		'disabled' => array()
+		'disabled' => array(),
 	);
 
 	/**
@@ -92,8 +92,8 @@ class WC_Settings_Tracking {
 		}
 
 		// Check and save toggled options.
-		if ( in_array( $new_value, ['yes', 'no'] ) && in_array( $old_value, ['yes', 'no'] ) ) {
-			$option_state = $new_value === 'yes' ? 'enabled' : 'disabled';
+		if ( in_array( $new_value, array( 'yes', 'no' ), true ) && in_array( $old_value, array( 'yes', 'no' ), true ) ) {
+			$option_state                             = 'yes' === $new_value ? 'enabled' : 'disabled';
 			$this->toggled_options[ $option_state ][] = $option_name;
 		}
 
@@ -115,13 +115,13 @@ class WC_Settings_Tracking {
 		);
 
 		foreach ( $this->toggled_options as $state => $options ) {
-            if ( ! empty( $options ) ) {
-                $properties[ $state ] = implode( ',', $options );
-            }
+			if ( ! empty( $options ) ) {
+				$properties[ $state ] = implode( ',', $options );
+			}
         }
 
 		$properties['tab'] = $current_tab ?? '';
-        $properties['section'] = $current_section ?? '';
+		$properties['section'] = $current_section ?? '';
 
 		WC_Tracks::record_event( 'settings_change', $properties );
 	}
