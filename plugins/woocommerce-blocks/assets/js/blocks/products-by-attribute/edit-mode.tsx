@@ -55,7 +55,7 @@ export const ProductsByAttributeEditMode = (
 					selected={ blockAttributes.attributes }
 					onChange={ ( value = [] ) => {
 						const result = value.map(
-							( { id, attr_slug: attributeSlug } ) => ( {
+							( { id, value: attributeSlug } ) => ( {
 								id,
 								attr_slug: attributeSlug,
 							} )
