@@ -17,7 +17,7 @@ export function Edit( {
 }: {
 	attributes: BlockAttributes;
 	context?: {
-		selectedTab?: string;
+		selectedTab?: string | null;
 	};
 } ) {
 	const blockProps = useBlockProps();
