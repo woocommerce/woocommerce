@@ -34,7 +34,7 @@ class WC_Settings_Tracking {
 	 * @var array
 	 */
 	protected $toggled_options = array(
-		'enabled' => array(),
+		'enabled'  => array(),
 		'disabled' => array(),
 	);
 
@@ -118,9 +118,9 @@ class WC_Settings_Tracking {
 			if ( ! empty( $options ) ) {
 				$properties[ $state ] = implode( ',', $options );
 			}
-        }
+		}
 
-		$properties['tab'] = $current_tab ?? '';
+		$properties['tab']     = $current_tab ?? '';
 		$properties['section'] = $current_section ?? '';
 
 		WC_Tracks::record_event( 'settings_change', $properties );
