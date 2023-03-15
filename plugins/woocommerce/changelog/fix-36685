@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Handle date arguments in OrderTableQuery correctly by adjusting their timezones before running.
