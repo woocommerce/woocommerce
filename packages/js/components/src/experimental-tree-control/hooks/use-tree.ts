@@ -20,6 +20,7 @@ export function useTree( {
 	onSelect,
 	onRemove,
 	shouldNotRecursivelySelect,
+	createValue,
 	...props
 }: TreeProps ) {
 	return {
