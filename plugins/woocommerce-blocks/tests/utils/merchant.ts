@@ -100,10 +100,9 @@ export const merchant = {
 			'Collect from store'
 		);
 		await expect( page ).toSelect(
-			'select[name="location_country"]',
-			'US'
+			'select[name="location_country_state"]',
+			'United States (US) — California'
 		);
-		await expect( page ).toSelect( 'select[name="location_state"]', 'CA' );
 		await expect( page ).toClick( 'button', { text: 'Done' } );
 		await merchant.saveLocalPickupSettingsPageWithRefresh();
 	},
