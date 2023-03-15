@@ -1361,14 +1361,9 @@ importers:
   packages/js/product-editor:
     specifiers:
       '@automattic/interpolate-components': ^1.2.0
-      '@testing-library/jest-dom': ^5.16.2
       '@testing-library/react': ^12.1.3
-      '@testing-library/react-hooks': ^8.0.1
-      '@testing-library/user-event': ^13.5.0
-      '@types/jest': ^27.4.1
       '@types/lodash': ^4.14.179
       '@types/react': ^17.0.2
-      '@types/testing-library__jest-dom': ^5.14.3
       '@types/wordpress__block-editor': ^7.0.0
       '@types/wordpress__block-library': ^2.6.1
       '@types/wordpress__blocks': ^11.0.7
@@ -1422,12 +1417,7 @@ importers:
       webpack-cli: ^3.3.12
     dependencies:
       '@automattic/interpolate-components': 1.2.1_pxzommwrsowkd4kgag6q3sluym
-      '@testing-library/jest-dom': 5.16.2
-      '@testing-library/react-hooks': 8.0.1_hiunvzosbwliizyirxfy6hjyim
-      '@testing-library/user-event': 13.5.0_gzufz4q333be4gqfrvipwvqt6a
-      '@types/jest': 27.4.1
       '@types/lodash': 4.14.184
-      '@types/testing-library__jest-dom': 5.14.3
       '@types/wordpress__blocks': 11.0.7_sfoxds7t5ydpegc3knd667wn6m
       '@woocommerce/components': link:../components
       '@woocommerce/currency': link:../currency
@@ -1478,7 +1468,7 @@ importers:
       react-hooks^8.0.1: link:@testing-library/react-hooks^8.0.1
       rimraf: 3.0.2
       sass-loader: 10.2.1_webpack@5.70.0
-      ts-jest: 27.1.3_wfmhell6c5i72vvtgtvpmkkb6i
+      ts-jest: 27.1.3_77oryishcckaigojnzbhxsiona
       typescript: 4.8.4
       webpack: 5.70.0_webpack-cli@3.3.12
       webpack-cli: 3.3.12_webpack@5.70.0
@@ -2849,7 +2839,7 @@ packages:
       '@babel/compat-data': 7.19.3
       '@babel/core': 7.12.9
       '@babel/helper-validator-option': 7.18.6
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       semver: 6.3.0
 
   /@babel/helper-compilation-targets/7.17.7_@babel+core@7.17.8:
@@ -6261,7 +6251,7 @@ packages:
       '@babel/helper-module-imports': 7.16.0
       '@babel/helper-plugin-utils': 7.14.5
       '@babel/plugin-syntax-jsx': 7.16.0_@babel+core@7.16.12
-      '@babel/types': 7.19.3
+      '@babel/types': 7.16.0
     dev: false
 
   /@babel/plugin-transform-react-jsx/7.17.3_@babel+core@7.17.8:
@@ -13171,6 +13161,10 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-error-boundary: 3.1.4_react@17.0.2
+<<<<<<< HEAD
+=======
+    dev: true
+>>>>>>> b993b30c57 (Fix up frozen lock file)
 
   /@testing-library/react/12.1.4_sfoxds7t5ydpegc3knd667wn6m:
     resolution: {integrity: sha512-jiPKOm7vyUw311Hn/HlNQ9P8/lHNtArAx0PisXyFixDDvfl8DbD6EUdbshK5eqauvBSvzZd19itqQ9j3nferJA==}
@@ -13193,6 +13187,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.17.7
       '@testing-library/dom': 8.11.3
+    dev: true
 
   /@tootallnate/once/1.1.2:
     resolution: {integrity: sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==}
@@ -14868,7 +14863,7 @@ packages:
       '@wordpress/browserslist-config': 4.1.3
       '@wordpress/element': 4.20.0
       '@wordpress/warning': 2.28.0
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       core-js: 3.25.5
     transitivePeerDependencies:
       - supports-color
@@ -14928,7 +14923,7 @@ packages:
       '@wordpress/browserslist-config': 5.11.0
       '@wordpress/element': 5.5.0
       '@wordpress/warning': 2.28.0
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       core-js: 3.25.5
     transitivePeerDependencies:
       - supports-color
@@ -15095,7 +15090,7 @@ packages:
       '@wordpress/is-shallow-equal': 4.19.0
       '@wordpress/keyboard-shortcuts': 3.17.0_react@17.0.2
       '@wordpress/keycodes': 3.28.0
-      '@wordpress/notices': 3.28.0_react@17.0.2
+      '@wordpress/notices': 3.19.0_react@17.0.2
       '@wordpress/rich-text': 5.17.0_react@17.0.2
       '@wordpress/shortcode': 3.19.0
       '@wordpress/style-engine': 0.15.0
@@ -15148,7 +15143,7 @@ packages:
       '@wordpress/i18n': 4.28.0
       '@wordpress/icons': 9.19.0
       '@wordpress/keycodes': 3.28.0
-      '@wordpress/notices': 3.28.0_react@17.0.2
+      '@wordpress/notices': 3.19.0_react@17.0.2
       '@wordpress/primitives': 3.17.0
       '@wordpress/reusable-blocks': 3.17.0_vcke6catv4iqpjdw24uwvlzyyi
       '@wordpress/rich-text': 5.17.0_react@17.0.2
@@ -15729,6 +15724,7 @@ packages:
       mousetrap: 1.6.5
       react: 17.0.2
       use-memo-one: 1.1.2_react@17.0.2
+    dev: false
 
   /@wordpress/core-data/4.4.5_react@17.0.2:
     resolution: {integrity: sha512-vhMbz/Q3xEMWTSFMs0D6n93qFSOhUZr/EgtRhLGRHdjskfgegFTlx13HrhDZ+U3xzkv1b8mH1klk4aZX+f0B8Q==}
@@ -15937,6 +15933,7 @@ packages:
       redux: 4.2.0
       turbo-combine-reducers: 1.0.2
       use-memo-one: 1.1.2_react@17.0.2
+    dev: false
 
   /@wordpress/date/4.28.0:
     resolution: {integrity: sha512-NtKVryepjrYIKS1gRubCtJhcT++3KtiHuf9w1nNWnbY0Onk0pMQUXkZyVL2Bk1EZ3ylUx6S6k/TLOv0QVPxgzA==}
@@ -16768,6 +16765,17 @@ packages:
       lodash: 4.17.21
     dev: false
 
+  /@wordpress/notices/3.19.0_react@17.0.2:
+    resolution: {integrity: sha512-NXL5fpfUHPYd1AA9mq0e5xubBzRg1KblR0hXpzV7GBWf2ohM/417HJkBfbzC3HLONMkmuoWR0T9WexYP26qQqw==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.19.0
+      '@wordpress/a11y': 3.28.0
+      '@wordpress/data': 7.3.0_react@17.0.2
+      react: 17.0.2
+
   /@wordpress/notices/3.28.0_react@17.0.2:
     resolution: {integrity: sha512-XftApWHyLlf2vq6FLYiqACoG4CxDsRqc6zQSjOA5UHQooVPbSsbYXl4eadloPtMnJohlzjzvb0SEIafjMyxjCA==}
     engines: {node: '>=12'}
@@ -16777,6 +16785,7 @@ packages:
       '@wordpress/data': 8.5.0_react@17.0.2
     transitivePeerDependencies:
       - react
+    dev: false
 
   /@wordpress/notices/3.6.1_react@17.0.2:
     resolution: {integrity: sha512-S+hOO+4NJJzaqcqm+XPa6uuvt/pkYjRz20HK3xt8Srb+HjO87D3X5feYGQMxEx5ueJl72+5/uOZwmXKJR4pzog==}
@@ -16982,6 +16991,7 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.19.0
+    dev: false
 
   /@wordpress/react-i18n/3.8.0:
     resolution: {integrity: sha512-5jg7DY05jCWfzCZRt+VCT4cKn6mCZwQhQlJIApcuzUGT51tlLk/BwyxBMfnn5ZT5IVSp9YxedExycohNPXEPjg==}
@@ -18163,7 +18173,7 @@ packages:
     hasBin: true
     dependencies:
       browserslist: 3.2.8
-      caniuse-lite: 1.0.30001418
+      caniuse-lite: 1.0.30001146
       normalize-range: 0.1.2
       num2fraction: 1.2.2
       postcss: 6.0.23
@@ -19470,7 +19480,7 @@ packages:
     resolution: {integrity: sha512-WHVocJYavUwVgVViC0ORikPHQquXwVh939TaelZ4WDqpWgTX/FsGhl/+P4qBUAGcRvtOgDgC+xftNWWp2RUTAQ==}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001418
+      caniuse-lite: 1.0.30001146
       electron-to-chromium: 1.4.276
     dev: true
 
@@ -20832,7 +20842,7 @@ packages:
   /core-js-compat/3.19.1:
     resolution: {integrity: sha512-Q/VJ7jAF/y68+aUsQJ/afPOewdsGkDtcMb40J8MbuWKlK3Y+wtHq8bTHKPj2WKWLIqmS5JhHs4CzHtz6pT2W6g==}
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       semver: 7.0.0
 
   /core-js-compat/3.21.1:
@@ -21141,7 +21151,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.0
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@3.3.12
 
   /css-loader/5.2.7_webpack@5.70.0:
     resolution: {integrity: sha512-Q7mOvpBNBG7YrVGMxRxcBJZFL75o+cH2abNASdibkj/fffYD8qWbInZrD0S9ccI6vZclF3DsHE7njGlLtaHbhg==}
@@ -21222,7 +21232,7 @@ packages:
     engines: {node: '>= 6'}
 
   /css.escape/1.5.1:
-    resolution: {integrity: sha512-YUifsXXuknHlUsmlgyY0PKzgPOr7/FjCePfHNt0jxm83wHZi44VDMQ7/fGNkjY3/jV1MC+1CmZbaHzugyeRtpg==}
+    resolution: {integrity: sha1-QuJ9T6BK4y+TGktNQZH6nN3ul8s=}
 
   /css/3.0.0:
     resolution: {integrity: sha512-DG9pFfwOrzc+hawpmqX/dHYHJG+Bsdb0klhyi1sDneOgGOXy9wQIC8hzyVp1e4NRYDBdxcylvywPkkXCHAzTyQ==}
@@ -22828,7 +22838,7 @@ packages:
       has: 1.0.3
       is-core-module: 2.8.0
       is-glob: 4.0.3
-      minimatch: 3.1.2
+      minimatch: 3.0.4
       object.values: 1.1.5
       resolve: 1.20.0
       tsconfig-paths: 3.14.0
@@ -22859,7 +22869,7 @@ packages:
       has: 1.0.3
       is-core-module: 2.8.0
       is-glob: 4.0.3
-      minimatch: 3.1.2
+      minimatch: 3.0.4
       object.values: 1.1.5
       resolve: 1.20.0
       tsconfig-paths: 3.14.0
@@ -31422,7 +31432,6 @@ packages:
     resolution: {integrity: sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==}
     dependencies:
       brace-expansion: 1.1.11
-    dev: true
 
   /minimatch/3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
@@ -33795,7 +33804,7 @@ packages:
     resolution: {integrity: sha512-gKWmR5aUulSjbzOfD9AlJiHCGH6AEVLaM0AV+aSioxUDd16qXP1PCh8d1/BGVvpdWn8k/HiK7n6TjeoXN1F7DA==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       caniuse-api: 3.0.0
       has: 1.0.3
       postcss: 7.0.39
@@ -34944,6 +34953,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.19.0
       react: 17.0.2
+    dev: true
 
   /react-fast-compare/3.2.0:
     resolution: {integrity: sha512-rtGImPZ0YyLrscKI9xTpV8psd6I8VAtjKCzQDlzyDvqJA8XOW78TXYQwNRNd8g8JZnDu8q9Fu/1v4HPAVwVdHA==}
@@ -36460,7 +36470,7 @@ packages:
       neo-async: 2.6.2
       schema-utils: 3.1.1
       semver: 7.3.5
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@3.3.12
 
   /sass-loader/12.6.0_sass@1.49.9+webpack@5.70.0:
     resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
@@ -38422,7 +38432,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.8.1
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@3.3.12
     transitivePeerDependencies:
       - acorn
 
@@ -40542,7 +40552,7 @@ packages:
       '@webassemblyjs/wasm-parser': 1.11.1
       acorn: 8.8.1
       acorn-import-assertions: 1.8.0_acorn@8.8.1
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.9.2
       es-module-lexer: 0.9.3
@@ -40581,7 +40591,7 @@ packages:
       '@webassemblyjs/wasm-parser': 1.11.1
       acorn: 8.8.1
       acorn-import-assertions: 1.8.0_acorn@8.8.1
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.9.2
       es-module-lexer: 0.9.3
@@ -40662,7 +40672,7 @@ packages:
       '@webassemblyjs/wasm-parser': 1.11.1
       acorn: 8.8.1
       acorn-import-assertions: 1.8.0_acorn@8.8.1
-      browserslist: 4.21.4
+      browserslist: 4.19.3
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.9.2
       es-module-lexer: 0.9.3
