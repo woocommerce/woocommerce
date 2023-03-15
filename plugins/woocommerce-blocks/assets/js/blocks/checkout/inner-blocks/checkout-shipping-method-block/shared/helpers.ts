@@ -84,7 +84,7 @@ export function getLocalPickupPrices(
 					lowestRate: CartShippingPackageShippingRate | undefined,
 					currentRate: CartShippingPackageShippingRate
 				) => {
-					if ( hasCollectableRate( currentRate.method_id ) ) {
+					if ( ! hasCollectableRate( currentRate.method_id ) ) {
 						return lowestRate;
 					}
 					if (
@@ -102,7 +102,7 @@ export function getLocalPickupPrices(
 					highestRate: CartShippingPackageShippingRate | undefined,
 					currentRate: CartShippingPackageShippingRate
 				) => {
-					if ( hasCollectableRate( currentRate.method_id ) ) {
+					if ( ! hasCollectableRate( currentRate.method_id ) ) {
 						return highestRate;
 					}
 					if (

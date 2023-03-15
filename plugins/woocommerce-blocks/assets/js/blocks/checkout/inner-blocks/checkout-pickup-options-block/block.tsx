@@ -67,7 +67,7 @@ const renderPickupLocation = (
 	packageCount: number
 ): RadioControlOption => {
 	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
-		? option.price + option.taxes
+		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
 		: option.price;
 	const location = getPickupLocation( option );
 	const address = getPickupAddress( option );
