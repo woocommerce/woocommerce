@@ -66,7 +66,7 @@ export function BlockEditor( {
 
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore __experimentalTearDownEditor is not yet included in types package.
-	const { setupEditor, __experimentalTearDownEditor } =
+	const { setupEditorState, __experimentalTearDownEditor } =
 		useDispatch( 'core/editor' );
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
@@ -99,7 +99,7 @@ export function BlockEditor( {
 	}, [ canUserCreateMedia, _settings ] );
 
 	useLayoutEffect( () => {
-		setupEditor( product, {}, _settings?.template );
+		setupEditorState( product );
 		updateBlocks(
 			synchronizeBlocksWithTemplate( [], _settings?.template )
 		);
