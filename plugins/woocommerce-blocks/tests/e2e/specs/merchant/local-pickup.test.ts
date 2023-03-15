@@ -253,13 +253,10 @@ describe( `Local Pickup Settings`, () => {
 				'.components-modal__content input[name="location_city"]',
 				'New City'
 			);
+			// We merged the Country and State fields into the same field in the local pickup modal.
 			await page.select(
-				'.components-modal__content select[name="location_country"]',
+				'.components-modal__content select[name="location_country_state"]',
 				'United Kingdom (UK)'
-			);
-			await expect( page ).toFill(
-				'.components-modal__content input[name="location_state"]',
-				'New State'
 			);
 			await expect( page ).toFill(
 				'.components-modal__content input[name="location_postcode"]',
