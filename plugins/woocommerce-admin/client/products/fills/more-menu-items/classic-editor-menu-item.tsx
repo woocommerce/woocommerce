@@ -1,0 +1,73 @@
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { getAdminLink } from '@woocommerce/settings';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { MenuItem } from '@wordpress/components';
+
+/**
+ * Internal dependencies
+ */
+import { ClassicEditorIcon } from '../../images/classic-editor-icon';
+import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
+import { NEW_PRODUCT_MANAGEMENT } from '~/customer-effort-score-tracks/product-mvp-ces-footer';
+import { ALLOW_TRACKING_OPTION_NAME } from '~/customer-effort-score-tracks/constants';
+
+export const ClassicEditorMenuItem = ( {
+	onClose,
+	productId,
+}: {
+	productId: number;
+	onClose: () => void;
+} ) => {
+	const { showProductMVPFeedbackModal } = useDispatch( CES_STORE_KEY );
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+
+	const { allowTracking, resolving: isLoading } = useSelect( ( select ) => {
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
+
+		const allowTrackingOption =
+			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
+
+		const resolving = ! hasFinishedResolution( 'getOption', [
+			ALLOW_TRACKING_OPTION_NAME,
+		] );
+
+		return {
+			allowTracking: allowTrackingOption === 'yes',
+			resolving,
+		};
+	} );
+
+	const classEditorUrl = productId
+		? getAdminLink( `post.php?post=${ productId }&action=edit` )
+		: getAdminLink( 'post-new.php?post_type=product' );
+
+	if ( isLoading ) {
+		return null;
+	}
+
+	return (
+		<MenuItem
+			onClick={ () => {
+				if ( allowTracking ) {
+					updateOptions( {
+						[ NEW_PRODUCT_MANAGEMENT ]: 'no',
+					} );
+					showProductMVPFeedbackModal();
+					onClose();
+				} else {
+					window.location.href = classEditorUrl;
+					onClose();
+				}
+			} }
+			icon={ <ClassicEditorIcon /> }
+			iconPosition="right"
+		>
+			{ __( 'Use the classic editor', 'woocommerce' ) }
+		</MenuItem>
+	);
+};

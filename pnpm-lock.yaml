@@ -1383,6 +1383,7 @@ importers:
       '@types/wordpress__data': ^6.0.2
       '@types/wordpress__editor': ^13.0.0
       '@types/wordpress__media-utils': ^3.0.0
+      '@types/wordpress__plugins': ^3.0.0
       '@woocommerce/components': workspace:*
       '@woocommerce/currency': workspace:*
       '@woocommerce/data': workspace:^4.1.0
@@ -1407,6 +1408,7 @@ importers:
       '@wordpress/interface': wp-6.0
       '@wordpress/keyboard-shortcuts': wp-6.0
       '@wordpress/media-utils': wp-6.0
+      '@wordpress/plugins': ^4.4.3
       '@wordpress/url': wp-6.0
       classnames: ^2.3.1
       concurrently: ^7.0.0
@@ -1452,6 +1454,7 @@ importers:
       '@wordpress/interface': 4.5.6_eqi5qhcxfphl6j3pngzexvnehi
       '@wordpress/keyboard-shortcuts': 3.4.1_react@17.0.2
       '@wordpress/media-utils': 3.4.1
+      '@wordpress/plugins': 4.4.3_react@17.0.2
       '@wordpress/url': 3.7.1
       classnames: 2.3.1
       lodash: 4.17.21
@@ -1473,6 +1476,7 @@ importers:
       '@types/wordpress__data': 6.0.2
       '@types/wordpress__editor': 13.0.0_sfoxds7t5ydpegc3knd667wn6m
       '@types/wordpress__media-utils': 3.0.0_sfoxds7t5ydpegc3knd667wn6m
+      '@types/wordpress__plugins': 3.0.0_sfoxds7t5ydpegc3knd667wn6m
       '@woocommerce/eslint-plugin': link:../eslint-plugin
       '@woocommerce/internal-style-build': link:../internal-style-build
       '@wordpress/browserslist-config': 4.1.3
