@@ -52,7 +52,7 @@
 		"@wordpress/interface": "wp-6.0",
 		"@wordpress/keyboard-shortcuts": "wp-6.0",
 		"@wordpress/media-utils": "wp-6.0",
-		"@wordpress/plugins": "^4.4.3",
+		"@wordpress/plugins": "wp-6.0",
 		"@wordpress/url": "wp-6.0",
 		"classnames": "^2.3.1",
 		"lodash": "^4.17.21",
