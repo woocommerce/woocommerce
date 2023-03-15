@@ -30,7 +30,7 @@ interface ThisProps {
 	getItemValue?: getItemValueType< Item >;
 	label: string | JSX.Element;
 	onInputChange?: ( value: string | undefined ) => void;
-	getFilteredItems?: (
+	getFilteredItems: (
 		allItems: any,
 		inputValue: string,
 		selectedItems: any,
@@ -44,15 +44,22 @@ interface ThisProps {
 
 export const SelectTree = function SelectTree( {
 	items,
-	getItemLabel = ( item: any ) => item?.label || '',
-	getItemValue = ( item: any ) => item?.value || '',
+	getItemLabel = ( item: any ) => item?.name || '',
+	getItemValue = ( item: any ) => item?.id || '',
 	getSelectedItemProps,
+	getFilteredItems,
 	myRef: ref,
 	suffix = <SuffixIcon icon={ search } />,
 	placeholder,
 	...props
 }: TreeControlProps & ThisProps ) {
-	const linkedTree = useLinkedTree( items );
+	const filteredItems = getFilteredItems(
+		items,
+		props.createValue || '',
+		props.selected,
+		getItemLabel
+	);
+	const linkedTree = useLinkedTree( filteredItems );
 
 	const [ isFocused, setIsFocused ] = useState( false );
 
