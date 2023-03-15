@@ -18,9 +18,6 @@ import { getAdminLink } from '@woocommerce/settings';
  * Internal dependencies
  */
 import { getHistory } from './history';
-import * as navUtils from './index';
-
-// For the above, import the module into itself. Functions consumed from this import can be mocked in tests.
 
 // Expose history so all uses get the same history object.
 export { getHistory };
@@ -82,7 +79,7 @@ export function getNewPath(
  * @param {Object} query Query containing the parameters.
  * @return {Object} Object containing the persisted queries.
  */
-export const getPersistedQuery = ( query = navUtils.getQuery() ) => {
+export const getPersistedQuery = ( query = getQuery() ) => {
 	/**
 	 * Filter persisted queries. These query parameters remain in the url when other parameters are updated.
 	 *
@@ -229,7 +226,7 @@ export function getIdsFromQuery( queryString = '' ) {
  * @param {Object} query Query object.
  * @return {Array} List of search words.
  */
-export function getSearchWords( query = navUtils.getQuery() ) {
+export function getSearchWords( query = getQuery() ) {
 	if ( typeof query !== 'object' ) {
 		throw new Error(
 			'Invalid parameter passed to getSearchWords, it expects an object or no parameters.'
