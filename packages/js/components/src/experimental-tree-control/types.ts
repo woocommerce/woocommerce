@@ -63,6 +63,8 @@ type BaseTreeProps = {
 	 * @see {@link LinkedTree}
 	 */
 	shouldItemBeHighlighted?( item: LinkedTree ): boolean;
+
+	onTreeBlur?(): void;
 };
 
 export type TreeProps = BaseTreeProps &

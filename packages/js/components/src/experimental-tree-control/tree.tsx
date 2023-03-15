@@ -49,7 +49,14 @@ export const Tree = forwardRef( function ForwardedTree(
 			{ props.allowCreate && ! createValueExists && (
 				<Button
 					className="experimental-woocommerce-tree__button"
-					onClick={ () => props.onCreateNew && props.onCreateNew() }
+					onClick={ () => {
+						if ( props.onCreateNew ) {
+							props.onCreateNew();
+						}
+						if ( props.onTreeBlur ) {
+							props.onTreeBlur();
+						}
+					} }
 				>
 					<Icon icon={ plus } size={ 20 } />
 					{ props.createValue

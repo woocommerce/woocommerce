@@ -4,3 +4,12 @@
 		border-color: var( --wp-admin-theme-color );
 	}
 }
+
+.woocommerce-experimental-select-tree-control__dropdown {
+	display: block;
+}
+
+// That's the only way I could remove the padding from the @wordpress/components Dropdown.
+.woocommerce-experimental-select-tree-control__dropdown-content .components-popover__content {
+	padding: 0;
+}

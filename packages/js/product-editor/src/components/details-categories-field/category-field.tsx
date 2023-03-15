@@ -186,16 +186,18 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 					}
 				} }
 				onRemove={ ( removedItems ) => {
-					if ( Array.isArray( removedItems ) ) {
-						const newValues = value.filter(
-							( item ) =>
-								! removedItems.some(
-									( { value: removedValue } ) =>
-										item.id === +removedValue
-								)
-						);
-						onChange( newValues );
-					}
+					const newValues = Array.isArray( removedItems )
+						? value.filter(
+								( item ) =>
+									! removedItems.some(
+										( { value: removedValue } ) =>
+											item.id === +removedValue
+									)
+						  )
+						: value.filter(
+								( item ) => item.id !== +removedItems.value
+						  );
+					onChange( newValues );
 				} }
 			></SelectTree>
 			<SelectControl< ProductCategoryLinkedList >
