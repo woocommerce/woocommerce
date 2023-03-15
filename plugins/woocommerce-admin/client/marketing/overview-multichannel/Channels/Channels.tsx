@@ -76,7 +76,7 @@ export const Channels: React.FC< ChannelsProps > = ( {
 			{ /* Recommended channels section. */ }
 			{ recommendedChannels.length >= 1 && (
 				<div>
-					{ hasRegisteredChannels && (
+					{ !! hasRegisteredChannels && (
 						<>
 							<CardDivider />
 							<CardBody>
@@ -95,7 +95,7 @@ export const Channels: React.FC< ChannelsProps > = ( {
 							</CardBody>
 						</>
 					) }
-					{ expanded &&
+					{ !! expanded &&
 						recommendedChannels.map( ( el, idx ) => {
 							return (
 								<Fragment key={ el.plugin }>

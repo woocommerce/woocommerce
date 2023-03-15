@@ -22,7 +22,7 @@ const CouponsOverview = () => {
 
 	return (
 		<div className="woocommerce-marketing-coupons">
-			{ shouldShowExtensions && (
+			{ !! shouldShowExtensions && (
 				<RecommendedExtensions
 					title={ __(
 						'Recommended coupon extensions',
