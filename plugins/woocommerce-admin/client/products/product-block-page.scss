@@ -46,9 +46,7 @@
 	}
 
 	.wp-block-woocommerce-product-section {
-		> .block-editor-inner-blocks
-			> .block-editor-block-list__layout
-			> .wp-block:not(:first-child) {
+		> .block-editor-inner-blocks > .block-editor-block-list__layout > .wp-block:not(:first-child) {
 			margin-top: $gap-large;
 		}
 	}
