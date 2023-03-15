@@ -145,6 +145,9 @@ export const SelectTree = function SelectTree( {
 										) as HTMLInputElement
 									 ).focus();
 								}
+								if ( event.key === 'Tab' ) {
+									onClose();
+								}
 							},
 							onChange: ( event: any ) =>
 								props.onInputChange &&
