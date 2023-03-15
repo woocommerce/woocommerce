@@ -213,6 +213,54 @@ class ProductQueryFilters {
 	}
 
 	/**
+	 * Gets product by metas.
+	 *
+	 * @since TBD
+	 * @param array $metas Array of metas to query.
+	 * @return array $results
+	 */
+	public function get_product_by_metas( $metas = array() ) {
+		global $wpdb;
+
+		if ( empty( $metas ) ) {
+			return array();
+		}
+
+		$where   = array();
+		$results = array();
+		$params  = array();
+
+		foreach ( $metas as $column => $value ) {
+			if ( 'min_price' === $column ) {
+				$where[]  = "{$column} >= %f";
+				$params[] = (float) $value;
+				continue;
+			}
+
+			if ( 'max_price' === $column ) {
+				$where[]  = "{$column} <= %f";
+				$params[] = (float) $value;
+				continue;
+			}
+
+			$where[]  = "{$column} = %s";
+			$params[] = $value;
+		}
+
+		if ( ! empty( $where ) ) {
+			$where_clause = implode( ' AND ', $where );
+			// Use a parameterized query.
+			$results = $wpdb->get_col(
+				$wpdb->prepare( "SELECT DISTINCT product_id FROM {$wpdb->prefix}wc_product_meta_lookup WHERE {$where_clause}", // phpcs:ignore
+					$params
+				)
+			);
+		}
+
+		return $results;
+	}
+
+	/**
 	 * Gets product by filtered terms.
 	 *
 	 * @since TBD
