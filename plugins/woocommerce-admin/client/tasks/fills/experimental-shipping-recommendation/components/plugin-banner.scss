@@ -1,5 +1,4 @@
 .woocommerce-task-shipping-recommendation__plugins-install {
-	// display: flex;
 	padding: $gap-large calc( $gap + $gap-smallest );
 	border: 1px solid #ddd;
 	border-radius: 3px;
@@ -28,6 +27,7 @@
 	}
 
 	&.single {
+		display: flex;
 		.plugins-install__list {
 			max-width: 380px;
 		}
