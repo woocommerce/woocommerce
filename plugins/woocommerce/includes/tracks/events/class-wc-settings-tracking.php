@@ -120,12 +120,8 @@ class WC_Settings_Tracking {
             }
         }
 
-		if ( isset( $current_tab ) ) {
-			$properties['tab'] = $current_tab;
-		}
-		if ( isset( $current_section ) ) {
-			$properties['section'] = $current_section;
-		}
+		$properties['tab'] = $current_tab ?? '';
+        $properties['section'] = $current_section ?? '';
 
 		WC_Tracks::record_event( 'settings_change', $properties );
 	}
