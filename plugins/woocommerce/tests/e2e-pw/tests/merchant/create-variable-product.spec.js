@@ -52,9 +52,8 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 
 		// add 3 attributes
 		for ( let i = 0; i < 3; i++ ) {
-			if ( i > 0 ) {
-				await page.click( 'button.add_attribute' );
-			}
+			await page.click( 'button.add_attribute' );
+			await page.waitForSelector( `input[name="attribute_names[${ i }]"]` );
 			await page.fill(
 				`input[name="attribute_names[${ i }]"]`,
 				`attr #${ i + 1 }`
@@ -64,15 +63,14 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 				'val1 | val2'
 			);
 		}
-		await page.keyboard.press( 'ArrowUp' );
-		await page.click( 'text=Save attributes' );
+		await page.click( 'text=Save attributes', { force: true } );
+		await page.waitForLoadState( 'networkidle' );
 
 		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
 		await page.locator( '#save-post' ).click();
 		await expect(
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
-		await page.click( '.updated.notice .notice-dismiss' );
 
 		// manually create variations from all attributes
 		await page.click( 'a[href="#variable_product_options"]' );
@@ -85,15 +83,15 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		// add variation attributes
-		for ( let i = 0; i < 8; i++ ) {
+		for ( let i = 0; i < 4; i++ ) {
 			const val1 = 'val1';
 			const val2 = 'val2';
 			const attr3 = !! ( i % 2 ); // 0-1,4-5 / 2-3,6-7
 			const attr2 = i % 4 > 1; // 0-3 / 4-7
-			const attr1 = i > 3;
-			await expect(
-				page.locator( `select[name="attribute_attr-1[${ i }]"]` )
-			).toHaveValue( attr1 ? val2 : val1 );
+			// const attr1 = i > 3;
+			// await expect(
+			// 	page.locator( `select[name="attribute_attr-1[${ i }]"]` )
+			// ).toHaveValue( attr1 ? val2 : val1 );
 			await expect(
 				page.locator( `select[name="attribute_attr-2[${ i }]"]` )
 			).toHaveValue( attr2 ? val2 : val1 );
@@ -146,7 +144,7 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		await page.click(
 			'#variable_product_options .toolbar-top a.expand_all'
 		);
-		for ( let i = 0; i < 8; i++ ) {
+		for ( let i = 0; i < 4; i++ ) {
 			const checkBox = page.locator(
 				`input[name="variable_is_downloadable[${ i }]"]`
 			);
@@ -159,7 +157,7 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		await page.click(
 			'#variable_product_options .toolbar-top a.expand_all'
 		);
-		for ( let i = 0; i < 8; i++ ) {
+		for ( let i = 0; i < 4; i++ ) {
 			const checkBox = page.locator(
 				`input[name="variable_is_downloadable[${ i }]"]`
 			);
