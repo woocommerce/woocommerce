@@ -193,6 +193,7 @@ function* handlePluginAPIError(
 				: JSON.stringify( error );
 	}
 
+	// Track the error.
 	switch ( actionType ) {
 		case 'install':
 			recordEvent( 'install_plugins_error', {
