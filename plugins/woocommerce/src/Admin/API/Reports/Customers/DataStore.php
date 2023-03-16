@@ -93,6 +93,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		add_action( 'delete_user', array( __CLASS__, 'delete_customer_by_user_id' ) );
 		add_action( 'remove_user_from_blog', array( __CLASS__, 'delete_customer_by_user_id' ) );
 
+		add_action( 'woocommerce_privacy_remove_order_personal_data', array( __CLASS__, 'anonymize_customer' ) );
+
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15, 2 );
 	}
 
@@ -866,6 +868,59 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$num_deleted = $wpdb->delete( self::get_db_table_name(), array( 'user_id' => $user_id ) );
 
 		if ( $num_deleted ) {
+			ReportsCache::invalidate();
+		}
+	}
+
+	/**
+	 * Anonymize the customer data for a single order.
+	 *
+	 * @internal
+	 * @param int $order_id Order id.
+	 * @return void
+	 */
+	public static function anonymize_customer( $order_id ) {
+		global $wpdb;
+
+		$customer_id = $wpdb->get_var(
+			$wpdb->prepare( "SELECT customer_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id )
+		);
+
+		if ( ! $customer_id ) {
+			return;
+		}
+
+		// Long form query because $wpdb->update rejects [deleted].
+		$deleted_text = __( '[deleted]', 'woocommerce' );
+		$updated      = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_customer_lookup
+					SET
+						user_id = NULL,
+						username = %s,
+						first_name = %s,
+						last_name = %s,
+						email = %s,
+						country = '',
+						postcode = %s,
+						city = %s,
+						state = %s
+					WHERE
+						customer_id = %d",
+				array(
+					$deleted_text,
+					$deleted_text,
+					$deleted_text,
+					'deleted@site.invalid',
+					$deleted_text,
+					$deleted_text,
+					$deleted_text,
+					$customer_id,
+				)
+			)
+		);
+		// If the customer row was anonymized, flush the cache.
+		if ( $updated ) {
 			ReportsCache::invalidate();
 		}
 	}
