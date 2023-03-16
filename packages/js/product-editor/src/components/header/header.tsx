@@ -1,22 +1,27 @@
 /**
  * External dependencies
  */
+import { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import { AUTO_DRAFT_NAME } from '../../utils';
+
 export type HeaderProps = {
 	productId: number;
-	title: string;
+	productName: string;
 };
 
-const DEFAULT_PRODUCT_NAME = 'AUTO-DRAFT';
-
-export function Header( { productId, title }: HeaderProps ) {
-	const { isProductLocked, isSaving } = useSelect(
+export function Header( { productId, productName }: HeaderProps ) {
+	const { isProductLocked, isSaving, product } = useSelect(
 		( select ) => {
-			const { isSavingEntityRecord } = select( 'core' );
+			const { isSavingEntityRecord, getEditedEntityRecord } =
+				select( 'core' );
 			const { isPostSavingLocked } = select( 'core/editor' );
 			return {
 				isProductLocked: isPostSavingLocked(),
@@ -25,13 +30,29 @@ export function Header( { productId, title }: HeaderProps ) {
 					'product',
 					productId
 				),
+				product: getEditedEntityRecord(
+					'postType',
+					'product',
+					productId
+				) as Product,
 			};
 		},
 		[ productId ]
 	);
 
 	const isDisabled = isProductLocked || isSaving;
-	const isCreating = title === DEFAULT_PRODUCT_NAME;
+	const isProductNameNotEmpty = Boolean( product?.name );
+	const isProductNameDirty = product.name !== productName;
+	const isCreating = productName === AUTO_DRAFT_NAME;
+
+	let title = '';
+	if ( isProductNameNotEmpty && isProductNameDirty ) {
+		title = product.name;
+	} else if ( isCreating ) {
+		title = __( 'Add new product', 'woocommerce' );
+	} else {
+		title = productName;
+	}
 
 	const { saveEditedEntityRecord } = useDispatch( 'core' );
 
@@ -46,9 +67,7 @@ export function Header( { productId, title }: HeaderProps ) {
 			aria-label={ __( 'Product Editor top bar.', 'woocommerce' ) }
 			tabIndex={ -1 }
 		>
-			<h1 className="woocommerce-product-header__title">
-				{ isCreating ? __( 'Add new product', 'woocommerce' ) : title }
-			</h1>
+			<h1 className="woocommerce-product-header__title">{ title }</h1>
 
 			<div className="woocommerce-product-header__actions">
 				<Button

@@ -50,7 +50,7 @@ export function Editor( { product, settings }: EditorProps ) {
 							header={
 								<Header
 									productId={ product.id }
-									title={ product.name }
+									productName={ product.name }
 								/>
 							}
 							content={
