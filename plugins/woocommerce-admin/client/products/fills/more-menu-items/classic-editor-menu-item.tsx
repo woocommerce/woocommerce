@@ -6,6 +6,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { MenuItem } from '@wordpress/components';
+import { ALLOW_TRACKING_OPTION_NAME } from '@woocommerce/customer-effort-score';
 
 /**
  * Internal dependencies
@@ -13,7 +14,6 @@ import { MenuItem } from '@wordpress/components';
 import { ClassicEditorIcon } from '../../images/classic-editor-icon';
 import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
 import { NEW_PRODUCT_MANAGEMENT } from '~/customer-effort-score-tracks/product-mvp-ces-footer';
-import { ALLOW_TRACKING_OPTION_NAME } from '~/customer-effort-score-tracks/constants';
 
 export const ClassicEditorMenuItem = ( {
 	onClose,
