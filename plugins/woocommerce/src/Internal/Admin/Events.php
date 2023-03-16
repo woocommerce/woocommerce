@@ -266,7 +266,7 @@ class Events {
 			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
 		}
 
-		if ( ! in_array( 'store_details', $completed_tasks, true ) ) {
+		if ( ! in_array( 'store_details', $completed_tasks, true ) && ! in_array( 'marketing', $completed_tasks, true ) ) {
 			RemoteFreeExtensionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
 		}
 	}
