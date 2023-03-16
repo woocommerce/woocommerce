@@ -12,7 +12,8 @@
 				"src/**/*.ts",
 				"src/**/*.tsx",
 				"src/**/*.php",
-				"includes/**/*.php"
+				"includes/**/*.php",
+				"tsconfig.tsbuildinfo"
 			],
 			"outputs": [
 				"dist/**",
