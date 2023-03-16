@@ -71,6 +71,7 @@ jobs:
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            ARTIFACT_NAME: ${{ env.E2E_UPDATE_WC_ARTIFACT }}
         steps:
             - uses: actions/checkout@v3
 
@@ -85,7 +86,7 @@ jobs:
               timeout-minutes: 60
               uses: ./.github/actions/tests/run-e2e-tests
               with:
-                  report-name: ${{ env.E2E_UPDATE_WC_ARTIFACT }}
+                  report-name: ${{ env.ARTIFACT_NAME }}
                   tests: update-woocommerce.spec.js
               env:
                   ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
@@ -104,7 +105,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.E2E_WP_LATEST_ARTIFACT }}
+                  destination-dir: ${{ env.ARTIFACT_NAME }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
@@ -118,7 +119,7 @@ jobs:
                     -f run_id=${{ github.run_id }} \
                     -f run_number=${{ github.run_number }} \
                     -f release_tag=${{ needs.get-tag.outputs.tag }} \
-                    -f artifact="${{ env.E2E_WP_LATEST_ARTIFACT }}" \
+                    -f artifact="${{ env.ARTIFACT_NAME }}" \
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
