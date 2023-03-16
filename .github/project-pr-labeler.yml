@@ -65,3 +65,12 @@
 - plugins/woocommerce/src/Admin/**/*
 - plugins/woocommerce/src/Internal/Admin/**/*
 - plugins/woocommerce-admin/**/*
+
+'focus: performance tests [team:Solaris]':
+- plugins/woocommerce/tests/performance/**/*
+
+'focus: api tests [team:Solaris]':
+- plugins/woocommerce/tests/api-core-tests/**/*
+
+'focus: e2e tests [team:Solaris]':
+- plugins/woocommerce/tests/e2e-pw/**/*
