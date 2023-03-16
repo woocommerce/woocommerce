@@ -51,23 +51,25 @@ export const ClassicEditorMenuItem = ( {
 	}
 
 	return (
-		<MenuItem
-			onClick={ () => {
-				if ( allowTracking ) {
-					updateOptions( {
-						[ NEW_PRODUCT_MANAGEMENT ]: 'no',
-					} );
-					showProductMVPFeedbackModal();
-					onClose();
-				} else {
-					window.location.href = classEditorUrl;
-					onClose();
-				}
-			} }
-			icon={ <ClassicEditorIcon /> }
-			iconPosition="right"
-		>
-			{ __( 'Use the classic editor', 'woocommerce' ) }
-		</MenuItem>
+		<>
+			<MenuItem
+				onClick={ () => {
+					if ( allowTracking ) {
+						updateOptions( {
+							[ NEW_PRODUCT_MANAGEMENT ]: 'no',
+						} );
+						showProductMVPFeedbackModal();
+						onClose();
+					} else {
+						window.location.href = classEditorUrl;
+						onClose();
+					}
+				} }
+				icon={ <ClassicEditorIcon /> }
+				iconPosition="right"
+			>
+				{ __( 'Use the classic editor', 'woocommerce' ) }
+			</MenuItem>
+		</>
 	);
 };
