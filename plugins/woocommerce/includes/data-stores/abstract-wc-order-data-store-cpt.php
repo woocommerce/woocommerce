@@ -107,6 +107,23 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
+	 * Check if an order exists by id.
+	 *
+	 * @since 7.7.0
+	 *
+	 * @param int $order_id The order id to check.
+	 * @return bool True if an order exists with the given name.
+	 */
+	public function order_exists( $order_id ) : bool {
+		if ( ! $order_id ) {
+			return false;
+		}
+
+		$post_object = get_post( $order_id );
+		return ! is_null( $post_object ) && in_array( $post_object->post_type, wc_get_order_types(), true );
+	}
+
+	/**
 	 * Method to read an order from the database.
 	 *
 	 * @param WC_Order $order Order object.

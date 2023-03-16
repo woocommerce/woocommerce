@@ -117,6 +117,20 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	private $error_logger;
 
 	/**
+	 * The name of the main orders table.
+	 *
+	 * @var string
+	 */
+	private $orders_table_name;
+
+	/**
+	 * The instance of the LegacyProxy object to use.
+	 *
+	 * @var LegacyProxy
+	 */
+	private $legacy_proxy;
+
+	/**
 	 * Initialize the object.
 	 *
 	 * @internal
@@ -129,8 +143,11 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	final public function init( OrdersTableDataStoreMeta $data_store_meta, DatabaseUtil $database_util, LegacyProxy $legacy_proxy ) {
 		$this->data_store_meta    = $data_store_meta;
 		$this->database_util      = $database_util;
+		$this->legacy_proxy       = $legacy_proxy;
 		$this->error_logger       = $legacy_proxy->call_function( 'wc_get_logger' );
 		$this->internal_meta_keys = $this->get_internal_meta_keys();
+
+		$this->orders_table_name = self::get_orders_table_name();
 	}
 
 	/**
@@ -956,6 +973,29 @@ WHERE
 	}
 
 	/**
+	 * Check if an order exists by id.
+	 *
+	 * @since 7.7.0
+	 *
+	 * @param int $order_id The order id to check.
+	 * @return bool True if an order exists with the given name.
+	 */
+	public function order_exists( $order_id ) : bool {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$exists = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT EXISTS (SELECT id FROM {$this->orders_table_name} WHERE id=%d)",
+				$order_id
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return (bool) $exists;
+	}
+
+	/**
 	 * Method to read an order from custom tables.
 	 *
 	 * @param \WC_Order $order Order object.
@@ -1576,6 +1616,7 @@ FROM $order_meta_table
 				array(
 					'post_type'   => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
 					'post_status' => 'draft',
+					'post_parent' => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
 				)
 			);
 
@@ -1761,18 +1802,24 @@ FROM $order_meta_table
 			 */
 			do_action( 'woocommerce_before_delete_order', $order_id, $order );
 
-			$this->upshift_child_orders( $order );
+			$this->upshift_or_delete_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
 			$this->delete_items( $order );
 
 			$order->set_id( 0 );
 
-			// Only delete post data if the posts table is authoritative and synchronization is enabled.
-			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-			if ( $data_synchronizer->data_sync_is_enabled() && $order->get_data_store()->get_current_class_name() === self::class ) {
-				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-				// Once we stop creating posts for orders, we should do the cleanup here instead.
-				wp_delete_post( $order_id );
+			// Only delete post data if the orders table is authoritative and synchronization is enabled.
+			$orders_table_is_authoritative = $order->get_data_store()->get_current_class_name() === self::class;
+
+			if ( $orders_table_is_authoritative ) {
+				$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+				if ( $data_synchronizer->data_sync_is_enabled() ) {
+					// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+					// Once we stop creating posts for orders, we should do the cleanup here instead.
+					wp_delete_post( $order_id );
+				} else {
+					$this->handle_order_deletion_with_sync_disabled( $order_id );
+				}
 			}
 
 			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
@@ -1794,23 +1841,89 @@ FROM $order_meta_table
 	}
 
 	/**
-	 * Helper method to set child orders to the parent order's parent.
+	 * Handles the deletion of an order from the orders table when sync is disabled:
+	 *
+	 * If the corresponding row in the posts table is of placeholder type,
+	 * it's just deleted; otherwise a "deleted_from" record is created in the meta table
+	 * and the sync process will detect these and take care of deleting the appropriate post records.
+	 *
+	 * @param int $order_id Th id of the order that has been deleted from the orders table.
+	 * @return void
+	 */
+	protected function handle_order_deletion_with_sync_disabled( $order_id ): void {
+		global $wpdb;
+
+		$post_type = $wpdb->get_var(
+			$wpdb->prepare( "SELECT post_type FROM {$wpdb->posts} WHERE ID=%d", $order_id )
+		);
+
+		if ( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post_type ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->posts} WHERE ID=%d OR post_parent=%d",
+					$order_id,
+					$order_id
+				)
+			);
+		} else {
+			$related_order_ids   = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT id FROM {$wpdb->posts} WHERE post_parent = %d",
+					$order_id
+				)
+			);
+			$related_order_ids[] = $order_id;
+
+			// phpcs:disable WordPress.DB.SlowDBQuery
+			foreach ( $related_order_ids as $id ) {
+				$wpdb->insert(
+					self::get_meta_table_name(),
+					array(
+						'order_id'   => $id,
+						'meta_key'   => 'deleted_from',
+						'meta_value' => self::get_orders_table_name(),
+					)
+				);
+			}
+			// phpcs:enable WordPress.DB.SlowDBQuery
+		}
+	}
+
+	/**
+	 * Set the parent id of child orders to the parent order's parent if the post type
+	 * for the order is hierarchical, just deletes the child orders otherwise.
 	 *
 	 * @param \WC_Abstract_Order $order Order object.
 	 *
 	 * @return void
 	 */
-	private function upshift_child_orders( $order ) {
+	private function upshift_or_delete_child_orders( $order ) {
 		global $wpdb;
-		$order_table  = self::get_orders_table_name();
-		$order_parent = $order->get_parent_id();
-		$wpdb->update(
-			$order_table,
-			array( 'parent_order_id' => $order_parent ),
-			array( 'parent_order_id' => $order->get_id() ),
-			array( '%d' ),
-			array( '%d' )
-		);
+
+		$order_table     = self::get_orders_table_name();
+		$order_parent_id = $order->get_parent_id();
+
+		if ( $this->legacy_proxy->call_function( 'is_post_type_hierarchical', $order->get_type() ) ) {
+			$wpdb->update(
+				$order_table,
+				array( 'parent_order_id' => $order_parent_id ),
+				array( 'parent_order_id' => $order->get_id() ),
+				array( '%d' ),
+				array( '%d' )
+			);
+		} else {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$child_order_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT id FROM $order_table WHERE parent_order_id=%d",
+					$order->get_id()
+				)
+			);
+			foreach ( $child_order_ids as $child_order_id ) {
+				$this->delete_order_data_from_custom_order_tables( $child_order_id );
+			}
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
 	}
 
 	/**

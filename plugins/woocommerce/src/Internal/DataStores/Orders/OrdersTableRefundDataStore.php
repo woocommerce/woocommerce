@@ -66,14 +66,18 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 		$this->delete_order_data_from_custom_order_tables( $refund_id );
 		$refund->set_id( 0 );
 
-		// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
-		if ( ! is_a( $refund->get_data_store(), self::class ) ) {
-			return;
-		}
+		$orders_table_is_authoritative = $refund->get_data_store()->get_current_class_name() === self::class;
 
-		// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-		// Once we stop creating posts for orders, we should do the cleanup here instead.
-		wp_delete_post( $refund_id );
+		if ( $orders_table_is_authoritative ) {
+			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+			if ( $data_synchronizer->data_sync_is_enabled() ) {
+				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+				// Once we stop creating posts for orders, we should do the cleanup here instead.
+				wp_delete_post( $refund_id );
+			} else {
+				$this->handle_order_deletion_with_sync_disabled( $refund_id );
+			}
+		}
 	}
 
 	/**

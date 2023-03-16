@@ -102,6 +102,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $object_type = 'order';
 
 	/**
+	 * Indicates if set_parent_id will throw an error if no order exists with the supplied id.
+	 *
+	 * @since 7.7.0
+	 * @var bool
+	 */
+	private $verify_parent_id = true;
+
+	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
 	 * This class should NOT be instantiated, but the wc_get_order function or new WC_Order_Factory
 	 * should be used. It is possible, but the aforementioned are preferred and are the only
@@ -569,10 +577,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.0.0
 	 * @param int $value Value to set.
-	 * @throws WC_Data_Exception Exception thrown if parent ID does not exist or is invalid.
+	 * @throws WC_Data_Exception Exception thrown if parent ID does not exist or is invalid (only if $verify_parent_id is true).
 	 */
 	public function set_parent_id( $value ) {
-		if ( $value && ( $value === $this->get_id() || ! wc_get_order( $value ) ) ) {
+		if ( $this->verify_parent_id && $value && ( $value === $this->get_id() || ! wc_get_order( $value ) ) ) {
 			$this->error( 'order_invalid_parent_id', __( 'Invalid parent ID', 'woocommerce' ) );
 		}
 		$this->set_prop( 'parent_id', absint( $value ) );
@@ -2320,5 +2328,28 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} else {
 			return __( 'Order', 'woocommerce' );
 		}
+	}
+
+	/**
+	 * Sets the value of the $verify_parent_id flag.
+	 *
+	 * If the flag is set, set_parent_id will throw an error if no order exists with the supplied id.
+	 *
+	 * @param bool $value
+	 * @return void
+	 */
+	public function set_verify_parent_id( bool $value ) {
+		$this->verify_parent_id = $value;
+	}
+
+	/**
+	 * Gets the value of the $verify_parent_id flag.
+	 *
+	 * If the flag is set, set_parent_id will throw an error if no order exists with the supplied id.
+	 *
+	 * @return bool
+	 */
+	public function get_verify_parent_id(): bool {
+		return $this->verify_parent_id;
 	}
 }
