@@ -57,6 +57,16 @@ export const Tree = forwardRef( function ForwardedTree(
 							props.onTreeBlur();
 						}
 					} }
+					// Prevents the up/down arrow keys from scrolling the page.
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					onKeyDown={ ( event: any ) => {
+						if (
+							event.key === 'ArrowUp' ||
+							event.key === 'ArrowDown'
+						) {
+							event.preventDefault();
+						}
+					} }
 				>
 					<Icon icon={ plus } size={ 20 } />
 					{ props.createValue
