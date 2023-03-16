@@ -272,7 +272,6 @@ jobs:
 
     get-wp-versions:
         name: Get WP L-1 & L-2 version numbers
-        if: false # mytodo remove this later
         needs: [get-tag]
         runs-on: ubuntu-20.04
         permissions:
@@ -311,10 +310,10 @@ jobs:
 
     test-wp-versions:
         name: Test against ${{ matrix.version.description }} (${{ matrix.version.number }})
-        if: false # mytodo remove this later
         runs-on: ubuntu-20.04
         needs: [get-wp-versions]
         strategy:
+            fail-fast: false
             matrix: ${{ fromJSON(needs.get-wp-versions.outputs.matrix) }}
         env:
             API_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/api/allure-report
@@ -358,38 +357,26 @@ jobs:
                   pnpm exec wp-env run tests-cli "wp theme list"
                   pnpm exec wp-env run tests-cli "wp user list"
 
-            - name: Run API tests.
-              id: api
-              working-directory: plugins/woocommerce
+            - name: Run API tests
+              id: run-api-composite-action
+              uses: ./.github/actions/tests/run-api-tests
+              with:
+                  report-name: ${{ env.API_WP_LATEST_X_ARTIFACT }}
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
-              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello
 
-            - name: Generate API Allure report.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.API_ALLURE_RESULTS_DIR }} --output ${{ env.API_ALLURE_REPORT_DIR }}
-
-            - name: Configure AWS credentials
-              if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1-node16
+            - name: Upload Allure files to bucket
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              uses: ./.github/actions/tests/upload-allure-files-to-bucket
               with:
-                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-
-            - name: Upload API Allure artifacts to bucket
-              if: success() || failure()
-              run: |
-                  aws s3 sync ${{ env.API_ALLURE_RESULTS_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_X_ARTIFACT }}/allure-results \
-                      --quiet
-                  aws s3 sync ${{ env.API_ALLURE_REPORT_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_WP_LATEST_X_ARTIFACT }}/allure-report \
-                      --quiet
+                  destination-dir: ${{ env.API_WP_LATEST_X_ARTIFACT }}
+                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish API Allure report
-              if: success() || failure()
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   ENV_DESCRIPTION: ${{ matrix.version.env_description }}
@@ -404,65 +391,30 @@ jobs:
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
 
-            - name: Archive API Allure reports
-              if: success() || failure()
-              uses: actions/upload-artifact@v3
-              with:
-                  name: ${{ env.API_WP_LATEST_X_ARTIFACT }}
-                  path: |
-                      ${{ env.API_ALLURE_RESULTS_DIR }}
-                      ${{ env.API_ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
-
-            - name: Download and install Chromium browser.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-
-            - name: Run E2E tests.
-              if: |
-                  success() || 
-                  ( failure() && steps.api.conclusion == 'success' )
+            - name: Run E2E tests
+              id: run-e2e-composite-action
               timeout-minutes: 60
-              id: e2e
+              uses: ./.github/actions/tests/run-e2e-tests
               env:
-                  USE_WP_ENV: 1
                   E2E_MAX_FAILURES: 15
-                  FORCE_COLOR: 1
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
-
-            - name: Generate E2E Allure report.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.E2E_ALLURE_RESULTS_DIR }} --output ${{ env.E2E_ALLURE_REPORT_DIR }}
-
-            - name: Upload E2E Allure artifacts to bucket
-              if: success() || failure()
-              run: |
-                  aws s3 sync ${{ env.E2E_ALLURE_RESULTS_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_X_ARTIFACT }}/allure-results \
-                      --quiet
-                  aws s3 sync ${{ env.E2E_ALLURE_REPORT_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_X_ARTIFACT }}/allure-report \
-                      --quiet
-
-            - name: Archive E2E Allure reports
-              if: success() || failure()
-              uses: actions/upload-artifact@v3
               with:
-                  name: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
-                  path: |
-                      ${{ env.E2E_ALLURE_RESULTS_DIR }}
-                      ${{ env.E2E_ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
+                  report-name: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
+                  tests: basic.spec.js # mytodo remove this later
+
+            - name: Upload Allure files to bucket
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              with:
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  destination-dir: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
+                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
-              if: success() || failure()
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   ENV_DESCRIPTION: ${{ matrix.version.env_description }}
@@ -479,10 +431,10 @@ jobs:
 
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}
-        if: false # mytodo remove this later
         runs-on: ubuntu-20.04
         needs: [get-tag]
         strategy:
+            fail-fast: false
             matrix:
                 php_version: ['7.4', '8.1']
         env:
@@ -519,35 +471,23 @@ jobs:
             - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
               run: unzip -d plugins -o tmp/woocommerce.zip
 
-            - name: Run API tests.
-              id: api
-              working-directory: plugins/woocommerce
+            - name: Run API tests
+              id: run-api-composite-action
+              uses: ./.github/actions/tests/run-api-tests
+              with:
+                  report-name: ${{ env.API_ARTIFACT }}
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
-              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello
 
-            - name: Generate API Allure report.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.API_ALLURE_RESULTS_DIR }} --output ${{ env.API_ALLURE_REPORT_DIR }}
-
-            - name: Configure AWS credentials
-              if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1-node16
+            - name: Upload Allure files to bucket
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              uses: ./.github/actions/tests/upload-allure-files-to-bucket
               with:
-                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-
-            - name: Upload API Allure artifacts to bucket
-              if: success() || failure()
-              run: |
-                  aws s3 sync ${{ env.API_ALLURE_RESULTS_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_ARTIFACT }}/allure-results \
-                      --quiet
-                  aws s3 sync ${{ env.API_ALLURE_REPORT_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.API_ARTIFACT }}/allure-report \
-                      --quiet
+                  destination-dir: ${{ env.API_ARTIFACT }}
+                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish API Allure report
               if: success() || failure()
@@ -565,60 +505,27 @@ jobs:
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
 
-            - name: Archive API Allure reports
-              if: success() || failure()
-              uses: actions/upload-artifact@v3
-              with:
-                  name: ${{ env.API_ARTIFACT }}
-                  path: |
-                      ${{ env.API_ALLURE_RESULTS_DIR }}
-                      ${{ env.API_ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
-
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-
-            - name: Run E2E tests.
-              if: |
-                  success() || 
-                  ( failure() && steps.api.conclusion == 'success' )
+            - name: Run E2E tests
+              id: run-e2e-composite-action
               timeout-minutes: 60
+              uses: ./.github/actions/tests/run-e2e-tests
               env:
-                  USE_WP_ENV: 1
-                  E2E_MAX_FAILURES: 15
-                  FORCE_COLOR: 1
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
-
-            - name: Generate E2E Allure report.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.E2E_ALLURE_RESULTS_DIR }} --output ${{ env.E2E_ALLURE_REPORT_DIR }}
-
-            - name: Upload E2E Allure artifacts to bucket
-              if: success() || failure()
-              run: |
-                  aws s3 sync ${{ env.E2E_ALLURE_RESULTS_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_ARTIFACT }}/allure-results \
-                      --quiet
-                  aws s3 sync ${{ env.E2E_ALLURE_REPORT_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_ARTIFACT }}/allure-report \
-                      --quiet
-
-            - name: Archive E2E Allure reports
-              if: success() || failure()
-              uses: actions/upload-artifact@v3
+                  E2E_MAX_FAILURES: 15
               with:
-                  name: ${{ env.E2E_ARTIFACT }}
-                  path: |
-                      ${{ env.E2E_ALLURE_RESULTS_DIR }}
-                      ${{ env.E2E_ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
+                  report-name: ${{ env.E2E_ARTIFACT }}
+                  tests: basic.spec.js # mytodo remove this later
+
+            - name: Upload Allure files to bucket
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              with:
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  destination-dir: ${{ env.E2E_ARTIFACT }}
+                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
               if: success() || failure()
