@@ -103,8 +103,9 @@ class DataRegenerator {
 		delete_option( 'woocommerce_attribute_lookup_processed_count' );
 		$this->data_store->unset_regeneration_in_progress_flag();
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$wpdb->query( 'DROP TABLE IF EXISTS ' . $this->lookup_table_name );
+		if ( $this->data_store->check_lookup_table_exists() ) {
+			$wpdb->query( "TRUNCATE TABLE {$this->lookup_table_name}" ); // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
 	}
 
 	/**
@@ -114,10 +115,8 @@ class DataRegenerator {
 	 * @return bool True if there's any product at all in the database, false otherwise.
 	 */
 	private function initialize_table_and_data() {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$wpdb->query( $this->get_table_creation_sql() );
+		$database_util = wc_get_container()->get( DatabaseUtil::class );
+		$database_util->dbdelta( $this->get_table_creation_sql() );
 
 		$last_existing_product_id = $this->get_last_existing_product_id();
 		if ( ! $last_existing_product_id ) {

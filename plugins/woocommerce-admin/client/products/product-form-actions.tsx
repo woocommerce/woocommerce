@@ -11,11 +11,16 @@ import {
 } from '@wordpress/components';
 import { chevronDown, check, Icon } from '@wordpress/icons';
 import { registerPlugin } from '@wordpress/plugins';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
 import { useFormContext } from '@woocommerce/components';
-import { preventLeavingProductForm } from '@woocommerce/product-editor';
+import { useCustomerEffortScoreExitPageTracker } from '@woocommerce/customer-effort-score';
+import {
+	preventLeavingProductForm,
+	__experimentalUseProductHelper as useProductHelper,
+} from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { navigateTo } from '@woocommerce/navigation';
+import { navigateTo, useConfirmUnsavedChanges } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -25,12 +30,8 @@ import { store } from '@wordpress/viewport';
 /**
  * Internal dependencies
  */
-import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
-import { WooHeaderItem } from '~/header/utils';
-import { useProductHelper } from './use-product-helper';
 import './product-form-actions.scss';
 import { useProductMVPCESFooter } from '~/customer-effort-score-tracks/use-product-mvp-ces-footer';
-import { useCustomerEffortScoreExitPageTracker } from '~/customer-effort-score-tracks/use-customer-effort-score-exit-page-tracker';
 
 export const ProductFormActions: React.FC = () => {
 	const {
@@ -48,7 +49,7 @@ export const ProductFormActions: React.FC = () => {
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 
-	usePreventLeavingPage( isDirty, preventLeavingProductForm );
+	useConfirmUnsavedChanges( isDirty, preventLeavingProductForm );
 
 	useCustomerEffortScoreExitPageTracker(
 		! values.id ? 'new_product' : 'editing_new_product',

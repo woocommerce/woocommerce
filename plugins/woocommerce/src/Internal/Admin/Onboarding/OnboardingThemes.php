@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Onboarding;
 
-use \Automattic\WooCommerce\Admin\Loader;
+use Automattic\WooCommerce\Admin\Loader;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Init as OnboardingTasks;

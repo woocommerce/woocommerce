@@ -366,6 +366,66 @@ class WC_Post_Types {
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
 					'rest_namespace'      => 'wp/v3',
+					'template'            => array(
+						array(
+							'woocommerce/product-tab',
+							array(
+								'id'    => 'general',
+								'title' => __( 'General', 'woocommerce' ),
+							),
+							array(
+								array(
+									'woocommerce/product-section',
+									array(
+										'title'       => __( 'Basic details', 'woocommerce' ),
+										'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
+									),
+									array(
+										array(
+											'woocommerce/product-name',
+											array(
+												'name' => 'Product name',
+											),
+										),
+									),
+								),
+							),
+						),
+						array(
+							'woocommerce/product-tab',
+							array(
+								'id'    => 'pricing',
+								'title' => __( 'Pricing', 'woocommerce' ),
+							),
+						),
+						array(
+							'woocommerce/product-tab',
+							array(
+								'id'    => 'inventory',
+								'title' => __( 'Inventory', 'woocommerce' ),
+							),
+						),
+						array(
+							'woocommerce/product-tab',
+							array(
+								'id'    => 'shipping',
+								'title' => __( 'Shipping', 'woocommerce' ),
+							),
+							array(
+								array(
+									'woocommerce/product-section',
+									array(
+										'title' => __( 'Shipping section', 'woocommerce' ),
+									),
+									array(
+										array(
+											'core/image',
+										),
+									),
+								),
+							),
+						),
+					),
 				)
 			)
 		);
@@ -624,6 +684,15 @@ class WC_Post_Types {
 					'show_in_admin_status_list' => true,
 					/* translators: %s: number of orders */
 					'label_count'               => _n_noop( 'Failed <span class="count">(%s)</span>', 'Failed <span class="count">(%s)</span>', 'woocommerce' ),
+				),
+				'auto-draft'    => array(
+					'label'                     => _x( 'Auto Draft', 'Order status', 'woocommerce' ),
+					'public'                    => false,
+					'exclude_from_search'       => false,
+					'show_in_admin_all_list'    => true,
+					'show_in_admin_status_list' => true,
+					/* translators: %s: number of orders */
+					'label_count'               => _n_noop( 'Auto draft <span class="count">(%s)</span>', 'Auto draft <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 			)
 		);

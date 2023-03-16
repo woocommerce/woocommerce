@@ -8,7 +8,6 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Testing\Tools\FakeQueue;
-use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 /**
  * Tests for the LookupDataStore class.
@@ -1111,7 +1110,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 			$attribute->set_id( $attribute_data['id'] );
 			$attribute->set_name( $taxonomy );
 			$attribute->set_options( $attribute_data['options'] );
-			$attribute->set_variation( ArrayUtil::get_value_or_default( $attribute_data, 'variation', false ) );
+			$attribute->set_variation( $attribute_data['variation'] ?? false );
 			$attributes[] = $attribute;
 		}
 

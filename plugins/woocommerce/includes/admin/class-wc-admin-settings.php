@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -431,7 +430,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					// Radio inputs.
 					case 'radio':
 						$option_value = $value['value'];
-						$disabled_values = ArrayUtil::get_value_or_default($value, 'disabled', array());
+						$disabled_values = $value['disabled'] ?? array();
 
 						?>
 						<tr valign="top">
@@ -488,7 +487,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							$visibility_class[] = 'show_options_if_checked';
 						}
 
-						$must_disable = ArrayUtil::get_value_or_default( $value, 'disabled', false );
+						$must_disable = $value['disabled'] ?? false;
 
 						if ( ! isset( $value['checkboxgroup'] ) || 'start' === $value['checkboxgroup'] ) {
 							$has_tooltip             = isset( $value['tooltip'] ) && '' !== $value['tooltip'];

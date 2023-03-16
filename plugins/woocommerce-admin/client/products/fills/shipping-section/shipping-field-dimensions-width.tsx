@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useFormContext } from '@woocommerce/components';
 import { PartialProduct } from '@woocommerce/data';
+import { __experimentalUseProductHelper as useProductHelper } from '@woocommerce/product-editor';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -14,7 +15,6 @@ import {
 /**
  * Internal dependencies
  */
-import { useProductHelper } from '../../use-product-helper';
 import { getInterpolatedSizeLabel } from './utils';
 import { ShippingDimensionsPropsType } from './index';
 

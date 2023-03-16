@@ -76,10 +76,10 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 					} }
 				/>
 			) }
-			{ dataRegistered?.length && <Campaigns /> }
+			{ !! dataRegistered?.length && <Campaigns /> }
 			{ dataRegistered &&
 				dataRecommended &&
-				( dataRegistered.length || dataRecommended.length ) && (
+				!! ( dataRegistered.length || dataRecommended.length ) && (
 					<Channels
 						addChannelsButtonRef={ addChannelsButtonRef }
 						registeredChannels={ dataRegistered }

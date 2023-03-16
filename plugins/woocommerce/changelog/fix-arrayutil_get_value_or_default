@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix ArrayUtil::get_value_or_default method not behaving as documented for null array values

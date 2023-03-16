@@ -12,6 +12,7 @@ import {
 import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { H, Section } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
@@ -48,7 +49,6 @@ import { useActiveSetupTasklist } from '~/tasks';
 import { LayoutContext } from '~/layout';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
 import { FeedbackIcon } from '~/products/images/feedback-icon';
-import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
 import { ProductFeedbackTour } from '~/guided-tours/add-product-feedback-tour';
 
 const HelpPanel = lazy( () =>

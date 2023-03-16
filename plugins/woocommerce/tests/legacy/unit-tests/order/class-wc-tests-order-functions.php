@@ -1410,6 +1410,36 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that order modified date is updated when a refund is created for it.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/28969
+	 */
+	public function test_wc_create_refund_28969() {
+		$order = WC_Helper_Order::create_order(
+			1,
+			WC_Helper_Product::create_simple_product(),
+			array(
+				'status' => 'completed',
+			)
+		);
+		// Ensure the order is a complete object with an initial modified date.
+		$order = wc_get_order( $order->get_id() );
+
+		// Ensure the order's initial modified date is sufficiently in the past.
+		sleep( 1 );
+
+		$args = array(
+			'order_id' => $order->get_id(),
+			'amount'   => 1,
+		);
+
+		wc_create_refund( $args );
+		$updated_order = wc_get_order( $order->get_id() );
+
+		$this->assertNotEquals( $order->get_date_modified()->getTimestamp(), $updated_order->get_date_modified()->getTimestamp() );
+	}
+
+	/**
 	 * Test wc_sanitize_order_id().
 	 */
 	public function test_wc_sanitize_order_id() {

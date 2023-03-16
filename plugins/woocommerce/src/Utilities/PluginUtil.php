@@ -97,7 +97,7 @@ class PluginUtil {
 	 */
 	public function get_plugin_name( string $plugin_id ): string {
 		$plugin_data = $this->proxy->call_function( 'get_plugin_data', WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $plugin_id );
-		return ArrayUtil::get_value_or_default( $plugin_data, 'Name', $plugin_id );
+		return $plugin_data['Name'] ?? $plugin_id;
 	}
 
 	/**
@@ -111,7 +111,7 @@ class PluginUtil {
 		if ( is_string( $plugin_file_or_data ) ) {
 			return in_array( $plugin_file_or_data, $this->get_woocommerce_aware_plugins(), true );
 		} elseif ( is_array( $plugin_file_or_data ) ) {
-			return '' !== ArrayUtil::get_value_or_default( $plugin_file_or_data, 'WC tested up to', '' );
+			return '' !== ( $plugin_file_or_data['WC tested up to'] ?? '' );
 		} else {
 			throw new \Exception( 'is_woocommerce_aware_plugin requires a plugin name or an array of plugin data as input' );
 		}
