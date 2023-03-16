@@ -1047,7 +1047,7 @@ class WC_Install {
 
 		// Clear table caches.
 		delete_transient( 'wc_attribute_taxonomies' );
-		
+
 		return $db_delta_result;
 	}
 
