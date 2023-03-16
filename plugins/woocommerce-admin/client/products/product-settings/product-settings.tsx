@@ -11,6 +11,8 @@ import {
 	TextControl,
 } from '@wordpress/components';
 import { closeSmall, cog } from '@wordpress/icons';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
+import { getCheckboxTracks } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { useFormContext } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
@@ -18,8 +20,6 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { getCheckboxTracks } from '../sections/utils';
-import { WooHeaderItem } from '~/header/utils';
 import './product-settings.scss';
 
 export const ProductSettings = () => {

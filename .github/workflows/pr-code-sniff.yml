@@ -16,6 +16,7 @@ permissions: {}
 
 jobs:
     test:
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
         name: Code sniff (PHP 7.4, WP Latest)
         timeout-minutes: 15
         runs-on: ubuntu-20.04

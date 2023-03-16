@@ -8,13 +8,13 @@ import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { defaultTableDateFormat } from '@woocommerce/date';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { CurrencyContext } from '../../../lib/currency-context';
 
 const capitalizeFirstLetter = ( expr ) =>
 	expr.charAt( 0 ).toUpperCase() + expr.slice( 1 );
@@ -116,7 +116,7 @@ class OrdersReportTable extends Component {
 		return map( tableData, ( row ) => {
 			const {
 				currency,
-				date_created: dateCreated,
+				date,
 				net_total: netTotal,
 				num_items_sold: numItemsSold,
 				order_id: orderId,
@@ -150,12 +150,9 @@ class OrdersReportTable extends Component {
 			return [
 				{
 					display: (
-						<Date
-							date={ dateCreated }
-							visibleFormat={ dateFormat }
-						/>
+						<Date date={ date } visibleFormat={ dateFormat } />
 					),
-					value: dateCreated,
+					value: date,
 				},
 				{
 					display: (

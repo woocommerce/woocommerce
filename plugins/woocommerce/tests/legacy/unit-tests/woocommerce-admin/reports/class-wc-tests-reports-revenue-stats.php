@@ -6,8 +6,8 @@
  * @todo Finish up unit testing to verify bug-free order reports.
  */
 
-use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
 
 /**
  * Class WC_Admin_Tests_Reports_Revenue_Stats

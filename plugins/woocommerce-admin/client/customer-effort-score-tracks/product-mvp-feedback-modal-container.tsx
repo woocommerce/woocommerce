@@ -1,18 +1,15 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { ProductMVPFeedbackModal } from '@woocommerce/customer-effort-score';
+import {
+	ProductMVPFeedbackModal,
+	STORE_KEY,
+} from '@woocommerce/customer-effort-score';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/settings';
 import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
-import { STORE_KEY } from './data/constants';
 
 export const ProductMVPFeedbackModalContainer: React.FC = () => {
 	const { values } = useFormContext< Product >();

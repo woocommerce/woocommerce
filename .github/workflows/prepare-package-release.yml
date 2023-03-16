@@ -3,7 +3,7 @@ on:
     workflow_dispatch:
         inputs:
             packages:
-                description: 'Enter a specific package to release, or packages separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input to the default "-a" will prepare to release all eligible packages.'
+                description: 'Enter a specific package to release, or packages separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input to the default "-a" will prepare to release all eligible packages. When releasing a package for the first time, pass the "--initialRelease" flag.'
                 required: false
                 default: '-a'
 

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Creating product entity in auto-draft status, and adding support for retrieving preexisting products.

@@ -4,20 +4,22 @@
 import { __ } from '@wordpress/i18n';
 import { DropdownMenu, MenuItem } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
 import { getAdminLink } from '@woocommerce/settings';
 import { moreVertical } from '@wordpress/icons';
 import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
 import { useFormContext } from '@woocommerce/components';
+import {
+	ALLOW_TRACKING_OPTION_NAME,
+	STORE_KEY as CES_STORE_KEY,
+} from '@woocommerce/customer-effort-score';
 
 /**
  * Internal dependencies
  */
 import { ClassicEditorIcon } from './images/classic-editor-icon';
 import { FeedbackIcon } from './images/feedback-icon';
-import { WooHeaderItem } from '~/header/utils';
-import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
 import { NEW_PRODUCT_MANAGEMENT } from '~/customer-effort-score-tracks/product-mvp-ces-footer';
-import { ALLOW_TRACKING_OPTION_NAME } from '~/customer-effort-score-tracks/constants';
 import './product-more-menu.scss';
 
 export const ProductMoreMenu = () => {

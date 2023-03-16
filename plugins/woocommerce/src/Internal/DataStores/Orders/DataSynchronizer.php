@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -66,6 +68,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private $error_logger;
 
 	/**
+	 * The order cache controller.
+	 *
+	 * @var OrderCacheController
+	 */
+	private $order_cache_controller;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -83,13 +92,21 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * @param DatabaseUtil                     $database_util The database util class to use.
 	 * @param PostsToOrdersMigrationController $posts_to_cot_migrator The posts to COT migration class to use.
 	 * @param LegacyProxy                      $legacy_proxy The legacy proxy instance to use.
+	 * @param OrderCacheController             $order_cache_controller The order cache controller instance to use.
 	 * @internal
 	 */
-	final public function init( OrdersTableDataStore $data_store, DatabaseUtil $database_util, PostsToOrdersMigrationController $posts_to_cot_migrator, LegacyProxy $legacy_proxy ) {
-		$this->data_store            = $data_store;
-		$this->database_util         = $database_util;
-		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
-		$this->error_logger          = $legacy_proxy->call_function( 'wc_get_logger' );
+	final public function init(
+		OrdersTableDataStore $data_store,
+		DatabaseUtil $database_util,
+		PostsToOrdersMigrationController $posts_to_cot_migrator,
+		LegacyProxy $legacy_proxy,
+		OrderCacheController $order_cache_controller
+	) {
+		$this->data_store             = $data_store;
+		$this->database_util          = $database_util;
+		$this->posts_to_cot_migrator  = $posts_to_cot_migrator;
+		$this->error_logger           = $legacy_proxy->call_function( 'wc_get_logger' );
+		$this->order_cache_controller = $order_cache_controller;
 	}
 
 	/**
@@ -371,6 +388,8 @@ WHERE
 	 * @param array $batch Batch details.
 	 */
 	public function process_batch( array $batch ) : void {
+		$this->order_cache_controller->temporarily_disable_orders_cache_usage();
+
 		$custom_orders_table_is_authoritative = $this->custom_orders_table_is_authoritative();
 		$deleted_order_ids                    = $this->process_deleted_orders( $batch, $custom_orders_table_is_authoritative );
 		$batch                                = array_diff( $batch, $deleted_order_ids );
@@ -393,6 +412,7 @@ WHERE
 
 		if ( 0 === $this->get_total_pending_count() ) {
 			$this->cleanup_synchronization_state();
+			$this->order_cache_controller->maybe_restore_orders_cache_usage();
 		}
 	}
 

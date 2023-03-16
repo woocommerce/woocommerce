@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix the value of `UPDATE_WC` environment variable in the daily k6 performance tests.

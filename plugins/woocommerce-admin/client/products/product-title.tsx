@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { WooHeaderPageTitle } from '@woocommerce/admin-layout';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	Product,
@@ -10,6 +11,11 @@ import {
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { getNewPath } from '@woocommerce/navigation';
+import {
+	getProductTitle,
+	getProductVariationTitle,
+	getTruncatedProductVariationTitle,
+} from '@woocommerce/product-editor';
 import { useFormContext } from '@woocommerce/components';
 import { useParams } from 'react-router-dom';
 import { useSelect } from '@wordpress/data';
@@ -17,14 +23,8 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getProductTitle } from './utils/get-product-title';
-import {
-	getProductVariationTitle,
-	getTruncatedProductVariationTitle,
-} from './utils/get-product-variation-title';
 import { ProductBreadcrumbs } from './product-breadcrumbs';
 import { ProductStatusBadge } from './product-status-badge';
-import { WooHeaderPageTitle } from '~/header/utils';
 import './product-title.scss';
 
 export const ProductTitle: React.FC = () => {

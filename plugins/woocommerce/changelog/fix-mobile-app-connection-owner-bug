@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+fixed bug where jetpack connection owner field was assumed to be username when its actually display name

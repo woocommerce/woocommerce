@@ -14,13 +14,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php if ( ! count( $variation_attributes ) ) : ?>
 
-			<div id="message" class="inline notice woocommerce-message">
-				<p><?php echo wp_kses_post( __( 'Before you can add a variation you need to add some variation attributes on the <strong>Attributes</strong> tab.', 'woocommerce' ) ); ?></p>
-				<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
-				<p><a class="button-primary" href="<?php echo esc_url( apply_filters( 'woocommerce_docs_url', 'https://docs.woocommerce.com/document/variable-product/', 'product-variations' ) ); ?>" target="_blank"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a></p>
-				<?php /* phpcs:enable */ ?>
+		<div id="message" class="inline notice woocommerce-message">
+			<p>
+				<?php echo esc_html_e( 'Offer customers multiple product options, like size and color. Start by creating a new custom attribute and enter available values (they’ll be shown as selectable product options).', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/#add-variations"><?php esc_html_e( 'Learn more about creating variations', 'woocommerce' ); ?></a>
+			</p>
+		</div>
+		<div class="wc-metabox">
+			<div class="woocommerce_variation_new_attribute_data wc-metabox-content">
+			<?php
+				$i                    = 0;
+				$is_variations_screen = true;
+				$attribute            = new WC_Product_Attribute();
+				$attribute->set_variation( true );
+				require __DIR__ . '/html-product-attribute-inner.php';
+			?>
+				<div class="toolbar">
+					<button type="button" class="button button-primary create-variations" disabled="disabled" title="<?php echo esc_html_e( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ); ?>"><?php esc_html_e( 'Create variations', 'woocommerce' ); ?></button>
+				</div>
 			</div>
-
+		</div>
 		<?php else : ?>
 
 			<div class="toolbar toolbar-variations-defaults">

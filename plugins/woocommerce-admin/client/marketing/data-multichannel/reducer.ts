@@ -20,6 +20,15 @@ const initialState = {
 		data: undefined,
 		error: undefined,
 	},
+	campaigns: {
+		perPage: undefined,
+		pages: undefined,
+		total: undefined,
+	},
+	campaignTypes: {
+		data: undefined,
+		error: undefined,
+	},
 };
 
 export const reducer: Reducer< State, Action > = (
@@ -55,6 +64,38 @@ export const reducer: Reducer< State, Action > = (
 					error: action.payload,
 				},
 			};
+
+		case TYPES.RECEIVE_CAMPAIGNS:
+			return {
+				...state,
+				campaigns: {
+					perPage: action.meta.perPage,
+					pages: {
+						...state.campaigns.pages,
+						[ action.meta.page ]: action.error
+							? {
+									error: action.payload,
+							  }
+							: {
+									data: action.payload,
+							  },
+					},
+					total: action.meta.total,
+				},
+			};
+
+		case TYPES.RECEIVE_CAMPAIGN_TYPES:
+			return {
+				...state,
+				campaignTypes: action.error
+					? {
+							error: action.payload,
+					  }
+					: {
+							data: action.payload,
+					  },
+			};
+
 		default:
 			return state;
 	}

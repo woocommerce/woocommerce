@@ -33,7 +33,12 @@ jQuery( function ( $ ) {
 					'button.add_price_for_variations',
 					this.open_modal_to_set_variations_price
 				)
-				.on( 'reload', this.reload );
+				.on( 'reload', this.reload )
+				.on(
+					'click',
+					'button.create-variations',
+					this.create_variations
+				);
 
 			$(
 				'input.variable_is_downloadable, input.variable_is_virtual, input.variable_manage_stock'
@@ -49,6 +54,69 @@ jQuery( function ( $ ) {
 					'.wc_input_variations_price',
 					this.maybe_enable_button_to_add_price_to_variations
 				);
+		},
+
+		create_variations: function () {
+			var new_attribute_data = $(
+				'.woocommerce_variation_new_attribute_data'
+			);
+
+			$( '#variable_product_options' ).block( {
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6,
+				},
+			} );
+
+			var original_data = new_attribute_data.find(
+				'input, select, textarea'
+			);
+
+			var data = {
+				post_id: woocommerce_admin_meta_boxes.post_id,
+				product_type: $( '#product-type' ).val(),
+				data: original_data.serialize(),
+				action: 'woocommerce_add_attributes_and_variations',
+				security:
+					woocommerce_admin_meta_boxes.add_attributes_and_variations,
+			};
+
+			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function (
+				response
+			) {
+				if ( response.error ) {
+					// Error.
+					window.alert( response.error );
+					$( '#variable_product_options' ).unblock();
+				} else if ( response ) {
+					// Reload variations and attributes panel.
+					var this_page_url = window.location.toString();
+					this_page_url = this_page_url.replace(
+						'post-new.php?',
+						'post.php?post=' +
+							woocommerce_admin_meta_boxes.post_id +
+							'&action=edit&'
+					);
+
+					$.get( this_page_url, function ( response ) {
+						$( '#variable_product_options' ).unblock();
+						$( '#variable_product_options_inner' ).replaceWith(
+							$( response ).find(
+								'#variable_product_options_inner'
+							)
+						);
+						$( '#variable_product_options' ).trigger( 'reload' );
+						$(
+							'#product_attributes > .product_attributes'
+						).replaceWith(
+							$( response ).find(
+								'#product_attributes > .product_attributes'
+							)
+						);
+					} );
+				}
+			} );
 		},
 
 		/**

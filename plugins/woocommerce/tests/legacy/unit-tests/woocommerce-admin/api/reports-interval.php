@@ -6,7 +6,7 @@
  * @since x.x.0
  */
 
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * Class WC_Admin_Tests_Reports_Interval_Stats

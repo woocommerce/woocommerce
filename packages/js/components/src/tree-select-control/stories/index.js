@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -15,7 +15,7 @@ const treeSelectControlOptions = [
 		children: [
 			{ value: 'ES', label: 'Spain' },
 			{ value: 'FR', label: 'France' },
-			{ key: 'FR-Colonies', value: 'FR', label: 'France (Colonies)' },
+			{ key: 'FR-Colonies', value: 'FR-C', label: 'France (Colonies)' },
 		],
 	},
 	{
@@ -69,6 +69,12 @@ const treeSelectControlOptions = [
 const Template = ( args ) => {
 	const [ selected, setSelected ] = useState( [ 'ES' ] );
 
+	useEffect( () => {
+		if ( args.onChange ) {
+			args.onChange( selected );
+		}
+	}, [ selected ] );
+
 	return (
 		<TreeSelectControl
 			{ ...args }
@@ -88,6 +94,13 @@ Base.args = {
 	options: treeSelectControlOptions,
 	maxVisibleTags: 3,
 	selectAllLabel: 'All countries',
+	includeParent: false,
+	alwaysShowPlaceholder: false,
+};
+
+Base.argTypes = {
+	onInputChange: { action: 'onInputChange' },
+	onChange: { action: 'onChange' },
 };
 
 export default {

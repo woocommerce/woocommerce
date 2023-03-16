@@ -110,7 +110,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			$screen       = get_current_screen();
 			$screen_id    = $screen ? $screen->id : '';
-			$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+			$wc_screen_id = 'woocommerce';
 			$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version      = Constants::get_constant( 'WC_VERSION' );
 
@@ -215,7 +215,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'gateway_toggle' => wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ),
 					),
 					'urls'                              => array(
-						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
+						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) || Features::is_enabled( 'block-editor-feature-enabled' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
@@ -339,6 +339,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				$remove_item_notice     = __( 'Are you sure you want to remove the selected items?', 'woocommerce' );
 				$remove_fee_notice      = __( 'Are you sure you want to remove the selected fees?', 'woocommerce' );
 				$remove_shipping_notice = __( 'Are you sure you want to remove the selected shipping?', 'woocommerce' );
+				$product                = wc_get_product( $post_id );
 
 				// Eventually this will become wc_data_or_post object as we implement more custom tables.
 				$order_or_post_object = $post;
@@ -385,6 +386,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'order_item_nonce'                   => wp_create_nonce( 'order-item' ),
 					'add_attribute_nonce'                => wp_create_nonce( 'add-attribute' ),
 					'save_attributes_nonce'              => wp_create_nonce( 'save-attributes' ),
+					'add_attributes_and_variations'      => wp_create_nonce( 'add-attributes-and-variations' ),
 					'calc_totals_nonce'                  => wp_create_nonce( 'calc-totals' ),
 					'get_customer_details_nonce'         => wp_create_nonce( 'get-customer-details' ),
 					'search_products_nonce'              => wp_create_nonce( 'search-products' ),
@@ -403,6 +405,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'rounding_precision'                 => wc_get_rounding_precision(),
 					'tax_rounding_mode'                  => wc_get_tax_rounding_mode(),
 					'product_types'                      => array_unique( array_merge( array( 'simple', 'grouped', 'variable', 'external' ), array_keys( wc_get_product_types() ) ) ),
+					'has_local_attributes'               => ! empty( wc_get_attribute_taxonomies() ),
 					'i18n_download_permission_fail'      => __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ),
 					'i18n_permission_revoke'             => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 					'i18n_tax_rate_already_exists'       => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
@@ -416,6 +419,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_product_other_tip'             => __( 'Product types define available product details and attributes, such as downloadable files and variations. They’re also used for analytics and inventory management.', 'woocommerce' ),
 					'i18n_product_description_tip'       => __( 'Describe this product. What makes it unique? What are its most important features?', 'woocommerce' ),
 					'i18n_product_short_description_tip' => __( 'Summarize this product in 1-2 short sentences. We’ll show it at the top of the page.', 'woocommerce' ),
+					'i18n_save_attribute_variation_tip'  => __( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ),
 					/* translators: %1$s: maximum file size */
 					'i18n_product_image_tip'             => sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ) , size_format( wp_max_upload_size() ) ),
 				);

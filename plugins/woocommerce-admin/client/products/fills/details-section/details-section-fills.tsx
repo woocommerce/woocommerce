@@ -3,24 +3,22 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
+	__experimentalProductFieldSection as ProductFieldSection,
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
-} from '@woocommerce/components';
-import { __experimentalProductFieldSection as ProductFieldSection } from '@woocommerce/product-editor';
+	__experimentalDetailsNameField as DetailsNameField,
+	__experimentalDetailsFeatureField as DetailsFeatureField,
+	__experimentalDetailsCategoriesField as DetailsCategoriesField,
+	__experimentalDetailsSummaryField as DetailsSummaryField,
+	__experimentalDetailsDescriptionField as DetailsDescriptionField,
+	DETAILS_SECTION_ID,
+	TAB_GENERAL_ID,
+} from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
  */
-import {
-	DetailsNameField,
-	DetailsCategoriesField,
-	DetailsFeatureField,
-	DetailsSummaryField,
-	DetailsDescriptionField,
-} from './index';
-
-import { DETAILS_SECTION_ID, PLUGIN_ID, TAB_GENERAL_ID } from '../constants';
-
+import { PLUGIN_ID } from '../constants';
 import './product-details-section.scss';
 
 export const DetailsSectionFills = () => (

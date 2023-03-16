@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Update `config@3.3.7` (from `3.3.3`). Fix `node_env_var_name is not defined` error.
