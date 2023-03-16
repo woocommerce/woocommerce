@@ -208,7 +208,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		// Product attribute filters.
-		$attribute_subqueries = $this->get_attribute_subqueries( $query_args, $orders_stats_table );
+		$attribute_subqueries = $this->get_attribute_subqueries( $query_args, $product_lookup );
 		if ( $attribute_subqueries['join'] && $attribute_subqueries['where'] ) {
 			// Build a subquery for getting order IDs by product attribute(s).
 			// Done here since our use case is a little more complicated than get_object_where_filter() can handle.
