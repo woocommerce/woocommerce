@@ -16,10 +16,6 @@ runs:
           id: run-api-tests
           working-directory: plugins/woocommerce
           shell: bash
-          env:
-              BASE_URL: http://localhost:8086
-              USER_KEY: admin
-              USER_SECRET: password
           run: |
               pnpm exec playwright test \
               --config=tests/api-core-tests/playwright.config.js \
