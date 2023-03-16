@@ -1035,7 +1035,7 @@ class WC_Install {
 			}
 		}
 
-		dbDelta( self::get_schema() );
+		$db_delta_result = dbDelta( self::get_schema() );
 
 		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
 
@@ -1047,6 +1047,8 @@ class WC_Install {
 
 		// Clear table caches.
 		delete_transient( 'wc_attribute_taxonomies' );
+		
+		return $db_delta_result;
 	}
 
 	/**
