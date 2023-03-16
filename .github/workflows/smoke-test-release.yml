@@ -181,7 +181,6 @@ jobs:
 
     e2e-wp-latest:
         name: E2E on WP Latest
-        if: false # mytodo remove this later
         runs-on: ubuntu-20.04
         needs: [get-tag, api-wp-latest]
         permissions:
@@ -198,11 +197,14 @@ jobs:
                   install-filters: woocommerce
                   build: false
 
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-
             - name: Run E2E tests
+              id: run-e2e-composite-action
+              timeout-minutes: 60
+              uses: ./.github/actions/tests/run-e2e-tests
+              with:
+                  report-name: e2e-wp-latest--partial--run-${{ github.run_number }}
+                  playwright-config: ignore-plugin-tests.playwright.config.js
+                  tests: basic.spec.js # mytodo remove this later
               env:
                   ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
                   ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
@@ -213,9 +215,6 @@ jobs:
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
                   E2E_MAX_FAILURES: 25
                   RESET_SITE: true
-              timeout-minutes: 60
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js
 
             - name: Download 'e2e-update-wc' artifact
               if: success() || failure()
@@ -234,23 +233,26 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
-            - name: Configure AWS credentials
+            - name: Archive E2E test report
               if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1-node16
+              uses: actions/upload-artifact@v3
               with:
-                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
-                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  name: ${{ env.E2E_WP_LATEST_ARTIFACT }}
+                  path: |
+                      ${{ env.ALLURE_RESULTS_DIR }}
+                      ${{ env.ALLURE_REPORT_DIR }}
+                  if-no-files-found: ignore
+                  retention-days: 5
 
-            - name: Upload report to bucket
-              if: success() || failure()
-              run: |
-                  aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-results \
-                      --quiet
-                  aws s3 sync ${{ env.ALLURE_REPORT_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-report \
-                      --quiet
+            - name: Upload Allure files to bucket
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              with:
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  destination-dir: ${{ env.E2E_WP_LATEST_ARTIFACT }}
+                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
               if: success() || failure()
@@ -267,17 +269,6 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
-
-            - name: Archive E2E test report
-              if: success() || failure()
-              uses: actions/upload-artifact@v3
-              with:
-                  name: ${{ env.E2E_WP_LATEST_ARTIFACT }}
-                  path: |
-                      ${{ env.ALLURE_RESULTS_DIR }}
-                      ${{ env.ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
 
     get-wp-versions:
         name: Get WP L-1 & L-2 version numbers

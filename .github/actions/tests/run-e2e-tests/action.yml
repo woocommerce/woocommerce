@@ -8,6 +8,9 @@ inputs:
         required: true
     tests:
         description: Specific tests to run, separated by single whitespace. See https://playwright.dev/docs/test-cli
+    playwright-config:
+        description: The Playwright configuration file to use.
+        default: playwright.config.js
 
 runs:
     using: composite
@@ -26,7 +29,7 @@ runs:
           shell: bash
           run: |
               pnpm exec playwright test \
-              --config=tests/e2e-pw/playwright.config.js \
+              --config=tests/e2e-pw/${{ inputs.playwright-config }} \
               ${{ inputs.tests }}
 
         - name: Generate Test report.
