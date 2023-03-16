@@ -27,8 +27,17 @@ type BaseTreeProps = {
 	 * not select their parents and selecting parents does not select their children.
 	 */
 	shouldNotRecursivelySelect?: boolean;
+	/**
+	 * When set, shows a 'create new' button when the typed value does not exist on the items.
+	 */
 	allowCreate?: boolean;
+	/**
+	 * The value to be used for comparison to determine if 'create new' button should be shown.
+	 */
 	createValue?: string;
+	/**
+	 * Called when the 'create new' button is clicked.
+	 */
 	onCreateNew?: () => void;
 	isExpanded?: boolean;
 	/**
@@ -63,7 +72,9 @@ type BaseTreeProps = {
 	 * @see {@link LinkedTree}
 	 */
 	shouldItemBeHighlighted?( item: LinkedTree ): boolean;
-
+	/**
+	 * Called when the create button is clicked to help closing any related popover.
+	 */
 	onTreeBlur?(): void;
 };
 
