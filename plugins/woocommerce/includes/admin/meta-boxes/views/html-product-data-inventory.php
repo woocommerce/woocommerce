@@ -115,17 +115,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		}
 
-		woocommerce_wp_select(
-			array(
-				'id'            => '_stock_status',
-				'value'         => $product_object->get_stock_status( 'edit' ),
-				'wrapper_class' => 'stock_status_field hide_if_variable hide_if_external hide_if_grouped',
-				'label'         => __( 'Stock status', 'woocommerce' ),
-				'options'       => wc_get_product_stock_status_options(),
-				'desc_tip'      => true,
-				'description'   => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
-			)
+		$stock_status_options = wc_get_product_stock_status_options();
+		$common_stock_status_args = array(
+			'id'            => '_stock_status',
+			'value'         => $product_object->get_stock_status('edit'),
+			'wrapper_class' => 'stock_status_field hide_if_variable hide_if_external hide_if_grouped',
+			'label'         => __('Stock status', 'woocommerce'),
+			'options'       => $stock_status_options,
 		);
+
+		if ( apply_filters( 'woocommerce_stock_status_use_radio', count( $stock_status_options ) === 3 ) ) {
+			woocommerce_wp_radio( $common_stock_status_args );
+		} else {
+			$select_input_args = array(
+				'desc_tip'    => true,
+				'description' => __('Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce'),
+			);
+			woocommerce_wp_select( array_merge( $common_stock_status_args, $select_input_args ) );
+		}
 
 		do_action( 'woocommerce_product_options_stock_status' );
 		?>
