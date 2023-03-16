@@ -66,8 +66,6 @@ export const SelectTree = function SelectTree( {
 
 	const [ isFocused, setIsFocused ] = useState( false );
 
-	const preventClose = useRef( false ); // using a ref instead of state to prevent re-renders
-
 	const comboBoxRef = useRef< HTMLDivElement >( null );
 
 	// getting the parent's parent div width to set the width of the dropdown
@@ -137,7 +135,6 @@ export const SelectTree = function SelectTree( {
 								// in that case we need to know when the focus has left the tree
 								if (
 									isOpen &&
-									! preventClose.current &&
 									! document
 										.querySelector(
 											'.woocommerce-experimental-select-control ~ .components-popover'
@@ -146,15 +143,11 @@ export const SelectTree = function SelectTree( {
 								) {
 									onClose();
 								}
-								if ( preventClose.current ) {
-									preventClose.current = false;
-								}
 								setIsFocused( false );
 							},
 							onKeyDown: ( event ) => {
 								if ( event.key === 'ArrowDown' ) {
 									event.preventDefault();
-									preventClose.current = true;
 									(
 										document.querySelector(
 											'.components-checkbox-control__input-container > input'
