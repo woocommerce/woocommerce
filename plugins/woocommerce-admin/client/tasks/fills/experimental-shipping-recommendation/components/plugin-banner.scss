@@ -1,5 +1,5 @@
 .woocommerce-task-shipping-recommendation__plugins-install {
-	padding: $gap-large calc( $gap + $gap-smallest );
+	padding: $gap-large calc($gap + $gap-smallest);
 	border: 1px solid #ddd;
 	border-radius: 3px;
 	justify-content: space-around;
@@ -46,7 +46,7 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: space-around;
-		gap: calc( $gap-smaller + $gap-smallest / 2 );
+		gap: calc($gap-smaller + $gap-smallest / 2);
 	}
 
 	.woocommerce-task-shipping-recommendations_plugins-buttons {
@@ -82,5 +82,5 @@
 
 .woocommerce-task-shipping-recommendations_skip-button.dual {
 	// we only want this to center this in a dual partner layout
-	margin-inline: calc( 50% - 34px );
+	margin-inline: calc(50% - 34px);
 }
