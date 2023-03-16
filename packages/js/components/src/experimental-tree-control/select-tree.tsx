@@ -5,7 +5,7 @@
 import { createElement, useRef, useState, Fragment } from 'react';
 import classNames from 'classnames';
 import { search } from '@wordpress/icons';
-import { Dropdown } from '@wordpress/components';
+import { Dropdown, Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -40,6 +40,7 @@ interface ThisProps {
 	myRef?: React.ForwardedRef< HTMLOListElement >;
 	suffix?: JSX.Element | null;
 	placeholder?: string;
+	isLoading?: boolean;
 }
 
 export const SelectTree = function SelectTree( {
@@ -51,6 +52,7 @@ export const SelectTree = function SelectTree( {
 	myRef: ref,
 	suffix = <SuffixIcon icon={ search } />,
 	placeholder,
+	isLoading,
 	...props
 }: TreeControlProps & ThisProps ) {
 	const filteredItems = getFilteredItems(
@@ -67,24 +69,37 @@ export const SelectTree = function SelectTree( {
 
 	const comboBoxRef = useRef< HTMLDivElement >( null );
 
+	// getting the parent's parent div width to set the width of the dropdown
+	const comboBoxWidth =
+		comboBoxRef.current?.parentElement?.parentElement?.getBoundingClientRect()
+			.width;
+
 	return (
 		<Dropdown
 			className="woocommerce-experimental-select-tree-control__dropdown"
 			contentClassName="woocommerce-experimental-select-tree-control__dropdown-content"
 			focusOnMount={ false }
-			renderContent={ ( { onClose } ) => (
-				<Tree
-					{ ...props }
-					ref={ ref }
-					items={ linkedTree }
-					onTreeBlur={ onClose }
-					style={ {
-						// getting the parent's parent div width to set the width of the dropdown
-						width: comboBoxRef.current?.parentElement?.parentElement?.getBoundingClientRect()
-							.width,
-					} }
-				/>
-			) }
+			renderContent={ ( { onClose } ) =>
+				isLoading ? (
+					<div
+						style={ {
+							width: comboBoxWidth,
+						} }
+					>
+						<Spinner />
+					</div>
+				) : (
+					<Tree
+						{ ...props }
+						ref={ ref }
+						items={ linkedTree }
+						onTreeBlur={ onClose }
+						style={ {
+							width: comboBoxWidth,
+						} }
+					/>
+				)
+			}
 			renderToggle={ ( { isOpen, onToggle, onClose } ) => (
 				<div
 					className={ classNames(
@@ -116,7 +131,7 @@ export const SelectTree = function SelectTree( {
 								}
 								setIsFocused( true );
 							},
-							onBlur: ( event: any ) => {
+							onBlur: ( event ) => {
 								// if blurring to an element inside the dropdown, don't close it
 								// in that case we need to know when the focus has left the tree
 								if (
@@ -135,7 +150,7 @@ export const SelectTree = function SelectTree( {
 								}
 								setIsFocused( false );
 							},
-							onKeyDown: ( event: KeyboardEvent ) => {
+							onKeyDown: ( event ) => {
 								if ( event.key === 'ArrowDown' ) {
 									event.preventDefault();
 									preventClose.current = true;
@@ -143,13 +158,13 @@ export const SelectTree = function SelectTree( {
 										document.querySelector(
 											'.components-checkbox-control__input-container > input'
 										) as HTMLInputElement
-									 ).focus();
+									 )?.focus();
 								}
 								if ( event.key === 'Tab' ) {
 									onClose();
 								}
 							},
-							onChange: ( event: any ) =>
+							onChange: ( event ) =>
 								props.onInputChange &&
 								props.onInputChange( event.target.value ),
 							placeholder,

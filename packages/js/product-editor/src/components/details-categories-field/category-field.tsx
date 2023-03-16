@@ -121,27 +121,6 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 		[ onInputChange ]
 	);
 
-	const onSelect = ( itemId: number, selected: boolean ) => {
-		if ( itemId === -99 ) {
-			setShowCreateNewModal( true );
-			return;
-		}
-		if ( selected ) {
-			const item = categoryTreeKeyValues[ itemId ].data;
-			if ( item ) {
-				onChange(
-					getSelectedWithParents(
-						[ ...value ],
-						item,
-						categoryTreeKeyValues
-					)
-				);
-			}
-		} else {
-			onChange( value.filter( ( i ) => i.id !== itemId ) );
-		}
-	};
-
 	const categoryFieldGetFilteredItems = (
 		allItems: ProductCategoryLinkedList[],
 		inputValue: string,
@@ -149,10 +128,6 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 	): ProductCategoryLinkedList[] => {
 		return getFilteredItems( allItems, inputValue, selectedItems );
 	};
-
-	const selectedIds = value.map( ( item ) => item.id );
-
-	const treeControlRef = useRef< any >();
 
 	return (
 		<>
@@ -162,6 +137,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 				allowCreate
 				createValue={ searchValue }
 				label={ label }
+				isLoading={ isSearching }
 				onInputChange={ searchDelayed }
 				getFilteredItems={ categoryFieldGetFilteredItems }
 				placeholder={ value.length === 0 ? placeholder : '' }
@@ -200,133 +176,6 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 					onChange( newValues );
 				} }
 			></SelectTree>
-			<SelectControl< ProductCategoryLinkedList >
-				className="woocommerce-category-field-dropdown components-base-control"
-				multiple
-				items={ categoriesSelectList }
-				label={ label }
-				selected={ value }
-				getItemLabel={ ( item ) => item?.name || '' }
-				getItemValue={ ( item ) => item?.id || '' }
-				onSelect={ ( item ) => {
-					if ( item ) {
-						onSelect( item.id, ! selectedIds.includes( item.id ) );
-					}
-				} }
-				onRemove={ ( item ) => item && onSelect( item.id, false ) }
-				onInputChange={ searchDelayed }
-				getFilteredItems={ categoryFieldGetFilteredItems }
-				placeholder={ value.length === 0 ? placeholder : '' }
-				__experimentalOpenMenuOnFocus
-				stateReducer={ ( state, actionAndChanges ) => {
-					const { changes, type } = actionAndChanges;
-					switch ( type ) {
-						case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
-							return {
-								...changes,
-								inputValue: state.inputValue,
-							};
-						case selectControlStateChangeTypes.ItemClick:
-							if (
-								changes.selectedItem &&
-								changes.selectedItem.id === -99
-							) {
-								return changes;
-							}
-							return {
-								...changes,
-								isOpen: true,
-								inputValue: state.inputValue,
-								highlightedIndex: state.highlightedIndex,
-							};
-						case selectControlStateChangeTypes.InputKeyDownEscape:
-							return {
-								...changes,
-								isOpen: false,
-							};
-						default:
-							return changes;
-					}
-				} }
-			>
-				{ ( {
-					items,
-					isOpen,
-					getMenuProps,
-					getItemProps,
-					highlightedIndex,
-				} ) => {
-					const { ref } = getMenuProps();
-					const width = document
-						.querySelector(
-							'.woocommerce-experimental-select-control__combo-box-wrapper'
-						)
-						?.getBoundingClientRect().width; // TODO find a better way?
-					return (
-						<Popover
-							ref={ ref }
-							// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
-							__unstableSlotName="category-popover"
-						>
-							{ isOpen && (
-								<TreeControl
-									ref={ treeControlRef }
-									multiple
-									shouldNotRecursivelySelect
-									allowCreate
-									createValue={ searchValue }
-									onCreateNew={ () => {
-										setShowCreateNewModal( true );
-									} }
-									style={ {
-										width,
-									} }
-									items={ mapFromCategoryType( items ) }
-									selected={ mapFromCategoryType( value ) }
-									onSelect={ ( selectedItems ) => {
-										if ( Array.isArray( selectedItems ) ) {
-											const newItems: ProductCategoryLinkedList[] =
-												mapToCategoryType(
-													selectedItems.filter(
-														( {
-															id: selectedItemValue,
-														} ) =>
-															! value.some(
-																( item ) =>
-																	item.id ===
-																	+selectedItemValue
-															)
-													)
-												);
-											onChange( [
-												...value,
-												...newItems,
-											] );
-										}
-									} }
-									onRemove={ ( removedItems ) => {
-										if ( Array.isArray( removedItems ) ) {
-											const newValues = value.filter(
-												( item ) =>
-													! removedItems.some(
-														( {
-															id: removedValue,
-														} ) =>
-															item.id ===
-															+removedValue
-													)
-											);
-											onChange( newValues );
-										}
-									} }
-								></TreeControl>
-							) }
-						</Popover>
-					);
-				} }
-			</SelectControl>
-			{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
-			<Popover.Slot name="category-popover" />
 			{ showCreateNewModal && (
 				<CreateCategoryModal
 					initialCategoryName={ searchValue }

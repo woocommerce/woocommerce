@@ -12,7 +12,7 @@ import { Props } from './types';
 type ComboBoxProps = {
 	children?: JSX.Element | JSX.Element[] | null;
 	comboBoxProps: Props;
-	inputProps: Props;
+	inputProps: JSX.IntrinsicElements[ 'input' ];
 	suffix?: JSX.Element | null;
 };
 
@@ -60,7 +60,7 @@ export const ComboBox = ( {
 					<input
 						{ ...inputProps }
 						ref={ ( node ) => {
-							if ( false ) { // TODO
+							if ( typeof inputProps.ref === 'function' ) {
 								inputRef.current = node;
 								(
 									inputProps.ref as unknown as (
