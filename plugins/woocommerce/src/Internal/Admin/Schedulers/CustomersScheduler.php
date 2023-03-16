@@ -28,6 +28,7 @@ class CustomersScheduler extends ImportScheduler {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_new_customer', array( __CLASS__, 'schedule_import' ) );
+		add_action( 'added_user_meta', array( __CLASS__, 'schedule_import_via_last_active' ), 10, 3 );
 		add_action( 'updated_user_meta', array( __CLASS__, 'schedule_import_via_last_active' ), 10, 3 );
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( __CLASS__, 'schedule_anonymize' ) );
 		add_action( 'delete_user', array( __CLASS__, 'schedule_user_delete' ) );
