@@ -1835,7 +1835,7 @@ importers:
       '@babel/preset-typescript': 7.16.7_@babel+core@7.17.8
       '@babel/runtime': 7.17.7
       '@octokit/core': 3.5.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.10_vvsky5staxf7riqd5ia3sjvzsm
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.10_kgzwhhiezcyg2m3alqq7chac3a
       '@testing-library/dom': 8.11.3
       '@testing-library/jest-dom': 5.16.2
       '@testing-library/react': 12.1.4_sfoxds7t5ydpegc3knd667wn6m
@@ -1944,8 +1944,8 @@ importers:
       url-loader: 1.1.2_webpack@5.70.0
       webpack: 5.70.0_webpack-cli@4.9.2
       webpack-bundle-analyzer: 3.9.0
-      webpack-cli: 4.9.2_p2twkydmemoqwqiml4djllh5wi
-      webpack-dev-server: 4.11.1_jaxrlecucqtr54lmhmx67obzmy
+      webpack-cli: 4.9.2_ciq5cijsysjq5sik752b4nyq2m
+      webpack-dev-server: 4.12.0_jaxrlecucqtr54lmhmx67obzmy
       webpack-fix-style-only-entries: 0.6.1
       webpack-merge: 5.8.0
       webpack-rtl-plugin: 2.0.0
@@ -4192,15 +4192,9 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-annotate-as-pure': 7.16.7
-<<<<<<< HEAD
-      '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.12.9
-      '@babel/helper-plugin-utils': 7.18.9
-      '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.12.9
-=======
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.17.8
       '@babel/helper-plugin-utils': 7.18.9
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.17.8
->>>>>>> a326f2a413 (Fix up frozen lock file)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4211,19 +4205,11 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.16.12
-      '@babel/helper-annotate-as-pure': 7.16.7
-      '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.16.12
-      '@babel/helper-plugin-utils': 7.18.9
-      '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.16.12
-=======
       '@babel/core': 7.12.9
       '@babel/helper-annotate-as-pure': 7.18.6
       '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.12.9
       '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.12.9
->>>>>>> a326f2a413 (Fix up frozen lock file)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -7437,7 +7423,7 @@ packages:
     resolution: {integrity: sha512-IAdDC7T0+wEB4y2gbIL0uOXEYpiZEeuFUTVbdGq+UwCcF35T/tS8KrmMomEwEc5wBbyfH3PJVpTSUqrhPDXFcQ==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      core-js-pure: 3.19.1
+      core-js-pure: 3.29.1
       regenerator-runtime: 0.13.9
 
   /@babel/runtime/7.17.7:
@@ -9503,7 +9489,7 @@ packages:
       playwright-core: 1.30.0
     dev: true
 
-  /@pmmmwh/react-refresh-webpack-plugin/0.5.10_vvsky5staxf7riqd5ia3sjvzsm:
+  /@pmmmwh/react-refresh-webpack-plugin/0.5.10_kgzwhhiezcyg2m3alqq7chac3a:
     resolution: {integrity: sha512-j0Ya0hCFZPd4x40qLzbhGsh9TMtdb+CJQiso+WxLOPNasohq9cc5SNUcwsZaRH6++Xh91Xkm/xHCkuIiIu0LUA==}
     engines: {node: '>= 10.13'}
     peerDependencies:
@@ -9531,7 +9517,7 @@ packages:
     dependencies:
       ansi-html-community: 0.0.8
       common-path-prefix: 3.0.0
-      core-js-pure: 3.29.0
+      core-js-pure: 3.29.1
       error-stack-parser: 2.0.6
       find-up: 5.0.0
       html-entities: 2.3.2
@@ -9540,7 +9526,7 @@ packages:
       schema-utils: 3.1.1
       source-map: 0.7.3
       webpack: 5.70.0_webpack-cli@4.9.2
-      webpack-dev-server: 4.11.1_jaxrlecucqtr54lmhmx67obzmy
+      webpack-dev-server: 4.12.0_jaxrlecucqtr54lmhmx67obzmy
     dev: true
 
   /@pmmmwh/react-refresh-webpack-plugin/0.5.1_a3gyllrqvxpec3fpybsrposvju:
@@ -9571,11 +9557,11 @@ packages:
     dependencies:
       ansi-html-community: 0.0.8
       common-path-prefix: 3.0.0
-      core-js-pure: 3.19.1
+      core-js-pure: 3.29.1
       error-stack-parser: 2.0.6
       find-up: 5.0.0
       html-entities: 2.3.2
-      loader-utils: 2.0.2
+      loader-utils: 2.0.4
       react-refresh: 0.11.0
       schema-utils: 3.1.1
       source-map: 0.7.3
@@ -11604,7 +11590,7 @@ packages:
       util-deprecate: 1.0.2
       watchpack: 2.3.1
       webpack: 4.46.0_webpack-cli@3.3.12
-      ws: 8.12.1
+      ws: 8.13.0
     transitivePeerDependencies:
       - '@types/react'
       - acorn
@@ -11681,7 +11667,7 @@ packages:
       util-deprecate: 1.0.2
       watchpack: 2.3.1
       webpack: 4.46.0
-      ws: 8.12.1
+      ws: 8.13.0
     transitivePeerDependencies:
       - '@types/react'
       - acorn
@@ -11756,7 +11742,7 @@ packages:
       util-deprecate: 1.0.2
       watchpack: 2.3.1
       webpack: 4.46.0_webpack-cli@3.3.12
-      ws: 8.12.1
+      ws: 8.13.0
     transitivePeerDependencies:
       - '@types/react'
       - acorn
@@ -11831,7 +11817,7 @@ packages:
       util-deprecate: 1.0.2
       watchpack: 2.3.1
       webpack: 4.46.0_webpack-cli@3.3.12
-      ws: 8.12.1
+      ws: 8.13.0
     transitivePeerDependencies:
       - '@types/react'
       - acorn
@@ -11908,7 +11894,7 @@ packages:
       util-deprecate: 1.0.2
       watchpack: 2.3.1
       webpack: 4.46.0
-      ws: 8.12.1
+      ws: 8.13.0
     transitivePeerDependencies:
       - '@types/react'
       - acorn
@@ -12793,7 +12779,7 @@ packages:
       core-js: 3.21.1
       estraverse: 5.3.0
       global: 4.4.0
-      loader-utils: 2.0.2
+      loader-utils: 2.0.4
       lodash: 4.17.21
       prettier: 2.3.0
       react: 17.0.2
@@ -12866,7 +12852,7 @@ packages:
       '@storybook/theming': 6.4.19_sfoxds7t5ydpegc3knd667wn6m
       copy-to-clipboard: 3.3.1
       core-js: 3.25.5
-      core-js-pure: 3.19.1
+      core-js-pure: 3.29.1
       downshift: 6.1.12_react@17.0.2
       emotion-theming: 10.3.0_gfrer23gq2rp2t523t6qbxrx6m
       fuse.js: 3.6.1
@@ -12906,7 +12892,7 @@ packages:
       '@storybook/theming': 6.4.19_sfoxds7t5ydpegc3knd667wn6m
       copy-to-clipboard: 3.3.1
       core-js: 3.25.5
-      core-js-pure: 3.19.1
+      core-js-pure: 3.29.1
       downshift: 6.1.12_react@17.0.2
       emotion-theming: 10.3.0_gfrer23gq2rp2t523t6qbxrx6m
       fuse.js: 3.6.1
@@ -13060,7 +13046,7 @@ packages:
       '@svgr/core': 5.5.0
       '@svgr/plugin-jsx': 5.5.0
       '@svgr/plugin-svgo': 5.5.0
-      loader-utils: 2.0.2
+      loader-utils: 2.0.4
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -13161,10 +13147,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-error-boundary: 3.1.4_react@17.0.2
-<<<<<<< HEAD
-=======
     dev: true
->>>>>>> b993b30c57 (Fix up frozen lock file)
 
   /@testing-library/react/12.1.4_sfoxds7t5ydpegc3knd667wn6m:
     resolution: {integrity: sha512-jiPKOm7vyUw311Hn/HlNQ9P8/lHNtArAx0PisXyFixDDvfl8DbD6EUdbshK5eqauvBSvzZd19itqQ9j3nferJA==}
@@ -14578,7 +14561,7 @@ packages:
       webpack-cli: 4.x.x
     dependencies:
       webpack: 5.70.0_webpack-cli@4.9.2
-      webpack-cli: 4.9.2_p2twkydmemoqwqiml4djllh5wi
+      webpack-cli: 4.9.2_ciq5cijsysjq5sik752b4nyq2m
     dev: true
 
   /@webpack-cli/info/1.4.1_webpack-cli@4.9.2:
@@ -14587,10 +14570,10 @@ packages:
       webpack-cli: 4.x.x
     dependencies:
       envinfo: 7.8.1
-      webpack-cli: 4.9.2_p2twkydmemoqwqiml4djllh5wi
+      webpack-cli: 4.9.2_ciq5cijsysjq5sik752b4nyq2m
     dev: true
 
-  /@webpack-cli/serve/1.6.1_oqvzz5d42buklxsrf2oiyc3dxq:
+  /@webpack-cli/serve/1.6.1_ht4xi23ezbiqlmpjtiwigrodwi:
     resolution: {integrity: sha512-gNGTiTrjEVQ0OcVnzsRSqTxaBSr+dmTfm+qJsCDluky8uhdLWep7Gcr62QsAKHTMxjCS/8nEITsmFAhfIx+QSw==}
     peerDependencies:
       webpack-cli: 4.x.x
@@ -14599,8 +14582,8 @@ packages:
       webpack-dev-server:
         optional: true
     dependencies:
-      webpack-cli: 4.9.2_p2twkydmemoqwqiml4djllh5wi
-      webpack-dev-server: 4.11.1_jaxrlecucqtr54lmhmx67obzmy
+      webpack-cli: 4.9.2_ciq5cijsysjq5sik752b4nyq2m
+      webpack-dev-server: 4.12.0_jaxrlecucqtr54lmhmx67obzmy
     dev: true
 
   /@webpack-cli/serve/1.6.1_webpack-cli@4.9.2:
@@ -20857,15 +20840,9 @@ packages:
     dependencies:
       browserslist: 4.21.4
 
-  /core-js-pure/3.19.1:
-    resolution: {integrity: sha512-Q0Knr8Es84vtv62ei6/6jXH/7izKmOrtrxH9WJTHLCMAVeU+8TF8z8Nr08CsH4Ot0oJKzBzJJL9SJBYIv7WlfQ==}
-    deprecated: core-js-pure@<3.23.3 is no longer maintained and not recommended for usage due to the number of issues. Because of the V8 engine whims, feature detection in old core-js versions could cause a slowdown up to 100x even if nothing is polyfilled. Some versions have web compatibility issues. Please, upgrade your dependencies to the actual version of core-js-pure.
+  /core-js-pure/3.29.1:
+    resolution: {integrity: sha512-4En6zYVi0i0XlXHVz/bi6l1XDjCqkKRq765NXuX+SnaIatlE96Odt5lMLjdxUiNI1v9OXI5DSLWYPlmTfkTktg==}
     requiresBuild: true
-
-  /core-js-pure/3.29.0:
-    resolution: {integrity: sha512-v94gUjN5UTe1n0yN/opTihJ8QBWD2O8i19RfTZR7foONPWArnjB96QA/wk5ozu1mm6ja3udQCzOzwQXTxi3xOQ==}
-    requiresBuild: true
-    dev: true
 
   /core-js/1.2.7:
     resolution: {integrity: sha512-ZiPp9pZlgxpWRu0M+YWbm6+aQ84XEfH1JRXvfOc/fILWI0VKhLC2LX13X1NYq4fULzLMq7Hfh43CSo2/aIaUPA==}
@@ -21160,7 +21137,7 @@ packages:
       webpack: ^4.27.0 || ^5.0.0
     dependencies:
       icss-utils: 5.1.0_postcss@8.4.12
-      loader-utils: 2.0.2
+      loader-utils: 2.0.4
       postcss: 8.4.12
       postcss-modules-extract-imports: 3.0.0_postcss@8.4.12
       postcss-modules-local-by-default: 4.0.0_postcss@8.4.12
@@ -24630,7 +24607,7 @@ packages:
       deepmerge: 4.3.0
       fs-extra: 9.1.0
       glob: 7.2.0
-      memfs: 3.3.0
+      memfs: 3.4.13
       minimatch: 3.1.2
       schema-utils: 2.7.0
       semver: 7.3.8
@@ -24694,7 +24671,7 @@ packages:
       eslint: 8.32.0
       fs-extra: 9.1.0
       glob: 7.2.0
-      memfs: 3.3.0
+      memfs: 3.4.13
       minimatch: 3.1.2
       schema-utils: 2.7.0
       semver: 7.3.8
@@ -24725,7 +24702,7 @@ packages:
       deepmerge: 4.3.0
       fs-extra: 9.1.0
       glob: 7.2.0
-      memfs: 3.3.0
+      memfs: 3.4.13
       minimatch: 3.1.2
       schema-utils: 2.7.0
       semver: 7.3.8
@@ -29877,6 +29854,13 @@ packages:
       package-json: 4.0.1
     dev: true
 
+  /launch-editor/2.6.0:
+    resolution: {integrity: sha512-JpDCcQnyAAzZZaZ7vEiSqL690w7dAEyLao+KC96zBplnYbJS7TYNjvM3M7y3dGz+v7aIsJk3hllWuc0kWAjyRQ==}
+    dependencies:
+      picocolors: 1.0.0
+      shell-quote: 1.7.3
+    dev: true
+
   /lazy-cache/0.2.7:
     resolution: {integrity: sha512-gkX52wvU/R8DVMMt78ATVPFMJqfW8FPz1GZ1sVHBVQHmu/WvhIWE4cE1GBzhJNFicDeYhnwp6Rl35BcAIM3YOQ==}
     engines: {node: '>=0.10.0'}
@@ -34817,7 +34801,7 @@ packages:
       is-touch-device: 1.0.1
       lodash: 4.17.21
       moment: 2.29.4
-      object.assign: 4.1.2
+      object.assign: 4.1.4
       object.values: 1.1.5
       prop-types: 15.8.1
       raf: 3.4.1
@@ -37646,7 +37630,7 @@ packages:
     peerDependencies:
       webpack: ^4.0.0 || ^5.0.0
     dependencies:
-      loader-utils: 2.0.2
+      loader-utils: 2.0.4
       schema-utils: 3.1.1
       webpack: 5.70.0
     dev: true
@@ -39578,7 +39562,7 @@ packages:
       file-loader:
         optional: true
     dependencies:
-      loader-utils: 2.0.2
+      loader-utils: 2.0.4
       mime-types: 2.1.35
       schema-utils: 3.1.1
       webpack: 5.70.0_bgqcrdgdviybk52kjcpjat65sa
@@ -40179,7 +40163,7 @@ packages:
       webpack: 5.70.0_webpack-cli@3.3.12
       yargs: 13.3.2
 
-  /webpack-cli/4.9.2_p2twkydmemoqwqiml4djllh5wi:
+  /webpack-cli/4.9.2_ciq5cijsysjq5sik752b4nyq2m:
     resolution: {integrity: sha512-m3/AACnBBzK/kMTcxWHcZFPrw/eQuY4Df1TxvIWfWM2x7mRqBQCqKEd96oCUa9jkapLBaFfRce33eGDb4Pr7YQ==}
     engines: {node: '>=10.13.0'}
     hasBin: true
@@ -40202,7 +40186,7 @@ packages:
       '@discoveryjs/json-ext': 0.5.7
       '@webpack-cli/configtest': 1.1.1_spmstbzrmxjdafr7ccogoqrx6e
       '@webpack-cli/info': 1.4.1_webpack-cli@4.9.2
-      '@webpack-cli/serve': 1.6.1_oqvzz5d42buklxsrf2oiyc3dxq
+      '@webpack-cli/serve': 1.6.1_ht4xi23ezbiqlmpjtiwigrodwi
       colorette: 2.0.16
       commander: 7.2.0
       execa: 5.1.1
@@ -40212,7 +40196,7 @@ packages:
       rechoir: 0.7.1
       webpack: 5.70.0_webpack-cli@4.9.2
       webpack-bundle-analyzer: 3.9.0
-      webpack-dev-server: 4.11.1_jaxrlecucqtr54lmhmx67obzmy
+      webpack-dev-server: 4.12.0_jaxrlecucqtr54lmhmx67obzmy
       webpack-merge: 5.8.0
     dev: true
 
@@ -40273,7 +40257,7 @@ packages:
     dependencies:
       colorette: 1.4.0
       mem: 8.1.1
-      memfs: 3.3.0
+      memfs: 3.4.13
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 3.1.1
@@ -40294,8 +40278,8 @@ packages:
       webpack: 5.70.0_webpack-cli@4.9.2
     dev: true
 
-  /webpack-dev-server/4.11.1_jaxrlecucqtr54lmhmx67obzmy:
-    resolution: {integrity: sha512-lILVz9tAUy1zGFwieuaQtYiadImb5M3d+H+L1zDYalYoDl0cksAB1UNyuE5MMWJrG6zR1tXkCP2fitl7yoUJiw==}
+  /webpack-dev-server/4.12.0_jaxrlecucqtr54lmhmx67obzmy:
+    resolution: {integrity: sha512-XRN9YRnvOj3TQQ5w/0pR1y1xDcVnbWtNkTri46kuEbaWUPTHsWUvOyAAI7PZHLY+hsFki2kRltJjKMw7e+IiqA==}
     engines: {node: '>= 12.13.0'}
     hasBin: true
     peerDependencies:
@@ -40324,6 +40308,7 @@ packages:
       html-entities: 2.3.2
       http-proxy-middleware: 2.0.6_fs2s5z67bp6aaux2wfl66yxz5e
       ipaddr.js: 2.0.1
+      launch-editor: 2.6.0
       open: 8.4.0
       p-retry: 4.6.1
       rimraf: 3.0.2
@@ -40333,9 +40318,9 @@ packages:
       sockjs: 0.3.24
       spdy: 4.0.2
       webpack: 5.70.0_webpack-cli@4.9.2
-      webpack-cli: 4.9.2_p2twkydmemoqwqiml4djllh5wi
+      webpack-cli: 4.9.2_ciq5cijsysjq5sik752b4nyq2m
       webpack-dev-middleware: 5.3.3_webpack@5.70.0
-      ws: 8.12.1
+      ws: 8.13.0
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -40688,7 +40673,7 @@ packages:
       tapable: 2.2.1
       terser-webpack-plugin: 5.2.5_acorn@8.8.1+webpack@5.70.0
       watchpack: 2.3.1
-      webpack-cli: 4.9.2_p2twkydmemoqwqiml4djllh5wi
+      webpack-cli: 4.9.2_ciq5cijsysjq5sik752b4nyq2m
       webpack-sources: 3.2.3
     transitivePeerDependencies:
       - '@swc/core'
@@ -41066,6 +41051,20 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+    dev: false
+
+  /ws/8.13.0:
+    resolution: {integrity: sha512-x9vcZYTrFPC7aSIbj7sRCYo7L/Xb8Iy+pW0ng0wt2vCJv7M9HOMy0UoN3rr+IFC7hb7vXoqS+P9ktyLLLhO+LA==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+    dev: true
 
   /x-is-string/0.1.0:
     resolution: {integrity: sha1-R0tQhlrzpJqcRlfwWs0UVFj3fYI=}
