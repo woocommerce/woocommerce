@@ -4,12 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import { MenuItem } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 
 /**
  * Internal dependencies
  */
 import { FeedbackIcon } from '../../images/feedback-icon';
-import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
 
 export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 	const { showCesModal } = useDispatch( CES_STORE_KEY );
