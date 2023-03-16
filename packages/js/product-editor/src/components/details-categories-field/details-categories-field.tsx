@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useFormContext } from '@woocommerce/components';
-import { Product, ProductCategory } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { createElement } from '@wordpress/element';
 
 /**
