@@ -1,4 +1,4 @@
 Significance: minor
 Type: dev
 
-dd CES data store to @woocommerce/customer-effort-score
+Add CES data store to @woocommerce/customer-effort-score
