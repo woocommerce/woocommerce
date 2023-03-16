@@ -22,11 +22,12 @@ class ShippingPartnerSuggestions {
 		}
 
 		$rule_evaluator = new RuleEvaluator();
-		foreach ( $specs as $spec ) {
+		foreach ( $specs as &$spec ) {
 			$spec = is_array( $spec ) ? (object) $spec : $spec;
 			if ( isset( $spec->is_visible ) ) {
 				$is_visible = $rule_evaluator->evaluate( $spec->is_visible );
 				if ( $is_visible ) {
+					$spec->is_visible = true;
 					$suggestions[] = $spec;
 				}
 			}
