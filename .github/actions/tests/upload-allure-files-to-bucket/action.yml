@@ -32,8 +32,9 @@ runs:
           shell: bash
           run: |
               echo "Uploading allure-results folder..."
-              aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
+              aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} \
                   ${{ inputs.s3-bucket }}/artifacts/${{ github.run_id }}/${{ inputs.destination-dir }}/allure-results \
+                  --recursive \
                   --quiet
               echo "Done"
 
@@ -41,7 +42,8 @@ runs:
           shell: bash
           run: |
               echo "Uploading allure-report folder..."
-              aws s3 sync ${{ env.ALLURE_REPORT_DIR }} \
+              aws s3 cp ${{ env.ALLURE_REPORT_DIR }} \
                   ${{ inputs.s3-bucket }}/artifacts/${{ github.run_id }}/${{ inputs.destination-dir }}/allure-report \
+                  --recursive \
                   --quiet
               echo "Done"
