@@ -28,8 +28,6 @@ class CustomersScheduler extends ImportScheduler {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_new_customer', array( __CLASS__, 'schedule_import' ) );
-		add_action( 'added_user_meta', array( __CLASS__, 'schedule_import_via_last_active' ), 10, 3 );
-		add_action( 'updated_user_meta', array( __CLASS__, 'schedule_import_via_last_active' ), 10, 3 );
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( __CLASS__, 'schedule_anonymize' ) );
 		add_action( 'delete_user', array( __CLASS__, 'schedule_user_delete' ) );
 		add_action( 'remove_user_from_blog', array( __CLASS__, 'schedule_user_delete' ) );
@@ -143,21 +141,6 @@ class CustomersScheduler extends ImportScheduler {
 	 */
 	public static function schedule_import( $user_id ) {
 		self::schedule_action( 'import', array( $user_id ) );
-	}
-
-	/**
-	 * Schedule an import if the "last active" meta value was changed.
-	 * Function expects to be hooked into the `updated_user_meta` action.
-	 *
-	 * @internal
-	 * @param int    $meta_id ID of updated metadata entry.
-	 * @param int    $user_id ID of the user being updated.
-	 * @param string $meta_key Meta key being updated.
-	 */
-	public static function schedule_import_via_last_active( $meta_id, $user_id, $meta_key ) {
-		if ( 'wc_last_active' === $meta_key ) {
-			self::schedule_import( $user_id );
-		}
 	}
 
 	/**

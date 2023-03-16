@@ -85,8 +85,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_update_customer', array( __CLASS__, 'update_registered_customer' ) );
-
 		add_action( 'profile_update', array( __CLASS__, 'update_registered_customer' ) );
+
+		add_action( 'added_user_meta', array( __CLASS__, 'update_registered_customer_via_last_active' ), 10, 3 );
+		add_action( 'updated_user_meta', array( __CLASS__, 'update_registered_customer_via_last_active' ), 10, 3 );
+
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15, 2 );
 	}
 
@@ -775,6 +778,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		ReportsCache::invalidate();
 
 		return $results;
+	}
+
+	/**
+	 * Update the database if the "last active" meta value was changed.
+	 * Function expects to be hooked into the `added_user_meta` and `updated_user_meta` actions.
+	 *
+	 * @param int    $meta_id ID of updated metadata entry.
+	 * @param int    $user_id ID of the user being updated.
+	 * @param string $meta_key Meta key being updated.
+	 */
+	public static function update_registered_customer_via_last_active( $meta_id, $user_id, $meta_key ) {
+		if ( 'wc_last_active' === $meta_key ) {
+			self::update_registered_customer( $user_id );
+		}
 	}
 
 	/**
