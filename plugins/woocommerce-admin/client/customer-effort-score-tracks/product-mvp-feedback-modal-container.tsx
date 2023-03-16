@@ -11,7 +11,9 @@ import { getAdminLink } from '@woocommerce/settings';
 import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 
-export const ProductMVPFeedbackModalContainer: React.FC = () => {
+export const ProductMVPFeedbackModalContainer: React.FC< {
+	productId?: number;
+} > = ( { productId: _productId } ) => {
 	const { values } = useFormContext< Product >();
 	const { hideProductMVPFeedbackModal } = useDispatch( STORE_KEY );
 	const { isProductMVPModalVisible } = useSelect( ( select ) => {
@@ -21,8 +23,10 @@ export const ProductMVPFeedbackModalContainer: React.FC = () => {
 		};
 	} );
 
-	const classicEditorUrl = values.id
-		? getAdminLink( `post.php?post=${ values.id }&action=edit` )
+	const productId = _productId ?? values.id;
+
+	const classicEditorUrl = productId
+		? getAdminLink( `post.php?post=${ productId }&action=edit` )
 		: getAdminLink( 'post-new.php?post_type=product' );
 
 	const recordScore = ( checked: string[], comments: string ) => {

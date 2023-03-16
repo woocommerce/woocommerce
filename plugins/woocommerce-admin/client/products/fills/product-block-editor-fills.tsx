@@ -1,9 +1,12 @@
 /**
  * External dependencies
  */
-import { __experimentalWooProductMoreMenuItem as WooProductMoreMenuItem } from '@woocommerce/product-editor';
+import {
+	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
+	__experimentalWooProductHeaderItem as WooProductHeaderItem,
+} from '@woocommerce/product-editor';
 import { registerPlugin } from '@wordpress/plugins';
-import { useEffect } from '@wordpress/element';
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -12,6 +15,7 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
+import { ProductMVPFeedbackModalContainer } from '~/customer-effort-score-tracks/product-mvp-feedback-modal-container';
 import {
 	FeedbackMenuItem,
 	ClassicEditorMenuItem,
@@ -28,18 +32,25 @@ const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
 	);
 };
 
+const ProductHeaderFill = () => {
+	const [ id ] = useEntityProp( 'postType', 'product', 'id' );
+
+	return <ProductMVPFeedbackModalContainer productId={ id } />;
+};
+
 registerPlugin( 'wc-admin-more-menu', {
 	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-product-block-editor',
-	render: () => {
-		return (
-			<>
-				<WooProductMoreMenuItem>
-					{ ( { onClose }: { onClose: () => void } ) => (
-						<MoreMenuFill onClose={ onClose } />
-					) }
-				</WooProductMoreMenuItem>
-			</>
-		);
-	},
+	render: () => (
+		<>
+			<WooProductMoreMenuItem>
+				{ ( { onClose }: { onClose: () => void } ) => (
+					<MoreMenuFill onClose={ onClose } />
+				) }
+			</WooProductMoreMenuItem>
+			<WooProductHeaderItem>
+				<ProductHeaderFill />
+			</WooProductHeaderItem>
+		</>
+	),
 } );
