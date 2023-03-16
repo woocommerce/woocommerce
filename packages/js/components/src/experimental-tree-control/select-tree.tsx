@@ -146,12 +146,17 @@ export const SelectTree = function SelectTree( {
 								setIsFocused( false );
 							},
 							onKeyDown: ( event ) => {
+								const baseQuery =
+									'.woocommerce-experimental-select-tree-control__dropdown > .components-popover';
 								if ( event.key === 'ArrowDown' ) {
 									event.preventDefault();
+									// focus on the first element from the Popover
 									(
 										document.querySelector(
-											'.components-checkbox-control__input-container > input'
-										) as HTMLInputElement
+											`${ baseQuery } input, ${ baseQuery } button`
+										) as
+											| HTMLInputElement
+											| HTMLButtonElement
 									 )?.focus();
 								}
 								if ( event.key === 'Tab' ) {
