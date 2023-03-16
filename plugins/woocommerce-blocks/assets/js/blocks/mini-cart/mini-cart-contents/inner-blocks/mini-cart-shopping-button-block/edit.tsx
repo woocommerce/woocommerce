@@ -22,22 +22,23 @@ export const Edit = ( {
 	const { startShoppingButtonLabel } = attributes;
 
 	return (
-		<div { ...blockProps }>
-			<div className="wp-block-button aligncenter">
-				<Button className="wc-block-mini-cart__shopping-button">
-					<RichText
-						multiline={ false }
-						allowedFormats={ [] }
-						value={ startShoppingButtonLabel }
-						placeholder={ defaultStartShoppingButtonLabel }
-						onChange={ ( content ) => {
-							setAttributes( {
-								startShoppingButtonLabel: content,
-							} );
-						} }
-					/>
-				</Button>
-			</div>
+		<div className="wp-block-button aligncenter">
+			<Button
+				{ ...blockProps }
+				className="wc-block-mini-cart__shopping-button"
+			>
+				<RichText
+					multiline={ false }
+					allowedFormats={ [] }
+					value={ startShoppingButtonLabel }
+					placeholder={ defaultStartShoppingButtonLabel }
+					onChange={ ( content ) => {
+						setAttributes( {
+							startShoppingButtonLabel: content,
+						} );
+					} }
+				/>
+			</Button>
 		</div>
 	);
 };
