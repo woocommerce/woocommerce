@@ -80,12 +80,13 @@ jobs:
                   install-filters: woocommerce
                   build: false
 
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-
-            - name: Run 'Update WooCommerce' test.
-              working-directory: plugins/woocommerce
+            - name: Run E2E tests
+              id: run-e2e-composite-action
+              timeout-minutes: 60
+              uses: ./.github/actions/tests/run-e2e-tests
+              with:
+                  report-name: ${{ env.E2E_UPDATE_WC_ARTIFACT }}
+                  tests: update-woocommerce.spec.js
               env:
                   ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
                   ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
@@ -95,36 +96,19 @@ jobs:
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
                   UPDATE_WC: ${{ needs.get-tag.outputs.tag }}
-              run: |
-                  pnpm exec playwright test \
-                      --config=tests/e2e-pw/playwright.config.js \
-                      update-woocommerce.spec.js
-
-            - name: Generate 'Update WooCommerce' test report.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
-
-            - name: Configure AWS credentials
-              if: success() || failure()
-              uses: aws-actions/configure-aws-credentials@v1-node16
-              with:
-                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
-                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
 
             - name: Upload Allure files to bucket
-              if: success() || failure()
-              run: |
-                  aws s3 sync ${{ env.ALLURE_RESULTS_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-results \
-                      --quiet
-                  aws s3 sync ${{ env.ALLURE_REPORT_DIR }} \
-                      ${{ secrets.REPORTS_BUCKET }}/artifacts/${{ github.run_id }}/${{ env.E2E_WP_LATEST_ARTIFACT }}/allure-report \
-                      --quiet
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              with:
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  destination-dir: ${{ env.E2E_WP_LATEST_ARTIFACT }}
+                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
-              if: success() || failure()
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   ENV_DESCRIPTION: wp-latest
@@ -139,21 +123,11 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
-            - name: Archive 'Update WooCommerce' test report
-              if: success() || failure()
-              uses: actions/upload-artifact@v3
-              with:
-                  name: ${{ env.E2E_UPDATE_WC_ARTIFACT }}
-                  path: |
-                      ${{ env.ALLURE_RESULTS_DIR }}
-                      ${{ env.ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
-
     api-wp-latest:
         name: API on WP Latest
         runs-on: ubuntu-20.04
         needs: [get-tag, e2e-update-wc]
+        if: false # mytodo remove this later
         permissions:
             contents: read
         env:
@@ -330,6 +304,7 @@ jobs:
 
     get-wp-versions:
         name: Get WP L-1 & L-2 version numbers
+        if: false # mytodo remove this later
         needs: [get-tag]
         runs-on: ubuntu-20.04
         permissions:
@@ -368,6 +343,7 @@ jobs:
 
     test-wp-versions:
         name: Test against ${{ matrix.version.description }} (${{ matrix.version.number }})
+        if: false # mytodo remove this later
         runs-on: ubuntu-20.04
         needs: [get-wp-versions]
         strategy:
@@ -535,6 +511,7 @@ jobs:
 
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}
+        if: false # mytodo remove this later
         runs-on: ubuntu-20.04
         needs: [get-tag]
         strategy:

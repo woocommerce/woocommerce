@@ -6,6 +6,8 @@ inputs:
     report-name:
         description: Name of Allure report to be generated.
         required: true
+    tests:
+        description: Specific tests to run, separated by single whitespace. See https://playwright.dev/docs/test-cli
 
 runs:
     using: composite
@@ -22,7 +24,10 @@ runs:
               USE_WP_ENV: 1
           working-directory: plugins/woocommerce
           shell: bash
-          run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+          run: |
+              pnpm exec playwright test \
+              --config=tests/e2e-pw/playwright.config.js \
+              ${{ inputs.tests }}
 
         - name: Generate Test report.
           if: success() || ( failure() && steps.run-e2e-tests.conclusion == 'failure' )
