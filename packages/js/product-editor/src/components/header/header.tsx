@@ -6,6 +6,7 @@ import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { navigateTo, getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -57,7 +58,17 @@ export function Header( { productId, productName }: HeaderProps ) {
 	const { saveEditedEntityRecord } = useDispatch( 'core' );
 
 	function handleSave() {
-		saveEditedEntityRecord( 'postType', 'product', productId );
+		saveEditedEntityRecord< Product >(
+			'postType',
+			'product',
+			productId
+		).then( ( response ) => {
+			if ( isCreating ) {
+				navigateTo( {
+					url: getNewPath( {}, `/product/${ response.id }` ),
+				} );
+			}
+		} );
 	}
 
 	return (
