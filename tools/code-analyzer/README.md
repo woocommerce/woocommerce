@@ -34,6 +34,6 @@ version argument to `analyzer`.
 
 Here is an example of the `scan` command run to look for hook changes:
 
-`pnpm analyzer scan hooks "release/6.8" "6.8.0" -b release/6.7`
+`pnpm analyzer scan hooks "release/6.8" "release/6.7" --since "6.8.0"`
 \
 In this command we compare the `release/6.7` and `release/6.8` branches to find hook changes, and we're looking for changes introduced since `6.8.0` (using the `@since` tag).
