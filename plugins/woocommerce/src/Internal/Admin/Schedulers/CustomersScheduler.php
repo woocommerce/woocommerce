@@ -29,8 +29,6 @@ class CustomersScheduler extends ImportScheduler {
 	public static function init() {
 		add_action( 'woocommerce_new_customer', array( __CLASS__, 'schedule_import' ) );
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( __CLASS__, 'schedule_anonymize' ) );
-		add_action( 'delete_user', array( __CLASS__, 'schedule_user_delete' ) );
-		add_action( 'remove_user_from_blog', array( __CLASS__, 'schedule_user_delete' ) );
 
 		CustomersDataStore::init();
 		parent::init();
@@ -46,7 +44,6 @@ class CustomersScheduler extends ImportScheduler {
 		return array(
 			'delete_batch_init' => OrdersScheduler::get_action( 'delete_batch_init' ),
 			'anonymize'         => self::get_action( 'import' ),
-			'delete_user'       => self::get_action( 'import' ),
 		);
 	}
 
@@ -128,7 +125,6 @@ class CustomersScheduler extends ImportScheduler {
 	public static function get_scheduler_actions() {
 		$actions                = parent::get_scheduler_actions();
 		$actions['anonymize']   = 'wc-admin_anonymize_' . static::$name;
-		$actions['delete_user'] = 'wc-admin_delete_user_' . static::$name;
 		return $actions;
 	}
 
@@ -154,20 +150,6 @@ class CustomersScheduler extends ImportScheduler {
 		if ( is_a( $order, 'WC_Order' ) ) {
 			// Postpone until any pending updates are completed.
 			self::schedule_action( 'anonymize', array( $order->get_id() ) );
-		}
-	}
-
-	/**
-	 * Schedule an action to delete a single User.
-	 *
-	 * @internal
-	 * @param int $user_id User ID.
-	 * @return void
-	 */
-	public static function schedule_user_delete( $user_id ) {
-		if ( (int) $user_id > 0 && ! doing_action( 'wp_uninitialize_site' ) ) {
-			// Postpone until any pending updates are completed.
-			self::schedule_action( 'delete_user', array( $user_id ) );
 		}
 	}
 
@@ -255,16 +237,5 @@ class CustomersScheduler extends ImportScheduler {
 		if ( $updated ) {
 			ReportsCache::invalidate();
 		}
-	}
-
-	/**
-	 * Delete the customer data for a single user.
-	 *
-	 * @internal
-	 * @param int $user_id User ID.
-	 * @return void
-	 */
-	public static function delete_user( $user_id ) {
-		CustomersDataStore::delete_customer_by_user_id( $user_id );
 	}
 }

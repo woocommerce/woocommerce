@@ -90,6 +90,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		add_action( 'added_user_meta', array( __CLASS__, 'update_registered_customer_via_last_active' ), 10, 3 );
 		add_action( 'updated_user_meta', array( __CLASS__, 'update_registered_customer_via_last_active' ), 10, 3 );
 
+		add_action( 'delete_user', array( __CLASS__, 'delete_customer_by_user_id' ) );
+		add_action( 'remove_user_from_blog', array( __CLASS__, 'delete_customer_by_user_id' ) );
+
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15, 2 );
 	}
 
@@ -853,6 +856,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function delete_customer_by_user_id( $user_id ) {
 		global $wpdb;
+
+		if ( (int) $user_id < 1 || doing_action( 'wp_uninitialize_site' ) ) {
+			// Skip the deletion.
+			return;
+		}
 
 		$user_id     = (int) $user_id;
 		$num_deleted = $wpdb->delete( self::get_db_table_name(), array( 'user_id' => $user_id ) );
