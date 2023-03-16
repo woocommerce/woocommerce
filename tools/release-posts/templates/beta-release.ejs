@@ -1,7 +1,9 @@
 <!-- wp:paragraph -->
 <p>
-	Beta <%= betaNumber %> for the March 2023 release of WooCommerce is now
-	available for testing! You can either
+	Beta <%= betaNumber %> for the <%=
+	finalReleaseDate.toLocaleDateString('en-US', {month: 'long', day:
+	'numeric'}) release of WooCommerce is now available for testing! You can
+	either
 	<a
 		href="https://downloads.wordpress.org/plugin/woocommerce.<%= version.version %>.zip"
 		target="_blank"
@@ -41,7 +43,7 @@
 <!-- wp:paragraph -->
 <p>
 	For the complete list, view the&nbsp;<a
-		href="https://github.com/woocommerce/woocommerce/blob/release/<%= previousVersion.major %>.<%= previousVersion.minor %>/plugins/woocommerce/readme.txt"
+		href="https://github.com/woocommerce/woocommerce/blob/release/<%= version.major %>.<%= version.minor %>/plugins/woocommerce/readme.txt"
 		>changelog</a
 	>&nbsp;in the readme for this release.
 </p>
