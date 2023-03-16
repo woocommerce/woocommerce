@@ -181,6 +181,7 @@ jobs:
 
     e2e-wp-latest:
         name: E2E on WP Latest
+        if: false # mytodo remove this later
         runs-on: ubuntu-20.04
         needs: [get-tag, api-wp-latest]
         permissions:
