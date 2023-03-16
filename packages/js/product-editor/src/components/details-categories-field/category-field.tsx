@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { useMemo, useState, createElement, Fragment } from '@wordpress/element';
-import { TreeItemType, SelectTree } from '@woocommerce/components';
+import {
+	TreeItemType,
+	__experimentalSelectTreeControl as SelectTree,
+} from '@woocommerce/components';
 import { ProductCategory } from '@woocommerce/data';
 import { debounce } from 'lodash';
 
