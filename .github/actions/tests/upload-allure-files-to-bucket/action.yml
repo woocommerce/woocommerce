@@ -16,6 +16,14 @@ inputs:
         required: true
     include-allure-results:
         dafault: false
+    allure-results-dir:
+        description: Path to the allure-results folder
+        default: ${{ env.ALLURE_RESULTS_DIR }}
+        required: true
+    allure-report-dir:
+        description: Path to the allure-report folder
+        default: ${{ env.ALLURE_REPORT_DIR }}
+        required: true
 
 runs:
     using: composite
@@ -32,7 +40,7 @@ runs:
           shell: bash
           run: |
               echo "Uploading allure-results folder..."
-              aws s3 cp ${{ env.ALLURE_RESULTS_DIR }} \
+              aws s3 cp ${{ inputs.allure-results-dir }} \
                   ${{ inputs.s3-bucket }}/artifacts/${{ github.run_id }}/${{ inputs.destination-dir }}/allure-results \
                   --recursive \
                   --quiet
@@ -42,7 +50,7 @@ runs:
           shell: bash
           run: |
               echo "Uploading allure-report folder..."
-              aws s3 cp ${{ env.ALLURE_REPORT_DIR }} \
+              aws s3 cp ${{ inputs.allure-report-dir }} \
                   ${{ inputs.s3-bucket }}/artifacts/${{ github.run_id }}/${{ inputs.destination-dir }}/allure-report \
                   --recursive \
                   --quiet

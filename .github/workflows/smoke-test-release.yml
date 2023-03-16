@@ -364,6 +364,7 @@ jobs:
                   report-name: ${{ env.API_WP_LATEST_X_ARTIFACT }}
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
 
             - name: Upload Allure files to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
@@ -374,6 +375,8 @@ jobs:
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   destination-dir: ${{ env.API_WP_LATEST_X_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
+                  allure-results-dir: ${{ env.API_ALLURE_RESULTS_DIR }}
+                  allure-report-dir: ${{ env.API_ALLURE_REPORT_DIR }}
 
             - name: Publish API Allure report
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
@@ -398,6 +401,7 @@ jobs:
               env:
                   E2E_MAX_FAILURES: 15
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               with:
                   report-name: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
@@ -412,6 +416,8 @@ jobs:
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   destination-dir: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
+                  allure-results-dir: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  allure-report-dir: ${{ env.E2E_ALLURE_REPORT_DIR }}
 
             - name: Publish E2E Allure report
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
@@ -478,6 +484,7 @@ jobs:
                   report-name: ${{ env.API_ARTIFACT }}
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
 
             - name: Upload Allure files to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
@@ -488,9 +495,11 @@ jobs:
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   destination-dir: ${{ env.API_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
+                  allure-results-dir: ${{ env.API_ALLURE_RESULTS_DIR }}
+                  allure-report-dir: ${{ env.API_ALLURE_REPORT_DIR }}
 
             - name: Publish API Allure report
-              if: success() || failure()
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   ENV_DESCRIPTION: php-${{ matrix.php_version }}
@@ -511,6 +520,7 @@ jobs:
               uses: ./.github/actions/tests/run-e2e-tests
               env:
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
                   E2E_MAX_FAILURES: 15
               with:
@@ -526,9 +536,11 @@ jobs:
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   destination-dir: ${{ env.E2E_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
+                  allure-results-dir: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  allure-report-dir: ${{ env.E2E_ALLURE_REPORT_DIR }}
 
             - name: Publish E2E Allure report
-              if: success() || failure()
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   ENV_DESCRIPTION: php-${{ matrix.php_version }}
