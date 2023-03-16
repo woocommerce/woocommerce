@@ -104,7 +104,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.E2E_UPDATE_WC_ARTIFACT }}
+                  destination-dir: ${{ env.E2E_WP_LATEST_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
@@ -118,7 +118,7 @@ jobs:
                     -f run_id=${{ github.run_id }} \
                     -f run_number=${{ github.run_number }} \
                     -f release_tag=${{ needs.get-tag.outputs.tag }} \
-                    -f artifact="${{ env.E2E_UPDATE_WC_ARTIFACT }}" \
+                    -f artifact="${{ env.E2E_WP_LATEST_ARTIFACT }}" \
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
