@@ -1428,9 +1428,6 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 ) $collate;
 		";
 
-		$f = fopen('/tmp/tables.sql', 'w');
-		fwrite($f, $tables);
-		fclose($f);
 		return $tables;
 	}
 
