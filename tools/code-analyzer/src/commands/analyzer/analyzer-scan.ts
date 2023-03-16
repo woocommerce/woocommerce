@@ -40,16 +40,16 @@ const program = new Command()
 		'GitHub branch/tag/commit hash to compare against the base branch/tag/commit hash.'
 	)
 	.argument(
-		'[sinceVersion]',
-		'Specify the version used to determine which changes are included (version listed in @since code doc). Only needed for hook, template, schema changes.'
-	)
-	.option(
-		'-b, --base <base>',
-		'GitHub base branch/tag/commit hash.',
+		'[base]',
+		'Base branch to compare against. Defaults to trunk.',
 		'trunk'
 	)
 	.option(
-		'-s, --source <source>',
+		'-s, --since <sinceVersion>',
+		'Specify the version used to determine which changes are included (version listed in @since code doc). Only needed for hook, template, schema changes.'
+	)
+	.option(
+		'-src, --source <source>',
 		'Git repo url or local path to a git repo.',
 		join( process.cwd(), '../../' )
 	)
@@ -58,8 +58,8 @@ const program = new Command()
 		'Output style for the results. Options: github, cli. Github output will set the results as an output variable for Github actions.',
 		'cli'
 	)
-	.action( async ( scanType, compare, sinceVersion, options ) => {
-		const { source, base, outputStyle } = options;
+	.action( async ( scanType, compare, base, options ) => {
+		const { since: sinceVersion, source, outputStyle } = options;
 
 		if (
 			( scanType === 'hooks' ||
