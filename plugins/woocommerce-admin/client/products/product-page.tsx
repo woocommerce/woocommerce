@@ -22,7 +22,7 @@ declare const productBlockEditorSettings: ProductEditorSettings;
 const ProductEditor: React.FC< { product: Product | undefined } > = ( {
 	product,
 } ) => {
-	if ( ! product ) {
+	if ( ! product?.id ) {
 		return <Spinner />;
 	}
 

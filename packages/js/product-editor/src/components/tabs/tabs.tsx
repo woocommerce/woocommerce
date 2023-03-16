@@ -8,7 +8,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { ReactElement } from 'react';
-import { Slot } from '@wordpress/components';
+import { NavigableMenu, Slot } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -20,7 +20,7 @@ import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 import { TABS_SLOT_NAME } from './constants';
 
 type TabsProps = {
-	onChange: ( tabId: string | null ) => void;
+	onChange?: ( tabId: string | null ) => void;
 };
 
 export type TabsFillProps = {
@@ -64,8 +64,20 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 		}
 	}
 
+	function selectTabOnNavigate(
+		_childIndex: number,
+		child: HTMLButtonElement
+	) {
+		child.click();
+	}
+
 	return (
-		<div className="woocommerce-product-tabs">
+		<NavigableMenu
+			role="tablist"
+			onNavigate={ selectTabOnNavigate }
+			className="woocommerce-product-tabs"
+			orientation="horizontal"
+		>
 			<Slot
 				fillProps={
 					{
@@ -79,6 +91,6 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 					return <>{ fills }</>;
 				} }
 			</Slot>
-		</div>
+		</NavigableMenu>
 	);
 }

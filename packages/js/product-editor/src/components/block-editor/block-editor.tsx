@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Template } from '@wordpress/blocks';
+import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -9,7 +9,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
-import { useSelect, select as WPSelect, useDispatch } from '@wordpress/data';
+import { useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -59,11 +59,6 @@ export function BlockEditor( {
 }: BlockEditorProps ) {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore __experimentalTearDownEditor is not yet included in types package.
-	const { setupEditor, __experimentalTearDownEditor } =
-		useDispatch( 'core/editor' );
-
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
 		return canUser( 'create', 'media', '' ) !== false;
@@ -93,19 +88,18 @@ export function BlockEditor( {
 		};
 	}, [ canUserCreateMedia, _settings ] );
 
-	useLayoutEffect( () => {
-		setupEditor( product, {}, _settings?.template );
-
-		return () => {
-			__experimentalTearDownEditor();
-		};
-	}, [] );
-
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
 		'product',
 		{ id: product.id }
 	);
+
+	useLayoutEffect( () => {
+		onChange(
+			synchronizeBlocksWithTemplate( [], _settings?.template ),
+			{}
+		);
+	}, [] );
 
 	if ( ! blocks ) {
 		return null;

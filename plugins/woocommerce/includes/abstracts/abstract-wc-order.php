@@ -1285,9 +1285,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Manual discounts are not affected; those are separate and do not affect
 	 * stored line totals.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
+	 * @since 7.6.0 Returns a boolean indicating success.
+	 *
 	 * @param  string $code Coupon code.
-	 * @return void
+	 * @return bool TRUE if coupon was removed, FALSE otherwise.
 	 */
 	public function remove_coupon( $code ) {
 		$coupons = $this->get_items( 'coupon' );
@@ -1299,9 +1301,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$coupon_object = new WC_Coupon( $code );
 				$coupon_object->decrease_usage_count( $this->get_user_id() );
 				$this->recalculate_coupons();
-				break;
+
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	/**
