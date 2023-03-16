@@ -289,7 +289,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 												mapToCategoryType(
 													selectedItems.filter(
 														( {
-															value: selectedItemValue,
+															id: selectedItemValue,
 														} ) =>
 															! value.some(
 																( item ) =>
@@ -310,7 +310,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 												( item ) =>
 													! removedItems.some(
 														( {
-															value: removedValue,
+															id: removedValue,
 														} ) =>
 															item.id ===
 															+removedValue
