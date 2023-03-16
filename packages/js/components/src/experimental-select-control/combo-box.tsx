@@ -4,14 +4,9 @@
 import { createElement, MouseEvent, useRef } from 'react';
 import classNames from 'classnames';
 
-/**
- * Internal dependencies
- */
-import { Props } from './types';
-
 type ComboBoxProps = {
 	children?: JSX.Element | JSX.Element[] | null;
-	comboBoxProps: Props;
+	comboBoxProps: JSX.IntrinsicElements[ 'div' ];
 	inputProps: JSX.IntrinsicElements[ 'input' ];
 	suffix?: JSX.Element | null;
 };

@@ -1,23 +1,10 @@
 /**
  * External dependencies
  */
-import {
-	useMemo,
-	useState,
-	createElement,
-	Fragment,
-	useRef,
-} from '@wordpress/element';
-import {
-	selectControlStateChangeTypes,
-	__experimentalSelectControl as SelectControl,
-	__experimentalTreeControl as TreeControl,
-	TreeItem,
-	SelectTree,
-} from '@woocommerce/components';
+import { useMemo, useState, createElement, Fragment } from '@wordpress/element';
+import { TreeItemType, SelectTree } from '@woocommerce/components';
 import { ProductCategory } from '@woocommerce/data';
 import { debounce } from 'lodash';
-import { Popover } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -70,7 +57,7 @@ function getSelectedWithParents(
 
 function mapFromCategoryType(
 	categories: ProductCategoryLinkedList[]
-): TreeItem[] {
+): TreeItemType[] {
 	return categories.map( ( val ) =>
 		val.parent
 			? {
@@ -86,7 +73,7 @@ function mapFromCategoryType(
 }
 
 function mapToCategoryType(
-	categories: TreeItem[]
+	categories: TreeItemType[]
 ): ProductCategoryLinkedList[] {
 	return categories.map( ( cat ) => ( {
 		id: +cat.id,
@@ -106,7 +93,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 		categoriesSelectList,
 		categoryTreeKeyValues,
 		searchCategories,
-		getFilteredItems,
+		getFilteredItemsForSelectTree,
 	} = useCategorySearch();
 	const [ showCreateNewModal, setShowCreateNewModal ] = useState( false );
 	const [ searchValue, setSearchValue ] = useState( '' );
@@ -121,14 +108,6 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 		[ onInputChange ]
 	);
 
-	const categoryFieldGetFilteredItems = (
-		allItems: ProductCategoryLinkedList[],
-		inputValue: string,
-		selectedItems: ProductCategoryLinkedList[]
-	): ProductCategoryLinkedList[] => {
-		return getFilteredItems( allItems, inputValue, selectedItems );
-	};
-
 	return (
 		<>
 			<SelectTree
@@ -139,7 +118,13 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 				label={ label }
 				isLoading={ isSearching }
 				onInputChange={ searchDelayed }
-				getFilteredItems={ categoryFieldGetFilteredItems }
+				getFilteredItems={ ( allItems, inputValue, selectedItems ) => {
+					return getFilteredItemsForSelectTree(
+						allItems,
+						inputValue,
+						selectedItems
+					);
+				} }
 				placeholder={ value.length === 0 ? placeholder : '' }
 				onCreateNew={ () => {
 					setShowCreateNewModal( true );

@@ -97,7 +97,7 @@ export {
 } from './slot-context';
 export {
 	TreeControl as __experimentalTreeControl,
-	Item as TreeItem,
+	Item as TreeItemType,
 	SelectTree,
 } from './experimental-tree-control';
 export { default as TreeSelectControl } from './tree-select-control';

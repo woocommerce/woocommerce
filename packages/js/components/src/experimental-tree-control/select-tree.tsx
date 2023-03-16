@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { createElement, useRef, useState, Fragment } from 'react';
+import { createElement, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { search } from '@wordpress/icons';
 import { Dropdown, Spinner } from '@wordpress/components';
@@ -24,41 +24,42 @@ import {
 } from '../experimental-select-control/utils';
 import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
-interface ThisProps {
-	getSelectedItemProps?: any;
+
+interface SelectTreeProps extends Omit< TreeControlProps, 'getItemLabel' > {
+	selected?: Item[];
 	getItemLabel?: getItemLabelType< Item >;
 	getItemValue?: getItemValueType< Item >;
-	label: string | JSX.Element;
-	onInputChange?: ( value: string | undefined ) => void;
+	getSelectedItemProps?: any;
 	getFilteredItems: (
-		allItems: any,
+		allItems: Item[],
 		inputValue: string,
-		selectedItems: any,
+		selectedItems: Item[],
 		getItemLabel: getItemLabelType< Item >
 	) => any[];
-	onSelect?( value: Item ): void;
-	myRef?: React.ForwardedRef< HTMLOListElement >;
+	treeRef?: React.ForwardedRef< HTMLOListElement >;
 	suffix?: JSX.Element | null;
-	placeholder?: string;
 	isLoading?: boolean;
+	label: string | JSX.Element;
+	onInputChange?: ( value: string | undefined ) => void;
 }
 
 export const SelectTree = function SelectTree( {
 	items,
-	getItemLabel = ( item: any ) => item?.name || '',
-	getItemValue = ( item: any ) => item?.id || '',
+	getItemLabel = ( item ) => item?.name || '',
+	getItemValue = ( item ) => item?.id || '',
 	getSelectedItemProps,
 	getFilteredItems,
-	myRef: ref,
+	treeRef: ref,
 	suffix = <SuffixIcon icon={ search } />,
+
 	placeholder,
 	isLoading,
 	...props
-}: TreeControlProps & ThisProps ) {
+}: SelectTreeProps ) {
 	const filteredItems = getFilteredItems(
 		items,
 		props.createValue || '',
-		props.selected,
+		props.selected || [],
 		getItemLabel
 	);
 	const linkedTree = useLinkedTree( filteredItems );
