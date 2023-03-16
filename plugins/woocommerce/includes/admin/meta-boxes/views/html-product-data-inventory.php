@@ -125,7 +125,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		);
 
 		/**
-		 * Allow 3rd parties to control whether the the option will use radio buttons or a select.
+		 * Allow 3rd parties to control whether the "Stock status" option will use radio buttons or a select.
 		 *
 		 * @since 7.6.0
 		 *
