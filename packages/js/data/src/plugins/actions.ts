@@ -183,8 +183,8 @@ function* handlePluginAPIError(
 	let rawErrorMessage;
 
 	if ( isPluginResponseError( plugins, error ) ) {
-		rawErrorMessage = Object.values( error ).join( ', \n' );
 		// Backend error messages are in the form of { plugin-slug: [ error messages ] }.
+		rawErrorMessage = Object.values( error ).join( ', \n' );
 	} else {
 		// Other error such as API connection errors.
 		rawErrorMessage =
