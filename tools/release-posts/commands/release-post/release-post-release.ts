@@ -150,7 +150,7 @@ const program = new Command()
 
 		let postContent;
 
-		if ( 'undefined' !== typeof options.editPostId ) {
+		if ( typeof options.editPostId !== 'undefined' ) {
 			try {
 				const prevPost = await fetchWpComPost(
 					siteId,
@@ -197,7 +197,7 @@ const program = new Command()
 		};
 
 		const html =
-			'undefined' !== typeof options.editPostId
+			typeof options.editPostId !== 'undefined'
 				? editPostHTML( postContent, {
 						hooks: await renderTemplate(
 							'hooks.ejs',
@@ -234,7 +234,7 @@ const program = new Command()
 
 			try {
 				const { URL } =
-					'undefined' !== typeof options.editPostId
+					typeof options.editPostId !== 'undefined'
 						? await editWpComPostContent(
 								siteId,
 								options.editPostId,
