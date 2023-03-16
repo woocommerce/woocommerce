@@ -1,16 +1,17 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { parseAdminUrl } from '@woocommerce/navigation';
-import {
-	Location,
-	UNSAFE_NavigationContext as NavigationContext,
-	useLocation,
-} from 'react-router-dom';
+import { Location } from 'react-router-dom';
+import { useEffect, useMemo } from '@wordpress/element';
 
-export default function usePreventLeavingPage(
+/**
+ * Internal dependencies
+ */
+import { getHistory } from '../history';
+import { parseAdminUrl } from '../';
+
+export const useConfirmUnsavedChanges = (
 	hasUnsavedChanges: boolean,
 	shouldConfirm?: ( path: URL, fromUrl: Location ) => boolean,
 	/**
@@ -19,24 +20,24 @@ export default function usePreventLeavingPage(
 	 * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event#compatibility_notes
 	 */
 	message?: string
-) {
+) => {
 	const confirmMessage = useMemo(
 		() =>
 			message ??
 			__( 'Changes you made may not be saved.', 'woocommerce' ),
 		[ message ]
 	);
-	const { navigator } = useContext( NavigationContext );
-	const fromUrl = useLocation();
+	const history = getHistory();
 
 	// This effect prevent react router from navigate and show
 	// a confirmation message. It's a work around to beforeunload
 	// because react router does not triggers that event.
 	useEffect( () => {
 		if ( hasUnsavedChanges ) {
-			const push = navigator.push;
+			const push = history.push;
 
-			navigator.push = ( ...args: Parameters< typeof push > ) => {
+			history.push = ( ...args: Parameters< typeof push > ) => {
+				const fromUrl = history.location;
 				const toUrl = parseAdminUrl( args[ 0 ] ) as URL;
 				if (
 					typeof shouldConfirm === 'function' &&
@@ -54,10 +55,10 @@ export default function usePreventLeavingPage(
 			};
 
 			return () => {
-				navigator.push = push;
+				history.push = push;
 			};
 		}
-	}, [ navigator, hasUnsavedChanges, confirmMessage ] );
+	}, [ history, hasUnsavedChanges, confirmMessage ] );
 
 	// This effect listen to the native beforeunload event to show
 	// a confirmation message
@@ -79,4 +80,4 @@ export default function usePreventLeavingPage(
 			};
 		}
 	}, [ hasUnsavedChanges, confirmMessage ] );
-}
+};
