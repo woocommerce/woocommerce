@@ -6,8 +6,9 @@
 	margin-bottom: $gap-large;
 
 	&.dual {
+		display: flex;
 		flex-direction: column;
-		justify-content: space-between;
+		justify-content: flex-start;
 		width: 285px;
 
 		p {
@@ -52,6 +53,9 @@
 		display: flex;
 		justify-content: space-between;
 		margin-top: $gap-large;
+		flex-grow: 1;
+		align-items: flex-end;
+
 		button {
 			min-width: 40%;
 			padding-inline: $gap-smaller;
