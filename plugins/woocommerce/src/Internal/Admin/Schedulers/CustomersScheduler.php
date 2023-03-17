@@ -39,7 +39,7 @@ class CustomersScheduler extends ImportScheduler {
 	 */
 	public static function get_dependencies() {
 		return array(
-			'delete_batch_init' => OrdersScheduler::get_action( 'delete_batch_init' )
+			'delete_batch_init' => OrdersScheduler::get_action( 'delete_batch_init' ),
 		);
 	}
 
