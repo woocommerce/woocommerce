@@ -369,14 +369,15 @@ jobs:
             - name: Upload Allure files to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
               with:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   destination-dir: ${{ env.API_WP_LATEST_X_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
-                  allure-results-dir: ${{ env.API_ALLURE_RESULTS_DIR }}
-                  allure-report-dir: ${{ env.API_ALLURE_REPORT_DIR }}
 
             - name: Publish API Allure report
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
@@ -410,14 +411,15 @@ jobs:
             - name: Upload Allure files to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
               with:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   destination-dir: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
-                  allure-results-dir: ${{ env.E2E_ALLURE_RESULTS_DIR }}
-                  allure-report-dir: ${{ env.E2E_ALLURE_REPORT_DIR }}
 
             - name: Publish E2E Allure report
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
@@ -489,14 +491,15 @@ jobs:
             - name: Upload Allure files to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
               with:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   destination-dir: ${{ env.API_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
-                  allure-results-dir: ${{ env.API_ALLURE_RESULTS_DIR }}
-                  allure-report-dir: ${{ env.API_ALLURE_REPORT_DIR }}
 
             - name: Publish API Allure report
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
@@ -530,14 +533,15 @@ jobs:
             - name: Upload Allure files to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
               with:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   destination-dir: ${{ env.E2E_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
-                  allure-results-dir: ${{ env.E2E_ALLURE_RESULTS_DIR }}
-                  allure-report-dir: ${{ env.E2E_ALLURE_REPORT_DIR }}
 
             - name: Publish E2E Allure report
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )

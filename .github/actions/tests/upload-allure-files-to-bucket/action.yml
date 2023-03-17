@@ -16,14 +16,6 @@ inputs:
         required: true
     include-allure-results:
         dafault: false
-    allure-results-dir:
-        description: Path to the allure-results folder
-        default: ${{ env.ALLURE_RESULTS_DIR }}
-        required: true
-    allure-report-dir:
-        description: Path to the allure-report folder
-        default: ${{ env.ALLURE_REPORT_DIR }}
-        required: true
 
 runs:
     using: composite
@@ -35,23 +27,26 @@ runs:
               aws-access-key-id: ${{ inputs.aws-access-key-id }}
               aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
 
+        - name: Verify allure-results and allure-report paths
+          uses: actions/github-script@v6
+          with:
+              script: |
+                  const script = require('./.github/actions/tests/upload-allure-files-to-bucket/scripts/verify-allure-dirs.js')
+                  script({core})
+
         - name: Upload 'allure-results' folder
           if: inputs.include-allure-results == true
           shell: bash
-          run: |
-              echo "Uploading allure-results folder..."
-              aws s3 cp ${{ inputs.allure-results-dir }} \
-                  ${{ inputs.s3-bucket }}/artifacts/${{ github.run_id }}/${{ inputs.destination-dir }}/allure-results \
-                  --recursive \
-                  --quiet
-              echo "Done"
+          working-directory: .github/actions/tests/upload-allure-files-to-bucket/scripts
+          run: bash upload-allure-results.sh
+          env:
+              DESTINATION_DIR: ${{ inputs.destination-dir }}
+              S3_BUCKET: ${{ inputs.s3-bucket }}
 
         - name: Upload 'allure-report' folder
           shell: bash
-          run: |
-              echo "Uploading allure-report folder..."
-              aws s3 cp ${{ inputs.allure-report-dir }} \
-                  ${{ inputs.s3-bucket }}/artifacts/${{ github.run_id }}/${{ inputs.destination-dir }}/allure-report \
-                  --recursive \
-                  --quiet
-              echo "Done"
+          working-directory: .github/actions/tests/upload-allure-files-to-bucket/scripts
+          run: bash upload-allure-report.sh
+          env:
+              DESTINATION_DIR: ${{ inputs.destination-dir }}
+              S3_BUCKET: ${{ inputs.s3-bucket }}
