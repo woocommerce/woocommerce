@@ -22,6 +22,7 @@ const WooCommerceDependencyExtractionWebpackPlugin = require( '../../packages/js
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
+const isHot = Boolean( process.env.HOT );
 const isProduction = NODE_ENV === 'production';
 
 const wcAdminPackages = [
@@ -134,6 +135,7 @@ const webpackConfig = {
 						plugins: [
 							'@babel/plugin-proposal-class-properties',
 							! isProduction &&
+								isHot &&
 								require.resolve( 'react-refresh/babel' ),
 						].filter( Boolean ),
 					},
@@ -190,7 +192,7 @@ const webpackConfig = {
 			} ) ),
 		} ),
 		// React Fast Refresh.
-		! isProduction && new ReactRefreshWebpackPlugin(),
+		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
 
 		// We reuse this Webpack setup for Storybook, where we need to disable dependency extraction.
 		! process.env.STORYBOOK &&
@@ -228,23 +230,26 @@ const webpackConfig = {
 if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
 	// Set default sourcemap mode if it wasn't set by WP_DEVTOOL.
 	webpackConfig.devtool = webpackConfig.devtool || 'source-map';
-	// Add dev server config
-	// Copied from https://github.com/WordPress/gutenberg/blob/05bea6dd5c6198b0287c41a401d36a06b48831eb/packages/scripts/config/webpack.config.js#L312-L326
-	webpackConfig.devServer = {
-		devMiddleware: {
-			writeToDisk: true,
-		},
-		allowedHosts: 'auto',
-		host: 'localhost',
-		port: 8887,
-		proxy: {
-			'/build': {
-				pathRewrite: {
-					'^/build': '',
+
+	if ( isHot ) {
+		// Add dev server config
+		// Copied from https://github.com/WordPress/gutenberg/blob/05bea6dd5c6198b0287c41a401d36a06b48831eb/packages/scripts/config/webpack.config.js#L312-L326
+		webpackConfig.devServer = {
+			devMiddleware: {
+				writeToDisk: true,
+			},
+			allowedHosts: 'auto',
+			host: 'localhost',
+			port: 8887,
+			proxy: {
+				'/build': {
+					pathRewrite: {
+						'^/build': '',
+					},
 				},
 			},
-		},
-	};
+		};
+	}
 }
 
 module.exports = webpackConfig;

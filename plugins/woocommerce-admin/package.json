@@ -38,7 +38,7 @@
 		"run:packages": "pnpm run --parallel --filter='../../packages/js/**'",
 		"prestart": "pnpm packages:build && cross-env WC_ADMIN_PHASE=development pnpm run build:feature-config",
 		"start": "concurrently \"cross-env WC_ADMIN_PHASE=development webpack --watch\" \"cross-env WC_ADMIN_PHASE=development pnpm packages:watch\"",
-		"start:hot": "pnpm prestart && concurrently \"cross-env WC_ADMIN_PHASE=development webpack serve\" \"cross-env WC_ADMIN_PHASE=development pnpm packages:watch\"",
+		"start:hot": "pnpm prestart && concurrently \"cross-env HOT=true WC_ADMIN_PHASE=development webpack serve\" \"cross-env WC_ADMIN_PHASE=development pnpm packages:watch\"",
 		"test-staged": "pnpm run test:client --bail --findRelatedTests",
 		"test:client": "jest --config client/jest.config.js",
 		"test:debug": "node --inspect-brk ./node_modules/.bin/jest --config client/jest.config.js --watch --runInBand --no-cache",
