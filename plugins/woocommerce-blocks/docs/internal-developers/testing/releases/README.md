@@ -121,7 +121,10 @@ Every release includes specific testing instructions for new features and bug fi
 -   [9.6.0](./960.md)
     -   [9.6.1](./961.md)
     -   [9.6.2](./962.md)
-
+    -   [9.6.3](./963.md)
+    -   [9.6.4](./964.md)
+    -   [9.6.5](./965.md)
+    -   [9.6.6](./965.md)
 
 <!-- FEEDBACK -->
 

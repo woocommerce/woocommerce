@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Icon, external } from '@wordpress/icons';
 import { VisuallyHidden } from '@wordpress/components';
 import { sanitizeHTML } from '@woocommerce/utils';
-import { alert } from '@woocommerce/icons';
+import { Alert } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -50,7 +50,7 @@ const ExternalLinkCard = ( {
 				) }
 				{ warning ? (
 					<span className="wc-block-editor-components-external-link-card__warning">
-						<Icon icon={ alert } />
+						<Icon icon={ <Alert status="error" /> } />
 						<span>{ warning }</span>
 					</span>
 				) : null }
