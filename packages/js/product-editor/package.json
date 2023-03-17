@@ -31,6 +31,7 @@
 		"@automattic/interpolate-components": "^1.2.0",
 		"@types/lodash": "^4.14.179",
 		"@types/wordpress__blocks": "^11.0.7",
+		"@woocommerce/admin-layout": "workspace:*",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/currency": "workspace:*",
 		"@woocommerce/data": "workspace:^4.1.0",

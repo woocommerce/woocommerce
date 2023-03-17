@@ -7,6 +7,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -17,7 +18,6 @@ import { AUTO_DRAFT_NAME, getHeaderTitle } from '../../utils';
  * Internal dependencies
  */
 import { MoreMenu } from './more-menu';
-import { WooProductHeaderItem } from './woo-product-header-item';
 
 export type HeaderProps = {
 	productId: number;
@@ -91,7 +91,7 @@ export function Header( { productId, productName }: HeaderProps ) {
 						? __( 'Add', 'woocommerce' )
 						: __( 'Save', 'woocommerce' ) }
 				</Button>
-				<WooProductHeaderItem.Slot />
+				<WooHeaderItem.Slot name="product" />
 				<MoreMenu />
 			</div>
 		</div>

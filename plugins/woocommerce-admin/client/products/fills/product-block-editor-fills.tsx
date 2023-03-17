@@ -1,11 +1,9 @@
 /**
  * External dependencies
  */
-import {
-	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
-	__experimentalWooProductHeaderItem as WooProductHeaderItem,
-} from '@woocommerce/product-editor';
+import { __experimentalWooProductMoreMenuItem as WooProductMoreMenuItem } from '@woocommerce/product-editor';
 import { registerPlugin } from '@wordpress/plugins';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -48,9 +46,9 @@ registerPlugin( 'wc-admin-more-menu', {
 					<MoreMenuFill onClose={ onClose } />
 				) }
 			</WooProductMoreMenuItem>
-			<WooProductHeaderItem>
+			<WooHeaderItem name="product">
 				<ProductHeaderFill />
-			</WooProductHeaderItem>
+			</WooHeaderItem>
 		</>
 	),
 } );
