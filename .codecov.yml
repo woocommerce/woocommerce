@@ -21,7 +21,7 @@ ignore:
 coverage:
     precision: 1
     round: nearest
-    range: '50...80'
+    range: '45...100'
 
     status:
         project:
