@@ -13,6 +13,7 @@ import {
 	useRegisteredChannels,
 	useRecommendedChannels,
 	useCampaignTypes,
+	useInstalledPlugins,
 } from '~/marketing/hooks';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { Campaigns } from './Campaigns';
@@ -35,6 +36,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 	} = useRegisteredChannels();
 	const { loading: loadingRecommended, data: dataRecommended } =
 		useRecommendedChannels();
+	const { loadInstalledPluginsAfterActivation } = useInstalledPlugins();
 	const { currentUserCan } = useUser();
 
 	if (
@@ -49,9 +51,10 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
 		currentUserCan( 'install_plugins' );
 
-	const refetch = () => {
+	const onInstalledAndActivated = ( pluginSlug: string ) => {
 		refetchCampaignTypes();
 		refetchRegisteredChannels();
+		loadInstalledPluginsAfterActivation( pluginSlug );
 	};
 
 	return (
@@ -62,7 +65,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 					<Channels
 						registeredChannels={ dataRegistered }
 						recommendedChannels={ dataRecommended }
-						onInstalledAndActivated={ refetch }
+						onInstalledAndActivated={ onInstalledAndActivated }
 					/>
 				) }
 			<InstalledExtensions />

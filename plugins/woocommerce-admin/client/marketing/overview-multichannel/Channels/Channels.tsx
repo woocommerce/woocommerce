@@ -29,7 +29,7 @@ import './Channels.scss';
 type ChannelsProps = {
 	registeredChannels: Array< RegisteredChannel >;
 	recommendedChannels: Array< RecommendedChannel >;
-	onInstalledAndActivated?: () => void;
+	onInstalledAndActivated?: ( pluginSlug: string ) => void;
 };
 
 export const Channels: React.FC< ChannelsProps > = ( {
