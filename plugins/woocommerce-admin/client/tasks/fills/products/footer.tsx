@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Text } from '@woocommerce/experimental';
-import { ExternalLink } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
