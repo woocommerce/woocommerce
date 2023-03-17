@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fixed payments recommendations pane in WooCommerce Payment Settings using the wrong image prop

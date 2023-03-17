@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 use Automattic\WooCommerce\Admin\Features\TransientNotices;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use WP_Block_Editor_Context;
 
 /**
  * Loads assets related to the new product management experience page.
@@ -29,6 +30,38 @@ class BlockEditorFeatureEnabled {
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 			add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
 		}
+		if ( Features::is_enabled( self::FEATURE_ID ) ) {
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_rest_base_config' ) );
+		}
+	}
+
+	/**
+	 * Enqueue scripts needed for the product form block editor.
+	 */
+	public function enqueue_scripts() {
+		if ( ! PageController::is_admin_or_embed_page() ) {
+			return;
+		}
+		$post_type_object     = get_post_type_object( 'product' );
+		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => 'core/edit-post' ) );
+
+		$editor_settings = array();
+		if ( ! empty( $post_type_object->template ) ) {
+			$editor_settings['template']     = $post_type_object->template;
+			$editor_settings['templateLock'] = ! empty( $post_type_object->template_lock ) ? $post_type_object->template_lock : false;
+		}
+
+		$editor_settings = get_block_editor_settings( $editor_settings, $block_editor_context );
+
+		$script_handle = 'wc-admin-edit-product';
+		wp_register_script( $script_handle, '', array(), '0.1.0', true );
+		wp_enqueue_script( $script_handle );
+		wp_add_inline_script(
+			$script_handle,
+			'var productBlockEditorSettings = productBlockEditorSettings || ' . wp_json_encode( $editor_settings ) . ';',
+			'before'
+		);
 	}
 
 	/**
@@ -70,4 +103,15 @@ class BlockEditorFeatureEnabled {
 		return $link;
 	}
 
+	/**
+	 * Updates the product endpoint to use WooCommerce REST API.
+	 *
+	 * @param array $post_args Args for the product post type.
+	 * @return array
+	 */
+	public function add_rest_base_config( $post_args ) {
+		$post_args['rest_base']      = 'products';
+		$post_args['rest_namespace'] = 'wc/v3';
+		return $post_args;
+	}
 }

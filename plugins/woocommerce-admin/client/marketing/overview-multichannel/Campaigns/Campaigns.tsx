@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import {
+	Button,
 	Card,
 	CardHeader,
 	CardBody,
@@ -25,6 +26,7 @@ import {
  */
 import { CardHeaderTitle } from '~/marketing/components';
 import { useCampaigns } from './useCampaigns';
+import { CreateNewCampaignModal } from './CreateNewCampaignModal';
 import './Campaigns.scss';
 
 const tableCaption = __( 'Campaigns', 'woocommerce' );
@@ -53,6 +55,7 @@ const perPage = 5;
  */
 export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
+	const [ isModalOpen, setModalOpen ] = useState( false );
 	const { loading, data, meta } = useCampaigns( page, perPage );
 	const total = meta?.total;
 
@@ -159,6 +162,17 @@ export const Campaigns = () => {
 				<CardHeaderTitle>
 					{ __( 'Campaigns', 'woocommerce' ) }
 				</CardHeaderTitle>
+				<Button
+					variant="secondary"
+					onClick={ () => setModalOpen( true ) }
+				>
+					{ __( 'Create new campaign', 'woocommerce' ) }
+				</Button>
+				{ isModalOpen && (
+					<CreateNewCampaignModal
+						onRequestClose={ () => setModalOpen( false ) }
+					/>
+				) }
 			</CardHeader>
 			{ getContent() }
 			{ total && total > perPage && (

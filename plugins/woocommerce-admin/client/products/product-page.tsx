@@ -4,6 +4,7 @@
 import {
 	__experimentalEditor as Editor,
 	AUTO_DRAFT_NAME,
+	ProductEditorSettings,
 } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
@@ -16,14 +17,21 @@ import { useParams } from 'react-router-dom';
  */
 import './product-page.scss';
 
+declare const productBlockEditorSettings: ProductEditorSettings;
+
 const ProductEditor: React.FC< { product: Product | undefined } > = ( {
 	product,
 } ) => {
-	if ( ! product ) {
+	if ( ! product?.id ) {
 		return <Spinner />;
 	}
 
-	return <Editor product={ product } settings={ {} } />;
+	return (
+		<Editor
+			product={ product }
+			settings={ productBlockEditorSettings || {} }
+		/>
+	);
 };
 
 const EditProductEditor: React.FC< { productId: string } > = ( {

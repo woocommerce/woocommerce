@@ -2,11 +2,10 @@
  * External dependencies
  */
 import { Slot, Fill } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { createOrderedChildren, sortFillsByOrder } from '../../../utils';
+import {
+	createOrderedChildren,
+	sortFillsByOrder,
+} from '@woocommerce/components';
 
 export const EXPERIMENTAL_WC_MARKETING_OVERVIEW_SECTION_SLOT_NAME =
 	'experimental_woocommerce_marketing_overview_section';

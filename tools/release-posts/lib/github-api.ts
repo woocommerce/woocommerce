@@ -102,3 +102,16 @@ export const getContributorData = async (
 		headRef,
 	} as ContributorData;
 };
+
+export const getMostRecentFinal = async () => {
+	const octokit = new Octokit( {
+		auth: getEnvVar( 'GITHUB_ACCESS_TOKEN', true ),
+	} );
+
+	const release = await octokit.repos.getLatestRelease( {
+		owner: 'woocommerce',
+		repo: 'woocommerce',
+	} );
+
+	return release.data;
+};

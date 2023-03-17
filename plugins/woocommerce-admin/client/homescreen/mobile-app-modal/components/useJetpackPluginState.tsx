@@ -89,8 +89,7 @@ export const useJetpackPluginState = () => {
 						);
 					} else if (
 						jetpackConnectionData &&
-						jetpackConnectionData?.currentUser?.username !==
-							jetpackConnectionData?.connectionOwner
+						! jetpackConnectionData?.currentUser?.isMaster
 					) {
 						setPluginState(
 							JetpackPluginStates.NOT_OWNER_OF_CONNECTION

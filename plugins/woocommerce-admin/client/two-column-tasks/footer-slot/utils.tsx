@@ -2,11 +2,10 @@
  * External dependencies
  */
 import { Slot, Fill } from '@wordpress/components';
-
-/**
- * Internal dependencies
- */
-import { createOrderedChildren, sortFillsByOrder } from '../../utils';
+import {
+	createOrderedChildren,
+	sortFillsByOrder,
+} from '@woocommerce/components';
 
 export const EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME =
 	'experimental_woocommerce_tasklist_footer_item';
@@ -24,7 +23,7 @@ export const EXPERIMENTAL_WC_TASKLIST_FOOTER_SLOT_NAME =
  * 			</div>
  * 		</div>
  * 	</Fill>
- );
+  );
  *
  * registerPlugin( 'my-extension', {
  * render: MyFooterItem,
