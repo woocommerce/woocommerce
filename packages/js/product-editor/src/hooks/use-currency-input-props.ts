@@ -17,13 +17,19 @@ export type CurrencyInputProps = {
 	onKeyUp: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 };
 
+type Props = {
+	value: string;
+	setValue: ( value: string ) => void;
+	onFocus?: ( event: React.FocusEvent< HTMLInputElement > ) => void;
+	onKeyUp?: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
+};
+
 export const useCurrencyInputProps = ( {
 	value,
 	setValue,
-}: {
-	value: string;
-	setValue: ( value: string ) => void;
-} ) => {
+	onFocus,
+	onKeyUp,
+}: Props ) => {
 	const { sanitizePrice } = useProductHelper();
 
 	const context = useContext( CurrencyContext );
@@ -49,6 +55,9 @@ export const useCurrencyInputProps = ( {
 				0,
 				event.currentTarget
 			);
+			if ( onFocus ) {
+				onFocus( event );
+			}
 		},
 		onKeyUp( event: React.KeyboardEvent< HTMLInputElement > ) {
 			const amount = Number.parseFloat( sanitizePrice( value || '0' ) );
@@ -58,6 +67,9 @@ export const useCurrencyInputProps = ( {
 			}
 			if ( event.code === 'ArrowDown' ) {
 				setValue( String( amount - step ) );
+			}
+			if ( onKeyUp ) {
+				onKeyUp( event );
 			}
 		},
 	};
