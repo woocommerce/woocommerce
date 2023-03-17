@@ -115,3 +115,31 @@ export const getMostRecentFinal = async () => {
 
 	return release.data;
 };
+
+export const getMostRecentBeta = async () => {
+	const octokit = new Octokit( {
+		auth: getEnvVar( 'GITHUB_ACCESS_TOKEN', true ),
+	} );
+
+	const { data: releases } = await octokit.repos.listReleases( {
+		owner: 'woocommerce',
+		repo: 'woocommerce',
+	} );
+
+	const betaReleases = releases.filter(
+		( release ) =>
+			release?.name && release.name.toLowerCase().includes( 'beta' )
+	);
+
+	if ( betaReleases.length === 0 ) {
+		throw new Error( 'No beta releases found' );
+	}
+
+	const latestBetaRelease = betaReleases.reduce( ( latest, current ) => {
+		const latestDate = new Date( latest.created_at );
+		const currentDate = new Date( current.created_at );
+		return currentDate > latestDate ? current : latest;
+	} );
+
+	return latestBetaRelease;
+};

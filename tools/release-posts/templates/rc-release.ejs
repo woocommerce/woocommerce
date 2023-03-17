@@ -1,6 +1,6 @@
 <!-- wp:paragraph -->
 <p>
-	Beta <%= betaNumber %> for the <%=
+	Release Candidate <%= rcNumber %> for the <%=
 	finalReleaseDate.toLocaleDateString('en-US', {month: 'long', day:
 	'numeric'}) %> release of WooCommerce is now available for testing! You can
 	either
@@ -21,7 +21,7 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading">Highlights</h2>
+<h2 class="wp-block-heading">What's New?</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -35,38 +35,21 @@
 <!-- wp:list -->
 <ul>
 	<!-- wp:list-item -->
-	<li>List your changes here.</li>
+	<li>List the changes to the release here.</li>
 	<!-- /wp:list-item -->
 </ul>
 <!-- /wp:list -->
 
-<!-- wp:paragraph -->
-<p>
-	For the complete list, view the&nbsp;<a
-		href="https://github.com/woocommerce/woocommerce/blob/release/<%= version.major %>.<%= version.minor %>/plugins/woocommerce/readme.txt"
-		>changelog</a
-	>&nbsp;in the readme for this release.
-</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading {"anchor":"actions-and-filters"} -->
-<h2 class="wp-block-heading" id="actions-and-filters">Actions and Filters</h2>
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Actions and Filters</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>Insert action and filter changes here.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:heading {"anchor":"database-changes"} -->
-<h2 class="wp-block-heading" id="database-changes">Database Changes</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>Insert db changes here.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:heading {"anchor":"template-changes"} -->
-<h2 class="wp-block-heading" id="template-changes">Template Changes</h2>
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Template Changes</h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -81,36 +64,10 @@
 <p>
 	We're still on track for our planned <%=
 	finalReleaseDate.toLocaleDateString('en-US', {month: 'long', day:
-	'numeric'}) %> release.
+	'numeric'}) %> release of WooCommerce <%= version.major %>.<%= version.minor
+	%>.
 </p>
 <!-- /wp:paragraph -->
-
-<!-- wp:table -->
-<figure class="wp-block-table">
-	<table>
-		<tbody>
-			<tr>
-				<td><strong>Version</strong></td>
-				<td><strong>Release</strong></td>
-			</tr>
-			<tr>
-				<td>Release Candidate</td>
-				<td>
-					<%= rcReleaseDate.toLocaleDateString('en-US', { month:
-					'long', day: 'numeric', year: 'numeric' }) %>
-				</td>
-			</tr>
-			<tr>
-				<td>Final Release</td>
-				<td>
-					<%= finalReleaseDate.toLocaleDateString('en-US', { month:
-					'long', day: 'numeric', year: 'numeric' }) %>
-				</td>
-			</tr>
-		</tbody>
-	</table>
-</figure>
-<!-- /wp:table -->
 
 <!-- wp:heading {"anchor":"testing"} -->
 <h2 class="wp-block-heading" id="testing">Testing</h2>
@@ -151,7 +108,7 @@
 <p>
 	If you discover any bugs during the testing process, please let us know
 	by&nbsp;<a
-		href="https://github.com/woocommerce/woocommerce/issues/new?assignees=&amp;labels=&amp;template=1-bug-report.yml&amp;title=[<%= version.major %>.<%= version.minor %> beta]: Title of the issue"
+		href="https://github.com/woocommerce/woocommerce/issues/new?assignees=&amp;labels=&amp;template=1-bug-report.yml&amp;title=[<%= version.major %>.<%= version.minor %> RC]: Title of the issue"
 		target="_blank"
 		rel="noreferrer noopener"
 		>logging a report in GitHub</a
