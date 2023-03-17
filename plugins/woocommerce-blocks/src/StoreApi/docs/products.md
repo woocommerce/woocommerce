@@ -23,7 +23,7 @@ GET /products?parent_exclude=10
 GET /products?type=simple
 GET /products?sku=sku-1,sku-2
 GET /products?featured=true
-GET /products?category=t-shirts
+GET /products?category=22
 GET /products?product-taxonomy=product-taxonomy-term-id
 GET /products?tag=special-items
 GET /products?attributes[0][attribute]=pa_color&attributes[0][slug]=red
