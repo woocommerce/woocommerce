@@ -562,7 +562,7 @@ jobs:
                     --repo woocommerce/woocommerce-test-reports
 
     test-plugins:
-        name: Test with ${{ matrix.plugin }} installed
+        name: With ${{ matrix.plugin }}
         runs-on: ubuntu-20.04
         needs: [get-tag]
         env:
