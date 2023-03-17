@@ -575,17 +575,23 @@ jobs:
                 include:
                     - plugin: 'WooCommerce Payments'
                       repo: 'automattic/woocommerce-payments'
+                      env_description: 'woocommerce-payments'
                     - plugin: 'WooCommerce PayPal Payments'
                       repo: 'woocommerce/woocommerce-paypal-payments'
+                      env_description: 'woocommerce-paypal-payments'
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
+                      env_description: 'woocommerce-shipping-&-tax'
                     - plugin: 'WooCommerce Subscriptions'
                       repo: WC_SUBSCRIPTIONS_REPO
                       private: true
+                      env_description: 'woocommerce-subscriptions'
                     - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
                       repo: 'Yoast/wordpress-seo'
+                      env_description: 'wordpress-seo'
                     - plugin: 'Contact Form 7'
                       repo: 'takayukister/contact-form-7'
+                      env_description: 'contact-form-7'
         steps:
             - name: Checkout
               uses: actions/checkout@v3
@@ -641,18 +647,17 @@ jobs:
                   destination-dir: ${{ env.ARTIFACT_NAME }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
-            # - name: Publish E2E Allure report
-            #   if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
-            #   env:
-            #       GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-            #       ENV_DESCRIPTION: ${{ matrix.version.env_description }}
-            #   run: |
-            #       gh workflow run publish-test-reports-release.yml \
-            #         -f created_at="${{ needs.get-tag.outputs.created }}" \
-            #         -f run_id=${{ github.run_id }} \
-            #         -f run_number=${{ github.run_number }} \
-            #         -f release_tag=${{ needs.get-tag.outputs.tag }} \
-            #         -f artifact="${{ env.E2E_WP_LATEST_X_ARTIFACT }}" \
-            #         -f env_description="${{ env.ENV_DESCRIPTION }}" \
-            #         -f test_type="e2e" \
-            #         --repo woocommerce/woocommerce-test-reports
+            - name: Publish E2E Allure report
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+              run: |
+                  gh workflow run publish-test-reports-release.yml \
+                    -f created_at="${{ needs.get-tag.outputs.created }}" \
+                    -f run_id=${{ github.run_id }} \
+                    -f run_number=${{ github.run_number }} \
+                    -f release_tag=${{ needs.get-tag.outputs.tag }} \
+                    -f artifact="${{ env.ARTIFACT_NAME }}" \
+                    -f env_description="${{ matrix.env_description }}" \
+                    -f test_type="e2e" \
+                    --repo woocommerce/woocommerce-test-reports
