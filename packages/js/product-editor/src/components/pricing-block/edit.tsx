@@ -68,7 +68,10 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 
 	return (
 		<div { ...blockProps }>
-			<BaseControl id={ 'product_pricing_' + name } help={ '' }>
+			<BaseControl
+				id={ 'product_pricing_' + name }
+				help={ taxSettingsElement ? taxSettingsElement : '' }
+			>
 				<InputControl
 					name={ name }
 					onChange={ setRegularPrice }
@@ -81,11 +84,6 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 					{ ...inputProps }
 				/>
 			</BaseControl>
-			{ taxSettingsElement && (
-				<span className="woocommerce-product-form__secondary-text">
-					{ taxSettingsElement }
-				</span>
-			) }
 		</div>
 	);
 }
