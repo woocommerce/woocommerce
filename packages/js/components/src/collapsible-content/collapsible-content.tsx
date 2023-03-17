@@ -7,10 +7,12 @@ import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
+import { DisplayState } from '../display-state';
 
 export type CollapsedProps = {
 	initialCollapsed?: boolean;
 	toggleText: string;
+	persistRender?: boolean;
 	children: React.ReactNode;
 } & React.HTMLAttributes< HTMLDivElement >;
 
@@ -18,9 +20,19 @@ export const CollapsibleContent: React.FC< CollapsedProps > = ( {
 	initialCollapsed = true,
 	toggleText,
 	children,
+	persistRender = false,
 	...props
 }: CollapsedProps ) => {
 	const [ collapsed, setCollapsed ] = useState( initialCollapsed );
+
+	const getState = () => {
+		if ( ! collapsed ) {
+			return 'visible';
+		}
+
+		return persistRender ? 'visually-hidden' : 'hidden';
+	};
+
 	return (
 		<div
 			aria-expanded={ collapsed ? 'false' : 'true' }
@@ -38,14 +50,12 @@ export const CollapsibleContent: React.FC< CollapsedProps > = ( {
 					/>
 				</div>
 			</button>
-			{ ! collapsed && (
-				<div
-					{ ...props }
-					className="woocommerce-collapsible-content__content"
-				>
-					{ children }
-				</div>
-			) }
+			<div
+				{ ...props }
+				className="woocommerce-collapsible-content__content"
+			>
+				<DisplayState state={ getState() }>{ children }</DisplayState>
+			</div>
 		</div>
 	);
 };

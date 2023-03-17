@@ -10,6 +10,7 @@ import { init as initName } from '../details-name-block';
 import { init as initSection } from '../section';
 import { init as initTab } from '../tab';
 import { init as initPricing } from '../pricing-block';
+import { init as initCollapsible } from '../collapsible-block';
 
 export const initBlocks = () => {
 	registerCoreBlocks();
@@ -17,4 +18,5 @@ export const initBlocks = () => {
 	initSection();
 	initTab();
 	initPricing();
+	initCollapsible();
 };
