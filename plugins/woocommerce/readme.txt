@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix no enforcing of min/max limits in quantity selector of variable products. [#36871](https://github.com/woocommerce/woocommerce/pull/36871)
 * Fix - Add HPOS support to the reserved stock query [#36535](https://github.com/woocommerce/woocommerce/pull/36535)
 * Fix - Comment: Fix inconsistencies on Analytics > Orders table when using date_paid or date_completed [#36876](https://github.com/woocommerce/woocommerce/pull/36876)
 * Fix - Define a public `api` property in the WooCommerce class to prevent a PHP deprecation warning [#36545](https://github.com/woocommerce/woocommerce/pull/36545)
