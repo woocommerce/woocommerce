@@ -84,6 +84,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
+		add_action( 'woocommerce_new_customer', array( __CLASS__, 'update_registered_customer' ) );
+
 		add_action( 'woocommerce_update_customer', array( __CLASS__, 'update_registered_customer' ) );
 		add_action( 'profile_update', array( __CLASS__, 'update_registered_customer' ) );
 

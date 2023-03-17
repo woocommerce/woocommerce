@@ -27,8 +27,6 @@ class CustomersScheduler extends ImportScheduler {
 	 * @internal
 	 */
 	public static function init() {
-		add_action( 'woocommerce_new_customer', array( __CLASS__, 'schedule_import' ) );
-
 		CustomersDataStore::init();
 		parent::init();
 	}
@@ -111,17 +109,6 @@ class CustomersScheduler extends ImportScheduler {
 	public static function get_total_imported() {
 		global $wpdb;
 		return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_customer_lookup" );
-	}
-
-	/**
-	 * Schedule import.
-	 *
-	 * @internal
-	 * @param int $user_id User ID.
-	 * @return void
-	 */
-	public static function schedule_import( $user_id ) {
-		self::schedule_action( 'import', array( $user_id ) );
 	}
 
 	/**
