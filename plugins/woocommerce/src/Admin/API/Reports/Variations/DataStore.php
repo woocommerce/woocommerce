@@ -119,7 +119,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function get_order_item_by_attribute_subquery( $query_args ) {
 		$order_product_lookup_table = self::get_db_table_name();
-		$attribute_subqueries       = $this->get_attribute_subqueries( $query_args, $order_product_lookup_table );
+		$attribute_subqueries       = $this->get_attribute_subqueries( $query_args );
 
 		if ( $attribute_subqueries['join'] && $attribute_subqueries['where'] ) {
 			// Perform a subquery for DISTINCT order items that match our attribute filters.
