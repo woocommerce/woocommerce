@@ -118,7 +118,10 @@ describe( 'Shopper → Checkout', () => {
 			expect( page ).toMatch( 'Woo Collection' );
 			await shopper.block.fillBillingDetails( BILLING_DETAILS );
 			await shopper.block.placeOrder();
-			await shopper.block.verifyBillingDetails( BILLING_DETAILS );
+			await shopper.block.verifyBillingDetails(
+				BILLING_DETAILS,
+				'.woocommerce-customer-details address'
+			);
 		} );
 	} );
 
@@ -144,6 +147,9 @@ describe( 'Shopper → Checkout', () => {
 	} );
 
 	describe( 'Shipping and Billing Addresses', () => {
+		const NORMAL_SHIPPING_NAME = 'Normal Shipping';
+		const NORMAL_SHIPPING_PRICE = '$20.00';
+
 		beforeAll( async () => {
 			await preventCompatibilityNotice();
 			await merchant.login();
@@ -186,6 +192,10 @@ describe( 'Shopper → Checkout', () => {
 			);
 			await shopper.block.fillShippingDetails( SHIPPING_DETAILS );
 			await shopper.block.fillBillingDetails( BILLING_DETAILS );
+			await shopper.block.selectAndVerifyShippingOption(
+				NORMAL_SHIPPING_NAME,
+				NORMAL_SHIPPING_PRICE
+			);
 			await shopper.block.placeOrder();
 			await shopper.block.verifyShippingDetails( SHIPPING_DETAILS );
 			await shopper.block.verifyBillingDetails( BILLING_DETAILS );
