@@ -44,7 +44,7 @@ export const ClassicEditorMenuItem = ( {
 		};
 	} );
 
-	const classEditorUrl = productId
+	const classicEditorUrl = productId
 		? getAdminLink( `post.php?post=${ productId }&action=edit` )
 		: getAdminLink( 'post-new.php?post_type=product' );
 
@@ -63,7 +63,7 @@ export const ClassicEditorMenuItem = ( {
 						showProductMVPFeedbackModal();
 						onClose();
 					} else {
-						window.location.href = classEditorUrl;
+						window.location.href = classicEditorUrl;
 						onClose();
 					}
 				} }
