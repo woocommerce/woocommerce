@@ -27,9 +27,6 @@ coverage:
         project:
             default:
                 target: auto
-        patch:
-            default:
-                target: auto
 parsers:
     gcov:
         branch_detection:
