@@ -212,6 +212,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update Playwright version from 1.28.0 -> 1.30.0 [#36789](https://github.com/woocommerce/woocommerce/pull/36789)
 * Update - Updates to product editor fill to support new prop API. [#36592](https://github.com/woocommerce/woocommerce/pull/36592)
 * Update - Update WooCommerce Blocks 9.6.0 & 9.6.1 [#36852](https://github.com/woocommerce/woocommerce/pull/36852)
+* Dev - Update column definitions with synonymous types to prevent dbDelta from trying to ALTER them on each install. [#37277](https://github.com/woocommerce/woocommerce/pull/37277)
 * Dev - Add attribute creation form when there are no attributes [#36606](https://github.com/woocommerce/woocommerce/pull/36606)
 * Dev - Add a unit test for woocommerce_admin_experimental_onboarding_tasklists filter [#36827](https://github.com/woocommerce/woocommerce/pull/36827)
 * Dev - Code refactor on marketing components. [#36540](https://github.com/woocommerce/woocommerce/pull/36540)
