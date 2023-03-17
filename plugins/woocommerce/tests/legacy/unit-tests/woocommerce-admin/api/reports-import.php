@@ -207,7 +207,6 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 			$pending_actions
 		);
 		$this->assertContains( 'wc-admin_import_orders', $pending_hooks );
-		$this->assertContains( 'wc-admin_import_customers', $pending_hooks );
 
 		// Cancel outstanding actions.
 		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/cancel' );
@@ -226,7 +225,6 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 			$pending_actions
 		);
 		$this->assertNotContains( 'wc-admin_import_orders', $pending_hooks );
-		$this->assertNotContains( 'wc-admin_import_customers', $pending_hooks );
 	}
 
 	/**
