@@ -65,10 +65,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			echo '<input type="hidden" name="_original_stock" value="' . esc_attr( wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ) ) . '" />';
 
 			$common_backorder_args = array(
-				'id'          => '_backorders',
-				'value'       => $product_object->get_backorders( 'edit' ),
-				'label'       => __( 'Allow backorders?', 'woocommerce' ),
-				'options'     => wc_get_product_backorder_options(),
+				'id'      => '_backorders',
+				'value'   => $product_object->get_backorders( 'edit' ),
+				'label'   => __( 'Allow backorders?', 'woocommerce' ),
+				'options' => wc_get_product_backorder_options(),
 			);
 
 			/**
