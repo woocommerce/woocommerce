@@ -68,7 +68,7 @@ const program = new Command()
 			! sinceVersion
 		) {
 			throw new Error(
-				`To scan for ${ scanType } changes you must provide the sinceVersion argument.`
+				`To scan for ${ scanType } changes you must provide the since argument.`
 			);
 		}
 
