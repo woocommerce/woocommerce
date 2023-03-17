@@ -558,3 +558,98 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
+
+    test-plugins:
+        name: Test with ${{ matrix.plugin }} installed
+        runs-on: ubuntu-20.04
+        needs: [get-tag]
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
+            ARTIFACT_NAME: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - plugin: 'WooCommerce Payments'
+                      repo: 'automattic/woocommerce-payments'
+                    - plugin: 'WooCommerce PayPal Payments'
+                      repo: 'woocommerce/woocommerce-paypal-payments'
+                    - plugin: 'WooCommerce Shipping & Tax'
+                      repo: 'automattic/woocommerce-services'
+                    - plugin: 'WooCommerce Subscriptions'
+                      repo: WC_SUBSCRIPTIONS_REPO
+                      private: true
+                    - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
+                      repo: 'Yoast/wordpress-seo'
+                    - plugin: 'Contact Form 7'
+                      repo: 'takayukister/contact-form-7'
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install-filters: woocommerce
+
+            - name: Launch WP Env
+              working-directory: plugins/woocommerce
+              run: pnpm run env:test
+
+            - name: Download release zip
+              env:
+                  GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+              run: gh release download ${{ needs.get-wp-versions.outputs.tag }} --dir tmp
+
+            - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
+              run: unzip -d plugins -o tmp/woocommerce.zip
+
+            - name: Run 'Upload plugin' test
+              id: run-upload-test
+              timeout-minutes: 60
+              uses: ./.github/actions/tests/run-e2e-tests
+              with:
+                  report-name: ${{ env.ARTIFACT_NAME }}
+                  tests: upload-plugin.spec.js
+              env:
+                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+                  PLUGIN_NAME: ${{ matrix.plugin }}
+                  PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
+
+            - name: Run the rest of E2E tests
+              id: run-e2e-composite-action
+              timeout-minutes: 60
+              uses: ./.github/actions/tests/run-e2e-tests
+              with:
+                  playwright-config: ignore-plugin-tests.playwright.config.js
+                  report-name: ${{ env.ARTIFACT_NAME }}
+                  tests: basic.spec.js # mytodo remove this later
+              env:
+                  E2E_MAX_FAILURES: 15
+
+            - name: Upload Allure files to bucket
+              if: success() || ( failure() && steps.run-upload-test.conclusion == 'failure' )
+              uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              with:
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  destination-dir: ${{ env.ARTIFACT_NAME }}
+                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
+
+            # - name: Publish E2E Allure report
+            #   if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+            #   env:
+            #       GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            #       ENV_DESCRIPTION: ${{ matrix.version.env_description }}
+            #   run: |
+            #       gh workflow run publish-test-reports-release.yml \
+            #         -f created_at="${{ needs.get-wp-versions.outputs.created }}" \
+            #         -f run_id=${{ github.run_id }} \
+            #         -f run_number=${{ github.run_number }} \
+            #         -f release_tag=${{ needs.get-wp-versions.outputs.tag }} \
+            #         -f artifact="${{ env.E2E_WP_LATEST_X_ARTIFACT }}" \
+            #         -f env_description="${{ env.ENV_DESCRIPTION }}" \
+            #         -f test_type="e2e" \
+            #         --repo woocommerce/woocommerce-test-reports
