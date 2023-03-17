@@ -568,7 +568,7 @@ jobs:
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
-            ARTIFACT_NAME: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
+            ARTIFACT_NAME: e2e-plugin-${{ matrix.plugin }}
         strategy:
             fail-fast: false
             matrix:
