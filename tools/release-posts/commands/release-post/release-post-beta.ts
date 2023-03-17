@@ -90,7 +90,8 @@ const program = new Command()
 		if (
 			! semverVersion ||
 			! semverVersion.prerelease.length ||
-			typeof semverVersion.prerelease[ 1 ] === 'string'
+			typeof semverVersion.prerelease[ 1 ] === 'string' ||
+			semverVersion.prerelease[ 0 ] !== 'beta'
 		) {
 			throw new Error(
 				`Invalid current version: ${ releaseVersion }. Provide current version in x.y.z-beta.n format.`
