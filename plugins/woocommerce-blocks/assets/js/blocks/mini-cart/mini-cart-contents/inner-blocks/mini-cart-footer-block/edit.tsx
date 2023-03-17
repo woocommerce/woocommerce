@@ -3,8 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { TotalsItem } from '@woocommerce/blocks-checkout';
-import Button from '@woocommerce/base-components/button';
-import { useBlockProps, RichText } from '@wordpress/block-editor';
+import EditableButton from '@woocommerce/editor-components/editable-button';
+import { useBlockProps } from '@wordpress/block-editor';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	usePaymentMethods,
@@ -64,35 +64,27 @@ export const Edit = ( {
 					) }
 				/>
 				<div className="wc-block-mini-cart__footer-actions">
-					<Button
+					<EditableButton
 						className="wc-block-mini-cart__footer-cart"
 						variant="outlined"
-					>
-						<RichText
-							multiline={ false }
-							allowedFormats={ [] }
-							value={ cartButtonLabel }
-							placeholder={ defaultCartButtonLabel }
-							onChange={ ( content ) => {
-								setAttributes( {
-									cartButtonLabel: content,
-								} );
-							} }
-						/>
-					</Button>
-					<Button className="wc-block-mini-cart__footer-checkout">
-						<RichText
-							multiline={ false }
-							allowedFormats={ [] }
-							value={ checkoutButtonLabel }
-							placeholder={ defaultCheckoutButtonLabel }
-							onChange={ ( content ) => {
-								setAttributes( {
-									checkoutButtonLabel: content,
-								} );
-							} }
-						/>
-					</Button>
+						value={ cartButtonLabel }
+						placeholder={ defaultCartButtonLabel }
+						onChange={ ( content ) => {
+							setAttributes( {
+								cartButtonLabel: content,
+							} );
+						} }
+					/>
+					<EditableButton
+						className="wc-block-mini-cart__footer-checkout"
+						value={ checkoutButtonLabel }
+						placeholder={ defaultCheckoutButtonLabel }
+						onChange={ ( content ) => {
+							setAttributes( {
+								checkoutButtonLabel: content,
+							} );
+						} }
+					/>
 				</div>
 				<PaymentEventsProvider>
 					<PaymentMethodIconsElement />

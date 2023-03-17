@@ -4,12 +4,8 @@
 import { useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import Button from '@woocommerce/base-components/button';
-import {
-	InspectorControls,
-	RichText,
-	useBlockProps,
-} from '@wordpress/block-editor';
+import EditableButton from '@woocommerce/editor-components/editable-button';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import PageSelector from '@woocommerce/editor-components/page-selector';
 import { CART_PAGE_ID } from '@woocommerce/block-settings';
 
@@ -68,19 +64,16 @@ export const Edit = ( {
 					/>
 				) }
 			</InspectorControls>
-			<Button className="wc-block-cart__submit-button">
-				<RichText
-					multiline={ false }
-					allowedFormats={ [] }
-					value={ buttonLabel }
-					placeholder={ defaultButtonLabel }
-					onChange={ ( content ) => {
-						setAttributes( {
-							buttonLabel: content,
-						} );
-					} }
-				/>
-			</Button>
+			<EditableButton
+				className="wc-block-cart__submit-button"
+				value={ buttonLabel }
+				placeholder={ defaultButtonLabel }
+				onChange={ ( content ) => {
+					setAttributes( {
+						buttonLabel: content,
+					} );
+				} }
+			/>
 		</div>
 	);
 };
