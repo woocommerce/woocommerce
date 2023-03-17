@@ -30,13 +30,14 @@ export const WC_HEADER_SLOT_NAME = 'woocommerce_header_item';
  * @param {Array}  param0.order    - Node order.
  */
 export const WooHeaderItem: React.FC< {
+	name?: string;
 	children?: React.ReactNode;
 	order?: number;
 } > & {
-	Slot: React.FC< Slot.Props >;
-} = ( { children, order = 1 } ) => {
+	Slot: React.FC< Slot.Props & { name?: string } >;
+} = ( { children, order = 1, name = '' } ) => {
 	return (
-		<Fill name={ WC_HEADER_SLOT_NAME }>
+		<Fill name={ `${ WC_HEADER_SLOT_NAME }/${ name }` }>
 			{ ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
@@ -44,8 +45,8 @@ export const WooHeaderItem: React.FC< {
 	);
 };
 
-WooHeaderItem.Slot = ( { fillProps } ) => (
-	<Slot name={ WC_HEADER_SLOT_NAME } fillProps={ fillProps }>
+WooHeaderItem.Slot = ( { fillProps, name = '' } ) => (
+	<Slot name={ `${ WC_HEADER_SLOT_NAME }/${ name }` } fillProps={ fillProps }>
 		{ sortFillsByOrder }
 	</Slot>
 );
