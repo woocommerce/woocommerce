@@ -193,11 +193,6 @@ const updateCustomerData = debounce( (): void => {
 						) as BaseAddressKey[] ),
 					];
 				}
-			} )
-			.finally( () => {
-				if ( ! shippingAddressHasValidationErrors() ) {
-					dispatch( STORE_KEY ).setFullShippingAddressPushed( true );
-				}
 			} );
 	}
 }, 1000 );
