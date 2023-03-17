@@ -12,7 +12,7 @@ import { Dropdown, Spinner } from '@wordpress/components';
  */
 import { useLinkedTree } from './hooks/use-linked-tree';
 import { Tree } from './tree';
-import { Item, TreeControlProps } from './types';
+import { Item, LinkedTree, TreeControlProps } from './types';
 import { SelectedItems } from '../experimental-select-control/selected-items';
 import {
 	getItemLabelType,
@@ -73,6 +73,20 @@ export const SelectTree = function SelectTree( {
 		comboBoxRef.current?.parentElement?.parentElement?.getBoundingClientRect()
 			.width;
 
+	const shouldItemBeExpanded = ( item: LinkedTree ): boolean => {
+		if ( ! props.createValue || ! item.children?.length ) return false;
+		return item.children.some( ( child ) => {
+			if (
+				new RegExp( props.createValue || '', 'ig' ).test(
+					child.data.name
+				)
+			) {
+				return true;
+			}
+			return shouldItemBeExpanded( child );
+		} );
+	};
+
 	return (
 		<Dropdown
 			className="woocommerce-experimental-select-tree-control__dropdown"
@@ -94,6 +108,7 @@ export const SelectTree = function SelectTree( {
 						ref={ ref }
 						items={ linkedTree }
 						onTreeBlur={ onClose }
+						shouldItemBeExpanded={ shouldItemBeExpanded }
 						style={ {
 							width: comboBoxWidth,
 						} }
