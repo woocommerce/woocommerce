@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Update column definitions with synonymous types to prevent dbDelta from trying to ALTER them on each install.
