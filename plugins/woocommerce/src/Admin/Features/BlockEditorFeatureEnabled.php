@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 use Automattic\WooCommerce\Admin\Features\TransientNotices;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistration;
 use WP_Block_Editor_Context;
 
 /**
@@ -33,6 +34,8 @@ class BlockEditorFeatureEnabled {
 		if ( Features::is_enabled( self::FEATURE_ID ) ) {
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_rest_base_config' ) );
+			$block_registration = new BlockRegistration();
+			$block_registration->register_blocks();
 		}
 	}
 
