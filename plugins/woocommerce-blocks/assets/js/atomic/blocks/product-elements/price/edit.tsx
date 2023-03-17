@@ -56,11 +56,10 @@ const PriceEdit = ( {
 	const isDescendentOfSingleProductTemplate = useSelect(
 		( select ) => {
 			const store = select( 'core/edit-site' );
-			const postId = store?.getEditedPostId();
+			const postId = store?.getEditedPostId< string | undefined >();
 
 			return (
-				( postId === 'woocommerce/woocommerce//product-meta' ||
-					postId === 'woocommerce/woocommerce//single-product' ) &&
+				postId?.includes( '//single-product' ) &&
 				! isDescendentOfQueryLoop
 			);
 		},
