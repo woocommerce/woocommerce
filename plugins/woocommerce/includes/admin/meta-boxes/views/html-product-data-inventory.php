@@ -116,6 +116,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 
 		$stock_status_options     = wc_get_product_stock_status_options();
+		$stock_status_count       = count( $stock_status_options );
 		$common_stock_status_args = array(
 			'id'            => '_stock_status',
 			'value'         => $product_object->get_stock_status( 'edit' ),
@@ -131,7 +132,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		 *
 		 * @param bool If false, the "Stock status" will be shown as a select. Default: it will use radio buttons.
 		 */
-		if ( apply_filters( 'woocommerce_product_stock_status_use_radio', count( $stock_status_options ) === 3 ) ) {
+		if ( apply_filters( 'woocommerce_product_stock_status_use_radio', $stock_status_count <= 3 && $stock_status_count >= 1 ) ) {
 			woocommerce_wp_radio( $common_stock_status_args );
 		} else {
 			$select_input_args = array(
