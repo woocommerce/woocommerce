@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the type for order items in the schema definition of REST API v1 and V2
