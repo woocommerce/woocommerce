@@ -21,6 +21,9 @@ export function useTree( {
 	onRemove,
 	shouldNotRecursivelySelect,
 	createValue,
+	allowCreate,
+	onTreeBlur,
+	onCreateNew,
 	...props
 }: TreeProps ) {
 	return {

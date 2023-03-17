@@ -26,6 +26,8 @@ export const Tree = forwardRef( function ForwardedTree(
 	const createValueExists =
 		items.findIndex( ( i ) => i.data.name === props.createValue ) !== -1;
 
+	const isCreateButtonVisible = props.allowCreate && ! createValueExists;
+
 	return (
 		<>
 			<ol
@@ -43,10 +45,20 @@ export const Tree = forwardRef( function ForwardedTree(
 						key={ child.data.id }
 						item={ child }
 						index={ index }
+						// Button ref is not working, so need to use CSS directly
+						onLastItemLoop={ () => {
+							if ( isCreateButtonVisible ) {
+								(
+									document.querySelector(
+										'.experimental-woocommerce-tree__button'
+									) as HTMLButtonElement
+								 )?.focus();
+							}
+						} }
 					/>
 				) ) }
 			</ol>
-			{ props.allowCreate && ! createValueExists && (
+			{ isCreateButtonVisible && (
 				<Button
 					className="experimental-woocommerce-tree__button"
 					onClick={ () => {
@@ -57,7 +69,7 @@ export const Tree = forwardRef( function ForwardedTree(
 							props.onTreeBlur();
 						}
 					} }
-					// Prevents the up/down arrow keys from scrolling the page.
+					// Component's event type definition is not working
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					onKeyDown={ ( event: any ) => {
 						if (
@@ -65,6 +77,18 @@ export const Tree = forwardRef( function ForwardedTree(
 							event.key === 'ArrowDown'
 						) {
 							event.preventDefault();
+							if ( event.key === 'ArrowUp' ) {
+								const allHeadings =
+									event.nativeEvent.srcElement.previousSibling.querySelectorAll(
+										'.experimental-woocommerce-tree-item > .experimental-woocommerce-tree-item__heading'
+									);
+
+								allHeadings[ allHeadings.length - 1 ]
+									?.querySelector(
+										'.experimental-woocommerce-tree-item__label'
+									)
+									?.focus();
+							}
 						}
 					} }
 				>

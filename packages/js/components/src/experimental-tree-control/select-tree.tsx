@@ -51,9 +51,9 @@ export const SelectTree = function SelectTree( {
 	getFilteredItems,
 	treeRef: ref,
 	suffix = <SuffixIcon icon={ search } />,
-
 	placeholder,
 	isLoading,
+	onInputChange,
 	...props
 }: SelectTreeProps ) {
 	const filteredItems = getFilteredItems(
@@ -174,8 +174,8 @@ export const SelectTree = function SelectTree( {
 								}
 							},
 							onChange: ( event ) =>
-								props.onInputChange &&
-								props.onInputChange( event.target.value ),
+								onInputChange &&
+								onInputChange( event.target.value ),
 							placeholder,
 						} }
 						suffix={ suffix }

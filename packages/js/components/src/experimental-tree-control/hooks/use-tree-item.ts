@@ -25,6 +25,11 @@ export function useTreeItem( {
 	shouldItemBeHighlighted,
 	onSelect,
 	onRemove,
+	isExpanded,
+	onCreateNew,
+	onLastItemLoop,
+	allowCreate,
+	onTreeBlur,
 	...props
 }: TreeItemProps ) {
 	const nextLevel = level + 1;
@@ -58,6 +63,7 @@ export function useTreeItem( {
 
 	const { onKeyDown } = useKeyboard( {
 		...expander,
+		onLastItemLoop,
 		item,
 	} );
 

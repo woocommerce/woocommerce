@@ -132,6 +132,7 @@ export type TreeItemProps = BaseTreeProps &
 		isFocused?: boolean;
 		getLabel?( item: LinkedTree ): JSX.Element;
 		shouldItemBeExpanded?( item: LinkedTree ): boolean;
+		onLastItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
 	};
 
 export type TreeControlProps = Omit< TreeProps, 'items' | 'level' > & {
