@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add productId dependency when getting the product by id in ProductPage
