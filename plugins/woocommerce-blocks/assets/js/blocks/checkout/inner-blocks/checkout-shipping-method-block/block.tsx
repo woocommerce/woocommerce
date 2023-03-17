@@ -9,6 +9,9 @@ import {
 } from 'wordpress-components';
 import classnames from 'classnames';
 import { Icon, store, shipping } from '@wordpress/icons';
+import { useEffect } from '@wordpress/element';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -18,6 +21,14 @@ import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
 import type { minMaxPrices } from './shared';
 import { defaultLocalPickupText, defaultShippingText } from './constants';
 import { shippingAddressHasValidationErrors } from '../../../../data/cart/utils';
+
+const SHIPPING_RATE_ERROR = {
+	hidden: true,
+	message: __(
+		'Shipping options are not available',
+		'woo-gutenberg-products-block'
+	),
+};
 
 const LocalPickupSelector = ( {
 	checked,
@@ -83,6 +94,23 @@ const ShippingSelector = ( {
 } ) => {
 	const rateShouldBeHidden =
 		shippingCostRequiresAddress && shippingAddressHasValidationErrors();
+	const hasShippingPrices = rate.min !== undefined && rate.max !== undefined;
+	const { setValidationErrors, clearValidationError } =
+		useDispatch( VALIDATION_STORE_KEY );
+	useEffect( () => {
+		if ( checked === 'shipping' && ! hasShippingPrices ) {
+			setValidationErrors( {
+				'shipping-rates-error': SHIPPING_RATE_ERROR,
+			} );
+		} else {
+			clearValidationError( 'shipping-rates-error' );
+		}
+	}, [
+		checked,
+		clearValidationError,
+		hasShippingPrices,
+		setValidationErrors,
+	] );
 	const Price =
 		rate.min === undefined || rateShouldBeHidden ? (
 			<span className="wc-block-checkout__shipping-method-option-price">
