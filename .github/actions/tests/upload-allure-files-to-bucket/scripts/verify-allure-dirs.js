@@ -6,5 +6,4 @@ if ( ! ( ALLURE_REPORT_DIR || ALLURE_RESULTS_DIR ) ) {
 		'To use this action, set the paths using the ALLURE_REPORT_DIR and ALLURE_RESULTS_DIR environment variables.';
 
 	core.setFailed( errorMessage );
-	process.exit();
 }
