@@ -362,6 +362,7 @@ jobs:
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.API_WP_LATEST_X_ARTIFACT }}
+                  tests: hello
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
@@ -484,6 +485,7 @@ jobs:
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.API_ARTIFACT }}
+                  tests: hello
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
