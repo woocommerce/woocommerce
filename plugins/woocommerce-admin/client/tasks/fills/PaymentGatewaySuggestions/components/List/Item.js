@@ -31,6 +31,7 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 		settingsUrl: manageUrl,
 		is_local_partner: isLocalPartner,
 		external_link: externalLink,
+		transaction_processors: transactionProcessors,
 	} = paymentGateway;
 
 	const connectSlot = useSlot(
@@ -88,6 +89,21 @@ export const Item = ( { isRecommended, markConfigured, paymentGateway } ) => {
 					<div className="woocommerce-task-payment__content">
 						{ content }
 					</div>
+					{ transactionProcessors && (
+						<div className="woocommerce-task-payment__transaction-processors_images">
+							{ Object.keys( transactionProcessors ).map(
+								( key ) => {
+									return (
+										<img
+											src={ transactionProcessors[ key ] }
+											alt={ key }
+											key={ key }
+										/>
+									);
+								}
+							) }
+						</div>
+					) }
 				</div>
 				<div className="woocommerce-task-payment__footer">
 					<Action
