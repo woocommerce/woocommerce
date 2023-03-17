@@ -131,7 +131,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		 *
 		 * @param bool If false, the "Stock status" will be shown as a select. Default: it will use radio buttons.
 		 */
-		if ( apply_filters( 'woocommerce_stock_status_use_radio', count( $stock_status_options ) === 3 ) ) {
+		if ( apply_filters( 'woocommerce_product_stock_status_use_radio', count( $stock_status_options ) === 3 ) ) {
 			woocommerce_wp_radio( $common_stock_status_args );
 		} else {
 			$select_input_args = array(
