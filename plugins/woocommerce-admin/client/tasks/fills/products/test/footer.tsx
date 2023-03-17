@@ -16,9 +16,9 @@ describe( 'Footer', () => {
 	beforeEach( () => {
 		( recordEvent as jest.Mock ).mockClear();
 	} );
-	it( 'should render footer with two links', () => {
+	it( 'should render footer with one links', () => {
 		const { queryAllByRole } = render( <Footer /> );
-		expect( queryAllByRole( 'link' ) ).toHaveLength( 2 );
+		expect( queryAllByRole( 'link' ) ).toHaveLength( 1 );
 	} );
 
 	it( 'clicking on import CSV should fire event tasklist_add_product with method:import and task_completion_time', () => {
