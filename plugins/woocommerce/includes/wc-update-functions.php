@@ -1846,7 +1846,7 @@ function wc_update_343_cleanup_foreign_keys() {
 	$create_table_sql = $wpdb->get_var( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log", 1 );
 
 	if ( ! empty( $create_table_sql ) ) {
-		// Extract and remove the foreign key constraints matching %wc_download_log_ib%
+		// Extract and remove the foreign key constraints matching %wc_download_log_ib%.
 		if ( preg_match_all( '/CONSTRAINT `([^`]*wc_download_log_ib[^`]*)` FOREIGN KEY/', $create_table_sql, $matches ) && ! empty( $matches[1] ) ) {
 			foreach ( $matches[1] as $foreign_key_name ) {
 				$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY `{$foreign_key_name}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -2445,7 +2445,6 @@ function wc_update_700_remove_download_log_fk() {
 	$create_table_sql = $wpdb->get_var( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log", 1 );
 
 	if ( ! empty( $create_table_sql ) ) {
-		// Extract the foreign key constraints
 		if ( preg_match_all( '/CONSTRAINT `([^`]*)` FOREIGN KEY/', $create_table_sql, $matches ) && ! empty( $matches[1] ) ) {
 			foreach ( $matches[1] as $foreign_key_name ) {
 				$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY `{$foreign_key_name}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
