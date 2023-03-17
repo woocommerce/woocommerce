@@ -114,6 +114,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 	return (
 		<>
 			<SelectTree
+				id="category-field"
 				multiple
 				shouldNotRecursivelySelect
 				allowCreate

@@ -90,6 +90,7 @@ export const SelectTree = function SelectTree( {
 				) : (
 					<Tree
 						{ ...props }
+						id={ `${ props.id }-menu` }
 						ref={ ref }
 						items={ linkedTree }
 						onTreeBlur={ onClose }
@@ -109,7 +110,8 @@ export const SelectTree = function SelectTree( {
 					) }
 				>
 					<label
-						htmlFor="categories-input"
+						htmlFor={ `${ props.id }-input` }
+						id={ `${ props.id }-label` }
 						className="woocommerce-experimental-select-control__label"
 					>
 						{ props.label }
@@ -119,11 +121,19 @@ export const SelectTree = function SelectTree( {
 							className:
 								'woocommerce-experimental-select-control__combo-box-wrapper',
 							ref: comboBoxRef,
+							role: 'combobox',
+							'aria-expanded': isOpen,
+							'aria-haspopup': 'listbox',
+							'aria-labelledby': `${ props.id }-label`,
+							'aria-owns': `${ props.id }-menu`,
 						} }
 						inputProps={ {
 							className:
 								'woocommerce-experimental-select-control__input',
-							id: 'categories-input',
+							id: `${ props.id }-input`,
+							'aria-autocomplete': 'list',
+							'aria-controls': `${ props.id }-menu`,
+							autoComplete: 'off',
 							onFocus: () => {
 								if ( ! isOpen ) {
 									onToggle();
