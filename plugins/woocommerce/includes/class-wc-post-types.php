@@ -382,9 +382,19 @@ class WC_Post_Types {
 									),
 									array(
 										array(
-											'woocommerce/product-name',
+											'woocommerce/collapsible',
 											array(
-												'name' => 'Product name',
+												'toggleText' => 'Show name field',
+												'initialCollapsed' => true,
+												'persistRender' => true,
+											),
+											array(
+												array(
+													'woocommerce/product-name',
+													array(
+														'name' => 'Product name',
+													),
+												),
 											),
 										),
 										array(
