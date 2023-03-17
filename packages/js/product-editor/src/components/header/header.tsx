@@ -11,7 +11,7 @@ import { navigateTo, getNewPath } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { AUTO_DRAFT_NAME } from '../../utils';
+import { AUTO_DRAFT_NAME, getHeaderTitle } from '../../utils';
 
 export type HeaderProps = {
 	productId: number;
@@ -19,11 +19,18 @@ export type HeaderProps = {
 };
 
 export function Header( { productId, productName }: HeaderProps ) {
-	const { isProductLocked, isSaving, product } = useSelect(
+	const { isProductLocked, isSaving, editedProductName } = useSelect(
 		( select ) => {
 			const { isSavingEntityRecord, getEditedEntityRecord } =
 				select( 'core' );
 			const { isPostSavingLocked } = select( 'core/editor' );
+
+			const product: Product = getEditedEntityRecord(
+				'postType',
+				'product',
+				productId
+			);
+
 			return {
 				isProductLocked: isPostSavingLocked(),
 				isSaving: isSavingEntityRecord(
@@ -31,29 +38,14 @@ export function Header( { productId, productName }: HeaderProps ) {
 					'product',
 					productId
 				),
-				product: getEditedEntityRecord(
-					'postType',
-					'product',
-					productId
-				) as Product,
+				editedProductName: product?.name,
 			};
 		},
 		[ productId ]
 	);
 
 	const isDisabled = isProductLocked || isSaving;
-	const isProductNameNotEmpty = Boolean( product?.name );
-	const isProductNameDirty = product.name !== productName;
 	const isCreating = productName === AUTO_DRAFT_NAME;
-
-	let title = '';
-	if ( isProductNameNotEmpty && isProductNameDirty ) {
-		title = product.name;
-	} else if ( isCreating ) {
-		title = __( 'Add new product', 'woocommerce' );
-	} else {
-		title = productName;
-	}
 
 	const { saveEditedEntityRecord } = useDispatch( 'core' );
 
@@ -78,7 +70,9 @@ export function Header( { productId, productName }: HeaderProps ) {
 			aria-label={ __( 'Product Editor top bar.', 'woocommerce' ) }
 			tabIndex={ -1 }
 		>
-			<h1 className="woocommerce-product-header__title">{ title }</h1>
+			<h1 className="woocommerce-product-header__title">
+				{ getHeaderTitle( editedProductName, productName ) }
+			</h1>
 
 			<div className="woocommerce-product-header__actions">
 				<Button
