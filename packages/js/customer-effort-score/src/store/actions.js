@@ -75,7 +75,8 @@ export function addCesSurvey( {
 export function showCesModal(
 	surveyProps = {},
 	props = {},
-	onSubmitNoticeProps = {}
+	onSubmitNoticeProps = {},
+	trackProps = {}
 ) {
 	return {
 		type: TYPES.SHOW_CES_MODAL,
@@ -83,6 +84,7 @@ export function showCesModal(
 		onsubmit_label: surveyProps.onsubmitLabel || '',
 		props,
 		onSubmitNoticeProps,
+		trackProps,
 	};
 }
 

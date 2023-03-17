@@ -8,13 +8,14 @@ import {
 } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useContext, useMemo } from '@wordpress/element';
 import { Spinner } from '@wordpress/components';
 import { useParams } from 'react-router-dom';
 
 /**
  * Internal dependencies
  */
+import { LayoutContext } from '~/layout';
 import './product-page.scss';
 import './product-block-page.scss';
 import './fills/product-block-editor-fills';
@@ -24,15 +25,22 @@ declare const productBlockEditorSettings: ProductEditorSettings;
 const ProductEditor: React.FC< { product: Product | undefined } > = ( {
 	product,
 } ) => {
+	const layoutContext = useContext( LayoutContext );
+	const updatedLayoutContext = useMemo(
+		() => layoutContext.getExtendedContext( 'block-product-editor' ),
+		[ layoutContext ]
+	);
 	if ( ! product?.id ) {
 		return <Spinner />;
 	}
 
 	return (
-		<Editor
-			product={ product }
-			settings={ productBlockEditorSettings || {} }
-		/>
+		<LayoutContext.Provider value={ updatedLayoutContext }>
+			<Editor
+				product={ product }
+				settings={ productBlockEditorSettings || {} }
+			/>
+		</LayoutContext.Provider>
 	);
 };
 

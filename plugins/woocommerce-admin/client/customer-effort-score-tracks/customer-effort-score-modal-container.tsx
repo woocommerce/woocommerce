@@ -59,6 +59,7 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 			score_combined: score + ( secondScore ?? 0 ),
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
+			...( visibleCESModalData.trackProps || {} ),
 		} );
 		createSuccessNotice(
 			visibleCESModalData.onSubmitLabel ||

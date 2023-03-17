@@ -5,14 +5,17 @@ import { __ } from '@wordpress/i18n';
 import { MenuItem } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
+import { useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { FeedbackIcon } from '../../images/feedback-icon';
+import { LayoutContext } from '~/layout';
 
 export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 	const { showCesModal } = useDispatch( CES_STORE_KEY );
+	const layoutContext = useContext( LayoutContext );
 
 	return (
 		<MenuItem
@@ -37,6 +40,9 @@ export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 					{
 						type: 'snackbar',
 						icon: <span>🌟</span>,
+					},
+					{
+						context: layoutContext.toString(),
 					}
 				);
 				onClose();

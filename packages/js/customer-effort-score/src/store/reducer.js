@@ -31,6 +31,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				firstQuestion: action.surveyProps.firstQuestion,
 				secondQuestion: action.surveyProps.secondQuestion,
 				onSubmitNoticeProps: action.onSubmitNoticeProps || {},
+				trackProps: action.trackProps || {},
 				props: action.props,
 			};
 			return {
