@@ -631,7 +631,10 @@ jobs:
                   E2E_MAX_FAILURES: 15
 
             - name: Upload Allure files to bucket
-              if: success() || ( failure() && steps.run-upload-test.conclusion == 'failure' )
+              if: |
+                  success() || 
+                  ( failure() && 
+                  ( steps.run-upload-test.conclusion == 'failure' || steps.run-e2e-composite-action.conclusion == 'failure' ) )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               with:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
