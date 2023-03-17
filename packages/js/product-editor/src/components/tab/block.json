@@ -23,5 +23,6 @@
 		"inserter": false,
 		"lock": false
 	},
-	"usesContext": [ "selectedTab" ]
+	"usesContext": [ "selectedTab" ],
+	"editorStyle": "file:./editor.css"
 }
