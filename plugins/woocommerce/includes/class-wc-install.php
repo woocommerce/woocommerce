@@ -1001,6 +1001,8 @@ class WC_Install {
 	 *      woocommerce_order_itemmeta - Order line item meta is stored in a table for storing extra data.
 	 *      woocommerce_tax_rates - Tax Rates are stored inside 2 tables making tax queries simple and efficient.
 	 *      woocommerce_tax_rate_locations - Each rate can be applied to more than one postcode/city hence the second table.
+	 * 
+	 * @return array Strings containing the results of the various update queries as returned by dbDelta.
 	 */
 	public static function create_tables() {
 		global $wpdb;
