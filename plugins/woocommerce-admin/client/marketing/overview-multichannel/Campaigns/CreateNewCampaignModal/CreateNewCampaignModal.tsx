@@ -105,7 +105,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 									<FlexItem>
 										{ __( 'Create', 'woocommerce' ) }
 									</FlexItem>
-									{ isExternalURL( el.createUrl ) && (
+									{ !! isExternalURL( el.createUrl ) && (
 										<FlexItem>
 											<Icon
 												icon={ external }

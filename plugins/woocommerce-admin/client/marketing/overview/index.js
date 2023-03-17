@@ -27,7 +27,7 @@ const MarketingOverview = () => {
 			<WelcomeCard />
 			<InstalledExtensions />
 			<MarketingOverviewSectionSlot />
-			{ shouldShowExtensions && (
+			{ !! shouldShowExtensions && (
 				<RecommendedExtensions category="marketing" />
 			) }
 			<KnowledgeBase category="marketing" />

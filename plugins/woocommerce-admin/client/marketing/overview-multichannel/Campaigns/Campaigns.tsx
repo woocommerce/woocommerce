@@ -139,7 +139,7 @@ export const Campaigns = () => {
 													{ el.title }
 												</Link>
 											</FlexItem>
-											{ el.description && (
+											{ !! el.description && (
 												<FlexItem className="woocommerce-marketing-campaigns-card__campaign-description">
 													{ el.description }
 												</FlexItem>
@@ -168,14 +168,14 @@ export const Campaigns = () => {
 				>
 					{ __( 'Create new campaign', 'woocommerce' ) }
 				</Button>
-				{ isModalOpen && (
+				{ !! isModalOpen && (
 					<CreateNewCampaignModal
 						onRequestClose={ () => setModalOpen( false ) }
 					/>
 				) }
 			</CardHeader>
 			{ getContent() }
-			{ total && total > perPage && (
+			{ !! ( total && total > perPage ) && (
 				<CardFooter className="woocommerce-marketing-campaigns-card__footer">
 					<Pagination
 						showPerPagePicker={ false }
