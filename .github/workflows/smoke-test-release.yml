@@ -592,8 +592,6 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  install-filters: woocommerce
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
