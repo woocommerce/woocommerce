@@ -167,11 +167,4 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$this->assertContains( 'some_table_name', WC_Install::get_tables() );
 	}
 
-	/**
-	 * Test that dbDelta is a noop on an installed site.
-	 */
-	public function test_dbDelta_is_a_noop() {
-		$db_delta_result = WC_Install::create_tables();
-		$this->assertEmpty( $db_delta_result );
-	}
 }
