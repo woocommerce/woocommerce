@@ -85,6 +85,13 @@
 			}
 		}
 	}
+
+	.woocommerce-experimental-select-control__label {
+		text-transform: uppercase;
+		font-size: 11px;
+		color: $gray-900;
+		font-weight: 500;
+	}
 }
 
 .woocommerce-layout:has(.woocommerce-product-block-editor) {
