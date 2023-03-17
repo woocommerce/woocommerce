@@ -600,7 +600,7 @@ jobs:
             - name: Download release zip
               env:
                   GH_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-              run: gh release download ${{ needs.get-wp-versions.outputs.tag }} --dir tmp
+              run: gh release download ${{ needs.get-tag.outputs.tag }} --dir tmp
 
             - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
               run: unzip -d plugins -o tmp/woocommerce.zip
@@ -648,10 +648,10 @@ jobs:
             #       ENV_DESCRIPTION: ${{ matrix.version.env_description }}
             #   run: |
             #       gh workflow run publish-test-reports-release.yml \
-            #         -f created_at="${{ needs.get-wp-versions.outputs.created }}" \
+            #         -f created_at="${{ needs.get-tag.outputs.created }}" \
             #         -f run_id=${{ github.run_id }} \
             #         -f run_number=${{ github.run_number }} \
-            #         -f release_tag=${{ needs.get-wp-versions.outputs.tag }} \
+            #         -f release_tag=${{ needs.get-tag.outputs.tag }} \
             #         -f artifact="${{ env.E2E_WP_LATEST_X_ARTIFACT }}" \
             #         -f env_description="${{ env.ENV_DESCRIPTION }}" \
             #         -f test_type="e2e" \
