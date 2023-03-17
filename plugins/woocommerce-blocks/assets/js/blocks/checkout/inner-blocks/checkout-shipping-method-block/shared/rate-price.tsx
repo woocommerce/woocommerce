@@ -16,7 +16,7 @@ export const RatePrice = ( {
 }: {
 	minRate: CartShippingPackageShippingRate | undefined;
 	maxRate: CartShippingPackageShippingRate | undefined;
-	multiple: boolean;
+	multiple?: boolean;
 } ) => {
 	if ( minRate === undefined || maxRate === undefined ) {
 		return null;
