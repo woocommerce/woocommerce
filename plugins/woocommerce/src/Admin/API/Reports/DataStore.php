@@ -1305,7 +1305,7 @@ class DataStore extends SqlQuery {
 	 * Returns product attribute subquery elements used in JOIN and WHERE clauses,
 	 * based on query arguments from the user.
 	 *
-	 * @param array  $query_args Parameters supplied by the user.
+	 * @param array $query_args Parameters supplied by the user.
 	 * @return array
 	 */
 	protected function get_attribute_subqueries( $query_args ) {
