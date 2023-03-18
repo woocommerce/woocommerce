@@ -1,25 +1,27 @@
 #!/usr/bin/env bash
 
+s3_upload () {
+    aws s3 cp "$1" "$2" \
+        --recursive \
+        --only-show-errors
+}
+
 upload_allure_results () {
     if [[ $INCLUDE_ALLURE_RESULTS != "true" ]]; then
         return
     fi
 
     SOURCE="$ALLURE_RESULTS_DIR"
-    DESTINATION="$S3_BUCKET/artifacts/$GITHUB_RUN_ID/$DESTINATION_DIR/allure-results"
+    DESTINATION="$S3_BUCKET/artifacts/$GITHUB_RUN_ID/$ARTIFACT_NAME/allure-results"
 
-    aws s3 cp "$SOURCE" "$DESTINATION" \
-        --recursive \
-        --only-show-errors
+    s3_upload $SOURCE $DESTINATION
 }
 
 upload_allure_report () {
     SOURCE="$ALLURE_REPORT_DIR"
-    DESTINATION="$S3_BUCKET/artifacts/$GITHUB_RUN_ID/$DESTINATION_DIR/allure-report"
+    DESTINATION="$S3_BUCKET/artifacts/$GITHUB_RUN_ID/$ARTIFACT_NAME/allure-report"
 
-    aws s3 cp "$SOURCE" "$DESTINATION" \
-        --recursive \
-        --only-show-errors
+    s3_upload $SOURCE $DESTINATION
 }
 
 upload_allure_results
