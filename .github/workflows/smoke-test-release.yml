@@ -12,8 +12,8 @@ concurrency:
     cancel-in-progress: true
 permissions: {}
 env:
-    E2E_WP_LATEST_ARTIFACT: E2E test on release smoke test site with WP Latest (run-${{ github.run_number }})
-    E2E_UPDATE_WC_ARTIFACT: WooCommerce version update test on release smoke test site (run-${{ github.run_number }})
+    E2E_WP_LATEST_ARTIFACT: E2E test on release smoke test site with WP Latest (run ${{ github.run_number }})
+    E2E_UPDATE_WC_ARTIFACT: WooCommerce version update test on release smoke test site (run ${{ github.run_number }})
 
 jobs:
     get-tag:
@@ -131,7 +131,7 @@ jobs:
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
-            API_WP_LATEST_ARTIFACT: API test on release smoke test site with WP Latest (run-${{ github.run_number }})
+            API_WP_LATEST_ARTIFACT: API test on release smoke test site with WP Latest (run ${{ github.run_number }})
         steps:
             - uses: actions/checkout@v3
 
@@ -567,7 +567,7 @@ jobs:
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
-            ARTIFACT_NAME: E2E test on wp-env with ${{ matrix.plugin }} installed (run-${{ github.run_number }})
+            ARTIFACT_NAME: E2E test on wp-env with ${{ matrix.plugin }} installed (run ${{ github.run_number }})
         strategy:
             fail-fast: false
             matrix:
