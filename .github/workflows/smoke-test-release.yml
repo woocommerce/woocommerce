@@ -96,7 +96,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
                   UPDATE_WC: ${{ needs.get-tag.outputs.tag }}
 
-            - name: Upload Allure files to bucket
+            - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               with:
@@ -152,7 +152,7 @@ jobs:
                   USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
                   USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
 
-            - name: Upload Allure files to bucket
+            - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               with:
@@ -243,7 +243,7 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-            - name: Upload Allure files to bucket
+            - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               with:
@@ -366,7 +366,7 @@ jobs:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
 
-            - name: Upload Allure files to bucket
+            - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               env:
@@ -408,7 +408,7 @@ jobs:
                   report-name: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
                   tests: basic.spec.js # mytodo remove this later
 
-            - name: Upload Allure files to bucket
+            - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               env:
@@ -489,7 +489,7 @@ jobs:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
 
-            - name: Upload Allure files to bucket
+            - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               env:
@@ -531,7 +531,7 @@ jobs:
                   report-name: ${{ env.E2E_ARTIFACT }}
                   tests: basic.spec.js # mytodo remove this later
 
-            - name: Upload Allure files to bucket
+            - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               env:
@@ -633,7 +633,7 @@ jobs:
               env:
                   E2E_MAX_FAILURES: 15
 
-            - name: Upload Allure files to bucket
+            - name: Upload Allure artifacts to bucket
               if: |
                   success() || 
                   ( failure() && 
