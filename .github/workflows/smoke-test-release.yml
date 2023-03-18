@@ -103,7 +103,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.E2E_WP_LATEST_ARTIFACT }}
+                  artifact-name: ${{ env.E2E_WP_LATEST_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
@@ -159,7 +159,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.API_WP_LATEST_ARTIFACT }}
+                  artifact-name: ${{ env.API_WP_LATEST_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish API Allure report
@@ -250,7 +250,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.E2E_WP_LATEST_ARTIFACT }}
+                  artifact-name: ${{ env.E2E_WP_LATEST_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
@@ -376,7 +376,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.API_WP_LATEST_X_ARTIFACT }}
+                  artifact-name: ${{ env.API_WP_LATEST_X_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish API Allure report
@@ -418,7 +418,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
+                  artifact-name: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
@@ -499,7 +499,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.API_ARTIFACT }}
+                  artifact-name: ${{ env.API_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish API Allure report
@@ -541,7 +541,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.E2E_ARTIFACT }}
+                  artifact-name: ${{ env.E2E_ARTIFACT }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
@@ -643,7 +643,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.ARTIFACT_NAME }}
+                  artifact-name: ${{ env.ARTIFACT_NAME }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
