@@ -28,7 +28,7 @@ import {
 	CardHeaderTitle,
 	CreateNewCampaignModal,
 } from '~/marketing/components';
-import { useCampaigns } from './useCampaigns';
+import { useCampaigns } from '~/marketing/hooks';
 import './Campaigns.scss';
 
 const tableCaption = __( 'Campaigns', 'woocommerce' );
