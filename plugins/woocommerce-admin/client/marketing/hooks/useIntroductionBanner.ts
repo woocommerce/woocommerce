@@ -11,16 +11,16 @@ type UseIntroductionBanner = {
 	dismissIntroductionBanner: () => void;
 };
 
-const OPTION_NAME =
+const OPTION_NAME_BANNER_DISMISSED =
 	'woocommerce_marketing_overview_multichannel_banner_dismissed';
-const OPTION_VALUE = 'yes';
+const OPTION_VALUE_YES = 'yes';
 
 export const useIntroductionBanner = (): UseIntroductionBanner => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const dismissIntroductionBanner = () => {
 		updateOptions( {
-			[ OPTION_NAME ]: OPTION_VALUE,
+			[ OPTION_NAME_BANNER_DISMISSED ]: OPTION_VALUE_YES,
 		} );
 		recordEvent( 'marketing_multichannel_banner_dismissed', {} );
 	};
@@ -31,9 +31,12 @@ export const useIntroductionBanner = (): UseIntroductionBanner => {
 		const isUpdateRequesting = isOptionsUpdating();
 
 		return {
-			loading: ! hasFinishedResolution( 'getOption', [ OPTION_NAME ] ),
+			loading: ! hasFinishedResolution( 'getOption', [
+				OPTION_NAME_BANNER_DISMISSED,
+			] ),
 			isIntroductionBannerDismissed:
-				getOption( OPTION_NAME ) === OPTION_VALUE || isUpdateRequesting,
+				getOption( OPTION_NAME_BANNER_DISMISSED ) ===
+					OPTION_VALUE_YES || isUpdateRequesting,
 			dismissIntroductionBanner,
 		};
 	}, [] );
