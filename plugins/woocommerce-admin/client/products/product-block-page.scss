@@ -1,0 +1,47 @@
+.woocommerce-product-block-editor {
+	.components-input-control {
+		&__prefix {
+			margin-left: $gap-smaller;
+		}
+
+		&__suffix {
+			margin-right: $gap-smaller;
+		}
+	}
+
+	.components-currency-control {
+		.components-input-control__prefix {
+			color: $gray-700;
+		}
+
+		.components-input-control__input {
+			text-align: right;
+		}
+	}
+
+	.woocommerce-product-form {
+		&__custom-label-input {
+			display: flex;
+			flex-direction: column;
+
+			label {
+				display: block;
+				margin-bottom: $gap-smaller;
+			}
+		}
+
+		&__optional-input {
+			color: $gray-700;
+		}
+	}
+
+	.wp-block-columns {
+		gap: $gap-large;
+	}
+
+	.wp-block-woocommerce-product-section {
+		> .block-editor-inner-blocks > .block-editor-block-list__layout > .wp-block:not(:first-child) {
+			margin-top: $gap-large;
+		}
+	}
+}

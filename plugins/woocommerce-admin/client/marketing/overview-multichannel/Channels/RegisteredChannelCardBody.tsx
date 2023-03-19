@@ -31,7 +31,7 @@ export const RegisteredChannelCardBody: React.FC<
 		registeredChannel.description
 	) : (
 		<div className="woocommerce-marketing-registered-channel-description">
-			{ registeredChannel.syncStatus && (
+			{ !! registeredChannel.syncStatus && (
 				<>
 					<SyncStatus status={ registeredChannel.syncStatus } />
 					<div className="woocommerce-marketing-registered-channel-description__separator" />

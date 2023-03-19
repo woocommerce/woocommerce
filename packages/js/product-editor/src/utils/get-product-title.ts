@@ -3,7 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 
-export const AUTO_DRAFT_NAME = 'AUTO-DRAFT';
+/**
+ * Internal dependencies
+ */
+import { AUTO_DRAFT_NAME } from './constants';
 
 /**
  * Get the product title for use in the header.

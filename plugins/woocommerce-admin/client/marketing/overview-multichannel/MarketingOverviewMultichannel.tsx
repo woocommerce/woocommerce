@@ -77,8 +77,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 				/>
 			) }
 			{ !! dataRegistered?.length && <Campaigns /> }
-			{ dataRegistered &&
-				dataRecommended &&
+			{ !! ( dataRegistered && dataRecommended ) &&
 				!! ( dataRegistered.length || dataRecommended.length ) && (
 					<Channels
 						addChannelsButtonRef={ addChannelsButtonRef }
@@ -88,7 +87,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 					/>
 				) }
 			<InstalledExtensions />
-			{ shouldShowExtensions && <DiscoverTools /> }
+			{ !! shouldShowExtensions && <DiscoverTools /> }
 			<LearnMarketing />
 		</div>
 	);
