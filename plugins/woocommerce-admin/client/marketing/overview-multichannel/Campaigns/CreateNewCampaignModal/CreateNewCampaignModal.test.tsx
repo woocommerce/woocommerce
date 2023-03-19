@@ -11,6 +11,7 @@ import {
 	useCampaignTypes,
 	useRecommendedChannels,
 	useRegisteredChannels,
+	useInstalledPlugins,
 } from '~/marketing/hooks';
 import { CreateNewCampaignModal } from './CreateNewCampaignModal';
 
@@ -28,6 +29,7 @@ jest.mock( '~/marketing/hooks', () => ( {
 	useCampaignTypes: jest.fn(),
 	useRecommendedChannels: jest.fn(),
 	useRegisteredChannels: jest.fn(),
+	useInstalledPlugins: jest.fn(),
 } ) );
 
 const google = {
@@ -77,15 +79,21 @@ const amazon = {
 };
 
 describe( 'CreateNewCampaignModal component', () => {
+	beforeEach( () => {
+		( useRegisteredChannels as jest.Mock ).mockReturnValue( {
+			refetch: jest.fn(),
+		} );
+		( useInstalledPlugins as jest.Mock ).mockReturnValue( {
+			loadInstalledPluginsAfterActivation: jest.fn(),
+		} );
+	} );
+
 	it( 'renders new campaign types with recommended channels', async () => {
 		( useCampaignTypes as jest.Mock ).mockReturnValue( {
 			data: [ google ],
 		} );
 		( useRecommendedChannels as jest.Mock ).mockReturnValue( {
 			data: [ pinterest, amazon ],
-		} );
-		( useRegisteredChannels as jest.Mock ).mockReturnValue( {
-			refetch: jest.fn(),
 		} );
 		render( <CreateNewCampaignModal onRequestClose={ () => {} } /> );
 
@@ -120,9 +128,6 @@ describe( 'CreateNewCampaignModal component', () => {
 		} );
 		( useRecommendedChannels as jest.Mock ).mockReturnValue( {
 			data: [],
-		} );
-		( useRegisteredChannels as jest.Mock ).mockReturnValue( {
-			refetch: jest.fn(),
 		} );
 		render( <CreateNewCampaignModal onRequestClose={ () => {} } /> );
 
