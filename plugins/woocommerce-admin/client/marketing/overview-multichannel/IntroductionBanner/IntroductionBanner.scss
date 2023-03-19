@@ -9,15 +9,11 @@
 
 		.woocommerce-marketing-introduction-banner-title {
 			font-size: 20px;
-			font-weight: 400;
 			line-height: 28px;
 			margin-bottom: $gap-smaller;
 		}
 
 		.woocommerce-marketing-introduction-banner-features {
-			font-size: 13px;
-			font-weight: 400;
-			line-height: 16px;
 			color: $gray-700;
 
 			svg {
@@ -32,7 +28,11 @@
 
 	.woocommerce-marketing-introduction-banner-illustration {
 		width: 271px;
-		background: linear-gradient(90deg, rgba(247, 237, 247, 0) 5.31%, rgba(196, 152, 217, 0.12) 77.75%);
+		background: linear-gradient(
+			90deg,
+			rgba( 247, 237, 247, 0 ) 5.31%,
+			rgba( 196, 152, 217, 0.12 ) 77.75%
+		);
 
 		.woocommerce-marketing-introduction-banner-close-button {
 			position: absolute;
