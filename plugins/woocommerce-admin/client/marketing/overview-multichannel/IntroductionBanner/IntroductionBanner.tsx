@@ -28,7 +28,7 @@ export const IntroductionBanner = ( {
 	onDismiss,
 	onAddChannels,
 }: IntroductionBannerProps ) => {
-	const [ open, setOpen ] = useState( false );
+	const [ isModalOpen, setModalOpen ] = useState( false );
 	const { data: dataRegistered } = useRegisteredChannels();
 	const { data: dataRecommended } = useRecommendedChannels();
 
@@ -111,7 +111,7 @@ export const IntroductionBanner = ( {
 							<Button
 								variant="primary"
 								onClick={ () => {
-									setOpen( true );
+									setModalOpen( true );
 								} }
 							>
 								{ __( 'Create a campaign', 'woocommerce' ) }
@@ -127,9 +127,9 @@ export const IntroductionBanner = ( {
 						) }
 					</Flex>
 				) }
-				{ open && (
+				{ isModalOpen && (
 					<CreateNewCampaignModal
-						onRequestClose={ () => setOpen( false ) }
+						onRequestClose={ () => setModalOpen( false ) }
 					/>
 				) }
 			</div>
