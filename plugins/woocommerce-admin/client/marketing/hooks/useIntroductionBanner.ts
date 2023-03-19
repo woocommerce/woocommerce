@@ -25,7 +25,7 @@ export const useIntroductionBanner = (): UseIntroductionBanner => {
 		recordEvent( 'marketing_multichannel_banner_dismissed', {} );
 	};
 
-	return useSelect( ( select ) => {
+	const { loading, data } = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } =
 			select( OPTIONS_STORE_NAME );
 
@@ -33,9 +33,13 @@ export const useIntroductionBanner = (): UseIntroductionBanner => {
 			loading: ! hasFinishedResolution( 'getOption', [
 				OPTION_NAME_BANNER_DISMISSED,
 			] ),
-			isIntroductionBannerDismissed:
-				getOption( OPTION_NAME_BANNER_DISMISSED ) === OPTION_VALUE_YES,
-			dismissIntroductionBanner,
+			data: getOption( OPTION_NAME_BANNER_DISMISSED ),
 		};
 	}, [] );
+
+	return {
+		loading,
+		isIntroductionBannerDismissed: data === OPTION_VALUE_YES,
+		dismissIntroductionBanner,
+	};
 };
