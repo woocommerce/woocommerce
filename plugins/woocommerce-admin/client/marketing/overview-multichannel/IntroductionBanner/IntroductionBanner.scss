@@ -1,10 +1,11 @@
 .woocommerce-marketing-introduction-banner {
 	& > div {
 		display: flex;
+		flex-wrap: wrap;
 	}
 
 	.woocommerce-marketing-introduction-banner-content {
-		width: 350px;
+		flex: 1 0;
 		margin: 32px 20px 32px 40px;
 
 		.woocommerce-marketing-introduction-banner-title {
@@ -27,12 +28,8 @@
 	}
 
 	.woocommerce-marketing-introduction-banner-illustration {
-		width: 271px;
-		background: linear-gradient(
-			90deg,
-			rgba( 247, 237, 247, 0 ) 5.31%,
-			rgba( 196, 152, 217, 0.12 ) 77.75%
-		);
+		flex: 0 0 270px;
+		background: linear-gradient(90deg, rgba(247, 237, 247, 0) 5.31%, rgba(196, 152, 217, 0.12) 77.75%);
 
 		.woocommerce-marketing-introduction-banner-close-button {
 			position: absolute;
