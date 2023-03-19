@@ -90,18 +90,11 @@ export const IntroductionBanner = ( {
 					</FlexItem>
 					<FlexItem>
 						<Flex>
-							<Icon
-								icon={
-									<img
-										src={ wooIconUrl }
-										alt={ __(
-											'WooCommerce logo',
-											'woocommerce'
-										) }
-										width="24"
-										height="24"
-									/>
-								}
+							<img
+								src={ wooIconUrl }
+								alt={ __( 'WooCommerce logo', 'woocommerce' ) }
+								width="24"
+								height="24"
 							/>
 							<FlexBlock>
 								{ __( 'Built by WooCommerce', 'woocommerce' ) }
