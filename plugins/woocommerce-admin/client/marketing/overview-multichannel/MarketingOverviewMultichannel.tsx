@@ -12,6 +12,7 @@ import '~/marketing/data-multichannel';
 import { CenteredSpinner } from '~/marketing/components';
 import {
 	useIntroductionBanner,
+	useCampaigns,
 	useRegisteredChannels,
 	useRecommendedChannels,
 	useCampaignTypes,
@@ -31,6 +32,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 		isIntroductionBannerDismissed,
 		dismissIntroductionBanner,
 	} = useIntroductionBanner();
+	const { loading: loadingCampaigns, meta: metaCampaigns } = useCampaigns();
 	const {
 		loading: loadingCampaignTypes,
 		data: dataCampaignTypes,
@@ -48,12 +50,17 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 
 	if (
 		loadingIntroductionBanner ||
+		( loadingCampaigns && metaCampaigns?.total === undefined ) ||
 		( loadingCampaignTypes && ! dataCampaignTypes ) ||
 		( loadingRegistered && ! dataRegistered ) ||
 		( loadingRecommended && ! dataRecommended )
 	) {
 		return <CenteredSpinner />;
 	}
+
+	const shouldShowCampaigns =
+		dataRegistered?.length &&
+		( isIntroductionBannerDismissed || !! metaCampaigns?.total );
 
 	const shouldShowExtensions =
 		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
@@ -76,7 +83,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 					} }
 				/>
 			) }
-			{ !! dataRegistered?.length && <Campaigns /> }
+			{ !! shouldShowCampaigns && <Campaigns /> }
 			{ !! ( dataRegistered && dataRecommended ) &&
 				!! ( dataRegistered.length || dataRecommended.length ) && (
 					<Channels
