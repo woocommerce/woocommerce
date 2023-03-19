@@ -27,13 +27,10 @@ type UseCampaignsType = {
 /**
  * Custom hook to get campaigns.
  *
- * @param  page    Page number. First page is `1`.
- * @param  perPage Page size, i.e. number of records in one page.
+ * @param  page    Page number. Default is `1`.
+ * @param  perPage Page size, i.e. number of records in one page. Default is `5`.
  */
-export const useCampaigns = (
-	page: number,
-	perPage: number
-): UseCampaignsType => {
+export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 	const { data: channels } = useRegisteredChannels();
 
 	return useSelect(
