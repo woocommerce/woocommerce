@@ -20,13 +20,13 @@ import illustrationUrl from './illustration.svg';
 import illustrationLargeUrl from './illustration-large.svg';
 
 type IntroductionBannerProps = {
-	onDismiss: () => void;
-	onAddChannels: () => void;
+	onDismissClick: () => void;
+	onAddChannelsClick: () => void;
 };
 
 export const IntroductionBanner = ( {
-	onDismiss,
-	onAddChannels,
+	onDismissClick,
+	onAddChannelsClick,
 }: IntroductionBannerProps ) => {
 	const [ isModalOpen, setModalOpen ] = useState( false );
 	const { data: dataRegistered } = useRegisteredChannels();
@@ -120,7 +120,7 @@ export const IntroductionBanner = ( {
 						{ showAddChannelsButton && (
 							<Button
 								variant="secondary"
-								onClick={ onAddChannels }
+								onClick={ onAddChannelsClick }
 							>
 								{ __( 'Add channels', 'woocommerce' ) }
 							</Button>
@@ -137,7 +137,7 @@ export const IntroductionBanner = ( {
 				<Button
 					isSmall
 					className="woocommerce-marketing-introduction-banner-close-button"
-					onClick={ onDismiss }
+					onClick={ onDismissClick }
 				>
 					<Icon icon={ closeSmall } />
 				</Button>

@@ -68,8 +68,8 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 		<div className="woocommerce-marketing-overview-multichannel">
 			{ ! isIntroductionBannerDismissed && (
 				<IntroductionBanner
-					onDismiss={ dismissIntroductionBanner }
-					onAddChannels={ () => {
+					onDismissClick={ dismissIntroductionBanner }
+					onAddChannelsClick={ () => {
 						addChannelsButtonRef.current?.focus();
 						addChannelsButtonRef.current?.click();
 						addChannelsButtonRef.current?.scrollIntoView();
