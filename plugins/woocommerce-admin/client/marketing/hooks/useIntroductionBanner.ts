@@ -36,5 +36,5 @@ export const useIntroductionBanner = (): UseIntroductionBanner => {
 				getOption( OPTION_NAME ) === OPTION_VALUE || isUpdateRequesting,
 			dismissIntroductionBanner,
 		};
-	} );
+	}, [] );
 };
