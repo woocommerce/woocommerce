@@ -20,7 +20,7 @@ import {
 import { getAdminSetting } from '~/utils/admin-settings';
 import { IntroductionBanner } from './IntroductionBanner';
 import { Campaigns } from './Campaigns';
-import { Channels } from './Channels';
+import { Channels, ChannelsRef } from './Channels';
 import { InstalledExtensions } from './InstalledExtensions';
 import { DiscoverTools } from './DiscoverTools';
 import { LearnMarketing } from './LearnMarketing';
@@ -46,7 +46,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 	const { loading: loadingRecommended, data: dataRecommended } =
 		useRecommendedChannels();
 	const { currentUserCan } = useUser();
-	const addChannelsButtonRef = useRef< HTMLButtonElement >( null );
+	const channelsRef = useRef< ChannelsRef >( null );
 
 	if (
 		loadingIntroductionBanner ||
@@ -77,9 +77,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 				<IntroductionBanner
 					onDismissClick={ dismissIntroductionBanner }
 					onAddChannelsClick={ () => {
-						addChannelsButtonRef.current?.focus();
-						addChannelsButtonRef.current?.click();
-						addChannelsButtonRef.current?.scrollIntoView();
+						channelsRef.current?.scrollIntoAddChannels();
 					} }
 				/>
 			) }
@@ -87,7 +85,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 			{ !! ( dataRegistered && dataRecommended ) &&
 				!! ( dataRegistered.length || dataRecommended.length ) && (
 					<Channels
-						addChannelsButtonRef={ addChannelsButtonRef }
+						ref={ channelsRef }
 						registeredChannels={ dataRegistered }
 						recommendedChannels={ dataRecommended }
 						onInstalledAndActivated={ refetch }
