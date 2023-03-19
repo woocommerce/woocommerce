@@ -26,17 +26,15 @@ export const useIntroductionBanner = (): UseIntroductionBanner => {
 	};
 
 	return useSelect( ( select ) => {
-		const { getOption, isOptionsUpdating, hasFinishedResolution } =
+		const { getOption, hasFinishedResolution } =
 			select( OPTIONS_STORE_NAME );
-		const isUpdateRequesting = isOptionsUpdating();
 
 		return {
 			loading: ! hasFinishedResolution( 'getOption', [
 				OPTION_NAME_BANNER_DISMISSED,
 			] ),
 			isIntroductionBannerDismissed:
-				getOption( OPTION_NAME_BANNER_DISMISSED ) ===
-					OPTION_VALUE_YES || isUpdateRequesting,
+				getOption( OPTION_NAME_BANNER_DISMISSED ) === OPTION_VALUE_YES,
 			dismissIntroductionBanner,
 		};
 	}, [] );
