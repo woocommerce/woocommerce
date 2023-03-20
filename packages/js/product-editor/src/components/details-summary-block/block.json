@@ -11,6 +11,10 @@
 		"align": {
 			"type": "string"
 		},
+		"direction": {
+			"type": "string",
+			"enum": [ "ltr", "rtl" ]
+		},
 		"label": {
 			"type": "string"
 		}

@@ -1,17 +1,30 @@
 /**
+ * External dependencies
+ */
+import { BlockConfiguration } from '@wordpress/blocks';
+
+/**
  * Internal dependencies
  */
 import { initBlock } from '../../utils';
-import metadata from './block.json';
+import blockConfiguration from './block.json';
 import { Edit } from './edit';
+import { SummaryAttributes } from './types';
 
-const { name } = metadata;
+const { name, ...metadata } =
+	blockConfiguration as BlockConfiguration< SummaryAttributes >;
 
-export { metadata, name };
+export { name, metadata };
 
 export const settings = {
 	example: {},
 	edit: Edit,
 };
 
-export const init = () => initBlock( { name, metadata, settings } );
+export function init() {
+	return initBlock< SummaryAttributes >( {
+		name,
+		metadata,
+		settings,
+	} );
+}

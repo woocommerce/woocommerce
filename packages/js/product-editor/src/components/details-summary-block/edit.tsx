@@ -3,6 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement } from '@wordpress/element';
+import { useEntityProp } from '@wordpress/core-data';
+import { BaseControl } from '@wordpress/components';
+import uniqueId from 'lodash/uniqueId';
+import { BlockEditProps } from '@wordpress/blocks';
+import classNames from 'classnames';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -11,21 +16,21 @@ import {
 	RichText,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { useEntityProp } from '@wordpress/core-data';
-import { BaseControl } from '@wordpress/components';
-import uniqueId from 'lodash/uniqueId';
-import { BlockAttributes } from '@wordpress/blocks';
-import classNames from 'classnames';
+
+/**
+ * Internal dependencies
+ */
+import { ParagraphRTLControl } from './paragraph-rtl-control';
+import { SummaryAttributes } from './types';
 
 export function Edit( {
 	attributes,
 	setAttributes,
-}: {
-	attributes: BlockAttributes;
-	setAttributes( attributes: BlockAttributes ): void;
-} ) {
-	const { align, label } = attributes;
-	const blockProps = useBlockProps();
+}: BlockEditProps< SummaryAttributes > ) {
+	const { align, direction, label } = attributes;
+	const blockProps = useBlockProps( {
+		style: { direction },
+	} );
 	const id = uniqueId();
 	const [ summary, setSummary ] = useEntityProp< string >(
 		'postType',
@@ -33,10 +38,12 @@ export function Edit( {
 		'short_description'
 	);
 
-	function handleAlignmentChange( value: string ) {
-		setAttributes( {
-			align: value,
-		} );
+	function handleAlignmentChange( value: SummaryAttributes[ 'align' ] ) {
+		setAttributes( { align: value } );
+	}
+
+	function handleDirectionChange( value: SummaryAttributes[ 'direction' ] ) {
+		setAttributes( { direction: value } );
 	}
 
 	return (
@@ -47,6 +54,11 @@ export function Edit( {
 				<AlignmentControl
 					value={ align }
 					onChange={ handleAlignmentChange }
+				/>
+
+				<ParagraphRTLControl
+					direction={ direction }
+					onChange={ handleDirectionChange }
 				/>
 			</BlockControls>
 
@@ -68,6 +80,7 @@ export function Edit( {
 					className={ classNames( 'components-summary-control', {
 						[ `has-text-align-${ align }` ]: align,
 					} ) }
+					dir={ direction }
 				/>
 			</BaseControl>
 		</div>
