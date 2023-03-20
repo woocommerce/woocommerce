@@ -1,26 +1,24 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { recordEvent } from '@woocommerce/tracks';
-import {
-	ALLOW_TRACKING_OPTION_NAME,
-	CustomerEffortScore,
-} from '@woocommerce/customer-effort-score';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
+import { useState } from '@wordpress/element';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
+import { CustomerEffortScore } from '../';
 import {
-	SHOWN_FOR_ACTIONS_OPTION_NAME,
 	ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
-} from './constants';
-import { getStoreAgeInWeeks } from './utils';
+	ALLOW_TRACKING_OPTION_NAME,
+	SHOWN_FOR_ACTIONS_OPTION_NAME,
+} from '../../constants';
+import { getStoreAgeInWeeks } from '../../utils';
 
 /**
  * A CustomerEffortScore wrapper that uses tracks to track the selected
