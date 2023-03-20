@@ -78,7 +78,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 *
 			 * @param bool If false, "Allow backorders?" will be shown as a select. Default: it will use radio buttons.
 			 */
-			if ( apply_filters( 'woocommerce_product_allow_backorder_use_radio', false ) ) {
+			if ( apply_filters( 'woocommerce_product_allow_backorder_use_radio', true ) ) {
 				woocommerce_wp_radio( $common_backorder_args );
 			} else {
 				$select_input_args = array(
