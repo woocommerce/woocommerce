@@ -1,11 +1,6 @@
 /**
  * External dependencies
  */
-import { BlockConfiguration } from '@wordpress/blocks';
-
-/**
- * External dependencies
- */
 const fs = require( 'fs' );
 const path = require( 'path' );
 const { sync: glob } = require( 'fast-glob' );
@@ -28,7 +23,7 @@ const getBlockMetaDataFiles = () => {
  * Get the block meta data from a block.json file.
  *
  * @param {string} filePath File path to block.json file.
- * @return {BlockConfiguration} Block meta data.
+ * @return {Object} Block meta data.
  */
 const getBlockMetaData = ( filePath ) => {
 	return JSON.parse( fs.readFileSync( filePath ) );
@@ -37,7 +32,7 @@ const getBlockMetaData = ( filePath ) => {
 /**
  * Get the block file assets with raw file paths.
  *
- * @param {BlockConfiguration} blockMetaData
+ * @param {Object} blockMetaData
  * @return {string[]} Asset file paths.
  */
 const getBlockFileAssets = ( blockMetaData ) => {
@@ -54,7 +49,7 @@ const getBlockFileAssets = ( blockMetaData ) => {
 /**
  * Get the block name from the meta data, removing the `woocommerce/` namespace.
  *
- * @param {BlockConfiguration} blockMetaData
+ * @param {Object} blockMetaData
  * @return {string} Block name.
  */
 const getBlockName = ( blockMetaData ) => {
@@ -64,8 +59,8 @@ const getBlockName = ( blockMetaData ) => {
 /**
  * Get the entry point name.
  *
- * @param {string}             entryFilePath
- * @param {BlockConfiguration} blockMetaData
+ * @param {string} entryFilePath
+ * @param {Object} blockMetaData
  * @return {string} The entry point name.
  */
 const getEntryPointName = ( entryFilePath, blockMetaData ) => {
