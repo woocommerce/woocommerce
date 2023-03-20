@@ -1,6 +1,5 @@
 <svg width="272" height="260" viewBox="0 0 272 260" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_2269_119804)">
-<rect width="271.419" height="260" transform="translate(0.582031)" fill="url(#paint0_linear_2269_119804)" fill-opacity="0.2"/>
 <g filter="url(#filter0_d_2269_119804)">
 <path d="M103.297 186.005H34.1019C28.6893 186.005 24.2632 181.606 24.2632 176.234V92.1946C24.2632 86.8226 28.6893 82.4234 34.1019 82.4234H103.297C108.709 82.4234 113.135 86.8226 113.135 92.1946V176.234C113.135 181.606 108.709 186.005 103.297 186.005Z" fill="white" stroke="#F6F7F7" stroke-width="0.52642"/>
 </g>
@@ -62,10 +61,6 @@
 <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2269_119804"/>
 <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2269_119804" result="shape"/>
 </filter>
-<linearGradient id="paint0_linear_2269_119804" x1="14.4189" y1="130.553" x2="246.824" y2="130.553" gradientUnits="userSpaceOnUse">
-<stop stop-color="#F7EDF7" stop-opacity="0"/>
-<stop offset="0.845956" stop-color="#C498D9" stop-opacity="0.6"/>
-</linearGradient>
 <clipPath id="clip0_2269_119804">
 <rect width="271.419" height="260" fill="white" transform="translate(0.582031)"/>
 </clipPath>

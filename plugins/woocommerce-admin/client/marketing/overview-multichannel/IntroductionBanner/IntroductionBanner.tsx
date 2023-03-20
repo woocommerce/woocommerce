@@ -16,7 +16,6 @@ import {
 } from '~/marketing/hooks';
 import './IntroductionBanner.scss';
 import wooIconUrl from './woo.svg';
-import illustrationUrl from './illustration.svg';
 import illustrationLargeUrl from './illustration-large.svg';
 
 type IntroductionBannerProps = {
@@ -141,16 +140,11 @@ export const IntroductionBanner = ( {
 				>
 					<Icon icon={ closeSmall } />
 				</Button>
-				<img
-					src={
-						showCreateCampaignButton || showAddChannelsButton
-							? illustrationLargeUrl
-							: illustrationUrl
-					}
-					alt={ __(
-						'WooCommerce Marketing introduction banner illustration',
-						'woocommerce'
-					) }
+				<div
+					className="woocommerce-marketing-introduction-banner-image-placeholder"
+					style={ {
+						backgroundImage: `url("${ illustrationLargeUrl }")`,
+					} }
 				/>
 			</div>
 		</Card>
