@@ -129,7 +129,7 @@ const StoreLocation = ( {
 			}: FormContext< FormValues > ) => (
 				<Fragment>
 					<StoreAddress
-						// @ts-expect-error
+						// @ts-expect-error return type doesn't match, but they do work. We should revisit and refactor them in a follow up issue.
 						getInputProps={ getInputProps }
 						setValue={ setValue }
 					/>
