@@ -13,7 +13,7 @@ class DefaultShippingPartners {
 	 * @return array Default specs.
 	 */
 	public static function get_all() {
-		$asset_base_url      = WC()->plugin_url() . 'assets/images/shipping_partners/';
+		$asset_base_url         = WC()->plugin_url() . 'assets/images/shipping_partners/';
 		$column_layout_features = array(
 			array(
 				'icon'        => $asset_base_url . 'timer.svg',
@@ -48,11 +48,11 @@ class DefaultShippingPartners {
 				'name'              => 'ShipStation',
 				'slug'              => 'woocommerce-shipstation-integration',
 				'description'       => __( 'Powerful yet easy-to-use solution:', 'woocommerce' ),
-				'layout_column'        => array(
+				'layout_column'     => array(
 					'image'    => $asset_base_url . 'shipstation-column.svg',
 					'features' => $column_layout_features,
 				),
-				'layout_row'     => array(
+				'layout_row'        => array(
 					'image'    => $asset_base_url . 'shipstation-row.svg',
 					'features' => array(
 						array(
@@ -92,7 +92,7 @@ class DefaultShippingPartners {
 			array(
 				'name'              => 'Skydropx',
 				'slug'              => 'skydropx-cotizador-y-envios',
-				'layout_column'        => array(
+				'layout_column'     => array(
 					'image'    => $asset_base_url . 'skydropx-column.svg',
 					'features' => $column_layout_features,
 				),
@@ -107,7 +107,7 @@ class DefaultShippingPartners {
 				'name'              => 'Envia',
 				'slug'              => '',
 				'description'       => '',
-				'layout_column'        => array(
+				'layout_column'     => array(
 					'image'    => $asset_base_url . 'envia-column.svg',
 					'features' => $column_layout_features,
 				),
@@ -121,11 +121,11 @@ class DefaultShippingPartners {
 				'name'              => 'Sendcloud',
 				'slug'              => 'sendcloud-shipping',
 				'description'       => __( 'All-in-one shipping tool:', 'woocommerce' ),
-				'layout_column'        => array(
+				'layout_column'     => array(
 					'image'    => $asset_base_url . 'sendcloud-column.svg',
 					'features' => $column_layout_features,
 				),
-				'layout_row'     => array(
+				'layout_row'        => array(
 					'image'    => $asset_base_url . 'sendcloud-row.svg',
 					'features' => array(
 						array(
@@ -164,11 +164,11 @@ class DefaultShippingPartners {
 				'name'              => 'Packlink',
 				'slug'              => 'packlink-pro-shipping',
 				'description'       => __( 'Optimize your full shipping process:', 'woocommerce' ),
-				'layout_column'        => array(
+				'layout_column'     => array(
 					'image'    => $asset_base_url . 'packlink-column.svg',
 					'features' => $column_layout_features,
 				),
-				'layout_row'     => array(
+				'layout_row'        => array(
 					'image'    => $asset_base_url . 'packlink-row.svg',
 					'features' => array(
 						array(
@@ -212,7 +212,7 @@ class DefaultShippingPartners {
 				'title'             => 'WooCommerce Shipping',
 				'slug'              => 'woocommerce-services',
 				'description'       => __( 'Save time and money by printing your shipping labels right from your computer with WooCommerce Shipping. Try WooCommerce Shipping for free.', 'woocommerce' ),
-				'layout_column'        => array(
+				'layout_column'     => array(
 					'image'    => $asset_base_url . 'wcs-column.svg',
 					'features' => $column_layout_features,
 				),
