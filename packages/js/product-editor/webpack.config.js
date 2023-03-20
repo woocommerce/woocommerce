@@ -43,13 +43,13 @@ module.exports = {
 			chunkFilename: 'chunks/[id].style.css',
 		} ),
 		new WebpackRTLPlugin( {
-			test: /^((?!editor).)*scss$/,
+			test: /style\.css$/,
 			filename: '[name]/style-rtl.css',
 			minify: NODE_ENV === 'development' ? false : { safe: true },
 		} ),
 		new WebpackRTLPlugin( {
-			test: /^editor\.scss$/,
-			filename: 'blocks/[name]/editor-rtl.css',
+			test: /(?<!style)\.css$/,
+			filename: '[name]-rtl.css',
 			minify: NODE_ENV === 'development' ? false : { safe: true },
 		} ),
 		new CopyWebpackPlugin( {
