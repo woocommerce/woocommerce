@@ -74,8 +74,8 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
 -   [ ] Edit the [GitHub release](https://github.com/woocommerce/woocommerce-gutenberg-products-block/releases) and copy changelog into the release notes. Ensure there is a release with the correct version, the one you entered above.
 -   [ ] The `#woo-blocks-repo` slack instance will be notified about the progress with the WordPress.org deploy. Watch for that. If anything goes wrong, an error will be reported and you can followup via the GitHub actions tab and the log for that workflow.
 -   [ ] After the wp.org workflow completes, confirm the following
-    -   [ ] Changelog, Version, and Last Updated on [WP.org plugin page](https://wordpress.org/plugins/woo-gutenberg-products-block/) is correct.
     -   [ ] Confirm svn tag is correct, e.g. [{{version}}](https://plugins.svn.wordpress.org/woo-gutenberg-products-block/tags/{{version}}/)
+    -   [ ] Changelog, Version, and Last Updated on [WP.org plugin page](https://wordpress.org/plugins/woo-gutenberg-products-block/) is correct.
     -   [ ] Confirm [WooCommerce.com plugin page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/) is updated. Note: this can take several hours, feel free to check it the following day.
     -   [ ] Download zip and smoke test.
     -   [ ] Test updating plugin from previous version.
@@ -132,6 +132,7 @@ This only needs to be done if this release is the last release of the feature pl
     -   Ping porters from each team to know which changelog entries need to be highlighted. Ask them to write a short text and optionally provide a screenshot. They can use previous posts for inspiration, we usually try to highlight new features or API changes.
     -   Ensure the release notes are included in the post verbatim.
     -   Don't forget to use category `WooCommerce Blocks Release Notes` for the post.
+    -   If any of the PRs in this release is labelled with `needs dev-note`, include it in the post.
 -   [ ] Add highlights to the WC core release post (do this even if the release you are doing is not merged into WC core):
     -   Check which WC core version will include the WC Blocks release you just did (reference: PdToLP-K-p2).
     -   Go to its Release Thread and search the _Feature Highlights_ comment (example: p6q8Tx-2gl-p2).
