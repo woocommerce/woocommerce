@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 import { compose } from '@wordpress/compose';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
