@@ -22,7 +22,13 @@ const WoocommercePaymentsTaskItem = () => {
 
 	return (
 		<WooOnboardingTaskListItem id="woocommerce-payments">
-			{ ( { defaultTaskItem: DefaultTaskItem } ) => (
+			{ ( {
+				defaultTaskItem: DefaultTaskItem,
+			}: {
+				defaultTaskItem: ( props: {
+					onClick: () => void;
+				} ) => JSX.Element;
+			} ) => (
 				<DefaultTaskItem
 					// intercept the click on the task list item so that we don't have to see a intermediate page before installing woocommerce payments
 					onClick={ () => {
@@ -41,6 +47,7 @@ const WoocommercePaymentsTaskItem = () => {
 };
 
 registerPlugin( 'woocommerce-admin-task-wcpay', {
+	// @ts-expect-error scope is not defined in the type definition but it is a valid property
 	scope: 'woocommerce-tasks',
 	render: WoocommercePaymentsTaskItem,
 } );
@@ -85,6 +92,7 @@ const WoocommercePaymentsTaskPage = () => (
 );
 
 registerPlugin( 'woocommerce-admin-task-wcpay-page', {
+	// @ts-expect-error scope is not defined in the type definition but it is a valid property
 	scope: 'woocommerce-tasks',
 	render: WoocommercePaymentsTaskPage,
 } );
