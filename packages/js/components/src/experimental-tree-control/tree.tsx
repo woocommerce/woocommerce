@@ -4,8 +4,9 @@
 import { Button, Icon } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { createElement, forwardRef, Fragment } from 'react';
+import { createElement, forwardRef, Fragment, useRef } from 'react';
 import { plus } from '@wordpress/icons';
+import { useMergeRefs } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -16,8 +17,10 @@ import { TreeProps } from './types';
 
 export const Tree = forwardRef( function ForwardedTree(
 	props: TreeProps,
-	ref: React.ForwardedRef< HTMLOListElement >
+	forwardedRef: React.ForwardedRef< HTMLOListElement >
 ) {
+	const thisRef = useRef< HTMLOListElement >( null );
+	const ref = useMergeRefs( [ thisRef, forwardedRef ] );
 	const { level, items, treeProps, treeItemProps } = useTree( {
 		...props,
 		ref,
@@ -49,7 +52,7 @@ export const Tree = forwardRef( function ForwardedTree(
 						onLastItemLoop={ () => {
 							if ( isCreateButtonVisible ) {
 								(
-									document.querySelector(
+									thisRef.current?.parentElement?.querySelector(
 										'.experimental-woocommerce-tree__button'
 									) as HTMLButtonElement
 								 )?.focus();
