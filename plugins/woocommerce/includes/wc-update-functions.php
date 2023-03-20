@@ -21,6 +21,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
@@ -2593,4 +2594,47 @@ function wc_update_750_disable_new_product_management_experience() {
 	if ( 'yes' === get_option( 'woocommerce_new_product_management_enabled' ) ) {
 		update_option( 'woocommerce_new_product_management_enabled', 'no' );
 	}
+}
+
+/**
+ * Delete stray order records in both posts table and the orders table:
+ *
+ * - Posts of type "shop_order_placeholder" with no matching order in the orders table.
+ * - Records of type "shop_order_refund" with a zero parent order id in both tables.
+ *
+ * @return void
+ */
+function wc_update_770_delete_stray_order_records() {
+	global $wpdb;
+
+	$orders_table_name = OrdersTableDataStore::get_orders_table_name();
+
+	// phpcs:disable WordPress.DB.PreparedSQL
+
+	if ( ! $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $orders_table_name ) ) ) ) {
+		return;
+	};
+
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->posts} WHERE post_type = %s AND ID NOT IN (SELECT id FROM $orders_table_name)",
+			'shop_order_placehold'
+		)
+	);
+
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->posts} WHERE post_type = %s AND post_parent = 0",
+			'shop_order_refund'
+		)
+	);
+
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$orders_table_name} WHERE type = %s AND (parent_order_id = 0 OR parent_order_id is null)",
+			'shop_order_refund'
+		)
+	);
+
+	// phpcs:enable WordPress.DB.PreparedSQL
 }
