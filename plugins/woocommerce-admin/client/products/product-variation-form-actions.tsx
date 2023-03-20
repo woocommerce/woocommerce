@@ -11,6 +11,7 @@ import {
 import { preventLeavingProductForm } from '@woocommerce/product-editor';
 import { registerPlugin } from '@wordpress/plugins';
 import { useDispatch } from '@wordpress/data';
+import { useConfirmUnsavedChanges } from '@woocommerce/navigation';
 import { useFormContext } from '@woocommerce/components';
 import { useParams } from 'react-router-dom';
 import { useState } from '@wordpress/element';
@@ -18,7 +19,6 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
 import './product-form-actions.scss';
 
 export const ProductVariationFormActions: React.FC = () => {
@@ -31,7 +31,7 @@ export const ProductVariationFormActions: React.FC = () => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isSaving, setIsSaving ] = useState( false );
 
-	usePreventLeavingPage( isDirty, preventLeavingProductForm );
+	useConfirmUnsavedChanges( isDirty, preventLeavingProductForm );
 
 	const onSave = async () => {
 		setIsSaving( true );

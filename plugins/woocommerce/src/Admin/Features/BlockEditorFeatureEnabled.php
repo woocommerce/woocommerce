@@ -32,6 +32,7 @@ class BlockEditorFeatureEnabled {
 		}
 		if ( Features::is_enabled( self::FEATURE_ID ) ) {
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_rest_base_config' ) );
 		}
 	}
 
@@ -102,4 +103,15 @@ class BlockEditorFeatureEnabled {
 		return $link;
 	}
 
+	/**
+	 * Updates the product endpoint to use WooCommerce REST API.
+	 *
+	 * @param array $post_args Args for the product post type.
+	 * @return array
+	 */
+	public function add_rest_base_config( $post_args ) {
+		$post_args['rest_base']      = 'products';
+		$post_args['rest_namespace'] = 'wc/v3';
+		return $post_args;
+	}
 }

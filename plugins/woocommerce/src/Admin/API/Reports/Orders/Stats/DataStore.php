@@ -113,6 +113,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
+		add_action( 'woocommerce_before_delete_order', array( __CLASS__, 'delete_order' ) );
 		add_action( 'delete_post', array( __CLASS__, 'delete_order' ) );
 	}
 
@@ -208,7 +209,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		// Product attribute filters.
-		$attribute_subqueries = $this->get_attribute_subqueries( $query_args, $orders_stats_table );
+		$attribute_subqueries = $this->get_attribute_subqueries( $query_args );
 		if ( $attribute_subqueries['join'] && $attribute_subqueries['where'] ) {
 			// Build a subquery for getting order IDs by product attribute(s).
 			// Done here since our use case is a little more complicated than get_object_where_filter() can handle.

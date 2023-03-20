@@ -66,6 +66,7 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		await page.click( 'text=Save attributes', { force: true } );
 		await page.waitForLoadState( 'networkidle' );
 
+		await page.waitForTimeout( 1000 ); // Wait for 1 second
 		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
 		await page.locator( '#save-post' ).click();
 		await expect(
@@ -203,10 +204,10 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 			if ( i > 0 ) {
 				await page.click( 'button.add_attribute' );
 			}
-			await page.fill(
-				`input[name="attribute_names[${ i }]"]`,
-				`attr #${ i + 1 }`
-			);
+			const input = `input[name="attribute_names[${ i }]"]`;
+
+			await page.waitForSelector( input, { timeout: 1000 } ); // Wait for up to 1 seconds
+			await page.fill( input, `attr #${ i + 1 }` );
 			await page.fill(
 				`textarea[name="attribute_values[${ i }]"]`,
 				'val1 | val2'
@@ -220,6 +221,7 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 			).toBeVisible();
 		}
 
+		await page.waitForTimeout( 1000 ); // Wait for 1 second
 		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
 		await page.locator( '#save-post' ).click();
 		await expect(

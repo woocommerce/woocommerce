@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Prevent 'woocommerce_ajax_order_items_removed' from generating PHP warnings.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Load same stylesheets in the Site Editor as in the frontend

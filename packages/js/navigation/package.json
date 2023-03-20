@@ -31,6 +31,7 @@
 		"@wordpress/compose": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
 		"@wordpress/hooks": "wp-6.0",
+		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/notices": "wp-6.0",
 		"@wordpress/url": "wp-6.0",
 		"history": "^5.3.0",

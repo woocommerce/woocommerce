@@ -113,9 +113,6 @@ test.describe( 'Payment setup task', () => {
 			.catch( () => {} );
 		await page.waitForLoadState( 'networkidle' );
 
-		// purposely no await again
-		page.click( 'button.toggle-button' );
-
 		// enable COD payment option
 		await page.click(
 			'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
