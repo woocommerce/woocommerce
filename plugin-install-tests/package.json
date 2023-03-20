@@ -1,0 +1,17 @@
+{
+	"name": "plugin-install",
+	"version": "1.0.0",
+	"description": "",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"concurrent": "node concurrent.js",
+		"sync": "node sync.js",
+		"clean": "node run-clean.js"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"node-fetch": "^3.3.1"
+	}
+}
