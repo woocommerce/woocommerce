@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Switch wc_product_attributes_lookup table management to use truncate and dbDelta over drop table
