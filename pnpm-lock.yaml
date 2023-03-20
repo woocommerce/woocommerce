@@ -608,6 +608,7 @@ importers:
       '@woocommerce/date': workspace:*
       '@woocommerce/eslint-plugin': workspace:*
       '@woocommerce/navigation': workspace:*
+      '@woocommerce/tracks': workspace:*
       '@wordpress/api-fetch': wp-6.0
       '@wordpress/compose': wp-6.0
       '@wordpress/core-data': wp-6.0
@@ -635,6 +636,7 @@ importers:
     dependencies:
       '@woocommerce/date': link:../date
       '@woocommerce/navigation': link:../navigation
+      '@woocommerce/tracks': link:../tracks
       '@wordpress/api-fetch': 6.3.1
       '@wordpress/compose': 5.4.1_react@17.0.2
       '@wordpress/core-data': 4.4.5_react@17.0.2

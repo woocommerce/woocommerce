@@ -28,6 +28,7 @@
 	"dependencies": {
 		"@woocommerce/date": "workspace:*",
 		"@woocommerce/navigation": "workspace:*",
+		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/compose": "wp-6.0",
 		"@wordpress/core-data": "wp-6.0",
