@@ -25,7 +25,7 @@ import { QUEUE_OPTION_NAME, STORE_KEY } from '../../store';
  * @param {boolean}  props.resolving  Whether the queue is resolving.
  * @param {Function} props.clearQueue Sets up clearing of the queue on the next page load.
  */
-function CustomerEffortScoreTracksContainer( {
+function _CustomerEffortScoreTracksContainer( {
 	queue,
 	resolving,
 	clearQueue,
@@ -65,7 +65,7 @@ function CustomerEffortScoreTracksContainer( {
 	);
 }
 
-CustomerEffortScoreTracksContainer.propTypes = {
+_CustomerEffortScoreTracksContainer.propTypes = {
 	/**
 	 * The queue of CES tracks surveys to display.
 	 */
@@ -80,7 +80,7 @@ CustomerEffortScoreTracksContainer.propTypes = {
 	clearQueue: PropTypes.func,
 };
 
-export default compose(
+export const CustomerEffortScoreTracksContainer = compose(
 	withSelect( ( select ) => {
 		const { getCesSurveyQueue, isResolving } = select( STORE_KEY );
 		const queue = getCesSurveyQueue();
@@ -107,4 +107,4 @@ export default compose(
 			},
 		};
 	} )
-)( CustomerEffortScoreTracksContainer );
+)( _CustomerEffortScoreTracksContainer );

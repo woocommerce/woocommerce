@@ -41,7 +41,7 @@ import { getStoreAgeInWeeks } from '../../utils';
  * @param {Function} props.updateOptions      Function to update options.
  * @param {Function} props.createNotice       Function to create a snackbar.
  */
-function CustomerEffortScoreTracks( {
+function _CustomerEffortScoreTracks( {
 	action,
 	trackProps,
 	title,
@@ -174,7 +174,7 @@ function CustomerEffortScoreTracks( {
 	);
 }
 
-CustomerEffortScoreTracks.propTypes = {
+_CustomerEffortScoreTracks.propTypes = {
 	/**
 	 * The action name sent to Tracks.
 	 */
@@ -217,7 +217,7 @@ CustomerEffortScoreTracks.propTypes = {
 	createNotice: PropTypes.func,
 };
 
-export default compose(
+export const CustomerEffortScoreTracks = compose(
 	withSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } =
 			select( OPTIONS_STORE_NAME );
@@ -260,4 +260,4 @@ export default compose(
 			createNotice,
 		};
 	} )
-)( CustomerEffortScoreTracks );
+)( _CustomerEffortScoreTracks );
