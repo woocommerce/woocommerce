@@ -66,7 +66,9 @@ export const Channels = forwardRef< ChannelsRef, ChannelsProps >(
 				scrollIntoAddChannels: () => {
 					setExpanded( true );
 					addChannelsButtonRef.current?.focus();
-					addChannelsButtonRef.current?.scrollIntoView();
+					addChannelsButtonRef.current?.scrollIntoView( {
+						block: 'center',
+					} );
 				},
 			} ),
 			[]
