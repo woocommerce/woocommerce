@@ -9,8 +9,6 @@ import './product-elements/button';
 import './product-elements/summary';
 import './product-elements/sale-badge';
 import './product-elements/sku';
-import './product-elements/category-list';
-import './product-elements/tag-list';
 import './product-elements/stock-indicator';
 import './product-elements/add-to-cart';
 import './product-elements/add-to-cart-form';
