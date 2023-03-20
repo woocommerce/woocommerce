@@ -13,7 +13,7 @@ class DefaultShippingPartners {
 	 * @return array Default specs.
 	 */
 	public static function get_all() {
-		$asset_base_url         = WC()->plugin_url() . 'assets/images/shipping_partners/';
+		$asset_base_url         = WC()->plugin_url() . '/assets/images/shipping_partners/';
 		$column_layout_features = array(
 			array(
 				'icon'        => $asset_base_url . 'timer.svg',
