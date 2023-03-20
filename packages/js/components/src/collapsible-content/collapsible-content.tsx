@@ -50,12 +50,14 @@ export const CollapsibleContent: React.FC< CollapsedProps > = ( {
 					/>
 				</div>
 			</button>
-			<div
-				{ ...props }
-				className="woocommerce-collapsible-content__content"
-			>
-				<DisplayState state={ getState() }>{ children }</DisplayState>
-			</div>
+			<DisplayState state={ getState() }>
+				<div
+					{ ...props }
+					className="woocommerce-collapsible-content__content"
+				>
+					{ children }
+				</div>
+			</DisplayState>
 		</div>
 	);
 };
