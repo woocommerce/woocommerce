@@ -11,7 +11,8 @@ The release pull request has been created! This checklist is a guide to follow f
 -   [ ] Ensure you pull your changes from the remote, since GitHub Actions will have added new commits to the branch.
     -   [ ] Check the version and date in the changelog section within `readme.txt`, e.g. `= {{version}} - YYYY-MM-DD =`
     -   [ ] Check the changelog matches the one in the pull request description above.
--   [ ] Update compatibility sections (if applicable). **Note:** Do not change the stable tag or plugin version; this is automated.
+-   [ ] Run `npm run change-versions` to update the version numbers in several files. Write the version number you are releasing: {{version}}.
+-   [ ] Update compatibility sections (if applicable).
 -   [ ] Push above changes to the release branch.
 
 ## Create the Testing Notes
@@ -46,7 +47,6 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
 
 -   [ ] Go through the description of the release pull request and edit it to update all the sections and checklist instructions there.
 -   [ ] Execute `npm run deploy`
-    -   Note: the script automatically updates version numbers (commits on your behalf).
     -   **ALERT**: This script will ask you if this release will be deployed to WordPress.org. You should only answer yes for this release **if it's the latest release and you want to deploy to WordPress.org**. Otherwise, answer no. If you answer yes, you will get asked additional verification by the `npm run deploy` script about deploying a patch release to WordPress.org.
 
 ## If this release is deployed to WordPress.org

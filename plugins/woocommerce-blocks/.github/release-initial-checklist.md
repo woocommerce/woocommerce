@@ -12,7 +12,8 @@ The release pull request has been created! This checklist is a guide to follow f
 -   [ ] Ensure you pull your changes from the remote, since GitHub Actions will have added new commits to the branch.
     -   [ ] Check the version and date in the changelog section within `readme.txt`, e.g. `= {{version}} - YYYY-MM-DD =`
     -   [ ] Check the changelog matches the one in the pull request description above.
--   [ ] Update compatibility sections (if applicable). **Note:** Do not change the stable tag or plugin version; this is automated.
+-   [ ] Run `npm run change-versions` to update the version numbers in several files. Write the version number you are releasing: {{version}}.
+-   [ ] Update compatibility sections (if applicable).
     -   [ ] Update _Requires at least_, _Tested up to_, and _Requires PHP_ sections at the top of `readme.txt`. Note, this should also be the latest WordPress version available at time of release.
     -   [ ] Update _Requires at least_, _Requires PHP_, _WC requires at least_, and _WC tested up to_ at the top of `woocommerce-gutenberg-products-block.php`. Note, this should include requiring the latest WP version at the time of release. For _WC requires at least_, use L1 (we publicly communicate L0 but technically support L1 to provide some space for folks to update). So this means if the current version of WooCommerce core is 5.8.0, then you'll want to put 5.7.0 here.
     -   [ ] If necessary, update the value of `$minimum_wp_version` at the top of the `woocommerce-gutenberg-products-block.php` file to the latest available version of WordPress.
@@ -64,7 +65,6 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
 
 -   [ ] Execute `npm run deploy`
     -   The script will ask you to enter the version number to tag. Please enter the version we're releasing right now. Do not publish any dev tags as a release.
-    -   Note: the script automatically updates version numbers on Github (commits on your behalf).
     -   **ALERT**: This script will ask you if this release will be deployed to WordPress.org. You should answer yes for this release even if it is a pre-release.
     -   A GitHub release will automatically be created and this will trigger a workflow that automatically deploys the plugin to WordPress.org.
 
@@ -83,12 +83,7 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
 ## After Workflow completes
 
 -   [ ] Merge this pull request back into `trunk`. This may have merge conflicts needing resolved if there are any cherry-picked commits in the release branch.
--   [ ] Update version on the `trunk` branch to be for the next version of the plugin and include the `dev` suffix (e.g. something like [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158)) for the next version. Be sure to update the version number in the following files:
-    -   [ ] `package-lock.json`
-    -   [ ] `package.json`
-    -   [ ] `readme.txt`
-    -   [ ] `src/Package.php`
-    -   [ ] `woocommerce-gutenberg-products-block.php`.
+-   [ ] Run `npm run change-versions` to update the version in `trunk` to the next version of the plugin and include the `dev` suffix. For example, if you released 2.5.0, you should update the version in `trunk` to 2.6.0-dev.
 -   [ ] Update the schedules p2 with the shipped date for the release (PdToLP-K-p2).
 -   [ ] Edit the GitHub milestone of the release you just shipped and add the current date as the due date (this is used to track ship date as well).
 
