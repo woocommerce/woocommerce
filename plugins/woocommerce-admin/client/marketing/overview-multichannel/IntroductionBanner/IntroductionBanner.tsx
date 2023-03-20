@@ -16,7 +16,7 @@ import {
 } from '~/marketing/hooks';
 import './IntroductionBanner.scss';
 import wooIconUrl from './woo.svg';
-import illustrationLargeUrl from './illustration-large.svg';
+import illustrationUrl from './illustration.svg';
 
 type IntroductionBannerProps = {
 	onDismissClick: () => void;
@@ -143,7 +143,7 @@ export const IntroductionBanner = ( {
 				<div
 					className="woocommerce-marketing-introduction-banner-image-placeholder"
 					style={ {
-						backgroundImage: `url("${ illustrationLargeUrl }")`,
+						backgroundImage: `url("${ illustrationUrl }")`,
 					} }
 				/>
 			</div>
