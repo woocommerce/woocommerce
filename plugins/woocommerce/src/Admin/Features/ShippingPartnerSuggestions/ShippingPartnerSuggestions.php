@@ -28,7 +28,7 @@ class ShippingPartnerSuggestions {
 				$is_visible = $rule_evaluator->evaluate( $spec->is_visible );
 				if ( $is_visible ) {
 					$spec->is_visible = true;
-					$suggestions[] = $spec;
+					$suggestions[]    = $spec;
 				}
 			}
 		}
