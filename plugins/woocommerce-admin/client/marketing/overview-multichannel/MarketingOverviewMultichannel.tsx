@@ -58,9 +58,10 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 		return <CenteredSpinner />;
 	}
 
-	const shouldShowCampaigns =
+	const shouldShowCampaigns = !! (
 		dataRegistered?.length &&
-		( isIntroductionBannerDismissed || !! metaCampaigns?.total );
+		( isIntroductionBannerDismissed || metaCampaigns?.total )
+	);
 
 	const shouldShowExtensions =
 		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
@@ -81,7 +82,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 					} }
 				/>
 			) }
-			{ !! shouldShowCampaigns && <Campaigns /> }
+			{ shouldShowCampaigns && <Campaigns /> }
 			{ !! ( dataRegistered && dataRecommended ) &&
 				!! ( dataRegistered.length || dataRecommended.length ) && (
 					<Channels
