@@ -46,7 +46,7 @@ class RemoteInboxNotificationsEngine {
 			array( __CLASS__, 'run_on_woocommerce_admin_updated' ),
 			'woocommerce-remote-inbox-engine'
 		);
-		
+
 		add_filter( 'woocommerce_get_note_from_db', array( __CLASS__, 'get_note_from_db' ), 10, 1 );
 	}
 
