@@ -10,9 +10,13 @@ import { Dropdown, Spinner } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { useLinkedTree } from './hooks/use-linked-tree';
-import { Tree } from './tree';
-import { Item, LinkedTree, TreeControlProps } from './types';
+import { useLinkedTree } from '../experimental-tree-control/hooks/use-linked-tree';
+import { Tree } from '../experimental-tree-control/tree';
+import {
+	Item,
+	LinkedTree,
+	TreeControlProps,
+} from '../experimental-tree-control/types';
 import { SelectedItems } from '../experimental-select-control/selected-items';
 import {
 	getItemLabelType,

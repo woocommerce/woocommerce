@@ -7,10 +7,9 @@ import React, { createElement } from 'react';
 /**
  * Internal dependencies
  */
-import { SelectTree } from '../../experimental-tree-control/select-tree';
+import { SelectTree } from '../select-tree';
 import { Item } from '../../experimental-tree-control/types';
-import '../../experimental-tree-control/select-tree.scss';
-import '../../experimental-tree-control/tree.scss';
+
 const listItems: Item[] = [
 	{ id: '1', name: 'Technology' },
 	{ id: '1.1', name: 'Notebooks', parent: '1' },
