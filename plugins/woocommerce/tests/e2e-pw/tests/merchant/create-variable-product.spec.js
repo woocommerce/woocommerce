@@ -11,6 +11,11 @@ const productLength = '10';
 const productWidth = '20';
 const productHeight = '15';
 const defaultAttributes = [ 'val2', 'val1', 'val2' ];
+const customProductAttributes = [
+	{ name: 'Logo', values: [ 'Woo', 'A8c' ] },
+	{ name: 'Badge', values: [ 'Left', 'Right' ] },
+	{ name: 'Stripes', values: [ 'Horizontal', 'Vertical' ] },
+];
 const stockAmount = '100';
 const lowStockAmount = '10';
 
@@ -44,68 +49,140 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 	test( 'can create product, attributes and variations', async ( {
 		page,
 	} ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
-		await page.fill( '#title', variableProductName );
-		await page.selectOption( '#product-type', 'variable', { force: true } );
-
-		await page.click( 'a[href="#product_attributes"]' );
-
-		// add 3 attributes
-		for ( let i = 0; i < 3; i++ ) {
-			if ( i > 0 ) {
-				await page.click( 'button.add_attribute' );
-			}
-			await page.fill(
-				`input[name="attribute_names[${ i }]"]`,
-				`attr #${ i + 1 }`
-			);
-			await page.fill(
-				`textarea[name="attribute_values[${ i }]"]`,
-				'val1 | val2'
-			);
-		}
-		await page.keyboard.press( 'ArrowUp' );
-		await page.click( 'text=Save attributes' );
-
-		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
-		await page.locator( '#save-post' ).click();
-		await expect(
-			page.getByText( 'Product draft updated. ' )
-		).toBeVisible();
-		await page.click( '.updated.notice .notice-dismiss' );
-
-		// manually create variations from all attributes
-		await page.click( 'a[href="#variable_product_options"]' );
-		await page.selectOption( '#field_to_edit', 'link_all_variations', {
-			force: true,
+		await test.step( 'Go to Products > Add New', async () => {
+			await page.goto( 'wp-admin/post-new.php?post_type=product' );
 		} );
-		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( 'a.do_variation_action' );
 
-		await page.waitForLoadState( 'networkidle' );
+		await test.step( 'Fill product name', async () => {
+			await page.fill( '#title', variableProductName );
+		} );
 
-		// add variation attributes
-		for ( let i = 0; i < 8; i++ ) {
-			const val1 = 'val1';
-			const val2 = 'val2';
-			const attr3 = !! ( i % 2 ); // 0-1,4-5 / 2-3,6-7
-			const attr2 = i % 4 > 1; // 0-3 / 4-7
-			const attr1 = i > 3;
-			await expect(
-				page.locator( `select[name="attribute_attr-1[${ i }]"]` )
-			).toHaveValue( attr1 ? val2 : val1 );
-			await expect(
-				page.locator( `select[name="attribute_attr-2[${ i }]"]` )
-			).toHaveValue( attr2 ? val2 : val1 );
-			await expect(
-				page.locator( `select[name="attribute_attr-3[${ i }]"]` )
-			).toHaveValue( attr3 ? val2 : val1 );
-		}
-
-		await page.locator( '#save-post' ).click();
-		await expect( page.locator( '#message.notice-success' ) ).toContainText(
-			'Product draft updated.'
+		await test.step(
+			"Select 'Variable product' from 'Product data' drop-down list",
+			async () => {
+				await page.selectOption( '#product-type', 'variable', {
+					force: true,
+				} );
+			}
 		);
+
+		await test.step( 'Go to the Attributes tab', async () => {
+			await page.click( 'a[href="#product_attributes"]' );
+		} );
+
+		await test.step( 'Add three custom product attributes', async () => {
+			for ( let i = 0; i < customProductAttributes.length; i++ ) {
+				const attributeName = customProductAttributes[ i ].name;
+				const attributeValuesInputString = customProductAttributes[
+					i
+				].values
+					.toString()
+					.replace( ',', '|' );
+
+				await test.step(
+					`Add attribute named "${ attributeName }" with values "${ attributeValuesInputString }"`,
+					async () => {
+						if ( i > 0 ) {
+							await page.click( 'button.add_attribute' );
+						}
+
+						await page
+							.locator(
+								'div#product_attributes input[name^="attribute_names"]'
+							)
+							.nth( i )
+							.fill( attributeName );
+						await page
+							.locator(
+								'div#product_attributes textarea[name^="attribute_values"]'
+							)
+							.nth( i )
+							.fill( attributeValuesInputString );
+
+						await page.keyboard.press( 'ArrowUp' );
+
+						await page.click( 'text=Save attributes' );
+
+						await expect(
+							page
+								.locator(
+									'div#product_attributes .closed h3 .attribute_name'
+								)
+								.nth( i )
+						).toHaveText( attributeName );
+					}
+				);
+			}
+		} );
+
+		await test.step( 'Save draft', async () => {
+			await page.locator( '#save-post' ).click();
+			await expect(
+				page.locator( '#message.notice-success' )
+			).toContainText( 'Product draft updated.' );
+		} );
+
+		await test.step( 'Go to Variations tab', async () => {
+			await page.click( 'a[href="#variable_product_options"]' );
+		} );
+
+		await test.step( 'Create variations from all attributes', async () => {
+			await page.selectOption( '#field_to_edit', 'link_all_variations' );
+			page.on( 'dialog', ( dialog ) => dialog.accept() );
+			await page.click( 'a.do_variation_action' );
+		} );
+
+		await test.step(
+			'Assert that all variations were created',
+			async () => {
+				const allLogoValues = customProductAttributes[ 0 ].values;
+				const allBadgeValues = customProductAttributes[ 1 ].values;
+				const allStripesValues = customProductAttributes[ 2 ].values;
+				const variationLocator = page.locator(
+					'.woocommerce_variation'
+				);
+
+				for ( let i = 0; i < 8; i++ ) {
+					const selectLocator = variationLocator
+						.nth( i )
+						.locator( 'select[name^="attribute_"]' );
+
+					const logoValue =
+						i <= 3 ? allLogoValues[ 0 ] : allLogoValues[ 1 ];
+
+					const badgeValue = [ 0, 1, 4, 5 ].includes( i )
+						? allBadgeValues[ 0 ]
+						: allBadgeValues[ 1 ];
+
+					const stripesValue =
+						i % 2 === 0
+							? allStripesValues[ 0 ]
+							: allStripesValues[ 1 ];
+
+					await test.step(
+						`Assert that the variation "${ logoValue }, ${ badgeValue }, ${ stripesValue }" was created`,
+						async () => {
+							await expect( selectLocator.nth( 0 ) ).toHaveValue(
+								logoValue
+							);
+							await expect( selectLocator.nth( 1 ) ).toHaveValue(
+								badgeValue
+							);
+							await expect( selectLocator.nth( 2 ) ).toHaveValue(
+								stripesValue
+							);
+						}
+					);
+				}
+			}
+		);
+
+		await test.step( 'Save draft', async () => {
+			await page.locator( '#save-post' ).click();
+			await expect(
+				page.locator( '#message.notice-success' )
+			).toContainText( 'Product draft updated.' );
+		} );
 	} );
 
 	test( 'can set the variation attributes, bulk edit variations', async ( {
