@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Moving use-product-helper and related product hooks to product editor package.
