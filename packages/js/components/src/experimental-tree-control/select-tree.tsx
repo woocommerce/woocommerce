@@ -138,7 +138,7 @@ export const SelectTree = function SelectTree( {
 							ref: comboBoxRef,
 							role: 'combobox',
 							'aria-expanded': isOpen,
-							'aria-haspopup': 'listbox',
+							'aria-haspopup': 'tree',
 							'aria-labelledby': `${ props.id }-label`,
 							'aria-owns': `${ props.id }-menu`,
 						} }
