@@ -24,9 +24,11 @@ import {
 /**
  * Internal dependencies
  */
-import { CardHeaderTitle } from '~/marketing/components';
-import { useCampaigns } from './useCampaigns';
-import { CreateNewCampaignModal } from './CreateNewCampaignModal';
+import {
+	CardHeaderTitle,
+	CreateNewCampaignModal,
+} from '~/marketing/components';
+import { useCampaigns } from '~/marketing/hooks';
 import './Campaigns.scss';
 
 const tableCaption = __( 'Campaigns', 'woocommerce' );
