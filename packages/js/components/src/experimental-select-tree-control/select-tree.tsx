@@ -161,7 +161,6 @@ export const SelectTree = function SelectTree( {
 							},
 							onBlur: ( event ) => {
 								// if blurring to an element inside the dropdown, don't close it
-								// in that case we need to know when the focus has left the tree
 								if (
 									isOpen &&
 									! document
