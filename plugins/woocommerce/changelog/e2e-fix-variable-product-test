@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix the recently failing "can create product, attributes and variations" E2E test.
