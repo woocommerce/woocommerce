@@ -8,7 +8,6 @@
 import { TreeProps } from '../types';
 
 export function useTree( {
-	ref,
 	items,
 	level = 1,
 	role = 'tree',
@@ -19,6 +18,11 @@ export function useTree( {
 	shouldItemBeHighlighted,
 	onSelect,
 	onRemove,
+	shouldNotRecursivelySelect,
+	createValue,
+	allowCreate,
+	onTreeBlur,
+	onCreateNew,
 	...props
 }: TreeProps ) {
 	return {
@@ -35,6 +39,7 @@ export function useTree( {
 			getLabel: getItemLabel,
 			shouldItemBeExpanded,
 			shouldItemBeHighlighted,
+			shouldNotRecursivelySelect,
 			onSelect,
 			onRemove,
 		},

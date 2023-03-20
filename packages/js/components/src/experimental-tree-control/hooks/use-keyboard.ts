@@ -110,12 +110,14 @@ export function useKeyboard( {
 	onExpand,
 	onCollapse,
 	onToggleExpand,
+	onLastItemLoop,
 }: {
 	item: LinkedTree;
 	isExpanded: boolean;
 	onExpand(): void;
 	onCollapse(): void;
 	onToggleExpand(): void;
+	onLastItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
 } ) {
 	function onKeyDown( event: React.KeyboardEvent< HTMLDivElement > ) {
 		if ( event.code === 'ArrowRight' ) {
@@ -154,6 +156,9 @@ export function useKeyboard( {
 				event.code
 			);
 			element?.focus();
+			if ( event.code === 'ArrowDown' && ! element && onLastItemLoop ) {
+				onLastItemLoop( event );
+			}
 		}
 
 		if ( event.code === 'Home' ) {
@@ -169,5 +174,5 @@ export function useKeyboard( {
 		}
 	}
 
-	return { onKeyDown };
+	return { onKeyDown, onLastItemLoop };
 }

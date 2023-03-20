@@ -29,15 +29,15 @@ function isIndeterminate(
 ): boolean {
 	if ( children?.length ) {
 		for ( const child of children ) {
-			if ( child.data.value in indeterminateMemo ) {
+			if ( child.data.id in indeterminateMemo ) {
 				return true;
 			}
-			const isChildSelected = child.data.value in selectedItems;
+			const isChildSelected = child.data.id in selectedItems;
 			if (
 				! isChildSelected ||
 				isIndeterminate( selectedItems, child.children, memo )
 			) {
-				indeterminateMemo[ child.data.value ] = true;
+				indeterminateMemo[ child.data.id ] = true;
 				return true;
 			}
 		}
@@ -52,7 +52,7 @@ function mapSelectedItems(
 	return selectedArray.reduce(
 		( map, selectedItem, index ) => ( {
 			...map,
-			[ selectedItem.value ]: index,
+			[ selectedItem.id ]: index,
 		} ),
 		{} as Record< string, number >
 	);
@@ -64,10 +64,10 @@ function hasSelectedSibblingChildren(
 	selectedItems: Record< string, number >
 ) {
 	return children.some( ( child ) => {
-		const isChildSelected = child.data.value in selectedItems;
+		const isChildSelected = child.data.id in selectedItems;
 		if ( ! isChildSelected ) return false;
 		return ! values.some(
-			( childValue ) => childValue.value === child.data.value
+			( childValue ) => childValue.id === child.data.id
 		);
 	} );
 }
@@ -75,6 +75,7 @@ function hasSelectedSibblingChildren(
 export function useSelection( {
 	item,
 	multiple,
+	shouldNotRecursivelySelect,
 	selected,
 	level,
 	index,
@@ -89,6 +90,7 @@ export function useSelection( {
 	| 'index'
 	| 'onSelect'
 	| 'onRemove'
+	| 'shouldNotRecursivelySelect'
 > ) {
 	const selectedItems = useMemo( () => {
 		if ( level === 1 && index === 0 ) {
@@ -99,8 +101,12 @@ export function useSelection( {
 	}, [ selected, level, index ] );
 
 	const checkedStatus: CheckedStatus = useMemo( () => {
-		if ( item.data.value in selectedItems ) {
-			if ( multiple && isIndeterminate( selectedItems, item.children ) ) {
+		if ( item.data.id in selectedItems ) {
+			if (
+				multiple &&
+				! shouldNotRecursivelySelect &&
+				isIndeterminate( selectedItems, item.children )
+			) {
 				return 'indeterminate';
 			}
 			return 'checked';
@@ -113,7 +119,7 @@ export function useSelection( {
 
 		if ( multiple ) {
 			value = [ item.data ];
-			if ( item.children.length ) {
+			if ( item.children.length && ! shouldNotRecursivelySelect ) {
 				value.push( ...getDeepChildren( item ) );
 			}
 		} else if ( item.children?.length ) {
@@ -132,7 +138,7 @@ export function useSelection( {
 	function onSelectChildren( value: Item | Item[] ) {
 		if ( typeof onSelect !== 'function' ) return;
 
-		if ( multiple ) {
+		if ( multiple && ! shouldNotRecursivelySelect ) {
 			value = [ item.data, ...( value as Item[] ) ];
 		}
 
@@ -142,7 +148,11 @@ export function useSelection( {
 	function onRemoveChildren( value: Item | Item[] ) {
 		if ( typeof onRemove !== 'function' ) return;
 
-		if ( multiple && item.children?.length ) {
+		if (
+			multiple &&
+			item.children?.length &&
+			! shouldNotRecursivelySelect
+		) {
 			const hasSelectedSibbling = hasSelectedSibblingChildren(
 				item.children,
 				value as Item[],
