@@ -8,6 +8,9 @@
 	"keywords": [ "products", "summary", "excerpt" ],
 	"textdomain": "default",
 	"attributes": {
+		"align": {
+			"type": "string"
+		},
 		"label": {
 			"type": "string"
 		}
