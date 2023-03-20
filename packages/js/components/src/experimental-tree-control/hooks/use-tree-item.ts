@@ -104,6 +104,7 @@ export function useTreeItem( {
 			getItemLabel: getLabel,
 			shouldItemBeExpanded,
 			shouldItemBeHighlighted,
+			shouldNotRecursivelySelect,
 			onSelect: selection.onSelectChildren,
 			onRemove: selection.onRemoveChildren,
 		},
