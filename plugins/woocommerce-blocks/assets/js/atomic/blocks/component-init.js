@@ -82,24 +82,6 @@ registerBlockComponent( {
 } );
 
 registerBlockComponent( {
-	blockName: 'woocommerce/product-category-list',
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "product-category-list" */ './product-elements/category-list/block'
-		)
-	),
-} );
-
-registerBlockComponent( {
-	blockName: 'woocommerce/product-tag-list',
-	component: lazy( () =>
-		import(
-			/* webpackChunkName: "product-tag-list" */ './product-elements/tag-list/block'
-		)
-	),
-} );
-
-registerBlockComponent( {
 	blockName: 'woocommerce/product-stock-indicator',
 	component: lazy( () =>
 		import(
