@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 7.5.1 2023-03-21 =
+
+**WooCommerce**
+
+* Fix - Fix no enforcing of min/max limits in quantity selector of variable products. [#36871](https://github.com/woocommerce/woocommerce/pull/36871)
+* Dev - Update column definitions with synonymous types to prevent dbDelta from trying to ALTER them on each install. [#37277](https://github.com/woocommerce/woocommerce/pull/37277)
+* Update - Update WooCommerce Blocks to 9.6.6. [#37298](https://github.com/woocommerce/woocommerce/pull/37298)
+
 = 7.5.0 2023-03-14 =
 
 **WooCommerce**
