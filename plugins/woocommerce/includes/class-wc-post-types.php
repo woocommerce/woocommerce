@@ -388,6 +388,9 @@ class WC_Post_Types {
 											),
 										),
 										array(
+											'woocommerce/product-summary',
+										),
+										array(
 											'core/columns',
 											array(),
 											array(
