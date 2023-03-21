@@ -1,21 +1,22 @@
 <?php
 /**
- * WooCommerce Block Editor Feature Endabled
+ * WooCommerce Product Block Editor
  */
 
-namespace Automattic\WooCommerce\Admin\Features;
+namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\TransientNotices;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;
 use WP_Block_Editor_Context;
 
 /**
- * Loads assets related to the new product management experience page.
+ * Loads assets related to the product block editor.
  */
-class BlockEditorFeatureEnabled {
+class Init {
 
-	const FEATURE_ID = 'block-editor-feature-enabled';
+	const FEATURE_ID = 'product-block-editor';
 
 	/**
 	 * Option name used to toggle this feature.

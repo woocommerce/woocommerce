@@ -427,7 +427,7 @@ class WC_Admin_Menus {
 	 * Maybe add new management product experience.
 	 */
 	public function maybe_add_new_product_management_experience() {
-		if ( Features::is_enabled( 'new-product-management-experience' ) || Features::is_enabled( 'block-editor-feature-enabled' ) ) {
+		if ( Features::is_enabled( 'new-product-management-experience' ) || Features::is_enabled( 'product-block-editor' ) ) {
 			global $submenu;
 			if ( isset( $submenu['edit.php?post_type=product'][10] ) ) {
 				// Disable phpcs since we need to override submenu classes.
