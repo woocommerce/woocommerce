@@ -70,6 +70,10 @@ export const useRecommendedPluginsWithoutChannels =
 			};
 		}, [] );
 
+		const isInitializing =
+			( loadingRecommendedPlugins && ! dataRecommendedPlugins.length ) ||
+			( loadingRecommendedChannels && ! dataRecommendedChannels );
+
 		const loading = loadingRecommendedPlugins || loadingRecommendedChannels;
 
 		const recommendedPluginsWithoutChannels = differenceWith(
@@ -79,10 +83,9 @@ export const useRecommendedPluginsWithoutChannels =
 		);
 
 		return {
-			isInitializing:
-				! recommendedPluginsWithoutChannels.length && loading,
+			isInitializing,
 			isLoading: loading,
-			data: recommendedPluginsWithoutChannels,
+			data: isInitializing ? [] : recommendedPluginsWithoutChannels,
 			installAndActivate,
 		};
 	};
