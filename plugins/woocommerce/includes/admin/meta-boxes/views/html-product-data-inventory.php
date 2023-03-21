@@ -62,7 +62,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				)
 			);
 
-			echo '<input type="hidden" name="_original_stock" value="' . esc_attr( wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ?? 1 ) ) . '" />';
+			echo '<input type="hidden" name="_original_stock" value="' . esc_attr( wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ) ) . '" />';
 
 			woocommerce_wp_select(
 				array(
