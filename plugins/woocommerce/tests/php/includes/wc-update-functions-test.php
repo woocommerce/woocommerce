@@ -24,8 +24,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE"
 		);
 		$table_definition = $wpdb->get_var( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log", 1 );
-		$this->assertNotFalse( strpos( $table_definition, "wc_download_log_ib" ) );
-		$this->assertNotFalse( strpos( $table_definition, "wc_download_log_ib_2" ) );
+		$this->assertNotFalse( strpos( $table_definition, 'wc_download_log_ib' ) );
+		$this->assertNotFalse( strpos( $table_definition, 'wc_download_log_ib_2' ) );
 
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
@@ -33,7 +33,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		// Verify that the keys were properly removed
 		$table_definition = $wpdb->get_var( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log", 1 );
-		$this->assertFalse( strpos( $table_definition, "wc_download_log_ib" ) );
+		$this->assertFalse( strpos( $table_definition, 'wc_download_log_ib' ) );
 	}
 
 	public function test_verify_wc_update_352_drop_download_log_fk_removes_foreign_keys() {
@@ -47,7 +47,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE"
 		);
 		$table_definition = $wpdb->get_var( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log", 1 );
-		$this->assertNotFalse( strpos( $table_definition, "fk_wc_download_log_permission_id" ) );
+		$this->assertNotFalse( strpos( $table_definition, 'fk_wc_download_log_permission_id' ) );
 
 		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
@@ -55,7 +55,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		// Verify that the key was properly removed
 		$table_definition = $wpdb->get_var( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log", 1 );
-		$this->assertFalse( strpos( $table_definition, "fk_wc_download_log_permission_id" ) );
+		$this->assertFalse( strpos( $table_definition, 'fk_wc_download_log_permission_id' ) );
 	}
 
 	public function test_verify_wc_update_700_remove_download_log_fk_removes_foreign_keys() {
