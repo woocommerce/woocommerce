@@ -15,7 +15,10 @@ const selector = 'getRecommendedPlugins';
 const category = 'marketing';
 
 export const useRecommendedPlugins = () => {
-	const { data: dataRecommendedChannels } = useRecommendedChannels();
+	const {
+		loading: loadingRecommendedChannels,
+		data: dataRecommendedChannels,
+	} = useRecommendedChannels();
 	const { invalidateResolution, installAndActivateRecommendedPlugin } =
 		useDispatch( STORE_KEY );
 
@@ -24,25 +27,28 @@ export const useRecommendedPlugins = () => {
 		invalidateResolution( selector, [ category ] );
 	};
 
-	const { isLoading, plugins } = useSelect( ( select ) => {
-		const { getRecommendedPlugins, hasFinishedResolution } =
-			select( STORE_KEY );
+	const { loading: loadingRecommendedPlugins, data: dataRecommendedPlugins } =
+		useSelect( ( select ) => {
+			const { getRecommendedPlugins, hasFinishedResolution } =
+				select( STORE_KEY );
 
-		return {
-			isLoading: ! hasFinishedResolution( selector, [ category ] ),
-			plugins: getRecommendedPlugins< RecommendedPlugin[] >( category ),
-		};
-	}, [] );
+			return {
+				loading: ! hasFinishedResolution( selector, [ category ] ),
+				data: getRecommendedPlugins< RecommendedPlugin[] >( category ),
+			};
+		}, [] );
+
+	const loading = loadingRecommendedPlugins || loadingRecommendedChannels;
 
 	const recommendedPluginsWithoutChannels = differenceWith(
-		plugins,
+		dataRecommendedPlugins,
 		dataRecommendedChannels || [],
 		( a, b ) => a.product === b.product
 	);
 
 	return {
-		isInitializing: ! recommendedPluginsWithoutChannels.length && isLoading,
-		isLoading,
+		isInitializing: ! recommendedPluginsWithoutChannels.length && loading,
+		isLoading: loading,
 		plugins: recommendedPluginsWithoutChannels,
 		installAndActivate,
 	};
