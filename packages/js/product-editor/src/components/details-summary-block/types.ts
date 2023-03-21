@@ -1,10 +1,5 @@
-/**
- * External dependencies
- */
-import { BlockAlignment } from '@wordpress/blocks';
-
 export type SummaryAttributes = {
-	align: BlockAlignment;
+	align: 'left' | 'center' | 'right' | 'justify';
 	direction: 'ltr' | 'rtl';
 	label: string;
 };

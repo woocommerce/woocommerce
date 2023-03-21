@@ -3,10 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement } from '@wordpress/element';
-import { useEntityProp } from '@wordpress/core-data';
-import { BaseControl } from '@wordpress/components';
-import uniqueId from 'lodash/uniqueId';
 import { BlockEditProps } from '@wordpress/blocks';
+import { BaseControl } from '@wordpress/components';
+import { useEntityProp } from '@wordpress/core-data';
+import uniqueId from 'lodash/uniqueId';
 import classNames from 'classnames';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -22,6 +22,7 @@ import {
  */
 import { ParagraphRTLControl } from './paragraph-rtl-control';
 import { SummaryAttributes } from './types';
+import { ALIGNMENT_CONTROLS } from './constants';
 
 export function Edit( {
 	attributes,
@@ -52,6 +53,7 @@ export function Edit( {
 			{ /* @ts-ignore No types for this exist yet. */ }
 			<BlockControls group="block">
 				<AlignmentControl
+					alignmentControls={ ALIGNMENT_CONTROLS }
 					value={ align }
 					onChange={ handleAlignmentChange }
 				/>
