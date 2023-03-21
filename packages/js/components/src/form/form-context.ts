@@ -51,10 +51,12 @@ export type FormContextType< Values extends Record< string, any > > = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const FormContext: React.Context< FormContextType< any > > = createContext< FormContextType< any > >(
+export const FormContext: React.Context< FormContextType< any > > =
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	{} as FormContextType< any >
-);
+	createContext< FormContextType< any > >(
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		{} as FormContextType< any >
+	);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useFormContext< Values extends Record< string, any > >() {
