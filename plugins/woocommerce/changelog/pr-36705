@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Added `woocommerce_widget_layered_nav_filters_start/end` hooks around layered nav filters widget

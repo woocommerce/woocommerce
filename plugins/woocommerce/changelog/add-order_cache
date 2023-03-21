@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a cache for orders, to use when custom order tables are enabled

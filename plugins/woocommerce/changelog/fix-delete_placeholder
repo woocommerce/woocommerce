@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Also delete when order type is placehoder, since it was created by HPOS.
