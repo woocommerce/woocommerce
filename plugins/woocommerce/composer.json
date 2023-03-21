@@ -14,7 +14,7 @@
 		}
 	],
 	"require": {
-		"php": ">=7.2",
+		"php": ">=7.3",
 		"automattic/jetpack-autoloader": "2.10.1",
 		"automattic/jetpack-constants": "1.5.1",
 		"composer/installers": "^1.9",
@@ -40,7 +40,7 @@
 		},
 		"sort-packages": true,
 		"platform": {
-			"php": "7.2"
+			"php": "7.3"
 		},
 		"allow-plugins": {
 			"automattic/jetpack-autoloader": true,
