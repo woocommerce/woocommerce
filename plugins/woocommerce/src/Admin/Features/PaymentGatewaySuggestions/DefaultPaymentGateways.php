@@ -38,6 +38,8 @@ class DefaultPaymentGateways {
 		'amazon_payments_advanced'                        => 7,
 		'affirm'                                          => 8,
 		'afterpay'                                        => 9,
+		'zipmoney'                                        => 10,
+		'payoneer-checkout'                               => 11,
 	);
 
 	/**
@@ -227,6 +229,9 @@ class DefaultPaymentGateways {
 				'is_visible'          => array(
 					self::get_rules_for_countries(
 						array(
+							'MX',
+							'US',
+							'CA',
 							'AT',
 							'BE',
 							'CH',
@@ -241,12 +246,15 @@ class DefaultPaymentGateways {
 							'NO',
 							'PL',
 							'SE',
+							'NZ',
+							'AU',
 						)
 					),
 					self::get_rules_for_cbd( false ),
 				),
 				'category_other'      => array(),
 				'category_additional' => array(
+					'MX',
 					'US',
 					'CA',
 					'AT',
@@ -263,6 +271,8 @@ class DefaultPaymentGateways {
 					'NO',
 					'PL',
 					'SE',
+					'NZ',
+					'AU',
 				),
 			),
 			array(
@@ -317,6 +327,27 @@ class DefaultPaymentGateways {
 				),
 				'category_other'      => array( 'ZA' ),
 				'category_additional' => array(),
+			),
+			array(
+				'id'                  => 'payoneer-checkout',
+				'title'               => __( 'Payoneer Checkout', 'woocommerce' ),
+				'content'             => __( 'Payoneer Checkout is the next generation of payment processing platforms, giving merchants around the world the solutions and direction they need to succeed in today’s hyper-competitive global market.', 'woocommerce' ),
+				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/payoneer.png',
+				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/payoneer.png',
+				'plugins'             => array( 'payoneer-checkout' ),
+				'is_visible'          => array(
+					self::get_rules_for_countries(
+						array(
+							'HK',
+							'CN',
+						)
+					),
+				),
+				'category_other'      => array(),
+				'category_additional' => array(
+					'HK',
+					'CN',
+				),
 			),
 			array(
 				'id'                  => 'paystack',
@@ -774,6 +805,29 @@ class DefaultPaymentGateways {
 							),
 						),
 					),
+				),
+			),
+			array(
+				'id'                  => 'zipmoney',
+				'title'               => __( 'Zip Co - Buy Now, Pay Later', 'woocommerce' ),
+				'content'             => __( 'Give your customers the power to pay later, interest free and watch your sales grow.', 'woocommerce' ),
+				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/zipco.png',
+				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/zipco.png',
+				'plugins'             => array( 'zipmoney-payments-woocommerce' ),
+				'is_visible'          => array(
+					self::get_rules_for_countries(
+						array(
+							'US',
+							'NZ',
+							'AU',
+						)
+					),
+				),
+				'category_other'      => array(),
+				'category_additional' => array(
+					'US',
+					'NZ',
+					'AU',
 				),
 			),
 		);
