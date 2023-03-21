@@ -10,6 +10,9 @@
  */
 class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
+	/**
+	 * Test wc_update_343_cleanup_foreign_keys() function.
+	 */
 	public function test_verify_wc_update_343_cleanup_foreign_keys_removes_foreign_keys() {
 		global $wpdb;
 
@@ -31,11 +34,14 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		wc_update_343_cleanup_foreign_keys();
 
-		// Verify that the keys were properly removed
+		// Verify that the keys were properly removed.
 		$table_definition = $wpdb->get_var( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log", 1 );
 		$this->assertFalse( strpos( $table_definition, 'wc_download_log_ib' ) );
 	}
 
+	/**
+	 * Test wc_update_352_drop_download_log_fk() function.
+	 */
 	public function test_verify_wc_update_352_drop_download_log_fk_removes_foreign_keys() {
 		global $wpdb;
 
@@ -53,11 +59,14 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		wc_update_352_drop_download_log_fk();
 
-		// Verify that the key was properly removed
+		// Verify that the key was properly removed.
 		$table_definition = $wpdb->get_var( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log", 1 );
 		$this->assertFalse( strpos( $table_definition, 'fk_wc_download_log_permission_id' ) );
 	}
 
+	/**
+	 * Test wc_update_700_remove_download_log_fk() function.
+	 */
 	public function test_verify_wc_update_700_remove_download_log_fk_removes_foreign_keys() {
 		global $wpdb;
 
