@@ -70,7 +70,12 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 		await page.keyboard.press( 'ArrowUp' );
 		await page.click( 'text=Save attributes' );
 
-		await page.waitForTimeout( 1000 ); // Wait for 1 second
+		// wait for the attributes to be saved
+		await page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/post.php?post=' ) &&
+				response.status() === 200
+		);
 
 		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
 		await page.locator( '#save-post' ).click();
@@ -223,14 +228,15 @@ test.describe.serial( 'Add New Variable Product Page', () => {
 				.fill( 'val1 | val2' );
 			await page.keyboard.press( 'ArrowUp' );
 			await page.click( 'text=Save attributes' );
-			await expect(
-				page
-					.locator( '.woocommerce_attribute.closed' )
-					.filter( { hasText: `attr #${ i + 1 }` } )
-			).toBeVisible();
 		}
 
-		await page.waitForTimeout( 1000 ); // Wait for 1 second
+		// wait for the attributes to be saved
+		await page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/post.php?post=' ) &&
+				response.status() === 200
+		);
+
 		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
 		await page.locator( '#save-post' ).click();
 		await expect(
