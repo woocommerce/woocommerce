@@ -3,18 +3,17 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import {
-	CustomerFeedbackModal,
-	STORE_KEY,
-} from '@woocommerce/customer-effort-score';
-import { recordEvent } from '@woocommerce/tracks';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { createElement } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { getStoreAgeInWeeks } from './utils';
-import { ADMIN_INSTALL_TIMESTAMP_OPTION_NAME } from './constants';
+import { CustomerFeedbackModal } from '../';
+import { getStoreAgeInWeeks } from '../../utils';
+import { STORE_KEY } from '../../store';
+import { ADMIN_INSTALL_TIMESTAMP_OPTION_NAME } from '../../constants';
 
 export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =
 	'woocommerce_ces_product_mvp_ces_action';
