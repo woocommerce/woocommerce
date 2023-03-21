@@ -286,7 +286,7 @@ abstract class AbstractBlock {
 	 *
 	 * @see $this->register_block_type()
 	 * @param string $key Data to get, or default to everything.
-	 * @return array|string
+	 * @return array|string|null
 	 */
 	protected function get_block_type_script( $key = null ) {
 		$script = [
