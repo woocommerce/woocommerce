@@ -9,7 +9,7 @@ import { box } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import initBlock from '../../utils/init-block';
+import { initBlock } from '../../utils/init-blocks';
 import blockConfiguration from './block.json';
 import { Edit } from './edit';
 import { SectionBlockAttributes } from './types';
@@ -26,9 +26,6 @@ export const settings: Partial< BlockConfiguration< SectionBlockAttributes > > =
 		edit: Edit,
 	};
 
-export const init = () =>
-	initBlock( {
-		name: name as string,
-		metadata: metadata as never,
-		settings: settings as never,
-	} );
+export function init() {
+	return initBlock( { name, metadata, settings } );
+}
