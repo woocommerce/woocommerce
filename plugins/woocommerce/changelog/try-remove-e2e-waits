@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Improve e2e test reliability for variable products tests.
+Remove timeouts in e2e tests for variable products and analytics.
