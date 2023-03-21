@@ -128,6 +128,7 @@
 		"@types/wordpress__viewport": "^2.5.4",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/browserslist-config": "wp-6.0",
 		"@wordpress/scripts": "^12.6.1",
 		"concurrently": "^7.0.0",

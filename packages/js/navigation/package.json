@@ -64,6 +64,7 @@
 		"@types/jest": "^27.4.1",
 		"@types/qs": "^6.9.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
 		"eslint": "^8.32.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",

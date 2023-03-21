@@ -80,6 +80,7 @@
 		"@types/wordpress__plugins": "^3.0.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/block-editor": "^9.8.0",
 		"@wordpress/browserslist-config": "wp-6.0",
 		"concurrently": "^7.0.0",

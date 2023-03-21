@@ -271,6 +271,7 @@ importers:
       '@woocommerce/data': workspace:*
       '@woocommerce/date': workspace:*
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-js-tests': workspace:*
       '@woocommerce/internal-style-build': workspace:*
       '@woocommerce/navigation': workspace:*
       '@wordpress/a11y': wp-6.0
@@ -425,6 +426,7 @@ importers:
       '@types/wordpress__media-utils': 3.0.0_sfoxds7t5ydpegc3knd667wn6m
       '@types/wordpress__viewport': 2.5.4
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-js-tests': link:../internal-js-tests
       '@woocommerce/internal-style-build': link:../internal-style-build
       '@wordpress/browserslist-config': 4.1.3
       '@wordpress/scripts': 12.6.1_h4xx42qb2l7ylq2u26dkj2fbyi
@@ -452,6 +454,7 @@ importers:
       '@babel/core': ^7.17.5
       '@types/jest': ^27.4.1
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-js-tests': workspace:*
       browser-filesaver: ^1.1.1
       eslint: ^8.32.0
       jest: ^27.5.1
@@ -467,6 +470,7 @@ importers:
       '@babel/core': 7.17.8
       '@types/jest': 27.4.1
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-js-tests': link:../internal-js-tests
       eslint: 8.32.0
       jest: 27.5.1
       jest-cli: 27.5.1
@@ -479,6 +483,7 @@ importers:
       '@babel/core': ^7.17.5
       '@types/jest': ^27.4.1
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-js-tests': workspace:*
       '@woocommerce/number': workspace:*
       '@wordpress/deprecated': wp-6.0
       '@wordpress/element': wp-6.0
@@ -502,6 +507,7 @@ importers:
       '@babel/core': 7.17.8
       '@types/jest': 27.4.1
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-js-tests': link:../internal-js-tests
       eslint: 8.32.0
       jest: 27.5.1
       jest-cli: 27.5.1
@@ -521,6 +527,7 @@ importers:
       '@woocommerce/data': workspace:*
       '@woocommerce/eslint-plugin': workspace:*
       '@woocommerce/experimental': workspace:*
+      '@woocommerce/internal-js-tests': workspace:*
       '@woocommerce/internal-style-build': workspace:*
       '@woocommerce/navigation': workspace:*
       '@woocommerce/tracks': workspace:*
@@ -572,6 +579,7 @@ importers:
       '@types/wordpress__data': 6.0.0
       '@woocommerce/data': link:../data
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-js-tests': link:../internal-js-tests
       '@woocommerce/internal-style-build': link:../internal-style-build
       '@woocommerce/navigation': link:../navigation
       '@woocommerce/tracks': link:../tracks
@@ -601,6 +609,7 @@ importers:
       '@types/jest': ^27.4.1
       '@types/lodash': ^4.14.182
       '@types/md5': ^2.3.2
+      '@types/node': ^16.18.18
       '@types/qs': ^6.9.7
       '@types/react': ^17.0.2
       '@types/wordpress__compose': ^4.0.1
@@ -609,6 +618,7 @@ importers:
       '@types/wordpress__data-controls': ^2.2.0
       '@woocommerce/date': workspace:*
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-js-tests': workspace:*
       '@woocommerce/navigation': workspace:*
       '@woocommerce/tracks': workspace:*
       '@wordpress/api-fetch': wp-6.0
@@ -666,6 +676,7 @@ importers:
       '@types/jest': 27.4.1
       '@types/lodash': 4.14.182
       '@types/md5': 2.3.2
+      '@types/node': 16.18.18
       '@types/qs': 6.9.7
       '@types/react': 17.0.50
       '@types/wordpress__compose': 4.0.1
@@ -673,6 +684,7 @@ importers:
       '@types/wordpress__data': 6.0.0
       '@types/wordpress__data-controls': 2.2.0
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-js-tests': link:../internal-js-tests
       eslint: 8.32.0
       jest: 27.5.1
       jest-cli: 27.5.1
@@ -689,6 +701,7 @@ importers:
       '@types/lodash': ^4.14.182
       '@types/qs': ^6.9.7
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-js-tests': workspace:*
       '@wordpress/date': wp-6.0
       '@wordpress/i18n': wp-6.0
       d3-time-format: ^2.3.0
@@ -716,6 +729,7 @@ importers:
       '@types/lodash': 4.14.182
       '@types/qs': 6.9.7
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-js-tests': link:../internal-js-tests
       d3-time-format: 2.3.0
       eslint: 8.32.0
       jest: 27.5.1
@@ -964,6 +978,7 @@ importers:
       '@types/wordpress__components': ^19.10.3
       '@woocommerce/components': workspace:*
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-js-tests': workspace:*
       '@woocommerce/internal-style-build': workspace:*
       '@wordpress/browserslist-config': wp-6.0
       '@wordpress/components': ^19.5.0
@@ -1022,6 +1037,7 @@ importers:
       '@types/testing-library__jest-dom': 5.14.3
       '@types/wordpress__components': 19.10.5_sfoxds7t5ydpegc3knd667wn6m
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-js-tests': link:../internal-js-tests
       '@woocommerce/internal-style-build': link:../internal-style-build
       '@wordpress/browserslist-config': 4.1.3
       concurrently: 7.0.0
@@ -1049,6 +1065,7 @@ importers:
       '@types/qs': ^6.9.7
       '@types/react': ^17.0.2
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-js-tests': workspace:*
       '@wordpress/api-fetch': wp-6.0
       '@wordpress/hooks': wp-6.0
       cookie: ^0.4.2
@@ -1074,6 +1091,7 @@ importers:
       '@types/qs': 6.9.7
       '@types/react': 17.0.50
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-js-tests': link:../internal-js-tests
       eslint: 8.32.0
       jest: 27.5.1
       jest-cli: 27.5.1
@@ -1111,6 +1129,7 @@ importers:
       '@wordpress/data': wp-6.0
       '@wordpress/i18n': wp-6.0
       '@wordpress/jest-console': ^5.0.1
+      babel-jest: ^27.5.1
       eslint: ^8.32.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
@@ -1129,6 +1148,7 @@ importers:
     devDependencies:
       '@babel/core': 7.17.8
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      babel-jest: 27.5.1_@babel+core@7.17.8
       eslint: 8.32.0
       jest: 27.5.1
       jest-cli: 27.5.1
@@ -1185,6 +1205,7 @@ importers:
       '@types/jest': ^27.4.1
       '@types/qs': ^6.9.7
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-js-tests': workspace:*
       '@wordpress/api-fetch': wp-6.0
       '@wordpress/components': wp-6.0
       '@wordpress/compose': wp-6.0
@@ -1222,6 +1243,7 @@ importers:
       '@types/jest': 27.4.1
       '@types/qs': 6.9.7
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-js-tests': link:../internal-js-tests
       eslint: 8.32.0
       jest: 27.5.1
       jest-cli: 27.5.1
@@ -1279,6 +1301,7 @@ importers:
       '@types/jest': ^27.4.1
       '@types/lodash': ^4.14.184
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-js-tests': workspace:*
       eslint: ^8.32.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
@@ -1294,6 +1317,7 @@ importers:
       '@types/jest': 27.4.1
       '@types/lodash': 4.14.184
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-js-tests': link:../internal-js-tests
       eslint: 8.32.0
       jest: 27.5.1
       jest-cli: 27.5.1
@@ -1389,6 +1413,7 @@ importers:
       '@woocommerce/currency': workspace:*
       '@woocommerce/data': workspace:^4.1.0
       '@woocommerce/eslint-plugin': workspace:*
+      '@woocommerce/internal-js-tests': workspace:*
       '@woocommerce/internal-style-build': workspace:*
       '@woocommerce/navigation': workspace:^8.1.0
       '@woocommerce/number': workspace:*
@@ -1480,6 +1505,7 @@ importers:
       '@types/wordpress__media-utils': 3.0.0_sfoxds7t5ydpegc3knd667wn6m
       '@types/wordpress__plugins': 3.0.0_sfoxds7t5ydpegc3knd667wn6m
       '@woocommerce/eslint-plugin': link:../eslint-plugin
+      '@woocommerce/internal-js-tests': link:../internal-js-tests
       '@woocommerce/internal-style-build': link:../internal-style-build
       '@wordpress/browserslist-config': 4.1.3
       concurrently: 7.0.0
@@ -11233,11 +11259,11 @@ packages:
       chalk: 4.1.2
       convert-source-map: 1.8.0
       fast-json-stable-stringify: 2.1.0
-      graceful-fs: 4.2.9
+      graceful-fs: 4.2.11
       jest-haste-map: 26.6.2
       jest-regex-util: 26.0.0
       jest-util: 26.6.2
-      micromatch: 4.0.4
+      micromatch: 4.0.5
       pirates: 4.0.5
       slash: 3.0.0
       source-map: 0.6.1
@@ -21701,7 +21727,7 @@ packages:
       '@babel/core': 7.12.9
       '@jest/transform': 26.6.2
       '@jest/types': 26.6.2
-      '@types/babel__core': 7.1.16
+      '@types/babel__core': 7.20.0
       babel-plugin-istanbul: 6.1.1
       babel-preset-jest: 26.6.2_@babel+core@7.12.9
       chalk: 4.1.2
@@ -21720,7 +21746,7 @@ packages:
       '@babel/core': 7.21.3
       '@jest/transform': 26.6.2
       '@jest/types': 26.6.2
-      '@types/babel__core': 7.1.16
+      '@types/babel__core': 7.20.0
       babel-plugin-istanbul: 6.1.1
       babel-preset-jest: 26.6.2_@babel+core@7.21.3
       chalk: 4.1.2
@@ -21739,11 +21765,11 @@ packages:
       '@babel/core': 7.17.8
       '@jest/transform': 27.5.1
       '@jest/types': 27.5.1
-      '@types/babel__core': 7.1.16
+      '@types/babel__core': 7.20.0
       babel-plugin-istanbul: 6.1.1
       babel-preset-jest: 27.5.1_@babel+core@7.17.8
       chalk: 4.1.2
-      graceful-fs: 4.2.9
+      graceful-fs: 4.2.11
       slash: 3.0.0
     transitivePeerDependencies:
       - supports-color
@@ -25872,7 +25898,7 @@ packages:
     resolution: {integrity: sha512-Nv9m36S/vxpsI+Hc4/ZGRs0n9mXqSWGGq49zxb/cJfPAQMbUtttJAlNPS4AQzaBdw/pKskw5bMbekT/Y7W/Wlg==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      graceful-fs: 4.2.9
+      graceful-fs: 4.2.11
       memory-fs: 0.5.0
       tapable: 1.1.3
 
@@ -25888,7 +25914,7 @@ packages:
     resolution: {integrity: sha512-GIm3fQfwLJ8YZx2smuHpBKkXC1yOk+OBEmKckVyL0i/ea8mqDEykK3ld5dgH1QYPNyT/lIllxV2LULnxCHaHkA==}
     engines: {node: '>=10.13.0'}
     dependencies:
-      graceful-fs: 4.2.9
+      graceful-fs: 4.2.11
       tapable: 2.2.1
 
   /enquirer/2.3.6:
@@ -28721,7 +28747,7 @@ packages:
     resolution: {integrity: sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g==}
     engines: {node: '>=6 <7 || >=8'}
     dependencies:
-      graceful-fs: 4.2.9
+      graceful-fs: 4.2.11
       jsonfile: 4.0.0
       universalify: 0.1.2
 
@@ -28730,7 +28756,7 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       at-least-node: 1.0.0
-      graceful-fs: 4.2.9
+      graceful-fs: 4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.0
 
@@ -39736,7 +39762,7 @@ packages:
     resolution: {integrity: sha512-crk4Qu3pmXwgxdSgGhgA/eXiJAPQiX4GMOZZMXnqKxHX7TaoL+3gQVo/WeuAiogr07DpnfjIMpXXa+PAIvwPGQ==}
     engines: {node: '>= 8'}
     dependencies:
-      picomatch: 2.3.0
+      picomatch: 2.3.1
     dev: true
 
   /readdirp/3.6.0:
@@ -44491,7 +44517,7 @@ packages:
     engines: {node: '>=10.13.0'}
     dependencies:
       glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.9
+      graceful-fs: 4.2.11
 
   /watchpack/2.4.0:
     resolution: {integrity: sha512-Lcvm7MGST/4fup+ifyKi2hjyIAwcdI4HRgtvTpIUxBRhB+RFtUh8XtDOxUfctVCnhVi+QQj49i91OyvzkJl6cg==}
@@ -44995,7 +45021,7 @@ packages:
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.9
+      graceful-fs: 4.2.11
       json-parse-better-errors: 1.0.2
       loader-runner: 4.2.0
       mime-types: 2.1.35
@@ -45034,7 +45060,7 @@ packages:
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.9
+      graceful-fs: 4.2.11
       json-parse-better-errors: 1.0.2
       loader-runner: 4.2.0
       mime-types: 2.1.35
@@ -45115,7 +45141,7 @@ packages:
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.9
+      graceful-fs: 4.2.11
       json-parse-better-errors: 1.0.2
       loader-runner: 4.2.0
       mime-types: 2.1.35
@@ -45447,7 +45473,7 @@ packages:
   /write-file-atomic/2.4.1:
     resolution: {integrity: sha512-TGHFeZEZMnv+gBFRfjAcxL5bPHrsGKtnb4qsFAws7/vlh+QfwAaySIw4AXP9ZskTTh5GWu3FLuJhsWVdiJPGvg==}
     dependencies:
-      graceful-fs: 4.2.9
+      graceful-fs: 4.2.11
       imurmurhash: 0.1.4
       signal-exit: 3.0.7
 

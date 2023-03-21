@@ -65,6 +65,7 @@
 		"@types/wordpress__data": "^6.0.0",
 		"@types/wordpress__data-controls": "^2.2.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
 		"eslint": "^8.32.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",

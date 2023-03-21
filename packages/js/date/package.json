@@ -40,6 +40,7 @@
 		"@types/lodash": "^4.14.182",
 		"@types/qs": "^6.9.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
 		"d3-time-format": "^2.3.0",
 		"eslint": "^8.32.0",
 		"jest": "^27.5.1",
