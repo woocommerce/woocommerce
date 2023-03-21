@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Improve e2e test reliability for variable products tests.
