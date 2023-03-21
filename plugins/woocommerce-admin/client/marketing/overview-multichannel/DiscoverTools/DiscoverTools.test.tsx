@@ -6,7 +6,7 @@ import { render, screen } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import { useInstalledExtensions } from '~/marketing/hooks';
+import { useInstalledPluginsWithoutChannels } from '~/marketing/hooks';
 import { useRecommendedPluginsWithoutChannels } from './useRecommendedPluginsWithoutChannels';
 import { DiscoverTools } from './DiscoverTools';
 
@@ -25,7 +25,7 @@ jest.mock( './useRecommendedPluginsWithoutChannels', () => ( {
 } ) );
 
 jest.mock( '~/marketing/hooks', () => ( {
-	useInstalledExtensions: jest.fn(),
+	useInstalledPluginsWithoutChannels: jest.fn(),
 } ) );
 
 describe( 'DiscoverTools component', () => {
@@ -35,7 +35,7 @@ describe( 'DiscoverTools component', () => {
 			isLoading: true,
 			data: [],
 		} );
-		( useInstalledExtensions as jest.Mock ).mockReturnValue( {
+		( useInstalledPluginsWithoutChannels as jest.Mock ).mockReturnValue( {
 			loadInstalledExtensionsAfterActivation: jest.fn(),
 		} );
 		render( <DiscoverTools /> );
@@ -49,7 +49,7 @@ describe( 'DiscoverTools component', () => {
 			isLoading: false,
 			data: [],
 		} );
-		( useInstalledExtensions as jest.Mock ).mockReturnValue( {
+		( useInstalledPluginsWithoutChannels as jest.Mock ).mockReturnValue( {
 			loadInstalledExtensionsAfterActivation: jest.fn(),
 		} );
 		render( <DiscoverTools /> );
@@ -97,9 +97,11 @@ describe( 'DiscoverTools component', () => {
 					},
 				],
 			} );
-			( useInstalledExtensions as jest.Mock ).mockReturnValue( {
-				loadInstalledExtensionsAfterActivation: jest.fn(),
-			} );
+			( useInstalledPluginsWithoutChannels as jest.Mock ).mockReturnValue(
+				{
+					loadInstalledExtensionsAfterActivation: jest.fn(),
+				}
+			);
 			render( <DiscoverTools /> );
 
 			// Assert that we have the "Sales channels" tab, the plugin name, the "Built by WooCommerce" pill, and the "Install plugin" button.
@@ -140,9 +142,11 @@ describe( 'DiscoverTools component', () => {
 					},
 				],
 			} );
-			( useInstalledExtensions as jest.Mock ).mockReturnValue( {
-				loadInstalledExtensionsAfterActivation: jest.fn(),
-			} );
+			( useInstalledPluginsWithoutChannels as jest.Mock ).mockReturnValue(
+				{
+					loadInstalledExtensionsAfterActivation: jest.fn(),
+				}
+			);
 			render( <DiscoverTools /> );
 
 			// Assert that we have the CRM tab, plugin name, and "View details" button.
