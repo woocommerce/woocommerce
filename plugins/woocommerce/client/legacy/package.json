@@ -10,6 +10,7 @@
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name"
 	},
 	"devDependencies": {
+		"@types/node": "^16.18.18",
 		"@wordpress/stylelint-config": "19.1.0",
 		"autoprefixer": "9.8.6",
 		"browserslist": "4.19.3",

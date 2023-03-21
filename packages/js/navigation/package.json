@@ -69,7 +69,7 @@
 		"jest-cli": "^27.5.1",
 		"rimraf": "^3.0.2",
 		"ts-jest": "^27.1.3",
-		"typescript": "^4.8.3"
+		"typescript": "^4.9.5"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
