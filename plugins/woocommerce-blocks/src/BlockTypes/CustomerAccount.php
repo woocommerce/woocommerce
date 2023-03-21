@@ -95,7 +95,7 @@ class CustomerAccount extends AbstractBlock {
 	 *
 	 * @param array $attributes Block attributes.
 	 *
-	 * @return string Label to render on the block
+	 * @return string Label to render on the block.
 	 */
 	private function render_label( $attributes ) {
 		if ( self::ICON_ONLY === $attributes['displayStyle'] ) {
@@ -105,5 +105,16 @@ class CustomerAccount extends AbstractBlock {
 		return get_current_user_id()
 			? __( 'My Account', 'woo-gutenberg-products-block' )
 			: __( 'Login', 'woo-gutenberg-products-block' );
+	}
+
+	/**
+	 * Get the frontend script handle for this block type.
+	 *
+	 * @param string $key Data to get, or default to everything.
+	 *
+	 * @return null This block has no frontend script.
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
 	}
 }
