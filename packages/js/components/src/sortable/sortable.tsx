@@ -43,7 +43,7 @@ export type SortableProps = {
 
 const THROTTLE_TIME = 16;
 
-export const SortableContext = createContext( {} );
+export const SortableContext: React.Context< {} > = createContext( {} );
 
 export const Sortable = ( {
 	children,
