@@ -750,7 +750,11 @@ jQuery( function ( $ ) {
 	);
 
 	// Save attributes and update variations.
-	$( '.save_attributes' ).on( 'click', function () {
+	$( '.save_attributes' ).on( 'click', function ( event ) {
+		if ( $( this ).hasClass( 'disabled' ) ) {
+			event.preventDefault();
+			return;
+		}
 		$( '.product_attributes' ).block( {
 			message: null,
 			overlayCSS: {
