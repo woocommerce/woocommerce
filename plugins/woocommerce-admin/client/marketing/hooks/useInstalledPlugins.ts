@@ -25,8 +25,14 @@ export type UseInstalledPlugins = {
  * The list of installed plugins will not include registered and recommended marketing channels.
  */
 export const useInstalledPlugins = (): UseInstalledPlugins => {
-	const { data: dataRegisteredChannels = [] } = useRegisteredChannels();
-	const { data: dataRecommendedChannels = [] } = useRecommendedChannels();
+	const {
+		loading: loadingRegisteredChannels,
+		data: dataRegisteredChannels = [],
+	} = useRegisteredChannels();
+	const {
+		loading: loadingRecommendedChannels,
+		data: dataRecommendedChannels = [],
+	} = useRecommendedChannels();
 
 	const { installedPlugins, activatingPlugins } = useSelect( ( select ) => {
 		const { getInstalledPlugins, getActivatingPlugins } =
@@ -38,6 +44,10 @@ export const useInstalledPlugins = (): UseInstalledPlugins => {
 		};
 	}, [] );
 
+	const { activateInstalledPlugin, loadInstalledPluginsAfterActivation } =
+		useDispatch( STORE_KEY );
+
+	const loading = loadingRegisteredChannels || loadingRecommendedChannels;
 	const installedPluginsWithoutChannels = chain( installedPlugins )
 		.differenceWith( dataRegisteredChannels, ( a, b ) => a.slug === b.slug )
 		.differenceWith(
@@ -46,11 +56,8 @@ export const useInstalledPlugins = (): UseInstalledPlugins => {
 		)
 		.value();
 
-	const { activateInstalledPlugin, loadInstalledPluginsAfterActivation } =
-		useDispatch( STORE_KEY );
-
 	return {
-		installedPlugins: installedPluginsWithoutChannels,
+		installedPlugins: loading ? [] : installedPluginsWithoutChannels,
 		activatingPlugins,
 		activateInstalledPlugin,
 		loadInstalledPluginsAfterActivation,
