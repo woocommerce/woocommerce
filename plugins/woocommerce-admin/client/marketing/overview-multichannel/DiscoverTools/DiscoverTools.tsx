@@ -14,7 +14,7 @@ import {
 	CardBody,
 	CenteredSpinner,
 } from '~/marketing/components';
-import { useRecommendedPluginsWithoutChannels } from './useRecommendedPlugins';
+import { useRecommendedPluginsWithoutChannels } from './useRecommendedPluginsWithoutChannels';
 import { PluginsTabPanel } from './PluginsTabPanel';
 import './DiscoverTools.scss';
 

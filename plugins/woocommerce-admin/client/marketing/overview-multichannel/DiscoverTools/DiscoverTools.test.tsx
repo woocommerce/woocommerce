@@ -7,7 +7,7 @@ import { render, screen } from '@testing-library/react';
  * Internal dependencies
  */
 import { useInstalledExtensions } from '~/marketing/hooks';
-import { useRecommendedPluginsWithoutChannels } from './useRecommendedPlugins';
+import { useRecommendedPluginsWithoutChannels } from './useRecommendedPluginsWithoutChannels';
 import { DiscoverTools } from './DiscoverTools';
 
 jest.mock( '@woocommerce/components', () => {
@@ -20,7 +20,7 @@ jest.mock( '@woocommerce/components', () => {
 	};
 } );
 
-jest.mock( './useRecommendedPlugins', () => ( {
+jest.mock( './useRecommendedPluginsWithoutChannels', () => ( {
 	useRecommendedPluginsWithoutChannels: jest.fn(),
 } ) );
 
