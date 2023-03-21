@@ -31,7 +31,7 @@
 			fadeIn: 200,
 			fadeOut: 200,
 			attribute: "title",
-			content: false, // HTML or String to fill TipTIp with
+			content: false, // HTML or String or callback to fill TipTIp with
 		  	enter: function(){},
 		  	exit: function(){}
 	  	};
@@ -98,8 +98,12 @@
 				}
 
 				function active_tiptip(){
+					var content = typeof opts.content === 'function' ? opts.content() : org_title;
+					if (!content) {
+						return;
+					}
 					opts.enter.call(this);
-					tiptip_content.html(org_title);
+					tiptip_content.html(content);
 					tiptip_holder.hide().css("margin","0");
 					tiptip_holder.removeAttr('class');
 					tiptip_arrow.removeAttr("style");
