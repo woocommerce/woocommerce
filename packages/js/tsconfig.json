@@ -11,7 +11,8 @@
 		"jsx": "react",
 		"jsxFactory": "createElement",
 		"jsxFragmentFactory": "Fragment",
-		"incremental": true
+		"incremental": true,
+		"typeRoots": []
 	},
 	"exclude": [
 		"node_modules",
