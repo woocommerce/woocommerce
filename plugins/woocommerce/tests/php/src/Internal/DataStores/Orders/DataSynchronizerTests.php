@@ -198,10 +198,8 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 	/**
 	 * When sync is enabled, and an order is deleted either from the post table or the COT table, the
 	 * change should propagate across to the other table.
-	 *
-	 * @return void
 	 */
-	public function test_order_deletions_propagate(): void {
+	public function test_order_deletions_propagate_with_sync_enabled(): void {
 		// Sync enabled and COT authoritative.
 		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
@@ -222,5 +220,303 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 			get_post( $order_id ),
 			'After the COT order record was deleted, the order was also deleted from the posts table.'
 		);
+	}
+
+	/**
+	 * @testdox When sync is disabled and the posts table is authoritative, deleting an order generates a deletion record in the meta table if the order exists in the backup table.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $manual_sync True to trigger synchronization manually, false if automatic synchronization is enabled.
+	 */
+	public function test_synced_order_deletion_with_sync_disabled_and_posts_authoritative_generates_proper_deletion_record_if_cot_record_exists( bool $manual_sync ) {
+		$this->set_posts_authoritative();
+
+		if ( $manual_sync ) {
+			$this->disable_data_sync();
+			$order = OrderHelper::create_order();
+			$this->do_sync();
+		} else {
+			$this->enable_data_sync();
+			$order = OrderHelper::create_order();
+		}
+
+		$this->disable_data_sync();
+		$order_id = $order->get_id();
+		$order->delete( true );
+
+		$this->assert_deletion_record_existence( $order_id, false );
+		$this->assert_order_record_existence( $order_id, true );
+	}
+
+	/**
+	 * @testdox When sync is disabled and the posts table is authoritative, deleting an order generates NO deletion record in the meta table if the order does NOT exist in the backup table.
+	 *
+	 * @return void
+	 */
+	public function test_synced_order_deletion_with_sync_disabled_and_posts_authoritative_not_generating_deletion_record_if_cot_record_not_exists() {
+		$this->set_posts_authoritative();
+		$this->disable_data_sync();
+		$order = OrderHelper::create_order();
+
+		$order_id = $order->get_id();
+		$order->delete( true );
+
+		$this->assert_deletion_record_existence( $order_id, null, false );
+	}
+
+	/**
+	 * @testdox 'get_next_batch_to_process' returns ids of deleted orders, unless there are orders pending to be created or updated.
+	 *
+	 * @testWith [false, false]
+	 *           [false, true]
+	 *           [true, false]
+	 *           [true, true]
+	 *
+	 * @param bool $cot_is_authoritative True to test with the orders table as authoritative, false to test with the posts table as authoritative.
+	 * @param bool $new_records_exist True to test with a new order pending sync.
+	 */
+	public function test_get_next_batch_to_process_returns_orders_deleted_from_current_authoritative_table( bool $cot_is_authoritative, bool $new_records_exist ) {
+		global $wpdb;
+
+		$meta_table_name = OrdersTableDataStore::get_meta_table_name();
+
+		if ( $cot_is_authoritative ) {
+			$this->set_cot_authoritative();
+		} else {
+			$this->set_posts_authoritative();
+		}
+
+		$this->enable_data_sync();
+		$order_1 = OrderHelper::create_order();
+		$order_2 = OrderHelper::create_order();
+		$order_3 = OrderHelper::create_order();
+		$order_4 = OrderHelper::create_order();
+
+		$this->disable_data_sync();
+		if ( $new_records_exist ) {
+			$order_5 = OrderHelper::create_order();
+		}
+		$order_3_id = $order_3->get_id();
+		$order_3->delete( true );
+		$order_4_id = $order_4->get_id();
+		$order_4->delete( true );
+
+		$this->assert_deletion_record_existence( $order_3_id, $cot_is_authoritative );
+		$this->assert_deletion_record_existence( $order_4_id, $cot_is_authoritative );
+
+		$batch = $this->sut->get_next_batch_to_process( 100 );
+		if ( $new_records_exist ) {
+			$this->assertEquals( array( $order_5->get_id() ), $batch );
+		} else {
+			$this->assertEquals( array( $order_3_id, $order_4_id ), $batch );
+		}
+	}
+
+	/**
+	 * @testdox 'process_batch' processes both orders pending creation/modification and orders pending deletion.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $cot_is_authoritative True to test with the orders table as authoritative, false to test with the posts table as authoritative.
+	 */
+	public function test_process_batch_processes_modified_and_deleted_orders( bool $cot_is_authoritative ) {
+		if ( $cot_is_authoritative ) {
+			$this->set_cot_authoritative();
+		} else {
+			$this->set_posts_authoritative();
+		}
+
+		$this->enable_data_sync();
+		$order_1 = OrderHelper::create_order();
+		$order_2 = OrderHelper::create_order();
+		$order_3 = OrderHelper::create_order();
+		$order_4 = OrderHelper::create_order();
+
+		$this->disable_data_sync();
+
+		$order_1->set_date_modified( '2100-01-01 00:00:00' );
+		$order_1->save();
+
+		$order_3_id = $order_3->get_id();
+		$order_3->delete( true );
+		$order_4_id = $order_4->get_id();
+		$order_4->delete( true );
+
+		$this->sut->process_batch( array( $order_1->get_id(), $order_3_id, $order_4_id ) );
+
+		$this->assertEmpty( $this->sut->get_next_batch_to_process( 100 ) );
+
+		$this->assert_order_record_existence( $order_3_id, true, false );
+		$this->assert_order_record_existence( $order_3_id, false, false );
+		$this->assert_order_record_existence( $order_4_id, true, false );
+		$this->assert_order_record_existence( $order_4_id, false, false );
+
+		$this->assert_deletion_record_existence( $order_3_id, null, false );
+		$this->assert_deletion_record_existence( $order_4_id, null, false );
+	}
+
+	/**
+	 * @testdox When an order deletion is recorded for an order that no longer exists in the backup table, a warning is logged.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $cot_is_authoritative True to test with the orders table as authoritative, false to test with the posts table as authoritative.
+	 */
+	public function test_deletion_record_for_non_existing_order_logs_warning_on_sync( bool $cot_is_authoritative ) {
+		global $wpdb;
+
+		//phpcs:disable Squiz.Commenting
+		$logger = new class() {
+			public $warnings = array();
+
+			public function debug( $text ) {}
+
+			public function warning( $text ) {
+				$this->warnings[] = $text; }
+
+			public function error( $text ) {}
+		};
+		//phpcs:enable Squiz.Commenting
+
+		$this->reset_container_resolutions();
+		$this->reset_legacy_proxy_mocks();
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_logger' => function() use ( $logger ) {
+					return $logger;},
+			)
+		);
+		$this->sut = wc_get_container()->get( DataSynchronizer::class );
+
+		if ( $cot_is_authoritative ) {
+			$this->set_cot_authoritative();
+		} else {
+			$this->set_posts_authoritative();
+		}
+
+		$this->enable_data_sync();
+		$order_1 = OrderHelper::create_order();
+		$order_2 = OrderHelper::create_order();
+
+		$this->disable_data_sync();
+
+		$order_1_id = $order_1->get_id();
+		$order_1->delete( true );
+		$order_2_id = $order_2->get_id();
+		$order_2->delete( true );
+
+		if ( $cot_is_authoritative ) {
+			$wpdb->delete( $wpdb->posts, array( 'ID' => $order_1_id ) );
+		} else {
+			$wpdb->delete( OrdersTableDataStore::get_orders_table_name(), array( 'ID' => $order_1_id ) );
+		}
+
+		$this->sut->process_batch( array( $order_1_id, $order_2_id ) );
+
+		$this->assertEquals( array( "Order {$order_1_id} doesn't exist in the backup table, thus it can't be deleted" ), $logger->warnings );
+	}
+
+	/**
+	 * Assert that a given order record exists or doesn't exist.
+	 *
+	 * @param int  $order_id The order id to check.
+	 * @param bool $in_cot True to assert that the order exists or not in the orders table, false to check in the posts table.
+	 * @param bool $exists True to assert that the order exists, false to check that the order doesn't exist.
+	 * @return void
+	 */
+	private function assert_order_record_existence( $order_id, $in_cot, $exists = true ) {
+		global $wpdb;
+
+		$table_name = $in_cot ? OrdersTableDataStore::get_orders_table_name() : $wpdb->posts;
+
+		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$exists = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT EXISTS (SELECT id FROM {$table_name} WHERE id = %d)",
+				$order_id
+			)
+		);
+		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		if ( $exists ) {
+			$this->assertTrue( (bool) $exists, "No order found with id $order_id in table $table_name" );
+		} else {
+			$this->assertFalse( (bool) $exists, "Unexpected order found with id $order_id in table $table_name" );
+		}
+	}
+
+	/**
+	 * Assert that an order deletion record exists or doesn't exist in the orders meta table.
+	 *
+	 * @param int  $order_id The order id to check.
+	 * @param bool $deleted_from_cot True to assert that the record corresponds to an order deleted from the orders table, or from the posts table otherwise.
+	 * @param bool $exists True to assert that the record exists, false to assert that the record doesn't exist.
+	 * @return void
+	 */
+	private function assert_deletion_record_existence( $order_id, $deleted_from_cot, $exists = true ) {
+		global $wpdb;
+
+		$meta_table_name = OrdersTableDataStore::get_meta_table_name();
+		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$record = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT meta_value FROM $meta_table_name WHERE order_id = %d AND meta_key = %s",
+				$order_id,
+				'deleted_from'
+			),
+			ARRAY_A
+		);
+		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		if ( $exists ) {
+			$this->assertNotNull( $record, "No deletion record found for order id {$order_id}, value: {$record['meta_value']}" );
+		} else {
+			$this->assertNull( $record, "Unexpected deletion record found for order id {$order_id}" );
+			return;
+		}
+
+		$deleted_from = $deleted_from_cot ? OrdersTableDataStore::get_orders_table_name() : $wpdb->posts;
+
+		$this->assertEquals( $deleted_from, $record['meta_value'], "Deletion record for order {$order_id} has a value of {$record['meta_value']}, expected {$deleted_from}" );
+	}
+
+	/**
+	 * Synchronize all the pending unsynchronized orders.
+	 */
+	private function do_sync() {
+		$batch = $this->sut->get_next_batch_to_process( 100 );
+		$this->sut->process_batch( $batch );
+	}
+
+	/**
+	 * Set the orders table as authoritative.
+	 */
+	private function set_cot_authoritative() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+	}
+
+	/**
+	 * Set the posts table as authoritative.
+	 */
+	private function set_posts_authoritative() {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+	}
+
+	/**
+	 * Enable the orders synchronization.
+	 */
+	private function enable_data_sync() {
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+	}
+
+	/**
+	 * Disable the orders synchronization.
+	 */
+	private function disable_data_sync() {
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
 	}
 }

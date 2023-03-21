@@ -388,6 +388,10 @@ WHERE
 	 * @param array $batch Batch details.
 	 */
 	public function process_batch( array $batch ) : void {
+		if ( empty( $batch ) ) {
+			return;
+		}
+
 		$this->order_cache_controller->temporarily_disable_orders_cache_usage();
 
 		$custom_orders_table_is_authoritative = $this->custom_orders_table_is_authoritative();
@@ -472,12 +476,12 @@ WHERE
 			try {
 				$order = new \WC_Order();
 
-				//We need to turn parent order verification off to avoid an exception for child orders (e.g. refunds).
-				//The 'read' method in the order class invokes 'set_parent_id', which by default verifies
-				//if the order the parent id refers to actually exists, and throws an exception if not.
-				//To check if the order exists 'wc_get_order' is used, but this function searches the order
-				//using the authoritative data store, and at this point the order doesn't exist anymore in the
-				//authoritative table ('read' below is being invoked in the backup data store).
+				// We need to turn parent order verification off to avoid an exception for child orders (e.g. refunds).
+				// The 'read' method in the order class invokes 'set_parent_id', which by default verifies
+				// if the order the parent id refers to actually exists, and throws an exception if not.
+				// To check if the order exists 'wc_get_order' is used, but this function searches the order
+				// using the authoritative data store, and at this point the order doesn't exist anymore in the
+				// authoritative table ('read' below is being invoked in the backup data store).
 				$order->set_verify_parent_id( false );
 
 				$order->set_id( $order_id );
@@ -616,8 +620,12 @@ WHERE
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.SlowDBQuery
 		if ( $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT EXISTS (SELECT id FROM {$this->data_store::get_orders_table_name()} WHERE ID=%d)",
-				$postid
+				"SELECT EXISTS (SELECT id FROM {$this->data_store::get_orders_table_name()} WHERE ID=%d)
+						AND NOT EXISTS (SELECT order_id FROM {$this->data_store::get_meta_table_name()} WHERE order_id=%d AND meta_key=%s AND meta_value=%s)",
+				$postid,
+				$postid,
+				'deleted_from',
+				$wpdb->posts
 			)
 		)
 		) {
