@@ -6,7 +6,7 @@ import { render, screen } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import { useInstalledPlugins } from '../../hooks';
+import { useInstalledExtensions } from '~/marketing/hooks';
 import { useRecommendedPlugins } from './useRecommendedPlugins';
 import { DiscoverTools } from './DiscoverTools';
 
@@ -24,8 +24,8 @@ jest.mock( './useRecommendedPlugins', () => ( {
 	useRecommendedPlugins: jest.fn(),
 } ) );
 
-jest.mock( '../../hooks', () => ( {
-	useInstalledPlugins: jest.fn(),
+jest.mock( '~/marketing/hooks', () => ( {
+	useInstalledExtensions: jest.fn(),
 } ) );
 
 describe( 'DiscoverTools component', () => {
@@ -35,8 +35,8 @@ describe( 'DiscoverTools component', () => {
 			isLoading: true,
 			plugins: [],
 		} );
-		( useInstalledPlugins as jest.Mock ).mockReturnValue( {
-			loadInstalledPluginsAfterActivation: jest.fn(),
+		( useInstalledExtensions as jest.Mock ).mockReturnValue( {
+			loadInstalledExtensionsAfterActivation: jest.fn(),
 		} );
 		render( <DiscoverTools /> );
 
@@ -49,8 +49,8 @@ describe( 'DiscoverTools component', () => {
 			isLoading: false,
 			plugins: [],
 		} );
-		( useInstalledPlugins as jest.Mock ).mockReturnValue( {
-			loadInstalledPluginsAfterActivation: jest.fn(),
+		( useInstalledExtensions as jest.Mock ).mockReturnValue( {
+			loadInstalledExtensionsAfterActivation: jest.fn(),
 		} );
 		render( <DiscoverTools /> );
 
@@ -95,8 +95,8 @@ describe( 'DiscoverTools component', () => {
 					},
 				],
 			} );
-			( useInstalledPlugins as jest.Mock ).mockReturnValue( {
-				loadInstalledPluginsAfterActivation: jest.fn(),
+			( useInstalledExtensions as jest.Mock ).mockReturnValue( {
+				loadInstalledExtensionsAfterActivation: jest.fn(),
 			} );
 			render( <DiscoverTools /> );
 
@@ -136,8 +136,8 @@ describe( 'DiscoverTools component', () => {
 					},
 				],
 			} );
-			( useInstalledPlugins as jest.Mock ).mockReturnValue( {
-				loadInstalledPluginsAfterActivation: jest.fn(),
+			( useInstalledExtensions as jest.Mock ).mockReturnValue( {
+				loadInstalledExtensionsAfterActivation: jest.fn(),
 			} );
 			render( <DiscoverTools /> );
 

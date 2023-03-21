@@ -16,13 +16,16 @@ import {
 	PluginCardBody,
 } from '~/marketing/components';
 import { InstalledPlugin } from '~/marketing/types';
-import { useInstalledPlugins } from '~/marketing/hooks';
+import { useInstalledExtensions } from '~/marketing/hooks';
 
 export const InstalledExtensions = () => {
-	const { installedPlugins, activatingPlugins, activateInstalledPlugin } =
-		useInstalledPlugins();
+	const {
+		installedExtensionsWithoutChannels,
+		activatingExtensions,
+		activateInstalledExtension,
+	} = useInstalledExtensions();
 
-	if ( installedPlugins.length === 0 ) {
+	if ( installedExtensionsWithoutChannels.length === 0 ) {
 		return null;
 	}
 
@@ -31,13 +34,13 @@ export const InstalledExtensions = () => {
 			return (
 				<Button
 					variant="secondary"
-					isBusy={ activatingPlugins.includes( plugin.slug ) }
-					disabled={ activatingPlugins.includes( plugin.slug ) }
+					isBusy={ activatingExtensions.includes( plugin.slug ) }
+					disabled={ activatingExtensions.includes( plugin.slug ) }
 					onClick={ () => {
 						recordEvent( 'marketing_installed_activate', {
 							name: plugin.name,
 						} );
-						activateInstalledPlugin( plugin.slug );
+						activateInstalledExtension( plugin.slug );
 					} }
 				>
 					{ __( 'Activate', 'woocommerce' ) }
@@ -81,7 +84,7 @@ export const InstalledExtensions = () => {
 
 	return (
 		<CollapsibleCard header={ __( 'Installed extensions', 'woocommerce' ) }>
-			{ installedPlugins.map( ( el, idx ) => {
+			{ installedExtensionsWithoutChannels.map( ( el, idx ) => {
 				return (
 					<Fragment key={ el.slug }>
 						<PluginCardBody
@@ -90,7 +93,8 @@ export const InstalledExtensions = () => {
 							description={ el.description }
 							button={ getButton( el ) }
 						/>
-						{ idx !== installedPlugins.length - 1 && (
+						{ idx !==
+							installedExtensionsWithoutChannels.length - 1 && (
 							<CardDivider />
 						) }
 					</Fragment>

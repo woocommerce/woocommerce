@@ -12,11 +12,13 @@ import { InstalledPlugin } from '~/marketing/types';
 import { useRecommendedChannels } from './useRecommendedChannels';
 import { useRegisteredChannels } from './useRegisteredChannels';
 
-export type UseInstalledPlugins = {
-	installedPlugins: InstalledPlugin[];
-	activatingPlugins: string[];
-	activateInstalledPlugin: ( slug: string ) => void;
-	loadInstalledPluginsAfterActivation: ( slug: string ) => void;
+type InstalledExtension = InstalledPlugin;
+
+export type UseInstalledExtensions = {
+	installedExtensionsWithoutChannels: InstalledExtension[];
+	activatingExtensions: string[];
+	activateInstalledExtension: ( slug: string ) => void;
+	loadInstalledExtensionsAfterActivation: ( slug: string ) => void;
 };
 
 /**
@@ -24,7 +26,7 @@ export type UseInstalledPlugins = {
  *
  * The list of installed plugins will not include registered and recommended marketing channels.
  */
-export const useInstalledPlugins = (): UseInstalledPlugins => {
+export const useInstalledExtensions = (): UseInstalledExtensions => {
 	const { loading: loadingRegisteredChannels, data: dataRegisteredChannels } =
 		useRegisteredChannels();
 	const {
@@ -37,7 +39,7 @@ export const useInstalledPlugins = (): UseInstalledPlugins => {
 			select( STORE_KEY );
 
 		return {
-			installedPlugins: getInstalledPlugins< InstalledPlugin[] >(),
+			installedPlugins: getInstalledPlugins< InstalledExtension[] >(),
 			activatingPlugins: getActivatingPlugins(),
 		};
 	}, [] );
@@ -58,9 +60,12 @@ export const useInstalledPlugins = (): UseInstalledPlugins => {
 		.value();
 
 	return {
-		installedPlugins: loading ? [] : installedPluginsWithoutChannels,
-		activatingPlugins,
-		activateInstalledPlugin,
-		loadInstalledPluginsAfterActivation,
+		installedExtensionsWithoutChannels: loading
+			? []
+			: installedPluginsWithoutChannels,
+		activatingExtensions: activatingPlugins,
+		activateInstalledExtension: activateInstalledPlugin,
+		loadInstalledExtensionsAfterActivation:
+			loadInstalledPluginsAfterActivation,
 	};
 };

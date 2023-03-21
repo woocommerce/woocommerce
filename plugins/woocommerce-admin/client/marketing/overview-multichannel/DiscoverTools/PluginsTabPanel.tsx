@@ -14,7 +14,7 @@ import { flatMapDeep, uniqBy } from 'lodash';
  * Internal dependencies
  */
 import { CardDivider, PluginCardBody } from '~/marketing/components';
-import { useInstalledPlugins } from '~/marketing/hooks';
+import { useInstalledExtensions } from '~/marketing/hooks';
 import { RecommendedPlugin } from '~/marketing/types';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 import { createNoticesFromResponse } from '~/lib/notices';
@@ -60,7 +60,7 @@ export const PluginsTabPanel = ( {
 		null
 	);
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const { loadInstalledPluginsAfterActivation } = useInstalledPlugins();
+	const { loadInstalledExtensionsAfterActivation } = useInstalledExtensions();
 
 	/**
 	 * Install and activate a plugin.
@@ -85,7 +85,7 @@ export const PluginsTabPanel = ( {
 			] );
 
 			onInstallAndActivate( plugin.product );
-			loadInstalledPluginsAfterActivation( plugin.product );
+			loadInstalledExtensionsAfterActivation( plugin.product );
 			createNoticesFromResponse( response );
 		} catch ( error ) {
 			createNoticesFromResponse( error );
