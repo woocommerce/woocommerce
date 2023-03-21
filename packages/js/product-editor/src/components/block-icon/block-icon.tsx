@@ -3,7 +3,7 @@
  */
 import { Block } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies

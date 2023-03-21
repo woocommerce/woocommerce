@@ -7,6 +7,12 @@
         font-size: 24px;
         font-weight: 500;
         color: $gray-900;
+				display: inline-flex;
+				align-items: center;
+
+				.block-editor-block-icon {
+						margin-right: 14px;
+				}
     }
 
     &__description {
