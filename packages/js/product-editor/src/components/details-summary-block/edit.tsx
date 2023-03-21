@@ -4,10 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { createElement } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
-import { BaseControl } from '@wordpress/components';
+import { BaseControl, ToolbarButton } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import uniqueId from 'lodash/uniqueId';
 import classNames from 'classnames';
+import { unregisterFormatType } from '@wordpress/rich-text';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -23,6 +24,9 @@ import {
 import { ParagraphRTLControl } from './paragraph-rtl-control';
 import { SummaryAttributes } from './types';
 import { ALIGNMENT_CONTROLS } from './constants';
+import { registerUppercaseFormatType } from '../../format-types';
+import { alignNone } from '@wordpress/icons';
+import { saveEntityRecord } from '@wordpress/core-data/actions';
 
 export function Edit( {
 	attributes,
@@ -62,6 +66,12 @@ export function Edit( {
 					direction={ direction }
 					onChange={ handleDirectionChange }
 				/>
+
+				<ToolbarButton
+					name="RichText.ToolbarControls"
+					icon={ alignNone }
+					title="SAMPLE"
+				/>
 			</BlockControls>
 
 			<BaseControl
@@ -83,8 +93,25 @@ export function Edit( {
 						[ `has-text-align-${ align }` ]: align,
 					} ) }
 					dir={ direction }
+					allowedFormats={ [
+						'core/underline',
+						'core/strikethrough',
+					] }
 				/>
 			</BaseControl>
 		</div>
 	);
 }
+
+unregisterFormatType( 'core/image' );
+unregisterFormatType( 'core/keyboard' );
+
+registerUppercaseFormatType();
+
+const [product, set] = useState(null);
+
+useEffect(() => {
+	const promise = productId ? getEntityRecord(productId) : saveEntityRecord({ ...});
+	promise.then(set).catch(() => {});
+}, [productId]);
+
