@@ -587,6 +587,10 @@ class WC_REST_Authentication {
 	private function update_last_access() {
 		global $wpdb;
 
+		if ( apply_filters( 'woocommerce_disable_api_access_log', false, $this->user->user_id ) ) {
+			return;
+		}
+
 		$wpdb->update(
 			$wpdb->prefix . 'woocommerce_api_keys',
 			array( 'last_access' => current_time( 'mysql' ) ),
