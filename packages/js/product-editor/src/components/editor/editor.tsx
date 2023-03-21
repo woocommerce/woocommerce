@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { createElement, StrictMode, Fragment } from '@wordpress/element';
 import { PluginArea } from '@wordpress/plugins';
 import {
