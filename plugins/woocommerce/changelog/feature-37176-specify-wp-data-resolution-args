@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix WP data resolution (`invalidateResolution`) not working with WP 5.9 in marketing page.

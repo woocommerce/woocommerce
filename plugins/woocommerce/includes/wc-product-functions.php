@@ -1001,13 +1001,18 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 
 	if ( $product->is_taxable() ) {
 		if ( ! wc_prices_include_tax() ) {
-			$tax_rates = WC_Tax::get_rates( $product->get_tax_class() );
-			$taxes     = WC_Tax::calc_tax( $line_price, $tax_rates, false );
-
-			if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-				$taxes_total = array_sum( $taxes );
+			// If the customer is exempt from VAT, set tax total to 0.
+			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
+				$taxes_total = 0.00;
 			} else {
-				$taxes_total = array_sum( array_map( 'wc_round_tax_total', $taxes ) );
+				$tax_rates = WC_Tax::get_rates( $product->get_tax_class() );
+				$taxes     = WC_Tax::calc_tax( $line_price, $tax_rates, false );
+
+				if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+					$taxes_total = array_sum( $taxes );
+				} else {
+					$taxes_total = array_sum( array_map( 'wc_round_tax_total', $taxes ) );
+				}
 			}
 
 			$return_price = NumberUtil::round( $line_price + $taxes_total, wc_get_price_decimals() );
@@ -1016,7 +1021,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 
 			/**
-			 * If the customer is excempt from VAT, remove the taxes here.
+			 * If the customer is exempt from VAT, remove the taxes here.
 			 * Either remove the base or the user taxes depending on woocommerce_adjust_non_base_location_prices setting.
 			 */
 			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) { // @codingStandardsIgnoreLine.

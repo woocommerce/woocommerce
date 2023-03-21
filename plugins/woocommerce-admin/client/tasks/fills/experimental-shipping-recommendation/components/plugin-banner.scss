@@ -1,5 +1,4 @@
 .woocommerce-task-shipping-recommendation__plugins-install {
-	display: flex;
 	padding: $gap-large calc($gap + $gap-smallest);
 	border: 1px solid #ddd;
 	border-radius: 3px;
@@ -7,19 +6,20 @@
 	margin-bottom: $gap-large;
 
 	&.dual {
+		display: flex;
 		flex-direction: column;
-		justify-content: space-between;
+		justify-content: flex-start;
 		width: 285px;
-		height: 322px;
 
 		p {
 			margin-top: 0;
-			margin-bottom: -$gap-smaller;
+			margin-bottom: 15px;
 			color: $gray-700;
 		}
 
 		.plugins-install__plugin-banner-image {
 			display: flex;
+			margin-bottom: $gap-large;
 			img {
 				width: 120px;
 				height: 28px;
@@ -28,8 +28,9 @@
 	}
 
 	&.single {
+		display: flex;
 		.plugins-install__list {
-			max-width: 380px;
+			max-width: 360px;
 		}
 	}
 
@@ -51,6 +52,10 @@
 	.woocommerce-task-shipping-recommendations_plugins-buttons {
 		display: flex;
 		justify-content: space-between;
+		margin-top: $gap-large;
+		flex-grow: 1;
+		align-items: flex-end;
+
 		button {
 			min-width: 40%;
 			padding-inline: $gap-smaller;
