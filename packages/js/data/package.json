@@ -59,6 +59,7 @@
 		"@types/md5": "^2.3.2",
 		"@types/qs": "^6.9.7",
 		"@types/react": "^17.0.2",
+		"@types/node": "^16.18.18",
 		"@types/wordpress__compose": "^4.0.1",
 		"@types/wordpress__core-data": "^2.4.5",
 		"@types/wordpress__data": "^6.0.0",
