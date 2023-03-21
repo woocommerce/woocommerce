@@ -2,6 +2,7 @@
 	"features": {
 		"activity-panels": true,
 		"analytics": true,
+		"block-editor-feature-enabled": true,
 		"coupons": true,
 		"customer-effort-score-tracks": true,
 		"import-products-task": true,

@@ -17,3 +17,7 @@ export const getRecommendedChannels = ( state: State ) => {
 export const getCampaigns = ( state: State ) => {
 	return state.campaigns;
 };
+
+export const getCampaignTypes = ( state: State ) => {
+	return state.campaignTypes;
+};

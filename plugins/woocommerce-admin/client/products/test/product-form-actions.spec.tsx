@@ -23,8 +23,8 @@ const onDraftCES = jest.fn().mockResolvedValue( {} );
 
 jest.mock( '@wordpress/plugins', () => ( { registerPlugin: jest.fn() } ) );
 
-jest.mock( '@woocommerce/data', () => ( {
-	...jest.requireActual( '@woocommerce/data' ),
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
 	useDispatch: jest.fn().mockReturnValue( { updateOptions: jest.fn() } ),
 	useSelect: jest.fn().mockReturnValue( { productCESAction: 'hide' } ),
 } ) );
@@ -38,14 +38,14 @@ jest.mock(
 		} ),
 	} )
 );
-jest.mock( '~/header/utils', () => ( {
+jest.mock( '@woocommerce/admin-layout', () => ( {
 	WooHeaderItem: ( props: { children: () => React.ReactElement } ) => (
 		<Fragment { ...props }>{ props.children() }</Fragment>
 	),
 } ) );
-jest.mock( '../use-product-helper', () => {
+jest.mock( '@woocommerce/product-editor', () => {
 	return {
-		useProductHelper: () => ( {
+		__experimentalUseProductHelper: () => ( {
 			createProductWithStatus,
 			updateProductWithStatus,
 			copyProductWithStatus,
@@ -53,13 +53,13 @@ jest.mock( '../use-product-helper', () => {
 		} ),
 	};
 } );
-jest.mock( '~/hooks/usePreventLeavingPage' );
-jest.mock(
-	'~/customer-effort-score-tracks/use-customer-effort-score-exit-page-tracker',
-	() => ( {
-		useCustomerEffortScoreExitPageTracker: jest.fn(),
-	} )
-);
+jest.mock( '@woocommerce/navigation', () => ( {
+	...jest.requireActual( '@woocommerce/navigation' ),
+	useConfirmUnsavedChanges: jest.fn(),
+} ) );
+jest.mock( '@woocommerce/customer-effort-score', () => ( {
+	useCustomerEffortScoreExitPageTracker: jest.fn(),
+} ) );
 
 describe( 'ProductFormActions', () => {
 	beforeEach( () => {

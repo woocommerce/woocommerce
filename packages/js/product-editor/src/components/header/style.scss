@@ -1,0 +1,10 @@
+.woocommerce-product-header {
+	height: $header-height;
+	display: flex;
+	align-items: center;
+	padding: 0 $gap;
+
+	&__actions {
+		margin-left: auto;
+	}
+}

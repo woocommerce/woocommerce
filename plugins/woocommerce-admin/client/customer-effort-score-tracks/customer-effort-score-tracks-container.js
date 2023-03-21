@@ -4,6 +4,10 @@
 import { useEffect } from 'react';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
+import {
+	QUEUE_OPTION_NAME,
+	STORE_KEY,
+} from '@woocommerce/customer-effort-score';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import PropTypes from 'prop-types';
 
@@ -11,8 +15,6 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import CustomerEffortScoreTracks from './customer-effort-score-tracks';
-import { STORE_KEY, QUEUE_OPTION_NAME } from './data/constants';
-import './data';
 
 /**
  * Maps the queue of CES tracks surveys to CustomerEffortScoreTracks

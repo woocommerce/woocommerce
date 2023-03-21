@@ -1,0 +1,61 @@
+# Duplicate workflow that returns success for this check when the author is "github-actions". See https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
+name: Status Check Bypass for Automation
+on:
+    pull_request:
+    
+jobs:
+    bypass-lint:
+        if: ${{ github.event.pull_request.user.login == 'github-actions[bot]' }}
+        runs-on: ubuntu-latest
+        name: "Lint and Test JS"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-7-4-latest:
+        if: ${{ github.event.pull_request.user.login == 'github-actions[bot]' }}
+        runs-on: ubuntu-latest
+        name: "PHP 7.4 WP latest"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-8-0-latest:
+        if: ${{ github.event.pull_request.user.login == 'github-actions[bot]' }}
+        runs-on: ubuntu-latest
+        name: "PHP 8.0 WP latest"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-api-tests:
+        if: ${{ github.event.pull_request.user.login == 'github-actions[bot]' }}
+        runs-on: ubuntu-latest
+        name: "Runs API tests."
+        steps:
+                - run: 'echo "No build required"'
+    bypass-k6:
+        if: ${{ github.event.pull_request.user.login == 'github-actions[bot]' }}
+        runs-on: ubuntu-latest
+        name: "Runs k6 Performance tests"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-sniff:
+        if: ${{ github.event.pull_request.user.login == 'github-actions[bot]' }}
+        runs-on: ubuntu-latest
+        name: "Code sniff (PHP 7.4, WP Latest)"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-changelogger-use:
+        if: ${{ github.event.pull_request.user.login == 'github-actions[bot]' }}
+        runs-on: ubuntu-latest
+        name: "Changelogger use"
+        steps:
+                - run: 'echo "No build required"'
+    bypass-e2e:
+        if: ${{ github.event.pull_request.user.login == 'github-actions[bot]' }}
+        runs-on: ubuntu-latest
+        name: "Runs E2E tests."
+        steps:
+                - run: 'echo "No build required"'
+    bypass-pr-highlight:
+        if: ${{ github.event.pull_request.user.login == 'github-actions[bot]' }}
+        runs-on: ubuntu-latest
+        name: "Check pull request changes to highlight"
+        steps:
+                - run: 'echo "No build required"'
+                

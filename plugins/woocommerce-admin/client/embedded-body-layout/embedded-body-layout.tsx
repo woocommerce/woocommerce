@@ -3,6 +3,7 @@
  */
 import { applyFilters } from '@wordpress/hooks';
 import { useEffect } from '@wordpress/element';
+import { triggerExitPageCesSurvey } from '@woocommerce/customer-effort-score';
 import QueryString, { parse } from 'qs';
 
 /**
@@ -13,7 +14,6 @@ import { ShippingRecommendations } from '../shipping';
 import { EmbeddedBodyProps } from './embedded-body-props';
 import { StoreAddressTour } from '../guided-tours/store-address-tour';
 import './style.scss';
-import { triggerExitPageCesSurvey } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 
 type QueryParams = EmbeddedBodyProps;
 

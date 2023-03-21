@@ -103,6 +103,7 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
+			// @ts-expect-error TODO - fix this type error with moment
 			formatDate( default24HourDateTimeFormat, dateTime )
 		);
 	} );
@@ -122,6 +123,7 @@ describe( 'DateTimePickerControl', () => {
 		expect( input?.value ).toBe(
 			formatDate(
 				default24HourDateTimeFormat,
+				// @ts-expect-error TODO - fix this type error with moment
 				moment.utc( ambiguousISODateTimeString ).local()
 			)
 		);
@@ -142,6 +144,7 @@ describe( 'DateTimePickerControl', () => {
 		expect( input?.value ).toBe(
 			formatDate(
 				default24HourDateTimeFormat,
+				// @ts-expect-error TODO - fix this type error with moment
 				moment.utc( unambiguousISODateTimeString ).local()
 			)
 		);
@@ -159,6 +162,7 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
+			// @ts-expect-error TODO - fix this type error with moment
 			formatDate( default12HourDateTimeFormat, dateTime )
 		);
 	} );
@@ -175,6 +179,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
+		// @ts-expect-error TODO - fix this type error with moment
 		expect( input?.value ).toBe( formatDate( dateTimeFormat, dateTime ) );
 	} );
 
@@ -198,6 +203,7 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
+			// @ts-expect-error TODO - fix this type error with moment
 			formatDate( default24HourDateTimeFormat, updatedDateTime )
 		);
 	} );

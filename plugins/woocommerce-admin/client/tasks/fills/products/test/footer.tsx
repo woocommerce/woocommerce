@@ -16,9 +16,9 @@ describe( 'Footer', () => {
 	beforeEach( () => {
 		( recordEvent as jest.Mock ).mockClear();
 	} );
-	it( 'should render footer with two links', () => {
+	it( 'should render footer with one links', () => {
 		const { queryAllByRole } = render( <Footer /> );
-		expect( queryAllByRole( 'link' ) ).toHaveLength( 2 );
+		expect( queryAllByRole( 'link' ) ).toHaveLength( 1 );
 	} );
 
 	it( 'clicking on import CSV should fire event tasklist_add_product with method:import and task_completion_time', () => {
@@ -28,21 +28,6 @@ describe( 'Footer', () => {
 			1,
 			'tasklist_add_product',
 			{ method: 'import' }
-		);
-		expect( recordEvent ).toHaveBeenNthCalledWith(
-			2,
-			'task_completion_time',
-			{ task_name: 'products', time: '0-2s' }
-		);
-	} );
-
-	it( 'clicking on start blank should fire event tasklist_add_product with method:migrate and task_completion_time', () => {
-		const { getByText } = render( <Footer /> );
-		userEvent.click( getByText( 'use a 3rd party migration plugin' ) );
-		expect( recordEvent ).toHaveBeenNthCalledWith(
-			1,
-			'tasklist_add_product',
-			{ method: 'migrate' }
 		);
 		expect( recordEvent ).toHaveBeenNthCalledWith(
 			2,

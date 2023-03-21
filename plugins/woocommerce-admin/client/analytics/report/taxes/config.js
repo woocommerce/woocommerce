@@ -3,6 +3,7 @@
  */
 import { __, _x } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { NAMESPACE } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 
@@ -11,7 +12,6 @@ import { dispatch } from '@wordpress/data';
  */
 import { getRequestByIdString } from '../../../lib/async-requests';
 import { getTaxCode } from './utils';
-import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 
 const TAXES_REPORT_CHARTS_FILTER = 'woocommerce_admin_taxes_report_charts';
 const TAXES_REPORT_FILTERS_FILTER = 'woocommerce_admin_taxes_report_filters';

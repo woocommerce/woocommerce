@@ -56,12 +56,22 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_style_add_data( 'woocommerce_admin_privacy_styles', 'rtl', 'replace' );
 
 			if ( $screen && $screen->is_block_editor() ) {
-				wp_register_style( 'woocommerce-general', WC()->plugin_url() . '/assets/css/woocommerce.css', array(), $version );
-				wp_style_add_data( 'woocommerce-general', 'rtl', 'replace' );
-				if ( wc_current_theme_is_fse_theme() ) {
-					wp_register_style( 'woocommerce-blocktheme', WC()->plugin_url() . '/assets/css/woocommerce-blocktheme.css', array(), $version );
-					wp_style_add_data( 'woocommerce-blocktheme', 'rtl', 'replace' );
-					wp_enqueue_style( 'woocommerce-blocktheme' );
+				$styles = WC_Frontend_Scripts::get_styles();
+
+				if ( $styles ) {
+					foreach ( $styles as $handle => $args ) {
+						wp_register_style(
+							$handle,
+							$args['src'],
+							$args['deps'],
+							$args['version'],
+							$args['media']
+						);
+
+						if ( ! isset( $args['has_rtl'] ) ) {
+							wp_style_add_data( $handle, 'rtl', 'replace' );
+						}
+					}
 				}
 			}
 
@@ -215,7 +225,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'gateway_toggle' => wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ),
 					),
 					'urls'                              => array(
-						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
+						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) || Features::is_enabled( 'block-editor-feature-enabled' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
@@ -419,6 +429,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_product_other_tip'             => __( 'Product types define available product details and attributes, such as downloadable files and variations. They’re also used for analytics and inventory management.', 'woocommerce' ),
 					'i18n_product_description_tip'       => __( 'Describe this product. What makes it unique? What are its most important features?', 'woocommerce' ),
 					'i18n_product_short_description_tip' => __( 'Summarize this product in 1-2 short sentences. We’ll show it at the top of the page.', 'woocommerce' ),
+					'i18n_save_attribute_variation_tip'  => __( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ),
 					/* translators: %1$s: maximum file size */
 					'i18n_product_image_tip'             => sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ) , size_format( wp_max_upload_size() ) ),
 				);

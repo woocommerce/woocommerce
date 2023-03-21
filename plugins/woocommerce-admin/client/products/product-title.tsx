@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { WooHeaderPageTitle } from '@woocommerce/admin-layout';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	Product,
@@ -24,7 +25,6 @@ import { useSelect } from '@wordpress/data';
  */
 import { ProductBreadcrumbs } from './product-breadcrumbs';
 import { ProductStatusBadge } from './product-status-badge';
-import { WooHeaderPageTitle } from '~/header/utils';
 import './product-title.scss';
 
 export const ProductTitle: React.FC = () => {

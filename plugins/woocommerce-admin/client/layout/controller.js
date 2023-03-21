@@ -34,6 +34,9 @@ const AddProductPage = lazy( () =>
 		/* webpackChunkName: "add-product-page" */ '../products/add-product-page'
 	)
 );
+const ProductPage = lazy( () =>
+	import( /* webpackChunkName: "product-page" */ '../products/product-page' )
+);
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
 );
@@ -171,7 +174,37 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures[ 'new-product-management-experience' ] ) {
+	if ( window.wcAdminFeatures[ 'block-editor-feature-enabled' ] ) {
+		pages.push( {
+			container: ProductPage,
+			path: '/add-product',
+			breadcrumbs: [
+				[ '/add-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Add New Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-add-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
+
+		pages.push( {
+			container: ProductPage,
+			path: '/product/:productId',
+			breadcrumbs: [
+				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-edit-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
+	} else if (
+		window.wcAdminFeatures[ 'new-product-management-experience' ]
+	) {
 		pages.push( {
 			container: AddProductPage,
 			path: '/add-product',

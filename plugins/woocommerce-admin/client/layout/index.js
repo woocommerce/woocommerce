@@ -17,6 +17,7 @@ import { Children, cloneElement } from 'react';
 import PropTypes from 'prop-types';
 import { get, isFunction, identity, memoize } from 'lodash';
 import { parse } from 'qs';
+import { triggerExitPageCesSurvey } from '@woocommerce/customer-effort-score';
 import { getHistory, getQuery } from '@woocommerce/navigation';
 import {
 	PLUGINS_STORE_NAME,
@@ -39,7 +40,6 @@ import Notices from './notices';
 import TransientNotices from './transient-notices';
 import { CustomerEffortScoreModalContainer } from '../customer-effort-score-tracks';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { triggerExitPageCesSurvey } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 import '~/activity-panel';
 import '~/mobile-banner';
 import './navigation';

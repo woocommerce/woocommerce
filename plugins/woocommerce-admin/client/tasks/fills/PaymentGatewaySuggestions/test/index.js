@@ -90,7 +90,7 @@ const paymentGatewaySuggestionsWithoutWCPay = paymentGatewaySuggestions.filter(
 );
 
 describe( 'PaymentGatewaySuggestions', () => {
-	test( 'should render only WCPay if its suggested', () => {
+	test( 'should render all payment gateways, including WCPay', () => {
 		const onComplete = jest.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
@@ -115,7 +115,10 @@ describe( 'PaymentGatewaySuggestions', () => {
 			( e ) => e.textContent
 		);
 
-		expect( paymentTitles ).toEqual( [] );
+		expect( paymentTitles ).toEqual( [
+			'Cash on delivery',
+			'Direct bank transfer',
+		] );
 
 		expect(
 			container
@@ -126,7 +129,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		).toBe( true );
 	} );
 
-	test( 'should render all payment gateways if no WCPay', () => {
+	test( 'should render all payment gateways except WCPay', () => {
 		const onComplete = jest.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
@@ -297,39 +300,6 @@ describe( 'PaymentGatewaySuggestions', () => {
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_payment_setup', {
 			selected: 'ppcp_gateway',
 		} );
-	} );
-
-	test( 'should record event correctly when Other payment providers is clicked', () => {
-		const onComplete = jest.fn();
-		const query = {};
-		useSelect.mockImplementation( () => ( {
-			isResolving: false,
-			getPaymentGateway: jest.fn(),
-			paymentGatewaySuggestions,
-			installedPaymentGateways: [],
-			countryCode: 'US',
-		} ) );
-
-		render(
-			<PaymentGatewaySuggestions
-				onComplete={ onComplete }
-				query={ query }
-			/>
-		);
-
-		fireEvent.click( screen.getByText( 'Other payment providers' ) );
-
-		// By default it's hidden, so when toggle it shows.
-		// Second call after "tasklist_payments_options".
-		expect(
-			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
-		).toEqual( [
-			'tasklist_payment_show_toggle',
-			{
-				toggle: 'show',
-				payment_method_count: paymentGatewaySuggestions.length - 1, // Minus one for WCPay since it's not counted in "Other payment providers".
-			},
-		] );
 	} );
 
 	test( 'should record event correctly when see more is clicked', () => {

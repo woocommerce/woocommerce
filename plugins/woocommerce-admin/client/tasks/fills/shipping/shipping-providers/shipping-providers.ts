@@ -83,6 +83,7 @@ const providers = {
 	},
 	Skydropx: {
 		name: 'Skydropx' as const,
+		slug: 'skydropx-cotizador-y-envios', // https://wordpress.org/plugins/skydropx-cotizador-y-envios/
 		url: 'https://wordpress.org/plugins/skydropx-cotizador-y-envios/',
 		'single-partner-layout': SkydropxSinglePartner,
 	},

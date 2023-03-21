@@ -5,6 +5,12 @@
 		"outDir": "build-module",
 		"declaration": true,
 		"declarationMap": true,
-		"declarationDir": "./build-types"
-	}
+		"declarationDir": "./build-types",
+		"resolveJsonModule": true
+	},
+	"include": [
+		"**/*.d.ts",
+		"src/**/*",
+		"src/**/*.json"
+	]
 }

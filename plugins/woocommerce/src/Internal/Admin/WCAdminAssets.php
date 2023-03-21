@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use \_WP_Dependency;
+use _WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;
@@ -249,6 +249,7 @@ class WCAdminAssets {
 		$css_file_version = self::get_file_version( 'css' );
 
 		$scripts = array(
+			'wc-admin-layout',
 			'wc-explat',
 			'wc-experimental',
 			'wc-customer-effort-score',
@@ -305,6 +306,14 @@ class WCAdminAssets {
 		}
 
 		wp_register_style(
+			'wc-admin-layout',
+			self::get_url( 'admin-layout/style', 'css' ),
+			array(),
+			$css_file_version
+		);
+		wp_style_add_data( 'wc-admin-layout', 'rtl', 'replace' );
+
+		wp_register_style(
 			'wc-components',
 			self::get_url( 'components/style', 'css' ),
 			array(),
@@ -348,7 +357,7 @@ class WCAdminAssets {
 		wp_register_style(
 			WC_ADMIN_APP,
 			self::get_url( 'app/style', 'css' ),
-			array( 'wc-components', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
+			array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
 			$css_file_version
 		);
 		wp_style_add_data( WC_ADMIN_APP, 'rtl', 'replace' );
@@ -368,6 +377,7 @@ class WCAdminAssets {
 	public function inject_wc_settings_dependencies() {
 		if ( wp_script_is( 'wc-settings', 'registered' ) ) {
 			$handles_for_injection = [
+				'wc-admin-layout',
 				'wc-csv',
 				'wc-currency',
 				'wc-customer-effort-score',

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Treat order as seperate resource when validating for webhook since it's not necessarily a CPT anymore.
