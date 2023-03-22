@@ -20,12 +20,16 @@
 			flex-basis: 100%;
 			text-align: left;
 		}
+		margin-top: ($gap-small);
 	}
 
 	.wc-block-components-shipping-rates-control__no-results-notice {
 		margin: 0 0 em($gap-small);
 	}
 
+	.wc-block-components-totals-shipping__change-address__link {
+		font-weight: normal;
+	}
 	.wc-block-components-totals-shipping__change-address-button {
 		@include link-button();
 

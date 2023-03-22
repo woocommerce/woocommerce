@@ -15,15 +15,20 @@ export const CalculatorButton = ( {
 	setIsShippingCalculatorOpen,
 }: CalculatorButtonProps ): JSX.Element => {
 	return (
-		<button
-			className="wc-block-components-totals-shipping__change-address-button"
-			onClick={ () => {
+		<a
+			role="button"
+			href="#wc-block-components-shipping-calculator-address__link"
+			className="wc-block-components-totals-shipping__change-address__link"
+			id="wc-block-components-totals-shipping__change-address__link"
+			onClick={ ( e ) => {
+				e.preventDefault();
 				setIsShippingCalculatorOpen( ! isShippingCalculatorOpen );
 			} }
+			aria-label={ label }
 			aria-expanded={ isShippingCalculatorOpen }
 		>
 			{ label }
-		</button>
+		</a>
 	);
 };
 
