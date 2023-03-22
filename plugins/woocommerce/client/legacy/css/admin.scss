@@ -1059,10 +1059,11 @@
 		padding: 32px 0px;
 		gap: 24px;
 		height: 360px;
-		img.variation-arrow {
+		position: relative;
+		.arrow-image-wrapper {
 			position: absolute;
-			top: 75px;
-			left: 35%;
+			top: 10px;
+			left: 87px;
 		}
 		p {
 			width: 90%;

@@ -165,7 +165,9 @@ $arrow_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-arrow.
 			</div>
 
 			<div class="add-variation-container">
-				<img class="variation-arrow" src="<?php echo esc_url( $arrow_img_url ); ?>" />
+				<div class="arrow-image-wrapper">
+					<img src="<?php echo esc_url( $arrow_img_url ); ?>" />
+				</div>
 				<img src="<?php echo esc_url( $background_img_url ); ?>" />
 				<p>
 					<?php
