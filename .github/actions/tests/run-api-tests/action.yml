@@ -1,0 +1,37 @@
+name: Run API tests
+description: Runs the WooCommerce Core API tests and generates Allure report.
+permissions: {}
+
+inputs:
+    report-name:
+        description: Name of Allure report to be generated.
+        required: true
+
+runs:
+    using: composite
+    steps:
+        - name: Run API tests.
+          id: run-api-tests
+          working-directory: plugins/woocommerce
+          shell: bash
+          env:
+              BASE_URL: http://localhost:8086
+              USER_KEY: admin
+              USER_SECRET: password
+          run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
+
+        - name: Generate Test report.
+          if: success() || ( failure() && steps.run-api-tests.conclusion == 'failure' )
+          working-directory: plugins/woocommerce
+          shell: bash
+          run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+        - name: Archive test report
+          if: success() || ( failure() && steps.run-api-tests.conclusion == 'failure' )
+          uses: actions/upload-artifact@v3
+          with:
+              name: ${{ inputs.report-name }}
+              path: |
+                  ${{ env.ALLURE_RESULTS_DIR }}
+                  ${{ env.ALLURE_REPORT_DIR }}
+              retention-days: 20
