@@ -39,6 +39,10 @@ export const ShippingPlaceholder = ( {
 
 	return (
 		<CalculatorButton
+			label={ __(
+				'Add an address for shipping options',
+				'woo-gutenberg-products-block'
+			) }
 			isShippingCalculatorOpen={ isShippingCalculatorOpen }
 			setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
 		/>
