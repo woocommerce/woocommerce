@@ -203,7 +203,6 @@ jobs:
               with:
                   report-name: e2e-wp-latest--partial--run-${{ github.run_number }}
                   playwright-config: ignore-plugin-tests.playwright.config.js
-                  tests: basic.spec.js # mytodo remove this later
               env:
                   ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
                   ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
@@ -406,7 +405,6 @@ jobs:
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               with:
                   report-name: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
-                  tests: basic.spec.js # mytodo remove this later
 
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
@@ -529,7 +527,6 @@ jobs:
                   E2E_MAX_FAILURES: 15
               with:
                   report-name: ${{ env.E2E_ARTIFACT }}
-                  tests: basic.spec.js # mytodo remove this later
 
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
@@ -629,7 +626,6 @@ jobs:
               with:
                   playwright-config: ignore-plugin-tests.playwright.config.js
                   report-name: ${{ env.ARTIFACT_NAME }}
-                  tests: basic.spec.js # mytodo remove this later
               env:
                   E2E_MAX_FAILURES: 15
 
