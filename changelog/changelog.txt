@@ -1,0 +1,4 @@
+'pre_get_payment_method_title' hook added.
+'pre_get_shipping_method_title' hook added.
+'get_payment_method_title' filter added.
+'get_shipping_method_title' filter added.
