@@ -8,23 +8,28 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+$add_attributes_icon_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';
 ?>
 <div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 	<div id="variable_product_options_inner">
 
 		<?php if ( ! count( $variation_attributes ) && $global_attributes_count > 0 ) : ?>
 
-		<div>
-			<p>
-				<?php
-					echo sprintf(
-						/* translators: %1$s: url for attributes tab, %2$s: url for variable product documentation */
-						__( 'Add some attributes in the <a href="%1$s">Attributes</a> tab to generate variations. Make sure to check the Used for variations box. <a href="%2$s" target="_blank">Learn more</a>', 'woocommerce' ),
-						esc_url( '#product_attributes' ),
-						esc_url( 'https://woocommerce.com/document/variable-product/' )
-					);
-				?>
-			</p>
+		<div class="add-attributes-container">
+			<div class="add-attributes-message">
+				<img src="<?php echo esc_url( $add_attributes_icon_url ); ?>" />
+				<p>
+					<?php
+						echo sprintf(
+							/* translators: %1$s: url for attributes tab, %2$s: url for variable product documentation */
+							__( 'Add some attributes in the <a href="%1$s">Attributes</a> tab to generate variations. Make sure to check the <b>Used for variations</b> box. <a href="%2$s" target="_blank" rel="noreferrer">Learn more</a>', 'woocommerce' ),
+							esc_url( '#product_attributes' ),
+							esc_url( 'https://woocommerce.com/document/variable-product/' )
+						);
+					?>
+				</p>
+			</div>
 		</div>
 
 		<?php elseif ( ! count( $variation_attributes ) ) : ?>

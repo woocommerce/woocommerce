@@ -1016,6 +1016,40 @@
 			margin: 1px;
 		}
 	}
+
+	.add-attributes-container {
+		box-sizing: border-box;
+		display: flex;
+		align-items: center;
+		padding: 32px 0;
+		height: 360px;
+
+		a {
+			text-decoration: none;
+
+			&[target="_blank"]::after {
+				content: url('../images/icons/external-link.svg');
+				margin-left: 2px;
+				vertical-align: sub;
+			}
+		}
+
+		.add-attributes-message {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 24px;
+			width: 100%;
+
+			p {
+				width: 90%;
+				max-width: 544px;
+				font-size: 14px;
+				line-height: 18px;
+				text-align: center;
+			}
+		}
+	}
 }
 
 #product_attributes {
