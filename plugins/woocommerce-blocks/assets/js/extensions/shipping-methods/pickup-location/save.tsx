@@ -29,6 +29,7 @@ const SaveSettings = () => {
 				onClick={ (
 					event: React.MouseEvent< HTMLButtonElement, MouseEvent >
 				) => {
+					event.preventDefault();
 					const target = event.target as HTMLButtonElement;
 					if ( target?.form?.reportValidity() ) {
 						save();
