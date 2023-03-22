@@ -184,6 +184,19 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
+	 * Set attributes data (stored as meta data - write only).
+	 *
+	 * @param array $data Key/Value pairs.
+	 */
+	public function set_attributes( $data = array() ) {
+		if ( is_array( $data ) ) {
+			foreach ( $data as $key => $value ) {
+				$this->add_meta_data( str_replace( 'attribute_', '', $key ), implode( ' ', $value->get_slugs() ), true );
+			}
+		}
+	}
+
+	/**
 	 * Set properties based on passed in product object.
 	 *
 	 * @param WC_Product $product Product instance.

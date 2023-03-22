@@ -1490,12 +1490,26 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				)
 			);
 
+			if ( $product->is_type( 'variation' ) ) {
+				// get the non-variation attributes.
+				$parent_product = new WC_Product_Variable( $product->get_parent_id() );
+				$attributes     = array_filter(
+					$parent_product->get_attributes(),
+					function( $attribute ) {
+						return false === $attribute->get_variation();
+					}
+				);
+			} else {
+				$attributes = $product->get_attributes();
+			}
+
 			$default_args = array(
 				'name'         => $product->get_name(),
 				'tax_class'    => $product->get_tax_class(),
 				'product_id'   => $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id(),
 				'variation_id' => $product->is_type( 'variation' ) ? $product->get_id() : 0,
 				'variation'    => $product->is_type( 'variation' ) ? $product->get_attributes() : array(),
+				'attributes'   => $attributes,
 				'subtotal'     => $total,
 				'total'        => $total,
 				'quantity'     => $qty,
