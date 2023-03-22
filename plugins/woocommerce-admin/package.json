@@ -45,7 +45,7 @@
 		"test:help": "wp-scripts test-unit-js --help",
 		"test:update-snapshots": "pnpm run test:client --updateSnapshot && pnpm run --filter @woocommerce/components test:update-snapshots",
 		"test:watch": "pnpm run test:client --watch",
-		"ts:check": "tsc --build ./tsconfig.json --pretty",
+		"ts:check": "tsc --project tsconfig.json --pretty",
 		"ts:check:watch": "npm run ts:check -- --watch"
 	},
 	"dependencies": {

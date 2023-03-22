@@ -36,7 +36,7 @@
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "rm -rf ./dist ./tsconfig.tsbuildinfo",
-		"compile": "tsc -b",
+		"compile": "tsc --project tsconfig.json",
 		"prepack": "pnpm run build",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint src",

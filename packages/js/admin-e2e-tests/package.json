@@ -56,12 +56,12 @@
 		"access": "public"
 	},
 	"scripts": {
-		"turbo:build": "tsc --build",
+		"turbo:build": "tsc --project tsconfig.json",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint src",
-		"start": "tsc --build --watch",
+		"start": "tsc --project tsconfig.json --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"lint:fix": "eslint src --fix",
 		"prepack": "pnpm run clean && pnpm run build"

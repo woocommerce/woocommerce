@@ -54,7 +54,7 @@
 		}
 	},
 	"scripts": {
-		"turbo:build": "shx rm -rf dist && tsc -b",
+		"turbo:build": "shx rm -rf dist && tsc --project tsconfig.json",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint . --ext .ts",
 		"postpack": "shx rm -f oclif.manifest.json",

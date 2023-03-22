@@ -6,7 +6,6 @@
 		"declaration": false,
 		"declarationMap": false,
 		"declarationDir": null,
-		"outDir": "build",
-		"composite": false
+		"outDir": "build"
 	}
 }

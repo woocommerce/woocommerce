@@ -1,6 +1,5 @@
 {
 	"compilerOptions": {
-		"composite": true,
 		"target": "es2019",
 		"module": "esnext",
 		"moduleResolution": "node",
@@ -10,8 +9,7 @@
 		"skipLibCheck": true,
 		"jsx": "react",
 		"jsxFactory": "createElement",
-		"jsxFragmentFactory": "Fragment",
-		"incremental": true
+		"jsxFragmentFactory": "Fragment"
 	},
 	"exclude": [
 		"node_modules",
