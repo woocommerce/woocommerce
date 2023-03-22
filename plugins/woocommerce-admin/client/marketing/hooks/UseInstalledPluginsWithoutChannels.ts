@@ -25,15 +25,6 @@ export type UseInstalledPluginsWithoutChannels = {
  */
 export const useInstalledPluginsWithoutChannels =
 	(): UseInstalledPluginsWithoutChannels => {
-		const {
-			loading: loadingRegisteredChannels,
-			data: dataRegisteredChannels,
-		} = useRegisteredChannels();
-		const {
-			loading: loadingRecommendedChannels,
-			data: dataRecommendedChannels,
-		} = useRecommendedChannels();
-
 		const { installedPlugins, activatingPlugins } = useSelect(
 			( select ) => {
 				const { getInstalledPlugins, getActivatingPlugins } =
@@ -47,6 +38,15 @@ export const useInstalledPluginsWithoutChannels =
 			},
 			[]
 		);
+
+		const {
+			loading: loadingRegisteredChannels,
+			data: dataRegisteredChannels,
+		} = useRegisteredChannels();
+		const {
+			loading: loadingRecommendedChannels,
+			data: dataRecommendedChannels,
+		} = useRecommendedChannels();
 
 		const { activateInstalledPlugin, loadInstalledPluginsAfterActivation } =
 			useDispatch( STORE_KEY );

@@ -46,18 +46,6 @@ const category = 'marketing';
 export const useRecommendedPluginsWithoutChannels =
 	(): UseRecommendedPluginsWithoutChannels => {
 		const {
-			loading: loadingRecommendedChannels,
-			data: dataRecommendedChannels,
-		} = useRecommendedChannels();
-		const { invalidateResolution, installAndActivateRecommendedPlugin } =
-			useDispatch( STORE_KEY );
-
-		const installAndActivate = ( slug: string ) => {
-			installAndActivateRecommendedPlugin( slug, category );
-			invalidateResolution( selector, [ category ] );
-		};
-
-		const {
 			loading: loadingRecommendedPlugins,
 			data: dataRecommendedPlugins,
 		} = useSelect( ( select ) => {
@@ -70,6 +58,14 @@ export const useRecommendedPluginsWithoutChannels =
 			};
 		}, [] );
 
+		const {
+			loading: loadingRecommendedChannels,
+			data: dataRecommendedChannels,
+		} = useRecommendedChannels();
+
+		const { invalidateResolution, installAndActivateRecommendedPlugin } =
+			useDispatch( STORE_KEY );
+
 		const isInitializing =
 			( loadingRecommendedPlugins && ! dataRecommendedPlugins.length ) ||
 			( loadingRecommendedChannels && ! dataRecommendedChannels );
@@ -81,6 +77,11 @@ export const useRecommendedPluginsWithoutChannels =
 			dataRecommendedChannels || [],
 			( a, b ) => a.product === b.product
 		);
+
+		const installAndActivate = ( slug: string ) => {
+			installAndActivateRecommendedPlugin( slug, category );
+			invalidateResolution( selector, [ category ] );
+		};
 
 		return {
 			isInitializing,
