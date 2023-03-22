@@ -196,9 +196,10 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_method_title( $context = 'view' ) {
+	    do_action( 'pre_get_shipping_method_title', $context );
 		$method_title = $this->get_prop( 'method_title', $context );
 		if ( 'view' === $context ) {
-			return $method_title ? $method_title : __( 'Shipping', 'woocommerce' );
+			return $method_title ? apply_filters( 'get_shipping_method_title', $method_title ) : __( 'Shipping', 'woocommerce' );
 		} else {
 			return $method_title;
 		}
