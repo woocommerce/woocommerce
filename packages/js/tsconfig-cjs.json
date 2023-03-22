@@ -1,7 +1,7 @@
 {
 	"extends": "./tsconfig",
 	"compilerOptions": {
-		"target": "esnext",
+		"target": "es2019",
 		"module": "commonjs",
 		"declaration": false,
 		"declarationMap": false,
