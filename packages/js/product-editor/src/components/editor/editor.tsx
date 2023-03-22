@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { createElement, StrictMode } from '@wordpress/element';
+import { createElement, StrictMode, Fragment } from '@wordpress/element';
+import { PluginArea } from '@wordpress/plugins';
 import {
 	EditorSettings,
 	EditorBlockListSettings,
@@ -54,10 +55,14 @@ export function Editor( { product, settings }: EditorProps ) {
 								/>
 							}
 							content={
-								<BlockEditor
-									settings={ settings }
-									product={ product }
-								/>
+								<>
+									<BlockEditor
+										settings={ settings }
+										product={ product }
+									/>
+									{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+									<PluginArea scope="woocommerce-product-block-editor" />
+								</>
 							}
 						/>
 

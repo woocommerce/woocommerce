@@ -10,8 +10,11 @@ import { OPTIONS_STORE_NAME, WCDataSelector, WEEK } from '@woocommerce/data';
 import { Button, Card, CardHeader } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import {
+	ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
+	ALLOW_TRACKING_OPTION_NAME,
 	CustomerFeedbackModal,
 	CustomerFeedbackSimple,
+	SHOWN_FOR_ACTIONS_OPTION_NAME,
 } from '@woocommerce/customer-effort-score';
 import { __ } from '@wordpress/i18n';
 
@@ -27,11 +30,7 @@ type TaskListCompletedHeaderProps = {
 	customerEffortScore: boolean;
 };
 
-const ADMIN_INSTALL_TIMESTAMP_OPTION_NAME =
-	'woocommerce_admin_install_timestamp';
-const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
 const CUSTOMER_EFFORT_SCORE_ACTION = 'store_setup';
-const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
 
 function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 	if ( adminInstallTimestamp === 0 ) {

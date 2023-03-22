@@ -51,6 +51,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@woocommerce/navigation": "workspace:*",
+		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/browserslist-config": "wp-6.0",
 		"concurrently": "^7.0.0",
 		"css-loader": "^3.6.0",

@@ -4,17 +4,15 @@
 import { useEffect } from 'react';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
-import {
-	QUEUE_OPTION_NAME,
-	STORE_KEY,
-} from '@woocommerce/customer-effort-score';
+import { createElement, Fragment } from '@wordpress/element';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
  */
-import CustomerEffortScoreTracks from './customer-effort-score-tracks';
+import { CustomerEffortScoreTracks } from '../';
+import { QUEUE_OPTION_NAME, STORE_KEY } from '../../store';
 
 /**
  * Maps the queue of CES tracks surveys to CustomerEffortScoreTracks
@@ -27,7 +25,7 @@ import CustomerEffortScoreTracks from './customer-effort-score-tracks';
  * @param {boolean}  props.resolving  Whether the queue is resolving.
  * @param {Function} props.clearQueue Sets up clearing of the queue on the next page load.
  */
-function CustomerEffortScoreTracksContainer( {
+function _CustomerEffortScoreTracksContainer( {
 	queue,
 	resolving,
 	clearQueue,
@@ -67,7 +65,7 @@ function CustomerEffortScoreTracksContainer( {
 	);
 }
 
-CustomerEffortScoreTracksContainer.propTypes = {
+_CustomerEffortScoreTracksContainer.propTypes = {
 	/**
 	 * The queue of CES tracks surveys to display.
 	 */
@@ -82,7 +80,7 @@ CustomerEffortScoreTracksContainer.propTypes = {
 	clearQueue: PropTypes.func,
 };
 
-export default compose(
+export const CustomerEffortScoreTracksContainer = compose(
 	withSelect( ( select ) => {
 		const { getCesSurveyQueue, isResolving } = select( STORE_KEY );
 		const queue = getCesSurveyQueue();
@@ -109,4 +107,4 @@ export default compose(
 			},
 		};
 	} )
-)( CustomerEffortScoreTracksContainer );
+)( _CustomerEffortScoreTracksContainer );
