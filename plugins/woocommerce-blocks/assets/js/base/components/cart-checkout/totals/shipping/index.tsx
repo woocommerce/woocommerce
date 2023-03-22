@@ -10,6 +10,7 @@ import type { Currency } from '@woocommerce/price-format';
 import { ShippingVia } from '@woocommerce/base-components/cart-checkout/totals/shipping/shipping-via';
 import { useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import { isAddressComplete } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -67,6 +68,8 @@ export const TotalsShipping = ( {
 		}
 	);
 
+	const addressComplete = isAddressComplete( shippingAddress );
+
 	return (
 		<div
 			className={ classnames(
@@ -77,23 +80,26 @@ export const TotalsShipping = ( {
 			<TotalsItem
 				label={ __( 'Shipping', 'woo-gutenberg-products-block' ) }
 				value={
-					hasRates && cartHasCalculatedShipping ? (
-						totalShippingValue
-					) : (
-						<ShippingPlaceholder
-							showCalculator={ showCalculator }
-							isCheckout={ isCheckout }
-							isShippingCalculatorOpen={
-								isShippingCalculatorOpen
-							}
-							setIsShippingCalculatorOpen={
-								setIsShippingCalculatorOpen
-							}
-						/>
-					)
+					hasRates && cartHasCalculatedShipping
+						? totalShippingValue
+						: // if address is not complete, display the link to add an address.
+						  ! addressComplete && (
+								<ShippingPlaceholder
+									showCalculator={ showCalculator }
+									isCheckout={ isCheckout }
+									isShippingCalculatorOpen={
+										isShippingCalculatorOpen
+									}
+									setIsShippingCalculatorOpen={
+										setIsShippingCalculatorOpen
+									}
+								/>
+						  )
 				}
 				description={
-					hasRates && cartHasCalculatedShipping ? (
+					// If address is complete, display the shipping address.
+					( hasRates && cartHasCalculatedShipping ) ||
+					addressComplete ? (
 						<>
 							<ShippingVia
 								selectedShippingRates={ selectedShippingRates }
@@ -132,6 +138,7 @@ export const TotalsShipping = ( {
 						hasRates={ hasRates }
 						shippingRates={ shippingRates }
 						isLoadingRates={ isLoadingRates }
+						isAddressComplete={ addressComplete }
 					/>
 				) }
 		</div>

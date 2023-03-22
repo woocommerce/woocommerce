@@ -26,6 +26,7 @@ const Block = ( {
 				showRateSelector={ false }
 				values={ cartTotals }
 				currency={ totalsCurrency }
+				isCheckout={ true }
 			/>
 		</TotalsWrapper>
 	);
