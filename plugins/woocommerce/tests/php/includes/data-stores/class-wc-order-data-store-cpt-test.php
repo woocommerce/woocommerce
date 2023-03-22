@@ -1,9 +1,40 @@
 <?php
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
+//phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name.
 /**
  * Class WC_Order_Data_Store_CPT_Test.
  */
 class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
+	/**
+	 * Store the COT state before the test.
+	 *
+	 * @var bool
+	 */
+	private $prev_cot_state;
+
+	/**
+	 * Store the COT state before the test.
+	 *
+	 * @return void
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->prev_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		OrderHelper::toggle_cot( false );
+	}
+
+	/**
+	 * Restore the COT state after the test.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		OrderHelper::toggle_cot( $this->prev_cot_state );
+		parent::tearDown();
+	}
 
 	/**
 	 * Test that refund cache are invalidated correctly when refund is deleted.
@@ -131,7 +162,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * Legacy getters and setters for props migrated from data stores should be set/reset properly.
 	 */
 	public function test_legacy_getters_setters() {
-		$order_id   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_complex_wp_post_order();
+		$order_id   = OrderHelper::create_complex_wp_post_order();
 		$order      = wc_get_order( $order_id );
 		$bool_props = array(
 			'_download_permissions_granted' => 'download_permissions_granted',

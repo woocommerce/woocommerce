@@ -6,7 +6,7 @@ import {
 	EditorSettings,
 	EditorBlockListSettings,
 } from '@wordpress/block-editor';
-import { SlotFillProvider } from '@wordpress/components';
+import { Popover, SlotFillProvider } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -60,6 +60,8 @@ export function Editor( { product, settings }: EditorProps ) {
 								/>
 							}
 						/>
+
+						<Popover.Slot />
 					</SlotFillProvider>
 				</ShortcutProvider>
 			</EntityProvider>

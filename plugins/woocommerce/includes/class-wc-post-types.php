@@ -387,6 +387,46 @@ class WC_Post_Types {
 												'name' => 'Product name',
 											),
 										),
+										array(
+											'woocommerce/product-summary',
+										),
+										array(
+											'core/columns',
+											array(),
+											array(
+												array(
+													'core/column',
+													array(
+														'templateLock' => 'all',
+													),
+													array(
+														array(
+															'woocommerce/product-pricing',
+															array(
+																'name' => 'regular_price',
+																'label' => __( 'List price', 'woocommerce' ),
+																'showPricingSection' => true,
+															),
+														),
+													),
+												),
+												array(
+													'core/column',
+													array(
+														'templateLock' => 'all',
+													),
+													array(
+														array(
+															'woocommerce/product-pricing',
+															array(
+																'name' => 'sale_price',
+																'label' => __( 'Sale price', 'woocommerce' ),
+															),
+														),
+													),
+												),
+											),
+										),
 									),
 								),
 							),

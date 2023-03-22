@@ -321,13 +321,8 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		// Create 1 draft order - to be excluded from totals.
 		$order = WC_Helper_Order::create_order( $this->customer, $product );
 		$order->set_date_created( time() - ( 5 * DAY_IN_SECONDS ) );
+		$order->set_status( 'auto-draft' );
 		$order->save();
-		wp_update_post(
-			array(
-				'ID'          => $order->get_id(),
-				'post_status' => 'auto-draft',
-			)
-		);
 
 		// Test totals and total params.
 		$request    = new WP_REST_Request( 'GET', $this->endpoint . '/totals' );
