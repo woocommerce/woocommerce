@@ -13,7 +13,7 @@ import { RecommendedPlugin } from '~/marketing/types';
 
 type UseRecommendedPluginsWithoutChannels = {
 	/**
-	 * Boolean indicating whether it is loading for the first time.
+	 * Boolean indicating whether it is initializing.
 	 */
 	isInitializing: boolean;
 
