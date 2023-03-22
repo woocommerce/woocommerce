@@ -39,6 +39,13 @@ class CheckoutSchema extends AbstractSchema {
 	protected $shipping_address_schema;
 
 	/**
+	 * Image Attachment schema instance.
+	 *
+	 * @var ImageAttachmentSchema
+	 */
+	protected $image_attachment_schema;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param ExtendSchema     $extend Rest Extending instance.
