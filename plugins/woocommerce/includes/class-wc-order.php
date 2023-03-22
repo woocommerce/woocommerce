@@ -794,7 +794,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_payment_method_title( $context = 'view' ) {
-		return $this->get_prop( 'payment_method_title', $context );
+		do_action( 'pre_get_payment_method_title', $context );
+		return apply_filters( 'get_payment_method_title', $this->get_prop( 'payment_method_title', $context ) );
 	}
 
 	/**
