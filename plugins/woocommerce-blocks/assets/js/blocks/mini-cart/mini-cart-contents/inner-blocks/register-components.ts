@@ -41,6 +41,7 @@ registerCheckoutBlock( {
 
 registerCheckoutBlock( {
 	metadata: miniCartTitleMetadata,
+	force: false,
 	component: lazy(
 		() =>
 			import(

@@ -46,6 +46,7 @@ export type RegisteredBlocks = Record< string, RegisteredBlock >;
 
 export type CheckoutBlockOptions = {
 	metadata: CheckoutBlockOptionsMetadata;
+	force?: boolean;
 	component:
 		| LazyExoticComponent< React.ComponentType< unknown > >
 		| ( () => JSX.Element | null )
