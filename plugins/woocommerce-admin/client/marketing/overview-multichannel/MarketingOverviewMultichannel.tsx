@@ -16,7 +16,7 @@ import {
 	useRegisteredChannels,
 	useRecommendedChannels,
 	useCampaignTypes,
-	useInstalledPlugins,
+	useInstalledPluginsWithoutChannels,
 } from '~/marketing/hooks';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { IntroductionBanner } from './IntroductionBanner';
@@ -46,7 +46,8 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 	} = useRegisteredChannels();
 	const { loading: loadingRecommended, data: dataRecommended } =
 		useRecommendedChannels();
-	const { loadInstalledPluginsAfterActivation } = useInstalledPlugins();
+	const { loadInstalledPluginsAfterActivation } =
+		useInstalledPluginsWithoutChannels();
 	const { currentUserCan } = useUser();
 	const channelsRef = useRef< ChannelsRef >( null );
 

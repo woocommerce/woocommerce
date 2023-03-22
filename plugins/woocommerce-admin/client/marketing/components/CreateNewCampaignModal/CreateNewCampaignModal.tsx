@@ -21,7 +21,7 @@ import {
 	useRecommendedChannels,
 	useCampaignTypes,
 	useRegisteredChannels,
-	useInstalledPlugins,
+	useInstalledPluginsWithoutChannels,
 } from '~/marketing/hooks';
 import { SmartPluginCardBody } from '~/marketing/components';
 import './CreateNewCampaignModal.scss';
@@ -44,7 +44,8 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 		useCampaignTypes();
 	const { refetch: refetchRegisteredChannels } = useRegisteredChannels();
 	const { data: recommendedChannels } = useRecommendedChannels();
-	const { loadInstalledPluginsAfterActivation } = useInstalledPlugins();
+	const { loadInstalledPluginsAfterActivation } =
+		useInstalledPluginsWithoutChannels();
 
 	const onInstalledAndActivated = ( pluginSlug: string ) => {
 		refetchCampaignTypes();

@@ -11,7 +11,7 @@ import {
 	useCampaignTypes,
 	useRecommendedChannels,
 	useRegisteredChannels,
-	useInstalledPlugins,
+	useInstalledPluginsWithoutChannels,
 } from '~/marketing/hooks';
 import { CreateNewCampaignModal } from './CreateNewCampaignModal';
 
@@ -29,7 +29,7 @@ jest.mock( '~/marketing/hooks', () => ( {
 	useCampaignTypes: jest.fn(),
 	useRecommendedChannels: jest.fn(),
 	useRegisteredChannels: jest.fn(),
-	useInstalledPlugins: jest.fn(),
+	useInstalledPluginsWithoutChannels: jest.fn(),
 } ) );
 
 const google = {
@@ -83,7 +83,7 @@ describe( 'CreateNewCampaignModal component', () => {
 		( useRegisteredChannels as jest.Mock ).mockReturnValue( {
 			refetch: jest.fn(),
 		} );
-		( useInstalledPlugins as jest.Mock ).mockReturnValue( {
+		( useInstalledPluginsWithoutChannels as jest.Mock ).mockReturnValue( {
 			loadInstalledPluginsAfterActivation: jest.fn(),
 		} );
 	} );
