@@ -1318,7 +1318,7 @@ class DataStore extends SqlQuery {
 		);
 		$match_operator        = $this->get_match_operator( $query_args );
 		$post_meta_comparators = array(
-			'RLIKE'  => 'attribute_is',
+			'RLIKE'     => 'attribute_is',
 			'NOT RLIKE' => 'attribute_is_not',
 		);
 
