@@ -9,7 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$add_attributes_icon_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';
+$add_attributes_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';
+$background_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-background-image.svg';
+$arrow_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-arrow.svg';
 ?>
 <div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 	<div id="variable_product_options_inner">
@@ -18,7 +20,7 @@ $add_attributes_icon_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';
 
 		<div class="add-attributes-container">
 			<div class="add-attributes-message">
-				<img src="<?php echo esc_url( $add_attributes_icon_url ); ?>" />
+				<img src="<?php echo esc_url( $add_attributes_img_url ); ?>" />
 				<p>
 					<?php
 						echo wp_kses_post(
@@ -160,6 +162,19 @@ $add_attributes_icon_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';
 					</span>
 				</div>
 				<div class="clear"></div>
+			</div>
+
+			<div class="add-variation-container">
+				<img class="variation-arrow" src="<?php echo esc_url( $arrow_img_url ); ?>" />
+				<img src="<?php echo esc_url( $background_img_url ); ?>" />
+				<p>
+					<?php
+					esc_html_e(
+						'No variations yet. Generate them from all added attributes or add a new variation manually.',
+						'woocommerce'
+					);
+					?>
+				</p>
 			</div>
 
 			<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
