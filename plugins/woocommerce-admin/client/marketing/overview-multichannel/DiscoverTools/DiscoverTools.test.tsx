@@ -6,7 +6,6 @@ import { render, screen } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import { useInstalledPluginsWithoutChannels } from '~/marketing/hooks';
 import { useRecommendedPluginsWithoutChannels } from './useRecommendedPluginsWithoutChannels';
 import { DiscoverTools } from './DiscoverTools';
 
@@ -25,7 +24,7 @@ jest.mock( './useRecommendedPluginsWithoutChannels', () => ( {
 } ) );
 
 jest.mock( '~/marketing/hooks', () => ( {
-	useInstalledPluginsWithoutChannels: jest.fn(),
+	useInstalledPluginsWithoutChannels: jest.fn( () => ( {} ) ),
 } ) );
 
 describe( 'DiscoverTools component', () => {
@@ -34,9 +33,6 @@ describe( 'DiscoverTools component', () => {
 			isInitializing: true,
 			isLoading: true,
 			data: [],
-		} );
-		( useInstalledPluginsWithoutChannels as jest.Mock ).mockReturnValue( {
-			loadInstalledExtensionsAfterActivation: jest.fn(),
 		} );
 		render( <DiscoverTools /> );
 
@@ -48,9 +44,6 @@ describe( 'DiscoverTools component', () => {
 			isInitializing: false,
 			isLoading: false,
 			data: [],
-		} );
-		( useInstalledPluginsWithoutChannels as jest.Mock ).mockReturnValue( {
-			loadInstalledExtensionsAfterActivation: jest.fn(),
 		} );
 		render( <DiscoverTools /> );
 
@@ -97,11 +90,6 @@ describe( 'DiscoverTools component', () => {
 					},
 				],
 			} );
-			( useInstalledPluginsWithoutChannels as jest.Mock ).mockReturnValue(
-				{
-					loadInstalledExtensionsAfterActivation: jest.fn(),
-				}
-			);
 			render( <DiscoverTools /> );
 
 			// Assert that we have the "Sales channels" tab, the plugin name, the "Built by WooCommerce" pill, and the "Install plugin" button.
@@ -142,11 +130,6 @@ describe( 'DiscoverTools component', () => {
 					},
 				],
 			} );
-			( useInstalledPluginsWithoutChannels as jest.Mock ).mockReturnValue(
-				{
-					loadInstalledExtensionsAfterActivation: jest.fn(),
-				}
-			);
 			render( <DiscoverTools /> );
 
 			// Assert that we have the CRM tab, plugin name, and "View details" button.
