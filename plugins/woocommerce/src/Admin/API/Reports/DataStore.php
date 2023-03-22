@@ -1318,8 +1318,8 @@ class DataStore extends SqlQuery {
 		);
 		$match_operator        = $this->get_match_operator( $query_args );
 		$post_meta_comparators = array(
-			'='  => 'attribute_is',
-			'!=' => 'attribute_is_not',
+			'RLIKE'  => 'attribute_is',
+			'NOT RLIKE' => 'attribute_is_not',
 		);
 
 		foreach ( $post_meta_comparators as $comparator => $arg ) {
@@ -1379,7 +1379,7 @@ class DataStore extends SqlQuery {
 				}
 
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$sql_clauses['where'][] = $wpdb->prepare( "( {$join_alias}.meta_key = %s AND {$join_alias}.meta_value {$comparator} %s )", $meta_key, $meta_value );
+				$sql_clauses['where'][] = $wpdb->prepare( "( {$join_alias}.meta_key = %s AND {$join_alias}.meta_value {$comparator} %s )", $meta_key, '[[:<:]]' . $meta_value . '[[:>:]]' );
 			}
 		}
 
