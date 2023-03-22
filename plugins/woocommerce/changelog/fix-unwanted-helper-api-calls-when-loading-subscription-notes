@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix the issue of stores sending frequent Helper API requests when the store databases disk is full.
