@@ -60,10 +60,8 @@ export const PluginsTabPanel = ( {
 		null
 	);
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const {
-		loadInstalledPluginsAfterActivation:
-			loadInstalledExtensionsAfterActivation,
-	} = useInstalledPluginsWithoutChannels();
+	const { loadInstalledPluginsAfterActivation } =
+		useInstalledPluginsWithoutChannels();
 
 	/**
 	 * Install and activate a plugin.
@@ -88,7 +86,7 @@ export const PluginsTabPanel = ( {
 			] );
 
 			onInstallAndActivate( plugin.product );
-			loadInstalledExtensionsAfterActivation( plugin.product );
+			loadInstalledPluginsAfterActivation( plugin.product );
 			createNoticesFromResponse( response );
 		} catch ( error ) {
 			createNoticesFromResponse( error );
