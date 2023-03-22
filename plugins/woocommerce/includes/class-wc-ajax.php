@@ -1315,7 +1315,7 @@ class WC_AJAX {
 				'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
 			);
 
-			if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
+			if ( is_numeric( $order_item_ids ) ) {
 				$order_item_ids = array( $order_item_ids );
 			}
 
@@ -1331,6 +1331,10 @@ class WC_AJAX {
 				foreach ( $order_item_ids as $item_id ) {
 					$item_id = absint( $item_id );
 					$item    = $order->get_item( $item_id );
+
+					if ( ! $item ) {
+						continue;
+					}
 
 					// Before deleting the item, adjust any stock values already reduced.
 					if ( $item->is_type( 'line_item' ) ) {
@@ -1363,7 +1367,7 @@ class WC_AJAX {
 			 * @param bool|array|WP_Error $changed_store Result of wc_maybe_adjust_line_item_product_stock().
 			 * @param bool|WC_Order|WC_Order_Refund $order As returned by wc_get_order().
 			 */
-			do_action( 'woocommerce_ajax_order_items_removed', $item_id, $item, $changed_stock, $order );
+			do_action( 'woocommerce_ajax_order_items_removed', $item_id ?? 0, $item ?? false, $changed_stock ?? false, $order );
 
 			// Get HTML to return.
 			ob_start();

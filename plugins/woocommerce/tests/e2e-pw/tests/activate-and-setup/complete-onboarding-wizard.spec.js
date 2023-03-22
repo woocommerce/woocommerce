@@ -145,23 +145,23 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 	} );
 } );
 
-// !Changed from Japanese to Malta store, as Japanese Yen does not use decimals
+// !Changed from Japanese to Liberian store, as Japanese Yen does not use decimals
 test.describe(
-	'A Malta store can complete the selective bundle install but does not include WCPay.',
+	'A Liberian store can complete the selective bundle install but does not include WCPay.',
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeEach( async () => {
 			// Complete "Store Details" step through the API to prevent flakiness when run on external sites.
-			await api.update.storeDetails( storeDetails.malta.store );
+			await api.update.storeDetails( storeDetails.liberia.store );
 		} );
 
 		// eslint-disable-next-line jest/expect-expect
 		test( 'can choose the "Other" industry', async ( { page } ) => {
 			await onboarding.completeIndustrySection(
 				page,
-				storeDetails.malta.industries,
-				storeDetails.malta.expectedIndustries
+				storeDetails.liberia.industries,
+				storeDetails.liberia.expectedIndustries
 			);
 			await page.click( 'button >> text=Continue' );
 		} );
@@ -174,14 +174,14 @@ test.describe(
 
 			await onboarding.completeIndustrySection(
 				page,
-				storeDetails.malta.industries,
-				storeDetails.malta.expectedIndustries
+				storeDetails.liberia.industries,
+				storeDetails.liberia.expectedIndustries
 			);
 			await page.click( 'button >> text=Continue' );
 
 			await onboarding.completeProductTypesSection(
 				page,
-				storeDetails.malta.products
+				storeDetails.liberia.products
 			);
 			// Make sure WC Payments is NOT present
 			await expect(
