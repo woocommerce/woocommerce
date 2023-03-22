@@ -3,7 +3,6 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import type { BlockConfiguration } from '@wordpress/blocks';
-import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -34,20 +33,6 @@ const blockConfig: BlockConfiguration = {
 		'woocommerce/product-meta',
 	],
 	edit,
-	save: () => {
-		if (
-			attributes.isDescendentOfQueryLoop ||
-			attributes.isDescendentOfSingleProductTemplate
-		) {
-			return null;
-		}
-
-		return (
-			<div
-				className={ classnames( 'is-loading', attributes.className ) }
-			/>
-		);
-	},
 };
 
 registerBlockType( 'woocommerce/product-sku', { ...blockConfig } );
