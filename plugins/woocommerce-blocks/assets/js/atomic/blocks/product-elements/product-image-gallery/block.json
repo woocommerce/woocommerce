@@ -9,6 +9,7 @@
 		"align": true,
 		"multiple": false
 	},
+	"attributes": {},
 	"keywords": [ "WooCommerce" ],
 	"usesContext": [ "postId", "postType", "queryId" ],
 	"textdomain": "woo-gutenberg-products-block",

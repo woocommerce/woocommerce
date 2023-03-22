@@ -6,8 +6,9 @@
 	"description": "A block that allows your customers to see details and reviews about the product.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
-	"supports": {},
-	"attributes": {},
+	"supports": {
+		"align": true
+	},
 	"textdomain": "woo-gutenberg-products-block",
 	"apiVersion": 2,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
