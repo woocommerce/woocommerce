@@ -1,5 +1,5 @@
 export { useIntroductionBanner } from './useIntroductionBanner';
-export { useInstalledPluginsWithoutChannels } from './UseInstalledPluginsWithoutChannels';
+export { useInstalledPluginsWithoutChannels } from './useInstalledPluginsWithoutChannels';
 export { useRegisteredChannels } from './useRegisteredChannels';
 export { useRecommendedChannels } from './useRecommendedChannels';
 export { useCampaignTypes } from './useCampaignTypes';
