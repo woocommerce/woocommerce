@@ -80,6 +80,17 @@ class WooSubscriptionsNotes {
 	public function admin_init() {
 		$this->check_connection();
 
+		if ( ! isset( $_GET['page'] ) ) {
+			// If the page parameter is not set, then the request is not initiated from the wc admin dashboard.
+			return;
+		}
+
+		if ( 'wc-addons' !== $_GET['page'] && 'wc-admin' !== $_GET['page'] ) {
+			// To avoid unnecessarily calling Helper API, we only want to refresh subscription notes,
+			// if the request is initiated from the wc admin dashboard.
+			return;
+		}
+
 		if ( $this->is_connected() ) {
 			$refresh_notes = false;
 
