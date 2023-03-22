@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -29,20 +28,6 @@ const blockConfig = {
 	attributes,
 	supports,
 	edit,
-	save: () => {
-		if (
-			attributes.isDescendentOfQueryLoop ||
-			attributes.isDescendentOfSingleProductTemplate
-		) {
-			return null;
-		}
-
-		return (
-			<div
-				className={ classnames( 'is-loading', attributes.className ) }
-			/>
-		);
-	},
 };
 
 registerBlockType( 'woocommerce/product-price', blockConfig );
