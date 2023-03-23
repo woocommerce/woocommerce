@@ -81,9 +81,9 @@
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "eslint src",
-		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"build:css": "webpack",
-		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
+		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"

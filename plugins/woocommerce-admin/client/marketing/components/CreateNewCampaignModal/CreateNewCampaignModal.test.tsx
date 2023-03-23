@@ -7,11 +7,7 @@ import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
-import {
-	useCampaignTypes,
-	useRecommendedChannels,
-	useRegisteredChannels,
-} from '~/marketing/hooks';
+import { useCampaignTypes, useRecommendedChannels } from '~/marketing/hooks';
 import { CreateNewCampaignModal } from './CreateNewCampaignModal';
 
 jest.mock( '@woocommerce/components', () => {
@@ -27,7 +23,8 @@ jest.mock( '@woocommerce/components', () => {
 jest.mock( '~/marketing/hooks', () => ( {
 	useCampaignTypes: jest.fn(),
 	useRecommendedChannels: jest.fn(),
-	useRegisteredChannels: jest.fn(),
+	useRegisteredChannels: jest.fn( () => ( {} ) ),
+	useInstalledPluginsWithoutChannels: jest.fn( () => ( {} ) ),
 } ) );
 
 const google = {
@@ -84,9 +81,6 @@ describe( 'CreateNewCampaignModal component', () => {
 		( useRecommendedChannels as jest.Mock ).mockReturnValue( {
 			data: [ pinterest, amazon ],
 		} );
-		( useRegisteredChannels as jest.Mock ).mockReturnValue( {
-			refetch: jest.fn(),
-		} );
 		render( <CreateNewCampaignModal onRequestClose={ () => {} } /> );
 
 		expect( screen.getByText( 'Google Ads' ) ).toBeInTheDocument();
@@ -120,9 +114,6 @@ describe( 'CreateNewCampaignModal component', () => {
 		} );
 		( useRecommendedChannels as jest.Mock ).mockReturnValue( {
 			data: [],
-		} );
-		( useRegisteredChannels as jest.Mock ).mockReturnValue( {
-			refetch: jest.fn(),
 		} );
 		render( <CreateNewCampaignModal onRequestClose={ () => {} } /> );
 

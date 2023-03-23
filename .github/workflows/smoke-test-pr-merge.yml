@@ -48,7 +48,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.ARTIFACT_NAME }}
+                  artifact-name: ${{ env.ARTIFACT_NAME }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish Allure report
@@ -112,7 +112,7 @@ jobs:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  destination-dir: ${{ env.ARTIFACT_NAME }}
+                  artifact-name: ${{ env.ARTIFACT_NAME }}
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
                   include-allure-results: false
 

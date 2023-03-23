@@ -37,7 +37,6 @@
 		"@wordpress/components": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
-		"concurrently": "^7.0.0",
 		"gridicons": "^3.4.0"
 	},
 	"devDependencies": {
@@ -51,6 +50,7 @@
 		"eslint": "^8.32.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
+		"concurrently": "^7.0.0",
 		"postcss": "^8.4.7",
 		"postcss-loader": "^4.3.0",
 		"rimraf": "^3.0.2",
@@ -67,9 +67,9 @@
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint src",
-		"build:js": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"build:css": "webpack",
-		"start": "concurrently \"tsc --build --watch\" \"webpack --watch\"",
+		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix"
 	},
