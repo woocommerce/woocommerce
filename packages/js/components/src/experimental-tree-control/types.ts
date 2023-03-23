@@ -28,10 +28,6 @@ type BaseTreeProps = {
 	 */
 	shouldNotRecursivelySelect?: boolean;
 	/**
-	 * When set, shows a 'create new' button when the typed value does not exist on the items.
-	 */
-	allowCreate?: boolean;
-	/**
 	 * The value to be used for comparison to determine if 'create new' button should be shown.
 	 */
 	createValue?: string;
@@ -39,6 +35,10 @@ type BaseTreeProps = {
 	 * Called when the 'create new' button is clicked.
 	 */
 	onCreateNew?: () => void;
+	/**
+	 * If passed, shows create button if return from callback is true
+	 */
+	shouldShowCreateButton?( value?: string ): boolean;
 	isExpanded?: boolean;
 	/**
 	 * When `multiple` is true and a child item is selected, all its

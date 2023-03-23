@@ -28,7 +28,7 @@ const listItems: Item[] = [
 	{ id: '3', name: 'Other' },
 ];
 
-const getFilteredItems = ( items, searchValue ) => {
+const getFilteredItems = ( items: Item[], searchValue ) => {
 	const filteredItems = items.filter( ( e ) =>
 		e.name.includes( searchValue )
 	);
@@ -60,7 +60,11 @@ export const MultipleSelectTree: React.FC = () => {
 			items={ items }
 			selected={ selected }
 			shouldNotRecursivelySelect
-			allowCreate
+			shouldShowCreateButton={ ( typedValue ) =>
+				! value ||
+				listItems.findIndex( ( item ) => item.name === typedValue ) ===
+					-1
+			}
 			createValue={ value }
 			// eslint-disable-next-line no-alert
 			onCreateNew={ () => alert( 'create new called' ) }

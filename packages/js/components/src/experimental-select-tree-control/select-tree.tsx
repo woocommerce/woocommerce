@@ -18,21 +18,12 @@ import {
 	TreeControlProps,
 } from '../experimental-tree-control/types';
 import { SelectedItems } from '../experimental-select-control/selected-items';
-import {
-	getItemLabelType,
-	getItemValueType,
-} from '../experimental-select-control/types';
-import {
-	defaultGetItemLabel,
-	defaultGetItemValue,
-} from '../experimental-select-control/utils';
 import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
 
-interface SelectTreeProps extends Omit< TreeControlProps, 'getItemLabel' > {
+interface SelectTreeProps
+	extends Omit< TreeControlProps, 'getItemLabel' | 'getItemValue' > {
 	selected?: Item[];
-	getItemLabel?: getItemLabelType< Item >;
-	getItemValue?: getItemValueType< Item >;
 	getSelectedItemProps?: any;
 	treeRef?: React.ForwardedRef< HTMLOListElement >;
 	suffix?: JSX.Element | null;
@@ -43,14 +34,13 @@ interface SelectTreeProps extends Omit< TreeControlProps, 'getItemLabel' > {
 
 export const SelectTree = function SelectTree( {
 	items,
-	getItemLabel = ( item ) => item?.name || '',
-	getItemValue = ( item ) => item?.id || '',
 	getSelectedItemProps,
 	treeRef: ref,
 	suffix = <SuffixIcon icon={ search } />,
 	placeholder,
 	isLoading,
 	onInputChange,
+	shouldShowCreateButton,
 	...props
 }: SelectTreeProps ) {
 	const linkedTree = useLinkedTree( items );
@@ -100,6 +90,7 @@ export const SelectTree = function SelectTree( {
 						items={ linkedTree }
 						onTreeBlur={ onClose }
 						shouldItemBeExpanded={ shouldItemBeExpanded }
+						shouldShowCreateButton={ shouldShowCreateButton }
 						style={ {
 							width: comboBoxWidth,
 						} }
@@ -187,8 +178,8 @@ export const SelectTree = function SelectTree( {
 					>
 						<SelectedItems
 							items={ ( props.selected as Item[] ) || [] }
-							getItemLabel={ getItemLabel || defaultGetItemLabel }
-							getItemValue={ getItemValue || defaultGetItemValue }
+							getItemLabel={ ( item ) => item?.name || '' }
+							getItemValue={ ( item ) => item?.id || '' }
 							onRemove={ ( item ) => {
 								if (
 									! Array.isArray( item ) &&

@@ -27,8 +27,8 @@ export function useTreeItem( {
 	onRemove,
 	isExpanded,
 	onCreateNew,
+	shouldShowCreateButton,
 	onLastItemLoop,
-	allowCreate,
 	onTreeBlur,
 	...props
 }: TreeItemProps ) {

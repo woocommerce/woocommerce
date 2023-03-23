@@ -4,9 +4,8 @@
 import { Button, Icon } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { createElement, forwardRef, Fragment, useRef } from 'react';
+import { createElement, forwardRef, Fragment } from 'react';
 import { plus } from '@wordpress/icons';
-import { useMergeRefs } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -17,19 +16,16 @@ import { TreeProps } from './types';
 
 export const Tree = forwardRef( function ForwardedTree(
 	props: TreeProps,
-	forwardedRef: React.ForwardedRef< HTMLOListElement >
+	ref: React.ForwardedRef< HTMLOListElement >
 ) {
-	const thisRef = useRef< HTMLOListElement >( null );
-	const ref = useMergeRefs( [ thisRef, forwardedRef ] );
 	const { level, items, treeProps, treeItemProps } = useTree( {
 		...props,
 		ref,
 	} );
 
-	const createValueExists =
-		items.findIndex( ( i ) => i.data.name === props.createValue ) !== -1;
-
-	const isCreateButtonVisible = props.allowCreate && ! createValueExists;
+	const isCreateButtonVisible =
+		props.shouldShowCreateButton &&
+		props.shouldShowCreateButton( props.createValue );
 
 	return (
 		<>
@@ -50,13 +46,11 @@ export const Tree = forwardRef( function ForwardedTree(
 						index={ index }
 						// Button ref is not working, so need to use CSS directly
 						onLastItemLoop={ () => {
-							if ( isCreateButtonVisible ) {
-								(
-									thisRef.current?.parentElement?.querySelector(
-										'.experimental-woocommerce-tree__button'
-									) as HTMLButtonElement
-								 )?.focus();
-							}
+							(
+								document.querySelector(
+									'.experimental-woocommerce-tree__button'
+								) as HTMLButtonElement
+							 )?.focus();
 						} }
 					/>
 				) ) }

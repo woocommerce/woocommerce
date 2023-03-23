@@ -20,9 +20,9 @@ export function useTree( {
 	onRemove,
 	shouldNotRecursivelySelect,
 	createValue,
-	allowCreate,
 	onTreeBlur,
 	onCreateNew,
+	shouldShowCreateButton,
 	...props
 }: TreeProps ) {
 	return {
