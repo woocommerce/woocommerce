@@ -173,7 +173,8 @@ export const SelectionMultiple: React.FC = () => {
 	function handleSelect( values: Item[] ) {
 		setSelected( ( items ) => {
 			const newItems = values.filter(
-				( { value: id } ) => ! items.some( ( item ) => item.value === id )
+				( { value } ) =>
+					! items.some( ( item ) => item.value === value )
 			);
 			return [ ...items, ...newItems ];
 		} );
@@ -182,7 +183,8 @@ export const SelectionMultiple: React.FC = () => {
 	function handleRemove( values: Item[] ) {
 		setSelected( ( items ) =>
 			items.filter(
-				( item ) => ! values.some( ( { value: id } ) => item.value === id )
+				( item ) =>
+					! values.some( ( { value } ) => item.value === value )
 			)
 		);
 	}
