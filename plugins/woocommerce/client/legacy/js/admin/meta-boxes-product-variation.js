@@ -1330,8 +1330,12 @@ jQuery( function ( $ ) {
 			);
 			if ( parseInt( wrapper.attr( 'data-total' ) ) > 0 ) {
 				$( '.add-variation-container' ).hide();
+				$( '#field_to_edit' ).show();
+				$( 'a.do_variation_action' ).show();
 			} else {
 				$( '.add-variation-container' ).show();
+				$( '#field_to_edit' ).hide();
+				$( 'a.do_variation_action' ).hide();
 			}
 		},
 
