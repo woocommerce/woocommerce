@@ -613,12 +613,26 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		foreach ( $order->get_meta_data() as $meta_data ) {
 			if ( isset( $existing_meta_data[ $meta_data->key ] ) ) {
 				if ( $existing_meta_data[ $meta_data->key ] === $meta_data->value ) {
+					unset( $existing_meta_data[ $meta_data->key ] );
 					continue;
 				}
-				delete_post_meta( $order->get_id(), $meta_data->key );
+
 				unset( $existing_meta_data[ $meta_data->key ] );
+				delete_post_meta( $order->get_id(), $meta_data->key );
 			}
 			add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
+		}
+
+		// Find remaining meta that was deleted from the order but still present in the associated post.
+		// Post meta corresponding to order props is excluded (as it shouldn't be deleted).
+		$keys_to_delete = array_diff(
+			array_keys( $existing_meta_data ),
+			$this->internal_meta_keys,
+			array_keys( $this->get_internal_data_store_key_getters() )
+		);
+
+		foreach ( $keys_to_delete as $meta_key ) {
+			delete_post_meta( $order->get_id(), $meta_key );
 		}
 
 		$this->update_post_meta( $order );
