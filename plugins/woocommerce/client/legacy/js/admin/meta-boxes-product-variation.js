@@ -655,6 +655,18 @@ jQuery( function ( $ ) {
 				'a.do_variation_action',
 				this.do_variation_action
 			);
+
+			$( '.wc-metaboxes-wrapper' ).on(
+				'click',
+				'button.generate_variations',
+				this.generate_variations
+			);
+
+			$( '.wc-metaboxes-wrapper' ).on(
+				'click',
+				'button.add_variation_manually',
+				this.add_variation_manually
+			);
 		},
 
 		/**
@@ -972,6 +984,7 @@ jQuery( function ( $ ) {
 						'woocommerce_variations_added',
 						1
 					);
+					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
 					wc_meta_boxes_product_variations_ajax.unblock();
 				}
 			);
@@ -1104,6 +1117,8 @@ jQuery( function ( $ ) {
 							);
 						}
 
+						wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
+
 						if ( count > 0 ) {
 							wc_meta_boxes_product_variations_pagenav.go_to_page(
 								1,
@@ -1173,12 +1188,6 @@ jQuery( function ( $ ) {
 				value;
 
 			switch ( do_variation_action ) {
-				case 'add_variation':
-					wc_meta_boxes_product_variations_ajax.add_variation();
-					return;
-				case 'link_all_variations':
-					wc_meta_boxes_product_variations_ajax.link_all_variations();
-					return;
 				case 'delete_all':
 					if (
 						window.confirm(
@@ -1310,6 +1319,34 @@ jQuery( function ( $ ) {
 					);
 				},
 			} );
+		},
+
+		/**
+		 * Show/hide variation empty state
+		 */
+		show_hide_variation_empty_state: function () {
+			var wrapper = $( '#variable_product_options' ).find(
+				'.woocommerce_variations'
+			);
+			if ( parseInt( wrapper.attr( 'data-total' ) ) > 0 ) {
+				$( '.add-variation-container' ).hide();
+			} else {
+				$( '.add-variation-container' ).show();
+			}
+		},
+
+		/**
+		 * Generate variations
+		 */
+		generate_variations: function () {
+			wc_meta_boxes_product_variations_ajax.link_all_variations();
+		},
+
+		/**
+		 * Add variation
+		 */
+		add_variation_manually: function () {
+			wc_meta_boxes_product_variations_ajax.add_variation();
 		},
 	};
 
@@ -1459,6 +1496,12 @@ jQuery( function ( $ ) {
 					displaying_links.show();
 				}
 			}
+
+			// Show/hide variations empty state
+			setTimeout(
+				wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state,
+				400
+			);
 		},
 
 		/**
