@@ -8,7 +8,7 @@
 	"scripts": {
 		"turbo:build": "grunt assets",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
-		"watch": "nodemon --watch js --watch css -e js,scss --exec pnpm build"
+		"start": "nodemon --watch js --watch css -e js,scss --exec pnpm build"
 	},
 	"devDependencies": {
 		"@wordpress/stylelint-config": "19.1.0",
