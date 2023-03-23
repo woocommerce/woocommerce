@@ -37,7 +37,9 @@ const getFilteredItems = ( items: Item[], searchValue ) => {
 		// The filter should include the parents of the filtered items
 		const element = itemsToIterate.pop();
 		if ( element ) {
-			const parent = listItems.find( ( x ) => x.value === element.parent );
+			const parent = listItems.find(
+				( x ) => x.value === element.parent
+			);
 			if ( parent && ! filteredItems.includes( parent ) ) {
 				filteredItems.push( parent );
 				itemsToIterate.push( parent );
