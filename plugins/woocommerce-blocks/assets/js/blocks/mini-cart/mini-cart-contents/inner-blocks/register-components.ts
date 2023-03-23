@@ -14,6 +14,8 @@ import miniCartProductsTableMetadata from './mini-cart-products-table-block/bloc
 import miniCartFooterMetadata from './mini-cart-footer-block/block.json';
 import miniCartItemsMetadata from './mini-cart-items-block/block.json';
 import miniCartShoppingButtonMetadata from './mini-cart-shopping-button-block/block.json';
+import miniCartCartButtonMetadata from './mini-cart-cart-button-block/block.json';
+import miniCartCheckoutButtonMetadata from './mini-cart-checkout-button-block/block.json';
 
 // Modify webpack publicPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase
@@ -86,6 +88,26 @@ registerCheckoutBlock( {
 		() =>
 			import(
 				/* webpackChunkName: "mini-cart-contents-block/shopping-button" */ './mini-cart-shopping-button-block/block'
+			)
+	),
+} );
+
+registerCheckoutBlock( {
+	metadata: miniCartCartButtonMetadata,
+	component: lazy(
+		() =>
+			import(
+				/* webpackChunkName: "mini-cart-contents-block/cart-button" */ './mini-cart-cart-button-block/block'
+			)
+	),
+} );
+
+registerCheckoutBlock( {
+	metadata: miniCartCheckoutButtonMetadata,
+	component: lazy(
+		() =>
+			import(
+				/* webpackChunkName: "mini-cart-contents-block/checkout-button" */ './mini-cart-checkout-button-block/block'
 			)
 	),
 } );
