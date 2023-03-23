@@ -21,8 +21,7 @@ import { SelectedItems } from '../experimental-select-control/selected-items';
 import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
 
-interface SelectTreeProps
-	extends Omit< TreeControlProps, 'getItemLabel' | 'getItemValue' > {
+interface SelectTreeProps extends TreeControlProps {
 	selected?: Item[];
 	getSelectedItemProps?: any;
 	treeRef?: React.ForwardedRef< HTMLOListElement >;
