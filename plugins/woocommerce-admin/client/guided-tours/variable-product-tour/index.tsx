@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { TourKit } from '@woocommerce/components';
 
 export const VariableProductTour = () => {
-	const [ isTourOpen, setIsTourOpen ] = useState( true );
+	const [ isTourOpen, setIsTourOpen ] = useState( false );
 
 	const config = {
 		steps: [
@@ -34,6 +34,32 @@ export const VariableProductTour = () => {
 		],
 		closeHandler: () => setIsTourOpen( false ),
 	};
+
+	// show the tour when the product type is changed to variable
+	useEffect( () => {
+		const productTypeSelect = document.querySelector(
+			'#product-type'
+		) as HTMLSelectElement;
+
+		if ( ! productTypeSelect ) {
+			return;
+		}
+
+		function handleProductTypeChange() {
+			if ( productTypeSelect.value === 'variable' ) {
+				setIsTourOpen( true );
+			}
+		}
+
+		productTypeSelect.addEventListener( 'change', handleProductTypeChange );
+
+		return () => {
+			productTypeSelect.removeEventListener(
+				'change',
+				handleProductTypeChange
+			);
+		};
+	} );
 
 	if ( ! isTourOpen ) {
 		return null;
