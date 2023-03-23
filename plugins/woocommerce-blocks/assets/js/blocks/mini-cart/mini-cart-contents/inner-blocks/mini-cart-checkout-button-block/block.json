@@ -1,0 +1,30 @@
+{
+	"name": "woocommerce/mini-cart-checkout-button-block",
+	"version": "1.0.0",
+	"title": "Mini Cart Proceed to Checkout Button",
+	"description": "Block that displays the checkout button when the Mini Cart has products.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": true,
+		"color": {
+			"text": true,
+			"background": true
+		}
+	},
+	"attributes": {
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": false,
+				"move": false
+			}
+		}
+	},
+	"parent": [ "woocommerce/mini-cart-footer-block" ],
+	"textdomain": "woo-gutenberg-products-block",
+	"apiVersion": 2
+}

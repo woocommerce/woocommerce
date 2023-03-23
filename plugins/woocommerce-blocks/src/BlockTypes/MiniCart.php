@@ -280,6 +280,8 @@ class MiniCart extends AbstractBlock {
 				'items-frontend',
 				'footer-frontend',
 				'products-table-frontend',
+				'cart-button-frontend',
+				'checkout-button-frontend',
 			);
 		}
 		foreach ( $inner_blocks_frontend_scripts as $inner_block_frontend_script ) {

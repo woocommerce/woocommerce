@@ -3,8 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { TotalsItem } from '@woocommerce/blocks-checkout';
-import EditableButton from '@woocommerce/editor-components/editable-button';
-import { useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	usePaymentMethods,
@@ -15,14 +14,6 @@ import { getIconsFromPaymentMethods } from '@woocommerce/base-utils';
 import { getSetting } from '@woocommerce/settings';
 import { PaymentEventsProvider } from '@woocommerce/base-context';
 
-/**
- * Internal dependencies
- */
-import {
-	defaultCartButtonLabel,
-	defaultCheckoutButtonLabel,
-} from './constants';
-
 const PaymentMethodIconsElement = (): JSX.Element => {
 	const { paymentMethods } = usePaymentMethods();
 	return (
@@ -32,23 +23,18 @@ const PaymentMethodIconsElement = (): JSX.Element => {
 	);
 };
 
-export const Edit = ( {
-	attributes,
-	setAttributes,
-}: {
-	attributes: {
-		cartButtonLabel: string;
-		checkoutButtonLabel: string;
-	};
-	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+export const Edit = (): JSX.Element => {
 	const blockProps = useBlockProps();
-	const { cartButtonLabel, checkoutButtonLabel } = attributes;
 	const { cartTotals } = useStoreCart();
 	const subTotal = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( cartTotals.total_items, 10 ) +
 		  parseInt( cartTotals.total_items_tax, 10 )
 		: parseInt( cartTotals.total_items, 10 );
+
+	const TEMPLATE = [
+		[ 'woocommerce/mini-cart-cart-button-block', {} ],
+		[ 'woocommerce/mini-cart-checkout-button-block', {} ],
+	];
 
 	return (
 		<div { ...blockProps }>
@@ -63,29 +49,7 @@ export const Edit = ( {
 						'woo-gutenberg-products-block'
 					) }
 				/>
-				<div className="wc-block-mini-cart__footer-actions">
-					<EditableButton
-						className="wc-block-mini-cart__footer-cart"
-						variant="outlined"
-						value={ cartButtonLabel }
-						placeholder={ defaultCartButtonLabel }
-						onChange={ ( content ) => {
-							setAttributes( {
-								cartButtonLabel: content,
-							} );
-						} }
-					/>
-					<EditableButton
-						className="wc-block-mini-cart__footer-checkout"
-						value={ checkoutButtonLabel }
-						placeholder={ defaultCheckoutButtonLabel }
-						onChange={ ( content ) => {
-							setAttributes( {
-								checkoutButtonLabel: content,
-							} );
-						} }
-					/>
-				</div>
+				<InnerBlocks template={ TEMPLATE } />
 				<PaymentEventsProvider>
 					<PaymentMethodIconsElement />
 				</PaymentEventsProvider>
@@ -95,5 +59,9 @@ export const Edit = ( {
 };
 
 export const Save = (): JSX.Element => {
-	return <div { ...useBlockProps.save() }></div>;
+	return (
+		<div { ...useBlockProps.save() }>
+			<InnerBlocks.Content />
+		</div>
+	);
 };
