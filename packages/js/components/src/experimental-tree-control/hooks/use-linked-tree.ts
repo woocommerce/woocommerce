@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { Item, LinkedTree } from '../types';
 
 type MemoItems = {
-	[ value: Item[ 'id' ] ]: LinkedTree;
+	[ value: Item[ 'value' ] ]: LinkedTree;
 };
 
 function findChildren(
@@ -26,7 +26,7 @@ function findChildren(
 		} else {
 			others.push( item );
 		}
-		memo[ item.id ] = {
+		memo[ item.value ] = {
 			parent: undefined,
 			data: item,
 			children: [],
@@ -34,9 +34,9 @@ function findChildren(
 	} );
 
 	return children.map( ( child ) => {
-		const linkedTree = memo[ child.id ];
+		const linkedTree = memo[ child.value ];
 		linkedTree.parent = child.parent ? memo[ child.parent ] : undefined;
-		linkedTree.children = findChildren( others, child.id, memo );
+		linkedTree.children = findChildren( others, child.value, memo );
 		return linkedTree;
 	} );
 }

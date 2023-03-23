@@ -11,33 +11,33 @@ import { SelectTree } from '../select-tree';
 import { Item } from '../../experimental-tree-control/types';
 
 const listItems: Item[] = [
-	{ id: '1', name: 'Technology' },
-	{ id: '1.1', name: 'Notebooks', parent: '1' },
-	{ id: '1.2', name: 'Phones', parent: '1' },
-	{ id: '1.2.1', name: 'iPhone', parent: '1.2' },
-	{ id: '1.2.1.1', name: 'iPhone 14 Pro', parent: '1.2.1' },
-	{ id: '1.2.1.2', name: 'iPhone 14 Pro Max', parent: '1.2.1' },
-	{ id: '1.2.2', name: 'Samsung', parent: '1.2' },
-	{ id: '1.2.2.1', name: 'Samsung Galaxy 22 Plus', parent: '1.2.2' },
-	{ id: '1.2.2.2', name: 'Samsung Galaxy 22 Ultra', parent: '1.2.2' },
-	{ id: '1.3', name: 'Wearables', parent: '1' },
-	{ id: '2', name: 'Hardware' },
-	{ id: '2.1', name: 'CPU', parent: '2' },
-	{ id: '2.2', name: 'GPU', parent: '2' },
-	{ id: '2.3', name: 'Memory RAM', parent: '2' },
-	{ id: '3', name: 'Other' },
+	{ value: '1', label: 'Technology' },
+	{ value: '1.1', label: 'Notebooks', parent: '1' },
+	{ value: '1.2', label: 'Phones', parent: '1' },
+	{ value: '1.2.1', label: 'iPhone', parent: '1.2' },
+	{ value: '1.2.1.1', label: 'iPhone 14 Pro', parent: '1.2.1' },
+	{ value: '1.2.1.2', label: 'iPhone 14 Pro Max', parent: '1.2.1' },
+	{ value: '1.2.2', label: 'Samsung', parent: '1.2' },
+	{ value: '1.2.2.1', label: 'Samsung Galaxy 22 Plus', parent: '1.2.2' },
+	{ value: '1.2.2.2', label: 'Samsung Galaxy 22 Ultra', parent: '1.2.2' },
+	{ value: '1.3', label: 'Wearables', parent: '1' },
+	{ value: '2', label: 'Hardware' },
+	{ value: '2.1', label: 'CPU', parent: '2' },
+	{ value: '2.2', label: 'GPU', parent: '2' },
+	{ value: '2.3', label: 'Memory RAM', parent: '2' },
+	{ value: '3', label: 'Other' },
 ];
 
 const getFilteredItems = ( items: Item[], searchValue ) => {
 	const filteredItems = items.filter( ( e ) =>
-		e.name.includes( searchValue )
+		e.label.includes( searchValue )
 	);
 	const itemsToIterate = [ ...filteredItems ];
 	while ( itemsToIterate.length > 0 ) {
 		// The filter should include the parents of the filtered items
 		const element = itemsToIterate.pop();
 		if ( element ) {
-			const parent = listItems.find( ( x ) => x.id === element.parent );
+			const parent = listItems.find( ( x ) => x.value === element.parent );
 			if ( parent && ! filteredItems.includes( parent ) ) {
 				filteredItems.push( parent );
 				itemsToIterate.push( parent );
@@ -62,7 +62,7 @@ export const MultipleSelectTree: React.FC = () => {
 			shouldNotRecursivelySelect
 			shouldShowCreateButton={ ( typedValue ) =>
 				! value ||
-				listItems.findIndex( ( item ) => item.name === typedValue ) ===
+				listItems.findIndex( ( item ) => item.label === typedValue ) ===
 					-1
 			}
 			createValue={ value }
@@ -79,12 +79,12 @@ export const MultipleSelectTree: React.FC = () => {
 					? selected.filter(
 							( item ) =>
 								! removedItems.some(
-									( { id: removedValue } ) =>
-										item.id === removedValue
+									( { value: removedValue } ) =>
+										item.value === removedValue
 								)
 					  )
 					: selected.filter(
-							( item ) => item.id !== removedItems.id
+							( item ) => item.value !== removedItems.value
 					  );
 				setSelected( newValues );
 			} }

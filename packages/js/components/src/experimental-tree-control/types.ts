@@ -1,7 +1,7 @@
 export interface Item {
 	parent?: string;
-	id: string;
-	name: string;
+	value: string;
+	label: string;
 }
 
 export interface LinkedTree {

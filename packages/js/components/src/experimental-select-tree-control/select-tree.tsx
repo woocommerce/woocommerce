@@ -58,7 +58,7 @@ export const SelectTree = function SelectTree( {
 		return item.children.some( ( child ) => {
 			if (
 				new RegExp( props.createValue || '', 'ig' ).test(
-					child.data.name
+					child.data.label
 				)
 			) {
 				return true;
@@ -177,8 +177,8 @@ export const SelectTree = function SelectTree( {
 					>
 						<SelectedItems
 							items={ ( props.selected as Item[] ) || [] }
-							getItemLabel={ ( item ) => item?.name || '' }
-							getItemValue={ ( item ) => item?.id || '' }
+							getItemLabel={ ( item ) => item?.label || '' }
+							getItemValue={ ( item ) => item?.value || '' }
 							onRemove={ ( item ) => {
 								if (
 									! Array.isArray( item ) &&

@@ -29,15 +29,15 @@ function isIndeterminate(
 ): boolean {
 	if ( children?.length ) {
 		for ( const child of children ) {
-			if ( child.data.id in indeterminateMemo ) {
+			if ( child.data.value in indeterminateMemo ) {
 				return true;
 			}
-			const isChildSelected = child.data.id in selectedItems;
+			const isChildSelected = child.data.value in selectedItems;
 			if (
 				! isChildSelected ||
 				isIndeterminate( selectedItems, child.children, memo )
 			) {
-				indeterminateMemo[ child.data.id ] = true;
+				indeterminateMemo[ child.data.value ] = true;
 				return true;
 			}
 		}
@@ -52,7 +52,7 @@ function mapSelectedItems(
 	return selectedArray.reduce(
 		( map, selectedItem, index ) => ( {
 			...map,
-			[ selectedItem.id ]: index,
+			[ selectedItem.value ]: index,
 		} ),
 		{} as Record< string, number >
 	);
@@ -64,10 +64,10 @@ function hasSelectedSibblingChildren(
 	selectedItems: Record< string, number >
 ) {
 	return children.some( ( child ) => {
-		const isChildSelected = child.data.id in selectedItems;
+		const isChildSelected = child.data.value in selectedItems;
 		if ( ! isChildSelected ) return false;
 		return ! values.some(
-			( childValue ) => childValue.id === child.data.id
+			( childValue ) => childValue.value === child.data.value
 		);
 	} );
 }
@@ -101,7 +101,7 @@ export function useSelection( {
 	}, [ selected, level, index ] );
 
 	const checkedStatus: CheckedStatus = useMemo( () => {
-		if ( item.data.id in selectedItems ) {
+		if ( item.data.value in selectedItems ) {
 			if (
 				multiple &&
 				! shouldNotRecursivelySelect &&

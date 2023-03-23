@@ -74,7 +74,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 					{ typeof getLabel === 'function' ? (
 						getLabel( item )
 					) : (
-						<span>{ item.data.name }</span>
+						<span>{ item.data.label }</span>
 					) }
 				</label>
 

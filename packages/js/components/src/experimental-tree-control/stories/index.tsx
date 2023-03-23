@@ -13,21 +13,21 @@ import { Item, LinkedTree } from '../types';
 import '../tree.scss';
 
 const listItems: Item[] = [
-	{ id: '1', name: 'Technology' },
-	{ id: '1.1', name: 'Notebooks', parent: '1' },
-	{ id: '1.2', name: 'Phones', parent: '1' },
-	{ id: '1.2.1', name: 'iPhone', parent: '1.2' },
-	{ id: '1.2.1.1', name: 'iPhone 14 Pro', parent: '1.2.1' },
-	{ id: '1.2.1.2', name: 'iPhone 14 Pro Max', parent: '1.2.1' },
-	{ id: '1.2.2', name: 'Samsung', parent: '1.2' },
-	{ id: '1.2.2.1', name: 'Samsung Galaxy 22 Plus', parent: '1.2.2' },
-	{ id: '1.2.2.2', name: 'Samsung Galaxy 22 Ultra', parent: '1.2.2' },
-	{ id: '1.3', name: 'Wearables', parent: '1' },
-	{ id: '2', name: 'Hardware' },
-	{ id: '2.1', name: 'CPU', parent: '2' },
-	{ id: '2.2', name: 'GPU', parent: '2' },
-	{ id: '2.3', name: 'Memory RAM', parent: '2' },
-	{ id: '3', name: 'Other' },
+	{ value: '1', label: 'Technology' },
+	{ value: '1.1', label: 'Notebooks', parent: '1' },
+	{ value: '1.2', label: 'Phones', parent: '1' },
+	{ value: '1.2.1', label: 'iPhone', parent: '1.2' },
+	{ value: '1.2.1.1', label: 'iPhone 14 Pro', parent: '1.2.1' },
+	{ value: '1.2.1.2', label: 'iPhone 14 Pro Max', parent: '1.2.1' },
+	{ value: '1.2.2', label: 'Samsung', parent: '1.2' },
+	{ value: '1.2.2.1', label: 'Samsung Galaxy 22 Plus', parent: '1.2.2' },
+	{ value: '1.2.2.2', label: 'Samsung Galaxy 22 Ultra', parent: '1.2.2' },
+	{ value: '1.3', label: 'Wearables', parent: '1' },
+	{ value: '2', label: 'Hardware' },
+	{ value: '2.1', label: 'CPU', parent: '2' },
+	{ value: '2.2', label: 'GPU', parent: '2' },
+	{ value: '2.3', label: 'Memory RAM', parent: '2' },
+	{ value: '3', label: 'Other' },
 ];
 
 export const SimpleTree: React.FC = () => {
@@ -41,7 +41,7 @@ export const SimpleTree: React.FC = () => {
 function shouldItemBeExpanded( item: LinkedTree, filter: string ) {
 	if ( ! filter || ! item.children?.length ) return false;
 	return item.children.some( ( child ) => {
-		if ( new RegExp( filter, 'ig' ).test( child.data.name ) ) {
+		if ( new RegExp( filter, 'ig' ).test( child.data.label ) ) {
 			return true;
 		}
 		return shouldItemBeExpanded( child, filter );
@@ -85,7 +85,7 @@ export const CustomItemLabel: React.FC = () => {
 						flexDirection: 'column',
 					} }
 				>
-					<strong>{ item.data.name }</strong>
+					<strong>{ item.data.label }</strong>
 					<small>Some item description</small>
 				</div>
 			</div>
@@ -108,7 +108,7 @@ function getItemLabel( item: LinkedTree, text: string ) {
 		<span>
 			{ text
 				? interpolate( {
-						mixedString: item.data.name.replace(
+						mixedString: item.data.label.replace(
 							new RegExp( text, 'ig' ),
 							( group ) => `{{bold}}${ group }{{/bold}}`
 						),
@@ -116,7 +116,7 @@ function getItemLabel( item: LinkedTree, text: string ) {
 							bold: <b />,
 						},
 				  } )
-				: item.data.name }
+				: item.data.label }
 		</span>
 	);
 }
@@ -173,7 +173,7 @@ export const SelectionMultiple: React.FC = () => {
 	function handleSelect( values: Item[] ) {
 		setSelected( ( items ) => {
 			const newItems = values.filter(
-				( { id } ) => ! items.some( ( item ) => item.id === id )
+				( { value: id } ) => ! items.some( ( item ) => item.value === id )
 			);
 			return [ ...items, ...newItems ];
 		} );
@@ -182,7 +182,7 @@ export const SelectionMultiple: React.FC = () => {
 	function handleRemove( values: Item[] ) {
 		setSelected( ( items ) =>
 			items.filter(
-				( item ) => ! values.some( ( { id } ) => item.id === id )
+				( item ) => ! values.some( ( { value: id } ) => item.value === id )
 			)
 		);
 	}
@@ -211,12 +211,12 @@ function getFirstMatchingItem(
 	memo: Record< string, string >
 ) {
 	if ( ! text ) return false;
-	if ( memo[ text ] === item.data.id ) return true;
+	if ( memo[ text ] === item.data.value ) return true;
 
 	const matcher = new RegExp( text, 'ig' );
-	if ( matcher.test( item.data.name ) ) {
+	if ( matcher.test( item.data.label ) ) {
 		if ( ! memo[ text ] ) {
-			memo[ text ] = item.data.id;
+			memo[ text ] = item.data.value;
 			return true;
 		}
 	}

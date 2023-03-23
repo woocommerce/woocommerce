@@ -41,7 +41,7 @@ export const Tree = forwardRef( function ForwardedTree(
 					<TreeItem
 						{ ...treeItemProps }
 						isExpanded={ props.isExpanded }
-						key={ child.data.id }
+						key={ child.data.value }
 						item={ child }
 						index={ index }
 						// Button ref is not working, so need to use CSS directly
