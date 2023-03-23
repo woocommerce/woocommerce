@@ -34,11 +34,6 @@ const withSidebarNotices = createHigherOrderComponent(
 	( BlockEdit ) => ( props ) => {
 		const { name: blockName, isSelected: isBlockSelected } = props;
 
-		// Show sidebar notices only when a WooCommerce block is selected.
-		if ( ! blockName.startsWith( 'woocommerce/' ) || ! isBlockSelected ) {
-			return <BlockEdit key="edit" { ...props } />;
-		}
-
 		const [
 			isIncompatiblePaymentGatewaysNoticeDismissed,
 			setIsIncompatiblePaymentGatewaysNoticeDismissed,
@@ -89,6 +84,11 @@ const withSidebarNotices = createHigherOrderComponent(
 				) }
 			</>
 		);
+
+		// Show sidebar notices only when a WooCommerce block is selected.
+		if ( ! blockName.startsWith( 'woocommerce/' ) || ! isBlockSelected ) {
+			return <BlockEdit key="edit" { ...props } />;
+		}
 
 		return (
 			<>
