@@ -181,7 +181,7 @@ export function getStoreTimeZoneMoment() {
 		return moment().utcOffset( window.wcSettings.timeZone );
 	}
 
-	return momentTz().tz( window.wcSettings.timeZone );
+	return ( moment() as momentTz.Moment ).tz( window.wcSettings.timeZone );
 }
 
 /**
