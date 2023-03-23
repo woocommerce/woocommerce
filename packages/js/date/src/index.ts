@@ -2,7 +2,7 @@
  * External dependencies
  */
 import moment from 'moment';
-import 'moment-timezone';
+import momentTz from 'moment-timezone';
 import { find, memoize } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { parse } from 'qs';
@@ -181,7 +181,7 @@ export function getStoreTimeZoneMoment() {
 		return moment().utcOffset( window.wcSettings.timeZone );
 	}
 
-	return moment().tz( window.wcSettings.timeZone );
+	return momentTz().tz( window.wcSettings.timeZone );
 }
 
 /**
