@@ -52,7 +52,7 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 		'core/heading',
 		{
 			level: 2,
-			content: __( 'Related products.', 'woo-gutenberg-products-block' ),
+			content: __( 'Related products', 'woo-gutenberg-products-block' ),
 		},
 	],
 	[
