@@ -95,9 +95,9 @@ $arrow_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-arrow.
 			<?php /* phpcs:enable */ ?>
 
 			<div class="toolbar toolbar-top">
-				<select id="field_to_edit" class="variation_actions">
-					<option data-global="true" value="add_variation"><?php esc_html_e( 'Add variation', 'woocommerce' ); ?></option>
-					<option data-global="true" value="link_all_variations"><?php esc_html_e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
+				<button type="button" class="button generate_variations"><?php esc_html_e( 'Generate variations', 'woocommerce' ); ?></button>
+				<button type="button" class="button add_variation_manually"><?php esc_html_e( 'Add manually', 'woocommerce' ); ?></button>
+				<select id="field_to_edit" class="variation_actions hidden">
 					<option value="delete_all"><?php esc_html_e( 'Delete all variations', 'woocommerce' ); ?></option>
 					<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
 						<option value="toggle_enabled"><?php esc_html_e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
@@ -135,7 +135,7 @@ $arrow_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-arrow.
 					<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
 					<?php /* phpcs:enable */ ?>
 				</select>
-				<a class="button bulk_edit do_variation_action"><?php esc_html_e( 'Go', 'woocommerce' ); ?></a>
+				<a class="button bulk_edit do_variation_action hidden"><?php esc_html_e( 'Go', 'woocommerce' ); ?></a>
 
 				<div class="variations-pagenav">
 					<?php /* translators: variations count */ ?>
