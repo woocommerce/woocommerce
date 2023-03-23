@@ -6,6 +6,8 @@ inputs:
     report-name:
         description: Name of Allure report to be generated.
         required: true
+    tests:
+        description: Specific tests to run, separated by single whitespace. See https://playwright.dev/docs/test-cli
 
 runs:
     using: composite
@@ -14,11 +16,10 @@ runs:
           id: run-api-tests
           working-directory: plugins/woocommerce
           shell: bash
-          env:
-              BASE_URL: http://localhost:8086
-              USER_KEY: admin
-              USER_SECRET: password
-          run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
+          run: |
+              pnpm exec playwright test \
+              --config=tests/api-core-tests/playwright.config.js \
+              ${{ inputs.tests }}
 
         - name: Generate Test report.
           if: success() || ( failure() && steps.run-api-tests.conclusion == 'failure' )
