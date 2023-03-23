@@ -159,16 +159,8 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		// delete all variations
 		await page.click( 'a[href="#variable_product_options"]' );
-		await Promise.all( [
-			page.waitForResponse(
-				( resp ) =>
-					resp.url().includes( 'admin-ajax.php' ) &&
-					resp.status() === 200
-			),
-			page.selectOption( '#field_to_edit', 'delete_all', {
-				force: true,
-			} ),
-		] );
+		await page.waitForLoadState( 'networkidle' );
+		await page.selectOption( '#field_to_edit', 'delete_all' );
 		await page.click( 'a.do_variation_action' );
 		await page.waitForSelector( '.woocommerce_variation', {
 			state: 'detached',
@@ -278,7 +270,7 @@ test.describe( 'Add New Variable Product Page', () => {
 				defaultAttributes[ i ]
 			);
 		}
-		await page.click( 'button.save-variation-changes', { force: true } );
+		await page.click( 'button.save-variation-changes' );
 		await page.waitForSelector( 'input#variable_low_stock_amount0', {
 			state: 'hidden',
 		} );
@@ -297,8 +289,6 @@ test.describe( 'Add New Variable Product Page', () => {
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await page.hover( '.woocommerce_variation' );
 		await page.click( '.remove_variation.delete' );
-		await expect( page.locator( '.woocommerce_variation' ) ).toHaveCount(
-			0
-		);
+		await expect( page.locator( '.woocommerce_variation' ) ).toHaveCount( 0 );
 	} );
 } );
