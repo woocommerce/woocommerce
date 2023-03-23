@@ -1,33 +1,16 @@
 /**
  * External dependencies
  */
-import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { TourKit } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-
-const VARIABLE_PRODUCT_TOUR_OPTION = 'woocommerce_variable_product_tour_shown';
-
-function useHasShownVariableProductTour(): undefined | boolean {
-	const { hasShownTour } = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
-
-		return {
-			hasShownTour: getOption( VARIABLE_PRODUCT_TOUR_OPTION ) as
-				| boolean
-				| undefined,
-		};
-	} );
-
-	return hasShownTour;
-}
+import { useUserPreferences } from '@woocommerce/data';
 
 export const VariableProductTour = () => {
-	const hasShownTour = useHasShownVariableProductTour();
 	const [ isTourOpen, setIsTourOpen ] = useState( false );
 
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateUserPreferences, variable_product_tour_shown: hasShownTour } =
+		useUserPreferences();
 
 	const config = {
 		steps: [
@@ -54,7 +37,7 @@ export const VariableProductTour = () => {
 			},
 		],
 		closeHandler: () => {
-			updateOptions( { [ VARIABLE_PRODUCT_TOUR_OPTION ]: true } );
+			updateUserPreferences( { variable_product_tour_shown: 'yes' } );
 			setIsTourOpen( false );
 		},
 	};
@@ -65,7 +48,7 @@ export const VariableProductTour = () => {
 			'#product-type'
 		) as HTMLSelectElement;
 
-		if ( hasShownTour || ! productTypeSelect ) {
+		if ( hasShownTour === 'yes' || ! productTypeSelect ) {
 			return;
 		}
 
