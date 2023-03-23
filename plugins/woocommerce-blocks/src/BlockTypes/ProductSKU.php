@@ -55,14 +55,22 @@ class ProductSKU extends AbstractBlock {
 		$post_id = $block->context['postId'];
 		$product = wc_get_product( $post_id );
 
-		if ( $product ) {
-			return sprintf(
-				'<div class="wc-block-components-product-sku wc-block-grid__product-sku">
-					SKU:
-					<strong>%s</strong>
-				</div>',
-				$product->get_sku()
-			);
+		if ( ! $product ) {
+			return '';
 		}
+
+		$product_sku = $product->get_sku();
+
+		if ( ! $product_sku ) {
+			return '';
+		}
+
+		return sprintf(
+			'<div class="wc-block-components-product-sku wc-block-grid__product-sku">
+				SKU:
+				<strong>%s</strong>
+			</div>',
+			$product_sku
+		);
 	}
 }
