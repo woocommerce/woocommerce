@@ -1551,14 +1551,14 @@ importers:
       rimraf: 3.0.2
       sass-loader: 10.2.1_webpack@5.70.0
 <<<<<<< HEAD
+<<<<<<< HEAD
       ts-jest: 27.1.3_kf3ytuxcuctivbjasfbyoij3w4
       typescript: 4.9.5
 =======
 <<<<<<< HEAD
-      ts-jest: 27.1.3_n6jwe674nt3ravnkwja2moplpy
 =======
-      ts-jest: 27.1.3_hszvtzkxfg7axc55y33g3o6iwa
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
+      ts-jest: 27.1.3_n6jwe674nt3ravnkwja2moplpy
       typescript: 4.8.4
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
       webpack: 5.70.0_webpack-cli@3.3.12
@@ -2935,19 +2935,7 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/types': 7.21.3
-<<<<<<< HEAD
-=======
       '@jridgewell/gen-mapping': 0.3.2
-      jsesc: 2.5.2
-
-  /@babel/generator/7.21.3:
-    resolution: {integrity: sha512-QS3iR1GYC/YGUnW7IdggFeN5c1poPUurnGttOV/bZgPGV+izC/D8HnD6DLwod0fsatNyVn1G3EVWMYIF0nHbeA==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/types': 7.21.3
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
-      '@jridgewell/gen-mapping': 0.3.2
-      '@jridgewell/trace-mapping': 0.3.17
       jsesc: 2.5.2
 
   /@babel/generator/7.21.3:
@@ -2972,6 +2960,7 @@ packages:
     dependencies:
       '@babel/types': 7.21.3
 <<<<<<< HEAD
+<<<<<<< HEAD
     dev: true
 =======
 <<<<<<< HEAD
@@ -2979,6 +2968,9 @@ packages:
     dev: true
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+    dev: true
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
 
   /@babel/helper-annotate-as-pure/7.18.6:
     resolution: {integrity: sha512-duORpUiYrEpzKIop6iNbjnwKLAKnJ47csTyRACyEmWj0QdUrm5aqNJGHSSEQSUAvNW0ojX0dOmK9dZduvkfeXA==}
@@ -3015,11 +3007,7 @@ packages:
     dependencies:
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
       '@babel/compat-data': 7.21.0
-<<<<<<< HEAD
-      '@babel/core': 7.12.9
-=======
       '@babel/core': 7.21.3
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-validator-option': 7.18.6
       browserslist: 4.19.3
       semver: 6.3.0
@@ -3034,11 +3022,7 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/compat-data': 7.21.0
-<<<<<<< HEAD
-      '@babel/core': 7.16.12
-=======
       '@babel/core': 7.17.8
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-validator-option': 7.18.6
       browserslist: 4.21.4
       semver: 6.3.0
@@ -3050,59 +3034,21 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/compat-data': 7.21.0
-<<<<<<< HEAD
-      '@babel/core': 7.17.8
-=======
       '@babel/core': 7.12.9
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-validator-option': 7.18.6
       browserslist: 4.21.4
       lru-cache: 5.1.1
       semver: 6.3.0
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
 
-<<<<<<< HEAD
-  /@babel/helper-compilation-targets/7.17.7_@babel+core@7.21.3:
-    resolution: {integrity: sha512-UFzlz2jjd8kroj0hmCFV5zr+tQPi1dpC2cRsDV/3IEW8bJfCPrPpmcSN6ZS8RqIq4LXcmpipCQFPddyFA5Yc7w==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-    dependencies:
-      '@babel/compat-data': 7.21.0
-      '@babel/core': 7.21.3
-      '@babel/helper-validator-option': 7.18.6
-      browserslist: 4.19.3
-      semver: 6.3.0
-    dev: true
-
-  /@babel/helper-compilation-targets/7.19.3_@babel+core@7.17.8:
-    resolution: {integrity: sha512-65ESqLGyGmLvgR0mst5AdW1FkNlj9rQsCKduzEoEPhBCDFGXvz2jW6bXFG6i0/MrV2s7hhXjjb2yAzcPuQlLwg==}
-=======
   /@babel/helper-compilation-targets/7.20.7_@babel+core@7.16.12:
     resolution: {integrity: sha512-4tGORmfQcrc+bvrjb5y3dG9Mx1IOZjsHqQVUz7XCNHO+iTmqxWnVg3KRygjGmpRLJGdQSKuvFinbIb0CnZwHAQ==}
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/compat-data': 7.21.0
-<<<<<<< HEAD
-      '@babel/core': 7.17.8
-      '@babel/helper-validator-option': 7.18.6
-      browserslist: 4.21.4
-      semver: 6.3.0
-
-  /@babel/helper-compilation-targets/7.20.7_@babel+core@7.12.9:
-    resolution: {integrity: sha512-4tGORmfQcrc+bvrjb5y3dG9Mx1IOZjsHqQVUz7XCNHO+iTmqxWnVg3KRygjGmpRLJGdQSKuvFinbIb0CnZwHAQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-    dependencies:
-      '@babel/compat-data': 7.21.0
-      '@babel/core': 7.12.9
-=======
       '@babel/core': 7.16.12
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-validator-option': 7.18.6
       browserslist: 4.21.4
       lru-cache: 5.1.1
@@ -3110,66 +3056,45 @@ packages:
     dev: false
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
   /@babel/helper-compilation-targets/7.20.7_@babel+core@7.16.12:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/helper-compilation-targets/7.20.7_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-4tGORmfQcrc+bvrjb5y3dG9Mx1IOZjsHqQVUz7XCNHO+iTmqxWnVg3KRygjGmpRLJGdQSKuvFinbIb0CnZwHAQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/compat-data': 7.21.0
-<<<<<<< HEAD
-      '@babel/core': 7.16.12
-=======
       '@babel/core': 7.17.8
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-validator-option': 7.18.6
       browserslist: 4.21.4
       lru-cache: 5.1.1
       semver: 6.3.0
     dev: true
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
   /@babel/helper-compilation-targets/7.20.7_@babel+core@7.17.8:
 =======
-  /@babel/helper-compilation-targets/7.20.7_@babel+core@7.21.3:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
-    resolution: {integrity: sha512-4tGORmfQcrc+bvrjb5y3dG9Mx1IOZjsHqQVUz7XCNHO+iTmqxWnVg3KRygjGmpRLJGdQSKuvFinbIb0CnZwHAQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-    dependencies:
-      '@babel/compat-data': 7.21.0
-<<<<<<< HEAD
-      '@babel/core': 7.17.8
-      '@babel/helper-validator-option': 7.18.6
-      browserslist: 4.21.4
-      lru-cache: 5.1.1
-      semver: 6.3.0
-    dev: true
-
-  /@babel/helper-compilation-targets/7.20.7_@babel+core@7.21.3:
-    resolution: {integrity: sha512-4tGORmfQcrc+bvrjb5y3dG9Mx1IOZjsHqQVUz7XCNHO+iTmqxWnVg3KRygjGmpRLJGdQSKuvFinbIb0CnZwHAQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-    dependencies:
-      '@babel/compat-data': 7.21.0
-      '@babel/core': 7.21.3
-      '@babel/helper-validator-option': 7.18.6
-      browserslist: 4.21.4
-      lru-cache: 5.1.1
 =======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
+  /@babel/helper-compilation-targets/7.20.7_@babel+core@7.21.3:
+    resolution: {integrity: sha512-4tGORmfQcrc+bvrjb5y3dG9Mx1IOZjsHqQVUz7XCNHO+iTmqxWnVg3KRygjGmpRLJGdQSKuvFinbIb0CnZwHAQ==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+    dependencies:
+      '@babel/compat-data': 7.21.0
       '@babel/core': 7.21.3
       '@babel/helper-validator-option': 7.18.6
       browserslist: 4.21.4
       lru-cache: 5.1.1
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       semver: 6.3.0
 
   /@babel/helper-create-class-features-plugin/7.17.6_@babel+core@7.17.8:
@@ -3221,6 +3146,7 @@ packages:
       '@babel/helper-environment-visitor': 7.18.9
       '@babel/helper-function-name': 7.21.0
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/helper-member-expression-to-functions': 7.21.0
 =======
 <<<<<<< HEAD
@@ -3247,6 +3173,8 @@ packages:
 =======
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/helper-member-expression-to-functions': 7.18.9
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-optimise-call-expression': 7.18.6
@@ -3254,7 +3182,6 @@ packages:
       '@babel/helper-split-export-declaration': 7.18.6
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /@babel/helper-create-class-features-plugin/7.19.0_@babel+core@7.16.12:
     resolution: {integrity: sha512-NRz8DwF4jT3UfrmUoZjd0Uph9HQnP30t7Ash+weACcyNkiYTywpIjDBgReJMKgr+n86sn2nPVVmJ28Dm053Kqw==}
@@ -3306,6 +3233,7 @@ packages:
       '@babel/helper-environment-visitor': 7.18.9
       '@babel/helper-function-name': 7.21.0
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/helper-member-expression-to-functions': 7.21.0
 =======
 <<<<<<< HEAD
@@ -3332,6 +3260,8 @@ packages:
 =======
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/helper-member-expression-to-functions': 7.18.9
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-optimise-call-expression': 7.18.6
@@ -3501,6 +3431,7 @@ packages:
     dependencies:
       '@babel/types': 7.21.3
 <<<<<<< HEAD
+<<<<<<< HEAD
     dev: true
 =======
 <<<<<<< HEAD
@@ -3508,6 +3439,9 @@ packages:
     dev: true
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+    dev: true
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
 
   /@babel/helper-module-imports/7.18.6:
     resolution: {integrity: sha512-0NFvs3VkuSYbFi1x2Vd6tKrywq+z/cLeYC/RJNFrIX/30Bf5aiGYbtvGXolEktzJH8o5E5KJ3tT+nkxuuZFVlA==}
@@ -3771,16 +3705,6 @@ packages:
     hasBin: true
     dependencies:
       '@babel/types': 7.21.3
-<<<<<<< HEAD
-
-  /@babel/parser/7.21.3:
-    resolution: {integrity: sha512-lobG0d7aOfQRXh8AyklEAgZGvA4FShxo6xQbUrrT/cNBPUdIDojlokwJsQyCC/eKia7ifqM0yP+2DRZ4WKw2RQ==}
-    engines: {node: '>=6.0.0'}
-    hasBin: true
-    dependencies:
-      '@babel/types': 7.21.3
-=======
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 
 <<<<<<< HEAD
 =======
@@ -3840,6 +3764,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression/7.18.6_@babel+core@7.17.8:
     resolution: {integrity: sha512-Dgxsyg54Fx1d4Nge8UnvTrED63vrwOdPmyvPzlNN/boaliRP54pm3pGzZD1SJUwrBA+Cs/xdG8kXX6Mn/RfISQ==}
 =======
@@ -3857,6 +3782,8 @@ packages:
 
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression/7.18.6_@babel+core@7.21.3:
     resolution: {integrity: sha512-Dgxsyg54Fx1d4Nge8UnvTrED63vrwOdPmyvPzlNN/boaliRP54pm3pGzZD1SJUwrBA+Cs/xdG8kXX6Mn/RfISQ==}
     engines: {node: '>=6.9.0'}
@@ -3923,6 +3850,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
   /@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining/7.16.7_@babel+core@7.21.3:
@@ -3940,6 +3868,8 @@ packages:
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining/7.18.9_@babel+core@7.21.3:
     resolution: {integrity: sha512-AHrP9jadvH7qlOj6PINbgSuphjQUAK7AOT7DPjBo9EHoLhQTnnK5u45e1Hd4DbSQEO9nqPWtQ89r+XEOWFScKg==}
     engines: {node: '>=6.9.0'}
@@ -4030,6 +3960,7 @@ packages:
     dev: false
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-proposal-async-generator-functions/7.20.7_@babel+core@7.12.9:
     resolution: {integrity: sha512-xMbiLsn/8RK7Wq7VeVytytS2L6qE69bXPB10YCmMdDZbKF4okCqY74pI/jJQ/8U0b/F6NrT2+14b8/P9/3AMGA==}
 =======
@@ -4055,8 +3986,9 @@ packages:
 =======
   /@babel/plugin-proposal-async-generator-functions/7.19.1_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-async-generator-functions/7.19.1_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-0yu8vNATgLy4ivqMNBIwb1HebCelqN7YX8SL3FDXORv/RqT0zEEWUCH4GH44JsSrvCu6GqnAdR5EBFAPeNBB4Q==}
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
     engines: {node: '>=6.9.0'}
@@ -4110,15 +4042,9 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.12.9
-      '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.12.9
-      '@babel/helper-plugin-utils': 7.19.0
-=======
       '@babel/core': 7.17.8
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.17.8
       '@babel/helper-plugin-utils': 7.18.9
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     transitivePeerDependencies:
       - supports-color
 
@@ -4128,13 +4054,8 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.16.12
-      '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.16.12
-=======
       '@babel/core': 7.21.3
-      '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.21.3
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+      '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.21.3
       '@babel/helper-plugin-utils': 7.19.0
     transitivePeerDependencies:
       - supports-color
@@ -4154,6 +4075,7 @@ packages:
       - supports-color
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-proposal-class-properties/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-IobU0Xme31ewjYOShSIqd/ZGM/r/cuOz2z0MDbNrhF5FW+ZVgi0f2lyeoj9KFPDOAqsYxmLWZte1WOwlvY9aww==}
     engines: {node: '>=6.9.0'}
@@ -4169,8 +4091,9 @@ packages:
 
   /@babel/plugin-proposal-class-properties/7.18.6_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-class-properties/7.18.6_@babel+core@7.16.12:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-cumfXOF0+nzZrrN8Rf0t7M+tF6sZc7vhQwYQck9q1/5w2OExlD+b4v4RpMJFaV1Z7WcDRgO6FqvxqxGlwo+RHQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -4197,7 +4120,11 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.17.8
+<<<<<<< HEAD
       '@babel/helper-plugin-utils': 7.20.2
+=======
+      '@babel/helper-plugin-utils': 7.19.0
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4284,6 +4211,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-proposal-class-static-block/7.18.6_@babel+core@7.17.8:
     resolution: {integrity: sha512-+I3oIiNxrCpup3Gi8n5IGMwj0gOCAjcJUSQEcotNnCCPMEnixawOQ+KeJPlgfjzx+FKQ1QSyZOWe7wmoJp7vhw==}
 =======
@@ -4305,6 +4233,8 @@ packages:
 
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-class-static-block/7.18.6_@babel+core@7.21.3:
     resolution: {integrity: sha512-+I3oIiNxrCpup3Gi8n5IGMwj0gOCAjcJUSQEcotNnCCPMEnixawOQ+KeJPlgfjzx+FKQ1QSyZOWe7wmoJp7vhw==}
     engines: {node: '>=6.9.0'}
@@ -4409,6 +4339,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
   /@babel/plugin-proposal-dynamic-import/7.16.7_@babel+core@7.21.3:
@@ -4425,6 +4356,8 @@ packages:
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-dynamic-import/7.18.6_@babel+core@7.21.3:
     resolution: {integrity: sha512-1auuwmK+Rz13SJj36R+jqFPMJWyKEDd7lLSdOj4oJK0UTgGueSAtkrCvz9ewmgyU/P941Rv2fQwZJN8s6QruXw==}
     engines: {node: '>=6.9.0'}
@@ -4529,6 +4462,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
   /@babel/plugin-proposal-export-namespace-from/7.16.7_@babel+core@7.21.3:
@@ -4545,6 +4479,8 @@ packages:
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-export-namespace-from/7.18.9_@babel+core@7.21.3:
     resolution: {integrity: sha512-k1NtHyOMvlDDFeb9G5PhUXuGj8m/wiwojgQVEhJ/fsVsMCpLyOP4h0uGEjYJKrRI+EVPlb5Jk+Gt9P97lOGwtA==}
     engines: {node: '>=6.9.0'}
@@ -4618,6 +4554,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
   /@babel/plugin-proposal-json-strings/7.16.7_@babel+core@7.21.3:
@@ -4634,6 +4571,8 @@ packages:
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-json-strings/7.18.6_@babel+core@7.21.3:
     resolution: {integrity: sha512-lr1peyn9kOdbYc0xr0OdHTZ5FMqS6Di+H0Fz2I/JwMzGmzJETNeOFq2pBySw6X/KFL5EWDjlJuMsUGRFb8fQgQ==}
     engines: {node: '>=6.9.0'}
@@ -4707,6 +4646,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
   /@babel/plugin-proposal-logical-assignment-operators/7.16.7_@babel+core@7.21.3:
@@ -4723,6 +4663,8 @@ packages:
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-logical-assignment-operators/7.18.9_@babel+core@7.21.3:
     resolution: {integrity: sha512-128YbMpjCrP35IOExw2Fq+x55LMP42DzhOhX2aNNIdI9avSWl2PI0yuBWarr3RYpZBSPtabfadkH2yeRiMD61Q==}
     engines: {node: '>=6.9.0'}
@@ -4784,6 +4726,7 @@ packages:
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-proposal-nullish-coalescing-operator/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-aUOrYU3EVtjf62jQrCj63pYZ7k6vns2h/DQvHPWGmsJRYzWXZ6/AsfgpiRy6XiuIDADhJzP2Q9MwSMKauBQ+UQ==}
     engines: {node: '>=6.9.0'}
@@ -4797,8 +4740,9 @@ packages:
 
   /@babel/plugin-proposal-nullish-coalescing-operator/7.18.6_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-nullish-coalescing-operator/7.18.6_@babel+core@7.16.12:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-wQxQzxYeJqHcfppzBDnm1yAY0jSRkUXR2z8RePZYrKwMKgMlE8+Z6LUno+bd6LvbGh8Gltvy74+9pIYkr+XkKA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -4826,19 +4770,21 @@ packages:
       '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3_@babel+core@7.17.8
     dev: true
 
-  /@babel/plugin-proposal-nullish-coalescing-operator/7.18.6_@babel+core@7.21.3:
+  /@babel/plugin-proposal-nullish-coalescing-operator/7.18.6_@babel+core@7.17.8:
     resolution: {integrity: sha512-wQxQzxYeJqHcfppzBDnm1yAY0jSRkUXR2z8RePZYrKwMKgMlE8+Z6LUno+bd6LvbGh8Gltvy74+9pIYkr+XkKA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
       '@babel/core': 7.21.3
 <<<<<<< HEAD
       '@babel/helper-plugin-utils': 7.20.2
 =======
-      '@babel/helper-plugin-utils': 7.19.0
-<<<<<<< HEAD
 =======
+      '@babel/core': 7.17.8
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
+      '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3_@babel+core@7.17.8
     dev: true
 
@@ -4850,8 +4796,11 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-plugin-utils': 7.19.0
+<<<<<<< HEAD
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3_@babel+core@7.21.3
 
   /@babel/plugin-proposal-numeric-separator/7.16.0_@babel+core@7.12.9:
@@ -4917,6 +4866,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
   /@babel/plugin-proposal-numeric-separator/7.16.7_@babel+core@7.21.3:
@@ -4933,6 +4883,8 @@ packages:
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-numeric-separator/7.18.6_@babel+core@7.21.3:
     resolution: {integrity: sha512-ozlZFogPqoLm8WBr5Z8UckIoE4YQ5KESVcNudyXOR8uqIkliTEgJ3RoketfG6pmzLdeZF0H/wjE9/cCEitBl7Q==}
     engines: {node: '>=6.9.0'}
@@ -4976,13 +4928,8 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/compat-data': 7.21.0
-<<<<<<< HEAD
-      '@babel/core': 7.12.9
-      '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.12.9
-=======
       '@babel/core': 7.17.8
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.17.8
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-object-rest-spread': 7.8.3_@babel+core@7.17.8
       '@babel/plugin-transform-parameters': 7.18.8_@babel+core@7.17.8
@@ -4995,13 +4942,8 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/compat-data': 7.21.0
-<<<<<<< HEAD
-      '@babel/core': 7.16.12
-      '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.16.12
-=======
       '@babel/core': 7.21.3
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.21.3
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-object-rest-spread': 7.8.3_@babel+core@7.21.3
       '@babel/plugin-transform-parameters': 7.18.8_@babel+core@7.21.3
@@ -5016,6 +4958,7 @@ packages:
     dependencies:
       '@babel/compat-data': 7.21.0
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/core': 7.17.8
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.17.8
 <<<<<<< HEAD
@@ -5025,14 +4968,16 @@ packages:
     dev: true
 =======
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.12.9
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.12.9
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-object-rest-spread': 7.8.3_@babel+core@7.12.9
       '@babel/plugin-transform-parameters': 7.18.8_@babel+core@7.12.9
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
 
+<<<<<<< HEAD
 <<<<<<< HEAD
   /@babel/plugin-proposal-object-rest-spread/7.17.3_@babel+core@7.21.3:
     resolution: {integrity: sha512-yuL5iQA/TbZn+RGAfxQXfi7CNLmKi1f8zInn4IgobuCWcAb7i+zj4TYzQ9l8cEzVyJ89PDGuqxK1xZpUDISesw==}
@@ -5050,14 +4995,16 @@ packages:
 
   /@babel/plugin-proposal-object-rest-spread/7.18.9_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-object-rest-spread/7.18.9_@babel+core@7.16.12:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-kDDHQ5rflIeY5xl69CEqGEZ0KY369ehsCIEbTGb4siHG5BE9sga/T0r0OUwyZNLMmZE79E1kbsqAjwFCW4ds6Q==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/compat-data': 7.21.0
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.12.9
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.12.9
@@ -5068,9 +5015,10 @@ packages:
     dev: true
 =======
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.16.12
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.16.12
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-object-rest-spread': 7.8.3_@babel+core@7.16.12
       '@babel/plugin-transform-parameters': 7.18.8_@babel+core@7.16.12
@@ -5084,6 +5032,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/compat-data': 7.21.0
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.17.8
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.17.8
@@ -5102,13 +5051,14 @@ packages:
       '@babel/plugin-syntax-object-rest-spread': 7.8.3_@babel+core@7.21.3
       '@babel/plugin-transform-parameters': 7.18.8_@babel+core@7.21.3
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.17.8
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.17.8
       '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-object-rest-spread': 7.8.3_@babel+core@7.17.8
       '@babel/plugin-transform-parameters': 7.18.8_@babel+core@7.17.8
     dev: true
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 
   /@babel/plugin-proposal-object-rest-spread/7.18.9_@babel+core@7.21.3:
     resolution: {integrity: sha512-kDDHQ5rflIeY5xl69CEqGEZ0KY369ehsCIEbTGb4siHG5BE9sga/T0r0OUwyZNLMmZE79E1kbsqAjwFCW4ds6Q==}
@@ -5192,6 +5142,7 @@ packages:
       '@babel/plugin-syntax-optional-catch-binding': 7.8.3_@babel+core@7.12.9
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-proposal-optional-catch-binding/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-eMOH/L4OvWSZAE1VkHbr1vckLG1WUcHGJSLqqQwl2GaUqG6QjddvrOaTUMNYiv77H5IKPMZ9U9P7EaHwvAShfA==}
     engines: {node: '>=6.9.0'}
@@ -5205,8 +5156,9 @@ packages:
 
   /@babel/plugin-proposal-optional-catch-binding/7.18.6_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-optional-catch-binding/7.18.6_@babel+core@7.16.12:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-Q40HEhs9DJQyaZfUjjn6vE8Cv4GmMHCYuMGIWUnlxH6400VGxOuwWsPt4FxXxJkC/5eOzgn0z21M9gMT4MOhbw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -5230,20 +5182,24 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/core': 7.17.8
       '@babel/helper-plugin-utils': 7.20.2
       '@babel/plugin-syntax-optional-catch-binding': 7.8.3_@babel+core@7.17.8
     dev: true
 =======
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.19.0
-<<<<<<< HEAD
-      '@babel/plugin-syntax-optional-catch-binding': 7.8.3_@babel+core@7.21.3
 =======
+      '@babel/core': 7.17.8
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
+      '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-optional-catch-binding': 7.8.3_@babel+core@7.17.8
     dev: true
+<<<<<<< HEAD
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
 
   /@babel/plugin-proposal-optional-catch-binding/7.18.6_@babel+core@7.21.3:
     resolution: {integrity: sha512-Q40HEhs9DJQyaZfUjjn6vE8Cv4GmMHCYuMGIWUnlxH6400VGxOuwWsPt4FxXxJkC/5eOzgn0z21M9gMT4MOhbw==}
@@ -5301,6 +5257,7 @@ packages:
       '@babel/plugin-syntax-optional-chaining': 7.8.3_@babel+core@7.21.3
     dev: true
 
+<<<<<<< HEAD
   /@babel/plugin-proposal-optional-chaining/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-eC3xy+ZrUcBtP7x+sq62Q/HYd674pPTb/77XZMb5wbDPGWIdUbSr4Agr052+zaUPSb+gGRnjxXfKFvx5iMJ+DA==}
     engines: {node: '>=6.9.0'}
@@ -5313,6 +5270,8 @@ packages:
       '@babel/plugin-syntax-optional-chaining': 7.8.3_@babel+core@7.21.3
     dev: true
 
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-optional-chaining/7.18.9_@babel+core@7.12.9:
     resolution: {integrity: sha512-v5nwt4IqBXihxGsW2QmCWMDS3B3bzGIk/EQVZz2ei7f3NJl8NzAJVvUmpDW5q1CRNY+Beb/k58UAH1Km1N411w==}
     engines: {node: '>=6.9.0'}
@@ -5366,6 +5325,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/core': 7.17.8
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.17.8
       '@babel/helper-plugin-utils': 7.18.9
@@ -5380,6 +5340,11 @@ packages:
       '@babel/helper-plugin-utils': 7.18.9
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+      '@babel/core': 7.17.8
+      '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.17.8
+      '@babel/helper-plugin-utils': 7.18.9
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -5390,6 +5355,7 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.21.3
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.21.3
@@ -5405,6 +5371,11 @@ packages:
       '@babel/helper-plugin-utils': 7.18.9
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+      '@babel/core': 7.21.3
+      '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.21.3
+      '@babel/helper-plugin-utils': 7.19.0
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -5427,6 +5398,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-proposal-private-methods/7.18.6_@babel+core@7.17.8:
     resolution: {integrity: sha512-nutsvktDItsNn4rpGItSNV2sz1XwS+nfU0Rg8aCx3W3NOKVzdMjJRu0O5OkgDp3ZGICSTbgRpxZoWsxoKRvbeA==}
 =======
@@ -5438,10 +5410,15 @@ packages:
     resolution: {integrity: sha512-nutsvktDItsNn4rpGItSNV2sz1XwS+nfU0Rg8aCx3W3NOKVzdMjJRu0O5OkgDp3ZGICSTbgRpxZoWsxoKRvbeA==}
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+  /@babel/plugin-proposal-private-methods/7.18.6_@babel+core@7.16.12:
+    resolution: {integrity: sha512-nutsvktDItsNn4rpGItSNV2sz1XwS+nfU0Rg8aCx3W3NOKVzdMjJRu0O5OkgDp3ZGICSTbgRpxZoWsxoKRvbeA==}
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.17.8
       '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.17.8
@@ -5458,6 +5435,8 @@ packages:
 
   /@babel/plugin-proposal-private-methods/7.18.6_@babel+core@7.21.3:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.16.12
       '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.16.12
       '@babel/helper-plugin-utils': 7.19.0
@@ -5466,15 +5445,20 @@ packages:
     dev: false
 
   /@babel/plugin-proposal-private-methods/7.18.6_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-nutsvktDItsNn4rpGItSNV2sz1XwS+nfU0Rg8aCx3W3NOKVzdMjJRu0O5OkgDp3ZGICSTbgRpxZoWsxoKRvbeA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
       '@babel/core': 7.21.3
       '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.21.3
       '@babel/helper-plugin-utils': 7.20.2
+=======
+      '@babel/core': 7.17.8
+      '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.17.8
+      '@babel/helper-plugin-utils': 7.19.0
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -5503,6 +5487,7 @@ packages:
       '@babel/core': 7.17.8
       '@babel/helper-annotate-as-pure': 7.16.7
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.17.8
       '@babel/helper-plugin-utils': 7.18.9
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.17.8
@@ -5517,6 +5502,11 @@ packages:
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.17.8
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+      '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.17.8
+      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.17.8
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -5530,6 +5520,7 @@ packages:
       '@babel/core': 7.21.3
       '@babel/helper-annotate-as-pure': 7.16.7
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.21.3
       '@babel/helper-plugin-utils': 7.20.2
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.21.3
@@ -5539,11 +5530,16 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.16.12
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/helper-create-class-features-plugin': 7.17.6_@babel+core@7.21.3
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.21.3
+<<<<<<< HEAD
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -5568,6 +5564,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-proposal-private-property-in-object/7.18.6_@babel+core@7.17.8:
     resolution: {integrity: sha512-9Rysx7FOctvT5ouj5JODjAFAkgGoudQuLPamZb0v1TGLpapdNaftzifU8NTWQm0IRjqoYypdrSmyWgkocDQ8Dw==}
 =======
@@ -5579,10 +5576,15 @@ packages:
     resolution: {integrity: sha512-9Rysx7FOctvT5ouj5JODjAFAkgGoudQuLPamZb0v1TGLpapdNaftzifU8NTWQm0IRjqoYypdrSmyWgkocDQ8Dw==}
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+  /@babel/plugin-proposal-private-property-in-object/7.18.6_@babel+core@7.16.12:
+    resolution: {integrity: sha512-9Rysx7FOctvT5ouj5JODjAFAkgGoudQuLPamZb0v1TGLpapdNaftzifU8NTWQm0IRjqoYypdrSmyWgkocDQ8Dw==}
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.17.8
       '@babel/helper-annotate-as-pure': 7.18.6
@@ -5603,6 +5605,8 @@ packages:
 
   /@babel/plugin-proposal-private-property-in-object/7.18.6_@babel+core@7.21.3:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.16.12
       '@babel/helper-annotate-as-pure': 7.18.6
       '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.16.12
@@ -5613,17 +5617,22 @@ packages:
     dev: false
 
   /@babel/plugin-proposal-private-property-in-object/7.18.6_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-9Rysx7FOctvT5ouj5JODjAFAkgGoudQuLPamZb0v1TGLpapdNaftzifU8NTWQm0IRjqoYypdrSmyWgkocDQ8Dw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-      '@babel/core': 7.21.3
+      '@babel/core': 7.17.8
       '@babel/helper-annotate-as-pure': 7.18.6
+<<<<<<< HEAD
       '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.21.3
       '@babel/helper-plugin-utils': 7.20.2
       '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.21.3
+=======
+      '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.17.8
+      '@babel/helper-plugin-utils': 7.19.0
+      '@babel/plugin-syntax-private-property-in-object': 7.14.5_@babel+core@7.17.8
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -5665,6 +5674,7 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
     dev: true
 
+<<<<<<< HEAD
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
   /@babel/plugin-proposal-unicode-property-regex/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-QRK0YI/40VLhNVGIjRNAAQkEHws0cswSdFFjpFyt943YmJIU1da9uW63Iu6NFV6CxTZW5eTDCrwZUstBWgp/Rg==}
@@ -5677,6 +5687,8 @@ packages:
       '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-proposal-unicode-property-regex/7.18.6_@babel+core@7.12.9:
     resolution: {integrity: sha512-2BShG/d5yoZyXZfVePH91urL5wTG6ASZU9M4o03lKK8u8UW1y08OMttBSOADTcJrnPMpvDXRG3G8fyLh4ovs8w==}
     engines: {node: '>=4'}
@@ -6366,22 +6378,12 @@ packages:
 =======
       '@babel/helper-plugin-utils': 7.19.0
 
-<<<<<<< HEAD
-  /@babel/plugin-transform-arrow-functions/7.16.7_@babel+core@7.21.3:
-    resolution: {integrity: sha512-9ffkFFMbvzTvv+7dTp/66xvZAWASuPD5Tl9LK3Z9vhOmANo6j94rik+5YMBt4CwHVMWLWpMsriIc2zsa3WW3xQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.19.0
-    dev: true
-
-  /@babel/plugin-transform-arrow-functions/7.18.6_@babel+core@7.12.9:
-=======
   /@babel/plugin-transform-arrow-functions/7.18.6_@babel+core@7.16.12:
+<<<<<<< HEAD
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     resolution: {integrity: sha512-9S9X9RUefzrsHZmKMbDXxweEH+YlE8JJEuat9FdvW9Qh1cw7W64jELCtWNkPBPX5En45uy28KGvA/AySqUh8CQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -6395,13 +6397,13 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
     dev: false
 
-  /@babel/plugin-transform-arrow-functions/7.18.6_@babel+core@7.21.3:
+  /@babel/plugin-transform-arrow-functions/7.18.6_@babel+core@7.17.8:
     resolution: {integrity: sha512-9S9X9RUefzrsHZmKMbDXxweEH+YlE8JJEuat9FdvW9Qh1cw7W64jELCtWNkPBPX5En45uy28KGvA/AySqUh8CQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-      '@babel/core': 7.21.3
+      '@babel/core': 7.17.8
       '@babel/helper-plugin-utils': 7.19.0
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
     dev: true
@@ -6438,7 +6440,7 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-module-imports': 7.16.7
-      '@babel/helper-plugin-utils': 7.19.0
+      '@babel/helper-plugin-utils': 7.18.9
       '@babel/helper-remap-async-to-generator': 7.16.8
     transitivePeerDependencies:
       - supports-color
@@ -6473,6 +6475,7 @@ packages:
       - supports-color
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-async-to-generator/7.16.8_@babel+core@7.21.3:
     resolution: {integrity: sha512-MtmUmTJQHCnyJVrScNzNlofQJ3dLFuobYn3mwOTKHnSCMtbNsqvF71GQmJfFjdrXSsAA7iysFmYWw4bXZ20hOg==}
     engines: {node: '>=6.9.0'}
@@ -6489,8 +6492,9 @@ packages:
 
   /@babel/plugin-transform-async-to-generator/7.18.6_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-async-to-generator/7.18.6_@babel+core@7.16.12:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-ARE5wZLKnTgPW7/1ftQmSi1CmkqqHo2DNmtztFhvgtOWSDfq0Cq9/9L+KnZNYSNrydBekhW3rwShduf59RoXag==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -6508,15 +6512,16 @@ packages:
       - supports-color
     dev: false
 
-  /@babel/plugin-transform-async-to-generator/7.18.6_@babel+core@7.21.3:
+  /@babel/plugin-transform-async-to-generator/7.18.6_@babel+core@7.17.8:
     resolution: {integrity: sha512-ARE5wZLKnTgPW7/1ftQmSi1CmkqqHo2DNmtztFhvgtOWSDfq0Cq9/9L+KnZNYSNrydBekhW3rwShduf59RoXag==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-      '@babel/core': 7.21.3
+      '@babel/core': 7.17.8
       '@babel/helper-module-imports': 7.18.6
       '@babel/helper-plugin-utils': 7.19.0
+<<<<<<< HEAD
       '@babel/helper-remap-async-to-generator': 7.18.9_@babel+core@7.21.3
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
     transitivePeerDependencies:
@@ -6532,6 +6537,8 @@ packages:
       '@babel/core': 7.17.8
       '@babel/helper-module-imports': 7.18.6
       '@babel/helper-plugin-utils': 7.20.2
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/helper-remap-async-to-generator': 7.18.9_@babel+core@7.17.8
     transitivePeerDependencies:
       - supports-color
@@ -6604,21 +6611,7 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
     dev: false
 
-<<<<<<< HEAD
-  /@babel/plugin-transform-block-scoped-functions/7.16.7_@babel+core@7.21.3:
-    resolution: {integrity: sha512-JUuzlzmF40Z9cXyytcbZEZKckgrQzChbQJw/5PuEHYeqzCsvebDx0K0jWnIIVcmmDOAVctCgnYs0pMcrYj2zJg==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.19.0
-    dev: true
-
-  /@babel/plugin-transform-block-scoped-functions/7.18.6_@babel+core@7.12.9:
-=======
   /@babel/plugin-transform-block-scoped-functions/7.18.6_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-ExUcOqpPWnliRcPqves5HJcJOvHvIIWfuS4sroBUenPuMdmW+SMHDakmtS7qOo13sVppmUijqeTv7qqGsvURpQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -6692,6 +6685,7 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-block-scoping/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-ObZev2nxVAYA4bhyusELdo9hb3H+A56bxH3FZMbEImZFiEDYVHXQSJ1hQKFlDnlt8G9bBrCZ5ZpURZUrV4G5qQ==}
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
@@ -6709,8 +6703,9 @@ packages:
 =======
   /@babel/plugin-transform-block-scoping/7.18.9_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-block-scoping/7.18.9_@babel+core@7.16.12:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-5sDIJRV1KtQVEbt/EIBwGy4T01uYIo4KRB3VUqzkhrAIOGx7AoctL9+Ux88btY0zXdDyPJ9mW+bg+v+XEkGmtw==}
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
     engines: {node: '>=6.9.0'}
@@ -6725,13 +6720,13 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
     dev: false
 
-  /@babel/plugin-transform-block-scoping/7.18.9_@babel+core@7.21.3:
+  /@babel/plugin-transform-block-scoping/7.18.9_@babel+core@7.17.8:
     resolution: {integrity: sha512-5sDIJRV1KtQVEbt/EIBwGy4T01uYIo4KRB3VUqzkhrAIOGx7AoctL9+Ux88btY0zXdDyPJ9mW+bg+v+XEkGmtw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-      '@babel/core': 7.21.3
+      '@babel/core': 7.17.8
       '@babel/helper-plugin-utils': 7.19.0
     dev: true
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
@@ -6822,6 +6817,7 @@ packages:
       '@babel/helper-environment-visitor': 7.18.9
       '@babel/helper-function-name': 7.21.0
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/helper-optimise-call-expression': 7.18.6
       '@babel/helper-plugin-utils': 7.20.2
       '@babel/helper-replace-supers': 7.20.7
@@ -6844,6 +6840,8 @@ packages:
       '@babel/helper-function-name': 7.21.0
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/helper-optimise-call-expression': 7.18.6
       '@babel/helper-plugin-utils': 7.20.2
       '@babel/helper-replace-supers': 7.20.7
@@ -6865,11 +6863,7 @@ packages:
     dependencies:
       '@babel/core': 7.16.12
       '@babel/helper-annotate-as-pure': 7.18.6
-<<<<<<< HEAD
-      '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.12.9
-=======
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.16.12
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-environment-visitor': 7.18.9
       '@babel/helper-function-name': 7.21.0
       '@babel/helper-optimise-call-expression': 7.18.6
@@ -6881,14 +6875,20 @@ packages:
       - supports-color
     dev: false
 
+<<<<<<< HEAD
   /@babel/plugin-transform-classes/7.21.0_@babel+core@7.17.8:
     resolution: {integrity: sha512-RZhbYTCEUAe6ntPehC4hlslPWosNHDox+vAs4On/mCLRLfoDVHf6hVEd7kuxr1RnHwJmxFfUM3cZiZRmPxJPXQ==}
+=======
+  /@babel/plugin-transform-classes/7.19.0_@babel+core@7.17.8:
+    resolution: {integrity: sha512-YfeEE9kCjqTS9IitkgfJuxjcEtLUHMqa8yUJ6zdz8vR7hKuo6mOy2C05P0F1tdMmDCeuyidKnlrw/iTppHcr2A==}
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-annotate-as-pure': 7.18.6
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.17.8
 =======
@@ -6898,6 +6898,9 @@ packages:
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.17.8
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+      '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.17.8
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/helper-environment-visitor': 7.18.9
       '@babel/helper-function-name': 7.21.0
       '@babel/helper-optimise-call-expression': 7.18.6
@@ -6980,6 +6983,7 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-computed-properties/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-gN72G9bcmenVILj//sv1zLNaPyYcOzUho2lIJBMh/iakJ9ygCo/hEF9cpGb61SCMEDxbbyBoVQxrt+bWKu5KGw==}
     engines: {node: '>=6.9.0'}
@@ -6992,8 +6996,9 @@ packages:
 
   /@babel/plugin-transform-computed-properties/7.18.9_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-computed-properties/7.18.9_@babel+core@7.16.12:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-+i0ZU1bCDymKakLxn5srGHrsAPRELC2WIbzwjLhHW9SIE1cPYkLCL0NlnXMZaM1vhfgA2+M7hySk42VBvrkBRw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -7015,10 +7020,14 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/core': 7.17.8
       '@babel/helper-plugin-utils': 7.20.2
 =======
       '@babel/core': 7.21.3
+=======
+      '@babel/core': 7.17.8
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/helper-plugin-utils': 7.19.0
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
     dev: true
@@ -7073,6 +7082,7 @@ packages:
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
     dev: true
 
+<<<<<<< HEAD
   /@babel/plugin-transform-destructuring/7.17.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-XVh0r5yq9sLR4vZ6eVZe8FKfIcSgaTBxVBRSYokRj2qksf6QerYnTxz9/GTuKTH/n/HwLP7t6gtlybHetJ/6hQ==}
     engines: {node: '>=6.9.0'}
@@ -7083,6 +7093,8 @@ packages:
       '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-destructuring/7.18.13_@babel+core@7.12.9:
     resolution: {integrity: sha512-TodpQ29XekIsex2A+YJPj5ax2plkGa8YYY6mFjCohk/IG9IY42Rtuj1FuDeemfg2ipxIFLzPeA83SIBnlhSIow==}
     engines: {node: '>=6.9.0'}
@@ -7094,6 +7106,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-destructuring/7.18.13_@babel+core@7.17.8:
 =======
 <<<<<<< HEAD
@@ -7102,11 +7115,15 @@ packages:
   /@babel/plugin-transform-destructuring/7.18.13_@babel+core@7.16.12:
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+  /@babel/plugin-transform-destructuring/7.18.13_@babel+core@7.16.12:
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     resolution: {integrity: sha512-TodpQ29XekIsex2A+YJPj5ax2plkGa8YYY6mFjCohk/IG9IY42Rtuj1FuDeemfg2ipxIFLzPeA83SIBnlhSIow==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.17.8
       '@babel/helper-plugin-utils': 7.20.2
@@ -7118,8 +7135,9 @@ packages:
 <<<<<<< HEAD
       '@babel/core': 7.21.3
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.16.12
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-plugin-utils': 7.19.0
     dev: false
 
@@ -7193,6 +7211,7 @@ packages:
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-plugin-utils': 7.19.0
 
+<<<<<<< HEAD
   /@babel/plugin-transform-dotall-regex/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-Lyttaao2SjZF6Pf4vk1dVKv8YypMpomAbygW+mU5cYP3S5cWTfCJjG8xV6CFdzGFlfWK81IjL9viiTvpb6G7gQ==}
     engines: {node: '>=6.9.0'}
@@ -7204,6 +7223,8 @@ packages:
       '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-dotall-regex/7.18.6_@babel+core@7.12.9:
     resolution: {integrity: sha512-6S3jpun1eEbAxq7TdjLotAsl4WpQI9DxfkycRcKrjhQYzU87qpXdknpBg/e+TdcMehqGnLFi7tnFUBR02Vq6wg==}
     engines: {node: '>=6.9.0'}
@@ -7292,6 +7313,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-duplicate-keys/7.18.9_@babel+core@7.17.8:
     resolution: {integrity: sha512-d2bmXCtZXYc59/0SanQKbiWINadaJXqtvIQIzd4+hNwkWBgyCd5F/2t1kXoUdvPMrxzPvhK6EMQRROxsue+mfw==}
 =======
@@ -7309,6 +7331,8 @@ packages:
 
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-duplicate-keys/7.18.9_@babel+core@7.21.3:
     resolution: {integrity: sha512-d2bmXCtZXYc59/0SanQKbiWINadaJXqtvIQIzd4+hNwkWBgyCd5F/2t1kXoUdvPMrxzPvhK6EMQRROxsue+mfw==}
     engines: {node: '>=6.9.0'}
@@ -7371,22 +7395,7 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
     dev: false
 
-<<<<<<< HEAD
-  /@babel/plugin-transform-exponentiation-operator/7.16.7_@babel+core@7.21.3:
-    resolution: {integrity: sha512-8UYLSlyLgRixQvlYH3J2ekXFHDFLQutdy7FfFAMm3CPZ6q9wHCwnUyiXpQCe3gVVnQlHc5nsuiEVziteRNTXEA==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.21.3
-      '@babel/helper-builder-binary-assignment-operator-visitor': 7.18.9
-      '@babel/helper-plugin-utils': 7.19.0
-    dev: true
-
-  /@babel/plugin-transform-exponentiation-operator/7.18.6_@babel+core@7.12.9:
-=======
   /@babel/plugin-transform-exponentiation-operator/7.18.6_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-wzEtc0+2c88FVR34aQmiz56dxEkxr2g8DQb/KfaFa1JYXOFVsbhvAonFN6PwVWj++fKmku8NP80plJ5Et4wqHw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -7431,6 +7440,7 @@ packages:
   /@babel/plugin-transform-flow-strip-types/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-mzmCq3cNsDpZZu9FADYYyfZJIOrSONmHcop2XEKPdBNMa4PDC4eEvcOvzZaCNcjKu72v0XQlA5y1g58aLRXdYg==}
 <<<<<<< HEAD
+<<<<<<< HEAD
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -7443,6 +7453,8 @@ packages:
     resolution: {integrity: sha512-5QKUw2kO+GVmKr2wMYSATCTTnHyscl6sxFRAY+rvN7h7WB0lcG0o4NoV6ZQU32OZGVsYUsfLGgPQpDFdkfjlJQ==}
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -7489,6 +7501,7 @@ packages:
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
     dev: true
 
+<<<<<<< HEAD
   /@babel/plugin-transform-for-of/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-/QZm9W92Ptpw7sjI9Nx1mbcsWz33+l8kuMIQnDwgQBG5s3fAfQvkRjQ7NqXhtNcKOnPkdICmUHyCaWW06HCsqg==}
     engines: {node: '>=6.9.0'}
@@ -7499,6 +7512,8 @@ packages:
       '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-for-of/7.18.8_@babel+core@7.12.9:
     resolution: {integrity: sha512-yEfTRnjuskWYo0k1mHUqrVWaZwrdq8AYbfrpqULOJOaucGSp4mNMVps+YtA8byoevxS/urwU75vyhQIxcCgiBQ==}
     engines: {node: '>=6.9.0'}
@@ -7518,9 +7533,6 @@ packages:
       '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
-<<<<<<< HEAD
-  /@babel/plugin-transform-for-of/7.18.8_@babel+core@7.21.3:
-=======
   /@babel/plugin-transform-for-of/7.18.8_@babel+core@7.16.12:
     resolution: {integrity: sha512-yEfTRnjuskWYo0k1mHUqrVWaZwrdq8AYbfrpqULOJOaucGSp4mNMVps+YtA8byoevxS/urwU75vyhQIxcCgiBQ==}
     engines: {node: '>=6.9.0'}
@@ -7532,13 +7544,12 @@ packages:
     dev: false
 
   /@babel/plugin-transform-for-of/7.18.8_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-yEfTRnjuskWYo0k1mHUqrVWaZwrdq8AYbfrpqULOJOaucGSp4mNMVps+YtA8byoevxS/urwU75vyhQIxcCgiBQ==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-      '@babel/core': 7.21.3
+      '@babel/core': 7.17.8
       '@babel/helper-plugin-utils': 7.19.0
     dev: true
 
@@ -7568,6 +7579,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/core': 7.21.3
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.21.3
 =======
@@ -7579,6 +7591,10 @@ packages:
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.21.3
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+      '@babel/core': 7.21.3
+      '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.21.3
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/helper-function-name': 7.21.0
       '@babel/helper-plugin-utils': 7.20.2
     dev: true
@@ -7589,6 +7605,7 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.12.9
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.12.9
@@ -7601,9 +7618,10 @@ packages:
       '@babel/core': 7.16.12
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.16.12
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.12.9
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.12.9
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-function-name': 7.21.0
       '@babel/helper-plugin-utils': 7.19.0
 
@@ -7614,6 +7632,7 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.17.8
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.17.8
@@ -7635,9 +7654,10 @@ packages:
       '@babel/core': 7.21.3
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.21.3
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.16.12
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.16.12
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-function-name': 7.21.0
       '@babel/helper-plugin-utils': 7.19.0
     dev: false
@@ -7648,13 +7668,8 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.12.9
-      '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.12.9
-=======
       '@babel/core': 7.17.8
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.17.8
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-function-name': 7.21.0
       '@babel/helper-plugin-utils': 7.19.0
     dev: true
@@ -7725,21 +7740,7 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
     dev: false
 
-<<<<<<< HEAD
-  /@babel/plugin-transform-literals/7.16.7_@babel+core@7.21.3:
-    resolution: {integrity: sha512-6tH8RTpTWI0s2sV6uq3e/C9wPo4PTqqZps4uF0kzQ9/xPLFQtipynvmT1g/dOfEJ+0EQsHhkQ/zyRId8J2b8zQ==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.19.0
-    dev: true
-
-  /@babel/plugin-transform-literals/7.18.9_@babel+core@7.12.9:
-=======
   /@babel/plugin-transform-literals/7.18.9_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-IFQDSRoTPnrAIrI5zoZv73IFeZu2dhu6irxQjY9rNjTT53VmKg9fenjvoiOWOkJ6mm4jKVPtdMzBY98Fp4Z4cg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -7813,21 +7814,7 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
     dev: false
 
-<<<<<<< HEAD
-  /@babel/plugin-transform-member-expression-literals/7.16.7_@babel+core@7.21.3:
-    resolution: {integrity: sha512-mBruRMbktKQwbxaJof32LT9KLy2f3gH+27a5XSuXo6h7R3vqltl0PgZ80C8ZMKw98Bf8bqt6BEVi3svOh2PzMw==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.19.0
-    dev: true
-
-  /@babel/plugin-transform-member-expression-literals/7.18.6_@babel+core@7.12.9:
-=======
   /@babel/plugin-transform-member-expression-literals/7.18.6_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-qSF1ihLGO3q+/g48k85tUjD033C29TNTVB2paCwZPVmOsjn9pClvYYrM2VeJpBY2bcNkuny0YUyTNRyRxJ54KA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -7918,6 +7905,7 @@ packages:
       '@babel/core': 7.17.8
       '@babel/helper-module-transforms': 7.21.2
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/helper-plugin-utils': 7.20.2
 =======
 <<<<<<< HEAD
@@ -7941,6 +7929,8 @@ packages:
 =======
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/helper-plugin-utils': 7.19.0
       babel-plugin-dynamic-import-node: 2.3.3
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
@@ -7994,6 +7984,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/core': 7.17.8
       '@babel/helper-module-transforms': 7.21.2
       '@babel/helper-plugin-utils': 7.20.2
@@ -8001,8 +7992,9 @@ packages:
 <<<<<<< HEAD
       '@babel/core': 7.12.9
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.17.8
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-module-transforms': 7.21.2
       '@babel/helper-plugin-utils': 7.19.0
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
@@ -8018,6 +8010,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/core': 7.21.3
       '@babel/helper-module-transforms': 7.21.2
       '@babel/helper-plugin-utils': 7.20.2
@@ -8025,8 +8018,9 @@ packages:
 <<<<<<< HEAD
       '@babel/core': 7.16.12
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.21.3
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-module-transforms': 7.21.2
       '@babel/helper-plugin-utils': 7.19.0
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
@@ -8042,6 +8036,7 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.12.9
 =======
@@ -8069,8 +8064,9 @@ packages:
 =======
       '@babel/core': 7.21.3
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.12.9
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-module-transforms': 7.21.2
       '@babel/helper-plugin-utils': 7.19.0
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
@@ -8078,7 +8074,6 @@ packages:
       babel-plugin-dynamic-import-node: 2.3.3
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
 <<<<<<< HEAD
   /@babel/plugin-transform-modules-commonjs/7.21.2_@babel+core@7.12.9:
@@ -8091,11 +8086,7 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-<<<<<<< HEAD
-      '@babel/core': 7.12.9
-=======
       '@babel/core': 7.16.12
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-module-transforms': 7.21.2
       '@babel/helper-plugin-utils': 7.20.2
       '@babel/helper-simple-access': 7.20.2
@@ -8103,6 +8094,7 @@ packages:
       - supports-color
     dev: false
 
+<<<<<<< HEAD
   /@babel/plugin-transform-modules-commonjs/7.21.2_@babel+core@7.17.8:
     resolution: {integrity: sha512-Cln+Yy04Gxua7iPdj6nOV96smLGjpElir5YwzF0LBPKoPlLDNJePNlrGGaybAJkd0zKRnOVXOgizSqPYMNYkzA==}
     engines: {node: '>=6.9.0'}
@@ -8119,10 +8111,15 @@ packages:
 
   /@babel/plugin-transform-modules-commonjs/7.21.2_@babel+core@7.21.3:
     resolution: {integrity: sha512-Cln+Yy04Gxua7iPdj6nOV96smLGjpElir5YwzF0LBPKoPlLDNJePNlrGGaybAJkd0zKRnOVXOgizSqPYMNYkzA==}
+=======
+  /@babel/plugin-transform-modules-commonjs/7.18.6_@babel+core@7.17.8:
+    resolution: {integrity: sha512-Qfv2ZOWikpvmedXQJDSbxNqy7Xr/j2Y8/KfijM0iJyKkBTmWuvCA1yeH1yDM7NJhBW/2aXxeucLj6i80/LAJ/Q==}
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.21.3
       '@babel/helper-module-transforms': 7.21.2
@@ -8131,6 +8128,8 @@ packages:
 <<<<<<< HEAD
 =======
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.17.8
       '@babel/helper-module-transforms': 7.21.2
       '@babel/helper-plugin-utils': 7.19.0
@@ -8150,7 +8149,6 @@ packages:
       '@babel/helper-module-transforms': 7.21.2
       '@babel/helper-plugin-utils': 7.19.0
       '@babel/helper-simple-access': 7.20.2
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       babel-plugin-dynamic-import-node: 2.3.3
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
     transitivePeerDependencies:
@@ -8236,6 +8234,7 @@ packages:
       '@babel/helper-hoist-variables': 7.18.6
       '@babel/helper-module-transforms': 7.21.2
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/helper-plugin-utils': 7.20.2
 =======
 <<<<<<< HEAD
@@ -8261,6 +8260,8 @@ packages:
 =======
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/helper-plugin-utils': 7.19.0
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-validator-identifier': 7.19.1
@@ -8358,6 +8359,7 @@ packages:
       '@babel/core': 7.12.9
       '@babel/helper-module-transforms': 7.21.2
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/helper-plugin-utils': 7.20.2
 =======
 <<<<<<< HEAD
@@ -8380,6 +8382,8 @@ packages:
 =======
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/helper-plugin-utils': 7.19.0
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
     transitivePeerDependencies:
@@ -8465,21 +8469,7 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
     dev: true
 
-<<<<<<< HEAD
-  /@babel/plugin-transform-named-capturing-groups-regex/7.16.8_@babel+core@7.21.3:
-    resolution: {integrity: sha512-j3Jw+n5PvpmhRR+mrgIh04puSANCk/T/UA3m3P1MjJkhlK906+ApHhDIqBQDdOgL/r1UYpz4GNclTXxyZrYGSw==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-    dependencies:
-      '@babel/core': 7.21.3
-      '@babel/helper-create-regexp-features-plugin': 7.19.0_@babel+core@7.21.3
-    dev: true
-
-  /@babel/plugin-transform-named-capturing-groups-regex/7.19.1_@babel+core@7.12.9:
-=======
   /@babel/plugin-transform-named-capturing-groups-regex/7.19.1_@babel+core@7.21.3:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-oWk9l9WItWBQYS4FgXD4Uyy5kq898lvkXpXQxoJEY1RnvPk4R/Dvu2ebXU9q8lP+rlMwUQTFf2Ok6d78ODa0kw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -8490,17 +8480,20 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
   /@babel/plugin-transform-named-capturing-groups-regex/7.19.1_@babel+core@7.21.3:
     resolution: {integrity: sha512-oWk9l9WItWBQYS4FgXD4Uyy5kq898lvkXpXQxoJEY1RnvPk4R/Dvu2ebXU9q8lP+rlMwUQTFf2Ok6d78ODa0kw==}
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-new-target/7.16.0_@babel+core@7.12.9:
     resolution: {integrity: sha512-fhjrDEYv2DBsGN/P6rlqakwRwIp7rBGLPbrKxwh7oVt5NNkIhZVOY2GRV+ULLsQri1bDqwDWnU3vhlmx5B2aCw==}
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.21.3
       '@babel/helper-create-regexp-features-plugin': 7.19.0_@babel+core@7.21.3
@@ -8508,8 +8501,9 @@ packages:
       '@babel/helper-plugin-utils': 7.20.2
 =======
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.12.9
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/helper-plugin-utils': 7.19.0
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
 
@@ -8563,6 +8557,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-new-target/7.18.6_@babel+core@7.17.8:
     resolution: {integrity: sha512-DjwFA/9Iu3Z+vrAn+8pBUGcjhxKguSMlsFqeCKbhb9BAV756v0krzVK04CRDi/4aqmk8BsHb4a/gFcaA5joXRw==}
 =======
@@ -8580,6 +8575,8 @@ packages:
 
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-new-target/7.18.6_@babel+core@7.21.3:
     resolution: {integrity: sha512-DjwFA/9Iu3Z+vrAn+8pBUGcjhxKguSMlsFqeCKbhb9BAV756v0krzVK04CRDi/4aqmk8BsHb4a/gFcaA5joXRw==}
     engines: {node: '>=6.9.0'}
@@ -8659,6 +8656,7 @@ packages:
     dev: false
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-object-super/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-14J1feiQVWaGvRxj2WjyMuXS2jsBkgB3MdSN5HuC2G5nRspa5RK9COcs82Pwy5BuGcjb+fYaUj94mYcOj7rCvw==}
     engines: {node: '>=6.9.0'}
@@ -8677,8 +8675,9 @@ packages:
 =======
   /@babel/plugin-transform-object-super/7.18.6_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-object-super/7.18.6_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-uvGz6zk+pZoS1aTZrOvrbj6Pp/kK2mp45t2B+bTDre2UgsZZ8EZLSJtUg7m/no0zOJUWgFONpB7Zv9W2tSaFlA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -8741,6 +8740,7 @@ packages:
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
     dev: true
 
+<<<<<<< HEAD
   /@babel/plugin-transform-parameters/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-AT3MufQ7zZEhU2hwOA11axBnExW0Lszu4RL/tAlUJBuNoRak+wehQW8h6KcXOcgjY42fHtDxswuMhMjFEuv/aw==}
     engines: {node: '>=6.9.0'}
@@ -8751,6 +8751,8 @@ packages:
       '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-parameters/7.18.8_@babel+core@7.12.9:
     resolution: {integrity: sha512-ivfbE3X2Ss+Fj8nnXvKJS6sjRG4gzwPMsP+taZC+ZzEGjAYlvENixmt1sZ5Ca6tWls+BlKSGKPJ6OOXvXCbkFg==}
     engines: {node: '>=6.9.0'}
@@ -8837,6 +8839,7 @@ packages:
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-property-literals/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-z4FGr9NMGdoIl1RqavCqGG+ZuYjfZ/hkCIeuH6Do7tXmSm0ls11nYVSJqFEUOSJbDab5wC6lRE/w6YjVcr6Hqw==}
     engines: {node: '>=6.9.0'}
@@ -8849,8 +8852,9 @@ packages:
 
   /@babel/plugin-transform-property-literals/7.18.6_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-property-literals/7.18.6_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-cYcs6qlgafTud3PAzrrRNbQtfpQ8+y/+M5tKmksS9+M1ckbH6kzY8MrexEM9mcA6JDsukE19iIRvAyYl463sMg==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -9146,6 +9150,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-regenerator/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-mF7jOgGYCkSJagJ6XCujSQg+6xC1M77/03K2oBmVJWoFGNUtnVJO4WHKJk3dnPC8HCcj4xBQP1Egm8DWh3Pb3Q==}
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
@@ -9160,6 +9165,8 @@ packages:
 
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-regenerator/7.18.6_@babel+core@7.21.3:
     resolution: {integrity: sha512-poqRI2+qiSdeldcz4wTSTXBRryoq3Gc70ye7m7UD5Ww0nE29IXqMl6r7Nd15WBgRd74vloEMlShtH6CKxVzfmQ==}
     engines: {node: '>=6.9.0'}
@@ -9227,6 +9234,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-reserved-words/7.18.6_@babel+core@7.17.8:
     resolution: {integrity: sha512-oX/4MyMoypzHjFrT1CdivfKZ+XvIPMFXwwxHp/r0Ddy2Vuomt4HDFGmft1TAY2yiTKiNSsh3kjBAzcM8kSdsjA==}
 =======
@@ -9244,6 +9252,8 @@ packages:
 
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-reserved-words/7.18.6_@babel+core@7.21.3:
     resolution: {integrity: sha512-oX/4MyMoypzHjFrT1CdivfKZ+XvIPMFXwwxHp/r0Ddy2Vuomt4HDFGmft1TAY2yiTKiNSsh3kjBAzcM8kSdsjA==}
     engines: {node: '>=6.9.0'}
@@ -9278,6 +9288,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/helper-module-imports': 7.16.0
       '@babel/helper-plugin-utils': 7.14.5
       babel-plugin-polyfill-corejs2: 0.3.0_@babel+core@7.21.3
@@ -9292,6 +9303,11 @@ packages:
       babel-plugin-polyfill-corejs2: 0.3.0_@babel+core@7.21.3
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+      '@babel/helper-module-imports': 7.18.6
+      '@babel/helper-plugin-utils': 7.19.0
+      babel-plugin-polyfill-corejs2: 0.3.3_@babel+core@7.21.3
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       babel-plugin-polyfill-corejs3: 0.4.0_@babel+core@7.21.3
       babel-plugin-polyfill-regenerator: 0.3.0_@babel+core@7.21.3
       semver: 6.3.0
@@ -9379,6 +9395,7 @@ packages:
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-shorthand-properties/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-hah2+FEnoRoATdIb05IOXf+4GzXYTq75TVhIn1PewihbpyrNWUt2JbudKQOETWw6QpLe+AIUpJ5MVLYTQbeeUg==}
     engines: {node: '>=6.9.0'}
@@ -9391,8 +9408,9 @@ packages:
 
   /@babel/plugin-transform-shorthand-properties/7.18.6_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-shorthand-properties/7.18.6_@babel+core@7.16.12:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-eCLXXJqv8okzg86ywZJbRn19YJHU4XUa55oz2wbHhaQVn/MM+XhukiT7SYqp/7o00dg52Rj51Ny+Ecw4oyoygw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -9406,13 +9424,13 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
     dev: false
 
-  /@babel/plugin-transform-shorthand-properties/7.18.6_@babel+core@7.21.3:
+  /@babel/plugin-transform-shorthand-properties/7.18.6_@babel+core@7.17.8:
     resolution: {integrity: sha512-eCLXXJqv8okzg86ywZJbRn19YJHU4XUa55oz2wbHhaQVn/MM+XhukiT7SYqp/7o00dg52Rj51Ny+Ecw4oyoygw==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-      '@babel/core': 7.21.3
+      '@babel/core': 7.17.8
       '@babel/helper-plugin-utils': 7.19.0
     dev: true
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
@@ -9482,6 +9500,7 @@ packages:
       '@babel/helper-skip-transparent-expression-wrappers': 7.18.9
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-spread/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-+pjJpgAngb53L0iaA5gU/1MLXJIfXcYepLgXB3esVRf4fqmj8f2cxM3/FKaHsZms08hFQJkFccEWuIpm429TXg==}
     engines: {node: '>=6.9.0'}
@@ -9495,8 +9514,9 @@ packages:
 
   /@babel/plugin-transform-spread/7.19.0_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-spread/7.19.0_@babel+core@7.16.12:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-RsuMk7j6n+r752EtzyScnWkQyuJdli6LdO5Klv8Yx0OfPVTcQkIUfS8clx5e9yHXzlnhOZF3CbQ8C2uP5j074w==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -9512,13 +9532,13 @@ packages:
       '@babel/helper-skip-transparent-expression-wrappers': 7.18.9
     dev: false
 
-  /@babel/plugin-transform-spread/7.19.0_@babel+core@7.21.3:
+  /@babel/plugin-transform-spread/7.19.0_@babel+core@7.17.8:
     resolution: {integrity: sha512-RsuMk7j6n+r752EtzyScnWkQyuJdli6LdO5Klv8Yx0OfPVTcQkIUfS8clx5e9yHXzlnhOZF3CbQ8C2uP5j074w==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-      '@babel/core': 7.21.3
+      '@babel/core': 7.17.8
       '@babel/helper-plugin-utils': 7.19.0
       '@babel/helper-skip-transparent-expression-wrappers': 7.18.9
     dev: true
@@ -9593,6 +9613,7 @@ packages:
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-sticky-regex/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-NJa0Bd/87QV5NZZzTuZG5BPJjLYadeSZ9fO6oOUoL4iQx+9EEuw/eEM92SrsT19Yc2jgB1u1hsjqDtH02c3Drw==}
     engines: {node: '>=6.9.0'}
@@ -9605,8 +9626,9 @@ packages:
 
   /@babel/plugin-transform-sticky-regex/7.18.6_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-sticky-regex/7.18.6_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-kfiDrDQ+PBsQDO85yj1icueWMfGfJFKN1KCkndygtu/C9+XUfydLC8Iv5UYJqRwy4zk8EcplRxEOeLyjq1gm6Q==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -9684,6 +9706,7 @@ packages:
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-template-literals/7.16.7_@babel+core@7.21.3:
     resolution: {integrity: sha512-VwbkDDUeenlIjmfNeDX/V0aWrQH2QiVyJtwymVQSzItFDTpxfyJh3EVaQiS0rIN/CqbLGr0VcGmuwyTdZtdIsA==}
     engines: {node: '>=6.9.0'}
@@ -9696,8 +9719,9 @@ packages:
 
   /@babel/plugin-transform-template-literals/7.18.9_@babel+core@7.12.9:
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-template-literals/7.18.9_@babel+core@7.16.12:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-S8cOWfT82gTezpYOiVaGHrCbhlHgKhQt8XH5ES46P2XWmX92yisoZywf5km75wv5sYcXDUCLMmMxOLCtthDgMA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -9711,13 +9735,13 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
     dev: false
 
-  /@babel/plugin-transform-template-literals/7.18.9_@babel+core@7.21.3:
+  /@babel/plugin-transform-template-literals/7.18.9_@babel+core@7.17.8:
     resolution: {integrity: sha512-S8cOWfT82gTezpYOiVaGHrCbhlHgKhQt8XH5ES46P2XWmX92yisoZywf5km75wv5sYcXDUCLMmMxOLCtthDgMA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
-      '@babel/core': 7.21.3
+      '@babel/core': 7.17.8
       '@babel/helper-plugin-utils': 7.19.0
     dev: true
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
@@ -9795,6 +9819,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-typeof-symbol/7.18.9_@babel+core@7.17.8:
     resolution: {integrity: sha512-SRfwTtF11G2aemAZWivL7PD+C9z52v9EvMqH9BuYbabyPuKUvSWks3oCg6041pT925L4zVFqaVBeECwsmlguEw==}
 =======
@@ -9812,6 +9837,8 @@ packages:
 
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-typeof-symbol/7.18.9_@babel+core@7.21.3:
     resolution: {integrity: sha512-SRfwTtF11G2aemAZWivL7PD+C9z52v9EvMqH9BuYbabyPuKUvSWks3oCg6041pT925L4zVFqaVBeECwsmlguEw==}
     engines: {node: '>=6.9.0'}
@@ -9930,6 +9957,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@babel/plugin-transform-unicode-escapes/7.18.10_@babel+core@7.17.8:
     resolution: {integrity: sha512-kKAdAI+YzPgGY/ftStBFXTI1LZFju38rYThnfMykS+IXy8BVx+res7s2fxf1l8I35DV2T97ezo6+SGrXz6B3iQ==}
 =======
@@ -9947,6 +9975,8 @@ packages:
 
 =======
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /@babel/plugin-transform-unicode-escapes/7.18.10_@babel+core@7.21.3:
     resolution: {integrity: sha512-kKAdAI+YzPgGY/ftStBFXTI1LZFju38rYThnfMykS+IXy8BVx+res7s2fxf1l8I35DV2T97ezo6+SGrXz6B3iQ==}
     engines: {node: '>=6.9.0'}
@@ -10015,22 +10045,7 @@ packages:
       '@babel/helper-plugin-utils': 7.19.0
     dev: false
 
-<<<<<<< HEAD
-  /@babel/plugin-transform-unicode-regex/7.16.7_@babel+core@7.21.3:
-    resolution: {integrity: sha512-oC5tYYKw56HO75KZVLQ+R/Nl3Hro9kf8iG0hXoaHP7tjAyCpvqBiSNe6vGrZni1Z6MggmUOC6A7VP7AVmw225Q==}
-    engines: {node: '>=6.9.0'}
-    peerDependencies:
-      '@babel/core': ^7.0.0-0
-    dependencies:
-      '@babel/core': 7.21.3
-      '@babel/helper-create-regexp-features-plugin': 7.19.0_@babel+core@7.21.3
-      '@babel/helper-plugin-utils': 7.19.0
-    dev: true
-
-  /@babel/plugin-transform-unicode-regex/7.18.6_@babel+core@7.12.9:
-=======
   /@babel/plugin-transform-unicode-regex/7.18.6_@babel+core@7.17.8:
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
     resolution: {integrity: sha512-gE7A6Lt7YLnNOL3Pb9BNeZvi+d8l7tcRrG4+pwJjK9hD2xX4mEvjlQW60G9EEmfXVYRPv9VRQcyegIVHCql/AA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
@@ -10314,6 +10329,7 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/compat-data': 7.21.0
 =======
@@ -10667,6 +10683,8 @@ packages:
       '@babel/helper-plugin-utils': 7.20.2
       '@babel/helper-validator-option': 7.18.6
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/compat-data': 7.21.0
       '@babel/core': 7.17.8
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.17.8
@@ -10842,7 +10860,6 @@ packages:
       '@babel/helper-compilation-targets': 7.20.7_@babel+core@7.21.3
       '@babel/helper-plugin-utils': 7.19.0
       '@babel/helper-validator-option': 7.18.6
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       '@babel/plugin-bugfix-safari-id-destructuring-collision-in-function-expression': 7.18.6_@babel+core@7.21.3
       '@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining': 7.18.9_@babel+core@7.21.3
       '@babel/plugin-proposal-async-generator-functions': 7.20.7_@babel+core@7.21.3
@@ -22837,6 +22854,7 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   /babel-plugin-polyfill-corejs2/0.3.0_@babel+core@7.16.12:
     resolution: {integrity: sha512-wMDoBJ6uG4u4PNFh72Ty6t3EgfA91puCuAwKIazbQlci+ENb/UU9A3xG5lutjUIiXCIn1CY5L15r9LimiJyrSA==}
@@ -22870,6 +22888,8 @@ packages:
     dev: true
 
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
   /babel-plugin-polyfill-corejs2/0.3.0_@babel+core@7.21.3:
     resolution: {integrity: sha512-wMDoBJ6uG4u4PNFh72Ty6t3EgfA91puCuAwKIazbQlci+ENb/UU9A3xG5lutjUIiXCIn1CY5L15r9LimiJyrSA==}
     peerDependencies:
@@ -22899,8 +22919,6 @@ packages:
   /babel-plugin-polyfill-corejs2/0.3.3_@babel+core@7.17.8:
 =======
   /babel-plugin-polyfill-corejs2/0.3.3_@babel+core@7.16.12:
-<<<<<<< HEAD
-=======
     resolution: {integrity: sha512-8hOdmFYFSZhqg2C/JgLUQ+t52o5nirNwaWM2B9LWteozwIvM14VSwdsCAUET10qT+kmySAlseadmfeeSWFCy+Q==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -22914,13 +22932,17 @@ packages:
     dev: false
 
   /babel-plugin-polyfill-corejs2/0.3.3_@babel+core@7.17.8:
+<<<<<<< HEAD
 >>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
 >>>>>>> f9a5c2d721 (Update copy-webpack-plugin dependency and lock file)
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
     resolution: {integrity: sha512-8hOdmFYFSZhqg2C/JgLUQ+t52o5nirNwaWM2B9LWteozwIvM14VSwdsCAUET10qT+kmySAlseadmfeeSWFCy+Q==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/compat-data': 7.21.0
+<<<<<<< HEAD
 <<<<<<< HEAD
       '@babel/core': 7.17.8
       '@babel/helper-define-polyfill-provider': 0.3.3_@babel+core@7.17.8
@@ -22943,9 +22965,10 @@ packages:
       '@babel/core': 7.21.3
       '@babel/helper-define-polyfill-provider': 0.3.3_@babel+core@7.21.3
 =======
+=======
+>>>>>>> 40bf1cc2bb (Fix up lock file after rebase)
       '@babel/core': 7.17.8
       '@babel/helper-define-polyfill-provider': 0.3.3_@babel+core@7.17.8
->>>>>>> 3670a11bdd (Update copy-webpack-plugin dependency and lock file)
       semver: 6.3.0
     transitivePeerDependencies:
       - supports-color
