@@ -34,12 +34,6 @@ interface SelectTreeProps extends Omit< TreeControlProps, 'getItemLabel' > {
 	getItemLabel?: getItemLabelType< Item >;
 	getItemValue?: getItemValueType< Item >;
 	getSelectedItemProps?: any;
-	getFilteredItems: (
-		allItems: Item[],
-		inputValue: string,
-		selectedItems: Item[],
-		getItemLabel: getItemLabelType< Item >
-	) => any[];
 	treeRef?: React.ForwardedRef< HTMLOListElement >;
 	suffix?: JSX.Element | null;
 	isLoading?: boolean;
@@ -52,7 +46,6 @@ export const SelectTree = function SelectTree( {
 	getItemLabel = ( item ) => item?.name || '',
 	getItemValue = ( item ) => item?.id || '',
 	getSelectedItemProps,
-	getFilteredItems,
 	treeRef: ref,
 	suffix = <SuffixIcon icon={ search } />,
 	placeholder,
@@ -60,13 +53,7 @@ export const SelectTree = function SelectTree( {
 	onInputChange,
 	...props
 }: SelectTreeProps ) {
-	const filteredItems = getFilteredItems(
-		items,
-		props.createValue || '',
-		props.selected || [],
-		getItemLabel
-	);
-	const linkedTree = useLinkedTree( filteredItems );
+	const linkedTree = useLinkedTree( items );
 
 	const [ isFocused, setIsFocused ] = useState( false );
 

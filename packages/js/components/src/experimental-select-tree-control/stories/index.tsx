@@ -28,35 +28,37 @@ const listItems: Item[] = [
 	{ id: '3', name: 'Other' },
 ];
 
+const getFilteredItems = ( items, searchValue ) => {
+	const filteredItems = items.filter( ( e ) =>
+		e.name.includes( searchValue )
+	);
+	const itemsToIterate = [ ...filteredItems ];
+	while ( itemsToIterate.length > 0 ) {
+		// The filter should include the parents of the filtered items
+		const element = itemsToIterate.pop();
+		if ( element ) {
+			const parent = listItems.find( ( x ) => x.id === element.parent );
+			if ( parent && ! filteredItems.includes( parent ) ) {
+				filteredItems.push( parent );
+				itemsToIterate.push( parent );
+			}
+		}
+	}
+	return filteredItems;
+};
+
 export const MultipleSelectTree: React.FC = () => {
 	const [ value, setValue ] = React.useState( '' );
 	const [ selected, setSelected ] = React.useState< Item[] >( [] );
+
+	const items = getFilteredItems( listItems, value );
+
 	return (
 		<SelectTree
 			label="Multiple Select Tree"
 			multiple
-			items={ listItems }
+			items={ items }
 			selected={ selected }
-			getFilteredItems={ ( items, searchValue ) => {
-				const filteredItems = items.filter( ( e ) =>
-					e.name.includes( searchValue )
-				);
-				const itemsToIterate = [ ...filteredItems ];
-				while ( itemsToIterate.length > 0 ) {
-					// The filter should include the parents of the filtered items
-					const element = itemsToIterate.pop();
-					if ( element ) {
-						const parent = listItems.find(
-							( x ) => x.id === element.parent
-						);
-						if ( parent && ! filteredItems.includes( parent ) ) {
-							filteredItems.push( parent );
-							itemsToIterate.push( parent );
-						}
-					}
-				}
-				return filteredItems;
-			} }
 			shouldNotRecursivelySelect
 			allowCreate
 			createValue={ value }
