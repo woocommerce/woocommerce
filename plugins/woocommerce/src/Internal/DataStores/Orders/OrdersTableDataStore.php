@@ -1964,21 +1964,6 @@ FROM $order_meta_table
 			$order->delete_meta_data( '_wp_trash_meta_comments_status' );
 			$order->save_meta_data();
 
-			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-			if ( $data_synchronizer->data_sync_is_enabled() ) {
-				// The previous $order->save() will have forced a sync to the posts table,
-				// this implies that the post status is not "trash" anymore, and thus
-				// wp_untrash_post would do nothing.
-				wp_update_post(
-					array(
-						'ID'          => $id,
-						'post_status' => 'trash',
-					)
-				);
-
-				wp_untrash_post( $id );
-			}
-
 			return true;
 		}
 
