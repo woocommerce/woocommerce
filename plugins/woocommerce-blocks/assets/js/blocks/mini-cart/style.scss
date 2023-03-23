@@ -171,12 +171,15 @@ h2.wc-block-mini-cart__title {
 		}
 	}
 
-	.wc-block-mini-cart__footer-actions {
+	.wc-block-mini-cart__footer-actions,
+	.block-editor-block-list__layout {
 		display: flex;
 		gap: $gap;
 
-		.wc-block-components-button {
+		.wc-block-components-button,
+		.wp-block-button {
 			flex-grow: 1;
+			display: inline-flex;
 		}
 
 		.wc-block-components-button.outlined {
