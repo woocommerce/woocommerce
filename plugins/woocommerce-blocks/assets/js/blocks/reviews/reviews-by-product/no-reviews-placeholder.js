@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
 import { Icon, commentContent } from '@wordpress/icons';
 import { withProduct } from '@woocommerce/block-hocs';
+import { decodeEntities } from '@wordpress/html-entities';
 
 const NoReviewsPlaceholder = ( { error, getProduct, isLoading, product } ) => {
 	const renderApiError = () => (
@@ -32,7 +33,7 @@ const NoReviewsPlaceholder = ( { error, getProduct, isLoading, product } ) => {
 					"This block lists reviews for a selected product. %s doesn't have any reviews yet, but they will show up here when it does.",
 					'woo-gutenberg-products-block'
 				),
-				product.name
+				decodeEntities( product.name )
 			)
 		);
 

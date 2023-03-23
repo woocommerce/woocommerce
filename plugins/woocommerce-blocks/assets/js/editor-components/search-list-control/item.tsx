@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import { CheckboxControl } from '@wordpress/components';
 import { useCallback } from '@wordpress/element';
 import { arrayDifferenceBy, arrayUnionBy } from '@woocommerce/utils';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -33,7 +34,7 @@ const ItemLabel = ( props: { item: SearchListItemProps; search: string } ) => {
 				</span>
 			) : null }
 			<span className="woocommerce-search-list__item-name">
-				{ getHighlightedName( item.name, search ) }
+				{ getHighlightedName( decodeEntities( item.name ), search ) }
 			</span>
 		</span>
 	);
