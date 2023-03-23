@@ -6,6 +6,7 @@ import { SearchListControl } from '@woocommerce/editor-components/search-list-co
 import PropTypes from 'prop-types';
 import { withSearchedProducts } from '@woocommerce/block-hocs';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * The products control exposes a custom selector for searching and selecting
@@ -72,7 +73,9 @@ const ProductsControl = ( {
 					: '';
 				return {
 					...product,
-					name: `${ product.name }${ formattedSku }`,
+					name: `${ decodeEntities(
+						product.name
+					) }${ formattedSku }`,
 				};
 			} ) }
 			isCompact={ isCompact }
