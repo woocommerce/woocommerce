@@ -39,7 +39,6 @@
 		"@wordpress/hooks": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/url": "wp-6.0",
-		"dompurify": "^2.3.6",
 		"md5": "^2.3.0",
 		"qs": "^6.10.3",
 		"rememo": "^4.0.0"
