@@ -40,8 +40,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		await api.post( 'products/batch', { delete: ids } );
 	} );
 
-	// tests build upon one another, so running one in the middle will fail.
-	test( 'can create product, attributes and variations', async ( {
+	test( 'can create product, attributes and variations, edit variations and delete variations', async ( {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product' );
@@ -102,14 +101,8 @@ test.describe( 'Add New Variable Product Page', () => {
 		await expect( page.locator( '#message.notice-success' ) ).toContainText(
 			'Product draft updated.'
 		);
-	} );
 
-	test( 'can set the variation attributes, bulk edit variations', async ( {
-		page,
-	} ) => {
-		await page.goto( 'wp-admin/edit.php?post_type=product' );
-		await page.locator( `a:has-text("${ variableProductName }")` ).click();
-		await page.waitForLoadState( 'networkidle' );
+		// set variation attributes and bulk edit variations
 		await page.click( 'a[href="#variable_product_options"]' );
 
 		// set the variation attributes
@@ -156,21 +149,16 @@ test.describe( 'Add New Variable Product Page', () => {
 			'#variable_product_options .toolbar-top a.expand_all'
 		);
 		for ( let i = 0; i < 4; i++ ) {
-			const checkBox = page.locator(
+			const checkBox = await page.locator(
 				`input[name="variable_is_downloadable[${ i }]"]`
 			);
 			await expect( checkBox ).toBeChecked();
 		}
 
 		await page.locator( '#save-post' ).click();
-	} );
 
-	test( 'can delete all variations', async ( { page } ) => {
-		await page.goto( 'wp-admin/edit.php?post_type=product' );
-		await page.locator( `a:has-text("${ variableProductName }")` ).click();
-		await page.waitForLoadState( 'networkidle' );
+		// delete all variations
 		await page.click( 'a[href="#variable_product_options"]' );
-		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await Promise.all( [
 			page.waitForResponse(
 				( resp ) =>
@@ -181,17 +169,16 @@ test.describe( 'Add New Variable Product Page', () => {
 				force: true,
 			} ),
 		] );
-
-		// delete all variations
 		await page.click( 'a.do_variation_action' );
 		await page.waitForSelector( '.woocommerce_variation', {
 			state: 'detached',
 		} );
 		const variationsCount = await page.$$( '.woocommerce_variation' );
 		await expect( variationsCount ).toHaveLength( 0 );
+
 	} );
 
-	test( 'can manually add a variation', async ( { page } ) => {
+	test( 'can manually add a variation, manage stock levels, set variation defaults and remove a variation', async ( { page } ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product' );
 		await page.fill( '#title', manualVariableProduct );
 		await page.selectOption( '#product-type', 'variable', { force: true } );
@@ -201,21 +188,12 @@ test.describe( 'Add New Variable Product Page', () => {
 			if ( i > 0 ) {
 				await page.click( 'button.add_attribute' );
 			}
+			await page.waitForSelector( `input[name="attribute_names[${ i }]"]` );
 
-			await page
-				.locator(
-					`.woocommerce_attribute_data input[name="attribute_names[${ i }]"]`
-				)
-				.fill( `attr #${ i + 1 }` );
-			await page
-				.locator(
-					`.woocommerce_attribute_data textarea[name="attribute_values[${ i }]"]`
-				)
-				.fill( 'val1 | val2' );
-			await page.keyboard.press( 'ArrowUp' );
-			await page.click( 'text=Save attributes' );
+			await page.locator( `input[name="attribute_names[${ i }]"]` ).first().type( `attr #${ i + 1 }` );
+			await page.locator( `textarea[name="attribute_values[${ i }]"]` ).first().type( 'val1 | val2' );
 		}
-
+		await page.click( 'text=Save attributes' );
 		// wait for the attributes to be saved
 		await page.waitForResponse(
 			( response ) =>
@@ -259,18 +237,10 @@ test.describe( 'Add New Variable Product Page', () => {
 		await expect(
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
-	} );
-
-	test( 'can manage stock at variation level', async ( { page } ) => {
-		await page.goto( 'wp-admin/edit.php?post_type=product' );
-		await page
-			.locator( `a:has-text("${ manualVariableProduct }")` )
-			.click();
-		await page.waitForLoadState( 'networkidle' );
-		await page.click( 'a[href="#variable_product_options"]' );
-		await page.waitForLoadState( 'networkidle' );
 
 		// manage stock at variation level
+		await page.click( 'a[href="#variable_product_options"]' );
+		await page.waitForLoadState( 'networkidle' );
 		await page.click(
 			'#variable_product_options .toolbar-top a.expand_all'
 		);
@@ -297,14 +267,8 @@ test.describe( 'Add New Variable Product Page', () => {
 		await expect(
 			page.locator( '#variable_backorders0 > option[selected]' )
 		).toHaveText( 'Allow, but notify customer' );
-	} );
 
-	test( 'can set variation defaults', async ( { page } ) => {
-		await page.goto( 'wp-admin/edit.php?post_type=product' );
-		await page
-			.locator( `a:has-text("${ manualVariableProduct }")` )
-			.click();
-		await page.waitForLoadState( 'networkidle' );
+		// set variation defaults
 		await page.click( 'a[href="#variable_product_options"]' );
 
 		// set variation defaults
@@ -325,14 +289,8 @@ test.describe( 'Add New Variable Product Page', () => {
 				)
 			).toHaveValue( `${ defaultAttributes[ i ] }` );
 		}
-	} );
 
-	test( 'can remove a variation', async ( { page } ) => {
-		await page.goto( 'wp-admin/edit.php?post_type=product' );
-		await page
-			.locator( `a:has-text("${ manualVariableProduct }")` )
-			.click();
-		await page.waitForLoadState( 'networkidle' );
+		// remove a variation
 		await page.click( 'a[href="#variable_product_options"]' );
 
 		// remove a variation
