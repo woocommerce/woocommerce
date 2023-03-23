@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update playwright api-core-tests to associate orders with real products to prevent extension issues for those that validate product ids

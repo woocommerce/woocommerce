@@ -95,6 +95,24 @@ const storeDetails = {
 			downloadable: 'Downloads',
 		},
 	},
+	liberia: {
+		store: {
+			address: 'addr1',
+			city: 'Kakata',
+			zip: 'Division 1',
+			email: admin.email,
+			country: 'Liberia — Margibi', // corresponding to the text value of the option,
+			countryCode: 'LR',
+		},
+		expectedIndustries: 8, // There are 8 checkboxes on the page (in Liberia), adjust this constant if we change that
+		industries: {
+			other: 'Other',
+		},
+		products: {
+			physical: 'Physical products',
+			downloadable: 'Downloads',
+		},
+	},
 };
 
 module.exports = {

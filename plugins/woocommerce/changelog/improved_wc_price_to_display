@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Add 'display_context' argument to wc_get_price_to_display().

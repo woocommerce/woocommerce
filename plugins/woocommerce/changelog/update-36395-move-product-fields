@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Moving some components out of core and into product-editor package.

@@ -2,52 +2,38 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { DropdownMenu, MenuItem } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { DropdownMenu } from '@wordpress/components';
+import { useFormContext } from '@woocommerce/components';
+import { useSelect } from '@wordpress/data';
 import { WooHeaderItem } from '@woocommerce/admin-layout';
-import { getAdminLink } from '@woocommerce/settings';
 import { moreVertical } from '@wordpress/icons';
 import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
-import { useFormContext } from '@woocommerce/components';
-import {
-	ALLOW_TRACKING_OPTION_NAME,
-	STORE_KEY as CES_STORE_KEY,
-} from '@woocommerce/customer-effort-score';
+import { ALLOW_TRACKING_OPTION_NAME } from '@woocommerce/customer-effort-score';
 
 /**
  * Internal dependencies
  */
-import { ClassicEditorIcon } from './images/classic-editor-icon';
-import { FeedbackIcon } from './images/feedback-icon';
-import { NEW_PRODUCT_MANAGEMENT } from '~/customer-effort-score-tracks/product-mvp-ces-footer';
+
+import {
+	FeedbackMenuItem,
+	ClassicEditorMenuItem,
+} from './fills/more-menu-items';
+
 import './product-more-menu.scss';
 
 export const ProductMoreMenu = () => {
 	const { values } = useFormContext< Product >();
-	const { showCesModal, showProductMVPFeedbackModal } =
-		useDispatch( CES_STORE_KEY );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-
-	const { allowTracking, resolving: isLoading } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
-
-		const allowTrackingOption =
-			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
+	const { resolving: isLoading } = useSelect( ( select ) => {
+		const { hasFinishedResolution } = select( OPTIONS_STORE_NAME );
 
 		const resolving = ! hasFinishedResolution( 'getOption', [
 			ALLOW_TRACKING_OPTION_NAME,
 		] );
 
 		return {
-			allowTracking: allowTrackingOption === 'yes',
 			resolving,
 		};
 	} );
-
-	const classEditorUrl = values.id
-		? getAdminLink( `post.php?post=${ values.id }&action=edit` )
-		: getAdminLink( 'post-new.php?post_type=product' );
 
 	if ( isLoading ) {
 		return null;
@@ -63,55 +49,11 @@ export const ProductMoreMenu = () => {
 			>
 				{ ( { onClose } ) => (
 					<>
-						<MenuItem
-							onClick={ () => {
-								showCesModal(
-									{
-										action: 'new_product',
-										title: __(
-											"How's your experience with the product editor?",
-											'woocommerce'
-										),
-										firstQuestion: __(
-											'The product editing screen is easy to use',
-											'woocommerce'
-										),
-										secondQuestion: __(
-											"The product editing screen's functionality meets my needs",
-											'woocommerce'
-										),
-									},
-									{ shouldShowComments: () => true },
-									{
-										type: 'snackbar',
-										icon: <span>🌟</span>,
-									}
-								);
-								onClose();
-							} }
-							icon={ <FeedbackIcon /> }
-							iconPosition="right"
-						>
-							{ __( 'Share feedback', 'woocommerce' ) }
-						</MenuItem>
-						<MenuItem
-							onClick={ () => {
-								if ( allowTracking ) {
-									updateOptions( {
-										[ NEW_PRODUCT_MANAGEMENT ]: 'no',
-									} );
-									showProductMVPFeedbackModal();
-									onClose();
-								} else {
-									window.location.href = classEditorUrl;
-									onClose();
-								}
-							} }
-							icon={ <ClassicEditorIcon /> }
-							iconPosition="right"
-						>
-							{ __( 'Use the classic editor', 'woocommerce' ) }
-						</MenuItem>
+						<FeedbackMenuItem onClose={ onClose } />
+						<ClassicEditorMenuItem
+							productId={ values.id }
+							onClose={ onClose }
+						/>
 					</>
 				) }
 			</DropdownMenu>

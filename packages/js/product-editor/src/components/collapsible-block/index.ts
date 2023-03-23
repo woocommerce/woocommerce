@@ -14,4 +14,5 @@ export const settings = {
 	edit: Edit,
 };
 
-export const init = () => initBlock( { name, metadata, settings } );
+export const init = () =>
+	initBlock( { name, metadata: metadata as never, settings } );
