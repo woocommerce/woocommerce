@@ -8,6 +8,7 @@ import EditableButton from '@woocommerce/editor-components/editable-button';
  * Internal dependencies
  */
 import { defaultCartButtonLabel } from './constants';
+import { getVariant } from '../utils';
 
 export const Edit = ( {
 	attributes,
@@ -25,7 +26,7 @@ export const Edit = ( {
 		<EditableButton
 			{ ...blockProps }
 			className="wc-block-mini-cart__footer-cart"
-			variant="outlined"
+			variant={ getVariant( blockProps.className, 'outlined' ) }
 			value={ cartButtonLabel }
 			placeholder={ defaultCartButtonLabel }
 			onChange={ ( content ) => {
