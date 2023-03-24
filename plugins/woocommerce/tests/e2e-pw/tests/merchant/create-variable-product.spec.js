@@ -109,10 +109,13 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		// manually create variations from all attributes
 		await page.click( 'a[href="#variable_product_options"]' );
-		await page.selectOption( '#field_to_edit', 'link_all_variations' );
-		page.on( 'dialog', ( dialog ) => dialog.accept() );
 
-		await page.click( 'a.do_variation_action' );
+		// Override the window.confirm function to always return true (or false, depending on your requirements)
+		await page.evaluate( () => {
+			window.confirm = () => true;
+		} );
+		await page.click( 'button.generate_variations' );
+
 		// add variation attributes
 		for ( let i = 0; i < 8; i++ ) {
 			const val1 = 'val1';
@@ -245,10 +248,7 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		// manually adds a variation
 		await page.click( 'a[href="#variable_product_options"]' );
-		await page.selectOption( '#field_to_edit', 'add_variation', {
-			force: true,
-		} );
-		await page.click( 'a.do_variation_action' );
+		await page.click( 'button.add_variation_manually' );
 		await expect( page.locator( '.variation-needs-update' ) ).toBeVisible();
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
 			await page.selectOption(
