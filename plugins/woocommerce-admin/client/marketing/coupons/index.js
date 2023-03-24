@@ -8,8 +8,8 @@ import { useUser } from '@woocommerce/data';
  * Internal dependencies
  */
 import './style.scss';
-import RecommendedExtensions from '../components/recommended-extensions';
-import KnowledgeBase from '../components/knowledge-base';
+import RecommendedExtensions from './recommended-extensions';
+import KnowledgeBase from './knowledge-base';
 import { getAdminSetting } from '~/utils/admin-settings';
 import '../data';
 
