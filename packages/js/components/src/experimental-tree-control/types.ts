@@ -14,7 +14,7 @@ export type CheckedStatus = 'checked' | 'unchecked' | 'indeterminate';
 
 type BaseTreeProps = {
 	/**
-	 * It contians one item if `multiple` value is false or
+	 * It contains one item if `multiple` value is false or
 	 * a list of items if it is true.
 	 */
 	selected?: Item | Item[];
@@ -22,6 +22,24 @@ type BaseTreeProps = {
 	 * Whether the tree items are single or multiple selected.
 	 */
 	multiple?: boolean;
+	/**
+	 * In `multiple` mode, when this flag is also set, selecting children does
+	 * not select their parents and selecting parents does not select their children.
+	 */
+	shouldNotRecursivelySelect?: boolean;
+	/**
+	 * The value to be used for comparison to determine if 'create new' button should be shown.
+	 */
+	createValue?: string;
+	/**
+	 * Called when the 'create new' button is clicked.
+	 */
+	onCreateNew?: () => void;
+	/**
+	 * If passed, shows create button if return from callback is true
+	 */
+	shouldShowCreateButton?( value?: string ): boolean;
+	isExpanded?: boolean;
 	/**
 	 * When `multiple` is true and a child item is selected, all its
 	 * ancestors and its descendants are also selected. If it's false
@@ -54,6 +72,10 @@ type BaseTreeProps = {
 	 * @see {@link LinkedTree}
 	 */
 	shouldItemBeHighlighted?( item: LinkedTree ): boolean;
+	/**
+	 * Called when the create button is clicked to help closing any related popover.
+	 */
+	onTreeBlur?(): void;
 };
 
 export type TreeProps = BaseTreeProps &
@@ -108,8 +130,10 @@ export type TreeItemProps = BaseTreeProps &
 		level: number;
 		item: LinkedTree;
 		index: number;
+		isFocused?: boolean;
 		getLabel?( item: LinkedTree ): JSX.Element;
 		shouldItemBeExpanded?( item: LinkedTree ): boolean;
+		onLastItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
 	};
 
 export type TreeControlProps = Omit< TreeProps, 'items' | 'level' > & {

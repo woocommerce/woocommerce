@@ -4,15 +4,10 @@
 import { createElement, MouseEvent, useRef } from 'react';
 import classNames from 'classnames';
 
-/**
- * Internal dependencies
- */
-import { Props } from './types';
-
 type ComboBoxProps = {
 	children?: JSX.Element | JSX.Element[] | null;
-	comboBoxProps: Props;
-	inputProps: Props;
+	comboBoxProps: JSX.IntrinsicElements[ 'div' ];
+	inputProps: JSX.IntrinsicElements[ 'input' ];
 	suffix?: JSX.Element | null;
 };
 
@@ -60,12 +55,14 @@ export const ComboBox = ( {
 					<input
 						{ ...inputProps }
 						ref={ ( node ) => {
-							inputRef.current = node;
-							(
-								inputProps.ref as unknown as (
-									node: HTMLInputElement | null
-								) => void
-							 )( node );
+							if ( typeof inputProps.ref === 'function' ) {
+								inputRef.current = node;
+								(
+									inputProps.ref as unknown as (
+										node: HTMLInputElement | null
+									) => void
+								 )( node );
+							}
 						} }
 					/>
 				</div>
