@@ -1072,6 +1072,9 @@
 			line-height: 18px;
 			text-align: center;
 		}
+		&.hidden {
+			display: none;
+		}
 	}
 }
 
