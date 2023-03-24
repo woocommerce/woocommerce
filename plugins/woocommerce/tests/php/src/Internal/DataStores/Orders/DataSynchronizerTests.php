@@ -5,13 +5,17 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+
+require_once __DIR__ . '/../../../../helpers/HPOSToggleTrait.php';
 
 /**
  * Tests for DataSynchronizer class.
  */
-class DataSynchronizerTests extends WC_Unit_Test_Case {
+class DataSynchronizerTests extends HposTestCase {
 	use ArraySubsetAsserts;
+	use HPOSToggleTrait;
 
 	/**
 	 * @var DataSynchronizer
@@ -231,23 +235,23 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 	 * @param bool $manual_sync True to trigger synchronization manually, false if automatic synchronization is enabled.
 	 */
 	public function test_synced_order_deletion_with_sync_disabled_and_posts_authoritative_generates_proper_deletion_record_if_cot_record_exists( bool $manual_sync ) {
-		$this->set_posts_authoritative();
+		$this->toggle_cot_authoritative( false );
 
 		if ( $manual_sync ) {
-			$this->disable_data_sync();
+			$this->disable_cot_sync();
 			$order = OrderHelper::create_order();
-			$this->do_sync();
+			$this->do_cot_sync();
 		} else {
-			$this->enable_data_sync();
+			$this->enable_cot_sync();
 			$order = OrderHelper::create_order();
 		}
 
-		$this->disable_data_sync();
+		$this->disable_cot_sync();
 		$order_id = $order->get_id();
 		$order->delete( true );
 
 		$this->assert_deletion_record_existence( $order_id, false );
-		$this->assert_order_record_existence( $order_id, true );
+		$this->assert_order_record_existence( $order_id, true, true );
 	}
 
 	/**
@@ -256,8 +260,8 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_synced_order_deletion_with_sync_disabled_and_posts_authoritative_not_generating_deletion_record_if_cot_record_not_exists() {
-		$this->set_posts_authoritative();
-		$this->disable_data_sync();
+		$this->toggle_cot_authoritative( false );
+		$this->disable_cot_sync();
 		$order = OrderHelper::create_order();
 
 		$order_id = $order->get_id();
@@ -282,19 +286,15 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 
 		$meta_table_name = OrdersTableDataStore::get_meta_table_name();
 
-		if ( $cot_is_authoritative ) {
-			$this->set_cot_authoritative();
-		} else {
-			$this->set_posts_authoritative();
-		}
+		$this->toggle_cot_authoritative( $cot_is_authoritative );
 
-		$this->enable_data_sync();
+		$this->enable_cot_sync();
 		$order_1 = OrderHelper::create_order();
 		$order_2 = OrderHelper::create_order();
 		$order_3 = OrderHelper::create_order();
 		$order_4 = OrderHelper::create_order();
 
-		$this->disable_data_sync();
+		$this->disable_cot_sync();
 		if ( $new_records_exist ) {
 			$order_5 = OrderHelper::create_order();
 		}
@@ -323,19 +323,15 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 	 * @param bool $cot_is_authoritative True to test with the orders table as authoritative, false to test with the posts table as authoritative.
 	 */
 	public function test_process_batch_processes_modified_and_deleted_orders( bool $cot_is_authoritative ) {
-		if ( $cot_is_authoritative ) {
-			$this->set_cot_authoritative();
-		} else {
-			$this->set_posts_authoritative();
-		}
+		$this->toggle_cot_authoritative( $cot_is_authoritative );
+		$this->enable_cot_sync();
 
-		$this->enable_data_sync();
 		$order_1 = OrderHelper::create_order();
 		$order_2 = OrderHelper::create_order();
 		$order_3 = OrderHelper::create_order();
 		$order_4 = OrderHelper::create_order();
 
-		$this->disable_data_sync();
+		$this->disable_cot_sync();
 
 		$order_1->set_date_modified( '2100-01-01 00:00:00' );
 		$order_1->save();
@@ -387,22 +383,19 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wc_get_logger' => function() use ( $logger ) {
-					return $logger;},
+					return $logger;
+				},
 			)
 		);
 		$this->sut = wc_get_container()->get( DataSynchronizer::class );
 
-		if ( $cot_is_authoritative ) {
-			$this->set_cot_authoritative();
-		} else {
-			$this->set_posts_authoritative();
-		}
+		$this->toggle_cot_authoritative( $cot_is_authoritative );
+		$this->enable_cot_sync();
 
-		$this->enable_data_sync();
 		$order_1 = OrderHelper::create_order();
 		$order_2 = OrderHelper::create_order();
 
-		$this->disable_data_sync();
+		$this->disable_cot_sync();
 
 		$order_1_id = $order_1->get_id();
 		$order_1->delete( true );
@@ -418,105 +411,5 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		$this->sut->process_batch( array( $order_1_id, $order_2_id ) );
 
 		$this->assertEquals( array( "Order {$order_1_id} doesn't exist in the backup table, thus it can't be deleted" ), $logger->warnings );
-	}
-
-	/**
-	 * Assert that a given order record exists or doesn't exist.
-	 *
-	 * @param int  $order_id The order id to check.
-	 * @param bool $in_cot True to assert that the order exists or not in the orders table, false to check in the posts table.
-	 * @param bool $exists True to assert that the order exists, false to check that the order doesn't exist.
-	 * @return void
-	 */
-	private function assert_order_record_existence( $order_id, $in_cot, $exists = true ) {
-		global $wpdb;
-
-		$table_name = $in_cot ? OrdersTableDataStore::get_orders_table_name() : $wpdb->posts;
-
-		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$exists = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT EXISTS (SELECT id FROM {$table_name} WHERE id = %d)",
-				$order_id
-			)
-		);
-		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		if ( $exists ) {
-			$this->assertTrue( (bool) $exists, "No order found with id $order_id in table $table_name" );
-		} else {
-			$this->assertFalse( (bool) $exists, "Unexpected order found with id $order_id in table $table_name" );
-		}
-	}
-
-	/**
-	 * Assert that an order deletion record exists or doesn't exist in the orders meta table.
-	 *
-	 * @param int  $order_id The order id to check.
-	 * @param bool $deleted_from_cot True to assert that the record corresponds to an order deleted from the orders table, or from the posts table otherwise.
-	 * @param bool $exists True to assert that the record exists, false to assert that the record doesn't exist.
-	 * @return void
-	 */
-	private function assert_deletion_record_existence( $order_id, $deleted_from_cot, $exists = true ) {
-		global $wpdb;
-
-		$meta_table_name = OrdersTableDataStore::get_meta_table_name();
-		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$record = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT meta_value FROM $meta_table_name WHERE order_id = %d AND meta_key = %s",
-				$order_id,
-				'deleted_from'
-			),
-			ARRAY_A
-		);
-		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		if ( $exists ) {
-			$this->assertNotNull( $record, "No deletion record found for order id {$order_id}, value: {$record['meta_value']}" );
-		} else {
-			$this->assertNull( $record, "Unexpected deletion record found for order id {$order_id}" );
-			return;
-		}
-
-		$deleted_from = $deleted_from_cot ? OrdersTableDataStore::get_orders_table_name() : $wpdb->posts;
-
-		$this->assertEquals( $deleted_from, $record['meta_value'], "Deletion record for order {$order_id} has a value of {$record['meta_value']}, expected {$deleted_from}" );
-	}
-
-	/**
-	 * Synchronize all the pending unsynchronized orders.
-	 */
-	private function do_sync() {
-		$batch = $this->sut->get_next_batch_to_process( 100 );
-		$this->sut->process_batch( $batch );
-	}
-
-	/**
-	 * Set the orders table as authoritative.
-	 */
-	private function set_cot_authoritative() {
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
-	}
-
-	/**
-	 * Set the posts table as authoritative.
-	 */
-	private function set_posts_authoritative() {
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
-	}
-
-	/**
-	 * Enable the orders synchronization.
-	 */
-	private function enable_data_sync() {
-		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
-	}
-
-	/**
-	 * Disable the orders synchronization.
-	 */
-	private function disable_data_sync() {
-		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
 	}
 }

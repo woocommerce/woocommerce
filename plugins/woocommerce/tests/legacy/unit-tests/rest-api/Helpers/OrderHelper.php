@@ -331,5 +331,4 @@ class OrderHelper {
 
 		return $order;
 	}
-
 }

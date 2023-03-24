@@ -28,14 +28,14 @@ trait HPOSToggleTrait {
 		OrderHelper::delete_order_custom_tables();
 		OrderHelper::create_order_custom_table_if_not_exist();
 
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 	}
 
 	/**
 	 * Call in teardown to disable COT/HPOS.
 	 */
 	public function clean_up_cot_setup(): void {
-		$this->toggle_cot( false );
+		$this->toggle_cot_feature_and_usage( false );
 
 		// Add back removed filter.
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
@@ -43,12 +43,12 @@ trait HPOSToggleTrait {
 	}
 
 	/**
-	 * Enables or disables the custom orders table across WP temporarily.
+	 * Enables or disables the custom orders table feature, and sets the orders table as authoritative, across WP temporarily.
 	 *
 	 * @param boolean $enabled TRUE to enable COT or FALSE to disable.
 	 * @return void
 	 */
-	private function toggle_cot( bool $enabled ): void {
+	private function toggle_cot_feature_and_usage( bool $enabled ): void {
 		$features_controller = wc_get_container()->get( Featurescontroller::class );
 		$features_controller->change_feature_enable( 'custom_order_tables', $enabled );
 
@@ -57,6 +57,14 @@ trait HPOSToggleTrait {
 		// Confirm things are really correct.
 		$wc_data_store = WC_Data_Store::load( 'order' );
 		assert( is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) === $enabled );
+	}
+
+	/**
+	 * Set the orders table or the posts table as the authoritative table to store orders.
+	 * @param bool $cot_authoritative True to set the orders table as authoritative, false to set the posts table as authoritative.
+	 */
+	protected function toggle_cot_authoritative( bool $cot_authoritative ) {
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, wc_bool_to_string( $cot_authoritative ) );
 	}
 
 	/**

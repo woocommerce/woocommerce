@@ -15,7 +15,7 @@ require_once __DIR__ . '/../../../../helpers/HPOSToggleTrait.php';
  *
  * Test for OrdersTableDataStore class.
  */
-class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
+class OrdersTableDataStoreTests extends HposTestCase {
 	use HPOSToggleTrait;
 
 	/**
@@ -50,7 +50,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		parent::setUp();
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		$this->setup_cot();
-		$this->toggle_cot( false );
+		$this->toggle_cot_feature_and_usage( false );
 		$container = wc_get_container();
 		$container->reset_all_resolved();
 		$this->sut            = $container->get( OrdersTableDataStore::class );
@@ -731,7 +731,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * @testDox Tests queries involving 'orderby' and meta queries.
 	 */
 	public function test_cot_query_meta_orderby() {
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 
 		$order1 = new \WC_Order();
 		$order1->add_meta_data( 'color', 'red' );
@@ -1988,7 +1988,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * @testDox Test that multiple calls to read don't try to sync again.
 	 */
 	public function test_read_multiple_dont_sync_again_for_same_order() {
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
 		$order = $this->create_complex_cot_order();
 
@@ -2018,7 +2018,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 		$order = new WC_Order();
 		$order->save();
 
@@ -2045,7 +2045,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 		$order = new WC_Order();
 		$order->save();
 
@@ -2064,7 +2064,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * @testDox Make sure get_order return false when checking an order of different order types without warning.
 	 */
 	public function test_get_order_with_id_for_different_type() {
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 		$this->disable_cot_sync();
 		$product = new \WC_Product();
 		$product->save();
@@ -2093,7 +2093,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 */
 	public function test_address_index_saved_on_update() {
 		global $wpdb;
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 		$this->disable_cot_sync();
 		$order = new WC_Order();
 		$order->set_billing_address_1( '123 Main St' );
@@ -2114,5 +2114,186 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( 1, $result );
+	}
+
+	/**
+	 * @testdox When sync is enabled and an order is deleted, records in both the authoritative and the backup tables are deleted, and no deletion records are created.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $cot_is_authoritative True to test with the orders table as authoritative, false to test with the posts table as authoritative.
+	 */
+	public function test_order_deletion_with_sync_enabled( bool $cot_is_authoritative ) {
+		$this->allow_current_user_to_delete_posts();
+		$this->toggle_cot_feature_and_usage( true );
+		$this->toggle_cot_authoritative( $cot_is_authoritative );
+		$this->enable_cot_sync();
+
+		list($order, $refund) = $this->create_order_with_refund();
+
+		$order_id  = $order->get_id();
+		$refund_id = $refund->get_id();
+
+		$order->delete( true );
+
+		$this->assert_no_order_records_or_deletion_records_exist( $order_id, $refund_id, $cot_is_authoritative );
+	}
+
+	/**
+	 * @testdox Deletion records are created when an order is deleted with sync disabled, then when sync is enabled all order and deletion records are deleted.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $cot_is_authoritative True to test with the orders table as authoritative, false to test with the posts table as authoritative.
+	 */
+	public function test_order_deletion_with_sync_disabled( bool $cot_is_authoritative ) {
+		$this->allow_current_user_to_delete_posts();
+		$this->toggle_cot_feature_and_usage( true );
+		$this->toggle_cot_authoritative( $cot_is_authoritative );
+		$this->enable_cot_sync();
+
+		list($order, $refund) = $this->create_order_with_refund();
+		$order_id             = $order->get_id();
+		$refund_id            = $refund->get_id();
+
+		$this->disable_cot_sync();
+		$order->delete( true );
+
+		$this->assert_order_record_existence( $order_id, true, ! $cot_is_authoritative );
+		$this->assert_order_record_existence( $order_id, false, $cot_is_authoritative );
+		$this->assert_order_record_existence( $refund_id, true, ! $cot_is_authoritative );
+		$this->assert_order_record_existence( $refund_id, false, $cot_is_authoritative );
+
+		$this->assert_deletion_record_existence( $order_id, $cot_is_authoritative, true );
+		$this->assert_deletion_record_existence( $refund_id, $cot_is_authoritative, true );
+
+		$this->do_cot_sync();
+
+		$this->assert_no_order_records_or_deletion_records_exist( $order_id, $refund_id, $cot_is_authoritative );
+	}
+
+	/**
+	 * @testdox When the orders table is authoritative, sync is disabled and an order is deleted, existing placeholder records are deleted from the posts table.
+	 */
+	public function test_order_deletion_with_sync_disabled_when_placeholders_are_created() {
+		$this->allow_current_user_to_delete_posts();
+		$this->toggle_cot_feature_and_usage( true );
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		list($order, $refund) = $this->create_order_with_refund();
+		$order_id             = $order->get_id();
+		$refund_id            = $refund->get_id();
+
+		$this->assert_order_record_existence( $order_id, true, true );
+		$this->assert_order_record_existence( $order_id, false, true, 'shop_order_placehold' );
+		$this->assert_order_record_existence( $refund_id, true, true );
+		$this->assert_order_record_existence( $refund_id, false, true, 'shop_order_placehold' );
+
+		$order->delete( true );
+
+		$this->assert_no_order_records_or_deletion_records_exist( $order_id, $refund_id, false );
+	}
+
+	/**
+	 * @testdox When deleting an order whose associated post type is hierarchical, child orders aren't deleted and get the parent id of their parent order.
+	 */
+	public function test_order_deletion_when_post_type_is_hierarchical_results_in_child_order_upshifting() {
+		$this->reset_container_resolutions();
+		$this->reset_legacy_proxy_mocks();
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'is_post_type_hierarchical' => function( $post_type ) {
+					return 'shop_order' === $post_type ? true : is_post_type_hierarchical( $post_type );
+				},
+			)
+		);
+		$this->sut = wc_get_container()->get( OrdersTableDataStore::class );
+
+		$this->allow_current_user_to_delete_posts();
+		$this->toggle_cot_feature_and_usage( true );
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		list($order, $refund) = $this->create_order_with_refund();
+		$order_id             = $order->get_id();
+		$refund_id            = $refund->get_id();
+
+		$this->switch_data_store( $order, $this->sut );
+
+		$order2    = OrderHelper::create_order();
+		$order2_id = $order2->get_id();
+		$order->set_parent_id( $order2_id );
+		$order->save();
+
+		$order->delete( true );
+
+		$this->assert_order_record_existence( $order_id, true, false );
+		$this->assert_order_record_existence( $refund_id, true, true );
+
+		$refund = wc_get_order( $refund_id );
+		$this->assertEquals( $order2_id, $refund->get_parent_id() );
+	}
+
+	/**
+	 * Mock the current user capabilities so that it's allowed to delete posts.
+	 *
+	 * @return void
+	 */
+	private function allow_current_user_to_delete_posts() {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'current_user_can' => function( $capability ) {
+					return 'delete_posts' === $capability ? true : current_user_can( $capability );
+				},
+			)
+		);
+	}
+
+	/**
+	 * Assert than no records exist whatsoever, and no deletion records either, for a given order and for its refund.
+	 *
+	 * @param int  $order_id The order id to test.
+	 * @param int  $refund_id The refund id to test.
+	 * @param bool $cot_is_authoritative True if the deletion record existence is to be checked for the orders table, false for the posts table.
+	 * @return void
+	 */
+	private function assert_no_order_records_or_deletion_records_exist( $order_id, $refund_id, $cot_is_authoritative ) {
+		$this->assert_order_record_existence( $order_id, true, false );
+		$this->assert_order_record_existence( $order_id, false, false );
+		$this->assert_order_record_existence( $refund_id, true, false );
+		$this->assert_order_record_existence( $refund_id, false, false );
+
+		$this->assert_deletion_record_existence( $order_id, $cot_is_authoritative, false );
+		$this->assert_deletion_record_existence( $refund_id, $cot_is_authoritative, false );
+	}
+
+	/**
+	 * Create an order and a refund.
+	 *
+	 * @return array An array containing the order as the first element and the refund as the second element.
+	 */
+	private function create_order_with_refund() {
+		$order = OrderHelper::create_order();
+
+		$item   = current( $order->get_items() )->get_data();
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$item['id'] => array(
+						'id'           => $item['id'],
+						'qty'          => $item['quantity'],
+						'refund_total' => $item['total'],
+						'refund_tax'   => $item['total_tax'],
+					),
+				),
+			)
+		);
+		$refund->save();
+
+		return array( $order, $refund );
 	}
 }
