@@ -57,43 +57,36 @@ export const PopularCategoryList: React.FC< {
 			className="categorychecklist form-no-clear"
 			id={ CATEGORY_TERM_NAME + 'checklist-pop' }
 		>
-			{ popularCategories.map( ( cat ) => (
-				<li key={ cat.term_id } className="popular-category">
-					<label
-						className="selectit"
-						htmlFor={
-							'in-popular-' +
-							CATEGORY_TERM_NAME +
-							'-' +
-							cat.term_id
-						}
-					>
-						<input
-							type="checkbox"
-							id={
-								'in-popular-' +
-								CATEGORY_TERM_NAME +
-								'-' +
-								cat.term_id
-							}
-							checked={ selectedIds.includes( cat.term_id ) }
-							onChange={ () => {
-								if ( selectedIds.includes( cat.term_id ) ) {
-									onChange(
-										selected.filter(
-											( sel ) =>
-												sel.term_id !== cat.term_id
-										)
-									);
-								} else {
-									onChange( [ ...selected, cat ] );
-								}
-							} }
-						/>
-						{ cat.name }
-					</label>
-				</li>
-			) ) }
+			{ popularCategories.map( ( cat ) => {
+				const categoryCheckboxId = `in-popular-${ CATEGORY_TERM_NAME }-${ cat.term_id }`;
+				return (
+					<li key={ cat.term_id } className="popular-category">
+						<label
+							className="selectit"
+							htmlFor={ categoryCheckboxId }
+						>
+							<input
+								type="checkbox"
+								id={ categoryCheckboxId }
+								checked={ selectedIds.includes( cat.term_id ) }
+								onChange={ () => {
+									if ( selectedIds.includes( cat.term_id ) ) {
+										onChange(
+											selected.filter(
+												( sel ) =>
+													sel.term_id !== cat.term_id
+											)
+										);
+									} else {
+										onChange( [ ...selected, cat ] );
+									}
+								} }
+							/>
+							{ cat.name }
+						</label>
+					</li>
+				);
+			} ) }
 		</ul>
 	);
 };
