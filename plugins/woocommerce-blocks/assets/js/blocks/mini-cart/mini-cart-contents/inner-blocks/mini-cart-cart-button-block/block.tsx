@@ -10,6 +10,7 @@ import { useColorProps } from '@woocommerce/base-hooks';
  * Internal dependencies
  */
 import { defaultCartButtonLabel } from './constants';
+import { getVariant } from '../utils';
 
 type MiniCartCartButtonBlockProps = {
 	cartButtonLabel?: string;
@@ -37,7 +38,7 @@ const Block = ( {
 			) }
 			style={ { ...colorProps.style } }
 			href={ CART_URL }
-			variant="outlined"
+			variant={ getVariant( className, 'outlined' ) }
 		>
 			{ cartButtonLabel || defaultCartButtonLabel }
 		</Button>

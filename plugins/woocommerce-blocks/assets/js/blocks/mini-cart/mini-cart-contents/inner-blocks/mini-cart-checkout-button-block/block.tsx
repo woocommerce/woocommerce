@@ -10,6 +10,7 @@ import { useColorProps } from '@woocommerce/base-hooks';
  * Internal dependencies
  */
 import { defaultCheckoutButtonLabel } from './constants';
+import { getVariant } from '../utils';
 
 type MiniCartCheckoutButtonBlockProps = {
 	checkoutButtonLabel?: string;
@@ -35,6 +36,7 @@ const Block = ( {
 				colorProps.className,
 				'wc-block-mini-cart__footer-checkout'
 			) }
+			variant={ getVariant( className, 'contained' ) }
 			style={ { ...colorProps.style } }
 			href={ CHECKOUT_URL }
 		>

@@ -3,11 +3,13 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import EditableButton from '@woocommerce/editor-components/editable-button';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
 import { defaultCheckoutButtonLabel } from './constants';
+import { getVariant } from '../utils';
 
 export const Edit = ( {
 	attributes,
@@ -24,7 +26,11 @@ export const Edit = ( {
 	return (
 		<EditableButton
 			{ ...blockProps }
-			className="wc-block-mini-cart__footer-checkout"
+			className={ classNames(
+				'wc-block-mini-cart__footer-checkout',
+				blockProps.className
+			) }
+			variant={ getVariant( blockProps.className, 'contained' ) }
 			value={ checkoutButtonLabel }
 			placeholder={ defaultCheckoutButtonLabel }
 			onChange={ ( content ) => {
