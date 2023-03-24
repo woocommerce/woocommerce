@@ -11,6 +11,7 @@
 		"start": "nodemon --watch js --watch css -e js,scss --exec pnpm build"
 	},
 	"devDependencies": {
+		"@types/node": "^16.18.18",
 		"@wordpress/stylelint-config": "19.1.0",
 		"autoprefixer": "9.8.6",
 		"browserslist": "4.19.3",

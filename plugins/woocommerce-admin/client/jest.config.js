@@ -1,6 +1,6 @@
 module.exports = {
 	rootDir: './',
-	preset: '../../../packages/js/internal-js-tests/jest.config.js',
+	preset: '../node_modules/@woocommerce/internal-js-tests/jest-preset.js',
 	globals: {
 		'ts-jest': {
 			diagnostics: {

@@ -9,7 +9,9 @@
 		"skipLibCheck": true,
 		"jsx": "react",
 		"jsxFactory": "createElement",
-		"jsxFragmentFactory": "Fragment"
+		"jsxFragmentFactory": "Fragment",
+		"incremental": true,
+		"typeRoots": []
 	},
 	"exclude": [
 		"node_modules",
@@ -19,6 +21,7 @@
 		"**/build-types",
 		"**/test/*",
 		"**/jest.config.js",
+		"**/jest-preset.js",
 		"**/webpack.*.js",
 		"**/babel.config.js"
 	]

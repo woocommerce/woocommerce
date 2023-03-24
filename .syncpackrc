@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:config|react|react-dom|eslint|typescript|@typescript-eslint|@types/react|@wordpress|@types/wordpress__components|postcss).*$",
+	"filter": "^(?:config|react|react-dom|eslint|typescript|@typescript-eslint|@types/react|@wordpress|@types/wordpress__components|postcss|@types/node).*$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -59,7 +59,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^4.8.3"
+			"pinVersion": "^4.9.5"
 		},
 		{
 			"dependencies": [
@@ -154,6 +154,15 @@
 				"**"
 			],
 			"pinVersion": "^8.4.7"
+		},
+		{
+			"dependencies": [
+				"@types/node"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^16.18.18"
 		}
 	]
 }
