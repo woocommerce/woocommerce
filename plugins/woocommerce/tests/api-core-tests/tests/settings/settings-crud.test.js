@@ -1696,15 +1696,6 @@ test.describe('Settings API tests: CRUD', () => {
 			expect(responseJSON).toEqual(
 				expect.arrayContaining([
 					expect.objectContaining({
-						"id": "woocommerce_multichannel_marketing_enabled",
-						"label": "Marketing",
-						"description": "Enables the new WooCommerce Multichannel Marketing experience in the Marketing page",
-						"type": "checkbox",
-					})
-				]));
-			expect(responseJSON).toEqual(
-				expect.arrayContaining([
-					expect.objectContaining({
 						"id": "woocommerce_navigation_enabled",
 						"label": "Navigation",
 						"description": expect.stringContaining("Adds the new WooCommerce navigation experience to the dashboard"),
