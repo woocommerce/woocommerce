@@ -477,62 +477,62 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'type'        => 'object',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
-					'properties'  => array(
-						'api_enabled'              => array(
+					'properties' => array(
+						'api_enabled'                    => array(
 							'description' => __( 'REST API enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'force_ssl'                => array(
+						'force_ssl'                      => array(
 							'description' => __( 'SSL forced?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'currency'                 => array(
+						'currency'                       => array(
 							'description' => __( 'Currency.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'currency_symbol'          => array(
+						'currency_symbol'                => array(
 							'description' => __( 'Currency symbol.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'currency_position'        => array(
+						'currency_position'              => array(
 							'description' => __( 'Currency position.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'thousand_separator'       => array(
+						'thousand_separator'             => array(
 							'description' => __( 'Thousand separator.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'decimal_separator'        => array(
+						'decimal_separator'              => array(
 							'description' => __( 'Decimal separator.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'number_of_decimals'       => array(
+						'number_of_decimals'             => array(
 							'description' => __( 'Number of decimals.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'geolocation_enabled'      => array(
+						'geolocation_enabled'            => array(
 							'description' => __( 'Geolocation enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'taxonomies'               => array(
+						'taxonomies'                     => array(
 							'description' => __( 'Taxonomy terms for product/order statuses.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view' ),
@@ -541,7 +541,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 								'type' => 'string',
 							),
 						),
-						'product_visibility_terms' => array(
+						'product_visibility_terms'       => array(
 							'description' => __( 'Terms in the product visibility taxonomy.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view' ),
@@ -550,8 +550,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 								'type' => 'string',
 							),
 						),
-						'wccom_connected'          => array(
-							'description' => __( 'Is WooCommerce.com connected?', 'woocommerce' ),
+						'wccom_connected'                => array(
+							'description' => __( 'Is store connected to WooCommerce.com?', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -562,25 +562,25 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'HPOS_feature_screen_enabled' => array(
+						'HPOS_feature_screen_enabled'    => array(
 							'description' => __( 'Is HPOS feature screen enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'HPOS_enabled' => array(
+						'HPOS_enabled'                   => array(
 							'description' => __( 'Is HPOS enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'order_datastore' => array(
+						'order_datastore'                => array(
 							'description' => __( 'Order datastore.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
-						'HPOS_sync_enabled' => array(
+						'HPOS_sync_enabled'              => array(
 							'description' => __( 'Is HPOS sync enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
@@ -1285,10 +1285,14 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'thousand_separator'             => wc_get_price_thousand_separator(),
 			'decimal_separator'              => wc_get_price_decimal_separator(),
 			'number_of_decimals'             => wc_get_price_decimals(),
-			'geolocation_enabled'            => in_array( get_option( 'woocommerce_default_customer_address' ), array(
-				'geolocation_ajax',
-				'geolocation'
-			), true ),
+			'geolocation_enabled'            => in_array(
+				get_option( 'woocommerce_default_customer_address' ),
+				array(
+					'geolocation_ajax',
+					'geolocation'
+				),
+				true
+			),
 			'taxonomies'                     => $term_response,
 			'product_visibility_terms'       => $product_visibility_terms,
 			'woocommerce_com_connected'      => ConnectionHelper::is_connected() ? 'yes' : 'no',
