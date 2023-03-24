@@ -13,6 +13,9 @@
 		},
 		"description": {
 			"type": "string"
+		},
+		"icon": {
+			"type": "object"
 		}
 	},
 	"supports": {
