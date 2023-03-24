@@ -59,6 +59,7 @@ export const CategoryAddNew: React.FC< {
 					{ term_id: res.id, name: res.name, count: res.count },
 				] );
 				setNewCategoryName( '' );
+				setCategoryParent( undefined );
 				setShowAddNew( false );
 			}
 		} );
@@ -101,14 +102,14 @@ export const CategoryAddNew: React.FC< {
 		<div id={ CATEGORY_TERM_NAME + '-adder' }>
 			<a
 				id="product_cat-add-toggle"
-				href="#product_cat-add"
+				href={ '#taxonomy-' + CATEGORY_TERM_NAME }
 				className="taxonomy-add-new"
 				onClick={ () => setShowAddNew( ! showAddNew ) }
 			>
 				{ __( '+ Add new category', 'woocommerce' ) }
 			</a>
 			{ showAddNew && (
-				<p id="product_cat-add" className="category-add">
+				<div id="product_cat-add" className="category-add">
 					<label
 						className="screen-reader-text"
 						htmlFor="newproduct_cat"
@@ -152,7 +153,7 @@ export const CategoryAddNew: React.FC< {
 						disabled={ ! newCategoryName.length }
 						onClick={ onCreate }
 					/>
-				</p>
+				</div>
 			) }
 		</div>
 	);

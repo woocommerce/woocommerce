@@ -20,7 +20,7 @@ if ( window.getUserSetting ) {
 const CATEGORY_POPULAR_TAB_ID = 'pop';
 const CATEGORY_ALL_TAB_ID = 'all';
 
-export const CategoryMetabox: React.FC< {
+const CategoryMetabox: React.FC< {
 	initialSelected: CategoryTerm[];
 } > = ( { initialSelected } ) => {
 	const [ selected, setSelected ] = useState( initialSelected );
@@ -30,7 +30,10 @@ export const CategoryMetabox: React.FC< {
 			: CATEGORY_ALL_TAB_ID
 	);
 	return (
-		<div id={ 'taxonomy-' + CATEGORY_TERM_NAME } className="categorydiv">
+		<div
+			id={ 'taxonomy-' + CATEGORY_TERM_NAME }
+			className="categorydiv category-async-metabox"
+		>
 			<ul className="category-tabs">
 				<li
 					className={
@@ -135,3 +138,5 @@ export const CategoryMetabox: React.FC< {
 		</div>
 	);
 };
+
+export default CategoryMetabox;

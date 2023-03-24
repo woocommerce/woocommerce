@@ -1,22 +1,28 @@
 /**
  * External dependencies
  */
-import { render } from '@wordpress/element';
+import { render, Suspense, lazy } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { CategoryMetabox } from './category-metabox';
+const CategoryMetabox = lazy( () =>
+	import( /* webpackChunkName: "category-metabox" */ './category-metabox' )
+);
 import { getSelectedCategoryData } from './category-handlers';
 import './style.scss';
 
 const metaboxContainer = document.querySelector(
 	'#taxonomy-product_cat-metabox'
 );
-const initialSelected = getSelectedCategoryData(
-	metaboxContainer.parentElement
-);
-render(
-	<CategoryMetabox initialSelected={ initialSelected } />,
-	metaboxContainer
-);
+if ( metaboxContainer ) {
+	const initialSelected = getSelectedCategoryData(
+		metaboxContainer.parentElement
+	);
+	render(
+		<Suspense fallback={ null }>
+			<CategoryMetabox initialSelected={ initialSelected } />
+		</Suspense>,
+		metaboxContainer
+	);
+}

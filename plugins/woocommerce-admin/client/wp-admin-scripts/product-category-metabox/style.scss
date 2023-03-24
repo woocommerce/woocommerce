@@ -3,7 +3,6 @@
 		margin-top: 8px;
 
 		.woocommerce-tree-select-control {
-
 			.components-base-control,
 			.woocommerce-tree-select-control__tree {
 				padding: 0 5px;
@@ -20,10 +19,19 @@
 	}
 }
 
-.categorydiv #product_cat-all {
-	overflow: visible;
+.categorydiv.category-async-metabox {
+	#product_cat-all {
+		overflow: visible;
 
-	.categorychecklist > li {
-		margin-right: 25px;
+		.categorychecklist > li {
+			margin-right: 25px;
+		}
+	}
+	.woocommerce-experimental-select-control__combo-box-wrapper {
+		min-height: 30px;
+		border-radius: 4px;
+	}
+	.woocommerce-experimental-select-control__menu-item {
+		padding: 5px 12px;
 	}
 }

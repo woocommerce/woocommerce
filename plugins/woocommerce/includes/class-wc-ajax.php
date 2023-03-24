@@ -1783,6 +1783,7 @@ class WC_AJAX {
 			foreach ( $terms as $term ) {
 				$term->formatted_name = '';
 
+				$ancestors = array();
 				if ( $term->parent ) {
 					$ancestors = array_reverse( get_ancestors( $term->term_id, 'product_cat' ) );
 					foreach ( $ancestors as $ancestor ) {
