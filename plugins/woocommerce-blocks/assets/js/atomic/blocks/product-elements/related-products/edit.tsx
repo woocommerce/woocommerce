@@ -5,9 +5,13 @@ import {
 	BLOCK_ATTRIBUTES,
 	INNER_BLOCKS_TEMPLATE,
 } from '@woocommerce/blocks/product-query/variations';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import {
+	InnerBlocks,
+	InspectorControls,
+	useBlockProps,
+} from '@wordpress/block-editor';
 import { InnerBlockTemplate } from '@wordpress/blocks';
-import { Disabled, Notice } from '@wordpress/components';
+import { Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -23,7 +27,7 @@ const Edit = () => {
 
 	return (
 		<div { ...blockProps }>
-			<Disabled>
+			<InspectorControls>
 				<Notice
 					className={ 'wc-block-editor-related-products__notice' }
 					status={ 'warning' }
@@ -36,7 +40,7 @@ const Edit = () => {
 						) }
 					</p>
 				</Notice>
-			</Disabled>
+			</InspectorControls>
 			<InnerBlocks template={ TEMPLATE } />
 		</div>
 	);
