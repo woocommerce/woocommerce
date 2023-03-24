@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Fix rounding difference on refunds with per-line taxes

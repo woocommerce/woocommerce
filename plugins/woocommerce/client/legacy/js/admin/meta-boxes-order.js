@@ -1043,15 +1043,19 @@ jQuery( function ( $ ) {
 			},
 
 			input_changed: function() {
-				var refund_amount = 0;
-				var $items        = $( '.woocommerce_order_items' ).find( 'tr.item, tr.fee, tr.shipping' );
+				var refund_amount     = 0;
+				var $items            = $( '.woocommerce_order_items' ).find( 'tr.item, tr.fee, tr.shipping' );
+				var round_at_subtotal = 'yes' === woocommerce_admin_meta_boxes.round_at_subtotal;
 
 				$items.each(function() {
 					var $row               = $( this );
 					var refund_cost_fields = $row.find( '.refund input:not(.refund_order_item_qty)' );
 
 					refund_cost_fields.each(function( index, el ) {
-						refund_amount += parseFloat( accounting.unformat( $( el ).val() || 0, woocommerce_admin.mon_decimal_point ) );
+						var field_amount = accounting.unformat( $( el ).val() || 0, woocommerce_admin.mon_decimal_point );
+						refund_amount += parseFloat( round_at_subtotal ?
+							field_amount :
+							accounting.formatNumber( field_amount, woocommerce_admin_meta_boxes.currency_format_num_decimals, '' ) );
 					});
 				});
 
