@@ -1289,7 +1289,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				get_option( 'woocommerce_default_customer_address' ),
 				array(
 					'geolocation_ajax',
-					'geolocation'
+					'geolocation',
 				),
 				true
 			),
