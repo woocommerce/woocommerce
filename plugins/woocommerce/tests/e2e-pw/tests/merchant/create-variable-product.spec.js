@@ -44,10 +44,6 @@ test.describe( 'Add New Variable Product Page', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product' );
 		await page.selectOption( '#product-type', 'variable', { force: true } );
 
-		await expect(
-			page.getByRole( 'button', { name: 'Got it' } )
-		).toBeVisible();
-
 		// because of the way that the tour is dynamically positioned,
 		// Playwright can't automatically scroll the button into view,
 		// so we will manually scroll the attributes tab into view,
@@ -56,6 +52,10 @@ test.describe( 'Add New Variable Product Page', () => {
 			.locator( '.attribute_tab' )
 			.getByRole( 'link', { name: 'Attributes' } )
 			.scrollIntoViewIfNeeded();
+
+		await expect(
+			page.getByRole( 'button', { name: 'Got it' } )
+		).toBeVisible();
 
 		// dismiss the variable product tour
 		await page
