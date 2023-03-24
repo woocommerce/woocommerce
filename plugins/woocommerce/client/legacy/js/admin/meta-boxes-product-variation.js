@@ -56,7 +56,11 @@ jQuery( function ( $ ) {
 				);
 		},
 
-		create_variations: function () {
+		create_variations: function ( event ) {
+			if ( $( this ).hasClass( 'disabled' ) ) {
+				event.preventDefault();
+				return;
+			}
 			var new_attribute_data = $(
 				'.woocommerce_variation_new_attribute_data'
 			);

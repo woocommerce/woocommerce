@@ -85,6 +85,18 @@ jQuery( function ( $ ) {
 		keepAlive: true,
 	} );
 
+	$( '.create-variations' ).tipTip( {
+		content: function () {
+			return $( '.create-variations' ).hasClass( 'disabled' )
+				? woocommerce_admin_meta_boxes.i18n_save_attribute_variation_tip
+				: '';
+		},
+		fadeIn: 50,
+		fadeOut: 50,
+		delay: 200,
+		keepAlive: true,
+	} );
+
 	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function () {
 		var metabox = $( this ).parent( '.wc-metabox' );
 
