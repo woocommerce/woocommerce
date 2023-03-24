@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Updates Playwright to 1.32 and adds command to use UI mode
