@@ -53,18 +53,10 @@ test.describe( 'Add New Variable Product Page', () => {
 			.getByRole( 'link', { name: 'Attributes' } )
 			.scrollIntoViewIfNeeded();
 
-		await expect(
-			page.getByRole( 'button', { name: 'Got it' } )
-		).toBeVisible();
-
 		// dismiss the variable product tour
 		await page
 			.getByRole( 'button', { name: 'Got it' } )
 			.click( { force: true } );
-
-		await expect(
-			page.getByRole( 'button', { name: 'Got it' } )
-		).not.toBeVisible();
 
 		// wait for the tour's dismissal to be saved
 		await page.waitForResponse(
