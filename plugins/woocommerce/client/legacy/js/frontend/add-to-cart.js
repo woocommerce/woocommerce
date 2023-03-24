@@ -116,6 +116,10 @@ jQuery( function( $ ) {
 					}
 
 					if ( response.error && response.product_url ) {
+						
+						// Trigger event so themes can interact with the DOM before the redirect.
+						$( document.body ).trigger( 'adding_to_cart_error', [ $thisbutton ] );
+						
 						window.location = response.product_url;
 						return;
 					}
