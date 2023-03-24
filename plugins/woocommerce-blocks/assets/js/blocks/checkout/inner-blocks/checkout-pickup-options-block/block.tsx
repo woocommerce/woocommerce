@@ -16,7 +16,10 @@ import { getSetting } from '@woocommerce/settings';
 import { Icon, mapMarker } from '@wordpress/icons';
 import type { RadioControlOption } from '@woocommerce/base-components/radio-control/types';
 import { CartShippingPackageShippingRate } from '@woocommerce/types';
-import { isPackageRateCollectable } from '@woocommerce/base-utils';
+import {
+	isPackageRateCollectable,
+	getShippingRatesPackageCount,
+} from '@woocommerce/base-utils';
 import { ExperimentalOrderLocalPickupPackages } from '@woocommerce/blocks-checkout';
 import { LocalPickupSelect } from '@woocommerce/base-components/cart-checkout/local-pickup-select';
 
@@ -73,36 +76,49 @@ const renderPickupLocation = (
 	const address = getPickupAddress( option );
 	const details = getPickupDetails( option );
 
+	// Default to showing "free" as the secondary label. Price checks below will update it if needed.
+	let secondaryLabel = (
+		<em>{ __( 'free', 'woo-gutenberg-products-block' ) }</em>
+	);
+
+	// If there is a cost for local pickup, show the cost per package.
+	if ( parseInt( priceWithTaxes, 10 ) > 0 ) {
+		// If only one package, show the price and not the package count.
+		if ( packageCount === 1 ) {
+			secondaryLabel = (
+				<FormattedMonetaryAmount
+					currency={ getCurrencyFromPriceResponse( option ) }
+					value={ priceWithTaxes }
+				/>
+			);
+		} else {
+			secondaryLabel = createInterpolateElement(
+				/* translators: <price/> is the price of the package, <packageCount/> is the number of packages. These must appear in the translated string. */
+				_n(
+					'<price/> x <packageCount/> package',
+					'<price/> x <packageCount/> packages',
+					packageCount,
+					'woo-gutenberg-products-block'
+				),
+				{
+					price: (
+						<FormattedMonetaryAmount
+							currency={ getCurrencyFromPriceResponse( option ) }
+							value={ priceWithTaxes }
+						/>
+					),
+					packageCount: <>{ packageCount }</>,
+				}
+			);
+		}
+	}
+
 	return {
 		value: option.rate_id,
 		label: location
 			? decodeEntities( location )
 			: decodeEntities( option.name ),
-		secondaryLabel:
-			parseInt( priceWithTaxes, 10 ) > 0 ? (
-				createInterpolateElement(
-					/* translators: %1$s name of the product (ie: Sunglasses), %2$d number of units in the current cart package */
-					_n(
-						'<price/>',
-						'<price/> x <packageCount/> packages',
-						packageCount,
-						'woo-gutenberg-products-block'
-					),
-					{
-						price: (
-							<FormattedMonetaryAmount
-								currency={ getCurrencyFromPriceResponse(
-									option
-								) }
-								value={ priceWithTaxes }
-							/>
-						),
-						packageCount: <>{ packageCount }</>,
-					}
-				)
-			) : (
-				<em>{ __( 'free', 'woo-gutenberg-products-block' ) }</em>
-			),
+		secondaryLabel,
 		description: decodeEntities( details ),
 		secondaryDescription: address ? (
 			<>
@@ -156,7 +172,7 @@ const Block = (): JSX.Element | null => {
 			onSelectRate( pickupLocations[ 0 ].rate_id );
 		}
 	}, [ onSelectRate, pickupLocations, selectedOption ] );
-
+	const packageCount = getShippingRatesPackageCount( shippingRates );
 	return (
 		<>
 			<ExperimentalOrderLocalPickupPackages.Slot { ...slotFillProps } />
@@ -168,6 +184,7 @@ const Block = (): JSX.Element | null => {
 					selectedOption={ selectedOption }
 					renderPickupLocation={ renderPickupLocation }
 					pickupLocations={ pickupLocations }
+					packageCount={ packageCount }
 				/>
 			</ExperimentalOrderLocalPickupPackages>
 		</>
