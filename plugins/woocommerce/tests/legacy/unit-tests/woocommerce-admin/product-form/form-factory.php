@@ -18,7 +18,7 @@ class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 		$field = Form::add_field( 'id', 'woocommerce', array() );
 
 		$this->assertInstanceOf( 'WP_Error', $field );
-		$this->assertContains( 'You are missing required arguments of WooCommerce ProductForm Field: type, section, properties.name, properties.label', $field->get_error_message() );
+		$this->assertStringContainsString( 'You are missing required arguments of WooCommerce ProductForm Field: type, section, properties.name, properties.label', $field->get_error_message() );
 	}
 
 	/**
@@ -51,7 +51,7 @@ class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertInstanceOf( 'WP_Error', $field_duplicate );
-		$this->assertContains( 'You have attempted to register a duplicate form field with WooCommerce Form: `id`', $field_duplicate->get_error_message() );
+		$this->assertStringContainsString( 'You have attempted to register a duplicate form field with WooCommerce Form: `id`', $field_duplicate->get_error_message() );
 	}
 
 	/**

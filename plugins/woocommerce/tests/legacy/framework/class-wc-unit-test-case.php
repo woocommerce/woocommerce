@@ -20,6 +20,8 @@ use PHPUnit\Framework\Constraint\IsType;
  */
 class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
+	public const DEFAULT_FLOAT_COMPARISON_DELTA = 1e-10;
+
 	/**
 	 * Holds the WC_Unit_Test_Factory instance.
 	 *
@@ -388,6 +390,18 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	public function assertNotRecordedTracksEvent( $event_name ): void {
 		$events = self::get_tracks_events( $event_name );
 		$this->assertEmpty( $events );
+	}
+
+	/**
+	 * Assert that the difference between two floats is smaller than a given delta.
+	 *
+	 * @param float      $expected The expected value.
+	 * @param float      $actual The actual value.
+	 * @param float|null $delta The maximum allowed difference, defaults to DEFAULT_FLOAT_COMPARISON_DELTA.
+	 * @param string     $message An optional error message to use if the assertion fails.
+	 */
+	public function assertFloatEquals( $expected, $actual, ?float $delta = null, string $message = '' ) {
+		$this->assertEqualsWithDelta( $expected, $actual, $delta ?? self::DEFAULT_FLOAT_COMPARISON_DELTA, $message );
 	}
 
 	/**

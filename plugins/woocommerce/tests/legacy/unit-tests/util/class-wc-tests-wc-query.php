@@ -6,10 +6,13 @@
  * @since 3.3.0
  */
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+
 /**
  * WC_Query tests.
  */
 class WC_Tests_WC_Query extends WC_Unit_Test_Case {
+	use ArraySubsetAsserts;
 
 	/**
 	 * Test WC_Query gets initialized properly.
@@ -353,8 +356,17 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		// phpcs:enable WordPress.DB.SlowDBQuery
 
 		WC()->query->product_query( new WP_Query( $query_args ) );
-		$tax_queries = WC_Query::get_main_tax_query();
-		$this->assertContains( $tax_query, $tax_queries );
+		$tax_queries       = WC_Query::get_main_tax_query();
+		$matching_tax_data = current(
+			array_filter(
+				$tax_queries,
+				function( $tax ) {
+					return 'product_tag' === $tax['taxonomy'];
+				}
+			)
+		);
+		$this->assertIsArray( $matching_tax_data );
+		$this->assertArraySubset( $tax_query, $matching_tax_data );
 	}
 
 	/**
