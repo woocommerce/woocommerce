@@ -35,6 +35,12 @@ class WC_Meta_Box_Product_Categories {
 	 * }
 	 */
 	public static function output( $post, $box ) {
+		$categories_count = (int) wp_count_terms( 'product_cat' );
+
+		if ( $categories_count <= apply_filters( 'woocommerce_product_category_metabox_search_threshold', 100 ) && function_exists( 'post_categories_meta_box' ) ) {
+			return post_categories_meta_box( $post, $box );
+		}
+
 		$defaults = array( 'taxonomy' => 'category' );
 		if ( ! isset( $box['args'] ) || ! is_array( $box['args'] ) ) {
 			$args = array();

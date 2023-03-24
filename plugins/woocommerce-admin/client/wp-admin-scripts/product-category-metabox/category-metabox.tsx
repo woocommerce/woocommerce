@@ -17,22 +17,33 @@ if ( window.getUserSetting ) {
 	initialTab = window.getUserSetting( CATEGORY_TERM_NAME + '_tab' ) || '';
 }
 
+const CATEGORY_POPULAR_TAB_ID = 'pop';
+const CATEGORY_ALL_TAB_ID = 'all';
+
 export const CategoryMetabox: React.FC< {
 	initialSelected: CategoryTerm[];
 } > = ( { initialSelected } ) => {
 	const [ selected, setSelected ] = useState( initialSelected );
 	const [ activeTab, setActiveTab ] = useState(
-		initialTab === 'pop' ? 'pop' : 'all'
+		initialTab === CATEGORY_POPULAR_TAB_ID
+			? initialTab
+			: CATEGORY_ALL_TAB_ID
 	);
 	return (
 		<div id={ 'taxonomy-' + CATEGORY_TERM_NAME } className="categorydiv">
 			<ul className="category-tabs">
-				<li className={ activeTab === 'all' ? 'tabs' : '' }>
+				<li
+					className={
+						activeTab === CATEGORY_ALL_TAB_ID ? 'tabs' : ''
+					}
+				>
 					<a
-						href={ '#' + CATEGORY_TERM_NAME + '-all' }
+						href={
+							'#' + CATEGORY_TERM_NAME + '-' + CATEGORY_ALL_TAB_ID
+						}
 						onClick={ ( event ) => {
 							event.preventDefault();
-							setActiveTab( 'all' );
+							setActiveTab( CATEGORY_ALL_TAB_ID );
 							if ( window.deleteUserSetting ) {
 								window.deleteUserSetting(
 									CATEGORY_TERM_NAME + '_tab'
@@ -43,16 +54,25 @@ export const CategoryMetabox: React.FC< {
 						{ __( 'All items', 'woocommerce' ) }
 					</a>
 				</li>
-				<li className={ activeTab === 'pop' ? 'tabs' : '' }>
+				<li
+					className={
+						activeTab === CATEGORY_POPULAR_TAB_ID ? 'tabs' : ''
+					}
+				>
 					<a
-						href={ '#' + CATEGORY_TERM_NAME + '-pop' }
+						href={
+							'#' +
+							CATEGORY_TERM_NAME +
+							'-' +
+							CATEGORY_POPULAR_TAB_ID
+						}
 						onClick={ ( event ) => {
 							event.preventDefault();
-							setActiveTab( 'pop' );
+							setActiveTab( CATEGORY_POPULAR_TAB_ID );
 							if ( window.setUserSetting ) {
 								window.setUserSetting(
 									CATEGORY_TERM_NAME + '_tab',
-									'pop'
+									CATEGORY_POPULAR_TAB_ID
 								);
 							}
 						} }
@@ -63,11 +83,19 @@ export const CategoryMetabox: React.FC< {
 			</ul>
 			<div
 				className="tabs-panel"
-				id={ CATEGORY_TERM_NAME + '-pop' }
-				style={ activeTab !== 'pop' ? { display: 'none' } : {} }
+				id={ CATEGORY_TERM_NAME + '-' + CATEGORY_POPULAR_TAB_ID }
+				style={
+					activeTab !== CATEGORY_POPULAR_TAB_ID
+						? { display: 'none' }
+						: {}
+				}
 			>
 				<ul
-					id={ CATEGORY_TERM_NAME + 'checklist-pop' }
+					id={
+						CATEGORY_TERM_NAME +
+						'checklist-' +
+						CATEGORY_POPULAR_TAB_ID
+					}
 					className="categorychecklist form-no-clear"
 				>
 					<PopularCategoryList
@@ -78,8 +106,10 @@ export const CategoryMetabox: React.FC< {
 			</div>
 			<div
 				className="tabs-panel"
-				id={ CATEGORY_TERM_NAME + '-all' }
-				style={ activeTab !== 'all' ? { display: 'none' } : {} }
+				id={ CATEGORY_TERM_NAME + '-' + CATEGORY_ALL_TAB_ID }
+				style={
+					activeTab !== CATEGORY_ALL_TAB_ID ? { display: 'none' } : {}
+				}
 			>
 				<AllCategoryList
 					selected={ selected }
