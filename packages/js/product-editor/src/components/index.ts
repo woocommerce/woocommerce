@@ -15,3 +15,7 @@ export {
 	Editor as __experimentalEditor,
 	ProductEditorSettings,
 } from './editor';
+export {
+	BlockIcon as __experimentalBlockIcon,
+	BlockIconProps,
+} from './block-icon';
