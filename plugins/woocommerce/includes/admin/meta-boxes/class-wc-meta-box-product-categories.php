@@ -37,6 +37,14 @@ class WC_Meta_Box_Product_Categories {
 	public static function output( $post, $box ) {
 		$categories_count = (int) wp_count_terms( 'product_cat' );
 
+		/**
+		 * Filters the category metabox search threshold, for when to render the typeahead field.
+		 *
+		 * @since 7.6.0
+		 *
+		 * @param number $threshold The default threshold.
+		 * @returns number The threshold that will be used.
+		 */
 		if ( $categories_count <= apply_filters( 'woocommerce_product_category_metabox_search_threshold', 100 ) && function_exists( 'post_categories_meta_box' ) ) {
 			return post_categories_meta_box( $post, $box );
 		}
