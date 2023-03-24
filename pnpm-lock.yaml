@@ -1580,7 +1580,7 @@ importers:
       '@babel/core': 7.12.9
       '@babel/preset-env': 7.12.7
       '@babel/register': 7.12.1
-      '@playwright/test': ^1.30.0
+      '@playwright/test': ^1.32.0
       '@typescript-eslint/eslint-plugin': ^5.54.0
       '@typescript-eslint/experimental-utils': ^5.43.0
       '@typescript-eslint/parser': ^5.54.0
@@ -1628,7 +1628,7 @@ importers:
       '@babel/core': 7.12.9
       '@babel/preset-env': 7.12.7_@babel+core@7.12.9
       '@babel/register': 7.12.1_@babel+core@7.12.9
-      '@playwright/test': 1.30.0
+      '@playwright/test': 1.32.0
       '@typescript-eslint/eslint-plugin': 5.54.0_kfyz2y6ibx5q22pdsikxez2g7q
       '@typescript-eslint/experimental-utils': 5.43.0_et5x32uxl7z5ldub3ye5rhlyqm
       '@typescript-eslint/parser': 5.54.0_et5x32uxl7z5ldub3ye5rhlyqm
@@ -10594,13 +10594,15 @@ packages:
     dependencies:
       '@octokit/openapi-types': 13.10.0
 
-  /@playwright/test/1.30.0:
-    resolution: {integrity: sha512-SVxkQw1xvn/Wk/EvBnqWIq6NLo1AppwbYOjNLmyU0R1RoQ3rLEBtmjTnElcnz8VEtn11fptj1ECxK0tgURhajw==}
+  /@playwright/test/1.32.0:
+    resolution: {integrity: sha512-zOdGloaF0jeec7hqoLqM5S3L2rR4WxMJs6lgiAeR70JlH7Ml54ZPoIIf3X7cvnKde3Q9jJ/gaxkFh8fYI9s1rg==}
     engines: {node: '>=14'}
     hasBin: true
     dependencies:
       '@types/node': 16.18.18
-      playwright-core: 1.30.0
+      playwright-core: 1.32.0
+    optionalDependencies:
+      fsevents: 2.3.2
     dev: true
 
   /@pmmmwh/react-refresh-webpack-plugin/0.5.10_kgzwhhiezcyg2m3alqq7chac3a:
@@ -34838,8 +34840,8 @@ packages:
       find-up: 5.0.0
     dev: true
 
-  /playwright-core/1.30.0:
-    resolution: {integrity: sha512-7AnRmTCf+GVYhHbLJsGUtskWTE33SwMZkybJ0v6rqR1boxq2x36U7p1vDRV7HO2IwTZgmycracLxPEJI49wu4g==}
+  /playwright-core/1.32.0:
+    resolution: {integrity: sha512-Z9Ij17X5Z3bjpp6XKujGBp9Gv4eViESac9aDmwgQFUEJBW0K80T21m/Z+XJQlu4cNsvPygw33b6V1Va6Bda5zQ==}
     engines: {node: '>=14'}
     hasBin: true
     dev: true
