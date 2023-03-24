@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Attach event to parent node to avoid it being overwritten when DOM changes
+
+
