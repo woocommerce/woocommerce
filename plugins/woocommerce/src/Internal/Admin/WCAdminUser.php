@@ -103,6 +103,11 @@ class WCAdminUser {
 	 * @return array Fields to expose over the WP user endpoint.
 	 */
 	public function get_user_data_fields() {
+		/**
+		 * Filter user data fields exposed over the WordPress user endpoint.
+		 *
+		 * @param array $fields Array of fields to expose over the WP user endpoint.
+		 */
 		return apply_filters( 'woocommerce_admin_get_user_data_fields', array( 'variable_product_tour_shown' ) );
 	}
 
