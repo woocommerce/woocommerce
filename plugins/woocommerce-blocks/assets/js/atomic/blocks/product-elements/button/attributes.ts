@@ -16,6 +16,9 @@ export const blockAttributes: BlockAttributes = {
 		type: 'string',
 		default: '',
 	},
+	width: {
+		type: 'number',
+	},
 };
 
 export default blockAttributes;

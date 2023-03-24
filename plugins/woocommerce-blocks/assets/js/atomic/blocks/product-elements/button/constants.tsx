@@ -15,3 +15,5 @@ export const BLOCK_DESCRIPTION: string = __(
 	'Display a call to action button which either adds the product to the cart, or links to the product page.',
 	'woo-gutenberg-products-block'
 );
+
+export const BLOCK_NAME = 'woocommerce/product-button';
