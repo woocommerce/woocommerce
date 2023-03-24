@@ -24,6 +24,17 @@
 			}
 		}
 	},
+	"styles": [
+		{
+			"name": "fill",
+			"label": "Fill"
+		},
+		{
+			"name": "outline",
+			"label": "Outline",
+			"isDefault": true
+		}
+	],
 	"parent": [ "woocommerce/mini-cart-footer-block" ],
 	"textdomain": "woo-gutenberg-products-block",
 	"apiVersion": 2
