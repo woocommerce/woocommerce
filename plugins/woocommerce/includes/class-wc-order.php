@@ -2313,7 +2313,12 @@ class WC_Order extends WC_Abstract_Order {
 			// Reapply all coupons in this order and recalculate the totals.
 			$this->recalculate_coupons();
 
-			// Trigger an action to signal that a coupon has been removed from an order.
+			/**
+			 * Action hook to indicate that a coupon has been removed from an order.
+			 *
+			 * @param WC_Coupon $coupon The coupon that was removed.
+			 * @param WC_Order  $order  The order that the coupon was removed from.
+			 */
 			do_action( 'woocommerce_order_removed_coupon', $coupon, $this );
 
 			break;
