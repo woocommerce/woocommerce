@@ -53,10 +53,11 @@ export const MultipleSelectTree: React.FC = () => {
 	const [ value, setValue ] = React.useState( '' );
 	const [ selected, setSelected ] = React.useState< Item[] >( [] );
 
-	const items = getFilteredItems( listItems, value );
+	const items = filterItems( listItems, value );
 
 	return (
 		<SelectTree
+			id="multiple-select-tree"
 			label="Multiple Select Tree"
 			multiple
 			items={ items }

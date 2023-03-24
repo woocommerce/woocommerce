@@ -22,6 +22,7 @@ import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
 
 interface SelectTreeProps extends TreeControlProps {
+	id: string;
 	selected?: Item[];
 	getSelectedItemProps?: any;
 	treeRef?: React.ForwardedRef< HTMLOListElement >;
