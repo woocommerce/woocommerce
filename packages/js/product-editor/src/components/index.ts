@@ -19,3 +19,4 @@ export {
 	BlockIcon as __experimentalBlockIcon,
 	BlockIconProps,
 } from './block-icon';
+export { ProductMVPFeedbackModal as __experimentalProductMVPFeedbackModal } from './product-mvp-feedback-modal';
