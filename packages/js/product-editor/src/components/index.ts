@@ -20,3 +20,4 @@ export {
 	BlockIconProps,
 } from './block-icon';
 export { ProductMVPFeedbackModal as __experimentalProductMVPFeedbackModal } from './product-mvp-feedback-modal';
+export { ProductMVPFeedbackModalContainer as __experimentalProductMVPFeedbackModalContainer } from './product-mvp-feedback-modal-container';
