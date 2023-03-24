@@ -26,8 +26,16 @@ export const supports = {
 		} ),
 		typography: {
 			fontSize: true,
+			lineHeight: true,
 			__experimentalFontWeight: true,
-			__experimentalSkipSerialization: true,
+			__experimentalFontFamily: true,
+			__experimentalFontStyle: true,
+			__experimentalTextTransform: true,
+			__experimentalTextDecoration: true,
+			__experimentalLetterSpacing: true,
+			__experimentalDefaultControls: {
+				fontSize: true,
+			},
 		},
 		__experimentalSelector:
 			'.wp-block-button.wc-block-components-product-button .wc-block-components-product-button__button',
