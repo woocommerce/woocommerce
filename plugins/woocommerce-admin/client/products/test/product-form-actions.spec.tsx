@@ -3,7 +3,7 @@
  */
 import { render, waitFor, screen, within } from '@testing-library/react';
 import { Fragment } from '@wordpress/element';
-import { Form, FormContext } from '@woocommerce/components';
+import { Form, FormContextType } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import userEvent from '@testing-library/user-event';
@@ -203,7 +203,7 @@ describe( 'ProductFormActions', () => {
 			};
 			const { queryByText, getByLabelText } = render(
 				<Form< Partial< Product > > initialValues={ product }>
-					{ ( { getInputProps }: FormContext< Product > ) => {
+					{ ( { getInputProps }: FormContextType< Product > ) => {
 						return (
 							<>
 								<label htmlFor="product-name">Name</label>
