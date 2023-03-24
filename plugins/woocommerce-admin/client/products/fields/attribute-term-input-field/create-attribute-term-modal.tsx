@@ -11,7 +11,7 @@ import {
 import { useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
-import { Form, FormContext, FormErrors } from '@woocommerce/components';
+import { Form, FormContextType, FormErrors } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
@@ -118,7 +118,7 @@ export const CreateAttributeTermModal: React.FC<
 					isValidForm,
 					setValue,
 					values,
-				}: FormContext< QueryProductAttribute > ) => {
+				}: FormContextType< QueryProductAttribute > ) => {
 					const nameInputProps = getInputProps< string >( 'name' );
 					return (
 						<>

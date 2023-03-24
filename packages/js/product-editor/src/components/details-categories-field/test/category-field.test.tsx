@@ -3,7 +3,7 @@
  */
 import { ReactElement, Component } from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { Form, FormContext } from '@woocommerce/components';
+import { Form, FormContextType } from '@woocommerce/components';
 import { Product, ProductCategory } from '@woocommerce/data';
 import { createElement } from '@wordpress/element';
 
@@ -114,7 +114,7 @@ describe( 'CategoryField', () => {
 	it( 'should render a dropdown select control', () => {
 		const { queryByText } = render(
 			<Form initialValues={ { categories: [] } }>
-				{ ( { getInputProps }: FormContext< Product > ) => (
+				{ ( { getInputProps }: FormContextType< Product > ) => (
 					<CategoryField
 						label="Categories"
 						placeholder="Search or create category…"
@@ -138,7 +138,7 @@ describe( 'CategoryField', () => {
 					],
 				} }
 			>
-				{ ( { getInputProps }: FormContext< Product > ) => (
+				{ ( { getInputProps }: FormContextType< Product > ) => (
 					<CategoryField
 						label="Categories"
 						placeholder="Search or create category…"
@@ -175,7 +175,7 @@ describe( 'CategoryField', () => {
 						categories: [],
 					} }
 				>
-					{ ( { getInputProps }: FormContext< Product > ) => (
+					{ ( { getInputProps }: FormContextType< Product > ) => (
 						<CategoryField
 							label="Categories"
 							placeholder="Search or create category…"
@@ -210,7 +210,7 @@ describe( 'CategoryField', () => {
 						categories: [ mockCategoryList[ 2 ] ],
 					} }
 				>
-					{ ( { getInputProps }: FormContext< Product > ) => (
+					{ ( { getInputProps }: FormContextType< Product > ) => (
 						<CategoryField
 							label="Categories"
 							placeholder="Search or create category…"
@@ -238,7 +238,7 @@ describe( 'CategoryField', () => {
 						categories: [ mockCategoryList[ 2 ] ],
 					} }
 				>
-					{ ( { getInputProps }: FormContext< Product > ) => (
+					{ ( { getInputProps }: FormContextType< Product > ) => (
 						<CategoryField
 							label="Categories"
 							placeholder="Search or create category…"
@@ -266,7 +266,7 @@ describe( 'CategoryField', () => {
 						categories: [ mockCategoryList[ 2 ] ],
 					} }
 				>
-					{ ( { getInputProps }: FormContext< Product > ) => (
+					{ ( { getInputProps }: FormContextType< Product > ) => (
 						<CategoryField
 							label="Categories"
 							placeholder="Search or create category…"
@@ -295,7 +295,7 @@ describe( 'CategoryField', () => {
 						categories: [ mockCategoryList[ 2 ] ],
 					} }
 				>
-					{ ( { getInputProps }: FormContext< Product > ) => (
+					{ ( { getInputProps }: FormContextType< Product > ) => (
 						<CategoryField
 							label="Categories"
 							placeholder="Search or create category…"

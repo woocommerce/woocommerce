@@ -6,6 +6,10 @@
 		"declaration": true,
 		"declarationMap": true,
 		"declarationDir": "./build-types",
-		"composite": true
+		"composite": true,
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		]
 	}
 }

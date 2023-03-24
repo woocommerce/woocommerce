@@ -11,3 +11,8 @@
 .interface-interface-skeleton__sidebar {
 	width: 280px;
 }
+
+.interface-interface-skeleton__header{
+	// Higher than the sidebar which has a z-index of 90.
+	z-index: 100;
+}

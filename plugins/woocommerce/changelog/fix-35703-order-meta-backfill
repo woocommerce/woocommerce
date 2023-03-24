@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+When order meta data is saved via HPOS, it should be backfilled to the CPT data store.

@@ -1,0 +1,17 @@
+name: Run k6 performance tests
+description: Runs the WooCommerce Core k6 performance tests.
+permissions: {}
+
+runs:
+    using: composite
+    steps:
+        - name: Install k6
+          shell: bash
+          run: |
+              curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+
+        - name: Run k6 performance tests
+          id: run-k6-tests
+          shell: bash
+          run: |
+              ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js

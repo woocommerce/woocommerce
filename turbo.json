@@ -5,7 +5,13 @@
 			"cache": false
 		},
 		"turbo:build": {
-			"dependsOn": [ "build:feature-config", "^turbo:build", "$WC_ADMIN_PHASE" ],
+			"dependsOn": [ 
+				"build:feature-config", 
+				"^turbo:build"
+			],
+			"env": [
+				"WC_ADMIN_PHASE" 
+			],
 			"inputs": [
 				"src/**/*.js",
 				"src/**/*.jsx",
@@ -40,7 +46,9 @@
 		},
 
 		"woocommerce/client/legacy#turbo:build": {
-			"dependsOn": [ "^turbo:build" ],
+			"dependsOn": [ 
+				"^turbo:build" 
+			],
 			"outputs": [
 				"../../assets/js/**",
 				"../../assets/css/**"
@@ -56,8 +64,10 @@
 		"woocommerce/client/admin#turbo:build": {
 			"dependsOn": [ 
 				"build:feature-config", 
-				"^turbo:build", 
-				"$WC_ADMIN_PHASE"
+				"^turbo:build"
+			],
+			"env": [
+				"WC_ADMIN_PHASE" 
 			],
 			"outputs": [
 				"../woocommerce/assets/client/admin/**"
@@ -74,7 +84,9 @@
 
 		"turbo:test": {
 			"cache": false,
-			"dependsOn": [ "turbo:build" ],
+			"dependsOn": [ 
+				"turbo:build" 
+			],
 			"outputs": []
 		}
 	}
