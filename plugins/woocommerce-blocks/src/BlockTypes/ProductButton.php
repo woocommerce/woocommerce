@@ -89,13 +89,16 @@ class ProductButton extends AbstractBlock {
 			$ajax_add_to_cart_enabled      = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
 			$is_ajax_button                = $ajax_add_to_cart_enabled && ! $cart_redirect_after_add && $product->supports( 'ajax_add_to_cart' ) && $product->is_purchasable() && $product->is_in_stock();
 			$html_element                  = $is_ajax_button ? 'button' : 'a';
-			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'border_radius', 'font_size', 'font_weight', 'margin', 'padding', 'text_color' ) );
+			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
+			$classname                     = isset( $attributes['className'] ) ? $attributes['className'] : '';
+			$custom_width_classes          = isset( $attributes['width'] ) ? 'has-custom-width wp-block-button__width-' . $attributes['width'] : '';
 			$html_classes                  = implode(
 				' ',
 				array_filter(
 					array(
 						'wp-block-button__link',
+						'wp-element-button',
 						'wc-block-components-product-button__button',
 						$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
 						$is_ajax_button ? 'ajax_add_to_cart' : '',
@@ -137,10 +140,11 @@ class ProductButton extends AbstractBlock {
 			return apply_filters(
 				'woocommerce_loop_add_to_cart_link',
 				sprintf(
-					'<div class="wp-block-button wc-block-components-product-button wc-block-grid__product-add-to-cart %1$s">
-					<%2$s href="%3$s" class="%4$s" style="%5$s" %6$s>%7$s</%2$s>
+					'<div class="wp-block-button wc-block-components-product-button %1$s %2$s">
+					<%3$s href="%4$s" class="%5$s" style="%6$s" %7$s>%8$s</%3$s>
 				</div>',
 					esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
+					esc_attr( $classname . ' ' . $custom_width_classes ),
 					$html_element,
 					esc_url( $product->add_to_cart_url() ),
 					isset( $args['class'] ) ? esc_attr( $args['class'] ) : '',
