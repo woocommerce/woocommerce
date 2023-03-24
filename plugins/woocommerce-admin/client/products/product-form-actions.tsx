@@ -17,6 +17,7 @@ import { useCustomerEffortScoreExitPageTracker } from '@woocommerce/customer-eff
 import {
 	preventLeavingProductForm,
 	__experimentalUseProductHelper as useProductHelper,
+	__experimentalUseProductMVPCESFooter as useProductMVPCESFooter,
 } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -31,7 +32,6 @@ import { store } from '@wordpress/viewport';
  * Internal dependencies
  */
 import './product-form-actions.scss';
-import { useProductMVPCESFooter } from '~/customer-effort-score-tracks/use-product-mvp-ces-footer';
 
 export const ProductFormActions: React.FC = () => {
 	const {
