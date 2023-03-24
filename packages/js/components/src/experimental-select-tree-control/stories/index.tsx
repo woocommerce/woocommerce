@@ -28,7 +28,7 @@ const listItems: Item[] = [
 	{ value: '3', label: 'Other' },
 ];
 
-const getFilteredItems = ( items: Item[], searchValue ) => {
+const filterItems = ( items: Item[], searchValue ) => {
 	const filteredItems = items.filter( ( e ) =>
 		e.label.includes( searchValue )
 	);
@@ -38,7 +38,7 @@ const getFilteredItems = ( items: Item[], searchValue ) => {
 		const element = itemsToIterate.pop();
 		if ( element ) {
 			const parent = listItems.find(
-				( x ) => x.value === element.parent
+				( item ) => item.value === element.parent
 			);
 			if ( parent && ! filteredItems.includes( parent ) ) {
 				filteredItems.push( parent );
