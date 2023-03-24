@@ -2,9 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { BlockIcon } from '@wordpress/block-editor';
 import { BlockConfiguration } from '@wordpress/blocks';
-import { box } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -22,7 +20,6 @@ export { metadata, name };
 export const settings: Partial< BlockConfiguration< SectionBlockAttributes > > =
 	{
 		example: {},
-		icon: <BlockIcon icon={ box } />,
 		edit: Edit,
 	};
 
