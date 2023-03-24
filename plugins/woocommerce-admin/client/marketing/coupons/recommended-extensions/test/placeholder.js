@@ -7,7 +7,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { RecommendedExtensionsPlaceholder } from '../';
+import { RecommendedExtensionsPlaceholder } from '..';
 
 describe( 'RecommendedExtensionsPlaceholder', () => {
 	test( 'should render a default placeholder', () => {

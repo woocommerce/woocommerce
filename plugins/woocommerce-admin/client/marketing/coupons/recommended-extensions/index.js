@@ -14,7 +14,7 @@ import './style.scss';
 import RecommendedExtensionsItem from './item';
 import RecommendedExtensionsPlaceholder from './placeholder';
 import { STORE_KEY } from '../../data/constants';
-import Card from '../card';
+import Card from '../../components/card';
 
 const RecommendedExtensions = ( {
 	extensions,
