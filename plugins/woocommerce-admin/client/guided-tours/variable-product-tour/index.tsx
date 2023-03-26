@@ -45,13 +45,6 @@ export const VariableProductTour = () => {
 			},
 		],
 		options: {
-			callbacks: {
-				onNextStep: ( currentStepIndex ) => {
-					recordEvent( 'variable_product_tour_step_viewed', {
-						step: getStepName( config.steps, currentStepIndex + 1 ),
-					} );
-				},
-			},
 			// WooTourKit does not handle merging of default options properly,
 			// so we need to duplicate the effects options here.
 			effects: {
@@ -105,9 +98,6 @@ export const VariableProductTour = () => {
 			if ( productTypeSelect.value === 'variable' ) {
 				setIsTourOpen( true );
 				recordEvent( 'variable_product_tour_started', {
-					step: getStepName( config.steps, 0 ),
-				} );
-				recordEvent( 'variable_product_tour_step_viewed', {
 					step: getStepName( config.steps, 0 ),
 				} );
 			}
