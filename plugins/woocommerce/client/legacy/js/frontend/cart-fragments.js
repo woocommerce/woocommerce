@@ -68,25 +68,28 @@ jQuery( function( $ ) {
 
 	/* Named callback for refreshing cart fragment */
 	function refresh_cart_fragment() {
-		const controller = new AbortController();
-		const timeoutId = setTimeout( () => controller.abort(), $fragment_refresh.timeout );
+		const options = $fragment_refresh;
+		const xhr = new XMLHttpRequest();
 
-		window.fetch( $fragment_refresh.url, {
-			method: $fragment_refresh.type,
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-			body: $fragment_refresh.data,
-			signal: controller.signal
-		} )
-			.then( response => {
-				clearTimeout( timeoutId );
+		xhr.open( options.type, options.url );
+		xhr.timeout = options.timeout;
+		xhr.responseType = 'json';
+		xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+		xhr.send( options.data );
 
-				if ( !response.ok ) {
-					throw new Error( response.statusText );
-				}
-				return response.json();
-			} )
-			.then( $fragment_refresh.success )
-			.catch( error => $fragment_refresh.error() );
+		xhr.onload = function() {
+			if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+				options.success( xhr.response );
+			} else {
+				options.error();
+			}
+			$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+		};
+
+		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+			options.error();
+			$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+		};
 	}
 
 	/* Cart Handling */

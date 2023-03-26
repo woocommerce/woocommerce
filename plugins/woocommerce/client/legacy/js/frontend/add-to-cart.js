@@ -52,20 +52,28 @@ jQuery( function( $ ) {
 		};
 
 		const options = this.requests[0];
-		window.fetch( options.url, {
-			method: options.type,
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-			body: options.data
-		} )
-			.then( response => {
-				if ( !response.ok ) {
-					throw new Error( response.statusText );
-				}
-				return response.json();
-			} )
-			.then( options.success )
-			.catch( error => options.error && options.error() )
-			.finally( () => options.complete && options.complete() );
+		const xhr = new XMLHttpRequest();
+
+		xhr.open( options.type, options.url );
+		xhr.responseType = 'json';
+		xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+		xhr.send( options.data );
+
+		xhr.onload = function() {
+			if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+				options.success( xhr.response );
+			} else {
+				options.error && options.error();
+			}
+			options.complete && options.complete();
+			$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+		};
+
+		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+			options.error && options.error();
+			options.complete && options.complete();
+			$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+		};
 	};
 
 	/**

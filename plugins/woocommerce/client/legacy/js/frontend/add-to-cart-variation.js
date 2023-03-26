@@ -167,8 +167,8 @@
 
 		if ( attributes.count && attributes.count === attributes.chosenCount ) {
 			if ( form.useAjax ) {
-				if ( form.controller ) {
-					form.controller.abort();
+				if ( form.xhr ) {
+					form.xhr.abort();
 				}
 				form.$form.block( { message: null, overlayCSS: { background: '#fff', opacity: 0.6 } } );
 				currentAttributes.product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
@@ -201,23 +201,26 @@
 					}
 				};
 
-				const controller = new AbortController();
-				form.controller = controller;
+				const xhr = new XMLHttpRequest();
+				form.xhr = xhr;
 
-				window.fetch( options.url, {
-					method: options.type,
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-					body: options.data,
-					signal: controller.signal
-				} )
-					.then( response => {
-						if ( !response.ok ) {
-							throw new Error( response.statusText );
-						}
-						return response.json();
-					})
-					.then( options.success )
-					.finally( () => options.complete() );
+				xhr.open( options.type, options.url );
+				xhr.responseType = 'json';
+				xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+				xhr.send( options.data );
+
+				xhr.onload = function() {
+					if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+						options.success( xhr.response );
+					}
+					options.complete();
+					$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+				};
+
+				xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+					options.complete();
+					$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+				};
 			} else {
 				form.$form.trigger( 'update_variation_values' );
 

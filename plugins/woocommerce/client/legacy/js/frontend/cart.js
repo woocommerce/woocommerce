@@ -14,19 +14,28 @@ jQuery( function( $ ) {
 	 * @param {Object} options
 	 */
 	const ajax = options => {
-		window.fetch( options.url, {
-			method: options.type || 'GET',
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-			body: options.data
-		} )
-			.then( response => {
-				if ( !response.ok ) {
-					throw new Error( response.statusText );
-				}
-				return response.text();
-			} )
-			.then( options.success )
-			.finally( () => options.complete() );
+		const xhr = new XMLHttpRequest();
+		xhr.open( options.type || 'GET', options.url );
+
+		if ( !options.type || options.type.toUpperCase() === 'GET' || options.type.toUpperCase() === 'HEAD' ) {
+			xhr.send();
+		} else {
+			xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+			xhr.send( options.data );
+		}
+
+		xhr.onload = function() {
+			if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+				options.success( xhr.response );
+			}
+			options.complete();
+			$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+		};
+
+		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+			options.complete();
+			$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+		};
 	};
 
 	/**

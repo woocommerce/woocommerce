@@ -127,17 +127,23 @@ jQuery( function( $ ) {
 	// Get the current geo hash. If it doesn't exist, or if it doesn't match the current
 	// page URL, perform a geolocation request.
 	if ( ! get_geo_hash() || needs_refresh() ) {
-		window.fetch( $geolocate_customer.url, {
-			method: $geolocate_customer.type,
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
-		} )
-		.then( response => {
-			if ( !response.ok ) {
-				throw new Error( response.statusText );
+		const options = $geolocate_customer;
+		const xhr = new XMLHttpRequest();
+
+		xhr.open( options.type, options.url );
+		xhr.responseType = 'json';
+		xhr.send();
+
+		xhr.onload = function() {
+			if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+				options.success( xhr.response );
 			}
-			return response.json();
-		} )
-		.then( $geolocate_customer.success );
+			$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+		};
+
+		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+			$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+		};
 	}
 
 	// Page updates.

@@ -9,34 +9,37 @@ jQuery( function( $ ) {
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
 
 	const ajax = options => {
-		const controller = new AbortController();
+		const xhr = new XMLHttpRequest();
 
-		window.fetch( options.url, {
-			method: options.type,
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-			body: options.data,
-			signal: controller.signal
-		} )
-			.then( response => {
-				response.text().then( text => {
-					if ( !response.ok ) {
-						const error = new Error( response.statusText );
-						error.responseText = text; // Needed for when wc_checkout_params.debug_mode is enabled
-						throw error;
-					}
+		xhr.open( options.type, options.url );
+		xhr.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+		xhr.send( options.data );
 
-					if ( options.dataType === 'html' ) {
-						options.success( text );
-						return;
-					}
+		xhr.onload = function() {
+			if ( xhr.status >= 200 && xhr.status < 300 || xhr.status === 304 ) {
+				let isSuccess = true;
+				let response = ajax.dataFilter( xhr.response, options.dataType || 'json' );
 
-					const json = JSON.parse( ajax.dataFilter( text, 'json' ) );
-					options.success( json );
-				} );
-			} )
-			.catch( error => options.error && options.error( error.responseText, 'error', error.message ) );
+				try {
+					response = ( options.dataType === 'html' ) ? response : JSON.parse( response );
+				} catch ( ex ) {
+					options.error && options.error( xhr, 'error', ex.message );
+					isSuccess = false;
+				}
 
-		return controller;
+				isSuccess && options.success( response );
+			} else {
+				options.error && options.error( xhr, 'error', xhr.statusText );
+			}
+			$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+		};
+
+		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+			options.error && options.error( xhr, 'error', xhr.statusText );
+			$( document ).trigger( 'ajaxComplete', [ xhr, options ] );
+		};
+
+		return xhr;
 	};
 	ajax.dataFilter = ( raw_response, dataType ) => raw_response;
 
@@ -288,8 +291,8 @@ jQuery( function( $ ) {
 			wc_checkout_form.updateTimer = setTimeout( wc_checkout_form.update_checkout_action, '5', args );
 		},
 		update_checkout_action: function( args ) {
-			if ( wc_checkout_form.controller ) {
-				wc_checkout_form.controller.abort();
+			if ( wc_checkout_form.xhr ) {
+				wc_checkout_form.xhr.abort();
 			}
 
 			var $form = $( 'form.checkout' );
@@ -374,7 +377,7 @@ jQuery( function( $ ) {
 				}
 			});
 
-			wc_checkout_form.controller = ajax({
+			wc_checkout_form.xhr = ajax({
 				type:		'POST',
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'update_order_review' ),
 				data:		new URLSearchParams( data ).toString(),
@@ -588,7 +591,7 @@ jQuery( function( $ ) {
 							}
 						}
 					},
-					error:	function( responseText, textStatus, errorThrown ) {
+					error:	function( xhr, textStatus, errorThrown ) {
 						// Detach the unload handler that prevents a reload / redirect
 						wc_checkout_form.detachUnloadEventsOnSubmit();
 
@@ -711,10 +714,10 @@ jQuery( function( $ ) {
 						$( 'form.checkout_coupon' ).find( 'input[name="coupon_code"]' ).val( '' );
 					}
 				},
-				error: function ( responseText ) {
+				error: function ( xhr ) {
 					if ( wc_checkout_params.debug_mode ) {
 						/* jshint devel: true */
-						console.log( responseText );
+						console.log( xhr.responseText );
 					}
 				},
 				dataType: 'html'
