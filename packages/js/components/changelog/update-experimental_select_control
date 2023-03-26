@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update experimental SelectControl compoment to expose combobox functions from Downshift and provide additional options.

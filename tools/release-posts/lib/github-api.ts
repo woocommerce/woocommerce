@@ -3,6 +3,10 @@
  */
 import { Octokit } from '@octokit/rest';
 import shuffle from 'lodash.shuffle';
+
+/**
+ * Internal dependencies
+ */
 import { getEnvVar } from './environment';
 
 export type ContributorData = {
@@ -97,4 +101,17 @@ export const getContributorData = async (
 		baseRef,
 		headRef,
 	} as ContributorData;
+};
+
+export const getMostRecentFinal = async () => {
+	const octokit = new Octokit( {
+		auth: getEnvVar( 'GITHUB_ACCESS_TOKEN', true ),
+	} );
+
+	const release = await octokit.repos.getLatestRelease( {
+		owner: 'woocommerce',
+		repo: 'woocommerce',
+	} );
+
+	return release.data;
 };

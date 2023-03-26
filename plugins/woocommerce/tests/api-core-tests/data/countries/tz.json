@@ -1,0 +1,138 @@
+{
+    "code": "TZ",
+    "name": "Tanzania",
+    "states": [
+        {
+            "code": "TZ01",
+            "name": "Arusha"
+        },
+        {
+            "code": "TZ02",
+            "name": "Dar es Salaam"
+        },
+        {
+            "code": "TZ03",
+            "name": "Dodoma"
+        },
+        {
+            "code": "TZ04",
+            "name": "Iringa"
+        },
+        {
+            "code": "TZ05",
+            "name": "Kagera"
+        },
+        {
+            "code": "TZ06",
+            "name": "Pemba North"
+        },
+        {
+            "code": "TZ07",
+            "name": "Zanzibar North"
+        },
+        {
+            "code": "TZ08",
+            "name": "Kigoma"
+        },
+        {
+            "code": "TZ09",
+            "name": "Kilimanjaro"
+        },
+        {
+            "code": "TZ10",
+            "name": "Pemba South"
+        },
+        {
+            "code": "TZ11",
+            "name": "Zanzibar South"
+        },
+        {
+            "code": "TZ12",
+            "name": "Lindi"
+        },
+        {
+            "code": "TZ13",
+            "name": "Mara"
+        },
+        {
+            "code": "TZ14",
+            "name": "Mbeya"
+        },
+        {
+            "code": "TZ15",
+            "name": "Zanzibar West"
+        },
+        {
+            "code": "TZ16",
+            "name": "Morogoro"
+        },
+        {
+            "code": "TZ17",
+            "name": "Mtwara"
+        },
+        {
+            "code": "TZ18",
+            "name": "Mwanza"
+        },
+        {
+            "code": "TZ19",
+            "name": "Coast"
+        },
+        {
+            "code": "TZ20",
+            "name": "Rukwa"
+        },
+        {
+            "code": "TZ21",
+            "name": "Ruvuma"
+        },
+        {
+            "code": "TZ22",
+            "name": "Shinyanga"
+        },
+        {
+            "code": "TZ23",
+            "name": "Singida"
+        },
+        {
+            "code": "TZ24",
+            "name": "Tabora"
+        },
+        {
+            "code": "TZ25",
+            "name": "Tanga"
+        },
+        {
+            "code": "TZ26",
+            "name": "Manyara"
+        },
+        {
+            "code": "TZ27",
+            "name": "Geita"
+        },
+        {
+            "code": "TZ28",
+            "name": "Katavi"
+        },
+        {
+            "code": "TZ29",
+            "name": "Njombe"
+        },
+        {
+            "code": "TZ30",
+            "name": "Simiyu"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/tz"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

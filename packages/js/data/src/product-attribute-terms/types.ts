@@ -8,7 +8,7 @@ import { DispatchFromMap } from '@automattic/data-stores';
  */
 import { CrudActions, CrudSelectors } from '../crud/types';
 
-type ProductAttributeTerm = {
+export type ProductAttributeTerm = {
 	id: number;
 	slug: string;
 	name: string;

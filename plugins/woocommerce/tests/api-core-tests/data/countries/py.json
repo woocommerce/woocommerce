@@ -1,0 +1,90 @@
+{
+    "code": "PY",
+    "name": "Paraguay",
+    "states": [
+        {
+            "code": "PY-ASU",
+            "name": "Asunción"
+        },
+        {
+            "code": "PY-1",
+            "name": "Concepción"
+        },
+        {
+            "code": "PY-2",
+            "name": "San Pedro"
+        },
+        {
+            "code": "PY-3",
+            "name": "Cordillera"
+        },
+        {
+            "code": "PY-4",
+            "name": "Guairá"
+        },
+        {
+            "code": "PY-5",
+            "name": "Caaguazú"
+        },
+        {
+            "code": "PY-6",
+            "name": "Caazapá"
+        },
+        {
+            "code": "PY-7",
+            "name": "Itapúa"
+        },
+        {
+            "code": "PY-8",
+            "name": "Misiones"
+        },
+        {
+            "code": "PY-9",
+            "name": "Paraguarí"
+        },
+        {
+            "code": "PY-10",
+            "name": "Alto Paraná"
+        },
+        {
+            "code": "PY-11",
+            "name": "Central"
+        },
+        {
+            "code": "PY-12",
+            "name": "Ñeembucú"
+        },
+        {
+            "code": "PY-13",
+            "name": "Amambay"
+        },
+        {
+            "code": "PY-14",
+            "name": "Canindeyú"
+        },
+        {
+            "code": "PY-15",
+            "name": "Presidente Hayes"
+        },
+        {
+            "code": "PY-16",
+            "name": "Alto Paraguay"
+        },
+        {
+            "code": "PY-17",
+            "name": "Boquerón"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/py"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

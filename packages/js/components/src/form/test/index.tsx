@@ -10,7 +10,8 @@ import { TextControl } from '@wordpress/components';
  * Internal dependencies
  */
 import { Form, useFormContext } from '../';
-import type { FormContext } from '../';
+import type { FormContextType } from '../';
+import { DateTimePickerControl } from '../../date-time-picker-control';
 
 const TestInputWithContext = () => {
 	const formProps = useFormContext< { foo: string } >();
@@ -43,7 +44,7 @@ describe( 'Form', () => {
 			>
 				{ ( {
 					handleSubmit,
-				}: FormContext< Record< string, string > > ) => {
+				}: FormContextType< Record< string, string > > ) => {
 					return <button onClick={ handleSubmit }>Submit</button>;
 				} }
 			</Form>
@@ -70,7 +71,7 @@ describe( 'Form', () => {
 				onChange={ mockOnChange }
 				validate={ () => ( {} ) }
 			>
-				{ ( { setValue }: FormContext< Record< string, string > > ) => {
+				{ ( { setValue }: FormContextType< Record< string, string > > ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -102,7 +103,7 @@ describe( 'Form', () => {
 			<Form onSubmit={ mockOnSubmit } validate={ () => ( {} ) }>
 				{ ( {
 					handleSubmit,
-				}: FormContext< Record< string, string > > ) => {
+				}: FormContextType< Record< string, string > > ) => {
 					return <button onClick={ handleSubmit }>Submit</button>;
 				} }
 			</Form>
@@ -123,7 +124,7 @@ describe( 'Form', () => {
 
 		const { queryByText } = render(
 			<Form onChange={ mockOnChange } validate={ () => ( {} ) }>
-				{ ( { setValue }: FormContext< Record< string, string > > ) => {
+				{ ( { setValue }: FormContextType< Record< string, string > > ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -155,7 +156,7 @@ describe( 'Form', () => {
 				{ ( {
 					setValue,
 					getInputProps,
-				}: FormContext< Record< string, string > > ) => {
+				}: FormContextType< Record< string, string > > ) => {
 					return (
 						<TextControl
 							label={ 'First Name' }
@@ -205,7 +206,7 @@ describe( 'Form', () => {
 				{ ( {
 					setValue,
 					getInputProps,
-				}: FormContext< Record< string, string > > ) => {
+				}: FormContextType< Record< string, string > > ) => {
 					return (
 						<TextControl
 							label={ 'First Name' }
@@ -242,7 +243,7 @@ describe( 'Form', () => {
 				{ ( {
 					setValue,
 					getInputProps,
-				}: FormContext< Record< string, string > > ) => {
+				}: FormContextType< Record< string, string > > ) => {
 					return (
 						<TextControl
 							label={ 'First Name' }
@@ -292,7 +293,7 @@ describe( 'Form', () => {
 				{ ( {
 					setValue,
 					getInputProps,
-				}: FormContext< Record< string, string > > ) => {
+				}: FormContextType< Record< string, string > > ) => {
 					return (
 						<TextControl
 							label={ 'First Name' }
@@ -328,7 +329,7 @@ describe( 'Form', () => {
 			<Form onChanges={ mockOnChanges } validate={ () => ( {} ) }>
 				{ ( {
 					setValues,
-				}: FormContext< Record< string, string > > ) => {
+				}: FormContextType< Record< string, string > > ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -378,7 +379,7 @@ describe( 'Form', () => {
 			<Form onChanges={ mockOnChanges } validate={ validate }>
 				{ ( {
 					setValues,
-				}: FormContext< Record< string, string > > ) => {
+				}: FormContextType< Record< string, string > > ) => {
 					return (
 						<button
 							onClick={ () => {
@@ -406,6 +407,68 @@ describe( 'Form', () => {
 			false
 		);
 	} );
+
+	// We need to bump up the timeout for this test because:
+	//     1. userEvent.type() is slow (see https://github.com/testing-library/user-event/issues/577)
+	//     2. moment.js is slow
+	// Otherwise, the following error can occur on slow machines (such as our CI), because Jest times out and starts
+	// tearing down the component while test microtasks are still being executed
+	// (see https://github.com/facebook/jest/issues/12670)
+	//       TypeError: Cannot read properties of null (reading 'createEvent')
+	it( 'should provide props that automatically handle DateTimePickerControl changes', async () => {
+		const newDateTimeInputString = 'invalid input';
+
+		type TestData = { date: string };
+
+		const mockOnChange = jest.fn();
+
+		function validate(): Record< string, string > {
+			return { date: 'This is a bad date' };
+		}
+
+		const { container, queryByText } = render(
+			<Form< TestData > onChange={ mockOnChange } validate={ validate }>
+				{ ( { getInputProps, values }: FormContextType< TestData > ) => {
+					return (
+						<DateTimePickerControl
+							label={ 'Date' }
+							onChangeDebounceWait={ 10 }
+							currentDate={ values.date }
+							{ ...getInputProps( 'date' ) }
+						/>
+					);
+				} }
+			</Form>
+		);
+
+		const controlRoot = container.querySelector(
+			'.woocommerce-date-time-picker-control'
+		);
+
+		const input = controlRoot?.querySelector( 'input' );
+		userEvent.type(
+			input!,
+			'{selectall}{backspace}' + newDateTimeInputString
+		);
+		fireEvent.blur( input! );
+
+		await waitFor(
+			() => {
+				expect( mockOnChange ).toHaveBeenLastCalledWith(
+					{ name: 'date', value: newDateTimeInputString },
+					{ date: newDateTimeInputString },
+					false
+				);
+				expect( controlRoot?.classList.contains( 'has-error' ) ).toBe(
+					true
+				);
+				expect(
+					queryByText( 'This is a bad date' )
+				).toBeInTheDocument();
+			},
+			{ timeout: 100 }
+		);
+	}, 10000 );
 
 	describe( 'FormContext', () => {
 		it( 'should allow nested field to use useFormContext to set field value', async () => {

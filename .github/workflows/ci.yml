@@ -12,11 +12,16 @@ defaults:
 concurrency: 
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions: {}
+
 jobs:
   test:
     name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
     timeout-minutes: 30
     runs-on: ubuntu-20.04
+    permissions:
+      contents: read
     continue-on-error: ${{ matrix.wp == 'nightly' }}
     strategy:
       fail-fast: false
@@ -26,9 +31,9 @@ jobs:
         include:
           - wp: nightly
             php: '7.4'
-          - wp: '5.9'
+          - wp: '6.0'
             php: 7.4
-          - wp: '5.8'
+          - wp: '5.9'
             php: 7.4
     services:
       database:

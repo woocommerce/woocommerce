@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Refetch data for "Installed extensions" card after installing a recommended marketing channel.

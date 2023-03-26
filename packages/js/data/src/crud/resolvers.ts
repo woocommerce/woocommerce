@@ -67,7 +67,7 @@ export const createResolvers = ( {
 		}
 
 		try {
-			const path = getRestPath( namespace, {}, urlParameters );
+			const path = getRestPath( namespace, query || {}, urlParameters );
 			const { items, totalCount }: { items: Item[]; totalCount: number } =
 				yield request< ItemQuery, Item >( path, resourceQuery );
 

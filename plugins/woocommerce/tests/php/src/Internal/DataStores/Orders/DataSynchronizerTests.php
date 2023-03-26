@@ -5,11 +5,13 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 /**
  * Tests for DataSynchronizer class.
  */
 class DataSynchronizerTests extends WC_Unit_Test_Case {
+	use ArraySubsetAsserts;
 
 	/**
 	 * @var DataSynchronizer
@@ -144,6 +146,151 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 			OrdersTableDataStore::class,
 			$cot_order->get_data_store()->get_current_class_name(),
 			'The order was successfully copied to the COT table, outside of a dedicated synchronization batch.'
+		);
+	}
+
+	/**
+	 * When sync is enabled and the posts store is authoritative, creating an order and updating the status from
+	 * draft to some non-draft status (as happens when an order is manually created in the admin environment) should
+	 * result in the same status change being made in the duplicate COT record.
+	 */
+	public function test_status_syncs_correctly_after_order_creation() {
+		global $wpdb;
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+
+		// Enable sync, make the posts table authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		// When a new order is manually created in the admin environment, WordPress automatically creates an empty
+		// draft post for us.
+		$order_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'shop_order',
+				'post_status' => 'draft',
+			)
+		);
+
+		// Once the admin user decides to go ahead and save the order (ie, they click 'Create'), we start performing
+		// various updates to the order record.
+		wc_get_order( $order_id )->save();
+
+		// As soon as the order is saved via our own internal API, the DataSynchronizer should create a copy of the
+		// record in the COT table.
+		$this->assertEquals(
+			'draft',
+			$wpdb->get_var( "SELECT status FROM $orders_table WHERE id = $order_id" ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			'When HPOS is enabled but the posts data store is authoritative, saving an order will result in a duplicate with the same status being saved in the COT table.'
+		);
+
+		// In a separate operation, the status will be updated to an actual non-draft order status. This should also be
+		// observed by the DataSynchronizer and a further update made to the COT table.
+		$order = wc_get_order( $order_id );
+		$order->set_status( 'pending' );
+		$order->save();
+		$this->assertEquals(
+			'wc-pending',
+			$wpdb->get_var( "SELECT status FROM $orders_table WHERE id = $order_id" ), //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			'When the order status is updated, the change should be observed by the DataSynhronizer and a matching update will take place in the COT table.'
+		);
+	}
+
+	/**
+	 * When sync is enabled, and an order is deleted either from the post table or the COT table, the
+	 * change should propagate across to the other table.
+	 *
+	 * @return void
+	 */
+	public function test_order_deletions_propagate(): void {
+		// Sync enabled and COT authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order = OrderHelper::create_order();
+		wp_delete_post( $order->get_id(), true );
+
+		$this->assertFalse(
+			wc_get_order( $order->get_id() ),
+			'After the order post record was deleted, the order was also deleted from COT.'
+		);
+
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+		$order->delete( true );
+
+		$this->assertNull(
+			get_post( $order_id ),
+			'After the COT order record was deleted, the order was also deleted from the posts table.'
+		);
+	}
+
+	/**
+	 * When sync is enabled, changes to meta data should propagate from the Custom Orders Table to
+	 * the post meta table whenever the order object's save_meta_data() method is called.
+	 *
+	 * @return void
+	 */
+	public function test_meta_data_changes_propagate_from_cot_to_cpt(): void {
+		// Sync enabled and COT authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'foo', 'bar' );
+		$order->add_meta_data( 'bar', 'baz' );
+		$order->save_meta_data();
+
+		$order->delete_meta_data( 'bar' );
+		$order->save_meta_data();
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		$refreshed_order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'foo' ),
+			'bar',
+			'Meta data persisted via the HPOS datastore is accessible via the CPT datastore.'
+		);
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'bar' ),
+			'',
+			'Meta data deleted from the HPOS datastore should also be deleted from the CPT datastore.'
+		);
+	}
+
+	/**
+	 * When sync is enabled, changes to meta data should propagate from the post meta table to
+	 * the Custom Orders Table whenever the order object's save_meta_data() method is called.
+	 *
+	 * @return void
+	 */
+	public function test_meta_data_changes_propagate_from_cpt_to_cot(): void {
+		// Sync enabled and CPT authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'foo', 'bar' );
+		$order->add_meta_data( 'bar', 'baz' );
+		$order->save_meta_data();
+
+		$order->delete_meta_data( 'bar' );
+		$order->save_meta_data();
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$refreshed_order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'foo' ),
+			'bar',
+			'Meta data persisted via the CPT datastore is accessible via the HPOS datastore.'
+		);
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'bar' ),
+			'',
+			'Meta data deleted from the CPT datastore should also be deleted from the HPOS datastore.'
 		);
 	}
 }

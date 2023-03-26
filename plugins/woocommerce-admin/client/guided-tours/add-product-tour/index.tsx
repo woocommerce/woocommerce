@@ -15,7 +15,7 @@ import { useActiveEditorType } from './use-active-editor-type';
 import {
 	bindEnableGuideModeClickEvent,
 	waitUntilElementTopNotChange,
-} from './utils';
+} from '../utils';
 import {
 	ProductTourStepName,
 	useProductStepChange,

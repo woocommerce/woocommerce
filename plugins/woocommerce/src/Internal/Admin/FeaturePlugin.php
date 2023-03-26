@@ -8,18 +8,16 @@ namespace Automattic\WooCommerce\Internal\Admin;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API;
-use \Automattic\WooCommerce\Admin\Notes\Notes;
-use \Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
-use \Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
-use \Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
-use \Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
-use \Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
-use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
-use \Automattic\WooCommerce\Internal\Admin\Notes\ManageStoreActivityFromHomeScreen;
-use \Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
+use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
+use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
+use Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
+use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
+use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
+use Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
+use Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
+use Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
+use Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstaller;
@@ -181,8 +179,6 @@ class FeaturePlugin {
 		new InstallJPAndWCSPlugins();
 		new TestCheckout();
 		new SellingOnlineCourses();
-		new WelcomeToWooCommerceForStoreUsers();
-		new ManageStoreActivityFromHomeScreen();
 		new MagentoMigration();
 
 		// Initialize MerchantEmailNotifications.

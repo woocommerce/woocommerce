@@ -32,7 +32,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '7.1.0';
+	public $version = '7.7.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -64,6 +64,13 @@ final class WooCommerce {
 	 * @var WC_Query
 	 */
 	public $query = null;
+
+	/**
+	 * API instance
+	 *
+	 * @var WC_API
+	 */
+	public $api;
 
 	/**
 	 * Product factory instance.
@@ -600,6 +607,9 @@ final class WooCommerce {
 					break;
 				case 'twentytwentytwo':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-two.php';
+					break;
+				case 'twentytwentythree':
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twenty-three.php';
 					break;
 			}
 		}

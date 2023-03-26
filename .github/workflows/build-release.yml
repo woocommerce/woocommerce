@@ -2,10 +2,15 @@ name: Build release asset
 on: 
   release:
     types: [published]
+
+permissions: {}
+
 jobs:
   build:
     name: Build release asset
     runs-on: ubuntu-20.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       
@@ -27,3 +32,19 @@ jobs:
           asset_path: plugins/woocommerce/woocommerce.zip
           asset_name: woocommerce.zip
           asset_content_type: application/zip
+
+
+  update-code-reference:
+    if: github.event.release.prerelease == false && github.event.release.draft == false && github.repository_owner == 'woocommerce'
+    name: Update Code Reference
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Invoke Code Reference build and deploy workflow
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: GitHub Pages deploy
+          repo: woocommerce/code-reference
+          token: ${{ secrets.CUSTOM_GH_TOKEN }}
+          ref: refs/heads/trunk
+          inputs: '{ "version": "${{ github.event.release.tag_name }}" }'    

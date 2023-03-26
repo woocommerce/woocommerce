@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes DateTimePickerControl's debounce handling to work even if onChange prop changes.

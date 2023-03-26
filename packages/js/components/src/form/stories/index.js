@@ -9,7 +9,8 @@ import {
 	TextControl,
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { Form } from '@woocommerce/components';
+import { Form, DateTimePickerControl } from '@woocommerce/components';
+import moment from 'moment';
 
 const validate = ( values ) => {
 	const errors = {};
@@ -18,6 +19,9 @@ const validate = ( values ) => {
 	}
 	if ( values.lastName.length < 3 ) {
 		errors.lastName = 'Last name must be at least 3 characters';
+	}
+	if ( ! moment( values.date, moment.ISO_8601, true ).isValid() ) {
+		errors.date = 'Invalid date';
 	}
 	return errors;
 };
@@ -28,6 +32,7 @@ const initialValues = {
 	firstName: '',
 	lastName: '',
 	select: '3',
+	date: '2014-10-24T13:02',
 	checkbox: true,
 	radio: 'one',
 };
@@ -67,6 +72,13 @@ export const Basic = () => {
 									{ label: 'Option 3', value: '3' },
 								] }
 								{ ...getInputProps( 'select' ) }
+							/>
+							<DateTimePickerControl
+								label="Date"
+								dateTimeFormat="YYYY-MM-DD HH:mm"
+								placeholder="Enter a date"
+								currentDate={ values.date }
+								{ ...getInputProps( 'date' ) }
 							/>
 							<CheckboxControl
 								label="Checkbox"

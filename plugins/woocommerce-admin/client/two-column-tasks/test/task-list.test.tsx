@@ -32,6 +32,12 @@ jest.mock( '../task-headers', () => ( {
 	required: () => <div>required_header</div>,
 	completed: () => <div>completed_header</div>,
 } ) );
+jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
+	useUserPreferences: jest.fn().mockReturnValue( {
+		updateUserPreferences: jest.fn(),
+	} ),
+} ) );
 
 const tasks: { [ key: string ]: TaskType[] } = {
 	setup: [
@@ -55,6 +61,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 		{
 			id: 'required',
@@ -77,6 +84,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: true,
 		},
 		{
 			id: 'completed',
@@ -98,6 +106,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 	],
 	extension: [
@@ -121,6 +130,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 	],
 };
@@ -258,57 +268,5 @@ describe( 'TaskList', () => {
 		expect(
 			queryByText( dismissedTask[ 0 ].title )
 		).not.toBeInTheDocument();
-	} );
-
-	it( 'should not display isSnoozed tasks', () => {
-		const dismissedTask = [
-			{
-				...tasks.setup[ 0 ],
-				isSnoozed: true,
-				snoozedUntil: Date.now() + 10000,
-			},
-		];
-		const { queryByText } = render(
-			<TaskList
-				id="extended"
-				tasks={ dismissedTask }
-				title="List title"
-				query={ {} }
-				isComplete={ false }
-				isHidden={ false }
-				eventPrefix={ '' }
-				displayProgressHeader={ false }
-				keepCompletedTaskList="no"
-				isVisible={ true }
-			/>
-		);
-		expect(
-			queryByText( dismissedTask[ 0 ].title )
-		).not.toBeInTheDocument();
-	} );
-
-	it( 'should display a snoozed task if snoozedUntil passed the current timestamp', () => {
-		const dismissedTask = [
-			{
-				...tasks.setup[ 0 ],
-				isSnoozed: true,
-				snoozedUntil: Date.now() - 1000,
-			},
-		];
-		const { queryByText } = render(
-			<TaskList
-				id="extended"
-				tasks={ dismissedTask }
-				title="List title"
-				query={ {} }
-				isComplete={ false }
-				isHidden={ false }
-				eventPrefix={ '' }
-				displayProgressHeader={ false }
-				keepCompletedTaskList="no"
-				isVisible={ true }
-			/>
-		);
-		expect( queryByText( dismissedTask[ 0 ].title ) ).toBeInTheDocument();
 	} );
 } );

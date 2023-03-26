@@ -67,6 +67,7 @@ class Loader {
 		Translations::get_instance();
 		WCAdminUser::get_instance();
 		Settings::get_instance();
+		SiteHealth::get_instance();
 		SystemStatusReport::get_instance();
 
 		wc_get_container()->get( Reviews::class );

@@ -4,6 +4,7 @@ export { default as AnimationSlider } from './animation-slider';
 export { default as Chart } from './chart';
 export { default as ChartPlaceholder } from './chart/placeholder';
 export { CompareButton, CompareFilter } from './compare-filter';
+export { ConditionalWrapper as __experimentalConditionalWrapper } from './conditional-wrapper';
 export { default as Date } from './date';
 export { default as DateRangeFilterPicker } from './date-range-filter-picker';
 export { default as DateRange } from './calendar/date-range';
@@ -15,12 +16,12 @@ export { default as EmptyContent } from './empty-content';
 export { default as Flag } from './flag';
 export { Form, useFormContext } from './form';
 export { FormSection } from './form-section';
-export type { FormContext, FormRef, FormErrors } from './form';
+export type { FormContext, FormContextType, FormRef, FormErrors } from './form';
 export { default as FilterPicker } from './filter-picker';
 export { H, Section } from './section';
 export { ImageGallery, ImageGalleryItem } from './image-gallery';
 export { default as ImageUpload } from './image-upload';
-export { default as Link } from './link';
+export { Link } from './link';
 export { default as List } from './list';
 export { MediaUploader } from './media-uploader';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
@@ -44,12 +45,16 @@ export { default as SelectControl } from './select-control';
 export {
 	SelectControl as __experimentalSelectControl,
 	selectControlStateChangeTypes,
+	useAsyncFilter,
 } from './experimental-select-control';
 export {
 	MenuItem as __experimentalSelectControlMenuItem,
 	MenuItemProps as __experimentalSelectControlMenuItemProps,
 } from './experimental-select-control/menu-item';
-export { Menu as __experimentalSelectControlMenu } from './experimental-select-control/menu';
+export {
+	Menu as __experimentalSelectControlMenu,
+	MenuSlot as __experimentalSelectControlMenuSlot,
+} from './experimental-select-control/menu';
 export { default as ScrollTo } from './scroll-to';
 export { Sortable } from './sortable';
 export { ListItem } from './list-item';
@@ -71,11 +76,35 @@ export { default as Tag } from './tag';
 export { default as TextControl } from './text-control';
 export { default as TextControlWithAffixes } from './text-control-with-affixes';
 export { default as Timeline } from './timeline';
+export { Tooltip as __experimentalTooltip } from './tooltip';
 export { default as ViewMoreList } from './view-more-list';
 export { default as WebPreview } from './web-preview';
 export { Badge } from './badge';
 export { DynamicForm } from './dynamic-form';
-export { EnrichedLabel } from './enriched-label';
 export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';
 export { CollapsibleContent } from './collapsible-content';
+export { createOrderedChildren, sortFillsByOrder } from './utils';
+export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-product-field-item';
+export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
+export { WooProductTabItem as __experimentalWooProductTabItem } from './woo-product-tab-item';
+export * from './product-fields';
+export {
+	SlotContextProvider,
+	useSlotContext,
+	SlotContextType,
+	SlotContextHelpersType,
+} from './slot-context';
+export {
+	TreeControl as __experimentalTreeControl,
+	Item as TreeItemType,
+} from './experimental-tree-control';
+export { SelectTree as __experimentalSelectTreeControl } from './experimental-select-tree-control';
+export { default as TreeSelectControl } from './tree-select-control';
+
+// Exports below can be removed once the @woocommerce/product-editor package is released.
+export {
+	ProductSectionLayout as __experimentalProductSectionLayout,
+	ProductFieldSection as __experimentalProductFieldSection,
+} from './product-section-layout';
+export { DisplayState } from './display-state';

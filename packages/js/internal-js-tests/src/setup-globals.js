@@ -5,6 +5,10 @@ import { setLocaleData } from '@wordpress/i18n';
 import { registerStore } from '@wordpress/data';
 import 'regenerator-runtime/runtime';
 
+// Due to the dependency @wordpress/compose which introduces the use of
+// ResizeObserver this global mock is required for some tests to work.
+global.ResizeObserver = require( 'resize-observer-polyfill' );
+
 // Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will
 // likely run into this.
 global.wp = {

@@ -1,0 +1,17 @@
+{
+    "code": "BL",
+    "name": "Saint Barth&eacute;lemy",
+    "states": [],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/bl"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

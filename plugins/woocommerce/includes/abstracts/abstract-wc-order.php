@@ -10,9 +10,11 @@
  * @package     WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -130,6 +132,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * This method overwrites the base class's clone method to make it a no-op. In base class WC_Data, we are unsetting the meta_id to clone.
+	 * It seems like this was done to avoid conflicting the metadata when duplicating products. However, doing that does not seems necessary for orders.
+	 * In-fact, when we do that for orders, we lose the capability to clone orders with custom meta data by caching plugins. This is because, when we clone an order object for caching, it will clone the metadata without the ID. Unfortunately, when this cached object with nulled meta ID is retreived, WC_Data will consider it as a new meta and will insert it as a new meta-data causing duplicates.
+	 *
+	 * Eventually, we should move away from overwriting the __clone method in base class itself, since it's easily possible to still duplicate the product without having to hook into the __clone method.
+	 *
+	 * @since 7.6.0
+	 */
+	public function __clone() {}
+
+	/**
 	 * Get internal type.
 	 *
 	 * @return string
@@ -202,6 +215,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 
 			$this->save_items();
+
+			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+				$order_cache = wc_get_container()->get( OrderCache::class );
+				$order_cache->update_if_cached( $this );
+			}
 
 			/**
 			 * Trigger action after saving to the DB.
@@ -351,6 +369,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get date_modified.
+	 *
+	 * @param  string $context View or edit context.
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 */
+	public function get_date_paid( $context = 'view' ) {
+		return $this->get_prop( 'date_paid', $context );
+	}
+
+	/**
+	 * Get date_modified.
+	 *
+	 * @param  string $context View or edit context.
+	 * @return WC_DateTime|NULL object if the date is set or null if there is no date.
+	 */
+	public function get_date_completed( $context = 'view' ) {
+		return $this->get_prop( 'date_completed', $context );
+	}
+
+
+	/**
 	 * Return the order statuses without wc- internal prefix.
 	 *
 	 * @param  string $context View or edit context.
@@ -417,7 +456,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Gets order grand total. incl. taxes. Used in gateways.
+	 * Gets order grand total including taxes, shipping cost, fees, and coupon discounts. Used in gateways.
 	 *
 	 * @param  string $context View or edit context.
 	 * @return float
@@ -458,7 +497,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Gets order subtotal.
+	 * Gets order subtotal. Order subtotal is the price of all items excluding taxes, fees, shipping cost, and coupon discounts.
+	 * If sale price is set on an item, the subtotal will include this sale discount. E.g. a product with a regular
+	 * price of $100 bought at a 50% discount will represent $50 of the subtotal for the order.
 	 *
 	 * @return float
 	 */
@@ -537,6 +578,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_recorded_coupon_usage_counts( $context = 'view' ) {
 		return wc_string_to_bool( $this->get_prop( 'recorded_coupon_usage_counts', $context ) );
+	}
+
+	/**
+	 * Get basic order data in array format.
+	 *
+	 * @return array
+	 */
+	public function get_base_data() {
+		return array_merge(
+			array( 'id' => $this->get_id() ),
+			$this->data
+		);
 	}
 
 	/*
@@ -1199,6 +1252,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
+		/**
+		 * Action to signal that a coupon has been applied to an order.
+		 *
+		 * @param  WC_Coupon $coupon The applied coupon object.
+		 * @param  WC_Order  $order  The current order object.
+		 *
+		 * @since 7.3
+		 */
+		do_action( 'woocommerce_order_applied_coupon', $coupon, $this );
+
 		$this->set_coupon_discount_amounts( $discounts );
 		$this->save();
 
@@ -1233,9 +1296,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Manual discounts are not affected; those are separate and do not affect
 	 * stored line totals.
 	 *
-	 * @since  3.2.0
+	 * @since 3.2.0
+	 * @since 7.6.0 Returns a boolean indicating success.
+	 *
 	 * @param  string $code Coupon code.
-	 * @return void
+	 * @return bool TRUE if coupon was removed, FALSE otherwise.
 	 */
 	public function remove_coupon( $code ) {
 		$coupons = $this->get_items( 'coupon' );
@@ -1247,9 +1312,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$coupon_object = new WC_Coupon( $code );
 				$coupon_object->decrease_usage_count( $this->get_user_id() );
 				$this->recalculate_coupons();
-				break;
+
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	/**
@@ -1616,6 +1684,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return apply_filters( 'woocommerce_order_get_tax_location', $args, $this );
+	}
+
+	/**
+	 * Public wrapper for exposing get_tax_location() method, enabling 3rd parties to get the tax location for an order.
+	 *
+	 * @since 7.6.0
+	 * @param array $args array Override the location.
+	 * @return array
+	 */
+	public function get_taxable_location( $args = array() ) {
+		return $this->get_tax_location( $args );
 	}
 
 	/**

@@ -17,7 +17,7 @@ import {
 
 export const WCPayBenefits: React.VFC = () => {
 	return (
-		<Flex className="woocommerce-wcpay-benefits" gap={ 30 } align="top">
+		<Flex className="woocommerce-wcpay-benefits" align="top">
 			<Flex className="woocommerce-wcpay-benefits-benefit">
 				<PaymentCardIcon />
 				<Text as="p">

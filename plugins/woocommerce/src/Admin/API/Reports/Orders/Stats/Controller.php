@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
+use Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 
 /**
  * REST API Reports orders stats controller class.
@@ -18,13 +18,6 @@ use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
  * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.

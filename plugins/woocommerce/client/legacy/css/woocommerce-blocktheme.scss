@@ -2,6 +2,7 @@
 * woocommerce-blocktheme.scss
 * Block theme default styles to ensure WooCommerce looks better out of the box with block themes that are not optimised for WooCommerce specifically.
 */
+@import "fonts";
 @import "variables";
 
 /**
@@ -17,33 +18,16 @@
 	}
 }
 
+.clear {
+	clear: both;
+}
+
 /**
 * General
 */
 .woocommerce {
-	mark {
-		// Style the mark element in theme colors.
-		// For details see https://github.com/woocommerce/woocommerce/pull/31631.
-		background-color: var(--wp--preset--color--foreground, $highlight);
-		color: var(--wp--preset--color--background, $highlightext);
-	}
-
-	/**
-	* Buttons
-	*/
-	a.button,
-	button[name="add-to-cart"],
-	input[name="submit"],
-	button.single_add_to_cart_button,
-	button[type="submit"]:not(.wp-block-search__button) {
-		// Slightly increase CTA size across the board.
-		padding: 0.9rem 1.1rem;
-	}
-
 	button.button,
 	a.button {
-		background-color: var(--wp--preset--color--foreground, $primary);
-		color: var(--wp--preset--color--background, $primarytext);
 
 		&.disabled,
 		&:disabled,
@@ -51,8 +35,6 @@
 		&.disabled:hover,
 		&:disabled:hover,
 		&:disabled[disabled]:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
-			color: var(--wp--preset--color--background, $primarytext);
 			opacity: 0.5;
 		}
 	}
@@ -60,13 +42,8 @@
 	#respond input#submit,
 	input.button,
 	a.button.alt {
-		// Style primary WooCommerce CTAs in theme colors by default.
-		background-color: var(--wp--preset--color--foreground, $primary);
-		color: var(--wp--preset--color--background, $primarytext);
 
 		&:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
-			color: var(--wp--preset--color--background, $primarytext);
 			opacity: 0.9;
 		}
 
@@ -76,8 +53,6 @@
 		&.disabled:hover,
 		&:disabled:hover,
 		&:disabled[disabled]:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
-			color: var(--wp--preset--color--background, $primarytext);
 			opacity: 0.5;
 		}
 	}
@@ -114,9 +89,6 @@
 
 		.woocommerce-tabs {
 			ul.tabs li.active {
-				// Style active tab in theme colors.
-				background: var(--wp--preset--color--background, $contentbg);
-				border-bottom-color: var(--wp--preset--color--background, $contentbg);
 
 				&::before {
 					box-shadow: 2px 2px 0 var(--wp--preset--color--background, $contentbg);
@@ -128,14 +100,25 @@
 			}
 		}
 
-		.quantity {
-			// Adjust positioning of quantity selector and button.
-			.qty {
-				margin-right: 0.5rem;
+		form.cart {
+			div.quantity {
+				display: inline-block;
+				float: none; // Remove float set by WC core.
+				vertical-align: middle;
+	
+				// Adjust positioning of quantity selector and button.
+				.qty {
+					margin-right: 0.5rem;
+				}
 			}
-
-			+ .single_add_to_cart_button {
-				min-height: 51px;
+	
+			button[name="add-to-cart"],
+			button.single_add_to_cart_button {
+				display: inline-block;
+				float: none; // Remove float set by WC core.
+				margin-top: 0;
+				margin-bottom: 0;
+				vertical-align: middle;
 			}
 		}
 
@@ -312,17 +295,18 @@
 			}
 		}
 
+		.coupon {
+			display: flex;
+			align-items: center;
+		}
+
 		#coupon_code {
 			// Allow sufficient space for the coupon code.
 			width: auto;
 			margin-right: 0.8rem;
-		}
-
-		#coupon_code,
-		.actions .button {
 			height: 50px;
-			padding: 0.9rem 1.1rem;
 			font-size: var(--wp--preset--font-size--small);
+			padding: 0 1.1rem;
 		}
 
 		@media only screen and ( max-width: 768px ) {

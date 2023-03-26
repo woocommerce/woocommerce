@@ -1,0 +1,18 @@
+.woocommerce-product-block-editor {
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	p,
+	input {
+		font-family: var(--wp--preset--font-family--system-font);
+	}
+
+	.editor-styles-wrapper {
+		max-width: 650px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}

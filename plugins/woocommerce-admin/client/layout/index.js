@@ -17,6 +17,10 @@ import { Children, cloneElement } from 'react';
 import PropTypes from 'prop-types';
 import { get, isFunction, identity, memoize } from 'lodash';
 import { parse } from 'qs';
+import {
+	CustomerEffortScoreModalContainer,
+	triggerExitPageCesSurvey,
+} from '@woocommerce/customer-effort-score';
 import { getHistory, getQuery } from '@woocommerce/navigation';
 import {
 	PLUGINS_STORE_NAME,
@@ -34,6 +38,7 @@ import { PluginArea } from '@wordpress/plugins';
 import './style.scss';
 import { Controller, getPages } from './controller';
 import { Header } from '../header';
+import { Footer } from './footer';
 import Notices from './notices';
 import TransientNotices from './transient-notices';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -133,6 +138,7 @@ class _Layout extends Component {
 
 	componentDidMount() {
 		this.recordPageViewTrack();
+		triggerExitPageCesSurvey();
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -145,6 +151,9 @@ class _Layout extends Component {
 
 		if ( previousPath !== currentPath ) {
 			this.recordPageViewTrack();
+			setTimeout( () => {
+				triggerExitPageCesSurvey();
+			}, 0 );
 		}
 	}
 
@@ -246,6 +255,8 @@ class _Layout extends Component {
 								<WCPayUsageModal />
 							</Suspense>
 						) }
+						<Footer />
+						<CustomerEffortScoreModalContainer />
 					</div>
 					<PluginArea scope="woocommerce-admin" />
 					{ window.wcAdminFeatures.navigation && (

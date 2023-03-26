@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { render, waitFor, screen, within } from '@testing-library/react';
-import { Form, FormContext } from '@woocommerce/components';
+import { Fragment } from '@wordpress/element';
+import { Form, FormContextType } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import userEvent from '@testing-library/user-event';
@@ -17,11 +18,34 @@ const createProductWithStatus = jest.fn();
 const updateProductWithStatus = jest.fn();
 const copyProductWithStatus = jest.fn();
 const deleteProductAndRedirect = jest.fn();
+const onPublishCES = jest.fn().mockResolvedValue( {} );
+const onDraftCES = jest.fn().mockResolvedValue( {} );
 
+jest.mock( '@wordpress/plugins', () => ( { registerPlugin: jest.fn() } ) );
+
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: jest.fn().mockReturnValue( { updateOptions: jest.fn() } ),
+	useSelect: jest.fn().mockReturnValue( { productCESAction: 'hide' } ),
+} ) );
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
-jest.mock( '../use-product-helper', () => {
+jest.mock(
+	'~/customer-effort-score-tracks/use-product-mvp-ces-footer',
+	() => ( {
+		useProductMVPCESFooter: () => ( {
+			onPublish: onPublishCES,
+			onSaveDraft: onDraftCES,
+		} ),
+	} )
+);
+jest.mock( '@woocommerce/admin-layout', () => ( {
+	WooHeaderItem: ( props: { children: () => React.ReactElement } ) => (
+		<Fragment { ...props }>{ props.children() }</Fragment>
+	),
+} ) );
+jest.mock( '@woocommerce/product-editor', () => {
 	return {
-		useProductHelper: () => ( {
+		__experimentalUseProductHelper: () => ( {
 			createProductWithStatus,
 			updateProductWithStatus,
 			copyProductWithStatus,
@@ -29,6 +53,13 @@ jest.mock( '../use-product-helper', () => {
 		} ),
 	};
 } );
+jest.mock( '@woocommerce/navigation', () => ( {
+	...jest.requireActual( '@woocommerce/navigation' ),
+	useConfirmUnsavedChanges: jest.fn(),
+} ) );
+jest.mock( '@woocommerce/customer-effort-score', () => ( {
+	useCustomerEffortScoreExitPageTracker: jest.fn(),
+} ) );
 
 describe( 'ProductFormActions', () => {
 	beforeEach( () => {
@@ -172,7 +203,7 @@ describe( 'ProductFormActions', () => {
 			};
 			const { queryByText, getByLabelText } = render(
 				<Form< Partial< Product > > initialValues={ product }>
-					{ ( { getInputProps }: FormContext< Product > ) => {
+					{ ( { getInputProps }: FormContextType< Product > ) => {
 						return (
 							<>
 								<label htmlFor="product-name">Name</label>

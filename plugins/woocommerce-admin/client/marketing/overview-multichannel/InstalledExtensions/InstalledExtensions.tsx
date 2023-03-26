@@ -15,18 +15,18 @@ import {
 	ProductIcon,
 	PluginCardBody,
 } from '~/marketing/components';
-import { Plugin } from './types';
-import { usePlugins } from './usePlugins';
+import { InstalledPlugin } from '~/marketing/types';
+import { useInstalledPluginsWithoutChannels } from '~/marketing/hooks';
 
 export const InstalledExtensions = () => {
-	const { installedPlugins, activatingPlugins, activateInstalledPlugin } =
-		usePlugins();
+	const { data, activatingPlugins, activateInstalledPlugin } =
+		useInstalledPluginsWithoutChannels();
 
-	if ( installedPlugins.length === 0 ) {
+	if ( data.length === 0 ) {
 		return null;
 	}
 
-	const getButton = ( plugin: Plugin ) => {
+	const getButton = ( plugin: InstalledPlugin ) => {
 		if ( plugin.status === 'installed' ) {
 			return (
 				<Button
@@ -81,7 +81,7 @@ export const InstalledExtensions = () => {
 
 	return (
 		<CollapsibleCard header={ __( 'Installed extensions', 'woocommerce' ) }>
-			{ installedPlugins.map( ( el, idx ) => {
+			{ data.map( ( el, idx ) => {
 				return (
 					<Fragment key={ el.slug }>
 						<PluginCardBody
@@ -90,9 +90,7 @@ export const InstalledExtensions = () => {
 							description={ el.description }
 							button={ getButton( el ) }
 						/>
-						{ idx !== installedPlugins.length - 1 && (
-							<CardDivider />
-						) }
+						{ idx !== data.length - 1 && <CardDivider /> }
 					</Fragment>
 				);
 			} ) }

@@ -339,6 +339,12 @@ function wc_body_class( $classes ) {
 		}
 	}
 
+	if ( wc_block_theme_has_styles_for_element( 'button' ) ) {
+
+		$classes[] = 'woocommerce-block-theme-has-button-styles';
+
+	}
+
 	$classes[] = 'woocommerce-no-js';
 
 	add_action( 'wp_footer', 'wc_no_js' );
@@ -1345,6 +1351,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 					array_filter(
 						array(
 							'button',
+							wc_wp_theme_get_element_class_name( 'button' ), // escaped in the template.
 							'product_type_' . $product->get_type(),
 							$product->is_purchasable() && $product->is_in_stock() ? 'add_to_cart_button' : '',
 							$product->supports( 'ajax_add_to_cart' ) && $product->is_purchasable() && $product->is_in_stock() ? 'ajax_add_to_cart' : '',
@@ -1796,6 +1803,7 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 			// When autocomplete is enabled in firefox, it will overwrite actual value with what user entered last. So we default to off.
 			// See @link https://github.com/woocommerce/woocommerce/issues/30733.
 			'autocomplete' => apply_filters( 'woocommerce_quantity_input_autocomplete', 'off', $product ),
+			'readonly'     => false,
 		);
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
@@ -1809,8 +1817,25 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 			$args['max_value'] = $args['min_value'];
 		}
 
-		ob_start();
+		/**
+		 * The input type attribute will generally be 'number' unless the quantity cannot be changed, in which case
+		 * it will be set to 'hidden'. An exception is made for non-hidden readonly inputs: in this case we set the
+		 * type to 'text' (this prevents most browsers from rendering increment/decrement arrows, which are useless
+		 * and/or confusing in this context).
+		 */
+		$type = $args['min_value'] > 0 && $args['min_value'] === $args['max_value'] ? 'hidden' : 'number';
+		$type = $args['readonly'] && 'hidden' !== $type ? 'text' : $type;
 
+		/**
+		 * Controls the quantity input's type attribute.
+		 *
+		 * @since 7.4.0
+		 *
+		 * @param string $type A valid input type attribute value, usually 'number' or 'hidden'.
+		 */
+		$args['type'] = apply_filters( 'woocommerce_quantity_input_type', $type );
+
+		ob_start();
 		wc_get_template( 'global/quantity-input.php', $args );
 
 		if ( $echo ) {
@@ -2193,7 +2218,8 @@ if ( ! function_exists( 'woocommerce_widget_shopping_cart_button_view_cart' ) ) 
 	 * Output the view cart button.
 	 */
 	function woocommerce_widget_shopping_cart_button_view_cart() {
-		echo '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward">' . esc_html__( 'View cart', 'woocommerce' ) . '</a>';
+		$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
+		echo '<a href="' . esc_url( wc_get_cart_url() ) . '" class="button wc-forward' . esc_attr( $wp_button_class ) . '">' . esc_html__( 'View cart', 'woocommerce' ) . '</a>';
 	}
 }
 
@@ -2203,7 +2229,8 @@ if ( ! function_exists( 'woocommerce_widget_shopping_cart_proceed_to_checkout' )
 	 * Output the proceed to checkout button.
 	 */
 	function woocommerce_widget_shopping_cart_proceed_to_checkout() {
-		echo '<a href="' . esc_url( wc_get_checkout_url() ) . '" class="button checkout wc-forward">' . esc_html__( 'Checkout', 'woocommerce' ) . '</a>';
+		$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
+		echo '<a href="' . esc_url( wc_get_checkout_url() ) . '" class="button checkout wc-forward' . esc_attr( $wp_button_class ) . '">' . esc_html__( 'Checkout', 'woocommerce' ) . '</a>';
 	}
 }
 
@@ -3075,6 +3102,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 				'attribute'        => false,
 				'product'          => false,
 				'selected'         => false,
+				'required'         => false,
 				'name'             => '',
 				'id'               => '',
 				'class'            => '',
@@ -3096,6 +3124,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		$name                  = $args['name'] ? $args['name'] : 'attribute_' . sanitize_title( $attribute );
 		$id                    = $args['id'] ? $args['id'] : sanitize_title( $attribute );
 		$class                 = $args['class'];
+		$required              = (bool) $args['required'];
 		$show_option_none      = (bool) $args['show_option_none'];
 		$show_option_none_text = $args['show_option_none'] ? $args['show_option_none'] : __( 'Choose an option', 'woocommerce' ); // We'll do our best to hide the placeholder, but we'll need to show something when resetting options.
 
@@ -3104,7 +3133,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			$options    = $attributes[ $attribute ];
 		}
 
-		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '">';
+		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . ( $required ? ' required' : '' ) . '>';
 		$html .= '<option value="">' . esc_html( $show_option_none_text ) . '</option>';
 
 		if ( ! empty( $options ) ) {
@@ -3207,6 +3236,7 @@ if ( ! function_exists( 'woocommerce_account_orders' ) ) {
 				'current_page'    => absint( $current_page ),
 				'customer_orders' => $customer_orders,
 				'has_orders'      => 0 < $customer_orders->total,
+				'wp_button_class' => wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '',
 			)
 		);
 	}

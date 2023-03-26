@@ -3,6 +3,7 @@
  */
 import '@wordpress/notices';
 import { render } from '@wordpress/element';
+import { CustomerEffortScoreTracksContainer } from '@woocommerce/customer-effort-score';
 import {
 	withCurrentUserHydration,
 	withSettingsHydration,
@@ -14,9 +15,9 @@ import {
 import './stylesheets/_index.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
-import { CustomerEffortScoreTracksContainer } from './customer-effort-score-tracks';
 import { EmbeddedBodyLayout } from './embedded-body-layout';
 import { WcAdminPaymentsGatewaysBannerSlot } from './payments/payments-settings-banner-slotfill';
+import { WcAdminConflictErrorSlot } from './settings/conflict-error-slotfill.js';
 
 // Modify webpack pubilcPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase
@@ -92,6 +93,12 @@ if ( appRoot ) {
 			WcAdminPaymentsGatewaysBannerSlot(),
 			isWcAdminSettingsPaymentPage
 		);
+	}
+
+	const isTaxPage = document.getElementById( 'wc_conflict_error_slotfill' );
+
+	if ( isTaxPage ) {
+		render( WcAdminConflictErrorSlot(), isTaxPage );
 	}
 
 	const wrap =

@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { applyFilters } from '@wordpress/hooks';
+import { useEffect } from '@wordpress/element';
+import { triggerExitPageCesSurvey } from '@woocommerce/customer-effort-score';
 import QueryString, { parse } from 'qs';
 
 /**
@@ -34,6 +36,10 @@ const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
  * Each Fill component receives QueryParams, consisting of a page, tab, and section string.
  */
 export const EmbeddedBodyLayout = () => {
+	useEffect( () => {
+		triggerExitPageCesSurvey();
+	}, [] );
+
 	const query = parse( location.search.substring( 1 ) );
 	let queryParams: QueryParams = { page: '', tab: '' };
 	if ( isWPPage( query ) ) {

@@ -18,7 +18,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\Admin\Marketing;
+use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
+use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -2469,5 +2470,127 @@ function wc_update_700_remove_download_log_fk() {
  * Remove the transient data for recommended marketing extensions.
  */
 function wc_update_700_remove_recommended_marketing_plugins_transient() {
-	delete_transient( Marketing::RECOMMENDED_PLUGINS_TRANSIENT );
+	delete_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT );
+}
+
+/**
+ * Update the New Zealand state codes in the database
+ * after they were updated in code to the CLDR standard.
+ */
+function wc_update_721_adjust_new_zealand_states() {
+	return MigrationHelper::migrate_country_states(
+		'NZ',
+		array(
+			'NL' => 'NTL',
+			'AK' => 'AUK',
+			'WA' => 'WKO',
+			'BP' => 'BOP',
+			'TK' => 'TKI',
+			'GI' => 'GIS',
+			'HB' => 'HKB',
+			'MW' => 'MWT',
+			'WE' => 'WGN',
+			'NS' => 'NSN',
+			'MB' => 'MBH',
+			'TM' => 'TAS',
+			'WC' => 'WTC',
+			'CT' => 'CAN',
+			'OT' => 'OTA',
+			'SL' => 'STL',
+		)
+	);
+}
+
+/**
+ * Update the Ukraine state codes in the database
+ * after they were updated in code to the CLDR standard.
+ */
+function wc_update_721_adjust_ukraine_states() {
+	return MigrationHelper::migrate_country_states(
+		'UA',
+		array(
+			'VN' => 'UA05',
+			'LH' => 'UA09',
+			'VL' => 'UA07',
+			'DP' => 'UA12',
+			'DT' => 'UA14',
+			'ZT' => 'UA18',
+			'ZK' => 'UA21',
+			'ZP' => 'UA23',
+			'IF' => 'UA26',
+			'KV' => 'UA32',
+			'KH' => 'UA35',
+			'LV' => 'UA46',
+			'MY' => 'UA48',
+			'OD' => 'UA51',
+			'PL' => 'UA53',
+			'RV' => 'UA56',
+			'SM' => 'UA59',
+			'TP' => 'UA61',
+			'KK' => 'UA63',
+			'KS' => 'UA65',
+			'KM' => 'UA68',
+			'CK' => 'UA71',
+			'CH' => 'UA74',
+			'CV' => 'UA77',
+		)
+	);
+}
+
+/**
+ * Update the New Zealand state codes in the database after they were updated in code to the CLDR standard.
+ *
+ * This is a simple wrapper for the corresponding 7.2.1 update function. The reason we do this (instead of
+ * reusing the original function directly) is for better traceability in the Action Scheduler log, in case
+ * of problems.
+ */
+function wc_update_722_adjust_new_zealand_states() {
+	return wc_update_721_adjust_new_zealand_states();
+}
+
+/**
+ * Update the Ukraine state codes in the database after they were updated in code to the CLDR standard.
+ *
+ * This is a simple wrapper for the corresponding 7.2.1 update function. The reason we do this (instead of
+ * reusing the original function directly) is for better traceability in the Action Scheduler log, in case
+ * of problems.
+ */
+function wc_update_722_adjust_ukraine_states() {
+	return wc_update_721_adjust_ukraine_states();
+}
+
+/**
+ * Add new columns date_paid and date_completed to wp_wc_order_stats table in order to provide the option
+ * of using the dates in the reports
+ */
+function wc_update_750_add_columns_to_order_stats_table() {
+	global $wpdb;
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}wc_order_stats AS order_stats
+		INNER JOIN {$wpdb->postmeta} AS postmeta
+			ON postmeta.post_id = order_stats.order_id
+			and postmeta.meta_key = '_date_paid'
+		SET order_stats.date_paid = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
+	);
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}wc_order_stats AS order_stats
+		INNER JOIN {$wpdb->postmeta} AS postmeta
+			ON postmeta.post_id = order_stats.order_id
+			and postmeta.meta_key = '_date_completed'
+		SET order_stats.date_completed = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
+	);
+
+}
+
+/**
+ * Disable the experimental product management experience.
+ *
+ * @return void
+ */
+function wc_update_750_disable_new_product_management_experience() {
+	if ( 'yes' === get_option( 'woocommerce_new_product_management_enabled' ) ) {
+		update_option( 'woocommerce_new_product_management_enabled', 'no' );
+	}
 }

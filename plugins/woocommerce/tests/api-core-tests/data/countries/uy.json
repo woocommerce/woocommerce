@@ -1,0 +1,94 @@
+{
+    "code": "UY",
+    "name": "Uruguay",
+    "states": [
+        {
+            "code": "UY-AR",
+            "name": "Artigas"
+        },
+        {
+            "code": "UY-CA",
+            "name": "Canelones"
+        },
+        {
+            "code": "UY-CL",
+            "name": "Cerro Largo"
+        },
+        {
+            "code": "UY-CO",
+            "name": "Colonia"
+        },
+        {
+            "code": "UY-DU",
+            "name": "Durazno"
+        },
+        {
+            "code": "UY-FS",
+            "name": "Flores"
+        },
+        {
+            "code": "UY-FD",
+            "name": "Florida"
+        },
+        {
+            "code": "UY-LA",
+            "name": "Lavalleja"
+        },
+        {
+            "code": "UY-MA",
+            "name": "Maldonado"
+        },
+        {
+            "code": "UY-MO",
+            "name": "Montevideo"
+        },
+        {
+            "code": "UY-PA",
+            "name": "Paysandú"
+        },
+        {
+            "code": "UY-RN",
+            "name": "Río Negro"
+        },
+        {
+            "code": "UY-RV",
+            "name": "Rivera"
+        },
+        {
+            "code": "UY-RO",
+            "name": "Rocha"
+        },
+        {
+            "code": "UY-SA",
+            "name": "Salto"
+        },
+        {
+            "code": "UY-SJ",
+            "name": "San José"
+        },
+        {
+            "code": "UY-SO",
+            "name": "Soriano"
+        },
+        {
+            "code": "UY-TA",
+            "name": "Tacuarembó"
+        },
+        {
+            "code": "UY-TT",
+            "name": "Treinta y Tres"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/uy"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

@@ -1,0 +1,70 @@
+{
+    "code": "PA",
+    "name": "Panama",
+    "states": [
+        {
+            "code": "PA-1",
+            "name": "Bocas del Toro"
+        },
+        {
+            "code": "PA-2",
+            "name": "Coclé"
+        },
+        {
+            "code": "PA-3",
+            "name": "Colón"
+        },
+        {
+            "code": "PA-4",
+            "name": "Chiriquí"
+        },
+        {
+            "code": "PA-5",
+            "name": "Darién"
+        },
+        {
+            "code": "PA-6",
+            "name": "Herrera"
+        },
+        {
+            "code": "PA-7",
+            "name": "Los Santos"
+        },
+        {
+            "code": "PA-8",
+            "name": "Panamá"
+        },
+        {
+            "code": "PA-9",
+            "name": "Veraguas"
+        },
+        {
+            "code": "PA-10",
+            "name": "West Panamá"
+        },
+        {
+            "code": "PA-EM",
+            "name": "Emberá"
+        },
+        {
+            "code": "PA-KY",
+            "name": "Guna Yala"
+        },
+        {
+            "code": "PA-NB",
+            "name": "Ngöbe-Buglé"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/pa"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

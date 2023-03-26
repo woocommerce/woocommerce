@@ -14,18 +14,26 @@
 
 Closes # .
 
+<!-- Begin testing instructions -->
+
 ### How to test the changes in this Pull Request:
+
+<!-- Please include detailed instructions on how these changes can be tested, make sure to review and follow the guide for writing high-quality testing instructions below. -->
+
+- [ ] Have you followed the [Writing high-quality testing instructions guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions)?
 
 1.
 2.
 3.
 
+<!-- End testing instructions -->
+
 ### Other information:
 
 -   [ ] Have you added an explanation of what your changes do and why you'd like us to include them?
 -   [ ] Have you written new tests for your changes, as applicable?
--   [ ] Have you successfully run tests with your changes locally?
--   [ ] Have you created a changelog file for each project being changed, ie `pnpm --filter=<project> run changelog add`?
+-   [ ] Have you created a changelog file for each project being changed, ie `pnpm --filter=<project> changelog add`?
+-   [ ] Have you included testing instructions?
 
 <!-- Mark completed items with an [x] -->
 

@@ -400,9 +400,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_additional_content() {
-		$content = $this->get_option( 'additional_content', '' );
-
-		return apply_filters( 'woocommerce_email_additional_content_' . $this->id, $this->format_string( $content ), $this->object, $this );
+		return apply_filters( 'woocommerce_email_additional_content_' . $this->id, $this->format_string( $this->get_option( 'additional_content', $this->get_default_additional_content() ) ), $this->object, $this );
 	}
 
 	/**

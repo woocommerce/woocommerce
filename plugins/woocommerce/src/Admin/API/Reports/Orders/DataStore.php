@@ -7,17 +7,25 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
-use \Automattic\WooCommerce\Admin\API\Reports\Cache;
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Cache;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 
 /**
  * API\Reports\Orders\DataStore.
  */
 class DataStore extends ReportsDataStore implements DataStoreInterface {
+
+	/**
+	 * Dynamically sets the date column name based on configuration
+	 */
+	public function __construct() {
+		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_created' );
+		parent::__construct();
+	}
 
 	/**
 	 * Table used to get the data.
@@ -67,6 +75,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->report_columns = array(
 			'order_id'         => "DISTINCT {$table_name}.order_id",
 			'parent_id'        => "{$table_name}.parent_id",
+			// Add 'date' field based on date type setting.
+			'date'             => "{$table_name}.{$this->date_column_name} AS date",
 			'date_created'     => "{$table_name}.date_created",
 			'date_created_gmt' => "{$table_name}.date_created_gmt",
 			'status'           => "REPLACE({$table_name}.status, 'wc-', '') as status",
@@ -118,7 +128,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		if ( $query_args['customer_type'] ) {
 			$returning_customer = 'returning' === $query_args['customer_type'] ? 1 : 0;
-			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = ${returning_customer}";
+			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = {$returning_customer}";
 		}
 
 		$refund_subquery = $this->get_refund_subquery( $query_args );
@@ -181,7 +191,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_subquery[] = "{$order_tax_lookup_table}.tax_rate_id NOT IN ({$excluded_tax_rates}) OR {$order_tax_lookup_table}.tax_rate_id IS NULL";
 		}
 
-		$attribute_subqueries = $this->get_attribute_subqueries( $query_args, $order_stats_lookup_table );
+		$attribute_subqueries = $this->get_attribute_subqueries( $query_args );
 		if ( $attribute_subqueries['join'] && $attribute_subqueries['where'] ) {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$order_product_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_product_lookup_table}.order_id" );
 
@@ -207,14 +217,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public function get_data( $query_args ) {
 		global $wpdb;
 
-		$table_name = self::get_db_table_name();
-
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
 			'per_page'          => get_option( 'posts_per_page' ),
 			'page'              => 1,
 			'order'             => 'DESC',
-			'orderby'           => 'date_created',
+			'orderby'           => $this->date_column_name,
 			'before'            => TimeInterval::default_before(),
 			'after'             => TimeInterval::default_after(),
 			'fields'            => '*',
@@ -256,7 +264,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->add_sql_query_params( $query_args );
 			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT(*) FROM (
+				"SELECT COUNT( DISTINCT tt.order_id ) FROM (
 					{$this->subquery->get_query_statement()}
 				) AS tt"
 			);
@@ -317,7 +325,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function normalize_order_by( $order_by ) {
 		if ( 'date' === $order_by ) {
-			return 'date_created';
+			return $this->date_column_name;
 		}
 
 		return $order_by;

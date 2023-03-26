@@ -24,11 +24,6 @@ class WC_Admin_Meta_Boxes {
 	public const ERROR_STORE = 'woocommerce_meta_box_errors';
 
 	/**
-	 * The css class used to close the meta box
-	 */
-	private const CLOSED_CSS_CLASS = 'closed';
-
-	/**
 	 * Is meta boxes saved once?
 	 *
 	 * @var boolean
@@ -138,8 +133,6 @@ class WC_Admin_Meta_Boxes {
 		add_meta_box( 'woocommerce-product-data', __( 'Product data', 'woocommerce' ), 'WC_Meta_Box_Product_Data::output', 'product', 'normal', 'high' );
 		add_meta_box( 'woocommerce-product-images', __( 'Product gallery', 'woocommerce' ), 'WC_Meta_Box_Product_Images::output', 'product', 'side', 'low' );
 
-		add_filter( 'postbox_classes_product_postexcerpt', array( $this, 'collapse_postexcerpt' ) );
-
 		// Orders.
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
 			$order_type_object = get_post_type_object( $type );
@@ -153,18 +146,6 @@ class WC_Admin_Meta_Boxes {
 		if ( 'comment' === $screen_id && isset( $_GET['c'] ) && metadata_exists( 'comment', wc_clean( wp_unslash( $_GET['c'] ) ), 'rating' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_meta_box( 'woocommerce-rating', __( 'Rating', 'woocommerce' ), 'WC_Meta_Box_Product_Reviews::output', 'comment', 'normal', 'high' );
 		}
-	}
-
-	/**
-	 * Collapse product short description meta box by default
-	 *
-	 * @param array $classes The css class array applied to the meta box.
-	 */
-	public function collapse_postexcerpt( $classes ) {
-		if ( ! in_array( self::CLOSED_CSS_CLASS, $classes, true ) ) {
-			array_push( $classes, self::CLOSED_CSS_CLASS );
-		}
-		return $classes;
 	}
 
 	/**

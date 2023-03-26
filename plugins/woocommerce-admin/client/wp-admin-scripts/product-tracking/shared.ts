@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { addCustomerEffortScoreExitPageListener } from '@woocommerce/customer-effort-score';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -13,23 +14,125 @@ import { waitUntilElementIsPresent } from './utils';
  *
  * @return object
  */
+
+const isElementVisible = ( element: HTMLElement ) =>
+	! ( window.getComputedStyle( element ).display === 'none' );
+
+const getProductType = () => {
+	return ( document.querySelector( '#product-type' ) as HTMLInputElement )
+		?.value;
+};
+
 const getProductData = () => {
-	return {
+	const isBlockEditor =
+		document.querySelectorAll( '.block-editor' ).length > 0;
+
+	let description_value = '';
+	let tagsText = '';
+
+	if ( ! isBlockEditor ) {
+		tagsText = (
+			document.querySelector(
+				'[name="tax_input[product_tag]"]'
+			) as HTMLInputElement
+		 ).value;
+		const content = document.querySelector(
+			'#content'
+		) as HTMLInputElement;
+		if ( content && isElementVisible( content ) ) {
+			description_value = content.value;
+		} else if ( typeof tinymce === 'object' && tinymce.get( 'content' ) ) {
+			description_value = tinymce.get( 'content' ).getContent();
+		}
+	} else {
+		description_value = (
+			document.querySelector(
+				'.block-editor-rich-text__editable'
+			) as HTMLInputElement
+		 )?.value;
+	}
+
+	const productData = {
 		product_id: ( document.querySelector( '#post_ID' ) as HTMLInputElement )
 			?.value,
-		product_type: (
-			document.querySelector( '#product-type' ) as HTMLInputElement
-		 )?.value,
+		product_type: getProductType(),
 		is_downloadable: (
 			document.querySelector( '#_downloadable' ) as HTMLInputElement
-		 )?.value,
+		 )?.checked
+			? 'Yes'
+			: 'No',
 		is_virtual: (
 			document.querySelector( '#_virtual' ) as HTMLInputElement
-		 )?.value,
+		 )?.checked
+			? 'Yes'
+			: 'No',
 		manage_stock: (
 			document.querySelector( '#_manage_stock' ) as HTMLInputElement
-		 )?.value,
+		 )?.checked
+			? 'Yes'
+			: 'No',
+		attributes: document.querySelectorAll( '.woocommerce_attribute' )
+			.length,
+		categories: document.querySelectorAll(
+			'[name="tax_input[product_cat][]"]:checked'
+		).length,
+		cross_sells: document.querySelectorAll( '#crosssell_ids option' ).length
+			? 'Yes'
+			: 'No',
+		description: description_value.trim() !== '' ? 'Yes' : 'No',
+		enable_reviews: (
+			document.querySelector( '#comment_status' ) as HTMLInputElement
+		 )?.checked
+			? 'Yes'
+			: 'No',
+		is_block_editor: isBlockEditor,
+		menu_order:
+			parseInt(
+				( document.querySelector( '#menu_order' ) as HTMLInputElement )
+					?.value ?? 0,
+				10
+			) !== 0
+				? 'Yes'
+				: 'No',
+		product_gallery: document.querySelectorAll(
+			'#product_images_container .product_images > li'
+		).length,
+		product_image:
+			parseInt(
+				(
+					document.querySelector(
+						'#_thumbnail_id'
+					) as HTMLInputElement
+				 )?.value,
+				10
+			) > 0
+				? 'Yes'
+				: 'No',
+		purchase_note: (
+			document.querySelector( '#_purchase_note' ) as HTMLInputElement
+		 )?.value.length
+			? 'Yes'
+			: 'No',
+		sale_price: (
+			document.querySelector( '#_sale_price' ) as HTMLInputElement
+		 )?.value
+			? 'Yes'
+			: 'No',
+		short_description: (
+			document.querySelector( '#excerpt' ) as HTMLInputElement
+		 )?.value.length
+			? 'Yes'
+			: 'No',
+		tags: tagsText.length > 0 ? tagsText.split( ',' ).length : 0,
+		upsells: document.querySelectorAll( '#upsell_ids option' ).length
+			? 'Yes'
+			: 'No',
+		weight: ( document.querySelector( '#_weight' ) as HTMLInputElement )
+			?.value
+			? 'Yes'
+			: 'No',
 	};
+	return productData;
 };
 
 /**
@@ -100,8 +203,97 @@ const prefixObjectKeys = (
 };
 
 /**
+ * Gets the tab name for a tab element.
+ *
+ * @param  tab Tab element to get slug for.
+ * @return string
+ */
+const getTabName = ( tab: Element ) => {
+	const optionsSuffix = '_options';
+
+	const optionsClassNames = Array.from( tab.classList ).filter(
+		( className ) => className.endsWith( optionsSuffix )
+	);
+
+	if ( optionsClassNames.length > 0 ) {
+		const className = optionsClassNames[ 0 ];
+
+		return className.slice( 0, -optionsSuffix.length );
+	}
+
+	return '';
+};
+
+/**
+ * Gets additional data associated with a product tab click.
+ *
+ * @param  tabName The name of the tab to get data for.
+ * @return object
+ */
+const getDataForProductTabClickEvent = ( tabName: string ) => {
+	const data: Record< string, boolean | string > = {};
+
+	data.product_type = getProductType();
+
+	if ( tabName === 'inventory' ) {
+		data.is_store_stock_management_enabled =
+			document.querySelector( '#_manage_stock' ) !== null;
+	}
+
+	return data;
+};
+
+/**
+ * Initializes the product tabs Tracks events.
+ */
+const initProductTabsTracks = () => {
+	const tabs = document.querySelectorAll( '.product_data_tabs > li' );
+
+	tabs.forEach( ( tab ) => {
+		const tabName = getTabName( tab );
+
+		tab.querySelector( 'a' )?.addEventListener( 'click', () => {
+			recordEvent( 'product_tab_click', {
+				product_tab: tabName,
+				...getDataForProductTabClickEvent( tabName ),
+			} );
+		} );
+	} );
+};
+
+/**
+ * Initializes the inventory tab Tracks events.
+ */
+const initInventoryTabTracks = () => {
+	document
+		.querySelector( '#_manage_stock' )
+		?.addEventListener( 'click', ( event ) => {
+			recordEvent( 'product_manage_stock_click', {
+				is_enabled: ( event.target as HTMLInputElement )?.checked,
+			} );
+		} );
+
+	document
+		.querySelector( '#_manage_stock_disabled' )
+		?.addEventListener( 'click', () => {
+			recordEvent(
+				'product_manage_stock_disabled_store_settings_link_click'
+			);
+		} );
+
+	document
+		.querySelector( '#inventory_product_data .notice a' )
+		?.addEventListener( 'click', () => {
+			recordEvent(
+				'product_inventory_variations_notice_learn_more_click'
+			);
+		} );
+};
+
+/**
  * Initialize all product screen tracks.
  */
+
 export const initProductScreenTracks = () => {
 	const initialPublishingData = getPublishingWidgetData();
 
@@ -205,7 +397,7 @@ export const initProductScreenTracks = () => {
 
 	// Product tags
 
-	function deleteTagEventListener( event: Event ) {
+	function deleteTagEventListener(/* event: Event */) {
 		recordEvent( 'product_tags_delete', {
 			page: 'product',
 			tag_list_size:
@@ -229,7 +421,7 @@ export const initProductScreenTracks = () => {
 
 	document
 		.querySelector( '.tagadd' )
-		?.addEventListener( 'click', ( event ) => {
+		?.addEventListener( 'click', (/* event: Event */) => {
 			const tagInput = document.querySelector< HTMLInputElement >(
 				'#new-tag-product_tag'
 			);
@@ -317,11 +509,102 @@ export const initProductScreenTracks = () => {
 				'.woocommerce_attribute'
 			).length;
 			if ( newAttributesCount > attributesCount ) {
+				const local_attributes = [
+					...document.querySelectorAll(
+						'.woocommerce_attribute:not(.pa_glbattr)'
+					),
+				].map( ( attr ) => {
+					const terms =
+						(
+							attr.querySelector(
+								"[name^='attribute_values']"
+							) as HTMLTextAreaElement
+						 )?.value.split( '|' ).length ?? 0;
+					return {
+						name: (
+							attr.querySelector(
+								'[name^="attribute_names"]'
+							) as HTMLInputElement
+						 )?.value,
+						terms,
+					};
+				} );
 				recordEvent( 'product_attributes_add', {
 					page: 'product',
 					enable_archive: '',
 					default_sort_order: '',
+					local_attributes,
 				} );
 			}
 		} );
+
+	document
+		.querySelector(
+			'#woocommerce-product-updated-message-view-product__link'
+		)
+		?.addEventListener( 'click', () => {
+			recordEvent( 'product_view_product_click', getProductData() );
+		} );
+
+	const dismissProductUpdatedButtonSelector =
+		'.notice-success.is-dismissible > button';
+
+	waitUntilElementIsPresent( dismissProductUpdatedButtonSelector, () => {
+		document
+			.querySelector( dismissProductUpdatedButtonSelector )
+			?.addEventListener( 'click', () => {
+				recordEvent( 'product_view_product_dismiss', getProductData() );
+			} );
+	} );
+
+	initProductTabsTracks();
+	initInventoryTabTracks();
 };
+
+export function addExitPageListener( pageId: string ) {
+	let productChanged = false;
+	let triggeredDelete = false;
+
+	const deleteButton = document.querySelector( '#submitpost a.submitdelete' );
+
+	if ( deleteButton ) {
+		deleteButton.addEventListener( 'click', function () {
+			triggeredDelete = true;
+		} );
+	}
+
+	function checkIfSubmitButtonsDisabled() {
+		const submitButtonSelectors = [
+			'#submitpost [type="submit"]',
+			'#submitpost #post-preview',
+		];
+		let isDisabled = false;
+		for ( const sel of submitButtonSelectors ) {
+			document.querySelectorAll( sel ).forEach( ( element ) => {
+				if ( element.classList.contains( 'disabled' ) ) {
+					isDisabled = true;
+				}
+			} );
+		}
+		return isDisabled;
+	}
+	window.addEventListener( 'beforeunload', function (/* event */) {
+		// Check if button disabled or triggered delete to see if user saved or deleted the product instead.
+		if ( checkIfSubmitButtonsDisabled() || triggeredDelete ) {
+			productChanged = false;
+			triggeredDelete = false;
+			return;
+		}
+		const editor = window.tinymce && window.tinymce.get( 'content' );
+
+		if ( window.wp.autosave ) {
+			productChanged = window.wp.autosave.server.postChanged();
+		} else if ( editor ) {
+			productChanged = ! editor.isHidden() && editor.isDirty();
+		}
+	} );
+
+	addCustomerEffortScoreExitPageListener( pageId, () => {
+		return productChanged;
+	} );
+}

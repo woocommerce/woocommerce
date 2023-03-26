@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
 import {
 	cloneElement,
 	useState,
@@ -17,6 +18,7 @@ import _setWith from 'lodash/setWith';
 import _get from 'lodash/get';
 import _clone from 'lodash/clone';
 import _isEqual from 'lodash/isEqual';
+import _omit from 'lodash/omit';
 
 /**
  * Internal dependencies
@@ -87,6 +89,40 @@ export type FormRef< Values > = {
 	resetForm: ( initialValues: Values ) => void;
 };
 
+export type InputProps< Values, Value > = {
+	value: Value;
+	checked: boolean;
+	selected?: boolean;
+	onChange: (
+		value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
+	) => void;
+	onBlur: () => void;
+	className: string | undefined;
+	help: string | null | undefined;
+};
+
+export type CheckboxProps< Values, Value > = Omit<
+	InputProps< Values, Value >,
+	'value' | 'selected'
+>;
+
+export type SelectControlProps< Values, Value > = Omit<
+	InputProps< Values, Value >,
+	'value'
+> & {
+	value: string | undefined;
+};
+
+export type ConsumerInputProps< Values > = {
+	className?: string;
+	onChange?: (
+		value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
+	) => void;
+	onBlur?: () => void;
+	[ key: string ]: unknown;
+	sanitize?: ( value: Values[ keyof Values ] ) => Values[ keyof Values ];
+};
+
 /**
  * A form component to handle form state and provide input helper props.
  */
@@ -130,11 +166,11 @@ function FormComponent< Values extends Record< string, any > >(
 		validate( values );
 	}, [] );
 
-	const resetForm = (
-		newInitialValues = {} as Values,
-		newTouchedFields = {},
-		newErrors = {}
-	) => {
+	const resetForm: (
+		newInitialValues?: Values,
+		newTouchedFields?: { [ P in keyof Values ]?: boolean | undefined },
+		newErrors?: FormErrors< Values >
+	) => void = ( newInitialValues, newTouchedFields = {}, newErrors = {} ) => {
 		const newValues = newInitialValues ?? initialValues.current ?? {};
 		initialValues.current = newValues;
 		setValuesInternal( newValues );
@@ -147,7 +183,7 @@ function FormComponent< Values extends Record< string, any > >(
 	} ) );
 
 	const isValidForm = async () => {
-		await validate( values );
+		validate( values );
 		return ! Object.keys( errors ).length;
 	};
 
@@ -268,21 +304,19 @@ function FormComponent< Values extends Record< string, any > >(
 	};
 
 	function getInputProps< Value = Values[ keyof Values ] >(
-		name: string
-	): {
-		value: Value;
-		checked: boolean;
-		selected?: boolean;
-		onChange: (
-			value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
-		) => void;
-		onBlur: () => void;
-		className: string | undefined;
-		help: string | null | undefined;
-	} {
+		name: string,
+		inputProps: ConsumerInputProps< Values > = {}
+	): InputProps< Values, Value > {
 		const inputValue = _get( values, name );
 		const isTouched = touched[ name ];
 		const inputError = _get( errors, name );
+		const {
+			className: classNameProp,
+			onBlur: onBlurProp,
+			onChange: onChangeProp,
+			sanitize,
+			...additionalProps
+		} = inputProps;
 
 		return {
 			value: inputValue,
@@ -290,10 +324,50 @@ function FormComponent< Values extends Record< string, any > >(
 			selected: inputValue,
 			onChange: (
 				value: ChangeEvent< HTMLInputElement > | Values[ keyof Values ]
-			) => handleChange( name, value ),
-			onBlur: () => handleBlur( name ),
-			className: isTouched && inputError ? 'has-error' : undefined,
+			) => {
+				handleChange( name, value );
+				if ( onChangeProp ) {
+					onChangeProp( value );
+				}
+			},
+			onBlur: () => {
+				if ( sanitize ) {
+					handleChange( name, sanitize( inputValue ) );
+				}
+				handleBlur( name );
+				if ( onBlurProp ) {
+					onBlurProp();
+				}
+			},
+			className: classnames( classNameProp, {
+				'has-error': isTouched && inputError,
+			} ),
 			help: isTouched ? ( inputError as string ) : null,
+			...additionalProps,
+		};
+	}
+
+	function getCheckboxControlProps< Value = Values[ keyof Values ] >(
+		name: string,
+		inputProps: ConsumerInputProps< Values > = {}
+	): CheckboxProps< Values, Value > {
+		return _omit( getInputProps( name, inputProps ), [
+			'selected',
+			'value',
+		] );
+	}
+
+	function getSelectControlProps< Value = Values[ keyof Values ] >(
+		name: string,
+		inputProps: ConsumerInputProps< Values > = {}
+	): SelectControlProps< Values, Value > {
+		const selectControlProps = getInputProps( name, inputProps );
+		return {
+			...selectControlProps,
+			value:
+				selectControlProps.value === undefined
+					? undefined
+					: String( selectControlProps.value ),
 		};
 	}
 
@@ -312,7 +386,9 @@ function FormComponent< Values extends Record< string, any > >(
 			setValue,
 			setValues,
 			handleSubmit,
+			getCheckboxControlProps,
 			getInputProps,
+			getSelectControlProps,
 			isValidForm: ! Object.keys( errors ).length,
 			resetForm,
 		};

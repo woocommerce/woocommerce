@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -244,6 +245,17 @@ function wc_get_order_types( $for = '' ) {
 				}
 			}
 			break;
+		case 'admin-menu':
+			$order_types = array_intersect(
+				array_keys( $wc_order_types ),
+				get_post_types(
+					array(
+						'show_ui'      => true,
+						'show_in_menu' => 'woocommerce',
+					)
+				)
+			);
+			break;
 		default:
 			$order_types = array_keys( $wc_order_types );
 			break;
@@ -338,25 +350,31 @@ function wc_processing_order_count() {
  * Return the orders count of a specific order status.
  *
  * @param string $status Status.
+ * @param string $type   (Optional) Order type. Leave empty to include all 'for order-count' order types. @{see wc_get_order_types()}.
  * @return int
  */
-function wc_orders_count( $status ) {
-	$count          = 0;
-	$status         = 'wc-' . $status;
-	$order_statuses = array_keys( wc_get_order_statuses() );
+function wc_orders_count( $status, string $type = '' ) {
+	$count           = 0;
+	$legacy_statuses = array( 'draft', 'trash' );
+	$valid_statuses  = array_merge( array_keys( wc_get_order_statuses() ), $legacy_statuses );
+	$status          = ( ! in_array( $status, $legacy_statuses, true ) && 0 !== strpos( $status, 'wc-' ) ) ? 'wc-' . $status : $status;
+	$valid_types     = wc_get_order_types( 'order-count' );
+	$type            = trim( $type );
 
-	if ( ! in_array( $status, $order_statuses, true ) ) {
+	if ( ! in_array( $status, $valid_statuses, true ) || ( $type && ! in_array( $type, $valid_types, true ) ) ) {
 		return 0;
 	}
 
-	$cache_key    = WC_Cache_Helper::get_cache_prefix( 'orders' ) . $status;
+	$cache_key    = WC_Cache_Helper::get_cache_prefix( 'orders' ) . $status . $type;
 	$cached_count = wp_cache_get( $cache_key, 'counts' );
 
 	if ( false !== $cached_count ) {
 		return $cached_count;
 	}
 
-	foreach ( wc_get_order_types( 'order-count' ) as $type ) {
+	$types_for_count = $type ? array( $type ) : $valid_types;
+
+	foreach ( $types_for_count as $type ) {
 		$data_store = WC_Data_Store::load( 'shop_order' === $type ? 'order' : $type );
 		if ( $data_store ) {
 			$count += $data_store->get_order_count( $status );
@@ -642,6 +660,9 @@ function wc_create_refund( $args = array() ) {
 			}
 		}
 
+		$order->set_date_modified( time() );
+		$order->save();
+
 		do_action( 'woocommerce_refund_created', $refund->get_id(), $args );
 		do_action( 'woocommerce_order_refunded', $order->get_id(), $refund->get_id() );
 
@@ -909,7 +930,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 	if ( count( $order->get_coupon_codes() ) > 0 ) {
 		foreach ( $order->get_coupon_codes() as $code ) {
-			if ( ! $code ) {
+			if ( StringUtil::is_null_or_whitespace( $code ) ) {
 				continue;
 			}
 

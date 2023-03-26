@@ -220,6 +220,12 @@ module.exports = function ( grunt ) {
 						src: 'jquery-ui/**',
 						dest: '<%= dirs.cssDest %>/',
 					},
+					{
+						cwd: '<%= dirs.css %>',
+						expand: true,
+						src: '*.scss',
+						dest: '<%= dirs.cssDest %>/',
+					}
 				],
 			},
 			js: {

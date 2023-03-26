@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add default value when calling get_option for woocommerce_task_list_tracked_completed_tasks.

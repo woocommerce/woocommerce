@@ -673,7 +673,7 @@ function get_woocommerce_currency_symbols() {
 			'ARS' => '&#36;',
 			'AUD' => '&#36;',
 			'AWG' => 'Afl.',
-			'AZN' => 'AZN',
+			'AZN' => '&#8380;',
 			'BAM' => 'KM',
 			'BBD' => '&#36;',
 			'BDT' => '&#2547;&nbsp;',
@@ -752,7 +752,7 @@ function get_woocommerce_currency_symbols() {
 			'LKR' => '&#xdbb;&#xdd4;',
 			'LRD' => '&#36;',
 			'LSL' => 'L',
-			'LYD' => '&#x644;.&#x62f;',
+			'LYD' => '&#x62f;.&#x644;',
 			'MAD' => '&#x62f;.&#x645;.',
 			'MDL' => 'MDL',
 			'MGA' => 'Ar',
@@ -1701,8 +1701,11 @@ function wc_get_shipping_method_count( $include_legacy = false, $enabled_only = 
 		return absint( $transient_value['value'] );
 	}
 
-	$where_clause = $enabled_only ? 'WHERE is_enabled=1' : '';
-	$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods ${where_clause}" ) );
+	if ( $enabled_only ) {
+		$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE is_enabled=1" ) );
+	} else {
+		$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
+	}
 
 	if ( $include_legacy ) {
 		// Count activated methods that don't support shipping zones.
@@ -1894,28 +1897,33 @@ function wc_get_tax_rounding_mode() {
 
 /**
  * Get rounding precision for internal WC calculations.
- * Will increase the precision of wc_get_price_decimals by 2 decimals, unless WC_ROUNDING_PRECISION is set to a higher number.
+ * Will return the value of wc_get_price_decimals increased by 2 decimals, with WC_ROUNDING_PRECISION being the minimum.
  *
  * @since 2.6.3
  * @return int
  */
 function wc_get_rounding_precision() {
 	$precision = wc_get_price_decimals() + 2;
-	if ( absint( WC_ROUNDING_PRECISION ) > $precision ) {
+	if ( $precision < absint( WC_ROUNDING_PRECISION ) ) {
 		$precision = absint( WC_ROUNDING_PRECISION );
 	}
 	return $precision;
 }
 
 /**
- * Add precision to a number and return a number.
+ * Add precision to a number by moving the decimal point to the right as many places as indicated by wc_get_price_decimals().
+ * Optionally the result is rounded so that the total number of digits equals wc_get_rounding_precision() plus one.
  *
  * @since  3.2.0
- * @param  float $value Number to add precision to.
- * @param  bool  $round If should round after adding precision.
+ * @param  float|null $value Number to add precision to.
+ * @param  bool       $round If the result should be rounded.
  * @return int|float
  */
-function wc_add_number_precision( float $value, bool $round = true ) {
+function wc_add_number_precision( ?float $value, bool $round = true ) {
+	if ( ! $value ) {
+		return 0.0;
+	}
+
 	$cent_precision = pow( 10, wc_get_price_decimals() );
 	$value          = $value * $cent_precision;
 	return $round ? NumberUtil::round( $value, wc_get_rounding_precision() - wc_get_price_decimals() ) : $value;
@@ -1929,6 +1937,10 @@ function wc_add_number_precision( float $value, bool $round = true ) {
  * @return float
  */
 function wc_remove_number_precision( $value ) {
+	if ( ! $value ) {
+		return 0.0;
+	}
+
 	$cent_precision = pow( 10, wc_get_price_decimals() );
 	return $value / $cent_precision;
 }
@@ -2397,6 +2409,7 @@ function wc_is_active_theme( $theme ) {
 function wc_is_wp_default_theme_active() {
 	return wc_is_active_theme(
 		array(
+			'twentytwentythree',
 			'twentytwentytwo',
 			'twentytwentyone',
 			'twentytwenty',

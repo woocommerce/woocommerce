@@ -10,8 +10,11 @@ import { OPTIONS_STORE_NAME, WCDataSelector, WEEK } from '@woocommerce/data';
 import { Button, Card, CardHeader } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 import {
+	ADMIN_INSTALL_TIMESTAMP_OPTION_NAME,
+	ALLOW_TRACKING_OPTION_NAME,
 	CustomerFeedbackModal,
 	CustomerFeedbackSimple,
+	SHOWN_FOR_ACTIONS_OPTION_NAME,
 } from '@woocommerce/customer-effort-score';
 import { __ } from '@wordpress/i18n';
 
@@ -27,11 +30,7 @@ type TaskListCompletedHeaderProps = {
 	customerEffortScore: boolean;
 };
 
-const ADMIN_INSTALL_TIMESTAMP_OPTION_NAME =
-	'woocommerce_admin_install_timestamp';
-const SHOWN_FOR_ACTIONS_OPTION_NAME = 'woocommerce_ces_shown_for_actions';
 const CUSTOMER_EFFORT_SCORE_ACTION = 'store_setup';
-const ALLOW_TRACKING_OPTION_NAME = 'woocommerce_allow_tracking';
 
 function getStoreAgeInWeeks( adminInstallTimestamp: number ) {
 	if ( adminInstallTimestamp === 0 ) {
@@ -97,10 +96,20 @@ export const TaskListCompletedHeader: React.FC<
 		}
 	}, [ hasSubmittedScore ] );
 
-	const submitScore = ( recordedScore: number, comments?: string ) => {
+	const submitScore = ( {
+		firstScore,
+		secondScore,
+		comments,
+	}: {
+		firstScore: number;
+		secondScore?: number;
+		comments?: string;
+	} ) => {
 		recordEvent( 'ces_feedback', {
 			action: CUSTOMER_EFFORT_SCORE_ACTION,
-			score: recordedScore,
+			score: firstScore,
+			score_second_question: secondScore ?? null,
+			score_combined: firstScore + ( secondScore ?? 0 ),
 			comments: comments || '',
 			store_age: storeAgeInWeeks,
 		} );
@@ -116,7 +125,7 @@ export const TaskListCompletedHeader: React.FC<
 	const recordScore = ( recordedScore: number ) => {
 		if ( recordedScore > 2 ) {
 			setScore( recordedScore );
-			submitScore( recordedScore );
+			submitScore( { firstScore: recordedScore } );
 		} else {
 			setScore( recordedScore );
 			setShowCesModal( true );
@@ -127,9 +136,13 @@ export const TaskListCompletedHeader: React.FC<
 		}
 	};
 
-	const recordModalScore = ( recordedScore: number, comments: string ) => {
+	const recordModalScore = (
+		firstScore: number,
+		secondScore: number,
+		comments: string
+	) => {
 		setShowCesModal( false );
-		submitScore( recordedScore, comments );
+		submitScore( { firstScore, secondScore, comments } );
 	};
 
 	return (
@@ -230,7 +243,15 @@ export const TaskListCompletedHeader: React.FC<
 			</div>
 			{ showCesModal ? (
 				<CustomerFeedbackModal
-					label={ __( 'How was your experience?', 'woocommerce' ) }
+					title={ __( 'How was your experience?', 'woocommerce' ) }
+					firstQuestion={ __(
+						'The store setup is easy to complete.',
+						'woocommerce'
+					) }
+					secondQuestion={ __(
+						'The store setup process meets my needs.',
+						'woocommerce'
+					) }
 					defaultScore={ score }
 					recordScoreCallback={ recordModalScore }
 					onCloseModal={ () => {
