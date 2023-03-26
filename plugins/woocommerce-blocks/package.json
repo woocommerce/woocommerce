@@ -121,7 +121,7 @@
 		"@types/jquery": "3.5.14",
 		"@types/lodash": "4.14.182",
 		"@types/puppeteer": "5.4.6",
-		"@types/react": "17.0.47",
+		"@types/react": "18.0.29",
 		"@types/react-dom": "18.0.10",
 		"@types/wordpress__block-editor": "6.0.6",
 		"@types/wordpress__blocks": "11.0.9",
