@@ -10,6 +10,7 @@ import { VARIATION_NAME as PRODUCT_SUMMARY_VARIATION_NAME } from '@woocommerce/b
 const getBlockifiedTemplate = () =>
 	[
 		createBlock( 'woocommerce/breadcrumbs' ),
+		createBlock( 'woocommerce/store-notices' ),
 		createBlock(
 			'core/columns',
 			{
