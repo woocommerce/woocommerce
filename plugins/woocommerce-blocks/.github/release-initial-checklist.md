@@ -49,10 +49,6 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
     -   If some PRs are not testing as expected but they are not blockers: revert the relevant commits, remove the changes from testing steps and changelog, open an issue (or reopen the original one) and proceed with the release.
     -   If minor issues are discovered during the testing, each team is responsible for logging them in Github.
 
-## Update Pull Request description and get approvals
-
--   [ ] Go through the description of the release pull request and edit it to update all the sections and checklist instructions there.
-
 ## Ensure hub is set up and you're authenticated
 
 -   [ ] Make sure you've got `hub` installed (`brew install hub`)
@@ -140,3 +136,4 @@ This only needs to be done if this release is the last release of the feature pl
 -   [ ] Update minimum supported versions (WordPress, WooCommerce Core) and other requirements where necessary, including:
     -   [WCCOM product page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/)
     -   [WooCommerce blocks main documentation page](https://docs.woocommerce.com/document/woocommerce-blocks/)
+-   [ ] Go through the description of the release pull request and edit it to update all the sections and checklist instructions there.

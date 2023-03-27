@@ -43,9 +43,8 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
     -   If some PRs are not testing as expected but they are not blockers: revert the relevant commits, remove the changes from testing steps and changelog, open an issue (or reopen the original one) and proceed with the release.
     -   If minor issues are discovered during the testing, each team is responsible for logging them in Github.
 
-## Update Pull Request description and get approvals
+## Push the button - Deploy
 
--   [ ] Go through the description of the release pull request and edit it to update all the sections and checklist instructions there.
 -   [ ] Execute `npm run deploy`
     -   **ALERT**: This script will ask you if this release will be deployed to WordPress.org. You should only answer yes for this release **if it's the latest release and you want to deploy to WordPress.org**. Otherwise, answer no. If you answer yes, you will get asked additional verification by the `npm run deploy` script about deploying a patch release to WordPress.org.
 
@@ -111,3 +110,4 @@ You only need to post public release announcements and update relevant public fa
     -   Ensure the release notes are included in the post verbatim.
     -   Don't forget to use category `WooCommerce Blocks Release Notes` for the post.
 -   [ ] Announce the release internally (`#woo-announcements` slack).
+-   [ ] Go through the description of the release pull request and edit it to update all the sections and checklist instructions there.
