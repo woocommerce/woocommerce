@@ -909,7 +909,7 @@ class DefaultPaymentGateways {
 	 * Get recommendation priority for a given payment gateway by id and country.
 	 * If country is not supported, return null.
 	 *
-	 * @param string $id Payment gateway id.
+	 * @param string $gateway_id Payment gateway id.
 	 * @param string $country_code Store country code.
 	 * @return int|null Priority. Priority is 0-indexed, so 0 is the highest priority.
 	 */
@@ -951,8 +951,8 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			],
-			'BG' => ['stripe', 'ppcp-gateway'],
-			'HR' => ['ppcp-gateway'],
+			'BG' => [ 'stripe', 'ppcp-gateway' ],
+			'HR' => [ 'ppcp-gateway' ],
 			'CH' => [
 				'woocommerce_payments',
 				'stripe',
@@ -960,15 +960,15 @@ class DefaultPaymentGateways {
 				'mollie_wc_gateway_banktransfer',
 				'klarna_payments',
 			],
-			'CY' => ['stripe', 'ppcp-gateway', 'amazon_payments_advanced'],
-			'CZ' => ['stripe', 'ppcp-gateway'],
+			'CY' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
+			'CZ' => [ 'stripe', 'ppcp-gateway' ],
 			'DK' => [
 				'stripe',
 				'ppcp-gateway',
 				'klarna_payments',
 				'amazon_payments_advanced',
 			],
-			'EE' => ['stripe', 'ppcp-gateway'],
+			'EE' => [ 'stripe', 'ppcp-gateway' ],
 			'ES' => [
 				'woocommerce_payments',
 				'stripe',
@@ -1011,8 +1011,8 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			],
-			'GR' => ['stripe', 'ppcp-gateway'],
-			'HU' => ['stripe', 'ppcp-gateway', 'amazon_payments_advanced'],
+			'GR' => [ 'stripe', 'ppcp-gateway' ],
+			'HU' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
 			'IE' => [
 				'woocommerce_payments',
 				'stripe',
@@ -1028,10 +1028,10 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			],
-			'LV' => ['stripe', 'ppcp-gateway'],
-			'LT' => ['stripe', 'ppcp-gateway'],
-			'LU' => ['stripe', 'ppcp-gateway', 'amazon_payments_advanced'],
-			'MT' => ['stripe', 'ppcp-gateway'],
+			'LV' => [ 'stripe', 'ppcp-gateway' ],
+			'LT' => [ 'stripe', 'ppcp-gateway' ],
+			'LU' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
+			'MT' => [ 'stripe', 'ppcp-gateway' ],
 			'NL' => [
 				'woocommerce_payments',
 				'stripe',
@@ -1040,7 +1040,7 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			],
-			'NO' => ['stripe', 'ppcp-gateway', 'kco', 'klarna_payments'],
+			'NO' => [ 'stripe', 'ppcp-gateway', 'kco', 'klarna_payments' ],
 			'PL' => [
 				'woocommerce_payments',
 				'stripe',
@@ -1054,9 +1054,9 @@ class DefaultPaymentGateways {
 				'ppcp-gateway',
 				'amazon_payments_advanced',
 			],
-			'RO' => ['stripe', 'ppcp-gateway'],
-			'SK' => ['stripe', 'ppcp-gateway'],
-			'SL' => ['stripe', 'ppcp-gateway', 'amazon_payments_advanced'],
+			'RO' => [ 'stripe', 'ppcp-gateway' ],
+			'SK' => [ 'stripe', 'ppcp-gateway' ],
+			'SL' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
 			'SE' => [
 				'stripe',
 				'ppcp-gateway',
@@ -1070,20 +1070,20 @@ class DefaultPaymentGateways {
 				'ppcp-gateway',
 				'klarna_payments',
 			],
-			'BR' => ['stripe', 'woo-mercado-pago-custom', 'ppcp-gateway'],
-			'AR' => ['woo-mercado-pago-custom', 'ppcp-gateway'],
+			'BR' => [ 'stripe', 'woo-mercado-pago-custom', 'ppcp-gateway' ],
+			'AR' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
 			'BO' => [],
-			'CL' => ['woo-mercado-pago-custom', 'ppcp-gateway'],
-			'CO' => ['woo-mercado-pago-custom', 'ppcp-gateway'],
-			'EC' => ['ppcp-gateway'],
+			'CL' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
+			'CO' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
+			'EC' => [ 'ppcp-gateway' ],
 			'FK' => [],
 			'GF' => [],
 			'GY' => [],
 			'PY' => [],
-			'PE' => ['woo-mercado-pago-custom', 'ppcp-gateway'],
+			'PE' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
 			'SR' => [],
-			'UY' => ['woo-mercado-pago-custom', 'ppcp-gateway'],
-			'VE' => ['ppcp-gateway'],
+			'UY' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
+			'VE' => [ 'ppcp-gateway' ],
 			'AU' => [
 				'woocommerce_payments',
 				'stripe',
@@ -1115,15 +1115,15 @@ class DefaultPaymentGateways {
 				'square_credit_card',
 				'amazon_payments_advanced',
 			],
-			'SG' => ['woocommerce_payments', 'stripe', 'ppcp-gateway', 'eway'],
-			'CN' => ['ppcp-gateway', 'payoneer-checkout'],
+			'SG' => [ 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'eway' ],
+			'CN' => [ 'ppcp-gateway', 'payoneer-checkout' ],
 			'FJ' => [],
 			'GU' => [],
-			'ID' => ['stripe', 'ppcp-gateway'],
-			'IN' => ['stripe', 'razorpay', 'payubiz', 'ppcp-gateway'],
-			'ZA' => ['payfast', 'paystack', 'ppcp-gateway'],
-			'NG' => ['paystack', 'ppcp-gateway'],
-			'GH' => ['paystack', 'ppcp-gateway'],
+			'ID' => [ 'stripe', 'ppcp-gateway' ],
+			'IN' => [ 'stripe', 'razorpay', 'payubiz', 'ppcp-gateway' ],
+			'ZA' => [ 'payfast', 'paystack', 'ppcp-gateway' ],
+			'NG' => [ 'paystack', 'ppcp-gateway' ],
+			'GH' => [ 'paystack', 'ppcp-gateway' ],
 		);
 
 		// If the country code is not in the list, return null.
@@ -1133,7 +1133,7 @@ class DefaultPaymentGateways {
 
 		$index = array_search( $gateway_id, $recommendation_priority_map[ $country_code ], true );
 
-		// If the gateway is not in the list, return the last index + 1
+		// If the gateway is not in the list, return the last index + 1.
 		if ( false === $index ) {
 			return count( $recommendation_priority_map[ $country_code ] );
 		}
