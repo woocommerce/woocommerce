@@ -16,13 +16,14 @@ import '../data';
 const CouponsOverview = () => {
 	const { currentUserCan } = useUser();
 
-	const shouldShowExtensions =
+	const showExtensions = !! (
 		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
-		currentUserCan( 'install_plugins' );
+		currentUserCan( 'install_plugins' )
+	);
 
 	return (
 		<div className="woocommerce-marketing-coupons">
-			{ !! shouldShowExtensions && (
+			{ showExtensions && (
 				<RecommendedExtensions
 					title={ __(
 						'Recommended coupon extensions',
