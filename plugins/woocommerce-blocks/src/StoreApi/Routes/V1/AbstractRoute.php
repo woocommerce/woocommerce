@@ -93,22 +93,9 @@ abstract class AbstractRoute implements RouteInterface {
 	 */
 	public function get_response( \WP_REST_Request $request ) {
 		$response = null;
+
 		try {
-			switch ( $request->get_method() ) {
-				case 'POST':
-					$response = $this->get_route_post_response( $request );
-					break;
-				case 'PUT':
-				case 'PATCH':
-					$response = $this->get_route_update_response( $request );
-					break;
-				case 'DELETE':
-					$response = $this->get_route_delete_response( $request );
-					break;
-				default:
-					$response = $this->get_route_response( $request );
-					break;
-			}
+			$response = $this->get_response_by_request_method( $request );
 		} catch ( RouteException $error ) {
 			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
 		} catch ( InvalidCartException $error ) {
@@ -117,11 +104,26 @@ abstract class AbstractRoute implements RouteInterface {
 			$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
 		}
 
-		if ( is_wp_error( $response ) ) {
-			$response = $this->error_to_response( $response );
-		}
+		return is_wp_error( $response ) ? $this->error_to_response( $response ) : $response;
+	}
 
-		return $response;
+	/**
+	 * Get the route response based on the type of request.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	protected function get_response_by_request_method( \WP_REST_Request $request ) {
+		switch ( $request->get_method() ) {
+			case 'POST':
+				return $this->get_route_post_response( $request );
+			case 'PUT':
+			case 'PATCH':
+				return $this->get_route_update_response( $request );
+			case 'DELETE':
+				return $this->get_route_delete_response( $request );
+		}
+		return $this->get_route_response( $request );
 	}
 
 	/**
