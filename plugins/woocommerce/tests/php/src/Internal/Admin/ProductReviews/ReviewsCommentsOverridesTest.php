@@ -283,7 +283,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 			'If the $current_screen global is not set, the product post type will not be removed from the comments query.'
 		);
 
-		// Clean-up.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen = $original_screen_value;
 	}
 
