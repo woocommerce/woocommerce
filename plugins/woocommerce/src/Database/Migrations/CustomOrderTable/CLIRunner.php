@@ -288,10 +288,16 @@ class CLIRunner {
 	 * default: 0
 	 * ---
 	 *
+	 * [--end-at=<order_id>]
+	 * : Order ID to end at.
+	 * ---
+	 * default: -1
+	 * ---
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Verify migrated order data, 500 orders at a time.
-	 *     wp wc cot verify_cot_data --batch-size=500 --start-from=0
+	 *     wp wc cot verify_cot_data --batch-size=500 --start-from=0 --end-at=10000
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -308,6 +314,7 @@ class CLIRunner {
 			array(
 				'batch-size' => 500,
 				'start-from' => 0,
+				'end-at'     => -1,
 			)
 		);
 
@@ -316,7 +323,9 @@ class CLIRunner {
 		$failed_ids     = array();
 		$processed      = 0;
 		$order_id_start = (int) $assoc_args['start-from'];
-		$order_count    = $this->get_verify_order_count( $order_id_start );
+		$order_id_end   = (int) $assoc_args['end-at'];
+		$order_id_end   = $order_id_end === - 1 ? PHP_INT_MAX : $order_id_end;
+		$order_count    = $this->get_verify_order_count( $order_id_start, $order_id_end );
 		$batch_size     = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
 
 		$progress = WP_CLI\Utils\make_progress_bar( 'Order Data Verification', $order_count / $batch_size );
@@ -337,8 +346,9 @@ class CLIRunner {
 
 			$order_ids        = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID > %d ORDER BY ID ASC LIMIT %d",
+					"SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID > %d AND ID < %d ORDER BY ID ASC LIMIT %d",
 					$order_id_start,
+					$order_id_end,
 					$batch_size
 				)
 			);
@@ -424,17 +434,19 @@ class CLIRunner {
 	 * Helper method to get count for orders needing verification.
 	 *
 	 * @param int  $order_id_start Order ID to start from.
+	 * @param int  $order_id_end   Order ID to end at.
 	 * @param bool $log Whether to also log an error message.
 	 *
 	 * @return int Order count.
 	 */
-	private function get_verify_order_count( int $order_id_start, $log = true ) : int {
+	private function get_verify_order_count( int $order_id_start, int $order_id_end, $log = true ) : int {
 		global $wpdb;
 
 		$order_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID > %d",
-				$order_id_start
+				"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID > %d AND ID < %d",
+				$order_id_start,
+				$order_id_end
 			)
 		);
 
