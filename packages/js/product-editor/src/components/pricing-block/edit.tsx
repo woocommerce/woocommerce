@@ -2,8 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement, useContext, Fragment } from '@wordpress/element';
-import interpolateComponents from '@automattic/interpolate-components';
+import {
+	createElement,
+	useContext,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
@@ -40,12 +43,12 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	} );
 
 	const taxSettingsElement = showPricingSection
-		? interpolateComponents( {
-				mixedString: __(
-					'Manage more settings in {{link}}Pricing.{{/link}}',
+		? createInterpolateElement(
+				__(
+					'Manage more settings in <link>Pricing.</link>',
 					'woocommerce'
 				),
-				components: {
+				{
 					link: (
 						<Link
 							href={ `${ getSetting(
@@ -58,12 +61,10 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 									'product_pricing_list_price_help_tax_settings_click'
 								);
 							} }
-						>
-							<></>
-						</Link>
+						></Link>
 					),
-				},
-		  } )
+				}
+		  )
 		: null;
 
 	return (
