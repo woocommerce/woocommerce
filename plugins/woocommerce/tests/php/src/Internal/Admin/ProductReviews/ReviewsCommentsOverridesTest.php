@@ -256,27 +256,30 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 			'post_type' => [ 'product' ],
 		];
 
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen = WP_Screen::get( 'edit-comments' );
 		$filtered_args  = $method->invoke( $overrides, $original_args );
 
 		$this->assertFalse(
-			in_array( 'product', $filtered_args['post_type'] ),
+			in_array( 'product', $filtered_args['post_type'], true ),
 			'In the context of the edit-comments screen, the product post type will be removed from the comments query.'
 		);
 
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen = WP_Screen::get( 'arbitrary-admin-page' );
 		$filtered_args  = $method->invoke( $overrides, $original_args );
 
 		$this->assertTrue(
-			in_array( 'product', $filtered_args['post_type'] ),
+			in_array( 'product', $filtered_args['post_type'], true ),
 			'In the context of all other admin screens, the product post type will not be removed from the comments query.'
 		);
 
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen = null;
 		$filtered_args  = $method->invoke( $overrides, $original_args );
 
 		$this->assertTrue(
-			in_array( 'product', $filtered_args['post_type'] ),
+			in_array( 'product', $filtered_args['post_type'], true ),
 			'If the $current_screen global is not set, the product post type will not be removed from the comments query.'
 		);
 
