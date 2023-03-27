@@ -169,7 +169,7 @@ class Reviews {
 	 */
 	private function handle_edit_review(): void {
 		// Don't interfere with comment functionality relating to the reviews meta box within the product editor.
-		if ( sanitize_text_field( wp_unslash( $_POST['mode'] ) ) === 'single' ) {
+		if ( sanitize_text_field( wp_unslash( $_POST['mode'] ?? '' ) ) === 'single' ) {
 			return;
 		}
 
@@ -241,7 +241,7 @@ class Reviews {
 	 */
 	private function handle_reply_to_review() : void {
 		// Don't interfere with comment functionality relating to the reviews meta box within the product editor.
-		if ( sanitize_text_field( wp_unslash( $_POST['mode'] ) ) === 'single' ) {
+		if ( sanitize_text_field( wp_unslash( $_POST['mode'] ?? '' ) ) === 'single' ) {
 			return;
 		}
 
