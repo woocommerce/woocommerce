@@ -158,7 +158,7 @@ class OrderHelper {
 	 * @param boolean $enabled TRUE to enable COT or FALSE to disable.
 	 * @return void
 	 */
-	public static function toggle_cot( bool $enabled ) {
+	public static function toggle_cot_feature_and_usage( bool $enabled ) {
 		$features_controller = wc_get_container()->get( Featurescontroller::class );
 		$features_controller->change_feature_enable( 'custom_order_tables', $enabled );
 
@@ -189,7 +189,7 @@ class OrderHelper {
 	 */
 	public static function create_complex_wp_post_order() {
 		$current_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		self::toggle_cot( false );
+		self::toggle_cot_feature_and_usage( false );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$uniq_cust_id = wp_generate_password( 10, false );
@@ -259,7 +259,7 @@ class OrderHelper {
 		$order->save();
 		$order->save_meta_data();
 
-		self::toggle_cot( $current_cot_state );
+		self::toggle_cot_feature_and_usage( $current_cot_state );
 
 		return $order->get_id();
 	}

@@ -23,7 +23,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->prev_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		OrderHelper::toggle_cot( false );
+		OrderHelper::toggle_cot_feature_and_usage( false );
 	}
 
 	/**
@@ -32,7 +32,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		OrderHelper::toggle_cot( $this->prev_cot_state );
+		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
 		parent::tearDown();
 	}
 

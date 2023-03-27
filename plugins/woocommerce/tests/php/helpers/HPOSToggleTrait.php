@@ -49,7 +49,7 @@ trait HPOSToggleTrait {
 	 * @return void
 	 */
 	private function toggle_cot_feature_and_usage( bool $enabled ): void {
-		OrderHelper::toggle_cot( $enabled );
+		OrderHelper::toggle_cot_feature_and_usage( $enabled );
 	}
 
 	/**
