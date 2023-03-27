@@ -16,5 +16,3 @@ declare module '@wordpress/core-data' {
 		id?: string
 	): [ T, ( value: T ) => void, T ];
 }
-
-declare module '*.svg';
