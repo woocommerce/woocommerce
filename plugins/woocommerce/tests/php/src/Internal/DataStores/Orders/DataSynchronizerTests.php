@@ -413,7 +413,7 @@ class DataSynchronizerTests extends HposTestCase {
 		$this->assertEquals( array( "Order {$order_1_id} doesn't exist in the backup table, thus it can't be deleted" ), $logger->warnings );
 	}
 
-	/*
+	/**
 	 * When sync is enabled, changes to meta data should propagate from the Custom Orders Table to
 	 * the post meta table whenever the order object's save_meta_data() method is called.
 	 *

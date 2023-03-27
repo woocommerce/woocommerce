@@ -230,8 +230,8 @@ class WC_Install {
 			'wc_update_750_disable_new_product_management_experience',
 		),
 		'7.7.0' => array(
-			'wc_update_770_delete_stray_order_records'
-		)
+			'wc_update_770_delete_stray_order_records',
+		),
 	);
 
 	/**

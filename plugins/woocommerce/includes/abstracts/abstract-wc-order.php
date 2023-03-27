@@ -2390,7 +2390,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * If the flag is set, set_parent_id will throw an error if no order exists with the supplied id.
 	 *
-	 * @param bool $value
+	 * @param bool $value The value to set.
 	 * @return void
 	 */
 	public function set_verify_parent_id( bool $value ) {
