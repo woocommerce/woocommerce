@@ -7,6 +7,7 @@ use Generator;
 use ReflectionClass;
 use ReflectionException;
 use WC_Unit_Test_Case;
+use WP_Screen;
 
 /**
  * Tests the product reviews overrides for the comments page.
@@ -244,20 +245,43 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	 * @throws ReflectionException If the method doesn't exist.
 	 */
 	public function test_exclude_reviews_from_comments() : void {
+		global $current_screen;
+		$original_screen_value = $current_screen;
+
 		$overrides = wc_get_container()->get( ReviewsCommentsOverrides::class );
+		$method    = ( new ReflectionClass( $overrides ) )->getMethod( 'exclude_reviews_from_comments' );
+		$method->setAccessible( true );
 
 		$original_args = [
 			'post_type' => [ 'product' ],
 		];
 
-		$this->assertTrue( in_array( 'product', $original_args['post_type'] ) );
+		$current_screen = WP_Screen::get( 'edit-comments' );
+		$filtered_args  = $method->invoke( $overrides, $original_args );
 
-		$method = ( new ReflectionClass( $overrides ) )->getMethod( 'exclude_reviews_from_comments' );
-		$method->setAccessible( true );
+		$this->assertFalse(
+			in_array( 'product', $filtered_args['post_type'] ),
+			'In the context of the edit-comments screen, the product post type will be removed from the comments query.'
+		);
 
-		$new_args = $method->invoke( $overrides, $original_args );
+		$current_screen = WP_Screen::get( 'arbitrary-admin-page' );
+		$filtered_args  = $method->invoke( $overrides, $original_args );
 
-		$this->assertFalse( in_array( 'product', $new_args['post_type'] ) );
+		$this->assertTrue(
+			in_array( 'product', $filtered_args['post_type'] ),
+			'In the context of all other admin screens, the product post type will not be removed from the comments query.'
+		);
+
+		$current_screen = null;
+		$filtered_args  = $method->invoke( $overrides, $original_args );
+
+		$this->assertTrue(
+			in_array( 'product', $filtered_args['post_type'] ),
+			'If the $current_screen global is not set, the product post type will not be removed from the comments query.'
+		);
+
+		// Clean-up.
+		$current_screen = $original_screen_value;
 	}
 
 }
