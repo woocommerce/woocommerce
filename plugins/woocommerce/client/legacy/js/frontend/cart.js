@@ -14,10 +14,13 @@ jQuery( function( $ ) {
 	 * @param {Object} options
 	 */
 	const ajax = options => {
+		const type = options.type || 'GET';
+		
 		window.fetch( options.url, {
-			method: options.type || 'GET',
+			method: type,
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-			body: options.data
+			// Don't try to pass a body for GET requests, this will result in a TypeError.
+			body: type !== 'GET' ? options.data : undefined,
 		} )
 			.then( response => {
 				if ( !response.ok ) {
