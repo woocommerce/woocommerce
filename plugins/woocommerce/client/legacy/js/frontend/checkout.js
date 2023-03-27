@@ -727,7 +727,11 @@ jQuery( function( $ ) {
 			$( document.body ).on( 'click', 'a.showlogin', this.show_login_form );
 		},
 		show_login_form: function() {
+			var login_form_was_hidden = $( 'form.login, form.woocommerce-form--login' ).css('display') == 'none';
 			$( 'form.login, form.woocommerce-form--login' ).slideToggle();
+			if ( login_form_was_hidden ) {
+				$.scroll_to_notices( $( 'form.login, form.woocommerce-form--login' ) );
+			}
 			return false;
 		}
 	};
