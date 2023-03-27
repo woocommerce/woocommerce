@@ -324,7 +324,7 @@ class CLIRunner {
 		$processed      = 0;
 		$order_id_start = (int) $assoc_args['start-from'];
 		$order_id_end   = (int) $assoc_args['end-at'];
-		$order_id_end   = $order_id_end === - 1 ? PHP_INT_MAX : $order_id_end;
+		$order_id_end   = -1 === $order_id_end ? PHP_INT_MAX : $order_id_end;
 		$order_count    = $this->get_verify_order_count( $order_id_start, $order_id_end );
 		$batch_size     = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
 
