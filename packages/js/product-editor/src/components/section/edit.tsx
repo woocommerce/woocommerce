@@ -2,8 +2,18 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
+import type { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
-import type { BlockEditProps } from '@wordpress/blocks';
+import { sanitize } from 'dompurify';
+
+const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
+const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
+
+function sanitizeHTML( html: string ) {
+	return {
+		__html: sanitize( html, { ALLOWED_TAGS, ALLOWED_ATTR } ),
+	};
+}
 
 /**
  * Internal dependencies
@@ -24,9 +34,10 @@ export function Edit( {
 				<BlockIcon clientId={ clientId } />
 				<span>{ title }</span>
 			</h2>
-			<p className="wp-block-woocommerce-product-section__description">
-				{ description }
-			</p>
+			<p
+				className="wp-block-woocommerce-product-section__description"
+				dangerouslySetInnerHTML={ sanitizeHTML( description ) }
+			/>
 			<InnerBlocks templateLock="all" />
 		</div>
 	);
