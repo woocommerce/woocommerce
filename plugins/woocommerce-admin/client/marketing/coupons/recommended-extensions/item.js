@@ -8,8 +8,8 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import './style.scss';
-import { ProductIcon } from '../../components';
-import { getInAppPurchaseUrl } from '../../../lib/in-app-purchase';
+import { ProductIcon } from '~/marketing/components';
+import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 
 const RecommendedExtensionsItem = ( {
 	title,
