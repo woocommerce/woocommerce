@@ -167,16 +167,16 @@
 
 		if ( attributes.count && attributes.count === attributes.chosenCount ) {
 			if ( form.useAjax ) {
-				if ( form.controller ) {
-					form.controller.abort();
+				if ( form.xhr ) {
+					form.xhr.abort();
 				}
 				form.$form.block( { message: null, overlayCSS: { background: '#fff', opacity: 0.6 } } );
 				currentAttributes.product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
 				currentAttributes.custom_data = form.$form.data( 'custom_data' );
-				const options                 = {
+				form.xhr                      = $.ajax( {
 					url: wc_add_to_cart_variation_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
 					type: 'POST',
-					data: $.param( currentAttributes ),
+					data: currentAttributes,
 					success: function( variation ) {
 						if ( variation ) {
 							form.$form.trigger( 'found_variation', [ variation ] );
@@ -199,25 +199,7 @@
 					complete: function() {
 						form.$form.unblock();
 					}
-				};
-
-				const controller = new AbortController();
-				form.controller = controller;
-
-				window.fetch( options.url, {
-					method: options.type,
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-					body: options.data,
-					signal: controller.signal
-				} )
-					.then( response => {
-						if ( !response.ok ) {
-							throw new Error( response.statusText );
-						}
-						return response.json();
-					})
-					.then( options.success )
-					.finally( () => options.complete() );
+				} );
 			} else {
 				form.$form.trigger( 'update_variation_values' );
 
