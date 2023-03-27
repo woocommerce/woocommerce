@@ -2594,3 +2594,10 @@ function wc_update_750_disable_new_product_management_experience() {
 		update_option( 'woocommerce_new_product_management_enabled', 'no' );
 	}
 }
+
+/**
+ * Remove the multichannel marketing feature flag. This feature is now enabled by default.
+ */
+function wc_update_770_remove_multichannel_marketing_feature_flag() {
+	delete_option( 'woocommerce_multichannel_marketing_enabled' );
+}
