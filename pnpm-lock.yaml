@@ -1477,7 +1477,12 @@ importers:
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
+<<<<<<< HEAD
       typescript: ^4.9.5
+=======
+      typescript: ^4.8.3
+      url-loader: ^1.1.2
+>>>>>>> 4b2cb63584 (Add images block to the product editor)
       webpack: ^5.70.0
       webpack-cli: ^3.3.12
     dependencies:
@@ -1548,8 +1553,14 @@ importers:
       react-hooks^8.0.1: link:@testing-library/react-hooks^8.0.1
       rimraf: 3.0.2
       sass-loader: 10.2.1_webpack@5.70.0
+<<<<<<< HEAD
       ts-jest: 27.1.3_kf3ytuxcuctivbjasfbyoij3w4
       typescript: 4.9.5
+=======
+      ts-jest: 27.1.3_n6jwe674nt3ravnkwja2moplpy
+      typescript: 4.8.4
+      url-loader: 1.1.2_webpack@5.70.0
+>>>>>>> 4b2cb63584 (Add images block to the product editor)
       webpack: 5.70.0_webpack-cli@3.3.12
       webpack-cli: 3.3.12_webpack@5.70.0
 
@@ -17135,7 +17146,11 @@ packages:
     peerDependencies:
       react: ^17.0.0
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.21.0
+=======
+      '@babel/runtime': 7.19.0
+>>>>>>> 4b2cb63584 (Add images block to the product editor)
       '@wordpress/api-fetch': 6.25.0
       '@wordpress/blocks': 11.18.0_react@17.0.2
       '@wordpress/data': 6.6.1_react@17.0.2
@@ -17494,7 +17509,11 @@ packages:
       react: ^17.0.0
       react-dom: ^17.0.0
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.21.0
+=======
+      '@babel/runtime': 7.19.0
+>>>>>>> 4b2cb63584 (Add images block to the product editor)
       '@wordpress/a11y': 3.28.0
       '@wordpress/api-fetch': 6.25.0
       '@wordpress/block-editor': 8.6.0_eqi5qhcxfphl6j3pngzexvnehi
@@ -17816,7 +17835,11 @@ packages:
     resolution: {integrity: sha512-4sIngmH64M1jzcprfkffo1GHsQbd/QNbTweq6cSPIJNorKfE63Inf59NQ6r0pq6+Nz+cuq64eMz5v4eyngjZ/A==}
     engines: {node: '>=12'}
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.21.0
+=======
+      '@babel/runtime': 7.19.0
+>>>>>>> 4b2cb63584 (Add images block to the product editor)
     dev: false
 
   /@wordpress/html-entities/3.28.0:
@@ -17875,7 +17898,11 @@ packages:
     engines: {node: '>=12'}
     hasBin: true
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.21.0
+=======
+      '@babel/runtime': 7.19.0
+>>>>>>> 4b2cb63584 (Add images block to the product editor)
       '@wordpress/hooks': 3.28.0
       gettext-parser: 1.4.0
       lodash: 4.17.21
@@ -17925,7 +17952,11 @@ packages:
       react: ^17.0.0
       react-dom: ^17.0.0
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.21.0
+=======
+      '@babel/runtime': 7.19.0
+>>>>>>> 4b2cb63584 (Add images block to the product editor)
       '@wordpress/a11y': 3.28.0
       '@wordpress/components': 19.8.5_eqi5qhcxfphl6j3pngzexvnehi
       '@wordpress/compose': 5.4.1_react@17.0.2
@@ -18163,7 +18194,11 @@ packages:
     resolution: {integrity: sha512-WNAaMqqw6Eqy61KTWBy1NlgXSZH82Cm2SPVbz0v6yhJ4ktJmSRFm7Fd4mTMFS/L7NKTxwo+DFqEHlTGKj3lyzQ==}
     engines: {node: '>=12'}
     dependencies:
+<<<<<<< HEAD
       '@babel/runtime': 7.21.0
+=======
+      '@babel/runtime': 7.19.0
+>>>>>>> 4b2cb63584 (Add images block to the product editor)
       '@wordpress/api-fetch': 6.25.0
       '@wordpress/blob': 3.28.0
       '@wordpress/element': 4.4.1
@@ -35143,7 +35178,10 @@ packages:
       schema-utils: 3.1.1
       semver: 7.3.8
       webpack: 5.70.0_webpack-cli@3.3.12
+<<<<<<< HEAD
     dev: true
+=======
+>>>>>>> 4b2cb63584 (Add images block to the product editor)
 
   /postcss-loader/6.2.1_wn4p5kzkgq2ohl66pfawxjf2x4:
     resolution: {integrity: sha512-WbbYpmAaKcux/P66bZ40bpWsBucjx/TTgVVzRZ9yUO8yQfVBlameJ0ZGVaPfH64hNSBh63a+ICP5nqOpBA0w+Q==}
@@ -41481,8 +41519,9 @@ packages:
       webpack: ^3.0.0 || ^4.0.0
     dependencies:
       loader-utils: 1.4.0
-      mime: 2.5.2
+      mime: 2.6.0
       schema-utils: 1.0.0
+<<<<<<< HEAD
       webpack: 5.70.0_webpack-cli@4.9.2
     dev: true
 
@@ -41496,6 +41535,9 @@ packages:
       mime: 2.5.2
       schema-utils: 1.0.0
       webpack: 5.76.3
+=======
+      webpack: 5.70.0_webpack-cli@3.3.12
+>>>>>>> 4b2cb63584 (Add images block to the product editor)
     dev: true
 
   /url-loader/3.0.0_webpack@4.46.0:

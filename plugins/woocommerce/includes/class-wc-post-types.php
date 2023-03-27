@@ -432,6 +432,25 @@ class WC_Post_Types {
 										),
 									),
 								),
+								array(
+									'woocommerce/product-section',
+									array(
+										'title'       => __( 'Images', 'woocommerce' ),
+										'description' => sprintf(
+											__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %sHow to prepare images?%s.', 'woocommerce' ),
+											'<a href="http://woocommerce.com/#" target="_blank" rel="noreferrer">',
+											'</a>'
+										),
+									),
+									array(
+										array(
+											'woocommerce/product-images',
+											array(
+												'images' => array(),
+											)
+										),
+									),
+								),
 							),
 						),
 						array(
