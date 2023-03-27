@@ -18,7 +18,7 @@
 
 	<!-- wp:group {"style":{"spacing":{"blockGap":"8px"},"typography":{"fontSize":"18px"},"layout":{"selfStretch":"fill","flexSize":null}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
 	<div class="wp-block-group" style="font-size:18px">
-		<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","iconStyle":"alt"} /-->
+		<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","iconStyle":"alt","iconClass":"wc-block-customer-account__account-icon"} /-->
 		<!-- wp:woocommerce/mini-cart {"textColor":"background","style":{"typography":{"fontSize":"14px"}}} /-->
 	</div>
 	<!-- /wp:group -->

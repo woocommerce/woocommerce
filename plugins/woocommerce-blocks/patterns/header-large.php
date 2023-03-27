@@ -14,7 +14,7 @@
 
 		<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
 		<div class="wp-block-group">
-			<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","fontSize":"small"} /-->
+			<!-- wp:woocommerce/customer-account {"displayStyle":"icon_only","fontSize":"small","iconClass":"wc-block-customer-account__account-icon"} /-->
 			<!-- wp:woocommerce/mini-cart {"hasHiddenPrice":true,"style":{"typography":{"fontSize":"14px"}}} /-->
 		</div>
 		<!-- /wp:group -->
