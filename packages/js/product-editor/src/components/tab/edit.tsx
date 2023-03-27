@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	BlockControls,
-	InnerBlocks,
-	useBlockProps,
-} from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import classnames from 'classnames';
 import { createElement } from '@wordpress/element';
 import type { BlockAttributes } from '@wordpress/blocks';
