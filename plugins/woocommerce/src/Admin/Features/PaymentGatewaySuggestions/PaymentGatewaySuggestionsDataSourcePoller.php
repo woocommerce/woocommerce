@@ -35,7 +35,7 @@ class PaymentGatewaySuggestionsDataSourcePoller extends DataSourcePoller {
 		if ( ! self::$instance ) {
 			// Add country query param to data sources.
 			$base_location = wc_get_base_location();
-			$data_sources = array_map(
+			$data_sources  = array_map(
 				function( $url ) use ( $base_location ) {
 					return add_query_arg(
 						'country',
