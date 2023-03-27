@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement } from '@wordpress/element';
 import interpolateComponents from '@automattic/interpolate-components';
 import { TextControl } from '@woocommerce/components';
 import { useBlockProps } from '@wordpress/block-editor';
