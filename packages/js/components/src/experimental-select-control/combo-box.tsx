@@ -9,7 +9,7 @@ type ComboBoxProps = {
 	children?: JSX.Element | JSX.Element[] | null;
 	comboBoxProps: JSX.IntrinsicElements[ 'div' ];
 	inputProps: JSX.IntrinsicElements[ 'input' ];
-	getToggleButtonProps: () => Omit<
+	getToggleButtonProps?: () => Omit<
 		JSX.IntrinsicElements[ 'button' ],
 		'ref'
 	>;
@@ -33,7 +33,7 @@ const ToggleButton = forwardRef< HTMLButtonElement >( ( props, ref ) => {
 export const ComboBox = ( {
 	children,
 	comboBoxProps,
-	getToggleButtonProps,
+	getToggleButtonProps = () => ( {} ),
 	inputProps,
 	suffix,
 	showToggleButton,
