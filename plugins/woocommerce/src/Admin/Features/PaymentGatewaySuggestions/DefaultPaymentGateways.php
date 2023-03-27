@@ -936,12 +936,12 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 			],
 			'AT' => [
-					'woocommerce_payments',
-					'stripe',
-					'ppcp-gateway',
-					'mollie_wc_gateway_banktransfer',
-					'klarna_payments',
-					'amazon_payments_advanced',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'klarna_payments',
+				'amazon_payments_advanced',
 			],
 			'BE' => [
 				'woocommerce_payments',
