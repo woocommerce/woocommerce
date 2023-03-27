@@ -109,10 +109,13 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 					);
 				}
 
-				if ( shippingDataFromResponse ) {
+				if (
+					objectHasProp( shippingDataFromResponse, 'address' ) &&
+					shippingDataFromResponse.address
+				) {
 					// Set this here so that old extensions still using shippingData can set the shippingAddress.
 					shippingAddress =
-						shippingDataFromResponse as ShippingAddress;
+						shippingDataFromResponse.address as ShippingAddress;
 					deprecated(
 						'returning shippingData from an onPaymentProcessing observer in WooCommerce Blocks',
 						{
