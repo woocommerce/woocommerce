@@ -13,11 +13,8 @@ import { WooHeaderItem } from '@woocommerce/admin-layout';
  * Internal dependencies
  */
 import { AUTO_DRAFT_NAME, getHeaderTitle } from '../../utils';
-
-/**
- * Internal dependencies
- */
 import { MoreMenu } from './more-menu';
+import { usePreview } from './hooks/use-preview';
 
 export type HeaderProps = {
 	productId: number;
@@ -69,6 +66,11 @@ export function Header( { productId, productName }: HeaderProps ) {
 		} );
 	}
 
+	const previewButtonProps = usePreview( {
+		productId,
+		disabled: isDisabled,
+	} );
+
 	return (
 		<div
 			className="woocommerce-product-header"
@@ -81,6 +83,8 @@ export function Header( { productId, productName }: HeaderProps ) {
 			</h1>
 
 			<div className="woocommerce-product-header__actions">
+				<Button { ...previewButtonProps } />
+
 				<Button
 					onClick={ handleSave }
 					variant="primary"
