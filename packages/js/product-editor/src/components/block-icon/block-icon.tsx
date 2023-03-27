@@ -4,7 +4,7 @@
 import { BlockIcon as BaseBlockIcon } from '@wordpress/block-editor';
 import { Block } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
-import { createElement, Fragment, RawHTML } from '@wordpress/element';
+import { createElement, RawHTML } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -33,7 +33,7 @@ export function BlockIcon( { clientId }: BlockIconProps ) {
 	);
 
 	if ( ! icon ) {
-		return <Fragment />;
+		return null;
 	}
 
 	if ( typeof icon === 'object' ) {
