@@ -97,24 +97,25 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$this->load_cart_session( $request );
 		$this->cart_controller->calculate_totals();
 
-		if ( $this->requires_nonce( $request ) ) {
-			$nonce_check = $this->check_nonce( $request );
+		$response    = null;
+		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
 
-			if ( is_wp_error( $nonce_check ) ) {
-				return $this->add_response_headers( $this->error_to_response( $nonce_check ) );
+		if ( is_wp_error( $nonce_check ) ) {
+			$response = $nonce_check;
+		}
+
+		if ( ! $response ) {
+			try {
+				$response = $this->get_response_by_request_method( $request );
+			} catch ( RouteException $error ) {
+				$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
+			} catch ( \Exception $error ) {
+				$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
 			}
 		}
 
-		try {
-			$response = parent::get_response( $request );
-		} catch ( RouteException $error ) {
-			$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
-		} catch ( \Exception $error ) {
-			$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage() );
-		}
-
 		if ( is_wp_error( $response ) ) {
-			return $this->error_to_response( $response );
+			$response = $this->error_to_response( $response );
 		}
 
 		if ( $this->is_update_request( $request ) ) {
