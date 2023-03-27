@@ -7,6 +7,7 @@
 	"compilerOptions": {
 		"outDir": "build",
 		"resolveJsonModule": true,
+		"jsx": "preserve",
 		"typeRoots": [
 			"./typings",
 			"./node_modules/@types"

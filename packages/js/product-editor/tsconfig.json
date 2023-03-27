@@ -6,6 +6,7 @@
 		"declaration": true,
 		"declarationMap": true,
 		"declarationDir": "./build-types",
+		"jsx": "preserve",
 		"resolveJsonModule": true,
 		"typeRoots": [
 			"./typings",
