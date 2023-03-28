@@ -390,8 +390,8 @@ class WC_Install {
 
 		WC()->wpdb_table_fix();
 		self::remove_admin_notices();
-		self::create_tables();
-		self::verify_base_tables();
+		$dbdelta_result = self::create_tables();
+		self::verify_base_tables_light( $dbdelta_result );
 		self::create_options();
 		self::migrate_options();
 		self::create_roles();
@@ -458,6 +458,36 @@ class WC_Install {
 			->get( DatabaseUtil::class )
 			->get_missing_tables( self::get_schema() );
 
+		self::modify_db_notices( $missing_tables, $modify_notice );
+
+		return $missing_tables;
+	}
+
+	/**
+	 * Check if all the base tables are present without running dbDelta unnecessarily.
+	 *
+	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
+	 * @param bool $dbdelta_result Result of dbDelta.
+	 *
+	 * @return array List of queries.
+	 */
+	public static function verify_base_tables_light( $modify_notice = true, $dbdelta_result = '' ) {
+		$missing_tables = wc_get_container()
+			->get( DatabaseUtil::class )
+			->parse_dbdelta_output( $dbdelta_result )['created_tables'];
+
+		self::modify_db_notices( $missing_tables, $modify_notice );
+
+		return $missing_tables;
+	}
+
+	/**
+	 * Modify the database notices based on missing tables.
+	 *
+	 * @param array $missing_tables List of missing tables.
+	 * @param bool  $modify_notice  Whether to modify notice based on if all tables are present.
+	 */
+	private static function modify_db_notices( $missing_tables, $modify_notice ) {
 		if ( 0 < count( $missing_tables ) ) {
 			if ( $modify_notice ) {
 				WC_Admin_Notices::add_notice( 'base_tables_missing' );
@@ -470,7 +500,6 @@ class WC_Install {
 			update_option( 'woocommerce_schema_version', WC()->db_version );
 			delete_option( 'woocommerce_schema_missing_tables' );
 		}
-		return $missing_tables;
 	}
 
 	/**
