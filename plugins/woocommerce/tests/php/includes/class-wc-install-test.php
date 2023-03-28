@@ -122,7 +122,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$note->add_action( 'test-action-2', 'Action 2', 'https://example.com' );
 		$data_store->create( $note );
 
-		$this->assertEquals( 1, count ( $data_store->get_notes_with_name( $note_name ) ) );
+		$this->assertEquals( 1, count( $data_store->get_notes_with_name( $note_name ) ) );
 
 		WC_Install::delete_obsolete_notes();
 
