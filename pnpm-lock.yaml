@@ -1410,7 +1410,6 @@ importers:
 
   packages/js/product-editor:
     specifiers:
-      '@automattic/interpolate-components': ^1.2.0
       '@babel/core': ^7.21.3
       '@babel/runtime': ^7.17.2
       '@testing-library/jest-dom': ^5.16.2
@@ -1478,7 +1477,6 @@ importers:
       webpack: ^5.70.0
       webpack-cli: ^3.3.12
     dependencies:
-      '@automattic/interpolate-components': 1.2.1_pxzommwrsowkd4kgag6q3sluym
       '@types/lodash': 4.14.184
       '@types/wordpress__blocks': 11.0.7_sfoxds7t5ydpegc3knd667wn6m
       '@woocommerce/admin-layout': link:../admin-layout
@@ -3801,7 +3799,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-create-class-features-plugin': 7.19.0_@babel+core@7.21.3
-      '@babel/helper-plugin-utils': 7.19.0
+      '@babel/helper-plugin-utils': 7.20.2
     transitivePeerDependencies:
       - supports-color
 
@@ -8819,7 +8817,7 @@ packages:
         optional: true
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/runtime': 7.19.0
+      '@babel/runtime': 7.21.0
       '@emotion/babel-plugin': 11.10.5_@babel+core@7.21.3
       '@emotion/cache': 11.10.5
       '@emotion/serialize': 1.1.1
@@ -35112,7 +35110,7 @@ packages:
     dependencies:
       cosmiconfig: 7.0.1
       klona: 2.0.5
-      loader-utils: 2.0.2
+      loader-utils: 2.0.4
       postcss: 8.4.21
       schema-utils: 3.1.1
       semver: 7.3.8
@@ -36586,7 +36584,7 @@ packages:
       react-outside-click-handler: 1.3.0_sfoxds7t5ydpegc3knd667wn6m
       react-portal: 4.2.1_sfoxds7t5ydpegc3knd667wn6m
       react-with-direction: 1.4.0_sfoxds7t5ydpegc3knd667wn6m
-      react-with-styles: 4.2.0_ijumbsfrpvhmwfiiw5c3tpdyzq
+      react-with-styles: 4.2.0_tzgwoaxjvs23ve2qhnwxwqxt3e
       react-with-styles-interface-css: 6.0.0_eivcclzbvdxqy5cnlnup5iddhy
     dev: false
 
@@ -37202,7 +37200,7 @@ packages:
       '@babel/runtime': 7.21.0
       array.prototype.flat: 1.2.5
       global-cache: 1.2.1
-      react-with-styles: 4.2.0_ijumbsfrpvhmwfiiw5c3tpdyzq
+      react-with-styles: 4.2.0_tzgwoaxjvs23ve2qhnwxwqxt3e
     dev: false
 
   /react-with-styles-interface-css/6.0.0_u5gvwsivijvqc4cln26hqg7igq:
@@ -37230,14 +37228,14 @@ packages:
       react-with-direction: 1.4.0_sfoxds7t5ydpegc3knd667wn6m
     dev: false
 
-  /react-with-styles/4.2.0_ijumbsfrpvhmwfiiw5c3tpdyzq:
+  /react-with-styles/4.2.0_tzgwoaxjvs23ve2qhnwxwqxt3e:
     resolution: {integrity: sha512-tZCTY27KriRNhwHIbg1NkSdTTOSfXDg6Z7s+Q37mtz0Ym7Sc7IOr3PzVt4qJhJMW6Nkvfi3g34FuhtiGAJCBQA==}
     peerDependencies:
       '@babel/runtime': ^7.0.0
       react: '>=0.14'
       react-with-direction: ^1.3.1
     dependencies:
-      '@babel/runtime': 7.21.0
+      '@babel/runtime': 7.19.0
       airbnb-prop-types: 2.16.0_react@17.0.2
       hoist-non-react-statics: 3.3.2
       object.assign: 4.1.4

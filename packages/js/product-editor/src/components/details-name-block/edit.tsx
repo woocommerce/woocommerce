@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement } from '@wordpress/element';
-import interpolateComponents from '@automattic/interpolate-components';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import { TextControl } from '@woocommerce/components';
 import { useBlockProps } from '@wordpress/block-editor';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -18,16 +17,16 @@ export function Edit() {
 	return (
 		<div { ...blockProps }>
 			<TextControl
-				label={ interpolateComponents( {
-					mixedString: __( 'Name {{required/}}', 'woocommerce' ),
-					components: {
+				label={ createInterpolateElement(
+					__( 'Name <required />', 'woocommerce' ),
+					{
 						required: (
 							<span className="woocommerce-product-form__optional-input">
 								{ __( '(required)', 'woocommerce' ) }
 							</span>
 						),
-					},
-				} ) }
+					}
+				) }
 				name={ 'woocommerce-product-name' }
 				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
 				onChange={ setName }
