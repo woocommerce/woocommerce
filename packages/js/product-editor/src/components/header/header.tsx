@@ -15,6 +15,7 @@ import { WooHeaderItem } from '@woocommerce/admin-layout';
 import { AUTO_DRAFT_NAME, getHeaderTitle } from '../../utils';
 import { MoreMenu } from './more-menu';
 import { usePreview } from './hooks/use-preview';
+import { usePublish } from './hooks/use-publish';
 
 export type HeaderProps = {
 	productId: number;
@@ -22,7 +23,7 @@ export type HeaderProps = {
 };
 
 export function Header( { productId, productName }: HeaderProps ) {
-	const { isProductLocked, isSaving, editedProductName } = useSelect(
+	const { isSavingLocked, isSaving, editedProductName } = useSelect(
 		( select ) => {
 			const { isSavingEntityRecord, getEditedEntityRecord } =
 				select( 'core' );
@@ -35,7 +36,7 @@ export function Header( { productId, productName }: HeaderProps ) {
 			);
 
 			return {
-				isProductLocked: isPostSavingLocked(),
+				isSavingLocked: isPostSavingLocked(),
 				isSaving: isSavingEntityRecord(
 					'postType',
 					'product',
@@ -47,28 +48,25 @@ export function Header( { productId, productName }: HeaderProps ) {
 		[ productId ]
 	);
 
-	const isDisabled = isProductLocked || isSaving;
+	const isDisabled = isSavingLocked || isSaving;
 	const isCreating = productName === AUTO_DRAFT_NAME;
-
-	const { saveEditedEntityRecord } = useDispatch( 'core' );
-
-	function handleSave() {
-		saveEditedEntityRecord< Product >(
-			'postType',
-			'product',
-			productId
-		).then( ( response ) => {
-			if ( isCreating ) {
-				navigateTo( {
-					url: getNewPath( {}, `/product/${ response.id }` ),
-				} );
-			}
-		} );
-	}
 
 	const previewButtonProps = usePreview( {
 		productId,
 		disabled: isDisabled,
+		'aria-label': __( 'Preview in new tab', 'woocommerce' ),
+	} );
+
+	const publishButtonProps = usePublish( {
+		productId,
+		disabled: isDisabled,
+		isBusy: isSaving,
+		onPublishSuccess( product ) {
+			if ( isCreating ) {
+				const url = getNewPath( {}, `/product/${ product.id }` );
+				navigateTo( { url } );
+			}
+		},
 	} );
 
 	return (
@@ -83,18 +81,16 @@ export function Header( { productId, productName }: HeaderProps ) {
 			</h1>
 
 			<div className="woocommerce-product-header__actions">
-				<Button { ...previewButtonProps } />
+				<Button { ...previewButtonProps }>
+					{ __( 'Preview', 'woocommerce' ) }
+				</Button>
 
-				<Button
-					onClick={ handleSave }
-					variant="primary"
-					isBusy={ isSaving }
-					disabled={ isDisabled }
-				>
+				<Button { ...publishButtonProps }>
 					{ isCreating
 						? __( 'Add', 'woocommerce' )
 						: __( 'Save', 'woocommerce' ) }
 				</Button>
+
 				<WooHeaderItem.Slot name="product" />
 				<MoreMenu />
 			</div>

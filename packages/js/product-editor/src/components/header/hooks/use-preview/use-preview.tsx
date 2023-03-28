@@ -4,7 +4,6 @@
 import { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
 
 export function usePreview( {
 	productId,
@@ -40,8 +39,6 @@ export function usePreview( {
 	}
 
 	return {
-		'aria-label': __( 'Preview in new tab', 'woocommerce' ),
-		children: __( 'Preview', 'woocommerce' ),
 		target: '_blank',
 		...props,
 		'aria-disabled': disabled || isDisabled,
