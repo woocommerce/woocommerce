@@ -23,7 +23,10 @@ import {
 /**
  * Internal dependencies
  */
-import { useCategorySearch } from './use-category-search';
+import {
+	ProductCategoryLinkedList,
+	useCategorySearch,
+} from './use-category-search';
 import { CategoryFieldItem } from './category-field-item';
 
 type CreateCategoryModalProps = {
@@ -51,10 +54,8 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 	const [ categoryName, setCategoryName ] = useState(
 		initialCategoryName || ''
 	);
-	const [ categoryParent, setCategoryParent ] = useState< Pick<
-		ProductCategory,
-		'id' | 'name'
-	> | null >( null );
+	const [ categoryParent, setCategoryParent ] =
+		useState< ProductCategoryLinkedList | null >( null );
 
 	const onSave = async () => {
 		recordEvent( 'product_category_add', {
@@ -94,7 +95,7 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					value={ categoryName }
 					onChange={ setCategoryName }
 				/>
-				<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
+				<SelectControl< ProductCategoryLinkedList >
 					items={ categoriesSelectList }
 					label={ createInterpolateElement(
 						__( 'Parent category <optional/>', 'woocommerce' ),
