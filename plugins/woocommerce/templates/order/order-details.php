@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 4.6.0
+ * @version 7.7.0
  */
 
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
