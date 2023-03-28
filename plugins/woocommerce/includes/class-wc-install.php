@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
+use Automattic\WooCommerce\Internal\Utilities\LockUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -380,10 +381,11 @@ class WC_Install {
 		}
 
 		// Check if we are not already running this routine.
-		if ( self::is_installing() ) {
+		if ( !LockUtil::test_and_set_expiring( 'wc_installing', 10 * MINUTE_IN_SECONDS ) ) {
 			return;
 		}
 
+		// This is no longer used to ensure atomicity (because it was prone to race conditions), but let's keep it for backwards compatibility.
 		// If we made it till here nothing is running yet, lets set the transient now.
 		set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		wc_maybe_define_constant( 'WC_INSTALLING', true );
@@ -407,6 +409,7 @@ class WC_Install {
 		self::maybe_update_db_version();
 
 		delete_transient( 'wc_installing' );
+		LockUtil::unlock( 'wc_installing' );
 
 		// Use add_option() here to avoid overwriting this value with each
 		// plugin version update. We base plugin age off of this value.
