@@ -785,8 +785,12 @@ class WC_Install {
 	 * Sets up the default options used on the settings page.
 	 */
 	private static function create_options() {
+		global $wpdb;
 		// Include settings so that we can run through defaults.
 		include_once dirname( __FILE__ ) . '/admin/class-wc-admin-settings.php';
+
+		// Use this var to warm up option cahce in one go instead of reading options one by one.
+		$options_cache = [];
 
 		$settings = WC_Admin_Settings::get_settings_pages();
 
@@ -805,17 +809,54 @@ class WC_Install {
 				foreach ( $section->get_settings( $subsection ) as $value ) {
 					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
 						$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
-						add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+						$options_cache[] = [ $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) ];
 					}
 				}
 			}
 		}
 
 		// Define other defaults if not in setting screens.
-		add_option( 'woocommerce_single_image_width', '600', '', 'yes' );
-		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
-		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
-		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
+		$options_cache[] = [ 'woocommerce_single_image_width', '600', '', 'yes' ];
+		$options_cache[] = [ 'woocommerce_thumbnail_image_width', '300', '', 'yes' ];
+		$options_cache[] = [ 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' ];
+		$options_cache[] = [ 'woocommerce_demo_store', 'no', '', 'no' ];
+
+		$non_autoload_options = array_filter(
+			$options_cache,
+			function( $option ) {
+				return 'no' === $option[3];
+			}
+		);
+
+		// Prime option cache with the non-autoloading options.
+		$non_autoload_option_names = array_map(
+			function( $option ) {
+				return $option[0];
+			},
+			$non_autoload_options
+		);
+
+		$option_name_placeholder = implode( ',', array_fill( 0, count( $non_autoload_option_names ), '%s' ) );
+
+		$non_autoload_db_options = $wpdb->get_results(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->prepare(
+				"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name IN ( $option_name_placeholder )",
+				$non_autoload_option_names
+			)
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		);
+
+		if ( is_array( $non_autoload_db_options ) ) {
+			foreach ( $non_autoload_db_options as $option ) {
+				wp_cache_add( $option->option_name, $option->option_value, 'options' );
+			}
+		}
+
+		// Add missing options.
+		foreach ( $options_cache as $option ) {
+			add_option( $option[0], $option[1], $option[2], $option[3] );
+		}
 
 		if ( self::is_new_install() ) {
 			// Define initial tax classes.
