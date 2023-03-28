@@ -882,10 +882,25 @@ class WC_Install {
 			);
 		}
 
-		foreach ( $obsolete_notes_names as $obsolete_notes_name ) {
-			$wpdb->delete( $wpdb->prefix . 'wc_admin_notes', array( 'name' => $obsolete_notes_name ) );
-			$wpdb->delete( $wpdb->prefix . 'wc_admin_note_actions', array( 'name' => $obsolete_notes_name ) );
-		}
+		$note_names_placeholder = substr( str_repeat( ',%s', count( $obsolete_notes_names ) ), 1 );
+
+		$wpdb->query(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Ignored for allowing interpolation in the IN statement.
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_admin_notes WHERE name IN ( $note_names_placeholder )",
+				$obsolete_notes_names
+			)
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared.
+		);
+
+		$wpdb->query(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Ignored for allowing interpolation in the IN statement.
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_admin_note_actions WHERE name IN ( $note_names_placeholder )",
+				$obsolete_notes_names
+			)
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared.
+		);
 	}
 
 	/**
