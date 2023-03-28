@@ -29,11 +29,14 @@
 	},
 	"dependencies": {
 		"@types/lodash": "^4.14.179",
+		"@types/prop-types": "^15.7.4",
 		"@types/wordpress__blocks": "^11.0.7",
 		"@woocommerce/admin-layout": "workspace:*",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/currency": "workspace:*",
+		"@woocommerce/customer-effort-score": "workspace:*",
 		"@woocommerce/data": "workspace:^4.1.0",
+		"@woocommerce/experimental": "workspace:*",
 		"@woocommerce/navigation": "workspace:^8.1.0",
 		"@woocommerce/number": "workspace:*",
 		"@woocommerce/settings": "^1.0.0",
@@ -56,6 +59,7 @@
 		"@wordpress/url": "wp-6.0",
 		"classnames": "^2.3.1",
 		"lodash": "^4.17.21",
+		"prop-types": "^15.8.1",
 		"react-router-dom": "^6.3.0"
 	},
 	"devDependencies": {
