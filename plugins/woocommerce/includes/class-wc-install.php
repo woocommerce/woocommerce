@@ -7,12 +7,11 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
-use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods as AccessiblePrivateMethods;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,6 +19,7 @@ defined( 'ABSPATH' ) || exit;
  * WC_Install Class.
  */
 class WC_Install {
+	use AccessiblePrivateMethods;
 
 	/**
 	 * DB updates and callbacks that need to be run per version.
@@ -247,6 +247,7 @@ class WC_Install {
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
+		self::add_action( 'woocommerce_refresh_cron_async', array( __CLASS__, 'create_cron_jobs' ) );
 	}
 
 	/**
@@ -397,7 +398,7 @@ class WC_Install {
 		self::create_roles();
 		self::setup_environment();
 		self::create_terms();
-		self::create_cron_jobs();
+		self::create_cron_jobs_later();
 		self::delete_obsolete_notes();
 		self::create_files();
 		self::maybe_create_pages();
@@ -640,6 +641,13 @@ class WC_Install {
 			'display'  => __( 'Every 15 Days', 'woocommerce' ),
 		);
 		return $schedules;
+	}
+
+	private static function create_cron_jobs_later() {
+		// This should spread the update to the cron jobs on hostings where they update all WC instances at the same time.
+		$spread = mt_rand( 0, 4 * HOUR_IN_SECONDS );
+		WC()->queue()->cancel_all( 'woocommerce_refresh_cron_async', [], 'woocommerce-install' );
+		WC()->queue()->schedule_single( time() + $spread, 'woocommerce_refresh_cron_async', [], 'woocommerce-install' );
 	}
 
 	/**
