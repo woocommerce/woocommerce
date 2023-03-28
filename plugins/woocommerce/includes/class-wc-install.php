@@ -643,11 +643,16 @@ class WC_Install {
 		return $schedules;
 	}
 
+	/**
+	 * Enqueue the creation of cron jobs for later.
+	 *
+	 * By default, a random time within 4 hours of the update.
+	 */
 	private static function create_cron_jobs_later() {
 		// This should spread the update to the cron jobs on hostings where they update all WC instances at the same time.
-		$spread = mt_rand( 0, 4 * HOUR_IN_SECONDS );
-		WC()->queue()->cancel_all( 'woocommerce_refresh_cron_async', [], 'woocommerce-install' );
-		WC()->queue()->schedule_single( time() + $spread, 'woocommerce_refresh_cron_async', [], 'woocommerce-install' );
+		$spread = wp_rand( 0, 4 * HOUR_IN_SECONDS );
+		WC()->queue()->cancel_all( 'woocommerce_refresh_cron_async', array(), 'woocommerce-install' );
+		WC()->queue()->schedule_single( time() + $spread, 'woocommerce_refresh_cron_async', array(), 'woocommerce-install' );
 	}
 
 	/**
