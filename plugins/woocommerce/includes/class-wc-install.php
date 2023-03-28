@@ -381,7 +381,7 @@ class WC_Install {
 		}
 
 		// Check if we are not already running this routine.
-		if ( !LockUtil::test_and_set_expiring( 'wc_installing', 10 * MINUTE_IN_SECONDS ) ) {
+		if ( ! LockUtil::test_and_set_expiring( 'wc_installing', 10 * MINUTE_IN_SECONDS ) ) {
 			return;
 		}
 

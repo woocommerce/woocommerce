@@ -35,9 +35,9 @@ class LockUtil {
 				$expiration
 			)
 		);
-		/**  With ON DUPLICATE KEY UPDATE, the affected-rows value per row is 
+		/**  With ON DUPLICATE KEY UPDATE, the affected-rows value per row is
 		 * 1 if the row is inserted as a new row,
-		 * 2 if an existing row is updated, and 
+		 * 2 if an existing row is updated, and
 		 * 0 if an existing row is set to its current values.
 		 */
 		return $result > 0;
@@ -45,7 +45,7 @@ class LockUtil {
 
 	/**
 	 * Unlock a lock.
-	 * 
+	 *
 	 * Sets the expiration time to 1 second ago.
 	 *
 	 * @param string $lock_name The name of the lock.
