@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix missing result prop in wcadmin_install_plugin_error track
