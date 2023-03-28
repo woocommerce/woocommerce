@@ -9,14 +9,7 @@ use Automattic\WooCommerce\Internal\Utilities\LockUtil;
  * Tests relating to LockUtil.
  */
 class LockUtilTest extends WC_Unit_Test_Case {
-
-	/**
-	 * Set-up subject under test.
-	 */
-	public function set_up() {
-		parent::set_up();
-	}
-
+	
 	/**
 	 * @testdox Test a lock can't be locked twice.
 	 */
