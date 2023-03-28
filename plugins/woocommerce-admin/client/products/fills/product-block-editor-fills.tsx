@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { __experimentalWooProductMoreMenuItem as WooProductMoreMenuItem } from '@woocommerce/product-editor';
+import {
+	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
+	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
+} from '@woocommerce/product-editor';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooHeaderItem } from '@woocommerce/admin-layout';
 
@@ -13,7 +16,6 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { ProductMVPFeedbackModalContainer } from '~/customer-effort-score-tracks/product-mvp-feedback-modal-container';
 import {
 	FeedbackMenuItem,
 	ClassicEditorMenuItem,

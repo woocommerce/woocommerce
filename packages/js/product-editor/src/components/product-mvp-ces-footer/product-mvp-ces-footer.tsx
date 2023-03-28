@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { createElement, Fragment } from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { Pill } from '@woocommerce/components';
@@ -17,12 +18,10 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import './product-mvp-ces-footer.scss';
-
-export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =
-	'woocommerce_ces_product_mvp_ces_action';
-export const NEW_PRODUCT_MANAGEMENT =
-	'woocommerce_new_product_management_enabled';
+import {
+	PRODUCT_MVP_CES_ACTION_OPTION_NAME,
+	NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME,
+} from '../../constants';
 
 export const ProductMVPCESFooter: React.FC = () => {
 	const { showCesModal, showProductMVPFeedbackModal } =
@@ -107,7 +106,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
 		} );
 		updateOptions( {
-			[ NEW_PRODUCT_MANAGEMENT ]: 'no',
+			[ NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME ]: 'no',
 		} );
 		showProductMVPFeedbackModal();
 	};
