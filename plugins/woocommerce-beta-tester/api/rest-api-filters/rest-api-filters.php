@@ -56,6 +56,12 @@ register_woocommerce_admin_test_helper_rest_route(
 class WCA_Test_Helper_Rest_Api_Filters {
 	const WC_ADMIN_TEST_HELPER_REST_API_FILTER_OPTION = 'wc-admin-test-helper-rest-api-filters';
 
+	/**
+	 * Create a filter.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
 	public static function create( $request ) {
 		$endpoint     = $request->get_param( 'endpoint' );
 		$dot_notation = $request->get_param( 'dot_notation' );
@@ -85,12 +91,24 @@ class WCA_Test_Helper_Rest_Api_Filters {
 		return new WP_REST_RESPONSE( null, 204 );
 	}
 
+	/**
+	 * Update the filters.
+	 *
+	 * @param callable $callback Callback to update the filters.
+	 * @return bool
+	 */
 	public static function update( callable $callback ) {
 		$filters = get_option( self::WC_ADMIN_TEST_HELPER_REST_API_FILTER_OPTION, array() );
 		$filters = $callback( $filters );
 		return update_option( self::WC_ADMIN_TEST_HELPER_REST_API_FILTER_OPTION, $filters );
 	}
 
+	/**
+	 * Delete a filter.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
 	public static function delete( $request ) {
 		self::update(
 			function ( $filters ) use ( $request ) {
@@ -102,6 +120,12 @@ class WCA_Test_Helper_Rest_Api_Filters {
 		return new WP_REST_RESPONSE( null, 204 );
 	}
 
+	/**
+	 * Toggle a filter on or off.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
 	public static function toggle( $request ) {
 		self::update(
 			function ( $filters ) use ( $request ) {
