@@ -7,6 +7,7 @@ import {
 	switchUserToAdmin,
 	searchForBlock,
 	openGlobalBlockInserter,
+	insertBlock,
 } from '@wordpress/e2e-test-utils';
 import {
 	findLabelWithText,
@@ -65,6 +66,70 @@ describe( `${ block.name } Block`, () => {
 			await page.keyboard.type( block.name );
 			const button = await page.$x( block.selectors.insertButton );
 			expect( button ).toHaveLength( 0 );
+		} );
+
+		it( 'inner blocks can be added/removed by filters', async () => {
+			// Begin by removing the block.
+			await selectBlockByName( block.slug );
+			const options = await page.$x(
+				'//div[@class="block-editor-block-toolbar"]//button[@aria-label="Options"]'
+			);
+			await options[ 0 ].click();
+			const removeButton = await page.$x(
+				'//button[contains(., "Remove Cart")]'
+			);
+			await removeButton[ 0 ].click();
+			// Expect block to have been removed.
+			await expect( page ).not.toMatchElement( block.class );
+
+			// Register a checkout filter to allow `core/table` block in the Checkout block's inner blocks, add
+			// core/audio into the woocommerce/cart-order-summary-block and remove core/paragraph from all Cart inner
+			// blocks.
+			await page.evaluate(
+				"wc.blocksCheckout.registerCheckoutFilters( 'woo-test-namespace'," +
+					'{ additionalCartCheckoutInnerBlockTypes: ( value, extensions, { block } ) => {' +
+					"    value.push('core/table');" +
+					"    if ( block === 'woocommerce/cart-order-summary-block' ) {" +
+					"        value.push( 'core/audio' );" +
+					'    }' +
+					'    return value;' +
+					'}' +
+					'}' +
+					');'
+			);
+
+			await insertBlock( block.name );
+
+			// Select the shipping address block and try to insert a block. Check the Table block is available.
+			await selectBlockByName( 'woocommerce/cart-order-summary-block' );
+			await page.waitForTimeout( 1000 );
+			const addBlockButton = await page.waitForXPath(
+				'//div[@data-type="woocommerce/cart-order-summary-block"]//button[@aria-label="Add block"]'
+			);
+			await addBlockButton.click();
+			const tableButton = await page.waitForXPath(
+				'//*[@role="option" and contains(., "Table")]'
+			);
+			const audioButton = await page.waitForXPath(
+				'//*[@role="option" and contains(., "Audio")]'
+			);
+			expect( tableButton ).not.toBeNull();
+			expect( audioButton ).not.toBeNull();
+
+			// // Now check the filled cart block and expect only the Table block to be available there.
+			await selectBlockByName( 'woocommerce/filled-cart-block' );
+			const filledCartAddBlockButton = await page.waitForXPath(
+				'//div[@data-type="woocommerce/filled-cart-block"]//button[@aria-label="Add block"]'
+			);
+			await filledCartAddBlockButton.click();
+			const filledCartTableButton = await page.waitForXPath(
+				'//*[@role="option" and contains(., "Table")]'
+			);
+			const filledCartAudioButton = await page.$x(
+				'//*[@role="option" and contains(., "Audio")]'
+			);
+			expect( filledCartTableButton ).not.toBeNull();
+			expect( filledCartAudioButton ).toHaveLength( 0 );
 		} );
 
 		it( 'renders without crashing', async () => {
