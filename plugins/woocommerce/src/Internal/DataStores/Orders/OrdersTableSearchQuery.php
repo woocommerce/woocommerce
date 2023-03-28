@@ -80,7 +80,7 @@ class OrdersTableSearchQuery {
 	private function generate_where(): string {
 		$where             = '';
 		$possible_order_id = (string) absint( $this->query->get( 's' ) );
-		$order_table = $this->query->get_table_name( 'orders' );
+		$order_table       = $this->query->get_table_name( 'orders' );
 
 		// Support the passing of an order ID as the search term.
 		if ( (string) $this->query->get( 's' ) === $possible_order_id ) {
@@ -107,10 +107,9 @@ class OrdersTableSearchQuery {
 	 * @return string The where clause for meta table.
 	 */
 	private function generate_where_for_meta_table(): string {
-		$meta_table =  $this->query->get_table_name( 'meta' );
-		$meta_fields       = $this->get_meta_fields_to_be_searched();
-		return
-"
+		$meta_table  = $this->query->get_table_name( 'meta' );
+		$meta_fields = $this->get_meta_fields_to_be_searched();
+		return "
 SELECT search_query_meta.order_id
 FROM $meta_table as search_query_meta
 WHERE search_query_meta.meta_key IN ( $meta_fields )
