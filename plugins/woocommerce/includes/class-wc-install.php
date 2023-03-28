@@ -790,7 +790,7 @@ class WC_Install {
 		include_once dirname( __FILE__ ) . '/admin/class-wc-admin-settings.php';
 
 		// Use this var to warm up option cahce in one go instead of reading options one by one.
-		$options_cache = [];
+		$options_cache = array();
 
 		$settings = WC_Admin_Settings::get_settings_pages();
 
@@ -808,18 +808,23 @@ class WC_Install {
 			foreach ( $subsections as $subsection ) {
 				foreach ( $section->get_settings( $subsection ) as $value ) {
 					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
-						$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
-						$options_cache[] = [ $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) ];
+						$autoload        = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
+						$options_cache[] = array(
+							$value['id'],
+							$value['default'],
+							'',
+							$autoload ? 'yes' : 'no',
+						);
 					}
 				}
 			}
 		}
 
 		// Define other defaults if not in setting screens.
-		$options_cache[] = [ 'woocommerce_single_image_width', '600', '', 'yes' ];
-		$options_cache[] = [ 'woocommerce_thumbnail_image_width', '300', '', 'yes' ];
-		$options_cache[] = [ 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' ];
-		$options_cache[] = [ 'woocommerce_demo_store', 'no', '', 'no' ];
+		$options_cache[] = array( 'woocommerce_single_image_width', '600', '', 'yes' );
+		$options_cache[] = array( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
+		$options_cache[] = array( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
+		$options_cache[] = array( 'woocommerce_demo_store', 'no', '', 'no' );
 
 		$non_autoload_options = array_filter(
 			$options_cache,
@@ -839,12 +844,12 @@ class WC_Install {
 		$option_name_placeholder = implode( ',', array_fill( 0, count( $non_autoload_option_names ), '%s' ) );
 
 		$non_autoload_db_options = $wpdb->get_results(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 			$wpdb->prepare(
 				"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name IN ( $option_name_placeholder )",
 				$non_autoload_option_names
 			)
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		);
 
 		if ( is_array( $non_autoload_db_options ) ) {
@@ -855,7 +860,7 @@ class WC_Install {
 
 		// Add missing options.
 		foreach ( $options_cache as $option ) {
-			add_option( $option[0], $option[1], $option[2], $option[3] );
+			add_option( $option[0], $option[1], '', $option[3] );
 		}
 
 		if ( self::is_new_install() ) {
