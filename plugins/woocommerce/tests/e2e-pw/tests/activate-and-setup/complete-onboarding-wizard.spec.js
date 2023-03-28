@@ -24,7 +24,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 		await page.click( 'button >> text=Continue' );
 		await expect( page ).toHaveURL( /.*step=product-types/ );
@@ -40,7 +40,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries2,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 
 		// Navigate back to "Store Details" section
@@ -63,7 +63,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 
 		// Navigate back to "Store Details" section
@@ -94,7 +94,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 		await page.click( 'button >> text=Continue' );
 
@@ -116,7 +116,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 		// Check to see if WC Payments is present
 		const wcPay = await page.locator(
@@ -161,7 +161,7 @@ test.describe(
 			await onboarding.completeIndustrySection(
 				page,
 				storeDetails.liberia.industries,
-				storeDetails.liberia.expectedIndustries
+				storeDetails.liberia.expectedNumberOfIndustries
 			);
 			await page.click( 'button >> text=Continue' );
 		} );
@@ -175,7 +175,7 @@ test.describe(
 			await onboarding.completeIndustrySection(
 				page,
 				storeDetails.liberia.industries,
-				storeDetails.liberia.expectedIndustries
+				storeDetails.liberia.expectedNumberOfIndustries
 			);
 			await page.click( 'button >> text=Continue' );
 
