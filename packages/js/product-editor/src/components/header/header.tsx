@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
+import { Product, ProductStatus } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
@@ -12,17 +12,23 @@ import { WooHeaderItem } from '@woocommerce/admin-layout';
 /**
  * Internal dependencies
  */
-import { AUTO_DRAFT_NAME, getHeaderTitle } from '../../utils';
+import { getHeaderTitle } from '../../utils';
 import { MoreMenu } from './more-menu';
 import { usePreview } from './hooks/use-preview';
 import { usePublish } from './hooks/use-publish';
+import { useSaveDraft } from './hooks/use-save-draft';
 
 export type HeaderProps = {
 	productId: number;
 	productName: string;
+	productStatus: ProductStatus;
 };
 
-export function Header( { productId, productName }: HeaderProps ) {
+export function Header( {
+	productId,
+	productName,
+	productStatus,
+}: HeaderProps ) {
 	const { isSavingLocked, isSaving, editedProductName } = useSelect(
 		( select ) => {
 			const { isSavingEntityRecord, getEditedEntityRecord } =
@@ -49,7 +55,20 @@ export function Header( { productId, productName }: HeaderProps ) {
 	);
 
 	const isDisabled = isSavingLocked || isSaving;
-	const isCreating = productName === AUTO_DRAFT_NAME;
+	const isCreating = ( productStatus as string ) === 'auto-draft';
+
+	function handleSaveSuccess( product: Product ) {
+		if ( isCreating ) {
+			const url = getNewPath( {}, `/product/${ product.id }` );
+			navigateTo( { url } );
+		}
+	}
+
+	const saveDraftButtonProps = useSaveDraft( {
+		productId,
+		disabled: isDisabled,
+		onSaveSuccess: handleSaveSuccess,
+	} );
 
 	const previewButtonProps = usePreview( {
 		productId,
@@ -61,12 +80,7 @@ export function Header( { productId, productName }: HeaderProps ) {
 		productId,
 		disabled: isDisabled,
 		isBusy: isSaving,
-		onPublishSuccess( product ) {
-			if ( isCreating ) {
-				const url = getNewPath( {}, `/product/${ product.id }` );
-				navigateTo( { url } );
-			}
-		},
+		onPublishSuccess: handleSaveSuccess,
 	} );
 
 	return (
@@ -81,6 +95,8 @@ export function Header( { productId, productName }: HeaderProps ) {
 			</h1>
 
 			<div className="woocommerce-product-header__actions">
+				<Button { ...saveDraftButtonProps } />
+
 				<Button { ...previewButtonProps }>
 					{ __( 'Preview', 'woocommerce' ) }
 				</Button>

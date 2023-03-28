@@ -52,6 +52,7 @@ export function Editor( { product, settings }: EditorProps ) {
 								<Header
 									productId={ product.id }
 									productName={ product.name }
+									productStatus={ product.status }
 								/>
 							}
 							content={

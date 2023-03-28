@@ -3,7 +3,7 @@
  */
 import { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 export function usePublish( {
 	productId,
@@ -13,9 +13,22 @@ export function usePublish( {
 	...props
 }: Omit< Button.ButtonProps, 'variant' | 'onClick' > & {
 	productId: number;
-	onPublishSuccess( product: Product ): void;
+	onPublishSuccess?( product: Product ): void;
 	onPublishError?( error: Error ): void;
 } ): Button.ButtonProps {
+	const hasEdits = useSelect(
+		( select ) => {
+			const { hasEditsForEntityRecord } = select( 'core' );
+
+			return hasEditsForEntityRecord< boolean >(
+				'postType',
+				'product',
+				productId
+			);
+		},
+		[ productId ]
+	);
+
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	async function handleClick() {
@@ -41,7 +54,7 @@ export function usePublish( {
 
 	return {
 		...props,
-		'aria-disabled': disabled,
+		'aria-disabled': disabled || ! hasEdits,
 		variant: 'primary',
 		onClick: handleClick,
 	};
