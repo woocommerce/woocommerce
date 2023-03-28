@@ -346,7 +346,7 @@ class CLIRunner {
 
 			$order_ids        = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID > %d AND ID < %d ORDER BY ID ASC LIMIT %d",
+					"SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID >= %d AND ID <= %d ORDER BY ID ASC LIMIT %d",
 					$order_id_start,
 					$order_id_end,
 					$batch_size
@@ -444,7 +444,7 @@ class CLIRunner {
 
 		$order_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID > %d AND ID < %d",
+				"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID >= %d AND ID <= %d",
 				$order_id_start,
 				$order_id_end
 			)
