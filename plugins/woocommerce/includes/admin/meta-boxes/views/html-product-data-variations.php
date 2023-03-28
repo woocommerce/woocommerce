@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $add_attributes_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';
-$background_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-background-image.svg';
-$arrow_img_url      = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-arrow.svg';
+$background_img_url     = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-background-image.svg';
+$arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-arrow.svg';
 ?>
 <div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 	<div id="variable_product_options_inner">
