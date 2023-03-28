@@ -2,10 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import interpolateComponents from '@automattic/interpolate-components';
 import { Button, Modal, Spinner, TextControl } from '@wordpress/components';
 import { useDebounce } from '@wordpress/compose';
-import { useState, createElement } from '@wordpress/element';
+import {
+	useState,
+	createElement,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import {
 	__experimentalSelectControl as SelectControl,
@@ -93,19 +96,16 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 				/>
 				<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
 					items={ categoriesSelectList }
-					label={ interpolateComponents( {
-						mixedString: __(
-							'Parent category {{optional/}}',
-							'woocommerce'
-						),
-						components: {
+					label={ createInterpolateElement(
+						__( 'Parent category <optional/>', 'woocommerce' ),
+						{
 							optional: (
 								<span className="woocommerce-product-form__optional-input">
 									{ __( '(optional)', 'woocommerce' ) }
 								</span>
 							),
-						},
-					} ) }
+						}
+					) }
 					selected={ categoryParent }
 					onSelect={ ( item ) => item && setCategoryParent( item ) }
 					onRemove={ () => setCategoryParent( null ) }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Overwrite clone method to prevent duplicate datq when saving a clone.
