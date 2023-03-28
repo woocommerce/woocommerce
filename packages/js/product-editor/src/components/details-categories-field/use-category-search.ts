@@ -293,9 +293,9 @@ export const useCategorySearch = () => {
 			return allItems.filter(
 				( item ) =>
 					selectedItems.indexOf( item ) < 0 &&
-					( searchRegex.test( item.name ) ||
-						( categoryTreeKeyValues[ +item.id ] &&
-							categoryTreeKeyValues[ +item.id ].isOpen ) )
+					( searchRegex.test( item.label ) ||
+						( categoryTreeKeyValues[ +item.value ] &&
+							categoryTreeKeyValues[ +item.value ].isOpen ) )
 			);
 		},
 		[ categoriesAndNewItem ]

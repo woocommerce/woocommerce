@@ -64,13 +64,13 @@ function mapFromCategoryType(
 	return categories.map( ( val ) =>
 		val.parent
 			? {
-					id: String( val.id ),
-					name: val.name,
+					value: String( val.id ),
+					label: val.name,
 					parent: String( val.parent ),
 			  }
 			: {
-					id: String( val.id ),
-					name: val.name,
+					value: String( val.id ),
+					label: val.name,
 			  }
 	);
 }
@@ -79,8 +79,8 @@ function mapToCategoryType(
 	categories: TreeItemType[]
 ): ProductCategoryLinkedList[] {
 	return categories.map( ( cat ) => ( {
-		id: +cat.id,
-		name: cat.name,
+		id: +cat.value,
+		name: cat.label,
 		parent: cat.parent ? +cat.parent : 0,
 	} ) );
 }
@@ -117,30 +117,32 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 				id="category-field"
 				multiple
 				shouldNotRecursivelySelect
-				allowCreate
 				createValue={ searchValue }
 				label={ label }
 				isLoading={ isSearching }
 				onInputChange={ searchDelayed }
-				getFilteredItems={ ( allItems, inputValue, selectedItems ) => {
-					return getFilteredItemsForSelectTree(
-						allItems,
-						inputValue,
-						selectedItems
-					);
-				} }
 				placeholder={ value.length === 0 ? placeholder : '' }
 				onCreateNew={ () => {
 					setShowCreateNewModal( true );
 				} }
-				items={ mapFromCategoryType( categoriesSelectList ) }
+				shouldShowCreateButton={ ( typedValue ) =>
+					! typedValue ||
+					categoriesSelectList.findIndex(
+						( item ) => item.name === typedValue
+					) === -1
+				}
+				items={ getFilteredItemsForSelectTree(
+					mapFromCategoryType( categoriesSelectList ),
+					searchValue,
+					mapFromCategoryType( value )
+				) }
 				selected={ mapFromCategoryType( value ) }
 				onSelect={ ( selectedItems ) => {
 					if ( Array.isArray( selectedItems ) ) {
 						const newItems: ProductCategoryLinkedList[] =
 							mapToCategoryType(
 								selectedItems.filter(
-									( { id: selectedItemValue } ) =>
+									( { value: selectedItemValue } ) =>
 										! value.some(
 											( item ) =>
 												item.id === +selectedItemValue
@@ -155,12 +157,12 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 						? value.filter(
 								( item ) =>
 									! removedItems.some(
-										( { id: removedValue } ) =>
+										( { value: removedValue } ) =>
 											item.id === +removedValue
 									)
 						  )
 						: value.filter(
-								( item ) => item.id !== +removedItems.id
+								( item ) => item.id !== +removedItems.value
 						  );
 					onChange( newValues );
 				} }
