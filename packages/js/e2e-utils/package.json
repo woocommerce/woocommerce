@@ -51,7 +51,7 @@
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
-		"prepare": "pnpm run build",
+		"prepack": "pnpm run build",
 		"lint": "eslint src --ext=js,ts,tsx",
 		"lint:fix": "eslint src --ext=js,ts,tsx --fix"
 	},
