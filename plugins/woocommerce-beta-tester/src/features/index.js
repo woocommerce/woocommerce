@@ -21,6 +21,8 @@ function Features() {
 
 	const { toggleFeature, resetModifiedFeatures } = useDispatch( STORE_KEY );
 
+	const sortedFeatureNames = Object.keys( features ).sort();
+
 	return (
 		<div id="wc-admin-test-helper-features">
 			<h2>
@@ -43,7 +45,7 @@ function Features() {
 					</tr>
 				</thead>
 				<tbody>
-					{ Object.keys( features ).map( ( feature_name ) => {
+					{ sortedFeatureNames.map( ( feature_name ) => {
 						return (
 							<tr key={ feature_name }>
 								<td className="feature-name">
