@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import classnames from 'classnames';
 import { createElement } from '@wordpress/element';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import type { BlockAttributes } from '@wordpress/blocks';
 
 /**
@@ -39,7 +39,9 @@ export function Edit( {
 				role="tabpanel"
 				className={ classes }
 			>
-				<InnerBlocks templateLock="all" />
+				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+				{ /* @ts-ignore Content only template locking does exist for this property. */ }
+				<InnerBlocks templateLock="contentOnly" />
 			</div>
 		</div>
 	);
