@@ -466,12 +466,12 @@ class WC_Install {
 	/**
 	 * Check if all the base tables are present without running dbDelta unnecessarily.
 	 *
-	 * @param bool $modify_notice Whether to modify notice based on if all tables are present.
+	 * @param bool  $modify_notice Whether to modify notice based on if all tables are present.
 	 * @param array $dbdelta_result Result of dbDelta.
 	 *
 	 * @return array List of queries.
 	 */
-	public static function verify_base_tables_light( $modify_notice = true, $dbdelta_result = [] ) {
+	public static function verify_base_tables_light( $modify_notice = true, $dbdelta_result = array() ) {
 		$missing_tables = wc_get_container()
 			->get( DatabaseUtil::class )
 			->parse_dbdelta_output( $dbdelta_result )['created_tables'];
