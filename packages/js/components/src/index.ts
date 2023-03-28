@@ -16,7 +16,7 @@ export { default as EmptyContent } from './empty-content';
 export { default as Flag } from './flag';
 export { Form, useFormContext } from './form';
 export { FormSection } from './form-section';
-export type { FormContext, FormRef, FormErrors } from './form';
+export type { FormContext, FormContextType, FormRef, FormErrors } from './form';
 export { default as FilterPicker } from './filter-picker';
 export { H, Section } from './section';
 export { ImageGallery, ImageGalleryItem } from './image-gallery';
@@ -88,10 +88,6 @@ export { createOrderedChildren, sortFillsByOrder } from './utils';
 export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-product-field-item';
 export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
 export { WooProductTabItem as __experimentalWooProductTabItem } from './woo-product-tab-item';
-export {
-	ProductSectionLayout as __experimentalProductSectionLayout,
-	ProductFieldSection as __experimentalProductFieldSection,
-} from './product-section-layout';
 export * from './product-fields';
 export {
 	SlotContextProvider,
@@ -99,3 +95,16 @@ export {
 	SlotContextType,
 	SlotContextHelpersType,
 } from './slot-context';
+export {
+	TreeControl as __experimentalTreeControl,
+	Item as TreeItemType,
+} from './experimental-tree-control';
+export { SelectTree as __experimentalSelectTreeControl } from './experimental-select-tree-control';
+export { default as TreeSelectControl } from './tree-select-control';
+
+// Exports below can be removed once the @woocommerce/product-editor package is released.
+export {
+	ProductSectionLayout as __experimentalProductSectionLayout,
+	ProductFieldSection as __experimentalProductFieldSection,
+} from './product-section-layout';
+export { DisplayState } from './display-state';

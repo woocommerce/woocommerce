@@ -29,7 +29,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 				'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
 				'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
 				'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
-				'wc-cancelled'  => _x( 'Canceled', 'Order status', 'woocommerce' ),
+				'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 				'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
 				'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
 			)
@@ -109,15 +109,19 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 				->will( $this->returnValueMap( $test_counts[ $order_type ] ) );
 		}
 
-		$add_mock_datastores = function( $stores ) use ( $mock_datastores ) {
+		$add_mock_datastores          = function ( $stores ) use ( $mock_datastores ) {
 			return array_merge( $stores, $mock_datastores );
 		};
-		$add_mock_order_type = function( $order_types ) use ( $mock_datastores ) {
+		$add_mock_order_type          = function ( $order_types ) use ( $mock_datastores ) {
 			return array( 'shop_order', 'order-fake-type' );
+		};
+		$return_mock_order_data_store = function ( $stores ) use ( $mock_datastores ) {
+			return $mock_datastores['order'];
 		};
 
 		add_filter( 'woocommerce_data_stores', $add_mock_datastores );
 		add_filter( 'wc_order_types', $add_mock_order_type );
+		add_filter( 'woocommerce_order_data_store', $return_mock_order_data_store, 1000, 2 );
 
 		// Check counts for specific order types.
 		$this->assertEquals( 2, wc_orders_count( 'on-hold', 'shop_order' ) );
@@ -131,6 +135,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_data_stores', $add_mock_datastores );
 		remove_filter( 'wc_order_types', $add_mock_order_type );
+		remove_filter( 'woocommerce_order_data_store', $return_mock_order_data_store, 1000 );
 
 		// Confirm that everything's back to normal.
 		wp_cache_flush();
@@ -190,7 +195,8 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		// Assert the return when $the_order args is false.
 		$this->assertFalse( wc_get_order( false ) );
 
-		$post = get_post( $order->get_id() );
+		$post     = get_post( $order->get_id() );
+		$theorder = $order;
 		$this->assertInstanceOf(
 			'WC_Order',
 			wc_get_order(),
@@ -1407,6 +1413,36 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		$refunded_fee = array_values( $refunded_fee_items )[0];
 		$this->assertEquals( -5, $refunded_fee->get_total() );
+	}
+
+	/**
+	 * Test that order modified date is updated when a refund is created for it.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/28969
+	 */
+	public function test_wc_create_refund_28969() {
+		$order = WC_Helper_Order::create_order(
+			1,
+			WC_Helper_Product::create_simple_product(),
+			array(
+				'status' => 'completed',
+			)
+		);
+		// Ensure the order is a complete object with an initial modified date.
+		$order = wc_get_order( $order->get_id() );
+
+		// Ensure the order's initial modified date is sufficiently in the past.
+		sleep( 1 );
+
+		$args = array(
+			'order_id' => $order->get_id(),
+			'amount'   => 1,
+		);
+
+		wc_create_refund( $args );
+		$updated_order = wc_get_order( $order->get_id() );
+
+		$this->assertNotEquals( $order->get_date_modified()->getTimestamp(), $updated_order->get_date_modified()->getTimestamp() );
 	}
 
 	/**

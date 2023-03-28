@@ -7,6 +7,9 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
+require_once __DIR__ . '/../../../../helpers/HPOSToggleTrait.php';
 
 /**
  * Class OrdersTableDataStoreTests.
@@ -38,6 +41,12 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	private $cpt_data_store;
 
 	/**
+	 * Whether COT was enabled before the test.
+	 * @var bool
+	 */
+	private $cot_state;
+
+	/**
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
@@ -47,6 +56,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		parent::setUp();
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		$this->setup_cot();
+		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->toggle_cot( false );
 		$this->sut            = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->migrator       = wc_get_container()->get( PostsToOrdersMigrationController::class );
@@ -59,6 +69,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		update_option( 'timezone_string', $this->original_time_zone );
+		$this->toggle_cot( $this->cot_state );
 		$this->clean_up_cot_setup();
 		parent::tearDown();
 	}
@@ -205,6 +216,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		wp_cache_flush();
 		$order = new WC_Order();
 		$order->set_id( $post_order->get_id() );
+		$this->toggle_cot( true );
 		$this->switch_data_store( $order, $this->sut );
 		$this->sut->read( $order );
 
@@ -239,6 +251,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		foreach ( $datastore_updates as $prop => $value ) {
 			$this->assertEquals( $value, $this->sut->{"get_$prop"}( $order ), "Unable to match prop $prop" );
 		}
+		$this->toggle_cot( false );
 	}
 
 	/**
@@ -1767,6 +1780,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * Ideally, this should be possible only from getters and setters for objects, but for backward compatibility, earlier ways are also supported.
 	 */
 	public function test_internal_ds_getters_and_setters() {
+		$this->toggle_cot( true );
 		$props_to_test = array(
 			'_download_permissions_granted',
 			'_recorded_sales',
@@ -1813,6 +1827,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			$order->save();
 		}
 		$this->assert_get_prop_via_ds_object_and_metadata( $props_to_test, $order, false, $ds_getter_setter_names );
+		$this->toggle_cot( false );
 	}
 
 	/**
@@ -1855,7 +1870,8 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * @testDox Legacy getters and setters for props migrated from data stores should be set/reset properly.
 	 */
 	public function test_legacy_getters_setters() {
-		$order_id = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_complex_wp_post_order();
+		$this->toggle_cot( true );
+		$order_id = OrderHelper::create_complex_data_store_order( $this->sut );
 		$order    = wc_get_order( $order_id );
 		$this->switch_data_store( $order, $this->sut );
 		$bool_props = array(
@@ -1887,7 +1903,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->assert_props_value_via_data_store( $order, $bool_props, true );
 
 		$this->assert_props_value_via_order_object( $order, $bool_props, true );
-
+		$this->toggle_cot( false );
 	}
 
 	/**
@@ -1984,8 +2000,9 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 */
 	public function test_read_multiple_dont_sync_again_for_same_order() {
 		$this->toggle_cot( true );
-		$this->enable_cot_sync();
 		$order = $this->create_complex_cot_order();
+		$this->sut->backfill_post_record( $order );
+		$this->enable_cot_sync();
 
 		$order_id = $order->get_id();
 
@@ -1999,6 +2016,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->assertTrue( $should_sync_callable->call( $this->sut, $order ) );
 		$this->sut->read_multiple( $orders );
 		$this->assertFalse( $should_sync_callable->call( $this->sut, $order ) );
+		$this->toggle_cot( false );
 	}
 
 	/**

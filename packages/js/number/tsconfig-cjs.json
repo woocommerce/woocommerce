@@ -2,6 +2,10 @@
 	"extends": "../tsconfig-cjs",
 	"compilerOptions": {
 		"declaration": true,
-		"outDir": "build"
+		"outDir": "build",
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		]
 	}
 }

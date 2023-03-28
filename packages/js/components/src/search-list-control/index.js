@@ -82,20 +82,6 @@ export const SearchListControl = ( props ) => {
 		};
 	};
 
-	const onSelect = ( item ) => {
-		return () => {
-			if ( isSelected( item ) ) {
-				onRemove( item.id )();
-				return;
-			}
-			if ( isSingle ) {
-				onChange( [ item ] );
-			} else {
-				onChange( [ ...selected, item ] );
-			}
-		};
-	};
-
 	const isSelected = ( item ) =>
 		findIndex( selected, { id: item.id } ) !== -1;
 
@@ -112,6 +98,20 @@ export const SearchListControl = ( props ) => {
 		return isHierarchical
 			? buildTermsTree( filteredList, list )
 			: filteredList;
+	};
+
+	const onSelect = ( item ) => {
+		return () => {
+			if ( isSelected( item ) ) {
+				onRemove( item.id )();
+				return;
+			}
+			if ( isSingle ) {
+				onChange( [ item ] );
+			} else {
+				onChange( [ ...selected, item ] );
+			}
+		};
 	};
 
 	const defaultRenderItem = ( args ) => {

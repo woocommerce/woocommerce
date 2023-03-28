@@ -5,9 +5,10 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
-use \Automattic\WooCommerce\Admin\Features\TransientNotices;
-use \Automattic\WooCommerce\Admin\PageController;
-use \Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Admin\Features\TransientNotices;
+use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Internal\Admin\Loader;
+use WP_Block_Editor_Context;
 
 /**
  * Loads assets related to the new product management experience page.

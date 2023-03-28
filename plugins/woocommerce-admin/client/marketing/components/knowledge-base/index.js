@@ -79,7 +79,7 @@ const KnowledgeBase = ( {
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					{ post.image && (
+					{ !! post.image && (
 						<div className="woocommerce-marketing-knowledgebase-card__post-img">
 							<img src={ post.image } alt="" />
 						</div>
@@ -89,7 +89,7 @@ const KnowledgeBase = ( {
 						<p className="woocommerce-marketing-knowledgebase-card__post-meta">
 							{ __( 'By', 'woocommerce' ) + ' ' }
 							{ post.author_name }
-							{ post.author_avatar && (
+							{ !! post.author_avatar && (
 								<img
 									src={ post.author_avatar.replace(
 										's=96',

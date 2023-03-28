@@ -3,17 +3,21 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
+	Link,
+	useFormContext,
+	CollapsibleContent,
+} from '@woocommerce/components';
+import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	__experimentalProductSectionLayout as ProductSectionLayout,
-	Link,
-	useFormContext,
-} from '@woocommerce/components';
-import { registerPlugin } from '@wordpress/plugins';
+	__experimentalUseProductHelper as useProductHelper,
+} from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { Product } from '@woocommerce/data';
 import { useContext } from '@wordpress/element';
 import { Card, CardBody } from '@wordpress/components';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -24,14 +28,7 @@ import {
 	PricingTaxesClassField,
 	PricingTaxesChargeField,
 } from './index';
-import { useProductHelper } from '../../use-product-helper';
-import {
-	PRICING_SECTION_BASIC_ID,
-	PRICING_SECTION_TAXES_ID,
-	TAB_PRICING_ID,
-	PLUGIN_ID,
-} from '../constants';
-import { CurrencyContext } from '../../../lib/currency-context';
+import { PLUGIN_ID } from '../constants';
 
 import './pricing-section.scss';
 
@@ -43,7 +40,19 @@ export type CurrencyInputProps = {
 	onKeyUp: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 };
 
-const PricingSection = () => {
+type PricingSectionFillsType = {
+	tabId: string;
+	basicSectionId: string;
+	taxesSectionId: string;
+	taxesAdvancedSectionId: string;
+};
+
+export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
+	tabId,
+	basicSectionId,
+	taxesSectionId,
+	taxesAdvancedSectionId,
+} ) => {
 	const { setValues, values } = useFormContext< Product >();
 	const { sanitizePrice } = useProductHelper();
 
@@ -96,8 +105,8 @@ const PricingSection = () => {
 	return (
 		<>
 			<WooProductSectionItem
-				id={ PRICING_SECTION_BASIC_ID }
-				tabs={ [ { name: TAB_PRICING_ID, order: 1 } ] }
+				id={ basicSectionId }
+				tabs={ [ { name: tabId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<ProductSectionLayout
@@ -130,43 +139,50 @@ const PricingSection = () => {
 					<Card>
 						<CardBody>
 							<WooProductFieldItem.Slot
-								section={ PRICING_SECTION_BASIC_ID }
+								section={ basicSectionId }
 							/>
 						</CardBody>
 					</Card>
 					<Card>
 						<CardBody>
 							<WooProductFieldItem.Slot
-								section={ PRICING_SECTION_TAXES_ID }
+								section={ taxesSectionId }
 							/>
+							<CollapsibleContent
+								toggleText={ __( 'Advanced', 'woocommerce' ) }
+							>
+								<WooProductFieldItem.Slot
+									section={ taxesAdvancedSectionId }
+								/>
+							</CollapsibleContent>
 						</CardBody>
 					</Card>
 				</ProductSectionLayout>
 			</WooProductSectionItem>
 			<WooProductFieldItem
-				id="pricing/list"
-				sections={ [ { name: PRICING_SECTION_BASIC_ID, order: 1 } ] }
+				id="list"
+				sections={ [ { name: basicSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<PricingListField currencyInputProps={ currencyInputProps } />
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id="pricing/sale"
-				sections={ [ { name: PRICING_SECTION_BASIC_ID, order: 3 } ] }
+				id="sale"
+				sections={ [ { name: basicSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<PricingSaleField currencyInputProps={ currencyInputProps } />
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id="pricing/taxes/charge"
-				sections={ [ { name: PRICING_SECTION_TAXES_ID, order: 1 } ] }
+				id="charge"
+				sections={ [ { name: taxesSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<PricingTaxesChargeField />
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id="pricing/taxes/class"
-				sections={ [ { name: PRICING_SECTION_TAXES_ID, order: 3 } ] }
+				id="class"
+				sections={ [ { name: taxesAdvancedSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<PricingTaxesClassField />
@@ -174,9 +190,3 @@ const PricingSection = () => {
 		</>
 	);
 };
-
-registerPlugin( 'wc-admin-product-editor-pricing-section', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-editor',
-	render: () => <PricingSection />,
-} );

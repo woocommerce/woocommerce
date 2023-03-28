@@ -959,11 +959,18 @@
 }
 
 #variable_product_options #message,
+#inventory_product_data .notice,
 #variable_product_options .notice {
 	display: flex;
 	margin: 10px;
-	background-color: #fcfae8;
+	background-color: #ffffff;
 	> p {
+		a {
+			text-decoration: none;
+			white-space: nowrap;
+		}
+	}
+	> p:not( :last-child ) {
 		width: 85%;
 	}
 	.woocommerce-add-variation-price-container {
@@ -1012,6 +1019,31 @@
 }
 
 #product_attributes {
+	.add-global-attribute-container {
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		padding: 32px 0px;
+		gap: 24px;
+		height: 360px;
+		@media screen and ( max-width: 782px ) {
+			button {
+				vertical-align: top;
+			}
+		}
+		p {
+			width: 90%;
+			max-width: 544px;
+			font-size: 14px;
+			line-height: 18px;
+			text-align: center;
+		}
+		&.hidden {
+			display: none;
+		}
+	}
 	.toolbar-top {
 		.button,
 		.select2-container {
@@ -3216,10 +3248,6 @@ table.wp-list-table {
 		display: none;
 	}
 
-	img {
-		margin: 1px 2px;
-	}
-
 	.row-actions {
 		color: #999;
 	}
@@ -5388,8 +5416,10 @@ img.help_tip {
 	.toolbar {
 		margin: 0 !important;
 		border-top: 1px solid white;
-		border-bottom: 1px solid #eee;
 		padding: 9px 12px !important;
+		&:not( .expand-close-hidden ) {
+			border-bottom: 1px solid #eee;
+		}
 
 		&:first-child {
 			border-top: 0;
@@ -7824,6 +7854,11 @@ table.bar_chart {
   * Product Reviews
   */
 .wp-list-table.product-reviews {
+
+	.column-author {
+		width: 20%;
+	}
+
 	th.column-type {
 		width: 10%;
 	}

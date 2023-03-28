@@ -81,7 +81,10 @@ export const generateSchemaDiff = async (
 	build: () => Promise< void > | void,
 	error: ( s: string ) => void
 ): Promise< SchemaDiff[] | null > => {
-	const git = simpleGit( { baseDir: tmpRepoPath } );
+	const git = simpleGit( {
+		baseDir: tmpRepoPath,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
 
 	// Be sure the wp-env engine is started.
 	await startWPEnv( tmpRepoPath, error );

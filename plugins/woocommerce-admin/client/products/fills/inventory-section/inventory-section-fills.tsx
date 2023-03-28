@@ -3,15 +3,16 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	__experimentalWooProductSectionItem as WooProductSectionItem,
-	__experimentalWooProductFieldItem as WooProductFieldItem,
-	__experimentalProductSectionLayout as ProductSectionLayout,
 	Link,
 	useFormContext,
 	CollapsibleContent,
 } from '@woocommerce/components';
+import {
+	__experimentalWooProductSectionItem as WooProductSectionItem,
+	__experimentalWooProductFieldItem as WooProductFieldItem,
+	__experimentalProductSectionLayout as ProductSectionLayout,
+} from '@woocommerce/product-editor';
 import { Card, CardBody } from '@wordpress/components';
-import { registerPlugin } from '@wordpress/plugins';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/settings';
 import { Product } from '@woocommerce/data';
@@ -27,21 +28,26 @@ import {
 	InventoryStockLimitField,
 	InventoryStockOutField,
 } from './index';
-import {
-	INVENTORY_SECTION_ID,
-	INVENTORY_SECTION_ADVANCED_ID,
-	TAB_INVENTORY_ID,
-	PLUGIN_ID,
-} from '../constants';
+import { PLUGIN_ID } from '../constants';
 
-const InventorySection = () => {
+type InventorySectionFillsType = {
+	tabId: string;
+	basicSectionId: string;
+	advancedSectionId: string;
+};
+
+export const InventorySectionFills: React.FC< InventorySectionFillsType > = ( {
+	tabId,
+	basicSectionId,
+	advancedSectionId,
+} ) => {
 	const { values } = useFormContext< Product >();
 
 	return (
 		<>
 			<WooProductSectionItem
-				id={ INVENTORY_SECTION_ID }
-				tabs={ [ { name: TAB_INVENTORY_ID, order: 1 } ] }
+				id={ basicSectionId }
+				tabs={ [ { name: tabId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<ProductSectionLayout
@@ -76,13 +82,13 @@ const InventorySection = () => {
 					<Card>
 						<CardBody>
 							<WooProductFieldItem.Slot
-								section={ INVENTORY_SECTION_ID }
+								section={ basicSectionId }
 							/>
 							<CollapsibleContent
 								toggleText={ __( 'Advanced', 'woocommerce' ) }
 							>
 								<WooProductFieldItem.Slot
-									section={ INVENTORY_SECTION_ADVANCED_ID }
+									section={ advancedSectionId }
 								/>
 							</CollapsibleContent>
 						</CardBody>
@@ -90,15 +96,15 @@ const InventorySection = () => {
 				</ProductSectionLayout>
 			</WooProductSectionItem>
 			<WooProductFieldItem
-				id="inventory/sku"
-				sections={ [ { name: INVENTORY_SECTION_ID, order: 1 } ] }
+				id="sku"
+				sections={ [ { name: basicSectionId, order: 1 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<InventorySkuField />
 			</WooProductFieldItem>
 			<WooProductFieldItem
-				id="inventory/track-quantity"
-				sections={ [ { name: INVENTORY_SECTION_ID, order: 3 } ] }
+				id="track-quantity"
+				sections={ [ { name: basicSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<InventoryTrackQuantityField />
@@ -106,16 +112,16 @@ const InventorySection = () => {
 
 			{ values.manage_stock ? (
 				<WooProductFieldItem
-					id="inventory/stock-manage"
-					sections={ [ { name: INVENTORY_SECTION_ID, order: 5 } ] }
+					id="stock-manage"
+					sections={ [ { name: basicSectionId, order: 5 } ] }
 					pluginId={ PLUGIN_ID }
 				>
 					<InventoryStockManageField />
 				</WooProductFieldItem>
 			) : (
 				<WooProductFieldItem
-					id="inventory/stock-manual"
-					sections={ [ { name: INVENTORY_SECTION_ID, order: 5 } ] }
+					id="stock-manual"
+					sections={ [ { name: basicSectionId, order: 5 } ] }
 					pluginId={ PLUGIN_ID }
 				>
 					<InventoryStockManualField />
@@ -124,10 +130,8 @@ const InventorySection = () => {
 
 			{ values.manage_stock && (
 				<WooProductFieldItem
-					id="inventory/advanced/stock-out"
-					sections={ [
-						{ name: INVENTORY_SECTION_ADVANCED_ID, order: 1 },
-					] }
+					id="stock-out"
+					sections={ [ { name: advancedSectionId, order: 1 } ] }
 					pluginId={ PLUGIN_ID }
 				>
 					<InventoryStockOutField />
@@ -135,10 +139,8 @@ const InventorySection = () => {
 			) }
 
 			<WooProductFieldItem
-				id="inventory/advanced/stock-limit"
-				sections={ [
-					{ name: INVENTORY_SECTION_ADVANCED_ID, order: 3 },
-				] }
+				id="stock-limit"
+				sections={ [ { name: advancedSectionId, order: 3 } ] }
 				pluginId={ PLUGIN_ID }
 			>
 				<InventoryStockLimitField />
@@ -146,9 +148,3 @@ const InventorySection = () => {
 		</>
 	);
 };
-
-registerPlugin( 'wc-admin-product-editor-inventory-section', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-editor',
-	render: () => <InventorySection />,
-} );

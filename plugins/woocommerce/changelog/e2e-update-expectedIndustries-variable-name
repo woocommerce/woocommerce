@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Updates an e2e variable name to be more descriptive

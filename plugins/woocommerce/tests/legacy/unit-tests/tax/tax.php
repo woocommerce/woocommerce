@@ -519,7 +519,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$this->assertGreaterThan( 0, $tax_rate_id );
 
-		$new_row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d", $tax_rate_id ) );
+		$new_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d",
+				$tax_rate_id
+			)
+		);
 
 		$this->assertEquals( $new_row->tax_rate_country, 'GB' );
 		$this->assertEquals( $new_row->tax_rate_state, '' );
@@ -617,7 +622,12 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $to_save );
 
-		$results = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d ORDER BY location_code ASC", $tax_rate_id ) );
+		$results = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d ORDER BY location_code ASC",
+				$tax_rate_id
+			)
+		);
 
 		$this->assertEquals( array( '12345', '90210...90215' ), $results );
 	}
@@ -646,8 +656,14 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		WC_Tax::_update_tax_rate_cities( $tax_rate_id, $to_save );
 
-		$results = $wpdb->get_col( $wpdb->prepare( "SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d ORDER BY location_code ASC", $tax_rate_id ) );
+		$results = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT location_code FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d ORDER BY location_code ASC",
+				$tax_rate_id
+			)
+		);
 
 		$this->assertEquals( array( 'SOMEWHERE', 'SOMEWHERE_ELSE' ), $results );
 	}
+
 }

@@ -6,10 +6,10 @@
 namespace Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats;
 
 defined( 'ABSPATH' ) || exit;
-use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
-use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
  * API\Reports\Coupons\Stats\DataStore.

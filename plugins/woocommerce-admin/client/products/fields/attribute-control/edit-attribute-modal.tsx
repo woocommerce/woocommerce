@@ -136,7 +136,7 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 					<Tooltip text={ visibleTooltip } />
 				</div>
 			</div>
-			<div className="woocommerce-add-attribute-modal__buttons">
+			<div className="woocommerce-edit-attribute-modal__buttons">
 				<Button
 					isSecondary
 					label={ cancelAccessibleLabel }

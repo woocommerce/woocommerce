@@ -7,23 +7,24 @@
 	"license": "GPLv2",
 	"repository": "woocommerce/woocommerce",
 	"dependencies": {
+		"@actions/core": "^1.10.0",
 		"@commander-js/extra-typings": "^0.1.0",
+		"@oclif/core": "^2.4.0",
 		"@tsconfig/node16": "^1.0.3",
 		"@types/uuid": "^8.3.4",
 		"cli-core": "workspace:*",
 		"commander": "^9.4.0",
 		"dotenv": "^10.0.0",
 		"simple-git": "^3.10.0",
-		"uuid": "^8.3.2",
-		"@actions/core": "^1.10.0"
+		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
-		"@types/node": "^16.9.4",
+		"@types/node": "^16.18.18",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.12.0",
+		"eslint": "^8.32.0",
 		"ts-node": "^10.2.1",
 		"tslib": "^2.3.1",
-		"typescript": "^4.8.3"
+		"typescript": "^4.9.5"
 	},
 	"scripts": {
 		"lint": "eslint . --ext .ts",

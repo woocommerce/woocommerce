@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { createElement, useContext } from '@wordpress/element';
 
 /**

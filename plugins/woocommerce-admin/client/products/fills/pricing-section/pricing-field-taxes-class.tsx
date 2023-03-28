@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useFormContext,
-	CollapsibleContent,
-	Link,
-} from '@woocommerce/components';
+import { useFormContext, Link } from '@woocommerce/components';
 import {
 	Product,
 	EXPERIMENTAL_TAX_CLASSES_STORE_NAME,
@@ -44,44 +40,44 @@ export const PricingTaxesClassField = () => {
 	delete taxClassProps.checked;
 	delete taxClassProps.value;
 
+	if ( isTaxClassesResolving || taxClasses.length <= 0 ) {
+		return null;
+	}
+
 	return (
-		<CollapsibleContent toggleText={ __( 'Advanced', 'woocommerce' ) }>
-			{ ! isTaxClassesResolving && taxClasses.length > 0 && (
-				<RadioControl
-					{ ...taxClassProps }
-					label={
-						<>
-							<span>{ __( 'Tax class', 'woocommerce' ) }</span>
-							<span className="woocommerce-product-form__secondary-text">
-								{ interpolateComponents( {
-									mixedString: __(
-										'Apply a tax rate if this product qualifies for tax reduction or exemption. {{link}}Learn more{{/link}}',
-										'woocommerce'
-									),
-									components: {
-										link: (
-											<Link
-												href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class"
-												target="_blank"
-												type="external"
-											>
-												<></>
-											</Link>
-										),
-									},
-								} ) }
-							</span>
-						</>
-					}
-					options={ taxClasses.map( ( taxClass ) => ( {
-						label: taxClass.name,
-						value:
-							taxClass.slug === STANDARD_RATE_TAX_CLASS_SLUG
-								? ''
-								: taxClass.slug,
-					} ) ) }
-				/>
-			) }
-		</CollapsibleContent>
+		<RadioControl
+			{ ...taxClassProps }
+			label={
+				<>
+					<span>{ __( 'Tax class', 'woocommerce' ) }</span>
+					<span className="woocommerce-product-form__secondary-text">
+						{ interpolateComponents( {
+							mixedString: __(
+								'Apply a tax rate if this product qualifies for tax reduction or exemption. {{link}}Learn more{{/link}}',
+								'woocommerce'
+							),
+							components: {
+								link: (
+									<Link
+										href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class"
+										target="_blank"
+										type="external"
+									>
+										<></>
+									</Link>
+								),
+							},
+						} ) }
+					</span>
+				</>
+			}
+			options={ taxClasses.map( ( taxClass ) => ( {
+				label: taxClass.name,
+				value:
+					taxClass.slug === STANDARD_RATE_TAX_CLASS_SLUG
+						? ''
+						: taxClass.slug,
+			} ) ) }
+		/>
 	);
 };

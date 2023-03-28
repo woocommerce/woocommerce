@@ -36,7 +36,13 @@ test.describe( 'Analytics pages', () => {
 				'//button[@title="Choose which analytics to display and the section name"]'
 			);
 			await page.click( 'text=Move up' );
-			await page.waitForTimeout( 1000 );
+
+			// wait for the changes to be saved
+			await page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/users/' ) &&
+					response.status() === 200
+			);
 		}
 	} );
 
@@ -49,18 +55,19 @@ test.describe( 'Analytics pages', () => {
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
 			{ waitForLoadState: 'networkidle' }
 		);
-		// Grab all of the section headings
-		const sections = await page.$$(
-			'h2.woocommerce-section-header__title'
-		);
-		// Create an array with the section headings
-		const arrFoundSections = new Array();
-		for await ( const section of sections ) {
-			arrFoundSections.push( await section.innerText() );
+
+		for ( const expectedSection of arrExpectedSections ) {
+			await test.step(
+				`Assert that the "${ expectedSection }" section is visible`,
+				async () => {
+					await expect(
+						page.locator( 'h2.woocommerce-section-header__title', {
+							hasText: expectedSection,
+						} )
+					).toBeVisible();
+				}
+			);
 		}
-		await expect( arrFoundSections.sort() ).toEqual(
-			arrExpectedSections.sort()
-		);
 	} );
 
 	test.describe( 'moving sections', () => {

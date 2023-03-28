@@ -113,6 +113,7 @@ class DefaultFreeExtensions {
 				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woocommerce.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/facebook.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-facebook',
+				'is_visible'     => false,
 				'is_built_by_wc' => false,
 			],
 			'facebook-for-woocommerce:alt'      => [
@@ -120,6 +121,7 @@ class DefaultFreeExtensions {
 				'description'    => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/facebook.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-facebook',
+				'is_visible'     => false,
 				'is_built_by_wc' => false,
 			],
 			'pinterest-for-woocommerce'         => [
@@ -280,6 +282,66 @@ class DefaultFreeExtensions {
 							[
 								'type'      => 'base_location_country',
 								'value'     => 'SG',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'CY',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'DK',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'EE',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'FI',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'GR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'LU',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'LT',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'LV',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'NO',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'MT',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'SI',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'SK',
 								'operation' => '=',
 							],
 						],
