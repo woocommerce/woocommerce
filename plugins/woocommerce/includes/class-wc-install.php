@@ -230,7 +230,7 @@ class WC_Install {
 			'wc_update_750_disable_new_product_management_experience',
 		),
 		'7.7.0' => array(
-			'wc_update_770_remove_multichannel_marketing_feature_flag',
+			'wc_update_770_remove_multichannel_marketing_feature_options',
 		),
 	);
 
