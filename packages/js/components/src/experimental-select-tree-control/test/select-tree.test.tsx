@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
+import React, { createElement } from 'react';
 import { SelectTree } from '../select-tree';
-import { createElement } from 'react';
 import { Item } from '../../experimental-tree-control';
 
 const mockItems: Item[] = [
