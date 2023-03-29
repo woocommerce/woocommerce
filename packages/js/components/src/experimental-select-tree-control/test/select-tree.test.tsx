@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import React, { createElement } from 'react';
+import React, { createElement } from '@wordpress/element';
 import { SelectTree } from '../select-tree';
 import { Item } from '../../experimental-tree-control';
 
