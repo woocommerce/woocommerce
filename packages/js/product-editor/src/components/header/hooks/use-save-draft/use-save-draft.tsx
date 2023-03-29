@@ -30,15 +30,13 @@ export function useSaveDraft( {
 				productId
 			);
 
-			const hasEdits = hasEditsForEntityRecord< boolean >(
-				'postType',
-				'product',
-				productId
-			);
-
 			return {
 				productStatus: product?.status,
-				hasEdits,
+				hasEdits: hasEditsForEntityRecord< boolean >(
+					'postType',
+					'product',
+					productId
+				),
 			};
 		},
 		[ productId ]
@@ -70,17 +68,15 @@ export function useSaveDraft( {
 	let children;
 	if ( productStatus === 'publish' ) {
 		children = __( 'Switch to draft', 'woocommerce' );
+	} else if ( hasEdits ) {
+		children = __( 'Save draft', 'woocommerce' );
 	} else {
-		if ( hasEdits ) {
-			children = __( 'Save draft', 'woocommerce' );
-		} else {
-			children = (
-				<>
-					<Icon icon={ check } />
-					{ __( 'Saved', 'woocommerce' ) }
-				</>
-			);
-		}
+		children = (
+			<>
+				<Icon icon={ check } />
+				{ __( 'Saved', 'woocommerce' ) }
+			</>
+		);
 	}
 
 	return {
