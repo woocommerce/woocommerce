@@ -7,7 +7,7 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { PRODUCT_MVP_CES_ACTION_OPTION_NAME } from './product-mvp-ces-footer';
+import { PRODUCT_MVP_CES_ACTION_OPTION_NAME } from '../../constants';
 
 async function isProductMVPCESHidden(): Promise< boolean > {
 	const productCESAction: string = await resolveSelect(

@@ -18,7 +18,9 @@
 				"src/**/*.ts",
 				"src/**/*.tsx",
 				"src/**/*.php",
-				"includes/**/*.php"
+				"includes/**/*.php",
+				"webpack.config.js",
+				"tsconfig.json"
 			],
 			"outputs": [
 				"dist/**",
@@ -77,7 +79,9 @@
 				"client/**/*.jsx",
 				"client/**/*.ts",
 				"client/**/*.tsx",
-				"client/**/*.scss"
+				"client/**/*.scss",
+				"webpack.config.js",
+				"tsconfig.json"
 			],
 			"outputMode": "new-only"
 		},

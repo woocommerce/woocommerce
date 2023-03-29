@@ -20,7 +20,7 @@ jobs:
               uses: actions/checkout@v3
             - name: Install prerequisites
               run: |
-                  npm install -g pnpm
+                  npm install -g pnpm@7
                   npm -g i @wordpress/env@5.1.0
                   pnpm install --filter code-analyzer --filter cli-core
             - name: Run analyzer

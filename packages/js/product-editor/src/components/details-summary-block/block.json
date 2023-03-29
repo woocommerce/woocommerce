@@ -17,6 +17,10 @@
 		},
 		"label": {
 			"type": "string"
+		},
+		"content": {
+			"type": "string",
+			"__experimentalRole": "content"
 		}
 	},
 	"supports": {

@@ -4,13 +4,9 @@
 import { createElement, Fragment, useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { CheckboxControl, TextareaControl } from '@wordpress/components';
+import { FeedbackModal } from '@woocommerce/customer-effort-score';
 import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
-
-/**
- * Internal dependencies
- */
-import { FeedbackModal } from '../feedback-modal';
 
 /**
  * Provides a modal requesting customer feedback.
