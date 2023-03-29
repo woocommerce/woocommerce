@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import type { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import type { BlockEditProps } from '@wordpress/blocks';
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { sanitize } from 'dompurify';
 
