@@ -1518,7 +1518,8 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 		$tables = self::get_tables();
 
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
 		}
 	}
 
