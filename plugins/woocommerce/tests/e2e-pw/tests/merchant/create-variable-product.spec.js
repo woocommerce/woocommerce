@@ -198,6 +198,9 @@ test.describe( 'Add New Variable Product Page', () => {
 		await page.click( 'a[href="#variable_product_options"]' );
 		await page.waitForLoadState( 'networkidle' );
 		await page.selectOption( '#field_to_edit', 'delete_all' );
+		await page.evaluate( () => {
+			window.confirm = () => true;
+		} );
 		await page.click( 'a.do_variation_action' );
 		await page.waitForSelector( '.woocommerce_variation', {
 			state: 'detached',
