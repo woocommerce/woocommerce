@@ -80,6 +80,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 9.8.4 - 2023-03-29 =
+
+#### Bug Fixes
+
+- Fix unlinked border widths not being applied correctly in the frontend in WP 6.2 for some blocks. ([8893](https://github.com/woocommerce/woocommerce-blocks/pull/8893))
+
 = 9.8.3 - 2023-03-28 =
 
 #### Bug Fixes
