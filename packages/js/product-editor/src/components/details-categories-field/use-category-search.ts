@@ -34,7 +34,7 @@ function openParents(
 	}
 }
 
-export type ProductCategoryLinkedList = Pick<
+export type ProductCategoryNode = Pick<
 	ProductCategory,
 	'id' | 'name' | 'parent'
 >;
@@ -262,9 +262,9 @@ export const useCategorySearch = () => {
 	 */
 	const getFilteredItems = useCallback(
 		(
-			allItems: ProductCategoryLinkedList[],
+			allItems: ProductCategoryNode[],
 			inputValue: string,
-			selectedItems: ProductCategoryLinkedList[]
+			selectedItems: ProductCategoryNode[]
 		) => {
 			const searchRegex = new RegExp( escapeRegExp( inputValue ), 'i' );
 			return allItems.filter(

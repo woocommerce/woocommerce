@@ -13,6 +13,7 @@ import { createElement } from '@wordpress/element';
 import { CategoryField } from '../category-field';
 import {
 	getCategoriesTreeWithMissingParents,
+	ProductCategoryNode,
 	useCategorySearch,
 } from '../use-category-search';
 
@@ -118,9 +119,9 @@ describe( 'CategoryField', () => {
 					<CategoryField
 						label="Categories"
 						placeholder="Search or create category…"
-						{ ...getInputProps<
-							Pick< ProductCategory, 'id' | 'name' >[]
-						>( 'categories' ) }
+						{ ...getInputProps< ProductCategoryNode[] >(
+							'categories'
+						) }
 					/>
 				) }
 			</Form>
@@ -214,9 +215,9 @@ describe( 'CategoryField', () => {
 						<CategoryField
 							label="Categories"
 							placeholder="Search or create category…"
-							{ ...getInputProps<
-								Pick< ProductCategory, 'id' | 'name' >[]
-							>( 'categories' ) }
+							{ ...getInputProps< ProductCategoryNode[] >(
+								'categories'
+							) }
 						/>
 					) }
 				</Form>
@@ -242,9 +243,9 @@ describe( 'CategoryField', () => {
 						<CategoryField
 							label="Categories"
 							placeholder="Search or create category…"
-							{ ...getInputProps<
-								Pick< ProductCategory, 'id' | 'name' >[]
-							>( 'categories' ) }
+							{ ...getInputProps< ProductCategoryNode[] >(
+								'categories'
+							) }
 						/>
 					) }
 				</Form>
@@ -270,9 +271,9 @@ describe( 'CategoryField', () => {
 						<CategoryField
 							label="Categories"
 							placeholder="Search or create category…"
-							{ ...getInputProps<
-								Pick< ProductCategory, 'id' | 'name' >[]
-							>( 'categories' ) }
+							{ ...getInputProps< ProductCategoryNode[] >(
+								'categories'
+							) }
 						/>
 					) }
 				</Form>
@@ -299,9 +300,9 @@ describe( 'CategoryField', () => {
 						<CategoryField
 							label="Categories"
 							placeholder="Search or create category…"
-							{ ...getInputProps<
-								Pick< ProductCategory, 'id' | 'name' >[]
-							>( 'categories' ) }
+							{ ...getInputProps< ProductCategoryNode[] >(
+								'categories'
+							) }
 						/>
 					) }
 				</Form>

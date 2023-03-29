@@ -13,17 +13,14 @@ import { debounce } from 'lodash';
  * Internal dependencies
  */
 import { CategoryTreeItem } from './category-field-item';
-import {
-	useCategorySearch,
-	ProductCategoryLinkedList,
-} from './use-category-search';
+import { useCategorySearch, ProductCategoryNode } from './use-category-search';
 import { CreateCategoryModal } from './create-category-modal';
 
 type CategoryFieldProps = {
 	label: string;
 	placeholder: string;
-	value?: ProductCategoryLinkedList[];
-	onChange: ( value: ProductCategoryLinkedList[] ) => void;
+	value?: ProductCategoryNode[];
+	onChange: ( value: ProductCategoryNode[] ) => void;
 };
 
 /**
@@ -31,10 +28,10 @@ type CategoryFieldProps = {
  * if not included already.
  */
 function getSelectedWithParents(
-	selected: ProductCategoryLinkedList[] = [],
+	selected: ProductCategoryNode[] = [],
 	item: ProductCategory,
 	treeKeyValues: Record< number, CategoryTreeItem >
-): ProductCategoryLinkedList[] {
+): ProductCategoryNode[] {
 	selected.push( { id: item.id, name: item.name, parent: item.parent } );
 
 	const parentId =
@@ -59,7 +56,7 @@ function getSelectedWithParents(
 }
 
 function mapFromCategoryType(
-	categories: ProductCategoryLinkedList[]
+	categories: ProductCategoryNode[]
 ): TreeItemType[] {
 	return categories.map( ( val ) =>
 		val.parent
@@ -77,7 +74,7 @@ function mapFromCategoryType(
 
 function mapToCategoryType(
 	categories: TreeItemType[]
-): ProductCategoryLinkedList[] {
+): ProductCategoryNode[] {
 	return categories.map( ( cat ) => ( {
 		id: +cat.value,
 		name: cat.label,
@@ -139,7 +136,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 				selected={ mapFromCategoryType( value ) }
 				onSelect={ ( selectedItems ) => {
 					if ( Array.isArray( selectedItems ) ) {
-						const newItems: ProductCategoryLinkedList[] =
+						const newItems: ProductCategoryNode[] =
 							mapToCategoryType(
 								selectedItems.filter(
 									( { value: selectedItemValue } ) =>

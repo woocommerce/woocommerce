@@ -12,7 +12,7 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
-import { ProductCategoryLinkedList } from './use-category-search';
+import { ProductCategoryNode } from './use-category-search';
 
 export type CategoryTreeItem = {
 	data: ProductCategory;
@@ -24,10 +24,10 @@ export type CategoryTreeItem = {
 type CategoryFieldItemProps = {
 	item: CategoryTreeItem;
 	selectedIds: number[];
-	items: ProductCategoryLinkedList[];
+	items: ProductCategoryNode[];
 	highlightedIndex: number;
 	openParent?: () => void;
-} & Pick< MenuItemProps< ProductCategoryLinkedList >, 'getItemProps' >;
+} & Pick< MenuItemProps< ProductCategoryNode >, 'getItemProps' >;
 
 export const CategoryFieldItem: React.FC< CategoryFieldItemProps > = ( {
 	item,
