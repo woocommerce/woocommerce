@@ -134,6 +134,7 @@ Every release includes specific testing instructions for new features and bug fi
     -   [9.8.1](./981.md)
     -   [9.8.2](./982.md)
     -   [9.8.3](./983.md)
+    -   [9.8.4](./984.md)
 
 
 <!-- FEEDBACK -->
