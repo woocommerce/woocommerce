@@ -18,6 +18,7 @@
 		"**/build",
 		"**/build-module",
 		"**/build-types",
+		"**/test/*",
 		"**/jest.config.js",
 		"**/jest-preset.js",
 		"**/webpack.*.js",
