@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useDispatch, useSelect } from '@wordpress/data';
-import { Button } from '@wordpress/components';
+import { Button, ToggleControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -36,37 +36,21 @@ function Features() {
 					Reset to defaults
 				</Button>
 			</h2>
-			<table className="features wp-list-table striped table-view-list widefat">
-				<thead>
-					<tr>
-						<th>Feature Name</th>
-						<th>Enabled?</th>
-						<th>Toggle</th>
-					</tr>
-				</thead>
-				<tbody>
-					{ sortedFeatureNames.map( ( feature_name ) => {
-						return (
-							<tr key={ feature_name }>
-								<td className="feature-name">
-									{ feature_name }
-								</td>
-								<td>{ features[ feature_name ].toString() }</td>
-								<td>
-									<Button
-										onClick={ () => {
-											toggleFeature( feature_name );
-										} }
-										isPrimary
-									>
-										Toggle
-									</Button>
-								</td>
-							</tr>
-						);
-					} ) }
-				</tbody>
-			</table>
+			<ul className="features">
+				{ sortedFeatureNames.map( ( feature_name ) => {
+					return (
+						<li key={ feature_name } className="feature-name">
+							<ToggleControl
+								label={ feature_name }
+								checked={ features[ feature_name ] }
+								onChange={ () => {
+									toggleFeature( feature_name );
+								} }
+							/>
+						</li>
+					);
+				} ) }
+			</ul>
 		</div>
 	);
 }
