@@ -67,10 +67,11 @@ export function usePreview( {
 	async function handleClick( event: MouseEvent< HTMLAnchorElement > ) {
 		if ( typeof onClick === 'function' ) onClick( event );
 
-		// Prevent an infinite recursion call due to `anchorRef.current?.click()`
+		// Prevent an infinite recursion call due to the
+		// `anchorRef.current?.click()` call.
 		if ( ! hasEdits ) return;
 
-		// Prevent the normal anchor behaviour
+		// Prevent the default anchor behaviour.
 		event.preventDefault();
 
 		try {
@@ -90,8 +91,8 @@ export function usePreview( {
 				productId
 			);
 
-			// Redirect using the default anchor behaviour. This way the usage
-			// of window.open is avoided which comes with a some edge cases.
+			// Redirect using the default anchor behaviour. This way, the usage
+			// of `window.open` is avoided which comes with some edge cases.
 			anchorRef.current?.click();
 
 			if ( typeof onSaveSuccess === 'function' ) {

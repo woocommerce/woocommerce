@@ -113,12 +113,12 @@ export function Header( {
 				actions: [
 					{
 						label: __( 'View in store', 'woocommerce' ),
-						// Leave the url to support a11y
+						// Leave the url to support a11y.
 						url: savedProduct.permalink,
 						onClick( event: MouseEvent< HTMLAnchorElement > ) {
 							event.preventDefault();
-							// Notice actions does not support target anchor prop
-							// So this forces the page to be opened in a new tab
+							// Notice actions do not support target anchor prop,
+							// so this forces the page to be opened in a new tab.
 							window.open( savedProduct.permalink, '_blank' );
 						},
 					},

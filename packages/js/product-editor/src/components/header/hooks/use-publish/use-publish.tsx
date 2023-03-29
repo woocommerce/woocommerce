@@ -43,9 +43,15 @@ export function usePublish( {
 
 	async function handleClick() {
 		try {
-			await editEntityRecord( 'postType', 'product', productId, {
-				status: 'publish',
-			} );
+			// The publish button click not only change the status of the product
+			// but also save all the pending changes. So even if the status is
+			// publish it's possible to save the product too.
+			if ( productStatus !== 'publish' ) {
+				await editEntityRecord( 'postType', 'product', productId, {
+					status: 'publish',
+				} );
+			}
+
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				'product',
