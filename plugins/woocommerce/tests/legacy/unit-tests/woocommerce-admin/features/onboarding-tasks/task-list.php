@@ -260,13 +260,13 @@ class WC_Admin_Tests_OnboardingTasks_TaskList extends WC_Unit_Test_Case {
 			)
 		);
 		$json = $this->list->get_json();
-		$this->assertContains( 'id', $json );
-		$this->assertContains( 'title', $json );
-		$this->assertContains( 'isHidden', $json );
-		$this->assertContains( 'isVisible', $json );
-		$this->assertContains( 'isComplete', $json );
-		$this->assertContains( 'tasks', $json );
-		$this->assertContains( 'isComplete', $json['tasks'][0] );
+		$this->assertArrayHasKey( 'id', $json );
+		$this->assertArrayHasKey( 'title', $json );
+		$this->assertArrayHasKey( 'isHidden', $json );
+		$this->assertArrayHasKey( 'isVisible', $json );
+		$this->assertArrayHasKey( 'isComplete', $json );
+		$this->assertArrayHasKey( 'tasks', $json );
+		$this->assertArrayHasKey( 'isComplete', $json['tasks'][0] );
 	}
 
 	/**

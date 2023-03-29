@@ -57,7 +57,6 @@ class WC_Admin_Notices {
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_redirect_download_method_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
-		self::add_action( 'admin_init', array( __CLASS__, 'maybe_remove_php73_required_notice' ) );
 
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
@@ -120,52 +119,7 @@ class WC_Admin_Notices {
 		self::add_notice( 'template_files' );
 		self::add_min_version_notice();
 		self::add_maxmind_missing_license_key_notice();
-		self::maybe_add_php73_required_notice();
 	}
-
-	// phpcs:disable Generic.Commenting.Todo.TaskFound
-
-	/**
-	 * Add an admin notice about the bump of the required PHP version in WooCommerce 7.7
-	 * if the current PHP version is too old.
-	 *
-	 * TODO: Remove this method in WooCommerce 7.7.
-	 */
-	private static function maybe_add_php73_required_notice() {
-		if ( version_compare( phpversion(), '7.3', '>=' ) ) {
-			return;
-		}
-
-		self::add_custom_notice(
-			'php73_required_in_woo_77',
-			sprintf(
-				'%s%s',
-				sprintf(
-					'<h4>%s</h4>',
-					esc_html__( 'PHP version requirements will change soon', 'woocommerce' )
-				),
-				sprintf(
-					// translators: Placeholder is a URL.
-					wpautop( wp_kses_data( __( 'WooCommerce 7.7, scheduled for <b>May 2023</b>, will require PHP 7.3 or newer to work. Your server is currently running an older version of PHP, so this change will impact your store. Upgrading to at least PHP 8.0 is recommended. <b><a href="%s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
-					'https://developer.woocommerce.com/2023/01/10/new-requirement-for-woocommerce-7-7-php-7-3/'
-				)
-			)
-		);
-	}
-
-	/**
-	 * Remove the admin notice about the bump of the required PHP version in WooCommerce 7.7
-	 * if the current PHP version is good.
-	 *
-	 * TODO: Remove this method in WooCommerce 7.7.
-	 */
-	private static function maybe_remove_php73_required_notice() {
-		if ( version_compare( phpversion(), '7.3', '>=' ) && self::has_notice( 'php73_required_in_woo_77' ) ) {
-			self::remove_notice( 'php73_required_in_woo_77' );
-		}
-	}
-
-	// phpcs:enable Generic.Commenting.Todo.TaskFound
 
 	/**
 	 * Show a notice.

@@ -21,6 +21,7 @@ import {
 	useRecommendedChannels,
 	useCampaignTypes,
 	useRegisteredChannels,
+	useInstalledPluginsWithoutChannels,
 } from '~/marketing/hooks';
 import { SmartPluginCardBody } from '~/marketing/components';
 import './CreateNewCampaignModal.scss';
@@ -43,10 +44,13 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 		useCampaignTypes();
 	const { refetch: refetchRegisteredChannels } = useRegisteredChannels();
 	const { data: recommendedChannels } = useRecommendedChannels();
+	const { loadInstalledPluginsAfterActivation } =
+		useInstalledPluginsWithoutChannels();
 
-	const refetch = () => {
+	const onInstalledAndActivated = ( pluginSlug: string ) => {
 		refetchCampaignTypes();
 		refetchRegisteredChannels();
+		loadInstalledPluginsAfterActivation( pluginSlug );
 	};
 
 	return (
@@ -143,7 +147,9 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 									<SmartPluginCardBody
 										key={ el.plugin }
 										plugin={ el }
-										onInstalledAndActivated={ refetch }
+										onInstalledAndActivated={
+											onInstalledAndActivated
+										}
 									/>
 								) ) }
 							</FlexItem>

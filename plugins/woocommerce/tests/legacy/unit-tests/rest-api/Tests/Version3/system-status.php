@@ -5,6 +5,8 @@
  * @package Automattic/WooCommerce/Tests
  */
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+
 /**
  * System Status REST Tests.
  *
@@ -12,6 +14,7 @@
  * @since 3.5.0
  */
 class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
+	use ArraySubsetAsserts;
 
 	/**
 	 * User variable.
@@ -117,8 +120,8 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		}
 		$expected_data = array(
 			'environment' => array(
-				'version' => WC()->version
-			)
+				'version' => WC()->version,
+			),
 		);
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/system_status' );
@@ -178,7 +181,8 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$theme    = (array) $data['theme'];
 
 		$this->assertEquals( 13, count( $theme ) );
-		$this->assertEquals( $active_theme->Name, $theme['name'] ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$this->assertEquals( $active_theme->Name, $theme['name'] );
 	}
 
 	/**
@@ -197,7 +201,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 		$settings = (array) $data['settings'];
 
-		$this->assertEquals( 12, count( $settings ) );
+		$this->assertEquals( 17, count( $settings ) );
 		$this->assertEquals( ( 'yes' === get_option( 'woocommerce_api_enabled' ) ), $settings['api_enabled'] );
 		$this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
 		$this->assertEquals( $term_response, $settings['taxonomies'] );
@@ -264,7 +268,18 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( count( $raw_tools ), count( $data ) );
-		$this->assertContains(
+
+		$matching_tool_data = current(
+			array_filter(
+				$data,
+				function( $tool ) {
+					return 'regenerate_thumbnails' === $tool['id'];
+				}
+			)
+		);
+		$this->assertIsArray( $matching_tool_data );
+
+		$this->assertArraySubset(
 			array(
 				'id'          => 'regenerate_thumbnails',
 				'name'        => 'Regenerate shop thumbnails',
@@ -279,7 +294,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-			$data
+			$matching_tool_data
 		);
 
 		$query_params = array(
@@ -292,12 +307,23 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( count( $raw_tools ), count( $data ) );
-		$this->assertContains(
+
+		$matching_tool_data = current(
+			array_filter(
+				$data,
+				function( $tool ) {
+					return 'regenerate_thumbnails' === $tool['id'];
+				}
+			)
+		);
+		$this->assertIsArray( $matching_tool_data );
+
+		$this->assertArraySubset(
 			array(
 				'id'   => 'regenerate_thumbnails',
 				'name' => 'Regenerate shop thumbnails',
 			),
-			$data
+			$matching_tool_data
 		);
 		foreach ( $data as $item ) {
 			// Fields that are not requested are not returned in response.

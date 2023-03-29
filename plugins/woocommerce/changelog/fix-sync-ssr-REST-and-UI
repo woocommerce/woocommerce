@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Synchronized SSR from template to REST API.

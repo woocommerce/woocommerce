@@ -59,18 +59,21 @@
 		"@types/md5": "^2.3.2",
 		"@types/qs": "^6.9.7",
 		"@types/react": "^17.0.2",
+		"@types/node": "^16.18.18",
 		"@types/wordpress__compose": "^4.0.1",
 		"@types/wordpress__core-data": "^2.4.5",
 		"@types/wordpress__data": "^6.0.0",
 		"@types/wordpress__data-controls": "^2.2.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
 		"eslint": "^8.32.0",
 		"jest": "^27.5.1",
 		"jest-cli": "^27.5.1",
+		"concurrently": "^7.0.0",
 		"redux": "^4.1.0",
 		"rimraf": "^3.0.2",
 		"ts-jest": "^27.1.3",
-		"typescript": "^4.8.3"
+		"typescript": "^4.9.5"
 	},
 	"peerDependencies": {
 		"@wordpress/core-data": "wp-6.0",
@@ -79,7 +82,7 @@
 		"react-dom": "^17.0.2"
 	},
 	"scripts": {
-		"turbo:build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"turbo:test": "jest --config ./jest.config.json",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
@@ -87,7 +90,7 @@
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"lint": "eslint src",
-		"start": "tsc --build --watch ./tsconfig.json ./tsconfig-cjs.json",
+		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"

@@ -7,4 +7,25 @@
 	&__actions {
 		margin-left: auto;
 	}
+
+	.components-popover__content {
+		min-width: auto;
+		width: min-content;
+	}
+
+	.woocommerce-product-header__actions {
+		display: flex;
+
+		> * + * {
+			margin-left: $gap;
+		}
+	}
+
+	.components-dropdown-menu__toggle {
+		&.is-opened {
+
+			background-color: #1E1E1E;
+			color: #fff;
+		}
+	}
 }

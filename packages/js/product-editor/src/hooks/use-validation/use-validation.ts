@@ -7,8 +7,8 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * Signals that product saving is locked.
  *
- * @param lockName The namespace used to lock the product saving if validation fails.
- * @param validate The validator function.
+ * @param  lockName The namespace used to lock the product saving if validation fails.
+ * @param  validate The validator function.
  */
 export function useValidation(
 	lockName: string,

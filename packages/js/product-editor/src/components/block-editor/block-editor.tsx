@@ -94,7 +94,7 @@ export function BlockEditor( {
 			synchronizeBlocksWithTemplate( [], _settings?.template ),
 			{}
 		);
-	}, [] );
+	}, [ product.id ] );
 
 	if ( ! blocks ) {
 		return null;

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fetch order first to refresh cache before returning prop.

@@ -184,7 +184,8 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 
 		$handler->handle( time(), 'notice', '', array() );
 		$handler->send_log_email();
-		$this->assertObjectHasAttribute( 'body', $mailer->get_sent( 0 ) );
+
+		$this->assertTrue( property_exists( $mailer->get_sent( 0 ), 'body' ) );
 	}
 
 	/**
@@ -206,7 +207,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 		$handler->handle( time(), 'info', '', array() );
 		$handler->send_log_email();
 
-		$this->assertObjectHasAttribute( 'body', $mailer->get_sent( 0 ) );
+		$this->assertTrue( property_exists( $mailer->get_sent( 0 ), 'body' ) );
 	}
 
 	/**

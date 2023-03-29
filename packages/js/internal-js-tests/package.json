@@ -21,7 +21,7 @@
 	"main": "build/util/index.js",
 	"module": "build-module/util/index.js",
 	"scripts": {
-		"turbo:build": "tsc --build ./tsconfig.json ./tsconfig-cjs.json",
+		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint src",
 		"ts:check": "tsc --noEmit --project ./tsconfig.json",
@@ -46,7 +46,8 @@
 		"resize-observer-polyfill": "1.5.1",
 		"rimraf": "^3.0.2",
 		"ts-jest": "^27.1.3",
-		"typescript": "^4.8.3"
+		"babel-jest": "^27.5.1",
+		"typescript": "^4.9.5"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

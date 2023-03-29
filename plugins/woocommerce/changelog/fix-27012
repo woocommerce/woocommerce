@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix incorrect VAT exempt behaviour on shop page when prices are exclusive of tax.
