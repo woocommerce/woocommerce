@@ -898,7 +898,7 @@ class WC_Install {
 			return;
 		}
 
-		$note_ids = array_column( $note_ids, 0 );
+		$note_ids             = array_column( $note_ids, 0 );
 		$note_ids_placeholder = substr( str_repeat( ',%d', count( $note_ids ) ), 1 );
 
 		$wpdb->query(
