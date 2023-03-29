@@ -73,7 +73,7 @@ export function Header( {
 	const previewButtonProps = usePreview( {
 		productId,
 		disabled: isDisabled,
-		'aria-label': __( 'Preview in new tab', 'woocommerce' ),
+		onSaveSuccess: handleSaveSuccess,
 	} );
 
 	const publishButtonProps = usePublish( {
@@ -97,9 +97,7 @@ export function Header( {
 			<div className="woocommerce-product-header__actions">
 				<Button { ...saveDraftButtonProps } />
 
-				<Button { ...previewButtonProps }>
-					{ __( 'Preview', 'woocommerce' ) }
-				</Button>
+				<Button { ...previewButtonProps } />
 
 				<Button { ...publishButtonProps }>
 					{ isCreating
