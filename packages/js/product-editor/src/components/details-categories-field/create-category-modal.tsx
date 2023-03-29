@@ -23,10 +23,7 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	ProductCategoryNode,
-	useCategorySearch,
-} from './use-category-search';
+import { ProductCategoryNode, useCategorySearch } from './use-category-search';
 import { CategoryFieldItem } from './category-field-item';
 
 type CreateCategoryModalProps = {
