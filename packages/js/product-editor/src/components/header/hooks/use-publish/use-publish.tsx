@@ -16,15 +16,25 @@ export function usePublish( {
 	onPublishSuccess?( product: Product ): void;
 	onPublishError?( error: Error ): void;
 } ): Button.ButtonProps {
-	const hasEdits = useSelect(
+	const { productStatus, hasEdits } = useSelect(
 		( select ) => {
-			const { hasEditsForEntityRecord } = select( 'core' );
+			const { getEditedEntityRecord, hasEditsForEntityRecord } =
+				select( 'core' );
 
-			return hasEditsForEntityRecord< boolean >(
+			const product = getEditedEntityRecord< Product >(
 				'postType',
 				'product',
 				productId
 			);
+
+			return {
+				productStatus: product?.status,
+				hasEdits: hasEditsForEntityRecord< boolean >(
+					'postType',
+					'product',
+					productId
+				),
+			};
 		},
 		[ productId ]
 	);
@@ -54,7 +64,8 @@ export function usePublish( {
 
 	return {
 		...props,
-		'aria-disabled': disabled || ! hasEdits,
+		'aria-disabled':
+			disabled || ( productStatus === 'publish' && ! hasEdits ),
 		variant: 'primary',
 		onClick: handleClick,
 	};

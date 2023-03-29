@@ -8,6 +8,7 @@ import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import { WooHeaderItem } from '@woocommerce/admin-layout';
+import { MouseEvent } from 'react';
 
 /**
  * Internal dependencies
@@ -17,7 +18,6 @@ import { MoreMenu } from './more-menu';
 import { usePreview } from './hooks/use-preview';
 import { usePublish } from './hooks/use-publish';
 import { useSaveDraft } from './hooks/use-save-draft';
-import { MouseEvent } from 'react';
 
 export type HeaderProps = {
 	productId: number;
@@ -115,7 +115,7 @@ export function Header( {
 						label: __( 'View in store', 'woocommerce' ),
 						// Leave the url to support a11y
 						url: savedProduct.permalink,
-						onClick( event: MouseEvent ) {
+						onClick( event: MouseEvent< HTMLAnchorElement > ) {
 							event.preventDefault();
 							// Notice actions does not support target anchor prop
 							// So this forces the page to be opened in a new tab
