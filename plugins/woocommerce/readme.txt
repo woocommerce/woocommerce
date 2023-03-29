@@ -227,6 +227,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Log to order notes when coupons are removed or applied. [#30642](https://github.com/woocommerce/woocommerce/pull/30642)
 * Add - Make WC_Order::get_tax_location accessible publicly through a wrapper function. [#36953](https://github.com/woocommerce/woocommerce/pull/36953)
 * Add - Update product post rest config when block editor feature is enabled. [#37206](https://github.com/woocommerce/woocommerce/pull/37206)
+* Update - Update WooCommerce Blocks to 9.8.4 [#37492](https://github.com/woocommerce/woocommerce/pull/37492)
 * Update - Update WooCommerce Blocks to 9.8.3 [#37477](https://github.com/woocommerce/woocommerce/pull/37477)
 * Update - Update WooCommerce Blocks to 9.8.2 [#37373](https://github.com/woocommerce/woocommerce/pull/37373)
 * Update - Add tabs and sections placeholders in product blocks template [#37174](https://github.com/woocommerce/woocommerce/pull/37174)
