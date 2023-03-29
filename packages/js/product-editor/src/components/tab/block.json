@@ -21,7 +21,10 @@
 		"multiple": true,
 		"reusable": false,
 		"inserter": false,
-		"lock": false
+		"lock": false,
+		"__experimentalToolbar": false
 	},
-	"usesContext": [ "selectedTab" ]
+	"usesContext": [ "selectedTab" ],
+	"editorStyle": "file:./editor.css",
+	"templateLock": "contentOnly"
 }

@@ -1,8 +1,10 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { ProductMVPCESFooter } from '~/customer-effort-score-tracks/product-mvp-ces-footer';
-import { ProductMVPFeedbackModalContainer } from '~/customer-effort-score-tracks/product-mvp-feedback-modal-container';
+import {
+	__experimentalProductMVPCESFooter as ProductMVPCESFooter,
+	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
+} from '@woocommerce/product-editor';
 
 export const ProductFormFooter: React.FC = () => {
 	return (
