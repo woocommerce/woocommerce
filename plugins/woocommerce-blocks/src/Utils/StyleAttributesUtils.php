@@ -250,7 +250,7 @@ class StyleAttributesUtils {
 
 		$border_width_css = '';
 
-		if ( array_key_exists( 'width', ( $custom_border ) ) ) {
+		if ( array_key_exists( 'width', ( $custom_border ) ) && ! empty( $custom_border['width'] ) ) {
 			// Linked sides.
 			$border_width_css = 'border-width:' . $custom_border['width'] . ';';
 		} else {
