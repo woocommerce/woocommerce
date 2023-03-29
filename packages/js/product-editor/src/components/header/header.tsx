@@ -17,6 +17,7 @@ import { MoreMenu } from './more-menu';
 import { usePreview } from './hooks/use-preview';
 import { usePublish } from './hooks/use-publish';
 import { useSaveDraft } from './hooks/use-save-draft';
+import { MouseEvent } from 'react';
 
 export type HeaderProps = {
 	productId: number;
@@ -108,15 +109,23 @@ export function Header( {
 				? __( 'Product successfully created.', 'woocommerce' )
 				: __( 'Product published.', 'woocommerce' );
 			const noticeOptions = {
+				icon: '🎉',
 				actions: [
 					{
 						label: __( 'View in store', 'woocommerce' ),
-						href: savedProduct.permalink,
+						// Leave the url to support a11y
+						url: savedProduct.permalink,
+						onClick( event: MouseEvent ) {
+							event.preventDefault();
+							// Notice actions does not support target anchor prop
+							// So this forces the page to be opened in a new tab
+							window.open( savedProduct.permalink, '_blank' );
+						},
 					},
 				],
 			};
 
-			createNotice( 'success', `🎉‎ ${ noticeContent }`, noticeOptions );
+			createNotice( 'success', noticeContent, noticeOptions );
 
 			tryRedirectToEditPage( savedProduct.id );
 		},
