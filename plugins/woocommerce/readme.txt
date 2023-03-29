@@ -169,7 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 * Fix - Add default value when calling get_option for woocommerce_task_list_tracked_completed_tasks. [#37397](https://github.com/woocommerce/woocommerce/pull/37397)
 * Fix - When order meta data is saved via HPOS, it should be backfilled to the CPT data store. [#36593](https://github.com/woocommerce/woocommerce/pull/36593)
-* Fix - Overwrite clone method to prevent duplicate datq when saving a clone. [#37313](https://github.com/woocommerce/woocommerce/pull/37313)
+* Fix - Overwrite clone method to prevent duplicate data when saving a clone. [#37313](https://github.com/woocommerce/woocommerce/pull/37313)
 * Fix - Add default button padding to TT2 stylesheet to fix some visual issues in WP 5.9 and 6.0 [#37018](https://github.com/woocommerce/woocommerce/pull/37018)
 * Fix - Added skydropx slug back to shipping partners list so that it can be installed through the shipping task [#37286](https://github.com/woocommerce/woocommerce/pull/37286)
 * Fix - Add HPOS compat for admin report functions. [#36650](https://github.com/woocommerce/woocommerce/pull/36650)
