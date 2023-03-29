@@ -63,7 +63,7 @@ const onboarding = {
 
 	handleSaveChangesModal: async ( page, { saveChanges } ) => {
 		// Save changes? Modal
-		await page.textContent( '.components-modal__header-heading' );
+		await page.getByText( 'Save Changes?' );
 
 		if ( saveChanges ) {
 			await page.click( 'button >> text=Save' );

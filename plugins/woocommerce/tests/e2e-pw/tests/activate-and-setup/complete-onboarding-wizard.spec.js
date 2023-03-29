@@ -74,7 +74,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		// Navigate back to "Industry" section
 		await page.click( 'button >> text=Industry' );
 		await page.textContent( '.components-checkbox-control__input' );
-		for ( let industry of Object.values( storeDetails.us.industries2 ) ) {
+		for ( let industry of Object.values( storeDetails.us.industries ) ) {
 			await expect( page.getByLabel( industry ) ).toBeChecked();
 		}
 	} );
