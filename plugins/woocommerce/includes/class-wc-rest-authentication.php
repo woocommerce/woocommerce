@@ -587,6 +587,14 @@ class WC_REST_Authentication {
 	private function update_last_access() {
 		global $wpdb;
 
+		/**
+		 * This filter enables the exclusion of the most recent access time from being logged for REST API calls.
+		 *
+		 * @param bool $result Default value.
+		 * @param int $user_id User ID associated with REST API request.
+		 *
+		 * @since 7.7.0
+		 */
 		if ( apply_filters( 'woocommerce_disable_api_access_log', false, $this->user->user_id ) ) {
 			return;
 		}
