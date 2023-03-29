@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import './style.scss';
 import RecommendedExtensionsItem from './item';
 import RecommendedExtensionsPlaceholder from './placeholder';
-import { STORE_KEY } from '../../data/constants';
+import { STORE_KEY } from '~/marketing/data/constants';
 import Card from '../card';
 
 const RecommendedExtensions = ( {
