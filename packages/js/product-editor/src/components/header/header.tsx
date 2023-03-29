@@ -3,7 +3,7 @@
  */
 import { Product, ProductStatus } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
@@ -54,12 +54,14 @@ export function Header( {
 		[ productId ]
 	);
 
+	const { createNotice } = useDispatch( 'core/notices' );
+
 	const isDisabled = isSavingLocked || isSaving;
 	const isCreating = ( productStatus as string ) === 'auto-draft';
 
-	function handleSaveSuccess( product: Product ) {
+	function tryRedirectToEditPage( id: number ) {
 		if ( isCreating ) {
-			const url = getNewPath( {}, `/product/${ product.id }` );
+			const url = getNewPath( {}, `/product/${ id }` );
 			navigateTo( { url } );
 		}
 	}
@@ -67,20 +69,64 @@ export function Header( {
 	const saveDraftButtonProps = useSaveDraft( {
 		productId,
 		disabled: isDisabled,
-		onSaveSuccess: handleSaveSuccess,
+		onSaveSuccess( savedProduct: Product ) {
+			createNotice(
+				'success',
+				__( 'Product saved as draft.', 'woocommerce' )
+			);
+
+			tryRedirectToEditPage( savedProduct.id );
+		},
+		onSaveError() {
+			createNotice(
+				'error',
+				__( 'Failed to update product.', 'woocommerce' )
+			);
+		},
 	} );
 
 	const previewButtonProps = usePreview( {
 		productId,
 		disabled: isDisabled,
-		onSaveSuccess: handleSaveSuccess,
+		onSaveSuccess( savedProduct: Product ) {
+			tryRedirectToEditPage( savedProduct.id );
+		},
+		onSaveError() {
+			createNotice(
+				'error',
+				__( 'Failed to preview product.', 'woocommerce' )
+			);
+		},
 	} );
 
 	const publishButtonProps = usePublish( {
 		productId,
 		disabled: isDisabled,
 		isBusy: isSaving,
-		onPublishSuccess: handleSaveSuccess,
+		onPublishSuccess( savedProduct: Product ) {
+			const noticeContent = isCreating
+				? __( 'Product successfully created.', 'woocommerce' )
+				: __( 'Product published.', 'woocommerce' );
+			const noticeOptions = {
+				actions: [
+					{
+						label: __( 'View in store', 'woocommerce' ),
+						href: savedProduct.permalink,
+					},
+				],
+			};
+
+			createNotice( 'success', `🎉‎ ${ noticeContent }`, noticeOptions );
+
+			tryRedirectToEditPage( savedProduct.id );
+		},
+		onPublishError() {
+			const noticeContent = isCreating
+				? __( 'Failed to create product.', 'woocommerce' )
+				: __( 'Failed to publish product.', 'woocommerce' );
+
+			createNotice( 'error', noticeContent );
+		},
 	} );
 
 	return (
