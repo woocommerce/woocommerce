@@ -21,7 +21,7 @@ jest.mock( '../use-category-search', () => {
 			originalModule.getCategoriesTreeWithMissingParents,
 		useCategorySearch: jest.fn().mockReturnValue( {
 			searchCategories: jest.fn(),
-			getFilteredItemsForSelectTree: jest.fn(),
+			getFilteredItemsForSelectTree: jest.fn().mockReturnValue( [] ),
 			isSearching: false,
 			categoriesSelectList: [],
 			categoryTreeKeyValues: {},
