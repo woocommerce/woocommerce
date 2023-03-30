@@ -36,6 +36,12 @@ const settings = {
 		html: false,
 		multiple: false,
 	},
+	example: {
+		attributes: {
+			isPreview: true,
+		},
+		viewportWidth: 800,
+	},
 	attributes: blockAttributes,
 	edit: Edit,
 	save: Save,

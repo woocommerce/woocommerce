@@ -19,6 +19,9 @@ interface EditorContextType {
 
 	// Get data by name.
 	getPreviewData: ( name: string ) => Record< string, unknown >;
+
+	// Indicates whether in the preview context.
+	isPreview?: boolean;
 }
 
 const EditorContext = createContext( {
@@ -38,11 +41,13 @@ export const EditorProvider = ( {
 	currentPostId = 0,
 	previewData = {},
 	currentView = '',
+	isPreview = false,
 }: {
 	children: React.ReactChildren;
 	currentPostId?: number | undefined;
 	previewData?: Record< string, unknown > | undefined;
 	currentView?: string | undefined;
+	isPreview?: boolean | undefined;
 } ) => {
 	const editingPostId = useSelect(
 		( select ): number =>
@@ -68,6 +73,7 @@ export const EditorProvider = ( {
 		currentView,
 		previewData,
 		getPreviewData,
+		isPreview,
 	};
 
 	return (
