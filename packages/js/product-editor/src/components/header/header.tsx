@@ -60,7 +60,7 @@ export function Header( {
 	const isDisabled = isSavingLocked || isSaving;
 	const isCreating = ( productStatus as string ) === 'auto-draft';
 
-	function tryRedirectToEditPage( id: number ) {
+	function maybeRedirectToEditPage( id: number ) {
 		if ( isCreating ) {
 			const url = getNewPath( {}, `/product/${ id }` );
 			navigateTo( { url } );
@@ -76,7 +76,7 @@ export function Header( {
 				__( 'Product saved as draft.', 'woocommerce' )
 			);
 
-			tryRedirectToEditPage( savedProduct.id );
+			maybeRedirectToEditPage( savedProduct.id );
 		},
 		onSaveError() {
 			createNotice(
@@ -90,7 +90,7 @@ export function Header( {
 		productId,
 		disabled: isDisabled,
 		onSaveSuccess( savedProduct: Product ) {
-			tryRedirectToEditPage( savedProduct.id );
+			maybeRedirectToEditPage( savedProduct.id );
 		},
 		onSaveError() {
 			createNotice(
@@ -127,7 +127,7 @@ export function Header( {
 
 			createNotice( 'success', noticeContent, noticeOptions );
 
-			tryRedirectToEditPage( savedProduct.id );
+			maybeRedirectToEditPage( savedProduct.id );
 		},
 		onPublishError() {
 			const noticeContent = isCreating

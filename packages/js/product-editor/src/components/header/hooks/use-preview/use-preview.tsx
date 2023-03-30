@@ -48,13 +48,10 @@ export function usePreview( {
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	let previewLink: string | undefined;
+	let previewLink: URL | undefined;
 	if ( typeof permalink === 'string' ) {
-		if ( permalink.includes( '?' ) ) {
-			previewLink = `${ permalink }&preview=true`;
-		} else {
-			previewLink = `${ permalink }?preview=true`;
-		}
+		previewLink = new URL( permalink );
+		previewLink.searchParams.append( 'preview', 'true' );
 	}
 
 	/**
@@ -117,7 +114,7 @@ export function usePreview( {
 		'aria-disabled': disabled,
 		// Note that the href is always passed for a11y support. So
 		// the final rendered element is always an anchor.
-		href: previewLink,
+		href: previewLink?.toString(),
 		variant: 'tertiary',
 		onClick: handleClick,
 	};
