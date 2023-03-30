@@ -8,7 +8,8 @@
 	"textdomain": "default",
 	"attributes": {
 		"toggleText": {
-			"type": "string"
+			"type": "string",
+			"__experimentalRole": "content"
 		},
 		"initialCollapsed": {
 			"type": "boolean"

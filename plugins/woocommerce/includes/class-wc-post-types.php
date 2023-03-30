@@ -514,25 +514,35 @@ class WC_Post_Types {
 											),
 										),
 										array(
-											'woocommerce/product-radio',
+											'woocommerce/collapsible',
 											array(
-												'title'       => __( 'Tax class', 'woocommerce' ),
-												'description' => __( 'Apply a tax rate if this product qualifies for tax reduction or exemption. Learn more', 'woocommerce' ),
-												'property'    => 'tax_class',
-												'options'     => array(
+												'toggleText'       => __( 'Advanced', 'woocommerce' ),
+												'initialCollapsed' => true,
+												'persistRender'    => true,
+											),
+											array(
+												array(
+													'woocommerce/product-radio',
 													array(
-														'label' => __( 'Standard', 'woocommerce' ),
-														'value' => '',
+														'title'       => __( 'Tax class', 'woocommerce' ),
+														'description' => __( 'Apply a tax rate if this product qualifies for tax reduction or exemption. Learn more', 'woocommerce' ),
+														'property'    => 'tax_class',
+														'options'     => array(
+															array(
+																'label' => __( 'Standard', 'woocommerce' ),
+																'value' => '',
+															),
+															array(
+																'label' => __( 'Reduced rate', 'woocommerce' ),
+																'value' => 'reduced-rate',
+															),
+															array(
+																'label' => __( 'Zero rate', 'woocommerce' ),
+																'value' => 'zero-rate',
+															),
+														)
 													),
-													array(
-														'label' => __( 'Reduced rate', 'woocommerce' ),
-														'value' => 'reduced-rate',
-													),
-													array(
-														'label' => __( 'Zero rate', 'woocommerce' ),
-														'value' => 'zero-rate',
-													),
-												)
+												),
 											),
 										),
 									),
