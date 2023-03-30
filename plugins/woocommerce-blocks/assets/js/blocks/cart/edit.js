@@ -22,7 +22,6 @@ import './editor.scss';
 import {
 	addClassToBody,
 	useBlockPropsWithLocking,
-	useForcedLayout,
 	BlockSettings,
 } from '../cart-checkout-shared';
 import '../cart-checkout-shared/sidebar-notices';
@@ -38,21 +37,16 @@ const ALLOWED_BLOCKS = [
 	'woocommerce/empty-cart-block',
 ];
 
-export const Edit = ( { className, attributes, setAttributes, clientId } ) => {
-	const { hasDarkControls, currentView } = attributes;
+export const Edit = ( { className, attributes, setAttributes } ) => {
+	const { hasDarkControls, currentView, isPreview = false } = attributes;
 	const defaultTemplate = [
 		[ 'woocommerce/filled-cart-block', {}, [] ],
 		[ 'woocommerce/empty-cart-block', {}, [] ],
 	];
 	const blockProps = useBlockPropsWithLocking( {
 		className: classnames( className, 'wp-block-woocommerce-cart', {
-			'is-editor-preview': attributes.isPreview,
+			'is-editor-preview': isPreview,
 		} ),
-	} );
-	useForcedLayout( {
-		clientId,
-		registeredBlocks: ALLOWED_BLOCKS,
-		defaultTemplate,
 	} );
 
 	return (
@@ -81,6 +75,7 @@ export const Edit = ( { className, attributes, setAttributes, clientId } ) => {
 				<EditorProvider
 					previewData={ { previewCart } }
 					currentView={ currentView }
+					isPreview={ isPreview }
 				>
 					<CartBlockContext.Provider
 						value={ {
@@ -92,7 +87,7 @@ export const Edit = ( { className, attributes, setAttributes, clientId } ) => {
 								<InnerBlocks
 									allowedBlocks={ ALLOWED_BLOCKS }
 									template={ defaultTemplate }
-									templateLock={ false }
+									templateLock="insert"
 								/>
 							</CartProvider>
 						</SlotFillProvider>

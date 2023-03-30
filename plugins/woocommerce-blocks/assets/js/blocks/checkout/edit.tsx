@@ -64,6 +64,7 @@ export const Edit = ( {
 		showReturnToCart,
 		showRateAfterTaxName,
 		cartPageId,
+		isPreview = false,
 	} = attributes;
 
 	const defaultTemplate = [
@@ -146,6 +147,7 @@ export const Edit = ( {
 				/>
 			</InspectorControls>
 			<EditorProvider
+				isPreview={ isPreview }
 				previewData={ { previewCart, previewSavedPaymentMethods } }
 			>
 				<SlotFillProvider>
