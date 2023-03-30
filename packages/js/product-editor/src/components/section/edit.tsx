@@ -4,22 +4,13 @@
 import { createElement } from '@wordpress/element';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
-import { sanitize } from 'dompurify';
-
-const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
-const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
-
-function sanitizeHTML( html: string ) {
-	return {
-		__html: sanitize( html, { ALLOWED_TAGS, ALLOWED_ATTR } ),
-	};
-}
 
 /**
  * Internal dependencies
  */
-import { SectionBlockAttributes } from './types';
 import { BlockIcon } from '../block-icon';
+import { SectionBlockAttributes } from './types';
+import { sanitizeHTML } from '../../utils/sanitize-html';
 
 export function Edit( {
 	attributes,
