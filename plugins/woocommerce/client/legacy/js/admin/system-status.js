@@ -46,6 +46,7 @@ jQuery( function ( $ ) {
 						// Find value
 						var $value_html = $( this ).find( 'td:eq(2)' ).clone();
 						$value_html.find( '.private' ).remove();
+						$value_html.find( '.hide-from-export, .screen-reader-text' ).remove();
 						$value_html.find( '.dashicons-yes' ).replaceWith( '&#10004;' );
 						$value_html.find( '.dashicons-no-alt, .dashicons-warning' ).replaceWith( '&#10060;' );
 
