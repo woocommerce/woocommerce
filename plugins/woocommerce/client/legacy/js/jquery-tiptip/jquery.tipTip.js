@@ -4,7 +4,10 @@
  * www.drewwilson.com
  * code.drewwilson.com/entry/tiptip-jquery-plugin
  *
- * Version 1.3   -   Updated: Mar. 23, 2010
+ * Version 1.3.1   -   Updated: Mar. 30, 2023
+ *
+ * This is a custom version of TipTip. This file has been locally modified for specific requirements.
+ * Since the original version is no longer maintained, the changes were not submitted back to the original author.
  *
  * This Plug-In will create a custom tooltip to replace the default
  * browser tooltip. It is extremely lightweight and very smart in
