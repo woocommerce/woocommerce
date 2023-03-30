@@ -1005,6 +1005,14 @@
 	}
 }
 
+/**
+  * Attributes and variations related variables
+  */
+$container-height: 360px;
+$max-content-width: 544px;
+$default-font-size: 14px;
+$default-line-height: 18px;
+
 #variable_product_options {
 	.form-row select {
 		max-width: 100%;
@@ -1016,12 +1024,24 @@
 		}
 	}
 
-	.add-attributes-container {
+	%container-defaults {
 		box-sizing: border-box;
 		display: flex;
-		align-items: center;
 		padding: 32px 0;
-		height: 360px;
+		height: $container-height;
+	}
+
+	%centered-text {
+		width: 90%;
+		max-width: $max-content-width;
+		font-size: $default-font-size;
+		line-height: $default-line-height;
+		text-align: center;
+	}
+
+	.add-attributes-container {
+		@extend %container-defaults;
+		align-items: center;
 
 		a {
 			text-decoration: none;
@@ -1041,37 +1061,29 @@
 			width: 100%;
 
 			p {
-				width: 90%;
-				max-width: 544px;
-				font-size: 14px;
-				line-height: 18px;
-				text-align: center;
+				@extend %centered-text;
 			}
 		}
 	}
 
 	.add-variation-container {
-		box-sizing: border-box;
-		display: flex;
+		@extend %container-defaults;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		padding: 32px 0px;
 		gap: 24px;
-		height: 360px;
 		position: relative;
+
 		.arrow-image-wrapper {
 			position: absolute;
 			top: 10px;
 			left: 87px;
 		}
+
 		p {
-			width: 90%;
-			max-width: 544px;
-			font-size: 14px;
-			line-height: 18px;
-			text-align: center;
+			@extend %centered-text;
 		}
+
 		&.hidden {
 			display: none;
 		}
