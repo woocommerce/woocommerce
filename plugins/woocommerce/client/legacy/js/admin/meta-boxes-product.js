@@ -628,9 +628,19 @@ jQuery( function ( $ ) {
 		}
 	);
 
-	$( '.product_attributes' ).on( 'click', '.remove_row', function () {
-		if ( window.confirm( woocommerce_admin_meta_boxes.remove_attribute ) ) {
-			var $parent = $( this ).parent().parent();
+	$( '#product_attributes' ).on( 'click', '.product_attributes .remove_row', function () {
+		var confirmMessage = woocommerce_admin_meta_boxes.remove_attribute;
+		var $parent = $( this ).parent().parent();
+		if ( !$parent.is( '.taxonomy' ) ) {
+			var variationsData = $(
+				'.woocommerce_variations :input'
+			).serializeJSON();
+			var val = $parent.find( 'input.attribute_name' ).val();
+			if ( variationsData[ `attribute_${ val }` ] ) {
+				confirmMessage = woocommerce_admin_meta_boxes.i18n_remove_used_attribute_confirmation_message;
+			}
+		}
+		if ( window.confirm( confirmMessage ) ) {
 
 			if ( $parent.is( '.taxonomy' ) ) {
 				$parent.find( 'select, input[type=text]' ).val( '' );
