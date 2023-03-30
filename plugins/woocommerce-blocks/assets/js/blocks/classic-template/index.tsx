@@ -89,7 +89,7 @@ const Edit = ( {
 		getButtonLabel,
 	} = conversionConfig[ templateType ];
 
-	const canConvert = isExperimentalBuild() && isConversionPossible();
+	const canConvert = isConversionPossible();
 	const placeholderDescription = getDescription( templateTitle, canConvert );
 
 	return (
