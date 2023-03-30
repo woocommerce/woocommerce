@@ -358,7 +358,7 @@ class WC_Admin_Status {
 
 		<br>
 		<strong style="color:#a00;">
-			<span class="dashicons dashicons-warning"></span>
+			<span class="dashicons dashicons-warning" aria-hidden="true"></span>
 			<?php
 				echo esc_html(
 					sprintf(
