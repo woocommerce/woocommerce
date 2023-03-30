@@ -466,7 +466,8 @@ class WC_Post_Types {
 									array(
 										'title'       => __( 'Pricing', 'woocommerce' ),
 										'description' => sprintf(
-											__( 'Set a competitive price, put the product on sale, and manage tax calculations. %sHow to price your product?%s', 'woocommerce'),
+											/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
+											__( 'Set a competitive price, put the product on sale, and manage tax calculations. %1$sHow to price your product?%2$s', 'woocommerce' ),
 											'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
 											'</a>'
 										),
