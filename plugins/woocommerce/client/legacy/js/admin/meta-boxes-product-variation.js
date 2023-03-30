@@ -774,7 +774,6 @@ jQuery( function ( $ ) {
 							'woocommerce_variations_loaded'
 						);
 
-						// wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
 						wc_meta_boxes_product_variations_ajax.unblock();
 
 						resolve( response );
