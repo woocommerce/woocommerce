@@ -188,19 +188,20 @@ class ProductImage extends AbstractBlock {
 		}
 		$parsed_attributes = $this->parse_attributes( $attributes );
 
-		$border_radius = StyleAttributesUtils::get_border_radius_class_and_style( $attributes );
-		$margin        = StyleAttributesUtils::get_margin_class_and_style( $attributes );
+		$border_radius      = StyleAttributesUtils::get_border_radius_class_and_style( $attributes );
+		$margin             = StyleAttributesUtils::get_margin_class_and_style( $attributes );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 
 		$post_id = $block->context['postId'];
 		$product = wc_get_product( $post_id );
 
 		if ( $product ) {
 			return sprintf(
-				'<div class="wc-block-components-product-image wc-block-grid__product-image" style="%1$s %2$s">
+				'<div class="wc-block-components-product-image wc-block-grid__product-image %1$s" style="%2$s">
 					%3$s
 				</div>',
-				isset( $border_radius['style'] ) ? esc_attr( $border_radius['style'] ) : '',
-				isset( $margin['style'] ) ? esc_attr( $margin['style'] ) : '',
+				esc_attr( $classes_and_styles['classes'] ),
+				esc_attr( $classes_and_styles['styles'] ),
 				$this->render_anchor(
 					$product,
 					$this->render_on_sale_badge( $product, $parsed_attributes ),

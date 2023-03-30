@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
-import { __experimentalGetSpacingClassesAndStyles } from '@wordpress/block-editor';
+import { __experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -20,9 +20,10 @@ export const supports = {
 			fontSize: true,
 			__experimentalSkipSerialization: true,
 		},
-		...( typeof __experimentalGetSpacingClassesAndStyles === 'function' && {
+		...( typeof getSpacingClassesAndStyles === 'function' && {
 			spacing: {
 				margin: true,
+				padding: true,
 				__experimentalSkipSerialization: true,
 			},
 		} ),
