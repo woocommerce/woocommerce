@@ -107,13 +107,11 @@ test.describe( 'Add New Variable Product Page', () => {
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
 
+		page.on( 'dialog', ( dialog ) => dialog.accept() );
+
 		// manually create variations from all attributes
 		await page.click( 'a[href="#variable_product_options"]' );
 
-		// Override the window.confirm function to always return true (or false, depending on your requirements)
-		await page.evaluate( () => {
-			window.confirm = () => true;
-		} );
 		await page.click( 'button.generate_variations' );
 
 		// add variation attributes
@@ -198,9 +196,6 @@ test.describe( 'Add New Variable Product Page', () => {
 		await page.click( 'a[href="#variable_product_options"]' );
 		await page.waitForLoadState( 'networkidle' );
 		await page.selectOption( '#field_to_edit', 'delete_all' );
-		await page.evaluate( () => {
-			window.confirm = () => true;
-		} );
 		await page.click( 'a.do_variation_action' );
 		await page.waitForSelector( '.woocommerce_variation', {
 			state: 'detached',
