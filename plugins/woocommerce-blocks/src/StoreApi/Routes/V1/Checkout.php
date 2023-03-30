@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentContext;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
+use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
@@ -121,6 +122,8 @@ class Checkout extends AbstractCartRoute {
 		if ( ! $response ) {
 			try {
 				$response = $this->get_response_by_request_method( $request );
+			} catch ( InvalidCartException $error ) {
+				$response = $this->get_route_error_response_from_object( $error->getError(), $error->getCode(), $error->getAdditionalData() );
 			} catch ( RouteException $error ) {
 				$response = $this->get_route_error_response( $error->getErrorCode(), $error->getMessage(), $error->getCode(), $error->getAdditionalData() );
 			} catch ( \Exception $error ) {
