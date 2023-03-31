@@ -188,7 +188,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 			),
 			'woocommerce_after_shop_loop_item_title'  => array(
 				'block_name' => 'core/post-title',
-				'position'   => 'before',
+				'position'   => 'after',
 				'hooked'     => array(
 					'woocommerce_template_loop_rating' => 5,
 					'woocommerce_template_loop_price'  => 10,
