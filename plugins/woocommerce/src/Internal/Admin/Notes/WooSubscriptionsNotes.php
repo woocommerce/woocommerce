@@ -78,8 +78,6 @@ class WooSubscriptionsNotes {
 	 * Things to do on admin_init.
 	 */
 	public function admin_init() {
-		$this->check_connection();
-
 		if ( ! isset( $_GET['page'] ) ) {
 			// If the page parameter is not set, then the request is not initiated from the wc admin dashboard.
 			return;
@@ -90,6 +88,8 @@ class WooSubscriptionsNotes {
 			// if the request is initiated from the wc admin dashboard.
 			return;
 		}
+
+		$this->check_connection();
 
 		if ( $this->is_connected() ) {
 			$refresh_notes = false;
