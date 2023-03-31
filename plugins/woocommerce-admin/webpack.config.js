@@ -2,6 +2,7 @@
  * External dependencies
  */
 const { get } = require( 'lodash' );
+const fs = require( 'fs' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
@@ -193,6 +194,17 @@ const webpackConfig = {
 				force: true,
 			} ) ),
 		} ),
+
+		// Get all product editor blocks so they can be loaded via JSON.
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: '../../packages/js/product-editor/build/blocks',
+					to: './product-editor/blocks',
+				},
+			],
+		} ),
+
 		// React Fast Refresh.
 		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
 
