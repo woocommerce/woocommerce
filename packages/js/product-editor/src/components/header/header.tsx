@@ -15,9 +15,9 @@ import { MouseEvent } from 'react';
  */
 import { getHeaderTitle } from '../../utils';
 import { MoreMenu } from './more-menu';
-import { usePreview } from './hooks/use-preview';
 import { usePublish } from './hooks/use-publish';
 import { useSaveDraft } from './hooks/use-save-draft';
+import { PreviewButton } from './preview-button';
 
 export type HeaderProps = {
 	productId: number;
@@ -86,20 +86,6 @@ export function Header( {
 		},
 	} );
 
-	const previewButtonProps = usePreview( {
-		productId,
-		disabled: isDisabled,
-		onSaveSuccess( savedProduct: Product ) {
-			maybeRedirectToEditPage( savedProduct.id );
-		},
-		onSaveError() {
-			createNotice(
-				'error',
-				__( 'Failed to preview product.', 'woocommerce' )
-			);
-		},
-	} );
-
 	const publishButtonProps = usePublish( {
 		productId,
 		disabled: isDisabled,
@@ -152,7 +138,7 @@ export function Header( {
 			<div className="woocommerce-product-header__actions">
 				<Button { ...saveDraftButtonProps } />
 
-				<Button { ...previewButtonProps } />
+				<PreviewButton />
 
 				<Button { ...publishButtonProps }>
 					{ isCreating

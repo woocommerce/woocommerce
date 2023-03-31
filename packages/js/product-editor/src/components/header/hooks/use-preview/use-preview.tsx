@@ -1,41 +1,56 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
+import { Product, ProductStatus } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
+import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { MouseEvent } from 'react';
 
 export function usePreview( {
-	productId,
 	disabled,
 	onClick,
 	onSaveSuccess,
 	onSaveError,
 	...props
 }: Omit< Button.AnchorProps, 'aria-disabled' | 'variant' | 'href' > & {
-	productId: number;
 	onSaveSuccess?( product: Product ): void;
 	onSaveError?( error: Error ): void;
 } ): Button.AnchorProps {
 	const anchorRef = useRef< HTMLAnchorElement >();
 
-	const { permalink, productStatus, hasEdits } = useSelect(
-		( select ) => {
-			const { getEditedEntityRecord, hasEditsForEntityRecord } =
-				select( 'core' );
+	const [ productId ] = useEntityProp< number >(
+		'postType',
+		'product',
+		'id'
+	);
+	const [ productStatus ] = useEntityProp< ProductStatus | 'auto-draft' >(
+		'postType',
+		'product',
+		'status'
+	);
+	const [ permalink ] = useEntityProp< string >(
+		'postType',
+		'product',
+		'permalink'
+	);
 
-			const product = getEditedEntityRecord< Product | undefined >(
+	const { hasEdits, isDisabled } = useSelect(
+		( select ) => {
+			const { hasEditsForEntityRecord, isSavingEntityRecord } =
+				select( 'core' );
+			const { isPostSavingLocked } = select( 'core/editor' );
+			const isSavingLocked = isPostSavingLocked();
+			const isSaving = isSavingEntityRecord< boolean >(
 				'postType',
 				'product',
 				productId
 			);
 
 			return {
-				permalink: product?.permalink,
-				productStatus: product?.status,
+				isDisabled: isSavingLocked || isSaving,
 				hasEdits: hasEditsForEntityRecord< boolean >(
 					'postType',
 					'product',
@@ -62,11 +77,15 @@ export function usePreview( {
 	 * @param event
 	 */
 	async function handleClick( event: MouseEvent< HTMLAnchorElement > ) {
-		if ( typeof onClick === 'function' ) onClick( event );
+		if ( onClick ) {
+			onClick( event );
+		}
 
 		// Prevent an infinite recursion call due to the
 		// `anchorRef.current?.click()` call.
-		if ( ! hasEdits ) return;
+		if ( ! hasEdits ) {
+			return;
+		}
 
 		// Prevent the default anchor behaviour.
 		event.preventDefault();
@@ -75,7 +94,7 @@ export function usePreview( {
 			// If the product status is `auto-draft` it's not possible to
 			// reach the preview page, so the status is changed to `draft`
 			// before redirecting.
-			if ( ( productStatus as string ) === 'auto-draft' ) {
+			if ( productStatus === 'auto-draft' ) {
 				await editEntityRecord( 'postType', 'product', productId, {
 					status: 'draft',
 				} );
@@ -92,11 +111,11 @@ export function usePreview( {
 			// of `window.open` is avoided which comes with some edge cases.
 			anchorRef.current?.click();
 
-			if ( typeof onSaveSuccess === 'function' ) {
+			if ( onSaveSuccess ) {
 				onSaveSuccess( publishedProduct );
 			}
 		} catch ( error ) {
-			if ( typeof onSaveError === 'function' ) {
+			if ( onSaveError ) {
 				onSaveError( error as Error );
 			}
 		}
@@ -111,7 +130,7 @@ export function usePreview( {
 			if ( typeof props.ref === 'function' ) props.ref( element );
 			anchorRef.current = element;
 		},
-		'aria-disabled': disabled,
+		'aria-disabled': disabled || isDisabled,
 		// Note that the href is always passed for a11y support. So
 		// the final rendered element is always an anchor.
 		href: previewLink?.toString(),
