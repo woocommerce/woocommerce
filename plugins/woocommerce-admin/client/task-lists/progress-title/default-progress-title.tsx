@@ -64,6 +64,6 @@ export const DefaultProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
 	}
 
 	return (
-		<h1 className="woocommerce-task-progress-header__title">{ title }</h1>
+		<h1 className="woocommerce-task-progress-header__title" dangerouslySetInnerHTML={ sanitizeHTML( title ) } />
 	);
 };
