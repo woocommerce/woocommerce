@@ -48,13 +48,7 @@ export function Editor( { product, settings }: EditorProps ) {
 					<FullscreenMode isActive={ false } />
 					<SlotFillProvider>
 						<InterfaceSkeleton
-							header={
-								<Header
-									productId={ product.id }
-									productName={ product.name }
-									productStatus={ product.status }
-								/>
-							}
+							header={ <Header productName={ product.name } /> }
 							content={
 								<>
 									<BlockEditor
