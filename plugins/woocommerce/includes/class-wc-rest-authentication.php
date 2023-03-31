@@ -595,7 +595,7 @@ class WC_REST_Authentication {
 		 *
 		 * @since 7.7.0
 		 */
-		if ( apply_filters( 'woocommerce_disable_api_access_log', false, $this->user->user_id ) ) {
+		if ( apply_filters( 'woocommerce_disable_rest_api_access_log', false, $this->user->user_id ) ) {
 			return;
 		}
 
