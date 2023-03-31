@@ -15,3 +15,10 @@ export {
 	Editor as __experimentalEditor,
 	ProductEditorSettings,
 } from './editor';
+export {
+	BlockIcon as __experimentalBlockIcon,
+	BlockIconProps,
+} from './block-icon';
+export { ProductMVPCESFooter as __experimentalProductMVPCESFooter } from './product-mvp-ces-footer';
+export { ProductMVPFeedbackModal as __experimentalProductMVPFeedbackModal } from './product-mvp-feedback-modal';
+export { ProductMVPFeedbackModalContainer as __experimentalProductMVPFeedbackModalContainer } from './product-mvp-feedback-modal-container';

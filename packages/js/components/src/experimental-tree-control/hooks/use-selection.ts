@@ -75,6 +75,7 @@ function hasSelectedSibblingChildren(
 export function useSelection( {
 	item,
 	multiple,
+	shouldNotRecursivelySelect,
 	selected,
 	level,
 	index,
@@ -89,6 +90,7 @@ export function useSelection( {
 	| 'index'
 	| 'onSelect'
 	| 'onRemove'
+	| 'shouldNotRecursivelySelect'
 > ) {
 	const selectedItems = useMemo( () => {
 		if ( level === 1 && index === 0 ) {
@@ -100,7 +102,11 @@ export function useSelection( {
 
 	const checkedStatus: CheckedStatus = useMemo( () => {
 		if ( item.data.value in selectedItems ) {
-			if ( multiple && isIndeterminate( selectedItems, item.children ) ) {
+			if (
+				multiple &&
+				! shouldNotRecursivelySelect &&
+				isIndeterminate( selectedItems, item.children )
+			) {
 				return 'indeterminate';
 			}
 			return 'checked';
@@ -113,7 +119,7 @@ export function useSelection( {
 
 		if ( multiple ) {
 			value = [ item.data ];
-			if ( item.children.length ) {
+			if ( item.children.length && ! shouldNotRecursivelySelect ) {
 				value.push( ...getDeepChildren( item ) );
 			}
 		} else if ( item.children?.length ) {
@@ -132,7 +138,7 @@ export function useSelection( {
 	function onSelectChildren( value: Item | Item[] ) {
 		if ( typeof onSelect !== 'function' ) return;
 
-		if ( multiple ) {
+		if ( multiple && ! shouldNotRecursivelySelect ) {
 			value = [ item.data, ...( value as Item[] ) ];
 		}
 
@@ -142,7 +148,11 @@ export function useSelection( {
 	function onRemoveChildren( value: Item | Item[] ) {
 		if ( typeof onRemove !== 'function' ) return;
 
-		if ( multiple && item.children?.length ) {
+		if (
+			multiple &&
+			item.children?.length &&
+			! shouldNotRecursivelySelect
+		) {
 			const hasSelectedSibbling = hasSelectedSibblingChildren(
 				item.children,
 				value as Item[],

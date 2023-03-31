@@ -1,6 +1,5 @@
 {
 	"compilerOptions": {
-		"composite": true,
 		"target": "es2019",
 		"module": "esnext",
 		"moduleResolution": "node",
@@ -11,7 +10,7 @@
 		"jsx": "react",
 		"jsxFactory": "createElement",
 		"jsxFragmentFactory": "Fragment",
-		"incremental": true
+		"typeRoots": []
 	},
 	"exclude": [
 		"node_modules",
@@ -21,6 +20,7 @@
 		"**/build-types",
 		"**/test/*",
 		"**/jest.config.js",
+		"**/jest-preset.js",
 		"**/webpack.*.js",
 		"**/babel.config.js"
 	]

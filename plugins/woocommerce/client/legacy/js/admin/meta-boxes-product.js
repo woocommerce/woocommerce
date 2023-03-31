@@ -836,6 +836,18 @@ jQuery( function ( $ ) {
 		} );
 	} );
 
+	// Go to attributes tab when clicking on link in variations message
+	$( document.body ).on(
+		'click',
+		'#variable_product_options .add-attributes-message a[href="#product_attributes"]',
+		function () {
+			$(
+				'#woocommerce-product-data .attribute_tab a[href="#product_attributes"]'
+			).trigger( 'click' );
+			return false;
+		}
+	);
+
 	// Uploading files.
 	var downloadable_file_frame;
 	var file_path_field;

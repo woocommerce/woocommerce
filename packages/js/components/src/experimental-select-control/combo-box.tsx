@@ -1,26 +1,42 @@
 /**
  * External dependencies
  */
-import { createElement, MouseEvent, useRef } from 'react';
+import { createElement, MouseEvent, useRef, forwardRef } from 'react';
 import classNames from 'classnames';
-
-/**
- * Internal dependencies
- */
-import { Props } from './types';
+import { Icon, chevronDown } from '@wordpress/icons';
 
 type ComboBoxProps = {
 	children?: JSX.Element | JSX.Element[] | null;
-	comboBoxProps: Props;
-	inputProps: Props;
+	comboBoxProps: JSX.IntrinsicElements[ 'div' ];
+	inputProps: JSX.IntrinsicElements[ 'input' ];
+	getToggleButtonProps?: () => Omit<
+		JSX.IntrinsicElements[ 'button' ],
+		'ref'
+	>;
 	suffix?: JSX.Element | null;
+	showToggleButton?: boolean;
 };
+
+const ToggleButton = forwardRef< HTMLButtonElement >( ( props, ref ) => {
+	// using forwardRef here because getToggleButtonProps injects a ref prop
+	return (
+		<button
+			className="woocommerce-experimental-select-control__combox-box-toggle-button"
+			{ ...props }
+			ref={ ref }
+		>
+			<Icon icon={ chevronDown } />
+		</button>
+	);
+} );
 
 export const ComboBox = ( {
 	children,
 	comboBoxProps,
+	getToggleButtonProps = () => ( {} ),
 	inputProps,
 	suffix,
+	showToggleButton,
 }: ComboBoxProps ) => {
 	const inputRef = useRef< HTMLInputElement | null >( null );
 
@@ -60,12 +76,14 @@ export const ComboBox = ( {
 					<input
 						{ ...inputProps }
 						ref={ ( node ) => {
-							inputRef.current = node;
-							(
-								inputProps.ref as unknown as (
-									node: HTMLInputElement | null
-								) => void
-							 )( node );
+							if ( typeof inputProps.ref === 'function' ) {
+								inputRef.current = node;
+								(
+									inputProps.ref as unknown as (
+										node: HTMLInputElement | null
+									) => void
+								 )( node );
+							}
 						} }
 					/>
 				</div>
@@ -74,6 +92,9 @@ export const ComboBox = ( {
 				<div className="woocommerce-experimental-select-control__suffix">
 					{ suffix }
 				</div>
+			) }
+			{ showToggleButton && (
+				<ToggleButton { ...getToggleButtonProps() } />
 			) }
 		</div>
 	);

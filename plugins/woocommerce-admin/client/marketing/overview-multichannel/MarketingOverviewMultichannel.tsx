@@ -16,6 +16,7 @@ import {
 	useRegisteredChannels,
 	useRecommendedChannels,
 	useCampaignTypes,
+	useInstalledPluginsWithoutChannels,
 } from '~/marketing/hooks';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { IntroductionBanner } from './IntroductionBanner';
@@ -45,6 +46,8 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 	} = useRegisteredChannels();
 	const { loading: loadingRecommended, data: dataRecommended } =
 		useRecommendedChannels();
+	const { loadInstalledPluginsAfterActivation } =
+		useInstalledPluginsWithoutChannels();
 	const { currentUserCan } = useUser();
 	const channelsRef = useRef< ChannelsRef >( null );
 
@@ -58,18 +61,26 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 		return <CenteredSpinner />;
 	}
 
-	const shouldShowCampaigns = !! (
+	const showCampaigns = !! (
 		dataRegistered?.length &&
 		( isIntroductionBannerDismissed || metaCampaigns?.total )
 	);
 
-	const shouldShowExtensions =
-		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
-		currentUserCan( 'install_plugins' );
+	const showChannels = !! (
+		dataRegistered &&
+		dataRecommended &&
+		( dataRegistered.length || dataRecommended.length )
+	);
 
-	const refetch = () => {
+	const showExtensions = !! (
+		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
+		currentUserCan( 'install_plugins' )
+	);
+
+	const onInstalledAndActivated = ( pluginSlug: string ) => {
 		refetchCampaignTypes();
 		refetchRegisteredChannels();
+		loadInstalledPluginsAfterActivation( pluginSlug );
 	};
 
 	return (
@@ -82,18 +93,17 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 					} }
 				/>
 			) }
-			{ shouldShowCampaigns && <Campaigns /> }
-			{ !! ( dataRegistered && dataRecommended ) &&
-				!! ( dataRegistered.length || dataRecommended.length ) && (
-					<Channels
-						ref={ channelsRef }
-						registeredChannels={ dataRegistered }
-						recommendedChannels={ dataRecommended }
-						onInstalledAndActivated={ refetch }
-					/>
-				) }
+			{ showCampaigns && <Campaigns /> }
+			{ showChannels && (
+				<Channels
+					ref={ channelsRef }
+					registeredChannels={ dataRegistered }
+					recommendedChannels={ dataRecommended }
+					onInstalledAndActivated={ onInstalledAndActivated }
+				/>
+			) }
 			<InstalledExtensions />
-			{ !! shouldShowExtensions && <DiscoverTools /> }
+			{ showExtensions && <DiscoverTools /> }
 			<LearnMarketing />
 		</div>
 	);

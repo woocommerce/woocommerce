@@ -17,7 +17,8 @@ export function useExpander( {
 	useEffect( () => {
 		if (
 			item.children?.length &&
-			typeof shouldItemBeExpanded === 'function'
+			typeof shouldItemBeExpanded === 'function' &&
+			! isExpanded
 		) {
 			setExpanded( shouldItemBeExpanded( item ) );
 		}

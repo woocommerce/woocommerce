@@ -21,6 +21,7 @@ import {
 	useRecommendedChannels,
 	useCampaignTypes,
 	useRegisteredChannels,
+	useInstalledPluginsWithoutChannels,
 } from '~/marketing/hooks';
 import { SmartPluginCardBody } from '~/marketing/components';
 import './CreateNewCampaignModal.scss';
@@ -43,10 +44,16 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 		useCampaignTypes();
 	const { refetch: refetchRegisteredChannels } = useRegisteredChannels();
 	const { data: recommendedChannels } = useRecommendedChannels();
+	const { loadInstalledPluginsAfterActivation } =
+		useInstalledPluginsWithoutChannels();
 
-	const refetch = () => {
+	const hasCampaignTypes = !! campaignTypes?.length;
+	const hasRecommendedChannels = !! recommendedChannels?.length;
+
+	const onInstalledAndActivated = ( pluginSlug: string ) => {
 		refetchCampaignTypes();
 		refetchRegisteredChannels();
+		loadInstalledPluginsAfterActivation( pluginSlug );
 	};
 
 	return (
@@ -60,7 +67,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 		>
 			<div className="woocommerce-marketing-new-campaigns">
 				<div className="woocommerce-marketing-new-campaigns__question-label">
-					{ !! campaignTypes?.length
+					{ hasCampaignTypes
 						? __(
 								'Where would you like to promote your products?',
 								'woocommerce'
@@ -105,7 +112,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 									<FlexItem>
 										{ __( 'Create', 'woocommerce' ) }
 									</FlexItem>
-									{ !! isExternalURL( el.createUrl ) && (
+									{ isExternalURL( el.createUrl ) && (
 										<FlexItem>
 											<Icon
 												icon={ external }
@@ -119,7 +126,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 					</Flex>
 				) ) }
 			</div>
-			{ !! recommendedChannels?.length && (
+			{ hasRecommendedChannels && (
 				<div className="woocommerce-marketing-add-channels">
 					<Flex direction="column">
 						<FlexItem>
@@ -143,7 +150,9 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 									<SmartPluginCardBody
 										key={ el.plugin }
 										plugin={ el }
-										onInstalledAndActivated={ refetch }
+										onInstalledAndActivated={
+											onInstalledAndActivated
+										}
 									/>
 								) ) }
 							</FlexItem>

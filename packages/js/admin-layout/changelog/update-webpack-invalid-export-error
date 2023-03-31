@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update webpack config to use @woocommerce/internal-style-build's parser config

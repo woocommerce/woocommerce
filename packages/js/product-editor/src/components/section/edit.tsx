@@ -2,21 +2,33 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
+import type { BlockEditProps } from '@wordpress/blocks';
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
-import type { BlockAttributes } from '@wordpress/blocks';
 
-export function Edit( { attributes }: { attributes: BlockAttributes } ) {
+/**
+ * Internal dependencies
+ */
+import { BlockIcon } from '../block-icon';
+import { SectionBlockAttributes } from './types';
+import { sanitizeHTML } from '../../utils/sanitize-html';
+
+export function Edit( {
+	attributes,
+	clientId,
+}: BlockEditProps< SectionBlockAttributes > ) {
 	const blockProps = useBlockProps();
 	const { description, title } = attributes;
 
 	return (
 		<div { ...blockProps }>
 			<h2 className="wp-block-woocommerce-product-section__title">
-				{ title }
+				<BlockIcon clientId={ clientId } />
+				<span>{ title }</span>
 			</h2>
-			<p className="wp-block-woocommerce-product-section__description">
-				{ description }
-			</p>
+			<p
+				className="wp-block-woocommerce-product-section__description"
+				dangerouslySetInnerHTML={ sanitizeHTML( description ) }
+			/>
 			<InnerBlocks templateLock="all" />
 		</div>
 	);

@@ -12,6 +12,7 @@ module.exports = {
 		path: __dirname,
 	},
 	module: {
+		parser: webpackConfig.parser,
 		rules: webpackConfig.rules,
 	},
 	plugins: webpackConfig.plugins,

@@ -35,7 +35,7 @@ import './Channels.scss';
 type ChannelsProps = {
 	registeredChannels: Array< RegisteredChannel >;
 	recommendedChannels: Array< RecommendedChannel >;
-	onInstalledAndActivated?: () => void;
+	onInstalledAndActivated?: ( pluginSlug: string ) => void;
 };
 
 export type ChannelsRef = {
@@ -103,7 +103,7 @@ export const Channels = forwardRef< ChannelsRef, ChannelsProps >(
 				{ /* Recommended channels section. */ }
 				{ recommendedChannels.length >= 1 && (
 					<div>
-						{ !! hasRegisteredChannels && (
+						{ hasRegisteredChannels && (
 							<>
 								<CardDivider />
 								<CardBody>
@@ -127,7 +127,7 @@ export const Channels = forwardRef< ChannelsRef, ChannelsProps >(
 								</CardBody>
 							</>
 						) }
-						{ !! expanded &&
+						{ expanded &&
 							recommendedChannels.map( ( el, idx ) => (
 								<Fragment key={ el.plugin }>
 									<SmartPluginCardBody
