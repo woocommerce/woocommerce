@@ -1,7 +1,8 @@
 .wc-block-editor-product-gallery {
 	img {
-		width: 500px;
-		height: 500px;
+		max-width: 500px;
+		width: 100%;
+		height: auto;
 	}
 	.wc-block-editor-product-gallery__other-images {
 		img {
