@@ -144,6 +144,7 @@ class Server {
 			'customer-downloads'       => 'WC_REST_Customer_Downloads_Controller',
 			'customers'                => 'WC_REST_Customers_Controller',
 			'network-orders'           => 'WC_REST_Network_Orders_Controller',
+			'order-downloads'          => 'WC_REST_Order_Downloads_Controller',
 			'order-notes'              => 'WC_REST_Order_Notes_Controller',
 			'order-refunds'            => 'WC_REST_Order_Refunds_Controller',
 			'orders'                   => 'WC_REST_Orders_Controller',
