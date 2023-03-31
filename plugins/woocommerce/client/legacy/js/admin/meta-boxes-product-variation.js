@@ -125,9 +125,12 @@ jQuery( function ( $ ) {
 		 * @param {Object} event
 		 * @param {Int} qty
 		 */
-		reload: async function () {
-			await wc_meta_boxes_product_variations_ajax.load_variations( 1 );
-			wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
+		reload: function () {
+			wc_meta_boxes_product_variations_ajax
+				.load_variations( 1 )
+				.then(
+					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state
+				);
 			wc_meta_boxes_product_variations_pagenav.set_paginav( 0 );
 		},
 
