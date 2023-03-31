@@ -24,14 +24,6 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	protected $hook_data;
 
 	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		$this->set_hook_data();
-		$this->init();
-	}
-
-	/**
 	 * Update the render block data to inject our custom attribute needed to
 	 * determine which blocks belong to an inherited Products block.
 	 *
