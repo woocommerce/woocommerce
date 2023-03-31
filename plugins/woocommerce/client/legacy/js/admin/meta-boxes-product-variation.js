@@ -1577,7 +1577,7 @@ jQuery( function ( $ ) {
 		/**
 		 * Paginav pagination selector
 		 */
-		page_selector: async function () {
+		page_selector: function () {
 			var selected = parseInt( $( this ).val(), 10 ),
 				wrapper = $( '#variable_product_options' ).find(
 					'.woocommerce_variations'
@@ -1590,10 +1590,11 @@ jQuery( function ( $ ) {
 				selected,
 				parseInt( wrapper.attr( 'data-total_pages' ), 10 )
 			);
-			await wc_meta_boxes_product_variations_ajax.load_variations(
-				selected
-			);
-			wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
+			wc_meta_boxes_product_variations_ajax
+				.load_variations( selected )
+				.then(
+					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state()
+				);
 		},
 
 		/**
