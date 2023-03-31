@@ -16,8 +16,8 @@ import { MouseEvent } from 'react';
 import { getHeaderTitle } from '../../utils';
 import { MoreMenu } from './more-menu';
 import { usePublish } from './hooks/use-publish';
-import { useSaveDraft } from './hooks/use-save-draft';
 import { PreviewButton } from './preview-button';
+import { SaveDraftButton } from './save-draft-button';
 
 export type HeaderProps = {
 	productId: number;
@@ -66,25 +66,6 @@ export function Header( {
 			navigateTo( { url } );
 		}
 	}
-
-	const saveDraftButtonProps = useSaveDraft( {
-		productId,
-		disabled: isDisabled,
-		onSaveSuccess( savedProduct: Product ) {
-			createNotice(
-				'success',
-				__( 'Product saved as draft.', 'woocommerce' )
-			);
-
-			maybeRedirectToEditPage( savedProduct.id );
-		},
-		onSaveError() {
-			createNotice(
-				'error',
-				__( 'Failed to update product.', 'woocommerce' )
-			);
-		},
-	} );
 
 	const publishButtonProps = usePublish( {
 		productId,
@@ -136,7 +117,7 @@ export function Header( {
 			</h1>
 
 			<div className="woocommerce-product-header__actions">
-				<Button { ...saveDraftButtonProps } />
+				<SaveDraftButton />
 
 				<PreviewButton />
 

@@ -1,37 +1,50 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
+import { Product, ProductStatus } from '@woocommerce/data';
 import { Button, Icon } from '@wordpress/components';
+import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { check } from '@wordpress/icons';
 import { createElement, Fragment } from '@wordpress/element';
+import { MouseEvent, ReactNode } from 'react';
 
 export function useSaveDraft( {
-	productId,
 	disabled,
+	onClick,
 	onSaveSuccess,
 	onSaveError,
 	...props
-}: Omit< Button.ButtonProps, 'variant' | 'onClick' > & {
-	productId: number;
+}: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' > & {
 	onSaveSuccess?( product: Product ): void;
 	onSaveError?( error: Error ): void;
 } ): Button.ButtonProps {
-	const { productStatus, hasEdits } = useSelect(
-		( select ) => {
-			const { getEditedEntityRecord, hasEditsForEntityRecord } =
-				select( 'core' );
+	const [ productId ] = useEntityProp< number >(
+		'postType',
+		'product',
+		'id'
+	);
+	const [ productStatus ] = useEntityProp< ProductStatus | 'auto-draft' >(
+		'postType',
+		'product',
+		'status'
+	);
 
-			const product = getEditedEntityRecord< Product | undefined >(
+	const { hasEdits, isDisabled } = useSelect(
+		( select ) => {
+			const { hasEditsForEntityRecord, isSavingEntityRecord } =
+				select( 'core' );
+			const { isPostSavingLocked } = select( 'core/editor' );
+			const isSavingLocked = isPostSavingLocked();
+			const isSaving = isSavingEntityRecord< boolean >(
 				'postType',
 				'product',
 				productId
 			);
 
 			return {
-				productStatus: product?.status,
+				isDisabled: isSavingLocked || isSaving,
 				hasEdits: hasEditsForEntityRecord< boolean >(
 					'postType',
 					'product',
@@ -44,7 +57,11 @@ export function useSaveDraft( {
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	async function handleClick() {
+	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( onClick ) {
+			onClick( event );
+		}
+
 		try {
 			await editEntityRecord( 'postType', 'product', productId, {
 				status: 'draft',
@@ -55,17 +72,17 @@ export function useSaveDraft( {
 				productId
 			);
 
-			if ( typeof onSaveSuccess === 'function' ) {
+			if ( onSaveSuccess ) {
 				onSaveSuccess( publishedProduct );
 			}
 		} catch ( error ) {
-			if ( typeof onSaveError === 'function' ) {
+			if ( onSaveError ) {
 				onSaveError( error as Error );
 			}
 		}
 	}
 
-	let children;
+	let children: ReactNode;
 	if ( productStatus === 'publish' ) {
 		children = __( 'Switch to draft', 'woocommerce' );
 	} else if ( hasEdits ) {
@@ -83,7 +100,9 @@ export function useSaveDraft( {
 		children,
 		...props,
 		'aria-disabled':
-			disabled || ( productStatus !== 'publish' && ! hasEdits ),
+			disabled ||
+			isDisabled ||
+			( productStatus !== 'publish' && ! hasEdits ),
 		variant: 'tertiary',
 		onClick: handleClick,
 	};
