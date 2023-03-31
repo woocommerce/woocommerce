@@ -76,16 +76,14 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 				<?php
 				$version = wc()->api->get_rest_api_package_version();
 
-				if ( ! is_null( $version ) ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . ' <span aria-hidden="true">-</span></span>';
-					echo '<span class="screen-reader-text">' . esc_html__( 'Version', 'woocommerce' ) . ' </span> ' . esc_html( $version ) . ' ';
-					echo '<code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark>';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					echo esc_html__( 'Unable to detect the REST API package.', 'woocommerce' ) . '</mark>';
-				}
+				self::render_yes_no(
+					! is_null( $version ),
+					array(
+						'yes_html' => esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code>',
+						'no_html'  => esc_html__( 'Unable to detect the REST API package.', 'woocommerce' ),
+						'no_class' => 'error',
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -100,16 +98,14 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 					$path    = \Automattic\WooCommerce\Blocks\Package::get_path(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				}
 
-				if ( ! is_null( $version ) ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . ' <span aria-hidden="true">-</span></span>';
-					echo '<span class="screen-reader-text">' . esc_html__( 'Version', 'woocommerce' ) . ' </span> ' . esc_html( $version ) . ' ';
-					echo '<code class="private">' . esc_html( $path ) . '</code></mark> ';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					echo esc_html__( 'Unable to detect the Blocks package.', 'woocommerce' ) . '</mark> ';
-				}
+				self::render_yes_no(
+					! is_null( $version ),
+					array(
+						'yes_html' => esc_html( $version ) . ' <code class="private">' . esc_html( $path ) . '</code>',
+						'no_html'  => esc_html__( 'Unable to detect the Blocks package.', 'woocommerce' ),
+						'no_class' => 'error',
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -124,16 +120,14 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 					$path    = ActionScheduler::plugin_path( '' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				}
 
-				if ( ! is_null( $version ) ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . ' <span aria-hidden="true">-</span></span>';
-					echo '<span class="screen-reader-text">' . esc_html__( 'Version', 'woocommerce' ) . '</span> ' . esc_html( $version ) . ' ';
-					echo '<code class="private">' . esc_html( $path ) . '</code></mark> ';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					echo esc_html__( 'Unable to detect the Action Scheduler package.', 'woocommerce' ) . '</mark> ';
-				}
+				self::render_yes_no(
+					! is_null( $version ),
+					array(
+						'yes_html' => esc_html( $version ) . ' <code class="private">' . esc_html( $path ) . '</code>',
+						'no_html'  => esc_html__( 'Unable to detect the Action Scheduler package.', 'woocommerce' ),
+						'no_class' => 'error',
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -142,16 +136,15 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Several WooCommerce extensions can write logs which makes debugging problems easier. The directory must be writable for this to happen.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( $environment['log_directory_writable'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . ' <span aria-hidden="true">-</span></span>';
-					echo '<span class="screen-reader-text">' . esc_html__( 'Path', 'woocommerce' ) . '</span> <code class="private">' . esc_html( $environment['log_directory'] ) . '</code></mark>';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					/* Translators: %1$s: Log directory, %2$s: Log directory constant */
-					echo sprintf( esc_html__( 'To allow logging, make %1$s writable or define a custom %2$s.', 'woocommerce' ), '<code>' . esc_html( $environment['log_directory'] ) . '</code>', '<code>WC_LOG_DIR</code>' ) . '</mark> ';
-				}
+				self::render_yes_no(
+					$environment['log_directory_writable'],
+					array(
+						'yes_html' => '<code class="private">' . esc_html( $environment['log_directory'] ) . '</code>',
+						/* Translators: %1$s: Log directory, %2$s: Log directory constant */
+						'no_html'  => sprintf( esc_html__( 'To allow logging, make %1$s writable or define a custom %2$s.', 'woocommerce' ), '<code>' . esc_html( $environment['log_directory'] ) . '</code>', '<code>WC_LOG_DIR</code>' ),
+						'no_class' => 'error',
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -174,65 +167,53 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 					set_transient( 'woocommerce_system_status_wp_version_check', $latest_version, DAY_IN_SECONDS );
 				}
 
-				if ( version_compare( $environment['wp_version'], $latest_version, '<' ) ) {
-					/* Translators: %1$s: Memory limit, %2$s: Docs link. */
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . sprintf( esc_html__( '%1$s - There is a newer version of WordPress available (%2$s)', 'woocommerce' ), esc_html( $environment['wp_version'] ), esc_html( $latest_version ) ) . '</mark>';
-				} else {
-					echo '<mark class="yes">' . esc_html( $environment['wp_version'] ) . ' <span class="screen-reader-text">' . esc_html__( 'Up to date.', 'woocommerce' ) . '</span></mark>';
-				}
+				self::render_yes_no(
+					version_compare( $environment['wp_version'], $latest_version, '>=' ),
+					array(
+						'yes_label' => '',
+						'no_label'  => '',
+						'yes_html'  => esc_html( $environment['wp_version'] ),
+						/* Translators: %1$s: Current version, %2$s: New version */
+						'no_html'   => sprintf( esc_html__( '%1$s - There is a newer version of WordPress available (%2$s)', 'woocommerce' ), esc_html( $environment['wp_version'] ), esc_html( $latest_version ) ),
+						'no_class'  => 'error',
+					)
+				);
 				?>
 			</td>
 		</tr>
 		<tr>
 			<td data-export-label="WP Multisite"><?php esc_html_e( 'WordPress multisite', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Whether or not you have WordPress Multisite enabled.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td>
-				<?php
-				if ( $environment['wp_multisite'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . '</span></mark>';
-				} else {
-					echo '<mark class="no"><span class="screen-reader-text">' . esc_html__( 'No', 'woocommerce' ) . '</span><span aria-hidden="true">&ndash;</span></mark>';
-				}
-				?>
-			</td>
+			<td><?php self::render_yes_no( $environment['wp_multisite'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="WP Memory Limit"><?php esc_html_e( 'WordPress memory limit', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( $environment['wp_memory_limit'] < 67108864 ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					/* Translators: %1$s: Memory limit, %2$s: Docs link. */
-					echo sprintf( esc_html__( '%1$s - We recommend setting memory to at least 64MB. See: %2$s.', 'woocommerce' ), esc_html( size_format( $environment['wp_memory_limit'] ) ), '<a href="https://wordpress.org/support/article/editing-wp-config-php/#increasing-memory-allocated-to-php" target="_blank">' . esc_html__( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
-				} else {
-					echo '<mark class="yes">' . esc_html( size_format( $environment['wp_memory_limit'] ) ) . '</mark>';
-				}
+				self::render_yes_no(
+					$environment['wp_memory_limit'] >= 67108864,
+					array(
+						'yes_label' => '',
+						'no_label'  => '',
+						'no_class'  => 'error',
+						'yes_html'  => esc_html( size_format( $environment['wp_memory_limit'] ) ),
+						/* Translators: %1$s: Memory limit, %2$s: Docs link. */
+						'no_html'   => sprintf( esc_html__( '%1$s - We recommend setting memory to at least 64MB. See: %2$s.', 'woocommerce' ), esc_html( size_format( $environment['wp_memory_limit'] ) ), '<a href="https://wordpress.org/support/article/editing-wp-config-php/#increasing-memory-allocated-to-php" target="_blank">' . esc_html__( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ),
+					)
+				);
 				?>
 			</td>
 		</tr>
 		<tr>
 			<td data-export-label="WP Debug Mode"><?php esc_html_e( 'WordPress debug mode', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not WordPress is in Debug Mode.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td>
-				<?php if ( $environment['wp_debug_mode'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export"><?php esc_html_e( 'Yes', 'woocommerce' ); ?></span></mark>
-				<?php else : ?>
-					<mark class="no"><span class="screen-reader-text"><?php esc_html_e( 'No', 'woocommerce' ); ?></span><span aria-hidden="true">&ndash;</span></mark>
-				<?php endif; ?>
-			</td>
+			<td><?php self::render_yes_no( $environment['wp_debug_mode'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="WP Cron"><?php esc_html_e( 'WordPress cron', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not WP Cron Jobs are enabled.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td>
-				<?php if ( $environment['wp_cron'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export"><?php esc_html_e( 'Yes', 'woocommerce' ); ?></span></mark>
-				<?php else : ?>
-					<mark class="no"><span class="screen-reader-text"><?php esc_html_e( 'No', 'woocommerce' ); ?></span><span aria-hidden="true">&ndash;</span></mark>
-				<?php endif; ?>
-			</td>
+			<td><?php self::render_yes_no( $environment['wp_cron'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Language"><?php esc_html_e( 'Language', 'woocommerce' ); ?>:</td>
@@ -242,13 +223,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 		<tr>
 			<td data-export-label="External object cache"><?php esc_html_e( 'External object cache', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not WordPress is using an external object cache.', 'woocommerce' ) ); ?></td>
-			<td>
-				<?php if ( $environment['external_object_cache'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export"><?php esc_html_e( 'Yes', 'woocommerce' ); ?></span></mark>
-				<?php else : ?>
-					<mark class="no"><span class="screen-reader-text"><?php esc_html_e( 'No', 'woocommerce' ); ?></span><span aria-hidden="true">&ndash;</span></mark>
-				<?php endif; ?>
-			</td>
+			<td><?php self::render_yes_no( $environment['external_object_cache'] ); ?></td>
 		</tr>
 	</tbody>
 </table>
@@ -269,9 +244,8 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of PHP installed on your hosting server.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( version_compare( $environment['php_version'], '7.2', '>=' ) ) {
-					echo '<mark class="yes">' . esc_html( $environment['php_version'] ) . '</mark>';
-				} else {
+				$php_ok = version_compare( $environment['php_version'], '7.2', '>=' );
+				if ( ! $php_ok ) {
 					$update_link = ' <a href="https://docs.woocommerce.com/document/how-to-update-your-php-version/" target="_blank">' . esc_html__( 'How to update your PHP version.', 'woocommerce' ) . '</a>';
 					$class       = 'error';
 
@@ -283,9 +257,20 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 						$notice = __( 'We recommend using PHP version 7.2 or above for greater performance and security.', 'woocommerce' ) . $update_link;
 						$class  = 'recommendation';
 					}
-
-					echo '<mark class="' . esc_attr( $class ) . '">' . ( 'recommendation' === $class ? '' : '<span class="dashicons dashicons-warning" aria-hidden="true"></span> ' ) . esc_html( $environment['php_version'] ) . ' - ' . wp_kses_post( $notice ) . '</mark>';
 				}
+
+				self::render_yes_no(
+					$php_ok,
+					array(
+						'yes_label' => '',
+						'yes_html'  => esc_html( $environment['php_version'] ),
+						'yes_icon'  => '',
+						'no_html'   => esc_html( $environment['php_version'] ) . ' - ' . wp_kses_post( $notice ?? '' ),
+						'no_label'  => '',
+						'no_class'  => $class ?? '',
+						'no_icon'   => ( isset( $class ) && 'recommendation' === $class ) ? '' : 'warning',
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -313,12 +298,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<tr>
 				<td data-export-label="SUHOSIN Installed"><?php esc_html_e( 'SUHOSIN installed', 'woocommerce' ); ?>:</td>
 				<td class="help"><?php echo wc_help_tip( esc_html__( 'Suhosin is an advanced protection system for PHP installations. It was designed to protect your servers on the one hand against a number of well known problems in PHP applications and on the other hand against potential unknown vulnerabilities within these applications or the PHP core itself. If enabled on your server, Suhosin may need to be configured to increase its data submission limits.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-				<td>
-					<?php if ( $environment['suhosin_installed'] ) : ?>
-						<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export"><?php esc_html_e( 'Yes', 'woocommerce' ); ?></span></mark>
-					<?php else : ?>
-						<mark class="no"><span class="screen-reader-text"><?php esc_html_e( 'No', 'woocommerce' ); ?></span><span aria-hidden="true">&ndash;</span></mark>
-					<?php endif; ?>
+				<td><?php self::render_yes_no( $environment['suhosin_installed'] ); ?></td>
 				</td>
 			</tr>
 		<?php endif; ?>
@@ -332,12 +312,16 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 				<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of MySQL installed on your hosting server.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 				<td>
 					<?php
-					if ( version_compare( $environment['mysql_version'], '5.6', '<' ) && ! strstr( $environment['mysql_version_string'], 'MariaDB' ) ) {
-						/* Translators: %1$s: MySQL version, %2$s: Recommended MySQL version. */
-						echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . sprintf( esc_html__( '%1$s - We recommend a minimum MySQL version of 5.6. See: %2$s.', 'woocommerce' ), esc_html( $environment['mysql_version_string'] ), '<a href="https://wordpress.org/about/requirements/" target="_blank">' . esc_html__( 'WordPress requirements', 'woocommerce' ) . '</a>' ) . '</mark>';
-					} else {
-						echo '<mark class="yes">' . esc_html( $environment['mysql_version_string'] ) . '</mark>';
-					}
+					self::render_yes_no(
+						! ( version_compare( $environment['mysql_version'], '5.6', '<' ) && ! strstr( $environment['mysql_version_string'], 'MariaDB' ) ),
+						array(
+							'yes_html'  => esc_html( $environment['mysql_version_string'] ),
+							'yes_label' => '',
+							'no_class'  => 'error',
+							/* Translators: %1$s: MySQL version, %2$s: Recommended MySQL version. */
+							'no_html'   => sprintf( esc_html__( '%1$s - We recommend a minimum MySQL version of 5.6. See: %2$s.', 'woocommerce' ), esc_html( $environment['mysql_version_string'] ), '<a href="https://wordpress.org/about/requirements/" target="_blank">' . esc_html__( 'WordPress requirements', 'woocommerce' ) . '</a>' ),
+						)
+					);
 					?>
 				</td>
 			</tr>
@@ -352,15 +336,14 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The default timezone for your server.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( 'UTC' !== $environment['default_timezone'] ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					/* Translators: %s: default timezone.. */
-					echo sprintf( esc_html__( 'Default timezone is %s - it should be UTC', 'woocommerce' ), esc_html( $environment['default_timezone'] ) );
-					echo '</mark>';
-				} else {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . '</span></mark>';
-				}
+				self::render_yes_no(
+					'UTC' === $environment['default_timezone'],
+					array(
+						'no_class' => 'error',
+						/* Translators: %s: default timezone. */
+						'no_html'  => sprintf( esc_html__( 'Default timezone is %s - it should be UTC', 'woocommerce' ), esc_html( $environment['default_timezone'] ) ),
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -369,14 +352,13 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Payment gateways can use cURL to communicate with remote servers to authorize payments, other plugins may also use it when communicating with remote services.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( $environment['fsockopen_or_curl_enabled'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . '</span></mark>';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					echo esc_html__( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' );
-					echo '</mark>';
-				}
+				self::render_yes_no(
+					$environment['fsockopen_or_curl_enabled'],
+					array(
+						'no_class' => 'error',
+						'no_html'  => esc_html__( 'Your server does not have fsockopen or cURL enabled - PayPal IPN and other scripts which communicate with other servers will not work. Contact your hosting provider.', 'woocommerce' ),
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -385,15 +367,14 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Some webservices like shipping use SOAP to get information from remote servers, for example, live shipping quotes from FedEx require SOAP to be installed.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( $environment['soapclient_enabled'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . '</span></mark>';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					/* Translators: %s classname and link. */
-					echo sprintf( esc_html__( 'Your server does not have the %s class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.soapclient.php">SoapClient</a>' );
-					echo '</mark>';
-				}
+				self::render_yes_no(
+					$environment['soapclient_enabled'],
+					array(
+						'no_class' => 'error',
+						/* Translators: %s classname and link. */
+						'no_html'  => sprintf( esc_html__( 'Your server does not have the %s class enabled - some gateway plugins which use SOAP may not work as expected.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.soapclient.php">SoapClient</a>' ),
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -402,15 +383,14 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'HTML/Multipart emails use DOMDocument to generate inline CSS in templates.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( $environment['domdocument_enabled'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . '</span></mark>';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					/* Translators: %s classname and link. */
-					echo sprintf( esc_html__( 'Your server does not have the %s class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.domdocument.php">DOMDocument</a>' );
-					echo '</mark>';
-				}
+				self::render_yes_no(
+					$environment['domdocument_enabled'],
+					array(
+						'no_class' => 'error',
+						/* Translators: %s classname and link. */
+						'no_html'  => sprintf( esc_html__( 'Your server does not have the %s class enabled - HTML/Multipart emails, and also some extensions, will not work without DOMDocument.', 'woocommerce' ), '<a href="https://php.net/manual/en/class.domdocument.php">DOMDocument</a>' ),
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -419,15 +399,14 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'GZip (gzopen) is used to open the GEOIP database from MaxMind.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( $environment['gzip_enabled'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . '</span></mark>';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					/* Translators: %s classname and link. */
-					echo sprintf( esc_html__( 'Your server does not support the %s function - this is required to use the GeoIP database from MaxMind.', 'woocommerce' ), '<a href="https://php.net/manual/en/zlib.installation.php">gzopen</a>' );
-					echo '</mark>';
-				}
+				self::render_yes_no(
+					$environment['gzip_enabled'],
+					array(
+						'no_class' => 'error',
+						/* Translators: %s classname and link. */
+						'no_html'  => sprintf( esc_html__( 'Your server does not support the %s function - this is required to use the GeoIP database from MaxMind.', 'woocommerce' ), '<a href="https://php.net/manual/en/zlib.installation.php">gzopen</a>' ),
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -436,15 +415,14 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Multibyte String (mbstring) is used to convert character encoding, like for emails or converting characters to lowercase.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( $environment['mbstring_enabled'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . '</span></mark>';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					/* Translators: %s classname and link. */
-					echo sprintf( esc_html__( 'Your server does not support the %s functions - this is required for better character encoding. Some fallbacks will be used instead for it.', 'woocommerce' ), '<a href="https://php.net/manual/en/mbstring.installation.php">mbstring</a>' );
-					echo '</mark>';
-				}
+				self::render_yes_no(
+					$environment['mbstring_enabled'],
+					array(
+						'no_class' => 'error',
+						/* Translators: %s classname and link. */
+						'no_html'  => sprintf( esc_html__( 'Your server does not support the %s functions - this is required for better character encoding. Some fallbacks will be used instead for it.', 'woocommerce' ), '<a href="https://php.net/manual/en/mbstring.installation.php">mbstring</a>' ),
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -453,15 +431,14 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'PayPal uses this method of communicating when sending back transaction information.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( $environment['remote_post_successful'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . '</span></mark>';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					/* Translators: %s classname and link. */
-					echo sprintf( esc_html__( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_post()' ) . ' ' . esc_html( $environment['remote_post_response'] );
-					echo '</mark>';
-				}
+				self::render_yes_no(
+					$environment['mbstring_enabled'],
+					array(
+						'no_class' => 'error',
+						/* Translators: %s: function name. */
+						'no_html'  => sprintf( esc_html__( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_post()' ) . ' ' . esc_html( $environment['remote_post_response'] ),
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -470,42 +447,42 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'WooCommerce plugins may use this method of communication when checking for plugin updates.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( $environment['remote_get_successful'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . '</span></mark>';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					/* Translators: %s classname and link. */
-					echo sprintf( esc_html__( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_get()' ) . ' ' . esc_html( $environment['remote_get_response'] );
-					echo '</mark>';
-				}
+				self::render_yes_no(
+					$environment['mbstring_enabled'],
+					array(
+						'no_class' => 'error',
+						/* Translators: %s: function name. */
+						'no_html'  => sprintf( esc_html__( '%s failed. Contact your hosting provider.', 'woocommerce' ), 'wp_remote_get()' ) . ' ' . esc_html( $environment['remote_get_response'] ),
+					)
+				);
 				?>
 			</td>
 		</tr>
 		<?php
 		$rows = apply_filters( 'woocommerce_system_status_environment_rows', array() );
 
-		foreach ( $rows as $row ) {
-			if ( ! empty( $row['success'] ) ) {
-				$css_class = 'yes';
-				$icon      = '<span class="dashicons dashicons-yes" aria-hidden="true"></span>';
-			} else {
-				$css_class = 'error';
-				$icon      = '<span class="dashicons dashicons-no-alt" aria-hidden="true"></span>';
-			}
+		foreach ( $rows as $row ) :
 			?>
 			<tr>
 				<td data-export-label="<?php echo esc_attr( $row['name'] ); ?>"><?php echo esc_html( $row['name'] ); ?>:</td>
 				<td class="help"><?php echo esc_html( isset( $row['help'] ) ? $row['help'] : '' ); ?></td>
 				<td>
-					<mark class="<?php echo esc_attr( $css_class ); ?>">
-						<?php echo wp_kses_post( $icon ); ?> <span class="hide-from-export"><?php echo ( 'yes' === $css_class ? esc_html__( 'Yes', 'woocommerce' ) : esc_html__( 'No', 'woocommerce' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> <span aria-hidden="true">-</span> </span><?php echo wp_kses_data( ! empty( $row['note'] ) ? $row['note'] : '' ); ?>
-					</mark>
+					<?php
+					$note = wp_kses_data( ! empty( $row['note'] ) ? $row['note'] : '' );
+
+					self::render_yes_no(
+						! empty( $row['success'] ),
+						array(
+							'no_class' => 'error',
+							'no_icon'  => 'no-alt',
+							'yes_html' => $note,
+							'no_html'  => $note,
+						)
+					);
+					?>
 				</td>
 			</tr>
-			<?php
-		}
-		?>
+		<?php endforeach; ?>
 	</tbody>
 </table>
 <table id="status-database" class="wc_status_table widefat" cellspacing="0">
@@ -532,14 +509,18 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td class="help">&nbsp;</td>
 			<td>
 				<?php
-				if ( strlen( $database['database_prefix'] ) > 20 ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ';
-					/* Translators: %1$s: Database prefix, %2$s: Docs link. */
-					echo sprintf( esc_html__( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s.', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . esc_html__( 'How to update your database table prefix', 'woocommerce' ) . '</a>' );
-					echo '</mark>';
-				} else {
-					echo '<mark class="yes">' . esc_html( $database['database_prefix'] ) . '</mark>';
-				}
+				self::render_yes_no(
+					strlen( $database['database_prefix'] ) <= 20,
+					array(
+						'yes_label' => '',
+						'yes_icon'  => '',
+						'yes_html'  => esc_html( $database['database_prefix'] ),
+						'no_label'  => '',
+						'no_class'  => 'error',
+						/* Translators: %1$s: Database prefix, %2$s: Docs link. */
+						'no_html'   => sprintf( esc_html__( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s.', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . esc_html__( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ),
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -642,27 +623,31 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 			<td data-export-label="Secure connection (HTTPS)"><?php esc_html_e( 'Secure connection (HTTPS)', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is the connection to your store secure?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
-				<?php if ( $security['secure_connection'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export"><?php esc_html_e( 'Yes', 'woocommerce' ); ?></span></mark>
-				<?php else : ?>
-					<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> <span class="hide-from-export"><?php esc_html_e( 'No', 'woocommerce' ); ?> <span aria-hidden="true">-</span> </span>
-					<?php
-					/* Translators: %s: docs link. */
-					echo wp_kses_post( sprintf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ) );
-					?>
-					</mark>
-				<?php endif; ?>
+				<?php
+				self::render_yes_no(
+					$security['secure_connection'],
+					array(
+						'no_class' => 'error',
+						/* Translators: %s: docs link. */
+						'no_html'  => wp_kses_post( sprintf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ) ),
+					)
+				);
+				?>
 			</td>
 		</tr>
 		<tr>
 			<td data-export-label="Hide errors from visitors"><?php esc_html_e( 'Hide errors from visitors', 'woocommerce' ); ?></td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Error messages can contain sensitive information about your store environment. These should be hidden from untrusted visitors.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
-				<?php if ( $security['hide_errors'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export"><?php esc_html_e( 'Yes', 'woocommerce' ); ?></span></mark>
-				<?php else : ?>
-					<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> <span class="hide-from-export"><?php esc_html_e( 'No', 'woocommerce' ); ?> <span aria-hidden="true">-</span> </span><?php echo esc_html__( 'Error messages should not be shown to visitors.', 'woocommerce' ); ?></mark>
-				<?php endif; ?>
+				<?php
+				self::render_yes_no(
+					$security['hide_errors'],
+					array(
+						'no_class' => 'error',
+						'no_html'  => esc_html__( 'Error messages should not be shown to visitors.', 'woocommerce' ),
+					)
+				);
+				?>
 			</td>
 		</tr>
 	</tbody>
@@ -754,23 +739,12 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		<tr>
 			<td data-export-label="API Enabled"><?php esc_html_e( 'API enabled', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Does your site have REST API enabled?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td>
-				<?php if ( $settings['api_enabled'] ) : ?>
-					<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export"><?php esc_html_e( 'Yes', 'woocommerce' ); ?></span></mark>
-				<?php else : ?>
-					<mark class="no"><span class="screen-reader-text"><?php esc_html_e( 'No', 'woocommerce' ); ?></span><span aria-hidden="true">&ndash;</span></mark>
-				<?php endif; ?>
-			</td>
+			<td><?php self::render_yes_no( $settings['api_enabled'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Force SSL"><?php esc_html_e( 'Force SSL', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Does your site force a SSL Certificate for transactions?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td>
-			<?php if ( $settings['force_ssl'] ) : ?>
-				<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export"><?php esc_html_e( 'Yes', 'woocommerce' ); ?></span></mark>
-			<?php else : ?>
-				<mark class="no"><span class="screen-reader-text"><?php esc_html_e( 'No', 'woocommerce' ); ?></span><span aria-hidden="true">&ndash;</span></mark>
-			<?php endif; ?>
+			<td><?php self::render_yes_no( $settings['force_ssl'] ); ?></td>
 		</td>
 		</tr>
 		<tr>
@@ -827,23 +801,23 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		<tr>
 			<td data-export-label="Connected to WooCommerce.com"><?php esc_html_e( 'Connected to WooCommerce.com', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to WooCommerce.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo 'yes' === $settings['woocommerce_com_connected'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+			<td><?php self::render_yes_no( 'yes' === $settings['woocommerce_com_connected'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Enforce Approved Product Download Directories"><?php esc_html_e( 'Enforce Approved Product Download Directories', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site enforcing the use of Approved Product Download Directories?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo $settings['enforce_approved_download_dirs'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+			<td><?php self::render_yes_no( $settings['enforce_approved_download_dirs'] ); ?></td>
 		</tr>
 
 		<tr>
 			<td data-export-label="HPOS feature screen enabled"><?php esc_html_e( 'HPOS feature screen enabled:', 'woocommerce' ); ?></td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is HPOS feature screen enabled?', 'woocommerce' ) ); ?></td>
-			<td><?php echo $settings['HPOS_feature_screen_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+			<td><?php self::render_yes_no( $settings['HPOS_feature_screen_enabled'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="HPOS feature enabled"><?php esc_html_e( 'HPOS enabled:', 'woocommerce' ); ?></td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is HPOS enabled?', 'woocommerce' ) ); ?></td>
-			<td><?php echo $settings['HPOS_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+			<td><?php self::render_yes_no( $settings['HPOS_enabled'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Order datastore"><?php esc_html_e( 'Order datastore:', 'woocommerce' ); ?></td>
@@ -853,7 +827,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		<tr>
 			<td data-export-label="HPOS data sync enabled"><?php esc_html_e( 'HPOS data sync enabled:', 'woocommerce' ); ?></td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is data sync enabled for HPOS?', 'woocommerce' ) ); ?></td>
-			<td><?php echo $settings['HPOS_sync_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+			<td><?php self::render_yes_no( $settings['HPOS_sync_enabled'] ); ?></td>
 		</tr>
 
 	</tbody>
@@ -868,7 +842,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		<?php
 		$alt = 1;
 		foreach ( $wp_pages as $_page ) {
-			$found_error = false;
+			$error_msg = '';
 
 			if ( $_page['page_id'] ) {
 				/* Translators: %s: page name. */
@@ -883,29 +857,33 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 
 			// Page ID check.
 			if ( ! $_page['page_set'] ) {
-				echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html__( 'Page not set', 'woocommerce' ) . '</mark>';
-				$found_error = true;
+				$error_msg = esc_html__( 'Page not set', 'woocommerce' );
 			} elseif ( ! $_page['page_exists'] ) {
-				echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html__( 'Page ID is set, but the page does not exist', 'woocommerce' ) . '</mark>';
-				$found_error = true;
+				$error_msg = esc_html__( 'Page ID is set, but the page does not exist', 'woocommerce' );
 			} elseif ( ! $_page['page_visible'] ) {
 				/* Translators: %s: docs link. */
-				echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' ) ) . '</mark>';
-				$found_error = true;
+				$error_msg = wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' ) );
 			} else {
 				// Shortcode and block check.
 				if ( $_page['shortcode_required'] || $_page['block_required'] ) {
 					if ( ! $_page['shortcode_present'] && ! $_page['block_present'] ) {
 						/* Translators: %1$s: shortcode text, %2$s: block slug. */
-						echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ) . '</mark>'; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
-						$found_error = true;
+						$error_msg = ( $_page['block_required'] ? sprintf( esc_html__( 'Page does not contain the %1$s shortcode or the %2$s block.', 'woocommerce' ), esc_html( $_page['shortcode'] ), esc_html( $_page['block'] ) ) : sprintf( esc_html__( 'Page does not contain the %s shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
 					}
 				}
 			}
 
-			if ( ! $found_error ) {
-				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>';
-			}
+			self::render_yes_no(
+				empty( $error_msg ),
+				array(
+					'yes_label' => '',
+					'yes_icon'  => '',
+					'yes_html'  => '#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ),
+					'no_class'  => 'error',
+					'no_label'  => '',
+					'no_html'   => $error_msg,
+				)
+			);
 
 			echo '</td></tr>';
 		}
@@ -948,14 +926,13 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not the current theme is a child theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( $theme['is_child_theme'] ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> <span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . '</span></mark>';
-				} else {
-					echo '<span class="dashicons dashicons-no-alt" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'No', 'woocommerce' ) . ' <span aria-hidden="true">-</span> </span>';
-					/* Translators: %s docs link. */
-					echo wp_kses_post( sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://developer.wordpress.org/themes/advanced-topics/child-themes/' ) );
-				}
+				self::render_yes_no(
+					$theme['is_child_theme'],
+					array(
+						/* Translators: %s docs link. */
+						'no_html' => wp_kses_post( sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>.', 'woocommerce' ), 'https://developer.wordpress.org/themes/advanced-topics/child-themes/' ) ),
+					)
+				);
 				?>
 				</td>
 		</tr>
@@ -994,12 +971,14 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( ! $theme['has_woocommerce_support'] ) {
-					echo '<mark class="error"><span class="dashicons dashicons-warning" aria-hidden="true"></span> ' . esc_html__( 'Not declared', 'woocommerce' ) . '</mark>';
-				} else {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes" aria-hidden="true"></span> ';
-					echo '<span class="hide-from-export">' . esc_html__( 'Yes', 'woocommerce' ) . '</span></mark>';
-				}
+				self::render_yes_no(
+					$theme['has_woocommerce_support'],
+					true,
+					array(
+						'no_class' => 'error',
+						'no_label' => __( 'Not declared', 'woocommerce' ),
+					)
+				);
 				?>
 			</td>
 		</tr>
@@ -1061,12 +1040,16 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 				<td data-export-label="Outdated Templates"><?php esc_html_e( 'Outdated templates', 'woocommerce' ); ?>:</td>
 				<td class="help">&nbsp;</td>
 				<td>
-					<mark class="error">
-						<span class="dashicons dashicons-warning"></span>
-					</mark>
-					<a href="https://docs.woocommerce.com/document/fix-outdated-templates-woocommerce/" target="_blank">
-						<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
-					</a>
+					<?php
+					self::render_yes_no(
+						false,
+						array(
+							'no_class' => 'error',
+							'no_label' => '',
+							'no_html'  => '<a href="https://docs.woocommerce.com/document/fix-outdated-templates-woocommerce/" target="_blank">' . esc_html__( 'Learn how to update', 'woocommerce' ) . '</a>',
+						)
+					);
+					?>
 				</td>
 			</tr>
 		<?php endif; ?>

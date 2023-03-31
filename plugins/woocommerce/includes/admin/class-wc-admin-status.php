@@ -435,4 +435,62 @@ class WC_Admin_Status {
 			}
 		}
 	}
+
+	/**
+	 * Utility function to render yes/no (or ok/error) <mark> tags on the System Status screen.
+	 * It defaults to "Yes" and "No" labels, with their corresponding icons.
+	 *
+	 * @since 7.7.0
+	 *
+	 * @param bool  $test The feature or check to perform. If this evaluates to TRUE, the "yes" configuration will be used.
+	 * @param array $args {
+	 *   Array of arguments to configure the output.
+	 *
+	 *   @type bool   $echo      Whether to directly print the result or not. Defaults to TRUE.
+	 *   @type string $yes_class CSS class to use for the <mark> tag when $test evaluates to TRUE. Defaults to 'yes'.
+	 *   @type string $yes_label Label to use for the when $test evaluates to TRUE. Defaults to 'Yes'.
+	 *   @type string $yes_icon  Dashicon to use for the when $test evaluates to TRUE. Defaults to 'yes'.
+	 *   @type string $yes_html  Optional HTML to append after the label when $test evaluates to TRUE.
+	 *   @type string $no_class  CSS class to use for the <mark> tag when $test evaluates to FALSE. Defaults to 'no'.
+	 *   @type string $no_label  Label to use for the when $test evaluates to FALSE. Defaults to 'No'.
+	 *   @type string $no_icon   Dashicon to use for the when $test evaluates to FALSE. Defaults to 'no-alt', except when $no_class is 'error', in which case it uses 'warning'.
+	 *   @type string $no_html   Optional HTML to append after the label when $test evaluates to FALSE.
+	 * }
+	 * @return string The HTML output.
+	 */
+	private static function render_yes_no( $test, $args = array() ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'echo'      => true,
+				'yes_class' => 'yes',
+				'yes_label' => __( 'Yes', 'woocommerce' ),
+				'yes_icon'  => null,
+				'yes_html'  => '',
+				'no_class'  => 'no',
+				'no_label'  => __( 'No', 'woocommerce' ),
+				'no_icon'   => null,
+				'no_html'   => '',
+			)
+		);
+
+		$class = $test ? $args['yes_class'] : $args['no_class'];
+		$icon  = $test ? ( $args['yes_icon'] ?? 'yes' ) : ( 'error' === $args['no_class'] ? 'warning' : ( $args['no_icon'] ?? 'no-alt' ) );
+		$label = $test ? $args['yes_label'] : $args['no_label'];
+		$html  = $test ? $args['yes_html'] : $args['no_html'];
+
+		$result  = '';
+		$result .= '<mark class="' . $class . '">';
+		$result .= $icon ? '<span class="dashicons dashicons-' . $icon . '" aria-hidden="true"></span> ' : '';
+		$result .= $label ? ( '<span class="hide-from-export">' . esc_html( $label ) . ' ' . ( $html ? '<span aria-hidden="true">-</span> ' : '' ) . '</span>' ) : '';
+		$result .= $html ? $html : '';
+		$result .= '</mark>';
+
+		if ( $args['echo'] ) {
+			echo $result; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+
+		return $result;
+	}
+
 }
