@@ -8,6 +8,11 @@ import { RadioControl } from '@wordpress/components';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 
+/**
+ * Internal dependencies
+ */
+import { sanitizeHTML } from '../../utils/sanitize-html';
+
 export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	const blockProps = useBlockProps();
 	const { description, options, property, title } = attributes;
@@ -25,9 +30,12 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 						<span className="wp-block-woocommerce-product-radio__title">
 							{ title }
 						</span>
-						<span className="wp-block-woocommerce-product-radio__description">
-							{ description }
-						</span>
+						<span
+							className="wp-block-woocommerce-product-radio__description"
+							dangerouslySetInnerHTML={ sanitizeHTML(
+								description
+							) }
+						/>
 					</>
 				}
 				selected={ value }
