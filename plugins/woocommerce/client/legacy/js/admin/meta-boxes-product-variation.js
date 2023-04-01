@@ -1451,7 +1451,7 @@ jQuery( function ( $ ) {
 
 				if ( page_nav.is( ':hidden' ) ) {
 					$( 'option, optgroup', '.variation_actions' ).show();
-					$( '.variation_actions' ).val( 'delete_all' );
+					$( '.variation_actions' ).val( 'bulk_actions' );
 					$( '#variable_product_options' ).find( '.toolbar' ).show();
 					page_nav.show();
 					$( '.pagination-links', page_nav ).hide();
@@ -1498,13 +1498,13 @@ jQuery( function ( $ ) {
 				toolbar.not( '.toolbar-top, .toolbar-buttons' ).hide();
 				page_nav.hide();
 				$( 'option, optgroup', variation_action ).hide();
-				$( '.variation_actions' ).val( 'delete_all' );
+				$( '.variation_actions' ).val( 'bulk_actions' );
 				$( 'option[data-global="true"]', variation_action ).show();
 			} else {
 				toolbar.show();
 				page_nav.show();
 				$( 'option, optgroup', variation_action ).show();
-				$( '.variation_actions' ).val( 'delete_all' );
+				$( '.variation_actions' ).val( 'bulk_actions' );
 
 				// Show/hide links
 				if ( 1 === total_pages ) {
