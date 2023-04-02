@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Tests_Logger file.
+ *
+ * @package WooCommerce\Tests
+ */
 
 /**
  * Class WC_Tests_Logger
@@ -43,11 +48,13 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_clear() {
+		// phpcs:disable WordPress.WP.AlternativeFunctions
 		$file = wc_get_log_file_path( 'unit-tests' );
-		file_put_contents( $file, 'Test file content.' ); // @codingStandardsIgnoreLine.
+		file_put_contents( $file, 'Test file content.' );
 		$log = new WC_Logger();
 		$log->clear( 'unit-tests' );
 		$this->assertEquals( '', file_get_contents( $file ) );
+		// phpcs:enable WordPress.WP.AlternativeFunctions
 	}
 
 	/**
@@ -67,6 +74,8 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_log() {
+		$this->expectNotToPerformAssertions();
+
 		$handler = $this->create_mock_handler();
 		$log     = new WC_Logger( array( $handler ), 'debug' );
 		$log->log( 'debug', 'debug message' );
@@ -121,6 +130,8 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_level_methods() {
+		$this->expectNotToPerformAssertions();
+
 		$handler = $this->create_mock_handler();
 		$log     = new WC_Logger( array( $handler ), 'debug' );
 		$log->debug( 'debug message' );
@@ -160,29 +171,27 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	public function test_threshold_defaults() {
 		$time = time();
 
-		// Test no filtering by default
+		// Test no filtering by default.
 		delete_option( 'woocommerce_log_threshold' );
 		$handler = $this
 			->getMockBuilder( 'WC_Log_Handler_Interface' )
 			->setMethods( array( 'handle' ) )
 			->getMock();
 		$handler
-			->expects( $this->at( 0 ) )
 			->method( 'handle' )
-			->with(
-				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'bad-level' ),
-				$this->equalTo( 'bad-level message' ),
-				$this->equalTo( array() )
-			);
-		$handler
-			->expects( $this->at( 1 ) )
-			->method( 'handle' )
-			->with(
-				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'debug' ),
-				$this->equalTo( 'debug message' ),
-				$this->equalTo( array() )
+			->withConsecutive(
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'bad-level' ),
+					$this->equalTo( 'bad-level message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'debug' ),
+					$this->equalTo( 'debug message' ),
+					$this->equalTo( array() ),
+				)
 			);
 
 		$log = new WC_Logger( array( $handler ) );
@@ -192,7 +201,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 		// Bad level also complains.
 		$this->setExpectedIncorrectUsage( 'WC_Logger::log' );
 
-		// Debug is lowest recognized level
+		// Debug is lowest recognized level.
 		$log->debug( 'debug message' );
 	}
 
@@ -251,76 +260,56 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 			->getMock();
 
 		$handler
-			->expects( $this->at( 0 ) )
 			->method( 'handle' )
-			->with(
-				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'debug' ),
-				$this->equalTo( 'debug message' ),
-				$this->equalTo( array() )
-			);
-		$handler
-			->expects( $this->at( 1 ) )
-			->method( 'handle' )
-			->with(
-				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'info' ),
-				$this->equalTo( 'info message' ),
-				$this->equalTo( array() )
-			);
-		$handler
-			->expects( $this->at( 2 ) )
-			->method( 'handle' )
-			->with(
-				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'notice' ),
-				$this->equalTo( 'notice message' ),
-				$this->equalTo( array() )
-			);
-		$handler
-			->expects( $this->at( 3 ) )
-			->method( 'handle' )
-			->with(
-				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'warning' ),
-				$this->equalTo( 'warning message' ),
-				$this->equalTo( array() )
-			);
-		$handler
-			->expects( $this->at( 4 ) )
-			->method( 'handle' )
-			->with(
-				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'error' ),
-				$this->equalTo( 'error message' ),
-				$this->equalTo( array() )
-			);
-		$handler
-			->expects( $this->at( 5 ) )
-			->method( 'handle' )
-			->with(
-				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'critical' ),
-				$this->equalTo( 'critical message' ),
-				$this->equalTo( array() )
-			);
-		$handler
-			->expects( $this->at( 6 ) )
-			->method( 'handle' )
-			->with(
-				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'alert' ),
-				$this->equalTo( 'alert message' ),
-				$this->equalTo( array() )
-			);
-		$handler
-			->expects( $this->at( 7 ) )
-			->method( 'handle' )
-			->with(
-				$this->greaterThanOrEqual( $time ),
-				$this->equalTo( 'emergency' ),
-				$this->equalTo( 'emergency message' ),
-				$this->equalTo( array() )
+			->withConsecutive(
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'debug' ),
+					$this->equalTo( 'debug message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'info' ),
+					$this->equalTo( 'info message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'notice' ),
+					$this->equalTo( 'notice message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'warning' ),
+					$this->equalTo( 'warning message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'error' ),
+					$this->equalTo( 'error message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'critical' ),
+					$this->equalTo( 'critical message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'alert' ),
+					$this->equalTo( 'alert message' ),
+					$this->equalTo( array() ),
+				),
+				array(
+					$this->greaterThanOrEqual( $time ),
+					$this->equalTo( 'emergency' ),
+					$this->equalTo( 'emergency message' ),
+					$this->equalTo( array() ),
+				)
 			);
 
 		return $handler;

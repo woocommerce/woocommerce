@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes a failing e2e test for product variations

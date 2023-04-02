@@ -573,6 +573,24 @@ export const CustomSuffix: React.FC = () => {
 	);
 };
 
+export const ToggleButton: React.FC = () => {
+	const [ selected, setSelected ] =
+		useState< SelectedType< DefaultItemType > >();
+
+	return (
+		<SelectControl
+			items={ sampleItems }
+			label="Has toggle button"
+			selected={ selected }
+			onSelect={ ( item ) => item && setSelected( item ) }
+			onRemove={ () => setSelected( null ) }
+			suffix={ null }
+			showToggleButton={ true }
+			__experimentalOpenMenuOnFocus={ true }
+		/>
+	);
+};
+
 export default {
 	title: 'WooCommerce Admin/experimental/SelectControl',
 	component: SelectControl,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Delete tax lookup and order stats database records when an order is deleted while orders table is authoritative

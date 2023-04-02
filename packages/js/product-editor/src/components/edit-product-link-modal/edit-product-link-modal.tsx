@@ -3,10 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Modal, TextControl } from '@wordpress/components';
-import { useState, createElement } from '@wordpress/element';
+import {
+	useState,
+	createElement,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
-import interpolateComponents from '@automattic/interpolate-components';
 import { Product } from '@woocommerce/data';
 import { useFormContext } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -106,12 +109,12 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 					value={ slug }
 					onChange={ setSlug }
 					hideLabelFromVision
-					help={ interpolateComponents( {
-						mixedString: __( 'Preview: {{link/}}', 'woocommerce' ),
-						components: {
+					help={ createInterpolateElement(
+						__( 'Preview: <link />', 'woocommerce' ),
+						{
 							link: <strong>{ newProductLinkLabel }</strong>,
-						},
-					} ) }
+						}
+					) }
 				/>
 				<div className="woocommerce-product-link-edit-modal__buttons">
 					<Button isSecondary onClick={ () => onCancel() }>

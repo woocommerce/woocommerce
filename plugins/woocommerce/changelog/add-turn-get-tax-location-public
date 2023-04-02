@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Make WC_Order::get_tax_location accessible publicly through a wrapper function.

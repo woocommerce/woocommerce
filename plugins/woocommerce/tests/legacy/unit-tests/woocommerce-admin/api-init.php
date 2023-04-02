@@ -104,26 +104,4 @@ class WC_Admin_Tests_API_Init extends WC_REST_Unit_Test_Case {
 
 		$this->assertEmpty( $this->queue->actions );
 	}
-
-	/**
-	 * Test that updating  wc_last_active triggers a customer sync.
-	 *
-	 * @return void
-	 */
-	public function test_other_last_active_update_customer_sync() {
-		// First call creates the meta key.
-		// These don't use wc_update_user_last_active() because the timestamps will be the same.
-		update_user_meta( 1, 'wc_last_active', time() - 10 );
-		// Second call updates it which triggers the sync.
-		update_user_meta( 1, 'wc_last_active', time() );
-
-		$this->assertCount( 1, $this->queue->actions );
-		$this->assertArraySubset(
-			array(
-				'hook' => CustomersScheduler::get_action( 'import' ),
-				'args' => array( 1 ),
-			),
-			$this->queue->actions[0]
-		);
-	}
 }

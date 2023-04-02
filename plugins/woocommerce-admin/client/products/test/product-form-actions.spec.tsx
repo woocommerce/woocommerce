@@ -3,7 +3,7 @@
  */
 import { render, waitFor, screen, within } from '@testing-library/react';
 import { Fragment } from '@wordpress/element';
-import { Form, FormContext } from '@woocommerce/components';
+import { Form, FormContextType } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import userEvent from '@testing-library/user-event';
@@ -29,15 +29,6 @@ jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn().mockReturnValue( { productCESAction: 'hide' } ),
 } ) );
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
-jest.mock(
-	'~/customer-effort-score-tracks/use-product-mvp-ces-footer',
-	() => ( {
-		useProductMVPCESFooter: () => ( {
-			onPublish: onPublishCES,
-			onSaveDraft: onDraftCES,
-		} ),
-	} )
-);
 jest.mock( '@woocommerce/admin-layout', () => ( {
 	WooHeaderItem: ( props: { children: () => React.ReactElement } ) => (
 		<Fragment { ...props }>{ props.children() }</Fragment>
@@ -50,6 +41,10 @@ jest.mock( '@woocommerce/product-editor', () => {
 			updateProductWithStatus,
 			copyProductWithStatus,
 			deleteProductAndRedirect,
+		} ),
+		__experimentalUseProductMVPCESFooter: () => ( {
+			onPublish: onPublishCES,
+			onSaveDraft: onDraftCES,
 		} ),
 	};
 } );
@@ -203,7 +198,7 @@ describe( 'ProductFormActions', () => {
 			};
 			const { queryByText, getByLabelText } = render(
 				<Form< Partial< Product > > initialValues={ product }>
-					{ ( { getInputProps }: FormContext< Product > ) => {
+					{ ( { getInputProps }: FormContextType< Product > ) => {
 						return (
 							<>
 								<label htmlFor="product-name">Name</label>

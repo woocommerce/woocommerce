@@ -24,14 +24,14 @@
 		"semver": "^7.3.2"
 	},
 	"devDependencies": {
-		"@types/node": "^16.9.4",
+		"@types/node": "^16.18.18",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"globby": "^11",
 		"oclif": "^2",
 		"shx": "^0.3.3",
 		"ts-node": "^10.2.1",
 		"tslib": "^2.3.1",
-		"typescript": "^4.8.3"
+		"typescript": "^4.9.5"
 	},
 	"oclif": {
 		"bin": "package-release",
@@ -49,7 +49,7 @@
 		}
 	},
 	"scripts": {
-		"turbo:build": "shx rm -rf dist && tsc -b",
+		"turbo:build": "shx rm -rf dist && tsc --project tsconfig.json",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint . --ext .ts --config .eslintrc",
 		"postpack": "shx rm -f oclif.manifest.json",
