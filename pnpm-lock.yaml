@@ -2143,33 +2143,6 @@ importers:
       sass: 1.49.9
       stylelint: 13.8.0
 
-  tools/actions:
-    specifiers:
-      '@commander-js/extra-typings': ^0.1.0
-      '@tsconfig/node16': ^1.0.3
-      '@types/node': ^16.18.18
-      '@types/uuid': ^8.3.4
-      '@woocommerce/eslint-plugin': workspace:*
-      commander: ^9.4.0
-      dotenv: ^10.0.0
-      eslint: ^8.32.0
-      ts-node: ^10.2.1
-      tslib: ^2.3.1
-      typescript: ^4.9.5
-    dependencies:
-      '@commander-js/extra-typings': 0.1.0_commander@9.4.0
-      '@tsconfig/node16': 1.0.3
-      '@types/uuid': 8.3.4
-      commander: 9.4.0
-      dotenv: 10.0.0
-    devDependencies:
-      '@types/node': 16.18.21
-      '@woocommerce/eslint-plugin': link:../../packages/js/eslint-plugin
-      eslint: 8.32.0
-      ts-node: 10.9.1_kmfuqqg37ytwipeijbkfhsguau
-      tslib: 2.5.0
-      typescript: 4.9.5
-
   tools/cli-core:
     specifiers:
       '@tsconfig/node16': ^1.0.3
@@ -2273,6 +2246,35 @@ importers:
       shx: 0.3.4
       ts-node: 10.9.1_kmfuqqg37ytwipeijbkfhsguau
       tslib: 2.3.1
+      typescript: 4.9.5
+
+  tools/monorepo-utils:
+    specifiers:
+      '@commander-js/extra-typings': ^0.1.0
+      '@tsconfig/node16': ^1.0.3
+      '@types/node': ^16.18.18
+      '@types/uuid': ^8.3.4
+      '@woocommerce/eslint-plugin': workspace:*
+      chalk: ^4.1.2
+      commander: ^9.4.0
+      dotenv: ^10.0.0
+      eslint: ^8.32.0
+      ts-node: ^10.2.1
+      tslib: ^2.3.1
+      typescript: ^4.9.5
+    dependencies:
+      '@commander-js/extra-typings': 0.1.0_commander@9.4.0
+      '@tsconfig/node16': 1.0.3
+      '@types/uuid': 8.3.4
+      chalk: 4.1.2
+      commander: 9.4.0
+      dotenv: 10.0.0
+    devDependencies:
+      '@types/node': 16.18.21
+      '@woocommerce/eslint-plugin': link:../../packages/js/eslint-plugin
+      eslint: 8.32.0
+      ts-node: 10.9.1_kmfuqqg37ytwipeijbkfhsguau
+      tslib: 2.5.0
       typescript: 4.9.5
 
   tools/package-release:

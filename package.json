@@ -26,7 +26,8 @@
 		"git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && husky install",
 		"create-extension": "node ./tools/create-extension/index.js",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
-		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches"
+		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
+		"utils": "pnpm run --filter='./tools/monorepo-utils' utils"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.20.2",

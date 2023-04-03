@@ -1,7 +1,7 @@
 {
-	"name": "actions",
+	"name": "monorepo-utils",
 	"version": "0.0.1",
-	"description": "WooCommerce Monorepo Actions tool.",
+	"description": "WooCommerce Monorepo utility tooling.",
 	"author": "Automattic",
 	"homepage": "https://github.com/woocommerce/woocommerce",
 	"license": "GPLv2",
@@ -10,6 +10,7 @@
 		"@commander-js/extra-typings": "^0.1.0",
 		"@tsconfig/node16": "^1.0.3",
 		"@types/uuid": "^8.3.4",
+		"chalk": "^4.1.2",
 		"commander": "^9.4.0",
 		"dotenv": "^10.0.0"
 	},
@@ -24,7 +25,7 @@
 	"scripts": {
 		"lint": "eslint . --ext .ts",
 		"posttest": "pnpm lint",
-		"code-freeze": "node -r ts-node/register ./src/commands/code-freeze/index.ts"
+		"utils": "node -r ts-node/register ./src/commands/code-freeze/index.ts"
 	},
 	"engines": {
 		"node": "^16.13.1",

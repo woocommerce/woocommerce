@@ -11,4 +11,4 @@ packages:
     - 'tools/cli-core'
     - 'tools/version-bump'
     - 'tools/storybook'
-    - 'tools/actions'
+    - 'tools/monorepo-utils'
