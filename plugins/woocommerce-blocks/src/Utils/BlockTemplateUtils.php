@@ -201,7 +201,7 @@ class BlockTemplateUtils {
 		// Remove the term description block from the archive-product template
 		// as the Product Catalog/Shop page doesn't have a description.
 		if ( 'archive-product' === $template_file->slug ) {
-			$template->content = str_replace( '<!-- wp:term-description /-->', '', $template->content );
+			$template->content = str_replace( '<!-- wp:term-description {"align":"wide"} /-->', '', $template->content );
 		}
 		// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
 		$template->source         = $template_file->source ? $template_file->source : 'plugin';
