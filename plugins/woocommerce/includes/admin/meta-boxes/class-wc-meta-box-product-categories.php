@@ -64,8 +64,8 @@ class WC_Meta_Box_Product_Categories {
 			<input
 				type="hidden"
 				value="<?php echo esc_attr( $term->term_id ); ?>"
-				name="tax_input[<?php echo esc_attr( $tax_name ); ?>][]"
-				data-name="<?php echo esc_attr( $term->name ); ?>"
+				name="tax_input[<?php esc_attr( $tax_name ); ?>][]"
+				data-name="<?php echo esc_attr( $tax_name ); ?>"
 			/>
 			<?php
 		}

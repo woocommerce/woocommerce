@@ -1765,14 +1765,13 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		$hide_empty       = isset( $_GET['hide_empty'] ) ? wc_clean( wp_unslash( $_GET['hide_empty'] ) ) : true;
-		$hide_empty       = 'false' === $hide_empty ? false : true;
+		$show_empty       = isset( $_GET['show_empty'] ) ? wp_validate_boolean( wc_clean( wp_unslash( $_GET['show_empty'] ) ) ) : false;
 		$found_categories = array();
 		$args             = array(
 			'taxonomy'   => array( 'product_cat' ),
 			'orderby'    => 'id',
 			'order'      => 'ASC',
-			'hide_empty' => $hide_empty,
+			'hide_empty' => ! $show_empty,
 			'fields'     => 'all',
 			'name__like' => $search_text,
 		);
@@ -1816,7 +1815,7 @@ class WC_AJAX {
 		}
 
 		$search_text = isset( $_GET['term'] ) ? wc_clean( wp_unslash( $_GET['term'] ) ) : '';
-		$number      = isset( $_GET['number'] ) ? absint( wp_unslash( $_GET['number'] ) ) : 50;
+		$number      = isset( $_GET['number'] ) ? absint( $_GET['number'] ) : 50;
 
 		$args = array(
 			'taxonomy'   => array( 'product_cat' ),
@@ -1835,7 +1834,6 @@ class WC_AJAX {
 		if ( $terms ) {
 			foreach ( $terms as $term ) {
 				$terms_map[ $term->term_id ] = $term;
-				$term->formatted_name        = '';
 
 				if ( $term->parent ) {
 					$ancestors     = get_ancestors( $term->term_id, 'product_cat' );

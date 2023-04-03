@@ -47,6 +47,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_register_style( 'woocommerce_admin_print_reports_styles', WC()->plugin_url() . '/assets/css/reports-print.css', array(), $version, 'print' );
 			wp_register_style( 'woocommerce_admin_marketplace_styles', WC()->plugin_url() . '/assets/css/marketplace-suggestions.css', array(), $version );
 			wp_register_style( 'woocommerce_admin_privacy_styles', WC()->plugin_url() . '/assets/css/privacy.css', array(), $version );
+			wp_register_style(
+				'woocommerce_admin_product_category_metabox_styles',
+				WCAdminAssets::get_url( 'product-category-metabox/style', 'css' ),
+				array(),
+				$version
+			);
 
 			// Add RTL support for admin styles.
 			wp_style_add_data( 'woocommerce_admin_menu_styles', 'rtl', 'replace' );
@@ -55,6 +61,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_style_add_data( 'woocommerce_admin_print_reports_styles', 'rtl', 'replace' );
 			wp_style_add_data( 'woocommerce_admin_marketplace_styles', 'rtl', 'replace' );
 			wp_style_add_data( 'woocommerce_admin_privacy_styles', 'rtl', 'replace' );
+			wp_style_add_data( 'woocommerce_admin_product_category_metabox_styles', 'rtl', 'replace' );
 
 			if ( $screen && $screen->is_block_editor() ) {
 				$styles = WC_Frontend_Scripts::get_styles();
@@ -84,6 +91,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_style( 'woocommerce_admin_styles' );
 				wp_enqueue_style( 'jquery-ui-style' );
 				wp_enqueue_style( 'wp-color-picker' );
+				wp_enqueue_style( 'woocommerce_admin_product_category_metabox_styles' );
 			}
 
 			if ( in_array( $screen_id, array( 'dashboard' ) ) ) {
@@ -195,16 +203,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// WooCommerce admin pages.
 			if ( in_array( $screen_id, wc_get_screen_ids() ) ) {
-				$rtl = is_rtl() ? '-rtl' : '';
 				wp_enqueue_script( 'iris' );
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
-				wp_enqueue_style(
-					'wc-admin-product-category-metabox',
-					WCAdminAssets::get_url( "product-category-metabox/style{$rtl}", 'css' ),
-					array( 'wp-components' ),
-					WCAdminAssets::get_file_version( 'css' )
-				);
+
 				WCAdminAssets::register_script( 'wp-admin-scripts', 'product-category-metabox', true );
 				wp_localize_script(
 					'wc-admin-product-category-metabox',

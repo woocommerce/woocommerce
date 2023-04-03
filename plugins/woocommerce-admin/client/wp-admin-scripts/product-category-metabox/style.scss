@@ -1,6 +1,6 @@
 .product-add-category {
 	&__tree-control {
-		margin-top: 8px;
+		margin-top: $gap-smaller;
 
 		.woocommerce-tree-select-control {
 			.components-base-control,
@@ -14,6 +14,19 @@
 
 			&__tags {
 				display: none;
+			}
+			.components-base-control
+				.woocommerce-tree-select-control__control-input,
+			.woocommerce-tree-select-control__option {
+				font-size: 12px;
+			}
+			.components-checkbox-control__input {
+				height: $gap;
+				width: $gap;
+			}
+			.components-checkbox-control__checked {
+				height: $gap + 4px;
+				width: $gap + 4px;
 			}
 		}
 	}
@@ -32,6 +45,6 @@
 		border-radius: 4px;
 	}
 	.woocommerce-experimental-select-control__menu-item {
-		padding: 5px 12px;
+		padding: 5px $gap-small;
 	}
 }
