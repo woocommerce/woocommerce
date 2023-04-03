@@ -5,9 +5,9 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
 import { Fragment } from '@wordpress/element';
-import { Form, Spinner } from '@woocommerce/components';
+import { Form, FormContextType, Spinner } from '@woocommerce/components';
 import { useSelect } from '@wordpress/data';
-
+import { Status, Options } from 'wordpress__notices';
 /**
  * Internal dependencies
  */
@@ -15,6 +15,42 @@ import {
 	StoreAddress,
 	getStoreAddressValidator,
 } from '../../../dashboard/components/settings/general/store-address';
+
+type FormValues = {
+	addressLine1: string;
+	addressLine2: string;
+	countryState: string;
+	city: string;
+	postCode: string;
+};
+
+type StoreLocationProps = {
+	onComplete: ( values: FormValues ) => void;
+	createNotice: (
+		status: Status | undefined,
+		content: string,
+		options?: Partial< Options >
+	) => void;
+	isSettingsError: boolean;
+	isSettingsRequesting: boolean;
+	buttonText?: string;
+	updateAndPersistSettingsForGroup: (
+		group: string,
+		data: {
+			[ key: string ]: unknown;
+		} & {
+			general?: {
+				[ key: string ]: string;
+			};
+			tax?: {
+				[ key: string ]: string;
+			};
+		}
+	) => void;
+	settings?: {
+		[ key: string ]: string;
+	};
+};
 
 const StoreLocation = ( {
 	onComplete,
@@ -24,8 +60,8 @@ const StoreLocation = ( {
 	updateAndPersistSettingsForGroup,
 	settings,
 	buttonText = __( 'Continue', 'woocommerce' ),
-} ) => {
-	const { getLocale, hasFinishedResolution } = useSelect( ( select ) => {
+}: StoreLocationProps ) => {
+	const { hasFinishedResolution } = useSelect( ( select ) => {
 		const countryStore = select( COUNTRIES_STORE_NAME );
 		countryStore.getCountries();
 		return {
@@ -36,7 +72,7 @@ const StoreLocation = ( {
 				countryStore.hasFinishedResolution( 'getCountries' ),
 		};
 	} );
-	const onSubmit = async ( values ) => {
+	const onSubmit = async ( values: FormValues ) => {
 		await updateAndPersistSettingsForGroup( 'general', {
 			general: {
 				...settings,
@@ -62,26 +98,17 @@ const StoreLocation = ( {
 	};
 
 	const getInitialValues = () => {
-		const {
-			woocommerce_store_address: storeAddress,
-			woocommerce_store_address_2: storeAddress2,
-			woocommerce_store_city: storeCity,
-			woocommerce_default_country: defaultCountry,
-			woocommerce_store_postcode: storePostcode,
-		} = settings;
-
 		return {
-			addressLine1: storeAddress || '',
-			addressLine2: storeAddress2 || '',
-			city: storeCity || '',
-			countryState: defaultCountry || '',
-			postCode: storePostcode || '',
+			addressLine1: settings?.woocommerce_store_address || '',
+			addressLine2: settings?.woocommerce_store_address_2 || '',
+			city: settings?.woocommerce_store_city || '',
+			countryState: settings?.woocommerce_default_country || '',
+			postCode: settings?.woocommerce_store_postcode || '',
 		};
 	};
 
-	const validate = ( values ) => {
-		const locale = getLocale( values.countryState );
-		const validator = getStoreAddressValidator( locale );
+	const validate = ( values: FormValues ) => {
+		const validator = getStoreAddressValidator();
 		return validator( values );
 	};
 
@@ -95,9 +122,14 @@ const StoreLocation = ( {
 			onSubmit={ onSubmit }
 			validate={ validate }
 		>
-			{ ( { getInputProps, handleSubmit, setValue } ) => (
+			{ ( {
+				getInputProps,
+				handleSubmit,
+				setValue,
+			}: FormContextType< FormValues > ) => (
 				<Fragment>
 					<StoreAddress
+						// @ts-expect-error return type doesn't match, but they do work. We should revisit and refactor them in a follow up issue.
 						getInputProps={ getInputProps }
 						setValue={ setValue }
 					/>

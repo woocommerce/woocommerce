@@ -20,5 +20,6 @@
 		"reusable": false,
 		"inserter": false,
 		"lock": false
-	}
+	},
+	"editorStyle": "file:./editor.css"
 }

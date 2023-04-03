@@ -229,6 +229,9 @@ class WC_Install {
 			'wc_update_750_add_columns_to_order_stats_table',
 			'wc_update_750_disable_new_product_management_experience',
 		),
+		'7.7.0' => array(
+			'wc_update_770_remove_multichannel_marketing_feature_options',
+		),
 	);
 
 	/**
