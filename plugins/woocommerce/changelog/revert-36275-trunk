@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert changes to use window.fetch in legacy cart JS

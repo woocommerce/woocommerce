@@ -9,27 +9,6 @@ jQuery( function( $ ) {
 	// Utility functions for the file.
 
 	/**
-	 * Perform an AJAX request that expects an HTML response.
-	 *
-	 * @param {Object} options
-	 */
-	const ajax = options => {
-		window.fetch( options.url, {
-			method: options.type || 'GET',
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-			body: options.data
-		} )
-			.then( response => {
-				if ( !response.ok ) {
-					throw new Error( response.statusText );
-				}
-				return response.text();
-			} )
-			.then( options.success )
-			.finally( () => options.complete() );
-	};
-
-	/**
 	 * Gets a url for a given AJAX endpoint.
 	 *
 	 * @param {String} endpoint The AJAX Endpoint
@@ -243,17 +222,13 @@ jQuery( function( $ ) {
 
 			var data = {
 				security: wc_cart_params.update_shipping_method_nonce,
+				shipping_method: shipping_methods
 			};
 
-			// Flatten shipping_methods for use in URLSearchParams()
-			for ( var k in shipping_methods ) {
-				data[ 'shipping_method[' + k + ']' ] = shipping_methods[ k ];
-			}
-
-			ajax( {
+			$.ajax( {
 				type:     'post',
 				url:      get_url( 'update_shipping_method' ),
-				data:     new URLSearchParams( data ).toString(),
+				data:     data,
 				dataType: 'html',
 				success:  function( response ) {
 					update_cart_totals_div( response );
@@ -285,10 +260,10 @@ jQuery( function( $ ) {
 							.appendTo( $form );
 
 			// Make call to actual form post URL.
-			ajax( {
+			$.ajax( {
 				type:     $form.attr( 'method' ),
 				url:      $form.attr( 'action' ),
-				data:     new URLSearchParams( new FormData( $form[0] ) ).toString(),
+				data:     $form.serialize(),
 				dataType: 'html',
 				success:  function( response ) {
 					update_wc_div( response );
@@ -372,10 +347,10 @@ jQuery( function( $ ) {
 			block( $( 'div.cart_totals' ) );
 
 			// Make call to actual form post URL.
-			ajax( {
+			$.ajax( {
 				type:     $form.attr( 'method' ),
 				url:      $form.attr( 'action' ),
-				data:     new URLSearchParams( new FormData( $form[0] ) ).toString(),
+				data:     $form.serialize(),
 				dataType: 'html',
 				success:  function( response ) {
 					update_wc_div( response, preserve_notices );
@@ -394,7 +369,7 @@ jQuery( function( $ ) {
 		update_cart_totals: function() {
 			block( $( 'div.cart_totals' ) );
 
-			ajax( {
+			$.ajax( {
 				url:      get_url( 'get_cart_totals' ),
 				dataType: 'html',
 				success:  function( response ) {
@@ -496,10 +471,10 @@ jQuery( function( $ ) {
 				coupon_code: coupon_code
 			};
 
-			ajax( {
+			$.ajax( {
 				type:     'POST',
 				url:      get_url( 'apply_coupon' ),
-				data:     new URLSearchParams( data ).toString(),
+				data:     data,
 				dataType: 'html',
 				success: function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
@@ -533,10 +508,10 @@ jQuery( function( $ ) {
 				coupon: coupon
 			};
 
-			ajax( {
+			$.ajax( {
 				type:    'POST',
 				url:      get_url( 'remove_coupon' ),
-				data:     new URLSearchParams( data ).toString(),
+				data:     data,
 				dataType: 'html',
 				success: function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .woocommerce-info' ).remove();
@@ -566,10 +541,10 @@ jQuery( function( $ ) {
 							.appendTo( $form );
 
 			// Make call to actual form post URL.
-			ajax( {
+			$.ajax( {
 				type:     $form.attr( 'method' ),
 				url:      $form.attr( 'action' ),
-				data:     new URLSearchParams( new FormData( $form[0] ) ).toString(),
+				data:     $form.serialize(),
 				dataType: 'html',
 				success:  function( response ) {
 					update_wc_div( response );
@@ -596,7 +571,7 @@ jQuery( function( $ ) {
 			block( $form );
 			block( $( 'div.cart_totals' ) );
 
-			ajax( {
+			$.ajax( {
 				type:     'GET',
 				url:      $a.attr( 'href' ),
 				dataType: 'html',
@@ -625,7 +600,7 @@ jQuery( function( $ ) {
 			block( $form );
 			block( $( 'div.cart_totals' ) );
 
-			ajax( {
+			$.ajax( {
 				type:     'GET',
 				url:      $a.attr( 'href' ),
 				dataType: 'html',
