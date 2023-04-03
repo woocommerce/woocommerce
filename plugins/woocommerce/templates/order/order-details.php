@@ -15,8 +15,6 @@
  * @version 7.7.0
  */
 
-use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
-
 defined( 'ABSPATH' ) || exit;
 
 $order = wc_get_order( $order_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -85,7 +83,7 @@ if ( $show_downloads ) {
 				?>
 					<tr>
 						<th scope="row"><?php echo esc_html( $total['label'] ); ?></th>
-						<td><?php echo ( 'payment_method' === $key ) ? wc_get_container()->get( HtmlSanitizer::class )->sanitize( $total['value'] ) : wp_kses_post( $total['value'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+						<td><?php echo wp_kses_post( $total['value'] ); ?></td>
 					</tr>
 					<?php
 			}
