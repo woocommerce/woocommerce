@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	openDocumentSettingsSidebar,
 	switchUserToAdmin,
 	openGlobalBlockInserter,
 	insertBlock,
@@ -11,7 +10,6 @@ import {
 	findLabelWithText,
 	visitBlockPage,
 	selectBlockByName,
-	switchBlockInspectorTabWhenGutenbergIsInstalled,
 } from '@woocommerce/blocks-test-utils';
 import { merchant } from '@woocommerce/e2e-utils';
 
@@ -20,6 +18,7 @@ import { merchant } from '@woocommerce/e2e-utils';
  */
 import {
 	searchForBlock,
+	openSettingsSidebar,
 	openWidgetEditor,
 	closeModalIfExists,
 } from '../../utils.js';
@@ -125,10 +124,7 @@ describe( `${ block.name } Block`, () => {
 
 		describe( 'attributes', () => {
 			beforeEach( async () => {
-				await openDocumentSettingsSidebar();
-				await switchBlockInspectorTabWhenGutenbergIsInstalled(
-					'Settings'
-				);
+				await openSettingsSidebar();
 				await selectBlockByName( block.slug );
 			} );
 
@@ -163,7 +159,7 @@ describe( `${ block.name } Block`, () => {
 					'.wc-block-checkout__shipping-method button',
 					{ text: 'Shipping' }
 				);
-				await openDocumentSettingsSidebar();
+				await openSettingsSidebar();
 				const toggleLabel = await findLabelWithText(
 					'Hide shipping costs until an address is entered'
 				);
@@ -225,10 +221,7 @@ describe( `${ block.name } Block`, () => {
 
 		describe( 'shipping address block attributes', () => {
 			beforeEach( async () => {
-				await openDocumentSettingsSidebar();
-				await switchBlockInspectorTabWhenGutenbergIsInstalled(
-					'Settings'
-				);
+				await openSettingsSidebar();
 				await selectBlockByName(
 					'woocommerce/checkout-shipping-address-block'
 				);
@@ -277,10 +270,7 @@ describe( `${ block.name } Block`, () => {
 
 		describe( 'action block attributes', () => {
 			beforeEach( async () => {
-				await openDocumentSettingsSidebar();
-				await switchBlockInspectorTabWhenGutenbergIsInstalled(
-					'Settings'
-				);
+				await openSettingsSidebar();
 				await selectBlockByName( 'woocommerce/checkout-actions-block' );
 			} );
 

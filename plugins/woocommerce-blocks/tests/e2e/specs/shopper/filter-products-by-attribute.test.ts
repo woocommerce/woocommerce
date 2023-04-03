@@ -8,23 +8,21 @@ import {
 	insertBlock,
 	switchUserToAdmin,
 	publishPost,
-	ensureSidebarOpened,
 } from '@wordpress/e2e-test-utils';
-import {
-	selectBlockByName,
-	insertBlockUsingSlash,
-	switchBlockInspectorTabWhenGutenbergIsInstalled,
-} from '@woocommerce/blocks-test-utils';
+import { selectBlockByName } from '@woocommerce/blocks-test-utils';
 
 /**
  * Internal dependencies
  */
 import {
 	BASE_URL,
+	enableApplyFiltersButton,
 	goToTemplateEditor,
+	insertAllProductsBlock,
 	saveTemplate,
 	useTheme,
 	waitForAllProductsBlockLoaded,
+	waitForCanvas,
 } from '../../utils';
 import { saveOrPublish } from '../../../utils';
 
@@ -36,8 +34,6 @@ const block = {
 		editor: {
 			firstAttributeInTheList:
 				'.woocommerce-search-list__list > li > label > input.woocommerce-search-list__item-input',
-			filterButtonToggle:
-				'//label[text()="Show \'Apply filters\' button"]',
 			doneButton: '.wc-block-attribute-filter__selection > button',
 		},
 		frontend: {
@@ -71,7 +67,7 @@ describe( `${ block.name } Block`, () => {
 				title: block.name,
 			} );
 
-			await insertBlockUsingSlash( 'All Products' );
+			await insertAllProductsBlock();
 			await insertBlock( block.name );
 			const canvasEl = canvas();
 
@@ -190,14 +186,9 @@ describe( `${ block.name } Block`, () => {
 				postId: productCatalogTemplateId,
 			} );
 
-			await ensureSidebarOpened();
+			await waitForCanvas();
 			await selectBlockByName( block.slug );
-			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
-
-			const [ filterButtonToggle ] = await page.$x(
-				block.selectors.editor.filterButtonToggle
-			);
-			await filterButtonToggle.click();
+			await enableApplyFiltersButton();
 			await saveTemplate();
 			await goToShopPage();
 
@@ -309,14 +300,10 @@ describe( `${ block.name } Block`, () => {
 
 		it( 'should refresh the page only if the user clicks on button', async () => {
 			await page.goto( editorPageUrl );
-			await ensureSidebarOpened();
-			await selectBlockByName( block.slug );
-			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
 
-			const [ filterButtonToggle ] = await page.$x(
-				block.selectors.editor.filterButtonToggle
-			);
-			await filterButtonToggle.click();
+			await waitForCanvas();
+			await selectBlockByName( block.slug );
+			await enableApplyFiltersButton();
 			await saveOrPublish();
 			await page.goto( frontedPageUrl );
 

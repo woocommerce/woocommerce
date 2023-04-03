@@ -2,15 +2,18 @@
  * External dependencies
  */
 import {
+	switchBlockInspectorTab,
 	switchUserToAdmin,
-	openDocumentSettingsSidebar,
 } from '@wordpress/e2e-test-utils';
-
 import {
 	visitBlockPage,
 	selectBlockByName,
-	switchBlockInspectorTabWhenGutenbergIsInstalled,
 } from '@woocommerce/blocks-test-utils';
+
+/**
+ * Internal dependencies
+ */
+import { openSettingsSidebar } from '../../utils.js';
 
 const block = {
 	name: 'Active Filters',
@@ -31,9 +34,9 @@ describe( `${ block.name } Block`, () => {
 
 	describe( 'attributes', () => {
 		beforeEach( async () => {
-			await openDocumentSettingsSidebar();
-			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
+			await openSettingsSidebar();
 			await selectBlockByName( block.slug );
+			await switchBlockInspectorTab( 'Settings' );
 		} );
 
 		it( "allows changing the block's title", async () => {

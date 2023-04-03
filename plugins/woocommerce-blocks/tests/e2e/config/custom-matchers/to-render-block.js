@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { getBlocksBySlug } from '../../utils.js';
+
 expect.extend( {
 	async toRenderBlock( page, block = {} ) {
 		const gutenbergNotFoundError = ( await page.content() ).match(
@@ -39,11 +44,11 @@ expect.extend( {
 			};
 		}
 
-		const blockElement = await page.$( block.class );
-		if ( blockElement === null ) {
+		const blocks = await getBlocksBySlug( block.slug );
+		if ( blocks >= 1 ) {
 			return {
 				message: () =>
-					`the ${ block.name || 'block' } with classname \`${
+					`${ block.name || 'block' } with classname \`${
 						block.class
 					}\` did not render.`,
 				pass: false,

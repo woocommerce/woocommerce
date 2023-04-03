@@ -5,16 +5,15 @@ import {
 	createNewPost,
 	deleteAllTemplates,
 	insertBlock,
+	switchBlockInspectorTab,
 	switchUserToAdmin,
 	publishPost,
 	ensureSidebarOpened,
 } from '@wordpress/e2e-test-utils';
 import {
 	selectBlockByName,
-	insertBlockUsingSlash,
 	saveOrPublish,
 	getToggleIdByLabel,
-	switchBlockInspectorTabWhenGutenbergIsInstalled,
 } from '@woocommerce/blocks-test-utils';
 import { setCheckbox } from '@woocommerce/e2e-utils';
 
@@ -23,7 +22,9 @@ import { setCheckbox } from '@woocommerce/e2e-utils';
  */
 import {
 	BASE_URL,
+	enableApplyFiltersButton,
 	goToTemplateEditor,
+	insertAllProductsBlock,
 	saveTemplate,
 	useTheme,
 	waitForAllProductsBlockLoaded,
@@ -35,10 +36,6 @@ const block = {
 	slug: 'woocommerce/rating-filter',
 	class: '.wc-block-rating-filter',
 	selectors: {
-		editor: {
-			filterButtonToggle:
-				'//label[text()="Show \'Apply filters\' button"]',
-		},
 		frontend: {
 			productsList: '.wc-block-grid__products > li',
 			queryProductsList: '.wp-block-post-template > li',
@@ -70,7 +67,7 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			await insertBlock( block.name );
-			await insertBlockUsingSlash( 'All Products' );
+			await insertAllProductsBlock();
 			await publishPost();
 
 			link = await page.evaluate( () =>
@@ -162,17 +159,7 @@ describe( `${ block.name } Block`, () => {
 
 			await waitForCanvas();
 			await selectBlockByName( block.slug );
-			await ensureSidebarOpened();
-			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
-
-			await page.waitForXPath(
-				block.selectors.editor.filterButtonToggle
-			);
-
-			const [ filterButtonToggle ] = await page.$x(
-				selectors.editor.filterButtonToggle
-			);
-			await filterButtonToggle.click();
+			await enableApplyFiltersButton();
 			await saveTemplate();
 			await goToShopPage();
 
@@ -271,7 +258,7 @@ describe( `${ block.name } Block`, () => {
 			await waitForCanvas();
 			await ensureSidebarOpened();
 			await selectBlockByName( block.slug );
-			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
+			await switchBlockInspectorTab( 'Settings' );
 			await setCheckbox(
 				await getToggleIdByLabel( "Show 'Apply filters' button", 1 )
 			);
