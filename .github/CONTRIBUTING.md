@@ -46,8 +46,6 @@ they are developed in their [own repository](https://github.com/woocommerce/wooc
 
 ## Feature Requests 🚀
 
-Feature requests can be [submitted to our issue tracker](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+enhancement%2Cstatus%3A+awaiting+triage&template=2-enhancement.yml&title=%5BEnhancement%5D%3A+). Be sure to include a description of the expected behavior and use case, and before submitting a request, please search for similar ones in the closed issues.
+The best place to submit feature requests is over on our [dedicated feature request page](https://woocommerce.com/feature-requests/woocommerce/). You can easily search and vote for existing requests, or create new requests if necessary.
 
-Feature request issues will remain closed until we see sufficient interest via comments and [👍 reactions](https://help.github.com/articles/about-discussions-in-issues-and-pull-requests/) from the community.
-
-You can see a [list of current feature requests which require votes here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aissue+sort%3Areactions-%2B1-desc+label%3A%22needs%3A+votes%22+).
+Alternatively, if you wish to propose a straightforward technical enhancement that is unlikely to require much discussion, you can [open a new issue](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+enhancement%2Cstatus%3A+awaiting+triage&template=2-enhancement.yml&title=%5BEnhancement%5D%3A+) right here on GitHub.
