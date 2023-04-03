@@ -72,22 +72,12 @@ const extendInnerBlocksWithNoResultsContent = (
 	];
 };
 
-const createProductsBlock = (
-	inheritedAttributes: InheritedAttributes,
-	templateInnerBlocks: BlockInstance[]
-) => {
+const createProductsBlock = ( inheritedAttributes: InheritedAttributes ) => {
 	const productsInnerBlocksWithNoResults =
 		extendInnerBlocksWithNoResultsContent(
 			productsInnerBlocksTemplate,
 			inheritedAttributes
 		);
-
-	const innerBlocks = [
-		...templateInnerBlocks,
-		...createBlocksFromInnerBlocksTemplate(
-			productsInnerBlocksWithNoResults
-		),
-	];
 
 	return createBlock(
 		'core/query',
@@ -100,12 +90,12 @@ const createProductsBlock = (
 				inherit: true,
 			},
 		},
-		innerBlocks
+		createBlocksFromInnerBlocksTemplate( productsInnerBlocksWithNoResults )
 	);
 };
 
-const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) => {
-	const templateInnerBlocks = [
+const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
+	[
 		createArchiveTitleBlock( 'search-title', inheritedAttributes ),
 		createBlock( 'woocommerce/store-notices', inheritedAttributes ),
 		createRowBlock(
@@ -115,10 +105,8 @@ const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) => {
 			],
 			inheritedAttributes
 		),
+		createProductsBlock( inheritedAttributes ),
 	].filter( Boolean ) as BlockInstance[];
-
-	return createProductsBlock( inheritedAttributes, templateInnerBlocks );
-};
 
 const isConversionPossible = () => {
 	// Blockification is possible for the WP version 6.1 and above,
