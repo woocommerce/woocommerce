@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 7.4.0
+ * @version 7.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
