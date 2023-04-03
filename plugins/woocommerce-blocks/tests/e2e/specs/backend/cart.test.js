@@ -3,7 +3,6 @@
  */
 import {
 	clickBlockToolbarButton,
-	openDocumentSettingsSidebar,
 	switchUserToAdmin,
 	searchForBlock,
 	openGlobalBlockInserter,
@@ -13,14 +12,17 @@ import {
 	findLabelWithText,
 	visitBlockPage,
 	selectBlockByName,
-	switchBlockInspectorTabWhenGutenbergIsInstalled,
 } from '@woocommerce/blocks-test-utils';
 import { merchant } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
-import { openWidgetEditor, closeModalIfExists } from '../../utils.js';
+import {
+	openSettingsSidebar,
+	openWidgetEditor,
+	closeModalIfExists,
+} from '../../utils.js';
 
 const block = {
 	name: 'Cart',
@@ -179,17 +181,14 @@ describe( `${ block.name } Block`, () => {
 
 		describe( 'attributes', () => {
 			beforeEach( async () => {
-				await openDocumentSettingsSidebar();
-				await switchBlockInspectorTabWhenGutenbergIsInstalled(
-					'Settings'
-				);
+				await openSettingsSidebar();
 				await selectBlockByName(
 					'woocommerce/cart-order-summary-shipping-block'
 				);
 			} );
 
 			it( 'can toggle Shipping calculator', async () => {
-				const selector = ` .wc-block-components-totals-shipping__change-address__link`;
+				const selector = `.wc-block-components-totals-shipping__change-address__link`;
 				const toggleLabel = await findLabelWithText(
 					'Shipping calculator'
 				);

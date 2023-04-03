@@ -5,16 +5,15 @@ import {
 	createNewPost,
 	deleteAllTemplates,
 	insertBlock,
+	switchBlockInspectorTab,
 	switchUserToAdmin,
 	publishPost,
 	ensureSidebarOpened,
 } from '@wordpress/e2e-test-utils';
 import {
 	selectBlockByName,
-	insertBlockUsingSlash,
 	getToggleIdByLabel,
 	saveOrPublish,
-	switchBlockInspectorTabWhenGutenbergIsInstalled,
 } from '@woocommerce/blocks-test-utils';
 import { setCheckbox } from '@woocommerce/e2e-utils';
 
@@ -23,7 +22,9 @@ import { setCheckbox } from '@woocommerce/e2e-utils';
  */
 import {
 	BASE_URL,
+	enableApplyFiltersButton,
 	goToTemplateEditor,
+	insertAllProductsBlock,
 	saveTemplate,
 	useTheme,
 	waitForAllProductsBlockLoaded,
@@ -35,10 +36,6 @@ const block = {
 	slug: 'woocommerce/stock-filter',
 	class: '.wc-block-stock-filter',
 	selectors: {
-		editor: {
-			filterButtonToggle:
-				'//label[text()="Show \'Apply filters\' button"]',
-		},
 		frontend: {
 			productsList: '.wc-block-grid__products > li',
 			classicProductsList: '.products.columns-3 > li',
@@ -69,7 +66,7 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			await insertBlock( block.name );
-			await insertBlockUsingSlash( 'All Products' );
+			await insertAllProductsBlock();
 			await publishPost();
 
 			link = await page.evaluate( () =>
@@ -168,16 +165,7 @@ describe( `${ block.name } Block`, () => {
 
 			await waitForCanvas();
 			await selectBlockByName( block.slug );
-			await ensureSidebarOpened();
-			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
-			await page.waitForXPath(
-				block.selectors.editor.filterButtonToggle
-			);
-
-			const [ filterButtonToggle ] = await page.$x(
-				selectors.editor.filterButtonToggle
-			);
-			await filterButtonToggle.click();
+			await enableApplyFiltersButton();
 			await saveTemplate();
 			await goToShopPage();
 
@@ -276,7 +264,7 @@ describe( `${ block.name } Block`, () => {
 			await waitForCanvas();
 			await ensureSidebarOpened();
 			await selectBlockByName( block.slug );
-			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
+			await switchBlockInspectorTab( 'Settings' );
 			await setCheckbox(
 				await getToggleIdByLabel( "Show 'Apply filters' button" )
 			);

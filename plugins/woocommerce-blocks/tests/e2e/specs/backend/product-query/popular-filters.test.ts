@@ -11,7 +11,6 @@ import {
 	selectBlockByName,
 	visitBlockPage,
 	saveOrPublish,
-	switchBlockInspectorTabWhenGutenbergIsInstalled,
 } from '@woocommerce/blocks-test-utils';
 
 /**
@@ -29,7 +28,6 @@ import {
 const getPopularFilterPanel = async () => {
 	await ensureSidebarOpened();
 	await selectBlockByName( block.slug );
-	await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
 	return await findSidebarPanelWithTitle( 'Popular Filters' );
 };
 

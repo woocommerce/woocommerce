@@ -6,8 +6,6 @@ import {
 	ensureSidebarOpened,
 } from '@wordpress/e2e-test-utils';
 
-import { switchBlockInspectorTabWhenGutenbergIsInstalled } from '@woocommerce/blocks-test-utils';
-
 /**
  * Internal dependencies
  */
@@ -20,7 +18,6 @@ import {
 import {
 	addProductQueryBlock,
 	block,
-	configureProductQueryBlock,
 	getProductsNameFromClassicTemplate,
 	getProductsNameFromProductQuery,
 	toggleInheritQueryFromTemplateSetting,
@@ -39,7 +36,6 @@ describe( `${ block.name } Block`, () => {
 			} );
 			await ensureSidebarOpened();
 			await addProductQueryBlock();
-			await switchBlockInspectorTabWhenGutenbergIsInstalled( 'Settings' );
 		} );
 
 		it( 'when Inherit Query from template is disabled all the settings that customize the query should be hidden', async () => {
@@ -55,7 +51,7 @@ describe( `${ block.name } Block`, () => {
 		} );
 
 		it( 'when Inherit Query from template is enabled all the settings that customize the query should be hidden', async () => {
-			await configureProductQueryBlock();
+			await ensureSidebarOpened();
 
 			const popularFilterEl = await page.$(
 				block.selectors.editor.popularFilter
@@ -78,7 +74,7 @@ describe( `${ block.name } Block`, () => {
 				postId: productCatalogTemplateId,
 			} );
 			await addProductQueryBlock();
-			await configureProductQueryBlock();
+			await ensureSidebarOpened();
 			await page.waitForNetworkIdle();
 			await saveTemplate();
 			await page.waitForNetworkIdle();
@@ -107,7 +103,7 @@ describe( `${ block.name } Block`, () => {
 				postId: taxonomyProductCategory,
 			} );
 			await addProductQueryBlock();
-			await configureProductQueryBlock();
+			await ensureSidebarOpened();
 			await page.waitForNetworkIdle();
 			await saveTemplate();
 			await page.waitForNetworkIdle();
@@ -139,7 +135,7 @@ describe( `${ block.name } Block`, () => {
 				postId: tagProductCategory,
 			} );
 			await addProductQueryBlock();
-			await configureProductQueryBlock();
+			await ensureSidebarOpened();
 			await page.waitForNetworkIdle();
 			await saveTemplate();
 			await page.waitForNetworkIdle();
@@ -171,7 +167,7 @@ describe( `${ block.name } Block`, () => {
 				postId: productSearchResults,
 			} );
 			await addProductQueryBlock();
-			await configureProductQueryBlock();
+			await ensureSidebarOpened();
 			await page.waitForNetworkIdle();
 			await saveTemplate();
 			await page.waitForNetworkIdle();
