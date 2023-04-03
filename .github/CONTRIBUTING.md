@@ -11,7 +11,7 @@ There are many ways to contribute to the project!
 - Submitting fixes, improvements, and enhancements.
 - To disclose a security issue to our team, [please submit a report via HackerOne](https://hackerone.com/automattic/).
 
-If you wish to contribute code, please read the information in the sections below. Then [fork](https://help.github.com/articles/fork-a-repo/) WooCommerce, commit your changes, and [submit a pull request](https://help.github.com/articles/using-pull-requests/) 🎉
+If you wish to contribute code, please read the information in the sections below. Then [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) WooCommerce, commit your changes, and [submit a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) 🎉
 
 We use the `good first issue` label to mark issues that are suitable for new contributors. You can find all the issues with this label [here](https://github.com/woocommerce/woocommerce/issues?q=is%3Aopen+is%3Aissue+label%3A%22type%3A+good+first+issue%22).
 
