@@ -12,6 +12,7 @@ import {
 } from '@wordpress/e2e-test-utils';
 import { setDefaultOptions } from 'expect-puppeteer';
 import { get } from 'lodash';
+
 /**
  * Internal dependencies
  */

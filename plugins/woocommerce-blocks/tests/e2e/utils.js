@@ -4,13 +4,17 @@
 import { Coupon, HTTPClientFactory } from '@woocommerce/api';
 import config from 'config';
 import {
+	canvas,
 	disableSiteEditorWelcomeGuide,
+	ensureSidebarOpened,
 	openGlobalBlockInserter,
+	switchBlockInspectorTab,
 	switchUserToAdmin,
 	visitAdminPage,
 	pressKeyWithModifier,
 	searchForBlock as searchForFSEBlock,
 	enterEditMode,
+	getAllBlocks,
 } from '@wordpress/e2e-test-utils';
 import { addQueryArgs } from '@wordpress/url';
 import { WP_ADMIN_DASHBOARD } from '@woocommerce/e2e-utils';
@@ -68,6 +72,13 @@ const SELECTORS = {
 	templateEditor: {
 		editButton:
 			'.edit-site-site-hub__edit-button[aria-label="Open the editor"]',
+	},
+	editor: {
+		filterButtonToggle: '//label[text()="Show \'Apply filters\' button"]',
+	},
+	frontend: {
+		XPathSubmitButton:
+			"//*[contains(@class,'wc-block-components-filter-submit-button')]",
 	},
 };
 
@@ -149,20 +160,17 @@ export const isBlockInsertedInWidgetsArea = async ( blockName ) => {
 };
 
 /**
- * Visits site editor dependening on used WordPress version and how Gutenberg is installed.
+ * Visits site editor depending on used WordPress version and how Gutenberg is installed.
  *
  * @param {Object}                             params                          Query parameters to add to the URL.
  * @param {string}                             [params.postId]                 ID of the template if we want to access template editor.
  * @param {'wp_template' | 'wp_template_part'} [params.postType='wp_template'] Type of template.
+ * @param {string}                             [params.path]                   Navigation path.
  */
 export async function goToSiteEditor( params = {} ) {
 	await visitAdminPage( 'site-editor.php', addQueryArgs( '', params ) );
 
-	// @todo Remove the Gutenberg guard clause in goToSiteEditor when WP 6.2 is released.
-	if (
-		GUTENBERG_EDITOR_CONTEXT === 'gutenberg' &&
-		( params?.postId || Object.keys( params ).length === 0 )
-	) {
+	if ( params?.postId || Object.keys( params ).length === 0 ) {
 		await enterEditMode();
 	}
 }
@@ -198,7 +206,12 @@ export async function goToTemplatesList( {
 	postType = 'wp_template',
 	waitFor = 'list',
 } = {} ) {
-	await goToSiteEditor( { postType } );
+	await goToSiteEditor( {
+		postType,
+		// In WP 6.2, if postId is not defined, the route expects `path` instead
+		// of `postType`.
+		path: `/${ postType }/all`,
+	} );
 
 	if ( waitFor === 'actions' ) {
 		await page.waitForSelector(
@@ -441,3 +454,97 @@ export const waitForAllProductsBlockLoaded = async () => {
  */
 export const describeOrSkip = ( condition ) =>
 	condition ? describe : describe.skip;
+
+/**
+ * Get all blocks in the document that match a certain slug.
+ *
+ * @param {string} slug Slug of the blocks to get.
+ *
+ * @return {Promise<{}>} Promise resolving with an array containing all blocks in
+ * the document that match a certain slug.
+ */
+export const getBlocksBySlug = async ( slug ) => {
+	const blocks = await getAllBlocks();
+	return blocks.filter( ( { name } ) => name === slug );
+};
+
+/**
+ * Insert the All Products block using the global inserter. This util is needed
+ * because inserting the All Products block using the `insertBlock()` util
+ * causes time outs.
+ */
+export const insertAllProductsBlock = async () => {
+	const searchTerm = 'All Products';
+
+	await searchForBlock( searchTerm );
+
+	// Wait for the default block list to disappear to prevent its items from
+	// being considered as search results. This is needed since we're debouncing
+	// search request.
+	await page.waitForSelector( '.block-editor-inserter__block-list', {
+		hidden: true,
+	} );
+
+	const insertButton = await page.waitForXPath(
+		`//*[@role='option' and contains(., '${ searchTerm }')]`
+	);
+	if ( ! insertButton ) {
+		throw new Error( `Could not find the "${ searchTerm }" block` );
+	}
+	insertButton?.click();
+};
+
+/**
+ * Clicks on the button in the header which opens Document Settings sidebar when it is closed.
+ * Based on https://github.com/WordPress/gutenberg/blob/trunk/packages/e2e-test-utils/src/open-document-settings-sidebar.js,
+ * but updates the selector so it works in WP 6.2 without GB.
+ */
+export async function openSettingsSidebar() {
+	const toggleButton = await page.waitForSelector(
+		'.edit-post-header__settings button[aria-label="Settings"]'
+	);
+
+	const isClosed = await page.evaluate(
+		( element ) => element.getAttribute( 'aria-expanded' ) === 'false',
+		toggleButton
+	);
+
+	if ( isClosed ) {
+		await toggleButton.click();
+		await page.waitForSelector( '.edit-post-sidebar' );
+	}
+}
+
+/**
+ * Enables the `Show 'Apply filters' button` toggle.
+ */
+export const enableApplyFiltersButton = async () => {
+	await ensureSidebarOpened();
+	await switchBlockInspectorTab( 'Settings' );
+
+	await page.waitForXPath( SELECTORS.editor.filterButtonToggle );
+
+	const [ filterButtonToggle ] = await page.$x(
+		SELECTORS.editor.filterButtonToggle
+	);
+	if ( ! filterButtonToggle ) {
+		throw new Error( "'Apply filters' toggle not found via XPath." );
+	}
+	await filterButtonToggle.click();
+
+	// If for some reason click didn't work (it seems to happen intermittently),
+	// click on the toggle via JS.
+	await page.evaluate( () => {
+		const toggle = document.querySelector(
+			'.components-toggle-control:last-child .components-form-toggle__input'
+		);
+		if ( ! toggle ) {
+			throw new Error( "'Apply filters' toggle not found via CSS." );
+		}
+		if ( ! toggle.checked ) {
+			toggle.click();
+		}
+	} );
+
+	await canvas().waitForXPath( SELECTORS.frontend.XPathSubmitButton );
+};
