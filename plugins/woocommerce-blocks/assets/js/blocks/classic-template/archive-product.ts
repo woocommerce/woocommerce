@@ -21,16 +21,8 @@ import { VARIATION_NAME as productsVariationName } from '../product-query/variat
 import { createArchiveTitleBlock, createRowBlock } from './utils';
 import { type InheritedAttributes } from './types';
 
-const createProductsBlock = (
-	inheritedAttributes: InheritedAttributes,
-	templateInnerBlocks: BlockInstance[]
-) => {
-	const innerBlocks = [
-		...templateInnerBlocks,
-		...createBlocksFromInnerBlocksTemplate( productsInnerBlocksTemplate ),
-	];
-
-	return createBlock(
+const createProductsBlock = ( inheritedAttributes: InheritedAttributes ) =>
+	createBlock(
 		'core/query',
 		{
 			...productsQueryDefaultAttributes,
@@ -41,15 +33,14 @@ const createProductsBlock = (
 				inherit: true,
 			},
 		},
-		innerBlocks
+		createBlocksFromInnerBlocksTemplate( productsInnerBlocksTemplate )
 	);
-};
 
 const getBlockifiedTemplate = (
 	inheritedAttributes: InheritedAttributes,
 	withTermDescription = false
-) => {
-	const templateInnerBlocks = [
+) =>
+	[
 		createBlock( 'woocommerce/breadcrumbs', inheritedAttributes ),
 		createArchiveTitleBlock( 'archive-title', inheritedAttributes ),
 		withTermDescription
@@ -63,10 +54,8 @@ const getBlockifiedTemplate = (
 			],
 			inheritedAttributes
 		),
+		createProductsBlock( inheritedAttributes ),
 	].filter( Boolean ) as BlockInstance[];
-
-	return createProductsBlock( inheritedAttributes, templateInnerBlocks );
-};
 
 const getBlockifiedTemplateWithTermDescription = (
 	inheritedAttributes: InheritedAttributes
