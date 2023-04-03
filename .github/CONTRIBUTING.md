@@ -42,8 +42,7 @@ If you have questions about the process to contribute code or want to discuss de
 - Please add a changelog entry by following the steps detailed in the [development guide](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md), but do not modify `changelog.txt` directly.
 - Please do not update any `.pot` files. These will be updated by the WooCommerce team.
 
-If you are contributing code to our (Javascript-driven) Gutenberg blocks, please note that
-they are developed in their [own repository](https://github.com/woocommerce/woocommerce-gutenberg-products-block) and have their [own issue tracker](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues).
+If you are contributing code to our (Javascript-driven) Gutenberg blocks, please note that they are developed in their [own repository](https://github.com/woocommerce/woocommerce-gutenberg-products-block) and have their [own issue tracker](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues).
 
 ## Feature Requests 🚀
 
