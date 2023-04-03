@@ -655,8 +655,8 @@ jQuery( function ( $ ) {
 			} );
 
 			$( '.wc-metaboxes-wrapper' ).on(
-				'click',
-				'a.do_variation_action',
+				'change',
+				'#field_to_edit',
 				this.do_variation_action
 			);
 
