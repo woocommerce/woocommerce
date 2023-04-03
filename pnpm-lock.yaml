@@ -613,7 +613,6 @@ importers:
       '@babel/runtime': ^7.17.2
       '@testing-library/react': ^12.1.3
       '@testing-library/react-hooks': ^7.0.2
-      '@types/dompurify': ^2.3.3
       '@types/jest': ^27.4.1
       '@types/lodash': ^4.14.182
       '@types/md5': ^2.3.2
@@ -640,7 +639,6 @@ importers:
       '@wordpress/i18n': wp-6.0
       '@wordpress/url': wp-6.0
       concurrently: ^7.0.0
-      dompurify: ^2.3.6
       eslint: ^8.32.0
       jest: ^27.5.1
       jest-cli: ^27.5.1
@@ -668,7 +666,6 @@ importers:
       '@wordpress/hooks': 3.6.1
       '@wordpress/i18n': 4.6.1
       '@wordpress/url': 3.7.1
-      dompurify: 2.3.6
       md5: 2.3.0
       moment: 2.29.1
       qs: 6.10.3
@@ -681,7 +678,6 @@ importers:
       '@babel/runtime': 7.17.7
       '@testing-library/react': 12.1.4_sfoxds7t5ydpegc3knd667wn6m
       '@testing-library/react-hooks': 7.0.2_sfoxds7t5ydpegc3knd667wn6m
-      '@types/dompurify': 2.3.3
       '@types/jest': 27.4.1
       '@types/lodash': 4.14.182
       '@types/md5': 2.3.2
