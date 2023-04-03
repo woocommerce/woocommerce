@@ -18,7 +18,7 @@ import { Select } from 'enquirer';
 import { renderTemplate } from '../../lib/render-template';
 import { getWordpressComAuthToken } from '../../lib/oauth-helper';
 import { getEnvVar } from '../../lib/environment';
-import { getMostRecentFinal } from '../../lib/github-api';
+import { getMostRecentBeta, getMostRecentFinal } from '../../lib/github-api';
 import {
 	getFirstTuesdayOfTheMonth,
 	getSecondTuesdayOfTheMonth,
@@ -35,10 +35,10 @@ dotenv.config();
 // Define the release post command
 const program = new Command()
 	.command( 'beta' )
-	.description( 'CLI to automate generation of a draft beta release post.' )
+	.description( 'CLI to automate generation of a draft RC release post.' )
 	.argument(
 		'<releaseVersion>',
-		'The version for this post in x.y.z-beta.n format. Ex: 7.1.0-beta.1'
+		'The version for this post in x.y.z-rc.n format. Ex: 7.1.0-rc.1'
 	)
 	.option(
 		'--releaseDate <date>',
@@ -82,31 +82,31 @@ const program = new Command()
 		const isOutputOnly = !! outputOnly;
 		const semverVersion = semver.parse( releaseVersion );
 
-		// This is supposed to be a beta post so throw if the version provided is not a beta version.
+		// This is supposed to be a RC post so throw if the version provided is not an RC version.
 		// Things we don't accept:
-		//    * missing beta.x
-		//    * any other kind of prerelease, e.g. rc
-		//    * .x must be a number, so not: beta.1b or beta.1.1 but beta.1 is ok.
+		//    * missing rc.x
+		//    * any other kind of prerelease, e.g. beta
+		//    * .x must be a number, so not: rc.1b or rc.1.1 but rc.1 is ok.
 		if (
 			! semverVersion ||
 			! semverVersion.prerelease.length ||
 			typeof semverVersion.prerelease[ 1 ] === 'string' ||
-			semverVersion.prerelease[ 0 ] !== 'beta'
+			semverVersion.prerelease[ 0 ] !== 'rc'
 		) {
 			throw new Error(
-				`Invalid current version: ${ releaseVersion }. Provide current version in x.y.z-beta.n format.`
+				`Invalid current version: ${ releaseVersion }. Provide current version in x.y.z-rc.n format.`
 			);
 		} else {
 			const [ , prereleaseVersion ] = semverVersion.prerelease;
 
-			// Now infer the previous version, if the one you provide is beta.1 we'll need to find the last major release from
-			// Github releases. If what you provided is beta.2 we'll assume previous was beta.1
+			// Now infer the previous version, if the one you provide is rc.1 we'll need to find the last beta release from
+			// Github releases. If what you provided is rc.2 we'll assume previous was rc.1
 			const previousVersion =
 				prereleaseVersion === 1
-					? ( await getMostRecentFinal() ).tag_name
+					? ( await getMostRecentBeta() ).tag_name
 					: `${ semverVersion.major }.${ semverVersion.minor }.${
 							semverVersion.patch
-					  }-beta.${ prereleaseVersion - 1 }`;
+					  }-rc.${ prereleaseVersion - 1 }`;
 
 			const semverPreviousVersion = semver.parse( previousVersion );
 
@@ -123,7 +123,7 @@ const program = new Command()
 				'http://localhost:3000/oauth';
 
 			Logger.startTask(
-				'Getting auth token for WordPress.com (needed to find last beta post).'
+				'Getting auth token for WordPress.com (needed to find last RC post).'
 			);
 			const authToken = await getWordpressComAuthToken(
 				clientId,
@@ -136,8 +136,8 @@ const program = new Command()
 
 			const versionSearch =
 				prereleaseVersion === 1
-					? `WooCommerce ${ semverPreviousVersion.major }.${ semverPreviousVersion.minor }.${ semverPreviousVersion.patch }`
-					: `WooCommerce ${ semverPreviousVersion.major }.${ semverPreviousVersion.minor } Beta ${ semverPreviousVersion.prerelease[ 1 ] }`;
+					? `WooCommerce ${ semverPreviousVersion.major }.${ semverPreviousVersion.minor }.${ semverPreviousVersion.patch } Beta`
+					: `WooCommerce ${ semverPreviousVersion.major }.${ semverPreviousVersion.minor } Release Candidate`;
 
 			Logger.startTask(
 				`Finding recent release posts with title: ${ versionSearch }`
@@ -177,12 +177,12 @@ const program = new Command()
 					'Error getting auth token, check your env settings are correct.'
 				);
 			} else {
-				const html = await renderTemplate( 'beta-release.ejs', {
+				const html = await renderTemplate( 'rc-release.ejs', {
 					releaseDate,
-					betaNumber: prereleaseVersion,
+					rcNumber: prereleaseVersion,
 					version: semverVersion,
 					previousVersion: semverPreviousVersion,
-					prettyVersion: `${ semverVersion.major }.${ semverVersion.minor }.${ semverVersion.patch } Beta ${ prereleaseVersion }`,
+					prettyVersion: `${ semverVersion.major }.${ semverVersion.minor }.${ semverVersion.patch } RC ${ prereleaseVersion }`,
 					prettyPreviousVersion: `${ semverPreviousVersion.major }.${
 						semverPreviousVersion.minor
 					}.${ semverPreviousVersion.patch }${
@@ -193,9 +193,6 @@ const program = new Command()
 							  semverPreviousVersion.prerelease[ 1 ]
 							: ''
 					}`,
-					rcReleaseDate: getFirstTuesdayOfTheMonth(
-						finalReleaseDate.getMonth()
-					),
 					finalReleaseDate,
 					lastReleasePostUrl:
 						lastReleasePost?.URL ||
@@ -205,7 +202,7 @@ const program = new Command()
 				if ( isOutputOnly ) {
 					const tmpFile = join(
 						tmpdir(),
-						`beta-release-${ releaseVersion }.html`
+						`rc-release-${ releaseVersion }.html`
 					);
 
 					await writeFile( tmpFile, html );
@@ -215,7 +212,7 @@ const program = new Command()
 					Logger.startTask( 'Publishing draft release post' );
 					const { ID } = await createWpComDraftPost(
 						siteId,
-						`WooCommerce ${ semverVersion.major }.${ semverVersion.minor } Beta ${ prereleaseVersion } Released`,
+						`WooCommerce ${ semverVersion.major }.${ semverVersion.minor } Release Candidate ${ prereleaseVersion }`,
 						html,
 						postTags,
 						authToken
