@@ -25,7 +25,7 @@
 		"test": "pnpm exec turbo run turbo:test",
 		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
 		"preinstall": "npx only-allow pnpm",
-		"postinstall": "pnpm git:update-hooks && pnpm run --filter='./tools/monorepo-utils' build",
+		"postinstall": "pnpm git:update-hooks && pnpm run --filter='./tools/monorepo-utils' build && chmod +x tools/monorepo-utils/dist/index.js",
 		"git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && husky install",
 		"create-extension": "node ./tools/create-extension/index.js",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
