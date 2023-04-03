@@ -3,7 +3,7 @@
  */
 import { Command } from '@commander-js/extra-typings';
 
-const program = new Command().command( 'paul' ).action( () => {
+const program = new Command().action( () => {
 	console.log( 'hello world' );
 } );
 
