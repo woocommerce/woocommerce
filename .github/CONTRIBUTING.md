@@ -41,9 +41,8 @@ If you have questions about the process to contribute code or want to discuss de
 - Make sure to write good and detailed commit messages (see [this post](https://chris.beams.io/posts/git-commit/) for more on this) and follow all the applicable sections of the pull request template.
 - Please avoid modifying the changelog directly or updating the .pot files. These will be updated by the WooCommerce team.
 
-If you are contributing code to the (Javascript-driven) Gutenberg blocks, note that it's developed in an external package.
-
-- [Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block)
+If you are contributing code to our (Javascript-driven) Gutenberg blocks, please note that
+they are developed in their [own repository](https://github.com/woocommerce/woocommerce-gutenberg-products-block) and have their [own issue tracker](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues).
 
 ## Feature Requests 🚀
 
