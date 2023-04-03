@@ -47,3 +47,5 @@ export const VARIANT_SHIPPING_SECTION_BASIC_ID = `variant/${ SHIPPING_SECTION_BA
 export const VARIANT_SHIPPING_SECTION_DIMENSIONS_ID = `variant/${ SHIPPING_SECTION_DIMENSIONS_ID }`;
 
 export const PRODUCT_DETAILS_SLUG = 'product-details';
+
+export const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';

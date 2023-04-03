@@ -1,0 +1,20 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-schedule-sale-pricing",
+	"title": "Product schedule sale pricing",
+	"category": "woocommerce",
+	"description": "The product schedule sale pricing.",
+	"keywords": [ "products", "schedule", "pricing" ],
+	"textdomain": "default",
+	"attributes": {},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": true,
+		"reusable": false,
+		"inserter": false,
+		"lock": false
+	},
+	"editorStyle": "file:./editor.css"
+}
