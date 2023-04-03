@@ -187,8 +187,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Get coupon 
-	 .
+	 * Get coupon status.
 	 *
 	 * @since  6.2.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
