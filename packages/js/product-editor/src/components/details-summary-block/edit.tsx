@@ -23,6 +23,7 @@ import {
 import { ParagraphRTLControl } from './paragraph-rtl-control';
 import { SummaryAttributes } from './types';
 import { ALIGNMENT_CONTROLS } from './constants';
+import { ModalEditor } from '../modal-editor';
 
 export function Edit( {
 	attributes,
@@ -63,6 +64,8 @@ export function Edit( {
 					onChange={ handleDirectionChange }
 				/>
 			</BlockControls>
+
+			<ModalEditor />
 
 			<BaseControl
 				id={ id }
