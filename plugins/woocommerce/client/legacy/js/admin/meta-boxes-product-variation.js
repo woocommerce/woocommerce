@@ -1195,7 +1195,7 @@ jQuery( function ( $ ) {
 		 * Actions
 		 */
 		do_variation_action: function () {
-			var do_variation_action = $( 'select.variation_actions' ).val(),
+			var do_variation_action = $( this ).val(),
 				data = {},
 				changes = 0,
 				value;
@@ -1344,11 +1344,9 @@ jQuery( function ( $ ) {
 			if ( parseInt( wrapper.attr( 'data-total' ) ) > 0 ) {
 				$( '.add-variation-container' ).addClass( 'hidden' );
 				$( '#field_to_edit' ).removeClass( 'hidden' );
-				$( 'a.do_variation_action' ).removeClass( 'hidden' );
 			} else {
 				$( '.add-variation-container' ).removeClass( 'hidden' );
 				$( '#field_to_edit' ).addClass( 'hidden' );
-				$( 'a.do_variation_action' ).addClass( 'hidden' );
 			}
 		},
 

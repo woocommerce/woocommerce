@@ -136,7 +136,6 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 					<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
 					<?php /* phpcs:enable */ ?>
 				</select>
-				<a class="button bulk_edit do_variation_action hidden"><?php esc_html_e( 'Go', 'woocommerce' ); ?></a>
 
 				<div class="variations-pagenav">
 					<?php /* translators: variations count */ ?>
