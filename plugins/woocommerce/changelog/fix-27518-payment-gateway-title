@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid over-aggressive escaping of the payment gateway title in the context of the checkout thank you page.
