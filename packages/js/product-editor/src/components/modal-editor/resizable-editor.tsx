@@ -27,9 +27,19 @@ const HANDLE_STYLES_OVERRIDE = {
 	left: undefined,
 };
 
-export function ResizableEditor( { enableResizing, height, children } ) {
+type ResizableEditorProps = {
+	enableResizing: boolean;
+	height: number;
+	children: React.ReactNode;
+};
+
+export function ResizableEditor( {
+	enableResizing,
+	height,
+	children,
+}: ResizableEditorProps ) {
 	const [ width, setWidth ] = useState( '100%' );
-	const resizableRef = useRef();
+	const resizableRef = useRef< HTMLDivElement >();
 	const resizeWidthBy = useCallback( ( deltaPixels ) => {
 		if ( resizableRef.current ) {
 			setWidth( resizableRef.current.offsetWidth + deltaPixels );
@@ -37,6 +47,8 @@ export function ResizableEditor( { enableResizing, height, children } ) {
 	}, [] );
 	return (
 		<ResizableBox
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore This prop was added to ResizeableBox.
 			ref={ ( api ) => {
 				resizableRef.current = api?.resizable;
 			} }

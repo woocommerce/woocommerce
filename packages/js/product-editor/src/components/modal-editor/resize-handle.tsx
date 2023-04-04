@@ -4,12 +4,21 @@
 import { __ } from '@wordpress/i18n';
 import { createElement, Fragment } from '@wordpress/element';
 import { LEFT, RIGHT } from '@wordpress/keycodes';
+import { KeyboardEvent } from 'react';
 import { VisuallyHidden } from '@wordpress/components';
 
 const DELTA_DISTANCE = 20; // The distance to resize per keydown in pixels.
 
-export default function ResizeHandle( { direction, resizeWidthBy } ) {
-	function handleKeyDown( event ) {
+type ResizeHandleProps = {
+	direction: 'left' | 'right';
+	resizeWidthBy: ( width: number ) => void;
+};
+
+export default function ResizeHandle( {
+	direction,
+	resizeWidthBy,
+}: ResizeHandleProps ) {
+	function handleKeyDown( event: KeyboardEvent< HTMLButtonElement > ) {
 		const { keyCode } = event;
 
 		if (
