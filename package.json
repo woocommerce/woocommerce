@@ -17,6 +17,9 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
+	"bin": {
+		"utils": "./tools/monorepo-utils/dist/index.js"
+	},
 	"scripts": {
 		"build": "pnpm exec turbo run turbo:build",
 		"test": "pnpm exec turbo run turbo:test",
@@ -27,7 +30,7 @@
 		"create-extension": "node ./tools/create-extension/index.js",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
-		"utils": "pnpm run --filter='./tools/monorepo-utils' utils"
+		"utils": "./tools/monorepo-utils/dist/index.js"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.20.2",

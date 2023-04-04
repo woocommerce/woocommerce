@@ -1,10 +1,10 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
-  "ts-node": {
-    "transpileOnly": true,
-    "files": true,
-  },
-  "include": [
-		"src/**/*"
-	]
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "dist",
+		"target": "es6",
+		"module": "commonjs",
+		"esModuleInterop": true,
+		"moduleResolution": "node"
+	}
 }
