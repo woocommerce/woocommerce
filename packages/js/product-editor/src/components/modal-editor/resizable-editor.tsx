@@ -62,6 +62,7 @@ export function ResizableEditor( {
 			minWidth={ 300 }
 			maxWidth="100%"
 			maxHeight="100%"
+			minHeight={ height }
 			enable={ {
 				right: enableResizing,
 				left: enableResizing,
