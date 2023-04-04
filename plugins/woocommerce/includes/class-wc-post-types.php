@@ -458,36 +458,124 @@ class WC_Post_Types {
 												),
 											),
 										),
-									),
-								),
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Images', 'woocommerce' ),
-										'description' => sprintf(
-											/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
-											__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s.', 'woocommerce' ),
-											'<a href="http://woocommerce.com/#" target="_blank" rel="noreferrer">',
-											'</a>'
-										),
-									),
-									array(
 										array(
-											'woocommerce/product-images',
+											'woocommerce/product-schedule-sale-fields',
+										),
+										array(
+											'woocommerce/product-radio',
 											array(
-												'images' => array(),
+												'title'    => __( 'Charge sales tax on', 'woocommerce' ),
+												'property' => 'tax_status',
+												'options'  => array(
+													array(
+														'label' => __( 'Product and shipping', 'woocommerce' ),
+														'value' => 'taxable',
+													),
+													array(
+														'label' => __( 'Only shipping', 'woocommerce' ),
+														'value' => 'shipping',
+													),
+													array(
+														'label' => __( "Don't charge tax", 'woocommerce' ),
+														'value' => 'none',
+													),
+												),
+											),
+										),
+										array(
+											'woocommerce/collapsible',
+											array(
+												'toggleText'       => __( 'Advanced', 'woocommerce' ),
+												'initialCollapsed' => true,
+												'persistRender'    => true,
+											),
+											array(
+												array(
+													'woocommerce/product-radio',
+													array(
+														'title'    => __( 'Tax class', 'woocommerce' ),
+														'description' => sprintf(
+															/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
+															__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s.', 'woocommerce' ),
+															'<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
+															'</a>'
+														),
+														'property' => 'tax_class',
+														'options'  => array(
+															array(
+																'label' => __( 'Standard', 'woocommerce' ),
+																'value' => '',
+															),
+															array(
+																'label' => __( 'Reduced rate', 'woocommerce' ),
+																'value' => 'reduced-rate',
+															),
+															array(
+																'label' => __( 'Zero rate', 'woocommerce' ),
+																'value' => 'zero-rate',
+															),
+														),
+													),
+												),
 											),
 										),
 									),
 								),
+							),
+						),
+<<<<<<< HEAD
+=======
+>>>>>>> 09bfcca82f (Add label to font family for block editor and fix template)
+=======
+						array(
+							'woocommerce/product-tab',
+							array(
+								'id'    => 'pricing',
+								'title' => __( 'Pricing', 'woocommerce' ),
+							),
+							array(
 								array(
 									'woocommerce/product-section',
 									array(
-										'title'       => __( 'Organization & visibility', 'woocommerce' ),
-										'description' => __( 'Help customers find this product by assigning it to categories or featuring it across your sales channels.', 'woocommerce' ),
+										'title'       => __( 'Pricing', 'woocommerce' ),
+										'description' => sprintf(
+											/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
+											__( 'Set a competitive price, put the product on sale, and manage tax calculations. %1$sHow to price your product?%2$s', 'woocommerce' ),
+											'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
+											'</a>'
+										),
+										'icon'        => array(
+											'src' => '<svg xmlns="http://www.w3.org/2000/svg" view-box="0 0 24 24"><path fill-rule="evenodd" d="M16.83 6.342l.602.3.625-.25.443-.176v12.569l-.443-.178-.625-.25-.603.301-1.444.723-2.41-.804-.475-.158-.474.158-2.41.803-1.445-.722-.603-.3-.625.25-.443.177V6.215l.443.178.625.25.603-.301 1.444-.722 2.41.803.475.158.474-.158 2.41-.803 1.445.722zM20 4l-1.5.6-1 .4-2-1-3 1-3-1-2 1-1-.4L5 4v17l1.5-.6 1-.4 2 1 3-1 3 1 2-1 1 .4 1.5.6V4zm-3.5 6.25v-1.5h-8v1.5h8zm0 3v-1.5h-8v1.5h8zm-8 3v-1.5h8v1.5h-8z" clip-rule="evenodd" /></svg>',
+										),
 									),
 									array(
 										array(
+											'core/columns',
+											array(),
+											array(
+												array(
+													'core/column',
+													array(
+														'templateLock' => 'all',
+													),
+													array(
+														array(
+															'woocommerce/product-pricing',
+															array(
+																'name' => 'regular_price',
+																'label' => __( 'List price', 'woocommerce' ),
+																'showPricingSection' => true,
+															),
+														),
+													),
+												),
+												array(
+													'core/column',
+													array(
+														'templateLock' => 'all',
+													),
+													array(
+														array(
 											'woocommerce/product-category',
 											array(
 												array(
@@ -592,8 +680,7 @@ class WC_Post_Types {
 >>>>>>> 09bfcca82f (Add label to font family for block editor and fix template)
 						),
 						array(
-							'woocommerce/product-tab',
-							array(
+										array(
 								'id'    => 'inventory',
 								'title' => __( 'Inventory', 'woocommerce' ),
 							),
