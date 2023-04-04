@@ -6,7 +6,7 @@ import { Command } from '@commander-js/extra-typings';
 /**
  * Internal dependencies
  */
-import CodeFreeze from './commands/code-freeze';
+import CodeFreeze from './code-freeze/commands';
 
 const program = new Command()
 	.name( 'utils' )

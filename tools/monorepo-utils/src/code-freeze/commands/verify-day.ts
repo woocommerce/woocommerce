@@ -6,10 +6,10 @@ import { Command } from '@commander-js/extra-typings';
 /**
  * Internal dependencies
  */
-import { verifyDay } from '../../lib/code-freeze';
+import { verifyDay } from '../utils/index';
 
-const program = new Command( 'code-freeze' )
-	.description( 'Code freeze utilities' )
+export const verifyDayCommand = new Command( 'verify-day' )
+	.description( 'Verify if today is the code freeze day' )
 	.option(
 		'-o, --override <override>',
 		"Time Override: The time to use in checking whether the action should run (default: 'now')."
@@ -19,5 +19,3 @@ const program = new Command( 'code-freeze' )
 
 		process.exit( 0 );
 	} );
-
-export default program;
