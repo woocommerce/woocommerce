@@ -7,16 +7,20 @@ import { createElement, useState } from '@wordpress/element';
 import { useResizeObserver } from '@wordpress/compose';
 import {
 	BlockList,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	BlockTools,
 	BlockEditorKeyboardShortcuts,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	privateApis as blockEditorPrivateApis,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
-	// unlock,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
+// eslint-disable-next-line @woocommerce/dependency-group
 import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
 
 /**
@@ -36,11 +40,13 @@ const { ExperimentalBlockEditorProvider } = unlock( blockEditorPrivateApis );
 export function ModalEditor() {
 	const [ resizeObserver, sizes ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( [] );
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock } = useDispatch( blockEditorStore );
 
 	return (
 		<ExperimentalBlockEditorProvider
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			settings={ productBlockEditorSettings }
 			value={ blocks }
@@ -60,14 +66,17 @@ export function ModalEditor() {
 					}
 				} }
 			>
+				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 				{ /* @ts-ignore */ }
 				<BlockEditorKeyboardShortcuts.Register />
 				{ /* <BackButton /> */ }
 				<ResizableEditor
 					enableResizing={ true }
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore This accepts numbers or strings.
 					height={ sizes.height ?? '100%' }
 				>
-					<EditorCanvas enableResizing={ true } settings={ {} }>
+					<EditorCanvas enableResizing={ true }>
 						{ resizeObserver }
 						<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
 					</EditorCanvas>
