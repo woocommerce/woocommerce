@@ -57,6 +57,7 @@ class Init {
 		if ( ! empty( $post_type_object->template ) ) {
 			$editor_settings['template']     = $post_type_object->template;
 			$editor_settings['templateLock'] = ! empty( $post_type_object->template_lock ) ? $post_type_object->template_lock : false;
+			$editor_settings['__unstableResolvedAssets'] = gutenberg_resolve_assets_override();
 		}
 
 		$editor_settings = get_block_editor_settings( $editor_settings, $block_editor_context );

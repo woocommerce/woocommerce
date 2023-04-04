@@ -2,81 +2,77 @@
  * External dependencies
  */
 import { BlockInstance } from '@wordpress/blocks';
-import classnames from 'classnames';
+import { useDispatch } from '@wordpress/data';
 import { createElement, useState } from '@wordpress/element';
 import { useResizeObserver } from '@wordpress/compose';
 import {
 	BlockList,
-	BlockInspector,
 	// @ts-ignore
 	BlockTools,
 	BlockEditorKeyboardShortcuts,
-	BlockEditorProvider,
+	// @ts-ignore
+	privateApis as blockEditorPrivateApis,
+	// @ts-ignore
+	// unlock,
+	store as blockEditorStore,
 } from '@wordpress/block-editor';
 // @ts-ignore
+import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
 
 /**
  * Internal dependencies
  */
 import { EditorCanvas } from './editor-canvas';
 import { ResizableEditor } from './resizable-editor';
-// import { SidebarInspectorFill } from '../sidebar-edit-mode';
 // import BackButton from './back-button';
 
-// const LAYOUT = {
-// 	type: 'default',
-// 	// At the root level of the site editor, no alignments should be allowed.
-// 	alignments: [],
-// };
+const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
+	'I know using unstable features means my plugin or theme will inevitably break on the next WordPress release.',
+	'@wordpress/block-editor'
+);
+
+const { ExperimentalBlockEditorProvider } = unlock( blockEditorPrivateApis );
 
 export function ModalEditor() {
-	// const [ resizeObserver ] = useResizeObserver();
+	const [ resizeObserver, sizes ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( [] );
+	// @ts-ignore This action exists in the block editor store.
+	const { clearSelectedBlock } = useDispatch( blockEditorStore );
 
 	return (
-		<BlockEditorProvider
-			// settings={ settings }
+		<ExperimentalBlockEditorProvider
+			// @ts-ignore
+			settings={ productBlockEditorSettings }
 			value={ blocks }
 			// onInput={ onInput }
 			onChange={ setBlocks }
 			useSubRegistry={ true }
 		>
-			{ /* <TemplatePartConverter /> */ }
-			{ /* <Sidebar.InspectorFill>
-                <BlockInspector />
-            </Sidebar.InspectorFill> */ }
-			{ /* Potentially this could be a generic slot (e.g. EditorCanvas.Slot) if there are other uses for it. */ }
-
 			<BlockTools
-				className={ classnames( 'edit-site-visual-editor', {
-					'is-focus-mode': true,
-				} ) }
+				className={ 'woocommerce-modal-editor' }
 				// __unstableContentRef={ contentRef }
-				// onClick={ ( event ) => {
-				// 	// Clear selected block when clicking on the gray background.
-				// 	if ( event.target === event.currentTarget ) {
-				// 		clearSelectedBlock();
-				// 	}
-				// } }
+				onClick={ (
+					event: React.MouseEvent< HTMLDivElement, MouseEvent >
+				) => {
+					// Clear selected block when clicking on the gray background.
+					if ( event.target === event.currentTarget ) {
+						clearSelectedBlock();
+					}
+				} }
 			>
-				{ /* <BlockEditorKeyboardShortcuts.Register /> */ }
+				{ /* @ts-ignore */ }
+				<BlockEditorKeyboardShortcuts.Register />
 				{ /* <BackButton /> */ }
-				<ResizableEditor enableResizing={ true } height={ '100%' }>
-					<EditorCanvas
-						enableResizing={ true }
-						settings={ {} }
-						// contentRef={ mergedRefs }
-						// readonly={ canvasMode === 'view' }
-					>
-						{ /* { resizeObserver } */ }
-						<BlockList
-							className="edit-site-block-editor__block-list wp-site-blocks"
-							// __experimentalLayout={ LAYOUT }
-							// renderAppender={ true }
-						/>
+				<ResizableEditor
+					enableResizing={ true }
+					height={ sizes.height ?? '100%' }
+				>
+					<EditorCanvas enableResizing={ true } settings={ {} }>
+						{ resizeObserver }
+						<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
 					</EditorCanvas>
 				</ResizableEditor>
 			</BlockTools>
-		</BlockEditorProvider>
+		</ExperimentalBlockEditorProvider>
 	);
 }

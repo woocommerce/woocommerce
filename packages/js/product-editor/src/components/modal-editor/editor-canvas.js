@@ -36,12 +36,17 @@ export function EditorCanvas( {
 			head={
 				<>
 					<EditorStyles styles={ settings.styles } />
-					<style>{
-						// Forming a "block formatting context" to prevent margin collapsing.
-						// @see https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Block_formatting_context
-						`.is-root-container { display: flow-root; }
-							body { position: relative; }`
-					}</style>
+					<style>
+						{
+							// Forming a "block formatting context" to prevent margin collapsing.
+							// @see https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Block_formatting_context
+							`.is-root-container { display: flow-root; }
+							body { position: relative; }
+                            .block-editor-block-list__layout {
+                                padding: 36px;
+                            }`
+						}
+					</style>
 					{ enableResizing && (
 						<style>
 							{
@@ -58,8 +63,6 @@ export function EditorCanvas( {
 			className="edit-site-visual-editor__editor-canvas"
 			{ ...props }
 		>
-			{ /* Filters need to be rendered before children to avoid Safari rendering issues. */ }
-			{ /* { settings.svgFilters } */ }
 			{ children }
 		</Iframe>
 	);
