@@ -54,7 +54,8 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		colorProps.className,
 		{
 			[ `${ parentClassName }__product-price` ]: parentClassName,
-		}
+		},
+		typographyProps.className
 	);
 
 	if ( ! product.id && ! isDescendentOfSingleProductTemplate ) {
