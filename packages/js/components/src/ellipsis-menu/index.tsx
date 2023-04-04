@@ -48,7 +48,7 @@ const EllipsisMenu = ( {
 	}
 
 	const renderEllipsis = ( {
-		onToggle: _onToggle,
+		onToggle: toggleHandlerOverride,
 		isOpen,
 	}: CallbackProps ) => {
 		const toggleClassname = classnames(
@@ -65,8 +65,8 @@ const EllipsisMenu = ( {
 					if ( onToggle ) {
 						onToggle( e );
 					}
-					if ( _onToggle ) {
-						_onToggle();
+					if ( toggleHandlerOverride ) {
+						toggleHandlerOverride();
 					}
 				} }
 				title={ label }
