@@ -15,14 +15,14 @@ import {
 	Fragment,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import moment from 'moment';
 
 /**
  * Internal dependencies
  */
 import { PRODUCT_SCHEDULED_SALE_SLUG } from '../../../constants';
-import { ScheduleSaleLabelProps } from './types';
 
-export function ScheduleSaleLabel( {}: ScheduleSaleLabelProps ) {
+export function ScheduleSaleLabel() {
 	const timeFormat = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
 		return ( getOption( 'time_format' ) as string ) || 'H:i';
@@ -42,7 +42,6 @@ export function ScheduleSaleLabel( {}: ScheduleSaleLabelProps ) {
 							<span>
 								{ formatDate(
 									timeFormat,
-									// @ts-expect-error TODO - fix this type error with moment
 									moment().startOf( 'day' )
 								) }
 							</span>
@@ -51,7 +50,6 @@ export function ScheduleSaleLabel( {}: ScheduleSaleLabelProps ) {
 							<span>
 								{ formatDate(
 									timeFormat,
-									// @ts-expect-error TODO - fix this type error with moment
 									moment().endOf( 'day' )
 								) }
 							</span>

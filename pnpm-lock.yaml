@@ -1468,6 +1468,7 @@ importers:
       jest: ^27.5.1
       jest-cli: ^27.5.1
       lodash: ^4.17.21
+      moment: ^2.29.4
       postcss: ^8.4.7
       postcss-loader: ^4.3.0
       prop-types: ^15.8.1
@@ -1515,6 +1516,7 @@ importers:
       classnames: 2.3.1
       dompurify: 2.3.6
       lodash: 4.17.21
+      moment: 2.29.4
       prop-types: 15.8.1
       react-router-dom: 6.3.0_sfoxds7t5ydpegc3knd667wn6m
     devDependencies:
@@ -22608,7 +22610,7 @@ packages:
       postcss-value-parser: 4.2.0
       schema-utils: 2.7.1
       semver: 6.3.0
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@3.3.12
 
   /css-loader/5.2.7_webpack@5.70.0:
     resolution: {integrity: sha512-Q7mOvpBNBG7YrVGMxRxcBJZFL75o+cH2abNASdibkj/fffYD8qWbInZrD0S9ccI6vZclF3DsHE7njGlLtaHbhg==}
@@ -36388,7 +36390,7 @@ packages:
       is-touch-device: 1.0.1
       lodash: 4.17.21
       moment: 2.29.4
-      object.assign: 4.1.2
+      object.assign: 4.1.4
       object.values: 1.1.5
       prop-types: 15.8.1
       raf: 3.4.1
@@ -38044,7 +38046,7 @@ packages:
       neo-async: 2.6.2
       schema-utils: 3.1.1
       semver: 7.3.5
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@3.3.12
 
   /sass-loader/10.4.1_sass@1.60.0+webpack@5.76.3:
     resolution: {integrity: sha512-aX/iJZTTpNUNx/OSYzo2KsjIUQHqvWsAhhUijFjAPdZTEhstjZI9zTNvkTTwsx+uNUJqUwOw5gacxQMx4hJxGQ==}
@@ -40049,7 +40051,7 @@ packages:
       serialize-javascript: 6.0.0
       source-map: 0.6.1
       terser: 5.10.0_acorn@8.8.1
-      webpack: 5.70.0
+      webpack: 5.70.0_webpack-cli@3.3.12
     transitivePeerDependencies:
       - acorn
 

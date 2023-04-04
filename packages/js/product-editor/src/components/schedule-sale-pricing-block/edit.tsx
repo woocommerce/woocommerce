@@ -11,20 +11,19 @@ import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import moment from 'moment';
 
 /**
  * Internal dependencies
  */
 import { ScheduleSalePricingBlockAttributes } from './types';
 import { ScheduleSaleLabel } from './schedule-sale-label';
+import { useValidation } from '../../hooks/use-validation';
 
-export function Edit( {
-	attributes,
-}: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
+export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
 	const blockProps = useBlockProps( {
 		className: 'wp-block-woocommerce-product-schedule-sale-pricing',
 	} );
-	const {} = attributes;
 
 	const dateFormat = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
@@ -50,7 +49,6 @@ export function Edit( {
 		string | null
 	>( 'postType', 'product', 'date_on_sale_to_gmt' );
 
-	// @ts-ignore
 	const today = moment().startOf( 'day' ).toISOString();
 
 	function handleToggleChange( value: boolean ) {
@@ -87,6 +85,21 @@ export function Edit( {
 		}
 	}, [ dateOnSaleFromGmt, dateOnSaleToGmt ] );
 
+	const isDateOnSaleFromGmtValid = useValidation(
+		'product/date_on_sale_from_gmt',
+		() =>
+			! showSaleSchedule ||
+			moment( dateOnSaleFromGmt ).isSameOrAfter( today, 'day' )
+	);
+
+	const isDateOnSaleToGmtValid = useValidation(
+		'product/date_on_sale_to_gmt',
+		() =>
+			! showSaleSchedule ||
+			! dateOnSaleToGmt ||
+			moment( dateOnSaleFromGmt ).isBefore( dateOnSaleToGmt, 'day' )
+	);
+
 	return (
 		<div { ...blockProps }>
 			<ToggleControl
@@ -105,8 +118,21 @@ export function Edit( {
 							timeForDateOnly={ 'start-of-day' }
 							isDateOnlyPicker
 							dateTimeFormat={ dateFormat }
-							currentDate={ dateOnSaleFromGmt || today }
+							currentDate={ dateOnSaleFromGmt }
 							onChange={ setDateOnSaleFromGmt }
+							className={
+								isDateOnSaleFromGmtValid
+									? undefined
+									: 'has-error'
+							}
+							help={
+								isDateOnSaleFromGmtValid
+									? undefined
+									: __(
+											'From date must be greater than or equal to today.',
+											'woocommerce'
+									  )
+							}
 						/>
 					</div>
 
@@ -119,6 +145,17 @@ export function Edit( {
 							dateTimeFormat={ dateFormat }
 							currentDate={ dateOnSaleToGmt }
 							onChange={ setDateOnSaleToGmt }
+							className={
+								isDateOnSaleToGmtValid ? undefined : 'has-error'
+							}
+							help={
+								isDateOnSaleToGmtValid
+									? undefined
+									: __(
+											'To date must be greater than From date.',
+											'woocommerce'
+									  )
+							}
 						/>
 					</div>
 				</div>
