@@ -755,9 +755,9 @@ class OrdersTableQuery {
 
 		if ( empty( $on ) ) {
 			if ( $this->tables['orders'] === $table ) {
-				$on = "{$this->tables['orders']}.id = {$alias}.id";
+				$on = "`{$this->tables['orders']}`.id = `{$alias}`.id";
 			} else {
-				$on = "{$this->tables['orders']}.id = {$alias}.order_id";
+				$on = "`{$this->tables['orders']}`.id = `{$alias}`.order_id";
 			}
 		}
 
@@ -775,8 +775,8 @@ class OrdersTableQuery {
 		}
 
 		$sql_join  = '';
-		$sql_join .= "{$join_type} JOIN {$table} ";
-		$sql_join .= ( $alias !== $table ) ? "AS {$alias} " : '';
+		$sql_join .= "{$join_type} JOIN `{$table}` ";
+		$sql_join .= ( $alias !== $table ) ? "AS `{$alias}` " : '';
 		$sql_join .= "ON ( {$on} )";
 
 		$this->join[ $alias ] = $sql_join;

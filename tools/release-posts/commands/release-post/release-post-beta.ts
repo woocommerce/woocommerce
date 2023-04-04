@@ -51,7 +51,10 @@ const program = new Command()
 			year: 'numeric',
 		} )
 	)
-	.option( '--outputOnly', 'Only output the post, do not publish it' )
+	.option(
+		'--outputOnly',
+		'Only output the post as HTML, do not publish a draft.'
+	)
 	.option(
 		'--tags <tags>',
 		'Comma separated list of tags to add to the post.',
@@ -87,7 +90,8 @@ const program = new Command()
 		if (
 			! semverVersion ||
 			! semverVersion.prerelease.length ||
-			typeof semverVersion.prerelease[ 1 ] === 'string'
+			typeof semverVersion.prerelease[ 1 ] === 'string' ||
+			semverVersion.prerelease[ 0 ] !== 'beta'
 		) {
 			throw new Error(
 				`Invalid current version: ${ releaseVersion }. Provide current version in x.y.z-beta.n format.`
@@ -209,12 +213,15 @@ const program = new Command()
 					Logger.notice( `Output written to ${ tmpFile }` );
 				} else {
 					Logger.startTask( 'Publishing draft release post' );
-					await createWpComDraftPost(
+					const { ID } = await createWpComDraftPost(
 						siteId,
 						`WooCommerce ${ semverVersion.major }.${ semverVersion.minor } Beta ${ prereleaseVersion } Released`,
 						html,
 						postTags,
 						authToken
+					);
+					Logger.notice(
+						`Release post created, edit it here: \nhttps://wordpress.com/post/developer.woocommerce.com/${ ID }`
 					);
 					Logger.endTask();
 				}

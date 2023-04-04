@@ -12,6 +12,7 @@ import {
 /**
  * Internal dependencies
  */
+import { init as initImages } from '../images';
 import { init as initName } from '../details-name-block';
 import { init as initSummary } from '../details-summary-block';
 import { init as initSection } from '../section';
@@ -28,6 +29,7 @@ export const initBlocks = () => {
 	// @ts-ignore An argument is allowed to specify which blocks to register.
 	registerCoreBlocks( blocks );
 
+	initImages();
 	initName();
 	initSummary();
 	initSection();

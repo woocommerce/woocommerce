@@ -246,7 +246,7 @@ class OrdersTableFieldQuery {
 		$this->table_aliases[] = $alias;
 
 		if ( $join ) {
-			$this->join[] = $join;
+			$this->join[ $alias ] = $join;
 		}
 
 		return $alias;
