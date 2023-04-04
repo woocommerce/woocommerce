@@ -17,7 +17,6 @@ import moment from 'moment';
  * Internal dependencies
  */
 import { ScheduleSalePricingBlockAttributes } from './types';
-import { ScheduleSaleLabel } from './schedule-sale-label';
 import { useValidation } from '../../hooks/use-validation';
 
 export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
@@ -25,9 +24,12 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 		className: 'wp-block-woocommerce-product-schedule-sale-pricing',
 	} );
 
-	const dateFormat = useSelect( ( select ) => {
+	const dateTimeFormat = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
-		return getOption< string | null >( 'date_format' ) || 'F j, Y';
+		return (
+			getOption< string | null >( 'links_updated_date_format' ) ||
+			'F j, Y g:i a'
+		);
 	} );
 
 	const [ showSaleSchedule, setShowSaleSchedule ] = useState( false );
@@ -49,7 +51,7 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 		string | null
 	>( 'postType', 'product', 'date_on_sale_to_gmt' );
 
-	const today = moment().startOf( 'day' ).toISOString();
+	const today = moment().toISOString();
 
 	function handleToggleChange( value: boolean ) {
 		recordEvent( 'product_pricing_schedule_sale_toggle_click', {
@@ -85,25 +87,18 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 		}
 	}, [ dateOnSaleFromGmt, dateOnSaleToGmt ] );
 
-	const isDateOnSaleFromGmtValid = useValidation(
-		'product/date_on_sale_from_gmt',
-		() =>
-			! showSaleSchedule ||
-			moment( dateOnSaleFromGmt ).isSameOrAfter( today, 'day' )
-	);
-
 	const isDateOnSaleToGmtValid = useValidation(
 		'product/date_on_sale_to_gmt',
 		() =>
 			! showSaleSchedule ||
 			! dateOnSaleToGmt ||
-			moment( dateOnSaleFromGmt ).isBefore( dateOnSaleToGmt, 'day' )
+			moment( dateOnSaleFromGmt ).isBefore( dateOnSaleToGmt, 'minute' )
 	);
 
 	return (
 		<div { ...blockProps }>
 			<ToggleControl
-				label={ <ScheduleSaleLabel /> }
+				label={ __( 'Schedule sale', 'woocommerce' ) }
 				checked={ showSaleSchedule }
 				onChange={ handleToggleChange }
 				disabled={ ! isSalePriceGreaterThanZero }
@@ -114,35 +109,24 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 					<div className="wp-block-column">
 						<DateTimePickerControl
 							label={ __( 'From', 'woocommerce' ) }
-							placeholder={ __( 'Now', 'woocommerce' ) }
-							timeForDateOnly={ 'start-of-day' }
-							isDateOnlyPicker
-							dateTimeFormat={ dateFormat }
+							placeholder={ __(
+								'Sale start date and time (optional)',
+								'woocommerce'
+							) }
+							dateTimeFormat={ dateTimeFormat }
 							currentDate={ dateOnSaleFromGmt }
 							onChange={ setDateOnSaleFromGmt }
-							className={
-								isDateOnSaleFromGmtValid
-									? undefined
-									: 'has-error'
-							}
-							help={
-								isDateOnSaleFromGmtValid
-									? undefined
-									: __(
-											'From date must be greater than or equal to today.',
-											'woocommerce'
-									  )
-							}
 						/>
 					</div>
 
 					<div className="wp-block-column">
 						<DateTimePickerControl
 							label={ __( 'To', 'woocommerce' ) }
-							placeholder={ __( 'No end date', 'woocommerce' ) }
-							timeForDateOnly={ 'end-of-day' }
-							isDateOnlyPicker
-							dateTimeFormat={ dateFormat }
+							placeholder={ __(
+								'Sale end date and time (optional)',
+								'woocommerce'
+							) }
+							dateTimeFormat={ dateTimeFormat }
 							currentDate={ dateOnSaleToGmt }
 							onChange={ setDateOnSaleToGmt }
 							className={
