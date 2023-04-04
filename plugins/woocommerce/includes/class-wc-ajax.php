@@ -299,7 +299,7 @@ class WC_AJAX {
 					'woocommerce_update_order_review_fragments',
 					array(
 						'form.woocommerce-checkout' => wc_print_notice(
-							esc_html__( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . __( 'Return to shop', 'woocommerce' ) . '</a>',
+							esc_html__( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . esc_html__( 'Return to shop', 'woocommerce' ) . '</a>',
 							'error',
 							[],
 							true
