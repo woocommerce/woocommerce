@@ -9,7 +9,7 @@ import { BlockEditProps } from '@wordpress/blocks';
 import { ToggleControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
-import { createElement, useState } from '@wordpress/element';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -21,21 +21,26 @@ import { ScheduleSaleLabel } from './schedule-sale-label';
 export function Edit( {
 	attributes,
 }: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
-	const blockProps = useBlockProps();
+	const blockProps = useBlockProps( {
+		className: 'wp-block-woocommerce-product-schedule-sale-pricing',
+	} );
 	const {} = attributes;
 
 	const dateFormat = useSelect( ( select ) => {
 		const { getOption } = select( OPTIONS_STORE_NAME );
-		return ( getOption( 'date_format' ) as string ) || 'F j, Y';
+		return getOption< string | null >( 'date_format' ) || 'F j, Y';
 	} );
 
 	const [ showSaleSchedule, setShowSaleSchedule ] = useState( false );
 
-	const [ salePrice ] = useEntityProp< string >(
+	const [ salePrice ] = useEntityProp< string | null >(
 		'postType',
 		'product',
 		'sale_price'
 	);
+
+	const isSalePriceGreaterThanZero =
+		Number.parseFloat( salePrice || '0' ) > 0;
 
 	const [ dateOnSaleFromGmt, setDateOnSaleFromGmt ] = useEntityProp<
 		string | null
@@ -55,11 +60,32 @@ export function Edit( {
 
 		setShowSaleSchedule( value );
 
-		if ( ! value ) {
-			setDateOnSaleFromGmt( null );
-			setDateOnSaleToGmt( null );
+		if ( value ) {
+			setDateOnSaleFromGmt( today );
+			setDateOnSaleToGmt( '' );
+		} else {
+			setDateOnSaleFromGmt( '' );
+			setDateOnSaleToGmt( '' );
 		}
 	}
+
+	// Hide and clean date fields if the user manually change
+	// the sale price to zero or less.
+	useEffect( () => {
+		if ( ! isSalePriceGreaterThanZero ) {
+			setShowSaleSchedule( false );
+			setDateOnSaleFromGmt( '' );
+			setDateOnSaleToGmt( '' );
+		}
+	}, [ isSalePriceGreaterThanZero ] );
+
+	// Automatically show date fields if `from` or `to` dates have
+	// any value.
+	useEffect( () => {
+		if ( dateOnSaleFromGmt || dateOnSaleToGmt ) {
+			setShowSaleSchedule( true );
+		}
+	}, [ dateOnSaleFromGmt, dateOnSaleToGmt ] );
 
 	return (
 		<div { ...blockProps }>
@@ -67,7 +93,7 @@ export function Edit( {
 				label={ <ScheduleSaleLabel /> }
 				checked={ showSaleSchedule }
 				onChange={ handleToggleChange }
-				disabled={ ! salePrice }
+				disabled={ ! isSalePriceGreaterThanZero }
 			/>
 
 			{ showSaleSchedule && (

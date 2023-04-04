@@ -7,7 +7,12 @@
 	"description": "The product schedule sale pricing.",
 	"keywords": [ "products", "schedule", "pricing" ],
 	"textdomain": "default",
-	"attributes": {},
+	"attributes": {
+		"name": {
+			"type": "string",
+			"__experimentalRole": "content"
+		}
+	},
 	"supports": {
 		"align": false,
 		"html": false,
