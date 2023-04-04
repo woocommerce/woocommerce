@@ -25,7 +25,7 @@
 	"scripts": {
 		"lint": "eslint . --ext .ts",
 		"posttest": "pnpm lint",
-		"utils": "node -r ts-node/register ./src/commands/code-freeze/index.ts"
+		"utils": "node -r ts-node/register ./src/index.ts"
 	},
 	"engines": {
 		"node": "^16.13.1",

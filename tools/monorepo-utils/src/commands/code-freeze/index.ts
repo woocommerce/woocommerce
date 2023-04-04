@@ -1,14 +1,23 @@
 /**
  * External dependencies
  */
-import { program } from '@commander-js/extra-typings';
-import dotenv from 'dotenv';
+import { Command } from '@commander-js/extra-typings';
 
-dotenv.config();
+/**
+ * Internal dependencies
+ */
+import { verifyDay } from '../../lib/code-freeze';
 
-program
-	.name( 'code-freeze' )
-	.version( '0.0.1' )
-	.command( 'verify-day', 'Verify that today is the day of the code freeze' );
+const program = new Command( 'code-freeze' )
+	.description( 'Code freeze utilities' )
+	.option(
+		'-o, --override <override>',
+		"Time Override: The time to use in checking whether the action should run (default: 'now')."
+	)
+	.action( () => {
+		console.log( verifyDay() );
 
-program.parse( process.argv );
+		process.exit( 0 );
+	} );
+
+export default program;
