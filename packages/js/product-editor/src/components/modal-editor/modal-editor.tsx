@@ -28,7 +28,6 @@ import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/pri
  */
 import { EditorCanvas } from './editor-canvas';
 import { ResizableEditor } from './resizable-editor';
-// import BackButton from './back-button';
 
 const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
 	'I know using unstable features means my plugin or theme will inevitably break on the next WordPress release.',
@@ -43,20 +42,17 @@ export function ModalEditor() {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock } = useDispatch( blockEditorStore );
-
 	return (
 		<ExperimentalBlockEditorProvider
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			settings={ productBlockEditorSettings }
 			value={ blocks }
-			// onInput={ onInput }
 			onChange={ setBlocks }
 			useSubRegistry={ true }
 		>
 			<BlockTools
 				className={ 'woocommerce-modal-editor' }
-				// __unstableContentRef={ contentRef }
 				onClick={ (
 					event: React.MouseEvent< HTMLDivElement, MouseEvent >
 				) => {
@@ -69,7 +65,6 @@ export function ModalEditor() {
 				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 				{ /* @ts-ignore */ }
 				<BlockEditorKeyboardShortcuts.Register />
-				{ /* <BackButton /> */ }
 				<ResizableEditor
 					enableResizing={ true }
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
