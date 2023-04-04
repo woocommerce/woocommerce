@@ -9,13 +9,13 @@
 	"textdomain": "default",
 	"attributes": {
 		"title": {
-			"type": "string",
+			"type": "string"
 		},
 		"description": {
-			"type": "string",
+			"type": "string"
 		},
 		"property": {
-			"type": "string",
+			"type": "string"
 		},
 		"options": {
 			"type": "array",
@@ -24,7 +24,7 @@
 			},
 			"default": [],
 			"__experimentalRole": "content"
-		},
+		}
 	},
 	"supports": {
 		"align": false,

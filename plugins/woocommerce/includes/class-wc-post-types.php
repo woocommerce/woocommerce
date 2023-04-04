@@ -545,7 +545,7 @@ class WC_Post_Types {
 																'label' => __( 'Zero rate', 'woocommerce' ),
 																'value' => 'zero-rate',
 															),
-														)
+														),
 													),
 												),
 											),
