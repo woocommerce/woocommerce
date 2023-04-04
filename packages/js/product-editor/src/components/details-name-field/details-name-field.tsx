@@ -6,13 +6,16 @@ import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { cleanForSlug } from '@wordpress/url';
 import { useFormContext } from '@woocommerce/components';
-import interpolateComponents from '@automattic/interpolate-components';
 import {
 	Product,
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
 } from '@woocommerce/data';
-import { useState, createElement } from '@wordpress/element';
+import {
+	useState,
+	createElement,
+	createInterpolateElement,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -26,9 +29,9 @@ export const DetailsNameField = ( {} ) => {
 	const { getInputProps, values, touched, errors, setValue } =
 		useFormContext< Product >();
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		( select: WCDataSelector ) => {
 			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
 			if ( values.id ) {
@@ -55,16 +58,16 @@ export const DetailsNameField = ( {} ) => {
 	return (
 		<div>
 			<TextControl
-				label={ interpolateComponents( {
-					mixedString: __( 'Name {{required/}}', 'woocommerce' ),
-					components: {
+				label={ createInterpolateElement(
+					__( 'Name <required />', 'woocommerce' ),
+					{
 						required: (
 							<span className="woocommerce-product-form__optional-input">
 								{ __( '(required)', 'woocommerce' ) }
 							</span>
 						),
-					},
-				} ) }
+					}
+				) }
 				name={ `${ PRODUCT_DETAILS_SLUG }-name` }
 				placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
 				{ ...getInputProps( 'name', {

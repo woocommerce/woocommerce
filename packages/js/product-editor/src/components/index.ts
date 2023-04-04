@@ -10,4 +10,15 @@ export { DetailsFeatureField as __experimentalDetailsFeatureField } from './deta
 export { DetailsCategoriesField as __experimentalDetailsCategoriesField } from './details-categories-field';
 export { DetailsSummaryField as __experimentalDetailsSummaryField } from './details-summary-field';
 export { DetailsDescriptionField as __experimentalDetailsDescriptionField } from './details-description-field';
-export { Editor as __experimentalEditor } from './editor';
+export { WooProductMoreMenuItem as __experimentalWooProductMoreMenuItem } from './header';
+export {
+	Editor as __experimentalEditor,
+	ProductEditorSettings,
+} from './editor';
+export {
+	BlockIcon as __experimentalBlockIcon,
+	BlockIconProps,
+} from './block-icon';
+export { ProductMVPCESFooter as __experimentalProductMVPCESFooter } from './product-mvp-ces-footer';
+export { ProductMVPFeedbackModal as __experimentalProductMVPFeedbackModal } from './product-mvp-feedback-modal';
+export { ProductMVPFeedbackModalContainer as __experimentalProductMVPFeedbackModalContainer } from './product-mvp-feedback-modal-container';

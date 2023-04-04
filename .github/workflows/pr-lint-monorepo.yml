@@ -11,6 +11,7 @@ permissions: {}
 
 jobs:
     changelogger_used:
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
         name: Changelogger use
         runs-on: ubuntu-20.04
         permissions:

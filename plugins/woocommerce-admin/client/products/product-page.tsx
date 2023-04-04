@@ -1,19 +1,38 @@
 /**
  * External dependencies
  */
-import { __experimentalEditor as Editor } from '@woocommerce/product-editor';
-import { Product } from '@woocommerce/data';
+import {
+	__experimentalEditor as Editor,
+	ProductEditorSettings,
+} from '@woocommerce/product-editor';
+
+import { Spinner } from '@wordpress/components';
+import { useParams } from 'react-router-dom';
 
 /**
  * Internal dependencies
  */
-import './product-page.scss';
+import { useProductEntityRecord } from './hooks/use-product-entity-record';
 
-const dummyProduct = {
-	name: 'Example product',
-	short_description: 'Short product description content',
-} as Product;
+import './product-page.scss';
+import './product-block-page.scss';
+import './fills/product-block-editor-fills';
+
+declare const productBlockEditorSettings: ProductEditorSettings;
 
 export default function ProductPage() {
-	return <Editor product={ dummyProduct } settings={ {} } />;
+	const { productId } = useParams();
+
+	const product = useProductEntityRecord( productId );
+
+	if ( ! product?.id ) {
+		return <Spinner />;
+	}
+
+	return (
+		<Editor
+			product={ product }
+			settings={ productBlockEditorSettings || {} }
+		/>
+	);
 }

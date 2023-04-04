@@ -51,11 +51,6 @@ const Dashboard = lazy( () =>
 const Homescreen = lazy( () =>
 	import( /* webpackChunkName: "homescreen" */ '../homescreen' )
 );
-const MarketingOverview = lazy( () =>
-	import(
-		/* webpackChunkName: "marketing-overview" */ '../marketing/overview'
-	)
-);
 const MarketingOverviewMultichannel = lazy( () =>
 	import(
 		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
@@ -157,9 +152,7 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures.marketing ) {
 		pages.push( {
-			container: window.wcAdminFeatures[ 'multichannel-marketing' ]
-				? MarketingOverviewMultichannel
-				: MarketingOverview,
+			container: MarketingOverviewMultichannel,
 			path: '/marketing',
 			breadcrumbs: [
 				...initialBreadcrumbs,
@@ -174,7 +167,7 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures[ 'new-product-management-experience' ] ) {
+	if ( window.wcAdminFeatures[ 'block-editor-feature-enabled' ] ) {
 		pages.push( {
 			container: ProductPage,
 			path: '/add-product',
@@ -184,20 +177,6 @@ export const getPages = () => {
 			],
 			navArgs: {
 				id: 'woocommerce-add-product',
-			},
-			wpOpenMenu: 'menu-posts-product',
-			capability: 'manage_woocommerce',
-		} );
-
-		pages.push( {
-			container: AddProductPage,
-			path: '/add-product-old',
-			breadcrumbs: [
-				[ '/add-product-old', __( 'Product', 'woocommerce' ) ],
-				__( 'Add New Product', 'woocommerce' ),
-			],
-			navArgs: {
-				id: 'woocommerce-add-product-old',
 			},
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'manage_woocommerce',
@@ -216,16 +195,32 @@ export const getPages = () => {
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'manage_woocommerce',
 		} );
+	} else if (
+		window.wcAdminFeatures[ 'new-product-management-experience' ]
+	) {
+		pages.push( {
+			container: AddProductPage,
+			path: '/add-product',
+			breadcrumbs: [
+				[ '/add-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Add New Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-add-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
 
 		pages.push( {
 			container: EditProductPage,
-			path: '/product-old/:productId',
+			path: '/product/:productId',
 			breadcrumbs: [
-				[ '/edit-product-old', __( 'Product', 'woocommerce' ) ],
-				__( 'Edit Product (Old)', 'woocommerce' ),
+				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product', 'woocommerce' ),
 			],
 			navArgs: {
-				id: 'woocommerce-edit-product-old',
+				id: 'woocommerce-edit-product',
 			},
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'manage_woocommerce',

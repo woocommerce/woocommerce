@@ -16,13 +16,13 @@ import {
 	PluginCardBody,
 } from '~/marketing/components';
 import { InstalledPlugin } from '~/marketing/types';
-import { useInstalledPlugins } from '~/marketing/hooks';
+import { useInstalledPluginsWithoutChannels } from '~/marketing/hooks';
 
 export const InstalledExtensions = () => {
-	const { installedPlugins, activatingPlugins, activateInstalledPlugin } =
-		useInstalledPlugins();
+	const { data, activatingPlugins, activateInstalledPlugin } =
+		useInstalledPluginsWithoutChannels();
 
-	if ( installedPlugins.length === 0 ) {
+	if ( data.length === 0 ) {
 		return null;
 	}
 
@@ -81,7 +81,7 @@ export const InstalledExtensions = () => {
 
 	return (
 		<CollapsibleCard header={ __( 'Installed extensions', 'woocommerce' ) }>
-			{ installedPlugins.map( ( el, idx ) => {
+			{ data.map( ( el, idx ) => {
 				return (
 					<Fragment key={ el.slug }>
 						<PluginCardBody
@@ -90,9 +90,7 @@ export const InstalledExtensions = () => {
 							description={ el.description }
 							button={ getButton( el ) }
 						/>
-						{ idx !== installedPlugins.length - 1 && (
-							<CardDivider />
-						) }
+						{ idx !== data.length - 1 && <CardDivider /> }
 					</Fragment>
 				);
 			} ) }

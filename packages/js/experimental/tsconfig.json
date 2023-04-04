@@ -6,6 +6,10 @@
 		"target": "es2019",
 		"declaration": true,
 		"declarationMap": true,
-		"declarationDir": "./build-types"
+		"declarationDir": "./build-types",
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		]
 	}
 }

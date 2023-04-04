@@ -61,7 +61,7 @@
 
 body.woocommerce-page {
 	.components-button.is-primary {
-		&:not(:disabled) {
+		&:not(:disabled):not([aria-disabled='true']):hover {
 			color: $studio-white;
 		}
 	}

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update textdomain in woocommerce-blocks *.json files to `woocommerce`

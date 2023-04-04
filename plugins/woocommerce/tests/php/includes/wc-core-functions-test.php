@@ -97,7 +97,7 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		);
 
 		$actual = wc_add_number_precision( $value, $round );
-		$this->assertEquals( $expected, $actual );
+		$this->assertFloatEquals( $expected, $actual );
 
 		remove_all_filters( 'wc_get_price_decimals' );
 	}
