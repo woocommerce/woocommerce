@@ -128,7 +128,7 @@ class CouponsController {
 	/**
 	 * Dehydrate order coupon_data meta.
 	 *
-	 * @since 7.6.0
+	 * @since 7.8.0
 	 * @param \WC_Meta_Data $meta Coupon data meta object.
 	 * @return \WC_Meta_Data
 	 */
@@ -166,7 +166,7 @@ class CouponsController {
 	/**
 	 * Hydrate order coupon_data meta array.
 	 *
-	 * @since 7.6.0
+	 * @since 7.8.0
 	 * @param array $meta Coupon data meta.
 	 * @return array
 	 */
@@ -202,7 +202,7 @@ class CouponsController {
 	/**
 	 * Get the order coupon default non-boolean falsey fields.
 	 *
-	 * @since 7.6.0
+	 * @since 7.8.0
 	 * @return array|string[]
 	 */
 	public function get_default_empty_fields(): array {
