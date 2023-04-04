@@ -140,8 +140,8 @@ const CategoryMetabox: React.FC< {
 			) }
 			<CategoryAddNew
 				selected={ selected }
-				onChange={ ( selected ) => {
-					setSelected( selected );
+				onChange={ ( sel ) => {
+					setSelected( sel );
 					if ( allCategoryListRef.current ) {
 						allCategoryListRef.current.resetInitialValues();
 					}
