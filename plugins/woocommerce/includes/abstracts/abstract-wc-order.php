@@ -199,6 +199,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return $this->get_id();
 		}
 
+		$updating = $this->get_id() > 0;
+
 		try {
 			/**
 			 * Trigger action before saving to the DB. Allows you to adjust object props before save.
@@ -216,7 +218,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$this->save_items();
 
-			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+			if ( $updating && OrderUtil::orders_cache_usage_is_enabled() ) {
 				$order_cache = wc_get_container()->get( OrderCache::class );
 				$order_cache->update_if_cached( $this );
 			}
