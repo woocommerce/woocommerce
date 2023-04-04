@@ -2252,7 +2252,7 @@ importers:
     specifiers:
       '@commander-js/extra-typings': ^0.1.0
       '@types/jest': ^27.4.1
-      '@types/node': ^16.18.21
+      '@types/node': ^16.18.18
       '@woocommerce/eslint-plugin': workspace:*
       chalk: ^4.1.2
       commander: ^9.4.0
@@ -2782,7 +2782,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@jridgewell/trace-mapping': 0.3.17
+      '@jridgewell/trace-mapping': 0.3.16
       commander: 4.1.1
       convert-source-map: 1.8.0
       fs-readdir-recursive: 1.1.0
@@ -10912,7 +10912,6 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.14
-    dev: true
 
   /@jridgewell/trace-mapping/0.3.17:
     resolution: {integrity: sha512-MCNzAp77qzKca9+W/+I0+sEpaUnZoeasnghNeVc41VZCEKaCH73Vq3BZZ/SzWIgrqE4H4ceI+p+b6C0mHf9T4g==}
