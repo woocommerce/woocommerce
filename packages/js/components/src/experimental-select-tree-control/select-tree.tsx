@@ -2,10 +2,15 @@
 /**
  * External dependencies
  */
-import { createElement, useRef, useState } from 'react';
+import {
+	createElement,
+	useRef,
+	useState,
+	createPortal,
+} from '@wordpress/element';
 import classNames from 'classnames';
 import { search } from '@wordpress/icons';
-import { Dropdown, Spinner } from '@wordpress/components';
+import { Dropdown, Spinner, Popover } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -73,6 +78,10 @@ export const SelectTree = function SelectTree( {
 			className="woocommerce-experimental-select-tree-control__dropdown"
 			contentClassName="woocommerce-experimental-select-tree-control__dropdown-content"
 			focusOnMount={ false }
+			// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
+			popoverProps={ {
+				__unstableSlotName: 'woocommerce-select-tree-control-menu',
+			} }
 			renderContent={ ( { onClose } ) =>
 				isLoading ? (
 					<div
@@ -147,7 +156,7 @@ export const SelectTree = function SelectTree( {
 										)
 										?.contains( event.relatedTarget )
 								) {
-									onClose();
+									// onClose();
 								}
 								setIsFocused( false );
 							},
@@ -197,3 +206,12 @@ export const SelectTree = function SelectTree( {
 		/>
 	);
 };
+
+export const SelectTreeMenuSlot: React.FC = () =>
+	createPortal(
+		<div aria-live="off">
+			{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
+			<Popover.Slot name="woocommerce-select-tree-control-menu" />
+		</div>,
+		document.body
+	);

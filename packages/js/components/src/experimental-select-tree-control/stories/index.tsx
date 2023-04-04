@@ -2,13 +2,14 @@
  * External dependencies
  */
 
-import React, { createElement } from 'react';
+import React, { createElement, useState, useEffect } from 'react';
 
 /**
  * Internal dependencies
  */
-import { SelectTree } from '../select-tree';
+import { SelectTree, SelectTreeMenuSlot } from '../select-tree';
 import { Item } from '../../experimental-tree-control/types';
+import { Button, Modal, SlotFillProvider } from '@wordpress/components';
 
 const listItems: Item[] = [
 	{ value: '1', label: 'Technology' },
@@ -92,6 +93,72 @@ export const MultipleSelectTree: React.FC = () => {
 				setSelected( newValues );
 			} }
 		/>
+	);
+};
+
+export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
+	const [ isOpen, setOpen ] = useState( true );
+	const [ value, setValue ] = React.useState( '' );
+	const [ selected, setSelected ] = React.useState< Item[] >( [] );
+
+	const items = filterItems( listItems, value );
+
+	return (
+		<SlotFillProvider>
+			Selected: { JSON.stringify( selected ) }
+			<Button onClick={ () => setOpen( true ) }>
+				Show Dropdown in Modal
+			</Button>
+			{ isOpen && (
+				<Modal
+					title="Dropdown Modal"
+					onRequestClose={ () => setOpen( false ) }
+				>
+					<SelectTree
+						id="multiple-select-tree"
+						label="Multiple Select Tree"
+						multiple
+						items={ items }
+						selected={ selected }
+						shouldNotRecursivelySelect
+						shouldShowCreateButton={ ( typedValue ) =>
+							! value ||
+							listItems.findIndex(
+								( item ) => item.label === typedValue
+							) === -1
+						}
+						createValue={ value }
+						// eslint-disable-next-line no-alert
+						onCreateNew={ () => alert( 'create new called' ) }
+						onInputChange={ ( a ) => setValue( a || '' ) }
+						onSelect={ ( selectedItems ) => {
+							if ( Array.isArray( selectedItems ) ) {
+								setSelected( [
+									...selected,
+									...selectedItems,
+								] );
+							}
+						} }
+						onRemove={ ( removedItems ) => {
+							const newValues = Array.isArray( removedItems )
+								? selected.filter(
+										( item ) =>
+											! removedItems.some(
+												( { value: removedValue } ) =>
+													item.value === removedValue
+											)
+								  )
+								: selected.filter(
+										( item ) =>
+											item.value !== removedItems.value
+								  );
+							setSelected( newValues );
+						} }
+					/>
+				</Modal>
+			) }
+			<SelectTreeMenuSlot />
+		</SlotFillProvider>
 	);
 };
 
