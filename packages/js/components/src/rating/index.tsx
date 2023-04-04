@@ -25,14 +25,14 @@ type RatingProps = {
  * Use `Rating` to display a set of stars, filled, empty or half-filled, that represents a
  * rating in a scale between 0 and the prop `totalStars` (default 5).
  */
-const Rating: React.VFC< RatingProps > = ( {
+const Rating = ( {
 	rating = 0,
 	totalStars = 5,
 	size = 18,
 	className,
 	icon,
 	outlineIcon,
-} ) => {
+}: RatingProps ) => {
 	const stars = ( _icon: React.ReactNode ) => {
 		const starStyles = {
 			width: size + 'px',
