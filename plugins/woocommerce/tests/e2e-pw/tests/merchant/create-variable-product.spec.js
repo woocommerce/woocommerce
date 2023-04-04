@@ -110,7 +110,12 @@ test.describe( 'Add New Variable Product Page', () => {
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 
 		// manually create variations from all attributes
-		await page.click( 'a[href="#variable_product_options"]' );
+		await page.click( 'a[href="#variable_product_options"]', { timeout: 30000 } );
+		await page.waitForResponse(
+			( response ) =>
+				response.url().includes( 'options' ) &&
+				response.status() === 200
+		);
 
 		await page.click( 'button.generate_variations' );
 
