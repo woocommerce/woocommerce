@@ -4,11 +4,13 @@
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	forwardRef,
+	useCallback,
 	useEffect,
 	useImperativeHandle,
 	useState,
 } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import { useDebounce } from '@wordpress/compose';
 import { TreeSelectControl } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
@@ -33,6 +35,8 @@ type CategoryTreeItemLabelValue = {
 	label: string;
 	value: string;
 };
+
+export const DEFAULT_DEBOUNCE_TIME = 250;
 
 const categoryLibrary: Record< number, CategoryTreeItem > = {};
 function convertTreeToLabelValue(
@@ -83,17 +87,28 @@ export const AllCategoryList = forwardRef<
 		CategoryTreeItemLabelValue[]
 	>( [] );
 
-	useEffect( () => {
-		if ( filter && filter.length > 0 ) {
-			recordEvent( 'product_category_search', {
-				page: 'product',
-				async: true,
-				search_string_length: filter.length,
+	const searchCategories = useCallback(
+		( value: string ) => {
+			if ( value && value.length > 0 ) {
+				recordEvent( 'product_category_search', {
+					page: 'product',
+					async: true,
+					search_string_length: value.length,
+				} );
+			}
+			getTreeItems( value ).then( ( res ) => {
+				setTreeItems( Object.values( res ) );
 			} );
-		}
-		getTreeItems( filter ).then( ( res ) => {
-			setTreeItems( Object.values( res ) );
-		} );
+		},
+		[ setTreeItems ]
+	);
+	const searchCategoriesDebounced = useDebounce(
+		searchCategories,
+		DEFAULT_DEBOUNCE_TIME
+	);
+
+	useEffect( () => {
+		searchCategoriesDebounced( filter );
 	}, [ filter ] );
 
 	useImperativeHandle(
