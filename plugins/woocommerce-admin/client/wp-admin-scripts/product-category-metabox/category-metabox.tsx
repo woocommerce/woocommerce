@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -24,6 +24,9 @@ const CategoryMetabox: React.FC< {
 	initialSelected: CategoryTerm[];
 } > = ( { initialSelected } ) => {
 	const [ selected, setSelected ] = useState( initialSelected );
+	const allCategoryListRef = useRef< { resetInitialValues: () => void } >(
+		null
+	);
 	const [ activeTab, setActiveTab ] = useState(
 		initialTab === CATEGORY_POPULAR_TAB_ID
 			? initialTab
@@ -117,6 +120,7 @@ const CategoryMetabox: React.FC< {
 				<AllCategoryList
 					selected={ selected }
 					onChange={ setSelected }
+					ref={ allCategoryListRef }
 				/>
 			</div>
 			{ ( selected || [] ).map( ( sel ) => (
@@ -134,7 +138,15 @@ const CategoryMetabox: React.FC< {
 					name={ 'tax_input[' + CATEGORY_TERM_NAME + '][]' }
 				/>
 			) }
-			<CategoryAddNew selected={ selected } onChange={ setSelected } />
+			<CategoryAddNew
+				selected={ selected }
+				onChange={ ( selected ) => {
+					setSelected( selected );
+					if ( allCategoryListRef.current ) {
+						allCategoryListRef.current.resetInitialValues();
+					}
+				} }
+			/>
 		</div>
 	);
 };

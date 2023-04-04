@@ -10,6 +10,7 @@ import {
 	__experimentalSelectControl as SelectControl,
 } from '@woocommerce/components';
 import { useUser } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -48,12 +49,20 @@ export const CategoryAddNew: React.FC< {
 			id: number;
 			name: string;
 			count: number;
+			parent: number;
 		} >( {
 			path: '/wc/v3/products/categories',
 			data,
 			method: 'POST',
 		} ).then( ( res ) => {
 			if ( res ) {
+				recordEvent( 'product_category_add', {
+					category_id: res.id,
+					parent_id: res.parent,
+					parent_category: res.parent > 0 ? 'Other' : 'None',
+					page: 'product',
+					async: true,
+				} );
 				onChange( [
 					...selected,
 					{ term_id: res.id, name: res.name, count: res.count },

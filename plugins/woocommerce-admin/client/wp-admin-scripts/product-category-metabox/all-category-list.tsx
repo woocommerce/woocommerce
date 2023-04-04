@@ -2,10 +2,16 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import {
+	forwardRef,
+	useEffect,
+	useImperativeHandle,
+	useState,
+} from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 import { TreeSelectControl } from '@woocommerce/components';
 import { getSetting } from '@woocommerce/settings';
+import { recordEvent } from '@woocommerce/tracks';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -48,31 +54,61 @@ function convertTreeToLabelValue(
 	return newTree;
 }
 
-export const AllCategoryList: React.FC< {
-	selected: CategoryTerm[];
-	onChange: ( selected: CategoryTerm[] ) => void;
-} > = ( { selected, onChange } ) => {
+async function getTreeItems( filter: string ) {
+	const resp = await apiFetch< CategoryTreeItem[] >( {
+		url: addQueryArgs( getSetting( 'adminUrl' ) + 'admin-ajax.php', {
+			term: filter,
+			action: 'woocommerce_json_search_categories_tree',
+			// eslint-disable-next-line no-undef, camelcase
+			security:
+				wc_product_category_metabox_params.search_categories_nonce,
+		} ),
+		method: 'GET',
+	} );
+	if ( resp ) {
+		return convertTreeToLabelValue( Object.values( resp ) );
+	}
+	return [];
+}
+
+export const AllCategoryList = forwardRef<
+	{ resetInitialValues: () => void },
+	{
+		selected: CategoryTerm[];
+		onChange: ( selected: CategoryTerm[] ) => void;
+	}
+>( ( { selected, onChange }, ref ) => {
 	const [ filter, setFilter ] = useState( '' );
 	const [ treeItems, setTreeItems ] = useState<
 		CategoryTreeItemLabelValue[]
 	>( [] );
 
 	useEffect( () => {
-		apiFetch< CategoryTreeItem[] >( {
-			url: addQueryArgs( getSetting( 'adminUrl' ) + 'admin-ajax.php', {
-				term: filter,
-				action: 'woocommerce_json_search_categories_tree',
-				// eslint-disable-next-line no-undef, camelcase
-				security:
-					wc_product_category_metabox_params.search_categories_nonce,
-			} ),
-			method: 'GET',
-		} ).then( ( res ) => {
-			if ( res ) {
-				setTreeItems( convertTreeToLabelValue( Object.values( res ) ) );
-			}
+		if ( filter && filter.length > 0 ) {
+			recordEvent( 'product_category_search', {
+				page: 'product',
+				async: true,
+				search_string_length: filter.length,
+			} );
+		}
+		getTreeItems( filter ).then( ( res ) => {
+			setTreeItems( Object.values( res ) );
 		} );
 	}, [ filter ] );
+
+	useImperativeHandle(
+		ref,
+		() => {
+			return {
+				resetInitialValues() {
+					getTreeItems( '' ).then( ( res ) => {
+						setTreeItems( Object.values( res ) );
+					} );
+				},
+			};
+		},
+		[]
+	);
 
 	return (
 		<>
@@ -83,6 +119,11 @@ export const AllCategoryList: React.FC< {
 					value={ selected.map( ( cat ) => cat.term_id.toString() ) }
 					onChange={ ( sel: number[] ) => {
 						onChange( sel.map( ( id ) => categoryLibrary[ id ] ) );
+						recordEvent( 'product_category_update', {
+							page: 'product',
+							async: true,
+							selected: sel.length,
+						} );
 					} }
 					selectAllLabel={ false }
 					onInputChange={ setFilter }
@@ -124,4 +165,4 @@ export const AllCategoryList: React.FC< {
 			</ul>
 		</>
 	);
-};
+} );
