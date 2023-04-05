@@ -36,7 +36,7 @@ const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
 
 const { ExperimentalBlockEditorProvider } = unlock( blockEditorPrivateApis );
 
-export function ModalEditor() {
+export function IframeEditor() {
 	const [ resizeObserver, sizes ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( [] );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -52,7 +52,7 @@ export function ModalEditor() {
 			useSubRegistry={ true }
 		>
 			<BlockTools
-				className={ 'woocommerce-modal-editor' }
+				className={ 'woocommerce-iframe-editor' }
 				onClick={ (
 					event: React.MouseEvent< HTMLDivElement, MouseEvent >
 				) => {
