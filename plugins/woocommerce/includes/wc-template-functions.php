@@ -2743,10 +2743,21 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 			return;
 		}
 
+		$button_class = implode(
+			' ',
+			array_filter(
+				array(
+					'button',
+					wc_wp_theme_get_element_class_name( 'button' )
+				)
+			)
+		);
+
 		wc_get_template(
 			'order/order-again.php',
 			array(
 				'order'           => $order,
+				'button_class'    => $button_class,
 				'order_again_url' => wp_nonce_url( add_query_arg( 'order_again', $order->get_id(), wc_get_cart_url() ), 'woocommerce-order_again' ),
 			)
 		);
