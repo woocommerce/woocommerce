@@ -88,7 +88,7 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 		() =>
 			! showScheduleSale ||
 			! dateOnSaleToGmt ||
-			moment( dateOnSaleFromGmt ).isBefore( dateOnSaleToGmt, 'minute' )
+			moment( dateOnSaleFromGmt ).isBefore( dateOnSaleToGmt )
 	);
 
 	return (
