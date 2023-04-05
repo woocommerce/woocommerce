@@ -47,7 +47,7 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 		string | null
 	>( 'postType', 'product', 'date_on_sale_to_gmt' );
 
-	const today = moment().toISOString();
+	const today = moment().startOf( 'minute' ).toISOString();
 
 	function handleToggleChange( value: boolean ) {
 		recordEvent( 'product_pricing_schedule_sale_toggle_click', {
@@ -124,7 +124,13 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 							) }
 							dateTimeFormat={ dateTimeFormat }
 							currentDate={ dateOnSaleToGmt }
-							onChange={ setDateOnSaleToGmt }
+							onChange={ ( value ) =>
+								setDateOnSaleToGmt(
+									moment( value )
+										.startOf( 'minute' )
+										.toISOString()
+								)
+							}
 							className={
 								isDateOnSaleToGmtValid ? undefined : 'has-error'
 							}
