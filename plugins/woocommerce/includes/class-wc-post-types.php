@@ -514,6 +514,27 @@ class WC_Post_Types {
 											),
 										),
 										array(
+											'woocommerce/product-radio',
+											array(
+												'title'    => __( 'Charge sales tax on', 'woocommerce' ),
+												'property' => 'tax_status',
+												'options'  => array(
+													array(
+														'label' => __( 'Product and shipping', 'woocommerce' ),
+														'value' => 'taxable',
+													),
+													array(
+														'label' => __( 'Only shipping', 'woocommerce' ),
+														'value' => 'shipping',
+													),
+													array(
+														'label' => __( "Don't charge tax", 'woocommerce' ),
+														'value' => 'none',
+													),
+												),
+											),
+										),
+										array(
 											'woocommerce/collapsible',
 											array(
 												'toggleText'       => __( 'Advanced', 'woocommerce' ),
