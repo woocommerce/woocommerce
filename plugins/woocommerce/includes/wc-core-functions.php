@@ -1607,7 +1607,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
 	 * @param string $sanitized_tip  Sanitized help tip text.
 	 * @param string $tip            Original help tip text.
 	 * @param bool   $allow_html     Allow sanitized HTML if true or escape.
-	 * 
+	 *
 	 * @return string
 	 */
 	return apply_filters( 'wc_help_tip', '<span class="woocommerce-help-tip" data-tip="' . $sanitized_tip . '"></span>', $sanitized_tip, $tip, $allow_html );
