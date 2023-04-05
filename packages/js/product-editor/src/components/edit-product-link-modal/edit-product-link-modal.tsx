@@ -13,10 +13,6 @@ import { cleanForSlug } from '@wordpress/url';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
-/**
- * Internal dependencies
- */
-
 type EditProductLinkModalProps = {
 	product: Product;
 	permalinkPrefix: string;
@@ -53,17 +49,19 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 			product_type: product.type,
 		} );
 
-		const updateValues = await saveHandler( slug );
+		const updatedValues = await saveHandler( slug );
 
-		if ( updateValues ) {
+		if ( updatedValues ) {
 			createNotice(
-				updateValues.slug === cleanForSlug( slug ) ? 'success' : 'info',
-				updateValues.slug === cleanForSlug( slug )
+				updatedValues.slug === cleanForSlug( slug )
+					? 'success'
+					: 'info',
+				updatedValues.slug === cleanForSlug( slug )
 					? __( 'Product link successfully updated.', 'woocommerce' )
 					: __(
 							'Product link already existed, updated to ',
 							'woocommerce'
-					  ) + updateValues.permalink
+					  ) + updatedValues.permalink
 			);
 		} else {
 			createNotice(
