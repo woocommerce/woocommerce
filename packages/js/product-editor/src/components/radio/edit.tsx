@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { createElement, Fragment } from '@wordpress/element';
 import type { BlockAttributes } from '@wordpress/blocks';
 import { RadioControl } from '@wordpress/components';
