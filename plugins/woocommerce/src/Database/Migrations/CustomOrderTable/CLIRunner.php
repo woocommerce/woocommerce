@@ -294,6 +294,12 @@ class CLIRunner {
 	 * default: -1
 	 * ---
 	 *
+	 * [--verbose=<verbose>]
+	 * : Whether to output errors as they happen in batch, or output them all together at the end.
+	 * ---
+	 * default: false
+	 * ---
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Verify migrated order data, 500 orders at a time.
@@ -315,6 +321,7 @@ class CLIRunner {
 				'batch-size' => 500,
 				'start-from' => 0,
 				'end-at'     => -1,
+				'verbose'    => false,
 			)
 		);
 
@@ -327,6 +334,7 @@ class CLIRunner {
 		$order_id_end   = -1 === $order_id_end ? PHP_INT_MAX : $order_id_end;
 		$order_count    = $this->get_verify_order_count( $order_id_start, $order_id_end, false );
 		$batch_size     = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
+		$verbose        = (bool) $assoc_args['verbose'];
 
 		$progress = WP_CLI\Utils\make_progress_bar( 'Order Data Verification', $order_count / $batch_size );
 
@@ -353,12 +361,30 @@ class CLIRunner {
 				)
 			);
 			$batch_start_time = microtime( true );
-			$failed_ids       = $failed_ids + $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
-			$failed_ids       = $this->verify_meta_data( $order_ids, $failed_ids );
-			$processed       += count( $order_ids );
+			$failed_ids_in_current_batch = $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
+			$failed_ids_in_current_batch = $this->verify_meta_data( $order_ids, $failed_ids_in_current_batch );
+			$failed_ids                  = $failed_ids + $failed_ids_in_current_batch;
+			$processed += count( $order_ids );
 			$batch_total_time = microtime( true ) - $batch_start_time;
 			$batch_count ++;
 			$total_time += $batch_total_time;
+
+			if ( $verbose && count( $failed_ids_in_current_batch ) > 0 ) {
+				$errors = print_r( $failed_ids_in_current_batch, true );
+				WP_CLI::warning(
+					sprintf(
+					/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
+						_n(
+							'%1$d error found: %2$s. Please review the error above.',
+							'%1$d errors found: %2$s. Please review the errors above.',
+							count( $failed_ids_in_current_batch ),
+							'woocommerce'
+						),
+						count( $failed_ids_in_current_batch ),
+						$errors
+					)
+				);
+			}
 
 			$progress->tick();
 
