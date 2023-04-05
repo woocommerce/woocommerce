@@ -584,6 +584,12 @@ class WC_Post_Types {
 								'id'    => 'inventory',
 								'title' => __( 'Inventory', 'woocommerce' ),
 							),
+							array(
+								array(
+									"woocommerce/product-track-inventory-fields",
+									array(),
+								),
+							),
 						),
 						array(
 							'woocommerce/product-tab',

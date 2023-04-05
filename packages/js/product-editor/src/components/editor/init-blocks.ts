@@ -21,6 +21,7 @@ import { init as initTab } from '../tab';
 import { init as initPricing } from '../pricing-block';
 import { init as initCollapsible } from '../collapsible-block';
 import { init as initScheduleSale } from '../../blocks/schedule-sale';
+import { init as initTrackInventory } from '../../blocks/track-inventory';
 
 export const initBlocks = () => {
 	const coreBlocks = __experimentalGetCoreBlocks();
@@ -40,4 +41,5 @@ export const initBlocks = () => {
 	initPricing();
 	initCollapsible();
 	initScheduleSale();
+	initTrackInventory();
 };
