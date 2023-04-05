@@ -1,15 +1,10 @@
-.wc-block-add-to-cart-form {
+.wc-block-editor-add-to-cart-form {
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
+	row-gap: $default-block-margin;
 }
 
-.wc-block-add-to-cart-form__notice.components-notice {
-	margin: 10px 0;
-	color: $black;
-	max-width: 60%;
-}
-
-input.wc-block-add-to-cart-form__quantity[type="number"] {
+input.wc-block-editor-add-to-cart-form__quantity[type="number"] {
 	max-width: 50px;
 	min-height: 23px;
 	float: left;
@@ -27,4 +22,11 @@ button.components-button.wc-block-add-to-cart-form__button {
 	float: left;
 	padding: 20px 30px;
 	border-radius: 0;
+}
+
+.wc-block-editor-container {
+	cursor: help;
+	gap: 10px;
+	display: flex;
+	flex-direction: column;
 }
