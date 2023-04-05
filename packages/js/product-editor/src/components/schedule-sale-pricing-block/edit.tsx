@@ -32,7 +32,7 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 		);
 	} );
 
-	const [ showSaleSchedule, setShowSaleSchedule ] = useState( false );
+	const [ showScheduleSale, setShowScheduleSale ] = useState( false );
 
 	const [ salePrice ] = useEntityProp< string | null >(
 		'postType',
@@ -58,7 +58,7 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 			enabled: value,
 		} );
 
-		setShowSaleSchedule( value );
+		setShowScheduleSale( value );
 
 		if ( value ) {
 			setDateOnSaleFromGmt( today );
@@ -73,7 +73,7 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 	// the sale price to zero or less.
 	useEffect( () => {
 		if ( ! isSalePriceGreaterThanZero ) {
-			setShowSaleSchedule( false );
+			setShowScheduleSale( false );
 			setDateOnSaleFromGmt( '' );
 			setDateOnSaleToGmt( '' );
 		}
@@ -83,14 +83,14 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 	// any value.
 	useEffect( () => {
 		if ( dateOnSaleFromGmt || dateOnSaleToGmt ) {
-			setShowSaleSchedule( true );
+			setShowScheduleSale( true );
 		}
 	}, [ dateOnSaleFromGmt, dateOnSaleToGmt ] );
 
 	const isDateOnSaleToGmtValid = useValidation(
 		'product/date_on_sale_to_gmt',
 		() =>
-			! showSaleSchedule ||
+			! showScheduleSale ||
 			! dateOnSaleToGmt ||
 			moment( dateOnSaleFromGmt ).isBefore( dateOnSaleToGmt, 'minute' )
 	);
@@ -99,12 +99,12 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 		<div { ...blockProps }>
 			<ToggleControl
 				label={ __( 'Schedule sale', 'woocommerce' ) }
-				checked={ showSaleSchedule }
+				checked={ showScheduleSale }
 				onChange={ handleToggleChange }
 				disabled={ ! isSalePriceGreaterThanZero }
 			/>
 
-			{ showSaleSchedule && (
+			{ showScheduleSale && (
 				<div className="wp-block-columns">
 					<div className="wp-block-column">
 						<DateTimePickerControl
