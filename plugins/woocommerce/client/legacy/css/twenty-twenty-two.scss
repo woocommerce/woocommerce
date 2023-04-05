@@ -53,6 +53,37 @@ $tt2-gray: #f7f7f7;
 	}
 }
 
+.woocommerce:where(body:not(.woocommerce-block-theme-has-button-styles)),
+:where(body:not(.woocommerce-block-theme-has-button-styles)) .woocommerce {
+
+	/**
+	 * Buttons
+	 */
+	a.button,
+	button[name="add-to-cart"],
+	input[name="submit"],
+	button.single_add_to_cart_button,
+	button[type="submit"]:not(.wp-block-search__button) {
+		display: inline-block;
+		text-align: center;
+		white-space: normal;
+		background-color: var(--wp--preset--color--primary, $primary);
+		color: var(--wp--preset--color--background, $primarytext);
+		border: 1px solid var(--wp--preset--color--primary, $primary);
+		padding: 1rem 2rem;
+		margin-top: 1rem;
+		text-decoration: none;
+		font-size: medium;
+		cursor: pointer;
+
+		&:hover,
+		&:visited {
+			color: var(--wp--preset--color--background, $primarytext);
+			text-decoration: underline;
+		}
+	}
+}
+
 .woocommerce {
 
 	// Common
@@ -109,30 +140,6 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
-	a.button,
-	button[name="add-to-cart"],
-	input[name="submit"],
-	button.single_add_to_cart_button,
-	button[type="submit"]:not(.wp-block-search__button) {
-		display: inline-block;
-		text-align: center;
-		white-space: normal;
-		background-color: var(--wp--preset--color--primary, $primary);
-		color: var(--wp--preset--color--background, $primarytext);
-		border: 1px solid var(--wp--preset--color--primary, $primary);
-		padding: 1rem 2rem;
-		margin-top: 1rem;
-		text-decoration: none;
-		font-size: medium;
-		cursor: pointer;
-
-		&:hover,
-		&:visited {
-			color: var(--wp--preset--color--background, $primarytext);
-			text-decoration: underline;
-		}
-	}
-
 	// Moved from blocktheme.css to make sure TT2 won't be changed.
 	#respond input#submit,
 	input.button {
@@ -179,7 +186,6 @@ $tt2-gray: #f7f7f7;
 	}
 
 	button.woocommerce-form-login__submit,
-	button.single_add_to_cart_button,
 	a.checkout-button {
 		font-size: 18px;
 		padding: 1.5rem 3.5rem;
