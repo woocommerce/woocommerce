@@ -74,6 +74,7 @@ class BlockRegistry {
 			return false;
 		}
 
+		// phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$metadata = json_decode( file_get_contents( $block_json_file ), true );
 		if ( ! is_array( $metadata ) || ! $metadata['name'] ) {
 			return false;
