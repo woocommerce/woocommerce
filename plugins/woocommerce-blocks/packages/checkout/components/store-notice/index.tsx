@@ -2,24 +2,27 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { Notice } from 'wordpress-components';
-import { info, warning, Icon } from '@wordpress/icons';
+import NoticeBanner, {
+	NoticeBannerProps,
+} from '@woocommerce/base-components/notice-banner';
 
 /**
- * Internal dependencies
+ * Wrapper for NoticeBanner component.
  */
-import './style.scss';
-
-const StoreNotice = ( { className, children, status, ...props } ) => {
+const StoreNotice = ( {
+	className,
+	children,
+	status,
+	...props
+}: NoticeBannerProps ) => {
 	return (
-		<Notice
+		<NoticeBanner
 			className={ classnames( 'wc-block-store-notice', className ) }
-			{ ...props }
 			status={ status }
+			{ ...props }
 		>
-			<Icon icon={ status === 'error' ? warning : info } />
-			<div>{ children }</div>
-		</Notice>
+			{ children }
+		</NoticeBanner>
 	);
 };
 

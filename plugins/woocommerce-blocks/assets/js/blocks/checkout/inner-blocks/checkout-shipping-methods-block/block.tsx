@@ -21,7 +21,7 @@ import type {
 } from '@woocommerce/types';
 import { CART_STORE_KEY } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
-import type { ReactElement } from 'react';
+import NoticeBanner from '@woocommerce/base-components/notice-banner';
 
 /**
  * Internal dependencies
@@ -57,7 +57,7 @@ const renderShippingRatesControlOption = (
 const Block = ( {
 	noShippingPlaceholder = null,
 	shippingCostRequiresAddress = false,
-} ): ReactElement | null => {
+} ): React.ReactElement | null => {
 	const { isEditor } = useEditorContext();
 
 	const {
@@ -126,15 +126,23 @@ const Block = ( {
 				<ShippingRatesControl
 					noResultsMessage={
 						<>
-							{ addressComplete
-								? __(
+							{ addressComplete ? (
+								<NoticeBanner
+									isDismissible={ false }
+									className="wc-block-components-shipping-rates-control__no-results-notice"
+									status="error"
+								>
+									{ __(
 										'There are no shipping options available. Please check your shipping address.',
 										'woo-gutenberg-products-block'
-								  )
-								: __(
-										'Add a shipping address to view shipping options.',
-										'woo-gutenberg-products-block'
-								  ) }
+									) }
+								</NoticeBanner>
+							) : (
+								__(
+									'Add a shipping address to view shipping options.',
+									'woo-gutenberg-products-block'
+								)
+							) }
 						</>
 					}
 					renderOption={ renderShippingRatesControlOption }
