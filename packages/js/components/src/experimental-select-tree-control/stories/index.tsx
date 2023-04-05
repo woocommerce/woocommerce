@@ -1,15 +1,14 @@
 /**
  * External dependencies
  */
-
-import React, { createElement, useState, useEffect } from 'react';
+import React, { createElement, useState } from 'react';
+import { Button, Modal, SlotFillProvider } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { SelectTree } from '../select-tree';
 import { Item } from '../../experimental-tree-control/types';
-import { Button, Modal, SlotFillProvider } from '@wordpress/components';
 import { SelectTreeMenuSlot } from '../select-tree-menu';
 
 const listItems: Item[] = [

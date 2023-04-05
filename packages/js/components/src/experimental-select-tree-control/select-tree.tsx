@@ -11,11 +11,7 @@ import { useInstanceId } from '@wordpress/compose';
  * Internal dependencies
  */
 import { useLinkedTree } from '../experimental-tree-control/hooks/use-linked-tree';
-import {
-	Item,
-	LinkedTree,
-	TreeControlProps,
-} from '../experimental-tree-control/types';
+import { Item, TreeControlProps } from '../experimental-tree-control/types';
 import { SelectedItems } from '../experimental-select-control/selected-items';
 import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
@@ -51,20 +47,6 @@ export const SelectTree = function SelectTree( {
 
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ isOpen, setIsOpen ] = useState( false );
-
-	const shouldItemBeExpanded = ( item: LinkedTree ): boolean => {
-		if ( ! props.createValue || ! item.children?.length ) return false;
-		return item.children.some( ( child ) => {
-			if (
-				new RegExp( props.createValue || '', 'ig' ).test(
-					child.data.label
-				)
-			) {
-				return true;
-			}
-			return shouldItemBeExpanded( child );
-		} );
-	};
 
 	return (
 		<div
