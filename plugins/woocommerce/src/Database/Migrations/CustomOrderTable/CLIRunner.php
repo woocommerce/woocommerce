@@ -370,6 +370,7 @@ class CLIRunner {
 			$total_time += $batch_total_time;
 
 			if ( $verbose && count( $failed_ids_in_current_batch ) > 0 ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a CLI command and debugging code is intended.
 				$errors = print_r( $failed_ids_in_current_batch, true );
 				WP_CLI::warning(
 					sprintf(
