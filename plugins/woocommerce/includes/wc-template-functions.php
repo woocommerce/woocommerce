@@ -2748,7 +2748,7 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 			array_filter(
 				array(
 					'button',
-					wc_wp_theme_get_element_class_name( 'button' )
+					wc_wp_theme_get_element_class_name( 'button' ),
 				)
 			)
 		);
