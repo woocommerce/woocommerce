@@ -514,7 +514,7 @@ class WC_Post_Types {
 											),
 										),
 										array(
-											'woocommerce/product-schedule-sale-pricing',
+											'woocommerce/product-schedule-sale-fields',
 										),
 										array(
 											'woocommerce/product-radio',

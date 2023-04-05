@@ -21,7 +21,7 @@ import { useValidation } from '../../hooks/use-validation';
 
 export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
 	const blockProps = useBlockProps( {
-		className: 'wp-block-woocommerce-product-schedule-sale-pricing',
+		className: 'wp-block-woocommerce-product-schedule-sale-fields',
 	} );
 
 	const dateTimeFormat = useSelect( ( select ) => {

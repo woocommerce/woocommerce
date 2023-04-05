@@ -1,11 +1,11 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/product-schedule-sale-pricing",
-	"title": "Product schedule sale pricing",
+	"name": "woocommerce/product-schedule-sale-fields",
+	"title": "Product schedule sale fields",
 	"category": "woocommerce",
-	"description": "The product schedule sale pricing.",
-	"keywords": [ "products", "schedule", "pricing" ],
+	"description": "The product schedule sale fields.",
+	"keywords": [ "products", "schedule", "sale" ],
 	"textdomain": "default",
 	"attributes": {
 		"name": {

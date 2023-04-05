@@ -20,7 +20,7 @@ import { init as initSection } from '../section';
 import { init as initTab } from '../tab';
 import { init as initPricing } from '../pricing-block';
 import { init as initCollapsible } from '../collapsible-block';
-import { init as initScheduleSalePricing } from '../schedule-sale-pricing-block';
+import { init as initScheduleSale } from '../../blocks/schedule-sale';
 
 export const initBlocks = () => {
 	const coreBlocks = __experimentalGetCoreBlocks();
@@ -39,5 +39,5 @@ export const initBlocks = () => {
 	initTab();
 	initPricing();
 	initCollapsible();
-	initScheduleSalePricing();
+	initScheduleSale();
 };
