@@ -70,9 +70,7 @@ class WC_REST_Order_Downloads_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		$object = $this->get_object( (int) $request['id'] );
-
-		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -239,6 +237,12 @@ class WC_REST_Order_Downloads_Controller extends WC_REST_Controller {
 				),
 				'access_expires'      => array(
 					'description' => __( "The date when download access expires, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'access_expires_gmt'  => array(
+					'description' => __( 'The date when download access expires, as GMT.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
