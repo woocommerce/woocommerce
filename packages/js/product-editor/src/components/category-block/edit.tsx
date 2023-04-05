@@ -26,7 +26,7 @@ export function Edit( {
 	const blockProps = useBlockProps();
 	const { name, label, placeholder } = attributes;
 	const [ categories, setCategories ] = useEntityProp<
-		Pick< ProductCategory, 'name' | 'id' >[]
+		Pick< ProductCategory, 'name' | 'id' | 'parent' >[]
 	>( 'postType', context?.postType || 'product', name || 'categories' );
 
 	return (
