@@ -52,6 +52,7 @@ module.exports = {
 			'prop-types',
 			'react',
 			'requireindex',
+			'react-transition-group',
 		],
 		'import/resolver': {
 			node: {},

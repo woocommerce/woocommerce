@@ -4,10 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
-import {
-	ExperimentalOrderShippingPackages,
-	StoreNotice,
-} from '@woocommerce/blocks-checkout';
+import { ExperimentalOrderShippingPackages } from '@woocommerce/blocks-checkout';
 import {
 	getShippingRatesPackageCount,
 	getShippingRatesRateCount,
@@ -17,6 +14,7 @@ import {
 	useEditorContext,
 	useShippingData,
 } from '@woocommerce/base-context';
+import NoticeBanner from '@woocommerce/base-components/notice-banner';
 
 /**
  * Internal dependencies
@@ -111,7 +109,7 @@ const ShippingRatesControl = ( {
 			{ hasSelectedLocalPickup &&
 				shippingRates.length > 1 &&
 				! isEditor && (
-					<StoreNotice
+					<NoticeBanner
 						className="wc-block-components-notice"
 						isDismissible={ false }
 						status="warning"
@@ -120,7 +118,7 @@ const ShippingRatesControl = ( {
 							'Multiple shipments must have the same pickup location',
 							'woo-gutenberg-products-block'
 						) }
-					</StoreNotice>
+					</NoticeBanner>
 				) }
 			<ExperimentalOrderShippingPackages>
 				<Packages

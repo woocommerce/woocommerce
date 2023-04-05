@@ -9,6 +9,7 @@ import {
 import { getNoticeContexts } from '@woocommerce/base-utils';
 import type { Notice } from '@wordpress/notices';
 import { useMemo, useEffect } from '@wordpress/element';
+import type { NoticeType } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -16,13 +17,13 @@ import { useMemo, useEffect } from '@wordpress/element';
 import './style.scss';
 import StoreNotices from './store-notices';
 import SnackbarNotices from './snackbar-notices';
-import type { StoreNoticesContainerProps, StoreNotice } from './types';
+import type { StoreNoticesContainerProps } from './types';
 
-const formatNotices = ( notices: Notice[], context: string ): StoreNotice[] => {
+const formatNotices = ( notices: Notice[], context: string ): NoticeType[] => {
 	return notices.map( ( notice ) => ( {
 		...notice,
 		context,
-	} ) ) as StoreNotice[];
+	} ) ) as NoticeType[];
 };
 
 const StoreNoticesContainer = ( {
@@ -57,7 +58,7 @@ const StoreNoticesContainer = ( {
 
 	// Get notices from the current context and any sub-contexts and append the name of the context to the notice
 	// objects for later reference.
-	const notices = useSelect< StoreNotice[] >( ( select ) => {
+	const notices = useSelect< NoticeType[] >( ( select ) => {
 		const { getNotices } = select( 'core/notices' );
 
 		return [
@@ -70,7 +71,7 @@ const StoreNoticesContainer = ( {
 					subContext
 				)
 			),
-		].filter( Boolean ) as StoreNotice[];
+		].filter( Boolean ) as NoticeType[];
 	} );
 
 	// Register the container context with the parent.
@@ -81,7 +82,7 @@ const StoreNoticesContainer = ( {
 		};
 	}, [ contexts, registerContainer, unregisterContainer ] );
 
-	if ( suppressNotices || ! notices.length ) {
+	if ( suppressNotices ) {
 		return null;
 	}
 
