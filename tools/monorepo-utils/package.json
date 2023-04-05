@@ -23,6 +23,7 @@
 	},
 	"scripts": {
 		"build": "tsc",
+		"start": "tsc --watch",
 		"lint": "eslint . --ext .ts",
 		"test": "jest"
 	},
