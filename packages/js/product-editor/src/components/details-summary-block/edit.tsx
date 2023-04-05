@@ -65,8 +65,6 @@ export function Edit( {
 				/>
 			</BlockControls>
 
-			<IframeEditor />
-
 			<BaseControl
 				id={ id }
 				label={ label || __( 'Summary', 'woocommerce' ) }
