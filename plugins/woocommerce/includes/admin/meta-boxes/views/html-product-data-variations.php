@@ -53,7 +53,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 				require __DIR__ . '/html-product-attribute-inner.php';
 			?>
 				<div class="toolbar">
-					<button type="button" class="button button-primary create-variations" disabled="disabled" title="<?php echo esc_html_e( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ); ?>"><?php esc_html_e( 'Create variations', 'woocommerce' ); ?></button>
+					<button type="button" aria-disabled="true" class="button button-primary create-variations disabled"><?php esc_html_e( 'Create variations', 'woocommerce' ); ?></button>
 				</div>
 			</div>
 		</div>
