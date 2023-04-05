@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Fix TT2 button styles and adjust coloring as described in the theme.json file
