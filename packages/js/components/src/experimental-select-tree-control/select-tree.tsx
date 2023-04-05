@@ -2,15 +2,9 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	useRef,
-	useState,
-	createPortal,
-} from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import classNames from 'classnames';
 import { search } from '@wordpress/icons';
-import { Popover } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 
 /**
@@ -58,13 +52,6 @@ export const SelectTree = function SelectTree( {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ isOpen, setIsOpen ] = useState( false );
 
-	const comboBoxRef = useRef< HTMLDivElement >( null );
-
-	// getting the parent's parent div width to set the width of the dropdown
-	const comboBoxWidth =
-		comboBoxRef.current?.parentElement?.parentElement?.getBoundingClientRect()
-			.width;
-
 	const shouldItemBeExpanded = ( item: LinkedTree ): boolean => {
 		if ( ! props.createValue || ! item.children?.length ) return false;
 		return item.children.some( ( child ) => {
@@ -103,7 +90,6 @@ export const SelectTree = function SelectTree( {
 					comboBoxProps={ {
 						className:
 							'woocommerce-experimental-select-control__combo-box-wrapper',
-						ref: comboBoxRef,
 						role: 'combobox',
 						'aria-expanded': isOpen,
 						'aria-haspopup': 'tree',
@@ -179,7 +165,6 @@ export const SelectTree = function SelectTree( {
 				isOpen={ isOpen }
 				items={ linkedTree }
 				shouldShowCreateButton={ shouldShowCreateButton }
-				comboBoxWidth={ comboBoxWidth }
 				onClose={ () => setIsOpen( false ) }
 			/>
 		</div>

@@ -27,7 +27,6 @@ type MenuProps = {
 	position?: Popover.Position;
 	scrollIntoViewOnOpen?: boolean;
 	items: LinkedTree[];
-	comboBoxWidth?: number;
 	treeRef?: React.ForwardedRef< HTMLOListElement >;
 	onClose?: () => void;
 } & Omit< TreeControlProps, 'items' >;
@@ -39,7 +38,6 @@ export const SelectTreeMenu = ( {
 	position = 'bottom center',
 	scrollIntoViewOnOpen = false,
 	items,
-	comboBoxWidth,
 	treeRef: ref,
 	onClose = () => {},
 	shouldShowCreateButton,
