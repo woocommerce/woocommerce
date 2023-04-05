@@ -325,7 +325,7 @@ class CLIRunner {
 		$order_id_start = (int) $assoc_args['start-from'];
 		$order_id_end   = (int) $assoc_args['end-at'];
 		$order_id_end   = -1 === $order_id_end ? PHP_INT_MAX : $order_id_end;
-		$order_count    = $this->get_verify_order_count( $order_id_start, $order_id_end );
+		$order_count    = $this->get_verify_order_count( $order_id_start, $order_id_end, false );
 		$batch_size     = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
 
 		$progress = WP_CLI\Utils\make_progress_bar( 'Order Data Verification', $order_count / $batch_size );
@@ -372,8 +372,8 @@ class CLIRunner {
 				)
 			);
 
-			$order_id_start  = max( $order_ids );
-			$remaining_count = $this->get_verify_order_count( $order_id_start, false );
+			$order_id_start  = max( $order_ids ) + 1;
+			$remaining_count = $this->get_verify_order_count( $order_id_start, $order_id_end, false );
 			if ( $remaining_count === $order_count ) {
 				return WP_CLI::error( __( 'Infinite loop detected, aborting. No errors found.', 'woocommerce' ) );
 			}
