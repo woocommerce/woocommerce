@@ -1018,8 +1018,13 @@ $default-line-height: 18px;
 		max-width: 100%;
 	}
 
+	.variation_actions {
+		max-width: 131px;
+	}
+
 	.toolbar-top {
-		.button {
+		.button,
+		.select {
 			margin: 1px;
 		}
 	}
