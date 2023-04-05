@@ -6,5 +6,6 @@
 		"module": "commonjs",
 		"esModuleInterop": true,
 		"moduleResolution": "node"
-	}
+	},
+	"exclude": [ "node_modules", "**/__tests__" ]
 }
