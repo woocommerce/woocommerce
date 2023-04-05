@@ -1,39 +1,49 @@
 /**
  * External dependencies
  */
-import { Popover } from '@wordpress/components';
+import { Popover, Spinner } from '@wordpress/components';
 import classnames from 'classnames';
 import {
 	createElement,
 	useEffect,
 	useRef,
-	useState,
 	createPortal,
-	Children,
 	useLayoutEffect,
+	useState,
 } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { getMenuPropsType } from './types';
+import {
+	LinkedTree,
+	Tree,
+	TreeControlProps,
+} from '../experimental-tree-control';
 
 type MenuProps = {
-	children?: JSX.Element | JSX.Element[];
-	getMenuProps: getMenuPropsType;
 	isOpen: boolean;
-	className?: string;
+	isLoading?: boolean;
 	position?: Popover.Position;
 	scrollIntoViewOnOpen?: boolean;
-};
+	items: LinkedTree[];
+	comboBoxWidth?: number;
+	treeRef?: React.ForwardedRef< HTMLOListElement >;
+	onClose?: () => void;
+} & Omit< TreeControlProps, 'items' >;
 
-export const Menu = ( {
-	children,
-	getMenuProps,
+export const SelectTreeMenu = ( {
+	isLoading,
 	isOpen,
 	className,
-	position = 'bottom right',
+	position = 'bottom center',
 	scrollIntoViewOnOpen = false,
+	items,
+	comboBoxWidth,
+	treeRef: ref,
+	onClose = () => {},
+	shouldShowCreateButton,
+	...props
 }: MenuProps ) => {
 	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
 	const selectControlMenuRef = useRef< HTMLDivElement >( null );
@@ -59,44 +69,76 @@ export const Menu = ( {
 		}
 	}, [ isOpen, scrollIntoViewOnOpen ] );
 
+	const shouldItemBeExpanded = ( item: LinkedTree ): boolean => {
+		if ( ! props.createValue || ! item.children?.length ) return false;
+		return item.children.some( ( child ) => {
+			if (
+				new RegExp( props.createValue || '', 'ig' ).test(
+					child.data.label
+				)
+			) {
+				return true;
+			}
+			return shouldItemBeExpanded( child );
+		} );
+	};
+
 	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 	/* Disabled because of the onmouseup on the ul element below. */
 	return (
 		<div
 			ref={ selectControlMenuRef }
-			className="woocommerce-experimental-select-control__menu"
+			className="woocommerce-experimental-select-tree-control__menu"
 		>
 			<div>
 				<Popover
 					// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
-					__unstableSlotName="woocommerce-select-control-menu"
+					__unstableSlotName="woocommerce-select-tree-control-menu"
 					focusOnMount={ false }
 					className={ classnames(
-						'woocommerce-experimental-select-control__popover-menu',
+						'woocommerce-experimental-select-tree-control__popover-menu',
+						className,
 						{
 							'is-open': isOpen,
-							'has-results': Children.count( children ) > 0,
+							'has-results': items.length > 0,
 						}
 					) }
 					position={ position }
 					animate={ false }
+					onFocusOutside={ () => {
+						onClose();
+					} }
 				>
-					<ul
-						{ ...getMenuProps() }
-						className={ classnames(
-							'woocommerce-experimental-select-control__popover-menu-container',
-							className
-						) }
-						style={ {
-							width: boundingRect?.width,
-						} }
-						onMouseUp={ ( e ) =>
-							// Fix to prevent select control dropdown from closing when selecting within the Popover.
-							e.stopPropagation()
-						}
-					>
-						{ isOpen && children }
-					</ul>
+					{ isOpen && (
+						<div>
+							{ isLoading ? (
+								<div
+									style={ {
+										width: boundingRect?.width,
+									} }
+								>
+									<Spinner />
+								</div>
+							) : (
+								<Tree
+									{ ...props }
+									id={ `${ props.id }-menu` }
+									ref={ ref }
+									items={ items }
+									onTreeBlur={ onClose }
+									shouldItemBeExpanded={
+										shouldItemBeExpanded
+									}
+									shouldShowCreateButton={
+										shouldShowCreateButton
+									}
+									style={ {
+										width: boundingRect?.width,
+									} }
+								/>
+							) }
+						</div>
+					) }
 				</Popover>
 			</div>
 		</div>
@@ -104,11 +146,11 @@ export const Menu = ( {
 	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 };
 
-export const MenuSlot: React.FC = () =>
+export const SelectTreeMenuSlot: React.FC = () =>
 	createPortal(
 		<div aria-live="off">
 			{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
-			<Popover.Slot name="woocommerce-select-control-menu" />
+			<Popover.Slot name="woocommerce-select-tree-control-menu" />
 		</div>,
 		document.body
 	);

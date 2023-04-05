@@ -7,9 +7,10 @@ import React, { createElement, useState, useEffect } from 'react';
 /**
  * Internal dependencies
  */
-import { SelectTree, SelectTreeMenuSlot } from '../select-tree';
+import { SelectTree } from '../select-tree';
 import { Item } from '../../experimental-tree-control/types';
 import { Button, Modal, SlotFillProvider } from '@wordpress/components';
+import { SelectTreeMenuSlot } from '../select-tree-menu';
 
 const listItems: Item[] = [
 	{ value: '1', label: 'Technology' },
