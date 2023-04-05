@@ -2,16 +2,18 @@
  * External dependencies
  */
 import { DateTimePickerControl } from '@woocommerce/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { ToggleControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import moment from 'moment';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore We need this to get the datetime format for the DateTimePickerControl.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { getSettings } from '@wordpress/date';
 
 /**
  * Internal dependencies
@@ -24,13 +26,7 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 		className: 'wp-block-woocommerce-product-schedule-sale-fields',
 	} );
 
-	const dateTimeFormat = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
-		return (
-			getOption< string | null >( 'links_updated_date_format' ) ||
-			'F j, Y g:i a'
-		);
-	} );
+	const dateTimeFormat = getSettings().formats.datetime;
 
 	const [ showScheduleSale, setShowScheduleSale ] = useState( false );
 
