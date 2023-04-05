@@ -117,9 +117,9 @@ $tt2-gray: #f7f7f7;
 		display: inline-block;
 		text-align: center;
 		white-space: normal;
-		background-color: var(--wp--preset--color--primary);
-		color: var(--wp--preset--color--background);
-		border: 1px solid var(--wp--preset--color--primary);
+		background-color: var(--wp--preset--color--primary, $primary);
+		color: var(--wp--preset--color--background, $primarytext);
+		border: 1px solid var(--wp--preset--color--primary, $primary);
 		padding: 1rem 2rem;
 		margin-top: 1rem;
 		text-decoration: none;
@@ -128,7 +128,7 @@ $tt2-gray: #f7f7f7;
 
 		&:hover,
 		&:visited {
-			color: var(--wp--preset--color--background);
+			color: var(--wp--preset--color--background, $primarytext);
 			text-decoration: underline;
 		}
 	}
@@ -146,9 +146,7 @@ $tt2-gray: #f7f7f7;
 		}
 
 		&.disabled,
-		&:disabled,
 		&:disabled[disabled],
-		&.disabled:hover,
 		&:disabled:hover,
 		&:disabled[disabled]:hover {
 			background-color: var(--wp--preset--color--foreground, $primary);
@@ -160,23 +158,21 @@ $tt2-gray: #f7f7f7;
 	a.button.alt,
 	button.button.alt,
 	input.button.alt {
-		background-color: var(--wp--preset--color--primary);
-		color: var(--wp--preset--color--background);
+		background-color: var(--wp--preset--color--primary, $primary);
+		color: var(--wp--preset--color--background, $primarytext);
 
 		&:hover {
-			background-color: var(--wp--preset--color--primary);
-			color: var(--wp--preset--color--background);
+			background-color: var(--wp--preset--color--primary, $primary);
+			color: var(--wp--preset--color--background, $primarytext);
 			opacity: 1;
 		}
 
 		&.disabled,
-		&:disabled,
 		&:disabled[disabled],
 		&.disabled:hover,
-		&:disabled:hover,
 		&:disabled[disabled]:hover {
-			background-color: var(--wp--preset--color--primary);
-			color: var(--wp--preset--color--background);
+			background-color: var(--wp--preset--color--primary, $primary);
+			color: var(--wp--preset--color--background, $primarytext);
 			opacity: 0.5;
 			cursor: not-allowed;
 		}
@@ -196,9 +192,7 @@ $tt2-gray: #f7f7f7;
 		color: var(--wp--preset--color--background, $primarytext);
 
 		&.disabled,
-		&:disabled,
 		&:disabled[disabled],
-		&.disabled:hover,
 		&:disabled:hover,
 		&:disabled[disabled]:hover {
 			background-color: var(--wp--preset--color--foreground, $primary);
