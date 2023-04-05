@@ -113,6 +113,10 @@
 		"ie 9"
 	],
 	"dependencies": {
-		"@wordpress/browserslist-config": "wp-6.0"
+		"@wordpress/browserslist-config": "wp-6.0",
+		"add": "^2.0.6",
+		"changelog": "^1.4.2",
+		"pnpm": "^8.1.1",
+		"run": "^1.4.0"
 	}
 }
