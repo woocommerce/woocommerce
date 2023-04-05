@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Do not attempt to cache order during order creation (HPOS).
