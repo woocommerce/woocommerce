@@ -144,11 +144,11 @@ $tt2-gray: #f7f7f7;
 	#respond input#submit,
 	input.button {
 		// Style primary WooCommerce CTAs in theme colors by default.
-		background-color: var(--wp--preset--color--foreground, $primary);
+		background-color: var(--wp--preset--color--primary, $primary);
 		color: var(--wp--preset--color--background, $primarytext);
 
 		&:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
+			background-color: var(--wp--preset--color--primary, $primary);
 			color: var(--wp--preset--color--background, $primarytext);
 		}
 
@@ -156,7 +156,7 @@ $tt2-gray: #f7f7f7;
 		&:disabled[disabled],
 		&:disabled:hover,
 		&:disabled[disabled]:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
+			background-color: var(--wp--preset--color--primary, $primary);
 			color: var(--wp--preset--color--background, $primarytext);
 		}
 	}
@@ -194,14 +194,14 @@ $tt2-gray: #f7f7f7;
 	// Moved from blockthemes.css to make sure TT2 won't be changed.
 	button.button,
 	a.button {
-		background-color: var(--wp--preset--color--foreground, $primary);
+		background-color: var(--wp--preset--color--primary, $primary);
 		color: var(--wp--preset--color--background, $primarytext);
 
 		&.disabled,
 		&:disabled[disabled],
 		&:disabled:hover,
 		&:disabled[disabled]:hover {
-			background-color: var(--wp--preset--color--foreground, $primary);
+			background-color: var(--wp--preset--color--primary, $primary);
 			color: var(--wp--preset--color--background, $primarytext);
 		}
 	}
