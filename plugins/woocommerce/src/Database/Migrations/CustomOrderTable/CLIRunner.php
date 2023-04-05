@@ -76,7 +76,7 @@ class CLIRunner {
 					sprintf(
 						// translators: %s - link to testing instructions webpage.
 						__( 'Custom order table usage is not enabled. If you are testing, you can enable it by following the testing instructions in %s', 'woocommerce' ),
-						'https://developer.woocommerce.com/' // TODO: Change the link when testing instructin page is live.
+						'https://github.com/woocommerce/woocommerce/wiki/High-Performance-Order-Storage-Upgrade-Recipe-Book'
 					)
 				);
 			}
@@ -352,7 +352,7 @@ class CLIRunner {
 				)
 			);
 
-			$order_ids        = $wpdb->get_col(
+			$order_ids                   = $wpdb->get_col(
 				$wpdb->prepare(
 					"SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID >= %d AND ID <= %d ORDER BY ID ASC LIMIT %d",
 					$order_id_start,
@@ -360,12 +360,12 @@ class CLIRunner {
 					$batch_size
 				)
 			);
-			$batch_start_time = microtime( true );
+			$batch_start_time            = microtime( true );
 			$failed_ids_in_current_batch = $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
 			$failed_ids_in_current_batch = $this->verify_meta_data( $order_ids, $failed_ids_in_current_batch );
 			$failed_ids                  = $failed_ids + $failed_ids_in_current_batch;
-			$processed += count( $order_ids );
-			$batch_total_time = microtime( true ) - $batch_start_time;
+			$processed                  += count( $order_ids );
+			$batch_total_time            = microtime( true ) - $batch_start_time;
 			$batch_count ++;
 			$total_time += $batch_total_time;
 
