@@ -9,3 +9,4 @@ export * from './use-typography-props';
 export * from './use-color-props';
 export * from './use-border-props';
 export * from './use-is-mounted';
+export * from './use-spoken-message';
