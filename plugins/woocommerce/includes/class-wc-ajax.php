@@ -301,7 +301,7 @@ class WC_AJAX {
 						'form.woocommerce-checkout' => wc_print_notice(
 							esc_html__( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . esc_html__( 'Return to shop', 'woocommerce' ) . '</a>',
 							'error',
-							[],
+							array(),
 							true
 						),
 					)
