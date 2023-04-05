@@ -9,7 +9,8 @@
 	"textdomain": "default",
 	"attributes": {
 		"name": {
-			"type": "string"
+			"type": "string",
+			"__experimentalRole": "content"
 		},
 		"label": {
 			"type": "string"
@@ -25,5 +26,6 @@
 		"reusable": false,
 		"inserter": false,
 		"lock": false
-	}
+	},
+	"editorStyle": "file:./editor.css"
 }

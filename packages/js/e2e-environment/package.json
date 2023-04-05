@@ -69,7 +69,7 @@
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
-		"prepare": "pnpm run build",
+		"prepack": "pnpm run build",
 		"docker:up": "./bin/docker-compose.sh up",
 		"docker:wait": "bash ./bin/wait-for-build.sh",
 		"docker:down": "./bin/docker-compose.sh down",

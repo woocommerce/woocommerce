@@ -1,73 +1,30 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
-import { Button } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useEntityProp } from '@wordpress/core-data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import { WooHeaderItem } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
  */
-import { AUTO_DRAFT_NAME, getHeaderTitle } from '../../utils';
-
-/**
- * Internal dependencies
- */
+import { getHeaderTitle } from '../../utils';
 import { MoreMenu } from './more-menu';
+import { PreviewButton } from './preview-button';
+import { SaveDraftButton } from './save-draft-button';
+import { PublishButton } from './publish-button';
 
 export type HeaderProps = {
-	productId: number;
 	productName: string;
 };
 
-export function Header( { productId, productName }: HeaderProps ) {
-	const { isProductLocked, isSaving, editedProductName } = useSelect(
-		( select ) => {
-			const { isSavingEntityRecord, getEditedEntityRecord } =
-				select( 'core' );
-			const { isPostSavingLocked } = select( 'core/editor' );
-
-			const product: Product = getEditedEntityRecord(
-				'postType',
-				'product',
-				productId
-			);
-
-			return {
-				isProductLocked: isPostSavingLocked(),
-				isSaving: isSavingEntityRecord(
-					'postType',
-					'product',
-					productId
-				),
-				editedProductName: product?.name,
-			};
-		},
-		[ productId ]
+export function Header( { productName }: HeaderProps ) {
+	const [ editedProductName ] = useEntityProp< string >(
+		'postType',
+		'product',
+		'name'
 	);
-
-	const isDisabled = isProductLocked || isSaving;
-	const isCreating = productName === AUTO_DRAFT_NAME;
-
-	const { saveEditedEntityRecord } = useDispatch( 'core' );
-
-	function handleSave() {
-		saveEditedEntityRecord< Product >(
-			'postType',
-			'product',
-			productId
-		).then( ( response ) => {
-			if ( isCreating ) {
-				navigateTo( {
-					url: getNewPath( {}, `/product/${ response.id }` ),
-				} );
-			}
-		} );
-	}
 
 	return (
 		<div
@@ -81,16 +38,12 @@ export function Header( { productId, productName }: HeaderProps ) {
 			</h1>
 
 			<div className="woocommerce-product-header__actions">
-				<Button
-					onClick={ handleSave }
-					variant="primary"
-					isBusy={ isSaving }
-					disabled={ isDisabled }
-				>
-					{ isCreating
-						? __( 'Add', 'woocommerce' )
-						: __( 'Save', 'woocommerce' ) }
-				</Button>
+				<SaveDraftButton />
+
+				<PreviewButton />
+
+				<PublishButton />
+
 				<WooHeaderItem.Slot name="product" />
 				<MoreMenu />
 			</div>

@@ -375,9 +375,12 @@ class WC_Admin_Menus {
 					?>
 				</ul>
 			</div>
-			<p class="button-controls">
+			<p class="button-controls" data-items-type="posttype-woocommerce-endpoints">
 				<span class="list-controls">
-					<a href="<?php echo esc_url( admin_url( 'nav-menus.php?page-tab=all&selectall=1#posttype-woocommerce-endpoints' ) ); ?>" class="select-all"><?php esc_html_e( 'Select all', 'woocommerce' ); ?></a>
+					<label>
+						<input type="checkbox" class="select-all" />
+						<?php esc_html_e( 'Select all', 'woocommerce' ); ?>
+					</label>
 				</span>
 				<span class="add-to-menu">
 					<button type="submit" class="button-secondary submit-add-to-menu right" value="<?php esc_attr_e( 'Add to menu', 'woocommerce' ); ?>" name="add-post-type-menu-item" id="submit-posttype-woocommerce-endpoints"><?php esc_html_e( 'Add to menu', 'woocommerce' ); ?></button>

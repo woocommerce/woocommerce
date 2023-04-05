@@ -12,37 +12,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class DefaultPaymentGateways {
 	/**
-	 * Priority is used to determine which payment gateway to recommend first.
-	 * The lower the number, the higher the priority.
-	 *
-	 * @var array
-	 */
-	private static $recommendation_priority = array(
-		'woocommerce_payments'                            => 1,
-		'woocommerce_payments:with-in-person-payments'    => 1,
-		'woocommerce_payments:without-in-person-payments' => 1,
-		'stripe'                                          => 2,
-		'woo-mercado-pago-custom'                         => 3,
-		// PayPal Payments.
-		'ppcp-gateway'                                    => 4,
-		'mollie_wc_gateway_banktransfer'                  => 5,
-		'razorpay'                                        => 5,
-		'payfast'                                         => 5,
-		'payubiz'                                         => 6,
-		'square_credit_card'                              => 6,
-		'klarna_payments'                                 => 6,
-		// Klarna Checkout.
-		'kco'                                             => 6,
-		'paystack'                                        => 6,
-		'eway'                                            => 7,
-		'amazon_payments_advanced'                        => 7,
-		'affirm'                                          => 8,
-		'afterpay'                                        => 9,
-		'zipmoney'                                        => 10,
-		'payoneer-checkout'                               => 11,
-	);
-
-	/**
 	 * Get default specs.
 	 *
 	 * @return array Default specs.
@@ -832,8 +801,10 @@ class DefaultPaymentGateways {
 			),
 		);
 
+		$base_location = wc_get_base_location();
+		$country       = $base_location['country'];
 		foreach ( $payment_gateways as $index => $payment_gateway ) {
-			$payment_gateways[ $index ]['recommendation_priority'] = self::get_recommendation_priority( $payment_gateway['id'] );
+			$payment_gateways[ $index ]['recommendation_priority'] = self::get_recommendation_priority( $payment_gateway['id'], $country );
 		}
 
 		return $payment_gateways;
@@ -935,16 +906,238 @@ class DefaultPaymentGateways {
 	}
 
 	/**
-	 * Get recommendation priority for a given payment gateway by id.
-	 * If no priority is set or the id is not found, return null.
+	 * Get recommendation priority for a given payment gateway by id and country.
+	 * If country is not supported, return null.
 	 *
-	 * @param string $id Payment gateway id.
-	 * @return int Priority.
+	 * @param string $gateway_id Payment gateway id.
+	 * @param string $country_code Store country code.
+	 * @return int|null Priority. Priority is 0-indexed, so 0 is the highest priority.
 	 */
-	private static function get_recommendation_priority( $id ) {
-		if ( ! $id || ! array_key_exists( $id, self::$recommendation_priority ) ) {
+	private static function get_recommendation_priority( $gateway_id, $country_code ) {
+		$recommendation_priority_map = array(
+			'US' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'square_credit_card',
+				'amazon_payments_advanced',
+				'affirm',
+				'afterpay',
+				'klarna_payments',
+				'zipmoney',
+			],
+			'CA' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'square_credit_card',
+				'affirm',
+				'afterpay',
+				'klarna_payments',
+			],
+			'AT' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			],
+			'BE' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			],
+			'BG' => [ 'stripe', 'ppcp-gateway' ],
+			'HR' => [ 'ppcp-gateway' ],
+			'CH' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'klarna_payments',
+			],
+			'CY' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
+			'CZ' => [ 'stripe', 'ppcp-gateway' ],
+			'DK' => [
+				'stripe',
+				'ppcp-gateway',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			],
+			'EE' => [ 'stripe', 'ppcp-gateway' ],
+			'ES' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'square_credit_card',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			],
+			'FI' => [
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'kco',
+				'klarna_payments',
+			],
+			'FR' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'square_credit_card',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			],
+			'DE' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			],
+			'GB' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'square_credit_card',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			],
+			'GR' => [ 'stripe', 'ppcp-gateway' ],
+			'HU' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
+			'IE' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'square_credit_card',
+				'amazon_payments_advanced',
+			],
+			'IT' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			],
+			'LV' => [ 'stripe', 'ppcp-gateway' ],
+			'LT' => [ 'stripe', 'ppcp-gateway' ],
+			'LU' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
+			'MT' => [ 'stripe', 'ppcp-gateway' ],
+			'NL' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			],
+			'NO' => [ 'stripe', 'ppcp-gateway', 'kco', 'klarna_payments' ],
+			'PL' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'mollie_wc_gateway_banktransfer',
+				'klarna_payments',
+			],
+			'PT' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'amazon_payments_advanced',
+			],
+			'RO' => [ 'stripe', 'ppcp-gateway' ],
+			'SK' => [ 'stripe', 'ppcp-gateway' ],
+			'SL' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
+			'SE' => [
+				'stripe',
+				'ppcp-gateway',
+				'kco',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			],
+			'MX' => [
+				'stripe',
+				'woo-mercado-pago-custom',
+				'ppcp-gateway',
+				'klarna_payments',
+			],
+			'BR' => [ 'stripe', 'woo-mercado-pago-custom', 'ppcp-gateway' ],
+			'AR' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
+			'BO' => [],
+			'CL' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
+			'CO' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
+			'EC' => [ 'ppcp-gateway' ],
+			'FK' => [],
+			'GF' => [],
+			'GY' => [],
+			'PY' => [],
+			'PE' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
+			'SR' => [],
+			'UY' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
+			'VE' => [ 'ppcp-gateway' ],
+			'AU' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'square_credit_card',
+				'eway',
+				'afterpay',
+				'klarna_payments',
+				'zipmoney',
+			],
+			'NZ' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'eway',
+				'klarna_payments',
+				'zipmoney',
+			],
+			'HK' => [
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'eway',
+				'payoneer-checkout',
+			],
+			'JP' => [
+				'stripe',
+				'ppcp-gateway',
+				'square_credit_card',
+				'amazon_payments_advanced',
+			],
+			'SG' => [ 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'eway' ],
+			'CN' => [ 'ppcp-gateway', 'payoneer-checkout' ],
+			'FJ' => [],
+			'GU' => [],
+			'ID' => [ 'stripe', 'ppcp-gateway' ],
+			'IN' => [ 'stripe', 'razorpay', 'payubiz', 'ppcp-gateway' ],
+			'ZA' => [ 'payfast', 'paystack', 'ppcp-gateway' ],
+			'NG' => [ 'paystack', 'ppcp-gateway' ],
+			'GH' => [ 'paystack', 'ppcp-gateway' ],
+		);
+
+		// If the country code is not in the list, return null.
+		if ( ! isset( $recommendation_priority_map[ $country_code ] ) ) {
 			return null;
 		}
-		return self::$recommendation_priority[ $id ];
+
+		$index = array_search( $gateway_id, $recommendation_priority_map[ $country_code ], true );
+
+		// If the gateway is not in the list, return the last index + 1.
+		if ( false === $index ) {
+			return count( $recommendation_priority_map[ $country_code ] );
+		}
+
+		return $index;
 	}
 }

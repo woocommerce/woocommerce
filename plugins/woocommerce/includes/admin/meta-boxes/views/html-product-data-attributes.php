@@ -22,19 +22,21 @@ $icon_url                        = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/global-a
 <div id="product_attributes" class="panel wc-metaboxes-wrapper hidden">
 	<div class="toolbar toolbar-top <?php echo $is_add_global_attribute_visible ? ' expand-close-hidden' : ''; ?>">
 		<div class="add-global-attribute-container<?php echo $is_add_global_attribute_visible ? '' : ' hidden'; ?>">
-			<img src="<?php echo esc_url( $icon_url ); ?>" />
-			<p>
-				<?php
-				esc_html_e(
-					'Add descriptive pieces of information that customers can use to search for this product on your store, such as “Material” or “Brand”.',
-					'woocommerce'
-				);
-				?>
-			</p>
-			<div>
-				<button type="button" class="button add_custom_attribute"><?php esc_html_e( 'Create new attribute', 'woocommerce' ); ?></button>
-				<select class="wc-attribute-search" data-placeholder="<?php esc_attr_e( 'Add existing attribute', 'woocommerce' ); ?>" data-minimum-input-length="0">
+			<div class="actions">
+				<button type="button" class="button add_custom_attribute"><?php esc_html_e( 'Add new', 'woocommerce' ); ?></button>
+				<select class="wc-attribute-search" data-placeholder="<?php esc_attr_e( 'Add existing', 'woocommerce' ); ?>" data-minimum-input-length="0">
 				</select>
+			</div>
+			<div class="message">
+				<img src="<?php echo esc_url( $icon_url ); ?>" />
+				<p>
+					<?php
+					esc_html_e(
+						'Add descriptive pieces of information that customers can use to search for this product on your store, such as “Material” or “Brand”.',
+						'woocommerce'
+					);
+					?>
+				</p>
 			</div>
 		</div>
 		<div class="add-attribute-container<?php echo $is_add_global_attribute_visible ? ' hidden' : ' '; ?>">

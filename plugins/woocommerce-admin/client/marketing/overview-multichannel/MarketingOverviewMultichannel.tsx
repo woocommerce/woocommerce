@@ -61,14 +61,21 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 		return <CenteredSpinner />;
 	}
 
-	const shouldShowCampaigns = !! (
+	const showCampaigns = !! (
 		dataRegistered?.length &&
 		( isIntroductionBannerDismissed || metaCampaigns?.total )
 	);
 
-	const shouldShowExtensions =
+	const showChannels = !! (
+		dataRegistered &&
+		dataRecommended &&
+		( dataRegistered.length || dataRecommended.length )
+	);
+
+	const showExtensions = !! (
 		getAdminSetting( 'allowMarketplaceSuggestions', false ) &&
-		currentUserCan( 'install_plugins' );
+		currentUserCan( 'install_plugins' )
+	);
 
 	const onInstalledAndActivated = ( pluginSlug: string ) => {
 		refetchCampaignTypes();
@@ -86,18 +93,17 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 					} }
 				/>
 			) }
-			{ shouldShowCampaigns && <Campaigns /> }
-			{ !! ( dataRegistered && dataRecommended ) &&
-				!! ( dataRegistered.length || dataRecommended.length ) && (
-					<Channels
-						ref={ channelsRef }
-						registeredChannels={ dataRegistered }
-						recommendedChannels={ dataRecommended }
-						onInstalledAndActivated={ onInstalledAndActivated }
-					/>
-				) }
+			{ showCampaigns && <Campaigns /> }
+			{ showChannels && (
+				<Channels
+					ref={ channelsRef }
+					registeredChannels={ dataRegistered }
+					recommendedChannels={ dataRecommended }
+					onInstalledAndActivated={ onInstalledAndActivated }
+				/>
+			) }
 			<InstalledExtensions />
-			{ !! shouldShowExtensions && <DiscoverTools /> }
+			{ showExtensions && <DiscoverTools /> }
 			<LearnMarketing />
 		</div>
 	);

@@ -40,6 +40,32 @@ test.describe( 'Add New Variable Product Page', () => {
 		await api.post( 'products/batch', { delete: ids } );
 	} );
 
+	test( 'shows the variable product tour', async ( { page } ) => {
+		await page.goto( 'wp-admin/post-new.php?post_type=product' );
+		await page.selectOption( '#product-type', 'variable', { force: true } );
+
+		// because of the way that the tour is dynamically positioned,
+		// Playwright can't automatically scroll the button into view,
+		// so we will manually scroll the attributes tab into view,
+		// which will cause the tour to be scrolled into view as well
+		await page
+			.locator( '.attribute_tab' )
+			.getByRole( 'link', { name: 'Attributes' } )
+			.scrollIntoViewIfNeeded();
+
+		// dismiss the variable product tour
+		await page
+			.getByRole( 'button', { name: 'Got it' } )
+			.click( { force: true } );
+
+		// wait for the tour's dismissal to be saved
+		await page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/users/' ) &&
+				response.status() === 200
+		);
+	} );
+
 	test( 'can create product, attributes and variations, edit variations and delete variations', async ( {
 		page,
 	} ) => {
@@ -54,10 +80,18 @@ test.describe( 'Add New Variable Product Page', () => {
 			if ( i > 0 ) {
 				await page.click( 'button.add_attribute' );
 			}
-			await page.waitForSelector( `input[name="attribute_names[${ i }]"]` );
+			await page.waitForSelector(
+				`input[name="attribute_names[${ i }]"]`
+			);
 
-			await page.locator( `input[name="attribute_names[${ i }]"]` ).first().type( `attr #${ i + 1 }` );
-			await page.locator( `textarea[name="attribute_values[${ i }]"]` ).first().type( 'val1 | val2' );
+			await page
+				.locator( `input[name="attribute_names[${ i }]"]` )
+				.first()
+				.type( `attr #${ i + 1 }` );
+			await page
+				.locator( `textarea[name="attribute_values[${ i }]"]` )
+				.first()
+				.type( 'val1 | val2' );
 		}
 		await page.click( 'text=Save attributes' );
 		// wait for the attributes to be saved
@@ -73,12 +107,13 @@ test.describe( 'Add New Variable Product Page', () => {
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
 
-		// manually create variations from all attributes
-		await page.click( 'a[href="#variable_product_options"]' );
-		await page.selectOption( '#field_to_edit', 'link_all_variations' );
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 
-		await page.click( 'a.do_variation_action' );
+		// manually create variations from all attributes
+		await page.click( 'a[href="#variable_product_options"]' );
+
+		await page.click( 'button.generate_variations' );
+
 		// add variation attributes
 		for ( let i = 0; i < 8; i++ ) {
 			const val1 = 'val1';
@@ -167,10 +202,11 @@ test.describe( 'Add New Variable Product Page', () => {
 		} );
 		const variationsCount = await page.$$( '.woocommerce_variation' );
 		await expect( variationsCount ).toHaveLength( 0 );
-
 	} );
 
-	test( 'can manually add a variation, manage stock levels, set variation defaults and remove a variation', async ( { page } ) => {
+	test( 'can manually add a variation, manage stock levels, set variation defaults and remove a variation', async ( {
+		page,
+	} ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product' );
 		await page.fill( '#title', manualVariableProduct );
 		await page.selectOption( '#product-type', 'variable', { force: true } );
@@ -180,10 +216,18 @@ test.describe( 'Add New Variable Product Page', () => {
 			if ( i > 0 ) {
 				await page.click( 'button.add_attribute' );
 			}
-			await page.waitForSelector( `input[name="attribute_names[${ i }]"]` );
+			await page.waitForSelector(
+				`input[name="attribute_names[${ i }]"]`
+			);
 
-			await page.locator( `input[name="attribute_names[${ i }]"]` ).first().type( `attr #${ i + 1 }` );
-			await page.locator( `textarea[name="attribute_values[${ i }]"]` ).first().type( 'val1 | val2' );
+			await page
+				.locator( `input[name="attribute_names[${ i }]"]` )
+				.first()
+				.type( `attr #${ i + 1 }` );
+			await page
+				.locator( `textarea[name="attribute_values[${ i }]"]` )
+				.first()
+				.type( 'val1 | val2' );
 		}
 		await page.click( 'text=Save attributes' );
 		// wait for the attributes to be saved
@@ -202,10 +246,7 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		// manually adds a variation
 		await page.click( 'a[href="#variable_product_options"]' );
-		await page.selectOption( '#field_to_edit', 'add_variation', {
-			force: true,
-		} );
-		await page.click( 'a.do_variation_action' );
+		await page.click( 'button.add_variation_manually' );
 		await expect( page.locator( '.variation-needs-update' ) ).toBeVisible();
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
 			await page.selectOption(
@@ -289,6 +330,8 @@ test.describe( 'Add New Variable Product Page', () => {
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await page.hover( '.woocommerce_variation' );
 		await page.click( '.remove_variation.delete' );
-		await expect( page.locator( '.woocommerce_variation' ) ).toHaveCount( 0 );
+		await expect( page.locator( '.woocommerce_variation' ) ).toHaveCount(
+			0
+		);
 	} );
 } );
