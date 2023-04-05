@@ -3237,6 +3237,7 @@ if ( ! function_exists( 'woocommerce_account_orders' ) ) {
 			apply_filters(
 				'woocommerce_my_account_my_orders_query',
 				array(
+					'limit' => 2,
 					'customer' => get_current_user_id(),
 					'page'     => $current_page,
 					'paginate' => true,

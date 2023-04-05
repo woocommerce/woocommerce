@@ -140,12 +140,23 @@ $tt2-gray: #f7f7f7;
 		}
 	}
 
+	a.button,
+	button[name="add-to-cart"],
+	input[name="submit"],
+	button.single_add_to_cart_button,
+	button[type="submit"]:not(.wp-block-search__button) {
+		display: inline-block;
+		text-align: center;
+		white-space: normal;
+	}
+
 	// Moved from blocktheme.css to make sure TT2 won't be changed.
 	#respond input#submit,
 	input.button {
 		// Style primary WooCommerce CTAs in theme colors by default.
 		background-color: var(--wp--preset--color--primary, $primary);
 		color: var(--wp--preset--color--background, $primarytext);
+		display: inline-block;
 
 		&:hover {
 			background-color: var(--wp--preset--color--primary, $primary);
@@ -167,6 +178,7 @@ $tt2-gray: #f7f7f7;
 	input.button.alt {
 		background-color: var(--wp--preset--color--primary, $primary);
 		color: var(--wp--preset--color--background, $primarytext);
+		display: inline-block;
 
 		&:hover {
 			background-color: var(--wp--preset--color--primary, $primary);
