@@ -232,7 +232,7 @@ $tt2-gray: #f7f7f7;
 			}
 
 			h2.woocommerce-loop-product__title {
-				color: var(--wp--preset--color--primary);
+				color: var(--wp--preset--color--foreground, $primarytext);
 				font-family: var(--wp--preset--font-family--system-font);
 				text-decoration: none;
 				margin-bottom: 0;
