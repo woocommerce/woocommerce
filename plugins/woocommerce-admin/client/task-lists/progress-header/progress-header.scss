@@ -4,10 +4,6 @@ $progress-complete-color: var(--wp-admin-theme-color);
 	position: relative;
 	min-height: 28px;
 
-	.woocommerce-task-progress-header__title {
-		padding-top: 4px;
-	}
-
 	h1 {
 		font-size: 24px;
 	}
@@ -74,5 +70,19 @@ $progress-complete-color: var(--wp-admin-theme-color);
 		.woocommerce-card__menu {
 			top: 17px;
 		}
+	}
+
+	@include breakpoint( '<782px' ) {
+		padding-left: var(--large-gap);
+        padding-right: var(--large-gap);
+	}
+}
+
+h1.woocommerce-task-progress-header__title {
+	padding-top: 4px;
+
+	@include breakpoint( '<782px' ) {
+		padding-left: var(--large-gap);
+        padding-right: var(--large-gap);
 	}
 }
