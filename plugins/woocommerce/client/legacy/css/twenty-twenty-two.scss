@@ -117,8 +117,8 @@ $tt2-gray: #f7f7f7;
 		display: inline-block;
 		text-align: center;
 		background-color: var(--wp--preset--color--primary);
-		color: #fff;
-		border: 1px solid var(--wp--preset--color--black);
+		color: var(--wp--preset--color--background);
+		border: 1px solid var(--wp--preset--color--primary);
 		padding: 1rem 2rem;
 		margin-top: 1rem;
 		text-decoration: none;
@@ -127,7 +127,7 @@ $tt2-gray: #f7f7f7;
 
 		&:hover,
 		&:visited {
-			color: var(--wp--preset--color--white);
+			color: var(--wp--preset--color--background);
 			text-decoration: underline;
 		}
 	}
@@ -160,11 +160,11 @@ $tt2-gray: #f7f7f7;
 	button.button.alt,
 	input.button.alt {
 		background-color: var(--wp--preset--color--primary);
-		color: #fff;
+		color: var(--wp--preset--color--background);
 
 		&:hover {
 			background-color: var(--wp--preset--color--primary);
-			color: #fff;
+			color: var(--wp--preset--color--background);
 			opacity: 1;
 		}
 
@@ -175,7 +175,7 @@ $tt2-gray: #f7f7f7;
 		&:disabled:hover,
 		&:disabled[disabled]:hover {
 			background-color: var(--wp--preset--color--primary);
-			color: #fff;
+			color: var(--wp--preset--color--background);
 			opacity: 0.5;
 			cursor: not-allowed;
 		}
