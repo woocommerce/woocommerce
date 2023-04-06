@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignoreFile
 
 if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 	class UPDATE_WP_JSON {
