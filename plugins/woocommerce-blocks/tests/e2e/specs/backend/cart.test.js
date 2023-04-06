@@ -29,6 +29,8 @@ const block = {
 	slug: 'woocommerce/cart',
 	class: '.wp-block-woocommerce-cart',
 	selectors: {
+		disabledInsertButton:
+			"//button[@aria-disabled='true']//span[text()='Cart']",
 		insertButton: "//button//span[text()='Cart']",
 	},
 };
@@ -109,14 +111,22 @@ describe( `${ block.name } Block`, () => {
 				'//div[@data-type="woocommerce/cart-order-summary-block"]//button[@aria-label="Add block"]'
 			);
 			await addBlockButton.click();
+			await expect( page ).toFill(
+				'input.components-search-control__input',
+				'Table'
+			);
 			const tableButton = await page.waitForXPath(
 				'//*[@role="option" and contains(., "Table")]'
+			);
+			await expect( tableButton ).not.toBeNull();
+			await expect( page ).toFill(
+				'input.components-search-control__input',
+				'Audio'
 			);
 			const audioButton = await page.waitForXPath(
 				'//*[@role="option" and contains(., "Audio")]'
 			);
-			expect( tableButton ).not.toBeNull();
-			expect( audioButton ).not.toBeNull();
+			await expect( audioButton ).not.toBeNull();
 
 			// // Now check the filled cart block and expect only the Table block to be available there.
 			await selectBlockByName( 'woocommerce/filled-cart-block' );
@@ -124,13 +134,14 @@ describe( `${ block.name } Block`, () => {
 				'//div[@data-type="woocommerce/filled-cart-block"]//button[@aria-label="Add block"]'
 			);
 			await filledCartAddBlockButton.click();
+
 			const filledCartTableButton = await page.waitForXPath(
 				'//*[@role="option" and contains(., "Table")]'
 			);
+			expect( filledCartTableButton ).not.toBeNull();
 			const filledCartAudioButton = await page.$x(
 				'//*[@role="option" and contains(., "Audio")]'
 			);
-			expect( filledCartTableButton ).not.toBeNull();
 			expect( filledCartAudioButton ).toHaveLength( 0 );
 		} );
 
