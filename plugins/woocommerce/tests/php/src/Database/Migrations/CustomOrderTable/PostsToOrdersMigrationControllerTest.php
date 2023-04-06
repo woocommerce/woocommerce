@@ -746,4 +746,21 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$this->assertEmpty( $errors );
 	}
+
+	/**
+	 * @testDox Test migration for multiple null order_key meta value.
+	 */
+	public function test_order_key_null_multiple() {
+		$order1 = OrderHelper::create_order();
+		$order2 = OrderHelper::create_order();
+		delete_post_meta( $order1->get_id(), '_order_key' );
+		delete_post_meta( $order2->get_id(), '_order_key' );
+
+		$this->sut->migrate_order( $order1->get_id() );
+		$this->sut->migrate_order( $order2->get_id() );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order1->get_id(), $order2->get_id() ) );
+
+		$this->assertEmpty( $errors );
+	}
 }

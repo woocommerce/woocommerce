@@ -2412,7 +2412,7 @@ CREATE TABLE $operational_data_table_name (
 	discount_total_amount decimal(26, 8) NULL,
 	recorded_sales tinyint(1) NULL,
 	UNIQUE KEY order_id (order_id),
-	UNIQUE KEY order_key (order_key)
+	KEY order_key (order_key)
 ) $collate;
 CREATE TABLE $meta_table (
 	id bigint(20) unsigned auto_increment primary key,
