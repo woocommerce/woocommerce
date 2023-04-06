@@ -30,7 +30,7 @@
 		"docker:ssh": "pnpm exec wc-e2e docker:ssh",
 		"docker:up": "pnpm exec wc-e2e docker:up",
 		"env:dev": "pnpm wp-env start",
-		"update-wp-env": "php ./tests/e2e-pw/bin/maybe-set-wp-version.php",
+		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
 		"env:test": "pnpm run update-wp-env && pnpm run env:dev && ./tests/e2e-pw/bin/test-env-setup.sh",
 		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
 		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
