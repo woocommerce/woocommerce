@@ -8,10 +8,14 @@ import {
 	InspectorControls,
 } from '@wordpress/block-editor';
 import { CheckboxControl } from '@woocommerce/blocks-checkout';
-import { PanelBody, ToggleControl, Notice } from '@wordpress/components';
+import {
+	PanelBody,
+	ToggleControl,
+	Notice,
+	ExternalLink,
+} from '@wordpress/components';
 import { PRIVACY_URL, TERMS_URL } from '@woocommerce/block-settings';
 import { ADMIN_URL } from '@woocommerce/settings';
-import { Icon, external } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -36,6 +40,82 @@ export const Edit = ( {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
+				{ /* Show this notice if a terms page or a privacy page is not setup. */ }
+				{ ( ! TERMS_URL || ! PRIVACY_URL ) && (
+					<Notice
+						className="wc-block-checkout__terms_notice"
+						status="warning"
+						isDismissible={ false }
+					>
+						{ __(
+							"Link to your store's Terms and Conditions and Privacy Policy pages by creating pages for them.",
+							'woo-gutenberg-products-block'
+						) }
+						<br />
+						{ ! TERMS_URL && (
+							<>
+								<br />
+								<ExternalLink
+									href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=advanced` }
+								>
+									{ __(
+										'Setup a Terms and Conditions page',
+										'woo-gutenberg-products-block'
+									) }
+								</ExternalLink>
+							</>
+						) }
+						{ ! PRIVACY_URL && (
+							<>
+								<br />
+								<ExternalLink
+									href={ `${ ADMIN_URL }options-privacy.php` }
+								>
+									{ __(
+										'Setup a Privacy Policy page',
+										'woo-gutenberg-products-block'
+									) }
+								</ExternalLink>
+							</>
+						) }
+					</Notice>
+				) }
+				{ /* Show this notice if we have both a terms and privacy pages, but they're not present in the text. */ }
+				{ TERMS_URL &&
+					PRIVACY_URL &&
+					! (
+						currentText.includes( TERMS_URL ) &&
+						currentText.includes( PRIVACY_URL )
+					) && (
+						<Notice
+							className="wc-block-checkout__terms_notice"
+							status="warning"
+							isDismissible={ false }
+							actions={
+								termsConsentDefaultText !== text
+									? [
+											{
+												label: __(
+													'Restore default text',
+													'woo-gutenberg-products-block'
+												),
+												onClick: () =>
+													setAttributes( {
+														text: '',
+													} ),
+											},
+									  ]
+									: []
+							}
+						>
+							<p>
+								{ __(
+									'Ensure you add links to your policy pages in this section.',
+									'woo-gutenberg-products-block'
+								) }
+							</p>
+						</Notice>
+					) }
 				<PanelBody
 					title={ __(
 						'Display options',
@@ -80,100 +160,6 @@ export const Edit = ( {
 					/>
 				) }
 			</div>
-			{ /* Show this notice if a terms page or a privacy page is not setup. */ }
-			{ ( ! TERMS_URL || ! PRIVACY_URL ) && (
-				<Notice
-					className="wc-block-checkout__terms_notice"
-					status="warning"
-					isDismissible={ false }
-					actions={ [
-						! TERMS_URL && {
-							className: 'wc-block-checkout__terms_notice-button',
-							label: (
-								<>
-									{ __(
-										'Setup a Terms and Conditions page',
-										'woo-gutenberg-products-block'
-									) }
-									<Icon
-										icon={ external }
-										size={ 16 }
-										className="wc-block-checkout__terms_notice-button__icon"
-									/>
-								</>
-							),
-
-							onClick: () =>
-								window.open(
-									`${ ADMIN_URL }admin.php?page=wc-settings&tab=advanced`,
-									'_blank'
-								),
-						},
-						! PRIVACY_URL && {
-							className: 'wc-block-checkout__terms_notice-button',
-							label: (
-								<>
-									{ __(
-										'Setup a Privacy Policy page',
-										'woo-gutenberg-products-block'
-									) }
-									<Icon
-										size={ 16 }
-										icon={ external }
-										className="wc-block-checkout__terms_notice-button__icon"
-									/>
-								</>
-							),
-							onClick: () =>
-								window.open(
-									`${ ADMIN_URL }options-privacy.php`,
-									'_blank'
-								),
-						},
-					].filter( Boolean ) }
-				>
-					<p>
-						{ __(
-							"You don't have any Terms and Conditions and/or Privacy Policy pages set up.",
-							'woo-gutenberg-products-block'
-						) }
-					</p>
-				</Notice>
-			) }
-			{ /* Show this notice if we have both a terms and privacy pages, but they're not present in the text. */ }
-			{ TERMS_URL &&
-				PRIVACY_URL &&
-				! (
-					currentText.includes( TERMS_URL ) &&
-					currentText.includes( PRIVACY_URL )
-				) && (
-					<Notice
-						className="wc-block-checkout__terms_notice"
-						status="warning"
-						isDismissible={ false }
-						actions={
-							termsConsentDefaultText !== text
-								? [
-										{
-											label: __(
-												'Restore default text',
-												'woo-gutenberg-products-block'
-											),
-											onClick: () =>
-												setAttributes( { text: '' } ),
-										},
-								  ]
-								: []
-						}
-					>
-						<p>
-							{ __(
-								'Ensure you add links to your policy pages in this section.',
-								'woo-gutenberg-products-block'
-							) }
-						</p>
-					</Notice>
-				) }
 		</div>
 	);
 };

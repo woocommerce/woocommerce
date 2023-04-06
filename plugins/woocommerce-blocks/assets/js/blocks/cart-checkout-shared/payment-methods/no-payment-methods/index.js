@@ -2,10 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Placeholder, Button } from 'wordpress-components';
-import { Icon, payment } from '@wordpress/icons';
-import { ADMIN_URL } from '@woocommerce/settings';
-import { useEditorContext } from '@woocommerce/base-context';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 
 /**
@@ -17,50 +13,6 @@ import './style.scss';
  * Render content when no payment methods are found depending on context.
  */
 const NoPaymentMethods = () => {
-	const { isEditor } = useEditorContext();
-
-	return isEditor ? (
-		<NoPaymentMethodsPlaceholder />
-	) : (
-		<NoPaymentMethodsNotice />
-	);
-};
-
-/**
- * Renders a placeholder in the editor.
- */
-const NoPaymentMethodsPlaceholder = () => {
-	return (
-		<Placeholder
-			icon={ <Icon icon={ payment } /> }
-			label={ __( 'Payment methods', 'woo-gutenberg-products-block' ) }
-			className="wc-block-checkout__no-payment-methods-placeholder"
-		>
-			<span className="wc-block-checkout__no-payment-methods-placeholder-description">
-				{ __(
-					'Your store does not have any payment methods that support the Checkout block. Once you have configured a compatible payment method it will be displayed here.',
-					'woo-gutenberg-products-block'
-				) }
-			</span>
-			<Button
-				isSecondary
-				href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
-				target="_blank"
-				rel="noopener noreferrer"
-			>
-				{ __(
-					'Configure Payment Methods',
-					'woo-gutenberg-products-block'
-				) }
-			</Button>
-		</Placeholder>
-	);
-};
-
-/**
- * Renders a notice on the frontend.
- */
-const NoPaymentMethodsNotice = () => {
 	return (
 		<NoticeBanner
 			isDismissible={ false }
