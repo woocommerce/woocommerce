@@ -48,7 +48,7 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 		public function set_php_version(){
 			if ( $this->php_version ) {
 				echo "Set PHP Version to $this->php_version \n";
-				$this->wp_json["plugins"] = $this->php_version;
+				$this->wp_json["phpVersion"] = $this->php_version;
 			}
 		}
 
