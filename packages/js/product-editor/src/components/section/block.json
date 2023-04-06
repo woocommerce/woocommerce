@@ -12,7 +12,8 @@
 			"type": "string"
 		},
 		"description": {
-			"type": "string"
+			"type": "string",
+			"__experimentalRole": "content"
 		},
 		"icon": {
 			"type": "object"
