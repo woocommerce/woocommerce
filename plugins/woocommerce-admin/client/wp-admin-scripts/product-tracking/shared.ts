@@ -504,7 +504,14 @@ export const initProductScreenTracks = () => {
 
 	document
 		.querySelector( '.save_attributes' )
-		?.addEventListener( 'click', () => {
+		?.addEventListener( 'click', ( event ) => {
+			if (
+				event.target instanceof Element &&
+				event.target.classList.contains( 'disabled' )
+			) {
+				// skip in case the button is disabled
+				return;
+			}
 			const newAttributesCount = document.querySelectorAll(
 				'.woocommerce_attribute'
 			).length;

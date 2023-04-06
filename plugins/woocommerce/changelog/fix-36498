@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Default to sorting orders by date (desc) when HPOS is active.

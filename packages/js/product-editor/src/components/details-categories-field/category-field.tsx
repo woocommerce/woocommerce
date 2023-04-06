@@ -3,11 +3,8 @@
  */
 import { useMemo, useState, createElement, Fragment } from '@wordpress/element';
 import {
-	selectControlStateChangeTypes,
-	Spinner,
-	__experimentalSelectControl as SelectControl,
-	__experimentalSelectControlMenuSlot as MenuSlot,
-	__experimentalSelectControlMenu as Menu,
+	TreeItemType,
+	__experimentalSelectTreeControl as SelectTree,
 } from '@woocommerce/components';
 import { ProductCategory } from '@woocommerce/data';
 import { debounce } from 'lodash';
@@ -15,16 +12,15 @@ import { debounce } from 'lodash';
 /**
  * Internal dependencies
  */
-import { CategoryFieldItem, CategoryTreeItem } from './category-field-item';
-import { useCategorySearch } from './use-category-search';
+import { CategoryTreeItem } from './category-field-item';
+import { useCategorySearch, ProductCategoryNode } from './use-category-search';
 import { CreateCategoryModal } from './create-category-modal';
-import { CategoryFieldAddNewItem } from './category-field-add-new-item';
 
 type CategoryFieldProps = {
 	label: string;
 	placeholder: string;
-	value?: Pick< ProductCategory, 'id' | 'name' >[];
-	onChange: ( value: Pick< ProductCategory, 'id' | 'name' >[] ) => void;
+	value?: ProductCategoryNode[];
+	onChange: ( value: ProductCategoryNode[] ) => void;
 };
 
 /**
@@ -32,11 +28,11 @@ type CategoryFieldProps = {
  * if not included already.
  */
 function getSelectedWithParents(
-	selected: Pick< ProductCategory, 'id' | 'name' >[] = [],
+	selected: ProductCategoryNode[] = [],
 	item: ProductCategory,
 	treeKeyValues: Record< number, CategoryTreeItem >
-): Pick< ProductCategory, 'id' | 'name' >[] {
-	selected.push( { id: item.id, name: item.name } );
+): ProductCategoryNode[] {
+	selected.push( { id: item.id, name: item.name, parent: item.parent } );
 
 	const parentId =
 		item.parent !== undefined
@@ -59,6 +55,33 @@ function getSelectedWithParents(
 	return selected;
 }
 
+function mapFromCategoryType(
+	categories: ProductCategoryNode[]
+): TreeItemType[] {
+	return categories.map( ( val ) =>
+		val.parent
+			? {
+					value: String( val.id ),
+					label: val.name,
+					parent: String( val.parent ),
+			  }
+			: {
+					value: String( val.id ),
+					label: val.name,
+			  }
+	);
+}
+
+function mapToCategoryType(
+	categories: TreeItemType[]
+): ProductCategoryNode[] {
+	return categories.map( ( cat ) => ( {
+		id: +cat.value,
+		name: cat.label,
+		parent: cat.parent ? +cat.parent : 0,
+	} ) );
+}
+
 export const CategoryField: React.FC< CategoryFieldProps > = ( {
 	label,
 	placeholder,
@@ -70,7 +93,7 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 		categoriesSelectList,
 		categoryTreeKeyValues,
 		searchCategories,
-		getFilteredItems,
+		getFilteredItemsForSelectTree,
 	} = useCategorySearch();
 	const [ showCreateNewModal, setShowCreateNewModal ] = useState( false );
 	const [ searchValue, setSearchValue ] = useState( '' );
@@ -85,167 +108,62 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 		[ onInputChange ]
 	);
 
-	const onSelect = ( itemId: number, selected: boolean ) => {
-		if ( itemId === -99 ) {
-			setShowCreateNewModal( true );
-			return;
-		}
-		if ( selected ) {
-			const item = categoryTreeKeyValues[ itemId ].data;
-			if ( item ) {
-				onChange(
-					getSelectedWithParents(
-						[ ...value ],
-						item,
-						categoryTreeKeyValues
-					)
-				);
-			}
-		} else {
-			onChange( value.filter( ( i ) => i.id !== itemId ) );
-		}
-	};
-
-	const categoryFieldGetFilteredItems = (
-		allItems: Pick< ProductCategory, 'id' | 'name' >[],
-		inputValue: string,
-		selectedItems: Pick< ProductCategory, 'id' | 'name' >[]
-	) => {
-		const filteredItems = getFilteredItems(
-			allItems,
-			inputValue,
-			selectedItems
-		);
-		if (
-			inputValue.length > 0 &&
-			! isSearching &&
-			! filteredItems.find(
-				( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
-			)
-		) {
-			return [
-				...filteredItems,
-				{
-					id: -99,
-					name: inputValue,
-				},
-			];
-		}
-		return filteredItems;
-	};
-
-	const selectedIds = value.map( ( item ) => item.id );
-
 	return (
 		<>
-			<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
-				className="woocommerce-category-field-dropdown components-base-control"
+			<SelectTree
+				id="category-field"
 				multiple
-				items={ categoriesSelectList }
+				shouldNotRecursivelySelect
+				createValue={ searchValue }
 				label={ label }
-				selected={ value }
-				getItemLabel={ ( item ) => item?.name || '' }
-				getItemValue={ ( item ) => item?.id || '' }
-				onSelect={ ( item ) => {
-					if ( item ) {
-						onSelect( item.id, ! selectedIds.includes( item.id ) );
-					}
-				} }
-				onRemove={ ( item ) => item && onSelect( item.id, false ) }
+				isLoading={ isSearching }
 				onInputChange={ searchDelayed }
-				getFilteredItems={ categoryFieldGetFilteredItems }
 				placeholder={ value.length === 0 ? placeholder : '' }
-				stateReducer={ ( state, actionAndChanges ) => {
-					const { changes, type } = actionAndChanges;
-					switch ( type ) {
-						case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
-							return {
-								...changes,
-								inputValue: state.inputValue,
-							};
-						case selectControlStateChangeTypes.ItemClick:
-							if (
-								changes.selectedItem &&
-								changes.selectedItem.id === -99
-							) {
-								return changes;
-							}
-							return {
-								...changes,
-								isOpen: true,
-								inputValue: state.inputValue,
-								highlightedIndex: state.highlightedIndex,
-							};
-						default:
-							return changes;
+				onCreateNew={ () => {
+					setShowCreateNewModal( true );
+				} }
+				shouldShowCreateButton={ ( typedValue ) =>
+					! typedValue ||
+					categoriesSelectList.findIndex(
+						( item ) => item.name === typedValue
+					) === -1
+				}
+				items={ getFilteredItemsForSelectTree(
+					mapFromCategoryType( categoriesSelectList ),
+					searchValue,
+					mapFromCategoryType( value )
+				) }
+				selected={ mapFromCategoryType( value ) }
+				onSelect={ ( selectedItems ) => {
+					if ( Array.isArray( selectedItems ) ) {
+						const newItems: ProductCategoryNode[] =
+							mapToCategoryType(
+								selectedItems.filter(
+									( { value: selectedItemValue } ) =>
+										! value.some(
+											( item ) =>
+												item.id === +selectedItemValue
+										)
+								)
+							);
+						onChange( [ ...value, ...newItems ] );
 					}
 				} }
-				__experimentalOpenMenuOnFocus
-			>
-				{ ( {
-					items,
-					isOpen,
-					getMenuProps,
-					getItemProps,
-					highlightedIndex,
-				} ) => {
-					const rootItems =
-						items.length > 0
-							? items.filter(
-									( item ) =>
-										categoryTreeKeyValues[ item.id ]
-											?.parentID === 0 || item.id === -99
-							  )
-							: [];
-					return (
-						<Menu
-							isOpen={ isOpen }
-							getMenuProps={ getMenuProps }
-							className="woocommerce-category-field-dropdown__menu"
-						>
-							<>
-								{ isSearching ? (
-									<li className="woocommerce-category-field-dropdown__item">
-										<div className="woocommerce-category-field-dropdown__item-content">
-											<Spinner />
-										</div>
-									</li>
-								) : (
-									rootItems.map( ( item ) => {
-										return item.id === -99 ? (
-											<CategoryFieldAddNewItem
-												key={ `${ item.id }` }
-												item={ item }
-												highlightedIndex={
-													highlightedIndex
-												}
-												items={ items }
-												getItemProps={ getItemProps }
-											/>
-										) : (
-											<CategoryFieldItem
-												key={ `${ item.id }` }
-												item={
-													categoryTreeKeyValues[
-														item.id
-													]
-												}
-												highlightedIndex={
-													highlightedIndex
-												}
-												selectedIds={ selectedIds }
-												items={ items }
-												getItemProps={ getItemProps }
-											/>
-										);
-									} )
-								) }
-							</>
-						</Menu>
-					);
+				onRemove={ ( removedItems ) => {
+					const newValues = Array.isArray( removedItems )
+						? value.filter(
+								( item ) =>
+									! removedItems.some(
+										( { value: removedValue } ) =>
+											item.id === +removedValue
+									)
+						  )
+						: value.filter(
+								( item ) => item.id !== +removedItems.value
+						  );
+					onChange( newValues );
 				} }
-			</SelectControl>
-			<MenuSlot />
+			></SelectTree>
 			{ showCreateNewModal && (
 				<CreateCategoryModal
 					initialCategoryName={ searchValue }

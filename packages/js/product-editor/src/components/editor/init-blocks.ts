@@ -14,6 +14,7 @@ import {
  */
 import { init as initImages } from '../images';
 import { init as initName } from '../details-name-block';
+import { init as initRadio } from '../radio';
 import { init as initSummary } from '../details-summary-block';
 import { init as initSection } from '../section';
 import { init as initTab } from '../tab';
@@ -31,6 +32,7 @@ export const initBlocks = () => {
 
 	initImages();
 	initName();
+	initRadio();
 	initSummary();
 	initSection();
 	initTab();
