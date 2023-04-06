@@ -294,7 +294,7 @@ class CLIRunner {
 	 * default: -1
 	 * ---
 	 *
-	 * [--verbose=<verbose>]
+	 * [--verbose]
 	 * : Whether to output errors as they happen in batch, or output them all together at the end.
 	 * ---
 	 * default: false
@@ -425,6 +425,9 @@ class CLIRunner {
 				)
 			);
 		} else {
+			if ( $verbose ) {
+				return;
+			}
 			$errors = print_r( $failed_ids, true );
 
 			return WP_CLI::error(
