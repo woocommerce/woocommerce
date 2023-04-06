@@ -10,6 +10,7 @@ import type { BlockConfiguration } from '@wordpress/blocks';
 import sharedConfig from '../shared/config';
 import attributes from './attributes';
 import edit from './edit';
+import { supports } from './supports';
 import {
 	BLOCK_TITLE as title,
 	BLOCK_ICON as icon,
@@ -33,6 +34,7 @@ const blockConfig: BlockConfiguration = {
 		'woocommerce/product-meta',
 	],
 	edit,
+	supports,
 };
 
 registerBlockType( 'woocommerce/product-sku', { ...blockConfig } );
