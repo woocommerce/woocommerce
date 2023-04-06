@@ -13,6 +13,7 @@ The release pull request has been created! This checklist is a guide to follow f
     -   [ ] Check the changelog matches the one in the pull request description above.
 -   [ ] Run `npm run change-versions` to update the version numbers in several files. Write the version number you are releasing: {{version}}.
 -   [ ] Update compatibility sections (if applicable).
+-   [ ] Cherry-pick into the release branch all fixes that need to be included in this release (assuming they were merged into `trunk`).
 -   [ ] Push above changes to the release branch.
 
 ## Create the Testing Notes
@@ -62,10 +63,7 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
 
 ## After Deploy
 
--   [ ] Merge this branch back into the base branch.
-    -   If the base branch was `trunk`, and this release was deployed to WordPress.org, then merge the branch into `trunk`.
-    -   If the base branch is the release branch this patch release is for, then merge branch into release branch and then merge the release branch back to `trunk` if the patch release is the latest released version. Otherwise just merge back into the release branch.
--   [ ] If you merged the branch to `trunk`, then update version on the `trunk` branch to be for the next version of the plugin and include the `dev` suffix (e.g. something like [`2.6-dev`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/commit/e27f053e7be0bf7c1d376f5bdb9d9999190ce158)) for the next version.
+-   [ ] Port to `trunk` the changes to the changelog, testing steps and required versions that you did in the previous steps. You can do so copy-and-pasting the changes in a new commit directly to `trunk`, or cherry-picking the commits that introduced those changes.
 -   [ ] Update the schedules p2 with the shipped date for the release (PdToLP-K-p2).
 -   [ ] Edit the GitHub milestone of the release you just shipped and add the current date as the due date (this is used to track ship date as well).
 
@@ -92,8 +90,11 @@ This only needs done if the patch release needs to be included in WooCommerce Co
         -   It lists all the WooCommerce Blocks versions that are being included since the last version that you edited in `plugins/woocommerce/composer.json`. Each version should have a link for the `Release PR`, `Testing instructions` and `Release post` (if available).
         -   The changelog should be aggregated from all the releases included in the package bump and grouped per type: `Enhancements`, `Bug Fixes`, `Various` etc. This changelog will be used in the release notes for the WooCommerce release. That's why it should only list the PRs that have WooCoomerce Core in the WooCommerce Visibility section of their description. Don't include changes available in the feature plugin or development builds.
 
--   Run through the testing checklist to ensure everything works in that branch for that package bump. **Note:** Testing should ensure any features/new blocks that are supposed to be behind feature gating for the core merge of this package update are working as expected.
--   Testing should include completing the [Smoke testing checklist](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/internal-developers/testing/smoke-testing.md). It's up to you to verify that those tests have been done.
+-   [ ] Build WC core from that branch with `pnpm run --filter='woocommerce' build ` (you might need to [install the dependencies first](https://github.com/woocommerce/woocommerce#prerequisites)) and:
+
+    -   [ ] Make sure the correct version of WC Blocks is being loaded. This can be done testing at least one of the testing steps from the release.
+    -   [ ] Complete the [Smoke testing checklist](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/internal-developers/testing/smoke-testing.md).
+
 -   [ ] Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed, etc.
 
     -   [ ] Assign the corresponding WC version milestone to the PR
@@ -111,3 +112,4 @@ You only need to post public release announcements and update relevant public fa
     -   Don't forget to use category `WooCommerce Blocks Release Notes` for the post.
 -   [ ] Announce the release internally (`#woo-announcements` slack).
 -   [ ] Go through the description of the release pull request and edit it to update all the sections and checklist instructions there.
+-   [ ] Close this PR.

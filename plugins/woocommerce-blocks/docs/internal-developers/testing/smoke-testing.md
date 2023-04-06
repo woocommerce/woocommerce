@@ -1,13 +1,4 @@
-# Smoke Testing <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [Setup](#setup)
-    -   [1. Create a page with all regular and SSR blocks (such as the product grids) setup and configured.](#1-create-a-page-with-all-regular-and-ssr-blocks-such-as-the-product-grids-setup-and-configured)
-    -   [2. Create a page with the All Products Block, and some Filter Blocks, setup to test that functionality in isolation. Using the columns block here too is a good idea to keep things organized.](#2-create-a-page-with-the-all-products-block-and-some-filter-blocks-setup-to-test-that-functionality-in-isolation-using-the-columns-block-here-too-is-a-good-idea-to-keep-things-organized)
-    -   [3. Add the Cart and Checkout block to the relevant WooCommerce pages.](#3-add-the-cart-and-checkout-block-to-the-relevant-woocommerce-pages)
--   [Editor Tests](#editor-tests)
--   [Frontend Tests](#frontend-tests)
+# Smoke Testing
 
 We generally consider smoke testing using this definition [from Wikipedia](<https://href.li/?https://en.wikipedia.org/wiki/Smoke_testing_(software)>):
 
@@ -19,10 +10,12 @@ When testing builds the following things should be tested to ensure critical par
 
 To make future testing more efficient, we recommend setting up some Blocks in advance so you can repeat tests on them whenever smoke testing.
 
-### 1. Create a page with all regular and SSR blocks (such as the product grids) setup and configured
+### 1. Create a page with most blocks
 
 <details>
-<summary>You can copy and paste the following code into a new page to add all the blocks (click):</summary>
+<summary>You can copy and paste (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) the following code into a new page to add all the blocks (click):</summary>
+
+Note: some blocks might fail to render because they are based on products having a specific id or depend on the site URL. You will need to remove and re-insert them.
 
 ```html
 <!-- wp:woocommerce/featured-product {"editMode":false,"productId":15} -->
@@ -107,144 +100,105 @@ To make future testing more efficient, we recommend setting up some Blocks in ad
 ></div>
 <!-- /wp:woocommerce/all-reviews -->
 
-<!-- wp:woocommerce/product-search {"formId":"wc-block-product-search-0"} -->
-<div class="wp-block-woocommerce-product-search">
-	<div class="wc-block-product-search">
-		<form
-			role="search"
-			method="get"
-			action="https://ephemeral-aljullu-20200929.atomicsites.blog/"
-		>
-			<label
-				for="wc-block-product-search-0"
-				class="wc-block-product-search__label"
-				>Search</label
-			>
-			<div class="wc-block-product-search__fields">
-				<input
-					type="search"
-					id="wc-block-product-search-0"
-					class="wc-block-product-search__field"
-					placeholder="Search products…"
-					name="s"
-				/><input
-					type="hidden"
-					name="post_type"
-					value="product"
-				/><button
-					type="submit"
-					class="wc-block-product-search__button"
-					label="Search"
-				>
-					<svg
-						aria-hidden="true"
-						role="img"
-						focusable="false"
-						class="dashicon dashicons-arrow-right-alt2"
-						xmlns="http://www.w3.org/2000/svg"
-						width="20"
-						height="20"
-						viewbox="0 0 20 20"
-					>
-						<path d="M6 15l5-5-5-5 1-2 7 7-7 7z"></path>
-					</svg>
-				</button>
-			</div>
-		</form>
-	</div>
-</div>
-<!-- /wp:woocommerce/product-search -->
+<!-- wp:search {"label":"Search","placeholder":"Search products…","buttonText":"Search","query":{"post_type":"product"}} /-->
+
+<!-- wp:woocommerce/mini-cart /-->
+
+<!-- wp:woocommerce/customer-account {"iconClass":"wc-block-customer-account__account-icon"} /-->
+
+<!-- wp:woocommerce/all-products {"columns":3,"rows":3,"alignButtons":false,"contentVisibility":{"orderBy":true},"orderby":"date","layoutConfig":[["woocommerce/product-image",{"imageSizing":"cropped"}],["woocommerce/product-title"],["woocommerce/product-price"],["woocommerce/product-rating"],["woocommerce/product-button"]]} -->
+<div class="wp-block-woocommerce-all-products wc-block-all-products" data-attributes="{&quot;alignButtons&quot;:false,&quot;columns&quot;:3,&quot;contentVisibility&quot;:{&quot;orderBy&quot;:true},&quot;isPreview&quot;:false,&quot;layoutConfig&quot;:[[&quot;woocommerce/product-image&quot;,{&quot;imageSizing&quot;:&quot;cropped&quot;}],[&quot;woocommerce/product-title&quot;],[&quot;woocommerce/product-price&quot;],[&quot;woocommerce/product-rating&quot;],[&quot;woocommerce/product-button&quot;]],&quot;orderby&quot;:&quot;date&quot;,&quot;rows&quot;:3}"></div>
+<!-- /wp:woocommerce/all-products -->
 ```
 
 </details>
 
-In the `wp:woocommerce/product-search` substitute the URL used for the `action` attribute to your site URL or the block will not embedd correctly.
-
-### 2. Create a page with the All Products Block, and some Filter Blocks, setup to test that functionality in isolation. Using the columns block here too is a good idea to keep things organized
+### 2. Create a page with the Products block, and filter blocks, setup to test that functionality in isolation. Using the columns block here too is a good idea to keep things organized
 
 <details>
-<summary>You can copy and paste the following code into a new page to add all the blocks (click):</summary>
+<summary>You can copy and paste (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) the following code into a new page to add all the blocks (click):</summary>
 
 ```html
-<!-- wp:columns -->
-<div class="wp-block-columns">
-	<!-- wp:column {"width":33.33} -->
-	<div class="wp-block-column" style="flex-basis:33.33%">
-		<!-- wp:woocommerce/price-filter -->
-		<div
-			class="wp-block-woocommerce-price-filter is-loading"
-			data-showinputfields="true"
-			data-showfilterbutton="false"
-			data-heading="Filter by price"
-			data-heading-level="3"
-		>
-			<span
-				aria-hidden="true"
-				class="wc-block-product-categories__placeholder"
-			></span>
-		</div>
-		<!-- /wp:woocommerce/price-filter -->
+<!-- wp:columns {"align":"wide"} -->
+<div class="wp-block-columns alignwide"><!-- wp:column {"width":"33.33%"} -->
+<div class="wp-block-column" style="flex-basis:33.33%"><!-- wp:woocommerce/filter-wrapper {"filterType":"price-filter","heading":"Filter by price"} -->
+<div class="wp-block-woocommerce-filter-wrapper"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Filter by price</h3>
+<!-- /wp:heading -->
 
-		<!-- wp:woocommerce/attribute-filter {"attributeId":1,"heading":"Filter by Color","displayStyle":"dropdown"} -->
-		<div
-			class="wp-block-woocommerce-attribute-filter is-loading"
-			data-attribute-id="1"
-			data-show-counts="true"
-			data-query-type="or"
-			data-heading="Filter by Color"
-			data-heading-level="3"
-			data-display-style="dropdown"
-		>
-			<span
-				aria-hidden="true"
-				class="wc-block-product-attribute-filter__placeholder"
-			></span>
-		</div>
-		<!-- /wp:woocommerce/attribute-filter -->
+<!-- wp:woocommerce/price-filter {"heading":"","lock":{"remove":true}} -->
+<div class="wp-block-woocommerce-price-filter is-loading" data-showinputfields="true" data-showfilterbutton="false" data-heading="" data-heading-level="3"><span aria-hidden="true" class="wc-block-product-categories__placeholder"></span></div>
+<!-- /wp:woocommerce/price-filter --></div>
+<!-- /wp:woocommerce/filter-wrapper -->
 
-		<!-- wp:woocommerce/attribute-filter {"attributeId":2,"heading":"Filter by Size"} -->
-		<div
-			class="wp-block-woocommerce-attribute-filter is-loading"
-			data-attribute-id="2"
-			data-show-counts="true"
-			data-query-type="or"
-			data-heading="Filter by Size"
-			data-heading-level="3"
-		>
-			<span
-				aria-hidden="true"
-				class="wc-block-product-attribute-filter__placeholder"
-			></span>
-		</div>
-		<!-- /wp:woocommerce/attribute-filter -->
+<!-- wp:woocommerce/filter-wrapper {"filterType":"attribute-filter","heading":"Filter by attribute"} -->
+<div class="wp-block-woocommerce-filter-wrapper"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Filter by attribute</h3>
+<!-- /wp:heading -->
 
-		<!-- wp:woocommerce/active-filters -->
-		<div
-			class="wp-block-woocommerce-active-filters is-loading"
-			data-display-style="list"
-			data-heading="Active filters"
-			data-heading-level="3"
-		>
-			<span
-				aria-hidden="true"
-				class="wc-block-active-filters__placeholder"
-			></span>
-		</div>
-		<!-- /wp:woocommerce/active-filters -->
-	</div>
-	<!-- /wp:column -->
+<!-- wp:woocommerce/attribute-filter {"attributeId":1,"queryType":"and","displayStyle":"dropdown","heading":"","lock":{"remove":true}} -->
+<div class="wp-block-woocommerce-attribute-filter is-loading" data-attribute-id="1" data-show-counts="true" data-query-type="and" data-heading="" data-heading-level="3" data-display-style="dropdown"><span aria-hidden="true" class="wc-block-product-attribute-filter__placeholder"></span></div>
+<!-- /wp:woocommerce/attribute-filter --></div>
+<!-- /wp:woocommerce/filter-wrapper -->
 
-	<!-- wp:column {"width":66.66} -->
-	<div class="wp-block-column" style="flex-basis:66.66%">
-		<!-- wp:woocommerce/all-products {"columns":3,"rows":3,"alignButtons":false,"contentVisibility":{"orderBy":true},"orderby":"date","layoutConfig":[["woocommerce/product-image"],["woocommerce/product-title"],["woocommerce/product-price"],["woocommerce/product-rating"],["woocommerce/product-button"]]} -->
-		<div
-			class="wp-block-woocommerce-all-products wc-block-all-products"
-			data-attributes='{"alignButtons":false,"columns":3,"contentVisibility":{"orderBy":true},"isPreview":false,"layoutConfig":[["woocommerce/product-image"],["woocommerce/product-title"],["woocommerce/product-price"],["woocommerce/product-rating"],["woocommerce/product-button"]],"orderby":"date","rows":3}'
-		></div>
-		<!-- /wp:woocommerce/all-products -->
-	</div>
-	<!-- /wp:column -->
-</div>
+<!-- wp:woocommerce/filter-wrapper {"filterType":"stock-filter","heading":"Filter by stock status"} -->
+<div class="wp-block-woocommerce-filter-wrapper"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Filter by stock status</h3>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/stock-filter {"heading":"","lock":{"remove":true}} -->
+<div class="wp-block-woocommerce-stock-filter is-loading" data-show-counts="true" data-heading="" data-heading-level="3"><span aria-hidden="true" class="wc-block-product-stock-filter__placeholder"></span></div>
+<!-- /wp:woocommerce/stock-filter --></div>
+<!-- /wp:woocommerce/filter-wrapper -->
+
+<!-- wp:woocommerce/filter-wrapper {"filterType":"rating-filter","heading":"Filter by rating"} -->
+<div class="wp-block-woocommerce-filter-wrapper"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Filter by rating</h3>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/rating-filter {"displayStyle":"dropdown","lock":{"remove":true}} -->
+<div class="wp-block-woocommerce-rating-filter is-loading" data-show-counts="true"><span aria-hidden="true" class="wc-block-product-rating-filter__placeholder"></span></div>
+<!-- /wp:woocommerce/rating-filter --></div>
+<!-- /wp:woocommerce/filter-wrapper -->
+
+<!-- wp:woocommerce/filter-wrapper {"filterType":"active-filters","heading":"Active filters"} -->
+<div class="wp-block-woocommerce-filter-wrapper"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Active filters</h3>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/active-filters {"heading":"","lock":{"remove":true}} -->
+<div class="wp-block-woocommerce-active-filters is-loading" data-display-style="list" data-heading="" data-heading-level="3"><span aria-hidden="true" class="wc-block-active-filters__placeholder"></span></div>
+<!-- /wp:woocommerce/active-filters --></div>
+<!-- /wp:woocommerce/filter-wrapper --></div>
+<!-- /wp:column -->
+
+<!-- wp:column {"width":"66.66%"} -->
+<div class="wp-block-column" style="flex-basis:66.66%"><!-- wp:query {"queryId":0,"query":{"perPage":9,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","outofstock","onbackorder"]},"displayLayout":{"type":"flex","columns":3},"namespace":"woocommerce/product-query"} -->
+<div class="wp-block-query"><!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->
+<!-- wp:woocommerce/product-image {"isDescendentOfQueryLoop":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}}} /-->
+
+<!-- wp:post-title {"textAlign":"center","level":3,"isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
+
+<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}}} /-->
+
+<!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}}} /-->
+<!-- /wp:post-template -->
+
+<!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
+<!-- wp:query-pagination-previous /-->
+
+<!-- wp:query-pagination-numbers /-->
+
+<!-- wp:query-pagination-next /-->
+<!-- /wp:query-pagination -->
+
+<!-- wp:query-no-results -->
+<!-- wp:paragraph {"placeholder":"Add text or blocks that will display when a query returns no results."} -->
+<p></p>
+<!-- /wp:paragraph -->
+<!-- /wp:query-no-results --></div>
+<!-- /wp:query --></div>
+<!-- /wp:column --></div>
 <!-- /wp:columns -->
 ```
 
@@ -263,9 +217,9 @@ In the `wp:woocommerce/product-search` substitute the URL used for the `action` 
     -   [ ] Is the Browser error console free from errors/notices/warnings?
 -   [ ] Test inserting various blocks into the editor
     -   [ ] This can be verified by copying and pasting the code examples above. However, please do also test manually inserting the next three blocks as representative examples for related blocks.
-    -   [ ] All Products Blocks (this is powered by the Store API)
-    -   [ ] Featured Product (this is powered by the REST API)
-    -   [ ] On Sale Products (this is SSR)
+        -   [ ] All Products Blocks (this is powered by the Store API)
+        -   [ ] Featured Product (this is powered by the REST API)
+        -   [ ] On Sale Products (this is SSR)
     -   [ ] Is the Browser error console free from errors/notices/warnings after inserting them?
     -   [ ] Do they persist and continue to display correctly after save/refresh?
 
