@@ -28,12 +28,12 @@ docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u)
 
 if [ $ENABLE_HPOS == 1 ]; then
 	echo 'Enable the COT feature'
-	docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u) -e HOME=/tmp tests-cli sh -c "wp plugin install https://gist.github.com/vedanshujain/564afec8f5e9235a1257994ed39b1449/archive/b031465052fc3e04b17624acbeeb2569ef4d5301.zip --activate"
+	docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-cli sh -c "wp plugin install https://gist.github.com/vedanshujain/564afec8f5e9235a1257994ed39b1449/archive/b031465052fc3e04b17624acbeeb2569ef4d5301.zip --activate"
 fi
 
 if [ $ENABLE_NEW_PRODUCT_EDITOR == 1 ]; then
 	echo 'Enable the new product editor feature'
-	docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u) -e HOME=/tmp tests-cli sh -c "wp plugin install https://github.com/woocommerce/woocommerce-experimental-enable-new-product-editor/releases/download/0.1.0/woocommerce-experimental-enable-new-product-editor.zip --activate"
+	docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-cli sh -c "wp plugin install https://github.com/woocommerce/woocommerce-experimental-enable-new-product-editor/releases/download/0.1.0/woocommerce-experimental-enable-new-product-editor.zip --activate"
 fi
 
 if [ $ENABLE_TRACKING == 1 ]; then
