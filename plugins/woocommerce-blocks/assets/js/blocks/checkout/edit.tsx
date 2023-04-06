@@ -21,7 +21,6 @@ import {
 } from '@wordpress/components';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import type { TemplateArray } from '@wordpress/blocks';
-import { CartCheckoutFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 
 /**
  * Internal dependencies
@@ -134,7 +133,6 @@ export const Edit = ( {
 					/>
 				) }
 			</PanelBody>
-			<CartCheckoutFeedbackPrompt />
 		</InspectorControls>
 	);
 	const blockProps = useBlockPropsWithLocking();
