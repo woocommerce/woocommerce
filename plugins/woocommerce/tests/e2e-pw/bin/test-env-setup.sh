@@ -4,9 +4,13 @@ ENABLE_HPOS="${ENABLE_HPOS:-0}"
 ENABLE_NEW_PRODUCT_EDITOR="${ENABLE_NEW_PRODUCT_EDITOR:-0}"
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
-docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-config.php"
+echo -e 'Normalize permissions for wp-content directory \n'
+docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-config.php \
+&& chmod -c ugo+w /var/www/html/wp-content \
+&& chmod -c ugo+w /var/www/html/wp-content/themes \
+&& chmod -c ugo+w /var/www/html/wp-content/plugins"
 
-docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u) -e HOME=/tmp tests-cli sh -c "ls \
+docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-cli sh -c "ls \
 && wp theme install twentynineteen --activate \
 && wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --activate \
 && wp plugin install wp-mail-logging --activate \
