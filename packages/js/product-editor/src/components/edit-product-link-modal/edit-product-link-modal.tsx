@@ -45,19 +45,18 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 			product_type: product.type,
 		} );
 
-		const updatedValues = await saveHandler( slug );
+		const { slug: updatedSlug, permalink: updatedPermalink } =
+			( await saveHandler( slug ) ) ?? {};
 
-		if ( updatedValues ) {
+		if ( updatedSlug ) {
 			createNotice(
-				updatedValues.slug === cleanForSlug( slug )
-					? 'success'
-					: 'info',
-				updatedValues.slug === cleanForSlug( slug )
+				updatedSlug === cleanForSlug( slug ) ? 'success' : 'info',
+				updatedSlug === cleanForSlug( slug )
 					? __( 'Product link successfully updated.', 'woocommerce' )
 					: __(
 							'Product link already existed, updated to ',
 							'woocommerce'
-					  ) + updatedValues.permalink
+					  ) + updatedPermalink
 			);
 		} else {
 			createNotice(
