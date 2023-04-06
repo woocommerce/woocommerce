@@ -424,8 +424,15 @@ class WC_Admin_Menus {
 	 * Maybe add new management product experience.
 	 */
 	public function maybe_add_new_product_management_experience() {
-		if ( Features::is_enabled( 'new-product-management-experience' ) ) {
-			add_submenu_page( 'edit.php?post_type=product', __( 'Add New', 'woocommerce' ), __( 'Add New (MVP)', 'woocommerce' ), 'manage_woocommerce', 'admin.php?page=wc-admin&path=/add-product', '', 2 );
+		if ( Features::is_enabled( 'new-product-management-experience' ) || Features::is_enabled( 'block-editor-feature-enabled' ) ) {
+			global $submenu;
+			if ( isset( $submenu['edit.php?post_type=product'][10] ) ) {
+				// Disable phpcs since we need to override submenu classes.
+				// Note that `phpcs:ignore WordPress.Variables.GlobalVariables.OverrideProhibited` does not work to disable this check.
+				// phpcs:disable
+				$submenu['edit.php?post_type=product'][10][2] = 'admin.php?page=wc-admin&path=/add-product';
+				// phps:enableWordPress.Variables.GlobalVariables.OverrideProhibited
+			}
 		}
 	}
 }

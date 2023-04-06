@@ -2,6 +2,7 @@
  * External dependencies
  */
 const { get } = require( 'lodash' );
+const fs = require( 'fs' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
@@ -9,6 +10,7 @@ const BundleAnalyzerPlugin =
 	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
+const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
 
 /**
  * Internal dependencies
@@ -21,8 +23,11 @@ const WooCommerceDependencyExtractionWebpackPlugin = require( '../../packages/js
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
+const isHot = Boolean( process.env.HOT );
+const isProduction = NODE_ENV === 'production';
 
 const wcAdminPackages = [
+	'admin-layout',
 	'components',
 	'csv-export',
 	'currency',
@@ -36,6 +41,7 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'onboarding',
+	'product-editor',
 ];
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
 // See ./client/wp-admin-scripts/README.md for more details
@@ -60,6 +66,7 @@ const wpAdminScripts = [
 	'settings-tracking',
 	'order-tracking',
 	'product-import-tracking',
+	'variable-product-tour',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -99,6 +106,7 @@ const webpackConfig = {
 		uniqueName: '__wcAdmin_webpackJsonp',
 	},
 	module: {
+		parser: styleConfig.parser,
 		rules: [
 			{
 				test: /\.(t|j)sx?$/,
@@ -127,7 +135,12 @@ const webpackConfig = {
 							],
 							[ '@babel/preset-typescript' ],
 						],
-						plugins: [ '@babel/plugin-proposal-class-properties' ],
+						plugins: [
+							'@babel/plugin-proposal-class-properties',
+							! isProduction &&
+								isHot &&
+								require.resolve( 'react-refresh/babel' ),
+						].filter( Boolean ),
 					},
 				},
 			},
@@ -182,6 +195,19 @@ const webpackConfig = {
 			} ) ),
 		} ),
 
+		// Get all product editor blocks so they can be loaded via JSON.
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: '../../packages/js/product-editor/build/blocks',
+					to: './product-editor/blocks',
+				},
+			],
+		} ),
+
+		// React Fast Refresh.
+		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
+
 		// We reuse this Webpack setup for Storybook, where we need to disable dependency extraction.
 		! process.env.STORYBOOK &&
 			new WooCommerceDependencyExtractionWebpackPlugin( {
@@ -215,13 +241,29 @@ const webpackConfig = {
 		},
 	},
 };
+if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
+	// Set default sourcemap mode if it wasn't set by WP_DEVTOOL.
+	webpackConfig.devtool = webpackConfig.devtool || 'source-map';
 
-// Use the source map if we're in development mode, .
-if (
-	webpackConfig.mode === 'development' ||
-	WC_ADMIN_PHASE === 'development'
-) {
-	webpackConfig.devtool = process.env.SOURCEMAP || 'source-map';
+	if ( isHot ) {
+		// Add dev server config
+		// Copied from https://github.com/WordPress/gutenberg/blob/05bea6dd5c6198b0287c41a401d36a06b48831eb/packages/scripts/config/webpack.config.js#L312-L326
+		webpackConfig.devServer = {
+			devMiddleware: {
+				writeToDisk: true,
+			},
+			allowedHosts: 'auto',
+			host: 'localhost',
+			port: 8887,
+			proxy: {
+				'/build': {
+					pathRewrite: {
+						'^/build': '',
+					},
+				},
+			},
+		};
+	}
 }
 
 module.exports = webpackConfig;

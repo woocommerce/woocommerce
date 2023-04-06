@@ -5,19 +5,22 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Icon, trendingUp } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
-import { Spinner } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { CollapsibleCard, CardBody } from '~/marketing/components';
-import { useRecommendedPlugins } from './useRecommendedPlugins';
+import {
+	CollapsibleCard,
+	CardBody,
+	CenteredSpinner,
+} from '~/marketing/components';
+import { useRecommendedPluginsWithoutChannels } from './useRecommendedPluginsWithoutChannels';
 import { PluginsTabPanel } from './PluginsTabPanel';
 import './DiscoverTools.scss';
 
 export const DiscoverTools = () => {
-	const { isInitializing, isLoading, plugins, installAndActivate } =
-		useRecommendedPlugins();
+	const { isInitializing, isLoading, data, installAndActivate } =
+		useRecommendedPluginsWithoutChannels();
 
 	/**
 	 * Renders card body.
@@ -30,12 +33,12 @@ export const DiscoverTools = () => {
 		if ( isInitializing ) {
 			return (
 				<CardBody>
-					<Spinner />
+					<CenteredSpinner />
 				</CardBody>
 			);
 		}
 
-		if ( plugins.length === 0 ) {
+		if ( data.length === 0 ) {
 			return (
 				<CardBody className="woocommerce-marketing-discover-tools-card-body-empty-content">
 					<Icon icon={ trendingUp } size={ 32 } />
@@ -63,7 +66,7 @@ export const DiscoverTools = () => {
 
 		return (
 			<PluginsTabPanel
-				plugins={ plugins }
+				plugins={ data }
 				isLoading={ isLoading }
 				onInstallAndActivate={ installAndActivate }
 			/>
@@ -72,7 +75,6 @@ export const DiscoverTools = () => {
 
 	return (
 		<CollapsibleCard
-			className="woocommerce-marketing-discover-tools-card"
 			header={ __( 'Discover more marketing tools', 'woocommerce' ) }
 		>
 			{ renderCardContent() }

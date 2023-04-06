@@ -1,0 +1,16 @@
+{
+	"extends": "../tsconfig-cjs",
+	"include": [
+		"**/*.d.ts",
+		"src/**/*",
+		"src/**/*.json"
+	],
+	"compilerOptions": {
+		"outDir": "build",
+		"resolveJsonModule": true,
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		]
+	}
+}

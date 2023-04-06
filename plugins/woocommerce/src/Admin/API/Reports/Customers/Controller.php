@@ -9,9 +9,9 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Customers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
-use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
+use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * REST API Reports customers controller class.
@@ -420,22 +420,22 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			),
 		);
 		$params['name_includes']           = array(
-			'description'       => __( 'Limit response to objects with specfic names.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects with specific names.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['name_excludes']           = array(
-			'description'       => __( 'Limit response to objects excluding specfic names.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects excluding specific names.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['username_includes']       = array(
-			'description'       => __( 'Limit response to objects with specfic usernames.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects with specific usernames.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['username_excludes']       = array(
-			'description'       => __( 'Limit response to objects excluding specfic usernames.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects excluding specific usernames.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -450,12 +450,12 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['country_includes']        = array(
-			'description'       => __( 'Limit response to objects with specfic countries.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects with specific countries.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['country_excludes']        = array(
-			'description'       => __( 'Limit response to objects excluding specfic countries.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects excluding specific countries.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

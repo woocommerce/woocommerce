@@ -330,8 +330,9 @@ $tt2-gray: #f7f7f7;
 			}
 		}
 
-		button[name="add-to-cart"],
-		button.single_add_to_cart_button {
+		form.cart button[name="add-to-cart"],
+		form.cart button.single_add_to_cart_button {
+			display: block;
 			margin-top: 0.5rem;
 			margin-bottom: var(--wp--style--block-gap);
 		}
@@ -365,63 +366,6 @@ $tt2-gray: #f7f7f7;
 
 		.related.products {
 			margin-top: 7rem;
-		}
-	}
-
-	.woocommerce-tabs {
-		padding-top: var(--wp--style--block-gap);
-
-		ul.wc-tabs {
-			padding: 0;
-			border-bottom-style: solid;
-			border-bottom-width: 1px;
-			border-bottom-color: #eae9eb;
-
-			li {
-				background: #eae9eb;
-				margin: 0;
-				padding: 0.5em 1em 0.5em 1em;
-				border-color: #eae9eb;
-				border-top-left-radius: 5px;
-				border-top-right-radius: 5px;
-				float: left;
-				border-style: solid;
-				border-width: 1px;
-				border-left-color: var(--wp--preset--color--background);
-				font-weight: 600;
-				font-size: var(--wp--preset--font-size--medium);
-
-				&:first-child {
-					border-left-color: #eae9eb;
-					margin-left: 1em;
-				}
-
-				&.active {
-					box-shadow: 0 1px var(--wp--preset--color--background);
-				}
-
-				a {
-					text-decoration: none;
-				}
-			}
-		}
-
-		// Moved from blocktheme.scss to retain full styling.
-		ul.tabs li.active {
-			// Style active tab in theme colors.
-			background: var(--wp--preset--color--background, $contentbg);
-			border-bottom-color: var(--wp--preset--color--background, $contentbg);
-		}
-
-
-		.woocommerce-Tabs-panel {
-			padding-top: var(--wp--style--block-gap);
-			font-size: var(--wp--preset--font-size--small);
-			margin-left: 1em;
-
-			h2 {
-				display: none;
-			}
 		}
 	}
 
@@ -599,6 +543,59 @@ $tt2-gray: #f7f7f7;
 	mark {
 		background: var(--wp--preset--color--secondary);
 		color: initial;
+	}
+}
+
+// Description/Additional info/Reviews tabs.
+.woocommerce-tabs {
+	padding-top: var(--wp--style--block-gap);
+}
+
+ul.wc-tabs {
+	padding: 0;
+	border-bottom-style: solid;
+	border-bottom-width: 1px;
+	border-bottom-color: #eae9eb;
+
+	li {
+		background: #eae9eb;
+		margin: 0;
+		padding: 0.5em 1em 0.5em 1em;
+		border-color: #eae9eb;
+		border-top-left-radius: 5px;
+		border-top-right-radius: 5px;
+		float: left;
+		border-style: solid;
+		border-width: 1px;
+		border-left-color: var(--wp--preset--color--background);
+		font-weight: 600;
+		font-size: var(--wp--preset--font-size--medium);
+
+		&:first-child {
+			border-left-color: #eae9eb;
+			margin-left: 1em;
+		}
+
+		&.active {
+			// Style active tab in theme colors.
+			background: var(--wp--preset--color--background, $contentbg);
+			border-bottom-color: var(--wp--preset--color--background, $contentbg);
+			box-shadow: 0 1px var(--wp--preset--color--background);
+		}
+
+		a {
+			text-decoration: none;
+		}
+	}
+}
+
+.woocommerce-Tabs-panel {
+	padding-top: var(--wp--style--block-gap);
+	font-size: var(--wp--preset--font-size--small);
+	margin-left: 1em;
+
+	h2 {
+		display: none;
 	}
 }
 

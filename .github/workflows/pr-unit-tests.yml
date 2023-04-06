@@ -14,12 +14,15 @@ permissions: {}
 
 jobs:
   test:
-    name: PHP ${{ matrix.php }} WP ${{ matrix.wp }}
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
+    name: PHP ${{ matrix.php }} WP ${{ matrix.wp }} ${{ matrix.hpos && 'HPOS' || '' }}
     timeout-minutes: 30
     runs-on: ubuntu-20.04
     permissions:
       contents: read
     continue-on-error: ${{ matrix.wp == 'nightly' }}
+    env:
+      HPOS: ${{ matrix.hpos }}
     strategy:
       fail-fast: false
       matrix:
@@ -32,6 +35,9 @@ jobs:
             php: 7.4
           - wp: '5.9'
             php: 7.4
+          - wp: 'latest'
+            php: '7.4'
+            hpos: true
     services:
       database:
         image: mysql:5.6

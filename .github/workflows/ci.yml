@@ -31,9 +31,9 @@ jobs:
         include:
           - wp: nightly
             php: '7.4'
-          - wp: '5.9'
+          - wp: '6.0'
             php: 7.4
-          - wp: '5.8'
+          - wp: '5.9'
             php: 7.4
     services:
       database:

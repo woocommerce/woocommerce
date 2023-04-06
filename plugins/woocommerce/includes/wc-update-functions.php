@@ -19,7 +19,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
-use Automattic\WooCommerce\Internal\Admin\Marketing;
+use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -1843,18 +1843,14 @@ function wc_update_340_db_version() {
 function wc_update_343_cleanup_foreign_keys() {
 	global $wpdb;
 
-	$results = $wpdb->get_results(
-		"SELECT CONSTRAINT_NAME
-		FROM information_schema.TABLE_CONSTRAINTS
-		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
-		AND CONSTRAINT_NAME LIKE '%wc_download_log_ib%'
-		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
-	);
+	$create_table_sql = $wpdb->get_var( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log", 1 );
 
-	if ( $results ) {
-		foreach ( $results as $fk ) {
-			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	if ( ! empty( $create_table_sql ) ) {
+		// Extract and remove the foreign key constraints matching %wc_download_log_ib%.
+		if ( preg_match_all( '/CONSTRAINT `([^`]*wc_download_log_ib[^`]*)` FOREIGN KEY/', $create_table_sql, $matches ) && ! empty( $matches[1] ) ) {
+			foreach ( $matches[1] as $foreign_key_name ) {
+				$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY `{$foreign_key_name}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			}
 		}
 	}
 }
@@ -1912,18 +1908,13 @@ function wc_update_350_db_version() {
  */
 function wc_update_352_drop_download_log_fk() {
 	global $wpdb;
-	$results = $wpdb->get_results(
-		"SELECT CONSTRAINT_NAME
-		FROM information_schema.TABLE_CONSTRAINTS
-		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
-		AND CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
-		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
-	);
 
-	// We only need to drop the old key as WC_Install::create_tables() takes care of creating the new FK.
-	if ( $results ) {
-		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY fk_wc_download_log_permission_id" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+	$create_table_sql = $wpdb->get_var( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log", 1 );
+
+	if ( ! empty( $create_table_sql ) ) {
+		if ( strpos( $create_table_sql, 'CONSTRAINT `fk_wc_download_log_permission_id` FOREIGN KEY' ) !== false ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY fk_wc_download_log_permission_id" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		}
 	}
 }
 
@@ -2451,17 +2442,13 @@ function wc_update_670_purge_comments_count_cache() {
 function wc_update_700_remove_download_log_fk() {
 	global $wpdb;
 
-	$results = $wpdb->get_results(
-		"SELECT CONSTRAINT_NAME
-		FROM information_schema.TABLE_CONSTRAINTS
-		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
-		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
-	);
+	$create_table_sql = $wpdb->get_var( "SHOW CREATE TABLE {$wpdb->prefix}wc_download_log", 1 );
 
-	if ( $results ) {
-		foreach ( $results as $fk ) {
-			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	if ( ! empty( $create_table_sql ) ) {
+		if ( preg_match_all( '/CONSTRAINT `([^`]*)` FOREIGN KEY/', $create_table_sql, $matches ) && ! empty( $matches[1] ) ) {
+			foreach ( $matches[1] as $foreign_key_name ) {
+				$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY `{$foreign_key_name}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			}
 		}
 	}
 }
@@ -2470,7 +2457,7 @@ function wc_update_700_remove_download_log_fk() {
  * Remove the transient data for recommended marketing extensions.
  */
 function wc_update_700_remove_recommended_marketing_plugins_transient() {
-	delete_transient( Marketing::RECOMMENDED_PLUGINS_TRANSIENT );
+	delete_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT );
 }
 
 /**
@@ -2557,4 +2544,48 @@ function wc_update_722_adjust_new_zealand_states() {
  */
 function wc_update_722_adjust_ukraine_states() {
 	return wc_update_721_adjust_ukraine_states();
+}
+
+/**
+ * Add new columns date_paid and date_completed to wp_wc_order_stats table in order to provide the option
+ * of using the dates in the reports
+ */
+function wc_update_750_add_columns_to_order_stats_table() {
+	global $wpdb;
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}wc_order_stats AS order_stats
+		INNER JOIN {$wpdb->postmeta} AS postmeta
+			ON postmeta.post_id = order_stats.order_id
+			and postmeta.meta_key = '_date_paid'
+		SET order_stats.date_paid = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
+	);
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}wc_order_stats AS order_stats
+		INNER JOIN {$wpdb->postmeta} AS postmeta
+			ON postmeta.post_id = order_stats.order_id
+			and postmeta.meta_key = '_date_completed'
+		SET order_stats.date_completed = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
+	);
+
+}
+
+/**
+ * Disable the experimental product management experience.
+ *
+ * @return void
+ */
+function wc_update_750_disable_new_product_management_experience() {
+	if ( 'yes' === get_option( 'woocommerce_new_product_management_enabled' ) ) {
+		update_option( 'woocommerce_new_product_management_enabled', 'no' );
+	}
+}
+
+/**
+ * Remove the multichannel marketing feature flag and options. This feature is now enabled by default.
+ */
+function wc_update_770_remove_multichannel_marketing_feature_options() {
+	delete_option( 'woocommerce_multichannel_marketing_enabled' );
+	delete_option( 'woocommerce_marketing_overview_welcome_hidden' );
 }

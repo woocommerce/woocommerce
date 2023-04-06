@@ -13,6 +13,7 @@ permissions: {}
 
 jobs:
     e2e-tests-run:
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
         permissions:
@@ -218,7 +219,7 @@ jobs:
                       return await script( { core } )
 
             - name: Find PR comment by github-actions[bot]
-              uses: peter-evans/find-comment@v2
+              uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
               id: find-comment
               with:
                   issue-number: ${{ github.event.pull_request.number }}
@@ -226,7 +227,7 @@ jobs:
                   body-includes: Test Results Summary
 
             - name: Create or update PR comment
-              uses: peter-evans/create-or-update-comment@v2
+              uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
               with:
                   comment-id: ${{ steps.find-comment.outputs.comment-id }}
                   issue-number: ${{ github.event.pull_request.number }}

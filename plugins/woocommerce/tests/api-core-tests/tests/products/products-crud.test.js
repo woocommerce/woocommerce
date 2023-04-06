@@ -929,7 +929,7 @@ test.describe('Products API tests: CRUD', () => {
 			productTagId = responseJSON.id;
 
 			expect(response.status()).toEqual(201);
-			expect(typeof productId).toEqual('number');
+			expect(typeof productTagId).toEqual('number');
 			expect(responseJSON.name).toEqual('Leather Shoes');
 			expect(responseJSON.slug).toEqual('leather-shoes');
 		});

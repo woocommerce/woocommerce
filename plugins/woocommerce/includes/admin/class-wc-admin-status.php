@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -49,13 +48,13 @@ class WC_Admin_Status {
 				$response = $tools_controller->execute_tool( $action );
 
 				$tool                  = $tools[ $action ];
-				$tool_requires_refresh = ArrayUtil::get_value_or_default( $tool, 'requires_refresh', false );
+				$tool_requires_refresh = $tool['requires_refresh'] ?? false;
 				$tool                  = array(
 					'id'          => $action,
 					'name'        => $tool['name'],
 					'action'      => $tool['button'],
 					'description' => $tool['desc'],
-					'disabled'    => ArrayUtil::get_value_or_default( $tool, 'disabled', false ),
+					'disabled'    => $tool['disabled'] ?? false,
 				);
 				$tool                  = array_merge( $tool, $response );
 

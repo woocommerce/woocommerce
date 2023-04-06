@@ -2,29 +2,42 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { DropdownMenu, MenuItem } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
-import { getAdminLink } from '@woocommerce/settings';
-import { moreVertical } from '@wordpress/icons';
-import { Product } from '@woocommerce/data';
+import { DropdownMenu } from '@wordpress/components';
 import { useFormContext } from '@woocommerce/components';
+import { useSelect } from '@wordpress/data';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
+import { moreVertical } from '@wordpress/icons';
+import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
+import { ALLOW_TRACKING_OPTION_NAME } from '@woocommerce/customer-effort-score';
 
 /**
  * Internal dependencies
  */
-import { ClassicEditorIcon } from './images/classic-editor-icon';
-import { FeedbackIcon } from './images/feedback-icon';
-import { WooHeaderItem } from '~/header/utils';
-import { STORE_KEY as CES_STORE_KEY } from '~/customer-effort-score-tracks/data/constants';
+
+import {
+	FeedbackMenuItem,
+	ClassicEditorMenuItem,
+} from './fills/more-menu-items';
+
 import './product-more-menu.scss';
 
 export const ProductMoreMenu = () => {
 	const { values } = useFormContext< Product >();
-	const { showCesModal } = useDispatch( CES_STORE_KEY );
+	const { resolving: isLoading } = useSelect( ( select ) => {
+		const { hasFinishedResolution } = select( OPTIONS_STORE_NAME );
 
-	const classEditorUrl = values.id
-		? getAdminLink( `post.php?post=${ values.id }&action=edit` )
-		: getAdminLink( 'post-new.php?post_type=product' );
+		const resolving = ! hasFinishedResolution( 'getOption', [
+			ALLOW_TRACKING_OPTION_NAME,
+		] );
+
+		return {
+			resolving,
+		};
+	} );
+
+	if ( isLoading ) {
+		return null;
+	}
 
 	return (
 		<WooHeaderItem>
@@ -36,49 +49,11 @@ export const ProductMoreMenu = () => {
 			>
 				{ ( { onClose } ) => (
 					<>
-						<MenuItem
-							onClick={ () => {
-								showCesModal(
-									{
-										action: 'new_product',
-										title: __(
-											"How's your experience with the product editor?",
-											'woocommerce'
-										),
-										firstQuestion: __(
-											'The product editing screen is easy to use',
-											'woocommerce'
-										),
-										secondQuestion: __(
-											"The product editing screen's functionality meets my needs",
-											'woocommerce'
-										),
-									},
-									{},
-									{
-										type: 'snackbar',
-										icon: <span>🌟</span>,
-									}
-								);
-								onClose();
-							} }
-							icon={ <FeedbackIcon /> }
-							iconPosition="right"
-						>
-							{ __( 'Share feedback', 'woocommerce' ) }
-						</MenuItem>
-						<MenuItem
-							onClick={ () => {
-								onClose();
-							} }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore The href prop exists as buttonProps.
-							href={ classEditorUrl }
-							icon={ <ClassicEditorIcon /> }
-							iconPosition="right"
-						>
-							{ __( 'Use the classic editor', 'woocommerce' ) }
-						</MenuItem>
+						<FeedbackMenuItem onClose={ onClose } />
+						<ClassicEditorMenuItem
+							productId={ values.id }
+							onClose={ onClose }
+						/>
 					</>
 				) }
 			</DropdownMenu>

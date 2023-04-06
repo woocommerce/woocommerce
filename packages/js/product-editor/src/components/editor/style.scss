@@ -1,0 +1,18 @@
+@import '@wordpress/interface/src/style.scss';
+
+.interface-interface-skeleton {
+	@include breakpoint( '<782px' ) {
+		top: $adminbar-height-mobile;
+	}
+	top: $adminbar-height;
+	background-color: $white;
+}
+
+.interface-interface-skeleton__sidebar {
+	width: 280px;
+}
+
+.interface-interface-skeleton__header{
+	// Higher than the sidebar which has a z-index of 90.
+	z-index: 100;
+}

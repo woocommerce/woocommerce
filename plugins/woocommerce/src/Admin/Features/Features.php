@@ -26,12 +26,10 @@ class Features {
 	 * @var array
 	 */
 	protected static $optional_features = array(
-		'multichannel-marketing'            => array( 'default' => 'no' ),
-		'navigation'                        => array( 'default' => 'no' ),
-		'settings'                          => array( 'default' => 'no' ),
-		'new-product-management-experience' => array( 'default' => 'no' ),
-		'analytics'                         => array( 'default' => 'yes' ),
-		'remote-inbox-notifications'        => array( 'default' => 'yes' ),
+		'navigation'                 => array( 'default' => 'no' ),
+		'settings'                   => array( 'default' => 'no' ),
+		'analytics'                  => array( 'default' => 'yes' ),
+		'remote-inbox-notifications' => array( 'default' => 'yes' ),
 	);
 
 	/**
@@ -40,9 +38,9 @@ class Features {
 	 * @var array
 	 */
 	protected static $beta_features = array(
-		'multichannel-marketing',
 		'navigation',
 		'new-product-management-experience',
+		'block-editor-feature-enabled',
 		'settings',
 	);
 

@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Loader;
 
 /**
  * Init class.
@@ -64,6 +64,10 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\Experiments',
 			'Automattic\WooCommerce\Admin\API\Marketing',
 			'Automattic\WooCommerce\Admin\API\MarketingOverview',
+			'Automattic\WooCommerce\Admin\API\MarketingRecommendations',
+			'Automattic\WooCommerce\Admin\API\MarketingChannels',
+			'Automattic\WooCommerce\Admin\API\MarketingCampaigns',
+			'Automattic\WooCommerce\Admin\API\MarketingCampaignTypes',
 			'Automattic\WooCommerce\Admin\API\Options',
 			'Automattic\WooCommerce\Admin\API\Orders',
 			'Automattic\WooCommerce\Admin\API\PaymentGatewaySuggestions',
@@ -86,6 +90,7 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\NavigationFavorites',
 			'Automattic\WooCommerce\Admin\API\Taxes',
 			'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
+			'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
 		);
 
 		$product_form_controllers = array();

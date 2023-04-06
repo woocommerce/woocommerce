@@ -57,24 +57,6 @@ describe( 'Products', () => {
 		);
 	} );
 
-	test( 'should fire "tasklist_add_product" event when the cart2cart option clicked', async () => {
-		const { getByRole } = render( <Products /> );
-
-		userEvent.click(
-			getByRole( 'menuitem', {
-				name: 'FROM CART2CART Migrate all store data like products, customers, and orders in no time with this 3rd party plugin. Learn more (opens in a new tab)',
-			} )
-		);
-		await waitFor( () =>
-			expect( recordEvent ).toHaveBeenCalledWith(
-				'tasklist_add_product',
-				{
-					method: 'migrate',
-				}
-			)
-		);
-	} );
-
 	test( 'should fire "task_completion_time" event when an option clicked', async () => {
 		Object.defineProperty( window, 'performance', {
 			value: {

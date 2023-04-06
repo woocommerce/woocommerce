@@ -23,7 +23,6 @@ import {
 import useIsEqualRefValue from './useIsEqualRefValue';
 import Control from './control';
 import Options from './options';
-import './index.scss';
 import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
 
 /**
@@ -64,11 +63,14 @@ import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
  * @param {string}                     [props.placeholder]                Placeholder for the search control input
  * @param {string}                     [props.className]                  The class name for this component
  * @param {boolean}                    [props.disabled]                   Disables the component
+ * @param {boolean}                    [props.includeParent]              Includes parent with selection.
+ * @param {boolean}                    [props.alwaysShowPlaceholder]      Will always show placeholder (default: false)
  * @param {Option[]}                   [props.options]                    Options to show in the component
  * @param {string[]}                   [props.value]                      Selected values
  * @param {number}                     [props.maxVisibleTags]             The maximum number of tags to show. Undefined, 0 or less than 0 evaluates to "Show All".
  * @param {Function}                   [props.onChange]                   Callback when the selector changes
  * @param {(visible: boolean) => void} [props.onDropdownVisibilityChange] Callback when the visibility of the dropdown options is changed.
+ * @param {Function}                   [props.onInputChange]              Callback when the selector changes
  * @return {JSX.Element} The component
  */
 const TreeSelectControl = ( {
@@ -84,6 +86,9 @@ const TreeSelectControl = ( {
 	maxVisibleTags,
 	onChange = () => {},
 	onDropdownVisibilityChange = noop,
+	onInputChange = noop,
+	includeParent = false,
+	alwaysShowPlaceholder = false,
 } ) => {
 	let instanceId = useInstanceId( TreeSelectControl );
 	instanceId = id ?? instanceId;
@@ -204,7 +209,12 @@ const TreeSelectControl = ( {
 						return [];
 					}
 					return this.children.flatMap( ( option ) => {
-						return option.hasChildren ? option.leaves : option;
+						if ( option.hasChildren ) {
+							return includeParent && option.value !== ROOT_VALUE
+								? [ option, ...option.leaves ]
+								: option.leaves;
+						}
+						return option;
 					} );
 				},
 			},
@@ -217,6 +227,9 @@ const TreeSelectControl = ( {
 				 * @return {boolean} True if checked, false otherwise.
 				 */
 				get() {
+					if ( includeParent && this.value !== ROOT_VALUE ) {
+						return cache.selectedValues.includes( this.value );
+					}
 					if ( this.hasChildren ) {
 						return this.leaves.every( ( opt ) => opt.checked );
 					}
@@ -373,36 +386,28 @@ const TreeSelectControl = ( {
 	};
 
 	/**
-	 * Handles a change on the Tree options. Could be a click on a parent option
-	 * or a child option
-	 *
-	 * @param {boolean}     checked Indicates if the item should be checked
-	 * @param {InnerOption} option  The option to change
-	 */
-	const handleOptionsChange = ( checked, option ) => {
-		if ( option.hasChildren ) {
-			handleParentChange( checked, option );
-		} else {
-			handleSingleChange( checked, option );
-		}
-
-		setInputControlValue( '' );
-		if ( ! nodesExpanded.includes( option.parent ) ) {
-			controlRef.current.focus();
-		}
-	};
-
-	/**
 	 * Handles a change of a child element.
 	 *
 	 * @param {boolean}     checked Indicates if the item should be checked
 	 * @param {InnerOption} option  The option to change
+	 * @param {InnerOption} parent  The options parent (could be null)
 	 */
-	const handleSingleChange = ( checked, option ) => {
+	const handleSingleChange = ( checked, option, parent ) => {
 		const newValue = checked
 			? [ ...value, option.value ]
 			: value.filter( ( el ) => el !== option.value );
-
+		if (
+			includeParent &&
+			parent &&
+			parent.value !== ROOT_VALUE &&
+			parent.children &&
+			parent.children.every( ( child ) =>
+				newValue.includes( child.value )
+			) &&
+			! newValue.includes( parent.value )
+		) {
+			newValue.push( parent.value );
+		}
 		onChange( newValue );
 	};
 
@@ -417,7 +422,9 @@ const TreeSelectControl = ( {
 		const changedValues = option.leaves
 			.filter( ( opt ) => opt.checked !== checked )
 			.map( ( opt ) => opt.value );
-
+		if ( includeParent && option.value !== ROOT_VALUE ) {
+			changedValues.push( option.value );
+		}
 		if ( checked ) {
 			if ( ! option.expanded ) {
 				handleToggleExpanded( option );
@@ -428,6 +435,28 @@ const TreeSelectControl = ( {
 		}
 
 		onChange( newValue );
+	};
+
+	/**
+	 * Handles a change on the Tree options. Could be a click on a parent option
+	 * or a child option
+	 *
+	 * @param {boolean}     checked Indicates if the item should be checked
+	 * @param {InnerOption} option  The option to change
+	 * @param {InnerOption} parent  The options parent (could be null)
+	 */
+	const handleOptionsChange = ( checked, option, parent ) => {
+		if ( option.hasChildren ) {
+			handleParentChange( checked, option );
+		} else {
+			handleSingleChange( checked, option, parent );
+		}
+
+		onInputChange( '' );
+		setInputControlValue( '' );
+		if ( ! nodesExpanded.includes( option.parent ) ) {
+			controlRef.current.focus();
+		}
 	};
 
 	/**
@@ -446,6 +475,7 @@ const TreeSelectControl = ( {
 	 * @param {Event} e Event returned by the On Change function in the Input control
 	 */
 	const handleOnInputChange = ( e ) => {
+		onInputChange( e.target.value );
 		setInputControlValue( e.target.value );
 	};
 
@@ -486,6 +516,7 @@ const TreeSelectControl = ( {
 				value={ inputControlValue }
 				onTagsChange={ handleTagsChange }
 				onInputChange={ handleOnInputChange }
+				alwaysShowPlaceholder={ alwaysShowPlaceholder }
 			/>
 			{ showTree && (
 				<div

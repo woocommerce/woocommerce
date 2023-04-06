@@ -18,7 +18,7 @@ class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 		$field = Form::add_field( 'id', 'woocommerce', array() );
 
 		$this->assertInstanceOf( 'WP_Error', $field );
-		$this->assertContains( 'You are missing required arguments of WooCommerce ProductForm Field: type, section, properties.name, properties.label', $field->get_error_message() );
+		$this->assertStringContainsString( 'You are missing required arguments of WooCommerce ProductForm Field: type, section, properties.name, properties.label', $field->get_error_message() );
 	}
 
 	/**
@@ -51,7 +51,7 @@ class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertInstanceOf( 'WP_Error', $field_duplicate );
-		$this->assertContains( 'You have attempted to register a duplicate form field with WooCommerce Form: `id`', $field_duplicate->get_error_message() );
+		$this->assertStringContainsString( 'You have attempted to register a duplicate form field with WooCommerce Form: `id`', $field_duplicate->get_error_message() );
 	}
 
 	/**
@@ -86,8 +86,8 @@ class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 
 		$fields = Form::get_fields();
 		$this->assertEquals( 2, count( $fields ) );
-		$this->assertEquals( 'text', $fields[0]->type );
-		$this->assertEquals( 'textarea', $fields[1]->type );
+		$this->assertEquals( 'text', $fields[0]->get_additional_args()['type'] );
+		$this->assertEquals( 'textarea', $fields[1]->get_additional_args()['type'] );
 	}
 
 	/**
@@ -201,6 +201,31 @@ class WC_Admin_Tests_ProductForm_Form_Factory extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, count( $sections ) );
 		$this->assertEquals( 'first', $sections[0]->get_id() );
 		$this->assertEquals( 'id2', $sections[1]->get_id() );
+	}
+	/**
+	 * Test that get_tabs.
+	 */
+	public function test_get_tabs_sort_default() {
+		Form::add_tab(
+			'id',
+			'woocommerce',
+			array(
+				'name'  => 'tab_name',
+				'title' => 'Tab Title',
+			)
+		);
+
+		Form::add_tab(
+			'id2',
+			'woocommerce',
+			array(
+				'name'  => 'tab_name2',
+				'title' => 'Tab Title 2',
+			)
+		);
+
+		$sections = Form::get_tabs();
+		$this->assertEquals( 2, count( $sections ) );
 	}
 }
 

@@ -39,7 +39,8 @@ If you have questions about the process to contribute code or want to discuss de
 - Ensure that your code supports the minimum supported versions of PHP and WordPress; this is shown at the top of the `readme.txt` file.
 - Push the changes to your fork and submit a pull request on the trunk branch of the WooCommerce repository.
 - Make sure to write good and detailed commit messages (see [this post](https://chris.beams.io/posts/git-commit/) for more on this) and follow all the applicable sections of the pull request template.
-- Please avoid modifying the changelog directly or updating the .pot files. These will be updated by the WooCommerce team.
+- Please create a change file for your changes by running `pnpm --filter=<project> changelog add`. For example, a change file for the WooCommerce Core project would be added by running `pnpm --filter=woocommerce changelog add`. 
+- Please avoid modifying the changelog directly or updating the .pot files. These will be updated by the WooCommerce team. 
 
 If you are contributing code to the (Javascript-driven) Gutenberg blocks, note that it's developed in an external package.
 

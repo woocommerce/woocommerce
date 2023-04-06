@@ -1223,7 +1223,10 @@ if ( ! function_exists( 'woocommerce_template_loop_category_link_open' ) ) {
 	 * @param int|object|string $category Category ID, Object or String.
 	 */
 	function woocommerce_template_loop_category_link_open( $category ) {
-		echo '<a href="' . esc_url( get_term_link( $category, 'product_cat' ) ) . '">';
+		$category_term = get_term( $category, 'product_cat' );
+		$category_name = ( ! $category_term || is_wp_error( $category_term ) ) ? '' : $category_term->name;
+		/* translators: %s: Category name */
+		echo '<a aria-label="' . sprintf( esc_attr__( 'Visit product category %1$s', 'woocommerce' ), esc_attr( $category_name ) ) . '" href="' . esc_url( get_term_link( $category, 'product_cat' ) ) . '">';
 	}
 }
 

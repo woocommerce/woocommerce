@@ -9,7 +9,7 @@ test.describe( 'Payment setup task', () => {
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
 		await page.click( 'text=Skip setup store details' );
-		await page.click( 'text=No thanks' );
+		await page.click( 'button >> text=No thanks' );
 		await page.waitForLoadState( 'networkidle' );
 	} );
 
@@ -112,9 +112,6 @@ test.describe( 'Payment setup task', () => {
 			.click()
 			.catch( () => {} );
 		await page.waitForLoadState( 'networkidle' );
-
-		// purposely no await again
-		page.click( 'button.toggle-button' );
 
 		// enable COD payment option
 		await page.click(
