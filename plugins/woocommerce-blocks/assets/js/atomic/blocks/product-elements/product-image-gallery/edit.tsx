@@ -6,6 +6,7 @@ import { isEmptyObject } from '@woocommerce/types';
 import { useBlockProps } from '@wordpress/block-editor';
 import { BlockAttributes } from '@wordpress/blocks';
 import { Disabled } from '@wordpress/components';
+import type { BlockEditProps } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -40,8 +41,7 @@ type Context = {
 	queryId: string;
 };
 
-interface Props {
-	attributes: BlockAttributes;
+interface Props extends BlockEditProps< BlockAttributes > {
 	context: Context;
 }
 
@@ -58,7 +58,7 @@ const Edit = ( { context }: Props ) => {
 		);
 	}
 	// We have work on this case when we will work on the Single Product block.
-	return '';
+	return <></>;
 };
 
 export default Edit;

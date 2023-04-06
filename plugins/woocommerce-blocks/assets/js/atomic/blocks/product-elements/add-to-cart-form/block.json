@@ -5,6 +5,7 @@
 	"description": "Display a button so the customer can add a product to their cart. Options will also be displayed depending on product type. e.g. quantity, variation.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
+	"usesContext": ["postId"],
 	"textdomain": "woo-gutenberg-products-block",
 	"apiVersion": 2,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
