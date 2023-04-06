@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class DefaultPaymentGateways {
 	/**
+	 * This is the default priority for countries that are not in the $recommendation_priority_map.
 	 * Priority is used to determine which payment gateway to recommend first.
 	 * The lower the number, the higher the priority.
 	 *
