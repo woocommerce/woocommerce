@@ -8,12 +8,15 @@ import {
 	createInterpolateElement,
 	useState,
 } from '@wordpress/element';
-import { TextControl } from '@woocommerce/components';
-import { Button } from '@wordpress/components';
+import {
+	Button,
+	BaseControl,
+	__experimentalInputControl as InputControl,
+} from '@wordpress/components';
 import { useBlockProps } from '@wordpress/block-editor';
 import { cleanForSlug } from '@wordpress/url';
 import { useSelect, useDispatch } from '@wordpress/data';
-
+import uniqueId from 'lodash/uniqueId';
 import {
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
@@ -80,22 +83,29 @@ export function Edit() {
 	return (
 		<>
 			<div { ...blockProps }>
-				<TextControl
+				<BaseControl
+					id={ uniqueId() }
 					label={ createInterpolateElement(
 						__( 'Name <required />', 'woocommerce' ),
 						{
 							required: (
-								<span className="woocommerce-product-form__optional-input">
-									{ __( '(required)', 'woocommerce' ) }
+								<span className="woocommerce-product-form__required-input">
+									{ __( '*', 'woocommerce' ) }
 								</span>
 							),
 						}
 					) }
-					name={ 'woocommerce-product-name' }
-					placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
-					onChange={ setName }
-					value={ name || '' }
-				/>
+				>
+					<InputControl
+						name={ 'woocommerce-product-name' }
+						placeholder={ __(
+							'e.g. 12 oz Coffee Mug',
+							'woocommerce'
+						) }
+						onChange={ setName }
+						value={ name || '' }
+					/>
+				</BaseControl>
 				{ productId &&
 					nameIsValid &&
 					product.status === 'publish' &&
