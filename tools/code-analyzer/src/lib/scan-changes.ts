@@ -74,7 +74,8 @@ export const scanChangesForHooks = async (
 	sinceVersion: string,
 	base: string,
 	source: string,
-	clonedPath?: string
+	clonedPath?: string,
+	allowPlaceholder: boolean = false
 ) => {
 	const { diff, tmpRepoPath } = await generateVersionDiff(
 		compareVersion,
@@ -86,7 +87,8 @@ export const scanChangesForHooks = async (
 	const hookChanges = await scanForHookChanges(
 		diff,
 		sinceVersion,
-		tmpRepoPath
+		tmpRepoPath,
+		allowPlaceholder
 	);
 
 	return Array.from( hookChanges.values() );
@@ -97,7 +99,8 @@ export const scanChangesForTemplates = async (
 	sinceVersion: string,
 	base: string,
 	source: string,
-	clonedPath?: string
+	clonedPath?: string,
+	allowPlaceholder: boolean = false
 ) => {
 	const { diff, tmpRepoPath } = await generateVersionDiff(
 		compareVersion,
@@ -109,7 +112,8 @@ export const scanChangesForTemplates = async (
 	const templateChanges = await scanForTemplateChanges(
 		diff,
 		sinceVersion,
-		tmpRepoPath
+		tmpRepoPath,
+		allowPlaceholder
 	);
 
 	return Array.from( templateChanges.values() );

@@ -22,12 +22,14 @@ export type HookChangeDescription = {
 	changeType: 'new' | 'updated';
 	version: string;
 	ghLink: string;
+	isPlaceholder: boolean;
 };
 
 export const scanForHookChanges = async (
 	content: string,
 	version: string,
-	tmpRepoPath: string
+	tmpRepoPath: string,
+	allowPlaceholder: boolean = false
 ) => {
 	const changes: Map< string, HookChangeDescription > = new Map();
 
@@ -38,7 +40,8 @@ export const scanForHookChanges = async (
 	const matchPatches = /^a\/(.+).php/g;
 	const patches = getPatches( content, matchPatches );
 	const verRegEx = getVersionRegex( version );
-	const matchHooks = `\(.*?)@since\\s+(${ verRegEx })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
+	const placeholderPattern = '[a-zA-Z]+\\.[a-zA-Z]+\\.[a-zA-Z]+';
+	const matchHooks = `\(?:.*?)@since\\s+(${ verRegEx }${ allowPlaceholder ? '|' + placeholderPattern : '' })(.*?)(apply_filters|do_action)\\((\\s+)?(\\'|\\")(.*?)(\\'|\\")`;
 	const newRegEx = new RegExp( matchHooks, 'gs' );
 
 	for ( const p in patches ) {
@@ -52,7 +55,7 @@ export const scanForHookChanges = async (
 			continue;
 		}
 
-		const results = patchWithHook.match( newRegEx );
+		const results = [ ...patchWithHook.matchAll( newRegEx ) ];
 
 		if ( ! results ) {
 			continue;
@@ -63,7 +66,7 @@ export const scanForHookChanges = async (
 
 		for ( const raw of results ) {
 			// Extract hook name and type.
-			const hookName = raw.match(
+			const hookName = raw[0].match(
 				/(.*)(do_action|apply_filters)\(\s+'(.*)'/
 			);
 
@@ -72,12 +75,12 @@ export const scanForHookChanges = async (
 			}
 
 			const name = getHookName( hookName[ 3 ] );
-			const description = getHookDescription( raw, name ) || '';
+			const description = getHookDescription( raw[0], name ) || '';
 
 			const hookType =
 				hookName[ 2 ] === 'do_action' ? 'action' : 'filter';
 
-			const changeType = getHookChangeType( raw );
+			const changeType = getHookChangeType( raw[0] );
 
 			if ( ! hookName[ 2 ].startsWith( '-' ) ) {
 				let ghLink = '';
@@ -101,7 +104,7 @@ export const scanForHookChanges = async (
 						}
 					} );
 
-					changes.set( filePath, {
+					changes.set( filePath + name, {
 						filePath,
 						name,
 						hookType,
@@ -109,6 +112,7 @@ export const scanForHookChanges = async (
 						changeType,
 						version,
 						ghLink,
+						isPlaceholder,
 					} );
 				} catch ( error ) {
 					if ( error ) {

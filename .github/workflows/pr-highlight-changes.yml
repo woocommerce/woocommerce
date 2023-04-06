@@ -29,7 +29,7 @@ jobs:
               run: |
                   HEAD_REF=$(git rev-parse HEAD)
                   version=$(pnpm run analyzer major-minor "$HEAD_REF" "plugins/woocommerce/woocommerce.php" | tail -n 1)
-                  pnpm run analyzer "$HEAD_REF" $version -o "github"
+                  pnpm run analyzer scan templates "$HEAD_REF" --allowPlaceholder --since "$version" -o "github"
             - name: Check results
               uses: actions/github-script@v6
               with:

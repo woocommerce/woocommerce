@@ -21,7 +21,8 @@ export type TemplateChangeDescription = {
 export const scanForTemplateChanges = async (
 	content: string,
 	version: string,
-	repositoryPath?: string
+	repositoryPath?: string,
+	allowPlaceholder: boolean = false
 ) => {
 	const changes: Map< string, TemplateChangeDescription > = new Map();
 
@@ -31,12 +32,13 @@ export const scanForTemplateChanges = async (
 
 	const matchPatches = /^a\/(.+)\/templates\/(.+)/g;
 	const patches = getPatches( content, matchPatches );
-	const matchVersion = `^(\\+.+\\*.+)(@version)\\s+(${ version.replace(
+	const placeholderPattern = '[a-zA-Z]+\\.[a-zA-Z]+\\.[a-zA-Z]+';
+	const matchVersion = `^(?:\\+.+\\*.+)(?:@version)\\s+(${ version.replace(
 		/\./g,
 		'\\.'
-	) }).*`;
+	) }${ allowPlaceholder ? '|' + placeholderPattern : '' }).*?$`;
 
-	const versionRegex = new RegExp( matchVersion, 'g' );
+	const versionRegex = new RegExp( matchVersion );
 
 	for ( const p in patches ) {
 		const patch = patches[ p ];
@@ -50,10 +52,11 @@ export const scanForTemplateChanges = async (
 
 		for ( const l in lines ) {
 			const line = lines[ l ];
-
-			if ( line.match( versionRegex ) ) {
+			const matches = line.match( versionRegex );
+			if ( matches ) {
+				const isPlaceholder = matches[1].match( new RegExp( placeholderPattern ) );
 				code = 'notice';
-				message = 'Version bump found';
+				message = isPlaceholder ? 'Version bump placeholder found' : 'Version bump found';
 			}
 
 			if ( repositoryPath ) {

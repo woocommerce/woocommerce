@@ -69,12 +69,11 @@ export const printHookResults = (
 			description,
 			hookType,
 			changeType,
+			isPlaceholder,
 		} of data ) {
 			opt += `\\n* **File:** ${ filePath }`;
 
-			const cliMessage = `**${ name }** introduced in ${ version }`;
-			const ghMessage = `\\'${ name }\\' introduced in ${ version }`;
-			const message = output === 'github' ? ghMessage : cliMessage;
+			const message = `\\'${ name }\\' introduced in ${ version }${ isPlaceholder ? ' with version placeholder' : '' }`;
 			const title = `${ changeType } ${ hookType } found`;
 
 			opt += `\\n  * NOTICE - ${ message }: ${ description }`;
@@ -95,10 +94,9 @@ export const printHookResults = (
 			hookType,
 			changeType,
 			ghLink,
+			isPlaceholder,
 		} of data ) {
-			const cliMessage = `**${ name }** introduced in ${ version }`;
-			const ghMessage = `\\'${ name }\\' introduced in ${ version }`;
-			const message = output === 'github' ? ghMessage : cliMessage;
+			const message = `**${ name }** introduced in ${ version }${ isPlaceholder ? ' with version placeholder' : '' }`;
 			const title = `${ changeType } ${ hookType } found`;
 
 			log( 'FILE: ' + filePath );
