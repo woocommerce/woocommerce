@@ -1,9 +1,8 @@
 const fs = require( 'fs' );
 const { getOctokit, context } = require( '@actions/github' );
-const { setFailed, getInput, setOutput } = require( '@actions/core' );
+const { getInput, setOutput } = require( '@actions/core' );
 const { parseXml, getFilesWithNewErrors } = require( './utils/xml' );
 const { generateMarkdownMessage } = require( './utils/markdown' );
-const { addRecord } = require( './utils/airtable' );
 const { addComment } = require( './utils/github' );
 
 const runner = async () => {
@@ -58,13 +57,17 @@ const runner = async () => {
 		}
 	}
 
-	if ( process.env[ 'CURRENT_BRANCH' ] === 'trunk' ) {
-		try {
-			await addRecord( currentCheckStyleFileContentParsed.totalErrors );
-		} catch ( error ) {
-			setFailed( error );
-		}
-	}
+	/**
+	 * @todo: Airtable integration is failing auth, so we're disabling it for now.
+	 * Issue opened: https://github.com/woocommerce/woocommerce-blocks/issues/8961
+	 */
+	// if ( process.env[ 'CURRENT_BRANCH' ] === 'trunk' ) {
+	// 	try {
+	// 		await addRecord( currentCheckStyleFileContentParsed.totalErrors );
+	// 	} catch ( error ) {
+	// 		setFailed( error );
+	// 	}
+	// }
 };
 
 runner();
