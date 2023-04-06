@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { box as icon } from '@wordpress/icons';
-import { registerBlockType, unregisterBlockType } from '@wordpress/blocks';
 import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
 
 /**
@@ -13,16 +12,13 @@ import save from './save';
 import metadata from './block.json';
 
 registerBlockSingleProductTemplate( {
-	registerBlockFn: () => {
-		// @ts-expect-error: `registerBlockType` is a function that is typed in WordPress core.
-		registerBlockType( metadata, {
-			icon,
-			edit,
-			save,
-		} );
-	},
-	unregisterBlockFn: () => {
-		unregisterBlockType( metadata.name );
-	},
 	blockName: metadata.name,
+	// @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
+	blockMetadata: metadata,
+	blockSettings: {
+		icon,
+		edit,
+		save,
+		ancestor: [ 'woocommerce/single-product' ],
+	},
 } );

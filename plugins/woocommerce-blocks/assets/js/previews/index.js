@@ -6,3 +6,4 @@ export { previewShippingRates } from './shipping-rates';
 export { previewSavedPaymentMethods } from './saved-payment-methods';
 
 export { gridBlockPreview } from './grid-block';
+export { singleProductBlockPreview } from './single-product-block';

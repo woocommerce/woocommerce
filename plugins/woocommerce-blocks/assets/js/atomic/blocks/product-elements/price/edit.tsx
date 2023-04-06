@@ -27,6 +27,9 @@ interface BlockAttributes {
 
 interface Attributes {
 	textAlign: 'left' | 'center' | 'right';
+	isDescendentOfSingleProduct: boolean;
+	isDescendentOfSingleProductBlock: boolean;
+	productId: number;
 }
 
 interface Context {
@@ -80,7 +83,9 @@ const PriceEdit = ( {
 	);
 
 	const showProductSelector =
-		! isDescendentOfQueryLoop && ! isDescendentOfSingleProductTemplate;
+		! isDescendentOfQueryLoop &&
+		! isDescendentOfSingleProductTemplate &&
+		! attributes.isDescendentOfSingleProductBlock;
 
 	if ( ! showProductSelector ) {
 		return (
