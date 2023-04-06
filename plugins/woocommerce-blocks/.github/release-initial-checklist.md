@@ -78,7 +78,7 @@ Each porter is responsible for testing the PRs that fall under the focus of thei
 
 ## After Workflow completes
 
--   [ ] Merge this pull request back into `trunk`. This may have merge conflicts needing resolved if there are any cherry-picked commits in the release branch.
+-   [ ] Port to `trunk` the changes to the changelog, testing steps and required versions that you did in the previous steps. You can do so copy-and-pasting the changes in a new commit directly to `trunk`, or cherry-picking the commits that introduced those changes.
 -   [ ] Run `npm run change-versions` to update the version in `trunk` to the next version of the plugin and include the `dev` suffix. For example, if you released 2.5.0, you should update the version in `trunk` to 2.6.0-dev.
 -   [ ] Update the schedules p2 with the shipped date for the release (PdToLP-K-p2).
 -   [ ] Edit the GitHub milestone of the release you just shipped and add the current date as the due date (this is used to track ship date as well).
@@ -106,11 +106,16 @@ This only needs to be done if this release is the last release of the feature pl
     -   The PR description can follow [this example](https://github.com/woocommerce/woocommerce/pull/32627).
         -   It lists all the WooCommerce Blocks versions that are being included since the last version that you edited in `plugins/woocommerce/composer.json`. Each version should have a link for the `Release PR`, `Testing instructions` and `Release post` (if available).
         -   The changelog should be aggregated from all the releases included in the package bump and grouped per type: `Enhancements`, `Bug Fixes`, `Various` etc. This changelog will be used in the release notes for the WooCommerce release. That's why it should only list the PRs that have WooCoomerce Core in the WooCommerce Visibility section of their description. Don't include changes available in the feature plugin or development builds.
-    -   Run through the testing checklist to ensure everything works in that branch for that package bump. **Note:** Testing should ensure any features/new blocks that are supposed to be behind feature gating for the core merge of this package update are working as expected.
-    -   Testing should include completing the [Smoke testing checklist](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/internal-developers/testing/smoke-testing.md). It's up to you to verify that those tests have been done.
-    -   [ ] Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed, etc.
-        -   [ ] Assign the corresponding WC version milestone to the PR
-        -   [ ] After the checklist is complete and the testing is done, select the porter of your team to review the PR. Once approved, make sure you merge the PR.
+
+
+-   [ ] Build WC core from that branch with `pnpm run --filter='woocommerce' build ` (you might need to [install the dependencies first](https://github.com/woocommerce/woocommerce#prerequisites)) and:
+
+    -   [ ] Make sure the correct version of WC Blocks is being loaded. This can be done testing at least one of the testing steps from the release.
+    -   [ ] Complete the [Smoke testing checklist](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/internal-developers/testing/smoke-testing.md).
+
+-   [ ] Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed, etc.
+    -   [ ] Assign the corresponding WC version milestone to the PR
+    -   [ ] After the checklist is complete and the testing is done, select the porter of your team to review the PR. Once approved, make sure you merge the PR.
 
 -   [ ] Make sure you join the `#woo-core-releases` Slack channel to represent Woo Blocks for the release of WooCommerce core this version is included in.
 -   [ ] Search the release thread of the WooCommerce core version in WooCommerce P2 (example: p6q8Tx-2gl-p2).
@@ -137,3 +142,4 @@ This only needs to be done if this release is the last release of the feature pl
     -   [WCCOM product page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/)
     -   [WooCommerce blocks main documentation page](https://docs.woocommerce.com/document/woocommerce-blocks/)
 -   [ ] Go through the description of the release pull request and edit it to update all the sections and checklist instructions there.
+-   [ ] Close this PR.
