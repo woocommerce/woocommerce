@@ -57,13 +57,30 @@ To see all options, run `cd plugins/woocommerce && pnpm playwright test --help`
 
 The default values are:
 
--   Latest stable WordPress version
+-   Latest stable WordPress version 
 -   PHP 7.4
 -   MariaDB
 -   URL: `http://localhost:8086/`
 -   Admin credentials: `admin/password`
 
-If you want to customize these, check the [Test Variables](#test-variables) section.
+If you want to customize the port or admin credentials, check the [Test Variables](#test-variables) section.
+
+If you would like to customize the `PHP`, `WordPress` or `WooCommerce` versions installed in the environment, you can define `UPDATE_WP_JSON_FILE=1` along with any or all of the following env vars when building the environment.
+- `WP_VERSION`
+  - Acceptable versions are `nightly`, `trunk`, and any version listed on [WordPress Releases] page.
+- `WC_VERSION`
+  - Acceptable versions can be found on the [WooCommerce Releases](https://github.com/woocommerce/woocommerce/releases) page
+- `PHP`
+  - Any PHP version you see it. Please note that WooCommerce requries a minimum of PHP 7.2.
+
+**Example**
+
+The command below will create and environment with WordPress version 6.2, WooCommerce version 7.5.1 and PHP version 8.2 installed.
+
+`UPDATE_WP_JSON_FILE=1 WP_VERSION=6.2 WC_TEST_VERSION=7.5.1 PHP_VERSION=8.2 pnpm run env:test`
+
+If you'd like to run with the default configuation, simply remove the `UPDATE_WP_JSON_FILE`.
+
 
 For more information how to configure the test environment for `wp-env`, please checkout the [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) documentation.
 
