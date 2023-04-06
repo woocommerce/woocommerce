@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
-import { registerBlockType, unregisterBlockType } from '@wordpress/blocks';
 import { Icon, button } from '@wordpress/icons';
 
 /**
@@ -11,26 +10,24 @@ import { Icon, button } from '@wordpress/icons';
 import metadata from './block.json';
 import edit from './edit';
 
+const blockSettings = {
+	edit,
+	icon: {
+		src: (
+			<Icon
+				icon={ button }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
+	},
+	ancestor: [ 'woocommerce/single-product' ],
+	save() {
+		return null;
+	},
+};
+
 registerBlockSingleProductTemplate( {
-	registerBlockFn: () => {
-		// @ts-expect-error: `registerBlockType` is a function that is typed in WordPress core.
-		registerBlockType( metadata, {
-			icon: {
-				src: (
-					<Icon
-						icon={ button }
-						className="wc-block-editor-components-block-icon"
-					/>
-				),
-			},
-			edit,
-			save() {
-				return null;
-			},
-		} );
-	},
-	unregisterBlockFn: () => {
-		unregisterBlockType( metadata.name );
-	},
 	blockName: metadata.name,
+	blockMetadata: metadata,
+	blockSettings,
 } );
