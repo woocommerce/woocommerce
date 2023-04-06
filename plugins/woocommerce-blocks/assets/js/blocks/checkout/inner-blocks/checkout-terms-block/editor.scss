@@ -20,20 +20,14 @@
 	}
 }
 
-.wc-block-checkout__terms_notice .components-notice__action {
-	margin-left: 0;
-}
-
-.wc-block-checkout__terms_notice-button {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-
-	.wc-block-checkout__terms_notice-button__icon {
-		margin-left: $gap-smallest;
+.wc-block-checkout__terms_notice {
+	margin: 0;
+	.components-notice__content {
+		margin: 4px 0;
 	}
-}
-
-.wc-block-checkout__terms_notice .components-notice__content {
-	color: $black;
+	.components-notice__actions {
+		button {
+			margin-left: 0;
+		}
+	}
 }

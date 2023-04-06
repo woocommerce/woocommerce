@@ -1,19 +1,14 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { store as editorStore } from '@wordpress/editor';
 import triggerFetch from '@wordpress/api-fetch';
 import { store as coreStore } from '@wordpress/core-data';
 import { Notice, Button } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { CHECKOUT_PAGE_ID, CART_PAGE_ID } from '@woocommerce/block-settings';
-import {
-	useCallback,
-	useState,
-	createInterpolateElement,
-} from '@wordpress/element';
-import { getAdminLink } from '@woocommerce/settings';
+import { useCallback, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
@@ -152,39 +147,6 @@ export function DefaultNotice( { block }: { block: string } ) {
 						) }
 					</Button>
 				</>
-			) }
-		</Notice>
-	);
-}
-
-export function LegacyNotice( { block }: { block: string } ) {
-	return (
-		<Notice
-			className="wc-blocks-legacy-page-notice"
-			isDismissible={ false }
-			status="warning"
-		>
-			{ createInterpolateElement(
-				sprintf(
-					/* translators: %s is the block name. It will be cart or checkout. */
-					__(
-						'If you would like to use this block as your default %s you must update your <a>page settings in WooCommerce</a>.',
-						'woo-gutenberg-products-block'
-					),
-					block
-				),
-				{
-					a: (
-						// eslint-disable-next-line jsx-a11y/anchor-has-content
-						<a
-							href={ getAdminLink(
-								'admin.php?page=wc-settings&tab=advanced'
-							) }
-							target="_blank"
-							rel="noopener noreferrer"
-						/>
-					),
-				}
 			) }
 		</Notice>
 	);
