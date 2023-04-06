@@ -22,8 +22,6 @@ type EditProductLinkModalProps = {
 	saveHandler: (
 		slug: string
 	) => Promise< { slug: string; permalink: string } | undefined >;
-	isBusy?: boolean;
-	disabled?: boolean;
 };
 
 export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
@@ -33,11 +31,9 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 	onCancel,
 	onSaved,
 	saveHandler,
-	isBusy,
-	disabled,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-
+	const [ isSaving, setIsSaving ] = useState< boolean >( false );
 	const [ slug, setSlug ] = useState(
 		product.slug || cleanForSlug( product.name )
 	);
@@ -107,10 +103,12 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 					</Button>
 					<Button
 						isPrimary
-						isBusy={ isBusy }
-						disabled={ disabled || slug === product.slug }
-						onClick={ () => {
-							onSave();
+						isBusy={ isSaving }
+						disabled={ isSaving || slug === product.slug }
+						onClick={ async () => {
+							setIsSaving( true );
+							await onSave();
+							setIsSaving( false );
 						} }
 					>
 						{ __( 'Save', 'woocommerce' ) }

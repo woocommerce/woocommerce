@@ -25,8 +25,7 @@ import { EditProductLinkModal } from '../edit-product-link-modal';
 import { useProductHelper } from '../../hooks/use-product-helper';
 
 export const DetailsNameField = ( {} ) => {
-	const { updateProductWithStatus, isUpdatingDraft, isUpdatingPublished } =
-		useProductHelper();
+	const { updateProductWithStatus } = useProductHelper();
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
 	const { getInputProps, values, touched, errors, setValue, resetForm } =
@@ -105,8 +104,6 @@ export const DetailsNameField = ( {} ) => {
 					product={ values }
 					onCancel={ () => setShowProductLinkEditModal( false ) }
 					onSaved={ () => setShowProductLinkEditModal( false ) }
-					isBusy={ isUpdatingDraft || isUpdatingPublished }
-					disabled={ isUpdatingDraft || isUpdatingPublished }
 					saveHandler={ async ( slug ) => {
 						const updatedProduct = await updateProductWithStatus(
 							values.id,
