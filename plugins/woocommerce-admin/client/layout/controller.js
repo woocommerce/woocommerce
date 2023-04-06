@@ -167,7 +167,7 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures[ 'block-editor-feature-enabled' ] ) {
+	if ( window.wcAdminFeatures[ 'product-block-editor' ] ) {
 		pages.push( {
 			container: ProductPage,
 			path: '/add-product',
