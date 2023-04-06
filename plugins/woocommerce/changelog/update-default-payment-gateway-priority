@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add default priority for countries that are not in the payment recommendation map
