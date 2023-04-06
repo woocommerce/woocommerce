@@ -37,7 +37,7 @@ export const ShippingRateSelector = ( {
 							<NoticeBanner
 								isDismissible={ false }
 								className="wc-block-components-shipping-rates-control__no-results-notice"
-								status="error"
+								status="warning"
 							>
 								{ __(
 									'There are no shipping options available. Please check your shipping address.',
