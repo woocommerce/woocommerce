@@ -363,7 +363,7 @@ class CLIRunner {
 			$batch_start_time            = microtime( true );
 			$failed_ids_in_current_batch = $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
 			$failed_ids_in_current_batch = $this->verify_meta_data( $order_ids, $failed_ids_in_current_batch );
-			$failed_ids                  = $failed_ids + $failed_ids_in_current_batch;
+			$failed_ids                  = $verbose ? array() : $failed_ids + $failed_ids_in_current_batch;
 			$processed                  += count( $order_ids );
 			$batch_total_time            = microtime( true ) - $batch_start_time;
 			$batch_count ++;
@@ -410,6 +410,10 @@ class CLIRunner {
 		$progress->finish();
 		WP_CLI::log( __( 'Verification completed.', 'woocommerce' ) );
 
+		if ( $verbose ) {
+			return;
+		}
+
 		if ( 0 === count( $failed_ids ) ) {
 			return WP_CLI::success(
 				sprintf(
@@ -425,9 +429,6 @@ class CLIRunner {
 				)
 			);
 		} else {
-			if ( $verbose ) {
-				return;
-			}
 			$errors = print_r( $failed_ids, true );
 
 			return WP_CLI::error(
