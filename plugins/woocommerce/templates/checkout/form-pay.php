@@ -67,6 +67,8 @@ $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVa
 		</tfoot>
 	</table>
 
+	<?php do_action( 'woocommerce_pay_order_before_payment' ); ?>
+
 	<div id="payment">
 		<?php if ( $order->needs_payment() ) : ?>
 			<ul class="wc_payment_methods payment_methods methods">
