@@ -350,6 +350,7 @@ class DefaultFreeExtensions {
 					),
 					DefaultPaymentGateways::get_rules_for_cbd( false ),
 				),
+				'min_wp_version' => '5.9',
 				'is_built_by_wc' => true,
 			),
 			'woocommerce-services:shipping'     => array(
@@ -517,6 +518,7 @@ class DefaultFreeExtensions {
 						),
 					),
 				),
+				'min_wp_version' => '6.0',
 				'is_built_by_wc' => false,
 			),
 			'mailpoet'                          => array(
