@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+
 /**
  * ProductSKU class.
  */
@@ -65,11 +67,15 @@ class ProductSKU extends AbstractBlock {
 			return '';
 		}
 
+		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+
 		return sprintf(
-			'<div class="wc-block-components-product-sku wc-block-grid__product-sku">
+			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku %1$s" style="%2$s">
 				SKU:
-				<strong>%s</strong>
+				<strong>%3$s</strong>
 			</div>',
+			esc_attr( $styles_and_classes['classes'] ),
+			esc_attr( $styles_and_classes['styles'] ?? '' ),
 			$product_sku
 		);
 	}

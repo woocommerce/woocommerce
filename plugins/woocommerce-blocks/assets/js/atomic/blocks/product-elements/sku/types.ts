@@ -3,4 +3,5 @@ export interface Attributes {
 	isDescendentOfQueryLoop: boolean;
 	isDescendentOfSingleProductTemplate: boolean;
 	showProductSelector: boolean;
+	isDescendantOfAllProducts: boolean;
 }
