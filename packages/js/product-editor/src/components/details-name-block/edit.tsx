@@ -8,11 +8,7 @@ import {
 	createInterpolateElement,
 	useState,
 } from '@wordpress/element';
-import {
-	Button,
-	BaseControl,
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
+
 import { useBlockProps } from '@wordpress/block-editor';
 import { cleanForSlug } from '@wordpress/url';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -22,6 +18,12 @@ import {
 	WCDataSelector,
 	Product,
 } from '@woocommerce/data';
+import {
+	Button,
+	BaseControl,
+	// @ts-expect-error `__experimentalInputControl` does exist.
+	__experimentalInputControl as InputControl,
+} from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
