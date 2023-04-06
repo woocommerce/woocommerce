@@ -1,12 +1,16 @@
 {
 	"phpVersion": "7.4",
-	"plugins": [ "." ],
+	"plugins": [ "https://github.com/woocommerce/woocommerce/releases/download/7.4.1/woocommerce.zip" ],
+	"core": "WordPress/WordPress#tags/6.1.1",
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG_LOG": true,
 		"WP_DEBUG_DISPLAY": true,
 		"ALTERNATE_WP_CRON": true
 	},
+	"mappings": {
+        "wp-cli.yml": "./tests/wp-cli.yml"
+    },
 	"env": {
 		"development": {},
 		"tests": {
