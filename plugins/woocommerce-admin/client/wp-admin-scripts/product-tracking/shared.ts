@@ -7,7 +7,10 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { waitUntilElementIsPresent } from './utils';
+import {
+	attachEventListenerToParentForChildren,
+	waitUntilElementIsPresent,
+} from './utils';
 
 /**
  * Get the product data.
@@ -274,7 +277,7 @@ const addInventoryTabTracks = () => {
 		} );
 
 	document
-		.querySelector( '#_manage_stock_disabled' )
+		.querySelector( '#_manage_stock_disabled > a' )
 		?.addEventListener( 'click', () => {
 			recordEvent(
 				'product_manage_stock_disabled_store_settings_link_click'
@@ -370,9 +373,9 @@ const addProductTagsTracks = () => {
 };
 
 /**
- * Adds product attribute tracks.
+ * Adds product attributes tracks.
  */
-const addProductAttributeTracks = () => {
+const addProductAttributesTracks = () => {
 	function addNewTermEventHandler() {
 		recordEvent( 'product_attributes_add_term', {
 			page: 'product',
@@ -463,6 +466,70 @@ const addProductAttributeTracks = () => {
 				recordEvent( 'product_view_product_dismiss', getProductData() );
 			} );
 	} );
+};
+
+/**
+ * Adds product variations tracks.
+ */
+const addProductVariationsTracks = () => {
+	document
+		.querySelector(
+			'#variable_product_options_inner .variations-add-attributes-link'
+		)
+		?.addEventListener( 'click', () => {
+			recordEvent( 'product_variations_empty_state', {
+				action: 'add_attribute_link',
+			} );
+		} );
+
+	document
+		.querySelector(
+			'#variable_product_options_inner .variations-learn-more-link'
+		)
+		?.addEventListener( 'click', () => {
+			recordEvent( 'product_variations_empty_state', {
+				action: 'learn_more_link',
+			} );
+		} );
+
+	const variationsSection = '#variable_product_options';
+
+	// We attach the events in this way because the buttons are added dynamically.
+	attachEventListenerToParentForChildren( variationsSection, [
+		{
+			eventName: 'click',
+			query: '.generate_variations',
+			callback: () => {
+				recordEvent( 'product_variations_buttons', {
+					action: 'generate_variations',
+				} );
+			},
+		},
+		{
+			eventName: 'click',
+			query: '.add_variation_manually',
+			callback: () => {
+				recordEvent( 'product_variations_buttons', {
+					action: 'add_variation_manually',
+				} );
+			},
+		},
+		{
+			eventName: 'change',
+			query: '#field_to_edit',
+			callback: () => {
+				const selectElement = document.querySelector(
+					'#field_to_edit'
+				) as HTMLSelectElement;
+				// Get the index of the selected option
+				const selectedIndex = selectElement.selectedIndex;
+				recordEvent( 'product_variations_buttons', {
+					action: 'bulk_actions',
+					selected: selectElement.options[ selectedIndex ]?.value,
+				} );
+			},
+		},
+	] );
 };
 
 /**
@@ -576,7 +643,8 @@ const addProductScreenTracks = () => {
 export const initProductScreenTracks = () => {
 	addProductScreenTracks();
 	addProductTagsTracks();
-	addProductAttributeTracks();
+	addProductAttributesTracks();
+	addProductVariationsTracks();
 	addProductTabsTracks();
 	addInventoryTabTracks();
 };

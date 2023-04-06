@@ -1,4 +1,40 @@
 /**
+ * Attaches a click event listener to a parent element and calls a callback when one of the child elements,
+ * specified by the list of queries, is clicked. This allows handling events for child elements that may not
+ * exist in the DOM when the event listener is added.
+ *
+ * @param {string}        parentQuery query of the parent element.
+ * @param {Array<Object>} children    array of child query and callback pairs.
+ */
+export function attachEventListenerToParentForChildren(
+	parentQuery: string,
+	children: Array< {
+		eventName: 'click' | 'change';
+		query: string;
+		callback: () => void;
+	} >
+) {
+	const parent = document.querySelector( parentQuery );
+
+	if ( ! parent ) return;
+
+	const eventListener = ( event: Event ) => {
+		children.forEach( ( { eventName, query, callback } ) => {
+			if (
+				event.type === eventName &&
+				( event.target as Element ).matches( query )
+			) {
+				callback();
+			}
+		} );
+	};
+
+	children.forEach( ( { eventName } ) => {
+		parent.addEventListener( eventName, eventListener );
+	} );
+}
+
+/**
  * Recursive function that waits up to 3 seconds until an element is found, then calls the callback.
  *
  * @param {string}   query query of the element.
