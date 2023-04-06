@@ -1,5 +1,6 @@
 .wc-block-components-product-rating {
 	display: block;
+	line-height: 1;
 
 	&__stars {
 		display: inline-block;
@@ -45,6 +46,7 @@
 
 	&__link {
 		display: inline-block;
+		height: 1.618em;
 		width: 100%;
 		text-align: inherit;
 		@include font-size(small);
