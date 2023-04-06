@@ -12,7 +12,6 @@ import {
 import { useBlockProps } from '@wordpress/block-editor';
 import { cleanForSlug } from '@wordpress/url';
 import { useSelect, useDispatch } from '@wordpress/data';
-import uniqueId from 'lodash/uniqueId';
 import {
 	PRODUCTS_STORE_NAME,
 	WCDataSelector,
@@ -86,7 +85,7 @@ export function Edit() {
 		<>
 			<div { ...blockProps }>
 				<BaseControl
-					id={ uniqueId() }
+					id={ 'product_name' }
 					label={ createInterpolateElement(
 						__( 'Name <required />', 'woocommerce' ),
 						{
