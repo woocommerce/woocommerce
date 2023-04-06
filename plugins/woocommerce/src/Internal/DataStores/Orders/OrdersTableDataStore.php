@@ -847,7 +847,7 @@ WHERE
 			$wpdb->prepare(
 				"SELECT {$orders_table}.id FROM {$orders_table}
 				INNER JOIN {$op_table} ON {$op_table}.order_id = {$orders_table}.id
-				WHERE {$op_table}.order_key = %s",
+				WHERE {$op_table}.order_key = %s AND {$op_table}.order_key != ''",
 				$order_key
 			)
 		);
