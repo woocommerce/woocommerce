@@ -85,7 +85,6 @@ export const useShippingData = (): ShippingData => {
 			( rate ) => rate.split( ':' )[ 0 ]
 		)
 	);
-
 	// Selects a shipping rate, fires an event, and catch any errors.
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const selectShippingRate = useCallback(

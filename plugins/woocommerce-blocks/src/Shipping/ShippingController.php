@@ -51,6 +51,7 @@ class ShippingController {
 				true
 			);
 		}
+
 		$this->asset_data_registry->add( 'collectableMethodIds', array( 'Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils', 'get_local_pickup_method_ids' ), true );
 		$this->asset_data_registry->add( 'shippingCostRequiresAddress', get_option( 'woocommerce_shipping_cost_requires_address', false ) === 'yes' );
 		add_action( 'rest_api_init', [ $this, 'register_settings' ] );

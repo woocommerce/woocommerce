@@ -77,7 +77,7 @@ export const isCalculating = ( state: CheckoutState ) => {
 };
 
 export const prefersCollection = ( state: CheckoutState ) => {
-	if ( state.prefersCollection === undefined ) {
+	if ( typeof state.prefersCollection === 'undefined' ) {
 		const shippingRates = select( cartStoreKey ).getShippingRates();
 		if ( ! shippingRates || ! shippingRates.length ) {
 			return false;
@@ -85,6 +85,7 @@ export const prefersCollection = ( state: CheckoutState ) => {
 		const selectedRate = shippingRates[ 0 ].shipping_rates.find(
 			( rate ) => rate.selected
 		);
+
 		if (
 			objectHasProp( selectedRate, 'method_id' ) &&
 			isString( selectedRate.method_id )
