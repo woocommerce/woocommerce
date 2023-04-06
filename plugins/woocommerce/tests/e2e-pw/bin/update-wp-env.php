@@ -26,7 +26,16 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 
 		public function set_wp_version(){
 			if ( $this->wp_version ) {
-				$version = $this->wp_version === 'trunk' ? "WordPress/WordPress" : "WordPress/WordPress#tags/$this->wp_version";
+
+				$version = "WordPress/WordPress#tags/$this->wp_version";
+
+				if ( 'trunk' === $this->version ) {
+					$version = "WordPress/WordPress";
+				}
+
+				if ( 'nightly' === $this->version ) {
+					$version = "https://wordpress.org/nightly-builds/wordpress-latest.zip";
+				}
 
 				echo "Set WP Version to $version \n";
 				$this->wp_json["core"] = $version;
