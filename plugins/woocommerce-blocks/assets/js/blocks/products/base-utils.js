@@ -50,6 +50,11 @@ export const getProductLayoutConfig = ( innerBlocks ) => {
 							block.attributes?.width,
 					} ),
 				} ),
+				/**
+				 * For product elements, special handing is required if product
+				 * elements are used in the "All Products" block.
+				 */
+				isDescendantOfAllProducts: true,
 			},
 		];
 	} );
