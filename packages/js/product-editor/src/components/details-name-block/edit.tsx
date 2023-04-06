@@ -52,6 +52,7 @@ export function Edit() {
 		)
 	);
 
+	const [ sku, setSku ] = useEntityProp( 'postType', 'product', 'sku' );
 	const [ name, setName ] = useEntityProp< string >(
 		'postType',
 		'product',
@@ -74,10 +75,14 @@ export function Edit() {
 		}
 	);
 
-	const nameIsValid = useValidation(
-		'product/name',
-		() => Boolean( name ) && name !== AUTO_DRAFT_NAME
-	);
+	const setSkuIfEmpty = () => {
+		if ( sku || ! name?.length ) {
+			return;
+		}
+		setSku( cleanForSlug( name ) );
+	};
+
+	const nameIsValid = Boolean( name ) && name !== AUTO_DRAFT_NAME;
 
 	return (
 		<>
@@ -103,6 +108,7 @@ export function Edit() {
 						) }
 						onChange={ setName }
 						value={ name || '' }
+						onBlur={ setSkuIfEmpty }
 					/>
 				</BaseControl>
 				{ productId &&
