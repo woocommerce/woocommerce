@@ -26,8 +26,10 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 
 		public function set_wp_version(){
 			if ( $this->wp_version ) {
-				echo "Set WP Version to $this->wp_version \n";
-				$this->wp_json["core"] = "WordPress/WordPress#tags/$this->wp_version";
+				$version = $this->wp_version === 'trunk' ? "WordPress/WordPress" : "WordPress/WordPress#tags/$this->wp_version";
+
+				echo "Set WP Version to $version \n";
+				$this->wp_json["core"] = $version;
 			}
 		}
 
