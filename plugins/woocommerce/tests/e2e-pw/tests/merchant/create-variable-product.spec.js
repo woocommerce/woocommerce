@@ -107,14 +107,15 @@ test.describe( 'Add New Variable Product Page', () => {
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
 
-		page.on( 'dialog', ( dialog ) => dialog.accept() );
-
-		// manually create variations from all attributes
 		await page.click( 'a[href="#variable_product_options"]' );
 
+		// event listener for handling the link_all_variations confirmation dialog
+		page.on( 'dialog', ( dialog ) => dialog.accept() );
+
+		// generate variations from all attributes
 		await page.click( 'button.generate_variations' );
 
-		// add variation attributes
+		// verify variations have the correct attribute values
 		for ( let i = 0; i < 8; i++ ) {
 			const val1 = 'val1';
 			const val2 = 'val2';
