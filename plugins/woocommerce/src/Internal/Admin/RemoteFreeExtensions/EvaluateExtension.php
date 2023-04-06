@@ -30,6 +30,10 @@ class EvaluateExtension {
 			$extension->is_visible = true;
 		}
 
+		if ( isset( $extension->min_php_version ) ) {
+			$extension->is_visible = version_compare( PHP_VERSION, $extension->min_php_version, '>=' );
+		}
+
 		$installed_plugins       = PluginsHelper::get_installed_plugin_slugs();
 		$activated_plugins       = PluginsHelper::get_active_plugin_slugs();
 		$extension->is_installed = in_array( explode( ':', $extension->key )[0], $installed_plugins, true );
