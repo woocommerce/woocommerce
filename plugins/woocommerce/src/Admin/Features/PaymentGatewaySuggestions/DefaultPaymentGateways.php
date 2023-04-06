@@ -12,6 +12,37 @@ defined( 'ABSPATH' ) || exit;
  */
 class DefaultPaymentGateways {
 	/**
+	 * Priority is used to determine which payment gateway to recommend first.
+	 * The lower the number, the higher the priority.
+	 *
+	 * @var array
+	 */
+	private static $recommendation_priority = array(
+		'woocommerce_payments'                            => 1,
+		'woocommerce_payments:with-in-person-payments'    => 1,
+		'woocommerce_payments:without-in-person-payments' => 1,
+		'stripe'                                          => 2,
+		'woo-mercado-pago-custom'                         => 3,
+		// PayPal Payments.
+		'ppcp-gateway'                                    => 4,
+		'mollie_wc_gateway_banktransfer'                  => 5,
+		'razorpay'                                        => 5,
+		'payfast'                                         => 5,
+		'payubiz'                                         => 6,
+		'square_credit_card'                              => 6,
+		'klarna_payments'                                 => 6,
+		// Klarna Checkout.
+		'kco'                                             => 6,
+		'paystack'                                        => 6,
+		'eway'                                            => 7,
+		'amazon_payments_advanced'                        => 7,
+		'affirm'                                          => 8,
+		'afterpay'                                        => 9,
+		'zipmoney'                                        => 10,
+		'payoneer-checkout'                               => 11,
+	);
+	
+	/**
 	 * Get default specs.
 	 *
 	 * @return array Default specs.
@@ -1126,9 +1157,9 @@ class DefaultPaymentGateways {
 			'GH' => [ 'paystack', 'ppcp-gateway' ],
 		);
 
-		// If the country code is not in the list, return null.
+		// If the country code is not in the list, return default priority.
 		if ( ! isset( $recommendation_priority_map[ $country_code ] ) ) {
-			return null;
+			return self::get_default_recommendation_priority( $gateway_id );
 		}
 
 		$index = array_search( $gateway_id, $recommendation_priority_map[ $country_code ], true );
@@ -1139,5 +1170,19 @@ class DefaultPaymentGateways {
 		}
 
 		return $index;
+	}
+
+	/**
+	 * Get the default recommendation priority for a payment gateway.
+	 * This is used when a country is not in the $recommendation_priority_map array.
+	 * 
+	 * @param string $id Payment gateway id.
+	 * @return int Priority.
+	 */
+	private static function get_default_recommendation_priority( $id ) {
+		if ( ! $id || ! array_key_exists( $id, self::$recommendation_priority ) ) {
+			return null;
+		}
+		return self::$recommendation_priority[ $id ];
 	}
 }
