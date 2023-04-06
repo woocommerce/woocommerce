@@ -37,7 +37,6 @@ const currencyToNumberFormat = (
 	return {
 		thousandSeparator: currency?.thousandSeparator,
 		decimalSeparator: currency?.decimalSeparator,
-		decimalScale: currency?.minorUnit,
 		fixedDecimalScale: true,
 		prefix: currency?.prefix,
 		suffix: currency?.suffix,
@@ -83,9 +82,11 @@ const FormattedMonetaryAmount = ( {
 		'wc-block-components-formatted-money-amount',
 		className
 	);
+	const decimalScale = props.decimalScale ?? currency?.minorUnit;
 	const numberFormatProps = {
 		...props,
 		...currencyToNumberFormat( currency ),
+		decimalScale,
 		value: undefined,
 		currency: undefined,
 		onValueChange: undefined,
