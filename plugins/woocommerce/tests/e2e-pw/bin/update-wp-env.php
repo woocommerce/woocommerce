@@ -29,11 +29,11 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 
 				$version = "WordPress/WordPress#tags/$this->wp_version";
 
-				if ( 'trunk' === $this->version ) {
+				if ( 'trunk' === $this->wp_version ) {
 					$version = "WordPress/WordPress";
 				}
 
-				if ( 'nightly' === $this->version ) {
+				if ( 'nightly' === $this->wp_version ) {
 					$version = "https://wordpress.org/nightly-builds/wordpress-latest.zip";
 				}
 
