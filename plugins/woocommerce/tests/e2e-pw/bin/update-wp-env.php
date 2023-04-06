@@ -37,7 +37,7 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 		public function set_wc_version(){
 			if ( $this->wc_version ) {
 				echo "Set WC Version to $this->wc_version \n";
-				$this->wp_json["plugins"] = [ "https://github.com/woocommerce/woocommerce/releases/download/$$this->wc_version/woocommerce.zip" ];
+				$this->wp_json["plugins"] = [ "https://github.com/woocommerce/woocommerce/releases/download/$this->wc_version/woocommerce.zip" ];
 			}
 		}
 
