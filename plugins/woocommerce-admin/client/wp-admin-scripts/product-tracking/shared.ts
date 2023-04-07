@@ -267,7 +267,7 @@ const addProductTabsTracks = () => {
 /**
  * Adds the inventory tab Tracks events.
  */
-const addInventoryTabTracks = () => {
+const addProductInventoryTabTracks = () => {
 	document
 		.querySelector( '#_manage_stock' )
 		?.addEventListener( 'click', ( event ) => {
@@ -373,9 +373,9 @@ const addProductTagsTracks = () => {
 };
 
 /**
- * Adds product attributes tracks.
+ * Adds attributes tracks.
  */
-const addProductAttributesTracks = () => {
+const addAttributesTracks = () => {
 	function addNewTermEventHandler() {
 		recordEvent( 'product_attributes_add_term', {
 			page: 'product',
@@ -400,7 +400,12 @@ const addProductAttributesTracks = () => {
 				addNewAttributeTermTracks();
 			}, 1000 );
 		} );
+};
 
+/**
+ * Adds product attributes tracks.
+ */
+const addProductAttributesTracks = () => {
 	const attributesCount = document.querySelectorAll(
 		'.woocommerce_attribute'
 	).length;
@@ -447,25 +452,6 @@ const addProductAttributesTracks = () => {
 				} );
 			}
 		} );
-
-	document
-		.querySelector(
-			'#woocommerce-product-updated-message-view-product__link'
-		)
-		?.addEventListener( 'click', () => {
-			recordEvent( 'product_view_product_click', getProductData() );
-		} );
-
-	const dismissProductUpdatedButtonSelector =
-		'.notice-success.is-dismissible > button';
-
-	waitUntilElementIsPresent( dismissProductUpdatedButtonSelector, () => {
-		document
-			.querySelector( dismissProductUpdatedButtonSelector )
-			?.addEventListener( 'click', () => {
-				recordEvent( 'product_view_product_dismiss', getProductData() );
-			} );
-	} );
 };
 
 /**
@@ -635,18 +621,38 @@ const addProductScreenTracks = () => {
 				checkbox: ( event.target as HTMLInputElement ).checked,
 			} );
 		} );
+
+	document
+		.querySelector(
+			'#woocommerce-product-updated-message-view-product__link'
+		)
+		?.addEventListener( 'click', () => {
+			recordEvent( 'product_view_product_click', getProductData() );
+		} );
+
+	const dismissProductUpdatedButtonSelector =
+		'.notice-success.is-dismissible > button';
+
+	waitUntilElementIsPresent( dismissProductUpdatedButtonSelector, () => {
+		document
+			.querySelector( dismissProductUpdatedButtonSelector )
+			?.addEventListener( 'click', () => {
+				recordEvent( 'product_view_product_dismiss', getProductData() );
+			} );
+	} );
 };
 
 /**
  * Initialize all product screen tracks.
  */
 export const initProductScreenTracks = () => {
+	addAttributesTracks();
 	addProductScreenTracks();
 	addProductTagsTracks();
 	addProductAttributesTracks();
 	addProductVariationsTracks();
 	addProductTabsTracks();
-	addInventoryTabTracks();
+	addProductInventoryTabTracks();
 };
 
 export function addExitPageListener( pageId: string ) {
