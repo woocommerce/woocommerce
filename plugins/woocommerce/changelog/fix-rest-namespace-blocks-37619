@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Removing modification to rest_namespace on post type and replacing with middleware.
