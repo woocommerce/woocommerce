@@ -406,6 +406,59 @@ const attachAttributesTracks = () => {
  * Attaches product attributes tracks.
  */
 const attachProductAttributesTracks = () => {
+	document
+		.querySelector( '#product_attributes .add_custom_attribute' )
+		?.addEventListener( 'click', () => {
+			recordEvent( 'product_attributes_buttons', {
+				action: 'add_first_attribute',
+			} );
+		} );
+	document
+		.querySelector( '#product_attributes .add_attribute' )
+		?.addEventListener( 'click', () => {
+			// We verify that we are not adding an existing attribute to not
+			// duplicate the recorded event.
+			const selectElement = document.querySelector(
+				'.attribute_taxonomy'
+			) as HTMLSelectElement;
+			// Get the index of the selected option
+			const selectedIndex = selectElement.selectedIndex;
+			if ( selectElement.options[ selectedIndex ]?.value === '' ) {
+				recordEvent( 'product_attributes_buttons', {
+					action: 'add_new',
+				} );
+			}
+		} );
+
+	document
+		.querySelector( '#product_attributes .attribute_taxonomy' )
+		?.addEventListener( 'click', () => {
+			recordEvent( 'product_attributes_buttons', {
+				action: 'add_existing',
+				empty_state:
+					document.querySelectorAll( '.woocommerce_attribute' )
+						.length === 0,
+			} );
+		} );
+
+	const attributesSection = '#product_attributes';
+
+	// We attach the events in this way because the buttons are added dynamically.
+	attachEventListenerToParentForChildren( attributesSection, [
+		{
+			eventName: 'click',
+			query: '.select2-selection__placeholder, .select2-selection__rendered',
+			callback: () => {
+				recordEvent( 'product_attributes_buttons', {
+					action: 'add_existing',
+					empty_state:
+						document.querySelectorAll( '.woocommerce_attribute' )
+							.length === 0,
+				} );
+			},
+		},
+	] );
+
 	const attributesCount = document.querySelectorAll(
 		'.woocommerce_attribute'
 	).length;
