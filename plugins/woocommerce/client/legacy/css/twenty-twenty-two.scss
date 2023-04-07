@@ -70,7 +70,6 @@ $tt2-gray: #f7f7f7;
 		color: var(--wp--preset--color--background, $primarytext);
 		border: 1px solid var(--wp--preset--color--primary, $primary);
 		padding: 1rem 2rem;
-		margin-top: 1rem;
 		text-decoration: none;
 		font-size: medium;
 		cursor: pointer;
@@ -147,6 +146,7 @@ $tt2-gray: #f7f7f7;
 		display: inline-block;
 		text-align: center;
 		white-space: normal;
+		margin-top: 1rem;
 	}
 
 	// Moved from blocktheme.css to make sure TT2 won't be changed.
