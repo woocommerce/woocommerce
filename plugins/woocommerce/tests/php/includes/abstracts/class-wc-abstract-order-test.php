@@ -272,11 +272,16 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Test for get_discount_to_display which must return a value
-	 * with and without tax whatever the setting of the options
+	 * with and without tax whatever the setting of the options.
 	 *
 	 * Issue :https://github.com/woocommerce/woocommerce/issues/36794
 	 */
 	public function test_get_discount_to_display() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_currency', 'USD' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+
 		// Set dummy data
 		$tax_rate = array(
 			'tax_rate_country'  => '',
@@ -289,7 +294,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$coupon  = WC_Helper_Coupon::create_coupon();
-		$product = WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product( true, array( 'price' => 10 ) );
 
 		$order = new WC_Order();
 		$order->add_product( $product );
@@ -297,16 +302,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->calculate_totals();
 		$order->save();
 
-		// Test
-		update_option( 'woocommerce_currency', 'USD' );
-		update_option( 'woocommerce_currency_pos', 'right' );
-		update_option( 'woocommerce_price_thousand_sep', '' );
-		update_option( 'woocommerce_price_decimal_sep', '.' );
-		update_option( 'woocommerce_price_num_decimals', 2 );
-
-		update_option( 'woocommerce_tax_display_cart', 'incl' );
-		$this->assertEquals( '1.00$', strip_tags( $order->get_discount_to_display( 'excl' ) ) );
-		$this->assertEquals( '1.20$', strip_tags( $order->get_discount_to_display( 'incl' ) ) );
+		$this->assertEquals( wc_price( 1, array( 'currency' => 'USD' ) ), $order->get_discount_to_display( 'excl' ) );
+		$this->assertEquals( wc_price( 1.20, array( 'currency' => 'USD' ) ), $order->get_discount_to_display( 'incl' ) );
 	}
 
 }
