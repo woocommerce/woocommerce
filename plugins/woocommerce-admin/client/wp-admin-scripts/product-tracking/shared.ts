@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
+import { addCustomerEffortScoreExitPageListener } from '@woocommerce/customer-effort-score';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { waitUntilElementIsPresent } from './utils';
-import { addCustomerEffortScoreExitPageListener } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 
 /**
  * Get the product data.
@@ -17,6 +17,11 @@ import { addCustomerEffortScoreExitPageListener } from '~/customer-effort-score-
 
 const isElementVisible = ( element: HTMLElement ) =>
 	! ( window.getComputedStyle( element ).display === 'none' );
+
+const getProductType = () => {
+	return ( document.querySelector( '#product-type' ) as HTMLInputElement )
+		?.value;
+};
 
 const getProductData = () => {
 	const isBlockEditor =
@@ -50,9 +55,7 @@ const getProductData = () => {
 	const productData = {
 		product_id: ( document.querySelector( '#post_ID' ) as HTMLInputElement )
 			?.value,
-		product_type: (
-			document.querySelector( '#product-type' ) as HTMLInputElement
-		 )?.value,
+		product_type: getProductType(),
 		is_downloadable: (
 			document.querySelector( '#_downloadable' ) as HTMLInputElement
 		 )?.checked
@@ -135,7 +138,7 @@ const getProductData = () => {
 /**
  * Get the publish date as a string.
  *
- * @param prefix Prefix for date element selectors.
+ * @param  prefix Prefix for date element selectors.
  * @return string
  */
 const getPublishDate = ( prefix = '' ) => {
@@ -186,8 +189,8 @@ const getPublishingWidgetData = () => {
 /**
  * Prefix all object keys with a string.
  *
- * @param obj    Object to create keys from.
- * @param prefix Prefix used before all keys.
+ * @param  obj    Object to create keys from.
+ * @param  prefix Prefix used before all keys.
  * @return object
  */
 const prefixObjectKeys = (
@@ -197,6 +200,94 @@ const prefixObjectKeys = (
 	return Object.fromEntries(
 		Object.entries( obj ).map( ( [ k, v ] ) => [ `${ prefix }${ k }`, v ] )
 	);
+};
+
+/**
+ * Gets the tab name for a tab element.
+ *
+ * @param  tab Tab element to get slug for.
+ * @return string
+ */
+const getTabName = ( tab: Element ) => {
+	const optionsSuffix = '_options';
+
+	const optionsClassNames = Array.from( tab.classList ).filter(
+		( className ) => className.endsWith( optionsSuffix )
+	);
+
+	if ( optionsClassNames.length > 0 ) {
+		const className = optionsClassNames[ 0 ];
+
+		return className.slice( 0, -optionsSuffix.length );
+	}
+
+	return '';
+};
+
+/**
+ * Gets additional data associated with a product tab click.
+ *
+ * @param  tabName The name of the tab to get data for.
+ * @return object
+ */
+const getDataForProductTabClickEvent = ( tabName: string ) => {
+	const data: Record< string, boolean | string > = {};
+
+	data.product_type = getProductType();
+
+	if ( tabName === 'inventory' ) {
+		data.is_store_stock_management_enabled =
+			document.querySelector( '#_manage_stock' ) !== null;
+	}
+
+	return data;
+};
+
+/**
+ * Initializes the product tabs Tracks events.
+ */
+const initProductTabsTracks = () => {
+	const tabs = document.querySelectorAll( '.product_data_tabs > li' );
+
+	tabs.forEach( ( tab ) => {
+		const tabName = getTabName( tab );
+
+		tab.querySelector( 'a' )?.addEventListener( 'click', () => {
+			recordEvent( 'product_tab_click', {
+				product_tab: tabName,
+				...getDataForProductTabClickEvent( tabName ),
+			} );
+		} );
+	} );
+};
+
+/**
+ * Initializes the inventory tab Tracks events.
+ */
+const initInventoryTabTracks = () => {
+	document
+		.querySelector( '#_manage_stock' )
+		?.addEventListener( 'click', ( event ) => {
+			recordEvent( 'product_manage_stock_click', {
+				is_enabled: ( event.target as HTMLInputElement )?.checked,
+			} );
+		} );
+
+	document
+		.querySelector( '#_manage_stock_disabled' )
+		?.addEventListener( 'click', () => {
+			recordEvent(
+				'product_manage_stock_disabled_store_settings_link_click'
+			);
+		} );
+
+	document
+		.querySelector( '#inventory_product_data .notice a' )
+		?.addEventListener( 'click', () => {
+			recordEvent(
+				'product_inventory_variations_notice_learn_more_click'
+			);
+		} );
 };
 
 /**
@@ -413,7 +504,14 @@ export const initProductScreenTracks = () => {
 
 	document
 		.querySelector( '.save_attributes' )
-		?.addEventListener( 'click', () => {
+		?.addEventListener( 'click', ( event ) => {
+			if (
+				event.target instanceof Element &&
+				event.target.classList.contains( 'disabled' )
+			) {
+				// skip in case the button is disabled
+				return;
+			}
 			const newAttributesCount = document.querySelectorAll(
 				'.woocommerce_attribute'
 			).length;
@@ -465,6 +563,9 @@ export const initProductScreenTracks = () => {
 				recordEvent( 'product_view_product_dismiss', getProductData() );
 			} );
 	} );
+
+	initProductTabsTracks();
+	initInventoryTabTracks();
 };
 
 export function addExitPageListener( pageId: string ) {

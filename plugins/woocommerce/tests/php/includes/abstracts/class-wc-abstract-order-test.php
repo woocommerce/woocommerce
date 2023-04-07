@@ -306,4 +306,22 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( wc_price( 1.20, array( 'currency' => 'USD' ) ), $order->get_discount_to_display( 'incl' ) );
 	}
 
+	/**
+	 * @testDox Cache does not interfere if wc_get_order returns a different class than WC_Order.
+	 */
+	public function test_cache_does_not_interferes_with_order_object() {
+		add_action(
+			'woocommerce_new_order',
+			function( $order_id ) {
+				// this makes the cache store a specific order class instance, but it's quickly replaced by a generic one
+				// as we're in the middle of a save and this gets executed before the logic in WC_Abstract_Order.
+				$order = wc_get_order( $order_id );
+			}
+		);
+		$order = new WC_Order();
+		$order->save();
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertInstanceOf( Automattic\WooCommerce\Admin\Overrides\Order::class, $order );
+	}
 }

@@ -1,0 +1,27 @@
+.wp-block-woocommerce-product-radio {
+    .components-base-control__label {
+        text-transform: none;
+        font-weight: 400;
+        > span {
+            display: block;
+            line-height: 1.5;
+        }
+        margin-bottom: $gap-large;
+    }
+
+    &__title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e1e1e;
+        margin-bottom: $gap-smaller;
+    }
+
+    &__description {
+        font-size: 13px;
+        color: #1e1e1e;
+    }
+
+    .components-base-control__field > .components-v-stack {
+        gap: $gap;
+    }
+}

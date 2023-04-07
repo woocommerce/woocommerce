@@ -8,6 +8,6 @@ import { createContext } from '@wordpress/element';
  *
  * See https://medium.com/@Heydon/managing-heading-levels-in-design-systems-18be9a746fa3
  */
-const Level = createContext( 2 );
+const Level: React.Context< number > = createContext( 2 );
 
 export { Level };

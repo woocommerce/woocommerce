@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Fix issue were template was not re-synced when switching between products.

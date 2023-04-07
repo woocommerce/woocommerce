@@ -36,7 +36,13 @@ test.describe( 'Analytics pages', () => {
 				'//button[@title="Choose which analytics to display and the section name"]'
 			);
 			await page.click( 'text=Move up' );
-			await page.waitForTimeout( 1000 );
+
+			// wait for the changes to be saved
+			await page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/users/' ) &&
+					response.status() === 200
+			);
 		}
 	} );
 

@@ -6,10 +6,13 @@
  * @since 3.5.0
  */
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+
 /**
  * Payment gateway test class.
  */
 class Payment_Gateways extends WC_REST_Unit_Test_Case {
+	use ArraySubsetAsserts;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -47,7 +50,18 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$gateways = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertContains(
+
+		$matching_gateway_data = current(
+			array_filter(
+				$gateways,
+				function( $gateway ) {
+					return 'cheque' === $gateway['id'];
+				}
+			)
+		);
+		$this->assertIsArray( $matching_gateway_data );
+
+		$this->assertArraySubset(
 			array(
 				'id'                     => 'cheque',
 				'title'                  => 'Check payments',
@@ -85,7 +99,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-			$gateways
+			$matching_gateway_data
 		);
 	}
 

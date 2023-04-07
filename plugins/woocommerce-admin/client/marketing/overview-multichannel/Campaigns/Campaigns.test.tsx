@@ -7,21 +7,23 @@ import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
-import { useCampaigns } from './useCampaigns';
-import { useCampaignTypes } from '~/marketing/hooks';
+import { useCampaignTypes, useCampaigns } from '~/marketing/hooks';
 import { Campaigns } from './Campaigns';
 
-jest.mock( './useCampaigns', () => ( {
-	useCampaigns: jest.fn(),
-} ) );
-
 jest.mock( '~/marketing/hooks', () => ( {
+	useCampaigns: jest.fn(),
 	useCampaignTypes: jest.fn(),
 } ) );
 
-jest.mock( './CreateNewCampaignModal', () => ( {
-	CreateNewCampaignModal: () => <div>Mocked CreateNewCampaignModal</div>,
-} ) );
+jest.mock( '~/marketing/components', () => {
+	const originalModule = jest.requireActual( '~/marketing/components' );
+
+	return {
+		__esModule: true,
+		...originalModule,
+		CreateNewCampaignModal: () => <div>Mocked CreateNewCampaignModal</div>,
+	};
+} );
 
 /**
  * Create a test campaign data object.

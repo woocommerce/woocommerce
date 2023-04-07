@@ -56,12 +56,22 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_style_add_data( 'woocommerce_admin_privacy_styles', 'rtl', 'replace' );
 
 			if ( $screen && $screen->is_block_editor() ) {
-				wp_register_style( 'woocommerce-general', WC()->plugin_url() . '/assets/css/woocommerce.css', array(), $version );
-				wp_style_add_data( 'woocommerce-general', 'rtl', 'replace' );
-				if ( wc_current_theme_is_fse_theme() ) {
-					wp_register_style( 'woocommerce-blocktheme', WC()->plugin_url() . '/assets/css/woocommerce-blocktheme.css', array(), $version );
-					wp_style_add_data( 'woocommerce-blocktheme', 'rtl', 'replace' );
-					wp_enqueue_style( 'woocommerce-blocktheme' );
+				$styles = WC_Frontend_Scripts::get_styles();
+
+				if ( $styles ) {
+					foreach ( $styles as $handle => $args ) {
+						wp_register_style(
+							$handle,
+							$args['src'],
+							$args['deps'],
+							$args['version'],
+							$args['media']
+						);
+
+						if ( ! isset( $args['has_rtl'] ) ) {
+							wp_style_add_data( $handle, 'rtl', 'replace' );
+						}
+					}
 				}
 			}
 
@@ -215,7 +225,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'gateway_toggle' => wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ),
 					),
 					'urls'                              => array(
-						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) || Features::is_enabled( 'block-editor-feature-enabled' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
+						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) || Features::is_enabled( 'product-block-editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),

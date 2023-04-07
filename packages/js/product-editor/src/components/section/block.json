@@ -13,6 +13,9 @@
 		},
 		"description": {
 			"type": "string"
+		},
+		"icon": {
+			"type": "object"
 		}
 	},
 	"supports": {
@@ -22,5 +25,6 @@
 		"reusable": false,
 		"inserter": false,
 		"lock": false
-	}
+	},
+	"editorStyle": "file:./editor.css"
 }

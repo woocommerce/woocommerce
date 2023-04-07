@@ -135,7 +135,7 @@ test.describe('Payment Gateways API tests', () => {
 							"default": "",
 							"tip": "If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.",
 							"placeholder": "",
-							"options": {
+							"options": expect.objectContaining({
 								"Flat rate": {
 									"flat_rate": "Any &quot;Flat rate&quot; method"
 								},
@@ -145,7 +145,7 @@ test.describe('Payment Gateways API tests', () => {
 								"Local pickup": {
 									"local_pickup": "Any &quot;Local pickup&quot; method"
 								}
-							}
+							})
 						},
 						"enable_for_virtual": {
 							"id": "enable_for_virtual",

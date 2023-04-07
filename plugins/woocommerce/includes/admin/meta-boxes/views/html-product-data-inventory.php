@@ -50,8 +50,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			woocommerce_wp_text_input(
 				array(
 					'id'                => '_stock',
-					'value'             => wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ),
-					'label'             => __( 'Stock quantity', 'woocommerce' ),
+					'value'             => wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ?? 1 ),
+					'label'             => __( 'Quantity', 'woocommerce' ),
 					'desc_tip'          => true,
 					'description'       => __( 'Stock quantity. If this is a variable product this value will be used to control stock for all variations, unless you define stock at variation level.', 'woocommerce' ),
 					'type'              => 'number',
@@ -64,16 +64,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			echo '<input type="hidden" name="_original_stock" value="' . esc_attr( wc_stock_amount( $product_object->get_stock_quantity( 'edit' ) ) ) . '" />';
 
-			woocommerce_wp_select(
-				array(
-					'id'          => '_backorders',
-					'value'       => $product_object->get_backorders( 'edit' ),
-					'label'       => __( 'Allow backorders?', 'woocommerce' ),
-					'options'     => wc_get_product_backorder_options(),
-					'desc_tip'    => true,
-					'description' => __( 'If managing stock, this controls whether or not backorders are allowed. If enabled, stock quantity can go below 0.', 'woocommerce' ),
-				)
+			$backorder_args = array(
+				'id'          => '_backorders',
+				'value'       => $product_object->get_backorders( 'edit' ),
+				'label'       => __( 'Allow backorders?', 'woocommerce' ),
+				'options'     => wc_get_product_backorder_options(),
+				'desc_tip'    => true,
+				'description' => __( 'If managing stock, this controls whether or not backorders are allowed. If enabled, stock quantity can go below 0.', 'woocommerce' ),
 			);
+
+			/**
+			 * Allow 3rd parties to control whether "Allow backorder?" option will use radio buttons or a select.
+			 *
+			 * @since 7.6.0
+			 *
+			 * @param bool If false, "Allow backorders?" will be shown as a select. Default: it will use radio buttons.
+			 */
+			if ( apply_filters( 'woocommerce_product_allow_backorder_use_radio', true ) ) {
+				woocommerce_wp_radio( $backorder_args );
+			} else {
+				woocommerce_wp_select( $backorder_args );
+			}
 
 			woocommerce_wp_text_input(
 				array(
@@ -115,17 +126,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		}
 
-		woocommerce_wp_select(
-			array(
-				'id'            => '_stock_status',
-				'value'         => $product_object->get_stock_status( 'edit' ),
-				'wrapper_class' => 'stock_status_field hide_if_variable hide_if_external hide_if_grouped',
-				'label'         => __( 'Stock status', 'woocommerce' ),
-				'options'       => wc_get_product_stock_status_options(),
-				'desc_tip'      => true,
-				'description'   => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
-			)
+		$stock_status_options = wc_get_product_stock_status_options();
+		$stock_status_count   = count( $stock_status_options );
+		$stock_status_args    = array(
+			'id'            => '_stock_status',
+			'value'         => $product_object->get_stock_status( 'edit' ),
+			'wrapper_class' => 'stock_status_field hide_if_variable hide_if_external hide_if_grouped',
+			'label'         => __( 'Stock status', 'woocommerce' ),
+			'options'       => $stock_status_options,
+			'desc_tip'      => true,
+			'description'   => __( 'Controls whether or not the product is listed as "in stock" or "out of stock" on the frontend.', 'woocommerce' ),
 		);
+
+		/**
+		 * Allow 3rd parties to control whether the "Stock status" option will use radio buttons or a select.
+		 *
+		 * @since 7.6.0
+		 *
+		 * @param bool If false, the "Stock status" will be shown as a select. Default: it will use radio buttons.
+		 */
+		if ( apply_filters( 'woocommerce_product_stock_status_use_radio', $stock_status_count <= 3 && $stock_status_count >= 1 ) ) {
+			woocommerce_wp_radio( $stock_status_args );
+		} else {
+			woocommerce_wp_select( $stock_status_args );
+		}
 
 		do_action( 'woocommerce_product_options_stock_status' );
 		?>

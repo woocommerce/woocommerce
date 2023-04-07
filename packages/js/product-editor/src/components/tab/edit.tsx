@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import classnames from 'classnames';
 import { createElement } from '@wordpress/element';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import type { BlockAttributes } from '@wordpress/blocks';
 
 /**
@@ -17,7 +17,7 @@ export function Edit( {
 }: {
 	attributes: BlockAttributes;
 	context?: {
-		selectedTab?: string;
+		selectedTab?: string | null;
 	};
 } ) {
 	const blockProps = useBlockProps();
@@ -30,14 +30,18 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<TabButton
-				id={ id }
-				className={ isSelected ? 'is-selected' : undefined }
-			>
+			<TabButton id={ id } selected={ isSelected }>
 				{ title }
 			</TabButton>
-			<div className={ classes }>
-				<InnerBlocks templateLock="all" />
+			<div
+				id={ `woocommerce-product-tab__${ id }-content` }
+				aria-labelledby={ `woocommerce-product-tab__${ id }` }
+				role="tabpanel"
+				className={ classes }
+			>
+				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+				{ /* @ts-ignore Content only template locking does exist for this property. */ }
+				<InnerBlocks templateLock="contentOnly" />
 			</div>
 		</div>
 	);

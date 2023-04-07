@@ -51,11 +51,6 @@ const Dashboard = lazy( () =>
 const Homescreen = lazy( () =>
 	import( /* webpackChunkName: "homescreen" */ '../homescreen' )
 );
-const MarketingOverview = lazy( () =>
-	import(
-		/* webpackChunkName: "marketing-overview" */ '../marketing/overview'
-	)
-);
 const MarketingOverviewMultichannel = lazy( () =>
 	import(
 		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
@@ -157,9 +152,7 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures.marketing ) {
 		pages.push( {
-			container: window.wcAdminFeatures[ 'multichannel-marketing' ]
-				? MarketingOverviewMultichannel
-				: MarketingOverview,
+			container: MarketingOverviewMultichannel,
 			path: '/marketing',
 			breadcrumbs: [
 				...initialBreadcrumbs,
@@ -174,7 +167,7 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures[ 'block-editor-feature-enabled' ] ) {
+	if ( window.wcAdminFeatures[ 'product-block-editor' ] ) {
 		pages.push( {
 			container: ProductPage,
 			path: '/add-product',

@@ -2,7 +2,7 @@
 	"features": {
 		"activity-panels": true,
 		"analytics": true,
-		"block-editor-feature-enabled": true,
+		"product-block-editor": true,
 		"coupons": true,
 		"customer-effort-score-tracks": true,
 		"import-products-task": true,
@@ -11,7 +11,6 @@
 		"shipping-setting-tour": true,
 		"homescreen": true,
 		"marketing": true,
-		"multichannel-marketing": true,
 		"minified-js": true,
 		"mobile-app-banner": true,
 		"navigation": true,

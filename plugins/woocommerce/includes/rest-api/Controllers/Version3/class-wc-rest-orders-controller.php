@@ -239,33 +239,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	}
 
 	/**
-	 * Get formatted item data.
-	 *
-	 * @param WC_Order $order WC_Data instance.
-	 * @return array
-	 */
-	protected function get_formatted_item_data( $order ) {
-		$item_data       = parent::get_formatted_item_data( $order );
-		$cpt_hidden_keys = array();
-
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$cpt_hidden_keys = ( new \WC_Order_Data_Store_CPT() )->get_internal_meta_keys();
-		}
-
-		// XXX: This might be removed once we finalize the design for internal keys vs meta vs props in COT.
-		if ( ! empty( $item_data['meta_data'] ) ) {
-			$item_data['meta_data'] = array_filter(
-				$item_data['meta_data'],
-				function( $meta ) use ( $cpt_hidden_keys ) {
-					return ! in_array( $meta->key, $cpt_hidden_keys, true );
-				}
-			);
-		}
-
-		return $item_data;
-	}
-
-	/**
 	 * Prepare objects query.
 	 *
 	 * @since  3.0.0

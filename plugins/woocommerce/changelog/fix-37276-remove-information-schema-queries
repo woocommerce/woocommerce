@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Replace information_schema queries in favor of create table parsing to remove foreign key constraints during updates

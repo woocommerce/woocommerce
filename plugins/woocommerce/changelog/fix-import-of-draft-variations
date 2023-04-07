@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix variations exported as draft being imported as draft (and thus remaining invisible)

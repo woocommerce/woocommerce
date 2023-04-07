@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Template } from '@wordpress/blocks';
+import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -9,12 +9,9 @@ import {
 	useState,
 } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
-import { useSelect, select as WPSelect, useDispatch } from '@wordpress/data';
+import { useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	BlockBreadcrumb,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	BlockContextProvider,
@@ -24,7 +21,6 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	BlockTools,
-	BlockInspector,
 	EditorSettings,
 	EditorBlockListSettings,
 	WritingFlow,
@@ -41,7 +37,6 @@ import {
 /**
  * Internal dependencies
  */
-import { Sidebar } from '../sidebar';
 import { Tabs } from '../tabs';
 
 type BlockEditorProps = {
@@ -58,11 +53,6 @@ export function BlockEditor( {
 	product,
 }: BlockEditorProps ) {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
-
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore __experimentalTearDownEditor is not yet included in types package.
-	const { setupEditor, __experimentalTearDownEditor } =
-		useDispatch( 'core/editor' );
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
@@ -93,19 +83,18 @@ export function BlockEditor( {
 		};
 	}, [ canUserCreateMedia, _settings ] );
 
-	useLayoutEffect( () => {
-		setupEditor( product, {}, _settings?.template );
-
-		return () => {
-			__experimentalTearDownEditor();
-		};
-	}, [] );
-
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
 		'product',
 		{ id: product.id }
 	);
+
+	useLayoutEffect( () => {
+		onChange(
+			synchronizeBlocksWithTemplate( [], _settings?.template ),
+			{}
+		);
+	}, [ product.id ] );
 
 	if ( ! blocks ) {
 		return null;
@@ -121,10 +110,6 @@ export function BlockEditor( {
 					settings={ settings }
 				>
 					<Tabs onChange={ setSelectedTab } />
-					<BlockBreadcrumb />
-					<Sidebar.InspectorFill>
-						<BlockInspector />
-					</Sidebar.InspectorFill>
 					<div className="editor-styles-wrapper">
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 						{ /* @ts-ignore No types for this exist yet. */ }

@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Make sure 'safe_text' settings are rendered as 'text' inputs for compatibility.
