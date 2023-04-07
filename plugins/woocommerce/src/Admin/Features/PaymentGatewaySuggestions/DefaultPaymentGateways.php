@@ -42,7 +42,7 @@ class DefaultPaymentGateways {
 		'zipmoney'                                        => 10,
 		'payoneer-checkout'                               => 11,
 	);
-	
+
 	/**
 	 * Get default specs.
 	 *
@@ -1176,7 +1176,7 @@ class DefaultPaymentGateways {
 	/**
 	 * Get the default recommendation priority for a payment gateway.
 	 * This is used when a country is not in the $recommendation_priority_map array.
-	 * 
+	 *
 	 * @param string $id Payment gateway id.
 	 * @return int Priority.
 	 */
