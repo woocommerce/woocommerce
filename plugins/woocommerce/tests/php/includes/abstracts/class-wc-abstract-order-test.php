@@ -282,7 +282,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_currency', 'USD' );
 		update_option( 'woocommerce_tax_display_cart', 'incl' );
 
-		// Set dummy data
+		// Set dummy data.
 		$tax_rate = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
