@@ -75,14 +75,13 @@ export function Edit() {
 		}
 	);
 
+	const nameIsValid = Boolean( name ) && name !== AUTO_DRAFT_NAME;
 	const setSkuIfEmpty = () => {
-		if ( sku || ! name?.length ) {
+		if ( sku || ! nameIsValid ) {
 			return;
 		}
 		setSku( cleanForSlug( name ) );
 	};
-
-	const nameIsValid = Boolean( name ) && name !== AUTO_DRAFT_NAME;
 
 	return (
 		<>
