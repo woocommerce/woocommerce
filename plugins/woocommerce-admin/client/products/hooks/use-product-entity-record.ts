@@ -6,19 +6,7 @@ import { Product } from '@woocommerce/data';
 import { useDispatch, resolveSelect } from '@wordpress/data';
 import { getQuery } from '@woocommerce/navigation';
 import { useEffect, useState } from '@wordpress/element';
-
-type ApiFetchOptions = Record< string, string >;
-
-type Middleware = (
-	options: ApiFetchOptions,
-	next: ( options: ApiFetchOptions ) => void
-) => void;
-
-type ApiFetch = {
-	use: ( middleware: Middleware ) => void;
-};
-
-declare const wp: { apiFetch: ApiFetch };
+import apiFetch from '@wordpress/api-fetch';
 
 const isProductEditor = () => {
 	const query: { page?: string; path?: string } = getQuery();
@@ -41,9 +29,13 @@ export function useProductEntityRecord(
 	useEffect( () => {
 		// This is needed to ensure that we use the correct namespace for the entity data store
 		// without disturbing the rest_namespace outside of the product block editor.
-		wp.apiFetch.use( ( options, next ) => {
+		apiFetch.use( ( options, next ) => {
 			const versionTwoRegex = new RegExp( '^/wp/v2/product' );
-			if ( versionTwoRegex.test( options?.path ) && isProductEditor() ) {
+			if (
+				options.path &&
+				versionTwoRegex.test( options?.path ) &&
+				isProductEditor()
+			) {
 				options.path = options.path.replace(
 					versionTwoRegex,
 					'/wc/v3/products'
