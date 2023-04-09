@@ -59,6 +59,11 @@ const MarketingOverviewMultichannel = lazy( () =>
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
+
+const CoreProfiler = lazy( () =>
+	import( /* webpackChunkName: "core-profiler" */ '../core-profiler' )
+);
+
 const SettingsGroup = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../settings' )
 );
@@ -250,6 +255,18 @@ export const getPages = () => {
 			breadcrumbs: [
 				...initialBreadcrumbs,
 				__( 'Setup Wizard', 'woocommerce' ),
+			],
+			capability: 'manage_woocommerce',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'core-profiler' ] ) {
+		pages.push( {
+			container: CoreProfiler,
+			path: '/profiler',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Profiler', 'woocommerce' ),
 			],
 			capability: 'manage_woocommerce',
 		} );
