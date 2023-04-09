@@ -1,6 +1,6 @@
 # WooCommerce Playwright End to End Tests
 
-This is the documentation for the new e2e testing setup based on Playwright and wp-env. It superseedes the Puppeteer and e2e-environment [setup](../tests/e2e), which we will gradually deprecate.
+This is the documentation for the new e2e testing setup based on Playwright and wp-env. It superseedes the Puppeteer and e2e-environment [setup](../e2e), which we will gradually deprecate.
 
 ## Table of contents
 
