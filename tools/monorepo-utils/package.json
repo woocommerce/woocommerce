@@ -1,5 +1,5 @@
 {
-	"name": "monorepo-utils",
+	"name": "@woocommerce/monorepo-utils",
 	"version": "0.0.1",
 	"description": "WooCommerce Monorepo utility tooling.",
 	"author": "Automattic",
