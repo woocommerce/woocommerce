@@ -605,6 +605,51 @@ class WC_Post_Types {
 										array(
 											'woocommerce/product-track-inventory-fields',
 										),
+										array(
+											'woocommerce/collapsible',
+											array(
+												'toggleText'       => __( 'Advanced', 'woocommerce' ),
+												'initialCollapsed' => true,
+												'persistRender'    => true,
+											),
+											array(
+												array(
+													'woocommerce/conditional',
+													array(
+														'mustMatch' => array(
+															'manage_stock' => array( true ),
+														),
+													),
+													array(
+														array(
+															'woocommerce/product-radio',
+															array(
+																'title'    => __( 'When out of stock', 'woocommerce' ),
+																'property' => 'backorders',
+																'options'  => array(
+																	array(
+																		'label' => __( 'Allow purchases', 'woocommerce' ),
+																		'value' => 'yes',
+																	),
+																	array(
+																		'label' => __(
+																			'Allow purchases, but notify customers',
+																			'woocommerce'
+																		),
+																		'value' => 'notify',
+																	),
+																	array(
+																		'label' => __( "Don't allow purchases", 'woocommerce' ),
+																		'value' => 'no',
+																	),
+																),
+															),
+														),
+													),
+												),
+											),
+										),
+
 									),
 								),
 							),
