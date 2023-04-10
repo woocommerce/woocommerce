@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { useSelect, select as wpSelect } from '@wordpress/data';
-import { createElement, useRef } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { createElement, useRef, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,31 +16,45 @@ export const withSettingsHydration = ( group: string, settings: Settings ) =>
 		( OriginalComponent ) => ( props ) => {
 			const settingsRef = useRef( settings );
 
-			// @ts-expect-error registry is not defined in the wp.data typings
-			useSelect( ( select: typeof wpSelect, registry ) => {
+			const {
+				startResolution,
+				finishResolution,
+				updateSettingsForGroup,
+				clearIsDirty,
+			} = useDispatch( STORE_NAME );
+			const { isResolvingGroup, hasFinishedResolutionGroup } = useSelect(
+				( select ) => {
+					const { isResolving, hasFinishedResolution } =
+						select( STORE_NAME );
+					return {
+						isResolvingGroup: isResolving( 'getSettings', [
+							group,
+						] ),
+						hasFinishedResolutionGroup: hasFinishedResolution(
+							'getSettings',
+							[ group ]
+						),
+					};
+				}
+			);
+			useEffect( () => {
 				if ( ! settingsRef.current ) {
 					return;
 				}
-
-				const { isResolving, hasFinishedResolution } =
-					select( STORE_NAME );
-				const {
-					startResolution,
-					finishResolution,
-					updateSettingsForGroup,
-					clearIsDirty,
-				} = registry.dispatch( STORE_NAME );
-
-				if (
-					! isResolving( 'getSettings', [ group ] ) &&
-					! hasFinishedResolution( 'getSettings', [ group ] )
-				) {
+				if ( ! isResolvingGroup && ! hasFinishedResolutionGroup ) {
 					startResolution( 'getSettings', [ group ] );
 					updateSettingsForGroup( group, settingsRef.current );
 					clearIsDirty( group );
 					finishResolution( 'getSettings', [ group ] );
 				}
-			}, [] );
+			}, [
+				isResolvingGroup,
+				hasFinishedResolutionGroup,
+				finishResolution,
+				updateSettingsForGroup,
+				startResolution,
+				clearIsDirty,
+			] );
 
 			return <OriginalComponent { ...props } />;
 		},
