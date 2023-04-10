@@ -8,6 +8,7 @@ import {
 	useLayoutEffect,
 	useRef,
 	useState,
+	useEffect,
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -76,9 +77,11 @@ export const Layout = ( {
 		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
 			'two_columns' && hasTwoColumnContent;
 
-	if ( isBatchUpdating && ! showInbox ) {
-		setShowInbox( true );
-	}
+	useEffect( () => {
+		if ( isBatchUpdating && ! showInbox ) {
+			setShowInbox( true );
+		}
+	}, [ isBatchUpdating, showInbox ] );
 
 	const isWideViewport = useRef( true );
 	const maybeToggleColumns = useCallback( () => {
