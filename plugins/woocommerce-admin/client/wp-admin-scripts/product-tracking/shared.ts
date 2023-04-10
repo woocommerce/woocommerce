@@ -457,6 +457,34 @@ const attachProductAttributesTracks = () => {
 				} );
 			},
 		},
+		{
+			eventName: 'click',
+			query: '.woocommerce_attribute_visible_on_product_page',
+			callback: () => {
+				const visibleOnProductPage = document.querySelector(
+					'.woocommerce_attribute_visible_on_product_page'
+				) as HTMLInputElement;
+
+				recordEvent( 'product_attributes_buttons', {
+					action: 'used_for_variations',
+					checked: visibleOnProductPage?.checked,
+				} );
+			},
+		},
+		{
+			eventName: 'click',
+			query: '.woocommerce_attribute_used_for_variations',
+			callback: () => {
+				const usedForVariations = document.querySelector(
+					'.woocommerce_attribute_used_for_variations'
+				) as HTMLInputElement;
+
+				recordEvent( 'product_attributes_buttons', {
+					action: 'used_for_variations',
+					checked: usedForVariations?.checked,
+				} );
+			},
+		},
 	] );
 
 	const attributesCount = document.querySelectorAll(
