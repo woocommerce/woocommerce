@@ -24,6 +24,7 @@ import { init as initScheduleSale } from '../../blocks/schedule-sale';
 import { init as initTrackInventory } from '../../blocks/track-inventory';
 import { init as initSku } from '../../blocks/inventory-sku';
 import { init as initConditional } from '../conditional-block';
+import { init as initLowStockQty } from '../inventory-email-block';
 
 export const initBlocks = () => {
 	const coreBlocks = __experimentalGetCoreBlocks();
@@ -46,4 +47,5 @@ export const initBlocks = () => {
 	initTrackInventory();
 	initSku();
 	initConditional();
+	initLowStockQty();
 };

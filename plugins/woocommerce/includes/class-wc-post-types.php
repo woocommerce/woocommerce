@@ -647,6 +647,9 @@ class WC_Post_Types {
 														),
 													),
 												),
+												array(
+													'woocommerce/product-inventory-email',
+												),
 											),
 										),
 
