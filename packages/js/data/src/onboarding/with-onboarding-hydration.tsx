@@ -2,15 +2,14 @@
  * External dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { useSelect } from '@wordpress/data';
-import { createElement, useRef } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
+import { createElement, useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
 import { ProfileItems } from './types';
-import { OnboardingSelector } from './';
 
 export const withOnboardingHydration = ( data: {
 	profileItems: ProfileItems;
@@ -20,39 +19,26 @@ export const withOnboardingHydration = ( data: {
 	return createHigherOrderComponent< Record< string, unknown > >(
 		( OriginalComponent ) => ( props ) => {
 			const onboardingRef = useRef( data );
+			const { startResolution, finishResolution, setProfileItems } =
+				useDispatch( STORE_NAME );
+			useEffect( () => {
+				if ( ! onboardingRef.current ) {
+					return;
+				}
 
-			useSelect(
-				// @ts-expect-error // @ts-expect-error registry is not defined in the wp.data typings
-				( select: ( s: string ) => OnboardingSelector, registry ) => {
-					if ( ! onboardingRef.current ) {
-						return;
-					}
+				const { profileItems } = onboardingRef.current;
+				if ( ! profileItems ) {
+					return;
+				}
 
-					const { isResolving, hasFinishedResolution } =
-						select( STORE_NAME );
-					const {
-						startResolution,
-						finishResolution,
-						setProfileItems,
-					} = registry.dispatch( STORE_NAME );
+				if ( profileItems && ! hydratedProfileItems ) {
+					startResolution( 'getProfileItems', [] );
+					setProfileItems( profileItems, true );
+					finishResolution( 'getProfileItems', [] );
 
-					const { profileItems } = onboardingRef.current;
-
-					if (
-						profileItems &&
-						! hydratedProfileItems &&
-						! isResolving( 'getProfileItems', [] ) &&
-						! hasFinishedResolution( 'getProfileItems', [] )
-					) {
-						startResolution( 'getProfileItems', [] );
-						setProfileItems( profileItems, true );
-						finishResolution( 'getProfileItems', [] );
-
-						hydratedProfileItems = true;
-					}
-				},
-				[]
-			);
+					hydratedProfileItems = true;
+				}
+			}, [ finishResolution, setProfileItems, startResolution ] );
 
 			return <OriginalComponent { ...props } />;
 		},
