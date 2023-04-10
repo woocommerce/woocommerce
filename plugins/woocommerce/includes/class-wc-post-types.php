@@ -691,7 +691,7 @@ class WC_Post_Types {
 										'description' => sprintf(
 											/* translators: %1$s: How to get started? link opening tag. %2$s: How to get started? link closing tag.*/
 											__( 'Set up shipping costs and enter dimensions used for accurate rate calculations. %1$sHow to get started?%2$s.', 'woocommerce' ),
-											'<a href="http://woocommerce.com/#" target="_blank" rel="noreferrer">',
+											'<a href="https://woocommerce.com/posts/how-to-calculate-shipping-costs-for-your-woocommerce-store/" target="_blank" rel="noreferrer">',
 											'</a>'
 										),
 										'icon'  => array(
@@ -699,6 +699,12 @@ class WC_Post_Types {
 										),
 									),
 									array(
+										array(
+											'woocommerce/product-shipping-fee-fields',
+											array(
+												'title' => __( 'Shipping fee', 'woocommerce' ),
+											),
+										),
 										array(
 											'woocommerce/product-shipping-dimensions-fields',
 										),
