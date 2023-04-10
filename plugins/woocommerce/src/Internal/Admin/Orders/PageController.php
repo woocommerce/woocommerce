@@ -286,8 +286,13 @@ class PageController {
 
 		$this->order = new $order_class_name();
 		$this->order->set_object_read( false );
-		$this->order->set_status( 'pending' );
+		$this->order->set_status( 'auto-draft' );
 		$this->order->save();
+
+		// Schedule auto-draft cleanup. We re-use the WP event here on purpose.
+		if ( ! wp_next_scheduled( 'wp_scheduled_auto_draft_delete' ) ) {
+			wp_schedule_event( time(), 'daily', 'wp_scheduled_auto_draft_delete' );
+		}
 
 		$theorder = $this->order;
 	}
