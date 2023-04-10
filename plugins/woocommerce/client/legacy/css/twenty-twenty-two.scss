@@ -594,7 +594,8 @@ ul.wc-tabs {
 	font-size: var(--wp--preset--font-size--small);
 	margin-left: 1em;
 
-	h2 {
+	// Hide repeated heading.
+	h2:first-of-type {
 		display: none;
 	}
 }
