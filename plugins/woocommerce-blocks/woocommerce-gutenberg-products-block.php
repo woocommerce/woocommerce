@@ -8,7 +8,7 @@
  * Author URI: https://woocommerce.com
  * Text Domain:  woo-gutenberg-products-block
  * Requires at least: 6.1
- * Requires PHP: 7.2
+ * Requires PHP: 7.3
  * WC requires at least: 7.4
  * WC tested up to: 7.5
  *
