@@ -5,6 +5,7 @@ import type { BlockAttributes } from '@wordpress/blocks';
 import { createElement, useMemo } from '@wordpress/element';
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
+import { DisplayState } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -39,13 +40,13 @@ export function Edit( {
 		return true;
 	}, [ mustMatch, product ] );
 
-	if ( ! displayBlocks ) {
-		return null;
-	}
-
 	return (
 		<div { ...blockProps }>
-			<InnerBlocks templateLock="all" />
+			<DisplayState
+				state={ displayBlocks ? 'visible' : 'visually-hidden' }
+			>
+				<InnerBlocks templateLock="all" />
+			</DisplayState>
 		</div>
 	);
 }
