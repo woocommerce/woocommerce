@@ -28,6 +28,7 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
 		OrderHelper::create_order_custom_table_if_not_exist();
+		OrderHelper::toggle_cot( false );
 		$this->sut           = wc_get_container()->get( DataSynchronizer::class );
 		$features_controller = wc_get_container()->get( Featurescontroller::class );
 		$features_controller->change_feature_enable( 'custom_order_tables', true );
@@ -311,4 +312,43 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		$this->assertEquals( $order2->get_id(), $orders_to_migrate[0] );
 		$this->assertEquals( $max_id + 1, $orders_to_migrate[1] );
 	}
+
+	/**
+	 * Tests that auto-draft orders older than 1 week are automatically deleted when WP does the same for posts.
+	 *
+	 * @return void
+	 */
+	public function test_auto_draft_deletion(): void {
+		OrderHelper::toggle_cot( true );
+
+		$order1 = new \WC_Order();
+		$order1->set_status( 'auto-draft' );
+		$order1->set_date_created( strtotime( '-10 days' ) );
+		$order1->save();
+
+		$order2 = new \WC_Order();
+		$order2->set_status( 'auto-draft' );
+		$order2->save();
+
+		$order3 = new \WC_Order();
+		$order3->set_status( 'processing' );
+		$order3->save();
+
+		// Run WP's auto-draft delete.
+		do_action( 'wp_scheduled_auto_draft_delete' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+
+		$orders = wc_get_orders(
+			array(
+				'status' => 'all',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		// Confirm that only $order1 is deleted when the action runs but the other orders remain intact.
+		$this->assertContains( $order2->get_id(), $orders );
+		$this->assertContains( $order3->get_id(), $orders );
+		$this->assertNotContains( $order1->get_id(), $orders );
+	}
+
 }
