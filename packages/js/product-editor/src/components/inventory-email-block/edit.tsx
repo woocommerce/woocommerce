@@ -24,7 +24,9 @@ import {
 import { useEntityProp } from '@wordpress/core-data';
 
 export function Edit() {
-	const blockProps = useBlockProps();
+	const blockProps = useBlockProps( {
+		className: 'woocommerce-product-form__inventory-email',
+	} );
 	const notifyLowStockAmount = getSetting( 'notifyLowStockAmount', 2 );
 
 	const [ lowStockAmount, setLowStockAmount ] = useEntityProp(
@@ -37,7 +39,6 @@ export function Edit() {
 		<>
 			<div { ...blockProps }>
 				<BaseControl
-					className="woocommerce-product-form__inventory-email"
 					id={ 'product_inventory_email' }
 					label={ __( 'Email me when stock reaches', 'woocommerce' ) }
 					help={ createInterpolateElement(
@@ -67,6 +68,7 @@ export function Edit() {
 						) }
 						onChange={ setLowStockAmount }
 						value={ lowStockAmount }
+						min={ 0 }
 					/>
 				</BaseControl>
 			</div>
