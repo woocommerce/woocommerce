@@ -6,6 +6,10 @@
 		"module": "commonjs",
 		"esModuleInterop": true,
 		"moduleResolution": "node",
-		"typeRoots": [ "./typings", "./node_modules/@types" ]
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types",
+			"./node_modules/@commander-js/extra-typings"
+		]
 	}
 }
