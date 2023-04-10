@@ -278,7 +278,7 @@ const Settings = () => [
 	},
 	{
 		id: 'woocommerce_specific_allowed_countries',
-		value: [ 'DZ', 'CA', 'NZ', 'ES', 'GB', 'US' ],
+		value: [ 'AL', 'DZ', 'CA', 'NZ', 'ES', 'GB', 'US' ],
 	},
 	{
 		id: 'woocommerce_ship_to_countries',
@@ -286,7 +286,7 @@ const Settings = () => [
 	},
 	{
 		id: 'woocommerce_specific_ship_to_countries',
-		value: [ 'DZ', 'CA', 'NZ', 'ES', 'GB', 'US' ],
+		value: [ 'AL', 'DZ', 'CA', 'NZ', 'ES', 'GB', 'US' ],
 	},
 	{
 		id: 'woocommerce_enable_coupons',

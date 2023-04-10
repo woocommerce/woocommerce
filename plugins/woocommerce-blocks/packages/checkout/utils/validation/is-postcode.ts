@@ -27,8 +27,10 @@ export interface IsPostcodeProps {
 }
 
 const isPostcode = ( { postcode, country }: IsPostcodeProps ): boolean => {
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-	return DEFAULT_REGEXES.get( country )!.test( postcode );
+	// If the country is not in the list of regexes, trying to test it would result in an error, so we skip and assume
+	// that it is valid.
+	const postcodeTest = DEFAULT_REGEXES.get( country )?.test( postcode );
+	return typeof postcodeTest !== 'undefined' ? postcodeTest : true;
 };
 
 export default isPostcode;
