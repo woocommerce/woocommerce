@@ -9,7 +9,7 @@
 		"typeRoots": [
 			"./typings",
 			"./node_modules/@types",
-			"./node_modules/@commander-js/extra-typings"
+			"./node_modules/@commander-js"
 		]
 	}
 }
