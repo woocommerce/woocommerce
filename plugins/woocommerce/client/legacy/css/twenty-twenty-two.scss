@@ -598,6 +598,25 @@ ul.wc-tabs {
 	h2:first-of-type {
 		display: none;
 	}
+
+	// Attributes table styles.
+	table.woocommerce-product-attributes {
+		tbody {
+
+			td, th {
+				padding: 0.2rem 0.2rem 0.2rem 0;
+
+				p {
+					margin: 0;
+				}
+			}
+
+			th {
+				text-align: left;
+				padding-right: 1rem;
+			}
+		}
+	}
 }
 
 /**
