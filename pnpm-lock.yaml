@@ -2262,11 +2262,11 @@ importers:
       ts-jest: ^29.1.0
       typescript: ^4.9.5
     dependencies:
+      '@commander-js/extra-typings': 0.1.0_commander@9.4.0
       chalk: 4.1.2
       commander: 9.4.0
       dotenv: 10.0.0
     devDependencies:
-      '@commander-js/extra-typings': 0.1.0_commander@9.4.0
       '@types/jest': 27.4.1
       '@types/node': 16.18.21
       '@woocommerce/eslint-plugin': link:../../packages/js/eslint-plugin
@@ -2780,7 +2780,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@jridgewell/trace-mapping': 0.3.17
+      '@jridgewell/trace-mapping': 0.3.16
       commander: 4.1.1
       convert-source-map: 1.8.0
       fs-readdir-recursive: 1.1.0
@@ -7856,8 +7856,8 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-module-imports': 7.16.0
-      '@babel/helper-plugin-utils': 7.20.2
-      babel-plugin-polyfill-corejs2: 0.3.3_@babel+core@7.21.3
+      '@babel/helper-plugin-utils': 7.14.5
+      babel-plugin-polyfill-corejs2: 0.3.0_@babel+core@7.21.3
       babel-plugin-polyfill-corejs3: 0.4.0_@babel+core@7.21.3
       babel-plugin-polyfill-regenerator: 0.3.0_@babel+core@7.21.3
       semver: 6.3.0
@@ -9364,6 +9364,7 @@ packages:
       commander: 9.x
     dependencies:
       commander: 9.4.0
+    dev: false
 
   /@cspotcode/source-map-support/0.8.1:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -10910,7 +10911,6 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.14
-    dev: true
 
   /@jridgewell/trace-mapping/0.3.17:
     resolution: {integrity: sha512-MCNzAp77qzKca9+W/+I0+sEpaUnZoeasnghNeVc41VZCEKaCH73Vq3BZZ/SzWIgrqE4H4ceI+p+b6C0mHf9T4g==}
@@ -25613,7 +25613,7 @@ packages:
       is-glob: 4.0.3
       minimatch: 3.1.2
       object.values: 1.1.5
-      resolve: 1.20.0
+      resolve: 1.22.1
       tsconfig-paths: 3.14.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -25644,7 +25644,7 @@ packages:
       is-glob: 4.0.3
       minimatch: 3.1.2
       object.values: 1.1.5
-      resolve: 1.20.0
+      resolve: 1.22.1
       tsconfig-paths: 3.14.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript

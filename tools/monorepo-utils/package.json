@@ -9,10 +9,10 @@
 	"dependencies": {
 		"chalk": "^4.1.2",
 		"commander": "^9.4.0",
+		"@commander-js/extra-typings": "^0.1.0",
 		"dotenv": "^10.0.0"
 	},
 	"devDependencies": {
-		"@commander-js/extra-typings": "^0.1.0",
 		"@types/jest": "^27.4.1",
 		"@types/node": "^16.18.18",
 		"@woocommerce/eslint-plugin": "workspace:*",
