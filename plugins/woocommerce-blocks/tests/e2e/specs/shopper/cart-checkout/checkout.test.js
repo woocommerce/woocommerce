@@ -197,6 +197,36 @@ describe( 'Shopper → Checkout', () => {
 			await shopper.block.verifyShippingDetails( SHIPPING_DETAILS );
 			await shopper.block.verifyBillingDetails( BILLING_DETAILS );
 		} );
+		it( 'User can add postcodes for different countries', async () => {
+			await shopper.block.goToShop();
+			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await shopper.block.goToCheckout();
+			await page.waitForSelector(
+				'.wc-block-checkout__use-address-for-billing input[type="checkbox"]'
+			);
+			await unsetCheckbox(
+				'.wc-block-checkout__use-address-for-billing input[type="checkbox"]'
+			);
+			await shopper.block.fillShippingDetails( {
+				...SHIPPING_DETAILS,
+				country: 'Albania',
+				state: 'Berat',
+				postcode: '1234',
+			} );
+
+			await shopper.block.fillBillingDetails( {
+				...BILLING_DETAILS,
+				country: 'United Kingdom',
+				postcode: 'SW1 1AA',
+			} );
+
+			await expect( page ).not.toMatchElement(
+				'.wc-block-components-validation-error p',
+				{
+					text: 'Please enter a valid postcode',
+				}
+			);
+		} );
 	} );
 
 	describe( 'Checkout Form Errors', () => {
