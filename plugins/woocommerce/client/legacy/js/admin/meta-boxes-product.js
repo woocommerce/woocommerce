@@ -663,6 +663,10 @@ jQuery( function ( $ ) {
 
 				$parent.remove();
 
+				window.wcTracks.recordEvent( 'product_attributes_buttons', {
+					action: 'remove_attribute',
+				} );
+
 				if (
 					! $( '.woocommerce_attribute_data' ).is( ':visible' ) &&
 					! $( 'div.add-global-attribute-container' ).hasClass(
