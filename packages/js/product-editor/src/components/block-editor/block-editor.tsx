@@ -92,8 +92,10 @@ export function BlockEditor( {
 	);
 
 	useLayoutEffect( () => {
+		console.log( _settings );
+		console.log( templateName );
 		// @ts-ignore Temporarily ignore since the `template` type needs to be updated.
-		const template = _settings?.templates[ templateName ];
+		const template = _settings?.template[ templateName ];
 		onChange( synchronizeBlocksWithTemplate( [], template ), {} );
 	}, [ product.id, templateName ] );
 

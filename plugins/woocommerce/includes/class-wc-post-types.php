@@ -617,8 +617,7 @@ class WC_Post_Types {
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
 					'rest_namespace'      => 'wp/v3',
-					'template'            => $simple_product_template, // @todo This can load the current product type's template if needed.
-					'templates'           => array(
+					'template'           => array(
 						'simple' => $simple_product_template,
 						'custom' => $custom_product_template,
 					),
