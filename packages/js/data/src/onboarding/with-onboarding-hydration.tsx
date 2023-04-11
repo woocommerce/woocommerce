@@ -50,6 +50,7 @@ export const withOnboardingHydration = ( data: {
 				if (
 					profileItems &&
 					! hydratedProfileItems &&
+					// Ensure that profile items have finished resolving to prevent race conditions
 					! isResolvingGroup &&
 					! hasFinishedResolutionGroup
 				) {
