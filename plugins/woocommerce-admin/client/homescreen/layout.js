@@ -7,7 +7,6 @@ import {
 	useCallback,
 	useLayoutEffect,
 	useRef,
-	useState,
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -53,7 +52,6 @@ const Tasks = lazy( () =>
 
 export const Layout = ( {
 	defaultHomescreenLayout,
-	isBatchUpdating,
 	query,
 	taskListComplete,
 	hasTaskList,
@@ -68,17 +66,12 @@ export const Layout = ( {
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
-	const [ showInbox, setShowInbox ] = useState( true );
 	const isDashboardShown = ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const twoColumns =
 		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
 			'two_columns' && hasTwoColumnContent;
-
-	if ( isBatchUpdating && ! showInbox ) {
-		setShowInbox( true );
-	}
 
 	const isWideViewport = useRef( true );
 	const maybeToggleColumns = useCallback( () => {
