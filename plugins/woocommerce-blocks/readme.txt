@@ -80,7 +80,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
-= 10.0.0 - 2032-04-11 =
+= 10.0.0 - 2023-04-11 =
 
 #### Enhancements
 
