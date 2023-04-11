@@ -507,7 +507,7 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * Delete meta data.
+	 * Delete meta data with a matching value.
 	 *
 	 * @since 7.7.0
 	 * @param string $key   Meta key.
