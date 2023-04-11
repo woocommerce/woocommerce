@@ -35,7 +35,8 @@ export const withSettingsHydration = ( group: string, settings: Settings ) =>
 							[ group ]
 						),
 					};
-				}
+				},
+				[]
 			);
 			useEffect( () => {
 				if ( ! settingsRef.current ) {
