@@ -247,7 +247,7 @@ const getDataForProductTabClickEvent = ( tabName: string ) => {
 };
 
 /**
- * Adds the product tabs Tracks events.
+ * Attaches the product tabs Tracks events.
  */
 const addProductTabsTracks = () => {
 	const tabs = document.querySelectorAll( '.product_data_tabs > li' );
@@ -265,7 +265,7 @@ const addProductTabsTracks = () => {
 };
 
 /**
- * Adds the inventory tab Tracks events.
+ * Attaches the inventory tab Tracks events.
  */
 const addProductInventoryTabTracks = () => {
 	document
@@ -294,7 +294,7 @@ const addProductInventoryTabTracks = () => {
 };
 
 /**
- * Adds product tags tracks.
+ * Attaches product tags tracks.
  */
 const addProductTagsTracks = () => {
 	function deleteTagEventListener(/* event: Event */) {
@@ -373,7 +373,7 @@ const addProductTagsTracks = () => {
 };
 
 /**
- * Adds attributes tracks.
+ * Attaches attributes tracks.
  */
 const addAttributesTracks = () => {
 	function addNewTermEventHandler() {
@@ -403,7 +403,7 @@ const addAttributesTracks = () => {
 };
 
 /**
- * Adds product attributes tracks.
+ * Attaches product attributes tracks.
  */
 const addProductAttributesTracks = () => {
 	const attributesCount = document.querySelectorAll(
@@ -455,7 +455,7 @@ const addProductAttributesTracks = () => {
 };
 
 /**
- * Adds product variations tracks.
+ * Attaches product variations tracks.
  */
 const addProductVariationsTracks = () => {
 	document
@@ -519,7 +519,7 @@ const addProductVariationsTracks = () => {
 };
 
 /**
- * Adds general product screen tracks.
+ * Attaches general product screen tracks.
  */
 const addProductScreenTracks = () => {
 	const initialPublishingData = getPublishingWidgetData();
