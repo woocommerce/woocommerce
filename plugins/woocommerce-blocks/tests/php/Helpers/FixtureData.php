@@ -209,6 +209,53 @@ class FixtureData {
 	}
 
 	/**
+	 * Create a new product taxonomy and term.
+	 *
+	 * @param  \WC_Product $product  The product to add the term to.
+	 * @param  string      $taxonomy_name  The name of the taxonomy.
+	 * @param  string      $term_name  The name of the term.
+	 * @param  string      $term_slug  The slug of the term.
+	 * @param  int         $term_parent  The parent of the term.
+	 * @param  string      $term_description  The description of the term.
+	 *
+	 * @return array|int[]|\WP_Error|\WP_Taxonomy
+	 */
+	public function get_taxonomy_and_term( \WC_Product $product, $taxonomy_name, $term_name, $term_slug = '', $term_parent = 0, $term_description = '' ) {
+		$taxonomy = register_taxonomy( $taxonomy_name, array( 'product' ), array( 'hierarchical' => true ) );
+
+		if ( is_wp_error( $taxonomy ) ) {
+			return $taxonomy;
+		}
+
+		$term = wp_insert_term(
+			$term_name,
+			$taxonomy_name,
+			array(
+				'slug'        => $term_slug,
+				'parent'      => $term_parent,
+				'description' => $term_description,
+			)
+		);
+
+		if ( ! is_wp_error( $term ) && ! empty( $term['term_id'] ) ) {
+			global $wpdb;
+			$wpdb->insert(
+				$wpdb->prefix . 'wc_product_attributes_lookup',
+				array(
+					'product_id'             => $product->get_id(),
+					'product_or_parent_id'   => $product->get_parent_id(),
+					'taxonomy'               => $taxonomy_name,
+					'term_id'                => $term['term_id'],
+					'is_variation_attribute' => true,
+				),
+				array( '%d', '%d', '%s', '%d', '%d' )
+			);
+		}
+
+		return $term;
+	}
+
+	/**
 	 * Upload a sample image and return it's ID.
 	 *
 	 * @param integer $product_id

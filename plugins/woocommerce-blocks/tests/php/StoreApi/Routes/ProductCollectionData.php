@@ -82,6 +82,7 @@ class ProductCollectionData extends ControllerTestCase {
 				$fixtures->get_product_attribute( 'size', array( 'small', 'medium', 'large' ) ),
 			)
 		);
+		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
 
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
 		$request->set_param(
@@ -91,8 +92,20 @@ class ProductCollectionData extends ControllerTestCase {
 					'taxonomy'   => 'pa_size',
 					'query_type' => 'and',
 				),
+			),
+		);
+
+		$request->set_param(
+			'attributes',
+			array(
+				array(
+					'attribute' => 'pa_size',
+					'operator'  => 'in',
+					'slug'      => array( 'large' ),
+				),
 			)
 		);
+
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -100,8 +113,9 @@ class ProductCollectionData extends ControllerTestCase {
 		$this->assertEquals( null, $data['price_range'] );
 		$this->assertEquals( null, $data['rating_counts'] );
 
-		$this->assertObjectHasAttribute( 'term', $data['attribute_counts'][0] );
-		$this->assertObjectHasAttribute( 'count', $data['attribute_counts'][0] );
+		$this->assertIsArray( $data );
+		$this->assertTrue( property_exists( $data['attribute_counts'][0], 'term' ) );
+		$this->assertTrue( property_exists( $data['attribute_counts'][0], 'count' ) );
 	}
 
 	/**
