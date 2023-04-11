@@ -650,6 +650,20 @@ class WC_Post_Types {
 														),
 													),
 												),
+												array(
+													'woocommerce/product-checkbox',
+													array(
+														'title'    => __(
+															'Restrictions',
+															'woocommerce'
+														),
+														'label'    => __(
+															'Limit purchases to 1 item per order',
+															'woocommerce'
+														),
+														'property' => 'sold_individually',
+													),
+												),
 
 											),
 										),
