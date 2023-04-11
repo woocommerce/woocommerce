@@ -21,6 +21,7 @@ class EvaluateExtension {
 	 * @return object The evaluated extension.
 	 */
 	public static function evaluate( $extension ) {
+		global $wp_version;
 		$rule_evaluator = new RuleEvaluator();
 
 		if ( isset( $extension->is_visible ) ) {
@@ -28,6 +29,14 @@ class EvaluateExtension {
 			$extension->is_visible = $is_visible;
 		} else {
 			$extension->is_visible = true;
+		}
+
+		if ( isset( $extension->min_php_version ) ) {
+			$extension->is_visible = version_compare( PHP_VERSION, $extension->min_php_version, '>=' );
+		}
+
+		if ( isset( $extension->min_wp_version ) ) {
+			$extension->is_visible = version_compare( $wp_version, $extension->min_wp_version, '>=' );
 		}
 
 		$installed_plugins       = PluginsHelper::get_installed_plugin_slugs();
