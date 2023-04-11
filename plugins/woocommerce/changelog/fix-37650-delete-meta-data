@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add method delete_matched_meta_data to WC_Data objects
