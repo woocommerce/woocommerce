@@ -1083,6 +1083,10 @@ jQuery( function ( $ ) {
 				} else {
 					wc_meta_boxes_product_variations_ajax.unblock();
 				}
+
+				window.wcTracks.recordEvent( 'product_variations_buttons', {
+					action: 'remove_variation',
+				} );
 			}
 
 			return false;
