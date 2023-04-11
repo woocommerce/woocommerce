@@ -33,6 +33,7 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  */
 import { AUTO_DRAFT_NAME } from '../../utils';
 import { EditProductLinkModal } from '../edit-product-link-modal';
+
 import { useValidation } from '../../hooks/use-validation';
 
 export function Edit() {
@@ -75,7 +76,11 @@ export function Edit() {
 		}
 	);
 
-	const nameIsValid = Boolean( name ) && name !== AUTO_DRAFT_NAME;
+	const nameIsValid = useValidation(
+		'product/name',
+		() => Boolean( name ) && name !== AUTO_DRAFT_NAME
+	);
+
 	const setSkuIfEmpty = () => {
 		if ( sku || ! nameIsValid ) {
 			return;
