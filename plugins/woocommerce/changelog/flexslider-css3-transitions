@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+FlexSlider always uses Web Animations API for "slide" animations.
