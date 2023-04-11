@@ -46,7 +46,7 @@ export const Card: React.FC< TaxChildProps > = ( { task } ) => {
 			actionText={
 				avalaraActivated
 					? __( 'Continue setup', 'woocommerce' )
-					: __( 'Enable & set up', 'woocommerce' )
+					: __( 'Download', 'woocommerce' )
 			}
 			onClick={ () => {
 				recordEvent( 'tasklist_tax_select_option', {

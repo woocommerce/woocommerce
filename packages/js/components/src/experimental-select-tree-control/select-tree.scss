@@ -1,0 +1,15 @@
+.woocommerce-experimental-select-control__combo-box-wrapper {
+	&:focus {
+		box-shadow: 0 0 0 1px var( --wp-admin-theme-color );
+		border-color: var( --wp-admin-theme-color );
+	}
+}
+
+.woocommerce-experimental-select-tree-control__dropdown {
+	display: block;
+}
+
+// That's the only way I could remove the padding from the @wordpress/components Dropdown.
+.woocommerce-experimental-select-tree-control__dropdown-content .components-popover__content {
+	padding: 0;
+}

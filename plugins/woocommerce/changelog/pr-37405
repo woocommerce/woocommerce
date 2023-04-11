@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Fix typos in comments in REST API customers controller

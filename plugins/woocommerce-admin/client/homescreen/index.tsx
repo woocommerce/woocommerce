@@ -3,7 +3,6 @@
  */
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
-import { identity } from 'lodash';
 import {
 	ONBOARDING_STORE_NAME,
 	withOnboardingHydration,
@@ -50,10 +49,8 @@ const withSelectHandler = ( select: WCDataSelector ) => {
 };
 
 export default compose(
-	onboardingData.profile
-		? withOnboardingHydration( {
-				profileItems: onboardingData.profile,
-		  } )
-		: identity,
+	withOnboardingHydration( {
+		profileItems: onboardingData.profile,
+	} ),
 	withSelect( withSelectHandler )
 )( Homescreen );

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update the date modified field for an order when a refund for it is successfully processed.

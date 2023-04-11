@@ -10,7 +10,7 @@ import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
 /**
  * Internal dependencies
  */
-import { WPDataSelectors } from '../types';
+import { WPDataSelectors, WPDataActions } from '../types';
 import { STORE_NAME } from './constants';
 import * as selectors from './selectors';
 import * as actions from './actions';
@@ -33,7 +33,7 @@ export const SETTINGS_STORE_NAME = STORE_NAME;
 declare module '@wordpress/data' {
 	function dispatch(
 		key: typeof STORE_NAME
-	): DispatchFromMap< typeof actions >;
+	): DispatchFromMap< typeof actions > & WPDataActions;
 	function select(
 		key: typeof STORE_NAME
 	): SelectFromMap< typeof selectors > & WPDataSelectors;

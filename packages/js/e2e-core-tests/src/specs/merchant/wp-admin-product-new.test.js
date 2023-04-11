@@ -222,7 +222,7 @@ const runAddVariableProductTest = () => {
 			);
 
 			await expect( firstDialog.message() ).toMatch(
-				'Are you sure you want to link all variations?'
+				'Do you want to generate all variations?'
 			);
 
 			// Set some variation data

@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import {
+	Button,
 	Card,
 	CardHeader,
 	CardBody,
@@ -23,8 +24,11 @@ import {
 /**
  * Internal dependencies
  */
-import { CardHeaderTitle } from '~/marketing/components';
-import { useCampaigns } from './useCampaigns';
+import {
+	CardHeaderTitle,
+	CreateNewCampaignModal,
+} from '~/marketing/components';
+import { useCampaigns } from '~/marketing/hooks';
 import './Campaigns.scss';
 
 const tableCaption = __( 'Campaigns', 'woocommerce' );
@@ -53,6 +57,7 @@ const perPage = 5;
  */
 export const Campaigns = () => {
 	const [ page, setPage ] = useState( 1 );
+	const [ isModalOpen, setModalOpen ] = useState( false );
 	const { loading, data, meta } = useCampaigns( page, perPage );
 	const total = meta?.total;
 
@@ -136,7 +141,7 @@ export const Campaigns = () => {
 													{ el.title }
 												</Link>
 											</FlexItem>
-											{ el.description && (
+											{ !! el.description && (
 												<FlexItem className="woocommerce-marketing-campaigns-card__campaign-description">
 													{ el.description }
 												</FlexItem>
@@ -153,15 +158,28 @@ export const Campaigns = () => {
 		);
 	};
 
+	const showFooter = !! ( total && total > perPage );
+
 	return (
 		<Card className="woocommerce-marketing-campaigns-card">
 			<CardHeader>
 				<CardHeaderTitle>
 					{ __( 'Campaigns', 'woocommerce' ) }
 				</CardHeaderTitle>
+				<Button
+					variant="secondary"
+					onClick={ () => setModalOpen( true ) }
+				>
+					{ __( 'Create new campaign', 'woocommerce' ) }
+				</Button>
+				{ isModalOpen && (
+					<CreateNewCampaignModal
+						onRequestClose={ () => setModalOpen( false ) }
+					/>
+				) }
 			</CardHeader>
 			{ getContent() }
-			{ total && total > perPage && (
+			{ showFooter && (
 				<CardFooter className="woocommerce-marketing-campaigns-card__footer">
 					<Pagination
 						showPerPagePicker={ false }

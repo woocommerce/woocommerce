@@ -2,11 +2,13 @@
  * Internal dependencies
  */
 import { TYPES } from './action-types';
+import { isApiFetchError } from './guards';
 import {
 	ApiFetchError,
 	RegisteredChannel,
 	RecommendedChannel,
 	Campaign,
+	CampaignType,
 } from './types';
 
 export const receiveRegisteredChannelsSuccess = (
@@ -75,10 +77,29 @@ export const receiveCampaigns = ( response: CampaignsResponse ) => {
 	};
 };
 
+export const receiveCampaignTypes = (
+	data: Array< CampaignType > | ApiFetchError
+) => {
+	if ( isApiFetchError( data ) ) {
+		return {
+			type: TYPES.RECEIVE_CAMPAIGN_TYPES,
+			payload: data,
+			error: true as const,
+		};
+	}
+
+	return {
+		type: TYPES.RECEIVE_CAMPAIGN_TYPES,
+		payload: data,
+		error: false as const,
+	};
+};
+
 export type Action = ReturnType<
 	| typeof receiveRegisteredChannelsSuccess
 	| typeof receiveRegisteredChannelsError
 	| typeof receiveRecommendedChannelsSuccess
 	| typeof receiveRecommendedChannelsError
 	| typeof receiveCampaigns
+	| typeof receiveCampaignTypes
 >;

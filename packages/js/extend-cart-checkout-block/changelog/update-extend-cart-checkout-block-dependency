@@ -1,0 +1,10 @@
+Significance: patch
+Type: update
+
+This patch includes the following changes:
+
+-   Add `prettier:npm:wp-prettier@2.6.2`
+-   Add `.wp-env`
+-   Add `.nvmrc`
+-   Correct CSS handle of newsletter subscription block
+-   Correct metadata category of newsletter subscription block

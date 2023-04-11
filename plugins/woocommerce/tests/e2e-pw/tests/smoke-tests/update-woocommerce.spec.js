@@ -46,6 +46,9 @@ const getWCDownloadURL = async () => {
 		headers: {
 			Accept: 'application/vnd.github+json',
 		},
+		params: {
+			per_page: 100
+		}
 	};
 
 	if ( GITHUB_TOKEN ) {

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the inability to apply a coupon whose code is "0"

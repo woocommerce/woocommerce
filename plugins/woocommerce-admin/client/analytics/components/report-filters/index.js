@@ -6,6 +6,7 @@ import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { omitBy, isUndefined, snakeCase } from 'lodash';
 import { withSelect, withDispatch } from '@wordpress/data';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { ReportFilters as Filters } from '@woocommerce/components';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import {
@@ -19,7 +20,6 @@ import { CurrencyContext } from '@woocommerce/currency';
 /**
  * Internal dependencies
  */
-import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 import { LOCALE } from '~/utils/admin-settings';
 
 class ReportFilters extends Component {
