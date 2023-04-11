@@ -602,6 +602,9 @@ class WC_Post_Types {
 										array(
 											'woocommerce/product-sku',
 										),
+										array(
+											'woocommerce/product-track-inventory-fields',
+										),
 									),
 								),
 							),
