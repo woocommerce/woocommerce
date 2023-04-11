@@ -4,13 +4,13 @@
  * exist in the DOM when the event listener is added.
  *
  * @param {string}        parentQuery query of the parent element.
- * @param {Array<Object>} children    array of child query and callback pairs.
+ * @param {Array<Object>} children    array of event, child query and callback pairs.
  */
 export function attachEventListenerToParentForChildren(
 	parentQuery: string,
 	children: Array< {
 		eventName: 'click' | 'change';
-		query: string;
+		childQuery: string;
 		callback: () => void;
 	} >
 ) {
@@ -19,10 +19,10 @@ export function attachEventListenerToParentForChildren(
 	if ( ! parent ) return;
 
 	const eventListener = ( event: Event ) => {
-		children.forEach( ( { eventName, query, callback } ) => {
+		children.forEach( ( { eventName, childQuery, callback } ) => {
 			if (
 				event.type === eventName &&
-				( event.target as Element ).matches( query )
+				( event.target as Element ).matches( childQuery )
 			) {
 				callback();
 			}

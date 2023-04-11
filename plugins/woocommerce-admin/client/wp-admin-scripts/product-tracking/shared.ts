@@ -484,7 +484,7 @@ const addProductVariationsTracks = () => {
 	attachEventListenerToParentForChildren( variationsSection, [
 		{
 			eventName: 'click',
-			query: '.generate_variations',
+			childQuery: '.generate_variations',
 			callback: () => {
 				recordEvent( 'product_variations_buttons', {
 					action: 'generate_variations',
@@ -493,7 +493,7 @@ const addProductVariationsTracks = () => {
 		},
 		{
 			eventName: 'click',
-			query: '.add_variation_manually',
+			childQuery: '.add_variation_manually',
 			callback: () => {
 				recordEvent( 'product_variations_buttons', {
 					action: 'add_variation_manually',
@@ -502,7 +502,7 @@ const addProductVariationsTracks = () => {
 		},
 		{
 			eventName: 'change',
-			query: '#field_to_edit',
+			childQuery: '#field_to_edit',
 			callback: () => {
 				const selectElement = document.querySelector(
 					'#field_to_edit'
