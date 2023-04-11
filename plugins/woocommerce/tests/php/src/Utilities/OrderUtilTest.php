@@ -38,39 +38,47 @@ class OrderUtilTest extends \WC_Unit_Test_Case {
 	 * @testdox `get_table_for_orders` should return the name of the posts table when HPOS is not in use.
 	 */
 	public function test_get_table_for_orders_posts() {
+		global $wpdb;
+
 		OrderHelper::toggle_cot( false );
 
 		$table_name = OrderUtil::get_table_for_orders();
-		$this->assertEquals( 'wptests_posts', $table_name );
+		$this->assertEquals( $wpdb->posts, $table_name );
 	}
 
 	/**
 	 * @testdox `get_table_for_orders` should return the name of the orders table when HPOS is in use.
 	 */
 	public function test_get_table_for_orders_hpos() {
+		global $wpdb;
+
 		OrderHelper::toggle_cot( true );
 
 		$table_name = OrderUtil::get_table_for_orders();
-		$this->assertEquals( 'wptests_wc_orders', $table_name );
+		$this->assertEquals( "{$wpdb->prefix}wc_orders", $table_name );
 	}
 
 	/**
 	 * @testdox `get_table_for_order_meta` should return the name of the postmeta table when HPOS is not in use.
 	 */
 	public function test_get_table_for_order_meta_posts() {
+		global $wpdb;
+
 		OrderHelper::toggle_cot( false );
 
 		$table_name = OrderUtil::get_table_for_order_meta();
-		$this->assertEquals( 'wptests_postmeta', $table_name );
+		$this->assertEquals( $wpdb->postmeta, $table_name );
 	}
 
 	/**
 	 * @testdox `get_table_for_order_meta` should return the name of the orders meta table when HPOS is in use.
 	 */
 	public function test_get_table_for_order_meta_hpos() {
+		global $wpdb;
+
 		OrderHelper::toggle_cot( true );
 
 		$table_name = OrderUtil::get_table_for_order_meta();
-		$this->assertEquals( 'wptests_wc_orders_meta', $table_name );
+		$this->assertEquals( "{$wpdb->prefix}wc_orders_meta", $table_name );
 	}
 }
