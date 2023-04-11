@@ -23,7 +23,7 @@ import type { HTMLAttributes } from 'react';
  */
 import ProductSaleBadge from '../sale-badge/block';
 import './style.scss';
-import type { BlockAttributes } from './types';
+import { BlockAttributes, ImageSizing } from './types';
 
 const ImagePlaceholder = (): JSX.Element => {
 	return (
@@ -81,7 +81,7 @@ type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
 export const Block = ( props: Props ): JSX.Element | null => {
 	const {
 		className,
-		imageSizing = 'full-size',
+		imageSizing = ImageSizing.SINGLE,
 		showProductLink = true,
 		showSaleBadge,
 		saleBadgeAlign = 'right',
@@ -160,7 +160,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					fallbackAlt={ product.name }
 					image={ image }
 					loaded={ ! isLoading }
-					showFullSize={ imageSizing !== 'cropped' }
+					showFullSize={ imageSizing !== ImageSizing.THUMBNAIL }
 				/>
 			</ParentComponent>
 		</div>
