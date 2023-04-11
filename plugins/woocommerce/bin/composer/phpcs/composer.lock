@@ -258,16 +258,16 @@
         },
         {
             "name": "sirbrillig/phpcs-changed",
-            "version": "v2.10.1",
+            "version": "v2.10.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sirbrillig/phpcs-changed.git",
-                "reference": "a5c3be6ec84395b168e7deadf8b167e50449e7a3"
+                "reference": "ba0432bc86ffdc31a6946117be6c2419b7e3e16d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sirbrillig/phpcs-changed/zipball/a5c3be6ec84395b168e7deadf8b167e50449e7a3",
-                "reference": "a5c3be6ec84395b168e7deadf8b167e50449e7a3",
+                "url": "https://api.github.com/repos/sirbrillig/phpcs-changed/zipball/ba0432bc86ffdc31a6946117be6c2419b7e3e16d",
+                "reference": "ba0432bc86ffdc31a6946117be6c2419b7e3e16d",
                 "shasum": ""
             },
             "require": {
@@ -308,9 +308,9 @@
             "description": "Run phpcs on files, but only report warnings/errors from lines which were changed.",
             "support": {
                 "issues": "https://github.com/sirbrillig/phpcs-changed/issues",
-                "source": "https://github.com/sirbrillig/phpcs-changed/tree/v2.10.1"
+                "source": "https://github.com/sirbrillig/phpcs-changed/tree/v2.10.2"
             },
-            "time": "2023-01-25T17:08:01+00:00"
+            "time": "2023-03-25T15:10:31+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
