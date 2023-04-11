@@ -7,8 +7,6 @@ import {
 	useCallback,
 	useLayoutEffect,
 	useRef,
-	useState,
-	useEffect,
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -54,7 +52,6 @@ const Tasks = lazy( () =>
 
 export const Layout = ( {
 	defaultHomescreenLayout,
-	isBatchUpdating,
 	query,
 	taskListComplete,
 	hasTaskList,
