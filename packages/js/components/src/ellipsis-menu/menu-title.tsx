@@ -9,12 +9,14 @@ import React from 'react';
  * (so this should not be used in place of the `EllipsisMenu` prop `label`).
  */
 
-const MenuTitle: React.FC< {
+const MenuTitle = ( {
+	children,
+}: {
 	/**
 	 * A renderable component (or string) which will be displayed as the content of this item.
 	 */
 	children: React.ReactNode;
-} > = ( { children } ) => {
+} ) => {
 	return <div className="woocommerce-ellipsis-menu__title">{ children }</div>;
 };
 

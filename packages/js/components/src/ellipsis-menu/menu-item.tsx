@@ -31,13 +31,13 @@ type MenuItemProps = {
 	onInvoke: ( () => void ) | undefined;
 };
 
-const MenuItem: React.FC< MenuItemProps > = ( {
+const MenuItem = ( {
 	checked,
 	children,
 	isCheckbox = false,
 	isClickable = false,
 	onInvoke = () => {},
-} ) => {
+}: MenuItemProps ) => {
 	const container = useRef< HTMLInputElement >( null );
 	const onClick = ( event: MouseEvent< HTMLDivElement > ) => {
 		if ( isClickable ) {
