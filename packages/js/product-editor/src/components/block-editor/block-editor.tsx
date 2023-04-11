@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Button } from '@wordpress/components';
 import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
 import {
 	createElement,
@@ -53,6 +54,7 @@ export function BlockEditor( {
 	product,
 }: BlockEditorProps ) {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
+	const [ templateName, setTemplateName ] = useState< string >( 'simple' );
 
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
@@ -90,11 +92,10 @@ export function BlockEditor( {
 	);
 
 	useLayoutEffect( () => {
-		onChange(
-			synchronizeBlocksWithTemplate( [], _settings?.template ),
-			{}
-		);
-	}, [ product.id ] );
+		// @ts-ignore Temporarily ignore since the `template` type needs to be updated.
+		const template = _settings?.templates[ templateName ];
+		onChange( synchronizeBlocksWithTemplate( [], template ), {} );
+	}, [ product.id, templateName ] );
 
 	if ( ! blocks ) {
 		return null;
@@ -109,6 +110,19 @@ export function BlockEditor( {
 					onChange={ onChange }
 					settings={ settings }
 				>
+					Product template: { templateName }
+					<Button
+						onClick={ () => {
+							if ( templateName === 'custom' ) {
+								setTemplateName( 'simple' );
+								return;
+							}
+							setTemplateName( 'custom' );
+						} }
+						variant="primary"
+					>
+						Toggle product type
+					</Button>
 					<Tabs onChange={ setSelectedTab } />
 					<div className="editor-styles-wrapper">
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }

@@ -313,6 +313,257 @@ class WC_Post_Types {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 
+		$simple_product_template = array(
+			array(
+				'woocommerce/product-tab',
+				array(
+					'id'    => 'general',
+					'title' => __( 'General', 'woocommerce' ),
+				),
+				array(
+					array(
+						'woocommerce/product-section',
+						array(
+							'title'       => __( 'Basic details', 'woocommerce' ),
+							'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
+							'icon'        => array(
+								'src' => '<svg xmlns="http://www.w3.org/2000/svg" view-box="0 0 24 24"><path fill-rule="evenodd" d="M5 5.5h14a.5.5 0 01.5.5v1.5a.5.5 0 01-.5.5H5a.5.5 0 01-.5-.5V6a.5.5 0 01.5-.5zM4 9.232A2 2 0 013 7.5V6a2 2 0 012-2h14a2 2 0 012 2v1.5a2 2 0 01-1 1.732V18a2 2 0 01-2 2H6a2 2 0 01-2-2V9.232zm1.5.268V18a.5.5 0 00.5.5h12a.5.5 0 00.5-.5V9.5h-13z" clip-rule="evenodd" /></svg>',
+							),
+						),
+						array(
+							array(
+								'woocommerce/product-name',
+								array(
+									'name' => 'Product name',
+								),
+							),
+							array(
+								'woocommerce/product-summary',
+							),
+							array(
+								'core/columns',
+								array(),
+								array(
+									array(
+										'core/column',
+										array(
+											'templateLock' => 'all',
+										),
+										array(
+											array(
+												'woocommerce/product-pricing',
+												array(
+													'name' => 'regular_price',
+													'label' => __( 'List price', 'woocommerce' ),
+													'showPricingSection' => true,
+												),
+											),
+										),
+									),
+									array(
+										'core/column',
+										array(
+											'templateLock' => 'all',
+										),
+										array(
+											array(
+												'woocommerce/product-pricing',
+												array(
+													'name' => 'sale_price',
+													'label' => __( 'Sale price', 'woocommerce' ),
+												),
+											),
+										),
+									),
+								),
+							),
+						),
+					),
+					array(
+						'woocommerce/product-section',
+						array(
+							'title'       => __( 'Images', 'woocommerce' ),
+							'description' => sprintf(
+								/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
+								__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s.', 'woocommerce' ),
+								'<a href="http://woocommerce.com/#" target="_blank" rel="noreferrer">',
+								'</a>'
+							),
+						),
+						array(
+							array(
+								'woocommerce/product-images',
+								array(
+									'images' => array(),
+								),
+							),
+						),
+					),
+				),
+			),
+			array(
+				'woocommerce/product-tab',
+				array(
+					'id'    => 'pricing',
+					'title' => __( 'Pricing', 'woocommerce' ),
+				),
+				array(
+					array(
+						'woocommerce/product-section',
+						array(
+							'title'       => __( 'Pricing', 'woocommerce' ),
+							'description' => sprintf(
+								/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
+								__( 'Set a competitive price, put the product on sale, and manage tax calculations. %1$sHow to price your product?%2$s', 'woocommerce' ),
+								'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
+								'</a>'
+							),
+							'icon'        => array(
+								'src' => '<svg xmlns="http://www.w3.org/2000/svg" view-box="0 0 24 24"><path fill-rule="evenodd" d="M16.83 6.342l.602.3.625-.25.443-.176v12.569l-.443-.178-.625-.25-.603.301-1.444.723-2.41-.804-.475-.158-.474.158-2.41.803-1.445-.722-.603-.3-.625.25-.443.177V6.215l.443.178.625.25.603-.301 1.444-.722 2.41.803.475.158.474-.158 2.41-.803 1.445.722zM20 4l-1.5.6-1 .4-2-1-3 1-3-1-2 1-1-.4L5 4v17l1.5-.6 1-.4 2 1 3-1 3 1 2-1 1 .4 1.5.6V4zm-3.5 6.25v-1.5h-8v1.5h8zm0 3v-1.5h-8v1.5h8zm-8 3v-1.5h8v1.5h-8z" clip-rule="evenodd" /></svg>',
+							),
+						),
+						array(
+							array(
+								'core/columns',
+								array(),
+								array(
+									array(
+										'core/column',
+										array(
+											'templateLock' => 'all',
+										),
+										array(
+											array(
+												'woocommerce/product-pricing',
+												array(
+													'name' => 'regular_price',
+													'label' => __( 'List price', 'woocommerce' ),
+													'showPricingSection' => true,
+												),
+											),
+										),
+									),
+									array(
+										'core/column',
+										array(
+											'templateLock' => 'all',
+										),
+										array(
+											array(
+												'woocommerce/product-pricing',
+												array(
+													'name' => 'sale_price',
+													'label' => __( 'Sale price', 'woocommerce' ),
+												),
+											),
+										),
+									),
+								),
+							),
+							array(
+								'woocommerce/product-radio',
+								array(
+									'title'    => __( 'Charge sales tax on', 'woocommerce' ),
+									'property' => 'tax_status',
+									'options'  => array(
+										array(
+											'label' => __( 'Product and shipping', 'woocommerce' ),
+											'value' => 'taxable',
+										),
+										array(
+											'label' => __( 'Only shipping', 'woocommerce' ),
+											'value' => 'shipping',
+										),
+										array(
+											'label' => __( "Don't charge tax", 'woocommerce' ),
+											'value' => 'none',
+										),
+									),
+								),
+							),
+							array(
+								'woocommerce/collapsible',
+								array(
+									'toggleText'       => __( 'Advanced', 'woocommerce' ),
+									'initialCollapsed' => true,
+									'persistRender'    => true,
+								),
+								array(
+									array(
+										'woocommerce/product-radio',
+										array(
+											'title'    => __( 'Tax class', 'woocommerce' ),
+											'description' => sprintf(
+												/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
+												__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s.', 'woocommerce' ),
+												'<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
+												'</a>'
+											),
+											'property' => 'tax_class',
+											'options'  => array(
+												array(
+													'label' => __( 'Standard', 'woocommerce' ),
+													'value' => '',
+												),
+												array(
+													'label' => __( 'Reduced rate', 'woocommerce' ),
+													'value' => 'reduced-rate',
+												),
+												array(
+													'label' => __( 'Zero rate', 'woocommerce' ),
+													'value' => 'zero-rate',
+												),
+											),
+										),
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+			array(
+				'woocommerce/product-tab',
+				array(
+					'id'    => 'inventory',
+					'title' => __( 'Inventory', 'woocommerce' ),
+				),
+			),
+			array(
+				'woocommerce/product-tab',
+				array(
+					'id'    => 'shipping',
+					'title' => __( 'Shipping', 'woocommerce' ),
+				),
+				array(
+					array(
+						'woocommerce/product-section',
+						array(
+							'title' => __( 'Shipping section', 'woocommerce' ),
+							'icon'  => array(
+								'src' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.5 7.75C3.5 6.7835 4.2835 6 5.25 6H14.75H15.5V6.75V9H17.25H17.5607L17.7803 9.21967L20.7803 12.2197L21 12.4393V12.75V14.75C21 15.7165 20.2165 16.5 19.25 16.5H19.2377C19.2458 16.5822 19.25 16.6656 19.25 16.75C19.25 18.1307 18.1307 19.25 16.75 19.25C15.3693 19.25 14.25 18.1307 14.25 16.75C14.25 16.6656 14.2542 16.5822 14.2623 16.5H14H10.2377C10.2458 16.5822 10.25 16.6656 10.25 16.75C10.25 18.1307 9.13071 19.25 7.75 19.25C6.36929 19.25 5.25 18.1307 5.25 16.75C5.25 16.6656 5.25418 16.5822 5.26234 16.5H4.25H3.5V15.75V7.75ZM14 15V9.75V9V7.5H5.25C5.11193 7.5 5 7.61193 5 7.75V15H5.96464C6.41837 14.5372 7.05065 14.25 7.75 14.25C8.44935 14.25 9.08163 14.5372 9.53536 15H14ZM18.5354 15H19.25C19.3881 15 19.5 14.8881 19.5 14.75V13.0607L16.9393 10.5H15.5V14.5845C15.8677 14.3717 16.2946 14.25 16.75 14.25C17.4493 14.25 18.0816 14.5372 18.5354 15ZM6.7815 16.5C6.76094 16.5799 6.75 16.6637 6.75 16.75C6.75 17.3023 7.19772 17.75 7.75 17.75C8.30228 17.75 8.75 17.3023 8.75 16.75C8.75 16.6637 8.73906 16.5799 8.7185 16.5C8.60749 16.0687 8.21596 15.75 7.75 15.75C7.28404 15.75 6.89251 16.0687 6.7815 16.5ZM15.7815 16.5C15.7609 16.5799 15.75 16.6637 15.75 16.75C15.75 17.3023 16.1977 17.75 16.75 17.75C17.3023 17.75 17.75 17.3023 17.75 16.75C17.75 16.6637 17.7391 16.5799 17.7185 16.5C17.7144 16.4841 17.7099 16.4683 17.705 16.4526C17.5784 16.0456 17.1987 15.75 16.75 15.75C16.284 15.75 15.8925 16.0687 15.7815 16.5Z" fill="#1E1E1E"/></svg>',
+							),
+						),
+						array(
+							array(
+								'core/image',
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$custom_product_template = array(
+			array(
+				'woocommerce/product-tab',
+				array(
+					'id'    => 'custom',
+					'title' => __( 'Custom', 'woocommerce' ),
+				),
+			),
+		);
+
 		register_post_type(
 			'product',
 			apply_filters(
@@ -366,245 +617,10 @@ class WC_Post_Types {
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
 					'rest_namespace'      => 'wp/v3',
-					'template'            => array(
-						array(
-							'woocommerce/product-tab',
-							array(
-								'id'    => 'general',
-								'title' => __( 'General', 'woocommerce' ),
-							),
-							array(
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Basic details', 'woocommerce' ),
-										'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
-										'icon'        => array(
-											'src' => '<svg xmlns="http://www.w3.org/2000/svg" view-box="0 0 24 24"><path fill-rule="evenodd" d="M5 5.5h14a.5.5 0 01.5.5v1.5a.5.5 0 01-.5.5H5a.5.5 0 01-.5-.5V6a.5.5 0 01.5-.5zM4 9.232A2 2 0 013 7.5V6a2 2 0 012-2h14a2 2 0 012 2v1.5a2 2 0 01-1 1.732V18a2 2 0 01-2 2H6a2 2 0 01-2-2V9.232zm1.5.268V18a.5.5 0 00.5.5h12a.5.5 0 00.5-.5V9.5h-13z" clip-rule="evenodd" /></svg>',
-										),
-									),
-									array(
-										array(
-											'woocommerce/product-name',
-											array(
-												'name' => 'Product name',
-											),
-										),
-										array(
-											'woocommerce/product-summary',
-										),
-										array(
-											'core/columns',
-											array(),
-											array(
-												array(
-													'core/column',
-													array(
-														'templateLock' => 'all',
-													),
-													array(
-														array(
-															'woocommerce/product-pricing',
-															array(
-																'name' => 'regular_price',
-																'label' => __( 'List price', 'woocommerce' ),
-																'showPricingSection' => true,
-															),
-														),
-													),
-												),
-												array(
-													'core/column',
-													array(
-														'templateLock' => 'all',
-													),
-													array(
-														array(
-															'woocommerce/product-pricing',
-															array(
-																'name' => 'sale_price',
-																'label' => __( 'Sale price', 'woocommerce' ),
-															),
-														),
-													),
-												),
-											),
-										),
-									),
-								),
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Images', 'woocommerce' ),
-										'description' => sprintf(
-											/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
-											__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s.', 'woocommerce' ),
-											'<a href="http://woocommerce.com/#" target="_blank" rel="noreferrer">',
-											'</a>'
-										),
-									),
-									array(
-										array(
-											'woocommerce/product-images',
-											array(
-												'images' => array(),
-											),
-										),
-									),
-								),
-							),
-						),
-						array(
-							'woocommerce/product-tab',
-							array(
-								'id'    => 'pricing',
-								'title' => __( 'Pricing', 'woocommerce' ),
-							),
-							array(
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Pricing', 'woocommerce' ),
-										'description' => sprintf(
-											/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
-											__( 'Set a competitive price, put the product on sale, and manage tax calculations. %1$sHow to price your product?%2$s', 'woocommerce' ),
-											'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
-											'</a>'
-										),
-										'icon'        => array(
-											'src' => '<svg xmlns="http://www.w3.org/2000/svg" view-box="0 0 24 24"><path fill-rule="evenodd" d="M16.83 6.342l.602.3.625-.25.443-.176v12.569l-.443-.178-.625-.25-.603.301-1.444.723-2.41-.804-.475-.158-.474.158-2.41.803-1.445-.722-.603-.3-.625.25-.443.177V6.215l.443.178.625.25.603-.301 1.444-.722 2.41.803.475.158.474-.158 2.41-.803 1.445.722zM20 4l-1.5.6-1 .4-2-1-3 1-3-1-2 1-1-.4L5 4v17l1.5-.6 1-.4 2 1 3-1 3 1 2-1 1 .4 1.5.6V4zm-3.5 6.25v-1.5h-8v1.5h8zm0 3v-1.5h-8v1.5h8zm-8 3v-1.5h8v1.5h-8z" clip-rule="evenodd" /></svg>',
-										),
-									),
-									array(
-										array(
-											'core/columns',
-											array(),
-											array(
-												array(
-													'core/column',
-													array(
-														'templateLock' => 'all',
-													),
-													array(
-														array(
-															'woocommerce/product-pricing',
-															array(
-																'name' => 'regular_price',
-																'label' => __( 'List price', 'woocommerce' ),
-																'showPricingSection' => true,
-															),
-														),
-													),
-												),
-												array(
-													'core/column',
-													array(
-														'templateLock' => 'all',
-													),
-													array(
-														array(
-															'woocommerce/product-pricing',
-															array(
-																'name' => 'sale_price',
-																'label' => __( 'Sale price', 'woocommerce' ),
-															),
-														),
-													),
-												),
-											),
-										),
-										array(
-											'woocommerce/product-radio',
-											array(
-												'title'    => __( 'Charge sales tax on', 'woocommerce' ),
-												'property' => 'tax_status',
-												'options'  => array(
-													array(
-														'label' => __( 'Product and shipping', 'woocommerce' ),
-														'value' => 'taxable',
-													),
-													array(
-														'label' => __( 'Only shipping', 'woocommerce' ),
-														'value' => 'shipping',
-													),
-													array(
-														'label' => __( "Don't charge tax", 'woocommerce' ),
-														'value' => 'none',
-													),
-												),
-											),
-										),
-										array(
-											'woocommerce/collapsible',
-											array(
-												'toggleText'       => __( 'Advanced', 'woocommerce' ),
-												'initialCollapsed' => true,
-												'persistRender'    => true,
-											),
-											array(
-												array(
-													'woocommerce/product-radio',
-													array(
-														'title'    => __( 'Tax class', 'woocommerce' ),
-														'description' => sprintf(
-															/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
-															__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s.', 'woocommerce' ),
-															'<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
-															'</a>'
-														),
-														'property' => 'tax_class',
-														'options'  => array(
-															array(
-																'label' => __( 'Standard', 'woocommerce' ),
-																'value' => '',
-															),
-															array(
-																'label' => __( 'Reduced rate', 'woocommerce' ),
-																'value' => 'reduced-rate',
-															),
-															array(
-																'label' => __( 'Zero rate', 'woocommerce' ),
-																'value' => 'zero-rate',
-															),
-														),
-													),
-												),
-											),
-										),
-									),
-								),
-							),
-						),
-						array(
-							'woocommerce/product-tab',
-							array(
-								'id'    => 'inventory',
-								'title' => __( 'Inventory', 'woocommerce' ),
-							),
-						),
-						array(
-							'woocommerce/product-tab',
-							array(
-								'id'    => 'shipping',
-								'title' => __( 'Shipping', 'woocommerce' ),
-							),
-							array(
-								array(
-									'woocommerce/product-section',
-									array(
-										'title' => __( 'Shipping section', 'woocommerce' ),
-										'icon'  => array(
-											'src' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.5 7.75C3.5 6.7835 4.2835 6 5.25 6H14.75H15.5V6.75V9H17.25H17.5607L17.7803 9.21967L20.7803 12.2197L21 12.4393V12.75V14.75C21 15.7165 20.2165 16.5 19.25 16.5H19.2377C19.2458 16.5822 19.25 16.6656 19.25 16.75C19.25 18.1307 18.1307 19.25 16.75 19.25C15.3693 19.25 14.25 18.1307 14.25 16.75C14.25 16.6656 14.2542 16.5822 14.2623 16.5H14H10.2377C10.2458 16.5822 10.25 16.6656 10.25 16.75C10.25 18.1307 9.13071 19.25 7.75 19.25C6.36929 19.25 5.25 18.1307 5.25 16.75C5.25 16.6656 5.25418 16.5822 5.26234 16.5H4.25H3.5V15.75V7.75ZM14 15V9.75V9V7.5H5.25C5.11193 7.5 5 7.61193 5 7.75V15H5.96464C6.41837 14.5372 7.05065 14.25 7.75 14.25C8.44935 14.25 9.08163 14.5372 9.53536 15H14ZM18.5354 15H19.25C19.3881 15 19.5 14.8881 19.5 14.75V13.0607L16.9393 10.5H15.5V14.5845C15.8677 14.3717 16.2946 14.25 16.75 14.25C17.4493 14.25 18.0816 14.5372 18.5354 15ZM6.7815 16.5C6.76094 16.5799 6.75 16.6637 6.75 16.75C6.75 17.3023 7.19772 17.75 7.75 17.75C8.30228 17.75 8.75 17.3023 8.75 16.75C8.75 16.6637 8.73906 16.5799 8.7185 16.5C8.60749 16.0687 8.21596 15.75 7.75 15.75C7.28404 15.75 6.89251 16.0687 6.7815 16.5ZM15.7815 16.5C15.7609 16.5799 15.75 16.6637 15.75 16.75C15.75 17.3023 16.1977 17.75 16.75 17.75C17.3023 17.75 17.75 17.3023 17.75 16.75C17.75 16.6637 17.7391 16.5799 17.7185 16.5C17.7144 16.4841 17.7099 16.4683 17.705 16.4526C17.5784 16.0456 17.1987 15.75 16.75 15.75C16.284 15.75 15.8925 16.0687 15.7815 16.5Z" fill="#1E1E1E"/></svg>',
-										),
-									),
-									array(
-										array(
-											'core/image',
-										),
-									),
-								),
-							),
-						),
+					'template'            => $simple_product_template, // @todo This can load the current product type's template if needed.
+					'templates'           => array(
+						'simple' => $simple_product_template,
+						'custom' => $custom_product_template,
 					),
 				)
 			)
