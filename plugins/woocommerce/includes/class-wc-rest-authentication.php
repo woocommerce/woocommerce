@@ -590,9 +590,9 @@ class WC_REST_Authentication {
 		/**
 		 * This filter enables the exclusion of the most recent access time from being logged for REST API calls.
 		 *
-		 * @param bool $result Default value.
-		 * @param int $key_id  Key ID associated with REST API request.
-		 * @param int $user_id User ID associated with REST API request.
+		 * @param bool $result  Default value.
+		 * @param int  $key_id  Key ID associated with REST API request.
+		 * @param int  $user_id User ID associated with REST API request.
 		 *
 		 * @since 7.7.0
 		 */
