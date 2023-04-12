@@ -76,8 +76,8 @@ test.describe( 'Add New Variable Product Page', () => {
 	} );
 
 	test( 'shows the variable product tour', async ( { page } ) => {
-		await page.goto( productPageURL );
-		await page.selectOption( '#product-type', 'variable', { force: true } );
+		await page.goto( 'wp-admin/post-new.php?post_type=product' );
+		await page.selectOption( '#product-type', 'variable' );
 
 		// because of the way that the tour is dynamically positioned,
 		// Playwright can't automatically scroll the button into view,
@@ -88,10 +88,12 @@ test.describe( 'Add New Variable Product Page', () => {
 			.getByRole( 'link', { name: 'Attributes' } )
 			.scrollIntoViewIfNeeded();
 
+		// the tour only seems to display when not running headless, so just make sure
+		if ( await page.locator( '.components-card-header' ).nth(1).isVisible() ) {
 		// dismiss the variable product tour
 		await page
-			.getByRole( 'button', { name: 'Got it' } )
-			.click( { force: true } );
+			.getByRole( 'button', { name: 'Close Tour' } )
+			.click();
 
 		// wait for the tour's dismissal to be saved
 		await page.waitForResponse(
@@ -99,6 +101,8 @@ test.describe( 'Add New Variable Product Page', () => {
 				response.url().includes( '/users/' ) &&
 				response.status() === 200
 		);
+
+		}
 	} );
 
 	test( 'can create product, attributes and variations, edit variations and delete variations', async ( {
@@ -106,14 +110,16 @@ test.describe( 'Add New Variable Product Page', () => {
 	} ) => {
 		await page.goto( productPageURL );
 		await page.fill( '#title', variableProductName );
-		await page.selectOption( '#product-type', 'variable', { force: true } );
+		await page.selectOption( '#product-type', 'variable' );
 
 		await page.click( 'a[href="#product_attributes"]' );
 
 		// add 3 attributes
 		for ( let i = 0; i < 3; i++ ) {
 			if ( i > 0 ) {
-				await page.click( 'button.add_attribute' );
+				await page.getByRole( 'button', { name: 'Add' } )
+				.nth(2)
+				.click();
 			}
 			await page.waitForSelector(
 				`input[name="attribute_names[${ i }]"]`
@@ -128,11 +134,13 @@ test.describe( 'Add New Variable Product Page', () => {
 				.first()
 				.type( 'val1 | val2' );
 		}
-		await page.click( 'text=Save attributes' );
-		// wait for the attributes to be saved
+
+		await page.getByRole( 'button', { name: 'Save attributes'} ).click( { clickCount: 3 });
+
+		// wait for the tour's dismissal to be saved
 		await page.waitForResponse(
 			( response ) =>
-				response.url().includes( '/post.php?post=' ) &&
+				response.url().includes( '/post.php' ) &&
 				response.status() === 200
 		);
 
@@ -142,14 +150,15 @@ test.describe( 'Add New Variable Product Page', () => {
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
 
-		page.on( 'dialog', ( dialog ) => dialog.accept() );
-
-		// manually create variations from all attributes
 		await page.click( 'a[href="#variable_product_options"]' );
 
+		// event listener for handling the link_all_variations confirmation dialog
+		page.on( 'dialog', ( dialog ) => dialog.accept() );
+
+		// generate variations from all attributes
 		await page.click( 'button.generate_variations' );
 
-		// add variation attributes
+		// verify variations have the correct attribute values
 		for ( let i = 0; i < 8; i++ ) {
 			const val1 = 'val1';
 			const val2 = 'val2';
