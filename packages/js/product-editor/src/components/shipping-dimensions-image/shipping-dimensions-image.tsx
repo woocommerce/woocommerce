@@ -1,6 +1,12 @@
-export type ShippingDimensionsImageProps = React.SVGProps< SVGSVGElement > & {
-	highlight?: 'A' | 'B' | 'C';
-};
+/**
+ * External dependencies
+ */
+import { createElement } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { ShippingDimensionsImageProps } from './types';
 
 export function ShippingDimensionsImage( {
 	highlight,
