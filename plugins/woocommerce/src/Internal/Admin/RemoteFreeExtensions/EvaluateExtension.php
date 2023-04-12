@@ -32,7 +32,7 @@ class EvaluateExtension {
 		}
 
 		// Run PHP and WP version chcecks.
-		if ( $extension->is_visible === true ) {
+		if ( true === $extension->is_visible ) {
 			if ( isset( $extension->min_php_version ) && ! version_compare( PHP_VERSION, $extension->min_php_version, '>=' ) ) {
 				$extension->is_visible = false;
 			}
