@@ -67,7 +67,7 @@ $icon_url                        = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/global-a
 			 */
 			if ( count( $attribute_taxonomies ) <= apply_filters( 'woocommerce_attribute_taxonomy_filter_threshold', 20 ) ) :
 				?>
-			<select name="attribute_taxonomy" class="select attribute_taxonomy">
+			<select name="attribute_taxonomy" class="attribute_taxonomy">
 				<option value=""><?php esc_html_e( 'Custom product attribute', 'woocommerce' ); ?></option>
 				<?php
 				if ( ! $has_local_attributes ) {
