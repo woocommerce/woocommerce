@@ -25,12 +25,6 @@ const getPreviousTwoVersions = async () => {
 			continue;
 		}
 
-		const hasNoPatchNumber = thisVersion.split( '.' ).length === 2;
-
-		if ( hasNoPatchNumber ) {
-			thisVersion = thisVersion.concat( '.0' );
-		}
-
 		prevTwo.push( thisVersion );
 
 		if ( prevTwo.length === 2 ) {
