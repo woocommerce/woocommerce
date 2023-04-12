@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the "install-filters" input parameter in the "Smoke test daily" workflow.
