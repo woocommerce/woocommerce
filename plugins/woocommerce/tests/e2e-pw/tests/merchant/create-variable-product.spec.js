@@ -14,10 +14,38 @@ const defaultAttributes = [ 'val2', 'val1', 'val2' ];
 const stockAmount = '100';
 const lowStockAmount = '10';
 
+async function resetVariableProductTour( baseURL, browser ) {
+	// Go to the product page, so that the `window.wp.data` module is available
+	const page = await browser.newPage( { baseURL: baseURL } );
+	await page.goto( 'wp-admin/post-new.php?post_type=product' );
+
+	// Get the current user's ID and user preferences
+	const { id: userId, woocommerce_meta } = await page.evaluate( () => {
+		return window.wp.data.select( 'core' ).getCurrentUser();
+	} );
+
+	// Reset the variable product tour preference, so that it will be shown again
+	const updatedWooCommerceMeta = {
+		...woocommerce_meta,
+		variable_product_tour_shown: '',
+	};
+
+	// Save the updated user preferences
+	await page.evaluate(
+		async ( { userId, updatedWooCommerceMeta } ) => {
+			await window.wp.data.dispatch( 'core' ).saveUser( {
+				id: userId,
+				woocommerce_meta: updatedWooCommerceMeta,
+			} );
+		},
+		{ userId, updatedWooCommerceMeta }
+	);
+}
+
 test.describe( 'Add New Variable Product Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.afterAll( async ( { baseURL } ) => {
+	test.afterAll( async ( { baseURL, browser } ) => {
 		const api = new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
@@ -38,6 +66,8 @@ test.describe( 'Add New Variable Product Page', () => {
 			.concat( manualProducts.map( ( { id } ) => id ) );
 
 		await api.post( 'products/batch', { delete: ids } );
+
+		await resetVariableProductTour( baseURL, browser );
 	} );
 
 	test( 'shows the variable product tour', async ( { page } ) => {
