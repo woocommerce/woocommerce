@@ -50,17 +50,14 @@ jQuery( function ( $ ) {
 				attributes_and_variations_data
 			)
 		) {
-			if ( ! $save_button.is( ':disabled' ) ) {
-				$save_button.attr( 'disabled', 'disabled' );
-				$save_button.attr(
-					'title',
-					woocommerce_admin_meta_boxes.i18n_save_attribute_variation_tip
-				);
+			if ( ! $save_button.hasClass( 'disabled' ) ) {
+				$save_button.addClass( 'disabled' );
+				$save_button.attr( 'aria-disabled', true );
 			}
-			return;
+		} else {
+			$save_button.removeClass( 'disabled' );
+			$save_button.removeAttr( 'aria-disabled' );
 		}
-		$save_button.removeAttr( 'disabled' );
-		$save_button.removeAttr( 'title' );
 	};
 
 	// Run tipTip
@@ -78,6 +75,30 @@ jQuery( function ( $ ) {
 	}
 
 	runTipTip();
+
+	$( '.save_attributes' ).tipTip( {
+		content: function () {
+			return $( '.save_attributes' ).hasClass( 'disabled' )
+				? woocommerce_admin_meta_boxes.i18n_save_attribute_variation_tip
+				: '';
+		},
+		fadeIn: 50,
+		fadeOut: 50,
+		delay: 200,
+		keepAlive: true,
+	} );
+
+	$( '.create-variations' ).tipTip( {
+		content: function () {
+			return $( '.create-variations' ).hasClass( 'disabled' )
+				? woocommerce_admin_meta_boxes.i18n_save_attribute_variation_tip
+				: '';
+		},
+		fadeIn: 50,
+		fadeOut: 50,
+		delay: 200,
+		keepAlive: true,
+	} );
 
 	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function () {
 		var metabox = $( this ).parent( '.wc-metabox' );

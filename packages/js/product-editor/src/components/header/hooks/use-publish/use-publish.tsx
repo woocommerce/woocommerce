@@ -55,10 +55,16 @@ export function usePublish( {
 	);
 
 	const isCreating = productStatus === 'auto-draft';
+	const ariaDisabled =
+		disabled || isDisabled || ( productStatus === 'publish' && ! hasEdits );
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( ariaDisabled ) {
+			return event.preventDefault();
+		}
+
 		if ( onClick ) {
 			onClick( event );
 		}
@@ -94,10 +100,7 @@ export function usePublish( {
 			? __( 'Add', 'woocommerce' )
 			: __( 'Save', 'woocommerce' ),
 		...props,
-		'aria-disabled':
-			disabled ||
-			isDisabled ||
-			( productStatus === 'publish' && ! hasEdits ),
+		'aria-disabled': ariaDisabled,
 		isBusy,
 		variant: 'primary',
 		onClick: handleClick,

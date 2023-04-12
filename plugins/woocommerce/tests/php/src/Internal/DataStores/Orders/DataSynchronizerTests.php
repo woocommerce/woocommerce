@@ -293,4 +293,22 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 			'Meta data deleted from the CPT datastore should also be deleted from the HPOS datastore.'
 		);
 	}
+
+	/**
+	 * @testDox Orders for migration are picked by ID sorted.
+	 */
+	public function test_migration_sort() {
+		global $wpdb;
+		$order1 = wc_get_order( OrderHelper::create_order() );
+		$order2 = wc_get_order( OrderHelper::create_order() );
+
+		// Let's update order1 id to be greater than order2 id.
+		// phpcs:ignore
+		$max_id = $wpdb->get_var( "SELECT MAX(id) FROM $wpdb->posts" );
+		$wpdb->update( $wpdb->posts, array( 'ID' => $max_id + 1 ), array( 'ID' => $order1->get_id() ) );
+
+		$orders_to_migrate = $this->sut->get_next_batch_to_process( 2 );
+		$this->assertEquals( $order2->get_id(), $orders_to_migrate[0] );
+		$this->assertEquals( $max_id + 1, $orders_to_migrate[1] );
+	}
 }

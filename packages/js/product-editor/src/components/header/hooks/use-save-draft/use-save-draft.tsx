@@ -55,9 +55,16 @@ export function useSaveDraft( {
 		[ productId ]
 	);
 
+	const ariaDisabled =
+		disabled || isDisabled || ( productStatus !== 'publish' && ! hasEdits );
+
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( ariaDisabled ) {
+			return event.preventDefault();
+		}
+
 		if ( onClick ) {
 			onClick( event );
 		}
@@ -99,10 +106,7 @@ export function useSaveDraft( {
 	return {
 		children,
 		...props,
-		'aria-disabled':
-			disabled ||
-			isDisabled ||
-			( productStatus !== 'publish' && ! hasEdits ),
+		'aria-disabled': ariaDisabled,
 		variant: 'tertiary',
 		onClick: handleClick,
 	};

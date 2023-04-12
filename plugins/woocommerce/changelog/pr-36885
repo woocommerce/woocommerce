@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove double checking for woocommerce_tax_display_cart filter.

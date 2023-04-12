@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent click event when the element is aria-disabled"
