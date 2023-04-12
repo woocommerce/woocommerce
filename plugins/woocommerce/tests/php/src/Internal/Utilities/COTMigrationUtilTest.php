@@ -30,7 +30,7 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->sut = wc_get_container()->get( COTMigrationUtil::class );
 
-		$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
+		$cot_controller       = wc_get_container()->get( CustomOrdersTableController::class );
 		$this->prev_cot_state = $cot_controller->custom_orders_table_usage_is_enabled();
 	}
 
