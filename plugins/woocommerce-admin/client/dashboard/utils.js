@@ -147,23 +147,6 @@ export function getProductList(
 		}
 	} );
 
-	const onboarding = getAdminSetting( 'onboarding', {} );
-	let theme = null;
-	if ( onboarding && onboarding.themes ) {
-		theme = onboarding.themes.find(
-			( themeData ) => themeData.slug === profileItems.theme
-		);
-	}
-
-	if (
-		theme &&
-		theme.id &&
-		getPriceValue( theme.price ) > 0 &&
-		( includeInstalledItems || ! theme.is_installed )
-	) {
-		productList.push( theme );
-	}
-
 	return productList;
 }
 
