@@ -109,7 +109,7 @@ export function Edit() {
 				</BaseControl>
 				{ productId &&
 					nameIsValid &&
-					product.status === 'publish' &&
+					[ 'publish', 'draft' ].includes( product.status ) &&
 					permalinkPrefix && (
 						<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
 							{ __( 'Product link', 'woocommerce' ) }
