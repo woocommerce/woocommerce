@@ -29,32 +29,19 @@ jobs:
         outputs:
             freeze: ${{ steps.check-freeze.outputs.freeze }}
         steps:
-            - name: 'Install PHP'
-              uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
+            - name: Checkout code
+              uses: actions/checkout@v3
               with:
-                  php-version: '7.4'
+                  fetch-depth: 0
+
+            - name: Install prerequisites
+              run: |
+                  npm install -g pnpm@7
+                  pnpm install --filter monorepo-utils
 
             - name: 'Check whether today is the code freeze day'
               id: check-freeze
-              shell: php {0}
-              run: |
-                  <?php
-                  $now = time();
-                  if ( getenv( 'TIME_OVERRIDE' ) ) {
-                    $now = strtotime( getenv( 'TIME_OVERRIDE' ) );
-                  }
-
-                  // Code freeze comes 22 days prior to release day.
-                  $release_time         = strtotime( '+22 days', $now );
-                  $release_day_of_week  = date( 'l', $release_time );
-                  $release_day_of_month = (int) date( 'j', $release_time );
-
-                  // If 22 days from now isn't the second Tuesday, then it's not code freeze day.
-                  if ( 'Tuesday' !== $release_day_of_week || $release_day_of_month < 8 || $release_day_of_month > 14 ) {
-                    file_put_contents( getenv( 'GITHUB_OUTPUT' ), "freeze=1\n", FILE_APPEND );
-                  } else {
-                    file_put_contents( getenv( 'GITHUB_OUTPUT' ), "freeze=0\n", FILE_APPEND );                    
-                  }
+              run: pnpm utils code-freeze verify-day -g -o $TIME_OVERRIDE
 
     maybe-create-next-milestone-and-release-branch:
         name: 'Maybe create next milestone and release branch'
@@ -63,12 +50,16 @@ jobs:
             contents: write
             issues: write
         needs: verify-code-freeze
-        if: needs.verify-code-freeze.outputs.freeze == 0
+        if: needs.verify-code-freeze.outputs.freeze == 'true'
         outputs:
             branch: ${{ steps.freeze.outputs.branch }}
             release_version: ${{ steps.freeze.outputs.release_version }}
             next_version: ${{ steps.freeze.outputs.next_version }}
         steps:
+            - name: 'Install PHP'
+              uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
+              with:
+                  php-version: '7.4'
             - name: Checkout code
               uses: actions/checkout@v3
               with:
