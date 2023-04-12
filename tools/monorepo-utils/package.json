@@ -25,6 +25,7 @@
 		"build": "tsc",
 		"start": "tsc --watch",
 		"lint": "eslint . --ext .ts",
+		"postinstall": "pnpm run build",
 		"test": "jest"
 	},
 	"engines": {
