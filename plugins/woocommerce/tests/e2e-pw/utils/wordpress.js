@@ -14,33 +14,35 @@ const getPreviousTwoVersions = async () => {
 		.filter( ( version ) => body[ version ] === 'outdated' )
 		.sort()
 		.reverse();
-	const latestMinorVersion = allVersions
+	const latestMajorAndMinorNumbers = allVersions
 		.find( ( version ) => body[ version ] === 'latest' )
 		.match( /^\d+.\d+/ )[ 0 ];
 
-	const prevTwo = [];
+	const latestMinus1 = previousStableVersions.find(
+		( version ) => ! version.startsWith( latestMajorAndMinorNumbers )
+	);
 
-	for ( let thisVersion of previousStableVersions ) {
-		if ( thisVersion.startsWith( latestMinorVersion ) ) {
-			continue;
-		}
+	const latestMinus1MajorAndMinorNumbers = latestMinus1.match(
+		/^\d+.\d+/
+	)[ 0 ];
 
-		prevTwo.push( thisVersion );
-
-		if ( prevTwo.length === 2 ) {
-			break;
-		}
-	}
+	const latestMinus2 = previousStableVersions.find(
+		( version ) =>
+			! (
+				version.startsWith( latestMajorAndMinorNumbers ) ||
+				version.startsWith( latestMinus1MajorAndMinorNumbers )
+			)
+	);
 
 	const matrix = {
 		version: [
 			{
-				number: prevTwo[ 0 ],
+				number: latestMinus1,
 				description: 'WP Latest-1',
 				env_description: 'wp-latest-1',
 			},
 			{
-				number: prevTwo[ 1 ],
+				number: latestMinus2,
 				description: 'WP Latest-2',
 				env_description: 'wp-latest-2',
 			},
