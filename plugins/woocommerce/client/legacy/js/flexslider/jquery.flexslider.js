@@ -720,12 +720,16 @@
             });
           }
         } else { // FADE:
-          if (!touch) {
-            slider.slides.eq(slider.currentSlide).css({"zIndex": 1}).animate({"opacity": 0}, slider.vars.animationSpeed, slider.vars.easing);
-            slider.slides.eq(target).css({"zIndex": 2}).animate({"opacity": 1}, slider.vars.animationSpeed, slider.vars.easing, slider.wrapup);
-          } else {
             slider.slides.eq(slider.currentSlide).css({ "opacity": 0, "zIndex": 1 });
             slider.slides.eq(target).css({ "opacity": 1, "zIndex": 2 });
+
+          if (!touch) {
+            // Unbind previous transitionEnd events and re-bind new transitionEnd event
+            slider.slides.eq(slider.currentSlide).off("transitionend");
+            slider.slides.eq(target).on("transitionend", function() {
+              slider.wrapup(dimension);
+            });
+          } else {
             slider.wrapup(dimension);
           }
         }
@@ -897,11 +901,26 @@
         if (type === "init") {
           if (!touch) {
             //slider.slides.eq(slider.currentSlide).fadeIn(slider.vars.animationSpeed, slider.vars.easing);
-            if (slider.vars.fadeFirstSlide == false) {
-              slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).eq(slider.currentSlide).css({"zIndex": 2}).css({"opacity": 1});
-            } else {
-              slider.slides.css({ "opacity": 0, "display": "block", "zIndex": 1 }).eq(slider.currentSlide).css({"zIndex": 2}).animate({"opacity": 1},slider.vars.animationSpeed,slider.vars.easing);
-            }
+            var fadeFirstSlide = slider.vars.fadeFirstSlide;
+            slider.slides.each(function(index) {
+              var style = this.style;
+              style.display = "block";
+
+              if (index === slider.currentSlide) {
+                style.zIndex = 2;
+                style.opacity = fadeFirstSlide ? 0 : 1;
+              } else {
+                style.zIndex = 1;
+                style.opacity = 0;
+              }
+
+              // Wait a frame: every opacity change before this.offsetWidth does NOT get
+              // animated; but every opacity change after this.offsetWidth gets animated
+              this.offsetWidth;
+              if (index === slider.currentSlide && fadeFirstSlide) style.opacity = 1;
+
+              style.transition = "opacity " + slider.vars.animationSpeed / 1000 + "s " + easing;
+            });
           } else {
             slider.slides.css({ "opacity": 0, "display": "block", "transition": "opacity " + slider.vars.animationSpeed / 1000 + "s ease", "zIndex": 1 }).eq(slider.currentSlide).css({ "opacity": 1, "zIndex": 2});
           }
