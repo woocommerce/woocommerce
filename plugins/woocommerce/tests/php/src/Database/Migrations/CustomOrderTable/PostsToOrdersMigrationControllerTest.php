@@ -746,4 +746,33 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$this->assertEmpty( $errors );
 	}
+
+	/**
+	 * @testDox When there are mutli meta values for a supposed unique meta key, the first one is picked.
+	 */
+	public function test_first_value_is_picked_when_multi_value() {
+		global $wpdb;
+		$order              = wc_get_order( OrderHelper::create_complex_wp_post_order() );
+		$original_order_key = $order->get_order_key();
+
+		$this->assertNotEmpty( $original_order_key );
+
+		// Add a second order key.
+		add_post_meta( $order->get_id(), '_order_key', 'second_order_key_should_be_ignored' );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$migrated_order_key = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT order_key FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+
+		$this->assertEquals( $original_order_key, $migrated_order_key );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+
+		$this->assertEmpty( $errors );
+	}
 }
