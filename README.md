@@ -11,7 +11,7 @@ To get up and running within the WooCommerce Monorepo, you will need to make sur
 ### Prerequisites
 
 * [NVM](https://github.com/nvm-sh/nvm#installing-and-updating): While you can always install Node through other means, we recommend using NVM to ensure you're aligned with the version used by our development teams. Our repository contains [an `.nvmrc` file](.nvmrc) which helps ensure you are using the correct version of Node.
-* [PNPM](https://pnpm.io/installation): Our repository utilizes PNPM to manage project dependencies and run various scripts involved in building and testing projects.
+* [PNPM](https://pnpm.io/installation): Our repository utilizes PNPM to manage project dependencies and run various scripts involved in building and testing projects. Until the repository tooling has been updated to support PNPM 8, install PNPM 7 like so: `npm install pnpm@7 --global`
 * [PHP 7.2+](https://www.php.net/manual/en/install.php): WooCommerce Core currently features a minimum PHP version of 7.2. It is also needed to run Composer and various project build scripts.
 * [Composer](https://getcomposer.org/doc/00-intro.md): We use Composer to manage all of the dependencies for PHP packages and plugins.
 
