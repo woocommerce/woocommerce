@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+
+const { program } = require( '../dist/index' );
+
+program.parse( process.argv );
