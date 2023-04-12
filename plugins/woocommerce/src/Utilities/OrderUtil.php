@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Utilities;
 
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, OrdersTableDataStore };
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use WC_Order;
@@ -141,14 +141,7 @@ final class OrderUtil {
 	 * @return string
 	 */
 	public static function get_table_for_orders() {
-		if ( self::custom_orders_table_usage_is_enabled() ) {
-			$table_name = OrdersTableDataStore::get_orders_table_name();
-		} else {
-			global $wpdb;
-			$table_name = $wpdb->posts;
-		}
-
-		return $table_name;
+		return wc_get_container()->get( COTMigrationUtil::class )->get_table_for_orders();
 	}
 
 	/**
@@ -157,13 +150,6 @@ final class OrderUtil {
 	 * @return string
 	 */
 	public static function get_table_for_order_meta() {
-		if ( self::custom_orders_table_usage_is_enabled() ) {
-			$table_name = OrdersTableDataStore::get_meta_table_name();
-		} else {
-			global $wpdb;
-			$table_name = $wpdb->postmeta;
-		}
-
-		return $table_name;
+		return wc_get_container()->get( COTMigrationUtil::class )->get_table_for_order_meta();
 	}
 }

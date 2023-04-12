@@ -19,11 +19,29 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * @var bool
+	 */
+	private $prev_cot_state;
+
+	/**
 	 * Set-up subject under test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = wc_get_container()->get( COTMigrationUtil::class );
+
+		$cot_controller = wc_get_container()->get( CustomOrdersTableController::class );
+		$this->prev_cot_state = $cot_controller->custom_orders_table_usage_is_enabled();
+	}
+
+	/**
+	 * Restore the COT state after the test.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		OrderHelper::toggle_cot( $this->prev_cot_state );
+		parent::tearDown();
 	}
 
 	/**
@@ -101,4 +119,51 @@ class COTMigrationUtilTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->is_custom_order_tables_in_sync() );
 	}
 
+	/**
+	 * @testdox `get_table_for_orders` should return the name of the posts table when HPOS is not in use.
+	 */
+	public function test_get_table_for_orders_posts() {
+		global $wpdb;
+
+		OrderHelper::toggle_cot( false );
+
+		$table_name = $this->sut->get_table_for_orders();
+		$this->assertEquals( $wpdb->posts, $table_name );
+	}
+
+	/**
+	 * @testdox `get_table_for_orders` should return the name of the orders table when HPOS is in use.
+	 */
+	public function test_get_table_for_orders_hpos() {
+		global $wpdb;
+
+		OrderHelper::toggle_cot( true );
+
+		$table_name = $this->sut->get_table_for_orders();
+		$this->assertEquals( "{$wpdb->prefix}wc_orders", $table_name );
+	}
+
+	/**
+	 * @testdox `get_table_for_order_meta` should return the name of the postmeta table when HPOS is not in use.
+	 */
+	public function test_get_table_for_order_meta_posts() {
+		global $wpdb;
+
+		OrderHelper::toggle_cot( false );
+
+		$table_name = $this->sut->get_table_for_order_meta();
+		$this->assertEquals( $wpdb->postmeta, $table_name );
+	}
+
+	/**
+	 * @testdox `get_table_for_order_meta` should return the name of the orders meta table when HPOS is in use.
+	 */
+	public function test_get_table_for_order_meta_hpos() {
+		global $wpdb;
+
+		OrderHelper::toggle_cot( true );
+
+		$table_name = $this->sut->get_table_for_order_meta();
+		$this->assertEquals( "{$wpdb->prefix}wc_orders_meta", $table_name );
+	}
 }
