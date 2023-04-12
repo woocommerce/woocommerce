@@ -54,9 +54,12 @@ class BlockRegistry {
 
 	/**
 	 * Register product related block categories.
+	 *
+	 * @param array[]                 $block_categories Array of categories for block types.
+	 * @param WP_Block_Editor_Context $editor_context   The current block editor context.
 	 */
 	public function register_categories( $block_categories, $editor_context ) {
-		if ( $editor_context->name === INIT::EDITOR_CONTEXT_NAME ) {
+		if ( INIT::EDITOR_CONTEXT_NAME === $editor_context->name ) {
 			$block_categories[] = array(
 				'slug'  => 'woocommerce',
 				'title' => __( 'WooCommerce', 'woocommerce' ),
