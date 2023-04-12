@@ -14,6 +14,29 @@ const defaultAttributes = [ 'val2', 'val1', 'val2' ];
 const stockAmount = '100';
 const lowStockAmount = '10';
 
+async function deleteProductsAddedByTests( baseURL ) {
+	const api = new wcApi( {
+		url: baseURL,
+		consumerKey: process.env.CONSUMER_KEY,
+		consumerSecret: process.env.CONSUMER_SECRET,
+		version: 'wc/v3',
+	} );
+
+	const varProducts = await api
+		.get( 'products', { per_page: 100, search: variableProductName } )
+		.then( ( response ) => response.data );
+
+	const manualProducts = await api
+		.get( 'products', { per_page: 100, search: manualVariableProduct } )
+		.then( ( response ) => response.data );
+
+	const ids = varProducts
+		.map( ( { id } ) => id )
+		.concat( manualProducts.map( ( { id } ) => id ) );
+
+	await api.post( 'products/batch', { delete: ids } );
+}
+
 async function resetVariableProductTour( baseURL, browser ) {
 	// Go to the product page, so that the `window.wp.data` module is available
 	const page = await browser.newPage( { baseURL: baseURL } );
@@ -46,27 +69,7 @@ test.describe( 'Add New Variable Product Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL, browser } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-
-		const varProducts = await api
-			.get( 'products', { per_page: 100, search: variableProductName } )
-			.then( ( response ) => response.data );
-
-		const manualProducts = await api
-			.get( 'products', { per_page: 100, search: manualVariableProduct } )
-			.then( ( response ) => response.data );
-
-		const ids = varProducts
-			.map( ( { id } ) => id )
-			.concat( manualProducts.map( ( { id } ) => id ) );
-
-		await api.post( 'products/batch', { delete: ids } );
-
+		await deleteProductsAddedByTests( baseURL );
 		await resetVariableProductTour( baseURL, browser );
 	} );
 
