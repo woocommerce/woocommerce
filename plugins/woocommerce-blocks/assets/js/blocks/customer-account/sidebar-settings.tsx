@@ -66,7 +66,9 @@ export const BlockSettings = ( {
 
 	return (
 		<InspectorControls key="inspector">
-			<AccountSettingsLink />
+			<PanelBody>
+				<AccountSettingsLink />
+			</PanelBody>
 			<PanelBody
 				title={ __(
 					'Display settings',
