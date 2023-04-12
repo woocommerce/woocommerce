@@ -1,6 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
+const productPageURL = 'wp-admin/post-new.php?post_type=product';
+
 const variableProductName = 'Variable Product with Three Variations';
 const manualVariableProduct = 'Manual Variable Product';
 const variationOnePrice = '9.99';
@@ -40,7 +42,7 @@ async function deleteProductsAddedByTests( baseURL ) {
 async function resetVariableProductTour( baseURL, browser ) {
 	// Go to the product page, so that the `window.wp.data` module is available
 	const page = await browser.newPage( { baseURL: baseURL } );
-	await page.goto( 'wp-admin/post-new.php?post_type=product' );
+	await page.goto( productPageURL );
 
 	// Get the current user's ID and user preferences
 	const { id: userId, woocommerce_meta } = await page.evaluate( () => {
@@ -74,7 +76,7 @@ test.describe( 'Add New Variable Product Page', () => {
 	} );
 
 	test( 'shows the variable product tour', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
+		await page.goto( productPageURL );
 		await page.selectOption( '#product-type', 'variable', { force: true } );
 
 		// because of the way that the tour is dynamically positioned,
@@ -102,7 +104,7 @@ test.describe( 'Add New Variable Product Page', () => {
 	test( 'can create product, attributes and variations, edit variations and delete variations', async ( {
 		page,
 	} ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
+		await page.goto( productPageURL );
 		await page.fill( '#title', variableProductName );
 		await page.selectOption( '#product-type', 'variable', { force: true } );
 
@@ -238,7 +240,7 @@ test.describe( 'Add New Variable Product Page', () => {
 	test( 'can manually add a variation, manage stock levels, set variation defaults and remove a variation', async ( {
 		page,
 	} ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
+		await page.goto( productPageURL );
 		await page.fill( '#title', manualVariableProduct );
 		await page.selectOption( '#product-type', 'variable', { force: true } );
 		await page.click( 'a[href="#product_attributes"]' );
