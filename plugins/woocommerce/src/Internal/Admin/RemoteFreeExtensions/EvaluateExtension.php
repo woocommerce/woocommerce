@@ -31,12 +31,15 @@ class EvaluateExtension {
 			$extension->is_visible = true;
 		}
 
-		if ( isset( $extension->min_php_version ) ) {
-			$extension->is_visible = version_compare( PHP_VERSION, $extension->min_php_version, '>=' );
-		}
+		// Run PHP and WP version chcecks.
+		if ( $extension->is_visible === true ) {
+			if ( isset( $extension->min_php_version ) && ! version_compare( PHP_VERSION, $extension->min_php_version, '>=' ) ) {
+				$extension->is_visible = false;
+			}
 
-		if ( isset( $extension->min_wp_version ) ) {
-			$extension->is_visible = version_compare( $wp_version, $extension->min_wp_version, '>=' );
+			if ( isset( $extension->min_wp_version ) && ! version_compare( $wp_version, $extension->min_wp_version, '>=' ) ) {
+				$extension->is_visible = false;
+			}
 		}
 
 		$installed_plugins       = PluginsHelper::get_installed_plugin_slugs();
