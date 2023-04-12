@@ -7,7 +7,10 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { waitUntilElementIsPresent } from './utils';
+import {
+	attachEventListenerToParentForChildren,
+	waitUntilElementIsPresent,
+} from './utils';
 
 /**
  * Get the product data.
@@ -244,9 +247,9 @@ const getDataForProductTabClickEvent = ( tabName: string ) => {
 };
 
 /**
- * Initializes the product tabs Tracks events.
+ * Attaches the product tabs Tracks events.
  */
-const initProductTabsTracks = () => {
+const attachProductTabsTracks = () => {
 	const tabs = document.querySelectorAll( '.product_data_tabs > li' );
 
 	tabs.forEach( ( tab ) => {
@@ -262,9 +265,9 @@ const initProductTabsTracks = () => {
 };
 
 /**
- * Initializes the inventory tab Tracks events.
+ * Attaches the inventory tab Tracks events.
  */
-const initInventoryTabTracks = () => {
+const attachProductInventoryTabTracks = () => {
 	document
 		.querySelector( '#_manage_stock' )
 		?.addEventListener( 'click', ( event ) => {
@@ -274,7 +277,7 @@ const initInventoryTabTracks = () => {
 		} );
 
 	document
-		.querySelector( '#_manage_stock_disabled' )
+		.querySelector( '#_manage_stock_disabled > a' )
 		?.addEventListener( 'click', () => {
 			recordEvent(
 				'product_manage_stock_disabled_store_settings_link_click'
@@ -291,10 +294,225 @@ const initInventoryTabTracks = () => {
 };
 
 /**
- * Initialize all product screen tracks.
+ * Attaches product tags tracks.
  */
+const attachProductTagsTracks = () => {
+	function deleteTagEventListener(/* event: Event */) {
+		recordEvent( 'product_tags_delete', {
+			page: 'product',
+			tag_list_size:
+				document.querySelector( '.tagchecklist' )?.children.length || 0,
+		} );
+	}
 
-export const initProductScreenTracks = () => {
+	function addTagsDeleteTracks() {
+		const tagsDeleteButtons = document.querySelectorAll(
+			'#product_tag .ntdelbutton'
+		);
+		tagsDeleteButtons.forEach( ( button ) => {
+			button.removeEventListener( 'click', deleteTagEventListener );
+			button.addEventListener( 'click', deleteTagEventListener );
+		} );
+	}
+	waitUntilElementIsPresent(
+		'#product_tag .tagchecklist',
+		addTagsDeleteTracks
+	);
+
+	document
+		.querySelector( '.tagadd' )
+		?.addEventListener( 'click', (/* event: Event */) => {
+			const tagInput = document.querySelector< HTMLInputElement >(
+				'#new-tag-product_tag'
+			);
+			if ( tagInput && tagInput.value && tagInput.value.length > 0 ) {
+				recordEvent( 'product_tags_add', {
+					page: 'product',
+					tag_string_length: tagInput.value.length,
+					tag_list_size:
+						( document.querySelector( '.tagchecklist' )?.children
+							.length || 0 ) + 1,
+					most_used: false,
+				} );
+				setTimeout( () => {
+					addTagsDeleteTracks();
+				}, 500 );
+			}
+		} );
+
+	function addMostUsedTagEventListener( event: Event ) {
+		recordEvent( 'product_tags_add', {
+			page: 'product',
+			tag_string_length: ( event.target as HTMLAnchorElement ).textContent
+				?.length,
+			tag_list_size:
+				document.querySelector( '.tagchecklist' )?.children.length || 0,
+			most_used: true,
+		} );
+		addTagsDeleteTracks();
+	}
+
+	function addMostUsedTagsTracks() {
+		const tagCloudLinks = document.querySelectorAll(
+			'#tagcloud-product_tag .tag-cloud-link'
+		);
+		tagCloudLinks.forEach( ( button ) => {
+			button.removeEventListener( 'click', addMostUsedTagEventListener );
+			button.addEventListener( 'click', addMostUsedTagEventListener );
+		} );
+	}
+
+	document
+		.querySelector( '.tagcloud-link' )
+		?.addEventListener( 'click', () => {
+			waitUntilElementIsPresent(
+				'#tagcloud-product_tag',
+				addMostUsedTagsTracks
+			);
+		} );
+};
+
+/**
+ * Attaches attributes tracks.
+ */
+const attachAttributesTracks = () => {
+	function addNewTermEventHandler() {
+		recordEvent( 'product_attributes_add_term', {
+			page: 'product',
+		} );
+	}
+
+	function addNewAttributeTermTracks() {
+		const addNewTermButtons = document.querySelectorAll(
+			'.woocommerce_attribute .add_new_attribute'
+		);
+		addNewTermButtons.forEach( ( button ) => {
+			button.removeEventListener( 'click', addNewTermEventHandler );
+			button.addEventListener( 'click', addNewTermEventHandler );
+		} );
+	}
+	addNewAttributeTermTracks();
+
+	document
+		.querySelector( '.add_attribute' )
+		?.addEventListener( 'click', () => {
+			setTimeout( () => {
+				addNewAttributeTermTracks();
+			}, 1000 );
+		} );
+};
+
+/**
+ * Attaches product attributes tracks.
+ */
+const attachProductAttributesTracks = () => {
+	const attributesCount = document.querySelectorAll(
+		'.woocommerce_attribute'
+	).length;
+
+	document
+		.querySelector( '.save_attributes' )
+		?.addEventListener( 'click', ( event ) => {
+			if (
+				event.target instanceof Element &&
+				event.target.classList.contains( 'disabled' )
+			) {
+				// skip in case the button is disabled
+				return;
+			}
+			const newAttributesCount = document.querySelectorAll(
+				'.woocommerce_attribute'
+			).length;
+			if ( newAttributesCount > attributesCount ) {
+				const local_attributes = [
+					...document.querySelectorAll(
+						'.woocommerce_attribute:not(.pa_glbattr)'
+					),
+				].map( ( attr ) => {
+					const terms =
+						(
+							attr.querySelector(
+								"[name^='attribute_values']"
+							) as HTMLTextAreaElement
+						 )?.value.split( '|' ).length ?? 0;
+					return {
+						name: (
+							attr.querySelector(
+								'[name^="attribute_names"]'
+							) as HTMLInputElement
+						 )?.value,
+						terms,
+					};
+				} );
+				recordEvent( 'product_attributes_add', {
+					page: 'product',
+					enable_archive: '',
+					default_sort_order: '',
+					local_attributes,
+				} );
+			}
+		} );
+};
+
+/**
+ * Attaches product variations tracks.
+ */
+const attachProductVariationsTracks = () => {
+	document
+		.querySelector(
+			'#variable_product_options_inner .variations-add-attributes-link'
+		)
+		?.addEventListener( 'click', () => {
+			recordEvent( 'product_variations_empty_state', {
+				action: 'add_attribute_link',
+			} );
+		} );
+
+	document
+		.querySelector(
+			'#variable_product_options_inner .variations-learn-more-link'
+		)
+		?.addEventListener( 'click', () => {
+			recordEvent( 'product_variations_empty_state', {
+				action: 'learn_more_link',
+			} );
+		} );
+
+	const variationsSection = '#variable_product_options';
+
+	// We attach the events in this way because the buttons are added dynamically.
+	attachEventListenerToParentForChildren( variationsSection, [
+		{
+			eventName: 'click',
+			childQuery: '.add_variation_manually',
+			callback: () => {
+				recordEvent( 'product_variations_buttons', {
+					action: 'add_variation_manually',
+				} );
+			},
+		},
+		{
+			eventName: 'change',
+			childQuery: '#field_to_edit',
+			callback: () => {
+				const selectElement = document.querySelector(
+					'#field_to_edit'
+				) as HTMLSelectElement;
+				// Get the index of the selected option
+				const selectedIndex = selectElement.selectedIndex;
+				recordEvent( 'product_variations_buttons', {
+					action: 'bulk_actions',
+					selected: selectElement.options[ selectedIndex ]?.value,
+				} );
+			},
+		},
+	] );
+};
+
+/**
+ * Attaches general product screen tracks.
+ */
+const attachProductScreenTracks = () => {
 	const initialPublishingData = getPublishingWidgetData();
 
 	document
@@ -395,156 +613,6 @@ export const initProductScreenTracks = () => {
 			} );
 		} );
 
-	// Product tags
-
-	function deleteTagEventListener(/* event: Event */) {
-		recordEvent( 'product_tags_delete', {
-			page: 'product',
-			tag_list_size:
-				document.querySelector( '.tagchecklist' )?.children.length || 0,
-		} );
-	}
-
-	function addTagsDeleteTracks() {
-		const tagsDeleteButtons = document.querySelectorAll(
-			'#product_tag .ntdelbutton'
-		);
-		tagsDeleteButtons.forEach( ( button ) => {
-			button.removeEventListener( 'click', deleteTagEventListener );
-			button.addEventListener( 'click', deleteTagEventListener );
-		} );
-	}
-	waitUntilElementIsPresent(
-		'#product_tag .tagchecklist',
-		addTagsDeleteTracks
-	);
-
-	document
-		.querySelector( '.tagadd' )
-		?.addEventListener( 'click', (/* event: Event */) => {
-			const tagInput = document.querySelector< HTMLInputElement >(
-				'#new-tag-product_tag'
-			);
-			if ( tagInput && tagInput.value && tagInput.value.length > 0 ) {
-				recordEvent( 'product_tags_add', {
-					page: 'product',
-					tag_string_length: tagInput.value.length,
-					tag_list_size:
-						( document.querySelector( '.tagchecklist' )?.children
-							.length || 0 ) + 1,
-					most_used: false,
-				} );
-				setTimeout( () => {
-					addTagsDeleteTracks();
-				}, 500 );
-			}
-		} );
-
-	function addMostUsedTagEventListener( event: Event ) {
-		recordEvent( 'product_tags_add', {
-			page: 'product',
-			tag_string_length: ( event.target as HTMLAnchorElement ).textContent
-				?.length,
-			tag_list_size:
-				document.querySelector( '.tagchecklist' )?.children.length || 0,
-			most_used: true,
-		} );
-		addTagsDeleteTracks();
-	}
-
-	function addMostUsedTagsTracks() {
-		const tagCloudLinks = document.querySelectorAll(
-			'#tagcloud-product_tag .tag-cloud-link'
-		);
-		tagCloudLinks.forEach( ( button ) => {
-			button.removeEventListener( 'click', addMostUsedTagEventListener );
-			button.addEventListener( 'click', addMostUsedTagEventListener );
-		} );
-	}
-
-	document
-		.querySelector( '.tagcloud-link' )
-		?.addEventListener( 'click', () => {
-			waitUntilElementIsPresent(
-				'#tagcloud-product_tag',
-				addMostUsedTagsTracks
-			);
-		} );
-
-	// Attribute tracks.
-
-	function addNewTermEventHandler() {
-		recordEvent( 'product_attributes_add_term', {
-			page: 'product',
-		} );
-	}
-
-	function addNewAttributeTermTracks() {
-		const addNewTermButtons = document.querySelectorAll(
-			'.woocommerce_attribute .add_new_attribute'
-		);
-		addNewTermButtons.forEach( ( button ) => {
-			button.removeEventListener( 'click', addNewTermEventHandler );
-			button.addEventListener( 'click', addNewTermEventHandler );
-		} );
-	}
-	addNewAttributeTermTracks();
-
-	document
-		.querySelector( '.add_attribute' )
-		?.addEventListener( 'click', () => {
-			setTimeout( () => {
-				addNewAttributeTermTracks();
-			}, 1000 );
-		} );
-
-	const attributesCount = document.querySelectorAll(
-		'.woocommerce_attribute'
-	).length;
-
-	document
-		.querySelector( '.save_attributes' )
-		?.addEventListener( 'click', ( event ) => {
-			if (
-				event.target instanceof Element &&
-				event.target.classList.contains( 'disabled' )
-			) {
-				// skip in case the button is disabled
-				return;
-			}
-			const newAttributesCount = document.querySelectorAll(
-				'.woocommerce_attribute'
-			).length;
-			if ( newAttributesCount > attributesCount ) {
-				const local_attributes = [
-					...document.querySelectorAll(
-						'.woocommerce_attribute:not(.pa_glbattr)'
-					),
-				].map( ( attr ) => {
-					const terms =
-						(
-							attr.querySelector(
-								"[name^='attribute_values']"
-							) as HTMLTextAreaElement
-						 )?.value.split( '|' ).length ?? 0;
-					return {
-						name: (
-							attr.querySelector(
-								'[name^="attribute_names"]'
-							) as HTMLInputElement
-						 )?.value,
-						terms,
-					};
-				} );
-				recordEvent( 'product_attributes_add', {
-					page: 'product',
-					enable_archive: '',
-					default_sort_order: '',
-					local_attributes,
-				} );
-			}
-		} );
-
 	document
 		.querySelector(
 			'#woocommerce-product-updated-message-view-product__link'
@@ -563,9 +631,19 @@ export const initProductScreenTracks = () => {
 				recordEvent( 'product_view_product_dismiss', getProductData() );
 			} );
 	} );
+};
 
-	initProductTabsTracks();
-	initInventoryTabTracks();
+/**
+ * Initialize all product screen tracks.
+ */
+export const initProductScreenTracks = () => {
+	attachAttributesTracks();
+	attachProductScreenTracks();
+	attachProductTagsTracks();
+	attachProductAttributesTracks();
+	attachProductVariationsTracks();
+	attachProductTabsTracks();
+	attachProductInventoryTabTracks();
 };
 
 export function addExitPageListener( pageId: string ) {
