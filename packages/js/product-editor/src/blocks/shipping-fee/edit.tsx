@@ -10,11 +10,7 @@ import {
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useBlockProps } from '@wordpress/block-editor';
-import {
-	BaseControl,
-	RadioControl,
-	SelectControl,
-} from '@wordpress/components';
+import { BaseControl, SelectControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
@@ -33,6 +29,7 @@ import classNames from 'classnames';
  */
 import { ShippingFeeBlockAttributes } from './types';
 import { useValidation } from '../../hooks/use-validation';
+import { RadioField } from '../../components/radio-field';
 
 const FOLLOW_CLASS_OPTION_VALUE = 'follow_class';
 const FREE_SHIPPING_OPTION_VALUE = 'free_shipping';
@@ -112,16 +109,11 @@ export function Edit( {
 		<div { ...blockProps }>
 			<div className="wp-block-columns">
 				<div className="wp-block-column">
-					<RadioControl
-						label={
-							<span className="wp-block-woocommerce-product-radio__title">
-								{ title }
-							</span>
-						}
+					<RadioField
+						title={ title }
 						selected={ option }
 						options={ options }
 						onChange={ handleOptionChange }
-						className="wp-block-woocommerce-product-radio"
 					/>
 				</div>
 			</div>
