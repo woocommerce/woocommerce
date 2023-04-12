@@ -514,6 +514,9 @@ class WC_Post_Types {
 											),
 										),
 										array(
+											'woocommerce/product-schedule-sale-fields',
+										),
+										array(
 											'woocommerce/product-radio',
 											array(
 												'title'    => __( 'Charge sales tax on', 'woocommerce' ),
@@ -580,6 +583,12 @@ class WC_Post_Types {
 							array(
 								'id'    => 'inventory',
 								'title' => __( 'Inventory', 'woocommerce' ),
+							),
+							array(
+								array(
+									'woocommerce/product-track-inventory-fields',
+									array(),
+								),
 							),
 						),
 						array(
