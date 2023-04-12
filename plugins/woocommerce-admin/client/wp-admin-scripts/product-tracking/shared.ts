@@ -249,7 +249,7 @@ const getDataForProductTabClickEvent = ( tabName: string ) => {
 /**
  * Attaches the product tabs Tracks events.
  */
-const addProductTabsTracks = () => {
+const attachProductTabsTracks = () => {
 	const tabs = document.querySelectorAll( '.product_data_tabs > li' );
 
 	tabs.forEach( ( tab ) => {
@@ -267,7 +267,7 @@ const addProductTabsTracks = () => {
 /**
  * Attaches the inventory tab Tracks events.
  */
-const addProductInventoryTabTracks = () => {
+const attachProductInventoryTabTracks = () => {
 	document
 		.querySelector( '#_manage_stock' )
 		?.addEventListener( 'click', ( event ) => {
@@ -296,7 +296,7 @@ const addProductInventoryTabTracks = () => {
 /**
  * Attaches product tags tracks.
  */
-const addProductTagsTracks = () => {
+const attachProductTagsTracks = () => {
 	function deleteTagEventListener(/* event: Event */) {
 		recordEvent( 'product_tags_delete', {
 			page: 'product',
@@ -375,7 +375,7 @@ const addProductTagsTracks = () => {
 /**
  * Attaches attributes tracks.
  */
-const addAttributesTracks = () => {
+const attachAttributesTracks = () => {
 	function addNewTermEventHandler() {
 		recordEvent( 'product_attributes_add_term', {
 			page: 'product',
@@ -405,7 +405,7 @@ const addAttributesTracks = () => {
 /**
  * Attaches product attributes tracks.
  */
-const addProductAttributesTracks = () => {
+const attachProductAttributesTracks = () => {
 	const attributesCount = document.querySelectorAll(
 		'.woocommerce_attribute'
 	).length;
@@ -457,7 +457,7 @@ const addProductAttributesTracks = () => {
 /**
  * Attaches product variations tracks.
  */
-const addProductVariationsTracks = () => {
+const attachProductVariationsTracks = () => {
 	document
 		.querySelector(
 			'#variable_product_options_inner .variations-add-attributes-link'
@@ -482,15 +482,6 @@ const addProductVariationsTracks = () => {
 
 	// We attach the events in this way because the buttons are added dynamically.
 	attachEventListenerToParentForChildren( variationsSection, [
-		{
-			eventName: 'click',
-			childQuery: '.generate_variations',
-			callback: () => {
-				recordEvent( 'product_variations_buttons', {
-					action: 'generate_variations',
-				} );
-			},
-		},
 		{
 			eventName: 'click',
 			childQuery: '.add_variation_manually',
@@ -521,7 +512,7 @@ const addProductVariationsTracks = () => {
 /**
  * Attaches general product screen tracks.
  */
-const addProductScreenTracks = () => {
+const attachProductScreenTracks = () => {
 	const initialPublishingData = getPublishingWidgetData();
 
 	document
@@ -646,13 +637,13 @@ const addProductScreenTracks = () => {
  * Initialize all product screen tracks.
  */
 export const initProductScreenTracks = () => {
-	addAttributesTracks();
-	addProductScreenTracks();
-	addProductTagsTracks();
-	addProductAttributesTracks();
-	addProductVariationsTracks();
-	addProductTabsTracks();
-	addProductInventoryTabTracks();
+	attachAttributesTracks();
+	attachProductScreenTracks();
+	attachProductTagsTracks();
+	attachProductAttributesTracks();
+	attachProductVariationsTracks();
+	attachProductTabsTracks();
+	attachProductInventoryTabTracks();
 };
 
 export function addExitPageListener( pageId: string ) {

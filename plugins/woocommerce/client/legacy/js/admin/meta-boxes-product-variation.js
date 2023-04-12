@@ -1154,6 +1154,10 @@ jQuery( function ( $ ) {
 						}
 					}
 				);
+
+				window.wcTracks.recordEvent( 'product_variations_buttons', {
+					action: 'generate_variations',
+				} );
 			}
 
 			return false;
