@@ -543,7 +543,11 @@ WHERE
 	private function processs_and_sanitize_meta_data( array &$sanitized_entity_data, array &$error_records, array $meta_data ): void {
 		foreach ( $meta_data as $datum ) {
 			$column_schema = $this->meta_column_mapping[ $datum->meta_key ];
-			$value         = $this->validate_data( $datum->meta_value, $column_schema['type'] );
+			if ( isset( $sanitized_entity_data[ $datum->entity_id ][ $column_schema['destination'] ] ) ) {
+				// We pick only the first meta if there are duplicates for a flat column, to be consistent with WP core behavior in handing duplicate meta which are marked as unique.
+				continue;
+			}
+			$value = $this->validate_data( $datum->meta_value, $column_schema['type'] );
 			if ( is_wp_error( $value ) ) {
 				$error_records[ $datum->entity_id ][ $column_schema['destination'] ] = "{$value->get_error_code()}: {$value->get_error_message()}";
 			} else {
