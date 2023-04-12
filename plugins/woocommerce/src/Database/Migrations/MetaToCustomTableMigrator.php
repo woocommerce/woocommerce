@@ -827,6 +827,9 @@ WHERE $where_clause
 	 * @return array Processed row.
 	 */
 	private function pre_process_row( $row, $schema, $alias, $destination_alias ) {
+		if ( ! isset( $row[ $alias ] ) ) {
+			$row[ $alias ] = $this->get_type_defaults( $schema['type'] );
+		}
 		if ( in_array( $schema['type'], array( 'int', 'decimal' ), true ) ) {
 			if ( '' === $row[ $alias ] || null === $row[ $alias ] ) {
 				$row[ $alias ] = 0; // $wpdb->prepare forces empty values to 0.
@@ -848,10 +851,6 @@ WHERE $where_clause
 				$row[ $destination_alias ] = null;
 			}
 		}
-		if ( ! isset( $row[ $alias ] ) ) {
-			$row[ $alias ] = $this->get_type_defaults( $schema['type'] );
-		}
-
 		return $row;
 	}
 
