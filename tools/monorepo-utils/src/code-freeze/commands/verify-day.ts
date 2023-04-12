@@ -29,13 +29,11 @@ export const verifyDayCommand = new Command( 'verify-day' )
 		const today = getToday( override );
 		const futureDate = getFutureDate( today );
 		console.log(
-			chalk.yellow(
-				"Today's timestamp UTC is: " + today.toUTCString() + '\n'
-			)
+			chalk.yellow( "Today's timestamp UTC is: " + today.toUTCString() )
 		);
 		console.log(
 			chalk.yellow(
-				`Checking to see if ${ DAYS_BETWEEN_CODE_FREEZE_AND_RELEASE } days from today is the second Tuesday of the month.\n`
+				`Checking to see if ${ DAYS_BETWEEN_CODE_FREEZE_AND_RELEASE } days from today is the second Tuesday of the month.`
 			)
 		);
 		const isCodeFreezeDay = isTodayCodeFreezeDay( override );
@@ -43,7 +41,7 @@ export const verifyDayCommand = new Command( 'verify-day' )
 			chalk.green(
 				`${ futureDate.toUTCString() } ${
 					isCodeFreezeDay ? 'is' : 'is not'
-				} release day.\n`
+				} release day.`
 			)
 		);
 		console.log(
