@@ -34,17 +34,15 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
 import { AUTO_DRAFT_NAME } from '../../utils';
 import { EditProductLinkModal } from '../edit-product-link-modal';
 import { useValidation } from '../../hooks/use-validation';
-import { useProductHelper } from '../../hooks/use-product-helper';
 
 export function Edit() {
 	const blockProps = useBlockProps();
 
-	const { updateProductWithStatus } = useProductHelper();
+	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
 
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
 
-	const { editEntityRecord } = useDispatch( 'core' );
 	const productId = useEntityId( 'postType', 'product' );
 	const product: Product = useSelect( ( select ) =>
 		select( 'core' ).getEditedEntityRecord(
@@ -141,15 +139,11 @@ export function Edit() {
 						onCancel={ () => setShowProductLinkEditModal( false ) }
 						onSaved={ () => setShowProductLinkEditModal( false ) }
 						saveHandler={ async ( updatedSlug ) => {
-							const { slug, permalink } =
-								await updateProductWithStatus(
-									product.id,
-									{
-										slug: updatedSlug,
-									},
-									product.status,
-									true
-								);
+							const { slug, permalink }: Product =
+								await saveEntityRecord( 'postType', 'product', {
+									id: product.id,
+									slug: updatedSlug,
+								} );
 
 							if ( slug && permalink ) {
 								editEntityRecord(
