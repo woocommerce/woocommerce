@@ -37,7 +37,6 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install-filters: woocommerce
                   build: false
 
             - name: Download and install Chromium browser.
@@ -96,7 +95,6 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install-filters: woocommerce
                   build: false
 
             - name: Download and install Chromium browser.
@@ -140,7 +138,6 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install-filters: woocommerce
                   build: false
 
             - name: Download and install Chromium browser.
