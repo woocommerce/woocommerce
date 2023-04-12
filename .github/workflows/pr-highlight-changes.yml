@@ -22,7 +22,7 @@ jobs:
               run: |
                   npm install -g pnpm@7
                   npm -g i @wordpress/env@5.1.0
-                  pnpm install --filter monorepo-utils --filter code-analyzer --filter cli-core
+                  pnpm install --filter code-analyzer --filter cli-core
             - name: Run analyzer
               id: run
               working-directory: tools/code-analyzer
