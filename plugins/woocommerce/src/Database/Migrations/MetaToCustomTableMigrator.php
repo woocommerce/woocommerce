@@ -614,7 +614,7 @@ WHERE
 		$query = $this->build_verification_query( $source_ids );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query should already be prepared.
 		$results = $wpdb->get_results( $query, ARRAY_A );
-
+		$results = $this->fill_source_metadata( $results, $source_ids );
 		return $this->verify_data( $results );
 	}
 
@@ -627,19 +627,13 @@ WHERE
 	 */
 	protected function build_verification_query( $source_ids ) {
 		$source_table                  = $this->schema_config['source']['entity']['table_name'];
-		$meta_table                    = $this->schema_config['source']['meta']['table_name'];
 		$destination_table             = $this->schema_config['destination']['table_name'];
-		$meta_entity_id_column         = $this->schema_config['source']['meta']['entity_id_column'];
-		$meta_key_column               = $this->schema_config['source']['meta']['meta_key_column'];
-		$meta_value_column             = $this->schema_config['source']['meta']['meta_value_column'];
 		$destination_source_rel_column = $this->schema_config['destination']['source_rel_column'];
 		$source_destination_rel_column = $this->schema_config['source']['entity']['destination_rel_column'];
-		$source_meta_rel_column        = $this->schema_config['source']['entity']['meta_rel_column'];
 
 		$source_destination_join_clause = "$destination_table ON $destination_table.$destination_source_rel_column = $source_table.$source_destination_rel_column";
 
 		$meta_select_clauses        = array();
-		$meta_join_clauses          = array();
 		$source_select_clauses      = array();
 		$destination_select_clauses = array();
 
@@ -650,19 +644,11 @@ WHERE
 		}
 
 		foreach ( $this->meta_column_mapping as $meta_key => $schema ) {
-			$meta_table_alias             = "meta_source_{$schema['destination']}";
-			$meta_select_clauses[]        = "$meta_table_alias.$meta_value_column AS $meta_table_alias";
-			$meta_join_clauses[]          = "
-$meta_table $meta_table_alias ON
-	$meta_table_alias.$meta_entity_id_column = $source_table.$source_meta_rel_column AND
-	$meta_table_alias.$meta_key_column = '$meta_key'
-";
 			$destination_select_clauses[] = "$destination_table.{$schema['destination']} as {$destination_table}_{$schema['destination']}";
 		}
 
 		$select_clause = implode( ', ', array_merge( $source_select_clauses, $meta_select_clauses, $destination_select_clauses ) );
 
-		$meta_join_clause = implode( ' LEFT JOIN ', $meta_join_clauses );
 
 		$where_clause = $this->get_where_clause_for_verification( $source_ids );
 
@@ -670,9 +656,69 @@ $meta_table $meta_table_alias ON
 SELECT $select_clause
 FROM $source_table
     LEFT JOIN $source_destination_join_clause
-    LEFT JOIN $meta_join_clause
 WHERE $where_clause
 ";
+	}
+
+	/**
+	 * Fill source metadata for given IDS for verification.
+	 *
+	 * @param array $source_ids List of source IDs.
+	 *
+	 * @return array List of source metadata. This will be in the following format:
+	 * [
+	 *    {
+	 *      $source_table_$source_column: $value,
+	 *      ...,
+	 *      $destination_table_$destination_column: $value,
+	 *      ...
+	 *      meta_source_{$destination_column_name1}: $meta_value,
+	 *      ...
+	 *    },
+	 *   ...
+	 * ]
+	 */
+	private function fill_source_metadata( $results, $source_ids ) {
+		global $wpdb;
+		$meta_table             = $this->schema_config['source']['meta']['table_name'];
+		$meta_entity_id_column  = $this->schema_config['source']['meta']['entity_id_column'];
+		$meta_key_column        = $this->schema_config['source']['meta']['meta_key_column'];
+		$meta_value_column      = $this->schema_config['source']['meta']['meta_value_column'];
+		$meta_id_column         = $this->schema_config['source']['meta']['meta_id_column'];
+		$meta_columns           = array_keys( $this->meta_column_mapping );
+
+		$meta_columns_placeholder = implode( ', ', array_fill( 0, count( $meta_columns ), '%s' ) );
+		$source_ids_placeholder   = implode( ', ', array_fill( 0, count( $source_ids ), '%d' ) );
+
+		$query = $wpdb->prepare(
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			"SELECT $meta_entity_id_column as entity_id, $meta_key_column as meta_key, $meta_value_column as meta_value
+			FROM $meta_table
+			WHERE $meta_entity_id_column IN ($source_ids_placeholder)
+			AND $meta_key_column IN ($meta_columns_placeholder)
+			ORDER BY $meta_id_column ASC",
+			array_merge( $source_ids, $meta_columns )
+		);
+
+		$meta_data = $wpdb->get_results( $query, ARRAY_A );
+		$source_metadata_rows = array();
+		foreach ( $meta_data as $meta_datum ) {
+			if ( ! isset( $source_metadata_rows[ $meta_datum['entity_id'] ] ) ) {
+				$source_metadata_rows[ $meta_datum['entity_id'] ] = array();
+			}
+			$destination_column = $this->meta_column_mapping[ $meta_datum['meta_key'] ]['destination'];
+			$alias = "meta_source_{$destination_column}";
+			if ( isset( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ) ) {
+				// Only process first value, duplicate values mapping to flat columns are ignored to be consistent with WP core.
+				continue;
+			}
+			$source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] = $meta_datum['meta_value'];
+		}
+		foreach ( $results as $index => $result_row ) {
+			$source_id = $result_row[ $this->schema_config['source']['entity']['table_name'] . '_' . $this->schema_config['source']['entity']['primary_key'] ];
+			$results[ $index ] = array_merge( $result_row, $source_metadata_rows[ $source_id ] );
+		}
+		return $results;
 	}
 
 	/**
@@ -802,7 +848,7 @@ WHERE $where_clause
 				$row[ $destination_alias ] = null;
 			}
 		}
-		if ( is_null( $row[ $alias ] ) ) {
+		if ( ! isset( $row[ $alias ] ) ) {
 			$row[ $alias ] = $this->get_type_defaults( $schema['type'] );
 		}
 
