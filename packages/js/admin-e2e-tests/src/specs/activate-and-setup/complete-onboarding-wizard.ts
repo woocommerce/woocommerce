@@ -107,11 +107,6 @@ export const testAdminOnboardingWizard = () => {
 			await profileWizard.continue();
 		} );
 
-		it( 'can complete the theme selection section', async () => {
-			await profileWizard.themes.isDisplayed();
-			await profileWizard.themes.continueWithActiveTheme();
-		} );
-
 		it( 'can select the right currency on settings page related to the onboarding country', async () => {
 			const settingsScreen = new WcSettings( page );
 			await settingsScreen.navigate();
@@ -185,7 +180,7 @@ export const testSelectiveBundleWCPay = () => {
 			await profileWizard.continue();
 		} );
 
-		it( 'can choose not to install any extensions', async () => {
+		it( 'can choose not to install any extensions, and finish the rest of the wizard successfully', async () => {
 			await profileWizard.business.freeFeaturesIsDisplayed();
 			// Add WC Pay check
 			await profileWizard.business.expandRecommendedBusinessFeatures();
@@ -196,13 +191,6 @@ export const testSelectiveBundleWCPay = () => {
 
 			await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
 			await profileWizard.continue();
-		} );
-
-		it( 'can finish the rest of the wizard successfully', async () => {
-			await profileWizard.themes.isDisplayed();
-
-			//  This navigates to the home screen
-			await profileWizard.themes.continueWithActiveTheme();
 		} );
 
 		it( 'should display the choose payments task, and not the woocommerce payments task', async () => {
@@ -333,11 +321,8 @@ export const testDifferentStoreCurrenciesWCPay = () => {
 				}
 
 				await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
-				await profileWizard.continue();
-				await profileWizard.themes.isDisplayed();
-
 				//  This navigates to the home screen
-				await profileWizard.themes.continueWithActiveTheme();
+				await profileWizard.continue();
 			} );
 
 			it( `can select ${ spec.expectedCurrency } as the currency for ${ spec.countryRegion }`, async () => {
@@ -583,7 +568,6 @@ export const testBusinessDetailsForm = () => {
 			await profileWizard.business.expandRecommendedBusinessFeatures();
 			await profileWizard.business.uncheckAllRecommendedBusinessFeatures();
 			await profileWizard.continue();
-			await profileWizard.themes.isDisplayed();
 		} );
 	} );
 };
