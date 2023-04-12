@@ -129,6 +129,7 @@ export type ProfileItems = {
 	selling_venues?: string | null;
 	setup_client?: boolean | null;
 	skipped?: boolean | null;
+	/** @deprecated This is alway null, the theme step has been removed since WC 7.7. */
 	theme?: string | null;
 	wccom_connected?: boolean | null;
 	is_agree_marketing?: boolean | null;
