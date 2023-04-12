@@ -8,7 +8,7 @@
 	"keywords": [ "products", "shipping", "dimensions" ],
 	"textdomain": "default",
 	"attributes": {
-		"name": {
+		"__contentEditable": {
 			"type": "string",
 			"__experimentalRole": "content"
 		}
