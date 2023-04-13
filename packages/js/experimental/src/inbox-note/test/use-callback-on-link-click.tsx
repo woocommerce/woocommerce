@@ -42,4 +42,17 @@ describe( 'useCallbackOnLinkClick hook', () => {
 		userEvent.click( getByText( 'Button' ) );
 		expect( callback ).not.toHaveBeenCalled();
 	} );
+
+	it( 'should remove listener on unmount', () => {
+		const listener = jest.fn();
+		const { getByText, unmount } = render(
+			<TestComp callback={ jest.fn() } />
+		);
+		const span = getByText( 'Some Text' );
+		jest.spyOn( span, 'removeEventListener' ).mockImplementation(
+			listener
+		);
+		unmount();
+		expect( listener ).toHaveBeenCalledTimes( 1 );
+	} );
 } );
