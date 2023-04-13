@@ -64,6 +64,7 @@ import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
  * @param {string}                     [props.className]                  The class name for this component
  * @param {boolean}                    [props.disabled]                   Disables the component
  * @param {boolean}                    [props.includeParent]              Includes parent with selection.
+ * @param {boolean}                    [props.individuallySelectParent]   Considers parent as a single item (default: false).
  * @param {boolean}                    [props.alwaysShowPlaceholder]      Will always show placeholder (default: false)
  * @param {Option[]}                   [props.options]                    Options to show in the component
  * @param {string[]}                   [props.value]                      Selected values
@@ -89,6 +90,7 @@ const TreeSelectControl = ( {
 	onDropdownVisibilityChange = noop,
 	onInputChange = noop,
 	includeParent = false,
+	individuallySelectParent = false,
 	alwaysShowPlaceholder = false,
 	minFilterQueryLength = 3,
 } ) => {
@@ -422,9 +424,11 @@ const TreeSelectControl = ( {
 	 */
 	const handleParentChange = ( checked, option ) => {
 		let newValue;
-		const changedValues = option.leaves
-			.filter( ( opt ) => opt.checked !== checked )
-			.map( ( opt ) => opt.value );
+		const changedValues = individuallySelectParent
+			? []
+			: option.leaves
+					.filter( ( opt ) => opt.checked !== checked )
+					.map( ( opt ) => opt.value );
 		if ( includeParent && option.value !== ROOT_VALUE ) {
 			changedValues.push( option.value );
 		}

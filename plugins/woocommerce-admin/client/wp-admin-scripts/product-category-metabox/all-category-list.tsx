@@ -145,6 +145,7 @@ export const AllCategoryList = forwardRef<
 					placeholder={ __( 'Add category', 'woocommerce' ) }
 					includeParent={ true }
 					minFilterQueryLength={ 2 }
+					individuallySelectParent={ true }
 				/>
 			</div>
 			<ul
@@ -174,7 +175,6 @@ export const AllCategoryList = forwardRef<
 								) }
 							</span>
 						</button>
-						&nbsp;
 						{ cat.name }
 					</li>
 				) ) }
