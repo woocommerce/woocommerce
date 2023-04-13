@@ -36,6 +36,8 @@ export function Header( { onTabSelect, productName }: HeaderProps ) {
 			tabIndex={ -1 }
 		>
 			<div className="woocommerce-product-header__inner">
+				<div />
+
 				<h1 className="woocommerce-product-header__title">
 					{ getHeaderTitle( editedProductName, productName ) }
 				</h1>
