@@ -1069,6 +1069,57 @@ jQuery( function ( $ ) {
 		return false;
 	} );
 
+	// Add gpt integration button
+	$( '#wp-content-media-buttons' ).append(
+		'<button class="button wp-media-button" type="button">' +
+			woocommerce_admin_meta_boxes.i18n_product_open_gpt_button +
+			'</button>'
+	);
+
+	// Add gpt integration form
+	$( '#wp-content-editor-tools' ).after(
+		'<div class="woocommerce-gpt-integration">' +
+			'<div class="woocommerce-gpt-integration__title">' +
+			'<h3>' +
+			woocommerce_admin_meta_boxes.i18n_product_gpt_title +
+			'<span class="woocommerce-beta-badge">BETA</span>' +
+			'<a class="woocommerce-hide-gpt-integration" href="#">hide</a>' +
+			'</h3>' +
+			'</div>' +
+			'<span class="woocommerce-textarea-title">' +
+			woocommerce_admin_meta_boxes.i18n_product_gpt_input_title +
+			'</span>' +
+			'<textarea class="woocommerce-gpt-textarea" placeholder="' +
+			woocommerce_admin_meta_boxes.i18n_product_gpt_input_placeholder +
+			'"></textarea>' +
+			'<div class="woocommerce-actions">' +
+			'<span class="woocommerce-action-buttons-title">' +
+			woocommerce_admin_meta_boxes.i18n_product_gpt_buttons_title +
+			'</span>' +
+			'<div class="woocommerce-action-buttons">' +
+			'<button class="woocommerce-gpt-action-casual active" type="button">' +
+			woocommerce_admin_meta_boxes.i18n_product_gpt_button_casual +
+			'</button>' +
+			'<button class="woocommerce-gpt-action-formal" type="button">' +
+			woocommerce_admin_meta_boxes.i18n_product_gpt_button_formal +
+			'</button>' +
+			'<button class="woocommerce-gpt-action-flowery" type="button">' +
+			woocommerce_admin_meta_boxes.i18n_product_gpt_button_flowery +
+			'</button>' +
+			'<button class="woocommerce-gpt-action-convincing" type="button">' +
+			woocommerce_admin_meta_boxes.i18n_product_gpt_button_convincing +
+			'</button>' +
+			'</div>' +
+			'<span class="woocommerce-action-description">' +
+			woocommerce_admin_meta_boxes.i18n_product_gpt_desc_casual +
+			'</span>' +
+			'</div>' +
+			'<button class="button button-primary woocommerce-gpt-action-accept" type="button">' +
+			woocommerce_admin_meta_boxes.i18n_product_gpt_button_accept +
+			'</button>' +
+			'</div>'
+	);
+
 	// Add a descriptive tooltip to the product description editor
 	$( '#wp-content-media-buttons' )
 		.append( '<span class="woocommerce-help-tip" tabindex="-1"></span>' )
