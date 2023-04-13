@@ -328,7 +328,7 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 	/**
 	 * Test deleting meta selectively.
 	 */
-	public function test_delete_matched_meta_data() {
+	public function test_delete_meta_data_value() {
 		$object    = $this->create_test_post();
 		$object_id = $object->get_id();
 		add_metadata( 'post', $object_id, 'test_meta_key', 'val1' );
@@ -338,13 +338,13 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 		$this->assertCount( 3, $object->get_meta( 'test_meta_key', false ) );
 
-		$object->delete_matched_meta_data( 'test_meta_key', 'val1' );
+		$object->delete_meta_data_value( 'test_meta_key', 'val1' );
 		$this->assertCount( 2, $object->get_meta( 'test_meta_key', false ) );
 
-		$object->delete_matched_meta_data( 'test_meta_key', array( 'bar', 'baz' ) );
+		$object->delete_meta_data_value( 'test_meta_key', array( 'bar', 'baz' ) );
 		$this->assertCount( 2, $object->get_meta( 'test_meta_key', false ) );
 
-		$object->delete_matched_meta_data( 'test_meta_key', array( 'foo', 'bar' ) );
+		$object->delete_meta_data_value( 'test_meta_key', array( 'foo', 'bar' ) );
 		$this->assertCount( 1, $object->get_meta( 'test_meta_key', false ) );
 
 		$this->assertEquals( 'val2', $object->get_meta( 'test_meta_key' ) );

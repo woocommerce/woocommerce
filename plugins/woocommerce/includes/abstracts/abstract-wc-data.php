@@ -513,7 +513,7 @@ abstract class WC_Data {
 	 * @param string $key   Meta key.
 	 * @param mixed  $value Meta value. Entries will only be removed that match the value.
 	 */
-	public function delete_matched_meta_data( $key, $value ) {
+	public function delete_meta_data_value( $key, $value ) {
 		$this->maybe_read_meta_data();
 		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key, true );
 
