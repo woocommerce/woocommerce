@@ -35,8 +35,18 @@
 	#product_cat-all {
 		overflow: visible;
 
-		.categorychecklist > li {
-			margin-right: 25px;
+		.categorychecklist {
+			max-height: 140px;
+			margin-left: 0px;
+			> li {
+				display: flex;
+				align-items: center;
+				margin-right: $gap-small;
+			}
+			.ntdelbutton {
+				position: relative;
+				margin: 0px;
+			}
 		}
 	}
 	.woocommerce-experimental-select-control__combo-box-wrapper {
