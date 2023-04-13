@@ -10,7 +10,7 @@ import ora from 'ora';
  */
 import { getLatestReleaseVersion } from '../../../github/repo';
 import { octokitWithAuth } from '../../../github/api';
-import { WPIncrement, setGithubMilestoneOutputs } from './utils';
+import { setGithubMilestoneOutputs, WPIncrement } from './utils';
 import { Options } from './types';
 
 export const milesStoneCommand = new Command( 'milestone' )
