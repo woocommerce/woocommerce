@@ -6,6 +6,13 @@
 		align-items: center;
 		padding: 0 $gap;
 		height: $header-height;
+
+		@include breakpoint( '<960px' ) {
+			> div:first-child {
+				display: none;
+			}
+			grid-template-columns: auto 1fr;
+		}
 	}
 
 	.woocommerce-product-header__title {
