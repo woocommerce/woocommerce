@@ -447,7 +447,8 @@ const attachProductAttributesTracks = () => {
 	attachEventListenerToParentForChildren( attributesSection, [
 		{
 			eventName: 'click',
-			query: '.select2-selection__placeholder, .select2-selection__rendered',
+			childQuery:
+				'.select2-selection__placeholder, .select2-selection__rendered',
 			callback: () => {
 				recordEvent( 'product_attributes_buttons', {
 					action: 'add_existing',
@@ -459,7 +460,7 @@ const attachProductAttributesTracks = () => {
 		},
 		{
 			eventName: 'click',
-			query: '.woocommerce_attribute_visible_on_product_page',
+			childQuery: '.woocommerce_attribute_visible_on_product_page',
 			callback: () => {
 				const visibleOnProductPage = document.querySelector(
 					'.woocommerce_attribute_visible_on_product_page'
@@ -473,7 +474,7 @@ const attachProductAttributesTracks = () => {
 		},
 		{
 			eventName: 'click',
-			query: '.woocommerce_attribute_used_for_variations',
+			childQuery: '.woocommerce_attribute_used_for_variations',
 			callback: () => {
 				const usedForVariations = document.querySelector(
 					'.woocommerce_attribute_used_for_variations'
