@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Updated Playwright to 1.32.3 and adds a command for UI mode
