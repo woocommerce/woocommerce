@@ -37,13 +37,20 @@ export function Edit( {}: BlockEditProps< TrackInventoryBlockAttributes > ) {
 		'stock_quantity'
 	);
 
-	const stockQuantityId = useInstanceId( BaseControl ) as string;
+	const stockQuantityId = useInstanceId(
+		BaseControl,
+		'product_stock_quantity'
+	) as string;
 
-	const isStockQuantityValid = useValidation(
+	const stockQuantityValidationError = useValidation(
 		'product/stock_quantity',
 		function stockQuantityValidator() {
-			if ( ! manageStock ) return true;
-			return Boolean( stockQuantity && stockQuantity >= 0 );
+			if ( manageStock && stockQuantity && stockQuantity < 0 ) {
+				return __(
+					'Stock quantity must be a positive number.',
+					'woocommerce'
+				);
+			}
 		}
 	);
 
@@ -70,18 +77,12 @@ export function Edit( {}: BlockEditProps< TrackInventoryBlockAttributes > ) {
 						<BaseControl
 							id={ stockQuantityId }
 							className={
-								isStockQuantityValid ? undefined : 'has-error'
+								stockQuantityValidationError && 'has-error'
 							}
-							help={
-								isStockQuantityValid
-									? undefined
-									: __(
-											'Stock quantity must be a positive number.',
-											'woocommerce'
-									  )
-							}
+							help={ stockQuantityValidationError ?? '' }
 						>
 							<InputControl
+								id={ stockQuantityId }
 								name="stock_quantity"
 								label={ __(
 									'Available quantity',
