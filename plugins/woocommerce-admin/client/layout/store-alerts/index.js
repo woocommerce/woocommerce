@@ -43,7 +43,7 @@ export class StoreAlerts extends Component {
 	}
 
 	previousAlert( event ) {
-		event.stopPropagation();
+		event?.stopPropagation();
 		const { currentIndex } = this.state;
 
 		if ( currentIndex > 0 ) {
@@ -178,6 +178,7 @@ export class StoreAlerts extends Component {
 						variant="tertiary"
 						onClick={ async () => {
 							await removeNote( alert.id );
+							this.previousAlert();
 							invalidateResolutionForStoreSelector( 'getNotes' );
 						} }
 					>
