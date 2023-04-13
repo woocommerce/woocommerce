@@ -75,42 +75,32 @@ test.describe( 'Add New Variable Product Page', () => {
 		await resetVariableProductTour( baseURL, browser );
 	} );
 
-	test( 'shows the variable product tour', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
-		await page.selectOption( '#product-type', 'variable' );
-
-		// because of the way that the tour is dynamically positioned,
-		// Playwright can't automatically scroll the button into view,
-		// so we will manually scroll the attributes tab into view,
-		// which will cause the tour to be scrolled into view as well
-		await page
-			.locator( '.attribute_tab' )
-			.getByRole( 'link', { name: 'Attributes' } )
-			.scrollIntoViewIfNeeded();
-
-		// the tour only seems to display when not running headless, so just make sure
-		if ( await page.locator( '.components-card-header' ).nth(1).isVisible() ) {
-		// dismiss the variable product tour
-		await page
-			.getByRole( 'button', { name: 'Close Tour' } )
-			.click();
-
-		// wait for the tour's dismissal to be saved
-		await page.waitForResponse(
-			( response ) =>
-				response.url().includes( '/users/' ) &&
-				response.status() === 200
-		);
-
-		}
-	} );
-
 	test( 'can create product, attributes and variations, edit variations and delete variations', async ( {
 		page,
 	} ) => {
 		await page.goto( productPageURL );
 		await page.fill( '#title', variableProductName );
 		await page.selectOption( '#product-type', 'variable' );
+
+		await page
+			.locator( '.attribute_tab' )
+			.getByRole( 'link', { name: 'Attributes' } )
+			.scrollIntoViewIfNeeded();
+
+		// the tour only seems to display when not running headless, so just make sure
+		if ( await page.locator( '.woocommerce-tour-kit-step__heading' ).isVisible() ) {
+			// dismiss the variable product tour
+			await page
+				.getByRole( 'button', { name: 'Close Tour' } )
+				.click();
+
+			// wait for the tour's dismissal to be saved
+			await page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/users/' ) &&
+					response.status() === 200
+			);
+		}
 
 		await page.click( 'a[href="#product_attributes"]' );
 
@@ -251,7 +241,28 @@ test.describe( 'Add New Variable Product Page', () => {
 	} ) => {
 		await page.goto( productPageURL );
 		await page.fill( '#title', manualVariableProduct );
-		await page.selectOption( '#product-type', 'variable', { force: true } );
+		await page.selectOption( '#product-type', 'variable' );
+
+		await page
+			.locator( '.attribute_tab' )
+			.getByRole( 'link', { name: 'Attributes' } )
+			.scrollIntoViewIfNeeded();
+
+		// the tour only seems to display when not running headless, so just make sure
+		if ( await page.locator( '.woocommerce-tour-kit-step__heading' ).isVisible() ) {
+			// dismiss the variable product tour
+			await page
+				.getByRole( 'button', { name: 'Close Tour' } )
+				.click();
+
+			// wait for the tour's dismissal to be saved
+			await page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/users/' ) &&
+					response.status() === 200
+			);
+		}
+
 		await page.click( 'a[href="#product_attributes"]' );
 		// add 3 attributes
 		for ( let i = 0; i < 3; i++ ) {
