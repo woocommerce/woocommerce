@@ -4,6 +4,7 @@
 import {
 	__experimentalEditor as Editor,
 	ProductEditorSettings,
+	productApiFetchMiddleware,
 } from '@woocommerce/product-editor';
 
 import { Spinner } from '@wordpress/components';
@@ -19,6 +20,8 @@ import './product-block-page.scss';
 import './fills/product-block-editor-fills';
 
 declare const productBlockEditorSettings: ProductEditorSettings;
+
+productApiFetchMiddleware();
 
 export default function ProductPage() {
 	const { productId } = useParams();
