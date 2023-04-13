@@ -7,6 +7,11 @@ import { useSelect } from '@wordpress/data';
 import { getVisibleTasks, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/settings';
 
+/**
+ * Internal dependencies
+ */
+import sanitizeHTML from '../../lib/sanitize-html';
+
 export type DefaultProgressTitleProps = {
 	taskListId: string;
 };
@@ -64,6 +69,9 @@ export const DefaultProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
 	}
 
 	return (
-		<h1 className="woocommerce-task-progress-header__title">{ title }</h1>
+		<h1
+			className="woocommerce-task-progress-header__title"
+			dangerouslySetInnerHTML={ sanitizeHTML( title ) }
+		/>
 	);
 };
