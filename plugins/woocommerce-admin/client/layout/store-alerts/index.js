@@ -66,7 +66,12 @@ export class StoreAlerts extends Component {
 	}
 
 	renderActions( alert ) {
-		const { triggerNoteAction, updateNote } = this.props;
+		const {
+			triggerNoteAction,
+			updateNote,
+			removeNote,
+			invalidateResolutionForStoreSelector,
+		} = this.props;
 		const actions = alert.actions.map( ( action ) => {
 			return (
 				<Button
@@ -164,14 +169,24 @@ export class StoreAlerts extends Component {
 			/>
 		);
 
-		if ( actions || snooze ) {
-			return (
-				<div className="woocommerce-store-alerts__actions">
-					{ actions }
-					{ snooze }
-				</div>
-			);
-		}
+		return (
+			<div className="woocommerce-store-alerts__actions">
+				{ actions }
+				{
+					<Button
+						key={ 'dismiss' }
+						variant="tertiary"
+						onClick={ async () => {
+							await removeNote( alert.id );
+							invalidateResolutionForStoreSelector( 'getNotes' );
+						} }
+					>
+						{ __( 'Dismiss', 'woocommerce' ) }
+					</Button>
+				}
+				{ snooze }
+			</div>
+		);
 	}
 
 	getAlerts() {
@@ -303,11 +318,18 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { triggerNoteAction, updateNote } = dispatch( NOTES_STORE_NAME );
+		const {
+			triggerNoteAction,
+			updateNote,
+			removeNote,
+			invalidateResolutionForStoreSelector,
+		} = dispatch( NOTES_STORE_NAME );
 
 		return {
 			triggerNoteAction,
 			updateNote,
+			removeNote,
+			invalidateResolutionForStoreSelector,
 		};
 	} )
 )( StoreAlerts );
