@@ -660,7 +660,7 @@ WHERE $where_clause
 	}
 
 	/**
-	 * Fill source metadata for given IDS for verification. This will return filled data in following format:
+	 * Fill source metadata for given IDs for verification. This will return filled data in following format:
 	 * [
 	 *    {
 	 *      $source_table_$source_column: $value,
