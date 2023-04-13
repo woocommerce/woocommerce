@@ -2,14 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	createElement,
-	createInterpolateElement,
-	Fragment,
-} from '@wordpress/element';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import { useBlockProps } from '@wordpress/block-editor';
-import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
-import { Icon, help } from '@wordpress/icons';
 
 import {
 	BaseControl,
@@ -39,33 +33,15 @@ export function Edit() {
 					__( 'Sku <description />', 'woocommerce' ),
 					{
 						description: (
-							<>
-								<span className="woocommerce-product-form__optional-input">
-									{ __(
-										'(STOCK KEEPING UNIT)',
-										'woocommerce'
-									) }
-								</span>
-								<Tooltip
-									text={ __(
-										'This is placeholder text for the SKU field.',
-										'woocommerce'
-									) }
-								>
-									<Icon
-										icon={ help }
-										size={ 20 }
-										color="#949494"
-									/>
-								</Tooltip>
-							</>
+							<span className="woocommerce-product-form__optional-input">
+								{ __( '(STOCK KEEPING UNIT)', 'woocommerce' ) }
+							</span>
 						),
 					}
 				) }
 			>
 				<InputControl
-					name={ 'woocommerce-product-name' }
-					placeholder={ __( 'e.g. 12 oz Coffee Mug', 'woocommerce' ) }
+					name={ 'woocommerce-product-sku' }
 					onChange={ setSku }
 					value={ sku || '' }
 				/>
