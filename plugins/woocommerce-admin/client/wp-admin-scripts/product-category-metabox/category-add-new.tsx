@@ -23,6 +23,14 @@ declare const wc_product_category_metabox_params: {
 	search_categories_nonce: string;
 };
 
+function getCategoryTermLabel( item: CategoryTerm | null ): string {
+	return item?.name || '';
+}
+
+function getCategoryTermKey( item: CategoryTerm | null ): string {
+	return String( item?.term_id );
+}
+
 export const CategoryAddNew: React.FC< {
 	selected: CategoryTerm[];
 	onChange: ( selected: CategoryTerm[] ) => void;
@@ -150,8 +158,8 @@ export const CategoryAddNew: React.FC< {
 						selected={ categoryParent || null }
 						placeholder={ __( 'Find category', 'woocommerce' ) }
 						onSelect={ setCategoryParent }
-						getItemLabel={ ( item ) => item?.name || '' }
-						getItemValue={ ( item ) => String( item?.term_id ) }
+						getItemLabel={ getCategoryTermLabel }
+						getItemValue={ getCategoryTermKey }
 						onRemove={ () => setCategoryParent( undefined ) }
 					/>
 					<input
