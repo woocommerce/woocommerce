@@ -51,7 +51,7 @@ function convertTreeToLabelValue(
 		};
 		categoryLibrary[ child.term_id ] = child;
 		newTree.push( newItem );
-		if ( child.children && child.children.length > 0 ) {
+		if ( child.children?.length ) {
 			convertTreeToLabelValue( child.children, newItem.children );
 		}
 	}
@@ -60,13 +60,16 @@ function convertTreeToLabelValue(
 
 async function getTreeItems( filter: string ) {
 	const resp = await apiFetch< CategoryTreeItem[] >( {
-		url: addQueryArgs( getSetting( 'adminUrl' ) + 'admin-ajax.php', {
-			term: filter,
-			action: 'woocommerce_json_search_categories_tree',
-			// eslint-disable-next-line no-undef, camelcase
-			security:
-				wc_product_category_metabox_params.search_categories_nonce,
-		} ),
+		url: addQueryArgs(
+			new URL( 'admin-ajax.php', getSetting( 'adminUrl' ) ).toString(),
+			{
+				term: filter,
+				action: 'woocommerce_json_search_categories_tree',
+				// eslint-disable-next-line no-undef, camelcase
+				security:
+					wc_product_category_metabox_params.search_categories_nonce,
+			}
+		),
 		method: 'GET',
 	} );
 	if ( resp ) {
@@ -78,10 +81,10 @@ async function getTreeItems( filter: string ) {
 export const AllCategoryList = forwardRef<
 	{ resetInitialValues: () => void },
 	{
-		selected: CategoryTerm[];
+		selectedCategoryTerms: CategoryTerm[];
 		onChange: ( selected: CategoryTerm[] ) => void;
 	}
->( ( { selected, onChange }, ref ) => {
+>( ( { selectedCategoryTerms, onChange }, ref ) => {
 	const [ filter, setFilter ] = useState( '' );
 	const [ treeItems, setTreeItems ] = useState<
 		CategoryTreeItemLabelValue[]
@@ -131,13 +134,19 @@ export const AllCategoryList = forwardRef<
 				<TreeSelectControl
 					alwaysShowPlaceholder={ true }
 					options={ treeItems }
-					value={ selected.map( ( cat ) => cat.term_id.toString() ) }
-					onChange={ ( sel: number[] ) => {
-						onChange( sel.map( ( id ) => categoryLibrary[ id ] ) );
+					value={ selectedCategoryTerms.map( ( category ) =>
+						category.term_id.toString()
+					) }
+					onChange={ ( selectedCategoryIds: number[] ) => {
+						onChange(
+							selectedCategoryIds.map(
+								( id ) => categoryLibrary[ id ]
+							)
+						);
 						recordEvent( 'product_category_update', {
 							page: 'product',
 							async: true,
-							selected: sel.length,
+							selected: selectedCategoryIds.length,
 						} );
 					} }
 					selectAllLabel={ false }
@@ -149,18 +158,22 @@ export const AllCategoryList = forwardRef<
 				/>
 			</div>
 			<ul
+				// Adding tagchecklist class to make use of already existing styling for the selected categories.
 				className="categorychecklist form-no-clear tagchecklist"
 				id={ CATEGORY_TERM_NAME + 'checklist' }
 			>
-				{ selected.map( ( cat ) => (
-					<li key={ cat.term_id }>
+				{ selectedCategoryTerms.map( ( selectedCategory ) => (
+					<li key={ selectedCategory.term_id }>
 						<button
 							type="button"
 							className="ntdelbutton"
 							onClick={ () => {
-								const newSelectedItems = selected.filter(
-									( sel ) => sel.term_id !== cat.term_id
-								);
+								const newSelectedItems =
+									selectedCategoryTerms.filter(
+										( category ) =>
+											category.term_id !==
+											selectedCategory.term_id
+									);
 								onChange( newSelectedItems );
 							} }
 						>
@@ -171,11 +184,11 @@ export const AllCategoryList = forwardRef<
 							<span className="screen-reader-text">
 								{ sprintf(
 									__( 'Remove term: %s', 'woocommerce' ),
-									cat.name
+									selectedCategory.name
 								) }
 							</span>
 						</button>
-						{ cat.name }
+						{ selectedCategory.name }
 					</li>
 				) ) }
 			</ul>

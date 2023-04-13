@@ -32,11 +32,12 @@ function getCategoryTermKey( item: CategoryTerm | null ): string {
 }
 
 export const CategoryAddNew: React.FC< {
-	selected: CategoryTerm[];
+	selectedCategoryTerms: CategoryTerm[];
 	onChange: ( selected: CategoryTerm[] ) => void;
-} > = ( { selected, onChange } ) => {
+} > = ( { selectedCategoryTerms, onChange } ) => {
 	const [ showAddNew, setShowAddNew ] = useState( false );
 	const [ newCategoryName, setNewCategoryName ] = useState( '' );
+	const [ categoryCreateError, setCategoryCreateError ] = useState( '' );
 	const [ categoryParent, setCategoryParent ] = useState< CategoryTerm >();
 	const [ fetchedItems, setFetchedItems ] = useState< CategoryTerm[] >( [] );
 	const { currentUserCan } = useUser();
@@ -51,8 +52,9 @@ export const CategoryAddNew: React.FC< {
 
 		const data = {
 			name: newCategoryName,
-			parent: categoryParent ? categoryParent.term_id : -1,
+			parent: categoryParent?.term_id ?? -1,
 		};
+		setCategoryCreateError( '' );
 		apiFetch< {
 			id: number;
 			name: string;
@@ -62,24 +64,30 @@ export const CategoryAddNew: React.FC< {
 			path: '/wc/v3/products/categories',
 			data,
 			method: 'POST',
-		} ).then( ( res ) => {
-			if ( res ) {
-				recordEvent( 'product_category_add', {
-					category_id: res.id,
-					parent_id: res.parent,
-					parent_category: res.parent > 0 ? 'Other' : 'None',
-					page: 'product',
-					async: true,
-				} );
-				onChange( [
-					...selected,
-					{ term_id: res.id, name: res.name, count: res.count },
-				] );
-				setNewCategoryName( '' );
-				setCategoryParent( undefined );
-				setShowAddNew( false );
-			}
-		} );
+		} )
+			.then( ( res ) => {
+				if ( res ) {
+					recordEvent( 'product_category_add', {
+						category_id: res.id,
+						parent_id: res.parent,
+						parent_category: res.parent > 0 ? 'Other' : 'None',
+						page: 'product',
+						async: true,
+					} );
+					onChange( [
+						...selectedCategoryTerms,
+						{ term_id: res.id, name: res.name, count: res.count },
+					] );
+					setNewCategoryName( '' );
+					setCategoryParent( undefined );
+					setShowAddNew( false );
+				}
+			} )
+			.catch( ( error ) => {
+				if ( error && error.message ) {
+					setCategoryCreateError( error.message );
+				}
+			} );
 	};
 
 	const filter: ( value: string ) => Promise< CategoryTerm[] > = useCallback(
@@ -87,7 +95,10 @@ export const CategoryAddNew: React.FC< {
 			setFetchedItems( [] );
 			return apiFetch< CategoryTerm[] >( {
 				url: addQueryArgs(
-					getSetting( 'adminUrl' ) + 'admin-ajax.php',
+					new URL(
+						'admin-ajax.php',
+						getSetting( 'adminUrl' )
+					).toString(),
 					{
 						term: value,
 						action: 'woocommerce_json_search_categories',
@@ -97,9 +108,9 @@ export const CategoryAddNew: React.FC< {
 					}
 				),
 				method: 'GET',
-			} ).then( ( res ) => {
-				if ( res ) {
-					setFetchedItems( Object.values( res ) );
+			} ).then( ( response ) => {
+				if ( response ) {
+					setFetchedItems( Object.values( response ) );
 				}
 				return [];
 			} );
@@ -122,6 +133,7 @@ export const CategoryAddNew: React.FC< {
 				href={ '#taxonomy-' + CATEGORY_TERM_NAME }
 				className="taxonomy-add-new"
 				onClick={ () => setShowAddNew( ! showAddNew ) }
+				aria-label={ __( 'Add new category', 'woocommerce' ) }
 			>
 				{ __( '+ Add new category', 'woocommerce' ) }
 			</a>
@@ -162,6 +174,11 @@ export const CategoryAddNew: React.FC< {
 						getItemValue={ getCategoryTermKey }
 						onRemove={ () => setCategoryParent( undefined ) }
 					/>
+					{ categoryCreateError && (
+						<p className="category-add__error">
+							{ categoryCreateError }
+						</p>
+					) }
 					<input
 						type="button"
 						id="product_cat-add-submit"

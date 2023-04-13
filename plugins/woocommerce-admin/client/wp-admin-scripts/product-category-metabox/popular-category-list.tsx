@@ -31,16 +31,22 @@ export const PopularCategoryList: React.FC< {
 
 	useEffect( () => {
 		apiFetch< CategoryTerm[] >( {
-			url: addQueryArgs( getSetting( 'adminUrl' ) + 'admin-ajax.php', {
-				action: 'woocommerce_json_search_taxonomy_terms',
-				taxonomy: CATEGORY_TERM_NAME,
-				limit: 10,
-				orderby: 'count',
-				order: 'DESC',
-				// eslint-disable-next-line no-undef, camelcase
-				security:
-					wc_product_category_metabox_params.search_taxonomy_terms_nonce,
-			} ),
+			url: addQueryArgs(
+				new URL(
+					'admin-ajax.php',
+					getSetting( 'adminUrl' )
+				).toString(),
+				{
+					action: 'woocommerce_json_search_taxonomy_terms',
+					taxonomy: CATEGORY_TERM_NAME,
+					limit: 10,
+					orderby: 'count',
+					order: 'DESC',
+					// eslint-disable-next-line no-undef, camelcase
+					security:
+						wc_product_category_metabox_params.search_taxonomy_terms_nonce,
+				}
+			),
 			method: 'GET',
 		} ).then( ( res ) => {
 			if ( res ) {

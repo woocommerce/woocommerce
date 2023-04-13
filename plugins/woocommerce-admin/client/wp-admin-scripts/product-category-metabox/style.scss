@@ -9,7 +9,7 @@
 			}
 
 			.components-checkbox-control__label {
-				min-height: 32px;
+				min-height: $gap-larger;
 			}
 
 			&__tags {
@@ -24,8 +24,8 @@
 				width: $gap;
 			}
 			.components-checkbox-control__checked {
-				height: $gap + 4px;
-				width: $gap + 4px;
+				height: $gap + $gap-smallest;
+				width: $gap + $gap-smallest;
 			}
 		}
 	}
@@ -37,7 +37,7 @@
 
 		.categorychecklist {
 			max-height: 140px;
-			margin-left: 0px;
+			margin-left: 0;
 			> li {
 				display: flex;
 				align-items: center;
@@ -45,15 +45,20 @@
 			}
 			.ntdelbutton {
 				position: relative;
-				margin: 0px;
+				margin: 0;
 			}
 		}
 	}
 	.woocommerce-experimental-select-control__combo-box-wrapper {
 		min-height: 30px;
-		border-radius: 4px;
+		border-radius: $gap-smallest;
 	}
 	.woocommerce-experimental-select-control__menu-item {
 		padding: 5px $gap-small;
+	}
+	.category-add {
+		&__error {
+			color: $error-red;
+		}
 	}
 }

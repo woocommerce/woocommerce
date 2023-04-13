@@ -14,9 +14,9 @@ export function getSelectedCategoryData( container ) {
 	if ( container ) {
 		const selectedCategories = Array.from(
 			container.querySelectorAll( ':scope > input[type=hidden]' )
-		).map( ( ele ) => {
-			const id = getCategoryDataFromElement( ele );
-			ele.remove();
+		).map( ( categoryElement ) => {
+			const id = getCategoryDataFromElement( categoryElement );
+			categoryElement.remove();
 			return id;
 		} );
 		return selectedCategories;

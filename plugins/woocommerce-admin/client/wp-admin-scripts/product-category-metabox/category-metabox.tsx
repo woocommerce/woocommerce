@@ -118,7 +118,7 @@ const CategoryMetabox: React.FC< {
 				}
 			>
 				<AllCategoryList
-					selected={ selected }
+					selectedCategoryTerms={ selected }
 					onChange={ setSelected }
 					ref={ allCategoryListRef }
 				/>
@@ -139,7 +139,7 @@ const CategoryMetabox: React.FC< {
 				/>
 			) }
 			<CategoryAddNew
-				selected={ selected }
+				selectedCategoryTerms={ selected }
 				onChange={ ( sel ) => {
 					setSelected( sel );
 					if ( allCategoryListRef.current ) {
