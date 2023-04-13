@@ -430,17 +430,6 @@ const attachProductAttributesTracks = () => {
 			}
 		} );
 
-	document
-		.querySelector( '#product_attributes .attribute_taxonomy' )
-		?.addEventListener( 'click', () => {
-			recordEvent( 'product_attributes_buttons', {
-				action: 'add_existing',
-				empty_state:
-					document.querySelectorAll( '.woocommerce_attribute' )
-						.length === 0,
-			} );
-		} );
-
 	const attributesSection = '#product_attributes';
 
 	// We attach the events in this way because the buttons are added dynamically.
