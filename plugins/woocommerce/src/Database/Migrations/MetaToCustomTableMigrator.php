@@ -649,7 +649,6 @@ WHERE
 
 		$select_clause = implode( ', ', array_merge( $source_select_clauses, $meta_select_clauses, $destination_select_clauses ) );
 
-
 		$where_clause = $this->get_where_clause_for_verification( $source_ids );
 
 		return "
@@ -661,11 +660,7 @@ WHERE $where_clause
 	}
 
 	/**
-	 * Fill source metadata for given IDS for verification.
-	 *
-	 * @param array $source_ids List of source IDs.
-	 *
-	 * @return array List of source metadata. This will be in the following format:
+	 * Fill source metadata for given IDS for verification. This will return filled data in following format:
 	 * [
 	 *    {
 	 *      $source_table_$source_column: $value,
@@ -677,21 +672,26 @@ WHERE $where_clause
 	 *    },
 	 *   ...
 	 * ]
+	 *
+	 * @param array $results    Entity data from both source and destination table.
+	 * @param array $source_ids List of source IDs.
+	 *
+	 * @return array Filled $results param with source metadata.
 	 */
 	private function fill_source_metadata( $results, $source_ids ) {
 		global $wpdb;
-		$meta_table             = $this->schema_config['source']['meta']['table_name'];
-		$meta_entity_id_column  = $this->schema_config['source']['meta']['entity_id_column'];
-		$meta_key_column        = $this->schema_config['source']['meta']['meta_key_column'];
-		$meta_value_column      = $this->schema_config['source']['meta']['meta_value_column'];
-		$meta_id_column         = $this->schema_config['source']['meta']['meta_id_column'];
-		$meta_columns           = array_keys( $this->meta_column_mapping );
+		$meta_table            = $this->schema_config['source']['meta']['table_name'];
+		$meta_entity_id_column = $this->schema_config['source']['meta']['entity_id_column'];
+		$meta_key_column       = $this->schema_config['source']['meta']['meta_key_column'];
+		$meta_value_column     = $this->schema_config['source']['meta']['meta_value_column'];
+		$meta_id_column        = $this->schema_config['source']['meta']['meta_id_column'];
+		$meta_columns          = array_keys( $this->meta_column_mapping );
 
 		$meta_columns_placeholder = implode( ', ', array_fill( 0, count( $meta_columns ), '%s' ) );
 		$source_ids_placeholder   = implode( ', ', array_fill( 0, count( $source_ids ), '%d' ) );
 
 		$query = $wpdb->prepare(
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 			"SELECT $meta_entity_id_column as entity_id, $meta_key_column as meta_key, $meta_value_column as meta_value
 			FROM $meta_table
 			WHERE $meta_entity_id_column IN ($source_ids_placeholder)
@@ -699,15 +699,17 @@ WHERE $where_clause
 			ORDER BY $meta_id_column ASC",
 			array_merge( $source_ids, $meta_columns )
 		);
+		//phpcs:enable
 
-		$meta_data = $wpdb->get_results( $query, ARRAY_A );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$meta_data            = $wpdb->get_results( $query, ARRAY_A );
 		$source_metadata_rows = array();
 		foreach ( $meta_data as $meta_datum ) {
 			if ( ! isset( $source_metadata_rows[ $meta_datum['entity_id'] ] ) ) {
 				$source_metadata_rows[ $meta_datum['entity_id'] ] = array();
 			}
 			$destination_column = $this->meta_column_mapping[ $meta_datum['meta_key'] ]['destination'];
-			$alias = "meta_source_{$destination_column}";
+			$alias              = "meta_source_{$destination_column}";
 			if ( isset( $source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] ) ) {
 				// Only process first value, duplicate values mapping to flat columns are ignored to be consistent with WP core.
 				continue;
@@ -715,7 +717,7 @@ WHERE $where_clause
 			$source_metadata_rows[ $meta_datum['entity_id'] ][ $alias ] = $meta_datum['meta_value'];
 		}
 		foreach ( $results as $index => $result_row ) {
-			$source_id = $result_row[ $this->schema_config['source']['entity']['table_name'] . '_' . $this->schema_config['source']['entity']['primary_key'] ];
+			$source_id         = $result_row[ $this->schema_config['source']['entity']['table_name'] . '_' . $this->schema_config['source']['entity']['primary_key'] ];
 			$results[ $index ] = array_merge( $result_row, $source_metadata_rows[ $source_id ] );
 		}
 		return $results;
