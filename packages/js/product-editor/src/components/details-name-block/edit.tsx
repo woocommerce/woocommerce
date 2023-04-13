@@ -33,6 +33,7 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  */
 import { AUTO_DRAFT_NAME } from '../../utils';
 import { EditProductLinkModal } from '../edit-product-link-modal';
+
 import { useValidation } from '../../hooks/use-validation';
 
 export function Edit() {
@@ -52,6 +53,7 @@ export function Edit() {
 		)
 	);
 
+	const [ sku, setSku ] = useEntityProp( 'postType', 'product', 'sku' );
 	const [ name, setName ] = useEntityProp< string >(
 		'postType',
 		'product',
@@ -79,6 +81,13 @@ export function Edit() {
 		() => Boolean( name ) && name !== AUTO_DRAFT_NAME
 	);
 
+	const setSkuIfEmpty = () => {
+		if ( sku || ! nameIsValid ) {
+			return;
+		}
+		setSku( cleanForSlug( name ) );
+	};
+
 	return (
 		<>
 			<div { ...blockProps }>
@@ -103,6 +112,7 @@ export function Edit() {
 						) }
 						onChange={ setName }
 						value={ name || '' }
+						onBlur={ setSkuIfEmpty }
 					/>
 				</BaseControl>
 				{ productId &&
