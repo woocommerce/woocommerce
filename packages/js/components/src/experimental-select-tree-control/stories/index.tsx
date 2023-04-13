@@ -98,8 +98,8 @@ export const MultipleSelectTree: React.FC = () => {
 
 export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
 	const [ isOpen, setOpen ] = useState( true );
-	const [ value, setValue ] = React.useState( '' );
-	const [ selected, setSelected ] = React.useState< Item[] >( [] );
+	const [ value, setValue ] = useState( '' );
+	const [ selected, setSelected ] = useState< Item[] >( [] );
 
 	const items = filterItems( listItems, value );
 
