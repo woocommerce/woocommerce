@@ -1,6 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
+const productPageURL = 'wp-admin/post-new.php?post_type=product';
+
 const variableProductName = 'Variable Product with Three Variations';
 const manualVariableProduct = 'Manual Variable Product';
 const variationOnePrice = '9.99';
@@ -14,35 +16,68 @@ const defaultAttributes = [ 'val2', 'val1', 'val2' ];
 const stockAmount = '100';
 const lowStockAmount = '10';
 
+async function deleteProductsAddedByTests( baseURL ) {
+	const api = new wcApi( {
+		url: baseURL,
+		consumerKey: process.env.CONSUMER_KEY,
+		consumerSecret: process.env.CONSUMER_SECRET,
+		version: 'wc/v3',
+	} );
+
+	const varProducts = await api
+		.get( 'products', { per_page: 100, search: variableProductName } )
+		.then( ( response ) => response.data );
+
+	const manualProducts = await api
+		.get( 'products', { per_page: 100, search: manualVariableProduct } )
+		.then( ( response ) => response.data );
+
+	const ids = varProducts
+		.map( ( { id } ) => id )
+		.concat( manualProducts.map( ( { id } ) => id ) );
+
+	await api.post( 'products/batch', { delete: ids } );
+}
+
+async function resetVariableProductTour( baseURL, browser ) {
+	// Go to the product page, so that the `window.wp.data` module is available
+	const page = await browser.newPage( { baseURL: baseURL } );
+	await page.goto( productPageURL );
+
+	// Get the current user's ID and user preferences
+	const { id: userId, woocommerce_meta } = await page.evaluate( () => {
+		return window.wp.data.select( 'core' ).getCurrentUser();
+	} );
+
+	// Reset the variable product tour preference, so that it will be shown again
+	const updatedWooCommerceMeta = {
+		...woocommerce_meta,
+		variable_product_tour_shown: '',
+	};
+
+	// Save the updated user preferences
+	await page.evaluate(
+		async ( { userId, updatedWooCommerceMeta } ) => {
+			await window.wp.data.dispatch( 'core' ).saveUser( {
+				id: userId,
+				woocommerce_meta: updatedWooCommerceMeta,
+			} );
+		},
+		{ userId, updatedWooCommerceMeta }
+	);
+}
+
 test.describe( 'Add New Variable Product Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-
-		const varProducts = await api
-			.get( 'products', { per_page: 100, search: variableProductName } )
-			.then( ( response ) => response.data );
-
-		const manualProducts = await api
-			.get( 'products', { per_page: 100, search: manualVariableProduct } )
-			.then( ( response ) => response.data );
-
-		const ids = varProducts
-			.map( ( { id } ) => id )
-			.concat( manualProducts.map( ( { id } ) => id ) );
-
-		await api.post( 'products/batch', { delete: ids } );
+	test.afterAll( async ( { baseURL, browser } ) => {
+		await deleteProductsAddedByTests( baseURL );
+		await resetVariableProductTour( baseURL, browser );
 	} );
 
 	test( 'shows the variable product tour', async ( { page } ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product' );
-		await page.selectOption( '#product-type', 'variable', { force: true } );
+		await page.selectOption( '#product-type', 'variable' );
 
 		// because of the way that the tour is dynamically positioned,
 		// Playwright can't automatically scroll the button into view,
@@ -53,10 +88,12 @@ test.describe( 'Add New Variable Product Page', () => {
 			.getByRole( 'link', { name: 'Attributes' } )
 			.scrollIntoViewIfNeeded();
 
+		// the tour only seems to display when not running headless, so just make sure
+		if ( await page.locator( '.components-card-header' ).nth(1).isVisible() ) {
 		// dismiss the variable product tour
 		await page
-			.getByRole( 'button', { name: 'Got it' } )
-			.click( { force: true } );
+			.getByRole( 'button', { name: 'Close Tour' } )
+			.click();
 
 		// wait for the tour's dismissal to be saved
 		await page.waitForResponse(
@@ -64,21 +101,25 @@ test.describe( 'Add New Variable Product Page', () => {
 				response.url().includes( '/users/' ) &&
 				response.status() === 200
 		);
+
+		}
 	} );
 
 	test( 'can create product, attributes and variations, edit variations and delete variations', async ( {
 		page,
 	} ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
+		await page.goto( productPageURL );
 		await page.fill( '#title', variableProductName );
-		await page.selectOption( '#product-type', 'variable', { force: true } );
+		await page.selectOption( '#product-type', 'variable' );
 
 		await page.click( 'a[href="#product_attributes"]' );
 
 		// add 3 attributes
 		for ( let i = 0; i < 3; i++ ) {
 			if ( i > 0 ) {
-				await page.click( 'button.add_attribute' );
+				await page.getByRole( 'button', { name: 'Add' } )
+				.nth(2)
+				.click();
 			}
 			await page.waitForSelector(
 				`input[name="attribute_names[${ i }]"]`
@@ -93,11 +134,13 @@ test.describe( 'Add New Variable Product Page', () => {
 				.first()
 				.type( 'val1 | val2' );
 		}
-		await page.click( 'text=Save attributes' );
-		// wait for the attributes to be saved
+
+		await page.getByRole( 'button', { name: 'Save attributes'} ).click( { clickCount: 3 });
+
+		// wait for the tour's dismissal to be saved
 		await page.waitForResponse(
 			( response ) =>
-				response.url().includes( '/post.php?post=' ) &&
+				response.url().includes( '/post.php' ) &&
 				response.status() === 200
 		);
 
@@ -107,14 +150,15 @@ test.describe( 'Add New Variable Product Page', () => {
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
 
-		page.on( 'dialog', ( dialog ) => dialog.accept() );
-
-		// manually create variations from all attributes
 		await page.click( 'a[href="#variable_product_options"]' );
 
+		// event listener for handling the link_all_variations confirmation dialog
+		page.on( 'dialog', ( dialog ) => dialog.accept() );
+
+		// generate variations from all attributes
 		await page.click( 'button.generate_variations' );
 
-		// add variation attributes
+		// verify variations have the correct attribute values
 		for ( let i = 0; i < 8; i++ ) {
 			const val1 = 'val1';
 			const val2 = 'val2';
@@ -205,7 +249,7 @@ test.describe( 'Add New Variable Product Page', () => {
 	test( 'can manually add a variation, manage stock levels, set variation defaults and remove a variation', async ( {
 		page,
 	} ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=product' );
+		await page.goto( productPageURL );
 		await page.fill( '#title', manualVariableProduct );
 		await page.selectOption( '#product-type', 'variable', { force: true } );
 		await page.click( 'a[href="#product_attributes"]' );
