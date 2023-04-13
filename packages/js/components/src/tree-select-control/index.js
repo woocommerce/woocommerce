@@ -71,6 +71,7 @@ import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
  * @param {Function}                   [props.onChange]                   Callback when the selector changes
  * @param {(visible: boolean) => void} [props.onDropdownVisibilityChange] Callback when the visibility of the dropdown options is changed.
  * @param {Function}                   [props.onInputChange]              Callback when the selector changes
+ * @param {number}                     [props.minFilterQueryLength]       Minimum input length to filter results by.
  * @return {JSX.Element} The component
  */
 const TreeSelectControl = ( {
@@ -89,6 +90,7 @@ const TreeSelectControl = ( {
 	onInputChange = noop,
 	includeParent = false,
 	alwaysShowPlaceholder = false,
+	minFilterQueryLength = 3,
 } ) => {
 	let instanceId = useInstanceId( TreeSelectControl );
 	instanceId = id ?? instanceId;
@@ -126,7 +128,8 @@ const TreeSelectControl = ( {
 
 	const filterQuery = inputControlValue.trim().toLowerCase();
 	// we only trigger the filter when there are more than 3 characters in the input.
-	const filter = filterQuery.length >= 3 ? filterQuery : '';
+	const filter =
+		filterQuery.length >= minFilterQueryLength ? filterQuery : '';
 
 	/**
 	 * Optimizes the performance for getting the tags info
@@ -475,6 +478,7 @@ const TreeSelectControl = ( {
 	 * @param {Event} e Event returned by the On Change function in the Input control
 	 */
 	const handleOnInputChange = ( e ) => {
+		setTreeVisible( true );
 		onInputChange( e.target.value );
 		setInputControlValue( e.target.value );
 	};

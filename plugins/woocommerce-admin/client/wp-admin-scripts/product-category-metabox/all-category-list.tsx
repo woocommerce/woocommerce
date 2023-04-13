@@ -144,6 +144,7 @@ export const AllCategoryList = forwardRef<
 					onInputChange={ setFilter }
 					placeholder={ __( 'Add category', 'woocommerce' ) }
 					includeParent={ true }
+					minFilterQueryLength={ 2 }
 				/>
 			</div>
 			<ul
