@@ -2,13 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	lazy,
-	useState,
-	useContext,
-	useMemo,
-	useEffect,
-} from '@wordpress/element';
+import { lazy, useState, useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
@@ -24,6 +18,10 @@ import {
 import { getHistory, addHistoryListener } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSlot } from '@woocommerce/experimental';
+import {
+	LayoutContextProvider,
+	useLayoutContext,
+} from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -46,7 +44,6 @@ import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-n
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getUrlParams } from '~/utils';
 import { useActiveSetupTasklist } from '~/tasks';
-import { LayoutContext } from '~/layout';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
 import { FeedbackIcon } from '~/products/images/feedback-icon';
 import { ProductFeedbackTour } from '~/guided-tours/add-product-feedback-tour';
@@ -76,11 +73,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
-	const layoutContext = useContext( LayoutContext );
-	const updatedLayoutContext = useMemo(
-		() => layoutContext.getExtendedContext( 'activity-panel' ),
-		[ layoutContext ]
-	);
+	const { updateLayoutPath } = useLayoutContext();
 
 	useEffect( () => {
 		return addHistoryListener( () => {
@@ -457,7 +450,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const showHelpHighlightTooltip = shouldShowHelpTooltip();
 
 	return (
-		<LayoutContext.Provider value={ updatedLayoutContext }>
+		<LayoutContextProvider value={ updateLayoutPath( 'activity-panel' ) }>
 			<div>
 				<H id={ headerId } className="screen-reader-text">
 					{ __( 'Store Activity', 'woocommerce' ) }
@@ -510,7 +503,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 					/>
 				) : null }
 			</div>
-		</LayoutContext.Provider>
+		</LayoutContextProvider>
 	);
 };
 
