@@ -662,6 +662,10 @@ class WC_Post_Types {
 															'woocommerce'
 														),
 														'property' => 'sold_individually',
+														'tooltip' => __(
+															'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
+															'woocommerce'
+														),
 													),
 												),
 

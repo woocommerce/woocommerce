@@ -17,6 +17,9 @@
 		},
 		"property": {
 			"type": "string"
+		},
+		"tooltip": {
+			"type": "string"
 		}
 	},
 	"supports": {

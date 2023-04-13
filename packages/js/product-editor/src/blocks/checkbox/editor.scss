@@ -1,26 +1,24 @@
-.wp-block-woocommerce-product-checkbox {
-    .components-base-control__label {
-        text-transform: none;
-        font-weight: 400;
-        > span {
-            display: block;
-            line-height: 1.5;
-        }
-        margin-bottom: $gap-large;
-    }
 
-    &__title {
-        font-size: 16px;
-        font-weight: 600;
-        color: #1e1e1e;
-    }
+.woocommerce-product-form__checkbox {
 
-    &__description {
-        font-size: 13px;
-        color: #1e1e1e;
-    }
+	.components-base-control__field {
+		display: flex;
+	}
 
-    .components-base-control__field > .components-v-stack {
-        gap: $gap;
-    }
+	.components-checkbox-control__label {
+		display: flex;
+	}
+
+	&-tooltip-icon {
+		margin: -2px 0 0 $gap-small;
+	}
 }
+
+.woocommerce-product-form__checkbox-tooltip {
+	.components-popover__content {
+		width: 200px;
+		min-width: auto;
+		white-space: normal !important;
+	}
+}
+
