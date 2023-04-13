@@ -1,5 +1,25 @@
 #!/usr/bin/env node
 
+const { existsSync } = require( 'fs' );
+const chalk = require( 'chalk' );
+const path = require( 'path' );
+
+const nodeModulesDirectory = path.join( __dirname, '../', 'node_modules' );
+
+if ( ! existsSync( nodeModulesDirectory ) ) {
+	console.log(
+		chalk.red(
+			'The @woocommerce/monorepo-utils must be built before running the CLI.'
+		)
+	);
+	console.log(
+		chalk.yellow(
+			'run `pnpm run build` from the root of the monorepo-utils package. or `pnpm install --filter monorepo-utils` from project root.'
+		)
+	);
+	process.exit( 1 );
+}
+
 const { program } = require( '../dist/index' );
 
 program.parse( process.argv );
