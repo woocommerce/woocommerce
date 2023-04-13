@@ -1,18 +1,12 @@
 /**
  * External dependencies
  */
-import { parse, inc } from 'semver';
 import { setOutput } from '@actions/core';
+import { parse, inc } from 'semver';
 
-/**
- * Bumps the version according to WP rules.
- *
- * @param {string} version Version to increment
- * @return {string} Incremented version
- */
-export const WPIncrement = ( version: string ): string => {
+const getMajorMinor = ( version: string ) => {
 	const parsedVersion = parse( version );
-	return inc( parsedVersion, parsedVersion.minor === 9 ? 'major' : 'minor' );
+	return `${ parsedVersion.major }.${ parsedVersion.minor }`;
 };
 
 /**
@@ -25,6 +19,17 @@ export const setGithubMilestoneOutputs = (
 	nextReleaseVersion: string,
 	nextMilestone: string
 ): void => {
-	setOutput( 'nextReleaseVersion', nextReleaseVersion );
-	setOutput( 'nextDevelopmentVersion', nextMilestone );
+	setOutput( 'nextReleaseVersion', getMajorMinor( nextReleaseVersion ) );
+	setOutput( 'nextDevelopmentVersion', getMajorMinor( nextMilestone ) );
+};
+
+/**
+ * Bumps the version according to WP rules.
+ *
+ * @param {string} version Version to increment
+ * @return {string} Incremented version
+ */
+export const WPIncrement = ( version: string ): string => {
+	const parsedVersion = parse( version );
+	return inc( parsedVersion, parsedVersion.minor === 9 ? 'major' : 'minor' );
 };
