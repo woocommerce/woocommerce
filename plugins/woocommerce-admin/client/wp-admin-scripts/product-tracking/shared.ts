@@ -436,19 +436,6 @@ const attachProductAttributesTracks = () => {
 	attachEventListenerToParentForChildren( attributesSection, [
 		{
 			eventName: 'click',
-			childQuery:
-				'.select2-selection__placeholder, .select2-selection__rendered',
-			callback: () => {
-				recordEvent( 'product_attributes_buttons', {
-					action: 'add_existing',
-					empty_state:
-						document.querySelectorAll( '.woocommerce_attribute' )
-							.length === 0,
-				} );
-			},
-		},
-		{
-			eventName: 'click',
 			childQuery: '.woocommerce_attribute_visible_on_product_page',
 			callback: () => {
 				const visibleOnProductPage = document.querySelector(
