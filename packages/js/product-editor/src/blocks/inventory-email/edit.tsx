@@ -38,39 +38,47 @@ export function Edit() {
 	return (
 		<>
 			<div { ...blockProps }>
-				<BaseControl
-					id={ 'product_inventory_email' }
-					label={ __( 'Email me when stock reaches', 'woocommerce' ) }
-					help={ createInterpolateElement(
-						__(
-							'Make sure to enable notifications in <link>store settings.</link>',
-							'woocommerce'
-						),
-						{
-							link: (
-								<Link
-									href={ `${ getSetting(
-										'adminUrl'
-									) }admin.php?page=wc-settings&tab=products&section=inventory` }
-									target="_blank"
-									type="external"
-								></Link>
-							),
-						}
-					) }
-				>
-					<InputControl
-						name={ 'woocommerce-product-name' }
-						placeholder={ sprintf(
-							// translators: Default quantity to notify merchants of low stock.
-							__( '%d (store default)', 'woocommerce' ),
-							notifyLowStockAmount
-						) }
-						onChange={ setLowStockAmount }
-						value={ lowStockAmount }
-						min={ 0 }
-					/>
-				</BaseControl>
+				<div className="wp-block-columns">
+					<div className="wp-block-column">
+						<BaseControl
+							id={ 'product_inventory_email' }
+							label={ __(
+								'Email me when stock reaches',
+								'woocommerce'
+							) }
+							help={ createInterpolateElement(
+								__(
+									'Make sure to enable notifications in <link>store settings.</link>',
+									'woocommerce'
+								),
+								{
+									link: (
+										<Link
+											href={ `${ getSetting(
+												'adminUrl'
+											) }admin.php?page=wc-settings&tab=products&section=inventory` }
+											target="_blank"
+											type="external"
+										></Link>
+									),
+								}
+							) }
+						>
+							<InputControl
+								name={ 'woocommerce-product-name' }
+								placeholder={ sprintf(
+									// translators: Default quantity to notify merchants of low stock.
+									__( '%d (store default)', 'woocommerce' ),
+									notifyLowStockAmount
+								) }
+								onChange={ setLowStockAmount }
+								value={ lowStockAmount }
+								min={ 0 }
+							/>
+						</BaseControl>
+					</div>
+					<div className="wp-block-column"></div>
+				</div>
 			</div>
 		</>
 	);
