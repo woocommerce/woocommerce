@@ -282,6 +282,8 @@ class MiniCart extends AbstractBlock {
 				'products-table-frontend',
 				'cart-button-frontend',
 				'checkout-button-frontend',
+				'title-label-frontend',
+				'title-items-counter-frontend',
 			);
 		}
 		foreach ( $inner_blocks_frontend_scripts as $inner_block_frontend_script ) {

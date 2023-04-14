@@ -42,7 +42,11 @@
 
 	h2.wc-block-mini-cart__title {
 		@include font-size(larger);
-		margin: $gap-largest $gap 0;
+
+		.block-editor-block-list__layout {
+			display: flex;
+			align-items: baseline;
+		}
 	}
 
 	table.wc-block-cart-items {
