@@ -129,11 +129,14 @@ This only needs to be done if this release is the last release of the feature pl
     -   Ensure the release notes are included in the post verbatim.
     -   Don't forget to use category `WooCommerce Blocks Release Notes` for the post.
     -   If any of the PRs in this release is labelled with `needs dev-note`, include it in the post.
--   [ ] Add highlights to the WC core release post (do this even if the release you are doing is not merged into WC core):
+-   [ ] Document highlights so they can be used in the WC core release post (do this even if the release you are doing is not merged into WC core):
     -   Check which WC core version will include the WC Blocks release you just did (reference: PdToLP-K-p2).
-    -   Go to its Release Thread and search the _Feature Highlights_ comment (example: p6q8Tx-2gl-p2).
-    -   Edit the linked draft post and add all highlights from the release you just did.
-    -   Leave a comment under the _Feature Highlights_ comment in the release thread mentioning that you updated the draft with the features included in WC Blocks X.Y.
+    -   Go to the _Release highlights_ page (PdToLP-xh-p2) and edit the _WC Blocks features merged in WC core X.Y_ page corresponding to the correct release (create it and add it to the list if it doesn't exist yet).
+    -   Edit that page and write all highlights from the release you just made which will be available in WC core. Skip all features which are only available in the feature plugin. Make the text user-friendly, as it will be part of a public post when WC core is released (you can use what you wrote in the release announcement in the step above).
+    -   If you are doing a release that gets merged into WC core:
+        -   Go to its Release Thread and search the _Feature Highlights_ comment (example: p6q8Tx-2gl-p2).
+        -   Edit the linked draft post and copy and paste all highlights from the _WC Blocks features merged in WC core X.Y_ page.
+        -   Leave a comment under the _Feature Highlights_ comment in the release thread mentioning that you updated the draft with the features included in WC Blocks X.Y.
 -   [ ] Announce the release internally (`#woo-announcements` slack).
 -   [ ] Update user-facing documentation as needed. When the plugin is released, ensure user-facing documentation is kept up to date with new blocks and compatibility information. The dev team should update documents in collaboration with support team and WooCommerce docs guild. In particular, please review and update as needed:
     -   Are there any new blocks in this release? Ensure they have adequate user documentation.
