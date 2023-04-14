@@ -449,7 +449,7 @@ class WC_Admin_Menus {
 			return;
 		}
 
-		echo '<button class="button wp-media-button" type="button">' . esc_html__( 'Write it for me', 'woocommerce' ) . '</button>';
+		echo '<button class="button wp-media-button" type="button">' . esc_html__( 'Write it for me (beta)', 'woocommerce' ) . '</button>';
 
 	}
 
@@ -503,7 +503,7 @@ class WC_Admin_Menus {
 							'</span>' .
 						'</div>' .
 						'<button class="button button-primary woocommerce-gpt-action-accept" type="button">' .
-							esc_html__( 'Accept', 'woocommerce' ) .
+							esc_html__( 'Write description', 'woocommerce' ) .
 						'</button>' .
 					'</div>';
 				$content = $gpt_form . $content;
