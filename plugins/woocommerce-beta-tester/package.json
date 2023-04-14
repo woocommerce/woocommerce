@@ -78,11 +78,6 @@
 		"node": "^16.13.1",
 		"pnpm": "^7.13.3"
 	},
-	"woorelease": {
-		"svn_reauth": "true",
-		"wp_org_slug": "woocommerce-beta-tester",
-		"build_step": "pnpm run build:zip"
-	},
 	"lint-staged": {
 		"*.php": [
 			"php -d display_errors=1 -l",
