@@ -26,6 +26,8 @@ class Shipping extends Task {
 		// when a new zone is added or an existing one has been changed.
 		add_action( 'wp_ajax_woocommerce_shipping_zones_save_changes', array( __CLASS__, 'delete_zone_count_transient' ), 9 );
 		add_action( 'wp_ajax_woocommerce_shipping_zone_methods_save_changes', array( __CLASS__, 'delete_zone_count_transient' ), 9 );
+		add_action( 'woocommerce_shipping_zone_method_added', array( __CLASS__, 'delete_zone_count_transient' ), 9 );
+		add_action( 'woocommerce_after_shipping_zone_object_save', array( __CLASS__, 'delete_zone_count_transient' ), 9 );
 	}
 
 	/**

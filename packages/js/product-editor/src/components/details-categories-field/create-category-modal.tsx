@@ -32,6 +32,15 @@ type CreateCategoryModalProps = {
 	onCreate: ( newCategory: ProductCategory ) => void;
 };
 
+function getCategoryItemLabel( item: ProductCategoryNode | null ): string {
+	return item?.name || '';
+}
+function getCategoryItemValue(
+	item: ProductCategoryNode | null
+): string | number {
+	return item?.id || '';
+}
+
 export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 	initialCategoryName,
 	onCancel,
@@ -109,8 +118,8 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					onRemove={ () => setCategoryParent( null ) }
 					onInputChange={ debouncedSearch }
 					getFilteredItems={ getFilteredItems }
-					getItemLabel={ ( item ) => item?.name || '' }
-					getItemValue={ ( item ) => item?.id || '' }
+					getItemLabel={ getCategoryItemLabel }
+					getItemValue={ getCategoryItemValue }
 				>
 					{ ( {
 						items,
