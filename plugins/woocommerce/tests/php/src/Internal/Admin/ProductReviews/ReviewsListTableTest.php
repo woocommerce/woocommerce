@@ -1627,25 +1627,25 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		yield 'empty type, empty post ID' => [
 			'comment_type' => '',
 			'post_id'      => 0,
-			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews',
+			'expected'     => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews',
 		];
 
 		yield 'review type, empty post ID' => [
 			'comment_type' => 'review',
 			'post_id'      => 0,
-			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=review',
+			'expected'     => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=review',
 		];
 
 		yield 'reply type, with post ID' => [
 			'comment_type' => 'reply',
 			'post_id'      => 123,
-			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=reply&p=123',
+			'expected'     => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=reply&p=123',
 		];
 
 		yield 'all type, with post ID' => [
 			'comment_type' => 'all',
 			'post_id'      => 123,
-			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&p=123',
+			'expected'     => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews&p=123',
 		];
 	}
 
@@ -1775,11 +1775,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			[
-				'all'       => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=all" class="current" aria-current="page">All <span class="count">(<span class="all-count">0</span>)</span></a>',
-				'moderated' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=moderated">Pending <span class="count">(<span class="pending-count">0</span>)</span></a>',
-				'approved'  => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=approved">Approved <span class="count">(<span class="approved-count">0</span>)</span></a>',
-				'spam'      => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=spam">Spam <span class="count">(<span class="spam-count">0</span>)</span></a>',
-				'trash'     => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=trash">Trash <span class="count">(<span class="trash-count">0</span>)</span></a>',
+				'all'       => '<a href="' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=all" class="current" aria-current="page">All <span class="count">(<span class="all-count">0</span>)</span></a>',
+				'moderated' => '<a href="' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=moderated">Pending <span class="count">(<span class="pending-count">0</span>)</span></a>',
+				'approved'  => '<a href="' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=approved">Approved <span class="count">(<span class="approved-count">0</span>)</span></a>',
+				'spam'      => '<a href="' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=spam">Spam <span class="count">(<span class="spam-count">0</span>)</span></a>',
+				'trash'     => '<a href="' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=trash">Trash <span class="count">(<span class="trash-count">0</span>)</span></a>',
 			],
 			$method->invoke( $list_table )
 		);
@@ -1930,28 +1930,28 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			'approved_review_count' => 2,
 			'pending_review_count' => 0,
 			'product_is_trashed' => false,
-			'expected_html' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=approved" class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">2</span><span class="screen-reader-text">2 reviews</span></a><span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">0</span><span class="screen-reader-text">No pending reviews</span></span>',
+			'expected_html' => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=approved" class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">2</span><span class="screen-reader-text">2 reviews</span></a><span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">0</span><span class="screen-reader-text">No pending reviews</span></span>',
 		];
 
 		yield 'approved and pending reviews' => [
 			'approved_review_count' => 1,
 			'pending_review_count' => 1,
 			'product_is_trashed' => false,
-			'expected_html' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=approved" class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">1</span><span class="screen-reader-text">1 approved review</span></a><a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">1</span><span class="screen-reader-text">1 pending review</span></a>',
+			'expected_html' => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=approved" class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">1</span><span class="screen-reader-text">1 approved review</span></a><a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">1</span><span class="screen-reader-text">1 pending review</span></a>',
 		];
 
 		yield 'pending reviews only' => [
 			'approved_review_count' => 0,
 			'pending_review_count' => 2,
 			'product_is_trashed' => false,
-			'expected_html' => '<span class="post-com-count post-com-count-no-comments"><span class="comment-count comment-count-no-comments" aria-hidden="true">0</span><span class="screen-reader-text">No approved reviews</span></span><a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">2</span><span class="screen-reader-text">2 pending reviews</span></a>',
+			'expected_html' => '<span class="post-com-count post-com-count-no-comments"><span class="comment-count comment-count-no-comments" aria-hidden="true">0</span><span class="screen-reader-text">No approved reviews</span></span><a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">2</span><span class="screen-reader-text">2 pending reviews</span></a>',
 		];
 
 		yield 'approved and pending reviews, but product is trashed' => [
 			'approved_review_count' => 2,
 			'pending_review_count' => 1,
 			'product_is_trashed' => true,
-			'expected_html' => '<span class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">2</span><span class="screen-reader-text">2 approved reviews</span></span><a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">1</span><span class="screen-reader-text">1 pending review</span></a>',
+			'expected_html' => '<span class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">2</span><span class="screen-reader-text">2 approved reviews</span></span><a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">1</span><span class="screen-reader-text">1 pending review</span></a>',
 		];
 	}
 

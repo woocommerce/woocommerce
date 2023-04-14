@@ -182,12 +182,14 @@ class WC_Settings_Page_Test extends WC_Unit_Test_Case {
 	public function test_output_sections() {
 		$sut = new WC_Settings_Example();
 
-		$expected = <<<'HTML'
+		$base_url = 'http://' . WP_TESTS_DIR;
+
+		$expected = <<<HTML
 			<ul class="subsubsub">
 				<li>
-					<a href="http://example.org/wp-admin/admin.php?page=wc-settings&tab=example&section=" class="">General</a> | </li>
+					<a href="http://$base_url/wp-admin/admin.php?page=wc-settings&tab=example&section=" class="">General</a> | </li>
 				<li>
-					<a href="http://example.org/wp-admin/admin.php?page=wc-settings&tab=example&section=new_section" class="">New Section</a></li>
+					<a href="http://$base_url/wp-admin/admin.php?page=wc-settings&tab=example&section=new_section" class="">New Section</a></li>
 			</ul>
 			<br class="clear" />
 HTML;

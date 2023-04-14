@@ -88,14 +88,14 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 			array(
 				true,
 				'5.2',
-				'When handling an <a href="http://example.org/wp-admin/tools.php?page=remove_personal_data">account erasure request</a>, should personal data within orders be retained or removed?',
-				'When handling an <a href="http://example.org/wp-admin/tools.php?page=remove_personal_data">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?',
+				'When handling an <a href="' . WP_TESTS_DOMAIN . '/wp-admin/tools.php?page=remove_personal_data">account erasure request</a>, should personal data within orders be retained or removed?',
+				'When handling an <a href="' . WP_TESTS_DOMAIN . '/wp-admin/tools.php?page=remove_personal_data">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?',
 			),
 			array(
 				true,
 				'5.3',
-				'When handling an <a href="http://example.org/wp-admin/erase-personal-data.php">account erasure request</a>, should personal data within orders be retained or removed?',
-				'When handling an <a href="http://example.org/wp-admin/erase-personal-data.php">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?',
+				'When handling an <a href="' . WP_TESTS_DOMAIN . '/wp-admin/erase-personal-data.php">account erasure request</a>, should personal data within orders be retained or removed?',
+				'When handling an <a href="' . WP_TESTS_DOMAIN . '/wp-admin/erase-personal-data.php">account erasure request</a>, should access to downloadable files be revoked and download logs cleared?',
 			),
 		);
 	}
