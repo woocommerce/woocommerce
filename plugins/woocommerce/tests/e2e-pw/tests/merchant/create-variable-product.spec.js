@@ -67,7 +67,7 @@ async function resetVariableProductTour( baseURL, browser ) {
 	);
 }
 
-test.describe( 'Add New Variable Product Page', () => {
+test.describe.serial( 'Add New Variable Product Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL, browser } ) => {
@@ -75,165 +75,377 @@ test.describe( 'Add New Variable Product Page', () => {
 		await resetVariableProductTour( baseURL, browser );
 	} );
 
-	test( 'can create product, attributes and variations, edit variations and delete variations', async ( {
+	// test( 'can create product, attributes and variations, edit variations and delete variations', async ( {
+	// 	page,
+	// } ) => {
+	// 	await page.goto( productPageURL );
+	// 	await page.fill( '#title', variableProductName );
+	// 	await page.selectOption( '#product-type', 'variable' );
+
+	// 	await page
+	// 		.locator( '.attribute_tab' )
+	// 		.getByRole( 'link', { name: 'Attributes' } )
+	// 		.scrollIntoViewIfNeeded();
+
+	// 	// the tour only seems to display when not running headless, so just make sure
+	// 	if ( await page.locator( '.woocommerce-tour-kit-step__heading' ).isVisible() ) {
+	// 		// dismiss the variable product tour
+	// 		await page
+	// 			.getByRole( 'button', { name: 'Close Tour' } )
+	// 			.click();
+
+	// 		// wait for the tour's dismissal to be saved
+	// 		await page.waitForResponse(
+	// 			( response ) =>
+	// 				response.url().includes( '/users/' ) &&
+	// 				response.status() === 200
+	// 		);
+	// 	}
+
+	// 	await page.click( 'a[href="#product_attributes"]' );
+
+	// 	// add 3 attributes
+	// 	for ( let i = 0; i < 3; i++ ) {
+	// 		if ( i > 0 ) {
+	// 			await page.getByRole( 'button', { name: 'Add' } )
+	// 			.nth(2)
+	// 			.click();
+	// 		}
+	// 		await page.waitForSelector(
+	// 			`input[name="attribute_names[${ i }]"]`
+	// 		);
+
+	// 		await page
+	// 			.locator( `input[name="attribute_names[${ i }]"]` )
+	// 			.first()
+	// 			.type( `attr #${ i + 1 }` );
+	// 		await page
+	// 			.locator( `textarea[name="attribute_values[${ i }]"]` )
+	// 			.first()
+	// 			.type( 'val1 | val2' );
+	// 	}
+
+	// 	await page.getByRole( 'button', { name: 'Save attributes'} ).click( { clickCount: 3 });
+
+	// 	// wait for the tour's dismissal to be saved
+	// 	await page.waitForResponse(
+	// 		( response ) =>
+	// 			response.url().includes( '/post.php' ) &&
+	// 			response.status() === 200
+	// 	);
+
+	// 	// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
+	// 	await page.locator( '#save-post' ).click();
+	// 	await expect(
+	// 		page.getByText( 'Product draft updated. ' )
+	// 	).toBeVisible();
+
+	// 	await page.click( 'a[href="#variable_product_options"]' );
+
+	// 	// event listener for handling the link_all_variations confirmation dialog
+	// 	page.on( 'dialog', ( dialog ) => dialog.accept() );
+
+	// 	// generate variations from all attributes
+	// 	await page.click( 'button.generate_variations' );
+
+	// 	// verify variations have the correct attribute values
+	// 	for ( let i = 0; i < 8; i++ ) {
+	// 		const val1 = 'val1';
+	// 		const val2 = 'val2';
+	// 		const attr3 = !! ( i % 2 ); // 0-1,4-5 / 2-3,6-7
+	// 		const attr2 = i % 4 > 1; // 0-3 / 4-7
+	// 		const attr1 = i > 3;
+	// 		await expect(
+	// 			page.locator( `select[name="attribute_attr-1[${ i }]"]` )
+	// 		).toHaveValue( attr1 ? val2 : val1 );
+	// 		await expect(
+	// 			page.locator( `select[name="attribute_attr-2[${ i }]"]` )
+	// 		).toHaveValue( attr2 ? val2 : val1 );
+	// 		await expect(
+	// 			page.locator( `select[name="attribute_attr-3[${ i }]"]` )
+	// 		).toHaveValue( attr3 ? val2 : val1 );
+	// 	}
+
+	// 	await page.locator( '#save-post' ).click();
+	// 	await expect( page.locator( '#message.notice-success' ) ).toContainText(
+	// 		'Product draft updated.'
+	// 	);
+
+	// 	// set variation attributes and bulk edit variations
+	// 	await page.click( 'a[href="#variable_product_options"]' );
+
+	// 	// set the variation attributes
+	// 	await page.click(
+	// 		'#variable_product_options .toolbar-top a.expand_all'
+	// 	);
+	// 	await page.check( 'input[name="variable_is_virtual[0]"]' );
+	// 	await page.fill(
+	// 		'input[name="variable_regular_price[0]"]',
+	// 		variationOnePrice
+	// 	);
+	// 	await page.check( 'input[name="variable_is_virtual[1]"]' );
+	// 	await page.fill(
+	// 		'input[name="variable_regular_price[1]"]',
+	// 		variationTwoPrice
+	// 	);
+	// 	await page.check( 'input[name="variable_manage_stock[2]"]' );
+	// 	await page.fill(
+	// 		'input[name="variable_regular_price[2]"]',
+	// 		variationThreePrice
+	// 	);
+	// 	await page.fill( 'input[name="variable_weight[2]"]', productWeight );
+	// 	await page.fill( 'input[name="variable_length[2]"]', productLength );
+	// 	await page.fill( 'input[name="variable_width[2]"]', productWidth );
+	// 	await page.fill( 'input[name="variable_height[2]"]', productHeight );
+	// 	await page.keyboard.press( 'ArrowUp' );
+	// 	await page.click( 'button.save-variation-changes' );
+
+	// 	// bulk-edit variations
+	// 	await page.click(
+	// 		'#variable_product_options .toolbar-top a.expand_all'
+	// 	);
+	// 	for ( let i = 0; i < 4; i++ ) {
+	// 		const checkBox = page.locator(
+	// 			`input[name="variable_is_downloadable[${ i }]"]`
+	// 		);
+	// 		await expect( checkBox ).not.toBeChecked();
+	// 	}
+	// 	await page.selectOption( '#field_to_edit', 'toggle_downloadable', {
+	// 		force: true,
+	// 	} );
+	// 	await page.click(
+	// 		'#variable_product_options .toolbar-top a.expand_all'
+	// 	);
+	// 	for ( let i = 0; i < 4; i++ ) {
+	// 		const checkBox = await page.locator(
+	// 			`input[name="variable_is_downloadable[${ i }]"]`
+	// 		);
+	// 		await expect( checkBox ).toBeChecked();
+	// 	}
+
+	// 	await page.locator( '#save-post' ).click();
+
+	// 	// delete all variations
+	// 	await page.click( 'a[href="#variable_product_options"]' );
+	// 	await page.waitForLoadState( 'networkidle' );
+	// 	await page.selectOption( '#field_to_edit', 'delete_all' );
+	// 	await page.waitForSelector( '.woocommerce_variation', {
+	// 		state: 'detached',
+	// 	} );
+	// 	const variationsCount = await page.$$( '.woocommerce_variation' );
+	// 	await expect( variationsCount ).toHaveLength( 0 );
+	// } );
+
+	test( 'can create product, attributes and variations', async ( {
 		page,
 	} ) => {
-		await page.goto( productPageURL );
-		await page.fill( '#title', variableProductName );
-		await page.selectOption( '#product-type', 'variable' );
+		await test.step( 'Go to "Products > Add New page".', async () => {
+			await page.goto( productPageURL );
+		} );
 
-		await page
-			.locator( '.attribute_tab' )
-			.getByRole( 'link', { name: 'Attributes' } )
-			.scrollIntoViewIfNeeded();
+		await test.step(
+			`Type "${ variableProductName }" into the "Product name" input field.`,
+			async () => {
+				await page.fill( '#title', variableProductName );
+			}
+		);
+
+		await test.step(
+			'Select the "Variable product" product type.',
+			async () => {
+				await page.selectOption( '#product-type', 'variable' );
+			}
+		);
+
+		await test.step( 'Click on the "Attributes" tab.', async () => {
+			await page
+				.locator( '.attribute_tab' )
+				.getByRole( 'link', { name: 'Attributes' } )
+				.scrollIntoViewIfNeeded();
+		} );
 
 		// the tour only seems to display when not running headless, so just make sure
-		if ( await page.locator( '.woocommerce-tour-kit-step__heading' ).isVisible() ) {
-			// dismiss the variable product tour
-			await page
-				.getByRole( 'button', { name: 'Close Tour' } )
-				.click();
-
-			// wait for the tour's dismissal to be saved
-			await page.waitForResponse(
-				( response ) =>
-					response.url().includes( '/users/' ) &&
-					response.status() === 200
-			);
-		}
-
-		await page.click( 'a[href="#product_attributes"]' );
-
-		// add 3 attributes
-		for ( let i = 0; i < 3; i++ ) {
-			if ( i > 0 ) {
-				await page.getByRole( 'button', { name: 'Add' } )
-				.nth(2)
-				.click();
+		const tourWasDisplayed = await test.step(
+			'See if the tour was displayed.',
+			async () => {
+				return await page
+					.locator( '.woocommerce-tour-kit-step__heading' )
+					.isVisible();
 			}
-			await page.waitForSelector(
-				`input[name="attribute_names[${ i }]"]`
+		);
+
+		if ( tourWasDisplayed ) {
+			await test.step( 'Tour was displayed, so dismiss it.', async () => {
+				await page
+					.getByRole( 'button', { name: 'Close Tour' } )
+					.click();
+			} );
+
+			await test.step(
+				"Wait for the tour's dismissal to be saved",
+				async () => {
+					await page.waitForResponse(
+						( response ) =>
+							response.url().includes( '/users/' ) &&
+							response.status() === 200
+					);
+				}
 			);
-
-			await page
-				.locator( `input[name="attribute_names[${ i }]"]` )
-				.first()
-				.type( `attr #${ i + 1 }` );
-			await page
-				.locator( `textarea[name="attribute_values[${ i }]"]` )
-				.first()
-				.type( 'val1 | val2' );
 		}
 
-		await page.getByRole( 'button', { name: 'Save attributes'} ).click( { clickCount: 3 });
+		await test.step( 'Add 3 attributes.', async () => {
+			for ( let i = 0; i < 3; i++ ) {
+				if ( i > 0 ) {
+					await test.step( "Click 'Add'.", async () => {
+						await page
+							.locator( '.add-attribute-container' )
+							.getByRole( 'button', { name: 'Add' } )
+							.click();
+					} );
+				}
 
-		// wait for the tour's dismissal to be saved
-		await page.waitForResponse(
-			( response ) =>
-				response.url().includes( '/post.php' ) &&
-				response.status() === 200
-		);
+				await test.step(
+					`Add the attribute "attr #${
+						i + 1
+					}" with values "val1 | val2"`,
+					async () => {
+						await test.step(
+							'Wait for the "Attribute name" input field to appear.',
+							async () => {
+								await page.waitForSelector(
+									`input[name="attribute_names[${ i }]"]`
+								);
+							}
+						);
 
-		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
-		await page.locator( '#save-post' ).click();
-		await expect(
-			page.getByText( 'Product draft updated. ' )
-		).toBeVisible();
+						await test.step(
+							`Type "attr #${
+								i + 1
+							}" in the "Attribute name" input field.`,
+							async () => {
+								await page
+									.locator(
+										`input[name="attribute_names[${ i }]"]`
+									)
+									.first()
+									.type( `attr #${ i + 1 }` );
+							}
+						);
 
-		await page.click( 'a[href="#variable_product_options"]' );
+						await test.step(
+							'Type the attribute values "val1 | val2".',
+							async () => {
+								await page
+									.locator(
+										`textarea[name="attribute_values[${ i }]"]`
+									)
+									.first()
+									.type( 'val1 | val2' );
+							}
+						);
 
-		// event listener for handling the link_all_variations confirmation dialog
-		page.on( 'dialog', ( dialog ) => dialog.accept() );
+						await test.step(
+							'Click "Save attributes".',
+							async () => {
+								await page
+									.getByRole( 'button', {
+										name: 'Save attributes',
+									} )
+									.click( { clickCount: 3 } );
+							}
+						);
 
-		// generate variations from all attributes
-		await page.click( 'button.generate_variations' );
-
-		// verify variations have the correct attribute values
-		for ( let i = 0; i < 8; i++ ) {
-			const val1 = 'val1';
-			const val2 = 'val2';
-			const attr3 = !! ( i % 2 ); // 0-1,4-5 / 2-3,6-7
-			const attr2 = i % 4 > 1; // 0-3 / 4-7
-			const attr1 = i > 3;
-			await expect(
-				page.locator( `select[name="attribute_attr-1[${ i }]"]` )
-			).toHaveValue( attr1 ? val2 : val1 );
-			await expect(
-				page.locator( `select[name="attribute_attr-2[${ i }]"]` )
-			).toHaveValue( attr2 ? val2 : val1 );
-			await expect(
-				page.locator( `select[name="attribute_attr-3[${ i }]"]` )
-			).toHaveValue( attr3 ? val2 : val1 );
-		}
-
-		await page.locator( '#save-post' ).click();
-		await expect( page.locator( '#message.notice-success' ) ).toContainText(
-			'Product draft updated.'
-		);
-
-		// set variation attributes and bulk edit variations
-		await page.click( 'a[href="#variable_product_options"]' );
-
-		// set the variation attributes
-		await page.click(
-			'#variable_product_options .toolbar-top a.expand_all'
-		);
-		await page.check( 'input[name="variable_is_virtual[0]"]' );
-		await page.fill(
-			'input[name="variable_regular_price[0]"]',
-			variationOnePrice
-		);
-		await page.check( 'input[name="variable_is_virtual[1]"]' );
-		await page.fill(
-			'input[name="variable_regular_price[1]"]',
-			variationTwoPrice
-		);
-		await page.check( 'input[name="variable_manage_stock[2]"]' );
-		await page.fill(
-			'input[name="variable_regular_price[2]"]',
-			variationThreePrice
-		);
-		await page.fill( 'input[name="variable_weight[2]"]', productWeight );
-		await page.fill( 'input[name="variable_length[2]"]', productLength );
-		await page.fill( 'input[name="variable_width[2]"]', productWidth );
-		await page.fill( 'input[name="variable_height[2]"]', productHeight );
-		await page.keyboard.press( 'ArrowUp' );
-		await page.click( 'button.save-variation-changes' );
-
-		// bulk-edit variations
-		await page.click(
-			'#variable_product_options .toolbar-top a.expand_all'
-		);
-		for ( let i = 0; i < 4; i++ ) {
-			const checkBox = page.locator(
-				`input[name="variable_is_downloadable[${ i }]"]`
-			);
-			await expect( checkBox ).not.toBeChecked();
-		}
-		await page.selectOption( '#field_to_edit', 'toggle_downloadable', {
-			force: true,
+						await test.step(
+							"Wait for the tour's dismissal to be saved",
+							async () => {
+								await page.waitForResponse(
+									( response ) =>
+										response
+											.url()
+											.includes( '/post.php' ) &&
+										response.status() === 200
+								);
+							}
+						);
+					}
+				);
+			}
 		} );
-		await page.click(
-			'#variable_product_options .toolbar-top a.expand_all'
+
+		await test.step(
+			'Save before going to the Variations tab to prevent variations from all attributes to be automatically created.',
+			async () => {
+				await page.locator( '#save-post' ).click();
+			}
 		);
-		for ( let i = 0; i < 4; i++ ) {
-			const checkBox = await page.locator(
-				`input[name="variable_is_downloadable[${ i }]"]`
-			);
-			await expect( checkBox ).toBeChecked();
-		}
 
-		await page.locator( '#save-post' ).click();
+		await test.step(
+			'Expect the "Product draft updated." notice to appear.',
+			async () => {
+				await expect(
+					page.getByText( 'Product draft updated. ' )
+				).toBeVisible();
+			}
+		);
 
-		// delete all variations
-		await page.click( 'a[href="#variable_product_options"]' );
-		await page.waitForLoadState( 'networkidle' );
-		await page.selectOption( '#field_to_edit', 'delete_all' );
-		await page.waitForSelector( '.woocommerce_variation', {
-			state: 'detached',
+		await test.step( 'Click on the "Variations" tab.', async () => {
+			await page.click( 'a[href="#variable_product_options"]' );
 		} );
-		const variationsCount = await page.$$( '.woocommerce_variation' );
-		await expect( variationsCount ).toHaveLength( 0 );
+
+		await test.step(
+			'Create event listener for handling the link_all_variations confirmation dialog.',
+			async () => {
+				page.on( 'dialog', ( dialog ) => dialog.accept() );
+			}
+		);
+
+		await test.step(
+			'Click on the "Generate variations" button.',
+			async () => {
+				await page.click( 'button.generate_variations' );
+			}
+		);
+
+		await test.step(
+			'Expect variations to have the correct attribute values',
+			async () => {
+				for ( let i = 0; i < 8; i++ ) {
+					const val1 = 'val1';
+					const val2 = 'val2';
+					const attr3 = !! ( i % 2 ); // 0-1,4-5 / 2-3,6-7
+					const attr2 = i % 4 > 1; // 0-3 / 4-7
+					const attr1 = i > 3;
+					await expect(
+						page.locator(
+							`select[name="attribute_attr-1[${ i }]"]`
+						)
+					).toHaveValue( attr1 ? val2 : val1 );
+					await expect(
+						page.locator(
+							`select[name="attribute_attr-2[${ i }]"]`
+						)
+					).toHaveValue( attr2 ? val2 : val1 );
+					await expect(
+						page.locator(
+							`select[name="attribute_attr-3[${ i }]"]`
+						)
+					).toHaveValue( attr3 ? val2 : val1 );
+				}
+			}
+		);
+
+		await test.step( 'Click "Save Draft" button.', async () => {
+			await page.locator( '#save-post' ).click();
+		} );
+
+		await test.step(
+			'Expect the "Product draft updated." notice to appear.',
+			async () => {
+				await expect(
+					page.locator( '#message.notice-success' )
+				).toContainText( 'Product draft updated.' );
+			}
+		);
 	} );
 
 	test( 'can manually add a variation, manage stock levels, set variation defaults and remove a variation', async ( {
@@ -249,11 +461,13 @@ test.describe( 'Add New Variable Product Page', () => {
 			.scrollIntoViewIfNeeded();
 
 		// the tour only seems to display when not running headless, so just make sure
-		if ( await page.locator( '.woocommerce-tour-kit-step__heading' ).isVisible() ) {
-			// dismiss the variable product tour
+		if (
 			await page
-				.getByRole( 'button', { name: 'Close Tour' } )
-				.click();
+				.locator( '.woocommerce-tour-kit-step__heading' )
+				.isVisible()
+		) {
+			// dismiss the variable product tour
+			await page.getByRole( 'button', { name: 'Close Tour' } ).click();
 
 			// wait for the tour's dismissal to be saved
 			await page.waitForResponse(
