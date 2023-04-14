@@ -194,6 +194,7 @@ const program = new Command()
 				schema: schemaChanges,
 			},
 			displayVersion: currentVersion,
+			currentBranch,
 		};
 
 		const html =
