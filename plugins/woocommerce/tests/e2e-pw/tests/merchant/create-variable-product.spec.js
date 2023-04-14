@@ -222,7 +222,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		page,
 	} ) => {
 		await test.step(
-			'Go to the product page, and reset the variable product tour.',
+			'Go to "Products > Add new" page, and reset the variable product tour.',
 			async () => {
 				await resetVariableProductTour( page );
 			}
