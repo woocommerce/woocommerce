@@ -470,12 +470,12 @@ class WC_Admin_Menus {
 				$gpt_form =
 					'<div class="woocommerce-gpt-integration">' .
 						'<span class="woocommerce-textarea-title">' .
-							esc_html__( 'ABOUT YOUR PRODUCT', 'woocommerce' ) .
+							esc_html__( 'About your product', 'woocommerce' ) .
 						'</span>' .
 						'<textarea class="woocommerce-gpt-textarea" placeholder="' . esc_html__( 'e.g. organic and sustainable skin cleanser for women', 'woocommerce' ) . '"></textarea>' .
 						'<div class="woocommerce-actions">' .
 							'<span class="woocommerce-action-buttons-title">' .
-								esc_html__( 'TONE OF VOICE', 'woocommerce' ) .
+								esc_html__( 'Tone of voice', 'woocommerce' ) .
 							'</span>' .
 							'<div class="woocommerce-action-buttons">' .
 								'<button class="woocommerce-gpt-action-casual active" type="button">' .
