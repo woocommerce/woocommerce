@@ -221,12 +221,13 @@ test.describe( 'Add New Variable Product Page', () => {
 	test( 'can create product, attributes and variations', async ( {
 		page,
 	} ) => {
-		await test.step(
-			'Go to "Products > Add new" page, and reset the variable product tour.',
-			async () => {
-				await resetVariableProductTour( page );
-			}
-		);
+		await test.step( 'Reset the variable product tour.', async () => {
+			await resetVariableProductTour( page );
+		} );
+
+		await test.step( 'Go to "Products > Add new" page.', async () => {
+			await page.goto( productPageURL );
+		} );
 
 		await test.step(
 			`Type "${ variableProductName }" into the "Product name" input field.`,
