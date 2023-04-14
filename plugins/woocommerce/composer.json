@@ -88,8 +88,11 @@
 		"phpcs": [
 			"phpcs -s -p"
 		],
-		"phpcs-pre-commit": [
-			"phpcs-changed --git -s"
+		"lint": [
+			"chg=$(git diff --relative --name-only -- '*.php'); [ -z $chg ] || phpcs-changed -s --git --git-unstaged $chg"
+		],
+		"lint-staged": [
+			"chg=$(git diff HEAD --relative --name-only -- '*.php'); [ -z $chg ] || phpcs-changed -s --git $chg"
 		],
 		"phpcbf": [
 			"phpcbf -p"
