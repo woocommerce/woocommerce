@@ -16,7 +16,8 @@ const defaultAttributes = [ 'val2', 'val1', 'val2' ];
 const stockAmount = '100';
 const lowStockAmount = '10';
 
-let variableProductId;
+let fixedVariableProductId;
+let fixedVariationIds;
 
 async function deleteProductsAddedByTests( baseURL ) {
 	const api = new wcApi( {
@@ -36,8 +37,10 @@ async function deleteProductsAddedByTests( baseURL ) {
 
 	const ids = varProducts
 		.map( ( { id } ) => id )
-		.concat( manualProducts.map( ( { id } ) => id ) );
+		.concat( manualProducts.map( ( { id } ) => id ) )
+		.push( fixedVariableProductId ); // mytodo why not being deleted?
 
+	console.log( `ids to delete: ${ ids }` ); // mytodo delete
 	await api.post( 'products/batch', { delete: ids } );
 }
 
@@ -69,8 +72,124 @@ async function resetVariableProductTour( baseURL, browser ) {
 	);
 }
 
+async function createVariableProductFixture( baseURL ) {
+	const api = new wcApi( {
+		url: baseURL,
+		consumerKey: process.env.CONSUMER_KEY,
+		consumerSecret: process.env.CONSUMER_SECRET,
+		version: 'wc/v3',
+	} );
+
+	const createVariableProductRequestPayload = {
+		name: 'Unbranded Granite Shirt',
+		type: 'variable',
+		attributes: [
+			{
+				name: 'Colour',
+				visible: true,
+				variation: true,
+				options: [ 'Red', 'Green' ],
+			},
+			{
+				name: 'Size',
+				visible: true,
+				variation: true,
+				options: [ 'Small', 'Medium' ],
+			},
+			{
+				name: 'Logo',
+				visible: true,
+				variation: true,
+				options: [ 'Woo', 'WordPress' ],
+			},
+		],
+	};
+
+	const batchCreateVariationsPayload = {
+		create: [
+			{
+				attributes: [
+					{ name: 'Colour', option: 'Red' },
+					{ name: 'Size', option: 'Small' },
+					{ name: 'Logo', option: 'Woo' },
+				],
+			},
+			{
+				attributes: [
+					{ name: 'Colour', option: 'Red' },
+					{ name: 'Size', option: 'Small' },
+					{ name: 'Logo', option: 'WordPress' },
+				],
+			},
+			{
+				attributes: [
+					{ name: 'Colour', option: 'Red' },
+					{ name: 'Size', option: 'Medium' },
+					{ name: 'Logo', option: 'Woo' },
+				],
+			},
+			{
+				attributes: [
+					{ name: 'Colour', option: 'Red' },
+					{ name: 'Size', option: 'Medium' },
+					{ name: 'Logo', option: 'WordPress' },
+				],
+			},
+			{
+				attributes: [
+					{ name: 'Colour', option: 'Green' },
+					{ name: 'Size', option: 'Small' },
+					{ name: 'Logo', option: 'Woo' },
+				],
+			},
+			{
+				attributes: [
+					{ name: 'Colour', option: 'Green' },
+					{ name: 'Size', option: 'Small' },
+					{ name: 'Logo', option: 'WordPress' },
+				],
+			},
+			{
+				attributes: [
+					{ name: 'Colour', option: 'Green' },
+					{ name: 'Size', option: 'Medium' },
+					{ name: 'Logo', option: 'Woo' },
+				],
+			},
+			{
+				attributes: [
+					{ name: 'Colour', option: 'Green' },
+					{ name: 'Size', option: 'Medium' },
+					{ name: 'Logo', option: 'WordPress' },
+				],
+			},
+		],
+	};
+
+	await api
+		.post( 'products', createVariableProductRequestPayload )
+		.then( ( response ) => {
+			fixedVariableProductId = response.data.id;
+		} );
+
+	await api
+		.post(
+			`products/${ fixedVariableProductId }/variations/batch`,
+			batchCreateVariationsPayload
+		)
+		.then( ( response ) => {
+			fixedVariationIds = response.data.create
+				.map( ( variation ) => variation.id )
+				.sort();
+		} );
+}
+
 test.describe( 'Add New Variable Product Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
+
+	test.beforeAll( async ( { baseURL } ) => {
+		await createVariableProductFixture( baseURL );
+	} );
 
 	test.afterAll( async ( { baseURL, browser } ) => {
 		await deleteProductsAddedByTests( baseURL );
@@ -101,15 +220,13 @@ test.describe( 'Add New Variable Product Page', () => {
 		await test.step(
 			'Scroll into the "Attributes" tab and click it.',
 			async () => {
-				await page
+				const attributesTab = page
 					.locator( '.attribute_tab' )
-					.getByRole( 'link', { name: 'Attributes' } )
-					.scrollIntoViewIfNeeded();
+					.getByRole( 'link', { name: 'Attributes' } );
 
-				await page
-					.locator( '.attribute_tab' )
-					.getByRole( 'link', { name: 'Attributes' } )
-					.click();
+				await attributesTab.scrollIntoViewIfNeeded();
+
+				await attributesTab.click();
 			}
 		);
 
@@ -237,13 +354,6 @@ test.describe( 'Add New Variable Product Page', () => {
 			}
 		);
 
-		await test.step( 'Save the product ID.', async () => {
-			variableProductId = page
-				.url()
-				.match( /post=\d+/ )[ 0 ]
-				.replace( 'post=', '' );
-		} );
-
 		await test.step( 'Click on the "Variations" tab.', async () => {
 			await page.click( 'a[href="#variable_product_options"]' );
 		} );
@@ -301,11 +411,20 @@ test.describe( 'Add New Variable Product Page', () => {
 	} );
 
 	test( 'can individually edit variations', async ( { page } ) => {
-		// mytodo setup: create variable product with the same attributes and variations
+		const variationRows = page.locator( '.woocommerce_variation' );
+		const firstVariation = variationRows.filter( {
+			hasText: `#${ fixedVariationIds[ 0 ] }`,
+		} );
+		const secondVariation = variationRows.filter( {
+			hasText: `#${ fixedVariationIds[ 1 ] }`,
+		} );
+		const thirdVariation = variationRows.filter( {
+			hasText: `#${ fixedVariationIds[ 2 ] }`,
+		} );
 
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ variableProductId }&action=edit`
+				`/wp-admin/post.php?post=${ fixedVariableProductId }&action=edit`
 			);
 		} );
 
@@ -319,76 +438,81 @@ test.describe( 'Add New Variable Product Page', () => {
 			);
 		} );
 
-		await test.step( 'Set the first variation to be virtual.', async () => {
-			await page.check( 'input[name="variable_is_virtual[0]"]' );
+		await test.step( 'Edit the first variation.', async () => {
+			await test.step( 'Check the "Virtual" checkbox.', async () => {
+				await firstVariation
+					.getByRole( 'checkbox', {
+						name: 'Virtual',
+					} )
+					.check();
+			} );
+
+			await test.step(
+				`Set regular price to "${ variationOnePrice }".`,
+				async () => {
+					await firstVariation
+						.getByRole( 'textbox', { name: 'Regular price' } )
+						.fill( variationOnePrice );
+				}
+			);
 		} );
 
-		await test.step(
-			`Set regular price of first variation to ${ variationOnePrice }.`,
-			async () => {
-				await page.fill(
-					'input[name="variable_regular_price[0]"]',
-					variationOnePrice
-				);
-			}
-		);
+		await test.step( 'Edit the second variation.', async () => {
+			await test.step( 'Check the "Virtual" checkbox.', async () => {
+				await secondVariation
+					.getByRole( 'checkbox', {
+						name: 'Virtual',
+					} )
+					.check();
+			} );
 
-		await test.step(
-			'Set the second variation to be virtual.',
-			async () => {
-				await page.check( 'input[name="variable_is_virtual[1]"]' );
-			}
-		);
+			await test.step(
+				`Set regular price to "${ variationTwoPrice }".`,
+				async () => {
+					await secondVariation
+						.getByRole( 'textbox', { name: 'Regular price' } )
+						.fill( variationTwoPrice );
+				}
+			);
+		} );
 
-		await test.step(
-			`Set regular price of second variation to ${ variationTwoPrice }.`,
-			async () => {
-				await page.fill(
-					'input[name="variable_regular_price[1]"]',
-					variationTwoPrice
-				);
-			}
-		);
+		await test.step( 'Edit the third variation.', async () => {
+			await test.step( 'Check "Manage stock?"', async () => {
+				await thirdVariation
+					.getByRole( 'checkbox', { name: 'Manage stock?' } )
+					.check();
+			} );
 
-		await test.step(
-			'Check "Manage stock?" in the third variation.',
-			async () => {
-				await page.check( 'input[name="variable_manage_stock[2]"]' );
-			}
-		);
+			await test.step(
+				`Set regular price to "${ variationThreePrice }".`,
+				async () => {
+					await thirdVariation
+						.getByRole( 'textbox', { name: 'Regular price' } )
+						.fill( variationThreePrice );
+				}
+			);
 
-		await test.step(
-			`Set regular price of third variation to ${ variationThreePrice }.`,
-			async () => {
-				await page.fill(
-					'input[name="variable_regular_price[2]"]',
-					variationThreePrice
-				);
-			}
-		);
+			await test.step(
+				'Set the weight and dimensions.',
+				async () => {
+					await thirdVariation
+						.getByRole( 'textbox', { name: 'Weight' } )
+						.type( productWeight );
 
-		await test.step(
-			'Set the weight and dimensions of the third variation.',
-			async () => {
-				await page.fill(
-					'input[name="variable_weight[2]"]',
-					productWeight
-				);
-				await page.fill(
-					'input[name="variable_length[2]"]',
-					productLength
-				);
-				await page.fill(
-					'input[name="variable_width[2]"]',
-					productWidth
-				);
-				await page.fill(
-					'input[name="variable_height[2]"]',
-					productHeight
-				);
-				await page.keyboard.press( 'ArrowUp' );
-			}
-		);
+					await thirdVariation
+						.getByRole( 'textbox', { name: 'Length' } )
+						.type( productLength );
+
+					await thirdVariation
+						.getByRole( 'textbox', { name: 'Width' } )
+						.type( productWidth );
+
+					await thirdVariation
+						.getByRole( 'textbox', { name: 'Height' } )
+						.type( productHeight );
+				}
+			);
+		} );
 
 		await test.step( 'Click "Save changes".', async () => {
 			await page.click( 'button.save-variation-changes' );
@@ -409,16 +533,20 @@ test.describe( 'Add New Variable Product Page', () => {
 			'Expect the first variation to be virtual.',
 			async () => {
 				await expect(
-					page.locator( 'input[name="variable_is_virtual[0]"]' )
+					firstVariation.getByRole( 'checkbox', {
+						name: 'Virtual',
+					} )
 				).toBeChecked();
 			}
 		);
 
 		await test.step(
-			`Expect the price of the first variation to be ${ variationOnePrice }.`,
+			`Expect the regular price of the first variation to be "${ variationOnePrice }".`,
 			async () => {
 				await expect(
-					page.locator( 'input[name="variable_regular_price[0]"]' )
+					firstVariation.getByRole( 'textbox', {
+						name: 'Regular price',
+					} )
 				).toHaveValue( variationOnePrice );
 			}
 		);
@@ -427,16 +555,20 @@ test.describe( 'Add New Variable Product Page', () => {
 			'Expect the second variation to be virtual.',
 			async () => {
 				await expect(
-					page.locator( 'input[name="variable_is_virtual[1]"]' )
+					secondVariation.getByRole( 'checkbox', {
+						name: 'Virtual',
+					} )
 				).toBeChecked();
 			}
 		);
 
 		await test.step(
-			`Expect the price of the second variation to be ${ variationTwoPrice }.`,
+			`Expect the regular price of the second variation to be "${ variationTwoPrice }".`,
 			async () => {
 				await expect(
-					page.locator( 'input[name="variable_regular_price[1]"]' )
+					secondVariation.getByRole( 'textbox', {
+						name: 'Regular price',
+					} )
 				).toHaveValue( variationTwoPrice );
 			}
 		);
@@ -445,16 +577,20 @@ test.describe( 'Add New Variable Product Page', () => {
 			'Expect the "Manage stock?" checkbox of the third variation to be checked.',
 			async () => {
 				await expect(
-					page.locator( 'input[name="variable_manage_stock[2]"]' )
+					thirdVariation.getByRole( 'checkbox', {
+						name: 'Manage stock?',
+					} )
 				).toBeChecked();
 			}
 		);
 
 		await test.step(
-			`Expect the price of the third variation to be ${ variationThreePrice }.`,
+			`Expect the regular price of the third variation to be "${ variationThreePrice }".`,
 			async () => {
 				await expect(
-					page.locator( 'input[name="variable_regular_price[2]"]' )
+					thirdVariation.getByRole( 'textbox', {
+						name: 'Regular price',
+					} )
 				).toHaveValue( variationThreePrice );
 			}
 		);
@@ -463,30 +599,28 @@ test.describe( 'Add New Variable Product Page', () => {
 			'Expect the weight and dimensions of the third variation to be correct.',
 			async () => {
 				await expect(
-					page.locator( 'input[name="variable_weight[2]"]' )
+					thirdVariation.getByRole( 'textbox', { name: 'Weight' } )
 				).toHaveValue( productWeight );
 
 				await expect(
-					page.locator( 'input[name="variable_length[2]"]' )
+					thirdVariation.getByRole( 'textbox', { name: 'Length' } )
 				).toHaveValue( productLength );
 
 				await expect(
-					page.locator( 'input[name="variable_width[2]"]' )
+					thirdVariation.getByRole( 'textbox', { name: 'Width' } )
 				).toHaveValue( productWidth );
 
 				await expect(
-					page.locator( 'input[name="variable_height[2]"]' )
+					thirdVariation.getByRole( 'textbox', { name: 'Height' } )
 				).toHaveValue( productHeight );
 			}
 		);
 	} );
 
 	test( 'can bulk edit variations', async ( { page } ) => {
-		// mytodo setup: create variable product with the same attributes and variations
-
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ variableProductId }&action=edit`
+				`/wp-admin/post.php?post=${ fixedVariableProductId }&action=edit`
 			);
 		} );
 
@@ -526,11 +660,9 @@ test.describe( 'Add New Variable Product Page', () => {
 	} );
 
 	test( 'can delete all variations', async ( { page } ) => {
-		// mytodo setup: create variable product with the same attributes and variations
-
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ variableProductId }&action=edit`
+				`/wp-admin/post.php?post=${ fixedVariableProductId }&action=edit`
 			);
 		} );
 
@@ -556,8 +688,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		);
 	} );
 
-	// mytodo remove skip
-	test.skip( 'can manually add a variation, manage stock levels, set variation defaults and remove a variation', async ( {
+	test( 'can manually add a variation, manage stock levels, set variation defaults and remove a variation', async ( {
 		page,
 	} ) => {
 		await page.goto( productPageURL );
