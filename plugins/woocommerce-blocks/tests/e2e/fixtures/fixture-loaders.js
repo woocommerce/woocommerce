@@ -481,7 +481,16 @@ const deleteProductAttributes = ( ids ) => {
 	return WooCommerce.post( 'products/attributes/batch', { delete: ids } );
 };
 
+const enableAttributeLookupDirectUpdates = () =>
+	WooCommerce.put(
+		'settings/products/woocommerce_attribute_lookup_direct_updates',
+		{
+			value: 'yes',
+		}
+	);
+
 module.exports = {
+	enableAttributeLookupDirectUpdates,
 	createProductAttributes,
 	deleteProductAttributes,
 	setupSettings,

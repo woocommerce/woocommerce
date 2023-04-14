@@ -15,13 +15,13 @@ import { openSettingsSidebar } from '../../utils.js';
 const block = {
 	name: 'Customer account',
 	slug: 'woocommerce/customer-account',
-	class: '.wc-block-customer-account',
+	class: '.wc-block-editor-customer-account',
 };
 
 const SELECTORS = {
 	icon: '.wp-block-woocommerce-customer-account svg',
 	label: '.wp-block-woocommerce-customer-account .label',
-	iconToggle: '.wc-block-customer-account__icon-style-toggle',
+	iconToggle: '.wc-block-editor-customer-account__icon-style-toggle',
 	displayDropdown: '.customer-account-display-style select',
 };
 

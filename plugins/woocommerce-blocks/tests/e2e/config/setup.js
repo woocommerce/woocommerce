@@ -20,6 +20,7 @@ import {
 	createBlockPages,
 	enablePaymentGateways,
 	createProductAttributes,
+	enableAttributeLookupDirectUpdates,
 } from '../fixtures/fixture-loaders';
 import { PERFORMANCE_REPORT_FILENAME } from '../../utils/constants';
 
@@ -28,9 +29,12 @@ module.exports = async ( globalConfig ) => {
 	await setupPuppeteer( globalConfig );
 
 	try {
+		await enableAttributeLookupDirectUpdates();
+
 		// do setupSettings separately which hopefully gives a chance for WooCommerce
 		// to be configured before the others are executed.
 		await setupSettings();
+
 		const pages = await createBlockPages();
 
 		/**
