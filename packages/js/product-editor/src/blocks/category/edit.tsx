@@ -14,7 +14,7 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { CategoryField } from '../details-categories-field';
+import { CategoryField } from '../../components/details-categories-field';
 
 export function Edit( {
 	attributes,
