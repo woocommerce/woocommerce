@@ -7,6 +7,7 @@ export type LayoutContextType = {
 	layoutString: string;
 	updateLayoutPath: ( item: string ) => LayoutContextType;
 	layoutPath: string[];
+	decendentOf: ( item: string ) => boolean;
 };
 
 type LayoutContextProviderProps = {
@@ -20,20 +21,19 @@ export const LayoutContext = createContext< LayoutContextType | undefined >(
 
 export const getLayoutContextValue = (
 	layoutPath: LayoutContextType[ 'layoutPath' ] = []
-) => {
-	return {
-		layoutPath: [ ...layoutPath ],
-		updateLayoutPath: ( item: string ) => {
-			const newLayoutPath = [ ...layoutPath, item ];
+): LayoutContextType => ( {
+	layoutPath: [ ...layoutPath ],
+	updateLayoutPath: ( item ) => {
+		const newLayoutPath = [ ...layoutPath, item ];
 
-			return {
-				...getLayoutContextValue( newLayoutPath ),
-				layoutPath: newLayoutPath,
-			};
-		},
-		layoutString: layoutPath.join( '/' ),
-	};
-};
+		return {
+			...getLayoutContextValue( newLayoutPath ),
+			layoutPath: newLayoutPath,
+		};
+	},
+	layoutString: layoutPath.join( '/' ),
+	decendentOf: ( item ) => layoutPath.includes( item ),
+} );
 
 export const LayoutContextProvider: React.FC< LayoutContextProviderProps > = ( {
 	children,
