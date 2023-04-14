@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { MenuItem } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
+import { useLayoutContext } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -13,6 +14,7 @@ import { FeedbackIcon } from '../../images/feedback-icon';
 
 export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 	const { showCesModal } = useDispatch( CES_STORE_KEY );
+	const { layoutPath } = useLayoutContext();
 
 	return (
 		<MenuItem
@@ -33,10 +35,17 @@ export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 							'woocommerce'
 						),
 					},
-					{ shouldShowComments: () => true },
+					{
+						shouldShowComments: () => true,
+					},
 					{
 						type: 'snackbar',
 						icon: <span>🌟</span>,
+					},
+					{
+						block_editor: layoutPath.includes(
+							'product-block-editor'
+						),
 					}
 				);
 				onClose();
