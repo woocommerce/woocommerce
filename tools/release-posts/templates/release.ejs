@@ -11,19 +11,7 @@
 <!-- /wp:paragraph -->
 
 <!-- wp:list -->
-<ul>
-  <% for ( const packageName in contributors ) { %>    
-    <% const {org, repo, contributors: packageContributors, totalCommits, baseRef, headRef} = contributors[packageName] %>
-    <% if ( packageContributors ) { %>
-      <li>
-        <a target="_blank" href="https://github.com/<%= org %>/<%= repo %>/compare/<%= baseRef %>...<%= headRef %>">
-          <%= totalCommits %> commits from <%= packageContributors.length %> contributors
-        </a> 
-        in <%= packageName %>.
-      </li>
-    <% } %>
-  <% } %>
-</ul>
+<ul><% for ( const packageName in contributors ) { %><% const {org, repo, contributors: packageContributors, totalCommits, baseRef, headRef} = contributors[packageName] %><% if ( packageContributors ) { %><li><a href="https://github.com/<%= org %>/<%= repo %>/compare/<%= baseRef %>...<%= headRef %>"><%= totalCommits %> commits from <%= packageContributors.length %> contributors</a> in <%= packageName %>.</li><% } %><% } %></ul>
 <!-- /wp:list -->
 
 <!-- wp:paragraph -->
