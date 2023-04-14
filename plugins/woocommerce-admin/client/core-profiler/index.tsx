@@ -104,7 +104,8 @@ const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
 	initial: 'initializing',
 	context: {
-		// these are the default values if the user skips everything
+		// these are safe default values if for some reason the steps fail to complete correctly
+		// actual defaults displayed to the user should be handled in the steps themselves
 		optInDataSharing: false,
 		userProfile: { skipped: true },
 		geolocatedLocation: { location: 'US:CA' },
@@ -271,6 +272,7 @@ const CoreProfilerController = ( {} ) => {
 		coreProfilerStateMachineDefinition.withConfig( {
 			services: {
 				initializeProfiler: () => ( sendBack ) => {
+					// TODO: placeholder to simulate initialization time
 					const interval = setInterval( () => {
 						sendBack( {
 							type: 'INITIALIZATION_COMPLETE',
@@ -312,7 +314,7 @@ const CoreProfilerController = ( {} ) => {
 			<div>Core Profiler Placeholder</div>
 			<div>{ `${ navigationProgress }% complete` }</div>
 			<div
-				className={ `woocommerce-profile-wizard__container ${ state.value }` }
+				className={ `woocommerce-profile-wizard__container woocommerce-profile-wizard__step-${ state.value }` }
 			>
 				<div>{ `Current State: ${ state.value }` }</div>
 				<div>
