@@ -182,8 +182,8 @@ const program = new Command()
 		const title = `WooCommerce ${ currentVersion } Released`;
 
 		const contributors = await generateContributors(
-			currentVersion,
-			previousVersion.toString()
+			currentBranch,
+			previousBranch
 		);
 
 		const postVariables = {
