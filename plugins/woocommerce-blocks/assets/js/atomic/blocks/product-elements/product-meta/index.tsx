@@ -8,6 +8,7 @@ import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
  * Internal dependencies
  */
 import edit from './edit';
+import save from './save';
 import metadata from './block.json';
 
 registerBlockSingleProductTemplate( {
@@ -16,6 +17,7 @@ registerBlockSingleProductTemplate( {
 	blockMetadata: metadata,
 	blockSettings: {
 		edit,
+		save,
 		icon,
 		ancestor: [ 'woocommerce/single-product' ],
 	},
