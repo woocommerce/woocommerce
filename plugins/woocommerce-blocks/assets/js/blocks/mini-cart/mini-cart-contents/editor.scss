@@ -1,8 +1,13 @@
-.editor-styles-wrapper .wp-block-woocommerce-mini-cart-contents {
-	/* We need to override the margin top here to simulate the layout of
-	the mini cart contents on the front end. */
-	margin: 0 auto !important;
+// Extra classes added for specificity, so we get rid of a top margin added by GB.
+.editor-styles-wrapper .wc-block-editor-mini-cart-contents__wrapper.wc-block-editor-mini-cart-contents__wrapper {
+	display: flex;
+	justify-content: center;
+	margin: 0;
+	position: relative;
+	z-index: 9999;
+}
 
+.editor-styles-wrapper .wp-block-woocommerce-mini-cart-contents {
 	.wp-block-woocommerce-empty-mini-cart-contents-block[hidden],
 	.wp-block-woocommerce-filled-mini-cart-contents-block[hidden] {
 		display: none;

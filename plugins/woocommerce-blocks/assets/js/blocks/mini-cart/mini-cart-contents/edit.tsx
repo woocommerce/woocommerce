@@ -123,7 +123,7 @@ const Edit = ( {
 	}, [] );
 
 	return (
-		<div { ...blockProps }>
+		<>
 			<InspectorControls key="inspector">
 				<PanelBody
 					title={ __( 'Dimensions', 'woo-gutenberg-products-block' ) }
@@ -144,15 +144,23 @@ const Edit = ( {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<EditorProvider currentView={ currentView }>
-				<InnerBlocks
-					allowedBlocks={ ALLOWED_BLOCKS }
-					template={ defaultTemplate }
-					templateLock={ false }
-				/>
-			</EditorProvider>
-			<MiniCartInnerBlocksStyle style={ blockProps.style } />
-		</div>
+			<div
+				className="wc-block-components-drawer__screen-overlay"
+				aria-hidden="true"
+			></div>
+			<div className="wc-block-editor-mini-cart-contents__wrapper">
+				<div { ...blockProps }>
+					<EditorProvider currentView={ currentView }>
+						<InnerBlocks
+							allowedBlocks={ ALLOWED_BLOCKS }
+							template={ defaultTemplate }
+							templateLock={ false }
+						/>
+					</EditorProvider>
+					<MiniCartInnerBlocksStyle style={ blockProps.style } />
+				</div>
+			</div>
+		</>
 	);
 };
 
