@@ -3239,13 +3239,14 @@ class WC_AJAX {
 		$api_key = get_option( 'woocommerce_feature_chatgpt_api_key_enabled' );
 		$api_url = "https://api.openai.com/v1/chat/completions";
 
-		$content = "Say hello world"; // TODO grab from request parameter
+		$product_description = $_POST['product_description'];
+		$tone = $_POST['tone'];
 
 		// Set up the messages
 		$messages = array(
 			array(
 				"role" => "user",
-				"content" => $content
+				"content" => "Write a product description for '$product_description' with $tone tone."
 			)
 		);
 
@@ -3279,12 +3280,13 @@ class WC_AJAX {
 			$response_data = json_decode($response, true);
 
 			// Extract and display the generated text
-			$generated_text = $response_data["choices"][0]["text"];
-			echo "Generated text: " . $generated_text;
+			$generated_text = $response_data["choices"][0]["message"]["content"];
+			echo $generated_text;
 		}
 
 		// Close the curl session
 		curl_close($ch);
+		wp_die();
 	}
 
 	/**

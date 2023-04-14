@@ -188,11 +188,4 @@ jQuery( function ( $ ) {
 		jQuery.maybe_disable_save_button
 	);
 
-	$.ajax({
-		url: '/wp-admin/admin-ajax.php',
-		type: 'POST',
-		data: {
-			action: 'woocommerce_generate_product_description',
-		},
-	});
 } );
