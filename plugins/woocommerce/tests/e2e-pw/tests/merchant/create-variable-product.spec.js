@@ -43,32 +43,44 @@ async function deleteProductsAddedByTests( baseURL ) {
 	await api.post( 'products/batch', { delete: ids } );
 }
 
-async function resetVariableProductTour( baseURL, browser ) {
-	// Go to the product page, so that the `window.wp.data` module is available
-	const page = await browser.newPage( { baseURL: baseURL } );
-	await page.goto( productPageURL );
-
-	// Get the current user's ID and user preferences
-	const { id: userId, woocommerce_meta } = await page.evaluate( () => {
-		return window.wp.data.select( 'core' ).getCurrentUser();
-	} );
-
-	// Reset the variable product tour preference, so that it will be shown again
-	const updatedWooCommerceMeta = {
-		...woocommerce_meta,
-		variable_product_tour_shown: '',
-	};
-
-	// Save the updated user preferences
-	await page.evaluate(
-		async ( { userId, updatedWooCommerceMeta } ) => {
-			await window.wp.data.dispatch( 'core' ).saveUser( {
-				id: userId,
-				woocommerce_meta: updatedWooCommerceMeta,
-			} );
-		},
-		{ userId, updatedWooCommerceMeta }
+async function resetVariableProductTour( page ) {
+	await test.step(
+		'Go to the product page, so that the `window.wp.data` module is available',
+		async () => {
+			await page.goto( productPageURL );
+		}
 	);
+
+	const { id: userId, woocommerce_meta } = await test.step(
+		"Get the current user's ID and user preferences",
+		async () => {
+			return await page.evaluate( () => {
+				return window.wp.data.select( 'core' ).getCurrentUser();
+			} );
+		}
+	);
+
+	const updatedWooCommerceMeta = await test.step(
+		'Reset the variable product tour preference, so that it will be shown again',
+		async () => {
+			return {
+				...woocommerce_meta,
+				variable_product_tour_shown: '',
+			};
+		}
+	);
+
+	await test.step( 'Save the updated user preferences', async () => {
+		await page.evaluate(
+			async ( { userId, updatedWooCommerceMeta } ) => {
+				await window.wp.data.dispatch( 'core' ).saveUser( {
+					id: userId,
+					woocommerce_meta: updatedWooCommerceMeta,
+				} );
+			},
+			{ userId, updatedWooCommerceMeta }
+		);
+	} );
 }
 
 async function createVariableProductFixture( baseURL ) {
@@ -165,42 +177,56 @@ async function createVariableProductFixture( baseURL ) {
 		],
 	};
 
-	await api
-		.post( 'products', createVariableProductRequestPayload )
-		.then( ( response ) => {
-			fixedVariableProductId = response.data.id;
-		} );
+	await test.step(
+		'Create the variable product and its attributes.',
+		async () => {
+			await api
+				.post( 'products', createVariableProductRequestPayload )
+				.then( ( response ) => {
+					fixedVariableProductId = response.data.id;
+				} );
+		}
+	);
 
-	await api
-		.post(
-			`products/${ fixedVariableProductId }/variations/batch`,
-			batchCreateVariationsPayload
-		)
-		.then( ( response ) => {
-			fixedVariationIds = response.data.create
-				.map( ( variation ) => variation.id )
-				.sort();
-		} );
+	await test.step( 'Generate all variations.', async () => {
+		await api
+			.post(
+				`products/${ fixedVariableProductId }/variations/batch`,
+				batchCreateVariationsPayload
+			)
+			.then( ( response ) => {
+				fixedVariationIds = response.data.create
+					.map( ( variation ) => variation.id )
+					.sort();
+			} );
+	} );
 }
 
 test.describe( 'Add New Variable Product Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
-		await createVariableProductFixture( baseURL );
+		await test.step(
+			'Set up a variable product fixture through the REST API.',
+			async () => {
+				await createVariableProductFixture( baseURL );
+			}
+		);
 	} );
 
-	test.afterAll( async ( { baseURL, browser } ) => {
+	test.afterAll( async ( { baseURL } ) => {
 		await deleteProductsAddedByTests( baseURL );
-		await resetVariableProductTour( baseURL, browser );
 	} );
 
 	test( 'can create product, attributes and variations', async ( {
 		page,
 	} ) => {
-		await test.step( 'Go to "Products > Add New page".', async () => {
-			await page.goto( productPageURL );
-		} );
+		await test.step(
+			'Go to the product page, and reset the variable product tour.',
+			async () => {
+				await resetVariableProductTour( page );
+			}
+		);
 
 		await test.step(
 			`Type "${ variableProductName }" into the "Product name" input field.`,
