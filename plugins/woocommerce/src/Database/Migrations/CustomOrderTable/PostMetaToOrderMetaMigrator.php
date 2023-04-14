@@ -52,6 +52,7 @@ class PostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 				'meta'          => array(
 					'table_name'        => $wpdb->postmeta,
 					'entity_id_column'  => 'post_id',
+					'meta_id_column'    => 'meta_id',
 					'meta_key_column'   => 'meta_key',
 					'meta_value_column' => 'meta_value',
 				),

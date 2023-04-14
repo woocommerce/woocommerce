@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use first meta value for HPOS migration when there are duplicates for flat column.
