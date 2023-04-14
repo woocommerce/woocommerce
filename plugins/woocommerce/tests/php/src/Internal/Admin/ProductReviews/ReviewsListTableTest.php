@@ -1775,11 +1775,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$this->assertSame(
 			[
-				'all'       => '<a href="' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=all" class="current" aria-current="page">All <span class="count">(<span class="all-count">0</span>)</span></a>',
-				'moderated' => '<a href="' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=moderated">Pending <span class="count">(<span class="pending-count">0</span>)</span></a>',
-				'approved'  => '<a href="' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=approved">Approved <span class="count">(<span class="approved-count">0</span>)</span></a>',
-				'spam'      => '<a href="' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=spam">Spam <span class="count">(<span class="spam-count">0</span>)</span></a>',
-				'trash'     => '<a href="' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=trash">Trash <span class="count">(<span class="trash-count">0</span>)</span></a>',
+				'all'       => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=all" class="current" aria-current="page">All <span class="count">(<span class="all-count">0</span>)</span></a>',
+				'moderated' => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=moderated">Pending <span class="count">(<span class="pending-count">0</span>)</span></a>',
+				'approved'  => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=approved">Approved <span class="count">(<span class="approved-count">0</span>)</span></a>',
+				'spam'      => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=spam">Spam <span class="count">(<span class="spam-count">0</span>)</span></a>',
+				'trash'     => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=trash">Trash <span class="count">(<span class="trash-count">0</span>)</span></a>',
 			],
 			$method->invoke( $list_table )
 		);
