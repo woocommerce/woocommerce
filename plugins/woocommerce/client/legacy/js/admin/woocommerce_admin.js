@@ -40,7 +40,18 @@
 
 		// Hook up "write it for me" button
 		$( '.wc-write-it-for-me' ).on( 'click', function () {
-			$( '.woocommerce-gpt-integration' ).slideToggle( 'fast' );
+			const gptForm = $( '.woocommerce-gpt-integration' );
+
+			if ( gptForm.is( ':visible' ) ) {
+				gptForm.slideUp( 'fast' );
+			} else {
+				gptForm.slideDown( {
+					duration: 'fast',
+					start: function () {
+						$( this ).css( 'display', 'grid' );
+					},
+				} );
+			}
 		} );
 
 		// Progress indicators when showing steps.
