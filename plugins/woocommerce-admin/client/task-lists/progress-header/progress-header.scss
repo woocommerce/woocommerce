@@ -74,7 +74,7 @@ $progress-complete-color: var(--wp-admin-theme-color);
 
 	@include breakpoint( '<782px' ) {
 		padding-left: var(--large-gap);
-        padding-right: var(--large-gap);
+		padding-right: var(--large-gap);
 	}
 }
 
@@ -83,6 +83,6 @@ h1.woocommerce-task-progress-header__title {
 
 	@include breakpoint( '<782px' ) {
 		padding-left: var(--large-gap);
-        padding-right: var(--large-gap);
+		padding-right: var(--large-gap);
 	}
 }
