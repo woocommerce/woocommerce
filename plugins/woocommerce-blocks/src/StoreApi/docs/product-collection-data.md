@@ -11,9 +11,9 @@ GET /products/collection-data?calculate_rating_counts=true
 
 | Attribute                    | Type   | Required | Description                                                                                                                                                                                                |
 | :--------------------------- | :----- | :------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `calculate_price_range`      | bool   |    No    | Returns the min and max price for the product collection. If false, only `null` will be returned.                                                                                                          |
+| `calculate_price_range`      | bool   |    No    | Returns the min and max price for the product collection. If false, only `null` will be returned. |
 | `calculate_attribute_counts` | object |    No    | Returns attribute counts for a list of attribute taxonomies you pass in via this parameter. Each should be provided as an object with keys "taxonomy" and "query_type". If empty, `null` will be returned. |
-| `calculate_rating_counts`    | bool   |    No    | Returns the counts of products with a certain average rating, 1-5. If false, only `null` will be returned.                                                                                                 |
+| `calculate_rating_counts`    | bool   |    No    | Returns the counts of products with a certain average rating, 1-5. If false, only `null` will be returned. |
 
 **In addition to the above attributes**, all product list attributes are supported. This allows you to get data for a certain subset of products. See [the products API list products section](products.md#list-products) for the full list.
 
@@ -29,6 +29,13 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?cal
 		"currency_minor_unit": 2,
 		"min_price": "0",
 		"max_price": "9000",
+		"currency_code": "USD",
+		"currency_decimal_separator": ".",
+		"currency_minor_unit": 2,
+		"currency_prefix": "$",
+		"currency_suffix": "",
+		"currency_symbol": "$",
+		"currency_thousand_separator": ",",
 	],
 	"attribute_counts": [
 		{
