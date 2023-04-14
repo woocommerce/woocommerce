@@ -8,9 +8,6 @@
 		height: $header-height;
 
 		@include breakpoint( '<960px' ) {
-			> div:first-child {
-				display: none;
-			}
 			grid-template-columns: auto 1fr;
 		}
 	}
@@ -21,6 +18,10 @@
 		font-weight: 600;
 		padding: 0;
 		color: #000000;
+
+		@include breakpoint( '<960px' ) {
+			display: none;
+		}
 	}
 
 	&__actions {
