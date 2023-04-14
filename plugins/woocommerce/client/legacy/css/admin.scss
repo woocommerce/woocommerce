@@ -8037,35 +8037,6 @@ table.bar_chart {
 		padding: 20px 0;
 	}
 	.woocommerce-actions {
-		.woocommerce-action-buttons {
-			display: flex;
-			flex-direction: row;
-			align-items: flex-start;
-			padding: 2px;
-			width: 394px;
-			height: 36px;
-			background: #ffffff;
-			border: 1px solid #949494;
-			border-radius: 2px;
-			> button {
-				width: 99px;
-				align-self: stretch;
-				flex-grow: 1;
-				background-color: #fff;
-				border: none;
-				font-style: normal;
-				font-weight: 400;
-				font-size: 15px;
-				color: #949494;
-				cursor: pointer;
-			}
-			> button:hover,
-			> button.active {
-				color: #ffffff;
-				background: #1e1e1e;
-				border-radius: 1px;
-			}
-		}
 		.woocommerce-action-description {
 			font-size: 11px;
 			display: flex;

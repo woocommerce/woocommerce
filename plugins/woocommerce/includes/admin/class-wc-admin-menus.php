@@ -473,28 +473,18 @@ class WC_Admin_Menus {
 							esc_html__( 'About your product', 'woocommerce' ) .
 						'</span>' .
 						'<textarea class="woocommerce-gpt-textarea" placeholder="' . esc_html__( 'e.g. organic and sustainable skin cleanser for women', 'woocommerce' ) . '"></textarea>' .
-						'<div class="woocommerce-actions">' .
-							'<span class="woocommerce-action-buttons-title">' .
-								esc_html__( 'Tone of voice', 'woocommerce' ) .
-							'</span>' .
-							'<div class="woocommerce-action-buttons">' .
-								'<button class="woocommerce-gpt-action-casual active" type="button">' .
-									esc_html__( 'Casual', 'woocommerce' ) .
-								'</button>' .
-								'<button class="woocommerce-gpt-action-formal" type="button">' .
-									esc_html__( 'Formal', 'woocommerce' ) .
-								'</button>' .
-								'<button class="woocommerce-gpt-action-flowery" type="button">' .
-									esc_html__( 'Flowery', 'woocommerce' ) .
-								'</button>' .
-								'<button class="woocommerce-gpt-action-convincing" type="button">' .
-									esc_html__( 'Convincing', 'woocommerce' ) .
-								'</button>' .
-							'</div>' .
-							'<span class="woocommerce-action-description">' .
-								esc_html__( 'Relaxed, informal, conversational tone. Like chatting with a friend.', 'woocommerce' ) .
-							'</span>' .
-						'</div>' .
+						'<span class="woocommerce-action-buttons-title">' .
+							esc_html__( 'Tone of voice', 'woocommerce' ) .
+						'</span>' .
+						'<select class="woocommerce-gpt-voice-tone">' .
+							'<option value="casual">' . esc_html__( 'Casual', 'woocommerce' ) . '</option>' .
+							'<option value="formal">' . esc_html__( 'Formal', 'woocommerce' ) . '</option>' .
+							'<option value="flowery">' . esc_html__( 'Flowery', 'woocommerce' ) . '</option>' .
+							'<option value="convincing">' . esc_html__( 'Convincing', 'woocommerce' ) . '</option>' .
+						'</select>' .
+						'<span class="woocommerce-action-description">' .
+							esc_html__( 'Relaxed, informal, conversational tone. Like chatting with a friend.', 'woocommerce' ) .
+						'</span>' .
 						'<button class="button button-primary woocommerce-gpt-action-accept" type="button">' .
 							esc_html__( 'Write description', 'woocommerce' ) .
 						'</button>' .
