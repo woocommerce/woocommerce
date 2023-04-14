@@ -12,7 +12,6 @@ import {
 	OnboardingState,
 	ExtensionList,
 	ProfileItems,
-	OnboardingProductTypes,
 } from './types';
 import { WPDataSelectors } from '../types';
 import { Plugin } from '../plugins/types';
