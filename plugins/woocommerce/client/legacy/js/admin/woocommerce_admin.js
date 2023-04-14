@@ -38,6 +38,11 @@
 			$title_action.hide();
 		}
 
+		// Hook up "write it for me" button
+		$( '.wc-write-it-for-me' ).on( 'click', function () {
+			$( '.woocommerce-gpt-integration' ).slideToggle( 'fast' );
+		} );
+
 		// Progress indicators when showing steps.
 		$( '.woocommerce-progress-form-wrapper .button-next' ).on(
 			'click',

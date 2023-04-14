@@ -449,7 +449,7 @@ class WC_Admin_Menus {
 			return;
 		}
 
-		echo '<button class="button wp-media-button" type="button">' . esc_html__( 'Write it for me (beta)', 'woocommerce' ) . '</button>';
+		echo '<button class="button wp-media-button wc-write-it-for-me" type="button">' . esc_html__( 'Write it for me (beta)', 'woocommerce' ) . '</button>';
 
 	}
 
