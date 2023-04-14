@@ -694,7 +694,7 @@ class WC_Post_Types {
 									),
 									array(
 										array(
-											'core/image',
+											'woocommerce/product-shipping-dimensions-fields',
 										),
 									),
 								),

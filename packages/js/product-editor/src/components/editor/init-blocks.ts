@@ -26,6 +26,7 @@ import { init as initSku } from '../../blocks/inventory-sku';
 import { init as initConditional } from '../../blocks/conditional';
 import { init as initLowStockQty } from '../../blocks/inventory-email';
 import { init as initCheckbox } from '../../blocks/checkbox';
+import { init as initShippingDimensions } from '../../blocks/shipping-dimensions';
 
 export const initBlocks = () => {
 	const coreBlocks = __experimentalGetCoreBlocks();
@@ -50,4 +51,5 @@ export const initBlocks = () => {
 	initConditional();
 	initLowStockQty();
 	initCheckbox();
+	initShippingDimensions();
 };
