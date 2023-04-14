@@ -469,13 +469,6 @@ class WC_Admin_Menus {
 			if ( $editor_container_position !== false ) {
 				$gpt_form =
 					'<div class="woocommerce-gpt-integration">' .
-						'<div class="woocommerce-gpt-integration__title">' .
-							'<h3>' .
-								esc_html__( 'Write a description', 'woocommerce' ) .
-								'<span class="woocommerce-beta-badge">BETA</span>' .
-								'<a class="woocommerce-hide-gpt-integration" href="#">hide</a>' .
-							'</h3>' .
-						'</div>' .
 						'<span class="woocommerce-textarea-title">' .
 							esc_html__( 'ABOUT YOUR PRODUCT', 'woocommerce' ) .
 						'</span>' .
