@@ -718,7 +718,7 @@ WHERE $where_clause
 		}
 		foreach ( $results as $index => $result_row ) {
 			$source_id         = $result_row[ $this->schema_config['source']['entity']['table_name'] . '_' . $this->schema_config['source']['entity']['primary_key'] ];
-			$results[ $index ] = array_merge( $result_row, $source_metadata_rows[ $source_id ] );
+			$results[ $index ] = array_merge( $result_row, ( $source_metadata_rows[ $source_id ] ?? array() ) );
 		}
 		return $results;
 	}
