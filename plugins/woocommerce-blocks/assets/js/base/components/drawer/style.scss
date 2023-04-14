@@ -1,6 +1,8 @@
+:root {
+	--neg-drawer-width: calc(var(--drawer-width) * -1);
+}
+
 $drawer-animation-duration: 0.3s;
-$drawer-width: 480px;
-$drawer-width-mobile: 100vw;
 
 @keyframes fadein {
 	from {
@@ -18,19 +20,7 @@ $drawer-width-mobile: 100vw;
 	}
 
 	to {
-		transform: translateX(-$drawer-width);
-	}
-}
-
-@media only screen and (max-width: 480px) {
-	@keyframes slidein {
-		from {
-			transform: translateX(0);
-		}
-
-		to {
-			transform: translateX(-$drawer-width-mobile);
-		}
+		transform: translateX(var(--neg-drawer-width));
 	}
 }
 
@@ -72,13 +62,9 @@ $drawer-width-mobile: 100vw;
 	position: fixed;
 	right: 0;
 	top: 0;
-	transform: translateX(-$drawer-width);
-	width: $drawer-width;
-
-	@media only screen and (max-width: 480px) {
-		transform: translateX(-$drawer-width-mobile);
-		width: $drawer-width-mobile;
-	}
+	transform: translateX(max(-100%, var(--neg-drawer-width)));
+	width: var(--drawer-width);
+	max-width: 100%;
 }
 
 .wc-block-components-drawer__screen-overlay--with-slide-out .wc-block-components-drawer {
