@@ -92,62 +92,70 @@ export function ordersAPI() {
 	} );
 
 	group( 'API Retrieve Order', function () {
-		response = http.get(
-			`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
-			{
-				headers: requestHeaders,
-				tags: { name: 'API - Retrieve Order' },
-			}
-		);
-		check( response, {
-			'status is 200': ( r ) => r.status === 200,
-			'body contains: Order ID': ( response ) =>
-				response.body.includes( `"id":${ post_id }` ),
-		} );
+		if ( post_id ) {
+			response = http.get(
+				`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
+				{
+					headers: requestHeaders,
+					tags: { name: 'API - Retrieve Order' },
+				}
+			);
+			check( response, {
+				'status is 200': ( r ) => r.status === 200,
+				'body contains: Order ID': ( response ) =>
+					response.body.includes( `"id":${ post_id }` ),
+			} );
+		}
 	} );
 
 	group( 'API List Orders', function () {
-		response = http.get( `${ base_url }/wp-json/wc/v3/orders`, {
-			headers: requestHeaders,
-			tags: { name: 'API - List Orders' },
-		} );
-		check( response, {
-			'status is 200': ( r ) => r.status === 200,
-			'body contains: Order ID': ( response ) =>
-				response.body.includes( '[{"id":' ),
-		} );
+		if ( post_id ) {
+			response = http.get( `${ base_url }/wp-json/wc/v3/orders`, {
+				headers: requestHeaders,
+				tags: { name: 'API - List Orders' },
+			} );
+			check( response, {
+				'status is 200': ( r ) => r.status === 200,
+				'body contains: Order ID': ( response ) =>
+					response.body.includes( '[{"id":' ),
+			} );
+		}
 	} );
 
 	group( 'API Update Order', function () {
-		response = http.put(
-			`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
-			JSON.stringify( updateData ),
-			{
-				headers: requestHeaders,
-				tags: { name: 'API - Update Order (Status)' },
-			}
-		);
-		check( response, {
-			'status is 200': ( r ) => r.status === 200,
-			"body contains: 'Completed' Status": ( response ) =>
-				response.body.includes( '"status":"completed"' ),
-		} );
+		if ( post_id ) {
+			response = http.put(
+				`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
+				JSON.stringify( updateData ),
+				{
+					headers: requestHeaders,
+					tags: { name: 'API - Update Order (Status)' },
+				}
+			);
+			check( response, {
+				'status is 200': ( r ) => r.status === 200,
+				"body contains: 'Completed' Status": ( response ) =>
+					response.body.includes( '"status":"completed"' ),
+			} );
+		}
 	} );
 
 	group( 'API Delete Order', function () {
-		response = http.del(
-			`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
-			JSON.stringify( { force: true } ),
-			{
-				headers: requestHeaders,
-				tags: { name: 'API - Delete Order' },
-			}
-		);
-		check( response, {
-			'status is 200': ( r ) => r.status === 200,
-			'body contains: Order ID': ( response ) =>
-				response.body.includes( `"id":${ post_id }` ),
-		} );
+		if ( post_id ) {
+			response = http.del(
+				`${ base_url }/wp-json/wc/v3/orders/${ post_id }`,
+				JSON.stringify( { force: true } ),
+				{
+					headers: requestHeaders,
+					tags: { name: 'API - Delete Order' },
+				}
+			);
+			check( response, {
+				'status is 200': ( r ) => r.status === 200,
+				'body contains: Order ID': ( response ) =>
+					response.body.includes( `"id":${ post_id }` ),
+			} );
+		}
 	} );
 
 	group( 'API Batch Create Orders', function () {
