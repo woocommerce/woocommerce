@@ -115,6 +115,7 @@ class WC_AJAX {
 			'checkout',
 			'get_variation',
 			'get_customer_location',
+			'generate_product_description',
 		);
 
 		foreach ( $ajax_events_nopriv as $ajax_event ) {
@@ -3226,6 +3227,64 @@ class WC_AJAX {
 
 		wp_send_json_error( 'invalid_gateway_id' );
 		wp_die();
+	}
+
+	/**
+	 * Generate ChatGPT product description via AJAX.
+	 *
+	 * @since 3.4.0
+	 */
+	public static function generate_product_description() {
+
+		$api_key = get_option( 'woocommerce_feature_chatgpt_api_key_enabled' );
+		$api_url = "https://api.openai.com/v1/chat/completions";
+
+		$content = "Say hello world"; // TODO grab from request parameter
+
+		// Set up the messages
+		$messages = array(
+			array(
+				"role" => "user",
+				"content" => $content
+			)
+		);
+
+		// Configure curl request
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $api_url);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+			"Content-Type: application/json",
+			"Authorization: Bearer " . $api_key
+		));
+
+		// Prepare the POST data
+		$post_data = array(
+			"messages" => $messages,
+			"model" => "gpt-3.5-turbo",
+			"temperature" => 0.7
+		);
+		$post_data_json = json_encode($post_data);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data_json);
+
+		// Execute the request and get the response
+		$response = curl_exec($ch);
+
+		// Check for errors
+		if (curl_errno($ch)) {
+			echo "Error: " . curl_error($ch);
+		} else {
+			// Decode the JSON response
+			$response_data = json_decode($response, true);
+
+			// Extract and display the generated text
+			$generated_text = $response_data["choices"][0]["text"];
+			echo "Generated text: " . $generated_text;
+		}
+
+		// Close the curl session
+		curl_close($ch);
 	}
 
 	/**
