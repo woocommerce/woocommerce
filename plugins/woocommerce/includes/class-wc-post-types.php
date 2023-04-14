@@ -634,6 +634,7 @@ class WC_Post_Types {
 							),
 						),
 					),
+					'template_lock'       => 'all',
 				)
 			)
 		);
