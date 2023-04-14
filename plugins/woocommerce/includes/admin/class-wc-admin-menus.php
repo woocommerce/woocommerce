@@ -469,22 +469,22 @@ class WC_Admin_Menus {
 			if ( $editor_container_position !== false ) {
 				$gpt_form =
 					'<div class="woocommerce-gpt-integration">' .
-						'<span class="woocommerce-textarea-title">' .
+						'<label for="woocommerce-product-description-gpt-about" class="woocommerce-textarea-title">' .
 							esc_html__( 'About your product', 'woocommerce' ) .
-						'</span>' .
-						'<textarea class="woocommerce-gpt-textarea" placeholder="' . esc_html__( 'e.g. organic and sustainable skin cleanser for women', 'woocommerce' ) . '"></textarea>' .
-						'<span class="woocommerce-action-buttons-title">' .
+						'</label>' .
+						'<textarea id="woocommerce-product-description-gpt-about" class="woocommerce-gpt-textarea" placeholder="' . esc_html__( 'e.g. organic and sustainable skin cleanser for women', 'woocommerce' ) . '"></textarea>' .
+						'<label for="woocommerce-product-description-gpt-voice-tone" class="woocommerce-action-buttons-title">' .
 							esc_html__( 'Tone of voice', 'woocommerce' ) .
-						'</span>' .
-						'<select class="woocommerce-gpt-voice-tone">' .
+						'</label>' .
+						'<select id="woocommerce-product-description-gpt-voice-tone" aria-describedby="woocommerce-product-description-gpt-voice-tone-description" class="woocommerce-gpt-voice-tone">' .
 							'<option value="casual">' . esc_html__( 'Casual', 'woocommerce' ) . '</option>' .
 							'<option value="formal">' . esc_html__( 'Formal', 'woocommerce' ) . '</option>' .
 							'<option value="flowery">' . esc_html__( 'Flowery', 'woocommerce' ) . '</option>' .
 							'<option value="convincing">' . esc_html__( 'Convincing', 'woocommerce' ) . '</option>' .
 						'</select>' .
-						'<span class="woocommerce-action-description">' .
+						'<p id="woocommerce-product-description-gpt-voice-tone-description" class="woocommerce-action-description">' .
 							esc_html__( 'Relaxed, informal, conversational tone. Like chatting with a friend.', 'woocommerce' ) .
-						'</span>' .
+						'</p>' .
 						'<button class="button button-primary woocommerce-gpt-action-accept" type="button">' .
 							esc_html__( 'Write description', 'woocommerce' ) .
 						'</button>' .
