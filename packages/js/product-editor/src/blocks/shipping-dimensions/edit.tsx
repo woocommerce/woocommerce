@@ -32,9 +32,7 @@ import {
 import { useValidation } from '../../hooks/use-validation';
 
 export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) {
-	const blockProps = useBlockProps( {
-		className: 'wp-block-woocommerce-product-shipping-dimensions-fields',
-	} );
+	const blockProps = useBlockProps();
 
 	const [ dimensions, setDimensions ] =
 		useEntityProp< Partial< ProductDimensions > | null >(
