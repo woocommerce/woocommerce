@@ -52,6 +52,7 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( $this->products[0]->get_id(), $data['id'] );
 		$this->assertEquals( $this->products[0]->get_title(), $data['name'] );
+		$this->assertEquals( $this->products[0]->get_slug(), $data['slug'] );
 		$this->assertEquals( $this->products[0]->get_permalink(), $data['permalink'] );
 		$this->assertEquals( $this->products[0]->get_sku(), $data['sku'] );
 		$this->assertEquals( $this->products[0]->get_price(), $data['prices']->price / ( 10 ** $data['prices']->currency_minor_unit ) );

@@ -12,6 +12,7 @@ The store products API provides public product data so it can be rendered on the
 ```http
 GET /products
 GET /products?search=product%20name
+GET /products?slug=slug-1,slug-2
 GET /products?after=2017-03-22&date_column=date
 GET /products?before=2017-03-22&date_column=date
 GET /products?exclude=10,44,33
@@ -39,8 +40,9 @@ GET /products?return_rating_counts=true
 ```
 
 | Attribute                                   | Type    | Required | Description                                                                                                                                                                |
-| :------------------------------------------ | :------ | :------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|:--------------------------------------------|:--------| :------: |:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `search`                                    | integer |    no    | Limit results to those matching a string.                                                                                                                                  |
+| `slug`                                      | string  |    no    | Limit result set to products with specific slug(s). Use commas to separate.                                                                                                |
 | `after`                                     | string  |    no    | Limit response to resources created after a given ISO8601 compliant date.                                                                                                  |
 | `before`                                    | string  |    no    | Limit response to resources created before a given ISO8601 compliant date.                                                                                                 |
 | `date_column`                               | string  |    no    | When limiting response using after/before, which date column to compare against. Allowed values: `date`, `date_gmt`, `modified`, `modified_gmt`                            |
@@ -80,6 +82,7 @@ curl "https://example-store.com/wp-json/wc/store/v1/products"
 	{
 		"id": 34,
 		"name": "WordPress Pennant",
+		"slug": "wordpress-pennant",
 		"variation": "",
 		"permalink": "https://local.wordpress.test/product/wordpress-pennant/",
 		"sku": "wp-pennant",
@@ -125,9 +128,9 @@ curl "https://example-store.com/wp-json/wc/store/v1/products"
 ]
 ```
 
-## Single Product
+## Single Product by ID
 
-Get a single product.
+Get a single product by id.
 
 ```http
 GET /products/:id
@@ -147,6 +150,74 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/34"
 {
 	"id": 34,
 	"name": "WordPress Pennant",
+	"slug": "wordpress-pennant",
+	"variation": "",
+	"permalink": "https://local.wordpress.test/product/wordpress-pennant/",
+	"sku": "wp-pennant",
+	"summary": "<p>This is an external product.</p>",
+	"short_description": "<p>This is an external product.</p>",
+	"description": "<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>",
+	"on_sale": false,
+	"prices": {
+		"currency_code": "GBP",
+		"currency_symbol": "£",
+		"currency_minor_unit": 2,
+		"currency_decimal_separator": ".",
+		"currency_thousand_separator": ",",
+		"currency_prefix": "£",
+		"currency_suffix": "",
+		"price": "1105",
+		"regular_price": "1105",
+		"sale_price": "1105",
+		"price_range": null
+	},
+	"average_rating": "0",
+	"review_count": 0,
+	"images": [
+		{
+			"id": 57,
+			"src": "https://local.wordpress.test/wp-content/uploads/2020/03/pennant-1.jpg",
+			"thumbnail": "https://local.wordpress.test/wp-content/uploads/2020/03/pennant-1-324x324.jpg",
+			"srcset": "https://local.wordpress.test/wp-content/uploads/2020/03/pennant-1.jpg 800w, https://local.wordpress.test/wp-content/uploads/2020/03/pennant-1-324x324.jpg 324w, https://local.wordpress.test/wp-content/uploads/2020/03/pennant-1-100x100.jpg 100w, https://local.wordpress.test/wp-content/uploads/2020/03/pennant-1-416x416.jpg 416w, https://local.wordpress.test/wp-content/uploads/2020/03/pennant-1-300x300.jpg 300w, https://local.wordpress.test/wp-content/uploads/2020/03/pennant-1-150x150.jpg 150w, https://local.wordpress.test/wp-content/uploads/2020/03/pennant-1-768x768.jpg 768w",
+			"sizes": "(max-width: 800px) 100vw, 800px",
+			"name": "pennant-1.jpg",
+			"alt": ""
+		}
+	],
+	"has_options": false,
+	"is_purchasable": true,
+	"is_in_stock": true,
+	"low_stock_remaining": null,
+	"add_to_cart": {
+		"text": "Add to cart",
+		"description": "Add &ldquo;WordPress Pennant&rdquo; to your cart"
+	}
+}
+```
+
+## Single Product by slug
+
+Get a single product by slug.
+
+```http
+GET /products/:slug
+```
+
+| Attribute | Type   | Required | Description                          |
+|:----------|:-------| :------: |:-------------------------------------|
+| `slug`    | string |   Yes    | The slug of the product to retrieve. |
+
+```sh
+curl "https://example-store.com/wp-json/wc/store/v1/products/wordpress-pennant"
+```
+
+**Example response:**
+
+```json
+{
+	"id": 34,
+	"name": "WordPress Pennant",
+	"slug": "wordpress-pennant",
 	"variation": "",
 	"permalink": "https://local.wordpress.test/product/wordpress-pennant/",
 	"sku": "wp-pennant",
