@@ -437,9 +437,10 @@ const attachProductAttributesTracks = () => {
 		{
 			eventName: 'click',
 			childQuery: '.woocommerce_attribute_visible_on_product_page',
-			callback: () => {
+			callback: ( clickedElement ) => {
+				const elementName = clickedElement.getAttribute( 'name' );
 				const visibleOnProductPage = document.querySelector(
-					'.woocommerce_attribute_visible_on_product_page'
+					`[name="${ elementName }"]`
 				) as HTMLInputElement;
 
 				recordEvent( 'product_attributes_buttons', {
@@ -451,9 +452,10 @@ const attachProductAttributesTracks = () => {
 		{
 			eventName: 'click',
 			childQuery: '.woocommerce_attribute_used_for_variations',
-			callback: () => {
+			callback: ( clickedElement ) => {
+				const elementName = clickedElement.getAttribute( 'name' );
 				const usedForVariations = document.querySelector(
-					'.woocommerce_attribute_used_for_variations'
+					`[name="${ elementName }"]`
 				) as HTMLInputElement;
 
 				recordEvent( 'product_attributes_buttons', {
