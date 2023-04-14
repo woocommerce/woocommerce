@@ -121,9 +121,22 @@ class FeaturesController {
 				'is_experimental' => false,
 				'disable_ui'      => true,
 			),
+			'chatgpt_integration' => array(
+				'name'            => __( 'ChatGPT integration', 'woocommerce' ),
+				'description'     => __( 'Enable ChatGPT integration to help write product descriptions', 'woocommerce' ),
+				'is_experimental' => true,
+				'disable_ui'      => false,
+			),
+			'chatgpt_api_key'     => array(
+				'name'            => __( 'ChatGPT API key', 'woocommerce' ),
+				'description'     => '',
+				'is_experimental' => true,
+				'disable_ui'      => false,
+				'type'            => 'text',
+			),
 		);
 
-		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'new_product_management' );
+		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'new_product_management', 'chatgpt_integration', 'chatgpt_api_key' );
 
 		$this->init_features( $features );
 
@@ -592,6 +605,9 @@ class FeaturesController {
 			}
 
 			$feature_settings[] = $this->get_setting_for_feature( $id, $features[ $id ], $admin_features_disabled );
+			if ( 'chatgpt_api_key' === $id ) { // workaround since there's a bug in the code that makes this setting appear twice.
+				unset( $feature_settings['chatgpt_api_key'] );
+			}
 		}
 
 		$feature_settings[] = array(
@@ -724,7 +740,7 @@ class FeaturesController {
 		return array(
 			'title'    => $feature['name'],
 			'desc'     => $description,
-			'type'     => 'checkbox',
+			'type'     => isset( $feature['type'] ) ? $feature['type'] : 'checkbox',
 			'id'       => $this->feature_enable_option_name( $feature_id ),
 			'disabled' => $disabled && ! $this->force_allow_enabling_features,
 			'desc_tip' => $desc_tip,
