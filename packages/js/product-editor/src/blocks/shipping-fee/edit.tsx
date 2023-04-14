@@ -50,9 +50,7 @@ export function Edit( {
 }: BlockEditProps< ShippingFeeBlockAttributes > ) {
 	const { title } = attributes;
 
-	const blockProps = useBlockProps( {
-		className: 'wp-block-woocommerce-product-shipping-fee-fields',
-	} );
+	const blockProps = useBlockProps();
 
 	const [ option, setOption ] = useState< string >(
 		FREE_SHIPPING_OPTION_VALUE
