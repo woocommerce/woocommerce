@@ -7992,55 +7992,43 @@ table.bar_chart {
 	margin-bottom: 20px;
 
 	display: none;
+	grid-template-columns: 200px 400px auto;
 
-	span.woocommerce-beta-badge {
-		border-radius: 25px;
-		padding: 6px 15px;
-		background-color: #f5e6ab;
-		color: #614200;
-		font-weight: 500;
-		font-size: 11px;
-		line-height: 16px;
-		margin-left: 15px;
-		text-decoration: none;
+	label[for="woocommerce-product-description-gpt-about"] {
+		grid-column: 1 / 2;
+		grid-row: 1 / 2;
 	}
 
-	a.woocommerce-hide-gpt-integration {
-		font-weight: 500;
-		font-size: 12px;
-		line-height: 16px;
-		margin-left: 15px;
-		text-decoration: none;
+	#woocommerce-product-description-gpt-about {
+		grid-column: 2 / 3;
+		grid-row: 1 / 2;
 	}
-	.woocommerce-textarea-title {
-		font-weight: 500;
-		font-size: 14px;
-		line-height: 16px;
+
+	label[for="woocommerce-product-description-gpt-voice-tone"] {
+		grid-column: 1 / 2;
+		grid-row: 2 / 3;
+	}
+
+	#woocommerce-product-description-gpt-voice-tone {
+		grid-column: 2 / 3;
+		grid-row: 2 / 3;
+	}
+
+	#woocommerce-product-description-gpt-voice-tone-description {
+		grid-column: 2 / 3;
+		grid-row: 3 / 4;
+	}
+
+	.woocommerce-product-description-gpt-actions-container {
+		grid-column: 2 / 3;
+		grid-row: 4 / 5;
+	}
+
+	.woocommerce-product-description-gpt-hide-container {
+		grid-column: 3 / 4;
+		grid-row: 1 / 2;
+
 		display: flex;
-		align-items: center;
-		padding-bottom: 20px;
-	}
-	.woocommerce-gpt-textarea {
-		width: 400px;
-		height: 72px;
-		border: 1px solid #949494;
-		border-radius: 2px;
-	}
-	.woocommerce-action-buttons-title {
-		font-style: normal;
-		font-weight: 500;
-		font-size: 14px;
-		line-height: 16px;
-		display: flex;
-		align-items: center;
-		padding: 20px 0;
-	}
-	.woocommerce-actions {
-		.woocommerce-action-description {
-			font-size: 11px;
-			display: flex;
-			color: #757575;
-			padding: 10px 0 20px;
-		}
+		flex-direction: row-reverse;
 	}
 }
