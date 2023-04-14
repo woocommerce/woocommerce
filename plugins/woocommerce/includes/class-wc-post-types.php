@@ -605,6 +605,73 @@ class WC_Post_Types {
 										array(
 											'woocommerce/product-track-inventory-fields',
 										),
+										array(
+											'woocommerce/collapsible',
+											array(
+												'toggleText'       => __( 'Advanced', 'woocommerce' ),
+												'initialCollapsed' => true,
+												'persistRender'    => true,
+											),
+											array(
+												array(
+													'woocommerce/conditional',
+													array(
+														'mustMatch' => array(
+															'manage_stock' => array( true ),
+														),
+													),
+													array(
+														array(
+															'woocommerce/product-radio',
+															array(
+																'title'    => __( 'When out of stock', 'woocommerce' ),
+																'property' => 'backorders',
+																'options'  => array(
+																	array(
+																		'label' => __( 'Allow purchases', 'woocommerce' ),
+																		'value' => 'yes',
+																	),
+																	array(
+																		'label' => __(
+																			'Allow purchases, but notify customers',
+																			'woocommerce'
+																		),
+																		'value' => 'notify',
+																	),
+																	array(
+																		'label' => __( "Don't allow purchases", 'woocommerce' ),
+																		'value' => 'no',
+																	),
+																),
+															),
+														),
+														array(
+															'woocommerce/product-inventory-email',
+														),
+													),
+												),
+												array(
+													'woocommerce/product-checkbox',
+													array(
+														'title'    => __(
+															'Restrictions',
+															'woocommerce'
+														),
+														'label'    => __(
+															'Limit purchases to 1 item per order',
+															'woocommerce'
+														),
+														'property' => 'sold_individually',
+														'tooltip' => __(
+															'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
+															'woocommerce'
+														),
+													),
+												),
+
+											),
+										),
+
 									),
 								),
 							),
