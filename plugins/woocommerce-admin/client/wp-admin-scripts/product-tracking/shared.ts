@@ -443,7 +443,7 @@ const attachProductAttributesTracks = () => {
 				) as HTMLInputElement;
 
 				recordEvent( 'product_attributes_buttons', {
-					action: 'used_for_variations',
+					action: 'visible_on_product_page',
 					checked: visibleOnProductPage?.checked,
 				} );
 			},
