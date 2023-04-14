@@ -35,6 +35,8 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
+		add_action( 'media_buttons', array( $this, 'add_gpt_button' ), 40 );
+		add_filter( 'the_editor', array( $this, 'add_gpt_form' ), 10, 1 );
 
 		if ( apply_filters( 'woocommerce_show_addons_page', true ) ) {
 			add_action( 'admin_menu', array( $this, 'addons_menu' ), 70 );
@@ -437,6 +439,78 @@ class WC_Admin_Menus {
 				// phps:enableWordPress.Variables.GlobalVariables.OverrideProhibited
 			}
 		}
+	}
+
+	/**
+	 * Add gpt button to the editor.
+	 */
+	public function add_gpt_button() {
+		if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'edit_pages' ) ) {
+			return;
+		}
+
+		echo '<button class="button wp-media-button" type="button">' . esc_html__( 'Write it for me', 'woocommerce' ) . '</button>';
+
+	}
+
+	/**
+	 * Add gpt form to the editor.
+	 */
+	public function add_gpt_form( $content ) {
+		global $post;
+
+		// Check if the current post type is 'product'
+		if ('product' === $post->post_type) {
+
+			// Check if the content contains the specific editor ID
+			$editor_container_id       = 'wp-content-editor-container';
+			$editor_container_position = strpos( $content, $editor_container_id );
+
+			if ( $editor_container_position !== false ) {
+				$gpt_form =
+					'<div class="woocommerce-gpt-integration">' .
+						'<div class="woocommerce-gpt-integration__title">' .
+							'<h3>' .
+								esc_html__( 'Write a description', 'woocommerce' ) .
+								'<span class="woocommerce-beta-badge">BETA</span>' .
+								'<a class="woocommerce-hide-gpt-integration" href="#">hide</a>' .
+							'</h3>' .
+						'</div>' .
+						'<span class="woocommerce-textarea-title">' .
+							esc_html__( 'ABOUT YOUR PRODUCT', 'woocommerce' ) .
+						'</span>' .
+						'<textarea class="woocommerce-gpt-textarea" placeholder="' . esc_html__( 'e.g. organic and sustainable skin cleanser for women', 'woocommerce' ) . '"></textarea>' .
+						'<div class="woocommerce-actions">' .
+							'<span class="woocommerce-action-buttons-title">' .
+								esc_html__( 'TONE OF VOICE', 'woocommerce' ) .
+							'</span>' .
+							'<div class="woocommerce-action-buttons">' .
+								'<button class="woocommerce-gpt-action-casual active" type="button">' .
+									esc_html__( 'Casual', 'woocommerce' ) .
+								'</button>' .
+								'<button class="woocommerce-gpt-action-formal" type="button">' .
+									esc_html__( 'Formal', 'woocommerce' ) .
+								'</button>' .
+								'<button class="woocommerce-gpt-action-flowery" type="button">' .
+									esc_html__( 'Flowery', 'woocommerce' ) .
+								'</button>' .
+								'<button class="woocommerce-gpt-action-convincing" type="button">' .
+									esc_html__( 'Convincing', 'woocommerce' ) .
+								'</button>' .
+							'</div>' .
+							'<span class="woocommerce-action-description">' .
+								esc_html__( 'Relaxed, informal, conversational tone. Like chatting with a friend.', 'woocommerce' ) .
+							'</span>' .
+						'</div>' .
+						'<button class="button button-primary woocommerce-gpt-action-accept" type="button">' .
+							esc_html__( 'Accept', 'woocommerce' ) .
+						'</button>' .
+					'</div>';
+				$content = $gpt_form . $content;
+			}
+		}
+
+		return $content;
 	}
 }
 
