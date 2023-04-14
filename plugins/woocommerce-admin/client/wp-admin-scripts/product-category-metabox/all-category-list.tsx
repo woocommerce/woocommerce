@@ -55,6 +55,19 @@ function convertTreeToLabelValue(
 			convertTreeToLabelValue( child.children, newItem.children );
 		}
 	}
+	newTree.sort(
+		( a: CategoryTreeItemLabelValue, b: CategoryTreeItemLabelValue ) => {
+			const nameA = a.label.toUpperCase();
+			const nameB = b.label.toUpperCase();
+			if ( nameA < nameB ) {
+				return -1;
+			}
+			if ( nameA > nameB ) {
+				return 1;
+			}
+			return 0;
+		}
+	);
 	return newTree;
 }
 
@@ -154,6 +167,7 @@ export const AllCategoryList = forwardRef<
 					placeholder={ __( 'Add category', 'woocommerce' ) }
 					includeParent={ true }
 					minFilterQueryLength={ 2 }
+					clearOnSelect={ false }
 					individuallySelectParent={ true }
 				/>
 			</div>

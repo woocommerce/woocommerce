@@ -73,6 +73,7 @@ import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
  * @param {(visible: boolean) => void} [props.onDropdownVisibilityChange] Callback when the visibility of the dropdown options is changed.
  * @param {Function}                   [props.onInputChange]              Callback when the selector changes
  * @param {number}                     [props.minFilterQueryLength]       Minimum input length to filter results by.
+ * @param {boolean}                    [props.clearOnSelect]              Clear input on select (default: true).
  * @return {JSX.Element} The component
  */
 const TreeSelectControl = ( {
@@ -93,6 +94,7 @@ const TreeSelectControl = ( {
 	individuallySelectParent = false,
 	alwaysShowPlaceholder = false,
 	minFilterQueryLength = 3,
+	clearOnSelect = true,
 } ) => {
 	let instanceId = useInstanceId( TreeSelectControl );
 	instanceId = id ?? instanceId;
@@ -459,10 +461,12 @@ const TreeSelectControl = ( {
 			handleSingleChange( checked, option, parent );
 		}
 
-		onInputChange( '' );
-		setInputControlValue( '' );
-		if ( ! nodesExpanded.includes( option.parent ) ) {
-			controlRef.current.focus();
+		if ( clearOnSelect ) {
+			onInputChange( '' );
+			setInputControlValue( '' );
+			if ( ! nodesExpanded.includes( option.parent ) ) {
+				controlRef.current.focus();
+			}
 		}
 	};
 

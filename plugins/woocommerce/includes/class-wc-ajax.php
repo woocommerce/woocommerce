@@ -1819,7 +1819,7 @@ class WC_AJAX {
 
 		$args = array(
 			'taxonomy'   => array( 'product_cat' ),
-			'orderby'    => 'id',
+			'orderby'    => 'name',
 			'order'      => 'ASC',
 			'hide_empty' => false,
 			'fields'     => 'all',

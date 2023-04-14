@@ -1,8 +1,8 @@
 <?php
 /**
- * Product Images
+ * Product Categories meta box
  *
- * Display the product images meta box.
+ * Display the product categories meta box.
  *
  * @package     WooCommerce\Admin\Meta Boxes
  * @version     7.5.0
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Product_Images Class.
+ * WC_Meta_Box_Product_Categories Class.
  */
 class WC_Meta_Box_Product_Categories {
 
