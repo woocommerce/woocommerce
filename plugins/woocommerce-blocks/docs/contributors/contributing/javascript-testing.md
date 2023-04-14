@@ -4,8 +4,9 @@
 
 - [How to run JavaScript unit tests](#how-to-run-javascript-unit-tests)
 - [How to run end-to-end tests](#how-to-run-end-to-end-tests)
+    - [Debugging e2e tests using generated reports](#debugging-e2e-tests-using-generated-reports)
     - [Modify the local environment used by end-to-end tests](#modify-the-local-environment-used-by-end-to-end-tests)
-    - [How to update end-to-end tests suites](#how-to-update-end-to-end-tests-suites)
+    - [WordPress versions and end-to-end tests suites](#wordpress-versions-and-end-to-end-tests-suites)
 
 Tests for JavaScript in the Blocks plugin are powered by [Jest](https://jestjs.io/). The Blocks plugin follows the same patterns as Gutenberg, therefore for instructions on writing tests you can [refer to this page in the Gutenberg Handbook](https://developer.wordpress.org/block-editor/contributors/develop/testing-overview/).
 
@@ -59,6 +60,24 @@ When you're done, you may want to shut down the test environment:
 
 **Note:** There are a number of other useful `wp-env` commands. You can find out more in the [wp-env docs](https://github.com/WordPress/gutenberg/blob/master/packages/env/README.md).
 
+### Debugging e2e tests using generated reports
+
+When e2e test suites are run in a GitHub automation, a report is generated automatically for every suite that failed. This can be a useful tool to debug failing tests, as it provides a visual way to inspect the tests that failed and, additionally, it includes some screenshots.
+
+To access the reports, you should go to the _Details_ of a failed e2e test suite:
+
+<img src="https://user-images.githubusercontent.com/3616980/231486295-26b1d8fd-2420-4890-b143-a249cc990d20.png" alt="PR showing a failing test suite and the cursor over the Details button of that suite" width="780" />
+
+From there, you can open the _Summary_ of the e2e test jobs:
+
+<img src="https://user-images.githubusercontent.com/3616980/231486308-8f85779b-8ede-440d-a250-6ff612d6ea20.png" alt="Log of an e2e test suite that failed, highlighting the Summary button" width="780" />
+
+From the _Summmary_ page, if you scroll down, you can download the report of each test suite that failed:
+
+<img src="https://user-images.githubusercontent.com/3616980/231486320-c52a0e10-c80e-4d3a-ae0f-b3998013f528.png" alt="Report summary showing the Artifacts list, including the e2e reports" width="780" />
+
+That will download a ZIP that you can open in your browser locally.
+
 ### Modify the local environment used by end-to-end tests
 
 To modify the environment used by tests locally, you will need to modify `.wp-env.json`. For example, you can set a specific WP version and install the latest Gutenberg version with these two lines:
@@ -79,60 +98,11 @@ To modify the environment used by tests locally, you will need to modify `.wp-en
 
 You will need to stop `wp-env` and start it again. In some cases, you will also need to clean the database: `npm run wp-env clean all`.
 
-### How to update end-to-end tests suites
+### WordPress versions and end-to-end tests suites
 
-We follow the same WordPress support policy as WooCommerce, this means we need to support the latest version, and the two previous ones (L-2).
+Currently, we only run e2e tests with the most recent version of WordPress. We also have the infrastructure in place to run e2e tests with the most recent version of WordPress with Gutenberg installed, but [it's currently disabled](https://github.com/woocommerce/woocommerce-blocks/blob/07605450ffa4e460543980b7011b3bf8a8e82ff4/.github/workflows/php-js-e2e-tests.yml#L10).
 
-For that, we run end-to-end tests against all of those versions, and because we use packages published by Gutenberg, we also run tests against the latest version of Gutenberg plugin.
-
-When a new version of WordPress is released, we drop support for the oldest version we have, so if the latest version is 5.6, we would test against:
-
--   WordPress 5.4
--   WordPress 5.5
--   WordPress 5.6
--   WordPress 5.6 + Gutenberg
-
-When 5.7 is released, we would drop support for 5.4, and update our `./.github/workflows/php-js-e2e-tests.yml` file.
-
-You need to bump the test version, so
-
-```yml
-  JSE2ETestsWP54:
-    name: JavaScipt E2E Tests (WP 5.4)
-      ...
-      - name: E2E Tests (WP 5.4)
-        env:
-          WOOCOMMERCE_BLOCKS_PHASE: 3
-          WP_VERSION: 5.4-branch
-        run: |
-          JSON='{"core": "WordPress/WordPress#'"$WP_VERSION"'"}'
-          echo $JSON > .wp-env.override.json
-          npm run wp-env start
-          npm run wp-env clean all
-          npm run test:e2e
-```
-
-Would become
-
-```yml
-  JSE2ETestsWP55:
-    name: JavaScipt E2E Tests (WP 5.5)
-      ...
-      - name: E2E Tests (WP 5.5)
-        env:
-          WOOCOMMERCE_BLOCKS_PHASE: 3
-          WP_VERSION: 5.5-branch
-        run: |
-          JSON='{"core": "WordPress/WordPress#'"$WP_VERSION"'"}'
-          echo $JSON > .wp-env.override.json
-          npm run wp-env start
-          npm run wp-env clean all
-          npm run test:e2e
-```
-
-You also need to check any existing tests that checks the WP version.
-
-In `./tests/e2e/specs`, verify for conditions like `if ( process.env.WP_VERSION < 5.4 )` and remove them if they're not relevant anymore.
+When preparing for a new version of WordPress, it's a good practice to search for conditions in our tests that check for specific WP versions (with the variable `WP_VERSION`) or that check whether Gutenberg is installed (with the variable `GUTENBERG_EDITOR_CONTEXT`).
 
 <!-- FEEDBACK -->
 
