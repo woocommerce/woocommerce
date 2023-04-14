@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Delete shipping zone count transient on woocommerce_shipping_zone_method_added and woocommerce_after_shipping_zone_object_save

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add method delete_meta_data_value to WC_Data objects

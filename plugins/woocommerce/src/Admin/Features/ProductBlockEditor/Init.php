@@ -24,6 +24,11 @@ class Init {
 	const TOGGLE_OPTION_NAME = 'woocommerce_' . self::FEATURE_ID . '_enabled';
 
 	/**
+	 * The context name used to identify the editor.
+	 */
+	const EDITOR_CONTEXT_NAME = 'woocommerce/edit-product';
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -33,9 +38,8 @@ class Init {
 		}
 		if ( Features::is_enabled( self::FEATURE_ID ) ) {
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_rest_base_config' ) );
 			$block_registry = new BlockRegistry();
-			$block_registry->register_product_blocks();
+			$block_registry->init();
 		}
 	}
 
@@ -47,7 +51,7 @@ class Init {
 			return;
 		}
 		$post_type_object     = get_post_type_object( 'product' );
-		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => 'core/edit-post' ) );
+		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
 
 		$editor_settings = array();
 		if ( ! empty( $post_type_object->template ) ) {
@@ -63,6 +67,11 @@ class Init {
 		wp_add_inline_script(
 			$script_handle,
 			'var productBlockEditorSettings = productBlockEditorSettings || ' . wp_json_encode( $editor_settings ) . ';',
+			'before'
+		);
+		wp_add_inline_script(
+			$script_handle,
+			sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( $editor_settings['blockCategories'] ) ),
 			'before'
 		);
 	}
@@ -106,15 +115,4 @@ class Init {
 		return $link;
 	}
 
-	/**
-	 * Updates the product endpoint to use WooCommerce REST API.
-	 *
-	 * @param array $post_args Args for the product post type.
-	 * @return array
-	 */
-	public function add_rest_base_config( $post_args ) {
-		$post_args['rest_base']      = 'products';
-		$post_args['rest_namespace'] = 'wc/v3';
-		return $post_args;
-	}
 }
