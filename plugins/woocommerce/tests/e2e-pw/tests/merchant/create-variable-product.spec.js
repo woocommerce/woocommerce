@@ -38,9 +38,8 @@ async function deleteProductsAddedByTests( baseURL ) {
 	const ids = varProducts
 		.map( ( { id } ) => id )
 		.concat( manualProducts.map( ( { id } ) => id ) )
-		.push( fixedVariableProductId ); // mytodo why not being deleted?
+		.concat( [ fixedVariableProductId ] );
 
-	console.log( `ids to delete: ${ ids }` ); // mytodo delete
 	await api.post( 'products/batch', { delete: ids } );
 }
 
@@ -492,26 +491,23 @@ test.describe( 'Add New Variable Product Page', () => {
 				}
 			);
 
-			await test.step(
-				'Set the weight and dimensions.',
-				async () => {
-					await thirdVariation
-						.getByRole( 'textbox', { name: 'Weight' } )
-						.type( productWeight );
+			await test.step( 'Set the weight and dimensions.', async () => {
+				await thirdVariation
+					.getByRole( 'textbox', { name: 'Weight' } )
+					.type( productWeight );
 
-					await thirdVariation
-						.getByRole( 'textbox', { name: 'Length' } )
-						.type( productLength );
+				await thirdVariation
+					.getByRole( 'textbox', { name: 'Length' } )
+					.type( productLength );
 
-					await thirdVariation
-						.getByRole( 'textbox', { name: 'Width' } )
-						.type( productWidth );
+				await thirdVariation
+					.getByRole( 'textbox', { name: 'Width' } )
+					.type( productWidth );
 
-					await thirdVariation
-						.getByRole( 'textbox', { name: 'Height' } )
-						.type( productHeight );
-				}
-			);
+				await thirdVariation
+					.getByRole( 'textbox', { name: 'Height' } )
+					.type( productHeight );
+			} );
 		} );
 
 		await test.step( 'Click "Save changes".', async () => {
