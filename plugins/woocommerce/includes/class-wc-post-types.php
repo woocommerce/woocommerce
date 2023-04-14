@@ -124,6 +124,7 @@ class WC_Post_Types {
 						'hierarchical' => true,
 					),
 					'meta_box_cb'           => 'WC_Meta_Box_Product_Categories::output',
+					'meta_box_sanitize_cb'  => 'taxonomy_meta_box_sanitize_cb_checkboxes',
 				)
 			)
 		);
