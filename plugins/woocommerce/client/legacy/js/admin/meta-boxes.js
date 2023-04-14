@@ -187,4 +187,5 @@ jQuery( function ( $ ) {
 		'input, textarea',
 		jQuery.maybe_disable_save_button
 	);
+
 } );

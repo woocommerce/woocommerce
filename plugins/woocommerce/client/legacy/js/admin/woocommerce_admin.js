@@ -606,6 +606,30 @@
 			}
 		);
 
+		$( '.woocommerce-gpt-action-accept' ).on( 'click', function () {
+			$.ajax( {
+				url: woocommerce_admin_meta_boxes.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'woocommerce_generate_product_description',
+					product_description: $( '.woocommerce-gpt-textarea' ).val(),
+					tone: 'casual', // TODO fetch this from the selected option
+				},
+				success: function ( response ) {
+					if ( tinyMCE.activeEditor ) {
+						tinyMCE.activeEditor.setContent( response );
+					} else {
+						$( '#wp-content-editor-container .wp-editor-area' ).val(
+							response
+						);
+					}
+				},
+				error: function ( err ) {
+					console.log( err );
+				},
+			} );
+		} );
+
 		$( '#wpbody' ).on( 'click', '#doaction, #doaction2', function () {
 			var action = $( this ).is( '#doaction' )
 				? $( '#bulk-action-selector-top' ).val()
