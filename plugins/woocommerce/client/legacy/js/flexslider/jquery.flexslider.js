@@ -720,8 +720,8 @@
             });
           }
         } else { // FADE:
-            slider.slides.eq(slider.currentSlide).css({ "opacity": 0, "zIndex": 1 });
-            slider.slides.eq(target).css({ "opacity": 1, "zIndex": 2 });
+          slider.slides.eq(slider.currentSlide).css({ "opacity": 0, "zIndex": 1 });
+          slider.slides.eq(target).css({ "opacity": 1, "zIndex": 2 });
 
           if (!touch) {
             // Unbind previous transitionEnd events and re-bind new transitionEnd event
