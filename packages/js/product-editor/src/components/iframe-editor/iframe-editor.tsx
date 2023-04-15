@@ -2,26 +2,22 @@
  * External dependencies
  */
 import { BlockInstance } from '@wordpress/blocks';
-import { useDispatch } from '@wordpress/data';
-import { createElement, useState } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import { useResizeObserver } from '@wordpress/compose';
 import {
+	BlockEditorProvider,
 	BlockList,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	BlockTools,
 	BlockEditorKeyboardShortcuts,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	privateApis as blockEditorPrivateApis,
+	EditorSettings,
+	EditorBlockListSettings,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-// eslint-disable-next-line @woocommerce/dependency-group
-import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
 
 /**
  * Internal dependencies
@@ -29,24 +25,37 @@ import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/pri
 import { EditorCanvas } from './editor-canvas';
 import { ResizableEditor } from './resizable-editor';
 
-const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
-	'I know using unstable features means my plugin or theme will inevitably break on the next WordPress release.',
-	'@wordpress/block-editor'
-);
+type IframeEditorProps = {
+	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
+};
 
-const { ExperimentalBlockEditorProvider } = unlock( blockEditorPrivateApis );
-
-export function IframeEditor() {
+export function IframeEditor( { settings }: IframeEditorProps ) {
 	const [ resizeObserver, sizes ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( [] );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
-	const { clearSelectedBlock } = useDispatch( blockEditorStore );
+	const { clearSelectedBlock, updateSettings } =
+		useDispatch( blockEditorStore );
+
+	const parentEditorSettings = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		return select( blockEditorStore ).getSettings();
+	}, [] );
+
+	useEffect( () => {
+		// Manually update the settings so that __unstableResolvedAssets gets added to the data store.
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		updateSettings( productBlockEditorSettings );
+	}, [] );
+
 	return (
-		<ExperimentalBlockEditorProvider
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			settings={ productBlockEditorSettings }
+		<BlockEditorProvider
+			settings={ {
+				...( settings || parentEditorSettings ),
+				templateLock: false,
+			} }
 			value={ blocks }
 			onChange={ setBlocks }
 			useSubRegistry={ true }
@@ -77,6 +86,6 @@ export function IframeEditor() {
 					</EditorCanvas>
 				</ResizableEditor>
 			</BlockTools>
-		</ExperimentalBlockEditorProvider>
+		</BlockEditorProvider>
 	);
 }
