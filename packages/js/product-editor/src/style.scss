@@ -1,6 +1,7 @@
 @import 'blocks/schedule-sale/editor.scss';
 @import 'blocks/track-inventory/editor.scss';
 @import 'blocks/shipping-dimensions/editor.scss';
+@import 'blocks/shipping-fee/editor.scss';
 @import 'components/editor/style.scss';
 @import 'components/product-section-layout/style.scss';
 @import 'components/edit-product-link-modal/style.scss';
@@ -9,8 +10,8 @@
 @import 'components/header/style.scss';
 @import 'components/images/editor.scss';
 @import 'components/block-editor/style.scss';
-@import 'components/radio/editor.scss';
 @import 'blocks/checkbox/editor.scss';
+@import 'components/radio-field/style.scss';
 @import 'components/section/editor.scss';
 @import 'components/tab/editor.scss';
 @import 'components/tabs/style.scss';

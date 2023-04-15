@@ -14,7 +14,7 @@ import {
  */
 import { init as initImages } from '../images';
 import { init as initName } from '../details-name-block';
-import { init as initRadio } from '../radio';
+import { init as initRadio } from '../../blocks/radio';
 import { init as initSummary } from '../details-summary-block';
 import { init as initSection } from '../section';
 import { init as initTab } from '../tab';
@@ -27,6 +27,7 @@ import { init as initConditional } from '../../blocks/conditional';
 import { init as initLowStockQty } from '../../blocks/inventory-email';
 import { init as initCheckbox } from '../../blocks/checkbox';
 import { init as initShippingDimensions } from '../../blocks/shipping-dimensions';
+import { init as initShippingFee } from '../../blocks/shipping-fee';
 
 export const initBlocks = () => {
 	const coreBlocks = __experimentalGetCoreBlocks();
@@ -52,4 +53,5 @@ export const initBlocks = () => {
 	initLowStockQty();
 	initCheckbox();
 	initShippingDimensions();
+	initShippingFee();
 };

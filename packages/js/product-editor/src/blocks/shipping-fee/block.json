@@ -1,22 +1,16 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/product-section",
-	"title": "Product section",
+	"name": "woocommerce/product-shipping-fee-fields",
+	"title": "Product shipping fee fields",
 	"category": "woocommerce",
-	"description": "The product section.",
-	"keywords": [ "products", "section", "group" ],
+	"description": "The product shipping fee fields.",
+	"keywords": [ "products", "shipping", "fee" ],
 	"textdomain": "default",
 	"attributes": {
 		"title": {
-			"type": "string"
-		},
-		"description": {
 			"type": "string",
 			"__experimentalRole": "content"
-		},
-		"icon": {
-			"type": "object"
 		}
 	},
 	"supports": {

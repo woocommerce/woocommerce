@@ -34,6 +34,5 @@
 		"inserter": false,
 		"lock": false,
 		"__experimentalToolbar": false
-	},
-	"editorStyle": "file:./editor.css"
+	}
 }
