@@ -29,7 +29,6 @@ export function EditorCanvas( {
 		<Iframe
 			head={
 				<>
-					<EditorStyles />
 					<style>
 						{
 							// Forming a "block formatting context" to prevent margin collapsing.
