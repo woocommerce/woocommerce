@@ -8054,5 +8054,17 @@ table.bar_chart {
 		grid-row: 1 / 2;
 
 		justify-self: right;
+		align-self: start;
+
+		text-decoration: none;
+
+		&::before {
+			content: "\f335";
+
+			font-family: "dashicons";
+			font-size: 1.5em;
+
+			color: #1E1E1E;
+		}
 	}
 }

@@ -490,7 +490,9 @@ class WC_Admin_Menus {
 						'<button id="woocommerce-product-description-gpt-action-accept" class="button button-primary" type="button">' .
 							esc_html__( 'Write description', 'woocommerce' ) .
 						'</button>' .
-						'<a id="woocommerce-product-description-gpt-hide" href="#">X</a>' .
+						'<a id="woocommerce-product-description-gpt-hide" href="#" title="' .
+							esc_html__( 'Hide', 'woocommerce' ) .
+						'"></a>' .
 					'</div>';
 				$content = $gpt_form . $content;
 			}
