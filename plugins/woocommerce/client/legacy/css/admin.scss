@@ -8027,41 +8027,13 @@ table.bar_chart {
 		}
 	}
 
-	.woocommerce-help-tip {
-		//position: absolute;
-	}
-
-	label[for="woocommerce-product-description-gpt-about"] {
+	label {
 		grid-column: 1;
-		grid-row: 2;
 	}
 
-	#woocommerce-product-description-gpt-about-wrapper {
-		grid-column: 2;
-		grid-row: 2;
-	}
-
-	label[for="woocommerce-product-description-gpt-voice-tone"] {
-		grid-column: 1;
-		grid-row: 3;
-	}
-
-	#woocommerce-product-description-gpt-voice-tone-wrapper {
-		grid-column: 2;
-		grid-row: 3;
-	}
-
-	#woocommerce-product-description-gpt-voice-tone-description {
-		margin: 12px 0 0;
-
-		color: #2C3338;
-	}
-
+	.field,
 	#woocommerce-product-description-gpt-action-accept {
 		grid-column: 2;
-		grid-row: 4;
-
-		justify-self: left;
 	}
 
 	#woocommerce-product-description-gpt-hide {
@@ -8080,5 +8052,27 @@ table.bar_chart {
 
 			color: #1D2327;
 		}
+	}
+
+	label[for="woocommerce-product-description-gpt-about"],
+	#woocommerce-product-description-gpt-about-wrapper {
+		grid-row: 2;
+	}
+
+	label[for="woocommerce-product-description-gpt-voice-tone"],
+	#woocommerce-product-description-gpt-voice-tone-wrapper {
+		grid-row: 3;
+	}
+
+	#woocommerce-product-description-gpt-voice-tone-description {
+		margin: 12px 0 0;
+
+		color: #2C3338;
+	}
+
+	#woocommerce-product-description-gpt-action-accept {
+		grid-row: 4;
+
+		justify-self: left;
 	}
 }
