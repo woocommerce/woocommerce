@@ -8033,22 +8033,22 @@ table.bar_chart {
 
 	label[for="woocommerce-product-description-gpt-about"] {
 		grid-column: 1;
-		grid-row: 1;
+		grid-row: 2;
 	}
 
 	#woocommerce-product-description-gpt-about-wrapper {
 		grid-column: 2;
-		grid-row: 1;
+		grid-row: 2;
 	}
 
 	label[for="woocommerce-product-description-gpt-voice-tone"] {
 		grid-column: 1;
-		grid-row: 2;
+		grid-row: 3;
 	}
 
 	#woocommerce-product-description-gpt-voice-tone-wrapper {
 		grid-column: 2;
-		grid-row: 2;
+		grid-row: 3;
 	}
 
 	#woocommerce-product-description-gpt-voice-tone-description {
@@ -8059,7 +8059,7 @@ table.bar_chart {
 
 	#woocommerce-product-description-gpt-action-accept {
 		grid-column: 2;
-		grid-row: 3;
+		grid-row: 4;
 
 		justify-self: left;
 	}
