@@ -476,6 +476,7 @@ class WC_Admin_Menus {
 						'<label for="woocommerce-product-description-gpt-voice-tone">' .
 							esc_html__( 'Tone of voice', 'woocommerce' ) .
 						'</label>' .
+						'<div id="woocommerce-product-description-gpt-voice-tone-wrapper" class="select-wrapper">'.
 						'<select id="woocommerce-product-description-gpt-voice-tone" aria-describedby="woocommerce-product-description-gpt-voice-tone-description">' .
 							'<option value="casual">' . esc_html__( 'Casual', 'woocommerce' ) . '</option>' .
 							'<option value="formal">' . esc_html__( 'Formal', 'woocommerce' ) . '</option>' .
@@ -485,14 +486,11 @@ class WC_Admin_Menus {
 						'<p id="woocommerce-product-description-gpt-voice-tone-description">' .
 							esc_html__( 'Relaxed, informal, conversational tone. Like chatting with a friend.', 'woocommerce' ) .
 						'</p>' .
-						'<div class="woocommerce-product-description-gpt-actions-container">' .
-							'<button class="button button-primary woocommerce-gpt-action-accept" type="button">' .
-								esc_html__( 'Write description', 'woocommerce' ) .
-							'</button>' .
 						'</div>' .
-						'<div class="woocommerce-product-description-gpt-hide-container">' .
-							'<a id="woocommerce-product-description-gpt-hide" href="#">X</a>' .
-						'</div>' .
+						'<button id="woocommerce-product-description-gpt-action-accept" class="button button-primary" type="button">' .
+							esc_html__( 'Write description', 'woocommerce' ) .
+						'</button>' .
+						'<a id="woocommerce-product-description-gpt-hide" href="#">X</a>' .
 					'</div>';
 				$content = $gpt_form . $content;
 			}
