@@ -7992,7 +7992,7 @@ table.bar_chart {
 	display: none;
 
 	// leave room in the 2nd column for tooltips
-	grid-template-columns: 180px minmax( calc(400px + 25px), 2000px ) auto;
+	grid-template-columns: 180px minmax( calc(100% - 24px - 180px - 24px - 21px), 2000px ) auto;
 	justify-content: stretch;
 	gap: 24px;
 
@@ -8014,7 +8014,7 @@ table.bar_chart {
 
 	.select-wrapper {
 		select {
-			width: calc(100% - 25px);
+			width: 50%;
 			max-width: 500px;
 		}
 	}
@@ -8032,7 +8032,6 @@ table.bar_chart {
 		grid-column: 1;
 	}
 
-	.field,
 	#woocommerce-product-description-gpt-action-accept {
 		grid-column: 2;
 	}
@@ -8075,5 +8074,42 @@ table.bar_chart {
 		grid-row: 4;
 
 		justify-self: left;
+	}
+
+	@media only screen and (max-width: 1200px) {
+		grid-template-columns: calc(100% - 24px - 21px) auto;
+
+		.select-wrapper {
+			select {
+				width: calc(100% - 25px);
+				max-width: calc(100% - 25px);
+			}
+		}
+
+		#woocommerce-product-description-gpt-hide {
+			grid-column: 2;
+			grid-row: 1;
+		}
+
+		label[for="woocommerce-product-description-gpt-about"] {
+			grid-row: 2;
+		}
+
+		#woocommerce-product-description-gpt-about-wrapper {
+			grid-row: 3;
+		}
+
+		label[for="woocommerce-product-description-gpt-voice-tone"] {
+			grid-row: 4;
+		}
+
+		#woocommerce-product-description-gpt-voice-tone-wrapper {
+			grid-row: 5;
+		}
+
+		#woocommerce-product-description-gpt-action-accept {
+			grid-column: 1;
+			grid-row: 6;
+		}
 	}
 }
