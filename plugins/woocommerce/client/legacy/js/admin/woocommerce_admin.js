@@ -39,7 +39,9 @@
 		}
 
 		// Hook up "write it for me" button
-		$( '.wc-write-it-for-me' ).on( 'click', function () {
+		$(
+			'.wc-write-it-for-me, #woocommerce-product-description-gpt-hide'
+		).on( 'click', function () {
 			const gptForm = $( '.woocommerce-gpt-integration' );
 
 			if ( gptForm.is( ':visible' ) ) {
