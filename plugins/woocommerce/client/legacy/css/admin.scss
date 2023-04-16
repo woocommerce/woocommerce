@@ -8056,6 +8056,9 @@ table.bar_chart {
 		&::before {
 			content: "\f335";
 
+			position: relative;
+			left: 2px;
+
 			font-family: "dashicons";
 			font-size: 1.5em;
 
@@ -8071,6 +8074,11 @@ table.bar_chart {
 	label[for="woocommerce-product-description-gpt-voice-tone"],
 	#woocommerce-product-description-gpt-voice-tone-wrapper {
 		grid-row: 3;
+	}
+
+	#woocommerce-product-description-gpt-about-wrapper,
+	#woocommerce-product-description-gpt-voice-tone-wrapper {
+		grid-column: span 2;
 	}
 
 	#woocommerce-product-description-gpt-voice-tone-description {
