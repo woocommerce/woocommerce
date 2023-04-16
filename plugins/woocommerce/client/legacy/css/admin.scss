@@ -7991,7 +7991,8 @@ table.bar_chart {
 .woocommerce-gpt-integration {
 	display: none;
 
-	grid-template-columns: 200px 400px auto;
+	// leave room in the 2nd column for tooltips
+	grid-template-columns: 180px calc( 400px + 25px ) auto;
 	gap: 24px;
 
 	margin: 20px 0;
@@ -8000,7 +8001,7 @@ table.bar_chart {
 	background: #F6F7F7;
 	border: 1px solid #C3C4C7;
 
-	label, textarea, .select-wrapper {
+	label, a, .select-wrapper, .textarea-wrapper {
 		align-self: baseline;
 	}
 
@@ -8016,16 +8017,27 @@ table.bar_chart {
 		}
 	}
 
+	.textarea-wrapper {
+		display: flex;
+
+		textarea {
+			width: 100%;
+			height: 72px;
+		}
+	}
+
+	.woocommerce-help-tip {
+		//position: absolute;
+	}
+
 	label[for="woocommerce-product-description-gpt-about"] {
 		grid-column: 1 / 2;
 		grid-row: 1 / 2;
 	}
 
-	#woocommerce-product-description-gpt-about {
+	#woocommerce-product-description-gpt-about-wrapper {
 		grid-column: 2 / 3;
 		grid-row: 1 / 2;
-
-		height: 72px;
 	}
 
 	label[for="woocommerce-product-description-gpt-voice-tone"] {
@@ -8056,7 +8068,6 @@ table.bar_chart {
 		grid-row: 1 / 2;
 
 		justify-self: right;
-		align-self: start;
 
 		text-decoration: none;
 
@@ -8066,7 +8077,7 @@ table.bar_chart {
 			font-family: "dashicons";
 			font-size: 1.5em;
 
-			color: #1E1E1E;
+			color: #1D2327;
 		}
 	}
 }

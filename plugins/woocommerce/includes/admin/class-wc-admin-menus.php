@@ -472,7 +472,9 @@ class WC_Admin_Menus {
 						'<label for="woocommerce-product-description-gpt-about">' .
 							esc_html__( 'About your product', 'woocommerce' ) .
 						'</label>' .
-						'<textarea id="woocommerce-product-description-gpt-about" placeholder="' . esc_html__( 'e.g. organic and sustainable skin cleanser for women', 'woocommerce' ) . '"></textarea>' .
+						'<div id="woocommerce-product-description-gpt-about-wrapper" class="textarea-wrapper">' .
+							'<textarea id="woocommerce-product-description-gpt-about" placeholder="' . esc_html__( 'e.g. organic and sustainable skin cleanser for women', 'woocommerce' ) . '"></textarea>' .
+						'</div>' .
 						'<label for="woocommerce-product-description-gpt-voice-tone">' .
 							esc_html__( 'Tone of voice', 'woocommerce' ) .
 						'</label>' .
