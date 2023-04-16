@@ -8002,6 +8002,14 @@ table.bar_chart {
 	background: #F6F7F7;
 	border: 1px solid #C3C4C7;
 
+	&::before {
+		content: url('../images/icons/accordion-expanded-tip-up.svg');
+
+		position: relative;
+		top: -36px;
+		left: 150px;
+	}
+
 	label, a, .select-wrapper, .textarea-wrapper {
 		align-self: baseline;
 	}
