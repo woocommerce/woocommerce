@@ -7997,7 +7997,7 @@ table.bar_chart {
 	gap: 24px;
 
 	margin: 20px 0;
-	padding: 24px 16px;
+	padding: 16px 16px 24px;
 
 	background: #F6F7F7;
 	border: 1px solid #C3C4C7;
@@ -8006,8 +8006,9 @@ table.bar_chart {
 		content: url('../images/icons/accordion-expanded-tip-up.svg');
 
 		position: relative;
-		top: -36px;
-		left: 150px;
+		top: -28px;
+		left: 155px;
+		width: 21px;
 	}
 
 	label, a, .select-wrapper, .textarea-wrapper {
