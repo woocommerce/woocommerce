@@ -7992,7 +7992,8 @@ table.bar_chart {
 	display: none;
 
 	// leave room in the 2nd column for tooltips
-	grid-template-columns: 180px calc( 400px + 25px ) auto;
+	grid-template-columns: 180px minmax( calc(400px + 25px), 2000px ) auto;
+	justify-content: stretch;
 	gap: 24px;
 
 	margin: 20px 0;
