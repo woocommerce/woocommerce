@@ -8014,7 +8014,8 @@ table.bar_chart {
 
 	.select-wrapper {
 		select {
-			width: 100%;
+			width: calc(100% - 25px);
+			max-width: 500px;
 		}
 	}
 
