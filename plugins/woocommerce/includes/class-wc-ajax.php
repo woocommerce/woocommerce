@@ -3237,55 +3237,67 @@ class WC_AJAX {
 	public static function generate_product_description() {
 
 		$api_key = get_option( 'woocommerce_feature_chatgpt_api_key_enabled' );
-		$api_url = "https://api.openai.com/v1/chat/completions";
+		$api_url = 'https://api.openai.com/v1/chat/completions';
 
 		$product_description = $_POST['product_description'];
-		$tone = $_POST['tone'];
+		$tone                = $_POST['tone'];
+		$previous_message    = $_POST['previous_message']
 
 		// Set up the messages
 		$messages = array(
 			array(
-				"role" => "user",
-				"content" => "Write a product description for '$product_description' with $tone tone."
-			)
+				'role'    => 'user',
+				'content' => "Write a product description for '$product_description' with $tone tone.",
+			),
 		);
+
+		if ( $previous_message ) {
+			$messages[] = array(
+				'role'    => 'assistant',
+				'content' => $previous_message,
+			);
+		}
 
 		// Configure curl request
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $api_url);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-			"Content-Type: application/json",
-			"Authorization: Bearer " . $api_key
-		));
+		curl_setopt( $ch, CURLOPT_URL, $api_url );
+		curl_setopt( $ch, CURLOPT_POST, 1 );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		curl_setopt(
+			$ch,
+			CURLOPT_HTTPHEADER,
+			array(
+				'Content-Type: application/json',
+				'Authorization: Bearer ' . $api_key,
+			)
+		);
 
 		// Prepare the POST data
-		$post_data = array(
-			"messages" => $messages,
-			"model" => "gpt-3.5-turbo",
-			"temperature" => 0.7
+		$post_data      = array(
+			'messages'    => $messages,
+			'model'       => 'gpt-3.5-turbo',
+			'temperature' => 0.7,
 		);
-		$post_data_json = json_encode($post_data);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data_json);
+		$post_data_json = json_encode( $post_data );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, $post_data_json );
 
 		// Execute the request and get the response
-		$response = curl_exec($ch);
+		$response = curl_exec( $ch );
 
 		// Check for errors
-		if (curl_errno($ch)) {
-			echo "Error: " . curl_error($ch);
+		if ( curl_errno( $ch ) ) {
+			echo 'Error: ' . curl_error( $ch );
 		} else {
 			// Decode the JSON response
-			$response_data = json_decode($response, true);
+			$response_data = json_decode( $response, true );
 
 			// Extract and display the generated text
-			$generated_text = $response_data["choices"][0]["message"]["content"];
+			$generated_text = $response_data['choices'][0]['message']['content'];
 			echo $generated_text;
 		}
 
 		// Close the curl session
-		curl_close($ch);
+		curl_close( $ch );
 		wp_die();
 	}
 

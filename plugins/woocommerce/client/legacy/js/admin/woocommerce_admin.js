@@ -620,6 +620,7 @@
 						tone: $(
 							'#woocommerce-product-description-gpt-voice-tone'
 						).val(),
+						existing_description: tinymce.get( 'content' ).getContent(),
 					},
 					success: function ( response ) {
 						if (
@@ -627,6 +628,7 @@
 							tinymce.get( 'content' )
 						) {
 							tinymce.get( 'content' ).setContent( response );
+
 						} else {
 							$(
 								'#wp-content-editor-container .wp-editor-area'
