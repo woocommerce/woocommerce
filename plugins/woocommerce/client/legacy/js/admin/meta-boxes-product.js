@@ -1087,6 +1087,44 @@ jQuery( function ( $ ) {
 			keepAlive: true,
 		} );
 
+	// Hook up "write it for me" button, and the hide button, to toggle the GPT form
+	$( '.wc-write-it-for-me, #woocommerce-product-description-gpt-hide' ).on(
+		'click',
+		function () {
+			const gptForm = $( '.woocommerce-gpt-integration' );
+
+			if ( gptForm.is( ':visible' ) ) {
+				gptForm.slideUp( 'fast' );
+			} else {
+				gptForm.slideDown( {
+					duration: 'fast',
+					start: function () {
+						$( this ).css( 'display', 'grid' );
+					},
+				} );
+			}
+		}
+	);
+
+	// Add a descriptive tooltip to the "write it for me" about field
+	$( '#woocommerce-product-description-gpt-about-wrapper' )
+		.append( '<span class="woocommerce-help-tip" tabindex="-1"></span>' )
+		.find( '.woocommerce-help-tip' )
+		.attr( 'for', 'content' )
+		.attr(
+			'aria-label',
+			woocommerce_admin_meta_boxes.i18n_product_description_gpt_about_tip
+		)
+		.tipTip( {
+			attribute: 'data-tip',
+			content:
+				woocommerce_admin_meta_boxes.i18n_product_description_gpt_about_tip,
+			fadeIn: 50,
+			fadeOut: 50,
+			delay: 200,
+			keepAlive: true,
+		} );
+
 	// Add a descriptive tooltip to the product short description meta box title
 	$( '#postexcerpt > .postbox-header > .hndle' )
 		.append( '<span class="woocommerce-help-tip"></span>' )

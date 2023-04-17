@@ -449,7 +449,7 @@ class WC_Admin_Menus {
 			return;
 		}
 
-		echo '<button class="button wp-media-button" type="button">' . esc_html__( 'Write it for me (beta)', 'woocommerce' ) . '</button>';
+		echo '<button class="button wp-media-button wc-write-it-for-me" type="button">' . esc_html__( 'Write it for me (beta)', 'woocommerce' ) . '</button>';
 
 	}
 
@@ -469,40 +469,30 @@ class WC_Admin_Menus {
 			if ( $editor_container_position !== false ) {
 				$gpt_form =
 					'<div class="woocommerce-gpt-integration">' .
-						'<div class="woocommerce-gpt-integration__title">' .
-							'<h3>' .
-								esc_html__( 'Write a description', 'woocommerce' ) .
-								'<span class="woocommerce-beta-badge">BETA</span>' .
-								'<a class="woocommerce-hide-gpt-integration" href="#">hide</a>' .
-							'</h3>' .
+						'<a id="woocommerce-product-description-gpt-hide" href="#" title="' .
+							esc_html__( 'Hide', 'woocommerce' ) .
+						'"></a>' .
+						'<label for="woocommerce-product-description-gpt-about">' .
+							esc_html__( 'About your product', 'woocommerce' ) .
+						'</label>' .
+						'<div id="woocommerce-product-description-gpt-about-wrapper" class="textarea-wrapper field">' .
+							'<textarea id="woocommerce-product-description-gpt-about" placeholder="' . esc_html__( 'e.g. organic and sustainable skin cleanser for women', 'woocommerce' ) . '"></textarea>' .
 						'</div>' .
-						'<span class="woocommerce-textarea-title">' .
-							esc_html__( 'ABOUT YOUR PRODUCT', 'woocommerce' ) .
-						'</span>' .
-						'<textarea class="woocommerce-gpt-textarea" placeholder="' . esc_html__( 'e.g. organic and sustainable skin cleanser for women', 'woocommerce' ) . '"></textarea>' .
-						'<div class="woocommerce-actions">' .
-							'<span class="woocommerce-action-buttons-title">' .
-								esc_html__( 'TONE OF VOICE', 'woocommerce' ) .
-							'</span>' .
-							'<div class="woocommerce-action-buttons">' .
-								'<button class="woocommerce-gpt-action-casual active" type="button">' .
-									esc_html__( 'Casual', 'woocommerce' ) .
-								'</button>' .
-								'<button class="woocommerce-gpt-action-formal" type="button">' .
-									esc_html__( 'Formal', 'woocommerce' ) .
-								'</button>' .
-								'<button class="woocommerce-gpt-action-flowery" type="button">' .
-									esc_html__( 'Flowery', 'woocommerce' ) .
-								'</button>' .
-								'<button class="woocommerce-gpt-action-convincing" type="button">' .
-									esc_html__( 'Convincing', 'woocommerce' ) .
-								'</button>' .
-							'</div>' .
-							'<span class="woocommerce-action-description">' .
-								esc_html__( 'Relaxed, informal, conversational tone. Like chatting with a friend.', 'woocommerce' ) .
-							'</span>' .
+						'<label for="woocommerce-product-description-gpt-voice-tone">' .
+							esc_html__( 'Tone of voice', 'woocommerce' ) .
+						'</label>' .
+						'<div id="woocommerce-product-description-gpt-voice-tone-wrapper" class="select-wrapper">'.
+						'<select id="woocommerce-product-description-gpt-voice-tone" class="field" aria-describedby="woocommerce-product-description-gpt-voice-tone-description">' .
+							'<option value="casual">' . esc_html__( 'Casual', 'woocommerce' ) . '</option>' .
+							'<option value="formal">' . esc_html__( 'Formal', 'woocommerce' ) . '</option>' .
+							'<option value="flowery">' . esc_html__( 'Flowery', 'woocommerce' ) . '</option>' .
+							'<option value="convincing">' . esc_html__( 'Convincing', 'woocommerce' ) . '</option>' .
+						'</select>' .
+						'<p id="woocommerce-product-description-gpt-voice-tone-description">' .
+							esc_html__( 'Relaxed, informal, conversational tone. Like chatting with a friend.', 'woocommerce' ) .
+						'</p>' .
 						'</div>' .
-						'<button class="button button-primary woocommerce-gpt-action-accept" type="button">' .
+						'<button id="woocommerce-product-description-gpt-action-accept" class="button button-primary" type="button">' .
 							esc_html__( 'Write description', 'woocommerce' ) .
 						'</button>' .
 					'</div>';

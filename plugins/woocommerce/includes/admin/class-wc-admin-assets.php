@@ -437,6 +437,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					/* translators: %1$s: maximum file size */
 					'i18n_product_image_tip'             => sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ) , size_format( wp_max_upload_size() ) ),
 					'i18n_remove_used_attribute_confirmation_message' => __( 'If you remove this attribute, customers will no longer be able to purchase some variations of this product.', 'woocommerce' ),
+					'i18n_product_description_gpt_about_tip' => __( 'Describe the item’s unique features and benefits and who’s the ideal customer.', 'woocommerce' ),
 				);
 
 				wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
