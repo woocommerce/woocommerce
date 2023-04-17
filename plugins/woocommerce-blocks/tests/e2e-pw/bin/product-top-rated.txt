@@ -1,0 +1,1 @@
+<!-- wp:woocommerce/product-top-rated /-->
