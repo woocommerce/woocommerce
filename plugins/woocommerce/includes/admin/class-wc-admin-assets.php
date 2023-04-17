@@ -229,7 +229,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
-					'i18n_product_description_gpt_generating' => __( 'Writing description&hellip;', 'woocommerce' ),
+					'i18n_product_description_gpt_writing'             => __( 'Writing description&hellip;', 'woocommerce' ),
+					'i18n_product_description_gpt_simplifying'         => __( 'Simplifying description&hellip;', 'woocommerce' ),
+					'i18n_product_description_gpt_rewriting'           => __( 'Rewriting description&hellip;', 'woocommerce' ),
+					'i18n_product_description_gpt_more'                => __( 'Making the description longer&hellip;', 'woocommerce' ),
 					'i18n_product_description_gpt_generating_content'  => __( 'Please wait&hellip;', 'woocommerce' ),
 				);
 
