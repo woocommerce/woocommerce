@@ -1135,6 +1135,26 @@ jQuery( function ( $ ) {
 			keepAlive: true,
 		} );
 
+	const gptVoiceToneDescriptions = {
+		casual: woocommerce_admin_meta_boxes.i18n_product_gpt_desc_casual,
+		formal: woocommerce_admin_meta_boxes.i18n_product_gpt_desc_formal,
+		flowery: woocommerce_admin_meta_boxes.i18n_product_gpt_desc_flowery,
+		convincing:
+			woocommerce_admin_meta_boxes.i18n_product_gpt_desc_convincing,
+	};
+
+	// Update the voice tone description when the voice tone is changed
+	$( '#woocommerce-product-description-gpt-voice-tone' ).on(
+		'change',
+		function () {
+			const value = $( this ).val();
+			const description = gptVoiceToneDescriptions[ value ];
+			$(
+				'#woocommerce-product-description-gpt-voice-tone-description'
+			).text( description );
+		}
+	);
+
 	// Add a descriptive tooltip to the product short description meta box title
 	$( '#postexcerpt > .postbox-header > .hndle' )
 		.append( '<span class="woocommerce-help-tip"></span>' )
