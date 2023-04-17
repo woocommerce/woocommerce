@@ -164,12 +164,14 @@ export class StoreAlerts extends Component {
 			/>
 		);
 
-		return (
-			<div className="woocommerce-store-alerts__actions">
-				{ actions }
-				{ snooze }
-			</div>
-		);
+		if ( actions || snooze ) {
+			return (
+				<div className="woocommerce-store-alerts__actions">
+					{ actions }
+					{ snooze }
+				</div>
+			);
+		}
 	}
 
 	getAlerts() {
