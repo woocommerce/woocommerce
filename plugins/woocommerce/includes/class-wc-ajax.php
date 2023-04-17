@@ -3239,11 +3239,13 @@ class WC_AJAX {
 		$api_key = get_option( 'woocommerce_feature_chatgpt_api_key_enabled' );
 		$api_url = 'https://api.openai.com/v1/chat/completions';
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$product_description  = isset( $_POST['product_description'] ) ? wc_clean( wp_unslash( $_POST['product_description'] ) ) : '';
 		$tone                 = isset( $_POST['tone'] ) ? wc_clean( wp_unslash( $_POST['tone'] ) ) : '';
 		$existing_description = isset( $_POST['existing_description'] ) ? wc_clean( wp_unslash( $_POST['existing_description'] ) ) : '';
 		$chatgpt_action       = isset( $_POST['chatgpt_action'] ) ? wc_clean( wp_unslash( $_POST['chatgpt_action'] ) ) : '';
+		// phpcs:enable
 
 		$prompt_by_action = array(
 			'more'     => 'Make it longer',
