@@ -503,6 +503,9 @@ jQuery( function ( $ ) {
 					selectedAttributes
 				);
 			}
+			window.wcTracks.recordEvent( 'product_attributes_buttons', {
+				action: 'add_existing',
+			} );
 		}
 		$( this ).val( null );
 		$( this ).trigger( 'change' );
@@ -528,6 +531,13 @@ jQuery( function ( $ ) {
 		add_attribute( this, attribute );
 		$( 'select.attribute_taxonomy' ).val( null );
 		$( 'select.attribute_taxonomy' ).trigger( 'change' );
+
+		// We record the event only when an existing attribute is added.
+		if ( attribute !== '' ) {
+			window.wcTracks.recordEvent( 'product_attributes_buttons', {
+				action: 'add_existing',
+			} );
+		}
 
 		return false;
 	} );
@@ -662,6 +672,10 @@ jQuery( function ( $ ) {
 				}
 
 				$parent.remove();
+
+				window.wcTracks.recordEvent( 'product_attributes_buttons', {
+					action: 'remove_attribute',
+				} );
 
 				if (
 					! $( '.woocommerce_attribute_data' ).is( ':visible' ) &&
