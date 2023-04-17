@@ -8,6 +8,7 @@ Syncronous validation
 
 ```typescript
 import { useCallback } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import {
 	__experimentalUseValidation as useValidation,
 	ValidationError
@@ -17,7 +18,7 @@ const product = ...;
 
 const validateTitle = useCallback( (): ValidationError => {
 	if ( product.title.length < 2 ) {
-		return 'Title must be greater than 1';
+		return __( 'Title must be greater than 1', 'text-domain' );
 	}
 }, [ product.title ] );
 
