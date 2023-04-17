@@ -67,6 +67,10 @@ $drawer-animation-duration: 0.3s;
 	max-width: 100%;
 }
 
+.rtl .wc-block-components-drawer {
+	transform: translateX(max(100%, var(--drawer-width)));
+}
+
 .wc-block-components-drawer__screen-overlay--with-slide-out .wc-block-components-drawer {
 	transition: transform $drawer-animation-duration;
 }
