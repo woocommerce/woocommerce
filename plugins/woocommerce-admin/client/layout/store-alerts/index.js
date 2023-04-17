@@ -16,7 +16,7 @@ import interpolateComponents from '@automattic/interpolate-components';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import moment from 'moment';
-import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
+import { Icon, chevronLeft, chevronRight, close } from '@wordpress/icons';
 import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
@@ -66,12 +66,7 @@ export class StoreAlerts extends Component {
 	}
 
 	renderActions( alert ) {
-		const {
-			triggerNoteAction,
-			updateNote,
-			removeNote,
-			invalidateResolutionForStoreSelector,
-		} = this.props;
+		const { triggerNoteAction, updateNote } = this.props;
 		const actions = alert.actions.map( ( action ) => {
 			return (
 				<Button
@@ -172,19 +167,6 @@ export class StoreAlerts extends Component {
 		return (
 			<div className="woocommerce-store-alerts__actions">
 				{ actions }
-				{
-					<Button
-						key={ 'dismiss' }
-						variant="tertiary"
-						onClick={ async () => {
-							await removeNote( alert.id );
-							this.previousAlert();
-							invalidateResolutionForStoreSelector( 'getNotes' );
-						} }
-					>
-						{ __( 'Dismiss', 'woocommerce' ) }
-					</Button>
-				}
 				{ snooze }
 			</div>
 		);
@@ -220,6 +202,8 @@ export class StoreAlerts extends Component {
 			'is-alert-error': type === 'error',
 			'is-alert-update': type === 'update',
 		} );
+
+		const { removeNote, invalidateResolutionForStoreSelector } = this.props;
 
 		return (
 			<Card className={ className } size={ null }>
@@ -280,6 +264,15 @@ export class StoreAlerts extends Component {
 							</Button>
 						</div>
 					) }
+					<Button
+						onClick={ async () => {
+							await removeNote( alert.id );
+							this.previousAlert();
+							invalidateResolutionForStoreSelector( 'getNotes' );
+						} }
+					>
+						<Icon icon={ close } />
+					</Button>
 				</CardHeader>
 				<CardBody>
 					<div
