@@ -7,7 +7,7 @@ export type LayoutContextType = {
 	layoutString: string;
 	updateLayoutPath: ( item: string ) => LayoutContextType;
 	layoutPath: string[];
-	decendentOf: ( item: string ) => boolean;
+	descendantOf: ( item: string ) => boolean;
 };
 
 type LayoutContextProviderProps = {
@@ -32,7 +32,7 @@ export const getLayoutContextValue = (
 		};
 	},
 	layoutString: layoutPath.join( '/' ),
-	decendentOf: ( item ) => layoutPath.includes( item ),
+	descendantOf: ( item ) => layoutPath.includes( item ),
 } );
 
 export const LayoutContextProvider: React.FC< LayoutContextProviderProps > = ( {
@@ -48,8 +48,7 @@ export const useLayoutContext = () => {
 	const layoutContext = useContext( LayoutContext );
 
 	if ( layoutContext === undefined ) {
-		// eslint-disable-next-line no-console
-		console.warn(
+		throw new Error(
 			'useLayoutContext must be used within a LayoutContextProvider'
 		);
 	}

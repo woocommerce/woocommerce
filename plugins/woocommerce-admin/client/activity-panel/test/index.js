@@ -18,6 +18,16 @@ import { useState } from '@wordpress/element';
 import { ActivityPanel } from '../activity-panel';
 import { Panel } from '../panel';
 
+jest.mock( '@woocommerce/admin-layout', () => ( {
+	...jest.requireActual( '@woocommerce/admin-layout' ),
+	useLayoutContext: jest.fn().mockReturnValue( {
+		layoutPath: [ 'home' ],
+		layoutString: 'home',
+		updateLayoutPath: () => {},
+		descendantOf: () => false,
+	} ),
+} ) );
+
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
 	useUser: jest.fn().mockReturnValue( { currentUserCan: () => true } ),

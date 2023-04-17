@@ -38,6 +38,15 @@ jest.mock( '@woocommerce/data', () => ( {
 		updateUserPreferences: jest.fn(),
 	} ),
 } ) );
+jest.mock( '@woocommerce/admin-layout', () => ( {
+	...jest.requireActual( '@woocommerce/admin-layout' ),
+	useLayoutContext: jest.fn().mockReturnValue( {
+		layoutPath: [ 'home' ],
+		layoutString: 'home',
+		updateLayoutPath: () => {},
+		descendantOf: () => false,
+	} ),
+} ) );
 
 const tasks: { [ key: string ]: TaskType[] } = {
 	setup: [
@@ -158,7 +167,7 @@ describe( 'TaskList', () => {
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
-			context: 'root',
+			context: 'home',
 			number_tasks: 0,
 			store_connected: null,
 		} );
@@ -181,7 +190,7 @@ describe( 'TaskList', () => {
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
-			context: 'root',
+			context: 'home',
 			number_tasks: 0,
 			store_connected: null,
 		} );
@@ -205,7 +214,7 @@ describe( 'TaskList', () => {
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'extended_tasklist_view', {
-			context: 'root',
+			context: 'home',
 			number_tasks: 0,
 			store_connected: null,
 		} );

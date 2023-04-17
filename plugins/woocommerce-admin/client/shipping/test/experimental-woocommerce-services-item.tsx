@@ -13,6 +13,16 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
+jest.mock( '@woocommerce/admin-layout', () => ( {
+	...jest.requireActual( '@woocommerce/admin-layout' ),
+	useLayoutContext: jest.fn().mockReturnValue( {
+		layoutPath: [ 'root' ],
+		layoutString: 'root',
+		updateLayoutPath: () => {},
+		descendantOf: () => false,
+	} ),
+} ) );
+
 describe( 'WooCommerceServicesItem', () => {
 	it( 'should render WCS item with CTA = "Get started" when WCS is not installed', () => {
 		render( <WooCommerceServicesItem isWCSInstalled={ false } /> );
