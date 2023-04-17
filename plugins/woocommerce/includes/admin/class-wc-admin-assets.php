@@ -232,7 +232,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_product_description_gpt_writing' => __( 'Writing description&hellip;', 'woocommerce' ),
 					'i18n_product_description_gpt_simplifying' => __( 'Simplifying description&hellip;', 'woocommerce' ),
 					'i18n_product_description_gpt_rewriting' => __( 'Rewriting description&hellip;', 'woocommerce' ),
-					'i18n_product_description_gpt_more' => __( 'Making the description longer&hellip;', 'woocommerce' ),
+					'i18n_product_description_gpt_more'    => __( 'Making the description longer&hellip;', 'woocommerce' ),
 					'i18n_product_description_gpt_generating_content'  => __( 'Please wait&hellip;', 'woocommerce' ),
 				);
 
