@@ -28,6 +28,7 @@
 		"transient-notices": true,
 		"woo-mobile-welcome": true,
 		"wc-pay-promotion": true,
-		"wc-pay-welcome-page": true
+		"wc-pay-welcome-page": true,
+		"async-product-editor-category-field": true
 	}
 }

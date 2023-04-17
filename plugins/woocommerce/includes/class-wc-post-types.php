@@ -122,9 +122,7 @@ class WC_Post_Types {
 						'slug'         => $permalinks['category_rewrite_slug'],
 						'with_front'   => false,
 						'hierarchical' => true,
-					),
-					'meta_box_cb'           => 'WC_Meta_Box_Product_Categories::output',
-					'meta_box_sanitize_cb'  => 'taxonomy_meta_box_sanitize_cb_checkboxes',
+					)
 				)
 			)
 		);
