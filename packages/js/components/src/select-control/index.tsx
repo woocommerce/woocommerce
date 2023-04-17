@@ -561,6 +561,7 @@ export class SelectControl extends Component< Props, State > {
 					isSearchable={ isSearchable }
 					isFocused={ isFocused }
 					instanceId={ instanceId }
+					searchInputType={ this.props.searchInputType }
 					query={ this.state.query }
 					placeholder={ this.props.placeholder }
 					autoComplete={ this.props.autoComplete }
