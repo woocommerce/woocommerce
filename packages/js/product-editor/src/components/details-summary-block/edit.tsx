@@ -23,7 +23,6 @@ import {
 import { ParagraphRTLControl } from './paragraph-rtl-control';
 import { SummaryAttributes } from './types';
 import { ALIGNMENT_CONTROLS } from './constants';
-import { IframeEditor } from '../iframe-editor';
 
 export function Edit( {
 	attributes,
