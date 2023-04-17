@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Added a woocommerce_disable_api_access_log filter to disable last access logging for rest api.
