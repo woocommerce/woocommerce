@@ -18,7 +18,7 @@ const product = ...;
 
 const validateTitle = useCallback( (): ValidationError => {
 	if ( product.title.length < 2 ) {
-		return __( 'Title must be greater than 1', 'text-domain' );
+		return __( 'Title must be more than 1 character', 'text-domain' );
 	}
 }, [ product.title ] );
 

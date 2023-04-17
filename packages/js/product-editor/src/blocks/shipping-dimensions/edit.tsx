@@ -112,7 +112,7 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 		'product/dimensions/width',
 		function dimensionsWidthValidator() {
 			if ( dimensions?.width && +dimensions.width <= 0 ) {
-				return __( 'Width must be higher than zero.', 'woocommerce' );
+				return __( 'Width must be greater than zero.', 'woocommerce' );
 			}
 		}
 	);
@@ -120,7 +120,7 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 		'product/dimensions/length',
 		function dimensionsLengthValidator() {
 			if ( dimensions?.length && +dimensions.length <= 0 ) {
-				return __( 'Length must be higher than zero.', 'woocommerce' );
+				return __( 'Length must be greater than zero.', 'woocommerce' );
 			}
 		}
 	);
@@ -128,7 +128,7 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 		'product/dimensions/height',
 		function dimensionsHeightValidator() {
 			if ( dimensions?.height && +dimensions.height <= 0 ) {
-				return __( 'Height must be higher than zero.', 'woocommerce' );
+				return __( 'Height must be greater than zero.', 'woocommerce' );
 			}
 		}
 	);
@@ -136,7 +136,7 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 		'product/weight',
 		function weightValidator() {
 			if ( weight && +weight <= 0 ) {
-				return __( 'Weight must be higher than zero.', 'woocommerce' );
+				return __( 'Weight must be greater than zero.', 'woocommerce' );
 			}
 		}
 	);
