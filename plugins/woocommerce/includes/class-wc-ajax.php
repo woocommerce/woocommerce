@@ -3264,7 +3264,7 @@ class WC_AJAX {
 		$post_data = array(
 			"messages" => $messages,
 			"model" => "gpt-3.5-turbo",
-			"temperature" => 0.7
+			"temperature" => apply_filters( 'experimental_woocommerce_chatgpt_product_description_temperature', 1 )
 		);
 		$post_data_json = json_encode($post_data);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data_json);
