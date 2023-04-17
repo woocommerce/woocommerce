@@ -642,11 +642,8 @@
 						).val(),
 					},
 					success: function ( response ) {
-						if (
-							typeof tinymce === 'object' &&
-							tinymce.get( 'content' )
-						) {
-							tinymce.get( 'content' ).setContent( response );
+						if ( contentTinyMCE ) {
+							contentTinyMCE.setContent( response );
 						} else {
 							$(
 								'#wp-content-editor-container .wp-editor-area'
@@ -663,7 +660,6 @@
 						button.attr( 'disabled', false );
 						button.text( buttonText );
 
-						//contentTinyMCE?.mode.set( contentTinyMCEMode );
 						if ( contentTinyMCE ) {
 							contentTinyMCE.readonly = false;
 						}
