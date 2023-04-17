@@ -39,8 +39,11 @@ tests/cli/vendor
 # Unit tests
 /tmp
 /tests/bin/tmp
-/tests/e2e-tests/config/local-*.json
 /reports
+
+# E2E tests
+/tests/e2e-tests/config/local-*.json
+/tests/e2e-pw/test-results/
 
 # Logs
 /logs
