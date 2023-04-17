@@ -8099,6 +8099,16 @@ table.bar_chart {
 		}
 	}
 
+	.woocommerce-gpt-extra-actions-wrapper {
+		gap: 12px;
+
+		// when jQuery show() is used, it sets the style to `block`, so override that
+		&[style*='block'] {
+			display: flex !important;
+			flex-wrap: wrap;
+		}
+	}
+
 	@media only screen and (max-width: 1200px) {
 		grid-template-columns: calc(100% - 24px - 21px) auto;
 
