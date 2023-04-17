@@ -695,16 +695,5 @@
 				navigator.msMaxTouchPoints > 0
 			);
 		}
-		// Move editor tabs after chatgpt integration.
-		// $( '.wp-editor-tabs' ).insertAfter( '.woocommerce-gpt-integration' );
-		if (
-			! $( '.woocommerce-gpt-integration' )
-				.next()
-				.hasClass( '.wp-editor-tabs:first' )
-		) {
-			$( '.wp-editor-tabs:first' ).insertAfter(
-				'.woocommerce-gpt-integration'
-			);
-		}
 	} );
 } )( jQuery, woocommerce_admin );

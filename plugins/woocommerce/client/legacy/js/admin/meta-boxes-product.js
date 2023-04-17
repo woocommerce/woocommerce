@@ -1087,6 +1087,10 @@ jQuery( function ( $ ) {
 			keepAlive: true,
 		} );
 
+	// Store the original position of .wp-editor-tabs
+	const wpEditorTabs = $( '.wp-editor-tabs' ).first();
+	const originalPrevElement = wpEditorTabs.prev();
+
 	// Hook up "write it for me" button, and the hide button, to toggle the GPT form
 	$( '.wc-write-it-for-me, #woocommerce-product-description-gpt-hide' ).on(
 		'click',
@@ -1094,8 +1098,14 @@ jQuery( function ( $ ) {
 			const gptForm = $( '.woocommerce-gpt-integration' );
 
 			if ( gptForm.is( ':visible' ) ) {
+				// Move .wp-editor-tabs back to its original position
+				originalPrevElement.after( wpEditorTabs );
 				gptForm.slideUp( 'fast' );
 			} else {
+				// Move .wp-editor-tabs after the GPT form
+				$( '.wp-editor-tabs:first' ).insertAfter(
+					'.woocommerce-gpt-integration'
+				);
 				gptForm.slideDown( {
 					duration: 'fast',
 					start: function () {
