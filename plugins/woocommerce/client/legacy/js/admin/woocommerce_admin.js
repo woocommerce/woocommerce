@@ -606,67 +606,94 @@
 			}
 		);
 
-		$( '#woocommerce-product-description-gpt-action-accept' ).on(
-			'click',
-			function () {
-				const button = $( this );
-				const buttonText = button.text();
-
-				button.attr( 'disabled', true );
-				button.text(
-					woocommerce_admin.i18n_product_description_gpt_generating
-				);
-
-				const contentTinyMCE =
-					typeof tinymce === 'object'
-						? tinymce.get( 'content' )
-						: null;
-
-				if ( contentTinyMCE ) {
-					contentTinyMCE.readonly = true;
-					contentTinyMCE.setContent(
-						woocommerce_admin.i18n_product_description_gpt_generating_content
-					);
-				}
-
-				$.ajax( {
-					url: woocommerce_admin_meta_boxes.ajax_url,
-					type: 'POST',
-					data: {
-						action: 'woocommerce_generate_product_description',
-						product_description: $(
-							'#woocommerce-product-description-gpt-about'
-						).val(),
-						tone: $(
-							'#woocommerce-product-description-gpt-voice-tone'
-						).val(),
-					},
-					success: function ( response ) {
-						if ( contentTinyMCE ) {
-							contentTinyMCE.setContent( response );
-						} else {
-							$(
-								'#wp-content-editor-container .wp-editor-area'
-							).val( response );
-						}
-					},
-					error: function ( err ) {
-						if ( contentTinyMCE ) {
-							contentTinyMCE.setContent( err );
-						}
-						console.log( err );
-					},
-					complete: function () {
-						button.attr( 'disabled', false );
-						button.text( buttonText );
-
-						if ( contentTinyMCE ) {
-							contentTinyMCE.readonly = false;
-						}
-					},
-				} );
+		function getWaitingButtonText( action ) {
+			var buttonText = '';
+			switch ( action ) {
+				case 'write':
+					buttonText =
+						woocommerce_admin.i18n_product_description_gpt_writing;
+					break;
+				case 'simplify':
+					buttonText =
+						woocommerce_admin.i18n_product_description_gpt_simplifying;
+					break;
+				case 'rewrite':
+					buttonText =
+						woocommerce_admin.i18n_product_description_gpt_rewriting;
+					break;
+				case 'more':
+					buttonText =
+						woocommerce_admin.i18n_product_description_gpt_more;
+					break;
 			}
-		);
+			return buttonText;
+		}
+
+		$( 'button.gpt-action' ).on( 'click', function () {
+			var button = $( this );
+			var buttonText = button.text();
+			var chatgptAction = button.attr( 'action' );
+			var existingDescription = '';
+
+			button.attr( 'disabled', true );
+			button.text( getWaitingButtonText( chatgptAction ) );
+
+			var contentTinyMCE =
+				typeof tinymce === 'object' ? tinymce.get( 'content' ) : null;
+
+			if ( contentTinyMCE ) {
+				existingDescription = contentTinyMCE
+					.getContent()
+					.replace( /(<([^>]+)>)/gi, '' );
+				contentTinyMCE.readonly = true;
+				contentTinyMCE.setContent(
+					woocommerce_admin.i18n_product_description_gpt_generating_content
+				);
+			}
+
+			$.ajax( {
+				url: woocommerce_admin_meta_boxes.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'woocommerce_generate_product_description',
+					chatgpt_action: chatgptAction,
+					existing_description: existingDescription,
+					product_description: $(
+						'#woocommerce-product-description-gpt-about'
+					).val(),
+					tone: $(
+						'#woocommerce-product-description-gpt-voice-tone'
+					).val(),
+				},
+				success: function ( response ) {
+					$(
+						'#woocommerce-product-description-gpt-action-accept'
+					).hide();
+					$( '.woocommerce-gpt-extra-actions-wrapper' ).show();
+					if ( contentTinyMCE ) {
+						contentTinyMCE.setContent( response );
+					} else {
+						$( '#wp-content-editor-container .wp-editor-area' ).val(
+							response
+						);
+					}
+				},
+				error: function ( err ) {
+					if ( contentTinyMCE ) {
+						contentTinyMCE.setContent( err );
+					}
+					console.log( err );
+				},
+				complete: function () {
+					button.attr( 'disabled', false );
+					button.text( buttonText );
+
+					if ( contentTinyMCE ) {
+						contentTinyMCE.readonly = false;
+					}
+				},
+			} );
+		} );
 
 		$( '#wpbody' ).on( 'click', '#doaction, #doaction2', function () {
 			var action = $( this ).is( '#doaction' )

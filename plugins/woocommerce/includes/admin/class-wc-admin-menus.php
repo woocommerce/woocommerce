@@ -492,9 +492,22 @@ class WC_Admin_Menus {
 							esc_html__( 'Relaxed, informal, conversational tone. Like chatting with a friend.', 'woocommerce' ) .
 						'</p>' .
 						'</div>' .
-						'<button id="woocommerce-product-description-gpt-action-accept" class="button button-primary" type="button">' .
+						'<div class="woocommerce-gpt-actions-wrapper">' .
+						'<button id="woocommerce-product-description-gpt-action-accept" class="button button-primary gpt-action" action="write" type="button">' .
 							esc_html__( 'Write description', 'woocommerce' ) .
 						'</button>' .
+						'<div class="woocommerce-gpt-extra-actions-wrapper hidden">' .
+						'<button id="woocommerce-product-description-gpt-action-simplify" class="button button-tertiary gpt-action" action="simplify" type="button">' .
+							esc_html__( 'Simplify it', 'woocommerce' ) .
+						'</button>' .
+						'<button id="woocommerce-product-description-gpt-action-longer" class="button button-tertiary gpt-action" action="more" type="button">' .
+							esc_html__( 'Make it longer', 'woocommerce' ) .
+						'</button>' .
+						'<button id="woocommerce-product-description-gpt-action-rewrite" class="button button-primary gpt-action" action="rewrite" type="button">' .
+							esc_html__( 'Rewrite', 'woocommerce' ) .
+						'</button>' .
+						'</div>' .
+						'</div>' .
 					'</div>';
 				$content = $gpt_form . $content;
 			}
