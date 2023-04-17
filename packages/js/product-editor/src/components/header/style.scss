@@ -18,6 +18,10 @@
 		font-weight: 600;
 		padding: 0;
 		color: #000000;
+		max-width: 500px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 
 		@include breakpoint( '<960px' ) {
 			display: none;

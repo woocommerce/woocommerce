@@ -6,21 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { AUTO_DRAFT_NAME, HEADER_TITLE_LIMIT } from './constants';
-
-/**
- * Returns a truncated title if too long.
- *
- * @param  title The title.
- * @return Truncated title
- */
-export const getTruncatedTitle = ( title: string ) => {
-	if ( title.length > HEADER_TITLE_LIMIT ) {
-		return title.substring( 0, HEADER_TITLE_LIMIT ) + '…';
-	}
-
-	return title;
-};
+import { AUTO_DRAFT_NAME } from './constants';
 
 /**
  * Get the header title using the product name.
@@ -38,12 +24,12 @@ export const getHeaderTitle = (
 	const isCreating = initialProductName === AUTO_DRAFT_NAME;
 
 	if ( isProductNameNotEmpty && isProductNameDirty ) {
-		return getTruncatedTitle( editedProductName );
+		return editedProductName;
 	}
 
 	if ( isCreating ) {
 		return __( 'Add new product', 'woocommerce' );
 	}
 
-	return getTruncatedTitle( initialProductName );
+	return initialProductName;
 };

@@ -8,4 +8,3 @@ export const UNCATEGORIZED_CATEGORY_SLUG = 'uncategorized';
 export const PRODUCT_VARIATION_TITLE_LIMIT = 32;
 export const STANDARD_RATE_TAX_CLASS_SLUG = 'standard';
 export const AUTO_DRAFT_NAME = 'AUTO-DRAFT';
-export const HEADER_TITLE_LIMIT = 75;
