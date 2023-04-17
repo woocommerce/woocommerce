@@ -43,6 +43,7 @@ import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { ProgressTitle } from '../task-lists';
 import { WooHomescreenHeaderBanner } from './header-banner-slot';
+import { WooHomescreenWCPayFeature } from './wcpay-feature-slot';
 
 const Tasks = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../tasks' ).then( ( module ) => ( {
@@ -64,6 +65,7 @@ export const Layout = ( {
 } ) => {
 	const userPrefs = useUserPreferences();
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
+	const shouldShowWCPayFeature = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const isDashboardShown = ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
@@ -104,6 +106,7 @@ export const Layout = ( {
 							) }
 						/>
 					) }
+					{ shouldShowWCPayFeature && <WooHomescreenWCPayFeature /> }
 					{ <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
