@@ -3256,7 +3256,7 @@ class WC_AJAX {
 			),
 		);
 
-		if ( $existing_description && array_key_exists( $prompt_by_action, $chatgpt_action ) ) {
+		if ( $existing_description && array_key_exists( $chatgpt_action, $prompt_by_action ) ) {
 			$messages[] = array(
 				'role'    => 'assistant',
 				'content' => $existing_description,
