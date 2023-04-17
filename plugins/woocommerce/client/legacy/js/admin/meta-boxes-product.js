@@ -555,13 +555,19 @@ jQuery( function ( $ ) {
 	} );
 
 	$( '.product_attributes' ).on( 'blur', 'input.attribute_name', function () {
-		var text = $( this ).val();
-		var attributeName = $( this )
+		var $inputElement = $( this );
+		var text = $inputElement.val();
+		var $attribute = $inputElement
 			.closest( '.woocommerce_attribute' )
 			.find( 'strong.attribute_name' );
-		var isPlaceholder = attributeName.hasClass( 'placeholder' );
-		if ( ( isPlaceholder && text ) || ! isPlaceholder ) {
-			attributeName.removeClass( 'placeholder' ).text( text );
+		if ( text === '' ) {
+			$attribute
+				.addClass( 'placeholder' )
+				.text(
+					woocommerce_admin_meta_boxes.i18n_attribute_name_placeholder
+				);
+		} else {
+			$attribute.removeClass( 'placeholder' ).text( text );
 		}
 	} );
 
