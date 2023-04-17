@@ -29,7 +29,9 @@ class Init {
 	}
 
 	/**
-	 * @param $args Category taxonomy args.
+	 * Adds meta_box_cb callback arguments for custom metabox.
+	 *
+	 * @param array $args Category taxonomy args.
 	 * @return array $args category taxonomy args.
 	 */
 	public function add_metabox_args( $args ) {
