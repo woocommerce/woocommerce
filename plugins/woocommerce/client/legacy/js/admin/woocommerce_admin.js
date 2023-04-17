@@ -622,8 +622,11 @@
 						).val(),
 					},
 					success: function ( response ) {
-						if ( tinyMCE.activeEditor ) {
-							tinyMCE.activeEditor.setContent( response );
+						if (
+							typeof tinymce === 'object' &&
+							tinymce.get( 'content' )
+						) {
+							tinymce.get( 'content' ).setContent( response );
 						} else {
 							$(
 								'#wp-content-editor-container .wp-editor-area'
