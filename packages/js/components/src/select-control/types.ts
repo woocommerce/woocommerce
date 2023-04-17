@@ -3,7 +3,7 @@ export type Option = {
 	label: string;
 	isDisabled?: boolean;
 	keywords?: Array< string >;
-	value: unknown;
+	value?: unknown;
 };
 
 export type Selected = string | Option[];
