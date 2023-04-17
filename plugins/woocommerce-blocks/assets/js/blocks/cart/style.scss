@@ -12,12 +12,16 @@
 			}
 		}
 	}
-}
 
-.wc-block-cart {
 	.wc-block-components-totals-taxes,
 	.wc-block-components-totals-footer-item {
 		margin: 0;
+	}
+
+	table.wc-block-cart-items,
+	table.wc-block-cart-items th,
+	table.wc-block-cart-items td {
+		margin: 0 0 2em;
 	}
 }
 
