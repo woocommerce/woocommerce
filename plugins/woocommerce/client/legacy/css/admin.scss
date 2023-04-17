@@ -8041,7 +8041,7 @@ table.bar_chart {
 		grid-column: 1;
 	}
 
-	#woocommerce-product-description-gpt-action-accept {
+	.woocommerce-gpt-actions-wrapper {
 		grid-column: 2;
 	}
 
@@ -8087,10 +8087,16 @@ table.bar_chart {
 		color: #2C3338;
 	}
 
-	#woocommerce-product-description-gpt-action-accept {
+	.woocommerce-gpt-actions-wrapper {
 		grid-row: 4;
 
 		justify-self: left;
+	}
+
+	.woocommerce-gpt-actions-wrapper {
+		.button-tertiary {
+			border: none !important;
+		}
 	}
 
 	@media only screen and (max-width: 1200px) {
@@ -8124,7 +8130,7 @@ table.bar_chart {
 			grid-row: 5;
 		}
 
-		#woocommerce-product-description-gpt-action-accept {
+		.woocommerce-gpt-actions-wrapper {
 			grid-column: 1;
 			grid-row: 6;
 		}
