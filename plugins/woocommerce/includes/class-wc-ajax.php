@@ -3239,7 +3239,6 @@ class WC_AJAX {
 		$api_key = get_option( 'woocommerce_feature_chatgpt_api_key_enabled' );
 		$api_url = 'https://api.openai.com/v1/chat/completions';
 
-
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$product_description  = isset( $_POST['product_description'] ) ? wc_clean( wp_unslash( $_POST['product_description'] ) ) : '';
 		$tone                 = isset( $_POST['tone'] ) ? wc_clean( wp_unslash( $_POST['tone'] ) ) : '';
