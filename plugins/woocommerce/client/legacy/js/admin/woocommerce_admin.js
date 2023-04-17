@@ -609,6 +609,26 @@
 		$( '#woocommerce-product-description-gpt-action-accept' ).on(
 			'click',
 			function () {
+				const button = $( this );
+				const buttonText = button.text();
+
+				button.attr( 'disabled', true );
+				button.text(
+					woocommerce_admin.i18n_product_description_gpt_generating
+				);
+
+				const contentTinyMCE =
+					typeof tinymce === 'object'
+						? tinymce.get( 'content' )
+						: null;
+
+				if ( contentTinyMCE ) {
+					contentTinyMCE.readonly = true;
+					contentTinyMCE.setContent(
+						woocommerce_admin.i18n_product_description_gpt_generating_content
+					);
+				}
+
 				$.ajax( {
 					url: woocommerce_admin_meta_boxes.ajax_url,
 					type: 'POST',
@@ -622,11 +642,8 @@
 						).val(),
 					},
 					success: function ( response ) {
-						if (
-							typeof tinymce === 'object' &&
-							tinymce.get( 'content' )
-						) {
-							tinymce.get( 'content' ).setContent( response );
+						if ( contentTinyMCE ) {
+							contentTinyMCE.setContent( response );
 						} else {
 							$(
 								'#wp-content-editor-container .wp-editor-area'
@@ -634,7 +651,18 @@
 						}
 					},
 					error: function ( err ) {
+						if ( contentTinyMCE ) {
+							contentTinyMCE.setContent( err );
+						}
 						console.log( err );
+					},
+					complete: function () {
+						button.attr( 'disabled', false );
+						button.text( buttonText );
+
+						if ( contentTinyMCE ) {
+							contentTinyMCE.readonly = false;
+						}
 					},
 				} );
 			}
