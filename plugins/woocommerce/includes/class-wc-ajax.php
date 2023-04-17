@@ -3239,10 +3239,10 @@ class WC_AJAX {
 		$api_key = get_option( 'woocommerce_feature_chatgpt_api_key_enabled' );
 		$api_url = 'https://api.openai.com/v1/chat/completions';
 
-		$product_description  = $_POST['product_description'];
-		$tone                 = $_POST['tone'];
-		$existing_description = $_POST['existing_description'];
-		$chatgpt_action       = $_POST['chatgpt_action'];
+		$product_description  = isset( $_POST['product_description'] ) ? wc_clean( wp_unslash( $_POST['product_description'] ) ) : '';
+		$tone                 = isset( $_POST['tone'] ) ? wc_clean( wp_unslash( $_POST['tone'] ) ) : '';
+		$existing_description = isset( $_POST['existing_description'] ) ? wc_clean( wp_unslash( $_POST['existing_description'] ) ) : '';
+		$chatgpt_action       = isset( $_POST['chatgpt_action'] ) ? wc_clean( wp_unslash( $_POST['chatgpt_action'] ) ) : '';
 
 		$prompt_by_action = array(
 			'more'     => 'Make it longer',
@@ -3294,8 +3294,8 @@ class WC_AJAX {
 		$response = curl_exec( $ch );
 
 		// Check for errors
-		if ( curl_errno( $ch ) ) {
-			echo 'Error: ' . curl_error( $ch );
+		if ( curl_error( $ch ) ) {
+			echo 'Error: ' . esc_html( curl_error( $ch ) );
 		} else {
 			// Decode the JSON response
 			$response_data = json_decode( $response, true );
