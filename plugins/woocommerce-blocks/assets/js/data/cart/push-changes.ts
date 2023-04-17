@@ -41,13 +41,20 @@ const isBillingAddress = (
 export const normalizeAddress = ( address: BillingOrShippingAddress ) => {
 	const trimmedAddress = Object.entries( address ).reduce(
 		( acc, [ key, value ] ) => {
+			//Skip normalizing for any non string field
+			if ( typeof value !== 'string' ) {
+				acc[ key as keyof BillingOrShippingAddress ] = value;
+				return acc;
+			}
+
 			if ( key === 'postcode' ) {
 				acc[ key as keyof BillingOrShippingAddress ] = value
 					.replace( ' ', '' )
 					.toUpperCase();
-			} else {
-				acc[ key as keyof BillingOrShippingAddress ] = value.trim();
+				return acc;
 			}
+
+			acc[ key as keyof BillingOrShippingAddress ] = value.trim();
 			return acc;
 		},
 		{} as BillingOrShippingAddress
