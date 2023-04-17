@@ -74,13 +74,12 @@ export function Edit( {
 
 	const shippingClassControlId = useInstanceId( BaseControl ) as string;
 
-	const isShippingClassValid = useValidation(
+	const shippingClassValidationError = useValidation(
 		'product/shipping_class',
 		function shippingClassValidator() {
 			if ( option === FOLLOW_CLASS_OPTION_VALUE && ! shippingClass ) {
-				return false;
+				return __( 'The shipping class is required.', 'woocommerce' );
 			}
-			return true;
 		}
 	);
 
@@ -120,7 +119,7 @@ export function Edit( {
 				<div className="wp-block-columns">
 					<div
 						className={ classNames( 'wp-block-column', {
-							'has-error': ! isShippingClassValid,
+							'has-error': shippingClassValidationError,
 						} ) }
 					>
 						<SelectControl
@@ -130,42 +129,37 @@ export function Edit( {
 							onChange={ setShippingClass }
 							label={ __( 'Shipping class', 'woocommerce' ) }
 							help={
-								isShippingClassValid
-									? createInterpolateElement(
-											__(
-												'Manage shipping classes and rates in <Link>global settings</Link>.',
-												'woocommerce'
-											),
-											{
-												Link: (
-													<Link
-														href={ getNewPath(
-															{
-																tab: 'shipping',
-																section:
-																	'classes',
-															},
-															'',
-															{},
-															'wc-settings'
-														) }
-														target="_blank"
-														type="external"
-														onClick={ () => {
-															recordEvent(
-																'product_shipping_global_settings_link_click'
-															);
-														} }
-													>
-														<Fragment />
-													</Link>
-												),
-											}
-									  )
-									: __(
-											'The shipping class is required.',
-											'woocommerce'
-									  )
+								shippingClassValidationError ||
+								createInterpolateElement(
+									__(
+										'Manage shipping classes and rates in <Link>global settings</Link>.',
+										'woocommerce'
+									),
+									{
+										Link: (
+											<Link
+												href={ getNewPath(
+													{
+														tab: 'shipping',
+														section: 'classes',
+													},
+													'',
+													{},
+													'wc-settings'
+												) }
+												target="_blank"
+												type="external"
+												onClick={ () => {
+													recordEvent(
+														'product_shipping_global_settings_link_click'
+													);
+												} }
+											>
+												<Fragment />
+											</Link>
+										),
+									}
+								)
 							}
 						>
 							{ shippingClasses.map( ( { slug, name } ) => (
