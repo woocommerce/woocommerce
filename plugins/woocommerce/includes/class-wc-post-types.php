@@ -122,7 +122,7 @@ class WC_Post_Types {
 						'slug'         => $permalinks['category_rewrite_slug'],
 						'with_front'   => false,
 						'hierarchical' => true,
-					)
+					),
 				)
 			)
 		);

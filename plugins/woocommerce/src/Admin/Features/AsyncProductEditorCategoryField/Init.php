@@ -28,9 +28,13 @@ class Init {
 		}
 	}
 
+	/**
+	 * @param $args Category taxonomy args.
+	 * @return array $args category taxonomy args.
+	 */
 	public function add_metabox_args( $args ) {
 		if ( ! isset( $args['meta_box_cb'] ) ) {
-			$args['meta_box_cb'] = 'WC_Meta_Box_Product_Categories::output';
+			$args['meta_box_cb']          = 'WC_Meta_Box_Product_Categories::output';
 			$args['meta_box_sanitize_cb'] = 'taxonomy_meta_box_sanitize_cb_checkboxes';
 		}
 		return $args;
@@ -63,7 +67,7 @@ class Init {
 		if ( ! PageController::is_admin_or_embed_page() ) {
 			return;
 		}
-		$version   = Constants::get_constant( 'WC_VERSION' );
+		$version = Constants::get_constant( 'WC_VERSION' );
 
 		wp_register_style(
 			'woocommerce_admin_product_category_metabox_styles',
