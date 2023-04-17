@@ -48,7 +48,8 @@ export const useLayoutContext = () => {
 	const layoutContext = useContext( LayoutContext );
 
 	if ( layoutContext === undefined ) {
-		throw new Error(
+		// eslint-disable-next-line no-console
+		console.warn(
 			'useLayoutContext must be used within a LayoutContextProvider'
 		);
 	}
