@@ -5,19 +5,24 @@ This document discusses unit tests. See [the e2e README](https://github.com/wooc
 ## Table of contents
 
 - [WooCommerce Tests](#woocommerce-tests)
-  - [Table of contents](#table-of-contents)
-  - [Initial Setup](#initial-setup)
-    - [MySQL database](#mysql-database)
-    - [Setup instructions](#setup-instructions)
-  - [Running Tests](#running-tests)
-    - [Troubleshooting](#troubleshooting)
-    - [Running tests in PHP 8](#running-tests-in-php-8)
-  - [Writing Tests](#writing-tests)
-  - [Automated Tests](#automated-tests)
-  - [Code Coverage](#code-coverage)
+    - [Table of contents](#table-of-contents)
+    - [Recommended Environment](#recommended-setup)
+    - [Manual Environment](#manual-setup)
+        - [MySQL database](#mysql-database)
+        - [Setup instructions](#setup-instructions)
+    - [Running Tests](#running-tests)
+        - [Troubleshooting](#troubleshooting)
+    - [Writing Tests](#writing-tests)
+    - [Automated Tests](#automated-tests)
+    - [Code Coverage](#code-coverage)
 
+## Recommended Setup
 
-## Initial Setup
+We provide support for running unit tests within a `wp-env` container. All you have to do is complete the [Getting Started Guide](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce#getting-started) and have a functional `wp-env` environment.
+
+## Manual Setup
+
+If you wish to set up a testing environment _without_ using `wp-env`, you may follow these instructions to get the tests working.
 
 ### MySQL database
 
@@ -53,19 +58,14 @@ Example:
 
 ## Running Tests
 
-Change to the plugin root directory and type:
+Depending your environment, you will use one of these commands to run unit tests:
 
-    $ vendor/bin/phpunit
+- **Recommended Environment**: `pnpm --filter=woocommerce test:unit:env`
+- **Manual Environment**: `pnpm --filter=woocommerce test:unit`
 
-The tests will execute and you'll be presented with a summary.
+The tests will execute and you will be presented with a summary.
 
-You can run specific tests by providing the path and filename to the test class:
-
-    $ vendor/bin/phpunit tests/legacy/unit-tests/importer/product.php
-
-A text code coverage summary can be displayed using the `--coverage-text` option:
-
-    $ vendor/bin/phpunit --coverage-text
+You can run specific test files by providing the path to the test class, such as `pnpm --filter=woocommerce test:unit:env tests/legacy/unit-tests/importer/product.php`. A text code coverage summary can be displayed using the `--coverage-text` option.
 
 ### Troubleshooting
 
