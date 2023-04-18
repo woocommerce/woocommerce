@@ -1,0 +1,19 @@
+.woocommerce-iframe-editor {
+    align-items: center;
+    background-color: #2f2f2f;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 132px 48px 48px 208px;
+    z-index: 1000;
+
+    iframe {
+        width: 100%;
+        height: 100%;
+    }
+}

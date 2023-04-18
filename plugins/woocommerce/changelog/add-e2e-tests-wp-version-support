@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Allows the WP, WC & PHP version to be specified in .wp-env.json for e2e and api tests
