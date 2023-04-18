@@ -1,13 +1,18 @@
 /**
  * External dependencies
  */
-import { renderHook } from '@testing-library/react-hooks';
+import {
+	RenderHookResult,
+	act,
+	renderHook,
+} from '@testing-library/react-hooks';
 import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { useValidation } from '../use-validation';
+import { ValidationError } from '../types';
 
 jest.mock( '@wordpress/data', () => ( {
 	useDispatch: jest.fn(),
@@ -17,6 +22,7 @@ describe( 'useValidation', () => {
 	const useDispatchMock = useDispatch as jest.Mock;
 	const lockPostSaving = jest.fn();
 	const unlockPostSaving = jest.fn();
+	let hookResult = {} as RenderHookResult< unknown, ValidationError >;
 
 	beforeEach( () => {
 		useDispatchMock.mockReturnValue( {
@@ -25,69 +31,91 @@ describe( 'useValidation', () => {
 		} );
 	} );
 
-	afterEach( () => {
+	afterEach( async () => {
 		jest.clearAllMocks();
 	} );
 
 	describe( 'sync', () => {
-		it( 'should lock the editor if validate returns false', async () => {
-			const { result, waitForNextUpdate } = renderHook( () =>
-				useValidation( 'product/name', () => false )
-			);
+		it( 'should lock the editor if validate returns an error', async () => {
+			const validationError = 'Invalid name';
 
-			await waitForNextUpdate();
+			await act( async () => {
+				hookResult = renderHook( () =>
+					useValidation( 'product/name', () => validationError )
+				);
+			} );
 
-			expect( result.current ).toBeFalsy();
+			const { result } = hookResult;
+
+			expect( result.current ).toBe( validationError );
 			expect( lockPostSaving ).toHaveBeenCalled();
 			expect( unlockPostSaving ).not.toHaveBeenCalled();
 		} );
 
-		it( 'should unlock the editor if validate returns true', async () => {
-			const { result, waitForNextUpdate } = renderHook( () =>
-				useValidation( 'product/name', () => true )
-			);
+		it( 'should unlock the editor if validate returns no error', async () => {
+			await act( async () => {
+				hookResult = renderHook( () =>
+					useValidation( 'product/name', () => undefined )
+				);
+			} );
 
-			await waitForNextUpdate();
+			const { result } = hookResult;
 
-			expect( result.current ).toBeTruthy();
+			expect( result.current ).toBeUndefined();
 			expect( lockPostSaving ).not.toHaveBeenCalled();
 			expect( unlockPostSaving ).toHaveBeenCalled();
 		} );
 	} );
 
 	describe( 'async', () => {
-		it( 'should lock the editor if validate resolves false', async () => {
-			const { result, waitForNextUpdate } = renderHook( () =>
-				useValidation( 'product/name', () => Promise.resolve( false ) )
-			);
+		it( 'should lock the editor if validate resolves an error', async () => {
+			const validationError = 'Invalid name';
 
-			await waitForNextUpdate();
+			await act( async () => {
+				hookResult = renderHook( () =>
+					useValidation( 'product/name', () =>
+						Promise.resolve( validationError )
+					)
+				);
+			} );
 
-			expect( result.current ).toBeFalsy();
+			const { result } = hookResult;
+
+			expect( result.current ).toBe( validationError );
 			expect( lockPostSaving ).toHaveBeenCalled();
 			expect( unlockPostSaving ).not.toHaveBeenCalled();
 		} );
 
 		it( 'should lock the editor if validate rejects', async () => {
-			const { result, waitForNextUpdate } = renderHook( () =>
-				useValidation( 'product/name', () => Promise.reject() )
-			);
+			const validationError = 'Invalid name';
 
-			await waitForNextUpdate();
+			await act( async () => {
+				hookResult = renderHook( () =>
+					useValidation( 'product/name', () =>
+						Promise.reject( validationError )
+					)
+				);
+			} );
 
-			expect( result.current ).toBeFalsy();
+			const { result } = hookResult;
+
+			expect( result.current ).toBe( validationError );
 			expect( lockPostSaving ).toHaveBeenCalled();
 			expect( unlockPostSaving ).not.toHaveBeenCalled();
 		} );
 
-		it( 'should unlock the editor if validate resolves true', async () => {
-			const { result, waitForNextUpdate } = renderHook( () =>
-				useValidation( 'product/name', () => Promise.resolve( true ) )
-			);
+		it( 'should unlock the editor if validate resolves undefined', async () => {
+			await act( async () => {
+				hookResult = renderHook( () =>
+					useValidation( 'product/name', () =>
+						Promise.resolve( undefined )
+					)
+				);
+			} );
 
-			await waitForNextUpdate();
+			const { result } = hookResult;
 
-			expect( result.current ).toBeTruthy();
+			expect( result.current ).toBeUndefined();
 			expect( lockPostSaving ).not.toHaveBeenCalled();
 			expect( unlockPostSaving ).toHaveBeenCalled();
 		} );

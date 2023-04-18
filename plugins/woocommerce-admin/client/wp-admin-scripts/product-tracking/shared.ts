@@ -406,6 +406,66 @@ const attachAttributesTracks = () => {
  * Attaches product attributes tracks.
  */
 const attachProductAttributesTracks = () => {
+	document
+		.querySelector( '#product_attributes .add_custom_attribute' )
+		?.addEventListener( 'click', () => {
+			recordEvent( 'product_attributes_buttons', {
+				action: 'add_first_attribute',
+			} );
+		} );
+	document
+		.querySelector( '#product_attributes .add_attribute' )
+		?.addEventListener( 'click', () => {
+			// We verify that we are not adding an existing attribute to not
+			// duplicate the recorded event.
+			const selectElement = document.querySelector(
+				'.attribute_taxonomy'
+			) as HTMLSelectElement;
+			// Get the index of the selected option
+			const selectedIndex = selectElement.selectedIndex;
+			if ( selectElement.options[ selectedIndex ]?.value === '' ) {
+				recordEvent( 'product_attributes_buttons', {
+					action: 'add_new',
+				} );
+			}
+		} );
+
+	const attributesSection = '#product_attributes';
+
+	// We attach the events in this way because the buttons are added dynamically.
+	attachEventListenerToParentForChildren( attributesSection, [
+		{
+			eventName: 'click',
+			childQuery: '.woocommerce_attribute_visible_on_product_page',
+			callback: ( clickedElement ) => {
+				const elementName = clickedElement.getAttribute( 'name' );
+				const visibleOnProductPage = document.querySelector(
+					`[name="${ elementName }"]`
+				) as HTMLInputElement;
+
+				recordEvent( 'product_attributes_buttons', {
+					action: 'visible_on_product_page',
+					checked: visibleOnProductPage?.checked,
+				} );
+			},
+		},
+		{
+			eventName: 'click',
+			childQuery: '.woocommerce_attribute_used_for_variations',
+			callback: ( clickedElement ) => {
+				const elementName = clickedElement.getAttribute( 'name' );
+				const usedForVariations = document.querySelector(
+					`[name="${ elementName }"]`
+				) as HTMLInputElement;
+
+				recordEvent( 'product_attributes_buttons', {
+					action: 'used_for_variations',
+					checked: usedForVariations?.checked,
+				} );
+			},
+		},
+	] );
+
 	const attributesCount = document.querySelectorAll(
 		'.woocommerce_attribute'
 	).length;

@@ -11,7 +11,7 @@ export function attachEventListenerToParentForChildren(
 	children: Array< {
 		eventName: 'click' | 'change';
 		childQuery: string;
-		callback: () => void;
+		callback: ( clickedElement: Element ) => void;
 	} >
 ) {
 	const parent = document.querySelector( parentQuery );
@@ -24,7 +24,7 @@ export function attachEventListenerToParentForChildren(
 				event.type === eventName &&
 				( event.target as Element ).matches( childQuery )
 			) {
-				callback();
+				callback( event.target as Element );
 			}
 		} );
 	};

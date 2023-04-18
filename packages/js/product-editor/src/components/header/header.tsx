@@ -14,12 +14,14 @@ import { MoreMenu } from './more-menu';
 import { PreviewButton } from './preview-button';
 import { SaveDraftButton } from './save-draft-button';
 import { PublishButton } from './publish-button';
+import { Tabs } from '../tabs';
 
 export type HeaderProps = {
+	onTabSelect: ( tabId: string | null ) => void;
 	productName: string;
 };
 
-export function Header( { productName }: HeaderProps ) {
+export function Header( { onTabSelect, productName }: HeaderProps ) {
 	const [ editedProductName ] = useEntityProp< string >(
 		'postType',
 		'product',
@@ -33,20 +35,25 @@ export function Header( { productName }: HeaderProps ) {
 			aria-label={ __( 'Product Editor top bar.', 'woocommerce' ) }
 			tabIndex={ -1 }
 		>
-			<h1 className="woocommerce-product-header__title">
-				{ getHeaderTitle( editedProductName, productName ) }
-			</h1>
+			<div className="woocommerce-product-header__inner">
+				<div />
 
-			<div className="woocommerce-product-header__actions">
-				<SaveDraftButton />
+				<h1 className="woocommerce-product-header__title">
+					{ getHeaderTitle( editedProductName, productName ) }
+				</h1>
 
-				<PreviewButton />
+				<div className="woocommerce-product-header__actions">
+					<SaveDraftButton />
 
-				<PublishButton />
+					<PreviewButton />
 
-				<WooHeaderItem.Slot name="product" />
-				<MoreMenu />
+					<PublishButton />
+
+					<WooHeaderItem.Slot name="product" />
+					<MoreMenu />
+				</div>
 			</div>
+			<Tabs onChange={ onTabSelect } />
 		</div>
 	);
 }
