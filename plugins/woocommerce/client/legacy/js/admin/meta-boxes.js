@@ -187,4 +187,7 @@ jQuery( function ( $ ) {
 		'input, textarea',
 		jQuery.maybe_disable_save_button
 	);
+
+	// Maybe disable save buttons when editing products.
+	jQuery.maybe_disable_save_button();
 } );
