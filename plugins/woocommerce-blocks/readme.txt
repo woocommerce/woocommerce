@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 6.1
 Tested up to: 6.2
 Requires PHP: 7.3
-Stable tag: 10.0.0
+Stable tag: 10.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -79,6 +79,14 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
 
 == Changelog ==
+
+= 10.0.1 - 2023-04-18 =
+
+#### Bug Fixes
+
+- Product Price Block: Remove ProductSelector support. ([8980](https://github.com/woocommerce/woocommerce-blocks/pull/8980))
+- Single Product Compatibility Layer: add support for custom HTML Blocks. ([9075](https://github.com/woocommerce/woocommerce-blocks/pull/9075))
+- Fix: tax_query should be calculated only if __woocommerceAttributes is valid. ([9049](https://github.com/woocommerce/woocommerce-blocks/pull/9049))
 
 = 10.0.0 - 2023-04-11 =
 
