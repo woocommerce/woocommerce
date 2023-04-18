@@ -6,7 +6,7 @@ This document discusses unit tests. See [the e2e README](https://github.com/wooc
 
 - [WooCommerce Tests](#woocommerce-tests)
     - [Table of contents](#table-of-contents)
-    - [Recommended Environment](#recommended-setup)
+    - [Experimental Environment](#experimental-setup)
     - [Manual Environment](#manual-setup)
         - [MySQL database](#mysql-database)
         - [Setup instructions](#setup-instructions)
@@ -16,11 +16,13 @@ This document discusses unit tests. See [the e2e README](https://github.com/wooc
     - [Automated Tests](#automated-tests)
     - [Code Coverage](#code-coverage)
 
-## Recommended Setup
+## Experimental Environment
+
+**Note: This is an experimental feature and may not work as-expected!**
 
 Complete the [Getting Started Guide](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce#getting-started) and you will have a functional `wp-env` environment to run unit tests.
 
-## Manual Setup
+## Manual Environment
 
 If you wish to set up a testing environment _without_ using `wp-env`, you may follow these instructions to get the tests working.
 
@@ -60,12 +62,14 @@ Example:
 
 Depending your environment, you will use one of these commands to run unit tests:
 
-- **Recommended Environment**: `pnpm --filter=woocommerce test:unit:env`
+- **Experimental Environment**: `pnpm --filter=woocommerce test:unit:env`
 - **Manual Environment**: `pnpm --filter=woocommerce test:unit`
 
 The tests will execute and you will be presented with a summary.
 
-You can run specific test files by providing the path to the test class, such as `pnpm --filter=woocommerce test:unit:env tests/legacy/unit-tests/importer/product.php`. A text code coverage summary can be displayed using the `--coverage-text` option.
+You can run specific tests by providing a `--filter` option. This is a regular expression pattern that matches test names. If you don't supply delimiters, PHPUnit will add them. For example, you can use `pnpm --filter=woocommerce {command} --filter=test_handle` to run any tests that have `test_handle` in them. A text code coverage summary can be displayed using the `--coverage-text` option.
+
+In the manual environment you can also give the command a path and run specific test files: `pnpm --filter=woocommerce test:unit tests/legacy/unit-tests/importer/product.php`.
 
 ### Troubleshooting
 
