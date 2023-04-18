@@ -444,8 +444,8 @@ class WC_Admin_Menus {
 	/**
 	 * Add gpt button to the editor.
 	 */
-	public function add_gpt_button() {
-		if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'edit_pages' ) ) {
+	public function add_gpt_button( $editor_id ) {
+		if ( $editor_id !== 'content' || ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'edit_pages' ) ) ) {
 			return;
 		}
 
