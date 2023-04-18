@@ -80,38 +80,26 @@ describe( 'StoreAlerts', () => {
 	} );
 
 	it( 'should show the actions for an alert that contains actions', () => {
-		const { container } = render(
+		const { container, getByText } = render(
 			<StoreAlerts alerts={ [ alerts[ 1 ] ] } />
 		);
 
-		expect(
-			container.querySelector( '.components-button' ).textContent
-		).toBe( 'Click me!' );
-		expect(
-			container
-				.querySelector( '.components-button' )
-				.getAttribute( 'href' )
-		).toBe( '#' );
+		expect( getByText( 'Click me!' ) ).toBeVisible();
+		expect( getByText( 'Click me!' ).getAttribute( 'href' ) ).toBe( '#' );
 		expect(
 			container.querySelector( '.woocommerce-store-alerts__snooze' )
 		).not.toBeInTheDocument();
 	} );
 
 	it( 'should show the actions and snooze actions for snoozable alerts', () => {
-		const { container } = render(
+		const { container, getByText } = render(
 			<StoreAlerts
 				alerts={ [ { ...alerts[ 1 ], is_snoozable: true } ] }
 			/>
 		);
 
-		expect(
-			container.querySelector( '.components-button' ).textContent
-		).toBe( 'Click me!' );
-		expect(
-			container
-				.querySelector( '.components-button' )
-				.getAttribute( 'href' )
-		).toBe( '#' );
+		expect( getByText( 'Click me!' ) ).toBeVisible();
+		expect( getByText( 'Click me!' ).getAttribute( 'href' ) ).toBe( '#' );
 		expect(
 			container.querySelector( '.woocommerce-store-alerts__snooze' )
 		).toBeInTheDocument();
