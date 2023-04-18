@@ -629,6 +629,20 @@
 			return buttonText;
 		}
 
+		const generatingContentPhrases = [
+			woocommerce_admin.i18n_product_description_gpt_generating_content_1,
+			woocommerce_admin.i18n_product_description_gpt_generating_content_2,
+			woocommerce_admin.i18n_product_description_gpt_generating_content_3,
+		];
+
+		let generatingContentPhraseInterval = null;
+
+		function getGeneratingContentPhrase() {
+			return generatingContentPhrases[
+				Math.floor( Math.random() * generatingContentPhrases.length )
+			];
+		}
+
 		$( 'button.gpt-action' ).on( 'click', function () {
 			var button = $( this );
 			var buttonText = button.text();
@@ -645,10 +659,18 @@
 				existingDescription = contentTinyMCE
 					.getContent()
 					.replace( /(<([^>]+)>)/gi, '' );
+
 				contentTinyMCE.readonly = true;
-				contentTinyMCE.setContent(
-					woocommerce_admin.i18n_product_description_gpt_generating_content
-				);
+
+				$( '#wp-content-editor-container' ).css( {
+					opacity: '0.5',
+					'pointer-events': 'none',
+				} );
+
+				contentTinyMCE.setContent( getGeneratingContentPhrase() );
+				generatingContentPhraseInterval = setInterval( function () {
+					contentTinyMCE.setContent( getGeneratingContentPhrase() );
+				}, 2000 );
 			}
 
 			$.ajax( {
@@ -671,6 +693,7 @@
 					).hide();
 					$( '.woocommerce-gpt-extra-actions-wrapper' ).show();
 					if ( contentTinyMCE ) {
+						clearInterval( generatingContentPhraseInterval );
 						contentTinyMCE.setContent( response );
 					} else {
 						$( '#wp-content-editor-container .wp-editor-area' ).val(
@@ -680,6 +703,7 @@
 				},
 				error: function ( err ) {
 					if ( contentTinyMCE ) {
+						clearInterval( generatingContentPhraseInterval );
 						contentTinyMCE.setContent( err );
 					}
 					console.log( err );
@@ -690,6 +714,11 @@
 
 					if ( contentTinyMCE ) {
 						contentTinyMCE.readonly = false;
+
+						$( '#wp-content-editor-container' ).css( {
+							opacity: '1',
+							'pointer-events': 'auto',
+						} );
 					}
 				},
 			} );
