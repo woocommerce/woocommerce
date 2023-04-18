@@ -10,6 +10,7 @@ import {
 } from '@wordpress/element';
 
 import { useBlockProps } from '@wordpress/block-editor';
+import { useInstanceId } from '@wordpress/compose';
 import { cleanForSlug } from '@wordpress/url';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -17,6 +18,7 @@ import {
 	WCDataSelector,
 	Product,
 } from '@woocommerce/data';
+import classNames from 'classnames';
 import {
 	Button,
 	BaseControl,
@@ -33,7 +35,6 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  */
 import { AUTO_DRAFT_NAME } from '../../utils';
 import { EditProductLinkModal } from '../edit-product-link-modal';
-
 import { useValidation } from '../../hooks/use-validation';
 
 export function Edit() {
@@ -76,23 +77,65 @@ export function Edit() {
 		}
 	);
 
-	const nameIsValid = useValidation(
+	const nameValidationError = useValidation(
 		'product/name',
-		() => Boolean( name ) && name !== AUTO_DRAFT_NAME
+		function nameValidator() {
+			if ( ! name || name === AUTO_DRAFT_NAME ) {
+				return __( 'This field is required.', 'woocommerce' );
+			}
+
+			if ( name.length > 120 ) {
+				return __(
+					'Please enter a product name shorter than 120 characters.',
+					'woocommerce'
+				);
+			}
+		}
 	);
 
 	const setSkuIfEmpty = () => {
-		if ( sku || ! nameIsValid ) {
+		if ( sku || nameValidationError ) {
 			return;
 		}
 		setSku( cleanForSlug( name ) );
 	};
 
+	const help =
+		nameValidationError ??
+		( productId &&
+			[ 'publish', 'draft' ].includes( product.status ) &&
+			permalinkPrefix && (
+				<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
+					{ __( 'Product link', 'woocommerce' ) }
+					:&nbsp;
+					<a
+						href={ product.permalink }
+						target="_blank"
+						rel="noreferrer"
+					>
+						{ permalinkPrefix }
+						{ product.slug || cleanForSlug( name ) }
+						{ permalinkSuffix }
+					</a>
+					<Button
+						variant="link"
+						onClick={ () => setShowProductLinkEditModal( true ) }
+					>
+						{ __( 'Edit', 'woocommerce' ) }
+					</Button>
+				</span>
+			) );
+
+	const nameControlId = useInstanceId(
+		BaseControl,
+		'product_name'
+	) as string;
+
 	return (
 		<>
 			<div { ...blockProps }>
 				<BaseControl
-					id={ 'product_name' }
+					id={ nameControlId }
 					label={ createInterpolateElement(
 						__( 'Name <required />', 'woocommerce' ),
 						{
@@ -103,9 +146,14 @@ export function Edit() {
 							),
 						}
 					) }
+					className={ classNames( {
+						'has-error': nameValidationError,
+					} ) }
+					help={ help }
 				>
 					<InputControl
-						name={ 'woocommerce-product-name' }
+						id={ nameControlId }
+						name="name"
 						placeholder={ __(
 							'e.g. 12 oz Coffee Mug',
 							'woocommerce'
@@ -115,32 +163,7 @@ export function Edit() {
 						onBlur={ setSkuIfEmpty }
 					/>
 				</BaseControl>
-				{ productId &&
-					nameIsValid &&
-					[ 'publish', 'draft' ].includes( product.status ) &&
-					permalinkPrefix && (
-						<span className="woocommerce-product-form__secondary-text product-details-section__product-link">
-							{ __( 'Product link', 'woocommerce' ) }
-							:&nbsp;
-							<a
-								href={ product.permalink }
-								target="_blank"
-								rel="noreferrer"
-							>
-								{ permalinkPrefix }
-								{ product.slug || cleanForSlug( name ) }
-								{ permalinkSuffix }
-							</a>
-							<Button
-								variant="link"
-								onClick={ () =>
-									setShowProductLinkEditModal( true )
-								}
-							>
-								{ __( 'Edit', 'woocommerce' ) }
-							</Button>
-						</span>
-					) }
+
 				{ showProductLinkEditModal && (
 					<EditProductLinkModal
 						permalinkPrefix={ permalinkPrefix || '' }

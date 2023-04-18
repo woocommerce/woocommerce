@@ -108,40 +108,36 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 		suffix: weightUnit,
 	};
 
-	const isDimensionsWidthValid = useValidation(
+	const dimensionsWidthValidationError = useValidation(
 		'product/dimensions/width',
-		function validator() {
+		function dimensionsWidthValidator() {
 			if ( dimensions?.width && +dimensions.width <= 0 ) {
-				return false;
+				return __( 'Width must be greater than zero.', 'woocommerce' );
 			}
-			return true;
 		}
 	);
-	const isDimensionsLengthValid = useValidation(
+	const dimensionsLengthValidationError = useValidation(
 		'product/dimensions/length',
-		function validator() {
+		function dimensionsLengthValidator() {
 			if ( dimensions?.length && +dimensions.length <= 0 ) {
-				return false;
+				return __( 'Length must be greater than zero.', 'woocommerce' );
 			}
-			return true;
 		}
 	);
-	const isDimensionsHeightValid = useValidation(
+	const dimensionsHeightValidationError = useValidation(
 		'product/dimensions/height',
-		function validator() {
+		function dimensionsHeightValidator() {
 			if ( dimensions?.height && +dimensions.height <= 0 ) {
-				return false;
+				return __( 'Height must be greater than zero.', 'woocommerce' );
 			}
-			return true;
 		}
 	);
-	const isWeightValid = useValidation(
+	const weightValidationError = useValidation(
 		'product/weight',
-		function validator() {
+		function weightValidator() {
 			if ( weight && +weight <= 0 ) {
-				return false;
+				return __( 'Weight must be greater than zero.', 'woocommerce' );
 			}
-			return true;
 		}
 	);
 
@@ -158,16 +154,9 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 							{ Side: <span>A</span> }
 						) }
 						className={ classNames( {
-							'has-error': ! isDimensionsWidthValid,
+							'has-error': dimensionsWidthValidationError,
 						} ) }
-						help={
-							isDimensionsWidthValid
-								? undefined
-								: __(
-										'Width must be higher than zero.',
-										'woocommerce'
-								  )
-						}
+						help={ dimensionsWidthValidationError }
 					>
 						<InputControl { ...dimensionsWidthProps } />
 					</BaseControl>
@@ -179,16 +168,9 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 							{ Side: <span>B</span> }
 						) }
 						className={ classNames( {
-							'has-error': ! isDimensionsLengthValid,
+							'has-error': dimensionsLengthValidationError,
 						} ) }
-						help={
-							isDimensionsLengthValid
-								? undefined
-								: __(
-										'Length must be higher than zero.',
-										'woocommerce'
-								  )
-						}
+						help={ dimensionsLengthValidationError }
 					>
 						<InputControl { ...dimensionsLengthProps } />
 					</BaseControl>
@@ -200,16 +182,9 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 							{ Side: <span>C</span> }
 						) }
 						className={ classNames( {
-							'has-error': ! isDimensionsHeightValid,
+							'has-error': dimensionsHeightValidationError,
 						} ) }
-						help={
-							isDimensionsHeightValid
-								? undefined
-								: __(
-										'Height must be higher than zero.',
-										'woocommerce'
-								  )
-						}
+						help={ dimensionsHeightValidationError }
 					>
 						<InputControl { ...dimensionsHeightProps } />
 					</BaseControl>
@@ -218,16 +193,9 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 						id={ weightProps.id }
 						label={ __( 'Weight', 'woocommerce' ) }
 						className={ classNames( {
-							'has-error': ! isWeightValid,
+							'has-error': weightValidationError,
 						} ) }
-						help={
-							isWeightValid
-								? undefined
-								: __(
-										'Weight must be higher than zero.',
-										'woocommerce'
-								  )
-						}
+						help={ weightValidationError }
 					>
 						<InputControl { ...weightProps } />
 					</BaseControl>
