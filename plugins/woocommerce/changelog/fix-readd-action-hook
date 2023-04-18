@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Re-add action hook which was removed by mistake
+
+

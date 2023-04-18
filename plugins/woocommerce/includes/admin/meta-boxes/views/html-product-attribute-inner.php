@@ -104,5 +104,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 		</td>
 	</tr>
+	<?php
+	if ( ! isset( $is_variations_screen ) ) {
+		/**
+		 * Hook to display custom attribute terms.
+		 *
+		 * @since 3.4.0
+		 * @param WC_Product_Attribute $attribute Attribute object.
+		 * @param number $i Attribute index.
+		 */
+		do_action( 'woocommerce_after_product_attribute_settings', $attribute, $i );
+	}
+	?>
 	</tbody>
 </table>
