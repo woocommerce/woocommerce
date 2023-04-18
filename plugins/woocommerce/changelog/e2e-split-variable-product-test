@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Split can create product, attributes and variations, edit variations and delete variations into smaller tests to avoid timing out

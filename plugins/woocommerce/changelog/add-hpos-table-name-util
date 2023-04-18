@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add methods to OrderUtil to get the names of order database tables

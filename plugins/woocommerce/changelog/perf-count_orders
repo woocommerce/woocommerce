@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Improve search count query performance by avoiding LEFT JOIN in favor of subquery.
