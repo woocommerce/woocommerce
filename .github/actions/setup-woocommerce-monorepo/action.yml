@@ -46,7 +46,7 @@ runs:
               tools: phpcs, sirbrillig/phpcs-changed
 
         - name: Cache Composer Dependencies
-          uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12
+          uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
           with:
               path: ~/.cache/composer/files
               key: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -59,7 +59,7 @@ runs:
               pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
         - name: Cache Build Output
-          uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12
+          uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
           with:
               path: node_modules/.cache/turbo
               key: ${{ runner.os }}-build-output-${{ hashFiles('node_modules/.cache/turbo/*-meta.json') }}
