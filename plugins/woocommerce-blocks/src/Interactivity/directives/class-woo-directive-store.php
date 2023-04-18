@@ -1,7 +1,7 @@
 <?php
 
 class Woo_Directive_Store {
-	private static array $store = array();
+	private static $store = array();
 
 	static function get_data() {
 		return self::$store;

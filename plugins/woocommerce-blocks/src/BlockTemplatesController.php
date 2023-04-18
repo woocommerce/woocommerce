@@ -325,7 +325,7 @@ class BlockTemplatesController {
 					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
 				}
 
-				if ( 'single-product' === $template->slug ) {
+				if ( str_contains( $template->slug, 'single-product' ) ) {
 					if ( ! is_admin() && ! BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
 
 						$new_content       = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
