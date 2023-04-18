@@ -233,7 +233,9 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_product_description_gpt_simplifying' => __( 'Simplifying description&hellip;', 'woocommerce' ),
 					'i18n_product_description_gpt_rewriting' => __( 'Rewriting description&hellip;', 'woocommerce' ),
 					'i18n_product_description_gpt_more'    => __( 'Making the description longer&hellip;', 'woocommerce' ),
-					'i18n_product_description_gpt_generating_content'  => __( 'Please wait&hellip;', 'woocommerce' ),
+					'i18n_product_description_gpt_generating_content_1'  => __( 'Please wait&hellip;', 'woocommerce' ),
+					'i18n_product_description_gpt_generating_content_2'  => __( 'Just a little longer&hellip;', 'woocommerce' ),
+					'i18n_product_description_gpt_generating_content_3'  => __( 'Almost there&hellip;', 'woocommerce' ),
 				);
 
 				wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
