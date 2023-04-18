@@ -645,7 +645,14 @@
 				existingDescription = contentTinyMCE
 					.getContent()
 					.replace( /(<([^>]+)>)/gi, '' );
+
 				contentTinyMCE.readonly = true;
+
+				$( '#wp-content-editor-container' ).css( {
+					opacity: '0.5',
+					'pointer-events': 'none',
+				} );
+
 				contentTinyMCE.setContent(
 					woocommerce_admin.i18n_product_description_gpt_generating_content
 				);
@@ -691,6 +698,11 @@
 					if ( contentTinyMCE ) {
 						contentTinyMCE.readonly = false;
 					}
+
+					$( '#wp-content-editor-container' ).css( {
+						opacity: '1',
+						'pointer-events': 'auto',
+					} );
 				},
 			} );
 		} );
