@@ -321,7 +321,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 				$carry['index'] = $carry['index'] + 1;
 				$block          = $item[0];
 
-				if ( 'core/template-part' === $block['blockName'] ) {
+				if ( 'core/template-part' === $block['blockName'] || self::is_custom_html( $block ) ) {
 					$carry['template'][] = $block;
 					return $carry;
 				}
@@ -433,9 +433,6 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 					$carry[] = array( $block );
 					return $carry;
 				}
-				if ( empty( $block['blockName'] ) ) {
-					return $carry;
-				}
 				$last_element_index = count( $carry ) - 1;
 				if ( isset( $carry[ $last_element_index ][0]['blockName'] ) && 'core/template-part' !== $carry[ $last_element_index ][0]['blockName'] ) {
 					$carry[ $last_element_index ][] = $block;
@@ -468,6 +465,16 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 			$closing_tag_position + 1,
 			0
 		);
+	}
 
+
+	/**
+	 * Plain custom HTML block is parsed as block with an empty blockName with a filled innerHTML.
+	 *
+	 * @param array $block Parse block.
+	 * @return bool
+	 */
+	private static function is_custom_html( $block ) {
+		return empty( $block['blockName'] ) && ! empty( $block['innerHTML'] );
 	}
 }
