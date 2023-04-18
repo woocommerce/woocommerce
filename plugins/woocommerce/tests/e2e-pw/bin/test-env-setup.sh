@@ -4,6 +4,10 @@ ENABLE_HPOS="${ENABLE_HPOS:-0}"
 ENABLE_NEW_PRODUCT_EDITOR="${ENABLE_NEW_PRODUCT_EDITOR:-0}"
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
+echo -r 'Check Dir/File owners\n'
+docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-wordpress sh -c "ls -ld /var/www/html/wp-content \
+&& ls -ld /var/www/html/wp-config.php"
+
 echo -e 'Normalize permissions for wp-content directory \n'
 docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-config.php \
 && chmod -c ugo+w /var/www/html/wp-content \
