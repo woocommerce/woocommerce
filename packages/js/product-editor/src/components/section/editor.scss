@@ -1,5 +1,10 @@
 .wp-block-woocommerce-product-section {
-    margin-top: 48px;
+    margin-bottom: 48px;
+	padding-top: 48px;
+
+	&:first-child {
+		padding-top: 64px;
+	}
 
     &__title {
         margin-top: 0;
@@ -12,7 +17,7 @@
 
         .block-editor-block-icon {
             margin-right: 14px;
-            
+
             > div {
                 display: flex;
                 align-items: center;
@@ -27,4 +32,8 @@
         font-size: 13px;
         color: $gray-700;
     }
+}
+
+.wp-block-woocommerce-product-section + .wp-block-woocommerce-product-section {
+	border-top: 1px solid #ddd;
 }
