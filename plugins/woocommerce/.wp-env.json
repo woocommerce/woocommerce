@@ -1,8 +1,7 @@
 {
     "phpVersion": "7.4",
     "plugins": [
-        ".",
-        "https://downloads.wordpress.org/plugin/akismet.zip"
+        "."
     ],
     "config": {
         "JETPACK_AUTOLOAD_DEV": true,
@@ -18,7 +17,6 @@
         "tests": {
             "port": 8086,
             "config": {
-                "WP_TESTS_DOMAIN": "localhost:8086",
                 "ALTERNATE_WP_CRON": false
             }
         }
