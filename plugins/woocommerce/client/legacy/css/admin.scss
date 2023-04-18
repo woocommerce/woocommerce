@@ -7986,6 +7986,17 @@ table.bar_chart {
 		margin: 0px 12px 12px;
 		width: calc(100% - 24px);
 	}
+
+	// hacks to fix visuals with "write it for me" button present
+	.wp-editor-tools {
+		top: -1px !important;
+		border-bottom: 0 !important;
+	}
+	.wp-switch-editor
+	{
+		position: relative;
+		z-index: 1;
+	}
 }
 
 .woocommerce-gpt-integration {
