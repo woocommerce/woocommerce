@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix WP latest-2 version retrieval in the "Smoke test release" workflow.

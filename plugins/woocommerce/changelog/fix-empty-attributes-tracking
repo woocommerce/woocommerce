@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Exclude empty attributes from the attribute count when tracking product updates.
