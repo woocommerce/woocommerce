@@ -41,6 +41,12 @@ jobs:
 
             - name: 'Check whether today is the code freeze day'
               id: check-freeze
+              if: ! $TIME_OVERRIDE
+              run: pnpm utils code-freeze verify-day -g
+
+            - name: 'Check whether today is the code freeze day with override'
+              id: check-freeze
+              if: $TIME_OVERRIDE
               run: pnpm utils code-freeze verify-day -g -o $TIME_OVERRIDE
 
     maybe-create-next-milestone-and-release-branch:
