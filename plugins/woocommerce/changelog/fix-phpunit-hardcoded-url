@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Replaced `example.org` in tests with WP_TESTS_DOMAIN for consistency with WordPress Core.
