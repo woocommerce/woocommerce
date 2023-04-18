@@ -327,4 +327,41 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$this->assertEquals( $result_without_withespace, $expected_single_product_template_without_whitespace, '' );
 	}
+
+	/**
+	 * Test that the Single Product Template is wrapped in a div with the correct class if it contains a block related to the Single Product Template and custom HTML isn't removed.
+	 */
+	public function test_add_compatibility_layer_if_contains_single_product_blocks_and_custom_HTML_not_removed() {
+
+		$default_single_product_template = '
+		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+		<span>Custom HTML</span>
+		<!-- wp:group {"layout":{"inherit":true,"type":"constrained"}} -->
+		<div class="wp-block-group">
+		   <!-- wp:woocommerce/product-image-gallery /-->
+		</div>
+		<!-- /wp:group -->
+		<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$expected_single_product_template = '
+		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+		<span>Custom HTML</span>
+		<!-- wp:group {"className":"woocommerce product", "__wooCommerceIsFirstBlock":true,"__wooCommerceIsLastBlock":true} -->
+		<div class="wp-block-group woocommerce product">
+		   <!-- wp:group {"layout":{"inherit":true,"type":"constrained"}} -->
+		   <div class="wp-block-group">
+			  <!-- wp:woocommerce/product-image-gallery /-->
+		   </div>
+		   <!-- /wp:group -->
+		</div>
+		<!-- /wp:group -->
+		<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
+
+		$result_without_withespace                           = preg_replace( '/\s+/', '', $result );
+		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
+
+		$this->assertEquals( $result_without_withespace, $expected_single_product_template_without_whitespace, '' );
+	}
 }
