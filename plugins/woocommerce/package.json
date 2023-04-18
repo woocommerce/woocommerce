@@ -46,6 +46,7 @@
 		"e2e:debug": "pnpm exec wc-e2e test:e2e-debug",
 		"e2e:dev": "pnpm exec wc-e2e test:e2e-dev",
 		"test:unit": "./vendor/bin/phpunit -c ./phpunit.xml",
+		"test:unit:env": "pnpm run env:dev && wp-env run tests-wordpress /var/www/html/wp-content/plugins/woocommerce/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/woocommerce/phpunit.xml --verbose",
 		"makepot": "composer run-script makepot",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js"
 	},
@@ -68,7 +69,7 @@
 		"@woocommerce/woocommerce-rest-api": "^1.0.1",
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
 		"@wordpress/babel-preset-default": "3.0.2",
-		"@wordpress/env": "^4.8.0",
+		"@wordpress/env": "^5.16.0",
 		"@wordpress/stylelint-config": "19.1.0",
 		"allure-commandline": "^2.17.2",
 		"allure-playwright": "^2.0.0-beta.16",
