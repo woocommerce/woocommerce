@@ -18,7 +18,7 @@ This document discusses unit tests. See [the e2e README](https://github.com/wooc
 
 ## Recommended Setup
 
-We provide support for running unit tests within a `wp-env` container. All you have to do is complete the [Getting Started Guide](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce#getting-started) and have a functional `wp-env` environment.
+Complete the [Getting Started Guide](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce#getting-started) and you will have a functional `wp-env` environment to run unit tests.
 
 ## Manual Setup
 
