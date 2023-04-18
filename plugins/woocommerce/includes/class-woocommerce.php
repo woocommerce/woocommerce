@@ -393,6 +393,8 @@ final class WooCommerce {
 				return defined( 'DOING_CRON' );
 			case 'frontend':
 				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! $this->is_rest_api_request();
+			case 'rest':
+				return $this->is_rest_api_request();
 		}
 	}
 
@@ -546,7 +548,7 @@ final class WooCommerce {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
 		}
 
-		if ( $this->is_request( 'admin' ) ) {
+		if ( $this->is_request( 'admin' ) || $this->is_request( 'rest' ) ) {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
 		}
 
