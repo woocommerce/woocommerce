@@ -63,6 +63,11 @@ class WC_WCCOM_Site_Installer {
 		'activate_product',
 	);
 
+	/**
+	 * An instance of the WP_Upgrader class to be used for installation.
+	 *
+	 * @var \WP_Upgrader $wp_upgrader
+	 */
 	private static $wp_upgrader;
 
 	/**
@@ -569,6 +574,11 @@ class WC_WCCOM_Site_Installer {
 		return false;
 	}
 
+	/**
+	 * Get an instance of WP_Upgrader to use for installing plugins.
+	 *
+	 * @return WP_Upgrader
+	 */
 	public static function get_wp_upgrader() {
 		if ( ! empty( self::$wp_upgrader ) ) {
 			return self::$wp_upgrader;
