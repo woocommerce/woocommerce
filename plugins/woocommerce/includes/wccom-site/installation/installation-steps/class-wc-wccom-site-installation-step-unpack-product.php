@@ -2,7 +2,8 @@
 /**
  * Get product info step.
  *
- * @package WooCommerce\WCCOM\Installation\Installation_Steps
+ * @package WooCommerce\WCCom
+ * @since   7.7.0
  */
 
 use WC_REST_WCCOM_Site_Installer_Error_Codes as Installer_Error_Codes;
@@ -10,11 +11,22 @@ use WC_REST_WCCOM_Site_Installer_Error as Installer_Error;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * WC_WCCOM_Site_Installation_Step_Unpack_Product class
+ */
 class WC_WCCOM_Site_Installation_Step_Unpack_Product implements WC_WCCOM_Site_Installation_Step {
+	/**
+	 * Constructor.
+	 *
+	 * @param array $state The current installation state.
+	 */
 	public function __construct( $state ) {
 		$this->state = $state;
 	}
 
+	/**
+	 * Run the step installation process.
+	 */
 	public function run() {
 		$upgrader      = WC_WCCOM_Site_Installer::get_wp_upgrader();
 		$unpacked_path = $upgrader->unpack_package( $this->state->get_download_path(), true );

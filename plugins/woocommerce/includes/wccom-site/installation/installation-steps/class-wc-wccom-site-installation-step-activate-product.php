@@ -2,7 +2,8 @@
 /**
  * Activate product step.
  *
- * @package WooCommerce\WCCOM\Installation\Installation_Steps
+ * @package WooCommerce\WCCom
+ * @since   7.7.0
  */
 
 use WC_REST_WCCOM_Site_Installer_Error_Codes as Installer_Error_Codes;
@@ -10,11 +11,22 @@ use WC_REST_WCCOM_Site_Installer_Error as Installer_Error;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * WC_WCCOM_Site_Installation_Step_Activate_Product Class
+ */
 class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_Installation_Step {
+	/**
+	 * Constructor.
+	 *
+	 * @param array $state The current installation state.
+	 */
 	public function __construct( $state ) {
 		$this->state = $state;
 	}
 
+	/**
+	 * Run the step installation process.
+	 */
 	public function run() {
 		$product_id = $this->state->get_product_id();
 
@@ -27,6 +39,11 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 		return $this->state;
 	}
 
+	/**
+	 * Activate plugin.
+	 *
+	 * @param int $product_id Product ID.
+	 */
 	private function activate_plugin( $product_id ) {
 		// Clear plugins cache used in `WC_Helper::get_local_woo_plugins`.
 		wp_clean_plugins_cache();
@@ -41,9 +58,9 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 		if ( false === $filename ) {
 			$plugins = wp_list_filter(
 				WC_Helper::get_local_woo_plugins(),
-				[
+				array(
 					'_product_id' => $product_id,
-				]
+				)
 			);
 
 			$filename = is_array( $plugins ) && ! empty( $plugins ) ? key( $plugins ) : '';
@@ -60,6 +77,11 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 		}
 	}
 
+	/**
+	 * Activate theme.
+	 *
+	 * @param int $product_id Product ID.
+	 */
 	private function activate_theme( $product_id ) {
 		// Clear plugins cache used in `WC_Helper::get_local_woo_themes`.
 		wp_clean_themes_cache();
@@ -74,9 +96,9 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 		if ( false === $theme_slug ) {
 			$themes = wp_list_filter(
 				WC_Helper::get_local_woo_themes(),
-				[
+				array(
 					'_product_id' => $product_id,
-				]
+				)
 			);
 
 			$theme_slug = is_array( $themes ) && ! empty( $themes ) ? dirname( key( $themes ) ) : '';
@@ -89,6 +111,11 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 		switch_theme( $theme_slug );
 	}
 
+	/**
+	 * Get WP.org product directory name.
+	 *
+	 * @return string|false
+	 */
 	private function get_wporg_product_dir_name() {
 		if ( empty( $this->state->get_installed_path() ) ) {
 			return false;
