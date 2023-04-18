@@ -290,6 +290,11 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Filters the "from" address in emails to use the expected test email.
+	 *
+	 * @return string
+	 */
 	public function filter_test_email() {
 		return WP_TESTS_EMAIL;
 	}
