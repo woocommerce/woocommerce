@@ -1,4 +1,9 @@
 <?php
+/**
+ * Activate product step.
+ *
+ * @package WooCommerce\WCCOM\Installation\Installation_Steps
+ */
 
 use WC_REST_WCCOM_Site_Installer_Error_Codes as Installer_Error_Codes;
 use WC_REST_WCCOM_Site_Installer_Error as Installer_Error;
@@ -6,11 +11,11 @@ use WC_REST_WCCOM_Site_Installer_Error as Installer_Error;
 defined( 'ABSPATH' ) || exit;
 
 class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_Installation_Step {
-	public function __construct($state) {
+	public function __construct( $state ) {
 		$this->state = $state;
 	}
 
-	public function run(  ) {
+	public function run() {
 		$product_id = $this->state->get_product_id();
 
 		if ( 'plugin' === $this->state->get_product_type() ) {
@@ -28,7 +33,7 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 		$filename = false;
 
 		// If product is WP.org one, find out its filename.
-		$dir_name = $this->get_wporg_product_dir_name( );
+		$dir_name = $this->get_wporg_product_dir_name();
 		if ( false !== $dir_name ) {
 			$filename = \WC_WCCOM_Site_Installer::get_wporg_plugin_main_file( $dir_name );
 		}
@@ -50,7 +55,7 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 
 		$result = activate_plugin( $filename );
 
-		if (is_wp_error($result)) {
+		if ( is_wp_error( $result ) ) {
 			return new Installer_Error( Installer_Error_Codes::PLUGIN_ACTIVATION_ERROR, $result->get_error_message() );
 		}
 	}
@@ -61,7 +66,7 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 		$theme_slug = false;
 
 		// If product is WP.org theme, find out its slug.
-		$dir_name = $this->get_wporg_product_dir_name( );
+		$dir_name = $this->get_wporg_product_dir_name();
 		if ( false !== $dir_name ) {
 			$theme_slug = basename( $dir_name );
 		}
@@ -84,14 +89,14 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 		switch_theme( $theme_slug );
 	}
 
-	private function get_wporg_product_dir_name( ) {
-		if ( empty($this->state->get_installed_path() ) ) {
+	private function get_wporg_product_dir_name() {
+		if ( empty( $this->state->get_installed_path() ) ) {
 			return false;
 		}
 
 		// Check whether product was downloaded from WordPress.org.
 		$download_url = $this->state->get_download_url();
-		$parsed_url = wp_parse_url( $download_url );
+		$parsed_url   = wp_parse_url( $download_url );
 		if ( ! empty( $parsed_url['host'] ) && 'downloads.wordpress.org' !== $parsed_url['host'] ) {
 			return false;
 		}

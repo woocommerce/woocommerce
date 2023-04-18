@@ -59,27 +59,27 @@ class WC_REST_WCCOM_Site_Installer_Controller_V2 extends WC_REST_Controller {
 							'type'     => 'string',
 							'enum' => WC_WCCOM_Site_Installation_Manager::STEPS,
 						],
-                        'idempotency-key' => [
-                            'required' => true,
+						'idempotency-key' => [
+							'required' => true,
 							'type'     => 'string',
 						],
 					],
 				],
-                [
-                    'methods'             => WP_REST_Server::DELETABLE,
-                    'callback'            => [ $this, 'reset_install' ],
-                    'permission_callback' => [ $this, 'check_permission' ],
-                    'args'                => [
-                        'product-id' => [
-                            'required' => true,
-                            'type'     => 'integer',
-                        ],
-                        'idempotency-key' => [
-                            'required' => true,
-                            'type'     => 'string',
-                        ],
-                    ],
-                ],
+				[
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => [ $this, 'reset_install' ],
+					'permission_callback' => [ $this, 'check_permission' ],
+					'args'                => [
+						'product-id' => [
+							'required' => true,
+							'type'     => 'integer',
+						],
+						'idempotency-key' => [
+							'required' => true,
+							'type'     => 'string',
+						],
+					],
+				],
 			]
 		);
 	}
@@ -144,29 +144,29 @@ class WC_REST_WCCOM_Site_Installer_Controller_V2 extends WC_REST_Controller {
 		return $response;
 	}
 
-    /**
-     * Reset installation state.
-     *
-     * @since 7.7.0
-     * @param WP_REST_Request $request Full details about the request.
-     * @return WP_REST_Response|WP_Error
-     */
-    public function reset_install( $request ) {
-        try {
-            $product_id =  $request['product-id'];
-            $idempotency_key = $request['idempotency-key'];
+	/**
+	 * Reset installation state.
+	 *
+	 * @since 7.7.0
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function reset_install( $request ) {
+		try {
+			$product_id =  $request['product-id'];
+			$idempotency_key = $request['idempotency-key'];
 
-            $installation_manager = new WC_WCCOM_Site_Installation_Manager($product_id, $idempotency_key);
-            $installation_manager->reset_installation();
+			$installation_manager = new WC_WCCOM_Site_Installation_Manager($product_id, $idempotency_key);
+			$installation_manager->reset_installation();
 
-	        $response = $this->success_response($product_id);
+			$response = $this->success_response($product_id);
 
-        } catch (Installer_Error $exception) {
-	        $response = $this->failure_response($product_id, $exception);
-        }
+		} catch (Installer_Error $exception) {
+			$response = $this->failure_response($product_id, $exception);
+		}
 
-	    return $response;
-    }
+		return $response;
+	}
 
 	protected function success_response( $product_id ) {
 		$state = WC_WCCOM_Site_Installation_State_Storage::get_state( $product_id );

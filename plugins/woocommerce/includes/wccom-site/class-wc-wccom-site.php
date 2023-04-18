@@ -80,7 +80,7 @@ class WC_WCCOM_Site {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
 				function() {
-                    return new Installer_Error( Installer_Error_Codes::NO_SIGNATURE );
+					return new Installer_Error( Installer_Error_Codes::NO_SIGNATURE );
 				}
 			);
 			return false;
@@ -93,7 +93,7 @@ class WC_WCCOM_Site {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
 				function() {
-                    return new Installer_Error( Installer_Error_Codes::SITE_NOT_CONNECTED );
+					return new Installer_Error( Installer_Error_Codes::SITE_NOT_CONNECTED );
 				}
 			);
 			return false;
@@ -103,7 +103,7 @@ class WC_WCCOM_Site {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
 				function() {
-                    return new Installer_Error( Installer_Error_Codes::INVALID_TOKEN );
+					return new Installer_Error( Installer_Error_Codes::INVALID_TOKEN );
 				}
 			);
 			return false;
@@ -115,7 +115,7 @@ class WC_WCCOM_Site {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
 				function() {
-                    return new Installer_Error( Installer_Error_Codes::REQUEST_VERIFICATION_FAILED );
+					return new Installer_Error( Installer_Error_Codes::REQUEST_VERIFICATION_FAILED );
 				}
 			);
 			return false;
@@ -126,7 +126,7 @@ class WC_WCCOM_Site {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
 				function() {
-                    return new Installer_Error( Installer_Error_Codes::USER_NOT_FOUND );
+					return new Installer_Error( Installer_Error_Codes::USER_NOT_FOUND );
 				}
 			);
 			return false;
@@ -224,18 +224,18 @@ class WC_WCCOM_Site {
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller-v2.php';
 
-        require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state.php';
-        require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state-storage.php';
-        require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-manager.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state-storage.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-manager.php';
 
-        require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/interface-installaton-step.php';
-        require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-installation-step-product-info.php';
-        require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-installation-step-download-product.php';
-        require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-installation-step-unpack-product.php';
-        require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-installation-step-move-product.php';
-        require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-installation-step-activate-product.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/interface-installaton-step.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-get-product-info.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-download-product.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-unpack-product.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-move-product.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-activate-product.php';
 
-        $namespaces['wccom-site/v1'] = array(
+		$namespaces['wccom-site/v1'] = array(
 			'installer' => 'WC_REST_WCCOM_Site_Installer_Controller',
 		);
 

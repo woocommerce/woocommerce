@@ -1,4 +1,9 @@
 <?php
+/**
+ * State for the WCCOM Site installation process.
+ *
+ * @package WooCommerce\WCCOM\Installation
+ */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -26,24 +31,24 @@ class WC_WCCOM_Site_Installation_State {
 		$this->product_id = $product_id;
 	}
 
-    public static function initiate_existing( $product_id, $idempotency_key, $last_step_name, $last_step_status, $last_step_error, $started_date ) {
-        $instance = new self( $product_id );
-        $instance->idempotency_key = $idempotency_key;
-        $instance->last_step_name = $last_step_name;
-        $instance->last_step_status = $last_step_status;
-        $instance->last_step_error = $last_step_error;
-        $instance->started_date = $started_date;
+	public static function initiate_existing( $product_id, $idempotency_key, $last_step_name, $last_step_status, $last_step_error, $started_date ) {
+		$instance = new self( $product_id );
+		$instance->idempotency_key = $idempotency_key;
+		$instance->last_step_name = $last_step_name;
+		$instance->last_step_status = $last_step_status;
+		$instance->last_step_error = $last_step_error;
+		$instance->started_date = $started_date;
 
-        return $instance;
-    }
+		return $instance;
+	}
 
-    public static function initiate_new( $product_id, $idempotency_key ) {
-        $instance = new self( $product_id );
-        $instance->idempotency_key = $idempotency_key;
+	public static function initiate_new( $product_id, $idempotency_key ) {
+		$instance = new self( $product_id );
+		$instance->idempotency_key = $idempotency_key;
 		$instance->started_date = time();
 
-        return $instance;
-    }
+		return $instance;
+	}
 
 	public function get_product_id() {
 		return $this->product_id;

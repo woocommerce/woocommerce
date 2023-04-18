@@ -1,4 +1,9 @@
 <?php
+/**
+ * State storage for the WCCOM Site installation process.
+ *
+ * @package WooCommerce\WCCOM\Installation
+ */
 
 defined( 'ABSPATH' ) || exit;
 
@@ -9,8 +14,8 @@ class WC_WCCOM_Site_Installation_State_Storage {
 		$data = get_option($storage_key);
 
 		if ( ! is_array( $data ) ) {
-            return null;
-        }
+			return null;
+		}
 
 		$installation_state = WC_WCCOM_Site_Installation_State::initiate_existing(
 			$product_id,
@@ -52,11 +57,11 @@ class WC_WCCOM_Site_Installation_State_Storage {
 		]);
 	}
 
-    public static function delete_state( WC_WCCOM_Site_Installation_State $state ) : bool {
-        $storage_key = self::get_storage_key( $state->get_product_id() );
+	public static function delete_state( WC_WCCOM_Site_Installation_State $state ) : bool {
+		$storage_key = self::get_storage_key( $state->get_product_id() );
 
-        return delete_option($storage_key);
-    }
+		return delete_option($storage_key);
+	}
 
 	protected static function get_storage_key( $product_id ) : string {
 		return sprintf('wccom-product-installation-state-%d', $product_id);

@@ -63,7 +63,7 @@ class WC_WCCOM_Site_Installer {
 		'activate_product',
 	);
 
-    private static $wp_upgrader;
+	private static $wp_upgrader;
 
 	/**
 	 * Get the product install state.
@@ -569,21 +569,21 @@ class WC_WCCOM_Site_Installer {
 		return false;
 	}
 
-    public static function get_wp_upgrader() {
-        if (!empty(self::$wp_upgrader)) {
-            return self::$wp_upgrader;
-        }
+	public static function get_wp_upgrader() {
+		if ( ! empty( self::$wp_upgrader ) ) {
+			return self::$wp_upgrader;
+		}
 
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-        require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-        require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-        WP_Filesystem();
-        self::$wp_upgrader = new WP_Upgrader( new Automatic_Upgrader_Skin() );
-        self::$wp_upgrader->init();
-        wp_clean_plugins_cache();
+		WP_Filesystem();
+		self::$wp_upgrader = new WP_Upgrader( new Automatic_Upgrader_Skin() );
+		self::$wp_upgrader->init();
+		wp_clean_plugins_cache();
 
-        return self::$wp_upgrader;
-    }
+		return self::$wp_upgrader;
+	}
 }

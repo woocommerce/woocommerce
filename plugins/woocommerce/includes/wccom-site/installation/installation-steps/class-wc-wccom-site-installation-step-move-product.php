@@ -1,13 +1,18 @@
 <?php
+/**
+ * Move product to the correct location.
+ *
+ * @package @package WooCommerce\WCCOM\Installation\Installation_Steps
+ */
 
 defined( 'ABSPATH' ) || exit;
 
 class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Installation_Step {
-	public function __construct($state) {
+	public function __construct( $state ) {
 		$this->state = $state;
 	}
 
-	public function run(  ) {
+	public function run() {
 		$upgrader = WC_WCCOM_Site_Installer::get_wp_upgrader();
 
 		$destination = 'plugin' === $this->state->get_product_type()
@@ -30,15 +35,17 @@ class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Inst
 		 * If install package returns error 'folder_exists' treat as success.
 		 */
 		if ( is_wp_error( $result ) && array_key_exists( 'folder_exists', $result->errors ) ) {
-			$existing_folder_path = $result->error_data[ 'folder_exists' ];
-			$plugin_info = WC_WCCOM_Site_Installer::get_plugin_info( $existing_folder_path );
+			$existing_folder_path = $result->error_data['folder_exists'];
+			$plugin_info          = WC_WCCOM_Site_Installer::get_plugin_info( $existing_folder_path );
 
 			$this->state->set_installed_path( $existing_folder_path );
 			$this->state->set_already_installed_plugin_info( $plugin_info );
+
 			return $this->state;
 		}
 
 		$this->state->set_installed_path( $result['destination'] );
+
 		return $this->state;
 	}
 }

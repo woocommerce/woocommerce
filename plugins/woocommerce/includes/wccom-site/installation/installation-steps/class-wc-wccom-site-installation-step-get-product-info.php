@@ -1,4 +1,9 @@
 <?php
+/**
+ * Get product info step.
+ *
+ * @package WooCommerce\WCCOM\Installation\Installation_Steps
+ */
 
 use WC_REST_WCCOM_Site_Installer_Error_Codes as Installer_Error_Codes;
 use WC_REST_WCCOM_Site_Installer_Error as Installer_Error;
@@ -6,11 +11,11 @@ use WC_REST_WCCOM_Site_Installer_Error as Installer_Error;
 defined( 'ABSPATH' ) || exit;
 
 class WC_WCCOM_Site_Installation_Step_Get_Product_Info implements WC_WCCOM_Site_Installation_Step {
-	public function __construct($state) {
+	public function __construct( $state ) {
 		$this->state = $state;
 	}
-	public function run() {
 
+	public function run() {
 		$product_id = $this->state->get_product_id();
 
 		// Get product info from woocommerce.com.
@@ -25,36 +30,36 @@ class WC_WCCOM_Site_Installation_Step_Get_Product_Info implements WC_WCCOM_Site_
 		);
 
 		if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
-			throw new Installer_Error( Installer_Error_Codes::FAILED_GETTING_PRODUCT_INFO  );
+			throw new Installer_Error( Installer_Error_Codes::FAILED_GETTING_PRODUCT_INFO );
 		}
 
 		$result = json_decode( wp_remote_retrieve_body( $request ), true );
 
-		if (!isset($result['_product_type'], $result['name'])) {
+		if ( ! isset( $result['_product_type'], $result['name'] ) ) {
 			throw new Installer_Error( Installer_Error_Codes::INVALID_PRODUCT_INFO_RESPONSE );
 		}
 
 
-		if ( ! empty( $result['_wporg_product'] )) {
+		if ( ! empty( $result['_wporg_product'] ) ) {
 			$download_url = $this->get_wporg_download_url( $result );
 		} else {
 			$download_url = $this->get_wccom_download_url( $product_id );
 		}
 
 		$this->state->set_product_type( $result['_product_type'] );
-		$this->state->set_product_name ($result['name'] );
-		$this->state->set_download_url ($download_url );
+		$this->state->set_product_name( $result['name'] );
+		$this->state->set_download_url( $download_url );
 
 		return $this->state;
 	}
 
 
-	protected function get_wporg_download_url ( $data ) {
+	protected function get_wporg_download_url( $data ) {
 		if ( empty( $data['_wporg_product'] ) ) {
 			return null;
 		}
 
-		if( empty( $data['download_link'] ) ) {
+		if ( empty( $data['download_link'] ) ) {
 			throw new Installer_Error( Installer_Error_Codes::WPORG_PRODUCT_MISSING_DOWNLOAD_LINK );
 		}
 

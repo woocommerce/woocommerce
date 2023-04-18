@@ -76,32 +76,32 @@ class WC_REST_WCCOM_Site_Installer_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return bool|WP_Error
 	 */
-    public function check_permission( $request ) {
-        $current_user = wp_get_current_user();
+	public function check_permission( $request ) {
+		$current_user = wp_get_current_user();
 
-        if ( empty( $current_user ) || ( $current_user instanceof WP_User && ! $current_user->exists() ) ) {
-            $error = apply_filters(
-                WC_WCCOM_Site::AUTH_ERROR_FILTER_NAME,
-                new Installer_Error( Installer_Error_Codes::NOT_AUTHENTICATED )
-            );
-            return new WP_Error(
-                $error->get_error_code(),
-                $error->get_error_message(),
-                array( 'status' => $error->get_http_code() )
-            );
-        }
+		if ( empty( $current_user ) || ( $current_user instanceof WP_User && ! $current_user->exists() ) ) {
+			$error = apply_filters(
+				WC_WCCOM_Site::AUTH_ERROR_FILTER_NAME,
+				new Installer_Error( Installer_Error_Codes::NOT_AUTHENTICATED )
+			);
+			return new WP_Error(
+				$error->get_error_code(),
+				$error->get_error_message(),
+				array( 'status' => $error->get_http_code() )
+			);
+		}
 
-        if ( ! user_can( $current_user, 'install_plugins' ) || ! user_can( $current_user, 'install_themes' ) ) {
-	        $error = new Installer_Error( Installer_Error_Codes::NO_PERMISSION );
-            return new WP_Error(
-                $error->get_error_code(),
-                $error->get_error_message(),
-                array( 'status' => $error->get_http_code() )
-            );
-        }
+		if ( ! user_can( $current_user, 'install_plugins' ) || ! user_can( $current_user, 'install_themes' ) ) {
+			$error = new Installer_Error( Installer_Error_Codes::NO_PERMISSION );
+			return new WP_Error(
+				$error->get_error_code(),
+				$error->get_error_message(),
+				array( 'status' => $error->get_http_code() )
+			);
+		}
 
-        return true;
-    }
+		return true;
+	}
 
 	/**
 	 * Get installation state.

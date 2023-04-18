@@ -19,7 +19,7 @@ class WC_REST_WCCOM_Site_Installer_Error extends Exception {
 		$this->error_message = $error_message ?? WC_REST_WCCOM_Site_Installer_Error_Codes::ERROR_MESSAGES[ $error_code ] ?? '';
 		$this->http_code = $http_code ?? WC_REST_WCCOM_Site_Installer_Error_Codes::HTTP_CODES[ $error_code ] ?? 400;
 
-        parent::__construct( $error_code );
+		parent::__construct( $error_code );
 	}
 
 	public function get_error_code( ) {
