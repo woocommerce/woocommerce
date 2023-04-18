@@ -16,7 +16,12 @@
         "development": [],
         "tests": {
             "port": 8086,
+            "plugins": [
+                ".",
+                "https://downloads.wordpress.org/plugin/akismet.zip"
+            ],
             "config": {
+                "WP_TESTS_DOMAIN": "localhost:8086",
                 "ALTERNATE_WP_CRON": false
             }
         }
