@@ -11,7 +11,7 @@ docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data
 && ls -ld /var/www/html/wp-content/plugins "
 
 echo -e 'Normalize permissions for wp-config.php \n'
-docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u) -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-config.php"
+docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-config.php"
 
 echo -e 'Normalize permissions for wp-content directory \n'
 docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u) -e HOME=/tmp tests-wordpress sh -c " && chmod -c ugo+w /var/www/html/wp-content \
