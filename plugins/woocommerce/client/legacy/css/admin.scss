@@ -6706,7 +6706,7 @@ table.bar_chart {
 	}
 
 	.woocommerce_options_panel {
-		.description {
+		:not(input) + .description {
 			display: block;
 			clear: both;
 			margin-left: 0;
