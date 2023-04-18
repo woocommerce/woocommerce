@@ -8,6 +8,9 @@
 	convertWarningsToExceptions="true"
 	verbose="true"
 	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+	<php>
+		<env name="WORDPRESS_TABLE_PREFIX" value="wptests_" />
+	</php>
 	<testsuites>
 		<testsuite name="WooCommerce Test Suite">
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
