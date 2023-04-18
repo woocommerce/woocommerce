@@ -85,6 +85,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		showProductLink = true,
 		showSaleBadge,
 		saleBadgeAlign = 'right',
+		...restProps
 	} = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product, isLoading } = useProductDataContext();
@@ -153,7 +154,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				{ !! showSaleBadge && (
 					<ProductSaleBadge
 						align={ saleBadgeAlign }
-						product={ product }
+						{ ...restProps }
 					/>
 				) }
 				<Image
