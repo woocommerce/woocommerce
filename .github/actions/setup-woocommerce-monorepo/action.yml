@@ -62,7 +62,7 @@ runs:
           uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
           with:
               path: node_modules/.cache/turbo
-              key: ${{ runner.os }}-build-output-${{ hashFiles('node_modules/.cache/turbo/*-meta.json') }}
+              key: ${{ runner.os }}-build-output-${{ hashFiles('**/*-meta.json') }}
               restore-keys: ${{ runner.os }}-build-output-
 
         - name: Build
