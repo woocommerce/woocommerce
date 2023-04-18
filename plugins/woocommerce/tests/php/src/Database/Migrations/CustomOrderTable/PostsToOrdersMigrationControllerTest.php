@@ -402,7 +402,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 				if ( $replacement_object->state ) {
 					return $replacement_object->state;
 				} else {
-					return $replacement_object->original_object->last_error;
+					return $replacement_object->decorated_object->last_error;
 				}
 			}
 		);
@@ -514,8 +514,8 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock->register_method_replacement(
 			'get_results',
 			function( ...$args ) {
-				$wpdb_decorator                              = $args[0];
-				$wpdb_decorator->original_object->last_error = 'Something failed!';
+				$wpdb_decorator                               = $args[0];
+				$wpdb_decorator->decorated_object->last_error = 'Something failed!';
 				return false;
 			}
 		);
@@ -591,8 +591,8 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock->register_method_replacement(
 			'get_results',
 			function( ...$args ) {
-				$wpdb_decorator                              = $args[0];
-				$wpdb_decorator->original_object->last_error = 'Something failed!';
+				$wpdb_decorator                               = $args[0];
+				$wpdb_decorator->decorated_object->last_error = 'Something failed!';
 				return false;
 			}
 		);
