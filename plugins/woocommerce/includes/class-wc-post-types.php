@@ -403,7 +403,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing',
+															'woocommerce/product-pricing-field',
 															array(
 																'name' => 'regular_price',
 																'label' => __( 'List price', 'woocommerce' ),
@@ -419,7 +419,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing',
+															'woocommerce/product-pricing-field',
 															array(
 																'name' => 'sale_price',
 																'label' => __( 'Sale price', 'woocommerce' ),
@@ -501,7 +501,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing',
+															'woocommerce/product-pricing-field',
 															array(
 																'name' => 'regular_price',
 																'label' => __( 'List price', 'woocommerce' ),
@@ -517,7 +517,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing',
+															'woocommerce/product-pricing-field',
 															array(
 																'name' => 'sale_price',
 																'label' => __( 'Sale price', 'woocommerce' ),

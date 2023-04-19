@@ -23,7 +23,7 @@ import { init as initSummary } from '../../blocks/summary';
 >>>>>>> ac1bf065cd (Change woocommerce/product-summary to woocommerce/product-summary-field)
 import { init as initSection } from '../section';
 import { init as initTab } from '../tab';
-import { init as initPricing } from '../pricing-block';
+import { init as initPricing } from '../../blocks/pricing';
 import { init as initCollapsible } from '../collapsible-block';
 import { init as initScheduleSale } from '../../blocks/schedule-sale';
 import { init as initTrackInventory } from '../../blocks/track-inventory';

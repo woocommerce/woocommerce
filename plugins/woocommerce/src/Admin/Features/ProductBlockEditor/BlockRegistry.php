@@ -22,7 +22,7 @@ class BlockRegistry {
 	const PRODUCT_BLOCKS = [
 		'woocommerce/product-name-field',
 		'woocommerce/product-summary-field',
-		'woocommerce/product-pricing',
+		'woocommerce/product-pricing-field',
 		'woocommerce/product-section',
 		'woocommerce/product-tab',
 	];
