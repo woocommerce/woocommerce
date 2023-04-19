@@ -62,16 +62,11 @@ runs:
           uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
           with:
               path: node_modules/.cache/turbo
-              key: ${{ runner.os }}-build-output-${{ hashFiles('node_modules/.cache/turbo/*-meta.json') }}
-              restore-keys: ${{ runner.os }}-build-output-
+              key: |
+                  ${{ runner.os }}-turbo-build-output-${{ hashFiles("**/*.js*","**/*.ts*","**/*.php", "pnpm-lock.yaml") }}
+              restore-keys: ${{ runner.os }}-turbo-build-output-
 
         - name: Build
           if: ${{ inputs.build == 'true' }}
           shell: bash
-          run: pnpm -w exec turbo run turbo:build --summarize ${{ steps.parse-input.outputs.BUILD_FILTERS }}
-
-        - name: Store summary of turbo run
-          uses: actions/upload-artifact@v3
-          with:
-              name: turbo-run-summary
-              path: .turbo/runs
+          run: pnpm -w exec turbo run turbo:build ${{ steps.parse-input.outputs.BUILD_FILTERS }}
