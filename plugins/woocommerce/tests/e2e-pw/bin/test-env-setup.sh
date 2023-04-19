@@ -8,7 +8,8 @@ echo -r 'Check Dir/File owners\n'
 docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-wordpress sh -c "ls -ld /var/www/html/wp-content \
 && ls -ld /var/www/html/wp-config.php \
 && ls -ld /var/www/html/wp-content/themes \
-&& ls -ld /var/www/html/wp-content/plugins"
+&& ls -ld /var/www/html/wp-content/plugins \
+&& ls -ld /var/www/html/.htaccess"
 
 echo -e 'Normalize permissions for wp-config.php \n'
 docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-config.php"
