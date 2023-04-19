@@ -22,11 +22,11 @@ echo -e 'Update Blog Name \n'
 wp-env run tests-cli 'wp option update blogname "WooCommerce Core E2E Test Suite"'
 
 echo -e 'Root Permissions \n';
-wp-env run tests-cli "ls -la /var/www/html"
+wp-env run tests-wordpress "ls -la /var/www/html"
 echo -e 'Content Permissions \n';
-wp-env run tests-cli "ls -la /var/www/html/wp-content"
+wp-env run tests-wordpress "ls -la /var/www/html/wp-content"
 echo -e 'Plugin Permissions \n';
-wp-env run tests-cli "ls -la /var/www/html/wp-content/plugins"
+wp-env run tests-wordpress "ls -la /var/www/html/wp-content/plugins"
 
 if [ $ENABLE_HPOS == 1 ]; then
 	echo 'Enable the COT feature'
