@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix recent failures in "Smoke test release" workflow.

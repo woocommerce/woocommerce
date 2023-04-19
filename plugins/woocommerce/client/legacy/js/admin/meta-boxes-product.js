@@ -503,6 +503,9 @@ jQuery( function ( $ ) {
 					selectedAttributes
 				);
 			}
+			window.wcTracks.recordEvent( 'product_attributes_buttons', {
+				action: 'add_existing',
+			} );
 		}
 		$( this ).val( null );
 		$( this ).trigger( 'change' );
@@ -529,6 +532,13 @@ jQuery( function ( $ ) {
 		$( 'select.attribute_taxonomy' ).val( null );
 		$( 'select.attribute_taxonomy' ).trigger( 'change' );
 
+		// We record the event only when an existing attribute is added.
+		if ( attribute !== '' ) {
+			window.wcTracks.recordEvent( 'product_attributes_buttons', {
+				action: 'add_existing',
+			} );
+		}
+
 		return false;
 	} );
 
@@ -545,13 +555,19 @@ jQuery( function ( $ ) {
 	} );
 
 	$( '.product_attributes' ).on( 'blur', 'input.attribute_name', function () {
-		var text = $( this ).val();
-		var attributeName = $( this )
+		var $inputElement = $( this );
+		var text = $inputElement.val();
+		var $attribute = $inputElement
 			.closest( '.woocommerce_attribute' )
 			.find( 'strong.attribute_name' );
-		var isPlaceholder = attributeName.hasClass( 'placeholder' );
-		if ( ( isPlaceholder && text ) || ! isPlaceholder ) {
-			attributeName.removeClass( 'placeholder' ).text( text );
+		if ( text === '' ) {
+			$attribute
+				.addClass( 'placeholder' )
+				.text(
+					woocommerce_admin_meta_boxes.i18n_attribute_name_placeholder
+				);
+		} else {
+			$attribute.removeClass( 'placeholder' ).text( text );
 		}
 	} );
 
@@ -662,6 +678,10 @@ jQuery( function ( $ ) {
 				}
 
 				$parent.remove();
+
+				window.wcTracks.recordEvent( 'product_attributes_buttons', {
+					action: 'remove_attribute',
+				} );
 
 				if (
 					! $( '.woocommerce_attribute_data' ).is( ':visible' ) &&

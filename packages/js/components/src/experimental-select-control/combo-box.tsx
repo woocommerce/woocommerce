@@ -45,9 +45,8 @@ export const ComboBox = ( {
 			return;
 		}
 
-		event.preventDefault();
-
 		if ( document.activeElement !== inputRef.current ) {
+			event.preventDefault();
 			inputRef.current.focus();
 			event.stopPropagation();
 		}
