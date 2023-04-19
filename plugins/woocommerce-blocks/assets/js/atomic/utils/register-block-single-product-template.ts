@@ -13,6 +13,13 @@ import {
 } from '@wordpress/blocks';
 import { subscribe, select } from '@wordpress/data';
 
+// Creating a local cache to prevent multiple registration tries.
+const blocksRegistered = new Set();
+
+function parseTemplateId( templateId: string | undefined ) {
+	return templateId?.split( '//' )[ 1 ];
+}
+
 export const registerBlockSingleProductTemplate = ( {
 	blockName,
 	blockMetadata,
@@ -31,9 +38,7 @@ export const registerBlockSingleProductTemplate = ( {
 	subscribe( () => {
 		const previousTemplateId = currentTemplateId;
 		const store = select( 'core/edit-site' );
-		currentTemplateId = store?.getEditedPostContext< {
-			templateSlug?: string;
-		} >()?.templateSlug;
+		currentTemplateId = parseTemplateId( store?.getEditedPostId() );
 		const hasChangedTemplate = previousTemplateId !== currentTemplateId;
 		const hasTemplateId = Boolean( currentTemplateId );
 
@@ -86,16 +91,21 @@ export const registerBlockSingleProductTemplate = ( {
 	}, 'core/edit-site' );
 
 	subscribe( () => {
-		const isBlockRegistered = Boolean( getBlockType( blockName ) );
-		const editPostStoreExists = Boolean( select( 'core/edit-post' ) );
-
-		if ( ! isBlockRegistered && editPostStoreExists ) {
+		const isBlockRegistered = Boolean( variationName )
+			? blocksRegistered.has( variationName )
+			: blocksRegistered.has( blockName );
+		// This subscribe callback could be invoked with the core/blocks store
+		// which would cause infinite registration loops because of the `registerBlockType` call.
+		// This local cache helps prevent that.
+		if ( ! isBlockRegistered ) {
 			if ( isVariationBlock ) {
+				blocksRegistered.add( variationName );
 				registerBlockVariation(
 					blockName,
 					blockSettings as BlockVariation< BlockAttributes >
 				);
 			} else {
+				blocksRegistered.add( blockName );
 				// @ts-expect-error: `registerBlockType` is typed in WordPress core
 				registerBlockType( blockMetadata, blockSettings );
 			}
