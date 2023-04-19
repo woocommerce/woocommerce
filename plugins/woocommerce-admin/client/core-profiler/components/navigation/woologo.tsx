@@ -6,11 +6,7 @@ const WooLogo = () => {
 			version="1.1"
 			viewBox="0 0 256 153"
 			xmlns="http://www.w3.org/2000/svg"
-<<<<<<< HEAD
 			className="wc-icon wc-icon__woo-logo"
-=======
-			className="wccom-icon wccom-icon__woo-logo"
->>>>>>> 86c4dd7f82 (Add navigation and progress-bar components)
 		>
 			<path
 				d="m23.759 0h208.38c13.187 0 23.863 10.675 23.863 23.863v79.542c0 13.187-10.675 23.863-23.863 23.863h-74.727l10.257 25.118-45.109-25.118h-98.695c-13.187 0-23.863-10.675-23.863-23.863v-79.542c-0.10466-13.083 10.571-23.863 23.758-23.863z"
