@@ -56,6 +56,9 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `/wp-admin` );
+
+			console.log( 'Content', adminPage.content() );
+
 			await adminPage.fill( 'input[name="log"]', admin.username );
 			await adminPage.fill( 'input[name="pwd"]', admin.password );
 			await adminPage.click( 'text=Log In' );
