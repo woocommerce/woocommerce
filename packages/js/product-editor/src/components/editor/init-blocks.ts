@@ -13,7 +13,7 @@ import {
  * Internal dependencies
  */
 import { init as initImages } from '../images';
-import { init as initName } from '../details-name-block';
+import { init as initName } from '../../blocks/name';
 import { init as initRadio } from '../../blocks/radio';
 import { init as initSummary } from '../details-summary-block';
 import { init as initCategory } from '../../blocks/category';

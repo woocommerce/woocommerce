@@ -34,7 +34,7 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { AUTO_DRAFT_NAME } from '../../utils';
-import { EditProductLinkModal } from '../edit-product-link-modal';
+import { EditProductLinkModal } from '../../components/edit-product-link-modal';
 import { useValidation } from '../../hooks/use-validation';
 
 export function Edit() {

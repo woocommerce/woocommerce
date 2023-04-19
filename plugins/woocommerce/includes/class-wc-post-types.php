@@ -384,7 +384,7 @@ class WC_Post_Types {
 									),
 									array(
 										array(
-											'woocommerce/product-name',
+											'woocommerce/product-name-field',
 											array(
 												'name' => 'Product name',
 											),

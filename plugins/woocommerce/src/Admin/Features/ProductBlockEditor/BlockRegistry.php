@@ -20,7 +20,7 @@ class BlockRegistry {
 	 * Array of all available product blocks.
 	 */
 	const PRODUCT_BLOCKS = [
-		'woocommerce/product-name',
+		'woocommerce/product-name-field',
 		'woocommerce/product-pricing',
 		'woocommerce/product-section',
 		'woocommerce/product-tab',
