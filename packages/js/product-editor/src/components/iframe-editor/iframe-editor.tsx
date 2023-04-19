@@ -22,14 +22,21 @@ import {
 /**
  * Internal dependencies
  */
+import { BackButton } from './back-button';
 import { EditorCanvas } from './editor-canvas';
 import { ResizableEditor } from './resizable-editor';
 
 type IframeEditorProps = {
+	onChange: ( blocks: BlockInstance[] ) => void;
+	onClose?: () => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
-export function IframeEditor( { settings }: IframeEditorProps ) {
+export function IframeEditor( {
+	onChange,
+	onClose,
+	settings,
+}: IframeEditorProps ) {
 	const [ resizeObserver, sizes ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( [] );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -57,7 +64,10 @@ export function IframeEditor( { settings }: IframeEditorProps ) {
 				templateLock: false,
 			} }
 			value={ blocks }
-			onChange={ setBlocks }
+			onChange={ ( updatedBlocks: BlockInstance[] ) => {
+				setBlocks( updatedBlocks );
+				onChange( updatedBlocks );
+			} }
 			useSubRegistry={ true }
 		>
 			<BlockTools
@@ -74,6 +84,7 @@ export function IframeEditor( { settings }: IframeEditorProps ) {
 				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 				{ /* @ts-ignore */ }
 				<BlockEditorKeyboardShortcuts.Register />
+				{ onClose && <BackButton onClick={ onClose } /> }
 				<ResizableEditor
 					enableResizing={ true }
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
