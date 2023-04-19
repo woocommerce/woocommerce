@@ -16,26 +16,19 @@ test.describe( 'Analytics pages', () => {
 		);
 		if ( sections.length < 3 ) {
 			// performance section is hidden
-			await page.click( '//button[@title="Add more sections"]' );
-			await page.click( '//button[@title="Add Performance section"]' );
-			await page.waitForSelector( 'h2:has-text("Performance")', {
-				state: 'visible',
-			} );
-			await page.waitForLoadState( 'networkidle' );
+			await page.getByTitle( 'Add more sections' ).click();
+			await page.getByTitle( 'Add Performance section' ).click();
+			await page.getByText( 'Performance', { state: 'visible' } );
 		}
 		const lastSection = await page.textContent(
 			'h2.woocommerce-section-header__title >> nth=2'
 		);
 		if ( lastSection === 'Performance' ) {
 			// sections are in the wrong order
-			await page.click(
-				'//button[@title="Choose which analytics to display and the section name"]'
-			);
-			await page.click( 'text=Move up' );
-			await page.click(
-				'//button[@title="Choose which analytics to display and the section name"]'
-			);
-			await page.click( 'text=Move up' );
+			await page.getByTitle( 'Choose which analytics to display and the section name' ).click();
+			await page.getByText( 'Move up' ).click();
+			await page.getByTitle( 'Choose which analytics to display and the section name' ).click();
+			await page.getByText( 'Move up' ).click();
 
 			// wait for the changes to be saved
 			await page.waitForResponse(
@@ -80,19 +73,13 @@ test.describe( 'Analytics pages', () => {
 				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 			);
 			// check the top section
-			await page
-				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
-				.first()
-				.click();
+			await page.getByTitle( 'Choose which analytics to display and the section name' ).click();
 			await expect( page.locator( 'text=Move up' ) ).not.toBeVisible();
 			await expect( page.locator( 'text=Move down' ) ).toBeVisible();
 			await page.keyboard.press( 'Escape' );
 
 			// check the bottom section
-			await page
-				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
-				.last()
-				.click();
+			await page.getByTitle( 'Choose which leaderboards to display and other settings' ).click();
 			await expect( page.locator( 'text=Move down' ) ).not.toBeVisible();
 			await expect( page.locator( 'text=Move up' ) ).toBeVisible();
 			await page.keyboard.press( 'Escape' );
@@ -111,10 +98,8 @@ test.describe( 'Analytics pages', () => {
 				.locator( 'h2.woocommerce-section-header__title >> nth=1' )
 				.innerText();
 
-			await page.click(
-				'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=0'
-			);
-			await page.click( 'text=Move down' );
+			await page.getByTitle( 'Choose which analytics to display and the section name' ).click();
+			await page.getByText( 'Move down' ).click();
 
 			// second section becomes first section, first becomes second
 			await expect(
@@ -138,10 +123,8 @@ test.describe( 'Analytics pages', () => {
 				.locator( 'h2.woocommerce-section-header__title >> nth=1' )
 				.innerText();
 
-			await page.click(
-				'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=1'
-			);
-			await page.click( 'text=Move up' );
+			await page.getByTitle( 'Choose which analytics to display and the section name' ).click();
+			await page.getByText( 'Move up' ).click();
 
 			// second section becomes first section, first becomes second
 			await expect(
@@ -158,7 +141,7 @@ test.describe( 'Analytics pages', () => {
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
 		// clicks the first button to the right of the Performance heading
-		await page.click( 'button:right-of(:text("Performance")) >> nth=0' );
+		await page.getByTitle( 'Choose which analytics to display and the section name' ).click();
 		await page.click( 'text=Remove section' );
 		// Grab all of the section headings
 		await page.waitForLoadState( 'networkidle' );
@@ -175,12 +158,12 @@ test.describe( 'Analytics pages', () => {
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
 		// button only shows when not all sections visible, so remove a section
-		await page.click( 'button:right-of(:text("Performance")) >> nth=0' );
-		await page.click( 'text=Remove section' );
+		await page.getByTitle( 'Choose which analytics to display and the section name' ).click();
+		await page.getByText( 'Remove section' ).click();
 
 		// add section
-		await page.click( '//button[@title="Add more sections"]' );
-		await page.click( '//button[@title="Add Performance section"]' );
+		await page.getByTitle( 'Add more sections' ).click();
+		await page.getByTitle( 'Add Performance section' ).click();
 		await expect(
 			page.locator( 'h2.woocommerce-section-header__title >> nth=2' )
 		).toContainText( 'Performance' );
