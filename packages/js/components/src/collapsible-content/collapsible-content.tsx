@@ -36,11 +36,11 @@ export const CollapsibleContent: React.FC< CollapsedProps > = ( {
 
 	const collapsibleToggleId = useInstanceId(
 		CollapsibleContent,
-		'collapsible_toggle'
+		'woocommerce-collapsible-content__toggle'
 	) as string;
 	const collapsibleContentId = useInstanceId(
 		CollapsibleContent,
-		'collapsible_content'
+		'woocommerce-collapsible-content__content'
 	) as string;
 
 	const displayState = getState();
