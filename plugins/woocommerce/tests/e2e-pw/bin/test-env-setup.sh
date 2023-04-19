@@ -12,11 +12,8 @@ else
     user=$(id -u)
 fi
 
-echo -e 'Normalize permissions for /var/www/html & wp-config.php \n'
-docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $user -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-config.php"
-
-echo -e 'Normalize permissions for multiple directories \n'
-docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $user -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-content \
+echo -e 'Normalize permissions for necessary directories \n'
+docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u) -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-content \
 && chmod -c ugo+w /var/www/html/wp-content/themes \
 && chmod -c ugo+w /var/www/html/wp-content/plugins \
 && mkdir -p /var/www/html/wp-content/upgrade \
