@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Log get_order() exception using standard WC Logger
