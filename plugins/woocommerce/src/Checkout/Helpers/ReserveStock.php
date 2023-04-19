@@ -72,6 +72,8 @@ final class ReserveStock {
 			return;
 		}
 
+		$order_notes = array();
+
 		try {
 			$items = array_filter(
 				$order->get_items(),
@@ -113,6 +115,7 @@ final class ReserveStock {
 				$item_quantity = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
 
 				$rows[ $managed_by_id ] = isset( $rows[ $managed_by_id ] ) ? $rows[ $managed_by_id ] + $item_quantity : $item_quantity;
+				$order_notes[]          = $product->get_formatted_name() . ' : ' . $rows[ $managed_by_id ];
 			}
 
 			if ( ! empty( $rows ) ) {
@@ -123,6 +126,11 @@ final class ReserveStock {
 		} catch ( ReserveStockException $e ) {
 			$this->release_stock_for_order( $order );
 			throw $e;
+		}
+
+		// Add order note after successfully holding the stock.
+		if ( ! empty( $rows ) ) {
+			$order->add_order_note( sprintf( __( 'Products stock held for %s minutes:', 'woocommerce' ), $minutes ) . ' ' . implode( ', ', $order_notes ) );
 		}
 	}
 
