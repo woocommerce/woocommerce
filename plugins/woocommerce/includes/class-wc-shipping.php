@@ -258,6 +258,21 @@ class WC_Shipping {
 		// Calculate costs for passed packages.
 		foreach ( $packages as $package_key => $package ) {
 			$this->packages[ $package_key ] = $this->calculate_shipping_for_package( $package, $package_key );
+
+			/**
+			 * Allow merchants to disable package rate validation.
+			 *
+			 * @since 7.8.0
+			 *
+			 * @param array      $package      The array of the current package before shipping cost calculation.
+			 * @param string|int $package_key  The offset of the $packages array referring to the current package. Can be used to access current package in the 3rd parameter of this filter.
+			 * @param array      $packages     The array of packages after shipping costs are calculated.
+			 */
+			if ( apply_filters( 'woocommerce_skip_shipping_rates_validation', false, $package, $package_key, $this->packages ) ) {
+				continue;
+			}
+
+			$this->validate_shipping_rates( $package, $package_key );
 		}
 
 		/**
@@ -274,6 +289,118 @@ class WC_Shipping {
 		$this->packages = array_filter( (array) apply_filters( 'woocommerce_shipping_packages', $this->packages ) );
 
 		return $this->packages;
+	}
+
+	/**
+	 * Validates the calculated shipping rates for each of the individual products.
+	 *
+	 * Solves https://github.com/woocommerce/woocommerce/issues/27030.
+	 *
+	 * Cart would pick any rate of a shipping class of a product in cart. Even though if by using that class one of the others
+	 * products could not be shipped using it.
+	 *
+	 * Here we validate that each one of the shipping rates the Frontend is provided with, could be used to ship each one of the
+	 * products that require shipping individually.
+	 *
+	 * @param array $package     Package of cart items.
+	 * @param int   $package_key Index of the package being calculated. Used to cache multiple package rates.
+	 * @return void
+	 */
+	protected function validate_shipping_rates( $package, $package_key ) {
+		// If package has no contents or has only one product as its content, above calculations are always correct.
+		if ( empty( $this->packages[ $package_key ]['contents'] ) || count( $this->packages[ $package_key ]['contents'] ) < 2 ) {
+			return;
+		}
+
+		// If no rates already, no further action is needed.
+		if ( empty( $this->packages[ $package_key ]['rates'] ) ) {
+			return;
+		}
+
+		$products_in_need_of_shipping = 0;
+
+		// Find out how many products in the cart require shipping.
+		foreach ( $this->packages[ $package_key ]['contents'] as $cart_content ) {
+			$cart_product = $cart_content['data'];
+			if ( ! $cart_product->needs_shipping() ) {
+				continue;
+			}
+
+			$products_in_need_of_shipping++;
+		}
+
+		// Only one or no products require shipping. Calculations done already are correct.
+		if ( 2 > $products_in_need_of_shipping ) {
+			return;
+		}
+
+		// For each of the shipping rates, recalculate the packages if the contents was only one shippable package.
+		// If the shipping rate looping through is not in the shipping rate when the calculation is done for the individual product,
+		// then that rate is not suitable for shipping one of those products.
+		foreach ( $this->packages[ $package_key ]['rates'] as $shipping_rate_key => $shipping_rate ) {
+			$temp_package = $package;
+
+			foreach ( $package['contents'] as $cart_content_key => $cart_content ) {
+				// Remove all the other contents of the package in each iteration.
+				unset( $temp_package['contents'] );
+
+				// Skip products that don't require shipping. It would produce unreliable results.
+				if ( ! $cart_content['data']->needs_shipping() ) {
+					continue;
+				}
+
+				$temp_package['contents'][ $cart_content_key ] = $cart_content;
+
+				// We don't provide package key, but thats fine. Cache will be overwritten suitably since we change the contents offset.
+				// So we are going to take cache data when we have calculated the same before and fresh when its actually a new calculation.
+				$temp_package = $this->calculate_shipping_for_package( $temp_package );
+
+				if ( empty( $temp_package['rates'] ) ) {
+					/**
+					 * Allow merchants to perform extra actions when a shipping rate is found invalid.
+					 *
+					 * Ideal for displaying notices with explanation as to why the package cannot be shipped as is.
+					 * For example using the $cart_content['data'] which is the (or one of the) product not suitable for being shipped under the current circumstances,
+					 * a notice can be displayed alerting the customer that removing this product from his cart will allow him to complete his checkout.
+					 *
+					 * @since 7.8.0
+					 *
+					 * @param WC_Shipping_Rate $shipping_rate The shipping rate about to be removed.
+					 * @param WC_Product       $product       The product, making the shipping rate not suitable to be used.
+					 * @param array            $package       The array of the current package before shipping cost calculation.
+					 * @param array            $packages      The array of packages after shipping costs are calculated.
+					 */
+					do_action( 'woocommerce_shipping_rate_invalid', $shipping_rate, $cart_content['data'], $package, $this->packages[ $package_key ] );
+					unset( $this->packages[ $package_key ]['rates'][ $shipping_rate_key ] );
+					continue;
+				}
+
+				$shipping_rate_id = $shipping_rate->get_id();
+
+				$rate_found_individually = false;
+
+				foreach ( $temp_package['rates'] as $rate ) {
+					if ( $rate->get_id() !== $shipping_rate_id ) {
+						continue;
+					}
+
+					$rate_found_individually = true;
+					break;
+				}
+
+				if ( $rate_found_individually ) {
+					continue;
+				}
+
+				/**
+				 * Documented just a few lines above.
+				 *
+				 * @inheritdoc
+				 */
+				do_action( 'woocommerce_shipping_rate_invalid', $shipping_rate, $cart_content['data'], $package, $this->packages[ $package_key ] );
+				unset( $this->packages[ $package_key ]['rates'][ $shipping_rate_key ] );
+			}
+		}
 	}
 
 	/**
