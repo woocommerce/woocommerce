@@ -32,7 +32,9 @@ export function Edit() {
 				variant="secondary"
 				onClick={ () => setIsModalOpen( true ) }
 			>
-				{ __( 'Add description', 'woocommerce' ) }
+				{ description.length
+					? __( 'Edit description', 'woocommerce' )
+					: __( 'Add description', 'woocommerce' ) }
 			</Button>
 			{ isModalOpen && (
 				<IframeEditor
