@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Added numeric check for Regular price in bulk edits.
