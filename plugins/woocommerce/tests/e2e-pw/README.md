@@ -34,24 +34,27 @@ End-to-end tests are powered by Playwright. The test site is spinned up using `w
 
 **Running tests for the first time:**
 
--   `nvm use`
--   `pnpm install`
--   `pnpm run build --filter=woocommerce`
--   `pnpm env:start`
+-   `nvm use` (uses the default node version you have set in NVM)
+-   `pnpm install` (installs dependencies)
+-   `pnpm run build --filter=woocommerce` (builds WooCommerce locally)
+-   `cd plugins/woocommerce` (heads to the WooCommerce plugin folder)
+-   `npx playwright install` (makes sure to use the latest Playwright version)
+-   `pnpm env:start` (starts the local environment)
+-   `pnpm test:e2e-pw` (runs tests in headless mode)
 
 To run the test again, re-create the environment to start with a fresh state:
 
--   `pnpm restart`
--   `pnpm test:e2e-pw`
+-   `pnpm env:restart` (restarts the local environment)
+-   `pnpm test:e2e-pw` (runs tests in headless mode)
 
-Other ways of running tests:
+Other ways of running tests (make sure you are in the `plugins/woocommerce` folder):
 
--   `pnpm env:test` (headless)
--   `cd plugin/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js --headed` (headed)
--   `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js --debug` (debug)
--   `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js ./tests/e2e-pw/tests/activate-and-setup/basic-setup.spec.js` (running a single test)
+-   `pnpm test:e2e-pw` (usual, headless run)
+-   `pnpm test:e2e-pw --headed` (headed -- displaying browser window and test interactions)
+-   `pnpm test:e2e-pw --debug` (runs tests in debug mode)
+-   `pnpm test:e2e-pw ./tests/e2e-pw/tests/activate-and-setup/basic-setup.spec.js` (runs a single test)
 
-To see all options, run `cd plugins/woocommerce && pnpm playwright test --help`
+To see all options, make sure you are in the `plugins/woocommerce` folder and run `pnpm playwright test --help`
 
 ### About the environment
 
