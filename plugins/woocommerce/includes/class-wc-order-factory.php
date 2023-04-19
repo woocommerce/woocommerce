@@ -53,6 +53,19 @@ class WC_Order_Factory {
 			return $order;
 		} catch ( Exception $e ) {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
+			
+			// Logging error in wc logs
+			$logger = wc_get_logger();
+			$logger->error(
+				sprintf(
+					$e->getMessage() . ' Order #%d',
+					$order_id
+				),
+				array(
+					'order' => $order_id,
+					'error' => $e,
+				)
+			);
 			return false;
 		}
 	}
