@@ -222,6 +222,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Change variations dropdown menu visibility [#37558](https://github.com/woocommerce/woocommerce/pull/37558)
 * Add - Register product track inventory block [#37585](https://github.com/woocommerce/woocommerce/pull/37585)
 * Add - Register woocommerce/product-shipping-dimensions-fields block [#37683](https://github.com/woocommerce/woocommerce/pull/37683)
+* Update - Update WooCommerce Blocks to 10.0.2 [#37818](https://github.com/woocommerce/woocommerce/pull/37818)
 * Update - Update WC Blocks to include changes from 9.9.0, 10.0.0 and 10.0.1 [#37662](https://github.com/woocommerce/woocommerce/pull/37662)
 * Update - Add default priority for countries that are not in the payment recommendation map [#37590](https://github.com/woocommerce/woocommerce/pull/37590)
 * Update - Add Payoneer, zipco payment gateways and update Klarna available countries [#37329](https://github.com/woocommerce/woocommerce/pull/37329)
