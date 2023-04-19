@@ -961,8 +961,12 @@ class WC_Form_Handler {
 					}
 				}
 
-				// Perform the login.
-				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
+				// Perform the login if the user is not already logged in.
+				if ( is_user_logged_in() ) {
+					$user = wp_get_current_user();
+				} else {
+					$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
+				}
 
 				if ( is_wp_error( $user ) ) {
 					throw new Exception( $user->get_error_message() );
