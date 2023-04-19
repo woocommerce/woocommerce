@@ -57,10 +57,7 @@ const Navigation = ( {
 							) }
 							isLink
 						>
-							{ __(
-								skipText ?? 'Skip this step',
-								'woocommerce'
-							) }
+							{ skipText }
 						</Button>
 					) }
 				</div>
