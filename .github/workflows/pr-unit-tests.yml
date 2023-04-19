@@ -33,8 +33,6 @@ jobs:
             php: '7.4'
           - wp: '6.0'
             php: 7.4
-          - wp: '5.9'
-            php: 7.4
           - wp: 'latest'
             php: '7.4'
             hpos: true
