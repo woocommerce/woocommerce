@@ -10,7 +10,8 @@ docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u)
 && chmod -c ugo+w /var/www/html/wp-content/plugins \
 && mkdir -p /var/www/html/wp-content/upgrade \
 && chmod -c ugo+w /var/www/html \
-&& chmod -c ugo+w /var/www/html/wp-content/upgrade"
+&& chmod -c ugo+w /var/www/html/wp-content/upgrade \
+&& chmod -c ugo+w /var/www/html/wp-content/uploads"
 
 wp-env run tests-cli "wp plugin activate woocommerce"
 
