@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
 
+WPENV_PATH=$(wp-env install-path)
 ENABLE_HPOS="${ENABLE_HPOS:-0}"
 ENABLE_NEW_PRODUCT_EDITOR="${ENABLE_NEW_PRODUCT_EDITOR:-0}"
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
-
-echo -e 'Generate any necessary files and directories \n'
-wp-env run tests-wordpress "touch /var/www/html/.htaccess"
-wp-env run tests-wordpress "chown 33:33 /var/www/html/.htaccess"
-wp-env run tests-wordpress "mkdir /var/www/html/wp-content/upgrade"
-wp-env run tests-wordpress "chown 33:33 /var/www/html/wp-content/upgrade"
+echo -e 'Fix WordPress Directory Ownership \n'
+chown -R 33:33 WPENV_PATH
 
 echo -e 'Activate twentynineteen theme \n'
 wp-env run tests-cli "wp theme activate twentynineteen"
