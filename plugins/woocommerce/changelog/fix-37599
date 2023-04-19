@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Add a product name in the aria-label attribute on the cart page.
+Add the product name to the "Remove from cart" button's aria-label in the cart and mini cart.
