@@ -202,3 +202,34 @@ function wc_get_webhook_rest_api_versions() {
 		'wp_api_v3',
 	);
 }
+
+
+/**
+ * Whenever a user is deleted, re-assign their webhooks to the new user.
+ *
+ * @param int      $old_user_id ID of the deleted user.
+ * @param int|null $new_user_id ID of the user to reassign existing data to.
+ *
+ * @return void
+ * @since 7.8.0
+ */
+function wc_reassign_webhooks_to_new_user_id( $old_user_id, $new_user_id ) {
+	if ( is_null( $old_user_id ) ) {
+		// There is no user id to re-assign existing content to.
+		return;
+	}
+
+	$data_store  = WC_Data_Store::load( 'webhook' );
+	$webhook_ids = $data_store->search_webhooks(
+		array(
+			'user_id' => $old_user_id,
+		)
+	);
+	foreach ( $webhook_ids as $webhook_id ) {
+		$webhook = new WC_Webhook( $webhook_id );
+		$webhook->set_user_id( $new_user_id );
+		$webhook->save();
+	}
+
+}
+add_action( 'deleted_user', 'wc_reassign_webhooks_to_new_user_id', 10, 2 );
