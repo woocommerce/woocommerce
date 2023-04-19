@@ -6,12 +6,14 @@ ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
 echo -e 'Testing \n';
 ls -la ~/wp-env
+wp-env run tests-cli "id -u"
+wp-env run tests-cli "id -g"
 
 echo -e 'Generate any necessary files and directories \n'
 wp-env run tests-wordpress "touch /var/www/html/.htaccess"
-wp-env run tests-wordpress "chown www-data:www-data /var/www/html/.htaccess"
+wp-env run tests-wordpress "chown 33:33 /var/www/html/.htaccess"
 wp-env run tests-wordpress "mkdir /var/www/html/wp-content/upgrade"
-wp-env run tests-wordpress "chown www-data:www-data /var/www/html/wp-content/upgrade"
+wp-env run tests-wordpress "chown 33:33 /var/www/html/wp-content/upgrade"
 
 echo -e 'Activate twentynineteen theme \n'
 wp-env run tests-cli "wp theme activate twentynineteen"
