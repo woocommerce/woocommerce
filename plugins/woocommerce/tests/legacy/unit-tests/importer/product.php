@@ -130,7 +130,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 0, count( $results['updated'] ) );
 		$this->assertEquals( 0, count( $results['skipped'] ) );
-		$this->assertEquals( 6, count( $results['imported'] )  + count( $results['imported_variations'] ) );
+		$this->assertEquals( 6, count( $results['imported'] ) + count( $results['imported_variations'] ) );
 		$this->assertEquals(
 			1,
 			count( $results['failed'] ),
