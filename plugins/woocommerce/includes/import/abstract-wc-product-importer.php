@@ -284,9 +284,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			do_action( 'woocommerce_product_import_inserted_product_object', $object, $data );
 
 			return array(
-				'id'      => $object->get_id(),
-				'updated' => $updating,
-                'is_variation' => $is_variation,
+				'id'           => $object->get_id(),
+				'updated'      => $updating,
+				'is_variation' => $is_variation,
 			);
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_product_importer_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
