@@ -257,20 +257,10 @@ class WC_Structured_Data {
 				);
 			}
 
-			$stock_status = $product->get_stock_status();
-
-			switch ( $stock_status ) {
-				case 'instock':
-					$stock_status_schema = 'InStock';
-					break;
-				case 'outofstock':
-                    $stock_status_schema = 'OutOfStock';
-					break;
-				case "onbackorder":
-                    $stock_status_schema = 'BackOrder';
-					break;
-				default:
-                    $stock_status_schema = '';
+			if ( $product->is_in_stock() ) {
+				$stock_status_schema = ( 'onbackorder' === $product->get_stock_status() ) ? 'BackOrder' : 'InStock';
+			} else {
+				$stock_status_schema = 'OutOfStock';
 			}
 
 			$markup_offer += array(
