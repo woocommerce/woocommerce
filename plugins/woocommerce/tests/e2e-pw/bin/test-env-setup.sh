@@ -4,11 +4,16 @@ ENABLE_HPOS="${ENABLE_HPOS:-0}"
 ENABLE_NEW_PRODUCT_EDITOR="${ENABLE_NEW_PRODUCT_EDITOR:-0}"
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
+echo -e 'Generate any necessary files and directories \n'
+wp-env run tests-wordpress "touch .htaccess &&\
+	chown www-data:www-data .htaccess &&\
+	mkdir /var/www/html/wp-content/upgrade && \
+	chown www-data:www-data /var/www/html/wp-content/upgrade"
+
 echo -e 'Activate twentynineteen theme \n'
 wp-env run tests-cli "wp theme activate twentynineteen"
 
 echo -e 'Update URL structure \n'
-wp-env run tests-wordpress "touch .htaccess"
 wp-env run tests-cli "wp rewrite structure '/%postname%/' --hard"
 
 echo -e 'Add Customer user \n'
