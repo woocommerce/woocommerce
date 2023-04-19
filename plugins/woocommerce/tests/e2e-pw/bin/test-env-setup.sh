@@ -30,8 +30,6 @@ wp-env run tests-cli "user create customer customer@woocommercecoree2etestsuite.
 echo -e 'Update Blog Name \n'
 wp-env run tests-cli 'wp option update blogname "WooCommerce Core E2E Test Suite"'
 
-wp-env run tests-cli "wp plugin install https://gist.github.com/vedanshujain/564afec8f5e9235a1257994ed39b1449/archive/b031465052fc3e04b17624acbeeb2569ef4d5301.zip --activate"
-
 if [ $ENABLE_HPOS == 1 ]; then
 	echo 'Enable the COT feature'
 	wp-env run tests-cli "wp plugin install https://gist.github.com/vedanshujain/564afec8f5e9235a1257994ed39b1449/archive/b031465052fc3e04b17624acbeeb2569ef4d5301.zip --activate"
