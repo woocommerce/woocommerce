@@ -538,7 +538,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$unpaid_orders = $wpdb->get_col(
 			$wpdb->prepare(
-				// @codingStandardsIgnoreStart
+			// @codingStandardsIgnoreStart
 				"SELECT posts.ID
 				FROM {$wpdb->posts} AS posts
 				WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
@@ -577,6 +577,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					'_shipping_address_index',
 					'_billing_last_name',
 					'_billing_email',
+					'_billing_phone',
 				)
 			)
 		);
@@ -602,6 +603,17 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 							FROM {$wpdb->prefix}woocommerce_order_items as order_items
 							WHERE order_item_name LIKE %s",
 							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
+						)
+					),
+					$wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT DISTINCT s.order_id FROM {$wpdb->prefix}wc_order_stats s WHERE s.customer_id = %s",
+							$wpdb->get_col(
+								$wpdb->prepare(
+									"SELECT DISTINCT um.user_id FROM {$wpdb->usermeta} um WHERE um.meta_value = %s AND um.meta_key = 'billing_phone'",
+									wc_clean( $term )
+								)
+							)
 						)
 					)
 				)
