@@ -132,6 +132,9 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as customer...' );
 			await customerPage.goto( `/wp-admin` );
+
+			console.log( 'Content', customerPage.content() );
+
 			await customerPage.fill( 'input[name="log"]', customer.username );
 			await customerPage.fill( 'input[name="pwd"]', customer.password );
 			await customerPage.click( 'text=Log In' );
