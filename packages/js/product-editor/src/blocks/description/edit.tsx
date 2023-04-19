@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement, useState } from '@wordpress/element';
-import { serialize } from '@wordpress/blocks';
+import { parse, serialize } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
@@ -20,7 +20,7 @@ import { IframeEditor } from '../../components/iframe-editor';
 export function Edit() {
 	const blockProps = useBlockProps();
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
-	const [ , setDescription ] = useEntityProp< string >(
+	const [ description, setDescription ] = useEntityProp< string >(
 		'postType',
 		'product',
 		'description'
@@ -36,6 +36,7 @@ export function Edit() {
 			</Button>
 			{ isModalOpen && (
 				<IframeEditor
+					initialBlocks={ parse( description ) }
 					onChange={ ( blocks ) => {
 						const html = serialize( blocks );
 						setDescription( html );

@@ -27,18 +27,20 @@ import { EditorCanvas } from './editor-canvas';
 import { ResizableEditor } from './resizable-editor';
 
 type IframeEditorProps = {
+	initialBlocks?: BlockInstance[];
 	onChange: ( blocks: BlockInstance[] ) => void;
 	onClose?: () => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
 export function IframeEditor( {
+	initialBlocks = [],
 	onChange,
 	onClose,
 	settings,
 }: IframeEditorProps ) {
 	const [ resizeObserver, sizes ] = useResizeObserver();
-	const [ blocks, setBlocks ] = useState< BlockInstance[] >( [] );
+	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock, updateSettings } =
