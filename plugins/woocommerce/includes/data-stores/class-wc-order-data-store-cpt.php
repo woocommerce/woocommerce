@@ -587,6 +587,8 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order_ids[] = absint( $term );
 		}
 
+		$customer_lookup_table = $wpdb->prefix . 'wc_customer_lookup';
+
 		if ( ! empty( $search_fields ) ) {
 			$order_ids = array_unique(
 				array_merge(
@@ -607,13 +609,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					),
 					$wpdb->get_col(
 						$wpdb->prepare(
-							"SELECT DISTINCT s.order_id FROM {$wpdb->prefix}wc_order_stats s WHERE s.customer_id = %s",
-							$wpdb->get_col(
-								$wpdb->prepare(
-									"SELECT DISTINCT um.user_id FROM {$wpdb->usermeta} um WHERE um.meta_value = %s AND um.meta_key = 'billing_phone'",
-									wc_clean( $term )
-								)
-							)
+							"SELECT DISTINCT os.order_id FROM {$wpdb->prefix}wc_order_stats os " .
+							"INNER JOIN {$customer_lookup_table} cl ON os.customer_id = cl.customer_id " .
+							"INNER JOIN {$wpdb->usermeta} um ON cl.user_id = um.user_id " .
+							"WHERE (um.meta_key = 'billing_phone' OR um.meta_key = 'shipping_phone') " .
+							"AND um.meta_value = %s",
+							wc_clean( $term )
 						)
 					)
 				)
