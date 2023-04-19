@@ -1,0 +1,25 @@
+{
+	"name": "@woocommerce/typescript",
+	"version": "0.0.1",
+	"description": "TS config and scripts to support unified TS compilation across WooCommerce",
+	"author": "Automattic",
+	"license": "GPL-3.0-or-later",
+	"engines": {
+		"node": "^16.13.1",
+		"pnpm": "^7.13.3"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/ts-config/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"dependencies": {
+		"typescript": "^4.9.5"
+	},
+	"bin": {
+		"wc-tsc": "./bin/tsc.js"
+	}
+}

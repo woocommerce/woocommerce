@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "build",
+		"target": "es2019",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"strict": true,
+		"skipLibCheck": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"allowJs": true,
+		"jsx": "react",
+		"jsxFactory": "createElement",
+		"jsxFragmentFactory": "Fragment",
+		"declaration": true,
+		"declarationMap": true,
+		"isolatedModules": true,
+		"resolveJsonModule": true,
+		"typeRoots": []
+	},
+
+	"include": [ "**/src/**/*" ],
+	"exclude": [ "**/test/*", "**/*.spec.*", "**/*.test.*" ]
+}
