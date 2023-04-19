@@ -67,6 +67,7 @@ const wpAdminScripts = [
 	'order-tracking',
 	'product-import-tracking',
 	'variable-product-tour',
+	'product-category-metabox',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
