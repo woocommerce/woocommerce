@@ -55,9 +55,6 @@ export function Editor( { product, settings }: EditorProps ) {
 					<FullscreenMode isActive={ false } />
 					<SlotFillProvider>
 						<InterfaceSkeleton
-							className={
-								'woocommerce-product-block-editor__interface-skeleton'
-							}
 							header={
 								<Header
 									productName={ product.name }
