@@ -260,7 +260,7 @@ export const getPages = () => {
 			container: SettingsGroup,
 			path: '/settings/:page',
 			breadcrumbs: ( { match } ) => {
-				// @todo This might need to be refactored to retreive groups via data store.
+				// @todo This might need to be refactored to retrieve groups via data store.
 				const settingsPages = getAdminSetting( 'settingsPages' );
 				const page = settingsPages[ match.params.page ];
 				if ( ! page ) {

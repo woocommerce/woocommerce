@@ -6,7 +6,7 @@ After merchants click on a recommendation, plugins from this source will then wa
 
 ### Quick start
 
-Gateway suggestions are retreived from a REST API and can be added via a remote JSON data source or filtered with the `woocommerce_admin_payment_gateway_suggestion_specs` filter.
+Gateway suggestions are retrieved from a REST API and can be added via a remote JSON data source or filtered with the `woocommerce_admin_payment_gateway_suggestion_specs` filter.
 
 To quickly get started with an example plugin, run the following:
 
