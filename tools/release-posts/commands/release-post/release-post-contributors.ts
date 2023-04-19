@@ -6,6 +6,7 @@ import { Logger } from 'cli-core/src/logger';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import semver from 'semver';
 
 /**
  * Internal dependencies
@@ -28,9 +29,37 @@ const program = new Command()
 	.action( async ( currentVersion, previousVersion ) => {
 		Logger.startTask( 'Generating contributors list...' );
 
+		const currentParsed = semver.parse( currentVersion );
+		const previousParsed = semver.parse( previousVersion );
+		let currentBranch;
+		let previousBranch;
+		
+		try {
+			if ( ! currentParsed ) {
+				throw new Error( 'Unable to parse current version' );
+			}
+			currentBranch = `release/${ currentParsed.major }.${ currentParsed.minor }`;
+		} catch ( error: unknown ) {
+			Logger.notice(
+				`Unable to find '${ currentBranch }', using 'trunk'.`
+			);
+			currentBranch = 'trunk';
+		}
+
+		try {
+			if ( ! previousParsed ) {
+				throw new Error( 'Unable to parse previous version' );
+			}
+			previousBranch = `release/${ previousParsed.major }.${ previousParsed.minor }`;
+		} catch ( error: unknown ) {
+			throw new Error(
+				`Unable to find '${ previousBranch }'. Branch for previous version must exist.`
+			);
+		}
+
 		const contributors = await generateContributors(
-			currentVersion,
-			previousVersion.toString()
+			currentBranch,
+			previousBranch
 		);
 
 		Logger.endTask();
