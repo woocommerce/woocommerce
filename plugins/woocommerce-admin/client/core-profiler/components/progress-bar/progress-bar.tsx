@@ -8,6 +8,7 @@ import { HTMLAttributes } from 'react';
  */
 
 import './progress-bar.scss';
+import WooLogo from '../navigation/woologo';
 
 type ProgressBarProps = {
 	className?: string;
@@ -26,16 +27,11 @@ const ProgressBar = ( {
 		backgroundColor: bgcolor,
 	};
 
-	let fillerStyles: HTMLAttributes< HTMLDivElement >[ 'style' ] = {
+	const fillerStyles: HTMLAttributes< HTMLDivElement >[ 'style' ] = {
 		backgroundColor: color,
 		width: `${ percent }%`,
+		display: percent === 0 ? 'none' : 'initial',
 	};
-
-	if ( percent === 0 ) {
-		fillerStyles = {
-			display: 'none',
-		};
-	}
 
 	return (
 		<div className={ `wc-progress-bar ${ className }` }>
