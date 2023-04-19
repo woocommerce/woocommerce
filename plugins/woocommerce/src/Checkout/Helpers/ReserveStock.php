@@ -130,7 +130,7 @@ final class ReserveStock {
 
 		// Add order note after successfully holding the stock.
 		if ( ! empty( $rows ) ) {
-			$order->add_order_note( sprintf( __( 'Products stock held for %s minutes:', 'woocommerce' ), $minutes ) . ' ' . implode( ', ', $order_notes ) );
+			$order->add_order_note( sprintf( __( 'Stock is held for %s minutes for payment:', 'woocommerce' ), $minutes ) . ' ' . implode( ', ', $order_notes ) );
 		}
 	}
 
