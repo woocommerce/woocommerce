@@ -83,14 +83,14 @@ This only needs done if the patch release needs to be included in WooCommerce Co
             Significance: patch
             Type: update
 
-            Update WooCommerce Blocks to 7.4.1
+            Update WooCommerce Blocks to {{version}}
             ```
 
     -   The PR description can follow [this example](https://github.com/woocommerce/woocommerce/pull/32627).
         -   It lists all the WooCommerce Blocks versions that are being included since the last version that you edited in `plugins/woocommerce/composer.json`. Each version should have a link for the `Release PR`, `Testing instructions` and `Release post` (if available).
         -   The changelog should be aggregated from all the releases included in the package bump and grouped per type: `Enhancements`, `Bug Fixes`, `Various` etc. This changelog will be used in the release notes for the WooCommerce release. That's why it should only list the PRs that have WooCoomerce Core in the WooCommerce Visibility section of their description. Don't include changes available in the feature plugin or development builds.
 
--   [ ] Build WC core from that branch with `pnpm run --filter='woocommerce' build ` (you might need to [install the dependencies first](https://github.com/woocommerce/woocommerce#prerequisites)) and:
+-   [ ] Build WC core from that branch with `pnpm run --filter='woocommerce' build` (you might need to [install the dependencies first](https://github.com/woocommerce/woocommerce#prerequisites)) and:
 
     -   [ ] Make sure the correct version of WC Blocks is being loaded. This can be done testing at least one of the testing steps from the release.
     -   [ ] Complete the [Smoke testing checklist](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/internal-developers/testing/smoke-testing.md).
@@ -112,4 +112,4 @@ You only need to post public release announcements and update relevant public fa
     -   Don't forget to use category `WooCommerce Blocks Release Notes` for the post.
 -   [ ] Announce the release internally (`#woo-announcements` slack).
 -   [ ] Go through the description of the release pull request and edit it to update all the sections and checklist instructions there.
--   [ ] Close this PR.
+-   [ ] Merge this PR into the base branch: `release/x.y.0`.
