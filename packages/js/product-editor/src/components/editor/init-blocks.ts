@@ -18,7 +18,7 @@ import { init as initRadio } from '../../blocks/radio';
 import { init as initSummary } from '../../blocks/summary';
 import { init as initCategory } from '../../blocks/category';
 import { init as initSection } from '../../blocks/section';
-import { init as initTab } from '../tab';
+import { init as initTab } from '../../blocks/tab';
 import { init as initPricing } from '../../blocks/pricing';
 import { init as initCollapsible } from '../collapsible-block';
 import { init as initScheduleSale } from '../../blocks/schedule-sale';
