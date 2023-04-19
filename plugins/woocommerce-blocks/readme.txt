@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 6.1
 Tested up to: 6.2
 Requires PHP: 7.3
-Stable tag: 10.0.1
+Stable tag: 10.0.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -79,6 +79,12 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
 
 == Changelog ==
+
+= 10.0.2 - 2023-04-19 =
+
+#### Bug Fixes
+
+- Fix infinite loop with the registration of Single Product Block (and inner blocks) breaking WP Post and Page editors in WP 6.1. ([9090](https://github.com/woocommerce/woocommerce-blocks/pull/9090))
 
 = 10.0.1 - 2023-04-18 =
 
