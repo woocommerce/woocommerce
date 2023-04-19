@@ -64,6 +64,7 @@ import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
  * @param {string}                     [props.className]                  The class name for this component
  * @param {boolean}                    [props.disabled]                   Disables the component
  * @param {boolean}                    [props.includeParent]              Includes parent with selection.
+ * @param {boolean}                    [props.individuallySelectParent]   Considers parent as a single item (default: false).
  * @param {boolean}                    [props.alwaysShowPlaceholder]      Will always show placeholder (default: false)
  * @param {Option[]}                   [props.options]                    Options to show in the component
  * @param {string[]}                   [props.value]                      Selected values
@@ -71,6 +72,8 @@ import { ARROW_DOWN, ARROW_UP, ENTER, ESCAPE, ROOT_VALUE } from './constants';
  * @param {Function}                   [props.onChange]                   Callback when the selector changes
  * @param {(visible: boolean) => void} [props.onDropdownVisibilityChange] Callback when the visibility of the dropdown options is changed.
  * @param {Function}                   [props.onInputChange]              Callback when the selector changes
+ * @param {number}                     [props.minFilterQueryLength]       Minimum input length to filter results by.
+ * @param {boolean}                    [props.clearOnSelect]              Clear input on select (default: true).
  * @return {JSX.Element} The component
  */
 const TreeSelectControl = ( {
@@ -88,7 +91,10 @@ const TreeSelectControl = ( {
 	onDropdownVisibilityChange = noop,
 	onInputChange = noop,
 	includeParent = false,
+	individuallySelectParent = false,
 	alwaysShowPlaceholder = false,
+	minFilterQueryLength = 3,
+	clearOnSelect = true,
 } ) => {
 	let instanceId = useInstanceId( TreeSelectControl );
 	instanceId = id ?? instanceId;
@@ -126,7 +132,8 @@ const TreeSelectControl = ( {
 
 	const filterQuery = inputControlValue.trim().toLowerCase();
 	// we only trigger the filter when there are more than 3 characters in the input.
-	const filter = filterQuery.length >= 3 ? filterQuery : '';
+	const filter =
+		filterQuery.length >= minFilterQueryLength ? filterQuery : '';
 
 	/**
 	 * Optimizes the performance for getting the tags info
@@ -419,9 +426,11 @@ const TreeSelectControl = ( {
 	 */
 	const handleParentChange = ( checked, option ) => {
 		let newValue;
-		const changedValues = option.leaves
-			.filter( ( opt ) => opt.checked !== checked )
-			.map( ( opt ) => opt.value );
+		const changedValues = individuallySelectParent
+			? []
+			: option.leaves
+					.filter( ( opt ) => opt.checked !== checked )
+					.map( ( opt ) => opt.value );
 		if ( includeParent && option.value !== ROOT_VALUE ) {
 			changedValues.push( option.value );
 		}
@@ -452,10 +461,12 @@ const TreeSelectControl = ( {
 			handleSingleChange( checked, option, parent );
 		}
 
-		onInputChange( '' );
-		setInputControlValue( '' );
-		if ( ! nodesExpanded.includes( option.parent ) ) {
-			controlRef.current.focus();
+		if ( clearOnSelect ) {
+			onInputChange( '' );
+			setInputControlValue( '' );
+			if ( ! nodesExpanded.includes( option.parent ) ) {
+				controlRef.current.focus();
+			}
 		}
 	};
 
@@ -475,6 +486,7 @@ const TreeSelectControl = ( {
 	 * @param {Event} e Event returned by the On Change function in the Input control
 	 */
 	const handleOnInputChange = ( e ) => {
+		setTreeVisible( true );
 		onInputChange( e.target.value );
 		setInputControlValue( e.target.value );
 	};
