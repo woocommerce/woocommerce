@@ -12,6 +12,14 @@
 		font-family: var(--wp--preset--font-family--system-font);
 	}
 
+	label {
+		color: $gray-900;
+	}
+
+	a {
+		text-decoration: none;
+	}
+
 	.editor-styles-wrapper {
 		max-width: 650px;
 		margin-left: auto;
@@ -19,6 +27,10 @@
 	}
 
 	.components-input-control {
+		&__input::placeholder {
+			color: $gray-700;
+		}
+
 		&__prefix {
 			margin-left: $gap-smaller;
 		}
