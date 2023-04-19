@@ -83,7 +83,7 @@ for ( const currentPage of wcPages ) {
 
 					await page.click(
 						`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`,
-						{ waitUntil: 'networkidle' }
+						{ waitForLoadState: 'networkidle' }
 					);
 
 					await expect(

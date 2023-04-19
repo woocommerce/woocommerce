@@ -82,7 +82,7 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		// Do the refund
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await page.click( '.do-manual-refund', {
-			waitUntil: 'networkidle',
+			waitForLoadState: 'networkidle',
 		} );
 
 		// Verify the product line item shows the refunded quantity and amount
@@ -115,7 +115,7 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await page.click( 'a.delete_refund', {
 			force: true,
-			waitUntil: 'networkidle',
+			waitForLoadState: 'networkidle',
 		} ); // have to force it because not visible
 
 		// Verify the refunded row item is no longer showing
@@ -223,7 +223,7 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		await page.fill( '#refund_reason', 'No longer wanted' );
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await page.click( '.do-manual-refund', {
-			waitUntil: 'networkidle',
+			waitForLoadState: 'networkidle',
 		} );
 
 		// Verify restock system note was added
