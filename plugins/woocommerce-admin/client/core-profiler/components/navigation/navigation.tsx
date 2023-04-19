@@ -19,6 +19,7 @@ type NavigationProps = {
 	showLogo?: boolean;
 	classNames?: { mobile?: boolean };
 	skipText?: string;
+	progressBarColor?: string;
 };
 
 const Navigation = ( {
@@ -28,6 +29,7 @@ const Navigation = ( {
 	showProgress = true,
 	showLogo = true,
 	classNames = {},
+	progressBarColor = 'var(--wp-admin-theme-color)',
 }: NavigationProps ) => {
 	return (
 		<div className={ classnames( 'wc-navigation-container', classNames ) }>
@@ -35,7 +37,7 @@ const Navigation = ( {
 				<ProgressBar
 					className={ 'progress-bar' }
 					percent={ percentage }
-					color={ 'var(--wp-admin-theme-color)' }
+					color={ progressBarColor }
 					bgcolor={ 'transparent' }
 				/>
 			) }
