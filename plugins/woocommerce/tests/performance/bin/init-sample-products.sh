@@ -16,14 +16,8 @@ wp-env run tests-cli "wp plugin activate woocommerce"
 
 wp-env run tests-cli "wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=subscriber --path=/var/www/html"
 
-# we cannot create API keys for the API, so we using basic auth, this plugin allows that.
-wp-env run tests-cli "wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --activate"
-
 # update permalinks to `pretty` to make it easier for testing APIs with k6
 wp-env run tests-cli "wp option update permalink_structure /%postname%/"
-
-# install the WP Mail Logging plugin to test emails
-wp-env run tests-cli "wp plugin install wp-mail-logging --activate"
 
 # Installing and activating the WordPress Importer plugin to import sample products"
 wp-env run tests-cli "wp plugin install wordpress-importer --activate"
