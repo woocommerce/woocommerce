@@ -10,7 +10,7 @@
         "ALTERNATE_WP_CRON": true
     },
     "mappings": {
-        "wp-cli.yml": ".\/tests\/wp-cli.yml"
+        "wp-cli.yml": "./tests/wp-cli.yml"
     },
     "env": {
         "development": [],
@@ -18,7 +18,12 @@
             "port": 8086,
             "plugins": [
                 ".",
-                "https://downloads.wordpress.org/plugin/akismet.zip"
+                "https://downloads.wordpress.org/plugin/akismet.zip",
+                "https://github.com/WP-API/Basic-Auth/archive/master.zip",
+                "https://downloads.wordpress.org/plugin/wp-mail-logging.zip"
+            ],
+            "themes": [
+                "https://downloads.wordpress.org/theme/twentynineteen.zip"
             ],
             "config": {
                 "WP_TESTS_DOMAIN": "localhost:8086",

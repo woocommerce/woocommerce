@@ -49,12 +49,24 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 		public function set_wc_version(){
 			if ( $this->wc_version ) {
 				echo "Set WC Version to $this->wc_version \n";
-				$this->wp_json["plugins"] = [ "https://github.com/woocommerce/woocommerce/releases/download/$this->wc_version/woocommerce.zip" ];
+				$this->wp_json["env"]["tests"]["plugins"] = array_values(
+					array_filter( $this->wp_json["env"]["tests"]["plugins"], function( $string ) {
+						return $string !== ".";
+					} )
+				);
+
+				array_push( $this->wp_json["env"]["tests"]["plugins"], "https://github.com/woocommerce/woocommerce/releases/download/$this->wc_version/woocommerce.zip" );
 			}
 		}
 
 		public function revert_wc_version(){
-			$this->wp_json["plugins"] = [ "." ];
+			$this->wp_json["env"]["tests"]["plugins"] = array_filter( $this->wp_json["env"]["tests"]["plugins"], function( $string ) {
+				return strpos( $string, "woocommerce.zip" ) === false;
+			} );
+
+			if ( ! in_array( ".", $this->wp_json["env"]["tests"]["plugins"] ) ) {
+				array_unshift( $this->wp_json["env"]["tests"]["plugins"], "." );
+			}
 		}
 
 		public function set_php_version(){
@@ -72,14 +84,14 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 			$this->set_wp_version();
 			$this->set_wc_version();
 			$this->set_php_version();
-			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT ) );
+			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 		}
 
 		public function revert(){
 			$this->revert_wp_version();
 			$this->revert_wc_version();
 			$this->revert_php_version();
-			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT ) );
+			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 
 			echo "Reverted .wp-env.json \n";
 		}
