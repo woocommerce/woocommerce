@@ -23,7 +23,8 @@ function ProgressBar( props: ProgressBarProps ): JSX.Element {
 		backgroundColor: bgcolor,
 	};
 
-	let fillerStyles: Record< string, string > = {
+     // import { HTMLAttributes } from 'react';
+	let fillerStyles: HTMLAttributes< HTMLDivElement >[ 'style' ] = {
 		backgroundColor: color,
 		width: `${ percent }%`,
 	};
