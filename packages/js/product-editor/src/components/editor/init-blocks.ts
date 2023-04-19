@@ -12,6 +12,7 @@ import {
 /**
  * Internal dependencies
  */
+<<<<<<< HEAD
 import { init as initImages } from '../../blocks/images';
 import { init as initName } from '../../blocks/name';
 import { init as initRadio } from '../../blocks/radio';
@@ -29,6 +30,9 @@ import { init as initLowStockQty } from '../../blocks/inventory-email';
 import { init as initCheckbox } from '../../blocks/checkbox';
 import { init as initShippingDimensions } from '../../blocks/shipping-dimensions';
 import { init as initShippingFee } from '../../blocks/shipping-fee';
+=======
+import * as productBlocks from '../../blocks';
+>>>>>>> bc7f743ab9 (Organize block registration, imports and styles)
 
 export const initBlocks = () => {
 	const coreBlocks = __experimentalGetCoreBlocks();
@@ -39,6 +43,7 @@ export const initBlocks = () => {
 	// @ts-ignore An argument is allowed to specify which blocks to register.
 	registerCoreBlocks( blocks );
 
+<<<<<<< HEAD
 	initImages();
 	initCategory();
 	initName();
@@ -56,4 +61,7 @@ export const initBlocks = () => {
 	initCheckbox();
 	initShippingDimensions();
 	initShippingFee();
+=======
+	Object.values( productBlocks ).forEach( ( init ) => init() );
+>>>>>>> bc7f743ab9 (Organize block registration, imports and styles)
 };
