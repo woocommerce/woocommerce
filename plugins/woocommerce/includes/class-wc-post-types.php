@@ -444,7 +444,7 @@ class WC_Post_Types {
 									),
 									array(
 										array(
-											'woocommerce/product-images',
+											'woocommerce/product-images-field',
 											array(
 												'images' => array(),
 											),

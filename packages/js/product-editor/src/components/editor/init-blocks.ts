@@ -12,7 +12,7 @@ import {
 /**
  * Internal dependencies
  */
-import { init as initImages } from '../images';
+import { init as initImages } from '../../blocks/images';
 import { init as initName } from '../../blocks/name';
 import { init as initRadio } from '../../blocks/radio';
 <<<<<<< HEAD
