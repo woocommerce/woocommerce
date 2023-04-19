@@ -817,6 +817,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 * @param  WC_Order  $this  The current order object.
 		 * @param  string $type Order item type. Default null.
 		 *
+		 * @since 7.8.0
 		 */
 		do_action( 'woocommerce_remove_order_items', $this, $type );
 		if ( ! empty( $type ) ) {
@@ -837,6 +838,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 * @param  WC_Order  $this  The current order object.
 		 * @param  string $type Order item type. Default null.
 		 *
+		 * @since 7.8.0
 		 */
 		do_action( 'woocommerce_removed_order_items', $this, $type );
 	}
