@@ -86,6 +86,9 @@ const Block = ( {
 		</Button>
 	);
 
+	// Get the body background color to use as the sticky container background color.
+	const backgroundColor = getComputedStyle( document.body ).backgroundColor;
+
 	return (
 		<div className={ classnames( 'wc-block-cart__submit', className ) }>
 			{ positionReferenceElement }
@@ -95,7 +98,10 @@ const Block = ( {
 			</div>
 			{ /* If the positionReferenceElement is below the viewport, display the sticky container. */ }
 			{ positionRelativeToViewport === 'below' && (
-				<div className="wc-block-cart__submit-container wc-block-cart__submit-container--sticky">
+				<div
+					className="wc-block-cart__submit-container wc-block-cart__submit-container--sticky"
+					style={ { backgroundColor } }
+				>
 					{ submitContainerContents }
 				</div>
 			) }
