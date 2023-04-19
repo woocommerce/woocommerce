@@ -5,9 +5,7 @@ ENABLE_NEW_PRODUCT_EDITOR="${ENABLE_NEW_PRODUCT_EDITOR:-0}"
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
 echo -e 'Testing \n';
-id -nu
-ls -la /
-ls -la ~
+ls -la ~/wp-env
 
 echo -e 'Generate any necessary files and directories \n'
 wp-env run tests-wordpress "touch /var/www/html/.htaccess"
