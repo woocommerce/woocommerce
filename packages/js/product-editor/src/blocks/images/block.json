@@ -27,13 +27,8 @@
 		"multiple": false,
 		"reusable": false,
 		"inserter": false,
-<<<<<<< HEAD:packages/js/product-editor/src/components/images/block.json
 		"lock": false,
 		"__experimentalToolbar": false
-	}
-=======
-		"lock": false
 	},
 	"editorStyle": "file:./editor.css"
->>>>>>> f089ebd6ea (Change woocommerce/product-images to woocommerce/product-images-field):packages/js/product-editor/src/blocks/images/block.json
 }
