@@ -4,10 +4,6 @@ ENABLE_HPOS="${ENABLE_HPOS:-0}"
 ENABLE_NEW_PRODUCT_EDITOR="${ENABLE_NEW_PRODUCT_EDITOR:-0}"
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
-echo -e 'Testing \n';
-id -u
-id -g
-ls -Rla ~/wp-env
 
 echo -e 'Generate any necessary files and directories \n'
 wp-env run tests-wordpress "touch /var/www/html/.htaccess"
@@ -31,13 +27,6 @@ wp-env run tests-cli "user create customer customer@woocommercecoree2etestsuite.
 
 echo -e 'Update Blog Name \n'
 wp-env run tests-cli 'wp option update blogname "WooCommerce Core E2E Test Suite"'
-
-echo -e 'Root Permissions \n';
-wp-env run tests-wordpress "ls -la /var/www/html"
-echo -e 'Content Permissions \n';
-wp-env run tests-wordpress "ls -la /var/www/html/wp-content"
-echo -e 'Plugin Permissions \n';
-wp-env run tests-wordpress "ls -la /var/www/html/wp-content/plugins"
 
 if [ $ENABLE_HPOS == 1 ]; then
 	echo 'Enable the COT feature'
