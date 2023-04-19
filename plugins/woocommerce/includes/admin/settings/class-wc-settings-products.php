@@ -29,6 +29,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 		$this->label = __( 'Products', 'woocommerce' );
 
 		parent::__construct();
+		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_notify_no_stock_amount', 'absint' );
 	}
 
 	/**
