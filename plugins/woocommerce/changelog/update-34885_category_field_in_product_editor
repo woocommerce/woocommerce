@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Update Category product metabox with an async dropdown search control rendered with React.

@@ -177,8 +177,13 @@ function SelectControl< ItemType = DefaultItemType >( {
 		items: filteredItems,
 		selectedItem: multiple ? null : singleSelectedItem,
 		itemToString: getItemLabel,
-		onSelectedItemChange: ( { selectedItem } ) =>
-			selectedItem && onSelect( selectedItem ),
+		onSelectedItemChange: ( { selectedItem } ) => {
+			if ( selectedItem ) {
+				onSelect( selectedItem );
+			} else if ( singleSelectedItem ) {
+				onRemove( singleSelectedItem );
+			}
+		},
 		onInputValueChange: ( { inputValue: value, ...changes } ) => {
 			if ( value !== undefined ) {
 				setInputValue( value );
@@ -193,8 +198,13 @@ function SelectControl< ItemType = DefaultItemType >( {
 					// Set input back to selected item if there is a selected item, blank otherwise.
 					newChanges = {
 						...changes,
+						selectedItem:
+							! changes.inputValue?.length && ! multiple
+								? null
+								: changes.selectedItem,
 						inputValue:
 							changes.selectedItem === state.selectedItem &&
+							changes.inputValue?.length &&
 							! multiple
 								? getItemLabel( comboboxSingleSelectedItem )
 								: '',
