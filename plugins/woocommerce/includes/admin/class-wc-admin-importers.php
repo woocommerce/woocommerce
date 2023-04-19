@@ -294,6 +294,7 @@ class WC_Admin_Importers {
 					'percentage' => 100,
 					'url'        => add_query_arg( array( '_wpnonce' => wp_create_nonce( 'woocommerce-csv-importer' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
 					'imported'   => count( $results['imported'] ),
+                                        'imported_variations'   => count( $results['imported_variations'] ),
 					'failed'     => count( $results['failed'] ),
 					'updated'    => count( $results['updated'] ),
 					'skipped'    => count( $results['skipped'] ),

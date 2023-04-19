@@ -250,11 +250,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			if ( 'external' === $object->get_type() ) {
 				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'], $data['low_stock_amount'] );
 			}
-
+                        $is_variation = false;
 			if ( 'variation' === $object->get_type() ) {
 				if ( isset( $data['status'] ) && -1 === $data['status'] ) {
 					$data['status'] = 0; // Variations cannot be drafts - set to private.
 				}
+                                $is_variation = true;
 			}
 
 			if ( 'importing' === $object->get_status() ) {
@@ -285,6 +286,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			return array(
 				'id'      => $object->get_id(),
 				'updated' => $updating,
+                                'is_variation' => $is_variation,
 			);
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_product_importer_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
