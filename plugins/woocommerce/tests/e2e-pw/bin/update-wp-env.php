@@ -55,7 +55,6 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 					} )
 				);
 
-				var_dump( $filtered );
 				array_push( $this->wp_json["env"]["tests"]["plugins"], "https://github.com/woocommerce/woocommerce/releases/download/$this->wc_version/woocommerce.zip" );
 			}
 		}
