@@ -109,7 +109,7 @@ class Package {
 				NewPackage::class,
 				function ( $container ) {
 					// leave for automated version bumping.
-					$version = '10.2.0-dev';
+					$version = '10.0.2';
 					return new NewPackage(
 						$version,
 						dirname( __DIR__ ),

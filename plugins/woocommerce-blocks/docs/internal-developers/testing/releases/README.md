@@ -137,8 +137,6 @@ Every release includes specific testing instructions for new features and bug fi
 -   [10.0.0](./1000.md)
     -   [10.0.1](./1001.md)
     -   [10.0.2](./1002.md)
-    -   [10.0.3](./1003.md)
--   [10.1.0](./1010.md)
 
 
 <!-- FEEDBACK -->
