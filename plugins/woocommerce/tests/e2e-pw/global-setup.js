@@ -137,8 +137,6 @@ module.exports = async ( config ) => {
 
 			await customerPage.goto( `/my-account` );
 
-			console.log( 'Content', await customerPage.content() );
-
 			await expect(
 				customerPage.locator(
 					'.woocommerce-MyAccount-navigation-link--customer-logout'
