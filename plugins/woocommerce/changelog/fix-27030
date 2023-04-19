@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Validate that the selected shipping rates are suitable for shipping each product in cart individually before displaying them.
