@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add the ability to skip the `review-testing-instructions` workflow when the PR is from an external contributor.
