@@ -316,6 +316,11 @@ class OrdersTableQuery {
 	 * @throws \Exception When date args are invalid.
 	 */
 	private function process_date_args(): void {
+		if ( $this->arg_isset( 'date_query' ) ) {
+			// Process already passed date queries args.
+			$this->args['date_query'] = $this->map_gmt_and_post_keys_to_hpos_keys( $this->args['date_query'] );
+		}
+
 		$valid_operators        = array( '>', '>=', '=', '<=', '<', '...' );
 		$date_queries           = array();
 		$local_to_gmt_date_keys = array(
@@ -330,9 +335,6 @@ class OrdersTableQuery {
 
 		$valid_date_keys = array_merge( $gmt_date_keys, $local_date_keys );
 		$date_keys       = array_filter( $valid_date_keys, array( $this, 'arg_isset' ) );
-
-		// Process already passed date queries args.
-		$this->args['date_query'] = $this->map_gmt_and_post_keys_to_hpos_keys( $this->args['date_query'] );
 
 		foreach ( $date_keys as $date_key ) {
 			$date_value = $this->args[ $date_key ];
