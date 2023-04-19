@@ -4,14 +4,6 @@ ENABLE_HPOS="${ENABLE_HPOS:-0}"
 ENABLE_NEW_PRODUCT_EDITOR="${ENABLE_NEW_PRODUCT_EDITOR:-0}"
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
-if [[ $(uname) == "Darwin" ]]; then
-    # Set variable for macOS
-    user=www-data
-else
-    # Set variable for Linux
-    user=$(id -u)
-fi
-
 echo -e 'Normalize permissions for necessary directories \n'
 docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u) -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-content \
 && chmod -c ugo+w /var/www/html/wp-content/themes \
