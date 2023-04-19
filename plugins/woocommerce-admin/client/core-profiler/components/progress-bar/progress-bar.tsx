@@ -34,13 +34,13 @@ const ProgressBar = ( {
 	};
 
 	return (
-		<div className={ `wc-progress-bar ${ className }` }>
+		<div className={ `woocommerce-profiler-progress-bar ${ className }` }>
 			<div
-				className="wc-progress-bar__container"
+				className="woocommerce-profiler-progress-bar__container"
 				style={ containerStyles }
 			>
 				<div
-					className="wc-progress-bar__filler"
+					className="woocommerce-profiler-progress-bar__filler"
 					style={ fillerStyles }
 				/>
 			</div>

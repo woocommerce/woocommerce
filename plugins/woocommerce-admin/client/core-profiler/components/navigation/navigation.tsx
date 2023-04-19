@@ -32,7 +32,12 @@ const Navigation = ( {
 	progressBarColor = 'var(--wp-admin-theme-color)',
 }: NavigationProps ) => {
 	return (
-		<div className={ classnames( 'wc-navigation-container', classNames ) }>
+		<div
+			className={ classnames(
+				'woocommerce-profiler-navigation-container',
+				classNames
+			) }
+		>
 			{ showProgress && (
 				<ProgressBar
 					className={ 'progress-bar' }
@@ -41,20 +46,20 @@ const Navigation = ( {
 					bgcolor={ 'transparent' }
 				/>
 			) }
-			<div className="wc-navigation">
-				<div className="wc-navigation-col-left">
+			<div className="woocommerce-profiler-navigation">
+				<div className="woocommerce-profiler-navigation-col-left">
 					{ showLogo && (
 						<span className="woologo">
 							<WooLogo />
 						</span>
 					) }
 				</div>
-				<div className="wc-navigation-col-right">
+				<div className="woocommerce-profiler-navigation-col-right">
 					{ typeof onSkip === 'function' && (
 						<Button
 							onClick={ onSkip }
 							className={ classnames(
-								'wc-navigation-skip-link',
+								'woocommerce-profiler-navigation-skip-link',
 								classNames.mobile ? 'mobile' : ''
 							) }
 							isLink
