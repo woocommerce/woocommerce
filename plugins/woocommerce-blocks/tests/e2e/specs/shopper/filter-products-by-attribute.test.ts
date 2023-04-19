@@ -59,6 +59,18 @@ const goToShopPage = () =>
 	} );
 
 describe( `${ block.name } Block`, () => {
+	const insertFilterByAttributeBlock = async () => {
+		await insertBlock( block.name );
+		const canvasEl = canvas();
+
+		// It seems that .click doesn't work well with radio input element.
+		await canvasEl.$eval(
+			block.selectors.editor.firstAttributeInTheList,
+			( el ) => ( el as HTMLInputElement ).click()
+		);
+		await canvasEl.click( selectors.editor.doneButton );
+	};
+
 	describe( 'with All Products Block', () => {
 		beforeAll( async () => {
 			await switchUserToAdmin();
@@ -68,15 +80,7 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			await insertAllProductsBlock();
-			await insertBlock( block.name );
-			const canvasEl = canvas();
-
-			// It seems that .click doesn't work well with radio input element.
-			await canvasEl.$eval(
-				block.selectors.editor.firstAttributeInTheList,
-				( el ) => ( el as HTMLInputElement ).click()
-			);
-			await canvasEl.click( selectors.editor.doneButton );
+			await insertFilterByAttributeBlock();
 			await publishPost();
 
 			const link = await page.evaluate( () =>
@@ -120,15 +124,7 @@ describe( `${ block.name } Block`, () => {
 			await goToTemplateEditor( {
 				postId: productCatalogTemplateId,
 			} );
-			await insertBlock( block.name );
-			const canvasEl = canvas();
-
-			// It seems that .click doesn't work well with radio input element.
-			await canvasEl.$eval(
-				block.selectors.editor.firstAttributeInTheList,
-				( el ) => ( el as HTMLInputElement ).click()
-			);
-			await canvasEl.click( selectors.editor.doneButton );
+			await insertFilterByAttributeBlock();
 			await saveTemplate();
 		} );
 
@@ -237,29 +233,17 @@ describe( `${ block.name } Block`, () => {
 			} );
 
 			await insertBlock( 'Products (Beta)' );
-			await insertBlock( block.name );
-			await page.waitForNetworkIdle();
-
-			await canvas().waitForSelector(
-				block.selectors.editor.firstAttributeInTheList
-			);
-			// It seems that .click doesn't work well with radio input element.
-			await canvas().$eval(
-				block.selectors.editor.firstAttributeInTheList,
-				( el ) => ( el as HTMLInputElement ).click()
-			);
-			await canvas().click( selectors.editor.doneButton );
+			await insertFilterByAttributeBlock();
 			await publishPost();
 
 			editorPageUrl = page.url();
 			frontedPageUrl = await page.evaluate( () =>
 				wp.data.select( 'core/editor' ).getPermalink()
 			);
-			await page.goto( frontedPageUrl );
+			await page.goto( frontedPageUrl, { waitUntil: 'networkidle2' } );
 		} );
 
 		it( 'should render products', async () => {
-			page.setDefaultTimeout( 200000 );
 			const products = await page.$$(
 				selectors.frontend.queryProductsList
 			);
@@ -268,7 +252,6 @@ describe( `${ block.name } Block`, () => {
 		} );
 
 		it( 'should show only products that match the filter', async () => {
-			page.setDefaultTimeout( 200000 );
 			const isRefreshed = jest.fn( () => void 0 );
 			page.on( 'load', isRefreshed );
 
@@ -301,7 +284,6 @@ describe( `${ block.name } Block`, () => {
 		} );
 
 		it( 'should refresh the page only if the user clicks on button', async () => {
-			page.setDefaultTimeout( 200000 );
 			await page.goto( editorPageUrl );
 
 			await waitForCanvas();
