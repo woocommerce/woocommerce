@@ -810,6 +810,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param string $type Order item type. Default null.
 	 */
 	public function remove_order_items( $type = null ) {
+		do_action( 'woocommerce_remove_order_items', $this, $type );
 		if ( ! empty( $type ) ) {
 			$this->data_store->delete_items( $this, $type );
 
@@ -822,6 +823,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->data_store->delete_items( $this );
 			$this->items = array();
 		}
+		do_action( 'woocommerce_removed_order_items', $this, $type );
 	}
 
 	/**
