@@ -1091,7 +1091,7 @@ jQuery( function ( $ ) {
 
 	// Add a descriptive tooltip to the product description editor
 	$( '#wp-content-media-buttons' )
-		.append( '<span class="woocommerce-help-tip" tabindex="-1"></span>' )
+		.append( '<span class="woocommerce-help-tip" tabindex="0"></span>' )
 		.find( '.woocommerce-help-tip' )
 		.attr(
 			'tabindex',
