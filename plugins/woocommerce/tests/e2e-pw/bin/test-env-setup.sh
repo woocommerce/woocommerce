@@ -22,7 +22,7 @@ docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data
 && chmod -c ugo+w /var/www/html \
 && chmod -c ugo+w /var/www/html/wp-content/upgrade"
 
-docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-cli sh -c "ls \
+docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u) -e HOME=/tmp tests-cli sh -c "ls \
 && wp theme install twentynineteen --activate \
 && wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --activate \
 && wp plugin install wp-mail-logging --activate \
