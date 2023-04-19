@@ -84,14 +84,14 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 			$this->set_wp_version();
 			$this->set_wc_version();
 			$this->set_php_version();
-			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT ) );
+			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 		}
 
 		public function revert(){
 			$this->revert_wp_version();
 			$this->revert_wc_version();
 			$this->revert_php_version();
-			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT ) );
+			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 
 			echo "Reverted .wp-env.json \n";
 		}
