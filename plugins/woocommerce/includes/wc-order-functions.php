@@ -872,9 +872,18 @@ function wc_order_search( $term ) {
 function wc_update_total_sales_counts( $order_id ) {
 	$order = wc_get_order( $order_id );
 
-	if ( ! $order || $order->get_data_store()->get_recorded_sales( $order ) ) {
+	if ( ! $order ) {
 		return;
 	}
+
+	$recorded_sales  = $order->get_data_store()->get_recorded_sales( $order );
+	$reflected_order = in_array( $order->get_status(), array( 'cancelled', 'refunded' ) );
+
+	if ( $recorded_sales && ! $reflected_order ) {
+		return;
+	}
+
+	$operation = $recorded_sales && $reflected_order ? 'decrease' : 'increase';
 
 	if ( count( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
@@ -882,12 +891,16 @@ function wc_update_total_sales_counts( $order_id ) {
 
 			if ( $product_id ) {
 				$data_store = WC_Data_Store::load( 'product' );
-				$data_store->update_product_sales( $product_id, absint( $item->get_quantity() ), 'increase' );
+				$data_store->update_product_sales( $product_id, absint( $item->get_quantity() ), $operation );
 			}
 		}
 	}
 
-	$order->get_data_store()->set_recorded_sales( $order, true );
+	if ( 'decrease' === $operation ) {
+		$order->get_data_store()->set_recorded_sales( $order, false );
+	} else {
+		$order->get_data_store()->set_recorded_sales( $order, true );
+	}
 
 	/**
 	 * Called when sales for an order are recorded
@@ -899,6 +912,12 @@ function wc_update_total_sales_counts( $order_id ) {
 add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_completed_to_cancelled', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_completed_to_refunded', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_processing_to_cancelled', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_processing_to_refunded', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_on-hold_to_cancelled', 'wc_update_total_sales_counts' );
+add_action( 'woocommerce_order_status_on-hold_to_refunded', 'wc_update_total_sales_counts' );
 
 /**
  * Update used coupon amount for each coupon within an order.
