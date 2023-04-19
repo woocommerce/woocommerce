@@ -37,8 +37,8 @@ End-to-end tests are powered by Playwright. The test site is spinned up using `w
 -   `nvm use` (uses the default node version you have set in NVM)
 -   `pnpm install` (installs dependencies)
 -   `pnpm run build --filter=woocommerce` (builds WooCommerce locally)
--   `cd plugins/woocommerce` (heads to the WooCommerce plugin folder)
--   `npx playwright install` (makes sure to use the latest Playwright version)
+-   `cd plugins/woocommerce` (changes into the WooCommerce plugin folder)
+-   `npx playwright install` (installs the latest Playwright version)
 -   `pnpm env:start` (starts the local environment)
 -   `pnpm test:e2e-pw` (runs tests in headless mode)
 
