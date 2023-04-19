@@ -531,7 +531,7 @@ class WC_Post_Types {
 											'woocommerce/product-schedule-sale-fields',
 										),
 										array(
-											'woocommerce/product-radio',
+											'woocommerce/product-radio-field',
 											array(
 												'title'    => __( 'Charge sales tax on', 'woocommerce' ),
 												'property' => 'tax_status',
@@ -560,7 +560,7 @@ class WC_Post_Types {
 											),
 											array(
 												array(
-													'woocommerce/product-radio',
+													'woocommerce/product-radio-field',
 													array(
 														'title'    => __( 'Tax class', 'woocommerce' ),
 														'description' => sprintf(
@@ -637,7 +637,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-radio',
+															'woocommerce/product-radio-field',
 															array(
 																'title'    => __( 'When out of stock', 'woocommerce' ),
 																'property' => 'backorders',
