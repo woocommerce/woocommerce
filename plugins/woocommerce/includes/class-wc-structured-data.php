@@ -257,21 +257,21 @@ class WC_Structured_Data {
 				);
 			}
 
-            $stock_status = $product->get_stock_status();
+			$stock_status = $product->get_stock_status();
 
-            switch ( $stock_status ) {
-                case "instock":
-                    $stock_status_schema = "InStock";
-                    break;
-                case "outofstock":
-                    $stock_status_schema = "OutOfStock";
-                    break;
-                case "onbackorder":
-                    $stock_status_schema = "BackOrder";
-                    break;
-                default:
-                    $stock_status_schema = "";
-            }
+			switch ( $stock_status ) {
+				case 'instock':
+					$stock_status_schema = 'InStock';
+					break;
+				case 'outofstock':
+                    $stock_status_schema = 'OutOfStock';
+					break;
+				case "onbackorder":
+                    $stock_status_schema = 'BackOrder';
+					break;
+				default:
+                    $stock_status_schema = '';
+			}
 
 			$markup_offer += array(
 				'priceCurrency' => $currency,
