@@ -18,7 +18,7 @@ wp-env run tests-cli "wp plugin activate woocommerce"
 wp-env run tests-cli "wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=subscriber --path=/var/www/html"
 
 # update permalinks to `pretty` to make it easier for testing APIs with k6
-wp-env run tests-cli "wp option update permalink_structure /%postname%/"
+wp-env run tests-cli "wp rewrite structure '/%postname%/' --hard"
 
 # Installing and activating the WordPress Importer plugin to import sample products"
 wp-env run tests-cli "wp plugin install wordpress-importer --activate"
