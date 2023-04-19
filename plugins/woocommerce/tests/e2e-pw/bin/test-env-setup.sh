@@ -9,17 +9,17 @@ docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data
 && ls -ld /var/www/html/wp-config.php \
 && ls -ld /var/www/html/wp-content/themes \
 && ls -ld /var/www/html/wp-content/plugins \
-&& ls -ld /var/www/html/.htaccess"
+&& ls -ld /var/www/html"
 
-echo -e 'Normalize permissions for wp-config.php \n'
-docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-config.php"
+echo -e 'Normalize permissions for /var/www/html & wp-config.php  \n'
+docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-config.php && chmod -c ugo+w /var/www/html"
 
 echo -e 'Normalize permissions for wp-content directory \n'
-docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u) -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-content \
+docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-content \
 && chmod -c ugo+w /var/www/html/wp-content/themes \
 && chmod -c ugo+w /var/www/html/wp-content/plugins \
 && mkdir -p /var/www/html/wp-content/upgrade \
-&& chmod -c ugo+w /var/www/html/.htaccess \
+&& chmod -c ugo+w /var/www/html \
 && chmod -c ugo+w /var/www/html/wp-content/upgrade"
 
 docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u www-data -e HOME=/tmp tests-cli sh -c "ls \
