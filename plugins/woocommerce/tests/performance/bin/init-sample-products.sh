@@ -4,7 +4,7 @@ ENABLE_HPOS="${ENABLE_HPOS:-0}"
 
 echo "Initializing WooCommerce E2E"
 
-echo -e 'Normalize permissions for wp-content directory \n'
+echo -e 'Normalize permissions for multiple directories \n'
 docker-compose -f $(wp-env install-path)/docker-compose.yml run --rm -u $(id -u) -e HOME=/tmp tests-wordpress sh -c "chmod -c ugo+w /var/www/html/wp-content \
 && chmod -c ugo+w /var/www/html/wp-content/themes \
 && chmod -c ugo+w /var/www/html/wp-content/plugins \
