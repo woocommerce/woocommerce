@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+
+import { HTMLAttributes } from 'react';
+/**
  * Internal dependencies
  */
 
@@ -23,7 +28,6 @@ function ProgressBar( props: ProgressBarProps ): JSX.Element {
 		backgroundColor: bgcolor,
 	};
 
-     // import { HTMLAttributes } from 'react';
 	let fillerStyles: HTMLAttributes< HTMLDivElement >[ 'style' ] = {
 		backgroundColor: color,
 		width: `${ percent }%`,
