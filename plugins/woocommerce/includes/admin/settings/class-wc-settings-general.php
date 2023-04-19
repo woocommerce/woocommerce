@@ -260,7 +260,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'     => 'text',
 					'desc_tip' => true,
 					'custom_attributes' => array(
-						'pattern'  => '[,.]{1}',
+						'pattern'  => '^[^a-zA-Z0-9]*([ ]|[^a-zA-Z0-9])[^a-zA-Z0-9]*$',
 					),
 				),
 
@@ -273,7 +273,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'     => 'text',
 					'desc_tip' => true,
 					'custom_attributes' => array(
-						'pattern'  => '[,.]{1}',
+						'pattern'  => '^[^a-zA-Z0-9]*([ ]|[^a-zA-Z0-9])[^a-zA-Z0-9]*$',
 					),
 				),
 

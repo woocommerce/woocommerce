@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Incorporate pattern for thousand and decimal separator to restrict input to only special characters as valid values.
