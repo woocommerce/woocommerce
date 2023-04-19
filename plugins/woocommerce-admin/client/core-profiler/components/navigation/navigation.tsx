@@ -45,7 +45,7 @@ export const Navigation = ( {
 const Navigation = ( {
 	percentage = 0,
 	onSkip,
-	skipText = 'Skip this step',
+	skipText = __( 'Skip this step', 'woocommerce' ),
 	showProgress = true,
 	showLogo = true,
 	classNames = {},
