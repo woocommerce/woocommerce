@@ -812,7 +812,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		await page.check( 'input.checkbox.variable_manage_stock' );
 
 		const firstVariationContainerLocator = await page
-			.locator('.woocommerce_variations  .woocommerce_variation')
+			.locator( '.woocommerce_variations  .woocommerce_variation' )
 			.first();
 
 		await firstVariationContainerLocator
@@ -821,11 +821,15 @@ test.describe( 'Add New Variable Product Page', () => {
 		await expect(
 			page.locator( 'p.variable_stock_status' )
 		).not.toBeVisible();
-		await firstVariationContainerLocator.getByLabel( 'Stock quantity' ).fill( stockAmount );
+		await firstVariationContainerLocator
+			.getByLabel( 'Stock quantity' )
+			.fill( stockAmount );
 		await page.selectOption( '#variable_backorders0', 'notify', {
 			force: true,
 		} );
-		await firstVariationContainerLocator.getByPlaceholder( 'Store-wide threshold (2)' ).fill( lowStockAmount );
+		await firstVariationContainerLocator
+			.getByPlaceholder( 'Store-wide threshold (2)' )
+			.fill( lowStockAmount );
 		await page.click( 'button.save-variation-changes' );
 		await page.click(
 			'#variable_product_options .toolbar-top a.expand_all'
