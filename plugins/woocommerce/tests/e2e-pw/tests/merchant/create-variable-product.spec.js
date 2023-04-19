@@ -232,7 +232,9 @@ test.describe( 'Add New Variable Product Page', () => {
 		await test.step(
 			`Type "${ variableProductName }" into the "Product name" input field.`,
 			async () => {
-				await page.fill( '#title', variableProductName );
+				await page
+					.getByLabel( 'Product name' )
+					.fill( variableProductName );
 			}
 		);
 
@@ -715,7 +717,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		page,
 	} ) => {
 		await page.goto( productPageURL );
-		await page.fill( '#title', manualVariableProduct );
+		await page.getByLabel( 'Product name' ).fill( manualVariableProduct );
 		await page.selectOption( '#product-type', 'variable' );
 
 		await page
@@ -808,15 +810,22 @@ test.describe( 'Add New Variable Product Page', () => {
 			'#variable_product_options .toolbar-top a.expand_all'
 		);
 		await page.check( 'input.checkbox.variable_manage_stock' );
-		await page.fill( 'input#variable_regular_price_0', variationOnePrice );
+
+		const firstVariationContainerLocator = await page
+			.locator('.woocommerce_variations  .woocommerce_variation')
+			.first();
+
+		await firstVariationContainerLocator
+			.getByPlaceholder( 'Variation price (required)' )
+			.fill( variationOnePrice );
 		await expect(
 			page.locator( 'p.variable_stock_status' )
 		).not.toBeVisible();
-		await page.fill( 'input#variable_stock0', stockAmount );
+		await firstVariationContainerLocator.getByLabel( 'Stock quantity' ).fill( stockAmount );
 		await page.selectOption( '#variable_backorders0', 'notify', {
 			force: true,
 		} );
-		await page.fill( 'input#variable_low_stock_amount0', lowStockAmount );
+		await firstVariationContainerLocator.getByPlaceholder( 'Store-wide threshold (2)' ).fill( lowStockAmount );
 		await page.click( 'button.save-variation-changes' );
 		await page.click(
 			'#variable_product_options .toolbar-top a.expand_all'
