@@ -130,6 +130,7 @@ final class ReserveStock {
 
 		// Add order note after successfully holding the stock.
 		if ( ! empty( $held_stock_notes ) ) {
+			// translators: %s is a time in minutes
 			$order->add_order_note( sprintf( __( 'Stock is held for %s minutes for payment:', 'woocommerce' ), $minutes ) . ' ' . implode( ', ', $order_notes ) );
 		}
 	}
