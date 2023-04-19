@@ -57,7 +57,7 @@ module.exports = async ( config ) => {
 			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `/wp-admin` );
 
-			console.log( 'Content', adminPage.content() );
+			console.log( 'Content', await adminPage.content() );
 
 			await adminPage.fill( 'input[name="log"]', admin.username );
 			await adminPage.fill( 'input[name="pwd"]', admin.password );
@@ -133,7 +133,7 @@ module.exports = async ( config ) => {
 			console.log( 'Trying to log-in as customer...' );
 			await customerPage.goto( `/wp-admin` );
 
-			console.log( 'Content', customerPage.content() );
+			console.log( 'Content', await customerPage.content() );
 
 			await customerPage.fill( 'input[name="log"]', customer.username );
 			await customerPage.fill( 'input[name="pwd"]', customer.password );
