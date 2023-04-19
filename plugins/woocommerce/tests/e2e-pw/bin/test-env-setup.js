@@ -1,11 +1,12 @@
 const { execSync } = require( 'child_process' );
 
 /**
- * Executes a WP-CLI command using wp-env and ends the script if it fails.
+ * Executes a WP-CLI command using wp-env.
  * 
- * @param {string} input
+ * @param {string}  input The CLI command input.
+ * @param {boolean} exitOnError Indicates whether or not the process should exit if the CLI returns an error.
  */
-function runWPCLI( input ) {
+function runWPCLI( input, exitOnError = false ) {
     try {
         execSync( 
             'wp-env run tests-cli "wp ' + input.replace(/"/g, '\\"') + '"',
@@ -23,15 +24,17 @@ function runWPCLI( input ) {
             console.error( errorMatch[1] );
         }
         
-        process.exit( 1 );
+        if ( exitOnError ) {
+            process.exit( 1 );
+        }
     }
 }
 
 console.log( 'Activating "twentynineteen" Theme...' );
-runWPCLI( 'theme activate twentynineteen' );
+runWPCLI( 'theme activate twentynineteen', true );
 
 console.log( 'Activating Pretty Permalinks...' );
-runWPCLI( 'rewrite structure \'/%postname%/\' --hard' );
+runWPCLI( 'rewrite structure \'/%postname%/\' --hard', true );
 
 console.log( 'Creating Customer...' );
 runWPCLI( 'user create customer customer@woocommercecoree2etestsuite.com \
