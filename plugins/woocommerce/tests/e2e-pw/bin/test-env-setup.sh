@@ -8,8 +8,7 @@ echo -e 'Activate twentynineteen theme \n'
 wp-env run tests-cli "wp theme activate twentynineteen"
 
 echo -e 'Update URL structure \n'
-wp-env run tests-cli "touch .htaccess"
-wp-env run tests-cli "wp rewrite structure '/%postname%/' --hard"
+wp-env run tests-cli "WP_CLI_ALLOW_ROOT=1 wp rewrite structure '/%postname%/' --hard"
 
 echo -e 'Add Customer user \n'
 wp-env run tests-cli "user create customer customer@woocommercecoree2etestsuite.com \
