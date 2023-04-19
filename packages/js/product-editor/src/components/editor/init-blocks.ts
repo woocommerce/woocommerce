@@ -15,8 +15,12 @@ import {
 import { init as initImages } from '../images';
 import { init as initName } from '../../blocks/name';
 import { init as initRadio } from '../../blocks/radio';
+<<<<<<< HEAD
 import { init as initSummary } from '../details-summary-block';
 import { init as initCategory } from '../../blocks/category';
+=======
+import { init as initSummary } from '../../blocks/summary';
+>>>>>>> ac1bf065cd (Change woocommerce/product-summary to woocommerce/product-summary-field)
 import { init as initSection } from '../section';
 import { init as initTab } from '../tab';
 import { init as initPricing } from '../pricing-block';

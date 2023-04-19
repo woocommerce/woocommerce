@@ -390,7 +390,7 @@ class WC_Post_Types {
 											),
 										),
 										array(
-											'woocommerce/product-summary',
+											'woocommerce/product-summary-field',
 										),
 										array(
 											'core/columns',
