@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-The "Update Cart" button does not need an aria-disabled attribute, as it has a disabled attribute, this PR removes it.
+Removed aria-disabled attribute from "Update Cart" button as it already has a disabled attribute.
