@@ -5,8 +5,8 @@ ENABLE_NEW_PRODUCT_EDITOR="${ENABLE_NEW_PRODUCT_EDITOR:-0}"
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
 echo -e 'Generate any necessary files and directories \n'
-wp-env run tests-wordpress "touch .htaccess &&\
-	chown www-data:www-data .htaccess &&\
+wp-env run tests-wordpress "touch /var/www/html/.htaccess &&\
+	chown www-data:www-data /var/www/html/.htaccess &&\
 	mkdir /var/www/html/wp-content/upgrade && \
 	chown www-data:www-data /var/www/html/wp-content/upgrade"
 
@@ -26,6 +26,13 @@ wp-env run tests-cli "user create customer customer@woocommercecoree2etestsuite.
 
 echo -e 'Update Blog Name \n'
 wp-env run tests-cli 'wp option update blogname "WooCommerce Core E2E Test Suite"'
+
+wp-env run tests-wordpress "id -nu"
+wp-env run tests-wordpress "bash -c 'id -nu'"
+wp-env run tests-cli "id -nu"
+wp-env run tests-cli "bash -c 'id -nu'"
+sudo wp-env run tests-wordpress "id -nu"
+sudo wp-env run tests-cli "id -nu"
 
 echo -e 'Root Permissions \n';
 wp-env run tests-wordpress "ls -la /var/www/html"
