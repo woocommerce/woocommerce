@@ -63,7 +63,7 @@ runs:
           with:
               path: node_modules/.cache/turbo
               key: |
-                  ${{ runner.os }}-turbo-build-output-${{ hashFiles("**/*.js*","**/*.ts*","**/*.php", "pnpm-lock.yaml") }}
+                  ${{ runner.os }}-turbo-build-output-${{ hashFiles('**.jsx?', '**.tsx?', '**.php', 'pnpm-lock.yaml') }}
               restore-keys: ${{ runner.os }}-turbo-build-output-
 
         - name: Build
