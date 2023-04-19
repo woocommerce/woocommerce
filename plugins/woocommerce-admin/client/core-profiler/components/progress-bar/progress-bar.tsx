@@ -30,7 +30,7 @@ const ProgressBar = ( {
 	const fillerStyles: HTMLAttributes< HTMLDivElement >[ 'style' ] = {
 		backgroundColor: color,
 		width: `${ percent }%`,
-		display: percent === 0 ? 'none' : 'initial',
+		display: percent === 0 ? 'none' : 'inherit',
 	};
 
 	return (
