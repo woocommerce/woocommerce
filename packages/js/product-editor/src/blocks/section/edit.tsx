@@ -8,7 +8,7 @@ import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { BlockIcon } from '../block-icon';
+import { BlockIcon } from '../../components/block-icon';
 import { SectionBlockAttributes } from './types';
 import { sanitizeHTML } from '../../utils/sanitize-html';
 
