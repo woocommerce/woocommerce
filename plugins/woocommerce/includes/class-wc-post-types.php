@@ -552,7 +552,7 @@ class WC_Post_Types {
 											),
 										),
 										array(
-											'woocommerce/collapsible',
+											'woocommerce/product-collapsible',
 											array(
 												'toggleText'       => __( 'Advanced', 'woocommerce' ),
 												'initialCollapsed' => true,
@@ -621,7 +621,7 @@ class WC_Post_Types {
 											'woocommerce/product-track-inventory-fields',
 										),
 										array(
-											'woocommerce/collapsible',
+											'woocommerce/product-collapsible',
 											array(
 												'toggleText'       => __( 'Advanced', 'woocommerce' ),
 												'initialCollapsed' => true,

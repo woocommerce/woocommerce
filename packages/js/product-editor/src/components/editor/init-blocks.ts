@@ -20,7 +20,7 @@ import { init as initCategory } from '../../blocks/category';
 import { init as initSection } from '../../blocks/section';
 import { init as initTab } from '../../blocks/tab';
 import { init as initPricing } from '../../blocks/pricing';
-import { init as initCollapsible } from '../collapsible-block';
+import { init as initCollapsible } from '../../blocks/collapsible';
 import { init as initScheduleSale } from '../../blocks/schedule-sale';
 import { init as initTrackInventory } from '../../blocks/track-inventory';
 import { init as initSku } from '../../blocks/inventory-sku';

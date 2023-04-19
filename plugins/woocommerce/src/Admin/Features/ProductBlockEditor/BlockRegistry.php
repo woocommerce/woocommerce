@@ -20,6 +20,7 @@ class BlockRegistry {
 	 * Array of all available product blocks.
 	 */
 	const PRODUCT_BLOCKS = [
+		'woocommerce/product-collapsible',
 		'woocommerce/product-images-field',
 		'woocommerce/product-name-field',
 		'woocommerce/product-pricing-field',
