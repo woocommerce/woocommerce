@@ -397,7 +397,7 @@ class WC_Shipping {
 				 *
 				 * @inheritdoc
 				 */
-				do_action( 'woocommerce_shipping_rate_invalid', $shipping_rate, $cart_content['data'], $package, $this->packages[ $package_key ] );
+				do_action( 'woocommerce_shipping_rate_invalid', $shipping_rate, $cart_content['data'], $package, $this->packages[ $package_key ] ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 				unset( $this->packages[ $package_key ]['rates'][ $shipping_rate_key ] );
 			}
 		}
