@@ -4,6 +4,7 @@
 import { BlockInstance } from '@wordpress/blocks';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement, useEffect, useState } from '@wordpress/element';
+import { debounce } from 'lodash';
 import { useResizeObserver } from '@wordpress/compose';
 import {
 	BlockEditorProvider,
@@ -59,6 +60,10 @@ export function IframeEditor( {
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
+	const debouncedOnChange = debounce( ( updatedBlocks ) => {
+		onChange( updatedBlocks );
+	}, 200 );
+
 	return (
 		<BlockEditorProvider
 			settings={ {
@@ -68,7 +73,7 @@ export function IframeEditor( {
 			value={ blocks }
 			onChange={ ( updatedBlocks: BlockInstance[] ) => {
 				setBlocks( updatedBlocks );
-				onChange( updatedBlocks );
+				debouncedOnChange( updatedBlocks );
 			} }
 			useSubRegistry={ true }
 		>
