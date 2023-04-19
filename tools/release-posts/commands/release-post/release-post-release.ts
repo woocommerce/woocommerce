@@ -168,8 +168,7 @@ const program = new Command()
 		const changes = await scanForChanges(
 			currentVersionRef,
 			`${ previousParsed.major }.${ previousParsed.minor }.${ previousParsed.patch }`,
-			//false,
-			true,
+			false,
 			SOURCE_REPO,
 			previousVersionRef,
 			'cli',
