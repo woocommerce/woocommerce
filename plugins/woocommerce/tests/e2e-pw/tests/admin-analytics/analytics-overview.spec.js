@@ -7,7 +7,7 @@ test.describe( 'Analytics pages', () => {
 		// do some cleanup after each test to make sure things are where they should be
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
-			{ waitForLoadState: 'networkidle' }
+			{ waitUntil: 'networkidle' }
 		);
 
 		// Grab all of the section headings
@@ -53,7 +53,7 @@ test.describe( 'Analytics pages', () => {
 		const arrExpectedSections = [ 'Charts', 'Leaderboards', 'Performance' ];
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
-			{ waitForLoadState: 'networkidle' }
+			{ waitUntil: 'networkidle' }
 		);
 
 		for ( const expectedSection of arrExpectedSections ) {
