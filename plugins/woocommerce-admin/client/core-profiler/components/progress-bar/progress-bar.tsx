@@ -16,14 +16,12 @@ type ProgressBarProps = {
 	bgcolor?: string;
 };
 
-function ProgressBar( props: ProgressBarProps ): JSX.Element {
-	const {
-		className = '',
-		percent = 0,
-		color = '#674399',
-		bgcolor = 'var(--wp-admin-theme-color)',
-	} = props;
-
+const ProgressBar = ( {
+	className = '',
+	percent = 0,
+	color = '#674399',
+	bgcolor = 'var(--wp-admin-theme-color)',
+}: ProgressBarProps ) => {
 	const containerStyles = {
 		backgroundColor: bgcolor,
 	};
@@ -52,6 +50,6 @@ function ProgressBar( props: ProgressBarProps ): JSX.Element {
 			</div>
 		</div>
 	);
-}
+};
 
 export default ProgressBar;
