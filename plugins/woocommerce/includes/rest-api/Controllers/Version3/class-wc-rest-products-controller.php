@@ -45,9 +45,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	protected function get_images( $product ) {
 		$images         = array();
 		$attachment_ids = array();
+		$featured_id    = null;
 
 		// Add featured image.
 		if ( $product->get_image_id() ) {
+			$featured_id      = $product->get_image_id();
 			$attachment_ids[] = $product->get_image_id();
 		}
 
@@ -68,6 +70,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			$images[] = array(
 				'id'                => (int) $attachment_id,
+				'featured'          => (int) $featured_id === (int) $attachment_id,
 				'date_created'      => wc_rest_prepare_date_response( $attachment_post->post_date, false ),
 				'date_created_gmt'  => wc_rest_prepare_date_response( strtotime( $attachment_post->post_date_gmt ) ),
 				'date_modified'     => wc_rest_prepare_date_response( $attachment_post->post_modified, false ),

@@ -205,6 +205,36 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that all fields are returned when requested one by one.
+	 */
+	public function test_products_get_images_array_contains_featured() {
+		global $wpdb;
+
+		$product     = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$gallery_url = media_sideload_image( 'https://cldup.com/6L9h56D9Bw.jpg', $product->get_id(), 'gallery', 'src' );
+		$this->assertNotWPError( $gallery_url );
+		$gallery_id = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $gallery_url ) );
+
+		$featured_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $product->get_id(), 'featured', 'src' );
+		$this->assertNotWPError( $featured_url );
+		$featured_id = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $featured_url ) );
+
+		$product->set_image_id( $featured_id[0] );
+		$product->set_gallery_image_ids( $gallery_id[0] );
+		$product->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() );
+		$request->set_param( '_fields', 'images' );
+		$response     = $this->server->dispatch( $request );
+		$images_array = $response->get_data()['images'];
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( $images_array[0]['featured'] );
+		$this->assertEquals( 'featured', $images_array[0]['name'] );
+		$this->assertFalse( $images_array[1]['featured'] );
+		$this->assertEquals( 'gallery', $images_array[1]['name'] );
+	}
+
+	/**
 	 * Test that the `search` parameter does partial matching in the product name, but not the SKU.
 	 *
 	 * @return void
