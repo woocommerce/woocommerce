@@ -20,6 +20,20 @@
 		text-decoration: none;
 	}
 
+	.has-error {
+		.components-base-control {
+			margin-bottom: 0;
+
+			.components-input-control__backdrop {
+				border-color: $studio-red-50;
+			}
+		}
+
+		.components-base-control__help {
+			color: $studio-red-50;
+		}
+	}
+
 	.editor-styles-wrapper {
 		max-width: 650px;
 		margin-left: auto;
