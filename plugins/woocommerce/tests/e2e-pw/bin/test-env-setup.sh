@@ -5,6 +5,8 @@ ENABLE_NEW_PRODUCT_EDITOR="${ENABLE_NEW_PRODUCT_EDITOR:-0}"
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
 echo -e 'Testing \n';
+id -u
+id -g
 ls -Rla ~/wp-env
 
 echo -e 'Generate any necessary files and directories \n'
