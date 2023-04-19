@@ -38,7 +38,7 @@ importers:
       sass: ^1.59.3
       sass-loader: ^10.4.1
       syncpack: ^9.8.4
-      turbo: ^1.8.5
+      turbo: ^1.9.3
       typescript: ^4.9.5
       url-loader: ^1.1.2
       webpack: ^5.76.2
@@ -76,7 +76,7 @@ importers:
       sass: 1.60.0
       sass-loader: 10.4.1_sass@1.60.0+webpack@5.76.3
       syncpack: 9.8.4
-      turbo: 1.8.5
+      turbo: 1.9.3
       typescript: 4.9.5
       url-loader: 1.1.2_webpack@5.76.3
       webpack: 5.76.3
@@ -3199,9 +3199,9 @@ packages:
       '@babel/helper-annotate-as-pure': 7.18.6
       '@babel/helper-environment-visitor': 7.18.9
       '@babel/helper-function-name': 7.21.0
-      '@babel/helper-member-expression-to-functions': 7.18.9
+      '@babel/helper-member-expression-to-functions': 7.21.0
       '@babel/helper-optimise-call-expression': 7.18.6
-      '@babel/helper-replace-supers': 7.19.1
+      '@babel/helper-replace-supers': 7.20.7
       '@babel/helper-split-export-declaration': 7.18.6
     transitivePeerDependencies:
       - supports-color
@@ -3345,12 +3345,6 @@ packages:
 
   /@babel/helper-hoist-variables/7.18.6:
     resolution: {integrity: sha512-UlJQPkFqFULIcyW5sbzgbkxn2FKRgwWiRexcuaR8RNJRy8+LLveqPjwZV/bwrLZCN0eUHD/x8D0heK1ozuoo6Q==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/types': 7.21.3
-
-  /@babel/helper-member-expression-to-functions/7.18.9:
-    resolution: {integrity: sha512-RxifAh2ZoVU67PyKIO4AMi1wTenGfMR/O/ae0CCRqwgBAt5v7xjdtRw7UoSbsreKrQn5t7r89eruK/9JjYHuDg==}
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/types': 7.21.3
@@ -9093,7 +9087,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-proposal-unicode-property-regex': 7.18.6_@babel+core@7.21.3
       '@babel/plugin-transform-dotall-regex': 7.18.6_@babel+core@7.21.3
       '@babel/types': 7.21.3
@@ -18103,6 +18097,7 @@ packages:
       react: 17.0.2
       react-resize-aware: 3.1.1_react@17.0.2
       use-memo-one: 1.1.2_react@17.0.2
+    dev: false
 
   /@wordpress/compose/6.5.0_react@17.0.2:
     resolution: {integrity: sha512-gtZwEeFFHGltsr0vqwyrxPbAcA6lVfE36s59mZBh9KHeC/s590q2FPQz+9jSE5Y+uQmnXZCtahCrjvnpnaBIUg==}
@@ -18273,9 +18268,9 @@ packages:
       react: ^17.0.0
     dependencies:
       '@babel/runtime': 7.21.0
-      '@wordpress/compose': 5.4.1_react@17.0.2
-      '@wordpress/deprecated': 3.6.1
-      '@wordpress/element': 4.4.1
+      '@wordpress/compose': 5.17.0_react@17.0.2
+      '@wordpress/deprecated': 3.28.0
+      '@wordpress/element': 4.20.0
       '@wordpress/is-shallow-equal': 4.28.0
       '@wordpress/priority-queue': 2.28.0
       '@wordpress/redux-routine': 4.28.0_redux@4.2.0
@@ -18389,6 +18384,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.21.0
       '@wordpress/hooks': 3.6.1
+    dev: false
 
   /@wordpress/dom-ready/3.28.0:
     resolution: {integrity: sha512-PFFAnuPUouV0uSDZN6G/B8yksybtxzS/6H53OZJEA3h3EsNCicKRMGSowkumvLwXA23HV0K2Kht6JuS+bDECzA==}
@@ -18422,6 +18418,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.21.0
       lodash: 4.17.21
+    dev: false
 
   /@wordpress/e2e-test-utils/3.0.0_ddjhsfu4aotkh3cuzmpsln6ywq:
     resolution: {integrity: sha512-XMdR8DeKyDQRF5jKeUlOzP4pTRtoJuOLsNZRLUFUvnrs9y/7/hH17VmPbWp3TJGvV/eGKzO4+D+wJTsP9nJmIw==}
@@ -19149,6 +19146,7 @@ packages:
       '@babel/runtime': 7.21.0
       '@wordpress/i18n': 4.6.1
       lodash: 4.17.21
+    dev: false
 
   /@wordpress/media-utils/3.4.1:
     resolution: {integrity: sha512-WNAaMqqw6Eqy61KTWBy1NlgXSZH82Cm2SPVbz0v6yhJ4ktJmSRFm7Fd4mTMFS/L7NKTxwo+DFqEHlTGKj3lyzQ==}
@@ -42467,65 +42465,65 @@ packages:
   /turbo-combine-reducers/1.0.2:
     resolution: {integrity: sha512-gHbdMZlA6Ym6Ur5pSH/UWrNQMIM9IqTH6SoL1DbHpqEdQ8i+cFunSmSlFykPt0eGQwZ4d/XTHOl74H0/kFBVWw==}
 
-  /turbo-darwin-64/1.8.5:
-    resolution: {integrity: sha512-CAYh56bzeHfnh7jTm03r29bh8p5a/EjQo1Id5yLUH7hS7msTau/+YpxJWPodLbN0UQsUYivUqHQkglJ+eMJ7xA==}
+  /turbo-darwin-64/1.9.3:
+    resolution: {integrity: sha512-0dFc2cWXl82kRE4Z+QqPHhbEFEpUZho1msHXHWbz5+PqLxn8FY0lEVOHkq5tgKNNEd5KnGyj33gC/bHhpZOk5g==}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-darwin-arm64/1.8.5:
-    resolution: {integrity: sha512-R3jCPOv+lu3dcvMhj8b/Defv6dyUwX6W+tbX7d6YUCA46Plf/bGCQ8+MSbxmr/4E1GyGOVFsn1wRfiYk0us/Dg==}
+  /turbo-darwin-arm64/1.9.3:
+    resolution: {integrity: sha512-1cYbjqLBA2zYE1nbf/qVnEkrHa4PkJJbLo7hnuMuGM0bPzh4+AnTNe98gELhqI1mkTWBu/XAEeF5u6dgz0jLNA==}
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-64/1.8.5:
-    resolution: {integrity: sha512-YRc/KNRZeUVvth11UO4SDQZR2IqGgl9MSsbzqoHuFz4B4Q5QXH7onHogv9aXWE/BZBBbcrSBTlwBSG0Gg+J8hg==}
+  /turbo-linux-64/1.9.3:
+    resolution: {integrity: sha512-UuBPFefawEwpuxh5pM9Jqq3q4C8M0vYxVYlB3qea/nHQ80pxYq7ZcaLGEpb10SGnr3oMUUs1zZvkXWDNKCJb8Q==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-arm64/1.8.5:
-    resolution: {integrity: sha512-8exVZb7XBl/V3gHSweuUyG2D9IzfWqwLvlXoeLWlVYSj61Ajgdv+WU7lvUmx+H2s+sSKqmIFmewA5Lw6YY37sg==}
+  /turbo-linux-arm64/1.9.3:
+    resolution: {integrity: sha512-vUrNGa3hyDtRh9W0MkO+l1dzP8Co2gKnOVmlJQW0hdpOlWlIh22nHNGGlICg+xFa2f9j4PbQlWTsc22c019s8Q==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-64/1.8.5:
-    resolution: {integrity: sha512-fA8PU5ZNoFnQkapG06WiEqfsVQ5wbIPkIqTwUsd/M2Lp+KgxE79SQbuEI+2vQ9SmwM5qoMi515IPjgvXAJXgCw==}
+  /turbo-windows-64/1.9.3:
+    resolution: {integrity: sha512-0BZ7YaHs6r+K4ksqWus1GKK3W45DuDqlmfjm/yuUbTEVc8szmMCs12vugU2Zi5GdrdJSYfoKfEJ/PeegSLIQGQ==}
     cpu: [x64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-arm64/1.8.5:
-    resolution: {integrity: sha512-SW/NvIdhckLsAWjU/iqBbCB0S8kXupKscUK3kEW1DZIr3MYcP/yIuaE/IdPuqcoF3VP0I3TLD4VTYCCKAo3tKA==}
+  /turbo-windows-arm64/1.9.3:
+    resolution: {integrity: sha512-QJUYLSsxdXOsR1TquiOmLdAgtYcQ/RuSRpScGvnZb1hY0oLc7JWU0llkYB81wVtWs469y8H9O0cxbKwCZGR4RQ==}
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo/1.8.5:
-    resolution: {integrity: sha512-UBnH2wIFb5g6OQCk8f34Ud15ZXV4xEMmugeDJTU5Ur2LpVRsNEny0isSCYdb3Iu3howoNyyXmtpaxWsAwNYkkg==}
+  /turbo/1.9.3:
+    resolution: {integrity: sha512-ID7mxmaLUPKG/hVkp+h0VuucB1U99RPCJD9cEuSEOdIPoSIuomcIClEJtKamUsdPLhLCud+BvapBNnhgh58Nzw==}
     hasBin: true
     requiresBuild: true
     optionalDependencies:
-      turbo-darwin-64: 1.8.5
-      turbo-darwin-arm64: 1.8.5
-      turbo-linux-64: 1.8.5
-      turbo-linux-arm64: 1.8.5
-      turbo-windows-64: 1.8.5
-      turbo-windows-arm64: 1.8.5
+      turbo-darwin-64: 1.9.3
+      turbo-darwin-arm64: 1.9.3
+      turbo-linux-64: 1.9.3
+      turbo-linux-arm64: 1.9.3
+      turbo-windows-64: 1.9.3
+      turbo-windows-arm64: 1.9.3
     dev: true
 
   /tweetnacl/0.14.5:

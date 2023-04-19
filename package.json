@@ -59,7 +59,7 @@
 		"sass": "^1.59.3",
 		"sass-loader": "^10.4.1",
 		"syncpack": "^9.8.4",
-		"turbo": "^1.8.5",
+		"turbo": "^1.9.3",
 		"typescript": "^4.9.5",
 		"url-loader": "^1.1.2",
 		"webpack": "^5.76.2"
