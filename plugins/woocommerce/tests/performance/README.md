@@ -246,7 +246,7 @@ Groups are used to organize common logic in the test scripts and can help with t
 
 Checks are like asserts but they don’t stop the tests if they record a failure (for example in a load test with 1000s of iterations of a request this allows for an isolated flakey iteration to not stop test execution).
 
-All requests have had checks for at least a `200` http status repsonse added and most also have an additional check for a string contained in the response body.
+All requests have had checks for at least a `200` http status response added and most also have an additional check for a string contained in the response body.
 
 ---
 ## Other Resources
