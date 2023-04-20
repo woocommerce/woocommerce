@@ -25,10 +25,12 @@ export function Edit( {
 				<BlockIcon clientId={ clientId } />
 				<span>{ title }</span>
 			</h2>
-			<p
-				className="wp-block-woocommerce-product-section__description"
-				dangerouslySetInnerHTML={ sanitizeHTML( description ) }
-			/>
+			{ description && (
+				<p
+					className="wp-block-woocommerce-product-section__description"
+					dangerouslySetInnerHTML={ sanitizeHTML( description ) }
+				/>
+			) }
 			<InnerBlocks templateLock="all" />
 		</div>
 	);
