@@ -1933,6 +1933,21 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Get the aria-describedby description for the add to cart button.
+	 *
+	 * @return string
+	 */
+	public function aria_describedby_description() {
+		$aria_describedby_description = '';
+
+		if ( 'Select options' === $this->add_to_cart_text() ) {
+			$aria_describedby_description = __( 'This product has multiple variants. The options may be chosen on the product page', 'woocommerce' );
+		}
+
+		return apply_filters( 'woocommerce_product_aria_describedby_description', $aria_describedby_description, $this );
+	}
+
+	/**
 	 * Get the add to cart button text.
 	 *
 	 * @return string
