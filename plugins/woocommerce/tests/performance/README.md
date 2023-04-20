@@ -251,4 +251,4 @@ All requests have had checks for at least a `200` http status response added and
 ---
 ## Other Resources
 
-[k6 documention](https://k6.io/docs/) is a very useful resource for test creation and execution.
+[k6 documentation](https://k6.io/docs/) is a very useful resource for test creation and execution.
