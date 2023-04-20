@@ -93,7 +93,7 @@
 		"wp-env:config": "./bin/wp-env-pre-config.sh"
 	},
 	"devDependencies": {
-		"@actions/core": "1.9.1",
+		"@actions/core": "1.10.0",
 		"@actions/github": "5.0.3",
 		"@automattic/color-studio": "2.5.0",
 		"@babel/cli": "7.18.9",
@@ -104,6 +104,7 @@
 		"@babel/polyfill": "7.12.1",
 		"@babel/preset-typescript": "7.18.6",
 		"@bartekbp/typescript-checkstyle": "5.0.0",
+		"@octokit/action": "5.0.2",
 		"@octokit/graphql": "4.8.0",
 		"@playwright/test": "1.32.3",
 		"@storybook/addon-a11y": "6.5.16",
