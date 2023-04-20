@@ -176,7 +176,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		public function get_additional_content() {
 			return apply_filters( 'woocommerce_email_additional_content_' . $this->id, $this->format_string( $this->get_option( 'additional_content' ) ), $this->object, $this );
 		}
-	
+
 		/**
 		 * Initialise settings form fields.
 		 */
