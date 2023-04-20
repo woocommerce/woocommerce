@@ -5,7 +5,11 @@ ENABLE_NEW_PRODUCT_EDITOR="${ENABLE_NEW_PRODUCT_EDITOR:-0}"
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
 echo -e 'Fix WordPress Directory Ownership \n'
-sudo chown -R 33:33 $(wp-env install-path)
+ls -la $(wp-env install-path)
+wp-env run tests-wordpress "chown -R 33:33 ."
+ls -la $(wp-env install-path)
+wp-env run tests-wordpress "ls -la ."
+wp-env run tests-cli "ls -la ."
 
 echo -e 'Activate twentynineteen theme \n'
 wp-env run tests-cli "wp theme activate twentynineteen"
