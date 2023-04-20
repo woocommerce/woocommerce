@@ -115,7 +115,7 @@ final class ReserveStock {
 				$item_quantity = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
 
 				$rows[ $managed_by_id ] = isset( $rows[ $managed_by_id ] ) ? $rows[ $managed_by_id ] + $item_quantity : $item_quantity;
-				$held_stock_notes[]     = $product->get_formatted_name() . ' : ' . $rows[ $managed_by_id ];
+				$held_stock_notes[]     = $product->get_formatted_name() . ' x ' . $rows[ $managed_by_id ];
 			}
 
 			if ( ! empty( $rows ) ) {
@@ -131,7 +131,7 @@ final class ReserveStock {
 		// Add order note after successfully holding the stock.
 		if ( ! empty( $held_stock_notes ) ) {
 			// translators: %s is a time in minutes
-			$order->add_order_note( sprintf( __( 'Stock is held for %s minutes for payment:', 'woocommerce' ), $minutes ) . ' ' . implode( ', ', $held_stock_notes ) );
+			$order->add_order_note( sprintf( __( 'Stock is held for %s minutes for payment:', 'woocommerce' ), $minutes ) . '<br>- ' . implode( '<br>- ', $held_stock_notes ) );
 		}
 	}
 
