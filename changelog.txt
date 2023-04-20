@@ -3361,7 +3361,7 @@
 * Fix - Add protection around func_get_args_call for backwards compatibility. #28677
 * Fix - Restore stock_status in REST API V3 response. #28731
 * Fix - Revert some of the changes related to perf enhancements (27735) as it was breaking stock_status filter. #28745
-* Dev - Hook for intializing price slider in frontend. #28014
+* Dev - Hook for initializing price slider in frontend. #28014
 * Dev - Add support for running a custom initialization script for tests. #28041
 * Dev - Use the coenjacobs/mozart package to renamespace vendor packages. #28147
 * Dev - Documentation for `wc_get_container`. #28269
