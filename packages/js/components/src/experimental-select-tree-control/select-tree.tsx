@@ -49,6 +49,16 @@ export const SelectTree = function SelectTree( {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ isOpen, setIsOpen ] = useState( false );
 
+	const recalculateInputValue = () => {
+		if ( onInputChange ) {
+			if ( ! props.multiple && props.selected ) {
+				onInputChange( ( props.selected as Item ).label );
+			} else {
+				onInputChange( '' );
+			}
+		}
+	};
+
 	const inputProps: any = {
 		className: 'woocommerce-experimental-select-control__input',
 		id: `${ props.id }-input`,
@@ -70,13 +80,7 @@ export const SelectTree = function SelectTree( {
 					?.contains( event.relatedTarget )
 			) {
 				setIsOpen( false );
-				if ( ! props.multiple ) {
-					if ( props.selected && onInputChange ) {
-						onInputChange( ( props.selected as Item ).label );
-					} else if ( onInputChange ) {
-						onInputChange( '' );
-					}
-				}
+				recalculateInputValue();
 			}
 			setIsFocused( false );
 		},
@@ -93,6 +97,7 @@ export const SelectTree = function SelectTree( {
 			}
 			if ( event.key === 'Tab' ) {
 				setIsOpen( false );
+				recalculateInputValue();
 			}
 		},
 		onChange: ( event: any ) =>
