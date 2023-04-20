@@ -1080,11 +1080,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$index            = 0;
 		$update_existing  = $this->params['update_existing'];
 		$data             = array(
-			'imported' => array(),
-            'imported_variations' => array(),
-			'failed'   => array(),
-			'updated'  => array(),
-			'skipped'  => array(),
+			'imported'            => array(),
+			'imported_variations' => array(),
+			'failed'              => array(),
+			'updated'             => array(),
+			'skipped'             => array(),
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
@@ -1151,9 +1151,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			} elseif ( $result['updated'] ) {
 				$data['updated'][] = $result['id'];
 			} else {
-				if( $result['is_variation'] ){
+				if ( $result['is_variation'] ) {
 					$data['imported_variations'][] = $result['id'];
-				}else{
+				} else {
 					$data['imported'][] = $result['id'];
 				}
 			}
