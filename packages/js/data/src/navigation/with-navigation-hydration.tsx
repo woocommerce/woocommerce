@@ -3,7 +3,7 @@
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { createElement, useEffect, useRef } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
