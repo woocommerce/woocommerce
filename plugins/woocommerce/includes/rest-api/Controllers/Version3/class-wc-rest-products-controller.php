@@ -320,7 +320,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			}
 
 			// Handle multiple featured images.
-			if ($featured_image_count > 1) {
+			if ( $featured_image_count > 1 ) {
 				throw new WC_REST_Exception(
 					'woocommerce_rest_product_featured_image_count',
 					__( 'Only one featured image is allowed.', 'woocommerce' ),
