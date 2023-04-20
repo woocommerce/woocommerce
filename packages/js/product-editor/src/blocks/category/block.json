@@ -5,7 +5,7 @@
 	"title": "Product Category",
 	"category": "widgets",
 	"description": "A field to select product categories.",
-	"keywords": [ "products", "name", "title" ],
+	"keywords": [ "products", "category" ],
 	"textdomain": "default",
 	"attributes": {
 		"name": {
@@ -27,5 +27,6 @@
 		"reusable": false,
 		"inserter": false,
 		"lock": false
-	}
+	},
+	"editorStyle": "file:./editor.css"
 }
