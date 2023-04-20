@@ -8112,7 +8112,7 @@
 * Tweak - Flat rate shipping support for percentage factor of additional costs.
 * Tweak - local delivery _ pattern matching for postcodes. e.g. NG1___ would match NG1 1AA but not NG10 1AA.
 * Tweak - Improved layered nav OR count logic
-* Tweak - Make shipping methods check if taxable, so when customer is VAT excempt taxes are not included in price.
+* Tweak - Make shipping methods check if taxable, so when customer is VAT exempt taxes are not included in price.
 * Tweak - Coupon in admin bar new menu #3974
 * Tweak - Shortcode tag filters + updated menu names to make white labelling easier.
 * Tweak - Removed placeholder polyfill. Use this plugin to replace functionality if required: https://wordpress.org/plugins/html5-placeholder-polyfill/
