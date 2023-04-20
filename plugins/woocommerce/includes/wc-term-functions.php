@@ -594,7 +594,7 @@ function wc_clear_term_product_ids( $object_id, $terms, $tt_ids, $taxonomy, $app
 add_action( 'set_object_terms', 'wc_clear_term_product_ids', 10, 6 );
 
 /**
- * Get full list of product visibilty term ids.
+ * Get full list of product visibility term ids.
  *
  * @since  3.0.0
  * @return int[]
