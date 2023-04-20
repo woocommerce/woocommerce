@@ -12,7 +12,7 @@ const {
  */
 test.describe('Payment Gateways API tests', () => {
 
-	test('can view all payment gatways', async ({
+	test('can view all payment gateways', async ({
 		request
 	}) => {
 		// call API to retrieve the payment gateways
@@ -167,7 +167,7 @@ test.describe('Payment Gateways API tests', () => {
 	test('can view a payment gateway', async ({
 		request
 	}) => {
-		// call API to retrieve a single payment gatway
+		// call API to retrieve a single payment gateway
 		const response = await request.get('/wp-json/wc/v3/payment_gateways/bacs');
 		const responseJSON = await response.json();
 		expect(response.status()).toEqual(200);
@@ -213,7 +213,7 @@ test.describe('Payment Gateways API tests', () => {
 	test('can update a payment gateway', async ({
 		request
 	}) => {
-		// call API to update a payment gatway
+		// call API to update a payment gateway
 		const response = await request.put('/wp-json/wc/v3/payment_gateways/bacs', {
 			data: {
 				enabled: true
