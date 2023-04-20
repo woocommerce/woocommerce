@@ -811,23 +811,23 @@ test.describe( 'Add New Variable Product Page', () => {
 		);
 		await page.check( 'input.checkbox.variable_manage_stock' );
 
-		const firstVariationContainerLocator = await page
+		const firstVariationContainer = await page
 			.locator( '.woocommerce_variations  .woocommerce_variation' )
 			.first();
 
-		await firstVariationContainerLocator
+		await firstVariationContainer
 			.getByPlaceholder( 'Variation price (required)' )
 			.fill( variationOnePrice );
 		await expect(
 			page.locator( 'p.variable_stock_status' )
 		).not.toBeVisible();
-		await firstVariationContainerLocator
+		await firstVariationContainer
 			.getByLabel( 'Stock quantity' )
 			.fill( stockAmount );
 		await page.selectOption( '#variable_backorders0', 'notify', {
 			force: true,
 		} );
-		await firstVariationContainerLocator
+		await firstVariationContainer
 			.getByPlaceholder( 'Store-wide threshold (2)' )
 			.fill( lowStockAmount );
 		await page.click( 'button.save-variation-changes' );
