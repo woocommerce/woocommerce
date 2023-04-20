@@ -19,14 +19,13 @@ import { usePublish } from '../hooks/use-publish';
 export function PublishButton(
 	props: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' >
 ) {
-	const [ productStatus ] = useEntityProp< ProductStatus | 'auto-draft' >(
+	const [ productStatus ] = useEntityProp< ProductStatus >(
 		'postType',
 		'product',
 		'status'
 	);
 
-
-	const isCreating = status === 'auto-draft';
+	const isCreating = productStatus === 'auto-draft';
 
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );

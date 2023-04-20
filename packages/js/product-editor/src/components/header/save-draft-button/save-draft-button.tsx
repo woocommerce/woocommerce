@@ -18,7 +18,7 @@ import { useSaveDraft } from '../hooks/use-save-draft';
 export function SaveDraftButton(
 	props: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' >
 ) {
-	const [ productStatus ] = useEntityProp< ProductStatus | 'auto-draft' >(
+	const [ productStatus ] = useEntityProp< ProductStatus >(
 		'postType',
 		'product',
 		'status'
