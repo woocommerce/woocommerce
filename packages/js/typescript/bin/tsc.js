@@ -10,7 +10,7 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const { spawnSync } = require( 'child_process' );
 
-const projectRoot = path.join( process.cwd(), '..' );
+const projectRoot = path.join( process.cwd() );
 const tsConfigPath = path.join( projectRoot, 'tsconfig.json' );
 
 //  Fail if tsconfig.json is not found at project root.
@@ -95,17 +95,16 @@ const tscArgs = [
 ];
 
 // Now run tsc with the new config
-const result = spawnSync( 'tsc', [ ...tscArgs, '--showConfig' ], {
+const result = spawnSync( 'tsc', [ ...tscArgs ], {
 	stdio: 'inherit',
 } );
+
+fs.unlinkSync( './generated-tsc-config.json' );
 
 // Check the exit code of tsc
 if ( result.status !== 0 ) {
 	console.error( `tsc exited with code ${ result.status }` );
-	console.error( result.stderr.toString() );
 	process.exit( 1 );
 }
-
-fs.unlinkSync( './generated-tsc-config.json' );
 
 console.log( 'tsc completed successfully' );
