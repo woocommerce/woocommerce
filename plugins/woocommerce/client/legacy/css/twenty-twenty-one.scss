@@ -3056,10 +3056,10 @@ a.reset_variations {
 	.woocommerce-info {
 		padding: 1rem 1.5rem;
 
-		.button {
+		a.button {
 			margin-left: 10px;
 			min-width: 100px;
-			padding: 10px 15px !important;
+			padding: calc(0.70 * var(--button--padding-vertical)) calc(0.50 * var(--button--padding-horizontal));
 		}
 	}
 }
