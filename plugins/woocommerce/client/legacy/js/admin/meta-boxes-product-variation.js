@@ -47,13 +47,11 @@ jQuery( function ( $ ) {
 				'woocommerce_variations_loaded',
 				this.variations_loaded
 			);
-			$( document.body )
-				.on( 'woocommerce_variations_added', this.variation_added )
-				.on(
-					'keyup',
-					'.wc_input_variations_price',
-					this.maybe_enable_button_to_add_price_to_variations
-				);
+			$( document.body ).on(
+				'keyup',
+				'.wc_input_variations_price',
+				this.maybe_enable_button_to_add_price_to_variations
+			);
 		},
 
 		create_variations: function ( event ) {
@@ -326,21 +324,6 @@ jQuery( function ( $ ) {
 			} );
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
-		},
-
-		/**
-		 * Run actions when added a variation
-		 *
-		 * @param {Object} event
-		 * @param {Int} qty
-		 */
-		variation_added: function ( event, qty ) {
-			if ( 1 === qty ) {
-				wc_meta_boxes_product_variations_actions.variations_loaded(
-					null,
-					true
-				);
-			}
 		},
 
 		/**
@@ -1385,10 +1368,6 @@ jQuery( function ( $ ) {
 		 */
 		init: function () {
 			$( document.body )
-				.on(
-					'woocommerce_variations_added',
-					this.update_single_quantity
-				)
 				.on(
 					'change',
 					'.variations-pagenav .page-selector',
