@@ -3543,7 +3543,7 @@ function wc_display_product_attributes( $product ) {
 	 * Hook: woocommerce_display_product_attributes.
 	 *
 	 * @since 3.6.0.
-	 * @param array $product_attributes Array of atributes to display; label, value.
+	 * @param array $product_attributes Array of attributes to display; label, value.
 	 * @param WC_Product $product Showing attributes for this product.
 	 */
 	$product_attributes = apply_filters( 'woocommerce_display_product_attributes', $product_attributes, $product );
