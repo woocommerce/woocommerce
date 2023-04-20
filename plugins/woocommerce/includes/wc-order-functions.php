@@ -913,11 +913,8 @@ add_action( 'woocommerce_order_status_completed', 'wc_update_total_sales_counts'
 add_action( 'woocommerce_order_status_processing', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_on-hold', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_completed_to_cancelled', 'wc_update_total_sales_counts' );
-add_action( 'woocommerce_order_status_completed_to_refunded', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_processing_to_cancelled', 'wc_update_total_sales_counts' );
-add_action( 'woocommerce_order_status_processing_to_refunded', 'wc_update_total_sales_counts' );
 add_action( 'woocommerce_order_status_on-hold_to_cancelled', 'wc_update_total_sales_counts' );
-add_action( 'woocommerce_order_status_on-hold_to_refunded', 'wc_update_total_sales_counts' );
 
 /**
  * Update used coupon amount for each coupon within an order.
