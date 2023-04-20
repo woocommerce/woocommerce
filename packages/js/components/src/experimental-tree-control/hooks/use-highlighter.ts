@@ -25,6 +25,8 @@ export function useHighlighter( {
 		if ( ! multiple ) {
 			return checkedStatus === 'checked';
 		}
+
+		return false;
 	}, [ item, multiple, checkedStatus, shouldItemBeHighlighted ] );
 
 	return { isHighlighted };

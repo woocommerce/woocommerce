@@ -243,7 +243,7 @@ export class Search extends Component< Props, State > {
 		return formattedOptions;
 	}
 
-	fetchOptions( previousOptions: unknown[], query: string ) {
+	fetchOptions( _: unknown[], query: string ) {
 		if ( ! query ) {
 			return [];
 		}

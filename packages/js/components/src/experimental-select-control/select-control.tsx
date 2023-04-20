@@ -117,7 +117,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	onRemove = () => null,
 	onSelect = () => null,
 	onFocus = () => null,
-	stateReducer = ( state, actionAndChanges ) => actionAndChanges.changes,
+	stateReducer = ( _, actionAndChanges ) => actionAndChanges.changes,
 	placeholder,
 	selected,
 	className,

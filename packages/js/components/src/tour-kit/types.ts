@@ -44,4 +44,4 @@ export interface WooTourStepRendererProps extends TourStepRendererProps {
 	steps: WooStep[];
 }
 
-export { CloseHandler } from '@automattic/tour-kit';
+export type { CloseHandler } from '@automattic/tour-kit';

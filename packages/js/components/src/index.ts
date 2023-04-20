@@ -47,10 +47,8 @@ export {
 	selectControlStateChangeTypes,
 	useAsyncFilter,
 } from './experimental-select-control';
-export {
-	MenuItem as __experimentalSelectControlMenuItem,
-	MenuItemProps as __experimentalSelectControlMenuItemProps,
-} from './experimental-select-control/menu-item';
+export { MenuItem as __experimentalSelectControlMenuItem } from './experimental-select-control/menu-item';
+export type { MenuItemProps as __experimentalSelectControlMenuItemProps } from './experimental-select-control/menu-item';
 export {
 	Menu as __experimentalSelectControlMenu,
 	MenuSlot as __experimentalSelectControlMenuSlot,
@@ -59,7 +57,8 @@ export { default as ScrollTo } from './scroll-to';
 export { Sortable } from './sortable';
 export { ListItem } from './list-item';
 export { default as Spinner } from './spinner';
-export { default as Stepper, StepperProps } from './stepper';
+export { default as Stepper } from './stepper';
+export type { StepperProps } from './stepper';
 export { default as SummaryList } from './summary';
 export { default as SummaryListPlaceholder } from './summary/placeholder';
 export { SummaryNumberPlaceholder } from './summary/placeholder';
@@ -89,16 +88,10 @@ export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-
 export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
 export { WooProductTabItem as __experimentalWooProductTabItem } from './woo-product-tab-item';
 export * from './product-fields';
-export {
-	SlotContextProvider,
-	useSlotContext,
-	SlotContextType,
-	SlotContextHelpersType,
-} from './slot-context';
-export {
-	TreeControl as __experimentalTreeControl,
-	Item as TreeItemType,
-} from './experimental-tree-control';
+export { SlotContextProvider, useSlotContext } from './slot-context';
+export type { SlotContextType, SlotContextHelpersType } from './slot-context';
+export { TreeControl as __experimentalTreeControl } from './experimental-tree-control';
+export type { Item as TreeItemType } from './experimental-tree-control';
 export {
 	SelectTree as __experimentalSelectTreeControl,
 	SelectTreeMenuSlot as __experimentalSelectTreeMenuSlot,

@@ -92,13 +92,15 @@ export const Plugins = ( {
 			}
 
 			installAndActivatePlugins( pluginSlugs )
-				.then( ( response ) => {
+				.then( ( response: InstallPluginsResponse ) => {
 					handleSuccess( response.data.activated, response );
 				} )
-				.catch( ( response ) => {
+				.catch( ( response: InstallPluginsResponse ) => {
 					setHasBeenClicked( false );
 					handleErrors( response.errors, response );
 				} );
+
+			return false;
 		},
 		[
 			handleErrors,

@@ -30,6 +30,7 @@ function getVariationName( {
 	name: string;
 } ) {
 	const separator =
+		// @ts-expect-error - TODO fix this
 		window.wcSettings.variationTitleAttributesSeparator || ' - ';
 
 	if ( name.indexOf( separator ) > -1 ) {
