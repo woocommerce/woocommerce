@@ -1110,7 +1110,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *     position - integer sort order.
 	 *     visible - If visible on frontend.
 	 *     variation - If used for variations.
-	 * Indexed by unqiue key to allow clearing old ones after a set.
+	 * Indexed by unique key to allow clearing old ones after a set.
 	 *
 	 * @since 3.0.0
 	 * @param array $raw_attributes Array of WC_Product_Attribute objects.
