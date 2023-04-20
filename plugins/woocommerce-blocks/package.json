@@ -68,6 +68,7 @@
 		"postinstall": "patch-package",
 		"reformat-files": "prettier --ignore-path .eslintignore --write \"**/*.{js,jsx,json,ts,tsx}\"",
 		"release": "sh ./bin/wordpress-deploy.sh",
+		"rimraf": "./node_modules/rimraf/bin.js",
 		"start": "rimraf build/* && cross-env BABEL_ENV=default CHECK_CIRCULAR_DEPS=true webpack --watch --info-verbosity none",
 		"storybook": "start-storybook  -c ./storybook -p 6006 --ci",
 		"storybook:build": "BABEL_ENV=development build-storybook  -c ./storybook -o ./storybook/dist",
@@ -94,7 +95,7 @@
 	},
 	"devDependencies": {
 		"@actions/core": "1.10.0",
-		"@actions/github": "5.0.3",
+		"@actions/github": "5.1.1",
 		"@automattic/color-studio": "2.5.0",
 		"@babel/cli": "7.18.9",
 		"@babel/core": "7.18.9",
