@@ -202,7 +202,7 @@ Create a custom Grafana dashboard using [these instructions](https://k6.io/docs/
 
 k6 tests rely on HTTP requests in order to test the backend. They can either be constructed from scratch, by using the k6 recorder, or by converting a HAR file.
 
-The k6 recorder is a browser extension which captures http requests generated as you perform actions in a tab. It generates a test with all the HTTP requests from your actions which can then be modified to make it execuatable.
+The k6 recorder is a browser extension which captures http requests generated as you perform actions in a tab. It generates a test with all the HTTP requests from your actions which can then be modified to make it executable.
 
 Alternatively any application which captures HTTP requests can be used to figure out the requests to include in a test such as the network section within browser developer tools.
 
