@@ -160,6 +160,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Local Pickup: Merge country and state into same field in location modal. ([8408](https://github.com/woocommerce/woocommerce-blocks/pull/8408))
 - Enable users to migrate to the blockified Single Product template. ([8324](https://github.com/woocommerce/woocommerce-blocks/pull/8324))
 
+= 9.8.5 - 2023-04-21 =
+
+#### Bug Fixes
+
+- Fix image editor in Featured Product/Category blocks on WP 6.2. ([9142](https://github.com/woocommerce/woocommerce-blocks/pull/9142))
+
 = 9.8.4 - 2023-03-29 =
 
 #### Bug Fixes
