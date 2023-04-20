@@ -276,6 +276,7 @@ importers:
       '@woocommerce/internal-js-tests': workspace:*
       '@woocommerce/internal-style-build': workspace:*
       '@woocommerce/navigation': workspace:*
+      '@woocommerce/typescript': workspace:*
       '@wordpress/a11y': wp-6.0
       '@wordpress/api-fetch': wp-6.0
       '@wordpress/base-styles': wp-6.0
@@ -334,7 +335,6 @@ importers:
       rimraf: ^3.0.2
       sass-loader: ^10.2.1
       ts-jest: ^27.1.3
-      typescript: ^4.9.5
       uuid: ^8.3.0
       webpack: ^5.70.0
       webpack-cli: ^3.3.12
@@ -430,6 +430,7 @@ importers:
       '@woocommerce/eslint-plugin': link:../eslint-plugin
       '@woocommerce/internal-js-tests': link:../internal-js-tests
       '@woocommerce/internal-style-build': link:../internal-style-build
+      '@woocommerce/typescript': link:../typescript
       '@wordpress/browserslist-config': 4.1.3
       '@wordpress/scripts': 12.6.1_c6qmhwnhjoryl2mlu436oznfja
       concurrently: 7.0.0
@@ -443,7 +444,6 @@ importers:
       rimraf: 3.0.2
       sass-loader: 10.2.1_webpack@5.70.0
       ts-jest: 27.1.3_z76afj7v5k462eeambgjfpsr3e
-      typescript: 4.9.5
       uuid: 8.3.2
       webpack: 5.70.0_webpack-cli@3.3.12
       webpack-cli: 3.3.12_webpack@5.70.0
@@ -1590,7 +1590,7 @@ importers:
       ts-jest: 27.1.3_4y4px6we76w7ab6r3dbcniovya
       typescript: 4.9.5
 
-  packages/js/ts-config:
+  packages/js/typescript:
     specifiers:
       typescript: ^4.9.5
     dependencies:
@@ -2796,7 +2796,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@jridgewell/trace-mapping': 0.3.16
+      '@jridgewell/trace-mapping': 0.3.17
       commander: 4.1.1
       convert-source-map: 1.8.0
       fs-readdir-recursive: 1.1.0
@@ -9080,7 +9080,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.19.0
       '@babel/plugin-proposal-unicode-property-regex': 7.18.6_@babel+core@7.17.8
       '@babel/plugin-transform-dotall-regex': 7.18.6_@babel+core@7.17.8
       '@babel/types': 7.21.3
@@ -9136,8 +9136,8 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.20.2
-      '@babel/helper-validator-option': 7.18.6
+      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-validator-option': 7.16.7
       '@babel/plugin-transform-typescript': 7.16.8_@babel+core@7.17.8
     transitivePeerDependencies:
       - supports-color
@@ -10924,6 +10924,7 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.14
+    dev: true
 
   /@jridgewell/trace-mapping/0.3.17:
     resolution: {integrity: sha512-MCNzAp77qzKca9+W/+I0+sEpaUnZoeasnghNeVc41VZCEKaCH73Vq3BZZ/SzWIgrqE4H4ceI+p+b6C0mHf9T4g==}
@@ -17217,7 +17218,7 @@ packages:
       '@wordpress/style-engine': 0.15.0
       '@wordpress/token-list': 2.19.0
       '@wordpress/url': 3.29.0
-      '@wordpress/warning': 2.19.0
+      '@wordpress/warning': 2.28.0
       '@wordpress/wordcount': 3.19.0
       change-case: 4.1.2
       classnames: 2.3.1
@@ -18103,7 +18104,6 @@ packages:
       react: 17.0.2
       react-resize-aware: 3.1.1_react@17.0.2
       use-memo-one: 1.1.2_react@17.0.2
-    dev: false
 
   /@wordpress/compose/6.5.0_react@17.0.2:
     resolution: {integrity: sha512-gtZwEeFFHGltsr0vqwyrxPbAcA6lVfE36s59mZBh9KHeC/s590q2FPQz+9jSE5Y+uQmnXZCtahCrjvnpnaBIUg==}
@@ -18274,9 +18274,9 @@ packages:
       react: ^17.0.0
     dependencies:
       '@babel/runtime': 7.21.0
-      '@wordpress/compose': 5.17.0_react@17.0.2
-      '@wordpress/deprecated': 3.28.0
-      '@wordpress/element': 4.20.0
+      '@wordpress/compose': 5.4.1_react@17.0.2
+      '@wordpress/deprecated': 3.6.1
+      '@wordpress/element': 4.4.1
       '@wordpress/is-shallow-equal': 4.28.0
       '@wordpress/priority-queue': 2.28.0
       '@wordpress/redux-routine': 4.28.0_redux@4.2.0
@@ -18390,7 +18390,6 @@ packages:
     dependencies:
       '@babel/runtime': 7.21.0
       '@wordpress/hooks': 3.6.1
-    dev: false
 
   /@wordpress/dom-ready/3.28.0:
     resolution: {integrity: sha512-PFFAnuPUouV0uSDZN6G/B8yksybtxzS/6H53OZJEA3h3EsNCicKRMGSowkumvLwXA23HV0K2Kht6JuS+bDECzA==}
@@ -18424,7 +18423,6 @@ packages:
     dependencies:
       '@babel/runtime': 7.21.0
       lodash: 4.17.21
-    dev: false
 
   /@wordpress/e2e-test-utils/3.0.0_ddjhsfu4aotkh3cuzmpsln6ywq:
     resolution: {integrity: sha512-XMdR8DeKyDQRF5jKeUlOzP4pTRtoJuOLsNZRLUFUvnrs9y/7/hH17VmPbWp3TJGvV/eGKzO4+D+wJTsP9nJmIw==}
@@ -19152,7 +19150,6 @@ packages:
       '@babel/runtime': 7.21.0
       '@wordpress/i18n': 4.6.1
       lodash: 4.17.21
-    dev: false
 
   /@wordpress/media-utils/3.4.1:
     resolution: {integrity: sha512-WNAaMqqw6Eqy61KTWBy1NlgXSZH82Cm2SPVbz0v6yhJ4ktJmSRFm7Fd4mTMFS/L7NKTxwo+DFqEHlTGKj3lyzQ==}
@@ -20725,7 +20722,7 @@ packages:
   /axios/0.21.4:
     resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
-      follow-redirects: 1.14.7_debug@4.3.3
+      follow-redirects: 1.14.7
     transitivePeerDependencies:
       - debug
 
@@ -27250,6 +27247,15 @@ packages:
       debug:
         optional: true
 
+  /follow-redirects/1.14.7:
+    resolution: {integrity: sha512-+hbxoLbFMbRKDwohX8GkTataGqO6Jb7jGwpAlwgy2bIz25XtRm7KEzJM76R1WiNT5SwZkX4Y75SwBolkpmE7iQ==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+
   /follow-redirects/1.14.7_debug@4.3.3:
     resolution: {integrity: sha512-+hbxoLbFMbRKDwohX8GkTataGqO6Jb7jGwpAlwgy2bIz25XtRm7KEzJM76R1WiNT5SwZkX4Y75SwBolkpmE7iQ==}
     engines: {node: '>=4.0'}
@@ -27260,6 +27266,7 @@ packages:
         optional: true
     dependencies:
       debug: 4.3.3
+    dev: true
 
   /follow-redirects/1.5.10:
     resolution: {integrity: sha512-0V5l4Cizzvqt5D44aTXbFZz+FtyXV1vrDN6qrelxtfYQKW0KO0W2T/hkE8xvGa/540LkZlkaUjO4ailYTFtHVQ==}
@@ -38061,7 +38068,7 @@ packages:
       is-touch-device: 1.0.1
       lodash: 4.17.21
       moment: 2.29.4
-      object.assign: 4.1.4
+      object.assign: 4.1.2
       object.values: 1.1.5
       prop-types: 15.8.1
       raf: 3.4.1
