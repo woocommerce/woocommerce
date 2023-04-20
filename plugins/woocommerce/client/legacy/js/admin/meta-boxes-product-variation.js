@@ -1104,25 +1104,15 @@ jQuery( function ( $ ) {
 					woocommerce_admin_meta_boxes_variations.ajax_url,
 					data,
 					function ( response ) {
-						var count = parseInt( response, 10 );
+						let count = parseInt( response, 10 );
+						count = isNaN( count ) ? 0 : count;
 
-						if ( 1 === count ) {
-							window.alert(
-								count +
-									' ' +
-									woocommerce_admin_meta_boxes_variations.i18n_variation_added
-							);
-						} else if ( 0 === count || count > 1 ) {
-							window.alert(
-								count +
-									' ' +
-									woocommerce_admin_meta_boxes_variations.i18n_variations_added
-							);
-						} else {
-							window.alert(
-								woocommerce_admin_meta_boxes_variations.i18n_no_variations_added
-							);
-						}
+						const message =
+							count === 1
+								? woocommerce_admin_meta_boxes_variations.i18n_variation_added
+								: woocommerce_admin_meta_boxes_variations.i18n_variations_added;
+
+						window.alert( message.replace( '%qty%', count ) );
 
 						wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
 
