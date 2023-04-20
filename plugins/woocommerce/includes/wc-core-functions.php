@@ -1610,7 +1610,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
 	 *
 	 * @return string
 	 */
-	return apply_filters( 'wc_help_tip', '<span class="woocommerce-help-tip" data-tip="' . $sanitized_tip . '"></span>', $sanitized_tip, $tip, $allow_html );
+	return apply_filters( 'wc_help_tip', '<span class="woocommerce-help-tip" tabindex="0" aria-label="' . $sanitized_tip . '" data-tip="' . $sanitized_tip . '"></span>', $sanitized_tip, $tip, $allow_html );
 }
 
 /**

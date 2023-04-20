@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+No warning shown for zero price.
