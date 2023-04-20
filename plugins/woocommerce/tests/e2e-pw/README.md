@@ -74,7 +74,7 @@ If you would like to customize the `PHP`, `WordPress` or `WooCommerce` versions 
 - `WC_VERSION`
   - Acceptable versions can be found on the [WooCommerce Releases](https://github.com/woocommerce/woocommerce/releases) page
 - `PHP`
-  - Any PHP version you see it. Please note that WooCommerce requries a minimum of PHP 7.2.
+  - Any PHP version you see it. Please note that WooCommerce requires a minimum of PHP 7.2.
 
 **Example**
 
