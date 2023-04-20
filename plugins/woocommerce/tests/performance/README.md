@@ -129,7 +129,7 @@ Another aspect that affects the traffic pattern of the tests is the amount of �
 To do this a sleep step is included between each request ``sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`))``.
 The amount of think time can be controlled from `config.js`.
 
->**_Note: It’s important to note to be very careful when adding load to a scenario. By accident a dangerous amount of load could be ran aginst the test environment that could effectively be like a denial-of-service attack on the test environment. Also important to consider any other consequences of running large load such as triggering of emails._**
+>**_Note: It’s important to note to be very careful when adding load to a scenario. By accident a dangerous amount of load could be ran against the test environment that could effectively be like a denial-of-service attack on the test environment. Also important to consider any other consequences of running large load such as triggering of emails._**
 
 To execute a test scenario (for example `tests/simple-all-requests.js`).
 
