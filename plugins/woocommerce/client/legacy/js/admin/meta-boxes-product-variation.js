@@ -997,6 +997,7 @@ jQuery( function ( $ ) {
 					$(
 						'button.cancel-variation-changes, button.save-variation-changes'
 					).prop( 'disabled', false );
+
 					$( '#variable_product_options' ).trigger(
 						'woocommerce_variations_added',
 						1
@@ -1143,10 +1144,6 @@ jQuery( function ( $ ) {
 						if ( count > 0 ) {
 							wc_meta_boxes_product_variations_pagenav.go_to_page(
 								1,
-								count
-							);
-							$( '#variable_product_options' ).trigger(
-								'woocommerce_variations_added',
 								count
 							);
 						} else {
