@@ -82,7 +82,7 @@ The command below will create and environment with WordPress version 6.2, WooCom
 
 `UPDATE_WP_JSON_FILE=1 WP_VERSION=6.2 WC_TEST_VERSION=7.5.1 PHP_VERSION=8.2 pnpm run env:test`
 
-If you'd like to run with the default configuation, simply remove the `UPDATE_WP_JSON_FILE`.
+If you'd like to run with the default configuration, simply remove the `UPDATE_WP_JSON_FILE`.
 
 
 For more information how to configure the test environment for `wp-env`, please checkout the [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) documentation.
