@@ -1,11 +1,11 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/product-track-inventory-fields",
-	"title": "Product track inventory fields",
+	"name": "woocommerce/product-inventory-quantity",
+	"title": "Product inventory quantity available",
 	"category": "woocommerce",
-	"description": "The product track inventory fields.",
-	"keywords": [ "products", "track", "inventory" ],
+	"description": "The product available quantity.",
+	"keywords": [ "products", "quantity", "inventory" ],
 	"textdomain": "default",
 	"attributes": {
 		"name": {
