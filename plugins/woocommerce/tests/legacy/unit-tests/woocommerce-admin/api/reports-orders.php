@@ -184,8 +184,8 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$bad_args = array(
 			'not an array!',                   // Not an array.
 			array( 1, 2, 3 ),                  // Not a tuple.
-			array( -1, $small_term->term_id ), // Invaid attribute ID.
-			array( $size_attr_id, -1 ),        // Invaid term ID.
+			array( -1, $small_term->term_id ), // Invalid attribute ID.
+			array( $size_attr_id, -1 ),        // Invalid term ID.
 		);
 
 		foreach ( $bad_args as $bad_arg ) {
