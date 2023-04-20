@@ -54,6 +54,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 									sprintf(
 										'<a href="%s" class="remove" aria-label="%s" data-product_id="%s" data-product_sku="%s">&times;</a>',
 										esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
+										/* translators: %s is the product name */
 										esc_attr( sprintf( __( 'Remove %s from cart', 'woocommerce' ), $product_name ) ),
 										esc_attr( $product_id ),
 										esc_attr( $_product->get_sku() )
