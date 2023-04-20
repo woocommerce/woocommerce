@@ -25,7 +25,7 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				if ( ! currentUser ) {
 					return;
 				}
-				// @ts-expect-error registry is not defined in the wp.data typings
+				// @ts-expect-error both functions are not defined in the wp.data typings
 				const { isResolving, hasFinishedResolution } =
 					select( STORE_NAME );
 				return (
@@ -35,9 +35,9 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 			} );
 
 			const {
-				// @ts-expect-error registry is not defined in the wp.data typings
+				// @ts-expect-error startResolution is not defined in the wp.data typings
 				startResolution,
-				// @ts-expect-error registry is not defined in the wp.data typings
+				// @ts-expect-error finishResolution is not defined in the wp.data typings
 				finishResolution,
 				receiveCurrentUser,
 			} = useDispatch( STORE_NAME );
