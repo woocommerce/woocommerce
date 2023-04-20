@@ -6602,7 +6602,7 @@
 * Removed internal scroll from log viewer.
 * Add reply-to to admin emails.
 * Improved the zone setup flow.
-* Made wc_get_wildcard_postcodes return the orignal postcode plus * since wildcards should match empty strings too.
+* Made wc_get_wildcard_postcodes return the original postcode plus * since wildcards should match empty strings too.
 * Use all paid statuses in $customer->get_total_spent().
 * Move location of billing email field to work with password managers.
 * Option to restrict selling locations by country.
