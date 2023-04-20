@@ -11,7 +11,6 @@ import { SelectFromMap } from '@automattic/data-stores';
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
-import { WPDataActions } from '../';
 import * as selectors from './selectors';
 import { WPDataSelectors } from '../types';
 
