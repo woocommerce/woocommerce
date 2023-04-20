@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 import { usePositionRelativeToViewport } from '@woocommerce/base-hooks';
@@ -87,7 +87,10 @@ const Block = ( {
 	);
 
 	// Get the body background color to use as the sticky container background color.
-	const backgroundColor = getComputedStyle( document.body ).backgroundColor;
+	const backgroundColor = useMemo(
+		() => getComputedStyle( document.body ).backgroundColor,
+		[]
+	);
 
 	return (
 		<div className={ classnames( 'wc-block-cart__submit', className ) }>
