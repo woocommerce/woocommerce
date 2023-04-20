@@ -62,7 +62,7 @@ class WC_Frontend_Scripts {
 		 *
 		 * @since 2.1.0
 		 * @param array List of default WooCommerce styles.
-		 * @retrun array List of styles to enqueue.
+		 * @return array List of styles to enqueue.
 		 */
 		$styles = apply_filters(
 			'woocommerce_enqueue_styles',
