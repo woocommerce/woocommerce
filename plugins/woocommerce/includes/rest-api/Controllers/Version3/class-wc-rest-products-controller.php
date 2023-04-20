@@ -1256,6 +1256,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
+							'featured'          => array(
+								'description' => __( 'Featured image.', 'woocommerce' ),
+								'type'        => 'boolean',
+								'default'     => false,
+								'context'     => array( 'view', 'edit' ),
+							),
 							'date_created'      => array(
 								'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
 								'type'        => 'date-time',

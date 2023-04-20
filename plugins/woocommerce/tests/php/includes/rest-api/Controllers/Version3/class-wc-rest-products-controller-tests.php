@@ -205,7 +205,55 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that all fields are returned when requested one by one.
+	 * Test that featured field exists under images in product argument.
+	 */
+	public function test_products_args_includes_featured_field() {
+		$request = new WP_REST_Request( 'OPTIONS', '/wc/v3/products' );
+		$request->set_param( '_fields', 'endpoints.1.args.images.items.properties' );
+		$response  = $this->server->dispatch( $request );
+		$image_arg = $response->get_data()['endpoints'][1]['args']['images']['items']['properties'];
+		$this->assertArrayHasKey( 'featured', $image_arg );
+		$this->assertEquals(
+			array(
+				'description' => 'Featured image.',
+				'type'        => 'boolean',
+				'default'     => false,
+				'context'     =>
+				array(
+					0 => 'view',
+					1 => 'edit',
+				),
+			),
+			$image_arg['featured']
+		);
+	}
+
+	/**
+	 * Test that featured field exists under images in product schema.
+	 */
+	public function test_products_schema_includes_featured_field() {
+		$request = new WP_REST_Request( 'OPTIONS', '/wc/v3/products' );
+		$request->set_param( '_fields', 'schema.properties.images.items.properties' );
+		$response     = $this->server->dispatch( $request );
+		$image_schema = $response->get_data()['schema']['properties']['images']['items']['properties'];
+		$this->assertArrayHasKey( 'featured', $image_schema );
+		$this->assertEquals(
+			array(
+				'description' => 'Featured image.',
+				'type'        => 'boolean',
+				'default'     => false,
+				'context'     =>
+				array(
+					0 => 'view',
+					1 => 'edit',
+				),
+			),
+			$image_schema['featured']
+		);
+	}
+
+	/**
+	 * Test that feature field is returned inside images.
 	 */
 	public function test_products_get_images_array_contains_featured() {
 		global $wpdb;
