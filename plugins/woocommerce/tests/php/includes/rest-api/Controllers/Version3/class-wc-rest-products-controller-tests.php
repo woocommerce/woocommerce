@@ -263,7 +263,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertNotWPError( $gallery_url );
 		$gallery_id = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $gallery_url ) );
 
-		$featured_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $product->get_id(), 'featured', 'src' );
+		$featured_url = media_sideload_image( 'https://cldup.com/Dr1Bczxq4q.png', $product->get_id(), 'featured', 'src' );
 		$this->assertNotWPError( $featured_url );
 		$featured_id = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $featured_url ) );
 

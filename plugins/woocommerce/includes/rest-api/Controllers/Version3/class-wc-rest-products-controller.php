@@ -308,6 +308,31 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$images = is_array( $images ) ? array_filter( $images ) : array();
 
 		if ( ! empty( $images ) ) {
+			$featured_image_index = 0;
+			$featured_image_count = 0;
+
+			// Collect featured field usage.
+			foreach ( $images as $index => $image ) {
+				if ( isset( $image['featured'] ) && $image['featured'] ) {
+					$featured_image_index = $index;
+					$featured_image_count++;
+				}
+			}
+
+			// Handle multiple featured images.
+			if ($featured_image_count > 1) {
+				throw new WC_REST_Exception(
+					'woocommerce_rest_product_featured_image_count',
+					__( 'Only one featured image is allowed.', 'woocommerce' ),
+					400
+				);
+			}
+
+			// If no featured image is set, and the first image explicitly set to false do not set featured at all.
+			if ( 0 === $featured_image_count && isset( $images[0]['featured'] ) && false === $images[0]['featured'] ) {
+				$featured_image_index = null;
+			}
+
 			$gallery = array();
 
 			foreach ( $images as $index => $image ) {
@@ -332,9 +357,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}
 
-				$featured_image = $product->get_image_id();
-
-				if ( 0 === $index ) {
+				if ( $featured_image_index === $index ) {
 					$product->set_image_id( $attachment_id );
 				} else {
 					$gallery[] = $attachment_id;
