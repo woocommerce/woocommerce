@@ -205,7 +205,7 @@ describe( 'Activity Panel', () => {
 		expect( getByText( 'Finish setup' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should not render the finish setup link when a user does not have capabilties', () => {
+	it( 'should not render the finish setup link when a user does not have capabilities', () => {
 		useUser.mockImplementation( () => ( {
 			currentUserCan: () => false,
 		} ) );
