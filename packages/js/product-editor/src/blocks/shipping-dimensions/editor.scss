@@ -14,20 +14,6 @@
 		}
 	}
 
-	.has-error {
-		.components-base-control {
-			margin-bottom: 0;
-
-			.components-input-control__backdrop {
-				border-color: $studio-red-50;
-			}
-		}
-
-		.components-base-control__help {
-			color: $studio-red-50;
-		}
-	}
-
 	&__dimensions-image {
 		width: 100%;
 		height: 100%;

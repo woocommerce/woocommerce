@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+add missing aria-label attributes to help tips
