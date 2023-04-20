@@ -201,7 +201,7 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * Get translations updates informations.
+	 * Get translations updates information.
 	 *
 	 * Scans through all subscriptions for the connected user, as well
 	 * as all Woo extensions without a subscription, and obtains update
