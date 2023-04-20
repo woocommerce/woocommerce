@@ -23,5 +23,16 @@
 	},
 
 	"include": [ "**/src/**/*" ],
-	"exclude": [ "**/test/*", "**/*.spec.*", "**/*.test.*" ]
+	"exclude": [
+		"node_modules",
+		"**/stories",
+		"**/build",
+		"**/build-module",
+		"**/build-types",
+		"**/test/*",
+		"**/jest.config.js",
+		"**/jest-preset.js",
+		"**/webpack.*.js",
+		"**/babel.config.js"
+	]
 }

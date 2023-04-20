@@ -88,7 +88,11 @@ fs.writeFileSync(
 	JSON.stringify( finalConfig )
 );
 
-const tscArgs = [ ...process.argv.slice( 2 ), './generated-tsc-config.json' ];
+const tscArgs = [
+	...process.argv.slice( 2 ),
+	'--project',
+	'./generated-tsc-config.json',
+];
 
 // Now run tsc with the new config
 const result = spawnSync( 'tsc', [ ...tscArgs, '--showConfig' ], {
