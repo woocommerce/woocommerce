@@ -31,10 +31,6 @@ const finalConfig = {
 	...tsConfig,
 };
 
-console.log(
-	'Making absolute paths to tsconfig.json for outDir, outFile, rootDir, include, files, and typeRoots.'
-);
-
 if ( finalConfig.compilerOptions.outDir ) {
 	finalConfig.compilerOptions.outDir = path.join(
 		projectRoot,
