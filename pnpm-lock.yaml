@@ -3287,6 +3287,9 @@ importers:
       dotenv:
         specifier: ^10.0.0
         version: 10.0.0
+      figlet:
+        specifier: ^1.6.0
+        version: 1.6.0
       graphql:
         specifier: ^16.6.0
         version: 16.6.0
@@ -8873,7 +8876,11 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
+<<<<<<< HEAD
       '@babel/helper-module-imports': 7.18.6
+=======
+      '@babel/helper-module-imports': 7.16.0
+>>>>>>> 4cfe3a0ce9 (lockfile update)
       '@babel/helper-plugin-utils': 7.20.2
       babel-plugin-polyfill-corejs2: 0.3.3(@babel/core@7.21.3)
       babel-plugin-polyfill-corejs3: 0.4.0(@babel/core@7.21.3)
@@ -27029,6 +27036,12 @@ packages:
   /figgy-pudding@3.5.2:
     resolution: {integrity: sha512-0btnI/H8f2pavGMN8w40mlSKOfTK2SVJmBfBeVIj3kNw0swwgzyRq0d5TJVOwodFmtvpPeWPN/MCcfuWF0Ezbw==}
     dev: true
+
+  /figlet@1.6.0:
+    resolution: {integrity: sha512-31EQGhCEITv6+hi2ORRPyn3bulaV9Fl4xOdR169cBzH/n1UqcxsiSB/noo6SJdD7Kfb1Ljit+IgR1USvF/XbdA==}
+    engines: {node: '>= 0.4.0'}
+    hasBin: true
+    dev: false
 
   /figures@1.7.0:
     resolution: {integrity: sha512-UxKlfCRuCBxSXU4C6t9scbDyWZ4VlaFFdojKtzJuSkuOBQ5CNFum+zZXFwHjo+CxBC1t6zlYPgHIgFjL8ggoEQ==}
