@@ -7,9 +7,14 @@ import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 import { ToggleControl } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
+import { ToggleBlockAttributes } from './types';
+
 export function Edit( {
 	attributes,
-}: BlockEditProps< { label: string; property: string } > ) {
+}: BlockEditProps< ToggleBlockAttributes > ) {
 	const blockProps = useBlockProps();
 	const { label, property } = attributes;
 	const [ value, setValue ] = useEntityProp< boolean >(

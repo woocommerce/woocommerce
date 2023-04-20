@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockEditProps, BlockAttributes } from '@wordpress/blocks';
+import { BlockEditProps } from '@wordpress/blocks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
@@ -16,14 +16,12 @@ import {
 /**
  * Internal dependencies
  */
+import { TrackInventoryBlockAttributes } from './types';
+
 import { useValidation } from '../../hooks/use-validation';
 
-export function Edit( {}: BlockEditProps<
-	BlockAttributes & { name: string }
-> ) {
-	const blockProps = useBlockProps( {
-		className: 'wp-block-woocommerce-product-track-inventory-fields',
-	} );
+export function Edit( {}: BlockEditProps< TrackInventoryBlockAttributes > ) {
+	const blockProps = useBlockProps();
 
 	const [ manageStock ] = useEntityProp< boolean >(
 		'postType',

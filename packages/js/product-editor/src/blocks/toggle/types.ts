@@ -3,9 +3,7 @@
  */
 import { BlockAttributes } from '@wordpress/blocks';
 
-export interface RadioBlockAttributes extends BlockAttributes {
-	title: string;
-	description: string;
+export interface ToggleBlockAttributes extends BlockAttributes {
+	label: string;
 	property: string;
-	options: [];
 }

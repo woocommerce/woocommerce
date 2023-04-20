@@ -9,17 +9,18 @@ import { BlockConfiguration } from '@wordpress/blocks';
 import { initBlock } from '../../utils/init-blocks';
 import blockConfiguration from './block.json';
 import { Edit } from './edit';
-import { RadioBlockAttributes } from './types';
+import { ToggleBlockAttributes } from './types';
 
 const { name, ...metadata } =
-	blockConfiguration as BlockConfiguration< RadioBlockAttributes >;
+	blockConfiguration as BlockConfiguration< ToggleBlockAttributes >;
 
 export { metadata, name };
 
-export const settings: Partial< BlockConfiguration< RadioBlockAttributes > > = {
-	example: {},
-	edit: Edit,
-};
+export const settings: Partial< BlockConfiguration< ToggleBlockAttributes > > =
+	{
+		example: {},
+		edit: Edit,
+	};
 
 export function init() {
 	return initBlock( { name, metadata, settings } );
