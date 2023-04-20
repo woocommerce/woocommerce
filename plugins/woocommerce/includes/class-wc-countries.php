@@ -1573,7 +1573,7 @@ class WC_Countries {
 			// Default Locale Can be filtered to override fields in get_address_fields(). Countries with no specific locale will use default.
 			$this->locale['default'] = apply_filters( 'woocommerce_get_country_locale_default', $this->get_default_address_fields() );
 
-			// Filter default AND shop base locales to allow overides via a single function. These will be used when changing countries on the checkout.
+			// Filter default AND shop base locales to allow overrides via a single function. These will be used when changing countries on the checkout.
 			if ( ! isset( $this->locale[ $this->get_base_country() ] ) ) {
 				$this->locale[ $this->get_base_country() ] = $this->locale['default'];
 			}
