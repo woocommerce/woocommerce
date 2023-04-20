@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix regression in supporting nested date query arguments in HPOS. [#37827](https://github.com/woocommerce/woocommerce/pull/37827)
 * Fix - Fix disabled "Save attributes" button [#37790](https://github.com/woocommerce/woocommerce/pull/37790)
 * Fix - Accessibility update for product_categories shortcode. [#37445](https://github.com/woocommerce/woocommerce/pull/37445)
 * Fix - Add sort order to  migration script for consistency. [#37545](https://github.com/woocommerce/woocommerce/pull/37545)
