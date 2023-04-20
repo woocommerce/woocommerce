@@ -998,10 +998,12 @@ jQuery( function ( $ ) {
 						'button.cancel-variation-changes, button.save-variation-changes'
 					).prop( 'disabled', false );
 
-					$( '#variable_product_options' ).trigger(
-						'woocommerce_variations_added',
-						1
+					wc_meta_boxes_product_variations_pagenav.update_single_quantity();
+					wc_meta_boxes_product_variations_actions.variations_loaded(
+						null,
+						true
 					);
+
 					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
 					wc_meta_boxes_product_variations_ajax.unblock();
 				}
@@ -1444,25 +1446,20 @@ jQuery( function ( $ ) {
 
 		/**
 		 * Update variations quantity when add a new variation
-		 *
-		 * @param {Object} event
-		 * @param {Int} qty
 		 */
-		update_single_quantity: function ( event, qty ) {
-			if ( 1 === qty ) {
-				var page_nav = $( '.variations-pagenav' );
+		update_single_quantity: function () {
+			wc_meta_boxes_product_variations_pagenav.update_variations_count(
+				1
+			);
 
-				wc_meta_boxes_product_variations_pagenav.update_variations_count(
-					qty
-				);
+			const page_nav = $( '.variations-pagenav' );
 
-				if ( page_nav.is( ':hidden' ) ) {
-					$( 'option, optgroup', '.variation_actions' ).show();
-					$( '.variation_actions' ).val( 'bulk_actions' );
-					$( '#variable_product_options' ).find( '.toolbar' ).show();
-					page_nav.show();
-					$( '.pagination-links', page_nav ).hide();
-				}
+			if ( page_nav.is( ':hidden' ) ) {
+				$( 'option, optgroup', '.variation_actions' ).show();
+				$( '.variation_actions' ).val( 'bulk_actions' );
+				$( '#variable_product_options' ).find( '.toolbar' ).show();
+				page_nav.show();
+				$( '.pagination-links', page_nav ).hide();
 			}
 		},
 
