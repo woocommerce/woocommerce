@@ -102,7 +102,7 @@ think_time_max | maximum sleep time (in seconds) between each request | no
 ---
 ## Running Tests
 
-When refering to running k6 tests usually this means executing the test scenario. The test scenario file in turn determines which requests we run and how much load will be applied to them. It is also possible to execute individual test files containing requests and pass in scenario config as a CLI flag but scenario files allow for more configuration options.
+When referring to running k6 tests usually this means executing the test scenario. The test scenario file in turn determines which requests we run and how much load will be applied to them. It is also possible to execute individual test files containing requests and pass in scenario config as a CLI flag but scenario files allow for more configuration options.
 
 ---
 ### Running Individual Tests
