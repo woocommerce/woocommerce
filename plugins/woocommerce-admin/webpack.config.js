@@ -2,7 +2,6 @@
  * External dependencies
  */
 const { get } = require( 'lodash' );
-const fs = require( 'fs' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
@@ -202,6 +201,15 @@ const webpackConfig = {
 				{
 					from: '../../packages/js/product-editor/build/blocks',
 					to: './product-editor/blocks',
+				},
+			],
+		} ),
+
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: '../../packages/js/product-editor/assets/icons',
+					to: './product-editor/icons',
 				},
 			],
 		} ),
