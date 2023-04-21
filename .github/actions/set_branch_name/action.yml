@@ -3,6 +3,7 @@ description: Sets the BRANCH_NAME env variable based on the Github Event
 permissions: {}
 
 runs:
+    using: composite
     steps:
         - name: Get branch name (merge)
           if: github.event_name != 'pull_request'
