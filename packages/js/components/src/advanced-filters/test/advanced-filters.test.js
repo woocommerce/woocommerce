@@ -160,7 +160,7 @@ const advancedFiltersConfig = {
 				add: 'Date',
 				remove: 'Remove date filter',
 				rule: 'Select a date filter match',
-				title: '{{title}}Date{{/title}} {{rule /}} {{filter /}}',
+				title: '<title>Date</title> <rule/> <filter/>',
 				filter: 'Select a transaction date',
 			},
 			rules: [
