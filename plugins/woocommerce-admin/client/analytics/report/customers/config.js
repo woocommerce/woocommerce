@@ -436,7 +436,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Registered{{/title}} {{rule /}} {{filter /}}',
+						'<title>Registered</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select registered date', 'woocommerce' ),
@@ -472,7 +472,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Last active{{/title}} {{rule /}} {{filter /}}',
+						'<title>Last active</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select registered date', 'woocommerce' ),
