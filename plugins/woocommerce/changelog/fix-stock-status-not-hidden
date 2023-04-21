@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide stock status field if stock management is enabled.
