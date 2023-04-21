@@ -666,7 +666,7 @@ class WC_Post_Types {
 													),
 												),
 												array(
-													'woocommerce/product-checkbox',
+													'woocommerce/product-checkbox-field',
 													array(
 														'title'    => __(
 															'Restrictions',
