@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <phpunit
 	bootstrap="tests/bootstrap.php"
 	backupGlobals="false"
 	colors="true"
-	convertErrorsToExceptions="false"
-	convertNoticesToExceptions="false"
-	convertWarningsToExceptions="false"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
 	verbose="true"
 	>
 	<testsuites>

@@ -1,82 +1,91 @@
 name: Check Modified Assets
 
 on:
-    pull_request:
+  pull_request:
 
 jobs:
-    build-trunk:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
-              with:
-                  ref: trunk
-            - name: Cache node_modules
-              id: cache-node-modules
-              uses: actions/cache@v3
-              env:
-                  cache-name: cache-node-modules
-              with:
-                  path: node_modules
-                  key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+  build-trunk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: trunk
 
-            - name: Setup node version and npm cache
-              uses: actions/setup-node@v3
-              with:
-                  node-version-file: '.nvmrc'
-                  cache: 'npm'
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
-            - name: Install Node dependencies
-              if: steps.cache-node-modules.outputs.cache-hit != 'true'
-              run: npm ci --no-optional
+      - name: Setup node version and npm cache
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
 
-            - name: Build Assets
-              run: npm run build:check-assets
+      - name: Install Node dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm install --no-optional --no-audit
 
-            - name: Upload Artifact
-              uses: actions/upload-artifact@v3
-              with:
-                  name: assets-list
-                  path: ./build/assets.json
+      - name: Build Assets
+        run: npm run build:check-assets
 
-    compare-assets-with-trunk:
-        needs: [build-trunk]
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: assets-list
+          path: ./build/assets.json
+  
+  compare-assets-with-trunk:
+    needs: [ build-trunk ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
-            - name: Cache node_modules
-              id: cache-node-modules
-              uses: actions/cache@v3
-              env:
-                  cache-name: cache-node-modules
-              with:
-                  path: node_modules
-                  key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      
+      - name: Setup node version and npm cache
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
 
-            - name: Setup node version and npm cache
-              uses: actions/setup-node@v3
-              with:
-                  node-version-file: '.nvmrc'
-                  cache: 'npm'
+      - name: Build Assets
+        run: npm run build:check-assets
 
-            - name: Build Assets
-              run: npm run build:check-assets
-
-            - name: Download assets (trunk)
-              uses: actions/download-artifact@v3
-              with:
-                  name: assets-list
-                  path: assets-list
-            - name: Compare Assets
-              uses: ./.github/compare-assets
-              id: compare-assets
-              with:
-                  repo-token: '${{ secrets.GITHUB_TOKEN }}'
-                  compare: assets-list/assets.json
-                  create-comment: false
-            - name: Append report
-              uses: ./.github/comments-aggregator
-              with:
-                  repo-token: '${{ secrets.GITHUB_TOKEN }}'
-                  section-id: compare-assets-with-trunk
-                  content: ${{steps.compare-assets.outputs.comment}}
+      - name: Download assets (trunk)
+        uses: actions/download-artifact@v3
+        with:
+          name: assets-list
+          path: assets-list
+      - name: Compare Assets
+        uses: ./.github/compare-assets
+        id: compare-assets
+        with:
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          compare: assets-list/assets.json
+          create-comment: false
+      - name: Append report
+        uses: ./.github/comments-aggregator
+        with:
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          section-id: compare-assets-with-trunk
+          content: ${{steps.compare-assets.outputs.comment}}
