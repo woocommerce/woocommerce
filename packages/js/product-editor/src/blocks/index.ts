@@ -1,3 +1,4 @@
+export { init as initCategory } from './category';
 export { init as initCheckbox } from './checkbox';
 export { init as initCollapsible } from './collapsible';
 export { init as initConditional } from './conditional';

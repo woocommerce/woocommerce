@@ -459,7 +459,7 @@ class WC_Post_Types {
 									),
 									array(
 										array(
-											'woocommerce/product-category',
+											'woocommerce/product-category-field',
 											array(
 												'name' => 'categories',
 											),
