@@ -28,7 +28,7 @@ services:
       - WORDPRESS_DB_NAME
       - WORDPRESS_DB_USER
       - WORDPRESS_DB_PASSWORD
-      - WORDPRESS_TABLE_PREFIX=wp_test_
+      - WORDPRESS_TABLE_PREFIX=wptests_
       - WP_CORE_DIR=/var/www/html
       - WP_TESTS_DIR=/tmp/wordpress-tests-lib
       - WOO_VERSION

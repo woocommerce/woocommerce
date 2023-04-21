@@ -141,17 +141,19 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 * Test set_has_theme_file_if_fallback_is_available when the template file has no fallback.
 	 */
 	public function test_set_has_theme_file_if_fallback_is_available_no_fallback() {
-		$template_file = array(
-			'slug'  => 'single-product',
-			'theme' => 'twentytwentytwo',
+		$query_result = array(
+			(object) array(
+				'slug'  => 'single-product',
+				'theme' => 'twentytwentytwo',
+			),
 		);
 
-		$query_result = (object) array(
+		$template_file = (object) array(
 			'slug'  => 'archive-product',
 			'theme' => 'twentytwentytwo',
 		);
 
-		$this->assertFalse( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $template_file, $query_result ) );
+		$this->assertFalse( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $query_result, $template_file ) );
 	}
 
 	/**
