@@ -15,6 +15,9 @@
 	"ignorePatterns": [
 		{
 		"pattern": "^http://localhost"
+		},
+		{
+		"pattern": "https://www.php.net/manual/en/install.php"
 		}
 	]
 }
