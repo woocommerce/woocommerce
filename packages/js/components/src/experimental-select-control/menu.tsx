@@ -10,6 +10,7 @@ import {
 	useState,
 	createPortal,
 	Children,
+	useLayoutEffect,
 } from '@wordpress/element';
 
 /**
@@ -37,13 +38,19 @@ export const Menu = ( {
 	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
 	const selectControlMenuRef = useRef< HTMLDivElement >( null );
 
-	useEffect( () => {
-		if ( selectControlMenuRef.current?.parentElement ) {
+	useLayoutEffect( () => {
+		if (
+			selectControlMenuRef.current?.parentElement &&
+			selectControlMenuRef.current?.parentElement.clientWidth > 0
+		) {
 			setBoundingRect(
 				selectControlMenuRef.current.parentElement.getBoundingClientRect()
 			);
 		}
-	}, [ selectControlMenuRef.current ] );
+	}, [
+		selectControlMenuRef.current,
+		selectControlMenuRef.current?.clientWidth,
+	] );
 
 	// Scroll the selected item into view when the menu opens.
 	useEffect( () => {

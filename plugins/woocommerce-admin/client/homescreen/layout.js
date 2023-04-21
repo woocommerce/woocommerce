@@ -7,7 +7,6 @@ import {
 	useCallback,
 	useLayoutEffect,
 	useRef,
-	useState,
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
@@ -44,6 +43,7 @@ import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { ProgressTitle } from '../task-lists';
 import { WooHomescreenHeaderBanner } from './header-banner-slot';
+import { WooHomescreenWCPayFeature } from './wcpay-feature-slot';
 
 const Tasks = lazy( () =>
 	import( /* webpackChunkName: "tasks" */ '../tasks' ).then( ( module ) => ( {
@@ -53,7 +53,6 @@ const Tasks = lazy( () =>
 
 export const Layout = ( {
 	defaultHomescreenLayout,
-	isBatchUpdating,
 	query,
 	taskListComplete,
 	hasTaskList,
@@ -66,19 +65,15 @@ export const Layout = ( {
 } ) => {
 	const userPrefs = useUserPreferences();
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
+	const shouldShowWCPayFeature = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
 		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
-	const [ showInbox, setShowInbox ] = useState( true );
 	const isDashboardShown = ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
 	const twoColumns =
 		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
 			'two_columns' && hasTwoColumnContent;
-
-	if ( isBatchUpdating && ! showInbox ) {
-		setShowInbox( true );
-	}
 
 	const isWideViewport = useRef( true );
 	const maybeToggleColumns = useCallback( () => {
@@ -111,6 +106,7 @@ export const Layout = ( {
 							) }
 						/>
 					) }
+					{ shouldShowWCPayFeature && <WooHomescreenWCPayFeature /> }
 					{ <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />

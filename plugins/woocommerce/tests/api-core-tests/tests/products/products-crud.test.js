@@ -265,7 +265,7 @@ test.describe('Products API tests: CRUD', () => {
 			expect(responseJSON.type).toEqual('select');
 			expect(responseJSON.order_by).toEqual('name');
 			// the below has_archives test is currently not working as expected
-			// an issue (https://github.com/woocommerce/woocommerce/issues/34991) 
+			// an issue (https://github.com/woocommerce/woocommerce/issues/34991)
 			// has been raised and this test can be
 			// updated as appropriate after triage
 			// expect(responseJSON.has_archives).toEqual(true);
@@ -913,7 +913,6 @@ test.describe('Products API tests: CRUD', () => {
 		});
 	});
 
-
 	test.describe('Product tags tests: CRUD', () => {
 		let productTagId;
 
@@ -1073,6 +1072,235 @@ test.describe('Products API tests: CRUD', () => {
 			);
 		});
 	});
+
+	test.describe( 'Product images tests: CRUD', () => {
+		let productId;
+		let images;
+
+		test( 'can add product with an image', async ( { request } ) => {
+			const response = await request.post( 'wp-json/wc/v3/products', {
+				data: {
+					images: [ { src: 'https://cldup.com/6L9h56D9Bw.jpg' } ],
+				},
+			} );
+			const responseJSON = await response.json();
+
+			expect( response.status() ).toEqual( 201 );
+			expect( responseJSON.images ).toHaveLength( 1 );
+			expect( responseJSON.images[ 0 ].name ).toContain( '6L9h56D9Bw' );
+			expect( responseJSON.images[ 0 ].featured ).toBeTruthy();
+			expect( responseJSON.images[ 0 ].alt ).toEqual( '' );
+			expect( responseJSON.images[ 0 ].src ).toContain( '6L9h56D9Bw' );
+
+			// Cleanup: Delete the used product
+			await request.delete(
+				`wp-json/wc/v3/products/${ responseJSON.id }`,
+				{
+					data: {
+						force: true,
+					},
+				}
+			);
+		} );
+
+		test( 'can add product with multiple images (backward compatible)', async ( {
+			request,
+		} ) => {
+			const response = await request.post( 'wp-json/wc/v3/products', {
+				data: {
+					images: [
+						{ src: 'https://cldup.com/6L9h56D9Bw.jpg' },
+						{ src: 'https://cldup.com/Dr1Bczxq4q.png' },
+					],
+				},
+			} );
+			const responseJSON = await response.json();
+			productId = responseJSON.id;
+			images = responseJSON.images.map( ( image ) => image.id );
+
+			expect( response.status() ).toEqual( 201 );
+			expect( responseJSON.images ).toHaveLength( 2 );
+			expect( responseJSON.images[ 0 ].name ).toContain( '6L9h56D9Bw' );
+			expect( responseJSON.images[ 0 ].featured ).toBeTruthy();
+			expect( responseJSON.images[ 1 ].name ).toContain( 'Dr1Bczxq4q' );
+			expect( responseJSON.images[ 1 ].featured ).toBeFalsy();
+		} );
+
+		test( 'can add product with multiple images (explicit featured)', async ( {
+			request,
+		} ) => {
+			const response = await request.post( 'wp-json/wc/v3/products', {
+				data: {
+					images: [
+						{
+							src: 'https://cldup.com/6L9h56D9Bw.jpg',
+							featured: false,
+						},
+						{
+							src: 'https://cldup.com/Dr1Bczxq4q.png',
+							featured: true,
+						},
+					],
+				},
+			} );
+			const responseJSON = await response.json();
+
+			expect( response.status() ).toEqual( 201 );
+			expect( responseJSON.images ).toHaveLength( 2 );
+			// When retrieving, the featured image is always the first one.
+			expect( responseJSON.images[ 0 ].name ).toContain( 'Dr1Bczxq4q' );
+			expect( responseJSON.images[ 0 ].featured ).toBeTruthy();
+			expect( responseJSON.images[ 1 ].name ).toContain( '6L9h56D9Bw' );
+			expect( responseJSON.images[ 1 ].featured ).toBeFalsy();
+
+			// Cleanup: Delete the used product
+			await request.delete(
+				`wp-json/wc/v3/products/${ responseJSON.id }`,
+				{
+					data: {
+						force: true,
+					},
+				}
+			);
+		} );
+
+		test( 'can add product with multiple images (no featured)', async ( {
+			request,
+		} ) => {
+			const response = await request.post( 'wp-json/wc/v3/products', {
+				data: {
+					images: [
+						{
+							src: 'https://cldup.com/6L9h56D9Bw.jpg',
+							featured: false,
+						},
+						{
+							src: 'https://cldup.com/Dr1Bczxq4q.png',
+							featured: false,
+						},
+					],
+				},
+			} );
+			const responseJSON = await response.json();
+
+			expect( response.status() ).toEqual( 201 );
+			expect( responseJSON.images ).toHaveLength( 2 );
+			expect( responseJSON.images[ 0 ].name ).toContain( '6L9h56D9Bw' );
+			expect( responseJSON.images[ 0 ].alt ).toEqual( '' );
+			expect( responseJSON.images[ 0 ].featured ).toBeFalsy();
+			expect( responseJSON.images[ 1 ].name ).toContain( 'Dr1Bczxq4q' );
+			expect( responseJSON.images[ 1 ].alt ).toEqual( '' );
+			expect( responseJSON.images[ 1 ].featured ).toBeFalsy();
+
+			// Cleanup: Delete the used product
+			await request.delete(
+				`wp-json/wc/v3/products/${ responseJSON.id }`,
+				{
+					data: {
+						force: true,
+					},
+				}
+			);
+		} );
+
+		test( 'cannot add product with multiple images (all featured)', async ( {
+			request,
+		} ) => {
+			const response = await request.post( 'wp-json/wc/v3/products', {
+				data: {
+					images: [
+						{
+							src: 'https://cldup.com/6L9h56D9Bw.jpg',
+							featured: true,
+						},
+						{
+							src: 'https://cldup.com/Dr1Bczxq4q.png',
+							featured: true,
+						},
+					],
+				},
+			} );
+			const responseJSON = await response.json();
+
+			expect( response.status() ).toEqual( 400 );
+			expect( responseJSON.code ).toEqual(
+				'woocommerce_rest_product_featured_image_count'
+			);
+			expect( responseJSON.message ).toEqual(
+				'Only one featured image is allowed.'
+			);
+			expect( responseJSON.data ).toEqual( { status: 400 } );
+		} );
+
+		test( 'can retrieve product images', async ( { request } ) => {
+			const response = await request.get(
+				`wp-json/wc/v3/products/${ productId }`
+			);
+			const responseJSON = await response.json();
+
+			expect( response.status() ).toEqual( 200 );
+			expect( responseJSON.images ).toHaveLength( 2 );
+			expect( responseJSON.images[ 0 ].id ).toEqual( images[ 0 ] );
+			expect( responseJSON.images[ 0 ].name ).toContain( '6L9h56D9Bw' );
+			expect( responseJSON.images[ 0 ].alt ).toEqual( '' );
+			expect( responseJSON.images[ 0 ].featured ).toBeTruthy();
+		} );
+
+		test( 'can update a product images', async ( { request } ) => {
+			// call API to update a product
+			const response = await request.put(
+				`wp-json/wc/v3/products/${ productId }`,
+				{
+					data: {
+						images: [
+							{ id: images[ 0 ], featured: false },
+							{ id: images[ 1 ], featured: true },
+						],
+					},
+				}
+			);
+			const responseJSON = await response.json();
+
+			expect( response.status() ).toEqual( 200 );
+			expect( responseJSON.images ).toHaveLength( 2 );
+			// When retrieving, the featured image is always the first one.
+			expect( responseJSON.images[ 0 ].id ).toEqual( images[ 1 ] );
+			expect( responseJSON.images[ 0 ].name ).toContain( 'Dr1Bczxq4q' );
+			expect( responseJSON.images[ 0 ].alt ).toEqual( '' );
+			expect( responseJSON.images[ 0 ].featured ).toBeTruthy();
+			expect( responseJSON.images[ 1 ].id ).toEqual( images[ 0 ] );
+			expect( responseJSON.images[ 1 ].name ).toContain( '6L9h56D9Bw' );
+			expect( responseJSON.images[ 1 ].alt ).toEqual( '' );
+			expect( responseJSON.images[ 1 ].featured ).toBeFalsy();
+		} );
+
+		test( 'can remove an image from a product', async ( { request } ) => {
+			// Delete the product attribute.
+			const response = await request.put(
+				`wp-json/wc/v3/products/${ productId }`,
+				{
+					data: {
+						images: [ { id: images[ 1 ] } ],
+					},
+				}
+			);
+			const responseJSON = await response.json();
+
+			expect( response.status() ).toEqual( 200 );
+			expect( responseJSON.images ).toHaveLength( 1 );
+			expect( responseJSON.images[ 0 ].id ).toEqual( images[ 1 ] );
+			expect( responseJSON.images[ 0 ].name ).toContain( 'Dr1Bczxq4q' );
+			expect( responseJSON.images[ 0 ].alt ).toEqual( '' );
+			expect( responseJSON.images[ 0 ].featured ).toBeTruthy();
+
+			// Cleanup: Delete the used product
+			await request.delete( `wp-json/wc/v3/products/${ productId }`, {
+				data: {
+					force: true,
+				},
+			} );
+		} );
+	} );
 
 	test('can add a virtual product', async ({
 		request

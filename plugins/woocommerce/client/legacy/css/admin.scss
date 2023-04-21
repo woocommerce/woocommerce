@@ -1018,8 +1018,13 @@ $default-line-height: 18px;
 		max-width: 100%;
 	}
 
+	.variation_actions {
+		max-width: 131px;
+	}
+
 	.toolbar-top {
-		.button {
+		.button,
+		.select {
 			margin: 1px;
 		}
 	}
@@ -1125,6 +1130,7 @@ $default-line-height: 18px;
 	}
 	.toolbar-top {
 		.button,
+		.attribute_taxonomy,
 		.select2-container {
 			margin: 1px;
 		}
@@ -5615,6 +5621,7 @@ img.help_tip {
 			a.delete,
 			a.edit {
 				float: right;
+				margin-right: 12px;
 			}
 
 			a.delete {
@@ -5650,7 +5657,7 @@ img.help_tip {
 
 			.handlediv {
 				background-position: 6px 5px !important;
-				visibility: hidden;
+				margin: 4px 0 -1px !important;
 				height: 26px;
 			}
 
@@ -5666,7 +5673,6 @@ img.help_tip {
 
 			a.delete,
 			a.edit,
-			.handlediv,
 			.sort {
 				margin-top: 0.25em;
 			}
@@ -5676,14 +5682,6 @@ img.help_tip {
 			a.edit,
 			.sort {
 				margin-top: 0.45em;
-			}
-		}
-
-		h3:hover,
-		&.ui-sortable-helper {
-			a.delete,
-			.handlediv {
-				visibility: visible;
 			}
 		}
 
@@ -6708,7 +6706,7 @@ table.bar_chart {
 	}
 
 	.woocommerce_options_panel {
-		.description {
+		:not(input) + .description {
 			display: block;
 			clear: both;
 			margin-left: 0;

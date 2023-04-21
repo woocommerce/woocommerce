@@ -61,6 +61,8 @@ export function usePreview( {
 		[ productId ]
 	);
 
+	const ariaDisabled = disabled || isDisabled;
+
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	let previewLink: URL | undefined;
@@ -77,6 +79,10 @@ export function usePreview( {
 	 * @param event
 	 */
 	async function handleClick( event: MouseEvent< HTMLAnchorElement > ) {
+		if ( ariaDisabled ) {
+			return event.preventDefault();
+		}
+
 		if ( onClick ) {
 			onClick( event );
 		}
@@ -130,7 +136,7 @@ export function usePreview( {
 			if ( typeof props.ref === 'function' ) props.ref( element );
 			anchorRef.current = element;
 		},
-		'aria-disabled': disabled || isDisabled,
+		'aria-disabled': ariaDisabled,
 		// Note that the href is always passed for a11y support. So
 		// the final rendered element is always an anchor.
 		href: previewLink?.toString(),

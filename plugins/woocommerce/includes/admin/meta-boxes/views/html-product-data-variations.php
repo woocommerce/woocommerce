@@ -26,7 +26,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 						echo wp_kses_post(
 							sprintf(
 								/* translators: %1$s: url for attributes tab, %2$s: url for variable product documentation */
-								__( 'Add some attributes in the <a href="%1$s">Attributes</a> tab to generate variations. Make sure to check the <b>Used for variations</b> box. <a href="%2$s" target="_blank" rel="noreferrer">Learn more</a>', 'woocommerce' ),
+								__( 'Add some attributes in the <a class="variations-add-attributes-link" href="%1$s">Attributes</a> tab to generate variations. Make sure to check the <b>Used for variations</b> box. <a class="variations-learn-more-link" href="%2$s" target="_blank" rel="noreferrer">Learn more</a>', 'woocommerce' ),
 								esc_url( '#product_attributes' ),
 								esc_url( 'https://woocommerce.com/document/variable-product/' )
 							)
@@ -53,7 +53,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 				require __DIR__ . '/html-product-attribute-inner.php';
 			?>
 				<div class="toolbar">
-					<button type="button" class="button button-primary create-variations" disabled="disabled" title="<?php echo esc_html_e( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ); ?>"><?php esc_html_e( 'Create variations', 'woocommerce' ); ?></button>
+					<button type="button" aria-disabled="true" class="button button-primary create-variations disabled"><?php esc_html_e( 'Create variations', 'woocommerce' ); ?></button>
 				</div>
 			</div>
 		</div>
@@ -97,7 +97,8 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 			<div class="toolbar toolbar-top">
 				<button type="button" class="button generate_variations"><?php esc_html_e( 'Generate variations', 'woocommerce' ); ?></button>
 				<button type="button" class="button add_variation_manually"><?php esc_html_e( 'Add manually', 'woocommerce' ); ?></button>
-				<select id="field_to_edit" class="variation_actions hidden">
+				<select id="field_to_edit" class="select variation_actions hidden">
+					<option value="bulk_actions" disabled>Bulk actions</option>
 					<option value="delete_all"><?php esc_html_e( 'Delete all variations', 'woocommerce' ); ?></option>
 					<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
 						<option value="toggle_enabled"><?php esc_html_e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
@@ -135,7 +136,6 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 					<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
 					<?php /* phpcs:enable */ ?>
 				</select>
-				<a class="button bulk_edit do_variation_action hidden"><?php esc_html_e( 'Go', 'woocommerce' ); ?></a>
 
 				<div class="variations-pagenav">
 					<?php /* translators: variations count */ ?>
