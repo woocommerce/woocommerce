@@ -19,6 +19,7 @@
 			$tbody             = $( '#rates' ),
 			$save_button       = $( ':input[name="save"]' ),
 			$pagination        = $( '#rates-pagination' ),
+			$bottom_pagination = $( '#rates-bottom-pagination' ),
 			$search_field      = $( '#rates-search .wc-tax-rates-search-field' ),
 			$submit            = $( '.submit .button-primary[type=submit]' ),
 			WCTaxTableModelConstructor = Backbone.Model.extend({
@@ -121,8 +122,8 @@
 					this.listenTo( this.model, 'saved:rates', this.clearUnloadConfirmation );
 					$tbody.on( 'change autocompletechange', ':input', { view: this }, this.updateModelOnChange );
 					$search_field.on( 'keyup search', { view: this }, this.onSearchField );
-					$pagination.on( 'click', 'a', { view: this }, this.onPageChange );
-					$pagination.on( 'change', 'input', { view: this }, this.onPageChange );
+					$pagination.add($bottom_pagination).on( 'click', 'a', { view: this }, this.onPageChange );
+					$pagination.add($bottom_pagination).on( 'change', 'input', { view: this }, this.onPageChange );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
 					$submit.on( 'click', { view: this }, this.onSubmit );
 					$save_button.prop( 'disabled', true );
@@ -173,7 +174,7 @@
 
 					if ( qty_pages > 1 ) {
 						// We've now displayed our initial page, time to render the pagination box.
-						$pagination.html( paginationTemplate( {
+						$pagination.add($bottom_pagination).html( paginationTemplate( {
 							qty_rates:    qty_rates,
 							current_page: this.page,
 							qty_pages:    qty_pages
