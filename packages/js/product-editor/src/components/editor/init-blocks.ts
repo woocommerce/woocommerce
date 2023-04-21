@@ -16,6 +16,7 @@ import { init as initImages } from '../images';
 import { init as initName } from '../details-name-block';
 import { init as initRadio } from '../../blocks/radio';
 import { init as initSummary } from '../details-summary-block';
+import { init as initCategory } from '../../blocks/category';
 import { init as initSection } from '../section';
 import { init as initTab } from '../tab';
 import { init as initPricing } from '../pricing-block';
@@ -39,6 +40,7 @@ export const initBlocks = () => {
 	registerCoreBlocks( blocks );
 
 	initImages();
+	initCategory();
 	initName();
 	initRadio();
 	initSummary();

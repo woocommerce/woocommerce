@@ -66,7 +66,11 @@ export function Editor( { product, settings }: EditorProps ) {
 									<BlockEditor
 										settings={ settings }
 										product={ product }
-										context={ { selectedTab } }
+										context={ {
+											selectedTab,
+											postType: 'product',
+											postId: product.id,
+										} }
 									/>
 									{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 									<PluginArea scope="woocommerce-product-block-editor" />
