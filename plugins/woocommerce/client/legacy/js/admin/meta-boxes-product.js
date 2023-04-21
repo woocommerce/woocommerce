@@ -334,19 +334,15 @@ jQuery( function ( $ ) {
 		isStockManagementEnabled,
 		productType
 	) {
-		const stockManagementFields = $( '.stock_fields' );
-		const stockStatusField = $( '.stock_status_field' );
+		const $stockManagementFields = $( '.stock_fields' );
+		const $stockStatusField = $( '.stock_status_field' );
 
-		if ( isStockManagementEnabled ) {
-			stockManagementFields.show();
-			stockStatusField.hide();
-		} else {
-			stockManagementFields.hide();
-			// do not show stock status field if it should be hidden for the product type
-			if ( ! stockStatusField.is( '.hide_if_' + productType ) ) {
-				stockStatusField.show();
-			}
-		}
+		$stockManagementFields.toggle( isStockManagementEnabled );
+		$stockStatusField.toggle(
+			! isStockManagementEnabled &&
+				// do not show stock status field if it should be hidden for the product type
+				! $stockStatusField.is( '.hide_if_' + productType )
+		);
 	}
 
 	$( 'input#_manage_stock' )
