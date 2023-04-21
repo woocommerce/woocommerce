@@ -621,7 +621,7 @@ class WC_Post_Types {
 											'woocommerce/product-sku-field',
 										),
 										array(
-											'woocommerce/product-toggle',
+											'woocommerce/product-toggle-field',
 											array(
 												'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
 												'property' => 'manage_stock',
@@ -636,7 +636,7 @@ class WC_Post_Types {
 											),
 											array(
 												array(
-													'woocommerce/product-inventory-quantity',
+													'woocommerce/product-inventory-quantity-field',
 												),
 											),
 										),
