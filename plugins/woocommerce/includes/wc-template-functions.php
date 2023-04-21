@@ -2747,6 +2747,7 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 			'order/order-again.php',
 			array(
 				'order'           => $order,
+				'wp_button_class' => wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '',
 				'order_again_url' => wp_nonce_url( add_query_arg( 'order_again', $order->get_id(), wc_get_cart_url() ), 'woocommerce-order_again' ),
 			)
 		);
