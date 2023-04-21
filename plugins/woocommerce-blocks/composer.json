@@ -19,10 +19,10 @@
 		"automattic/jetpack-autoloader": "^2.9.1"
 	},
 	"require-dev": {
-		"wp-phpunit/wp-phpunit": "^6.0",
+		"phpunit/phpunit": "^8",
 		"woocommerce/woocommerce-sniffs": "0.1.3",
 		"yoast/phpunit-polyfills": "^1.0",
-		"mockery/mockery": "^1.4",
+		"mockery/mockery": "^1",
 		"wp-hooks/generator": "^0.9.0"
 	},
 	"autoload": {
@@ -50,7 +50,7 @@
 	},
 	"config": {
 		"platform": {
-			"php": "7.4.32"
+			"php": "7.4.33"
 		},
 		"allow-plugins": {
 			"automattic/jetpack-autoloader": true,
