@@ -11,7 +11,7 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { IframeEditor } from '../../components/iframe-editor';
+import { ModalEditor } from '../../components/modal-editor';
 
 /**
  * Internal dependencies
@@ -37,7 +37,7 @@ export function Edit() {
 					: __( 'Add description', 'woocommerce' ) }
 			</Button>
 			{ isModalOpen && (
-				<IframeEditor
+				<ModalEditor
 					initialBlocks={ parse( description ) }
 					onChange={ ( blocks ) => {
 						const html = serialize( blocks );
