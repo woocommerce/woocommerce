@@ -20,9 +20,12 @@ class BlockRegistry {
 	 * Array of all available product blocks.
 	 */
 	const PRODUCT_BLOCKS = [
+		'woocommerce/conditional',
+		'woocommerce/product-category-field',
 		'woocommerce/product-checkbox-field',
 		'woocommerce/product-collapsible',
 		'woocommerce/product-images-field',
+		'woocommerce/product-inventory-email-field',
 		'woocommerce/product-name-field',
 		'woocommerce/product-pricing-field',
 		'woocommerce/product-radio-field',
