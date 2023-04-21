@@ -38,7 +38,7 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	 * @testDox Check that a deleted administrator user (with content re-assigned to another user)
 	 * does not cause webhook payloads to fail.
 	 */
-	public function test_payload_for_deleted_user_id() {
+	public function test_payload_for_deleted_user_id_with_reassign() {
 		$admin_user_id_1 = wp_insert_user(
 			array(
 				'user_login' => 'test_admin',
@@ -77,6 +77,39 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'code', $payload );
 		$this->assertArrayHasKey( 'id', $payload );
 		$this->assertSame( $order->get_id(), $payload['id'] );
+	}
+
+	/**
+	 * @testDox Check that a deleted administrator user (without content re-assigned to another user)
+	 * has all webhooks changed to user_id zero.
+	 */
+	public function test_payload_for_deleted_user_id_without_reassign() {
+		$admin_user_id = wp_insert_user(
+			array(
+				'user_login' => 'test_admin',
+				'user_pass'  => 'password',
+				'role'       => 'administrator',
+			)
+		);
+
+		$webhook1 = new WC_Webhook();
+		$webhook1->set_topic( 'order.created' );
+		$webhook1->set_user_id( $admin_user_id );
+		$webhook1->save();
+
+		$webhook2 = new WC_Webhook();
+		$webhook2->set_topic( 'order.created' );
+		$webhook2->set_user_id( 999 );
+		$webhook2->save();
+
+		wp_delete_user( $admin_user_id );
+
+		// Re-load the webhooks from the database.
+		$webhook1 = new WC_Webhook( $webhook1->get_id() );
+		$webhook2 = new WC_Webhook( $webhook2->get_id() );
+		// Confirm user_id has been updated to zero for the first webhook only.
+		$this->assertSame( 0, $webhook1->get_user_id() );
+		$this->assertSame( 999, $webhook2->get_user_id() );
 	}
 
 }

@@ -207,16 +207,18 @@ function wc_get_webhook_rest_api_versions() {
 /**
  * Whenever a user is deleted, re-assign their webhooks to the new user.
  *
+ * If re-assignment isn't selected during deletion, assign the webhooks to user_id 0,
+ * so that an admin can edit and re-save them in order to get them to be assigned to a valid user.
+ *
  * @param int      $old_user_id ID of the deleted user.
- * @param int|null $new_user_id ID of the user to reassign existing data to.
+ * @param int|null $new_user_id ID of the user to reassign existing data to, or null if no re-assignment is requested.
  *
  * @return void
  * @since 7.8.0
  */
 function wc_reassign_webhooks_to_new_user_id( $old_user_id, $new_user_id ) {
 	if ( is_null( $old_user_id ) ) {
-		// There is no user id to re-assign existing content to.
-		return;
+		$old_user_id = 0;
 	}
 
 	$data_store  = WC_Data_Store::load( 'webhook' );
