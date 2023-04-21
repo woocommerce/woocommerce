@@ -35,6 +35,7 @@
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
+		"pre-commit": "lint-staged",
 		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 npm run build",
 		"build": "rimraf build/* && cross-env BABEL_ENV=default NODE_ENV=production webpack",
 		"build:check-assets": "rimraf build/* && cross-env ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
@@ -276,11 +277,6 @@
 	},
 	"optionalDependencies": {
 		"ndb": "1.1.5"
-	},
-	"husky": {
-		"hooks": {
-			"pre-commit": "lint-staged"
-		}
 	},
 	"lint-staged": {
 		"*.scss": [
