@@ -649,7 +649,7 @@ class WC_Post_Types {
 											),
 											array(
 												array(
-													'woocommerce/product-radio',
+													'woocommerce/product-radio-field',
 													array(
 														'title'    => __( 'Stock status', 'woocommerce' ),
 														'property' => 'stock_status',

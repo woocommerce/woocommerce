@@ -14,4 +14,5 @@ export { init as initShippingDimensions } from './shipping-dimensions';
 export { init as initShippingFee } from './shipping-fee';
 export { init as initSummary } from './summary';
 export { init as initTab } from './tab';
-export { init as initTrackInventory } from './track-inventory';
+export { init as initInventoryQuantity } from './inventory-quantity';
+export { init as initToggle } from './toggle';
