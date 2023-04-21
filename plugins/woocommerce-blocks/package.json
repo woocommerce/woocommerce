@@ -35,7 +35,6 @@
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
-		"pre-commit": "lint-staged",
 		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 npm run build",
 		"build": "rimraf build/* && cross-env BABEL_ENV=default NODE_ENV=production webpack",
 		"build:check-assets": "rimraf build/* && cross-env ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
@@ -67,6 +66,8 @@
 		"package-plugin:zip-only": "rimraf woocommerce-gutenberg-products-block.zip && ./bin/build-plugin-zip.sh -z",
 		"package-plugin:deploy": "npm run build:deploy && npm run package-plugin:zip-only",
 		"postinstall": "patch-package",
+		"pre-commit": "lint-staged",
+		"prepare": "husky install",
 		"reformat-files": "prettier --ignore-path .eslintignore --write \"**/*.{js,jsx,json,ts,tsx}\"",
 		"release": "sh ./bin/wordpress-deploy.sh",
 		"rimraf": "./node_modules/rimraf/bin.js",
