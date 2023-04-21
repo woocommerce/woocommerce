@@ -1,0 +1,15 @@
+name: Set BRANCH_NAME environment variable
+description: Sets the BRANCH_NAME env variable based on the Github Event
+permissions: {}
+
+runs:
+    steps:
+        - name: Get branch name (merge)
+          if: github.event_name != 'pull_request'
+          shell: bash
+          run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+
+        - name: Get branch name (pull request)
+          if: github.event_name == 'pull_request'
+          shell: bash
+          run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV

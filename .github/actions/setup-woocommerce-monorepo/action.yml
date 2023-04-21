@@ -58,13 +58,16 @@ runs:
               pnpm -w install turbo
               pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
+        - name: Set the BRANCH_NAME env variable
+          uses: ./.github/actions/set_branch_name
+
         - name: Cache Build Output
           uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
           with:
               path: node_modules/.cache/turbo
-              key: ${{ runner.os }}-build-output-${{ github.ref_name }}-${{ github.sha }}
+              key: ${{ runner.os }}-build-output-${{ env.BRANCH_NAME }}-${{ github.sha }}
               restore-keys: |
-                  ${{ runner.os }}-build-output-${{ github.ref_name }}
+                  ${{ runner.os }}-build-output-${{ env.BRANCH_NAME }}
                   ${{ runner.os }}-build-output
 
         - name: Build
