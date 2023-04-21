@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { BlockInstance } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
 import {
@@ -20,17 +19,19 @@ type ModalEditorProps = {
 	onChange: ( blocks: BlockInstance[] ) => void;
 	onClose: () => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
+	title: string;
 };
 
 export function ModalEditor( {
 	initialBlocks,
 	onChange,
 	onClose,
+	title,
 }: ModalEditorProps ) {
 	return (
 		<Modal
 			className="woocommerce-modal-editor"
-			title={ __( 'Edit description', 'woocommerce' ) }
+			title={ title }
 			onRequestClose={ onClose }
 			shouldCloseOnClickOutside={ false }
 		>

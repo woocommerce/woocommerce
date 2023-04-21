@@ -44,6 +44,7 @@ export function Edit() {
 						setDescription( html );
 					} }
 					onClose={ () => setIsModalOpen( false ) }
+					title={ __( 'Edit description', 'woocommerce' ) }
 				/>
 			) }
 		</div>
