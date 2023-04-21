@@ -1,4 +1,5 @@
 .wc-block-components-radio-control__option {
+	@include reset-color();
 	@include reset-typography();
 	display: block;
 	margin: em($gap) 0;

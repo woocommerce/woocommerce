@@ -396,10 +396,10 @@ export const shopper = {
 
 		addCrossSellsProductToCart: async () => {
 			await page.waitForSelector(
-				'.wc-block-components-product-add-to-cart-button'
+				'.wp-block-cart-cross-sells-product__product-add-to-cart .wc-block-components-product-button__button'
 			);
 			expect( page ).toClick(
-				'.wc-block-components-product-add-to-cart-button'
+				'.wp-block-cart-cross-sells-product__product-add-to-cart .wc-block-components-product-button__button'
 			);
 		},
 
