@@ -32,8 +32,11 @@ class BlockRegistry {
 		'woocommerce/product-radio-field',
 		'woocommerce/product-schedule-sale-fields',
 		'woocommerce/product-section',
+		'woocommerce/product-shipping-dimensions-fields',
+		'woocommerce/product-shipping-fee-fields',
 		'woocommerce/product-summary-field',
 		'woocommerce/product-tab',
+		'woocommerce/product-track-inventory-fields',
 	];
 
 	/**

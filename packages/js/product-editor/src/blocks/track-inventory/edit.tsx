@@ -21,9 +21,7 @@ import { TrackInventoryBlockAttributes } from './types';
 import { useValidation } from '../../hooks/use-validation';
 
 export function Edit( {}: BlockEditProps< TrackInventoryBlockAttributes > ) {
-	const blockProps = useBlockProps( {
-		className: 'wp-block-woocommerce-product-track-inventory-fields',
-	} );
+	const blockProps = useBlockProps();
 
 	const [ manageStock, setManageStock ] = useEntityProp< boolean >(
 		'postType',
