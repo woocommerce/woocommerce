@@ -20,7 +20,7 @@ export function PreviewButton( {
 	Button.AnchorProps,
 	'aria-disabled' | 'variant' | 'href' | 'children'
 > ) {
-	const [ productStatus ] = useEntityProp< ProductStatus | 'auto-draft' >(
+	const [ productStatus ] = useEntityProp< ProductStatus >(
 		'postType',
 		'product',
 		'status'

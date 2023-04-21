@@ -25,7 +25,7 @@ export function useSaveDraft( {
 		'product',
 		'id'
 	);
-	const [ productStatus ] = useEntityProp< ProductStatus | 'auto-draft' >(
+	const [ productStatus ] = useEntityProp< ProductStatus >(
 		'postType',
 		'product',
 		'status'
