@@ -38,11 +38,12 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 			<?php
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-				$_product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
-				$product_id   = apply_filters( 'woocommerce_cart_item_product_id', $cart_item['product_id'], $cart_item, $cart_item_key );
+				$_product   = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+				$product_id = apply_filters( 'woocommerce_cart_item_product_id', $cart_item['product_id'], $cart_item, $cart_item_key );
 				/**
 				 * Filter the product name.
 				 *
+				 * @since 7.8.0
 				 * @param string $product_name Name of the product in the cart.
 				 */
 				$product_name = apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key );
@@ -84,8 +85,22 @@ do_action( 'woocommerce_before_cart' ); ?>
 						<td class="product-name" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
 						<?php
 						if ( ! $product_permalink ) {
+							/**
+							 * Filter the product name.
+							 *
+							 * @since 7.8.0
+							 * @param string $product_name Name of the product in the cart.
+							 * @param array $cart_item The product in the cart.
+							 * @param string $cart_item_key Key for the product in the cart.
+							 */
 							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $product_name, $cart_item, $cart_item_key ) . '&nbsp;' );
 						} else {
+							/**
+							 * Filter the product name.
+							 *
+							 * @since 7.8.0
+							 * @param string $product_url URL the product in the cart.
+							 */
 							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', esc_url( $product_permalink ), $product_name ), $cart_item, $cart_item_key ) );
 						}
 
