@@ -58,13 +58,19 @@ runs:
               pnpm -w install turbo
               pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
+        - name: Get branch name
+          run: |
+              BRANCH_NAME=${GITHUB_REF#refs/heads/}
+              echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
         - name: Cache Build Output
           uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
           with:
               path: node_modules/.cache/turbo
-              key: |
-                  ${{ runner.os }}-turbo-build-output-${{ hashFiles('**.jsx?', '**.tsx?', '**.php', 'pnpm-lock.yaml') }}
-              restore-keys: ${{ runner.os }}-turbo-build-output-
+              key: ${{ runner.os }}-build-output-${{ env.BRANCH_NAME }}-${{ github.sha }}
+              restore-keys: |
+                  ${{ runner.os }}-build-output-${{ env.BRANCH_NAME }}
+                  ${{ runner.os }}-build-output
 
         - name: Build
           if: ${{ inputs.build == 'true' }}
