@@ -270,15 +270,6 @@ class OrdersTableQuery {
 				$this->args['meta_query'] = array( $shortcut_meta_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			}
 		}
-
-		// Date query.
-		if ( isset( $this->args['date_query'] ) && is_array( $this->args['date_query'] ) ) {
-			foreach ( $this->args['date_query'] as $index => $query ) {
-				if ( isset( $query['column'] ) && isset( $mapping[ $query['column'] ] ) ) {
-					$this->args['date_query'][ $index ]['column'] = $mapping[ $query['column'] ];
-				}
-			}
-		}
 	}
 
 	/**
@@ -325,6 +316,11 @@ class OrdersTableQuery {
 	 * @throws \Exception When date args are invalid.
 	 */
 	private function process_date_args(): void {
+		if ( $this->arg_isset( 'date_query' ) ) {
+			// Process already passed date queries args.
+			$this->args['date_query'] = $this->map_gmt_and_post_keys_to_hpos_keys( $this->args['date_query'] );
+		}
+
 		$valid_operators        = array( '>', '>=', '=', '<=', '<', '...' );
 		$date_queries           = array();
 		$local_to_gmt_date_keys = array(
@@ -333,29 +329,12 @@ class OrdersTableQuery {
 			'date_paid'      => 'date_paid_gmt',
 			'date_completed' => 'date_completed_gmt',
 		);
-		$gmt_date_keys          = array_values( $local_to_gmt_date_keys );
-		$local_date_keys        = array_keys( $local_to_gmt_date_keys );
+
+		$gmt_date_keys   = array_values( $local_to_gmt_date_keys );
+		$local_date_keys = array_keys( $local_to_gmt_date_keys );
 
 		$valid_date_keys = array_merge( $gmt_date_keys, $local_date_keys );
 		$date_keys       = array_filter( $valid_date_keys, array( $this, 'arg_isset' ) );
-
-		// Process already passed date queries args.
-		if ( $this->arg_isset( 'date_query' ) && is_array( $this->args['date_query'] ) ) {
-			foreach ( $this->args['date_query'] as $index => $query ) {
-				if ( ! isset( $query['column'] ) || ! in_array( $query['column'], $valid_date_keys, true ) ) {
-					unset( $this->args['date_query'][ $index ] );
-					continue;
-				}
-				// Convert any local dates to GMT.
-				if ( isset( $local_to_gmt_date_keys[ $query['column'] ] ) ) {
-					$this->args['date_query'][ $index ]['column'] = $local_to_gmt_date_keys[ $query['column'] ];
-					$op                                        = isset( $query['after'] ) ? 'after' : 'before';
-					$date_value_local                          = $query[ $op ];
-					$date_value_gmt                            = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
-					$this->args['date_query'][ $index ][ $op ] = $this->date_to_date_query_arg( $date_value_gmt, 'UTC' );
-				}
-			}
-		}
 
 		foreach ( $date_keys as $date_key ) {
 			$date_value = $this->args[ $date_key ];
@@ -428,6 +407,63 @@ class OrdersTableQuery {
 		}
 
 		$this->process_date_query_columns();
+	}
+
+	/**
+	 * Helper function to map posts and gmt based keys to HPOS keys.
+	 *
+	 * @param array $query Date query argument.
+	 *
+	 * @return array|mixed Date query argument with modified keys.
+	 */
+	private function map_gmt_and_post_keys_to_hpos_keys( $query ) {
+		if ( ! is_array( $query ) ) {
+			return $query;
+		}
+
+		$post_to_hpos_mappings = array(
+			'post_date'         => 'date_created',
+			'post_date_gmt'     => 'date_created_gmt',
+			'post_modified'     => 'date_updated',
+			'post_modified_gmt' => 'date_updated_gmt',
+			'_date_completed'   => 'date_completed',
+			'_date_paid'        => 'date_paid',
+			'date_modified'     => 'date_updated',
+			'date_modified_gmt' => 'date_updated_gmt',
+		);
+
+		$local_to_gmt_date_keys = array(
+			'date_created'   => 'date_created_gmt',
+			'date_updated'   => 'date_updated_gmt',
+			'date_paid'      => 'date_paid_gmt',
+			'date_completed' => 'date_completed_gmt',
+		);
+
+		array_walk(
+			$query,
+			function ( &$sub_query ) {
+				$sub_query = $this->map_gmt_and_post_keys_to_hpos_keys( $sub_query );
+			}
+		);
+
+		if ( ! isset( $query['column'] ) ) {
+			return $query;
+		}
+
+		if ( isset( $post_to_hpos_mappings[ $query['column'] ] ) ) {
+			$query['column'] = $post_to_hpos_mappings[ $query['column'] ];
+		}
+
+		// Convert any local dates to GMT.
+		if ( isset( $local_to_gmt_date_keys[ $query['column'] ] ) ) {
+			$query['column']  = $local_to_gmt_date_keys[ $query['column'] ];
+			$op               = isset( $query['after'] ) ? 'after' : 'before';
+			$date_value_local = $query[ $op ];
+			$date_value_gmt   = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
+			$query[ $op ]     = $this->date_to_date_query_arg( $date_value_gmt, 'UTC' );
+		}
+
+		return $query;
 	}
 
 	/**
