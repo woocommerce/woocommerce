@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix regression in supporting nested date query arguments in HPOS. [#37827](https://github.com/woocommerce/woocommerce/pull/37827)
 * Fix - Fix incorrect usage of dispatch, useSelect, and setState calls in homescreen along with settings and onboarding package [#37641](https://github.com/woocommerce/woocommerce/pull/37641)
 * Fix - Do not attempt to cache order during order creation (HPOS). [#37569](https://github.com/woocommerce/woocommerce/pull/37569)
 * Fix - Add default value when calling get_option for woocommerce_task_list_tracked_completed_tasks. [#37397](https://github.com/woocommerce/woocommerce/pull/37397)
