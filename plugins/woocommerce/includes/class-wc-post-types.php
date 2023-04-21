@@ -615,7 +615,7 @@ class WC_Post_Types {
 									),
 									array(
 										array(
-											'woocommerce/product-sku',
+											'woocommerce/product-sku-field',
 										),
 										array(
 											'woocommerce/product-track-inventory-fields',
