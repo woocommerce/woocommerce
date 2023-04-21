@@ -8,8 +8,8 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { TABS_SLOT_NAME } from '../tabs/constants';
-import { TabsFillProps } from '../tabs';
+import { TABS_SLOT_NAME } from '../../components/tabs/constants';
+import { TabsFillProps } from '../../components/tabs';
 
 export function TabButton( {
 	children,

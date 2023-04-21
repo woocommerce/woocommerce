@@ -1,24 +1,16 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/product-images",
-	"title": "Product images",
+	"name": "woocommerce/product-name-field",
+	"title": "Product name",
 	"category": "widgets",
-	"description": "The product images.",
-	"keywords": [ "products", "image", "images", "gallery" ],
+	"description": "The product name.",
+	"keywords": [ "products", "name", "title" ],
 	"textdomain": "default",
 	"attributes": {
-		"mediaId": {
-			"type": "number",
+		"name": {
+			"type": "string",
 			"__experimentalRole": "content"
-		},
-		"images": {
-			"__experimentalRole": "content",
-			"type": "array",
-			"items": {
-				"type": "number"
-			},
-			"default": []
 		}
 	},
 	"supports": {
@@ -29,5 +21,6 @@
 		"inserter": false,
 		"lock": false,
 		"__experimentalToolbar": false
-	}
+	},
+	"editorStyle": "file:./editor.css"
 }

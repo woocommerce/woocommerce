@@ -1,38 +1,27 @@
 /* Editor */
+
 @import 'components/editor/style.scss';
 @import 'components/block-editor/style.scss';
 
 /* Structural */
 
-@import 'components/section/editor.scss';
-@import 'components/tab/editor.scss';
 @import 'components/tabs/style.scss';
 @import 'components/product-section-layout/style.scss';
 @import 'components/header/style.scss';
 
-/* Generic Blocks */
-
-@import 'blocks/checkbox/editor.scss';
-@import 'components/radio-field/style.scss';
-
-/* Field Blocks */
-
-@import 'blocks/inventory-sku/style.scss';
-@import 'blocks/inventory-email/style.scss';
-@import 'blocks/schedule-sale/editor.scss';
-@import 'blocks/track-inventory/editor.scss';
-@import 'blocks/shipping-dimensions/editor.scss';
-@import 'blocks/category/editor.scss';
-@import 'components/images/editor.scss';
-@import 'components/details-summary-block/style.scss';
-@import 'components/details-name-block/style.scss';
-@import 'components/pricing-block/style.scss';
-
 /* Components */
 
+@import 'components/radio-field/style.scss';
 @import 'components/iframe-editor/style.scss';
 @import 'components/details-categories-field/style.scss';
 @import 'components/details-categories-field/create-category-modal.scss';
 @import 'components/product-mvp-ces-footer/style.scss';
 @import 'components/product-mvp-feedback-modal/style.scss';
 @import 'components/edit-product-link-modal/style.scss';
+@import 'components/edit-product-link-modal/style.scss';
+@import 'components/details-categories-field/style.scss';
+@import 'components/details-categories-field/create-category-modal.scss';
+
+/* Field Blocks */
+
+@import 'blocks/style.scss'

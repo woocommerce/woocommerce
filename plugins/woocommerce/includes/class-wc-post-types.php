@@ -384,13 +384,13 @@ class WC_Post_Types {
 									),
 									array(
 										array(
-											'woocommerce/product-name',
+											'woocommerce/product-name-field',
 											array(
 												'name' => 'Product name',
 											),
 										),
 										array(
-											'woocommerce/product-summary',
+											'woocommerce/product-summary-field',
 										),
 										array(
 											'core/columns',
@@ -403,7 +403,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing',
+															'woocommerce/product-pricing-field',
 															array(
 																'name' => 'regular_price',
 																'label' => __( 'List price', 'woocommerce' ),
@@ -419,7 +419,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing',
+															'woocommerce/product-pricing-field',
 															array(
 																'name' => 'sale_price',
 																'label' => __( 'Sale price', 'woocommerce' ),
@@ -447,7 +447,7 @@ class WC_Post_Types {
 									),
 									array(
 										array(
-											'woocommerce/product-images',
+											'woocommerce/product-images-field',
 											array(
 												'images' => array(),
 											),
@@ -462,7 +462,7 @@ class WC_Post_Types {
 									),
 									array(
 										array(
-											'woocommerce/product-category',
+											'woocommerce/product-category-field',
 											array(
 												'name' => 'categories',
 											),
@@ -504,7 +504,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing',
+															'woocommerce/product-pricing-field',
 															array(
 																'name' => 'regular_price',
 																'label' => __( 'List price', 'woocommerce' ),
@@ -520,7 +520,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing',
+															'woocommerce/product-pricing-field',
 															array(
 																'name' => 'sale_price',
 																'label' => __( 'Sale price', 'woocommerce' ),
@@ -534,7 +534,7 @@ class WC_Post_Types {
 											'woocommerce/product-schedule-sale-fields',
 										),
 										array(
-											'woocommerce/product-radio',
+											'woocommerce/product-radio-field',
 											array(
 												'title'    => __( 'Charge sales tax on', 'woocommerce' ),
 												'property' => 'tax_status',
@@ -555,7 +555,7 @@ class WC_Post_Types {
 											),
 										),
 										array(
-											'woocommerce/collapsible',
+											'woocommerce/product-collapsible',
 											array(
 												'toggleText'       => __( 'Advanced', 'woocommerce' ),
 												'initialCollapsed' => true,
@@ -563,7 +563,7 @@ class WC_Post_Types {
 											),
 											array(
 												array(
-													'woocommerce/product-radio',
+													'woocommerce/product-radio-field',
 													array(
 														'title'    => __( 'Tax class', 'woocommerce' ),
 														'description' => sprintf(
@@ -618,13 +618,13 @@ class WC_Post_Types {
 									),
 									array(
 										array(
-											'woocommerce/product-sku',
+											'woocommerce/product-sku-field',
 										),
 										array(
 											'woocommerce/product-track-inventory-fields',
 										),
 										array(
-											'woocommerce/collapsible',
+											'woocommerce/product-collapsible',
 											array(
 												'toggleText'       => __( 'Advanced', 'woocommerce' ),
 												'initialCollapsed' => true,
@@ -640,7 +640,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-radio',
+															'woocommerce/product-radio-field',
 															array(
 																'title'    => __( 'When out of stock', 'woocommerce' ),
 																'property' => 'backorders',
@@ -664,12 +664,12 @@ class WC_Post_Types {
 															),
 														),
 														array(
-															'woocommerce/product-inventory-email',
+															'woocommerce/product-inventory-email-field',
 														),
 													),
 												),
 												array(
-													'woocommerce/product-checkbox',
+													'woocommerce/product-checkbox-field',
 													array(
 														'title'    => __(
 															'Restrictions',

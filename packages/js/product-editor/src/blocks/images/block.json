@@ -1,22 +1,24 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/product-pricing",
-	"description": "A product price block with currency display.",
-	"title": "Product pricing",
+	"name": "woocommerce/product-images-field",
+	"title": "Product images",
 	"category": "widgets",
-	"keywords": [ "products", "price" ],
+	"description": "The product images.",
+	"keywords": [ "products", "image", "images", "gallery" ],
 	"textdomain": "default",
 	"attributes": {
-		"name": {
-			"type": "string",
+		"mediaId": {
+			"type": "number",
 			"__experimentalRole": "content"
 		},
-		"label": {
-			"type": "string"
-		},
-		"showPricingSection": {
-			"type": "boolean"
+		"images": {
+			"__experimentalRole": "content",
+			"type": "array",
+			"items": {
+				"type": "number"
+			},
+			"default": []
 		}
 	},
 	"supports": {
