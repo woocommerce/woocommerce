@@ -10,9 +10,12 @@
 	"dependencies": {
 		"@actions/core": "^1.10.0",
 		"@commander-js/extra-typings": "^0.1.0",
+		"@tsconfig/node16": "^1.0.3",
 		"chalk": "^4.1.2",
+		"cli-core": "workspace:*",
 		"commander": "^9.4.0",
-		"dotenv": "^10.0.0"
+		"dotenv": "^10.0.0",
+		"ts-node": "^10.9.1"
 	},
 	"devDependencies": {
 		"@types/jest": "^27.4.1",
@@ -24,11 +27,12 @@
 		"typescript": "^4.9.5"
 	},
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc --noEmit",
 		"start": "tsc --watch",
 		"lint": "eslint . --ext .ts",
 		"postinstall": "pnpm run build",
-		"test": "jest"
+		"test": "jest",
+		"utils": "node -r ts-node/register ./src/index.ts"
 	},
 	"engines": {
 		"node": "^16.13.1",

@@ -34,7 +34,7 @@ export const getFutureDate = ( today: Date ) => {
  * @param {string} now The time to use in checking if today is the day of the code freeze. Default to now.
  * @return {boolean} true if today is the day of the code freeze.
  */
-export const isTodayCodeFreezeDay = ( now: string ) => {
+export const isTodayCodeFreezeDay = ( now = 'now' ) => {
 	const today = getToday( now );
 	const futureDate = getFutureDate( today );
 	const month = futureDate.getUTCMonth();
