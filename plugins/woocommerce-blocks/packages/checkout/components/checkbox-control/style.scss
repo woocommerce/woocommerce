@@ -1,4 +1,5 @@
 .wc-block-components-checkbox {
+	@include reset-color();
 	@include reset-typography();
 	margin-top: em($gap-large);
 
