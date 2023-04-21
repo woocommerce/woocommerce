@@ -9,7 +9,6 @@ import { createElement, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
-	ToggleControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
@@ -18,12 +17,13 @@ import {
  * Internal dependencies
  */
 import { TrackInventoryBlockAttributes } from './types';
+
 import { useValidation } from '../../hooks/use-validation';
 
 export function Edit( {}: BlockEditProps< TrackInventoryBlockAttributes > ) {
 	const blockProps = useBlockProps();
 
-	const [ manageStock, setManageStock ] = useEntityProp< boolean >(
+	const [ manageStock ] = useEntityProp< boolean >(
 		'postType',
 		'product',
 		'manage_stock'
@@ -60,43 +60,29 @@ export function Edit( {}: BlockEditProps< TrackInventoryBlockAttributes > ) {
 
 	return (
 		<div { ...blockProps }>
-			<ToggleControl
-				label={ __(
-					'Track stock quantity for this product',
-					'woocommerce'
-				) }
-				checked={ manageStock }
-				onChange={ setManageStock }
-			/>
-
-			{ manageStock && (
-				<div className="wp-block-columns">
-					<div className="wp-block-column">
-						<BaseControl
+			<div className="wp-block-columns">
+				<div className="wp-block-column">
+					<BaseControl
+						id={ stockQuantityId }
+						className={
+							stockQuantityValidationError && 'has-error'
+						}
+						help={ stockQuantityValidationError ?? '' }
+					>
+						<InputControl
 							id={ stockQuantityId }
-							className={
-								stockQuantityValidationError && 'has-error'
-							}
-							help={ stockQuantityValidationError ?? '' }
-						>
-							<InputControl
-								id={ stockQuantityId }
-								name="stock_quantity"
-								label={ __(
-									'Available quantity',
-									'woocommerce'
-								) }
-								value={ stockQuantity }
-								onChange={ setStockQuantity }
-								type="number"
-								min={ 0 }
-							/>
-						</BaseControl>
-					</div>
-
-					<div className="wp-block-column" />
+							name="stock_quantity"
+							label={ __( 'Available quantity', 'woocommerce' ) }
+							value={ stockQuantity }
+							onChange={ setStockQuantity }
+							type="number"
+							min={ 0 }
+						/>
+					</BaseControl>
 				</div>
-			) }
+
+				<div className="wp-block-column" />
+			</div>
 		</div>
 	);
 }

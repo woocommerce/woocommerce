@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { CardBody, DropZone } from '@wordpress/components';
+import { DropZone } from '@wordpress/components';
 import classnames from 'classnames';
 import { createElement, useState } from '@wordpress/element';
 import { Icon, trash } from '@wordpress/icons';
@@ -67,57 +67,50 @@ export function Edit() {
 		<div { ...blockProps }>
 			<div className="woocommerce-product-form__image-drop-zone">
 				{ isRemovingZoneVisible ? (
-					<CardBody>
-						<div className="woocommerce-product-form__remove-image-drop-zone">
-							<span>
-								<Icon
-									icon={ trash }
-									size={ 20 }
-									className="icon-control"
-								/>
-								{ __( 'Drop here to remove', 'woocommerce' ) }
-							</span>
-							<DropZone
-								onHTMLDrop={ () => setIsRemoving( true ) }
-								onDrop={ () => setIsRemoving( true ) }
-								label={ __(
-									'Drop here to remove',
-									'woocommerce'
-								) }
+					<div className="woocommerce-product-form__remove-image-drop-zone">
+						<span>
+							<Icon
+								icon={ trash }
+								size={ 20 }
+								className="icon-control"
 							/>
-						</div>
-					</CardBody>
-				) : (
-					<CardBody>
-						<MediaUploader
-							multipleSelect={ true }
-							onError={ () => null }
-							onFileUploadChange={ onFileUpload }
-							onSelect={ ( files ) => {
-								const newImages = files.filter(
-									( img: Image ) =>
-										! images.find(
-											( image ) => image.id === img.id
-										)
-								);
-								if ( newImages.length > 0 ) {
-									recordEvent(
-										'product_images_add_via_media_library'
-									);
-									setImages( [ ...images, ...newImages ] );
-								}
-							} }
-							onUpload={ ( files ) => {
-								if ( files[ 0 ].id ) {
-									recordEvent(
-										'product_images_add_via_drag_and_drop_upload'
-									);
-									setImages( [ ...images, ...files ] );
-								}
-							} }
-							label={ '' }
+							{ __( 'Drop here to remove', 'woocommerce' ) }
+						</span>
+						<DropZone
+							onHTMLDrop={ () => setIsRemoving( true ) }
+							onDrop={ () => setIsRemoving( true ) }
+							label={ __( 'Drop here to remove', 'woocommerce' ) }
 						/>
-					</CardBody>
+					</div>
+				) : (
+					<MediaUploader
+						multipleSelect={ true }
+						onError={ () => null }
+						onFileUploadChange={ onFileUpload }
+						onSelect={ ( files ) => {
+							const newImages = files.filter(
+								( img: Image ) =>
+									! images.find(
+										( image ) => image.id === img.id
+									)
+							);
+							if ( newImages.length > 0 ) {
+								recordEvent(
+									'product_images_add_via_media_library'
+								);
+								setImages( [ ...images, ...newImages ] );
+							}
+						} }
+						onUpload={ ( files ) => {
+							if ( files[ 0 ].id ) {
+								recordEvent(
+									'product_images_add_via_drag_and_drop_upload'
+								);
+								setImages( [ ...images, ...files ] );
+							}
+						} }
+						label={ '' }
+					/>
 				) }
 			</div>
 			<ImageGallery

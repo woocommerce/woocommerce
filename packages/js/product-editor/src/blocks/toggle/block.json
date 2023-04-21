@@ -1,26 +1,28 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/product-track-inventory-fields",
-	"title": "Product track inventory fields",
+	"name": "woocommerce/product-toggle-field",
+	"title": "Product toggle control",
 	"category": "woocommerce",
-	"description": "The product track inventory fields.",
-	"keywords": [ "products", "track", "inventory" ],
+	"description": "The product toggle.",
+	"keywords": [ "products", "radio", "input" ],
 	"textdomain": "default",
 	"attributes": {
-		"name": {
+		"label": {
 			"type": "string",
 			"__experimentalRole": "content"
+		},
+		"property": {
+			"type": "string"
 		}
 	},
 	"supports": {
 		"align": false,
 		"html": false,
-		"multiple": false,
-		"reusable": false,
+		"multiple": true,
+		"reusable": true,
 		"inserter": false,
 		"lock": false,
 		"__experimentalToolbar": false
-	},
-	"editorStyle": "file:./editor.css"
+	}
 }

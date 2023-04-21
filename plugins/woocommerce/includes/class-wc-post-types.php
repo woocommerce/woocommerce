@@ -621,7 +621,55 @@ class WC_Post_Types {
 											'woocommerce/product-sku-field',
 										),
 										array(
-											'woocommerce/product-track-inventory-fields',
+											'woocommerce/product-toggle-field',
+											array(
+												'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
+												'property' => 'manage_stock',
+											),
+										),
+										array(
+											'woocommerce/conditional',
+											array(
+												'mustMatch' => array(
+													'manage_stock' => array( true ),
+												),
+											),
+											array(
+												array(
+													'woocommerce/product-inventory-quantity-field',
+												),
+											),
+										),
+										array(
+											'woocommerce/conditional',
+											array(
+												'mustMatch' => array(
+													'manage_stock' => array( false ),
+												),
+											),
+											array(
+												array(
+													'woocommerce/product-radio-field',
+													array(
+														'title'    => __( 'Stock status', 'woocommerce' ),
+														'property' => 'stock_status',
+														'options'  => array(
+															array(
+																'label' => __( 'In stock', 'woocommerce' ),
+																'value' => 'instock',
+															),
+															array(
+																'label' => __( 'Out of stock', 'woocommerce' ),
+																'value' => 'outofstock',
+															),
+															array(
+																'label' => __( 'On backorder', 'woocommerce' ),
+																'value' => 'onbackorder',
+															),
+														),
+													),
+												),
+											),
 										),
 										array(
 											'woocommerce/product-collapsible',

@@ -1,7 +1,7 @@
 .wp-block-woocommerce-product-images-field {
-    .components-card__body {
-        padding: 0 0 40px 0;
-    }
+	.woocommerce-image-gallery {
+		margin-top: $gap-largest;
+	}
     .woocommerce-media-uploader {
         text-align: left;
     }
