@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 6.1
 Tested up to: 6.2
 Requires PHP: 7.3
-Stable tag: 10.0.2
+Stable tag: 10.0.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -79,6 +79,12 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
 
 == Changelog ==
+
+= 10.0.3 - 2023-04-21 =
+
+#### Bug Fixes
+
+- Fix image editor in Featured Product/Category blocks on WP 6.2. ([9142](https://github.com/woocommerce/woocommerce-blocks/pull/9142))
 
 = 10.0.2 - 2023-04-19 =
 
