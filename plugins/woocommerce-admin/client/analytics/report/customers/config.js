@@ -100,7 +100,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Name{{/title}} {{rule /}} {{filter /}}',
+						'<title>Name</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select customer name', 'woocommerce' ),
@@ -151,7 +151,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Country / Region{{/title}} {{rule /}} {{filter /}}',
+						'<title>Country / Region</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select country / region', 'woocommerce' ),
@@ -205,7 +205,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a customer username filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Username{{/title}} {{rule /}} {{filter /}}',
+						'<title>Username</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select customer username', 'woocommerce' ),
@@ -247,7 +247,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a customer email filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
 					title: __(
-						'{{title}}Email{{/title}} {{rule /}} {{filter /}}',
+						'<title>Email</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select customer email', 'woocommerce' ),

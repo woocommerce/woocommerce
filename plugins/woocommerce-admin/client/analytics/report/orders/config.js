@@ -145,7 +145,7 @@ export const advancedFilters = applyFilters(
 					rule: __( 'Select a product filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'{{title}}Product{{/title}} {{rule /}} {{filter /}}',
+						'<title>Product</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select products', 'woocommerce' ),
@@ -179,7 +179,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Variation filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'{{title}}Variation{{/title}} {{rule /}} {{filter /}}',
+						'<title>Variation</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select variation', 'woocommerce' ),
@@ -210,7 +210,7 @@ export const advancedFilters = applyFilters(
 					rule: __( 'Select a coupon filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Coupon filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'{{title}}Coupon code{{/title}} {{rule /}} {{filter /}}',
+						'<title>Coupon code</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select coupon codes', 'woocommerce' ),
@@ -302,7 +302,7 @@ export const advancedFilters = applyFilters(
 					rule: __( 'Select a tax rate filter match', 'woocommerce' ),
 					/* translators: A sentence describing a tax rate filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'{{title}}Tax Rate{{/title}} {{rule /}} {{filter /}}',
+						'<title>Tax Rate</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select tax rates', 'woocommerce' ),
