@@ -59,6 +59,7 @@ runs:
               pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
         - name: Get branch name
+          shell: bash
           run: |
               BRANCH_NAME=${GITHUB_REF#refs/heads/}
               echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
