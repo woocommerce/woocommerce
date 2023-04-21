@@ -36,7 +36,8 @@ class BlockRegistry {
 		'woocommerce/product-shipping-fee-fields',
 		'woocommerce/product-summary-field',
 		'woocommerce/product-tab',
-		'woocommerce/product-track-inventory-fields',
+		'woocommerce/product-inventory-quantity-field',
+		'woocommerce/product-toggle-field',
 	];
 
 	/**
