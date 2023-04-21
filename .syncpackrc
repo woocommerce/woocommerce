@@ -82,6 +82,7 @@
 				"@wordpress/prettier-config",
 				"@wordpress/scripts",
 				"@wordpress/jest-console",
+				"@wordpress/env",
 				"@wordpress/dependency-extraction-webpack-plugin",
 				"@wordpress/e2e-test-utils",
 				"@wordpress/jest-preset-default",
@@ -93,15 +94,6 @@
 				"**"
 			],
 			"isIgnored": true
-		},
-		{
-			"dependencies": [
-				"@wordpress/env"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^5.16.0"
 		},
 		{
 			"dependencies": [
