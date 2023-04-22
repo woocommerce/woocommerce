@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { createElement, StrictMode, Fragment } from '@wordpress/element';
+import {
+	createElement,
+	StrictMode,
+	Fragment,
+	useState,
+} from '@wordpress/element';
 import { PluginArea } from '@wordpress/plugins';
 import {
 	EditorSettings,
@@ -41,6 +46,8 @@ type EditorProps = {
 };
 
 export function Editor( { product, settings }: EditorProps ) {
+	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
+
 	return (
 		<StrictMode>
 			<EntityProvider kind="postType" type="product" id={ product.id }>
@@ -48,12 +55,22 @@ export function Editor( { product, settings }: EditorProps ) {
 					<FullscreenMode isActive={ false } />
 					<SlotFillProvider>
 						<InterfaceSkeleton
-							header={ <Header productName={ product.name } /> }
+							header={
+								<Header
+									productName={ product.name }
+									onTabSelect={ setSelectedTab }
+								/>
+							}
 							content={
 								<>
 									<BlockEditor
 										settings={ settings }
 										product={ product }
+										context={ {
+											selectedTab,
+											postType: 'product',
+											postId: product.id,
+										} }
 									/>
 									{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 									<PluginArea scope="woocommerce-product-block-editor" />

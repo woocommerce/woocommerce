@@ -8,34 +8,39 @@ Syncronous validation
 
 ```typescript
 import { useCallback } from '@wordpress/element';
-import { useValidation } from '@woocommerce/product-editor';
+import { __ } from '@wordpress/i18n';
+import {
+	__experimentalUseValidation as useValidation,
+	ValidationError
+} from '@woocommerce/product-editor';
 
 const product = ...;
 
-const validateTitle = useCallback( (): boolean => {
+const validateTitle = useCallback( (): ValidationError => {
 	if ( product.title.length < 2 ) {
-		return false;
+		return __( 'Title must be more than 1 character', 'text-domain' );
 	}
-	return true;
 }, [ product.title ] );
 
-const isTitleValid = useValidation( 'product/title', validateTitle );
+const validationError = useValidation( 'product/title', validateTitle );
 ```
 
 Asyncronous validation
 
 ```typescript
 import { useCallback } from '@wordpress/element';
-import { useValidation } from '@woocommerce/product-editor';
+import {
+	__experimentalUseValidation as useValidation,
+	ValidationError
+} from '@woocommerce/product-editor';
 
 const product = ...;
 
-const validateSlug = useCallback( async (): Promise< boolean > => {
+const validateSlug = useCallback( async (): Promise< ValidationError > => {
 	return fetch( `.../validate-slug?slug=${ product.slug }` )
 		.then( ( response ) => response.json() )
-		.then( ( { isValid } ) => isValid )
-		.catch( () => false );
+		.then( ( { errorMessage } ) => errorMessage );
 }, [ product.slug ] );
 
-const isSlugValid = useValidation( 'product/slug', validateSlug );
+const validationError = useValidation( 'product/slug', validateSlug );
 ```

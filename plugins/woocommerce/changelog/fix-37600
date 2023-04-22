@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Removed aria-disabled attribute from "Update Cart" button as it already has a disabled attribute.

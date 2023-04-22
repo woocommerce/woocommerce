@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Move additional CES-related components to @woocommerce/customer-effort-score.
