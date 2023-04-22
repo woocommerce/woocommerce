@@ -432,7 +432,7 @@ export const shopper = {
 			};
 
 			// We need to wait for the shipping total to update before we assert.
-			// As no dom elements are being added or removed, we cannot use `await page.waitForSelectot()`
+			// As no dom elements are being added or removed, we cannot use `await page.waitForSelector()`
 			// so instead we check when the `via <Shipping Method>` text changes
 			await page.$eval(
 				'.wc-block-components-totals-shipping .wc-block-components-totals-shipping__via',
