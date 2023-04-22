@@ -106,32 +106,8 @@ describe( `Local Pickup Settings`, () => {
 				checkoutSlug: 'checkout-block',
 			} );
 		} );
-		it( 'hides the correct shipping options if Checkout block is the default', async () => {
-			await visitAdminPage(
-				'admin.php',
-				'page=wc-settings&tab=shipping&section=options'
-			);
-			const hideShippingLabel = await findLabelWithText(
-				'Hide shipping costs until an address is entered'
-			);
-			expect( hideShippingLabel ).toBeUndefined();
-
-			const shippingCalculatorLabel = await findLabelWithText(
-				'Enable the shipping calculator on the cart page'
-			);
-			expect( shippingCalculatorLabel ).toBeUndefined();
-		} );
-
-		it( 'does not hide the relevant setting if Cart or Checkout block is not the default', async () => {
-			await setCartCheckoutPages( {
-				cartSlug: 'cart',
-				checkoutSlug: 'checkout',
-			} );
-
-			await visitAdminPage(
-				'admin.php',
-				'page=wc-settings&tab=advanced'
-			);
+		it( 'shows the correct shipping options depending on whether Local Pickup is enabled', async () => {
+			await merchant.disableLocalPickup();
 			await visitAdminPage(
 				'admin.php',
 				'page=wc-settings&tab=shipping&section=options'
@@ -141,10 +117,15 @@ describe( `Local Pickup Settings`, () => {
 			);
 			await expect( hideShippingLabel ).toHaveLength( 1 );
 
-			const shippingCalculatorLabel = await page.$x(
-				'//label[contains(., "Enable the shipping calculator on the cart page")]'
+			await merchant.enableLocalPickup();
+			await visitAdminPage(
+				'admin.php',
+				'page=wc-settings&tab=shipping&section=options'
 			);
-			await expect( shippingCalculatorLabel ).toHaveLength( 1 );
+			const modifiedHideShippingLabel = await page.$x(
+				'//label[contains(., "Hide shipping costs until an address is entered (Not available when using WooCommerce Blocks Local Pickup)")]'
+			);
+			await expect( modifiedHideShippingLabel ).toHaveLength( 1 );
 		} );
 	} );
 
