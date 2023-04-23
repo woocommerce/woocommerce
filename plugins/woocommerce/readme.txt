@@ -201,6 +201,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Updates an e2e variable name to be more descriptive [#37448](https://github.com/woocommerce/woocommerce/pull/37448)
 * Fix - update select all to checkbox in menu editor [#37562](https://github.com/woocommerce/woocommerce/pull/37562)
 * Fix - Use first meta value for HPOS migration when there are duplicates for flat column. [#37676](https://github.com/woocommerce/woocommerce/pull/37676)
+* Fix - Hide stock status field if stock management is enabled. [#37890](https://github.com/woocommerce/woocommerce/pull/37890)
 * Add - Add a category for product editor blocks [#37347](https://github.com/woocommerce/woocommerce/pull/37347)
 * Add - Add country query param to payment gateway data sources [#37443](https://github.com/woocommerce/woocommerce/pull/37443)
 * Add - Add image configuration to the product block template [#37340](https://github.com/woocommerce/woocommerce/pull/37340)
