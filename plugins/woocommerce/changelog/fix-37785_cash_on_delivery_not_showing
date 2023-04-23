@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Sync up date_column_name default for orders table, between stats and table data.
