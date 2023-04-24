@@ -4,6 +4,7 @@
 		"analytics": true,
 		"product-block-editor": false,
 		"coupons": true,
+		"core-profiler": false,
 		"customer-effort-score-tracks": true,
 		"import-products-task": true,
 		"experimental-fashion-sample-products": true,
