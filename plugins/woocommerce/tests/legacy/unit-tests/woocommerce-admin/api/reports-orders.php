@@ -414,6 +414,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 	 * See: https://github.com/woocommerce/woocommerce-admin/issues/5803#issuecomment-738403405.
 	 */
 	public function test_order_price_formatting_with_different_base_currency() {
+		update_option( 'woocommerce_date_type', 'date_created' );
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 

@@ -14,7 +14,7 @@ on:
                 description: 'Slack Channel Override: The channel ID to send the Slack ping about the freeze'
 
 env:
-    TIME_OVERRIDE: ${{ inputs.timeOverride }}
+    TIME_OVERRIDE: ${{ inputs.timeOverride || 'now' }}
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
     GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
     GIT_AUTHOR_NAME: 'WooCommerce Bot'

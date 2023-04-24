@@ -330,19 +330,30 @@ jQuery( function ( $ ) {
 	);
 
 	// Stock options.
+	function show_or_hide_stock_management_fields(
+		isStockManagementEnabled,
+		productType
+	) {
+		const $stockManagementFields = $( '.stock_fields' );
+		const $stockStatusField = $( '.stock_status_field' );
+
+		$stockManagementFields.toggle( isStockManagementEnabled );
+		$stockStatusField.toggle(
+			! isStockManagementEnabled &&
+				// do not show stock status field if it should be hidden for the product type
+				! $stockStatusField.is( '.hide_if_' + productType )
+		);
+	}
+
 	$( 'input#_manage_stock' )
 		.on( 'change', function () {
-			if ( $( this ).is( ':checked' ) ) {
-				$( 'div.stock_fields' ).show();
-				$( 'p.stock_status_field' ).hide();
-			} else {
-				var product_type = $( 'select#product-type' ).val();
+			const isStockManagementEnabled = $( this ).is( ':checked' );
+			const productType = $( 'select#product-type' ).val();
 
-				$( 'div.stock_fields' ).hide();
-				$(
-					'p.stock_status_field:not( .hide_if_' + product_type + ' )'
-				).show();
-			}
+			show_or_hide_stock_management_fields(
+				isStockManagementEnabled,
+				productType
+			);
 
 			$( 'input.variable_manage_stock' ).trigger( 'change' );
 		} )
@@ -1091,8 +1102,9 @@ jQuery( function ( $ ) {
 
 	// Add a descriptive tooltip to the product description editor
 	$( '#wp-content-media-buttons' )
-		.append( '<span class="woocommerce-help-tip" tabindex="-1"></span>' )
+		.append( '<span class="woocommerce-help-tip" tabindex="0"></span>' )
 		.find( '.woocommerce-help-tip' )
+		.attr( 'tabindex', '0' )
 		.attr( 'for', 'content' )
 		.attr(
 			'aria-label',
@@ -1111,6 +1123,7 @@ jQuery( function ( $ ) {
 	$( '#postexcerpt > .postbox-header > .hndle' )
 		.append( '<span class="woocommerce-help-tip"></span>' )
 		.find( '.woocommerce-help-tip' )
+		.attr( 'tabindex', '0' )
 		.attr(
 			'aria-label',
 			woocommerce_admin_meta_boxes.i18n_product_short_description_tip

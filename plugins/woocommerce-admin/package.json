@@ -81,6 +81,7 @@
 		"@wordpress/url": "wp-6.0",
 		"@wordpress/viewport": "wp-6.0",
 		"@wordpress/warning": "wp-6.0",
+		"@xstate/react": "3.2.1",
 		"classnames": "^2.3.1",
 		"core-js": "^3.21.1",
 		"debug": "^4.3.3",
@@ -97,7 +98,8 @@
 		"react-router-dom": "^6.3.0",
 		"react-transition-group": "^4.4.2",
 		"react-visibility-sensor": "^5.1.1",
-		"redux": "^4.1.2"
+		"redux": "^4.1.2",
+		"xstate": "4.37.1"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "^2.5.0",
@@ -169,6 +171,7 @@
 		"@wordpress/prettier-config": "^1.1.2",
 		"@wordpress/scripts": "^12.6.1",
 		"@wordpress/stylelint-config": "^20.0.2",
+		"@xstate/inspect": "0.8.0",
 		"autoprefixer": "^10.4.2",
 		"await-exec": "^0.1.2",
 		"babel-jest": "^27.5.1",
