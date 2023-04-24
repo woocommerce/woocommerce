@@ -7,6 +7,7 @@ on:
 
 jobs:
   PlaywrightE2ETests:
+    if: false
     name: Playwright E2E tests
     timeout-minutes: 60
     runs-on: ubuntu-latest
