@@ -8,7 +8,6 @@ import { HTMLAttributes } from 'react';
  */
 
 import './progress-bar.scss';
-import WooLogo from '../navigation/woologo';
 
 type ProgressBarProps = {
 	className?: string;
