@@ -6,6 +6,7 @@ import {
 	StrictMode,
 	Fragment,
 	useState,
+	useMemo,
 } from '@wordpress/element';
 import { PluginArea } from '@wordpress/plugins';
 import {
@@ -53,10 +54,13 @@ export function Editor( { product, settings }: EditorProps ) {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
 	const { updateLayoutPath } = useLayoutContext();
 
+	const updatedLayoutContext = useMemo(
+		() => updateLayoutPath( 'product-block-editor' ),
+		[ updateLayoutPath ]
+	);
+
 	return (
-		<LayoutContextProvider
-			value={ updateLayoutPath( 'product-block-editor' ) }
-		>
+		<LayoutContextProvider value={ updatedLayoutContext }>
 			<StrictMode>
 				<EntityProvider
 					kind="postType"

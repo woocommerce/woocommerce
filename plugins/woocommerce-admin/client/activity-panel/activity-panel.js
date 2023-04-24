@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { lazy, useState, useEffect } from '@wordpress/element';
+import { lazy, useState, useEffect, useMemo } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
@@ -81,6 +81,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			clearPanel();
 		} );
 	}, [] );
+
+	const updatedLayoutContext = useMemo(
+		() => updateLayoutPath( 'activity-panel' ),
+		[ updateLayoutPath ]
+	);
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
 		let trackData = {};
@@ -450,7 +455,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const showHelpHighlightTooltip = shouldShowHelpTooltip();
 
 	return (
-		<LayoutContextProvider value={ updateLayoutPath( 'activity-panel' ) }>
+		<LayoutContextProvider value={ updatedLayoutContext }>
 			<div>
 				<H id={ headerId } className="screen-reader-text">
 					{ __( 'Store Activity', 'woocommerce' ) }
