@@ -24,6 +24,20 @@ class WC_WCCOM_Site_Installation_Manager {
 	);
 
 	/**
+	 * The product ID.
+	 *
+	 * @var int
+	 */
+	protected $product_id;
+
+	/**
+	 * The idempotency key.
+	 *
+	 * @var string
+	 */
+	protected $idempotency_key;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int    $product_id The product ID.

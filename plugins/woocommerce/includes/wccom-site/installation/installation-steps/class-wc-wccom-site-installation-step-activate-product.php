@@ -16,6 +16,13 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_Installation_Step {
 	/**
+	 * The current installation state.
+	 *
+	 * @var WC_WCCOM_Site_Installation_State
+	 */
+	protected $state;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array $state The current installation state.
