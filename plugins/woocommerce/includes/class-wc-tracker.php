@@ -533,6 +533,13 @@ class WC_Tracker {
 		foreach ( $orders_by_gateway as $orders_details ) {
             $key = str_replace( array( "payment method", "gateway" ), "",  strtolower( $orders_details->gateway ) );
 
+            // If a payment method has a unique id( like last 4 digits of a credit card), we don't want it to be a unique payment method
+            // If the count is very less( less than 6 ), it is highly likely that it is a payment method with a unique id 
+            // In addition, if it has a digit, then truncate the payment method name( the key ) to just before the first digit
+            if ( $orders_details->counts <= 5 && $pos = strcspn( $key , '0123456789' ) ) {
+                  $key = substr( $key, 0, $pos );
+            }
+
 			$currency = $orders_details->currency;
 			$count    = $gateway . '_' . $currency . '_count';
 			$total    = $gateway . '_' . $currency . '_total';
