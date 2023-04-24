@@ -22,7 +22,7 @@ import { textContent } from './utils';
 class NumberFilter extends Component {
 	getBetweenString() {
 		return _x(
-			'{{rangeStart /}}{{span}} and {{/span}}{{rangeEnd /}}',
+			'<rangeStart/><span> and </span><rangeEnd/>',
 			'Numerical range inputs arranged on a single line',
 			'woocommerce'
 		);
