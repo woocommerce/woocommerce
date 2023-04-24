@@ -6,14 +6,14 @@ import { Link } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME,
 	ProductShippingClass,
+	PartialProduct,
 } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { BaseControl, SelectControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
-import { useEntityProp } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	Fragment,
 	createElement,
@@ -23,6 +23,7 @@ import {
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
+import { useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -30,9 +31,32 @@ import classNames from 'classnames';
 import { ShippingFeeBlockAttributes } from './types';
 import { useValidation } from '../../hooks/use-validation';
 import { RadioField } from '../../components/radio-field';
+import { AddNewShippingClassModal } from '../../components';
+import { ADD_NEW_SHIPPING_CLASS_OPTION_VALUE } from '../../constants';
+
+type ServerErrorResponse = {
+	code: string;
+};
 
 const FOLLOW_CLASS_OPTION_VALUE = 'follow_class';
 const FREE_SHIPPING_OPTION_VALUE = 'free_shipping';
+
+export const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
+	{ value: '', label: __( 'No shipping class', 'woocommerce' ) },
+	{
+		value: ADD_NEW_SHIPPING_CLASS_OPTION_VALUE,
+		label: __( 'Add new shipping class', 'woocommerce' ),
+	},
+];
+
+function mapShippingClassToSelectOption(
+	shippingClasses: ProductShippingClass[]
+): SelectControl.Option[] {
+	return shippingClasses.map( ( { slug, name } ) => ( {
+		value: slug,
+		label: name,
+	} ) );
+}
 
 const options = [
 	{
@@ -45,10 +69,31 @@ const options = [
 	},
 ];
 
+function extractDefaultShippingClassFromProduct(
+	categories?: PartialProduct[ 'categories' ],
+	shippingClasses?: ProductShippingClass[]
+): Partial< ProductShippingClass > | undefined {
+	console.debug( 'categories', categories );
+	const category = categories?.find(
+		( { slug } ) => slug !== 'uncategorized'
+	);
+	if (
+		category &&
+		! shippingClasses?.some( ( { slug } ) => slug === category.slug )
+	) {
+		return {
+			name: category.name,
+			slug: category.slug,
+		};
+	}
+}
+
 export function Edit( {
 	attributes,
 }: BlockEditProps< ShippingFeeBlockAttributes > ) {
 	const { title } = attributes;
+	const [ showShippingClassModal, setShowShippingClassModal ] =
+		useState( false );
 
 	const blockProps = useBlockProps();
 
@@ -56,11 +101,44 @@ export function Edit( {
 		FREE_SHIPPING_OPTION_VALUE
 	);
 
+	const { createProductShippingClass, invalidateResolution } = useDispatch(
+		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
+	);
+
+	const { createErrorNotice } = useDispatch( 'core/notices' );
+
+	const [ categories ] = useEntityProp< PartialProduct[ 'categories' ] >(
+		'postType',
+		'product',
+		'categories'
+	);
 	const [ shippingClass, setShippingClass ] = useEntityProp< string >(
 		'postType',
 		'product',
 		'shipping_class'
 	);
+
+	function handleShippingClassServerError(
+		error: ServerErrorResponse
+	): Promise< ProductShippingClass > {
+		let message = __(
+			'We couldn’t add this shipping class. Try again in a few seconds.',
+			'woocommerce'
+		);
+
+		if ( error.code === 'term_exists' ) {
+			message = __(
+				'A shipping class with that slug already exists.',
+				'woocommerce'
+			);
+		}
+
+		createErrorNotice( message, {
+			explicitDismiss: true,
+		} );
+
+		throw error;
+	}
 
 	const { shippingClasses } = useSelect( ( select ) => {
 		const { getProductShippingClasses } = select(
@@ -126,8 +204,23 @@ export function Edit( {
 							id={ shippingClassControlId }
 							name="shipping_class"
 							value={ shippingClass }
-							onChange={ setShippingClass }
+							onChange={ ( value: string ) => {
+								if (
+									value ===
+									ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
+								) {
+									setShowShippingClassModal( true );
+									return;
+								}
+								setShippingClass( value );
+							} }
 							label={ __( 'Shipping class', 'woocommerce' ) }
+							options={ [
+								...DEFAULT_SHIPPING_CLASS_OPTIONS,
+								...mapShippingClassToSelectOption(
+									shippingClasses ?? []
+								),
+							] }
 							help={
 								shippingClassValidationError ||
 								createInterpolateElement(
@@ -161,17 +254,36 @@ export function Edit( {
 									}
 								)
 							}
-						>
-							{ shippingClasses.map( ( { slug, name } ) => (
-								<option key={ slug } value={ slug }>
-									{ name }
-								</option>
-							) ) }
-						</SelectControl>
+						/>
 					</div>
 
 					<div className="wp-block-column"></div>
 				</div>
+			) }
+			{ showShippingClassModal && (
+				<AddNewShippingClassModal
+					shippingClass={ extractDefaultShippingClassFromProduct(
+						categories,
+						shippingClasses
+					) }
+					onAdd={ ( shippingClassValues ) =>
+						createProductShippingClass<
+							Promise< ProductShippingClass >
+						>( shippingClassValues )
+							.then( ( value ) => {
+								recordEvent(
+									'product_new_shipping_class_modal_add_button_click'
+								);
+								invalidateResolution(
+									'getProductShippingClasses'
+								);
+								setShippingClass( value.slug );
+								return value;
+							} )
+							.catch( handleShippingClassServerError )
+					}
+					onCancel={ () => setShowShippingClassModal( false ) }
+				/>
 			) }
 		</div>
 	);

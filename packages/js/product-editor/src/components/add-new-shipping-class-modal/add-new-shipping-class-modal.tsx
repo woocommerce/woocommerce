@@ -3,15 +3,10 @@
  */
 import interpolateComponents from '@automattic/interpolate-components';
 import { Button, Modal, TextControl } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useState, createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Form, FormErrors, useFormContext } from '@woocommerce/components';
 import { ProductShippingClass } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
-import './add-new-shipping-class-modal.scss';
 
 export type ShippingClassFormProps = {
 	onAdd: () => Promise< ProductShippingClass >;
