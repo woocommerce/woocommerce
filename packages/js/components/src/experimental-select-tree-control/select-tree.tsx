@@ -198,6 +198,13 @@ export const SelectTree = function SelectTree( {
 				items={ linkedTree }
 				shouldShowCreateButton={ shouldShowCreateButton }
 				onClose={ () => setIsOpen( false ) }
+				onFirstTreeItemBack={ () => {
+					(
+						document.querySelector(
+							`#${ props.id }-input`
+						) as HTMLInputElement
+					 )?.focus();
+				} }
 			/>
 		</div>
 	);

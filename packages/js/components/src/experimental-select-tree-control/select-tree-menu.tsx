@@ -41,6 +41,7 @@ export const SelectTreeMenu = ( {
 	treeRef: ref,
 	onClose = () => {},
 	shouldShowCreateButton,
+	onFirstTreeItemBack,
 	...props
 }: MenuProps ) => {
 	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
@@ -124,6 +125,7 @@ export const SelectTreeMenu = ( {
 									ref={ ref }
 									items={ items }
 									onTreeBlur={ onClose }
+									onFirstTreeItemBack={ onFirstTreeItemBack }
 									shouldItemBeExpanded={
 										shouldItemBeExpanded
 									}
