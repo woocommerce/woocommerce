@@ -22,9 +22,7 @@ import { ScheduleSalePricingBlockAttributes } from './types';
 import { useValidation } from '../../hooks/use-validation';
 
 export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
-	const blockProps = useBlockProps( {
-		className: 'wp-block-woocommerce-product-schedule-sale-fields',
-	} );
+	const blockProps = useBlockProps();
 
 	const dateTimeFormat = getSettings().formats.datetime;
 
@@ -83,12 +81,43 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 		}
 	}, [ dateOnSaleFromGmt, dateOnSaleToGmt ] );
 
-	const isDateOnSaleToGmtValid = useValidation(
+	const _dateOnSaleFrom = moment( dateOnSaleFromGmt, moment.ISO_8601, true );
+	const _dateOnSaleTo = moment( dateOnSaleToGmt, moment.ISO_8601, true );
+
+	const dateOnSaleFromGmtValidationError = useValidation(
+		'product/date_on_sale_from_gmt',
+		function dateOnSaleFromValidator() {
+			if ( showScheduleSale && dateOnSaleFromGmt ) {
+				if ( ! _dateOnSaleFrom.isValid() ) {
+					return __( 'Please enter a valid date.', 'woocommerce' );
+				}
+
+				if ( _dateOnSaleFrom.isAfter( _dateOnSaleTo ) ) {
+					return __(
+						'The start date of the sale must be before the end date.',
+						'woocommerce'
+					);
+				}
+			}
+		}
+	);
+
+	const dateOnSaleToGmtValidationError = useValidation(
 		'product/date_on_sale_to_gmt',
-		() =>
-			! showScheduleSale ||
-			! dateOnSaleToGmt ||
-			moment( dateOnSaleFromGmt ).isBefore( dateOnSaleToGmt )
+		function dateOnSaleToValidator() {
+			if ( showScheduleSale && dateOnSaleToGmt ) {
+				if ( ! _dateOnSaleTo.isValid() ) {
+					return __( 'Please enter a valid date.', 'woocommerce' );
+				}
+
+				if ( _dateOnSaleTo.isBefore( _dateOnSaleFrom ) ) {
+					return __(
+						'The end date of the sale must be after the start date.',
+						'woocommerce'
+					);
+				}
+			}
+		}
 	);
 
 	return (
@@ -112,6 +141,10 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 							dateTimeFormat={ dateTimeFormat }
 							currentDate={ dateOnSaleFromGmt }
 							onChange={ setDateOnSaleFromGmt }
+							className={
+								dateOnSaleFromGmtValidationError && 'has-error'
+							}
+							help={ dateOnSaleFromGmtValidationError as string }
 						/>
 					</div>
 
@@ -132,16 +165,9 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 								)
 							}
 							className={
-								isDateOnSaleToGmtValid ? undefined : 'has-error'
+								dateOnSaleToGmtValidationError && 'has-error'
 							}
-							help={
-								isDateOnSaleToGmtValid
-									? undefined
-									: __(
-											'To date must be greater than From date.',
-											'woocommerce'
-									  )
-							}
+							help={ dateOnSaleToGmtValidationError as string }
 						/>
 					</div>
 				</div>

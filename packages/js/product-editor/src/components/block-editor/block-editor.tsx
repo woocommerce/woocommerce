@@ -2,12 +2,7 @@
  * External dependencies
  */
 import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
-import {
-	createElement,
-	useMemo,
-	useLayoutEffect,
-	useState,
-} from '@wordpress/element';
+import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
 import { useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
@@ -34,12 +29,10 @@ import {
 	useEntityBlockEditor,
 } from '@wordpress/core-data';
 
-/**
- * Internal dependencies
- */
-import { Tabs } from '../tabs';
-
 type BlockEditorProps = {
+	context: {
+		[ key: string ]: unknown;
+	};
 	product: Partial< Product >;
 	settings:
 		| ( Partial< EditorSettings & EditorBlockListSettings > & {
@@ -49,11 +42,10 @@ type BlockEditorProps = {
 };
 
 export function BlockEditor( {
+	context,
 	settings: _settings,
 	product,
 }: BlockEditorProps ) {
-	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
-
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
 		return canUser( 'create', 'media', '' ) !== false;
@@ -102,14 +94,13 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
-			<BlockContextProvider value={ { selectedTab } }>
+			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }
 					onInput={ onInput }
 					onChange={ onChange }
 					settings={ settings }
 				>
-					<Tabs onChange={ setSelectedTab } />
 					<div className="editor-styles-wrapper">
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 						{ /* @ts-ignore No types for this exist yet. */ }
