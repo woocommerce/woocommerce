@@ -207,6 +207,12 @@ export class StoreAlerts extends Component {
 
 		const { removeNote, invalidateResolutionForStoreSelector } = this.props;
 
+		const removeNoteAndInvalidate = async () => {
+			await removeNote( alert.id );
+			this.previousAlert();
+			invalidateResolutionForStoreSelector( 'getNotes' );
+		};
+
 		return (
 			<Card className={ className } size={ null }>
 				<CardHeader isBorderless>
@@ -218,63 +224,66 @@ export class StoreAlerts extends Component {
 					>
 						{ alert.title }
 					</Text>
-					{ numberOfAlerts > 1 && (
-						<div className="woocommerce-store-alerts__pagination">
-							<Button
-								onClick={ this.previousAlert }
-								disabled={ currentIndex === 0 }
-								label={ __( 'Previous Alert', 'woocommerce' ) }
-							>
-								<Icon
-									icon={ chevronLeft }
-									className="arrow-left-icon"
-								/>
-							</Button>
-							<span
-								className="woocommerce-store-alerts__pagination-label"
-								role="status"
-								aria-live="polite"
-							>
-								{ interpolateComponents( {
-									mixedString: __(
-										'{{current /}} of {{total /}}',
+					<div>
+						{ numberOfAlerts > 1 && (
+							<div className="woocommerce-store-alerts__pagination">
+								<Button
+									onClick={ this.previousAlert }
+									disabled={ currentIndex === 0 }
+									label={ __(
+										'Previous Alert',
 										'woocommerce'
-									),
-									components: {
-										current: (
-											<Fragment>
-												{ currentIndex + 1 }
-											</Fragment>
+									) }
+								>
+									<Icon
+										icon={ chevronLeft }
+										className="arrow-left-icon"
+									/>
+								</Button>
+								<span
+									className="woocommerce-store-alerts__pagination-label"
+									role="status"
+									aria-live="polite"
+								>
+									{ interpolateComponents( {
+										mixedString: __(
+											'{{current /}} of {{total /}}',
+											'woocommerce'
 										),
-										total: (
-											<Fragment>
-												{ numberOfAlerts }
-											</Fragment>
-										),
-									},
-								} ) }
-							</span>
-							<Button
-								onClick={ this.nextAlert }
-								disabled={ numberOfAlerts - 1 === currentIndex }
-								label={ __( 'Next Alert', 'woocommerce' ) }
-							>
-								<Icon
-									icon={ chevronRight }
-									className="arrow-right-icon"
-								/>
-							</Button>
-						</div>
-					) }
-					<Button
-						onClick={ async () => {
-							await removeNote( alert.id );
-							this.previousAlert();
-							invalidateResolutionForStoreSelector( 'getNotes' );
-						} }
-					>
-						<Icon icon={ close } />
-					</Button>
+										components: {
+											current: (
+												<Fragment>
+													{ currentIndex + 1 }
+												</Fragment>
+											),
+											total: (
+												<Fragment>
+													{ numberOfAlerts }
+												</Fragment>
+											),
+										},
+									} ) }
+								</span>
+								<Button
+									onClick={ this.nextAlert }
+									disabled={
+										numberOfAlerts - 1 === currentIndex
+									}
+									label={ __( 'Next Alert', 'woocommerce' ) }
+								>
+									<Icon
+										icon={ chevronRight }
+										className="arrow-right-icon"
+									/>
+								</Button>
+							</div>
+						) }
+						<Button
+							onClick={ removeNoteAndInvalidate }
+							icon={ close }
+							label={ __( 'Close', 'woocommerce' ) }
+						/>
+					</div>
 				</CardHeader>
 				<CardBody>
 					<div
