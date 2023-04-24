@@ -293,7 +293,7 @@ export const advancedFilters = applyFilters(
 						'woocommerce'
 					),
 					title: __(
-						'{{title}}No. of Orders{{/title}} {{rule /}} {{filter /}}',
+						'<title>No. of Orders</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 				},
@@ -339,7 +339,7 @@ export const advancedFilters = applyFilters(
 						'woocommerce'
 					),
 					title: __(
-						'{{title}}Total Spend{{/title}} {{rule /}} {{filter /}}',
+						'<title>Total Spend</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 				},
@@ -388,7 +388,7 @@ export const advancedFilters = applyFilters(
 						'woocommerce'
 					),
 					title: __(
-						'{{title}}AOV{{/title}} {{rule /}} {{filter /}}',
+						'<title>AOV</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 				},
