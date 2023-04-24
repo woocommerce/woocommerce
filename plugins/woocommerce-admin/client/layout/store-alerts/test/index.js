@@ -11,12 +11,14 @@ import { setAdminSetting } from '~/utils/admin-settings';
 
 const alerts = [
 	{
+		id: '1',
 		title: 'Alert title 1',
 		content: 'Alert content 1',
 		status: 'unactioned',
 		actions: [],
 	},
 	{
+		id: '2',
 		title: 'Alert title 2',
 		content: 'Alert content 2',
 		status: 'unactioned',
@@ -129,5 +131,27 @@ describe( 'StoreAlerts', () => {
 		expect( container.querySelector( 'h2' ).textContent ).toBe(
 			'Alert title 1'
 		);
+	} );
+
+	it( 'should dismiss the alert when clicking on the close button and navigate to previous one', async () => {
+		const removeNote = jest.fn();
+		const invalidateResolutionForStoreSelector = jest.fn();
+		const { getByLabelText, getByText } = render(
+			<StoreAlerts
+				alerts={ alerts }
+				removeNote={ removeNote }
+				invalidateResolutionForStoreSelector={
+					invalidateResolutionForStoreSelector
+				}
+			/>
+		);
+		expect( getByLabelText( 'Close' ) ).toBeInTheDocument();
+		fireEvent.click( getByLabelText( 'Next Alert' ) );
+		await fireEvent.click( getByLabelText( 'Close' ) );
+		expect( removeNote ).toBeCalledWith( '2' );
+		expect( invalidateResolutionForStoreSelector ).toBeCalledWith(
+			'getNotes'
+		);
+		expect( getByText( 'Alert title 1' ) ).toBeVisible();
 	} );
 } );
