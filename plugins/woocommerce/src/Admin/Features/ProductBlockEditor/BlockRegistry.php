@@ -20,10 +20,24 @@ class BlockRegistry {
 	 * Array of all available product blocks.
 	 */
 	const PRODUCT_BLOCKS = [
-		'woocommerce/product-name',
-		'woocommerce/product-pricing',
+		'woocommerce/conditional',
+		'woocommerce/product-category-field',
+		'woocommerce/product-checkbox-field',
+		'woocommerce/product-collapsible',
+		'woocommerce/product-images-field',
+		'woocommerce/product-inventory-email-field',
+		'woocommerce/product-sku-field',
+		'woocommerce/product-name-field',
+		'woocommerce/product-pricing-field',
+		'woocommerce/product-radio-field',
+		'woocommerce/product-schedule-sale-fields',
 		'woocommerce/product-section',
+		'woocommerce/product-shipping-dimensions-fields',
+		'woocommerce/product-shipping-fee-fields',
+		'woocommerce/product-summary-field',
 		'woocommerce/product-tab',
+		'woocommerce/product-inventory-quantity-field',
+		'woocommerce/product-toggle-field',
 	];
 
 	/**
