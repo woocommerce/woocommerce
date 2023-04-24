@@ -14,7 +14,7 @@ import { FeedbackIcon } from '../../images/feedback-icon';
 
 export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 	const { showCesModal } = useDispatch( CES_STORE_KEY );
-	const { descendantOf } = useLayoutContext();
+	const { isDescendantOf } = useLayoutContext();
 
 	return (
 		<MenuItem
@@ -43,7 +43,7 @@ export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 						icon: <span>🌟</span>,
 					},
 					{
-						block_editor: descendantOf( 'product-block-editor' ),
+						block_editor: isDescendantOf( 'product-block-editor' ),
 					}
 				);
 				onClose();

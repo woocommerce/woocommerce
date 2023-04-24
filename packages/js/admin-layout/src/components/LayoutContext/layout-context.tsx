@@ -7,7 +7,7 @@ export type LayoutContextType = {
 	layoutString: string;
 	updateLayoutPath: ( item: string ) => LayoutContextType;
 	layoutPath: string[];
-	descendantOf: ( item: string ) => boolean;
+	isDescendantOf: ( item: string ) => boolean;
 };
 
 type LayoutContextProviderProps = {
@@ -32,7 +32,7 @@ export const getLayoutContextValue = (
 		};
 	},
 	layoutString: layoutPath.join( '/' ),
-	descendantOf: ( item ) => layoutPath.includes( item ),
+	isDescendantOf: ( item ) => layoutPath.includes( item ),
 } );
 
 export const LayoutContextProvider: React.FC< LayoutContextProviderProps > = ( {

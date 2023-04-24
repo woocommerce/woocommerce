@@ -24,7 +24,7 @@ jest.mock( '@woocommerce/admin-layout', () => ( {
 		layoutPath: [ 'home' ],
 		layoutString: 'home',
 		updateLayoutPath: () => {},
-		descendantOf: () => false,
+		isDescendantOf: () => false,
 	} ),
 } ) );
 
