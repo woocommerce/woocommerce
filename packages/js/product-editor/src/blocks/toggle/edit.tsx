@@ -16,7 +16,7 @@ export function Edit( {
 	attributes,
 }: BlockEditProps< ToggleBlockAttributes > ) {
 	const blockProps = useBlockProps();
-	const { label, property } = attributes;
+	const { label, property, disabled } = attributes;
 	const [ value, setValue ] = useEntityProp< boolean >(
 		'postType',
 		'product',
@@ -28,6 +28,7 @@ export function Edit( {
 			<ToggleControl
 				label={ label }
 				checked={ value }
+				disabled={ disabled }
 				onChange={ setValue }
 			/>
 		</div>
