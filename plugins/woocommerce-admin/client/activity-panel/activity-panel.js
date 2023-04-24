@@ -73,7 +73,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
-	const { updateLayoutPath } = useLayoutContext();
+	const { extendLayout } = useLayoutContext();
 
 	useEffect( () => {
 		return addHistoryListener( () => {
@@ -83,8 +83,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	}, [] );
 
 	const updatedLayoutContext = useMemo(
-		() => updateLayoutPath( 'activity-panel' ),
-		[ updateLayoutPath ]
+		() => extendLayout( 'activity-panel' ),
+		[ extendLayout ]
 	);
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {

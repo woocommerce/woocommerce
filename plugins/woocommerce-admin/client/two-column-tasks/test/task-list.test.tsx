@@ -41,9 +41,9 @@ jest.mock( '@woocommerce/data', () => ( {
 jest.mock( '@woocommerce/admin-layout', () => ( {
 	...jest.requireActual( '@woocommerce/admin-layout' ),
 	useLayoutContext: jest.fn().mockReturnValue( {
-		layoutPath: [ 'home' ],
+		layoutParts: [ 'home' ],
 		layoutString: 'home',
-		updateLayoutPath: () => {},
+		extendLayout: () => {},
 		isDescendantOf: () => false,
 	} ),
 } ) );

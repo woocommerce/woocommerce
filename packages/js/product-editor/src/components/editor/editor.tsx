@@ -52,11 +52,11 @@ type EditorProps = {
 
 export function Editor( { product, settings }: EditorProps ) {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
-	const { updateLayoutPath } = useLayoutContext();
+	const { extendLayout } = useLayoutContext();
 
 	const updatedLayoutContext = useMemo(
-		() => updateLayoutPath( 'product-block-editor' ),
-		[ updateLayoutPath ]
+		() => extendLayout( 'product-block-editor' ),
+		[ extendLayout ]
 	);
 
 	return (

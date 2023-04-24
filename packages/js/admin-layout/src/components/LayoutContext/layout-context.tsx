@@ -5,8 +5,8 @@ import { createElement, createContext, useContext } from '@wordpress/element';
 
 export type LayoutContextType = {
 	layoutString: string;
-	updateLayoutPath: ( item: string ) => LayoutContextType;
-	layoutPath: string[];
+	extendLayout: ( item: string ) => LayoutContextType;
+	layoutParts: string[];
 	isDescendantOf: ( item: string ) => boolean;
 };
 
@@ -20,19 +20,19 @@ export const LayoutContext = createContext< LayoutContextType | undefined >(
 );
 
 export const getLayoutContextValue = (
-	layoutPath: LayoutContextType[ 'layoutPath' ] = []
+	layoutParts: LayoutContextType[ 'layoutParts' ] = []
 ): LayoutContextType => ( {
-	layoutPath: [ ...layoutPath ],
-	updateLayoutPath: ( item ) => {
-		const newLayoutPath = [ ...layoutPath, item ];
+	layoutParts: [ ...layoutParts ],
+	extendLayout: ( item ) => {
+		const newLayoutPath = [ ...layoutParts, item ];
 
 		return {
 			...getLayoutContextValue( newLayoutPath ),
-			layoutPath: newLayoutPath,
+			layoutParts: newLayoutPath,
 		};
 	},
-	layoutString: layoutPath.join( '/' ),
-	isDescendantOf: ( item ) => layoutPath.includes( item ),
+	layoutString: layoutParts.join( '/' ),
+	isDescendantOf: ( item ) => layoutParts.includes( item ),
 } );
 
 export const LayoutContextProvider: React.FC< LayoutContextProviderProps > = ( {
