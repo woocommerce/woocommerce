@@ -13,6 +13,7 @@ import { IntroOptIn } from './pages/IntroOptIn';
 import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
+import './style.scss';
 
 /** Uncomment below to display xstate inspector during development */
 // import { inspect } from '@xstate/inspect';
@@ -311,27 +312,16 @@ const CoreProfilerController = ( {} ) => {
 
 	return (
 		<>
-			<div>Core Profiler Placeholder</div>
-			<div>{ `${ navigationProgress }% complete` }</div>
 			<div
 				className={ `woocommerce-profile-wizard__container woocommerce-profile-wizard__step-${ state.value }` }
 			>
-				<div>{ `Current State: ${ state.value }` }</div>
-				<div>
-					{ `Context values: ${ JSON.stringify(
-						state.context,
-						null,
-						2
-					) }` }
-				</div>
-				<div>
-					{
-						<CurrentComponent
-							sendEvent={ send }
-							context={ state.context }
-						/>
-					}
-				</div>
+				{
+					<CurrentComponent
+						navigationProgress={ navigationProgress }
+						sendEvent={ send }
+						context={ state.context }
+					/>
+				}
 			</div>
 		</>
 	);

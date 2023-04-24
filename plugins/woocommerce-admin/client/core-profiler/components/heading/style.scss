@@ -1,0 +1,23 @@
+.woocommerce-profiler-heading {
+	margin-bottom: 48px;
+	width: 615px;
+
+	.woocommerce-profiler-heading__title {
+		font-style: normal;
+		font-weight: 500;
+		font-size: 32px;
+		line-height: 40px;
+		text-align: center;
+		color: #000;
+		margin-bottom: 12px;
+	}
+
+	.woocommerce-profiler-heading__subtitle {
+		font-style: normal;
+		font-weight: 400;
+		font-size: 16px;
+		line-height: 24px;
+		text-align: center;
+		color: $gray-700;
+	}
+}
