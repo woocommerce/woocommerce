@@ -13,6 +13,9 @@ import { useDispatch } from '@wordpress/data';
 import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
+	__experimentalSelectTreeControl as SelectTree,
+	__experimentalSelectTreeMenuSlot as SelectTreeMenuSlot,
+	TreeItemType as Item,
 } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import {
@@ -25,6 +28,7 @@ import {
  */
 import { ProductCategoryNode, useCategorySearch } from './use-category-search';
 import { CategoryFieldItem } from './category-field-item';
+import { mapFromCategoryType } from './category-field';
 
 type CreateCategoryModalProps = {
 	initialCategoryName?: string;
@@ -52,6 +56,7 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 		categoryTreeKeyValues,
 		searchCategories,
 		getFilteredItems,
+		getFilteredItemsForSelectTree,
 	} = useCategorySearch();
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isCreating, setIsCreating ] = useState( false );
@@ -62,6 +67,9 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 	);
 	const [ categoryParent, setCategoryParent ] =
 		useState< ProductCategoryNode | null >( null );
+
+	const [ categoryParentTypedValue, setCategoryParentTypedValue ] =
+		useState< string >( '' );
 
 	const onSave = async () => {
 		recordEvent( 'product_category_add', {
@@ -100,6 +108,38 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					name="Tops"
 					value={ categoryName }
 					onChange={ setCategoryName }
+				/>
+				<SelectTree
+					label={ __( 'Parent category (optional)', 'woocommerce' ) }
+					id="parent-category-field"
+					items={ getFilteredItemsForSelectTree(
+						mapFromCategoryType( categoriesSelectList ),
+						categoryParentTypedValue,
+						[]
+					) }
+					shouldNotRecursivelySelect
+					selected={
+						categoryParent
+							? {
+									label: String( categoryParent?.name ),
+									value: String( categoryParent?.id ),
+							  }
+							: undefined
+					}
+					onSelect={ ( item: Item ) =>
+						item &&
+						setCategoryParent( {
+							id: +item.value,
+							name: item.label,
+							parent: item.parent ? +item.parent : 0,
+						} )
+					}
+					onRemove={ () => setCategoryParent( null ) }
+					onInputChange={ ( value ) => {
+						debouncedSearch( value );
+						setCategoryParentTypedValue( value || '' );
+					} }
+					createValue={ categoryParentTypedValue }
 				/>
 				<SelectControl< ProductCategoryNode >
 					items={ categoriesSelectList }
@@ -205,6 +245,7 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					</Button>
 				</div>
 			</div>
+			<SelectTreeMenuSlot />
 		</Modal>
 	);
 };

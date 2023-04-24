@@ -172,6 +172,9 @@ export const SelectTree = function SelectTree( {
 							if ( props.onSelect && item ) {
 								props.onSelect( item );
 							}
+							if ( ! value && props.onRemove ) {
+								props.onRemove( props.selected as Item );
+							}
 						} }
 					/>
 				) }
