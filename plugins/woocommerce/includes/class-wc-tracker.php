@@ -540,13 +540,18 @@ class WC_Tracker {
                   $key = substr( $key, 0, $pos );
             }
 
-			$currency = $orders_details->currency;
-			$count    = $gateway . '_' . $currency . '_count';
-			$total    = $gateway . '_' . $currency . '_total';
+		$key       = 'gateway_' . $key . '_' . $orders_details->currency;
+		$count_key = $key . '_count';
+		$total_key = $key . '_total';
 
-			$orders_by_gateway_currency[ $count ] = $orders_details->counts;
-			$orders_by_gateway_currency[ $total ] = $orders_details->totals;
-		}
+		if ( array_key_exists( $count_key, $orders_by_gateway_currency ) || array_key_exists( $total_key, $orders_by_gateway_currency ) ) {
+			$orders_by_gateway_currency[ $count_key ] = $orders_by_gateway_currency[ $count_key ] + $orders_details->counts;
+			$orders_by_gateway_currency[ $total_key ] = $orders_by_gateway_currency[ $total_key ] + $orders_details->totals;
+            } else {
+                $orders_by_gateway_currency[ $count_key ] = $orders_details->counts;
+                $orders_by_gateway_currency[ $total_key ] = $orders_details->totals;
+            }
+        }
 
 		return $orders_by_gateway_currency;
 	}
