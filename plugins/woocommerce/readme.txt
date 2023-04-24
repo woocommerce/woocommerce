@@ -245,6 +245,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Support min_php_version and min_wp_version for the free extensions feed [#37694](https://github.com/woocommerce/woocommerce/pull/37694)
 * Update - Update payment gateway recommendation priority [#37442](https://github.com/woocommerce/woocommerce/pull/37442)
 * Update - Update textdomain in woocommerce-blocks *.json files to `woocommerce` [#37234](https://github.com/woocommerce/woocommerce/pull/37234)
+* Dev - Fix recent failures in "Smoke test release" workflow. [#37783](https://github.com/woocommerce/woocommerce/pull/37783)
 * Dev - Add composer scripts for linting with phpcs-changed [#37465](https://github.com/woocommerce/woocommerce/pull/37465)
 * Dev - Add tracks event to gather onboarding heuristics [#37767](https://github.com/woocommerce/woocommerce/pull/37767)
 * Dev - Bump required PHP version to 7.3 and PHPUnit version to 9 [#37366](https://github.com/woocommerce/woocommerce/pull/37366)
