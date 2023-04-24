@@ -22,7 +22,7 @@ type NavigationProps = {
 	progressBarColor?: string;
 };
 
-const Navigation = ( {
+export const Navigation = ( {
 	percentage = 0,
 	onSkip,
 	skipText = __( 'Skip this step', 'woocommerce' ),
@@ -72,5 +72,3 @@ const Navigation = ( {
 		</div>
 	);
 };
-
-export default Navigation;
