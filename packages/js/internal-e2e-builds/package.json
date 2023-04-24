@@ -5,7 +5,7 @@
 	"private": true,
 	"main": "build.js",
 	"engines": {
-		"node": "^16.13.1",
+		"node": "^16.14.1",
 		"pnpm": "^8.3.1"
 	},
 	"bin": {

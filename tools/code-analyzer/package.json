@@ -32,7 +32,7 @@
 		"analyzer": "node -r ts-node/register ./src/commands/analyzer/index.ts"
 	},
 	"engines": {
-		"node": "^16.13.1",
+		"node": "^16.14.1",
 		"pnpm": "^8.3.1"
 	},
 	"types": "dist/index.d.ts"
