@@ -4,7 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import { Button, CheckboxControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-
+import interpolateComponents from '@automattic/interpolate-components';
+import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
@@ -38,10 +39,15 @@ export const IntroOptIn = ( {
 				<WelcomeImage />
 				<Heading
 					title={ __( 'Welcome to Woo!', 'woocommerce' ) }
-					subTitle={ __(
-						'We’ll ask you a few questions to tailor your experience with Woo and help you set up your online store in a breeze.',
-						'woocommerce'
-					) }
+					subTitle={ interpolateComponents( {
+						mixedString: __(
+							'We’ll ask you a few questions to tailor your experience with Woo and{{br/}} help you set up your online store in a breeze.',
+							'woocommerce'
+						),
+						components: {
+							br: <br />,
+						},
+					} ) }
 				/>
 				<Button
 					className="woocommerce-profiler-setup-store__button"
@@ -59,10 +65,21 @@ export const IntroOptIn = ( {
 				<div className="woocommerce-profiler-intro-opt-in__footer">
 					<CheckboxControl
 						className="woocommerce-profiler-intro-opt-in__checkbox"
-						label={ __(
-							'I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. Learn more about usage tracking.',
-							'woocommerce'
-						) }
+						label={ interpolateComponents( {
+							mixedString: __(
+								'I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+								'woocommerce'
+							),
+							components: {
+								link: (
+									<Link
+										href="https://woocommerce.com/usage-tracking?utm_medium=product"
+										target="_blank"
+										type="external"
+									/>
+								),
+							},
+						} ) }
 						checked={ iOptInDataSharing }
 						onChange={ setIsOptInDataSharing }
 					/>
