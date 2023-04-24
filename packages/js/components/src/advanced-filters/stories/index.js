@@ -29,7 +29,7 @@ const query = {
 };
 
 const advancedFilters = {
-	title: 'Orders Match {{select /}} Filters',
+	title: 'Orders Match <select/> Filters',
 	filters: {
 		status: {
 			labels: {
