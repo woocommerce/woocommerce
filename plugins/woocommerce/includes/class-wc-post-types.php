@@ -405,9 +405,9 @@ class WC_Post_Types {
 														array(
 															'woocommerce/product-pricing-field',
 															array(
-																'name' => 'regular_price',
+																'name'  => 'regular_price',
 																'label' => __( 'List price', 'woocommerce' ),
-																'showPricingSection' => true,
+																'help'  => __( 'Manage more settings in <PricingTab>Pricing.</PricingTab>', 'woocommerce' ),
 															),
 														),
 													),
@@ -421,7 +421,7 @@ class WC_Post_Types {
 														array(
 															'woocommerce/product-pricing-field',
 															array(
-																'name' => 'sale_price',
+																'name'  => 'sale_price',
 																'label' => __( 'Sale price', 'woocommerce' ),
 															),
 														),
@@ -506,9 +506,8 @@ class WC_Post_Types {
 														array(
 															'woocommerce/product-pricing-field',
 															array(
-																'name' => 'regular_price',
+																'name'  => 'regular_price',
 																'label' => __( 'List price', 'woocommerce' ),
-																'showPricingSection' => true,
 															),
 														),
 													),
@@ -522,7 +521,7 @@ class WC_Post_Types {
 														array(
 															'woocommerce/product-pricing-field',
 															array(
-																'name' => 'sale_price',
+																'name'  => 'sale_price',
 																'label' => __( 'Sale price', 'woocommerce' ),
 															),
 														),

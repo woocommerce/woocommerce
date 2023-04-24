@@ -1,19 +1,20 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { Link } from '@woocommerce/components';
+import { CurrencyContext } from '@woocommerce/currency';
+import { getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
+import { useBlockProps } from '@wordpress/block-editor';
+import { BlockEditProps } from '@wordpress/blocks';
+import { useInstanceId } from '@wordpress/compose';
+import { useEntityProp } from '@wordpress/core-data';
 import {
 	createElement,
 	useContext,
 	createInterpolateElement,
 } from '@wordpress/element';
-import { Link } from '@woocommerce/components';
-import { useBlockProps } from '@wordpress/block-editor';
-import { useEntityProp } from '@wordpress/core-data';
-import { BlockAttributes } from '@wordpress/blocks';
-import { CurrencyContext } from '@woocommerce/currency';
-import { getSetting } from '@woocommerce/settings';
-import { recordEvent } from '@woocommerce/tracks';
+import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -23,13 +24,16 @@ import {
 /**
  * Internal dependencies
  */
-import { formatCurrencyDisplayValue } from '../../utils';
 import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
+import { formatCurrencyDisplayValue } from '../../utils';
+import { PricingBlockAttributes } from './types';
 
-export function Edit( { attributes }: { attributes: BlockAttributes } ) {
+export function Edit( {
+	attributes,
+}: BlockEditProps< PricingBlockAttributes > ) {
 	const blockProps = useBlockProps();
-	const { name, label, showPricingSection = false } = attributes;
-	const [ regularPrice, setRegularPrice ] = useEntityProp< string >(
+	const { name, label, help } = attributes;
+	const [ price, setPrice ] = useEntityProp< string >(
 		'postType',
 		'product',
 		name
@@ -38,51 +42,44 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 	const { getCurrencyConfig, formatAmount } = context;
 	const currencyConfig = getCurrencyConfig();
 	const inputProps = useCurrencyInputProps( {
-		value: regularPrice,
-		setValue: setRegularPrice,
+		value: price,
+		setValue: setPrice,
 	} );
 
-	const taxSettingsElement = showPricingSection
-		? createInterpolateElement(
-				__(
-					'Manage more settings in <link>Pricing.</link>',
-					'woocommerce'
+	const interpolatedHelp = help
+		? createInterpolateElement( help, {
+				PricingTab: (
+					<Link
+						href={ getNewPath( { tab: 'pricing' } ) }
+						onClick={ () => {
+							recordEvent(
+								'product_pricing_list_price_help_tax_settings_click'
+							);
+						} }
+					/>
 				),
-				{
-					link: (
-						<Link
-							href={ `${ getSetting(
-								'adminUrl'
-							) }admin.php?page=wc-settings&tab=tax` }
-							target="_blank"
-							type="external"
-							onClick={ () => {
-								recordEvent(
-									'product_pricing_list_price_help_tax_settings_click'
-								);
-							} }
-						></Link>
-					),
-				}
-		  )
+		  } )
 		: null;
+
+	const priceId = useInstanceId(
+		BaseControl,
+		'wp-block-woocommerce-product-pricing-field'
+	) as string;
 
 	return (
 		<div { ...blockProps }>
-			<BaseControl
-				id={ 'product_pricing_' + name }
-				help={ taxSettingsElement ? taxSettingsElement : '' }
-			>
+			<BaseControl id={ priceId } help={ interpolatedHelp }>
 				<InputControl
+					{ ...inputProps }
+					id={ priceId }
 					name={ name }
-					onChange={ setRegularPrice }
+					onChange={ setPrice }
 					label={ label || __( 'Price', 'woocommerce' ) }
 					value={ formatCurrencyDisplayValue(
-						String( regularPrice ),
+						String( price ),
 						currencyConfig,
 						formatAmount
 					) }
-					{ ...inputProps }
 				/>
 			</BaseControl>
 		</div>
