@@ -625,6 +625,7 @@ class WC_Post_Types {
 											array(
 												'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
 												'property' => 'manage_stock',
+												'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
 											),
 										),
 										array(
