@@ -1,0 +1,46 @@
+.woocommerce-profile-wizard__body {
+	background-color: #fff;
+}
+
+.woocommerce-profile-wizard__body #woocommerce-layout__primary {
+	margin: 0;
+	width: 100%;
+}
+
+.woocommerce-profiler-page__content {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
+
+.woocommerce-profiler-intro-opt-in__content {
+	padding-top: 81px;
+
+	.woocommerce-profiler-welcome-image {
+		margin-bottom: 48px;
+	}
+
+	.woocommerce-profiler-setup-store__button {
+		padding: 10px 16px;
+		width: 200px;
+		height: 54px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.woocommerce-profiler-intro-opt-in__footer {
+		position: absolute;
+		bottom: 40px;
+		display: flex;
+		justify-content: center;
+
+		.components-checkbox-control__label {
+			display: inline-block;
+			color: $gray-700;
+			font-size: 13px;
+			line-height: 16px;
+			width: 579px;
+		}
+	}
+}

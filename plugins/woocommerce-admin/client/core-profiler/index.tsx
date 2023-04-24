@@ -13,6 +13,7 @@ import { IntroOptIn } from './pages/IntroOptIn';
 import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
+import './style.scss';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
 // https://stately.ai/blog/introducing-typescript-typegen-for-xstate
@@ -304,27 +305,16 @@ const CoreProfilerController = ( {} ) => {
 
 	return (
 		<>
-			<div>Core Profiler Placeholder</div>
-			<div>{ `${ navigationProgress }% complete` }</div>
 			<div
 				className={ `woocommerce-profile-wizard__container woocommerce-profile-wizard__step-${ state.value }` }
 			>
-				<div>{ `Current State: ${ state.value }` }</div>
-				<div>
-					{ `Context values: ${ JSON.stringify(
-						state.context,
-						null,
-						2
-					) }` }
-				</div>
-				<div>
-					{
-						<CurrentComponent
-							sendEvent={ send }
-							context={ state.context }
-						/>
-					}
-				</div>
+				{
+					<CurrentComponent
+						navigationProgress={ navigationProgress }
+						sendEvent={ send }
+						context={ state.context }
+					/>
+				}
 			</div>
 		</>
 	);
