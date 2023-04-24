@@ -6,12 +6,11 @@ import {
 	StrictMode,
 	Fragment,
 	useState,
-	useMemo,
 } from '@wordpress/element';
 import { PluginArea } from '@wordpress/plugins';
 import {
 	LayoutContextProvider,
-	useLayoutContext,
+	useExtendLayout,
 } from '@woocommerce/admin-layout';
 import {
 	EditorSettings,
@@ -52,12 +51,8 @@ type EditorProps = {
 
 export function Editor( { product, settings }: EditorProps ) {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
-	const { extendLayout } = useLayoutContext();
 
-	const updatedLayoutContext = useMemo(
-		() => extendLayout( 'product-block-editor' ),
-		[ extendLayout ]
-	);
+	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
 
 	return (
 		<LayoutContextProvider value={ updatedLayoutContext }>

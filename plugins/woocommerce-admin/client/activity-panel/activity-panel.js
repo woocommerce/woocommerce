@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { lazy, useState, useEffect, useMemo } from '@wordpress/element';
+import { lazy, useState, useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
@@ -20,7 +20,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useSlot } from '@woocommerce/experimental';
 import {
 	LayoutContextProvider,
-	useLayoutContext,
+	useExtendLayout,
 } from '@woocommerce/admin-layout';
 
 /**
@@ -73,7 +73,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
-	const { extendLayout } = useLayoutContext();
 
 	useEffect( () => {
 		return addHistoryListener( () => {
@@ -82,10 +81,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		} );
 	}, [] );
 
-	const updatedLayoutContext = useMemo(
-		() => extendLayout( 'activity-panel' ),
-		[ extendLayout ]
-	);
+	const updatedLayoutContext = useExtendLayout( 'activity-panel' );
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
 		let trackData = {};

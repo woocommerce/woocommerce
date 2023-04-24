@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { createElement, createContext, useContext } from '@wordpress/element';
+import {
+	createElement,
+	createContext,
+	useContext,
+	useMemo,
+} from '@wordpress/element';
 
 export type LayoutContextType = {
 	layoutString: string;
@@ -54,4 +59,10 @@ export const useLayoutContext = () => {
 	}
 
 	return layoutContext;
+};
+
+export const useExtendLayout = ( item: string ) => {
+	const { extendLayout } = useLayoutContext();
+
+	return useMemo( () => extendLayout( item ), [ extendLayout, item ] );
 };
