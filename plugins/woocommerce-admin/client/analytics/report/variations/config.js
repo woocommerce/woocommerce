@@ -146,7 +146,7 @@ export const advancedFilters = applyFilters(
 	VARIATIONS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
-			'Variations match {{select /}} filters',
+			'Variations match <select/> filters',
 			'A sentence describing filters for Variations. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
 			'woocommerce'
 		),

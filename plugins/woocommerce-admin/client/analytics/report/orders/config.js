@@ -97,7 +97,7 @@ export const advancedFilters = applyFilters(
 	ORDERS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
-			'Orders match {{select /}} filters',
+			'Orders match <select/> filters',
 			'A sentence describing filters for Orders. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
 			'woocommerce'
 		),

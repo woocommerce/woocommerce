@@ -77,7 +77,7 @@ export const advancedFilters = applyFilters(
 	DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
-			'Downloads match {{select /}} filters',
+			'Downloads match <select/> filters',
 			'A sentence describing filters for Downloads. See screen shot for context: https://cloudup.com/ccxhyH2mEDg',
 			'woocommerce'
 		),
