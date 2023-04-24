@@ -35,12 +35,34 @@
 		display: flex;
 		justify-content: center;
 
+		.woocommerce-profiler-intro-opt-in__checkbox input {
+			box-shadow: 0 0 0 2px #fff, 0 0 0 4px $gray-700;
+			outline: 2px solid transparent;
+			width: 16px;
+			height: 16px;
+		}
+
+		.components-checkbox-control__input-container {
+			width: 16px;
+			height: 16px;
+		}
+
+		svg.components-checkbox-control__checked {
+			width: 20px;
+			height: 20px;
+		}
+
 		.components-checkbox-control__label {
 			display: inline-block;
 			color: $gray-700;
 			font-size: 13px;
 			line-height: 16px;
 			width: 579px;
+			margin-left: 10px;
+		}
+
+		a {
+			color: $gray-700;
 		}
 	}
 }
