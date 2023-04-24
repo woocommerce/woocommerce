@@ -34,7 +34,7 @@ const CURRENCY = {
 };
 
 const advancedFiltersConfig = {
-	title: 'Orders Match {{select /}} Filters',
+	title: 'Orders Match <select/> Filters',
 	filters: {
 		status: {
 			labels: {
