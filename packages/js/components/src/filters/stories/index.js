@@ -75,7 +75,7 @@ const advancedFilters = {
 				add: 'Order Status',
 				remove: 'Remove order status filter',
 				rule: 'Select an order status filter match',
-				title: 'Order Status {{rule /}} {{filter /}}',
+				title: 'Order Status <rule/> <filter/>',
 				filter: 'Select an order status',
 			},
 			rules: [
@@ -126,7 +126,7 @@ const advancedFilters = {
 				add: 'Customer type',
 				remove: 'Remove customer filter',
 				rule: 'Select a customer filter match',
-				title: 'Customer is {{filter /}}',
+				title: 'Customer is <filter/>',
 				filter: 'Select a customer type',
 			},
 			input: {
