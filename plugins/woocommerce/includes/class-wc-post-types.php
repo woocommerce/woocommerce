@@ -442,7 +442,7 @@ class WC_Post_Types {
 									),
 									array(
 										array(
-											'woocommerce/product-description',
+											'woocommerce/product-description-field',
 										),
 									),
 								),

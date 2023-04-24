@@ -3,9 +3,13 @@
  */
 import { BlockInstance } from '@wordpress/blocks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { createElement, useEffect, useState } from '@wordpress/element';
-import { debounce } from 'lodash';
-import { useResizeObserver } from '@wordpress/compose';
+import {
+	createElement,
+	useCallback,
+	useEffect,
+	useState,
+} from '@wordpress/element';
+import { useDebounce, useResizeObserver } from '@wordpress/compose';
 import {
 	BlockEditorProvider,
 	BlockList,
@@ -60,9 +64,14 @@ export function IframeEditor( {
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
-	const debouncedOnChange = debounce( ( updatedBlocks ) => {
-		onChange( updatedBlocks );
-	}, 200 );
+	const handleChange = useCallback(
+		( updatedBlocks: BlockInstance[] ) => {
+			onChange( updatedBlocks );
+		},
+		[ onChange ]
+	);
+
+	const debouncedOnChange = useDebounce( handleChange, 200 );
 
 	return (
 		<BlockEditorProvider
