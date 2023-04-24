@@ -823,6 +823,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		).not.toBeVisible();
 		await firstVariationContainer
 			.getByLabel( 'Stock quantity' )
+			.last()
 			.fill( stockAmount );
 		await page.selectOption( '#variable_backorders0', 'notify', {
 			force: true,
