@@ -531,27 +531,30 @@ class WC_Tracker {
 
 		$orders_by_gateway_currency = array();
 		foreach ( $orders_by_gateway as $orders_details ) {
-            $key = str_replace( array( "payment method", "gateway" ), "",  strtolower( $orders_details->gateway ) );
+			$key = str_replace( array( 'payment method', 'gateway' ), '', strtolower( $orders_details->gateway ) );
 
-            // If a payment method has a unique id( like last 4 digits of a credit card), we don't want it to be a unique payment method
-            // If the count is very less( less than 6 ), it is highly likely that it is a payment method with a unique id 
-            // In addition, if it has a digit, then truncate the payment method name( the key ) to just before the first digit
-            if ( $orders_details->counts <= 5 && $pos = strcspn( $key , '0123456789' ) ) {
-                  $key = substr( $key, 0, $pos );
-            }
+			// If a payment method has a unique id( like last 4 digits of a credit card), we don't want it to be a unique payment method.
+			// If the count is very less( less than 6 ), it is highly likely that it is a payment method with a unique id.
+			// In addition, if it has a digit, then truncate the payment method name( the key ) to just before the first digit.
+			if ( $orders_details->counts <= 5 ) {
+				$pos = strcspn( $key, '0123456789' );
+				if ( $pos ) {
+					$key = substr( $key, 0, $pos );
+				}
+			}
 
-		$key       = 'gateway_' . $key . '_' . $orders_details->currency;
-		$count_key = $key . '_count';
-		$total_key = $key . '_total';
+			$key       = 'gateway_' . $key . '_' . $orders_details->currency;
+			$count_key = $key . '_count';
+			$total_key = $key . '_total';
 
-		if ( array_key_exists( $count_key, $orders_by_gateway_currency ) || array_key_exists( $total_key, $orders_by_gateway_currency ) ) {
-			$orders_by_gateway_currency[ $count_key ] = $orders_by_gateway_currency[ $count_key ] + $orders_details->counts;
-			$orders_by_gateway_currency[ $total_key ] = $orders_by_gateway_currency[ $total_key ] + $orders_details->totals;
-            } else {
-                $orders_by_gateway_currency[ $count_key ] = $orders_details->counts;
-                $orders_by_gateway_currency[ $total_key ] = $orders_details->totals;
-            }
-        }
+			if ( array_key_exists( $count_key, $orders_by_gateway_currency ) || array_key_exists( $total_key, $orders_by_gateway_currency ) ) {
+				$orders_by_gateway_currency[ $count_key ] = $orders_by_gateway_currency[ $count_key ] + $orders_details->counts;
+				$orders_by_gateway_currency[ $total_key ] = $orders_by_gateway_currency[ $total_key ] + $orders_details->totals;
+			} else {
+				$orders_by_gateway_currency[ $count_key ] = $orders_details->counts;
+				$orders_by_gateway_currency[ $total_key ] = $orders_details->totals;
+			}
+		}
 
 		return $orders_by_gateway_currency;
 	}
@@ -581,7 +584,21 @@ class WC_Tracker {
 
 		$orders_by_origin = array();
 		foreach ( $orders_origin as $origin ) {
-			$orders_by_origin[ $origin->origin ] = (int) $origin->count;
+			$key = strtolower( $origin->origin );
+
+			// If the origin name has a unique id, discard it, especially if the count is 1.
+			if ( 1 === $origin->count ) {
+				$pos = strcspn( $key, '0123456789' );
+				if ( $pos ) {
+					$key = substr( $key, 0, $pos );
+				}
+			}
+
+			if ( array_key_exists( $key, $orders_by_origin ) ) {
+				$orders_by_origin[ $key ] = $orders_by_origin[ $key ] + (int) $origin->count;
+			} else {
+				$orders_by_origin[ $key ] = (int) $origin->count;
+			}
 		}
 
 		return array( 'created_via' => $orders_by_origin );
