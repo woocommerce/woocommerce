@@ -109,7 +109,7 @@ const advancedFiltersConfig = {
 				add: 'Item Quantity',
 				remove: 'Remove item quantity filter',
 				rule: 'Select an item quantity filter match',
-				title: '{{title}}Item Quantity is{{/title}} {{rule /}} {{filter /}}',
+				title: '<title>Item Quantity is</title> <rule/> <filter/>',
 			},
 			rules: [
 				{
@@ -134,7 +134,7 @@ const advancedFiltersConfig = {
 				add: 'Subtotal',
 				remove: 'Remove subtotal filter',
 				rule: 'Select a subtotal filter match',
-				title: '{{title}}Subtotal is{{/title}} {{rule /}} {{filter /}}',
+				title: '<title>Subtotal is</title> <rule/> <filter/>',
 			},
 			rules: [
 				{
