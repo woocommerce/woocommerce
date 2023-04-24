@@ -59,6 +59,12 @@ export const SelectTree = function SelectTree( {
 		}
 	};
 
+	const focusOnInput = () => {
+		(
+			document.querySelector( `#${ props.id }-input` ) as HTMLInputElement
+		 )?.focus();
+	};
+
 	const inputProps: any = {
 		className: 'woocommerce-experimental-select-control__input',
 		id: `${ props.id }-input`,
@@ -186,6 +192,7 @@ export const SelectTree = function SelectTree( {
 						onInputChange( ( item as Item ).label );
 						setIsOpen( false );
 						setIsFocused( false );
+						focusOnInput();
 					}
 					if ( props.onSelect ) {
 						props.onSelect( item );
@@ -198,13 +205,7 @@ export const SelectTree = function SelectTree( {
 				items={ linkedTree }
 				shouldShowCreateButton={ shouldShowCreateButton }
 				onClose={ () => setIsOpen( false ) }
-				onFirstTreeItemBack={ () => {
-					(
-						document.querySelector(
-							`#${ props.id }-input`
-						) as HTMLInputElement
-					 )?.focus();
-				} }
+				onFirstTreeItemBack={ focusOnInput }
 			/>
 		</div>
 	);
