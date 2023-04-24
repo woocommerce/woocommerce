@@ -531,7 +531,8 @@ class WC_Tracker {
 
 		$orders_by_gateway_currency = array();
 		foreach ( $orders_by_gateway as $orders_details ) {
-			$gateway  = 'gateway_' . $orders_details->gateway;
+            $key = str_replace( array( "payment method", "gateway" ), "",  strtolower( $orders_details->gateway ) );
+
 			$currency = $orders_details->currency;
 			$count    = $gateway . '_' . $currency . '_count';
 			$total    = $gateway . '_' . $currency . '_total';
