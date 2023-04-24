@@ -38,15 +38,19 @@ jest.mock( '@woocommerce/data', () => ( {
 		updateUserPreferences: jest.fn(),
 	} ),
 } ) );
-jest.mock( '@woocommerce/admin-layout', () => ( {
-	...jest.requireActual( '@woocommerce/admin-layout' ),
-	useLayoutContext: jest.fn().mockReturnValue( {
-		layoutParts: [ 'home' ],
+jest.mock( '@woocommerce/admin-layout', () => {
+	const mockContext = {
+		layoutPath: [ 'home' ],
 		layoutString: 'home',
 		extendLayout: () => {},
 		isDescendantOf: () => false,
-	} ),
-} ) );
+	};
+	return {
+		...jest.requireActual( '@woocommerce/admin-layout' ),
+		useLayoutContext: jest.fn().mockReturnValue( mockContext ),
+		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
+	};
+} );
 
 const tasks: { [ key: string ]: TaskType[] } = {
 	setup: [

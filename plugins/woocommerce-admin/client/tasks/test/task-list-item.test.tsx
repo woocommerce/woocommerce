@@ -21,15 +21,19 @@ jest.mock( '@wordpress/data', () => {
 		useDispatch: jest.fn(),
 	};
 } );
-jest.mock( '@woocommerce/admin-layout', () => ( {
-	...jest.requireActual( '@woocommerce/admin-layout' ),
-	useLayoutContext: jest.fn().mockReturnValue( {
+jest.mock( '@woocommerce/admin-layout', () => {
+	const mockContext = {
 		layoutPath: [ 'home' ],
 		layoutString: 'home',
 		extendLayout: () => {},
 		isDescendantOf: () => false,
-	} ),
-} ) );
+	};
+	return {
+		...jest.requireActual( '@woocommerce/admin-layout' ),
+		useLayoutContext: jest.fn().mockReturnValue( mockContext ),
+		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
+	};
+} );
 
 const mockDispatch = {
 	createNotice: jest.fn(),

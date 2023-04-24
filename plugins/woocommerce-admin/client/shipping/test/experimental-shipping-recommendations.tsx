@@ -17,15 +17,19 @@ jest.mock( '../../settings-recommendations/dismissable-list', () => ( {
 	DismissableList: ( ( { children } ) => children ) as React.FC,
 	DismissableListHeading: ( ( { children } ) => children ) as React.FC,
 } ) );
-jest.mock( '@woocommerce/admin-layout', () => ( {
-	...jest.requireActual( '@woocommerce/admin-layout' ),
-	useLayoutContext: jest.fn().mockReturnValue( {
+jest.mock( '@woocommerce/admin-layout', () => {
+	const mockContext = {
 		layoutPath: [ 'home' ],
 		layoutString: 'home',
 		extendLayout: () => {},
 		isDescendantOf: () => false,
-	} ),
-} ) );
+	};
+	return {
+		...jest.requireActual( '@woocommerce/admin-layout' ),
+		useLayoutContext: jest.fn().mockReturnValue( mockContext ),
+		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
+	};
+} );
 
 const defaultSelectReturn = {
 	getActivePlugins: () => [],
