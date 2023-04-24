@@ -112,7 +112,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing an Order Status filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'{{title}}Order Status{{/title}} {{rule /}} {{filter /}}',
+						'<title>Order Status</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select an order status', 'woocommerce' ),
@@ -240,7 +240,7 @@ export const advancedFilters = applyFilters(
 					rule: __( 'Select a customer filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Customer filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'{{title}}Customer is{{/title}} {{filter /}}',
+						'<title>Customer is</title> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select a customer type', 'woocommerce' ),
@@ -266,7 +266,7 @@ export const advancedFilters = applyFilters(
 					remove: __( 'Remove refunds filter', 'woocommerce' ),
 					rule: __( 'Select a refund filter match', 'woocommerce' ),
 					title: __(
-						'{{title}}Refunds{{/title}} {{filter /}}',
+						'<title>Refunds</title> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select a refund type', 'woocommerce' ),
