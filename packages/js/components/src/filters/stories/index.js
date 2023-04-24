@@ -102,7 +102,7 @@ const advancedFilters = {
 				placeholder: 'Search products',
 				remove: 'Remove products filter',
 				rule: 'Select a product filter match',
-				title: 'Product {{rule /}} {{filter /}}',
+				title: 'Product <rule/> <filter/>',
 				filter: 'Select products',
 			},
 			rules: [
