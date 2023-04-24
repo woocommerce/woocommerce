@@ -7,10 +7,10 @@
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain:  woo-gutenberg-products-block
- * Requires at least: 6.1
+ * Requires at least: 6.2
  * Requires PHP: 7.3
- * WC requires at least: 7.4
- * WC tested up to: 7.5
+ * WC requires at least: 7.5
+ * WC tested up to: 7.6
  *
  * @package WooCommerce\Blocks
  * @internal This file is only used when running as a feature plugin.
