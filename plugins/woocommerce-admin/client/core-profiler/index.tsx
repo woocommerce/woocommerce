@@ -104,7 +104,6 @@ const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
 	initial: 'initializing',
 	context: {
-
 		// these are safe default values if for some reason the steps fail to complete correctly
 		// actual defaults displayed to the user should be handled in the steps themselves
 		optInDataSharing: false,
