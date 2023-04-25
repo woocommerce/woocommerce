@@ -80,7 +80,7 @@ describe( 'IntroOptIn', () => {
 		);
 		screen
 			.getByRole( 'button', {
-				name: /Skip this step/i,
+				name: /Skip guided setup/i,
 			} )
 			.click();
 		expect( props.sendEvent ).toHaveBeenCalledWith( {
