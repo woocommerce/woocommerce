@@ -23,6 +23,7 @@ export const getLatestReleaseVersion = async ( options: {
 					) {
 						nodes {
 							tagName
+							isLatest
 						}
 					}
 				}
