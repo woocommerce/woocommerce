@@ -6,6 +6,7 @@ import { Button, CheckboxControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
+
 /**
  * Internal dependencies
  */

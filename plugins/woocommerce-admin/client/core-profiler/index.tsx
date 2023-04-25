@@ -197,7 +197,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 						target: 'introOptIn', // leave it as initialised default on error
 					},
 				},
-			],
+			},
 			meta: {
 				progress: 0,
 			},
@@ -365,6 +365,30 @@ const CoreProfilerController = ( {} ) => {
 	}, [] );
 
 	const [ state, send ] = useMachine( augmentedStateMachine );
+
+	const { optInDataSharing, isResolving } = useSelect( ( select ) => {
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
+
+		return {
+			optInDataSharing:
+				getOption( 'woocommerce_allow_tracking' ) === 'yes',
+			isResolving: ! hasFinishedResolution( 'getOption', [
+				'woocommerce_allow_tracking',
+			] ),
+		};
+	}, [] );
+
+	useEffect( () => {
+		if ( ! isResolving ) {
+			send( {
+				type: 'INITIALIZATION_COMPLETE',
+				payload: {
+					optInDataSharing,
+				},
+			} );
+		}
+	}, [ send, optInDataSharing, isResolving ] );
 
 	const currentNodeMeta = state.meta[ `coreProfiler.${ state.value }` ]
 		? state.meta[ `coreProfiler.${ state.value }` ]
