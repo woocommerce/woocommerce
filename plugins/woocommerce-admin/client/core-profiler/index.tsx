@@ -163,9 +163,16 @@ const coreProfilerStateMachineDefinition = createMachine( {
 					],
 				},
 			},
+			entry: [
+				() => {
+					recordEvent( 'storeprofiler_step_view', {
+						step: 'store_details',
+						wc_version: getSetting( 'wcVersion' ),
+					} );
+				},
+			],
 			exit: [
 				( _context, event: IntroOptInEvent ) => {
-					console.log( event );
 					switch ( event.type ) {
 						case 'INTRO_COMPLETED':
 							recordEvent( 'storeprofiler_step_complete', {
@@ -331,7 +338,8 @@ const CoreProfilerController = ( {} ) => {
 
 		return {
 			optInDataSharing:
-				getOption( 'woocommerce_allow_tracking' ) === 'yes',
+				// Set default to true if the option is not set
+				getOption( 'woocommerce_allow_tracking' ) !== 'no',
 			isResolving: ! hasFinishedResolution( 'getOption', [
 				'woocommerce_allow_tracking',
 			] ),
