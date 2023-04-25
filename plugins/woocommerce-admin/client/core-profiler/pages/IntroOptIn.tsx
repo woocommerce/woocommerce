@@ -12,7 +12,7 @@ import { Link } from '@woocommerce/components';
  */
 import { IntroOptInEvent, CoreProfilerStateMachineContext } from '../index';
 import { Heading } from '../components/heading/heading';
-import Navigation from '../components/navigation/navigation';
+import { Navigation } from '../components/navigation/navigation';
 import { WelcomeImage } from '../assets/images/welcome-img';
 
 export const IntroOptIn = ( {
