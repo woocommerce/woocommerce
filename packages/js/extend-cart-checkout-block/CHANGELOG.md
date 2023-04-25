@@ -2,6 +2,16 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.1.1) - 2023-04-25 
+
+-   Patch - This patch includes the following changes:
+    
+    -   Add `prettier:npm:wp-prettier@2.6.2`
+    -   Add `.wp-env`
+    -   Add `.nvmrc`
+    -   Correct CSS handle of newsletter subscription block
+    -   Correct metadata category of newsletter subscription block [#37723]
+
 ## [1.1.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.1.0) - 2022-11-21 
 
 -   Patch - Include an example of adding an inner block to the WooCommerce Blocks Checkout Block [#35609]
