@@ -372,7 +372,8 @@ const CoreProfilerController = ( {} ) => {
 
 		return {
 			optInDataSharing:
-				getOption( 'woocommerce_allow_tracking' ) === 'yes',
+				// Set default to true if the option is not set
+				getOption( 'woocommerce_allow_tracking' ) !== 'no',
 			isResolving: ! hasFinishedResolution( 'getOption', [
 				'woocommerce_allow_tracking',
 			] ),
