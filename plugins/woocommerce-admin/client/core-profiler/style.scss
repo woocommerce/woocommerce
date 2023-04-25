@@ -1,23 +1,57 @@
 .woocommerce-profile-wizard__body {
 	background-color: #fff;
-}
 
-.woocommerce-profile-wizard__body #woocommerce-layout__primary {
-	margin: 0;
-	width: 100%;
+	#woocommerce-layout__primary {
+		margin: 0;
+		width: 100%;
+	}
+
+	.woocommerce-layout__main {
+		padding-right: 0;
+	}
 }
 
 .woocommerce-profiler-page__content {
 	display: flex;
 	align-items: center;
 	flex-direction: column;
+
+	@include breakpoint( '<782px' ) {
+		padding: 0 20px;
+	}
+}
+
+// Intro opt-in page
+.woocommerce-profiler-intro-opt-in {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
 }
 
 .woocommerce-profiler-intro-opt-in__content {
 	padding-top: 81px;
+	flex: 1;
+
+	@include breakpoint( '<782px' ) {
+		padding-top: 70px;
+	}
+
+	.woocommerce-profiler-heading {
+		max-width: 520px;
+	}
 
 	.woocommerce-profiler-welcome-image {
 		margin-bottom: 48px;
+		width: 266px;
+		height: 172px;
+		background: url('./assets/images/welcome-desktop.svg') no-repeat center center;
+
+		@include breakpoint( '<782px' ) {
+			margin-bottom: 40px;
+			background: url('./assets/images/welcome-mobile.svg') no-repeat center center;
+			width: 222px;
+			height: 144px;
+		}
 	}
 
 	.woocommerce-profiler-setup-store__button {
@@ -27,38 +61,60 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
+
+		@include breakpoint( '<782px' ) {
+			width: 100%;
+			margin-top: auto;
+		}
 	}
 
 	.woocommerce-profiler-intro-opt-in__footer {
-		position: absolute;
-		bottom: 40px;
+		margin: auto auto 40px;
 		display: flex;
 		justify-content: center;
 
-		.woocommerce-profiler-intro-opt-in__checkbox input {
-			box-shadow: 0 0 0 2px #fff, 0 0 0 4px $gray-700;
-			outline: 2px solid transparent;
-			width: 16px;
-			height: 16px;
+		@include breakpoint( '<782px' ) {
+			margin: 16px auto 20px;
 		}
 
-		.components-checkbox-control__input-container {
-			width: 16px;
-			height: 16px;
-		}
+		.woocommerce-profiler-intro-opt-in__checkbox {
+			input {
+				box-shadow: 0 0 0 2px #fff, 0 0 0 4px $gray-700;
+				outline: 2px solid transparent;
+				width: 16px;
+				height: 16px;
+			}
 
-		svg.components-checkbox-control__checked {
-			width: 20px;
-			height: 20px;
-		}
+			.components-checkbox-control__input-container {
+				width: 16px;
+				height: 16px;
+				margin-left: 5px;
+			}
 
-		.components-checkbox-control__label {
-			display: inline-block;
-			color: $gray-700;
-			font-size: 13px;
-			line-height: 16px;
-			width: 514px;
-			margin-left: 10px;
+			svg.components-checkbox-control__checked {
+				width: 20px;
+				height: 20px;
+
+				@include breakpoint( '<782px' ) {
+					width: 16px;
+					height: 16px;
+				}
+			}
+
+			.components-base-control__field {
+				margin-bottom: 0;
+				display: flex;
+				align-items: center;
+			}
+
+			.components-checkbox-control__label {
+				display: inline-block;
+				color: $gray-700;
+				font-size: 13px;
+				line-height: 16px;
+				max-width: 514px;
+				margin-left: 10px;
+			}
 		}
 
 		a {

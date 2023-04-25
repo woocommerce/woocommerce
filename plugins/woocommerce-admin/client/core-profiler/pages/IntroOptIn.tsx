@@ -13,7 +13,6 @@ import { Link } from '@woocommerce/components';
 import { IntroOptInEvent, CoreProfilerStateMachineContext } from '../index';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
-import { WelcomeImage } from '../assets/images/welcome-img';
 
 export const IntroOptIn = ( {
 	sendEvent,
@@ -32,6 +31,7 @@ export const IntroOptIn = ( {
 		<div className="woocommerce-profiler-intro-opt-in">
 			<Navigation
 				percentage={ navigationProgress }
+				skipText={ __( 'Skip guided setup', 'woocommerce' ) }
 				onSkip={ () =>
 					sendEvent( {
 						type: 'INTRO_SKIPPED',
@@ -40,12 +40,12 @@ export const IntroOptIn = ( {
 				}
 			/>
 			<div className="woocommerce-profiler-page__content woocommerce-profiler-intro-opt-in__content">
-				<WelcomeImage />
+				<div className="woocommerce-profiler-welcome-image" />
 				<Heading
 					title={ __( 'Welcome to Woo!', 'woocommerce' ) }
 					subTitle={ interpolateComponents( {
 						mixedString: __(
-							"It's great to have you here with us! We'll be guiding you through the{{br/}}setup process – first, answer a few questions to tailor your experience.",
+							"It's great to have you here with us! We'll be guiding you through the setup process – first, answer a few questions to tailor your experience.",
 							'woocommerce'
 						),
 						components: {
