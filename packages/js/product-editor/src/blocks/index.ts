@@ -2,6 +2,7 @@ export { init as initCategory } from './category';
 export { init as initCheckbox } from './checkbox';
 export { init as initCollapsible } from './collapsible';
 export { init as initConditional } from './conditional';
+export { init as initDescription } from './description';
 export { init as initImages } from './images';
 export { init as initLowStockQty } from './inventory-email';
 export { init as initSku } from './inventory-sku';
