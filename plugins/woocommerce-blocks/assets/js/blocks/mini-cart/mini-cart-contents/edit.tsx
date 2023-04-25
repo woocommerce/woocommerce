@@ -8,9 +8,10 @@ import {
 	InspectorControls,
 } from '@wordpress/block-editor';
 import { EditorProvider } from '@woocommerce/base-context';
+import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import type { TemplateArray } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
-import type { ReactElement } from 'react';
+import type { FocusEvent, ReactElement } from 'react';
 import { __ } from '@wordpress/i18n';
 import {
 	PanelBody,
@@ -31,6 +32,7 @@ const ALLOWED_BLOCKS = [
 	'woocommerce/filled-mini-cart-contents-block',
 	'woocommerce/empty-mini-cart-contents-block',
 ];
+const MIN_WIDTH = 300;
 
 interface Props {
 	clientId: string;
@@ -124,26 +126,44 @@ const Edit = ( {
 
 	return (
 		<>
-			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __( 'Dimensions', 'woo-gutenberg-products-block' ) }
-					initialOpen
-				>
-					<UnitControl
-						onChange={ ( value ) => {
-							setAttributes( { width: value } );
-						} }
-						value={ width }
-						units={ [
-							{
-								value: 'px',
-								label: 'px',
-								default: defaultAttributes.width.default,
-							},
-						] }
-					/>
-				</PanelBody>
-			</InspectorControls>
+			{ isFeaturePluginBuild() && (
+				<InspectorControls key="inspector">
+					<PanelBody
+						title={ __(
+							'Dimensions',
+							'woo-gutenberg-products-block'
+						) }
+						initialOpen
+					>
+						<UnitControl
+							onChange={ ( value ) => {
+								setAttributes( { width: value } );
+							} }
+							onBlur={ ( e: FocusEvent< HTMLInputElement > ) => {
+								if ( e.target.value === '' ) {
+									setAttributes( {
+										width: defaultAttributes.width.default,
+									} );
+								} else if (
+									Number( e.target.value ) < MIN_WIDTH
+								) {
+									setAttributes( {
+										width: MIN_WIDTH + 'px',
+									} );
+								}
+							} }
+							value={ width }
+							units={ [
+								{
+									value: 'px',
+									label: 'px',
+									default: defaultAttributes.width.default,
+								},
+							] }
+						/>
+					</PanelBody>
+				</InspectorControls>
+			) }
 			<div
 				className="wc-block-components-drawer__screen-overlay"
 				aria-hidden="true"
