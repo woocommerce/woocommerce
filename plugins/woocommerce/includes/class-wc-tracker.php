@@ -587,7 +587,7 @@ class WC_Tracker {
 			$key = strtolower( $origin->origin );
 
 			// If the origin name has a unique id, discard it, especially if the count is 1.
-			if ( 1 === $origin->count ) {
+			if ( 1 === (int) $origin->count ) {
 				$pos = strcspn( $key, '0123456789' );
 				if ( $pos ) {
 					$key = substr( $key, 0, $pos );
