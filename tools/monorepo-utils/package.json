@@ -18,6 +18,7 @@
 		"graphql": "^16.6.0",
 		"octokit": "^2.0.14",
 		"ora": "^5.4.1",
+		"promptly": "^3.2.0",
 		"semver": "^7.3.2"
 	},
 	"devDependencies": {
