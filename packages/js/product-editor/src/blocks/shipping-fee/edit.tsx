@@ -73,7 +73,6 @@ function extractDefaultShippingClassFromProduct(
 	categories?: PartialProduct[ 'categories' ],
 	shippingClasses?: ProductShippingClass[]
 ): Partial< ProductShippingClass > | undefined {
-	console.debug( 'categories', categories );
 	const category = categories?.find(
 		( { slug } ) => slug !== 'uncategorized'
 	);
