@@ -18,7 +18,7 @@ import {
 	createGithubBranch,
 	deleteGithubBranch,
 } from '../../../github/repo';
-import { WPIncrement } from '../../utils';
+import { WPIncrement } from '../milestone/utils';
 import { Options } from './types';
 
 const getNextReleaseBranch = async ( options: Options ) => {
