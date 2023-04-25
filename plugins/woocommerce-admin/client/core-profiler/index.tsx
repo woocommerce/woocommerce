@@ -4,7 +4,11 @@
 import { createMachine, assign } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { useEffect } from '@wordpress/element';
-import { ExtensionList } from '@woocommerce/data';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { ExtensionList, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
+import { getSetting } from '@woocommerce/settings';
+import { initializeExPlat } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -24,6 +28,11 @@ import './style.scss';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
 // https://stately.ai/blog/introducing-typescript-typegen-for-xstate
+
+export type InitializationCompleteEvent = {
+	type: 'INITIALIZATION_COMPLETE';
+	payload: { optInDataSharing: boolean };
+};
 
 export type IntroOptInEvent =
 	| { type: 'INTRO_COMPLETED'; payload: { optInDataSharing: boolean } } // can be true or false depending on whether the user opted in or not
@@ -117,13 +126,18 @@ const coreProfilerStateMachineDefinition = createMachine( {
 	states: {
 		initializing: {
 			on: {
-				INITIALIZATION_COMPLETE: 'introOptIn',
-			},
-			invoke: [
-				{
-					src: 'initializeProfiler',
+				INITIALIZATION_COMPLETE: {
+					target: 'introOptIn',
+					actions: [
+						assign( {
+							optInDataSharing: (
+								_context,
+								event: InitializationCompleteEvent
+							) => event.payload.optInDataSharing, // sets context.optInDataSharing to the payload of the event
+						} ),
+					],
 				},
-			],
+			},
 			meta: {
 				progress: 0,
 			},
@@ -139,6 +153,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 								event: IntroOptInEvent
 							) => event.payload.optInDataSharing, // sets context.optInDataSharing to the payload of the event
 						} ),
+						'updateTracking',
 					],
 				},
 				INTRO_SKIPPED: {
@@ -151,9 +166,26 @@ const coreProfilerStateMachineDefinition = createMachine( {
 								event: IntroOptInEvent
 							) => event.payload.optInDataSharing, // sets context.optInDataSharing to the payload of the event, which is always false
 						} ),
+						'updateTracking',
 					],
 				},
 			},
+			exit: [
+				( _context, event: IntroOptInEvent ) => {
+					console.log( event );
+					switch ( event.type ) {
+						case 'INTRO_COMPLETED':
+							recordEvent( 'storeprofiler_step_complete', {
+								step: 'store_details',
+								wc_version: getSetting( 'wcVersion' ),
+							} );
+							break;
+						case 'INTRO_SKIPPED':
+							recordEvent( 'storeprofiler_store_details_skip' );
+							break;
+					}
+				},
+			],
 			meta: {
 				progress: 20,
 				component: IntroOptIn,
@@ -269,25 +301,60 @@ const coreProfilerStateMachineDefinition = createMachine( {
 } );
 
 const CoreProfilerController = ( {} ) => {
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const updateTracking = (
+		context: CoreProfilerStateMachineContext,
+		event: IntroOptInEvent
+	) => {
+		if (
+			event.payload.optInDataSharing &&
+			typeof window.wcTracks.enable === 'function'
+		) {
+			window.wcTracks.enable( () => {
+				initializeExPlat();
+			} );
+		} else if ( ! event.payload.optInDataSharing ) {
+			window.wcTracks.isEnabled = false;
+		}
+
+		const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
+		updateOptions( {
+			woocommerce_allow_tracking: trackingValue,
+		} );
+	};
+
 	const [ state, send ] = useMachine(
 		coreProfilerStateMachineDefinition.withConfig( {
-			services: {
-				initializeProfiler: () => ( sendBack ) => {
-					// TODO: placeholder to simulate initialization time
-					const interval = setInterval( () => {
-						sendBack( {
-							type: 'INITIALIZATION_COMPLETE',
-						} );
-					}, 1000 );
-
-					return () => {
-						clearInterval( interval );
-					};
-				},
+			actions: {
+				updateTracking,
 			},
 		} ),
 		{ devTools: true }
 	);
+
+	const { optInDataSharing, isResolving } = useSelect( ( select ) => {
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
+
+		return {
+			optInDataSharing:
+				getOption( 'woocommerce_allow_tracking' ) === 'yes',
+			isResolving: ! hasFinishedResolution( 'getOption', [
+				'woocommerce_allow_tracking',
+			] ),
+		};
+	}, [] );
+
+	useEffect( () => {
+		if ( ! isResolving ) {
+			send( {
+				type: 'INITIALIZATION_COMPLETE',
+				payload: {
+					optInDataSharing,
+				},
+			} );
+		}
+	}, [ send, optInDataSharing, isResolving ] );
 
 	const currentNodeMeta = state.meta[ `coreProfiler.${ state.value }` ]
 		? state.meta[ `coreProfiler.${ state.value }` ]

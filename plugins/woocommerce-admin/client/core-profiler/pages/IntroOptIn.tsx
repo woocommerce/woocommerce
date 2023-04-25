@@ -6,10 +6,11 @@ import { Button, CheckboxControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
+
 /**
  * Internal dependencies
  */
-import { IntroOptInEvent } from '../index';
+import { IntroOptInEvent, CoreProfilerStateMachineContext } from '../index';
 import { Heading } from '../components/heading/heading';
 import Navigation from '../components/navigation/navigation';
 import { WelcomeImage } from '../assets/images/welcome-img';
@@ -17,12 +18,15 @@ import { WelcomeImage } from '../assets/images/welcome-img';
 export const IntroOptIn = ( {
 	sendEvent,
 	navigationProgress,
+	context,
 }: {
 	sendEvent: ( event: IntroOptInEvent ) => void;
 	navigationProgress: number;
+	context: CoreProfilerStateMachineContext;
 } ) => {
-	const [ iOptInDataSharing, setIsOptInDataSharing ] =
-		useState< boolean >( true );
+	const [ iOptInDataSharing, setIsOptInDataSharing ] = useState< boolean >(
+		context.optInDataSharing
+	);
 
 	return (
 		<div className="woocommerce-profiler-intro-opt-in">
