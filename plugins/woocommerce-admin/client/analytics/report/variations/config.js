@@ -163,7 +163,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'{{title}}Attribute{{/title}} {{rule /}} {{filter /}}',
+						'<title>Attribute</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select attributes', 'woocommerce' ),
