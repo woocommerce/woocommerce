@@ -47,7 +47,9 @@ export function Edit() {
 					onClose={ () => setIsModalOpen( false ) }
 				/>
 			) }
-			<ContentPreview content={ description } />
+			{ !! description.length && (
+				<ContentPreview content={ description } />
+			) }
 		</div>
 	);
 }
