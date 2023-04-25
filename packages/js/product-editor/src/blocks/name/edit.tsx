@@ -7,6 +7,7 @@ import {
 	Fragment,
 	createInterpolateElement,
 	useState,
+	useEffect,
 } from '@wordpress/element';
 
 import { useBlockProps } from '@wordpress/block-editor';
@@ -159,7 +160,7 @@ export function Edit() {
 							'woocommerce'
 						) }
 						onChange={ setName }
-						value={ name || '' }
+						value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
 						onBlur={ setSkuIfEmpty }
 					/>
 				</BaseControl>
