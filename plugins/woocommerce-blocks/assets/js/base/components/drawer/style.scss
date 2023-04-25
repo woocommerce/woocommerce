@@ -20,7 +20,17 @@ $drawer-animation-duration: 0.3s;
 	}
 
 	to {
-		transform: translateX(var(--neg-drawer-width));
+		transform: translateX(max(-100%, var(--neg-drawer-width)));
+	}
+}
+
+@keyframes rtlslidein {
+	from {
+		transform: translateX(0);
+	}
+
+	to {
+		transform: translateX(min(100%, var(--drawer-width)));
 	}
 }
 
@@ -68,7 +78,7 @@ $drawer-animation-duration: 0.3s;
 }
 
 .rtl .wc-block-components-drawer {
-	transform: translateX(max(100%, var(--drawer-width)));
+	transform: translateX(min(100%, var(--drawer-width)));
 }
 
 .wc-block-components-drawer__screen-overlay--with-slide-out .wc-block-components-drawer {
@@ -78,6 +88,10 @@ $drawer-animation-duration: 0.3s;
 .wc-block-components-drawer__screen-overlay--with-slide-in .wc-block-components-drawer {
 	animation-duration: $drawer-animation-duration;
 	animation-name: slidein;
+}
+
+.rtl .wc-block-components-drawer__screen-overlay--with-slide-in .wc-block-components-drawer {
+	animation-name: rtlslidein;
 }
 
 .wc-block-components-drawer__screen-overlay--is-hidden .wc-block-components-drawer {
