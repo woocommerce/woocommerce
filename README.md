@@ -4,6 +4,8 @@ Welcome to the WooCommerce Monorepo on GitHub. Here you can find all of the plug
 
 We recommend all developers to follow the [WooCommerce development blog](https://woocommerce.wordpress.com/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
 
+HERE IS A CHANGE!
+
 ## Getting Started
 
 To get up and running within the WooCommerce Monorepo, you will need to make sure that you have installed all of the prerequisites.
