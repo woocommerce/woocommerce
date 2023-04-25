@@ -80,7 +80,6 @@
 		"chai-as-promised": "7.1.1",
 		"config": "3.3.7",
 		"cross-env": "6.0.3",
-		"deasync": "0.1.26",
 		"dotenv": "^10.0.0",
 		"eslint": "^8.32.0",
 		"eslint-config-wpcalypso": "5.0.0",
@@ -106,8 +105,8 @@
 		]
 	},
 	"engines": {
-		"node": "^16.13.1",
-		"pnpm": "^7.13.3"
+		"node": "^16.14.1",
+		"pnpm": "^8.3.1"
 	},
 	"browserslist": [
 		"> 0.1%",
