@@ -13,7 +13,7 @@ import { octokitWithAuth } from '../../../github/api';
 import { setGithubMilestoneOutputs, WPIncrement } from './utils';
 import { Options } from './types';
 
-export const milesStoneCommand = new Command( 'milestone' )
+export const milestoneCommand = new Command( 'milestone' )
 	.description( 'Create a milestone' )
 	.option(
 		'-g --github',
