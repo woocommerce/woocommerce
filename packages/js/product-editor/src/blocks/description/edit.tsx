@@ -12,6 +12,7 @@ import { useEntityProp } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { IframeEditor } from '../../components/iframe-editor';
+import { ContentPreview } from '../../components/content-preview';
 
 /**
  * Internal dependencies
@@ -46,6 +47,7 @@ export function Edit() {
 					onClose={ () => setIsModalOpen( false ) }
 				/>
 			) }
+			<ContentPreview content={ description } />
 		</div>
 	);
 }
