@@ -8736,9 +8736,9 @@ packages:
       '@babel/core': 7.21.3
       '@babel/helper-annotate-as-pure': 7.16.7
       '@babel/helper-module-imports': 7.16.7
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.18.9
       '@babel/plugin-syntax-jsx': 7.16.7(@babel/core@7.21.3)
-      '@babel/types': 7.21.3
+      '@babel/types': 7.17.0
     dev: true
 
   /@babel/plugin-transform-react-jsx@7.19.0(@babel/core@7.12.9):
@@ -20866,8 +20866,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      browserslist: 4.21.4
-      caniuse-lite: 1.0.30001418
+      browserslist: 4.20.2
+      caniuse-lite: 1.0.30001352
       fraction.js: 4.2.0
       normalize-range: 0.1.2
       picocolors: 1.0.0
@@ -22409,7 +22409,6 @@ packages:
       escalade: 3.1.1
       node-releases: 2.0.6
       picocolors: 1.0.0
-    dev: true
 
   /browserslist@4.20.4:
     resolution: {integrity: sha512-ok1d+1WpnU24XYN7oC3QWgTyMhY/avPJ/r9T00xxvUOIparA/gc+UPUMaod3i+G6s+nI2nUb9xZ5k794uIwShw==}

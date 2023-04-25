@@ -10,12 +10,8 @@ import ora from 'ora';
  */
 import { getLatestReleaseVersion } from '../../../github/repo';
 import { octokitWithAuth } from '../../../github/api';
-<<<<<<< HEAD
-import { setGithubMilestoneOutputs, WPIncrement } from './utils';
-=======
 import { setGithubMilestoneOutputs } from './utils';
 import { WPIncrement } from '../../utils';
->>>>>>> d1c774add8 (lock file update)
 import { Options } from './types';
 
 export const milestoneCommand = new Command( 'milestone' )
