@@ -6,7 +6,7 @@ import { render } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import Navigation from '../navigation';
+import { Navigation } from '../navigation';
 
 describe( 'Navigation', () => {
 	it( 'should render skip button when onSkip is provided', () => {
