@@ -2,17 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Modal, Spinner, TextControl } from '@wordpress/components';
+import { Button, Modal, TextControl } from '@wordpress/components';
 import { useDebounce } from '@wordpress/compose';
-import {
-	useState,
-	createElement,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { useState, createElement } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import {
-	__experimentalSelectControl as SelectControl,
-	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectTreeControl as SelectTree,
 	__experimentalSelectTreeMenuSlot as SelectTreeMenuSlot,
 	TreeItemType as Item,
@@ -27,7 +21,6 @@ import {
  * Internal dependencies
  */
 import { ProductCategoryNode, useCategorySearch } from './use-category-search';
-import { CategoryFieldItem } from './category-field-item';
 import { mapFromCategoryType } from './category-field';
 
 type CreateCategoryModalProps = {
@@ -35,15 +28,6 @@ type CreateCategoryModalProps = {
 	onCancel: () => void;
 	onCreate: ( newCategory: ProductCategory ) => void;
 };
-
-function getCategoryItemLabel( item: ProductCategoryNode | null ): string {
-	return item?.name || '';
-}
-function getCategoryItemValue(
-	item: ProductCategoryNode | null
-): string | number {
-	return item?.id || '';
-}
 
 export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 	initialCategoryName,
@@ -53,9 +37,7 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 	const {
 		categoriesSelectList,
 		isSearching,
-		categoryTreeKeyValues,
 		searchCategories,
-		getFilteredItems,
 		getFilteredItemsForSelectTree,
 	} = useCategorySearch();
 	const { createNotice } = useDispatch( 'core/notices' );
@@ -112,6 +94,7 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 				<SelectTree
 					label={ __( 'Parent category (optional)', 'woocommerce' ) }
 					id="parent-category-field"
+					isLoading={ isSearching }
 					items={ getFilteredItemsForSelectTree(
 						mapFromCategoryType( categoriesSelectList ),
 						categoryParentTypedValue,
@@ -141,90 +124,6 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					} }
 					createValue={ categoryParentTypedValue }
 				/>
-				<SelectControl< ProductCategoryNode >
-					items={ categoriesSelectList }
-					label={ createInterpolateElement(
-						__( 'Parent category <optional/>', 'woocommerce' ),
-						{
-							optional: (
-								<span className="woocommerce-product-form__optional-input">
-									{ __( '(optional)', 'woocommerce' ) }
-								</span>
-							),
-						}
-					) }
-					selected={ categoryParent }
-					onSelect={ ( item ) => item && setCategoryParent( item ) }
-					onRemove={ () => setCategoryParent( null ) }
-					onInputChange={ debouncedSearch }
-					getFilteredItems={ getFilteredItems }
-					getItemLabel={ getCategoryItemLabel }
-					getItemValue={ getCategoryItemValue }
-				>
-					{ ( {
-						items,
-						isOpen,
-						getMenuProps,
-						highlightedIndex,
-						getItemProps,
-					} ) => {
-						return (
-							<Menu
-								isOpen={ isOpen }
-								getMenuProps={ getMenuProps }
-								className="woocommerce-category-field-dropdown__menu"
-							>
-								{ [
-									isSearching ? (
-										<div
-											key="loading-spinner"
-											className="woocommerce-category-field-dropdown__item"
-										>
-											<div className="woocommerce-category-field-dropdown__item-content">
-												<Spinner />
-											</div>
-										</div>
-									) : null,
-									...items
-										.filter(
-											( item ) =>
-												categoryTreeKeyValues[ item.id ]
-													?.parentID === 0
-										)
-										.map( ( item ) => {
-											return (
-												<CategoryFieldItem
-													key={ `${ item.id }` }
-													item={
-														categoryTreeKeyValues[
-															item.id
-														]
-													}
-													selectedIds={
-														categoryParent
-															? [
-																	categoryParent.id,
-															  ]
-															: []
-													}
-													items={ items }
-													highlightedIndex={
-														highlightedIndex
-													}
-													getItemProps={
-														getItemProps
-													}
-												/>
-											);
-										} ),
-								].filter(
-									( item ): item is JSX.Element =>
-										item !== null
-								) }
-							</Menu>
-						);
-					} }
-				</SelectControl>
 				<div className="woocommerce-create-new-category-modal__buttons">
 					<Button
 						isSecondary

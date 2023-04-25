@@ -257,32 +257,6 @@ export const useCategorySearch = () => {
 
 	const categoryTreeKeyValues = categoriesAndNewItem[ 2 ];
 
-	/**
-	 * getFilteredItems callback for use in the SelectControl component.
-	 */
-	const getFilteredItems = useCallback(
-		(
-			allItems: ProductCategoryNode[],
-			inputValue: string,
-			selectedItems: ProductCategoryNode[]
-		) => {
-			const searchRegex = new RegExp( escapeRegExp( inputValue ), 'i' );
-			return allItems.filter(
-				( item ) =>
-					selectedItems.indexOf( item ) < 0 &&
-					( searchRegex.test( item.name ) ||
-						( categoryTreeKeyValues[ item.id ] &&
-							categoryTreeKeyValues[ item.id ].isOpen ) )
-			);
-		},
-		[ categoriesAndNewItem ]
-	);
-
-	/**
-	 * this is the same as getFilteredItems but for the SelectTree component, where item id is a string.
-	 * After all the occurrences of getFilteredItems are migrated to use SelectTree,
-	 * this can become the standard version
-	 */
 	const getFilteredItemsForSelectTree = useCallback(
 		(
 			allItems: TreeItemType[],
@@ -303,7 +277,6 @@ export const useCategorySearch = () => {
 
 	return {
 		searchCategories,
-		getFilteredItems,
 		getFilteredItemsForSelectTree,
 		categoriesSelectList: categoriesAndNewItem[ 0 ],
 		categories: categoriesAndNewItem[ 1 ],
