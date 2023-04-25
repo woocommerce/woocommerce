@@ -29,7 +29,6 @@ class WC_Admin {
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
 		add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
-		add_action( 'rest_api_init', array( 'WC_Site_Tracking', 'init' ) );
 
 		// Disable WXR export of schedule action posts.
 		add_filter( 'action_scheduler_post_type_args', array( $this, 'disable_webhook_post_export' ) );
@@ -67,12 +66,6 @@ class WC_Admin {
 		include_once __DIR__ . '/class-wc-admin-pointers.php';
 		include_once __DIR__ . '/class-wc-admin-importers.php';
 		include_once __DIR__ . '/class-wc-admin-exporters.php';
-
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
 
 		// Help Tabs.
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
