@@ -1,6 +1,7 @@
 .woocommerce-profiler-heading {
 	margin-bottom: 48px;
-	width: 615px;
+	width: 100%;
+	max-width: 550px;
 
 	.woocommerce-profiler-heading__title {
 		font-style: normal;
@@ -10,6 +11,11 @@
 		text-align: center;
 		color: #000;
 		margin-bottom: 12px;
+
+		@include breakpoint( '<782px' ) {
+			font-size: 28px;
+			line-height: 36px;
+		}
 	}
 
 	.woocommerce-profiler-heading__subtitle {
@@ -19,5 +25,9 @@
 		line-height: 24px;
 		text-align: center;
 		color: $gray-700;
+
+		@include breakpoint( '<782px' ) {
+			color: $gray-800;
+		}
 	}
 }
