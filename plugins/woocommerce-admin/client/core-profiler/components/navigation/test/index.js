@@ -6,11 +6,7 @@ import { render } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-<<<<<<< HEAD
 import { Navigation } from '../navigation';
-=======
-import Navigation from '../navigation';
->>>>>>> 86c4dd7f82 (Add navigation and progress-bar components)
 
 describe( 'Navigation', () => {
 	it( 'should render skip button when onSkip is provided', () => {
