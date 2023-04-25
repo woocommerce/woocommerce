@@ -13,7 +13,7 @@ import {
 	DAYS_BETWEEN_CODE_FREEZE_AND_RELEASE,
 	getToday,
 	getFutureDate,
-} from '../utils/index';
+} from './utils';
 
 export const verifyDayCommand = new Command( 'verify-day' )
 	.description( 'Verify if today is the code freeze day' )
