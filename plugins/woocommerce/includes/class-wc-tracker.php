@@ -631,6 +631,18 @@ class WC_Tracker {
 			"
 		);
 
+		$orders_and_origins = self::group_objects_by_key(
+			// Convert into an associative array with the origin as key
+			array_reduce( $orders_origin,
+				function( $result, $item ) {
+					$key = $item->origin;
+
+					$result[ $key ] = $item;
+					return $result;
+				}, array()
+			), 'origin' );
+
+
 		$orders_by_origin = array();
 		foreach ( $orders_origin as $origin ) {
 			$key = strtolower( $origin->origin );
