@@ -5,10 +5,15 @@ import { createMachine, assign, DoneInvokeEvent, actions } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
-import { ExtensionList, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	ExtensionList,
+	OPTIONS_STORE_NAME,
+	COUNTRIES_STORE_NAME,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
 import { initializeExPlat } from '@woocommerce/explat';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -17,6 +22,7 @@ import { IntroOptIn } from './pages/IntroOptIn';
 import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
+import { getCountryStateOptions, Country } from './services/country';
 import './style.scss';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
@@ -73,6 +79,7 @@ export type CoreProfilerStateMachineContext = {
 	extensionsAvailable: ExtensionList[ 'plugins' ] | [  ];
 	extensionsSelected: string[]; // extension slugs
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
+	countries: { [ key: string ]: string };
 };
 
 const Extensions = ( {
@@ -113,6 +120,15 @@ const handleTrackingOption = assign( {
 		_context,
 		event: DoneInvokeEvent< 'no' | 'yes' | undefined >
 	) => event.data !== 'no',
+} );
+
+const getCountries = async () =>
+	resolveSelect( COUNTRIES_STORE_NAME ).getCountries();
+
+const handleCountries = assign( {
+	countries: ( _context, event: DoneInvokeEvent< Country[] > ) => {
+		return getCountryStateOptions( event.data );
+	},
 } );
 
 const recordTracksIntroCompleted = () => {
@@ -175,6 +191,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 		businessInfo: { location: 'US:CA' },
 		extensionsAvailable: [],
 		extensionsSelected: [],
+		countries: {},
 	} as CoreProfilerStateMachineContext,
 	states: {
 		initializing: {
@@ -227,7 +244,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 				},
 				INTRO_SKIPPED: {
 					// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
-					target: 'skipFlowBusinessLocation',
+					target: 'preSkipFlowBusinessLocation',
 					actions: [
 						'assignOptInDataSharing',
 						'updateTrackingOption',
@@ -308,6 +325,22 @@ const coreProfilerStateMachineDefinition = createMachine( {
 				component: BusinessInfo,
 			},
 		},
+		preSkipFlowBusinessLocation: {
+			invoke: [
+				{
+					src: 'getCountries',
+					onDone: [
+						{
+							actions: [ 'handleCountries' ],
+							target: 'skipFlowBusinessLocation',
+						},
+					],
+					onError: {
+						target: 'skipFlowBusinessLocation',
+					},
+				},
+			],
+		},
 		skipFlowBusinessLocation: {
 			on: {
 				BUSINESS_LOCATION_COMPLETED: {
@@ -371,9 +404,11 @@ const CoreProfilerController = ( {} ) => {
 				recordTracksIntroSkipped,
 				recordTracksIntroViewed,
 				assignOptInDataSharing,
+				handleCountries,
 			},
 			services: {
 				getAllowTrackingOption,
+				getCountries,
 			},
 		} );
 	}, [] );
