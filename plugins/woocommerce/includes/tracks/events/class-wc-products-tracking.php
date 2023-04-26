@@ -151,6 +151,27 @@ class WC_Products_Tracking {
 					var tagsText = '';
 					var currentStockValue = $( '#_stock' ).val();
 
+					function getProductTypeOptions() {
+						const productTypeOptionsCheckboxes = $( 'input[type=\"checkbox\"][data-product-type-option-id]' );
+						const productTypeOptions = productTypeOptionsCheckboxes.map( function() {
+							return {
+								id: $( this ).data( 'product-type-option-id' ),
+								isEnabled: $( this ).is( ':checked' ),
+							};
+						} ).get();
+						return productTypeOptions;
+					}
+
+					function getProductTypeOptionsString( productTypeOptions ) {
+						return productTypeOptions
+							.filter( productTypeOption => productTypeOption.isEnabled )
+							.map( productTypeOption => productTypeOption.id )
+							.join( ', ' );
+					}
+
+					const productTypeOptions = getProductTypeOptions();
+					const productTypeOptionsString = getProductTypeOptionsString( productTypeOptions );
+
 					if ( ! isBlockEditor ) {
 						tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
 						if ( $( '#content' ).is( ':visible' ) ) {
@@ -174,26 +195,27 @@ class WC_Products_Tracking {
 					} ).length;
 
 					var properties = {
-						attributes:				numberOfAttributes,
-						categories:				$( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
-						cross_sells:			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
-						description:			description_value.trim() !== '' ? 'Yes' : 'No',
-						enable_reviews:			$( '#comment_status' ).is( ':checked' ) ? 'Yes' : 'No',
-						is_virtual:				$( '#_virtual' ).is( ':checked' ) ? 'Yes' : 'No',
-						is_block_editor:		isBlockEditor,
-						is_downloadable:		$( '#_downloadable' ).is( ':checked' ) ? 'Yes' : 'No',
-						manage_stock:			$( '#_manage_stock' ).is( ':checked' ) ? 'Yes' : 'No',
-						menu_order:				parseInt( $( '#menu_order' ).val(), 10 ) !== 0 ? 'Yes' : 'No',
-						product_gallery:		$( '#product_images_container .product_images > li' ).length,
-						product_image:			$( '#_thumbnail_id' ).val() > 0 ? 'Yes' : 'No',
-						product_type:			$( '#product-type' ).val(),
-						purchase_note:			$( '#_purchase_note' ).val().length ? 'yes' : 'no',
-						sale_price:				$( '#_sale_price' ).val() ? 'yes' : 'no',
-						short_description:		$( '#excerpt' ).val().length ? 'yes' : 'no',
-						stock_quantity_update:	( initialStockValue != currentStockValue ) ? 'Yes' : 'No',
-						tags:					tagsText.length > 0 ? tagsText.split( ',' ).length : 0,
-						upsells:				$( '#upsell_ids option' ).length ? 'Yes' : 'No',
-						weight:					$( '#_weight' ).val() ? 'Yes' : 'No',
+						attributes:				     numberOfAttributes,
+						categories:				     $( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
+						cross_sells:			     $( '#crosssell_ids option' ).length ? 'Yes' : 'No',
+						description:			     description_value.trim() !== '' ? 'Yes' : 'No',
+						enable_reviews:			     $( '#comment_status' ).is( ':checked' ) ? 'Yes' : 'No',
+						is_virtual:				     $( '#_virtual' ).is( ':checked' ) ? 'Yes' : 'No',
+						is_block_editor:		     isBlockEditor,
+						is_downloadable:		     $( '#_downloadable' ).is( ':checked' ) ? 'Yes' : 'No',
+						manage_stock:			     $( '#_manage_stock' ).is( ':checked' ) ? 'Yes' : 'No',
+						menu_order:				     parseInt( $( '#menu_order' ).val(), 10 ) !== 0 ? 'Yes' : 'No',
+						product_gallery:		     $( '#product_images_container .product_images > li' ).length,
+						product_image:			     $( '#_thumbnail_id' ).val() > 0 ? 'Yes' : 'No',
+						product_type:			     $( '#product-type' ).val(),
+						product_type_options_string: productTypeOptionsString,
+						purchase_note:			     $( '#_purchase_note' ).val().length ? 'yes' : 'no',
+						sale_price:				     $( '#_sale_price' ).val() ? 'yes' : 'no',
+						short_description:		     $( '#excerpt' ).val().length ? 'yes' : 'no',
+						stock_quantity_update:	     ( initialStockValue != currentStockValue ) ? 'Yes' : 'No',
+						tags:					     tagsText.length > 0 ? tagsText.split( ',' ).length : 0,
+						upsells:				     $( '#upsell_ids option' ).length ? 'Yes' : 'No',
+						weight:					     $( '#_weight' ).val() ? 'Yes' : 'No',
 					};
 					window.wcTracks.recordEvent( 'product_update', properties );
 				} );
