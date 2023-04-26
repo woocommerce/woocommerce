@@ -321,11 +321,11 @@ This endpoint will return an error unless a valid [Nonce Token](nonce-tokens.md)
 POST /cart/add-item
 ```
 
-| Attribute   | Type    | Required | Description                                                                                          |
-| :---------- | :------ | :------: | :--------------------------------------------------------------------------------------------------- |
-| `id`        | integer |   Yes    | The cart item product or variation ID.                                                               |
-| `quantity`  | integer |   Yes    | Quantity of this item in the cart.                                                                   |
-| `variation` | array   |   Yes    | Chosen attributes (for variations) containing an array of objects with keys `attribute` and `value`. |
+| Attribute   | Type    | Required | Description                                                                                                                               |
+| :---------- | :------ | :------: | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`        | integer |   Yes    | The cart item product or variation ID.                                                                                                    |
+| `quantity`  | integer |   Yes    | Quantity of this item in the cart.                                                                                                        |
+| `variation` | array   |   Yes    | Chosen attributes (for variations) containing an array of objects with keys `attribute` and `value`. See notes on attribute naming below. |
 
 ```sh
 curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/cart/add-item?id=100&quantity=1
@@ -334,6 +334,37 @@ curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc
 Returns the full [Cart Response](#cart-response) on success, or an [Error Response](#error-response) on failure.
 
 If you want to add supplemental cart item data before it is passed into `CartController::add_to_cart` use the [`woocommerce_store_api_add_to_cart_data`](https://github.com/woocommerce/woocommerce-blocks/blob/4d1c295a2bace9a4f6397cfd5469db31083d477a/docs/third-party-developers/extensibility/hooks/filters.md#woocommerce_store_api_add_to_cart_data) filter.
+
+**Variation attribute naming:**
+
+When adding variations to the cart, the naming of the attribute is important.
+
+For global attributes, the attribute posted to the API should be the slug of the attribute. This should have a `pa_` prefix. For example, if you have an attribute named `Color`, the slug will be `pa_color`.
+
+For product specific attributes, the attribute posted to the API should be the name of the attribute. For example, if you have an attribute named `Size`, the name will be `Size`. This is case-sensitive.
+
+**Example POST body:**
+
+```json
+{
+	"id": 13,
+	"quantity": 1,
+	"variation": [
+		{
+			"attribute": "pa_color",
+			"value": "blue"
+		},
+		{
+			"attribute": "Logo",
+			"value": "Yes"
+		}
+	]
+}
+```
+
+The above example adds a product variation to the cart with attributes size and color.
+
+**Batching:**
 
 If you want to add multiple items at once, you need to use the batch endpoint:
 
@@ -520,4 +551,3 @@ Returns the full [Cart Response](#cart-response) on success, or an [Error Respon
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/cart.md)
 
 <!-- /FEEDBACK -->
-
