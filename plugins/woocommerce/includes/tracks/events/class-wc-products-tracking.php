@@ -202,6 +202,36 @@ class WC_Products_Tracking {
 		);
 	}
 
+	private static function get_possible_product_type_options_ids() {
+		$product_type_options_ids = array_merge(
+			array_values(
+				array_map(
+					function ( $product_type_option ) { return $product_type_option['id']; },
+					apply_filters( 'product_type_options', array() )
+				)
+			),
+			array( '_downloadable', '_virtual' )
+		);
+
+		return $product_type_options_ids;
+	}
+
+	private static function get_product_type_options( $post_id ) {
+		$possible_product_type_options_ids = self::get_possible_product_type_options_ids();
+		$post_meta = get_post_meta( $post_id );
+		$product_type_options = array();
+
+		foreach ( $possible_product_type_options_ids as $product_type_option_id ) {
+			$product_type_options[ $product_type_option_id ] = isset( $post_meta[ $product_type_option_id ] ) ? $post_meta[ $product_type_option_id ][0] : 'no';
+		}
+
+		return $product_type_options;
+	}
+
+	private static function get_product_type_options_string( $product_type_options ) {
+		return implode( ', ', array_keys( array_filter( $product_type_options, function ( $is_enabled ) { return $is_enabled === 'yes'; } ) ) );
+	}
+
 	/**
 	 * Send a Tracks event when a product is published.
 	 *
@@ -222,27 +252,31 @@ class WC_Products_Tracking {
 
 		$product = wc_get_product( $post_id );
 
+		$product_type_options = self::get_product_type_options( $post_id );
+		$product_type_options_string = self::get_product_type_options_string( $product_type_options );
+
 		$properties = array(
-			'attributes'        => count( $product->get_attributes() ),
-			'categories'        => count( $product->get_category_ids() ),
-			'cross_sells'       => ! empty( $product->get_cross_sell_ids() ) ? 'yes' : 'no',
-			'description'       => $product->get_description() ? 'yes' : 'no',
-			'dimensions'        => wc_format_dimensions( $product->get_dimensions( false ) ) !== 'N/A' ? 'yes' : 'no',
-			'enable_reviews'    => $product->get_reviews_allowed() ? 'yes' : 'no',
-			'is_downloadable'   => $product->is_downloadable() ? 'yes' : 'no',
-			'is_virtual'        => $product->is_virtual() ? 'yes' : 'no',
-			'manage_stock'      => $product->get_manage_stock() ? 'yes' : 'no',
-			'menu_order'        => $product->get_menu_order() ? 'yes' : 'no',
-			'product_id'        => $post_id,
-			'product_gallery'   => count( $product->get_gallery_image_ids() ),
-			'product_image'     => $product->get_image_id() ? 'yes' : 'no',
-			'product_type'      => $product->get_type(),
-			'purchase_note'     => $product->get_purchase_note() ? 'yes' : 'no',
-			'sale_price'        => $product->get_sale_price() ? 'yes' : 'no',
-			'short_description' => $product->get_short_description() ? 'yes' : 'no',
-			'tags'              => count( $product->get_tag_ids() ),
-			'upsells'           => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',
-			'weight'            => $product->get_weight() ? 'yes' : 'no',
+			'attributes'           => count( $product->get_attributes() ),
+			'categories'           => count( $product->get_category_ids() ),
+			'cross_sells'          => ! empty( $product->get_cross_sell_ids() ) ? 'yes' : 'no',
+			'description'          => $product->get_description() ? 'yes' : 'no',
+			'dimensions'           => wc_format_dimensions( $product->get_dimensions( false ) ) !== 'N/A' ? 'yes' : 'no',
+			'enable_reviews'       => $product->get_reviews_allowed() ? 'yes' : 'no',
+			'is_downloadable'      => $product->is_downloadable() ? 'yes' : 'no',
+			'is_virtual'           => $product->is_virtual() ? 'yes' : 'no',
+			'manage_stock'         => $product->get_manage_stock() ? 'yes' : 'no',
+			'menu_order'           => $product->get_menu_order() ? 'yes' : 'no',
+			'product_id'           => $post_id,
+			'product_gallery'      => count( $product->get_gallery_image_ids() ),
+			'product_image'        => $product->get_image_id() ? 'yes' : 'no',
+			'product_type'         => $product->get_type(),
+			'product_type_options' => $product_type_options_string,
+			'purchase_note'        => $product->get_purchase_note() ? 'yes' : 'no',
+			'sale_price'           => $product->get_sale_price() ? 'yes' : 'no',
+			'short_description'    => $product->get_short_description() ? 'yes' : 'no',
+			'tags'                 => count( $product->get_tag_ids() ),
+			'upsells'              => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',
+			'weight'               => $product->get_weight() ? 'yes' : 'no',
 		);
 
 		WC_Tracks::record_event( 'product_add_publish', $properties );
