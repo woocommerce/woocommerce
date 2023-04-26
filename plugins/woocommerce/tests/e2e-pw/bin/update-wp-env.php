@@ -14,7 +14,7 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 			if ( file_exists( $this->wp_env_path ) ) {
 				$this->wp_json = json_decode( file_get_contents( $this->wp_env_path ), true );
 			} else {
-				throw new Exception( ".wp_env.json doesn't exist!" );
+				throw new Exception( ".wp-env.json doesn't exist!" );
 			}
 
 			$env = getenv();

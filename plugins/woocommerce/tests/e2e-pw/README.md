@@ -26,7 +26,7 @@ This is the documentation for the new e2e testing setup based on Playwright and 
 
 Note, that if you are on Mac and you install docker through other methods such as homebrew, for example, your steps to set it up might be different. The commands listed in steps below may also vary.
 
-If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/) for running E2E tests. Follow the [WSL Setup Instructions](../tests/e2e/WSL_SETUP_INSTRUCTIONS.md) first before proceeding with the steps below.
+If you are using Windows, we recommend using [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/) for running E2E tests. Follow the [WSL Setup Instructions](./WSL_SETUP_INSTRUCTIONS.md) first before proceeding with the steps below.
 
 ### Introduction
 
@@ -34,24 +34,27 @@ End-to-end tests are powered by Playwright. The test site is spinned up using `w
 
 **Running tests for the first time:**
 
--   `nvm use`
--   `pnpm install`
--   `pnpm run build --filter=woocommerce`
--   `pnpm env:start`
+-   `nvm use` (uses the default node version you have set in NVM)
+-   `pnpm install` (installs dependencies)
+-   `pnpm run build --filter=woocommerce` (builds WooCommerce locally)
+-   `cd plugins/woocommerce` (changes into the WooCommerce plugin folder)
+-   `npx playwright install` (installs the latest Playwright version)
+-   `pnpm env:start` (starts the local environment)
+-   `pnpm test:e2e-pw` (runs tests in headless mode)
 
 To run the test again, re-create the environment to start with a fresh state:
 
--   `pnpm restart`
--   `pnpm test:e2e-pw`
+-   `pnpm env:restart` (restarts the local environment)
+-   `pnpm test:e2e-pw` (runs tests in headless mode)
 
-Other ways of running tests:
+Other ways of running tests (make sure you are in the `plugins/woocommerce` folder):
 
--   `pnpm env:test` (headless)
--   `cd plugin/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js --headed` (headed)
--   `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js --debug` (debug)
--   `cd plugins/woocommerce && USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js ./tests/e2e-pw/tests/activate-and-setup/basic-setup.spec.js` (running a single test)
+-   `pnpm test:e2e-pw` (usual, headless run)
+-   `pnpm test:e2e-pw --headed` (headed -- displaying browser window and test interactions)
+-   `pnpm test:e2e-pw --debug` (runs tests in debug mode)
+-   `pnpm test:e2e-pw ./tests/e2e-pw/tests/activate-and-setup/basic-setup.spec.js` (runs a single test)
 
-To see all options, run `cd plugins/woocommerce && pnpm playwright test --help`
+To see all options, make sure you are in the `plugins/woocommerce` folder and run `pnpm playwright test --help`
 
 ### About the environment
 

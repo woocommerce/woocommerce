@@ -6,10 +6,7 @@
 		"module": "commonjs",
 		"esModuleInterop": true,
 		"moduleResolution": "node",
-		"typeRoots": [
-			"./typings",
-			"./node_modules/@types",
-			"./node_modules/@commander-js"
-		]
+		"skipLibCheck": true,
+		"typeRoots": [ "./node_modules/@types", "./node_modules/@commander-js" ]
 	}
 }

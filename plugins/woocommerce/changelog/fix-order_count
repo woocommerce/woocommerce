@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Minor fixup for getting order ids in verify db command.

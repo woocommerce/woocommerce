@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Migrate woocommerce-payments task to TS and remove connect.js from task fills

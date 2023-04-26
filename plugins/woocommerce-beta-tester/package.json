@@ -75,8 +75,8 @@
 		"test:unit": "wp-scripts test-unit-js"
 	},
 	"engines": {
-		"node": "^16.13.1",
-		"pnpm": "^7.13.3"
+		"node": "^16.14.1",
+		"pnpm": "^8.3.1"
 	},
 	"woorelease": {
 		"svn_reauth": "true",

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove unique constraint from order_key, since orders can be created with empty order keys, which then conflict with the constraint.

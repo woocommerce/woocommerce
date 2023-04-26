@@ -21,6 +21,19 @@ jest.mock( '@wordpress/data', () => {
 		useDispatch: jest.fn(),
 	};
 } );
+jest.mock( '@woocommerce/admin-layout', () => {
+	const mockContext = {
+		layoutPath: [ 'home' ],
+		layoutString: 'home',
+		extendLayout: () => {},
+		isDescendantOf: () => false,
+	};
+	return {
+		...jest.requireActual( '@woocommerce/admin-layout' ),
+		useLayoutContext: jest.fn().mockReturnValue( mockContext ),
+		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
+	};
+} );
 
 const mockDispatch = {
 	createNotice: jest.fn(),
@@ -34,6 +47,7 @@ const mockDispatch = {
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
+
 jest.mock( '@woocommerce/data', () => {
 	const originalModule = jest.requireActual( '@woocommerce/data' );
 	return {
@@ -131,7 +145,7 @@ describe( 'TaskListItem', () => {
 
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_item_view', {
-			context: 'root',
+			context: 'home',
 			is_complete: task.isComplete,
 			task_name: task.id,
 		} );

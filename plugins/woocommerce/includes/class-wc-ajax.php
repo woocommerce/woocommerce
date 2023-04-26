@@ -157,6 +157,7 @@ class WC_AJAX {
 			'json_search_downloadable_products_and_variations',
 			'json_search_customers',
 			'json_search_categories',
+			'json_search_categories_tree',
 			'json_search_taxonomy_terms',
 			'json_search_product_attributes',
 			'json_search_pages',
@@ -298,7 +299,12 @@ class WC_AJAX {
 				'fragments' => apply_filters(
 					'woocommerce_update_order_review_fragments',
 					array(
-						'form.woocommerce-checkout' => '<div class="woocommerce-error">' . __( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . __( 'Return to shop', 'woocommerce' ) . '</a></div>',
+						'form.woocommerce-checkout' => wc_print_notice(
+							esc_html__( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . esc_html__( 'Return to shop', 'woocommerce' ) . '</a>',
+							'error',
+							array(),
+							true
+						),
 					)
 				),
 			)
@@ -1764,12 +1770,13 @@ class WC_AJAX {
 			wp_die();
 		}
 
+		$show_empty       = isset( $_GET['show_empty'] ) ? wp_validate_boolean( wc_clean( wp_unslash( $_GET['show_empty'] ) ) ) : false;
 		$found_categories = array();
 		$args             = array(
 			'taxonomy'   => array( 'product_cat' ),
 			'orderby'    => 'id',
 			'order'      => 'ASC',
-			'hide_empty' => true,
+			'hide_empty' => ! $show_empty,
 			'fields'     => 'all',
 			'name__like' => $search_text,
 		);
@@ -1780,6 +1787,7 @@ class WC_AJAX {
 			foreach ( $terms as $term ) {
 				$term->formatted_name = '';
 
+				$ancestors = array();
 				if ( $term->parent ) {
 					$ancestors = array_reverse( get_ancestors( $term->term_id, 'product_cat' ) );
 					foreach ( $ancestors as $ancestor ) {
@@ -1790,12 +1798,82 @@ class WC_AJAX {
 					}
 				}
 
+				$term->parents                      = $ancestors;
 				$term->formatted_name              .= $term->name . ' (' . $term->count . ')';
 				$found_categories[ $term->term_id ] = $term;
 			}
 		}
 
 		wp_send_json( apply_filters( 'woocommerce_json_search_found_categories', $found_categories ) );
+	}
+
+	/**
+	 * Search for categories and return json.
+	 */
+	public static function json_search_categories_tree() {
+		ob_start();
+
+		check_ajax_referer( 'search-categories', 'security' );
+
+		if ( ! current_user_can( 'edit_products' ) ) {
+			wp_die( -1 );
+		}
+
+		$search_text = isset( $_GET['term'] ) ? wc_clean( wp_unslash( $_GET['term'] ) ) : '';
+		$number      = isset( $_GET['number'] ) ? absint( $_GET['number'] ) : 50;
+
+		$args = array(
+			'taxonomy'   => array( 'product_cat' ),
+			'orderby'    => 'name',
+			'order'      => 'ASC',
+			'hide_empty' => false,
+			'fields'     => 'all',
+			'number'     => $number,
+			'name__like' => $search_text,
+		);
+
+		$terms = get_terms( $args );
+
+		$terms_map = array();
+
+		if ( $terms ) {
+			foreach ( $terms as $term ) {
+				$terms_map[ $term->term_id ] = $term;
+
+				if ( $term->parent ) {
+					$ancestors     = get_ancestors( $term->term_id, 'product_cat' );
+					$current_child = $term;
+					foreach ( $ancestors as $ancestor ) {
+						if ( ! isset( $terms_map[ $ancestor ] ) ) {
+							$ancestor_term          = get_term( $ancestor, 'product_cat' );
+							$terms_map[ $ancestor ] = $ancestor_term;
+						}
+						if ( ! $terms_map[ $ancestor ]->children ) {
+							$terms_map[ $ancestor ]->children = array();
+						}
+						$item_exists = count(
+							array_filter(
+								$terms_map[ $ancestor ]->children,
+								function( $term ) use ( $current_child ) {
+									return $term->term_id === $current_child->term_id;
+								}
+							)
+						) === 1;
+						if ( ! $item_exists ) {
+							$terms_map[ $ancestor ]->children[] = $current_child;
+						}
+						$current_child = $terms_map[ $ancestor ];
+					}
+				}
+			}
+		}
+		$parent_terms = array_filter(
+			array_values( $terms_map ),
+			function( $term ) {
+				return 0 === $term->parent;
+			}
+		);
+		wp_send_json( apply_filters( 'woocommerce_json_search_found_categories', $parent_terms ) );
 	}
 
 	/**
@@ -1814,11 +1892,12 @@ class WC_AJAX {
 		$limit       = isset( $_GET['limit'] ) ? absint( wp_unslash( $_GET['limit'] ) ) : null;
 		$taxonomy    = isset( $_GET['taxonomy'] ) ? wc_clean( wp_unslash( $_GET['taxonomy'] ) ) : '';
 		$orderby     = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'name';
+		$order       = isset( $_GET['order'] ) ? wc_clean( wp_unslash( $_GET['order'] ) ) : 'ASC';
 
 		$args = array(
 			'taxonomy'        => $taxonomy,
 			'orderby'         => $orderby,
-			'order'           => 'ASC',
+			'order'           => $order,
 			'hide_empty'      => false,
 			'fields'          => 'all',
 			'number'          => $limit,

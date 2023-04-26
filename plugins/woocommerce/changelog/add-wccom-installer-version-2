@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add plugin installer version independent of WP cron.

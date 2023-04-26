@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Remove the multichannel marketing feature flag from database since it's the default option now.

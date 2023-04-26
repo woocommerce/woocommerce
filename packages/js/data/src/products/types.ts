@@ -11,6 +11,7 @@ import { BaseQueryParams } from '../types';
 
 export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
 export type ProductStatus =
+	| 'auto-draft'
 	| 'deleted'
 	| 'draft'
 	| 'pending'

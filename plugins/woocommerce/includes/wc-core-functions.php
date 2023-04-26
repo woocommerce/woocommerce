@@ -1610,7 +1610,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
 	 *
 	 * @return string
 	 */
-	return apply_filters( 'wc_help_tip', '<span class="woocommerce-help-tip" data-tip="' . $sanitized_tip . '"></span>', $sanitized_tip, $tip, $allow_html );
+	return apply_filters( 'wc_help_tip', '<span class="woocommerce-help-tip" tabindex="0" aria-label="' . $sanitized_tip . '" data-tip="' . $sanitized_tip . '"></span>', $sanitized_tip, $tip, $allow_html );
 }
 
 /**
@@ -2211,7 +2211,9 @@ function wc_get_permalink_structure() {
  * @since 3.1.0
  */
 function wc_switch_to_site_locale() {
-	if ( function_exists( 'switch_to_locale' ) ) {
+	global $wp_locale_switcher;
+
+	if ( function_exists( 'switch_to_locale' ) && isset( $wp_locale_switcher ) ) {
 		switch_to_locale( get_locale() );
 
 		// Filter on plugin_locale so load_plugin_textdomain loads the correct locale.
@@ -2228,7 +2230,9 @@ function wc_switch_to_site_locale() {
  * @since 3.1.0
  */
 function wc_restore_locale() {
-	if ( function_exists( 'restore_previous_locale' ) ) {
+	global $wp_locale_switcher;
+
+	if ( function_exists( 'restore_previous_locale' ) && isset( $wp_locale_switcher ) ) {
 		restore_previous_locale();
 
 		// Remove filter.

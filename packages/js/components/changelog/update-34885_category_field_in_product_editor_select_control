@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix issue where single item can not be cleared and text can not be selected upon click.

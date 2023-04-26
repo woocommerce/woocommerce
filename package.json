@@ -4,8 +4,8 @@
 	"description": "Monorepo for the WooCommerce ecosystem",
 	"homepage": "https://woocommerce.com/",
 	"engines": {
-		"node": "^16.13.1",
-		"pnpm": "^7.13.3"
+		"node": "^16.14.1",
+		"pnpm": "^8.3.1"
 	},
 	"private": true,
 	"repository": {
