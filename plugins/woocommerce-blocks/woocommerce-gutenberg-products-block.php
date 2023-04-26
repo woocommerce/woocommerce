@@ -304,7 +304,7 @@ add_filter(
 );
 
 /**
- * Load and setup the Interactivity API if enabled.
+ * Load and set up the Interactivity API if enabled.
  */
 function woocommerce_blocks_interactivity_setup() {
 	// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
