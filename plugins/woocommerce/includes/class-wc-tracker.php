@@ -656,16 +656,9 @@ class WC_Tracker {
 
 
 		$orders_by_origin = array();
-		foreach ( $orders_origin as $origin ) {
-			$key = strtolower( $origin->origin );
 
-			// If the origin name has a unique id, discard it, especially if the count is 1.
-			if ( 1 === (int) $origin->count ) {
-				$pos = strcspn( $key, '0123456789' );
-				if ( $pos ) {
-					$key = substr( $key, 0, $pos );
-				}
-			}
+		foreach ( $orders_and_origins as $origin ) {
+			$key = strtolower( $origin->group_key );
 
 			if ( array_key_exists( $key, $orders_by_origin ) ) {
 				$orders_by_origin[ $key ] = $orders_by_origin[ $key ] + (int) $origin->count;
