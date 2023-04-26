@@ -579,6 +579,19 @@ class WC_Tracker {
 		);
 
 		$orders_by_gateway_currency = array();
+
+		$orders_by_gateway = self::group_objects_by_key(
+			// Convert into an associative array with a combination of currency and gateway as key
+			array_reduce( $orders_and_gateway_details,
+				function( $result, $item ) {
+					$key = $item->currency . '==' . $item->gateway;
+
+					$result[ $key ] = $item;
+					return $result;
+				}, array()
+			), 'gateway' );
+
+
 		foreach ( $orders_by_gateway as $orders_details ) {
 			$key = str_replace( array( 'payment method', 'gateway' ), '', strtolower( $orders_details->gateway ) );
 
