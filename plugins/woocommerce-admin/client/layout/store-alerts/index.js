@@ -211,6 +211,12 @@ export class StoreAlerts extends Component {
 			await removeNote( alert.id );
 			this.previousAlert();
 			invalidateResolutionForStoreSelector( 'getNotes' );
+			recordEvent( 'store_alert_close', {
+				alert_id: alert.id,
+				alert_name: alert.name,
+				alert_title: alert.title,
+				alert_content: alert.content,
+			} );
 		};
 
 		return (
