@@ -91,6 +91,12 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$order->update_status( 'completed' );
 		$this->assertEquals( 1, $product->get_total_sales() );
 
+		$order->update_status( 'refunded' );
+		$this->assertEquals( 1, $product->get_total_sales() );
+
+		$order->update_status( 'processing' );
+		$this->assertEquals( 1, $product->get_total_sales() );
+
 		if ( $order->delete( true ) ) {
 			$this->assertEquals( 0, $product->get_total_sales() );
 		}
