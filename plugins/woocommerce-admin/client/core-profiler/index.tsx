@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createMachine, assign, DoneInvokeEvent } from 'xstate';
+import { createMachine, assign, DoneInvokeEvent, actions } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { useEffect } from '@wordpress/element';
 import { useDispatch, resolveSelect } from '@wordpress/data';
@@ -122,6 +122,17 @@ const handleTrackingOption = assign( {
 	) => event.data !== 'no',
 } );
 
+const recordTracksIntroCompleted = () => {
+	recordEvent( 'storeprofiler_step_complete', {
+		step: 'store_details',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
+const recordTracksIntroSkipped = () => {
+	recordEvent( 'storeprofiler_store_details_skip' );
+};
+
 const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
 	initial: 'initializing',
@@ -196,21 +207,17 @@ const coreProfilerStateMachineDefinition = createMachine( {
 					} );
 				},
 			],
-			exit: [
-				( _context, event: IntroOptInEvent ) => {
-					switch ( event.type ) {
-						case 'INTRO_COMPLETED':
-							recordEvent( 'storeprofiler_step_complete', {
-								step: 'store_details',
-								wc_version: getSetting( 'wcVersion' ),
-							} );
-							break;
-						case 'INTRO_SKIPPED':
-							recordEvent( 'storeprofiler_store_details_skip' );
-							break;
-					}
+			exit: actions.choose( [
+				{
+					cond: ( _context, event ) =>
+						event.type === 'INTRO_COMPLETED',
+					actions: 'recordTracksIntroCompleted',
 				},
-			],
+				{
+					cond: ( _context, event ) => event.type === 'INTRO_SKIPPED',
+					actions: 'recordTracksIntroSkipped',
+				},
+			] ),
 			meta: {
 				progress: 20,
 				component: IntroOptIn,
@@ -353,6 +360,8 @@ const CoreProfilerController = ( {} ) => {
 			actions: {
 				updateTracking,
 				handleTrackingOption,
+				recordTracksIntroCompleted,
+				recordTracksIntroSkipped,
 			},
 			services: {
 				getAllowTrackingOption,
