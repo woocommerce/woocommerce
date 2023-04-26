@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { createMachine, assign } from 'xstate';
+import { createMachine, assign, DoneInvokeEvent } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { useEffect } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useDispatch, resolveSelect } from '@wordpress/data';
 import { ExtensionList, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
@@ -110,6 +110,18 @@ const Extensions = ( {
 	);
 };
 
+const getAllowTrackingOption = async () =>
+	resolveSelect( OPTIONS_STORE_NAME ).getOption(
+		'woocommerce_allow_tracking'
+	);
+
+const handleTrackingOption = assign( {
+	optInDataSharing: (
+		_context,
+		event: DoneInvokeEvent< 'no' | 'yes' | undefined >
+	) => event.data !== 'no',
+} );
+
 const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
 	initial: 'initializing',
@@ -128,16 +140,22 @@ const coreProfilerStateMachineDefinition = createMachine( {
 			on: {
 				INITIALIZATION_COMPLETE: {
 					target: 'introOptIn',
-					actions: [
-						assign( {
-							optInDataSharing: (
-								_context,
-								event: InitializationCompleteEvent
-							) => event.payload.optInDataSharing, // sets context.optInDataSharing to the payload of the event
-						} ),
-					],
 				},
 			},
+			invoke: [
+				{
+					src: 'getAllowTrackingOption',
+					onDone: [
+						{
+							actions: [ 'handleTrackingOption' ],
+							target: 'introOptIn',
+						},
+					],
+					onError: {
+						target: 'introOptIn', // leave it as initialised default on error
+					},
+				},
+			],
 			meta: {
 				progress: 0,
 			},
@@ -334,35 +352,14 @@ const CoreProfilerController = ( {} ) => {
 		coreProfilerStateMachineDefinition.withConfig( {
 			actions: {
 				updateTracking,
+				handleTrackingOption,
+			},
+			services: {
+				getAllowTrackingOption,
 			},
 		} ),
 		{ devTools: true }
 	);
-
-	const { optInDataSharing, isResolving } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
-
-		return {
-			optInDataSharing:
-				// Set default to true if the option is not set
-				getOption( 'woocommerce_allow_tracking' ) !== 'no',
-			isResolving: ! hasFinishedResolution( 'getOption', [
-				'woocommerce_allow_tracking',
-			] ),
-		};
-	}, [] );
-
-	useEffect( () => {
-		if ( ! isResolving ) {
-			send( {
-				type: 'INITIALIZATION_COMPLETE',
-				payload: {
-					optInDataSharing,
-				},
-			} );
-		}
-	}, [ send, optInDataSharing, isResolving ] );
 
 	const currentNodeMeta = state.meta[ `coreProfiler.${ state.value }` ]
 		? state.meta[ `coreProfiler.${ state.value }` ]
