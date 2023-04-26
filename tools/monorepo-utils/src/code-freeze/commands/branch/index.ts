@@ -12,17 +12,18 @@ import { setOutput } from '@actions/core';
  * Internal dependencies
  */
 import {
-	getLatestReleaseVersion,
+	getLatestGithubReleaseVersion,
 	doesGithubBranchExist,
 	getRefFromGithubBranch,
 	createGithubBranch,
 	deleteGithubBranch,
-} from '../../../github/repo';
-import { WPIncrement } from '../milestone/utils';
+} from '../../../core/github/repo';
+import { WPIncrement } from '../../../core/version';
+import { Logger } from '../../../core/logger';
 import { Options } from './types';
 
 const getNextReleaseBranch = async ( options: Options ) => {
-	const latestReleaseVersion = await getLatestReleaseVersion( options );
+	const latestReleaseVersion = await getLatestGithubReleaseVersion( options );
 	const nextReleaseVersion = WPIncrement( latestReleaseVersion );
 	const parsedNextReleaseVersion = parse( nextReleaseVersion );
 	const nextReleaseMajorMinor = `${ parsedNextReleaseVersion.major }.${ parsedNextReleaseVersion.minor }`;
@@ -66,11 +67,7 @@ export const branchCommand = new Command( 'branch' )
 				)
 			).start();
 			nextReleaseBranch = await getNextReleaseBranch( options );
-			console.log(
-				chalk.yellow(
-					`The next release branch is ${ nextReleaseBranch }`
-				)
-			);
+			Logger.warn( `The next release branch is ${ nextReleaseBranch }` );
 			versionSpinner.succeed();
 		} else {
 			nextReleaseBranch = branch;
@@ -90,10 +87,8 @@ export const branchCommand = new Command( 'branch' )
 
 		if ( branchExists ) {
 			if ( github ) {
-				console.log(
-					chalk.red(
-						`Release branch ${ nextReleaseBranch } already exists`
-					)
+				Logger.error(
+					`Release branch ${ nextReleaseBranch } already exists`
 				);
 				// When in Github Actions, we don't want to prompt the user for input.
 				process.exit( 0 );
@@ -104,18 +99,18 @@ export const branchCommand = new Command( 'branch' )
 				)
 			);
 			if ( deleteExistingReleaseBranch ) {
-				const deleteBranchSpinner = ora(
-					chalk.yellow(
-						`Delete branch ${ nextReleaseBranch } on ${ owner }/${ name } and create new one from ${ source }`
-					)
-				).start();
-				await deleteGithubBranch( options, nextReleaseBranch );
-				deleteBranchSpinner.succeed();
+				if ( ! dryRun ) {
+					const deleteBranchSpinner = ora(
+						chalk.yellow(
+							`Delete branch ${ nextReleaseBranch } on ${ owner }/${ name } and create new one from ${ source }`
+						)
+					).start();
+					await deleteGithubBranch( options, nextReleaseBranch );
+					deleteBranchSpinner.succeed();
+				}
 			} else {
-				console.log(
-					chalk.green(
-						`Branch ${ nextReleaseBranch } already exist on ${ owner }/${ name }, no action taken.`
-					)
+				Logger.notice(
+					`Branch ${ nextReleaseBranch } already exist on ${ owner }/${ name }, no action taken.`
 				);
 				process.exit( 0 );
 			}
@@ -127,10 +122,8 @@ export const branchCommand = new Command( 'branch' )
 
 		if ( dryRun ) {
 			createBranchSpinner.succeed();
-			console.log(
-				chalk.green(
-					`DRY RUN: Skipping actual creation of branch ${ nextReleaseBranch } on ${ owner }/${ name }`
-				)
+			Logger.notice(
+				`DRY RUN: Skipping actual creation of branch ${ nextReleaseBranch } on ${ owner }/${ name }`
 			);
 
 			process.exit( 0 );
@@ -144,9 +137,7 @@ export const branchCommand = new Command( 'branch' )
 			setOutput( 'nextReleaseBranch', nextReleaseBranch );
 		}
 
-		console.log(
-			chalk.green(
-				`Branch ${ nextReleaseBranch } successfully created on ${ owner }/${ name }`
-			)
+		Logger.notice(
+			`Branch ${ nextReleaseBranch } successfully created on ${ owner }/${ name }`
 		);
 	} );

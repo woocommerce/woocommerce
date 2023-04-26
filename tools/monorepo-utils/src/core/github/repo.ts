@@ -8,7 +8,7 @@ import { Repository } from '@octokit/graphql-schema';
  */
 import { graphqlWithAuth, octokitWithAuth } from './api';
 
-export const getLatestReleaseVersion = async ( options: {
+export const getLatestGithubReleaseVersion = async ( options: {
 	owner?: string;
 	name?: string;
 } ): Promise< string > => {

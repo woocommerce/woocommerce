@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Logger } from 'cli-core/src/logger';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 

@@ -5,7 +5,8 @@ import semver from 'semver';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { Logger } from 'cli-core/src/logger';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
+import { getEnvVar } from '@woocommerce/monorepo-utils/src/core/environment';
 import { Command } from '@commander-js/extra-typings';
 import dotenv from 'dotenv';
 // @ts-expect-error - The enquirer types are incorrect.
@@ -17,12 +18,8 @@ import { Select } from 'enquirer';
  */
 import { renderTemplate } from '../../lib/render-template';
 import { getWordpressComAuthToken } from '../../lib/oauth-helper';
-import { getEnvVar } from '../../lib/environment';
-import { getMostRecentBeta, getMostRecentFinal } from '../../lib/github-api';
-import {
-	getFirstTuesdayOfTheMonth,
-	getSecondTuesdayOfTheMonth,
-} from '../../lib/dates';
+import { getMostRecentBeta } from '../../lib/github-api';
+import { getSecondTuesdayOfTheMonth } from '../../lib/dates';
 import {
 	createWpComDraftPost,
 	searchForPostsByCategory,

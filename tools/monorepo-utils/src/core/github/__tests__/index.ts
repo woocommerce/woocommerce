@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getLatestReleaseVersion } from '../repo';
+import { getLatestGithubReleaseVersion } from '../repo';
 
 jest.mock( '../api', () => {
 	return {
@@ -50,7 +50,7 @@ jest.mock( '../api', () => {
 
 it( 'should return the latest release version', async () => {
 	expect(
-		await getLatestReleaseVersion( {
+		await getLatestGithubReleaseVersion( {
 			owner: 'woocommerce',
 			name: 'woocommerce',
 		} )
