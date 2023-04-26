@@ -3247,14 +3247,14 @@ class WC_AJAX {
 		// phpcs:enable
 
 		$prompt_by_action = array(
-			'more'     => 'Make it longer',
-			'simplify' => 'Simplify it',
+			'more'     => 'Make my last message longer, without losing any important information.',
+			'simplify' => 'Simplify my last message, without losing any important information.',
 		);
 
 		$messages = array(
 			array(
 				'role'    => 'user',
-				'content' => "Write a product description for '$product_description' with $tone tone.",
+				'content' => "Write a product description with $tone tone, from the following features: '$product_description'.",
 			),
 		);
 
