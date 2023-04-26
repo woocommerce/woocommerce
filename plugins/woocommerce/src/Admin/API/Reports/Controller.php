@@ -25,13 +25,6 @@ class Controller extends \WC_REST_Reports_Controller {
 	protected $namespace = 'wc-analytics';
 
 	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'reports';
-
-	/**
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
