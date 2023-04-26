@@ -47,21 +47,21 @@ jobs:
 
             - name: 'Check whether today is the code freeze day'
               id: check-freeze
-              run: pnpm utils code-freeze verify-day -g -o $TIME_OVERRIDE
+              run: pnpm utils code-freeze verify-day -o $TIME_OVERRIDE
 
             - name: Create next milestone
               id: milestone
               if: steps.check-freeze.outputs.freeze == 'true'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze milestone -g -o ${{ github.repository_owner }}
+              run: pnpm run utils code-freeze milestone -o ${{ github.repository_owner }}
 
             - name: Create next release branch
               id: branch
               if: steps.check-freeze.outputs.freeze == 'true'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils code-freeze branch -g -o ${{ github.repository_owner }}
+              run: pnpm run utils code-freeze branch -o ${{ github.repository_owner }}
 
     prep-trunk:
         name: Preps trunk for next development cycle
