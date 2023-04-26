@@ -9,16 +9,20 @@ import { createElement } from '@wordpress/element';
  */
 import Rating from './index';
 
+type ReviewRatingProps = {
+	review: {
+		rating?: number;
+	};
+};
+
 /**
  * Display a set of stars representing the review's rating.
- *
- * @param {Object} props
- * @param {Object} props.review
- * @return {Object} -
  */
-const ReviewRating = ( { review, ...props } ) => {
-	const rating = ( review && review.rating ) || 0;
-	return <Rating rating={ rating } { ...props } />;
+const ReviewRating: React.VFC< ReviewRatingProps > = ( {
+	review,
+	...props
+} ) => {
+	return <Rating rating={ review.rating || 0 } { ...props } />;
 };
 
 ReviewRating.propTypes = {
