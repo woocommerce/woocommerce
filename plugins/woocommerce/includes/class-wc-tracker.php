@@ -499,6 +499,55 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Group an associative array of objects by removing unique id from the key
+	 *
+	 * @return array
+	 */
+	private static function group_objects_by_key( $objects, $default_key ) {
+		$keys = array_keys( $objects );
+
+		// sort keys by length and then by characters within the same length keys
+  		usort( $keys, function( $a, $b ) {
+			if ( strlen( $a ) == strlen( $b ) ) {
+				return strcmp( $a, $b );
+			}
+			return ( strlen( $a ) < strlen( $b ) ) ? -1 : 1;
+		} );
+
+		// Look for common tokens in every pair of adjacent keys
+		$prev = '';
+		foreach ( $keys as $key ) {
+			if ( $prev ) {
+				$comm_tokens = array();
+
+				// Tokenize the current and previous gateway names
+				$curr_tokens = preg_split( '/[ :,\-_]/ ', $key );
+				$prev_tokens = preg_split( '/[ :,\-_]/ ', $prev );
+
+				// Gather the common tokens.
+				// Let us allow for the unique reference id to be anywhere in the name but for the first token.
+				for( $i = 0; $i < count( $curr_tokens ) && $i < count( $prev_tokens ); $i++ ) {
+					if ($curr_tokens[ $i ] === $prev_tokens[ $i ] ) {
+						$comm_tokens[] = $curr_tokens[ $i ];
+					}
+				}
+
+				// If only one token is different, that could be the unique id.
+				if ( count( $curr_tokens ) - count( $comm_tokens ) <= 1 && count( $comm_tokens ) > 0 ) {
+					$objects[ $key ]->group_key = implode( ' ', $comm_tokens );
+					$objects[ $prev ]->group_key = implode( ' ', $comm_tokens );
+				} else {
+					$objects[ $key ]->group_key = $objects[ $key ]->$default_key;
+				}
+			} else {
+				$objects[ $key ]->group_key = $objects[ $key ]->$default_key;
+			}
+			$prev = $key;
+		}
+		return $objects;
+	}
+
+	/**
 	 * Get order details by gateway.
 	 *
 	 * @return array
