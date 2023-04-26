@@ -163,7 +163,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 7.6.1 2023-04-XX =
+= 7.6.1 2023-04-26 =
 
 **WooCommerce**
 
