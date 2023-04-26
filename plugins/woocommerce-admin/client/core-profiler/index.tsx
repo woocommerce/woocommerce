@@ -4,7 +4,7 @@
 import { createMachine, assign, DoneInvokeEvent, actions } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { useEffect } from '@wordpress/element';
-import { useDispatch, resolveSelect } from '@wordpress/data';
+import { resolveSelect, dispatch } from '@wordpress/data';
 import { ExtensionList, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
@@ -133,6 +133,27 @@ const recordTracksIntroSkipped = () => {
 	recordEvent( 'storeprofiler_store_details_skip' );
 };
 
+const updateTrackingOption = (
+	_context: CoreProfilerStateMachineContext,
+	event: IntroOptInEvent
+) => {
+	if (
+		event.payload.optInDataSharing &&
+		typeof window.wcTracks.enable === 'function'
+	) {
+		window.wcTracks.enable( () => {
+			initializeExPlat();
+		} );
+	} else if ( ! event.payload.optInDataSharing ) {
+		window.wcTracks.isEnabled = false;
+	}
+
+	const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
+	dispatch(OPTIONS_STORE_NAME).updateOptions( {
+		woocommerce_allow_tracking: trackingValue,
+	} );
+};
+
 const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
 	initial: 'initializing',
@@ -182,7 +203,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 								event: IntroOptInEvent
 							) => event.payload.optInDataSharing, // sets context.optInDataSharing to the payload of the event
 						} ),
-						'updateTracking',
+						'updateTrackingOption',
 					],
 				},
 				INTRO_SKIPPED: {
@@ -195,7 +216,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 								event: IntroOptInEvent
 							) => event.payload.optInDataSharing, // sets context.optInDataSharing to the payload of the event, which is always false
 						} ),
-						'updateTracking',
+						'updateTrackingOption',
 					],
 				},
 			},
@@ -333,32 +354,10 @@ const coreProfilerStateMachineDefinition = createMachine( {
 } );
 
 const CoreProfilerController = ( {} ) => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const updateTracking = (
-		context: CoreProfilerStateMachineContext,
-		event: IntroOptInEvent
-	) => {
-		if (
-			event.payload.optInDataSharing &&
-			typeof window.wcTracks.enable === 'function'
-		) {
-			window.wcTracks.enable( () => {
-				initializeExPlat();
-			} );
-		} else if ( ! event.payload.optInDataSharing ) {
-			window.wcTracks.isEnabled = false;
-		}
-
-		const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
-		updateOptions( {
-			woocommerce_allow_tracking: trackingValue,
-		} );
-	};
-
 	const [ state, send ] = useMachine(
 		coreProfilerStateMachineDefinition.withConfig( {
 			actions: {
-				updateTracking,
+				updateTrackingOption,
 				handleTrackingOption,
 				recordTracksIntroCompleted,
 				recordTracksIntroSkipped,
