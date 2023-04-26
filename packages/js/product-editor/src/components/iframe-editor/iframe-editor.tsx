@@ -3,8 +3,13 @@
  */
 import { BlockInstance } from '@wordpress/blocks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { createElement, useEffect, useState } from '@wordpress/element';
-import { useResizeObserver } from '@wordpress/compose';
+import {
+	createElement,
+	useCallback,
+	useEffect,
+	useState,
+} from '@wordpress/element';
+import { useDebounce, useResizeObserver } from '@wordpress/compose';
 import {
 	BlockEditorProvider,
 	BlockList,
@@ -22,16 +27,25 @@ import {
 /**
  * Internal dependencies
  */
+import { BackButton } from './back-button';
 import { EditorCanvas } from './editor-canvas';
 import { ResizableEditor } from './resizable-editor';
 
 type IframeEditorProps = {
+	initialBlocks?: BlockInstance[];
+	onChange: ( blocks: BlockInstance[] ) => void;
+	onClose?: () => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
-export function IframeEditor( { settings }: IframeEditorProps ) {
+export function IframeEditor( {
+	initialBlocks = [],
+	onChange,
+	onClose,
+	settings,
+}: IframeEditorProps ) {
 	const [ resizeObserver, sizes ] = useResizeObserver();
-	const [ blocks, setBlocks ] = useState< BlockInstance[] >( [] );
+	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock, updateSettings } =
@@ -50,6 +64,15 @@ export function IframeEditor( { settings }: IframeEditorProps ) {
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
+	const handleChange = useCallback(
+		( updatedBlocks: BlockInstance[] ) => {
+			onChange( updatedBlocks );
+		},
+		[ onChange ]
+	);
+
+	const debouncedOnChange = useDebounce( handleChange, 200 );
+
 	return (
 		<BlockEditorProvider
 			settings={ {
@@ -57,7 +80,10 @@ export function IframeEditor( { settings }: IframeEditorProps ) {
 				templateLock: false,
 			} }
 			value={ blocks }
-			onChange={ setBlocks }
+			onChange={ ( updatedBlocks: BlockInstance[] ) => {
+				setBlocks( updatedBlocks );
+				debouncedOnChange( updatedBlocks );
+			} }
 			useSubRegistry={ true }
 		>
 			<BlockTools
@@ -74,6 +100,7 @@ export function IframeEditor( { settings }: IframeEditorProps ) {
 				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 				{ /* @ts-ignore */ }
 				<BlockEditorKeyboardShortcuts.Register />
+				{ onClose && <BackButton onClick={ onClose } /> }
 				<ResizableEditor
 					enableResizing={ true }
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
