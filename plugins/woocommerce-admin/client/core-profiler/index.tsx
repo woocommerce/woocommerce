@@ -133,6 +133,13 @@ const recordTracksIntroSkipped = () => {
 	recordEvent( 'storeprofiler_store_details_skip' );
 };
 
+const recordTracksIntroViewed = () => {
+	recordEvent( 'storeprofiler_step_view', {
+		step: 'store_details',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
 const updateTrackingOption = (
 	_context: CoreProfilerStateMachineContext,
 	event: IntroOptInEvent
@@ -149,10 +156,18 @@ const updateTrackingOption = (
 	}
 
 	const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
-	dispatch(OPTIONS_STORE_NAME).updateOptions( {
+	dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_allow_tracking: trackingValue,
 	} );
 };
+
+/**
+ * Assigns the optInDataSharing value from the event payload to the context
+ */
+const assignOptInDataSharing = assign( {
+	optInDataSharing: ( _context, event: IntroOptInEvent ) =>
+		event.payload.optInDataSharing,
+} );
 
 const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -197,12 +212,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 				INTRO_COMPLETED: {
 					target: 'userProfile',
 					actions: [
-						assign( {
-							optInDataSharing: (
-								_context,
-								event: IntroOptInEvent
-							) => event.payload.optInDataSharing, // sets context.optInDataSharing to the payload of the event
-						} ),
+						'assignOptInDataSharing',
 						'updateTrackingOption',
 					],
 				},
@@ -210,24 +220,12 @@ const coreProfilerStateMachineDefinition = createMachine( {
 					// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
 					target: 'skipFlowBusinessLocation',
 					actions: [
-						assign( {
-							optInDataSharing: (
-								context,
-								event: IntroOptInEvent
-							) => event.payload.optInDataSharing, // sets context.optInDataSharing to the payload of the event, which is always false
-						} ),
+						'assignOptInDataSharing',
 						'updateTrackingOption',
 					],
 				},
 			},
-			entry: [
-				() => {
-					recordEvent( 'storeprofiler_step_view', {
-						step: 'store_details',
-						wc_version: getSetting( 'wcVersion' ),
-					} );
-				},
-			],
+			entry: [ 'recordTracksIntroViewed' ],
 			exit: actions.choose( [
 				{
 					cond: ( _context, event ) =>
@@ -361,6 +359,8 @@ const CoreProfilerController = ( {} ) => {
 				handleTrackingOption,
 				recordTracksIntroCompleted,
 				recordTracksIntroSkipped,
+				recordTracksIntroViewed,
+				assignOptInDataSharing
 			},
 			services: {
 				getAllowTrackingOption,
