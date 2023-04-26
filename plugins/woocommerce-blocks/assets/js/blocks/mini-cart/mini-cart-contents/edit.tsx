@@ -56,7 +56,7 @@ const Edit = ( {
 		 */
 		style: {
 			minHeight: '100vh',
-			maxWidth: width,
+			width,
 		},
 	} );
 
