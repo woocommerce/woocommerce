@@ -28,7 +28,7 @@ export function Edit( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< SummaryAttributes > ) {
-	const { align, direction, label } = attributes;
+	const { align, allowedFormats, direction, label } = attributes;
 	const blockProps = useBlockProps( {
 		style: { direction },
 	} );
@@ -83,6 +83,7 @@ export function Edit( {
 						[ `has-text-align-${ align }` ]: align,
 					} ) }
 					dir={ direction }
+					allowedFormats={ allowedFormats }
 				/>
 			</BaseControl>
 		</div>
