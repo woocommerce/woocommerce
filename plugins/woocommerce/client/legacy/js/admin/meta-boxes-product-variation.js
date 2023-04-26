@@ -1104,8 +1104,7 @@ jQuery( function ( $ ) {
 					woocommerce_admin_meta_boxes_variations.ajax_url,
 					data,
 					function ( response ) {
-						let count = parseInt( response, 10 );
-						count = isNaN( count ) ? 0 : count;
+						const count = parseInt( response, 10 ) || 0;
 
 						const message =
 							count === 1
