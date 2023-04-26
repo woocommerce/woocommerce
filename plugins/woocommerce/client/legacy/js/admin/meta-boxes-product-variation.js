@@ -1110,9 +1110,12 @@ jQuery( function ( $ ) {
 						const message =
 							count === 1
 								? woocommerce_admin_meta_boxes_variations.i18n_variation_added
-								: woocommerce_admin_meta_boxes_variations.i18n_variations_added;
+								: woocommerce_admin_meta_boxes_variations.i18n_variations_added.replace(
+										'%qty%',
+										count
+								  );
 
-						window.alert( message.replace( '%qty%', count ) );
+						window.alert( message );
 
 						wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
 
@@ -1394,21 +1397,15 @@ jQuery( function ( $ ) {
 			// Set the new total of variations
 			wrapper.attr( 'data-total', total );
 
-			if ( 1 === total ) {
-				displaying_num.text(
-					woocommerce_admin_meta_boxes_variations.i18n_variation_count_single.replace(
-						'%qty%',
-						total
-					)
-				);
-			} else {
-				displaying_num.text(
-					woocommerce_admin_meta_boxes_variations.i18n_variation_count_plural.replace(
-						'%qty%',
-						total
-					)
-				);
-			}
+			const message =
+				total === 1
+					? woocommerce_admin_meta_boxes_variations.i18n_variation_count_single
+					: woocommerce_admin_meta_boxes_variations.i18n_variation_count_plural.replace(
+							'%qty%',
+							total
+					  );
+
+			displaying_num.text( message );
 
 			return total;
 		},
