@@ -56,4 +56,44 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 0, (int) $line_item->get_meta( '_reduced_stock', true ) );
 		$this->assertEquals( 2, (int) $line_item->get_meta( '_restock_refunded_items', true ) );
 	}
+
+	/**
+	 * Test update_total_sales_counts and check total_sales after order reflection.
+	 *
+	 * Tests the fix for issue #23796
+	 */
+	public function test_wc_update_total_sales_counts() {
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$order_id = WC_Checkout::instance()->create_order(
+			array(
+				'billing_email'  => 'a@b.com',
+				'payment_method' => 'dummy',
+			)
+		);
+
+		$this->assertEquals( 0, $product->get_total_sales() );
+
+		$order = new WC_Order( $order_id );
+
+		$order->update_status( 'processing' );
+		$this->assertEquals( 1, $product->get_total_sales() );
+
+		$order->update_status( 'cancelled' );
+		$this->assertEquals( 0, $product->get_total_sales() );
+
+		$order->update_status( 'processing' );
+		$this->assertEquals( 1, $product->get_total_sales() );
+
+		$order->update_status( 'completed' );
+		$this->assertEquals( 1, $product->get_total_sales() );
+
+		if ( $order->delete( true ) ) {
+			$this->assertEquals( 0, $product->get_total_sales() );
+		}
+	}
+
 }
