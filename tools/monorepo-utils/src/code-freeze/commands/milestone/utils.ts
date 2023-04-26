@@ -15,6 +15,11 @@ export const WPIncrement = ( version: string ): string => {
 	return inc( parsedVersion, parsedVersion.minor === 9 ? 'major' : 'minor' );
 };
 
+const getMajorMinor = ( version: string ) => {
+	const parsedVersion = parse( version );
+	return `${ parsedVersion.major }.${ parsedVersion.minor }`;
+};
+
 /**
  * Set Github outputs.
  *
@@ -25,6 +30,6 @@ export const setGithubMilestoneOutputs = (
 	nextReleaseVersion: string,
 	nextMilestone: string
 ): void => {
-	setOutput( 'nextReleaseVersion', nextReleaseVersion );
-	setOutput( 'nextDevelopmentVersion', nextMilestone );
+	setOutput( 'nextReleaseVersion', getMajorMinor( nextReleaseVersion ) );
+	setOutput( 'nextDevelopmentVersion', getMajorMinor( nextMilestone ) );
 };
