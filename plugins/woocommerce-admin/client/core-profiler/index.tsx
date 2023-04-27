@@ -353,7 +353,7 @@ const CoreProfilerController = ( {} ) => {
 				recordTracksIntroCompleted,
 				recordTracksIntroSkipped,
 				recordTracksIntroViewed,
-				assignOptInDataSharing
+				assignOptInDataSharing,
 			},
 			services: {
 				getAllowTrackingOption,
