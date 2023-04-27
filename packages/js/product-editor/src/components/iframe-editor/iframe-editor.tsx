@@ -80,6 +80,7 @@ export function IframeEditor( {
 			<BlockEditorProvider
 				settings={ {
 					...( settings || parentEditorSettings ),
+					hasFixedToolbar: true,
 					templateLock: false,
 				} }
 				value={ blocks }
