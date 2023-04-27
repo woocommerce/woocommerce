@@ -44,11 +44,11 @@
 		margin-bottom: 48px;
 		width: 266px;
 		height: 172px;
-		background: url('./assets/images/welcome-desktop.svg') no-repeat center center;
+		background: url(./assets/images/welcome-desktop.svg) no-repeat center center;
 
 		@include breakpoint( '<782px' ) {
 			margin-bottom: 40px;
-			background: url('./assets/images/welcome-mobile.svg') no-repeat center center;
+			background: url(./assets/images/welcome-mobile.svg) no-repeat center center;
 			width: 222px;
 			height: 144px;
 		}
