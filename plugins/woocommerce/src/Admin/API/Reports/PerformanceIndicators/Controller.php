@@ -7,6 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators;
 
+use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 defined( 'ABSPATH' ) || exit;
@@ -15,16 +16,9 @@ defined( 'ABSPATH' ) || exit;
  * REST API Reports Performance indicators controller class.
  *
  * @internal
- * @extends WC_REST_Reports_Controller
+ * @extends AbstractController
  */
-class Controller extends \WC_REST_Reports_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
+class Controller extends AbstractController {
 
 	/**
 	 * Route base.
@@ -294,13 +288,13 @@ class Controller extends \WC_REST_Reports_Controller {
 			$objects[] = $this->prepare_response_for_collection( $prepared );
 		}
 
-		$response = rest_ensure_response( $objects );
-		$response->header( 'X-WP-Total', count( $data ) );
-		$response->header( 'X-WP-TotalPages', 1 );
-
-		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-
-		return $response;
+		return $this->add_pagination_headers(
+			$request,
+			$objects,
+			(int) count( $data ),
+			1,
+			1
+		);
 	}
 
 	/**

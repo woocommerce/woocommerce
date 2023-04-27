@@ -9,22 +9,16 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Stock;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 
 /**
  * REST API Reports stock controller class.
  *
  * @internal
- * @extends WC_REST_Reports_Controller
+ * @extends AbstractController
  */
-class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
+class Controller extends AbstractController implements ExportableInterface {
 
 	/**
 	 * Route base.
@@ -136,30 +130,13 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			$objects[] = $this->prepare_response_for_collection( $data );
 		}
 
-		$page      = (int) $query_args['paged'];
-		$max_pages = $query_results['pages'];
-
-		$response = rest_ensure_response( $objects );
-		$response->header( 'X-WP-Total', $query_results['total'] );
-		$response->header( 'X-WP-TotalPages', (int) $max_pages );
-
-		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-
-		if ( $page > 1 ) {
-			$prev_page = $page - 1;
-			if ( $prev_page > $max_pages ) {
-				$prev_page = $max_pages;
-			}
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
-		}
-		if ( $max_pages > $page ) {
-			$next_page = $page + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
-			$response->link_header( 'next', $next_link );
-		}
-
-		return $response;
+		return $this->add_pagination_headers(
+			$request,
+			$objects,
+			(int) $query_results['total'],
+			(int) $query_args['paged'],
+			(int) $query_results['pages']
+		);
 	}
 
 	/**
