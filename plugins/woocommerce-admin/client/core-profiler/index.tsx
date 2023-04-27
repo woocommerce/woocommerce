@@ -13,7 +13,7 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
 import { initializeExPlat } from '@woocommerce/explat';
-import { decodeEntities } from '@wordpress/html-entities';
+import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -76,7 +76,7 @@ export type CoreProfilerStateMachineContext = {
 	geolocatedLocation: {
 		location: string;
 	};
-	extensionsAvailable: ExtensionList[ 'plugins' ] | [];
+	extensionsAvailable: ExtensionList[ 'plugins' ] | [  ];
 	extensionsSelected: string[]; // extension slugs
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
@@ -130,6 +130,14 @@ const handleCountries = assign( {
 		return getCountryStateOptions( event.data );
 	},
 } );
+
+const redirectWooHome = () => {
+	const homescreenUrl = new URL(
+		getNewPath( {}, '/', {} ),
+		window.location.href
+	).href;
+	window.location.href = homescreenUrl;
+};
 
 const recordTracksIntroCompleted = () => {
 	recordEvent( 'storeprofiler_step_complete', {
@@ -340,6 +348,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 					],
 				},
 			},
+			exit: 'redirectWooHome',
 			meta: {
 				progress: 80,
 				component: BusinessLocation,
@@ -390,6 +399,7 @@ const CoreProfilerController = ( {} ) => {
 				recordTracksIntroViewed,
 				assignOptInDataSharing,
 				handleCountries,
+				redirectWooHome,
 			},
 			services: {
 				getAllowTrackingOption,
