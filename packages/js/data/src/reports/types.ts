@@ -325,9 +325,9 @@ export type ReportItemObject = {
 		| TaxesReport
 		| StockReport
 		| DownloadReport
-		| OrderReport[]
+		| OrderReport
 		| CategoriesReport
-		| PerformanceIndicatorReport;
+		| PerformanceIndicatorReport[];
 	totalResults: number;
 	totalPages: number;
 };
