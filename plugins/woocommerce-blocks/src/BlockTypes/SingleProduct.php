@@ -51,12 +51,13 @@ class SingleProduct extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$classname = $attributes['className'] ?? '';
+		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classname ) );
 
 		$html = sprintf(
-			'<div class="wp-block-woocommerce-single-product %1$s">
+			'<div %1$s>
 				%2$s
 			</div>',
-			esc_attr( $classname ),
+			$wrapper_attributes,
 			$content
 		);
 
