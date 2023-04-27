@@ -12,6 +12,7 @@
 		"@commander-js/extra-typings": "^0.1.0",
 		"@octokit/graphql": "4.8.0",
 		"@octokit/graphql-schema": "^14.1.0",
+		"@types/uuid": "^9.0.1",
 		"chalk": "^4.1.2",
 		"commander": "^9.4.0",
 		"dotenv": "^10.0.0",
@@ -20,7 +21,9 @@
 		"octokit": "^2.0.14",
 		"ora": "^5.4.1",
 		"promptly": "^3.2.0",
-		"semver": "^7.3.2"
+		"semver": "^7.3.2",
+		"simple-git": "^3.10.0",
+		"uuid": "^9.0.0"
 	},
 	"devDependencies": {
 		"@types/jest": "^27.4.1",
