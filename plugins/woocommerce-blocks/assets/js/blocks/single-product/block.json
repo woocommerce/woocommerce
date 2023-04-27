@@ -6,7 +6,9 @@
 	"description": "Display a single product.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
-	"supports": {},
+	"supports": {
+		"align": [ "wide", "full" ]
+	},
 	"attributes": {
 		"isPreview": {
 		   "type": "boolean",
