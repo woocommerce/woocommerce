@@ -11,6 +11,7 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
+import { ContentPreview } from '../../components/content-preview';
 import { ModalEditor } from '../../components/modal-editor';
 
 /**
@@ -46,6 +47,9 @@ export function Edit() {
 					onClose={ () => setIsModalOpen( false ) }
 					title={ __( 'Edit description', 'woocommerce' ) }
 				/>
+			) }
+			{ !! description.length && (
+				<ContentPreview content={ description } />
 			) }
 		</div>
 	);
