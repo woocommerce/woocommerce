@@ -394,8 +394,6 @@ final class WooCommerce {
 				return defined( 'DOING_CRON' );
 			case 'frontend':
 				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! $this->is_rest_api_request();
-			case 'rest':
-				return $this->is_rest_api_request();
 		}
 	}
 
@@ -536,6 +534,15 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
 
 		/**
+		 * Tracks.
+		 */
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
+
+		/**
 		 * WCCOM Site.
 		 */
 		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
@@ -551,14 +558,6 @@ final class WooCommerce {
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
-		}
-
-		if ( $this->is_request( 'admin' ) || $this->is_request( 'rest' ) ) {
-			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
-			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
-			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
-			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
-			include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
 		}
 
 		if ( $this->is_request( 'frontend' ) ) {
