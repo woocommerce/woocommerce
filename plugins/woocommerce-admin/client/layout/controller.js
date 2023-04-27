@@ -272,6 +272,18 @@ export const getPages = () => {
 		}
 	}
 
+	if ( window.wcAdminFeatures[ 'core-profiler' ] ) {
+		pages.push( {
+			container: CoreProfiler,
+			path: '/profiler',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Profiler', 'woocommerce' ),
+			],
+			capability: 'manage_woocommerce',
+		} );
+	}
+
 	if ( window.wcAdminFeatures.settings ) {
 		pages.push( {
 			container: SettingsGroup,
