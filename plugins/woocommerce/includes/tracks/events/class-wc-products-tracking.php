@@ -224,11 +224,19 @@ class WC_Products_Tracking {
 		);
 	}
 
+	/**
+	 * Get the IDs of the possible product type options.
+	 *
+	 * @return array
+	 */
 	private static function get_possible_product_type_options_ids() {
 		$product_type_options_ids = array_merge(
 			array_values(
 				array_map(
-					function ( $product_type_option ) { return $product_type_option['id']; },
+					function ( $product_type_option ) {
+						return $product_type_option['id'];
+					},
+					/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 					apply_filters( 'product_type_options', array() )
 				)
 			),
@@ -238,10 +246,17 @@ class WC_Products_Tracking {
 		return $product_type_options_ids;
 	}
 
+	/**
+	 * Get the product type options for a product.
+	 *
+	 * @param int $post_id The ID of the product.
+	 *
+	 * @return array
+	 */
 	private static function get_product_type_options( $post_id ) {
 		$possible_product_type_options_ids = self::get_possible_product_type_options_ids();
-		$post_meta = get_post_meta( $post_id );
-		$product_type_options = array();
+		$post_meta                         = get_post_meta( $post_id );
+		$product_type_options              = array();
 
 		foreach ( $possible_product_type_options_ids as $product_type_option_id ) {
 			$product_type_options[ $product_type_option_id ] = isset( $post_meta[ $product_type_option_id ] ) ? $post_meta[ $product_type_option_id ][0] : 'no';
@@ -250,8 +265,25 @@ class WC_Products_Tracking {
 		return $product_type_options;
 	}
 
+	/**
+	 * Get a comma-separated string of the product type options that are enabled.
+	 *
+	 * @param array $product_type_options The product type options.
+	 *
+	 * @return string
+	 */
 	private static function get_product_type_options_string( $product_type_options ) {
-		return implode( ', ', array_keys( array_filter( $product_type_options, function ( $is_enabled ) { return $is_enabled === 'yes'; } ) ) );
+		return implode(
+			', ',
+			array_keys(
+				array_filter(
+					$product_type_options,
+					function ( $is_enabled ) {
+						return 'yes' === $is_enabled;
+					}
+				)
+			)
+		);
 	}
 
 	/**
@@ -274,7 +306,7 @@ class WC_Products_Tracking {
 
 		$product = wc_get_product( $post_id );
 
-		$product_type_options = self::get_product_type_options( $post_id );
+		$product_type_options        = self::get_product_type_options( $post_id );
 		$product_type_options_string = self::get_product_type_options_string( $product_type_options );
 
 		$properties = array(
