@@ -111,7 +111,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 > Are you a designer? The following documents explain how to apply design-changes to the WooCommerce Blocks plugin.
 
 -   [Theming](designers/theming/README.md)
-    -   [All Products & filters](designers/theming/all-products-and-filters.md)
+    -   [Filter blocks](designers/theming/filter-blocks.md)
     -   [Cart and Checkout](designers/theming/cart-and-checkout.md)
     -   [Class names update in 4.6.0](designers/theming/class-names-update-460.md)
     -   [Class names update in 3.4.0](designers/theming/class-names-update-340.md)

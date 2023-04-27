@@ -69,7 +69,7 @@ WooCommerce Blocks avoids using legacy unprefixed classes as much as possible. H
 
 ## Blocks
 
--   [All Products & filters](all-products-and-filters.md)
+-   [Filter blocks](filter-blocks.md)
 -   [Cart and Checkout](cart-and-checkout.md)
 
 ## Other docs
