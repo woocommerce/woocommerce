@@ -8,7 +8,7 @@ import {
 	TextareaControl,
 	TextControl,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useState, createElement, Fragment } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
 import { Form, FormContextType, FormErrors } from '@woocommerce/components';
@@ -18,11 +18,6 @@ import {
 	ProductAttributeTerm,
 	QueryProductAttribute,
 } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
-import './create-attribute-term-modal.scss';
 
 type CreateAttributeTermModalProps = {
 	initialAttributeTermName: string;

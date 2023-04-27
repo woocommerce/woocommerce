@@ -2,22 +2,25 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import {
+	useState,
+	createElement,
+	Fragment,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
 import {
 	Sortable,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 	Link,
 } from '@woocommerce/components';
-import interpolateComponents from '@automattic/interpolate-components';
 import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import './attribute-field.scss';
 import { EditAttributeModal } from './edit-attribute-modal';
-import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
+import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import {
 	getAttributeId,
 	getAttributeKey,
@@ -69,7 +72,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		emptyStateSubtitle: undefined,
 		newAttributeListItemLabel: undefined,
 		globalAttributeHelperMessage: __(
-			`You can change the attribute's name in {{link}}Attributes{{/link}}.`,
+			`You can change the attribute's name in <link>Attributes</link>.`,
 			'woocommerce'
 		),
 	},
@@ -253,9 +256,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						__( 'Edit %s', 'woocommerce' ),
 						currentAttribute.name
 					) }
-					globalAttributeHelperMessage={ interpolateComponents( {
-						mixedString: uiStrings.globalAttributeHelperMessage,
-						components: {
+					globalAttributeHelperMessage={ createInterpolateElement(
+						uiStrings.globalAttributeHelperMessage,
+						{
 							link: (
 								<Link
 									href={ getAdminLink(
@@ -267,8 +270,8 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 									<></>
 								</Link>
 							),
-						},
-					} ) }
+						}
+					) }
 					onCancel={ () => {
 						closeEditModal( currentAttribute );
 						onEditModalCancel( currentAttribute );

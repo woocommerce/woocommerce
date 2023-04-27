@@ -5,6 +5,7 @@ import { sprintf, __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { Spinner, Icon } from '@wordpress/components';
 import { plus } from '@wordpress/icons';
+import { createElement } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	QueryProductAttribute,
@@ -21,8 +22,7 @@ import {
 /**
  * Internal dependencies
  */
-import './attribute-input-field.scss';
-import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
+import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
 type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
 
@@ -51,6 +51,8 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	disabled,
 	ignoredAttributeIds = [],
 } ) => {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
 		const { getProductAttributes, hasFinishedResolution } = select(
 			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME

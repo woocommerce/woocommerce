@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { createElement } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -8,7 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { AttributeControl } from '../attribute-control';
-import { useProductAttributes } from '~/products/hooks/use-product-attributes';
+import { useProductAttributes } from '../../hooks/use-product-attributes';
 
 type AttributesProps = {
 	value: ProductAttribute[];

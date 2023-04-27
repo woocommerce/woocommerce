@@ -4,7 +4,14 @@
 import { sprintf, __ } from '@wordpress/i18n';
 import { CheckboxControl, Icon, Spinner } from '@wordpress/components';
 import { resolveSelect } from '@wordpress/data';
-import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import {
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+	createElement,
+	Fragment,
+} from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import { plus } from '@wordpress/icons';
 import {
@@ -21,7 +28,6 @@ import {
 /**
  * Internal dependencies
  */
-import './attribute-term-input-field.scss';
 import { CreateAttributeTermModal } from './create-attribute-term-modal';
 
 type AttributeTermInputFieldProps = {

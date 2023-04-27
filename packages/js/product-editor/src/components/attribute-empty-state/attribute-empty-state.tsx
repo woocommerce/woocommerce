@@ -4,12 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Card, CardBody } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import './attribute-empty-state.scss';
-import AttributeEmptyStateLogo from './attribute-empty-state-logo.svg';
+// import AttributeEmptyStateLogo from './attribute-empty-state-logo.svg';
 
 type AttributeEmptyStateProps = {
 	image?: string;
@@ -19,7 +19,7 @@ type AttributeEmptyStateProps = {
 };
 
 export const AttributeEmptyState: React.FC< AttributeEmptyStateProps > = ( {
-	image = AttributeEmptyStateLogo,
+	image,
 	subtitle = __( 'No attributes yet', 'woocommerce' ),
 	addNewLabel = __( 'Add first attribute', 'woocommerce' ),
 	onNewClick,

@@ -3,18 +3,13 @@
  */
 import { sprintf, __ } from '@wordpress/i18n';
 import { CheckboxControl, Icon } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useState, createElement, Fragment } from '@wordpress/element';
 import { plus } from '@wordpress/icons';
 import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
-
-/**
- * Internal dependencies
- */
-import './attribute-term-input-field.scss';
 
 type CustomAttributeTermInputFieldProps = {
 	value?: string[];

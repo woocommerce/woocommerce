@@ -9,8 +9,8 @@ import { useFormContext } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { AttributeControl } from '../attribute-control';
-import { useProductAttributes } from '~/products/hooks/use-product-attributes';
+import { AttributeControl } from '@woocommerce/product-editor/src/components/attribute-control';
+import { useProductAttributes } from '@woocommerce/product-editor/src/hooks/use-product-attributes';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
 type OptionsProps = {
