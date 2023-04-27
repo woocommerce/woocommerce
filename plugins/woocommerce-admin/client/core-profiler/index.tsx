@@ -157,6 +157,20 @@ const recordTracksIntroViewed = () => {
 	} );
 };
 
+const recordTracksSkipBusinessLocationViewed = () => {
+	recordEvent( 'storeprofiler_step_view', {
+		step: 'skip_business_location',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
+const recordTracksSkipBusinessLocationCompleted = () => {
+	recordEvent( 'storeprofiler_step_complete', {
+		step: 'skp_business_location',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
 const updateTrackingOption = (
 	_context: CoreProfilerStateMachineContext,
 	event: IntroOptInEvent
@@ -348,7 +362,11 @@ const coreProfilerStateMachineDefinition = createMachine( {
 					],
 				},
 			},
-			exit: 'redirectWooHome',
+			entry: [ 'recordTracksSkipBusinessLocationViewed' ],
+			exit: [
+				'recordTracksSkipBusinessLocationCompleted',
+				'redirectWooHome',
+			],
 			meta: {
 				progress: 80,
 				component: BusinessLocation,
@@ -397,6 +415,8 @@ const CoreProfilerController = ( {} ) => {
 				recordTracksIntroCompleted,
 				recordTracksIntroSkipped,
 				recordTracksIntroViewed,
+				recordTracksSkipBusinessLocationViewed,
+				recordTracksSkipBusinessLocationCompleted,
 				assignOptInDataSharing,
 				handleCountries,
 				redirectWooHome,
