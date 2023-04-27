@@ -3,7 +3,7 @@
  */
 import { createMachine, assign, DoneInvokeEvent, actions } from 'xstate';
 import { useMachine } from '@xstate/react';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
 import { ExtensionList, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -172,6 +172,7 @@ const assignOptInDataSharing = assign( {
 const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
 	initial: 'initializing',
+	predictableActionArguments: true, // recommended setting: https://xstate.js.org/docs/guides/actions.html
 	context: {
 		// these are safe default values if for some reason the steps fail to complete correctly
 		// actual defaults displayed to the user should be handled in the steps themselves
@@ -352,8 +353,9 @@ const coreProfilerStateMachineDefinition = createMachine( {
 } );
 
 const CoreProfilerController = ( {} ) => {
-	const [ state, send ] = useMachine(
-		coreProfilerStateMachineDefinition.withConfig( {
+	const augmentedStateMachine = useMemo( () => {
+		// When adding extensibility, this is the place to manipulate the state machine definition.
+		return coreProfilerStateMachineDefinition.withConfig( {
 			actions: {
 				updateTrackingOption,
 				handleTrackingOption,
@@ -365,9 +367,10 @@ const CoreProfilerController = ( {} ) => {
 			services: {
 				getAllowTrackingOption,
 			},
-		} ),
-		{ devTools: true }
-	);
+		} );
+	}, [] );
+
+	const [ state, send ] = useMachine( augmentedStateMachine );
 
 	const currentNodeMeta = state.meta[ `coreProfiler.${ state.value }` ]
 		? state.meta[ `coreProfiler.${ state.value }` ]
