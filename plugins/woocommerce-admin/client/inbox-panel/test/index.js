@@ -4,6 +4,7 @@
 import { render } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { useEffect } from 'react';
 
 /**
  * Internal dependencies
@@ -24,6 +25,23 @@ jest.mock( '@wordpress/data', () => {
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
+jest.mock( '@woocommerce/experimental', () => {
+	// Require the original module to not be mocked...
+	const originalModule = jest.requireActual( '@woocommerce/experimental' );
+
+	const MockInboxNoteCard = ( { onNoteVisible, note } ) => {
+		useEffect( () => onNoteVisible( note ), [] );
+		return <div>{ note.id }</div>;
+	};
+
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...originalModule,
+		InboxNoteCard: MockInboxNoteCard,
+	};
+} );
+
+// be wary that the notes are modified inside various tests
 const notes = [
 	{
 		id: 1,
@@ -31,6 +49,10 @@ const notes = [
 		is_deleted: false,
 		status: 'unactioned',
 		actions: [],
+		content: 'content1',
+		name: 'name1',
+		title: 'title1',
+		type: 'type1',
 	},
 	{
 		id: 2,
@@ -38,6 +60,10 @@ const notes = [
 		is_deleted: false,
 		status: 'unactioned',
 		actions: [],
+		content: 'content2',
+		name: 'name2',
+		title: 'title2',
+		type: 'type2',
 	},
 	{
 		id: 3,
@@ -45,6 +71,10 @@ const notes = [
 		is_deleted: false,
 		status: 'unactioned',
 		actions: [],
+		content: 'content3',
+		name: 'name3',
+		title: 'title3',
+		type: 'type3',
 	},
 	{
 		id: 4,
@@ -52,6 +82,10 @@ const notes = [
 		is_deleted: false,
 		status: 'unactioned',
 		actions: [],
+		content: 'content4',
+		name: 'name4',
+		title: 'title4',
+		type: 'type4',
 	},
 	{
 		id: 5,
@@ -59,6 +93,10 @@ const notes = [
 		is_deleted: false,
 		status: 'unactioned',
 		actions: [],
+		content: 'content5',
+		name: 'name5',
+		title: 'title5',
+		type: 'type5',
 	},
 ];
 
@@ -103,6 +141,28 @@ describe( 'hasValidNotes', () => {
 		notes[ 0 ].is_deleted = true;
 		notes[ 3 ].is_deleted = true;
 		expect( hasValidNotes( notes ) ).toBeTruthy();
+	} );
+} );
+
+describe( 'inbox_note_view event', () => {
+	test( 'should fire when inbox note card calls onNoteVisible', () => {
+		notes.forEach( ( note ) => ( note.is_deleted = false ) );
+		useSelect.mockImplementation( () => ( {
+			notes,
+			isError: false,
+			notesHaveResolved: true,
+			isBatchUpdating: false,
+		} ) );
+		render( <InboxPanel /> );
+		for ( let i = 0; i < notes.length; i++ ) {
+			expect( recordEvent ).toHaveBeenCalledWith( 'inbox_note_view', {
+				note_content: notes[ i ].content,
+				note_name: notes[ i ].name,
+				note_title: notes[ i ].title,
+				note_type: notes[ i ].type,
+				screen: '',
+			} );
+		}
 	} );
 } );
 
