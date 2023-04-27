@@ -26,6 +26,37 @@ const getProductType = () => {
 		?.value;
 };
 
+type ProductTypeOption = {
+	id: string | null;
+	isEnabled: boolean;
+};
+
+function getProductTypeOptions() {
+	const productTypeOptionsCheckboxes = Array.from(
+		document.querySelectorAll(
+			'input[type="checkbox"][data-product-type-option-id]'
+		)
+	) as HTMLInputElement[];
+	const productTypeOptions = productTypeOptionsCheckboxes.map(
+		( checkbox ) => {
+			return {
+				id: checkbox.getAttribute( 'data-product-type-option-id' ),
+				isEnabled: checkbox.checked,
+			};
+		}
+	);
+	return productTypeOptions;
+}
+
+function getProductTypeOptionsString(
+	productTypeOptions: ProductTypeOption[]
+) {
+	return productTypeOptions
+		.filter( ( productTypeOption ) => productTypeOption.isEnabled )
+		.map( ( productTypeOption ) => productTypeOption.id )
+		.join( ', ' );
+}
+
 const getProductData = () => {
 	const isBlockEditor =
 		document.querySelectorAll( '.block-editor' ).length > 0;
@@ -55,10 +86,15 @@ const getProductData = () => {
 		 )?.value;
 	}
 
+	const productTypeOptions = getProductTypeOptions();
+	const productTypeOptionsString =
+		getProductTypeOptionsString( productTypeOptions );
+
 	const productData = {
 		product_id: ( document.querySelector( '#post_ID' ) as HTMLInputElement )
 			?.value,
 		product_type: getProductType(),
+		product_type_options: productTypeOptionsString,
 		is_downloadable: (
 			document.querySelector( '#_downloadable' ) as HTMLInputElement
 		 )?.checked
