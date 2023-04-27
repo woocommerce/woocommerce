@@ -82,9 +82,3 @@ runs:
           if: ${{ inputs.build == 'true' }}
           shell: bash
           run: pnpm -w exec turbo run turbo:build --cache-dir=".turbo" ${{ steps.parse-input.outputs.BUILD_FILTERS }}
-
-        - name: Store summary of turbo run
-          uses: actions/upload-artifact@v3
-          with:
-              name: turbo-run-summary
-              path: .turbo/runs
