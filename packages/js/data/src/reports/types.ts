@@ -13,7 +13,7 @@ export type ReportItemsEndpoint =
 	| 'coupons'
 	| 'stock'
 	| 'downloads'
-	| 'performance_indicator';
+	| 'performance-indicators';
 
 export type ReportStatEndpoint =
 	| 'products'
@@ -24,7 +24,9 @@ export type ReportStatEndpoint =
 	| 'coupons'
 	| 'customers';
 
-export type ReportQueryParams = ReturnType< typeof getReportTableQuery >;
+export type ReportQueryParams = ReturnType< typeof getReportTableQuery > & {
+	stats?: string;
+};
 export type ReportStatQueryParams = ReturnType< typeof getRequestQuery >;
 
 export type CustomerReport = {
@@ -323,7 +325,7 @@ export type ReportItemObject = {
 		| TaxesReport
 		| StockReport
 		| DownloadReport
-		| OrderReport
+		| OrderReport[]
 		| CategoriesReport
 		| PerformanceIndicatorReport;
 	totalResults: number;
