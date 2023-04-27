@@ -29,6 +29,21 @@ class WC_Settings_Tracking {
 	protected $updated_options = array();
 
 	/**
+	 * List of option names that are dropdown menus.
+	 *
+	 * @var array
+	 */
+	protected $dropdown_menu_options = array();
+
+
+	/**
+	 * List of options that have been modified.
+	 *
+	 * @var array
+	 */
+	protected $modified_options = array();
+
+	/**
 	 * Toggled options.
 	 *
 	 * @var array
@@ -61,6 +76,10 @@ class WC_Settings_Tracking {
 	public function add_option_to_list( $option ) {
 		$this->allowed_options[] = $option['id'];
 
+		if ( isset( $option[ 'options' ] ) ){
+			$this->dropdown_menu_options[] = $option['id'];
+		}
+
 		// Delay attaching this action since it could get fired a lot.
 		if ( false === has_action( 'update_option', array( $this, 'track_setting_change' ) ) ) {
 			add_action( 'update_option', array( $this, 'track_setting_change' ), 10, 3 );
@@ -91,8 +110,10 @@ class WC_Settings_Tracking {
 			return;
 		}
 
+		if ( in_array( $option_name, $this->dropdown_menu_options, true ) ) {
+			$this->modified_options[ $option_name ] = $new_value;
 		// Check and save toggled options.
-		if ( in_array( $new_value, array( 'yes', 'no' ), true ) && in_array( $old_value, array( 'yes', 'no' ), true ) ) {
+		} elseif ( in_array( $new_value, array( 'yes', 'no' ), true ) && in_array( $old_value, array( 'yes', 'no' ), true ) ) {
 			$option_state                             = 'yes' === $new_value ? 'enabled' : 'disabled';
 			$this->toggled_options[ $option_state ][] = $option_name;
 		}
@@ -117,6 +138,12 @@ class WC_Settings_Tracking {
 		foreach ( $this->toggled_options as $state => $options ) {
 			if ( ! empty( $options ) ) {
 				$properties[ $state ] = implode( ',', $options );
+			}
+		}
+
+		if ( ! empty( $this->modified_options ) ) {
+			foreach ( $this->modified_options as $option_name => $selected_option ) {
+				$properties[ $option_name ] = $selected_option ?? '';
 			}
 		}
 
