@@ -29,6 +29,7 @@ import StoreAlertsPlaceholder from './placeholder';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 import './style.scss';
+import { getScreenName } from '~/utils';
 
 export class StoreAlerts extends Component {
 	constructor( props ) {
@@ -212,10 +213,11 @@ export class StoreAlerts extends Component {
 			this.previousAlert();
 			invalidateResolutionForStoreSelector( 'getNotes' );
 			recordEvent( 'store_alert_close', {
-				alert_id: alert.id,
-				alert_name: alert.name,
-				alert_title: alert.title,
-				alert_content: alert.content,
+				note_name: alert.name,
+				note_title: alert.title,
+				note_type: alert.type,
+				note_content: alert.content,
+				screen: getScreenName(),
 			} );
 		};
 
