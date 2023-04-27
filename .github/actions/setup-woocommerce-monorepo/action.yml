@@ -72,7 +72,7 @@ runs:
         - name: Cache Build Output
           uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
           with:
-              path: node_modules/.cache/turbo
+              path: .turbo
               key: ${{ runner.os }}-build-output-${{ steps.get_branch.outputs.CURRENT_BRANCH_NAME }}-${{ github.sha }}
               restore-keys: |
                   ${{ runner.os }}-build-output-${{ steps.get_branch.outputs.CURRENT_BRANCH_NAME }}
@@ -81,7 +81,7 @@ runs:
         - name: Build
           if: ${{ inputs.build == 'true' }}
           shell: bash
-          run: pnpm -w exec turbo run turbo:build --summarize ${{ steps.parse-input.outputs.BUILD_FILTERS }}
+          run: pnpm -w exec turbo run turbo:build --cache-dir=".turbo" ${{ steps.parse-input.outputs.BUILD_FILTERS }}
 
         - name: Store summary of turbo run
           uses: actions/upload-artifact@v3
