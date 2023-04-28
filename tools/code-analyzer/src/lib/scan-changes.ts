@@ -1,9 +1,12 @@
 /**
  * External dependencies
  */
-import { Logger } from 'cli-core/src/logger';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 import { join } from 'path';
-import { cloneRepo, generateDiff } from 'cli-core/src/git';
+import {
+	cloneRepo,
+	generateDiff,
+} from '@woocommerce/monorepo-utils/src/core/git';
 import { readFile } from 'fs/promises';
 import { execSync } from 'child_process';
 

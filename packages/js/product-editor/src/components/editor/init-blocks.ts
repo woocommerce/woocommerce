@@ -12,12 +12,7 @@ import {
 /**
  * Internal dependencies
  */
-import { init as initName } from '../details-name-block';
-import { init as initSummary } from '../details-summary-block';
-import { init as initSection } from '../section';
-import { init as initTab } from '../tab';
-import { init as initPricing } from '../pricing-block';
-import { init as initCollapsible } from '../collapsible-block';
+import * as productBlocks from '../../blocks';
 
 export const initBlocks = () => {
 	const coreBlocks = __experimentalGetCoreBlocks();
@@ -28,10 +23,5 @@ export const initBlocks = () => {
 	// @ts-ignore An argument is allowed to specify which blocks to register.
 	registerCoreBlocks( blocks );
 
-	initName();
-	initSummary();
-	initSection();
-	initTab();
-	initPricing();
-	initCollapsible();
+	Object.values( productBlocks ).forEach( ( init ) => init() );
 };

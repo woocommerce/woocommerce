@@ -6,10 +6,13 @@
  * @since 3.0.0
  */
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+
 /**
  * Payment gateway test class.
  */
 class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
+	use ArraySubsetAsserts;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -47,7 +50,18 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 		$gateways = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertContains(
+
+		$matching_gateway_data = current(
+			array_filter(
+				$gateways,
+				function( $gateway ) {
+					return 'cheque' === $gateway['id'];
+				}
+			)
+		);
+		$this->assertIsArray( $matching_gateway_data );
+
+		$this->assertArraySubset(
 			array(
 				'id'                     => 'cheque',
 				'title'                  => 'Check payments',
@@ -65,7 +79,7 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 				),
 				'needs_setup'            => false,
 				'post_install_scripts'   => array(),
-				'settings_url'           => 'http://example.org/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
+				'settings_url'           => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
 				'connection_url'         => '',
 				'setup_help_text'        => '',
 				'required_settings_keys' => array(),
@@ -82,7 +96,7 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-			$gateways
+			$matching_gateway_data
 		);
 	}
 
@@ -127,7 +141,7 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 				),
 				'needs_setup'            => false,
 				'post_install_scripts'   => array(),
-				'settings_url'           => 'http://example.org/wp-admin/admin.php?page=wc-settings&tab=checkout&section=paypal',
+				'settings_url'           => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/admin.php?page=wc-settings&tab=checkout&section=paypal',
 				'connection_url'         => null,
 				'setup_help_text'        => null,
 				'required_settings_keys' => array(),

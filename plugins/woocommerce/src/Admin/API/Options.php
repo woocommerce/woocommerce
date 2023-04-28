@@ -167,7 +167,6 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_task_list_dismissed_tasks',
 			'woocommerce_setting_payments_recommendations_hidden',
 			'woocommerce_navigation_favorites_tooltip_hidden',
-			'woocommerce_marketing_overview_welcome_hidden',
 			'woocommerce_admin_transient_notices_queue',
 			'woocommerce_task_list_welcome_modal_dismissed',
 			'woocommerce_welcome_from_calypso_modal_dismissed',

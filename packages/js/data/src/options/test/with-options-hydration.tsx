@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -16,6 +16,7 @@ import {
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
+	useDispatch: jest.fn(),
 } ) );
 
 const optionData = {
@@ -40,20 +41,16 @@ describe( 'withOptionsHydration', () => {
 	const receiveOptionsMock = jest.fn();
 	beforeEach( () => {
 		( useSelect as jest.Mock ).mockImplementation( ( callback ) => {
-			callback(
-				() => ( {
-					isResolving: isResolvingMock,
-					hasFinishedResolution: hasFinishedMock,
-				} ),
-				{
-					dispatch: () => ( {
-						startResolution: startResolutionMock,
-						finishResolution: jest.fn(),
-						receiveOptions: receiveOptionsMock,
-					} ),
-				}
-			);
+			return callback( () => ( {
+				isResolving: isResolvingMock,
+				hasFinishedResolution: hasFinishedMock,
+			} ) );
 		} );
+		( useDispatch as jest.Mock ).mockImplementation( () => ( {
+			startResolution: startResolutionMock,
+			finishResolution: jest.fn(),
+			receiveOptions: receiveOptionsMock,
+		} ) );
 	} );
 
 	afterEach( () => {

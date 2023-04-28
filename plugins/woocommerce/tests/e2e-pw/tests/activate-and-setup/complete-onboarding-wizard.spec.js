@@ -24,7 +24,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 		await page.click( 'button >> text=Continue' );
 		await expect( page ).toHaveURL( /.*step=product-types/ );
@@ -40,7 +40,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries2,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 
 		// Navigate back to "Store Details" section
@@ -63,7 +63,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 
 		// Navigate back to "Store Details" section
@@ -94,7 +94,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 		await page.click( 'button >> text=Continue' );
 
@@ -116,7 +116,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 		// Check to see if WC Payments is present
 		const wcPay = await page.locator(
@@ -130,18 +130,6 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 
 		await onboarding.unselectBusinessFeatures( page );
 		await page.click( 'button >> text=Continue' );
-	} );
-
-	test( 'can complete the theme selection section', async ( { page } ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=theme'
-		);
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
-		expect( pageHeading ).toContain( 'Choose a theme' );
-		// Just continue with the current theme
-		await page.click( 'button >> text=Continue with my active theme' );
 	} );
 } );
 
@@ -161,7 +149,7 @@ test.describe(
 			await onboarding.completeIndustrySection(
 				page,
 				storeDetails.liberia.industries,
-				storeDetails.liberia.expectedIndustries
+				storeDetails.liberia.expectedNumberOfIndustries
 			);
 			await page.click( 'button >> text=Continue' );
 		} );
@@ -175,7 +163,7 @@ test.describe(
 			await onboarding.completeIndustrySection(
 				page,
 				storeDetails.liberia.industries,
-				storeDetails.liberia.expectedIndustries
+				storeDetails.liberia.expectedNumberOfIndustries
 			);
 			await page.click( 'button >> text=Continue' );
 
@@ -216,10 +204,12 @@ test.describe(
 				page.locator( '.woocommerce-input-toggle--disabled' )
 			).toHaveCount( 3 );
 			// Checklist shows when completing setup wizard
-			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=theme'
-			);
-			await page.click( 'button >> text=Continue with my active theme' );
+			await onboarding.completeBusinessDetailsSection( page );
+			await page.click( 'button >> text=Continue' );
+
+			await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
+			await page.click( 'button >> text=Continue' );
+		
 			// Start test
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
@@ -268,7 +258,6 @@ test.describe.skip( 'Store owner can go through setup Task List', () => {
 			await page.click( '.components-checkbox-control__input' );
 		}
 		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=Continue with my active theme' );
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	} );
 

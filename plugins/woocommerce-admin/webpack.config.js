@@ -65,6 +65,8 @@ const wpAdminScripts = [
 	'settings-tracking',
 	'order-tracking',
 	'product-import-tracking',
+	'variable-product-tour',
+	'product-category-metabox',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -104,6 +106,7 @@ const webpackConfig = {
 		uniqueName: '__wcAdmin_webpackJsonp',
 	},
 	module: {
+		parser: styleConfig.parser,
 		rules: [
 			{
 				test: /\.(t|j)sx?$/,
@@ -191,6 +194,26 @@ const webpackConfig = {
 				force: true,
 			} ) ),
 		} ),
+
+		// Get all product editor blocks so they can be loaded via JSON.
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: '../../packages/js/product-editor/build/blocks',
+					to: './product-editor/blocks',
+				},
+			],
+		} ),
+
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: '../../packages/js/product-editor/assets/icons',
+					to: './product-editor/icons',
+				},
+			],
+		} ),
+
 		// React Fast Refresh.
 		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
 

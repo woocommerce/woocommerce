@@ -294,7 +294,8 @@ LEFT JOIN $orders_table orders ON posts.ID = orders.id
 WHERE
   posts.post_type IN ($order_post_type_placeholders)
   AND posts.post_status != 'auto-draft'
-  AND orders.id IS NULL",
+  AND orders.id IS NULL
+ORDER BY posts.ID ASC",
 					$order_post_types
 				);
 				// phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
@@ -305,6 +306,7 @@ SELECT posts.ID FROM $wpdb->posts posts
 INNER JOIN $orders_table orders ON posts.id=orders.id
 WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'
 AND orders.status not in ( 'auto-draft' )
+ORDER BY posts.id ASC
 ";
 				break;
 			case self::ID_TYPE_DIFFERENT_UPDATE_DATE:
@@ -317,6 +319,7 @@ JOIN $wpdb->posts posts on posts.ID = orders.id
 WHERE
   posts.post_type IN ($order_post_type_placeholders)
   AND orders.date_updated_gmt $operator posts.post_modified_gmt
+ORDER BY orders.id ASC
 ",
 					$order_post_types
 				);

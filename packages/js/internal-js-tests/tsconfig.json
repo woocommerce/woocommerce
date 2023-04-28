@@ -3,7 +3,6 @@
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "build-module",
-		"composite": true,
 		"typeRoots": [
 			"./typings",
 			"./node_modules/@types"

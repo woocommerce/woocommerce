@@ -44,6 +44,19 @@ class DownloadPermissionsAdjuster {
 			return;
 		}
 
+		$are_any_children_downloadable = false;
+		foreach ( $children_ids as $child_id ) {
+			$child = wc_get_product( $child_id );
+			if ( $child && $child->is_downloadable() ) {
+				$are_any_children_downloadable = true;
+				break;
+			}
+		}
+
+		if ( ! $product->is_downloadable() && ! $are_any_children_downloadable ) {
+			return;
+		}
+
 		$scheduled_action_args = array( $product->get_id() );
 
 		$already_scheduled_actions =

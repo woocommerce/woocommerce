@@ -1,0 +1,10 @@
+.wp-block-woocommerce-product-tab__content {
+    &:not(.is-selected) {
+        display: none;
+    }
+}
+
+// Remove the Gutenberg selected outline.
+.wp-block-woocommerce-product-tab:after {
+    display: none;
+}

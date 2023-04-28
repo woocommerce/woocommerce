@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Use locator.fill to fill variation values in the form instead of page.fill

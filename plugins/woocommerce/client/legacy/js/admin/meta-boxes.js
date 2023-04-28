@@ -30,13 +30,16 @@ jQuery( function ( $ ) {
 	 * Function to maybe disable the save button.
 	 */
 	jQuery.maybe_disable_save_button = function () {
-		var $tab = $( '.product_attributes' );
-		var $save_button = $( 'button.save_attributes' );
+		var $tab;
+		var $save_button;
 		if (
 			$( '.woocommerce_variation_new_attribute_data' ).is( ':visible' )
 		) {
 			$tab = $( '.woocommerce_variation_new_attribute_data' );
 			$save_button = $( 'button.create-variations' );
+		} else {
+			var $tab = $( '.product_attributes' );
+			var $save_button = $( 'button.save_attributes' );
 		}
 
 		var attributes_and_variations_data = $tab.find(
@@ -47,17 +50,14 @@ jQuery( function ( $ ) {
 				attributes_and_variations_data
 			)
 		) {
-			if ( ! $save_button.is( ':disabled' ) ) {
-				$save_button.attr( 'disabled', 'disabled' );
-				$save_button.attr(
-					'title',
-					woocommerce_admin_meta_boxes.i18n_save_attribute_variation_tip
-				);
+			if ( ! $save_button.hasClass( 'disabled' ) ) {
+				$save_button.addClass( 'disabled' );
+				$save_button.attr( 'aria-disabled', true );
 			}
-			return;
+		} else {
+			$save_button.removeClass( 'disabled' );
+			$save_button.removeAttr( 'aria-disabled' );
 		}
-		$save_button.removeAttr( 'disabled' );
-		$save_button.removeAttr( 'title' );
 	};
 
 	// Run tipTip
@@ -75,6 +75,30 @@ jQuery( function ( $ ) {
 	}
 
 	runTipTip();
+
+	$( '.save_attributes' ).tipTip( {
+		content: function () {
+			return $( '.save_attributes' ).hasClass( 'disabled' )
+				? woocommerce_admin_meta_boxes.i18n_save_attribute_variation_tip
+				: '';
+		},
+		fadeIn: 50,
+		fadeOut: 50,
+		delay: 200,
+		keepAlive: true,
+	} );
+
+	$( '.create-variations' ).tipTip( {
+		content: function () {
+			return $( '.create-variations' ).hasClass( 'disabled' )
+				? woocommerce_admin_meta_boxes.i18n_save_attribute_variation_tip
+				: '';
+		},
+		fadeIn: 50,
+		fadeOut: 50,
+		delay: 200,
+		keepAlive: true,
+	} );
 
 	$( '.wc-metaboxes-wrapper' ).on( 'click', '.wc-metabox > h3', function () {
 		var metabox = $( this ).parent( '.wc-metabox' );
@@ -153,15 +177,17 @@ jQuery( function ( $ ) {
 		$( this ).find( '.wc-metabox-content' ).hide();
 	} );
 
-	$( '.product_attributes, .woocommerce_variation_new_attribute_data' ).on(
-		'keyup',
-		'input, textarea',
-		jQuery.maybe_disable_save_button
-	);
-
 	$( '#product_attributes' ).on(
 		'change',
 		'select.attribute_values',
 		jQuery.maybe_disable_save_button
 	);
+	$( '#product_attributes, #variable_product_options' ).on(
+		'keyup',
+		'input, textarea',
+		jQuery.maybe_disable_save_button
+	);
+
+	// Maybe disable save buttons when editing products.
+	jQuery.maybe_disable_save_button();
 } );

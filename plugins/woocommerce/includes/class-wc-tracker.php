@@ -696,7 +696,6 @@ class WC_Tracker {
 			'hpos_transactions_enabled'             => get_option( 'woocommerce_use_db_transactions_for_custom_orders_table_data_sync' ),
 			'hpos_transactions_level'               => get_option( 'woocommerce_db_transactions_isolation_level_for_custom_orders_table_data_sync' ),
 			'show_marketplace_suggestions'          => get_option( 'woocommerce_show_marketplace_suggestions' ),
-			'multichannel_marketing_enabled'        => get_option( 'woocommerce_multichannel_marketing_enabled' ),
 		);
 	}
 

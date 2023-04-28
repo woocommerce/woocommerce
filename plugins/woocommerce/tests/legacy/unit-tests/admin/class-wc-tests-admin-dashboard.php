@@ -49,10 +49,10 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 
 		$widget_output = $this->getActualOutput();
 
-		$this->assertRegExp( '/page\=wc-admin\&\#038\;path\=\%2Fanalytics\%2Frevenue/', $widget_output );
-		$this->assertRegExp( '/page\=wc-admin\&\#038\;filter\=single_product/', $widget_output );
-		$this->assertRegExp( '/page\=wc-admin\&\#038\;type\=lowstock/', $widget_output );
-		$this->assertRegExp( '/page\=wc-admin\&\#038\;type\=outofstock/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;path\=\%2Fanalytics\%2Frevenue/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;filter\=single_product/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;type\=lowstock/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;type\=outofstock/', $widget_output );
 	}
 
 	/**
@@ -72,10 +72,10 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		( new WC_Admin_Dashboard() )->status_widget();
 
 		$widget_output = $this->getActualOutput();
-		$this->assertRegExp( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;range\=month/', $widget_output );
-		$this->assertRegExp( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;report\=sales_by_product/', $widget_output );
-		$this->assertRegExp( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=low_in_stock/', $widget_output );
-		$this->assertRegExp( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=out_of_stock/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;range\=month/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;report\=sales_by_product/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=low_in_stock/', $widget_output );
+		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=out_of_stock/', $widget_output );
 
 		remove_filter( 'woocommerce_admin_disabled', '__return_true' );
 	}

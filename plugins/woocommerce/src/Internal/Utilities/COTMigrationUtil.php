@@ -6,7 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\{ DataSynchronizer, OrdersTableDataStore };
 use WC_Order;
 use WP_Post;
 
@@ -164,5 +164,37 @@ class COTMigrationUtil {
 		$order_id         = $this->get_post_or_order_id( $order_id );
 		$order_data_store = \WC_Data_Store::load( 'order' );
 		return $order_data_store->get_order_type( $order_id );
+	}
+
+	/**
+	 * Get the name of the database table that's currently in use for orders.
+	 *
+	 * @return string
+	 */
+	public function get_table_for_orders() {
+		if ( $this->custom_orders_table_usage_is_enabled() ) {
+			$table_name = OrdersTableDataStore::get_orders_table_name();
+		} else {
+			global $wpdb;
+			$table_name = $wpdb->posts;
+		}
+
+		return $table_name;
+	}
+
+	/**
+	 * Get the name of the database table that's currently in use for orders.
+	 *
+	 * @return string
+	 */
+	public function get_table_for_order_meta() {
+		if ( $this->custom_orders_table_usage_is_enabled() ) {
+			$table_name = OrdersTableDataStore::get_meta_table_name();
+		} else {
+			global $wpdb;
+			$table_name = $wpdb->postmeta;
+		}
+
+		return $table_name;
 	}
 }

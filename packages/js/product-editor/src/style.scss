@@ -1,11 +1,28 @@
+/* Editor */
+
 @import 'components/editor/style.scss';
+@import 'components/block-editor/style.scss';
+
+/* Structural */
+
+@import 'components/tabs/style.scss';
 @import 'components/product-section-layout/style.scss';
+@import 'components/header/style.scss';
+
+/* Components */
+
+@import 'components/content-preview/style.scss';
+@import 'components/radio-field/style.scss';
+@import 'components/iframe-editor/style.scss';
+@import 'components/details-categories-field/style.scss';
+@import 'components/details-categories-field/create-category-modal.scss';
+@import 'components/product-mvp-ces-footer/style.scss';
+@import 'components/product-mvp-feedback-modal/style.scss';
+@import 'components/edit-product-link-modal/style.scss';
 @import 'components/edit-product-link-modal/style.scss';
 @import 'components/details-categories-field/style.scss';
 @import 'components/details-categories-field/create-category-modal.scss';
-@import 'components/header/style.scss';
-@import 'components/block-editor/style.scss';
-@import 'components/section/style.scss';
-@import 'components/tab/style.scss';
-@import 'components/tabs/style.scss';
-@import 'components/details-summary-block/style.scss';
+
+/* Field Blocks */
+
+@import 'blocks/style.scss'

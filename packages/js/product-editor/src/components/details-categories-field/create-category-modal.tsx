@@ -2,10 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import interpolateComponents from '@automattic/interpolate-components';
 import { Button, Modal, Spinner, TextControl } from '@wordpress/components';
 import { useDebounce } from '@wordpress/compose';
-import { useState, createElement } from '@wordpress/element';
+import {
+	useState,
+	createElement,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import {
 	__experimentalSelectControl as SelectControl,
@@ -20,7 +23,7 @@ import {
 /**
  * Internal dependencies
  */
-import { useCategorySearch } from './use-category-search';
+import { ProductCategoryNode, useCategorySearch } from './use-category-search';
 import { CategoryFieldItem } from './category-field-item';
 
 type CreateCategoryModalProps = {
@@ -28,6 +31,15 @@ type CreateCategoryModalProps = {
 	onCancel: () => void;
 	onCreate: ( newCategory: ProductCategory ) => void;
 };
+
+function getCategoryItemLabel( item: ProductCategoryNode | null ): string {
+	return item?.name || '';
+}
+function getCategoryItemValue(
+	item: ProductCategoryNode | null
+): string | number {
+	return item?.id || '';
+}
 
 export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 	initialCategoryName,
@@ -48,10 +60,8 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 	const [ categoryName, setCategoryName ] = useState(
 		initialCategoryName || ''
 	);
-	const [ categoryParent, setCategoryParent ] = useState< Pick<
-		ProductCategory,
-		'id' | 'name'
-	> | null >( null );
+	const [ categoryParent, setCategoryParent ] =
+		useState< ProductCategoryNode | null >( null );
 
 	const onSave = async () => {
 		recordEvent( 'product_category_add', {
@@ -91,28 +101,25 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					value={ categoryName }
 					onChange={ setCategoryName }
 				/>
-				<SelectControl< Pick< ProductCategory, 'id' | 'name' > >
+				<SelectControl< ProductCategoryNode >
 					items={ categoriesSelectList }
-					label={ interpolateComponents( {
-						mixedString: __(
-							'Parent category {{optional/}}',
-							'woocommerce'
-						),
-						components: {
+					label={ createInterpolateElement(
+						__( 'Parent category <optional/>', 'woocommerce' ),
+						{
 							optional: (
 								<span className="woocommerce-product-form__optional-input">
 									{ __( '(optional)', 'woocommerce' ) }
 								</span>
 							),
-						},
-					} ) }
+						}
+					) }
 					selected={ categoryParent }
 					onSelect={ ( item ) => item && setCategoryParent( item ) }
 					onRemove={ () => setCategoryParent( null ) }
 					onInputChange={ debouncedSearch }
 					getFilteredItems={ getFilteredItems }
-					getItemLabel={ ( item ) => item?.name || '' }
-					getItemValue={ ( item ) => item?.id || '' }
+					getItemLabel={ getCategoryItemLabel }
+					getItemValue={ getCategoryItemValue }
 				>
 					{ ( {
 						items,

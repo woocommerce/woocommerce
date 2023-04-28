@@ -10,12 +10,12 @@ import {
 	ALLOW_TRACKING_OPTION_NAME,
 	STORE_KEY as CES_STORE_KEY,
 } from '@woocommerce/customer-effort-score';
+import { NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
  */
 import { ClassicEditorIcon } from '../../images/classic-editor-icon';
-import { NEW_PRODUCT_MANAGEMENT } from '~/customer-effort-score-tracks/product-mvp-ces-footer';
 
 export const ClassicEditorMenuItem = ( {
 	onClose,
@@ -57,7 +57,7 @@ export const ClassicEditorMenuItem = ( {
 			onClick={ () => {
 				if ( allowTracking ) {
 					updateOptions( {
-						[ NEW_PRODUCT_MANAGEMENT ]: 'no',
+						[ NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME ]: 'no',
 					} );
 					showProductMVPFeedbackModal();
 					onClose();

@@ -6,7 +6,6 @@ import './PaymentGatewaySuggestions';
 import './shipping';
 import './Marketing';
 import './appearance';
-import './connect';
 import './tax';
 import './woocommerce-payments';
 import './purchase';

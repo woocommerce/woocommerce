@@ -162,8 +162,19 @@ class WC_Products_Tracking {
 						description_value  = $( '.block-editor-rich-text__editable' ).text();
 					}
 
+					// We can't just check the number of '.woocommerce_attribute' elements because
+					// there might be empty ones, which get stripped out when saved. So, we'll check
+					// whether the name and values have been filled out.
+					var numberOfAttributes = $( '.woocommerce_attribute' ).filter( function () {
+						var attributeElement = $( this );
+						var attributeName = attributeElement.find( 'input.attribute_name' ).val();
+						var attributeValues = attributeElement.find( 'textarea[name^=\"attribute_values\"]' ).val();
+
+						return attributeName !== '' && attributeValues !== '';
+					} ).length;
+
 					var properties = {
-						attributes:				$( '.woocommerce_attribute' ).length,
+						attributes:				numberOfAttributes,
 						categories:				$( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
 						cross_sells:			$( '#crosssell_ids option' ).length ? 'Yes' : 'No',
 						description:			description_value.trim() !== '' ? 'Yes' : 'No',

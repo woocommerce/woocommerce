@@ -63,11 +63,9 @@ class OrdersTableSearchQuery {
 	 */
 	private function generate_join(): string {
 		$orders_table = $this->query->get_table_name( 'orders' );
-		$meta_table   = $this->query->get_table_name( 'meta' );
 		$items_table  = $this->query->get_table_name( 'items' );
 
 		return "
-			LEFT JOIN $meta_table AS search_query_meta ON search_query_meta.order_id = $orders_table.id
 			LEFT JOIN $items_table AS search_query_items ON search_query_items.order_id = $orders_table.id
 		";
 	}
@@ -81,23 +79,43 @@ class OrdersTableSearchQuery {
 	 */
 	private function generate_where(): string {
 		$where             = '';
-		$meta_fields       = $this->get_meta_fields_to_be_searched();
 		$possible_order_id = (string) absint( $this->query->get( 's' ) );
+		$order_table       = $this->query->get_table_name( 'orders' );
 
 		// Support the passing of an order ID as the search term.
 		if ( (string) $this->query->get( 's' ) === $possible_order_id ) {
-			$where = $this->query->get_table_name( 'orders' ) . '.id = ' . $possible_order_id . ' OR ';
+			$where = "`$order_table`.id = $possible_order_id OR ";
 		}
 
+		$meta_sub_query = $this->generate_where_for_meta_table();
+
 		$where .= "
-			(
-				search_query_meta.meta_key IN ( $meta_fields )
-				AND search_query_meta.meta_value LIKE $this->search_term
-			)
-			OR search_query_items.order_item_name LIKE $this->search_term
+			search_query_items.order_item_name LIKE $this->search_term
+			OR `$order_table`.id IN ( $meta_sub_query )
 		";
 
 		return " ( $where ) ";
+	}
+
+	/**
+	 * Generates where clause for meta table.
+	 *
+	 * Note we generate the where clause as a subquery to be used by calling function inside the IN clause. This is against the general wisdom for performance, but in this particular case, a subquery is able to use the order_id-meta_key-meta_value index, which is not possible with a join.
+	 *
+	 * Since it can use the index, which otherwise would not be possible, it is much faster than both LEFT JOIN or SQL_CALC approach that could have been used.
+	 *
+	 * @return string The where clause for meta table.
+	 */
+	private function generate_where_for_meta_table(): string {
+		$meta_table  = $this->query->get_table_name( 'meta' );
+		$meta_fields = $this->get_meta_fields_to_be_searched();
+		return "
+SELECT search_query_meta.order_id
+FROM $meta_table as search_query_meta
+WHERE search_query_meta.meta_key IN ( $meta_fields )
+AND search_query_meta.meta_value LIKE $this->search_term
+GROUP BY search_query_meta.order_id
+";
 	}
 
 	/**

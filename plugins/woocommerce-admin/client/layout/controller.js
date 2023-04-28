@@ -51,11 +51,6 @@ const Dashboard = lazy( () =>
 const Homescreen = lazy( () =>
 	import( /* webpackChunkName: "homescreen" */ '../homescreen' )
 );
-const MarketingOverview = lazy( () =>
-	import(
-		/* webpackChunkName: "marketing-overview" */ '../marketing/overview'
-	)
-);
 const MarketingOverviewMultichannel = lazy( () =>
 	import(
 		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
@@ -64,6 +59,11 @@ const MarketingOverviewMultichannel = lazy( () =>
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
+
+const CoreProfiler = lazy( () =>
+	import( /* webpackChunkName: "core-profiler" */ '../core-profiler' )
+);
+
 const SettingsGroup = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../settings' )
 );
@@ -157,9 +157,7 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures.marketing ) {
 		pages.push( {
-			container: window.wcAdminFeatures[ 'multichannel-marketing' ]
-				? MarketingOverviewMultichannel
-				: MarketingOverview,
+			container: MarketingOverviewMultichannel,
 			path: '/marketing',
 			breadcrumbs: [
 				...initialBreadcrumbs,
@@ -174,7 +172,7 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures[ 'block-editor-feature-enabled' ] ) {
+	if ( window.wcAdminFeatures[ 'product-block-editor' ] ) {
 		pages.push( {
 			container: ProductPage,
 			path: '/add-product',
@@ -251,12 +249,36 @@ export const getPages = () => {
 	}
 
 	if ( window.wcAdminFeatures.onboarding ) {
+		if ( ! window.wcAdminFeatures[ 'core-profiler' ] ) {
+			pages.push( {
+				container: ProfileWizard,
+				path: '/setup-wizard',
+				breadcrumbs: [
+					...initialBreadcrumbs,
+					__( 'Setup Wizard', 'woocommerce' ),
+				],
+				capability: 'manage_woocommerce',
+			} );
+		} else {
+			pages.push( {
+				container: CoreProfiler,
+				path: '/setup-wizard',
+				breadcrumbs: [
+					...initialBreadcrumbs,
+					__( 'Profiler', 'woocommerce' ),
+				],
+				capability: 'manage_woocommerce',
+			} );
+		}
+	}
+
+	if ( window.wcAdminFeatures[ 'core-profiler' ] ) {
 		pages.push( {
-			container: ProfileWizard,
-			path: '/setup-wizard',
+			container: CoreProfiler,
+			path: '/profiler',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				__( 'Setup Wizard', 'woocommerce' ),
+				__( 'Profiler', 'woocommerce' ),
 			],
 			capability: 'manage_woocommerce',
 		} );
