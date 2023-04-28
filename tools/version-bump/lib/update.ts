@@ -3,7 +3,7 @@
  */
 import { readFile, writeFile, stat } from 'fs/promises';
 import { join } from 'path';
-import { Logger } from 'cli-core/src/logger';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 
 /**
  * Internal dependencies

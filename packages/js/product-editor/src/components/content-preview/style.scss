@@ -1,0 +1,26 @@
+.woocommerce-content-preview {
+    border: 1px solid $gray-300;
+    max-height: 144px;
+    overflow: hidden;
+    padding: $gap-large;
+    margin-top: $gap-largest;
+
+    >:first-child {
+        margin-top: 0;
+    }
+
+    > * {
+        max-width: 100%;
+    }
+
+    &:after {
+        content: '';
+        display: block;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 57px;
+        width: 100%;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 89.5%);
+    }
+}

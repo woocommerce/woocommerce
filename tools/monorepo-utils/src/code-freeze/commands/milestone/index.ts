@@ -2,23 +2,21 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
-import chalk from 'chalk';
 import ora from 'ora';
 
 /**
  * Internal dependencies
  */
-import { getLatestReleaseVersion } from '../../../github/repo';
-import { octokitWithAuth } from '../../../github/api';
-import { WPIncrement, setGithubMilestoneOutputs } from './utils';
+import { getLatestGithubReleaseVersion } from '../../../core/github/repo';
+import { octokitWithAuth } from '../../../core/github/api';
+import { setGithubMilestoneOutputs } from './utils';
+import { WPIncrement } from '../../../core/version';
 import { Options } from './types';
+import { Logger } from '../../../core/logger';
+import { getEnvVar } from '../../../core/environment';
 
-export const milesStoneCommand = new Command( 'milestone' )
+export const milestoneCommand = new Command( 'milestone' )
 	.description( 'Create a milestone' )
-	.option(
-		'-g --github',
-		'CLI command is used in the Github Actions context.'
-	)
 	.option( '-d --dryRun', 'Prepare the milestone but do not create it.' )
 	.option(
 		'-o --owner <owner>',
@@ -35,13 +33,12 @@ export const milesStoneCommand = new Command( 'milestone' )
 		'Milestone to create. Next milestone is gathered from Github if none is supplied'
 	)
 	.action( async ( options: Options ) => {
-		const { owner, name, dryRun, milestone, github } = options;
+		const { owner, name, dryRun, milestone } = options;
+		const isGithub = getEnvVar( 'CI' );
 
-		if ( milestone && github ) {
-			console.log(
-				chalk.red(
-					"You can't manually supply a milestone using Github mode. Please use the CLI locally to add a milestone."
-				)
+		if ( milestone && isGithub ) {
+			Logger.error(
+				"You can't manually supply a milestone using Github mode. Please use the CLI locally to add a milestone."
 			);
 			process.exit( 1 );
 		}
@@ -50,17 +47,15 @@ export const milesStoneCommand = new Command( 'milestone' )
 		let nextReleaseVersion;
 
 		if ( milestone ) {
-			console.log(
-				chalk.yellow(
-					`Manually creating milestone ${ milestone } in ${ owner }/${ name }`
-				)
+			Logger.warn(
+				`Manually creating milestone ${ milestone } in ${ owner }/${ name }`
 			);
 			nextMilestone = milestone;
 		} else {
 			const versionSpinner = ora(
 				'No milestone supplied, going off the latest release version'
 			).start();
-			const latestReleaseVersion = await getLatestReleaseVersion(
+			const latestReleaseVersion = await getLatestGithubReleaseVersion(
 				options
 			);
 			versionSpinner.succeed();
@@ -68,22 +63,16 @@ export const milesStoneCommand = new Command( 'milestone' )
 			nextReleaseVersion = WPIncrement( latestReleaseVersion );
 			nextMilestone = WPIncrement( nextReleaseVersion );
 
-			console.log(
-				chalk.yellow(
-					`The latest release in ${ owner }/${ name } is version: ${ latestReleaseVersion }`
-				)
+			Logger.warn(
+				`The latest release in ${ owner }/${ name } is version: ${ latestReleaseVersion }`
 			);
 
-			console.log(
-				chalk.yellow(
-					`The next release in ${ owner }/${ name } will be version: ${ nextReleaseVersion }`
-				)
+			Logger.warn(
+				`The next release in ${ owner }/${ name } will be version: ${ nextReleaseVersion }`
 			);
 
-			console.log(
-				chalk.yellow(
-					`The next milestone in ${ owner }/${ name } will be: ${ nextMilestone }`
-				)
+			Logger.warn(
+				`The next milestone in ${ owner }/${ name } will be: ${ nextMilestone }`
 			);
 		}
 
@@ -93,10 +82,8 @@ export const milesStoneCommand = new Command( 'milestone' )
 
 		if ( dryRun ) {
 			milestoneSpinner.succeed();
-			console.log(
-				chalk.green(
-					`DRY RUN: Skipping actual creation of milestone ${ nextMilestone }`
-				)
+			Logger.notice(
+				`DRY RUN: Skipping actual creation of milestone ${ nextMilestone }`
 			);
 
 			process.exit( 0 );
@@ -116,12 +103,10 @@ export const milesStoneCommand = new Command( 'milestone' )
 
 			if ( milestoneAlreadyExistsError ) {
 				milestoneSpinner.succeed();
-				console.log(
-					chalk.green(
-						`Milestone ${ nextMilestone } already exists in ${ owner }/${ name }`
-					)
+				Logger.notice(
+					`Milestone ${ nextMilestone } already exists in ${ owner }/${ name }`
 				);
-				if ( github ) {
+				if ( isGithub ) {
 					setGithubMilestoneOutputs(
 						nextReleaseVersion,
 						nextMilestone
@@ -130,23 +115,19 @@ export const milesStoneCommand = new Command( 'milestone' )
 				process.exit( 0 );
 			} else {
 				milestoneSpinner.fail();
-				console.log(
-					chalk.red(
-						`\nFailed to create milestone ${ nextMilestone } in ${ owner }/${ name }`
-					)
+				Logger.error(
+					`\nFailed to create milestone ${ nextMilestone } in ${ owner }/${ name }`
 				);
-				console.log( chalk.red( e.response.data.message ) );
+				Logger.error( e.response.data.message );
 				process.exit( 1 );
 			}
 		}
 
 		milestoneSpinner.succeed();
-		if ( github ) {
+		if ( isGithub ) {
 			setGithubMilestoneOutputs( nextReleaseVersion, nextMilestone );
 		}
-		console.log(
-			chalk.green(
-				`Successfully created milestone ${ nextMilestone } in ${ owner }/${ name }`
-			)
+		Logger.notice(
+			`Successfully created milestone ${ nextMilestone } in ${ owner }/${ name }`
 		);
 	} );
