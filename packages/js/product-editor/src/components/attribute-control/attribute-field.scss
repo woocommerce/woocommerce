@@ -14,4 +14,15 @@
 		background: none;
 		border-top: 0;
 	}
+
+	.woocommerce-add-attribute-list-item__add-button {
+		margin-bottom: $gap;
+	}
+
+	.woocommerce-list-item {
+		background: none;
+		border: none;
+		border-bottom: 1px solid $gray-200;
+	}
+
 }

@@ -8,6 +8,7 @@ import {
 	Fragment,
 	createInterpolateElement,
 } from '@wordpress/element';
+import { Button } from '@wordpress/components';
 import { ProductAttribute } from '@woocommerce/data';
 import {
 	Sortable,
@@ -27,10 +28,7 @@ import {
 	reorderSortableProductAttributePositions,
 } from './utils';
 import { AttributeEmptyState } from '../attribute-empty-state';
-import {
-	AttributeListItem,
-	NewAttributeListItem,
-} from '../attribute-list-item';
+import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 
 type AttributeControlProps = {
@@ -70,7 +68,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	uiStrings = {
 		newAttributeModalTitle: undefined,
 		emptyStateSubtitle: undefined,
-		newAttributeListItemLabel: undefined,
+		newAttributeListItemLabel: __( 'Add attributes', 'woocommerce' ),
 		globalAttributeHelperMessage: __(
 			`You can change the attribute's name in <link>Attributes</link>.`,
 			'woocommerce'
@@ -206,6 +204,13 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	return (
 		<div className="woocommerce-attribute-field">
+			<Button
+				variant="secondary"
+				className="woocommerce-add-attribute-list-item__add-button"
+				onClick={ () => openNewModal() }
+			>
+				{ uiStrings.newAttributeListItemLabel }
+			</Button>
 			<Sortable
 				onOrderChange={ ( items ) => {
 					const itemPositions = items.reduce(
@@ -233,10 +238,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					/>
 				) ) }
 			</Sortable>
-			<NewAttributeListItem
-				label={ uiStrings.newAttributeListItemLabel }
-				onClick={ () => openNewModal() }
-			/>
 			{ isNewModalVisible && (
 				<NewAttributeModal
 					title={ uiStrings.newAttributeModalTitle }
