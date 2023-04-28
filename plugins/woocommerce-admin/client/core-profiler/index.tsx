@@ -14,13 +14,6 @@ import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 
-/** Uncomment below to display xstate inspector during development */
-// import { inspect } from '@xstate/inspect';
-// inspect( {
-// 	// url: 'https://stately.ai/viz?inspect', // (default)
-// 	iframe: false, // open in new window
-// } );
-
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
 // https://stately.ai/blog/introducing-typescript-typegen-for-xstate
 
