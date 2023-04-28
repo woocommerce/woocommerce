@@ -2,9 +2,7 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
-import { join } from 'path';
 import simpleGit from 'simple-git';
-import { readFile, writeFile } from 'fs/promises';
 
 /**
  * Internal dependencies
@@ -13,6 +11,7 @@ import { Logger } from '../../../core/logger';
 import { cloneRepo } from '../../../core/git';
 import { octokitWithAuth } from '../../../core/github/api';
 import { getEnvVar } from '../../../core/environment';
+import { bumpFiles } from './bump';
 
 const errFn = ( err ) => {
 	if ( err.git ) {
@@ -55,25 +54,12 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		const base = 'trunk';
 		await git.checkoutBranch( branch, base ).catch( errFn );
 
-		const filePath = join(
-			tmpRepoPath,
-			`plugins/woocommerce/woocommerce.php`
-		);
-
-		try {
-			const pluginFileContents = await readFile( filePath, 'utf8' );
-
-			const updatedPluginFileContents = pluginFileContents.replace(
-				/Version: \d+\.\d+\.\d+.*\n/m,
-				`Version: XX.XX\n`
-			);
-			await writeFile( filePath, updatedPluginFileContents );
-		} catch ( e ) {
-			Logger.error( 'Unable to update plugin file.' );
-		}
+		Logger.startTask( `Bumping versions in ${ owner }/${ name }` );
+		bumpFiles( tmpRepoPath );
+		Logger.endTask();
 
 		Logger.startTask( 'Adding and committing changes' );
-		await git.add( filePath ).catch( errFn );
+		await git.add( '.' ).catch( errFn );
 		await git.commit( 'Prep trunk for XX.XX cycle' ).catch( errFn );
 		Logger.endTask();
 
