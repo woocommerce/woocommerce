@@ -283,7 +283,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 							openMenu();
 						}
 					},
-					// onBlur: () => setIsFocused( false ),
+					onBlur: () => setIsFocused( false ),
 					placeholder,
 					disabled,
 					...inputProps,
