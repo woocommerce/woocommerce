@@ -159,7 +159,7 @@ export function Edit() {
 							'woocommerce'
 						) }
 						onChange={ setName }
-						value={ name || '' }
+						value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
 						onBlur={ setSkuIfEmpty }
 					/>
 				</BaseControl>
