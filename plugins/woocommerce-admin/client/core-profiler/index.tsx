@@ -82,12 +82,15 @@ export type CoreProfilerStateMachineContext = {
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
 	loader: {
-		title: string;
-		progress?: number;
-		className?: string;
-		paragraphs?: Array< {
-			text: string | JSX.Element;
-			duration?: number;
+		currentStage?: number;
+		stages: Array< {
+			title: string;
+			progress?: number;
+			className?: string;
+			paragraphs?: Array< {
+				text: string | JSX.Element;
+				duration?: number;
+			} >;
 		} >;
 	};
 };
@@ -225,12 +228,17 @@ const coreProfilerStateMachineDefinition = createMachine( {
 		extensionsSelected: [],
 		countries: {},
 		loader: {
-			title: '',
-			progress: 0,
-			className: '',
-			paragraphs: [
+			currentStage: 0,
+			stages: [
 				{
-					text: '',
+					title: 'Loading',
+					progress: 0,
+					className: '',
+					paragraphs: [
+						{
+							text: '',
+						},
+					],
 				},
 			],
 		},
@@ -389,10 +397,67 @@ const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		postSkipFlowBusinessLocation: {
-			exit: [
-				'recordTracksSkipBusinessLocationCompleted',
-				'redirectWooHome',
-			],
+			initial: 'stage1',
+			states: {
+				// Set stage 2 and wait for 5 seconds before moving to the next stage
+				stage1: {
+					invoke: {
+						src: ( context ) => ( callback ) => {
+							return new Promise( ( resolve ) => {
+								setTimeout( resolve, 5000 );
+							} );
+						},
+						onDone: [
+							{
+								target: 'stage2',
+								actions: [
+									assign( {
+										loader: ( context ) => {
+											return {
+												...context.loader,
+												currentStage: 1,
+											};
+										},
+									} ),
+								],
+							},
+						],
+					},
+				},
+				// wait for 5 sec and move to home
+				stage2: {
+					invoke: {
+						src: ( context ) => ( callback ) => {
+							return new Promise( ( resolve ) => {
+								setTimeout( resolve, 5000 );
+							} );
+						},
+						onDone: [
+							{
+								actions: [
+									'recordTracksSkipBusinessLocationCompleted',
+									// 'redirectWooHome',
+								],
+							},
+						],
+					},
+				},
+			},
+			entry: assign( {
+				loader: {
+					currentStage: 0,
+					stages: [
+						{
+							title: 'Loading 1',
+							progress: 20,
+						},
+						{
+							title: 'Loading 2',
+							progress: 40,
+						},
+					],
+				},
+			} ),
 			meta: {
 				component: Loader,
 			},
@@ -455,12 +520,17 @@ const CoreProfilerController = ( {} ) => {
 
 	const [ state, send ] = useMachine( augmentedStateMachine );
 
-	const currentNodeMeta = state.meta[ `coreProfiler.${ state.value }` ]
-		? state.meta[ `coreProfiler.${ state.value }` ]
+	let stateValue = state.value;
+	if ( typeof state.value === 'object' ) {
+		stateValue = Object.keys( state.value )[ 0 ];
+	}
+	const currentNodeMeta = state.meta[ `coreProfiler.${ stateValue }` ]
+		? state.meta[ `coreProfiler.${ stateValue }` ]
 		: undefined;
 	const navigationProgress = currentNodeMeta?.progress; // This value is defined in each state node's meta tag, we can assume it is 0-100
 	const CurrentComponent =
 		currentNodeMeta?.component ?? ( () => <div>Insert Spinner</div> ); // If no component is defined for the state then its a loading state
+	console.log( state.context.loader );
 
 	useEffect( () => {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );

@@ -24,15 +24,16 @@ export const Loader = ( {
 }: {
 	context: CoreProfilerStateMachineContext;
 } ) => {
+	const stage = context.loader.stages[ context.loader.currentStage ?? 0 ];
 	return (
 		<div
 			className={ classNames(
 				'woocommerce-profiler-loader',
-				context.loader.className
+				stage.className
 			) }
 		>
 			<h1 className="woocommerce-profiler-loader__title">
-				{ context.loader.title }
+				{ stage.title }
 			</h1>
 		</div>
 	);
