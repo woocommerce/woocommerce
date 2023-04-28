@@ -76,7 +76,7 @@ class WC_Settings_Tracking {
 	public function add_option_to_list( $option ) {
 		$this->allowed_options[] = $option['id'];
 
-		if ( isset( $option[ 'options' ] ) ){
+		if ( isset( $option['options'] ) ) {
 			$this->dropdown_menu_options[] = $option['id'];
 		}
 
@@ -112,8 +112,8 @@ class WC_Settings_Tracking {
 
 		if ( in_array( $option_name, $this->dropdown_menu_options, true ) ) {
 			$this->modified_options[ $option_name ] = $new_value;
-		// Check and save toggled options.
 		} elseif ( in_array( $new_value, array( 'yes', 'no' ), true ) && in_array( $old_value, array( 'yes', 'no' ), true ) ) {
+			// Save toggled options.
 			$option_state                             = 'yes' === $new_value ? 'enabled' : 'disabled';
 			$this->toggled_options[ $option_state ][] = $option_name;
 		}
