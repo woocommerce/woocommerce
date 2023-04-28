@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Remove if statement that caused stats not to be loaded on certain scenarios
+
+
