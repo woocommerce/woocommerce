@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Print blocks-based CSS classes only when a FSE theme is used
