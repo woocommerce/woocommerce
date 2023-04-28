@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Use SELECT * when querying the custom orders table instead of using table aliases in order to shrink the length of the query.
