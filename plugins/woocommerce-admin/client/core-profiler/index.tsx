@@ -81,6 +81,15 @@ export type CoreProfilerStateMachineContext = {
 	extensionsSelected: string[]; // extension slugs
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
+	loader: {
+		title: string;
+		progress?: number;
+		className?: string;
+		paragraphs?: Array< {
+			text: string | JSX.Element;
+			duration?: number;
+		} >;
+	};
 };
 
 const Extensions = ( {

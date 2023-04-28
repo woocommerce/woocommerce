@@ -19,7 +19,11 @@ type Props = {
 	} >;
 };
 
-export const Loader = ( { context }: CoreProfilerStateMachineContext ) => {
+export const Loader = ( {
+	context,
+}: {
+	context: CoreProfilerStateMachineContext;
+} ) => {
 	return (
 		<div
 			className={ classNames(
