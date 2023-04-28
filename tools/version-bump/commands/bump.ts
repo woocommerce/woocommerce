@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { prerelease } from 'semver';
-import { Logger } from 'cli-core/src/logger';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 
 /**
  * Internal dependencies

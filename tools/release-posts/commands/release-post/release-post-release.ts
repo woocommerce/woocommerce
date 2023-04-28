@@ -6,8 +6,12 @@ import semver from 'semver';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { cloneRepo, getCommitHash } from 'cli-core/src/git';
-import { Logger } from 'cli-core/src/logger';
+import {
+	cloneRepo,
+	getCommitHash,
+} from '@woocommerce/monorepo-utils/src/core/git';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
+import { getEnvVar } from '@woocommerce/monorepo-utils/src/core/environment';
 import { Command } from '@commander-js/extra-typings';
 import dotenv from 'dotenv';
 
@@ -21,7 +25,6 @@ import {
 	editWpComPostContent,
 } from '../../lib/draft-post';
 import { getWordpressComAuthToken } from '../../lib/oauth-helper';
-import { getEnvVar } from '../../lib/environment';
 import { generateContributors } from '../../lib/contributors';
 import { editPostHTML } from '../../lib/edit-post';
 

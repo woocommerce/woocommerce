@@ -1,0 +1,6 @@
+Significance: patch
+Type: dev
+
+Added xstate inspector toggling via localStorage flag and dev node environment, and eslint xstate plugin
+
+ 

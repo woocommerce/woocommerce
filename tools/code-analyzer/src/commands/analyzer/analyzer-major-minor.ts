@@ -4,8 +4,8 @@
 import { join } from 'path';
 import { readFile } from 'fs/promises';
 import simpleGit from 'simple-git';
-import { cloneRepo } from 'cli-core/src/git';
-import { Logger } from 'cli-core/src/logger';
+import { cloneRepo } from '@woocommerce/monorepo-utils/src/core/git';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 import { Command } from '@commander-js/extra-typings';
 
 /**
