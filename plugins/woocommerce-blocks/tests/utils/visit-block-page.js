@@ -8,7 +8,7 @@ import {
 } from '@wordpress/e2e-test-utils';
 import { outputFile } from 'fs-extra';
 import { dirname } from 'path';
-import kebabCase from 'lodash/kebabCase';
+import { paramCase as kebabCase } from 'change-case';
 
 /**
  * Internal dependencies

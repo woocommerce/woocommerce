@@ -3,7 +3,7 @@
  */
 const path = require( 'path' );
 const fs = require( 'fs' );
-const { kebabCase } = require( 'lodash' );
+const { paramCase } = require( 'change-case' );
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
@@ -79,7 +79,7 @@ const getCoreConfig = ( options = {} ) => {
 		entry: getEntryConfig( 'core', options.exclude || [] ),
 		output: {
 			filename: ( chunkData ) => {
-				return `${ kebabCase( chunkData.chunk.name ) }.js`;
+				return `${ paramCase( chunkData.chunk.name ) }.js`;
 			},
 			path: path.resolve( __dirname, '../build/' ),
 			library: [ 'wc', '[name]' ],

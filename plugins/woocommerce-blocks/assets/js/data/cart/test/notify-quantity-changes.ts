@@ -3,8 +3,9 @@
  */
 import { dispatch, select } from '@wordpress/data';
 import { previewCart } from '@woocommerce/resource-previews';
-import { camelCase, cloneDeep, mapKeys } from 'lodash';
+import { klona } from 'klona/json';
 import { Cart, CartResponse } from '@woocommerce/types';
+import { camelCaseKeys } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -34,14 +35,12 @@ select.mockImplementation( () => {
  * Clones the preview cart and turns it into a `Cart`.
  */
 const getFreshCarts = (): { oldCart: Cart; newCart: Cart } => {
-	const oldCart = mapKeys(
-		cloneDeep< CartResponse >( previewCart ),
-		( _, key ) => camelCase( key )
-	) as unknown as Cart;
-	const newCart = mapKeys(
-		cloneDeep< CartResponse >( previewCart ),
-		( _, key ) => camelCase( key )
-	) as unknown as Cart;
+	const oldCart = camelCaseKeys(
+		klona< CartResponse >( previewCart )
+	) as Cart;
+	const newCart = camelCaseKeys(
+		klona< CartResponse >( previewCart )
+	) as Cart;
 	return { oldCart, newCart };
 };
 

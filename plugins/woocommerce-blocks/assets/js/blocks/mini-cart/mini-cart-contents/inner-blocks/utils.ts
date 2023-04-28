@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { isObject } from 'lodash';
+import { isObject } from '@woocommerce/types';
 
 type Variant = 'text' | 'contained' | 'outlined';
 

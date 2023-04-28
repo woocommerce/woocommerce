@@ -4,11 +4,10 @@
  * External dependencies
  */
 import type { BlockAlignment } from '@wordpress/blocks';
-import { ProductResponseItem } from '@woocommerce/types';
+import { ProductResponseItem, isEmpty } from '@woocommerce/types';
 import { __experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles } from '@wordpress/block-editor';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
 import classnames from 'classnames';
-import { isEmpty } from 'lodash';
 import { useCallback, useState } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { useBorderProps } from '@woocommerce/base-hooks';

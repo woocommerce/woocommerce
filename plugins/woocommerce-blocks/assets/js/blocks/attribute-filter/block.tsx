@@ -34,7 +34,6 @@ import {
 	PREFIX_QUERY_ARG_FILTER_TYPE,
 	PREFIX_QUERY_ARG_QUERY_TYPE,
 } from '@woocommerce/utils';
-import { difference } from 'lodash';
 import FormTokenField from '@woocommerce/base-components/form-token-field';
 import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placeholder';
 import classnames from 'classnames';
@@ -591,13 +590,19 @@ const AttributeFilterBlock = ( {
 										: token;
 								} );
 
-								const added = difference( tokens, checked );
+								const added = [ tokens, checked ].reduce(
+									( a, b ) =>
+										a.filter( ( c ) => ! b.includes( c ) )
+								);
 
 								if ( added.length === 1 ) {
 									return onChange( added[ 0 ] );
 								}
 
-								const removed = difference( checked, tokens );
+								const removed = [ checked, tokens ].reduce(
+									( a, b ) =>
+										a.filter( ( c ) => ! b.includes( c ) )
+								);
 								if ( removed.length === 1 ) {
 									onChange( removed[ 0 ] );
 								}
