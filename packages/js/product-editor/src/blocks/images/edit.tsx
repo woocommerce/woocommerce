@@ -114,6 +114,7 @@ export function Edit() {
 				) }
 			</div>
 			<ImageGallery
+				allowDragging={ false }
 				onDragStart={ ( event ) => {
 					const { id: imageId, dataset } =
 						event.target as HTMLElement;
