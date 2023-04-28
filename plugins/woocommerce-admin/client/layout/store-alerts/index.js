@@ -74,7 +74,14 @@ export class StoreAlerts extends Component {
 					isPrimary={ action.primary }
 					isSecondary={ ! action.primary }
 					href={ action.url || undefined }
-					onClick={ () => triggerNoteAction( alert.id, action.id ) }
+					onClick={ async ( event ) => {
+						const url = event.currentTarget.getAttribute( 'href' );
+						event.preventDefault();
+						await triggerNoteAction( alert.id, action.id );
+						if ( url && url !== '#' ) {
+							window.location.href = url;
+						}
+					} }
 				>
 					{ action.label }
 				</Button>
