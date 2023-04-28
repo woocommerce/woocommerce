@@ -67,7 +67,6 @@ class Controller extends AbstractController implements ExportableInterface {
 			$data[] = $this->prepare_response_for_collection( $item );
 		}
 
-
 		return $this->add_pagination_headers(
 			$request,
 			$data,
@@ -196,7 +195,7 @@ class Controller extends AbstractController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
+		$params                       = parent::get_collection_params();
 		$params['orderby']['default'] = 'coupon_id';
 		$params['orderby']['enum']    = array(
 			'coupon_id',
@@ -204,7 +203,7 @@ class Controller extends AbstractController implements ExportableInterface {
 			'amount',
 			'orders_count',
 		);
-		$params['coupons']       = array(
+		$params['coupons']            = array(
 			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -213,7 +212,7 @@ class Controller extends AbstractController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
-		$params['extended_info'] = array(
+		$params['extended_info']      = array(
 			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,

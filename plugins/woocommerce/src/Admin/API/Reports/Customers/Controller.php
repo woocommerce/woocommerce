@@ -304,7 +304,7 @@ class Controller extends AbstractController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
+		$params                            = parent::get_collection_params();
 		$params['registered_before']       = array(
 			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
@@ -317,8 +317,8 @@ class Controller extends AbstractController implements ExportableInterface {
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']['default'] = 'date_registered';
-		$params['orderby']['enum']    = array(
+		$params['orderby']['default']      = 'date_registered';
+		$params['orderby']['enum']         = array(
 			'username',
 			'name',
 			'country',

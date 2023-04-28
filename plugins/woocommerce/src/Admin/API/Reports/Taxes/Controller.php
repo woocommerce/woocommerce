@@ -203,9 +203,9 @@ class Controller extends AbstractController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
+		$params                       = parent::get_collection_params();
 		$params['orderby']['default'] = 'tax_rate_id';
-		$params['orderby']['enum'] = array(
+		$params['orderby']['enum']    = array(
 			'name',
 			'tax_rate_id',
 			'tax_code',
@@ -215,7 +215,7 @@ class Controller extends AbstractController implements ExportableInterface {
 			'shipping_tax',
 			'orders_count',
 		);
-		$params['taxes']    = array(
+		$params['taxes']              = array(
 			'description'       => __( 'Limit result set to items assigned one or more tax rates.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',

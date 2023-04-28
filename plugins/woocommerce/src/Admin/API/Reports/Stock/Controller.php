@@ -417,7 +417,7 @@ class Controller extends AbstractController implements ExportableInterface {
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
 		unset( $params['after'], $params['before'], $params['force_cache_refresh'] );
-		$params['exclude']        = array(
+		$params['exclude']            = array(
 			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -426,7 +426,7 @@ class Controller extends AbstractController implements ExportableInterface {
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['include']        = array(
+		$params['include']            = array(
 			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -435,15 +435,15 @@ class Controller extends AbstractController implements ExportableInterface {
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['offset']         = array(
+		$params['offset']             = array(
 			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']['default'] = 'asc';
+		$params['order']['default']   = 'asc';
 		$params['orderby']['default'] = 'stock_status';
-		$params['orderby']['enum'] = array(
+		$params['orderby']['enum']    = array(
 			'stock_status',
 			'stock_quantity',
 			'date',
@@ -452,7 +452,7 @@ class Controller extends AbstractController implements ExportableInterface {
 			'title',
 			'sku',
 		);
-		$params['parent']         = array(
+		$params['parent']             = array(
 			'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -461,7 +461,7 @@ class Controller extends AbstractController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'default'           => array(),
 		);
-		$params['parent_exclude'] = array(
+		$params['parent_exclude']     = array(
 			'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -470,7 +470,7 @@ class Controller extends AbstractController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'default'           => array(),
 		);
-		$params['type']           = array(
+		$params['type']               = array(
 			'description' => __( 'Limit result set to items assigned a stock report type.', 'woocommerce' ),
 			'type'        => 'string',
 			'default'     => 'all',

@@ -328,7 +328,7 @@ class Controller extends AbstractController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
+		$params                    = parent::get_collection_params();
 		$params['orderby']['enum'] = array(
 			'date',
 			'total_sales',
@@ -341,7 +341,7 @@ class Controller extends AbstractController implements ExportableInterface {
 			'items_sold',
 			'gross_sales',
 		);
-		$params['interval']  = array(
+		$params['interval']        = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'week',
@@ -355,7 +355,7 @@ class Controller extends AbstractController implements ExportableInterface {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['segmentby'] = array(
+		$params['segmentby']       = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(

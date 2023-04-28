@@ -200,8 +200,8 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
-		$params['orderby']['enum'] = array(
+		$params                     = parent::get_collection_params();
+		$params['orderby']['enum']  = array(
 			'date',
 			'download_count',
 		);

@@ -283,8 +283,8 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
-		$params              = array();
+		$params                    = parent::get_collection_params();
+		$params                    = array();
 		$params['orderby']['enum'] = array(
 			'date',
 			'items_sold',
@@ -292,7 +292,7 @@ class Controller extends AbstractController {
 			'orders_count',
 			'products_count',
 		);
-		$params['interval']  = array(
+		$params['interval']        = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'week',
@@ -306,7 +306,7 @@ class Controller extends AbstractController {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['taxes']     = array(
+		$params['taxes']           = array(
 			'description'       => __( 'Limit result set to all items that have the specified term assigned in the taxes taxonomy.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -315,7 +315,7 @@ class Controller extends AbstractController {
 				'type' => 'integer',
 			),
 		);
-		$params['segmentby'] = array(
+		$params['segmentby']       = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(
@@ -323,7 +323,7 @@ class Controller extends AbstractController {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['fields']    = array(
+		$params['fields']          = array(
 			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',

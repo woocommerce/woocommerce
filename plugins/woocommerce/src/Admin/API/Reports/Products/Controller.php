@@ -230,7 +230,7 @@ class Controller extends AbstractController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
+		$params                    = parent::get_collection_params();
 		$params['orderby']['enum'] = array(
 			'date',
 			'net_revenue',
@@ -240,7 +240,7 @@ class Controller extends AbstractController implements ExportableInterface {
 			'variations',
 			'sku',
 		);
-		$params['categories'] = array(
+		$params['categories']      = array(
 			'description'       => __( 'Limit result to items from the specified categories.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -249,7 +249,7 @@ class Controller extends AbstractController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
-		$params['match']      = array(
+		$params['match']           = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'all',
@@ -259,7 +259,7 @@ class Controller extends AbstractController implements ExportableInterface {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['products']   = array(
+		$params['products']        = array(
 			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',

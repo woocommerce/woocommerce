@@ -287,7 +287,7 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
+		$params                      = parent::get_collection_params();
 		$params['match']             = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
 			'type'              => 'string',
@@ -298,7 +298,7 @@ class Controller extends AbstractController {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']['enum'] = array(
+		$params['orderby']['enum']   = array(
 			'date',
 			'net_revenue',
 			'coupons',
