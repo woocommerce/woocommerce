@@ -172,9 +172,7 @@ export function Edit( {
 	}
 
 	useEffect( () => {
-		if ( shippingClass === '' ) {
-			setOption( FREE_SHIPPING_OPTION_VALUE );
-		} else if ( shippingClass ) {
+		if ( shippingClass ) {
 			setOption( FOLLOW_CLASS_OPTION_VALUE );
 		}
 	}, [ shippingClass ] );
