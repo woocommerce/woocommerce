@@ -12,6 +12,7 @@ import { cloneRepo } from '../../../core/git';
 import { octokitWithAuth } from '../../../core/github/api';
 import { getEnvVar } from '../../../core/environment';
 import { bumpFiles } from './bump';
+import { validateArgs } from './lib/validate';
 
 const errFn = ( err ) => {
 	if ( err.git ) {
@@ -22,6 +23,7 @@ const errFn = ( err ) => {
 
 export const versionBumpCommand = new Command( 'version-bump' )
 	.description( 'Bump versions ahead of new development cycle' )
+	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.option(
 		'-o --owner <owner>',
 		'Repository owner. Default: woocommerce',
@@ -32,7 +34,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		'Repository name. Default: woocommerce',
 		'woocommerce'
 	)
-	.action( async ( { owner, name } ) => {
+	.action( async ( { owner, name, version } ) => {
 		Logger.startTask(
 			`Making a temporary clone of '${ owner }/${ name }'`
 		);
@@ -46,6 +48,8 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			`Temporary clone of '${ owner }/${ name }' created at ${ tmpRepoPath }`
 		);
 
+		await validateArgs( tmpRepoPath, version );
+
 		const git = simpleGit( {
 			baseDir: tmpRepoPath,
 			config: [ 'core.hooksPath=/dev/null' ],
@@ -55,7 +59,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		await git.checkoutBranch( branch, base ).catch( errFn );
 
 		Logger.startTask( `Bumping versions in ${ owner }/${ name }` );
-		bumpFiles( tmpRepoPath );
+		bumpFiles( tmpRepoPath, version );
 		Logger.endTask();
 
 		Logger.startTask( 'Adding and committing changes' );
