@@ -12,12 +12,13 @@ import { readFile, writeFile } from 'fs/promises';
 import { Logger } from '../../../core/logger';
 import { cloneRepo } from '../../../core/git';
 import { octokitWithAuth } from '../../../core/github/api';
+import { getEnvVar } from '../../../core/environment';
 
 const errFn = ( err ) => {
 	if ( err.git ) {
 		return err.git;
-	} // the unsuccessful mergeSummary
-	throw err; // some other error, so throw
+	}
+	throw err;
 };
 
 export const versionBumpCommand = new Command( 'version-bump' )
@@ -33,12 +34,12 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		'woocommerce'
 	)
 	.action( async ( { owner, name } ) => {
-		const source = `github.com/${ owner }/${ name }`;
-		const remote = `https://${ owner }:${ process.env.GITHUB_TOKEN }@${ source }`;
-
 		Logger.startTask(
 			`Making a temporary clone of '${ owner }/${ name }'`
 		);
+		const source = `github.com/${ owner }/${ name }`;
+		const token = getEnvVar( 'GITHUB_TOKEN' );
+		const remote = `https://${ owner }:${ token }@${ source }`;
 		const tmpRepoPath = await cloneRepo( remote );
 		Logger.endTask();
 
@@ -52,7 +53,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		} );
 		const branch = 'prep/trunk-for-next-dev-cycle-XX.XX';
 		const base = 'trunk';
-		await git.checkoutBranch( branch, base );
+		await git.checkoutBranch( branch, base ).catch( errFn );
 
 		const filePath = join(
 			tmpRepoPath,
@@ -71,27 +72,29 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			Logger.error( 'Unable to update plugin file.' );
 		}
 
-		console.log( 'Adding and committing changes' );
+		Logger.startTask( 'Adding and committing changes' );
 		await git.add( filePath ).catch( errFn );
-		console.log( 'Committing changes' );
 		await git.commit( 'Prep trunk for XX.XX cycle' ).catch( errFn );
-		console.log( 'authenticating' );
-		await git.env( 'GITHUB_TOKEN', process.env.GITHUB_TOKEN );
-		console.log( 'Pushing changes' );
+		Logger.endTask();
+
+		Logger.startTask( 'Pushing to Github' );
 		await git
 			.push( 'origin', 'prep/trunk-for-next-dev-cycle-XX.XX' )
 			.catch( errFn );
+		Logger.endTask();
 
-		const pr = await octokitWithAuth.request(
-			'POST /repos/{owner}/{repo}/pulls',
-			{
+		try {
+			Logger.startTask( 'Creating a pull request' );
+			await octokitWithAuth.request( 'POST /repos/{owner}/{repo}/pulls', {
 				owner,
 				repo: name,
 				title: 'Amazing new feature',
 				body: 'Please pull these awesome changes in!',
 				head: branch,
 				base,
-			}
-		);
-		console.log( pr );
+			} );
+			Logger.endTask();
+		} catch ( e ) {
+			throw e;
+		}
 	} );
