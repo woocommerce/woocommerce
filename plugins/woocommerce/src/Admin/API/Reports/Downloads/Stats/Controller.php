@@ -10,6 +10,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
+use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * REST API Reports downloads stats controller class.
@@ -89,19 +91,12 @@ class Controller extends AbstractController {
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param Array           $report  Report data.
+	 * @param array           $report  Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = $report;
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$response = parent::prepare_item_for_response( $report, $request );
 
 		/**
 		 * Filter a report returned from the API.

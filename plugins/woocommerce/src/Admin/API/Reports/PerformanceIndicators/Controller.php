@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators;
 
 use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use WP_REST_Request;
+use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -452,19 +454,14 @@ class Controller extends AbstractController {
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $stat_data    Report data.
+	 * @param array           $stat_data    Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $stat_data, $request ) {
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $stat_data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
+		$response = parent::prepare_item_for_response( $stat_data, $request );
 
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $data ) );
+		$response->add_links( $this->prepare_links( $stat_data ) );
 
 		/**
 		 * Filter a report returned from the API.

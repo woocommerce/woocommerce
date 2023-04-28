@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
+use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * REST API Reports taxes controller class.
@@ -87,12 +89,7 @@ class Controller extends AbstractController implements ExportableInterface {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$report  = $this->add_additional_fields_to_object( $report, $request );
-		$report  = $this->filter_response_by_context( $report, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $report );
+		$response = parent::prepare_item_for_response( $report, $request );
 		$response->add_links( $this->prepare_links( $report ) );
 
 		/**

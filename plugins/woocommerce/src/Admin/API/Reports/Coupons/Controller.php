@@ -11,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * REST API Reports coupons controller class.
@@ -78,19 +80,12 @@ class Controller extends AbstractController implements ExportableInterface {
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param array           $report  Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = $report;
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$response = parent::prepare_item_for_response( $report, $request );
 		$response->add_links( $this->prepare_links( $report ) );
 
 		/**

@@ -3,6 +3,9 @@ namespace Automattic\WooCommerce\Admin\API\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use WP_REST_Request;
+use WP_REST_Response;
+
 /**
  * WC REST API Reports controller extended
  * to be shared as a generic base for all Analytics controllers.
@@ -119,5 +122,23 @@ abstract class AbstractController extends \WC_REST_Reports_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Prepare a report object for serialization.
+	 *
+	 * @param array           $report  Report data.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function prepare_item_for_response( $report, $request ) {
+		$data = $report;
+
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->filter_response_by_context( $data, $context );
+
+		// Wrap the data in a response object.
+		return rest_ensure_response( $data );
 	}
 }

@@ -11,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
 use Automattic\WooCommerce\Admin\API\Reports\ParameterException;
+use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * REST API Reports coupons stats controller class.
@@ -95,12 +97,7 @@ class Controller extends AbstractController {
 	public function prepare_item_for_response( $report, $request ) {
 		$data = get_object_vars( $report );
 
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$response = parent::prepare_item_for_response( $data, $request );
 
 		/**
 		 * Filter a report returned from the API.
