@@ -28,7 +28,6 @@ import FormTokenField from '@woocommerce/base-components/form-token-field';
 import { addQueryArgs, removeQueryArgs } from '@wordpress/url';
 import { changeUrl, normalizeQueryParams } from '@woocommerce/utils';
 import classnames from 'classnames';
-import { difference } from 'lodash';
 import type { ReactElement } from 'react';
 
 /**
@@ -381,13 +380,19 @@ const RatingFilterBlock = ( {
 										: token;
 								} );
 
-								const added = difference( tokens, checked );
+								const added = [ tokens, checked ].reduce(
+									( a, b ) =>
+										a.filter( ( c ) => ! b.includes( c ) )
+								);
 
 								if ( added.length === 1 ) {
 									return onClick( added[ 0 ] );
 								}
 
-								const removed = difference( checked, tokens );
+								const removed = [ checked, tokens ].reduce(
+									( a, b ) =>
+										a.filter( ( c ) => ! b.includes( c ) )
+								);
 								if ( removed.length === 1 ) {
 									onClick( removed[ 0 ] );
 								}
