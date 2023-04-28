@@ -25,6 +25,16 @@ const ORDER_STATUSES = {
 	refunded: 'Refunded',
 };
 
+const CURRENCY = {
+	code: 'USD',
+	decimalSeparator: '.',
+	precision: 2,
+	priceFormat: '%1$s%2$s',
+	symbol: '$',
+	symbolPosition: 'left',
+	thousandSeparator: ',',
+};
+
 // Fetch store default date range and compose with date utility functions.
 const defaultDateRange = 'period=month&compare=previous_year';
 const storeGetDateParamsFromQuery = partialRight(
@@ -58,14 +68,14 @@ const filters = [
 ];
 
 const advancedFilters = {
-	title: 'Orders Match {{select /}} Filters',
+	title: 'Orders Match <select/> Filters',
 	filters: {
 		status: {
 			labels: {
 				add: 'Order Status',
 				remove: 'Remove order status filter',
 				rule: 'Select an order status filter match',
-				title: 'Order Status {{rule /}} {{filter /}}',
+				title: 'Order Status <rule/> <filter/>',
 				filter: 'Select an order status',
 			},
 			rules: [
@@ -92,7 +102,7 @@ const advancedFilters = {
 				placeholder: 'Search products',
 				remove: 'Remove products filter',
 				rule: 'Select a product filter match',
-				title: 'Product {{rule /}} {{filter /}}',
+				title: 'Product <rule/> <filter/>',
 				filter: 'Select products',
 			},
 			rules: [
@@ -116,7 +126,7 @@ const advancedFilters = {
 				add: 'Customer type',
 				remove: 'Remove customer filter',
 				rule: 'Select a customer filter match',
-				title: 'Customer is {{filter /}}',
+				title: 'Customer is <filter/>',
 				filter: 'Select a customer type',
 			},
 			input: {
@@ -133,7 +143,7 @@ const advancedFilters = {
 				add: 'Item Quantity',
 				remove: 'Remove item quantity filter',
 				rule: 'Select an item quantity filter match',
-				title: 'Item Quantity is {{rule /}} {{filter /}}',
+				title: 'Item Quantity is <rule/> <filter/>',
 			},
 			rules: [
 				{
@@ -158,7 +168,7 @@ const advancedFilters = {
 				add: 'Subtotal',
 				remove: 'Remove subtotal filter',
 				rule: 'Select a subtotal filter match',
-				title: 'Subtotal is {{rule /}} {{filter /}}',
+				title: 'Subtotal is <rule/> <filter/>',
 			},
 			rules: [
 				{
@@ -225,6 +235,7 @@ export const Examples = () => (
 				query={ query }
 				filterTitle="Orders"
 				config={ advancedFilters }
+				currency={ CURRENCY }
 			/>
 		</Section>
 

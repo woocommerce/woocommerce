@@ -9,14 +9,18 @@ import { createElement } from '@wordpress/element';
  */
 import Rating from './index';
 
+type ProductRatingProps = {
+	product: {
+		average_rating?: number;
+	};
+};
 /**
  * Display a set of stars representing the product's average rating.
- *
- * @param {Object} props
- * @param {Object} props.product
- * @return {Object} -
  */
-const ProductRating = ( { product, ...props } ) => {
+const ProductRating: React.VFC< ProductRatingProps > = ( {
+	product,
+	...props
+} ) => {
 	const rating = ( product && product.average_rating ) || 0;
 	return <Rating rating={ rating } { ...props } />;
 };

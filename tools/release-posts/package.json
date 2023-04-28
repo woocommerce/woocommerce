@@ -26,7 +26,7 @@
 	"dependencies": {
 		"@commander-js/extra-typings": "^0.1.0",
 		"@octokit/rest": "^19.0.4",
-		"cli-core": "workspace:*",
+		"@woocommerce/monorepo-utils": "workspace:*",
 		"code-analyzer": "workspace:*",
 		"commander": "9.4.0",
 		"dotenv": "^10.0.0",

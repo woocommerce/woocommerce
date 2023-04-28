@@ -9,7 +9,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import Rating from '../';
+import Rating from '..';
 import ProductRating from '../product';
 import ReviewRating from '../review';
 
