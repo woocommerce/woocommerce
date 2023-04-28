@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, useState } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
 import { useBlockProps } from '@wordpress/block-editor';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
