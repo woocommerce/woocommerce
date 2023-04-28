@@ -17,14 +17,8 @@ type AttributeEmptyStateProps = {
 	onNewClick?: () => void;
 };
 
-declare const window: {
-	wcSettings: {
-		wcAssetUrl: string;
-	};
-};
-
 export const AttributeEmptyState: React.FC< AttributeEmptyStateProps > = ( {
-	image = `${ window.wcSettings.wcAssetUrl }client/admin/product-editor/icons/attribute-empty-state-logo.svg`,
+	image,
 	subtitle = __( 'No attributes yet', 'woocommerce' ),
 	addNewLabel = __( 'Add first attribute', 'woocommerce' ),
 	onNewClick,
