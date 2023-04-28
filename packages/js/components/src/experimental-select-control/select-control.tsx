@@ -15,7 +15,7 @@ import {
 	createElement,
 	Fragment,
 } from '@wordpress/element';
-import { search } from '@wordpress/icons';
+import { chevronDown } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -123,7 +123,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	className,
 	disabled,
 	inputProps = {},
-	suffix = <SuffixIcon icon={ search } />,
+	suffix = <SuffixIcon icon={ chevronDown } />,
 	showToggleButton = false,
 	__experimentalOpenMenuOnFocus = false,
 }: SelectControlProps< ItemType > ) {
@@ -239,6 +239,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	const selectedItemTags = multiple ? (
 		<SelectedItems
 			items={ selectedItems }
+			isReadOnly={ ! isOpen }
 			getItemLabel={ getItemLabel }
 			getItemValue={ getItemValue }
 			getSelectedItemProps={ getSelectedItemProps }
@@ -282,7 +283,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 							openMenu();
 						}
 					},
-					onBlur: () => setIsFocused( false ),
+					// onBlur: () => setIsFocused( false ),
 					placeholder,
 					disabled,
 					...inputProps,

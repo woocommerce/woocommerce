@@ -2,9 +2,9 @@
 /**
  * External dependencies
  */
-import { createElement, useState } from '@wordpress/element';
+import { chevronDown } from '@wordpress/icons';
 import classNames from 'classnames';
-import { search } from '@wordpress/icons';
+import { createElement, useState } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 
 /**
@@ -32,7 +32,7 @@ export const SelectTree = function SelectTree( {
 	items,
 	getSelectedItemProps,
 	treeRef: ref,
-	suffix = <SuffixIcon icon={ search } />,
+	suffix = <SuffixIcon icon={ chevronDown } />,
 	placeholder,
 	isLoading,
 	onInputChange,
@@ -126,6 +126,7 @@ export const SelectTree = function SelectTree( {
 					suffix={ suffix }
 				>
 					<SelectedItems
+						isReadOnly={ ! isOpen }
 						items={ ( props.selected as Item[] ) || [] }
 						getItemLabel={ ( item ) => item?.label || '' }
 						getItemValue={ ( item ) => item?.value || '' }
