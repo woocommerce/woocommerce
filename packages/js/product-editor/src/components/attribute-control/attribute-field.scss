@@ -4,7 +4,6 @@
 
 	.woocommerce-sortable {
 		margin: 0;
-		padding: 0;
 	}
 
 	.woocommerce-sortable__item:not(:first-child) {
@@ -19,11 +18,18 @@
 		margin-bottom: $gap;
 	}
 
+}
+
+.wp-block-woocommerce-product-attributes-field {
+
+	.woocommerce-sortable {
+		padding: 0;
+	}
+
 	.woocommerce-list-item {
 		background: none;
 		border: none;
 		border-bottom: 1px solid $gray-200;
 		padding-left: 0;
 	}
-
 }
