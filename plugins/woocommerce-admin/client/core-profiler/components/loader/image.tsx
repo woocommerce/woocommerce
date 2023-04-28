@@ -3,7 +3,7 @@
  */
 import LightBulb from './images/lightbulb';
 
-export const Image = ( { imageName }: { imageName: string } ) => {
+export const Image = ( { imageName }: { imageName: 'lightbulb' } ) => {
 	switch ( imageName ) {
 		case 'lightbulb':
 			return <LightBulb />;

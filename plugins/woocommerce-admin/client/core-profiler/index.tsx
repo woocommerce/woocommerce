@@ -140,7 +140,7 @@ const handleCountries = assign( {
 	},
 } );
 
-const redirectWooHome = () => {
+const redirectToWooHome = () => {
 	const homescreenUrl = new URL(
 		getNewPath( {}, '/', {} ),
 		window.location.href
@@ -453,7 +453,7 @@ const CoreProfilerController = ( {} ) => {
 				recordTracksSkipBusinessLocationCompleted,
 				assignOptInDataSharing,
 				handleCountries,
-				redirectWooHome,
+				redirectToWooHome,
 			},
 			services: {
 				getAllowTrackingOption,

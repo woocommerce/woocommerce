@@ -17,13 +17,6 @@ export default [
 					'woocommerce'
 				),
 			},
-			{
-				label: __( '#FunWooFact: ', 'woocommerce' ),
-				text: __(
-					'#FunWooFact: The Woo team is made up..',
-					'woocommerce'
-				),
-			},
 		],
 	},
 ] as Stages;
