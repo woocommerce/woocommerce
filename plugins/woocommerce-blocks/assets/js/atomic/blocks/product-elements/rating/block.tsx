@@ -20,11 +20,6 @@ import { isNumber, ProductResponseItem } from '@woocommerce/types';
  */
 import './style.scss';
 
-type Props = {
-	textAlign?: string;
-	className?: string;
-};
-
 type RatingProps = {
 	reviews: number;
 	rating: number;
@@ -109,17 +104,38 @@ const AddReview = ( props: AddReviewProps ): JSX.Element | null => {
 	) : null;
 };
 
-/**
- * Product Rating Block Component.
- *
- * @param {Object} props             Incoming props.
- * @param {string} [props.className] CSS Class name for the component.
- * @param {string} [props.textAlign] Text alignment.
- *
- * @return {*} The component.
- */
-export const Block = ( props: Props ): JSX.Element | null => {
-	const { textAlign } = props;
+const ReviewsCount = ( props: { reviews: number } ): JSX.Element => {
+	const { reviews } = props;
+
+	const reviewsCount = sprintf(
+		/* translators: %s is referring to the total of reviews for a product */
+		_n(
+			'(%s customer review)',
+			'(%s customer reviews)',
+			reviews,
+			'woo-gutenberg-products-block'
+		),
+		reviews
+	);
+
+	return (
+		<span className="wc-block-components-product-rating__reviews_count">
+			{ reviewsCount }
+		</span>
+	);
+};
+
+interface ProductRatingProps {
+	className?: string;
+	textAlign?: string;
+	isDescendentOfSingleProductBlock: boolean;
+	isDescendentOfQueryLoop: boolean;
+	postId: number;
+	productId: number;
+}
+
+export const Block = ( props: ProductRatingProps ): JSX.Element | null => {
+	const { textAlign, isDescendentOfSingleProductBlock } = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const rating = getAverageRating( product );
@@ -157,7 +173,12 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				...spacingProps.style,
 			} }
 		>
-			{ content }
+			<div className="wc-block-components-product-rating__container">
+				{ content }
+				{ reviews && isDescendentOfSingleProductBlock ? (
+					<ReviewsCount reviews={ reviews } />
+				) : null }
+			</div>
 		</div>
 	);
 };
