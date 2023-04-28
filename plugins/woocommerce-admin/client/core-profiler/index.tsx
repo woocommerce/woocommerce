@@ -23,6 +23,7 @@ import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions, Country } from './services/country';
+import { Loader } from './components/loader/loader';
 import './style.scss';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
@@ -76,7 +77,7 @@ export type CoreProfilerStateMachineContext = {
 	geolocatedLocation: {
 		location: string;
 	};
-	extensionsAvailable: ExtensionList[ 'plugins' ] | [];
+	extensionsAvailable: ExtensionList[ 'plugins' ] | [  ];
 	extensionsSelected: string[]; // extension slugs
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
@@ -214,6 +215,16 @@ const coreProfilerStateMachineDefinition = createMachine( {
 		extensionsAvailable: [],
 		extensionsSelected: [],
 		countries: {},
+		loader: {
+			title: '',
+			progress: 0,
+			className: '',
+			paragraphs: [
+				{
+					text: '',
+				},
+			],
+		},
 	} as CoreProfilerStateMachineContext,
 	states: {
 		initializing: {
@@ -351,7 +362,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 		skipFlowBusinessLocation: {
 			on: {
 				BUSINESS_LOCATION_COMPLETED: {
-					target: 'settingUpStore',
+					target: 'postSkipFlowBusinessLocation',
 					actions: [
 						assign( {
 							businessInfo: (
@@ -363,13 +374,18 @@ const coreProfilerStateMachineDefinition = createMachine( {
 				},
 			},
 			entry: [ 'recordTracksSkipBusinessLocationViewed' ],
+			meta: {
+				progress: 80,
+				component: BusinessLocation,
+			},
+		},
+		postSkipFlowBusinessLocation: {
 			exit: [
 				'recordTracksSkipBusinessLocationCompleted',
 				'redirectWooHome',
 			],
 			meta: {
-				progress: 80,
-				component: BusinessLocation,
+				component: Loader,
 			},
 		},
 		preExtensions: {
