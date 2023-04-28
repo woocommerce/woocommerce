@@ -2,49 +2,59 @@
  * External dependencies
  */
 import classNames from 'classnames';
-
+import { useState, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { CoreProfilerStateMachineContext } from '../..';
-import LightBulb from './images/lightbulb';
 import ProgressBar from '../progress-bar/progress-bar';
-
-type Props = {
-	title: string | JSX.Element;
-	progress?: number;
-	className?: string;
-	paragraphs?: Array< {
-		text: string | JSX.Element;
-		duration?: number;
-	} >;
-};
+import { useStages } from './useStages';
+import { Image } from './image';
 
 export const Loader = ( {
 	context,
 }: {
 	context: CoreProfilerStateMachineContext;
 } ) => {
-	const stage = context.loader.stages[ context.loader.currentStage ?? 0 ];
+	const stages = useStages( context.loader.stagesFor );
+	const currentStage = stages[ context.loader.currentStage ?? 0 ];
+	const [ currentParagraph, setCurrentParagraph ] = useState( 0 );
+
+	useEffect( () => {
+		const interval = setInterval( () => {
+			currentStage.paragraphs[ currentParagraph + 1 ]
+				? setCurrentParagraph(
+						( currentParagraph ) => currentParagraph + 1
+				  )
+				: setCurrentParagraph( 0 );
+		}, currentStage.paragraphs[ currentParagraph ]?.duration ?? 3000 );
+
+		return () => clearInterval( interval );
+	}, [ currentParagraph, currentStage.paragraphs ] );
+
 	return (
 		<div
 			className={ classNames(
 				'woocommerce-profiler-loader',
-				stage.className
+				context.loader.className
 			) }
 		>
-			{ stage.image ?? <LightBulb /> }
+			<Image imageName={ currentStage.image } />
 
 			<h1 className="woocommerce-profiler-loader__title">
-				{ stage.title }
+				{ currentStage.title }
 			</h1>
 			<ProgressBar
 				className={ 'progress-bar' }
-				percent={ stage.progress }
+				percent={ currentStage.progress }
 				color={ 'var(--wp-admin-theme-color)' }
 				bgcolor={ '#E0E0E0' }
 			/>
+			<p className="woocommerce-profiler-loader__paragraph">
+				<b>{ currentStage.paragraphs[ currentParagraph ].label } </b>
+				{ currentStage.paragraphs[ currentParagraph ].text }
+			</p>
 		</div>
 	);
 };

@@ -25,8 +25,9 @@ import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions, Country } from './services/country';
 import { Loader } from './components/loader/loader';
-import LightBulb from './components/loader/images/lightbulb';
+import postSkipFlowBusinessLocationLoader from './components/loader/stages/businessLocation';
 import './style.scss';
+import { StagesFor } from './components/loader/types';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
 // https://stately.ai/blog/introducing-typescript-typegen-for-xstate
@@ -85,16 +86,8 @@ export type CoreProfilerStateMachineContext = {
 	countries: { [ key: string ]: string };
 	loader: {
 		currentStage?: number;
-		stages: Array< {
-			title: string;
-			image?: JSX.Element;
-			progress?: number;
-			className?: string;
-			paragraphs?: Array< {
-				text: string | JSX.Element;
-				duration?: number;
-			} >;
-		} >;
+		className?: string;
+		stagesFor: StagesFor;
 	};
 };
 
@@ -232,18 +225,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 		countries: {},
 		loader: {
 			currentStage: 0,
-			stages: [
-				{
-					title: 'Loading',
-					progress: 0,
-					className: '',
-					paragraphs: [
-						{
-							text: '',
-						},
-					],
-				},
-			],
+			stagesFor: 'intro',
 		},
 	} as CoreProfilerStateMachineContext,
 	states: {
@@ -406,31 +388,18 @@ const coreProfilerStateMachineDefinition = createMachine( {
 						setTimeout( resolve, 5000 );
 					} );
 				},
+				onDone: [
+					{
+						actions: [
+							'recordTracksSkipBusinessLocationCompleted',
+							'redirectToWooHome',
+						],
+					},
+				],
 			},
 			entry: assign( {
 				loader: {
-					currentStage: 0,
-					stages: [
-						{
-							title: __( 'Turning on the lights', 'woocommerce' ),
-							image: <LightBulb />,
-							progress: 80,
-							paragraphs: [
-								{
-									text: __(
-										'#FunWooFact: The Woo team is made up..',
-										'woocommerce'
-									),
-								},
-								{
-									text: __(
-										'#FunWooFact: The Woo team is made up..',
-										'woocommerce'
-									),
-								},
-							],
-						},
-					],
+					stagesFor: 'businessLocation',
 				},
 			} ),
 			meta: {
@@ -505,7 +474,6 @@ const CoreProfilerController = ( {} ) => {
 	const navigationProgress = currentNodeMeta?.progress; // This value is defined in each state node's meta tag, we can assume it is 0-100
 	const CurrentComponent =
 		currentNodeMeta?.component ?? ( () => <div>Insert Spinner</div> ); // If no component is defined for the state then its a loading state
-	console.log( state.context.loader );
 
 	useEffect( () => {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );
