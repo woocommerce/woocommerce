@@ -7,7 +7,6 @@ import {
 	Fragment,
 	createInterpolateElement,
 	useState,
-	useEffect,
 } from '@wordpress/element';
 
 import { useBlockProps } from '@wordpress/block-editor';
