@@ -11,11 +11,11 @@ import type {
 	CartShippingPackageShippingRate,
 	CartShippingRate,
 } from '@woocommerce/types';
-import { camelCase, mapKeys } from 'lodash';
 import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
 import {
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
+	camelCaseKeys,
 } from '@woocommerce/base-utils';
 
 /**
@@ -70,9 +70,7 @@ export const setErrorData = (
 export const receiveCartContents = (
 	response: CartResponse
 ): { type: string; response: Partial< Cart > } => {
-	const cart = mapKeys( response, ( _, key ) =>
-		camelCase( key )
-	) as unknown as Cart;
+	const cart = camelCaseKeys( response ) as unknown as Cart;
 	const { shippingAddress, billingAddress, ...cartWithoutAddress } = cart;
 	return {
 		type: types.SET_CART_DATA,
