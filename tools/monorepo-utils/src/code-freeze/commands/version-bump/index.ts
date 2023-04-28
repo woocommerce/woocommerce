@@ -75,14 +75,18 @@ export const versionBumpCommand = new Command( 'version-bump' )
 
 		try {
 			Logger.startTask( 'Creating a pull request' );
-			await octokitWithAuth.request( 'POST /repos/{owner}/{repo}/pulls', {
-				owner,
-				repo: name,
-				title: 'Amazing new feature',
-				body: 'Please pull these awesome changes in!',
-				head: branch,
-				base,
-			} );
+			const pr = await octokitWithAuth.request(
+				'POST /repos/{owner}/{repo}/pulls',
+				{
+					owner,
+					repo: name,
+					title: 'Amazing new feature',
+					body: 'Please pull these awesome changes in!',
+					head: branch,
+					base,
+				}
+			);
+			Logger.notice( `Pull request created: ${ pr.data.html_url }` );
 			Logger.endTask();
 		} catch ( e ) {
 			throw e;
