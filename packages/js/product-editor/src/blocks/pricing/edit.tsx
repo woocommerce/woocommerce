@@ -52,9 +52,7 @@ export function Edit( {
 					<Link
 						href={ getNewPath( { tab: 'pricing' } ) }
 						onClick={ () => {
-							recordEvent(
-								'product_pricing_list_price_help_tax_settings_click'
-							);
+							recordEvent( 'product_pricing_help_click' );
 						} }
 					/>
 				),
