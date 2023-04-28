@@ -38,13 +38,16 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 			<TextControl
 				{ ...getInputProps( 'name' ) }
 				placeholder={ __( 'e.g. Fragile products', 'woocommerce' ) }
-				label={ createInterpolateElement( 'Name <required />', {
-					required: (
-						<span className="woocommerce-add-new-shipping-class-modal__optional-input">
-							{ __( '(required)', 'woocommerce' ) }
-						</span>
-					),
-				} ) }
+				label={ createInterpolateElement(
+					__( 'Name <required />', 'woocommerce' ),
+					{
+						required: (
+							<span className="woocommerce-add-new-shipping-class-modal__optional-input">
+								{ __( '(required)', 'woocommerce' ) }
+							</span>
+						),
+					}
+				) }
 			/>
 			<TextControl
 				{ ...getInputProps( 'slug' ) }
