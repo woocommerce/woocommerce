@@ -1,7 +1,6 @@
 .wc-block-components-button:not(.is-link) {
 	align-items: center;
 	display: inline-flex;
-	min-height: 3em;
 	height: auto;
 	justify-content: center;
 	text-align: center;
@@ -58,7 +57,7 @@
 }
 
 body:not(.woocommerce-block-theme-has-button-styles) .wc-block-components-button:not(.is-link) {
-	padding: 0 em($gap);
+	min-height: 3em;
 
 	&:focus {
 		box-shadow: 0 0 0 2px $studio-blue;
