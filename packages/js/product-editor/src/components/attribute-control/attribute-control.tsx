@@ -27,7 +27,6 @@ import {
 	getAttributeKey,
 	reorderSortableProductAttributePositions,
 } from './utils';
-import { AttributeEmptyState } from '../attribute-empty-state';
 import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 
@@ -161,30 +160,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		closeEditModal( updatedAttribute );
 	};
 
-	if ( ! value.length ) {
-		return (
-			<>
-				<AttributeEmptyState
-					addNewLabel={ uiStrings.newAttributeModalTitle }
-					onNewClick={ () => openNewModal() }
-					subtitle={ uiStrings.emptyStateSubtitle }
-				/>
-				{ isNewModalVisible && (
-					<NewAttributeModal
-						onCancel={ () => {
-							closeNewModal();
-							onNewModalCancel();
-						} }
-						onAdd={ handleAdd }
-						selectedAttributeIds={ [] }
-						title={ uiStrings.newAttributeModalTitle }
-					/>
-				) }
-				<SelectControlMenuSlot />
-			</>
-		);
-	}
-
 	const sortedAttributes = value.sort( ( a, b ) => a.position - b.position );
 
 	const attributeKeyValues = value.reduce(
@@ -207,37 +182,41 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			<Button
 				variant="secondary"
 				className="woocommerce-add-attribute-list-item__add-button"
-				onClick={ () => openNewModal() }
+				onClick={ openNewModal }
 			>
 				{ uiStrings.newAttributeListItemLabel }
 			</Button>
-			<Sortable
-				onOrderChange={ ( items ) => {
-					const itemPositions = items.reduce(
-						( positions, { props }, index ) => {
-							positions[ getAttributeKey( props.attribute ) ] =
-								index;
-							return positions;
-						},
-						{} as Record< number | string, number >
-					);
-					onChange(
-						reorderSortableProductAttributePositions(
-							itemPositions,
-							attributeKeyValues
-						)
-					);
-				} }
-			>
-				{ sortedAttributes.map( ( attr ) => (
-					<AttributeListItem
-						attribute={ attr }
-						key={ getAttributeId( attr ) }
-						onEditClick={ () => openEditModal( attr ) }
-						onRemoveClick={ () => handleRemove( attr ) }
-					/>
-				) ) }
-			</Sortable>
+			{ Boolean( value.length ) && (
+				<Sortable
+					onOrderChange={ ( items ) => {
+						const itemPositions = items.reduce(
+							( positions, { props }, index ) => {
+								positions[
+									getAttributeKey( props.attribute )
+								] = index;
+								return positions;
+							},
+							{} as Record< number | string, number >
+						);
+						onChange(
+							reorderSortableProductAttributePositions(
+								itemPositions,
+								attributeKeyValues
+							)
+						);
+					} }
+				>
+					{ sortedAttributes.map( ( attr ) => (
+						<AttributeListItem
+							attribute={ attr }
+							key={ getAttributeId( attr ) }
+							onEditClick={ () => openEditModal( attr ) }
+							onRemoveClick={ () => handleRemove( attr ) }
+						/>
+					) ) }
+				</Sortable>
+			) }
+
 			{ isNewModalVisible && (
 				<NewAttributeModal
 					title={ uiStrings.newAttributeModalTitle }
