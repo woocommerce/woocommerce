@@ -57,9 +57,12 @@
 	},
 	"scripts": {
 		"turbo:build": "tsc --project tsconfig.json",
+		"turbo:watch": "pnpm run turbo:watch:* --parallel",
+		"turbo:watch:ts": "tsc --project tsconfig.json --watch",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
+		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name",
 		"lint": "eslint src",
 		"start": "tsc --project tsconfig.json --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",

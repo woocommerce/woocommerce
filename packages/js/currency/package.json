@@ -39,6 +39,8 @@
 	"scripts": {
 		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"turbo:test": "jest --config ./jest.config.json",
+		"turbo:watch": "pnpm run turbo:watch:* --parallel",
+		"turbo:watch:ts": "tsc --project tsconfig.json --watch",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
@@ -48,7 +50,8 @@
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix",
-		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests",
+		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.17.5",

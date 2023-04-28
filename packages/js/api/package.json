@@ -32,6 +32,8 @@
 	"scripts": {
 		"turbo:build": "pnpm run clean && npm run compile",
 		"turbo:test": "jest",
+		"turbo:watch": "pnpm run turbo:watch:* --parallel",
+		"turbo:watch:ts": "tsc --watch --project tsconfig.json",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
@@ -40,7 +42,8 @@
 		"prepack": "pnpm run build",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint src",
-		"lint:fix": "eslint src --fix"
+		"lint:fix": "eslint src --fix",
+		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name"
 	},
 	"dependencies": {
 		"axios": "^0.24.0",
