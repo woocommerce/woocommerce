@@ -49,7 +49,7 @@ describe( 'Shopper → Cart & Checkout → Translations', () => {
 
 		await expect( orderSummary ).toMatch( 'Subtotaal' );
 		// Skipping translation for now, as it's not available in WooCommerce Core.
-		// await expect( orderSummary ).toMatch( 'Een waardebon toevoegen' );
+		await expect( orderSummary ).toMatch( 'Een waardebon toevoegen' );
 		await expect( orderSummary ).toMatch( 'Totaal' );
 	} );
 
