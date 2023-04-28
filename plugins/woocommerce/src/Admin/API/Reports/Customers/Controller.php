@@ -304,8 +304,7 @@ class Controller extends AbstractController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                            = array();
-		$params['context']                 = $this->get_context_param( array( 'default' => 'view' ) );
+		$params = parent::get_collection_params();
 		$params['registered_before']       = array(
 			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
@@ -318,60 +317,19 @@ class Controller extends AbstractController implements ExportableInterface {
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']                   = array(
-			'description'       => __( 'Limit response to resources with orders published after a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['before']                  = array(
-			'description'       => __( 'Limit response to resources with orders published before a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['page']                    = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 1,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-			'minimum'           => 1,
-		);
-		$params['per_page']                = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 10,
-			'minimum'           => 1,
-			'maximum'           => 100,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['order']                   = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'desc',
-			'enum'              => array( 'asc', 'desc' ),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['orderby']                 = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'date_registered',
-			'enum'              => array(
-				'username',
-				'name',
-				'country',
-				'city',
-				'state',
-				'postcode',
-				'date_registered',
-				'date_last_active',
-				'orders_count',
-				'total_spend',
-				'avg_order_value',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
+		$params['orderby']['default'] = 'date_registered';
+		$params['orderby']['enum']    = array(
+			'username',
+			'name',
+			'country',
+			'city',
+			'state',
+			'postcode',
+			'date_registered',
+			'date_last_active',
+			'orders_count',
+			'total_spend',
+			'avg_order_value',
 		);
 		$params['match']                   = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
@@ -563,12 +521,6 @@ class Controller extends AbstractController implements ExportableInterface {
 			'items'             => array(
 				'type' => 'integer',
 			),
-		);
-		$params['force_cache_refresh'] = array(
-			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
-			'type'              => 'boolean',
-			'sanitize_callback' => 'wp_validate_boolean',
-			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

@@ -418,25 +418,8 @@ class Controller extends AbstractController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                   = array();
-		$params['context']        = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']           = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 1,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-			'minimum'           => 1,
-		);
-		$params['per_page']       = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 10,
-			'minimum'           => 1,
-			'maximum'           => 100,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
+		$params = parent::get_collection_params();
+		unset( $params['after'], $params['before'], $params['force_cache_refresh'] );
 		$params['exclude']        = array(
 			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
@@ -461,27 +444,16 @@ class Controller extends AbstractController implements ExportableInterface {
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']          = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'asc',
-			'enum'              => array( 'asc', 'desc' ),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['orderby']        = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'stock_status',
-			'enum'              => array(
-				'stock_status',
-				'stock_quantity',
-				'date',
-				'id',
-				'include',
-				'title',
-				'sku',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
+		$params['order']['default'] = 'asc';
+		$params['orderby']['default'] = 'stock_status';
+		$params['orderby']['enum'] = array(
+			'stock_status',
+			'stock_quantity',
+			'date',
+			'id',
+			'include',
+			'title',
+			'sku',
 		);
 		$params['parent']         = array(
 			'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
