@@ -40,17 +40,26 @@ export const SelectTree = function SelectTree( {
 	...props
 }: SelectTreeProps ) {
 	const linkedTree = useLinkedTree( items );
+	const selectTreeInstanceId = useInstanceId(
+		SelectTree,
+		'woocommerce-experimental-select-tree-control__dropdown'
+	);
 	const menuInstanceId = useInstanceId(
 		SelectTree,
 		'woocommerce-select-tree-control__menu'
 	);
+	const isEventOutside = ( event: React.FocusEvent ) => {
+		return ! document
+			.querySelector( '.' + selectTreeInstanceId )
+			?.contains( event.relatedTarget );
+	};
 
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ isOpen, setIsOpen ] = useState( false );
 
 	return (
 		<div
-			className="woocommerce-experimental-select-tree-control__dropdown"
+			className={ `woocommerce-experimental-select-tree-control__dropdown ${ selectTreeInstanceId }` }
 			tabIndex={ -1 }
 		>
 			<div
@@ -93,12 +102,7 @@ export const SelectTree = function SelectTree( {
 						},
 						onBlur: ( event ) => {
 							// if blurring to an element inside the dropdown, don't close it
-							if (
-								isOpen &&
-								! document
-									.querySelector( '.' + menuInstanceId )
-									?.contains( event.relatedTarget )
-							) {
+							if ( isEventOutside( event ) ) {
 								setIsOpen( false );
 							}
 							setIsFocused( false );
@@ -133,7 +137,6 @@ export const SelectTree = function SelectTree( {
 						onRemove={ ( item ) => {
 							if ( ! Array.isArray( item ) && props.onRemove ) {
 								props.onRemove( item );
-								setIsOpen( false );
 							}
 						} }
 						getSelectedItemProps={ () => ( {} ) }
@@ -145,10 +148,13 @@ export const SelectTree = function SelectTree( {
 				id={ `${ props.id }-menu` }
 				className={ menuInstanceId.toString() }
 				ref={ ref }
+				isEventOutside={ isEventOutside }
 				isOpen={ isOpen }
 				items={ linkedTree }
 				shouldShowCreateButton={ shouldShowCreateButton }
-				onClose={ () => setIsOpen( false ) }
+				onClose={ () => {
+					setIsOpen( false );
+				} }
 			/>
 		</div>
 	);
