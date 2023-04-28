@@ -419,7 +419,7 @@ class WC_Tracker {
 				SUM( order_meta.meta_value ) AS 'gross_total'
 			FROM {$wpdb->prefix}posts AS orders
 			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
-			WHERE order_meta.meta_key =  '_order_total'
+			WHERE order_meta.meta_key = '_order_total'
 				AND orders.post_status in ( 'wc-completed', 'wc-refunded' )
 			GROUP BY order_meta.meta_key
 		"
@@ -435,7 +435,7 @@ class WC_Tracker {
 				SUM( order_meta.meta_value ) AS 'gross_total'
 			FROM {$wpdb->prefix}posts AS orders
 			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
-			WHERE order_meta.meta_key =  '_order_total'
+			WHERE order_meta.meta_key = '_order_total'
 				AND orders.post_status = 'wc-processing'
 			GROUP BY order_meta.meta_key
 		"
@@ -499,14 +499,16 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Group an associative array of objects which have unique ids in the key.
+	 * Extract the group key for an associative array of objects which have unique ids in the key.
 	 * A 'group_key' property is introduced in the object.
+	 * For example, two objects with keys like 'WooDataPay ** #123' and 'WooDataPay ** #78' would
+	 * both have a group_key of 'WooDataPay **' after this function call.
 	 *
 	 * @param array  $objects     The array of objects that need to be grouped.
 	 * @param string $default_key The property that will be the default group_key.
 	 * @return array Contains the objects with a group_key property.
 	 */
-	private static function group_objects_by_key( $objects, $default_key ) {
+	private static function extract_group_key( $objects, $default_key ) {
 		$keys = array_keys( $objects );
 
 		// Sort keys by length and then by characters within the same length keys.
@@ -589,11 +591,17 @@ class WC_Tracker {
 
 		$orders_by_gateway_currency = array();
 
-		$orders_by_gateway = self::group_objects_by_key(
+		// The associative array that is created as the result of array_reduce is passed to extract_group_key()
+		// This function has the logic that will remove specific transaction identifiers that may sometimes be part of a
+		// payment method. For example, two payments methods like 'WooDataPay ** #123' and 'WooDataPay ** #78' would
+		// both have the same group_key 'WooDataPay **'.
+		$orders_by_gateway = self::extract_group_key(
 			// Convert into an associative array with a combination of currency and gateway as key.
 			array_reduce(
 				$orders_and_gateway_details,
 				function( $result, $item ) {
+					$item->gateway = preg_replace( '/\s+/', ' ', $item->gateway );
+
 					// Introduce currency as a prefix for the key.
 					$key = $item->currency . '==' . $item->gateway;
 
@@ -605,6 +613,7 @@ class WC_Tracker {
 			'gateway'
 		);
 
+		// Aggregate using group_key.
 		foreach ( $orders_by_gateway as $orders_details ) {
 			$gkey = $orders_details->group_key;
 
@@ -618,6 +627,7 @@ class WC_Tracker {
 
 			$key = str_replace( array( 'payment method', 'gateway' ), '', strtolower( $key ) );
 
+			// Add currency as postfix of gateway for backward compatibility.
 			$key       = 'gateway_' . $key . '_' . $orders_details->currency;
 			$count_key = $key . '_count';
 			$total_key = $key . '_total';
@@ -657,7 +667,10 @@ class WC_Tracker {
 			"
 		);
 
-		$orders_and_origins = self::group_objects_by_key(
+		// The associative array that is created as the result of array_reduce is passed to extract_group_key()
+		// This function has the logic that will remove specific identifiers that may sometimes be part of an origin.
+		// For example, two origins like 'Import #123' and 'Import ** #78' would both have a group_key 'Import **'.
+		$orders_and_origins = self::extract_group_key(
 			// Convert into an associative array with the origin as key.
 			array_reduce(
 				$orders_origin,
@@ -674,6 +687,7 @@ class WC_Tracker {
 
 		$orders_by_origin = array();
 
+		// Aggregate using group_key.
 		foreach ( $orders_and_origins as $origin ) {
 			$key = strtolower( $origin->group_key );
 
