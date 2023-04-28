@@ -21,6 +21,7 @@ import {
 import { WPIncrement } from '../../../core/version';
 import { Logger } from '../../../core/logger';
 import { Options } from './types';
+import { getEnvVar } from '../../../core/environment';
 
 const getNextReleaseBranch = async ( options: Options ) => {
 	const latestReleaseVersion = await getLatestGithubReleaseVersion( options );
@@ -32,10 +33,6 @@ const getNextReleaseBranch = async ( options: Options ) => {
 
 export const branchCommand = new Command( 'branch' )
 	.description( 'Create a new release branch' )
-	.option(
-		'-g --github',
-		'CLI command is used in the Github Actions context.'
-	)
 	.option( '-d --dryRun', 'Prepare the branch but do not create it.' )
 	.option(
 		'-o --owner <owner>',
@@ -57,7 +54,9 @@ export const branchCommand = new Command( 'branch' )
 		'trunk'
 	)
 	.action( async ( options: Options ) => {
-		const { github, source, branch, owner, name, dryRun } = options;
+		const { source, branch, owner, name, dryRun } = options;
+		const isGithub = getEnvVar( 'CI' );
+
 		let nextReleaseBranch;
 
 		if ( ! branch ) {
@@ -86,7 +85,7 @@ export const branchCommand = new Command( 'branch' )
 		branchSpinner.succeed();
 
 		if ( branchExists ) {
-			if ( github ) {
+			if ( isGithub ) {
 				Logger.error(
 					`Release branch ${ nextReleaseBranch } already exists`
 				);
@@ -133,7 +132,7 @@ export const branchCommand = new Command( 'branch' )
 		await createGithubBranch( options, nextReleaseBranch, ref );
 		createBranchSpinner.succeed();
 
-		if ( github ) {
+		if ( isGithub ) {
 			setOutput( 'nextReleaseBranch', nextReleaseBranch );
 		}
 

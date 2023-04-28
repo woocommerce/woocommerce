@@ -14,6 +14,7 @@ import {
 	getFutureDate,
 } from './utils';
 import { Logger } from '../../../core/logger';
+import { getEnvVar } from '../../../core/environment';
 
 export const verifyDayCommand = new Command( 'verify-day' )
 	.description( 'Verify if today is the code freeze day' )
@@ -21,11 +22,7 @@ export const verifyDayCommand = new Command( 'verify-day' )
 		'-o, --override <override>',
 		"Time Override: The time to use in checking whether the action should run (default: 'now')."
 	)
-	.option(
-		'-g --github',
-		'CLI command is used in the Github Actions context.'
-	)
-	.action( ( { override, github } ) => {
+	.action( ( { override } ) => {
 		const today = getToday( override );
 		const futureDate = getFutureDate( today );
 		Logger.warn( "Today's timestamp UTC is: " + today.toUTCString() );
@@ -42,7 +39,7 @@ export const verifyDayCommand = new Command( 'verify-day' )
 			`Today is ${ isCodeFreezeDay ? 'indeed' : 'not' } code freeze day.`
 		);
 
-		if ( github ) {
+		if ( getEnvVar( 'CI' ) ) {
 			setOutput( 'freeze', isCodeFreezeDay.toString() );
 		}
 
