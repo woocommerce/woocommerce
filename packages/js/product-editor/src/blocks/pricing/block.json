@@ -15,8 +15,8 @@
 		"label": {
 			"type": "string"
 		},
-		"showPricingSection": {
-			"type": "boolean"
+		"help": {
+			"type": "string"
 		}
 	},
 	"supports": {
