@@ -46,7 +46,7 @@ runs:
               tools: phpcs, sirbrillig/phpcs-changed
 
         - name: Cache Composer Dependencies
-          uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12
+          uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
           with:
               path: ~/.cache/composer/files
               key: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -58,14 +58,27 @@ runs:
               pnpm -w install turbo
               pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
+        - name: Get branch name
+          id: get_branch
+          shell: bash
+          run: |
+              if [ "${{ github.event_name }}" == "pull_request" ]; then
+                branch_name=$(echo "${{ github.head_ref }}" | tr '/' '-')
+                echo "CURRENT_BRANCH_NAME=$branch_name" >> $GITHUB_OUTPUT
+              else
+                echo "CURRENT_BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+              fi
+
         - name: Cache Build Output
-          uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12
+          uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
           with:
-              path: node_modules/.cache/turbo
-              key: ${{ runner.os }}-build-output-${{ hashFiles('node_modules/.cache/turbo/*-meta.json') }}
-              restore-keys: ${{ runner.os }}-build-output-
+              path: .turbo
+              key: ${{ runner.os }}-build-output-${{ steps.get_branch.outputs.CURRENT_BRANCH_NAME }}-${{ github.sha }}
+              restore-keys: |
+                  ${{ runner.os }}-build-output-${{ steps.get_branch.outputs.CURRENT_BRANCH_NAME }}
+                  ${{ runner.os }}-build-output
 
         - name: Build
           if: ${{ inputs.build == 'true' }}
           shell: bash
-          run: pnpm -w exec turbo run turbo:build ${{ steps.parse-input.outputs.BUILD_FILTERS }}
+          run: pnpm -w exec turbo run turbo:build --cache-dir=".turbo" ${{ steps.parse-input.outputs.BUILD_FILTERS }}
