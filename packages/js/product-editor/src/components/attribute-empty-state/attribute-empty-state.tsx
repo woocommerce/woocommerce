@@ -9,7 +9,6 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-// import AttributeEmptyStateLogo from './attribute-empty-state-logo.svg';
 
 type AttributeEmptyStateProps = {
 	image?: string;
@@ -18,8 +17,14 @@ type AttributeEmptyStateProps = {
 	onNewClick?: () => void;
 };
 
+declare const window: {
+	wcSettings: {
+		wcAssetUrl: string;
+	};
+};
+
 export const AttributeEmptyState: React.FC< AttributeEmptyStateProps > = ( {
-	image,
+	image = `${ window.wcSettings.wcAssetUrl }client/admin/product-editor/icons/attribute-empty-state-logo.svg`,
 	subtitle = __( 'No attributes yet', 'woocommerce' ),
 	addNewLabel = __( 'Add first attribute', 'woocommerce' ),
 	onNewClick,
