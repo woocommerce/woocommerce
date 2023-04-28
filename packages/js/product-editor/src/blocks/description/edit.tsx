@@ -11,8 +11,8 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { IframeEditor } from '../../components/iframe-editor';
 import { ContentPreview } from '../../components/content-preview';
+import { ModalEditor } from '../../components/modal-editor';
 
 /**
  * Internal dependencies
@@ -38,13 +38,14 @@ export function Edit() {
 					: __( 'Add description', 'woocommerce' ) }
 			</Button>
 			{ isModalOpen && (
-				<IframeEditor
+				<ModalEditor
 					initialBlocks={ parse( description ) }
 					onChange={ ( blocks ) => {
 						const html = serialize( blocks );
 						setDescription( html );
 					} }
 					onClose={ () => setIsModalOpen( false ) }
+					title={ __( 'Edit description', 'woocommerce' ) }
 				/>
 			) }
 			{ !! description.length && (

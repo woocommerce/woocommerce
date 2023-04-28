@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { BlockInstance } from '@wordpress/blocks';
+import { Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	createElement,
@@ -111,6 +112,7 @@ export function IframeEditor( {
 						{ resizeObserver }
 						<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
 					</EditorCanvas>
+					<Popover.Slot />
 				</ResizableEditor>
 			</BlockTools>
 		</BlockEditorProvider>
