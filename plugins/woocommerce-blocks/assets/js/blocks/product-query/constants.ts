@@ -79,19 +79,17 @@ export const QUERY_DEFAULT_ATTRIBUTES: QueryBlockAttributes = {
 export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 	[
 		'core/post-template',
-		{ __woocommerceNamespace: PRODUCT_TEMPLATE_ID },
+		{
+			__woocommerceNamespace: PRODUCT_TEMPLATE_ID,
+			/**
+			 * This class is used to add default styles for inner blocks.
+			 */
+			className: 'products-block-post-template',
+		},
 		[
 			[
 				'woocommerce/product-image',
 				{
-					style: {
-						spacing: {
-							margin: {
-								bottom: '0.75rem',
-								top: '0',
-							},
-						},
-					},
 					imageSizing: ImageSizing.THUMBNAIL,
 				},
 			],
@@ -112,39 +110,20 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 					isLink: true,
 					__woocommerceNamespace: PRODUCT_TITLE_ID,
 				},
-				[],
 			],
 			[
 				'woocommerce/product-price',
 				{
 					textAlign: 'center',
 					fontSize: 'small',
-					style: {
-						spacing: {
-							margin: {
-								bottom: '0.75rem',
-								top: '0',
-							},
-						},
-					},
 				},
-				[],
 			],
 			[
 				'woocommerce/product-button',
 				{
 					textAlign: 'center',
 					fontSize: 'small',
-					style: {
-						spacing: {
-							margin: {
-								bottom: '0.75rem',
-								top: '0',
-							},
-						},
-					},
 				},
-				[],
 			],
 		],
 	],
@@ -156,7 +135,6 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 				justifyContent: 'center',
 			},
 		},
-		[],
 	],
 	[ 'core/query-no-results' ],
 ];
