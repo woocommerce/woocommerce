@@ -1,26 +1,23 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { createElement } from '@wordpress/element';
+import React from 'react';
 
 /**
  * `MenuTitle` is another valid Menu child, but this does not have any accessibility attributes associated
  * (so this should not be used in place of the `EllipsisMenu` prop `label`).
- *
- * @param {Object} props
- * @param {Node}   props.children
- * @return {Object} -
  */
-const MenuTitle = ( { children } ) => {
-	return <div className="woocommerce-ellipsis-menu__title">{ children }</div>;
-};
 
-MenuTitle.propTypes = {
+const MenuTitle = ( {
+	children,
+}: {
 	/**
 	 * A renderable component (or string) which will be displayed as the content of this item.
 	 */
-	children: PropTypes.node,
+	children: React.ReactNode;
+} ) => {
+	return <div className="woocommerce-ellipsis-menu__title">{ children }</div>;
 };
 
 export default MenuTitle;
