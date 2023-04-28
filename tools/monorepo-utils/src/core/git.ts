@@ -83,7 +83,7 @@ export const cloneRepo = async ( repoPath: string ) => {
 	mkdirSync( folderPath, { recursive: true } );
 
 	const git = simpleGit( { baseDir: folderPath } );
-	await git.clone( repoPath, folderPath );
+	await git.clone( repoPath, folderPath, { '--depth': 1 } );
 
 	// If this is a local clone then the simplest way to maintain remote settings is to copy git config across
 	if ( ! isUrl( repoPath ) ) {
