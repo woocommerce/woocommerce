@@ -5,6 +5,7 @@ import { createMachine, assign, DoneInvokeEvent, actions } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 import {
 	ExtensionList,
 	OPTIONS_STORE_NAME,
@@ -24,6 +25,7 @@ import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions, Country } from './services/country';
 import { Loader } from './components/loader/loader';
+import LightBulb from './components/loader/images/lightbulb';
 import './style.scss';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
@@ -85,6 +87,7 @@ export type CoreProfilerStateMachineContext = {
 		currentStage?: number;
 		stages: Array< {
 			title: string;
+			image?: JSX.Element;
 			progress?: number;
 			className?: string;
 			paragraphs?: Array< {
@@ -397,50 +400,11 @@ const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		postSkipFlowBusinessLocation: {
-			initial: 'stage1',
-			states: {
-				// Set stage 2 and wait for 5 seconds before moving to the next stage
-				stage1: {
-					invoke: {
-						src: ( context ) => ( callback ) => {
-							return new Promise( ( resolve ) => {
-								setTimeout( resolve, 5000 );
-							} );
-						},
-						onDone: [
-							{
-								target: 'stage2',
-								actions: [
-									assign( {
-										loader: ( context ) => {
-											return {
-												...context.loader,
-												currentStage: 1,
-											};
-										},
-									} ),
-								],
-							},
-						],
-					},
-				},
-				// wait for 5 sec and move to home
-				stage2: {
-					invoke: {
-						src: ( context ) => ( callback ) => {
-							return new Promise( ( resolve ) => {
-								setTimeout( resolve, 5000 );
-							} );
-						},
-						onDone: [
-							{
-								actions: [
-									'recordTracksSkipBusinessLocationCompleted',
-									// 'redirectWooHome',
-								],
-							},
-						],
-					},
+			invoke: {
+				src: ( context ) => {
+					return new Promise( ( resolve ) => {
+						setTimeout( resolve, 5000 );
+					} );
 				},
 			},
 			entry: assign( {
@@ -448,12 +412,23 @@ const coreProfilerStateMachineDefinition = createMachine( {
 					currentStage: 0,
 					stages: [
 						{
-							title: 'Loading 1',
-							progress: 20,
-						},
-						{
-							title: 'Loading 2',
-							progress: 40,
+							title: __( 'Turning on the lights', 'woocommerce' ),
+							image: <LightBulb />,
+							progress: 80,
+							paragraphs: [
+								{
+									text: __(
+										'#FunWooFact: The Woo team is made up..',
+										'woocommerce'
+									),
+								},
+								{
+									text: __(
+										'#FunWooFact: The Woo team is made up..',
+										'woocommerce'
+									),
+								},
+							],
 						},
 					],
 				},
@@ -520,10 +495,10 @@ const CoreProfilerController = ( {} ) => {
 
 	const [ state, send ] = useMachine( augmentedStateMachine );
 
-	let stateValue = state.value;
-	if ( typeof state.value === 'object' ) {
-		stateValue = Object.keys( state.value )[ 0 ];
-	}
+	const stateValue =
+		typeof state.value === 'object'
+			? Object.keys( state.value )[ 0 ]
+			: state.value;
 	const currentNodeMeta = state.meta[ `coreProfiler.${ stateValue }` ]
 		? state.meta[ `coreProfiler.${ stateValue }` ]
 		: undefined;
