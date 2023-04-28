@@ -1316,10 +1316,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				/**
 				 * Action hook to indicate that a coupon has been removed from an order.
 				 *
-				 * @param WC_Coupon $coupon The coupon that was removed.
-				 * @param WC_Order  $order  The order that the coupon was removed from.
+				 * @param string             $coupon_code The coupon that was removed.
+				 * @param WC_Abstract_Order  $order  The order that the coupon was removed from.
 				 */
-				do_action( 'woocommerce_order_removed_coupon', $coupon_object, $this );
+				do_action( 'woocommerce_order_removed_coupon', $code, $this );
 
 
 				return true;
