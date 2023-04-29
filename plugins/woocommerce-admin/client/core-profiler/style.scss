@@ -167,3 +167,27 @@
 		left: 13px;
 	}
 }
+
+.woocommerce-profiler-loader {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	position: absolute;
+
+	h1 {
+		padding: 0;
+		margin: 58px 0 0 0;
+		font-size: 26px;
+	}
+
+	.woocommerce-profiler-progress-bar {
+		width: 520px;
+		margin: 16px 0 16px 0;
+	}
+	.woocommerce-profiler-progress-bar__container {
+		height: 4px;
+	}
+}

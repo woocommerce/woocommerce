@@ -23,6 +23,8 @@ import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions, Country } from './services/country';
+import { Loader } from './pages/Loader';
+
 import './style.scss';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
@@ -76,10 +78,15 @@ export type CoreProfilerStateMachineContext = {
 	geolocatedLocation: {
 		location: string;
 	};
-	extensionsAvailable: ExtensionList[ 'plugins' ] | [];
+	extensionsAvailable: ExtensionList[ 'plugins' ] | [  ];
 	extensionsSelected: string[]; // extension slugs
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
+	loader: {
+		className?: string;
+		useStages?: string;
+		stageIndex?: number;
+	};
 };
 
 const Extensions = ( {
@@ -131,7 +138,7 @@ const handleCountries = assign( {
 	},
 } );
 
-const redirectWooHome = () => {
+const redirectToWooHome = () => {
 	const homescreenUrl = new URL(
 		getNewPath( {}, '/', {} ),
 		window.location.href
@@ -214,6 +221,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 		extensionsAvailable: [],
 		extensionsSelected: [],
 		countries: {},
+		loader: {},
 	} as CoreProfilerStateMachineContext,
 	states: {
 		initializing: {
@@ -366,7 +374,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 		skipFlowBusinessLocation: {
 			on: {
 				BUSINESS_LOCATION_COMPLETED: {
-					target: 'settingUpStore',
+					target: 'postSkipFlowBusinessLocation',
 					actions: [
 						assign( {
 							businessInfo: (
@@ -374,17 +382,30 @@ const coreProfilerStateMachineDefinition = createMachine( {
 								event: BusinessLocationEvent
 							) => event.payload.businessInfo, // assign context.businessInfo to the payload of the event
 						} ),
+						'recordTracksSkipBusinessLocationCompleted',
 					],
 				},
 			},
 			entry: [ 'recordTracksSkipBusinessLocationViewed' ],
-			exit: [
-				'recordTracksSkipBusinessLocationCompleted',
-				'redirectWooHome',
-			],
 			meta: {
 				progress: 80,
 				component: BusinessLocation,
+			},
+		},
+		postSkipFlowBusinessLocation: {
+			invoke: {
+				src: () => {
+					// show the loader for 3 seconds
+					return new Promise( ( resolve ) => {
+						setTimeout( resolve, 3000 );
+					} );
+				},
+				onDone: {
+					actions: [ 'redirectToWooHome' ],
+				},
+			},
+			meta: {
+				component: Loader,
 			},
 		},
 		preExtensions: {
@@ -434,7 +455,7 @@ const CoreProfilerController = ( {} ) => {
 				recordTracksSkipBusinessLocationCompleted,
 				assignOptInDataSharing,
 				handleCountries,
-				redirectWooHome,
+				redirectToWooHome,
 			},
 			services: {
 				getAllowTrackingOption,
