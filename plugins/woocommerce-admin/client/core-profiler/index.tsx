@@ -465,9 +465,12 @@ const CoreProfilerController = ( {} ) => {
 	}, [] );
 
 	const [ state, send ] = useMachine( augmentedStateMachine );
-
-	const currentNodeMeta = state.meta[ `coreProfiler.${ state.value }` ]
-		? state.meta[ `coreProfiler.${ state.value }` ]
+	const stateValue =
+		typeof state.value === 'object'
+			? Object.keys( state.value )[ 0 ]
+			: state.value;
+	const currentNodeMeta = state.meta[ `coreProfiler.${ stateValue }` ]
+		? state.meta[ `coreProfiler.${ stateValue }` ]
 		: undefined;
 	const navigationProgress = currentNodeMeta?.progress; // This value is defined in each state node's meta tag, we can assume it is 0-100
 	const CurrentComponent =
