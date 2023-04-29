@@ -6,8 +6,8 @@ export type StagesFor =
 
 export type Stage = {
 	title: string;
-	image: string;
-	progress: number;
+	image: string | JSX.Element;
+	progress?: number;
 	paragraphs: Array< {
 		label: string;
 		text: string;
