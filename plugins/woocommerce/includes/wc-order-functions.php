@@ -883,7 +883,7 @@ function wc_update_total_sales_counts( $order_id ) {
 		$reflected_order = true;
 	}
 
-	if ( $recorded_sales && ! $reflected_order ) {
+	if ( $recorded_sales xor $reflected_order ) {
 		return;
 	}
 
