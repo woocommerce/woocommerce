@@ -6,8 +6,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import LightBulb from './images/lightbulb';
-import { Stages } from './types';
+import LightBulb from './assets/images/loader-lightbulb.svg';
+import { Stages } from './pages/Loader';
 
 export const useStages = ( key: string ): Stages => {
 	switch ( key ) {

@@ -24,7 +24,7 @@ import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions, Country } from './services/country';
-import { Loader } from './components/loader/Loader';
+import { Loader } from './pages/Loader';
 import './style.scss';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves

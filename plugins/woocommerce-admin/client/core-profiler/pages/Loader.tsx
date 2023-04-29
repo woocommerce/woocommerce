@@ -6,10 +6,22 @@ import { useState, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './loader.scss';
-import { CoreProfilerStateMachineContext } from '../..';
-import ProgressBar from '../progress-bar/progress-bar';
-import { useStages } from './use-stages';
+import { CoreProfilerStateMachineContext } from '..';
+import ProgressBar from '../components/progress-bar/progress-bar';
+import { useStages } from '../use-loader-stages';
+
+export type Stage = {
+	title: string;
+	progress?: number;
+	image?: string | JSX.Element;
+	paragraphs: Array< {
+		label: string;
+		text: string;
+		duration?: number;
+	} >;
+};
+
+export type Stages = Array< Stage >;
 
 export const Loader = ( {
 	context,
