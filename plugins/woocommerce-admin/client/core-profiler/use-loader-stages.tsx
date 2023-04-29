@@ -16,6 +16,20 @@ export const useStages = ( key: string ): Stages => {
 			return [
 				{
 					title: __( 'Turning on the lights', 'woocommerce' ),
+					progress: 40,
+					image: <img src={ LightBulb } />,
+					paragraphs: [
+						{
+							label: __( '#FunWooFact: ', 'woocommerce' ),
+							text: __(
+								'The Woo team is made up of over 350 talented individuals, distributed across 30+ countries.',
+								'woocommerce'
+							),
+						},
+					],
+				},
+				{
+					title: __( 'Opening the doors', 'woocommerce' ),
 					progress: 80,
 					image: <img src={ LightBulb } />,
 					paragraphs: [

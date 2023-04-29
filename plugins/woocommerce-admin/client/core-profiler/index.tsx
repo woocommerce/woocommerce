@@ -385,15 +385,40 @@ const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		postSkipFlowBusinessLocation: {
-			invoke: {
-				src: () => {
-					// show the loader for 3 seconds
-					return new Promise( ( resolve ) => {
-						setTimeout( resolve, 3000 );
-					} );
+			initial: 'step1',
+			states: {
+				step1: {
+					invoke: {
+						src: () => {
+							// do something async
+							// and return a promise
+							return new Promise( ( resolve ) => {
+								setTimeout( resolve, 3000 );
+							} );
+						},
+						onDone: {
+							target: 'step2',
+							actions: assign( {
+								loader: {
+									stageIndex: 1,
+								},
+							} ),
+						},
+					},
 				},
-				onDone: {
-					actions: [ 'redirectToWooHome' ],
+				step2: {
+					invoke: {
+						src: () => {
+							// do something async
+							// and return a promise
+							return new Promise( ( resolve ) => {
+								setTimeout( resolve, 3000 );
+							} );
+						},
+						onDone: {
+							actions: 'redirectToWooHome',
+						},
+					},
 				},
 			},
 			meta: {
@@ -457,9 +482,12 @@ const CoreProfilerController = ( {} ) => {
 	}, [] );
 
 	const [ state, send ] = useMachine( augmentedStateMachine );
-
-	const currentNodeMeta = state.meta[ `coreProfiler.${ state.value }` ]
-		? state.meta[ `coreProfiler.${ state.value }` ]
+	const stateValue =
+		typeof state.value === 'object'
+			? Object.keys( state.value )[ 0 ]
+			: state.value;
+	const currentNodeMeta = state.meta[ `coreProfiler.${ stateValue }` ]
+		? state.meta[ `coreProfiler.${ stateValue }` ]
 		: undefined;
 	const navigationProgress = currentNodeMeta?.progress; // This value is defined in each state node's meta tag, we can assume it is 0-100
 	const CurrentComponent =
