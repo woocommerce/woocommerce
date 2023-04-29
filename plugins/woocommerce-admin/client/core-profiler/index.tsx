@@ -24,9 +24,8 @@ import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions, Country } from './services/country';
-import { Loader } from './pages/Loader';
+import { Loader } from './components/loader/Loader';
 import './style.scss';
-import stepsets from './pages/loader/messages';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
 // https://stately.ai/blog/introducing-typescript-typegen-for-xstate
@@ -84,9 +83,9 @@ export type CoreProfilerStateMachineContext = {
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
 	loader: {
-		currentStep?: number;
 		className?: string;
-		stepSet: keyof stepsets;
+		useStages?: string;
+		stageIndex?: number;
 	};
 };
 
@@ -222,10 +221,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 		extensionsAvailable: [],
 		extensionsSelected: [],
 		countries: {},
-		loader: {
-			currentStage: 0,
-			stagesFor: 'default',
-		},
+		loader: {},
 	} as CoreProfilerStateMachineContext,
 	states: {
 		initializing: {

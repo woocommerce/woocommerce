@@ -6,19 +6,18 @@ import { useState, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './loader/loader.scss';
-import { CoreProfilerStateMachineContext } from '..';
-import ProgressBar from '../components/progress-bar/progress-bar';
-import { Image } from './loader/image';
-import stepsets from './loader/messages';
+import './loader.scss';
+import { CoreProfilerStateMachineContext } from '../..';
+import ProgressBar from '../progress-bar/progress-bar';
+import { useStages } from './use-stages';
 
 export const Loader = ( {
 	context,
 }: {
 	context: CoreProfilerStateMachineContext;
 } ) => {
-	const stepset =
-		stepsets[ context.loader.theme ][ context.loader.currentStage ?? 0 ];
+	const stages = useStages( context.loader.useStages ?? 'default' );
+	const currentStage = stages[ context.loader.stageIndex ?? 0 ];
 	const [ currentParagraph, setCurrentParagraph ] = useState( 0 );
 
 	useEffect( () => {
@@ -40,10 +39,7 @@ export const Loader = ( {
 				context.loader.className
 			) }
 		>
-			{ typeof currentStage.image === 'string' && (
-				<Image imageName={ currentStage.image } />
-			) }
-			{ typeof currentStage.image === 'object' && currentStage.image }
+			{ currentStage.image && currentStage.image }
 
 			<h1 className="woocommerce-profiler-loader__title">
 				{ currentStage.title }

@@ -1,7 +1,7 @@
-export type Step = {
+export type Stage = {
 	title: string;
-	image: string | JSX.Element;
 	progress?: number;
+	image?: string | JSX.Element;
 	paragraphs: Array< {
 		label: string;
 		text: string;
@@ -9,4 +9,4 @@ export type Step = {
 	} >;
 };
 
-export type Steps = Array< Step >;
+export type Stages = Array< Stage >;
