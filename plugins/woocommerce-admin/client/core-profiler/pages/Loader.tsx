@@ -6,19 +6,19 @@ import { useState, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './style.scss';
-import { CoreProfilerStateMachineContext } from '../..';
-import ProgressBar from '../progress-bar/progress-bar';
-import { useStages } from './useStages';
-import { Image } from './image';
+import './loader/loader.scss';
+import { CoreProfilerStateMachineContext } from '..';
+import ProgressBar from '../components/progress-bar/progress-bar';
+import { Image } from './loader/image';
+import stepsets from './loader/messages';
 
 export const Loader = ( {
 	context,
 }: {
 	context: CoreProfilerStateMachineContext;
 } ) => {
-	const stages = useStages( context.loader.stagesFor );
-	const currentStage = stages[ context.loader.currentStage ?? 0 ];
+	const stepset =
+		stepsets[ context.loader.theme ][ context.loader.currentStage ?? 0 ];
 	const [ currentParagraph, setCurrentParagraph ] = useState( 0 );
 
 	useEffect( () => {

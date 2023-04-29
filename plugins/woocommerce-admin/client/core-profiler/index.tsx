@@ -24,10 +24,9 @@ import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions, Country } from './services/country';
-import { Loader } from './components/loader/loader';
-import postSkipFlowBusinessLocationLoader from './components/loader/stages/businessLocation';
+import { Loader } from './pages/Loader';
 import './style.scss';
-import { StagesFor } from './components/loader/types';
+import stepsets from './pages/loader/messages';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
 // https://stately.ai/blog/introducing-typescript-typegen-for-xstate
@@ -85,9 +84,9 @@ export type CoreProfilerStateMachineContext = {
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
 	loader: {
-		currentStage?: number;
+		currentStep?: number;
 		className?: string;
-		stagesFor: StagesFor;
+		stepSet: keyof stepsets;
 	};
 };
 
@@ -225,7 +224,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 		countries: {},
 		loader: {
 			currentStage: 0,
-			stagesFor: 'intro',
+			stagesFor: 'default',
 		},
 	} as CoreProfilerStateMachineContext,
 	states: {
@@ -372,6 +371,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 								event: BusinessLocationEvent
 							) => event.payload.businessInfo, // assign context.businessInfo to the payload of the event
 						} ),
+						'recordTracksSkipBusinessLocationCompleted',
 					],
 				},
 			},
@@ -383,25 +383,14 @@ const coreProfilerStateMachineDefinition = createMachine( {
 		},
 		postSkipFlowBusinessLocation: {
 			invoke: {
-				src: ( context ) => {
+				src: () => {
+					// show the loader for 3 seconds
 					return new Promise( ( resolve ) => {
-						setTimeout( resolve, 5000 );
+						setTimeout( resolve, 3000 );
 					} );
 				},
-				onDone: [
-					{
-						actions: [
-							'recordTracksSkipBusinessLocationCompleted',
-							'redirectToWooHome',
-						],
-					},
-				],
+				onDone: {},
 			},
-			entry: assign( {
-				loader: {
-					stagesFor: 'businessLocation',
-				},
-			} ),
 			meta: {
 				component: Loader,
 			},
