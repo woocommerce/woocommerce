@@ -194,6 +194,7 @@ return array(
 			'SJ',
 			'SK',
 			'SM',
+			'XK',
 			'TR',
 			'UA',
 			'VA',
