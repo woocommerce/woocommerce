@@ -20,10 +20,25 @@ class BlockRegistry {
 	 * Array of all available product blocks.
 	 */
 	const PRODUCT_BLOCKS = [
-		'woocommerce/product-name',
-		'woocommerce/product-pricing',
+		'woocommerce/conditional',
+		'woocommerce/product-category-field',
+		'woocommerce/product-checkbox-field',
+		'woocommerce/product-collapsible',
+		'woocommerce/product-description-field',
+		'woocommerce/product-images-field',
+		'woocommerce/product-inventory-email-field',
+		'woocommerce/product-sku-field',
+		'woocommerce/product-name-field',
+		'woocommerce/product-pricing-field',
+		'woocommerce/product-radio-field',
+		'woocommerce/product-schedule-sale-fields',
 		'woocommerce/product-section',
+		'woocommerce/product-shipping-dimensions-fields',
+		'woocommerce/product-shipping-fee-fields',
+		'woocommerce/product-summary-field',
 		'woocommerce/product-tab',
+		'woocommerce/product-inventory-quantity-field',
+		'woocommerce/product-toggle-field',
 	];
 
 	/**
@@ -31,17 +46,43 @@ class BlockRegistry {
 	 *
 	 * @param string $path File path.
 	 */
-	public function get_file_path( $path ) {
+	private function get_file_path( $path ) {
 		return WC_ABSPATH . WCAdminAssets::get_path( 'js' ) . trailingslashit( self::BLOCKS_DIR ) . $path;
+	}
+
+	/**
+	 * Initialize all blocks.
+	 */
+	public function init() {
+		add_filter( 'block_categories_all', array( $this, 'register_categories' ), 10, 2 );
+		$this->register_product_blocks();
 	}
 
 	/**
 	 * Register all the product blocks.
 	 */
-	public function register_product_blocks() {
+	private function register_product_blocks() {
 		foreach ( self::PRODUCT_BLOCKS as $block_name ) {
 			$this->register_block( $block_name );
 		}
+	}
+
+	/**
+	 * Register product related block categories.
+	 *
+	 * @param array[]                 $block_categories Array of categories for block types.
+	 * @param WP_Block_Editor_Context $editor_context   The current block editor context.
+	 */
+	public function register_categories( $block_categories, $editor_context ) {
+		if ( INIT::EDITOR_CONTEXT_NAME === $editor_context->name ) {
+			$block_categories[] = array(
+				'slug'  => 'woocommerce',
+				'title' => __( 'WooCommerce', 'woocommerce' ),
+				'icon'  => null,
+			);
+		}
+
+		return $block_categories;
 	}
 
 	/**
@@ -51,7 +92,7 @@ class BlockRegistry {
 	 *
 	 * @return string
 	 */
-	public function remove_block_prefix( $block_name ) {
+	private function remove_block_prefix( $block_name ) {
 		if ( 0 === strpos( $block_name, 'woocommerce/' ) ) {
 			return substr_replace( $block_name, '', 0, strlen( 'woocommerce/' ) );
 		}
@@ -66,7 +107,7 @@ class BlockRegistry {
 	 *
 	 * @return WP_Block_Type|false The registered block type on success, or false on failure.
 	 */
-	public function register_block( $block_name ) {
+	private function register_block( $block_name ) {
 		$block_name      = $this->remove_block_prefix( $block_name );
 		$block_json_file = $this->get_file_path( $block_name . '/block.json' );
 

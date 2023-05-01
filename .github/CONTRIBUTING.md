@@ -21,6 +21,8 @@ If you have questions about the process to contribute code or want to discuss de
 
 ## Getting started
 
+Please take a moment to review the [project readme](https://github.com/woocommerce/woocommerce/blob/trunk/README.md) and our [development notes](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md), which cover the basics needed to start working on this project. You may also be interested in the following resources:
+
 - [How to set up WooCommerce development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment)
 - [Git Flow](https://github.com/woocommerce/woocommerce/wiki/WooCommerce-Git-Flow)
 - [Minification of SCSS and JS](https://github.com/woocommerce/woocommerce/wiki/Minification-of-SCSS-and-JS)

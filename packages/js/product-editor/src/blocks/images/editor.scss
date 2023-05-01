@@ -1,0 +1,21 @@
+.wp-block-woocommerce-product-images-field {
+	.woocommerce-image-gallery {
+		margin-top: $gap-largest;
+	}
+    .woocommerce-media-uploader {
+        text-align: left;
+    }
+    .woocommerce-media-uploader__label {
+        display: none;
+    }
+    .woocommerce-sortable {
+        margin-top: 0;
+        padding: 0;
+    }
+
+    &:not(.has-images) {
+        .woocommerce-sortable {
+            display: none;
+        }
+    }
+}

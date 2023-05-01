@@ -48,6 +48,9 @@ declare global {
 				isDirty: () => boolean;
 			};
 		};
+		getUserSetting?: ( name: string ) => string | undefined;
+		setUserSetting?: ( name: string, value: string ) => void;
+		deleteUserSetting?: ( name: string ) => void;
 	}
 }
 

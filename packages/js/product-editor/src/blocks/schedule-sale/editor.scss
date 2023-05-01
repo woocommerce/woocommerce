@@ -3,14 +3,4 @@
 		display: flex;
 		align-items: center;
 	}
-
-	.woocommerce-date-time-picker-control.has-error {
-		.components-base-control .components-input-control__backdrop {
-			border-color: $studio-red-50;
-		}
-
-		.components-base-control__help {
-			color: $studio-red-50;
-		}
-	}
 }
