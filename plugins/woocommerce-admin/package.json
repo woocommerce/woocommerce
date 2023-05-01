@@ -12,7 +12,7 @@
 		"changelog": "pnpm --filter=woocommerce -r run changelog ",
 		"turbo:build": "pnpm run clean && cross-env NODE_ENV=production WC_ADMIN_PHASE=core webpack",
 		"turbo:test": "pnpm run test:client",
-		"turbo:watch": "pnpm run turbo:watch:* --parallel",
+		"turbo:watch": "pnpm run /^turbo:watch:.*/ --parallel",
 		"turbo:watch:webpack": "cross-env WC_ADMIN_PHASE=development webpack --watch",
 		"analyze": "cross-env NODE_ENV=production ANALYZE=true webpack",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",

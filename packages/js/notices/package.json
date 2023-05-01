@@ -42,7 +42,7 @@
 	"private": true,
 	"scripts": {
 		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
-		"turbo:watch": "pnpm run turbo:watch:* --parallel",
+		"turbo:watch": "pnpm run /^turbo:watch:.*/ --parallel",
 		"turbo:watch:ts-esm": "tsc --project tsconfig.json --watch",
 		"turbo:watch:ts-cjs": "tsc --project tsconfig-cjs.json --watch",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",

@@ -32,7 +32,7 @@
 	"scripts": {
 		"turbo:build": "pnpm run clean && npm run compile",
 		"turbo:test": "jest",
-		"turbo:watch": "pnpm run turbo:watch:* --parallel",
+		"turbo:watch": "pnpm run /^turbo:watch:.*/ --parallel",
 		"turbo:watch:ts-esm": "tsc --watch --project tsconfig.json",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
 		"prepare": "composer install",
