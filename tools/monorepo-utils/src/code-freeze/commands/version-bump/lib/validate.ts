@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { valid, lt as versionLessThan, parse } from 'semver';
+import { valid, lt as versionLessThan, parse, prerelease } from 'semver';
 import { join } from 'path';
 import { readFile } from 'fs/promises';
 
@@ -59,6 +59,16 @@ export const validateArgs = async (
 	if ( ! valid( nextVersion ) ) {
 		Logger.error(
 			'Invalid version supplied, please pass in a semantically correct version.'
+		);
+	}
+
+	const prereleaseParameters = prerelease( nextVersion );
+	const isDevVersionBump =
+		prereleaseParameters && prereleaseParameters[ 0 ] === 'dev';
+
+	if ( ! isDevVersionBump ) {
+		Logger.error(
+			`Version ${ nextVersion } is not a development version bump. This tool is only intended to bump development versions for the preparation of the next development cycle.`
 		);
 	}
 

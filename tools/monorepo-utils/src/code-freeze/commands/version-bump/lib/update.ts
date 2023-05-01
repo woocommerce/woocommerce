@@ -10,31 +10,6 @@ import { join } from 'path';
 import { Logger } from '../../../../core/logger';
 
 /**
- * Update plugin readme stable tag.
- *
- * @param  tmpRepoPath cloned repo path
- * @param  nextVersion version to bump to
- */
-export const updateReadmeStableTag = async (
-	tmpRepoPath: string,
-	nextVersion: string
-): Promise< void > => {
-	const filePath = join( tmpRepoPath, `plugins/woocommerce/readme.txt` );
-	try {
-		const readmeContents = await readFile( filePath, 'utf8' );
-
-		const updatedReadmeContents = readmeContents.replace(
-			/Stable tag: \d+\.\d+\.\d+\n/m,
-			`Stable tag: ${ nextVersion }\n`
-		);
-
-		await writeFile( filePath, updatedReadmeContents );
-	} catch ( e ) {
-		Logger.error( 'Unable to update readme stable tag' );
-	}
-};
-
-/**
  * Update plugin readme changelog.
  *
  * @param  tmpRepoPath cloned repo path
