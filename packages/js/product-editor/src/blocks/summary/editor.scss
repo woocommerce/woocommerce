@@ -1,0 +1,31 @@
+.components-summary-control {
+	width: 100%;
+	min-height: calc($gap-larger * 3);
+	background-color: $white;
+	box-sizing: border-box;
+	border: 1px solid #757575;
+	border-radius: 2px;
+	padding: $gap-smaller;
+	margin: 0;
+	appearance: textarea;
+	resize: vertical;
+	overflow: hidden;
+
+	&.rich-text [data-rich-text-placeholder]:after {
+		color: $gray-700;
+		opacity: 1;
+	}
+
+	&:focus {
+		box-shadow: inset 0 0 0 1px var(--wp-admin-theme-color-darker-10, --wp-admin-theme-color);
+		border-color: var(--wp-admin-theme-color-darker-10, --wp-admin-theme-color);
+	}
+}
+
+
+// This alignment class does not exists in
+// https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/common.scss
+.has-text-align-justify {
+	/*rtl:ignore*/
+	text-align: justify;
+}

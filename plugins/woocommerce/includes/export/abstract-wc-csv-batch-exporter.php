@@ -127,6 +127,13 @@ abstract class WC_CSV_Batch_Exporter extends WC_CSV_Exporter {
 	protected function write_csv_data( $data ) {
 
 		if ( ! file_exists( $this->get_file_path() ) || ! is_writeable( $this->get_file_path() ) ) {
+			wc_get_logger()->error(
+				sprintf(
+					/* translators: %s is file path. */
+					__( 'Unable to create or write to %s during CSV export. Please check file permissions.', 'woocommerce' ),
+					esc_html( $this->get_file_path() )
+				)
+			);
 			return false;
 		}
 

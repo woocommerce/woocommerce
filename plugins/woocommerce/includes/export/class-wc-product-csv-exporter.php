@@ -6,6 +6,8 @@
  * @version 3.1.0
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -99,6 +101,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * @return array
 	 */
 	public function get_default_column_names() {
+		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
+
 		return apply_filters(
 			"woocommerce_product_export_{$this->export_type}_default_columns",
 			array(
@@ -121,13 +126,13 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				'backorders'         => __( 'Backorders allowed?', 'woocommerce' ),
 				'sold_individually'  => __( 'Sold individually?', 'woocommerce' ),
 				/* translators: %s: weight */
-				'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), get_option( 'woocommerce_weight_unit' ) ),
+				'weight'             => sprintf( __( 'Weight (%s)', 'woocommerce' ), $weight_unit_label ),
 				/* translators: %s: length */
-				'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+				'length'             => sprintf( __( 'Length (%s)', 'woocommerce' ), $dimension_unit_label ),
 				/* translators: %s: width */
-				'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+				'width'              => sprintf( __( 'Width (%s)', 'woocommerce' ), $dimension_unit_label ),
 				/* translators: %s: Height */
-				'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ),
+				'height'             => sprintf( __( 'Height (%s)', 'woocommerce' ), $dimension_unit_label ),
 				'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
 				'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
 				'sale_price'         => __( 'Sale price', 'woocommerce' ),
@@ -652,7 +657,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 					$this->column_names[ 'attributes:taxonomy' . $i ] = sprintf( __( 'Attribute %d global', 'woocommerce' ), $i );
 
 					if ( is_a( $attribute, 'WC_Product_Attribute' ) ) {
-						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute->get_name(), $product );
+						$row[ 'attributes:name' . $i ] = html_entity_decode( wc_attribute_label( $attribute->get_name(), $product ), ENT_QUOTES );
 
 						if ( $attribute->is_taxonomy() ) {
 							$terms  = $attribute->get_terms();
@@ -671,14 +676,14 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 						$row[ 'attributes:visible' . $i ] = $attribute->get_visible();
 					} else {
-						$row[ 'attributes:name' . $i ] = wc_attribute_label( $attribute_name, $product );
+						$row[ 'attributes:name' . $i ] = html_entity_decode( wc_attribute_label( $attribute_name, $product ), ENT_QUOTES );
 
 						if ( 0 === strpos( $attribute_name, 'pa_' ) ) {
 							$option_term = get_term_by( 'slug', $attribute, $attribute_name ); // @codingStandardsIgnoreLine.
-							$row[ 'attributes:value' . $i ]    = $option_term && ! is_wp_error( $option_term ) ? str_replace( ',', '\\,', $option_term->name ) : str_replace( ',', '\\,', $attribute );
+							$row[ 'attributes:value' . $i ]    = $option_term && ! is_wp_error( $option_term ) ? html_entity_decode( str_replace( ',', '\\,', $option_term->name ), ENT_QUOTES ) : html_entity_decode( str_replace( ',', '\\,', $attribute ), ENT_QUOTES );
 							$row[ 'attributes:taxonomy' . $i ] = 1;
 						} else {
-							$row[ 'attributes:value' . $i ]    = str_replace( ',', '\\,', $attribute );
+							$row[ 'attributes:value' . $i ]    = html_entity_decode( str_replace( ',', '\\,', $attribute ), ENT_QUOTES );
 							$row[ 'attributes:taxonomy' . $i ] = 0;
 						}
 

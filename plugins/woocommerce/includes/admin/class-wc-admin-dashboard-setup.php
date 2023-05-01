@@ -187,7 +187,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 				return false;
 			}
 
-			if ( ! $this->get_task_list() || $this->get_task_list()->is_complete() || $this->get_task_list()->is_hidden() ) {
+			if ( ! $this->get_task_list() || $this->get_task_list()->is_hidden() || $this->get_task_list()->is_complete() ) {
 				return false;
 			}
 

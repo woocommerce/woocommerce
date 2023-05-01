@@ -193,7 +193,14 @@ const PaymentRecommendations: React.FC = () => {
 					</Button>
 				),
 				before: (
-					<img src={ plugin.square_image || plugin.image } alt="" />
+					<img
+						src={
+							plugin.square_image ||
+							plugin.image_72x72 ||
+							plugin.image
+						}
+						alt=""
+					/>
 				),
 			};
 		} );

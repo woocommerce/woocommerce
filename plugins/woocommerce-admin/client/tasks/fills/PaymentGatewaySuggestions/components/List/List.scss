@@ -67,6 +67,18 @@
 			font-size: 12px;
 		}
 	}
+	.woocommerce-task-payment__transaction-processors_images {
+		padding-top: 16px;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: 8px;
+
+		img {
+			height: 24px;
+		}
+	}
+
 	.woocommerce-task-payment__description {
 		flex: 1;
 	}

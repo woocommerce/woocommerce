@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Stock;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 
 /**
  * REST API Reports stock controller class.

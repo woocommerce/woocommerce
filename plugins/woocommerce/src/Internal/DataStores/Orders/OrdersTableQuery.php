@@ -116,6 +116,13 @@ class OrdersTableQuery {
 	private $sql = '';
 
 	/**
+	 * Final SQL query to count results after processing of args.
+	 *
+	 * @var string
+	 */
+	private $count_sql = '';
+
+	/**
 	 * The number of pages (when pagination is enabled).
 	 *
 	 * @var int
@@ -157,6 +164,12 @@ class OrdersTableQuery {
 	 */
 	private $date_query = null;
 
+	/**
+	 * Instance of the OrdersTableDataStore class.
+	 *
+	 * @var OrdersTableDataStore
+	 */
+	private $order_datastore = null;
 
 	/**
 	 * Sets up and runs the query after processing arguments.
@@ -164,19 +177,11 @@ class OrdersTableQuery {
 	 * @param array $args Array of query vars.
 	 */
 	public function __construct( $args = array() ) {
-		global $wpdb;
+		// Note that ideally we would inject this dependency via constructor, but that's not possible since this class needs to be backward compatible with WC_Order_Query class.
+		$this->order_datastore = wc_get_container()->get( OrdersTableDataStore::class );
 
-		$datastore = wc_get_container()->get( OrdersTableDataStore::class );
-
-		// TODO: maybe OrdersTableDataStore::get_all_table_names() could return these keys/indices instead.
-		$this->tables   = array(
-			'orders'           => $datastore::get_orders_table_name(),
-			'addresses'        => $datastore::get_addresses_table_name(),
-			'operational_data' => $datastore::get_operational_data_table_name(),
-			'meta'             => $datastore::get_meta_table_name(),
-			'items'            => $wpdb->prefix . 'woocommerce_order_items',
-		);
-		$this->mappings = $datastore->get_all_order_column_mappings();
+		$this->tables   = $this->order_datastore::get_all_table_names_with_id();
+		$this->mappings = $this->order_datastore->get_all_order_column_mappings();
 
 		$this->args = $args;
 
@@ -195,13 +200,13 @@ class OrdersTableQuery {
 	private function maybe_remap_args(): void {
 		$mapping = array(
 			// WP_Query legacy.
-			'post_date'           => 'date_created_gmt',
+			'post_date'           => 'date_created',
 			'post_date_gmt'       => 'date_created_gmt',
-			'post_modified'       => 'date_modified_gmt',
+			'post_modified'       => 'date_updated',
 			'post_modified_gmt'   => 'date_updated_gmt',
 			'post_status'         => 'status',
-			'_date_completed'     => 'date_completed_gmt',
-			'_date_paid'          => 'date_paid_gmt',
+			'_date_completed'     => 'date_completed',
+			'_date_paid'          => 'date_paid',
 			'paged'               => 'page',
 			'post_parent'         => 'parent_order_id',
 			'post_parent__in'     => 'parent_order_id',
@@ -224,12 +229,8 @@ class OrdersTableQuery {
 
 			// Translate from WC_Order_Query to table structure.
 			'version'             => 'woocommerce_version',
-			'date_created'        => 'date_created_gmt',
-			'date_modified'       => 'date_updated_gmt',
+			'date_modified'       => 'date_updated',
 			'date_modified_gmt'   => 'date_updated_gmt',
-			'date_completed'      => 'date_completed_gmt',
-			'date_completed_gmt'  => 'date_completed_gmt',
-			'date_paid'           => 'date_paid_gmt',
 			'discount_total'      => 'discount_total_amount',
 			'discount_tax'        => 'discount_tax_amount',
 			'shipping_total'      => 'shipping_total_amount',
@@ -242,7 +243,7 @@ class OrdersTableQuery {
 		);
 
 		foreach ( $mapping as $query_key => $table_field ) {
-			if ( isset( $this->args[ $query_key ] ) ) {
+			if ( isset( $this->args[ $query_key ] ) && '' !== $this->args[ $query_key ] ) {
 				$this->args[ $table_field ] = $this->args[ $query_key ];
 				unset( $this->args[ $query_key ] );
 			}
@@ -275,10 +276,11 @@ class OrdersTableQuery {
 	 * Generates a `WP_Date_Query` compatible query from a given date.
 	 * YYYY-MM-DD queries have 'day' precision for backwards compatibility.
 	 *
-	 * @param mixed $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
+	 * @param mixed  $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
+	 * @param string $timezone The timezone to use for the date.
 	 * @return array An array with keys 'year', 'month', 'day' and possibly 'hour', 'minute' and 'second'.
 	 */
-	private function date_to_date_query_arg( $date ): array {
+	private function date_to_date_query_arg( $date, $timezone ): array {
 		$result    = array(
 			'year'  => '',
 			'month' => '',
@@ -287,7 +289,7 @@ class OrdersTableQuery {
 		$precision = 'second';
 
 		if ( is_numeric( $date ) ) {
-			$date = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
+			$date = new \WC_DateTime( "@{$date}", new \DateTimeZone( $timezone ) );
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
 			// YYYY-MM-DD queries have 'day' precision for backwards compat.
 			$date      = wc_string_to_datetime( $date );
@@ -314,30 +316,42 @@ class OrdersTableQuery {
 	 * @throws \Exception When date args are invalid.
 	 */
 	private function process_date_args(): void {
-		$valid_operators = array( '>', '>=', '=', '<=', '<', '...' );
-		$date_queries    = array();
-		$gmt_date_keys   = array(
-			'date_created_gmt',
-			'date_updated_gmt',
-			'date_paid_gmt',
-			'date_completed_gmt',
+		if ( $this->arg_isset( 'date_query' ) ) {
+			// Process already passed date queries args.
+			$this->args['date_query'] = $this->map_gmt_and_post_keys_to_hpos_keys( $this->args['date_query'] );
+		}
+
+		$valid_operators        = array( '>', '>=', '=', '<=', '<', '...' );
+		$date_queries           = array();
+		$local_to_gmt_date_keys = array(
+			'date_created'   => 'date_created_gmt',
+			'date_updated'   => 'date_updated_gmt',
+			'date_paid'      => 'date_paid_gmt',
+			'date_completed' => 'date_completed_gmt',
 		);
 
-		foreach ( array_filter( $gmt_date_keys, array( $this, 'arg_isset' ) ) as $date_key ) {
+		$gmt_date_keys   = array_values( $local_to_gmt_date_keys );
+		$local_date_keys = array_keys( $local_to_gmt_date_keys );
+
+		$valid_date_keys = array_merge( $gmt_date_keys, $local_date_keys );
+		$date_keys       = array_filter( $valid_date_keys, array( $this, 'arg_isset' ) );
+
+		foreach ( $date_keys as $date_key ) {
 			$date_value = $this->args[ $date_key ];
 			$operator   = '=';
 			$dates      = array();
+			$timezone   = in_array( $date_key, $gmt_date_keys, true ) ? '+0000' : wc_timezone_string();
 
 			if ( is_string( $date_value ) && preg_match( self::REGEX_SHORTHAND_DATES, $date_value, $matches ) ) {
 				$operator = in_array( $matches[2], $valid_operators, true ) ? $matches[2] : '';
 
 				if ( ! empty( $matches[1] ) ) {
-					$dates[] = $this->date_to_date_query_arg( $matches[1] );
+					$dates[] = $this->date_to_date_query_arg( $matches[1], $timezone );
 				}
 
-				$dates[] = $this->date_to_date_query_arg( $matches[3] );
+				$dates[] = $this->date_to_date_query_arg( $matches[3], $timezone );
 			} else {
-				$dates[] = $this->date_to_date_query_arg( $date_value );
+				$dates[] = $this->date_to_date_query_arg( $date_value, $timezone );
 			}
 
 			if ( empty( $dates ) || ! $operator || ( '...' === $operator && count( $dates ) < 2 ) ) {
@@ -354,6 +368,7 @@ class OrdersTableQuery {
 				$operator_to_keys[] = 'before';
 			}
 
+			$date_key       = in_array( $date_key, $local_date_keys, true ) ? $local_to_gmt_date_keys[ $date_key ] : $date_key;
 			$date_queries[] = array_merge(
 				array(
 					'column'    => $date_key,
@@ -392,6 +407,63 @@ class OrdersTableQuery {
 		}
 
 		$this->process_date_query_columns();
+	}
+
+	/**
+	 * Helper function to map posts and gmt based keys to HPOS keys.
+	 *
+	 * @param array $query Date query argument.
+	 *
+	 * @return array|mixed Date query argument with modified keys.
+	 */
+	private function map_gmt_and_post_keys_to_hpos_keys( $query ) {
+		if ( ! is_array( $query ) ) {
+			return $query;
+		}
+
+		$post_to_hpos_mappings = array(
+			'post_date'         => 'date_created',
+			'post_date_gmt'     => 'date_created_gmt',
+			'post_modified'     => 'date_updated',
+			'post_modified_gmt' => 'date_updated_gmt',
+			'_date_completed'   => 'date_completed',
+			'_date_paid'        => 'date_paid',
+			'date_modified'     => 'date_updated',
+			'date_modified_gmt' => 'date_updated_gmt',
+		);
+
+		$local_to_gmt_date_keys = array(
+			'date_created'   => 'date_created_gmt',
+			'date_updated'   => 'date_updated_gmt',
+			'date_paid'      => 'date_paid_gmt',
+			'date_completed' => 'date_completed_gmt',
+		);
+
+		array_walk(
+			$query,
+			function ( &$sub_query ) {
+				$sub_query = $this->map_gmt_and_post_keys_to_hpos_keys( $sub_query );
+			}
+		);
+
+		if ( ! isset( $query['column'] ) ) {
+			return $query;
+		}
+
+		if ( isset( $post_to_hpos_mappings[ $query['column'] ] ) ) {
+			$query['column'] = $post_to_hpos_mappings[ $query['column'] ];
+		}
+
+		// Convert any local dates to GMT.
+		if ( isset( $local_to_gmt_date_keys[ $query['column'] ] ) ) {
+			$query['column']  = $local_to_gmt_date_keys[ $query['column'] ];
+			$op               = isset( $query['after'] ) ? 'after' : 'before';
+			$date_value_local = $query[ $op ];
+			$date_value_gmt   = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
+			$query[ $op ]     = $this->date_to_date_query_arg( $date_value_gmt, 'UTC' );
+		}
+
+		return $query;
 	}
 
 	/**
@@ -502,15 +574,36 @@ class OrdersTableQuery {
 			return;
 		}
 
-		if ( is_string( $orderby ) ) {
-			$orderby = array( $orderby => $order );
+		// No need to sanitize, will be processed in calling function.
+		if ( 'include' === $orderby || 'post__in' === $orderby ) {
+			return;
 		}
+
+		if ( is_string( $orderby ) ) {
+			$orderby_fields = array_map( 'trim', explode( ' ', $orderby ) );
+			$orderby        = array();
+			foreach ( $orderby_fields as $field ) {
+				$orderby[ $field ] = $order;
+			}
+		}
+
+		$allowed_orderby = array_merge(
+			array_keys( $mapping ),
+			array_values( $mapping ),
+			$this->meta_query ? $this->meta_query->get_orderby_keys() : array()
+		);
 
 		$this->args['orderby'] = array();
 		foreach ( $orderby as $order_key => $order ) {
-			if ( isset( $mapping[ $order_key ] ) ) {
-				$this->args['orderby'][ $mapping[ $order_key ] ] = $this->sanitize_order( $order );
+			if ( ! in_array( $order_key, $allowed_orderby, true ) ) {
+				continue;
 			}
+
+			if ( isset( $mapping[ $order_key ] ) ) {
+				$order_key = $mapping[ $order_key ];
+			}
+
+			$this->args['orderby'][ $order_key ] = $this->sanitize_order( $order );
 		}
 	}
 
@@ -565,9 +658,6 @@ class OrdersTableQuery {
 			$this->join  = $sql['join'] ? array_merge( $this->join, $sql['join'] ) : $this->join;
 			$this->where = $sql['where'] ? array_merge( $this->where, array( $sql['where'] ) ) : $this->where;
 
-			if ( $sql['join'] ) {
-				$this->groupby[] = "{$this->tables['orders']}.id";
-			}
 		}
 
 		// Date queries.
@@ -581,16 +671,10 @@ class OrdersTableQuery {
 
 		$orders_table = $this->tables['orders'];
 
-		// SELECT [fields].
-		$this->fields = "{$orders_table}.id";
-		$fields       = $this->fields;
-
-		// SQL_CALC_FOUND_ROWS.
-		if ( ( ! $this->arg_isset( 'no_found_rows' ) || ! $this->args['no_found_rows'] ) && $this->limits ) {
-			$found_rows = 'SQL_CALC_FOUND_ROWS';
-		} else {
-			$found_rows = '';
-		}
+		// Group by is a faster substitute for DISTINCT, as long as we are only selecting IDs. MySQL don't like it when we join tables and use DISTINCT.
+		$this->groupby[] = "{$this->tables['orders']}.id";
+		$this->fields    = "{$orders_table}.id";
+		$fields          = $this->fields;
 
 		// JOIN.
 		$join = implode( ' ', array_unique( array_filter( array_map( 'trim', $this->join ) ) ) );
@@ -616,7 +700,24 @@ class OrdersTableQuery {
 		// GROUP BY.
 		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
 
-		$this->sql = "SELECT $found_rows DISTINCT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
+		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
+		$this->build_count_query( $fields, $join, $where, $groupby );
+	}
+
+	/**
+	 * Build SQL query for counting total number of results.
+	 *
+	 * @param string $fields Prepared fields for SELECT clause.
+	 * @param string $join Prepared JOIN clause.
+	 * @param string $where Prepared WHERE clause.
+	 * @param string $groupby Prepared GROUP BY clause.
+	 */
+	private function build_count_query( $fields, $join, $where, $groupby ) {
+		if ( ! isset( $this->sql ) || '' === $this->sql ) {
+			wc_doing_it_wrong( __FUNCTION__, 'Count query can only be build after main query is built.', '7.3.0' );
+		}
+		$orders_table    = $this->tables['orders'];
+		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where";
 	}
 
 	/**
@@ -690,9 +791,9 @@ class OrdersTableQuery {
 
 		if ( empty( $on ) ) {
 			if ( $this->tables['orders'] === $table ) {
-				$on = "{$this->tables['orders']}.id = {$alias}.id";
+				$on = "`{$this->tables['orders']}`.id = `{$alias}`.id";
 			} else {
-				$on = "{$this->tables['orders']}.id = {$alias}.order_id";
+				$on = "`{$this->tables['orders']}`.id = `{$alias}`.order_id";
 			}
 		}
 
@@ -710,8 +811,8 @@ class OrdersTableQuery {
 		}
 
 		$sql_join  = '';
-		$sql_join .= "{$join_type} JOIN {$table} ";
-		$sql_join .= ( $alias !== $table ) ? "AS {$alias} " : '';
+		$sql_join .= "{$join_type} JOIN `{$table}` ";
+		$sql_join .= ( $alias !== $table ) ? "AS `{$alias}` " : '';
 		$sql_join .= "ON ( {$on} )";
 
 		$this->join[ $alias ] = $sql_join;
@@ -838,6 +939,9 @@ class OrdersTableQuery {
 				$ids[] = absint( $value );
 			} elseif ( is_string( $value ) && is_email( $value ) ) {
 				$emails[] = sanitize_email( $value );
+			} else {
+				// Invalid query.
+				$pieces[] = '1=0';
 			}
 		}
 
@@ -957,8 +1061,24 @@ class OrdersTableQuery {
 			return;
 		}
 
+		if ( 'include' === $orderby || 'post__in' === $orderby ) {
+			$ids = $this->args['id'] ?? $this->args['includes'];
+			if ( empty( $ids ) ) {
+				return;
+			}
+			$ids           = array_map( 'absint', $ids );
+			$this->orderby = array( "FIELD( {$this->tables['orders']}.id, " . implode( ',', $ids ) . ' )' );
+			return;
+		}
+
+		$meta_orderby_keys = $this->meta_query ? $this->meta_query->get_orderby_keys() : array();
+
 		$orderby_array = array();
 		foreach ( $this->args['orderby'] as $_orderby => $order ) {
+			if ( in_array( $_orderby, $meta_orderby_keys, true ) ) {
+				$_orderby = $this->meta_query->get_orderby_clause_for_key( $_orderby );
+			}
+
 			$orderby_array[] = "{$_orderby} {$order}";
 		}
 
@@ -1014,7 +1134,7 @@ class OrdersTableQuery {
 		}
 
 		if ( $this->limits ) {
-			$this->found_orders  = absint( $wpdb->get_var( 'SELECT FOUND_ROWS()' ) );
+			$this->found_orders  = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
 		} else {
 			$this->found_orders = count( $this->orders );

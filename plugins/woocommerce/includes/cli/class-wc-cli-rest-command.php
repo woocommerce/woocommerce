@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Main Command for WooCommere CLI.
+ * Main Command for WooCommerce CLI.
  *
  * Since a lot of WC operations can be handled via the REST API, we base our CLI
  * off of Restful to generate commands for each WooCommerce REST API endpoint

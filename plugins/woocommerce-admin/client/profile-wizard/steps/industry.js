@@ -45,8 +45,9 @@ const Loader = ( props ) => {
 class Industry extends Component {
 	constructor( props ) {
 		const profileItems = get( props, 'profileItems', {} );
-		let selected = profileItems.industry || [];
-
+		let selected = Array.isArray( profileItems.industry )
+			? [ ...profileItems.industry ]
+			: [];
 		/**
 		 * @todo Remove block on `updateProfileItems` refactor to wp.data dataStores.
 		 *
@@ -93,6 +94,14 @@ class Industry extends Component {
 
 	getSelectedSlugs() {
 		return this.state.selected.map( ( industry ) => industry.slug );
+	}
+
+	componentDidMount() {
+		recordEvent( 'onboarding_site_heuristics', {
+			page_count: onboarding.pageCount,
+			post_count: onboarding.postCount,
+			is_block_theme: onboarding.isBlockTheme,
+		} );
 	}
 
 	componentDidUpdate() {

@@ -5,6 +5,7 @@
 <!-- wp:paragraph -->
 <p>We are pleased to announce the release of WooCommerce <%= displayVersion %>. This release should be backwards compatible with the previous version.</p>
 <!-- /wp:paragraph -->
+
 <!-- wp:paragraph -->
 <p>This release contains:</p>
 <!-- /wp:paragraph -->
@@ -48,9 +49,9 @@
 <!-- /wp:paragraph -->
 
 
-<%- include( 'hooks' ) %>
-<%- include( 'database') %>
-<%- include( 'templates' ) %>
+<!-- release:hooks --><%- include( 'hooks' ) %><!-- /release:hooks -->
+<!-- release:database --><%- include( 'database' ) %><!-- /release:database -->
+<!-- release:templates --><%- include( 'templates' ) %><!-- /release:templates -->
 
 <!-- wp:heading -->
 <h2 id="deprecations">Deprecations</h2>
@@ -59,5 +60,5 @@
 <p>There are no deprecations in this release.</p>
 <!-- /wp:paragraph -->
 
-<%- include('contributors') %>
+<!-- release:contributors--><%- include('contributors') %><!-- /release:contributors -->
 

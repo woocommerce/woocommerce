@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators;
 
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -86,19 +86,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * Register the routes for reports.
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_collection_params(),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
+		parent::register_routes();
 
 		register_rest_route(
 			$this->namespace,

@@ -340,36 +340,11 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public static function import_sample_products() {
-		if (
-			( Features::is_enabled( 'experimental-import-products-task' ) || Features::is_enabled( 'experimental-products-task' ) )
-			&& static::is_experiment_product_task()
-		) {
-
-			$sample_csv_file = Features::is_enabled( 'experimental-fashion-sample-products' ) ? WC_ABSPATH . 'sample-data/experimental_fashion_sample_9_products.csv' :
-			WC_ABSPATH . 'sample-data/experimental_sample_9_products.csv';
-		} else {
-			$sample_csv_file = WC_ABSPATH . 'sample-data/sample_products.csv';
-		}
+		$sample_csv_file = Features::is_enabled( 'experimental-fashion-sample-products' ) ? WC_ABSPATH . 'sample-data/experimental_fashion_sample_9_products.csv' :
+		WC_ABSPATH . 'sample-data/experimental_sample_9_products.csv';
 
 		$import = self::import_sample_products_from_csv( $sample_csv_file );
 		return rest_ensure_response( $import );
-	}
-
-	/**
-	 * Check if product task experiment is treatment.
-	 *
-	 * @return bool
-	 */
-	public static function is_experiment_product_task() {
-		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
-		$allow_tracking = get_option( 'woocommerce_allow_tracking' ) === 'yes';
-		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
-			$anon_id,
-			'woocommerce',
-			$allow_tracking
-		);
-		return $abtest->get_variation( 'woocommerce_products_task_layout_stacked_v3' ) === 'treatment' ||
-			$abtest->get_variation( 'woocommerce_products_task_layout_card_v3' ) === 'treatment';
 	}
 
 	/**

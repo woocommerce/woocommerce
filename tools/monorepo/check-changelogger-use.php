@@ -70,9 +70,9 @@ if ( $verbose ) {
 	 */
 	function debug( ...$args ) {
 		if ( getenv( 'CI' ) ) {
-			$args[0] = "\e[34m${args[0]}\e[0m\n";
+			$args[0] = "\e[34m{$args[0]}\e[0m\n";
 		} else {
-			$args[0] = "\e[1;30m${args[0]}\e[0m\n";
+			$args[0] = "\e[1;30m{$args[0]}\e[0m\n";
 		}
 		fprintf( STDERR, ...$args );
 	}

@@ -38,6 +38,13 @@ class WC_Meta_Box_Order_Data {
 	 */
 	public static function init_address_fields() {
 
+		/**
+		 * Provides an opportunity to modify the list of order billing fields displayed on the admin.
+		 *
+		 * @since 1.4.0
+		 *
+		 * @param array Billing fields.
+		 */
 		self::$billing_fields = apply_filters(
 			'woocommerce_admin_billing_fields',
 			array(
@@ -90,6 +97,13 @@ class WC_Meta_Box_Order_Data {
 			)
 		);
 
+		/**
+		 * Provides an opportunity to modify the list of order shipping fields displayed on the admin.
+		 *
+		 * @since 1.4.0
+		 *
+		 * @param array Shipping fields.
+		 */
 		self::$shipping_fields = apply_filters(
 			'woocommerce_admin_shipping_fields',
 			array(
@@ -223,7 +237,6 @@ class WC_Meta_Box_Order_Data {
 						);
 					}
 
-
 					$ip_address = $order->get_customer_ip_address();
 					if ( $ip_address ) {
 						$meta_list[] = sprintf(
@@ -304,24 +317,32 @@ class WC_Meta_Box_Order_Data {
 							$user_string = '';
 							$user_id     = '';
 							if ( $order->get_user_id() ) {
-								$user_id     = absint( $order->get_user_id() );
-								$user        = get_user_by( 'id', $user_id );
+								$user_id  = absint( $order->get_user_id() );
+								$customer = new WC_Customer( $user_id );
+								/* translators: 1: user display name 2: user ID 3: user email */
 								$user_string = sprintf(
-									/* translators: 1: user display name 2: user ID 3: user email */
+									/* translators: 1: customer name, 2 customer id, 3: customer email */
 									esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-									$user->display_name,
-									absint( $user->ID ),
-									$user->user_email
+									$customer->get_first_name() . ' ' . $customer->get_last_name(),
+									$customer->get_id(),
+									$customer->get_email()
 								);
 							}
 							?>
 							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
-								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected">
-									<?php
-									// htmlspecialchars to prevent XSS when rendered by selectWoo.
-									echo esc_html( htmlspecialchars( wp_kses_post( $user_string ) ) );
-									?>
-								</option>
+								<?php
+								// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+								/**
+								 * Filter to customize the display of the currently selected customer for an order in the order edit page.
+								 * This is the same filter used in the ajax call for customer search in the same metabox.
+								 *
+								 * @since 7.2.0 (this instance of the filter)
+								 *
+								 * @param array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order.
+								 */
+								?>
+								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', array( $user_string ) ) ) ) ) ); ?></option>
+								<?php // phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 							</select>
 							<!--/email_off-->
 						</p>
@@ -526,6 +547,13 @@ class WC_Meta_Box_Order_Data {
 								}
 							}
 
+							/**
+							 * Allows 3rd parties to alter whether the customer note should be displayed on the admin.
+							 *
+							 * @since 2.1.0
+							 *
+							 * @param bool TRUE if the note should be displayed. FALSE otherwise.
+							 */
 							if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) :
 								?>
 								<p class="form-field form-field-wide">
@@ -662,7 +690,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Customer note.
 		if ( isset( $_POST['customer_note'] ) ) {
-			$props['customer_note'] = sanitize_text_field( wp_unslash( $_POST['customer_note'] ) );
+			$props['customer_note'] = sanitize_textarea_field( wp_unslash( $_POST['customer_note'] ) );
 		}
 
 		// Save order data.

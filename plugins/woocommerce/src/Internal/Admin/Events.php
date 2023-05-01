@@ -7,49 +7,45 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\Features\Features;
-use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\DataSourcePoller;
-use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
-use \Automattic\WooCommerce\Internal\Admin\Notes\AddFirstProduct;
-use \Automattic\WooCommerce\Internal\Admin\Notes\AddingAndManangingProducts;
-use \Automattic\WooCommerce\Internal\Admin\Notes\ChoosingTheme;
-use \Automattic\WooCommerce\Internal\Admin\Notes\CouponPageMoved;
-use \Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
-use \Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
-use \Automattic\WooCommerce\Internal\Admin\Notes\EditProductsOnTheMove;
-use \Automattic\WooCommerce\Internal\Admin\Notes\EUVATNumber;
-use \Automattic\WooCommerce\Internal\Admin\Notes\FirstDownlaodableProduct;
-use \Automattic\WooCommerce\Internal\Admin\Notes\FirstProduct;
-use \Automattic\WooCommerce\Internal\Admin\Notes\InsightFirstProductAndPayment;
-use \Automattic\WooCommerce\Internal\Admin\Notes\InsightFirstSale;
-use \Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
-use \Automattic\WooCommerce\Internal\Admin\Notes\LaunchChecklist;
-use \Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
-use \Automattic\WooCommerce\Internal\Admin\Notes\ManageOrdersOnTheGo;
-use \Automattic\WooCommerce\Internal\Admin\Notes\ManageStoreActivityFromHomeScreen;
-use \Automattic\WooCommerce\Internal\Admin\Notes\MarketingJetpack;
-use \Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
-use \Automattic\WooCommerce\Internal\Admin\Notes\MigrateFromShopify;
-use \Automattic\WooCommerce\Internal\Admin\Notes\MobileApp;
-use \Automattic\WooCommerce\Internal\Admin\Notes\NewSalesRecord;
-use \Automattic\WooCommerce\Internal\Admin\Notes\OnboardingPayments;
-use \Automattic\WooCommerce\Internal\Admin\Notes\OnlineClothingStore;
-use \Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
-use \Automattic\WooCommerce\Internal\Admin\Notes\PaymentsRemindMeLater;
-use \Automattic\WooCommerce\Internal\Admin\Notes\PerformanceOnMobile;
-use \Automattic\WooCommerce\Internal\Admin\Notes\PersonalizeStore;
-use \Automattic\WooCommerce\Internal\Admin\Notes\RealTimeOrderAlerts;
-use \Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
-use \Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
-use \Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
-use \Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
-use \Automattic\WooCommerce\Internal\Admin\Notes\UpdateStoreDetails;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WelcomeToWooCommerceForStoreUsers;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommerceSubscriptions;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
-use \Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
-use \Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
+use Automattic\WooCommerce\Internal\Admin\Notes\AddFirstProduct;
+use Automattic\WooCommerce\Internal\Admin\Notes\ChoosingTheme;
+use Automattic\WooCommerce\Internal\Admin\Notes\CouponPageMoved;
+use Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
+use Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
+use Automattic\WooCommerce\Internal\Admin\Notes\EditProductsOnTheMove;
+use Automattic\WooCommerce\Internal\Admin\Notes\EUVATNumber;
+use Automattic\WooCommerce\Internal\Admin\Notes\FirstProduct;
+use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
+use Automattic\WooCommerce\Internal\Admin\Notes\LaunchChecklist;
+use Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
+use Automattic\WooCommerce\Internal\Admin\Notes\ManageOrdersOnTheGo;
+use Automattic\WooCommerce\Internal\Admin\Notes\MarketingJetpack;
+use Automattic\WooCommerce\Internal\Admin\Notes\MerchantEmailNotifications;
+use Automattic\WooCommerce\Internal\Admin\Notes\MigrateFromShopify;
+use Automattic\WooCommerce\Internal\Admin\Notes\MobileApp;
+use Automattic\WooCommerce\Internal\Admin\Notes\NewSalesRecord;
+use Automattic\WooCommerce\Internal\Admin\Notes\OnboardingPayments;
+use Automattic\WooCommerce\Internal\Admin\Notes\OnlineClothingStore;
+use Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
+use Automattic\WooCommerce\Internal\Admin\Notes\PaymentsMoreInfoNeeded;
+use Automattic\WooCommerce\Internal\Admin\Notes\PaymentsRemindMeLater;
+use Automattic\WooCommerce\Internal\Admin\Notes\PerformanceOnMobile;
+use Automattic\WooCommerce\Internal\Admin\Notes\PersonalizeStore;
+use Automattic\WooCommerce\Internal\Admin\Notes\RealTimeOrderAlerts;
+use Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
+use Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
+use Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
+use Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
+use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
+use Automattic\WooCommerce\Internal\Admin\Notes\WooCommerceSubscriptions;
+use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\MailchimpScheduler;
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller;
+use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\RemoteFreeExtensionsDataSourcePoller;
 
 /**
  * Events Class.
@@ -76,16 +72,12 @@ class Events {
 	 */
 	private static $note_classes_to_added_or_updated = array(
 		AddFirstProduct::class,
-		AddingAndManangingProducts::class,
 		ChoosingTheme::class,
 		CustomizeStoreWithBlocks::class,
 		CustomizingProductCatalog::class,
 		EditProductsOnTheMove::class,
 		EUVATNumber::class,
-		FirstDownlaodableProduct::class,
 		FirstProduct::class,
-		InsightFirstProductAndPayment::class,
-		InsightFirstSale::class,
 		LaunchChecklist::class,
 		MagentoMigration::class,
 		ManageOrdersOnTheGo::class,
@@ -95,13 +87,13 @@ class Events {
 		NewSalesRecord::class,
 		OnboardingPayments::class,
 		OnlineClothingStore::class,
+		PaymentsMoreInfoNeeded::class,
 		PaymentsRemindMeLater::class,
 		PerformanceOnMobile::class,
 		PersonalizeStore::class,
 		RealTimeOrderAlerts::class,
 		TestCheckout::class,
 		TrackingOptIn::class,
-		UpdateStoreDetails::class,
 		WooCommercePayments::class,
 		WooCommerceSubscriptions::class,
 	);
@@ -114,11 +106,9 @@ class Events {
 	private static $other_note_classes = array(
 		CouponPageMoved::class,
 		InstallJPAndWCSPlugins::class,
-		ManageStoreActivityFromHomeScreen::class,
 		OrderMilestones::class,
 		SellingOnlineCourses::class,
 		UnsecuredReportFiles::class,
-		WelcomeToWooCommerceForStoreUsers::class,
 		WooSubscriptionsNotes::class,
 	);
 
@@ -129,7 +119,7 @@ class Events {
 	 * @return object Instance.
 	 */
 	final public static function instance() {
-		if ( static::$instance === null ) {
+		if ( null === static::$instance ) {
 			static::$instance = new static();
 		}
 		return static::$instance;
@@ -155,6 +145,7 @@ class Events {
 		$this->possibly_add_notes();
 		$this->possibly_delete_notes();
 		$this->possibly_update_notes();
+		$this->possibly_refresh_data_source_pollers();
 
 		if ( $this->is_remote_inbox_notifications_enabled() ) {
 			DataSourcePoller::get_instance()->read_specs_from_data_sources();
@@ -214,6 +205,7 @@ class Events {
 	 */
 	protected function possibly_delete_notes() {
 		PaymentsRemindMeLater::delete_if_not_applicable();
+		PaymentsMoreInfoNeeded::delete_if_not_applicable();
 	}
 
 	/**
@@ -260,5 +252,22 @@ class Events {
 
 		// All checks have passed.
 		return true;
+	}
+
+	/**
+	 *   Refresh transient for the following DataSourcePollers on wc_admin_daily cron job.
+	 *   - PaymentGatewaySuggestionsDataSourcePoller
+	 *   - RemoteFreeExtensionsDataSourcePoller
+	 */
+	protected function possibly_refresh_data_source_pollers() {
+		$completed_tasks = get_option( 'woocommerce_task_list_tracked_completed_tasks', array() );
+
+		if ( ! in_array( 'payments', $completed_tasks, true ) && ! in_array( 'woocommerce-payments', $completed_tasks, true ) ) {
+			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
+		}
+
+		if ( ! in_array( 'store_details', $completed_tasks, true ) && ! in_array( 'marketing', $completed_tasks, true ) ) {
+			RemoteFreeExtensionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
+		}
 	}
 }

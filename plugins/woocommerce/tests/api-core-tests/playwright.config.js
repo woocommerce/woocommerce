@@ -1,52 +1,59 @@
 const { devices } = require( '@playwright/test' );
-require( 'dotenv' ).config();
+require( 'dotenv' ).config({ path: __dirname + '/.env' });
 
-let baseURL = 'http://localhost:8086';
-let userKey = 'admin';
-let userSecret = 'password';
+const {
+	BASE_URL,
+	CI,
+	DEFAULT_TIMEOUT_OVERRIDE,
+	USER_KEY,
+	USER_SECRET,
+} = process.env;
 
-if ( process.env.BASE_URL ) {
-	baseURL = process.env.BASE_URL;
-}
-
-if ( process.env.USER_KEY ) {
-	userKey = process.env.USER_KEY;
-}
-
-if ( process.env.USER_SECRET ) {
-	userSecret = process.env.USER_SECRET;
-}
-
+const baseURL = BASE_URL ?? 'http://localhost:8086';
+const userKey = USER_KEY ?? 'admin';
+const userSecret = USER_SECRET ?? 'password';
 const base64auth = btoa( `${ userKey }:${ userSecret }` );
 
 const config = {
-	timeout: 90 * 1000,
+	timeout: DEFAULT_TIMEOUT_OVERRIDE
+		? Number( DEFAULT_TIMEOUT_OVERRIDE )
+		: 90 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: './report',
+	outputDir: './test-results/report',
 	testDir: 'tests',
-	retries: process.env.CI ? 4 : 2,
+	retries: CI ? 4 : 2,
 	workers: 4,
 	reporter: [
 		[ 'list' ],
 		[
 			'html',
 			{
-				outputFolder: 'output',
-				open: process.env.CI ? 'never' : 'always',
+				outputFolder: process.env.PLAYWRIGHT_HTML_REPORT ?? './test-results/playwright-report',
+				open: CI ? 'never' : 'always',
 			},
 		],
 		[
 			'allure-playwright',
-			{ outputFolder: 'api-test-report/allure-results' },
+			{
+				outputFolder:
+					process.env.ALLURE_RESULTS_DIR ??
+					'./tests/api-core-tests/test-results/allure-results',
+			},
 		],
-		[ 'json', { outputFile: 'api-test-report/test-results.json' } ],
+		[
+			'json',
+			{
+				outputFile: process.env.PLAYWRIGHT_JSON_OUTPUT_NAME ?? 
+					'./test-results/test-results.json',
+			},
+		],
 	],
 	use: {
 		screenshot: 'only-on-failure',
 		video: 'on-first-retry',
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
-		baseURL,
+		baseURL: baseURL,
 		extraHTTPHeaders: {
 			// Add authorization token to all requests.
 			Authorization: `Basic ${ base64auth }`,

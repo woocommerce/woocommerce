@@ -1,0 +1,23 @@
+.woocommerce-product-mvp-feedback-modal {
+	&__subtitle {
+		margin-top: $gap-smaller !important;
+	}
+	&__checkboxes {
+		margin: $gap-small 0;
+	}
+	&__comments {
+		margin-top: 2em;
+		margin-bottom: 1.5em;
+
+		label {
+			display: block;
+			font-weight: bold;
+			text-transform: none;
+			font-size: 14px;
+		}
+
+		textarea {
+			width: 100%;
+		}
+	}
+}

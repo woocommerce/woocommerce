@@ -19,7 +19,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		// Set default country to non-US so that 'payments' task gets added but 'woocommerce-payments' doesn't,
 		// by default it won't be considered completed but we can manually change that as needed.
 		update_option( 'woocommerce_default_country', 'JP' );
-		$password   = wp_generate_password( 8, false, false );
+		$password    = wp_generate_password( 8, false, false );
 		$this->admin = wp_insert_user(
 			array(
 				'user_login' => "test_admin$password",
@@ -88,11 +88,16 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	 * Tests widget does not display when task list is complete.
 	 */
 	public function test_widget_does_not_display_when_task_list_complete() {
-		$task_list = new class {
+		// phpcs:disable Squiz.Commenting
+		$task_list = new class() {
 			public function is_complete() {
 				return true;
 			}
+			public function is_hidden() {
+				return false;
+			}
 		};
+		// phpcs:enable Squiz.Commenting
 		$widget    = $this->get_widget();
 		$widget->set_task_list( $task_list );
 
@@ -160,7 +165,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		);
 
 		foreach ( $required_strings as $required_string ) {
-			$this->assertRegexp( "/${required_string}/", $html );
+			$this->assertMatchesRegularExpression( "/{$required_string}/", $html );
 		}
 	}
 
@@ -186,7 +191,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		if ( $completed_tasks_count === $tasks_count ) {
 			$this->assertEmpty( $this->get_widget_output() );
 		} else {
-			$this->assertRegexp( "/Step ${step_number} of 6/", $this->get_widget_output() );
+			$this->assertMatchesRegularExpression( "/Step {$step_number} of 6/", $this->get_widget_output() );
 		}
 	}
 }

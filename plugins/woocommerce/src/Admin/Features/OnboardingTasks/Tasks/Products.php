@@ -37,9 +37,6 @@ class Products extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( count( $this->task_list->get_sections() ) > 0 && ! $this->is_complete() ) {
-			return __( 'Create or upload your first products', 'woocommerce' );
-		}
 		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
 			if ( $this->is_complete() ) {
 				return __( 'You added products', 'woocommerce' );
@@ -55,9 +52,6 @@ class Products extends Task {
 	 * @return string
 	 */
 	public function get_content() {
-		if ( count( $this->task_list->get_sections() ) > 0 ) {
-			return __( 'Add products to sell and build your catalog.', 'woocommerce' );
-		}
 		return __(
 			'Start by adding the first product to your store. You can add your products manually, via CSV, or import them from another service.',
 			'woocommerce'

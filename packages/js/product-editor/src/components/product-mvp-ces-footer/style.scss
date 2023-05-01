@@ -1,0 +1,27 @@
+.woocommerce-product-mvp-ces-footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	padding: $gap-smaller $gap;
+
+	.woocommerce-pill {
+		margin-right: $gap-smaller;
+	}
+
+	.components-button {
+		margin-left: $gap;
+	}
+
+	&__close-button {
+		position: absolute;
+		right: $gap;
+	}
+
+	&__container {
+		margin-right: $gap-larger;
+		flex-wrap: nowrap;
+		display: flex;
+		align-items: center;
+	}
+}

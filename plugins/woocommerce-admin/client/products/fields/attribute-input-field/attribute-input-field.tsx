@@ -1,39 +1,55 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { sprintf, __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { Spinner } from '@wordpress/components';
+import { Spinner, Icon } from '@wordpress/components';
+import { plus } from '@wordpress/icons';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	QueryProductAttribute,
 	ProductAttribute,
 	WCDataSelector,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
 
+/**
+ * Internal dependencies
+ */
+import './attribute-input-field.scss';
+import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
+
+type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
+
 type AttributeInputFieldProps = {
-	value?: ProductAttribute;
+	value?: EnhancedProductAttribute | null;
 	onChange: (
-		value?: Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
+		value?:
+			| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
+			| string
 	) => void;
 	label?: string;
 	placeholder?: string;
 	disabled?: boolean;
-	filteredAttributeIds?: number[];
+	ignoredAttributeIds?: number[];
 };
 
+function isNewAttributeListItem( attribute: NarrowedQueryAttribute ): boolean {
+	return attribute.id === -99;
+}
+
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
-	value,
+	value = null,
 	onChange,
 	placeholder,
 	label,
 	disabled,
-	filteredAttributeIds = [],
+	ignoredAttributeIds = [],
 } ) => {
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
 		const { getProductAttributes, hasFinishedResolution } = select(
@@ -46,26 +62,43 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	} );
 
 	const getFilteredItems = (
-		allItems: Pick< QueryProductAttribute, 'id' | 'name' >[],
+		allItems: NarrowedQueryAttribute[],
 		inputValue: string
 	) => {
-		return allItems.filter(
+		const ignoreIdsFilter = ( item: NarrowedQueryAttribute ) =>
+			ignoredAttributeIds.length
+				? ! ignoredAttributeIds.includes( item.id )
+				: true;
+
+		const filteredItems = allItems.filter(
 			( item ) =>
-				filteredAttributeIds.indexOf( item.id ) < 0 &&
+				ignoreIdsFilter( item ) &&
 				( item.name || '' )
 					.toLowerCase()
 					.startsWith( inputValue.toLowerCase() )
 		);
+
+		if (
+			inputValue.length > 0 &&
+			! allItems.find(
+				( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
+			)
+		) {
+			return [
+				...filteredItems,
+				{
+					id: -99,
+					name: inputValue,
+				},
+			];
+		}
+
+		return filteredItems;
 	};
-	const selected: Pick< QueryProductAttribute, 'id' | 'name' > | null = value
-		? {
-				id: value.id,
-				name: value.name,
-		  }
-		: null;
 
 	return (
-		<SelectControl< Pick< QueryProductAttribute, 'id' | 'name' > >
+		<SelectControl< NarrowedQueryAttribute >
+			className="woocommerce-attribute-input-field"
 			items={ attributes || [] }
 			label={ label || '' }
 			disabled={ disabled }
@@ -73,15 +106,25 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			placeholder={ placeholder }
 			getItemLabel={ ( item ) => item?.name || '' }
 			getItemValue={ ( item ) => item?.id || '' }
-			selected={ selected }
-			onSelect={ ( attribute ) =>
-				onChange( {
-					id: attribute.id,
-					name: attribute.name,
-					options: [],
-				} )
-			}
+			selected={ value }
+			onSelect={ ( attribute ) => {
+				if ( isNewAttributeListItem( attribute ) ) {
+					recordEvent( 'product_attribute_add_custom_attribute', {
+						new_product_page: true,
+					} );
+				}
+				onChange(
+					isNewAttributeListItem( attribute )
+						? attribute.name
+						: {
+								id: attribute.id,
+								name: attribute.name,
+								options: [],
+						  }
+				);
+			} }
 			onRemove={ () => onChange() }
+			__experimentalOpenMenuOnFocus
 		>
 			{ ( {
 				items: renderItems,
@@ -103,7 +146,27 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 									item={ item }
 									getItemProps={ getItemProps }
 								>
-									{ item.name }
+									{ isNewAttributeListItem( item ) ? (
+										<div className="woocommerce-attribute-input-field__add-new">
+											<Icon
+												icon={ plus }
+												size={ 20 }
+												className="woocommerce-attribute-input-field__add-new-icon"
+											/>
+											<span>
+												{ sprintf(
+													/* translators: The name of the new attribute term to be created */
+													__(
+														'Create "%s"',
+														'woocommerce'
+													),
+													item.name
+												) }
+											</span>
+										</div>
+									) : (
+										item.name
+									) }
 								</MenuItem>
 							) )
 						) }

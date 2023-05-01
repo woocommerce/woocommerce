@@ -6,7 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\{ DataSynchronizer, OrdersTableDataStore };
 use WC_Order;
 use WP_Post;
 
@@ -75,7 +75,7 @@ class COTMigrationUtil {
 	 */
 	public function is_custom_order_tables_in_sync() : bool {
 		$sync_status = $this->data_synchronizer->get_sync_status();
-		return $sync_status['current_pending_count'] === 0 && $this->data_synchronizer->data_sync_is_enabled();
+		return 0 === $sync_status['current_pending_count'] && $this->data_synchronizer->data_sync_is_enabled();
 	}
 
 	/**
@@ -96,7 +96,7 @@ class COTMigrationUtil {
 			}
 			return $data->get_meta( $key, $single );
 		} else {
-			return get_post_meta( $post->ID, $key, $single );
+			return isset( $post->ID ) ? get_post_meta( $post->ID, $key, $single ) : false;
 		}
 	}
 
@@ -122,15 +122,15 @@ class COTMigrationUtil {
 	}
 
 	/**
-	 * Helper function to id from an post or order object.
+	 * Helper function to get ID from a post or order object.
 	 *
 	 * @param WP_Post/WC_Order $post_or_order_object WP_Post/WC_Order object to get ID for.
 	 *
 	 * @return int Order or post ID.
 	 */
 	public function get_post_or_order_id( $post_or_order_object ) : int {
-		if ( is_int( $post_or_order_object ) ) {
-			return $post_or_order_object;
+		if ( is_numeric( $post_or_order_object ) ) {
+			return (int) $post_or_order_object;
 		} elseif ( $post_or_order_object instanceof WC_Order ) {
 			return $post_or_order_object->get_id();
 		} elseif ( $post_or_order_object instanceof WP_Post ) {
@@ -160,9 +160,41 @@ class COTMigrationUtil {
 	 *
 	 * @return string|null Type of the order.
 	 */
-	public function get_order_type( $order_id ) : ?string {
+	public function get_order_type( $order_id ) {
 		$order_id         = $this->get_post_or_order_id( $order_id );
 		$order_data_store = \WC_Data_Store::load( 'order' );
 		return $order_data_store->get_order_type( $order_id );
+	}
+
+	/**
+	 * Get the name of the database table that's currently in use for orders.
+	 *
+	 * @return string
+	 */
+	public function get_table_for_orders() {
+		if ( $this->custom_orders_table_usage_is_enabled() ) {
+			$table_name = OrdersTableDataStore::get_orders_table_name();
+		} else {
+			global $wpdb;
+			$table_name = $wpdb->posts;
+		}
+
+		return $table_name;
+	}
+
+	/**
+	 * Get the name of the database table that's currently in use for orders.
+	 *
+	 * @return string
+	 */
+	public function get_table_for_order_meta() {
+		if ( $this->custom_orders_table_usage_is_enabled() ) {
+			$table_name = OrdersTableDataStore::get_meta_table_name();
+		} else {
+			global $wpdb;
+			$table_name = $wpdb->postmeta;
+		}
+
+		return $table_name;
 	}
 }

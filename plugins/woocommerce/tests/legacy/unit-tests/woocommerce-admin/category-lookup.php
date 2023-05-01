@@ -25,7 +25,7 @@ class WC_Admin_Tests_Category_Lookup extends WP_UnitTestCase {
 	 * Setup
 	 */
 
-	public function setUp() {
+	public function setUp(): void {
 		delete_transient('wc_installing');
 		parent::setUp();
 		$parent                = wp_insert_term( 'test_parent', 'product_cat' );

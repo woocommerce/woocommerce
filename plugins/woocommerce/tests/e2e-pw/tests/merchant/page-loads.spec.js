@@ -62,10 +62,25 @@ for ( const currentPage of wcPages ) {
 							'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 						);
 						await page.click( 'text=Skip setup store details' );
-						await page.click( 'text=No thanks' );
+						await page.click( 'button >> text=No thanks' );
 						await page.waitForLoadState( 'networkidle' );
 						await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 					}
+
+					// deal with cases where the 'Coupons' legacy menu had already been removed.
+					if ( currentPage.subpages[ i ].name === 'Coupons' ) {
+						const couponsMenuVisible = await page
+							.locator(
+								`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`
+							)
+							.isVisible();
+
+						test.skip(
+							! couponsMenuVisible,
+							'Skipping this test because the legacy Coupons menu was not found and may have already been removed.'
+						);
+					}
+
 					await page.click(
 						`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`,
 						{ waitForLoadState: 'networkidle' }

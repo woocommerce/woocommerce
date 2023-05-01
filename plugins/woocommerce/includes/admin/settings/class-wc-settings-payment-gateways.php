@@ -267,7 +267,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 								foreach ( $plugin_suggestions as $plugin_suggestion ) {
 									$alt = str_replace( '.png', '', basename( $plugin_suggestion->image_72x72 ) );
 									// phpcs:ignore
-									echo "<img src='{$plugin_suggestion->image_72x72}' alt='${alt}' width='24' height='24' style='vertical-align: middle; margin-right: 8px;'/>";
+									echo "<img src='{$plugin_suggestion->image_72x72}' alt='{$alt}' width='24' height='24' style='vertical-align: middle; margin-right: 8px;'/>";
 								}
 								echo '& more.';
 							}

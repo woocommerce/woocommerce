@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevents error in Customers API endpoint when date_created value is missing

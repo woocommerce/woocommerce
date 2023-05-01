@@ -33,3 +33,19 @@ add_action('woocommerce_blocks_loaded', function() {
 		}
 	);
 });
+
+/**
+ * Registers the slug as a block category with WordPress.
+ */
+function register_{{slugPascalCase}}_block_category( $categories ) {
+    return array_merge(
+        $categories,
+        [
+            [
+                'slug'  => '{{slug}}',
+                'title' => __( '{{slugPascalCase}} Blocks', '{{slug}}' ),
+            ],
+        ]
+    );
+}
+add_action( 'block_categories_all', 'register_{{slugPascalCase}}_block_category', 10, 2 );

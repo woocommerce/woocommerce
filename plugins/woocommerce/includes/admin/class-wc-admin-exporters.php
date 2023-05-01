@@ -199,7 +199,7 @@ class WC_Admin_Exporters {
 	 * @return array The product types keys and labels.
 	 */
 	public static function get_product_types() {
-		$product_types = wc_get_product_types();
+		$product_types              = wc_get_product_types();
 		$product_types['variation'] = __( 'Product variations', 'woocommerce' );
 
 		/**

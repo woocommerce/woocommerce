@@ -51,7 +51,7 @@ Object {
           </p>
         </div>
         <div
-          class="components-surface components-card css-1vyvcpq-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+          class="components-surface components-card css-nsno0f-View-Surface-getBorders-primary-Card-rounded em57xhy0"
           data-wp-c16t="true"
           data-wp-component="Card"
         >
@@ -59,7 +59,7 @@ Object {
             class="css-mgwsf4-View-Content em57xhy0"
           >
             <div
-              class="components-card__body components-card-body css-1lr0m0h-View-Body-borderRadius-medium em57xhy0"
+              class="components-card__body components-card-body css-1nwhnu3-View-Body-borderRadius-medium em57xhy0"
               data-wp-c16t="true"
               data-wp-component="CardBody"
             >
@@ -115,6 +115,7 @@ Object {
                           aria-autocomplete="list"
                           aria-expanded="false"
                           aria-haspopup="true"
+                          aria-label="Country / Region *"
                           autocomplete="new-password"
                           class="woocommerce-select-control__control-input"
                           id="woocommerce-select-control-0__control-input"
@@ -129,13 +130,13 @@ Object {
                 </div>
                 <div>
                   <div
-                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                   >
                     <div
-                      class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                      class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                     >
                       <label
-                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                         for="inspector-text-control-0"
                       >
                         Address
@@ -153,13 +154,13 @@ Object {
                 </div>
                 <div>
                   <div
-                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                   >
                     <div
-                      class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                      class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                     >
                       <label
-                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                         for="inspector-text-control-1"
                       >
                         Post code
@@ -177,13 +178,13 @@ Object {
                 </div>
                 <div>
                   <div
-                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                    class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                   >
                     <div
-                      class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                      class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                     >
                       <label
-                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                        class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                         for="inspector-text-control-2"
                       >
                         City
@@ -202,13 +203,13 @@ Object {
               </div>
               <div>
                 <div
-                  class="components-base-control muriel-component muriel-input-text with-value css-wdf2ti-Wrapper e1puf3u4"
+                  class="components-base-control muriel-component muriel-input-text with-value css-wdf2ti-Wrapper ej5x27r4"
                 >
                   <div
-                    class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                    class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                   >
                     <label
-                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                       for="inspector-text-control-3"
                     >
                       Email address
@@ -235,10 +236,10 @@ Object {
                   class="woocommerce-profile-wizard__newsletter-signup"
                 >
                   <div
-                    class="components-base-control components-checkbox-control css-wdf2ti-Wrapper e1puf3u4"
+                    class="components-base-control components-checkbox-control css-wdf2ti-Wrapper ej5x27r4"
                   >
                     <div
-                      class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                      class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                     >
                       <span
                         class="components-checkbox-control__input-container"
@@ -283,7 +284,7 @@ Object {
               </div>
             </div>
             <div
-              class="components-flex components-card__footer components-card-footer css-kiriyp-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium em57xhy0"
+              class="components-flex components-card__footer components-card-footer css-142znvl-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium em57xhy0"
               data-wp-c16t="true"
               data-wp-component="CardFooter"
             >
@@ -365,7 +366,7 @@ Object {
         </p>
       </div>
       <div
-        class="components-surface components-card css-1vyvcpq-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+        class="components-surface components-card css-nsno0f-View-Surface-getBorders-primary-Card-rounded em57xhy0"
         data-wp-c16t="true"
         data-wp-component="Card"
       >
@@ -373,7 +374,7 @@ Object {
           class="css-mgwsf4-View-Content em57xhy0"
         >
           <div
-            class="components-card__body components-card-body css-1lr0m0h-View-Body-borderRadius-medium em57xhy0"
+            class="components-card__body components-card-body css-1nwhnu3-View-Body-borderRadius-medium em57xhy0"
             data-wp-c16t="true"
             data-wp-component="CardBody"
           >
@@ -429,6 +430,7 @@ Object {
                         aria-autocomplete="list"
                         aria-expanded="false"
                         aria-haspopup="true"
+                        aria-label="Country / Region *"
                         autocomplete="new-password"
                         class="woocommerce-select-control__control-input"
                         id="woocommerce-select-control-0__control-input"
@@ -443,13 +445,13 @@ Object {
               </div>
               <div>
                 <div
-                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                 >
                   <div
-                    class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                    class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                   >
                     <label
-                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                       for="inspector-text-control-0"
                     >
                       Address
@@ -467,13 +469,13 @@ Object {
               </div>
               <div>
                 <div
-                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                 >
                   <div
-                    class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                    class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                   >
                     <label
-                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                       for="inspector-text-control-1"
                     >
                       Post code
@@ -491,13 +493,13 @@ Object {
               </div>
               <div>
                 <div
-                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper e1puf3u4"
+                  class="components-base-control muriel-component muriel-input-text empty css-wdf2ti-Wrapper ej5x27r4"
                 >
                   <div
-                    class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                    class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                   >
                     <label
-                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                      class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                       for="inspector-text-control-2"
                     >
                       City
@@ -516,13 +518,13 @@ Object {
             </div>
             <div>
               <div
-                class="components-base-control muriel-component muriel-input-text with-value css-wdf2ti-Wrapper e1puf3u4"
+                class="components-base-control muriel-component muriel-input-text with-value css-wdf2ti-Wrapper ej5x27r4"
               >
                 <div
-                  class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                 >
                   <label
-                    class="components-base-control__label css-eweeby-StyledLabel-labelStyles e1puf3u2"
+                    class="components-base-control__label css-eweeby-StyledLabel-labelStyles ej5x27r2"
                     for="inspector-text-control-3"
                   >
                     Email address
@@ -549,10 +551,10 @@ Object {
                 class="woocommerce-profile-wizard__newsletter-signup"
               >
                 <div
-                  class="components-base-control components-checkbox-control css-wdf2ti-Wrapper e1puf3u4"
+                  class="components-base-control components-checkbox-control css-wdf2ti-Wrapper ej5x27r4"
                 >
                   <div
-                    class="components-base-control__field css-igk9ll-StyledField e1puf3u3"
+                    class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
                   >
                     <span
                       class="components-checkbox-control__input-container"
@@ -597,7 +599,7 @@ Object {
             </div>
           </div>
           <div
-            class="components-flex components-card__footer components-card-footer css-kiriyp-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium em57xhy0"
+            class="components-flex components-card__footer components-card-footer css-142znvl-View-Flex-sx-Base-sx-Items-ItemsRow-Footer-borderRadius-borderColor-medium em57xhy0"
             data-wp-c16t="true"
             data-wp-component="CardFooter"
           >

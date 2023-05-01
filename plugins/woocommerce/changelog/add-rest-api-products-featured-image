@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add `featured` field to the images array for Product REST API

@@ -10,11 +10,13 @@
         <tr>
           <th><strong>Filter</strong></th>
           <th><strong>Description</strong></th>
+          <th><strong>GitHub Link</strong></th>
         </tr>
-        <% changes.hooks.forEach(({ name, description }) => { %>
+        <% changes.hooks.forEach(({ name, description, ghLink }) => { %>
           <tr>
             <td><%= name %></td>
             <td><%= description %></td>
+            <td><a target="_blank" href="<%= ghLink %>">Link</a></td>
           </tr>
         <% }) %>
         <!-- end each hook change-->

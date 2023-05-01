@@ -6,6 +6,9 @@
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Caches\OrderCacheController;
+use Automattic\WooCommerce\Caching\TransientsEngine;
 use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
@@ -36,6 +39,8 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 		CLIRunner::class,
 		OrdersTableDataStoreMeta::class,
 		OrdersTableRefundDataStore::class,
+		OrderCache::class,
+		OrderCacheController::class,
 	);
 
 	/**
@@ -45,7 +50,15 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 		$this->share( OrdersTableDataStoreMeta::class );
 
 		$this->share( OrdersTableDataStore::class )->addArguments( array( OrdersTableDataStoreMeta::class, DatabaseUtil::class, LegacyProxy::class ) );
-		$this->share( DataSynchronizer::class )->addArguments( array( OrdersTableDataStore::class, DatabaseUtil::class, PostsToOrdersMigrationController::class, LegacyProxy::class ) );
+		$this->share( DataSynchronizer::class )->addArguments(
+			array(
+				OrdersTableDataStore::class,
+				DatabaseUtil::class,
+				PostsToOrdersMigrationController::class,
+				LegacyProxy::class,
+				OrderCacheController::class,
+			)
+		);
 		$this->share( OrdersTableRefundDataStore::class )->addArguments( array( OrdersTableDataStoreMeta::class, DatabaseUtil::class, LegacyProxy::class ) );
 		$this->share( CustomOrdersTableController::class )->addArguments(
 			array(
@@ -54,9 +67,12 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 				OrdersTableRefundDataStore::class,
 				BatchProcessingController::class,
 				FeaturesController::class,
+				OrderCache::class,
+				OrderCacheController::class,
 			)
 		);
-
+		$this->share( OrderCache::class );
+		$this->share( OrderCacheController::class )->addArgument( OrderCache::class );
 		if ( Constants::is_defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->share( CLIRunner::class )->addArguments( array( CustomOrdersTableController::class, DataSynchronizer::class, PostsToOrdersMigrationController::class ) );
 		}

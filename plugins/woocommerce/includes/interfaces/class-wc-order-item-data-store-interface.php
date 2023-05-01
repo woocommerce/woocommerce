@@ -68,7 +68,7 @@ interface WC_Order_Item_Data_Store_Interface {
 	 *
 	 * @param  int    $item_id Item ID.
 	 * @param  string $meta_key Meta key.
-	 * @param  string $meta_value Meta value (default: '').
+	 * @param  mixed  $meta_value Meta value (default: '').
 	 * @param  bool   $delete_all Delete all matching entries? (default: false).
 	 * @return bool
 	 */

@@ -263,6 +263,10 @@ class Notes extends \WC_REST_CRUD_Controller {
 		$args['source']     = isset( $request['source'] ) ? $request['source'] : array();
 		$args['is_deleted'] = 0;
 
+		if ( isset( $request['is_read'] ) ) {
+			$args['is_read'] = filter_var( $request['is_read'], FILTER_VALIDATE_BOOLEAN );
+		}
+
 		if ( 'date' === $args['orderby'] ) {
 			$args['orderby'] = 'date_created';
 		}

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { registerPlugin } from '@wordpress/plugins';
+import { WooHeaderNavigationItem } from '@woocommerce/admin-layout';
 import {
 	WooNavigationItem,
 	getNewPath,
@@ -19,7 +20,6 @@ import { NAVIGATION_STORE_NAME } from '@woocommerce/data';
 import getReports from '../analytics/report/get-reports';
 import { getPages } from './controller';
 import Navigation from '~/navigation';
-import { WooHeaderNavigationItem } from '~/header/utils';
 
 const NavigationPlugin = () => {
 	const { persistedQuery } = useSelect( ( select ) => {

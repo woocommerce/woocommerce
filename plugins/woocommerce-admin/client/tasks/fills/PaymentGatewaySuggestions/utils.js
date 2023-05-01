@@ -90,18 +90,7 @@ export const getSplitGateways = (
 	isWCPayOrOtherCategoryDoneSetup
 ) =>
 	Array.from( paymentGateways.values() )
-		.sort( ( a, b ) => {
-			if ( a.hasPlugins === b.hasPlugins ) {
-				return comparePaymentGatewaysByPriority( a, b );
-			}
-
-			// hasPlugins payment first
-			if ( a.hasPlugins ) {
-				return -1;
-			}
-
-			return 1;
-		} )
+		.sort( comparePaymentGatewaysByPriority )
 		.reduce(
 			( all, gateway ) => {
 				const [ wcPay, offline, additional ] = all;

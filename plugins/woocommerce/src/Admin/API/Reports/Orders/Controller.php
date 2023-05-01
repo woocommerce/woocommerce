@@ -9,8 +9,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
-use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
+use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 
 /**
  * REST API Reports orders controller class.
@@ -19,13 +19,6 @@ use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
  * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends ReportsController implements ExportableInterface {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.

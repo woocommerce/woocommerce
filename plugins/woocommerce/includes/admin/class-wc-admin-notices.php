@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -15,6 +16,8 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Notices Class.
  */
 class WC_Admin_Notices {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * Stores notices.

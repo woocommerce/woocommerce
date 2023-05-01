@@ -10,6 +10,19 @@ const shippingZoneNameLocalPickup = 'Mayne Island with Local pickup';
 test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
+	test.beforeAll( async ( { baseURL } ) => {
+		// Set selling location to all countries.
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		await api.put( 'settings/general/woocommerce_allowed_countries', {
+			value: 'all',
+		} );
+	} );
+
 	test.afterAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
@@ -43,7 +56,8 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
-				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
+				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
+				{ waitUntil: 'networkidle' }
 			);
 			await page.fill( '#zone_name', shippingZoneNameLocalPickup );
 
@@ -66,6 +80,12 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'local_pickup'
 			);
 			await page.click( '#btn-ok' );
+			await page.waitForLoadState( 'networkidle' );
+			await expect(
+				page
+					.locator( '.wc-shipping-zone-method-title' )
+					.filter( { hasText: 'Local pickup' } )
+			).toBeVisible();
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -92,7 +112,8 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
-				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
+				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
+				{ waitUntil: 'networkidle' }
 			);
 			await page.fill( '#zone_name', shippingZoneNameFreeShip );
 
@@ -112,6 +133,12 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'free_shipping'
 			);
 			await page.click( '#btn-ok' );
+			await page.waitForLoadState( 'networkidle' );
+			await expect(
+				page
+					.locator( '.wc-shipping-zone-method-title' )
+					.filter( { hasText: 'Free shipping' } )
+			).toBeVisible();
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -135,7 +162,8 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
-				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
+				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
+				{ waitUntil: 'networkidle' }
 			);
 			await page.fill( '#zone_name', shippingZoneNameFlatRate );
 
@@ -152,10 +180,17 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'flat_rate'
 			);
 			await page.click( '#btn-ok' );
+			await page.waitForLoadState( 'networkidle' );
+			await expect(
+				page
+					.locator( '.wc-shipping-zone-method-title' )
+					.filter( { hasText: 'Flat rate' } )
+			).toBeVisible();
 
 			await page.click( 'a.wc-shipping-zone-method-settings' );
 			await page.fill( '#woocommerce_flat_rate_cost', '10' );
 			await page.click( '#btn-ok' );
+			await page.waitForLoadState( 'networkidle' );
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -299,7 +334,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 
 	test.beforeEach( async ( { context, page } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );

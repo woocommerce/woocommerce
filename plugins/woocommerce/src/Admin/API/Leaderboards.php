@@ -9,10 +9,10 @@ namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Categories\DataStore as CategoriesDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Categories\DataStore as CategoriesDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
 
 /**
  * Leaderboards controller.

@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce Beta Tester
  * Plugin URI: https://github.com/woocommerce/woocommerce-beta-tester
  * Description: Run bleeding edge versions of WooCommerce. This will replace your installed version of WooCommerce with the latest tagged release - use with caution, and not on production sites.
- * Version: 2.1.0
+ * Version: 2.2.0
  * Author: WooCommerce
  * Author URI: http://woocommerce.com/
  * Requires at least: 5.8
@@ -16,6 +16,12 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+
+if ( defined( 'WP_CLI' ) ) {
+	require_once dirname( __FILE__ ) . '/includes/class-wc-beta-tester-cli.php';
+	WP_CLI::add_command( 'wc-beta-tester', WC_Beta_Tester_CLI::class );
+}
 
 // Define WC_BETA_TESTER_FILE.
 if ( ! defined( 'WC_BETA_TESTER_FILE' ) ) {
@@ -63,7 +69,7 @@ function _wc_beta_tester_bootstrap() {
 	}
 
 	// Load admin.
-	require( 'plugin.php' );
+	require 'plugin.php';
 }
 
 add_action( 'plugins_loaded', '_wc_beta_tester_bootstrap' );
@@ -75,12 +81,12 @@ function add_extension_register_script() {
 	$script_path       = '/build/index.js';
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
 	$script_asset      = file_exists( $script_asset_path )
-		? require( $script_asset_path )
+		? require $script_asset_path
 		: array(
 			'dependencies' => array(),
 			'version'      => filemtime( $script_path ),
 		);
-	$script_url = plugins_url( $script_path, __FILE__ );
+	$script_url        = plugins_url( $script_path, __FILE__ );
 
 	wp_register_script(
 		'woocommerce-admin-test-helper',

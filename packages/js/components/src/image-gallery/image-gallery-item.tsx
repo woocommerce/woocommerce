@@ -9,7 +9,7 @@ import { createElement, Fragment } from '@wordpress/element';
  */
 import Pill from '../pill';
 import { SortableHandle, NonSortableItem } from '../sortable';
-import { ConditionalWrapper } from '../util/conditional-wrapper';
+import { ConditionalWrapper } from '../conditional-wrapper';
 
 export type ImageGalleryItemProps = {
 	id?: string;

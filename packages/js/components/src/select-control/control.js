@@ -154,6 +154,7 @@ class Control extends Component {
 						: null
 				}
 				disabled={ disabled }
+				aria-label={ this.props.ariaLabel ?? this.props.label }
 			/>
 		);
 	}

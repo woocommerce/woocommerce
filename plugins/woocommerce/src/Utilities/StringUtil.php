@@ -83,4 +83,25 @@ final class StringUtil {
 	public static function plugin_name_from_plugin_file( string $plugin_file_path ): string {
 		return basename( dirname( $plugin_file_path ) ) . DIRECTORY_SEPARATOR . basename( $plugin_file_path );
 	}
+
+	/**
+	 * Check if a string is null or is empty.
+	 *
+	 * @param string|null $value The string to check.
+	 * @return bool True if the string is null or is empty.
+	 */
+	public static function is_null_or_empty( ?string $value ) {
+		return is_null( $value ) || '' === $value;
+	}
+
+	/**
+	 * Check if a string is null, is empty, or has only whitespace characters
+	 * (space, tab, vertical tab, form feed, carriage return, new line)
+	 *
+	 * @param string|null $value The string to check.
+	 * @return bool True if the string is null, is empty, or contains only whitespace characters.
+	 */
+	public static function is_null_or_whitespace( ?string $value ) {
+		return is_null( $value ) || '' === $value || ctype_space( $value );
+	}
 }

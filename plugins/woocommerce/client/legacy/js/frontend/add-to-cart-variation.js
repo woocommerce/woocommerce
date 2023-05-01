@@ -245,7 +245,8 @@
 			$dimensions    = form.$product.find(
 				'.product_dimensions, .woocommerce-product-attributes-item--dimensions .woocommerce-product-attributes-item__value'
 			),
-			$qty           = form.$singleVariationWrap.find( '.quantity' ),
+			$qty_input     = form.$singleVariationWrap.find( '.quantity input.qty[name="quantity"]' ),
+			$qty           = $qty_input.closest( '.quantity' ),
 			purchasable    = true,
 			variation_id   = '',
 			template       = false,
@@ -290,12 +291,11 @@
 
 		// Hide or show qty input
 		if ( variation.is_sold_individually === 'yes' ) {
-			$qty.find( 'input.qty' ).val( '1' ).attr( 'min', '1' ).attr( 'max', '' ).trigger( 'change' );
+			$qty_input.val( '1' ).attr( 'min', '1' ).attr( 'max', '' ).trigger( 'change' );
 			$qty.hide();
 		} else {
 
-			var $qty_input = $qty.find( 'input.qty' ),
-				qty_val    = parseFloat( $qty_input.val() );
+			var qty_val    = parseFloat( $qty_input.val() );
 
 			if ( isNaN( qty_val ) ) {
 				qty_val = variation.min_qty;

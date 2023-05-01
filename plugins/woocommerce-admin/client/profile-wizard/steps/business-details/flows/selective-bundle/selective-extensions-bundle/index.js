@@ -22,10 +22,12 @@ import { getCountryCode } from '../../../../../../dashboard/utils';
 
 const ALLOWED_PLUGIN_CATEGORIES = [ 'obw/basics', 'obw/grow' ];
 
-const FreeBadge = () => {
+const FreeBadge = ( props ) => {
 	return (
 		<div className="woocommerce-admin__business-details__free-badge">
-			{ __( 'Free', 'woocommerce' ) }
+			{ props.isFreeTrial
+				? __( 'Free Trial', 'woocommerce' )
+				: __( 'Free', 'woocommerce' ) }
 		</div>
 	);
 };
@@ -133,7 +135,13 @@ const renderBusinessExtensionHelpText = ( values, isInstallingActivating ) => {
 	);
 };
 
-const BundleExtensionCheckbox = ( { onChange, description, isChecked } ) => {
+const BundleExtensionCheckbox = ( {
+	onChange,
+	description,
+	isChecked,
+	extensionKey,
+} ) => {
+	const isFreeTrial = extensionKey === 'codistoconnect';
 	const recordProductLinkClick = ( event ) => {
 		const link = event.target.closest( 'a' );
 		if (
@@ -169,7 +177,10 @@ const BundleExtensionCheckbox = ( { onChange, description, isChecked } ) => {
 				onClick={ recordProductLinkClick }
 			/>
 			{ /* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */ }
-			<FreeBadge />
+			<FreeBadge
+				isFreeTrial={ isFreeTrial }
+				extensionKey={ extensionKey }
+			/>
 		</div>
 	);
 };
@@ -201,6 +212,7 @@ export const ExtensionSection = ( {
 			{ extensions.map( ( { description, key } ) => (
 				<BundleExtensionCheckbox
 					key={ key }
+					extensionKey={ key }
 					description={ description }
 					isChecked={ installExtensionOptions[ key ] }
 					onChange={ onCheckboxChange( key ) }

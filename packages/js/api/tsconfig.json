@@ -4,7 +4,11 @@
 		"types": [ "node", "jest", "axios", "create-hmac" ],
 		"rootDir": "src",
 		"outDir": "dist",
-		"target": "es5"
+		"target": "es5",
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		]
 	},
 	"include": [ "src/" ]
 }

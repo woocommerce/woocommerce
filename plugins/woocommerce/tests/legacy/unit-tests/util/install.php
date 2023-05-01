@@ -166,4 +166,5 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 
 		$this->assertContains( 'some_table_name', WC_Install::get_tables() );
 	}
+
 }

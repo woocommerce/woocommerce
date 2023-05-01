@@ -1,0 +1,62 @@
+{
+    "code": "MZ",
+    "name": "Mozambique",
+    "states": [
+        {
+            "code": "MZP",
+            "name": "Cabo Delgado"
+        },
+        {
+            "code": "MZG",
+            "name": "Gaza"
+        },
+        {
+            "code": "MZI",
+            "name": "Inhambane"
+        },
+        {
+            "code": "MZB",
+            "name": "Manica"
+        },
+        {
+            "code": "MZL",
+            "name": "Maputo Province"
+        },
+        {
+            "code": "MZMPM",
+            "name": "Maputo"
+        },
+        {
+            "code": "MZN",
+            "name": "Nampula"
+        },
+        {
+            "code": "MZA",
+            "name": "Niassa"
+        },
+        {
+            "code": "MZS",
+            "name": "Sofala"
+        },
+        {
+            "code": "MZT",
+            "name": "Tete"
+        },
+        {
+            "code": "MZQ",
+            "name": "Zambézia"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/mz"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

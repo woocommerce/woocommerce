@@ -36,6 +36,13 @@ use ReflectionClass;
  */
 final class FunctionsMockerHack extends CodeHack {
 	/**
+	 * An array containing the names of the functions that will become mockable.
+	 *
+	 * @var array
+	 */
+	private $mockable_functions;
+
+	/**
 	 * Tokens that precede a non-standalone-function identifier.
 	 *
 	 * @var array

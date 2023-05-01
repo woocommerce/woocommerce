@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove use of @automattic/interpolate-components using createInterpolateElement instead.

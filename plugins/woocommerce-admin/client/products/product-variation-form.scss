@@ -1,0 +1,25 @@
+.product-variation-form__navigation {
+	display: flex;
+	align-items: end;
+	justify-content: center;
+	width: 100%;
+	position: fixed;
+	bottom: 16px;
+	left: 0;
+	right: 0;
+	padding-left: 160px;
+
+	@include breakpoint('782px-960px') {
+		padding-left: 18px;
+	}
+
+	@include breakpoint('<782px') {
+		padding-left: 0;
+		bottom: calc(69px + 16px);
+	}
+
+	.simple-navigation {
+		position: absolute;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+	}
+}

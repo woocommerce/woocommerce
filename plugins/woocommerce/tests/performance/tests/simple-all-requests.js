@@ -11,6 +11,7 @@ import { cartApplyCoupon } from '../requests/shopper/cart-apply-coupon.js';
 import { checkoutGuest } from '../requests/shopper/checkout-guest.js';
 import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-login.js';
 import { myAccount } from '../requests/shopper/my-account.js';
+import { myAccountOrders } from '../requests/shopper/my-account-orders.js';
 import { categoryPage } from '../requests/shopper/category-page.js';
 import { products } from '../requests/merchant/products.js';
 import { addProduct } from '../requests/merchant/add-product.js';
@@ -73,7 +74,7 @@ export const options = {
 		allMerchantSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 1,
+			iterations: 2,
 			maxDuration: '360s',
 			exec: 'allMerchantFlow',
 		},
@@ -87,6 +88,7 @@ export const options = {
 	},
 	thresholds: {
 		checks: [ 'rate==1' ],
+		// Listing individual metrics due to https://github.com/grafana/k6/issues/1321
 		'http_req_duration{name:Shopper - Site Root}': [
 			`${ shopper_request_threshold }`,
 		],
@@ -139,6 +141,15 @@ export const options = {
 			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Shopper - Login to My Account}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - My Account}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - My Account Orders}': [
+			`${ shopper_request_threshold }`,
+		],
+		'http_req_duration{name:Shopper - My Account Open Order}': [
 			`${ shopper_request_threshold }`,
 		],
 		'http_req_duration{name:Merchant - WP Login Page}': [
@@ -257,6 +268,7 @@ export function checkoutCustomerLoginFlow() {
 }
 export function myAccountFlow() {
 	myAccount();
+	myAccountOrders();
 }
 export function cartFlow() {
 	cartRemoveItem();

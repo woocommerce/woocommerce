@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { getFilename, getPatches } from 'cli-core/src/util';
+import {
+	getFilename,
+	getPatches,
+} from '@woocommerce/monorepo-utils/src/core/git';
+import fs from 'node:fs';
 
 /**
  * Internal dependencies
@@ -20,9 +24,14 @@ export type HookChangeDescription = {
 	hookType: string;
 	changeType: 'new' | 'updated';
 	version: string;
+	ghLink: string;
 };
 
-export const scanForHookChanges = ( content: string, version: string ) => {
+export const scanForHookChanges = async (
+	content: string,
+	version: string,
+	tmpRepoPath: string
+) => {
 	const changes: Map< string, HookChangeDescription > = new Map();
 
 	if ( ! content.match( /diff --git a\/(.+).php/g ) ) {
@@ -45,6 +54,7 @@ export const scanForHookChanges = ( content: string, version: string ) => {
 		if ( ! patchWithHook ) {
 			continue;
 		}
+
 		const results = patchWithHook.match( newRegEx );
 
 		if ( ! results ) {
@@ -73,14 +83,42 @@ export const scanForHookChanges = ( content: string, version: string ) => {
 			const changeType = getHookChangeType( raw );
 
 			if ( ! hookName[ 2 ].startsWith( '-' ) ) {
-				changes.set( filePath, {
-					filePath,
-					name,
-					hookType,
-					description,
-					changeType,
-					version,
-				} );
+				let ghLink = '';
+
+				try {
+					const data = await fs.promises.readFile(
+						tmpRepoPath + filePath,
+						'utf-8'
+					);
+
+					const reg = new RegExp( name );
+
+					data.split( '\n' ).forEach( ( line, index ) => {
+						if ( line.match( reg ) ) {
+							const lineNum = index + 1;
+
+							ghLink = `https://github.com/woocommerce/woocommerce/blob/${ version }/${ filePath.replace(
+								/(^\/)/,
+								''
+							) }#L${ lineNum }`;
+						}
+					} );
+
+					changes.set( filePath, {
+						filePath,
+						name,
+						hookType,
+						description,
+						changeType,
+						version,
+						ghLink,
+					} );
+				} catch ( error ) {
+					if ( error ) {
+						// eslint-disable-next-line no-console
+						console.error( error );
+					}
+				}
 			}
 		}
 	}

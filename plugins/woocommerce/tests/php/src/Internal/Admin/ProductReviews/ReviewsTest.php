@@ -362,7 +362,7 @@ class ReviewsTest extends WC_Unit_Test_Case {
 		$result = $method->invoke( $reviews );
 
 		foreach ( $expected_result as $i => $expected_message ) {
-			$this->assertContains( $expected_message, $result[ $i ] );
+			$this->assertStringContainsString( $expected_message, $result[ $i ] );
 		}
 	}
 
@@ -646,7 +646,7 @@ test2</p></div>',
 	 * @return void
 	 */
 	public function test_get_reviews_page_url() : void {
-		$this->assertSame( 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews', Reviews::get_reviews_page_url() );
+		$this->assertSame( 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews', Reviews::get_reviews_page_url() );
 	}
 
 }

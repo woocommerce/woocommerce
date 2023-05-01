@@ -175,7 +175,7 @@ test.describe('Orders API tests: CRUD', () => {
 				const response = await request.get(`/wp-json/wc/v3/orders/${orderId}/notes`);
 				const responseJSON = await response.json();
 				expect(response.status()).toEqual(200);
-				expect(Array.isArray(responseJSON));
+				expect(Array.isArray(responseJSON)).toBe(true);
 				expect(responseJSON.length).toBeGreaterThan(0);
 			});
 

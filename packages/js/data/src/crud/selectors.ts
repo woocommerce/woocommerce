@@ -6,8 +6,15 @@ import createSelector from 'rememo';
 /**
  * Internal dependencies
  */
-import { applyNamespace, getUrlParameters, parseId } from './utils';
-import { getResourceName, getTotalCountResourceName } from '../utils';
+import {
+	applyNamespace,
+	getGenericActionName,
+	getRequestIdentifier,
+	getUrlParameters,
+	maybeReplaceIdQuery,
+	parseId,
+} from './utils';
+import { getTotalCountResourceName } from '../utils';
 import { IdQuery, IdType, Item, ItemQuery } from './types';
 import { ResourceState } from './reducer';
 import CRUD_ACTIONS from './crud-actions';
@@ -22,7 +29,7 @@ export const getItemCreateError = (
 	state: ResourceState,
 	query: ItemQuery
 ) => {
-	const itemQuery = getResourceName( CRUD_ACTIONS.CREATE_ITEM, query );
+	const itemQuery = getRequestIdentifier( CRUD_ACTIONS.CREATE_ITEM, query );
 	return state.errors[ itemQuery ];
 };
 
@@ -33,7 +40,7 @@ export const getItemDeleteError = (
 ) => {
 	const urlParameters = getUrlParameters( namespace, idQuery );
 	const { key } = parseId( idQuery, urlParameters );
-	const itemQuery = getResourceName( CRUD_ACTIONS.DELETE_ITEM, { key } );
+	const itemQuery = getRequestIdentifier( CRUD_ACTIONS.DELETE_ITEM, key );
 	return state.errors[ itemQuery ];
 };
 
@@ -54,13 +61,13 @@ export const getItemError = (
 ) => {
 	const urlParameters = getUrlParameters( namespace, idQuery );
 	const { key } = parseId( idQuery, urlParameters );
-	const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEM, { key } );
+	const itemQuery = getRequestIdentifier( CRUD_ACTIONS.GET_ITEM, key );
 	return state.errors[ itemQuery ];
 };
 
 export const getItems = createSelector(
 	( state: ResourceState, query?: ItemQuery ) => {
-		const itemQuery = getResourceName(
+		const itemQuery = getRequestIdentifier(
 			CRUD_ACTIONS.GET_ITEMS,
 			query || {}
 		);
@@ -96,7 +103,7 @@ export const getItems = createSelector(
 		return data;
 	},
 	( state, query ) => {
-		const itemQuery = getResourceName(
+		const itemQuery = getRequestIdentifier(
 			CRUD_ACTIONS.GET_ITEMS,
 			query || {}
 		);
@@ -129,7 +136,10 @@ export const getItemsTotalCount = (
 };
 
 export const getItemsError = ( state: ResourceState, query?: ItemQuery ) => {
-	const itemQuery = getResourceName( CRUD_ACTIONS.GET_ITEMS, query || {} );
+	const itemQuery = getRequestIdentifier(
+		CRUD_ACTIONS.GET_ITEMS,
+		query || {}
+	);
 	return state.errors[ itemQuery ];
 };
 
@@ -138,12 +148,8 @@ export const getItemUpdateError = (
 	idQuery: IdQuery,
 	urlParameters: IdType[]
 ) => {
-	const params = parseId( idQuery, urlParameters );
-	const { key } = params;
-	const itemQuery = getResourceName( CRUD_ACTIONS.UPDATE_ITEM, {
-		key,
-		params,
-	} );
+	const { key } = parseId( idQuery, urlParameters );
+	const itemQuery = getRequestIdentifier( CRUD_ACTIONS.UPDATE_ITEM, key );
 	return state.errors[ itemQuery ];
 };
 
@@ -154,6 +160,32 @@ export const createSelectors = ( {
 	pluralResourceName,
 	namespace,
 }: SelectorOptions ) => {
+	const hasFinishedRequest = (
+		state: ResourceState,
+		action: string,
+		args = []
+	) => {
+		const sanitizedArgs = maybeReplaceIdQuery( args, namespace );
+		const actionName = getGenericActionName( action, resourceName );
+		const requestId = getRequestIdentifier( actionName, ...sanitizedArgs );
+		if ( action )
+			return (
+				state.requesting.hasOwnProperty( requestId ) &&
+				! state.requesting[ requestId ]
+			);
+	};
+
+	const isRequesting = (
+		state: ResourceState,
+		action: string,
+		args = []
+	) => {
+		const sanitizedArgs = maybeReplaceIdQuery( args, namespace );
+		const actionName = getGenericActionName( action, resourceName );
+		const requestId = getRequestIdentifier( actionName, ...sanitizedArgs );
+		return state.requesting[ requestId ];
+	};
+
 	return {
 		[ `get${ resourceName }` ]: applyNamespace( getItem, namespace ),
 		[ `get${ resourceName }Error` ]: applyNamespace(
@@ -184,5 +216,7 @@ export const createSelectors = ( {
 			getItemUpdateError,
 			namespace
 		),
+		hasFinishedRequest,
+		isRequesting,
 	};
 };

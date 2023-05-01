@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { difference } from 'lodash';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { Stepper } from '@woocommerce/components';
 import { Card, CardBody, Button } from '@wordpress/components';
 

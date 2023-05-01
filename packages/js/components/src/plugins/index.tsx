@@ -9,7 +9,7 @@ import {
 	useState,
 	useEffect,
 } from '@wordpress/element';
-import { SyntheticEvent } from 'react';
+import { SyntheticEvent, useCallback } from 'react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { PLUGINS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
 
@@ -25,6 +25,11 @@ type PluginsProps = {
 	pluginSlugs?: string[];
 	onAbort?: () => void;
 	abortText?: string;
+	installText?: string;
+	installButtonVariant?: Button.BaseProps[ 'variant' ];
+	learnMoreLink?: string;
+	learnMoreText?: string;
+	onLearnMore?: () => void;
 };
 
 export const Plugins = ( {
@@ -34,10 +39,17 @@ export const Plugins = ( {
 	onError = () => null,
 	pluginSlugs = [ 'jetpack', 'woocommerce-services' ],
 	onSkip,
+	installText = __( 'Install & enable', 'woocommerce' ),
 	skipText = __( 'No thanks', 'woocommerce' ),
 	abortText = __( 'Abort', 'woocommerce' ),
+	installButtonVariant = 'primary',
+	learnMoreLink,
+	learnMoreText = __( 'Learn more', 'woocommerce' ),
+	onLearnMore,
 }: PluginsProps ) => {
 	const [ hasErrors, setHasErrors ] = useState( false );
+	// Tracks action so that multiple instances of this button don't all light up when one is clicked
+	const [ hasBeenClicked, setHasBeenClicked ] = useState( false );
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
 	const { isRequesting } = useSelect( ( select ) => {
 		const { getActivePlugins, getInstalledPlugins, isPluginsRequesting } =
@@ -52,48 +64,56 @@ export const Plugins = ( {
 		};
 	} );
 
-	const handleErrors = (
-		errors: unknown,
-		response: InstallPluginsResponse
-	) => {
-		setHasErrors( true );
+	const handleErrors = useCallback(
+		( errors: unknown, response: InstallPluginsResponse ) => {
+			setHasErrors( true );
 
-		onError( errors, response );
-	};
+			onError( errors, response );
+		},
+		[ onError ]
+	);
 
-	const handleSuccess = (
-		plugins: string[],
-		response: InstallPluginsResponse
-	) => {
-		onComplete( plugins, response );
-	};
+	const handleSuccess = useCallback(
+		( plugins: string[], response: InstallPluginsResponse ) => {
+			onComplete( plugins, response );
+		},
+		[ onComplete ]
+	);
 
-	const installAndActivate = async (
-		event?: SyntheticEvent< HTMLAnchorElement >
-	) => {
-		if ( event ) {
-			event.preventDefault();
-		}
+	const installAndActivate = useCallback(
+		async ( event?: SyntheticEvent< HTMLAnchorElement > ) => {
+			if ( event ) {
+				event.preventDefault();
+			}
 
-		// Avoid double activating.
-		if ( isRequesting ) {
-			return false;
-		}
+			// Avoid double activating.
+			if ( isRequesting ) {
+				return false;
+			}
 
-		installAndActivatePlugins( pluginSlugs )
-			.then( ( response ) => {
-				handleSuccess( response.data.activated, response );
-			} )
-			.catch( ( response ) => {
-				handleErrors( response.errors, response );
-			} );
-	};
+			installAndActivatePlugins( pluginSlugs )
+				.then( ( response ) => {
+					handleSuccess( response.data.activated, response );
+				} )
+				.catch( ( response ) => {
+					setHasBeenClicked( false );
+					handleErrors( response.errors, response );
+				} );
+		},
+		[
+			handleErrors,
+			handleSuccess,
+			installAndActivatePlugins,
+			isRequesting,
+			pluginSlugs,
+		]
+	);
 
 	useEffect( () => {
 		if ( autoInstall ) {
 			installAndActivate();
 		}
-	}, [] );
+	}, [ autoInstall, installAndActivate ] );
 
 	if ( hasErrors ) {
 		return (
@@ -131,16 +151,31 @@ export const Plugins = ( {
 	return (
 		<>
 			<Button
-				isBusy={ isRequesting }
-				isPrimary
-				onClick={ installAndActivate }
+				isBusy={ isRequesting && hasBeenClicked }
+				variant={
+					isRequesting && hasBeenClicked
+						? 'primary' // set to primary when busy, the other variants look weird when combined with isBusy
+						: installButtonVariant
+				}
+				disabled={ isRequesting && hasBeenClicked }
+				onClick={ () => {
+					setHasBeenClicked( true );
+					installAndActivate();
+				} }
 			>
-				{ __( 'Install & enable', 'woocommerce' ) }
+				{ installText }
 			</Button>
 			{ onSkip && (
 				<Button isTertiary onClick={ onSkip }>
 					{ skipText }
 				</Button>
+			) }
+			{ learnMoreLink && (
+				<a href={ learnMoreLink } target="_blank" rel="noreferrer">
+					<Button isTertiary onClick={ onLearnMore }>
+						{ learnMoreText }
+					</Button>
+				</a>
 			) }
 			{ onAbort && (
 				<Button isTertiary onClick={ onAbort }>

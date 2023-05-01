@@ -26,7 +26,6 @@ class Features {
 	 * @var array
 	 */
 	protected static $optional_features = array(
-		'multichannel-marketing'     => array( 'default' => 'no' ),
 		'navigation'                 => array( 'default' => 'no' ),
 		'settings'                   => array( 'default' => 'no' ),
 		'analytics'                  => array( 'default' => 'yes' ),
@@ -39,8 +38,9 @@ class Features {
 	 * @var array
 	 */
 	protected static $beta_features = array(
-		'multichannel-marketing',
 		'navigation',
+		'new-product-management-experience',
+		'product-block-editor',
 		'settings',
 	);
 

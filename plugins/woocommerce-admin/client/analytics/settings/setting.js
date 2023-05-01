@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button, CheckboxControl } from '@wordpress/components';
+import { Button, CheckboxControl, SelectControl } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
@@ -73,6 +73,22 @@ class Setting extends Component {
 						value={ value }
 						onChange={ handleChange }
 						{ ...this.props }
+					/>
+				);
+			case 'select':
+				return (
+					<SelectControl
+						options={ options }
+						value={ value }
+						onChange={ ( newValue ) =>
+							handleChange( {
+								target: {
+									name,
+									type: 'select',
+									value: newValue,
+								},
+							} )
+						}
 					/>
 				);
 			case 'text':
@@ -188,6 +204,7 @@ Setting.propTypes = {
 		'checkboxGroup',
 		'text',
 		'component',
+		'select',
 	] ),
 	/**
 	 * Label used for describing the setting.

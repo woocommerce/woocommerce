@@ -12,6 +12,7 @@ import { Link, Tag } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -19,7 +20,6 @@ import { ITEMS_STORE_NAME } from '@woocommerce/data';
 import CategoryBreacrumbs from '../categories/breadcrumbs';
 import { isLowStock } from './utils';
 import ReportTable from '../../components/report-table';
-import { CurrencyContext } from '../../../lib/currency-context';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 import './style.scss';

@@ -1,4 +1,8 @@
 module.exports = {
-	configs: require( './configs' ),
-	rules: require( './rules' ),
+	configs: {
+		recommended: require( './configs/recommended' ),
+	},
+	rules: {
+		'dependency-group': require( './rules/dependency-group' ),
+	},
 };

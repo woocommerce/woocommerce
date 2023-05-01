@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Updating WooProductFieldItem to uniquely generate IDs with different sections.

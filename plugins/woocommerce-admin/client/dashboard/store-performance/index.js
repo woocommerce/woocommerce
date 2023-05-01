@@ -17,12 +17,12 @@ import {
 } from '@woocommerce/components';
 import { getDateParamsFromQuery } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { CurrencyContext } from '../../lib/currency-context';
 import { getIndicatorData, getIndicatorValues } from './utils';
 import { getAdminSetting } from '~/utils/admin-settings';
 

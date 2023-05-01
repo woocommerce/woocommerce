@@ -5,7 +5,7 @@
  * @package Automattic\WooCommerce\Admin\Features
  */
 
-use \Automattic\WooCommerce\Admin\Features\TransientNotices;
+use Automattic\WooCommerce\Admin\Features\TransientNotices;
 
 /**
  * Class WC_Admin_Tests_Transient_Notices

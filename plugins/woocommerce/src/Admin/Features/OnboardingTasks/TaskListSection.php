@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 /**
  * Task List section class.
+ *
+ * @deprecated 7.2.0
  */
 class TaskListSection {
 

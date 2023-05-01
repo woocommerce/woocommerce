@@ -1,0 +1,54 @@
+{
+    "code": "UM",
+    "name": "United States (US) Minor Outlying Islands",
+    "states": [
+        {
+            "code": 81,
+            "name": "Baker Island"
+        },
+        {
+            "code": 84,
+            "name": "Howland Island"
+        },
+        {
+            "code": 86,
+            "name": "Jarvis Island"
+        },
+        {
+            "code": 67,
+            "name": "Johnston Atoll"
+        },
+        {
+            "code": 89,
+            "name": "Kingman Reef"
+        },
+        {
+            "code": 71,
+            "name": "Midway Atoll"
+        },
+        {
+            "code": 76,
+            "name": "Navassa Island"
+        },
+        {
+            "code": 95,
+            "name": "Palmyra Atoll"
+        },
+        {
+            "code": 79,
+            "name": "Wake Island"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/um"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

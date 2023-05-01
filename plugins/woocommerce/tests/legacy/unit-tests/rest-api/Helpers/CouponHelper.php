@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_Coupon;
+use WC_Coupon;
 
 /**
  * Class CouponHelper.

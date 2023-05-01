@@ -1,3 +1,85 @@
+# See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 
 ".github/*":
+  - team: atlas
+
+"packages/js/api/**/*":
+  - team: solaris
+
+"packages/js/e2e-utils/**/*":
+  - team: solaris
+
+"packages/js/e2e-environment/**/*":
+  - team: solaris
+
+"packages/js/api-core-tests/**/*":
+  - team: solaris
+
+"packages/js/e2e-core-tests/**/*":
+  - team: solaris
+
+"packages/js/admin-e2e-tests/**/*":
+  - team: solaris
+
+"packages/js/components/**/*":
+  - team: mothra
+  - team: ghidorah
+
+"packages/js/csv-export/**/*":
+  - team: mothra
+
+"packages/js/currency/**/*":
+  - team: mothra
+
+"packages/js/customer-effort-score/**/*":
+  - team: mothra
+
+"packages/js/data/**/*":
+  - team: mothra
+  - team: ghidorah
+
+"packages/js/date/**/*":
+  - team: mothra
+
+"packages/js/dependency-extraction-webpack-plugin/**/*":
+  - team: mothra
+
+"packages/js/eslint-plugin/**/*":
+  - team: mothra
+
+"packages/js/experimental/**/*":
+  - team: mothra
+
+"packages/js/explat/**/*":
+  - team: mothra
+  - team: ghidorah
+
+"packages/js/navigation/**/*":
+  - team: mothra
+
+"packages/js/number/**/*":
+  - team: mothra
+
+"packages/js/onboarding/**/*":
+  - team: ghidorah
+
+"packages/js/tracks/**/*":
+  - team: mothra
+
+"plugins/woocommerce/**/*":
+  - team: proton
+
+"plugins/woocommerce/src/Admin/**/*":
+  - team: mothra
+  - team: ghidorah
+
+"plugins/woocommerce/src/Internal/Admin/**/*":
+  - team: mothra
+  - team: ghidorah
+  
+"plugins/woocommerce-admin/**/*":
+  - team: mothra
+  - team: ghidorah
+
+"plugins/woocommerce-beta-tester/**/*":
   - team: atlas
