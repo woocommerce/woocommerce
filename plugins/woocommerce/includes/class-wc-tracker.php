@@ -535,16 +535,19 @@ class WC_Tracker {
 				$len_curr = count( $curr_tokens );
 				$len_prev = count( $prev_tokens );
 
+				$index_unique = -1;
 				// Gather the common tokens.
-				// Let us allow for the unique reference id to be anywhere in the name but for the first token.
+				// Let us allow for the unique reference id to be anywhere in the name.
 				for ( $i = 0; $i < $len_curr && $i < $len_prev; $i++ ) {
 					if ( $curr_tokens[ $i ] === $prev_tokens[ $i ] ) {
 						$comm_tokens[] = $curr_tokens[ $i ];
+					} elseif ( preg_match( '/\d/', $curr_tokens[ $i ] ) && preg_match( '/\d/', $prev_tokens[ $i ] ) ) {
+						$index_unique = $i;
 					}
 				}
 
-				// If only one token is different, that could be the unique id.
-				if ( count( $curr_tokens ) - count( $comm_tokens ) <= 1 && count( $comm_tokens ) > 0 ) {
+				// If only one token is different, and those tokens contain digits, then that could be the unique id.
+				if ( count( $curr_tokens ) - count( $comm_tokens ) <= 1 && count( $comm_tokens ) > 0 && $index_unique > -1 ) {
 					$objects[ $key ]->group_key  = implode( ' ', $comm_tokens );
 					$objects[ $prev ]->group_key = implode( ' ', $comm_tokens );
 				} else {
