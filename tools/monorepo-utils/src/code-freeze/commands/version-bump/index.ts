@@ -11,6 +11,7 @@ import { Logger } from '../../../core/logger';
 import { cloneRepo } from '../../../core/git';
 import { octokitWithAuth } from '../../../core/github/api';
 import { getEnvVar } from '../../../core/environment';
+import { getMajorMinor } from '../../../core/version';
 import { bumpFiles } from './bump';
 import { validateArgs } from './lib/validate';
 
@@ -54,7 +55,8 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			baseDir: tmpRepoPath,
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
-		const branch = 'prep/trunk-for-next-dev-cycle-XX.XX';
+		const majorMinor = getMajorMinor( version );
+		const branch = `prep/trunk-for-next-dev-cycle-${ majorMinor }`;
 		const base = 'trunk';
 		await git.checkoutBranch( branch, base ).catch( errFn );
 
@@ -64,13 +66,13 @@ export const versionBumpCommand = new Command( 'version-bump' )
 
 		Logger.startTask( 'Adding and committing changes' );
 		await git.add( '.' ).catch( errFn );
-		await git.commit( 'Prep trunk for XX.XX cycle' ).catch( errFn );
+		await git
+			.commit( `Prep trunk for ${ majorMinor } cycle` )
+			.catch( errFn );
 		Logger.endTask();
 
 		Logger.startTask( 'Pushing to Github' );
-		await git
-			.push( 'origin', 'prep/trunk-for-next-dev-cycle-XX.XX' )
-			.catch( errFn );
+		await git.push( 'origin', branch ).catch( errFn );
 		Logger.endTask();
 
 		try {
