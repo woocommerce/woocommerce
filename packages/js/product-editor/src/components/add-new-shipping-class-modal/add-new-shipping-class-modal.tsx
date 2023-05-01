@@ -1,17 +1,15 @@
 /**
  * External dependencies
  */
-import interpolateComponents from '@automattic/interpolate-components';
 import { Button, Modal, TextControl } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import {
+	useState,
+	createElement,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Form, FormErrors, useFormContext } from '@woocommerce/components';
 import { ProductShippingClass } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
-import './add-new-shipping-class-modal.scss';
 
 export type ShippingClassFormProps = {
 	onAdd: () => Promise< ProductShippingClass >;
@@ -40,16 +38,16 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 			<TextControl
 				{ ...getInputProps( 'name' ) }
 				placeholder={ __( 'e.g. Fragile products', 'woocommerce' ) }
-				label={ interpolateComponents( {
-					mixedString: __( 'Name {{required/}}', 'woocommerce' ),
-					components: {
+				label={ createInterpolateElement(
+					__( 'Name <required />', 'woocommerce' ),
+					{
 						required: (
 							<span className="woocommerce-add-new-shipping-class-modal__optional-input">
 								{ __( '(required)', 'woocommerce' ) }
 							</span>
 						),
-					},
-				} ) }
+					}
+				) }
 			/>
 			<TextControl
 				{ ...getInputProps( 'slug' ) }
