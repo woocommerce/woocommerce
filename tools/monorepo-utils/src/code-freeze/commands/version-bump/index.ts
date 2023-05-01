@@ -15,7 +15,7 @@ import { getMajorMinor } from '../../../core/version';
 import { bumpFiles } from './bump';
 import { validateArgs } from './lib/validate';
 
-const errFn = ( err ) => {
+const genericErrorFunction = ( err ) => {
 	if ( err.git ) {
 		return err.git;
 	}
@@ -62,21 +62,26 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		} );
 		const majorMinor = getMajorMinor( version );
 		const branch = `prep/trunk-for-next-dev-cycle-${ majorMinor }`;
-		await git.checkoutBranch( branch, base ).catch( errFn );
+		await git.checkoutBranch( branch, base ).catch( genericErrorFunction );
 
 		Logger.startTask( `Bumping versions in ${ owner }/${ name }` );
 		bumpFiles( tmpRepoPath, version );
 		Logger.endTask();
 
 		Logger.startTask( 'Adding and committing changes' );
-		await git.add( '.' ).catch( errFn );
+		await git.add( '.' ).catch( genericErrorFunction );
 		await git
 			.commit( `Prep trunk for ${ majorMinor } cycle` )
-			.catch( errFn );
+			.catch( genericErrorFunction );
 		Logger.endTask();
 
 		Logger.startTask( 'Pushing to Github' );
-		await git.push( 'origin', branch ).catch( errFn );
+		await git.push( 'origin', branch ).catch( ( e ) => {
+			Logger.warn( e );
+			Logger.error(
+				`\nBranch ${ branch } already exists. Run \`git push origin --delete ${ branch }\` and rerun this command.`
+			);
+		} );
 		Logger.endTask();
 
 		try {
@@ -95,6 +100,6 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			Logger.notice( `Pull request created: ${ pr.data.html_url }` );
 			Logger.endTask();
 		} catch ( e ) {
-			throw e;
+			Logger.error( e );
 		}
 	} );
