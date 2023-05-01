@@ -13,6 +13,7 @@ import {
 import { useDebounce, useResizeObserver } from '@wordpress/compose';
 import {
 	BlockEditorProvider,
+	BlockInspector,
 	BlockList,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -75,46 +76,51 @@ export function IframeEditor( {
 	const debouncedOnChange = useDebounce( handleChange, 200 );
 
 	return (
-		<BlockEditorProvider
-			settings={ {
-				...( settings || parentEditorSettings ),
-				templateLock: false,
-			} }
-			value={ blocks }
-			onChange={ ( updatedBlocks: BlockInstance[] ) => {
-				setBlocks( updatedBlocks );
-				debouncedOnChange( updatedBlocks );
-			} }
-			useSubRegistry={ true }
-		>
-			<BlockTools
-				className={ 'woocommerce-iframe-editor' }
-				onClick={ (
-					event: React.MouseEvent< HTMLDivElement, MouseEvent >
-				) => {
-					// Clear selected block when clicking on the gray background.
-					if ( event.target === event.currentTarget ) {
-						clearSelectedBlock();
-					}
+		<div className="woocommerce-iframe-editor">
+			<BlockEditorProvider
+				settings={ {
+					...( settings || parentEditorSettings ),
+					templateLock: false,
 				} }
+				value={ blocks }
+				onChange={ ( updatedBlocks: BlockInstance[] ) => {
+					setBlocks( updatedBlocks );
+					debouncedOnChange( updatedBlocks );
+				} }
+				useSubRegistry={ true }
 			>
-				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-				{ /* @ts-ignore */ }
-				<BlockEditorKeyboardShortcuts.Register />
-				{ onClose && <BackButton onClick={ onClose } /> }
-				<ResizableEditor
-					enableResizing={ true }
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore This accepts numbers or strings.
-					height={ sizes.height ?? '100%' }
+				<BlockTools
+					className={ 'woocommerce-iframe-editor__content' }
+					onClick={ (
+						event: React.MouseEvent< HTMLDivElement, MouseEvent >
+					) => {
+						// Clear selected block when clicking on the gray background.
+						if ( event.target === event.currentTarget ) {
+							clearSelectedBlock();
+						}
+					} }
 				>
-					<EditorCanvas enableResizing={ true }>
-						{ resizeObserver }
-						<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
-					</EditorCanvas>
-					<Popover.Slot />
-				</ResizableEditor>
-			</BlockTools>
-		</BlockEditorProvider>
+					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+					{ /* @ts-ignore */ }
+					<BlockEditorKeyboardShortcuts.Register />
+					{ onClose && <BackButton onClick={ onClose } /> }
+					<ResizableEditor
+						enableResizing={ true }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore This accepts numbers or strings.
+						height={ sizes.height ?? '100%' }
+					>
+						<EditorCanvas enableResizing={ true }>
+							{ resizeObserver }
+							<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
+						</EditorCanvas>
+						<Popover.Slot />
+					</ResizableEditor>
+				</BlockTools>
+				<div className="woocommerce-iframe-editor__sidebar">
+					<BlockInspector />
+				</div>
+			</BlockEditorProvider>
+		</div>
 	);
 }
