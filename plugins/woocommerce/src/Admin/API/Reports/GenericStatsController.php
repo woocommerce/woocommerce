@@ -20,8 +20,8 @@ abstract class GenericStatsController extends GenericController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                    = parent::get_collection_params();
-		$params['interval']        = array(
+		$params             = parent::get_collection_params();
+		$params['interval'] = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'week',
