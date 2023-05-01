@@ -2305,8 +2305,8 @@ importers:
         specifier: 7.12.1
         version: 7.12.1(@babel/core@7.12.9)
       '@playwright/test':
-        specifier: ^1.33.0
-        version: 1.33.0
+        specifier: ^1.30.0
+        version: 1.30.0
       '@typescript-eslint/eslint-plugin':
         specifier: ^5.54.0
         version: 5.54.0(@typescript-eslint/parser@5.54.0)(eslint@8.32.0)(typescript@4.9.5)
@@ -4963,7 +4963,7 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-create-class-features-plugin': 7.17.6(@babel/core@7.12.9)
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.20.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4988,7 +4988,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-create-class-features-plugin': 7.17.6(@babel/core@7.21.3)
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.20.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8937,8 +8937,8 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-module-imports': 7.16.0
-      '@babel/helper-plugin-utils': 7.20.2
-      babel-plugin-polyfill-corejs2: 0.3.3(@babel/core@7.21.3)
+      '@babel/helper-plugin-utils': 7.14.5
+      babel-plugin-polyfill-corejs2: 0.3.0(@babel/core@7.21.3)
       babel-plugin-polyfill-corejs3: 0.4.0(@babel/core@7.21.3)
       babel-plugin-polyfill-regenerator: 0.3.0(@babel/core@7.21.3)
       semver: 6.3.0
@@ -12810,15 +12810,13 @@ packages:
       aggregate-error: 3.1.0
     dev: false
 
-  /@playwright/test@1.33.0:
-    resolution: {integrity: sha512-YunBa2mE7Hq4CfPkGzQRK916a4tuZoVx/EpLjeWlTVOnD4S2+fdaQZE0LJkbfhN5FTSKNLdcl7MoT5XB37bTkg==}
+  /@playwright/test@1.30.0:
+    resolution: {integrity: sha512-SVxkQw1xvn/Wk/EvBnqWIq6NLo1AppwbYOjNLmyU0R1RoQ3rLEBtmjTnElcnz8VEtn11fptj1ECxK0tgURhajw==}
     engines: {node: '>=14'}
     hasBin: true
     dependencies:
       '@types/node': 16.18.21
-      playwright-core: 1.33.0
-    optionalDependencies:
-      fsevents: 2.3.2
+      playwright-core: 1.30.0
     dev: true
 
   /@pmmmwh/react-refresh-webpack-plugin@0.5.1(react-refresh@0.11.0)(webpack@4.46.0):
@@ -20838,8 +20836,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      browserslist: 4.21.4
-      caniuse-lite: 1.0.30001418
+      browserslist: 4.20.2
+      caniuse-lite: 1.0.30001352
       fraction.js: 4.2.0
       normalize-range: 0.1.2
       picocolors: 1.0.0
@@ -22382,7 +22380,6 @@ packages:
       escalade: 3.1.1
       node-releases: 2.0.6
       picocolors: 1.0.0
-    dev: true
 
   /browserslist@4.20.4:
     resolution: {integrity: sha512-ok1d+1WpnU24XYN7oC3QWgTyMhY/avPJ/r9T00xxvUOIparA/gc+UPUMaod3i+G6s+nI2nUb9xZ5k794uIwShw==}
@@ -27381,7 +27378,7 @@ packages:
       vue-template-compiler:
         optional: true
     dependencies:
-      '@babel/code-frame': 7.16.7
+      '@babel/code-frame': 7.18.6
       '@types/json-schema': 7.0.9
       chalk: 4.1.2
       chokidar: 3.5.3
@@ -36249,8 +36246,8 @@ packages:
       find-up: 5.0.0
     dev: true
 
-  /playwright-core@1.33.0:
-    resolution: {integrity: sha512-aizyPE1Cj62vAECdph1iaMILpT0WUDCq3E6rW6I+dleSbBoGbktvJtzS6VHkZ4DKNEOG9qJpiom/ZxO+S15LAw==}
+  /playwright-core@1.30.0:
+    resolution: {integrity: sha512-7AnRmTCf+GVYhHbLJsGUtskWTE33SwMZkybJ0v6rqR1boxq2x36U7p1vDRV7HO2IwTZgmycracLxPEJI49wu4g==}
     engines: {node: '>=14'}
     hasBin: true
     dev: true
@@ -37958,7 +37955,7 @@ packages:
       is-touch-device: 1.0.1
       lodash: 4.17.21
       moment: 2.29.4
-      object.assign: 4.1.2
+      object.assign: 4.1.4
       object.values: 1.1.5
       prop-types: 15.8.1
       raf: 3.4.1
