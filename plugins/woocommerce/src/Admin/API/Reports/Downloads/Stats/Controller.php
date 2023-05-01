@@ -110,13 +110,15 @@ class Controller extends GenericStatsController {
 		return apply_filters( 'woocommerce_rest_prepare_report_downloads_stats', $response, $report, $request );
 	}
 
+
 	/**
-	 * Get the Report's schema, conforming to JSON Schema.
+	 * Get the Report's item properties schema.
+	 * Will be used by `get_item_schema` as `totals` and `subtotals`.
 	 *
 	 * @return array
 	 */
-	public function get_item_schema() {
-		$totals = array(
+	public function get_item_properties_schema() {
+		return array(
 			'download_count' => array(
 				'title'       => __( 'Downloads', 'woocommerce' ),
 				'description' => __( 'Number of downloads.', 'woocommerce' ),
@@ -126,6 +128,15 @@ class Controller extends GenericStatsController {
 				'indicator'   => true,
 			),
 		);
+	}
+	/**
+	 * Get the Report's schema, conforming to JSON Schema.
+	 * It does not have the segments as in GenericStatsController.
+	 *
+	 * @return array
+	 */
+	public function get_item_schema() {
+		$totals = $this->get_item_properties_schema();
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',

@@ -133,12 +133,13 @@ class Controller extends GenericStatsController implements ExportableInterface {
 	}
 
 	/**
-	 * Get the Report's schema, conforming to JSON Schema.
+	 * Get the Report's item properties schema.
+	 * Will be used by `get_item_schema` as `totals` and `subtotals`.
 	 *
 	 * @return array
 	 */
-	public function get_item_schema() {
-		$data_values = array(
+	public function get_item_properties_schema() {
+		return array(
 			'total_sales'    => array(
 				'description' => __( 'Total sales.', 'woocommerce' ),
 				'type'        => 'number',
@@ -205,12 +206,6 @@ class Controller extends GenericStatsController implements ExportableInterface {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'products'       => array(
-				'description' => __( 'Products sold.', 'woocommerce' ),
-				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
 			'gross_sales'    => array(
 				'description' => __( 'Gross sales.', 'woocommerce' ),
 				'type'        => 'number',
@@ -220,103 +215,23 @@ class Controller extends GenericStatsController implements ExportableInterface {
 				'format'      => 'currency',
 			),
 		);
+	}
 
-		$segments = array(
-			'segments' => array(
-				'description' => __( 'Reports data grouped by segment condition.', 'woocommerce' ),
-				'type'        => 'array',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-				'items'       => array(
-					'type'       => 'object',
-					'properties' => array(
-						'segment_id' => array(
-							'description' => __( 'Segment identificator.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'subtotals'  => array(
-							'description' => __( 'Interval subtotals.', 'woocommerce' ),
-							'type'        => 'object',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-							'properties'  => $data_values,
-						),
-					),
-				),
-			),
-		);
+	/**
+	 * Get the Report's schema, conforming to JSON Schema.
+	 *
+	 * @return array
+	 */
+	public function get_item_schema() {
+		$schema          = parent::get_item_schema();
+		$schema['title'] = 'report_revenue_stats';
 
-		$totals = array_merge( $data_values, $segments );
-
-		// Products is not shown in intervals.
-		unset( $data_values['products'] );
-
-		$intervals = array_merge( $data_values, $segments );
-
-		$schema = array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'report_revenue_stats',
-			'type'       => 'object',
-			'properties' => array(
-				'totals'    => array(
-					'description' => __( 'Totals data.', 'woocommerce' ),
-					'type'        => 'object',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'properties'  => $totals,
-				),
-				'intervals' => array(
-					'description' => __( 'Reports data grouped by intervals.', 'woocommerce' ),
-					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'items'       => array(
-						'type'       => 'object',
-						'properties' => array(
-							'interval'       => array(
-								'description' => __( 'Type of interval.', 'woocommerce' ),
-								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'enum'        => array( 'day', 'week', 'month', 'year' ),
-							),
-							'date_start'     => array(
-								'description' => __( "The date the report start, in the site's timezone.", 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_start_gmt' => array(
-								'description' => __( 'The date the report start, as GMT.', 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_end'       => array(
-								'description' => __( "The date the report end, in the site's timezone.", 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_end_gmt'   => array(
-								'description' => __( 'The date the report end, as GMT.', 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'subtotals'      => array(
-								'description' => __( 'Interval subtotals.', 'woocommerce' ),
-								'type'        => 'object',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'properties'  => $intervals,
-							),
-						),
-					),
-				),
-			),
+		// Products is not shown in intervals, only in totals.
+		$schema['properties']['totals']['properties']['products'] = array(
+			'description' => __( 'Products sold.', 'woocommerce' ),
+			'type'        => 'integer',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
 		);
 
 		return $this->add_additional_fields_schema( $schema );

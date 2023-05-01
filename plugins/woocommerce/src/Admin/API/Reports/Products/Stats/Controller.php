@@ -124,12 +124,13 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Get the Report's schema, conforming to JSON Schema.
+	 * Get the Report's item properties schema.
+	 * Will be used by `get_item_schema` as `totals` and `subtotals`.
 	 *
 	 * @return array
 	 */
-	public function get_item_schema() {
-		$data_values = array(
+	public function get_item_properties_schema() {
+		return array(
 			'items_sold'   => array(
 				'title'       => __( 'Products sold', 'woocommerce' ),
 				'description' => __( 'Number of product items sold.', 'woocommerce' ),
@@ -152,106 +153,27 @@ class Controller extends GenericStatsController {
 				'readonly'    => true,
 			),
 		);
+	}
 
-		$segments = array(
-			'segments' => array(
-				'description' => __( 'Reports data grouped by segment condition.', 'woocommerce' ),
-				'type'        => 'array',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-				'items'       => array(
-					'type'       => 'object',
-					'properties' => array(
-						'segment_id'    => array(
-							'description' => __( 'Segment identificator.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'segment_label' => array(
-							'description' => __( 'Human readable segment label, either product or variation name.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-							'enum'        => array( 'day', 'week', 'month', 'year' ),
-						),
-						'subtotals'     => array(
-							'description' => __( 'Interval subtotals.', 'woocommerce' ),
-							'type'        => 'object',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-							'properties'  => $data_values,
-						),
-					),
-				),
-			),
+	/**
+	 * Get the Report's schema, conforming to JSON Schema.
+	 *
+	 * @return array
+	 */
+	public function get_item_schema() {
+		$schema          = parent::get_item_schema();
+		$schema['title'] = 'report_products_stats';
+
+		$segment_label = array(
+			'description' => __( 'Human readable segment label, either product or variation name.', 'woocommerce' ),
+			'type'        => 'string',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
+			'enum'        => array( 'day', 'week', 'month', 'year' ),
 		);
 
-		$totals = array_merge( $data_values, $segments );
-
-		$schema = array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'report_products_stats',
-			'type'       => 'object',
-			'properties' => array(
-				'totals'    => array(
-					'description' => __( 'Totals data.', 'woocommerce' ),
-					'type'        => 'object',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'properties'  => $totals,
-				),
-				'intervals' => array(
-					'description' => __( 'Reports data grouped by intervals.', 'woocommerce' ),
-					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'items'       => array(
-						'type'       => 'object',
-						'properties' => array(
-							'interval'       => array(
-								'description' => __( 'Type of interval.', 'woocommerce' ),
-								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'enum'        => array( 'day', 'week', 'month', 'year' ),
-							),
-							'date_start'     => array(
-								'description' => __( "The date the report start, in the site's timezone.", 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_start_gmt' => array(
-								'description' => __( 'The date the report start, as GMT.', 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_end'       => array(
-								'description' => __( "The date the report end, in the site's timezone.", 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_end_gmt'   => array(
-								'description' => __( 'The date the report end, as GMT.', 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'subtotals'      => array(
-								'description' => __( 'Interval subtotals.', 'woocommerce' ),
-								'type'        => 'object',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'properties'  => $totals,
-							),
-						),
-					),
-				),
-			),
-		);
+		$schema['properties']['totals']['properties']['segments']['items']['properties']['segment_label'] = $segment_label;
+		$schema['properties']['intervals']['items']['properties']['subtotals']['properties']              = $segment_label;
 
 		return $this->add_additional_fields_schema( $schema );
 	}
