@@ -27,3 +27,4 @@ export {
 	type ShippingDimensionsImageProps,
 	type HighlightSides,
 } from './shipping-dimensions-image';
+export * from './add-new-shipping-class-modal';
