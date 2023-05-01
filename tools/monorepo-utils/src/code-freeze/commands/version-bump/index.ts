@@ -35,7 +35,12 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		'Repository name. Default: woocommerce',
 		'woocommerce'
 	)
-	.action( async ( { owner, name, version } ) => {
+	.option(
+		'-b --base <base>',
+		'Base branch to create the PR against. Default: trunk',
+		'trunk'
+	)
+	.action( async ( { owner, name, version, base } ) => {
 		Logger.startTask(
 			`Making a temporary clone of '${ owner }/${ name }'`
 		);
@@ -57,7 +62,6 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		} );
 		const majorMinor = getMajorMinor( version );
 		const branch = `prep/trunk-for-next-dev-cycle-${ majorMinor }`;
-		const base = 'trunk';
 		await git.checkoutBranch( branch, base ).catch( errFn );
 
 		Logger.startTask( `Bumping versions in ${ owner }/${ name }` );
@@ -82,8 +86,8 @@ export const versionBumpCommand = new Command( 'version-bump' )
 				{
 					owner,
 					repo: name,
-					title: 'Amazing new feature',
-					body: 'Please pull these awesome changes in!',
+					title: `Prep trunk for ${ majorMinor } cycle`,
+					body: `This PR updates the versions in trunk to ${ version } for next development cycle.`,
 					head: branch,
 					base,
 				}
