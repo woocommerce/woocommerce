@@ -149,7 +149,7 @@
 	"scripts": {
 		"turbo:build": "pnpm run build:js && pnpm run build:css",
 		"turbo:test": "jest --config ./jest.config.json",
-		"turbo:watch": "pnpm run /^turbo:watch:.*/ --parallel",
+		"turbo:watch": "pnpm run --parallel /^turbo:watch:.*/",
 		"turbo:watch:ts-esm": "tsc --project tsconfig.json --watch",
 		"turbo:watch:ts-cjs": "tsc --project tsconfig-cjs.json --watch",
 		"turbo:watch:webpack": "webpack --watch",

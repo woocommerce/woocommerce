@@ -59,7 +59,7 @@
 	"scripts": {
 		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"turbo:test": "jest --config ./jest.config.json",
-		"turbo:watch": "pnpm run /^turbo:watch:.*/ --parallel",
+		"turbo:watch": "pnpm run --parallel /^turbo:watch:.*/",
 		"turbo:watch:ts-esm": "tsc --project tsconfig.json --watch",
 		"turbo:watch:ts-cjs": "tsc --project tsconfig-cjs.json --watch",
 		"prepare": "composer install",

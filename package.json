@@ -23,7 +23,7 @@
 	"scripts": {
 		"build": "pnpm exec turbo run turbo:build",
 		"test": "pnpm exec turbo run turbo:test",
-		"watch": "pnpm exec turbo run turbo:watch",
+		"watch": "pnpm exec turbo run turbo:watch --concurrency 1000",
 		"clean": "pnpm store prune && git clean -fx **/node_modules && pnpm i",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",
