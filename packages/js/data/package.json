@@ -95,7 +95,8 @@
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix",
 		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests",
-		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name"
+		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name",
+		"watch-deep": "pnpm -w exec turbo run turbo:watch --filter \"$npm_package_name...\""
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

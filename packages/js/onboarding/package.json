@@ -76,7 +76,8 @@
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix",
-		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name"
+		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name",
+		"watch-deep": "pnpm -w exec turbo run turbo:watch --filter \"$npm_package_name...\""
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

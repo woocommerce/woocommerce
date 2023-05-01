@@ -157,7 +157,6 @@
 		"changelog": "composer exec -- changelogger",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"test": "pnpm -w exec turbo run turbo:test --filter=$npm_package_name",
-		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name",
 		"lint": "eslint src --ext=js,ts,tsx",
 		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"build:css": "webpack",
@@ -166,7 +165,9 @@
 		"prepack": "pnpm run clean && pnpm run build",
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
 		"test:update-snapshots": "pnpm run test -- --updateSnapshot",
-		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests"
+		"test-staged": "jest --bail --config ./jest.config.json --findRelatedTests",
+		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name",
+		"watch-deep": "pnpm -w exec turbo run turbo:watch --filter \"$npm_package_name...\""
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [

@@ -30,7 +30,8 @@
 		"clean": "pnpm exec rimraf *.tsbuildinfo build build-*",
 		"prepack": "pnpm run clean && pnpm run build",
 		"lint:fix": "eslint src --fix",
-		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name"
+		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name",
+		"watch-deep": "pnpm -w exec turbo run turbo:watch --filter \"$npm_package_name...\""
 	},
 	"dependencies": {
 		"@testing-library/jest-dom": "^5.16.2",

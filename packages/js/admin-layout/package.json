@@ -35,12 +35,13 @@
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint src",
-		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name",
 		"build:js": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
 		"build:css": "webpack",
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix"
+		"lint:fix": "eslint src --fix",
+		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name",
+		"watch-deep": "pnpm -w exec turbo run turbo:watch --filter \"$npm_package_name...\""
 	},
 	"devDependencies": {
 		"@types/react": "^17.0.2",

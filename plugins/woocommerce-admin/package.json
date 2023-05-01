@@ -49,7 +49,8 @@
 		"test:watch": "pnpm run test:client --watch",
 		"ts:check": "tsc --project tsconfig.json --pretty",
 		"ts:check:watch": "pnpm ts:check -- --watch",
-		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name"
+		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name",
+		"watch-deep": "pnpm -w exec turbo run turbo:watch --filter \"$npm_package_name...\""
 	},
 	"dependencies": {
 		"@automattic/explat-client": "^0.0.3",
