@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -17,9 +17,9 @@ use WP_REST_Response;
  * REST API Reports taxes stats controller class.
  *
  * @internal
- * @extends AbstractController
+ * @extends GenericStatsController
  */
-class Controller extends AbstractController {
+class Controller extends GenericStatsController {
 
 	/**
 	 * Route base.
@@ -290,20 +290,6 @@ class Controller extends AbstractController {
 			'total_sales',
 			'orders_count',
 			'products_count',
-		);
-		$params['interval']        = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'week',
-			'enum'              => array(
-				'hour',
-				'day',
-				'week',
-				'month',
-				'quarter',
-				'year',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['taxes']           = array(
 			'description'       => __( 'Limit result set to all items that have the specified term assigned in the taxes taxonomy.', 'woocommerce' ),

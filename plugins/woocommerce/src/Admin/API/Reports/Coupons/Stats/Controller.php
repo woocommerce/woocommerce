@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
 use Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -18,9 +18,9 @@ use WP_REST_Response;
  * REST API Reports coupons stats controller class.
  *
  * @internal
- * @extends AbstractController
+ * @extends GenericStatsController
  */
-class Controller extends AbstractController {
+class Controller extends GenericStatsController {
 
 	/**
 	 * Route base.
@@ -250,20 +250,6 @@ class Controller extends AbstractController {
 			'amount',
 			'coupons_count',
 			'orders_count',
-		);
-		$params['interval']        = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'week',
-			'enum'              => array(
-				'hour',
-				'day',
-				'week',
-				'month',
-				'quarter',
-				'year',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['coupons']         = array(
 			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce' ),

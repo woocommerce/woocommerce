@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -17,9 +17,9 @@ use WP_REST_Response;
  * REST API Reports downloads stats controller class.
  *
  * @internal
- * @extends AbstractController
+ * @extends GenericStatsController
  */
-class Controller extends AbstractController {
+class Controller extends GenericStatsController {
 
 	/**
 	 * Route base.
@@ -204,20 +204,6 @@ class Controller extends AbstractController {
 		$params['orderby']['enum']  = array(
 			'date',
 			'download_count',
-		);
-		$params['interval']         = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'week',
-			'enum'              => array(
-				'hour',
-				'day',
-				'week',
-				'month',
-				'quarter',
-				'year',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['match']            = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),

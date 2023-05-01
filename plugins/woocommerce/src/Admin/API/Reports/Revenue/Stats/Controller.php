@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Revenue\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
 use Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
@@ -21,9 +21,9 @@ use WP_REST_Response;
  * REST API Reports revenue stats controller class.
  *
  * @internal
- * @extends AbstractController
+ * @extends GenericStatsController
  */
-class Controller extends AbstractController implements ExportableInterface {
+class Controller extends GenericStatsController implements ExportableInterface {
 	/**
 	 * Exportable traits.
 	 */
@@ -340,20 +340,6 @@ class Controller extends AbstractController implements ExportableInterface {
 			'orders_count',
 			'items_sold',
 			'gross_sales',
-		);
-		$params['interval']        = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'week',
-			'enum'              => array(
-				'hour',
-				'day',
-				'week',
-				'month',
-				'quarter',
-				'year',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['segmentby']       = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
