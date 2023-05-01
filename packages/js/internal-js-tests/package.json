@@ -22,12 +22,15 @@
 	"module": "build-module/util/index.js",
 	"scripts": {
 		"turbo:build": "tsc --project tsconfig.json && tsc --project tsconfig-cjs.json",
+		"turbo:watch": "pnpm run turbo:watch:* --parallel",
+		"turbo:watch:ts-check": "tsc --noEmit --project ./tsconfig.json --watch",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"lint": "eslint src",
 		"ts:check": "tsc --noEmit --project ./tsconfig.json",
 		"clean": "pnpm exec rimraf *.tsbuildinfo build build-*",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix"
+		"lint:fix": "eslint src --fix",
+		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name"
 	},
 	"dependencies": {
 		"@testing-library/jest-dom": "^5.16.2",

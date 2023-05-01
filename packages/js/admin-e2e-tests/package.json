@@ -58,7 +58,7 @@
 	"scripts": {
 		"turbo:build": "tsc --project tsconfig.json",
 		"turbo:watch": "pnpm run turbo:watch:* --parallel",
-		"turbo:watch:ts": "tsc --project tsconfig.json --watch",
+		"turbo:watch:ts-esm": "tsc --project tsconfig.json --watch",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",

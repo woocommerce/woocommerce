@@ -62,6 +62,10 @@
 	},
 	"scripts": {
 		"turbo:build": "pnpm run build:js && pnpm run build:css",
+		"turbo:watch": "pnpm run turbo:watch:* --parallel",
+		"turbo:watch:ts-esm": "tsc --project tsconfig.json --watch",
+		"turbo:watch:ts-cjs": "tsc --project tsconfig-cjs.json --watch",
+		"turbo:watch:css": "webpack --watch",
 		"prepare": "composer install",
 		"changelog": "composer exec -- changelogger",
 		"clean": "pnpm exec rimraf tsconfig.tsbuildinfo build build-*",
@@ -71,7 +75,8 @@
 		"build:css": "webpack",
 		"start": "concurrently \"tsc --project tsconfig.json --watch\" \"tsc --project tsconfig-cjs.json --watch\" \"webpack --watch\"",
 		"prepack": "pnpm run clean && pnpm run build",
-		"lint:fix": "eslint src --fix"
+		"lint:fix": "eslint src --fix",
+		"watch": "pnpm -w exec turbo run turbo:watch --filter=$npm_package_name"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
