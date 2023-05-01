@@ -32,11 +32,6 @@
 		margin-left: auto;
 	}
 
-	.components-popover__content {
-		min-width: auto;
-		width: min-content;
-	}
-
 	.woocommerce-product-header__actions {
 		display: flex;
 
@@ -52,4 +47,12 @@
 			color: #fff;
 		}
 	}
+}
+
+.woocommerce-product-header__more-menu {
+	.components-popover__content {
+		min-width: auto;
+		width: min-content;
+	}
+
 }
