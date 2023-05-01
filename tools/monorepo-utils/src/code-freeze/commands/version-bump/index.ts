@@ -50,7 +50,11 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		const token = getEnvVar( 'GITHUB_TOKEN' );
 		const remote = `https://${ owner }:${ token }@${ source }`;
 		const tmpRepoPath = await sparseCheckoutRepo( remote, 'woocommerce', [
-			'plugins/woocommerce',
+			'plugins/woocommerce/composer.json',
+			'plugins/woocommerce/includes/class-woocommerce.php',
+			'plugins/woocommerce/package.json',
+			'plugins/woocommerce/readme.txt',
+			'plugins/woocommerce/woocommerce.php',
 		] );
 		Logger.endTask();
 
@@ -83,7 +87,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		await git.push( 'origin', branch ).catch( ( e ) => {
 			Logger.warn( e );
 			Logger.error(
-				`\nBranch ${ branch } already exists. Run \`git push origin --delete ${ branch }\` and rerun this command.`
+				`\nBranch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
 			);
 		} );
 		Logger.endTask();
