@@ -3,15 +3,15 @@ namespace Automattic\WooCommerce\Admin\API\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 
 /**
  * Generic base for all Stats controllers.
  *
  * @internal
- * @extends AbstractController
+ * @extends GenericController
  */
-abstract class GenericStatsController extends AbstractController {
+abstract class GenericStatsController extends GenericController {
 
 	/**
 	 * Get the query params for collections.

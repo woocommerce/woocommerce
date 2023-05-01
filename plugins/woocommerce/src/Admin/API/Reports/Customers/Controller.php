@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Customers;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
@@ -18,9 +18,9 @@ use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
  * REST API Reports customers controller class.
  *
  * @internal
- * @extends AbstractController
+ * @extends GenericController
  */
-class Controller extends AbstractController implements ExportableInterface {
+class Controller extends GenericController implements ExportableInterface {
 	/**
 	 * Exportable traits.
 	 */

@@ -9,15 +9,15 @@ namespace Automattic\WooCommerce\Admin\API\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 
 /**
  * REST API Reports controller class.
  *
  * @internal
- * @extends AbstractController
+ * @extends GenericController
  */
-class Controller extends AbstractController {
+class Controller extends GenericController {
 
 	/**
 	 * Get all reports.

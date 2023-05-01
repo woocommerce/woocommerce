@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Products;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -18,9 +18,9 @@ use WP_REST_Response;
  * REST API Reports products controller class.
  *
  * @internal
- * @extends AbstractController
+ * @extends GenericController
  */
-class Controller extends AbstractController implements ExportableInterface {
+class Controller extends GenericController implements ExportableInterface {
 
 	/**
 	 * Route base.

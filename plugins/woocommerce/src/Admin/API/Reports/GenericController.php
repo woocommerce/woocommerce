@@ -13,7 +13,7 @@ use WP_REST_Response;
  * @internal
  * @extends WC_REST_Reports_Controller
  */
-abstract class AbstractController extends \WC_REST_Reports_Controller {
+abstract class GenericController extends \WC_REST_Reports_Controller {
 
 	/**
 	 * Endpoint namespace.

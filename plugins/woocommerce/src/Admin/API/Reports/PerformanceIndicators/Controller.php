@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators;
 
-use Automattic\WooCommerce\Admin\API\Reports\AbstractController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -18,9 +18,9 @@ defined( 'ABSPATH' ) || exit;
  * REST API Reports Performance indicators controller class.
  *
  * @internal
- * @extends AbstractController
+ * @extends GenericController
  */
-class Controller extends AbstractController {
+class Controller extends GenericController {
 
 	/**
 	 * Route base.
