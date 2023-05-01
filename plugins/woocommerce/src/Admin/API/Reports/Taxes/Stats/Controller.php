@@ -284,7 +284,6 @@ class Controller extends AbstractController {
 	 */
 	public function get_collection_params() {
 		$params                    = parent::get_collection_params();
-		$params                    = array();
 		$params['orderby']['enum'] = array(
 			'date',
 			'items_sold',
