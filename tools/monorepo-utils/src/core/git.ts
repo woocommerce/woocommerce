@@ -107,7 +107,8 @@ export const cloneRepo = async ( repoPath: string ) => {
 export const sparseCheckoutRepo = async (
 	githubRepoUrl: string,
 	path: string,
-	directories: string[]
+	directories: string[],
+	base = 'trunk'
 ) => {
 	const folderPath = join( tmpdir(), path );
 
@@ -123,7 +124,7 @@ export const sparseCheckoutRepo = async (
 	} );
 	await git.raw( 'sparse-checkout', 'init', { '--cone': null } );
 	await git.raw( 'sparse-checkout', 'set', directories.join( ' ' ) );
-	await git.checkout( 'trunk' );
+	await git.checkout( base );
 
 	return folderPath;
 };
