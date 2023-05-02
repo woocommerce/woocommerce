@@ -117,9 +117,13 @@ export const sparseCheckoutRepo = async (
 
 	const git = simpleGit( { baseDir: folderPath } );
 
-	await git.clone( githubRepoUrl, folderPath, { '--depth': 1 } );
+	await git.clone( githubRepoUrl, folderPath, {
+		'--depth': 1,
+		'--no-checkout': null,
+	} );
 	await git.raw( 'sparse-checkout', 'init', { '--cone': null } );
 	await git.raw( 'sparse-checkout', 'set', directories.join( ' ' ) );
+	await git.checkout( 'trunk' );
 
 	return folderPath;
 };
