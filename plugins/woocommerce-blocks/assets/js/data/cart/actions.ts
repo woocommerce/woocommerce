@@ -383,7 +383,7 @@ export const changeCartItemQuantity =
  * @param {number | string} [packageId] The key of the packages that we will select within.
  */
 export const selectShippingRate =
-	( rateId: string, packageId = 0 ) =>
+	( rateId: string, packageId: number | null = null ) =>
 	async ( {
 		dispatch,
 		select,
