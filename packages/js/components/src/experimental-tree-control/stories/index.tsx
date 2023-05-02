@@ -33,7 +33,14 @@ const listItems: Item[] = [
 export const SimpleTree: React.FC = () => {
 	return (
 		<BaseControl label="Simple tree" id="simple-tree">
-			<TreeControl id="simple-tree" items={ listItems } />
+			<TreeControl
+				id="simple-tree"
+				items={ listItems }
+				onFirstTreeItemBack={ () =>
+					// eslint-disable-next-line no-alert
+					alert( 'onFirstTreeItemBack called' )
+				}
+			/>
 		</BaseControl>
 	);
 };
