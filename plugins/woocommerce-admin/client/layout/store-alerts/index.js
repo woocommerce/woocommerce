@@ -20,6 +20,7 @@ import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
 import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
+import { navigateTo, parseAdminUrl } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -78,8 +79,12 @@ export class StoreAlerts extends Component {
 						const url = event.currentTarget.getAttribute( 'href' );
 						event.preventDefault();
 						await triggerNoteAction( alert.id, action.id );
-						if ( url && url !== '#' ) {
-							window.location.href = url;
+						if (
+							url &&
+							url !== '#' &&
+							parseAdminUrl( url ).href !== window.location.href
+						) {
+							navigateTo( { url } );
 						}
 					} }
 				>
