@@ -117,7 +117,7 @@ class Controller extends GenericStatsController {
 	 *
 	 * @return array
 	 */
-	public function get_item_properties_schema() {
+	protected function get_item_properties_schema() {
 		return array(
 			'download_count' => array(
 				'title'       => __( 'Downloads', 'woocommerce' ),

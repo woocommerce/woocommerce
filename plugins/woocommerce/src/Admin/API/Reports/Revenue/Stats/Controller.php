@@ -138,7 +138,7 @@ class Controller extends GenericStatsController implements ExportableInterface {
 	 *
 	 * @return array
 	 */
-	public function get_item_properties_schema() {
+	protected function get_item_properties_schema() {
 		return array(
 			'total_sales'    => array(
 				'description' => __( 'Total sales.', 'woocommerce' ),

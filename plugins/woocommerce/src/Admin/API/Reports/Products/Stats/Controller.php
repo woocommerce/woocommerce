@@ -129,7 +129,7 @@ class Controller extends GenericStatsController {
 	 *
 	 * @return array
 	 */
-	public function get_item_properties_schema() {
+	protected function get_item_properties_schema() {
 		return array(
 			'items_sold'   => array(
 				'title'       => __( 'Products sold', 'woocommerce' ),
