@@ -85,22 +85,19 @@ export const versionBumpCommand = new Command( 'version-bump' )
 
 		await git.checkoutBranch( branch, base ).catch( genericErrorFunction );
 
-		Logger.startTask( `Bumping versions in ${ owner }/${ name }` );
+		Logger.notice( `Bumping versions in ${ owner }/${ name }` );
 		bumpFiles( tmpRepoPath, version );
-		Logger.endTask();
 
-		Logger.startTask( 'Adding and committing changes' );
+		Logger.notice( 'Adding and committing changes' );
 		await git.add( '.' ).catch( genericErrorFunction );
 		await git
 			.commit( `Prep trunk for ${ majorMinor } cycle` )
 			.catch( genericErrorFunction );
-		Logger.endTask();
 
-		Logger.startTask( 'Pushing to Github' );
+		Logger.notice( 'Pushing to Github' );
 		await git.push( 'origin', branch ).catch( ( e ) => {
 			Logger.error( e );
 		} );
-		Logger.endTask();
 
 		try {
 			Logger.startTask( 'Creating a pull request' );
