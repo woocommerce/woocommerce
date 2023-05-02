@@ -54,7 +54,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			'woocommerce',
 			[
 				'plugins/woocommerce/includes/class-woocommerce.php',
-				// All that's truely needed is the line above, but including these here for completeness.
+				// All that's needed is the line above, but including these here for completeness.
 				'plugins/woocommerce/composer.json',
 				'plugins/woocommerce/package.json',
 				'plugins/woocommerce/readme.txt',
