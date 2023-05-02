@@ -1060,6 +1060,12 @@ jQuery( function ( $ ) {
 								page = total_pages;
 							}
 
+							if ( total_pages === 0 ) {
+								$( '.generate_variations' ).text(
+									'Generate variations'
+								);
+							}
+
 							wc_meta_boxes_product_variations_pagenav.go_to_page(
 								page,
 								-1
@@ -1122,6 +1128,9 @@ jQuery( function ( $ ) {
 							wc_meta_boxes_product_variations_pagenav.go_to_page(
 								1,
 								count
+							);
+							$( '.generate_variations' ).text(
+								'Regenerate variations'
 							);
 						} else {
 							wc_meta_boxes_product_variations_ajax.unblock();
