@@ -32,7 +32,7 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 		OrderUtil::class,
 		PluginUtil::class,
 		COTMigrationUtil::class,
-		WebhookUtil::class
+		WebhookUtil::class,
 	);
 
 	/**
