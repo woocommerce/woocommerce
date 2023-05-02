@@ -47,7 +47,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			`Making a temporary clone of '${ owner }/${ name }'`
 		);
 		const source = `github.com/${ owner }/${ name }`;
-		const token = getEnvVar( 'GITHUB_TOKEN' );
+		const token = getEnvVar( 'GITHUB_TOKEN', true );
 		const remote = `https://${ owner }:${ token }@${ source }`;
 		const tmpRepoPath = await sparseCheckoutRepoShallow(
 			remote,
