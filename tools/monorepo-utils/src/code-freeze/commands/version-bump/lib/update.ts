@@ -52,8 +52,8 @@ export const updateClassPluginFile = async (
 	try {
 		await stat( filePath );
 	} catch ( e ) {
-		// Class file does not exist, return early.
-		return;
+		Logger.warn( e );
+		Logger.error( 'Unable to update plugin file.' );
 	}
 
 	try {
@@ -66,6 +66,7 @@ export const updateClassPluginFile = async (
 
 		await writeFile( filePath, updatedClassPluginFileContents );
 	} catch ( e ) {
+		Logger.warn( e );
 		Logger.error( 'Unable to update plugin file.' );
 	}
 };

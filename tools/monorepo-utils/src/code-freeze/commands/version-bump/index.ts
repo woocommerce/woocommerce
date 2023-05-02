@@ -8,7 +8,7 @@ import simpleGit from 'simple-git';
  * Internal dependencies
  */
 import { Logger } from '../../../core/logger';
-import { sparseCheckoutRepo } from '../../../core/git';
+import { cloneRepo } from '../../../core/git';
 import { octokitWithAuth } from '../../../core/github/api';
 import { getEnvVar } from '../../../core/environment';
 import { getMajorMinor } from '../../../core/version';
@@ -49,13 +49,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		const source = `github.com/${ owner }/${ name }`;
 		const token = getEnvVar( 'GITHUB_TOKEN' );
 		const remote = `https://${ owner }:${ token }@${ source }`;
-		const tmpRepoPath = await sparseCheckoutRepo( remote, 'woocommerce', [
-			'plugins/woocommerce/composer.json',
-			'plugins/woocommerce/includes/class-woocommerce.php',
-			'plugins/woocommerce/package.json',
-			'plugins/woocommerce/readme.txt',
-			'plugins/woocommerce/woocommerce.php',
-		] );
+		const tmpRepoPath = await cloneRepo( remote );
 		Logger.endTask();
 
 		Logger.notice(
