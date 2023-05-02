@@ -75,6 +75,14 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		} );
 		const majorMinor = getMajorMinor( version );
 		const branch = `prep/trunk-for-next-dev-cycle-${ majorMinor }`;
+		const exists = await git.raw( 'ls-remote', 'origin', branch );
+
+		if ( exists.trim().length > 0 ) {
+			Logger.error(
+				`Branch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
+			);
+		}
+
 		await git.checkoutBranch( branch, base ).catch( genericErrorFunction );
 
 		Logger.startTask( `Bumping versions in ${ owner }/${ name }` );
@@ -90,10 +98,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 
 		Logger.startTask( 'Pushing to Github' );
 		await git.push( 'origin', branch ).catch( ( e ) => {
-			Logger.warn( e );
-			Logger.error(
-				`\nBranch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
-			);
+			Logger.error( e );
 		} );
 		Logger.endTask();
 
