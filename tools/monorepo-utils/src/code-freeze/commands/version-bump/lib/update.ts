@@ -19,7 +19,7 @@ export const updateReadmeChangelog = async (
 	tmpRepoPath: string,
 	nextVersion: string
 ): Promise< void > => {
-	const filePath = join( tmpRepoPath, `plugins/woocommerce/readme.txt` );
+	const filePath = join( tmpRepoPath, 'plugins/woocommerce/readme.txt' );
 	try {
 		const readmeContents = await readFile( filePath, 'utf8' );
 
@@ -30,7 +30,7 @@ export const updateReadmeChangelog = async (
 
 		await writeFile( filePath, updatedReadmeContents );
 	} catch ( e ) {
-		Logger.error( 'Unable to update readme changelog' );
+		Logger.error( e );
 	}
 };
 
@@ -52,8 +52,7 @@ export const updateClassPluginFile = async (
 	try {
 		await stat( filePath );
 	} catch ( e ) {
-		Logger.warn( e );
-		Logger.error( 'Unable to update plugin file.' );
+		Logger.error( e );
 	}
 
 	try {
@@ -66,8 +65,7 @@ export const updateClassPluginFile = async (
 
 		await writeFile( filePath, updatedClassPluginFileContents );
 	} catch ( e ) {
-		Logger.warn( e );
-		Logger.error( 'Unable to update plugin file.' );
+		Logger.error( e );
 	}
 };
 
@@ -92,7 +90,7 @@ export const updateJSON = async (
 			JSON.stringify( composerJson, null, '\t' ) + '\n'
 		);
 	} catch ( e ) {
-		Logger.error( 'Unable to update composer.json' );
+		Logger.error( e );
 	}
 };
 
@@ -116,6 +114,6 @@ export const updatePluginFile = async (
 		);
 		await writeFile( filePath, updatedPluginFileContents );
 	} catch ( e ) {
-		Logger.error( 'Unable to update plugin file.' );
+		Logger.error( e );
 	}
 };

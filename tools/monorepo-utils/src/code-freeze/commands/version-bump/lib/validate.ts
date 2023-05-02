@@ -22,7 +22,7 @@ export const getCurrentVersion = async (
 		const composerJSON = JSON.parse( await readFile( filePath, 'utf8' ) );
 		return composerJSON.version;
 	} catch ( e ) {
-		Logger.error( 'Unable to read current version.' );
+		Logger.error( e );
 	}
 };
 
