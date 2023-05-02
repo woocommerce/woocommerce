@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\Admin;
 
+use WP_Upgrader;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( ! function_exists( 'get_plugins' ) ) {
@@ -285,7 +287,7 @@ class PluginsHelper {
 		}
 
 		$job_id = uniqid();
-		WC()->queue()->schedule_single( time() + 5, 'woocommerce_plugins_install_callback', array( $plugins, $job_id ) );
+		WC()->queue()->schedule_single( time() + 5, 'woocommerce_plugins_install_callback', array( $plugins ) );
 
 		return $job_id;
 	}
