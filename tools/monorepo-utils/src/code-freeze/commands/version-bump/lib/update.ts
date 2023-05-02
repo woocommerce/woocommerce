@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { readFile, writeFile, stat } from 'fs/promises';
-import { dirent } from 'fs';
 import { join } from 'path';
 
 /**
@@ -50,16 +49,12 @@ export const updateClassPluginFile = async (
 		`plugins/woocommerce/includes/class-woocommerce.php`
 	);
 
-	if ( ! ( await dirent.isFile( filePath + 'adsfd' ) ) ) {
-		Logger.error( 'class-woocommerce.php does not exist.' );
+	try {
+		await stat( filePath );
+	} catch ( e ) {
+		Logger.warn( e );
+		Logger.error( 'Unable to update plugin file.' );
 	}
-
-	// try {
-	// 	await stat( filePath );
-	// } catch ( e ) {
-	// 	Logger.warn( e );
-	// 	Logger.error( 'Unable to update plugin file.' );
-	// }
 
 	try {
 		const classPluginFileContents = await readFile( filePath, 'utf8' );
