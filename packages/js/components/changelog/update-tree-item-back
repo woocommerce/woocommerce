@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add onFirstTreeItemBack hook and fix a bug where items with children were not selected in single mode
