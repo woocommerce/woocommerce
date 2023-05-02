@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { readFile, writeFile, stat } from 'fs/promises';
+import { readFile, writeFile, isFile } from 'fs/promises';
 import { join } from 'path';
 
 /**
@@ -49,10 +49,8 @@ export const updateClassPluginFile = async (
 		`plugins/woocommerce/includes/class-woocommerce.php`
 	);
 
-	try {
-		await stat( filePath );
-	} catch ( e ) {
-		Logger.error( e );
+	if ( ! isFile( filePath ) ) {
+		Logger.error( "Plugin file 'class-woocommerce.php' does not exist." );
 	}
 
 	try {
