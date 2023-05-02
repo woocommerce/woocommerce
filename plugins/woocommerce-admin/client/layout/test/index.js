@@ -1,7 +1,14 @@
 /**
+ * External dependencies
+ */
+import { render } from '@testing-library/react';
+import * as tracks from '@woocommerce/tracks';
+
+/**
  * Internal dependencies
  */
 import { updateLinkHref } from '../controller';
+import { EmbedLayout } from '../index';
 
 describe( 'updateLinkHref', () => {
 	const timeExcludedScreens = [ 'stock', 'settings', 'customers' ];
@@ -61,5 +68,17 @@ describe( 'updateLinkHref', () => {
 		updateLinkHref( item, nextQuery, timeExcludedScreens );
 
 		expect( item.href ).toBe( WP_ADMIN_URL );
+	} );
+} );
+
+describe( 'Layout', () => {
+	it( 'should call recordPageView with correct parameters', () => {
+		jest.spyOn( tracks, 'recordPageView' );
+		window.history.pushState( {}, 'Page Title', '/url?search' );
+		render( <EmbedLayout /> );
+		expect( tracks.recordPageView ).toHaveBeenCalledWith( '/url?search', {
+			has_navigation: true,
+			is_embedded: true,
+		} );
 	} );
 } );
