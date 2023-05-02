@@ -29,6 +29,7 @@ export function useTreeItem( {
 	onCreateNew,
 	shouldShowCreateButton,
 	onLastItemLoop,
+	onFirstTreeItemBack,
 	onTreeBlur,
 	...props
 }: TreeItemProps ) {
@@ -64,6 +65,7 @@ export function useTreeItem( {
 	const { onKeyDown } = useKeyboard( {
 		...expander,
 		onLastItemLoop,
+		onFirstTreeItemBack,
 		item,
 	} );
 

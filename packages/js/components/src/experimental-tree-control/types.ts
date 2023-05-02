@@ -76,6 +76,10 @@ type BaseTreeProps = {
 	 * Called when the create button is clicked to help closing any related popover.
 	 */
 	onTreeBlur?(): void;
+	/**
+	 * Called when user presses shift + tab and the focus is on the first item.
+	 */
+	onFirstTreeItemBack?(): void;
 };
 
 export type TreeProps = BaseTreeProps &
@@ -134,6 +138,7 @@ export type TreeItemProps = BaseTreeProps &
 		getLabel?( item: LinkedTree ): JSX.Element;
 		shouldItemBeExpanded?( item: LinkedTree ): boolean;
 		onLastItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
+		onFirstTreeItemBack?(): void;
 	};
 
 export type TreeControlProps = Omit< TreeProps, 'items' | 'level' > & {
