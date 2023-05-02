@@ -1580,6 +1580,9 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
  * @return string
  */
 function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
+	if( ! is_attachment( $attachment_id ) ){
+		return sprintf( '<div class="woocommerce-product-gallery__image--placeholder"><img src="%s" alt="%s" class="wp-post-image" /></div>', esc_url( wc_placeholder_img_src( 'woocommerce_single' ) ), esc_html__( 'Awaiting product image', 'woocommerce' ) );
+    }
 	$flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
 	$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
 	$thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
