@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { act, render, waitFor, screen } from '@testing-library/react';
-import { useState } from '@wordpress/element';
+import { useState, createElement } from '@wordpress/element';
 import { resolveSelect } from '@wordpress/data';
 import { ProductAttributeTerm } from '@woocommerce/data';
 

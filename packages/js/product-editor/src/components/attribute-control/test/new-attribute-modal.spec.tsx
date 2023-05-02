@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
+import { createElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
