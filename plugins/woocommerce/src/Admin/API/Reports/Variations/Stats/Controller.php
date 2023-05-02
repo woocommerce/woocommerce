@@ -176,8 +176,8 @@ class Controller extends GenericStatsController {
 			'enum'        => array( 'day', 'week', 'month', 'year' ),
 		);
 
-		$schema['properties']['totals']['properties']['segments']['items']['properties']['segment_label'] = $segment_label;
-		$schema['properties']['intervals']['items']['properties']['subtotals']['properties']              = $segment_label;
+		$schema['properties']['totals']['properties']['segments']['items']['properties']['segment_label']                                        = $segment_label;
+		$schema['properties']['intervals']['items']['properties']['subtotals']['properties']['segments']['items']['properties']['segment_label'] = $segment_label;
 
 		return $this->add_additional_fields_schema( $schema );
 	}
