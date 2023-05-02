@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { createElement } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
 import { BaseControl } from '@wordpress/components';
+import { useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import uniqueId from 'lodash/uniqueId';
 import classNames from 'classnames';
@@ -14,6 +15,7 @@ import {
 	AlignmentControl,
 	BlockControls,
 	RichText,
+	store as blockEditorStore,
 	useBlockProps,
 } from '@wordpress/block-editor';
 
@@ -38,6 +40,9 @@ export function Edit( {
 		'product',
 		'short_description'
 	);
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
+	const { clearSelectedBlock } = useDispatch( blockEditorStore );
 
 	function handleAlignmentChange( value: SummaryAttributes[ 'align' ] ) {
 		setAttributes( { align: value } );
@@ -45,6 +50,15 @@ export function Edit( {
 
 	function handleDirectionChange( value: SummaryAttributes[ 'direction' ] ) {
 		setAttributes( { direction: value } );
+	}
+
+	function handleBlur( event: React.FocusEvent< 'p', Element > ) {
+		const isToolbar = event.relatedTarget?.closest(
+			'.block-editor-block-contextual-toolbar'
+		);
+		if ( ! isToolbar ) {
+			clearSelectedBlock();
+		}
 	}
 
 	return (
@@ -84,6 +98,7 @@ export function Edit( {
 					} ) }
 					dir={ direction }
 					allowedFormats={ allowedFormats }
+					onBlur={ handleBlur }
 				/>
 			</BaseControl>
 		</div>
