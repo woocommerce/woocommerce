@@ -34,7 +34,9 @@ export function Edit( {
 	const blockProps = useBlockProps( {
 		style: { direction },
 	} );
-	const id = uniqueId();
+	const contentId = uniqueId(
+		'wp-block-woocommerce-product-summary-field__content-'
+	);
 	const [ summary, setSummary ] = useEntityProp< string >(
 		'postType',
 		'product',
@@ -83,12 +85,12 @@ export function Edit( {
 			</BlockControls>
 
 			<BaseControl
-				id={ id }
+				id={ contentId }
 				label={ label || __( 'Summary', 'woocommerce' ) }
 			>
 				<div { ...blockProps }>
 					<RichText
-						id={ id }
+						id={ contentId }
 						identifier="content"
 						tagName="p"
 						value={ summary }
