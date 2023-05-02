@@ -79,7 +79,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 		self::add_action( 'deleted_post', array( $this, 'handle_deleted_post' ), 10, 2 );
 		self::add_action( 'woocommerce_new_order', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'woocommerce_update_order', array( $this, 'handle_updated_order' ), 100 );
-		self::add_action( 'wp_scheduled_auto_draft_delete', array( $this, 'delete_auto_draft_orders' ) );
+		self::add_action( 'wp_scheduled_auto_draft_delete', array( $this, 'delete_auto_draft_orders' ), 9 );
 
 		self::add_filter( 'woocommerce_feature_description_tip', array( $this, 'handle_feature_description_tip' ), 10, 3 );
 	}
