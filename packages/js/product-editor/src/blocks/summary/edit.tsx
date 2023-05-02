@@ -62,7 +62,11 @@ export function Edit( {
 	}
 
 	return (
-		<div { ...blockProps }>
+		<div
+			className={
+				'wp-block wp-block-woocommerce-product-summary-field-wrapper'
+			}
+		>
 			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 			{ /* @ts-ignore No types for this exist yet. */ }
 			<BlockControls group="block">
@@ -82,24 +86,26 @@ export function Edit( {
 				id={ id }
 				label={ label || __( 'Summary', 'woocommerce' ) }
 			>
-				<RichText
-					id={ id }
-					identifier="content"
-					tagName="p"
-					value={ summary }
-					onChange={ setSummary }
-					placeholder={ __(
-						"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
-						'woocommerce'
-					) }
-					data-empty={ Boolean( summary ) }
-					className={ classNames( 'components-summary-control', {
-						[ `has-text-align-${ align }` ]: align,
-					} ) }
-					dir={ direction }
-					allowedFormats={ allowedFormats }
-					onBlur={ handleBlur }
-				/>
+				<div { ...blockProps }>
+					<RichText
+						id={ id }
+						identifier="content"
+						tagName="p"
+						value={ summary }
+						onChange={ setSummary }
+						placeholder={ __(
+							"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
+							'woocommerce'
+						) }
+						data-empty={ Boolean( summary ) }
+						className={ classNames( 'components-summary-control', {
+							[ `has-text-align-${ align }` ]: align,
+						} ) }
+						dir={ direction }
+						allowedFormats={ allowedFormats }
+						onBlur={ handleBlur }
+					/>
+				</div>
 			</BaseControl>
 		</div>
 	);
