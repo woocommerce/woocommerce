@@ -371,6 +371,7 @@ class WC_Post_Types {
 							array(
 								'id'    => 'general',
 								'title' => __( 'General', 'woocommerce' ),
+								'order' => 10,
 							),
 							array(
 								array(
@@ -491,6 +492,7 @@ class WC_Post_Types {
 							array(
 								'id'    => 'pricing',
 								'title' => __( 'Pricing', 'woocommerce' ),
+								'order' => 20,
 							),
 							array(
 								array(
@@ -614,6 +616,7 @@ class WC_Post_Types {
 							array(
 								'id'    => 'inventory',
 								'title' => __( 'Inventory', 'woocommerce' ),
+								'order' => 30,
 							),
 							array(
 								array(
@@ -763,6 +766,7 @@ class WC_Post_Types {
 							array(
 								'id'    => 'shipping',
 								'title' => __( 'Shipping', 'woocommerce' ),
+								'order' => 40,
 							),
 							array(
 								array(

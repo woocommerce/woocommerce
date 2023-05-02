@@ -11,7 +11,7 @@ import { createElement } from '@wordpress/element';
  * @param {Array} fills - slot's `Fill`s.
  * @return {Node} Node.
  */
-export const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills ) => {
+export const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills = [] ) => {
 	// Copy fills array here because its type is readonly array that doesn't have .sort method in Typescript definition.
 	const sortedFills = [ ...fills ].sort( ( a, b ) => {
 		return a[ 0 ].props.order - b[ 0 ].props.order;

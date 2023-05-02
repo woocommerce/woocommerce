@@ -6,6 +6,7 @@ import {
 	Fragment,
 	useEffect,
 	useState,
+	Children,
 } from '@wordpress/element';
 import { ReactElement } from 'react';
 import { NavigableMenu, Slot } from '@wordpress/components';
@@ -17,6 +18,7 @@ import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
+import { sortFillsByOrder } from '../../utils';
 import { TABS_SLOT_NAME } from './constants';
 
 type TabsProps = {
@@ -30,13 +32,6 @@ export type TabsFillProps = {
 export function Tabs( { onChange = () => {} }: TabsProps ) {
 	const [ selected, setSelected ] = useState< string | null >( null );
 	const query = getQuery() as Record< string, string >;
-
-	function onClick( tabId: string ) {
-		window.document.documentElement.scrollTop = 0;
-		navigateTo( {
-			url: getNewPath( { tab: tabId } ),
-		} );
-	}
 
 	useEffect( () => {
 		onChange( selected );
@@ -81,14 +76,21 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 			<Slot
 				fillProps={
 					{
-						onClick,
+						onClick: ( tabId ) =>
+							navigateTo( {
+								url: getNewPath( { tab: tabId } ),
+							} ),
 					} as TabsFillProps
 				}
 				name={ TABS_SLOT_NAME }
 			>
 				{ ( fills ) => {
+					if ( ! sortFillsByOrder ) {
+						return null;
+					}
+
 					maybeSetSelected( fills );
-					return <>{ fills }</>;
+					return sortFillsByOrder( fills );
 				} }
 			</Slot>
 		</NavigableMenu>
