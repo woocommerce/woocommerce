@@ -147,7 +147,7 @@ class PluginsHelper {
 	 * @param array $plugins Plugins to install.
 	 * @return array
 	 */
-	public static function install_plugins( $plugins ) {
+	public static function install_plugins( $plugins, WP_Upgrader $upgrader = null ) {
 		/**
 		 * Filter the list of plugins to install.
 		 *
@@ -223,7 +223,9 @@ class PluginsHelper {
 				continue;
 			}
 
-			$upgrader           = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
+			if ( $upgrader === null ) {
+				$upgrader = new \Plugin_Upgrader(new \Automatic_Upgrader_Skin());
+			}
 			$result             = $upgrader->install( $api->download_link );
 			$results[ $plugin ] = $result;
 			$time[ $plugin ]    = round( ( microtime( true ) - $start_time ) * 1000 );
