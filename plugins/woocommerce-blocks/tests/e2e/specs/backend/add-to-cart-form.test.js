@@ -20,7 +20,7 @@ import {
 } from '../../utils.js';
 
 const block = {
-	name: 'Add to Cart Options',
+	name: 'Add to Cart with Options',
 	slug: 'woocommerce/add-to-cart-form',
 	class: '.wc-block-add-to-cart-form',
 };
