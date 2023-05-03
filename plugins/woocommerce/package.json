@@ -54,7 +54,6 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.30.0",
 		"@typescript-eslint/eslint-plugin": "^5.54.0",
 		"@typescript-eslint/experimental-utils": "^5.43.0",
 		"@typescript-eslint/parser": "^5.54.0",
@@ -113,6 +112,7 @@
 		"ie 9"
 	],
 	"dependencies": {
+		"@playwright/test": "^1.33.0",
 		"@wordpress/browserslist-config": "wp-6.0"
 	}
 }
