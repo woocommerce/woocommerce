@@ -67,6 +67,7 @@ class WC_Site_Tracking {
 		$user           = wp_get_current_user();
 		$server_details = WC_Tracks::get_server_details();
 		$blog_details   = WC_Tracks::get_blog_details( $user->ID );
+		$tracks_identity = WC_Tracks_Client::get_identity( $user->ID);
 
 		$client_tracking_properties = array_merge( $server_details, $blog_details );
 		/**
@@ -80,7 +81,13 @@ class WC_Site_Tracking {
 		<!-- WooCommerce Tracks -->
 		<script type="text/javascript">
 			window.wcTracks = window.wcTracks || {};
+			window.wcTracks.isInitialized = false;
 			window.wcTracks.isEnabled = <?php echo self::is_tracking_enabled() ? 'true' : 'false'; ?>;
+			window._tkq = window._tkq || [];
+
+			<?php if ( $tracks_identity['_ut'] !== 'anon' ) { ?>
+			window._tkq.push( [ 'identifyUser', '<?= $tracks_identity['_ui'] ?>' ] );
+			<?php } ?>
 			window.wcTracks.validateEvent = function( eventName, props = {} ) {
 				let isValid = true;
 				if ( ! <?php echo esc_js( WC_Tracks_Event::EVENT_NAME_REGEX ); ?>.test( eventName ) ) {
@@ -124,7 +131,6 @@ class WC_Site_Tracking {
 				if ( ! window.wcTracks.validateEvent( eventName, eventProperties ) ) {
 					return;
 				}
-				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 			}
 		</script>
