@@ -5,6 +5,8 @@ import { render } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from 'react';
+import { InboxNoteCard } from '@woocommerce/experimental';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -29,15 +31,10 @@ jest.mock( '@woocommerce/experimental', () => {
 	// Require the original module to not be mocked...
 	const originalModule = jest.requireActual( '@woocommerce/experimental' );
 
-	const MockInboxNoteCard = ( { onNoteVisible, note } ) => {
-		useEffect( () => onNoteVisible( note ), [] );
-		return <div>{ note.id }</div>;
-	};
-
 	return {
 		__esModule: true, // Use it when dealing with esModules
 		...originalModule,
-		InboxNoteCard: MockInboxNoteCard,
+		InboxNoteCard: jest.fn(),
 	};
 } );
 
@@ -144,6 +141,25 @@ describe( 'hasValidNotes', () => {
 	} );
 } );
 
+describe( 'inbox_panel_view_event', () => {
+	test( 'should fire when panel rendered', () => {
+		useSelect.mockImplementation( () => ( {
+			notes,
+			isError: false,
+			notesHaveResolved: true,
+			isBatchUpdating: false,
+		} ) );
+		InboxNoteCard.mockImplementation( ( { note } ) => {
+			return <div>{ note.id }</div>;
+		} );
+		render( <InboxPanel /> );
+
+		expect( recordEvent ).toHaveBeenCalledWith( 'inbox_panel_view', {
+			total: 5,
+		} );
+	} );
+} );
+
 describe( 'inbox_note_view event', () => {
 	test( 'should fire when inbox note card calls onNoteVisible', () => {
 		notes.forEach( ( note ) => ( note.is_deleted = false ) );
@@ -153,31 +169,47 @@ describe( 'inbox_note_view event', () => {
 			notesHaveResolved: true,
 			isBatchUpdating: false,
 		} ) );
+		InboxNoteCard.mockImplementation( ( { onNoteVisible, note } ) => {
+			useEffect( () => onNoteVisible( note ), [] );
+			return <div>{ note.id }</div>;
+		} );
 		render( <InboxPanel /> );
-		for ( let i = 0; i < notes.length; i++ ) {
+		notes.forEach( ( note ) => {
 			expect( recordEvent ).toHaveBeenCalledWith( 'inbox_note_view', {
-				note_content: notes[ i ].content,
-				note_name: notes[ i ].name,
-				note_title: notes[ i ].title,
-				note_type: notes[ i ].type,
+				note_content: note.content,
+				note_name: note.name,
+				note_title: note.title,
+				note_type: note.type,
 				screen: '',
 			} );
-		}
+		} );
 	} );
 } );
 
-describe( 'inbox_panel_view_event', () => {
-	test( 'should fire when panel rendered', () => {
+describe( 'inbox_action_click event', () => {
+	test( 'should fire tracks event when inboxNoteCard fires onBodyLinkClick', () => {
 		useSelect.mockImplementation( () => ( {
 			notes,
 			isError: false,
 			notesHaveResolved: true,
 			isBatchUpdating: false,
 		} ) );
-		render( <InboxPanel /> );
-
-		expect( recordEvent ).toHaveBeenCalledWith( 'inbox_panel_view', {
-			total: 5,
+		InboxNoteCard.mockImplementation( ( { onBodyLinkClick, note } ) => {
+			return (
+				<button onClick={ () => onBodyLinkClick( note, 'innerLink' ) }>
+					Trigger action
+				</button>
+			);
+		} );
+		const { getAllByText } = render( <InboxPanel /> );
+		const buttons = getAllByText( 'Trigger action' );
+		buttons.forEach( ( button ) => userEvent.click( button ) );
+		notes.forEach( ( note ) => {
+			expect( recordEvent ).toHaveBeenCalledWith( 'inbox_action_click', {
+				note_name: note.name,
+				note_title: note.title,
+				note_content_inner_link: 'innerLink',
+			} );
 		} );
 	} );
 } );
