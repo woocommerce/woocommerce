@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { decodeEntities } from '@wordpress/html-entities';
-
+import { Country } from '@woocommerce/data';
 function decodeHtml( content: string ) {
 	if ( ! content ) {
 		return '';
@@ -13,14 +13,6 @@ function decodeHtml( content: string ) {
 /**
  * Type definitions
  */
-export type Country = {
-	code: string;
-	name: string;
-	states: {
-		code: string;
-		name: string;
-	}[];
-};
 
 type CountryStateOption = {
 	key: string;
