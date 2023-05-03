@@ -85,7 +85,7 @@ class WC_Site_Tracking {
 			window._tkq = window._tkq || [];
 
 			<?php if ( 'anon' !== $tracks_identity['_ut'] ) { ?>
-			window._tkq.push( [ 'identifyUser', '<?php echo $tracks_identity['_ui']; ?>' ] );
+			window._tkq.push( [ 'identifyUser', '<?php echo esc_js( $tracks_identity['_ui'] ); ?>' ] );
 			<?php } ?>
 			window.wcTracks.validateEvent = function( eventName, props = {} ) {
 				let isValid = true;
