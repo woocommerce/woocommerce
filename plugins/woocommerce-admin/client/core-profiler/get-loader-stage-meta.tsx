@@ -16,7 +16,7 @@ export const getLoaderStageMeta = ( key: string ): Stages => {
 			return [
 				{
 					title: __( 'Turning on the lights', 'woocommerce' ),
-					image: <img src={ LightBulb } />,
+					image: <img src={ LightBulb } alt="loader-lightbulb" />,
 					paragraphs: [
 						{
 							label: __( '#FunWooFact: ', 'woocommerce' ),
