@@ -916,7 +916,7 @@
               // Wait a frame: every opacity change before this.offsetWidth does NOT get
               // animated; but every opacity change after this.offsetWidth gets animated
               this.offsetWidth;
-              if (index === slider.currentSlide && fadeFirstSlide) style.opacity = 1;
+              if (index === slider.currentSlide && fadeFirstSlide) style.opacity = 1; // fadeIn
 
               style.transition = "opacity " + slider.vars.animationSpeed / 1000 + "s " + easing;
             });
