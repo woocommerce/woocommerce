@@ -73,7 +73,7 @@ export function Edit( {
 
 	const regularPriceValidationError = useValidation(
 		'product/regular_price',
-		function nameValidator() {
+		function regularPriceValidator() {
 			const listPrice = Number.parseFloat( regularPrice );
 			if ( listPrice ) {
 				if ( listPrice < 0 ) {

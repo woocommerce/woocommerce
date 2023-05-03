@@ -53,7 +53,7 @@ export function Edit( {
 
 	const salePriceValidationError = useValidation(
 		'product/sale_price',
-		function nameValidator() {
+		function salePriceValidator() {
 			if ( salePrice ) {
 				if ( Number.parseFloat( salePrice ) < 0 ) {
 					return __(
