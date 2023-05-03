@@ -186,6 +186,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 			invoke: [
 				{
 					src: 'getAllowTrackingOption',
+					// eslint-disable-next-line xstate/no-ondone-outside-compound-state -- The invoke.onDone property refers to the invocation (invoke.src) being done, not the onDone property on a state node.
 					onDone: [
 						{
 							actions: [ 'handleTrackingOption' ],
