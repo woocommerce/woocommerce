@@ -16,7 +16,6 @@ export const getLoaderStageMeta = ( key: string ): Stages => {
 			return [
 				{
 					title: __( 'Turning on the lights', 'woocommerce' ),
-					progress: 80,
 					image: <img src={ LightBulb } />,
 					paragraphs: [
 						{

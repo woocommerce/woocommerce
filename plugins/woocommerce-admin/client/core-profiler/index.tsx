@@ -84,6 +84,7 @@ export type CoreProfilerStateMachineContext = {
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
 	loader: {
+		progress?: number;
 		className?: string;
 		useStages?: string;
 		stageIndex?: number;
@@ -194,6 +195,12 @@ const updateTrackingOption = (
 	const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
 	dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_allow_tracking: trackingValue,
+	} );
+};
+
+const promiseDelay = ( milliseconds: number ) => {
+	return new Promise( ( resolve ) => {
+		setTimeout( resolve, milliseconds );
 	} );
 };
 
@@ -377,15 +384,37 @@ const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		postSkipFlowBusinessLocation: {
-			invoke: {
-				src: () => {
-					// show the loader for 3 seconds
-					return new Promise( ( resolve ) => {
-						setTimeout( resolve, 3000 );
-					} );
+			initial: 'progress20',
+			states: {
+				progress20: {
+					entry: assign( {
+						loader: {
+							progress: 20,
+						},
+					} ),
+					invoke: {
+						src: () => {
+							return promiseDelay( 1500 );
+						},
+						onDone: {
+							target: 'progress80',
+						},
+					},
 				},
-				onDone: {
-					actions: [ 'redirectToWooHome' ],
+				progress80: {
+					entry: assign( {
+						loader: {
+							progress: 80,
+						},
+					} ),
+					invoke: {
+						src: () => {
+							return promiseDelay( 1500 );
+						},
+						onDone: {
+							actions: [ 'redirectToWooHome' ],
+						},
+					},
 				},
 			},
 			meta: {

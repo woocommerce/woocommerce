@@ -12,7 +12,6 @@ import { getLoaderStageMeta } from '../get-loader-stage-meta';
 
 export type Stage = {
 	title: string;
-	progress?: number;
 	image?: string | JSX.Element;
 	paragraphs: Array< {
 		label: string;
@@ -58,7 +57,7 @@ export const Loader = ( {
 			</h1>
 			<ProgressBar
 				className={ 'progress-bar' }
-				percent={ currentStage.progress ?? 0 }
+				percent={ context.loader.progress ?? 0 }
 				color={ 'var(--wp-admin-theme-color)' }
 				bgcolor={ '#E0E0E0' }
 			/>
