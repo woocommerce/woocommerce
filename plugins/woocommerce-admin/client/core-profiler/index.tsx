@@ -11,7 +11,7 @@ import { getSetting } from '@woocommerce/settings';
 import { initializeExPlat } from '@woocommerce/explat';
 
 /**
- * Internal dependencies
+ * Internal dependencies test
  */
 import { IntroOptIn } from './pages/IntroOptIn';
 import { UserProfile } from './pages/UserProfile';
