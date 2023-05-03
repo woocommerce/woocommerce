@@ -31,6 +31,54 @@ const gitCheckoutRemoteBranch = async ( gitInstance, newBranch ) => {
 	] );
 };
 
+const updateReleaseBranchChangelogs = async (
+	git,
+	releaseBranch,
+	tmpRepoPath,
+	version
+) => {
+	await gitCheckoutRemoteBranch( git, releaseBranch );
+
+	await git.checkout( {
+		'-b': null,
+		[ `update/${ version }-changelog` ]: null,
+	} );
+
+	Logger.notice( `Running the changelog script in ${ tmpRepoPath }` );
+	execSync(
+		`pnpm --filter=woocommerce run changelog write --add-pr-num -n -vvv --use-version ${ version }`,
+		{
+			cwd: tmpRepoPath,
+			stdio: 'inherit',
+		}
+	);
+
+	//Checkout pnpm-lock.yaml to prevent issues in case of an out of date lockfile.
+	await git.checkout( 'pnpm-lock.yaml' );
+
+	Logger.notice( `Committing deleted files in ${ tmpRepoPath }` );
+
+	await git.add( 'plugins/woocommerce/changelog/' );
+	await git.commit( `Delete changelog files from ${ version } release` );
+
+	const deletionCommitHash = await git.raw( [ 'rev-parse', 'HEAD' ] );
+	Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
+
+	// Do readme.txt changes
+	Logger.notice( `Updating readme.txt in ${ tmpRepoPath }` );
+	execSync( 'php .github/workflows/scripts/release-changelog.php', {
+		cwd: tmpRepoPath,
+		stdio: 'inherit',
+	} );
+	await git.add( 'plugins/woocommerce/readme.txt' );
+	await git.commit( `Update the readme files for the ${ version } release` );
+	// Push changes here.
+	await git.checkout( '.' );
+	// Create PR here
+
+	return deletionCommitHash;
+};
+
 export const changelogCommand = new Command( 'changelog' )
 	.description( 'Create a new release branch' )
 	.option(
@@ -70,36 +118,16 @@ export const changelogCommand = new Command( 'changelog' )
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 
-		await gitCheckoutRemoteBranch( git, releaseBranch );
-
-		await git.checkout( {
-			'-b': null,
-			[ `update/${ version }-changelog` ]: null,
-		} );
-
 		// Logger.notice( `Installing dependencies in ${ tmpRepoPath }` );
 		// execSync( 'pnpm install --filter woocommerce', {
 		// 	cwd: tmpRepoPath,
 		// 	stdio: 'inherit',
 		// } );
 
-		Logger.notice( `Running the changelog script in ${ tmpRepoPath }` );
-		execSync(
-			`pnpm --filter=woocommerce run changelog write --add-pr-num -n -vvv --use-version ${ version }`,
-			{
-				cwd: tmpRepoPath,
-				stdio: 'inherit',
-			}
+		const deletionCommitHash = await updateReleaseBranchChangelogs(
+			git,
+			releaseBranch,
+			tmpRepoPath,
+			version
 		);
-
-		//Checkout pnpm-lock.yaml to prevent issues in case of an out of date lockfile.
-		await git.checkout( 'pnpm-lock.yaml' );
-
-		Logger.notice( `Committing deleted files in ${ tmpRepoPath }` );
-
-		await git.add( 'plugins/woocommerce/changelog/' );
-		await git.commit( `Delete changelog files from ${ version } release` );
-
-		const deletionCommitHash = await git.raw( [ 'rev-parse', 'HEAD' ] );
-		Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
 	} );
