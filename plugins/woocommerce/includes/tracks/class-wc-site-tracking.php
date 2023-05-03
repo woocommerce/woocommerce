@@ -64,9 +64,9 @@ class WC_Site_Tracking {
 	 * Adds the tracking function to the admin footer.
 	 */
 	public static function add_tracking_function() {
-		$user           = wp_get_current_user();
-		$server_details = WC_Tracks::get_server_details();
-		$blog_details   = WC_Tracks::get_blog_details( $user->ID );
+		$user            = wp_get_current_user();
+		$server_details  = WC_Tracks::get_server_details();
+		$blog_details    = WC_Tracks::get_blog_details( $user->ID );
 		$tracks_identity = WC_Tracks_Client::get_identity( $user->ID );
 
 		$client_tracking_properties = array_merge( $server_details, $blog_details );
