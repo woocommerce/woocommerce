@@ -405,6 +405,7 @@
 					$( this ).parent().find( '.wc-shipping-zone-method-description' ).remove();
 					$( this ).after( '<div class="wc-shipping-zone-method-description">' + description + '</div>' );
 					$( this ).closest( 'article' ).height( $( this ).parent().height() );
+					$( this ).closest( 'article' ).width( $( this ).parent().width() );
 				},
 				onTogglePostcodes: function( event ) {
 					event.preventDefault();
