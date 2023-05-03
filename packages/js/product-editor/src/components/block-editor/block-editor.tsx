@@ -18,7 +18,6 @@ import {
 	BlockTools,
 	EditorSettings,
 	EditorBlockListSettings,
-	WritingFlow,
 	ObserveTyping,
 } from '@wordpress/block-editor';
 // It doesn't seem to notice the External dependency block whn @ts-ignore is added.
@@ -106,11 +105,9 @@ export function BlockEditor( {
 						{ /* @ts-ignore No types for this exist yet. */ }
 						<BlockEditorKeyboardShortcuts.Register />
 						<BlockTools>
-							<WritingFlow>
-								<ObserveTyping>
-									<BlockList className="woocommerce-product-block-editor__block-list" />
-								</ObserveTyping>
-							</WritingFlow>
+							<ObserveTyping>
+								<BlockList className="woocommerce-product-block-editor__block-list" />
+							</ObserveTyping>
 						</BlockTools>
 					</div>
 				</BlockEditorProvider>
