@@ -67,7 +67,7 @@ class WC_Site_Tracking {
 		$user           = wp_get_current_user();
 		$server_details = WC_Tracks::get_server_details();
 		$blog_details   = WC_Tracks::get_blog_details( $user->ID );
-		$tracks_identity = WC_Tracks_Client::get_identity( $user->ID);
+		$tracks_identity = WC_Tracks_Client::get_identity( $user->ID );
 
 		$client_tracking_properties = array_merge( $server_details, $blog_details );
 		/**
@@ -84,8 +84,8 @@ class WC_Site_Tracking {
 			window.wcTracks.isEnabled = <?php echo self::is_tracking_enabled() ? 'true' : 'false'; ?>;
 			window._tkq = window._tkq || [];
 
-			<?php if ( $tracks_identity['_ut'] !== 'anon' ) { ?>
-			window._tkq.push( [ 'identifyUser', '<?= $tracks_identity['_ui'] ?>' ] );
+			<?php if ( 'anon' !== $tracks_identity['_ut'] ) { ?>
+			window._tkq.push( [ 'identifyUser', '<?php echo $tracks_identity['_ui']; ?>' ] );
 			<?php } ?>
 			window.wcTracks.validateEvent = function( eventName, props = {} ) {
 				let isValid = true;
