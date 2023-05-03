@@ -56,6 +56,7 @@ export const SelectTree = function SelectTree( {
 
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ isOpen, setIsOpen ] = useState( false );
+	const isReadOnly = ! isOpen;
 
 	return (
 		<div
@@ -66,6 +67,7 @@ export const SelectTree = function SelectTree( {
 				className={ classNames(
 					'woocommerce-experimental-select-control',
 					{
+						'is-read-only': isReadOnly,
 						'is-focused': isFocused,
 					}
 				) }
@@ -130,7 +132,7 @@ export const SelectTree = function SelectTree( {
 					suffix={ suffix }
 				>
 					<SelectedItems
-						isReadOnly={ ! isOpen }
+						isReadOnly={ isReadOnly }
 						items={ ( props.selected as Item[] ) || [] }
 						getItemLabel={ ( item ) => item?.label || '' }
 						getItemValue={ ( item ) => item?.value || '' }

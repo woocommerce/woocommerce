@@ -236,10 +236,12 @@ function SelectControl< ItemType = DefaultItemType >( {
 		onRemove( item );
 	};
 
+	const isReadOnly = ! isOpen;
+
 	const selectedItemTags = multiple ? (
 		<SelectedItems
 			items={ selectedItems }
-			isReadOnly={ ! isOpen }
+			isReadOnly={ isReadOnly }
 			getItemLabel={ getItemLabel }
 			getItemValue={ getItemValue }
 			getSelectedItemProps={ getSelectedItemProps }
@@ -253,6 +255,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 				'woocommerce-experimental-select-control',
 				className,
 				{
+					'is-read-only': isReadOnly,
 					'is-focused': isFocused,
 				}
 			) }
