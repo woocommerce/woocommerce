@@ -10,6 +10,7 @@ import {
 	ExtensionList,
 	OPTIONS_STORE_NAME,
 	COUNTRIES_STORE_NAME,
+	Country,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
@@ -22,7 +23,7 @@ import { IntroOptIn } from './pages/IntroOptIn';
 import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
-import { getCountryStateOptions, Country } from './services/country';
+import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
 
 import './style.scss';
@@ -231,20 +232,6 @@ const coreProfilerStateMachineDefinition = createMachine( {
 				{
 					src: 'getAllowTrackingOption',
 					// eslint-disable-next-line xstate/no-ondone-outside-compound-state -- The invoke.onDone property refers to the invocation (invoke.src) being done, not the onDone property on a state node.
-					onDone: [
-						{
-							actions: [ 'handleTrackingOption' ],
-							target: 'introOptIn',
-						},
-					],
-					onError: {
-						target: 'introOptIn', // leave it as initialised default on error
-					},
-				},
-			},
-			invoke: [
-				{
-					src: 'getAllowTrackingOption',
 					onDone: [
 						{
 							actions: [ 'handleTrackingOption' ],
