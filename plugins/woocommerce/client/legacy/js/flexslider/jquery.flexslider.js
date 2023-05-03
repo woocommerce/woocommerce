@@ -902,16 +902,17 @@
           if (!touch) {
             //slider.slides.eq(slider.currentSlide).fadeIn(slider.vars.animationSpeed, slider.vars.easing);
             var fadeFirstSlide = slider.vars.fadeFirstSlide;
+
             slider.slides.each(function(index) {
               var style = this.style;
               style.display = "block";
 
               if (index === slider.currentSlide) {
-                style.zIndex = 2;
                 style.opacity = fadeFirstSlide ? 0 : 1;
+                style.zIndex = 2;
               } else {
-                style.zIndex = 1;
                 style.opacity = 0;
+                style.zIndex = 1;
               }
 
               // Wait a frame: every opacity change before this.offsetWidth does NOT get
