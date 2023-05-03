@@ -145,7 +145,7 @@ function getPaymentGatewaySuggestions( props ) {
 			link: 'https://woocommerce.com/document/klarna-payments/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.payfast && {
-			title: __( 'PayFast Setup and Configuration', 'woocommerce' ),
+			title: __( 'Payfast Setup and Configuration', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/payfast-payment-gateway/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.eway && {
