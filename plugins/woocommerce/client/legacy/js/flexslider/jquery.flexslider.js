@@ -726,9 +726,7 @@
           if (!touch) {
             // Unbind previous transitionEnd events and re-bind new transitionEnd event
             slider.slides.eq(slider.currentSlide).off("transitionend");
-            slider.slides.eq(target).on("transitionend", function() {
-              slider.wrapup(dimension);
-            });
+            slider.slides.eq(target).on("transitionend", () => slider.wrapup(dimension));
           } else {
             slider.wrapup(dimension);
           }
