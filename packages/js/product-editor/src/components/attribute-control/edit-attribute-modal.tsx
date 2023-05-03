@@ -8,7 +8,7 @@ import {
 	CheckboxControl,
 	TextControl,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useState, createElement } from '@wordpress/element';
 import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
 
 /**
@@ -19,8 +19,6 @@ import {
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
-
-import './edit-attribute-modal.scss';
 
 type EditAttributeModalProps = {
 	title?: string;

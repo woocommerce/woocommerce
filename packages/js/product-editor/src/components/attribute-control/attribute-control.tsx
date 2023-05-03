@@ -2,32 +2,32 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import {
+	useState,
+	createElement,
+	Fragment,
+	createInterpolateElement,
+} from '@wordpress/element';
+import { Button } from '@wordpress/components';
 import { ProductAttribute } from '@woocommerce/data';
 import {
 	Sortable,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 	Link,
 } from '@woocommerce/components';
-import interpolateComponents from '@automattic/interpolate-components';
 import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import './attribute-field.scss';
 import { EditAttributeModal } from './edit-attribute-modal';
-import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
+import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import {
 	getAttributeId,
 	getAttributeKey,
 	reorderSortableProductAttributePositions,
 } from './utils';
-import { AttributeEmptyState } from '../attribute-empty-state';
-import {
-	AttributeListItem,
-	NewAttributeListItem,
-} from '../attribute-list-item';
+import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
 
 type AttributeControlProps = {
@@ -67,9 +67,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	uiStrings = {
 		newAttributeModalTitle: undefined,
 		emptyStateSubtitle: undefined,
-		newAttributeListItemLabel: undefined,
+		newAttributeListItemLabel: __( 'Add attributes', 'woocommerce' ),
 		globalAttributeHelperMessage: __(
-			`You can change the attribute's name in {{link}}Attributes{{/link}}.`,
+			`You can change the attribute's name in <link>Attributes</link>.`,
 			'woocommerce'
 		),
 	},
@@ -160,30 +160,6 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		closeEditModal( updatedAttribute );
 	};
 
-	if ( ! value.length ) {
-		return (
-			<>
-				<AttributeEmptyState
-					addNewLabel={ uiStrings.newAttributeModalTitle }
-					onNewClick={ () => openNewModal() }
-					subtitle={ uiStrings.emptyStateSubtitle }
-				/>
-				{ isNewModalVisible && (
-					<NewAttributeModal
-						onCancel={ () => {
-							closeNewModal();
-							onNewModalCancel();
-						} }
-						onAdd={ handleAdd }
-						selectedAttributeIds={ [] }
-						title={ uiStrings.newAttributeModalTitle }
-					/>
-				) }
-				<SelectControlMenuSlot />
-			</>
-		);
-	}
-
 	const sortedAttributes = value.sort( ( a, b ) => a.position - b.position );
 
 	const attributeKeyValues = value.reduce(
@@ -203,37 +179,44 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	return (
 		<div className="woocommerce-attribute-field">
-			<Sortable
-				onOrderChange={ ( items ) => {
-					const itemPositions = items.reduce(
-						( positions, { props }, index ) => {
-							positions[ getAttributeKey( props.attribute ) ] =
-								index;
-							return positions;
-						},
-						{} as Record< number | string, number >
-					);
-					onChange(
-						reorderSortableProductAttributePositions(
-							itemPositions,
-							attributeKeyValues
-						)
-					);
-				} }
+			<Button
+				variant="secondary"
+				className="woocommerce-add-attribute-list-item__add-button"
+				onClick={ openNewModal }
 			>
-				{ sortedAttributes.map( ( attr ) => (
-					<AttributeListItem
-						attribute={ attr }
-						key={ getAttributeId( attr ) }
-						onEditClick={ () => openEditModal( attr ) }
-						onRemoveClick={ () => handleRemove( attr ) }
-					/>
-				) ) }
-			</Sortable>
-			<NewAttributeListItem
-				label={ uiStrings.newAttributeListItemLabel }
-				onClick={ () => openNewModal() }
-			/>
+				{ uiStrings.newAttributeListItemLabel }
+			</Button>
+			{ Boolean( value.length ) && (
+				<Sortable
+					onOrderChange={ ( items ) => {
+						const itemPositions = items.reduce(
+							( positions, { props }, index ) => {
+								positions[
+									getAttributeKey( props.attribute )
+								] = index;
+								return positions;
+							},
+							{} as Record< number | string, number >
+						);
+						onChange(
+							reorderSortableProductAttributePositions(
+								itemPositions,
+								attributeKeyValues
+							)
+						);
+					} }
+				>
+					{ sortedAttributes.map( ( attr ) => (
+						<AttributeListItem
+							attribute={ attr }
+							key={ getAttributeId( attr ) }
+							onEditClick={ () => openEditModal( attr ) }
+							onRemoveClick={ () => handleRemove( attr ) }
+						/>
+					) ) }
+				</Sortable>
+			) }
+
 			{ isNewModalVisible && (
 				<NewAttributeModal
 					title={ uiStrings.newAttributeModalTitle }
@@ -253,9 +236,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						__( 'Edit %s', 'woocommerce' ),
 						currentAttribute.name
 					) }
-					globalAttributeHelperMessage={ interpolateComponents( {
-						mixedString: uiStrings.globalAttributeHelperMessage,
-						components: {
+					globalAttributeHelperMessage={ createInterpolateElement(
+						uiStrings.globalAttributeHelperMessage,
+						{
 							link: (
 								<Link
 									href={ getAdminLink(
@@ -267,8 +250,8 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 									<></>
 								</Link>
 							),
-						},
-					} ) }
+						}
+					) }
 					onCancel={ () => {
 						closeEditModal( currentAttribute );
 						onEditModalCancel( currentAttribute );

@@ -1,5 +1,6 @@
 .woocommerce-attribute-field {
 	width: 100%;
+	font-size: 13px;
 
 	.woocommerce-sortable {
 		margin: 0;
@@ -11,5 +12,24 @@
 	.woocommerce-sortable__item:focus-visible:not(:active) + .woocommerce-sortable__item .woocommerce-attribute-list-item {
 		background: none;
 		border-top: 0;
+	}
+
+	.woocommerce-add-attribute-list-item__add-button {
+		margin-bottom: $gap;
+	}
+
+}
+
+.wp-block-woocommerce-product-attributes-field {
+
+	.woocommerce-sortable {
+		padding: 0;
+	}
+
+	.woocommerce-list-item {
+		background: none;
+		border: none;
+		border-bottom: 1px solid $gray-200;
+		padding-left: 0;
 	}
 }

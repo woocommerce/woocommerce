@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { render, act, screen } from '@testing-library/react';
-import { useState, useEffect } from '@wordpress/element';
+import {
+	useState,
+	useEffect,
+	createElement,
+	Fragment,
+} from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
 
 /**
@@ -108,12 +113,11 @@ describe( 'AttributeControl', () => {
 	} );
 
 	describe( 'empty state', () => {
-		it( 'should show subtitle and "Add first attribute" button', () => {
+		it( 'should show subtitle and "Add attributes" button', () => {
 			const { queryByText } = render(
 				<AttributeControl value={ [] } onChange={ () => {} } />
 			);
-			expect( queryByText( 'No attributes yet' ) ).toBeInTheDocument();
-			expect( queryByText( 'Add first attribute' ) ).toBeInTheDocument();
+			expect( queryByText( 'Add attributes' ) ).toBeInTheDocument();
 		} );
 	} );
 
@@ -166,7 +170,7 @@ describe( 'AttributeControl', () => {
 
 	describe( 'deleting', () => {
 		it( 'should show a window confirm when trash icon is clicked', async () => {
-			jest.spyOn( global, 'confirm' ).mockReturnValueOnce( false );
+			jest.spyOn( globalThis, 'confirm' ).mockReturnValueOnce( false );
 			act( () => {
 				render(
 					<AttributeControl
@@ -178,11 +182,11 @@ describe( 'AttributeControl', () => {
 			(
 				await screen.findAllByLabelText( 'Remove attribute' )
 			 )[ 0 ].click();
-			expect( global.confirm ).toHaveBeenCalled();
+			expect( globalThis.confirm ).toHaveBeenCalled();
 		} );
 
 		it( 'should trigger onChange with removed item when user clicks ok on alert', async () => {
-			jest.spyOn( global, 'confirm' ).mockReturnValueOnce( true );
+			jest.spyOn( globalThis, 'confirm' ).mockReturnValueOnce( true );
 			const onChange = jest.fn();
 
 			act( () => {
@@ -198,12 +202,12 @@ describe( 'AttributeControl', () => {
 				await screen.findAllByLabelText( 'Remove attribute' )
 			 )[ 0 ].click();
 
-			expect( global.confirm ).toHaveBeenCalled();
+			expect( globalThis.confirm ).toHaveBeenCalled();
 			expect( onChange ).toHaveBeenCalledWith( [ attributeList[ 1 ] ] );
 		} );
 
 		it( 'should not trigger onChange with removed item when user cancel', async () => {
-			jest.spyOn( global, 'confirm' ).mockReturnValueOnce( false );
+			jest.spyOn( globalThis, 'confirm' ).mockReturnValueOnce( false );
 			const onChange = jest.fn();
 			act( () => {
 				render(
@@ -216,14 +220,14 @@ describe( 'AttributeControl', () => {
 			(
 				await screen.findAllByLabelText( 'Remove attribute' )
 			 )[ 0 ].click();
-			expect( global.confirm ).toHaveBeenCalled();
+			expect( globalThis.confirm ).toHaveBeenCalled();
 			expect( onChange ).not.toHaveBeenCalled();
 		} );
 	} );
 
 	describe( 'dragging', () => {
 		it.skip( 'should trigger onChange with new order when onOrderChange triggered', async () => {
-			jest.spyOn( global, 'confirm' ).mockReturnValueOnce( true );
+			jest.spyOn( globalThis, 'confirm' ).mockReturnValueOnce( true );
 			const onChange = jest.fn();
 
 			act( () => {

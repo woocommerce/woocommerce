@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { ListItem } from '@woocommerce/components';
+import { createElement } from '@wordpress/element';
 
 type NewAttributeListItemProps = {
 	label?: string;

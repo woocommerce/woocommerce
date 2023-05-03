@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, createElement, Fragment } from '@wordpress/element';
 import { trash } from '@wordpress/icons';
 import {
 	Form,
@@ -20,13 +20,12 @@ import {
 /**
  * Internal dependencies
  */
-import './new-attribute-modal.scss';
 import { AttributeInputField } from '../attribute-input-field';
 import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
-import { EnhancedProductAttribute } from '~/products/hooks/use-product-attributes';
+import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import { getProductAttributeObject } from './utils';
 
 type NewAttributeModalProps = {

@@ -7,11 +7,7 @@ import { ProductAttribute } from '@woocommerce/data';
 import { sprintf, __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { closeSmall } from '@wordpress/icons';
-
-/**
- * Internal dependencies
- */
-import './attribute-list-item.scss';
+import { createElement } from '@wordpress/element';
 
 type AttributeListItemProps = {
 	attribute: ProductAttribute;

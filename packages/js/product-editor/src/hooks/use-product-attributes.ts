@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { sift } from '../../utils';
+import { sift } from '../utils';
 
 type useProductAttributesProps = {
 	allAttributes: ProductAttribute[];

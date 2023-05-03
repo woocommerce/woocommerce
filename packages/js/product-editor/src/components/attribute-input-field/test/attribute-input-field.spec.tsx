@@ -3,7 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useState, createElement } from '@wordpress/element';
 import { ProductAttribute, QueryProductAttribute } from '@woocommerce/data';
 
 /**
