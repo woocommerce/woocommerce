@@ -33,9 +33,9 @@ const gitCheckoutRemoteBranch = async ( gitInstance, newBranch ) => {
 
 const updateReleaseBranchChangelogs = async (
 	git,
-	releaseBranch,
 	tmpRepoPath,
-	version
+	version,
+	releaseBranch
 ) => {
 	await gitCheckoutRemoteBranch( git, releaseBranch );
 
@@ -76,7 +76,24 @@ const updateReleaseBranchChangelogs = async (
 	await git.checkout( '.' );
 	// Create PR here
 
-	return deletionCommitHash;
+	return deletionCommitHash.trim();
+};
+
+const updateTrunkChangelog = async (
+	git,
+	tmpRepoPath,
+	version,
+	deletionCommitHash
+) => {
+	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
+	await git.checkout( 'trunk' );
+	await git.checkout( {
+		'-b': null,
+		[ `delete/${ version }-changelog` ]: null,
+	} );
+	await git.raw( [ 'cherry-pick', deletionCommitHash ] );
+	// push branch here
+	// create PR here
 };
 
 export const changelogCommand = new Command( 'changelog' )
@@ -126,8 +143,15 @@ export const changelogCommand = new Command( 'changelog' )
 
 		const deletionCommitHash = await updateReleaseBranchChangelogs(
 			git,
-			releaseBranch,
 			tmpRepoPath,
-			version
+			version,
+			releaseBranch
+		);
+
+		await updateTrunkChangelog(
+			git,
+			tmpRepoPath,
+			version,
+			deletionCommitHash
 		);
 	} );
