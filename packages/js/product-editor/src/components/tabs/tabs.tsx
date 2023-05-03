@@ -46,8 +46,7 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 			if ( fills[ i ][ 0 ].props.disabled ) {
 				continue;
 			}
-			// Remove the `.$` prefix on keys.  E.g., .$key => key
-			const tabId = fills[ i ][ 0 ].key?.toString().slice( 2 ) || null;
+			const tabId = fills[ i ][ 0 ].props?.children?.key || null;
 			setSelected( tabId );
 			return;
 		}
