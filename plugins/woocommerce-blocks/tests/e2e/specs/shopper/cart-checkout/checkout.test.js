@@ -46,6 +46,8 @@ describe( 'Shopper → Checkout', () => {
 	} );
 
 	describe( 'Local pickup', () => {
+		const NORMAL_SHIPPING_NAME = 'Normal Shipping';
+
 		beforeAll( async () => {
 			// Enable local pickup.
 			await visitAdminPage(
@@ -120,6 +122,58 @@ describe( 'Shopper → Checkout', () => {
 			await shopper.block.verifyBillingDetails(
 				BILLING_DETAILS,
 				'.woocommerce-customer-details address'
+			);
+		} );
+
+		it( 'Switching between local pickup and shipping does not affect the address', async () => {
+			await shopper.block.emptyCart();
+			await shopper.block.goToShop();
+			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await shopper.block.goToCheckout();
+			await expect( page ).toClick(
+				'.wc-block-checkout__shipping-method-option-title',
+				{
+					text: 'Local Pickup',
+				}
+			);
+			expect( page ).toMatch( 'Woo Collection' );
+			await shopper.block.fillBillingDetails( BILLING_DETAILS );
+
+			await expect( page ).toFill(
+				'input#email',
+				'thisShouldRemainHere@mail.com'
+			);
+
+			await expect( page ).toClick(
+				'.wc-block-checkout__shipping-method-option-title',
+				{
+					text: 'Shipping',
+				}
+			);
+
+			await page.waitForXPath(
+				`//div[contains(@class, "wc-block-components-totals-item__description")][contains(text(), "${ NORMAL_SHIPPING_NAME }")]`
+			);
+
+			const enteredEmail = await page.evaluate( () => {
+				return document.getElementById( 'email' ).value;
+			} );
+
+			expect( enteredEmail ).toEqual( 'thisShouldRemainHere@mail.com' );
+
+			await expect( page ).toFill(
+				'input#email',
+				'thisShouldRemainHereToo@mail.com'
+			);
+
+			await expect( page ).toFill( 'input#shipping-first_name', 'Test' );
+
+			const secondEnteredEmail = await page.evaluate( () => {
+				return document.getElementById( 'email' ).value;
+			} );
+
+			expect( secondEnteredEmail ).toEqual(
+				'thisShouldRemainHereToo@mail.com'
 			);
 		} );
 	} );
