@@ -81,7 +81,6 @@ class WC_Site_Tracking {
 		<!-- WooCommerce Tracks -->
 		<script type="text/javascript">
 			window.wcTracks = window.wcTracks || {};
-			window.wcTracks.isInitialized = false;
 			window.wcTracks.isEnabled = <?php echo self::is_tracking_enabled() ? 'true' : 'false'; ?>;
 			window._tkq = window._tkq || [];
 
