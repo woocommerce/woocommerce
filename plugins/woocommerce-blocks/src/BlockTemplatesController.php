@@ -116,7 +116,7 @@ class BlockTemplatesController {
 			return null;
 		}
 
-		if ( count( $posts ) > 0 ) {
+		if ( count( $posts ) > 0 && 'archive-product' === $posts[0]->post_name ) {
 			$template = _build_block_template_result_from_post( $posts[0] );
 
 			if ( ! is_wp_error( $template ) ) {
