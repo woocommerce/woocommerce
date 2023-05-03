@@ -1,13 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	Fragment,
-	useEffect,
-	useState,
-	Children,
-} from '@wordpress/element';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import { ReactElement } from 'react';
 import { NavigableMenu, Slot } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
