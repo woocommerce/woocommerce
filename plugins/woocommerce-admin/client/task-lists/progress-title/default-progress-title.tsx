@@ -55,7 +55,7 @@ export const DefaultProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
 				  )
 				: __( 'Welcome to your store', 'woocommerce' );
 		}
-		if ( completedCount > 0 && completedCount < 4 ) {
+		if ( completedCount <= 3 ) {
 			return __( "Let's get you started", 'woocommerce' ) + '   🚀';
 		}
 		if ( completedCount > 3 && completedCount < 6 ) {
