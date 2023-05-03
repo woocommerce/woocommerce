@@ -347,20 +347,18 @@ const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		preSkipFlowBusinessLocation: {
-			invoke: [
-				{
-					src: 'getCountries',
-					onDone: [
-						{
-							actions: [ 'handleCountries' ],
-							target: 'skipFlowBusinessLocation',
-						},
-					],
-					onError: {
+			invoke: {
+				src: 'getCountries',
+				onDone: [
+					{
+						actions: [ 'handleCountries' ],
 						target: 'skipFlowBusinessLocation',
 					},
+				],
+				onError: {
+					target: 'skipFlowBusinessLocation',
 				},
-			],
+			},
 		},
 		skipFlowBusinessLocation: {
 			on: {
