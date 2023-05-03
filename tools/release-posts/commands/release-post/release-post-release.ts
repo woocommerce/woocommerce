@@ -7,7 +7,7 @@ import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import {
-	cloneRepo,
+	cloneRepoShallow,
 	getCommitHash,
 } from '@woocommerce/monorepo-utils/src/core/git';
 import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
@@ -105,7 +105,7 @@ const program = new Command()
 		Logger.startTask( `Making temporary clone of ${ SOURCE_REPO }...` );
 		const currentParsed = semver.parse( currentVersion );
 		const previousParsed = semver.parse( previousVersion );
-		const tmpRepoPath = await cloneRepo( SOURCE_REPO );
+		const tmpRepoPath = await cloneRepoShallow( SOURCE_REPO );
 		Logger.endTask();
 		let currentBranch;
 		let previousBranch;

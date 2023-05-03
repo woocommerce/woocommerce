@@ -4,7 +4,7 @@
 import { join } from 'path';
 import { readFile } from 'fs/promises';
 import simpleGit from 'simple-git';
-import { cloneRepo } from '@woocommerce/monorepo-utils/src/core/git';
+import { cloneRepoShallow } from '@woocommerce/monorepo-utils/src/core/git';
 import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 import { Command } from '@commander-js/extra-typings';
 
@@ -62,7 +62,7 @@ const program = new Command()
 		const { source } = options;
 
 		Logger.startTask( `Making a temporary clone of '${ branch }'` );
-		const tmpRepoPath = await cloneRepo( source );
+		const tmpRepoPath = await cloneRepoShallow( source );
 		Logger.endTask();
 
 		const version = await getPluginData(

@@ -4,7 +4,7 @@
 import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 import { join } from 'path';
 import {
-	cloneRepo,
+	cloneRepoShallow,
 	generateDiff,
 } from '@woocommerce/monorepo-utils/src/core/git';
 import { readFile } from 'fs/promises';
@@ -33,7 +33,7 @@ const generateVersionDiff = async (
 	const tmpRepoPath =
 		typeof clonedPath !== 'undefined'
 			? clonedPath
-			: await cloneRepo( source );
+			: await cloneRepoShallow( source );
 
 	Logger.endTask();
 
@@ -148,7 +148,7 @@ export const scanForChanges = async (
 	const tmpRepoPath =
 		typeof clonedPath !== 'undefined'
 			? clonedPath
-			: await cloneRepo( source );
+			: await cloneRepoShallow( source );
 
 	Logger.endTask();
 
