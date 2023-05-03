@@ -72,8 +72,8 @@ class WebhookUtil {
 			$text = sprintf(
 				/* translators: 1 = user id, 2 = user login, 3 = webhooks count */
 				_nx(
-					'User #%1$s %2$s has created %3$d webhook.',
-					'User #%1$s %2$s has created %3$d webhooks.',
+					'User #%1$s %2$s has created %3$d WooCommerce webhook.',
+					'User #%1$s %2$s has created %3$d WooCommerce webhooks.',
 					$webhooks_count,
 					'user webhook count',
 					'woocommerce'
@@ -105,18 +105,18 @@ class WebhookUtil {
 		// phpcs:enable WooCommerce.Commenting.CommentHooks, WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( $users_have_content ) {
-			$text = __( 'If the "Delete all content" option is selected, the affected webhooks will <b>not</b> be deleted and will be attributed to user id 0.<br/>', 'woocommerce' );
+			$text = __( 'If the "Delete all content" option is selected, the affected WooCommerce webhooks will <b>not</b> be deleted and will be attributed to user id 0.<br/>', 'woocommerce' );
 		} else {
-			$text = __( 'The affected webhooks will <b>not</b> be deleted and will be attributed to user id 0.<br/>', 'woocommerce' );
+			$text = __( 'The affected WooCommerce webhooks will <b>not</b> be deleted and will be attributed to user id 0.<br/>', 'woocommerce' );
 		}
 
 		$text .= sprintf(
 			/* translators: 1 = url of the WooCommerce webhooks settings page */
-			__( 'After that they can be reassigned to the logged in user by going to the <a href="%1$s">webhooks settings page</a> and re-saving them.', 'woocommerce' ),
+			__( 'After that they can be reassigned to the logged-in user by going to the <a href="%1$s">WooCommerce webhooks settings page</a> and re-saving them.', 'woocommerce' ),
 			$webhooks_settings_url
 		);
 
-		echo '<p>' . esc_html( $text ) . '</p>';
+		echo '<p>' . wp_kses_post( $text ) . '</p>';
 	}
 
 	/**
