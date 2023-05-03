@@ -204,7 +204,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 		$nonce = wp_create_nonce( 'woocommerce_hide_notices_nonce' );
 
 		$this->assertStringContainsString( '<div class="notice notice-info is-dismissible">', $output );
-		$this->assertStringContainsString( '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews" class="button-primary">', $output );
+		$this->assertStringContainsString( '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews" class="button-primary">', $output );
 		$this->assertStringContainsString( '<button type="button" class="notice-dismiss" onclick="window.location = \'?wc-hide-notice=product_reviews_moved&#038;_wc_notice_nonce=' . $nonce . '\';">', $output );
 	}
 

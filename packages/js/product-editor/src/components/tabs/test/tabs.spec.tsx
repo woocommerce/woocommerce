@@ -11,7 +11,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { Tabs } from '../';
-import { Edit as Tab } from '../../tab/edit';
+import { Edit as Tab } from '../../../blocks/tab/edit';
 
 jest.mock( '@wordpress/block-editor', () => ( {
 	...jest.requireActual( '@wordpress/block-editor' ),

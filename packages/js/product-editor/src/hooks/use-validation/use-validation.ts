@@ -5,39 +5,46 @@ import { useDispatch } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 
 /**
+ * Internal dependencies
+ */
+import { ValidationError } from './types';
+
+/**
  * Signals that product saving is locked.
  *
  * @param  lockName The namespace used to lock the product saving if validation fails.
  * @param  validate The validator function.
+ * @return The error message.
  */
 export function useValidation(
 	lockName: string,
-	validate: () => boolean | Promise< boolean >
-): boolean | undefined {
-	const [ isValid, setIsValid ] = useState< boolean | undefined >();
+	validate: () => ValidationError | Promise< ValidationError >
+): ValidationError {
+	const [ validationError, setValidationError ] =
+		useState< ValidationError >();
 	const { lockPostSaving, unlockPostSaving } = useDispatch( 'core/editor' );
 
 	useEffect( () => {
 		let validationResponse = validate();
 
-		if ( typeof validationResponse === 'boolean' ) {
+		if ( ! ( validationResponse instanceof Promise ) ) {
 			validationResponse = Promise.resolve( validationResponse );
 		}
 
 		validationResponse
-			.then( ( isValidationValid ) => {
-				if ( isValidationValid ) {
-					unlockPostSaving( lockName );
-				} else {
+			.then( ( message ) => {
+				if ( message ) {
 					lockPostSaving( lockName );
+				} else {
+					unlockPostSaving( lockName );
 				}
-				setIsValid( isValidationValid );
+				setValidationError( message );
 			} )
-			.catch( () => {
+			.catch( ( error ) => {
 				lockPostSaving( lockName );
-				setIsValid( false );
+				setValidationError( error.message ?? error );
 			} );
 	}, [ lockName, validate, lockPostSaving, unlockPostSaving ] );
 
-	return isValid;
+	return validationError;
 }

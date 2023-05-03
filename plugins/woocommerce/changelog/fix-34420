@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+When creating default storefront pages, the site language (and not the language of the current user) should be used.

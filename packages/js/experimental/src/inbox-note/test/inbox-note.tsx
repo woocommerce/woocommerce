@@ -23,6 +23,8 @@ jest.mock( 'react-visibility-sensor', () =>
 	} )
 );
 
+window.open = jest.fn();
+
 describe( 'InboxNoteCard', () => {
 	const note = {
 		id: 1,

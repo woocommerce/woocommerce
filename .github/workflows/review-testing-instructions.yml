@@ -11,7 +11,25 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+
+      - name: Install Octokit
+        run: npm --prefix .github/workflows/scripts install @octokit/action
+
+      - name: Install Actions Core
+        run: npm --prefix .github/workflows/scripts install @actions/core
+
+      - name: Check if user is a community contributor
+        id: is-community-contributor
+        run: node .github/workflows/scripts/is-community-contributor.js
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Get the username of requested reviewers
+        if: steps.is-community-contributor.outputs.is-community == 'no'
         id: get_reviewer_username
         run: |
           # Retrieves the username of all reviewers and stores them in a comma-separated list
