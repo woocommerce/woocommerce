@@ -236,7 +236,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		onRemove( item );
 	};
 
-	const isReadOnly = ! isOpen;
+	const isReadOnly = ! isOpen && ! isFocused;
 
 	const selectedItemTags = multiple ? (
 		<SelectedItems

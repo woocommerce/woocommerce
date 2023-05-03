@@ -56,7 +56,7 @@ export const SelectTree = function SelectTree( {
 
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ isOpen, setIsOpen ] = useState( false );
-	const isReadOnly = ! isOpen;
+	const isReadOnly = ! isOpen && ! isFocused;
 
 	return (
 		<div
