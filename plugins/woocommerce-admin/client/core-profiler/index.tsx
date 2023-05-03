@@ -5,6 +5,7 @@ import { createMachine, assign, DoneInvokeEvent, actions } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
+import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import {
 	ExtensionList,
 	OPTIONS_STORE_NAME,
@@ -13,7 +14,6 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
 import { initializeExPlat } from '@woocommerce/explat';
-import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -139,11 +139,8 @@ const handleCountries = assign( {
 } );
 
 const redirectToWooHome = () => {
-	const homescreenUrl = new URL(
-		getNewPath( {}, '/', {} ),
-		window.location.href
-	).href;
-	window.location.href = homescreenUrl;
+	const url = new URL( getNewPath( {}, '/', {} ), window.location.href ).href;
+	navigateTo( { url } );
 };
 
 const recordTracksIntroCompleted = () => {
