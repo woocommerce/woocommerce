@@ -670,3 +670,33 @@ jobs:
                     -f env_description="${{ matrix.env_description }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
+
+    post-slack-summary:
+        name: Post Slack summary
+        needs: [get-tag, test-wp-versions]
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        env:
+            SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        steps:
+            - name: Post Slack summary
+              uses: slackapi/slack-github-action@v1.23.0
+              with:
+                  channel-id: 'D020PBQ5Q0G' # mytodo use channel id for release smoke tests
+                  payload: |
+                      {
+                        "blocks": [
+                          {
+                            "type": "divider"
+                          },
+                          {
+                            "type": "header",
+                            "text": {
+                              "type": "plain_text",
+                              "text": ":colorful-bar-chart: Test summary for ${{ needs.get-tag.outputs.tag }}",
+                              "emoji": true
+                            }
+                          }
+                        ]
+                      }
