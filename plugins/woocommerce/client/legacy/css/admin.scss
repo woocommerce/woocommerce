@@ -5505,13 +5505,15 @@ img.help_tip {
   * WooCommerce meta boxes
   */
 .wc-metaboxes-wrapper {
+	&:not(#variable_product_options_inner) {
+		> .toolbar:not(.expand-close-hidden) {
+		  border-bottom: 1px solid #eee;
+		}
+	  }
 	.toolbar {
 		margin: 0 !important;
 		border-top: 1px solid white;
 		padding: 9px 12px !important;
-		&:not(.expand-close-hidden) {
-			border-bottom: 1px solid #eee;
-		}
 
 		&:first-child {
 			border-top: 0;
