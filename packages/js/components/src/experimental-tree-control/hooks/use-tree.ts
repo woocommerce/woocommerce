@@ -23,7 +23,6 @@ export function useTree( {
 	onTreeBlur,
 	onCreateNew,
 	shouldShowCreateButton,
-	onFirstTreeItemBack,
 	...props
 }: TreeProps ) {
 	return {

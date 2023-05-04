@@ -111,7 +111,6 @@ export function useKeyboard( {
 	onCollapse,
 	onToggleExpand,
 	onLastItemLoop,
-	onFirstTreeItemBack,
 }: {
 	item: LinkedTree;
 	isExpanded: boolean;
@@ -119,7 +118,6 @@ export function useKeyboard( {
 	onCollapse(): void;
 	onToggleExpand(): void;
 	onLastItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
-	onFirstTreeItemBack?(): void;
 } ) {
 	function onKeyDown( event: React.KeyboardEvent< HTMLDivElement > ) {
 		if ( event.code === 'ArrowRight' ) {
@@ -173,13 +171,6 @@ export function useKeyboard( {
 			event.preventDefault();
 			const element = getLastFocusableElement( event.currentTarget );
 			element?.focus();
-		}
-
-		if ( event.shiftKey && event.code === 'Tab' && onFirstTreeItemBack ) {
-			if ( ! getNextFocusableElement( event.currentTarget, 'ArrowUp' ) ) {
-				event.preventDefault();
-				onFirstTreeItemBack();
-			}
 		}
 	}
 
