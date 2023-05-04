@@ -430,7 +430,7 @@ const attachAttributesTracks = () => {
 	addNewAttributeTermTracks();
 
 	document
-		.querySelector( '.add_attribute' )
+		.querySelector( '.add_custom_attribute' )
 		?.addEventListener( 'click', () => {
 			setTimeout( () => {
 				addNewAttributeTermTracks();
@@ -450,7 +450,7 @@ const attachProductAttributesTracks = () => {
 			} );
 		} );
 	document
-		.querySelector( '#product_attributes .add_attribute' )
+		.querySelector( '#product_attributes .add_custom_attribute' )
 		?.addEventListener( 'click', () => {
 			// We verify that we are not adding an existing attribute to not
 			// duplicate the recorded event.
