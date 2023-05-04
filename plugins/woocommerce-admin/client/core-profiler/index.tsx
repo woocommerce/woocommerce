@@ -141,8 +141,7 @@ const handleCountries = assign( {
 } );
 
 const redirectToWooHome = () => {
-	const url = new URL( getNewPath( {}, '/', {} ), window.location.href ).href;
-	navigateTo( { url } );
+	navigateTo( { url: getNewPath( {}, '/', {} ) } );
 };
 
 const recordTracksIntroCompleted = () => {
