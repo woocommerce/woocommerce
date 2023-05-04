@@ -139,6 +139,19 @@ const updateTrunkChangelog = async (
 	);
 };
 
+const clone = async ( options ) => {
+	const { owner, name } = options;
+	Logger.startTask( `Making a temporary clone of '${ owner }/${ name }'` );
+	const source = `github.com/${ owner }/${ name }`;
+	const token = getEnvVar( 'GITHUB_TOKEN' );
+	const remote = `https://${ owner }:${ token }@${ source }`;
+
+	// We need the full history here to get the changelog PRs.
+	const tmpRepoPath = await cloneRepoShallow( remote );
+	Logger.endTask();
+	return tmpRepoPath;
+};
+
 export const changelogCommand = new Command( 'changelog' )
 	.description( 'Create a new release branch' )
 	.option(
@@ -151,23 +164,14 @@ export const changelogCommand = new Command( 'changelog' )
 		'Repository name. Default: woocommerce',
 		'woocommerce'
 	)
+	.option(
+		'-d --devRepoPath <devRepoPath>',
+		'Path to existing repo. Use this option to avoid cloning a fresh repo and installing all the dependencies.'
+	)
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options ) => {
-		const { owner, name, version } = options;
-		const releaseBranch = `release/${ version }`;
-
-		// Logger.startTask(
-		// 	`Making a temporary clone of '${ owner }/${ name }'`
-		// );
-		// const source = `github.com/${ owner }/${ name }`;
-		// const token = getEnvVar( 'GITHUB_TOKEN' );
-		// const remote = `https://${ owner }:${ token }@${ source }`;
-
-		// // We need the full history here to get the changelog PRs.
-		// const tmpRepoPath = await cloneRepoShallow( remote );
-		// Logger.endTask();
-
-		const tmpRepoPath = '/Users/paulsealock/Workspace/tmp/woocommerce';
+		const { owner, name, version, devRepoPath } = options;
+		const tmpRepoPath = devRepoPath ? devRepoPath : await clone( options );
 
 		Logger.notice(
 			`Temporary clone of '${ owner }/${ name }' created at ${ tmpRepoPath }`
@@ -178,12 +182,15 @@ export const changelogCommand = new Command( 'changelog' )
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 
-		// Logger.notice( `Installing dependencies in ${ tmpRepoPath }` );
-		// execSync( 'pnpm install --filter woocommerce', {
-		// 	cwd: tmpRepoPath,
-		// 	stdio: 'inherit',
-		// } );
+		if ( ! devRepoPath ) {
+			Logger.notice( `Installing dependencies in ${ tmpRepoPath }` );
+			execSync( 'pnpm install --filter woocommerce', {
+				cwd: tmpRepoPath,
+				stdio: 'inherit',
+			} );
+		}
 
+		const releaseBranch = `release/${ version }`;
 		const deletionCommitHash = await updateReleaseBranchChangelogs(
 			git,
 			tmpRepoPath,
