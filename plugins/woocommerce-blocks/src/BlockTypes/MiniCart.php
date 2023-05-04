@@ -181,14 +181,12 @@ class MiniCart extends AbstractBlock {
 				);
 			}
 
-			$template_part_edit_uri = esc_url(
-				add_query_arg(
-					array(
-						'postId'   => sprintf( '%s//%s', $theme_slug, 'mini-cart' ),
-						'postType' => 'wp_template_part',
-					),
-					$site_editor_uri
-				)
+			$template_part_edit_uri = add_query_arg(
+				array(
+					'postId'   => sprintf( '%s//%s', $theme_slug, 'mini-cart' ),
+					'postType' => 'wp_template_part',
+				),
+				$site_editor_uri
 			);
 		}
 
