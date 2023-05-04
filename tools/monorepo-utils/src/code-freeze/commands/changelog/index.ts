@@ -49,8 +49,8 @@ export const changelogCommand = new Command( 'changelog' )
 
 		const releaseBranch = `release/${ version }`;
 		const deletionCommitHash = await updateReleaseBranchChangelogs(
+			options,
 			tmpRepoPath,
-			version,
 			releaseBranch
 		);
 

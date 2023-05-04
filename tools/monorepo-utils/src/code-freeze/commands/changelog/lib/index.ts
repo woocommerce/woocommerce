@@ -12,10 +12,11 @@ import { checkoutRemoteBranch } from '../../../../core/git';
 import { createPR } from '../../../../core/github/repo';
 
 export const updateReleaseBranchChangelogs = async (
+	options,
 	tmpRepoPath,
-	version,
 	releaseBranch
 ) => {
+	const { owner, name, version } = options;
 	await checkoutRemoteBranch( tmpRepoPath, releaseBranch );
 
 	const git = simpleGit( {
@@ -69,9 +70,9 @@ export const updateReleaseBranchChangelogs = async (
 	Logger.notice( `Creating PR for ${ branch }` );
 	createPR(
 		branch,
-		'trunk',
-		'psealock',
-		'woocommerce',
+		releaseBranch,
+		owner,
+		name,
 		`Update changelog for ${ version } release`,
 		'This is a body'
 	);
@@ -80,10 +81,11 @@ export const updateReleaseBranchChangelogs = async (
 };
 
 export const updateTrunkChangelog = async (
+	options,
 	tmpRepoPath,
-	version,
 	deletionCommitHash
 ) => {
+	const { owner, name, version } = options;
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
@@ -103,8 +105,8 @@ export const updateTrunkChangelog = async (
 	createPR(
 		branch,
 		'trunk',
-		'psealock',
-		'woocommerce',
+		owner,
+		name,
 		`Delete changelog for ${ version } release`,
 		'This is a body'
 	);
