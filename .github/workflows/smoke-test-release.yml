@@ -372,6 +372,7 @@ jobs:
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.API_WP_LATEST_X_ARTIFACT }}
+                  # mytodo re-run all tests
                   tests: hello
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
@@ -498,6 +499,7 @@ jobs:
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.API_ARTIFACT }}
+                  # mytodo re-enable all tests
                   tests: hello
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
