@@ -40,7 +40,6 @@ export function getCountryStateOptions(
 	const countryStateOptions: CountryStateOption[] = countries.reduce(
 		( acc, country ) => {
 			if ( ! country.states.length ) {
-				// @ts-expect-error tmp
 				acc.push( {
 					key: country.code,
 					label: decodeHtml( country.name ),
@@ -57,12 +56,11 @@ export function getCountryStateOptions(
 						decodeHtml( state.name ),
 				};
 			} );
-			// @ts-expect-error tmp
 			acc.push( ...countryStates );
 
 			return acc;
 		},
-		[]
+		[] as CountryStateOption[]
 	);
 
 	return countryStateOptions;
