@@ -122,6 +122,8 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
+            # mytodo slack alert step here
+
     api-wp-latest:
         name: API on WP Latest
         runs-on: ubuntu-20.04
@@ -177,6 +179,8 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
+
+              # mytodo slack alert step here
 
     e2e-wp-latest:
         name: E2E on WP Latest
@@ -267,6 +271,8 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
+
+              # mytodo slack alert step here
 
     get-wp-versions:
         name: Get WP L-1 & L-2 version numbers
@@ -435,6 +441,8 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
+            # mytodo slack alert step here
+
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}
         runs-on: ubuntu-20.04
@@ -557,6 +565,8 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
+            # mytodo slack alert step here
+
     test-plugins:
         name: With ${{ matrix.plugin }}
         runs-on: ubuntu-20.04
@@ -656,3 +666,5 @@ jobs:
                     -f env_description="${{ matrix.env_description }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
+
+            # mytodo slack alert step here
