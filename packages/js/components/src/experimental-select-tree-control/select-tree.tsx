@@ -205,7 +205,6 @@ export const SelectTree = function SelectTree( {
 				items={ linkedTree }
 				shouldShowCreateButton={ shouldShowCreateButton }
 				onClose={ () => setIsOpen( false ) }
-				onFirstTreeItemBack={ focusOnInput }
 			/>
 		</div>
 	);

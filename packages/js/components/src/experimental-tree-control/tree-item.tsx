@@ -59,10 +59,12 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							onChange={ selection.onSelectChild }
 						/>
 					) : (
-						<button
-							className="components-radio-control__input"
+						<input
+							type="checkbox"
+							className="components-checkbox-control__input"
+							checked={ selection.checkedStatus === 'checked' }
 							onChange={ ( event ) =>
-								selection.onSelectChild( true )
+								selection.onSelectChild( event.target.checked )
 							}
 						/>
 					) }

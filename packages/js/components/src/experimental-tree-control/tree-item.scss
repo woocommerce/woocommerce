@@ -45,7 +45,7 @@ $control-size: $gap-large;
 			margin: 0;
 		}
 
-		.components-radio-control__input {
+		.components-checkbox-control__input {
 			@include screen-reader-only();
 		}
 
