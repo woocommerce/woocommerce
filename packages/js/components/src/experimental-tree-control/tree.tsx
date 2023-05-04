@@ -58,7 +58,6 @@ export const Tree = forwardRef( function ForwardedTree(
 									) as HTMLButtonElement
 							 )?.focus();
 						} }
-						onFirstTreeItemBack={ props.onFirstTreeItemBack }
 					/>
 				) ) }
 			</ol>
