@@ -499,20 +499,28 @@ jQuery( function ( $ ) {
 		}
 	}
 
+	function add_if_not_exists( arr, item ) {
+		return arr.includes( item ) ? attr : [ ...arr, item ];
+	}
+
+	function disable_in_attribute_search( selectedAttributes ) {
+		$( 'select.wc-attribute-search' ).data( 'disabled-items', selectedAttributes );
+	}
+
 	$( 'select.wc-attribute-search' ).on( 'select2:select', function ( e ) {
-		if ( e.params && e.params.data && e.params.data.id ) {
-			add_attribute( this, e.params.data.id );
-			if ( ! selectedAttributes.includes( e.params.data.id ) ) {
-				selectedAttributes.push( e.params.data.id );
-				$( 'select.wc-attribute-search' ).data(
-					'disabled-items',
-					selectedAttributes
-				);
-			}
+		const attributeId = e?.params?.data?.id;
+
+		if ( attributeId ) {
+			add_attribute( this, attributeId );
+
+			selectedAttributes = add_if_not_exists( selectedAttributes, attributeId );
+			disable_in_attribute_search( selectedAttributes );
+
 			window.wcTracks.recordEvent( 'product_attributes_buttons', {
 				action: 'add_existing',
 			} );
 		}
+
 		$( this ).val( null );
 		$( this ).trigger( 'change' );
 
