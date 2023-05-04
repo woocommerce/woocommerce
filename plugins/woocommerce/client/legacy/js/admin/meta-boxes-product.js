@@ -57,12 +57,6 @@ jQuery( function ( $ ) {
 		} );
 	} );
 
-	$( function () {
-		if ( ! woocommerce_admin_meta_boxes.has_local_attributes ) {
-			$( 'button.add_attribute' ).trigger( 'click' );
-		}
-	} );
-
 	// Catalog Visibility.
 	$( '#catalog-visibility' )
 		.find( '.edit-catalog-visibility' )
@@ -399,6 +393,13 @@ jQuery( function ( $ ) {
 	var woocommerce_attribute_items = $( '.product_attributes' )
 		.find( '.woocommerce_attribute' )
 		.get();
+
+	// If the product has no attributes, add an empty attribute to be filled out by the user.
+	$( function add_empty_attribute() {
+		if ( woocommerce_attribute_items.length === 0  ) {
+			$( 'button.add_custom_attribute' ).trigger( 'click' );
+		}
+	} );
 
 	woocommerce_attribute_items.sort( function ( a, b ) {
 		var compA = parseInt( $( a ).attr( 'rel' ), 10 );
