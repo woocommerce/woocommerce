@@ -451,6 +451,12 @@ jobs:
                     --repo woocommerce/woocommerce-test-reports
 
             # mytodo slack alert step here
+            # - name: Send Slack report
+            #   uses: ./.github/actions/tests/slack-report-on-release-tests
+            #   with:
+            #       slack-bot-token: ${{ secrets.E2E_SLACK_TOKEN }}
+            #       channel-id: # mytodo
+            # mytodo job-name ???
 
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}
