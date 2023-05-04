@@ -87,6 +87,7 @@ function add_extension_register_script() {
 			'version'      => filemtime( $script_path ),
 		);
 	$script_url        = plugins_url( $script_path, __FILE__ );
+
 	$script_asset['dependencies'][] = WC_ADMIN_APP; // Add WCA as a dependency to ensure it loads first.
 
 	wp_register_script(

@@ -16,7 +16,7 @@ add_action( 'wp_loaded', function() {
 } );
 
 add_filter( 'woocommerce_admin_get_feature_config', function( $feature_config ) {
-	$feature_config[ 'beta-tester-slotfill-examples' ] = false;
+	$feature_config['beta-tester-slotfill-examples'] = false;
     $custom_feature_values = get_option( 'wc_admin_helper_feature_values', array() );
     foreach ( $custom_feature_values as $feature => $value ) {
         if ( isset(  $feature_config[$feature] ) ) {
