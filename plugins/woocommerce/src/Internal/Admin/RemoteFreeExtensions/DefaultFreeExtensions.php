@@ -346,6 +346,36 @@ class DefaultFreeExtensions {
 								'value'     => 'SK',
 								'operation' => '=',
 							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'BG',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'CZ',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'HR',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'HU',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'RO',
+								'operation' => '=',
+							],
+							[
+								'type'      => 'base_location_country',
+								'value'     => 'SE',
+								'operation' => '=',
+							],
 						],
 					],
 					DefaultPaymentGateways::get_rules_for_cbd( false ),
