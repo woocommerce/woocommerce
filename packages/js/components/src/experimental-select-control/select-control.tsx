@@ -9,6 +9,7 @@ import {
 	useMultipleSelection,
 	GetInputPropsOptions,
 } from 'downshift';
+import { useInstanceId } from '@wordpress/compose';
 import {
 	useState,
 	useEffect,
@@ -129,6 +130,10 @@ function SelectControl< ItemType = DefaultItemType >( {
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
+	const instanceId = useInstanceId(
+		SelectControl,
+		'woocommerce-experimental-select-control'
+	);
 
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
@@ -230,6 +235,12 @@ function SelectControl< ItemType = DefaultItemType >( {
 		},
 	} );
 
+	const isEventOutside = ( event: React.FocusEvent ) => {
+		return ! document
+			.querySelector( '.' + instanceId )
+			?.contains( event.relatedTarget );
+	};
+
 	const onRemoveItem = ( item: ItemType ) => {
 		selectItem( null );
 		removeSelectedItem( item );
@@ -254,6 +265,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 			className={ classnames(
 				'woocommerce-experimental-select-control',
 				className,
+				instanceId,
 				{
 					'is-read-only': isReadOnly,
 					'is-focused': isFocused,
@@ -288,7 +300,11 @@ function SelectControl< ItemType = DefaultItemType >( {
 							openMenu();
 						}
 					},
-					onBlur: () => setIsFocused( false ),
+					onBlur: ( event: React.FocusEvent ) => {
+						if ( isEventOutside( event ) ) {
+							setIsFocused( false );
+						}
+					},
 					placeholder,
 					disabled,
 					...inputProps,
