@@ -500,7 +500,9 @@ jobs:
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
 
             - name: Upload Allure artifacts to bucket
-              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              # mytodo re-enable
+              if: false
+              # if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
@@ -513,7 +515,9 @@ jobs:
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish API Allure report
-              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              # mytodo re-enable
+              if: false
+              # if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   ENV_DESCRIPTION: php-${{ matrix.php_version }}
@@ -541,7 +545,9 @@ jobs:
                   report-name: ${{ env.E2E_ARTIFACT }}
 
             - name: Upload Allure artifacts to bucket
-              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              # mytodo re-enable
+              if: false
+              # if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               env:
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
@@ -554,7 +560,9 @@ jobs:
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
-              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              # mytodo re-enable
+              if: false
+              # if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   ENV_DESCRIPTION: php-${{ matrix.php_version }}
