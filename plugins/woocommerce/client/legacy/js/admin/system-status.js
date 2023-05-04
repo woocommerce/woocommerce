@@ -117,8 +117,12 @@ jQuery( function ( $ ) {
 
 		downloadReport: function() {
 			var ssr_text = new Blob( [ $( '#debug-report' ).find( 'textarea' ).val() ], { type: 'text/plain' } );
+
+			var domain = window.location.hostname;
+			var datetime = new Date().toISOString().slice( 0, 19 ).replace( /:/g, '-' );
+
 			var a = document.createElement( 'a' );
-			a.download = 'SystemStatusReport.txt';
+			a.download = 'SystemStatusReport_' + domain + '_' + datetime + '.txt';
 			a.href = window.URL.createObjectURL( ssr_text );
 			a.textContent = 'Download ready';
 			a.style='display:none';
