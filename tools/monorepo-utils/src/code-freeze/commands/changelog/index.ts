@@ -51,6 +51,7 @@ const updateReleaseBranchChangelogs = async (
 	await git.add( 'plugins/woocommerce/changelog/' );
 	await git.commit( `Delete changelog files from ${ version } release` );
 
+	// Can use git.revparse() here I think.
 	const deletionCommitHash = await git.raw( [ 'rev-parse', 'HEAD' ] );
 	Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
 
@@ -60,6 +61,10 @@ const updateReleaseBranchChangelogs = async (
 		cwd: tmpRepoPath,
 		stdio: 'inherit',
 	} );
+
+	Logger.notice(
+		`Committing readme.txt changes in ${ branch } on ${ tmpRepoPath }`
+	);
 	await git.add( 'plugins/woocommerce/readme.txt' );
 	await git.commit( `Update the readme files for the ${ version } release` );
 	await git.push( 'origin', branch );
@@ -90,6 +95,7 @@ const updateTrunkChangelog = async (
 	} );
 	await git.checkout( 'trunk' );
 	const branch = `delete/${ version }-changelog`;
+	Logger.notice( `Committing deletions in ${ branch } on ${ tmpRepoPath }` );
 	await git.checkout( {
 		'-b': null,
 		[ branch ]: null,
