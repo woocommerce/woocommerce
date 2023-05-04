@@ -9,17 +9,23 @@ import { execSync } from 'child_process';
  * Internal dependencies
  */
 import { Logger } from '../../../core/logger';
-import { getEnvVar } from '../../../core/environment';
-import { cloneRepoShallow, checkoutRemoteBranch } from '../../../core/git';
+import {
+	checkoutRemoteBranch,
+	cloneAuthenticatedRepo,
+} from '../../../core/git';
 import { createPR } from '../../../core/github/repo';
 
 const updateReleaseBranchChangelogs = async (
-	git,
 	tmpRepoPath,
 	version,
 	releaseBranch
 ) => {
 	await checkoutRemoteBranch( tmpRepoPath, releaseBranch );
+
+	const git = simpleGit( {
+		baseDir: tmpRepoPath,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
 
 	const branch = `update/${ version }-changelog`;
 
@@ -73,12 +79,15 @@ const updateReleaseBranchChangelogs = async (
 };
 
 const updateTrunkChangelog = async (
-	git,
 	tmpRepoPath,
 	version,
 	deletionCommitHash
 ) => {
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
+	const git = simpleGit( {
+		baseDir: tmpRepoPath,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
 	await git.checkout( 'trunk' );
 	const branch = `delete/${ version }-changelog`;
 	await git.checkout( {
@@ -97,19 +106,6 @@ const updateTrunkChangelog = async (
 		`Delete changelog for ${ version } release`,
 		'This is a body'
 	);
-};
-
-const clone = async ( options ) => {
-	const { owner, name } = options;
-	Logger.startTask( `Making a temporary clone of '${ owner }/${ name }'` );
-	const source = `github.com/${ owner }/${ name }`;
-	const token = getEnvVar( 'GITHUB_TOKEN' );
-	const remote = `https://${ owner }:${ token }@${ source }`;
-
-	// We need the full history here to get the changelog PRs.
-	const tmpRepoPath = await cloneRepoShallow( remote );
-	Logger.endTask();
-	return tmpRepoPath;
 };
 
 export const changelogCommand = new Command( 'changelog' )
@@ -131,16 +127,13 @@ export const changelogCommand = new Command( 'changelog' )
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options ) => {
 		const { owner, name, version, devRepoPath } = options;
-		const tmpRepoPath = devRepoPath ? devRepoPath : await clone( options );
+		const tmpRepoPath = devRepoPath
+			? devRepoPath
+			: await cloneAuthenticatedRepo( options, true );
 
 		Logger.notice(
 			`Temporary clone of '${ owner }/${ name }' created at ${ tmpRepoPath }`
 		);
-
-		const git = simpleGit( {
-			baseDir: tmpRepoPath,
-			config: [ 'core.hooksPath=/dev/null' ],
-		} );
 
 		// When a devRepoPath is provided, assume that the dependencies are already installed.
 		if ( ! devRepoPath ) {
@@ -153,16 +146,10 @@ export const changelogCommand = new Command( 'changelog' )
 
 		const releaseBranch = `release/${ version }`;
 		const deletionCommitHash = await updateReleaseBranchChangelogs(
-			git,
 			tmpRepoPath,
 			version,
 			releaseBranch
 		);
 
-		await updateTrunkChangelog(
-			git,
-			tmpRepoPath,
-			version,
-			deletionCommitHash
-		);
+		await updateTrunkChangelog( tmpRepoPath, version, deletionCommitHash );
 	} );

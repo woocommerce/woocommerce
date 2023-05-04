@@ -11,6 +11,11 @@ import { mkdir, rm } from 'fs/promises';
 import { URL } from 'node:url';
 
 /**
+ * Internal dependencies
+ */
+import { getEnvVar } from './environment';
+
+/**
  * Get filename from patch
  *
  * @param {string} str String to extract filename from.
@@ -108,6 +113,17 @@ export const cloneRepo = async (
  */
 export const cloneRepoShallow = async ( repoPath: string ) => {
 	return await cloneRepo( repoPath, { '--depth': 1 } );
+};
+
+export const cloneAuthenticatedRepo = async ( options, isShallow = true ) => {
+	const { owner, name } = options;
+	const source = `github.com/${ owner }/${ name }`;
+	const token = getEnvVar( 'GITHUB_TOKEN' );
+	const remote = `https://${ owner }:${ token }@${ source }`;
+
+	return isShallow
+		? await cloneRepoShallow( remote )
+		: await cloneRepo( remote );
 };
 
 /**
