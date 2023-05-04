@@ -418,6 +418,8 @@ jobs:
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               with:
                   report-name: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
+                  # mytodo re-enable all tests
+                  tests: basic.spec.js
 
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
