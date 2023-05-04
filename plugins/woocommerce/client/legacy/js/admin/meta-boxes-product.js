@@ -507,10 +507,30 @@ jQuery( function ( $ ) {
 		$( 'select.wc-attribute-search' ).data( 'disabled-items', selectedAttributes );
 	}
 
+	function remove_empty_attribute_if_only() {
+		const $attributes = $( '.product_attributes .woocommerce_attribute' );
+
+		if ( $attributes.length === 1 ) {
+			const $attribute = $attributes.first();
+
+			const $attributeName = $attribute.find( 'input[name="attribute_names[0]"]' );
+			const $attributeValue = $attribute.find( 'input[name="attribute_values[0]"]' );
+
+			console.log( 'name: ' + $attributeName.val() );
+			console.log( 'value: ' + $attributeValue.val() );
+
+			if ( ! $attributeName.val() && ! $attributeValue.val() ) {
+				$attribute.remove();
+			}
+		}
+	}
+
 	$( 'select.wc-attribute-search' ).on( 'select2:select', function ( e ) {
 		const attributeId = e?.params?.data?.id;
 
 		if ( attributeId ) {
+			remove_empty_attribute_if_only();
+
 			add_attribute( this, attributeId );
 
 			selectedAttributes = add_if_not_exists( selectedAttributes, attributeId );
