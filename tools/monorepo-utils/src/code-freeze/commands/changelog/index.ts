@@ -12,6 +12,28 @@ import { join } from 'path';
 import { Logger } from '../../../core/logger';
 import { getEnvVar } from '../../../core/environment';
 import { cloneRepoShallow } from '../../../core/git';
+import { octokitWithAuth } from '../../../core/github/api';
+
+const createPR = async ( branch, base, owner, name, title, body ) => {
+	try {
+		Logger.startTask( 'Creating a pull request' );
+		const pr = await octokitWithAuth.request(
+			'POST /repos/{owner}/{repo}/pulls',
+			{
+				owner,
+				repo: name,
+				title,
+				body,
+				head: branch,
+				base,
+			}
+		);
+		Logger.notice( `Pull request created: ${ pr.data.html_url }` );
+		Logger.endTask();
+	} catch ( e ) {
+		Logger.error( e );
+	}
+};
 
 const gitCheckoutRemoteBranch = async ( gitInstance, newBranch ) => {
 	// The clone is shallow, so we need to call this before fetching.
@@ -39,9 +61,11 @@ const updateReleaseBranchChangelogs = async (
 ) => {
 	await gitCheckoutRemoteBranch( git, releaseBranch );
 
+	const branch = `update/${ version }-changelog`;
+
 	await git.checkout( {
 		'-b': null,
-		[ `update/${ version }-changelog` ]: null,
+		[ branch ]: null,
 	} );
 
 	Logger.notice( `Running the changelog script in ${ tmpRepoPath }` );
@@ -72,9 +96,18 @@ const updateReleaseBranchChangelogs = async (
 	} );
 	await git.add( 'plugins/woocommerce/readme.txt' );
 	await git.commit( `Update the readme files for the ${ version } release` );
-	// Push changes here.
+	await git.push( 'origin', branch );
 	await git.checkout( '.' );
-	// Create PR here
+
+	Logger.notice( `Creating PR for ${ branch }` );
+	createPR(
+		branch,
+		'trunk',
+		'psealock',
+		'woocommerce',
+		`Update changelog for ${ version } release`,
+		'This is a body'
+	);
 
 	return deletionCommitHash.trim();
 };
@@ -87,13 +120,23 @@ const updateTrunkChangelog = async (
 ) => {
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
 	await git.checkout( 'trunk' );
+	const branch = `delete/${ version }-changelog`;
 	await git.checkout( {
 		'-b': null,
-		[ `delete/${ version }-changelog` ]: null,
+		[ branch ]: null,
 	} );
 	await git.raw( [ 'cherry-pick', deletionCommitHash ] );
-	// push branch here
-	// create PR here
+	await git.push( 'origin', branch );
+
+	Logger.notice( `Creating PR for ${ branch }` );
+	createPR(
+		branch,
+		'trunk',
+		'psealock',
+		'woocommerce',
+		`Delete changelog for ${ version } release`,
+		'This is a body'
+	);
 };
 
 export const changelogCommand = new Command( 'changelog' )
