@@ -688,7 +688,7 @@ jobs:
         permissions:
             contents: read
         env:
-            SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
         steps:
             - name: Post Slack summary
               uses: slackapi/slack-github-action@v1.23.0
