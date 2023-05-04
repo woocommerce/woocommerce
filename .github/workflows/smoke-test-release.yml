@@ -124,8 +124,6 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
-            # mytodo slack alert step here
-
     api-wp-latest:
         name: API on WP Latest
         # mytodo re-enable
@@ -183,8 +181,6 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
-
-              # mytodo slack alert step here
 
     e2e-wp-latest:
         name: E2E on WP Latest
@@ -277,8 +273,6 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
-
-              # mytodo slack alert step here
 
     get-wp-versions:
         name: Get WP L-1 & L-2 version numbers
@@ -450,14 +444,6 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
-            # mytodo slack alert step here
-            # - name: Send Slack report
-            #   uses: ./.github/actions/tests/slack-report-on-release-tests
-            #   with:
-            #       slack-bot-token: ${{ secrets.E2E_SLACK_TOKEN }}
-            #       channel-id: # mytodo
-            # mytodo job-name ???
-
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}
         # mytodo re-enable
@@ -583,8 +569,6 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
-            # mytodo slack alert step here
-
     test-plugins:
         name: With ${{ matrix.plugin }}
         # mytodo re-enable
@@ -686,5 +670,3 @@ jobs:
                     -f env_description="${{ matrix.env_description }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
-
-            # mytodo slack alert step here
