@@ -41,9 +41,11 @@ interface PriceProps {
 
 export const Block = ( props: Props ): JSX.Element | null => {
 	const { className, textAlign, isDescendentOfSingleProductTemplate } = props;
-	const { parentClassName } = useInnerBlockLayoutContext();
+	const { parentName, parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 
+	const isDescendentOfAllProductsBlock =
+		parentName === 'woocommerce/all-products';
 	const colorProps = useColorProps( props );
 	const spacingProps = useSpacingProps( props );
 	const typographyProps = useTypographyProps( props );
@@ -59,9 +61,17 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	);
 
 	if ( ! product.id && ! isDescendentOfSingleProductTemplate ) {
-		return (
+		const productPriceComponent = (
 			<ProductPrice align={ textAlign } className={ wrapperClassName } />
 		);
+		if ( isDescendentOfAllProductsBlock ) {
+			return (
+				<div className="wp-block-woocommerce-product-price">
+					{ productPriceComponent }
+				</div>
+			);
+		}
+		return productPriceComponent;
 	}
 
 	const style = {
@@ -83,7 +93,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		[ `${ parentClassName }__product-price__value--on-sale` ]: isOnSale,
 	} );
 
-	return (
+	const productPriceComponent = (
 		<ProductPrice
 			align={ textAlign }
 			className={ wrapperClassName }
@@ -112,6 +122,14 @@ export const Block = ( props: Props ): JSX.Element | null => {
 			spacingStyle={ spacingStyle }
 		/>
 	);
+	if ( isDescendentOfAllProductsBlock ) {
+		return (
+			<div className="wp-block-woocommerce-product-price">
+				{ productPriceComponent }
+			</div>
+		);
+	}
+	return productPriceComponent;
 };
 
 export default ( props: Props ) => {
