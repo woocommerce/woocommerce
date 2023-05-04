@@ -45,10 +45,6 @@ $control-size: $gap-large;
 			margin: 0;
 		}
 
-		.components-checkbox-control__input {
-			@include screen-reader-only();
-		}
-
 		.components-checkbox-control__label {
 			display: none;
 		}
@@ -85,5 +81,9 @@ $control-size: $gap-large;
 			width: $control-size;
 			min-width: $control-size;
 		}
+	}
+
+	&__checkbox {
+		@include screen-reader-only();
 	}
 }

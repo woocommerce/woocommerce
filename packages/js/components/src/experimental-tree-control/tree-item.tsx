@@ -61,7 +61,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 					) : (
 						<input
 							type="checkbox"
-							className="components-checkbox-control__input"
+							className="experimental-woocommerce-tree-item__checkbox"
 							checked={ selection.checkedStatus === 'checked' }
 							onChange={ ( event ) =>
 								selection.onSelectChild( event.target.checked )
