@@ -151,11 +151,12 @@ export function Edit() {
 						images.find( ( img ) => media.id === img.id ) ===
 						undefined
 					) {
-						images[ replaceIndex ] = media as MediaItem;
+						let newImages = [ ...images ];
+						newImages[ replaceIndex ] = media as MediaItem;
 						recordEvent(
 							'product_images_replace_image_button_click'
 						);
-						setImages( images );
+						setImages( newImages );
 					}
 				} }
 				onSelectAsCover={ () =>
