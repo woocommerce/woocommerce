@@ -8,7 +8,6 @@ import { useState, createElement } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import {
 	__experimentalSelectTreeControl as SelectTree,
-	__experimentalSelectTreeMenuSlot as SelectTreeMenuSlot,
 	TreeItemType as Item,
 } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -144,7 +143,6 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					</Button>
 				</div>
 			</div>
-			<SelectTreeMenuSlot />
 		</Modal>
 	);
 };
