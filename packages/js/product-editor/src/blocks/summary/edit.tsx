@@ -7,7 +7,7 @@ import { BlockEditProps } from '@wordpress/blocks';
 import { BaseControl } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
-import uniqueId from 'lodash/uniqueId';
+import { useInstanceId } from '@wordpress/compose';
 import classNames from 'classnames';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -34,8 +34,9 @@ export function Edit( {
 	const blockProps = useBlockProps( {
 		style: { direction },
 	} );
-	const contentId = uniqueId(
-		'wp-block-woocommerce-product-summary-field__content-'
+	const contentId = useInstanceId(
+		Edit,
+		'wp-block-woocommerce-product-summary-field__content'
 	);
 	const [ summary, setSummary ] = useEntityProp< string >(
 		'postType',
@@ -85,12 +86,12 @@ export function Edit( {
 			</BlockControls>
 
 			<BaseControl
-				id={ contentId }
+				id={ contentId.toString() }
 				label={ label || __( 'Summary', 'woocommerce' ) }
 			>
 				<div { ...blockProps }>
 					<RichText
-						id={ contentId }
+						id={ contentId.toString() }
 						identifier="content"
 						tagName="p"
 						value={ summary }
