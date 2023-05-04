@@ -69,6 +69,8 @@ export const SelectTree = function SelectTree( {
 					{
 						'is-read-only': isReadOnly,
 						'is-focused': isFocused,
+						'is-multiple': props.multiple,
+						'has-selected-items': props.selected?.length,
 					}
 				) }
 			>

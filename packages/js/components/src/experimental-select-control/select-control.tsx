@@ -257,6 +257,8 @@ function SelectControl< ItemType = DefaultItemType >( {
 				{
 					'is-read-only': isReadOnly,
 					'is-focused': isFocused,
+					'is-multiple': multiple,
+					'has-selected-items': selectedItems.length,
 				}
 			) }
 		>
