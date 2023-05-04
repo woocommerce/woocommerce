@@ -38,7 +38,10 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 	<div id="debug-report">
 		<textarea readonly="readonly"></textarea>
 		<p class="submit">
-			<button id="copy-for-support" class="button-primary" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
+			<button id="download-for-support" class="button-primary" href="#">
+				<?php esc_html_e( 'Download for support', 'woocommerce' ); ?>
+			</button>
+			<button id="copy-for-support" class="button" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
 				<?php esc_html_e( 'Copy for support', 'woocommerce' ); ?>
 			</button>
 		</p>
