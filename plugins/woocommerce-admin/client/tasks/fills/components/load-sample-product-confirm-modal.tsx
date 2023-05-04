@@ -22,6 +22,7 @@ export const LoadSampleProductConfirmModal: React.VFC< Props > = ( {
 	return (
 		<Modal
 			className="woocommerce-products-load-sample-product-confirm-modal"
+			overlayClassName="woocommerce-products-load-sample-product-confirm-modal-overlay"
 			title={ __( 'Load sample products', 'woocommerce' ) }
 			onRequestClose={ onCancel }
 		>
