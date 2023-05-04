@@ -848,7 +848,7 @@ class DefaultPaymentGateways {
 	 * @return array Array of countries.
 	 */
 	public static function get_wcpay_countries() {
-		return array( 'US', 'PR', 'AU', 'CA', 'CY', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'IE', 'IT', 'LU', 'LT', 'LV', 'NO', 'NZ', 'MT', 'AT', 'BE', 'NL', 'PL', 'PT', 'CH', 'HK', 'SI', 'SK', 'SG' );
+		return array( 'US', 'PR', 'AU', 'CA', 'CY', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'IE', 'IT', 'LU', 'LT', 'LV', 'NO', 'NZ', 'MT', 'AT', 'BE', 'NL', 'PL', 'PT', 'CH', 'HK', 'SI', 'SK', 'SG', 'BG', 'CZ', 'HR', 'HU', 'RO', 'SE');
 	}
 
 	/**
