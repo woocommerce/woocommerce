@@ -2,7 +2,9 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useSelect } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -54,6 +56,10 @@ jest.mock( '../orders/utils', () => {
 	};
 } );
 
+jest.mock( '@woocommerce/tracks', () => ( {
+	recordEvent: jest.fn(),
+} ) );
+
 describe( 'ActivityPanel', () => {
 	it( 'should render a panel with two rows', () => {
 		render( <ActivityPanel /> );
@@ -83,5 +89,16 @@ describe( 'ActivityPanel', () => {
 		render( <ActivityPanel /> );
 		expect( screen.queryByText( 'custom-panel-1' ) ).toBeNull();
 		expect( screen.queryByText( 'custom-panel-2' ) ).toBeNull();
+	} );
+
+	it( 'should call recordEvent with the correct tab when a panel is opened', () => {
+		useSelect.mockReturnValue( {
+			isTaskListHidden: false,
+		} );
+		const { getByText } = render( <ActivityPanel /> );
+		userEvent.click( getByText( 'custom-panel-2' ) );
+		expect( recordEvent ).toHaveBeenCalledWith( 'activity_panel_open', {
+			tab: 'custom-panel-2',
+		} );
 	} );
 } );
