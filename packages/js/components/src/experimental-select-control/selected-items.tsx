@@ -64,6 +64,9 @@ export const SelectedItems = < ItemType, >( {
 							selectedItem: item,
 							index,
 						} ) }
+						onMouseDown={ ( event ) => {
+							event.preventDefault();
+						} }
 						onClick={ ( event ) => {
 							event.preventDefault();
 						} }
