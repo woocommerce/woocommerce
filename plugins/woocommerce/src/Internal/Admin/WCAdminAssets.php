@@ -278,6 +278,7 @@ class WCAdminAssets {
 			'wc-date',
 			'wc-components',
 			'wc-customer-effort-score',
+			'wc-experimental',
 			WC_ADMIN_APP,
 		);
 
