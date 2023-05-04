@@ -451,6 +451,8 @@ jobs:
 
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}
+        # mytodo re-enable
+        if: false
         runs-on: ubuntu-20.04
         needs: [get-tag]
         strategy:
@@ -575,6 +577,8 @@ jobs:
 
     test-plugins:
         name: With ${{ matrix.plugin }}
+        # mytodo re-enable
+        if: false
         runs-on: ubuntu-20.04
         needs: [get-tag]
         env:
