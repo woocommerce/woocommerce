@@ -151,7 +151,7 @@ export function Edit() {
 						images.find( ( img ) => media.id === img.id ) ===
 						undefined
 					) {
-						let newImages = [ ...images ];
+						const newImages = [ ...images ];
 						newImages[ replaceIndex ] = media as MediaItem;
 						recordEvent(
 							'product_images_replace_image_button_click'
