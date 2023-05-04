@@ -93,9 +93,10 @@ class RelatedProducts extends AbstractBlock {
 		}
 
 		return array(
-			'post_type'   => 'product',
-			'post__in'    => $related_products_ids,
-			'post_status' => 'publish',
+			'post_type'      => 'product',
+			'post__in'       => $related_products_ids,
+			'post_status'    => 'publish',
+			'posts_per_page' => $query['posts_per_page'],
 		);
 	}
 
