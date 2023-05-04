@@ -4,58 +4,60 @@
  * Slug: woocommerce-blocks/featured-category-triple
  * Categories: WooCommerce
  */
-
-// Below query is temporary work around to get patterns previews to work.
-$transient_name = 'wc_blocks_pattern_featured_category_triple';
-$categories     = get_transient( $transient_name );
-
-if ( ( false === $categories ) || ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ) {
-	global $wpdb;
-
-	$categories = $wpdb->get_results(
-		"SELECT tt.term_id FROM {$wpdb->prefix}term_taxonomy AS tt
-		LEFT JOIN {$wpdb->prefix}terms AS t ON tt.term_id = t.term_id
-		WHERE tt.taxonomy = 'product_cat' AND tt.count > 0 AND tt.parent = 0 AND t.slug != 'uncategorized'
-		LIMIT 3",
-		ARRAY_A
-	);
-
-	set_transient( $transient_name, $categories, DAY_IN_SECONDS * 14 );
-}
-
-$cat1 = $categories[0]['term_id'] ? $categories[0]['term_id'] : 0;
-$cat2 = $categories[1]['term_id'] ? $categories[1]['term_id'] : 0;
-$cat3 = $categories[2]['term_id'] ? $categories[2]['term_id'] : 0;
-
 ?>
-<!-- wp:columns {"align":"full","style":{"spacing":{"blockGap":{"top":"0","left":"0"},"padding":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
-<div class="wp-block-columns alignfull" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0"><!-- wp:column -->
-	<div class="wp-block-column"><?php echo '<!-- wp:woocommerce/featured-category {"dimRatio":0,"editMode":false,"imageFit":"cover","categoryId":' . esc_attr( $cat1 ) . ',"overlayColor":"#F6F6F6","showDesc":false,"textColor":"foreground"} -->'; ?>
-			<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-			<div class="wp-block-buttons"><!-- wp:button {"lock":{"move":true,"remove":true}} -->
-				<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( get_category_link( $cat1 ) ); ?>"><?php esc_html_e( 'Shop now', 'woo-gutenberg-products-block' ); ?></a></div>
-				<!-- /wp:button --></div>
-			<!-- /wp:buttons -->
-			<!-- /wp:woocommerce/featured-category --></div>
-		<!-- /wp:column -->
+<!-- wp:columns {"align":"wide","style":{"spacing":{"blockGap":{"top":"0","left":"0"},"padding":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
+<div class="wp-block-columns alignwide" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
+	<!-- wp:column -->
+	<div class="wp-block-column">
+		<?php echo '<!-- wp:cover {"url":"' . esc_url( plugins_url() ) . '/woocommerce-blocks/images/pattern-placeholders/product-beauty-3.png","id":1,"dimRatio":0,"contentPosition":"bottom center","style":{"spacing":{"blockGap":"0","padding":{"bottom":"1.8em"}}},"layout":{"type":"constrained"}} -->'; ?>
+		<div class="wp-block-cover has-custom-content-position is-position-bottom-center" style="padding-bottom:1.8em">
+			<span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span>
+			<img class="wp-block-cover__image-background wp-image-1" alt="" src="<?php echo esc_url( plugins_url() ); ?>/woocommerce-blocks/images/pattern-placeholders/product-beauty-3.png" data-object-fit="cover"/>
+			<div class="wp-block-cover__inner-container">
+				<!-- wp:paragraph {"align":"center","placeholder":"Write title…","style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"margin":{"top":"0","right":"0","bottom":"0","left":"0"}}},"textColor":"background","fontSize":"large"} -->
+				<p class="has-text-align-center has-background-color has-text-color has-large-font-size" style="margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0"><strong>Aztec clay masks</strong></p>
+				<!-- /wp:paragraph -->
 
-		<!-- wp:column -->
-		<div class="wp-block-column"><?php echo '<!-- wp:woocommerce/featured-category {"dimRatio":0,"editMode":false,"imageFit":"cover","categoryId":' . esc_attr( $cat2 ) . ',"overlayColor":"#F6F6F6","showDesc":false,"textColor":"foreground"} -->'; ?>
-			<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-			<div class="wp-block-buttons"><!-- wp:button -->
-				<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( get_category_link( $cat2 ) ); ?>"><?php esc_html_e( 'Shop now', 'woo-gutenberg-products-block' ); ?></a></div>
-				<!-- /wp:button --></div>
-			<!-- /wp:buttons -->
-			<!-- /wp:woocommerce/featured-category --></div>
-		<!-- /wp:column -->
+				<!-- wp:paragraph {"align":"center","textColor":"background","fontSize":"small"} -->
+				<p class="has-text-align-center has-background-color has-text-color has-small-font-size"><strong><span style="text-decoration: underline;">Shop Now</span></strong></p>
+				<!-- /wp:paragraph --></div>
+			</div>
+		<!-- /wp:cover --></div>
+	<!-- /wp:column -->
 
-		<!-- wp:column -->
-		<div class="wp-block-column"><?php echo '<!-- wp:woocommerce/featured-category {"dimRatio":0,"editMode":false,"imageFit":"cover","categoryId":' . esc_attr( $cat3 ) . ',"overlayColor":"#F6F6F6","showDesc":false,"textColor":"foreground"} -->'; ?>
-			<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
-			<div class="wp-block-buttons"><!-- wp:button -->
-				<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( get_category_link( $cat3 ) ); ?>"><?php esc_html_e( 'Shop now', 'woo-gutenberg-products-block' ); ?></a></div>
-				<!-- /wp:button --></div>
-			<!-- /wp:buttons -->
-		<!-- /wp:woocommerce/featured-category --></div>
+	<!-- wp:column -->
+	<div class="wp-block-column">
+		<?php echo '<!-- wp:cover {"url":"' . esc_url( plugins_url() ) . '/woocommerce-blocks/images/pattern-placeholders/product-beauty-2.png","id":1,"dimRatio":0,"contentPosition":"bottom center","isDark":false,"style":{"spacing":{"padding":{"bottom":"1.8em"},"blockGap":"0"}},"textColor":"foreground","layout":{"type":"constrained"}} -->'; ?>
+		<div class="wp-block-cover is-light has-custom-content-position is-position-bottom-center has-foreground-color has-text-color" style="padding-bottom:1.8em">
+			<span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span>
+			<img class="wp-block-cover__image-background wp-image-1" alt="" src="<?php echo esc_url( plugins_url() ); ?>/woocommerce-blocks/images/pattern-placeholders/product-beauty-2.png" data-object-fit="cover"/>
+			<div class="wp-block-cover__inner-container">
+				<!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
+				<p class="has-text-align-center has-large-font-size"><strong>Moisturizing toners</strong></p>
+				<!-- /wp:paragraph -->
+
+				<!-- wp:paragraph {"align":"center","textColor":"foreground","fontSize":"small"} -->
+				<p class="has-text-align-center has-foreground-color has-text-color has-small-font-size"><strong><span style="text-decoration: underline;">Shop Now</span></strong></p>
+				<!-- /wp:paragraph --></div>
+			</div>
+		<!-- /wp:cover --></div>
+	<!-- /wp:column -->
+
+	<!-- wp:column -->
+	<div class="wp-block-column">
+		<?php echo '<!-- wp:cover {"url":"' . esc_url( plugins_url() ) . '/woocommerce-blocks/images/pattern-placeholders/product-beauty-1.png","id":1,"dimRatio":0,"contentPosition":"bottom center","isDark":false,"style":{"spacing":{"padding":{"bottom":"1.8em"},"blockGap":"0"}},"textColor":"background","layout":{"type":"constrained"}} -->'; ?>
+		<div class="wp-block-cover is-light has-custom-content-position is-position-bottom-center has-background-color has-text-color" style="padding-bottom:1.8em">
+			<span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span>
+			<img class="wp-block-cover__image-background wp-image-1" alt="" src="<?php echo esc_url( plugins_url() ); ?>/woocommerce-blocks/images/pattern-placeholders/product-beauty-1.png" data-object-fit="cover"/>
+			<div class="wp-block-cover__inner-container">
+				<!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
+				<p class="has-text-align-center has-large-font-size"><strong>Natural body lotions</strong></p>
+				<!-- /wp:paragraph -->
+
+				<!-- wp:paragraph {"align":"center","textColor":"background","fontSize":"small"} -->
+				<p class="has-text-align-center has-background-color has-text-color has-small-font-size"><strong><span style="text-decoration: underline;">Shop Now</span></strong></p>
+				<!-- /wp:paragraph --></div>
+			</div>
+		<!-- /wp:cover --></div>
 	<!-- /wp:column --></div>
 <!-- /wp:columns -->
