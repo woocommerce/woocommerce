@@ -704,6 +704,7 @@ jobs:
                   channel-id: 'C0564A5FES1' # mytodo use channel id for release smoke tests
                   payload: |
                       {
+                        "text": "Test summary for ${{ needs.get-tag.outputs.tag }}",
                         "blocks": [
                           {
                             "type": "divider"
