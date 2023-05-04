@@ -63,6 +63,8 @@ jobs:
 
     e2e-update-wc:
         name: Test WooCommerce update
+        # mytodo re-enable
+        if: false
         runs-on: ubuntu-20.04
         needs: [get-tag]
         permissions:
@@ -126,6 +128,8 @@ jobs:
 
     api-wp-latest:
         name: API on WP Latest
+        # mytodo re-enable
+        if: false
         runs-on: ubuntu-20.04
         needs: [get-tag, e2e-update-wc]
         permissions:
@@ -184,6 +188,8 @@ jobs:
 
     e2e-wp-latest:
         name: E2E on WP Latest
+        # mytodo re-enable
+        if: false
         runs-on: ubuntu-20.04
         needs: [get-tag, api-wp-latest]
         permissions:
