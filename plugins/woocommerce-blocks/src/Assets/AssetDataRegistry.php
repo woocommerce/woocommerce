@@ -66,9 +66,23 @@ class AssetDataRegistry {
 	 * Hook into WP asset registration for enqueueing asset data.
 	 */
 	protected function init() {
-		add_action( 'init', array( $this, 'register_data_script' ) );
+		if ( $this->is_site_editor() ) {
+			add_action( 'enqueue_block_editor_assets', array( $this, 'register_data_script' ) );
+		} else {
+			add_action( 'init', array( $this, 'register_data_script' ) );
+		}
 		add_action( 'wp_print_footer_scripts', array( $this, 'enqueue_asset_data' ), 2 );
 		add_action( 'admin_print_footer_scripts', array( $this, 'enqueue_asset_data' ), 2 );
+	}
+
+	/**
+	 * Checks if the current URL is the Site Editor.
+	 *
+	 * @return boolean
+	 */
+	protected function is_site_editor() {
+		$url_path = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		return str_contains( $url_path, 'site-editor.php' );
 	}
 
 	/**
