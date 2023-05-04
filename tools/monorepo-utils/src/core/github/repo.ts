@@ -7,6 +7,7 @@ import { Repository } from '@octokit/graphql-schema';
  * Internal dependencies
  */
 import { graphqlWithAuth, octokitWithAuth } from './api';
+import { Logger } from '../logger';
 
 export const getLatestGithubReleaseVersion = async ( options: {
 	owner?: string;
@@ -127,4 +128,25 @@ export const deleteGithubBranch = async (
 			ref: branch,
 		}
 	);
+};
+
+export const createPR = async ( branch, base, owner, name, title, body ) => {
+	try {
+		Logger.startTask( 'Creating a pull request' );
+		const pr = await octokitWithAuth.request(
+			'POST /repos/{owner}/{repo}/pulls',
+			{
+				owner,
+				repo: name,
+				title,
+				body,
+				head: branch,
+				base,
+			}
+		);
+		Logger.notice( `Pull request created: ${ pr.data.html_url }` );
+		Logger.endTask();
+	} catch ( e ) {
+		Logger.error( e );
+	}
 };

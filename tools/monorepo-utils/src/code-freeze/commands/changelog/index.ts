@@ -4,54 +4,14 @@
 import { Command } from '@commander-js/extra-typings';
 import simpleGit from 'simple-git';
 import { execSync } from 'child_process';
-import { join } from 'path';
 
 /**
  * Internal dependencies
  */
 import { Logger } from '../../../core/logger';
 import { getEnvVar } from '../../../core/environment';
-import { cloneRepoShallow } from '../../../core/git';
-import { octokitWithAuth } from '../../../core/github/api';
-
-const createPR = async ( branch, base, owner, name, title, body ) => {
-	try {
-		Logger.startTask( 'Creating a pull request' );
-		const pr = await octokitWithAuth.request(
-			'POST /repos/{owner}/{repo}/pulls',
-			{
-				owner,
-				repo: name,
-				title,
-				body,
-				head: branch,
-				base,
-			}
-		);
-		Logger.notice( `Pull request created: ${ pr.data.html_url }` );
-		Logger.endTask();
-	} catch ( e ) {
-		Logger.error( e );
-	}
-};
-
-const gitCheckoutRemoteBranch = async ( gitInstance, newBranch ) => {
-	// The clone is shallow, so we need to call this before fetching.
-	await gitInstance.raw( [
-		'remote',
-		'set-branches',
-		'--add',
-		'origin',
-		newBranch,
-	] );
-	await gitInstance.raw( [ 'fetch', 'origin', newBranch ] );
-	await gitInstance.raw( [
-		'checkout',
-		'-b',
-		newBranch,
-		`origin/${ newBranch }`,
-	] );
-};
+import { cloneRepoShallow, checkoutRemoteBranch } from '../../../core/git';
+import { createPR } from '../../../core/github/repo';
 
 const updateReleaseBranchChangelogs = async (
 	git,
@@ -59,7 +19,7 @@ const updateReleaseBranchChangelogs = async (
 	version,
 	releaseBranch
 ) => {
-	await gitCheckoutRemoteBranch( git, releaseBranch );
+	await checkoutRemoteBranch( tmpRepoPath, releaseBranch );
 
 	const branch = `update/${ version }-changelog`;
 
@@ -166,7 +126,7 @@ export const changelogCommand = new Command( 'changelog' )
 	)
 	.option(
 		'-d --devRepoPath <devRepoPath>',
-		'Path to existing repo. Use this option to avoid cloning a fresh repo and installing all the dependencies.'
+		'Path to existing repo. Use this option to avoid cloning a fresh repo and installing all the dependencies. Note that using this option assumes dependencies are already installed.'
 	)
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options ) => {
@@ -182,6 +142,7 @@ export const changelogCommand = new Command( 'changelog' )
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 
+		// When a devRepoPath is provided, assume that the dependencies are already installed.
 		if ( ! devRepoPath ) {
 			Logger.notice( `Installing dependencies in ${ tmpRepoPath }` );
 			execSync( 'pnpm install --filter woocommerce', {

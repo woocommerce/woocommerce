@@ -391,3 +391,15 @@ export const generateDiff = async (
 		return '';
 	}
 };
+
+export const checkoutRemoteBranch = async ( tmpRepoPath, branch ) => {
+	const git = simpleGit( {
+		baseDir: tmpRepoPath,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
+
+	// When the clone is shallow, we need to call this before fetching.
+	await git.raw( [ 'remote', 'set-branches', '--add', 'origin', branch ] );
+	await git.raw( [ 'fetch', 'origin', branch ] );
+	await git.raw( [ 'checkout', '-b', branch, `origin/${ branch }` ] );
+};
