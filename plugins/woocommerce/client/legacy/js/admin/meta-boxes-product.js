@@ -520,27 +520,6 @@ jQuery( function ( $ ) {
 	} );
 
 	// Add rows.
-	$( 'button.add_attribute' ).on( 'click', function () {
-		var attribute = $( 'select.attribute_taxonomy' ).val();
-		if (
-			! attribute &&
-			$( 'select.attribute_taxonomy' ).hasClass( 'wc-attribute-search' )
-		) {
-			return;
-		}
-		add_attribute( this, attribute );
-		$( 'select.attribute_taxonomy' ).val( null );
-		$( 'select.attribute_taxonomy' ).trigger( 'change' );
-
-		// We record the event only when an existing attribute is added.
-		if ( attribute !== '' ) {
-			window.wcTracks.recordEvent( 'product_attributes_buttons', {
-				action: 'add_existing',
-			} );
-		}
-
-		return false;
-	} );
 
 	$( 'button.add_custom_attribute' ).on( 'click', function () {
 		add_attribute( this, '' );
