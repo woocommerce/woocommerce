@@ -18,3 +18,4 @@ export const program = new Command()
 	.name( 'utils' )
 	.description( 'Monorepo utilities' )
 	.addCommand( CodeFreeze );
+	.addCommand( Slack );

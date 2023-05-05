@@ -7,7 +7,7 @@ import chalk from 'chalk';
 /**
  * Internal dependencies
  */
-import { getEnvVar } from './environment';
+import { getEnvVar, isGithubCI } from './environment';
 
 const LOGGING_LEVELS: Record< string, number > = {
 	verbose: 3,
@@ -45,21 +45,26 @@ export class Logger {
 	}
 
 	static startTask( message: string ) {
-		if ( Logger.loggingLevel > LOGGING_LEVELS.silent ) {
+		if ( Logger.loggingLevel > LOGGING_LEVELS.silent && ! isGithubCI() ) {
 			const spinner = ora( chalk.green( `${ message }...` ) ).start();
 			Logger.lastSpinner = spinner;
+		} else if ( isGithubCI() ) {
+			Logger.notice( message );
 		}
 	}
 
 	static endTask() {
 		if (
 			Logger.loggingLevel > LOGGING_LEVELS.silent &&
-			Logger.lastSpinner
+			Logger.lastSpinner &&
+			! isGithubCI()
 		) {
 			Logger.lastSpinner.succeed(
 				`${ Logger.lastSpinner.text } complete.`
 			);
 			Logger.lastSpinner = null;
+		} else if ( isGithubCI() ) {
+			Logger.notice( 'Task complete.' );
 		}
 	}
 }

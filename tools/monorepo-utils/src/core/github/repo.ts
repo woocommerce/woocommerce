@@ -70,7 +70,7 @@ export const getRefFromGithubBranch = async (
 		name?: string;
 	},
 	source: string
-): Promise< string > => {
+): Promise< string | null > => {
 	const { owner, name } = options;
 	const { repository } = await graphqlWithAuth< {
 		repository: Repository;
@@ -90,8 +90,15 @@ export const getRefFromGithubBranch = async (
 			}
 		` );
 
-	// @ts-ignore: The graphql query is typed, but the response is not.
-	return repository.ref.target.history.edges.shift().node.oid;
+	const target = repository.ref.target;
+
+	if ( 'history' in target ) {
+		// If this is not a string we have bigger problems. GitObjectID is a 40 char hex string in the response.
+		const oid = target.history.edges.shift().node?.oid as string;
+		return oid || null;
+	}
+
+	return null;
 };
 
 export const createGithubBranch = async (

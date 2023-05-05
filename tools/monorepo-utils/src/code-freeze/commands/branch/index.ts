@@ -129,6 +129,11 @@ export const branchCommand = new Command( 'branch' )
 		}
 
 		const ref = await getRefFromGithubBranch( options, source );
+
+		if ( ! ref ) {
+			Logger.error( 'Could not determine ref from source branch.' );
+		}
+
 		await createGithubBranch( options, nextReleaseBranch, ref );
 		createBranchSpinner.succeed();
 
