@@ -2,11 +2,18 @@
  * External dependencies
  */
 import { BlockInstance } from '@wordpress/blocks';
+import { Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { createElement, useEffect, useState } from '@wordpress/element';
-import { useResizeObserver } from '@wordpress/compose';
+import {
+	createElement,
+	useCallback,
+	useEffect,
+	useState,
+} from '@wordpress/element';
+import { useDebounce, useResizeObserver } from '@wordpress/compose';
 import {
 	BlockEditorProvider,
+	BlockInspector,
 	BlockList,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -22,16 +29,25 @@ import {
 /**
  * Internal dependencies
  */
+import { BackButton } from './back-button';
 import { EditorCanvas } from './editor-canvas';
 import { ResizableEditor } from './resizable-editor';
 
 type IframeEditorProps = {
+	initialBlocks?: BlockInstance[];
+	onChange: ( blocks: BlockInstance[] ) => void;
+	onClose?: () => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
-export function IframeEditor( { settings }: IframeEditorProps ) {
+export function IframeEditor( {
+	initialBlocks = [],
+	onChange,
+	onClose,
+	settings,
+}: IframeEditorProps ) {
 	const [ resizeObserver, sizes ] = useResizeObserver();
-	const [ blocks, setBlocks ] = useState< BlockInstance[] >( [] );
+	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock, updateSettings } =
@@ -50,42 +66,62 @@ export function IframeEditor( { settings }: IframeEditorProps ) {
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
+	const handleChange = useCallback(
+		( updatedBlocks: BlockInstance[] ) => {
+			onChange( updatedBlocks );
+		},
+		[ onChange ]
+	);
+
+	const debouncedOnChange = useDebounce( handleChange, 200 );
+
 	return (
-		<BlockEditorProvider
-			settings={ {
-				...( settings || parentEditorSettings ),
-				templateLock: false,
-			} }
-			value={ blocks }
-			onChange={ setBlocks }
-			useSubRegistry={ true }
-		>
-			<BlockTools
-				className={ 'woocommerce-iframe-editor' }
-				onClick={ (
-					event: React.MouseEvent< HTMLDivElement, MouseEvent >
-				) => {
-					// Clear selected block when clicking on the gray background.
-					if ( event.target === event.currentTarget ) {
-						clearSelectedBlock();
-					}
+		<div className="woocommerce-iframe-editor">
+			<BlockEditorProvider
+				settings={ {
+					...( settings || parentEditorSettings ),
+					hasFixedToolbar: true,
+					templateLock: false,
 				} }
+				value={ blocks }
+				onChange={ ( updatedBlocks: BlockInstance[] ) => {
+					setBlocks( updatedBlocks );
+					debouncedOnChange( updatedBlocks );
+				} }
+				useSubRegistry={ true }
 			>
-				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-				{ /* @ts-ignore */ }
-				<BlockEditorKeyboardShortcuts.Register />
-				<ResizableEditor
-					enableResizing={ true }
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore This accepts numbers or strings.
-					height={ sizes.height ?? '100%' }
+				<BlockTools
+					className={ 'woocommerce-iframe-editor__content' }
+					onClick={ (
+						event: React.MouseEvent< HTMLDivElement, MouseEvent >
+					) => {
+						// Clear selected block when clicking on the gray background.
+						if ( event.target === event.currentTarget ) {
+							clearSelectedBlock();
+						}
+					} }
 				>
-					<EditorCanvas enableResizing={ true }>
-						{ resizeObserver }
-						<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
-					</EditorCanvas>
-				</ResizableEditor>
-			</BlockTools>
-		</BlockEditorProvider>
+					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+					{ /* @ts-ignore */ }
+					<BlockEditorKeyboardShortcuts.Register />
+					{ onClose && <BackButton onClick={ onClose } /> }
+					<ResizableEditor
+						enableResizing={ true }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore This accepts numbers or strings.
+						height={ sizes.height ?? '100%' }
+					>
+						<EditorCanvas enableResizing={ true }>
+							{ resizeObserver }
+							<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
+						</EditorCanvas>
+						<Popover.Slot />
+					</ResizableEditor>
+				</BlockTools>
+				<div className="woocommerce-iframe-editor__sidebar">
+					<BlockInspector />
+				</div>
+			</BlockEditorProvider>
+		</div>
 	);
 }

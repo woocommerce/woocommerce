@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add enable prop to window.wcTracks type

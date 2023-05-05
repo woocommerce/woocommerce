@@ -8,7 +8,6 @@ packages:
     - 'tools/package-release'
     - 'tools/cherry-pick'
     - 'tools/release-posts'
-    - 'tools/cli-core'
     - 'tools/version-bump'
     - 'tools/storybook'
     - 'tools/monorepo-utils'

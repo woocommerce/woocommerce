@@ -9,6 +9,7 @@
 	button,
 	span,
 	label,
+	div,
 	input {
 		font-family: var( --wp--preset--font-family--system-font );
 	}
@@ -93,6 +94,10 @@
 		font-size: 11px;
 		color: $gray-900;
 		font-weight: 500;
+	}
+
+	.block-editor-block-list__layout .block-editor-block-list__block:not( [contenteditable] ):focus:after {
+		display: none; // use important or increase specificity.
 	}
 }
 

@@ -3,7 +3,11 @@
  */
 import { join } from 'path';
 import { simpleGit } from 'simple-git';
-import { execAsync, startWPEnv, stopWPEnv } from 'cli-core/src/util';
+import { execAsync } from '@woocommerce/monorepo-utils/src/core/util';
+import {
+	startWPEnv,
+	stopWPEnv,
+} from '@woocommerce/monorepo-utils/src/core/wpenv';
 
 export type SchemaDump = {
 	schema: string;

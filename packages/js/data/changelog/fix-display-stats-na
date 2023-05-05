@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Handle request with empty stats in performance-indicators report

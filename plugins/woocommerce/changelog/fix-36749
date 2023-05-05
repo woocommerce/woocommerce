@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Create orders as 'auto-draft' by default in admin.

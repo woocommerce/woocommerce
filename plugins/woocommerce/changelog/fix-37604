@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+replace title HTML attribute with aria-label for quantity input field
