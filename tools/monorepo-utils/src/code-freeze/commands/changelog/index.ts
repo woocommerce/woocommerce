@@ -31,10 +31,15 @@ export const changelogCommand = new Command( 'changelog' )
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options: Options ) => {
 		const { owner, name, version, devRepoPath } = options;
+		Logger.startTask(
+			`Making a temporary clone of '${ owner }/${ name }'`
+		);
 		// Use a supplied path, otherwise do a full clone of the repo, including history so that changelogs can be created with links to PRs.
 		const tmpRepoPath = devRepoPath
 			? devRepoPath
 			: await cloneAuthenticatedRepo( options, false );
+
+		Logger.endTask();
 
 		Logger.notice(
 			`Temporary clone of '${ owner }/${ name }' created at ${ tmpRepoPath }`

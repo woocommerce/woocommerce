@@ -26,7 +26,16 @@ export const updateReleaseBranchChangelogs = async (
 	releaseBranch: string
 ): Promise< { deletionCommitHash: string; prNumber: number } > => {
 	const { owner, name, version } = options;
-	await checkoutRemoteBranch( tmpRepoPath, releaseBranch );
+	try {
+		await checkoutRemoteBranch( tmpRepoPath, releaseBranch );
+	} catch ( e ) {
+		if ( e.message.includes( "couldn't find remote ref" ) ) {
+			Logger.warn(
+				`${ releaseBranch } does not exist on ${ owner }/${ name }.`
+			);
+		}
+		Logger.error( e );
+	}
 
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
