@@ -112,7 +112,7 @@ export const milestoneCommand = new Command( 'milestone' )
 			const error: RequestError = e as RequestError;
 
 			// If its 422 we can type narrow to get validation errors.
-			if ( error.response.status === 422 ) {
+			if ( error?.response?.status === 422 ) {
 				const response: OctokitErrorResponse =
 					error.response as OctokitErrorResponse;
 				const validationErrors = response.data.errors;
