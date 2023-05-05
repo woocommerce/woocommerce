@@ -30,8 +30,12 @@ export const updateReadmeChangelog = async (
 		);
 
 		await writeFile( filePath, updatedReadmeContents );
-	} catch ( e ) {
-		Logger.error( e );
+	} catch ( e: unknown ) {
+		const errorDetails = `Could not update readme changelog, ${
+			e instanceof Error ? e.message : `Error unknown.`
+		}`;
+
+		Logger.error( errorDetails );
 	}
 };
 
@@ -63,8 +67,12 @@ export const updateClassPluginFile = async (
 		);
 
 		await writeFile( filePath, updatedClassPluginFileContents );
-	} catch ( e ) {
-		Logger.error( e );
+	} catch ( e: unknown ) {
+		const errorDetails = `Could not update class plugin file, ${
+			e instanceof Error ? e.message : `Error unknown.`
+		}`;
+
+		Logger.error( errorDetails );
 	}
 };
 
@@ -88,8 +96,12 @@ export const updateJSON = async (
 			filePath,
 			JSON.stringify( composerJson, null, '\t' ) + '\n'
 		);
-	} catch ( e ) {
-		Logger.error( e );
+	} catch ( e: unknown ) {
+		const errorDetails = `Could not update ${ type }.json, ${
+			e instanceof Error ? e.message : `Error unknown.`
+		}`;
+
+		Logger.error( errorDetails );
 	}
 };
 
@@ -112,7 +124,11 @@ export const updatePluginFile = async (
 			`Version: ${ nextVersion }\n`
 		);
 		await writeFile( filePath, updatedPluginFileContents );
-	} catch ( e ) {
-		Logger.error( e );
+	} catch ( e: unknown ) {
+		const errorDetails = `Could not update plugin file, ${
+			e instanceof Error ? e.message : `Error unknown.`
+		}`;
+
+		Logger.error( errorDetails );
 	}
 };

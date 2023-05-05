@@ -7,6 +7,7 @@
 		"esModuleInterop": true,
 		"moduleResolution": "node",
 		"skipLibCheck": true,
+		"noImplicitAny": true,
 		"typeRoots": [ "./node_modules/@types", "./node_modules/@commander-js" ]
 	}
 }

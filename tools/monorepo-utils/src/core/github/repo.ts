@@ -9,8 +9,8 @@ import { Repository } from '@octokit/graphql-schema';
 import { graphqlWithAuth, octokitWithAuth } from './api';
 
 export const getLatestGithubReleaseVersion = async ( options: {
-	owner?: string;
-	name?: string;
+	owner: string;
+	name: string;
 } ): Promise< string > => {
 	const { owner, name } = options;
 
@@ -37,8 +37,8 @@ export const getLatestGithubReleaseVersion = async ( options: {
 
 export const doesGithubBranchExist = async (
 	options: {
-		owner?: string;
-		name?: string;
+		owner: string;
+		name: string;
 	},
 	nextReleaseBranch: string
 ): Promise< boolean > => {
@@ -66,11 +66,11 @@ export const doesGithubBranchExist = async (
 
 export const getRefFromGithubBranch = async (
 	options: {
-		owner?: string;
-		name?: string;
+		owner: string;
+		name: string;
 	},
 	source: string
-): Promise< string > => {
+): Promise< string | null > => {
 	const { owner, name } = options;
 	const { repository } = await graphqlWithAuth< {
 		repository: Repository;
@@ -90,14 +90,21 @@ export const getRefFromGithubBranch = async (
 			}
 		` );
 
-	// @ts-ignore: The graphql query is typed, but the response is not.
-	return repository.ref.target.history.edges.shift().node.oid;
+	const target = repository.ref.target;
+
+	if ( 'history' in target ) {
+		// If this is not a string we have bigger problems. GitObjectID is a 40 char hex string in the response.
+		const oid = target.history.edges.shift().node?.oid as string;
+		return oid || null;
+	}
+
+	return null;
 };
 
 export const createGithubBranch = async (
 	options: {
-		owner?: string;
-		name?: string;
+		owner: string;
+		name: string;
 	},
 	branch: string,
 	ref: string
@@ -113,8 +120,8 @@ export const createGithubBranch = async (
 
 export const deleteGithubBranch = async (
 	options: {
-		owner?: string;
-		name?: string;
+		owner: string;
+		name: string;
 	},
 	branch: string
 ): Promise< void > => {

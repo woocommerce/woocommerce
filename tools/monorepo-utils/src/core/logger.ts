@@ -25,9 +25,14 @@ export class Logger {
 		] as number;
 	}
 
-	static error( message: string ) {
+	static error( message: string | Error ) {
 		if ( Logger.loggingLevel >= LOGGING_LEVELS.error ) {
-			error( chalk.red( message ) );
+			if ( message instanceof Error ) {
+				error( chalk.red( message.message ) );
+			} else {
+				error( chalk.red( message ) );
+			}
+
 			process.exit( 1 );
 		}
 	}

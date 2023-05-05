@@ -14,7 +14,6 @@ import { getEnvVar } from '../../../core/environment';
 import { getMajorMinor } from '../../../core/version';
 import { bumpFiles } from './bump';
 import { validateArgs } from './lib/validate';
-import { Options } from './types';
 
 const genericErrorFunction = ( err ) => {
 	if ( err.git ) {
@@ -41,7 +40,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		'Base branch to create the PR against. Default: trunk',
 		'trunk'
 	)
-	.action( async ( options: Options ) => {
+	.action( async ( options ) => {
 		const { owner, name, version, base } = options;
 		Logger.startTask(
 			`Making a temporary clone of '${ owner }/${ name }'`

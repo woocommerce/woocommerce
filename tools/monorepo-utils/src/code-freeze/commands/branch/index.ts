@@ -20,10 +20,12 @@ import {
 } from '../../../core/github/repo';
 import { WPIncrement } from '../../../core/version';
 import { Logger } from '../../../core/logger';
-import { Options } from './types';
 import { getEnvVar } from '../../../core/environment';
 
-const getNextReleaseBranch = async ( options: Options ) => {
+const getNextReleaseBranch = async ( options: {
+	owner: string;
+	name: string;
+} ) => {
 	const latestReleaseVersion = await getLatestGithubReleaseVersion( options );
 	const nextReleaseVersion = WPIncrement( latestReleaseVersion );
 	const parsedNextReleaseVersion = parse( nextReleaseVersion );
@@ -53,7 +55,7 @@ export const branchCommand = new Command( 'branch' )
 		'Branch to create the release branch from. Default: trunk',
 		'trunk'
 	)
-	.action( async ( options: Options ) => {
+	.action( async ( options ) => {
 		const { source, branch, owner, name, dryRun } = options;
 		const isGithub = getEnvVar( 'CI' );
 
@@ -65,7 +67,7 @@ export const branchCommand = new Command( 'branch' )
 					'No branch supplied, going off the latest release version'
 				)
 			).start();
-			nextReleaseBranch = await getNextReleaseBranch( options );
+			nextReleaseBranch = await getNextReleaseBranch( { owner, name } );
 			Logger.warn( `The next release branch is ${ nextReleaseBranch }` );
 			versionSpinner.succeed();
 		} else {
@@ -79,7 +81,7 @@ export const branchCommand = new Command( 'branch' )
 		).start();
 
 		const branchExists = await doesGithubBranchExist(
-			options,
+			{ owner, name },
 			nextReleaseBranch
 		);
 		branchSpinner.succeed();
@@ -104,7 +106,10 @@ export const branchCommand = new Command( 'branch' )
 							`Delete branch ${ nextReleaseBranch } on ${ owner }/${ name } and create new one from ${ source }`
 						)
 					).start();
-					await deleteGithubBranch( options, nextReleaseBranch );
+					await deleteGithubBranch(
+						{ owner, name },
+						nextReleaseBranch
+					);
 					deleteBranchSpinner.succeed();
 				}
 			} else {
@@ -128,8 +133,15 @@ export const branchCommand = new Command( 'branch' )
 			process.exit( 0 );
 		}
 
-		const ref = await getRefFromGithubBranch( options, source );
-		await createGithubBranch( options, nextReleaseBranch, ref );
+		const ref = await getRefFromGithubBranch( { owner, name }, source );
+
+		if ( ! ref ) {
+			Logger.error(
+				`Could not find ref for ${ source } on ${ owner }/${ name }`
+			);
+		}
+
+		await createGithubBranch( { owner, name }, nextReleaseBranch, ref );
 		createBranchSpinner.succeed();
 
 		if ( isGithub ) {

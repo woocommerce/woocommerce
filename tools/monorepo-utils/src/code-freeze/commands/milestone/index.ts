@@ -3,7 +3,8 @@
  */
 import { Command } from '@commander-js/extra-typings';
 import ora from 'ora';
-
+import { RequestError } from '@octokit/request-error';
+import { OctokitResponse } from '@octokit/types';
 /**
  * Internal dependencies
  */
@@ -11,9 +12,19 @@ import { getLatestGithubReleaseVersion } from '../../../core/github/repo';
 import { octokitWithAuth } from '../../../core/github/api';
 import { setGithubMilestoneOutputs } from './utils';
 import { WPIncrement } from '../../../core/version';
-import { Options } from './types';
 import { Logger } from '../../../core/logger';
 import { getEnvVar } from '../../../core/environment';
+
+type ValidationError = {
+	resource: string;
+	code: string;
+	field: string;
+};
+
+type OctokitErrorResponse = OctokitResponse< {
+	message: string;
+	errors: RequestError[];
+} >;
 
 export const milestoneCommand = new Command( 'milestone' )
 	.description( 'Create a milestone' )
@@ -32,7 +43,7 @@ export const milestoneCommand = new Command( 'milestone' )
 		'-m --milestone <milestone>',
 		'Milestone to create. Next milestone is gathered from Github if none is supplied'
 	)
-	.action( async ( options: Options ) => {
+	.action( async ( options ) => {
 		const { owner, name, dryRun, milestone } = options;
 		const isGithub = getEnvVar( 'CI' );
 
@@ -55,9 +66,10 @@ export const milestoneCommand = new Command( 'milestone' )
 			const versionSpinner = ora(
 				'No milestone supplied, going off the latest release version'
 			).start();
-			const latestReleaseVersion = await getLatestGithubReleaseVersion(
-				options
-			);
+			const latestReleaseVersion = await getLatestGithubReleaseVersion( {
+				owner,
+				name,
+			} );
 			versionSpinner.succeed();
 
 			nextReleaseVersion = WPIncrement( latestReleaseVersion );
@@ -96,30 +108,42 @@ export const milestoneCommand = new Command( 'milestone' )
 					title: nextMilestone,
 				}
 			);
-		} catch ( e ) {
-			const milestoneAlreadyExistsError = e.response.data.errors?.some(
-				( error ) => error.code === 'already_exists'
-			);
+		} catch ( e: unknown ) {
+			//  We need to check the error type is 422, to determine if its a validation error
+			//  otherwise it's some other unknown error.
+			if ( e instanceof RequestError && e.response.status === 422 ) {
+				const data = ( e as OctokitErrorResponse ).response.data;
+				const errors: ValidationError[] =
+					data?.errors as ValidationError[];
 
-			if ( milestoneAlreadyExistsError ) {
-				milestoneSpinner.succeed();
-				Logger.notice(
-					`Milestone ${ nextMilestone } already exists in ${ owner }/${ name }`
+				const milestoneAlreadyExistsError = errors.some(
+					( error ) => error.code === 'already_exists'
 				);
-				if ( isGithub ) {
-					setGithubMilestoneOutputs(
-						nextReleaseVersion,
-						nextMilestone
+
+				if ( milestoneAlreadyExistsError ) {
+					milestoneSpinner.succeed();
+					console.log(
+						chalk.green(
+							`Milestone ${ nextMilestone } already exists in ${ owner }/${ name }`
+						)
 					);
+					if ( github ) {
+						setGithubMilestoneOutputs(
+							nextReleaseVersion,
+							nextMilestone
+						);
+					}
+					process.exit( 0 );
+				} else {
+					milestoneSpinner.fail();
+					console.log(
+						chalk.red(
+							`\nFailed to create milestone ${ nextMilestone } in ${ owner }/${ name }`
+						)
+					);
+					console.log( chalk.red( e.response.data.message ) );
+					process.exit( 1 );
 				}
-				process.exit( 0 );
-			} else {
-				milestoneSpinner.fail();
-				Logger.error(
-					`\nFailed to create milestone ${ nextMilestone } in ${ owner }/${ name }`
-				);
-				Logger.error( e.response.data.message );
-				process.exit( 1 );
 			}
 		}
 
