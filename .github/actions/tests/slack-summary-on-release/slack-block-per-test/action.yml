@@ -38,6 +38,7 @@ runs:
               E2E_RESULT: ${{ inputs.e2e-result }}
 
         - name: Write JSON object to file
+          shell: bash
           run: echo "${{ toJSON(steps.api-json.outputs.result) }}" > "Slack block - ${{ inputs.test-name }}.txt"
 
         - name: Upload file as artifact
