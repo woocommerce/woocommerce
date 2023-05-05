@@ -37,14 +37,19 @@ runs:
               API_RESULT: ${{ inputs.api-result }}
               E2E_RESULT: ${{ inputs.e2e-result }}
 
-        - name: Write JSON object to file
+        - name: Create tmp directory
+          shell: bash
+          run: mkdir -p tmp
+
+        - name: Write JSON file
+          working-directory: tmp
           shell: bash
           env:
               CONTEXT_JSON: ${{ toJSON(steps.generate-json.outputs.result) }}
-          run: echo ${{ env.CONTEXT_JSON }} > "${{ inputs.test-name }}.slack-block.json"
+          run: echo ${{ env.CONTEXT_JSON }} > "${{ inputs.test-name }}.json"
 
-        - name: Upload file as artifact
+        - name: Upload JSON file as artifact
           uses: actions/upload-artifact@v3
           with:
-              name: ${{ inputs.test-name }}.slack-block.json
-              path: ${{ inputs.test-name }}.slack-block.json
+              name: ${{ env.SLACK_BLOCKS_ARTIFACT }}
+              path: tmp/${{ inputs.test-name }}.json

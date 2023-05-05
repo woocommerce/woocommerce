@@ -14,7 +14,7 @@ permissions: {}
 env:
     E2E_WP_LATEST_ARTIFACT: E2E test on release smoke test site with WP Latest (run ${{ github.run_number }})
     E2E_UPDATE_WC_ARTIFACT: WooCommerce version update test on release smoke test site (run ${{ github.run_number }})
-
+    SLACK_BLOCKS_ARTIFACT: slack-blocks
 jobs:
     get-tag:
         name: Get WooCommerce release tag
