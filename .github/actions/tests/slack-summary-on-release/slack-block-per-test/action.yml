@@ -25,8 +25,8 @@ inputs:
 runs:
     using: composite
     steps:
-        - name: Generate JSON object for the API block
-          id: api-json
+        - name: Create context block as a JSON object
+          id: generate-json
           uses: actions/github-script@v6
           with:
               script: |
@@ -39,7 +39,9 @@ runs:
 
         - name: Write JSON object to file
           shell: bash
-          run: echo "${{ steps.api-json.outputs.result }}" > "Slack block - ${{ inputs.test-name }}.txt"
+          env:
+              CONTEXT_JSON: ${{ steps.generate-json.outputs.result }}
+          run: echo "${{ env.CONTEXT_JSON }}" > "Slack block - ${{ inputs.test-name }}.txt"
 
         - name: Upload file as artifact
           uses: actions/upload-artifact@v3
