@@ -1,4 +1,6 @@
 :root {
+	/* This value might be overridden in PHP based on the attribute set by the user. */
+	--drawer-width: 480px;
 	--neg-drawer-width: calc(var(--drawer-width) * -1);
 }
 

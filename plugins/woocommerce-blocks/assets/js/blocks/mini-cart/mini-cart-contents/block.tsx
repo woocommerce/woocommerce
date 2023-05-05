@@ -15,12 +15,7 @@ type MiniCartContentsBlockProps = {
 export const MiniCartContentsBlock = (
 	props: MiniCartContentsBlockProps
 ): JSX.Element => {
-	const {
-		children,
-		attributes: { width },
-	} = props;
-
-	document.documentElement.style.setProperty( '--drawer-width', width );
+	const { children } = props;
 
 	return <>{ children }</>;
 };
