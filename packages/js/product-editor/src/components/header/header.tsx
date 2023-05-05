@@ -1,73 +1,32 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
-import { Button } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useEntityProp } from '@wordpress/core-data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import { WooHeaderItem } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
  */
-import { AUTO_DRAFT_NAME, getHeaderTitle } from '../../utils';
-
-/**
- * Internal dependencies
- */
+import { getHeaderTitle } from '../../utils';
 import { MoreMenu } from './more-menu';
+import { PreviewButton } from './preview-button';
+import { SaveDraftButton } from './save-draft-button';
+import { PublishButton } from './publish-button';
+import { Tabs } from '../tabs';
 
 export type HeaderProps = {
-	productId: number;
+	onTabSelect: ( tabId: string | null ) => void;
 	productName: string;
 };
 
-export function Header( { productId, productName }: HeaderProps ) {
-	const { isProductLocked, isSaving, editedProductName } = useSelect(
-		( select ) => {
-			const { isSavingEntityRecord, getEditedEntityRecord } =
-				select( 'core' );
-			const { isPostSavingLocked } = select( 'core/editor' );
-
-			const product: Product = getEditedEntityRecord(
-				'postType',
-				'product',
-				productId
-			);
-
-			return {
-				isProductLocked: isPostSavingLocked(),
-				isSaving: isSavingEntityRecord(
-					'postType',
-					'product',
-					productId
-				),
-				editedProductName: product?.name,
-			};
-		},
-		[ productId ]
+export function Header( { onTabSelect, productName }: HeaderProps ) {
+	const [ editedProductName ] = useEntityProp< string >(
+		'postType',
+		'product',
+		'name'
 	);
-
-	const isDisabled = isProductLocked || isSaving;
-	const isCreating = productName === AUTO_DRAFT_NAME;
-
-	const { saveEditedEntityRecord } = useDispatch( 'core' );
-
-	function handleSave() {
-		saveEditedEntityRecord< Product >(
-			'postType',
-			'product',
-			productId
-		).then( ( response ) => {
-			if ( isCreating ) {
-				navigateTo( {
-					url: getNewPath( {}, `/product/${ response.id }` ),
-				} );
-			}
-		} );
-	}
 
 	return (
 		<div
@@ -76,24 +35,25 @@ export function Header( { productId, productName }: HeaderProps ) {
 			aria-label={ __( 'Product Editor top bar.', 'woocommerce' ) }
 			tabIndex={ -1 }
 		>
-			<h1 className="woocommerce-product-header__title">
-				{ getHeaderTitle( editedProductName, productName ) }
-			</h1>
+			<div className="woocommerce-product-header__inner">
+				<div />
 
-			<div className="woocommerce-product-header__actions">
-				<Button
-					onClick={ handleSave }
-					variant="primary"
-					isBusy={ isSaving }
-					disabled={ isDisabled }
-				>
-					{ isCreating
-						? __( 'Add', 'woocommerce' )
-						: __( 'Save', 'woocommerce' ) }
-				</Button>
-				<WooHeaderItem.Slot name="product" />
-				<MoreMenu />
+				<h1 className="woocommerce-product-header__title">
+					{ getHeaderTitle( editedProductName, productName ) }
+				</h1>
+
+				<div className="woocommerce-product-header__actions">
+					<SaveDraftButton />
+
+					<PreviewButton />
+
+					<PublishButton />
+
+					<WooHeaderItem.Slot name="product" />
+					<MoreMenu />
+				</div>
 			</div>
+			<Tabs onChange={ onTabSelect } />
 		</div>
 	);
 }

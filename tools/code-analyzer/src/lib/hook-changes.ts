@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { getFilename, getPatches } from 'cli-core/src/util';
+import {
+	getFilename,
+	getPatches,
+} from '@woocommerce/monorepo-utils/src/core/git';
 import fs from 'node:fs';
 
 /**

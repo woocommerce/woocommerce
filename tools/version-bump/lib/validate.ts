@@ -4,7 +4,7 @@
 import { valid, lt as versionLessThan, parse } from 'semver';
 import { join } from 'path';
 import { readFile } from 'fs/promises';
-import { Logger } from 'cli-core/src/logger';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 
 /**
  * Internal dependencies

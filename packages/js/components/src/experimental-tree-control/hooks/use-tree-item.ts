@@ -17,6 +17,7 @@ export function useTreeItem( {
 	item,
 	level,
 	multiple,
+	shouldNotRecursivelySelect,
 	selected,
 	index,
 	getLabel,
@@ -24,6 +25,11 @@ export function useTreeItem( {
 	shouldItemBeHighlighted,
 	onSelect,
 	onRemove,
+	isExpanded,
+	onCreateNew,
+	shouldShowCreateButton,
+	onLastItemLoop,
+	onTreeBlur,
 	...props
 }: TreeItemProps ) {
 	const nextLevel = level + 1;
@@ -41,6 +47,7 @@ export function useTreeItem( {
 		index,
 		onSelect,
 		onRemove,
+		shouldNotRecursivelySelect,
 	} );
 
 	const highlighter = useHighlighter( {
@@ -56,6 +63,7 @@ export function useTreeItem( {
 
 	const { onKeyDown } = useKeyboard( {
 		...expander,
+		onLastItemLoop,
 		item,
 	} );
 
@@ -96,6 +104,7 @@ export function useTreeItem( {
 			getItemLabel: getLabel,
 			shouldItemBeExpanded,
 			shouldItemBeHighlighted,
+			shouldNotRecursivelySelect,
 			onSelect: selection.onSelectChildren,
 			onRemove: selection.onRemoveChildren,
 		},

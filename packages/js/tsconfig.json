@@ -10,7 +10,6 @@
 		"jsx": "react",
 		"jsxFactory": "createElement",
 		"jsxFragmentFactory": "Fragment",
-		"incremental": true,
 		"typeRoots": []
 	},
 	"exclude": [

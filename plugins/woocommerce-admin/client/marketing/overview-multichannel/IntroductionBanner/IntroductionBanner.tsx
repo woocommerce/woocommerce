@@ -47,8 +47,9 @@ export const IntroductionBanner = ( {
 	 * and clicking on the "Add channels" button in this introduction banner
 	 * will scroll to the button in Channels card.
 	 */
-	const showAddChannelsButton =
-		!! dataRegistered?.length && !! dataRecommended?.length;
+	const showAddChannelsButton = !! (
+		dataRegistered?.length && dataRecommended?.length
+	);
 
 	return (
 		<Card className="woocommerce-marketing-introduction-banner">

@@ -230,6 +230,7 @@ class WC_Install {
 			'wc_update_750_disable_new_product_management_experience',
 		),
 		'7.7.0' => array(
+			'wc_update_770_remove_multichannel_marketing_feature_options',
 			'wc_update_770_delete_stray_order_records',
 		),
 	);
@@ -710,6 +711,9 @@ class WC_Install {
 	 * Create pages that the plugin relies on, storing page IDs in variables.
 	 */
 	public static function create_pages() {
+		// Set the locale to the store locale to ensure pages are created in the correct language.
+		wc_switch_to_site_locale();
+
 		include_once dirname( __FILE__ ) . '/admin/wc-admin-functions.php';
 
 		/**
@@ -780,6 +784,9 @@ class WC_Install {
 				! empty( $page['post_status'] ) ? $page['post_status'] : 'publish'
 			);
 		}
+
+		// Restore the locale to the default locale.
+		wc_restore_locale();
 	}
 
 	/**

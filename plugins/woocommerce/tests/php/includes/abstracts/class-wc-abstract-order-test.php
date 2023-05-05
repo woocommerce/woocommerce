@@ -269,4 +269,59 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( $coupon->get_id(), $coupon_data['id'] );
 		$this->assertEquals( $coupon_code, $coupon_data['code'] );
 	}
+
+	/**
+	 * Test for get_discount_to_display which must return a value
+	 * with and without tax whatever the setting of the options.
+	 *
+	 * Issue :https://github.com/woocommerce/woocommerce/issues/36794
+	 */
+	public function test_get_discount_to_display() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_currency', 'USD' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+
+		// Set dummy data.
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'tax',
+			'tax_rate_priority' => '1',
+			'tax_rate_order'    => '1',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$coupon  = WC_Helper_Coupon::create_coupon();
+		$product = WC_Helper_Product::create_simple_product( true, array( 'price' => 10 ) );
+
+		$order = new WC_Order();
+		$order->add_product( $product );
+		$order->apply_coupon( $coupon );
+		$order->calculate_totals();
+		$order->save();
+
+		$this->assertEquals( wc_price( 1, array( 'currency' => 'USD' ) ), $order->get_discount_to_display( 'excl' ) );
+		$this->assertEquals( wc_price( 1.20, array( 'currency' => 'USD' ) ), $order->get_discount_to_display( 'incl' ) );
+	}
+
+	/**
+	 * @testDox Cache does not interfere if wc_get_order returns a different class than WC_Order.
+	 */
+	public function test_cache_does_not_interferes_with_order_object() {
+		add_action(
+			'woocommerce_new_order',
+			function( $order_id ) {
+				// this makes the cache store a specific order class instance, but it's quickly replaced by a generic one
+				// as we're in the middle of a save and this gets executed before the logic in WC_Abstract_Order.
+				$order = wc_get_order( $order_id );
+			}
+		);
+		$order = new WC_Order();
+		$order->save();
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertInstanceOf( Automattic\WooCommerce\Admin\Overrides\Order::class, $order );
+	}
 }

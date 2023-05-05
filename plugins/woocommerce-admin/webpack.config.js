@@ -5,8 +5,8 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
-const BundleAnalyzerPlugin =
-	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin = require( 'webpack-bundle-analyzer' )
+	.BundleAnalyzerPlugin;
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
@@ -65,6 +65,8 @@ const wpAdminScripts = [
 	'settings-tracking',
 	'order-tracking',
 	'product-import-tracking',
+	'variable-product-tour',
+	'product-category-metabox',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -104,6 +106,7 @@ const webpackConfig = {
 		uniqueName: '__wcAdmin_webpackJsonp',
 	},
 	module: {
+		parser: styleConfig.parser,
 		rules: [
 			{
 				test: /\.(t|j)sx?$/,
@@ -191,6 +194,26 @@ const webpackConfig = {
 				force: true,
 			} ) ),
 		} ),
+
+		// Get all product editor blocks so they can be loaded via JSON.
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: '../../packages/js/product-editor/build/blocks',
+					to: './product-editor/blocks',
+				},
+			],
+		} ),
+
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: '../../packages/js/product-editor/assets',
+					to: './product-editor',
+				},
+			],
+		} ),
+
 		// React Fast Refresh.
 		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
 

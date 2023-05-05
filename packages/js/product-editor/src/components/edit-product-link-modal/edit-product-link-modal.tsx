@@ -3,18 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, Modal, TextControl } from '@wordpress/components';
-import { useState, createElement } from '@wordpress/element';
+import {
+	useState,
+	createElement,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
-import interpolateComponents from '@automattic/interpolate-components';
 import { Product } from '@woocommerce/data';
-import { useFormContext } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-
-/**
- * Internal dependencies
- */
-import { useProductHelper } from '../../hooks/use-product-helper';
 
 type EditProductLinkModalProps = {
 	product: Product;
@@ -22,6 +19,9 @@ type EditProductLinkModalProps = {
 	permalinkSuffix: string;
 	onCancel: () => void;
 	onSaved: () => void;
+	saveHandler: (
+		slug: string
+	) => Promise< { slug: string; permalink: string } | undefined >;
 };
 
 export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
@@ -30,14 +30,13 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 	permalinkSuffix,
 	onCancel,
 	onSaved,
+	saveHandler,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateProductWithStatus, isUpdatingDraft, isUpdatingPublished } =
-		useProductHelper();
+	const [ isSaving, setIsSaving ] = useState< boolean >( false );
 	const [ slug, setSlug ] = useState(
 		product.slug || cleanForSlug( product.name )
 	);
-	const { resetForm, touched, errors } = useFormContext< Product >();
 
 	const onSave = async () => {
 		recordEvent( 'product_update_slug', {
@@ -45,35 +44,19 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 			product_id: product.id,
 			product_type: product.type,
 		} );
-		const updatedProduct = await updateProductWithStatus(
-			product.id,
-			{
-				slug,
-			},
-			product.status,
-			true
-		);
-		if ( updatedProduct && updatedProduct.id ) {
-			// only reset the updated slug and permalink fields.
-			resetForm(
-				{
-					...product,
-					slug: updatedProduct.slug,
-					permalink: updatedProduct.permalink,
-				},
-				touched,
-				errors
-			);
+
+		const { slug: updatedSlug, permalink: updatedPermalink } =
+			( await saveHandler( slug ) ) ?? {};
+
+		if ( updatedSlug ) {
 			createNotice(
-				updatedProduct.slug === cleanForSlug( slug )
-					? 'success'
-					: 'info',
-				updatedProduct.slug === cleanForSlug( slug )
+				updatedSlug === cleanForSlug( slug ) ? 'success' : 'info',
+				updatedSlug === cleanForSlug( slug )
 					? __( 'Product link successfully updated.', 'woocommerce' )
 					: __(
 							'Product link already existed, updated to ',
 							'woocommerce'
-					  ) + updatedProduct.permalink
+					  ) + updatedPermalink
 			);
 		} else {
 			createNotice(
@@ -106,12 +89,12 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 					value={ slug }
 					onChange={ setSlug }
 					hideLabelFromVision
-					help={ interpolateComponents( {
-						mixedString: __( 'Preview: {{link/}}', 'woocommerce' ),
-						components: {
+					help={ createInterpolateElement(
+						__( 'Preview: <link />', 'woocommerce' ),
+						{
 							link: <strong>{ newProductLinkLabel }</strong>,
-						},
-					} ) }
+						}
+					) }
 				/>
 				<div className="woocommerce-product-link-edit-modal__buttons">
 					<Button isSecondary onClick={ () => onCancel() }>
@@ -119,14 +102,12 @@ export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
 					</Button>
 					<Button
 						isPrimary
-						isBusy={ isUpdatingDraft || isUpdatingPublished }
-						disabled={
-							isUpdatingDraft ||
-							isUpdatingPublished ||
-							slug === product.slug
-						}
-						onClick={ () => {
-							onSave();
+						isBusy={ isSaving }
+						disabled={ isSaving || slug === product.slug }
+						onClick={ async () => {
+							setIsSaving( true );
+							await onSave();
+							setIsSaving( false );
 						} }
 					>
 						{ __( 'Save', 'woocommerce' ) }

@@ -8,10 +8,13 @@ import {
 	Link,
 	__experimentalTooltip as Tooltip,
 } from '@woocommerce/components';
-import interpolateComponents from '@automattic/interpolate-components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { createElement, Fragment } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	createInterpolateElement,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -28,12 +31,12 @@ export const DetailsFeatureField = () => {
 				<>
 					{ __( 'Feature this product', 'woocommerce' ) }
 					<Tooltip
-						text={ interpolateComponents( {
-							mixedString: __(
-								'Include this product in a featured section on your website with a widget or shortcode. {{moreLink/}}',
+						text={ createInterpolateElement(
+							__(
+								'Include this product in a featured section on your website with a widget or shortcode. <moreLink />',
 								'woocommerce'
 							),
-							components: {
+							{
 								moreLink: (
 									<Link
 										href="https://woocommerce.com/document/woocommerce-shortcodes/#products"
@@ -52,8 +55,8 @@ export const DetailsFeatureField = () => {
 										{ __( 'Learn more', 'woocommerce' ) }
 									</Link>
 								),
-							},
-						} ) }
+							}
+						) }
 					/>
 				</>
 			}

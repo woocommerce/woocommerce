@@ -402,7 +402,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 				if ( $replacement_object->state ) {
 					return $replacement_object->state;
 				} else {
-					return $replacement_object->original_object->last_error;
+					return $replacement_object->decorated_object->last_error;
 				}
 			}
 		);
@@ -514,8 +514,8 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock->register_method_replacement(
 			'get_results',
 			function( ...$args ) {
-				$wpdb_decorator                              = $args[0];
-				$wpdb_decorator->original_object->last_error = 'Something failed!';
+				$wpdb_decorator                               = $args[0];
+				$wpdb_decorator->decorated_object->last_error = 'Something failed!';
 				return false;
 			}
 		);
@@ -591,8 +591,8 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock->register_method_replacement(
 			'get_results',
 			function( ...$args ) {
-				$wpdb_decorator                              = $args[0];
-				$wpdb_decorator->original_object->last_error = 'Something failed!';
+				$wpdb_decorator                               = $args[0];
+				$wpdb_decorator->decorated_object->last_error = 'Something failed!';
 				return false;
 			}
 		);
@@ -744,6 +744,50 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->sut->migrate_order( $order->get_id() );
 		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
 
+		$this->assertEmpty( $errors );
+	}
+
+	/**
+	 * @testDox When there are mutli meta values for a supposed unique meta key, the first one is picked.
+	 */
+	public function test_first_value_is_picked_when_multi_value() {
+		global $wpdb;
+		$order              = wc_get_order( OrderHelper::create_complex_wp_post_order() );
+		$original_order_key = $order->get_order_key();
+
+		$this->assertNotEmpty( $original_order_key );
+
+		// Add a second order key.
+		add_post_meta( $order->get_id(), '_order_key', 'second_order_key_should_be_ignored' );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$migrated_order_key = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT order_key FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+
+		$this->assertEquals( $original_order_key, $migrated_order_key );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+		$this->assertEmpty( $errors );
+	}
+
+	/**
+	 * @testDox Test migration for multiple null order_key meta value.
+	 */
+	public function test_order_key_null_multiple() {
+		$order1 = OrderHelper::create_order();
+		$order2 = OrderHelper::create_order();
+		delete_post_meta( $order1->get_id(), '_order_key' );
+		delete_post_meta( $order2->get_id(), '_order_key' );
+
+		$this->sut->migrate_order( $order1->get_id() );
+		$this->sut->migrate_order( $order2->get_id() );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order1->get_id(), $order2->get_id() ) );
 		$this->assertEmpty( $errors );
 	}
 }

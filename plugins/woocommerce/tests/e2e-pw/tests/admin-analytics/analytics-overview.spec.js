@@ -6,8 +6,7 @@ test.describe( 'Analytics pages', () => {
 	test.afterEach( async ( { page } ) => {
 		// do some cleanup after each test to make sure things are where they should be
 		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
-			{ waitForLoadState: 'networkidle' }
+			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
 
 		// Grab all of the section headings
@@ -52,8 +51,7 @@ test.describe( 'Analytics pages', () => {
 		// Create an array of the sections we're expecting to find.
 		const arrExpectedSections = [ 'Charts', 'Leaderboards', 'Performance' ];
 		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
-			{ waitForLoadState: 'networkidle' }
+			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
 
 		for ( const expectedSection of arrExpectedSections ) {

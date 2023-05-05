@@ -68,6 +68,7 @@ export type SelectControlProps< ItemType > = {
 	disabled?: boolean;
 	inputProps?: GetInputPropsOptions;
 	suffix?: JSX.Element | null;
+	showToggleButton?: boolean;
 	/**
 	 * This is a feature already implemented in downshift@7.0.0 through the
 	 * reducer. In order for us to use it this prop is added temporarily until
@@ -123,6 +124,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	disabled,
 	inputProps = {},
 	suffix = <SuffixIcon icon={ search } />,
+	showToggleButton = false,
 	__experimentalOpenMenuOnFocus = false,
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
@@ -154,12 +156,13 @@ function SelectControl< ItemType = DefaultItemType >( {
 		}
 
 		setInputValue( getItemLabel( singleSelectedItem ) );
-	}, [ singleSelectedItem ] );
+	}, [ getItemLabel, multiple, singleSelectedItem ] );
 
 	const {
 		isOpen,
 		getLabelProps,
 		getMenuProps,
+		getToggleButtonProps,
 		getInputProps,
 		getComboboxProps,
 		highlightedIndex,
@@ -174,8 +177,13 @@ function SelectControl< ItemType = DefaultItemType >( {
 		items: filteredItems,
 		selectedItem: multiple ? null : singleSelectedItem,
 		itemToString: getItemLabel,
-		onSelectedItemChange: ( { selectedItem } ) =>
-			selectedItem && onSelect( selectedItem ),
+		onSelectedItemChange: ( { selectedItem } ) => {
+			if ( selectedItem ) {
+				onSelect( selectedItem );
+			} else if ( singleSelectedItem ) {
+				onRemove( singleSelectedItem );
+			}
+		},
 		onInputValueChange: ( { inputValue: value, ...changes } ) => {
 			if ( value !== undefined ) {
 				setInputValue( value );
@@ -190,8 +198,13 @@ function SelectControl< ItemType = DefaultItemType >( {
 					// Set input back to selected item if there is a selected item, blank otherwise.
 					newChanges = {
 						...changes,
+						selectedItem:
+							! changes.inputValue?.length && ! multiple
+								? null
+								: changes.selectedItem,
 						inputValue:
 							changes.selectedItem === state.selectedItem &&
+							changes.inputValue?.length &&
 							! multiple
 								? getItemLabel( comboboxSingleSelectedItem )
 								: '',
@@ -256,6 +269,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
 			<ComboBox
 				comboBoxProps={ getComboboxProps() }
+				getToggleButtonProps={ getToggleButtonProps }
 				inputProps={ getInputProps( {
 					...getDropdownProps( {
 						preventKeyAction: isOpen,
@@ -274,6 +288,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 					...inputProps,
 				} ) }
 				suffix={ suffix }
+				showToggleButton={ showToggleButton }
 			>
 				<>
 					{ children( {

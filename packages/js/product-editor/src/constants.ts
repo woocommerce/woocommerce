@@ -1,3 +1,8 @@
+export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =
+	'woocommerce_ces_product_mvp_ces_action';
+export const NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME =
+	'woocommerce_new_product_management_enabled';
+
 export const NUMBERS_AND_ALLOWED_CHARS = '[^-0-9%s1%s2]';
 export const NUMBERS_AND_DECIMAL_SEPARATOR = '[^-\\d\\%s]+';
 export const ONLY_ONE_DECIMAL_SEPARATOR = '[%s](?=%s*[%s])';
@@ -42,3 +47,5 @@ export const VARIANT_SHIPPING_SECTION_BASIC_ID = `variant/${ SHIPPING_SECTION_BA
 export const VARIANT_SHIPPING_SECTION_DIMENSIONS_ID = `variant/${ SHIPPING_SECTION_DIMENSIONS_ID }`;
 
 export const PRODUCT_DETAILS_SLUG = 'product-details';
+
+export const PRODUCT_SCHEDULED_SALE_SLUG = 'product-scheduled-sale';

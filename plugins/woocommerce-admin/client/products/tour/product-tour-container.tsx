@@ -1,9 +1,13 @@
 /**
+ * External dependencies
+ */
+import { __experimentalUseProductMVPCESFooter as useProductMVPCESFooter } from '@woocommerce/product-editor';
+
+/**
  * Internal dependencies
  */
 import { ProductTour } from './product-tour';
 import { ProductTourModal } from './product-tour-modal';
-import { useProductMVPCESFooter } from '~/customer-effort-score-tracks/use-product-mvp-ces-footer';
 import { useProductTour } from './use-product-tour';
 
 export const ProductTourContainer: React.FC = () => {

@@ -85,6 +85,7 @@ jobs:
 
     api-tests-run:
         name: Runs API tests.
+        if: github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -137,6 +138,7 @@ jobs:
 
     k6-tests-run:
         name: Runs k6 Performance tests
+        if: github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -167,6 +169,7 @@ jobs:
         if: |
             always() && 
             ! github.event.pull_request.head.repo.fork &&
+            github.event.pull_request.user.login != 'github-actions[bot]' &&
             (
               contains( needs.*.result, 'success' ) ||
               contains( needs.*.result, 'failure' )
@@ -239,6 +242,7 @@ jobs:
         if: |
             always() && 
             ! github.event.pull_request.head.repo.fork &&
+            github.event.pull_request.user.login != 'github-actions[bot]' &&
             (
               contains( needs.*.result, 'success' ) ||
               contains( needs.*.result, 'failure' )
