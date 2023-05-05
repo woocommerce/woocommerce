@@ -162,6 +162,35 @@ export const SingleWithinModalUsingBodyDropdownPlacement: React.FC = () => {
 	);
 };
 
+export const SingleSelectTree: React.FC = () => {
+	const [ value, setValue ] = React.useState( '' );
+	const [ selected, setSelected ] = React.useState< Item | undefined >();
+
+	const items = filterItems( listItems, value );
+
+	return (
+		<SelectTree
+			id="single-select-tree"
+			label="Single Select Tree"
+			items={ items }
+			selected={ selected }
+			shouldNotRecursivelySelect
+			shouldShowCreateButton={ ( typedValue ) =>
+				! value ||
+				listItems.findIndex( ( item ) => item.label === typedValue ) ===
+					-1
+			}
+			createValue={ value }
+			// eslint-disable-next-line no-alert
+			onCreateNew={ () => alert( 'create new called' ) }
+			onInputChange={ ( a ) => setValue( a || '' ) }
+			onSelect={ ( selectedItems ) => {
+				setSelected( selectedItems as Item );
+			} }
+		/>
+	);
+};
+
 export default {
 	title: 'WooCommerce Admin/experimental/SelectTreeControl',
 	component: SelectTree,
