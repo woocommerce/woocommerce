@@ -114,7 +114,7 @@ const getTourConfig = ( {
 					),
 					descriptions: {
 						desktop: __(
-							'Start typing your new product name here. Add your full product description here. Describe your product in detail.',
+							'Add your full product description here. Describe your product in detail.',
 							'woocommerce'
 						),
 					},
