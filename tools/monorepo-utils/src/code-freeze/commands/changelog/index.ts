@@ -54,5 +54,5 @@ export const changelogCommand = new Command( 'changelog' )
 			releaseBranch
 		);
 
-		await updateTrunkChangelog( tmpRepoPath, version, deletionCommitHash );
+		await updateTrunkChangelog( options, tmpRepoPath, deletionCommitHash );
 	} );

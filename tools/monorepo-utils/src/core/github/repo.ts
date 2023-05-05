@@ -8,6 +8,7 @@ import { Repository } from '@octokit/graphql-schema';
  */
 import { graphqlWithAuth, octokitWithAuth } from './api';
 import { Logger } from '../logger';
+import { PullRequestEndpointResponse } from './types';
 
 export const getLatestGithubReleaseVersion = async ( options: {
 	owner?: string;
@@ -130,23 +131,38 @@ export const deleteGithubBranch = async (
 	);
 };
 
-export const createPR = async ( branch, base, owner, name, title, body ) => {
-	try {
-		Logger.startTask( 'Creating a pull request' );
-		const pr = await octokitWithAuth.request(
-			'POST /repos/{owner}/{repo}/pulls',
-			{
-				owner,
-				repo: name,
-				title,
-				body,
-				head: branch,
-				base,
-			}
-		);
-		Logger.notice( `Pull request created: ${ pr.data.html_url }` );
-		Logger.endTask();
-	} catch ( e ) {
-		Logger.error( e );
-	}
+/**
+ * Create a pull request from branches on Github.
+ *
+ * @param {Object} options       pull request options.
+ * @param {string} options.head  branch name containing the changes you want to merge.
+ * @param {string} options.base  branch name you want the changes pulled into.
+ * @param {string} options.owner repository owner.
+ * @param {string} options.name  repository name.
+ * @param {string} options.title pull request title.
+ * @param {string} options.body  pull request body.
+ * @return {Promise<object>}     pull request data.
+ */
+export const createPullRequest = async ( options: {
+	head: string;
+	base: string;
+	owner: string;
+	name: string;
+	title: string;
+	body: string;
+} ): Promise< PullRequestEndpointResponse[ 'data' ] > => {
+	const { head, base, owner, name, title, body } = options;
+	const pullRequest = await octokitWithAuth.request(
+		'POST /repos/{owner}/{repo}/pulls',
+		{
+			owner,
+			repo: name,
+			title,
+			body,
+			head,
+			base,
+		}
+	);
+	//@ts-ignore There is a type mismatch between the graphql schema and the response. pullRequest.data.head.repo.has_discussions is a boolean, but the graphql schema doesn't have that field.
+	return pullRequest.data;
 };

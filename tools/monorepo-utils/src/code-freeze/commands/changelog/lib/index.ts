@@ -9,7 +9,7 @@ import { execSync } from 'child_process';
  */
 import { Logger } from '../../../../core/logger';
 import { checkoutRemoteBranch } from '../../../../core/git';
-import { createPR } from '../../../../core/github/repo';
+import { createPullRequest } from '../../../../core/github/repo';
 
 export const updateReleaseBranchChangelogs = async (
 	options,
@@ -68,14 +68,19 @@ export const updateReleaseBranchChangelogs = async (
 	await git.checkout( '.' );
 
 	Logger.notice( `Creating PR for ${ branch }` );
-	createPR(
-		branch,
-		releaseBranch,
-		owner,
-		name,
-		`Update changelog for ${ version } release`,
-		'This is a body'
-	);
+	try {
+		const pullRequest = await createPullRequest( {
+			owner,
+			name,
+			title: `Update changelog for ${ version } release`,
+			body: 'This is a body',
+			head: branch,
+			base: releaseBranch,
+		} );
+		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
+	} catch ( e ) {
+		Logger.error( e );
+	}
 
 	return deletionCommitHash.trim();
 };
@@ -102,12 +107,17 @@ export const updateTrunkChangelog = async (
 	await git.push( 'origin', branch );
 
 	Logger.notice( `Creating PR for ${ branch }` );
-	createPR(
-		branch,
-		'trunk',
-		owner,
-		name,
-		`Delete changelog for ${ version } release`,
-		'This is a body'
-	);
+	try {
+		const pullRequest = await createPullRequest( {
+			owner,
+			name,
+			title: `Delete changelog for ${ version } release`,
+			body: 'This is a body',
+			head: branch,
+			base: 'trunk',
+		} );
+		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
+	} catch ( e ) {
+		Logger.error( e );
+	}
 };
