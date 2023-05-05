@@ -37,12 +37,8 @@ runs:
               API_RESULT: ${{ inputs.api-result }}
               E2E_RESULT: ${{ inputs.e2e-result }}
 
-        - name: Create tmp directory
-          shell: bash
-          run: mkdir -p tmp
-
         - name: Write JSON file
-          working-directory: tmp
+          working-directory: /tmp
           shell: bash
           env:
               CONTEXT_JSON: ${{ toJSON(steps.generate-json.outputs.result) }}
@@ -52,4 +48,4 @@ runs:
           uses: actions/upload-artifact@v3
           with:
               name: ${{ env.SLACK_BLOCKS_ARTIFACT }}
-              path: tmp/${{ inputs.test-name }}.json
+              path: /tmp/${{ inputs.test-name }}.json
