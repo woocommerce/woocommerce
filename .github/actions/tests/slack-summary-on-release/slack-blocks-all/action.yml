@@ -7,7 +7,8 @@ inputs:
         required: true
 
 outputs:
-    payload: ${{ steps.payload.outputs.result }}
+    payload:
+        value: ${{ steps.payload.outputs.result }}
 
 runs:
     using: composite
