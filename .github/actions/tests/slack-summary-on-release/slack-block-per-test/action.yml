@@ -41,10 +41,10 @@ runs:
           shell: bash
           env:
               CONTEXT_JSON: ${{ toJSON(steps.generate-json.outputs.result) }}
-          run: echo ${{ env.CONTEXT_JSON }} > "Slack block - ${{ inputs.test-name }}.txt"
+          run: echo ${{ env.CONTEXT_JSON }} > "${{ inputs.test-name }}.slack-block.json"
 
         - name: Upload file as artifact
           uses: actions/upload-artifact@v3
           with:
-              name: Slack block - ${{ inputs.test-name }}
-              path: Slack block - ${{ inputs.test-name }}.txt
+              name: ${{ inputs.test-name }}.slack-block.json
+              path: ${{ inputs.test-name }}.slack-block.json
