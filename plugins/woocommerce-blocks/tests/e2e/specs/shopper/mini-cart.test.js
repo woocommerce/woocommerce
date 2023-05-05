@@ -304,8 +304,6 @@ describe( 'Shopper → Mini Cart', () => {
 				'.wc-block-components-quantity-selector__button--plus'
 			);
 
-			await page.waitForTimeout( 500 );
-
 			await page.click(
 				'.wc-block-components-quantity-selector__button--plus'
 			);
