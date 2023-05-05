@@ -19,5 +19,5 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <p class="order-again">
-	<a href="<?php echo esc_url( $order_again_url ); ?>" class="button<?php esc_attr( $wp_button_class ); ?>"><?php esc_html_e( 'Order again', 'woocommerce' ); ?></a>
+	<a href="<?php echo esc_url( $order_again_url ); ?>" class="button<?php echo esc_attr( $wp_button_class ); ?>"><?php esc_html_e( 'Order again', 'woocommerce' ); ?></a>
 </p>
