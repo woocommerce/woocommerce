@@ -118,7 +118,14 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Mini Cart block: fix slide in animation. ([9195](https://github.com/woocommerce/woocommerce-blocks/pull/9195))
 - Set minimum width for the Mini Cart Contents block. ([9196](https://github.com/woocommerce/woocommerce-blocks/pull/9196))
 
-= 10.0.3 - 2023-04-21 =
+= 10.0.4 - 2023-05-04 =
+
+#### Bug Fixes
+
+- Fix "Edit Mini Cart template part" URL for the Mini Cart block. ([9348](https://github.com/woocommerce/woocommerce-blocks/pull/9348))
+- Fix duplicate taxonomy templates being created on every save. ([9330](https://github.com/woocommerce/woocommerce-blocks/pull/9330))
+
+= 10.0.3 - 2023-04-20 =
 
 #### Bug Fixes
 
