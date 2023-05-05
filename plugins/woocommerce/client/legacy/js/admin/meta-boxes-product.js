@@ -532,10 +532,6 @@ jQuery( function ( $ ) {
 
 			selectedAttributes = add_if_not_exists( selectedAttributes, attributeId );
 			disable_in_attribute_search( selectedAttributes );
-
-			window.wcTracks.recordEvent( 'product_attributes_buttons', {
-				action: 'add_existing',
-			} );
 		}
 
 		$( this ).val( null );
