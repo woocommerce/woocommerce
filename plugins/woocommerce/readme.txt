@@ -280,6 +280,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Update style of product attributes tab empty state. [#37429](https://github.com/woocommerce/woocommerce/pull/37429)
 * Tweak - Update to the merchant variable product e2e test [#37714](https://github.com/woocommerce/woocommerce/pull/37714)
 * Performance - Improve search count query performance by avoiding LEFT JOIN in favor of subquery. [#36688](https://github.com/woocommerce/woocommerce/pull/36688)
+* Enhancement - Added a button to download SSR to a file. [#38110](https://github.com/woocommerce/woocommerce/pull/38110)
 * Enhancement - Added a woocommerce_disable_api_access_log filter to disable last access logging for rest api. [#37332](https://github.com/woocommerce/woocommerce/pull/37332)
 * Enhancement - Fix rounding difference on refunds with per-line taxes [#34641](https://github.com/woocommerce/woocommerce/pull/34641)
 * Enhancement - Show info message when on variations tab and no attributes have been assigned to product. [#37352](https://github.com/woocommerce/woocommerce/pull/37352)
