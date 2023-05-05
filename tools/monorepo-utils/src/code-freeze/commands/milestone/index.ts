@@ -23,7 +23,7 @@ type ValidationError = {
 
 type OctokitErrorResponse = OctokitResponse< {
 	message: string;
-	errors: RequestError[];
+	errors: ValidationError[];
 } >;
 
 export const milestoneCommand = new Command( 'milestone' )
@@ -109,41 +109,38 @@ export const milestoneCommand = new Command( 'milestone' )
 				}
 			);
 		} catch ( e: unknown ) {
-			//  We need to check the error type is 422, to determine if its a validation error
-			//  otherwise it's some other unknown error.
-			if ( e instanceof RequestError && e.response.status === 422 ) {
-				const data = ( e as OctokitErrorResponse ).response.data;
-				const errors: ValidationError[] =
-					data?.errors as ValidationError[];
+			const error: RequestError = e as RequestError;
 
-				const milestoneAlreadyExistsError = errors.some(
-					( error ) => error.code === 'already_exists'
+			// If its 422 we can type narrow to get validation errors.
+			if ( error.response.status === 422 ) {
+				const response: OctokitErrorResponse =
+					error.response as OctokitErrorResponse;
+				const validationErrors = response.data.errors;
+
+				const milestoneAlreadyExistsError = validationErrors.some(
+					( err ) => err.code === 'already_exists'
 				);
 
 				if ( milestoneAlreadyExistsError ) {
 					milestoneSpinner.succeed();
-					console.log(
-						chalk.green(
-							`Milestone ${ nextMilestone } already exists in ${ owner }/${ name }`
-						)
+					Logger.notice(
+						`Milestone ${ nextMilestone } already exists in ${ owner }/${ name }`
 					);
-					if ( github ) {
+					if ( isGithub ) {
 						setGithubMilestoneOutputs(
 							nextReleaseVersion,
 							nextMilestone
 						);
 					}
 					process.exit( 0 );
-				} else {
-					milestoneSpinner.fail();
-					console.log(
-						chalk.red(
-							`\nFailed to create milestone ${ nextMilestone } in ${ owner }/${ name }`
-						)
-					);
-					console.log( chalk.red( e.response.data.message ) );
-					process.exit( 1 );
 				}
+			} else {
+				milestoneSpinner.fail();
+				Logger.error(
+					`\nFailed to create milestone ${ nextMilestone } in ${ owner }/${ name }`
+				);
+				Logger.error( error.message );
+				process.exit( 1 );
 			}
 		}
 
