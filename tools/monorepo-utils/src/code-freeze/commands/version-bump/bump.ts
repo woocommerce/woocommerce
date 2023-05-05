@@ -9,7 +9,7 @@ import {
 	updateClassPluginFile,
 } from './lib/update';
 
-export const bumpFiles = async ( tmpRepoPath, version ) => {
+export const bumpFiles = async ( tmpRepoPath: string, version: string ) => {
 	let nextVersion = version;
 
 	await updatePluginFile( tmpRepoPath, nextVersion );
