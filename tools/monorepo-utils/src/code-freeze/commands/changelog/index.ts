@@ -10,6 +10,7 @@ import { execSync } from 'child_process';
 import { Logger } from '../../../core/logger';
 import { cloneAuthenticatedRepo } from '../../../core/git';
 import { updateTrunkChangelog, updateReleaseBranchChangelogs } from './lib';
+import { Options } from './types';
 
 export const changelogCommand = new Command( 'changelog' )
 	.description( 'Create a new release branch' )
@@ -28,7 +29,7 @@ export const changelogCommand = new Command( 'changelog' )
 		'Path to existing repo. Use this option to avoid cloning a fresh repo for development purposes. Note that using this option assumes dependencies are already installed.'
 	)
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
-	.action( async ( options ) => {
+	.action( async ( options: Options ) => {
 		const { owner, name, version, devRepoPath } = options;
 		const tmpRepoPath = devRepoPath
 			? devRepoPath

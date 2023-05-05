@@ -10,12 +10,21 @@ import { execSync } from 'child_process';
 import { Logger } from '../../../../core/logger';
 import { checkoutRemoteBranch } from '../../../../core/git';
 import { createPullRequest } from '../../../../core/github/repo';
+import { Options } from '../types';
 
+/**
+ * Perform changelog operations on release branch by submitting a pull request. The release branch is a remote branch.
+ *
+ * @param {Object} options       CLI options
+ * @param {string} tmpRepoPath   temp repo path
+ * @param {string} releaseBranch release branch name. The release branch is a remote branch on Github.
+ * @return {Object} update data
+ */
 export const updateReleaseBranchChangelogs = async (
-	options,
-	tmpRepoPath,
-	releaseBranch
-) => {
+	options: Options,
+	tmpRepoPath: string,
+	releaseBranch: string
+): Promise< { deletionCommitHash: string; prNumber: number } > => {
 	const { owner, name, version } = options;
 	await checkoutRemoteBranch( tmpRepoPath, releaseBranch );
 
@@ -87,12 +96,22 @@ export const updateReleaseBranchChangelogs = async (
 	}
 };
 
+/**
+ * Perform changelog operations on trunk by submitting a pull request.
+ *
+ * @param {Object} options                                 CLI options
+ * @param {string} tmpRepoPath                             temp repo path
+ * @param {string} releaseBranch                           release branch name
+ * @param {Object} releaseBranchChanges                    update data from updateReleaseBranchChangelogs
+ * @param {Object} releaseBranchChanges.deletionCommitHash commit from the changelog deletions in updateReleaseBranchChangelogs
+ * @param {Object} releaseBranchChanges.prNumber           pr number created in updateReleaseBranchChangelogs
+ */
 export const updateTrunkChangelog = async (
-	options,
-	tmpRepoPath,
-	releaseBranch,
-	releaseBranchChanges
-) => {
+	options: Options,
+	tmpRepoPath: string,
+	releaseBranch: string,
+	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
+): Promise< void > => {
 	const { owner, name, version } = options;
 	const { deletionCommitHash, prNumber } = releaseBranchChanges;
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
