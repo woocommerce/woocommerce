@@ -32,6 +32,7 @@ runs:
               script: |
                   const script = require('././.github/actions/tests/slack-summary-on-release/slack-block-per-test/scripts/create-result-block.js');
                   return script();
+              result-encoding: string
           env:
               TEST_NAME: ${{ inputs.test-name }}
               API_RESULT: ${{ inputs.api-result }}
