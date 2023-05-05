@@ -32,7 +32,6 @@ runs:
               script: |
                   const script = require('././.github/actions/tests/slack-summary-on-release/slack-block-per-test/scripts/create-result-block.js');
                   return script();
-              result-encoding: string
           env:
               TEST_NAME: ${{ inputs.test-name }}
               API_RESULT: ${{ inputs.api-result }}
@@ -41,8 +40,8 @@ runs:
         - name: Write JSON object to file
           shell: bash
           env:
-              CONTEXT_JSON: ${{ steps.generate-json.outputs.result }}
-          run: echo "${{ env.CONTEXT_JSON }}" > "Slack block - ${{ inputs.test-name }}.txt"
+              CONTEXT_JSON: ${{ toJSON(steps.generate-json.outputs.result) }}
+          run: echo ${{ env.CONTEXT_JSON }} > "Slack block - ${{ inputs.test-name }}.txt"
 
         - name: Upload file as artifact
           uses: actions/upload-artifact@v3
