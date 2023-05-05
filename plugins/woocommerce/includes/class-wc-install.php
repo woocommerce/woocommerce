@@ -231,7 +231,9 @@ class WC_Install {
 		),
 		'7.7.0' => array(
 			'wc_update_770_remove_multichannel_marketing_feature_options',
-			'wc_update_770_delete_stray_order_records',
+		),
+		'7.8.0' => array(
+			'wc_update_780_delete_stray_order_records',
 		),
 	);
 
