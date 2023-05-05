@@ -61,7 +61,11 @@
 			"@woocommerce/type-defs/*": [ "assets/js/types/type-defs/*" ],
 			"@woocommerce/types": [ "assets/js/types" ],
 			"@woocommerce/storybook-controls": [ "storybook/custom-controls" ],
-			"@woocommerce/utils": [ "assets/js/utils" ]
+			"@woocommerce/utils": [ "assets/js/utils" ],
+			"@woocommerce/e2e-utils": [ "tests/e2e-pw/utils" ],
+			"@woocommerce/e2e-types": [ "tests/e2e-pw/types" ],
+			"@woocommerce/e2e-playwright-utils": [ "tests/e2e-pw/playwright-utils" ],
+
 		}
 	}
 }

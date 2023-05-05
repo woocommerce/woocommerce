@@ -13,8 +13,7 @@ else
 fi
 
 ## set permalinks for easier wp-json
-wp rewrite structure '/%postname%/'
-wp rewrite flush
+wp rewrite structure '/%postname%/' --hard
 wp core version --extra
 wp plugin list
 wp theme activate storefront
@@ -22,6 +21,7 @@ wp wc customer update 1 --user=1 --billing='{"first_name":"John","last_name":"Do
 ## Prepare translation for the test suite
 wp language core install nl_NL
 wp language plugin install woocommerce nl_NL
+wp plugin activate woocommerce-blocks
 ## We download a full version of .po (that has translation for js files as well).
 curl https://translate.wordpress.org/projects/wp-plugins/woo-gutenberg-products-block/stable/nl/default/export-translations/ --output ./wp-content/languages/plugins/woo-gutenberg-products-block-nl_NL.po
 sleep 5

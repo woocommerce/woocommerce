@@ -7,12 +7,6 @@
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 ###################################################################################################
-# Install the WordPress Importer plugin and activate it
-###################################################################################################
-
-wp-env run tests-cli "wp plugin install wordpress-importer --activate"
-
-###################################################################################################
 # Empty site to prevent conflicts with existing data
 ###################################################################################################
 
@@ -342,9 +336,10 @@ wp-env run tests-cli "wp wc tax create \
 ###################################################################################################
 # Adjust and flush rewrite rules
 ###################################################################################################
-
-wp-env run tests-cli "wp rewrite structure /%postname%/"
-wp-env run tests-cli "wp rewrite flush"
+# Currently, the rewrite rules don't work properly in the test environment: https://github.com/WordPress/gutenberg/issues/28201
+wp-env run tests-wordpress "chmod -c ugo+w /var/www/html"
+wp-env run tests-cli "wp rewrite structure /%postname%/ --hard"
+wp-env run tests-cli "wp rewrite flush --hard"
 
 ###################################################################################################
 # Create a customer
