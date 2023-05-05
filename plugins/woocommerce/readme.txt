@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Removing auto-draft as wc post type to resolve publish time bug. [#38099](https://github.com/woocommerce/woocommerce/pull/38099)
 * Fix - Handle updating customer when user_registered is 0000-00-00 00:00:00. [#37907](https://github.com/woocommerce/woocommerce/pull/37907)
 * Fix - Sync up date_column_name default for orders table, between stats and table data. [#37927](https://github.com/woocommerce/woocommerce/pull/37927)
 * Fix - Fix regression in supporting nested date query arguments in HPOS. [#37827](https://github.com/woocommerce/woocommerce/pull/37827)
