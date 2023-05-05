@@ -39,7 +39,7 @@ runs:
 
         - name: Write JSON object to file
           shell: bash
-          run: echo "${{ toJSON(steps.api-json.outputs.result) }}" > "Slack block - ${{ inputs.test-name }}.txt"
+          run: echo "${{ steps.api-json.outputs.result }}" > "Slack block - ${{ inputs.test-name }}.txt"
 
         - name: Upload file as artifact
           uses: actions/upload-artifact@v3
