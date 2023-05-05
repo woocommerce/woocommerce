@@ -35,10 +35,14 @@ export const updateReleaseBranchChangelogs = async (
 
 	const branch = `update/${ version }-changelog`;
 
-	await git.checkout( {
-		'-b': null,
-		[ branch ]: null,
-	} );
+	await git
+		.checkout( {
+			'-b': null,
+			[ branch ]: null,
+		} )
+		.catch( ( e ) => {
+			Logger.error( e );
+		} );
 
 	Logger.notice( `Running the changelog script in ${ tmpRepoPath }` );
 	execSync(
@@ -50,12 +54,20 @@ export const updateReleaseBranchChangelogs = async (
 	);
 
 	//Checkout pnpm-lock.yaml to prevent issues in case of an out of date lockfile.
-	await git.checkout( 'pnpm-lock.yaml' );
+	await git.checkout( 'pnpm-lock.yaml' ).catch( ( e ) => {
+		Logger.error( e );
+	} );
 
 	Logger.notice( `Committing deleted files in ${ tmpRepoPath }` );
 
-	await git.add( 'plugins/woocommerce/changelog/' );
-	await git.commit( `Delete changelog files from ${ version } release` );
+	await git.add( 'plugins/woocommerce/changelog/' ).catch( ( e ) => {
+		Logger.error( e );
+	} );
+	await git
+		.commit( `Delete changelog files from ${ version } release` )
+		.catch( ( e ) => {
+			Logger.error( e );
+		} );
 
 	// Can use git.revparse() here I think.
 	const deletionCommitHash = await git.raw( [ 'rev-parse', 'HEAD' ] );
@@ -71,10 +83,20 @@ export const updateReleaseBranchChangelogs = async (
 	Logger.notice(
 		`Committing readme.txt changes in ${ branch } on ${ tmpRepoPath }`
 	);
-	await git.add( 'plugins/woocommerce/readme.txt' );
-	await git.commit( `Update the readme files for the ${ version } release` );
-	await git.push( 'origin', branch );
-	await git.checkout( '.' );
+	await git.add( 'plugins/woocommerce/readme.txt' ).catch( ( e ) => {
+		Logger.error( e );
+	} );
+	await git
+		.commit( `Update the readme files for the ${ version } release` )
+		.catch( ( e ) => {
+			Logger.error( e );
+		} );
+	await git.push( 'origin', branch ).catch( ( e ) => {
+		Logger.error( e );
+	} );
+	await git.checkout( '.' ).catch( ( e ) => {
+		Logger.error( e );
+	} );
 
 	Logger.notice( `Creating PR for ${ branch }` );
 	try {
@@ -119,15 +141,25 @@ export const updateTrunkChangelog = async (
 		baseDir: tmpRepoPath,
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
-	await git.checkout( 'trunk' );
+	await git.checkout( 'trunk' ).catch( ( e ) => {
+		Logger.error( e );
+	} );
 	const branch = `delete/${ version }-changelog`;
 	Logger.notice( `Committing deletions in ${ branch } on ${ tmpRepoPath }` );
-	await git.checkout( {
-		'-b': null,
-		[ branch ]: null,
+	await git
+		.checkout( {
+			'-b': null,
+			[ branch ]: null,
+		} )
+		.catch( ( e ) => {
+			Logger.error( e );
+		} );
+	await git.raw( [ 'cherry-pick', deletionCommitHash ] ).catch( ( e ) => {
+		Logger.error( e );
 	} );
-	await git.raw( [ 'cherry-pick', deletionCommitHash ] );
-	await git.push( 'origin', branch );
+	await git.push( 'origin', branch ).catch( ( e ) => {
+		Logger.error( e );
+	} );
 
 	Logger.notice( `Creating PR for ${ branch }` );
 	try {
