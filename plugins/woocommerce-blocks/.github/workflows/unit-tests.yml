@@ -37,7 +37,7 @@ jobs:
       - name: Npm install and build
         run: |
           npm ci --no-optional
-          FORCE_REDUCED_MOTION=true npm run build:e2e-test
+          FORCE_REDUCED_MOTION=true npm run build
           
       - name: blocks.ini setup
         run: echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = test' > blocks.ini

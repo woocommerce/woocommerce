@@ -1,5 +1,4 @@
 name: Playwright Tests
-
 on:
   push:
     branches: [ trunk ]
@@ -7,27 +6,12 @@ on:
 
 jobs:
   PlaywrightE2ETests:
-    if: false
+    
     name: Playwright E2E tests
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: trunk
-
-      - name: Cache node_modules
-        id: cache-node-modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
 
       - name: Setup node version and npm cache
         uses: actions/setup-node@v3
@@ -36,27 +20,45 @@ jobs:
           cache: 'npm'
 
       - name: Install Node dependencies
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm install --no-optional --no-audit
+        run: npm ci
 
-      - name: Load wp-env
-        run: npm run env:start --update
+      - name: Build Assets
+        run: FORCE_REDUCED_MOTION=true npm run build
 
-      - name: Fix permissions # We need to figure this out https://github.com/WordPress/gutenberg/issues/22515#issuecomment-1308346256
+      - name: blocks.ini setup
         run: |
-          WP_ENV_DIR=$(npm run wp-env install-path --silent 2>&1 | head -1)
-          cd $WP_ENV_DIR
-          mkdir -p tests-WordPress/wp-content/languages tests-WordPress/wp-content/upgrade
-          chmod -R 767 tests-WordPress/wp-content/languages tests-WordPress/wp-content/upgrade
-          cd -
+          echo -e 'woocommerce_blocks_phase = 3\nwoocommerce_blocks_env = tests' > blocks.ini
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
-      - name: Install Playwright Browsers
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+          coverage: none
+          tools: composer
+
+      - name: Composer install
+        run: composer install
+
+      - name: Install Playwright
         run: npx playwright install --with-deps
 
+
+      - name: Load wp-env
+        run: npm run env:start
+
       - name: Run Playwright tests
-        run: npx playwright test --config=tests/e2e-pw/playwright.config.ts
+        run: npm run test:e2e-pw
+
       - uses: actions/upload-artifact@v3
         with:
           name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+          path: ./tests/e2e-pw/artifacts/test-results

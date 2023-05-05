@@ -36,7 +36,7 @@ Additionally,
 -   `test:update` updates the snapshot tests for components, used if you change a component that has tests attached.
 -   `test:watch` keeps watch of files and automatically re-runs tests when things change.
 
-## How to run end-to-end tests
+## How to run end-to-end tests with deprecated infrastructure
 
 End-to-end tests are implemented in `tests/e2e-tests/specs/`.
 
@@ -44,7 +44,7 @@ Since these drive the user interface, they need to run against a test environmen
 
 To set up to run e2e tests:
 
--   `npm run build:e2e-test` builds the assets (js/css), you can exclude this step if you've already got built files to test with.
+-   `npm run build` builds the assets (js/css), you can exclude this step if you've already got built files to test with.
 -   `npm run wp-env start` to start the test environment
 
     Then, to run the tests:
@@ -59,6 +59,10 @@ When you're done, you may want to shut down the test environment:
 -   `npm run wp-env stop` to stop the test environment
 
 **Note:** There are a number of other useful `wp-env` commands. You can find out more in the [wp-env docs](https://github.com/WordPress/gutenberg/blob/master/packages/env/README.md).
+
+## How to run end-to-end tests
+
+Visit the [dedicated documentation](../../../tests/e2e-pw/README.md).
 
 ### Debugging e2e tests using generated reports
 
