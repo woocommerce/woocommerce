@@ -1,21 +1,18 @@
-.wp-block-woocommerce-product-images-field {
-	.woocommerce-image-gallery {
-		margin-top: $gap-largest;
+.wp-block-woocommerce-product-attributes-field {
+	.woocommerce-sortable {
+		padding: 0;
 	}
-    .woocommerce-media-uploader {
-        text-align: left;
-    }
-    .woocommerce-media-uploader__label {
+
+	.woocommerce-list-item {
+		background: none;
+		border: none;
+		border-bottom: 1px solid $gray-200;
+		padding-left: 0;
+        grid-template-columns: 26% auto 90px;
+	}
+
+    .woocommerce-sortable__handle {
         display: none;
     }
-    .woocommerce-sortable {
-        margin-top: 0;
-        padding: 0;
-    }
 
-    &:not(.has-images) {
-        .woocommerce-sortable {
-            display: none;
-        }
-    }
 }
