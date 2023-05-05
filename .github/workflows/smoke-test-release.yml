@@ -454,6 +454,20 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && (
+                      steps.run-api-composite-action.outputs.result == 'failure' ||
+                      steps.run-e2e-composite-action.outputs.result == 'failure' 
+                    ) 
+                  )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-block-per-test
+              with:
+                  test-name: ${{ matrix.version.description }} (${{ matrix.version.number }})
+                  api-result: ${{ steps.run-api-composite-action.outputs.result }}
+                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}
         # mytodo re-enable
@@ -690,6 +704,7 @@ jobs:
                     --repo woocommerce/woocommerce-test-reports
 
     post-slack-summary:
+        if: false # mytodo re-enable
         name: Post Slack summary
         needs: [get-tag, test-wp-versions]
         runs-on: ubuntu-20.04

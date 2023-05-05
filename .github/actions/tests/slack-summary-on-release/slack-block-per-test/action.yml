@@ -1,0 +1,47 @@
+name: Compose a Slack block for release tests
+description: Create a Slack block that shows the API and E2E test results from one of the release tests, and upload it as an artifact.
+permissions: {}
+
+inputs:
+    test-name:
+        required: true
+    api-result:
+        required: true
+        type: choice
+        options:
+            - success
+            - failure
+            - cancelled
+            - skipped
+    e2e-result:
+        required: true
+        type: choice
+        options:
+            - success
+            - failure
+            - cancelled
+            - skipped
+
+runs:
+    using: composite
+    steps:
+        - name: Generate JSON object for the API block
+          id: api-json
+          uses: actions/github-script@v6
+          with:
+              script: |
+                  const script = require('././.github/actions/tests/slack-summary-on-release/slack-block-per-test/scripts/create-result-block.js');
+                  return script();
+          env:
+              TEST_NAME: ${{ inputs.test-name }}
+              API_RESULT: ${{ inputs.api-result }}
+              E2E_RESULT: ${{ inputs.e2e-result }}
+
+        - name: Write JSON object to file
+          run: echo "${{ toJSON(steps.api-json.outputs.result) }}" > "Slack block - ${{ inputs.test-name }}.txt"
+
+        - name: Upload file as artifact
+          uses: actions/upload-artifact@v3
+          with:
+              name: Slack block - ${{ inputs.test-name }}
+              path: Slack block - ${{ inputs.test-name }}.txt
