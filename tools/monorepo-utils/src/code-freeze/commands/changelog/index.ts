@@ -25,7 +25,7 @@ export const changelogCommand = new Command( 'changelog' )
 	)
 	.option(
 		'-d --devRepoPath <devRepoPath>',
-		'Path to existing repo. Use this option to avoid cloning a fresh repo and installing all the dependencies. Note that using this option assumes dependencies are already installed.'
+		'Path to existing repo. Use this option to avoid cloning a fresh repo for development purposes. Note that using this option assumes dependencies are already installed.'
 	)
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options ) => {
@@ -48,11 +48,15 @@ export const changelogCommand = new Command( 'changelog' )
 		}
 
 		const releaseBranch = `release/${ version }`;
-		const deletionCommitHash = await updateReleaseBranchChangelogs(
+		const releaseBranchChanges = await updateReleaseBranchChangelogs(
 			options,
 			tmpRepoPath,
 			releaseBranch
 		);
 
-		await updateTrunkChangelog( options, tmpRepoPath, deletionCommitHash );
+		await updateTrunkChangelog(
+			options,
+			tmpRepoPath,
+			releaseBranchChanges
+		);
 	} );

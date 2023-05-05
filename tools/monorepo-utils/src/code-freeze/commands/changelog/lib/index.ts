@@ -72,25 +72,28 @@ export const updateReleaseBranchChangelogs = async (
 		const pullRequest = await createPullRequest( {
 			owner,
 			name,
-			title: `Update changelog for ${ version } release`,
-			body: 'This is a body',
+			title: `Release: Prepare the changelog for ${ version }`,
+			body: `This pull request was automatically generated during the code freeze to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
+		return {
+			deletionCommitHash: deletionCommitHash.trim(),
+			prNumber: pullRequest.number,
+		};
 	} catch ( e ) {
 		Logger.error( e );
 	}
-
-	return deletionCommitHash.trim();
 };
 
 export const updateTrunkChangelog = async (
 	options,
 	tmpRepoPath,
-	deletionCommitHash
+	releaseBranchChanges
 ) => {
 	const { owner, name, version } = options;
+	const { deletionCommitHash, prNumber } = releaseBranchChanges;
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
@@ -111,8 +114,8 @@ export const updateTrunkChangelog = async (
 		const pullRequest = await createPullRequest( {
 			owner,
 			name,
-			title: `Delete changelog for ${ version } release`,
-			body: 'This is a body',
+			title: `Release: Remove ${ version } change files`,
+			body: `This pull request was automatically generated during the code freeze to remove the changefiles from ${ version } that are compiled into the ${ 'releaseBranch' } branch via ${ prNumber }`,
 			head: branch,
 			base: 'trunk',
 		} );
