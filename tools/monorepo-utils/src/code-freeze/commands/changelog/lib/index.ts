@@ -90,6 +90,7 @@ export const updateReleaseBranchChangelogs = async (
 export const updateTrunkChangelog = async (
 	options,
 	tmpRepoPath,
+	releaseBranch,
 	releaseBranchChanges
 ) => {
 	const { owner, name, version } = options;
@@ -115,7 +116,7 @@ export const updateTrunkChangelog = async (
 			owner,
 			name,
 			title: `Release: Remove ${ version } change files`,
-			body: `This pull request was automatically generated during the code freeze to remove the changefiles from ${ version } that are compiled into the ${ 'releaseBranch' } branch via ${ prNumber }`,
+			body: `This pull request was automatically generated during the code freeze to remove the changefiles from ${ version } that are compiled into the \`${ releaseBranch }\` branch via #${ prNumber }`,
 			head: branch,
 			base: 'trunk',
 		} );

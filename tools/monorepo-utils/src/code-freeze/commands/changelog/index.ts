@@ -57,6 +57,7 @@ export const changelogCommand = new Command( 'changelog' )
 		await updateTrunkChangelog(
 			options,
 			tmpRepoPath,
+			releaseBranch,
 			releaseBranchChanges
 		);
 	} );
