@@ -516,9 +516,6 @@ jQuery( function ( $ ) {
 			const $attributeName = $attribute.find( 'input[name="attribute_names[0]"]' );
 			const $attributeValue = $attribute.find( 'input[name="attribute_values[0]"]' );
 
-			console.log( 'name: ' + $attributeName.val() );
-			console.log( 'value: ' + $attributeValue.val() );
-
 			if ( ! $attributeName.val() && ! $attributeValue.val() ) {
 				$attribute.remove();
 			}
