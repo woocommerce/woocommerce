@@ -31,9 +31,10 @@ export const changelogCommand = new Command( 'changelog' )
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options: Options ) => {
 		const { owner, name, version, devRepoPath } = options;
+		// Use a supplied path, otherwise do a full clone of the repo, including history so that changelogs can be created with links to PRs.
 		const tmpRepoPath = devRepoPath
 			? devRepoPath
-			: await cloneAuthenticatedRepo( options, true );
+			: await cloneAuthenticatedRepo( options, false );
 
 		Logger.notice(
 			`Temporary clone of '${ owner }/${ name }' created at ${ tmpRepoPath }`
@@ -49,12 +50,15 @@ export const changelogCommand = new Command( 'changelog' )
 		}
 
 		const releaseBranch = `release/${ version }`;
+
+		// Update the release branch.
 		const releaseBranchChanges = await updateReleaseBranchChangelogs(
 			options,
 			tmpRepoPath,
 			releaseBranch
 		);
 
+		// Update trunk.
 		await updateTrunkChangelog(
 			options,
 			tmpRepoPath,

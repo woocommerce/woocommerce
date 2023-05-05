@@ -115,7 +115,19 @@ export const cloneRepoShallow = async ( repoPath: string ) => {
 	return await cloneRepo( repoPath, { '--depth': 1 } );
 };
 
-export const cloneAuthenticatedRepo = async ( options, isShallow = true ) => {
+/**
+ * Clone a repo using the authenticated token `GITHUB_TOKEN`. This allows the script to push branches to origin.
+ *
+ * @param {Object}  options       CLI options
+ * @param {string}  options.owner repo owner
+ * @param {string}  options.name  repo name
+ * @param {boolean} isShallow     whether to do a shallow clone or not.
+ * @return {string} temporary repo path
+ */
+export const cloneAuthenticatedRepo = async (
+	options: { owner: string; name: string },
+	isShallow = true
+): Promise< string > => {
 	const { owner, name } = options;
 	const source = `github.com/${ owner }/${ name }`;
 	const token = getEnvVar( 'GITHUB_TOKEN' );
@@ -408,7 +420,15 @@ export const generateDiff = async (
 	}
 };
 
-export const checkoutRemoteBranch = async ( tmpRepoPath, branch ) => {
+/**
+ *
+ * @param {string} tmpRepoPath path to temporary repo
+ * @param {string} branch      remote branch to checkout
+ */
+export const checkoutRemoteBranch = async (
+	tmpRepoPath: string,
+	branch: string
+): Promise< void > => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
 		config: [ 'core.hooksPath=/dev/null' ],
