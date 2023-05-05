@@ -4,13 +4,8 @@
 import { BlockInstance } from '@wordpress/blocks';
 import { Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import {
-	createElement,
-	useCallback,
-	useEffect,
-	useState,
-} from '@wordpress/element';
-import { useDebounce, useResizeObserver } from '@wordpress/compose';
+import { createElement, useEffect, useState } from '@wordpress/element';
+import { useResizeObserver } from '@wordpress/compose';
 import {
 	BlockEditorProvider,
 	BlockInspector,
@@ -66,15 +61,6 @@ export function IframeEditor( {
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
-	const handleChange = useCallback(
-		( updatedBlocks: BlockInstance[] ) => {
-			onChange( updatedBlocks );
-		},
-		[ onChange ]
-	);
-
-	const debouncedOnChange = useDebounce( handleChange, 200 );
-
 	return (
 		<div className="woocommerce-iframe-editor">
 			<BlockEditorProvider
@@ -86,7 +72,7 @@ export function IframeEditor( {
 				value={ blocks }
 				onChange={ ( updatedBlocks: BlockInstance[] ) => {
 					setBlocks( updatedBlocks );
-					debouncedOnChange( updatedBlocks );
+					onChange( updatedBlocks );
 				} }
 				useSubRegistry={ true }
 			>
@@ -104,7 +90,13 @@ export function IframeEditor( {
 					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 					{ /* @ts-ignore */ }
 					<BlockEditorKeyboardShortcuts.Register />
-					{ onClose && <BackButton onClick={ onClose } /> }
+					{ onClose && (
+						<BackButton
+							onClick={ () => {
+								setTimeout( onClose, 550 );
+							} }
+						/>
+					) }
 					<ResizableEditor
 						enableResizing={ true }
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
