@@ -8,7 +8,7 @@ Stable tag: 7.6.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-WooCommerce is the world’s most popular open-source eCommerce solution.
+Everything you need to launch an online store in days and keep it growing for years. From your first sale to millions in revenue, Woo is with you.
 
 == Description ==
 
@@ -268,6 +268,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Smoke test WooCommerce with plugins installed on releases. [#37361](https://github.com/woocommerce/woocommerce/pull/37361)
 * Dev - Split can create product, attributes and variations, edit variations and delete variations into smaller tests to avoid timing out [#37733](https://github.com/woocommerce/woocommerce/pull/37733)
 * Dev - Update webpack config to use @woocommerce/internal-style-build's parser config [#37195](https://github.com/woocommerce/woocommerce/pull/37195)
+* Tweak - Update plugin listing description [#38074](https://github.com/woocommerce/woocommerce/pull/38074)
 * Tweak - Changed label for button to add a new global attribute value from the product screen. [#37414](https://github.com/woocommerce/woocommerce/pull/37414)
 * Tweak - Default to sorting orders by date (desc) when HPOS is active. [#37565](https://github.com/woocommerce/woocommerce/pull/37565)
 * Tweak - Exclude empty attributes from the attribute count when tracking product updates. [#37718](https://github.com/woocommerce/woocommerce/pull/37718)
