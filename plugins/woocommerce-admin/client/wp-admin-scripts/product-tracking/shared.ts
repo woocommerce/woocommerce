@@ -446,7 +446,7 @@ const attachProductAttributesTracks = () => {
 		.querySelector( '#product_attributes .add_custom_attribute' )
 		?.addEventListener( 'click', () => {
 			recordEvent( 'product_attributes_buttons', {
-				action: 'add_first_attribute',
+				action: 'add_new',
 			} );
 		} );
 	document
