@@ -711,7 +711,9 @@ jQuery( function ( $ ) {
 	$( '.product_attributes' ).on(
 		'click',
 		'button.add_new_attribute',
-		function () {
+		function ( event ) {
+			event.preventDefault();
+
 			$( '.product_attributes' ).block( {
 				message: null,
 				overlayCSS: {
@@ -761,8 +763,6 @@ jQuery( function ( $ ) {
 			} else {
 				$( '.product_attributes' ).unblock();
 			}
-
-			return false;
 		}
 	);
 
