@@ -7,13 +7,16 @@ test.describe( 'Can create a new post', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL } ) => {
-		const base64auth = btoa( `${ admin.username }:${ admin.password }` );
+		const base64auth = Buffer.from(
+			`${ admin.username }:${ admin.password }`
+		).toString( 'base64' );
 		const wpApi = await request.newContext( {
 			baseURL: `${ baseURL }/wp-json/wp/v2/`,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ base64auth }`,
 			},
 		} );
+
 		let response = await wpApi.get( `posts` );
 		const allPosts = await response.json();
 
