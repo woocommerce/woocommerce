@@ -19,16 +19,28 @@ test.describe( 'Can create a new post', () => {
 
 		await allPosts.forEach( async ( post ) => {
 			if ( post.title.rendered === postTitle ) {
-				response = await wpApi.delete( `posts/${ post.id }` );
+				response = await wpApi.delete( `posts/${ post.id }`, {
+					data: {
+						force: true,
+					},
+				} );
 				expect( response.ok() ).toBeTruthy();
 			}
 		} );
 	} );
 
 	test( 'can create new post', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php', {
-			waitUntil: 'networkidle',
-		} );
+		await page.goto( 'wp-admin/post-new.php' );
+
+		const welcomeModalVisible = await page
+			.getByRole( 'heading', {
+				name: 'Welcome to the block editor',
+			} )
+			.isVisible();
+
+		if ( welcomeModalVisible ) {
+			await page.getByRole( 'button', { name: 'Close dialog' } ).click();
+		}
 
 		await page
 			.getByRole( 'textbox', { name: 'Add Title' } )
@@ -52,8 +64,8 @@ test.describe( 'Can create a new post', () => {
 			.getByRole( 'button', { name: 'Publish', exact: true } )
 			.click();
 
-		expect(
-			await page.getByText( `${ postTitle } is now live.` )
-		).toBeTruthy();
+		await expect(
+			page.getByText( `${ postTitle } is now live.` )
+		).toBeVisible();
 	} );
 } );
