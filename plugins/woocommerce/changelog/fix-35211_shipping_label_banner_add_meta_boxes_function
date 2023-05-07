@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update ShippingLabelBanner add_meta_box action to only trigger on shop_order pages and remove deprecated function call.

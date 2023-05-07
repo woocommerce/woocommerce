@@ -7,7 +7,7 @@
 
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\DataSourcePoller;
-use \Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_SpecRunner

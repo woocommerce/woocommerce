@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Admin\API;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
-use \Automattic\WooCommerce\Admin\Notes\Notes as NotesFactory;
+use Automattic\WooCommerce\Admin\Notes\Notes as NotesFactory;
 
 /**
  * REST API Admin Note Action controller class.

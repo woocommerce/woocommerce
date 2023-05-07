@@ -9,6 +9,9 @@ echo "Generating build directory..."
 rm -rf "$BUILD_PATH"
 mkdir -p "$DEST_PATH"
 
+echo "Cleaning up assets..."
+find "$PROJECT_PATH/assets/css/." ! -name '.gitkeep' -type f -exec rm -f {} + && find "$PROJECT_PATH/assets/client/." ! -name '.gitkeep' -type f -exec rm -f {} + && find "$PROJECT_PATH/assets/js/." ! -name '.gitkeep' -type f -exec rm -f {} +
+
 echo "Installing PHP and JS dependencies..."
 pnpm install
 echo "Running JS Build..."

@@ -16,12 +16,12 @@ export { default as EmptyContent } from './empty-content';
 export { default as Flag } from './flag';
 export { Form, useFormContext } from './form';
 export { FormSection } from './form-section';
-export type { FormContext, FormRef, FormErrors } from './form';
+export type { FormContext, FormContextType, FormRef, FormErrors } from './form';
 export { default as FilterPicker } from './filter-picker';
 export { H, Section } from './section';
 export { ImageGallery, ImageGalleryItem } from './image-gallery';
 export { default as ImageUpload } from './image-upload';
-export { default as Link } from './link';
+export { Link } from './link';
 export { default as List } from './list';
 export { MediaUploader } from './media-uploader';
 export { default as MenuItem } from './ellipsis-menu/menu-item';
@@ -45,6 +45,7 @@ export { default as SelectControl } from './select-control';
 export {
 	SelectControl as __experimentalSelectControl,
 	selectControlStateChangeTypes,
+	useAsyncFilter,
 } from './experimental-select-control';
 export {
 	MenuItem as __experimentalSelectControlMenuItem,
@@ -83,3 +84,30 @@ export { DynamicForm } from './dynamic-form';
 export { default as TourKit } from './tour-kit';
 export * as TourKitTypes from './tour-kit/types';
 export { CollapsibleContent } from './collapsible-content';
+export { createOrderedChildren, sortFillsByOrder } from './utils';
+export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-product-field-item';
+export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
+export { WooProductTabItem as __experimentalWooProductTabItem } from './woo-product-tab-item';
+export * from './product-fields';
+export {
+	SlotContextProvider,
+	useSlotContext,
+	SlotContextType,
+	SlotContextHelpersType,
+} from './slot-context';
+export {
+	TreeControl as __experimentalTreeControl,
+	Item as TreeItemType,
+} from './experimental-tree-control';
+export {
+	SelectTree as __experimentalSelectTreeControl,
+	SelectTreeMenuSlot as __experimentalSelectTreeMenuSlot,
+} from './experimental-select-tree-control';
+export { default as TreeSelectControl } from './tree-select-control';
+
+// Exports below can be removed once the @woocommerce/product-editor package is released.
+export {
+	ProductSectionLayout as __experimentalProductSectionLayout,
+	ProductFieldSection as __experimentalProductFieldSection,
+} from './product-section-layout';
+export { DisplayState } from './display-state';

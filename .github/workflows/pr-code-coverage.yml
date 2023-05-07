@@ -1,54 +1,61 @@
 name: Run code coverage on PR
 on:
-  pull_request:
-  workflow_dispatch:
+    pull_request:
+        paths-ignore:
+            - '**/changelog/**'
+    workflow_dispatch:
 defaults:
-  run:
-    shell: bash
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    run:
+        shell: bash
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions: {}
+
 jobs:
-  test:
-    name: Code coverage (PHP 7.4, WP Latest)
-    timeout-minutes: 30
-    runs-on: ubuntu-20.04
-    services:
-      database:
-        image: mysql:5.6
-        env:
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 100
+    test:
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
+        name: Code coverage (PHP 7.4, WP Latest)
+        timeout-minutes: 30
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        services:
+            database:
+                image: mysql:5.6
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                ports:
+                    - 3306:3306
+                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  fetch-depth: 100
 
-      - name: Setup WooCommerce Monorepo
-        uses: ./.github/actions/setup-woocommerce-monorepo
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
-      - name: Tool versions
-        run: |
-          php --version
-          composer --version
+            - name: Tool versions
+              run: |
+                  php --version
+                  composer --version
 
-      - name: Build Admin feature config
-        working-directory: plugins/woocommerce
-        run:
-          pnpm run build:feature-config
+            - name: Build Admin feature config
+              working-directory: plugins/woocommerce
+              run: pnpm run build:feature-config
 
-      - name: Init DB and WP
-        working-directory: plugins/woocommerce
-        run: bash tests/bin/install.sh woo_test root root 127.0.0.1 latest
+            - name: Init DB and WP
+              working-directory: plugins/woocommerce
+              run: bash tests/bin/install.sh woo_test root root 127.0.0.1 latest
 
-      - name: Run unit tests with code coverage. Allow to fail.
-        working-directory: plugins/woocommerce
-        run: |
-          RUN_CODE_COVERAGE=1 bash tests/bin/phpunit.sh
-          exit 0
-      
-      - name: Send code coverage to Codecov.
-        run: |
-          bash <(curl -s https://codecov.io/bash)
+            - name: Run unit tests with code coverage. Allow to fail.
+              working-directory: plugins/woocommerce
+              run: |
+                  RUN_CODE_COVERAGE=1 bash tests/bin/phpunit.sh
+                  exit 0
+
+            - name: Send code coverage to Codecov.
+              run: |
+                  bash <(curl -s https://codecov.io/bash)

@@ -10,6 +10,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { get, noop, partial, uniq } from 'lodash';
 import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { CompareButton, Search, TableCard } from '@woocommerce/components';
 import {
 	getIdsFromQuery,
@@ -39,7 +40,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import DownloadIcon from './download-icon';
 import ReportError from '../report-error';
 import { extendTableData } from './utils';
-import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 import './style.scss';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';

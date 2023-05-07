@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Rewrote withOptionsHydration to not use dispatch-within-useselect pattern that is broken after gutenberg 15.5 update

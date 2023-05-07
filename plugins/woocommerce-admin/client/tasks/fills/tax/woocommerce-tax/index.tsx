@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { difference } from 'lodash';
 import { useSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';

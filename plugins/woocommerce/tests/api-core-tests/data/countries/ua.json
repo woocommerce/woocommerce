@@ -1,0 +1,126 @@
+{
+    "code": "UA",
+    "name": "Ukraine",
+    "states": [
+        {
+            "code": "UA05",
+            "name": "Vinnychchyna"
+        },
+        {
+            "code": "UA07",
+            "name": "Volyn"
+        },
+        {
+            "code": "UA09",
+            "name": "Luhanshchyna"
+        },
+        {
+            "code": "UA12",
+            "name": "Dnipropetrovshchyna"
+        },
+        {
+            "code": "UA14",
+            "name": "Donechchyna"
+        },
+        {
+            "code": "UA18",
+            "name": "Zhytomyrshchyna"
+        },
+        {
+            "code": "UA21",
+            "name": "Zakarpattia"
+        },
+        {
+            "code": "UA23",
+            "name": "Zaporizhzhya"
+        },
+        {
+            "code": "UA26",
+            "name": "Prykarpattia"
+        },
+        {
+            "code": "UA30",
+            "name": "Kyiv"
+        },
+        {
+            "code": "UA32",
+            "name": "Kyivshchyna"
+        },
+        {
+            "code": "UA35",
+            "name": "Kirovohradschyna"
+        },
+        {
+            "code": "UA40",
+            "name": "Sevastopol"
+        },
+        {
+            "code": "UA43",
+            "name": "Crimea"
+        },
+        {
+            "code": "UA46",
+            "name": "Lvivshchyna"
+        },
+        {
+            "code": "UA48",
+            "name": "Mykolayivschyna"
+        },
+        {
+            "code": "UA51",
+            "name": "Odeshchyna"
+        },
+        {
+            "code": "UA53",
+            "name": "Poltavshchyna"
+        },
+        {
+            "code": "UA56",
+            "name": "Rivnenshchyna"
+        },
+        {
+            "code": "UA59",
+            "name": "Sumshchyna"
+        },
+        {
+            "code": "UA61",
+            "name": "Ternopilshchyna"
+        },
+        {
+            "code": "UA63",
+            "name": "Kharkivshchyna"
+        },
+        {
+            "code": "UA65",
+            "name": "Khersonshchyna"
+        },
+        {
+            "code": "UA68",
+            "name": "Khmelnychchyna"
+        },
+        {
+            "code": "UA71",
+            "name": "Cherkashchyna"
+        },
+        {
+            "code": "UA74",
+            "name": "Chernihivshchyna"
+        },
+        {
+            "code": "UA77",
+            "name": "Chernivtsi Oblast"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/ua"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

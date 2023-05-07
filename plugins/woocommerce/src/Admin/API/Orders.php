@@ -10,6 +10,8 @@ namespace Automattic\WooCommerce\Admin\API;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Orders controller.
@@ -54,29 +56,60 @@ class Orders extends \WC_REST_Orders_Controller {
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
-		global $wpdb;
 		$args = parent::prepare_objects_query( $request );
 
-		// Search by partial order number.
 		if ( ! empty( $request['number'] ) ) {
-			$partial_number = trim( $request['number'] );
-			$limit          = intval( $args['posts_per_page'] );
-			$order_ids      = $wpdb->get_col(
+			$args = $this->search_partial_order_number( $request['number'], $args );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Helper method to allow searching by partial order number.
+	 *
+	 * @param int   $number Partial order number match.
+	 * @param array $args List of arguments for the request.
+	 *
+	 * @return array Modified args with partial order search included.
+	 */
+	private function search_partial_order_number( $number, $args ) {
+		global $wpdb;
+
+		$partial_number = trim( $number );
+		$limit          = intval( $args['posts_per_page'] );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order_table_name = OrdersTableDataStore::get_orders_table_name();
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $orders_table_name is hardcoded.
+			$order_ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT ID
-					FROM {$wpdb->prefix}posts
-					WHERE post_type = 'shop_order'
-					AND ID LIKE %s
+					"SELECT id
+					FROM $order_table_name
+					    WHERE type = 'shop_order'
+					    AND id LIKE %s
 					LIMIT %d",
 					$wpdb->esc_like( absint( $partial_number ) ) . '%',
 					$limit
 				)
 			);
-
-			// Force WP_Query return empty if don't found any order.
-			$order_ids        = empty( $order_ids ) ? array( 0 ) : $order_ids;
-			$args['post__in'] = $order_ids;
+			// phpcs:enable
+		} else {
+			$order_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID
+				FROM {$wpdb->prefix}posts
+				WHERE post_type = 'shop_order'
+				AND ID LIKE %s
+				LIMIT %d",
+					$wpdb->esc_like( absint( $partial_number ) ) . '%',
+					$limit
+				)
+			);
 		}
+
+		// Force WP_Query return empty if don't found any order.
+		$order_ids        = empty( $order_ids ) ? array( 0 ) : $order_ids;
+		$args['post__in'] = $order_ids;
 
 		return $args;
 	}

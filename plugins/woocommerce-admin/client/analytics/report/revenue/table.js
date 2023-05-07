@@ -20,13 +20,13 @@ import {
 	defaultTableDateFormat,
 	getCurrentDates,
 } from '@woocommerce/date';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { CurrencyContext } from '../../../lib/currency-context';
 
 const EMPTY_ARRAY = [];
 

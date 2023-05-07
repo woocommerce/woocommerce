@@ -18,7 +18,7 @@ export type FormErrors< Values > = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type FormContext< Values extends Record< string, any > > = {
+export type FormContextType< Values extends Record< string, any > > = {
 	values: Values;
 	errors: FormErrors< Values >;
 	isDirty: boolean;
@@ -44,21 +44,23 @@ export type FormContext< Values extends Record< string, any > > = {
 	): InputProps< Values, Value >;
 	isValidForm: boolean;
 	resetForm: (
-		initialValues: Values,
+		initialValues?: Values,
 		touchedFields?: { [ P in keyof Values ]?: boolean | undefined },
 		errors?: FormErrors< Values >
 	) => void;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const FormContext = createContext< FormContext< any > >(
+export const FormContext: React.Context< FormContextType< any > > =
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	{} as FormContext< any >
-);
+	createContext< FormContextType< any > >(
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		{} as FormContextType< any >
+	);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useFormContext< Values extends Record< string, any > >() {
-	const formik = useContext< FormContext< Values > >( FormContext );
+	const formContext = useContext< FormContextType< Values > >( FormContext );
 
-	return formik;
+	return formContext;
 }

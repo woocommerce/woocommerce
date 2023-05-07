@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Loader;
 
 /**
  * Init class.
@@ -64,6 +64,10 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\Experiments',
 			'Automattic\WooCommerce\Admin\API\Marketing',
 			'Automattic\WooCommerce\Admin\API\MarketingOverview',
+			'Automattic\WooCommerce\Admin\API\MarketingRecommendations',
+			'Automattic\WooCommerce\Admin\API\MarketingChannels',
+			'Automattic\WooCommerce\Admin\API\MarketingCampaigns',
+			'Automattic\WooCommerce\Admin\API\MarketingCampaignTypes',
 			'Automattic\WooCommerce\Admin\API\Options',
 			'Automattic\WooCommerce\Admin\API\Orders',
 			'Automattic\WooCommerce\Admin\API\PaymentGatewaySuggestions',
@@ -86,7 +90,13 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\NavigationFavorites',
 			'Automattic\WooCommerce\Admin\API\Taxes',
 			'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
+			'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
 		);
+
+		$product_form_controllers = array();
+		if ( Features::is_enabled( 'new-product-management-experience' ) ) {
+			$product_form_controllers[] = 'Automattic\WooCommerce\Admin\API\ProductForm';
+		}
 
 		if ( Features::is_enabled( 'analytics' ) ) {
 			$analytics_controllers = array(
@@ -118,9 +128,15 @@ class Init {
 			// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
 			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
 
-			$controllers = array_merge( $controllers, $analytics_controllers );
+			$controllers = array_merge( $controllers, $analytics_controllers, $product_form_controllers );
 		}
 
+		/**
+		 * Filter for the WooCommerce Admin REST controllers.
+		 *
+		 * @since 3.5.0
+		 * @param array $controllers List of rest API controllers.
+		 */
 		$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
 
 		foreach ( $controllers as $controller ) {

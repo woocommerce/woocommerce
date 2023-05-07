@@ -5,8 +5,10 @@
 
 namespace Automattic\WooCommerce\Utilities;
 
+use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use WC_Order;
 use WP_Post;
@@ -33,6 +35,15 @@ final class OrderUtil {
 	 */
 	public static function custom_orders_table_usage_is_enabled() : bool {
 		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+	}
+
+	/**
+	 * Helper function to get whether the orders cache should be used or not.
+	 *
+	 * @return bool True if the orders cache should be used, false otherwise.
+	 */
+	public static function orders_cache_usage_is_enabled() : bool {
+		return wc_get_container()->get( OrderCacheController::class )->orders_cache_usage_is_enabled();
 	}
 
 	/**
@@ -122,5 +133,23 @@ final class OrderUtil {
 	 */
 	public static function get_order_admin_new_url() : string {
 		return wc_get_container()->get( PageController::class )->get_new_page_url();
+	}
+
+	/**
+	 * Get the name of the database table that's currently in use for orders.
+	 *
+	 * @return string
+	 */
+	public static function get_table_for_orders() {
+		return wc_get_container()->get( COTMigrationUtil::class )->get_table_for_orders();
+	}
+
+	/**
+	 * Get the name of the database table that's currently in use for orders.
+	 *
+	 * @return string
+	 */
+	public static function get_table_for_order_meta() {
+		return wc_get_container()->get( COTMigrationUtil::class )->get_table_for_order_meta();
 	}
 }

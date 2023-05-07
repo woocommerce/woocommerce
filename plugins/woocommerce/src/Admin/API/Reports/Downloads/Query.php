@@ -17,7 +17,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Downloads;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
  * API\Reports\Downloads\Query

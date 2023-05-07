@@ -22,6 +22,7 @@ import Checkbox from './checkbox';
  *
  * @param {Object}                        props                    Component parameters
  * @param {InnerOption[]}                 props.options            List of options to be rendered
+ * @param {InnerOption}                   props.parent             Parent option
  * @param {Function}                      props.onChange           Callback when an option changes
  * @param {Function}                      [props.onExpanderClick]  Callback when an expander is clicked.
  * @param {(option: InnerOption) => void} [props.onToggleExpanded] Callback when requesting an expander to be toggled.
@@ -31,6 +32,7 @@ const Options = ( {
 	onChange = () => {},
 	onExpanderClick = noop,
 	onToggleExpanded = noop,
+	parent = null,
 } ) => {
 	/**
 	 * Alters the node with some keys for accessibility
@@ -76,6 +78,7 @@ const Options = ( {
 							) }
 							tabIndex="-1"
 							onClick={ ( e ) => {
+								e.preventDefault();
 								onExpanderClick( e );
 								onToggleExpanded( option );
 							} }
@@ -93,7 +96,7 @@ const Options = ( {
 						option={ option }
 						checked={ checked }
 						onChange={ ( e ) => {
-							onChange( e.target.checked, option );
+							onChange( e.target.checked, option, parent );
 						} }
 						onKeyDown={ ( e ) => {
 							handleKeyDown( e, option );
@@ -113,6 +116,7 @@ const Options = ( {
 							onChange={ onChange }
 							onExpanderClick={ onExpanderClick }
 							onToggleExpanded={ onToggleExpanded }
+							parent={ option }
 						/>
 					</div>
 				) }

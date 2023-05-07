@@ -1,0 +1,158 @@
+{
+    "code": "MD",
+    "name": "Moldova",
+    "states": [
+        {
+            "code": "C",
+            "name": "Chișinău"
+        },
+        {
+            "code": "BL",
+            "name": "Bălți"
+        },
+        {
+            "code": "AN",
+            "name": "Anenii Noi"
+        },
+        {
+            "code": "BS",
+            "name": "Basarabeasca"
+        },
+        {
+            "code": "BR",
+            "name": "Briceni"
+        },
+        {
+            "code": "CH",
+            "name": "Cahul"
+        },
+        {
+            "code": "CT",
+            "name": "Cantemir"
+        },
+        {
+            "code": "CL",
+            "name": "Călărași"
+        },
+        {
+            "code": "CS",
+            "name": "Căușeni"
+        },
+        {
+            "code": "CM",
+            "name": "Cimișlia"
+        },
+        {
+            "code": "CR",
+            "name": "Criuleni"
+        },
+        {
+            "code": "DN",
+            "name": "Dondușeni"
+        },
+        {
+            "code": "DR",
+            "name": "Drochia"
+        },
+        {
+            "code": "DB",
+            "name": "Dubăsari"
+        },
+        {
+            "code": "ED",
+            "name": "Edineț"
+        },
+        {
+            "code": "FL",
+            "name": "Fălești"
+        },
+        {
+            "code": "FR",
+            "name": "Florești"
+        },
+        {
+            "code": "GE",
+            "name": "UTA Găgăuzia"
+        },
+        {
+            "code": "GL",
+            "name": "Glodeni"
+        },
+        {
+            "code": "HN",
+            "name": "Hîncești"
+        },
+        {
+            "code": "IL",
+            "name": "Ialoveni"
+        },
+        {
+            "code": "LV",
+            "name": "Leova"
+        },
+        {
+            "code": "NS",
+            "name": "Nisporeni"
+        },
+        {
+            "code": "OC",
+            "name": "Ocnița"
+        },
+        {
+            "code": "OR",
+            "name": "Orhei"
+        },
+        {
+            "code": "RZ",
+            "name": "Rezina"
+        },
+        {
+            "code": "RS",
+            "name": "Rîșcani"
+        },
+        {
+            "code": "SG",
+            "name": "Sîngerei"
+        },
+        {
+            "code": "SR",
+            "name": "Soroca"
+        },
+        {
+            "code": "ST",
+            "name": "Strășeni"
+        },
+        {
+            "code": "SD",
+            "name": "Șoldănești"
+        },
+        {
+            "code": "SV",
+            "name": "Ștefan Vodă"
+        },
+        {
+            "code": "TR",
+            "name": "Taraclia"
+        },
+        {
+            "code": "TL",
+            "name": "Telenești"
+        },
+        {
+            "code": "UN",
+            "name": "Ungheni"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/md"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

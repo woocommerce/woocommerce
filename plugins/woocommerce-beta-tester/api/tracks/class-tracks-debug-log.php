@@ -24,17 +24,31 @@ class Tracks_Debug_Log {
 	private $source = 'tracks';
 
 	/**
+	 * Get the logger instance.
+	 *
+	 * @return WC_Logger_Interface|null
+	 */
+	private function get_logger() {
+		// Sometimes between installations of WC versions the logger will not be available.
+		if ( ! $this->logger && function_exists( 'wc_get_logger' ) ) {
+			$this->logger = wc_get_logger();
+		}
+
+		return $this->logger;
+	}
+
+	/**
 	 * Initialize hooks.
 	 */
 	public function __construct() {
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
+		// WooCommerce might not be installed/activated between installs of WC versions.
+		if ( class_exists( 'WooCommerce' ) ) {
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
 
-		$logger       = wc_get_logger();
-		$this->logger = $logger;
-
-		add_action( 'admin_footer', array( $this, 'log_footer_pixels' ), 5 );
-		add_action( 'pre_http_request', array( $this, 'log_remote_pixels' ), 10, 3 );
+			add_action( 'admin_footer', array( $this, 'log_footer_pixels' ), 5 );
+			add_action( 'pre_http_request', array( $this, 'log_remote_pixels' ), 10, 3 );
+		}
 	}
 
 	/**
@@ -44,15 +58,22 @@ class Tracks_Debug_Log {
 	 * @param array  $properties Event properties.
 	 */
 	public function log_event( $event_name, $properties ) {
-		$this->logger->debug(
-			$event_name,
-			array( 'source' => $this->source )
-		);
-		foreach ( $properties as $key => $property ) {
-			$this->logger->debug(
-				"  - {$key}: {$property}",
+		$logger = $this->get_logger();
+
+		if ( $logger ) {
+			$logger->debug(
+				$event_name,
 				array( 'source' => $this->source )
 			);
+		}
+
+		foreach ( $properties as $key => $property ) {
+			if ( $logger ) {
+				$logger->debug(
+					"  - {$key}: {$property}",
+					array( 'source' => $this->source )
+				);
+			}
 		}
 	}
 

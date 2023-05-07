@@ -11,7 +11,7 @@ const selectors = createSelectors( {
 
 describe( 'crud selectors', () => {
 	it( 'should return methods for the default selectors', () => {
-		expect( Object.keys( selectors ).length ).toEqual( 8 );
+		expect( Object.keys( selectors ).length ).toEqual( 10 );
 		expect( selectors ).toHaveProperty( 'getProduct' );
 		expect( selectors ).toHaveProperty( 'getProducts' );
 		expect( selectors ).toHaveProperty( 'getProductsTotalCount' );
@@ -20,5 +20,7 @@ describe( 'crud selectors', () => {
 		expect( selectors ).toHaveProperty( 'getProductCreateError' );
 		expect( selectors ).toHaveProperty( 'getProductDeleteError' );
 		expect( selectors ).toHaveProperty( 'getProductUpdateError' );
+		expect( selectors ).toHaveProperty( 'hasFinishedRequest' );
+		expect( selectors ).toHaveProperty( 'isRequesting' );
 	} );
 } );

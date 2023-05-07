@@ -7,10 +7,10 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Products\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
-use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
  * API\Reports\Products\Stats\DataStore.
@@ -188,7 +188,7 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 
 			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 			$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-			$this->interval_query->add_sql_clause( 'select', ", MAX(${table_name}.date_created) AS datetime_anchor" );
+			$this->interval_query->add_sql_clause( 'select', ", MAX({$table_name}.date_created) AS datetime_anchor" );
 			if ( '' !== $selections ) {
 				$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
 			}

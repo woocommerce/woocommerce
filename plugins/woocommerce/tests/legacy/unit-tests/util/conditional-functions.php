@@ -79,7 +79,7 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	 * @return string
 	 */
 	public function _https_url() {
-		return 'https://example.org';
+		return 'https://' . WP_TESTS_DOMAIN . '';
 	}
 
 	/**

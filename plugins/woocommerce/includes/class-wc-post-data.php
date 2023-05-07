@@ -54,6 +54,7 @@ class WC_Post_Data {
 		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'before_delete_order' ) );
+		add_action( 'woocommerce_before_delete_order', array( __CLASS__, 'before_delete_order' ) );
 
 		// Meta cache flushing.
 		add_action( 'updated_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
@@ -502,7 +503,7 @@ class WC_Post_Data {
 	 * @param  int    $meta_id    Meta ID.
 	 * @param  int    $object_id  Object ID.
 	 * @param  string $meta_key   Meta key.
-	 * @param  string $meta_value Meta value.
+	 * @param  mixed  $meta_value Meta value.
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
 		WC_Cache_Helper::invalidate_cache_group( 'object_' . $object_id );

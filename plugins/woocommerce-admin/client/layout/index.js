@@ -4,7 +4,7 @@
 import { SlotFillProvider } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
-import { Component, lazy, Suspense, createContext } from '@wordpress/element';
+import { Component, lazy, Suspense } from '@wordpress/element';
 import {
 	unstable_HistoryRouter as HistoryRouter,
 	Route,
@@ -16,6 +16,10 @@ import {
 import { Children, cloneElement } from 'react';
 import PropTypes from 'prop-types';
 import { get, isFunction, identity, memoize } from 'lodash';
+import {
+	CustomerEffortScoreModalContainer,
+	triggerExitPageCesSurvey,
+} from '@woocommerce/customer-effort-score';
 import { getHistory, getQuery } from '@woocommerce/navigation';
 import {
 	PLUGINS_STORE_NAME,
@@ -26,6 +30,10 @@ import {
 import { recordPageView } from '@woocommerce/tracks';
 import '@woocommerce/notices';
 import { PluginArea } from '@wordpress/plugins';
+import {
+	LayoutContextProvider,
+	getLayoutContextValue,
+} from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -33,6 +41,7 @@ import { PluginArea } from '@wordpress/plugins';
 import './style.scss';
 import { Controller, getPages } from './controller';
 import { Header } from '../header';
+import { Footer } from './footer';
 import Notices from './notices';
 import TransientNotices from './transient-notices';
 import { getAdminSetting } from '~/utils/admin-settings';
@@ -48,20 +57,6 @@ const WCPayUsageModal = lazy( () =>
 	import(
 		/* webpackChunkName: "wcpay-usage-modal" */ '../tasks/fills/PaymentGatewaySuggestions/components/WCPay/UsageModal'
 	)
-);
-
-const LayoutContextPrototype = {
-	getExtendedContext( newItem ) {
-		return { ...this, path: [ ...this.path, newItem ] };
-	},
-	toString() {
-		return this.path.join( '/' );
-	},
-	path: [],
-};
-
-export const LayoutContext = createContext(
-	LayoutContextPrototype.getExtendedContext( 'root' )
 );
 
 export class PrimaryLayout extends Component {
@@ -124,14 +119,12 @@ const LayoutSwitchWrapper = ( props ) => {
 };
 
 class _Layout extends Component {
-	memoizedLayoutContext = memoize( ( page ) =>
-		LayoutContextPrototype.getExtendedContext(
-			page?.navArgs?.id?.toLowerCase() || 'page'
-		)
+	memoizedLayoutContext = memoize(
+		( page ) => page?.navArgs?.id?.toLowerCase() || 'page'
 	);
-
 	componentDidMount() {
 		this.recordPageViewTrack();
+		triggerExitPageCesSurvey();
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -144,6 +137,9 @@ class _Layout extends Component {
 
 		if ( previousPath !== currentPath ) {
 			this.recordPageViewTrack();
+			setTimeout( () => {
+				triggerExitPageCesSurvey();
+			}, 0 );
 		}
 	}
 
@@ -207,8 +203,10 @@ class _Layout extends Component {
 		);
 
 		return (
-			<LayoutContext.Provider
-				value={ this.memoizedLayoutContext( page ) }
+			<LayoutContextProvider
+				value={ getLayoutContextValue( [
+					this.memoizedLayoutContext( page ),
+				] ) }
 			>
 				<SlotFillProvider>
 					<div className="woocommerce-layout">
@@ -238,6 +236,8 @@ class _Layout extends Component {
 								<WCPayUsageModal />
 							</Suspense>
 						) }
+						<Footer />
+						<CustomerEffortScoreModalContainer />
 					</div>
 					<PluginArea scope="woocommerce-admin" />
 					{ window.wcAdminFeatures.navigation && (
@@ -245,7 +245,7 @@ class _Layout extends Component {
 					) }
 					<PluginArea scope="woocommerce-tasks" />
 				</SlotFillProvider>
-			</LayoutContext.Provider>
+			</LayoutContextProvider>
 		);
 	}
 }

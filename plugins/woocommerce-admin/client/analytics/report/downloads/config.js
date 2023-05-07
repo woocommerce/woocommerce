@@ -77,7 +77,7 @@ export const advancedFilters = applyFilters(
 	DOWLOADS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
-			'Downloads match {{select /}} filters',
+			'Downloads match <select/> filters',
 			'A sentence describing filters for Downloads. See screen shot for context: https://cloudup.com/ccxhyH2mEDg',
 			'woocommerce'
 		),
@@ -90,7 +90,7 @@ export const advancedFilters = applyFilters(
 					rule: __( 'Select a product filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
 					title: __(
-						'{{title}}Product{{/title}} {{rule /}} {{filter /}}',
+						'<title>Product</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select product', 'woocommerce' ),
@@ -130,7 +130,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a customer username filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
 					title: __(
-						'{{title}}Username{{/title}} {{rule /}} {{filter /}}',
+						'<title>Username</title> <rule/> <filter />',
 						'woocommerce'
 					),
 					filter: __( 'Select customer username', 'woocommerce' ),
@@ -172,7 +172,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
 					title: __(
-						'{{title}}Order #{{/title}} {{rule /}} {{filter /}}',
+						'<title>Order #</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select order number', 'woocommerce' ),
@@ -212,7 +212,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
 					title: __(
-						'{{title}}IP Address{{/title}} {{rule /}} {{filter /}}',
+						'<title>IP Address</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select IP address', 'woocommerce' ),

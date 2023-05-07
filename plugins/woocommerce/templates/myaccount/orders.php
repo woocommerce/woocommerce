@@ -14,7 +14,7 @@
  *
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 7.0.1
+ * @version 7.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -96,10 +96,9 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 	<?php endif; ?>
 
 <?php else : ?>
-	<div class="woocommerce-message woocommerce-message--info woocommerce-Message woocommerce-Message--info woocommerce-info">
-		<a class="woocommerce-Button button" href="<?php echo esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ); ?>"><?php esc_html_e( 'Browse products', 'woocommerce' ); ?></a>
-		<?php esc_html_e( 'No order has been made yet.', 'woocommerce' ); ?>
-	</div>
+
+	<?php wc_print_notice( esc_html__( 'No order has been made yet.', 'woocommerce' ) . ' <a class="woocommerce-Button button" href="' . esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ) . '">' . esc_html__( 'Browse products', 'woocommerce' ) . '</a>', 'notice' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
+
 <?php endif; ?>
 
 <?php do_action( 'woocommerce_after_account_orders', $has_orders ); ?>

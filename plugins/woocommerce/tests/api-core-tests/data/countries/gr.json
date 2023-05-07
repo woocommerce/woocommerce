@@ -1,0 +1,70 @@
+{
+    "code": "GR",
+    "name": "Greece",
+    "states": [
+        {
+            "code": "I",
+            "name": "Attica"
+        },
+        {
+            "code": "A",
+            "name": "East Macedonia and Thrace"
+        },
+        {
+            "code": "B",
+            "name": "Central Macedonia"
+        },
+        {
+            "code": "C",
+            "name": "West Macedonia"
+        },
+        {
+            "code": "D",
+            "name": "Epirus"
+        },
+        {
+            "code": "E",
+            "name": "Thessaly"
+        },
+        {
+            "code": "F",
+            "name": "Ionian Islands"
+        },
+        {
+            "code": "G",
+            "name": "West Greece"
+        },
+        {
+            "code": "H",
+            "name": "Central Greece"
+        },
+        {
+            "code": "J",
+            "name": "Peloponnese"
+        },
+        {
+            "code": "K",
+            "name": "North Aegean"
+        },
+        {
+            "code": "L",
+            "name": "South Aegean"
+        },
+        {
+            "code": "M",
+            "name": "Crete"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/gr"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

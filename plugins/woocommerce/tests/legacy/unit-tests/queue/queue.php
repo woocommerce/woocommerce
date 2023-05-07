@@ -4,9 +4,9 @@
  * @package WooCommerce\Tests\Queue
  */
 
- /**
-  * WC_Tests_Discounts.
-  */
+/**
+ * WC_Tests_Discounts.
+ */
 class WC_Tests_Queue extends WC_Unit_Test_Case {
 
 	/**
@@ -35,21 +35,24 @@ class WC_Tests_Queue extends WC_Unit_Test_Case {
 		// Test that the action can be found.
 		$action_ids = $queue->search(
 			array(
-				'hook' => $hook,
-				'args' => $args,
+				'hook'  => $hook,
+				'args'  => $args,
 				'group' => $group,
 			),
 			'ids'
 		);
+		$action_ids = array_map( 'absint', $action_ids );
 		$this->assertContains( $single, $action_ids );
+
 		$action_ids = $queue->search(
 			array(
-				'hook' => $hook,
+				'hook'   => $hook,
 				'search' => $unique_hash,
-				'group' => $group,
+				'group'  => $group,
 			),
 			'ids'
 		);
+		$action_ids = array_map( 'absint', $action_ids );
 		$this->assertContains( $single, $action_ids );
 
 		// Schedule a recurring action.
@@ -63,21 +66,24 @@ class WC_Tests_Queue extends WC_Unit_Test_Case {
 		// Test that the action can be found.
 		$action_ids = $queue->search(
 			array(
-				'hook' => $hook,
-				'args' => $args,
+				'hook'  => $hook,
+				'args'  => $args,
 				'group' => $group,
 			),
 			'ids'
 		);
+		$action_ids = array_map( 'absint', $action_ids );
 		$this->assertContains( $recurring, $action_ids );
+
 		$action_ids = $queue->search(
 			array(
-				'hook' => $hook,
+				'hook'   => $hook,
 				'search' => $unique_hash,
-				'group' => $group,
+				'group'  => $group,
 			),
 			'ids'
 		);
+		$action_ids = array_map( 'absint', $action_ids );
 		$this->assertContains( $recurring, $action_ids );
 
 		// Schedule a cron action on a daily midnight schedule starting at the next midnight.
@@ -93,21 +99,24 @@ class WC_Tests_Queue extends WC_Unit_Test_Case {
 		// Test that the action can be found.
 		$action_ids = $queue->search(
 			array(
-				'hook' => $hook,
-				'args' => $args,
+				'hook'  => $hook,
+				'args'  => $args,
 				'group' => $group,
 			),
 			'ids'
 		);
+		$action_ids = array_map( 'absint', $action_ids );
 		$this->assertContains( $cron_action, $action_ids );
+
 		$action_ids = $queue->search(
 			array(
-				'hook' => $hook,
+				'hook'   => $hook,
 				'search' => $unique_hash,
-				'group' => $group,
+				'group'  => $group,
 			),
 			'ids'
 		);
+		$action_ids = array_map( 'absint', $action_ids );
 		$this->assertContains( $cron_action, $action_ids );
 
 		// Test wildcard search.

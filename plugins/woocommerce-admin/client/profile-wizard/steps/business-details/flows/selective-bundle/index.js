@@ -25,11 +25,11 @@ import {
 import { getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 import classnames from 'classnames';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { CurrencyContext } from '~/lib/currency-context';
 import { createNoticesFromResponse } from '~/lib/notices';
 import { platformOptions } from '../../data/platform-options';
 import { employeeOptions } from '../../data/employee-options';
@@ -766,7 +766,11 @@ class BusinessDetails extends Component {
 				activeClass="is-active"
 				initialTabName="current-tab"
 				onSelect={ ( tabName ) => {
-					if ( this.state.currentTab !== tabName ) {
+					if (
+						this.state.currentTab !== tabName &&
+						// TabPanel calls onSelect on mount when initialTabName is provided, so we need to check if the tabName is valid.
+						tabName !== 'current-tab'
+					) {
 						this.setState( {
 							currentTab: tabName,
 							savedValues:

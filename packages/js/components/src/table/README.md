@@ -241,6 +241,7 @@ Name | Type | Default | Description
 `rows` | Array | `null` | (required) An array of arrays of display/value object pairs
 `rowHeader` | One of type: number, bool | `0` | Which column should be the row header, defaults to the first item (`0`) (but could be set to `1`, if the first col is checkboxes, for example). Set to false to disable row headers
 `rowKey` | Function(row, index): string | `null` | Function used to get the row key.
+`emptyMessage` | String | `undefined` | Customize the message to show when there are no rows in the table.
 
 ### `headers` structure
 

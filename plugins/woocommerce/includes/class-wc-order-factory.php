@@ -8,6 +8,9 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -28,13 +31,26 @@ class WC_Order_Factory {
 			return false;
 		}
 
+		$use_orders_cache = OrderUtil::orders_cache_usage_is_enabled();
+		if ( $use_orders_cache ) {
+			$order_cache = wc_get_container()->get( OrderCache::class );
+			$order       = $order_cache->get( $order_id );
+			if ( ! is_null( $order ) ) {
+				return $order;
+			}
+		}
+
 		$classname = self::get_class_name_for_order_id( $order_id );
 		if ( ! $classname ) {
 			return false;
 		}
 
 		try {
-			return new $classname( $order_id );
+			$order = new $classname( $order_id );
+			if ( $use_orders_cache && $order instanceof \WC_Abstract_Legacy_Order ) {
+				$order_cache->set( $order, $order_id );
+			}
+			return $order;
 		} catch ( Exception $e ) {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
 			return false;
@@ -51,8 +67,29 @@ class WC_Order_Factory {
 	 * @throws \Exception When an invalid order is found.
 	 */
 	public static function get_orders( $order_ids = array(), $skip_invalid = false ) {
-		$result    = array();
-		$order_ids = array_filter( array_map( array( __CLASS__, 'get_order_id' ), $order_ids ) );
+		if ( empty( $order_ids ) ) {
+			return array();
+		}
+
+		$result              = array();
+		$order_ids           = array_filter( array_map( array( __CLASS__, 'get_order_id' ), $order_ids ) );
+		$original_order_sort = $order_ids;
+		$order_cache         = wc_get_container()->get( OrderCache::class );
+
+		$already_cached_orders = array();
+		$use_orders_cache      = OrderUtil::orders_cache_usage_is_enabled();
+		if ( $use_orders_cache ) {
+			$uncached_order_ids = array();
+			foreach ( $order_ids as $order_id ) {
+				$cached_order = $order_cache->get( absint( $order_id ) );
+				if ( $cached_order instanceof \WC_Abstract_Legacy_Order ) {
+					$already_cached_orders[ $order_id ] = $cached_order;
+				} else {
+					$uncached_order_ids[] = $order_id;
+				}
+			}
+			$order_ids = $uncached_order_ids;
+		}
 
 		// We separate order list by class, since their datastore might be different.
 		$order_list_by_class = array();
@@ -96,10 +133,16 @@ class WC_Order_Factory {
 			}
 		}
 
-		// restore the sort order.
-		$result = array_replace( array_flip( $order_ids ), $result );
+		if ( $use_orders_cache ) {
+			foreach ( $result as $order_id => $order ) {
+				$order_cache->set( $order, $order->get_id() );
+			}
+			$result = array_replace( $result, $already_cached_orders );
+		}
 
-		return array_values( $result );
+		// restore the sort order.
+		$result = array_values( array_replace( array_flip( $original_order_sort ), $result ) );
+		return $result;
 	}
 
 	/**
@@ -165,16 +208,41 @@ class WC_Order_Factory {
 	 * @return int|bool false on failure
 	 */
 	public static function get_order_id( $order ) {
-		global $post;
-
-		if ( false === $order && is_a( $post, 'WP_Post' ) && 'shop_order' === get_post_type( $post ) ) {
-			return absint( $post->ID );
+		if ( false === $order ) {
+			return self::get_global_order_id();
 		} elseif ( is_numeric( $order ) ) {
 			return $order;
 		} elseif ( $order instanceof WC_Abstract_Order ) {
 			return $order->get_id();
 		} elseif ( ! empty( $order->ID ) ) {
 			return $order->ID;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Try to determine the current order ID based on available global state.
+	 *
+	 * @return false|int
+	 */
+	private static function get_global_order_id() {
+		global $post;
+		global $theorder;
+
+		// Initialize the global $theorder object if necessary.
+		if ( ! isset( $theorder ) || ! $theorder instanceof WC_Abstract_Order ) {
+			if ( ! isset( $post ) || 'shop_order' !== $post->post_type ) {
+				return false;
+			} else {
+				OrderUtil::init_theorder_object( $post );
+			}
+		}
+
+		if ( $theorder instanceof WC_Order ) {
+			return $theorder->get_id();
+		} elseif ( is_a( $post, 'WP_Post' ) && 'shop_order' === get_post_type( $post ) ) {
+			return absint( $post->ID );
 		} else {
 			return false;
 		}

@@ -7,9 +7,9 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
-use \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
-use \Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
  * Remote Inbox Notifications engine.
@@ -48,7 +48,7 @@ class RemoteInboxNotificationsEngine {
 					array( __CLASS__, 'run_on_woocommerce_admin_updated' ),
 					'woocommerce-remote-inbox-engine'
 				);
-				if ( $next_hook === null ) {
+				if ( null === $next_hook ) {
 					WC()->queue()->schedule_single(
 						time(),
 						'woocommerce_run_on_woocommerce_admin_updated',

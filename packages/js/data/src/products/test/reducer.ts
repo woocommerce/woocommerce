@@ -223,7 +223,6 @@ describe( 'products reducer', () => {
 	} );
 
 	it( 'should handle CREATE_PRODUCT_START', () => {
-		const id = 1;
 		const state = reducer( defaultState, {
 			type: TYPES.CREATE_PRODUCT_START,
 		} );

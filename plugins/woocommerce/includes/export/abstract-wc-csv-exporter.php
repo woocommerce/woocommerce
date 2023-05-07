@@ -467,7 +467,7 @@ abstract class WC_CSV_Exporter {
 		$values_to_implode = array();
 
 		foreach ( $values as $value ) {
-			$value               = (string) is_scalar( $value ) ? $value : '';
+			$value               = (string) is_scalar( $value ) ? html_entity_decode( $value, ENT_QUOTES ) : '';
 			$values_to_implode[] = str_replace( ',', '\\,', $value );
 		}
 

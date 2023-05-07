@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add deprecated message to packages moved to product-editor package.

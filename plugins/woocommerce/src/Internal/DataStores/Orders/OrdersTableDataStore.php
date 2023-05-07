@@ -6,9 +6,12 @@
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Exception;
+use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
 
@@ -179,6 +182,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Get the names of all the tables involved in the custom orders table feature.
 	 *
+	 * See also : get_all_table_names_with_id.
+	 *
 	 * @return string[]
 	 */
 	public function get_all_table_names() {
@@ -187,6 +192,22 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			$this->get_addresses_table_name(),
 			$this->get_operational_data_table_name(),
 			$this->get_meta_table_name(),
+		);
+	}
+
+	/**
+	 * Similar to get_all_table_names, but also returns the table name along with the items table.
+	 *
+	 * @return array Names of the tables.
+	 */
+	public static function get_all_table_names_with_id() {
+		global $wpdb;
+		return array(
+			'orders'           => self::get_orders_table_name(),
+			'addresses'        => self::get_addresses_table_name(),
+			'operational_data' => self::get_operational_data_table_name(),
+			'meta'             => self::get_meta_table_name(),
+			'items'            => $wpdb->prefix . 'woocommerce_order_items',
 		);
 	}
 
@@ -553,7 +574,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether permissions are granted.
 	 */
 	public function get_download_permissions_granted( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		$order_id = is_int( $order ) ? $order : $order->get_id();
+		$order    = wc_get_order( $order_id );
 		return $order->get_download_permissions_granted();
 	}
 
@@ -579,7 +601,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether sales are recorded.
 	 */
 	public function get_recorded_sales( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		$order_id = is_int( $order ) ? $order : $order->get_id();
+		$order    = wc_get_order( $order_id );
 		return $order->get_recorded_sales();
 	}
 
@@ -605,7 +628,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether coupon counts were updated.
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		$order_id = is_int( $order ) ? $order : $order->get_id();
+		$order    = wc_get_order( $order_id );
 		return $order->get_recorded_coupon_usage_counts();
 	}
 
@@ -631,7 +655,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether email is sent.
 	 */
 	public function get_email_sent( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		$order_id = is_int( $order ) ? $order : $order->get_id();
+		$order    = wc_get_order( $order_id );
 		return $order->get_new_order_email_sent();
 	}
 
@@ -657,8 +682,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether email was sent.
 	 */
 	public function get_new_order_email_sent( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
-		return $order->get_new_order_email_sent();
+		return $this->get_email_sent( $order );
 	}
 
 	/**
@@ -683,7 +707,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether stock was reduced.
 	 */
 	public function get_stock_reduced( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		$order_id = is_int( $order ) ? $order : $order->get_id();
+		$order    = wc_get_order( $order_id );
 		return $order->get_order_stock_reduced();
 	}
 
@@ -822,7 +847,7 @@ WHERE
 			$wpdb->prepare(
 				"SELECT {$orders_table}.id FROM {$orders_table}
 				INNER JOIN {$op_table} ON {$op_table}.order_id = {$orders_table}.id
-				WHERE {$op_table}.order_key = %s",
+				WHERE {$op_table}.order_key = %s AND {$op_table}.order_key != ''",
 				$order_key
 			)
 		);
@@ -889,7 +914,12 @@ WHERE
 	 * @return int[] Array of order IDs.
 	 */
 	public function search_orders( $term ) {
-		$order_ids = wc_get_orders( array( 's' => $term ) );
+		$order_ids = wc_get_orders(
+			array(
+				's'      => $term,
+				'return' => 'ids',
+			)
+		);
 
 		/**
 		 * Provides an opportunity to modify the list of order IDs obtained during an order search.
@@ -904,8 +934,6 @@ WHERE
 		 */
 		return array_map( 'intval', (array) apply_filters( 'woocommerce_cot_shop_order_search_results', $order_ids, $term ) );
 	}
-
-	//phpcs:enable Squiz.Commenting, Generic.Commenting
 
 	/**
 	 * Fetch order type for orders in bulk.
@@ -1022,7 +1050,7 @@ WHERE
 	 *
 	 * @return void
 	 */
-	private function init_order_record( \WC_Abstract_Order &$order, int $order_id, \stdClass $order_data ) {
+	protected function init_order_record( \WC_Abstract_Order &$order, int $order_id, \stdClass $order_data ) {
 		$order->set_defaults();
 		$order->set_id( $order_id );
 		$filtered_meta_data = $this->filter_raw_meta_data( $order, $order_data->meta_data );
@@ -1145,9 +1173,26 @@ WHERE
 			foreach ( $cpt_store_orders[ $cpt_store_name ] as $order_id => $order ) {
 				$cpt_order_class_name = wc_get_order_type( $order->get_type() )['class_name'];
 				$cpt_order            = new $cpt_order_class_name();
-				$cpt_order->set_id( $order_id );
-				$cpt_store->read( $cpt_order );
-				$cpt_orders[ $order_id ] = $cpt_order;
+
+				try {
+					$cpt_order->set_id( $order_id );
+					$cpt_store->read( $cpt_order );
+					$cpt_orders[ $order_id ] = $cpt_order;
+				} catch ( Exception $e ) {
+					// If the post record has been deleted (for instance, by direct query) then an exception may be thrown.
+					$this->error_logger->warning(
+						sprintf(
+							/* translators: %1$d order ID. */
+							__( 'Unable to load the post record for order %1$d', 'woocommerce' ),
+							$order_id
+						),
+						array(
+							'exception_code' => $e->getCode(),
+							'exception_msg'  => $e->getMessage(),
+							'origin'         => __METHOD__,
+						)
+					);
+				}
 			}
 		}
 		return $cpt_orders;
@@ -1342,7 +1387,7 @@ WHERE
 	 *
 	 * @return \stdClass[]|object|null DB Order objects or error.
 	 */
-	private function get_order_data_for_ids( $ids ) {
+	protected function get_order_data_for_ids( $ids ) {
 		if ( ! $ids ) {
 			return array();
 		}
@@ -1713,9 +1758,6 @@ FROM $order_meta_table
 		);
 	}
 
-
-	//phpcs:disable Squiz.Commenting, Generic.Commenting
-
 	/**
 	 * Method to delete an order from the database.
 	 *
@@ -1732,13 +1774,6 @@ FROM $order_meta_table
 		}
 
 		if ( ! empty( $args['force_delete'] ) ) {
-			$this->delete_order_data_from_custom_order_tables( $order_id );
-			$order->set_id( 0 );
-
-			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
-			if ( ! is_a( $order->get_data_store(), self::class ) ) {
-				return;
-			}
 
 			/**
 			 * Fires immediately before an order is deleted from the database.
@@ -1750,9 +1785,24 @@ FROM $order_meta_table
 			 */
 			do_action( 'woocommerce_before_delete_order', $order_id, $order );
 
-			// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-			// Once we stop creating posts for orders, we should do the cleanup here instead.
-			wp_delete_post( $order_id );
+			$this->upshift_child_orders( $order );
+			$this->delete_order_data_from_custom_order_tables( $order_id );
+			$this->delete_items( $order );
+
+			$order->set_id( 0 );
+
+			/** We can delete the post data if:
+			 * 1. The HPOS table is authoritative and synchronization is enabled.
+			 * 2. The post record is of type `shop_order_placehold`, since this is created by the HPOS in the first place.
+			 *
+			 * In other words, we do not delete the post record when HPOS table is authoritative and synchronization is disabled but post record is a full record and not just a placeholder, because it implies that the order was created before HPOS was enabled.
+			 */
+			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+			if ( $data_synchronizer->data_sync_is_enabled() || get_post_type( $order_id ) === 'shop_order_placehold' ) {
+				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+				// Once we stop creating posts for orders, we should do the cleanup here instead.
+				wp_delete_post( $order_id );
+			}
 
 			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		} else {
@@ -1773,9 +1823,30 @@ FROM $order_meta_table
 	}
 
 	/**
+	 * Helper method to set child orders to the parent order's parent.
+	 *
+	 * @param \WC_Abstract_Order $order Order object.
+	 *
+	 * @return void
+	 */
+	private function upshift_child_orders( $order ) {
+		global $wpdb;
+		$order_table  = self::get_orders_table_name();
+		$order_parent = $order->get_parent_id();
+		$wpdb->update(
+			$order_table,
+			array( 'parent_order_id' => $order_parent ),
+			array( 'parent_order_id' => $order->get_id() ),
+			array( '%d' ),
+			array( '%d' )
+		);
+	}
+
+	/**
 	 * Trashes an order.
 	 *
-	 * @param WC_Order $order The order object
+	 * @param  WC_Order $order The order object.
+	 *
 	 * @return void
 	 */
 	public function trash_order( $order ) {
@@ -1893,21 +1964,6 @@ FROM $order_meta_table
 			$order->delete_meta_data( '_wp_trash_meta_comments_status' );
 			$order->save_meta_data();
 
-			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-			if ( $data_synchronizer->data_sync_is_enabled() ) {
-				//The previous $order->save() will have forced a sync to the posts table,
-				//this implies that the post status is not "trash" anymore, and thus
-				//wp_untrash_post would do nothing.
-				wp_update_post(
-					array(
-						'ID'          => $id,
-						'post_status' => 'trash',
-					)
-				);
-
-				wp_untrash_post( $id );
-			}
-
 			return true;
 		}
 
@@ -1932,6 +1988,7 @@ FROM $order_meta_table
 	 */
 	public function delete_order_data_from_custom_order_tables( $order_id ) {
 		global $wpdb;
+		$order_cache = wc_get_container()->get( OrderCache::class );
 
 		// Delete COT-specific data.
 		foreach ( $this->get_all_table_names() as $table ) {
@@ -1942,6 +1999,7 @@ FROM $order_meta_table
 					: array( 'order_id' => $order_id ),
 				array( '%d' )
 			);
+			$order_cache->remove( $order_id );
 		}
 	}
 
@@ -1974,6 +2032,8 @@ FROM $order_meta_table
 	 * This should not contain and specific meta or actions, so that it can be used other order types safely.
 	 *
 	 * @param \WC_Order $order Order object.
+	 * @param bool      $force_all_fields Force update all fields, instead of calculating and updating only changed fields.
+	 * @param bool      $backfill Whether to backfill data to post datastore.
 	 *
 	 * @return void
 	 *
@@ -2003,7 +2063,7 @@ FROM $order_meta_table
 	/**
 	 * Method to update an order in the database.
 	 *
-	 * @param \WC_Order $order
+	 * @param \WC_Order $order Order object.
 	 */
 	public function update( &$order ) {
 		// Before updating, ensure date paid is set if missing.
@@ -2059,6 +2119,7 @@ FROM $order_meta_table
 	 * This is expected to be reused by other order types, and should not contain any specific metadata updates or actions.
 	 *
 	 * @param \WC_Order $order Order object.
+	 * @param bool      $backfill Whether to backfill data to post tables.
 	 *
 	 * @return array $changes Array of changes.
 	 *
@@ -2111,7 +2172,8 @@ FROM $order_meta_table
 
 	/**
 	 * Helper function to update billing and shipping address metadata.
-	 * @param \WC_Abstract_Order $order Order Object
+	 *
+	 * @param \WC_Abstract_Order $order Order Object.
 	 * @param array              $changes Array of changes.
 	 *
 	 * @return void
@@ -2210,6 +2272,13 @@ FROM $order_meta_table
 
 	}
 
+	/**
+	 * Performs actual query to get orders. Uses `OrdersTableQuery` to build and generate the query.
+	 *
+	 * @param array $query_vars Query variables.
+	 *
+	 * @return array|object List of orders and count of orders.
+	 */
 	public function query( $query_vars ) {
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
 			$query_vars['no_found_rows'] = true;
@@ -2256,10 +2325,6 @@ FROM $order_meta_table
 		}
 
 		return $orders;
-	}
-
-	public function get_order_item_type( $order, $order_item_id ) {
-		return 'line_item';
 	}
 
 	//phpcs:enable Squiz.Commenting, Generic.Commenting
@@ -2347,7 +2412,7 @@ CREATE TABLE $operational_data_table_name (
 	discount_total_amount decimal(26, 8) NULL,
 	recorded_sales tinyint(1) NULL,
 	UNIQUE KEY order_id (order_id),
-	UNIQUE KEY order_key (order_key)
+	KEY order_key (order_key)
 ) $collate;
 CREATE TABLE $meta_table (
 	id bigint(20) unsigned auto_increment primary key,
@@ -2378,9 +2443,17 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing at least ->id).
+	 *
+	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
-		return $this->data_store_meta->delete_meta( $object, $meta );
+		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $delete_meta;
 	}
 
 	/**
@@ -2388,10 +2461,17 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->key and ->value).
-	 * @return int meta ID
+	 *
+	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) {
-		return $this->data_store_meta->add_meta( $object, $meta );
+		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $add_meta;
 	}
 
 	/**
@@ -2399,8 +2479,16 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 *
+	 * @return bool
 	 */
 	public function update_meta( &$object, $meta ) {
-		return $this->data_store_meta->update_meta( $object, $meta );
+		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $update_meta;
 	}
 }

@@ -14,7 +14,7 @@ import { useActiveEditorType } from './use-active-editor-type';
 import {
 	bindEnableGuideModeClickEvent,
 	waitUntilElementTopNotChange,
-} from './utils';
+} from '../utils';
 import {
 	ProductTourStepName,
 	useProductStepChange,
@@ -113,7 +113,7 @@ const getTourConfig = ( {
 					),
 					descriptions: {
 						desktop: __(
-							'Start typing your new product name here. Add your full product description here. Describe your product in detail.',
+							'Add your full product description here. Describe your product in detail.',
 							'woocommerce'
 						),
 					},

@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { ADMIN_USER_EMAIL } = process.env;
+const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe( 'Merchant > Order Action emails received', () => {
@@ -9,10 +9,6 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		email: 'john.doe.merchant.test@example.com',
 	};
 
-	const adminEmail =
-		process.env.USE_WP_ENV === '1'
-			? 'wordpress@example.com'
-			: ADMIN_USER_EMAIL ?? 'admin@woocommercecoree2etestsuite.com';
 	const storeName = 'WooCommerce Core E2E Test Suite';
 	let orderId, newOrderId;
 
@@ -83,7 +79,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		);
 		await expect(
 			page.locator( 'td.column-receiver >> nth=1' )
-		).toContainText( adminEmail );
+		).toContainText( admin.email );
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
 		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
@@ -106,7 +102,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			) }`
 		);
 		await expect( page.locator( 'td.column-receiver' ) ).toContainText(
-			adminEmail
+			admin.email
 		);
 		await expect( page.locator( 'td.column-subject' ) ).toContainText(
 			`[${ storeName }]: New order #${ orderId }`

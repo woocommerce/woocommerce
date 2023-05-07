@@ -7,6 +7,8 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -55,8 +57,23 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_style_add_data( 'woocommerce_admin_privacy_styles', 'rtl', 'replace' );
 
 			if ( $screen && $screen->is_block_editor() ) {
-				wp_register_style( 'woocommerce-general', WC()->plugin_url() . '/assets/css/woocommerce.css', array(), $version );
-				wp_style_add_data( 'woocommerce-general', 'rtl', 'replace' );
+				$styles = WC_Frontend_Scripts::get_styles();
+
+				if ( $styles ) {
+					foreach ( $styles as $handle => $args ) {
+						wp_register_style(
+							$handle,
+							$args['src'],
+							$args['deps'],
+							$args['version'],
+							$args['media']
+						);
+
+						if ( ! isset( $args['has_rtl'] ) ) {
+							wp_style_add_data( $handle, 'rtl', 'replace' );
+						}
+					}
+				}
 			}
 
 			// Sitewide menu CSS.
@@ -84,7 +101,9 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// @deprecated 2.3.
 			if ( has_action( 'woocommerce_admin_css' ) ) {
+				/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 				do_action( 'woocommerce_admin_css' );
+				/* phpcs: enable */
 				wc_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
 			}
 
@@ -102,7 +121,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			$screen       = get_current_screen();
 			$screen_id    = $screen ? $screen->id : '';
-			$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+			$wc_screen_id = 'woocommerce';
 			$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version      = Constants::get_constant( 'WC_VERSION' );
 
@@ -179,18 +198,19 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'iris' );
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
+
 				wp_enqueue_script( 'jquery-ui-sortable' );
 				wp_enqueue_script( 'jquery-ui-autocomplete' );
 
-				$locale  = localeconv();
+				$locale        = localeconv();
 				$decimal_point = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
-				$decimal = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
+				$decimal       = ( ! empty( wc_get_price_decimal_separator() ) ) ? wc_get_price_decimal_separator() : $decimal_point;
 
 				$params = array(
 					/* translators: %s: decimal */
-					'i18n_decimal_error'                => sprintf( __( 'Please enter with one decimal point (%s) without thousand separators.', 'woocommerce' ), $decimal ),
+					'i18n_decimal_error'                => sprintf( __( 'Please enter a value with one decimal point (%s) without thousand separators.', 'woocommerce' ), $decimal ),
 					/* translators: %s: price decimal separator */
-					'i18n_mon_decimal_error'            => sprintf( __( 'Please enter with one monetary decimal point (%s) without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
+					'i18n_mon_decimal_error'            => sprintf( __( 'Please enter a value with one monetary decimal point (%s) without thousand separators and currency symbols.', 'woocommerce' ), wc_get_price_decimal_separator() ),
 					'i18n_country_iso_error'            => __( 'Please enter in country code with two capital letters.', 'woocommerce' ),
 					'i18n_sale_less_than_regular_error' => __( 'Please enter in a value less than the regular price.', 'woocommerce' ),
 					'i18n_delete_product_notice'        => __( 'This product has produced sales and may be linked to existing orders. Are you sure you want to delete it?', 'woocommerce' ),
@@ -207,6 +227,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'gateway_toggle' => wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ),
 					),
 					'urls'                              => array(
+						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) || Features::is_enabled( 'product-block-editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,
 						'import_products' => current_user_can( 'import' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) : null,
 						'export_products' => current_user_can( 'export' ) ? esc_url_raw( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ) : null,
 					),
@@ -247,10 +268,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			// Meta boxes.
+			/* phpcs:disable */
 			if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
 				wp_enqueue_media();
 				wp_register_script( 'wc-admin-product-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'media-models' ), $version );
-				wp_register_script( 'wc-admin-variation-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product-variation' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'serializejson', 'media-models' ), $version );
+				wp_register_script( 'wc-admin-variation-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product-variation' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'serializejson', 'media-models', 'backbone', 'jquery-ui-sortable', 'wc-backbone-modal' ), $version );
 
 				wp_enqueue_script( 'wc-admin-product-meta-boxes' );
 				wp_enqueue_script( 'wc-admin-variation-meta-boxes' );
@@ -267,7 +289,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'save_variations_nonce'               => wp_create_nonce( 'save-variations' ),
 					'bulk_edit_variations_nonce'          => wp_create_nonce( 'bulk-edit-variations' ),
 					/* translators: %d: Number of variations */
-					'i18n_link_all_variations'            => esc_js( sprintf( __( 'Are you sure you want to link all variations? This will create a new variation for each and every possible combination of variation attributes (max %d per run).', 'woocommerce' ), Constants::is_defined( 'WC_MAX_LINKED_VARIATIONS' ) ? Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) : 50 ) ),
+					'i18n_link_all_variations'            => esc_js( sprintf( __( 'Do you want to generate all variations? This will create a new variation for each and every possible combination of variation attributes (max %d per run).', 'woocommerce' ), Constants::is_defined( 'WC_MAX_LINKED_VARIATIONS' ) ? Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) : 50 ) ),
 					'i18n_enter_a_value'                  => esc_js( __( 'Enter a value', 'woocommerce' ) ),
 					'i18n_enter_menu_order'               => esc_js( __( 'Variation menu order (determines position in the list of variations)', 'woocommerce' ) ),
 					'i18n_enter_a_value_fixed_or_percent' => esc_js( __( 'Enter a value (fixed or %)', 'woocommerce' ) ),
@@ -275,20 +297,20 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_last_warning'                   => esc_js( __( 'Last warning, are you sure?', 'woocommerce' ) ),
 					'i18n_choose_image'                   => esc_js( __( 'Choose an image', 'woocommerce' ) ),
 					'i18n_set_image'                      => esc_js( __( 'Set variation image', 'woocommerce' ) ),
-					'i18n_variation_added'                => esc_js( __( 'variation added', 'woocommerce' ) ),
-					'i18n_variations_added'               => esc_js( __( 'variations added', 'woocommerce' ) ),
-					'i18n_no_variations_added'            => esc_js( __( 'No variations added', 'woocommerce' ) ),
+					'i18n_variation_added'                => esc_js( __( '1 variation added', 'woocommerce' ) ),
+					'i18n_variations_added'               => esc_js( __( '%qty% variations added', 'woocommerce' ) ),
 					'i18n_remove_variation'               => esc_js( __( 'Are you sure you want to remove this variation?', 'woocommerce' ) ),
 					'i18n_scheduled_sale_start'           => esc_js( __( 'Sale start date (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
 					'i18n_scheduled_sale_end'             => esc_js( __( 'Sale end date (YYYY-MM-DD format or leave blank)', 'woocommerce' ) ),
 					'i18n_edited_variations'              => esc_js( __( 'Save changes before changing page?', 'woocommerce' ) ),
-					'i18n_variation_count_single'         => esc_js( __( '%qty% variation', 'woocommerce' ) ),
+					'i18n_variation_count_single'         => esc_js( __( '1 variation', 'woocommerce' ) ),
 					'i18n_variation_count_plural'         => esc_js( __( '%qty% variations', 'woocommerce' ) ),
 					'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) ),
 				);
 
 				wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_admin_meta_boxes_variations', $params );
 			}
+			/* phpcs: enable */
 			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
 				$default_location = wc_get_customer_default_location();
 
@@ -306,6 +328,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					)
 				);
 			}
+			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 			if ( in_array( $screen_id, array( 'shop_coupon', 'edit-shop_coupon' ) ) ) {
 				wp_enqueue_script( 'wc-admin-coupon-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-coupon' . $suffix . '.js', array( 'wc-admin-meta-boxes' ), $version );
 				wp_localize_script(
@@ -320,12 +343,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					)
 				);
 			}
+			/* phpcs: enable */
 			if ( in_array( str_replace( 'edit-', '', $screen_id ), array( 'shop_coupon', 'product' ), true ) || $this->is_order_meta_box_screen( $screen_id ) ) {
 				$post_id                = isset( $post->ID ) ? $post->ID : '';
 				$currency               = '';
 				$remove_item_notice     = __( 'Are you sure you want to remove the selected items?', 'woocommerce' );
 				$remove_fee_notice      = __( 'Are you sure you want to remove the selected fees?', 'woocommerce' );
 				$remove_shipping_notice = __( 'Are you sure you want to remove the selected shipping?', 'woocommerce' );
+				$product                = wc_get_product( $post_id );
 
 				// Eventually this will become wc_data_or_post object as we implement more custom tables.
 				$order_or_post_object = $post;
@@ -372,6 +397,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'order_item_nonce'                   => wp_create_nonce( 'order-item' ),
 					'add_attribute_nonce'                => wp_create_nonce( 'add-attribute' ),
 					'save_attributes_nonce'              => wp_create_nonce( 'save-attributes' ),
+					'add_attributes_and_variations'      => wp_create_nonce( 'add-attributes-and-variations' ),
 					'calc_totals_nonce'                  => wp_create_nonce( 'calc-totals' ),
 					'get_customer_details_nonce'         => wp_create_nonce( 'get-customer-details' ),
 					'search_products_nonce'              => wp_create_nonce( 'search-products' ),
@@ -390,12 +416,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'rounding_precision'                 => wc_get_rounding_precision(),
 					'tax_rounding_mode'                  => wc_get_tax_rounding_mode(),
 					'product_types'                      => array_unique( array_merge( array( 'simple', 'grouped', 'variable', 'external' ), array_keys( wc_get_product_types() ) ) ),
+					'has_local_attributes'               => ! empty( wc_get_attribute_taxonomies() ),
 					'i18n_download_permission_fail'      => __( 'Could not grant access - the user may already have permission for this file or billing email is not set. Ensure the billing email is set, and the order has been saved.', 'woocommerce' ),
 					'i18n_permission_revoke'             => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 					'i18n_tax_rate_already_exists'       => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
 					'i18n_delete_note'                   => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
 					'i18n_apply_coupon'                  => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
 					'i18n_add_fee'                       => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
+					'i18n_attribute_name_placeholder'    => __( 'New attribute', 'woocommerce' ),
 					'i18n_product_simple_tip'            => __( '<b>Simple –</b> covers the vast majority of any products you may sell. Simple products are shipped and have no options. For example, a book.', 'woocommerce' ),
 					'i18n_product_grouped_tip'           => __( '<b>Grouped –</b> a collection of related products that can be purchased individually and only consist of simple products. For example, a set of six drinking glasses.', 'woocommerce' ),
 					'i18n_product_external_tip'          => __( '<b>External or Affiliate –</b> one that you list and describe on your website but is sold elsewhere.', 'woocommerce' ),
@@ -403,12 +431,17 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_product_other_tip'             => __( 'Product types define available product details and attributes, such as downloadable files and variations. They’re also used for analytics and inventory management.', 'woocommerce' ),
 					'i18n_product_description_tip'       => __( 'Describe this product. What makes it unique? What are its most important features?', 'woocommerce' ),
 					'i18n_product_short_description_tip' => __( 'Summarize this product in 1-2 short sentences. We’ll show it at the top of the page.', 'woocommerce' ),
+					'i18n_save_attribute_variation_tip'  => __( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ),
+					/* translators: %1$s: maximum file size */
+					'i18n_product_image_tip'             => sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ) , size_format( wp_max_upload_size() ) ),
+					'i18n_remove_used_attribute_confirmation_message' => __( 'If you remove this attribute, customers will no longer be able to purchase some variations of this product.', 'woocommerce' ),
 				);
 
 				wp_localize_script( 'wc-admin-meta-boxes', 'woocommerce_admin_meta_boxes', $params );
 			}
 
 			// Term ordering - only when sorting by term_order.
+			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 			if ( ( strstr( $screen_id, 'edit-pa_' ) || ( ! empty( $_GET['taxonomy'] ) && in_array( wp_unslash( $_GET['taxonomy'] ), apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ) ) ) ) && ! isset( $_GET['orderby'] ) ) {
 
 				wp_register_script( 'woocommerce_term_ordering', WC()->plugin_url() . '/assets/js/admin/term-ordering' . $suffix . '.js', array( 'jquery-ui-sortable' ), $version );
@@ -422,6 +455,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				wp_localize_script( 'woocommerce_term_ordering', 'woocommerce_term_ordering_params', $woocommerce_term_order_params );
 			}
+			/* phpcs: enable */
 
 			// Product sorting - only when sorting by menu order on the products page.
 			if ( current_user_can( 'edit_others_pages' ) && 'edit-product' === $screen_id && isset( $wp_query->query['orderby'] ) && 'menu_order title' === $wp_query->query['orderby'] ) {
@@ -430,6 +464,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			// Reports Pages.
+			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 			if ( in_array( $screen_id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc-reports', 'toplevel_page_wc-reports', 'dashboard' ) ) ) ) {
 				wp_register_script( 'wc-reports', WC()->plugin_url() . '/assets/js/admin/reports' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker' ), $version );
 
@@ -440,6 +475,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'flot-pie' );
 				wp_enqueue_script( 'flot-stack' );
 			}
+			/* phpcs: enable */
 
 			// API settings.
 			if ( $wc_screen_id . '_page_wc-settings' === $screen_id && isset( $_GET['section'] ) && 'keys' == $_GET['section'] ) {
@@ -523,8 +559,16 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * @return bool Whether the current screen is an order edit screen.
 		 */
 		private function is_order_meta_box_screen( $screen_id ) {
-			return in_array( str_replace( 'edit-', '', $screen_id ), wc_get_order_types( 'order-meta-boxes' ), true ) ||
-						wc_get_page_screen_id( 'shop-order' ) === $screen_id;
+			$screen_id = str_replace( 'edit-', '', $screen_id );
+
+			$types_with_metaboxes_screen_ids = array_filter(
+				array_map(
+					'wc_get_page_screen_id',
+					wc_get_order_types( 'order-meta-boxes' )
+				)
+			);
+
+			return in_array( $screen_id, $types_with_metaboxes_screen_ids, true );
 		}
 
 	}

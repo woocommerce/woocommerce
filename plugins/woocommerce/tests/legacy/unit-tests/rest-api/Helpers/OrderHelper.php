@@ -14,13 +14,15 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+use WC_Data_Store;
 use WC_Mock_Payment_Gateway;
 use WC_Order;
 use WC_Product;
-use \WC_Tax;
-use \WC_Shipping_Rate;
-use \WC_Order_Item_Shipping;
-use \WC_Order_Item_Product;
+use WC_Tax;
+use WC_Shipping_Rate;
+use WC_Order_Item_Shipping;
+use WC_Order_Item_Product;
 
 /**
  * Class OrderHelper.
@@ -151,6 +153,23 @@ class OrderHelper {
 	}
 
 	/**
+	 * Enables or disables the custom orders table across WP temporarily.
+	 *
+	 * @param boolean $enabled TRUE to enable COT or FALSE to disable.
+	 * @return void
+	 */
+	public static function toggle_cot( bool $enabled ) {
+		$features_controller = wc_get_container()->get( Featurescontroller::class );
+		$features_controller->change_feature_enable( 'custom_order_tables', $enabled );
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, wc_bool_to_string( $enabled ) );
+
+		// Confirm things are really correct.
+		$wc_data_store = WC_Data_Store::load( 'order' );
+		assert( is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) === $enabled );
+	}
+
+	/**
 	 * Helper method to create custom tables if not present.
 	 */
 	public static function create_order_custom_table_if_not_exist() {
@@ -169,6 +188,8 @@ class OrderHelper {
 	 * @return int Order ID
 	 */
 	public static function create_complex_wp_post_order() {
+		$current_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		self::toggle_cot( false );
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$uniq_cust_id = wp_generate_password( 10, false );
@@ -238,6 +259,8 @@ class OrderHelper {
 		$order->save();
 		$order->save_meta_data();
 
+		self::toggle_cot( $current_cot_state );
+
 		return $order->get_id();
 	}
 
@@ -249,8 +272,20 @@ class OrderHelper {
 	 */
 	public static function switch_data_store( $order, $data_store ) {
 		$update_data_store_func = function ( $data_store ) {
-			$this->data_store = $data_store;
+			// Each order object contains a reference to its data store, but this reference is itself
+			// held inside of an instance of WC_Data_Store, so we create that first.
+			$data_store_wrapper = WC_Data_Store::load( 'order' );
+
+			// Bind $data_store to our WC_Data_Store.
+			( function ( $data_store ) {
+				$this->current_class_name = get_class( $data_store );
+				$this->instance           = $data_store;
+			} )->call( $data_store_wrapper, $data_store );
+
+			// Finally, update the $order object with our WC_Data_Store( $data_store ) instance.
+			$this->data_store = $data_store_wrapper;
 		};
+
 		$update_data_store_func->call( $order, $data_store );
 	}
 

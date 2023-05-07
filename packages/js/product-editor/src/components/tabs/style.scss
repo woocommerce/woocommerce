@@ -1,0 +1,17 @@
+.woocommerce-product-tabs {
+    display: flex;
+    justify-content: center;
+
+    .components-button {
+        padding: $gap-smaller 0 20px 0;
+        margin-left: $gap;
+        margin-right: $gap;
+        border-bottom: 3.5px solid transparent;
+        border-radius: 0;
+        height: auto;
+
+        &.is-selected {
+            border-color: var(--wp-admin-theme-color);
+        }
+    }
+}

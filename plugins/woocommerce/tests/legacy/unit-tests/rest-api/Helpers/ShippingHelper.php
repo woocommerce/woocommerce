@@ -7,8 +7,8 @@ namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_Cache_Helper;
-use \WC;
+use WC_Cache_Helper;
+use WC;
 
 /**
  * Class ShippingHelper.

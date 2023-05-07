@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { SETTINGS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 
 /**

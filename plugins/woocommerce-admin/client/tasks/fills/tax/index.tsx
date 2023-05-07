@@ -92,20 +92,34 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		}
 	}, [] );
 
-	const onAutomate = useCallback( () => {
+	const onAutomate = useCallback( async () => {
 		setIsPending( true );
-		updateAndPersistSettingsForGroup( 'tax', {
-			tax: {
-				...taxSettings,
-				wc_connect_taxes_enabled: 'yes',
-			},
-		} );
-		updateAndPersistSettingsForGroup( 'general', {
-			general: {
-				...generalSettings,
-				woocommerce_calc_taxes: 'yes',
-			},
-		} );
+		try {
+			await Promise.all( [
+				updateAndPersistSettingsForGroup( 'tax', {
+					tax: {
+						...taxSettings,
+						wc_connect_taxes_enabled: 'yes',
+					},
+				} ),
+				updateAndPersistSettingsForGroup( 'general', {
+					general: {
+						...generalSettings,
+						woocommerce_calc_taxes: 'yes',
+					},
+				} ),
+			] );
+		} catch ( error: unknown ) {
+			setIsPending( false );
+			createNotice(
+				'error',
+				__(
+					'There was a problem setting up automated taxes. Please try again.',
+					'woocommerce'
+				)
+			);
+			return;
+		}
 
 		createNotice(
 			'success',

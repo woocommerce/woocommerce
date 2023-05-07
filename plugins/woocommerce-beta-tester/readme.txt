@@ -3,7 +3,7 @@ Contributors: automattic, bor0, claudiosanches, claudiulodro, kloon, mikejolley,
 Tags: woocommerce, woo commerce, beta, beta tester, bleeding edge, testing
 Requires at least: 4.7
 Tested up to: 6.0
-Stable tag: 2.1.0
+Stable tag: 2.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 

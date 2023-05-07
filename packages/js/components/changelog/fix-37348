@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Prevent duplicate registration of core blocks in client

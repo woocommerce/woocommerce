@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\API
  */
 
-use \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 
 /**

@@ -25,6 +25,7 @@ export type UserPreferences = {
 		[ key: string ]: number;
 	};
 	taxes_report_columns?: string;
+	variable_product_tour_shown?: string;
 	variations_report_columns?: string;
 };
 

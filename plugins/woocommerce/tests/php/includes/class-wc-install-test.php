@@ -97,4 +97,12 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$this->assertContains( 'premium_support', array_keys( $plugin_row_data ) );
 	}
 
+	/**
+	 * Test that dbDelta is a noop on an installed site.
+	 */
+	public function test_dbDelta_is_a_noop() {
+		$db_delta_result = WC_Install::create_tables();
+		$this->assertEmpty( $db_delta_result );
+	}
+
 }

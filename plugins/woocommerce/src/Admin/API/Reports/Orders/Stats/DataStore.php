@@ -7,12 +7,12 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use \Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
-use \Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
-use \Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
-use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -70,6 +70,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected $context = 'orders_stats';
 
 	/**
+	 * Dynamically sets the date column name based on configuration
+	 */
+	public function __construct() {
+		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
+		parent::__construct();
+	}
+
+	/**
 	 * Assign report columns once full table name has been assigned.
 	 */
 	protected function assign_report_columns() {
@@ -105,6 +113,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
+		add_action( 'woocommerce_before_delete_order', array( __CLASS__, 'delete_order' ) );
 		add_action( 'delete_post', array( __CLASS__, 'delete_order' ) );
 	}
 
@@ -200,7 +209,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		// Product attribute filters.
-		$attribute_subqueries = $this->get_attribute_subqueries( $query_args, $orders_stats_table );
+		$attribute_subqueries = $this->get_attribute_subqueries( $query_args );
 		if ( $attribute_subqueries['join'] && $attribute_subqueries['where'] ) {
 			// Build a subquery for getting order IDs by product attribute(s).
 			// Done here since our use case is a little more complicated than get_object_where_filter() can handle.
@@ -378,7 +387,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->update_intervals_sql_params( $query_args, $db_interval_count, $expected_interval_count, $table_name );
 			$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 			$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-			$this->interval_query->add_sql_clause( 'select', ", MAX(${table_name}.date_created) AS datetime_anchor" );
+			$this->interval_query->add_sql_clause( 'select', ", MAX({$table_name}.date_created) AS datetime_anchor" );
 			if ( '' !== $selections ) {
 				$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
 			}
@@ -517,6 +526,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				'order_id'           => $order->get_id(),
 				'parent_id'          => $order->get_parent_id(),
 				'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
+				'date_paid'          => $order->get_date_paid() ? $order->get_date_paid()->date( 'Y-m-d H:i:s' ) : null,
+				'date_completed'     => $order->get_date_completed() ? $order->get_date_completed()->date( 'Y-m-d H:i:s' ) : null,
 				'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
 				'num_items_sold'     => self::get_num_items_sold( $order ),
 				'total_sales'        => $order->get_total(),
@@ -535,6 +546,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'%d',
 			'%s',
 			'%s',
+			'%s',
+			'%s',
 			'%d',
 			'%f',
 			'%f',
@@ -551,6 +564,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$data['parent_id'] = $parent_order->get_id();
 				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
 			}
+			/**
+			 * Set date_completed and date_paid the same as date_created to avoid problems
+			 * when they are being used to sort the data, as refunds don't have them filled
+			*/
+			$data['date_completed'] = $data['date_created'];
+			$data['date_paid']      = $data['date_created'];
 		}
 
 		// Update or add the information to the DB.
@@ -697,7 +716,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE ${orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
+				// phpcs:ignore Generic.Commenting.Todo.TaskFound
+				// TODO: use the %i placeholder to prepare the table name when available in the the minimum required WordPress version.
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"UPDATE {$orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
 				$order_id,
 				$customer_id
 			)

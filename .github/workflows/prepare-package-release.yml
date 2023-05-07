@@ -3,16 +3,22 @@ on:
     workflow_dispatch:
         inputs:
             packages:
-                description: 'Enter a specific package to release, or packages separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input to the default "-a" will prepare to release all eligible packages.'
+                description: 'Enter a specific package to release, or packages separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input to the default "-a" will prepare to release all eligible packages. When releasing a package for the first time, pass the "--initialRelease" flag.'
                 required: false
                 default: '-a'
+
+permissions: {}
+
 jobs:
     prepare:
         name: Run prepare script
         runs-on: ubuntu-20.04
+        permissions:
+            contents: write
+            pull-requests: write
         steps:
             - uses: actions/checkout@v3
-            
+
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
 
@@ -24,17 +30,17 @@ jobs:
 
             - name: Get current date
               id: date
-              run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+              run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
             - name: Set all package string
               id: all_description
               if: ${{ github.event.inputs.packages == '-a'}}
-              run: echo "::set-output name=str::all packages"
+              run: echo "str=all packages" >> $GITHUB_OUTPUT
 
             - name: Set Specific packages string
               id: specific_description
               if: ${{ github.event.inputs.packages != '-a'}}
-              run: echo "::set-output name=str::${{ github.event.inputs.packages }}"
+              run: echo "str=${{ github.event.inputs.packages }}" >> $GITHUB_OUTPUT
 
             - name: Create Pull Request
               uses: peter-evans/create-pull-request@v4

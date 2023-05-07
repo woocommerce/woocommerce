@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Products\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\ParameterException;
+use Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 
 /**
  * REST API Reports products stats controller class.

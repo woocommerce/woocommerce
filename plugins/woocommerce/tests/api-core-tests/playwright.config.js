@@ -1,4 +1,6 @@
 const { devices } = require( '@playwright/test' );
+require( 'dotenv' ).config({ path: __dirname + '/.env' });
+
 const {
 	BASE_URL,
 	CI,
@@ -6,12 +8,10 @@ const {
 	USER_KEY,
 	USER_SECRET,
 } = process.env;
-require( 'dotenv' ).config();
 
 const baseURL = BASE_URL ?? 'http://localhost:8086';
 const userKey = USER_KEY ?? 'admin';
 const userSecret = USER_SECRET ?? 'password';
-
 const base64auth = btoa( `${ userKey }:${ userSecret }` );
 
 const config = {
@@ -19,7 +19,7 @@ const config = {
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 90 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: './report',
+	outputDir: './test-results/report',
 	testDir: 'tests',
 	retries: CI ? 4 : 2,
 	workers: 4,
@@ -28,7 +28,7 @@ const config = {
 		[
 			'html',
 			{
-				outputFolder: 'output',
+				outputFolder: process.env.PLAYWRIGHT_HTML_REPORT ?? './test-results/playwright-report',
 				open: CI ? 'never' : 'always',
 			},
 		],
@@ -37,14 +37,14 @@ const config = {
 			{
 				outputFolder:
 					process.env.ALLURE_RESULTS_DIR ??
-					'tests/api-core-tests/api-test-report/allure-results',
+					'./tests/api-core-tests/test-results/allure-results',
 			},
 		],
 		[
 			'json',
 			{
-				outputFile:
-					'tests/api-core-tests/api-test-report/test-results.json',
+				outputFile: process.env.PLAYWRIGHT_JSON_OUTPUT_NAME ?? 
+					'./test-results/test-results.json',
 			},
 		],
 	],
@@ -53,7 +53,7 @@ const config = {
 		video: 'on-first-retry',
 		trace: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
-		baseURL,
+		baseURL: baseURL,
 		extraHTTPHeaders: {
 			// Add authorization token to all requests.
 			Authorization: `Basic ${ base64auth }`,

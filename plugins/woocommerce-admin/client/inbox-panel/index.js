@@ -93,11 +93,13 @@ const renderNotes = ( {
 	notes,
 	onDismiss,
 	onNoteActionClick,
+	onNoteVisible,
 	setShowDismissAllModal: onDismissAll,
 	showHeader = true,
 	loadMoreNotes,
 	allNotesFetched,
 	notesHaveResolved,
+	unreadNotesCount,
 } ) => {
 	if ( isBatchUpdating ) {
 		return;
@@ -114,17 +116,6 @@ const renderNotes = ( {
 		hasFiredPanelViewTrack = true;
 	}
 
-	const screen = getScreenName();
-	const onNoteVisible = ( note ) => {
-		recordEvent( 'inbox_note_view', {
-			note_content: note.content,
-			note_name: note.name,
-			note_title: note.title,
-			note_type: note.type,
-			screen,
-		} );
-	};
-
 	const notesArray = Object.keys( notes ).map( ( key ) => notes[ key ] );
 
 	return (
@@ -135,7 +126,7 @@ const renderNotes = ( {
 						<Text size="20" lineHeight="28px" variant="title.small">
 							{ __( 'Inbox', 'woocommerce' ) }
 						</Text>
-						<Badge count={ notesArray.length } />
+						<Badge count={ unreadNotesCount } />
 					</div>
 					<EllipsisMenu
 						label={ __( 'Inbox Notes Options', 'woocommerce' ) }
@@ -216,6 +207,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 	);
 	const [ allNotesFetched, setAllNotesFetched ] = useState( false );
 	const [ allNotes, setAllNotes ] = useState( [] );
+	const [ viewedNotes, setViewedNotes ] = useState( {} );
 	const { createNotice } = useDispatch( 'core/notices' );
 	const {
 		removeNote,
@@ -223,6 +215,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 		triggerNoteAction,
 		invalidateResolutionForStoreSelector,
 	} = useDispatch( NOTES_STORE_NAME );
+	const screen = getScreenName();
 
 	const inboxQuery = useMemo( () => {
 		return {
@@ -231,25 +224,34 @@ const InboxPanel = ( { showHeader = true } ) => {
 		};
 	}, [ noteDisplayQty ] );
 
-	const { isError, notes, notesHaveResolved, isBatchUpdating } = useSelect(
-		( select ) => {
-			const {
-				getNotes,
-				getNotesError,
-				isNotesRequesting,
-				hasFinishedResolution,
-			} = select( NOTES_STORE_NAME );
+	const {
+		isError,
+		notes,
+		notesHaveResolved,
+		isBatchUpdating,
+		unreadNotesCount,
+	} = useSelect( ( select ) => {
+		const {
+			getNotes,
+			getNotesError,
+			isNotesRequesting,
+			hasFinishedResolution,
+		} = select( NOTES_STORE_NAME );
 
-			return {
-				notes: getNotes( inboxQuery ),
-				isError: Boolean( getNotesError( 'getNotes', [ inboxQuery ] ) ),
-				isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
-				notesHaveResolved:
-					! isNotesRequesting( 'batchUpdateNotes' ) &&
-					hasFinishedResolution( 'getNotes', [ inboxQuery ] ),
-			};
-		}
-	);
+		return {
+			notes: getNotes( inboxQuery ),
+			unreadNotesCount: getNotes( {
+				...DEFAULT_INBOX_QUERY,
+				is_read: false,
+				per_page: -1,
+			} ).length,
+			isError: Boolean( getNotesError( 'getNotes', [ inboxQuery ] ) ),
+			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
+			notesHaveResolved:
+				! isNotesRequesting( 'batchUpdateNotes' ) &&
+				hasFinishedResolution( 'getNotes', [ inboxQuery ] ),
+		};
+	} );
 
 	useEffect( () => {
 		if ( notesHaveResolved && notes.length < noteDisplayQty ) {
@@ -284,9 +286,25 @@ const InboxPanel = ( { showHeader = true } ) => {
 
 	const [ showDismissAllModal, setShowDismissAllModal ] = useState( false );
 
-	const onDismiss = async ( note ) => {
-		const screen = getScreenName();
+	const onNoteVisible = ( note ) => {
+		if ( ! viewedNotes[ note.id ] && ! note.is_read ) {
+			setViewedNotes( { ...viewedNotes, [ note.id ]: true } );
+			setTimeout( () => {
+				updateNote( note.id, {
+					is_read: true,
+				} );
+			}, 3000 );
+		}
+		recordEvent( 'inbox_note_view', {
+			note_content: note.content,
+			note_name: note.name,
+			note_title: note.title,
+			note_type: note.type,
+			screen,
+		} );
+	};
 
+	const onDismiss = async ( note ) => {
 		recordEvent( 'inbox_action_dismiss', {
 			note_name: note.name,
 			note_title: note.title,
@@ -383,10 +401,12 @@ const InboxPanel = ( { showHeader = true } ) => {
 							onNoteActionClick: ( note, action ) => {
 								triggerNoteAction( note.id, action.id );
 							},
+							onNoteVisible,
 							setShowDismissAllModal,
 							showHeader,
 							allNotesFetched,
 							notesHaveResolved,
+							unreadNotesCount,
 						} ) }
 				</Section>
 			</div>

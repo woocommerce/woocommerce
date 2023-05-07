@@ -1,5 +1,7 @@
 declare global {
 	interface Window {
+		pagenow: string;
+		adminpage: string;
 		wcSettings: {
 			preloadOptions: Record< string, unknown >;
 			adminUrl: string;
@@ -7,9 +9,9 @@ declare global {
 		wcAdminFeatures: {
 			'activity-panels': boolean;
 			analytics: boolean;
+			'product-block-editor': boolean;
 			coupons: boolean;
 			'customer-effort-score-tracks': boolean;
-			'experimental-products-task': boolean;
 			homescreen: boolean;
 			marketing: boolean;
 			'minified-js': boolean;
@@ -19,6 +21,7 @@ declare global {
 			onboarding: boolean;
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
+			'product-variation-management': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;
@@ -32,6 +35,22 @@ declare global {
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
 		};
+		wp: {
+			autosave?: {
+				server: {
+					postChanged: () => boolean;
+				};
+			};
+		};
+		tinymce?: {
+			get: ( name: string ) => {
+				isHidden: () => boolean;
+				isDirty: () => boolean;
+			};
+		};
+		getUserSetting?: ( name: string ) => string | undefined;
+		setUserSetting?: ( name: string, value: string ) => void;
+		deleteUserSetting?: ( name: string ) => void;
 	}
 }
 

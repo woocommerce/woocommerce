@@ -103,9 +103,7 @@ class WC_Admin_Taxonomies {
 			return;
 		}
 
-		$meta_name = taxonomy_is_product_attribute( $taxonomy ) ? 'order_' . esc_attr( $taxonomy ) : 'order';
-
-		update_term_meta( $term_id, $meta_name, 0 );
+		update_term_meta( $term_id, 'order', 0 );
 	}
 
 	/**

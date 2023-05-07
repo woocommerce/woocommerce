@@ -142,11 +142,13 @@ class CustomerEffortScoreTracks {
 	 * an increase of the number of rows in tags table
 	 *
 	 * @param string $action Action name for the survey.
-	 * @param string $label Label for the snackbar.
+	 * @param string $title Title for the snackbar.
+	 * @param string $first_question The text for the first question.
+	 * @param string $second_question The text for the second question.
 	 *
 	 * @return string Generated JavaScript to append to page.
 	 */
-	private function get_script_track_edit_php( $action, $label ) {
+	private function get_script_track_edit_php( $action, $title, $first_question, $second_question ) {
 		return sprintf(
 			"(function( $ ) {
 				'use strict';
@@ -158,7 +160,7 @@ class CustomerEffortScoreTracks {
 						if ( $('.tags tbody > tr').length > initialCount ) {
 							// New tag detected.
 							clearInterval( interval );
-							wp.data.dispatch('wc/customer-effort-score').addCesSurvey( '%s', '%s', window.pagenow, window.adminpage, '%s' );
+							wp.data.dispatch('wc/customer-effort-score').addCesSurvey({ action: '%s', title: '%s', firstQuestion: '%s', secondQuestion: '%s', onsubmitLabel: '%s' });
 						} else {
 							// Form is no longer loading, most likely failed.
 							if ( $( '#addtag .submit .spinner.is-active' ).length < 1 ) {
@@ -169,7 +171,9 @@ class CustomerEffortScoreTracks {
 				});
 			})( jQuery );",
 			esc_js( $action ),
-			esc_js( $label ),
+			esc_js( $title ),
+			esc_js( $first_question ),
+			esc_js( $second_question ),
 			esc_js( $this->onsubmit_label )
 		);
 	}
@@ -271,8 +275,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::SEARCH_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to use search?',
+					'woocommerce'
+				),
+				'firstQuestion'  => __(
+					'The search feature in WooCommerce is easy to use.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The search\'s functionality meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
@@ -337,8 +349,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::PRODUCT_ADD_PUBLISH_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to add a product?',
+					'woocommerce'
+				),
+				'firstQuestion'  => __(
+					'The product creation screen is easy to use.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The product creation screen\'s functionality meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
@@ -362,8 +382,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::PRODUCT_UPDATE_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to edit your product?',
+					'woocommerce'
+				),
+				'firstQuestion'  => __(
+					'The product update process is easy to complete.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The product update process meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
@@ -387,8 +415,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::SHOP_ORDER_UPDATE_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to update an order?',
+					'woocommerce'
+				),
+				'firstQuestion'  => __(
+					'The order details screen is easy to use.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The order details screen\'s functionality meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
@@ -447,7 +483,9 @@ class CustomerEffortScoreTracks {
 		wc_enqueue_js(
 			$this->get_script_track_edit_php(
 				self::ADD_PRODUCT_CATEGORIES_ACTION_NAME,
-				__( 'How easy was it to add product category?', 'woocommerce' )
+				__( 'How easy was it to add product category?', 'woocommerce' ),
+				__( 'The product category details screen is easy to use.', 'woocommerce' ),
+				__( "The product category details screen's functionality meets my needs.", 'woocommerce' )
 			)
 		);
 	}
@@ -463,7 +501,9 @@ class CustomerEffortScoreTracks {
 		wc_enqueue_js(
 			$this->get_script_track_edit_php(
 				self::ADD_PRODUCT_TAGS_ACTION_NAME,
-				__( 'How easy was it to add a product tag?', 'woocommerce' )
+				__( 'How easy was it to add a product tag?', 'woocommerce' ),
+				__( 'The product tag details screen is easy to use.', 'woocommerce' ),
+				__( "The product tag details screen's functionality meets my needs.", 'woocommerce' )
 			)
 		);
 	}
@@ -484,8 +524,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::IMPORT_PRODUCTS_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to import products?',
+					'woocommerce'
+				),
+				'firstQuestion'  => __(
+					'The product import process is easy to complete.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The product import process meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
@@ -519,8 +567,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::SETTINGS_CHANGE_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to update your settings?',
+					'woocommerce'
+				),
+				'firstQuestion'  => __(
+					'The settings screen is easy to use.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'The settings screen\'s functionality meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
@@ -542,8 +598,16 @@ class CustomerEffortScoreTracks {
 		$this->enqueue_to_ces_tracks(
 			array(
 				'action'         => self::ADD_PRODUCT_ATTRIBUTES_ACTION_NAME,
-				'label'          => __(
+				'title'          => __(
 					'How easy was it to add a product attribute?',
+					'woocommerce'
+				),
+				'firstQuestion'  => __(
+					'Product attributes are easy to use.',
+					'woocommerce'
+				),
+				'secondQuestion' => __(
+					'Product attributes\' functionality meets my needs.',
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,

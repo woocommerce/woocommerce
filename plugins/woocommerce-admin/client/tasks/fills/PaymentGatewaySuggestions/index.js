@@ -22,7 +22,6 @@ import ExternalIcon from 'gridicons/dist/external';
  */
 import { List, Placeholder as ListPlaceholder } from './components/List';
 import { Setup, Placeholder as SetupPlaceholder } from './components/Setup';
-import { Toggle } from './components/Toggle/Toggle';
 import { WCPaySuggestion } from './components/WCPay';
 import { getCountryCode } from '~/dashboard/utils';
 import {
@@ -182,14 +181,6 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		recordEvent( 'tasklist_payment_see_more', {} );
 	};
 
-	const trackToggle = ( isShow ) => {
-		recordEvent( 'tasklist_payment_show_toggle', {
-			toggle: isShow ? 'hide' : 'show',
-			payment_method_count:
-				offlineGateways.length + additionalGateways.length,
-		} );
-	};
-
 	if ( query.id && ! currentGateway ) {
 		return <SetupPlaceholder />;
 	}
@@ -270,16 +261,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 			{ wcPayGateway.length ? (
 				<>
 					<WCPaySuggestion paymentGateway={ wcPayGateway[ 0 ] } />
-					<Toggle
-						heading={ __(
-							'Other payment providers',
-							'woocommerce'
-						) }
-						onToggle={ trackToggle }
-					>
-						{ additionalSection }
-						{ offlineSection }
-					</Toggle>
+					{ additionalSection }
+					{ offlineSection }
 				</>
 			) : (
 				<>

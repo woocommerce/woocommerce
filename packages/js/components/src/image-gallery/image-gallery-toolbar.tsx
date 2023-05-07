@@ -16,6 +16,7 @@ import { MediaUploadComponentType } from './types';
 
 export type ImageGalleryToolbarProps = {
 	childIndex: number;
+	allowDragging?: boolean;
 	moveItem: ( fromIndex: number, toIndex: number ) => void;
 	removeItem: ( removeIndex: number ) => void;
 	replaceItem: (
@@ -29,6 +30,7 @@ export type ImageGalleryToolbarProps = {
 
 export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 	childIndex,
+	allowDragging = true,
 	moveItem,
 	removeItem,
 	replaceItem,
@@ -60,12 +62,14 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 			>
 				{ ! isCoverItem && (
 					<ToolbarGroup>
-						<ToolbarButton
-							icon={ () => (
-								<SortableHandle itemIndex={ childIndex } />
-							) }
-							label={ __( 'Drag', 'woocommerce' ) }
-						/>
+						{ allowDragging && (
+							<ToolbarButton
+								icon={ () => (
+									<SortableHandle itemIndex={ childIndex } />
+								) }
+								label={ __( 'Drag to reorder', 'woocommerce' ) }
+							/>
+						) }
 						<ToolbarButton
 							disabled={ childIndex < 2 }
 							onClick={ () => movePrevious() }
@@ -85,7 +89,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 						<ToolbarButton
 							onClick={ () => setAsCoverImage( childIndex ) }
 							icon={ CoverImageIcon }
-							label={ __( 'Set as cover image', 'woocommerce' ) }
+							label={ __( 'Set as cover', 'woocommerce' ) }
 						/>
 					</ToolbarGroup>
 				) }
@@ -106,7 +110,7 @@ export const ImageGalleryToolbar: React.FC< ImageGalleryToolbarProps > = ( {
 					<ToolbarButton
 						onClick={ () => removeItem( childIndex ) }
 						icon={ trash }
-						label={ __( 'Delete', 'woocommerce' ) }
+						label={ __( 'Remove', 'woocommerce' ) }
 					/>
 				</ToolbarGroup>
 			</Toolbar>

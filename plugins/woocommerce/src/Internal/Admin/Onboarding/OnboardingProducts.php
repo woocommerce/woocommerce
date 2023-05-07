@@ -88,10 +88,12 @@ class OnboardingProducts {
 			$woocommerce_products = wp_remote_get(
 				add_query_arg(
 					array(
-						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-						'locale'     => $locale,
+						'locale' => $locale,
 					),
 					'https://woocommerce.com/wp-json/wccom-extensions/1.0/search'
+				),
+				array(
+					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)
 			);
 			if ( is_wp_error( $woocommerce_products ) ) {

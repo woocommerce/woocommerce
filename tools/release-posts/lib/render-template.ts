@@ -8,14 +8,14 @@ const TEMPLATE_DIR = join( __dirname, '..', 'templates' );
 
 export const renderTemplate = (
 	templateFile: string,
-	templateData: unknown
+	templateData: ejs.Data
 ) => {
 	return new Promise< string >( ( resolve, reject ) => {
 		ejs.renderFile(
 			join( TEMPLATE_DIR, templateFile ),
 			templateData,
 			{},
-			function ( err: Error, str: string ) {
+			function ( err: Error | null, str: string ) {
 				if ( err ) {
 					reject( err );
 				} else {

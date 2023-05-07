@@ -1,0 +1,17 @@
+{
+    "code": "ST",
+    "name": "S&atilde;o Tom&eacute; and Pr&iacute;ncipe",
+    "states": [],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/st"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

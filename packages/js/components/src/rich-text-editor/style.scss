@@ -1,3 +1,5 @@
+$toolbar-height: 40px;
+
 .woocommerce-rich-text-editor {
 	.woocommerce-rich-text-editor__writing-flow {
 		border: 1px solid $gray-600;
@@ -9,19 +11,10 @@
 		box-sizing: border-box;
 	}
 
-	.block-editor-inserter {
-		display: none;
-	}
-
 	.block-editor-block-contextual-toolbar.is-fixed,
 	.block-editor-block-contextual-toolbar.is-fixed .block-editor-block-toolbar .components-toolbar-group,
 	.block-editor-block-contextual-toolbar.is-fixed .block-editor-block-toolbar .components-toolbar {
 		border-color: $gray-600;
-	}
-
-	/* Hide rich text placeholder text */
-	.rich-text [data-rich-text-placeholder] {
-		display: none !important;
 	}
 
 	/* hide block boundary background styling */
@@ -39,11 +32,6 @@
 		outline: none;
 	}
 
-	.block-editor-block-list__empty-block-inserter,
-	.block-editor-block-list__insertion-point {
-		display: none !important;
-	}
-
 	.block-editor-writing-flow {
 		padding: $gap-small;
 	}
@@ -56,11 +44,25 @@
 	}
 
 	.components-accessible-toolbar {
+		height: $toolbar-height;
 		width: 100%;
 		background-color: $white;
 		border-color: $gray-700;
 		border-bottom-left-radius: 0;
 		border-bottom-right-radius: 0;
+
+		.components-button {
+			height: $toolbar-height;
+		}
+	}
+
+	.block-editor-block-mover:not(.is-horizontal) .block-editor-block-mover__move-button-container > * {
+		height: calc( $toolbar-height / 2 );
+	}
+
+	.block-editor-block-contextual-toolbar.is-fixed,
+	.components-toolbar-group {
+		min-height: $toolbar-height;
 	}
 
 	.wp-block-quote {

@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe( 'WooCommerce Orders > Refund an order', () => {
+test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 	let productId, orderId, currencySymbol;
 
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -233,7 +233,7 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 
 		// Update the order
 		await page.click( 'button.save_order' );
-		await expect( page.locator( 'div.notice-success' ) ).toContainText(
+		await expect( page.locator( 'div.updated.notice-success' ) ).toContainText(
 			'Order updated.'
 		);
 

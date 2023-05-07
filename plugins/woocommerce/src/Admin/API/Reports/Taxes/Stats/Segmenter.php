@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Segmenter as ReportsSegmenter;
+use Automattic\WooCommerce\Admin\API\Reports\Segmenter as ReportsSegmenter;
 
 /**
  * Date & time interval and numeric range handling class for Reporting API.

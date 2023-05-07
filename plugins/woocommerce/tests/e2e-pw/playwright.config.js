@@ -5,6 +5,7 @@ const {
 	CI,
 	DEFAULT_TIMEOUT_OVERRIDE,
 	E2E_MAX_FAILURES,
+	PLAYWRIGHT_HTML_REPORT,
 } = process.env;
 
 const config = {
@@ -12,7 +13,7 @@ const config = {
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 90 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: './report',
+	outputDir: './test-results/report',
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
@@ -23,7 +24,9 @@ const config = {
 		[
 			'html',
 			{
-				outputFolder: 'output',
+				outputFolder:
+					PLAYWRIGHT_HTML_REPORT ??
+					'./test-results/playwright-report',
 				open: CI ? 'never' : 'always',
 			},
 		],
@@ -31,16 +34,19 @@ const config = {
 			'allure-playwright',
 			{
 				outputFolder:
-					ALLURE_RESULTS_DIR ?? 'tests/e2e-pw/allure-results',
+					ALLURE_RESULTS_DIR ??
+					'./tests/e2e-pw/test-results/allure-results',
+				detail: true,
+				suiteTitle: true,
 			},
 		],
-		[ 'json', { outputFile: 'tests/e2e-pw/test-results.json' } ],
+		[ 'json', { outputFile: './test-results/test-results.json' } ],
 	],
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
 		baseURL: BASE_URL ?? 'http://localhost:8086',
 		screenshot: 'only-on-failure',
-		stateDir: 'tests/e2e-pw/storage/',
+		stateDir: 'tests/e2e-pw/test-results/storage/',
 		trace: 'retain-on-failure',
 		video: 'on-first-retry',
 		viewport: { width: 1280, height: 720 },

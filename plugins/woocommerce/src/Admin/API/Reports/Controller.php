@@ -32,40 +32,6 @@ class Controller extends \WC_REST_Reports_Controller {
 	protected $rest_base = 'reports';
 
 	/**
-	 * Register the routes for reports.
-	 */
-	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_collection_params(),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-	}
-
-	/**
-	 * Check whether a given request has permission to read reports.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'reports', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-
-	/**
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.

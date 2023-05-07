@@ -112,16 +112,15 @@ describe( 'transformExtensionToPlugin', () => {
 
 describe( 'getMarketingExtensionLists', () => {
 	test( 'should only return the allowed lists', () => {
-		const [ installed, lists ] = getMarketingExtensionLists(
+		const [ , lists ] = getMarketingExtensionLists(
 			extensionLists,
 			[],
 			[]
 		);
-		const listKeys = lists.map( ( list ) => list.key );
 
 		expect( lists.length ).toBe( 2 );
-		expect( listKeys ).toContain( 'task-list/reach' );
-		expect( listKeys ).toContain( 'task-list/grow' );
+		expect( lists[ 0 ].key ).toBe( 'task-list/grow' );
+		expect( lists[ 1 ].key ).toBe( 'task-list/reach' );
 	} );
 
 	test( 'should separate installed plugins', () => {
@@ -136,7 +135,7 @@ describe( 'getMarketingExtensionLists', () => {
 	} );
 
 	test( 'should not include installed plugins in the extensions list', () => {
-		const [ installed, lists ] = getMarketingExtensionLists(
+		const [ , lists ] = getMarketingExtensionLists(
 			extensionLists,
 			[],
 			[ 'grow-plugin' ]
@@ -146,7 +145,7 @@ describe( 'getMarketingExtensionLists', () => {
 	} );
 
 	test( 'should only include allowed list plugins in the installed list', () => {
-		const [ installed, lists ] = getMarketingExtensionLists(
+		const [ installed ] = getMarketingExtensionLists(
 			extensionLists,
 			[],
 			[ 'basic-plugin' ]

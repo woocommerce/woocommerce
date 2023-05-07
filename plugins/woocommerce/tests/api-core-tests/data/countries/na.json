@@ -1,0 +1,74 @@
+{
+    "code": "NA",
+    "name": "Namibia",
+    "states": [
+        {
+            "code": "ER",
+            "name": "Erongo"
+        },
+        {
+            "code": "HA",
+            "name": "Hardap"
+        },
+        {
+            "code": "KA",
+            "name": "Karas"
+        },
+        {
+            "code": "KE",
+            "name": "Kavango East"
+        },
+        {
+            "code": "KW",
+            "name": "Kavango West"
+        },
+        {
+            "code": "KH",
+            "name": "Khomas"
+        },
+        {
+            "code": "KU",
+            "name": "Kunene"
+        },
+        {
+            "code": "OW",
+            "name": "Ohangwena"
+        },
+        {
+            "code": "OH",
+            "name": "Omaheke"
+        },
+        {
+            "code": "OS",
+            "name": "Omusati"
+        },
+        {
+            "code": "ON",
+            "name": "Oshana"
+        },
+        {
+            "code": "OT",
+            "name": "Oshikoto"
+        },
+        {
+            "code": "OD",
+            "name": "Otjozondjupa"
+        },
+        {
+            "code": "CA",
+            "name": "Zambezi"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/na"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

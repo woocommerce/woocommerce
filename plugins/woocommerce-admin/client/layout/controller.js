@@ -28,11 +28,13 @@ const EditProductPage = lazy( () =>
 		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
 	)
 );
-
 const AddProductPage = lazy( () =>
 	import(
 		/* webpackChunkName: "add-product-page" */ '../products/add-product-page'
 	)
+);
+const ProductPage = lazy( () =>
+	import( /* webpackChunkName: "product-page" */ '../products/product-page' )
 );
 const AnalyticsReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report" */ '../analytics/report' )
@@ -45,14 +47,8 @@ const AnalyticsSettings = lazy( () =>
 const Dashboard = lazy( () =>
 	import( /* webpackChunkName: "dashboard" */ '../dashboard' )
 );
-
 const Homescreen = lazy( () =>
 	import( /* webpackChunkName: "homescreen" */ '../homescreen' )
-);
-const MarketingOverview = lazy( () =>
-	import(
-		/* webpackChunkName: "marketing-overview" */ '../marketing/overview'
-	)
 );
 const MarketingOverviewMultichannel = lazy( () =>
 	import(
@@ -62,10 +58,14 @@ const MarketingOverviewMultichannel = lazy( () =>
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
 );
+
+const CoreProfiler = lazy( () =>
+	import( /* webpackChunkName: "core-profiler" */ '../core-profiler' )
+);
+
 const SettingsGroup = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../settings' )
 );
-
 const WCPaymentsWelcomePage = lazy( () =>
 	import(
 		/* webpackChunkName: "wcpay-payment-welcome-page" */ '../payments-welcome'
@@ -156,9 +156,7 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures.marketing ) {
 		pages.push( {
-			container: window.wcAdminFeatures[ 'multichannel-marketing' ]
-				? MarketingOverviewMultichannel
-				: MarketingOverview,
+			container: MarketingOverviewMultichannel,
 			path: '/marketing',
 			breadcrumbs: [
 				...initialBreadcrumbs,
@@ -173,7 +171,37 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures[ 'new-product-management-experience' ] ) {
+	if ( window.wcAdminFeatures[ 'product-block-editor' ] ) {
+		pages.push( {
+			container: ProductPage,
+			path: '/add-product',
+			breadcrumbs: [
+				[ '/add-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Add New Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-add-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
+
+		pages.push( {
+			container: ProductPage,
+			path: '/product/:productId',
+			breadcrumbs: [
+				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-edit-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		} );
+	} else if (
+		window.wcAdminFeatures[ 'new-product-management-experience' ]
+	) {
 		pages.push( {
 			container: AddProductPage,
 			path: '/add-product',
@@ -203,13 +231,53 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures.onboarding ) {
+	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
 		pages.push( {
-			container: ProfileWizard,
-			path: '/setup-wizard',
+			container: EditProductPage,
+			path: '/product/:productId/variation/:variationId',
+			breadcrumbs: [
+				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
+				__( 'Edit Product Variation', 'woocommerce' ),
+			],
+			navArgs: {
+				id: 'woocommerce-edit-product',
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'edit_products',
+		} );
+	}
+
+	if ( window.wcAdminFeatures.onboarding ) {
+		if ( ! window.wcAdminFeatures[ 'core-profiler' ] ) {
+			pages.push( {
+				container: ProfileWizard,
+				path: '/setup-wizard',
+				breadcrumbs: [
+					...initialBreadcrumbs,
+					__( 'Setup Wizard', 'woocommerce' ),
+				],
+				capability: 'manage_woocommerce',
+			} );
+		} else {
+			pages.push( {
+				container: CoreProfiler,
+				path: '/setup-wizard',
+				breadcrumbs: [
+					...initialBreadcrumbs,
+					__( 'Profiler', 'woocommerce' ),
+				],
+				capability: 'manage_woocommerce',
+			} );
+		}
+	}
+
+	if ( window.wcAdminFeatures[ 'core-profiler' ] ) {
+		pages.push( {
+			container: CoreProfiler,
+			path: '/profiler',
 			breadcrumbs: [
 				...initialBreadcrumbs,
-				__( 'Setup Wizard', 'woocommerce' ),
+				__( 'Profiler', 'woocommerce' ),
 			],
 			capability: 'manage_woocommerce',
 		} );

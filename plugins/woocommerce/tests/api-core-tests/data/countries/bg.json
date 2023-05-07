@@ -1,0 +1,130 @@
+{
+    "code": "BG",
+    "name": "Bulgaria",
+    "states": [
+        {
+            "code": "BG-01",
+            "name": "Blagoevgrad"
+        },
+        {
+            "code": "BG-02",
+            "name": "Burgas"
+        },
+        {
+            "code": "BG-08",
+            "name": "Dobrich"
+        },
+        {
+            "code": "BG-07",
+            "name": "Gabrovo"
+        },
+        {
+            "code": "BG-26",
+            "name": "Haskovo"
+        },
+        {
+            "code": "BG-09",
+            "name": "Kardzhali"
+        },
+        {
+            "code": "BG-10",
+            "name": "Kyustendil"
+        },
+        {
+            "code": "BG-11",
+            "name": "Lovech"
+        },
+        {
+            "code": "BG-12",
+            "name": "Montana"
+        },
+        {
+            "code": "BG-13",
+            "name": "Pazardzhik"
+        },
+        {
+            "code": "BG-14",
+            "name": "Pernik"
+        },
+        {
+            "code": "BG-15",
+            "name": "Pleven"
+        },
+        {
+            "code": "BG-16",
+            "name": "Plovdiv"
+        },
+        {
+            "code": "BG-17",
+            "name": "Razgrad"
+        },
+        {
+            "code": "BG-18",
+            "name": "Ruse"
+        },
+        {
+            "code": "BG-27",
+            "name": "Shumen"
+        },
+        {
+            "code": "BG-19",
+            "name": "Silistra"
+        },
+        {
+            "code": "BG-20",
+            "name": "Sliven"
+        },
+        {
+            "code": "BG-21",
+            "name": "Smolyan"
+        },
+        {
+            "code": "BG-23",
+            "name": "Sofia District"
+        },
+        {
+            "code": "BG-22",
+            "name": "Sofia"
+        },
+        {
+            "code": "BG-24",
+            "name": "Stara Zagora"
+        },
+        {
+            "code": "BG-25",
+            "name": "Targovishte"
+        },
+        {
+            "code": "BG-03",
+            "name": "Varna"
+        },
+        {
+            "code": "BG-04",
+            "name": "Veliko Tarnovo"
+        },
+        {
+            "code": "BG-05",
+            "name": "Vidin"
+        },
+        {
+            "code": "BG-06",
+            "name": "Vratsa"
+        },
+        {
+            "code": "BG-28",
+            "name": "Yambol"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/bg"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

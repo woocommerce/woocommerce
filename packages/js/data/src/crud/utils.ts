@@ -6,6 +6,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * Internal dependencies
  */
+import CRUD_ACTIONS from './crud-actions';
 import { IdQuery, IdType, ItemQuery } from './types';
 
 /**
@@ -149,6 +150,52 @@ export const getUrlParameters = (
 };
 
 /**
+ * Check to see if an argument is a valid type of ID query.
+ *
+ * @param  arg       Unknow argument to check.
+ * @param  namespace The namespace string
+ * @return boolean
+ */
+export const isValidIdQuery = ( arg: unknown, namespace: string ) => {
+	if ( typeof arg === 'string' || typeof arg === 'number' ) {
+		return true;
+	}
+
+	const validKeys = [ 'id', ...getNamespaceKeys( namespace ) ];
+
+	if (
+		arg &&
+		typeof arg === 'object' &&
+		arg.hasOwnProperty( 'id' ) &&
+		JSON.stringify( validKeys.sort() ) ===
+			JSON.stringify( Object.keys( arg ).sort() )
+	) {
+		return true;
+	}
+
+	return false;
+};
+
+/**
+ * Replace the initial argument with a key if it's a valid ID query.
+ *
+ * @param  args      Args to check.
+ * @param  namespace Namespace.
+ * @return Sanitized arguments.
+ */
+export const maybeReplaceIdQuery = ( args: unknown[], namespace: string ) => {
+	const [ firstArgument, ...rest ] = args;
+	if ( ! firstArgument || ! isValidIdQuery( firstArgument, namespace ) ) {
+		return args;
+	}
+
+	const urlParameters = getUrlParameters( namespace, firstArgument );
+	const { key } = parseId( firstArgument as IdQuery, urlParameters );
+
+	return [ key, ...rest ];
+};
+
+/**
  * Clean a query of all namespaced params.
  *
  * @param  query     Query to clean.
@@ -167,4 +214,47 @@ export const cleanQuery = (
 	} );
 
 	return cleaned;
+};
+
+/**
+ * Get the identifier for a request provided its arguments.
+ *
+ * @param  name Name of action or selector.
+ * @param  args Arguments for the request.
+ * @return Key to identify the request.
+ */
+export const getRequestIdentifier = ( name: string, ...args: unknown[] ) => {
+	const suffix = JSON.stringify(
+		args.map( ( arg ) => {
+			if ( typeof arg === 'object' && arg !== null ) {
+				return JSON.stringify( arg, Object.keys( arg ).sort() );
+			}
+			return arg;
+		} )
+	).replace( /\\"/g, '"' );
+
+	return name + '/' + suffix;
+};
+
+/**
+ * Get a generic action name from a resource action name if one exists.
+ *
+ * @param  action       Action name to check.
+ * @param  resourceName Resurce name.
+ * @return Generic action name if one exists, otherwise the passed action name.
+ */
+export const getGenericActionName = (
+	action: string,
+	resourceName: string
+) => {
+	switch ( action ) {
+		case `create${ resourceName }`:
+			return CRUD_ACTIONS.CREATE_ITEM;
+		case `delete${ resourceName }`:
+			return CRUD_ACTIONS.DELETE_ITEM;
+		case `update${ resourceName }`:
+			return CRUD_ACTIONS.UPDATE_ITEM;
+	}
+
+	return action;
 };

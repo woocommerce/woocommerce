@@ -7,8 +7,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as TaxesStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore as TaxesStatsDataStore;
 
 /**
  * Date & time interval and numeric range handling class for Reporting API.

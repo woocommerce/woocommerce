@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { SETTINGS_STORE_NAME, WCDataSelector } from '@woocommerce/data';
+import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';

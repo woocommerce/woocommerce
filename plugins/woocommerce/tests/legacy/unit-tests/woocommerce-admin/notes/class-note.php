@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\Notes
  */
 
-use \Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Note;
 
 /**
  * Class WC_Admin_Tests_Note

@@ -563,8 +563,8 @@ SelectControl.defaultProps = {
 	autoComplete: 'off',
 };
 
-export default compose( [
+export default compose(
 	withSpokenMessages,
 	withInstanceId,
-	withFocusOutside, // this MUST be the innermost HOC as it calls handleFocusOutside
-] )( SelectControl );
+	withFocusOutside // this MUST be the innermost HOC as it calls handleFocusOutside
+)( SelectControl );

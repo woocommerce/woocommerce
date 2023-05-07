@@ -1,8 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { admin, customer } = require( '../../test-data/data' );
 
 const guestEmail = 'checkout-guest@example.com';
-const customerEmail = 'customer@woocommercecoree2etestsuite.com';
 
 test.describe( 'Checkout page', () => {
 	const singleProductPrice = '9.99';
@@ -106,7 +106,7 @@ test.describe( 'Checkout page', () => {
 
 	test.beforeEach( async ( { context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
-		context.clearCookies();
+		await context.clearCookies();
 	} );
 
 	test( 'should display cart items in order review', async ( { page } ) => {
@@ -248,8 +248,8 @@ test.describe( 'Checkout page', () => {
 		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
 		await page.goto( 'wp-login.php' );
-		await page.fill( 'input[name="log"]', 'admin' );
-		await page.fill( 'input[name="pwd"]', 'password' );
+		await page.fill( 'input[name="log"]', admin.username );
+		await page.fill( 'input[name="pwd"]', admin.password );
 		await page.click( 'text=Log In' );
 
 		// load the order placed as a guest
@@ -276,8 +276,8 @@ test.describe( 'Checkout page', () => {
 
 	test( 'allows existing customer to place order', async ( { page } ) => {
 		await page.goto( 'wp-admin/' );
-		await page.fill( 'input[name="log"]', 'customer' );
-		await page.fill( 'input[name="pwd"]', 'password' );
+		await page.fill( 'input[name="log"]', customer.username );
+		await page.fill( 'input[name="pwd"]', customer.password );
 		await page.click( 'text=Log In' );
 		await page.waitForLoadState( 'networkidle' );
 		for ( let i = 1; i < 3; i++ ) {
@@ -301,7 +301,7 @@ test.describe( 'Checkout page', () => {
 		await page.selectOption( '#billing_state', 'OR' );
 		await page.fill( '#billing_postcode', '97403' );
 		await page.fill( '#billing_phone', '555 555-5555' );
-		await page.fill( '#billing_email', customerEmail );
+		await page.fill( '#billing_email', customer.email );
 
 		await page.click( 'text=Cash on delivery' );
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
@@ -327,8 +327,8 @@ test.describe( 'Checkout page', () => {
 		await page.goto( 'wp-login.php?loggedout=true' );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.fill( 'input[name="log"]', 'admin' );
-		await page.fill( 'input[name="pwd"]', 'password' );
+		await page.fill( 'input[name="log"]', admin.username );
+		await page.fill( 'input[name="pwd"]', admin.password );
 		await page.click( 'text=Log In' );
 
 		// load the order placed as a customer

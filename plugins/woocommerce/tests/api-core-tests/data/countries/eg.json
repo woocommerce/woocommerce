@@ -1,0 +1,126 @@
+{
+    "code": "EG",
+    "name": "Egypt",
+    "states": [
+        {
+            "code": "EGALX",
+            "name": "Alexandria"
+        },
+        {
+            "code": "EGASN",
+            "name": "Aswan"
+        },
+        {
+            "code": "EGAST",
+            "name": "Asyut"
+        },
+        {
+            "code": "EGBA",
+            "name": "Red Sea"
+        },
+        {
+            "code": "EGBH",
+            "name": "Beheira"
+        },
+        {
+            "code": "EGBNS",
+            "name": "Beni Suef"
+        },
+        {
+            "code": "EGC",
+            "name": "Cairo"
+        },
+        {
+            "code": "EGDK",
+            "name": "Dakahlia"
+        },
+        {
+            "code": "EGDT",
+            "name": "Damietta"
+        },
+        {
+            "code": "EGFYM",
+            "name": "Faiyum"
+        },
+        {
+            "code": "EGGH",
+            "name": "Gharbia"
+        },
+        {
+            "code": "EGGZ",
+            "name": "Giza"
+        },
+        {
+            "code": "EGIS",
+            "name": "Ismailia"
+        },
+        {
+            "code": "EGJS",
+            "name": "South Sinai"
+        },
+        {
+            "code": "EGKB",
+            "name": "Qalyubia"
+        },
+        {
+            "code": "EGKFS",
+            "name": "Kafr el-Sheikh"
+        },
+        {
+            "code": "EGKN",
+            "name": "Qena"
+        },
+        {
+            "code": "EGLX",
+            "name": "Luxor"
+        },
+        {
+            "code": "EGMN",
+            "name": "Minya"
+        },
+        {
+            "code": "EGMNF",
+            "name": "Monufia"
+        },
+        {
+            "code": "EGMT",
+            "name": "Matrouh"
+        },
+        {
+            "code": "EGPTS",
+            "name": "Port Said"
+        },
+        {
+            "code": "EGSHG",
+            "name": "Sohag"
+        },
+        {
+            "code": "EGSHR",
+            "name": "Al Sharqia"
+        },
+        {
+            "code": "EGSIN",
+            "name": "North Sinai"
+        },
+        {
+            "code": "EGSUZ",
+            "name": "Suez"
+        },
+        {
+            "code": "EGWAD",
+            "name": "New Valley"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/eg"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

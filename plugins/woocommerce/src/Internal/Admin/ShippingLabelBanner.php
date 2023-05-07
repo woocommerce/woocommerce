@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use \Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 
 /**
  * Shows print shipping label banner on edit order page.

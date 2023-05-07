@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix 'Invalid payment method' error upon double click on Delete button of Payment methods table

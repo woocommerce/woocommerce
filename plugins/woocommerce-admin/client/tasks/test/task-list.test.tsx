@@ -29,6 +29,19 @@ jest.mock( '@woocommerce/components', () => ( {
 		.fn()
 		.mockImplementation( ( { count } ) => <div>Count:{ count }</div> ),
 } ) );
+jest.mock( '@woocommerce/admin-layout', () => {
+	const mockContext = {
+		layoutPath: [ 'home' ],
+		layoutString: 'home',
+		extendLayout: () => {},
+		isDescendantOf: () => false,
+	};
+	return {
+		...jest.requireActual( '@woocommerce/admin-layout' ),
+		useLayoutContext: jest.fn().mockReturnValue( mockContext ),
+		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
+	};
+} );
 
 const tasks: { [ key: string ]: TaskType[] } = {
 	setup: [
@@ -52,6 +65,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 		{
 			id: 'required',
@@ -74,6 +88,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 		{
 			id: 'completed',
@@ -95,6 +110,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 	],
 	extension: [
@@ -118,6 +134,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 	],
 };
@@ -144,7 +161,7 @@ describe( 'TaskList', () => {
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
-			context: 'root',
+			context: 'home',
 			number_tasks: 0,
 			store_connected: null,
 		} );
@@ -167,7 +184,7 @@ describe( 'TaskList', () => {
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'extended_tasklist_view', {
-			context: 'root',
+			context: 'home',
 			number_tasks: 0,
 			store_connected: null,
 		} );
@@ -234,57 +251,5 @@ describe( 'TaskList', () => {
 		expect(
 			queryByText( dismissedTask[ 0 ].title )
 		).not.toBeInTheDocument();
-	} );
-
-	it( 'should not display isSnoozed tasks', () => {
-		const dismissedTask = [
-			{
-				...tasks.setup[ 0 ],
-				isSnoozed: true,
-				snoozedUntil: Date.now() + 10000,
-			},
-		];
-		const { queryByText } = render(
-			<TaskList
-				id="setup"
-				eventPrefix="tasklist_"
-				tasks={ dismissedTask }
-				title="List title"
-				query={ {} }
-				isVisible={ true }
-				isHidden={ false }
-				isComplete={ false }
-				displayProgressHeader={ false }
-				keepCompletedTaskList="no"
-			/>
-		);
-		expect(
-			queryByText( dismissedTask[ 0 ].title )
-		).not.toBeInTheDocument();
-	} );
-
-	it( 'should display a snoozed task if snoozedUntil passed the current timestamp', () => {
-		const dismissedTask = [
-			{
-				...tasks.setup[ 0 ],
-				isSnoozed: true,
-				snoozedUntil: Date.now() - 1000,
-			},
-		];
-		const { queryByText } = render(
-			<TaskList
-				id="setup"
-				eventPrefix="tasklist_"
-				tasks={ dismissedTask }
-				title="List title"
-				query={ {} }
-				isVisible={ true }
-				isHidden={ false }
-				isComplete={ false }
-				displayProgressHeader={ false }
-				keepCompletedTaskList="no"
-			/>
-		);
-		expect( queryByText( dismissedTask[ 0 ].title ) ).toBeInTheDocument();
 	} );
 } );
