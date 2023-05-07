@@ -224,7 +224,7 @@ class CoreMenu {
 			);
 		}
 
-		if(isset($coupon_items['default']))$coupon_items['default'] = array();
+		if(　isset(　$coupon_items['default']　)　)　$coupon_items['default'] = array();
 		return array_merge(
 			array(
 				$home_item,
