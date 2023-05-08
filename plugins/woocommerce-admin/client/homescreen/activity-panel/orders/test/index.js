@@ -22,17 +22,6 @@ jest.mock( '@wordpress/data', () => {
 	};
 } );
 
-jest.mock( '@woocommerce/tracks', () => {
-	// Require the original module to not be mocked...
-	const originalModule = jest.requireActual( '@woocommerce/tracks' );
-
-	return {
-		__esModule: true, // Use it when dealing with esModules
-		...originalModule,
-		recordEvent: jest.fn(),
-	};
-} );
-
 describe( 'OrdersPanel', () => {
 	it( 'should render an empty order card', () => {
 		useSelect.mockReturnValue( {

@@ -11,17 +11,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { StockPanel } from '../';
 
-jest.mock( '@woocommerce/tracks', () => {
-	// Require the original module to not be mocked...
-	const originalModule = jest.requireActual( '@woocommerce/tracks' );
-
-	return {
-		__esModule: true, // Use it when dealing with esModules
-		...originalModule,
-		recordEvent: jest.fn(),
-	};
-} );
-
 describe( 'StockPanel', () => {
 	it( 'should the correct number of placeholders', () => {
 		const { container } = render(

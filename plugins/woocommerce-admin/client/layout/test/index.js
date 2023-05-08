@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import * as tracks from '@woocommerce/tracks';
+import { recordPageView } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -73,10 +73,9 @@ describe( 'updateLinkHref', () => {
 
 describe( 'Layout', () => {
 	it( 'should call recordPageView with correct parameters', () => {
-		jest.spyOn( tracks, 'recordPageView' );
 		window.history.pushState( {}, 'Page Title', '/url?search' );
 		render( <EmbedLayout /> );
-		expect( tracks.recordPageView ).toHaveBeenCalledWith( '/url?search', {
+		expect( recordPageView ).toHaveBeenCalledWith( '/url?search', {
 			has_navigation: true,
 			is_embedded: true,
 		} );

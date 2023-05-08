@@ -10,6 +10,10 @@ module.exports = {
 			__dirname,
 			'build/mocks/woocommerce-settings'
 		),
+		'@woocommerce/tracks': path.resolve(
+			__dirname,
+			'build/mocks/woocommerce-tracks'
+		),
 		'~/(.*)': path.resolve(
 			__dirname,
 			'../../../plugins/woocommerce-admin/client/$1'

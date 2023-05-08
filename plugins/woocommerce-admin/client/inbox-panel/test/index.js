@@ -25,8 +25,6 @@ jest.mock( '@wordpress/data', () => {
 	};
 } );
 
-jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
-
 jest.mock( '@woocommerce/experimental', () => {
 	// Require the original module to not be mocked...
 	const originalModule = jest.requireActual( '@woocommerce/experimental' );

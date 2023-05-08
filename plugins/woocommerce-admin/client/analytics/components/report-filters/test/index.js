@@ -11,8 +11,6 @@ import userEvent from '@testing-library/user-event';
  */
 import ReportFilters from '..';
 
-jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
-
 describe( 'ReportFilters', () => {
 	test( 'should record analytics_filter Tracks event when filter is changed', async () => {
 		const { getByText } = render(

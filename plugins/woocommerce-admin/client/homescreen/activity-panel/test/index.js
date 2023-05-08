@@ -56,10 +56,6 @@ jest.mock( '../orders/utils', () => {
 	};
 } );
 
-jest.mock( '@woocommerce/tracks', () => ( {
-	recordEvent: jest.fn(),
-} ) );
-
 describe( 'ActivityPanel', () => {
 	it( 'should render a panel with two rows', () => {
 		render( <ActivityPanel /> );
