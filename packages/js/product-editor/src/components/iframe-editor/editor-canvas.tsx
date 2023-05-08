@@ -3,22 +3,29 @@
  */
 import { createElement, Fragment } from '@wordpress/element';
 import {
+	EditorSettings,
+	EditorBlockListSettings,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	__unstableIframe as Iframe,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
 	__unstableUseMouseMoveTypingReset as useMouseMoveTypingReset,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
+	__unstableEditorStyles as EditorStyles,
 } from '@wordpress/block-editor';
 
 type EditorCanvasProps = {
-	enableResizing: boolean;
 	children: React.ReactNode;
+	enableResizing: boolean;
+	settings: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
 export function EditorCanvas( {
-	enableResizing,
 	children,
+	enableResizing,
+	settings,
 	...props
 }: EditorCanvasProps ) {
 	const mouseMoveTypingRef = useMouseMoveTypingReset();
@@ -26,6 +33,7 @@ export function EditorCanvas( {
 		<Iframe
 			head={
 				<>
+					<EditorStyles styles={ settings?.styles } />
 					<style>
 						{
 							// Forming a "block formatting context" to prevent margin collapsing.
