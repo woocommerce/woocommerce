@@ -25,10 +25,20 @@ export class Logger {
 		] as number;
 	}
 
-	static error( message: string ) {
+	static error( err: unknown, failOnErr = true ) {
 		if ( Logger.loggingLevel >= LOGGING_LEVELS.error ) {
-			error( chalk.red( message ) );
-			process.exit( 1 );
+			if ( err instanceof Error ) {
+				error( chalk.red( err.message ) );
+			} else if ( typeof err === 'string' ) {
+				error( chalk.red( err ) );
+			} else {
+				// Best effort to log the error when we don't know the type.
+				error( chalk.red( JSON.stringify( err ) ) );
+			}
+
+			if ( failOnErr ) {
+				process.exit( 1 );
+			}
 		}
 	}
 
