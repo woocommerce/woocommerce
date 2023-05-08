@@ -741,7 +741,7 @@ jobs:
 
     post-slack-summary:
         name: Post Slack summary
-        needs: [get-tag, test-wp-versions]
+        needs: [get-tag, test-wp-versions, e2e-wp-latest]
         runs-on: ubuntu-20.04
         permissions:
             contents: read
