@@ -1215,6 +1215,9 @@ jQuery( function ( $ ) {
 										.attr( 'data-total' ),
 									10
 								) * -1;
+							$( '.generate_variations' ).text(
+								'Generate variations'
+							);
 						}
 					}
 					break;
