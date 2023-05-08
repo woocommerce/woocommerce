@@ -10,7 +10,14 @@
 		"multiple": false,
 		"reusable": false,
 		"inserter": false,
-		"lock": false
+		"lock": false,
+		"color": {
+			"text": true,
+			"background": false
+		},
+		"typography": {
+			"fontSize": true
+		}
 	},
 	"attributes": {
 		"lock": {
