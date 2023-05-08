@@ -25,15 +25,19 @@ export class Logger {
 		] as number;
 	}
 
-	static error( message: string | Error ) {
+	static error( err: unknown, exitOnFail = true ) {
 		if ( Logger.loggingLevel >= LOGGING_LEVELS.error ) {
-			if ( message instanceof Error ) {
-				error( chalk.red( message.message ) );
+			if ( err instanceof Error ) {
+				error( chalk.red( err.message ) );
+			} else if ( typeof err === 'string' ) {
+				error( chalk.red( err ) );
 			} else {
-				error( chalk.red( message ) );
+				error( chalk.red( JSON.stringify( err ) ) );
 			}
 
-			process.exit( 1 );
+			if ( exitOnFail ) {
+				process.exit( 1 );
+			}
 		}
 	}
 

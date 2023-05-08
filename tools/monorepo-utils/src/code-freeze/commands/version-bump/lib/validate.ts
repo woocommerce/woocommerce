@@ -21,12 +21,8 @@ export const getCurrentVersion = async (
 	try {
 		const composerJSON = JSON.parse( await readFile( filePath, 'utf8' ) );
 		return composerJSON.version;
-	} catch ( e: unknown ) {
-		if ( e instanceof Error ) {
-			Logger.error(
-				`Could not determine current version with error: ${ e.message }`
-			);
-		}
+	} catch ( e ) {
+		Logger.error( e );
 	}
 };
 

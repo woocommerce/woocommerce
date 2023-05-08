@@ -51,11 +51,10 @@ export const milestoneCommand = new Command( 'milestone' )
 			Logger.error(
 				"You can't manually supply a milestone using Github mode. Please use the CLI locally to add a milestone."
 			);
-			process.exit( 1 );
 		}
 
-		let nextMilestone;
-		let nextReleaseVersion;
+		let nextMilestone = '';
+		let nextReleaseVersion = '';
 
 		if ( milestone ) {
 			Logger.warn(
@@ -108,7 +107,7 @@ export const milestoneCommand = new Command( 'milestone' )
 					title: nextMilestone,
 				}
 			);
-		} catch ( e: unknown ) {
+		} catch ( e ) {
 			const error: RequestError = e as RequestError;
 
 			// If its 422 we can type narrow to get validation errors.
@@ -140,7 +139,6 @@ export const milestoneCommand = new Command( 'milestone' )
 					`\nFailed to create milestone ${ nextMilestone } in ${ owner }/${ name }`
 				);
 				Logger.error( error.message );
-				process.exit( 1 );
 			}
 		}
 
