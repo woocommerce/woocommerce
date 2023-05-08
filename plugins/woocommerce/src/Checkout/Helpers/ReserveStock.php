@@ -73,7 +73,6 @@ final class ReserveStock {
 		}
 
 		$held_stock_notes   = array();
-		$held_stock_counter = 0;
 
 		try {
 			$items = array_filter(
@@ -117,9 +116,8 @@ final class ReserveStock {
 
 				$rows[ $managed_by_id ] = isset( $rows[ $managed_by_id ] ) ? $rows[ $managed_by_id ] + $item_quantity : $item_quantity;
 
-				if ( $held_stock_counter < 5 ) {
 					$held_stock_notes[] = $product->get_formatted_name() . ' x ' . $rows[ $managed_by_id ];
-					$held_stock_counter++;
+				if ( count( $held_stock_notes ) < 5 ) {
 				}
 			}
 
@@ -138,9 +136,9 @@ final class ReserveStock {
 
 			$note_suffix   = '';
 			// Add suffix if there are more than 5 items.
-			if ( count( $items ) > $held_stock_counter ) {
-				$remaining_count = count( $items ) - $held_stock_counter;
 
+			$remaining_count = count( $rows ) - count( $held_stock_notes );
+			if ( $remaining_count > 0 ) {
 				// translators: %d is the remaining order items count.
 				$note_suffix     = '<br>- ' . sprintf( __( '... and %d more items.', 'woocommerce' ), $remaining_count );
 			}
