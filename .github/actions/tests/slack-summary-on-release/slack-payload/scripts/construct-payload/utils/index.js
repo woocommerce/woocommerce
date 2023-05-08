@@ -1,4 +1,3 @@
-const { combineContextBlocks } = require( './combine-context-blocks' );
-const { filterContextBlocks } = require( './filter-blocks' );
+const { getContextBlocks } = require( './get-context-blocks' );
 
-module.exports = { combineContextBlocks, filterContextBlocks };
+module.exports = { getContextBlocks };

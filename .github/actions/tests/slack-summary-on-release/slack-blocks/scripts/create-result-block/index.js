@@ -1,24 +1,31 @@
 module.exports = () => {
 	const { API_RESULT, E2E_RESULT, ENV_SLUG, TEST_NAME, RELEASE_VERSION } =
 		process.env;
-	const { createElementBlock, initContextBlock } = require( './utils' );
+	const { setElementText } = require( './utils' );
 
-	const contextBlock = initContextBlock( TEST_NAME );
-	const apiElementBlock = createElementBlock( {
+	const apiLinkText = setElementText( {
 		testType: 'API',
 		result: API_RESULT,
 		envSlug: ENV_SLUG,
 		releaseVersion: RELEASE_VERSION,
 	} );
-	const e2eElementBlock = createElementBlock( {
+	const e2eLinkText = setElementText( {
 		testType: 'E2E',
 		result: E2E_RESULT,
 		envSlug: ENV_SLUG,
 		releaseVersion: RELEASE_VERSION,
 	} );
+	const elementText = `*${ TEST_NAME }*\n    ${ apiLinkText }    ${ e2eLinkText }`;
 
-	contextBlock.elements.push( apiElementBlock );
-	contextBlock.elements.push( e2eElementBlock );
+	const contextBlock = {
+		type: 'context',
+		elements: [
+			{
+				type: 'mrkdwn',
+				text: elementText,
+			},
+		],
+	};
 
 	return contextBlock;
 };

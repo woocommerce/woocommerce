@@ -1,9 +1,15 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const combineContextBlocks = ( blocksDir ) => {
+const getContextBlocks = ( blocksDir, testName ) => {
 	const jsonsDir = path.resolve( blocksDir );
-	const jsons = fs.readdirSync( jsonsDir );
+	const jsons = fs
+		.readdirSync( jsonsDir )
+		.filter( ( { elements } ) => elements[ 0 ].text.includes( testName ) );
+
+	const dividerBlock = {
+		type: 'divider',
+	};
 
 	let contextBlocks = [];
 
@@ -12,11 +18,12 @@ const combineContextBlocks = ( blocksDir ) => {
 		const contextBlock = require( jsonPath );
 
 		contextBlocks.push( contextBlock );
+		contextBlocks.push( dividerBlock );
 	}
 
 	return contextBlocks;
 };
 
 module.exports = {
-	combineContextBlocks,
+	getContextBlocks,
 };

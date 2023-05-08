@@ -1,7 +1,5 @@
-const { createElementBlock } = require( './create-element-block' );
-const { initContextBlock } = require( './init-context-block' );
+const { setElementText } = require( './set-element-text' );
 
 module.exports = {
-	createElementBlock,
-	initContextBlock,
+	setElementText,
 };
