@@ -462,7 +462,7 @@ jobs:
                       steps.run-e2e-composite-action.outputs.result == 'failure' 
                     ) 
                   )
-              uses: ./.github/actions/tests/slack-summary-on-release/slack-block-per-test
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
               with:
                   test-name: ${{ matrix.version.description }} (${{ matrix.version.number }})
                   api-result: ${{ steps.run-api-composite-action.outputs.result }}
