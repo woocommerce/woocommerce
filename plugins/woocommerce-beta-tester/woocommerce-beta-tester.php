@@ -44,7 +44,7 @@ function _wc_beta_tester_load_textdomain() {
 add_action( 'plugins_loaded', '_wc_beta_tester_load_textdomain' );
 
 /**
- * Boostrap plugin.
+ * Bootstrap plugin.
  */
 function _wc_beta_tester_bootstrap() {
 
