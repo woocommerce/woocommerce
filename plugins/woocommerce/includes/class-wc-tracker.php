@@ -628,7 +628,8 @@ class WC_Tracker {
 				$key = $gkey;
 			}
 
-			$key = str_replace( array( 'payment method', 'gateway' ), '', strtolower( $key ) );
+			$key = str_replace( array( 'payment method', 'payment gateway', 'gateway' ), '', strtolower( $key ) );
+			$key = trim( preg_replace( '/[: ,#*\-_]+/', ' ', $key ) );
 
 			// Add currency as postfix of gateway for backward compatibility.
 			$key       = 'gateway_' . $key . '_' . $orders_details->currency;
