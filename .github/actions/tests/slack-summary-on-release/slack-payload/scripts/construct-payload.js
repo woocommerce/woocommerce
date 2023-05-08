@@ -19,18 +19,22 @@ const combineContextBlocks = () => {
 };
 
 module.exports = () => {
+	const headerText = `Test summary for ${ RELEASE_VERSION }`;
 	const headerBlock = {
 		type: 'header',
 		text: {
 			type: 'plain_text',
-			text: `Test summary for ${ RELEASE_VERSION }`,
+			text: headerText,
 			emoji: true,
 		},
 	};
 
 	const contextBlocks = combineContextBlocks();
 
-	const payload = { blocks: [ headerBlock ].concat( contextBlocks ) };
+	const payload = {
+		text: headerText,
+		blocks: [ headerBlock ].concat( contextBlocks ),
+	};
 
 	return payload;
 };
