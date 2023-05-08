@@ -1215,9 +1215,6 @@ jQuery( function ( $ ) {
 										.attr( 'data-total' ),
 									10
 								) * -1;
-							$( '.generate_variations' ).text(
-								'Generate variations'
-							);
 						}
 					}
 					break;
@@ -1305,6 +1302,7 @@ jQuery( function ( $ ) {
 				$( '#variable_product_options' )
 					.find( '.variation-needs-update' )
 					.removeClass( 'variation-needs-update' );
+				$( '.generate_variations' ).text( 'Generate variations' );
 			} else {
 				wc_meta_boxes_product_variations_ajax.check_for_changes();
 			}
