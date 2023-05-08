@@ -1071,26 +1071,37 @@ $default-line-height: 18px;
 		}
 	}
 
-	.add-variation-container {
-		@extend %container-defaults;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		gap: 24px;
-		position: relative;
-
-		.arrow-image-wrapper {
-			position: absolute;
-			top: 10px;
-			left: 87px;
+	#variable_product_options_inner {
+		> .toolbar:not(.expand-close-hidden) {
+			border-bottom: 1px solid #eee;
 		}
-
-		p {
-			@extend %centered-text;
-		}
-
-		&.hidden {
+		.add-variation-container {
 			display: none;
+		}
+
+		&.no-variations {
+			> .toolbar:not(.expand-close-hidden) {
+				border-bottom: none;
+			}
+			.add-variation-container {
+				display: flex;
+				@extend %container-defaults;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				gap: 24px;
+				position: relative;
+
+				.arrow-image-wrapper {
+					position: absolute;
+					top: 10px;
+					left: 87px;
+				}
+
+				p {
+					@extend %centered-text;
+				}
+			}
 		}
 	}
 }
@@ -5505,11 +5516,11 @@ img.help_tip {
   * WooCommerce meta boxes
   */
 .wc-metaboxes-wrapper {
-	&:not(#variable_product_options_inner) {
-		> .toolbar:not(.expand-close-hidden) {
+	:not(#variable_product_options_inner) {
+		.toolbar:not(.expand-close-hidden) {
 		  border-bottom: 1px solid #eee;
 		}
-	  }
+	}
 	.toolbar {
 		margin: 0 !important;
 		border-top: 1px solid white;
