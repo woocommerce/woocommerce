@@ -467,6 +467,8 @@ jobs:
                   test-name: ${{ matrix.version.description }} (${{ matrix.version.number }})
                   api-result: ${{ steps.run-api-composite-action.outputs.result }}
                   e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  env-slug: ${{ matrix.version.env_description }}
+                  release-version: ${{ needs.get-wp-versions.outputs.tag }}
 
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}

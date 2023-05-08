@@ -21,6 +21,10 @@ inputs:
             - failure
             - cancelled
             - skipped
+    env-slug:
+        required: true
+    release-version:
+        required: true
 
 runs:
     using: composite
@@ -33,9 +37,11 @@ runs:
                   const script = require('././.github/actions/tests/slack-summary-on-release/slack-blocks/scripts/create-result-block');
                   return script();
           env:
-              TEST_NAME: ${{ inputs.test-name }}
               API_RESULT: ${{ inputs.api-result }}
               E2E_RESULT: ${{ inputs.e2e-result }}
+              ENV_SLUG: ${{ inputs.env-slug }}
+              TEST_NAME: ${{ inputs.test-name }}
+              RELEASE_VERSION: ${{ inputs.release-version }}
 
         - name: Write JSON file
           working-directory: /tmp
