@@ -229,7 +229,6 @@ jobs:
               with:
                   report-name: e2e-wp-latest--partial--run-${{ github.run_number }}
                   playwright-config: ignore-plugin-tests.playwright.config.js
-                  tests: basic.spec.js # mytodo remove
               env:
                   ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
                   ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
@@ -402,16 +401,12 @@ jobs:
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.API_WP_LATEST_X_ARTIFACT }}
-                  # mytodo re-run all tests
-                  tests: hello
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
 
             - name: Upload Allure artifacts to bucket
-              # mytodo re-enable
-              if: false
-              # if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
@@ -424,9 +419,7 @@ jobs:
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish API Allure report
-              # mytodo re-enable
-              if: false
-              # if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   ENV_DESCRIPTION: ${{ matrix.version.env_description }}
@@ -452,13 +445,9 @@ jobs:
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
               with:
                   report-name: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
-                  # mytodo re-enable all tests
-                  tests: basic.spec.js
 
             - name: Upload Allure artifacts to bucket
-              # mytodo re-enable
-              if: false
-              # if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               env:
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
@@ -471,9 +460,7 @@ jobs:
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
-              # mytodo re-enable
-              if: false
-              # if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   ENV_DESCRIPTION: ${{ matrix.version.env_description }}
@@ -551,16 +538,12 @@ jobs:
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.API_ARTIFACT }}
-                  # mytodo re-enable all tests
-                  tests: hello
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
 
             - name: Upload Allure artifacts to bucket
-              # mytodo re-enable
-              if: false
-              # if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
@@ -573,9 +556,7 @@ jobs:
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish API Allure report
-              # mytodo re-enable
-              if: false
-              # if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   ENV_DESCRIPTION: php-${{ matrix.php_version }}
@@ -601,12 +582,9 @@ jobs:
                   E2E_MAX_FAILURES: 15
               with:
                   report-name: ${{ env.E2E_ARTIFACT }}
-                  tests: basic.spec.js # mytodo remove
 
             - name: Upload Allure artifacts to bucket
-              # mytodo re-enable
-              if: false
-              # if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
               env:
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
@@ -619,9 +597,7 @@ jobs:
                   s3-bucket: ${{ secrets.REPORTS_BUCKET }}
 
             - name: Publish E2E Allure report
-              # mytodo re-enable
-              if: false
-              # if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               env:
                   GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   ENV_DESCRIPTION: php-${{ matrix.php_version }}
@@ -721,7 +697,6 @@ jobs:
               with:
                   playwright-config: ignore-plugin-tests.playwright.config.js
                   report-name: ${{ env.ARTIFACT_NAME }}
-                  tests: basic.spec.js # mytodo remove
               env:
                   E2E_MAX_FAILURES: 15
 
