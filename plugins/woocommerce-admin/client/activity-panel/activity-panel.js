@@ -153,6 +153,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const {
 		hasUnreadNotes,
 		hasAbbreviatedNotifications,
+		hasUnread,
 		isCompletedTask,
 		thingsToDoNextCount,
 		requestingTaskListOptions,
@@ -175,6 +176,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const thingsToDoCount = getThingsToDoNextCount( extendedTaskList );
 
+		const orderStatuses = getOrderStatuses( select );
+
 		return {
 			hasUnreadNotes: isNotesPanelVisible( select ),
 			hasAbbreviatedNotifications: isAbbreviatedPanelVisible(
@@ -182,6 +185,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				isSetupTaskListHidden,
 				thingsToDoCount
 			),
+			unread:
+				getUnreadOrders( select, orderStatuses ) > 0 ||
+				getUnapprovedReviews( select ) ||
+				getLowStockProducts( select ) ||
+				thingsToDoCount > 0 ||
+				hasExtendedNotifications,
 			thingsToDoNextCount: thingsToDoCount,
 			requestingTaskListOptions:
 				! hasFinishedResolution( 'getTaskLists' ),
@@ -271,7 +280,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			name: 'activity',
 			title: __( 'Activity', 'woocommerce' ),
 			icon: <IconFlag />,
-			unread: hasUnreadNotes || hasAbbreviatedNotifications,
+			unread: hasUnread,
 			visible:
 				( isEmbedded || ! isHomescreen() ) &&
 				! isPerformingSetupTask() &&
