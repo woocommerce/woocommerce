@@ -63,8 +63,6 @@ jobs:
 
     e2e-update-wc:
         name: Test WooCommerce update
-        # mytodo re-enable
-        if: false
         runs-on: ubuntu-20.04
         needs: [get-tag]
         permissions:
@@ -124,14 +122,26 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && steps.run-e2e-composite-action.outputs.result == 'failure'
+                  )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: WC Update test
+                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  env-slug: wp-latest
+                  release-version: ${{ needs.get-tag.outputs.tag }}
+
     api-wp-latest:
         name: API on WP Latest
-        # mytodo re-enable
-        if: false
         runs-on: ubuntu-20.04
         needs: [get-tag, e2e-update-wc]
         permissions:
             contents: read
+        outputs:
+            result: ${{ steps.run-api-composite-action.outputs.result }}
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
@@ -182,10 +192,20 @@ jobs:
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
 
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && steps.run-api-composite-action.outputs.result == 'failure'
+                  )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: WP Latest
+                  api-result: ${{ steps.run-api-composite-action.outputs.result }}
+                  env-slug: wp-latest
+                  release-version: ${{ needs.get-tag.outputs.tag }}
+
     e2e-wp-latest:
         name: E2E on WP Latest
-        # mytodo re-enable
-        if: false
         runs-on: ubuntu-20.04
         needs: [get-tag, api-wp-latest]
         permissions:
@@ -209,6 +229,7 @@ jobs:
               with:
                   report-name: e2e-wp-latest--partial--run-${{ github.run_number }}
                   playwright-config: ignore-plugin-tests.playwright.config.js
+                  tests: basic.spec.js # mytodo remove
               env:
                   ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
                   ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
@@ -273,6 +294,19 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
+
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && steps.run-e2e-composite-action.outputs.result == 'failure'
+                  )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: WP Latest
+                  api-result: ${{ needs.api-wp-latest.outputs.result }}
+                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  env-slug: wp-latest
+                  release-version: ${{ needs.get-tag.outputs.tag }}
 
     get-wp-versions:
         name: Get WP L-1 & L-2 version numbers

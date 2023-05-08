@@ -8,6 +8,7 @@ inputs:
     api-result:
         required: true
         type: choice
+        default: skipped
         options:
             - success
             - failure
@@ -16,6 +17,7 @@ inputs:
     e2e-result:
         required: true
         type: choice
+        default: skipped
         options:
             - success
             - failure
