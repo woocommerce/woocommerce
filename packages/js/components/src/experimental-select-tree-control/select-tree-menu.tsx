@@ -22,6 +22,7 @@ import {
 } from '../experimental-tree-control';
 
 type MenuProps = {
+	isEventOutside: ( event: React.FocusEvent ) => boolean;
 	isOpen: boolean;
 	isLoading?: boolean;
 	position?: Popover.Position;
@@ -32,6 +33,7 @@ type MenuProps = {
 } & Omit< TreeControlProps, 'items' >;
 
 export const SelectTreeMenu = ( {
+	isEventOutside,
 	isLoading,
 	isOpen,
 	className,
@@ -103,8 +105,10 @@ export const SelectTreeMenu = ( {
 					) }
 					position={ position }
 					animate={ false }
-					onFocusOutside={ () => {
-						onClose();
+					onFocusOutside={ ( event ) => {
+						if ( isEventOutside( event ) ) {
+							onClose();
+						}
 					} }
 				>
 					{ isOpen && (

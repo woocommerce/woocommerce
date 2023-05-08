@@ -2,18 +2,73 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
+import { RefObject } from 'react';
 import classnames from 'classnames';
 import { createElement, Component, createRef } from '@wordpress/element';
-import { isEqual } from 'lodash';
+import { isEqual, isNumber } from 'lodash';
 import { ENTER, ESCAPE, UP, DOWN, LEFT, RIGHT, TAB } from '@wordpress/keycodes';
-import PropTypes from 'prop-types';
+
+/**
+ * Internal dependencies
+ */
+import { Option } from './types';
+
+type Props = {
+	/**
+	 * ID of the main SelectControl instance.
+	 */
+	listboxId?: string;
+	/**
+	 * ID used for a11y in the listbox.
+	 */
+	instanceId: number;
+	/**
+	 * Parent node to bind keyboard events to.
+	 */
+	node: HTMLElement | null;
+	/**
+	 * Function to execute when an option is selected.
+	 */
+	onSelect: ( option: Option ) => void;
+	/**
+	 * Array of options to display.
+	 */
+	options: Array< Option >;
+	/**
+	 * Integer for the currently selected item.
+	 */
+	selectedIndex: number | null | undefined;
+	/**
+	 * Bool to determine if the list should be positioned absolutely or staticly.
+	 */
+	staticList: boolean;
+	/**
+	 * Function to execute when keyboard navigation should decrement the selected index.
+	 */
+	decrementSelectedIndex: () => void;
+	/**
+	 * Function to execute when keyboard navigation should increment the selected index.
+	 */
+	incrementSelectedIndex: () => void;
+	/**
+	 * Function to execute when the search value changes.
+	 */
+	onSearch: ( option: string | null ) => void;
+	/**
+	 * Function to execute when the list should be expanded or collapsed.
+	 */
+	setExpanded: ( expanded: boolean ) => void;
+};
 
 /**
  * A list box that displays filtered options after search.
  */
-class List extends Component {
-	constructor() {
-		super( ...arguments );
+class List extends Component< Props > {
+	optionRefs: { [ key: number ]: RefObject< HTMLButtonElement > };
+	listbox: RefObject< HTMLDivElement >;
+
+	constructor( props: Props ) {
+		super( props );
 
 		this.handleKeyDown = this.handleKeyDown.bind( this );
 		this.select = this.select.bind( this );
@@ -21,7 +76,7 @@ class List extends Component {
 		this.listbox = createRef();
 	}
 
-	componentDidUpdate( prevProps ) {
+	componentDidUpdate( prevProps: Props ) {
 		const { options, selectedIndex } = this.props;
 
 		// Remove old option refs to avoid memory leaks.
@@ -29,12 +84,15 @@ class List extends Component {
 			this.optionRefs = {};
 		}
 
-		if ( selectedIndex !== prevProps.selectedIndex ) {
+		if (
+			selectedIndex !== prevProps.selectedIndex &&
+			isNumber( selectedIndex )
+		) {
 			this.scrollToOption( selectedIndex );
 		}
 	}
 
-	getOptionRef( index ) {
+	getOptionRef( index: number ) {
 		if ( ! this.optionRefs.hasOwnProperty( index ) ) {
 			this.optionRefs[ index ] = createRef();
 		}
@@ -42,7 +100,7 @@ class List extends Component {
 		return this.optionRefs[ index ];
 	}
 
-	select( option ) {
+	select( option: Option ) {
 		const { onSelect } = this.props;
 
 		if ( option.isDisabled ) {
@@ -52,8 +110,12 @@ class List extends Component {
 		onSelect( option );
 	}
 
-	scrollToOption( index ) {
+	scrollToOption( index: number ) {
 		const listbox = this.listbox.current;
+
+		if ( ! listbox ) {
+			return;
+		}
 
 		if ( listbox.scrollHeight <= listbox.clientHeight ) {
 			return;
@@ -64,6 +126,12 @@ class List extends Component {
 		}
 
 		const option = this.optionRefs[ index ].current;
+		if ( ! option ) {
+			// eslint-disable-next-line no-console
+			console.warn( 'Option not found, index:', index );
+			return;
+		}
+
 		const scrollBottom = listbox.clientHeight + listbox.scrollTop;
 		const elementBottom = option.offsetTop + option.offsetHeight;
 		if ( elementBottom > scrollBottom ) {
@@ -73,7 +141,7 @@ class List extends Component {
 		}
 	}
 
-	handleKeyDown( event ) {
+	handleKeyDown( event: KeyboardEvent ) {
 		const {
 			decrementSelectedIndex,
 			incrementSelectedIndex,
@@ -100,7 +168,7 @@ class List extends Component {
 				break;
 
 			case ENTER:
-				if ( options[ selectedIndex ] ) {
+				if ( isNumber( selectedIndex ) && options[ selectedIndex ] ) {
 					this.select( options[ selectedIndex ] );
 				}
 				event.preventDefault();
@@ -118,7 +186,7 @@ class List extends Component {
 				return;
 
 			case TAB:
-				if ( options[ selectedIndex ] ) {
+				if ( isNumber( selectedIndex ) && options[ selectedIndex ] ) {
 					this.select( options[ selectedIndex ] );
 				}
 				setExpanded( false );
@@ -128,8 +196,14 @@ class List extends Component {
 		}
 	}
 
-	toggleKeyEvents( isListening ) {
+	toggleKeyEvents( isListening: boolean ) {
 		const { node } = this.props;
+		if ( ! node ) {
+			// eslint-disable-next-line no-console
+			console.warn( 'No node to bind events to.' );
+			return;
+		}
+
 		// This exists because we must capture ENTER key presses before RichText.
 		// It seems that react fires the simulated capturing events after the
 		// native browser event has already bubbled so we can't stopPropagation
@@ -138,12 +212,16 @@ class List extends Component {
 		const handler = isListening
 			? 'addEventListener'
 			: 'removeEventListener';
-		node[ handler ]( 'keydown', this.handleKeyDown, true );
+		node[ handler ](
+			'keydown',
+			this.handleKeyDown as ( e: Event ) => void,
+			true
+		);
 	}
 
 	componentDidMount() {
 		const { selectedIndex } = this.props;
-		if ( selectedIndex > -1 ) {
+		if ( isNumber( selectedIndex ) && selectedIndex > -1 ) {
 			this.scrollToOption( selectedIndex );
 		}
 		this.toggleKeyEvents( true );
@@ -169,7 +247,7 @@ class List extends Component {
 				id={ listboxId }
 				role="listbox"
 				className={ listboxClasses }
-				tabIndex="-1"
+				tabIndex={ -1 }
 			>
 				{ options.map( ( option, index ) => (
 					<Button
@@ -186,7 +264,7 @@ class List extends Component {
 							}
 						) }
 						onClick={ () => this.select( option ) }
-						tabIndex="-1"
+						tabIndex={ -1 }
 					>
 						{ option.label }
 					</Button>
@@ -195,51 +273,5 @@ class List extends Component {
 		);
 	}
 }
-
-List.propTypes = {
-	/**
-	 * ID of the main SelectControl instance.
-	 */
-	instanceId: PropTypes.number,
-	/**
-	 * ID used for a11y in the listbox.
-	 */
-	listboxId: PropTypes.string,
-	/**
-	 * Parent node to bind keyboard events to.
-	 */
-	// eslint-disable-next-line no-undef
-	node: PropTypes.instanceOf( Element ).isRequired,
-	/**
-	 * Function to execute when an option is selected.
-	 */
-	onSelect: PropTypes.func,
-	/**
-	 * Array of options to display.
-	 */
-	options: PropTypes.arrayOf(
-		PropTypes.shape( {
-			isDisabled: PropTypes.bool,
-			key: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] )
-				.isRequired,
-			keywords: PropTypes.arrayOf(
-				PropTypes.oneOfType( [ PropTypes.string, PropTypes.number ] )
-			),
-			label: PropTypes.oneOfType( [
-				PropTypes.string,
-				PropTypes.object,
-			] ),
-			value: PropTypes.any,
-		} )
-	).isRequired,
-	/**
-	 * Integer for the currently selected item.
-	 */
-	selectedIndex: PropTypes.number,
-	/**
-	 * Bool to determine if the list should be positioned absolutely or staticly.
-	 */
-	staticList: PropTypes.bool,
-};
 
 export default List;

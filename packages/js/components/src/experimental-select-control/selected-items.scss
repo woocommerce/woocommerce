@@ -1,3 +1,9 @@
+.woocommerce-experimental-select-control__selected-items.is-read-only {
+    font-size: 13px;
+    color: $gray-900;
+    font-family: var(--wp--preset--font-family--system-font);
+}
+
 .woocommerce-experimental-select-control__selected-item {
     margin-right: $gap-smallest;
     margin-top: 2px;
