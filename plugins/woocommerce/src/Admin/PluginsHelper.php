@@ -152,7 +152,7 @@ class PluginsHelper {
 	 * @param array $plugins Plugins to install.
 	 * @return array
 	 */
-	public static function install_plugins( $plugins, WP_Upgrader $upgrader = null, PluginsInstallLogger $logger = null ) {
+	public static function install_plugins( $plugins, PluginsInstallLogger $logger = null ) {
 		/**
 		 * Filter the list of plugins to install.
 		 *
@@ -230,9 +230,7 @@ class PluginsHelper {
 				continue;
 			}
 
-			if ( $upgrader === null ) {
-				$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
-			}
+			$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
 			$result = $upgrader->install( $api->download_link );
 			// result can be false or WP_Error
 			$results[ $plugin ] = $result;
@@ -301,7 +299,7 @@ class PluginsHelper {
 	public function install_plugins_async_callback( array $plugins, string $job_id ) {
 		$option_name = "woocommerce_onboarding_plugins_install_async_" . $job_id;
 		$logger = new AsynPluginsInstallLogger( $option_name );
-		self::install_plugins( $plugins, null, $logger );
+		self::install_plugins( $plugins, $logger );
 		return true;
 	}
 
