@@ -1,6 +1,9 @@
 module.exports = () => {
 	const { RELEASE_VERSION, BLOCKS_DIR } = process.env;
-	const { getContextBlocks } = require( './utils' );
+	const {
+		filterContextBlocks,
+		readContextBlocksFromJsonFiles,
+	} = require( './utils' );
 
 	const headerText = `Test summary for ${ RELEASE_VERSION }`;
 	const headerBlock = {
@@ -12,13 +15,14 @@ module.exports = () => {
 		},
 	};
 
-	const block_wcUpdate = getContextBlocks( BLOCKS_DIR, 'WC Update' );
-	const blocks_wpVersions = getContextBlocks( BLOCKS_DIR, 'WP Latest' );
-	const blocks_phpVersions = getContextBlocks( BLOCKS_DIR, 'PHP' );
-	const blocks_plugins = getContextBlocks( BLOCKS_DIR, 'With' );
+	const blocks_all = readContextBlocksFromJsonFiles( BLOCKS_DIR );
+	const blocks_wcUpdate = filterContextBlocks( blocks_all, 'WC Update' );
+	const blocks_wpVersions = filterContextBlocks( blocks_all, 'WP Latest' );
+	const blocks_phpVersions = filterContextBlocks( blocks_all, 'PHP' );
+	const blocks_plugins = filterContextBlocks( blocks_all, 'With' );
 
 	const blocksPayload = [ headerBlock ]
-		.concat( block_wcUpdate )
+		.concat( blocks_wcUpdate )
 		.concat( blocks_wpVersions )
 		.concat( blocks_phpVersions )
 		.concat( blocks_plugins );

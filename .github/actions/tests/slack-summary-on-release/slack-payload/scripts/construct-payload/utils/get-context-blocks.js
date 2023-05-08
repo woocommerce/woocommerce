@@ -1,15 +1,9 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const getContextBlocks = ( blocksDir, testName ) => {
+const readContextBlocksFromJsonFiles = ( blocksDir ) => {
 	const jsonsDir = path.resolve( blocksDir );
-	const jsons = fs
-		.readdirSync( jsonsDir )
-		.filter( ( { elements } ) => elements[ 0 ].text.includes( testName ) );
-
-	const dividerBlock = {
-		type: 'divider',
-	};
+	const jsons = fs.readdirSync( jsonsDir );
 
 	let contextBlocks = [];
 
@@ -18,12 +12,31 @@ const getContextBlocks = ( blocksDir, testName ) => {
 		const contextBlock = require( jsonPath );
 
 		contextBlocks.push( contextBlock );
-		contextBlocks.push( dividerBlock );
 	}
 
 	return contextBlocks;
 };
 
+const filterContextBlocks = ( blocks, testName ) => {
+	const divider = {
+		type: 'divider',
+	};
+
+	let filteredBlocks = [];
+
+	const matchingBlocks = blocks.filter( ( { elements } ) =>
+		elements[ 0 ].text.includes( testName )
+	);
+
+	matchingBlocks.forEach( ( block ) => {
+		filteredBlocks.push( block );
+		filteredBlocks.push( divider );
+	} );
+
+	return filteredBlocks;
+};
+
 module.exports = {
-	getContextBlocks,
+	filterContextBlocks,
+	readContextBlocksFromJsonFiles,
 };

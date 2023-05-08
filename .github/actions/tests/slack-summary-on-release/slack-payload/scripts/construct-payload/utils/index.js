@@ -1,3 +1,6 @@
-const { getContextBlocks } = require( './get-context-blocks' );
+const {
+	filterContextBlocks,
+	readContextBlocksFromJsonFiles,
+} = require( './get-context-blocks' );
 
-module.exports = { getContextBlocks };
+module.exports = { filterContextBlocks, readContextBlocksFromJsonFiles };
