@@ -45,7 +45,7 @@ describe( 'OrdersPanel', () => {
 			screen.queryByText( 'You’ve fulfilled all your orders' )
 		).toBeInTheDocument();
 	} );
-	it( 'should call activity_panel_orders_orders_begin_fulfillment when order is clicked', () => {
+	it( 'should record activity_panel_orders_orders_begin_fulfillment Tracks event when order is clicked', () => {
 		useSelect.mockReturnValue( {
 			orders: [
 				{

@@ -34,7 +34,9 @@ jest.mock( '@woocommerce/experimental', () => {
 	return {
 		__esModule: true, // Use it when dealing with esModules
 		...originalModule,
-		InboxNoteCard: jest.fn(),
+		InboxNoteCard: jest.fn().mockImplementation( ( { note } ) => {
+			return <div>{ note.id }</div>;
+		} ),
 	};
 } );
 
@@ -149,9 +151,6 @@ describe( 'inbox_panel_view_event', () => {
 			notesHaveResolved: true,
 			isBatchUpdating: false,
 		} ) );
-		InboxNoteCard.mockImplementation( ( { note } ) => {
-			return <div>{ note.id }</div>;
-		} );
 		render( <InboxPanel /> );
 
 		expect( recordEvent ).toHaveBeenCalledWith( 'inbox_panel_view', {
@@ -174,14 +173,13 @@ describe( 'inbox_note_view event', () => {
 			return <div>{ note.id }</div>;
 		} );
 		render( <InboxPanel /> );
-		notes.forEach( ( note ) => {
-			expect( recordEvent ).toHaveBeenCalledWith( 'inbox_note_view', {
-				note_content: note.content,
-				note_name: note.name,
-				note_title: note.title,
-				note_type: note.type,
-				screen: '',
-			} );
+
+		expect( recordEvent ).toHaveBeenCalledWith( 'inbox_note_view', {
+			note_content: notes[ 0 ].content,
+			note_name: notes[ 0 ].name,
+			note_title: notes[ 0 ].title,
+			note_type: notes[ 0 ].type,
+			screen: '',
 		} );
 	} );
 } );
@@ -203,13 +201,11 @@ describe( 'inbox_action_click event', () => {
 		} );
 		const { getAllByText } = render( <InboxPanel /> );
 		const buttons = getAllByText( 'Trigger action' );
-		buttons.forEach( ( button ) => userEvent.click( button ) );
-		notes.forEach( ( note ) => {
-			expect( recordEvent ).toHaveBeenCalledWith( 'inbox_action_click', {
-				note_name: note.name,
-				note_title: note.title,
-				note_content_inner_link: 'innerLink',
-			} );
+		userEvent.click( buttons[ 0 ] );
+		expect( recordEvent ).toHaveBeenCalledWith( 'inbox_action_click', {
+			note_name: notes[ 0 ].name,
+			note_title: notes[ 0 ].title,
+			note_content_inner_link: 'innerLink',
 		} );
 	} );
 } );

@@ -91,7 +91,7 @@ describe( 'ActivityPanel', () => {
 		expect( screen.queryByText( 'custom-panel-2' ) ).toBeNull();
 	} );
 
-	it( 'should call recordEvent with the correct tab when a panel is opened', () => {
+	it( 'should record activity_panel_open Tracks event when panel is opened', () => {
 		useSelect.mockReturnValue( {
 			isTaskListHidden: false,
 		} );

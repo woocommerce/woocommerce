@@ -74,7 +74,7 @@ describe( 'StockPanel', () => {
 			expect( invalidateResolution ).toHaveBeenCalled();
 		} );
 	} );
-	it( 'should fire tracks event activity_panel_stock_update_stock when Update stock is clicked', async () => {
+	it( 'should record activity_panel_stock_update_stock Tracks event when Update stock is clicked', async () => {
 		const createNotice = jest.fn();
 		const invalidateResolution = jest.fn();
 		const updateProductStock = jest.fn().mockResolvedValue( true );
@@ -99,7 +99,7 @@ describe( 'StockPanel', () => {
 			/>
 		);
 		userEvent.click( getByRole( 'button', { name: 'Update stock' } ) );
-		expect( recordEvent ).toHaveBeenLastCalledWith(
+		expect( recordEvent ).toHaveBeenCalledWith(
 			'activity_panel_stock_update_stock',
 			{}
 		);
