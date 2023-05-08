@@ -18,6 +18,6 @@ const initContextBlock = ( testName ) => {
 	};
 };
 
-module.exports = () => {
-	initContextBlock;
+module.exports = {
+	initContextBlock,
 };

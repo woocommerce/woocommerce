@@ -30,6 +30,6 @@ const createElementBlock = ( testType, result ) => {
 	};
 };
 
-module.exports = () => {
-	createElementBlock;
+module.exports = {
+	createElementBlock,
 };
