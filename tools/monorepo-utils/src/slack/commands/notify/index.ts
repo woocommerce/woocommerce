@@ -9,7 +9,7 @@ import { Command } from '@commander-js/extra-typings';
 import { Logger } from '../../../core/logger';
 import { requestAsync } from '../../../core/util';
 
-export const verifyDayCommand = new Command( 'message' )
+export const slackMessageCommand = new Command( 'message' )
 	.description( 'Send a message to a slack channel' )
 	.argument(
 		'<token>',
@@ -58,6 +58,4 @@ export const verifyDayCommand = new Command( 'message' )
 				logError( `Could not send message to Slack. Error unknown.` );
 			}
 		}
-
-		process.exit( 0 );
 	} );
