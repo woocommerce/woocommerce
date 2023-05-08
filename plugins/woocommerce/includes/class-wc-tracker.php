@@ -529,8 +529,8 @@ class WC_Tracker {
 				$comm_tokens = array();
 
 				// Tokenize the current and previous gateway names.
-				$curr_tokens = preg_split( '/[ :,\-_]/ ', $key );
-				$prev_tokens = preg_split( '/[ :,\-_]/ ', $prev );
+				$curr_tokens = preg_split( '/[ :,\-_]+/', $key );
+				$prev_tokens = preg_split( '/[ :,\-_]+/', $prev );
 
 				$len_curr = count( $curr_tokens );
 				$len_prev = count( $prev_tokens );
