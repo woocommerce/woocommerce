@@ -7,6 +7,10 @@
 
 namespace Automattic\WooCommerce\Admin;
 
+use ActionScheduler;
+use ActionScheduler_QueueRunner;
+use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
+use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
 use WP_Upgrader;
 
 defined( 'ABSPATH' ) || exit;
@@ -25,6 +29,7 @@ class PluginsHelper {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_plugins_install_callback', array( __CLASS__, 'install_plugins' ), 10, 2 );
+		add_action( 'woocommerce_plugins_install_async_callback', array( __CLASS__, 'install_plugins_async_callback' ), 10, 2 );
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
 	}
 
@@ -147,7 +152,7 @@ class PluginsHelper {
 	 * @param array $plugins Plugins to install.
 	 * @return array
 	 */
-	public static function install_plugins( $plugins, WP_Upgrader $upgrader = null ) {
+	public static function install_plugins( $plugins, WP_Upgrader $upgrader = null, PluginsInstallLogger $logger = null ) {
 		/**
 		 * Filter the list of plugins to install.
 		 *
@@ -175,9 +180,11 @@ class PluginsHelper {
 
 		foreach ( $plugins as $plugin ) {
 			$slug = sanitize_key( $plugin );
+			$logger && $logger->install_requested( $plugin );
 
 			if ( isset( $existing_plugins[ $slug ] ) ) {
 				$installed_plugins[] = $plugin;
+				$logger && $logger->installed( $plugin, 0 );
 				continue;
 			}
 
@@ -211,22 +218,23 @@ class PluginsHelper {
 				 */
 				do_action( 'woocommerce_plugins_install_api_error', $slug, $api );
 
-				$errors->add(
-					$plugin,
-					sprintf(
-						/* translators: %s: plugin slug (example: woocommerce-services) */
-						__( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce' ),
-						$slug
-					)
+				$error_message = sprintf(
+					/* translators: %s: plugin slug (example: woocommerce-services) */
+					__( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce' ),
+					$slug
 				);
+
+				$errors->add( $plugin, $error_message );
+				$logger && $logger->add_error( $plugin, $error_message );
 
 				continue;
 			}
 
 			if ( $upgrader === null ) {
-				$upgrader = new \Plugin_Upgrader(new \Automatic_Upgrader_Skin());
+				$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
 			}
-			$result             = $upgrader->install( $api->download_link );
+			$result = $upgrader->install( $api->download_link );
+			// result can be false or WP_Error
 			$results[ $plugin ] = $result;
 			$time[ $plugin ]    = round( ( microtime( true ) - $start_time ) * 1000 );
 
@@ -253,18 +261,22 @@ class PluginsHelper {
 				*/
 				do_action( 'woocommerce_plugins_install_error', $slug, $api, $result, $upgrader );
 
+				$install_error_message = sprintf(
+				/* translators: %s: plugin slug (example: woocommerce-services) */
+					__( 'The requested plugin `%s` could not be installed. Upgrader install failed.', 'woocommerce' ),
+					$slug
+				);
 				$errors->add(
 					$plugin,
-					sprintf(
-						/* translators: %s: plugin slug (example: woocommerce-services) */
-						__( 'The requested plugin `%s` could not be installed. Upgrader install failed.', 'woocommerce' ),
-						$slug
-					)
+					$install_error_message
 				);
+				$logger && $logger->add_error( $plugin, $install_error_message );
+
 				continue;
 			}
 
 			$installed_plugins[] = $plugin;
+			$logger && $logger->installed( $plugin, $time[ $plugin ] );
 		}
 
 		$data = array(
@@ -275,6 +287,22 @@ class PluginsHelper {
 		);
 
 		return $data;
+	}
+
+	/**
+	 * Callback regsitered by OnboardingPlugins::install_async.
+	 *
+	 * It is used to call install_plugins with a custom logger.
+	 *
+	 * @param array  $plugins A list of plugins to install.
+	 * @param string $job_id An unique job I.D
+	 * @return bool
+	 */
+	public function install_plugins_async_callback( array $plugins, string $job_id ) {
+		$option_name = "woocommerce_onboarding_plugins_install_async_" . $job_id;
+		$logger = new AsynPluginsInstallLogger( $option_name );
+		self::install_plugins( $plugins, null, $logger );
+		return true;
 	}
 
 	/**
@@ -409,11 +437,10 @@ class PluginsHelper {
 	 * @return array Array of action data.
 	 */
 	public static function get_action_data( $actions ) {
-		$data = [];
+		$data = array();
 
 		foreach ( $actions as $action_id => $action ) {
 			$store  = new \ActionScheduler_DBStore();
-			$status = $store->get_status( $action_id );
 			$args   = $action->get_args();
 			$data[] = array(
 				'job_id'  => $args[1],
