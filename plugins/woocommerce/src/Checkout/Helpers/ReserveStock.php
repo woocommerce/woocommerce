@@ -72,7 +72,7 @@ final class ReserveStock {
 			return;
 		}
 
-		$held_stock_notes   = array();
+		$held_stock_notes = array();
 
 		try {
 			$items = array_filter(
@@ -116,8 +116,9 @@ final class ReserveStock {
 
 				$rows[ $managed_by_id ] = isset( $rows[ $managed_by_id ] ) ? $rows[ $managed_by_id ] + $item_quantity : $item_quantity;
 
-					$held_stock_notes[] = $product->get_formatted_name() . ' x ' . $rows[ $managed_by_id ];
 				if ( count( $held_stock_notes ) < 5 ) {
+					// translators: %1$s is a product's formatted name, %2$d: is the quantity of said product to which the stock hold applied.
+					$held_stock_notes[] = sprintf( _x( '- %1$s &times; %2$d', 'held stock note', 'woocommerce' ), $product->get_formatted_name(), $rows[ $managed_by_id ] );
 				}
 			}
 
@@ -133,18 +134,23 @@ final class ReserveStock {
 
 		// Add order note after successfully holding the stock.
 		if ( ! empty( $held_stock_notes ) ) {
-
-			$note_suffix   = '';
-			// Add suffix if there are more than 5 items.
-
 			$remaining_count = count( $rows ) - count( $held_stock_notes );
 			if ( $remaining_count > 0 ) {
-				// translators: %d is the remaining order items count.
-				$note_suffix     = '<br>- ' . sprintf( __( '... and %d more items.', 'woocommerce' ), $remaining_count );
+				$held_stock_notes[] = sprintf(
+					// translators: %d is the remaining order items count.
+					_nx( '- ...and %d more item.', '- ... and %d more items.', $remaining_count, 'held stock note', 'woocommerce' ),
+					$remaining_count
+				);
 			}
 
-			// translators: %s is a time in minutes
-			$order->add_order_note( sprintf( __( 'Stock hold of %s minutes applied to:', 'woocommerce' ), $minutes ) . '<br>- ' . implode( '<br>- ', $held_stock_notes ) . $note_suffix );
+			$order->add_order_note(
+				sprintf(
+					// translators: %1$s is a time in minutes, %2$s is a list of products and quantities.
+					_x( 'Stock hold of %1$s minutes applied to: %2$s', 'held stock note', 'woocommerce' ),
+					$minutes,
+					'<br>' . implode( '<br>', $held_stock_notes )
+				)
+			);
 		}
 	}
 
