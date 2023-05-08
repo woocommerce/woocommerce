@@ -11,7 +11,7 @@
 	<div class="wp-block-columns">
 		<!-- wp:column {"width":"40%"} -->
 		<div class="wp-block-column" style="flex-basis:40%"><!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
-			<figure class="wp-block-image size-full"><img src="<?php echo esc_url( plugins_url() ); ?>/woocommerce-blocks/images/pattern-placeholders/product-electronics-1.png" alt="" class="wp-image-1"/></figure>
+			<figure class="wp-block-image size-full"><img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-electronics-1.png', dirname( __FILE__ ) ) ); ?>" alt="" class="wp-image-1"/></figure>
 			<!-- /wp:image --></div>
 		<!-- /wp:column -->
 
