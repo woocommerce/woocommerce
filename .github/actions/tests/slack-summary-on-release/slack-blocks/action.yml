@@ -36,7 +36,7 @@ runs:
           uses: actions/github-script@v6
           with:
               script: |
-                  const script = require('././.github/actions/tests/slack-summary-on-release/slack-blocks/scripts/create-result-block');
+                  const script = require('./.github/actions/tests/slack-summary-on-release/slack-blocks/scripts/create-result-block');
                   return script();
           env:
               API_RESULT: ${{ inputs.api-result }}
