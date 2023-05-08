@@ -185,7 +185,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				isSetupTaskListHidden,
 				thingsToDoCount
 			),
-			unread:
+			hasUnread:
 				getUnreadOrders( select, orderStatuses ) > 0 ||
 				getUnapprovedReviews( select ) ||
 				getLowStockProducts( select ) ||
