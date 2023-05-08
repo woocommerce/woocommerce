@@ -74,7 +74,7 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Callback for chaning home url to https.
+	 * Callback for changing home url to https.
 	 *
 	 * @return string
 	 */

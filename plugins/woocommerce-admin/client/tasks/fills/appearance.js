@@ -210,7 +210,7 @@ class Appearance extends Component {
 			this.setState( { isUpdatingLogo: false } );
 			createNotice(
 				'success',
-				__( 'Store logo updated sucessfully', 'woocommerce' )
+				__( 'Store logo updated successfully', 'woocommerce' )
 			);
 			this.completeStep();
 		} else {

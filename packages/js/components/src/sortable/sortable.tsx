@@ -110,7 +110,7 @@ export const Sortable = ( {
 
 		// Items before the current item cause a one off error when
 		// removed from the old array and spliced into the new array.
-		// TODO: Issue with dragging into same position having to do with isBefore returning true intially.
+		// TODO: Issue with dragging into same position having to do with isBefore returning true initially.
 		let targetIndex = dragIndex < index ? index : index + 1;
 		if ( isBefore( event, isHorizontal ) ) {
 			targetIndex--;

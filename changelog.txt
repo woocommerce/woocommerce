@@ -54,7 +54,7 @@
 * Fix - Prevent possible warning arising from use of woocommerce_wp_* family of functions. [#37026](https://github.com/woocommerce/woocommerce/pull/37026)
 * Fix - Record values for toggled checkboxes/features in settings [#37242](https://github.com/woocommerce/woocommerce/pull/37242)
 * Fix - Restore the sort order when orders are cached. [#36650](https://github.com/woocommerce/woocommerce/pull/36650)
-* Fix - Treat order as seperate resource when validating for webhook since it's not necessarily a CPT anymore. [#36650](https://github.com/woocommerce/woocommerce/pull/36650)
+* Fix - Treat order as separate resource when validating for webhook since it's not necessarily a CPT anymore. [#36650](https://github.com/woocommerce/woocommerce/pull/36650)
 * Fix - Update Customers report with latest user data after editing user. [#37237](https://github.com/woocommerce/woocommerce/pull/37237)
 * Add - Add "Create a new campaign" modal in Campaigns card in Multichannel Marketing page. [#37044](https://github.com/woocommerce/woocommerce/pull/37044)
 * Add - Add a cache for orders, to use when custom order tables are enabled [#35014](https://github.com/woocommerce/woocommerce/pull/35014)
@@ -432,7 +432,7 @@
 * Tweak - Resolve an error in the product tracking code by testing to see if the `post_type` query var is set before checking its value. [#34501](https://github.com/woocommerce/woocommerce/pull/34501)
 * Tweak - Simplify wording within the customer emails for on-hold orders. [#31886](https://github.com/woocommerce/woocommerce/pull/31886)
 * Tweak - WooCommerce has now been tested up to WordPress 6.1.x. [#35985](https://github.com/woocommerce/woocommerce/pull/35985)
-* Performance - Split CALC_FOUND_ROW query into seperate count query for better performance. [#35468](https://github.com/woocommerce/woocommerce/pull/35468)
+* Performance - Split CALC_FOUND_ROW query into separate count query for better performance. [#35468](https://github.com/woocommerce/woocommerce/pull/35468)
 * Enhancement - Add a bottom padding to the whole form [#35721](https://github.com/woocommerce/woocommerce/pull/35721)
 * Enhancement - Add a confirmation modal when the user tries to navigate away with unsaved changes [#35625](https://github.com/woocommerce/woocommerce/pull/35625)
 * Enhancement - Add a default placeholder title for newly added attributes and always show remove button for attributes [#35904](https://github.com/woocommerce/woocommerce/pull/35904)
@@ -3371,7 +3371,7 @@
 * Fix - Add protection around func_get_args_call for backwards compatibility. #28677
 * Fix - Restore stock_status in REST API V3 response. #28731
 * Fix - Revert some of the changes related to perf enhancements (27735) as it was breaking stock_status filter. #28745
-* Dev - Hook for intializing price slider in frontend. #28014
+* Dev - Hook for initializing price slider in frontend. #28014
 * Dev - Add support for running a custom initialization script for tests. #28041
 * Dev - Use the coenjacobs/mozart package to renamespace vendor packages. #28147
 * Dev - Documentation for `wc_get_container`. #28269
@@ -5290,7 +5290,7 @@
 * Fix - Fix edge case where `get_plugins` would not have the custom WooCommerce plugin headers if `get_plugins` was called early. #21669
 * Fix - Prevent PHP warning when deprecated user meta starts with uppercase. #21943
 * Fix - Fixed support for multiple query parameters translated to meta queries via REST API requests. #22108
-* Fix - Prevent PHP errors when trying to access non-existant report tabs. #22183
+* Fix - Prevent PHP errors when trying to access non-existent report tabs. #22183
 * Fix - Filter by attributes dropdown placeholder text should not be wrapped in quotes. #22185
 * Fix - Apply sale price until end of closing sale date. #22189
 * Fix - Allow empty schema again when registering a custom field for the API. #22204
@@ -6612,7 +6612,7 @@
 * Removed internal scroll from log viewer.
 * Add reply-to to admin emails.
 * Improved the zone setup flow.
-* Made wc_get_wildcard_postcodes return the orignal postcode plus * since wildcards should match empty strings too.
+* Made wc_get_wildcard_postcodes return the original postcode plus * since wildcards should match empty strings too.
 * Use all paid statuses in $customer->get_total_spent().
 * Move location of billing email field to work with password managers.
 * Option to restrict selling locations by country.
@@ -8122,7 +8122,7 @@
 * Tweak - Flat rate shipping support for percentage factor of additional costs.
 * Tweak - local delivery _ pattern matching for postcodes. e.g. NG1___ would match NG1 1AA but not NG10 1AA.
 * Tweak - Improved layered nav OR count logic
-* Tweak - Make shipping methods check if taxable, so when customer is VAT excempt taxes are not included in price.
+* Tweak - Make shipping methods check if taxable, so when customer is VAT exempt taxes are not included in price.
 * Tweak - Coupon in admin bar new menu #3974
 * Tweak - Shortcode tag filters + updated menu names to make white labelling easier.
 * Tweak - Removed placeholder polyfill. Use this plugin to replace functionality if required: https://wordpress.org/plugins/html5-placeholder-polyfill/
