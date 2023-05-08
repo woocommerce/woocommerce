@@ -506,8 +506,6 @@ jobs:
 
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}
-        # mytodo re-enable
-        if: false
         runs-on: ubuntu-20.04
         needs: [get-tag]
         strategy:
@@ -603,6 +601,7 @@ jobs:
                   E2E_MAX_FAILURES: 15
               with:
                   report-name: ${{ env.E2E_ARTIFACT }}
+                  tests: basic.spec.js # mytodo remove
 
             - name: Upload Allure artifacts to bucket
               # mytodo re-enable
@@ -637,10 +636,24 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && (
+                      steps.run-api-composite-action.outputs.result == 'failure' ||
+                      steps.run-e2e-composite-action.outputs.result == 'failure' 
+                    )
+                  )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: PHP ${{ matrix.php_version }}
+                  api-result: ${{ steps.run-api-composite-action.outputs.result }}
+                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  env-slug: php-${{ matrix.php_version }}
+                  release-version: ${{ needs.get-tag.outputs.tag }}
+
     test-plugins:
         name: With ${{ matrix.plugin }}
-        # mytodo re-enable
-        if: false
         runs-on: ubuntu-20.04
         needs: [get-tag]
         env:
@@ -708,6 +721,7 @@ jobs:
               with:
                   playwright-config: ignore-plugin-tests.playwright.config.js
                   report-name: ${{ env.ARTIFACT_NAME }}
+                  tests: basic.spec.js # mytodo remove
               env:
                   E2E_MAX_FAILURES: 15
 
@@ -739,9 +753,25 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && steps.run-e2e-composite-action.outputs.result == 'failure' )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: With ${{ matrix.plugin }}
+                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  env-slug: ${{ matrix.env_description }}
+                  release-version: ${{ needs.get-tag.outputs.tag }}
+
     post-slack-summary:
         name: Post Slack summary
-        needs: [get-tag, test-wp-versions, e2e-wp-latest]
+        needs:
+            - e2e-wp-latest
+            - get-tag
+            - test-php-versions
+            - test-plugins
+            - test-wp-versions
         runs-on: ubuntu-20.04
         permissions:
             contents: read
