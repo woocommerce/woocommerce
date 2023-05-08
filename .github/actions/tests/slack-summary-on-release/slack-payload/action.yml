@@ -23,5 +23,5 @@ runs:
               BLOCKS_DIR: ${{ inputs.blocks-dir }}
           with:
               script: |
-                  const script = require('./.github/actions/tests/slack-summary-on-release/slack-payload/scripts/construct-payload.js');
+                  const script = require('./.github/actions/tests/slack-summary-on-release/slack-payload/scripts/construct-payload');
                   return script();
