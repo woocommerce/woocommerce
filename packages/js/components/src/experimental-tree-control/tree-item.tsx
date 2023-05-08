@@ -60,13 +60,11 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 						/>
 					) : (
 						<input
-							type="radio"
+							type="checkbox"
+							className="experimental-woocommerce-tree-item__checkbox"
 							checked={ selection.checkedStatus === 'checked' }
-							className="components-radio-control__input"
 							onChange={ ( event ) =>
-								selection.onSelectChild(
-									event.currentTarget.checked
-								)
+								selection.onSelectChild( event.target.checked )
 							}
 						/>
 					) }

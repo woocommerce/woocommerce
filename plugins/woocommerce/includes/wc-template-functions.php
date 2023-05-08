@@ -2772,6 +2772,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'description'       => '',
 			'placeholder'       => '',
 			'maxlength'         => false,
+			'minlength'         => false,
 			'required'          => false,
 			'autocomplete'      => false,
 			'id'                => $key,
@@ -2815,6 +2816,10 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		if ( $args['maxlength'] ) {
 			$args['custom_attributes']['maxlength'] = absint( $args['maxlength'] );
+		}
+
+		if ( $args['minlength'] ) {
+			$args['custom_attributes']['minlength'] = absint( $args['minlength'] );
 		}
 
 		if ( ! empty( $args['autocomplete'] ) ) {

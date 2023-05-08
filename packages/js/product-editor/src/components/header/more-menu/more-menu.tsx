@@ -16,7 +16,11 @@ import { WooProductMoreMenuItem } from '../woo-more-menu-item';
 export const MoreMenu = () => {
 	return (
 		<>
-			<MoreMenuDropdown>
+			<MoreMenuDropdown
+				popoverProps={ {
+					className: 'woocommerce-product-header__more-menu',
+				} }
+			>
 				{ ( { onClose }: { onClose: () => void } ) => (
 					<>
 						<WooProductMoreMenuItem.Slot

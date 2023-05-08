@@ -1386,7 +1386,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			return;
 		}
 
-		$stock_is_above_notification_threshold = ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
+		$stock_is_above_notification_threshold = ( (int) $this->get_stock_quantity() > absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) ) );
 		$backorders_are_allowed                = ( 'no' !== $this->get_backorders() );
 
 		if ( $stock_is_above_notification_threshold ) {

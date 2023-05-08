@@ -50,6 +50,7 @@ let admin_created_order_assert;
 let admin_open_order_base;
 let admin_open_order_assert;
 let admin_update_order_base;
+let admin_update_order;
 let admin_update_order_id;
 let admin_update_order_params;
 let admin_update_order_assert;
@@ -57,9 +58,9 @@ let admin_update_order_assert;
 if ( cot_status === true ) {
 	admin_new_order_base = 'admin.php?page=wc-orders&action=new';
 	admin_update_order_base = 'admin.php?page=wc-orders&action=edit';
-	admin_new_order_assert = 'post_status" type="hidden" value="auto-draft';
+	admin_new_order_assert = 'post_status" type="hidden" value="pending';
 	admin_open_order_assert = 'post_status" type="hidden" value="pending';
-	admin_created_order_assert = 'changed from auto-draft to';
+	admin_created_order_assert = 'Order updated.';
 	admin_update_order_assert = 'changed from Pending payment to Completed';
 } else {
 	admin_new_order_base = 'post-new.php?post_type=shop_order';
@@ -375,14 +376,15 @@ export function addOrder() {
 		] );
 
 		if ( cot_status === true ) {
-			admin_update_order_base = `${ admin_update_order_base }&id=${ hpos_post_id }`;
+			admin_update_order = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 			admin_update_order_params = cotOrderParams.toString();
 		} else {
+			admin_update_order = admin_update_order_base;
 			admin_update_order_params = orderParams.toString();
 		}
 
 		response = http.post(
-			`${ base_url }/wp-admin/${ admin_update_order_base }`,
+			`${ base_url }/wp-admin/${ admin_update_order }`,
 			admin_update_order_params.toString(),
 			{
 				headers: requestHeaders,

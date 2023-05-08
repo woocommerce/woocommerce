@@ -5348,11 +5348,19 @@ img.help_tip {
 		}
 	}
 
-	.description {
+	.description,
+	input[type="checkbox"] + .description,
+	input[type="radio"] + .description {
 		padding: 0;
 		margin: 0 0 0 7px;
 		clear: none;
 		display: inline;
+	}
+
+	input:not([type="checkbox"]):not([type="radio"]) + .description {
+		display: block;
+		clear: both;
+		margin-left: 0;
 	}
 
 	.description-block {
@@ -6706,7 +6714,7 @@ table.bar_chart {
 	}
 
 	.woocommerce_options_panel {
-		:not(input) + .description {
+		.description {
 			display: block;
 			clear: both;
 			margin-left: 0;
