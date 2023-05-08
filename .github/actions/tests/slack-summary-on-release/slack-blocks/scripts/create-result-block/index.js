@@ -1,8 +1,7 @@
 module.exports = () => {
 	const { API_RESULT, E2E_RESULT, ENV_SLUG, TEST_NAME, RELEASE_VERSION } =
 		process.env;
-	const { initContextBlock } = require( './utils/init-context-block' );
-	const { createElementBlock } = require( './utils/create-element-block' );
+	const { createElementBlock, initContextBlock } = require( './utils' );
 
 	const contextBlock = initContextBlock( TEST_NAME );
 	const apiElementBlock = createElementBlock( {
