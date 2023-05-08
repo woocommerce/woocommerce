@@ -741,15 +741,19 @@ jobs:
 
     post-slack-summary:
         name: Post Slack summary
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        if: |
+            success() || (
+              failure() && contains( needs.*.result, 'failure' )
+            )
         needs:
             - e2e-wp-latest
             - get-tag
             - test-php-versions
             - test-plugins
             - test-wp-versions
-        runs-on: ubuntu-20.04
-        permissions:
-            contents: read
         steps:
             - uses: actions/checkout@v3
 
