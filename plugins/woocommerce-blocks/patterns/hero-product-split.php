@@ -22,7 +22,7 @@
 	</div>
 
 	<figure class="wp-block-media-text__media">
-		<img src="<?php echo esc_url( plugins_url() ); ?>/woocommerce-blocks/images/pattern-placeholders/hero-product-split.webp" alt="Woman in red, black, and white plaid hoodie." />
+		<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/hero-product-split.webp', dirname( __FILE__ ) ) ); ?>" alt="Woman in red, black, and white plaid hoodie." />
 	</figure>
 </div>
 <!-- /wp:media-text -->
