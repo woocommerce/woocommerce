@@ -149,7 +149,9 @@ class PluginsHelper {
 	/**
 	 * Install an array of plugins.
 	 *
-	 * @param array $plugins Plugins to install.
+	 * @param array                     $plugins Plugins to install.
+	 * @param PluginsInstallLogger|null $logger an optional logger.
+	 *
 	 * @return array
 	 */
 	public static function install_plugins( $plugins, PluginsInstallLogger $logger = null ) {
@@ -231,8 +233,8 @@ class PluginsHelper {
 			}
 
 			$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
-			$result = $upgrader->install( $api->download_link );
-			// result can be false or WP_Error
+			$result   = $upgrader->install( $api->download_link );
+			// result can be false or WP_Error.
 			$results[ $plugin ] = $result;
 			$time[ $plugin ]    = round( ( microtime( true ) - $start_time ) * 1000 );
 
@@ -293,12 +295,12 @@ class PluginsHelper {
 	 * It is used to call install_plugins with a custom logger.
 	 *
 	 * @param array  $plugins A list of plugins to install.
-	 * @param string $job_id An unique job I.D
+	 * @param string $job_id An unique job I.D.
 	 * @return bool
 	 */
 	public function install_plugins_async_callback( array $plugins, string $job_id ) {
-		$option_name = "woocommerce_onboarding_plugins_install_async_" . $job_id;
-		$logger = new AsynPluginsInstallLogger( $option_name );
+		$option_name = 'woocommerce_onboarding_plugins_install_async_' . $job_id;
+		$logger      = new AsynPluginsInstallLogger( $option_name );
 		self::install_plugins( $plugins, $logger );
 		return true;
 	}

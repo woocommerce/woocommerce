@@ -13,6 +13,7 @@ use ActionScheduler;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use WC_REST_Data_Controller;
 use WP_Error;
+use WP_REST_Request;
 use WP_REST_Response;
 
 /**
@@ -83,9 +84,16 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 	}
 
-	public function install_async( $request ) {
-		$plugins   = $request->get_param( 'plugins' );
-		$job_id = uniqid();
+	/**
+	 * Queue plugin install request.
+	 *
+	 * @param WP_REST_Request $request WP_REST_Request object.
+	 *
+	 * @return array
+	 */
+	public function install_async( WP_REST_Request $request ) {
+		$plugins = $request->get_param( 'plugins' );
+		$job_id  = uniqid();
 
 		WC()->queue()->add( 'woocommerce_plugins_install_async_callback', array( $plugins, $job_id ) );
 
@@ -101,13 +109,20 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		}
 
 		return array(
-			'job_id' => $job_id,
-			'status'    => 'pending',
-			'plugins'   => $plugin_status,
+			'job_id'  => $job_id,
+			'status'  => 'pending',
+			'plugins' => $plugin_status,
 		);
 	}
 
-	public function get_scheduled_installs( $request ) {
+	/**
+	 * Returns current status of given job.
+	 *
+	 * @param WP_REST_Request $request WP_REST_Request object.
+	 *
+	 * @return array|WP_REST_Response
+	 */
+	public function get_scheduled_installs( WP_REST_Request $request ) {
 		$job_id = $request->get_param( 'job_id' );
 
 		$actions = WC()->queue()->search(
@@ -132,7 +147,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		$response = array(
 			'job_id' => $actions[0]['job_id'],
-			'status'    => $actions[0]['status'],
+			'status' => $actions[0]['status'],
 		);
 
 		$option = get_option( 'woocommerce_onboarding_plugins_install_async_' . $job_id );
@@ -169,7 +184,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 				'type'       => 'object',
 				'properties' => array(
 					'job_id' => 'integer',
-					'status'    => array(
+					'status' => array(
 						'type' => 'string',
 						'enum' => array( 'pending', 'complete', 'failed' ),
 					),

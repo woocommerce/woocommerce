@@ -38,11 +38,18 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 	}
 
+	/**
+	 * Request to install-async endpoint.
+	 *
+	 * @param array $plugins a list of plugins to install.
+	 *
+	 * @return mixed
+	 */
 	private function request( $plugins ) {
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/install-async' );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body(
-			json_encode(
+			wp_json_encode(
 				array(
 					'plugins' => $plugins,
 				)
@@ -52,12 +59,24 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 		return $response->get_data();
 	}
 
+	/**
+	 * Request to schedulled-installs endpoint.
+	 *
+	 * @param string $job_id job id.
+	 *
+	 * @return mixed
+	 */
 	private function get( $job_id ) {
 		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/scheduled-installs/' . $job_id );
 		return $this->server->dispatch( $request )->get_data();
 	}
 
-	function test_response_format() {
+	/**
+	 * Test to confirm install-async response format.
+	 *
+	 * @return void
+	 */
+	public function test_response_format() {
 		$data = $this->request( array( 'test' ) );
 		$this->assertArrayHasKey( 'job_id', $data );
 		$this->assertArrayHasKey( 'status', $data );
@@ -65,7 +84,12 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( isset( $data['plugins']['test'] ) );
 	}
 
-	function test_it_queues_action() {
+	/**
+	 * Test to confirm it queues an action scheduler job.
+	 *
+	 * @return void
+	 */
+	public function test_it_queues_action() {
 		$data      = $this->request( array( 'test' ) );
 		$action_id = $data['job_id'];
 
