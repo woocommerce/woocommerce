@@ -709,23 +709,24 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
             contents: read
-        env:
-            SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }} # mytodo scope under Slack message sending step
-            JSONS_DIR: /tmp
         steps:
             - uses: actions/checkout@v3
 
             - name: Download all slack blocks
+              id: download-slack-blocks
               uses: actions/download-artifact@v3
               with:
                   name: ${{ env.SLACK_BLOCKS_ARTIFACT }}
-                  path: ${{ env.JSONS_DIR }}
+                  path: /tmp/slack-payload
 
             - name: Construct payload from all blocks
               id: run-payload-action
-              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks-all
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-payload
               with:
                   release-version: ${{ needs.get-tag.outputs.tag }}
+                  blocks-dir: ${{ steps.download-slack-blocks.outputs.download-path }}
 
             - name: Send Slack message
               run: echo ${{ toJSON(steps.run-payload-action.outputs.payload) }}
+              env:
+                  SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }} # mytodo scope under Slack message sending step

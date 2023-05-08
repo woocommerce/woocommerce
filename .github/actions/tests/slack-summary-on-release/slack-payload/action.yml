@@ -5,6 +5,8 @@ permissions: {}
 inputs:
     release-version:
         required: true
+    blocks-dir:
+        require: true
 
 outputs:
     payload:
@@ -18,7 +20,8 @@ runs:
           uses: actions/github-script@v6
           env:
               RELEASE_VERSION: ${{ inputs.release-version }}
+              BLOCKS_DIR: ${{ inputs.blocks-dir }}
           with:
               script: |
-                  const script = require('./.github/actions/tests/slack-summary-on-release/slack-blocks-all/scripts/construct-payload.js');
+                  const script = require('./.github/actions/tests/slack-summary-on-release/slack-payload/scripts/construct-payload.js');
                   return script();

@@ -1,15 +1,15 @@
-const { JSONS_DIR, RELEASE_VERSION, SLACK_BLOCKS_ARTIFACT } = process.env;
+const { BLOCKS_DIR, RELEASE_VERSION } = process.env;
 const fs = require( 'fs' );
 const path = require( 'path' );
 
 const combineContextBlocks = () => {
-	const jsonsPath = path.resolve( JSONS_DIR, SLACK_BLOCKS_ARTIFACT );
-	const jsons = fs.readdirSync( jsonsPath );
+	const jsonsDir = path.resolve( BLOCKS_DIR );
+	const jsons = fs.readdirSync( jsonsDir );
 
 	let contextBlocks = [];
 
 	for ( const json of jsons ) {
-		const jsonPath = path.resolve( jsonsPath, json );
+		const jsonPath = path.resolve( jsonsDir, json );
 		const contextBlock = require( jsonPath );
 
 		contextBlocks.push( contextBlock );
