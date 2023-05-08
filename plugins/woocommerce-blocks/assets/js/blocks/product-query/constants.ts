@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { getSetting } from '@woocommerce/settings';
+import { objectOmit } from '@woocommerce/utils';
 import type { InnerBlockTemplate } from '@wordpress/blocks';
 
 /**
@@ -11,15 +12,6 @@ import { QueryBlockAttributes } from './types';
 import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
 import { VARIATION_NAME as PRODUCT_TEMPLATE_ID } from './variations/elements/product-template';
 import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
-
-/**
- * Returns an object without a key.
- */
-function objectOmit< T, K extends keyof T >( obj: T, key: K ) {
-	const { [ key ]: omit, ...rest } = obj;
-
-	return rest;
-}
 
 export const EDIT_ATTRIBUTES_URL =
 	'/wp-admin/edit.php?post_type=product&page=product_attributes';
@@ -31,6 +23,7 @@ export const DEFAULT_CORE_ALLOWED_CONTROLS = [ 'taxQuery', 'search' ];
 export const ALL_PRODUCT_QUERY_CONTROLS = [
 	'attributes',
 	'presets',
+	'productSelector',
 	'onSale',
 	'stockStatus',
 	'wooInherit',
