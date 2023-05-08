@@ -1,9 +1,8 @@
-const { BLOCKS_DIR } = process.env;
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const combineContextBlocks = () => {
-	const jsonsDir = path.resolve( BLOCKS_DIR );
+const combineContextBlocks = ( blocksDir ) => {
+	const jsonsDir = path.resolve( blocksDir );
 	const jsons = fs.readdirSync( jsonsDir );
 
 	let contextBlocks = [];
