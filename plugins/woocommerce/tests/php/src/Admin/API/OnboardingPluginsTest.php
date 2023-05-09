@@ -93,10 +93,19 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 		$data      = $this->request( array( 'test' ) );
 		$action_id = $data['job_id'];
 
-		// actino scheduler might take time to kick off.
-		// not ideal, but this is only workaround I've found so far.
 		$data = $this->get( $action_id );
 		$this->assertIsArray( $data );
 		$this->assertEquals( $action_id, $data['job_id'] );
+	}
+
+	/**
+	 * Test it returns 404 when an unknown job id is given.
+	 *
+	 * @return void
+	 */
+	public function test_it_returns_404_with_unknown_job_id() {
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/scheduled-installs/i-do-not-exist' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 404, $response->get_status() );
 	}
 }
