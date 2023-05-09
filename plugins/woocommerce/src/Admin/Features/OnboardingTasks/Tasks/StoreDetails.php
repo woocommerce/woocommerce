@@ -69,11 +69,11 @@ class StoreDetails extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		$country = WC()->countries->get_base_country();
+		$country        = WC()->countries->get_base_country();
 		$country_locale = WC()->countries->get_country_locale();
-		$locale = $country_locale[$country] ?? array();
+		$locale         = $country_locale[ $country ] ?? array();
 
-		$hide_postcode  = $locale['postcode']['hidden'] ?? false;
+		$hide_postcode = $locale['postcode']['hidden'] ?? false;
 		// If postcode is hidden, just check that the store address and city are set.
 		if ( $hide_postcode ) {
 			return get_option( 'woocommerce_store_address', '' ) !== '' && get_option( 'woocommerce_store_city', '' ) !== '';
