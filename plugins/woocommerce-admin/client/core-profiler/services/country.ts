@@ -1,19 +1,12 @@
 /**
  * External dependencies
  */
-import { decodeEntities } from '@wordpress/html-entities';
 import { Country } from '@woocommerce/data';
-function decodeHtml( content: string ) {
-	if ( ! content ) {
-		return '';
-	}
+import { decodeEntities } from '@wordpress/html-entities';
 
-	return decodeEntities( content );
-}
 /**
  * Type definitions
  */
-
 export type CountryStateOption = {
 	key: string;
 	label: string;
@@ -42,7 +35,7 @@ export function getCountryStateOptions(
 			if ( ! country.states.length ) {
 				acc.push( {
 					key: country.code,
-					label: decodeHtml( country.name ),
+					label: decodeEntities( country.name ),
 				} );
 				return acc;
 			}
@@ -51,9 +44,9 @@ export function getCountryStateOptions(
 				return {
 					key: country.code + ':' + state.code,
 					label:
-						decodeHtml( country.name ) +
+						decodeEntities( country.name ) +
 						' — ' +
-						decodeHtml( state.name ),
+						decodeEntities( state.name ),
 				};
 			} );
 			acc.push( ...countryStates );
