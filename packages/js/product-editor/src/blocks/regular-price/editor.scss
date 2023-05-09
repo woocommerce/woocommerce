@@ -1,0 +1,11 @@
+.wp-block-woocommerce-product-regular-price-field {
+	.components-currency-control {
+		.components-input-control__prefix {
+			color: $gray-700;
+		}
+
+		.components-input-control__input {
+			text-align: right;
+		}
+	}
+}

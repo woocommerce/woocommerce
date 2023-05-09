@@ -94,7 +94,7 @@ const EditProductPage: React.FC = () => {
 	);
 
 	useEffect( () => {
-		// used for determening the wasDeletedUsingAction condition.
+		// used for determining the wasDeletedUsingAction condition.
 		if (
 			previousProductRef.current &&
 			product &&

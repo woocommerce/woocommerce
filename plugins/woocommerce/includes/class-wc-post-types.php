@@ -371,6 +371,7 @@ class WC_Post_Types {
 							array(
 								'id'    => 'general',
 								'title' => __( 'General', 'woocommerce' ),
+								'order' => 10,
 							),
 							array(
 								array(
@@ -403,7 +404,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing-field',
+															'woocommerce/product-regular-price-field',
 															array(
 																'name'  => 'regular_price',
 																'label' => __( 'List price', 'woocommerce' ),
@@ -419,9 +420,8 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing-field',
+															'woocommerce/product-sale-price-field',
 															array(
-																'name'  => 'sale_price',
 																'label' => __( 'Sale price', 'woocommerce' ),
 															),
 														),
@@ -484,6 +484,26 @@ class WC_Post_Types {
 										),
 									),
 								),
+								array(
+									'woocommerce/product-section',
+									array(
+										'title'       => __( 'Attributes', 'woocommerce' ),
+										'description' => sprintf(
+											/* translators: %1$s: Attributes guide link opening tag. %2$s: Attributes guide link closing tag.*/
+											__( 'Add descriptive pieces of information that customers can use to filter and search for this product. %1$sLearn more%2$s', 'woocommerce' ),
+											'<a href="https://woocommerce.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">',
+											'</a>'
+										),
+										'icon'        => array(
+											'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_attributes.svg', WC_PLUGIN_FILE ),
+										),
+									),
+									array(
+										array(
+											'woocommerce/product-attributes-field',
+										),
+									),
+								),
 							),
 						),
 						array(
@@ -491,6 +511,7 @@ class WC_Post_Types {
 							array(
 								'id'    => 'pricing',
 								'title' => __( 'Pricing', 'woocommerce' ),
+								'order' => 20,
 							),
 							array(
 								array(
@@ -519,7 +540,7 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing-field',
+															'woocommerce/product-regular-price-field',
 															array(
 																'name'  => 'regular_price',
 																'label' => __( 'List price', 'woocommerce' ),
@@ -534,9 +555,8 @@ class WC_Post_Types {
 													),
 													array(
 														array(
-															'woocommerce/product-pricing-field',
+															'woocommerce/product-sale-price-field',
 															array(
-																'name'  => 'sale_price',
 																'label' => __( 'Sale price', 'woocommerce' ),
 															),
 														),
@@ -614,6 +634,7 @@ class WC_Post_Types {
 							array(
 								'id'    => 'inventory',
 								'title' => __( 'Inventory', 'woocommerce' ),
+								'order' => 30,
 							),
 							array(
 								array(
@@ -763,6 +784,7 @@ class WC_Post_Types {
 							array(
 								'id'    => 'shipping',
 								'title' => __( 'Shipping', 'woocommerce' ),
+								'order' => 40,
 							),
 							array(
 								array(
@@ -1053,15 +1075,6 @@ class WC_Post_Types {
 					'show_in_admin_status_list' => true,
 					/* translators: %s: number of orders */
 					'label_count'               => _n_noop( 'Failed <span class="count">(%s)</span>', 'Failed <span class="count">(%s)</span>', 'woocommerce' ),
-				),
-				'auto-draft'    => array(
-					'label'                     => _x( 'Auto Draft', 'Order status', 'woocommerce' ),
-					'public'                    => false,
-					'exclude_from_search'       => false,
-					'show_in_admin_all_list'    => true,
-					'show_in_admin_status_list' => true,
-					/* translators: %s: number of orders */
-					'label_count'               => _n_noop( 'Auto draft <span class="count">(%s)</span>', 'Auto draft <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 			)
 		);

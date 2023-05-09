@@ -45,7 +45,7 @@ export const EditorWritingFlow = ( {
 		};
 	} );
 
-	// This is a workaround to prevent focusing the block on intialization.
+	// This is a workaround to prevent focusing the block on initialization.
 	// Changing to a mode other than "edit" ensures that no initial position
 	// is found and no element gets subsequently focused.
 	// See https://github.com/WordPress/gutenberg/blob/411b6eee8376e31bf9db4c15c92a80524ae38e9b/packages/block-editor/src/components/block-list/use-block-props/use-focus-first-element.js#L42

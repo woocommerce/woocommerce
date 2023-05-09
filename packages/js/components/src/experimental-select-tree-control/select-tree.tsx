@@ -2,9 +2,9 @@
 /**
  * External dependencies
  */
-import { createElement, useState } from '@wordpress/element';
+import { chevronDown } from '@wordpress/icons';
 import classNames from 'classnames';
-import { search } from '@wordpress/icons';
+import { createElement, useState } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 
 /**
@@ -32,7 +32,7 @@ export const SelectTree = function SelectTree( {
 	items,
 	getSelectedItemProps,
 	treeRef: ref,
-	suffix = <SuffixIcon icon={ search } />,
+	suffix = <SuffixIcon icon={ chevronDown } />,
 	placeholder,
 	isLoading,
 	onInputChange,
@@ -40,24 +40,37 @@ export const SelectTree = function SelectTree( {
 	...props
 }: SelectTreeProps ) {
 	const linkedTree = useLinkedTree( items );
+	const selectTreeInstanceId = useInstanceId(
+		SelectTree,
+		'woocommerce-experimental-select-tree-control__dropdown'
+	);
 	const menuInstanceId = useInstanceId(
 		SelectTree,
 		'woocommerce-select-tree-control__menu'
 	);
+	const isEventOutside = ( event: React.FocusEvent ) => {
+		return ! document
+			.querySelector( '.' + selectTreeInstanceId )
+			?.contains( event.relatedTarget );
+	};
 
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ isOpen, setIsOpen ] = useState( false );
+	const isReadOnly = ! isOpen && ! isFocused;
 
 	return (
 		<div
-			className="woocommerce-experimental-select-tree-control__dropdown"
+			className={ `woocommerce-experimental-select-tree-control__dropdown ${ selectTreeInstanceId }` }
 			tabIndex={ -1 }
 		>
 			<div
 				className={ classNames(
 					'woocommerce-experimental-select-control',
 					{
+						'is-read-only': isReadOnly,
 						'is-focused': isFocused,
+						'is-multiple': props.multiple,
+						'has-selected-items': props.selected?.length,
 					}
 				) }
 			>
@@ -93,12 +106,7 @@ export const SelectTree = function SelectTree( {
 						},
 						onBlur: ( event ) => {
 							// if blurring to an element inside the dropdown, don't close it
-							if (
-								isOpen &&
-								! document
-									.querySelector( '.' + menuInstanceId )
-									?.contains( event.relatedTarget )
-							) {
+							if ( isEventOutside( event ) ) {
 								setIsOpen( false );
 							}
 							setIsFocused( false );
@@ -126,13 +134,13 @@ export const SelectTree = function SelectTree( {
 					suffix={ suffix }
 				>
 					<SelectedItems
+						isReadOnly={ isReadOnly }
 						items={ ( props.selected as Item[] ) || [] }
 						getItemLabel={ ( item ) => item?.label || '' }
 						getItemValue={ ( item ) => item?.value || '' }
 						onRemove={ ( item ) => {
 							if ( ! Array.isArray( item ) && props.onRemove ) {
 								props.onRemove( item );
-								setIsOpen( false );
 							}
 						} }
 						getSelectedItemProps={ () => ( {} ) }
@@ -144,10 +152,13 @@ export const SelectTree = function SelectTree( {
 				id={ `${ props.id }-menu` }
 				className={ menuInstanceId.toString() }
 				ref={ ref }
+				isEventOutside={ isEventOutside }
 				isOpen={ isOpen }
 				items={ linkedTree }
 				shouldShowCreateButton={ shouldShowCreateButton }
-				onClose={ () => setIsOpen( false ) }
+				onClose={ () => {
+					setIsOpen( false );
+				} }
 			/>
 		</div>
 	);

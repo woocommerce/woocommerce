@@ -1,10 +1,14 @@
 /**
  * External dependencies
  */
-import { createMachine, assign } from 'xstate';
+import { createMachine, assign, DoneInvokeEvent, actions } from 'xstate';
 import { useMachine } from '@xstate/react';
-import { useEffect } from '@wordpress/element';
-import { ExtensionList } from '@woocommerce/data';
+import { useEffect, useMemo } from '@wordpress/element';
+import { resolveSelect, dispatch } from '@wordpress/data';
+import { ExtensionList, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
+import { getSetting } from '@woocommerce/settings';
+import { initializeExPlat } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
@@ -13,9 +17,15 @@ import { IntroOptIn } from './pages/IntroOptIn';
 import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
+import './style.scss';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
 // https://stately.ai/blog/introducing-typescript-typegen-for-xstate
+
+export type InitializationCompleteEvent = {
+	type: 'INITIALIZATION_COMPLETE';
+	payload: { optInDataSharing: boolean };
+};
 
 export type IntroOptInEvent =
 	| { type: 'INTRO_COMPLETED'; payload: { optInDataSharing: boolean } } // can be true or false depending on whether the user opted in or not
@@ -93,9 +103,69 @@ const Extensions = ( {
 	);
 };
 
+const getAllowTrackingOption = async () =>
+	resolveSelect( OPTIONS_STORE_NAME ).getOption(
+		'woocommerce_allow_tracking'
+	);
+
+const handleTrackingOption = assign( {
+	optInDataSharing: (
+		_context,
+		event: DoneInvokeEvent< 'no' | 'yes' | undefined >
+	) => event.data !== 'no',
+} );
+
+const recordTracksIntroCompleted = () => {
+	recordEvent( 'storeprofiler_step_complete', {
+		step: 'store_details',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
+const recordTracksIntroSkipped = () => {
+	recordEvent( 'storeprofiler_store_details_skip' );
+};
+
+const recordTracksIntroViewed = () => {
+	recordEvent( 'storeprofiler_step_view', {
+		step: 'store_details',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
+const updateTrackingOption = (
+	_context: CoreProfilerStateMachineContext,
+	event: IntroOptInEvent
+) => {
+	if (
+		event.payload.optInDataSharing &&
+		typeof window.wcTracks.enable === 'function'
+	) {
+		window.wcTracks.enable( () => {
+			initializeExPlat();
+		} );
+	} else if ( ! event.payload.optInDataSharing ) {
+		window.wcTracks.isEnabled = false;
+	}
+
+	const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
+	dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_allow_tracking: trackingValue,
+	} );
+};
+
+/**
+ * Assigns the optInDataSharing value from the event payload to the context
+ */
+const assignOptInDataSharing = assign( {
+	optInDataSharing: ( _context, event: IntroOptInEvent ) =>
+		event.payload.optInDataSharing,
+} );
+
 const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
 	initial: 'initializing',
+	predictableActionArguments: true, // recommended setting: https://xstate.js.org/docs/guides/actions.html
 	context: {
 		// these are safe default values if for some reason the steps fail to complete correctly
 		// actual defaults displayed to the user should be handled in the steps themselves
@@ -109,11 +179,23 @@ const coreProfilerStateMachineDefinition = createMachine( {
 	states: {
 		initializing: {
 			on: {
-				INITIALIZATION_COMPLETE: 'introOptIn',
+				INITIALIZATION_COMPLETE: {
+					target: 'introOptIn',
+				},
 			},
 			invoke: [
 				{
-					src: 'initializeProfiler',
+					src: 'getAllowTrackingOption',
+					// eslint-disable-next-line xstate/no-ondone-outside-compound-state -- The invoke.onDone property refers to the invocation (invoke.src) being done, not the onDone property on a state node.
+					onDone: [
+						{
+							actions: [ 'handleTrackingOption' ],
+							target: 'introOptIn',
+						},
+					],
+					onError: {
+						target: 'introOptIn', // leave it as initialised default on error
+					},
 				},
 			],
 			meta: {
@@ -125,27 +207,31 @@ const coreProfilerStateMachineDefinition = createMachine( {
 				INTRO_COMPLETED: {
 					target: 'userProfile',
 					actions: [
-						assign( {
-							optInDataSharing: (
-								_context,
-								event: IntroOptInEvent
-							) => event.payload.optInDataSharing, // sets context.optInDataSharing to the payload of the event
-						} ),
+						'assignOptInDataSharing',
+						'updateTrackingOption',
 					],
 				},
 				INTRO_SKIPPED: {
 					// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
 					target: 'skipFlowBusinessLocation',
 					actions: [
-						assign( {
-							optInDataSharing: (
-								context,
-								event: IntroOptInEvent
-							) => event.payload.optInDataSharing, // sets context.optInDataSharing to the payload of the event, which is always false
-						} ),
+						'assignOptInDataSharing',
+						'updateTrackingOption',
 					],
 				},
 			},
+			entry: [ 'recordTracksIntroViewed' ],
+			exit: actions.choose( [
+				{
+					cond: ( _context, event ) =>
+						event.type === 'INTRO_COMPLETED',
+					actions: 'recordTracksIntroCompleted',
+				},
+				{
+					cond: ( _context, event ) => event.type === 'INTRO_SKIPPED',
+					actions: 'recordTracksIntroSkipped',
+				},
+			] ),
 			meta: {
 				progress: 20,
 				component: IntroOptIn,
@@ -261,25 +347,24 @@ const coreProfilerStateMachineDefinition = createMachine( {
 } );
 
 const CoreProfilerController = ( {} ) => {
-	const [ state, send ] = useMachine(
-		coreProfilerStateMachineDefinition.withConfig( {
-			services: {
-				initializeProfiler: () => ( sendBack ) => {
-					// TODO: placeholder to simulate initialization time
-					const interval = setInterval( () => {
-						sendBack( {
-							type: 'INITIALIZATION_COMPLETE',
-						} );
-					}, 1000 );
-
-					return () => {
-						clearInterval( interval );
-					};
-				},
+	const augmentedStateMachine = useMemo( () => {
+		// When adding extensibility, this is the place to manipulate the state machine definition.
+		return coreProfilerStateMachineDefinition.withConfig( {
+			actions: {
+				updateTrackingOption,
+				handleTrackingOption,
+				recordTracksIntroCompleted,
+				recordTracksIntroSkipped,
+				recordTracksIntroViewed,
+				assignOptInDataSharing,
 			},
-		} ),
-		{ devTools: true }
-	);
+			services: {
+				getAllowTrackingOption,
+			},
+		} );
+	}, [] );
+
+	const [ state, send ] = useMachine( augmentedStateMachine );
 
 	const currentNodeMeta = state.meta[ `coreProfiler.${ state.value }` ]
 		? state.meta[ `coreProfiler.${ state.value }` ]
@@ -304,27 +389,16 @@ const CoreProfilerController = ( {} ) => {
 
 	return (
 		<>
-			<div>Core Profiler Placeholder</div>
-			<div>{ `${ navigationProgress }% complete` }</div>
 			<div
 				className={ `woocommerce-profile-wizard__container woocommerce-profile-wizard__step-${ state.value }` }
 			>
-				<div>{ `Current State: ${ state.value }` }</div>
-				<div>
-					{ `Context values: ${ JSON.stringify(
-						state.context,
-						null,
-						2
-					) }` }
-				</div>
-				<div>
-					{
-						<CurrentComponent
-							sendEvent={ send }
-							context={ state.context }
-						/>
-					}
-				</div>
+				{
+					<CurrentComponent
+						navigationProgress={ navigationProgress }
+						sendEvent={ send }
+						context={ state.context }
+					/>
+				}
 			</div>
 		</>
 	);

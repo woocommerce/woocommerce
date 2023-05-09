@@ -466,7 +466,7 @@ final class CodeHacker {
 	}
 
 	/**
-	 * Apply the reigstered hacks to the contents of a file.
+	 * Apply the registered hacks to the contents of a file.
 	 *
 	 * @param string $code Code content to hack.
 	 * @param string $path Path of the file being hacked.

@@ -2032,7 +2032,7 @@ importers:
         specifier: workspace:*
         version: link:../customer-effort-score
       '@woocommerce/data':
-        specifier: workspace:^4.1.0
+        specifier: workspace:*
         version: link:../data
       '@woocommerce/experimental':
         specifier: workspace:*
@@ -2185,6 +2185,9 @@ importers:
       '@types/wordpress__plugins':
         specifier: ^3.0.0
         version: 3.0.0(react-dom@17.0.2)(react@17.0.2)
+      '@types/wordpress__rich-text':
+        specifier: ^3.4.6
+        version: 3.4.6
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../eslint-plugin
@@ -5976,8 +5979,8 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.12.9
-      '@babel/helper-annotate-as-pure': 7.16.7
-      '@babel/helper-create-class-features-plugin': 7.17.6(@babel/core@7.12.9)
+      '@babel/helper-annotate-as-pure': 7.18.6
+      '@babel/helper-create-class-features-plugin': 7.19.0(@babel/core@7.12.9)
       '@babel/helper-plugin-utils': 7.20.2
       '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.12.9)
     transitivePeerDependencies:
@@ -6006,8 +6009,8 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-annotate-as-pure': 7.16.7
-      '@babel/helper-create-class-features-plugin': 7.17.6(@babel/core@7.21.3)
+      '@babel/helper-annotate-as-pure': 7.18.6
+      '@babel/helper-create-class-features-plugin': 7.19.0(@babel/core@7.21.3)
       '@babel/helper-plugin-utils': 7.20.2
       '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.21.3)
     transitivePeerDependencies:
@@ -6827,7 +6830,7 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-module-imports': 7.16.7
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.18.9
       '@babel/helper-remap-async-to-generator': 7.16.8
     transitivePeerDependencies:
       - supports-color
@@ -6855,7 +6858,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-module-imports': 7.16.7
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.18.9
       '@babel/helper-remap-async-to-generator': 7.16.8
     transitivePeerDependencies:
       - supports-color
@@ -13468,7 +13471,7 @@ packages:
       '@babel/generator': 7.17.7
       '@babel/parser': 7.17.8
       '@babel/plugin-transform-react-jsx': 7.17.3(@babel/core@7.17.8)
-      '@babel/preset-env': 7.16.11(@babel/core@7.17.8)
+      '@babel/preset-env': 7.20.2(@babel/core@7.17.8)
       '@jest/transform': 26.6.2
       '@mdx-js/loader': 1.6.22(react@17.0.2)
       '@mdx-js/mdx': 1.6.22
@@ -13492,7 +13495,7 @@ packages:
       acorn: 7.4.1
       acorn-jsx: 5.3.2(acorn@7.4.1)
       acorn-walk: 7.2.0
-      core-js: 3.21.1
+      core-js: 3.29.1
       doctrine: 3.0.0
       escodegen: 2.0.0
       fast-deep-equal: 3.1.3
@@ -13508,7 +13511,7 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
       react-element-to-jsx-string: 14.3.4(react-dom@17.0.2)(react@17.0.2)
-      regenerator-runtime: 0.13.9
+      regenerator-runtime: 0.13.11
       remark-external-links: 8.0.0
       remark-slug: 6.1.0
       ts-dedent: 2.2.0
@@ -20836,8 +20839,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      browserslist: 4.20.2
-      caniuse-lite: 1.0.30001352
+      browserslist: 4.21.4
+      caniuse-lite: 1.0.30001418
       fraction.js: 4.2.0
       normalize-range: 0.1.2
       picocolors: 1.0.0
@@ -22380,6 +22383,7 @@ packages:
       escalade: 3.1.1
       node-releases: 2.0.6
       picocolors: 1.0.0
+    dev: true
 
   /browserslist@4.20.4:
     resolution: {integrity: sha512-ok1d+1WpnU24XYN7oC3QWgTyMhY/avPJ/r9T00xxvUOIparA/gc+UPUMaod3i+G6s+nI2nUb9xZ5k794uIwShw==}

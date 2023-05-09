@@ -5,7 +5,7 @@ import { execSync } from 'child_process';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { mkdirSync } from 'fs';
-import { simpleGit } from 'simple-git';
+import { simpleGit, TaskOptions } from 'simple-git';
 import { v4 } from 'uuid';
 import { mkdir, rm } from 'fs/promises';
 import { URL } from 'node:url';
@@ -75,15 +75,19 @@ const isUrl = ( maybeURL: string ) => {
 /**
  * Clone a git repository.
  *
- * @param {string} repoPath - the path (either URL or file path) to the repo to clone.
+ * @param {string}      repoPath - the path (either URL or file path) to the repo to clone.
+ * @param {TaskOptions} options  - options to pass to simple-git.
  * @return {Promise<string>} the path to the cloned repo.
  */
-export const cloneRepo = async ( repoPath: string ) => {
+export const cloneRepo = async (
+	repoPath: string,
+	options: TaskOptions = {}
+) => {
 	const folderPath = join( tmpdir(), 'code-analyzer-tmp', v4() );
 	mkdirSync( folderPath, { recursive: true } );
 
 	const git = simpleGit( { baseDir: folderPath } );
-	await git.clone( repoPath, folderPath );
+	await git.clone( repoPath, folderPath, options );
 
 	// If this is a local clone then the simplest way to maintain remote settings is to copy git config across
 	if ( ! isUrl( repoPath ) ) {
@@ -97,17 +101,31 @@ export const cloneRepo = async ( repoPath: string ) => {
 };
 
 /**
+ * Clone a git repository without history.
+ *
+ * @param {string} repoPath - the path (either URL or file path) to the repo to clone.
+ * @return {Promise<string>} the path to the cloned repo.
+ */
+export const cloneRepoShallow = async ( repoPath: string ) => {
+	return await cloneRepo( repoPath, { '--depth': 1 } );
+};
+
+/**
  * Do a minimal sparse checkout of a github repo.
  *
  * @param {string}        githubRepoUrl -     the URL to the repo to checkout.
  * @param {string}        path          - the path to checkout to.
  * @param {Array<string>} directories   - the files or directories to checkout.
+ * @param {string}        base          - the base branch to checkout from. Defaults to trunk.
+ * @param {TaskOptions}   options       - options to pass to simple-git.
  * @return {Promise<string>}  the path to the cloned repo.
  */
 export const sparseCheckoutRepo = async (
 	githubRepoUrl: string,
 	path: string,
-	directories: string[]
+	directories: string[],
+	base = 'trunk',
+	options: TaskOptions = {}
 ) => {
 	const folderPath = join( tmpdir(), path );
 
@@ -117,11 +135,35 @@ export const sparseCheckoutRepo = async (
 
 	const git = simpleGit( { baseDir: folderPath } );
 
-	await git.clone( githubRepoUrl, folderPath );
+	const cloneOptions = { '--no-checkout': null };
+	await git.clone( githubRepoUrl, folderPath, {
+		...cloneOptions,
+		...options,
+	} );
 	await git.raw( 'sparse-checkout', 'init', { '--cone': null } );
 	await git.raw( 'sparse-checkout', 'set', directories.join( ' ' ) );
+	await git.checkout( base );
 
 	return folderPath;
+};
+
+/**
+ * Do a minimal sparse checkout of a github repo without history.
+ *
+ * @param {string}        githubRepoUrl -     the URL to the repo to checkout.
+ * @param {string}        path          - the path to checkout to.
+ * @param {Array<string>} directories   - the files or directories to checkout.
+ * @return {Promise<string>}  the path to the cloned repo.
+ */
+export const sparseCheckoutRepoShallow = async (
+	githubRepoUrl: string,
+	path: string,
+	directories: string[],
+	base = 'trunk'
+) => {
+	return await sparseCheckoutRepo( githubRepoUrl, path, directories, base, {
+		'--depth': 1,
+	} );
 };
 
 /**

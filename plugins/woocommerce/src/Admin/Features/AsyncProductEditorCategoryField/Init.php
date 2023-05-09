@@ -46,9 +46,10 @@ class Init {
 	 * Enqueue scripts needed for the product form block editor.
 	 */
 	public function enqueue_scripts() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_embed_page() ) {
 			return;
 		}
+
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'product-category-metabox', true );
 		wp_localize_script(
 			'wc-admin-product-category-metabox',
@@ -66,7 +67,7 @@ class Init {
 	 * Enqueue styles needed for the rich text editor.
 	 */
 	public function enqueue_styles() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_embed_page() ) {
 			return;
 		}
 		$version = Constants::get_constant( 'WC_VERSION' );

@@ -204,7 +204,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_global' can be used to reigster replacements for globals.
+	 * @testdox 'get_global' can be used to register replacements for globals.
 	 */
 	public function test_register_global_mocks_can_be_used_to_replace_globals() {
 		$replacement_wpdb = new \stdClass();

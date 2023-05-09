@@ -16,14 +16,24 @@
 	&__content {
 		flex-grow: 1;
 		background-color: #2f2f2f;
-		padding: 40px 48px;
+		padding: 90px 48px 40px;
 		height: 100%;
 		justify-content: center;
 		display: flex;
+		position: relative;
 	}
 
 	&__sidebar {
 		flex-shrink: 0;
 		width: 280px;
+	}
+
+	.block-editor-block-contextual-toolbar.is-fixed {
+		position: absolute;
+		left: 0;
+		top: 0;
+		border-bottom: 1px solid $gray-400;
+		border-right: 1px solid $gray-400;
+		box-sizing: border-box;
 	}
 }

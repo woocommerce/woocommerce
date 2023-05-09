@@ -1114,7 +1114,10 @@ jQuery( function ( $ ) {
 										count
 								  );
 
-						window.alert( message );
+						window.wp.data.dispatch( 'core/notices' ).createSuccessNotice(
+							message,
+							{ icon: '🎉' }
+						);
 
 						wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
 

@@ -205,6 +205,17 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 					<ShippingDimensionsImage
 						highlight={ highlightSide }
 						className="wp-block-woocommerce-product-shipping-dimensions-fields__dimensions-image"
+						labels={ {
+							A: dimensionsWidthProps.value?.length
+								? dimensionsWidthProps.value
+								: undefined,
+							B: dimensionsLengthProps.value?.length
+								? dimensionsLengthProps.value
+								: undefined,
+							C: dimensionsHeightProps.value?.length
+								? dimensionsHeightProps.value
+								: undefined,
+						} }
 					/>
 				</div>
 			</div>
