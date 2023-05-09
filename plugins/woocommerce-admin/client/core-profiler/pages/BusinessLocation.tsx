@@ -14,7 +14,7 @@ import {
 	BusinessLocationEvent,
 	CoreProfilerStateMachineContext,
 } from '../index';
-
+import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
 export const BusinessLocation = ( {
@@ -26,7 +26,10 @@ export const BusinessLocation = ( {
 	navigationProgress: number;
 	context: CoreProfilerStateMachineContext;
 } ) => {
-	const [ storeCountry, setStoreCountry ] = useState< string >( '' );
+	const [ storeCountry, setStoreCountry ] = useState< CountryStateOption >( {
+		key: '',
+		label: '',
+	} );
 
 	return (
 		<div className="woocommerce-profiler-business-location">
@@ -46,7 +49,7 @@ export const BusinessLocation = ( {
 					className="woocommerce-profiler-select-control__country"
 					instanceId={ 1 }
 					label={
-						! storeCountry
+						storeCountry.key === ''
 							? __( 'Select country/region', 'woocommerce' )
 							: ''
 					}
@@ -60,7 +63,7 @@ export const BusinessLocation = ( {
 					options={ context.countries }
 					excludeSelectedOptions={ false }
 					help={ <Icon icon={ chevronDown } /> }
-					onChange={ ( results: Array< string > ) => {
+					onChange={ ( results: Array< CountryStateOption > ) => {
 						if ( results.length ) {
 							setStoreCountry( results[ 0 ] );
 						}
@@ -78,7 +81,7 @@ export const BusinessLocation = ( {
 							type: 'BUSINESS_LOCATION_COMPLETED',
 							payload: {
 								businessInfo: {
-									location: storeCountry,
+									location: storeCountry.key,
 								},
 							},
 						} );

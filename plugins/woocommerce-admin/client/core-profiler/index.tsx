@@ -79,7 +79,7 @@ export type CoreProfilerStateMachineContext = {
 	geolocatedLocation: {
 		location: string;
 	};
-	extensionsAvailable: ExtensionList[ 'plugins' ] | [];
+	extensionsAvailable: ExtensionList[ 'plugins' ] | [  ];
 	extensionsSelected: string[]; // extension slugs
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
@@ -194,6 +194,12 @@ const updateTrackingOption = (
 	const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
 	dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_allow_tracking: trackingValue,
+	} );
+};
+
+const updateBusinessLocation = ( countryAndState: string ) => {
+	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_default_country: countryAndState,
 	} );
 };
 
@@ -381,8 +387,25 @@ const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		postSkipFlowBusinessLocation: {
-			initial: 'progress20',
+			initial: 'updateBusinessLocation',
 			states: {
+				updateBusinessLocation: {
+					entry: assign( {
+						loader: {
+							progress: 10,
+						},
+					} ),
+					invoke: {
+						src: ( context ) => {
+							return updateBusinessLocation(
+								context.businessInfo.location
+							);
+						},
+						onDone: {
+							target: 'progress20',
+						},
+					},
+				},
 				progress20: {
 					entry: assign( {
 						loader: {

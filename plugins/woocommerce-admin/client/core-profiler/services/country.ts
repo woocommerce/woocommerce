@@ -14,7 +14,7 @@ function decodeHtml( content: string ) {
  * Type definitions
  */
 
-type CountryStateOption = {
+export type CountryStateOption = {
 	key: string;
 	label: string;
 };
