@@ -9,7 +9,6 @@ import {
 	LayoutContextProvider,
 	getLayoutContextValue,
 } from '@woocommerce/admin-layout';
-import { memoize } from 'lodash';
 
 /**
  * Internal dependencies
