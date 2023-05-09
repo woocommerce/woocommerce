@@ -70,7 +70,7 @@ export function getCountryStateOptions(
  * Get the user's location
  *
  * @return {Object} {
- * 	latitude: '39.039474',
+ *  latitude: '39.039474',
  *  longitude: '-77.491809',
  *  country_short: 'US',
  *  country_long: 'United States of America',
