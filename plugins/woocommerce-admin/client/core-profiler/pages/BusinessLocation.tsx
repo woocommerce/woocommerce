@@ -71,24 +71,26 @@ export const BusinessLocation = ( {
 					selected={ storeCountry ? [ storeCountry ] : [] }
 					showAllOnFocus
 					isSearchable
-				></SelectControl>
-				<Button
-					className="woocommerce-profiler-go-to-mystore__button"
-					variant="primary"
-					disabled={ ! storeCountry.key }
-					onClick={ () => {
-						sendEvent( {
-							type: 'BUSINESS_LOCATION_COMPLETED',
-							payload: {
-								businessInfo: {
-									location: storeCountry.key,
+				/>
+				<div className="woocommerce-profiler-go-to-mystore__button-container">
+					<Button
+						className="woocommerce-profiler-go-to-mystore__button"
+						variant="primary"
+						disabled={ ! storeCountry.key }
+						onClick={ () => {
+							sendEvent( {
+								type: 'BUSINESS_LOCATION_COMPLETED',
+								payload: {
+									businessInfo: {
+										location: storeCountry.key,
+									},
 								},
-							},
-						} );
-					} }
-				>
-					{ __( 'Go to my store', 'woocommerce' ) }
-				</Button>
+							} );
+						} }
+					>
+						{ __( 'Go to my store', 'woocommerce' ) }
+					</Button>
+				</div>
 			</div>
 		</div>
 	);
