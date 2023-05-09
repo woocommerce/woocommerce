@@ -75,6 +75,7 @@ class Init {
 			sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( $editor_settings['blockCategories'] ) ),
 			'before'
 		);
+		wp_tinymce_inline_scripts();
 	}
 
 	/**
