@@ -29,6 +29,7 @@ jobs:
         permissions:
             contents: write
             issues: write
+            pull-requests: write
         outputs:
             freeze: ${{ steps.check-freeze.outputs.freeze }}
             nextReleaseBranch: ${{ steps.branch.outputs.nextReleaseBranch }}
@@ -63,64 +64,17 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: pnpm run utils code-freeze branch -o ${{ github.repository_owner }}
 
-    prep-trunk:
-        name: Preps trunk for next development cycle
-        runs-on: ubuntu-20.04
-        permissions:
-            contents: write
-            pull-requests: write
-        needs: code-freeze-prep
-        if: needs.code-freeze-prep.outputs.freeze == 'true'
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
-              with:
-                  fetch-depth: 100
-
-            - name: fetch-trunk
-              run: git fetch origin trunk
-
-            - name: checkout-trunk
-              run: git checkout trunk
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-
-            - name: Create branch
-              run: git checkout -b prep/trunk-for-next-dev-cycle-${{ needs.code-freeze-prep.outputs.nextDevelopmentVersion }}
-
-            - name: Bump versions
-              working-directory: ./tools/version-bump
-              run: pnpm run version bump woocommerce -v ${{ needs.code-freeze-prep.outputs.nextDevelopmentVersion }}.0-dev
-
-            - name: Checkout pnpm-lock.yaml to prevent issues
-              run: git checkout pnpm-lock.yaml
-
-            - name: Commit changes
-              run: git commit -am "Prep trunk for ${{ needs.code-freeze-prep.outputs.nextDevelopmentVersion }} cycle"
-
-            - name: Push branch up
-              run: git push --no-verify origin prep/trunk-for-next-dev-cycle-${{ needs.code-freeze-prep.outputs.nextDevelopmentVersion }}
-
-            - name: Create the PR
-              uses: actions/github-script@v6
-              with:
-                  script: |
-                      const body = "This PR updates the versions in trunk to ${{ needs.code-freeze-prep.outputs.nextDevelopmentVersion }} for next development cycle."
-
-                      const pr = await github.rest.pulls.create({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        title: "Prep trunk for ${{ needs.code-freeze-prep.outputs.nextDevelopmentVersion }} cycle",
-                        head: "prep/trunk-for-next-dev-cycle-${{ needs.code-freeze-prep.outputs.nextDevelopmentVersion }}",
-                        base: "trunk",
-                        body: body
-                      })
+            - name: Prepare trunk for next development cycle
+              id: prep-trunk
+              if: steps.check-freeze.outputs.freeze == 'true'
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: pnpm run utils code-freeze version-bump -o ${{ github.repository_owner }} -v ${{ steps.milestone.outputs.nextDevelopmentVersion }}.0-dev
 
     notify-slack:
         name: 'Sends code freeze notification to Slack'
         runs-on: ubuntu-20.04
-        needs: prep-trunk
+        needs: code-freeze-prep
         if: ${{ inputs.skipSlackPing != true }}
         steps:
             - name: Slack

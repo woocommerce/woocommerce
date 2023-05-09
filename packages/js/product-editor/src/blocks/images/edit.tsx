@@ -114,6 +114,7 @@ export function Edit() {
 				) }
 			</div>
 			<ImageGallery
+				allowDragging={ false }
 				onDragStart={ ( event ) => {
 					const { id: imageId, dataset } =
 						event.target as HTMLElement;
@@ -150,11 +151,12 @@ export function Edit() {
 						images.find( ( img ) => media.id === img.id ) ===
 						undefined
 					) {
-						images[ replaceIndex ] = media as MediaItem;
+						const newImages = [ ...images ];
+						newImages[ replaceIndex ] = media as MediaItem;
 						recordEvent(
 							'product_images_replace_image_button_click'
 						);
-						setImages( images );
+						setImages( newImages );
 					}
 				} }
 				onSelectAsCover={ () =>

@@ -286,7 +286,7 @@
 	grid-column-start: 4;
 }
 
-/* Any columns following a section header need to be expicitly put into the second row, for IE support. */
+/* Any columns following a section header need to be explicitly put into the second row, for IE support. */
 .about__section.has-2-columns .is-section-header ~ .column,
 .about__section.has-3-columns .is-section-header ~ .column,
 .about__section.has-4-columns .is-section-header ~ .column,

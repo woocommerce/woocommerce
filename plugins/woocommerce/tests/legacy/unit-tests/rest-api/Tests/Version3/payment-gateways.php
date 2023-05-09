@@ -247,7 +247,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'woo@woo.local', $paypal['settings']['email']['value'] );
 		$this->assertEquals( 'yes', $paypal['settings']['testmode']['value'] );
 
-		// Test bogus paramter.
+		// Test bogus parameter.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/paypal' );
 		$request->set_body_params(
 			array(

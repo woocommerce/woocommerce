@@ -332,6 +332,11 @@
 
 		.single_variation_wrap {
 			margin-top: var(--wp--style--block-gap);
+
+			// Prevent height flickering when selecting a variation.
+			.single_variation .woocommerce-variation-description > :first-child {
+				margin-top: 0;
+			}
 		}
 
 		ol.flex-control-thumbs {

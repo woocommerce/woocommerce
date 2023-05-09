@@ -6,18 +6,149 @@ import { BACKSPACE, DOWN, UP } from '@wordpress/keycodes';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { Icon, search } from '@wordpress/icons';
 import classnames from 'classnames';
-import PropTypes from 'prop-types';
+import { isArray } from 'lodash';
+import {
+	RefObject,
+	ChangeEvent,
+	FocusEvent,
+	KeyboardEvent,
+	InputHTMLAttributes,
+} from 'react';
 
 /**
  * Internal dependencies
  */
 import Tags from './tags';
+import { Selected, Option } from './types';
+
+type Props = {
+	/**
+	 * Bool to determine if tags should be rendered.
+	 */
+	hasTags?: boolean;
+	/**
+	 * Help text to be appended beneath the input.
+	 */
+	help?: string | JSX.Element;
+	/**
+	 * Render tags inside input, otherwise render below input.
+	 */
+	inlineTags?: boolean;
+	/**
+	 * Allow the select options to be filtered by search input.
+	 */
+	isSearchable?: boolean;
+	/**
+	 * ID of the main SelectControl instance.
+	 */
+	instanceId?: number;
+	/**
+	 * A label to use for the main input.
+	 */
+	label?: string;
+	/**
+	 * ID used for a11y in the listbox.
+	 */
+	listboxId?: string;
+	/**
+	 * Function called when the input is blurred.
+	 */
+	onBlur?: () => void;
+	/**
+	 * Function called when selected results change, passed result list.
+	 */
+	onChange: ( selected: Option[] ) => void;
+	/**
+	 * Function called when input field is changed or focused.
+	 */
+	onSearch: ( query: string ) => void;
+	/**
+	 * A placeholder for the search input.
+	 */
+	placeholder?: string;
+	/**
+	 * Search query entered by user.
+	 */
+	query?: string | null;
+	/**
+	 * An array of objects describing selected values. If the label of the selected
+	 * value is omitted, the Tag of that value will not be rendered inside the
+	 * search box.
+	 */
+	selected?: Selected;
+	/**
+	 * Show all options on focusing, even if a query exists.
+	 */
+	showAllOnFocus?: boolean;
+	/**
+	 * Control input autocomplete field, defaults: off.
+	 */
+	autoComplete?: string;
+	/**
+	 * Function to execute when the control should be expanded or collapsed.
+	 */
+	setExpanded: ( expanded: boolean ) => void;
+	/**
+	 * Function to execute when the search value changes.
+	 */
+	updateSearchOptions: ( query: string ) => void;
+	/**
+	 * Function to execute when keyboard navigation should decrement the selected index.
+	 */
+	decrementSelectedIndex: () => void;
+	/**
+	 * Function to execute when keyboard navigation should increment the selected index.
+	 */
+	incrementSelectedIndex: () => void;
+	/**
+	 * Multi-select mode allows multiple options to be selected.
+	 */
+	multiple?: boolean;
+	/**
+	 * Is the control currently focused.
+	 */
+	isFocused?: boolean;
+	/**
+	 * ID for accessibility purposes. aria-activedescendant will be set to this value.
+	 */
+	activeId?: string;
+	/**
+	 * Disable the control.
+	 */
+	disabled?: boolean;
+	/**
+	 * Is the control currently expanded. This is for accessibility purposes.
+	 */
+	isExpanded?: boolean;
+	/**
+	 * The type of input to use for the search field.
+	 */
+	searchInputType?: InputHTMLAttributes< HTMLInputElement >[ 'type' ];
+	/**
+	 * The aria label for the search input.
+	 */
+	ariaLabel?: string;
+	/**
+	 * Class name to be added to the input.
+	 */
+	className?: string;
+	/**
+	 * Show the clear button.
+	 */
+	showClearButton?: boolean;
+};
+
+type State = {
+	isActive: boolean;
+};
 
 /**
  * A search control to allow user input to filter the options.
  */
-class Control extends Component {
-	constructor( props ) {
+class Control extends Component< Props, State > {
+	input: RefObject< HTMLInputElement >;
+
+	constructor( props: Props ) {
 		super( props );
 		this.state = {
 			isActive: false,
@@ -31,13 +162,13 @@ class Control extends Component {
 		this.onKeyDown = this.onKeyDown.bind( this );
 	}
 
-	updateSearch( onSearch ) {
-		return ( event ) => {
+	updateSearch( onSearch: ( query: string ) => void ) {
+		return ( event: ChangeEvent< HTMLInputElement > ) => {
 			onSearch( event.target.value );
 		};
 	}
 
-	onFocus( onSearch ) {
+	onFocus( onSearch: ( query: string ) => void ) {
 		const {
 			isSearchable,
 			setExpanded,
@@ -45,7 +176,7 @@ class Control extends Component {
 			updateSearchOptions,
 		} = this.props;
 
-		return ( event ) => {
+		return ( event: FocusEvent< HTMLInputElement > ) => {
 			this.setState( { isActive: true } );
 			if ( isSearchable && showAllOnFocus ) {
 				event.target.select();
@@ -68,7 +199,7 @@ class Control extends Component {
 		this.setState( { isActive: false } );
 	}
 
-	onKeyDown( event ) {
+	onKeyDown( event: KeyboardEvent< HTMLInputElement > ) {
 		const {
 			decrementSelectedIndex,
 			incrementSelectedIndex,
@@ -78,7 +209,12 @@ class Control extends Component {
 			setExpanded,
 		} = this.props;
 
-		if ( BACKSPACE === event.keyCode && ! query && selected.length ) {
+		if (
+			BACKSPACE === event.keyCode &&
+			! query &&
+			isArray( selected ) &&
+			selected.length
+		) {
 			onChange( [ ...selected.slice( 0, -1 ) ] );
 		}
 
@@ -100,7 +236,7 @@ class Control extends Component {
 	renderButton() {
 		const { multiple, selected } = this.props;
 
-		if ( multiple || ! selected.length ) {
+		if ( multiple || ! isArray( selected ) || ! selected.length ) {
 			return null;
 		}
 
@@ -151,7 +287,7 @@ class Control extends Component {
 				aria-describedby={
 					hasTags && inlineTags
 						? `search-inline-input-${ instanceId }`
-						: null
+						: undefined
 				}
 				disabled={ disabled }
 				aria-label={ this.props.ariaLabel ?? this.props.label }
@@ -168,7 +304,8 @@ class Control extends Component {
 			query,
 			selected,
 		} = this.props;
-		const selectedValue = selected.length ? selected[ 0 ].label : '';
+		const selectedValue =
+			isArray( selected ) && selected.length ? selected[ 0 ].label : '';
 
 		// Show the selected value for simple select dropdowns.
 		if ( ! multiple && ! isFocused && ! inlineTags ) {
@@ -194,6 +331,8 @@ class Control extends Component {
 			isSearchable,
 			label,
 			query,
+			onChange,
+			showClearButton,
 		} = this.props;
 		const { isActive } = this.state;
 
@@ -213,7 +352,7 @@ class Control extends Component {
 						empty: ! query || query.length === 0,
 						'is-active': isActive,
 						'has-tags': inlineTags && hasTags,
-						'with-value': this.getInputValue().length,
+						'with-value': this.getInputValue()?.length,
 						'has-error': !! help,
 						'is-disabled': disabled,
 					}
@@ -221,8 +360,11 @@ class Control extends Component {
 				onClick={ ( event ) => {
 					// Don't focus the input if the click event is from the error message.
 					if (
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore - event.target.className is not in the type definition.
 						event.target.className !==
-						'components-base-control__help'
+							'components-base-control__help' &&
+						this.input.current
 					) {
 						this.input.current.focus();
 					}
@@ -234,7 +376,13 @@ class Control extends Component {
 						icon={ search }
 					/>
 				) }
-				{ inlineTags && <Tags { ...this.props } /> }
+				{ inlineTags && (
+					<Tags
+						onChange={ onChange }
+						showClearButton={ showClearButton }
+						selected={ this.props.selected }
+					/>
+				) }
 
 				<div className="components-base-control__field">
 					{ !! label && (
@@ -271,76 +419,5 @@ class Control extends Component {
 		);
 	}
 }
-
-Control.propTypes = {
-	/**
-	 * Bool to determine if tags should be rendered.
-	 */
-	hasTags: PropTypes.bool,
-	/**
-	 * Help text to be appended beneath the input.
-	 */
-	help: PropTypes.oneOfType( [ PropTypes.string, PropTypes.node ] ),
-	/**
-	 * Render tags inside input, otherwise render below input.
-	 */
-	inlineTags: PropTypes.bool,
-	/**
-	 * Allow the select options to be filtered by search input.
-	 */
-	isSearchable: PropTypes.bool,
-	/**
-	 * ID of the main SelectControl instance.
-	 */
-	instanceId: PropTypes.number,
-	/**
-	 * A label to use for the main input.
-	 */
-	label: PropTypes.string,
-	/**
-	 * ID used for a11y in the listbox.
-	 */
-	listboxId: PropTypes.string,
-	/**
-	 * Function called when the input is blurred.
-	 */
-	onBlur: PropTypes.func,
-	/**
-	 * Function called when selected results change, passed result list.
-	 */
-	onChange: PropTypes.func,
-	/**
-	 * Function called when input field is changed or focused.
-	 */
-	onSearch: PropTypes.func,
-	/**
-	 * A placeholder for the search input.
-	 */
-	placeholder: PropTypes.string,
-	/**
-	 * Search query entered by user.
-	 */
-	query: PropTypes.string,
-	/**
-	 * An array of objects describing selected values. If the label of the selected
-	 * value is omitted, the Tag of that value will not be rendered inside the
-	 * search box.
-	 */
-	selected: PropTypes.arrayOf(
-		PropTypes.shape( {
-			key: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] )
-				.isRequired,
-			label: PropTypes.string,
-		} )
-	),
-	/**
-	 * Show all options on focusing, even if a query exists.
-	 */
-	showAllOnFocus: PropTypes.bool,
-	/**
-	 * Control input autocomplete field, defaults: off.
-	 */
-	autoComplete: PropTypes.string,
-};
 
 export default Control;

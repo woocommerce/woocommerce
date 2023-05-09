@@ -169,7 +169,7 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'My account'
 		);
-		await page.click( 'text=Logout' );
+		await page.click( 'text=Log out' );
 		// sign in as admin to confirm account creation
 		await page.fill( '#username', admin.username );
 		await page.fill( '#password', admin.password );
