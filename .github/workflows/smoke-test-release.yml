@@ -14,7 +14,7 @@ permissions: {}
 env:
     E2E_WP_LATEST_ARTIFACT: E2E test on release smoke test site with WP Latest (run ${{ github.run_number }})
     E2E_UPDATE_WC_ARTIFACT: WooCommerce version update test on release smoke test site (run ${{ github.run_number }})
-
+    SLACK_BLOCKS_ARTIFACT: slack-blocks
 jobs:
     get-tag:
         name: Get WooCommerce release tag
@@ -122,12 +122,26 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && steps.run-e2e-composite-action.outputs.result == 'failure'
+                  )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: WC Update test
+                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  env-slug: wp-latest
+                  release-version: ${{ needs.get-tag.outputs.tag }}
+
     api-wp-latest:
         name: API on WP Latest
         runs-on: ubuntu-20.04
         needs: [get-tag, e2e-update-wc]
         permissions:
             contents: read
+        outputs:
+            result: ${{ steps.run-api-composite-action.outputs.result }}
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
@@ -177,6 +191,18 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
+
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && steps.run-api-composite-action.outputs.result == 'failure'
+                  )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: WP Latest
+                  api-result: ${{ steps.run-api-composite-action.outputs.result }}
+                  env-slug: wp-latest
+                  release-version: ${{ needs.get-tag.outputs.tag }}
 
     e2e-wp-latest:
         name: E2E on WP Latest
@@ -268,6 +294,19 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && steps.run-e2e-composite-action.outputs.result == 'failure'
+                  )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: WP Latest
+                  api-result: ${{ needs.api-wp-latest.outputs.result }}
+                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  env-slug: wp-latest
+                  release-version: ${{ needs.get-tag.outputs.tag }}
+
     get-wp-versions:
         name: Get WP L-1 & L-2 version numbers
         needs: [get-tag]
@@ -328,6 +367,8 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build-filters: woocommerce
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
@@ -360,7 +401,7 @@ jobs:
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.API_WP_LATEST_X_ARTIFACT }}
-                  tests: hello
+                  tests: hello.test.js
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
@@ -435,6 +476,22 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && (
+                      steps.run-api-composite-action.outputs.result == 'failure' ||
+                      steps.run-e2e-composite-action.outputs.result == 'failure' 
+                    ) 
+                  )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: ${{ matrix.version.description }} (${{ matrix.version.number }})
+                  api-result: ${{ steps.run-api-composite-action.outputs.result }}
+                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  env-slug: ${{ matrix.version.env_description }}
+                  release-version: ${{ needs.get-wp-versions.outputs.tag }}
+
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}
         runs-on: ubuntu-20.04
@@ -456,6 +513,8 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build-filters: woocommerce
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
@@ -482,7 +541,7 @@ jobs:
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.API_ARTIFACT }}
-                  tests: hello
+                  tests: hello.test.js
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
@@ -557,6 +616,22 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && (
+                      steps.run-api-composite-action.outputs.result == 'failure' ||
+                      steps.run-e2e-composite-action.outputs.result == 'failure' 
+                    )
+                  )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: PHP ${{ matrix.php_version }}
+                  api-result: ${{ steps.run-api-composite-action.outputs.result }}
+                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  env-slug: php-${{ matrix.php_version }}
+                  release-version: ${{ needs.get-tag.outputs.tag }}
+
     test-plugins:
         name: With ${{ matrix.plugin }}
         runs-on: ubuntu-20.04
@@ -594,6 +669,8 @@ jobs:
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build-filters: woocommerce
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
@@ -656,3 +733,54 @@ jobs:
                     -f env_description="${{ matrix.env_description }}" \
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
+
+            - name: Create Slack block
+              if: |
+                  success() || (
+                    failure() && steps.run-e2e-composite-action.outputs.result == 'failure' )
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: With ${{ matrix.plugin }}
+                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+                  env-slug: ${{ matrix.env_description }}
+                  release-version: ${{ needs.get-tag.outputs.tag }}
+
+    post-slack-summary:
+        name: Post Slack summary
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        if: |
+            success() || (
+              failure() && contains( needs.*.result, 'failure' )
+            )
+        needs:
+            - e2e-wp-latest
+            - get-tag
+            - test-php-versions
+            - test-plugins
+            - test-wp-versions
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Download all slack blocks
+              id: download-slack-blocks
+              uses: actions/download-artifact@v3
+              with:
+                  name: ${{ env.SLACK_BLOCKS_ARTIFACT }}
+                  path: /tmp/slack-payload
+
+            - name: Construct payload from all blocks
+              id: run-payload-action
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-payload
+              with:
+                  release-version: ${{ needs.get-tag.outputs.tag }}
+                  blocks-dir: ${{ steps.download-slack-blocks.outputs.download-path }}
+
+            - name: Send Slack message
+              uses: slackapi/slack-github-action@v1.23.0
+              with:
+                  channel-id: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
+                  payload: ${{ steps.run-payload-action.outputs.payload }}
+              env:
+                  SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
