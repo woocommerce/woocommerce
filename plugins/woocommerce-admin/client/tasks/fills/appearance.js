@@ -25,11 +25,13 @@ import { WooOnboardingTask } from '@woocommerce/onboarding';
 class Appearance extends Component {
 	constructor( props ) {
 		super( props );
-		const { hasHomepage, hasProducts } = props.task.additionalData;
+		const { hasHomepage, hasProducts, supportCustomLogo } =
+			props.task.additionalData;
 
 		this.stepVisibility = {
 			homepage: ! hasHomepage,
 			import: ! hasProducts,
+			logo: supportCustomLogo,
 		};
 
 		this.state = {
@@ -338,7 +340,7 @@ class Appearance extends Component {
 						</Button>
 					</Fragment>
 				),
-				visible: true,
+				visible: this.stepVisibility.logo,
 			},
 			{
 				key: 'notice',
