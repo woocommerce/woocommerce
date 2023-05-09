@@ -52,7 +52,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 				'downloads'       => 'Downloads',
 				'edit-address'    => 'Addresses',
 				'edit-account'    => 'Account details',
-				'customer-logout' => 'Logout',
+				'customer-logout' => 'Log out',
 			),
 			wc_get_account_menu_items()
 		);

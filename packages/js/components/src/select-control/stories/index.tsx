@@ -1,8 +1,12 @@
 /**
  * External dependencies
  */
-import { SelectControl } from '@woocommerce/components';
-import { useState } from '@wordpress/element';
+import React from 'react';
+import { createElement, useState } from '@wordpress/element';
+/**
+ * Internal dependencies
+ */
+import SelectControl from '../';
 
 const options = [
 	{

@@ -32,8 +32,8 @@ $args = array(
   'can_view'        => 'US:CA' === wc_get_base_location(),
   'level'           => 3, // Priority level shown for extended tasks.
   'time'            => __( '2 minutes', 'plugin-text-domain' ), // Time string for time to complete the task.
-  'is_dismissable'  => false, // Determine if the taks is dismissable.
-  'is_snoozeable'   => true, // Determine if the taks is snoozeable.
+  'is_dismissable'  => false, // Determine if the task is dismissable.
+  'is_snoozeable'   => true, // Determine if the task is snoozeable.
   'additional_info' => array( 'apples', 'oranges', 'bananas' ), // Additional info passed to the task.
 )
 $task = new Task( $args );

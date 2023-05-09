@@ -10,7 +10,7 @@
  */
 class WC_Tests_Widget extends WC_Unit_Test_Case {
 	/**
-	 * Test intance creation
+	 * Test instance creation
 	 *
 	 * @return void
 	 */

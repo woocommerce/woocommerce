@@ -37,7 +37,7 @@ class Init {
 	}
 
 	/**
-	 * Boostrap REST API.
+	 * Bootstrap REST API.
 	 */
 	public function __construct() {
 		// Hook in data stores.

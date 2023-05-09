@@ -21,7 +21,7 @@ export function Edit( {
 	};
 } ) {
 	const blockProps = useBlockProps();
-	const { id, title } = attributes;
+	const { id, title, order } = attributes;
 	const isSelected = context?.selectedTab === id;
 
 	const classes = classnames( 'wp-block-woocommerce-product-tab__content', {
@@ -30,7 +30,7 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<TabButton id={ id } selected={ isSelected }>
+			<TabButton id={ id } selected={ isSelected } order={ order }>
 				{ title }
 			</TabButton>
 			<div
