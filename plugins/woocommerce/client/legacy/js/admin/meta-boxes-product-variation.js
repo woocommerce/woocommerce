@@ -1331,10 +1331,14 @@ jQuery( function ( $ ) {
 				'.woocommerce_variations'
 			);
 			if ( parseInt( wrapper.attr( 'data-total' ) ) > 0 ) {
-				$( '.add-variation-container' ).addClass( 'hidden' );
+				$( '#variable_product_options_inner' ).removeClass(
+					'no-variations'
+				);
 				$( '#field_to_edit' ).removeClass( 'hidden' );
 			} else {
-				$( '.add-variation-container' ).removeClass( 'hidden' );
+				$( '#variable_product_options_inner' ).addClass(
+					'no-variations'
+				);
 				$( '#field_to_edit' ).addClass( 'hidden' );
 			}
 		},
