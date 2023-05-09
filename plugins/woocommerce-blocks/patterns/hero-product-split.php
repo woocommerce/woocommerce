@@ -9,7 +9,7 @@
 <!-- wp:media-text {"align":"full","mediaPosition":"right","mediaType":"image","mediaSizeSlug":"full","imageFill":false,"backgroundColor":"contrast","textColor":"base"} -->
 <div class="wp-block-media-text alignfull has-media-on-the-right is-stacked-on-mobile has-base-color has-contrast-background-color has-text-color has-background">
 	<div class="wp-block-media-text__content"><!-- wp:heading -->
-		<h2 class="wp-block-heading">Get cozy this fall with<br>flannel shirts</h2>
+		<h2 class="wp-block-heading">Get cozy this fall with flannel shirts</h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:buttons {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} -->
