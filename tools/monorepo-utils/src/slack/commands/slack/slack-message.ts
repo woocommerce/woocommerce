@@ -9,6 +9,11 @@ import { Command } from '@commander-js/extra-typings';
 import { Logger } from '../../../core/logger';
 import { requestAsync } from '../../../core/util';
 
+type SlackResponse = {
+	ok: boolean;
+	error?: string;
+};
+
 export const slackMessageCommand = new Command( 'message' )
 	.description( 'Send a plain-text message to a slack channel' )
 	.argument(
@@ -33,16 +38,18 @@ export const slackMessageCommand = new Command( 'message' )
 		};
 
 		try {
-			const { statusCode } = await requestAsync(
+			const { statusCode, body } = await requestAsync(
 				options,
 				JSON.stringify( { channel, text } )
 			);
 
 			Logger.endTask();
 
-			if ( statusCode !== 200 ) {
+			const response = JSON.parse( body ) as SlackResponse;
+
+			if ( ! response.ok || statusCode !== 200 ) {
 				Logger.error(
-					`Slack API returned a non-200 response: ${ statusCode }, message failed to send.`,
+					`Slack API returned an error: ${ response?.error }, message failed to send.`,
 					fail
 				);
 			} else {
