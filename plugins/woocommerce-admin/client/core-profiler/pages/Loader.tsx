@@ -33,11 +33,11 @@ export const Loader = ( {
 
 	useEffect( () => {
 		const interval = setInterval( () => {
-			currentStage.paragraphs[ currentParagraph + 1 ]
-				? setCurrentParagraph(
-						( currentParagraph ) => currentParagraph + 1
-				  )
-				: setCurrentParagraph( 0 );
+			setCurrentParagraph( ( _currentParagraph ) =>
+				currentStage.paragraphs[ _currentParagraph + 1 ]
+					? _currentParagraph + 1
+					: 0
+			);
 		}, currentStage.paragraphs[ currentParagraph ]?.duration ?? 3000 );
 
 		return () => clearInterval( interval );
