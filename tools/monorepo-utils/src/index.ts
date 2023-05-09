@@ -34,7 +34,11 @@ const run = async () => {
 		//  parseAsync handles cases where the action is async and not async.
 		await program.parseAsync( process.argv );
 	} catch ( e ) {
-		if ( e.code !== 'commander.help' ) {
+		// if github ci, always error
+		if ( isGithubCI() ) {
+			Logger.error( e );
+		} else if ( e.code !== 'commander.help' ) {
+			// if not github ci, only error if not help
 			Logger.error( e );
 		}
 	}
