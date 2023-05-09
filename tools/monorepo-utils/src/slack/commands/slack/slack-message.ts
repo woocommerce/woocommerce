@@ -23,13 +23,13 @@ export const slackMessageCommand = new Command( 'message' )
 	.argument( '<channel>', 'Slack channel to send the message to.' )
 	.argument( '<text>', 'Text based message to send to the slack channel.' )
 	.option(
-		'--dontfail',
+		'--dontFail',
 		'Do not fail the command if the message fails to send.'
 	)
-	.action( async ( token, channel, text, { dontfail } ) => {
+	.action( async ( token, channel, text, { dontFail } ) => {
 		Logger.startTask( 'Attempting to send message to slack' );
 
-		const shouldFail = ! dontfail;
+		const shouldFail = ! dontFail;
 
 		// Define the request options
 		const options = {
