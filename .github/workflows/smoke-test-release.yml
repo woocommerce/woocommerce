@@ -780,7 +780,7 @@ jobs:
             - name: Send Slack message
               uses: slackapi/slack-github-action@v1.23.0
               with:
-                  channel-id: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
+                  channel-id: C0564A5FES1
                   payload: ${{ steps.run-payload-action.outputs.payload }}
               env:
                   SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
