@@ -33,7 +33,7 @@ export class Logger {
 				error( chalk.red( err ) );
 			} else {
 				// Best effort to log the error when we don't know the type.
-				error( chalk.red( JSON.stringify( err ) ) );
+				error( chalk.red( JSON.stringify( err, null, 2 ) ) );
 			}
 
 			if ( failOnErr ) {
