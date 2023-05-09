@@ -752,7 +752,7 @@ class DefaultPaymentGateways {
 				'description' => __( 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies. Track cash flow and manage recurring revenue directly from your store’s dashboard - with no setup costs or monthly fees.', 'woocommerce' ),
 				'is_visible'  => array(
 					self::get_rules_for_cbd( false ),
-					self::get_rules_for_countries( array_diff( self::get_wcpay_countries(), array( 'US', 'CA' ) ) ),
+					self::get_rules_for_countries( array_diff( self::get_wcpay_countries(), array( 'US', 'CA', 'GB' ) ) ),
 					(object) array(
 						'type'     => 'or',
 						// Older versions of WooCommerce Admin require the ID to be `woocommerce-payments` to show the suggestion card.
@@ -787,7 +787,7 @@ class DefaultPaymentGateways {
 				'description' => __( 'With WooCommerce Payments, you can securely accept major cards, Apple Pay, and payments in over 100 currencies – with no setup costs or monthly fees – and you can now accept in-person payments with the Woo mobile app.', 'woocommerce' ),
 				'is_visible'  => array(
 					self::get_rules_for_cbd( false ),
-					self::get_rules_for_countries( array( 'US', 'CA' ) ),
+					self::get_rules_for_countries( array( 'US', 'CA', 'GB' ) ),
 					(object) array(
 						'type'     => 'or',
 						// Older versions of WooCommerce Admin require the ID to be `woocommerce-payments` to show the suggestion card.
