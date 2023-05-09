@@ -28,7 +28,7 @@ import {
  */
 import './style.scss';
 import { IconFlag } from './icon-flag';
-import { isNotesPanelVisible } from './unread-indicators';
+import { hasUnreadNotes as hasUnreadNotesFn } from './unread-indicators';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
@@ -121,25 +121,22 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		).length;
 	}
 
-	function isAbbreviatedPanelVisible(
+	function hasAbbreviatedNotificationsFn(
 		select,
 		setupTaskListHidden,
 		thingsToDoNextCount
 	) {
 		const orderStatuses = getOrderStatuses( select );
 
-		const isOrdersCardVisible =
-			setupTaskListHidden && isPanelOpen
-				? getUnreadOrders( select, orderStatuses ) > 0
-				: false;
-		const isReviewsCardVisible =
-			setupTaskListHidden && isPanelOpen
-				? getUnapprovedReviews( select )
-				: false;
-		const isLowStockCardVisible =
-			setupTaskListHidden && isPanelOpen
-				? getLowStockProducts( select )
-				: false;
+		const isOrdersCardVisible = setupTaskListHidden
+			? getUnreadOrders( select, orderStatuses ) > 0
+			: false;
+		const isReviewsCardVisible = setupTaskListHidden
+			? getUnapprovedReviews( select )
+			: false;
+		const isLowStockCardVisible = setupTaskListHidden
+			? getLowStockProducts( select )
+			: false;
 
 		return (
 			thingsToDoNextCount > 0 ||
@@ -153,7 +150,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const {
 		hasUnreadNotes,
 		hasAbbreviatedNotifications,
-		hasUnread,
 		isCompletedTask,
 		thingsToDoNextCount,
 		requestingTaskListOptions,
@@ -176,21 +172,13 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const thingsToDoCount = getThingsToDoNextCount( extendedTaskList );
 
-		const orderStatuses = getOrderStatuses( select );
-
 		return {
-			hasUnreadNotes: isNotesPanelVisible( select ),
-			hasAbbreviatedNotifications: isAbbreviatedPanelVisible(
+			hasUnreadNotes: hasUnreadNotesFn( select ),
+			hasAbbreviatedNotifications: hasAbbreviatedNotificationsFn(
 				select,
 				isSetupTaskListHidden,
 				thingsToDoCount
 			),
-			hasUnread:
-				getUnreadOrders( select, orderStatuses ) > 0 ||
-				getUnapprovedReviews( select ) ||
-				getLowStockProducts( select ) ||
-				thingsToDoCount > 0 ||
-				hasExtendedNotifications,
 			thingsToDoNextCount: thingsToDoCount,
 			requestingTaskListOptions:
 				! hasFinishedResolution( 'getTaskLists' ),
@@ -280,7 +268,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			name: 'activity',
 			title: __( 'Activity', 'woocommerce' ),
 			icon: <IconFlag />,
-			unread: hasUnread,
+			unread: hasUnreadNotes || hasAbbreviatedNotifications,
 			visible:
 				( isEmbedded || ! isHomescreen() ) &&
 				! isPerformingSetupTask() &&
