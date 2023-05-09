@@ -9,14 +9,35 @@ import chalk from 'chalk';
  * Internal dependencies
  */
 import CodeFreeze from './code-freeze/commands';
-import Slack from './slack/commands';
+import Slack from './slack/commands/slack';
+import { Logger } from './core/logger';
+import { isGithubCI } from './core/environment';
 
-console.log(
-	chalk.rgb( 150, 88, 138 ).bold( figlet.textSync( 'WooCommerce Utilities' ) )
-);
+if ( ! isGithubCI() ) {
+	Logger.notice(
+		chalk
+			.rgb( 150, 88, 138 )
+			.bold( figlet.textSync( 'WooCommerce \n Utils' ) )
+	);
+}
 
-export const program = new Command()
+const program = new Command()
 	.name( 'utils' )
 	.description( 'Monorepo utilities' )
 	.addCommand( CodeFreeze )
 	.addCommand( Slack );
+
+program.exitOverride();
+
+const run = async () => {
+	try {
+		//  parseAsync handles cases where the action is async and not async.
+		await program.parseAsync( process.argv );
+	} catch ( e ) {
+		if ( e.code !== 'commander.help' ) {
+			Logger.error( e );
+		}
+	}
+};
+
+run();

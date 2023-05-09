@@ -20,10 +20,12 @@ import {
 } from '../../../core/github/repo';
 import { WPIncrement } from '../../../core/version';
 import { Logger } from '../../../core/logger';
-import { Options } from './types';
 import { getEnvVar } from '../../../core/environment';
 
-const getNextReleaseBranch = async ( options: Options ) => {
+const getNextReleaseBranch = async ( options: {
+	owner?: string;
+	repo?: string;
+} ) => {
 	const latestReleaseVersion = await getLatestGithubReleaseVersion( options );
 	const nextReleaseVersion = WPIncrement( latestReleaseVersion );
 	const parsedNextReleaseVersion = parse( nextReleaseVersion );
@@ -53,7 +55,7 @@ export const branchCommand = new Command( 'branch' )
 		'Branch to create the release branch from. Default: trunk',
 		'trunk'
 	)
-	.action( async ( options: Options ) => {
+	.action( async ( options ) => {
 		const { source, branch, owner, name, dryRun } = options;
 		const isGithub = getEnvVar( 'CI' );
 

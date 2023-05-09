@@ -10,17 +10,15 @@ import { Logger } from '../../../core/logger';
 import { requestAsync } from '../../../core/util';
 
 export const slackMessageCommand = new Command( 'message' )
-	.description( 'Send a message to a slack channel' )
+	.description( 'Send a plain-text message to a slack channel' )
 	.argument(
 		'<token>',
 		'Slack authentication token bearing required scopes.'
 	)
 	.argument( '<channel>', 'Slack channel to send the message to.' )
 	.argument( '<text>', 'Text based message to send to the slack channel.' )
-	.option( '--fail', 'Fail the command if the message fails to send.' )
+	.option( '--fail', 'Fail the command if the message fails to send.', true )
 	.action( async ( token, channel, text, { fail } ) => {
-		const logError = fail ? Logger.error : Logger.warn;
-
 		Logger.startTask( 'Attempting to send message to slack' );
 
 		// Define the request options
@@ -43,19 +41,14 @@ export const slackMessageCommand = new Command( 'message' )
 			Logger.endTask();
 
 			if ( statusCode !== 200 ) {
-				logError(
-					`Slack API returned a non-200 response: ${ statusCode }, message failed to send.`
+				Logger.error(
+					`Slack API returned a non-200 response: ${ statusCode }, message failed to send.`,
+					fail
 				);
 			} else {
 				Logger.notice( 'Slack message sent successfully' );
 			}
 		} catch ( e: unknown ) {
-			if ( e instanceof Error ) {
-				logError(
-					`Could not send message to Slack with error: ${ e.message }`
-				);
-			} else {
-				logError( `Could not send message to Slack. Error unknown.` );
-			}
+			Logger.error( e, fail );
 		}
 	} );
