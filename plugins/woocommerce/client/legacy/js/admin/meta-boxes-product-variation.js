@@ -1060,6 +1060,12 @@ jQuery( function ( $ ) {
 								page = total_pages;
 							}
 
+							if ( total_pages === 0 ) {
+								$( '.generate_variations' ).text(
+									'Generate variations'
+								);
+							}
+
 							wc_meta_boxes_product_variations_pagenav.go_to_page(
 								page,
 								-1
@@ -1125,6 +1131,9 @@ jQuery( function ( $ ) {
 							wc_meta_boxes_product_variations_pagenav.go_to_page(
 								1,
 								count
+							);
+							$( '.generate_variations' ).text(
+								'Regenerate variations'
 							);
 						} else {
 							wc_meta_boxes_product_variations_ajax.unblock();
@@ -1296,6 +1305,7 @@ jQuery( function ( $ ) {
 				$( '#variable_product_options' )
 					.find( '.variation-needs-update' )
 					.removeClass( 'variation-needs-update' );
+				$( '.generate_variations' ).text( 'Generate variations' );
 			} else {
 				wc_meta_boxes_product_variations_ajax.check_for_changes();
 			}
