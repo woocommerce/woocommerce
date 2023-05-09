@@ -75,7 +75,7 @@ jobs:
         name: 'Sends code freeze notification to Slack'
         runs-on: ubuntu-20.04
         needs: code-freeze-prep
-        if: ${{ inputs.skipSlackPing != true }}
+        if: ${{ needs.code-freeze-prep.outputs.freeze == 'true' && inputs.skipSlackPing != true }}
         steps:
             - name: Slack
               uses: archive/github-actions-slack@v2.0.0
