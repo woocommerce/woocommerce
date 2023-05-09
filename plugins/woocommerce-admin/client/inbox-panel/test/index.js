@@ -38,8 +38,7 @@ jest.mock( '@woocommerce/experimental', () => {
 	};
 } );
 
-// be wary that the notes are modified inside various tests
-const notes = [
+const NOTES = [
 	{
 		id: 1,
 		date_created_gmt: '2019-05-10T16:57:31',
@@ -101,30 +100,54 @@ describe( 'getUnreadNotesCount', () => {
 	const lastRead = 1589285995243;
 
 	test( 'should return 4, 1 of the notes was read', () => {
-		const unreadCount = getUnreadNotesCount( notes, lastRead );
+		const unreadCount = getUnreadNotesCount( NOTES, lastRead );
 		expect( unreadCount ).toEqual( 4 );
 	} );
 
 	test( 'should return 3, 1 of the notes was read and 1 is deleted', () => {
-		notes[ 3 ].is_deleted = true;
+		const notes = [
+			{ ...NOTES[ 0 ] },
+			{ ...NOTES[ 1 ] },
+			{ ...NOTES[ 2 ] },
+			{ ...NOTES[ 3 ], is_deleted: true },
+			{ ...NOTES[ 4 ] },
+		];
 		const unreadCount = getUnreadNotesCount( notes, lastRead );
 		expect( unreadCount ).toEqual( 3 );
 	} );
 
 	test( 'should return 2, 2 of the notes were read and 1 is deleted', () => {
-		notes[ 1 ].date_created_gmt = '2020-05-05T16:57:31';
+		const notes = [
+			{ ...NOTES[ 0 ] },
+			{ ...NOTES[ 1 ], date_created_gmt: '2020-05-05T16:57:31' },
+			{ ...NOTES[ 2 ] },
+			{ ...NOTES[ 3 ], is_deleted: true },
+			{ ...NOTES[ 4 ] },
+		];
 		const unreadCount = getUnreadNotesCount( notes, lastRead );
 		expect( unreadCount ).toEqual( 2 );
 	} );
 
 	test( 'should return 1, 2 of the notes were read, 1 was actioned and 1 is deleted', () => {
-		notes[ 4 ].status = 'actioned';
+		const notes = [
+			{ ...NOTES[ 0 ] },
+			{ ...NOTES[ 1 ], date_created_gmt: '2020-05-05T16:57:31' },
+			{ ...NOTES[ 2 ] },
+			{ ...NOTES[ 3 ], is_deleted: true },
+			{ ...NOTES[ 4 ], status: 'actioned' },
+		];
 		const unreadCount = getUnreadNotesCount( notes, lastRead );
 		expect( unreadCount ).toEqual( 1 );
 	} );
 
 	test( 'should return 0, 2 of the notes were read and 2 are deleted', () => {
-		notes[ 2 ].is_deleted = true;
+		const notes = [
+			{ ...NOTES[ 0 ] },
+			{ ...NOTES[ 1 ], date_created_gmt: '2020-05-05T16:57:31' },
+			{ ...NOTES[ 2 ], is_deleted: true },
+			{ ...NOTES[ 3 ], is_deleted: true },
+			{ ...NOTES[ 4 ], status: 'actioned' },
+		];
 		const unreadCount = getUnreadNotesCount( notes, lastRead );
 		expect( unreadCount ).toEqual( 0 );
 	} );
@@ -132,19 +155,34 @@ describe( 'getUnreadNotesCount', () => {
 
 describe( 'hasValidNotes', () => {
 	test( 'should return true, 2 notes are deleted', () => {
+		const notes = [
+			{ ...NOTES[ 0 ] },
+			{ ...NOTES[ 1 ] },
+			{ ...NOTES[ 2 ], is_deleted: true },
+			{ ...NOTES[ 3 ], is_deleted: true },
+			{ ...NOTES[ 4 ] },
+		];
 		expect( hasValidNotes( notes ) ).toBeTruthy();
 	} );
-	test( 'should return false, 4 notes are deleted', () => {
-		notes[ 0 ].is_deleted = true;
-		notes[ 3 ].is_deleted = true;
-		expect( hasValidNotes( notes ) ).toBeTruthy();
+	test( 'should return false, all notes are deleted', () => {
+		const notes = [
+			{ ...NOTES[ 0 ], is_deleted: true },
+			{
+				...NOTES[ 1 ],
+				is_deleted: true,
+			},
+			{ ...NOTES[ 2 ], is_deleted: true },
+			{ ...NOTES[ 3 ], is_deleted: true },
+			{ ...NOTES[ 4 ], is_deleted: true },
+		];
+		expect( hasValidNotes( notes ) ).toBeFalsy();
 	} );
 } );
 
 describe( 'inbox_panel_view_event', () => {
 	test( 'should fire when panel rendered', () => {
 		useSelect.mockImplementation( () => ( {
-			notes,
+			notes: NOTES,
 			isError: false,
 			notesHaveResolved: true,
 			isBatchUpdating: false,
@@ -159,13 +197,13 @@ describe( 'inbox_panel_view_event', () => {
 
 describe( 'inbox_note_view event', () => {
 	test( 'should fire when inbox note card calls onNoteVisible', () => {
-		notes.forEach( ( note ) => ( note.is_deleted = false ) );
 		useSelect.mockImplementation( () => ( {
-			notes,
+			notes: NOTES,
 			isError: false,
 			notesHaveResolved: true,
 			isBatchUpdating: false,
 		} ) );
+		// The original InboxNotecard has a VisibilityDetector so I prefered to mock it and always call onNoteVisible
 		InboxNoteCard.mockImplementation( ( { onNoteVisible, note } ) => {
 			useEffect( () => onNoteVisible( note ), [] );
 			return <div>{ note.id }</div>;
@@ -173,10 +211,10 @@ describe( 'inbox_note_view event', () => {
 		render( <InboxPanel /> );
 
 		expect( recordEvent ).toHaveBeenCalledWith( 'inbox_note_view', {
-			note_content: notes[ 0 ].content,
-			note_name: notes[ 0 ].name,
-			note_title: notes[ 0 ].title,
-			note_type: notes[ 0 ].type,
+			note_content: NOTES[ 0 ].content,
+			note_name: NOTES[ 0 ].name,
+			note_title: NOTES[ 0 ].title,
+			note_type: NOTES[ 0 ].type,
 			screen: '',
 		} );
 	} );
@@ -185,7 +223,7 @@ describe( 'inbox_note_view event', () => {
 describe( 'inbox_action_click event', () => {
 	test( 'should fire tracks event when inboxNoteCard fires onBodyLinkClick', () => {
 		useSelect.mockImplementation( () => ( {
-			notes,
+			notes: NOTES,
 			isError: false,
 			notesHaveResolved: true,
 			isBatchUpdating: false,
@@ -201,8 +239,8 @@ describe( 'inbox_action_click event', () => {
 		const buttons = getAllByText( 'Trigger action' );
 		userEvent.click( buttons[ 0 ] );
 		expect( recordEvent ).toHaveBeenCalledWith( 'inbox_action_click', {
-			note_name: notes[ 0 ].name,
-			note_title: notes[ 0 ].title,
+			note_name: NOTES[ 0 ].name,
+			note_title: NOTES[ 0 ].title,
 			note_content_inner_link: 'innerLink',
 		} );
 	} );
