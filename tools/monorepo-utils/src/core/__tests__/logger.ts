@@ -44,7 +44,7 @@ describe( 'Logger', () => {
 			Logger.error( { foo: 'bar' } );
 
 			expect( global.console.error ).toHaveBeenCalledWith(
-				chalk.red( '{"foo":"bar"}' )
+				chalk.red( JSON.stringify( { foo: 'bar' }, null, 2 ) )
 			);
 		} );
 
