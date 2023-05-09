@@ -105,7 +105,6 @@ export function BlockEditor( {
 					settings={ settings }
 				>
 					<EditorStyles styles={ settings?.styles } />
-					{/* <EditorStyles styles={ styles } /> */}
 					<div className="editor-styles-wrapper">
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 						{ /* @ts-ignore No types for this exist yet. */ }
