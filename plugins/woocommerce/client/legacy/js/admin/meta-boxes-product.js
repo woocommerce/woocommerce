@@ -395,7 +395,8 @@ jQuery( function ( $ ) {
 		.get();
 
 	// If the product has no attributes, add an empty attribute to be filled out by the user.
-	$( function add_empty_attribute() {
+	$( function add_blank_custom_attribute_if_no_attributes() {
+
 		if ( woocommerce_attribute_items.length === 0  ) {
 			$( 'button.add_custom_attribute' ).trigger( 'click' );
 		}
@@ -507,7 +508,7 @@ jQuery( function ( $ ) {
 		$( 'select.wc-attribute-search' ).data( 'disabled-items', selectedAttributes );
 	}
 
-	function remove_empty_attribute_if_only() {
+	function remove_blank_custom_attribute_if_no_other_attributes() {
 		const $attributes = $( '.product_attributes .woocommerce_attribute' );
 
 		if ( $attributes.length === 1 ) {
@@ -526,7 +527,7 @@ jQuery( function ( $ ) {
 		const attributeId = e?.params?.data?.id;
 
 		if ( attributeId ) {
-			remove_empty_attribute_if_only();
+			remove_blank_custom_attribute_if_no_other_attributes();
 
 			add_attribute( this, attributeId );
 
@@ -708,6 +709,7 @@ jQuery( function ( $ ) {
 		'click',
 		'button.add_new_attribute',
 		function ( event ) {
+			// prevent form submission but allow event propagation
 			event.preventDefault();
 
 			$( '.product_attributes' ).block( {
