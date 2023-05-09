@@ -292,7 +292,7 @@ export const ShippingTour: React.FC< {
 				createNotice(
 					'error',
 					__(
-						'There was a problem marking the shipping tour as reviewed.',
+						'There was a problem marking the shipping tour as completed.',
 						'woocommerce'
 					)
 				);
