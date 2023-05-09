@@ -1,6 +1,9 @@
 .wp-block-woocommerce-product-schedule-sale-fields {
+	margin-bottom: $gap-large;
+
 	.components-toggle-control {
-		margin-bottom: $gap-large;
+		margin-bottom: $gap;
+		padding-bottom: $gap-smaller;
 	}
 
 	.components-toggle-control__label {
