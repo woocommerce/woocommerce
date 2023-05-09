@@ -79,7 +79,7 @@ export type CoreProfilerStateMachineContext = {
 	geolocatedLocation: {
 		location: string;
 	};
-	extensionsAvailable: ExtensionList[ 'plugins' ] | [];
+	extensionsAvailable: ExtensionList[ 'plugins' ] | [  ];
 	extensionsSelected: string[]; // extension slugs
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
@@ -406,6 +406,9 @@ const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 				},
+				// Although we don't need to wait 3 seconds for the following states
+				// We will dispaly 20% and 80% progress for 1.5 seconds each
+				// for the sake of user experience.
 				progress20: {
 					entry: assign( {
 						loader: {
