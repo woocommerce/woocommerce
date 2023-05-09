@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * External dependencies
  */
@@ -21,7 +20,6 @@ import { SelectTreeMenu } from './select-tree-menu';
 interface SelectTreeProps extends TreeControlProps {
 	id: string;
 	selected?: Item | Item[];
-	getSelectedItemProps?: any;
 	treeRef?: React.ForwardedRef< HTMLOListElement >;
 	suffix?: JSX.Element | null;
 	isLoading?: boolean;
@@ -31,7 +29,6 @@ interface SelectTreeProps extends TreeControlProps {
 
 export const SelectTree = function SelectTree( {
 	items,
-	getSelectedItemProps,
 	treeRef: ref,
 	suffix = <SuffixIcon icon={ search } />,
 	placeholder,
@@ -65,7 +62,14 @@ export const SelectTree = function SelectTree( {
 		 )?.focus();
 	};
 
-	const inputProps: any = {
+	const isInsideDropdown = (
+		event: React.FocusEvent< HTMLInputElement, Element >
+	) =>
+		document
+			.querySelector( '.' + menuInstanceId )
+			?.contains( event.relatedTarget );
+
+	const inputProps: React.InputHTMLAttributes< HTMLInputElement > = {
 		className: 'woocommerce-experimental-select-control__input',
 		id: `${ props.id }-input`,
 		'aria-autocomplete': 'list',
@@ -77,20 +81,14 @@ export const SelectTree = function SelectTree( {
 			}
 			setIsFocused( true );
 		},
-		onBlur: ( event: any ) => {
-			// if blurring to an element inside the dropdown, don't close it
-			if (
-				isOpen &&
-				! document
-					.querySelector( '.' + menuInstanceId )
-					?.contains( event.relatedTarget )
-			) {
+		onBlur: ( event ) => {
+			if ( isOpen && ! isInsideDropdown( event ) ) {
 				setIsOpen( false );
 				recalculateInputValue();
 			}
 			setIsFocused( false );
 		},
-		onKeyDown: ( event: any ) => {
+		onKeyDown: ( event ) => {
 			setIsOpen( true );
 			if ( event.key === 'ArrowDown' ) {
 				event.preventDefault();
@@ -106,7 +104,7 @@ export const SelectTree = function SelectTree( {
 				recalculateInputValue();
 			}
 		},
-		onChange: ( event: any ) =>
+		onChange: ( event ) =>
 			onInputChange && onInputChange( event.target.value ),
 		placeholder,
 	};
@@ -142,12 +140,7 @@ export const SelectTree = function SelectTree( {
 							'aria-labelledby': `${ props.id }-label`,
 							'aria-owns': `${ props.id }-menu`,
 						} }
-						inputProps={ {
-							...inputProps,
-							onChange: ( event: any ) =>
-								onInputChange &&
-								onInputChange( event.target.value ),
-						} }
+						inputProps={ inputProps }
 						suffix={ suffix }
 					>
 						<SelectedItems
@@ -169,7 +162,7 @@ export const SelectTree = function SelectTree( {
 				) : (
 					<TextControl
 						{ ...inputProps }
-						value={ props.createValue }
+						value={ props.createValue || '' }
 						onChange={ ( value ) => {
 							if ( onInputChange ) onInputChange( value );
 							const item = items.find(
