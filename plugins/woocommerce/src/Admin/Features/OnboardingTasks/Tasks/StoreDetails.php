@@ -74,7 +74,6 @@ class StoreDetails extends Task {
 		$locale = $country_locale[$country] ?? array();
 
 		$hide_postcode  = $locale['postcode']['hidden'] ?? false;
-
 		// If postcode is hidden, just check that the store address and city are set.
 		if ( $hide_postcode ) {
 			return get_option( 'woocommerce_store_address', '' ) !== '' && get_option( 'woocommerce_store_city', '' ) !== '';
