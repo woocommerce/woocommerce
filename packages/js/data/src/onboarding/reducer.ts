@@ -35,7 +35,7 @@ export const defaultState: OnboardingState = {
 	},
 	emailPrefill: '',
 	paymentMethods: [],
-	productTypes: [],
+	productTypes: {},
 	requesting: {},
 	taskLists: {},
 };

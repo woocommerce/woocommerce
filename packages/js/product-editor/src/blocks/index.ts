@@ -9,6 +9,8 @@ export { init as initSku } from './inventory-sku';
 export { init as initName } from './name';
 export { init as initPricing } from './pricing';
 export { init as initRadio } from './radio';
+export { init as initRegularPrice } from './regular-price';
+export { init as initSalePrice } from './sale-price';
 export { init as initScheduleSale } from './schedule-sale';
 export { init as initSection } from './section';
 export { init as initShippingDimensions } from './shipping-dimensions';
