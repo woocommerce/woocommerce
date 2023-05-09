@@ -75,7 +75,7 @@ export const BusinessLocation = ( {
 				<Button
 					className="woocommerce-profiler-go-to-mystore__button"
 					variant="primary"
-					disabled={ ! storeCountry }
+					disabled={ ! storeCountry.key }
 					onClick={ () => {
 						sendEvent( {
 							type: 'BUSINESS_LOCATION_COMPLETED',
