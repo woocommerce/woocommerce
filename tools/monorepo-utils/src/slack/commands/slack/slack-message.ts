@@ -20,47 +20,56 @@ export const slackMessageCommand = new Command( 'message' )
 		'<token>',
 		'Slack authentication token bearing required scopes.'
 	)
-	.argument( '<channel>', 'Slack channel to send the message to.' )
 	.argument( '<text>', 'Text based message to send to the slack channel.' )
+	.argument(
+		'<channels...>',
+		'Slack channels to send the message to. Pass as many as you like.'
+	)
 	.option(
-		'--dontFail',
+		'--dont-fail',
 		'Do not fail the command if the message fails to send.'
 	)
-	.action( async ( token, channel, text, { dontFail } ) => {
-		Logger.startTask( 'Attempting to send message to slack' );
+	.action( async ( token, text, channels, { dontFail } ) => {
+		Logger.startTask(
+			`Attempting to send message to Slack for channels: ${ channels.join(
+				','
+			) }`
+		);
 
 		const shouldFail = ! dontFail;
 
-		// Define the request options
-		const options = {
-			hostname: 'slack.com',
-			path: '/api/chat.postMessage',
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${ token }`,
-			},
-		};
+		for ( const channel of channels ) {
+			// Define the request options
+			const options = {
+				hostname: 'slack.com',
+				path: '/api/chat.postMessage',
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${ token }`,
+				},
+			};
 
-		try {
-			const { statusCode, body } = await requestAsync(
-				options,
-				JSON.stringify( { channel, text } )
-			);
-
-			Logger.endTask();
-
-			const response = JSON.parse( body ) as SlackResponse;
-
-			if ( ! response.ok || statusCode !== 200 ) {
-				Logger.error(
-					`Slack API returned an error: ${ response?.error }, message failed to send.`,
-					shouldFail
+			try {
+				const { statusCode, body } = await requestAsync(
+					options,
+					JSON.stringify( { channel, text } )
 				);
-			} else {
-				Logger.notice( 'Slack message sent successfully' );
+
+				Logger.endTask();
+
+				const response = JSON.parse( body ) as SlackResponse;
+
+				if ( ! response.ok || statusCode !== 200 ) {
+					Logger.error(
+						`Slack API returned an error: ${ response?.error }, message failed to send.`,
+						shouldFail
+					);
+				} else {
+					Logger.notice( 'Slack message sent successfully' );
+				}
+			} catch ( e: unknown ) {
+				Logger.error( e, shouldFail );
 			}
-		} catch ( e: unknown ) {
-			Logger.error( e, shouldFail );
 		}
 	} );
