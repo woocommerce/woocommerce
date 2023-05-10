@@ -78,7 +78,6 @@
 				"@wordpress/eslint-plugin",
 				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/babel-preset-default",
-				"@wordpress/env",
 				"@wordpress/stylelint-config",
 				"@wordpress/prettier-config",
 				"@wordpress/scripts",
@@ -115,6 +114,15 @@
 				"@woocommerce/experimental"
 			],
 			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/env"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^7.0.0"
 		},
 		{
 			"dependencies": [
