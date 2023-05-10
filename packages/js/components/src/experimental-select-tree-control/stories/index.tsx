@@ -187,6 +187,7 @@ export const SingleSelectTree: React.FC = () => {
 			onSelect={ ( selectedItems ) => {
 				setSelected( selectedItems as Item );
 			} }
+			onRemove={ () => setSelected( undefined ) }
 		/>
 	);
 };
