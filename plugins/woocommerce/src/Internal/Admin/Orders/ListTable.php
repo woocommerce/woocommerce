@@ -868,6 +868,16 @@ class ListTable extends WP_List_Table {
 		ob_start();
 		?>
 		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="<?php echo esc_attr( $this->_args['singular'] ); ?>" value="<?php echo esc_attr( $item->get_id() ); ?>" />
+
+		<div class="locked-indicator">
+			<span class="locked-indicator-icon" aria-hidden="true"></span>
+			<span class="screen-reader-text">
+				<?php
+				// translators: %s is an order ID.
+				echo esc_html( sprintf( __( 'Order %s is locked.', 'woocommerce' ), $item->get_id() ) );
+				?>
+			</span>
+		</div>
 		<?php
 		return ob_get_clean();
 	}

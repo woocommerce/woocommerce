@@ -665,4 +665,47 @@
 			);
 		}
 	} );
+
+	$( function() {
+		/**
+		 * Handles heartbeat integration of order locking when HPOS is enabled.
+		 */
+		var wc_order_lock = {
+			init: function() {
+				// Orders list table.
+				this.$list_table = $( '.woocommerce_page_wc-orders table.wc-orders-list-table' );
+				if ( 0 !== this.$list_table.length ) {
+					$( document ).on( 'heartbeat-send', this.send_orders_in_list );
+					$( document ).on( 'heartbeat-tick', this.check_orders_in_list );
+				}
+			},
+
+			send_orders_in_list: function( e, data ) {
+				data['wc-check-locked-orders'] = wc_order_lock.$list_table.find( 'tr input[name="order"]' ).map(
+					function() { return this.value; }
+				).get();
+			},
+
+			check_orders_in_list: function( e, data ) {
+				var locked_orders = data['wc-check-locked-orders'] || {};
+
+				wc_order_lock.$list_table.find( 'tr' ).each( function( i, tr ) {
+					var $tr      = $( tr );
+					var order_id = $tr.find( 'input[name="order"]' ).val();
+
+					if ( locked_orders[ order_id ] ) {
+						if ( ! $tr.hasClass( 'wp-locked' ) ) {
+							$tr.find( '.check-column checkbox' ).prop( 'checked', false );
+							$tr.addClass( 'wp-locked' );
+						}
+					} else {
+						$tr.removeClass( 'wp-locked' ).find( '.locked-info span' ).empty();
+					}
+				} );
+			}
+		};
+
+		wc_order_lock.init();
+	} );
+
 } )( jQuery, woocommerce_admin );
