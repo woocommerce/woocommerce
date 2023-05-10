@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make Admin\API\Reports\Customers\DataStore::anonymize_customer accept an order instance as a parameter to ensure compatibility with the `woocommerce_privacy_remove_order_personal_data` hook. 
