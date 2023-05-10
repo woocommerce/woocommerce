@@ -10,6 +10,7 @@ export interface BlockAttributes {
 	className?: string | undefined;
 	textAlign?: string | undefined;
 	isDescendentOfQueryLoop?: boolean | undefined;
+	isDescendentOfSingleProductBlock?: boolean | undefined;
 	width?: number | undefined;
 }
 

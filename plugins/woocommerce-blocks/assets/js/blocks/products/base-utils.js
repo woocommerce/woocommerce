@@ -6,7 +6,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { BLOCK_NAME as PRODUCT_BUTTON_BLOCK_NAME } from '../../atomic/blocks/product-elements/button/constants';
+import addToCartButtonMetadata from '../../atomic/blocks/product-elements/button/block.json';
 import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
 /**
@@ -45,7 +45,7 @@ export const getProductLayoutConfig = ( innerBlocks ) => {
 				 * This is needed to support "Width Setting" controls available in
 				 * "woocommerce/product-button" block.
 				 */
-				...( block.name === PRODUCT_BUTTON_BLOCK_NAME && {
+				...( block.name === addToCartButtonMetadata.name && {
 					className: classnames( block.attributes.className, {
 						[ `has-custom-width wp-block-button__width-${ block.attributes?.width }` ]:
 							block.attributes?.width,
