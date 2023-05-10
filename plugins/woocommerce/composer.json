@@ -20,7 +20,7 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.5.4",
+		"woocommerce/action-scheduler": "3.6.0",
 		"woocommerce/woocommerce-blocks": "10.0.4"
 	},
 	"require-dev": {
