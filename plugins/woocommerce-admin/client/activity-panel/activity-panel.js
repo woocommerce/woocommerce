@@ -28,7 +28,7 @@ import {
  */
 import './style.scss';
 import { IconFlag } from './icon-flag';
-import { hasUnreadNotes as hasUnreadNotesFn } from './unread-indicators';
+import { hasUnreadNotes as checkIfHasUnreadNotes } from './unread-indicators';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
@@ -121,7 +121,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		).length;
 	}
 
-	function hasAbbreviatedNotificationsFn(
+	function checkIfHasAbbreviatedNotifications(
 		select,
 		setupTaskListHidden,
 		thingsToDoNextCount
@@ -173,8 +173,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const thingsToDoCount = getThingsToDoNextCount( extendedTaskList );
 
 		return {
-			hasUnreadNotes: hasUnreadNotesFn( select ),
-			hasAbbreviatedNotifications: hasAbbreviatedNotificationsFn(
+			hasUnreadNotes: checkIfHasUnreadNotes( select ),
+			hasAbbreviatedNotifications: checkIfHasAbbreviatedNotifications(
 				select,
 				isSetupTaskListHidden,
 				thingsToDoCount
