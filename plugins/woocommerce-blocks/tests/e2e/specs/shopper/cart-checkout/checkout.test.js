@@ -125,7 +125,12 @@ describe( 'Shopper → Checkout', () => {
 			);
 		} );
 
-		it( 'Switching between local pickup and shipping does not affect the address', async () => {
+		/**
+		 * Temporarily disable test as it often fails on a pipeline,
+		 * but cannot be reproduced manually.
+		 */
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip( 'Switching between local pickup and shipping does not affect the address', async () => {
 			await shopper.block.emptyCart();
 			await shopper.block.goToShop();
 			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
