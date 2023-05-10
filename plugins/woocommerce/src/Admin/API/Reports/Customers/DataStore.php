@@ -886,7 +886,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		if ( ! is_object( $order ) ) {
 			$order = wc_get_order( absint( $order ) );
-		}		
+		}
 
 		$customer_id = $wpdb->get_var(
 			$wpdb->prepare( "SELECT customer_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order->get_id() )
