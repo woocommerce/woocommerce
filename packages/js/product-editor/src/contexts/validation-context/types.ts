@@ -4,7 +4,6 @@ export type Validator< T > = ( initialValue?: T ) => ValidatorResponse;
 
 export type ValidationContextProps< T > = {
 	errors: ValidationErrors;
-	validators: Record< string, Validator< T > >;
 	registerValidator( name: string, validator: Validator< T > ): void;
 	validateField( name: string ): ValidatorResponse;
 	validateAll(): Promise< ValidationErrors >;
