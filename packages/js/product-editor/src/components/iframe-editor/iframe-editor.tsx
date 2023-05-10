@@ -19,9 +19,6 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	store as blockEditorStore,
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-__unstableEditorStyles as EditorStyles,
 } from '@wordpress/block-editor';
 
 /**
@@ -108,7 +105,10 @@ export function IframeEditor( {
 						// @ts-ignore This accepts numbers or strings.
 						height={ sizes.height ?? '100%' }
 					>
-						<EditorCanvas enableResizing={ true } settings={ settings }>
+						<EditorCanvas
+							enableResizing={ true }
+							settings={ settings }
+						>
 							{ resizeObserver }
 							<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
 						</EditorCanvas>
