@@ -77,23 +77,26 @@ export function Edit() {
 		}
 	);
 
-	const { error: nameValidationError, validate: validateName } =
-		useValidation< Product >(
-			'name',
-			async function nameValidator() {
-				if ( ! name || name === AUTO_DRAFT_NAME ) {
-					return __( 'This field is required.', 'woocommerce' );
-				}
+	const {
+		ref: nameRef,
+		error: nameValidationError,
+		validate: validateName,
+	} = useValidation< Product >(
+		'name',
+		async function nameValidator() {
+			if ( ! name || name === AUTO_DRAFT_NAME ) {
+				return __( 'This field is required.', 'woocommerce' );
+			}
 
-				if ( name.length > 120 ) {
-					return __(
-						'Please enter a product name shorter than 120 characters.',
-						'woocommerce'
-					);
-				}
-			},
-			[ name ]
-		);
+			if ( name.length > 120 ) {
+				return __(
+					'Please enter a product name shorter than 120 characters.',
+					'woocommerce'
+				);
+			}
+		},
+		[ name ]
+	);
 
 	const setSkuIfEmpty = () => {
 		if ( sku || nameValidationError ) {
@@ -155,6 +158,7 @@ export function Edit() {
 				>
 					<InputControl
 						id={ nameControlId }
+						ref={ nameRef }
 						name="name"
 						placeholder={ __(
 							'e.g. 12 oz Coffee Mug',
