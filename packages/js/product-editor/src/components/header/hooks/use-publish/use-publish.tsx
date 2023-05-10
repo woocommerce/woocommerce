@@ -39,14 +39,13 @@ export function usePublish( {
 	const { isSaving } = useSelect(
 		( select ) => {
 			const { isSavingEntityRecord } = select( 'core' );
-			const isSaving = isSavingEntityRecord< boolean >(
-				'postType',
-				'product',
-				productId
-			);
 
 			return {
-				isSaving,
+				isSaving: isSavingEntityRecord< boolean >(
+					'postType',
+					'product',
+					productId
+				),
 			};
 		},
 		[ productId ]

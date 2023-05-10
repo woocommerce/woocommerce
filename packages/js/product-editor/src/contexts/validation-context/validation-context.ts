@@ -8,10 +8,11 @@ import { createContext } from '@wordpress/element';
  */
 import { ValidationContextProps } from './types';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const ValidationContext = createContext< ValidationContextProps< any > >(
 	{
 		errors: {},
-		registerValidator: () => {},
+		registerValidator: () => () => {},
 		validateField: () => Promise.resolve( undefined ),
 		validateAll: () => Promise.resolve( {} ),
 	}

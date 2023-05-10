@@ -4,7 +4,10 @@ export type Validator< T > = ( initialValue?: T ) => ValidatorResponse;
 
 export type ValidationContextProps< T > = {
 	errors: ValidationErrors;
-	registerValidator( name: string, validator: Validator< T > ): void;
+	registerValidator(
+		validatorId: string,
+		validator: Validator< T >
+	): React.Ref< HTMLElement >;
 	validateField( name: string ): ValidatorResponse;
 	validateAll(): Promise< ValidationErrors >;
 };
@@ -18,6 +21,7 @@ export type ValidationErrors = Record< string, ValidationError >;
 
 export type ValidatorRegistration = {
 	name: string;
+	ref: React.Ref< HTMLElement >;
 	error?: ValidationError;
 	validate(): ValidatorResponse;
 };

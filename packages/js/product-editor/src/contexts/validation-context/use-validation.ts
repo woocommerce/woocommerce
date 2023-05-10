@@ -11,22 +11,25 @@ import { Validator } from './types';
 import { ValidationContext } from './validation-context';
 
 export function useValidation< T >(
-	name: string,
+	validatorId: string,
 	validator: Validator< T >,
 	deps: DependencyList = []
 ) {
 	const context = useContext( ValidationContext );
 	const [ isValidating, setIsValidating ] = useState( false );
 
-	useMemo( () => context.registerValidator( name, validator ), deps );
+	const ref = useMemo(
+		() => context.registerValidator( validatorId, validator ),
+		[ validatorId, ...deps ]
+	);
 
 	return {
-		name,
-		error: context.errors[ name ],
+		ref,
+		error: context.errors[ validatorId ],
 		isValidating,
 		async validate() {
 			setIsValidating( true );
-			return context.validateField( name ).finally( () => {
+			return context.validateField( validatorId ).finally( () => {
 				setIsValidating( false );
 			} );
 		},

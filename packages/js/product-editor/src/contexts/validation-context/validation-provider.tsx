@@ -14,34 +14,40 @@ import {
 	ValidatorResponse,
 } from './types';
 import { ValidationContext } from './validation-context';
+import { findFirstInvalidElement } from './helpers';
 
 export function ValidationProvider< T >( {
 	initialValue,
 	children,
 }: PropsWithChildren< ValidationProviderProps< T > > ) {
 	const validatorsRef = useRef< Record< string, Validator< T > > >( {} );
+	const fieldRefs = useRef< Record< string, HTMLElement > >( {} );
 	const [ errors, setErrors ] = useState< ValidationErrors >( {} );
 
 	function registerValidator(
-		name: string,
+		validatorId: string,
 		validator: Validator< T >
-	): void {
+	): React.Ref< HTMLElement > {
 		validatorsRef.current = {
 			...validatorsRef.current,
-			[ name ]: validator,
+			[ validatorId ]: validator,
+		};
+
+		return ( element: HTMLElement ) => {
+			fieldRefs.current[ validatorId ] = element;
 		};
 	}
 
-	async function validateField( name: string ): ValidatorResponse {
+	async function validateField( validatorId: string ): ValidatorResponse {
 		const validators = validatorsRef.current;
-		if ( name in validators ) {
-			const validator = validators[ name ];
+		if ( validatorId in validators ) {
+			const validator = validators[ validatorId ];
 			const result = validator( initialValue );
 
 			return result.then( ( error ) => {
 				setErrors( ( currentErrors ) => ( {
 					...currentErrors,
-					[ name ]: error,
+					[ validatorId ]: error,
 				} ) );
 				return error;
 			} );
@@ -54,11 +60,18 @@ export function ValidationProvider< T >( {
 		const newErrors: ValidationErrors = {};
 		const validators = validatorsRef.current;
 
-		for ( let name in validators ) {
-			newErrors[ name ] = await validateField( name );
+		for ( const validatorId in validators ) {
+			newErrors[ validatorId ] = await validateField( validatorId );
 		}
 
 		setErrors( newErrors );
+
+		const firstElementWithError = findFirstInvalidElement(
+			fieldRefs.current,
+			newErrors
+		);
+
+		firstElementWithError?.focus();
 
 		return newErrors;
 	}
