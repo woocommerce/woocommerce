@@ -28,7 +28,7 @@ export class Logger {
 	static error( err: unknown, failOnErr = true ) {
 		if ( Logger.loggingLevel >= LOGGING_LEVELS.error ) {
 			if ( err instanceof Error ) {
-				error( chalk.red( err.message ) );
+				error( chalk.red( `${ err.message }\n${ err.stack }` ) );
 			} else if ( typeof err === 'string' ) {
 				error( chalk.red( err ) );
 			} else {
