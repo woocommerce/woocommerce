@@ -6,7 +6,7 @@
  * @since 3.5.0
  */
 
-use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 
 /**
  * Reports Orders REST API Test Class
@@ -184,8 +184,8 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$bad_args = array(
 			'not an array!',                   // Not an array.
 			array( 1, 2, 3 ),                  // Not a tuple.
-			array( -1, $small_term->term_id ), // Invaid attribute ID.
-			array( $size_attr_id, -1 ),        // Invaid term ID.
+			array( -1, $small_term->term_id ), // Invalid attribute ID.
+			array( $size_attr_id, -1 ),        // Invalid term ID.
 		);
 
 		foreach ( $bad_args as $bad_arg ) {
@@ -414,6 +414,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 	 * See: https://github.com/woocommerce/woocommerce-admin/issues/5803#issuecomment-738403405.
 	 */
 	public function test_order_price_formatting_with_different_base_currency() {
+		update_option( 'woocommerce_date_type', 'date_created' );
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 

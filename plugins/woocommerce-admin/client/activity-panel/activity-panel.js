@@ -2,16 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	lazy,
-	useState,
-	useContext,
-	useMemo,
-	useEffect,
-} from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { lazy, useState, useEffect } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { H, Section } from '@woocommerce/components';
 import {
 	ONBOARDING_STORE_NAME,
@@ -23,6 +18,10 @@ import {
 import { getHistory, addHistoryListener } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSlot } from '@woocommerce/experimental';
+import {
+	LayoutContextProvider,
+	useExtendLayout,
+} from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -43,9 +42,11 @@ import {
 import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils';
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { getUrlParams } from '~/utils';
 import { useActiveSetupTasklist } from '~/tasks';
-import { LayoutContext } from '~/layout';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
+import { FeedbackIcon } from '~/products/images/feedback-icon';
+import { ProductFeedbackTour } from '~/guided-tours/add-product-feedback-tour';
 
 const HelpPanel = lazy( () =>
 	import( /* webpackChunkName: "activity-panels-help" */ './panels/help' )
@@ -72,11 +73,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const hasExtendedNotifications = Boolean( fills?.length );
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
-	const layoutContext = useContext( LayoutContext );
-	const updatedLayoutContext = useMemo(
-		() => layoutContext.getExtendedContext( 'activity-panel' ),
-		[ layoutContext ]
-	);
 
 	useEffect( () => {
 		return addHistoryListener( () => {
@@ -84,6 +80,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			clearPanel();
 		} );
 	}, [] );
+
+	const updatedLayoutContext = useExtendLayout( 'activity-panel' );
 
 	const getPreviewSiteBtnTrackData = ( select, getOption ) => {
 		let trackData = {};
@@ -202,6 +200,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			),
 		};
 	} );
+
+	const { showCesModal } = useDispatch( CES_STORE_KEY );
+
 	const { currentUserCan } = useUser();
 
 	const togglePanel = ( { name: tabName }, isTabOpen ) => {
@@ -237,10 +238,20 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		return query.page === 'wc-admin' && ! query.path;
 	};
 
-	const isProductPage = () => {
+	const isProductScreen = () => {
 		const [ firstPathSegment ] = getSegmentsFromPath( query.path );
 		return (
 			firstPathSegment === 'add-product' || firstPathSegment === 'product'
+		);
+	};
+
+	const isAddProductPage = () => {
+		const urlParams = getUrlParams( window.location.search );
+
+		return (
+			isEmbedded &&
+			/post-new\.php$/.test( window.location.pathname ) &&
+			urlParams?.post_type === 'product'
 		);
 	};
 
@@ -264,7 +275,49 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			visible:
 				( isEmbedded || ! isHomescreen() ) &&
 				! isPerformingSetupTask() &&
-				! isProductPage(),
+				! isProductScreen(),
+		};
+
+		const feedback = {
+			name: 'feedback',
+			title: __( 'Feedback', 'woocommerce' ),
+			icon: <FeedbackIcon />,
+			onClick: () => {
+				setCurrentTab( 'feedback' );
+				setIsPanelOpen( true );
+				showCesModal(
+					{
+						action: 'product_feedback',
+						title: __(
+							"How's your experience with the product editor?",
+							'woocommerce'
+						),
+						firstQuestion: __(
+							'The product editing screen is easy to use',
+							'woocommerce'
+						),
+						secondQuestion: __(
+							"The product editing screen's functionality meets my needs",
+							'woocommerce'
+						),
+					},
+					{
+						onRecordScore: () => {
+							setCurrentTab( '' );
+							setIsPanelOpen( false );
+						},
+						onCloseModal: () => {
+							setCurrentTab( '' );
+							setIsPanelOpen( false );
+						},
+					},
+					{
+						type: 'snackbar',
+						icon: <span>🌟</span>,
+					}
+				);
+			},
+			visible: isAddProductPage(),
 		};
 
 		const setup = {
@@ -284,7 +337,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				! setupTaskListComplete &&
 				! setupTaskListHidden &&
 				! isHomescreen() &&
-				! isProductPage(),
+				! isProductScreen(),
 		};
 
 		const help = {
@@ -337,6 +390,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		return [
 			activity,
+			feedback,
 			setup,
 			previewSite,
 			previewStore,
@@ -397,7 +451,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const showHelpHighlightTooltip = shouldShowHelpTooltip();
 
 	return (
-		<LayoutContext.Provider value={ updatedLayoutContext }>
+		<LayoutContextProvider value={ updatedLayoutContext }>
 			<div>
 				<H id={ headerId } className="screen-reader-text">
 					{ __( 'Store Activity', 'woocommerce' ) }
@@ -431,6 +485,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 						clearPanel={ () => clearPanel() }
 					/>
 				</Section>
+				{ isAddProductPage() && (
+					<ProductFeedbackTour currentTab={ currentTab } />
+				) }
 				{ showHelpHighlightTooltip ? (
 					<HighlightTooltip
 						delay={ 1000 }
@@ -447,7 +504,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 					/>
 				) : null }
 			</div>
-		</LayoutContext.Provider>
+		</LayoutContextProvider>
 	);
 };
 

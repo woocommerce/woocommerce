@@ -1,28 +1,28 @@
 name: Cherry Pick Tool
 on:
-  issues:
-    types: [milestoned, labeled]
-  pull_request:
-    types: [closed]
-  workflow_dispatch:
-    inputs:
-      release_branch:
-        description: Provide the release branch you want to cherry pick into. Example release/6.9
-        default: ''
-        required: true
-      pull_requests:
-        description: The pull request number.
-        default: ''
-        required: true
-      skipSlackPing:
-        description: "Skip Slack Ping: If true, the Slack ping will be skipped (useful for testing)"
-        type: boolean
-        required: false
-        default: false
-      slackChannelOverride:
-        description: "Slack Channel Override: The channel ID to send the Slack ping about the code freeze violation"
-        required: false
-        default: ''
+    issues:
+        types: [milestoned, labeled]
+    pull_request:
+        types: [closed]
+    workflow_dispatch:
+        inputs:
+            release_branch:
+                description: Provide the release branch you want to cherry pick into. Example release/6.9
+                default: ''
+                required: true
+            pull_requests:
+                description: The pull request number.
+                default: ''
+                required: true
+            skipSlackPing:
+                description: 'Skip Slack Ping: If true, the Slack ping will be skipped (useful for testing)'
+                type: boolean
+                required: false
+                default: false
+            slackChannelOverride:
+                description: 'Slack Channel Override: The channel ID to send the Slack ping about the code freeze violation'
+                required: false
+                default: ''
 
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
@@ -30,321 +30,328 @@ env:
     GIT_AUTHOR_NAME: 'WooCommerce Bot'
     GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
 
+permissions: {}
+
 jobs:
-  verify:
-    name: Verify
-    runs-on: ubuntu-20.04
-    outputs:
-      run: ${{ steps.check.outputs.run }}
-    steps:
-      - name: check
-        id: check
-        uses: actions/github-script@v6
-        with:
-          script: |
-            let run = false;
+    verify:
+        name: Verify
+        runs-on: ubuntu-20.04
+        outputs:
+            run: ${{ steps.check.outputs.run }}
+        steps:
+            - name: check
+              id: check
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      let run = false;
 
-            const isManualTrigger = context.payload.inputs && context.payload.inputs.release_branch && context.payload.inputs.release_branch != null;
- 
-            const isMergedMilestonedIssue = context.payload.issue && context.payload.issue.pull_request != null && context.payload.issue.pull_request.merged_at != null && context.payload.issue.milestone != null;
- 
-            const isMergedMilestonedPR = context.payload.pull_request && context.payload.pull_request != null && context.payload.pull_request.merged == true && context.payload.pull_request.milestone != null;
+                      const isManualTrigger = context.payload.inputs && context.payload.inputs.release_branch && context.payload.inputs.release_branch != null;
 
-            const isBot = context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' );
+                      const isMergedMilestonedIssue = context.payload.issue && context.payload.issue.pull_request != null && context.payload.issue.pull_request.merged_at != null && context.payload.issue.milestone != null;
 
-            if ( !isBot && ( isManualTrigger || isMergedMilestonedIssue || isMergedMilestonedPR ) ) {
-              console.log( "::set-output name=run::true" );
-            } else {
-              console.log( "::set-output name=run::false" );
-            } 
-  prep:
-    name: Prep inputs
-    runs-on: ubuntu-20.04
-    needs: verify
-    if: needs.verify.outputs.run == 'true'
-    outputs:
-      release: ${{ steps.prep-inputs.outputs.release }}
-      pr: ${{ steps.prep-inputs.outputs.pr }}
-      version: ${{ steps.prep-inputs.outputs.version }}
-    steps:
-      - name: Prep inputs
-        id: prep-inputs
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const event = ${{ toJSON( github.event ) }}
+                      const isMergedMilestonedPR = context.payload.pull_request && context.payload.pull_request != null && context.payload.pull_request.merged == true && context.payload.pull_request.milestone != null;
 
-            // Means this workflow was triggered manually.
-            if ( event.inputs && event.inputs.release_branch ) {
-              const releaseBranch = '${{ inputs.release_branch }}'
-              const version = releaseBranch.replace( 'release/', '' );
+                      const isBot = context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' );
 
-              console.log( "::set-output name=version::" + version )
-              console.log( "::set-output name=release::${{ inputs.release_branch }}" )
-            } else if ( event.action === 'milestoned' ) {
-              const version = '${{ github.event.issue.milestone.title }}'
-              const release = version.substring( 0, 3 )
+                      if ( !isBot && ( isManualTrigger || isMergedMilestonedIssue || isMergedMilestonedPR ) ) {
+                        core.setOutput( 'run', 'true' );
+                      } else {
+                        core.setOutput( 'run', 'false' );
+                      }
+    prep:
+        name: Prep inputs
+        runs-on: ubuntu-20.04
+        needs: verify
+        if: needs.verify.outputs.run == 'true'
+        outputs:
+            release: ${{ steps.prep-inputs.outputs.release }}
+            pr: ${{ steps.prep-inputs.outputs.pr }}
+            version: ${{ steps.prep-inputs.outputs.version }}
+        steps:
+            - name: Prep inputs
+              id: prep-inputs
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const event = ${{ toJSON( github.event ) }}
 
-              console.log( "::set-output name=version::" + version )
-              console.log( "::set-output name=release::release/" + release )
-            } else {
-              const version = '${{ github.event.pull_request.milestone.title }}'
-              const release = version.substring( 0, 3 )
+                      // Means this workflow was triggered manually.
+                      if ( event.inputs && event.inputs.release_branch ) {
+                        const releaseBranch = '${{ inputs.release_branch }}'
+                        const version = releaseBranch.replace( 'release/', '' )
 
-              console.log( "::set-output name=version::" + version )
-              console.log( "::set-output name=release::release/" + release )
-            }
+                        core.setOutput( 'version', version )
+                        core.setOutput( 'release', releaseBranch )
+                      } else if ( event.action === 'milestoned' ) {
+                        const version = '${{ github.event.issue.milestone.title }}'
+                        const release = version.substring( 0, 3 )
 
-            // Means this workflow was triggered manually.
-            if ( event.inputs && event.inputs.pull_requests ) {
-              console.log( "::set-output name=pr::${{ inputs.pull_requests }}" )
-            } else if ( event.action === 'milestoned' ) {
-              console.log( "::set-output name=pr::${{ github.event.issue.number }}" )
-            } else {
-              console.log( "::set-output name=pr::${{ github.event.pull_request.number }}" )
-            }
-  check-release-branch-exists:
-    name: Check for existence of release branch
-    runs-on: ubuntu-20.04
-    needs: prep
-    steps:
-      - name: Check for release branch
-        id: release-breanch-check
-        uses: actions/github-script@v6
-        with:
-          script: |
-            // This will throw an error for non-200 responses, which prevents subsequent jobs from completing, as desired.
-            await github.request( 'GET /repos/{owner}/{repo}/branches/{branch}', {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              branch: '${{ needs.prep.outputs.release }}',
-            } );
-  cherry-pick-run:
-    name: Run cherry pick tool
-    runs-on: ubuntu-20.04
-    needs: [ prep, check-release-branch-exists ]
-    if: success()
-    steps:
-      - name: Checkout release branch
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+                        core.setOutput( 'version', version )
+                        core.setOutput( 'release', `release/${release}` )
+                      } else {
+                        const version = '${{ github.event.pull_request.milestone.title }}'
+                        const release = version.substring( 0, 3 )
 
-      - name: Git fetch the release branch
-        run: git fetch origin ${{ needs.prep.outputs.release }}
+                        core.setOutput( 'version', version )
+                        core.setOutput( 'release', `release/${release}` )
+                      }
 
-      - name: Checkout release branch
-        run: git checkout ${{ needs.prep.outputs.release }}
+                      // Means this workflow was triggered manually.
+                      if ( event.inputs && event.inputs.pull_requests ) {
+                        core.setOutput( 'pr', '${{ inputs.pull_requests }}' )                        
+                      } else if ( event.action === 'milestoned' ) {
+                        core.setOutput( 'pr', '${{ github.event.issue.number }}' )
+                      } else {
+                        core.setOutput( 'pr', '${{ github.event.pull_request.number }}' )
+                      }
+    check-release-branch-exists:
+        name: Check for existence of release branch
+        runs-on: ubuntu-20.04
+        needs: prep
+        steps:
+            - name: Check for release branch
+              id: release-breanch-check
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      // This will throw an error for non-200 responses, which prevents subsequent jobs from completing, as desired.
+                      await github.request( 'GET /repos/{owner}/{repo}/branches/{branch}', {
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        branch: '${{ needs.prep.outputs.release }}',
+                      } );
+    cherry-pick-run:
+        name: Run cherry pick tool
+        runs-on: ubuntu-20.04
+        permissions:
+          actions: write
+          contents: write
+          pull-requests: write
+        needs: [prep, check-release-branch-exists]
+        if: success()
+        steps:
+            - name: Checkout release branch
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
 
-      - name: Create a cherry pick branch based on release branch
-        run: git checkout -b cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}
+            - name: Git fetch the release branch
+              run: git fetch origin ${{ needs.prep.outputs.release }}
 
-      - name: Get commit sha from PR
-        id: commit-sha
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const pr = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: '${{ needs.prep.outputs.pr }}'
-            })
+            - name: Checkout release branch
+              run: git checkout ${{ needs.prep.outputs.release }}
 
-            console.log( `::set-output name=sha::${ pr.data.merge_commit_sha }` )
+            - name: Create a cherry pick branch based on release branch
+              run: git checkout -b cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}
 
-      - name: Cherry pick
-        run: |
-          git cherry-pick ${{ steps.commit-sha.outputs.sha }}
+            - name: Get commit sha from PR
+              id: commit-sha
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const pr = await github.rest.pulls.get({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        pull_number: '${{ needs.prep.outputs.pr }}'
+                      })
 
-      - name: Generate changelog
-        id: changelog
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require( 'node:fs' );
+                      core.setOutput( 'sha', pr.data.merge_commit_sha )
 
-            const changelogsToBeDeleted = []
-            let changelogTxt = '';
+            - name: Cherry pick
+              run: |
+                  git cherry-pick ${{ steps.commit-sha.outputs.sha }} -m1
 
-            const commit = await github.rest.repos.getCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: '${{ steps.commit-sha.outputs.sha }}'
-            })
+            - name: Generate changelog
+              id: changelog
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const fs = require( 'node:fs' );
 
-            for ( const file of commit.data.files ) {
-              if ( file.filename.match( 'plugins/woocommerce/changelog/' ) ) {
-                if ( changelogsToBeDeleted.indexOf( file.filename ) === -1 ) {
-                  changelogsToBeDeleted.push( file.filename );
-                }
+                      const changelogsToBeDeleted = []
+                      let changelogTxt = '';
 
-                let changelogEntry     = '';
-                let changelogEntryType = '';
+                      const commit = await github.rest.repos.getCommit({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        ref: '${{ steps.commit-sha.outputs.sha }}'
+                      })
 
-                fs.readFile( './' + file.filename, 'utf-8', function( err, data ) {
-                  if ( err ) {
-                    console.error( err );
-                  }
+                      for ( const file of commit.data.files ) {
+                        if ( file.filename.match( 'plugins/woocommerce/changelog/' ) ) {
+                          if ( changelogsToBeDeleted.indexOf( file.filename ) === -1 ) {
+                            changelogsToBeDeleted.push( file.filename );
+                          }
 
-                  const changelogEntryArr  = data.split( "\n" );
-                  changelogEntryType = data.match( /Type: (.+)/i );
-                  changelogEntryType = changelogEntryType[ 1 ].charAt( 0 ).toUpperCase() + changelogEntryType[ 1 ].slice( 1 );
+                          let changelogEntry     = '';
+                          let changelogEntryType = '';
 
-                  changelogEntry = changelogEntryArr.filter( el => {
-                    return el !== null && typeof el !== 'undefined' && el !== '';
-                  } );
-                  changelogEntry = changelogEntry[ changelogEntry.length - 1 ];
+                          fs.readFile( './' + file.filename, 'utf-8', function( err, data ) {
+                            if ( err ) {
+                              console.error( err );
+                            }
 
-                  // Check if changelogEntry is what we want.
-                  if ( changelogEntry.length < 1 ) {
-                    changelogEntry = false;
-                  }
+                            const changelogEntryArr  = data.split( "\n" );
+                            changelogEntryType = data.match( /Type: (.+)/i );
+                            changelogEntryType = changelogEntryType[ 1 ].charAt( 0 ).toUpperCase() + changelogEntryType[ 1 ].slice( 1 );
 
-                  if ( changelogEntry.match( /significance:/i ) ) {
-                    changelogEntry = false;
-                  }
+                            changelogEntry = changelogEntryArr.filter( el => {
+                              return el !== null && typeof el !== 'undefined' && el !== '';
+                            } );
+                            changelogEntry = changelogEntry[ changelogEntry.length - 1 ];
 
-                  if ( changelogEntry.match( /type:/i ) ) {
-                    changelogEntry = false;
-                  }
+                            // Check if changelogEntry is what we want.
+                            if ( changelogEntry.length < 1 ) {
+                              changelogEntry = false;
+                            }
 
-                  if ( changelogEntry.match( /comment:/i ) ) {
-                    changelogEntry = false;
-                  }
-                } );
+                            if ( changelogEntry.match( /significance:/i ) ) {
+                              changelogEntry = false;
+                            }
 
-                if ( changelogEntry === false ) {
-                  continue;
-                }
+                            if ( changelogEntry.match( /type:/i ) ) {
+                              changelogEntry = false;
+                            }
 
-                fs.readFile( './plugins/woocommerce/readme.txt', 'utf-8', function( err, data ) {
-                  if ( err ) {
-                    console.error( err );
-                  }
+                            if ( changelogEntry.match( /comment:/i ) ) {
+                              changelogEntry = false;
+                            }
 
-                  changelogTxt = data.split( "\n" );
-                  let isInRange = false;
-                  let newChangelogTxt = [];
+                            if ( ! changelogEntry ) {
+                              return;
+                            }
 
-                  for ( const line of changelogTxt ) {
-                    if ( isInRange === false && line === '== Changelog ==' ) {
-                      isInRange = true;
-                    }
+                            fs.readFile( './plugins/woocommerce/readme.txt', 'utf-8', function( err, data ) {
+                              if ( err ) {
+                                console.error( err );
+                              }
 
-                    if ( isInRange === true && line.match( /\*\*WooCommerce Blocks/ ) ) {
-                      isInRange = false;
-                    }
+                              changelogTxt = data.split( "\n" );
+                              let isInRange = false;
+                              let newChangelogTxt = [];
 
-                    // Find the first match of the entry "Type".
-                    if ( isInRange && line.match( `\\* ${changelogEntryType} -` ) ) {
-                      newChangelogTxt.push( '* ' + changelogEntryType + ' - ' + changelogEntry + ` [#${{ needs.prep.outputs.pr }}](https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }})` );
-                      newChangelogTxt.push( line );
-                      isInRange = false;
-                      continue;
-                    }
+                              for ( const line of changelogTxt ) {
+                                if ( isInRange === false && line === '== Changelog ==' ) {
+                                  isInRange = true;
+                                }
 
-                    newChangelogTxt.push( line );
-                  }
+                                if ( isInRange === true && line.match( /\*\*WooCommerce Blocks/ ) ) {
+                                  isInRange = false;
+                                }
 
-                  fs.writeFile( './plugins/woocommerce/readme.txt', newChangelogTxt.join( "\n" ), err => {
-                    if ( err ) {
-                      console.error( `Unable to generate the changelog entry for PR ${{ needs.prep.outputs.pr }}` );
-                    }
-                  } );
-                } );
-              }
-            }
+                                // Find the first match of the entry "Type".
+                                if ( isInRange && line.match( `\\* ${changelogEntryType} -` ) ) {
+                                  newChangelogTxt.push( '* ' + changelogEntryType + ' - ' + changelogEntry + ` [#${{ needs.prep.outputs.pr }}](https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }})` );
+                                  newChangelogTxt.push( line );
+                                  isInRange = false;
+                                  continue;
+                                }
 
-            console.log( `::set-output name=changelogsToBeDeleted::${ changelogsToBeDeleted }` )
+                                newChangelogTxt.push( line );
+                              }
 
-      - name: Delete changelog files from cherry pick branch
-        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
-        run: git rm ${{ steps.changelog.outputs.changelogsToBeDeleted }}
+                              fs.writeFile( './plugins/woocommerce/readme.txt', newChangelogTxt.join( "\n" ), err => {
+                                if ( err ) {
+                                  console.error( `Unable to generate the changelog entry for PR ${{ needs.prep.outputs.pr }}` );
+                                }
+                              } );
+                            } );
+                          } );
+                        }
+                      }
 
-      - name: Commit changes for cherry pick
-        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
-        run: git commit --no-verify -am "Prep for cherry pick ${{ needs.prep.outputs.pr }}"
+                      core.setOutput( 'changelogsToBeDeleted', changelogsToBeDeleted.join( ' ' ) )
 
-      - name: Push cherry pick branch up
-        run: git push origin cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}
+            - name: Delete changelog files from cherry pick branch
+              if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
+              run: git rm ${{ steps.changelog.outputs.changelogsToBeDeleted }}
 
-      - name: Create the PR for cherry pick branch
-        id: cherry-pick-pr
-        uses: actions/github-script@v6
-        with:
-          script: |
-            let cherryPickPRBody = "This PR cherry-picks the following PRs into the release branch:\n";
+            - name: Commit changes for cherry pick
+              if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
+              run: git commit --no-verify -am "Prep for cherry pick ${{ needs.prep.outputs.pr }}"
 
-            cherryPickPRBody = `${cherryPickPRBody}` + `* #${{ needs.prep.outputs.pr }}` + "\n";
+            - name: Push cherry pick branch up
+              run: git push origin cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}
 
-            const pr = await github.rest.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: "Cherry pick ${{ needs.prep.outputs.pr }} into ${{ needs.prep.outputs.release }}",
-              head: "cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}",
-              base: "${{ needs.prep.outputs.release }}",
-              body: cherryPickPRBody
-            })
+            - name: Create the PR for cherry pick branch
+              id: cherry-pick-pr
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      let cherryPickPRBody = "This PR cherry-picks the following PRs into the release branch:\n";
 
-            console.log( `::set-output name=cherry-pick-pr::${ pr.data.html_url }` )
-      - name: Checkout trunk branch
-        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
-        run: git checkout trunk
+                      cherryPickPRBody = `${cherryPickPRBody}` + `* #${{ needs.prep.outputs.pr }}` + "\n";
 
-      - name: Create a branch based on trunk branch
-        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
-        run: git checkout -b delete-changelogs/${{ needs.prep.outputs.pr }}
+                      const pr = await github.rest.pulls.create({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        title: "Cherry pick ${{ needs.prep.outputs.pr }} into ${{ needs.prep.outputs.release }}",
+                        head: "cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}",
+                        base: "${{ needs.prep.outputs.release }}",
+                        body: cherryPickPRBody
+                      })
 
-      - name: Delete changelogs from trunk
-        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
-        run: git rm ${{ steps.changelog.outputs.changelogsToBeDeleted }}
+                      core.setOutput( 'cherry-pick-pr', pr.data.html_url )
 
-      - name: Commit changes for deletion
-        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
-        run: git commit --no-verify -am "Delete changelog files for ${{ needs.prep.outputs.pr }}"
+            - name: Checkout trunk branch
+              if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
+              run: git checkout trunk
 
-      - name: Push deletion branch up
-        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
-        run: git push origin delete-changelogs/${{ needs.prep.outputs.pr }}
+            - name: Create a branch based on trunk branch
+              if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
+              run: git checkout -b delete-changelogs/${{ needs.prep.outputs.pr }}
 
-      - name: Create the PR for deletion branch
-        id: deletion-pr
-        if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const pr = await github.rest.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: "Delete changelog files based on PR ${{ needs.prep.outputs.pr }}",
-              head: "delete-changelogs/${{ needs.prep.outputs.pr }}",
-              base: "trunk",
-              body: "Delete changelog files based on PR #${{ needs.prep.outputs.pr }}"
-            })
+            - name: Delete changelogs from trunk
+              if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
+              run: git rm ${{ steps.changelog.outputs.changelogsToBeDeleted }}
 
-            console.log( `::set-output name=deletion-pr::${ pr.data.html_url }` )
+            - name: Commit changes for deletion
+              if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
+              run: git commit --no-verify -am "Delete changelog files for ${{ needs.prep.outputs.pr }}"
 
-      - name: Notify Slack on failure
-        if: ${{ failure() && inputs.skipSlackPing != true }}
-        uses: archive/github-actions-slack@v2.0.0
-        with:
-          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-          slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
-          slack-text: |
-            :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
+            - name: Push deletion branch up
+              if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
+              run: git push origin delete-changelogs/${{ needs.prep.outputs.pr }}
 
-            An attempt to cherry pick PR(s) into outgoing release '${{ needs.prep.outputs.release }}' has failed. This could be due to a merge conflict or something else that requires manual attention. Please check: https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }}
+            - name: Create the PR for deletion branch
+              id: deletion-pr
+              if: steps.changelog.outputs.changelogsToBeDeleted != '' && steps.changelog.outputs.changelogsToBeDeleted != null
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const pr = await github.rest.pulls.create({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        title: "Delete changelog files based on PR ${{ needs.prep.outputs.pr }}",
+                        head: "delete-changelogs/${{ needs.prep.outputs.pr }}",
+                        base: "trunk",
+                        body: "Delete changelog files based on PR #${{ needs.prep.outputs.pr }}"
+                      })
 
-      - name: Notify Slack on success
-        if: ${{ success() && inputs.skipSlackPing != true }}
-        uses: archive/github-actions-slack@v2.0.0
-        with:
-          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-          slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
-          slack-text: |
-            :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
-            
-            Release lead please review:
+                      core.setOutput( 'deletion-pr', pr.data.html_url )
 
-            ${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}
-            ${{ steps.deletion-pr.outputs.deletion-pr }}
+            - name: Notify Slack on failure
+              if: ${{ failure() && inputs.skipSlackPing != true }}
+              uses: archive/github-actions-slack@v2.0.0
+              with:
+                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+                  slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
+                  slack-text: |
+                      :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
+
+                      An attempt to cherry pick PR(s) into outgoing release '${{ needs.prep.outputs.release }}' has failed. This could be due to a merge conflict or something else that requires manual attention. Please check: https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }}
+
+            - name: Notify Slack on success
+              if: ${{ success() && inputs.skipSlackPing != true }}
+              uses: archive/github-actions-slack@v2.0.0
+              with:
+                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+                  slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
+                  slack-text: |
+                      :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
+
+                      Release lead please review:
+
+                      ${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}
+                      ${{ steps.deletion-pr.outputs.deletion-pr }}

@@ -466,6 +466,15 @@ abstract class Task {
 	}
 
 	/**
+	 * Check if should record event when task is viewed
+	 *
+	 * @return bool
+	 */
+	public function get_record_view_event(): bool {
+		return false;
+	}
+
+	/**
 	 * Get the task as JSON.
 	 *
 	 * @return array
@@ -474,27 +483,28 @@ abstract class Task {
 		$this->possibly_track_completion();
 
 		return array(
-			'id'             => $this->get_id(),
-			'parentId'       => $this->get_parent_id(),
-			'title'          => $this->get_title(),
-			'canView'        => $this->can_view(),
-			'content'        => $this->get_content(),
-			'additionalInfo' => $this->get_additional_info(),
-			'actionLabel'    => $this->get_action_label(),
-			'actionUrl'      => $this->get_action_url(),
-			'isComplete'     => $this->is_complete(),
-			'time'           => $this->get_time(),
-			'level'          => 3,
-			'isActioned'     => $this->is_actioned(),
-			'isDismissed'    => $this->is_dismissed(),
-			'isDismissable'  => $this->is_dismissable(),
-			'isSnoozed'      => false,
-			'isSnoozeable'   => false,
-			'isVisited'      => $this->is_visited(),
-			'isDisabled'     => false,
-			'snoozedUntil'   => null,
-			'additionalData' => self::convert_object_to_camelcase( $this->get_additional_data() ),
-			'eventPrefix'    => $this->prefix_event( '' ),
+			'id'              => $this->get_id(),
+			'parentId'        => $this->get_parent_id(),
+			'title'           => $this->get_title(),
+			'canView'         => $this->can_view(),
+			'content'         => $this->get_content(),
+			'additionalInfo'  => $this->get_additional_info(),
+			'actionLabel'     => $this->get_action_label(),
+			'actionUrl'       => $this->get_action_url(),
+			'isComplete'      => $this->is_complete(),
+			'time'            => $this->get_time(),
+			'level'           => 3,
+			'isActioned'      => $this->is_actioned(),
+			'isDismissed'     => $this->is_dismissed(),
+			'isDismissable'   => $this->is_dismissable(),
+			'isSnoozed'       => false,
+			'isSnoozeable'    => false,
+			'isVisited'       => $this->is_visited(),
+			'isDisabled'      => false,
+			'snoozedUntil'    => null,
+			'additionalData'  => self::convert_object_to_camelcase( $this->get_additional_data() ),
+			'eventPrefix'     => $this->prefix_event( '' ),
+			'recordViewEvent' => $this->get_record_view_event(),
 		);
 	}
 

@@ -61,7 +61,7 @@ Name | Type | Default | Description
 `ids` | Array | `null` | A list of IDs, matching to the row list so that ids[ 0 ] contains the object ID for the object displayed in row[ 0 ]
 `isLoading` | Boolean | `false` | Defines if the table contents are loading. It will display `TablePlaceholder` component instead of `Table` if that's the case
 `onQueryChange` | Function | `noop` | A function which returns a callback function to update the query string for a given `param`
-`onColumnsChange` | Function | `noop` | A function which returns a callback function which is called upon the user changing the visiblity of columns
+`onColumnsChange` | Function | `noop` | A function which returns a callback function which is called upon the user changing the visibility of columns
 `onSearch` | Function | `noop` | A function which is called upon the user searching in the table header
 `onSort` | Function | `undefined` | A function which is called upon the user changing the sorting of the table
 `downloadable` | Boolean | `false` | Whether the table must be downloadable. If true, the download button will appear
@@ -241,6 +241,7 @@ Name | Type | Default | Description
 `rows` | Array | `null` | (required) An array of arrays of display/value object pairs
 `rowHeader` | One of type: number, bool | `0` | Which column should be the row header, defaults to the first item (`0`) (but could be set to `1`, if the first col is checkboxes, for example). Set to false to disable row headers
 `rowKey` | Function(row, index): string | `null` | Function used to get the row key.
+`emptyMessage` | String | `undefined` | Customize the message to show when there are no rows in the table.
 
 ### `headers` structure
 

@@ -88,10 +88,12 @@ class OnboardingProducts {
 			$woocommerce_products = wp_remote_get(
 				add_query_arg(
 					array(
-						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-						'locale'     => $locale,
+						'locale' => $locale,
 					),
 					'https://woocommerce.com/wp-json/wccom-extensions/1.0/search'
+				),
+				array(
+					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)
 			);
 			if ( is_wp_error( $woocommerce_products ) ) {
@@ -126,9 +128,6 @@ class OnboardingProducts {
 				$product_data[ $key ]['description']  = $products[ $product_type['product'] ]->excerpt;
 				$product_data[ $key ]['more_url']     = $products[ $product_type['product'] ]->link;
 				$product_data[ $key ]['slug']         = strtolower( preg_replace( '~[^\pL\d]+~u', '-', $products[ $product_type['product'] ]->slug ) );
-			} elseif ( isset( $product_type['product'] ) ) {
-				/* translators: site currency symbol (used to show that the product costs money) */
-				$product_data[ $key ]['label'] .= sprintf( __( ' — %s', 'woocommerce' ), html_entity_decode( get_woocommerce_currency_symbol() ) );
 			}
 		}
 

@@ -5,7 +5,9 @@
 		margin-right: 8px;
 	}
 
-	.components-datetime__date {
-		border-top: 0;
+	&__popover {
+		.components-datetime__date {
+			border-top: 0;
+		}
 	}
 }

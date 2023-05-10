@@ -11,6 +11,11 @@
 			$blankslate = $product_screen.find( '.woocommerce-BlankState' );
 
 		if ( 0 === $blankslate.length ) {
+			if ( woocommerce_admin.urls.add_product ) {
+				$title_action
+					.first()
+					.attr( 'href', woocommerce_admin.urls.add_product );
+			}
 			if ( woocommerce_admin.urls.export_products ) {
 				$title_action.after(
 					'<a href="' +

@@ -92,20 +92,34 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		}
 	}, [] );
 
-	const onAutomate = useCallback( () => {
+	const onAutomate = useCallback( async () => {
 		setIsPending( true );
-		updateAndPersistSettingsForGroup( 'tax', {
-			tax: {
-				...taxSettings,
-				wc_connect_taxes_enabled: 'yes',
-			},
-		} );
-		updateAndPersistSettingsForGroup( 'general', {
-			general: {
-				...generalSettings,
-				woocommerce_calc_taxes: 'yes',
-			},
-		} );
+		try {
+			await Promise.all( [
+				updateAndPersistSettingsForGroup( 'tax', {
+					tax: {
+						...taxSettings,
+						wc_connect_taxes_enabled: 'yes',
+					},
+				} ),
+				updateAndPersistSettingsForGroup( 'general', {
+					general: {
+						...generalSettings,
+						woocommerce_calc_taxes: 'yes',
+					},
+				} ),
+			] );
+		} catch ( error: unknown ) {
+			setIsPending( false );
+			createNotice(
+				'error',
+				__(
+					'There was a problem setting up automated taxes. Please try again.',
+					'woocommerce'
+				)
+			);
+			return;
+		}
 
 		createNotice(
 			'success',
@@ -133,9 +147,9 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 	}, [] );
 
 	const getVisiblePartners = () => {
-		const countryCode = getCountryCode(
-			generalSettings?.woocommerce_default_country
-		);
+		const countryCode =
+			getCountryCode( generalSettings?.woocommerce_default_country ) ||
+			'';
 		const {
 			additionalData: {
 				woocommerceTaxCountries = [],
@@ -150,11 +164,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 				component: WooCommerceTax,
 				isVisible:
 					! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
-					woocommerceTaxCountries.includes(
-						getCountryCode(
-							generalSettings?.woocommerce_default_country
-						)
-					),
+					woocommerceTaxCountries.includes( countryCode ),
 			},
 			{
 				id: 'avalara',

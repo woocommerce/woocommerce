@@ -105,7 +105,7 @@ class Settings {
 	}
 
 	/**
-	 * Hooks extra neccessary data into the component settings array already set in WooCommerce core.
+	 * Hooks extra necessary data into the component settings array already set in WooCommerce core.
 	 *
 	 * @param array $settings Array of component settings.
 	 * @return array Array of component settings.
@@ -287,6 +287,18 @@ class Settings {
 			'description' => __( 'Default Date Range', 'woocommerce' ),
 			'default'     => 'period=month&compare=previous_year',
 			'type'        => 'text',
+		);
+		$settings[] = array(
+			'id'          => 'woocommerce_date_type',
+			'option_key'  => 'woocommerce_date_type',
+			'label'       => __( 'Date Type', 'woocommerce' ),
+			'description' => __( 'Database date field considered for Revenue and Orders reports', 'woocommerce' ),
+			'type'        => 'select',
+			'options'     => array(
+				'date_created'   => 'date_created',
+				'date_paid'      => 'date_paid',
+				'date_completed' => 'date_completed',
+			),
 		);
 		return $settings;
 	}

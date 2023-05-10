@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\Customers
  */
 
-use \Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\DataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\DataStore;
 
 /**
  * Class WC_Admin_Tests_Reports_Customers
@@ -16,7 +16,7 @@ use \Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\DataStore;
 class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 
 	/**
-	 * Test order count caluclation for customer.
+	 * Test order count calculation for customer.
 	 *
 	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_order_count
 	 */

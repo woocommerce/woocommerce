@@ -1,0 +1,82 @@
+{
+    "code": "MY",
+    "name": "Malaysia",
+    "states": [
+        {
+            "code": "JHR",
+            "name": "Johor"
+        },
+        {
+            "code": "KDH",
+            "name": "Kedah"
+        },
+        {
+            "code": "KTN",
+            "name": "Kelantan"
+        },
+        {
+            "code": "LBN",
+            "name": "Labuan"
+        },
+        {
+            "code": "MLK",
+            "name": "Malacca (Melaka)"
+        },
+        {
+            "code": "NSN",
+            "name": "Negeri Sembilan"
+        },
+        {
+            "code": "PHG",
+            "name": "Pahang"
+        },
+        {
+            "code": "PNG",
+            "name": "Penang (Pulau Pinang)"
+        },
+        {
+            "code": "PRK",
+            "name": "Perak"
+        },
+        {
+            "code": "PLS",
+            "name": "Perlis"
+        },
+        {
+            "code": "SBH",
+            "name": "Sabah"
+        },
+        {
+            "code": "SWK",
+            "name": "Sarawak"
+        },
+        {
+            "code": "SGR",
+            "name": "Selangor"
+        },
+        {
+            "code": "TRG",
+            "name": "Terengganu"
+        },
+        {
+            "code": "PJY",
+            "name": "Putrajaya"
+        },
+        {
+            "code": "KUL",
+            "name": "Kuala Lumpur"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/my"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

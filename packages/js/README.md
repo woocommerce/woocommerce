@@ -1,6 +1,6 @@
 # WooCommerce Packages
 
-Currently we have a small set of public-facing packages that can be dowloaded from [npm](https://www.npmjs.com/org/woocommerce) and used in external applications.
+Currently we have a set of public-facing packages that can be dowloaded from [npm](https://www.npmjs.com/org/woocommerce) and used in external applications. Here is a non-exhaustive list.
 
 -   `@woocommerce/components`: A library of components that can be used to create pages in the WooCommerce dashboard and reports pages.
 -   `@woocommerce/csv-export`: A set of functions to convert data into CSV values, and enable a browser download of the CSV data.
@@ -12,12 +12,11 @@ Currently we have a small set of public-facing packages that can be dowloaded fr
 ## Working with existing packages
 
 -   You can make changes to packages files as normal, and running `pnpm start` will compile and watch both app files and packages.
--   :warning: Make sure any dependencies you add to a package are also added to that package's `package.json`, not just the woocommerce-admin package.json
--   :warning: Make sure you're not importing from any woocommerce-admin files outside of the package (you can import from other packages, just use the `import from @woocommerce/package` syntax).
--   Add your change to the CHANGELOG for that package under the next version number, creating one if necessary (we use semantic versioning for packages, [see these guidelines](https://github.com/WordPress/gutenberg/blob/master/CONTRIBUTING.md#maintaining-changelogs)).
+-   :warning: Add any dependencies to a package using `pnpm add` from the package root.
+-   :warning: Make sure you're not importing from any other files outside of the package (you can import from other packages, just use the `import from @woocommerce/package` syntax).
 -   Don't change the version in `package.json`.
 -   Label your PR with the `Packages` label.
--   Once merged, you can wait for the next package release roundup, or you can publish a release now (see below, "Publishing packages").
+-   See the [Package Release Tool](https://github.com/woocommerce/woocommerce/blob/f9e7a5a3fb11cdd4dc064c02e045cf429cb6a2b6/tools/package-release/README.md) for instructions on how to release packages.
 
 ---
 
@@ -36,7 +35,7 @@ To create a new package, add a new folder to `/packages`, containing…
     	"author": "Automattic",
     	"license": "GPL-2.0-or-later",
     	"keywords": [ "wordpress", "woocommerce" ],
-    	"homepage": "https://github.com/woocommerce/woocommerce/tree/main/packages/[_YOUR_PACKAGE_]/README.md",
+    	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/[_YOUR_PACKAGE_]/README.md",
     	"repository": {
     		"type": "git",
     		"url": "https://github.com/woocommerce/woocommerce.git"
@@ -61,25 +60,14 @@ To create a new package, add a new folder to `/packages`, containing…
     - Package description
     - Installation details
     - Usage example
-4. A `src` directory for the source of your module, which will be built by default using the `pnpm run build:packages` command. Note that you'll want an `index.js` file that exports the package contents, see other packages for examples.
+4. A `src` directory for the source of your module, which will be built by default using the `pnpm run turbo:build` command. Note that you'll want an `index.js` file that exports the package contents, see other packages for examples.
 
-5. Add the new package name to `packages/dependency-extraction-webpack-plugin/assets/packages.js` so that users of that plugin will also be able to use the new package without enqueuing it.
+5. A blank Changelog file, `changelog.md`.
 
----
+```
+# Changelog
 
-## Publishing packages
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+```
 
--   Run `pnpm run publish-packages:check` to run pnpm publish with the `--dry-run` option
--   Create a PR with a CHANGELOG for each updated package (or try to add to the CHANGELOG with any PR editing `packages/`)
--   Run `pnpm run publish-packages:prod` to publish the package
--   _OR_ Run `pnpm run publish-packages:dev` to publish "next" releases (installed as `pnpm i @woocommerce/package@next`). Only use `:dev` if you have a reason to.
--   Both commands will run `build:packages` before the publishing  task, just to catch any last updates.
-
-### Publishing a single package
-
-Sometimes, its helpful to release a singular package. This can be done directly through pnpm. Be sure versions and builds are correct.
-
--   Bump the version in the package's package.json as well as its CHANGELOG file.
--   `pnpm install && pnpm run build:packages` to build packages.
--   `cd packages/<package-name>`
--   `pnpm publish`
+6. Add the new package name to `packages/js/dependency-extraction-webpack-plugin/assets/packages.js` so that users of that plugin will also be able to use the new package without enqueuing it.

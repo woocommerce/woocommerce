@@ -1,14 +1,17 @@
 /**
  * External dependencies
  */
-import { createElement, Component, Fragment } from '@wordpress/element';
+import {
+	createElement,
+	createInterpolateElement,
+	Component,
+	Fragment,
+} from '@wordpress/element';
 import { SelectControl, TextControl } from '@wordpress/components';
 import { get, find, isArray } from 'lodash';
-import interpolateComponents from '@automattic/interpolate-components';
 import classnames from 'classnames';
 import { sprintf, __, _x } from '@wordpress/i18n';
-
-import CurrencyFactory from '@woocommerce/currency';
+import { CurrencyFactory } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -19,7 +22,7 @@ import { textContent } from './utils';
 class NumberFilter extends Component {
 	getBetweenString() {
 		return _x(
-			'{{rangeStart /}}{{span}} and {{/span}}{{rangeEnd /}}',
+			'<rangeStart/><span> and </span><rangeEnd/>',
 			'Numerical range inputs arranged on a single line',
 			'woocommerce'
 		);
@@ -47,24 +50,18 @@ class NumberFilter extends Component {
 		let filterStr = rangeStart;
 
 		if ( rule.value === 'between' ) {
-			filterStr = interpolateComponents( {
-				mixedString: this.getBetweenString(),
-				components: {
-					rangeStart: <Fragment>{ rangeStart }</Fragment>,
-					rangeEnd: <Fragment>{ rangeEnd }</Fragment>,
-					span: <Fragment />,
-				},
+			filterStr = createInterpolateElement( this.getBetweenString(), {
+				rangeStart: <Fragment>{ rangeStart }</Fragment>,
+				rangeEnd: <Fragment>{ rangeEnd }</Fragment>,
+				span: <Fragment />,
 			} );
 		}
 
 		return textContent(
-			interpolateComponents( {
-				mixedString: config.labels.title,
-				components: {
-					filter: <Fragment>{ filterStr }</Fragment>,
-					rule: <Fragment>{ rule.label }</Fragment>,
-					title: <Fragment />,
-				},
+			createInterpolateElement( config.labels.title, {
+				filter: <Fragment>{ filterStr }</Fragment>,
+				rule: <Fragment>{ rule.label }</Fragment>,
+				title: <Fragment />,
 			} )
 		);
 	}
@@ -198,37 +195,34 @@ class NumberFilter extends Component {
 			} );
 		};
 
-		return interpolateComponents( {
-			mixedString: this.getBetweenString(),
-			components: {
-				rangeStart: this.getFormControl( {
-					type: inputType,
-					value: rangeStart || '',
-					label: sprintf(
-						/* eslint-disable-next-line max-len */
-						/* translators: Sentence fragment, "range start" refers to the first of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
-						__( '%(field)s range start', 'woocommerce' ),
-						{ field: get( config, [ 'labels', 'add' ] ) }
-					),
-					onChange: rangeStartOnChange,
-					currencySymbol,
-					symbolPosition,
-				} ),
-				rangeEnd: this.getFormControl( {
-					type: inputType,
-					value: rangeEnd || '',
-					label: sprintf(
-						/* eslint-disable-next-line max-len */
-						/* translators: Sentence fragment, "range end" refers to the second of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
-						__( '%(field)s range end', 'woocommerce' ),
-						{ field: get( config, [ 'labels', 'add' ] ) }
-					),
-					onChange: rangeEndOnChange,
-					currencySymbol,
-					symbolPosition,
-				} ),
-				span: <span className="separator" />,
-			},
+		return createInterpolateElement( this.getBetweenString(), {
+			rangeStart: this.getFormControl( {
+				type: inputType,
+				value: rangeStart || '',
+				label: sprintf(
+					/* eslint-disable-next-line max-len */
+					/* translators: Sentence fragment, "range start" refers to the first of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
+					__( '%(field)s range start', 'woocommerce' ),
+					{ field: get( config, [ 'labels', 'add' ] ) }
+				),
+				onChange: rangeStartOnChange,
+				currencySymbol,
+				symbolPosition,
+			} ),
+			rangeEnd: this.getFormControl( {
+				type: inputType,
+				value: rangeEnd || '',
+				label: sprintf(
+					/* eslint-disable-next-line max-len */
+					/* translators: Sentence fragment, "range end" refers to the second of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
+					__( '%(field)s range end', 'woocommerce' ),
+					{ field: get( config, [ 'labels', 'add' ] ) }
+				),
+				onChange: rangeEndOnChange,
+				currencySymbol,
+				symbolPosition,
+			} ),
+			span: <span className="separator" />,
 		} );
 	}
 
@@ -238,38 +232,35 @@ class NumberFilter extends Component {
 		const { rule } = filter;
 		const { labels, rules } = config;
 
-		const children = interpolateComponents( {
-			mixedString: labels.title,
-			components: {
-				title: <span className={ className } />,
-				rule: (
-					<SelectControl
-						className={ classnames(
-							className,
-							'woocommerce-filters-advanced__rule'
-						) }
-						options={ rules }
-						value={ rule }
-						onChange={ ( value ) =>
-							onFilterChange( { property: 'rule', value } )
+		const children = createInterpolateElement( labels.title, {
+			title: <span className={ className } />,
+			rule: (
+				<SelectControl
+					className={ classnames(
+						className,
+						'woocommerce-filters-advanced__rule'
+					) }
+					options={ rules }
+					value={ rule }
+					onChange={ ( value ) =>
+						onFilterChange( { property: 'rule', value } )
+					}
+					aria-label={ labels.rule }
+				/>
+			),
+			filter: (
+				<div
+					className={ classnames(
+						className,
+						'woocommerce-filters-advanced__input-range',
+						{
+							'is-between': rule === 'between',
 						}
-						aria-label={ labels.rule }
-					/>
-				),
-				filter: (
-					<div
-						className={ classnames(
-							className,
-							'woocommerce-filters-advanced__input-range',
-							{
-								'is-between': rule === 'between',
-							}
-						) }
-					>
-						{ this.getFilterInputs() }
-					</div>
-				),
-			},
+					) }
+				>
+					{ this.getFilterInputs() }
+				</div>
+			),
 		} );
 
 		const screenReaderText = this.getScreenReaderText( filter, config );

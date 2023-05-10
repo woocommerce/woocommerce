@@ -5,11 +5,13 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 /**
  * Tests for DataSynchronizer class.
  */
 class DataSynchronizerTests extends WC_Unit_Test_Case {
+	use ArraySubsetAsserts;
 
 	/**
 	 * @var DataSynchronizer
@@ -26,6 +28,7 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
 		OrderHelper::create_order_custom_table_if_not_exist();
+		OrderHelper::toggle_cot( false );
 		$this->sut           = wc_get_container()->get( DataSynchronizer::class );
 		$features_controller = wc_get_container()->get( Featurescontroller::class );
 		$features_controller->change_feature_enable( 'custom_order_tables', true );
@@ -148,7 +151,7 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * When sync is enbabled and the posts store is authoritative, creating an order and updating the status from
+	 * When sync is enabled and the posts store is authoritative, creating an order and updating the status from
 	 * draft to some non-draft status (as happens when an order is manually created in the admin environment) should
 	 * result in the same status change being made in the duplicate COT record.
 	 */
@@ -192,4 +195,160 @@ class DataSynchronizerTests extends WC_Unit_Test_Case {
 			'When the order status is updated, the change should be observed by the DataSynhronizer and a matching update will take place in the COT table.'
 		);
 	}
+
+	/**
+	 * When sync is enabled, and an order is deleted either from the post table or the COT table, the
+	 * change should propagate across to the other table.
+	 *
+	 * @return void
+	 */
+	public function test_order_deletions_propagate(): void {
+		// Sync enabled and COT authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order = OrderHelper::create_order();
+		wp_delete_post( $order->get_id(), true );
+
+		$this->assertFalse(
+			wc_get_order( $order->get_id() ),
+			'After the order post record was deleted, the order was also deleted from COT.'
+		);
+
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+		$order->delete( true );
+
+		$this->assertNull(
+			get_post( $order_id ),
+			'After the COT order record was deleted, the order was also deleted from the posts table.'
+		);
+	}
+
+	/**
+	 * When sync is enabled, changes to meta data should propagate from the Custom Orders Table to
+	 * the post meta table whenever the order object's save_meta_data() method is called.
+	 *
+	 * @return void
+	 */
+	public function test_meta_data_changes_propagate_from_cot_to_cpt(): void {
+		// Sync enabled and COT authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'foo', 'bar' );
+		$order->add_meta_data( 'bar', 'baz' );
+		$order->save_meta_data();
+
+		$order->delete_meta_data( 'bar' );
+		$order->save_meta_data();
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		$refreshed_order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'foo' ),
+			'bar',
+			'Meta data persisted via the HPOS datastore is accessible via the CPT datastore.'
+		);
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'bar' ),
+			'',
+			'Meta data deleted from the HPOS datastore should also be deleted from the CPT datastore.'
+		);
+	}
+
+	/**
+	 * When sync is enabled, changes to meta data should propagate from the post meta table to
+	 * the Custom Orders Table whenever the order object's save_meta_data() method is called.
+	 *
+	 * @return void
+	 */
+	public function test_meta_data_changes_propagate_from_cpt_to_cot(): void {
+		// Sync enabled and CPT authoritative.
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'foo', 'bar' );
+		$order->add_meta_data( 'bar', 'baz' );
+		$order->save_meta_data();
+
+		$order->delete_meta_data( 'bar' );
+		$order->save_meta_data();
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		$refreshed_order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'foo' ),
+			'bar',
+			'Meta data persisted via the CPT datastore is accessible via the HPOS datastore.'
+		);
+
+		$this->assertEquals(
+			$refreshed_order->get_meta( 'bar' ),
+			'',
+			'Meta data deleted from the CPT datastore should also be deleted from the HPOS datastore.'
+		);
+	}
+
+	/**
+	 * @testDox Orders for migration are picked by ID sorted.
+	 */
+	public function test_migration_sort() {
+		global $wpdb;
+		$order1 = wc_get_order( OrderHelper::create_order() );
+		$order2 = wc_get_order( OrderHelper::create_order() );
+
+		// Let's update order1 id to be greater than order2 id.
+		// phpcs:ignore
+		$max_id = $wpdb->get_var( "SELECT MAX(id) FROM $wpdb->posts" );
+		$wpdb->update( $wpdb->posts, array( 'ID' => $max_id + 1 ), array( 'ID' => $order1->get_id() ) );
+
+		$orders_to_migrate = $this->sut->get_next_batch_to_process( 2 );
+		$this->assertEquals( $order2->get_id(), $orders_to_migrate[0] );
+		$this->assertEquals( $max_id + 1, $orders_to_migrate[1] );
+	}
+
+	/**
+	 * Tests that auto-draft orders older than 1 week are automatically deleted when WP does the same for posts.
+	 *
+	 * @return void
+	 */
+	public function test_auto_draft_deletion(): void {
+		OrderHelper::toggle_cot( true );
+
+		$order1 = new \WC_Order();
+		$order1->set_status( 'auto-draft' );
+		$order1->set_date_created( strtotime( '-10 days' ) );
+		$order1->save();
+
+		$order2 = new \WC_Order();
+		$order2->set_status( 'auto-draft' );
+		$order2->save();
+
+		$order3 = new \WC_Order();
+		$order3->set_status( 'processing' );
+		$order3->save();
+
+		// Run WP's auto-draft delete.
+		do_action( 'wp_scheduled_auto_draft_delete' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+
+		$orders = wc_get_orders(
+			array(
+				'status' => 'all',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		// Confirm that only $order1 is deleted when the action runs but the other orders remain intact.
+		$this->assertContains( $order2->get_id(), $orders );
+		$this->assertContains( $order3->get_id(), $orders );
+		$this->assertNotContains( $order1->get_id(), $orders );
+	}
+
 }

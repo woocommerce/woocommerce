@@ -7,8 +7,8 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
-use Automattic\WooCommerce\Internal\Admin\Marketing as MarketingFeature;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -103,9 +103,16 @@ class Marketing extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_recommended_plugins( $request ) {
+		/**
+		 * MarketingSpecs class.
+		 *
+		 * @var MarketingSpecs $marketing_specs
+		 */
+		$marketing_specs = wc_get_container()->get( MarketingSpecs::class );
+
 		// Default to marketing category (if no category set).
 		$category      = ( ! empty( $request->get_param( 'category' ) ) ) ? $request->get_param( 'category' ) : 'marketing';
-		$all_plugins   = MarketingFeature::get_instance()->get_recommended_plugins();
+		$all_plugins   = $marketing_specs->get_recommended_plugins();
 		$valid_plugins = [];
 		$per_page      = $request->get_param( 'per_page' );
 
@@ -130,7 +137,14 @@ class Marketing extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_knowledge_base_posts( $request ) {
+		/**
+		 * MarketingSpecs class.
+		 *
+		 * @var MarketingSpecs $marketing_specs
+		 */
+		$marketing_specs = wc_get_container()->get( MarketingSpecs::class );
+
 		$category = $request->get_param( 'category' );
-		return rest_ensure_response( MarketingFeature::get_instance()->get_knowledge_base_posts( $category ) );
+		return rest_ensure_response( $marketing_specs->get_knowledge_base_posts( $category ) );
 	}
 }

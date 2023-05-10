@@ -2,17 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useEffect,
-	useRef,
-	useState,
-	createElement,
-	useContext,
-} from '@wordpress/element';
+import { useEffect, useRef, useState, createElement } from '@wordpress/element';
 import { Button, Card } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { EllipsisMenu } from '@woocommerce/components';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
+import { WooOnboardingTaskListHeader } from '@woocommerce/onboarding';
 import {
 	ONBOARDING_STORE_NAME,
 	TaskType,
@@ -22,8 +17,9 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { List } from '@woocommerce/experimental';
+import { List, useSlot } from '@woocommerce/experimental';
 import classnames from 'classnames';
+import { useLayoutContext } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -35,7 +31,12 @@ import TaskListCompleted from './completed';
 import { ProgressHeader } from '~/task-lists/progress-header';
 import { TaskListItemTwoColumn } from './task-list-item-two-column';
 import { TaskListCompletedHeader } from './completed-header';
-import { LayoutContext } from '~/layout';
+
+import { ExperimentalWooTaskListFooter } from './footer-slot';
+import {
+	TaskListCompletionSlot,
+	EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME,
+} from './task-list-completion-slot';
 
 export type TaskListProps = TaskListType & {
 	eventName?: string;
@@ -78,7 +79,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	} >( {} );
 	const [ activeTaskId, setActiveTaskId ] = useState( '' );
 	const [ showDismissModal, setShowDismissModal ] = useState( false );
-	const layoutContext = useContext( LayoutContext );
+	const { layoutString } = useLayoutContext();
 
 	const prevQueryRef = useRef( query );
 
@@ -91,13 +92,17 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		recordEvent( `${ listEventPrefix }view`, {
 			number_tasks: visibleTasks.length,
 			store_connected: profileItems.wccom_connected,
-			context: layoutContext.toString(),
+			context: layoutString,
 		} );
 	};
 
 	useEffect( () => {
 		recordTaskListView();
 	}, [] );
+
+	const taskListCompletionSlot = useSlot(
+		EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME
+	);
 
 	useEffect( () => {
 		const { task: prevTask } = prevQueryRef.current;
@@ -161,6 +166,15 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		selectedHeaderCard = visibleTasks[ visibleTasks.length - 1 ];
 	}
 
+	const taskListHeaderSlot = useSlot(
+		`woocommerce_onboarding_task_list_header_${
+			headerData?.task?.id ?? selectedHeaderCard?.id
+		}`
+	);
+	const hasTaskListHeaderSlotFills = Boolean(
+		taskListHeaderSlot?.fills?.length
+	);
+
 	const getTaskStartedCount = ( taskId: string ) => {
 		const trackedStartedTasks =
 			userPreferences.task_list_tracked_started_tasks;
@@ -188,7 +202,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	const trackClick = ( task: TaskType ) => {
 		recordEvent( `${ listEventPrefix }click`, {
 			task_name: task.id,
-			context: layoutContext.toString(),
+			context: layoutString,
 		} );
 	};
 
@@ -209,7 +223,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	};
 
 	const showTaskHeader = ( task: TaskType ) => {
-		if ( taskHeaders[ task.id ] ) {
+		if ( taskHeaders[ task.id ] || hasTaskListHeaderSlotFills ) {
 			setHeaderData( {
 				task,
 				goToTask: () => goToTask( task ),
@@ -229,7 +243,22 @@ export const TaskList: React.FC< TaskListProps > = ( {
 		return <div className="woocommerce-task-dashboard__container"></div>;
 	}
 
+	const hasTaskListCompletionSlotFills = Boolean(
+		taskListCompletionSlot?.fills?.length
+	);
+
 	if ( isComplete && keepCompletedTaskList !== 'yes' ) {
+		if ( hasTaskListCompletionSlotFills ) {
+			return (
+				<TaskListCompletionSlot
+					fillProps={ {
+						hideTasks,
+						keepTasks,
+						customerEffortScore: cesHeader,
+					} }
+				/>
+			);
+		}
 		return (
 			<>
 				{ cesHeader ? (
@@ -273,11 +302,18 @@ export const TaskList: React.FC< TaskListProps > = ( {
 				>
 					<div className="wooocommerce-task-card__header-container">
 						<div className="wooocommerce-task-card__header">
-							{ headerData?.task &&
+							{ hasTaskListHeaderSlotFills ? (
+								<WooOnboardingTaskListHeader.Slot
+									id={ selectedHeaderCard?.id }
+									fillProps={ headerData }
+								/>
+							) : (
+								headerData?.task &&
 								createElement(
 									taskHeaders[ headerData.task.id ],
 									headerData
-								) }
+								)
+							) }
 						</div>
 						{ ! displayProgressHeader && renderMenu() }
 					</div>
@@ -295,6 +331,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 							);
 						} ) }
 					</List>
+					<ExperimentalWooTaskListFooter />
 				</Card>
 			</div>
 		</>

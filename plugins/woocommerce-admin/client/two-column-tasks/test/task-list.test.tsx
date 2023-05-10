@@ -32,6 +32,25 @@ jest.mock( '../task-headers', () => ( {
 	required: () => <div>required_header</div>,
 	completed: () => <div>completed_header</div>,
 } ) );
+jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
+	useUserPreferences: jest.fn().mockReturnValue( {
+		updateUserPreferences: jest.fn(),
+	} ),
+} ) );
+jest.mock( '@woocommerce/admin-layout', () => {
+	const mockContext = {
+		layoutPath: [ 'home' ],
+		layoutString: 'home',
+		extendLayout: () => {},
+		isDescendantOf: () => false,
+	};
+	return {
+		...jest.requireActual( '@woocommerce/admin-layout' ),
+		useLayoutContext: jest.fn().mockReturnValue( mockContext ),
+		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
+	};
+} );
 
 const tasks: { [ key: string ]: TaskType[] } = {
 	setup: [
@@ -55,6 +74,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 		{
 			id: 'required',
@@ -77,6 +97,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: true,
 		},
 		{
 			id: 'completed',
@@ -98,6 +119,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 	],
 	extension: [
@@ -121,6 +143,7 @@ const tasks: { [ key: string ]: TaskType[] } = {
 			isActioned: false,
 			eventPrefix: '',
 			level: 0,
+			recordViewEvent: false,
 		},
 	],
 };
@@ -148,7 +171,7 @@ describe( 'TaskList', () => {
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
-			context: 'root',
+			context: 'home',
 			number_tasks: 0,
 			store_connected: null,
 		} );
@@ -171,7 +194,7 @@ describe( 'TaskList', () => {
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_view', {
-			context: 'root',
+			context: 'home',
 			number_tasks: 0,
 			store_connected: null,
 		} );
@@ -195,7 +218,7 @@ describe( 'TaskList', () => {
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith( 'extended_tasklist_view', {
-			context: 'root',
+			context: 'home',
 			number_tasks: 0,
 			store_connected: null,
 		} );

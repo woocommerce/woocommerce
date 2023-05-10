@@ -28,6 +28,7 @@ const task: TaskType = {
 	isActioned: false,
 	eventPrefix: '',
 	level: 0,
+	recordViewEvent: false,
 };
 
 /**

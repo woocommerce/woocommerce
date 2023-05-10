@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Export;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\ReportExporter;
+use Automattic\WooCommerce\Admin\ReportExporter;
 
 /**
  * Reports Export controller.
@@ -20,12 +20,6 @@ use \Automattic\WooCommerce\Admin\ReportExporter;
  * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends \Automattic\WooCommerce\Admin\API\Reports\Controller {
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.

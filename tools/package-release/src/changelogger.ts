@@ -14,7 +14,7 @@ import { getFilepathFromPackageName } from './validate';
  * Call changelogger's next version function to get the version for the next release.
  *
  * @param {string} name Package name.
- * @return {string} Next release version.
+ * @return {string|null} Next release version or null if none exists.
  */
 export const getNextVersion = ( name: string ) => {
 	try {
@@ -25,9 +25,7 @@ export const getNextVersion = ( name: string ) => {
 		} ).trim();
 	} catch ( e ) {
 		if ( e instanceof Error ) {
-			// eslint-disable-next-line no-console
-			console.log( e );
-			throw e;
+			return null;
 		}
 	}
 };
@@ -59,13 +57,18 @@ export const validateChangelogEntries = ( name: string ) => {
  *
  * @param {string} name Package name.
  */
-export const writeChangelog = ( name: string ) => {
+export const writeChangelog = ( name: string, nextVersion?: string ) => {
 	try {
 		const cwd = getFilepathFromPackageName( name );
-		execSync( './vendor/bin/changelogger write --add-pr-num', {
-			cwd,
-			encoding: 'utf-8',
-		} );
+		execSync(
+			`./vendor/bin/changelogger write --add-pr-num ${
+				nextVersion ? '--use-version ' + nextVersion : ''
+			}`,
+			{
+				cwd,
+				encoding: 'utf-8',
+			}
+		);
 	} catch ( e ) {
 		if ( e instanceof Error ) {
 			// eslint-disable-next-line no-console

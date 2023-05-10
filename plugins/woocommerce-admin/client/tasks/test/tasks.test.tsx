@@ -3,7 +3,6 @@
  */
 import { render, act, cleanup, waitFor } from '@testing-library/react';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useExperiment } from '@woocommerce/explat';
 import { recordEvent } from '@woocommerce/tracks';
 import userEvent from '@testing-library/user-event';
 

@@ -6,6 +6,8 @@
  * @version  2.4.0
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -16,8 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_screen_ids() {
-
-	$wc_screen_id = sanitize_title( __( 'WooCommerce', 'woocommerce' ) );
+	$wc_screen_id = 'woocommerce';
 	$screen_ids   = array(
 		'toplevel_page_' . $wc_screen_id,
 		$wc_screen_id . '_page_wc-orders',
@@ -39,12 +40,12 @@ function wc_get_screen_ids() {
 		'edit-product_tag',
 		'profile',
 		'user-edit',
-		wc_get_page_screen_id( 'shop-order' ),
 	);
 
 	foreach ( wc_get_order_types() as $type ) {
 		$screen_ids[] = $type;
 		$screen_ids[] = 'edit-' . $type;
+		$screen_ids[] = wc_get_page_screen_id( $type );
 	}
 
 	$attributes = wc_get_attribute_taxonomies();
@@ -68,11 +69,18 @@ function wc_get_screen_ids() {
  * @return string Page ID. Empty string if resource not found.
  */
 function wc_get_page_screen_id( $for ) {
-	switch ( $for ) {
-		case 'shop-order':
-			return 'woocommerce_page_wc-orders';
+	$screen_id = '';
+	$for       = str_replace( '-', '_', $for );
+
+	if ( in_array( $for, wc_get_order_types( 'admin-menu' ), true ) ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$screen_id = 'woocommerce_page_wc-orders' . ( 'shop_order' === $for ? '' : '--' . $for );
+		} else {
+			$screen_id = $for;
+		}
 	}
-	return '';
+
+	return $screen_id;
 }
 
 /**
@@ -500,18 +508,20 @@ function wc_render_invalid_variation_notice( $product_object ) {
 
 	// Check if a variation exists without pricing data.
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-	$invalid_variation_count = $wpdb->get_var(
+	$valid_variation_count = $wpdb->get_var(
 		"
 		SELECT count(post_id) FROM {$wpdb->postmeta}
 		WHERE post_id in (" . implode( ',', array_map( 'absint', $variation_ids ) ) . ")
 		AND ( meta_key='_subscription_sign_up_fee' OR meta_key='_price' )
-		AND meta_value > 0
+		AND meta_value >= 0
 		AND meta_value != ''
 		"
 	);
 	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-	if ( 0 < ( $variation_count - $invalid_variation_count ) ) {
+	$invalid_variation_count = $variation_count - $valid_variation_count;
+
+	if ( 0 < $invalid_variation_count ) {
 		?>
 		<div id="message" class="inline notice notice-warning woocommerce-message woocommerce-notice-invalid-variation">
 			<p>
@@ -519,8 +529,8 @@ function wc_render_invalid_variation_notice( $product_object ) {
 			echo wp_kses_post(
 				sprintf(
 					/* Translators: %d variation count. */
-					_n( '%d variation does not have a price.', '%d variations do not have prices.', ( $variation_count - $invalid_variation_count ), 'woocommerce' ),
-					( $variation_count - $invalid_variation_count )
+					_n( '%d variation does not have a price.', '%d variations do not have prices.', $invalid_variation_count, 'woocommerce' ),
+					$invalid_variation_count
 				) . '&nbsp;' .
 				__( 'Variations (and their attributes) that do not have prices will not be shown in your store.', 'woocommerce' )
 			);

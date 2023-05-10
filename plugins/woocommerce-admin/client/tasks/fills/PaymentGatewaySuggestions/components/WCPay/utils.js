@@ -73,6 +73,18 @@ export function isWCPaySupported( countryCode ) {
 		'CH',
 		'HK',
 		'SG',
+		'CY',
+		'DK',
+		'EE',
+		'FI',
+		'GR',
+		'LU',
+		'LT',
+		'LV',
+		'NO',
+		'MT',
+		'SI',
+		'SK',
 	];
 
 	return supportedCountries.includes( countryCode );

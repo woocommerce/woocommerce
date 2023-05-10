@@ -1,0 +1,206 @@
+{
+    "code": "KE",
+    "name": "Kenya",
+    "states": [
+        {
+            "code": "KE01",
+            "name": "Baringo"
+        },
+        {
+            "code": "KE02",
+            "name": "Bomet"
+        },
+        {
+            "code": "KE03",
+            "name": "Bungoma"
+        },
+        {
+            "code": "KE04",
+            "name": "Busia"
+        },
+        {
+            "code": "KE05",
+            "name": "Elgeyo-Marakwet"
+        },
+        {
+            "code": "KE06",
+            "name": "Embu"
+        },
+        {
+            "code": "KE07",
+            "name": "Garissa"
+        },
+        {
+            "code": "KE08",
+            "name": "Homa Bay"
+        },
+        {
+            "code": "KE09",
+            "name": "Isiolo"
+        },
+        {
+            "code": "KE10",
+            "name": "Kajiado"
+        },
+        {
+            "code": "KE11",
+            "name": "Kakamega"
+        },
+        {
+            "code": "KE12",
+            "name": "Kericho"
+        },
+        {
+            "code": "KE13",
+            "name": "Kiambu"
+        },
+        {
+            "code": "KE14",
+            "name": "Kilifi"
+        },
+        {
+            "code": "KE15",
+            "name": "Kirinyaga"
+        },
+        {
+            "code": "KE16",
+            "name": "Kisii"
+        },
+        {
+            "code": "KE17",
+            "name": "Kisumu"
+        },
+        {
+            "code": "KE18",
+            "name": "Kitui"
+        },
+        {
+            "code": "KE19",
+            "name": "Kwale"
+        },
+        {
+            "code": "KE20",
+            "name": "Laikipia"
+        },
+        {
+            "code": "KE21",
+            "name": "Lamu"
+        },
+        {
+            "code": "KE22",
+            "name": "Machakos"
+        },
+        {
+            "code": "KE23",
+            "name": "Makueni"
+        },
+        {
+            "code": "KE24",
+            "name": "Mandera"
+        },
+        {
+            "code": "KE25",
+            "name": "Marsabit"
+        },
+        {
+            "code": "KE26",
+            "name": "Meru"
+        },
+        {
+            "code": "KE27",
+            "name": "Migori"
+        },
+        {
+            "code": "KE28",
+            "name": "Mombasa"
+        },
+        {
+            "code": "KE29",
+            "name": "Murang’a"
+        },
+        {
+            "code": "KE30",
+            "name": "Nairobi County"
+        },
+        {
+            "code": "KE31",
+            "name": "Nakuru"
+        },
+        {
+            "code": "KE32",
+            "name": "Nandi"
+        },
+        {
+            "code": "KE33",
+            "name": "Narok"
+        },
+        {
+            "code": "KE34",
+            "name": "Nyamira"
+        },
+        {
+            "code": "KE35",
+            "name": "Nyandarua"
+        },
+        {
+            "code": "KE36",
+            "name": "Nyeri"
+        },
+        {
+            "code": "KE37",
+            "name": "Samburu"
+        },
+        {
+            "code": "KE38",
+            "name": "Siaya"
+        },
+        {
+            "code": "KE39",
+            "name": "Taita-Taveta"
+        },
+        {
+            "code": "KE40",
+            "name": "Tana River"
+        },
+        {
+            "code": "KE41",
+            "name": "Tharaka-Nithi"
+        },
+        {
+            "code": "KE42",
+            "name": "Trans Nzoia"
+        },
+        {
+            "code": "KE43",
+            "name": "Turkana"
+        },
+        {
+            "code": "KE44",
+            "name": "Uasin Gishu"
+        },
+        {
+            "code": "KE45",
+            "name": "Vihiga"
+        },
+        {
+            "code": "KE46",
+            "name": "Wajir"
+        },
+        {
+            "code": "KE47",
+            "name": "West Pokot"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/ke"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

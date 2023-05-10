@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
+use Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
 
 /**
  * Rule processor for sending when the provided plugins are activated.

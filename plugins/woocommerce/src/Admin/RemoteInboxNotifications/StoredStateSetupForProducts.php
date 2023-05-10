@@ -7,8 +7,8 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
-use \Automattic\WooCommerce\Admin\RemoteInboxNotifications\SpecRunner;
+use Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\SpecRunner;
 
 /**
  * Handles stored state setup for products.

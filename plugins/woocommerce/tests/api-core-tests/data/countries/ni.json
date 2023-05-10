@@ -1,0 +1,86 @@
+{
+    "code": "NI",
+    "name": "Nicaragua",
+    "states": [
+        {
+            "code": "NI-AN",
+            "name": "Atlántico Norte"
+        },
+        {
+            "code": "NI-AS",
+            "name": "Atlántico Sur"
+        },
+        {
+            "code": "NI-BO",
+            "name": "Boaco"
+        },
+        {
+            "code": "NI-CA",
+            "name": "Carazo"
+        },
+        {
+            "code": "NI-CI",
+            "name": "Chinandega"
+        },
+        {
+            "code": "NI-CO",
+            "name": "Chontales"
+        },
+        {
+            "code": "NI-ES",
+            "name": "Estelí"
+        },
+        {
+            "code": "NI-GR",
+            "name": "Granada"
+        },
+        {
+            "code": "NI-JI",
+            "name": "Jinotega"
+        },
+        {
+            "code": "NI-LE",
+            "name": "León"
+        },
+        {
+            "code": "NI-MD",
+            "name": "Madriz"
+        },
+        {
+            "code": "NI-MN",
+            "name": "Managua"
+        },
+        {
+            "code": "NI-MS",
+            "name": "Masaya"
+        },
+        {
+            "code": "NI-MT",
+            "name": "Matagalpa"
+        },
+        {
+            "code": "NI-NS",
+            "name": "Nueva Segovia"
+        },
+        {
+            "code": "NI-RI",
+            "name": "Rivas"
+        },
+        {
+            "code": "NI-SJ",
+            "name": "Río San Juan"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/ni"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

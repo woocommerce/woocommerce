@@ -9,8 +9,8 @@
 
 namespace Automattic\WooCommerce\Testing\Tools\CodeHacking;
 
-use \ReflectionObject;
-use \ReflectionException;
+use ReflectionObject;
+use ReflectionException;
 
 /**
  * CodeHacker - allows to hack (alter on the fly) the content of PHP code files.
@@ -466,7 +466,7 @@ final class CodeHacker {
 	}
 
 	/**
-	 * Apply the reigstered hacks to the contents of a file.
+	 * Apply the registered hacks to the contents of a file.
 	 *
 	 * @param string $code Code content to hack.
 	 * @param string $path Path of the file being hacked.

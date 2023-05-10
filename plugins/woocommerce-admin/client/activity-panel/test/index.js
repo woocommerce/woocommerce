@@ -18,6 +18,20 @@ import { useState } from '@wordpress/element';
 import { ActivityPanel } from '../activity-panel';
 import { Panel } from '../panel';
 
+jest.mock( '@woocommerce/admin-layout', () => {
+	const mockContext = {
+		layoutPath: [ 'home' ],
+		layoutString: 'home',
+		extendLayout: () => {},
+		isDescendantOf: () => false,
+	};
+	return {
+		...jest.requireActual( '@woocommerce/admin-layout' ),
+		useLayoutContext: jest.fn().mockReturnValue( mockContext ),
+		useExtendLayout: jest.fn().mockReturnValue( mockContext ),
+	};
+} );
+
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
 	useUser: jest.fn().mockReturnValue( { currentUserCan: () => true } ),
@@ -205,7 +219,7 @@ describe( 'Activity Panel', () => {
 		expect( getByText( 'Finish setup' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should not render the finish setup link when a user does not have capabilties', () => {
+	it( 'should not render the finish setup link when a user does not have capabilities', () => {
 		useUser.mockImplementation( () => ( {
 			currentUserCan: () => false,
 		} ) );

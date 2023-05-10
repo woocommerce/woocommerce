@@ -52,7 +52,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 			</li>
 			<li class="marketplace-header__tab">
 				<a
-					class="marketplace-header__tab-link"
+					class="marketplace-header__tab-link marketplace-header__tab-link_helper"
 					href="<?php echo esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ); ?>"
 				>
 					<?php

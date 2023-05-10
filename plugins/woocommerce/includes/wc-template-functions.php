@@ -339,6 +339,12 @@ function wc_body_class( $classes ) {
 		}
 	}
 
+	if ( wc_block_theme_has_styles_for_element( 'button' ) ) {
+
+		$classes[] = 'woocommerce-block-theme-has-button-styles';
+
+	}
+
 	$classes[] = 'woocommerce-no-js';
 
 	add_action( 'wp_footer', 'wc_no_js' );
@@ -811,7 +817,7 @@ function wc_privacy_policy_page_id() {
 }
 
 /**
- * See if the checkbox is enabled or not based on the existance of the terms page and checkbox text.
+ * See if the checkbox is enabled or not based on the existence of the terms page and checkbox text.
  *
  * @since 3.4.0
  * @return bool
@@ -1217,7 +1223,10 @@ if ( ! function_exists( 'woocommerce_template_loop_category_link_open' ) ) {
 	 * @param int|object|string $category Category ID, Object or String.
 	 */
 	function woocommerce_template_loop_category_link_open( $category ) {
-		echo '<a href="' . esc_url( get_term_link( $category, 'product_cat' ) ) . '">';
+		$category_term = get_term( $category, 'product_cat' );
+		$category_name = ( ! $category_term || is_wp_error( $category_term ) ) ? '' : $category_term->name;
+		/* translators: %s: Category name */
+		echo '<a aria-label="' . sprintf( esc_attr__( 'Visit product category %1$s', 'woocommerce' ), esc_attr( $category_name ) ) . '" href="' . esc_url( get_term_link( $category, 'product_cat' ) ) . '">';
 	}
 }
 
@@ -1797,6 +1806,7 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 			// When autocomplete is enabled in firefox, it will overwrite actual value with what user entered last. So we default to off.
 			// See @link https://github.com/woocommerce/woocommerce/issues/30733.
 			'autocomplete' => apply_filters( 'woocommerce_quantity_input_autocomplete', 'off', $product ),
+			'readonly'     => false,
 		);
 
 		$args = apply_filters( 'woocommerce_quantity_input_args', wp_parse_args( $args, $defaults ), $product );
@@ -1810,8 +1820,25 @@ if ( ! function_exists( 'woocommerce_quantity_input' ) ) {
 			$args['max_value'] = $args['min_value'];
 		}
 
-		ob_start();
+		/**
+		 * The input type attribute will generally be 'number' unless the quantity cannot be changed, in which case
+		 * it will be set to 'hidden'. An exception is made for non-hidden readonly inputs: in this case we set the
+		 * type to 'text' (this prevents most browsers from rendering increment/decrement arrows, which are useless
+		 * and/or confusing in this context).
+		 */
+		$type = $args['min_value'] > 0 && $args['min_value'] === $args['max_value'] ? 'hidden' : 'number';
+		$type = $args['readonly'] && 'hidden' !== $type ? 'text' : $type;
 
+		/**
+		 * Controls the quantity input's type attribute.
+		 *
+		 * @since 7.4.0
+		 *
+		 * @param string $type A valid input type attribute value, usually 'number' or 'hidden'.
+		 */
+		$args['type'] = apply_filters( 'woocommerce_quantity_input_type', $type );
+
+		ob_start();
 		wc_get_template( 'global/quantity-input.php', $args );
 
 		if ( $echo ) {
@@ -2745,6 +2772,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'description'       => '',
 			'placeholder'       => '',
 			'maxlength'         => false,
+			'minlength'         => false,
 			'required'          => false,
 			'autocomplete'      => false,
 			'id'                => $key,
@@ -2788,6 +2816,10 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 		if ( $args['maxlength'] ) {
 			$args['custom_attributes']['maxlength'] = absint( $args['maxlength'] );
+		}
+
+		if ( $args['minlength'] ) {
+			$args['custom_attributes']['minlength'] = absint( $args['minlength'] );
 		}
 
 		if ( ! empty( $args['autocomplete'] ) ) {
@@ -3078,6 +3110,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 				'attribute'        => false,
 				'product'          => false,
 				'selected'         => false,
+				'required'         => false,
 				'name'             => '',
 				'id'               => '',
 				'class'            => '',
@@ -3099,6 +3132,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		$name                  = $args['name'] ? $args['name'] : 'attribute_' . sanitize_title( $attribute );
 		$id                    = $args['id'] ? $args['id'] : sanitize_title( $attribute );
 		$class                 = $args['class'];
+		$required              = (bool) $args['required'];
 		$show_option_none      = (bool) $args['show_option_none'];
 		$show_option_none_text = $args['show_option_none'] ? $args['show_option_none'] : __( 'Choose an option', 'woocommerce' ); // We'll do our best to hide the placeholder, but we'll need to show something when resetting options.
 
@@ -3107,7 +3141,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			$options    = $attributes[ $attribute ];
 		}
 
-		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '">';
+		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . ( $required ? ' required' : '' ) . '>';
 		$html .= '<option value="">' . esc_html( $show_option_none_text ) . '</option>';
 
 		if ( ! empty( $options ) ) {
@@ -3514,7 +3548,7 @@ function wc_display_product_attributes( $product ) {
 	 * Hook: woocommerce_display_product_attributes.
 	 *
 	 * @since 3.6.0.
-	 * @param array $product_attributes Array of atributes to display; label, value.
+	 * @param array $product_attributes Array of attributes to display; label, value.
 	 * @param WC_Product $product Showing attributes for this product.
 	 */
 	$product_attributes = apply_filters( 'woocommerce_display_product_attributes', $product_attributes, $product );
@@ -3644,7 +3678,10 @@ function wc_logout_url( $redirect = '' ) {
  * @since 3.1.0
  */
 function wc_empty_cart_message() {
-	echo '<p class="cart-empty woocommerce-info">' . wp_kses_post( apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) ) ) . '</p>';
+	$message = wp_kses_post( apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+	$notice  = wc_print_notice( $message, 'notice', array(), true );
+	$notice  = str_replace( 'class="woocommerce-info"', 'class="cart-empty woocommerce-info"', $notice );
+	echo $notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**

@@ -14,6 +14,7 @@ import {
 import { DragEvent, DragEventHandler, KeyboardEvent } from 'react';
 import { speak } from '@wordpress/a11y';
 import { throttle } from 'lodash';
+import { v4 } from 'uuid';
 
 /**
  * Internal dependencies
@@ -42,7 +43,7 @@ export type SortableProps = {
 
 const THROTTLE_TIME = 16;
 
-export const SortableContext = createContext( {} );
+export const SortableContext: React.Context< object > = createContext( {} );
 
 export const Sortable = ( {
 	children,
@@ -109,7 +110,7 @@ export const Sortable = ( {
 
 		// Items before the current item cause a one off error when
 		// removed from the old array and spliced into the new array.
-		// TODO: Issue with dragging into same position having to do with isBefore returning true intially.
+		// TODO: Issue with dragging into same position having to do with isBefore returning true initially.
 		let targetIndex = dragIndex < index ? index : index + 1;
 		if ( isBefore( event, isHorizontal ) ) {
 			targetIndex--;
@@ -265,7 +266,7 @@ export const Sortable = ( {
 						<SortableItem
 							key={ child.key || index }
 							className={ itemClasses }
-							id={ index }
+							id={ `${ index }-${ v4() }` }
 							index={ index }
 							isDragging={ isDragging }
 							isSelected={ selectedIndex === index }

@@ -1,0 +1,54 @@
+{
+    "code": "BO",
+    "name": "Bolivia",
+    "states": [
+        {
+            "code": "BO-B",
+            "name": "Beni"
+        },
+        {
+            "code": "BO-H",
+            "name": "Chuquisaca"
+        },
+        {
+            "code": "BO-C",
+            "name": "Cochabamba"
+        },
+        {
+            "code": "BO-L",
+            "name": "La Paz"
+        },
+        {
+            "code": "BO-O",
+            "name": "Oruro"
+        },
+        {
+            "code": "BO-N",
+            "name": "Pando"
+        },
+        {
+            "code": "BO-P",
+            "name": "Potosí"
+        },
+        {
+            "code": "BO-S",
+            "name": "Santa Cruz"
+        },
+        {
+            "code": "BO-T",
+            "name": "Tarija"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/bo"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

@@ -9,6 +9,15 @@ import { addFilter } from '@wordpress/hooks';
  */
 import { EmbeddedBodyLayout } from '../embedded-body-layout';
 
+jest.mock( '@woocommerce/customer-effort-score', () => ( {
+	triggerExitPageCesSurvey: jest.fn(),
+} ) );
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	resolveSelect: jest.fn().mockReturnValue( {
+		getOption: jest.fn(),
+	} ),
+} ) );
 jest.mock( '@woocommerce/data', () => ( {
 	useUser: () => ( {
 		currentUserCan: jest.fn(),

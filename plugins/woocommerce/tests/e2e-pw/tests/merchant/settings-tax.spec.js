@@ -29,7 +29,7 @@ test.describe( 'WooCommerce Tax Settings > enable', () => {
 	} );
 } );
 
-test.describe( 'WooCommerce Tax Settings', () => {
+test.describe.serial( 'WooCommerce Tax Settings', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { baseURL } ) => {
@@ -56,7 +56,9 @@ test.describe( 'WooCommerce Tax Settings', () => {
 	} );
 
 	test( 'can set tax options', async ( { page } ) => {
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=tax' );
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=tax', {
+			waitUntil: 'networkidle',
+		} );
 
 		// Make sure we're on the tax tab
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
@@ -105,7 +107,9 @@ test.describe( 'WooCommerce Tax Settings', () => {
 	} );
 
 	test( 'can add tax classes', async ( { page } ) => {
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=tax' );
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=tax', {
+			waitUntil: 'networkidle',
+		} );
 
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
 			'Tax'
@@ -136,10 +140,10 @@ test.describe( 'WooCommerce Tax Settings', () => {
 		).toContainText( 'Fancy rates' );
 	} );
 
-	// TODO: This test relies on the previous test completing successfully.
 	test( 'can set rate settings', async ( { page } ) => {
 		await page.goto(
-			'wp-admin/admin.php?page=wc-settings&tab=tax&section=fancy'
+			'wp-admin/admin.php?page=wc-settings&tab=tax&section=fancy',
+			{ waitUntil: 'networkidle' }
 		);
 
 		// Make sure the tax tab is active, with the "fancy" subsection

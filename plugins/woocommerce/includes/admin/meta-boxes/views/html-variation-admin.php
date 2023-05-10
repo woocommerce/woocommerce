@@ -9,6 +9,8 @@
  * @var array $variation_data array of variation data @deprecated 4.4.0.
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 ?>
@@ -279,9 +281,9 @@ defined( 'ABSPATH' ) || exit;
 
 				if ( wc_product_weight_enabled() ) {
 					$label = sprintf(
-						/* translators: %s: weight unit */
+						/* translators: %s: Weight unit */
 						__( 'Weight (%s)', 'woocommerce' ),
-						esc_html( get_option( 'woocommerce_weight_unit' ) )
+						I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) )
 					);
 
 					woocommerce_wp_text_input(
@@ -310,9 +312,9 @@ defined( 'ABSPATH' ) || exit;
 						<label for="product_length">
 							<?php
 							printf(
-								/* translators: %s: dimension unit */
+								/* translators: %s dimension unit */
 								esc_html__( 'Dimensions (L&times;W&times;H) (%s)', 'woocommerce' ),
-								esc_html( get_option( 'woocommerce_dimension_unit' ) )
+								esc_html( I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit' ) ) )
 							);
 							?>
 						</label>

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
-import { Logger } from 'cli-core/src/logger';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -41,7 +41,7 @@ const program = new Command()
 
 		const tmpFile = join(
 			tmpdir(),
-			`contributors-${ currentVersion }.html`
+			`contributors-${ currentVersion.replace( '/', '-' ) }.html`
 		);
 
 		await writeFile( tmpFile, html );

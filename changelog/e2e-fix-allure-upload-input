@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix the incorrect workflow input for uploading Allure reports.

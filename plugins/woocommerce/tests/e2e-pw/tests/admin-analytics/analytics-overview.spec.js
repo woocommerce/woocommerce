@@ -6,8 +6,7 @@ test.describe( 'Analytics pages', () => {
 	test.afterEach( async ( { page } ) => {
 		// do some cleanup after each test to make sure things are where they should be
 		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
-			{ waitForLoadState: 'networkidle' }
+			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
 
 		// Grab all of the section headings
@@ -36,7 +35,13 @@ test.describe( 'Analytics pages', () => {
 				'//button[@title="Choose which analytics to display and the section name"]'
 			);
 			await page.click( 'text=Move up' );
-			await page.waitForTimeout( 1000 );
+
+			// wait for the changes to be saved
+			await page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/users/' ) &&
+					response.status() === 200
+			);
 		}
 	} );
 
@@ -46,21 +51,21 @@ test.describe( 'Analytics pages', () => {
 		// Create an array of the sections we're expecting to find.
 		const arrExpectedSections = [ 'Charts', 'Leaderboards', 'Performance' ];
 		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview',
-			{ waitForLoadState: 'networkidle' }
+			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
-		// Grab all of the section headings
-		const sections = await page.$$(
-			'h2.woocommerce-section-header__title'
-		);
-		// Create an array with the section headings
-		const arrFoundSections = new Array();
-		for await ( const section of sections ) {
-			arrFoundSections.push( await section.innerText() );
+
+		for ( const expectedSection of arrExpectedSections ) {
+			await test.step(
+				`Assert that the "${ expectedSection }" section is visible`,
+				async () => {
+					await expect(
+						page.locator( 'h2.woocommerce-section-header__title', {
+							hasText: expectedSection,
+						} )
+					).toBeVisible();
+				}
+			);
 		}
-		await expect( arrFoundSections.sort() ).toEqual(
-			arrExpectedSections.sort()
-		);
 	} );
 
 	test.describe( 'moving sections', () => {
@@ -72,19 +77,23 @@ test.describe( 'Analytics pages', () => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 			);
-			// check the top section (Performance)
-			await page.click(
-				'//button[@title="Choose which analytics to display and the section name"]'
-			);
+			// check the top section
+			await page
+				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
+				.first()
+				.click();
 			await expect( page.locator( 'text=Move up' ) ).not.toBeVisible();
 			await expect( page.locator( 'text=Move down' ) ).toBeVisible();
+			await page.keyboard.press( 'Escape' );
 
-			// check the bottom section (Leaderboards)
-			await page.click(
-				'//button[@title="Choose which leaderboards to display and other settings"]'
-			);
+			// check the bottom section
+			await page
+				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
+				.last()
+				.click();
 			await expect( page.locator( 'text=Move down' ) ).not.toBeVisible();
 			await expect( page.locator( 'text=Move up' ) ).toBeVisible();
+			await page.keyboard.press( 'Escape' );
 		} );
 
 		test( 'should allow a user to move a section down', async ( {

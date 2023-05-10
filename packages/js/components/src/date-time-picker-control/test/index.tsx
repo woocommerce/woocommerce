@@ -103,6 +103,7 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
+			// @ts-expect-error TODO - fix this type error with moment
 			formatDate( default24HourDateTimeFormat, dateTime )
 		);
 	} );
@@ -122,6 +123,7 @@ describe( 'DateTimePickerControl', () => {
 		expect( input?.value ).toBe(
 			formatDate(
 				default24HourDateTimeFormat,
+				// @ts-expect-error TODO - fix this type error with moment
 				moment.utc( ambiguousISODateTimeString ).local()
 			)
 		);
@@ -142,6 +144,7 @@ describe( 'DateTimePickerControl', () => {
 		expect( input?.value ).toBe(
 			formatDate(
 				default24HourDateTimeFormat,
+				// @ts-expect-error TODO - fix this type error with moment
 				moment.utc( unambiguousISODateTimeString ).local()
 			)
 		);
@@ -159,6 +162,7 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
+			// @ts-expect-error TODO - fix this type error with moment
 			formatDate( default12HourDateTimeFormat, dateTime )
 		);
 	} );
@@ -175,6 +179,7 @@ describe( 'DateTimePickerControl', () => {
 		);
 
 		const input = container.querySelector( 'input' );
+		// @ts-expect-error TODO - fix this type error with moment
 		expect( input?.value ).toBe( formatDate( dateTimeFormat, dateTime ) );
 	} );
 
@@ -198,6 +203,7 @@ describe( 'DateTimePickerControl', () => {
 
 		const input = container.querySelector( 'input' );
 		expect( input?.value ).toBe(
+			// @ts-expect-error TODO - fix this type error with moment
 			formatDate( default24HourDateTimeFormat, updatedDateTime )
 		);
 	} );
@@ -659,4 +665,112 @@ describe( 'DateTimePickerControl', () => {
 
 		await waitFor( () => expect( onChangeHandler ).not.toHaveBeenCalled() );
 	} );
+
+	it( 'should not call onChange if currentDate is set to an equivalent UTC date without Zulu offset specifier', async () => {
+		const originalDateTime = '2023-01-01T00:00:00Z';
+		const equivalentDateTimeWithoutZulu = '2023-01-01T00:00:00';
+		const onChangeHandler = jest.fn();
+
+		const { rerender } = render(
+			<DateTimePickerControl
+				currentDate={ originalDateTime }
+				onChange={ onChangeHandler }
+			/>
+		);
+
+		// re-render the component; we do this to then test whether our onChange still gets called
+		rerender(
+			<DateTimePickerControl
+				currentDate={ equivalentDateTimeWithoutZulu }
+				onChange={ onChangeHandler }
+			/>
+		);
+
+		await waitFor( () => expect( onChangeHandler ).not.toHaveBeenCalled() );
+	} );
+
+	it( 'should not call onChange if currentDate is set to an equivalent UTC date without time', async () => {
+		const originalDateTime = '2023-01-01T00:00:00Z';
+		const equivalentDateTimeWithoutTime = '2023-01-01';
+		const onChangeHandler = jest.fn();
+
+		const { rerender } = render(
+			<DateTimePickerControl
+				currentDate={ originalDateTime }
+				onChange={ onChangeHandler }
+			/>
+		);
+
+		// re-render the component; we do this to then test whether our onChange still gets called
+		rerender(
+			<DateTimePickerControl
+				currentDate={ equivalentDateTimeWithoutTime }
+				onChange={ onChangeHandler }
+			/>
+		);
+
+		await waitFor( () => expect( onChangeHandler ).not.toHaveBeenCalled() );
+	} );
+
+	it( 'should not call onChange when the dateTimeFormat changes', async () => {
+		// we are specifically using a date with seconds in it, with a format
+		// without seconds in it; this helps us to determine if the currentDate
+		// is getting re-parsed from the input string (if it does this, it
+		// would result in a different date)
+		const originalDateTime = moment( '2022-11-15 02:30:40' );
+		const originalDateTimeFormat = 'm-d-Y, H:i';
+		const newDateTimeFormat = 'Y-m-d H:i';
+		const onChangeHandler = jest.fn();
+
+		const { rerender } = render(
+			<DateTimePickerControl
+				dateTimeFormat={ originalDateTimeFormat }
+				currentDate={ originalDateTime.toISOString() }
+				onChange={ onChangeHandler }
+			/>
+		);
+
+		// re-render the component; we do this to then test whether our onChange still gets called
+		rerender(
+			<DateTimePickerControl
+				dateTimeFormat={ newDateTimeFormat }
+				currentDate={ originalDateTime.toISOString() }
+				onChange={ onChangeHandler }
+			/>
+		);
+
+		await waitFor( () => expect( onChangeHandler ).not.toHaveBeenCalled() );
+	} );
+
+	// We need to bump up the timeout for this test because:
+	//     1. userEvent.type() is slow (see https://github.com/testing-library/user-event/issues/577)
+	//     2. moment.js is slow
+	// Otherwise, the following error can occur on slow machines (such as our CI), because Jest times out and starts
+	// tearing down the component while test microtasks are still being executed
+	// (see https://github.com/facebook/jest/issues/12670)
+	//       TypeError: Cannot read properties of null (reading 'createEvent')
+	it( 'should not call onChange when the input is changed to an equivalent date', async () => {
+		const originalDateTime = moment( '2022-09-15' );
+		const newDateTimeInputString = 'September 9, 2022';
+		const onChangeHandler = jest.fn();
+
+		const { container } = render(
+			<DateTimePickerControl
+				isDateOnlyPicker={ true }
+				currentDate={ originalDateTime.toISOString() }
+				onChange={ onChangeHandler }
+				onChangeDebounceWait={ 5000 }
+			/>
+		);
+
+		const input = container.querySelector( 'input' );
+		userEvent.type(
+			input!,
+			'{selectall}{backspace}' + newDateTimeInputString
+		);
+
+		await waitFor( () => expect( onChangeHandler ).not.toHaveBeenCalled(), {
+			timeout: 10000,
+		} );
+	}, 10000 );
 } );

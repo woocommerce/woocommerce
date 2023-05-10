@@ -714,16 +714,40 @@ function wc_get_customer_order_count( $user_id ) {
 function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 	global $wpdb;
 
-	$wpdb->update(
-		$wpdb->postmeta,
-		array(
-			'meta_value' => 0,
-		),
-		array(
-			'meta_key'   => '_customer_user',
-			'meta_value' => $user_id,
-		)
-	); // WPCS: slow query ok.
+	if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		$order_table_ds = wc_get_container()->get( OrdersTableDataStore::class );
+		$order_table    = $order_table_ds::get_orders_table_name();
+		$wpdb->update(
+			$order_table,
+			array(
+				'customer_id'      => 0,
+				'date_updated_gmt' => current_time( 'mysql', true ),
+			),
+			array(
+				'customer_id' => $user_id,
+			),
+			array(
+				'%d',
+				'%s',
+			),
+			array(
+				'%d',
+			)
+		);
+	}
+
+	if ( ! OrderUtil::custom_orders_table_usage_is_enabled() || OrderUtil::is_custom_order_tables_in_sync() ) {
+		$wpdb->update(
+			$wpdb->postmeta,
+			array(
+				'meta_value' => 0, //phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			),
+			array(
+				'meta_key'   => '_customer_user', //phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => $user_id, //phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+	}
 }
 
 add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );
@@ -779,7 +803,7 @@ add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
  * @param int    $meta_id     ID of the meta object that was changed.
  * @param int    $user_id     The user that was updated.
  * @param string $meta_key    Name of the meta key that was changed.
- * @param string $_meta_value Value of the meta that was changed.
+ * @param mixed  $_meta_value Value of the meta that was changed.
  */
 function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
 	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );

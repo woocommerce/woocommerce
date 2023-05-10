@@ -50,10 +50,11 @@ class WC_Widget_Products extends WC_Widget {
 				'std'     => 'date',
 				'label'   => __( 'Order by', 'woocommerce' ),
 				'options' => array(
-					'date'  => __( 'Date', 'woocommerce' ),
-					'price' => __( 'Price', 'woocommerce' ),
-					'rand'  => __( 'Random', 'woocommerce' ),
-					'sales' => __( 'Sales', 'woocommerce' ),
+					'menu_order' => __( 'Menu order', 'woocommerce' ),
+					'date'       => __( 'Date', 'woocommerce' ),
+					'price'      => __( 'Price', 'woocommerce' ),
+					'rand'       => __( 'Random', 'woocommerce' ),
+					'sales'      => __( 'Sales', 'woocommerce' ),
 				),
 			),
 			'order'       => array(
@@ -153,6 +154,9 @@ class WC_Widget_Products extends WC_Widget {
 		}
 
 		switch ( $orderby ) {
+			case 'menu_order':
+				$query_args['orderby'] = 'menu_order';
+				break;
 			case 'price':
 				$query_args['meta_key'] = '_price'; // WPCS: slow query ok.
 				$query_args['orderby']  = 'meta_value_num';

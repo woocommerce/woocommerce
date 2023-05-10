@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\API
  */
 
-use \Automattic\WooCommerce\Admin\API\OnboardingTasks;
+use Automattic\WooCommerce\Admin\API\OnboardingTasks;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
@@ -133,6 +133,32 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 		$product = wc_get_product( $data['id'] );
 		$this->assertEquals( 'auto-draft', $product->get_status() );
 		$this->assertEquals( 'simple', $product->get_type() );
+	}
+
+	/**
+	 * Test creating a product from a template with 'en_US' locale since this is handled differently.
+	 */
+	public function test_create_product_from_template_locale() {
+		wp_set_current_user( $this->user );
+
+		// Get the current user's locale.
+		$user_locale = get_user_locale();
+		switch_to_locale( 'en_US', $this->user );
+
+		$request = new WP_REST_Request( 'POST', $this->endpoint . '/create_product_from_template' );
+		$request->set_param( 'template_name', 'variable' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assertArrayHasKey( 'id', $data );
+		$product = wc_get_product( $data['id'] );
+		$this->assertEquals( 'auto-draft', $product->get_status() );
+		$this->assertEquals( 'variable', $product->get_type() );
+
+		// Set to initial locale.
+		switch_to_locale( $user_locale, $this->user );
 	}
 
 	/**

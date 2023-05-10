@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Move experimental product section components to @woocommerce/product-editor package.

@@ -20,14 +20,13 @@ import {
 	defaultTableDateFormat,
 	getCurrentDates,
 } from '@woocommerce/date';
-import { stringify } from 'qs';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { CurrencyContext } from '../../../lib/currency-context';
 
 const EMPTY_ARRAY = [];
 
@@ -308,7 +307,7 @@ const formatProps = memoize(
 		[
 			isError,
 			isRequesting,
-			stringify( tableQuery ),
+			new URLSearchParams( tableQuery ).toString(),
 			get( revenueData, [ 'totalResults' ], 0 ),
 			get( revenueData, [ 'data', 'intervals' ], EMPTY_ARRAY ).length,
 		].join( ':' )

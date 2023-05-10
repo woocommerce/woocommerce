@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\PageController
  */
 
-use \Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Admin\PageController;
 
 /**
  * WC_Admin_Tests_Page_Controller Class

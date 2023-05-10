@@ -39,7 +39,7 @@ foreach ( $tools as $action_name => $tool ) {
 								echo wp_kses_post( $selector['description'] );
 							}
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo "&nbsp;&nbsp;<select style='width: 300px;' form='form_$action_name' id='selector_$action_name' data-allow_clear='true' class='${selector['class']}' name='${selector['name']}' data-placeholder='${selector['placeholder']}' data-action='${selector['search_action']}'></select>";
+							echo "&nbsp;&nbsp;<select style='width: 300px;' form='form_$action_name' id='selector_$action_name' data-allow_clear='true' class='{$selector['class']}' name='{$selector['name']}' data-placeholder='{$selector['placeholder']}' data-action='{$selector['search_action']}'></select>";
 						}
 						?>
 					</p>

@@ -234,7 +234,7 @@ class PluginsHelper {
 					'api_version'           => $api->version,
 					'api_download_link'     => $api->download_link,
 					'upgrader_skin_message' => implode( ',', $upgrader->skin->get_upgrade_messages() ),
-					'result'                => $result,
+					'result'                => is_wp_error( $result ) ? $result->get_error_message() : 'null',
 				);
 				wc_admin_record_tracks_event( 'install_plugin_error', $properties );
 
@@ -332,7 +332,7 @@ class PluginsHelper {
 			}
 
 			$result = activate_plugin( $path );
-			if ( ! is_null( $result ) ) {
+			if ( ! is_plugin_active( $path ) ) {
 				/**
 				 * Action triggered when a plugin activation fails.
 				 *

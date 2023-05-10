@@ -30,9 +30,8 @@ module.exports = ( storybookConfig ) => {
 	storybookConfig.resolve.alias = wcAdminWebpackConfig.resolve.alias;
 
 	wcAdminPackages.forEach( ( name ) => {
-		storybookConfig.resolve.alias[
-			`@woocommerce/${ name }`
-		] = path.resolve( __dirname, `../../packages/js/${ name }/src` );
+		storybookConfig.resolve.alias[ `@woocommerce/${ name }` ] =
+			path.resolve( __dirname, `../../packages/js/${ name }/src` );
 	} );
 
 	storybookConfig.resolve.alias[ '@woocommerce/settings' ] = path.resolve(

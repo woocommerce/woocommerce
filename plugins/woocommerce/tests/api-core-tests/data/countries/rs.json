@@ -1,0 +1,146 @@
+{
+    "code": "RS",
+    "name": "Serbia",
+    "states": [
+        {
+            "code": "RS00",
+            "name": "Belgrade"
+        },
+        {
+            "code": "RS14",
+            "name": "Bor"
+        },
+        {
+            "code": "RS11",
+            "name": "Braničevo"
+        },
+        {
+            "code": "RS02",
+            "name": "Central Banat"
+        },
+        {
+            "code": "RS10",
+            "name": "Danube"
+        },
+        {
+            "code": "RS23",
+            "name": "Jablanica"
+        },
+        {
+            "code": "RS09",
+            "name": "Kolubara"
+        },
+        {
+            "code": "RS08",
+            "name": "Mačva"
+        },
+        {
+            "code": "RS17",
+            "name": "Morava"
+        },
+        {
+            "code": "RS20",
+            "name": "Nišava"
+        },
+        {
+            "code": "RS01",
+            "name": "North Bačka"
+        },
+        {
+            "code": "RS03",
+            "name": "North Banat"
+        },
+        {
+            "code": "RS24",
+            "name": "Pčinja"
+        },
+        {
+            "code": "RS22",
+            "name": "Pirot"
+        },
+        {
+            "code": "RS13",
+            "name": "Pomoravlje"
+        },
+        {
+            "code": "RS19",
+            "name": "Rasina"
+        },
+        {
+            "code": "RS18",
+            "name": "Raška"
+        },
+        {
+            "code": "RS06",
+            "name": "South Bačka"
+        },
+        {
+            "code": "RS04",
+            "name": "South Banat"
+        },
+        {
+            "code": "RS07",
+            "name": "Srem"
+        },
+        {
+            "code": "RS12",
+            "name": "Šumadija"
+        },
+        {
+            "code": "RS21",
+            "name": "Toplica"
+        },
+        {
+            "code": "RS05",
+            "name": "West Bačka"
+        },
+        {
+            "code": "RS15",
+            "name": "Zaječar"
+        },
+        {
+            "code": "RS16",
+            "name": "Zlatibor"
+        },
+        {
+            "code": "RS25",
+            "name": "Kosovo"
+        },
+        {
+            "code": "RS26",
+            "name": "Peć"
+        },
+        {
+            "code": "RS27",
+            "name": "Prizren"
+        },
+        {
+            "code": "RS28",
+            "name": "Kosovska Mitrovica"
+        },
+        {
+            "code": "RS29",
+            "name": "Kosovo-Pomoravlje"
+        },
+        {
+            "code": "RSKM",
+            "name": "Kosovo-Metohija"
+        },
+        {
+            "code": "RSVO",
+            "name": "Vojvodina"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/rs"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

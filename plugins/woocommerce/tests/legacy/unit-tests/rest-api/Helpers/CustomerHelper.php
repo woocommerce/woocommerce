@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_Customer;
+use WC_Customer;
 
 /**
  * Class CustomerHelper.

@@ -1,0 +1,17 @@
+.woocommerce-product-status {
+	margin-left: $gap-smaller;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	color: $gray-700;
+	border-color: $gray-700;
+
+	&.is-instock {
+		color: #00a32a;
+		border-color: #00a32a;
+	}
+
+	&.is-outofstock {
+		color: #cc1818;
+		border-color: #cc1818;
+	}
+}

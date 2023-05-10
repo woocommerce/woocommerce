@@ -126,7 +126,7 @@ class Homescreen {
 		if (
 			( 'US' === $country_code && $is_jetpack_installed )
 			||
-			( ! in_array( $country_code, array( 'US', 'CA', 'AU', 'GB' ), true ) )
+			( ! in_array( $country_code, array( 'CA', 'AU', 'GB', 'ES', 'IT', 'DE', 'FR', 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT', 'NL', 'AT', 'BE' ), true ) )
 			||
 			( 'US' === $country_code && false === $is_jetpack_installed && false === $is_wcs_installed )
 		) {

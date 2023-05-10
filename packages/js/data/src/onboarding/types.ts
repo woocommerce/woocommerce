@@ -25,6 +25,7 @@ export type TaskType = {
 	isActioned: boolean;
 	eventPrefix: string;
 	level: number;
+	recordViewEvent: boolean;
 	additionalData?: {
 		woocommerceTaxCountries?: string[];
 		taxJarActivated?: boolean;
@@ -74,7 +75,7 @@ export type OnboardingState = {
 	profileItems: ProfileItems;
 	taskLists: Record< string, TaskListType >;
 	paymentMethods: Plugin[];
-	productTypes: OnboardingProductType[];
+	productTypes: OnboardingProductTypes;
 	emailPrefill: string;
 	// TODO clarify what the error record's type is
 	errors: Record< string, unknown >;
@@ -128,6 +129,7 @@ export type ProfileItems = {
 	selling_venues?: string | null;
 	setup_client?: boolean | null;
 	skipped?: boolean | null;
+	/** @deprecated This is always null, the theme step has been removed since WC 7.7. */
 	theme?: string | null;
 	wccom_connected?: boolean | null;
 	is_agree_marketing?: boolean | null;
@@ -150,10 +152,20 @@ export type MethodFields = {
 };
 
 export type OnboardingProductType = {
-	default?: boolean;
 	label: string;
+	default?: boolean;
 	product?: number;
+	id?: number;
+	title?: string;
+	yearly_price?: number;
+	description?: string;
+	more_url?: string;
+	slug?: string;
 };
+
+export type OnboardingProductTypes =
+	| Record< ProductTypeSlug, OnboardingProductType >
+	| Record< string, never >;
 
 export type ExtensionList = {
 	key: string;

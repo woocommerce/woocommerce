@@ -7,10 +7,10 @@
  * @package WooCommerce\Admin
  */
 
-use \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
-use \Automattic\WooCommerce\Admin\Notes\Notes;
-use \Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
-use \Automattic\WooCommerce\Admin\ReportExporter;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
+use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
+use Automattic\WooCommerce\Admin\ReportExporter;
 
 /**
  * Update order stats `status` index length.

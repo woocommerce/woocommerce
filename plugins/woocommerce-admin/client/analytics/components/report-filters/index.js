@@ -6,6 +6,7 @@ import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { omitBy, isUndefined, snakeCase } from 'lodash';
 import { withSelect, withDispatch } from '@wordpress/data';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { ReportFilters as Filters } from '@woocommerce/components';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import {
@@ -14,12 +15,11 @@ import {
 	isoDateFormat,
 } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { CurrencyContext } from '../../../lib/currency-context';
-import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 import { LOCALE } from '~/utils/admin-settings';
 
 class ReportFilters extends Component {
@@ -45,7 +45,7 @@ class ReportFilters extends Component {
 		// This event gets triggered in the following cases.
 		// 1. Select "Single product" and choose a product.
 		// 2. Select "Comparison" or any other filter types.
-		// The comparsion and other filter types require a user to click
+		// The comparison and other filter types require a user to click
 		// a button to execute a query, so this is not a good place to
 		// trigger a CES survey for those.
 		const triggerCesFor = [

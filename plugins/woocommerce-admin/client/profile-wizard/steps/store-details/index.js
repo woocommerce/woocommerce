@@ -26,6 +26,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
 import { Icon, info } from '@wordpress/icons';
 import { isEmail } from '@wordpress/url';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -36,7 +37,6 @@ import {
 	getStoreAddressValidator,
 } from '../../../dashboard/components/settings/general/store-address';
 import UsageModal from '../usage-modal';
-import { CurrencyContext } from '../../../lib/currency-context';
 import { getAdminSetting } from '~/utils/admin-settings';
 import './style.scss';
 
@@ -181,7 +181,7 @@ export class StoreDetails extends Component {
 		 * `await` and performs an update aysnchronously. This means the following
 		 * screen may not be initialized with correct profile settings.
 		 *
-		 * This comment may be removed when a refactor to wp.data datatores is complete.
+		 * This comment may be removed when a refactor to wp.data datastores is complete.
 		 */
 		if (
 			region !== 'US' &&

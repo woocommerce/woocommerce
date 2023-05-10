@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix JS error when the business step is accessed directly via URL without completing the previous steps

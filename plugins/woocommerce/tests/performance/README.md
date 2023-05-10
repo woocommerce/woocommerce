@@ -11,7 +11,7 @@ Automated k6 performance tests for WooCommerce. To be used for benchmarking perf
   - [Config Variables](#config-variables)
 - [Scenarios](#scenarios)
 - [Running Tests](#running-tests)
-  - [Running Indvidual Tests](#running-individual-tests)
+  - [Running Individual Tests](#running-individual-tests)
   - [Running Scenarios](#running-scenarios)
   - [Debugging Tests](#debugging-tests)
   - [User Agent](#user-agent)
@@ -76,11 +76,11 @@ base_url | base URL of the test environment | yes `__ENV.URL`
 base_host | base host of the test environment (for use in headers) | yes `__ENV.HOST`
 admin_username | username for admin user | yes `__ENV.A_USER`
 admin_password | password for admin user | yes `__ENV.A_PW`
-admin_acc_login | set to true if site needs to use my account for admin login | yes `__ENV.A_PW`
+admin_acc_login | set to true if site needs to use my account for admin login | yes `__ENV.A_ACC_LOGIN`
 customer_username | username for customer user | yes `__ENV.C_USER`
 customer_password | password for customer user | yes `__ENV.C_PW`
 customer_user_id | user id for customer user | yes `__ENV.C_UID`
-cot_status | set to true if site is using order tables | yes `__ENV.C_PW`
+cot_status | set to true if site is using order tables | yes `__ENV.COT`
 admin_orders_base_url | url part for order urls when posts table is used | no
 cot_admin_orders_base_url | url part for order urls when orders table is used | no
 addresses_customer_billing_* | billing address details for existing customer user | no
@@ -102,10 +102,10 @@ think_time_max | maximum sleep time (in seconds) between each request | no
 ---
 ## Running Tests
 
-When refering to running k6 tests usually this means executing the test scenario. The test scenario file in turn determines which requests we run and how much load will be applied to them. It is also possible to execute individual test files containing requests and pass in scenario config as a CLI flag but scenario files allow for more configuration options.
+When referring to running k6 tests usually this means executing the test scenario. The test scenario file in turn determines which requests we run and how much load will be applied to them. It is also possible to execute individual test files containing requests and pass in scenario config as a CLI flag but scenario files allow for more configuration options.
 
 ---
-### Running Indvidual Tests
+### Running Individual Tests
 
 To execute an individual test file (for example `requests/shopper/shop-page.js`)  containing requests.
 
@@ -129,7 +129,7 @@ Another aspect that affects the traffic pattern of the tests is the amount of �
 To do this a sleep step is included between each request ``sleep(randomIntBetween(`${think_time_min}`, `${think_time_max}`))``.
 The amount of think time can be controlled from `config.js`.
 
->**_Note: It’s important to note to be very careful when adding load to a scenario. By accident a dangerous amount of load could be ran aginst the test environment that could effectively be like a denial-of-service attack on the test environment. Also important to consider any other consequences of running large load such as triggering of emails._**
+>**_Note: It’s important to note to be very careful when adding load to a scenario. By accident a dangerous amount of load could be ran against the test environment that could effectively be like a denial-of-service attack on the test environment. Also important to consider any other consequences of running large load such as triggering of emails._**
 
 To execute a test scenario (for example `tests/simple-all-requests.js`).
 
@@ -202,7 +202,7 @@ Create a custom Grafana dashboard using [these instructions](https://k6.io/docs/
 
 k6 tests rely on HTTP requests in order to test the backend. They can either be constructed from scratch, by using the k6 recorder, or by converting a HAR file.
 
-The k6 recorder is a browser extension which captures http requests generated as you perform actions in a tab. It generates a test with all the HTTP requests from your actions which can then be modified to make it execuatable.
+The k6 recorder is a browser extension which captures http requests generated as you perform actions in a tab. It generates a test with all the HTTP requests from your actions which can then be modified to make it executable.
 
 Alternatively any application which captures HTTP requests can be used to figure out the requests to include in a test such as the network section within browser developer tools.
 
@@ -246,9 +246,9 @@ Groups are used to organize common logic in the test scripts and can help with t
 
 Checks are like asserts but they don’t stop the tests if they record a failure (for example in a load test with 1000s of iterations of a request this allows for an isolated flakey iteration to not stop test execution).
 
-All requests have had checks for at least a `200` http status repsonse added and most also have an additional check for a string contained in the response body.
+All requests have had checks for at least a `200` http status response added and most also have an additional check for a string contained in the response body.
 
 ---
 ## Other Resources
 
-[k6 documention](https://k6.io/docs/) is a very useful resource for test creation and execution.
+[k6 documentation](https://k6.io/docs/) is a very useful resource for test creation and execution.

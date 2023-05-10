@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Export TreeSelectControl component and add additional props: onInputChange, alwaysShowPlaceholder, includeParent.

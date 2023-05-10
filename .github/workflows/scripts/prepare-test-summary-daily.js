@@ -92,7 +92,7 @@ const addSummaryHeadingAndTable = ( core ) => {
 	const apiTableRow = createAPITableRow();
 	const e2eTableRow = createE2ETableRow();
 
-	core.summary.addHeading( 'Smoke tests on trunk' ).addTable( [
+	core.summary.addHeading( 'Smoke tests on nightly build' ).addTable( [
 		[
 			{ data: 'Test :test_tube:', header: true },
 			{ data: 'Passed :white_check_mark:', header: true },

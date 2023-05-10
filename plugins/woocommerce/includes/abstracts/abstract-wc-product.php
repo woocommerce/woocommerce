@@ -820,7 +820,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( $this->get_object_read() && ! empty( $sku ) && ! wc_product_has_unique_sku( $this->get_id(), $sku ) ) {
 			$sku_found = wc_get_product_id_by_sku( $sku );
 
-			$this->error( 'product_invalid_sku', __( 'Invalid or duplicated SKU.', 'woocommerce' ), 400, array( 'resource_id' => $sku_found ) );
+			$this->error(
+				'product_invalid_sku',
+				__( 'Invalid or duplicated SKU.', 'woocommerce' ),
+				400,
+				array(
+					'resource_id' => $sku_found,
+					'unique_sku'  => wc_product_generate_unique_sku( $this->get_id(), $sku ),
+				)
+			);
 		}
 		$this->set_prop( 'sku', $sku );
 	}
@@ -1102,7 +1110,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *     position - integer sort order.
 	 *     visible - If visible on frontend.
 	 *     variation - If used for variations.
-	 * Indexed by unqiue key to allow clearing old ones after a set.
+	 * Indexed by unique key to allow clearing old ones after a set.
 	 *
 	 * @since 3.0.0
 	 * @param array $raw_attributes Array of WC_Product_Attribute objects.
@@ -1378,7 +1386,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			return;
 		}
 
-		$stock_is_above_notification_threshold = ( $this->get_stock_quantity() > get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
+		$stock_is_above_notification_threshold = ( (int) $this->get_stock_quantity() > absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) ) );
 		$backorders_are_allowed                = ( 'no' !== $this->get_backorders() );
 
 		if ( $stock_is_above_notification_threshold ) {

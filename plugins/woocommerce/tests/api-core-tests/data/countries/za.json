@@ -1,0 +1,54 @@
+{
+    "code": "ZA",
+    "name": "South Africa",
+    "states": [
+        {
+            "code": "EC",
+            "name": "Eastern Cape"
+        },
+        {
+            "code": "FS",
+            "name": "Free State"
+        },
+        {
+            "code": "GP",
+            "name": "Gauteng"
+        },
+        {
+            "code": "KZN",
+            "name": "KwaZulu-Natal"
+        },
+        {
+            "code": "LP",
+            "name": "Limpopo"
+        },
+        {
+            "code": "MP",
+            "name": "Mpumalanga"
+        },
+        {
+            "code": "NC",
+            "name": "Northern Cape"
+        },
+        {
+            "code": "NW",
+            "name": "North West"
+        },
+        {
+            "code": "WC",
+            "name": "Western Cape"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/za"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

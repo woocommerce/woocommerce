@@ -1,6 +1,10 @@
 /**
  * External dependencies
  */
+import {
+	WooHeaderNavigationItem,
+	WooHeaderPageTitle,
+} from '@woocommerce/admin-layout';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
@@ -9,7 +13,6 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { WooHeaderNavigationItem, WooHeaderPageTitle } from '~/header/utils';
 import { BackButton } from './back-button';
 
 export type TaskProps = {
