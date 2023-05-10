@@ -841,7 +841,11 @@ class ListTable extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $item ) {
-		return sprintf( '<input type="checkbox" name="%1$s[]" value="%2$s" />', esc_attr( $this->_args['singular'] ), esc_attr( $item->get_id() ) );
+		ob_start();
+		?>
+		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="<?php echo esc_attr( $this->_args['singular'] ); ?>" value="<?php echo esc_attr( $item->get_id() ); ?>" />
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
