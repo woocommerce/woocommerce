@@ -115,20 +115,35 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @since 7.8.0
 	 *
-	 * @param \WC_Order $order The current order
+	 * @param \WC_Order $order The current order.
 	 */
 	public function single_row( $order ) {
-		// CSS classes.
+		/**
+		 * Filters the list of CSS class names for a given order row in the orders list table.
+		 *
+		 * @since 7.8.0
+		 *
+		 * @param string[]  $classes An array of CSS class names.
+		 * @param \WC_Order $order   The order object.
+		 */
 		$css_classes = apply_filters(
 			'woocommerce_' . $this->order_type . '_list_table_order_css_classes',
 			array(
 				'order-' . $order->get_id(),
 				'type-' . $order->get_type(),
 				'status-' . $order->get_status(),
-			)
+			),
+			$order
 		);
 		$css_classes = array_unique( array_map( 'trim', $css_classes ) );
-		echo '<tr id="order-' . $order->get_id() . '" class="' . esc_attr( implode( ' ', $css_classes ) ) . '">';
+
+		// Is locked?
+		$edit_lock = wc_get_container()->get( EditLock::class );
+		if ( $edit_lock->is_locked_by_another_user( $order ) ) {
+			$css_classes[] = 'wp-locked';
+		}
+
+		echo '<tr id="order-' . esc_attr( $order->get_id() ) . '" class="' . esc_attr( implode( ' ', $css_classes ) ) . '">';
 		$this->single_row_columns( $order );
 		echo '</tr>';
 	}
@@ -308,6 +323,14 @@ class ListTable extends WP_List_Table {
 	 * @return string[] Array of CSS classes for the table tag.
 	 */
 	protected function get_table_classes() {
+		/**
+		 * Filters the list of CSS class names for the orders list table.
+		 *
+		 * @since 7.8.0
+		 *
+		 * @param string[] $classes    An array of CSS class names.
+		 * @param string   $order_type The order type.
+		 */
 		$css_classes = apply_filters(
 			'woocommerce_' . $this->order_type . '_list_table_css_classes',
 			array_merge(
@@ -316,7 +339,8 @@ class ListTable extends WP_List_Table {
 					'wc-orders-list-table',
 					'wc-orders-list-table-' . $this->order_type,
 				)
-			)
+			),
+			$this->order_type
 		);
 
 		return array_unique( array_map( 'trim', $css_classes ) );
