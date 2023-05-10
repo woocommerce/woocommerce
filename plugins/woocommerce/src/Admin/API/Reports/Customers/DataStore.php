@@ -878,14 +878,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Anonymize the customer data for a single order.
 	 *
 	 * @internal
-	 * @param int $order_id Order id.
+	 * @param int|WC_Order $order Order instance or ID.
 	 * @return void
 	 */
-	public static function anonymize_customer( $order_id ) {
+	public static function anonymize_customer( $order ) {
 		global $wpdb;
 
+		if ( ! is_object( $order ) ) {
+			$order = wc_get_order( absint( $order ) );
+		}		
+
 		$customer_id = $wpdb->get_var(
-			$wpdb->prepare( "SELECT customer_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id )
+			$wpdb->prepare( "SELECT customer_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order->get_id() )
 		);
 
 		if ( ! $customer_id ) {
