@@ -30,7 +30,7 @@ export const updateReleaseBranchChangelogs = async (
 		await checkoutRemoteBranch( tmpRepoPath, releaseBranch );
 	} catch ( e ) {
 		if ( e.message.includes( "couldn't find remote ref" ) ) {
-			Logger.warn(
+			Logger.error(
 				`${ releaseBranch } does not exist on ${ owner }/${ name }.`
 			);
 		}
