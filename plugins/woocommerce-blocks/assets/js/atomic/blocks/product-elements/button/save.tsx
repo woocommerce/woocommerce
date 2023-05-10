@@ -14,7 +14,10 @@ type Props = {
 };
 
 const Save = ( { attributes }: Props ): JSX.Element | null => {
-	if ( attributes.isDescendentOfQueryLoop ) {
+	if (
+		attributes.isDescendentOfQueryLoop ||
+		attributes.isDescendentOfSingleProductBlock
+	) {
 		return null;
 	}
 
