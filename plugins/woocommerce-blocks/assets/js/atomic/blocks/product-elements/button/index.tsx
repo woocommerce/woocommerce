@@ -1,11 +1,19 @@
-/* eslint-disable @wordpress/no-unsafe-wp-apis */
 /**
  * External dependencies
  */
+import { Icon, button } from '@wordpress/icons';
+import { registerBlockType } from '@wordpress/blocks';
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { __experimentalGetSpacingClassesAndStyles } from '@wordpress/block-editor';
+/**
+ * Internal dependencies
+ */
+import edit from './edit';
+import save from './save';
+import metadata from './block.json';
 
-export const supports = {
+const featurePluginSupport = {
+	...metadata.supports,
 	...( isFeaturePluginBuild() && {
 		color: {
 			text: true,
@@ -47,3 +55,22 @@ export const supports = {
 			},
 		} ),
 };
+// @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
+registerBlockType( metadata, {
+	icon: {
+		src: (
+			<Icon
+				icon={ button }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
+	},
+	attributes: {
+		...metadata.attributes,
+	},
+	supports: {
+		...featurePluginSupport,
+	},
+	edit,
+	save,
+} );
