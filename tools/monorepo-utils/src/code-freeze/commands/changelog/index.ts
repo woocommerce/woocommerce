@@ -25,7 +25,7 @@ export const changelogCommand = new Command( 'changelog' )
 		'woocommerce'
 	)
 	.option(
-		'-d --devRepoPath <devRepoPath>',
+		'-d --dev-repo-path <devRepoPath>',
 		'Path to existing repo. Use this option to avoid cloning a fresh repo for development purposes. Note that using this option assumes dependencies are already installed.'
 	)
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
