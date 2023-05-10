@@ -75,8 +75,8 @@ export const ComboBox = ( {
 					<input
 						{ ...inputProps }
 						ref={ ( node ) => {
+							inputRef.current = node;
 							if ( typeof inputProps.ref === 'function' ) {
-								inputRef.current = node;
 								(
 									inputProps.ref as unknown as (
 										node: HTMLInputElement | null

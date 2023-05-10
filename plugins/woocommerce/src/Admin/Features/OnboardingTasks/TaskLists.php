@@ -253,7 +253,7 @@ class TaskLists {
 	}
 
 	/**
-	 * Temporarily store the active task to persist across page loads when neccessary.
+	 * Temporarily store the active task to persist across page loads when necessary.
 	 * Most tasks do not need this.
 	 */
 	public static function set_active_task() {

@@ -10,7 +10,7 @@ Currently, development efforts have been focused on two primary areas:
 
 ## Analytics
 
-With WooCommerce installed, a new Analytics menu item is created in the wp-admin menu system. This menu item, and the reports contained insde of it are available to all wp-admin users that have the `view_woocommerce_reports` capability, so per a standard WooCommerce install this would give `shop_manager`s and `administrator`s access to the reports.
+With WooCommerce installed, a new Analytics menu item is created in the wp-admin menu system. This menu item, and the reports contained inside of it are available to all wp-admin users that have the `view_woocommerce_reports` capability, so per a standard WooCommerce install this would give `shop_manager`s and `administrator`s access to the reports.
 
 Each report is quite unique with its own set of filtering options and chart types. To learn more about each individual report, please view the pages below:
 

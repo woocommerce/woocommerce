@@ -158,7 +158,7 @@ export type TableCardProps = CommonTableProps & {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	onQueryChange?: ( param: string ) => ( ...props: any ) => void;
 	/**
-	 * A function which returns a callback function which is called upon the user changing the visiblity of columns.
+	 * A function which returns a callback function which is called upon the user changing the visibility of columns.
 	 */
 	onColumnsChange?: ( showCols: Array< string >, key?: string ) => void;
 	/**

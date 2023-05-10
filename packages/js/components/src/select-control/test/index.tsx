@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createElement } from '@wordpress/element';
@@ -9,10 +10,11 @@ import { createElement } from '@wordpress/element';
  * Internal dependencies
  */
 import { SelectControl } from '../index';
+import { Option } from '../types';
 
 describe( 'SelectControl', () => {
 	const query = 'lorem';
-	const options = [
+	const options: Option[] = [
 		{ key: '1', label: 'lorem 1', value: { id: '1' } },
 		{ key: '2', label: 'lorem 2', value: { id: '2' } },
 		{ key: '3', label: 'bar', value: { id: '3' } },
@@ -168,9 +170,9 @@ describe( 'SelectControl', () => {
 	} );
 
 	it( 'changes the options on search', async () => {
-		const queriedOptions = [];
+		const queriedOptions: Option[] = [];
 		// eslint-disable-next-line @typescript-eslint/no-shadow
-		const queryOptions = ( options, searchedQuery ) => {
+		const queryOptions = async ( options: Option[], searchedQuery: string | null ) => {
 			if ( searchedQuery === 'test' ) {
 				queriedOptions.push( {
 					key: 'test-option',
@@ -209,7 +211,7 @@ describe( 'SelectControl', () => {
 				isSearchable
 				showAllOnFocus
 				options={ options }
-				onSearch={ () => options }
+				onSearch={ async () => options }
 				onFilter={ () => options }
 				onChange={ onChangeMock }
 			/>
@@ -229,7 +231,7 @@ describe( 'SelectControl', () => {
 					isSearchable
 					selected={ [ { ...options[ 0 ] } ] }
 					options={ options }
-					onSearch={ () => options }
+					onSearch={ async () => options }
 					onFilter={ () => options }
 					onChange={ onChangeMock }
 				/>
@@ -258,7 +260,7 @@ describe( 'SelectControl', () => {
 					isSearchable
 					selected={ options[ 0 ].key }
 					options={ options }
-					onSearch={ () => options }
+					onSearch={ async () => options }
 					onFilter={ () => options }
 					onChange={ onChangeMock }
 				/>
@@ -289,7 +291,7 @@ describe( 'SelectControl', () => {
 						showAllOnFocus
 						selected={ options[ 2 ].key }
 						options={ options }
-						onSearch={ () => options }
+						onSearch={ async () => options }
 						onFilter={ () => options }
 						onChange={ onChangeMock }
 						excludeSelectedOptions={ false }
@@ -316,7 +318,7 @@ describe( 'SelectControl', () => {
 						showAllOnFocus
 						selected={ options[ 2 ].key }
 						options={ options }
-						onSearch={ () => options }
+						onSearch={ async () => options }
 						onFilter={ () => options }
 						onChange={ onChangeMock }
 						excludeSelectedOptions={ false }
@@ -364,7 +366,7 @@ describe( 'SelectControl', () => {
 						isSearchable
 						selected={ [ { ...options[ 0 ] } ] }
 						options={ options }
-						onSearch={ () => options }
+						onSearch={ async () => options }
 						onFilter={ () => options }
 						onChange={ onChangeMock }
 					/>
@@ -383,7 +385,7 @@ describe( 'SelectControl', () => {
 						isSearchable
 						selected={ options[ 0 ].key }
 						options={ options }
-						onSearch={ () => options }
+						onSearch={ async () => options }
 						onFilter={ () => options }
 						onChange={ onChangeMock }
 					/>
@@ -416,9 +418,8 @@ describe( 'SelectControl', () => {
 			const { getByRole } = render(
 				<SelectControl
 					options={ options }
-					onSearch={ () => options }
+					onSearch={ async () => options }
 					onFilter={ () => options }
-					selected={ null }
 				/>
 			);
 
@@ -440,7 +441,7 @@ describe( 'SelectControl', () => {
 			const { getByRole } = render(
 				<SelectControl
 					options={ options }
-					onSearch={ () => options }
+					onSearch={ async () => options }
 					onFilter={ () => options }
 					selected={ options[ 1 ].key }
 					excludeSelectedOptions={ false }
@@ -465,7 +466,7 @@ describe( 'SelectControl', () => {
 			const { getByRole } = render(
 				<SelectControl
 					options={ options }
-					onSearch={ () => options }
+					onSearch={ async () => options }
 					onFilter={ () => options }
 					selected={ options[ options.length - 1 ].key }
 					excludeSelectedOptions={ false }
@@ -490,9 +491,8 @@ describe( 'SelectControl', () => {
 			const { getByRole } = render(
 				<SelectControl
 					options={ options }
-					onSearch={ () => options }
+					onSearch={ async () => options }
 					onFilter={ () => options }
-					selected={ null }
 				/>
 			);
 
@@ -514,9 +514,8 @@ describe( 'SelectControl', () => {
 			const { getByRole, queryByRole } = render(
 				<SelectControl
 					options={ options }
-					onSearch={ () => options }
+					onSearch={ async () => options }
 					onFilter={ () => options }
-					selected={ null }
 				/>
 			);
 
@@ -537,9 +536,8 @@ describe( 'SelectControl', () => {
 			const { getByRole } = render(
 				<SelectControl
 					options={ options }
-					onSearch={ () => options }
+					onSearch={ async () => options }
 					onFilter={ () => options }
-					selected={ null }
 					excludeSelectedOptions={ false }
 					onChange={ onChangeMock }
 				/>

@@ -147,9 +147,9 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 	}, [] );
 
 	const getVisiblePartners = () => {
-		const countryCode = getCountryCode(
-			generalSettings?.woocommerce_default_country
-		);
+		const countryCode =
+			getCountryCode( generalSettings?.woocommerce_default_country ) ||
+			'';
 		const {
 			additionalData: {
 				woocommerceTaxCountries = [],
@@ -164,11 +164,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 				component: WooCommerceTax,
 				isVisible:
 					! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
-					woocommerceTaxCountries.includes(
-						getCountryCode(
-							generalSettings?.woocommerce_default_country
-						)
-					),
+					woocommerceTaxCountries.includes( countryCode ),
 			},
 			{
 				id: 'avalara',

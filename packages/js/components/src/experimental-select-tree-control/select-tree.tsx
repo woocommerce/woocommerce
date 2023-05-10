@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { createElement, useState } from '@wordpress/element';
+import { chevronDown } from '@wordpress/icons';
 import classNames from 'classnames';
-import { search } from '@wordpress/icons';
+import { createElement, useState } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { TextControl } from '@wordpress/components';
 
@@ -30,7 +30,7 @@ interface SelectTreeProps extends TreeControlProps {
 export const SelectTree = function SelectTree( {
 	items,
 	treeRef: ref,
-	suffix = <SuffixIcon icon={ search } />,
+	suffix = <SuffixIcon icon={ chevronDown } />,
 	placeholder,
 	isLoading,
 	onInputChange,
@@ -38,13 +38,19 @@ export const SelectTree = function SelectTree( {
 	...props
 }: SelectTreeProps ) {
 	const linkedTree = useLinkedTree( items );
+	const selectTreeInstanceId = useInstanceId(
+		SelectTree,
+		'woocommerce-experimental-select-tree-control__dropdown'
+	);
 	const menuInstanceId = useInstanceId(
 		SelectTree,
 		'woocommerce-select-tree-control__menu'
 	);
-
-	const [ isFocused, setIsFocused ] = useState( false );
-	const [ isOpen, setIsOpen ] = useState( false );
+	const isEventOutside = ( event: React.FocusEvent ) => {
+		return ! document
+			.querySelector( '.' + selectTreeInstanceId )
+			?.contains( event.relatedTarget );
+	};
 
 	const recalculateInputValue = () => {
 		if ( onInputChange ) {
@@ -62,12 +68,9 @@ export const SelectTree = function SelectTree( {
 		 )?.focus();
 	};
 
-	const isInsideDropdown = (
-		event: React.FocusEvent< HTMLInputElement, Element >
-	) =>
-		document
-			.querySelector( '.' + menuInstanceId )
-			?.contains( event.relatedTarget );
+	const [ isFocused, setIsFocused ] = useState( false );
+	const [ isOpen, setIsOpen ] = useState( false );
+	const isReadOnly = ! isOpen && ! isFocused;
 
 	const inputProps: React.InputHTMLAttributes< HTMLInputElement > = {
 		className: 'woocommerce-experimental-select-control__input',
@@ -82,7 +85,7 @@ export const SelectTree = function SelectTree( {
 			setIsFocused( true );
 		},
 		onBlur: ( event ) => {
-			if ( isOpen && ! isInsideDropdown( event ) ) {
+			if ( isOpen && isEventOutside( event ) ) {
 				setIsOpen( false );
 				recalculateInputValue();
 			}
@@ -111,14 +114,19 @@ export const SelectTree = function SelectTree( {
 
 	return (
 		<div
-			className="woocommerce-experimental-select-tree-control__dropdown"
+			className={ `woocommerce-experimental-select-tree-control__dropdown ${ selectTreeInstanceId }` }
 			tabIndex={ -1 }
 		>
 			<div
 				className={ classNames(
 					'woocommerce-experimental-select-control',
 					{
+						'is-read-only': isReadOnly,
 						'is-focused': isFocused,
+						'is-multiple': props.multiple,
+						'has-selected-items':
+							Array.isArray( props.selected ) &&
+							props.selected.length,
 					}
 				) }
 			>
@@ -144,6 +152,7 @@ export const SelectTree = function SelectTree( {
 						suffix={ suffix }
 					>
 						<SelectedItems
+							isReadOnly={ isReadOnly }
 							items={ ( props.selected as Item[] ) || [] }
 							getItemLabel={ ( item ) => item?.label || '' }
 							getItemValue={ ( item ) => item?.value || '' }
@@ -153,7 +162,6 @@ export const SelectTree = function SelectTree( {
 									props.onRemove
 								) {
 									props.onRemove( item );
-									setIsOpen( false );
 								}
 							} }
 							getSelectedItemProps={ () => ( {} ) }
@@ -194,10 +202,13 @@ export const SelectTree = function SelectTree( {
 				id={ `${ props.id }-menu` }
 				className={ menuInstanceId.toString() }
 				ref={ ref }
+				isEventOutside={ isEventOutside }
 				isOpen={ isOpen }
 				items={ linkedTree }
 				shouldShowCreateButton={ shouldShowCreateButton }
-				onClose={ () => setIsOpen( false ) }
+				onClose={ () => {
+					setIsOpen( false );
+				} }
 			/>
 		</div>
 	);

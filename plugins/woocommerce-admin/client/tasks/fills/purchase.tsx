@@ -15,7 +15,13 @@ import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
 import CartModal from '../../dashboard/components/cart-modal';
 import { getCategorizedOnboardingProducts } from '../../dashboard/utils';
 
-const PurchaseTaskItem = ( { defaultTaskItem } ) => {
+type PurchaseTaskItemProps = {
+	defaultTaskItem: React.ComponentType< {
+		onClick: () => void;
+	} >;
+};
+
+const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
 	const [ cartModalOpen, setCartModalOpen ] = useState( false );
 
 	const { installedPlugins, productTypes, profileItems } = useSelect(
@@ -71,7 +77,7 @@ const PurchaseTaskItem = ( { defaultTaskItem } ) => {
 const PurchaseTaskItemFill = () => {
 	return (
 		<WooOnboardingTaskListItem id="purchase">
-			{ ( { defaultTaskItem } ) => (
+			{ ( { defaultTaskItem }: PurchaseTaskItemProps ) => (
 				<PurchaseTaskItem defaultTaskItem={ defaultTaskItem } />
 			) }
 		</WooOnboardingTaskListItem>
@@ -79,6 +85,7 @@ const PurchaseTaskItemFill = () => {
 };
 
 registerPlugin( 'woocommerce-admin-task-purchase', {
+	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 	scope: 'woocommerce-tasks',
 	render: PurchaseTaskItemFill,
 } );
