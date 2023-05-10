@@ -929,10 +929,17 @@ class WC_Form_Handler {
 	 * @throws Exception On login error.
 	 */
 	public static function process_login() {
+
+		static $valid_nonce;
+
 		// The global form-login.php template used `_wpnonce` in template versions < 3.3.0.
 		$nonce_value = wc_get_var( $_REQUEST['woocommerce-login-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 
-		if ( isset( $_POST['login'], $_POST['username'], $_POST['password'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-login' ) ) {
+		if ( ! empty( $nonce_value ) ) {
+			$valid_nonce = wp_verify_nonce( $nonce_value, 'woocommerce-login' );
+		}
+
+		if ( isset( $_POST['login'], $_POST['username'], $_POST['password'] ) && $valid_nonce ) {
 
 			try {
 				$creds = array(
