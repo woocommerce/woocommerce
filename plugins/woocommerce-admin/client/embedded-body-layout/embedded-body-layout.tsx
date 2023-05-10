@@ -4,7 +4,6 @@
 import { applyFilters } from '@wordpress/hooks';
 import { useEffect } from '@wordpress/element';
 import { triggerExitPageCesSurvey } from '@woocommerce/customer-effort-score';
-import QueryString, { parse } from 'qs';
 import {
 	LayoutContextProvider,
 	getLayoutContextValue,
@@ -21,10 +20,8 @@ import './style.scss';
 
 type QueryParams = EmbeddedBodyProps;
 
-function isWPPage(
-	params: QueryParams | QueryString.ParsedQs
-): params is QueryParams {
-	return ( params as QueryParams ).page !== undefined;
+function isWPPage( params: URLSearchParams ): boolean {
+	return params.get( 'page' ) !== null;
 }
 
 const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
@@ -44,10 +41,10 @@ export const EmbeddedBodyLayout = () => {
 		triggerExitPageCesSurvey();
 	}, [] );
 
-	const query = parse( location.search.substring( 1 ) );
+	const query = new URLSearchParams( location.search );
 	let queryParams: QueryParams = { page: '', tab: '' };
 	if ( isWPPage( query ) ) {
-		queryParams = query;
+		queryParams = Object.fromEntries( query ) as QueryParams;
 	}
 	/**
 	 * Filter an array of body components for WooCommerce non-react pages.

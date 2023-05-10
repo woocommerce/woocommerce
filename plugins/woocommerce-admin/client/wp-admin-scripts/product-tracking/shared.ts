@@ -412,29 +412,44 @@ const attachProductTagsTracks = () => {
  * Attaches attributes tracks.
  */
 const attachAttributesTracks = () => {
-	function addNewTermEventHandler() {
-		recordEvent( 'product_attributes_add_term', {
-			page: 'product',
-		} );
-	}
+	attachEventListenerToParentForChildren( '#product_attributes', [
+		{
+			eventName: 'click',
+			childQuery: '.add_new_attribute',
+			callback: () => {
+				recordEvent( 'product_attributes_add_term', {
+					page: 'product',
+				} );
+			},
+		},
+	] );
+};
 
-	function addNewAttributeTermTracks() {
-		const addNewTermButtons = document.querySelectorAll(
-			'.woocommerce_attribute .add_new_attribute'
-		);
-		addNewTermButtons.forEach( ( button ) => {
-			button.removeEventListener( 'click', addNewTermEventHandler );
-			button.addEventListener( 'click', addNewTermEventHandler );
-		} );
-	}
-	addNewAttributeTermTracks();
-
+/**
+ * Attaches Tracks event for when a new custom attribute is added to a product.
+ */
+const attachAddCustomAttributeTracks = () => {
 	document
-		.querySelector( '.add_attribute' )
+		.querySelector( '#product_attributes .add_custom_attribute' )
 		?.addEventListener( 'click', () => {
-			setTimeout( () => {
-				addNewAttributeTermTracks();
-			}, 1000 );
+			recordEvent( 'product_attributes_buttons', {
+				action: 'add_new',
+			} );
+		} );
+};
+
+/**
+ * Attaches Tracks event for when an existing global attribute is added to a product.
+ */
+const attachAddExistingAttributeTracks = () => {
+	window
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore Need to use jQuery to hook up to the select2:select event since the select2 component is jQuery-based
+		?.jQuery( 'select.wc-attribute-search' )
+		.on( 'select2:select', function () {
+			recordEvent( 'product_attributes_buttons', {
+				action: 'add_existing',
+			} );
 		} );
 };
 
@@ -442,29 +457,8 @@ const attachAttributesTracks = () => {
  * Attaches product attributes tracks.
  */
 const attachProductAttributesTracks = () => {
-	document
-		.querySelector( '#product_attributes .add_custom_attribute' )
-		?.addEventListener( 'click', () => {
-			recordEvent( 'product_attributes_buttons', {
-				action: 'add_first_attribute',
-			} );
-		} );
-	document
-		.querySelector( '#product_attributes .add_attribute' )
-		?.addEventListener( 'click', () => {
-			// We verify that we are not adding an existing attribute to not
-			// duplicate the recorded event.
-			const selectElement = document.querySelector(
-				'.attribute_taxonomy'
-			) as HTMLSelectElement;
-			// Get the index of the selected option
-			const selectedIndex = selectElement.selectedIndex;
-			if ( selectElement.options[ selectedIndex ]?.value === '' ) {
-				recordEvent( 'product_attributes_buttons', {
-					action: 'add_new',
-				} );
-			}
-		} );
+	attachAddCustomAttributeTracks();
+	attachAddExistingAttributeTracks();
 
 	const attributesSection = '#product_attributes';
 
