@@ -24,7 +24,7 @@ import { getEnvVar } from '../../../core/environment';
 
 const getNextReleaseBranch = async ( options: {
 	owner?: string;
-	repo?: string;
+	name?: string;
 } ) => {
 	const latestReleaseVersion = await getLatestGithubReleaseVersion( options );
 	const nextReleaseVersion = WPIncrement( latestReleaseVersion );
