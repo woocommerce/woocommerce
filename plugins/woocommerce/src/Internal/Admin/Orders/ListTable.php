@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_List_Table;
 use WP_Screen;
@@ -107,6 +108,29 @@ class ListTable extends WP_List_Table {
 		set_screen_options();
 
 		add_action( 'manage_' . wc_get_page_screen_id( $this->order_type ) . '_custom_column', array( $this, 'render_column' ), 10, 2 );
+	}
+
+	/**
+	 * Generates content for a single row of the table.
+	 *
+	 * @since 7.8.0
+	 *
+	 * @param \WC_Order $order The current order
+	 */
+	public function single_row( $order ) {
+		// CSS classes.
+		$css_classes = apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_order_css_classes',
+			array(
+				'order-' . $order->get_id(),
+				'type-' . $order->get_type(),
+				'status-' . $order->get_status(),
+			)
+		);
+		$css_classes = array_unique( array_map( 'trim', $css_classes ) );
+		echo '<tr id="order-' . $order->get_id() . '" class="' . esc_attr( implode( ' ', $css_classes ) ) . '">';
+		$this->single_row_columns( $order );
+		echo '</tr>';
 	}
 
 	/**
@@ -274,6 +298,28 @@ class ListTable extends WP_List_Table {
 		}
 
 		return $actions;
+	}
+
+	/**
+	 * Gets a list of CSS classes for the WP_List_Table table tag.
+	 *
+	 * @since 7.8.0
+	 *
+	 * @return string[] Array of CSS classes for the table tag.
+	 */
+	protected function get_table_classes() {
+		$css_classes = apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_css_classes',
+			array_merge(
+				parent::get_table_classes(),
+				array(
+					'wc-orders-list-table',
+					'wc-orders-list-table-' . $this->order_type,
+				)
+			)
+		);
+
+		return array_unique( array_map( 'trim', $css_classes ) );
 	}
 
 	/**
