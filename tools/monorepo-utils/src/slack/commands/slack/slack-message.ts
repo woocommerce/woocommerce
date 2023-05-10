@@ -27,7 +27,7 @@ export const slackMessageCommand = new Command( 'message' )
 	)
 	.option(
 		'--dont-fail',
-		'Do not fail the command if the message fails to send.'
+		'Do not fail the command if a message fails to send to any channel.'
 	)
 	.action( async ( token, text, channels, { dontFail } ) => {
 		Logger.startTask(
@@ -62,11 +62,13 @@ export const slackMessageCommand = new Command( 'message' )
 
 				if ( ! response.ok || statusCode !== 200 ) {
 					Logger.error(
-						`Slack API returned an error: ${ response?.error }, message failed to send.`,
+						`Slack API returned an error: ${ response?.error }, message failed to send to ${ channel }.`,
 						shouldFail
 					);
 				} else {
-					Logger.notice( 'Slack message sent successfully' );
+					Logger.notice(
+						`Slack message sent successfully to channel: ${ channel }`
+					);
 				}
 			} catch ( e: unknown ) {
 				Logger.error( e, shouldFail );
