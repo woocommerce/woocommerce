@@ -199,6 +199,7 @@ class WC_AJAX {
 
 		// WP's heartbeat.
 		$ajax_heartbeat_callbacks = array(
+			'order_refresh_lock',
 			'check_locked_orders',
 		);
 		foreach ( $ajax_heartbeat_callbacks as $ajax_callback ) {
@@ -3336,6 +3337,17 @@ class WC_AJAX {
 	 */
 	private static function order_delete_meta() : void {
 		wc_get_container()->get( CustomMetaBox::class )->delete_meta_ajax();
+	}
+
+	/**
+	 * Hooked to 'heartbeat_received' on the edit order page to refresh the lock on an order being edited by the current user.
+	 *
+	 * @param array $response The heartbeat response to be sent.
+	 * @param array $data     Data sent through the heartbeat.
+	 * @return array Response to be sent.
+	 */
+	private static function order_refresh_lock( $response, $data ) : array {
+		return wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\Orders\EditLock::class )->refresh_lock_ajax( $response, $data );
 	}
 
 	/**
