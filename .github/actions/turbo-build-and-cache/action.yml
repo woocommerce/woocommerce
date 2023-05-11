@@ -1,9 +1,12 @@
-name: Turbo build and cache
-description: Perform a turbo build and cache the output. dispatches a build-and-cache_complete repo dispatch event.
+name: Setup, build, cache
+on:
+  pull_request:
+    paths-ignore:
+      - '**/changelog/**'
+description: Perform setup of dependencies and caches, performs repository_dispatch on completion.
 permissions: {}
 
 runs:
-    using: composite
     steps:
         - name: Setup PNPM
           uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
@@ -17,11 +20,25 @@ runs:
               cache: pnpm
               registry-url: 'https://registry.npmjs.org'
 
+        - name: Setup PHP
+          uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
+          with:
+              php-version: ${{ inputs.php-version }}
+              coverage: none
+              tools: phpcs, sirbrillig/phpcs-changed
+
+        - name: Cache Composer Dependencies
+          uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
+          with:
+              path: ~/.cache/composer/files
+              key: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
+              restore-keys: ${{ runner.os }}-php-${{ inputs.php-version }}-composer-
+
         - name: Install Node and PHP Dependencies
           shell: bash
           run: |
               pnpm -w install turbo
-              pnpm install --ignore-scripts
+              pnpm install ${{ steps.parse-input.outputs.INSTALL_FILTERS }}
 
         - name: Get branch name
           id: get_branch
@@ -46,13 +63,13 @@ runs:
         - name: Build
           if: ${{ inputs.build == 'true' }}
           shell: bash
-          run: pnpm -w exec turbo run turbo:build --cache-dir=".turbo"
+          run: pnpm -w exec turbo run turbo:build --cache-dir=".turbo" ${{ steps.parse-input.outputs.BUILD_FILTERS }}
 
         - name: Trigger dependent workflows
-          if: success()
-          uses: peter-evans/repository-dispatch@v1
-          with:
-              token: ${{ secrets.PAT_TOKEN_FOR_DISPATCH }}
-              repository: ${{ github.repository }}
-              event-type: build-and-cache-complete
-              client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+            if: success()
+            uses: peter-evans/repository-dispatch@v1
+            with:
+                token: ${{ secrets.PAT_TOKEN_REPO_DISPATCH }}
+                repository: ${{ github.repository }}
+                event-type: build-and-cache-complete
+                client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
