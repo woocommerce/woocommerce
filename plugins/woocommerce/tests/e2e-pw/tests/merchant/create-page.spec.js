@@ -41,7 +41,7 @@ test.describe( 'Can create a new page', () => {
 			.isVisible();
 
 		if ( welcomeModalVisible ) {
-			await page.getByRole( 'button', { name: 'Close dialog' } ).click();
+			await page.getByRole( 'button', { name: 'Close' } ).click();
 		}
 
 		await page
