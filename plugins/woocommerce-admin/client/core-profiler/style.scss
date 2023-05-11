@@ -124,6 +124,37 @@
 		}
 	}
 }
+.woocommerce-profiler-select-control__country {
+	max-width: 400px;
+	margin: auto auto 32px auto;
+	.woocommerce-select-control__option {
+		font-size: 13px;
+		&:hover {
+			background: #eff2fd;
+		}
+	}
+	.woocommerce-select-control__listbox {
+		box-shadow: 0px 2px 6px rgba( 0, 0, 0, 0.05 );
+		border: 1px solid #cccccc;
+		margin-top: 8px;
+	}
+
+	.woocommerce-select-control__control {
+		height: 40px;
+		padding: 12px;
+		label,
+		input {
+			font-size: 13px;
+			color: var( --wp-components-color-foreground, #757575 );
+		}
+		&.is-active {
+			border: 1px solid #3858e9;
+		}
+	}
+	#woocommerce-select-control__listbox-0 {
+		top: 40px !important;
+	}
+}
 .woocommerce-profiler-business-location {
 	display: flex;
 	flex-direction: column;
@@ -142,9 +173,15 @@
 			@include breakpoint( '<782px' ) {
 				margin-top: 52px;
 				margin-bottom: 40px;
-				h1,
+				h1 {
+					font-size: 32px;
+					line-height: 40px;
+					text-align: left;
+				}
 				h2 {
 					text-align: left;
+					font-size: 16px;
+					margin-bottom: 0;
 				}
 			}
 		}
@@ -170,24 +207,7 @@
 		.components-base-control__field {
 			height: 40px;
 		}
-		.woocommerce-profiler-select-control__country {
-			max-width: 400px;
-			margin: auto auto 32px auto;
-			.woocommerce-select-control__option {
-				font-size: 13px;
-			}
-			.woocommerce-select-control__control {
-				height: 40px;
-				padding: 12px;
-				label,
-				input {
-					font-size: 13px;
-				}
-			}
-			#woocommerce-select-control__listbox-0 {
-				top: 40px !important;
-			}
-		}
+
 		.woocommerce-select-control__control-icon {
 			display: none;
 		}

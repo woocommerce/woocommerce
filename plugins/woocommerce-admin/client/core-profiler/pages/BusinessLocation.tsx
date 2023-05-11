@@ -31,6 +31,8 @@ export const BusinessLocation = ( {
 		label: '',
 	} );
 
+	const inputLabel = __( 'Select country/region', 'woocommerce' );
+
 	return (
 		<div className="woocommerce-profiler-business-location">
 			<Navigation percentage={ navigationProgress } />
@@ -48,11 +50,8 @@ export const BusinessLocation = ( {
 				<SelectControl
 					className="woocommerce-profiler-select-control__country"
 					instanceId={ 1 }
-					label={
-						storeCountry.key === ''
-							? __( 'Select country/region', 'woocommerce' )
-							: ''
-					}
+					placeholder={ inputLabel }
+					label={ storeCountry.key === '' ? inputLabel : '' }
 					getSearchExpression={ ( query: string ) => {
 						return new RegExp(
 							'(^' + query + '| — (' + query + '))',
