@@ -1,26 +1,37 @@
 .wc-block-mini-cart__quantity-badge {
 	align-items: center;
 	display: flex;
+	position: relative;
 }
 
 .wc-block-mini-cart__badge {
 	align-items: center;
-	background: transparent;
-	border: 0.15em solid;
 	border-radius: 1em;
 	box-sizing: border-box;
-	color: inherit;
 	display: flex;
 	font-size: 0.875em;
 	font-weight: 600;
 	height: math.div(em(20px), 0.875);
 	justify-content: center;
-	margin-left: math.div(em(-10px), 0.875);
+	left: 100%;
+	margin-left: -44%;
 	min-width: math.div(em(20px), 0.875);
 	padding: 0 em($gap-smallest);
+	position: absolute;
 	transform: translateY(-50%);
+	transition: all 0.15s;
 	white-space: nowrap;
 	z-index: 1;
+}
+
+:where(.wc-block-mini-cart__badge) {
+	// These values will be overridden in JS.
+	background-color: transparent;
+	color: transparent;
+}
+
+.wc-block-mini-cart__badge:empty {
+	opacity: 0;
 }
 
 .wc-block-mini-cart__icon {
