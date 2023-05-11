@@ -390,14 +390,15 @@ export function addOrder( includeTests = {} ) {
 			] );
 
 			if ( cot_status === true ) {
-				admin_update_order_base = `${ admin_update_order_base }&id=${ hpos_post_id }`;
+				admin_update_order = `${ admin_update_order_base }&id=${ hpos_post_id }`;
 				admin_update_order_params = cotOrderParams.toString();
 			} else {
+				admin_update_order = admin_update_order_base;
 				admin_update_order_params = orderParams.toString();
 			}
 
 			response = http.post(
-				`${ base_url }/wp-admin/${ admin_update_order_base }`,
+				`${ base_url }/wp-admin/${ admin_update_order }`,
 				admin_update_order_params.toString(),
 				{
 					headers: requestHeaders,
