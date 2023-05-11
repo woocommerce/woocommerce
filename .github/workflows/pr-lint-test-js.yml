@@ -1,9 +1,11 @@
 name: Lint and tests for JS packages and woocommerce-admin/client
 
 on:
-    pull_request:
-        paths-ignore:
-            - '**/changelog/**'
+    repository_dispatch:
+        types: [build-and-cache-complete]
+        # pull_request:
+        #     paths-ignore:
+        #         - '**/changelog/**'
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
@@ -11,8 +13,11 @@ concurrency:
 permissions: {}
 
 jobs:
+    setup:
+        uses: ./.github/workflows/setup-repo.yml
     lint-test-js:
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
+        needs: setup
         name: Lint and Test JS
         runs-on: ubuntu-20.04
         permissions:
@@ -20,8 +25,10 @@ jobs:
         steps:
             - uses: actions/checkout@v3
 
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
+            # - name: Setup WooCommerce Monorepo
+            #   uses: ./.github/actions/setup-woocommerce-monorepo
+
+            # TODO - just restore cache here
 
             - name: Lint
               run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
