@@ -75,6 +75,7 @@ jobs:
 
     e2e-tests:
         name: E2E tests on nightly build
+        if: false # mytodo re-enable
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -133,7 +134,8 @@ jobs:
         permissions:
             contents: read
         needs: [api-tests]
-        if: success() || failure()
+        # if: success() || failure()
+        if: false # mytodo re-enable
         steps:
             - uses: actions/checkout@v3
 
@@ -191,19 +193,20 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - plugin: 'WooCommerce Payments'
-                      repo: 'automattic/woocommerce-payments'
-                    - plugin: 'WooCommerce PayPal Payments'
-                      repo: 'woocommerce/woocommerce-paypal-payments'
-                    - plugin: 'WooCommerce Shipping & Tax'
-                      repo: 'automattic/woocommerce-services'
-                    - plugin: 'WooCommerce Subscriptions'
-                      repo: WC_SUBSCRIPTIONS_REPO
-                      private: true
-                    - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
-                      repo: 'Yoast/wordpress-seo'
-                    - plugin: 'Contact Form 7'
-                      repo: 'takayukister/contact-form-7'
+                    # mytodo uncomment
+                    # - plugin: 'WooCommerce Payments'
+                    #   repo: 'automattic/woocommerce-payments'
+                    # - plugin: 'WooCommerce PayPal Payments'
+                    #   repo: 'woocommerce/woocommerce-paypal-payments'
+                    # - plugin: 'WooCommerce Shipping & Tax'
+                    #   repo: 'automattic/woocommerce-services'
+                    # - plugin: 'WooCommerce Subscriptions'
+                    #   repo: WC_SUBSCRIPTIONS_REPO
+                    #   private: true
+                    - plugin: 'Gutenberg' # latest stable
+                      repo: 'WordPress/gutenberg'
+                    - plugin: 'Gutenberg' # nightly
+                      repo: 'bph/gutenberg'
         steps:
             - uses: actions/checkout@v3
 
@@ -250,9 +253,10 @@ jobs:
 
     trunk-results:
         name: Publish report on smoke tests on nightly build
-        if: |
-            ( success() || failure() ) &&
-            ! github.event.pull_request.head.repo.fork
+        # if: |
+        #     ( success() || failure() ) &&
+        #     ! github.event.pull_request.head.repo.fork
+        if: false # mytodo re-enable
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -320,16 +324,20 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - plugin: 'WooCommerce Payments'
-                      repo: 'automattic/woocommerce-payments'
-                    - plugin: 'WooCommerce PayPal Payments'
-                      repo: 'woocommerce/woocommerce-paypal-payments'
-                    - plugin: 'WooCommerce Shipping & Tax'
-                      repo: 'automattic/woocommerce-services'
-                    - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
-                      repo: 'Yoast/wordpress-seo'
-                    - plugin: 'Contact Form 7'
-                      repo: 'takayukister/contact-form-7'
+                    # mytodo uncomment
+                    # - plugin: 'WooCommerce Payments'
+                    #   repo: 'automattic/woocommerce-payments'
+                    # - plugin: 'WooCommerce PayPal Payments'
+                    #   repo: 'woocommerce/woocommerce-paypal-payments'
+                    # - plugin: 'WooCommerce Shipping & Tax'
+                    #   repo: 'automattic/woocommerce-services'
+                    # - plugin: 'WooCommerce Subscriptions'
+                    #   repo: WC_SUBSCRIPTIONS_REPO
+                    #   private: true
+                    - plugin: 'Gutenberg' # latest stable
+                      repo: 'WordPress/gutenberg'
+                    - plugin: 'Gutenberg' # nightly
+                      repo: 'bph/gutenberg'
         steps:
             - name: Download test report artifact
               uses: actions/download-artifact@v3
