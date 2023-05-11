@@ -8,15 +8,6 @@ wp-env run tests-cli "wp plugin activate woocommerce"
 
 wp-env run tests-cli "wp user create customer customer@woocommercecoree2etestsuite.com --user_pass=password --role=subscriber --path=/var/www/html"
 
-# we cannot create API keys for the API, so we using basic auth, this plugin allows that.
-wp-env run tests-cli "wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --activate"
-
-# update permalinks to `pretty` to make it easier for testing APIs with k6
-wp-env run tests-cli "wp option update permalink_structure /%postname%/"
-
-# install the WP Mail Logging plugin to test emails
-wp-env run tests-cli "wp plugin install wp-mail-logging --activate"
-
 # Installing and activating the WordPress Importer plugin to import sample products"
 wp-env run tests-cli "wp plugin install wordpress-importer --activate"
 
@@ -43,8 +34,7 @@ wp-env run tests-cli "wp theme install storefront --activate"
 
 echo "Success! Your E2E Test Environment is now ready."
 
-
 if [ $ENABLE_HPOS == 1 ]; then
-	echo 'Enable the COT feature'
+	echo "Enable the COT feature"
 	wp-env run tests-cli "wp plugin install https://gist.github.com/vedanshujain/564afec8f5e9235a1257994ed39b1449/archive/b031465052fc3e04b17624acbeeb2569ef4d5301.zip --activate"
 fi

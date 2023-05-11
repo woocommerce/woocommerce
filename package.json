@@ -30,7 +30,7 @@
 		"create-extension": "node ./tools/create-extension/index.js",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
-		"utils": "./tools/monorepo-utils/bin/run"
+		"utils": "node ./tools/monorepo-utils/dist/index.js"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.20.2",
