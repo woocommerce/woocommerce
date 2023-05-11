@@ -50,7 +50,7 @@ const Edit = ( {
 	const blockProps = useBlockProps( {
 		/**
 		 * This is a workaround for the Site Editor to calculate the
-		 * correct height of the Mini Cart template part on the first load.
+		 * correct height of the Mini-Cart template part on the first load.
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5825
 		 */
@@ -73,7 +73,7 @@ const Edit = ( {
 
 	/**
 	 * This is a workaround for the Site Editor to set the correct
-	 * background color of the Mini Cart Contents block base on
+	 * background color of the Mini-Cart Contents block base on
 	 * the main background color set by the theme.
 	 */
 	useEffect( () => {

@@ -91,7 +91,7 @@ export const shopper = {
 	// This is important as we might one day merge this into core WC.
 	block: {
 		// All block pages have a title composed of the block name followed by "Block".
-		// E.g. "Checkout Block or Mini Cart Block". The permalinks are generated from
+		// E.g. "Checkout Block or Mini-Cart Block". The permalinks are generated from
 		// the page title so we can derive them directly
 		goToBlockPage: async ( blockName ) => {
 			const pageTitle = `${ blockName } Block`;

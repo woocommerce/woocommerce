@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
- * Mini Cart class.
+ * Mini-Cart class.
  *
  * @internal
  */
@@ -396,7 +396,7 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Append frontend scripts when rendering the Mini Cart block.
+	 * Append frontend scripts when rendering the Mini-Cart block.
 	 *
 	 * @param array    $attributes Block attributes.
 	 * @param string   $content    Block content.
@@ -408,7 +408,7 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Render the markup for the Mini Cart block.
+	 * Render the markup for the Mini-Cart block.
 	 *
 	 * @param array $attributes Block attributes.
 	 *
@@ -463,7 +463,7 @@ class MiniCart extends AbstractBlock {
 				return '';
 			}
 
-			// It is not necessary to load the Mini Cart Block on Cart and Checkout page.
+			// It is not necessary to load the Mini-Cart Block on Cart and Checkout page.
 			return '<div class="' . $wrapper_classes . '" style="visibility:hidden" aria-hidden="true">
 				<button class="wc-block-mini-cart__button" aria-label="' . esc_attr( $aria_label ) . '" disabled>' . $button_html . '</button>
 			</div>';
@@ -609,7 +609,7 @@ class MiniCart extends AbstractBlock {
 		register_block_pattern(
 			'woocommerce/mini-cart-empty-cart-message',
 			array(
-				'title'    => __( 'Empty Mini Cart Message', 'woo-gutenberg-products-block' ),
+				'title'    => __( 'Empty Mini-Cart Message', 'woo-gutenberg-products-block' ),
 				'inserter' => false,
 				'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your cart is currently empty!', 'woo-gutenberg-products-block' ) . '</strong></p><!-- /wp:paragraph -->',
 			)
@@ -617,7 +617,7 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
-	 * Returns whether the mini cart should be rendered or not.
+	 * Returns whether the Mini-Cart should be rendered or not.
 	 *
 	 * @param array $attributes Block attributes.
 	 *

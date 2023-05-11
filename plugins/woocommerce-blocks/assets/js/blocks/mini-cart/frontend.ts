@@ -155,7 +155,7 @@ window.addEventListener( 'load', () => {
 				? openDrawerWithRefresh
 				: loadContentsWithRefresh;
 
-		// There might be more than one Mini Cart block in the page. Make sure
+		// There might be more than one Mini-Cart block in the page. Make sure
 		// only one opens when adding a product to the cart.
 		if ( i === 0 ) {
 			document.body.addEventListener(
@@ -171,7 +171,7 @@ window.addEventListener( 'load', () => {
 
 	/**
 	 * Get the background color of the body then set it as the background color
-	 * of the Mini Cart Contents block. We use :where here to make customized
+	 * of the Mini-Cart Contents block. We use :where here to make customized
 	 * background color alway have higher priority.
 	 *
 	 * We only set the background color, instead of the whole background. As

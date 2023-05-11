@@ -1,8 +1,8 @@
 {
 	"name": "woocommerce/mini-cart-footer-block",
 	"version": "1.0.0",
-	"title": "Mini Cart Footer",
-	"description": "Block that displays the footer of the Mini Cart block.",
+	"title": "Mini-Cart Footer",
+	"description": "Block that displays the footer of the Mini-Cart block.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,

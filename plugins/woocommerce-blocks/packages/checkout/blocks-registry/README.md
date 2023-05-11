@@ -18,7 +18,7 @@
 -   [`hasInnerBlocks( blockName )`](#hasinnerblocks-blockname-)
     -   [Usage](#usage-2)
 
-This directory contains the Checkout Blocks Registry. This provides functions to **register new Inner Blocks** that can be inserted automatically, or optionally, within the Mini Cart, Cart and Checkout blocks in certain areas.
+This directory contains the Checkout Blocks Registry. This provides functions to **register new Inner Blocks** that can be inserted automatically, or optionally, within the Mini-Cart, Cart and Checkout blocks in certain areas.
 
 Registered Inner Blocks can either be forced within the layout of the Cart/Checkout Block, or they can just be made available to merchants so they can be inserted manually. Inner Blocks registered in this way can also define a component to render on the frontend in place of the Block.
 
