@@ -15,6 +15,6 @@ pnpm utils
 
 ## Development
 
-During development you can watch for changes via `pnpm build --watch` in this directory, this will
+During development you can watch for changes via `pnpm start` in this directory, this will
 update the script referenced at the root package.json so you will see immediate changes as you
 re-run the CLI.
