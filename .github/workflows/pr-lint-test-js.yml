@@ -10,8 +10,6 @@ concurrency:
 permissions: {}
 
 jobs:
-    setup:
-        uses: ./.github/workflows/setup-repo.yml
     lint-test-js:
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
         needs: setup
