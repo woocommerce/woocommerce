@@ -1,0 +1,83 @@
+<?php
+/**
+ * Plugin Name:       {{title}}
+{{#pluginURI}}
+ * Plugin URI:        {{{pluginURI}}}
+{{/pluginURI}}
+{{#description}}
+ * Description:       {{description}}
+{{/description}}
+ * Version:           {{version}}
+ * Requires at least: 6.1
+ * Requires PHP:      7.0
+{{#author}}
+ * Author:            {{author}}
+{{/author}}
+{{#license}}
+ * License:           {{license}}
+{{/license}}
+{{#licenseURI}}
+ * License URI:       {{{licenseURI}}}
+{{/licenseURI}}
+ * Text Domain:       {{textdomain}}
+{{#domainPath}}
+ * Domain Path:       {{{domainPath}}}
+{{/domainPath}}
+{{#updateURI}}
+ * Update URI:        {{{updateURI}}}
+{{/updateURI}}
+ *
+ * @package           {{namespace}}
+ */
+
+/**
+ * Registers the block using the metadata loaded from the `block.json` file.
+ * Behind the scenes, it registers also all assets so they can be enqueued
+ * through the block editor in the corresponding context.
+ *
+ * @see https://developer.wordpress.org/reference/functions/register_block_type/
+ */
+function {{namespaceSnakeCase}}_{{slugSnakeCase}}_block_init() {
+	register_block_type( __DIR__ . '/build' );
+}
+add_action( 'init', '{{namespaceSnakeCase}}_{{slugSnakeCase}}_block_init' );
+
+function {{namespaceSnakeCase}}_{{slugSnakeCase}}_add_block_to_product_editor( $args ) {
+	$template = $args['template'];
+
+	// find the 'Basic details' section and add our block to the end of it
+	foreach ( $template as $tab_index => $tab ) {
+		$tab_properties = $tab[1];
+
+		if ( 'general' === $tab_properties['id'] ) {
+			$tab_sections = $tab[2];
+
+			foreach ( $tab_sections as $section_index => $section ) {
+				$section_properties = $section[1];
+
+				// TODO: this is not the right way to do this, since it is checking a localized string.
+				if ( 'Basic details' === $section_properties['title'] ) {
+					$section_fields = $section[2];
+
+					// add our block to the end of the section
+					$section_fields[] = [
+						'{{namespace}}/{{slug}}',
+						[
+							'message' => '{{title}}',
+						]
+					];
+
+					// update the template with our new block
+					$args[ 'template' ][ $tab_index ][2][ $section_index ][2] = $section_fields;
+
+					break;
+				}
+			}
+
+			break;
+		}
+	}
+
+	return $args;
+}
+add_filter( 'woocommerce_register_post_type_product', '{{namespaceSnakeCase}}_{{slugSnakeCase}}_add_block_to_product_editor' );
