@@ -15,7 +15,7 @@
 
 ## The problem
 
-You want to extend the Mini Cart, Cart and Checkout blocks, but you want to use some custom data not available on Store API or the context. You don't want to create your own endpoints or Ajax actions. You want to piggyback on the existing StoreAPI calls.
+You want to extend the Mini-Cart, Cart and Checkout blocks, but you want to use some custom data not available on Store API or the context. You don't want to create your own endpoints or Ajax actions. You want to piggyback on the existing StoreAPI calls.
 
 ## Solution
 

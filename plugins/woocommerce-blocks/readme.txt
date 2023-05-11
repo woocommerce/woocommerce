@@ -32,7 +32,7 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
 - **Filter by Rating**
 - **Filter by Stock**
 - **Hand-picked Products**
-- **Mini Cart**
+- **Mini-Cart**
 - **Newest Products**
 - **On Sale Products**
 - **Product Categories List**

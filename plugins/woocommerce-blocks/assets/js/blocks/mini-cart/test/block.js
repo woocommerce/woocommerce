@@ -51,7 +51,7 @@ const mockFullCart = () => {
 	} );
 };
 
-describe( 'Testing Mini Cart', () => {
+describe( 'Testing Mini-Cart', () => {
 	beforeEach( () => {
 		act( () => {
 			mockFullCart();
@@ -65,7 +65,7 @@ describe( 'Testing Mini Cart', () => {
 		fetchMock.resetMocks();
 	} );
 
-	it( 'opens Mini Cart drawer when clicking on button', async () => {
+	it( 'opens Mini-Cart drawer when clicking on button', async () => {
 		render( <MiniCartBlock /> );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 		userEvent.click( screen.getByLabelText( /items/i ) );

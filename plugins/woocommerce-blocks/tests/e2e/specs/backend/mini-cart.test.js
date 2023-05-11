@@ -21,13 +21,13 @@ import {
 } from '../../utils.js';
 
 const block = {
-	name: 'Mini Cart',
+	name: 'Mini-Cart',
 	slug: 'woocommerce/mini-cart',
 	class: '.wc-block-mini-cart',
 	selectors: {
-		insertButton: "//button//span[text()='Mini Cart']",
+		insertButton: "//button//span[text()='Mini-Cart']",
 		insertButtonDisabled:
-			"//button[@aria-disabled]//span[text()='Mini Cart']",
+			"//button[@aria-disabled]//span[text()='Mini-Cart']",
 	},
 };
 

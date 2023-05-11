@@ -25,7 +25,7 @@ const Block = ( {
 		return null;
 	}
 
-	// The `Mini Cart Title` was converted to two inner blocks, but we still need to render the old title for
+	// The `Mini-Cart Title` was converted to two inner blocks, but we still need to render the old title for
 	// themes that have the old `mini-cart.html` template. So we check if there are any inner blocks and if
 	// not, render the title blocks.
 	const hasTitleInnerBlocks = hasChildren( children );

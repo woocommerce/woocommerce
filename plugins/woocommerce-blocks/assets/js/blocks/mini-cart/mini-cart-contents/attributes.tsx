@@ -29,12 +29,12 @@ export const attributes = {
 		default: [
 			{
 				view: 'woocommerce/filled-mini-cart-contents-block',
-				label: __( 'Filled Mini Cart', 'woo-gutenberg-products-block' ),
+				label: __( 'Filled Mini-Cart', 'woo-gutenberg-products-block' ),
 				icon: <Icon icon={ filledCart } />,
 			},
 			{
 				view: 'woocommerce/empty-mini-cart-contents-block',
-				label: __( 'Empty Mini Cart', 'woo-gutenberg-products-block' ),
+				label: __( 'Empty Mini-Cart', 'woo-gutenberg-products-block' ),
 				icon: <Icon icon={ removeCart } />,
 			},
 		],

@@ -1,8 +1,8 @@
 {
 	"name": "woocommerce/mini-cart-products-table-block",
 	"version": "1.0.0",
-	"title": "Mini Cart Products Table",
-	"description": "Block that displays the products table of the Mini Cart block.",
+	"title": "Mini-Cart Products Table",
+	"description": "Block that displays the products table of the Mini-Cart block.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,

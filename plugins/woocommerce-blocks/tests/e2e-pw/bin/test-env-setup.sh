@@ -132,7 +132,7 @@ post_content=$(cat "${script_dir}/mini-cart.txt" | sed 's/"/\\"/g')
 wp-env run tests-cli "wp post create \
 	--post_status=publish \
 	--post_author=1 \
-	--post_title='Mini Cart block' \
+	--post_title='Mini-Cart block' \
 	--post_content=\"$post_content\"
 "
 
