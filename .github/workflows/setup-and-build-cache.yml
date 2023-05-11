@@ -1,8 +1,5 @@
 name: Setup, build, cache
-on:
-    pull_request:
-        paths-ignore:
-            - '**/changelog/**'
+on: pull_request
 description: Perform setup of dependencies and caches, performs repository_dispatch on completion.
 permissions: {}
 
