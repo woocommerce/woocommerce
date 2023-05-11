@@ -1545,6 +1545,9 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		// Should find order searching by order item name.
 		$this->assertEquals( array( $order->get_id() ), wc_order_search( 'Dummy Product' ) );
 
+		// Should find order searching by billing email.
+		$this->assertEquals( array( $order->get_id() ), wc_order_search( 'admin@example.org' ) );
+
 		// Should return nothing when searching for nonexistent term.
 		$this->assertEmpty( wc_order_search( 'Nonexistent term' ) );
 	}
