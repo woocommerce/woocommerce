@@ -11,7 +11,6 @@ import { getLatestGithubReleaseVersion } from '../../../core/github/repo';
 import { octokitWithAuth } from '../../../core/github/api';
 import { setGithubMilestoneOutputs } from './utils';
 import { WPIncrement } from '../../../core/version';
-import { Options } from './types';
 import { Logger } from '../../../core/logger';
 import { getEnvVar } from '../../../core/environment';
 
@@ -32,7 +31,7 @@ export const milestoneCommand = new Command( 'milestone' )
 		'-m --milestone <milestone>',
 		'Milestone to create. Next milestone is gathered from Github if none is supplied'
 	)
-	.action( async ( options: Options ) => {
+	.action( async ( options ) => {
 		const { owner, name, dryRun, milestone } = options;
 		const isGithub = getEnvVar( 'CI' );
 

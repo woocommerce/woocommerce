@@ -1019,6 +1019,15 @@ ul.wc-tabs {
 		thead th {
 			text-transform: uppercase;
 		}
+
+		.wc-item-meta {
+			list-style-type: none;
+			padding-inline-start: 2rem;
+
+			li > p {
+				margin-block-start: 0.3rem;
+			}
+		}
 	}
 }
 

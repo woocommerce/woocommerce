@@ -205,6 +205,7 @@ export const ShippingTour: React.FC< {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { show: showTour } = useShowShippingTour();
 	const [ step, setStepNumber ] = useState( 0 );
+	const { createNotice } = useDispatch( 'core/notices' );
 
 	const tourConfig: TourKitTypes.WooConfig = {
 		placement: 'auto',
@@ -282,10 +283,24 @@ export const ShippingTour: React.FC< {
 				},
 			},
 		],
-		closeHandler: ( steps, stepIndex, source ) => {
-			updateOptions( {
+		closeHandler: async ( steps, stepIndex, source ) => {
+			const update = await updateOptions( {
 				[ REVIEWED_DEFAULTS_OPTION ]: 'yes',
 			} );
+
+			if ( ! update.success ) {
+				createNotice(
+					'error',
+					__(
+						'There was a problem marking the shipping tour as completed.',
+						'woocommerce'
+					)
+				);
+				recordEvent(
+					'walkthrough_settings_shipping_updated_option_error'
+				);
+			}
+
 			if ( source === 'close-btn' ) {
 				recordEvent( 'walkthrough_settings_shipping_dismissed', {
 					step_name: steps[ stepIndex ].meta.name,

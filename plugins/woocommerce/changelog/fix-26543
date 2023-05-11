@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Save an order created via the REST API to prevent overrides from 3rd party plugins or themes if they try to add fees to the order.
