@@ -1,6 +1,5 @@
-name: Setup, build, cache
+name: Setup, build and cache project
 on: pull_request
-description: Perform setup of dependencies and caches, performs repository_dispatch on completion.
 permissions: {}
 
 jobs:
