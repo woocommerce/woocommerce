@@ -5,29 +5,18 @@
  * @package WooCommerce\Admin
  */
 
-use Automattic\WooCommerce\Internal\Admin\Onboarding;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
-
 /**
  * Register the task.
  */
 function add_task_my_task() {
-	TaskLists::add_task(
+	require_once __DIR__ . '/my-task.php';
+	$task_lists = \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists::instance();
+	
+	// Add the task to the extended list.
+	$task_lists::add_task(
 		'extended',
-		array(
-			'id'             => 'my-task',
-			'title'          => __( 'My task', 'woocommerce-admin' ),
-			'content'        => __(
-				'Add your task description here for display in the task list.',
-				'woocommerce-admin'
-			),
-			'action_label'   => __( 'Do action', 'woocommerce-admin' ),
-			'is_complete'    => Task::is_task_actioned( 'my-task' ),
-			'can_view'       => 'US' === WC()->countries->get_base_country(),
-			'time'           => __( '2 minutes', 'woocommerce-admin' ),
-			'is_dismissable' => true,
-			'is_snoozeable'  => true,
+		new MyTask(
+			$task_lists::get_list( 'extended' ),
 		)
 	);
 }
