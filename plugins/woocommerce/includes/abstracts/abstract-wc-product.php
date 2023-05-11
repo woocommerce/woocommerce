@@ -1937,14 +1937,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @return string
 	 */
-	public function aria_describedby_description() {
-		$aria_describedby_description = '';
-
-		if ( 'Select options' === $this->add_to_cart_text() ) {
-			$aria_describedby_description = __( 'This product has multiple variants. The options may be chosen on the product page', 'woocommerce' );
-		}
-
-		return apply_filters( 'woocommerce_product_aria_describedby_description', $aria_describedby_description, $this );
+	public function add_to_cart_aria_describedby() {
+		/**
+		 * Filter the aria-describedby description for the add to cart button.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string $var aria-describedby description.
+		 * @param WC_Product $this object.
+		 */
+		return apply_filters( 'woocommerce_product_add_to_cart_aria_describedby', '', $this );
 	}
 
 	/**

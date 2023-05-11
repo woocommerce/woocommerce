@@ -1365,17 +1365,15 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 					'data-product_id'  => $product->get_id(),
 					'data-product_sku' => $product->get_sku(),
 					'aria-label'       => $product->add_to_cart_description(),
-					'aria-describedby' => $product->aria_describedby_description(),
+					'aria-describedby' => $product->add_to_cart_aria_describedby(),
 					'rel'              => 'nofollow',
 				),
 			);
 
 			$args = apply_filters( 'woocommerce_loop_add_to_cart_args', wp_parse_args( $args, $defaults ), $product );
 
-			if ( isset( $args['attributes']['aria-describedby'] ) && ! empty( $args['attributes']['aria-describedby'] ) ) {
+			if ( ! empty( $args['attributes']['aria-describedby'] ) ) {
 				$args['attributes']['aria-describedby'] = wp_strip_all_tags( $args['attributes']['aria-describedby'] );
-			} else {
-				unset( $args['attributes']['aria-describedby'] );
 			}
 
 			if ( isset( $args['attributes']['aria-label'] ) ) {
