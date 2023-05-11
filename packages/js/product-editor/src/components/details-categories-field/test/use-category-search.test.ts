@@ -179,7 +179,7 @@ describe( 'useCategorySearch', () => {
 		);
 	} );
 
-	describe( 'getFilteredItems', () => {
+	describe( 'getFilteredItemsForSelectTree', () => {
 		it( 'should filter items by label, matching input value, and if selected', async () => {
 			getProductCategoriesMock.mockReturnValue( [ ...mockCategoryList ] );
 
@@ -191,13 +191,16 @@ describe( 'useCategorySearch', () => {
 			);
 			await waitForNextUpdate();
 
-			const filteredItems = result.current.getFilteredItems(
-				result.current.categoriesSelectList,
+			const filteredItems = result.current.getFilteredItemsForSelectTree(
+				result.current.categoriesSelectList.map( ( l ) => ( {
+					value: String( l.id ),
+					label: l.name,
+				} ) ),
 				'Rain',
 				[]
 			);
 			expect( filteredItems.length ).toEqual( 1 );
-			expect( filteredItems[ 0 ].name ).toEqual( 'Rain gear' );
+			expect( filteredItems[ 0 ].label ).toEqual( 'Rain gear' );
 		} );
 
 		it( 'should filter items by isOpen as well, keeping them if isOpen is true', async () => {
@@ -215,15 +218,18 @@ describe( 'useCategorySearch', () => {
 			} );
 			await waitForNextUpdate();
 			expect( result.current.categoriesSelectList.length ).toEqual( 6 );
-			const filteredItems = result.current.getFilteredItems(
-				result.current.categoriesSelectList,
+			const filteredItems = result.current.getFilteredItemsForSelectTree(
+				result.current.categoriesSelectList.map( ( l ) => ( {
+					value: String( l.id ),
+					label: l.name,
+				} ) ),
 				'Bel',
 				[]
 			);
 			expect( filteredItems.length ).toEqual( 3 );
-			expect( filteredItems[ 0 ].name ).toEqual( 'Clothing' );
-			expect( filteredItems[ 1 ].name ).toEqual( 'Accessories' );
-			expect( filteredItems[ 2 ].name ).toEqual( 'Belts' );
+			expect( filteredItems[ 0 ].label ).toEqual( 'Clothing' );
+			expect( filteredItems[ 1 ].label ).toEqual( 'Accessories' );
+			expect( filteredItems[ 2 ].label ).toEqual( 'Belts' );
 		} );
 	} );
 

@@ -55,7 +55,7 @@ function getSelectedWithParents(
 	return selected;
 }
 
-function mapFromCategoryType(
+export function mapFromCategoryType(
 	categories: ProductCategoryNode[]
 ): TreeItemType[] {
 	return categories.map( ( val ) =>
@@ -72,7 +72,7 @@ function mapFromCategoryType(
 	);
 }
 
-function mapToCategoryType(
+export function mapToCategoryType(
 	categories: TreeItemType[]
 ): ProductCategoryNode[] {
 	return categories.map( ( cat ) => ( {
