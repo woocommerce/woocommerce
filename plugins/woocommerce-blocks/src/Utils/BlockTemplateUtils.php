@@ -328,8 +328,8 @@ class BlockTemplateUtils {
 				'description' => __( 'Displays search results for your store.', 'woo-gutenberg-products-block' ),
 			),
 			MiniCartTemplate::SLUG             => array(
-				'title'       => _x( 'Mini Cart', 'Template name', 'woo-gutenberg-products-block' ),
-				'description' => __( 'Template used to display the Mini Cart drawer.', 'woo-gutenberg-products-block' ),
+				'title'       => _x( 'Mini-Cart', 'Template name', 'woo-gutenberg-products-block' ),
+				'description' => __( 'Template used to display the Mini-Cart drawer.', 'woo-gutenberg-products-block' ),
 			),
 		);
 

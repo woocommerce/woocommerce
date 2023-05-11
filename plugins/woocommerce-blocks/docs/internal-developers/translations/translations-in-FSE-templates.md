@@ -83,7 +83,7 @@ public function register_empty_cart_message_block_pattern() {
     register_block_pattern(
         'woocommerce/mini-cart-empty-cart-message',
         array(
-            'title'    => __( 'Empty Mini Cart Message', 'woo-gutenberg-products-block' ),
+            'title'    => __( 'Empty Mini-Cart Message', 'woo-gutenberg-products-block' ),
             'inserter' => false,
             'content'  => '<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>' . __( 'Your cart is currently empty!', 'woo-gutenberg-products-block' ) . '</strong></p><!-- /wp:paragraph -->',
         )

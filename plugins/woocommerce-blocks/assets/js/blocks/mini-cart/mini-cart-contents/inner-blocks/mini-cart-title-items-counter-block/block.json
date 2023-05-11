@@ -1,8 +1,8 @@
 {
 	"name": "woocommerce/mini-cart-title-items-counter-block",
 	"version": "1.0.0",
-	"title": "Mini Cart Title Items Counter",
-	"description": "Block that displays the items counter part of the Mini Cart Title block.",
+	"title": "Mini-Cart Title Items Counter",
+	"description": "Block that displays the items counter part of the Mini-Cart Title block.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,

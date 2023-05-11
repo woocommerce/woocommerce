@@ -1,8 +1,8 @@
 {
 	"name": "woocommerce/mini-cart-items-block",
 	"version": "1.0.0",
-	"title": "Mini Cart Items",
-	"description": "Contains the products table and other custom blocks of filled mini cart.",
+	"title": "Mini-Cart Items",
+	"description": "Contains the products table and other custom blocks of filled mini-cart.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,

@@ -1,6 +1,6 @@
 # Translations for lazy-loaded components
 
-The Mini Cart block as well as inner blocks of the Cart and the Checkout blocks are lazy-loaded. To lazy-load them, the translation chunks needs to be registered. This takes place in `/src/BlockTypes/AbstractBlock.php`:
+The Mini-Cart block as well as inner blocks of the Cart and the Checkout blocks are lazy-loaded. To lazy-load them, the translation chunks needs to be registered. This takes place in `/src/BlockTypes/AbstractBlock.php`:
 
 ```php
 /**
