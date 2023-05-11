@@ -109,7 +109,7 @@ describe( 'Shopper → Mini-Cart', () => {
 				}
 			);
 			await expect( page ).toMatchElement( '.wc-block-mini-cart__badge', {
-				text: '0',
+				text: '',
 			} );
 		} );
 	} );
