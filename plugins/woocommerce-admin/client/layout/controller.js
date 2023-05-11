@@ -182,6 +182,9 @@ export const getPages = () => {
 			navArgs: {
 				id: 'woocommerce-add-product',
 			},
+			layout: {
+				header: false,
+			},
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'manage_woocommerce',
 		} );
@@ -195,6 +198,9 @@ export const getPages = () => {
 			],
 			navArgs: {
 				id: 'woocommerce-edit-product',
+			},
+			layout: {
+				header: false,
 			},
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'manage_woocommerce',

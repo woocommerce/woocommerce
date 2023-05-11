@@ -185,7 +185,8 @@ function _Layout( {
 		);
 	}
 
-	const { breadcrumbs } = page;
+	const { breadcrumbs, layout = { header: true, footer: true } } = page;
+	const { header: showHeader = true, footer: showFooter = true } = layout;
 
 	const query = Object.fromEntries(
 		new URLSearchParams( location && location.search )
@@ -199,15 +200,17 @@ function _Layout( {
 		>
 			<SlotFillProvider>
 				<div className="woocommerce-layout">
-					<Header
-						sections={
-							isFunction( breadcrumbs )
-								? breadcrumbs( { match } )
-								: breadcrumbs
-						}
-						isEmbedded={ isEmbedded }
-						query={ query }
-					/>
+					{ showHeader && (
+						<Header
+							sections={
+								isFunction( breadcrumbs )
+									? breadcrumbs( { match } )
+									: breadcrumbs
+							}
+							isEmbedded={ isEmbedded }
+							query={ query }
+						/>
+					) }
 					<TransientNotices />
 					{ ! isEmbedded && (
 						<PrimaryLayout>
@@ -226,7 +229,7 @@ function _Layout( {
 							<WCPayUsageModal />
 						</Suspense>
 					) }
-					<Footer />
+					{ showFooter && <Footer /> }
 					<CustomerEffortScoreModalContainer />
 				</div>
 				<PluginArea scope="woocommerce-admin" />
@@ -273,8 +276,11 @@ const Layout = compose(
 			return;
 		}
 
-		const { getActivePlugins, getInstalledPlugins, isJetpackConnected } =
-			select( PLUGINS_STORE_NAME );
+		const {
+			getActivePlugins,
+			getInstalledPlugins,
+			isJetpackConnected,
+		} = select( PLUGINS_STORE_NAME );
 
 		return {
 			activePlugins: getActivePlugins(),

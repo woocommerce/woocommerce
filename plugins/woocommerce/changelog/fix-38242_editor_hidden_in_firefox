@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add support for `showHeader` config in router config to hide header if needed.
