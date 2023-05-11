@@ -35,20 +35,29 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 	test.beforeAll( async ( { playwright, baseURL } ) => {
 		pluginSlug = path.basename( PLUGIN_REPOSITORY );
 
-		// Download plugin.
-		pluginPath = await downloadZip( {
-			repository: PLUGIN_REPOSITORY,
-			authorizationToken: GITHUB_TOKEN,
-		} );
+		pluginPath = await test.step(
+			`Download ${ PLUGIN_NAME } plugin zip`,
+			async () => {
+				return downloadZip( {
+					repository: PLUGIN_REPOSITORY,
+					authorizationToken: GITHUB_TOKEN,
+				} );
+			}
+		);
 
 		// Delete plugin from test site if it's installed.
-		await deletePlugin( {
-			request: playwright.request,
-			baseURL,
-			slug: pluginSlug,
-			username: admin.username,
-			password: admin.password,
-		} );
+		await test.step(
+			"Delete plugin from test site if it's installed.",
+			async () => {
+				await deletePlugin( {
+					request: playwright.request,
+					baseURL,
+					slug: pluginSlug,
+					username: admin.username,
+					password: admin.password,
+				} );
+			}
+		);
 	} );
 
 	test.afterAll( async ( {} ) => {
