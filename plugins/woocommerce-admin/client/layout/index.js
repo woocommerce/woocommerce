@@ -45,6 +45,7 @@ import { Footer } from './footer';
 import Notices from './notices';
 import TransientNotices from './transient-notices';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { usePageClasses } from './hooks/use-page-classes';
 import '~/activity-panel';
 import '~/mobile-banner';
 import './navigation';
@@ -127,6 +128,8 @@ function _Layout( {
 	match,
 	page,
 } ) {
+	usePageClasses( page );
+
 	function recordPageViewTrack() {
 		const navigationFlag = {
 			has_navigation: !! window.wcNavigation,
