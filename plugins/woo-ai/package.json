@@ -10,6 +10,7 @@
 	"version": "0.1.0",
 	"homepage": "http://github.com/woocommerce/woo-ai",
 	"devDependencies": {
+		"@types/jquery": "^3.5.16",
 		"@types/react": "^17.0.2",
 		"@types/react-dom": "^17.0.2",
 		"@types/wordpress__components": "^19.10.3",
