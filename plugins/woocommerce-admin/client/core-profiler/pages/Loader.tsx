@@ -50,21 +50,25 @@ export const Loader = ( {
 				context.loader.className
 			) }
 		>
-			{ currentStage.image && currentStage.image }
+			<div className="woocommerce-profiler-loader-wrapper">
+				{ currentStage.image && currentStage.image }
 
-			<h1 className="woocommerce-profiler-loader__title">
-				{ currentStage.title }
-			</h1>
-			<ProgressBar
-				className={ 'progress-bar' }
-				percent={ context.loader.progress ?? 0 }
-				color={ 'var(--wp-admin-theme-color)' }
-				bgcolor={ '#E0E0E0' }
-			/>
-			<p className="woocommerce-profiler-loader__paragraph">
-				<b>{ currentStage.paragraphs[ currentParagraph ]?.label } </b>
-				{ currentStage.paragraphs[ currentParagraph ]?.text }
-			</p>
+				<h1 className="woocommerce-profiler-loader__title">
+					{ currentStage.title }
+				</h1>
+				<ProgressBar
+					className={ 'progress-bar' }
+					percent={ context.loader.progress ?? 0 }
+					color={ 'var(--wp-admin-theme-color)' }
+					bgcolor={ '#E0E0E0' }
+				/>
+				<p className="woocommerce-profiler-loader__paragraph">
+					<b>
+						{ currentStage.paragraphs[ currentParagraph ]?.label }{ ' ' }
+					</b>
+					{ currentStage.paragraphs[ currentParagraph ]?.text }
+				</p>
+			</div>
 		</div>
 	);
 };

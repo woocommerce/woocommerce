@@ -253,7 +253,13 @@
 			font-size: 20px;
 		}
 	}
-
+	.woocommerce-profiler-loader-wrapper {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		max-width: 520px;
+	}
 	.woocommerce-profiler-progress-bar {
 		width: 520px;
 		margin: 16px 0 16px 0;
@@ -263,5 +269,17 @@
 	}
 	.woocommerce-profiler-progress-bar__container {
 		height: 4px;
+	}
+
+	.woocommerce-profiler-loader__paragraph {
+		font-size: 16px;
+		line-height: 24px;
+		color: #2f2f2f;
+		opacity: 0.8;
+		text-align: center;
+		@include breakpoint( '<782px' ) {
+			font-size: 14px;
+			line-height: 20px;
+		}
 	}
 }
