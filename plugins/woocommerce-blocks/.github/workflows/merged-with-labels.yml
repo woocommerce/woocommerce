@@ -6,9 +6,11 @@ name: Merged Pull Requests
 
 jobs:
   remove_labels:
+    name: Remove labels
     runs-on: ubuntu-latest
     steps:
-      - uses: actions-ecosystem/action-remove-labels@v1
+      - uses: mondeja/remove-labels-gh-action@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: 'status: ready to merge'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          labels: |
+            status: ready to merge
