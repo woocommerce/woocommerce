@@ -8,7 +8,9 @@ The task list is easily extensible to allow inserting custom tasks around plugin
 
 ## Adding a custom task
 
-To add a custom task, you need to create a new class that extends the `Task` class.
+### Step 1: Add your task in PHP
+
+To add a custom task, you first need to create a new class that extends the `Task` class.
 
 ```php
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
@@ -45,7 +47,38 @@ TaskLists::add_task(
 );
 ```
 
-## Example
+### Step 2 – Register the task in JavaScript.
+
+Next, you have to add your task to the tasks list in JavaScript.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import {
+  WooOnboardingTask,
+  WooOnboardingTaskListItem,
+} from '@woocommerce/onboarding';
+
+const Task = ( { onComplete, task, query } ) => {
+  // Implement your task UI/feature here.
+  return (
+    <div>
+    </div>
+  );
+};
+
+registerPlugin( 'add-task-content', {
+  render: () => (
+    <WooOnboardingTask id="my-task">
+      { ( {
+        onComplete,
+        query,
+        task,
+      } ) => <Task onComplete={ onComplete } task={ task } query={ query } /> }
+    </WooOnboardingTask>
+  )
+```
+
+### Example
 
 You can find an full example of how to add a custom task in the [examples directory](../examples/extensions/add-task/) as a WP plugin.
 
