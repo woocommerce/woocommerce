@@ -29,21 +29,21 @@ jest.mock( '@wordpress/data', () => {
 jest.mock( '@woocommerce/explat' );
 jest.mock( '@woocommerce/tracks' );
 
-jest.mock( '../task-list', () => ( {
+jest.mock( '../components/task-list', () => ( {
 	TaskList: ( { id }: TaskListProps ) => <div>task-list:{ id }</div>,
 } ) );
 
-jest.mock( './setup-task-list', () => ( {
+jest.mock( '../setup-task-list', () => ( {
 	SetupTaskList: ( { id }: SetupTaskListProps ) => (
 		<div>setup-task-list:{ id }</div>
 	),
 } ) );
 
-jest.mock( '../task', () => ( {
+jest.mock( '../components/task', () => ( {
 	Task: ( { query }: TaskProps ) => <div>task:{ query.task }</div>,
 } ) );
 
-jest.mock( '../placeholder', () => ( {
+jest.mock( '../components/placeholder', () => ( {
 	TasksPlaceholder: () => <div>task-placeholder</div>,
 } ) );
 

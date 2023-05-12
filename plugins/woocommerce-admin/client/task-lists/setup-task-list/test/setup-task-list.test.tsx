@@ -27,10 +27,12 @@ jest.mock( '@woocommerce/components', () => ( {
 		.fn()
 		.mockImplementation( () => <div>task_list_menu</div> ),
 } ) );
-jest.mock( '../task-headers', () => ( {
-	optional: () => <div>optional_header</div>,
-	required: () => <div>required_header</div>,
-	completed: () => <div>completed_header</div>,
+jest.mock( '../components/task-headers', () => ( {
+	taskHeaders: {
+		optional: () => <div>optional_header</div>,
+		required: () => <div>required_header</div>,
+		completed: () => <div>completed_header</div>,
+	},
 } ) );
 jest.mock( '@woocommerce/data', () => ( {
 	...jest.requireActual( '@woocommerce/data' ),
