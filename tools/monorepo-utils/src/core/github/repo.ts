@@ -47,7 +47,7 @@ export const doesGithubBranchExist = async (
 
 	try {
 		const branchOnGithub = await octokitWithAuth().request(
-			'GET /repos/{owner}/{rsepo}/branches/{branch}',
+			'GET /repos/{owner}/{repo}/branches/{branch}',
 			{
 				owner,
 				repo: name,
