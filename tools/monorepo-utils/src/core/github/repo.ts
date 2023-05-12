@@ -14,9 +14,8 @@ export const getLatestGithubReleaseVersion = async ( options: {
 	name?: string;
 } ): Promise< string > => {
 	const { owner, name } = options;
-	const gql = graphqlWithAuth();
 
-	const data = await gql< { repository: Repository } >( `
+	const data = await graphqlWithAuth()< { repository: Repository } >( `
 			{
 			    repository(owner: "${ owner }", name: "${ name }") {
 					releases(
@@ -45,9 +44,9 @@ export const doesGithubBranchExist = async (
 	nextReleaseBranch: string
 ): Promise< boolean > => {
 	const { owner, name } = options;
-	const octokit = octokitWithAuth();
+
 	try {
-		const branchOnGithub = await octokit.request(
+		const branchOnGithub = await octokitWithAuth().request(
 			'GET /repos/{owner}/{rsepo}/branches/{branch}',
 			{
 				owner,
@@ -75,8 +74,7 @@ export const getRefFromGithubBranch = async (
 	source: string
 ): Promise< string > => {
 	const { owner, name } = options;
-	const gql = graphqlWithAuth();
-	const { repository } = await gql< {
+	const { repository } = await graphqlWithAuth()< {
 		repository: Repository;
 	} >( `
 			{
@@ -106,9 +104,8 @@ export const createGithubBranch = async (
 	branch: string,
 	ref: string
 ): Promise< void > => {
-	const octokit = octokitWithAuth();
 	const { owner, name } = options;
-	await octokit.request( 'POST /repos/{owner}/{repo}/git/refs', {
+	await octokitWithAuth().request( 'POST /repos/{owner}/{repo}/git/refs', {
 		owner,
 		repo: name,
 		ref: `refs/heads/${ branch }`,
@@ -123,9 +120,8 @@ export const deleteGithubBranch = async (
 	},
 	branch: string
 ): Promise< void > => {
-	const octokit = octokitWithAuth();
 	const { owner, name } = options;
-	await octokit.request(
+	await octokitWithAuth().request(
 		'DELETE /repos/{owner}/{repo}/git/refs/heads/{ref}',
 		{
 			owner,
@@ -155,9 +151,8 @@ export const createPullRequest = async ( options: {
 	title: string;
 	body: string;
 } ): Promise< PullRequestEndpointResponse[ 'data' ] > => {
-	const octokit = octokitWithAuth();
 	const { head, base, owner, name, title, body } = options;
-	const pullRequest = await octokit.request(
+	const pullRequest = await octokitWithAuth().request(
 		'POST /repos/{owner}/{repo}/pulls',
 		{
 			owner,
