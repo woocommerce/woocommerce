@@ -13,14 +13,8 @@ import { ImageSizing } from '../types';
 
 jest.mock( '@woocommerce/base-hooks', () => ( {
 	__esModule: true,
-	useBorderProps: jest.fn( () => ( {
+	useStyleProps: jest.fn( () => ( {
 		className: '',
-		style: {},
-	} ) ),
-	useTypographyProps: jest.fn( () => ( {
-		style: {},
-	} ) ),
-	useSpacingProps: jest.fn( () => ( {
 		style: {},
 	} ) ),
 } ) );

@@ -15,3 +15,4 @@ export * from './camel-case-keys';
 export * from './snake-case-keys';
 export * from './debounce';
 export * from './keyby';
+export * from './get-inline-styles';

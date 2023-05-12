@@ -35,6 +35,7 @@ export const Edit = ( {
 						cartButtonLabel: content,
 					} );
 				} }
+				style={ blockProps.style }
 			/>
 		</div>
 	);

@@ -4,7 +4,7 @@
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 import Button from '@woocommerce/base-components/button';
 import classNames from 'classnames';
-import { useColorProps } from '@woocommerce/base-hooks';
+import { useStyleProps } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -23,7 +23,7 @@ const Block = ( {
 	checkoutButtonLabel,
 	style,
 }: MiniCartCheckoutButtonBlockProps ): JSX.Element | null => {
-	const colorProps = useColorProps( { style } );
+	const styleProps = useStyleProps( { style } );
 
 	if ( ! CHECKOUT_URL ) {
 		return null;
@@ -33,11 +33,11 @@ const Block = ( {
 		<Button
 			className={ classNames(
 				className,
-				colorProps.className,
+				styleProps.className,
 				'wc-block-mini-cart__footer-checkout'
 			) }
 			variant={ getVariant( className, 'contained' ) }
-			style={ { ...colorProps.style } }
+			style={ styleProps.style }
 			href={ CHECKOUT_URL }
 		>
 			{ checkoutButtonLabel || defaultCheckoutButtonLabel }
