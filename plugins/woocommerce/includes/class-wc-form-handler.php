@@ -930,12 +930,12 @@ class WC_Form_Handler {
 	 */
 	public static function process_login() {
 
-		static $valid_nonce;
+		static $valid_nonce = null;
 
-		// The global form-login.php template used `_wpnonce` in template versions < 3.3.0.
-		$nonce_value = wc_get_var( $_REQUEST['woocommerce-login-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+		if ( null === $valid_nonce ) {
+			// The global form-login.php template used `_wpnonce` in template versions < 3.3.0.
+			$nonce_value = wc_get_var( $_REQUEST['woocommerce-login-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 
-		if ( ! empty( $nonce_value ) ) {
 			$valid_nonce = wp_verify_nonce( $nonce_value, 'woocommerce-login' );
 		}
 
