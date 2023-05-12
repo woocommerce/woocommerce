@@ -310,56 +310,47 @@ jobs:
     #                 -f s3_root=public \
     #                 --repo woocommerce/woocommerce-test-reports
 
-    # plugins-results:
-    #     name: Publish report on Smoke tests on trunk with plugins
-    #     if: |
-    #         ( success() || failure() ) &&
-    #         ! github.event.pull_request.head.repo.fork
-    #     runs-on: ubuntu-20.04
-    #     # needs: [e2e-tests, test-plugins, k6-tests]
-    #     needs: [test-plugins] # mytodo revert to the above
-    #     env:
-    #         GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-    #         RUN_ID: ${{ github.run_id }}
-    #         ARTIFACT: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
-    #     strategy:
-    #         fail-fast: false
-    #         matrix:
-    #             include:
-    #                 # mytodo uncomment
-    #                 # - plugin: 'WooCommerce Payments'
-    #                 #   repo: 'automattic/woocommerce-payments'
-    #                 # - plugin: 'WooCommerce PayPal Payments'
-    #                 #   repo: 'woocommerce/woocommerce-paypal-payments'
-    #                 # - plugin: 'WooCommerce Shipping & Tax'
-    #                 #   repo: 'automattic/woocommerce-services'
-    #                 # - plugin: 'WooCommerce Subscriptions'
-    #                 #   repo: WC_SUBSCRIPTIONS_REPO
-    #                 #   private: true
-    #                 - plugin: 'Gutenberg'
-    #                   repo: 'WordPress/gutenberg'
-    #                 - plugin: 'Gutenberg - Nightly'
-    #                   repo: 'bph/gutenberg'
-    #     steps:
-    #         - name: Download test report artifact
-    #           uses: actions/download-artifact@v3
-    #           with:
-    #               name: ${{ env.ARTIFACT }}
+    plugins-results:
+        name: Publish report on Smoke tests on trunk with plugins
+        if: |
+            ( success() || failure() ) &&
+            ! github.event.pull_request.head.repo.fork
+        runs-on: ubuntu-20.04
+        # needs: [e2e-tests, test-plugins, k6-tests]
+        needs: [test-plugins] # mytodo revert to the above
+        env:
+            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+            RUN_ID: ${{ github.run_id }}
+            ARTIFACT: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    # mytodo uncomment
+                    # - plugin: 'WooCommerce Payments'
+                    #   slug: woocommerce-payments
+                    # - plugin: 'WooCommerce PayPal Payments'
+                    #   slug: woocommerce-paypal-payments
+                    # - plugin: 'WooCommerce Shipping & Tax'
+                    #   slug: woocommerce-services
+                    # - plugin: 'WooCommerce Subscriptions'
+                    #   slug: woocommerce-subscriptions
+                    - plugin: 'Gutenberg'
+                      slug: gutenberg
+                    - plugin: 'Gutenberg - Nightly'
+                      slug: gutenberg-nightly
+        steps:
+            - name: Download test report artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: ${{ env.ARTIFACT }}
 
-    #         # mytodo fix this, same slug between Gutenberg and its nightly
-    #         - name: Get slug
-    #           id: get-slug
-    #           uses: actions/github-script@v6
-    #           with:
-    #               result-encoding: string
-    #               script: return "${{ matrix.repo }}".split( '/' ).pop()
-
-    #         - name: Publish reports
-    #           run: |
-    #               gh workflow run publish-test-reports-daily-plugins.yml \
-    #                 -f run_id=$RUN_ID \
-    #                 -f artifact="${{ env.ARTIFACT }}" \
-    #                 -f plugin="${{ matrix.plugin }}" \
-    #                 -f slug="${{ steps.get-slug.outputs.result }}" \
-    #                 -f s3_root=public \
-    #                 --repo woocommerce/woocommerce-test-reports
+            - name: Publish reports
+              run: |
+                  gh workflow run publish-test-reports-daily-plugins.yml \
+                    -f run_id=$RUN_ID \
+                    -f artifact="${{ env.ARTIFACT }}" \
+                    -f plugin="${{ matrix.plugin }}" \
+                    -f slug="${{ matrix.slug }}" \
+                    -f s3_root=public \
+                    --repo woocommerce/woocommerce-test-reports
