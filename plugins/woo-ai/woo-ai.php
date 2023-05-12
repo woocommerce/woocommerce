@@ -52,8 +52,13 @@ function _woo_ai_bootstrap() {
 		add_action( 'admin_init', array( 'Woo_AI', 'instance' ) );
 	}
 
-	// Load admin.
-	require 'plugin.php';
 }
+
+add_action(
+	'wp_loaded',
+	function() {
+		require 'api/api.php';
+	}
+);
 
 add_action( 'plugins_loaded', '_woo_ai_bootstrap' );

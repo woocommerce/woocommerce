@@ -2324,6 +2324,9 @@ importers:
       '@wordpress/hooks':
         specifier: wp-6.0
         version: 3.6.1
+      '@wordpress/i18n':
+        specifier: ^4.6.1
+        version: 4.6.1
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
@@ -9005,8 +9008,8 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-module-imports': 7.16.0
-      '@babel/helper-plugin-utils': 7.14.5
-      babel-plugin-polyfill-corejs2: 0.3.0(@babel/core@7.21.3)
+      '@babel/helper-plugin-utils': 7.20.2
+      babel-plugin-polyfill-corejs2: 0.3.3(@babel/core@7.21.3)
       babel-plugin-polyfill-corejs3: 0.4.0(@babel/core@7.21.3)
       babel-plugin-polyfill-regenerator: 0.3.0(@babel/core@7.21.3)
       semver: 6.3.0

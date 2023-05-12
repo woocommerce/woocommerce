@@ -1,4 +1,8 @@
-/* global woocommerce_admin */
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
 ( function ( $, woocommerce_admin ) {
 	$( function () {
 		if ( typeof woocommerce_admin === 'undefined' ) {
@@ -9,29 +13,31 @@
 			let buttonText = '';
 			switch ( action ) {
 				case 'write':
-					buttonText =
-						woocommerce_admin.i18n_product_description_gpt_writing;
+					buttonText = __( 'Writing description…', 'woocommerce' );
 					break;
 				case 'simplify':
-					buttonText =
-						woocommerce_admin.i18n_product_description_gpt_simplifying;
+					buttonText = __(
+						'Simplifying description…',
+						'woocommerce'
+					);
 					break;
 				case 'rewrite':
-					buttonText =
-						woocommerce_admin.i18n_product_description_gpt_rewriting;
+					buttonText = __( 'Rewriting description…', 'woocommerce' );
 					break;
 				case 'more':
-					buttonText =
-						woocommerce_admin.i18n_product_description_gpt_more;
+					buttonText = __(
+						'Making the description longer…',
+						'woocommerce'
+					);
 					break;
 			}
 			return buttonText;
 		}
 
 		const generatingContentPhrases = [
-			woocommerce_admin.i18n_product_description_gpt_generating_content_1,
-			woocommerce_admin.i18n_product_description_gpt_generating_content_2,
-			woocommerce_admin.i18n_product_description_gpt_generating_content_3,
+			__( 'Please wait…', 'woocommerce' ),
+			__( 'Just a little longer…', 'woocommerce' ),
+			__( 'Almost there…', 'woocommerce' ),
 		];
 
 		let generatingContentPhraseInterval = null;

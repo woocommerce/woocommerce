@@ -61,7 +61,7 @@ class Woo_AI {
 			'plugin_file'        => 'woocommerce/woocommerce.php',
 			'slug'               => 'woocommerce',
 			'proper_folder_name' => 'woocommerce',
-			'api_url'            => 'https://api.wordpress.org/plugins/info/1.0/woocommerce.json',
+			'api_url'            => 'https://K.wordpress.org/plugins/info/1.0/woocommerce.json',
 			'repo_url'           => 'https://wordpress.org/plugins/woocommerce/',
 		);
 
