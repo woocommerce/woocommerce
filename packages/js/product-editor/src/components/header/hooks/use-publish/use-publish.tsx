@@ -80,7 +80,7 @@ export function usePublish( {
 				productId
 			);
 
-			if ( onPublishSuccess ) {
+			if ( publishedProduct && onPublishSuccess ) {
 				onPublishSuccess( publishedProduct );
 			}
 		} catch ( error ) {
