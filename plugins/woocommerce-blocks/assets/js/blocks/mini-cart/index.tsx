@@ -48,6 +48,7 @@ const settings: BlockConfiguration = {
 			className: 'wc-block-mini-cart--preview',
 		},
 	},
+	usesContext: [ 'postId', 'postType' ],
 	attributes: {
 		isPreview: {
 			type: 'boolean',
