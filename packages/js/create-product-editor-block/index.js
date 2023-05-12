@@ -30,6 +30,7 @@ module.exports = {
 			'@woocommerce/dependency-extraction-webpack-plugin',
 			'@woocommerce/eslint-plugin',
 			'@wordpress/prettier-config',
+			'@wordpress/stylelint-config',
 			'eslint-import-resolver-typescript',
 		],
 		customScripts: {
