@@ -94,7 +94,7 @@ class AdditionalPayments extends Payments {
 			return false;
 		}
 
-		if ( $this->can_view_result !== null ) {
+		if ( null !== $this->can_view_result ) {
 			return $this->can_view_result;
 		}
 
@@ -122,11 +122,12 @@ class AdditionalPayments extends Payments {
 	 * @return bool
 	 */
 	private static function has_enabled_other_category_gateways() {
-		$other_gateways = self::get_suggestion_gateways( 'category_other' );
+		$other_gateways     = self::get_suggestion_gateways( 'category_other' );
+		$other_gateways_ids = wp_list_pluck( $other_gateways, 'id' );
 
 		return self::has_enabled_gateways(
-			function( $gateway ) use ( $other_gateways ) {
-				return in_array( $gateway->id, array_keys( $other_gateways ), true );
+			function( $gateway ) use ( $other_gateways_ids ) {
+				return in_array( $gateway->id, $other_gateways_ids, true );
 			}
 		);
 	}
@@ -137,12 +138,13 @@ class AdditionalPayments extends Payments {
 	 * @return bool
 	 */
 	private static function has_enabled_additional_gateways() {
-		$additional_gateways = self::get_suggestion_gateways( 'category_additional' );
+		$additional_gateways     = self::get_suggestion_gateways( 'category_additional' );
+		$additional_gateways_ids = wp_list_pluck( $additional_gateways, 'id' );
 
 		return self::has_enabled_gateways(
-			function( $gateway ) use ( $additional_gateways ) {
+			function( $gateway ) use ( $additional_gateways_ids ) {
 				return 'yes' === $gateway->enabled
-				&& in_array( $gateway->id, array_keys( $additional_gateways ), true );
+				&& in_array( $gateway->id, $additional_gateways_ids, true );
 			}
 		);
 	}
