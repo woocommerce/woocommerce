@@ -11,13 +11,16 @@
 	<figure class="wp-block-image size-full is-resized"><img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-furniture-10.png', dirname( __FILE__ ) ) ); ?>" alt="" class="wp-image-1" width="502" height="335"/></figure>
 	<!-- /wp:image -->
 
-	<!-- wp:paragraph {"align":"center","fontSize":"large"} -->
-	<p class="has-text-align-center has-large-font-size">Announcing our newest collection</p>
+	<!-- wp:paragraph {"align":"center","style":{"color":{"text":"#000000"}},"fontSize":"large"} -->
+	<p class="has-text-align-center has-text-color has-large-font-size" style="color:#000000">Announcing our newest collection</p>
 	<!-- /wp:paragraph -->
 
 	<!-- wp:buttons -->
-	<div class="wp-block-buttons"><!-- wp:button {"backgroundColor":"contrast","textColor":"base"} -->
-		<div class="wp-block-button"><a class="wp-block-button__link has-base-color has-contrast-background-color has-text-color has-background wp-element-button">Shop now</a></div>
+	<div class="wp-block-buttons">
+		<!-- wp:button {"style":{"color":{"text":"#ffffff","background":"#000000"},"border":{"width":"0px","style":"none"}}} -->
+		<div class="wp-block-button">
+			<a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-style:none;border-width:0px;color:#ffffff;background-color:#000000">Shop now</a>
+		</div>
 		<!-- /wp:button --></div>
 	<!-- /wp:buttons --></div>
 <!-- /wp:group -->

@@ -17,24 +17,30 @@
 
 		<!-- wp:column {"width":"60%","style":{"spacing":{"padding":{"top":"3em","left":"0em","bottom":"3em"}}}} -->
 		<div class="wp-block-column" style="padding-top:3em;padding-bottom:3em;padding-left:0em;flex-basis:60%">
-			<!-- wp:heading {"style":{"typography":{"lineHeight":"0"}},"textColor":"base","fontSize":"large"} -->
-			<h2 class="wp-block-heading has-base-color has-text-color has-large-font-size" style="line-height:0">Mini 5 Dreamer</h2>
+			<!-- wp:heading {"style":{"typography":{"lineHeight":"0"},"color":{"text":"#ffffff"}},"fontSize":"large"} -->
+			<h2 class="wp-block-heading has-text-color has-large-font-size" style="color:#ffffff;line-height:0">Mini 5 Dreamer</h2>
 			<!-- /wp:heading -->
 
-			<!-- wp:paragraph {"style":{"typography":{"fontSize":"1em"}},"textColor":"base"} -->
-			<p class="has-base-color has-text-color" style="font-size:1em"><strong>$1,999</strong></p>
+			<!-- wp:paragraph {"style":{"typography":{"fontSize":"1em"},"color":{"text":"#ffffff"}}} -->
+			<p class="has-text-color" style="color:#ffffff;font-size:1em"><strong>$1,999</strong></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:buttons -->
 			<div class="wp-block-buttons">
-				<!-- wp:button {"backgroundColor":"contrast","textColor":"base","style":{"typography":{"fontSize":"0.8em"},"spacing":{"padding":{"left":"2em","right":"2em"}}}} -->
-				<div class="wp-block-button has-custom-font-size" style="font-size:0.8em"><a class="wp-block-button__link has-base-color has-contrast-background-color has-text-color has-background wp-element-button" style="padding-right:2em;padding-left:2em">Add to cart</a></div>
-				<!-- /wp:button --></div>
+				<!-- wp:button {"style":{"typography":{"fontSize":"0.8em"},"spacing":{"padding":{"left":"2em","right":"2em"}},"color":{"text":"#ffffff","background":"#000000"},"border":{"width":"0px","style":"none"}}} -->
+				<div class="wp-block-button has-custom-font-size" style="font-size:0.8em">
+					<a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-style:none;border-width:0px;color:#ffffff;background-color:#000000;padding-right:2em;padding-left:2em">Add to cart</a>
+				</div>
+				<!-- /wp:button -->
+			</div>
 			<!-- /wp:buttons -->
 
-			<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.8em"}},"textColor":"base"} -->
-			<p class="has-base-color has-text-color" style="font-size:0.8em">Do anything you can imagine with a single unit. Chorus, distortion, echo, wah, volume and more can all be applied and controlled from a single pedal-sized unit. The all-in-one Mini 5 Dreamer is on the pedal board of your favorite artists.</p>
-			<!-- /wp:paragraph --></div>
-		<!-- /wp:column --></div>
-	<!-- /wp:columns --></div>
+			<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.8em"},"color":{"text":"#ffffff"}}} -->
+			<p class="has-text-color" style="color:#ffffff;font-size:0.8em">Do anything you can imagine with a single unit. Chorus, distortion, echo, wah, volume and more can all be applied and controlled from a single pedal-sized unit. The all-in-one Mini 5 Dreamer is on the pedal board of your favorite artists.</p>
+			<!-- /wp:paragraph -->
+		</div>
+		<!-- /wp:column -->
+		</div>
+	<!-- /wp:columns -->
+	</div>
 <!-- /wp:group -->
