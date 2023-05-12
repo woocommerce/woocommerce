@@ -42,7 +42,10 @@ export const Edit = ( {
 		>
 			<InspectorControls>
 				<PanelBody
-					title={ __( 'Account', 'woo-gutenberg-products-block' ) }
+					title={ __(
+						'Account creation and guest checkout',
+						'woo-gutenberg-products-block'
+					) }
 				>
 					<p className="wc-block-checkout__controls-text">
 						{ __(
