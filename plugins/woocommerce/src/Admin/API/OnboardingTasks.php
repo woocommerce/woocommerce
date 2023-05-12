@@ -296,7 +296,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * Check if a given request has access to manage woocommerce.
 	 *
 	 * @deprecated 7.8.0 snooze task is deprecated.
-	 * 
+	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
@@ -821,7 +821,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * Snooze an onboarding task.
 	 *
 	 * @deprecated 7.8.0 snooze task is deprecated.
-	 * 
+	 *
 	 * @param WP_REST_Request $request Request data.
 	 *
 	 * @return WP_REST_Response|WP_Error
