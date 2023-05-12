@@ -68,14 +68,6 @@ jobs:
                 WP_ENV_PHP_VERSION: ${{ matrix.php }}
               run: pnpm --filter=woocommerce env:test
 
-            - name: Debug Testing Environment
-              env:
-                WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
-                WP_ENV_PHP_VERSION: ${{ matrix.php }}
-              run: |
-                pnpm --filter=woocommerce exec wp-env run tests-cli wp core version
-                pnpm --filter=woocommerce exec wp-env run mysql "mysql --version"
-
             - name: Run Tests
               env:
                 WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
