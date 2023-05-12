@@ -13,6 +13,12 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
  */
 class WooCommercePayments extends Task {
 	/**
+	 * Used to cache is_complete() method result.
+	 * @var null
+	 */
+	private $is_complete_result = null;
+
+	/**
 	 * ID.
 	 *
 	 * @return string
@@ -78,7 +84,11 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		return self::is_connected();
+		if ( $this->is_complete_result === null ) {
+			$this->is_complete_result = self::is_connected();
+		}
+
+		return $this->is_complete_result;
 	}
 
 	/**
