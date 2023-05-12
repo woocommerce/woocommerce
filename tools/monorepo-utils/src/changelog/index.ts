@@ -3,14 +3,13 @@
  */
 import { Command } from '@commander-js/extra-typings';
 import simpleGit from 'simple-git';
-import { readFile, writeFile } from 'fs/promises';
-import path from 'path';
+import { execSync } from 'child_process';
 
 /**
  * Internal dependencies
  */
-import { Logger } from './core/logger';
-import { cloneAuthenticatedRepo, checkoutRemoteBranch } from './core/git';
+import { Logger } from '../core/logger';
+import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
 
 const changeLogHelper = new Command( 'changelog' )
 	.option(
@@ -34,6 +33,15 @@ const changeLogHelper = new Command( 'changelog' )
 			devRepoPath?: string;
 		} ) => {
 			const { owner, name, devRepoPath } = options;
+			const prNumber = '38267';
+			const branch = 'test/change';
+			const fileName = branch.replace( '/', '-' );
+			const project = 'woocommerce';
+			const message = `Add test changelog for PR #${ prNumber }`;
+			const significance = 'patch';
+			const type = 'fix';
+
+			const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } -e "${ message }" -n`;
 
 			Logger.startTask(
 				`Making a temporary clone of '${ owner }/${ name }'`
@@ -48,36 +56,35 @@ const changeLogHelper = new Command( 'changelog' )
 				`Temporary clone of '${ owner }/${ name }' created at ${ tmpRepoPath }`
 			);
 
-			const branch = 'test/change';
-
 			Logger.notice( `Checking out branch ${ branch }` );
 			await checkoutRemoteBranch( tmpRepoPath, branch );
 
-			const readmeFile = path.join(
-				tmpRepoPath,
-				'plugins',
-				'woocommerce',
-				'readme.txt'
-			);
+			// When a devRepoPath is provided, assume that the dependencies are already installed.
+			if ( ! devRepoPath ) {
+				Logger.notice( `Installing dependencies in ${ tmpRepoPath }` );
+				execSync( `pnpm install --filter ${ project }`, {
+					cwd: tmpRepoPath,
+					stdio: 'inherit',
+				} );
+			}
 
-			Logger.notice( `Updating ${ readmeFile }` );
-			const readme = await readFile( readmeFile, 'utf-8' );
-			await writeFile( readmeFile, readme + 'THIS IS A CHANGE' );
+			Logger.notice( `Running changelog command` );
+			execSync( cmd, { cwd: tmpRepoPath } );
 
 			const git = simpleGit( {
 				baseDir: tmpRepoPath,
 				config: [ 'core.hooksPath=/dev/null' ],
 			} );
-			await git.raw(
-				'config',
-				'--global',
-				'user.email',
-				'psealock@gmail.com'
-			);
-			await git.raw( 'config', '--global', 'user.name', 'paul sealock' );
+			// await git.raw(
+			// 	'config',
+			// 	'--global',
+			// 	'user.email',
+			// 	'psealock@gmail.com'
+			// );
+			// await git.raw( 'config', '--global', 'user.name', 'paul sealock' );
 			Logger.notice( `Adding and committing changes` );
 			await git.add( '.' );
-			await git.commit( 'test' );
+			await git.commit( `Adding changelog` );
 			await git.push( 'origin', branch );
 
 			Logger.notice( `Pushed changes to ${ branch }` );
