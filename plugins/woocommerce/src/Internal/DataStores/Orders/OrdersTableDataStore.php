@@ -1860,16 +1860,14 @@ FROM $order_meta_table
 					$order->get_id()
 				)
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			foreach ( $child_order_ids as $child_order_id ) {
-				// We can't use wc_get_order here because we would get a "Invalid parent ID" error
-				// (and we don't need to load the full order from the database anyway).
-				$child_order = new \WC_Order();
-				$child_order->set_verify_parent_id( false );
-				$child_order->set_id( $child_order_id );
-				$child_order->delete( true );
+				$child_order = wc_get_order( $child_order_id );
+				if ( $child_order ) {
+					$child_order->delete( true );
+				}
 			}
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 
