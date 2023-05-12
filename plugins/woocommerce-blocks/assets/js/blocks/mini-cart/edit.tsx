@@ -15,7 +15,6 @@ import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { ReactElement } from 'react';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -34,14 +33,18 @@ interface Props {
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 }
 
-const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
+const Edit = ( {
+	attributes,
+	setAttributes,
+	context: { postType, postId },
+}: Props ): ReactElement => {
 	const { addToCartBehaviour, hasHiddenPrice, cartAndCheckoutRenderStyle } =
 		attributes;
 	const blockProps = useBlockProps( {
 		className: `wc-block-mini-cart`,
 	} );
 
-	const isSiteEditor = useSelect( 'core/edit-site' ) !== undefined;
+	const isSiteEditor = postType === undefined || postId === undefined;
 
 	const templatePartEditUri = getSetting(
 		'templatePartEditUri',
