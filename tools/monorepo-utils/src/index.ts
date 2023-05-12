@@ -10,6 +10,7 @@ import chalk from 'chalk';
  */
 import CodeFreeze from './code-freeze/commands';
 import Slack from './slack/commands/slack';
+import changeLogHelper from './changelog';
 import { Logger } from './core/logger';
 import { isGithubCI } from './core/environment';
 
@@ -25,7 +26,8 @@ const program = new Command()
 	.name( 'utils' )
 	.description( 'Monorepo utilities' )
 	.addCommand( CodeFreeze )
-	.addCommand( Slack );
+	.addCommand( Slack )
+	.addCommand( changeLogHelper );
 
 program.exitOverride();
 
