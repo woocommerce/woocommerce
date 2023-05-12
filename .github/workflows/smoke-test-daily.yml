@@ -333,9 +333,9 @@ jobs:
                     # - plugin: 'WooCommerce Subscriptions'
                     #   repo: WC_SUBSCRIPTIONS_REPO
                     #   private: true
-                    - plugin: 'Gutenberg' # latest stable
+                    - plugin: 'Gutenberg'
                       repo: 'WordPress/gutenberg'
-                    - plugin: 'Gutenberg' # nightly
+                    - plugin: 'Gutenberg - Nightly'
                       repo: 'bph/gutenberg'
         steps:
             - name: Download test report artifact
