@@ -166,4 +166,4 @@ WooCommerce comes with some sample data you can use to see how products look; im
 = 7.8.0 2023-XX-XX =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
-THIS IS A CHANGETHIS IS A CHANGE
+THIS IS A CHANGETHIS IS A CHANGETHIS IS A CHANGE
