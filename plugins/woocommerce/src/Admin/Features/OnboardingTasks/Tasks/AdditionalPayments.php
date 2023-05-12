@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Payments;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 
 /**
  * Payments Task
@@ -14,6 +13,7 @@ class AdditionalPayments extends Payments {
 
 	/**
 	 * Used to cache is_complete() method result.
+	 *
 	 * @var null
 	 */
 	private $is_complete_result = null;
@@ -85,14 +85,10 @@ class AdditionalPayments extends Payments {
 			return false;
 		}
 
-		$woocommerce_payments = new WooCommercePayments();
+		$payment_task = $this->task_list->get_task( 'payments' );
+		$wc_pay_task  = $this->task_list->get_task( 'woocommerce-payments' );
 
-		if ( ! $woocommerce_payments->is_requested() || ! $woocommerce_payments->is_supported() || ! $woocommerce_payments->is_connected() ) {
-			// Hide task if WC Pay is not installed via OBW, or is not connected, or the store is located in a country that is not supported by WC Pay.
-			return false;
-		}
-
-		return true;
+		return $payment_task->is_complete() || $wc_pay_task->is_complete();
 	}
 
 	/**
