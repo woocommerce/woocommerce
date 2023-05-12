@@ -11,7 +11,7 @@
 		text-align: center;
 		color: #000;
 		margin-bottom: 12px;
-		padding-top: 0px;
+		padding-top: 0;
 
 		@include breakpoint( '<782px' ) {
 			font-size: 28px;
