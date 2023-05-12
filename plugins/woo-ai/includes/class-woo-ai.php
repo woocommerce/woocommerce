@@ -43,7 +43,6 @@ class Woo_AI {
 		delete_site_transient( 'woocommerce_latest_tag' );
 	}
 
-
 	/**
 	 * Get the plugin url.
 	 *
@@ -66,15 +65,20 @@ class Woo_AI {
 			'repo_url'           => 'https://wordpress.org/plugins/woocommerce/',
 		);
 
-		$this->includes();
+		add_action( 'current_screen', array( $this, 'includes' ) );
 	}
 
 	/**
 	 * Include any classes we need within admin.
 	 */
 	public function includes() {
-		// include classes here.
+		$current_screen = get_current_screen();
+
+		if ( 'post' === $current_screen->base && 'product' === $current_screen->post_type ) {
+			include_once dirname( __FILE__ ) . '/class-woo-ai-product-text-generation.php';
+		}
 	}
+
 
 	/**
 	 * Get plugin download URL.

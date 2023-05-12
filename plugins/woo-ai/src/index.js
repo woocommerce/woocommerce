@@ -7,6 +7,8 @@ import { render } from '@wordpress/element';
  * Internal dependencies
  */
 import { App } from './app';
+
+import './product-text-generation';
 import './index.scss';
 
 const appRoot = document.getElementById( 'woocommerce-ai-app-root' );
