@@ -64,7 +64,9 @@ jobs:
               with:
                 script: |
                     const parseWPVersion = require( './.github/workflows/scripts/parse-wp-version' );
-                    core.setOutput( 'wpVersion', parseWPVersion( '${{ matrix.wp }}' ) );
+                    parseWPVersion( '${{ matrix.wp }}' ).then( ( version ) => {
+                      core.setOutput( 'wpVersion', version );
+                    } );
 
             - name: Prepare Testing Environment
               env:
