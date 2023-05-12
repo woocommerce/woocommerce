@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Change attributes of product_attribute_add tracks event
