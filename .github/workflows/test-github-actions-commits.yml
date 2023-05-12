@@ -1,0 +1,26 @@
+name: 'Add commits to PRs'
+on: workflow_dispatch
+permissions: {}
+
+jobs:
+    add-commits:
+        name: 'Add commits to open community PR'
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: write
+            issues: write
+            pull-requests: write
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+
+            - name: Install prerequisites
+              run: |
+                  npm install -g pnpm
+                  pnpm install --filter monorepo-utils
+
+            - name: 'Check whether today is the code freeze day'
+              id: check-freeze
+              run: pnpm run utils changelog -o psealock

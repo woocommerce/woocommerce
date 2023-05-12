@@ -40,10 +40,7 @@ const changeLogHelper = new Command( 'changelog' )
 			);
 			const tmpRepoPath = devRepoPath
 				? devRepoPath
-				: await cloneAuthenticatedRepo(
-						{ owner: 'psealock', name: 'woocommerce' },
-						true
-				  );
+				: await cloneAuthenticatedRepo( options, true );
 
 			Logger.endTask();
 
@@ -51,10 +48,9 @@ const changeLogHelper = new Command( 'changelog' )
 				`Temporary clone of '${ owner }/${ name }' created at ${ tmpRepoPath }`
 			);
 
-			console.log( 'changelog' );
-
 			const branch = 'test/change';
 
+			Logger.notice( `Checking out branch ${ branch }` );
 			await checkoutRemoteBranch( tmpRepoPath, branch );
 
 			const readmeFile = path.join(
@@ -64,6 +60,7 @@ const changeLogHelper = new Command( 'changelog' )
 				'readme.txt'
 			);
 
+			Logger.notice( `Updating ${ readmeFile }` );
 			const readme = await readFile( readmeFile, 'utf-8' );
 			await writeFile( readmeFile, readme + 'THIS IS A CHANGE' );
 
@@ -71,9 +68,12 @@ const changeLogHelper = new Command( 'changelog' )
 				baseDir: tmpRepoPath,
 				config: [ 'core.hooksPath=/dev/null' ],
 			} );
+			Logger.notice( `Adding and committing changes` );
 			await git.add( '.' );
 			await git.commit( 'test' );
 			await git.push( 'origin', branch );
+
+			Logger.notice( `Pushed changes to ${ branch }` );
 		}
 	);
 
