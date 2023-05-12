@@ -90,11 +90,15 @@ test.describe( 'Single Product Page', () => {
 		await page.goto( `product/${ slug }` );
 
 		await page.fill( 'input.qty', '5' );
-		await page.click( 'text=Add to cart' );
+		// await page.click( 'text=Add to cart' );//translate
+		await page.click( 'text=Añadir al carrito' );//translate
 
+		// await expect( page.locator( '.woocommerce-message' ) ).toContainText(
+		// 	'have been added to your cart.'
+		// );//translate
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			'have been added to your cart.'
-		);
+			'han sido añadidos a tu carrito.'
+		);//translate
 
 		await page.goto( 'cart/' );
 		await expect( page.locator( 'td.product-name' ) ).toContainText(
@@ -115,9 +119,13 @@ test.describe( 'Single Product Page', () => {
 		await page.goto( 'cart/' );
 		await page.click( 'a.remove' );
 
+		// await expect( page.locator( '.cart-empty' ) ).toContainText(
+		// 	'Your cart is currently empty.'
+		// );//translate
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
-			'Your cart is currently empty.'
-		);
+			'Tu carrito está vacío.'
+		);//translate
+		
 	} );
 } );
 
@@ -180,10 +188,15 @@ test.describe( 'Variable Product Page', () => {
 
 		for ( const attr of variations ) {
 			await page.selectOption( '#size', attr.attributes[ 0 ].option );
-			await page.click( 'text=Add to cart' );
+			// await page.click( 'text=Add to cart' );//translate
+			await page.click( 'text=Añadir al carrito' );//translate
+
+			// await expect(
+			// 	page.locator( '.woocommerce-message' )
+			// ).toContainText( 'has been added to your cart.' );//translate
 			await expect(
 				page.locator( '.woocommerce-message' )
-			).toContainText( 'has been added to your cart.' );
+			).toContainText( 'se ha añadido a tu carrito.' );//translate
 		}
 
 		await page.goto( 'cart/' );
@@ -200,14 +213,18 @@ test.describe( 'Variable Product Page', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 		await page.selectOption( '#size', 'Large' );
-		await page.click( 'text=Add to cart' );
+				// await page.click( 'text=Add to cart' );//translate
+		await page.click( 'text=Añadir al carrito' );//translate
 
 		await page.goto( 'cart/' );
 		await page.click( 'a.remove' );
 
+		// await expect( page.locator( '.cart-empty' ) ).toContainText(
+		// 	'Your cart is currently empty.'
+		// );//translate
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
-			'Your cart is currently empty.'
-		);
+			'Tu carrito está vacío.'
+		);//translate
 	} );
 } );
 
@@ -281,17 +298,29 @@ test.describe( 'Grouped Product Page', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 
-		await page.click( 'text=Add to cart' );
+				// await page.click( 'text=Add to cart' );//translate
+				await page.click( 'text=Añadir al carrito' );//translate
+
+		// await expect( page.locator( '.woocommerce-error' ) ).toContainText(
+		// 	'Please choose the quantity of items you wish to add to your cart…'
+		// );//translate
 		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
-			'Please choose the quantity of items you wish to add to your cart…'
-		);
+			'Por favor, elige la cantidad de artículos que quieres añadir a tu carrito…'
+		);//translate
+		
 
 		await page.fill( 'div.quantity input.qty >> nth=0', '5' );
 		await page.fill( 'div.quantity input.qty >> nth=1', '5' );
-		await page.click( 'text=Add to cart' );
+				// await page.click( 'text=Add to cart' );//translate
+		await page.click( 'text=Añadir al carrito' );//translate
+
+		// await expect( page.locator( '.woocommerce-message' ) ).toContainText(
+		// 	`“${ simpleProduct1 }” and “${ simpleProduct2 }” have been added to your cart.`
+		// );//translate
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			`“${ simpleProduct1 }” and “${ simpleProduct2 }” have been added to your cart.`
-		);
+			`“${ simpleProduct1 }” y “${ simpleProduct2 }” han sido añadidos a tu carrito.`
+		);//translate
+		
 
 		await page.goto( 'cart/' );
 		await expect(
@@ -311,14 +340,18 @@ test.describe( 'Grouped Product Page', () => {
 		await page.goto( `product/${ slug }` );
 		await page.fill( 'div.quantity input.qty >> nth=0', '1' );
 		await page.fill( 'div.quantity input.qty >> nth=1', '1' );
-		await page.click( 'text=Add to cart' );
+				// await page.click( 'text=Add to cart' );//translate
+		await page.click( 'text=Añadir al carrito' );//translate
 
 		await page.goto( 'cart/' );
 		await page.click( 'a.remove >> nth=1' );
 		await page.click( 'a.remove >> nth=0' );
 
+		// await expect( page.locator( '.cart-empty' ) ).toContainText(
+		// 	'Your cart is currently empty.'
+		// );//translate
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
-			'Your cart is currently empty.'
-		);
+			'Tu carrito está vacío.'
+		);//translate
 	} );
 } );

@@ -28,6 +28,7 @@ test.describe( 'Add New Coupon Page', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_coupon', {
 			waitUntil: 'networkidle',
 		} );
+//await expect(page).toHaveScreenshot();
 
 		await page.fill( '#title', couponCode );
 
@@ -38,10 +39,15 @@ test.describe( 'Add New Coupon Page', () => {
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
 		await page.click( '#publish' );
 
+		// await expect(
+		// 	page
+		// 		.locator( 'div.notice-success > p' )
+		// 		.filter( { hasText: 'Coupon updated.' } )
+		// ).toBeVisible();//translate
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Coupon updated.' } )
-		).toBeVisible();
+				.filter( { hasText: 'Cupón actualizado.' } )
+		).toBeVisible();//translate
 	} );
 } );

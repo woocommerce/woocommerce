@@ -90,8 +90,10 @@ const variations = [
 	},
 ];
 
+// const cartDialogMessage =
+// 	'Please select some product options before adding this product to your cart.';//translate
 const cartDialogMessage =
-	'Please select some product options before adding this product to your cart.';
+	'Elige las opciones del producto antes de añadir este producto a tu carrito.';//translate
 
 test.describe( 'Shopper > Update variable product', () => {
 	let variableProductId;
@@ -174,7 +176,7 @@ test.describe( 'Shopper > Update variable product', () => {
 		).toContainText( productPrice );
 	} );
 
-	test( 'Shopper can change attributes to combination with dimensions and weight', async ( {
+	test( 'Shopper can change attributes to combination with dimentions and weight', async ( {
 		page,
 	} ) => {
 		await page.goto( `product/${ slug }` );

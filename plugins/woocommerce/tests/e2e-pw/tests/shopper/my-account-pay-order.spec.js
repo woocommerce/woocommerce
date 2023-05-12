@@ -85,17 +85,27 @@ test.describe( 'Customer can pay for their order through My Account', () => {
 		// sign in as the "customer" user
 		await page.fill( '#username', customer.username );
 		await page.fill( '#password', customer.password );
-		await page.click( 'text=Log in' );
+		// await page.click( 'text=Log in' );//translate
+		await page.getByRole('button', { name: 'Acceder' })
+		.click();//translate
+		
 
 		await page.click( 'a.pay' );
 
+		// await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+		// 	'Pay for order'
+		// );//translate
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Pay for order'
-		);
+			'Pagar por el pedido'
+		);//translate
+		
 		await page.click( '#place_order' );
 
+		// await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+		// 	'Order received'
+		// );//translate
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+			'Pedido recibido'
+		);//translate
 	} );
 } );

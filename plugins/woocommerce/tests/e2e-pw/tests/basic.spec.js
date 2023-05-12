@@ -5,6 +5,7 @@ test.describe(
 	() => {
 		test( 'Load the home page', async ( { page } ) => {
 			await page.goto( '/' );
+//await expect(page).toHaveScreenshot();
 			const title = page.locator( 'h1.site-title' );
 			await expect( title ).toHaveText(
 				'WooCommerce Core E2E Test Suite'
@@ -17,8 +18,11 @@ test.describe(
 			} );
 			test( 'Load wp-admin', async ( { page } ) => {
 				await page.goto( '/wp-admin' );
+//await expect(page).toHaveScreenshot();
 				const title = page.locator( 'div.wrap > h1' );
-				await expect( title ).toHaveText( 'Dashboard' );
+				//await expect( title ).toHaveText( 'Dashboard' );//translate
+				await expect( title ).toHaveText( 'Escritorio' );//translate
+				
 			} );
 		} );
 
@@ -28,6 +32,7 @@ test.describe(
 			} );
 			test( 'Load customer my account page', async ( { page } ) => {
 				await page.goto( '/my-account' );
+//await expect(page).toHaveScreenshot();
 				const title = page.locator( 'h1.entry-title' );
 				await expect( title ).toHaveText( 'My account' );
 			} );

@@ -1,3 +1,5 @@
+const { createBrotliDecompress } = require("zlib");
+
 const {
 	ADMIN_USER,
 	ADMIN_PASSWORD,
@@ -58,23 +60,63 @@ const storeDetails = {
 			city: 'San Francisco',
 			zip: '94107',
 			email: admin.email,
-			country: 'United States (US) — California', // corresponding to the text value of the option,
+			//country: 'United States (US) — California', // corresponding to the text value of the option,//translate
+			//country: 'Estados Unidos (EEUU) — California', // corresponding to the text value of the option,//translate
+			country: 'الولايات المتحدة الأمريكية — كاليفورنيا',//translate
 			countryCode: 'US:CA',
 		},
 		expectedNumberOfIndustries: 8, // There are 8 checkboxes on the page (in the US), adjust this constant if we change that
 		industries: {
-			fashion: 'Fashion, apparel, and accessories',
-			health: 'Health and beauty',
+			//fashion: 'Fashion, apparel, and accessories',//translate
+			// fashion: 'Moda, complementos y accesorios',//translate
+			// fashion: 'الأزياء والملابس والاكسسوارات',//translate how it appears
+			//fashion: 'الأزياء والملابس والاكسسوارات',//translate	
+	
+			// await page.getByText('الأزياء والملابس والإكسسوارات').click();
+			// await page.getByText('الصحة والجمال').click();
+			// await page.getByText('الأجهزة الإلكترونية وأجهزة الحاسوب').click();
+			// await page.getByText('الطعام والشراب').click();
+			// await page.getByText('المنزل والأثاث والحديقة').click();
+			// await page.getByText('منتجات الكانابيديول (CBD) وغيرها من المنتجات المشتقة من نباتات القنب').click();
+			// await page.getByText('التعليم والتعلُّم').click();
+			// await page.getByText('المزيد').click();
+			
+			//health: 'Health and beauty',//translate
+			// health: 'Salud y belleza',//translate
+			health: 'الصحة والجمال',//translate
+			electronic:'الأجهزة الإلكترونية وأجهزة الحاسوب',
+			food:'الطعام والشراب',
+			home:'المنزل والأثاث والحديقة',
+			cbd:'منتجات الكانابيديول (CBD) وغيرها من المنتجات المشتقة من نباتات القنب',
+			education:'التعليم والتعلُّم',
+			more:'المزيد',
+
+			//added to test
+			fashion: 'الأزياء والملابس والاكسسوارات',//translate
 		},
 		// For testing "Save Changes" feature, need to be different from the above
 		industries2: {
-			fashion: 'Fashion, apparel, and accessories',
-			health: 'Health and beauty',
-			foodAndDrinks: 'Food and drink',
+			//fashion: 'Fashion, apparel, and accessories',//translate
+			// fashion: 'Moda, complementos y accesorios',//translate
+			fashion: 'الأزياء والملابس والإكسسوارات',//translate
+
+			
+
+			//health: 'Health and beauty',//translate
+			// health: 'Salud y belleza',//translate
+			health: 'الصحة والجمال',//translate
+			//foodAndDrinks: 'Food and drink',//translate
+			// foodAndDrinks: 'Alimentación y bebidas',
+			foodAndDrinks: 'طعام و شراب',
 		},
 		products: {
-			physical: 'Physical products',
-			downloadable: 'Downloads',
+			//physical: 'Physical products',//translate
+			//physical: 'Productos físicos',//translate
+			physical: 'المنتجات المادية',//translate
+
+			//downloadable: 'Downloads',//translate
+			// downloadable: 'Descargas',//translate
+			downloadable: 'التحميلات',//translate
 		},
 	},
 	malta: {
@@ -88,11 +130,17 @@ const storeDetails = {
 		},
 		expectedNumberOfIndustries: 7, // There are 7 checkboxes on the page (in Malta), adjust this constant if we change that
 		industries: {
-			other: 'Other',
+			//other: 'Other',//translate
+			other: 'Otro',//translate
 		},
 		products: {
-			physical: 'Physical products',
-			downloadable: 'Downloads',
+			//physical: 'Physical products',//translate
+			// physical: 'Productos físicos',//translate
+			physical: 'المنتجات المادية',//translate
+
+			//downloadable: 'Downloads',//translate
+			// downloadable: 'Descargas',//translate
+			downloadable: 'التحميلات',//translate
 		},
 	},
 	liberia: {
@@ -106,11 +154,19 @@ const storeDetails = {
 		},
 		expectedNumberOfIndustries: 8, // There are 8 checkboxes on the page (in Liberia), adjust this constant if we change that
 		industries: {
-			other: 'Other',
+			//other: 'Other',//translate
+			// other: 'Otro',//translate
+			other: 'آخر',//translate
 		},
 		products: {
-			physical: 'Physical products',
-			downloadable: 'Downloads',
+			//physical: 'Physical products',//translate
+			// physical: 'Productos físicos',//translate
+			physical: 'المنتجات المادية',//translate
+
+			//downloadable: 'Downloads',//translate
+			// downloadable: 'Descargas',//translate
+			downloadable: 'التحميلات',//translate
+
 		},
 	},
 };

@@ -13,28 +13,45 @@ test.describe( 'Analytics pages', () => {
 		const sections = await page.$$(
 			'h2.woocommerce-section-header__title'
 		);
+
 		if ( sections.length < 3 ) {
 			// performance section is hidden
-			await page.click( '//button[@title="Add more sections"]' );
-			await page.click( '//button[@title="Add Performance section"]' );
-			await page.waitForSelector( 'h2:has-text("Performance")', {
+			//await page.click( '//button[@title="Add more sections"]' );//translate
+			await page.click( '//button[@title="Añadir más secciones"]' );//translate
+			//await page.click( '//button[@title="Add Performance section"]' );//translate
+			await page.click( '//button[@title="Añadir sección Rendimiento"]' );//translate
+			// await page.waitForSelector( 'h2:has-text("Performance")', {
+			// 	state: 'visible',
+			// } );//translate
+			await page.waitForSelector( 'h2:has-text("Rendimiento")', {
 				state: 'visible',
-			} );
+			} );//translate
 			await page.waitForLoadState( 'networkidle' );
 		}
 		const lastSection = await page.textContent(
 			'h2.woocommerce-section-header__title >> nth=2'
 		);
-		if ( lastSection === 'Performance' ) {
+		//if ( lastSection === 'Performance' ) {//translate
+		if ( lastSection === 'Rendimiento' ) {//translate
 			// sections are in the wrong order
+			// await page.click(
+			// 	'//button[@title="Choose which analytics to display and the section name"]'
+			// );//translate
 			await page.click(
-				'//button[@title="Choose which analytics to display and the section name"]'
+				'//button[@title="Elige qué análisis mostrar y el nombre de la sección"]'
 			);
-			await page.click( 'text=Move up' );
+			
+			//await page.click( 'text=Move up' );//translate
+			await page.click( 'text=Subir' );//translate
+			
+			// await page.click(
+			// 	'//button[@title="Choose which analytics to display and the section name"]'
+			// );//translate
 			await page.click(
-				'//button[@title="Choose which analytics to display and the section name"]'
+				'//button[@title="Elige qué análisis mostrar y el nombre de la sección"]'
 			);
-			await page.click( 'text=Move up' );
+			//await page.click( 'text=Move up' );//translate
+			await page.click( 'text=Subir' );//translate
 
 			// wait for the changes to be saved
 			await page.waitForResponse(
@@ -49,10 +66,13 @@ test.describe( 'Analytics pages', () => {
 		page,
 	} ) => {
 		// Create an array of the sections we're expecting to find.
-		const arrExpectedSections = [ 'Charts', 'Leaderboards', 'Performance' ];
+		//const arrExpectedSections = [ 'Charts', 'Leaderboards', 'Performance' ];//translate
+		const arrExpectedSections = [ 'Gráficos', 'Favoritos', 'Rendimiento' ];//translate
+		
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
+//await expect(page).toHaveScreenshot();
 
 		for ( const expectedSection of arrExpectedSections ) {
 			await test.step(
@@ -77,13 +97,17 @@ test.describe( 'Analytics pages', () => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 			);
+//await expect(page).toHaveScreenshot();
 			// check the top section
 			await page
 				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
 				.first()
 				.click();
-			await expect( page.locator( 'text=Move up' ) ).not.toBeVisible();
-			await expect( page.locator( 'text=Move down' ) ).toBeVisible();
+			//await expect( page.locator( 'text=Move up' ) ).not.toBeVisible();//translate
+			await expect( page.locator( 'text=Subir' ) ).not.toBeVisible();//translate
+			
+			//await expect( page.locator( 'text=Move down' ) ).toBeVisible();//translate
+			await expect( page.locator( 'text=Mover abajo' ) ).toBeVisible();//translate
 			await page.keyboard.press( 'Escape' );
 
 			// check the bottom section
@@ -91,8 +115,12 @@ test.describe( 'Analytics pages', () => {
 				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
 				.last()
 				.click();
-			await expect( page.locator( 'text=Move down' ) ).not.toBeVisible();
-			await expect( page.locator( 'text=Move up' ) ).toBeVisible();
+			//await expect( page.locator( 'text=Move down' ) ).not.toBeVisible();//translate
+			await expect( page.locator( 'text=Mover abajo' ) ).not.toBeVisible();//translate
+
+			//await expect( page.locator( 'text=Move up' ) ).toBeVisible();//translate
+			await expect( page.locator( 'text=Subir' ) ).toBeVisible();//translate
+
 			await page.keyboard.press( 'Escape' );
 		} );
 
@@ -102,6 +130,7 @@ test.describe( 'Analytics pages', () => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 			);
+//await expect(page).toHaveScreenshot();
 			const firstSection = await page
 				.locator( 'h2.woocommerce-section-header__title >> nth=0' )
 				.innerText();
@@ -112,7 +141,9 @@ test.describe( 'Analytics pages', () => {
 			await page.click(
 				'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=0'
 			);
-			await page.click( 'text=Move down' );
+			//await page.click( 'text=Move down' );//translate
+			await page.click( 'text=Mover abajo' );//translate
+			
 
 			// second section becomes first section, first becomes second
 			await expect(
@@ -129,6 +160,7 @@ test.describe( 'Analytics pages', () => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 			);
+//await expect(page).toHaveScreenshot();
 			const firstSection = await page
 				.locator( 'h2.woocommerce-section-header__title >> nth=0' )
 				.innerText();
@@ -139,7 +171,9 @@ test.describe( 'Analytics pages', () => {
 			await page.click(
 				'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=1'
 			);
-			await page.click( 'text=Move up' );
+			//await page.click( 'text=Move up' );//translate
+			await page.click( 'text=Subir' );//translate
+			
 
 			// second section becomes first section, first becomes second
 			await expect(
@@ -155,9 +189,14 @@ test.describe( 'Analytics pages', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
+//await expect(page).toHaveScreenshot();
 		// clicks the first button to the right of the Performance heading
-		await page.click( 'button:right-of(:text("Performance")) >> nth=0' );
-		await page.click( 'text=Remove section' );
+		//await page.click( 'button:right-of(:text("Performance")) >> nth=0' );//translate
+		await page.click( 'button:right-of(:text("Rendimiento")) >> nth=0' );//translate
+	
+		//await page.click( 'text=Remove section' );//translate
+		await page.click( 'text=Quitar sección' );//translate
+		
 		// Grab all of the section headings
 		await page.waitForLoadState( 'networkidle' );
 		const sections = await page.$$(
@@ -172,15 +211,24 @@ test.describe( 'Analytics pages', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
+//await expect(page).toHaveScreenshot();
 		// button only shows when not all sections visible, so remove a section
-		await page.click( 'button:right-of(:text("Performance")) >> nth=0' );
-		await page.click( 'text=Remove section' );
+		//await page.click( 'button:right-of(:text("Performance")) >> nth=0' );//translate
+		await page.click( 'button:right-of(:text("Rendimiento")) >> nth=0' );//translate
+		//await page.click( 'text=Remove section' );//translate
+		await page.click( 'text=Quitar sección' );//translate
 
 		// add section
-		await page.click( '//button[@title="Add more sections"]' );
-		await page.click( '//button[@title="Add Performance section"]' );
+		//await page.click( '//button[@title="Add more sections"]' );//translate
+		await page.click( '//button[@title="Añadir más secciones"]' );//translate
+
+		//await page.click( '//button[@title="Add Performance section"]' );//translate
+		await page.click( '//button[@title="Añadir sección Rendimiento"]' );//translate
+		// await expect(
+		// 	page.locator( 'h2.woocommerce-section-header__title >> nth=2' )
+		// ).toContainText( 'Performance' );//translate
 		await expect(
 			page.locator( 'h2.woocommerce-section-header__title >> nth=2' )
-		).toContainText( 'Performance' );
+			).toContainText( 'Rendimiento' );//translate
 	} );
 } );

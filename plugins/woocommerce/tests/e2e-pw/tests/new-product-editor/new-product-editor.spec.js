@@ -9,9 +9,13 @@ const isNewProductEditorSupposedToBeEnabled = !! process.env
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
 async function clickAddNewMenuItem( page ) {
-	await page
+	// await page
+	// 	.locator( '#menu-posts-product' )
+	// 	.getByRole( 'link', { name: 'Add New' } )
+	// 	.click();//translate
+		await page
 		.locator( '#menu-posts-product' )
-		.getByRole( 'link', { name: 'Add New' } )
+		.getByRole( 'link', { name: 'Añadir nuevo' } )
 		.click();
 }
 
@@ -39,9 +43,12 @@ async function dismissFeedbackModalIfShown( page ) {
 }
 
 async function expectOldProductEditor( page ) {
+	// await expect(
+	// 	page.locator( '#woocommerce-product-data h2' )
+	// ).toContainText( 'Product data' );//translate
 	await expect(
 		page.locator( '#woocommerce-product-data h2' )
-	).toContainText( 'Product data' );
+	).toContainText( 'Datos del producto' );//translate
 }
 
 async function expectNewProductEditor( page ) {
@@ -62,6 +69,7 @@ test.describe( 'New product editor', () => {
 		test( 'is feature flag disabled', async ( { page } ) => {
 			// we have to go to a WCAdmin page to get the wcAdminFeatures global
 			await page.goto( ALL_PRODUCTS_URL );
+//await expect(page).toHaveScreenshot();
 
 			const wcAdminFeatures = await page.evaluate(
 				'window.wcAdminFeatures'
@@ -74,6 +82,7 @@ test.describe( 'New product editor', () => {
 
 		test( 'is not hooked up to sidebar "Add New"', async ( { page } ) => {
 			await page.goto( ALL_PRODUCTS_URL );
+//await expect(page).toHaveScreenshot();
 			await clickAddNewMenuItem( page );
 			await expectOldProductEditor( page );
 		} );
@@ -90,6 +99,7 @@ test.describe( 'New product editor', () => {
 		test( 'is feature flag enabled', async ( { page } ) => {
 			// we have to go to a WCAdmin page to get the wcAdminFeatures global
 			await page.goto( ALL_PRODUCTS_URL );
+//await expect(page).toHaveScreenshot();
 
 			const wcAdminFeatures = await page.evaluate(
 				'window.wcAdminFeatures'
@@ -102,12 +112,14 @@ test.describe( 'New product editor', () => {
 
 		test( 'is hooked up to sidebar "Add New"', async ( { page } ) => {
 			await page.goto( ALL_PRODUCTS_URL );
+//await expect(page).toHaveScreenshot();
 			await clickAddNewMenuItem( page );
 			await expectNewProductEditor( page );
 		} );
 
 		test( 'can be disabled from the header', async ( { page } ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
+//await expect(page).toHaveScreenshot();
 			await dismissGuideIfShown( page );
 
 			// turn off new product editor from the header
@@ -137,6 +149,7 @@ test.describe( 'New product editor', () => {
 			// from the header test succeeds
 
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
+//await expect(page).toHaveScreenshot();
 			await dismissGuideIfShown( page );
 
 			let footerShown = true;

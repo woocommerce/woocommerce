@@ -64,30 +64,41 @@ test.describe(
 			await page.goto(
 				`wp-admin/post.php?post=${ orderId }&action=edit`
 			);
+//await expect(page).toHaveScreenshot();
 
 			// verify that the order is pending payment
+			// await expect(
+			// 	page.locator( '#select2-order_status-container' )
+			// ).toContainText( 'Pending payment' );//translate
 			await expect(
 				page.locator( '#select2-order_status-container' )
-			).toContainText( 'Pending payment' );
+			).toContainText( 'Pendiente de pago' );//translate
 
 			//verify that the customer payment page link is displayed
+			// await expect(
+			// 	page.locator( 'label[for=order_status] > a' )
+			// ).toContainText( 'Customer payment page →' );//translate
 			await expect(
 				page.locator( 'label[for=order_status] > a' )
-			).toContainText( 'Customer payment page →' );
+			).toContainText( 'Página de pago del cliente →' );//translate
 		} );
 
 		test( 'should load the customer payment page', async ( { page } ) => {
 			await page.goto(
 				`wp-admin/post.php?post=${ orderId }&action=edit`
 			);
+//await expect(page).toHaveScreenshot();
 
 			// visit the page
 			await page.click( 'label[for=order_status] > a' );
 
 			// verify we landed on the customer payment page
+			// await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			// 	'Pay for order'
+			// );//translate
 			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-				'Pay for order'
-			);
+				'Pagar por el pedido'
+			);//translate
 			await expect( page.locator( 'td.product-name' ) ).toContainText(
 				productName
 			);
@@ -103,15 +114,20 @@ test.describe(
 			await page.goto(
 				`wp-admin/post.php?post=${ orderId }&action=edit`
 			);
+//await expect(page).toHaveScreenshot();
 			await page.click( 'label[for=order_status] > a' );
 
 			// pay for the order
 			await page.click( 'button#place_order' );
 
 			// Verify we landed on the order received page
+			// await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			// 	'Order received'
+			// );//translate
 			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-				'Order received'
-			);
+				'Pedido recibido'
+			);//translate
+
 			await expect(
 				page.locator( 'li.woocommerce-order-overview__order.order' )
 			).toContainText( orderId.toString() );

@@ -7,6 +7,7 @@ test.describe(
 
 		test( 'can make sure WooCommerce is activated.', async ( { page } ) => {
 			await page.goto( '/wp-admin/plugins.php' );
+//await expect(page).toHaveScreenshot();
 			// Expect the woo plugin to be displayed -- if there's an update available, it has the same data-slug attribute
 			await expect(
 				page.locator( "//tr[@data-slug='woocommerce'][1]" )

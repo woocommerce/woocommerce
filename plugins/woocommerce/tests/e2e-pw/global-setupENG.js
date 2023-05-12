@@ -58,28 +58,14 @@ module.exports = async ( config ) => {
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', admin.username );
 			await adminPage.fill( 'input[name="pwd"]', admin.password );
-
-			// const translatedButton = await adminPage.evaluate(__, 'Log In');
-			// console.log('translatedButton=',translatedButton);
-
-			//await adminPage.click( 'text=Log In' );//translate
-			//await adminPage.click( 'text=Acceder' );//translate
-			await adminPage.click( 'text=دخول' );//translate
-			
-			
+			await adminPage.click( 'text=Log In' );
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.waitForLoadState( 'domcontentloaded' );
 
-			// await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-			// 	'Dashboard'
-			// );//translate
-			// await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-			// 	'Escritorio'
-			// );//translate
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-				'الرئيسية'
-			);//translate
+				'Dashboard'
+			);
 			await adminPage
 				.context()
 				.storageState( { path: process.env.ADMINSTATE } );
@@ -110,18 +96,9 @@ module.exports = async ( config ) => {
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
-			console.log('#key_description');
 			await adminPage.fill( '#key_description', 'Key for API access' );
-			console.log('#key_permissions');
-			
 			await adminPage.selectOption( '#key_permissions', 'read_write' );
-			// await adminPage.click( 'text=Generate API key' );//translate
-			// await adminPage.click( 'text=Generar clave de API' );//translate
-			console.log('generate api');
-			// await adminPage.click( 'text=Generate API key' );//translate
-			await adminPage.click( 'text=توليد مفتاح API' );//translate
-			
-			
+			await adminPage.click( 'text=Generate API key' );
 			process.env.CONSUMER_KEY = await adminPage.inputValue(
 				'#key_consumer_key'
 			);
@@ -152,14 +129,9 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as customer...' );
 			await customerPage.goto( `/wp-admin` );
-			console.log('customer.username=',customer.username);
-			console.log('customer.password=',customer.password);
-			
 			await customerPage.fill( 'input[name="log"]', customer.username );
 			await customerPage.fill( 'input[name="pwd"]', customer.password );
-			// await customerPage.click( 'text=Log In' );//translate
-			// await customerPage.click( 'text=Acceder' );//translate
-			await customerPage.click( 'text=دخول' );//translate
+			await customerPage.click( 'text=Log In' );
 
 			await customerPage.goto( `/my-account` );
 			await expect(
@@ -167,22 +139,11 @@ module.exports = async ( config ) => {
 					'.woocommerce-MyAccount-navigation-link--customer-logout'
 				)
 			).toBeVisible();
-			// await expect(
-			// 	customerPage.locator(
-			// 		'div.woocommerce-MyAccount-content > p >> nth=0'
-			// 	)
-			// ).toContainText( 'Hello' );//translate
-			// await expect(
-			// 	customerPage.locator(
-			// 		'div.woocommerce-MyAccount-content > p >> nth=0'
-			// 	)
-			// ).toContainText( 'Hola' );//translate
-			console.log('hello');
 			await expect(
 				customerPage.locator(
 					'div.woocommerce-MyAccount-content > p >> nth=0'
 				)
-			).toContainText( 'مرحبًا' );//translate
+			).toContainText( 'Hello' );
 
 			await customerPage
 				.context()

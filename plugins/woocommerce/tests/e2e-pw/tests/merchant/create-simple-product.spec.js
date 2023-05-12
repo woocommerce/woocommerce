@@ -55,6 +55,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product', {
 			waitUntil: 'networkidle',
 		} );
+//await expect(page).toHaveScreenshot();
 		await page.fill( '#title', virtualProductName );
 		await page.fill( '#_regular_price', productPrice );
 		await page.click( '#_virtual' );
@@ -71,11 +72,16 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			await page.waitForLoadState( 'networkidle' );
 		}
 
+		// await expect(
+		// 	page
+		// 		.locator( 'div.notice-success > p' )
+		// 		.filter( { hasText: 'Product published.' } )
+		// ).toBeVisible();//translate
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Product published.' } )
-		).toBeVisible();
+				.filter( { hasText: 'Producto publicado.' } )
+		).toBeVisible();//translate
 
 		// Save product ID
 		virtualProductId = page.url().match( /(?<=post=)\d+/ );
@@ -88,17 +94,23 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( `/?post_type=product&p=${ virtualProductId }`, {
 			waitUntil: 'networkidle',
 		} );
+//await expect(page).toHaveScreenshot();
 		await expect( page.locator( '.product_title' ) ).toHaveText(
 			virtualProductName
 		);
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.click( 'text=Add to cart' );
-		await page.click( 'text=View cart' );
-		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
+		//await page.click( 'text=Add to cart' );//translate
+		await page.click( 'text=Añadir al carrito' );//translate	
+		// await page.click( 'text=View cart' );//translate
+		await page.click( 'text=Ver carrito' );//translate
+		// await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
+		// 	virtualProductName
+		// );//translate
+		await expect( page.locator( 'td[data-title=Producto]' ) ).toContainText(
 			virtualProductName
-		);
+		);//translate
 		await expect(
 			page.locator( 'a.shipping-calculator-button' )
 		).not.toBeVisible();
@@ -113,6 +125,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product', {
 			waitUntil: 'networkidle',
 		} );
+//await expect(page).toHaveScreenshot();
 		await page.fill( '#title', nonVirtualProductName );
 		await page.fill( '#_regular_price', productPrice );
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
@@ -129,11 +142,16 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 			await page.waitForLoadState( 'networkidle' );
 		}
 
+		// await expect(
+		// 	page
+		// 		.locator( 'div.notice-success > p' )
+		// 		.filter( { hasText: 'Product published.' } )
+		// ).toBeVisible();//translate
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Product published.' } )
-		).toBeVisible();
+				.filter( { hasText: 'Producto publicado.' } )
+		).toBeVisible();//translate
 
 		// Save product ID
 		nonVirtualProductId = page.url().match( /(?<=post=)\d+/ );
@@ -146,17 +164,23 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( `/?post_type=product&p=${ nonVirtualProductId }`, {
 			waitUntil: 'networkidle',
 		} );
+//await expect(page).toHaveScreenshot();
 		await expect( page.locator( '.product_title' ) ).toHaveText(
 			nonVirtualProductName
 		);
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.click( 'text=Add to cart' );
-		await page.click( 'text=View cart' );
-		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
+		//await page.click( 'text=Add to cart' );//translate
+		await page.click( 'text=Añadir al carrito' );//translate	
+		// await page.click( 'text=View cart' );//translate
+		await page.click( 'text=Ver carrito' );//translate
+		// await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
+		// 	nonVirtualProductName
+		// );//translate
+		await expect( page.locator( 'td[data-title=Producto]' ) ).toContainText(
 			nonVirtualProductName
-		);
+		);//translate
 		await expect(
 			page.locator( 'a.shipping-calculator-button' )
 		).toBeVisible();

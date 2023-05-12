@@ -227,14 +227,13 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		await test.step( 'Go to "Products > Add new" page.', async () => {
 			await page.goto( productPageURL );
+//await expect(page).toHaveScreenshot();
 		} );
 
 		await test.step(
 			`Type "${ variableProductName }" into the "Product name" input field.`,
 			async () => {
-				await page
-					.getByLabel( 'Product name' )
-					.fill( variableProductName );
+				await page.fill( '#title', variableProductName );
 			}
 		);
 
@@ -248,9 +247,12 @@ test.describe( 'Add New Variable Product Page', () => {
 		await test.step(
 			'Scroll into the "Attributes" tab and click it.',
 			async () => {
+				// const attributesTab = page
+				// 	.locator( '.attribute_tab' )
+				// 	.getByRole( 'link', { name: 'Attributes' } );//translate
 				const attributesTab = page
 					.locator( '.attribute_tab' )
-					.getByRole( 'link', { name: 'Attributes' } );
+					.getByRole( 'link', { name: 'Atributos' } );//translate
 
 				await attributesTab.scrollIntoViewIfNeeded();
 
@@ -270,10 +272,16 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		if ( tourWasDisplayed ) {
 			await test.step( 'Tour was displayed, so dismiss it.', async () => {
+				// await page
+				// 	.getByRole( 'button', { name: 'Close Tour' } )
+				// 	.click();//translate
 				await page
-					.getByRole( 'button', { name: 'Close Tour' } )
-					.click();
+					.getByRole( 'button', { name: 'Cerrar el recorrido' } )
+					.click();//translate
 			} );
+
+			//
+			//Cerrar el recorrido
 
 			await test.step(
 				"Wait for the tour's dismissal to be saved",
@@ -291,10 +299,14 @@ test.describe( 'Add New Variable Product Page', () => {
 			for ( let i = 0; i < 3; i++ ) {
 				if ( i > 0 ) {
 					await test.step( "Click 'Add'.", async () => {
-						await page
-							.locator( '#product_attributes .toolbar-top' )
-							.getByRole( 'button', { name: 'Add new' } )
-							.click();
+						// await page
+						// 	.locator( '.add-attribute-container' )
+						// 	.getByRole( 'button', { name: 'Add' } )
+						// 	.click();//translate
+							await page
+							.locator( '.add-attribute-container' )
+							.getByRole( 'button', { name: 'Añadir' } )
+							.click();//translate
 					} );
 				}
 
@@ -341,12 +353,18 @@ test.describe( 'Add New Variable Product Page', () => {
 						await test.step(
 							'Click "Save attributes".',
 							async () => {
-								await page
+								// await page
+								// 	.getByRole( 'button', {
+								// 		name: 'Save attributes',
+								// 	} )
+								// 	.click( { clickCount: 3 } );//translate
+									await page
 									.getByRole( 'button', {
-										name: 'Save attributes',
+										name: 'Guardar atributos',
 									} )
 									.click( { clickCount: 3 } );
 							}
+							//
 						);
 
 						await test.step(
@@ -376,9 +394,12 @@ test.describe( 'Add New Variable Product Page', () => {
 		await test.step(
 			'Expect the "Product draft updated." notice to appear.',
 			async () => {
+				// await expect(
+				// 	page.getByText( 'Product draft updated. ' )
+				// ).toBeVisible();//translate
 				await expect(
-					page.getByText( 'Product draft updated. ' )
-				).toBeVisible();
+					page.getByText( 'Borrador del producto actualizado. ' )
+				).toBeVisible();//translate
 			}
 		);
 
@@ -431,9 +452,12 @@ test.describe( 'Add New Variable Product Page', () => {
 		await test.step(
 			'Expect the "Product draft updated." notice to appear.',
 			async () => {
+				// await expect(
+				// 	page.locator( '#message.notice-success' )
+				// ).toContainText( 'Product draft updated.' );//translate
 				await expect(
 					page.locator( '#message.notice-success' )
-				).toContainText( 'Product draft updated.' );
+				).toContainText( 'Borrador del producto actualizado. ' );
 			}
 		);
 	} );
@@ -454,6 +478,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			await page.goto(
 				`/wp-admin/post.php?post=${ fixedVariableProductId }&action=edit`
 			);
+//await expect(page).toHaveScreenshot();
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
@@ -478,9 +503,12 @@ test.describe( 'Add New Variable Product Page', () => {
 			await test.step(
 				`Set regular price to "${ variationOnePrice }".`,
 				async () => {
+					// await firstVariation
+					// 	.getByRole( 'textbox', { name: 'Regular price' } )
+					// 	.fill( variationOnePrice );//translate
 					await firstVariation
-						.getByRole( 'textbox', { name: 'Regular price' } )
-						.fill( variationOnePrice );
+					.getByRole( 'textbox', { name: 'Precio normal' } )
+					.fill( variationOnePrice );//translate
 				}
 			);
 		} );
@@ -497,45 +525,67 @@ test.describe( 'Add New Variable Product Page', () => {
 			await test.step(
 				`Set regular price to "${ variationTwoPrice }".`,
 				async () => {
-					await secondVariation
-						.getByRole( 'textbox', { name: 'Regular price' } )
-						.fill( variationTwoPrice );
+					// await secondVariation
+					// 	.getByRole( 'textbox', { name: 'Regular price' } )
+					// 	.fill( variationTwoPrice );//translate
+						await secondVariation
+						.getByRole( 'textbox', { name: 'Precio normal' } )
+						.fill( variationTwoPrice );//translate
 				}
 			);
 		} );
 
 		await test.step( 'Edit the third variation.', async () => {
 			await test.step( 'Check "Manage stock?"', async () => {
+				// await thirdVariation
+				// 	.getByRole( 'checkbox', { name: 'Manage stock?' } )
+				// 	.check();//translate
 				await thirdVariation
-					.getByRole( 'checkbox', { name: 'Manage stock?' } )
-					.check();
+					.getByRole( 'checkbox', { name: '¿Gestionar inventario?' } )
+					.check();//translate
 			} );
 
 			await test.step(
 				`Set regular price to "${ variationThreePrice }".`,
 				async () => {
+					// await thirdVariation
+					// 	.getByRole( 'textbox', { name: 'Regular price' } )
+					// 	.fill( variationThreePrice );//translate
 					await thirdVariation
-						.getByRole( 'textbox', { name: 'Regular price' } )
-						.fill( variationThreePrice );
+					.getByRole( 'textbox', { name: 'Precio normal' } )
+					.fill( variationThreePrice );//translate
+						
 				}
 			);
 
 			await test.step( 'Set the weight and dimensions.', async () => {
-				await thirdVariation
-					.getByRole( 'textbox', { name: 'Weight' } )
-					.type( productWeight );
+				// await thirdVariation
+				// 	.getByRole( 'textbox', { name: 'Weight' } )
+				// 	.type( productWeight );//translate
+					await thirdVariation
+					.getByRole( 'textbox', { name: 'Peso' } )
+					.type( productWeight );//translate	
 
+				// await thirdVariation
+				// 	.getByRole( 'textbox', { name: 'Length' } )
+				// 	.type( productLength );//translate
 				await thirdVariation
-					.getByRole( 'textbox', { name: 'Length' } )
-					.type( productLength );
+				.getByRole( 'textbox', { name: 'Longitud' } )
+				.type( productLength );//translate
 
+				// await thirdVariation
+				// 	.getByRole( 'textbox', { name: 'Width' } )
+				// 	.type( productWidth );//translate
 				await thirdVariation
-					.getByRole( 'textbox', { name: 'Width' } )
-					.type( productWidth );
+				.getByRole( 'textbox', { name: 'Anchura' } )
+				.type( productWidth );//translate
 
+				// await thirdVariation
+				// 	.getByRole( 'textbox', { name: 'Height' } )
+				// 	.type( productHeight );//translate
 				await thirdVariation
-					.getByRole( 'textbox', { name: 'Height' } )
-					.type( productHeight );
+				.getByRole( 'textbox', { name: 'Altura' } )
+				.type( productHeight );//translate
 			} );
 		} );
 
@@ -568,11 +618,16 @@ test.describe( 'Add New Variable Product Page', () => {
 		await test.step(
 			`Expect the regular price of the first variation to be "${ variationOnePrice }".`,
 			async () => {
+				// await expect(
+				// 	firstVariation.getByRole( 'textbox', {
+				// 		name: 'Regular price',
+				// 	} )
+				// ).toHaveValue( variationOnePrice );//translate
 				await expect(
 					firstVariation.getByRole( 'textbox', {
-						name: 'Regular price',
+						name: 'Precio normal',
 					} )
-				).toHaveValue( variationOnePrice );
+				).toHaveValue( variationOnePrice );//translate
 			}
 		);
 
@@ -590,55 +645,85 @@ test.describe( 'Add New Variable Product Page', () => {
 		await test.step(
 			`Expect the regular price of the second variation to be "${ variationTwoPrice }".`,
 			async () => {
+				// await expect(
+				// 	secondVariation.getByRole( 'textbox', {
+				// 		name: 'Regular price',
+				// 	} )
+				// ).toHaveValue( variationTwoPrice );//translate
 				await expect(
 					secondVariation.getByRole( 'textbox', {
-						name: 'Regular price',
+						name: 'Precio normal',
 					} )
-				).toHaveValue( variationTwoPrice );
+				).toHaveValue( variationTwoPrice );//translate
 			}
 		);
 
 		await test.step(
 			'Expect the "Manage stock?" checkbox of the third variation to be checked.',
 			async () => {
+				// await expect(
+				// 	thirdVariation.getByRole( 'checkbox', {
+				// 		name: 'Manage stock?',
+				// 	} )
+				// ).toBeChecked();//translate
 				await expect(
 					thirdVariation.getByRole( 'checkbox', {
-						name: 'Manage stock?',
+						name: '¿Gestionar inventario?',
 					} )
-				).toBeChecked();
+				).toBeChecked();//translate
 			}
 		);
 
 		await test.step(
 			`Expect the regular price of the third variation to be "${ variationThreePrice }".`,
 			async () => {
+				// await expect(
+				// 	thirdVariation.getByRole( 'textbox', {
+				// 		name: 'Regular price',
+				// 	} )
+				// ).toHaveValue( variationThreePrice );//translate
 				await expect(
 					thirdVariation.getByRole( 'textbox', {
-						name: 'Regular price',
+						name: 'Precio normal',
 					} )
-				).toHaveValue( variationThreePrice );
+				).toHaveValue( variationThreePrice );//translate
 			}
 		);
 
 		await test.step(
 			'Expect the weight and dimensions of the third variation to be correct.',
 			async () => {
+				// await expect(
+				// 	thirdVariation.getByRole( 'textbox', { name: 'Weight' } )
+				// ).toHaveValue( productWeight );//translate
 				await expect(
-					thirdVariation.getByRole( 'textbox', { name: 'Weight' } )
-				).toHaveValue( productWeight );
+					thirdVariation.getByRole( 'textbox', { name: 'Peso' } )
+				).toHaveValue( productWeight );//translate
+
+				// await expect(
+				// 	thirdVariation.getByRole( 'textbox', { name: 'Length' } )
+				// ).toHaveValue( productLength );//translate
+				await expect(
+					thirdVariation.getByRole( 'textbox', { name: 'Longitud' } )
+				).toHaveValue( productLength );//translate
+
+				// await expect(
+				// 	thirdVariation.getByRole( 'textbox', { name: 'Width' } )
+				// ).toHaveValue( productWidth );//translate
 
 				await expect(
-					thirdVariation.getByRole( 'textbox', { name: 'Length' } )
-				).toHaveValue( productLength );
+					thirdVariation.getByRole( 'textbox', { name: 'Anchura' } )
+				).toHaveValue( productWidth );//translate
 
+				// await expect(
+				// 	thirdVariation.getByRole( 'textbox', { name: 'Height' } )
+				// ).toHaveValue( productHeight );//translate
 				await expect(
-					thirdVariation.getByRole( 'textbox', { name: 'Width' } )
-				).toHaveValue( productWidth );
+					thirdVariation.getByRole( 'textbox', { name: 'Altura' } )
+				).toHaveValue( productHeight );//translate
 
-				await expect(
-					thirdVariation.getByRole( 'textbox', { name: 'Height' } )
-				).toHaveValue( productHeight );
 			}
+
 		);
 	} );
 
@@ -647,6 +732,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			await page.goto(
 				`/wp-admin/post.php?post=${ fixedVariableProductId }&action=edit`
 			);
+//await expect(page).toHaveScreenshot();
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
@@ -689,6 +775,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			await page.goto(
 				`/wp-admin/post.php?post=${ fixedVariableProductId }&action=edit`
 			);
+//await expect(page).toHaveScreenshot();
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
@@ -717,13 +804,18 @@ test.describe( 'Add New Variable Product Page', () => {
 		page,
 	} ) => {
 		await page.goto( productPageURL );
-		await page.getByLabel( 'Product name' ).fill( manualVariableProduct );
+//await expect(page).toHaveScreenshot();
+		await page.fill( '#title', manualVariableProduct );
 		await page.selectOption( '#product-type', 'variable' );
 
+		// await page
+		// 	.locator( '.attribute_tab' )
+		// 	.getByRole( 'link', { name: 'Attributes' } )
+		// 	.scrollIntoViewIfNeeded();//translate
 		await page
 			.locator( '.attribute_tab' )
-			.getByRole( 'link', { name: 'Attributes' } )
-			.scrollIntoViewIfNeeded();
+			.getByRole( 'link', { name: 'Atributos' } )
+			.scrollIntoViewIfNeeded();//translate
 
 		// the tour only seems to display when not running headless, so just make sure
 		if (
@@ -732,7 +824,8 @@ test.describe( 'Add New Variable Product Page', () => {
 				.isVisible()
 		) {
 			// dismiss the variable product tour
-			await page.getByRole( 'button', { name: 'Close Tour' } ).click();
+			//await page.getByRole( 'button', { name: 'Close Tour' } ).click();//translate
+			await page.getByRole( 'button', { name: 'Cerrar el recorrido' } ).click();//translate
 
 			// wait for the tour's dismissal to be saved
 			await page.waitForResponse(
@@ -746,7 +839,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		// add 3 attributes
 		for ( let i = 0; i < 3; i++ ) {
 			if ( i > 0 ) {
-				await page.click( 'button.add_custom_attribute' );
+				await page.click( 'button.add_attribute' );
 			}
 			await page.waitForSelector(
 				`input[name="attribute_names[${ i }]"]`
@@ -761,7 +854,9 @@ test.describe( 'Add New Variable Product Page', () => {
 				.first()
 				.type( 'val1 | val2' );
 		}
-		await page.click( 'text=Save attributes' );
+		//await page.click( 'text=Save attributes' );//translate
+		await page.click( 'text=Guardar atributos' );//translate
+		
 		// wait for the attributes to be saved
 		await page.waitForResponse(
 			( response ) =>
@@ -771,9 +866,12 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
 		await page.locator( '#save-post' ).click();
+		// await expect(
+		// 	page.getByText( 'Product draft updated. ' )
+		// ).toBeVisible();//translate
 		await expect(
-			page.getByText( 'Product draft updated. ' )
-		).toBeVisible();
+			page.getByText( 'Borrador del producto actualizado. ' )
+		).toBeVisible();//translate 
 		await page.click( '.updated.notice .notice-dismiss' );
 
 		// manually adds a variation
@@ -799,9 +897,12 @@ test.describe( 'Add New Variable Product Page', () => {
 		}
 
 		await page.locator( '#save-post' ).click();
+		// await expect(
+		// 	page.getByText( 'Product draft updated. ' )
+		// ).toBeVisible();//translate
 		await expect(
-			page.getByText( 'Product draft updated. ' )
-		).toBeVisible();
+			page.getByText( 'Borrador del producto actualizado. ' )
+		).toBeVisible();//translate
 
 		// manage stock at variation level
 		await page.click( 'a[href="#variable_product_options"]' );
@@ -810,27 +911,15 @@ test.describe( 'Add New Variable Product Page', () => {
 			'#variable_product_options .toolbar-top a.expand_all'
 		);
 		await page.check( 'input.checkbox.variable_manage_stock' );
-
-		const firstVariationContainer = await page
-			.locator( '.woocommerce_variations  .woocommerce_variation' )
-			.first();
-
-		await firstVariationContainer
-			.getByPlaceholder( 'Variation price (required)' )
-			.fill( variationOnePrice );
+		await page.fill( 'input#variable_regular_price_0', variationOnePrice );
 		await expect(
 			page.locator( 'p.variable_stock_status' )
 		).not.toBeVisible();
-		await firstVariationContainer
-			.getByLabel( 'Stock quantity' )
-			.nth(1)
-			.fill( stockAmount );
+		await page.fill( 'input#variable_stock0', stockAmount );
 		await page.selectOption( '#variable_backorders0', 'notify', {
 			force: true,
 		} );
-		await firstVariationContainer
-			.getByPlaceholder( 'Store-wide threshold (2)' )
-			.fill( lowStockAmount );
+		await page.fill( 'input#variable_low_stock_amount0', lowStockAmount );
 		await page.click( 'button.save-variation-changes' );
 		await page.click(
 			'#variable_product_options .toolbar-top a.expand_all'
@@ -841,9 +930,12 @@ test.describe( 'Add New Variable Product Page', () => {
 		await expect(
 			page.locator( '#variable_low_stock_amount0' )
 		).toHaveValue( lowStockAmount );
+		// await expect(
+		// 	page.locator( '#variable_backorders0 > option[selected]' )
+		// ).toHaveText( 'Allow, but notify customer' );//translate
 		await expect(
 			page.locator( '#variable_backorders0 > option[selected]' )
-		).toHaveText( 'Allow, but notify customer' );
+		).toHaveText( 'Permitir, pero se avisará al cliente' );//translate
 
 		// set variation defaults
 		await page.click( 'a[href="#variable_product_options"]' );

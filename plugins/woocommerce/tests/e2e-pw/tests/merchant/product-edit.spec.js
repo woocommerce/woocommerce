@@ -38,6 +38,7 @@ test.describe( 'Products > Edit Product', () => {
 
 	test( 'can edit a product and save the changes', async ( { page } ) => {
 		await page.goto( `wp-admin/post.php?post=${ productId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 
 		// make some edits
 		await page.fill( '#title', 'Awesome product' );

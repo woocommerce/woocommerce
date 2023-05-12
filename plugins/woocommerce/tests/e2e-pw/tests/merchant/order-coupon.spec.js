@@ -74,17 +74,24 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 
 	test( 'can apply a coupon', async ( { page } ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
+//await expect(page).toHaveScreenshot();
 
 		// open modal for adding line items
 		await page.click( 'button.add-line-item' );
 		await page.click( 'button.add-order-item' );
 
 		// search for product to add
-		await page.click( 'text=Search for a product…' );
+		// await page.click( 'text=Search for a product…' );//translate
+		await page.click( 'text=Busca un producto…' );//translate
+
+		// await page.type(
+		// 	'input:below(:text("Search for a product…"))',
+		// 	productName
+		// );//translate
 		await page.type(
-			'input:below(:text("Search for a product…"))',
+			'input:below(:text("Busca un producto…"))',
 			productName
-		);
+		);//translate
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
 		);
@@ -96,12 +103,18 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await page.click( 'button.add-coupon' );
 
 		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).toBeVisible();
+		// await expect(
+		// 	page.locator( '.wc-order-totals td.label >> nth=1' )
+		// ).toContainText( 'Coupon(s)' );//translate
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Coupon(s)' );
+		).toContainText( 'Cupón(es)' );//translate
+		// await expect(
+		// 	page.locator( '.wc-order-totals td.label >> nth=2' )
+		// ).toContainText( 'Order Total' );//translate
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=2' )
-		).toContainText( 'Order Total' );
+		).toContainText( 'Total del pedido' );//translate
 		await expect(
 			page.locator( '.wc-order-totals td.total >> nth=1' )
 		).toContainText( couponAmount );
@@ -112,14 +125,21 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 
 	test( 'can remove a coupon', async ( { page } ) => {
 		await page.goto( `/wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 		// assert that there is a coupon on the order
 		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).toBeVisible();
+		// await expect(
+		// 	page.locator( '.wc-order-totals td.label >> nth=1' )
+		// ).toContainText( 'Coupon(s)' );//translate
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Coupon(s)' );
+		).toContainText( 'Cupón(es)' );//translate
+		// await expect(
+		// 	page.locator( '.wc-order-totals td.label >> nth=2' )
+		// ).toContainText( 'Order Total' );//translate
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=2' )
-		).toContainText( 'Order Total' );
+		).toContainText( 'Total del pedido' );//translate
 		await expect(
 			page.locator( '.wc-order-totals td.total >> nth=1' )
 		).toContainText( couponAmount );
@@ -131,9 +151,13 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 
 		// make sure the coupon was removed
 		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).not.toBeVisible();
+		// await expect(
+		// 	page.locator( '.wc-order-totals td.label >> nth=1' )
+		// ).toContainText( 'Order Total' );//translate
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Order Total' );
+		).toContainText( 'Total del pedido' );//translate
+
 		await expect(
 			page.locator( '.wc-order-totals td.total >> nth=1' )
 		).toContainText( productPrice );

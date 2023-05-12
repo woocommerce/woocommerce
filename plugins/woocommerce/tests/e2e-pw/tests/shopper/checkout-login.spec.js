@@ -31,6 +31,7 @@ test.describe( 'Shopper Checkout Login Account', () => {
 			version: 'wc/v3',
 		} );
 		// add product
+		console.log('add product');
 		await api
 			.post( 'products', {
 				name: 'Checkout Login Account',
@@ -40,12 +41,14 @@ test.describe( 'Shopper Checkout Login Account', () => {
 			.then( ( response ) => {
 				productId = response.data.id;
 			} );
+			console.log('put');
 		await api.put(
 			'settings/account/woocommerce_enable_checkout_login_reminder',
 			{
 				value: 'yes',
 			}
 		);
+		console.log('add ship');
 		// add a shipping zone and method
 		await api
 			.post( 'shipping/zones', {
@@ -54,20 +57,24 @@ test.describe( 'Shopper Checkout Login Account', () => {
 			.then( ( response ) => {
 				shippingZoneId = response.data.id;
 			} );
+			console.log('put');
 		await api.put( `shipping/zones/${ shippingZoneId }/locations`, [
 			{
 				code: 'US:NY',
 				type: 'state',
 			},
 		] );
+		console.log('post ship');
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
 			method_id: 'free_shipping',
 		} );
 		// create customer and save its id
+		console.log('create cust');
 		await api
 			.post( 'customers', customer )
 			.then( ( response ) => ( customerId = response.data.id ) );
 		// enable a payment method
+		console.log('payment_gateways');
 		await api.put( 'payment_gateways/cod', {
 			enabled: true,
 		} );
@@ -119,7 +126,8 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		page,
 	} ) => {
 		await page.goto( '/checkout/' );
-		await page.click( 'text=Click here to login' );
+		// await page.click( 'text=Click here to login' );//translate
+		await page.click( 'text=Haz clic aquí para acceder' );//translate
 
 		// fill in the customer account info
 		await page.fill( '#username', customer.username );
@@ -153,10 +161,15 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		);
 
 		// place an order
-		await page.click( 'text=Place order' );
+		// await page.click( 'text=Place order' );//translate
+		await page.click( 'text=Realizar el pedido' );//translate
+		// await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+		// 	'Order received'
+		// );//translate
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+			'Pedido recibido'
+		);//translate
+
 
 		await page.waitForLoadState( 'networkidle' );
 		// get order ID from the page
@@ -167,7 +180,8 @@ test.describe( 'Shopper Checkout Login Account', () => {
 			( element ) => element.textContent,
 			orderReceivedHtmlElement
 		);
-		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+		// orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();//translate
+		orderId = orderReceivedText.split( /(\s+)/ )[ 8 ].toString();//translate
 
 		await expect( page.locator( 'ul > li.email' ) ).toContainText(
 			customer.email

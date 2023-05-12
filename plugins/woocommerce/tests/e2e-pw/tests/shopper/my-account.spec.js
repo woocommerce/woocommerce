@@ -1,12 +1,18 @@
 const { test, expect } = require( '@playwright/test' );
 const { customer } = require( '../../test-data/data' );
 
+// const pages = [
+// 	[ 'Orders', 'my-account/orders' ],
+// 	[ 'Downloads', 'my-account/downloads' ],
+// 	[ 'Addresses', 'my-account/edit-address' ],
+// 	[ 'Account details', 'my-account/edit-account' ],
+// ];//translate
 const pages = [
-	[ 'Orders', 'my-account/orders' ],
-	[ 'Downloads', 'my-account/downloads' ],
-	[ 'Addresses', 'my-account/edit-address' ],
-	[ 'Account details', 'my-account/edit-account' ],
-];
+	[ 'Pedidos', 'my-account/orders' ],
+	[ 'Descargas', 'my-account/downloads' ],
+	[ 'Dirección', 'my-account/edit-address' ],
+	[ 'Detalles de la cuenta', 'my-account/edit-account' ],
+];//translate
 
 test.describe( 'My account page', () => {
 	test.use( { storageState: process.env.CUSTOMERSTATE } );
@@ -22,30 +28,56 @@ test.describe( 'My account page', () => {
 		).toContainText( `${ customer.first_name } ${ customer.last_name }` );
 
 		// assert that navigation is visible
+		// await expect(
+		// 	page.locator( '.woocommerce-MyAccount-navigation-link--dashboard' )
+		// ).toContainText( 'Dashboard' );//translate
 		await expect(
 			page.locator( '.woocommerce-MyAccount-navigation-link--dashboard' )
-		).toContainText( 'Dashboard' );
+		).toContainText( 'Escritorio' );//translate
+		// await expect(
+		// 	page.locator( '.woocommerce-MyAccount-navigation-link--orders' )
+		// ).toContainText( 'Orders' );//translate
 		await expect(
 			page.locator( '.woocommerce-MyAccount-navigation-link--orders' )
-		).toContainText( 'Orders' );
+		).toContainText( 'Pedidos' );//translate
+		// await expect(
+		// 	page.locator( '.woocommerce-MyAccount-navigation-link--downloads' )
+		// ).toContainText( 'Downloads' );//translate
 		await expect(
 			page.locator( '.woocommerce-MyAccount-navigation-link--downloads' )
-		).toContainText( 'Downloads' );
+		).toContainText( 'Descargas' );//translate
+		// await expect(
+		// 	page.locator(
+		// 		'.woocommerce-MyAccount-navigation-link--edit-address'
+		// 	)
+		// ).toContainText( 'Addresses' );//translate
 		await expect(
 			page.locator(
 				'.woocommerce-MyAccount-navigation-link--edit-address'
 			)
-		).toContainText( 'Addresses' );
+		).toContainText( 'Direcciones' );//translate
+		
+		// await expect(
+		// 	page.locator(
+		// 		'.woocommerce-MyAccount-navigation-link--edit-account'
+		// 	)
+		// ).toContainText( 'Account details' );//translate
 		await expect(
 			page.locator(
 				'.woocommerce-MyAccount-navigation-link--edit-account'
 			)
-		).toContainText( 'Account details' );
-		await expect(
+		).toContainText( 'Detalles de la cuenta' );//translate
+		// await expect(
+		// 	page.locator(
+		// 		'.woocommerce-MyAccount-navigation-link--customer-logout'
+		// 	)
+		// ).toContainText( 'Logout' );//translate
+				await expect(
 			page.locator(
 				'.woocommerce-MyAccount-navigation-link--customer-logout'
 			)
-		).toContainText( 'Log out' );
+		).toContainText( 'Log out' );//translate
+		
 	} );
 
 	for ( let i = 0; i < pages.length; i++ ) {

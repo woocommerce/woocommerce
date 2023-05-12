@@ -36,24 +36,33 @@ test.describe( 'Edit order', () => {
 	test( 'can view single order', async ( { page } ) => {
 		// go to orders page
 		await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
+//await expect(page).toHaveScreenshot();
 
 		// confirm we're on the orders page
+		// await expect( page.locator( 'h1.components-text' ) ).toContainText(
+		// 	'Orders'
+		// );//translate
 		await expect( page.locator( 'h1.components-text' ) ).toContainText(
-			'Orders'
-		);
+			'Pedidos'
+		);//translate
 
 		// open order we created
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// make sure we're on the order details page
+		// await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
+		// 	/Edit [oO]rder/
+		// );//translate
 		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
-			/Edit [oO]rder/
-		);
+			/Editar [pP]edido/
+		);//translate
+		//Editar pedido
 	} );
 
 	test( 'can update order status', async ( { page } ) => {
 		// open order we created
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 
 		// update order status to Completed
 		await page.selectOption( '#order_status', 'wc-completed' );
@@ -63,25 +72,36 @@ test.describe( 'Edit order', () => {
 		await expect( page.locator( '#order_status' ) ).toHaveValue(
 			'wc-completed'
 		);
+		// await expect(
+		// 	page.locator( '#woocommerce-order-notes .note_content >> nth=0' )
+		// ).toContainText( 'Order status changed from Processing to Completed.' );//translate
 		await expect(
 			page.locator( '#woocommerce-order-notes .note_content >> nth=0' )
-		).toContainText( 'Order status changed from Processing to Completed.' );
+		).toContainText( 'El estado del pedido cambió de Procesando a Completado.' );//translate
+		
 	} );
 
 	test( 'can update order details', async ( { page } ) => {
 		// open order we created
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 
 		// update order date
 		await page.fill( 'input[name=order_date]', '2018-12-14' );
 		await page.click( 'button.save_order' );
 
 		// verify changes
+		// await expect(
+		// 	page
+		// 		.locator( 'div.notice-success > p' )
+		// 		.filter( { hasText: 'Order updated.' } )
+		// ).toBeVisible();//translate
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Order updated.' } )
-		).toBeVisible();
+				.filter( { hasText: 'Pedido actualizado.' } )
+		).toBeVisible();//translate
+		
 		await expect( page.locator( 'input[name=order_date]' ) ).toHaveValue(
 			'2018-12-14'
 		);
@@ -222,6 +242,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		await page.goto(
 			`wp-admin/post.php?post=${ noProductOrderId }&action=edit`
 		);
+//await expect(page).toHaveScreenshot();
 
 		// add downloadable product permissions
 		await page.type( 'input.select2-search__field', productName );
@@ -236,21 +257,39 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > h3 > strong'
 			)
 		).toContainText( productName );
+		// await expect(
+		// 	page.locator(
+		// 		'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
+		// 	)
+		// ).toHaveAttribute( 'placeholder', 'Unlimited' );//translate
 		await expect(
 			page.locator(
 				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
 			)
-		).toHaveAttribute( 'placeholder', 'Unlimited' );
+		).toHaveAttribute( 'placeholder', 'Ilimitado' );//translate
+
+		// await expect(
+		// 	page.locator(
+		// 		'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
+		// 	)
+		// ).toHaveAttribute( 'placeholder', 'Never' );//translate
 		await expect(
 			page.locator(
 				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
 			)
-		).toHaveAttribute( 'placeholder', 'Never' );
+		).toHaveAttribute( 'placeholder', 'Nunca' );//translate
 		await expect( page.locator( 'button.revoke_access' ) ).toBeVisible();
-		await expect( page.locator( 'a:has-text("Copy link")' ) ).toBeVisible();
+		//await expect( page.locator( 'a:has-text("Copy link")' ) ).toBeVisible();//translate
+		await expect( page.locator( 'a:has-text("Copiar enlace")' ) ).toBeVisible();//translate
+		
+		// await expect(
+		// 	page.locator( 'a:has-text("View report")' )
+		// ).toBeVisible();//translate
 		await expect(
-			page.locator( 'a:has-text("View report")' )
-		).toBeVisible();
+			page.locator( 'a:has-text("Ver informe")' )
+		).toBeVisible();//translate
+
+		
 	} );
 
 	test( 'can add downloadable product permissions to order with product', async ( {
@@ -258,6 +297,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 	} ) => {
 		// open the order that already has a product assigned
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 
 		// add downloadable product permissions
 		await page.type( 'input.select2-search__field', product2Name );
@@ -274,16 +314,28 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 			)
 		).toBeVisible();
 
+		// await expect(
+		// 	page.locator(
+		// 		'#woocommerce-order-downloads input[name^="downloads_remaining"] >> nth=-1'
+		// 	)
+		// ).toHaveAttribute( 'placeholder', 'Unlimited' );//translate
+
 		await expect(
 			page.locator(
 				'#woocommerce-order-downloads input[name^="downloads_remaining"] >> nth=-1'
 			)
-		).toHaveAttribute( 'placeholder', 'Unlimited' );
+		).toHaveAttribute( 'placeholder', 'Ilimitado' );//translate
+		
+		// await expect(
+		// 	page.locator(
+		// 		'#woocommerce-order-downloads input[name^="access_expires"] >> nth=-1'
+		// 	)
+		// ).toHaveAttribute( 'placeholder', 'Never' );//translate
 		await expect(
 			page.locator(
 				'#woocommerce-order-downloads input[name^="access_expires"] >> nth=-1'
 			)
-		).toHaveAttribute( 'placeholder', 'Never' );
+		).toHaveAttribute( 'placeholder', 'Nunca' );//translate
 	} );
 
 	test( 'can edit downloadable product permissions', async ( { page } ) => {
@@ -292,6 +344,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 
 		// open the order that already has a product assigned
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 
 		// expand product download permissions
 		await page.click(
@@ -328,6 +381,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 	test( 'can revoke downloadable product permissions', async ( { page } ) => {
 		// open the order that already has a product assigned
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 
 		// expand product download permissions
 		await page.click(
@@ -357,11 +411,15 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 	test( 'should not allow downloading a product if download attempts are exceeded', async ( {
 		page,
 	} ) => {
+		// const expectedReason =
+		// 	'Sorry, you have reached your download limit for this file';//translate
 		const expectedReason =
-			'Sorry, you have reached your download limit for this file';
+			'Lo siento, has alcanzado el límite de descargas para este archivo';
+			
 
 		// open the order that already has a product assigned
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 
 		// set the download limit to 0
 		// expand product download permissions
@@ -394,10 +452,13 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 	test( 'should not allow downloading a product if expiration date has passed', async ( {
 		page,
 	} ) => {
-		const expectedReason = 'Sorry, this download has expired';
+		// const expectedReason = 'Sorry, this download has expired';//translate
+		const expectedReason = 'Lo siento, esta descarga ha caducado';//translate
+		
 
 		// open the order that already has a product assigned
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 
 		// set the download limit to 0
 		// expand product download permissions

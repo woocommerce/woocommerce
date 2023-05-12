@@ -228,14 +228,20 @@ test.describe( 'Checkout page', () => {
 		await page.fill( '#billing_phone', '555 555-5555' );
 		await page.fill( '#billing_email', guestEmail );
 
-		await page.click( 'text=Cash on delivery' );
+		// await page.click( 'text=Cash on delivery' );//translate
+		await page.click( 'text=Contra reembolso' );//translate
+		
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
 
-		await page.click( 'text=Place order' );
+		// await page.click( 'text=Place order' );//translate
+		await page.click( 'text=Realizar el pedido' );//translate
 
+				// await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+		// 	'Order received'
+		// );//translate
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+			'Pedido recibido'
+		);//translate
 
 		// get order ID from the page
 		const orderReceivedHtmlElement = await page.$(
@@ -245,21 +251,27 @@ test.describe( 'Checkout page', () => {
 			( element ) => element.textContent,
 			orderReceivedHtmlElement
 		);
-		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+		// guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();//translate
+		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 8 ].toString();//translate
 
 		await page.goto( 'wp-login.php' );
 		await page.fill( 'input[name="log"]', admin.username );
 		await page.fill( 'input[name="pwd"]', admin.password );
-		await page.click( 'text=Log In' );
+		// await page.click( 'text=Log In' );//translate
+		await page.click( 'text=Acceder' );//translate
 
 		// load the order placed as a guest
 		await page.goto(
 			`wp-admin/post.php?post=${ guestOrderId }&action=edit`
 		);
 
+		// await expect(
+		// 	page.locator( 'h2.woocommerce-order-data__heading' )
+		// ).toContainText( `Order #${ guestOrderId } details` );//translate
 		await expect(
 			page.locator( 'h2.woocommerce-order-data__heading' )
-		).toContainText( `Order #${ guestOrderId } details` );
+		).toContainText( `Detalles de Pedido #${ guestOrderId }` );//translate
+
 		await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
 			simpleProductName
 		);
@@ -278,7 +290,8 @@ test.describe( 'Checkout page', () => {
 		await page.goto( 'wp-admin/' );
 		await page.fill( 'input[name="log"]', customer.username );
 		await page.fill( 'input[name="pwd"]', customer.password );
-		await page.click( 'text=Log In' );
+		// await page.click( 'text=Log In' );//translate
+		await page.click( 'text=Acceder' );//translate
 		await page.waitForLoadState( 'networkidle' );
 		for ( let i = 1; i < 3; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
@@ -303,14 +316,19 @@ test.describe( 'Checkout page', () => {
 		await page.fill( '#billing_phone', '555 555-5555' );
 		await page.fill( '#billing_email', customer.email );
 
-		await page.click( 'text=Cash on delivery' );
+		// await page.click( 'text=Cash on delivery' );//translate
+		await page.click( 'text=Contra reembolso' );//translate
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
 
-		await page.click( 'text=Place order' );
+		// await page.click( 'text=Place order' );//translate
+		await page.click( 'text=Realizar el pedido' );//translate
 
+		// await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+		// 	'Order received'
+		// );//translate
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+			'Pedido recibido'
+		);//translate
 
 		// get order ID from the page
 		const orderReceivedHtmlElement = await page.$(
@@ -320,24 +338,32 @@ test.describe( 'Checkout page', () => {
 			( element ) => element.textContent,
 			orderReceivedHtmlElement
 		);
-		customerOrderId = await orderReceivedText
-			.split( /(\s+)/ )[ 6 ]
-			.toString();
+		// customerOrderId = await orderReceivedText
+		// 	.split( /(\s+)/ )[ 6 ]
+		// 	.toString();//translate
+			customerOrderId = await orderReceivedText
+			.split( /(\s+)/ )[ 8 ]
+			.toString();//translate
 
 		await page.goto( 'wp-login.php?loggedout=true' );
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.fill( 'input[name="log"]', admin.username );
 		await page.fill( 'input[name="pwd"]', admin.password );
-		await page.click( 'text=Log In' );
+		// await page.click( 'text=Log In' );//translate
+		await page.click( 'text=Acceder' );//translate
 
 		// load the order placed as a customer
 		await page.goto(
 			`wp-admin/post.php?post=${ customerOrderId }&action=edit`
 		);
+		// await expect(
+		// 	page.locator( 'h2.woocommerce-order-data__heading' )
+		// ).toContainText( `Order #${ customerOrderId } details` );//translate
 		await expect(
 			page.locator( 'h2.woocommerce-order-data__heading' )
-		).toContainText( `Order #${ customerOrderId } details` );
+		).toContainText( `Detalles de Pedido  #${ customerOrderId }` );//translate
+
 		await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
 			simpleProductName
 		);

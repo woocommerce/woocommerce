@@ -19,8 +19,12 @@ const coupons = [
 		amount: '7.00',
 	},
 ];
-const discounts = [ '$5.00', '$10.00', '$7.00' ];
-const totals = [ '$15.00', '$10.00', '$13.00' ];
+const discounts = [ '$5.00', 
+'$10.00', 
+'$7.00' ];
+const totals = [ '$15.00',
+ '$10.00', 
+ '$13.00' ];
 
 test.describe( 'Cart applying coupons', () => {
 	let firstProductId;
@@ -60,6 +64,7 @@ test.describe( 'Cart applying coupons', () => {
 	} );
 
 	test.beforeEach( async ( { page, context } ) => {
+		
 		// Shopping cart is very sensitive to cookies, so be explicit
 		await context.clearCookies();
 
@@ -83,15 +88,22 @@ test.describe( 'Cart applying coupons', () => {
 
 	for ( let i = 0; i < coupons.length; i++ ) {
 		test( `allows cart to apply coupon of type ${ coupons[ i ].discount_type }`, async ( {
-			page,
+			page, context
 		} ) => {
 			await page.goto( '/cart/' );
+//await expect(page).toHaveScreenshot();
 			await page.fill( '#coupon_code', coupons[ i ].code );
-			await page.click( 'text=Apply coupon' );
+			// await page.click( 'text=Apply coupon' );//translate
+			await page.click( 'text=Aplicar cupón' );//translate
+			
 
+			// await expect(
+			// 	page.locator( '.woocommerce-message' )
+			// ).toContainText( 'Coupon code applied successfully.' );//translate
 			await expect(
 				page.locator( '.woocommerce-message' )
-			).toContainText( 'Coupon code applied successfully.' );
+			).toContainText( 'El código de cupón se ha aplicado correctamente.' );//translate
+			
 			// Checks the coupon amount is credited properly
 			await expect(
 				page.locator( '.cart-discount .amount' )
@@ -100,27 +112,38 @@ test.describe( 'Cart applying coupons', () => {
 			await expect(
 				page.locator( '.order-total .amount' )
 			).toContainText( totals[ i ] );
+
 		} );
 	}
 
 	test( 'prevents cart applying same coupon twice', async ( { page } ) => {
 		await page.goto( '/cart/' );
+//await expect(page).toHaveScreenshot();
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+			// await page.click( 'text=Apply coupon' );//translate
+			await page.click( 'text=Aplicar cupón' );//translate
 		// successful first time
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			'Coupon code applied successfully.'
-		);
+			// await expect(
+			// 	page.locator( '.woocommerce-message' )
+			// ).toContainText( 'Coupon code applied successfully.' );//translate
+			await expect(
+				page.locator( '.woocommerce-message' )
+			).toContainText( 'El código de cupón se ha aplicado correctamente.' );//translate
 		await page.waitForLoadState( 'networkidle' );
 		// try to apply the same coupon
 		await page.goto( '/cart/' );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+			// await page.click( 'text=Apply coupon' );//translate
+			await page.click( 'text=Aplicar cupón' );//translate
 		await page.waitForLoadState( 'networkidle' );
 		// error received
+		// await expect( page.locator( '.woocommerce-error' ) ).toContainText(
+		// 	'Coupon code already applied!'
+		// );//translate
 		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
-			'Coupon code already applied!'
-		);
+			'¡El código del cupón ya se ha aplicado!'
+		);//translate
+		
 		// check cart total
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(
 			discounts[ 0 ]
@@ -132,21 +155,30 @@ test.describe( 'Cart applying coupons', () => {
 
 	test( 'allows cart to apply multiple coupons', async ( { page } ) => {
 		await page.goto( '/cart/' );
+//await expect(page).toHaveScreenshot();
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+			// await page.click( 'text=Apply coupon' );//translate
+			await page.click( 'text=Aplicar cupón' );//translate
 		// successful
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			'Coupon code applied successfully.'
-		);
+			// await expect(
+			// 	page.locator( '.woocommerce-message' )
+			// ).toContainText( 'Coupon code applied successfully.' );//translate
+			await expect(
+				page.locator( '.woocommerce-message' )
+			).toContainText( 'El código de cupón se ha aplicado correctamente.' );//translate
 
 		await page.waitForLoadState( 'networkidle' );
 		await page.click( '#coupon_code' );
 		await page.fill( '#coupon_code', coupons[ 2 ].code );
-		await page.click( 'text=Apply coupon' );
+			// await page.click( 'text=Apply coupon' );//translate
+			await page.click( 'text=Aplicar cupón' );//translate
 		// successful
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			'Coupon code applied successfully.'
-		);
+			// await expect(
+			// 	page.locator( '.woocommerce-message' )
+			// ).toContainText( 'Coupon code applied successfully.' );//translate
+			await expect(
+				page.locator( '.woocommerce-message' )
+			).toContainText( 'El código de cupón se ha aplicado correctamente.' );//translate
 		// check cart total
 		await expect(
 			page.locator( '.cart-discount .amount >> nth=0' )
@@ -163,8 +195,10 @@ test.describe( 'Cart applying coupons', () => {
 		page,
 	} ) => {
 		await page.goto( '/cart/' );
+//await expect(page).toHaveScreenshot();
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+			// await page.click( 'text=Apply coupon' );//translate
+			await page.click( 'text=Aplicar cupón' );//translate
 
 		// confirm numbers
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(

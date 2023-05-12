@@ -50,9 +50,12 @@ test.describe( 'Cart page', () => {
 
 	test( 'should display no item in the cart', async ( { page } ) => {
 		await page.goto( '/cart/' );
+		// await expect( page.locator( '.cart-empty' ) ).toContainText(
+		// 	'Your cart is currently empty.'
+		// );//translate
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
-			'Your cart is currently empty.'
-		);
+			'Tu carrito está vacío.'
+		);//translate
 	} );
 
 	test( 'should add the product to the cart from the shop page', async ( {
@@ -98,7 +101,8 @@ test.describe( 'Cart page', () => {
 
 		await page.goto( '/cart/' );
 		await page.fill( 'input.qty', '2' );
-		await page.click( 'text=Update cart' );
+		// await page.click( 'text=Update cart' );//translate
+		await page.click( 'text=Actualizar carrito' );//translate
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			`$${ twoProductPrice }`
@@ -122,9 +126,13 @@ test.describe( 'Cart page', () => {
 
 		await page.click( 'a.remove' );
 
+		// await expect( page.locator( '.woocommerce-info' ) ).toContainText(
+		// 	'Your cart is currently empty.'
+		// );//translate
 		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
-			'Your cart is currently empty.'
-		);
+			'Tu carrito está vacío.'
+		);//translate
+		
 	} );
 
 	test( 'should update subtotal in cart totals when adding product to the cart', async ( {
@@ -142,7 +150,8 @@ test.describe( 'Cart page', () => {
 		);
 
 		await page.fill( 'input.qty', '2' );
-		await page.click( 'text=Update cart' );
+		// await page.click( 'text=Update cart' );//translate
+		await page.click( 'text=Actualizar carrito' );//translate
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			`$${ twoProductPrice }`

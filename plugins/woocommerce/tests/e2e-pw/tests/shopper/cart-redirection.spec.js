@@ -55,6 +55,7 @@ test.describe( 'Cart > Redirect to cart from shop', () => {
 
 	test( 'can redirect user to cart from shop page', async ( { page } ) => {
 		await page.goto( '/shop/' );
+//await expect(page).toHaveScreenshot();
 		await page.click(
 			`a[data-product_id='${ productId }'][href*=add-to-cart]`
 		);
@@ -68,10 +69,13 @@ test.describe( 'Cart > Redirect to cart from shop', () => {
 
 	test( 'can redirect user to cart from detail page', async ( { page } ) => {
 		await page.goto( '/shop/' );
+//await expect(page).toHaveScreenshot();
 		await page.click( `text=${ productName }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.click( 'text=Add to cart' );
+		// await page.click( 'text=Add to cart' );//translate
+		await page.click( 'text=Añadir al carrito' );//translate
+		
 
 		await expect( page.url() ).toContain( '/cart/' );
 		await expect( page.locator( 'td.product-name' ) ).toContainText(

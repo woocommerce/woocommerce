@@ -29,10 +29,14 @@ const onboarding = {
 		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
 		await page.check( '#inspector-checkbox-control-0' );
 		// Click continue button
-		await page.click( 'button >> text=Continue' );
+		//await page.click( 'button >> text=Continue' );//translate
+		// await page.click( 'button >> text=Seguir' );//translate
+		await page.click( 'button >> text=متابعة' );//translate
 		// Usage tracking dialog
 		await page.textContent( '.components-modal__header-heading' );
-		await page.click( 'button >> text=No thanks' );
+		//await page.click( 'button >> text=No thanks' );//translate
+		//await page.click( 'button >> text=No, gracias' );//translate
+		await page.click( 'button >> text=لا شكرًا' );//translate
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	},
 
@@ -42,9 +46,17 @@ const onboarding = {
 			'div.woocommerce-profile-wizard__step-header > h2'
 		);
 
+		// expect( pageHeading ).toContain(
+		// 	'In which industry does the store operate?'
+		// );//translate
+		// expect( pageHeading ).toContain(
+		// 	'¿En qué sector opera la tienda?'
+		// );//translate
 		expect( pageHeading ).toContain(
-			'In which industry does the store operate?'
-		);
+			'في أي مجال يعمل المتجر؟'
+		);//translate
+
+	
 		// Check that there are the correct number of options listed
 		const numCheckboxes = await page.$$(
 			'.components-checkbox-control__input'
@@ -56,8 +68,48 @@ const onboarding = {
 			await page.uncheck( currentCheck );
 		}
 
+		const testVar = 'الأزياء والملابس والإكسسوارات';
+		await page.getByText(`${testVar}`).click();
+
+		const fashionAlone ='الأزياء';		
+
+		const testStoreDetails = {
+			us: {
+				store: {
+					address: 'addr1',
+					city: 'San Francisco',
+					zip: '94107',
+					//country: 'United States (US) — California', // corresponding to the text value of the option,//translate
+					//country: 'Estados Unidos (EEUU) — California', // corresponding to the text value of the option,//translate
+					country: 'الولايات المتحدة الأمريكية — كاليفورنيا',//translate
+					countryCode: 'US:CA',
+				},
+				expectedNumberOfIndustries: 8, // There are 8 checkboxes on the page (in the US), adjust this constant if we change that
+				industries: {
+					testfashion:'الأزياء'
+				}
+			}
+		};
+
+		await page.getByText(`${testVar}`).click();
+
+		console.log('testVar=',testVar);
+
+		// await page.getByText(`/${fashionAlone}/`).click();//failed
+
+		await page.getByText(fashionAlone).click();
+		
+		await page.getByText(testStoreDetails.us.industries.testfashion).click();
+		console.log('testStoreDetails.us.industries.testfashion',testStoreDetails.us.industries.testfashion);
+
+		await page.getByText(`${testStoreDetails.us.industries.testfashion}`).click();
+
+
 		for ( let industry of Object.values( industries ) ) {
-			await page.click( `label >> text=${ industry }` );
+			console.log('industry=',industry);
+			//await page.click( `label >> text=${ industry }` );
+			//await page.getByText(industry).click();
+			await page.getByText(`${industry}`).click();
 		}
 	},
 
@@ -66,9 +118,13 @@ const onboarding = {
 		await page.textContent( '.components-modal__header-heading' );
 
 		if ( saveChanges ) {
-			await page.click( 'button >> text=Save' );
+			//await page.click( 'button >> text=Save' );//translate
+			await page.click( 'button >> text=Guardar' );//translate
+			
 		} else {
-			await page.click( 'button >> text=Discard' );
+			//await page.click( 'button >> text=Discard' );//translate
+			await page.click( 'button >> text=Descartar' );//translate
+			
 		}
 		await page.waitForLoadState( 'networkidle' );
 	},
@@ -80,9 +136,13 @@ const onboarding = {
 		const pageHeading = await page.textContent(
 			'div.woocommerce-profile-wizard__step-header > h2'
 		);
+		// expect( pageHeading ).toContain(
+		// 	'What type of products will be listed?'
+		// );//translate
 		expect( pageHeading ).toContain(
-			'What type of products will be listed?'
-		);
+			'¿Qué tipo de productos se mostrarán?'
+		);//translate
+		
 		// Check that there are the correct number of options listed
 		const numCheckboxes = await page.$$(
 			'.components-checkbox-control__input'
@@ -104,7 +164,9 @@ const onboarding = {
 		const pageHeading = await page.textContent(
 			'div.woocommerce-profile-wizard__step-header > h2'
 		);
-		expect( pageHeading ).toContain( 'Tell us about your business' );
+		//expect( pageHeading ).toContain( 'Tell us about your business' );//translate
+		expect( pageHeading ).toContain( 'Háblanos de tu negocio' );//translate
+		
 		// Select 1 - 10 for products
 		await page.click( '#woocommerce-select-control-0__control-input', {
 			force: true,
@@ -125,7 +187,9 @@ const onboarding = {
 		const pageHeading = await page.textContent(
 			'div.woocommerce-profile-wizard__step-header > h2'
 		);
-		expect( pageHeading ).toContain( 'Included business features' );
+		//expect( pageHeading ).toContain( 'Included business features' );//translate
+		expect( pageHeading ).toContain( 'Características de negocio incluidas' );//translate
+		
 		// Expand list of features
 		await page.click(
 			'button.woocommerce-admin__business-details__selective-extensions-bundle__expand'

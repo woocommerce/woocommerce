@@ -7,14 +7,22 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-settings&tab=products&section=downloadable'
 		);
+//await expect(page).toHaveScreenshot();
 
 		// make sure the product tab is active
+		// await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
+		// 	'Products'
+		// );//translate
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
-			'Products'
-		);
+			'Productos'
+		);//translate
+		// await expect(
+		// 	page.locator( 'ul.subsubsub > li > a.current' )
+		// ).toContainText( 'Downloadable products' );//translate
 		await expect(
 			page.locator( 'ul.subsubsub > li > a.current' )
-		).toContainText( 'Downloadable products' );
+		).toContainText( 'Productos descargables' );//translate
+		
 
 		// Set download options
 		await page.selectOption(
@@ -25,12 +33,16 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		await page.check( '#woocommerce_downloads_grant_access_after_payment' );
 		await page.check( '#woocommerce_downloads_redirect_fallback_allowed' );
 		await page.uncheck( '#woocommerce_downloads_add_hash_to_filename' );
-		await page.click( 'text=Save changes' );
+		//await page.click( 'text=Save changes' );//translate
+		await page.click( 'text=Guardar los cambios' );//translate
 
 		// Verify that settings have been saved
+		// await expect( page.locator( 'div.updated.inline' ) ).toContainText(
+		// 	'Your settings have been saved.'
+		// );//translate
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
-		);
+			'Tus ajustes se han guardado.'
+		);//translate
 		await expect(
 			page.locator( '#woocommerce_file_download_method' )
 		).toHaveValue( 'redirect' );
@@ -61,12 +73,17 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 			'#woocommerce_downloads_redirect_fallback_allowed'
 		);
 		await page.check( '#woocommerce_downloads_add_hash_to_filename' );
-		await page.click( 'text=Save changes' );
+		//await page.click( 'text=Save changes' );//translate
+		await page.click( 'text=Guardar los cambios' );//translate
 
 		// Verify that settings have been saved
+		// await expect( page.locator( 'div.updated.inline' ) ).toContainText(
+		// 	'Your settings have been saved.'
+		// );//translate
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
-		);
+			'Tus ajustes se han guardado.'
+		);//translate
+		
 		await expect(
 			page.locator( '#woocommerce_file_download_method' )
 		).toHaveValue( 'xsendfile' );
@@ -86,12 +103,16 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		// Try the final option
 		await page.reload();
 		await page.selectOption( '#woocommerce_file_download_method', 'force' );
-		await page.click( 'text=Save changes' );
+		//await page.click( 'text=Save changes' );//translate
+		await page.click( 'text=Guardar los cambios' );//translate
 
 		// Verify that settings have been saved
+		// await expect( page.locator( 'div.updated.inline' ) ).toContainText(
+		// 	'Your settings have been saved.'
+		// );//translate
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
-		);
+			'Tus ajustes se han guardado.'
+		);//translate
 		await expect(
 			page.locator( '#woocommerce_file_download_method' )
 		).toHaveValue( 'force' );

@@ -22,9 +22,7 @@ module.exports = async ( config ) => {
 			await adminPage.fill( 'input[name="log"]', admin.username );
 			await adminPage.fill( 'input[name="pwd"]', admin.password );
 			//await adminPage.click( 'text=Log In' );//translate
-			// await adminPage.click( 'text=Acceder' );//translate
-			await adminPage.click( 'text=دخول' );//translate
-			
+			await adminPage.click( 'text=Acceder' );//translate
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
 			);

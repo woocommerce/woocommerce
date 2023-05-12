@@ -18,21 +18,30 @@ test.describe( 'WooCommerce General Settings', () => {
 
 	test( 'can update settings', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+//await expect(page).toHaveScreenshot();
 
 		// make sure the general tab is active
+		// await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
+		// 	'General'
+		// );//translate
 		await expect( page.locator( 'a.nav-tab-active' ) ).toContainText(
 			'General'
-		);
+		);//translate
 
 		// Set selling location to all countries first so we can
 		// choose California as base location.
 		await page.selectOption( '#woocommerce_allowed_countries', 'all' );
-		await page.click( 'text=Save changes' );
+		//await page.click( 'text=Save changes' );//translate
+		await page.click( 'text=Guardar los cambios' );//translate
 
 		// confirm setting saved
+		// await expect( page.locator( 'div.updated.inline' ) ).toContainText(
+		// 	'Your settings have been saved.'
+		// );//translate
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
-		);
+			'Tus ajustes se han guardado.'
+		);//translate
+
 		await expect(
 			page.locator( '#woocommerce_allowed_countries' )
 		).toHaveValue( 'all' );
@@ -42,12 +51,16 @@ test.describe( 'WooCommerce General Settings', () => {
 			'select[name="woocommerce_default_country"]',
 			'US:CA'
 		);
-		await page.click( 'text=Save changes' );
+		//await page.click( 'text=Save changes' );//translate
+		await page.click( 'text=Guardar los cambios' );//translate
 
 		// verify the settings have been saved
+		// await expect( page.locator( 'div.updated.inline' ) ).toContainText(
+		// 	'Your settings have been saved.'
+		// );//translate
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
-		);
+			'Tus ajustes se han guardado.'
+		);//translate
 		await expect(
 			page.locator( 'select[name="woocommerce_default_country"]' )
 		).toHaveValue( 'US:CA' );
@@ -55,8 +68,12 @@ test.describe( 'WooCommerce General Settings', () => {
 		// Set selling location to specific countries first, so we can choose U.S as base location (without state).
 		// This will makes specific countries option appears.
 		await page.selectOption( '#woocommerce_allowed_countries', 'specific' );
+		// await page.selectOption(
+		// 	'select[data-placeholder="Choose countries / regions…"] >> nth=1',
+		// 	'US'
+		// );//translate
 		await page.selectOption(
-			'select[data-placeholder="Choose countries / regions…"] >> nth=1',
+			'select[data-placeholder="Seleccionar países/regiones…"] >> nth=1',
 			'US'
 		);
 
@@ -65,12 +82,16 @@ test.describe( 'WooCommerce General Settings', () => {
 		await page.fill( '#woocommerce_price_decimal_sep', '.' );
 		await page.fill( '#woocommerce_price_num_decimals', '2' );
 
-		await page.click( 'text=Save changes' );
+		//await page.click( 'text=Save changes' );//translate
+		await page.click( 'text=Guardar los cambios' );//translate
 
 		// verify that settings have been saved
+		// await expect( page.locator( 'div.updated.inline' ) ).toContainText(
+		// 	'Your settings have been saved.'
+		// );//translate
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
-		);
+			'Tus ajustes se han guardado.'
+		);//translate
 		await expect(
 			page.locator( '#woocommerce_price_thousand_sep' )
 		).toHaveValue( ',' );

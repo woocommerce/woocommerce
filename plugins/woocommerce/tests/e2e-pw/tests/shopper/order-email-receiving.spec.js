@@ -71,7 +71,8 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		await page.fill( '#billing_phone', customer.billing.us.phone );
 		await page.fill( '#billing_email', customer.email );
 
-		await page.click( 'text=Place order' );
+		// await page.click( 'text=Place order' );//translate
+		await page.click( 'text=Realizar el pedido' );//translate
 
 		await page.waitForSelector(
 			'li.woocommerce-order-overview__order > strong'
@@ -90,8 +91,11 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		await expect(
 			page.locator( 'td.column-receiver >> nth=0' )
 		).toContainText( customer.email );
+		// await expect(
+		// 	page.locator( 'td.column-subject >> nth=1' )
+		// ).toContainText( `[${ storeName }]: New order #${ orderId }` );//translate
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
-		).toContainText( `[${ storeName }]: New order #${ orderId }` );
+		).toContainText( `[${ storeName }] Nuevo pedido #(${ orderId })` );//translate
 	} );
 } );

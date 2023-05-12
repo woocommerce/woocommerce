@@ -209,9 +209,13 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 	test( 'can create new order', async ( { page } ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
+//await expect(page).toHaveScreenshot();
+		// await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
+		// 	'Add new order'
+		// );//translate
 		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
-			'Add new order'
-		);
+			'Añadir nuevo pedido'
+		);//translate
 
 		await page.waitForLoadState( 'networkidle' );
 		// get order ID from the page
@@ -232,61 +236,96 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		await page.click( 'button.save_order' );
 
+		// await expect(
+		// 	page.locator( 'div.updated.notice.notice-success.is-dismissible', {
+		// 		has: page.locator( 'p' ),
+		// 	} )
+		// ).toContainText( 'Order updated.' );//translate
 		await expect(
 			page.locator( 'div.updated.notice.notice-success.is-dismissible', {
 				has: page.locator( 'p' ),
 			} )
-		).toContainText( 'Order updated.' );
+		).toContainText( 'Pedido actualizado.' );//translate
+
 		await expect( page.locator( '#order_status' ) ).toHaveValue(
 			'wc-processing'
 		);
+		// await expect( page.locator( 'div.note_content' ) ).toContainText(
+		// 	'Order status changed from Pending payment to Processing.'
+		// );//translate
 		await expect( page.locator( 'div.note_content' ) ).toContainText(
-			'Order status changed from Pending payment to Processing.'
-		);
+			'El estado del pedido cambió de Pendiente de pago a Procesando.'
+		);//translate
 	} );
 
 	test( 'can create new complex order with multiple product types & tax classes', async ( {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
+//await expect(page).toHaveScreenshot();
 
 		// open modal for adding line items
 		await page.click( 'button.add-line-item' );
 		await page.click( 'button.add-order-item' );
 
 		// search for each product to add
-		await page.click( 'text=Search for a product…' );
+		//await page.click( 'text=Search for a product…' );//translate
+		await page.click( 'text=Busca un producto…' )
+		// await page.type(
+		// 	'input:below(:text("Search for a product…"))',
+		// 	simpleProductName
+		// );//translate
 		await page.type(
-			'input:below(:text("Search for a product…"))',
+			'input:below(:text("Busca un producto…"))',
 			simpleProductName
-		);
+		);//translate
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
 		);
 
-		await page.click( 'text=Search for a product…' );
+		//await page.click( 'text=Search for a product…' );//translate
+		await page.click( 'text=Busca un producto…' )
+
+		// await page.type(
+		// 	'input:below(:text("Search for a product…"))',
+		// 	variableProductName
+		// );//translate
 		await page.type(
-			'input:below(:text("Search for a product…"))',
+			'input:below(:text("Busca un producto…"))',
 			variableProductName
-		);
+		);//translate
+
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
 		);
 
-		await page.click( 'text=Search for a product…' );
+
+		//await page.click( 'text=Search for a product…' );//translate
+		await page.click( 'text=Busca un producto…' )
+
+		// await page.type(
+		// 	'input:below(:text("Search for a product…"))',
+		// 	groupedProductName
+		// );//translate
 		await page.type(
-			'input:below(:text("Search for a product…"))',
+			'input:below(:text("Busca un producto…"))',
 			groupedProductName
-		);
+		);//translate
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
 		);
 
-		await page.click( 'text=Search for a product…' );
-		await page.type(
-			'input:below(:text("Search for a product…"))',
+		//await page.click( 'text=Search for a product…' );//translate
+		await page.click( 'text=Busca un producto…' )
+
+		// await page.type(
+		// 	'input:below(:text("Search for a product…"))',
+		// 	externalProductName
+		// );//translate
+				await page.type(
+			'input:below(:text("Busca un producto…"))',
 			externalProductName
-		);
+		);//translate
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
 		);
@@ -309,7 +348,8 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		// Recalculate taxes
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( 'text=Recalculate' );
+		// await page.click( 'text=Recalculate' );//translate
+		await page.click( 'text=Recalcular' );//translate
 
 		// verify tax names
 		let i = 0;

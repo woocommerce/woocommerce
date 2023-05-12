@@ -52,6 +52,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+//await expect(page).toHaveScreenshot();
 		if ( await page.isVisible( `text=${ shippingZoneNameLocalPickup }` ) ) {
 			// this shipping zone already exists, don't create it
 		} else {
@@ -62,10 +63,15 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.fill( '#zone_name', shippingZoneNameLocalPickup );
 
 			await page.click( '.select2-search__field' );
+			// await page.type(
+			// 	'.select2-search__field',
+			// 	'British Columbia, Canada'
+			// );//translate
 			await page.type(
 				'.select2-search__field',
-				'British Columbia, Canada'
-			);
+				'Columbia Británica, Canadá'
+			);//translate
+			
 			await page.click(
 				'.select2-results__option.select2-results__option--highlighted'
 			);
@@ -73,7 +79,8 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.click( '.wc-shipping-zone-postcodes-toggle' );
 			await page.fill( '#zone_postcodes', maynePostal );
 
-			await page.click( 'text=Add shipping method' );
+			// await page.click( 'text=Add shipping method' );//translate
+			await page.click( 'text=Añadir método de envío' );//translate
 
 			await page.selectOption(
 				'select[name=add_method_id]',
@@ -81,10 +88,15 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			);
 			await page.click( '#btn-ok' );
 			await page.waitForLoadState( 'networkidle' );
+			// await expect(
+			// 	page
+			// 		.locator( '.wc-shipping-zone-method-title' )
+			// 		.filter( { hasText: 'Local pickup' } )
+			// ).toBeVisible();//translate
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
-					.filter( { hasText: 'Local pickup' } )
+					.filter( { hasText: 'Recogida local' } )
 			).toBeVisible();
 
 			await page.goto(
@@ -96,18 +108,25 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
 			/Mayne Island with Local pickup.*/
 		);
+		// await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
+		// 	/British Columbia, V0N 2J0.*/
+		// );//translate
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/British Columbia, V0N 2J0.*/
-		);
+			/Columbia Británica, V0N 2J0.*/
+		);//translate
+		// await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
+		// 	/Local pickup.*/
+		// );//translate
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Local pickup.*/
-		);
+			/Recogida local.*/
+		);//translate
 	} );
 
 	test( 'add shipping zone for British Columbia with Free shipping', async ( {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+//await expect(page).toHaveScreenshot();
 		if ( await page.isVisible( `text=${ shippingZoneNameFreeShip }` ) ) {
 			// this shipping zone already exists, don't create it
 		} else {
@@ -118,15 +137,20 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.fill( '#zone_name', shippingZoneNameFreeShip );
 
 			await page.click( '.select2-search__field' );
+			// await page.type(
+			// 	'.select2-search__field',
+			// 	'British Columbia, Canada'
+			// );//translate
 			await page.type(
 				'.select2-search__field',
-				'British Columbia, Canada'
-			);
+				'Columbia Británica, Canadá'
+			);//translate
 			await page.click(
 				'.select2-results__option.select2-results__option--highlighted'
 			);
 
-			await page.click( 'text=Add shipping method' );
+			// await page.click( 'text=Add shipping method' );//translate
+			await page.click( 'text=Añadir método de envío' );//translate
 
 			await page.selectOption(
 				'select[name=add_method_id]',
@@ -134,11 +158,18 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			);
 			await page.click( '#btn-ok' );
 			await page.waitForLoadState( 'networkidle' );
+			// await expect(
+			// 	page
+			// 		.locator( '.wc-shipping-zone-method-title' )
+			// 		.filter( { hasText: 'Free shipping' } )
+			// ).toBeVisible();//translate
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
-					.filter( { hasText: 'Free shipping' } )
-			).toBeVisible();
+					.filter( { hasText: 'Envío gratuito' } )
+			).toBeVisible();//translate
+
+			//Recogida local							
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -148,16 +179,24 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
 			/BC with Free shipping.*/
 		);
+		// await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
+		// 	/British Columbia.*/
+		// );//translate
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/British Columbia.*/
-		);
+			/Columbia Británica.*/
+		);//translate
+
+		// await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
+		// 	/Free shipping.*/
+		// );//translate
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Free shipping.*/
-		);
+			/Envío gratuito.*/
+		);//translate
 	} );
 
 	test( 'add shipping zone for Canada with Flat rate', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+//await expect(page).toHaveScreenshot();
 		if ( await page.isVisible( `text=${ shippingZoneNameFlatRate }` ) ) {
 			// this shipping zone already exists, don't create it
 		} else {
@@ -168,12 +207,16 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.fill( '#zone_name', shippingZoneNameFlatRate );
 
 			await page.click( '.select2-search__field' );
-			await page.type( '.select2-search__field', 'Canada' );
+			//await page.type( '.select2-search__field', 'Canada' );//translate
+			await page.type( '.select2-search__field', 'Canadá' );//translate
+			
 			await page.click(
 				'.select2-results__option.select2-results__option--highlighted'
 			);
 
-			await page.click( 'text=Add shipping method' );
+
+			// await page.click( 'text=Add shipping method' );//translate
+			await page.click( 'text=Añadir método de envío' );//translate
 
 			await page.selectOption(
 				'select[name=add_method_id]',
@@ -181,11 +224,16 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			);
 			await page.click( '#btn-ok' );
 			await page.waitForLoadState( 'networkidle' );
+			// await expect(
+			// 	page
+			// 		.locator( '.wc-shipping-zone-method-title' )
+			// 		.filter( { hasText: 'Flat rate' } )
+			// ).toBeVisible();//translate
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
-					.filter( { hasText: 'Flat rate' } )
-			).toBeVisible();
+					.filter( { hasText: 'Precio fijo' } )
+			).toBeVisible();//translate
 
 			await page.click( 'a.wc-shipping-zone-method-settings' );
 			await page.fill( '#woocommerce_flat_rate_cost', '10' );
@@ -200,18 +248,26 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
 			/Canada with Flat rate*/
 		);
+		// await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
+		// 	/Canada.*/
+		// );//translate
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Canada.*/
+			/Canadá.*/
 		);
+		// await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
+		// 	/Flat rate.*/
+		// );//translate
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Flat rate.*/
+			/Precio fijo.*/
 		);
+
 	} );
 
 	test( 'add shipping zone with region and then delete the region', async ( {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+//await expect(page).toHaveScreenshot();
 		if ( await page.isVisible( `text=${ shippingZoneNameUSRegion }` ) ) {
 			// this shipping zone already exists, don't create it
 		} else {
@@ -221,7 +277,9 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.fill( '#zone_name', shippingZoneNameUSRegion );
 
 			await page.click( '.select2-search__field' );
-			await page.type( '.select2-search__field', 'United States' );
+			// await page.type( '.select2-search__field', 'United States' );//translate
+			await page.type( '.select2-search__field', 'Estados Unidos' );//translate
+			
 			await page.click(
 				'.select2-results__option.select2-results__option--highlighted'
 			);
@@ -250,9 +308,12 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
 
 		//prove that the Region has been removed (Everywhere will display)
+		// await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
+		// 	/Everywhere.*/
+		// );//translate
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Everywhere.*/
-		);
+			/En todas partes.*/
+		);//translate
 	} );
 } );
 
@@ -363,6 +424,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		page,
 	} ) => {
 		await page.goto( 'cart/' );
+//await expect(page).toHaveScreenshot();
 		await page.click( 'a.shipping-calculator-button' );
 		await page.selectOption( '#calc_shipping_country', 'CA' );
 		await page.selectOption( '#calc_shipping_state', 'BC' );
@@ -372,9 +434,13 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 			state: 'hidden',
 		} );
 
+		// await expect(
+		// 	page.locator( '.shipping ul#shipping_method > li > label' )
+		// ).toContainText( 'Local pickup' );//translate
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
-		).toContainText( 'Local pickup' );
+		).toContainText( 'Recogida local' );//translate
+
 		await expect(
 			page.locator( 'td[data-title="Total"] > strong > .amount > bdi' )
 		).toContainText( '25.99' );
@@ -384,6 +450,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		page,
 	} ) => {
 		await page.goto( 'cart/' );
+//await expect(page).toHaveScreenshot();
 
 		await page.click( 'a.shipping-calculator-button' );
 		await page.selectOption( '#calc_shipping_country', 'CA' );
@@ -393,9 +460,12 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 			state: 'hidden',
 		} );
 
+		// await expect(
+		// 	page.locator( '.shipping ul#shipping_method > li > label' )
+		// ).toContainText( 'Free shipping' );//translate
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
-		).toContainText( 'Free shipping' );
+		).toContainText( 'Envío gratuito' );//translate
 		await expect(
 			page.locator( 'td[data-title="Total"] > strong > .amount > bdi' )
 		).toContainText( '25.99' );
@@ -405,6 +475,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		page,
 	} ) => {
 		await page.goto( 'cart/' );
+//await expect(page).toHaveScreenshot();
 
 		await page.click( 'a.shipping-calculator-button' );
 		await page.selectOption( '#calc_shipping_country', 'CA' );
@@ -415,9 +486,12 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 			state: 'hidden',
 		} );
 
+		// await expect(
+		// 	page.locator( '.shipping ul#shipping_method > li > label' )
+		// ).toContainText( 'Flat rate:' );//translate
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
-		).toContainText( 'Flat rate:' );
+		).toContainText( 'Precio fijo:' );//translate
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
 		).toContainText( '10.00' );

@@ -53,7 +53,7 @@ const config = {
 	},
 	projects: [
 		{
-			name: 'Chrome',
+			name: 'Google Chrome',
 			use: { ...devices[ 'Desktop Chrome' ] },
 		},
 	],

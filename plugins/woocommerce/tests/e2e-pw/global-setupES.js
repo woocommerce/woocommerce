@@ -63,9 +63,7 @@ module.exports = async ( config ) => {
 			// console.log('translatedButton=',translatedButton);
 
 			//await adminPage.click( 'text=Log In' );//translate
-			//await adminPage.click( 'text=Acceder' );//translate
-			await adminPage.click( 'text=دخول' );//translate
-			
+			await adminPage.click( 'text=Acceder' );//translate
 			
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto( `/wp-admin` );
@@ -74,11 +72,8 @@ module.exports = async ( config ) => {
 			// await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 			// 	'Dashboard'
 			// );//translate
-			// await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-			// 	'Escritorio'
-			// );//translate
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-				'الرئيسية'
+				'Escritorio'
 			);//translate
 			await adminPage
 				.context()
@@ -110,17 +105,10 @@ module.exports = async ( config ) => {
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
-			console.log('#key_description');
 			await adminPage.fill( '#key_description', 'Key for API access' );
-			console.log('#key_permissions');
-			
 			await adminPage.selectOption( '#key_permissions', 'read_write' );
 			// await adminPage.click( 'text=Generate API key' );//translate
-			// await adminPage.click( 'text=Generar clave de API' );//translate
-			console.log('generate api');
-			// await adminPage.click( 'text=Generate API key' );//translate
-			await adminPage.click( 'text=توليد مفتاح API' );//translate
-			
+			await adminPage.click( 'text=Generar clave de API' );//translate
 			
 			process.env.CONSUMER_KEY = await adminPage.inputValue(
 				'#key_consumer_key'
@@ -158,8 +146,8 @@ module.exports = async ( config ) => {
 			await customerPage.fill( 'input[name="log"]', customer.username );
 			await customerPage.fill( 'input[name="pwd"]', customer.password );
 			// await customerPage.click( 'text=Log In' );//translate
-			// await customerPage.click( 'text=Acceder' );//translate
-			await customerPage.click( 'text=دخول' );//translate
+			await customerPage.click( 'text=Acceder' );//translate
+			
 
 			await customerPage.goto( `/my-account` );
 			await expect(
@@ -172,17 +160,11 @@ module.exports = async ( config ) => {
 			// 		'div.woocommerce-MyAccount-content > p >> nth=0'
 			// 	)
 			// ).toContainText( 'Hello' );//translate
-			// await expect(
-			// 	customerPage.locator(
-			// 		'div.woocommerce-MyAccount-content > p >> nth=0'
-			// 	)
-			// ).toContainText( 'Hola' );//translate
-			console.log('hello');
 			await expect(
 				customerPage.locator(
 					'div.woocommerce-MyAccount-content > p >> nth=0'
 				)
-			).toContainText( 'مرحبًا' );//translate
+			).toContainText( 'Hola' );//translate
 
 			await customerPage
 				.context()

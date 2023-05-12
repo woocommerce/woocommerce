@@ -52,6 +52,7 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 
 	test( 'can issue a refund by quantity', async ( { page } ) => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 
 		// get currency symbol
 		currencySymbol = await page.textContent(
@@ -75,9 +76,13 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 			'9.99'
 		);
 		await expect( page.locator( '#refund_amount' ) ).toHaveValue( '9.99' );
+		// await expect( page.locator( '.do-manual-refund' ) ).toContainText(
+		// 	`Refund ${ currencySymbol }9.99 manually`
+		// );//translate
 		await expect( page.locator( '.do-manual-refund' ) ).toContainText(
-			`Refund ${ currencySymbol }9.99 manually`
-		);
+			`Reembolsar ${ currencySymbol }9.99  manualmente`
+		);//translate
+		 
 
 		// Do the refund
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
@@ -102,14 +107,18 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		).toContainText( `-${ currencySymbol }9.99` );
 
 		// Verify system note was added
+		// await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
+		// 	'Order status changed from Completed to Refunded.'
+		// );//translate
 		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
-			'Order status changed from Completed to Refunded.'
-		);
+			'El estado del pedido cambió de Completado a Reembolsado.'
+		);//translate
 	} );
 
 	// this test relies on the previous test, so should refactor
 	test( 'can delete an issued refund', async ( { page } ) => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 		await page.waitForLoadState( 'networkidle' );
 
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
@@ -203,11 +212,15 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		page,
 	} ) => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 
 		// Verify stock reduction system note was added
+		// await expect( page.locator( '.system-note >> nth=1' ) ).toContainText(
+		// 	/Stock levels reduced: Product with stock \(#\d+\) 10→8/
+		// );//translate
 		await expect( page.locator( '.system-note >> nth=1' ) ).toContainText(
-			/Stock levels reduced: Product with stock \(#\d+\) 10→8/
-		);
+			/Niveles de inventario reducidos: Product with stock \(#\d+\) 10→8/
+		);//translate
 
 		// Click the Refund button
 		await page.click( 'button.refund-items' );
@@ -227,26 +240,42 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		} );
 
 		// Verify restock system note was added
+		// await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
+		// 	/Item #\d+ stock increased from 8 to 10./
+		// );//translate
 		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
-			/Item #\d+ stock increased from 8 to 10./
-		);
+			/Inventario del artículo #\d+ incrementado de 8 a 10./
+		);//translate
 
 		// Update the order
 		await page.click( 'button.save_order' );
+		// await expect( page.locator( 'div.updated.notice-success' ) ).toContainText(
+		// 	'Order updated.'
+		// );//translate
 		await expect( page.locator( 'div.updated.notice-success' ) ).toContainText(
-			'Order updated.'
-		);
+			'Pedido actualizado.'
+		);//translate
+
+
 
 		// Verify that inventory wasn't modified.
 		expect(
+			// await page.$$eval( '.note', ( notes ) =>
+			// 	notes.every(
+			// 		( note ) =>
+			// 			! note.textContent.match(
+			// 				/Adjusted stock: Product with Stock \(10→8\)/
+			// 			)
+			// 	)
+			// )//translate
 			await page.$$eval( '.note', ( notes ) =>
-				notes.every(
-					( note ) =>
-						! note.textContent.match(
-							/Adjusted stock: Product with Stock \(10→8\)/
-						)
-				)
+			notes.every(
+				( note ) =>
+					! note.textContent.match(
+						/Niveles de inventario reducidos: Product with Stock 10→8/
+					)
 			)
+		)//translate
 		).toEqual( true );
 	} );
 } );

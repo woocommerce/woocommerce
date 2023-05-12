@@ -17,13 +17,16 @@ test.describe( 'Merchant can add shipping classes', () => {
 			'.wc-shipping-class-delete >> nth=0',
 			'click'
 		);
-		await page.dispatchEvent( 'text=Save shipping classes', 'click' );
+		// await page.dispatchEvent( 'text=Save shipping classes', 'click' );//translate
+		await page.dispatchEvent( 'text=Guardar clases de envío', 'click' );//translate
+		
 	} );
 
 	test( 'can add shipping classes', async ( { page } ) => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-settings&tab=shipping&section=classes'
 		);
+//await expect(page).toHaveScreenshot();
 
 		const shippingClassSlug = {
 			name: 'Small Items',
@@ -39,7 +42,8 @@ test.describe( 'Merchant can add shipping classes', () => {
 
 		// Add shipping classes
 		for ( const { name, slug, description } of shippingClasses ) {
-			await page.click( 'text=Add shipping class' );
+			// await page.click( 'text=Add shipping class' );//translate
+			await page.click( 'text=Añadir clase de envío' );//translate
 			await page.fill(
 				'.editing:last-child [data-attribute="name"]',
 				name
@@ -53,16 +57,22 @@ test.describe( 'Merchant can add shipping classes', () => {
 				description
 			);
 		}
-		await page.click( 'text=Save shipping classes' );
+		// await page.click( 'text=Save shipping classes' );//translate
+		await page.click( 'text=Guardar clases de envío' );//translate
+		
 
 		// Set the expected auto-generated slug
 		shippingClassNoSlug.slug = 'poster-pack';
 
 		// Verify that the specified shipping classes were saved
 		for ( const { name, slug, description } of shippingClasses ) {
+			// await expect(
+			// 	page.locator( `text=${ name } Edit | Remove` )
+			// ).toBeVisible();//translate
 			await expect(
-				page.locator( `text=${ name } Edit | Remove` )
-			).toBeVisible();
+				page.locator( `text=${ name } Editar | Eliminar` )
+			).toBeVisible();//translate
+			
 			await expect( page.locator( `text=${ slug }` ) ).toBeVisible();
 			// account for blank description
 			if ( description !== '' ) {

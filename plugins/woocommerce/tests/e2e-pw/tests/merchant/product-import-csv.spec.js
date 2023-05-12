@@ -89,8 +89,11 @@ const productCategories = [
 ];
 const productAttributes = [ 'Color', 'Size' ];
 
+// const errorMessage =
+// 	'Invalid file type. The importer supports CSV and TXT file formats.';//translate
 const errorMessage =
-	'Invalid file type. The importer supports CSV and TXT file formats.';
+	'Tipo de archivo no válido. El importador es compatible con archivos en formatos CSV y TXT.';//translate
+	
 
 test.describe.serial( 'Import Products from a CSV file', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -168,9 +171,11 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		await page.goto(
 			'wp-admin/edit.php?post_type=product&page=product_importer'
 		);
+//await expect(page).toHaveScreenshot();
 
 		// verify the error message if you go without providing CSV file
-		await page.click( 'button[value="Continue"]' );
+		// await page.click( 'button[value="Continue"]' );//translate
+		await page.click( 'button[value="Seguir"]' );//translate
 		await expect( page.locator( 'div.error.inline' ) ).toContainText(
 			errorMessage
 		);
@@ -180,6 +185,7 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		await page.goto(
 			'wp-admin/edit.php?post_type=product&page=product_importer'
 		);
+//await expect(page).toHaveScreenshot();
 
 		// Select the CSV file and upload it
 		const [ fileChooser ] = await Promise.all( [
@@ -187,18 +193,24 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 			page.click( '#upload' ),
 		] );
 		await fileChooser.setFiles( filePath );
-		await page.click( 'button[value="Continue"]' );
+		// await page.click( 'button[value="Continue"]' );//translate
+		await page.click( 'button[value="Seguir"]' );//translate
 
 		// Click on run the importer
-		await page.click( 'button[value="Run the importer"]' );
+		// await page.click( 'button[value="Run the importer"]' );//translate
+		await page.click( 'button[value="Ejecutar el importador"]' );//translate
 
 		// Confirm that the import is done
+		// await expect(
+		// 	page.locator( '.woocommerce-importer-done' )
+		// ).toContainText( 'Import complete!', { timeout: 120000 } );//translate
 		await expect(
 			page.locator( '.woocommerce-importer-done' )
-		).toContainText( 'Import complete!', { timeout: 120000 } );
+		).toContainText( '¡Importación completa!', { timeout: 120000 } );//translate
 
 		// View the products
-		await page.click( 'text=View products' );
+		// await page.click( 'text=View products' );//translate
+		await page.click( 'text=Ver productos' );//translate
 
 		// Search for "import" to narrow the results to just the products we imported
 		await page.fill( '#post-search-input', 'Imported' );
@@ -222,6 +234,7 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		await page.goto(
 			'wp-admin/edit.php?post_type=product&page=product_importer'
 		);
+//await expect(page).toHaveScreenshot();
 
 		// Put the CSV Override products file, set checkbox and proceed further
 		const [ fileChooser ] = await Promise.all( [
@@ -230,18 +243,24 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		] );
 		await fileChooser.setFiles( filePathOverride );
 		await page.click( '#woocommerce-importer-update-existing' );
-		await page.click( 'button[value="Continue"]' );
+		// await page.click( 'button[value="Continue"]' );//translate
+		await page.click( 'button[value="Seguir"]' );//translate
 
 		// Click on run the importer
-		await page.click( 'button[value="Run the importer"]' );
+		// await page.click( 'button[value="Run the importer"]' );//translate
+		await page.click( 'button[value="Ejecutar el importador"]' );//translate
 
 		// Confirm that the import is done
+		// await expect(
+		// 	page.locator( '.woocommerce-importer-done' )
+		// ).toContainText( 'Import complete!', { timeout: 120000 } );//translate
 		await expect(
 			page.locator( '.woocommerce-importer-done' )
-		).toContainText( 'Import complete!', { timeout: 120000 } ); // import can take a while
+		).toContainText( '¡Importación completa!', { timeout: 120000 } );//translate
 
 		// View the products
-		await page.click( 'text=View products' );
+		// await page.click( 'text=View products' );//translate
+		await page.click( 'text=Ver productos' );//translate
 
 		// Search for "import" to narrow the results to just the products we imported
 		await page.fill( '#post-search-input', 'Imported' );

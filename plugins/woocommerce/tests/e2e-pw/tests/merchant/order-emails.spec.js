@@ -71,23 +71,29 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			.then( ( response ) => {
 				newOrderId = response.data.id;
 			} );
+			
 		// search to narrow it down to just the messages we want
 		await page.goto(
 			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
 				customerBilling.email
 			) }`
 		);
+		//await expect(page).toHaveScreenshot();
 		await expect(
 			page.locator( 'td.column-receiver >> nth=1' )
 		).toContainText( admin.email );
+		// await expect(
+		// 	page.locator( 'td.column-subject >> nth=1' )
+		// ).toContainText( `[${ storeName }]: New order #${ newOrderId }` );//translate
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
-		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
+		).toContainText( `[${ storeName }] Nuevo pedido #(${ newOrderId })` );//translate
 	} );
 
 	test( 'can resend new order notification', async ( { page } ) => {
 		// resend the new order notification
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 		await page.selectOption(
 			'li#actions > select',
 			'send_order_details_admin'
@@ -104,14 +110,18 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await expect( page.locator( 'td.column-receiver' ) ).toContainText(
 			admin.email
 		);
+		// await expect( page.locator( 'td.column-subject' ) ).toContainText(
+		// 	`[${ storeName }]: New order #${ orderId }`
+		// );//translate
 		await expect( page.locator( 'td.column-subject' ) ).toContainText(
-			`[${ storeName }]: New order #${ orderId }`
-		);
+			`[${ storeName }] Nuevo pedido #(${ orderId })`
+		);//translate
 	} );
 
 	test( 'can email invoice/order details to customer', async ( { page } ) => {
 		// send the customer order details
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+//await expect(page).toHaveScreenshot();
 		await page.selectOption( 'li#actions > select', 'send_order_details' );
 		await page.click( 'button.wc-reload' );
 		await page.waitForLoadState( 'networkidle' );
@@ -125,8 +135,11 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await expect( page.locator( 'td.column-receiver' ) ).toContainText(
 			customerBilling.email
 		);
+		// await expect( page.locator( 'td.column-subject' ) ).toContainText(
+		// 	`Invoice for order #${ orderId } on ${ storeName }`
+		// );//translate
 		await expect( page.locator( 'td.column-subject' ) ).toContainText(
-			`Invoice for order #${ orderId } on ${ storeName }`
-		);
+			`Recibo del pedido #${ orderId } en ${ storeName }`
+		);//translate
 	} );
 } );

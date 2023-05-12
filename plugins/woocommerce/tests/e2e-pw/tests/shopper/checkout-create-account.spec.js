@@ -94,6 +94,7 @@ test.describe( 'Shopper Checkout Create Account', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
+
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );
@@ -150,9 +151,13 @@ test.describe( 'Shopper Checkout Create Account', () => {
 
 		await page.click( '#place_order' );
 
+		// await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+		// 	'Order received'
+		// );//translate
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+			'Pedido recibido'
+		);//translate
+		
 
 		// get order ID from the page
 		const orderReceivedHtmlElement = await page.$(
@@ -162,19 +167,26 @@ test.describe( 'Shopper Checkout Create Account', () => {
 			( element ) => element.textContent,
 			orderReceivedHtmlElement
 		);
-		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
-
+		
+		//orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();//translate
+		orderId = orderReceivedText.split( /(\s+)/ )[ 8 ].toString();//translate
+		
 		await page.goto( '/my-account/' );
 		// confirms that an account was created
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'My account'
 		);
-		await page.click( 'text=Log out' );
+		// await page.click( 'text=Logout' );//translate
+		//await page.click( 'text=Salir' );//translate
+		await page.click( 'text=Log out' );//translate
+		
 		// sign in as admin to confirm account creation
 		await page.fill( '#username', admin.username );
 		await page.fill( '#password', admin.password );
-		await page.click( 'text=Log in' );
-
+		// await page.click( 'text=Log in' );//translate
+		await page.getByRole('button', { name: 'Acceder' })
+			.click();//translate
+		
 		await page.goto( 'wp-admin/users.php' );
 		await expect( page.locator( 'tbody#the-list' ) ).toContainText(
 			billingEmail

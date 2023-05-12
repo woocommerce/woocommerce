@@ -45,6 +45,7 @@ test.describe( 'Products > Search and View a product', () => {
 		const searchString = productName.substring( 0, productName.length / 2 );
 
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
+//await expect(page).toHaveScreenshot();
 
 		await page.fill( '#post-search-input', searchString );
 		await page.click( '#search-submit' );
@@ -59,6 +60,7 @@ test.describe( 'Products > Search and View a product', () => {
 		const productIdInURL = new RegExp( `post=${ productId }` );
 
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
+//await expect(page).toHaveScreenshot();
 
 		await page.fill( '#post-search-input', productName );
 		await page.click( '#search-submit' );
@@ -76,12 +78,17 @@ test.describe( 'Products > Search and View a product', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
+//await expect(page).toHaveScreenshot();
 
 		await page.fill( '#post-search-input', 'abcd1234' );
 		await page.click( '#search-submit' );
 
+		// await expect( page.locator( '.no-items' ) ).toContainText(
+		// 	'No products found'
+		// );//translate
 		await expect( page.locator( '.no-items' ) ).toContainText(
-			'No products found'
-		);
+			'No se han encontrado productos'
+		);//translate
+		
 	} );
 } );

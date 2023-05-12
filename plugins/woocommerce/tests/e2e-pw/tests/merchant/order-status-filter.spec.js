@@ -5,15 +5,24 @@ const orderBatchId = new Array();
 const statusColumnTextSelector = 'mark.order-status > span';
 
 // Define order statuses to filter against
+// const orderStatus = [
+// 	[ 'Pending payment', 'wc-pending' ],
+// 	[ 'Processing', 'wc-processing' ],
+// 	[ 'On hold', 'wc-on-hold' ],
+// 	[ 'Completed', 'wc-completed' ],
+// 	[ 'Cancelled', 'wc-cancelled' ],
+// 	[ 'Refunded', 'wc-refunded' ],
+// 	[ 'Failed', 'wc-failed' ],
+// ];//translate
 const orderStatus = [
-	[ 'Pending payment', 'wc-pending' ],
-	[ 'Processing', 'wc-processing' ],
-	[ 'On hold', 'wc-on-hold' ],
-	[ 'Completed', 'wc-completed' ],
-	[ 'Cancelled', 'wc-cancelled' ],
-	[ 'Refunded', 'wc-refunded' ],
-	[ 'Failed', 'wc-failed' ],
-];
+	[ 'Pendiente de pago', 'wc-pending' ],
+	[ 'Procesando', 'wc-processing' ],
+	[ 'En espera', 'wc-on-hold' ],
+	[ 'Completado', 'wc-completed' ],
+	[ 'Cancelado', 'wc-cancelled' ],
+	[ 'Reembolsado', 'wc-refunded' ],
+	[ 'Fallido', 'wc-failed' ],
+];//translate
 
 test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -54,6 +63,7 @@ test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 
 	test( 'should filter by All', async ( { page } ) => {
 		await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
+//await expect(page).toHaveScreenshot();
 
 		await page.click( 'li.all > a' );
 		await page.waitForLoadState( 'networkidle' );
@@ -71,6 +81,7 @@ test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 			page,
 		} ) => {
 			await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
+//await expect(page).toHaveScreenshot();
 
 			await page.click( `li.${ orderStatus[ i ][ 1 ] }` );
 			await page.waitForLoadState( 'networkidle' );

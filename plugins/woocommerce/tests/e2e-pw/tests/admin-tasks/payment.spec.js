@@ -8,8 +8,12 @@ test.describe( 'Payment setup task', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
-		await page.click( 'text=Skip setup store details' );
-		await page.click( 'button >> text=No thanks' );
+		// await page.click( 'text=Skip setup store details' );//translate
+		await page.click( 'text=Saltar la configuración de los detalles de la tienda' );//translate
+
+		// await page.click( 'button >> text=No thanks' );//translate
+		await page.click( 'button >> text=No, gracias' );//translate
+
 		await page.waitForLoadState( 'networkidle' );
 	} );
 
@@ -32,10 +36,15 @@ test.describe( 'Payment setup task', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.click( 'text=Set up payments' );
+//await expect(page).toHaveScreenshot();
+		// await page.click( 'text=Set up payments' );//translate
+		await page.click( 'text=Configurar pagos' );//translate
+		// await expect(
+		// 	page.locator( '.woocommerce-layout__header-wrapper > h1' )
+		// ).toHaveText( 'Set up payments' );//translate
 		await expect(
 			page.locator( '.woocommerce-layout__header-wrapper > h1' )
-		).toHaveText( 'Set up payments' );
+		).toHaveText( 'Configurar pagos' );
 	} );
 
 	test( 'Saving valid bank account transfer details enables the payment method', async ( {
@@ -45,24 +54,41 @@ test.describe( 'Payment setup task', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&task=payments&id=bacs'
 		);
+//await expect(page).toHaveScreenshot();
 		// purposely no await -- close the help dialog if/when it appears
 		page.locator( '.components-button.is-small.has-icon' )
 			.click()
 			.catch( () => {} );
 
 		// fill in bank transfer form
-		await page.fill( '//input[@placeholder="Account name"]', 'Savings' );
-		await page.fill( '//input[@placeholder="Account number"]', '1234' );
-		await page.fill( '//input[@placeholder="Bank name"]', 'Test Bank' );
-		await page.fill( '//input[@placeholder="Sort code"]', '12' );
-		await page.fill( '//input[@placeholder="IBAN"]', '12 3456 7890' );
-		await page.fill( '//input[@placeholder="BIC / Swift"]', 'ABBA' );
-		await page.click( 'text=Save' );
+		// await page.fill( '//input[@placeholder="Account name"]', 'Savings' );//translate
+		await page.fill( '//input[@placeholder="Nombre de la cuenta"]', 'Savings' );//translate
+
+		// await page.fill( '//input[@placeholder="Account number"]', '1234' );//translate
+		await page.fill( '//input[@placeholder="Número de cuenta"]', '1234' );//translate
+
+		//await page.fill( '//input[@placeholder="Bank name"]', 'Test Bank' );//translate
+		await page.fill( '//input[@placeholder="Nombre del banco"]', 'Test Bank' );//translate
+
+		//await page.fill( '//input[@placeholder="Sort Code"]', '12' );//translate
+		await page.fill( '//input[@placeholder="Código de clasificación"]', '12' );//translate
+
+		// await page.fill( '//input[@placeholder="IBAN"]', '12 3456 7890' );//translate
+		await page.fill( '//input[@placeholder="IBAN"]', '12 3456 7890' );//translate
+
+		//await page.fill( '//input[@placeholder="BIC / Swift"]', 'ABBA' );//translate
+		await page.fill( '//input[@placeholder="BIC / Swift"]', 'ABBA' );//translate
+		
+		// await page.click( 'text=Save' );//translate
+		await page.click( 'text=Guardar' );//translate
 
 		// check that bank transfers were set up
+		// await expect(
+		// 	page.locator( 'div.components-snackbar__content' )
+		// ).toContainText( 'Direct bank transfer details added successfully' );//translate
 		await expect(
 			page.locator( 'div.components-snackbar__content' )
-		).toContainText( 'Direct bank transfer details added successfully' );
+		).toContainText( 'Detalles para transferencia bancaria directa añadidos correctamente' );//translate
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
 
@@ -106,6 +132,7 @@ test.describe( 'Payment setup task', () => {
 			],
 		} );
 		await page.goto( 'wp-admin/admin.php?page=wc-admin&task=payments' );
+//await expect(page).toHaveScreenshot();
 
 		// purposely no await -- close the help dialog if/when it appears
 		page.locator( '.components-button.is-small.has-icon' )

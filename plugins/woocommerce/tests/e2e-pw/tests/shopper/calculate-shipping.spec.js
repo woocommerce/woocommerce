@@ -128,15 +128,19 @@ test.describe( 'Cart Calculate Shipping', () => {
 		page,
 	} ) => {
 		await page.goto( '/cart/' );
+//await expect(page).toHaveScreenshot();
 		// Set shipping country to Germany
 		await page.click( 'a.shipping-calculator-button' );
 		await page.selectOption( '#calc_shipping_country', shippingCountryDE );
 		await page.click( 'button[name="calc_shipping"]' );
 
 		// Verify shipping costs
+		// await expect(
+		// 	page.locator( '.shipping ul#shipping_method > li' )
+		// ).toContainText( 'Free shipping' );//translate
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li' )
-		).toContainText( 'Free shipping' );
+		).toContainText( 'Envío gratuito' );//translate
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			firstProductPrice
 		);
@@ -146,6 +150,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 		page,
 	} ) => {
 		await page.goto( '/cart/' );
+//await expect(page).toHaveScreenshot();
 		// Set shipping country to France
 		await page.click( 'a.shipping-calculator-button' );
 		await page.selectOption( '#calc_shipping_country', shippingCountryFR );
@@ -160,7 +165,8 @@ test.describe( 'Cart Calculate Shipping', () => {
 		);
 
 		// Set shipping to local pickup instead of flat rate
-		await page.click( 'text=Local pickup' );
+		// await page.click( 'text=Local pickup' );//translate
+		await page.click( 'text=Recogida local' );//translate
 
 		// Verify updated shipping costs
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
@@ -172,8 +178,11 @@ test.describe( 'Cart Calculate Shipping', () => {
 		page,
 	} ) => {
 		await page.goto( '/cart/' );
+//await expect(page).toHaveScreenshot();
 		await page.fill( 'input.qty', '4' );
-		await page.click( 'text=Update cart' );
+		// await page.click( 'text=Update cart' );//translate
+		await page.click( 'text=Actualizar carrito' );//translate
+		
 
 		// Set shipping country to France
 		await page.click( 'a.shipping-calculator-button' );
@@ -189,6 +198,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 		page,
 	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
+//await expect(page).toHaveScreenshot();
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );
@@ -208,6 +218,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 		page,
 	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
+//await expect(page).toHaveScreenshot();
 		await page.waitForLoadState( 'networkidle' );
 
 		// Set shipping country to Spain
