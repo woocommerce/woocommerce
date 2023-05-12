@@ -506,6 +506,7 @@ const attachProductAttributesTracks = () => {
 				// skip in case the button is disabled
 				return;
 			}
+
 			const globalAttributesCount = document.querySelectorAll(
 				'.woocommerce_attribute:not(.taxonomy)'
 			).length;
@@ -525,9 +526,16 @@ const attachProductAttributesTracks = () => {
 				visible_on_product_page_count: document.querySelectorAll(
 					'input[name^="attribute_visibility"]:checked'
 				).length,
-				used_for_variations_count: document.querySelectorAll(
-					'input[name^="attribute_variation"]:checked'
-				).length,
+				used_for_variations_count:
+					(
+						document.querySelector(
+							'#product-type'
+						) as HTMLSelectElement
+					 )?.value === 'variable'
+						? document.querySelectorAll(
+								'input[name^="attribute_variation"]:checked'
+						  ).length
+						: null,
 			} );
 		} );
 };
