@@ -9,9 +9,9 @@
  * Register the task.
  */
 function add_task_my_task() {
-	require_once __DIR__ . '/my-task.php';
+	require_once __DIR__ . '/class-mytask.php';
 	$task_lists = \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists::instance();
-	
+
 	// Add the task to the extended list.
 	$task_lists::add_task(
 		'extended',
