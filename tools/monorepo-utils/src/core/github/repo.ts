@@ -7,7 +7,6 @@ import { Repository } from '@octokit/graphql-schema';
  * Internal dependencies
  */
 import { graphqlWithAuth, octokitWithAuth } from './api';
-import { Logger } from '../logger';
 import { PullRequestEndpointResponse } from './types';
 
 export const getLatestGithubReleaseVersion = async ( options: {
@@ -15,8 +14,9 @@ export const getLatestGithubReleaseVersion = async ( options: {
 	name?: string;
 } ): Promise< string > => {
 	const { owner, name } = options;
+	const gql = graphqlWithAuth();
 
-	const data = await graphqlWithAuth< { repository: Repository } >( `
+	const data = await gql< { repository: Repository } >( `
 			{
 			    repository(owner: "${ owner }", name: "${ name }") {
 					releases(
@@ -45,9 +45,10 @@ export const doesGithubBranchExist = async (
 	nextReleaseBranch: string
 ): Promise< boolean > => {
 	const { owner, name } = options;
+	const octokit = octokitWithAuth();
 	try {
-		const branchOnGithub = await octokitWithAuth.request(
-			'GET /repos/{owner}/{repo}/branches/{branch}',
+		const branchOnGithub = await octokit.request(
+			'GET /repos/{owner}/{rsepo}/branches/{branch}',
 			{
 				owner,
 				repo: name,
@@ -74,7 +75,8 @@ export const getRefFromGithubBranch = async (
 	source: string
 ): Promise< string > => {
 	const { owner, name } = options;
-	const { repository } = await graphqlWithAuth< {
+	const gql = graphqlWithAuth();
+	const { repository } = await gql< {
 		repository: Repository;
 	} >( `
 			{
@@ -104,8 +106,9 @@ export const createGithubBranch = async (
 	branch: string,
 	ref: string
 ): Promise< void > => {
+	const octokit = octokitWithAuth();
 	const { owner, name } = options;
-	await octokitWithAuth.request( 'POST /repos/{owner}/{repo}/git/refs', {
+	await octokit.request( 'POST /repos/{owner}/{repo}/git/refs', {
 		owner,
 		repo: name,
 		ref: `refs/heads/${ branch }`,
@@ -120,8 +123,9 @@ export const deleteGithubBranch = async (
 	},
 	branch: string
 ): Promise< void > => {
+	const octokit = octokitWithAuth();
 	const { owner, name } = options;
-	await octokitWithAuth.request(
+	await octokit.request(
 		'DELETE /repos/{owner}/{repo}/git/refs/heads/{ref}',
 		{
 			owner,
@@ -151,8 +155,9 @@ export const createPullRequest = async ( options: {
 	title: string;
 	body: string;
 } ): Promise< PullRequestEndpointResponse[ 'data' ] > => {
+	const octokit = octokitWithAuth();
 	const { head, base, owner, name, title, body } = options;
-	const pullRequest = await octokitWithAuth.request(
+	const pullRequest = await octokit.request(
 		'POST /repos/{owner}/{repo}/pulls',
 		{
 			owner,
@@ -163,6 +168,7 @@ export const createPullRequest = async ( options: {
 			base,
 		}
 	);
+
 	//@ts-ignore There is a type mismatch between the graphql schema and the response. pullRequest.data.head.repo.has_discussions is a boolean, but the graphql schema doesn't have that field.
 	return pullRequest.data;
 };

@@ -89,7 +89,8 @@ export const milestoneCommand = new Command( 'milestone' )
 		}
 
 		try {
-			await octokitWithAuth.request(
+			const octokit = octokitWithAuth();
+			await octokit.request(
 				`POST /repos/${ owner }/${ name }/milestones`,
 				{
 					title: nextMilestone,
