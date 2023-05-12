@@ -4,6 +4,8 @@ The onboarding tasks provides a way to help store owners get their sites quickly
 
 The task list is easily extensible to allow inserting custom tasks around plugin setup that benefits store owners.
 
+![Onboarding Task List](./images/task-list.png)
+
 ## Adding a custom task
 
 To add a custom task, you need to create a new class that extends the `Task` class.
@@ -252,7 +254,7 @@ const { taskLists } = useSelect( ( select ) => {
 - `hideTaskList( id )` - (dispatch) Hide a task list
 - `actionTask( id )` - (dispatch) Mark a task as actioned
 - `dismissTask( id )` - (dispatch) Dismiss a task
-- `undoDismissTask( id ) - (dispatch) Undo task dismiss
+- `undoDismissTask( id )` - (dispatch) Undo task dismiss
 - `optimisticallyCompleteTask( id )` - (dispatch) Optimistically mark a task as complete
 
 ### API Endpoints
