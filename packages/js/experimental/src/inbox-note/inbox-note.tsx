@@ -42,6 +42,7 @@ type InboxNote = {
 	date_created: string;
 	date_created_gmt: string;
 	actions: InboxNoteAction[];
+	has_actions: boolean;
 	layout: string;
 	image: string;
 	is_deleted: boolean;
@@ -141,6 +142,35 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 		);
 	};
 
+	const renderTitle = () => {
+		const hasAction = note.has_actions;
+
+		if ( ! hasAction ) {
+			return '<a href="#">' + note.title + '</a>';
+		}
+
+		if ( note.actions && note.actions.length === 1 ) {
+			return (
+				<>
+					<InboxNoteActionButton
+						key={ note.actions[ 0 ].id }
+						label={ note.title }
+						preventBusyState={ true }
+						variant="link"
+						href={
+							note.actions[ 0 ].url &&
+							note.actions[ 0 ].url.length
+								? note.actions[ 0 ].url
+								: undefined
+						}
+						onClick={ () => onActionClicked( note.actions[ 0 ] ) }
+					/>
+					{ note.actions && note.actions.length > 1 && note.title }
+				</>
+			);
+		}
+	};
+
 	const {
 		content,
 		date_created_gmt: dateCreatedGmt,
@@ -193,25 +223,7 @@ const InboxNoteCard: React.FC< InboxNoteProps > = ( {
 							</span>
 						) }
 						<H className="woocommerce-inbox-message__title">
-							{ note.actions && note.actions.length === 1 && (
-								<InboxNoteActionButton
-									key={ note.actions[ 0 ].id }
-									label={ title }
-									preventBusyState={ true }
-									variant="link"
-									href={
-										note.actions[ 0 ].url &&
-										note.actions[ 0 ].url.length
-											? note.actions[ 0 ].url
-											: undefined
-									}
-									onClick={ () =>
-										onActionClicked( note.actions[ 0 ] )
-									}
-								/>
-							) }
-
-							{ note.actions && note.actions.length > 1 && title }
+							{ title && renderTitle() }
 						</H>
 						<Section className="woocommerce-inbox-message__text">
 							<span
