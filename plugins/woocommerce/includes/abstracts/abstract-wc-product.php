@@ -1933,6 +1933,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Get the aria-describedby description for the add to cart button.
+	 *
+	 * @return string
+	 */
+	public function add_to_cart_aria_describedby() {
+		/**
+		 * Filter the aria-describedby description for the add to cart button.
+		 *
+		 * @since 7.8.0
+		 *
+		 * @param string $var Text for the 'aria-describedby' attribute.
+		 * @param WC_Product $this Product object.
+		 */
+		return apply_filters( 'woocommerce_product_add_to_cart_aria_describedby', '', $this );
+	}
+
+	/**
 	 * Get the add to cart button text.
 	 *
 	 * @return string

@@ -3250,6 +3250,9 @@ importers:
       '@octokit/graphql-schema':
         specifier: ^14.1.0
         version: 14.1.0
+      '@octokit/types':
+        specifier: ^9.2.0
+        version: 9.2.1
       '@types/uuid':
         specifier: ^9.0.1
         version: 9.0.1
@@ -3506,43 +3509,6 @@ importers:
       webpack:
         specifier: ^5.70.0
         version: 5.70.0(uglify-js@3.14.5)(webpack-cli@4.9.2)
-
-  tools/version-bump:
-    dependencies:
-      '@commander-js/extra-typings':
-        specifier: ^0.1.0
-        version: 0.1.0(commander@9.4.0)
-      '@woocommerce/monorepo-utils':
-        specifier: workspace:*
-        version: link:../monorepo-utils
-      chalk:
-        specifier: ^4.1.2
-        version: 4.1.2
-      commander:
-        specifier: 9.4.0
-        version: 9.4.0
-      express:
-        specifier: ^4.18.1
-        version: 4.18.1
-      ora:
-        specifier: ^5.4.1
-        version: 5.4.1
-      semver:
-        specifier: ^7.3.2
-        version: 7.3.7
-      ts-node:
-        specifier: ^10.9.1
-        version: 10.9.1(@types/node@16.18.21)(typescript@4.9.5)
-    devDependencies:
-      '@tsconfig/node16':
-        specifier: ^1.0.3
-        version: 1.0.3
-      '@types/express':
-        specifier: ^4.17.13
-        version: 4.17.14
-      typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
 
 packages:
 
@@ -3871,7 +3837,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@jridgewell/trace-mapping': 0.3.17
+      '@jridgewell/trace-mapping': 0.3.16
       commander: 4.1.1
       convert-source-map: 1.8.0
       fs-readdir-recursive: 1.1.0
@@ -8720,9 +8686,9 @@ packages:
       '@babel/core': 7.21.3
       '@babel/helper-annotate-as-pure': 7.16.7
       '@babel/helper-module-imports': 7.16.7
-      '@babel/helper-plugin-utils': 7.18.9
+      '@babel/helper-plugin-utils': 7.20.2
       '@babel/plugin-syntax-jsx': 7.16.7(@babel/core@7.21.3)
-      '@babel/types': 7.17.0
+      '@babel/types': 7.21.3
     dev: true
 
   /@babel/plugin-transform-react-jsx@7.19.0(@babel/core@7.12.9):
@@ -8951,8 +8917,8 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-module-imports': 7.16.0
-      '@babel/helper-plugin-utils': 7.20.2
-      babel-plugin-polyfill-corejs2: 0.3.3(@babel/core@7.21.3)
+      '@babel/helper-plugin-utils': 7.14.5
+      babel-plugin-polyfill-corejs2: 0.3.0(@babel/core@7.21.3)
       babel-plugin-polyfill-corejs3: 0.4.0(@babel/core@7.21.3)
       babel-plugin-polyfill-regenerator: 0.3.0(@babel/core@7.21.3)
       semver: 6.3.0
@@ -11969,7 +11935,6 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.14
-    dev: true
 
   /@jridgewell/trace-mapping@0.3.17:
     resolution: {integrity: sha512-MCNzAp77qzKca9+W/+I0+sEpaUnZoeasnghNeVc41VZCEKaCH73Vq3BZZ/SzWIgrqE4H4ceI+p+b6C0mHf9T4g==}
@@ -12494,7 +12459,7 @@ packages:
       '@octokit/graphql': 4.8.0
       '@octokit/request': 5.6.3
       '@octokit/request-error': 2.1.0
-      '@octokit/types': 6.34.0
+      '@octokit/types': 6.41.0
       before-after-hook: 2.2.2
       universal-user-agent: 6.0.0
     transitivePeerDependencies:
@@ -12593,10 +12558,6 @@ packages:
     transitivePeerDependencies:
       - encoding
     dev: false
-
-  /@octokit/openapi-types@11.2.0:
-    resolution: {integrity: sha512-PBsVO+15KSlGmiI8QAzaqvsNlZlrDlyAJYcrXBCvVUxCp7VnXjkwPoFHgjEJXx3WF9BAwkA6nfCUA7i9sODzKA==}
-    dev: true
 
   /@octokit/openapi-types@12.11.0:
     resolution: {integrity: sha512-VsXyi8peyRq9PqIz/tpqiL2w3w80OgVMwBHltTml3LmVvXiphgeqmY9mvBw9Wu7e0QWk/fqD37ux8yP5uVekyQ==}
@@ -12793,12 +12754,6 @@ packages:
     transitivePeerDependencies:
       - encoding
     dev: false
-
-  /@octokit/types@6.34.0:
-    resolution: {integrity: sha512-s1zLBjWhdEI2zwaoSgyOFoKSl109CUcVBCc7biPJ3aAf6LGLU6szDvi31JPU7bxfla2lqfhjbbg/5DdFNxOwHw==}
-    dependencies:
-      '@octokit/openapi-types': 11.2.0
-    dev: true
 
   /@octokit/types@6.41.0:
     resolution: {integrity: sha512-eJ2jbzjdijiL3B4PrSQaSjuF2sPEQPVCPzBvTHJD9Nz+9dw2SGH4K4xeQJ77YfTq5bRQ+bD8wT11JbeDPmxmGg==}
@@ -20857,8 +20812,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      browserslist: 4.20.2
-      caniuse-lite: 1.0.30001352
+      browserslist: 4.21.4
+      caniuse-lite: 1.0.30001418
       fraction.js: 4.2.0
       normalize-range: 0.1.2
       picocolors: 1.0.0
@@ -22401,6 +22356,7 @@ packages:
       escalade: 3.1.1
       node-releases: 2.0.6
       picocolors: 1.0.0
+    dev: true
 
   /browserslist@4.20.4:
     resolution: {integrity: sha512-ok1d+1WpnU24XYN7oC3QWgTyMhY/avPJ/r9T00xxvUOIparA/gc+UPUMaod3i+G6s+nI2nUb9xZ5k794uIwShw==}

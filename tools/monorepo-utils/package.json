@@ -12,6 +12,7 @@
 		"@commander-js/extra-typings": "^10.0.3",
 		"@octokit/graphql": "4.8.0",
 		"@octokit/graphql-schema": "^14.1.0",
+		"@octokit/types": "^9.2.0",
 		"@types/uuid": "^9.0.1",
 		"chalk": "^4.1.2",
 		"commander": "^10.0.1",
