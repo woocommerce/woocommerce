@@ -21,6 +21,8 @@ jobs:
                   npm install -g pnpm
                   pnpm install --filter monorepo-utils
 
-            - name: 'Check whether today is the code freeze day'
-              id: check-freeze
+            - name: 'Make commits'
+              id: commits
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: pnpm run utils changelog -o psealock
