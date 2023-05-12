@@ -4,7 +4,7 @@ The onboarding tasks provides a way to help store owners get their sites quickly
 
 The task list is easily extensible to allow inserting custom tasks around plugin setup that benefits store owners.
 
-![Onboarding Task List](./images/task-list.png)
+<img src="./images/task-list.png" width="500px" alt="Onboarding Task List" />
 
 ## Adding a custom task
 
