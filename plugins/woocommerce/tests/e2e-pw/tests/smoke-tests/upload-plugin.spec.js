@@ -15,7 +15,6 @@ const {
 } = require( '../../utils/plugin-utils' );
 
 const skipMessage = 'Skipping this test because PLUGIN_REPOSITORY is undefined';
-const pluginSlug = path.basename( PLUGIN_REPOSITORY );
 const deletePluginFromSite = async ( { request, baseURL } ) => {
 	await deletePlugin( {
 		request,
@@ -26,7 +25,7 @@ const deletePluginFromSite = async ( { request, baseURL } ) => {
 	} );
 };
 
-let pluginPath;
+let pluginSlug, pluginPath;
 
 test.skip( () => {
 	const shouldSkip = ! PLUGIN_REPOSITORY;
@@ -42,6 +41,8 @@ test.describe( `${ PLUGIN_NAME } plugin can be uploaded and activated`, () => {
 	test.use( { storageState: ADMINSTATE } );
 
 	test.beforeAll( async ( { playwright, baseURL } ) => {
+		pluginSlug = path.basename( PLUGIN_REPOSITORY );
+
 		pluginPath = await test.step(
 			`Download ${ PLUGIN_NAME } plugin zip`,
 			async () => {
