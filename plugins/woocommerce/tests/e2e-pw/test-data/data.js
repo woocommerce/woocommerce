@@ -69,7 +69,6 @@ const storeDetails = {
 		industries: {
 			//fashion: 'Fashion, apparel, and accessories',//translate
 			// fashion: 'Moda, complementos y accesorios',//translate
-			// fashion: 'الأزياء والملابس والاكسسوارات',//translate how it appears
 			//fashion: 'الأزياء والملابس والاكسسوارات',//translate	
 	
 			// await page.getByText('الأزياء والملابس والإكسسوارات').click();
@@ -83,16 +82,15 @@ const storeDetails = {
 			
 			//health: 'Health and beauty',//translate
 			// health: 'Salud y belleza',//translate
-			health: 'الصحة والجمال',//translate
+			health: 'الصحة والجمال',
 			electronic:'الأجهزة الإلكترونية وأجهزة الحاسوب',
 			food:'الطعام والشراب',
 			home:'المنزل والأثاث والحديقة',
 			cbd:'منتجات الكانابيديول (CBD) وغيرها من المنتجات المشتقة من نباتات القنب',
 			education:'التعليم والتعلُّم',
 			more:'المزيد',
-
-			//added to test
-			fashion: 'الأزياء والملابس والاكسسوارات',//translate
+			testFashion:'الأزياء',
+			testFashionApparrelandAccessories:"الأزياء والملابس والاكسسوارات"
 		},
 		// For testing "Save Changes" feature, need to be different from the above
 		industries2: {
