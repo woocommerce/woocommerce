@@ -219,6 +219,9 @@ class Init {
 
 	/**
 	 * Enqueue styles needed for the rich text editor.
+	 *
+	 * @param array $args Array of post type arguments.
+	 * @return array Array of post type arguments.
 	 */
 	public function add_product_template( $args ) {
 		if ( ! isset( $args['template'] ) ) {
@@ -622,7 +625,7 @@ class Init {
 													'woocommerce'
 												),
 												'property' => 'sold_individually',
-												'tooltip' => __(
+												'tooltip'  => __(
 													'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
 													'woocommerce'
 												),
