@@ -11,9 +11,9 @@
 <div class="wp-block-columns alignwide has-white-color has-text-color has-background" style="background-color:#333333;padding-top:1.3rem;padding-right:1.3rem;padding-bottom:1.3rem;padding-left:1.3rem">
 	<!-- wp:column {"verticalAlignment":"center","width":"33.33%","style":{"spacing":{"padding":{"right":"var:preset|spacing|40","left":"var:preset|spacing|40"}}}} -->
 	<div class="wp-block-column is-vertically-aligned-center" style="padding-right:var(--wp--preset--spacing--40);padding-left:var(--wp--preset--spacing--40);flex-basis:33.33%">
-		<!-- wp:heading {"textAlign":"center","textColor":"background","fontSize":"x-large"} -->
-		<h2 class="wp-block-heading has-text-align-center has-background-color has-text-color has-x-large-font-size">
-			<?php echo __( 'This week\'s popular products', 'woo-gutenberg-products-block' ) ?>
+		<!-- wp:heading {"textAlign":"center","style":{"typography":{"fontStyle":"normal","fontWeight":"700"}},"textColor":"background","fontSize":"x-large"} -->
+		<h2 class="wp-block-heading has-text-align-center has-background-color has-text-color has-x-large-font-size" style="font-style:normal;font-weight:700">
+			<?php echo __( 'This week\'s popular products', 'woo-gutenberg-products-block' ); ?>
 		</h2>
 		<!-- /wp:heading -->
 	</div>
@@ -26,7 +26,11 @@
 			<!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->
 				<!-- wp:group {"style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"blockGap":"0"},"color":{"background":"#484848"},"border":{"radius":{"topLeft":"0px","topRight":"0px","bottomLeft":"4px","bottomRight":"4px"}}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"stretch"}} -->
 				<div class="wp-block-group has-background" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-left-radius:4px;border-bottom-right-radius:4px;background-color:#484848;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
-					<!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3","style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"}},"border":{"radius":{"topLeft":"4px","topRight":"4px","bottomLeft":"0px","bottomRight":"0px"},"top":{"color":"#ffffff","style":"solid","width":"3px"},"right":{"color":"#ffffff","style":"solid","width":"3px"},"bottom":{"color":"#ffffff","style":"solid","width":"3px"},"left":{"color":"#ffffff","style":"solid","width":"3px"}}}} /-->
+					<!-- wp:group {"style":{"border":{"radius":{"topLeft":"4px","topRight":"4px"},"top":{"width":"3px","style":"solid"},"right":{"width":"3px","style":"solid"},"bottom":{"width":"3px","style":"solid"},"left":{"width":"3px","style":"solid"}},"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"blockGap":"0"}},"layout":{"type":"flex","orientation":"vertical"}} -->
+					<div class="wp-block-group" style="border-top-left-radius:4px;border-top-right-radius:4px;border-top-style:solid;border-top-width:3px;border-right-style:solid;border-right-width:3px;border-bottom-style:solid;border-bottom-width:3px;border-left-style:solid;border-left-width:3px;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
+						<!-- wp:woocommerce/product-image {"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} /-->
+					</div>
+					<!-- /wp:group -->
 
 					<!-- wp:group {"style":{"spacing":{"blockGap":"0","padding":{"top":"20px","right":"20px","left":"20px","bottom":"10px"}},"elements":{"link":{"color":{"text":"var:preset|color|background"}}}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"left","verticalAlignment":"center"}} -->
 					<div class="wp-block-group has-link-color" style="padding-top:20px;padding-right:20px;padding-bottom:10px;padding-left:20px">
