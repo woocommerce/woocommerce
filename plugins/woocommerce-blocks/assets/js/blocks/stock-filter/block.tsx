@@ -4,11 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
 import { Icon, chevronDown } from '@wordpress/icons';
-import {
-	usePrevious,
-	useShallowEqual,
-	useBorderProps,
-} from '@woocommerce/base-hooks';
+import { usePrevious, useShallowEqual } from '@woocommerce/base-hooks';
 import {
 	useQueryStateByKey,
 	useQueryStateByContext,
@@ -144,8 +140,6 @@ const StockStatusFilterBlock = ( {
 		More info: https://github.com/woocommerce/woocommerce-blocks/pull/6920#issuecomment-1222402482
 	 */
 	const [ remountKey, setRemountKey ] = useState( generateUniqueId() );
-
-	const borderProps = useBorderProps( blockAttributes );
 
 	/**
 	 * Compare intersection of all stock statuses and filtered counts to get a list of options to display.
@@ -467,11 +461,10 @@ const StockStatusFilterBlock = ( {
 					<>
 						<FormTokenField
 							key={ remountKey }
-							className={ classnames( borderProps.className, {
+							className={ classnames( {
 								'single-selection': ! allowsMultipleOptions,
 								'is-loading': isLoading,
 							} ) }
-							style={ { ...borderProps.style } }
 							suggestions={ displayedOptions
 								.filter(
 									( option ) =>

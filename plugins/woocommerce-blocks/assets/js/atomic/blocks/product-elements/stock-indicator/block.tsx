@@ -7,11 +7,7 @@ import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
-import {
-	useColorProps,
-	useTypographyProps,
-	useSpacingProps,
-} from '@woocommerce/base-hooks';
+import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import type { HTMLAttributes } from 'react';
 
@@ -64,11 +60,9 @@ type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
 
 export const Block = ( props: Props ): JSX.Element | null => {
 	const { className } = props;
+	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
-	const colorProps = useColorProps( props );
-	const typographyProps = useTypographyProps( props );
-	const spacingProps = useSpacingProps( props );
 
 	if ( ! product.id ) {
 		return null;
@@ -92,19 +86,14 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					!! isBackordered,
 				// When inside All products block
 				...( props.isDescendantOfAllProducts && {
-					[ colorProps.className ]: colorProps.className,
-					[ typographyProps.className ]: typographyProps.className,
+					[ styleProps.className ]: styleProps.className,
 					'wc-block-components-product-stock-indicator wp-block-woocommerce-product-stock-indicator':
 						true,
 				} ),
 			} ) }
 			// When inside All products block
 			{ ...( props.isDescendantOfAllProducts && {
-				style: {
-					...colorProps.style,
-					...typographyProps.style,
-					...spacingProps.style,
-				},
+				style: styleProps.style,
 			} ) }
 		>
 			{ getTextBasedOnStock( {

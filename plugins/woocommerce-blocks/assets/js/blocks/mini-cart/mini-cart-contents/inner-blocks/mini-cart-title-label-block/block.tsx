@@ -1,12 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	useColorProps,
-	useSpacingProps,
-	useTypographyProps,
-} from '@woocommerce/base-hooks';
-import classNames from 'classnames';
+import { useStyleProps } from '@woocommerce/base-hooks';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -19,22 +15,12 @@ type Props = {
 };
 
 const Block = ( props: Props ): JSX.Element => {
-	const colorProps = useColorProps( props );
-	const typographyProps = useTypographyProps( props );
-	const spacingProps = useSpacingProps( props );
+	const styleProps = useStyleProps( props );
 
 	return (
 		<span
-			className={ classNames(
-				props.className,
-				colorProps.className,
-				typographyProps.className
-			) }
-			style={ {
-				...colorProps.style,
-				...typographyProps.style,
-				...spacingProps.style,
-			} }
+			className={ classnames( props.className, styleProps.className ) }
+			style={ styleProps.style }
 		>
 			{ props.label || defaultYourCartLabel }
 		</span>
