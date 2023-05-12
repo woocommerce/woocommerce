@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Compute if any order is pending, when deciding to process next migration batch
