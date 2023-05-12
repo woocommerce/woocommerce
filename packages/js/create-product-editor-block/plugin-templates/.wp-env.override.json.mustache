@@ -1,12 +1,17 @@
 {
+	"phpVersion": "8.2",
+	"core": "https://wordpress.org/wordpress-6.2.zip",
 	"plugins": [
-		"https://downloads.wordpress.org/plugin/woocommerce.7.7.0.zip",
-		"https://downloads.wordpress.org/plugin/woocommerce-beta-tester.2.1.0.zip",
+		"https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip",
+		"https://github.com/woocommerce/woocommerce/releases/download/wc-beta-tester-2.3.0/woocommerce-beta-tester.zip",
 		"."
 	],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG": true,
-		"SCRIPT_DEBUG": true
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": false,
+		"SCRIPT_DEBUG": true,
+		"ALTERNATE_WP_CRON": true,
 	}
 }
