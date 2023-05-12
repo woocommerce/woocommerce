@@ -68,6 +68,13 @@ const changeLogHelper = new Command( 'changelog' )
 				baseDir: tmpRepoPath,
 				config: [ 'core.hooksPath=/dev/null' ],
 			} );
+			await git.raw(
+				'config',
+				'--global',
+				'user.email',
+				'psealock@gmail.com'
+			);
+			await git.raw( 'config', '--global', 'user.name', 'paul sealock' );
 			Logger.notice( `Adding and committing changes` );
 			await git.add( '.' );
 			await git.commit( 'test' );
