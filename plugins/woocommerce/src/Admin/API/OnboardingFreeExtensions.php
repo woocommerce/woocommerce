@@ -73,6 +73,9 @@ class OnboardingFreeExtensions extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_available_extensions( $request ) {
+		/**
+		* Allows filtering the extension list.
+		*/
 		return apply_filters( 'woocommerce_rest_onboarding_free_extensions_response', RemoteFreeExtensions::get_extensions() );
 	}
 
