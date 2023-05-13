@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Admin\PluginsInstallLoggers;
 /**
  * A logger to log plugin installation progress in real time to an option.
  */
-class AsyncPluginsInstallLogger implements PluginsInstallLogger {
+class AsynPluginsInstallLogger implements PluginsInstallLogger {
 
 	/**
 	 * Variable to store logs.
@@ -34,9 +34,12 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 
 		// Set status as failed in case we run out of exectuion time.
 		register_shutdown_function( function () {
-			$option           = $this->get();
-			$option['status'] = 'failed';
-			$this->update( $option );
+			$error = error_get_last();
+			if ( isset( $error['type'] ) && $error['type'] === E_ERROR ) {
+				$option           = $this->get();
+				$option['status'] = 'failed';
+				$this->update( $option );
+			}
 		} );
 	}
 
