@@ -13,7 +13,7 @@ use WP_REST_Request;
 /**
  * MarketingCampaigns API controller test.
  *
- * @class MarketingCampaignsTest.
+ * @class OnboardingPluginsTest.
  */
 class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	/**
