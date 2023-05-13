@@ -29,7 +29,6 @@ class PluginsHelper {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_plugins_install_callback', array( __CLASS__, 'install_plugins' ), 10, 2 );
-		add_action( 'woocommerce_plugins_install_async_callback', array( __CLASS__, 'install_plugins_async_callback' ), 10, 2 );
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
 	}
 
@@ -67,8 +66,9 @@ class PluginsHelper {
 	 */
 	public static function get_installed_plugin_slugs() {
 		return array_map(
-			function( $plugin_path ) {
+			function ( $plugin_path ) {
 				$path_parts = explode( '/', $plugin_path );
+
 				return $path_parts[0];
 			},
 			array_keys( get_plugins() )
@@ -100,8 +100,9 @@ class PluginsHelper {
 	 */
 	public static function get_active_plugin_slugs() {
 		return array_map(
-			function( $plugin_path ) {
+			function ( $plugin_path ) {
 				$path_parts = explode( '/', $plugin_path );
+
 				return $path_parts[0];
 			},
 			get_option( 'active_plugins', array() )
@@ -117,6 +118,7 @@ class PluginsHelper {
 	 */
 	public static function is_plugin_installed( $plugin ) {
 		$plugin_path = self::get_plugin_path_from_slug( $plugin );
+
 		return $plugin_path ? array_key_exists( $plugin_path, get_plugins() ) : false;
 	}
 
@@ -129,6 +131,7 @@ class PluginsHelper {
 	 */
 	public static function is_plugin_active( $plugin ) {
 		$plugin_path = self::get_plugin_path_from_slug( $plugin );
+
 		return $plugin_path ? in_array( $plugin_path, get_option( 'active_plugins', array() ), true ) : false;
 	}
 
@@ -149,7 +152,7 @@ class PluginsHelper {
 	/**
 	 * Install an array of plugins.
 	 *
-	 * @param array                     $plugins Plugins to install.
+	 * @param array $plugins Plugins to install.
 	 * @param PluginsInstallLogger|null $logger an optional logger.
 	 *
 	 * @return array
@@ -159,12 +162,14 @@ class PluginsHelper {
 		 * Filter the list of plugins to install.
 		 *
 		 * @param array $plugins A list of the plugins to install.
+		 *
 		 * @since 6.4.0
 		 */
 		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_install', $plugins );
 
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ) );
+			return new \WP_Error( 'woocommerce_plugins_invalid_plugins',
+				__( 'Plugins must be a non-empty array.', 'woocommerce' ) );
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -205,7 +210,8 @@ class PluginsHelper {
 			if ( is_wp_error( $api ) ) {
 				$properties = array(
 					/* translators: %s: plugin slug (example: woocommerce-services) */
-					'error_message'     => sprintf( __( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce' ), $slug ),
+					'error_message'     => sprintf( __( 'The requested plugin `%s` could not be installed. Plugin API call failed.',
+						'woocommerce' ), $slug ),
 					'api_error_message' => $api->get_error_message(),
 					'slug'              => $slug,
 				);
@@ -216,12 +222,13 @@ class PluginsHelper {
 				 *
 				 * @param string $slug The plugin slug.
 				 * @param \WP_Error $api The API response.
+				 *
 				 * @since 6.4.0
 				 */
 				do_action( 'woocommerce_plugins_install_api_error', $slug, $api );
 
 				$error_message = sprintf(
-					/* translators: %s: plugin slug (example: woocommerce-services) */
+				/* translators: %s: plugin slug (example: woocommerce-services) */
 					__( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce' ),
 					$slug
 				);
@@ -241,7 +248,8 @@ class PluginsHelper {
 			if ( is_wp_error( $result ) || is_null( $result ) ) {
 				$properties = array(
 					/* translators: %s: plugin slug (example: woocommerce-services) */
-					'error_message'         => sprintf( __( 'The requested plugin `%s` could not be installed.', 'woocommerce' ), $slug ),
+					'error_message'         => sprintf( __( 'The requested plugin `%s` could not be installed.',
+						'woocommerce' ), $slug ),
 					'slug'                  => $slug,
 					'api_version'           => $api->version,
 					'api_download_link'     => $api->download_link,
@@ -257,8 +265,9 @@ class PluginsHelper {
 				 * @param object $api The plugin API object.
 				 * @param \WP_Error|null $result The result of the plugin installation.
 				 * @param \Plugin_Upgrader $upgrader The plugin upgrader.
+				 *
 				 * @since 6.4.0
-				*/
+				 */
 				do_action( 'woocommerce_plugins_install_error', $slug, $api, $result, $upgrader );
 
 				$install_error_message = sprintf(
@@ -292,30 +301,16 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Callback regsitered by OnboardingPlugins::install_async.
-	 *
-	 * It is used to call install_plugins with a custom logger.
-	 *
-	 * @param array  $plugins A list of plugins to install.
-	 * @param string $job_id An unique job I.D.
-	 * @return bool
-	 */
-	public function install_plugins_async_callback( array $plugins, string $job_id ) {
-		$option_name = 'woocommerce_onboarding_plugins_install_async_' . $job_id;
-		$logger      = new AsynPluginsInstallLogger( $option_name );
-		self::install_plugins( $plugins, $logger );
-		return true;
-	}
-
-	/**
 	 * Schedule plugin installation.
 	 *
 	 * @param array $plugins Plugins to install.
+	 *
 	 * @return string Job ID.
 	 */
 	public static function schedule_install_plugins( $plugins ) {
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_plugins_invalid_plugins',
+				__( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
 		}
 
 		$job_id = uniqid();
@@ -328,11 +323,13 @@ class PluginsHelper {
 	 * Activate the requested plugins.
 	 *
 	 * @param array $plugins Plugins.
+	 *
 	 * @return WP_Error|array Plugin Status
 	 */
 	public static function activate_plugins( $plugins ) {
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_plugins_invalid_plugins',
+				__( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -344,6 +341,7 @@ class PluginsHelper {
 		 * Filter the list of plugins to activate.
 		 *
 		 * @param array $plugins A list of the plugins to activate.
+		 *
 		 * @since 6.4.0
 		 */
 		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_activate', $plugins );
@@ -372,6 +370,7 @@ class PluginsHelper {
 				 *
 				 * @param string $slug The plugin slug.
 				 * @param null|\WP_Error $result The result of the plugin activation.
+				 *
 				 * @since 6.4.0
 				 */
 				do_action( 'woocommerce_plugins_activate_error', $slug, $result );
@@ -400,15 +399,18 @@ class PluginsHelper {
 	 * Schedule plugin activation.
 	 *
 	 * @param array $plugins Plugins to activate.
+	 *
 	 * @return string Job ID.
 	 */
 	public static function schedule_activate_plugins( $plugins ) {
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins', __( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_plugins_invalid_plugins',
+				__( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
 		}
 
 		$job_id = uniqid();
-		WC()->queue()->schedule_single( time() + 5, 'woocommerce_plugins_activate_callback', array( $plugins, $job_id ) );
+		WC()->queue()->schedule_single( time() + 5, 'woocommerce_plugins_activate_callback',
+			array( $plugins, $job_id ) );
 
 		return $job_id;
 	}
@@ -417,6 +419,7 @@ class PluginsHelper {
 	 * Installation status.
 	 *
 	 * @param int $job_id Job ID.
+	 *
 	 * @return array Job data.
 	 */
 	public static function get_installation_status( $job_id = null ) {
@@ -436,6 +439,7 @@ class PluginsHelper {
 	 * Gets the plugin data for the first action.
 	 *
 	 * @param array $actions Array of AS actions.
+	 *
 	 * @return array Array of action data.
 	 */
 	public static function get_action_data( $actions ) {
@@ -458,6 +462,7 @@ class PluginsHelper {
 	 * Activation status.
 	 *
 	 * @param int $job_id Job ID.
+	 *
 	 * @return array Array of action data.
 	 */
 	public static function get_activation_status( $job_id = null ) {
