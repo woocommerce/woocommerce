@@ -60,7 +60,7 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Request to schedulled-installs endpoint.
+	 * Request to scheduled-installs endpoint.
 	 *
 	 * @param string $job_id job id.
 	 *
