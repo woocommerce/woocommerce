@@ -11,7 +11,7 @@ use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
 /**
- * MarketingCampaigns API controller test.
+ * OnboardingPlugins API controller test.
  *
  * @class OnboardingPluginsTest.
  */
