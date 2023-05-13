@@ -16,7 +16,7 @@ interface PluginsInstallLogger {
 	public function install_requested( string $plugin_name );
 
 	/**
-	 * Caleld when a plugin installed sucessfully.
+	 * Called when a plugin installed successfully.
 	 *
 	 * @param string $plugin_name plugin name.
 	 * @param int    $duration # of seconds it took to install $plugin_name.
