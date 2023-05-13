@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use ActionScheduler;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use WC_REST_Data_Controller;
 use WP_Error;
 use WP_REST_Request;
@@ -54,9 +55,9 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 							'description'       => 'A list of plugins to install',
 							'type'              => 'array',
 							'items'             => 'string',
-							'sanitize_callback' => function( $value ) {
+							'sanitize_callback' => function ( $value ) {
 								return array_map(
-									function( $value ) {
+									function ( $value ) {
 										return sanitize_text_field( $value );
 									},
 									$value
@@ -81,7 +82,34 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_install_async_schema' ),
 			)
 		);
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/run-in-background',
+			array(
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( $this, 'run_in_background' ),
+					'permission_callback' => array( $this, 'can_install_plugins' ),
+				),
+			)
+		);
+	}
 
+	/**
+	 * Initiate install_plugins.
+	 *
+	 * This function is called from /install-async endpoint with blocking = false option
+	 * to simulate a background process.
+	 *
+	 * @return void
+	 */
+	public function run_in_background( $request ) {
+		set_time_limit( 60 );
+		$job_id      = $request->get_param( 'job_id' );
+		$plugins     = $request->get_param( 'plugins' );
+		$option_name = 'woocommerce_onboarding_plugins_install_async_' . $job_id;
+		$logger      = new AsynPluginsInstallLogger( $option_name );
+		PluginsHelper::install_plugins( $plugins, $logger );
 	}
 
 	/**
@@ -94,11 +122,27 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	public function install_async( WP_REST_Request $request ) {
 		$plugins = $request->get_param( 'plugins' );
 		$job_id  = uniqid();
+		$url     = site_url( 'wp-json/wc-admin/onboarding/plugins/run-in-background' );
 
-		WC()->queue()->add( 'woocommerce_plugins_install_async_callback', array( $plugins, $job_id ) );
+		wp_remote_post(
+			$url,
+			array(
+				'timeout'  => 0.01,
+				'blocking' => false,
+				'headers'  => [
+					'Content-Type' => 'application/json'
+				],
 
-		// Run the scheduler immediately without waiting.
-		ActionScheduler::runner()->run();
+				'body'      => wp_json_encode(
+					array(
+						'job_id'  => $job_id,
+						'plugins' => $plugins,
+					)
+				),
+				'cookies'   => $_COOKIE,
+				'sslverify' => false,
+			)
+		);
 
 		$plugin_status = array();
 		foreach ( $plugins as $plugin ) {
@@ -125,32 +169,16 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	public function get_scheduled_installs( WP_REST_Request $request ) {
 		$job_id = $request->get_param( 'job_id' );
 
-		$actions = WC()->queue()->search(
-			array(
-				'hook'    => 'woocommerce_plugins_install_async_callback',
-				'search'  => $job_id,
-				'orderby' => 'date',
-				'order'   => 'DESC',
-			)
-		);
-
-		$actions = array_filter(
-			PluginsHelper::get_action_data( $actions ),
-			function( $action ) use ( $job_id ) {
-				return $action['job_id'] === $job_id;
-			}
-		);
-
-		if ( empty( $actions ) ) {
+		$option = get_option( 'woocommerce_onboarding_plugins_install_async_' . $job_id, false );
+		if ( false === $option ) {
 			return new WP_REST_Response( null, 404 );
 		}
 
 		$response = array(
-			'job_id' => $actions[0]['job_id'],
-			'status' => $actions[0]['status'],
+			'job_id' => $job_id,
+			'status' => $option['status'],
 		);
 
-		$option = get_option( 'woocommerce_onboarding_plugins_install_async_' . $job_id );
 		if ( isset( $option['plugins'] ) ) {
 			$response['plugins'] = $option['plugins'];
 		}
@@ -165,8 +193,11 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 */
 	public function can_install_plugins() {
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_update',
+				__( 'Sorry, you cannot manage plugins.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() ) );
 		}
+
 		return true;
 	}
 
