@@ -25,17 +25,26 @@ class AsynPluginsInstallLogger implements PluginsInstallLogger {
 			$this->option_name,
 			array(
 				'created_time' => time(),
+				'status'       => 'pending',
 				'plugins'      => array(),
 			),
 			'',
 			'no'
 		);
+
+		// Set status as failed in case we run out of exectuion time.
+		register_shutdown_function( function () {
+			$option           = $this->get();
+			$option['status'] = 'failed';
+			$this->update( $option );
+		} );
 	}
 
 	/**
 	 * Update the option.
 	 *
 	 * @param array $data New data.
+	 *
 	 * @return bool
 	 */
 	private function update( array $data ) {
@@ -55,6 +64,7 @@ class AsynPluginsInstallLogger implements PluginsInstallLogger {
 	 * Add requested plugin.
 	 *
 	 * @param string $plugin_name plugin name.
+	 *
 	 * @return void
 	 */
 	public function install_requested( string $plugin_name ) {
@@ -73,7 +83,8 @@ class AsynPluginsInstallLogger implements PluginsInstallLogger {
 	 * Add installed plugin.
 	 *
 	 * @param string $plugin_name plugin name.
-	 * @param int    $duration time took to install plugin.
+	 * @param int $duration time took to install plugin.
+	 *
 	 * @return void
 	 */
 	public function installed( string $plugin_name, int $duration ) {
@@ -87,8 +98,9 @@ class AsynPluginsInstallLogger implements PluginsInstallLogger {
 	/**
 	 * Add an error.
 	 *
-	 * @param string      $plugin_name plugin name.
+	 * @param string $plugin_name plugin name.
 	 * @param string|null $error_message error message.
+	 *
 	 * @return void
 	 */
 	public function add_error( string $plugin_name, string $error_message = null ) {
@@ -96,6 +108,8 @@ class AsynPluginsInstallLogger implements PluginsInstallLogger {
 
 		$option['plugins'][ $plugin_name ]['errors'][] = $error_message;
 		$option['plugins'][ $plugin_name ]['status']   = 'failed';
+		$option['status']                              = 'failed';
+
 		$this->update( $option );
 	}
 
@@ -107,7 +121,9 @@ class AsynPluginsInstallLogger implements PluginsInstallLogger {
 	public function complete() {
 		$option = $this->get();
 
-		$option['completed_time'] = time();
+		$option['complete_time'] = time();
+		$option['status']        = 'complete';
+
 		$this->update( $option );
 	}
 }
