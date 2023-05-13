@@ -104,7 +104,10 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 * @return void
 	 */
 	public function run_in_background( $request ) {
-		set_time_limit( 60 );
+		$timeout = 60;
+		set_time_limit( $timeout );
+		ini_set( 'max_execution_time', $timeout );
+
 		$job_id      = $request->get_param( 'job_id' );
 		$plugins     = $request->get_param( 'plugins' );
 		$option_name = 'woocommerce_onboarding_plugins_install_async_' . $job_id;
