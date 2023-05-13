@@ -25,7 +25,7 @@ interface PluginsInstallLogger {
 	public function installed( string $plugin_name, int $duration);
 
 	/**
-	 * Called when an error ocured while installing a plugin.
+	 * Called when an error occurred while installing a plugin.
 	 *
 	 * @param string      $plugin_name plugin name.
 	 * @param string|null $error_message error message.
