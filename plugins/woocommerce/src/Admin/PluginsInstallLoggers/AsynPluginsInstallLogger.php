@@ -33,14 +33,16 @@ class AsynPluginsInstallLogger implements PluginsInstallLogger {
 		);
 
 		// Set status as failed in case we run out of exectuion time.
-		register_shutdown_function( function () {
-			$error = error_get_last();
-			if ( isset( $error['type'] ) && $error['type'] === E_ERROR ) {
-				$option           = $this->get();
-				$option['status'] = 'failed';
-				$this->update( $option );
+		register_shutdown_function(
+			function () {
+				$error = error_get_last();
+				if ( isset( $error['type'] ) && E_ERROR === $error['type'] ) {
+					$option           = $this->get();
+					$option['status'] = 'failed';
+					$this->update( $option );
+				}
 			}
-		} );
+		);
 	}
 
 	/**
@@ -86,7 +88,7 @@ class AsynPluginsInstallLogger implements PluginsInstallLogger {
 	 * Add installed plugin.
 	 *
 	 * @param string $plugin_name plugin name.
-	 * @param int $duration time took to install plugin.
+	 * @param int    $duration time took to install plugin.
 	 *
 	 * @return void
 	 */
@@ -101,7 +103,7 @@ class AsynPluginsInstallLogger implements PluginsInstallLogger {
 	/**
 	 * Add an error.
 	 *
-	 * @param string $plugin_name plugin name.
+	 * @param string      $plugin_name plugin name.
 	 * @param string|null $error_message error message.
 	 *
 	 * @return void

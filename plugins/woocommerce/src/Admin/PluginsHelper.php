@@ -8,9 +8,13 @@
 namespace Automattic\WooCommerce\Admin;
 
 use ActionScheduler;
+use ActionScheduler_DBStore;
 use ActionScheduler_QueueRunner;
+use Automatic_Upgrader_Skin;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
+use Plugin_Upgrader;
+use WP_Error;
 use WP_Upgrader;
 
 defined( 'ABSPATH' ) || exit;
@@ -152,7 +156,7 @@ class PluginsHelper {
 	/**
 	 * Install an array of plugins.
 	 *
-	 * @param array $plugins Plugins to install.
+	 * @param array                     $plugins Plugins to install.
 	 * @param PluginsInstallLogger|null $logger an optional logger.
 	 *
 	 * @return array
@@ -168,8 +172,10 @@ class PluginsHelper {
 		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_install', $plugins );
 
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins',
-				__( 'Plugins must be a non-empty array.', 'woocommerce' ) );
+			return new WP_Error(
+				'woocommerce_plugins_invalid_plugins',
+				__( 'Plugins must be a non-empty array.', 'woocommerce' )
+			);
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -183,7 +189,7 @@ class PluginsHelper {
 		$installed_plugins = array();
 		$results           = array();
 		$time              = array();
-		$errors            = new \WP_Error();
+		$errors            = new WP_Error();
 
 		foreach ( $plugins as $plugin ) {
 			$slug = sanitize_key( $plugin );
@@ -209,9 +215,14 @@ class PluginsHelper {
 
 			if ( is_wp_error( $api ) ) {
 				$properties = array(
-					/* translators: %s: plugin slug (example: woocommerce-services) */
-					'error_message'     => sprintf( __( 'The requested plugin `%s` could not be installed. Plugin API call failed.',
-						'woocommerce' ), $slug ),
+					'error_message'     => sprintf(
+						// translators: %s: plugin slug (example: woocommerce-services).
+						__(
+							'The requested plugin `%s` could not be installed. Plugin API call failed.',
+							'woocommerce'
+						),
+						$slug
+					),
 					'api_error_message' => $api->get_error_message(),
 					'slug'              => $slug,
 				);
@@ -221,7 +232,7 @@ class PluginsHelper {
 				 * Action triggered when a plugin API call failed.
 				 *
 				 * @param string $slug The plugin slug.
-				 * @param \WP_Error $api The API response.
+				 * @param WP_Error $api The API response.
 				 *
 				 * @since 6.4.0
 				 */
@@ -239,7 +250,7 @@ class PluginsHelper {
 				continue;
 			}
 
-			$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
+			$upgrader = new Plugin_Upgrader( new Automatic_Upgrader_Skin() );
 			$result   = $upgrader->install( $api->download_link );
 			// result can be false or WP_Error.
 			$results[ $plugin ] = $result;
@@ -247,9 +258,14 @@ class PluginsHelper {
 
 			if ( is_wp_error( $result ) || is_null( $result ) ) {
 				$properties = array(
-					/* translators: %s: plugin slug (example: woocommerce-services) */
-					'error_message'         => sprintf( __( 'The requested plugin `%s` could not be installed.',
-						'woocommerce' ), $slug ),
+					'error_message'         => sprintf(
+						/* translators: %s: plugin slug (example: woocommerce-services) */
+						__(
+							'The requested plugin `%s` could not be installed.',
+							'woocommerce'
+						),
+						$slug
+					),
 					'slug'                  => $slug,
 					'api_version'           => $api->version,
 					'api_download_link'     => $api->download_link,
@@ -263,8 +279,8 @@ class PluginsHelper {
 				 *
 				 * @param string $slug The plugin slug.
 				 * @param object $api The plugin API object.
-				 * @param \WP_Error|null $result The result of the plugin installation.
-				 * @param \Plugin_Upgrader $upgrader The plugin upgrader.
+				 * @param WP_Error|null $result The result of the plugin installation.
+				 * @param Plugin_Upgrader $upgrader The plugin upgrader.
 				 *
 				 * @since 6.4.0
 				 */
@@ -309,8 +325,11 @@ class PluginsHelper {
 	 */
 	public static function schedule_install_plugins( $plugins ) {
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins',
-				__( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
+			return new WP_Error(
+				'woocommerce_plugins_invalid_plugins',
+				__( 'Plugins must be a non-empty array.', 'woocommerce' ),
+				404
+			);
 		}
 
 		$job_id = uniqid();
@@ -328,8 +347,11 @@ class PluginsHelper {
 	 */
 	public static function activate_plugins( $plugins ) {
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins',
-				__( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
+			return new WP_Error(
+				'woocommerce_plugins_invalid_plugins',
+				__( 'Plugins must be a non-empty array.', 'woocommerce' ),
+				404
+			);
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -347,7 +369,7 @@ class PluginsHelper {
 		$plugins = apply_filters( 'woocommerce_admin_plugins_pre_activate', $plugins );
 
 		$plugin_paths      = self::get_installed_plugins_paths();
-		$errors            = new \WP_Error();
+		$errors            = new WP_Error();
 		$activated_plugins = array();
 
 		foreach ( $plugins as $plugin ) {
@@ -369,7 +391,7 @@ class PluginsHelper {
 				 * Action triggered when a plugin activation fails.
 				 *
 				 * @param string $slug The plugin slug.
-				 * @param null|\WP_Error $result The result of the plugin activation.
+				 * @param null|WP_Error $result The result of the plugin activation.
 				 *
 				 * @since 6.4.0
 				 */
@@ -404,13 +426,19 @@ class PluginsHelper {
 	 */
 	public static function schedule_activate_plugins( $plugins ) {
 		if ( empty( $plugins ) || ! is_array( $plugins ) ) {
-			return new \WP_Error( 'woocommerce_plugins_invalid_plugins',
-				__( 'Plugins must be a non-empty array.', 'woocommerce' ), 404 );
+			return new WP_Error(
+				'woocommerce_plugins_invalid_plugins',
+				__( 'Plugins must be a non-empty array.', 'woocommerce' ),
+				404
+			);
 		}
 
 		$job_id = uniqid();
-		WC()->queue()->schedule_single( time() + 5, 'woocommerce_plugins_activate_callback',
-			array( $plugins, $job_id ) );
+		WC()->queue()->schedule_single(
+			time() + 5,
+			'woocommerce_plugins_activate_callback',
+			array( $plugins, $job_id )
+		);
 
 		return $job_id;
 	}
@@ -446,7 +474,7 @@ class PluginsHelper {
 		$data = array();
 
 		foreach ( $actions as $action_id => $action ) {
-			$store  = new \ActionScheduler_DBStore();
+			$store  = new ActionScheduler_DBStore();
 			$args   = $action->get_args();
 			$data[] = array(
 				'job_id'  => $args[1],

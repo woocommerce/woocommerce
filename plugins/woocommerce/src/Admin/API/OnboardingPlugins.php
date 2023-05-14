@@ -23,7 +23,7 @@ use WP_REST_Response;
  * @internal
  * @extends WC_REST_Data_Controller
  */
-class OnboardingPlugins extends \WC_REST_Data_Controller {
+class OnboardingPlugins extends WC_REST_Data_Controller {
 	/**
 	 * Endpoint namespace.
 	 *
@@ -101,12 +101,13 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 * This function is called from /install-async endpoint with blocking = false option
 	 * to simulate a background process.
 	 *
+	 * @param WP_REST_Request $request request object.
+	 *
 	 * @return void
 	 */
 	public function run_in_background( $request ) {
 		$timeout = 60;
 		set_time_limit( $timeout );
-		ini_set( 'max_execution_time', $timeout );
 
 		$job_id      = $request->get_param( 'job_id' );
 		$plugins     = $request->get_param( 'plugins' );
@@ -130,11 +131,11 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		wp_remote_post(
 			$url,
 			array(
-				'timeout'  => 0.01,
-				'blocking' => false,
-				'headers'  => [
-					'Content-Type' => 'application/json'
-				],
+				'timeout'   => 0.01,
+				'blocking'  => false,
+				'headers'   => array(
+					'Content-Type' => 'application/json',
+				),
 
 				'body'      => wp_json_encode(
 					array(
@@ -196,9 +197,11 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 */
 	public function can_install_plugins() {
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update',
+			return new WP_Error(
+				'woocommerce_rest_cannot_update',
 				__( 'Sorry, you cannot manage plugins.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() ) );
+				array( 'status' => rest_authorization_required_code() )
+			);
 		}
 
 		return true;
