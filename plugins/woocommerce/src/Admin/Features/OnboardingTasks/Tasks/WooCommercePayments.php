@@ -85,7 +85,7 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		if ( null === $this->is_complete_result  ) {
+		if ( null === $this->is_complete_result ) {
 			$this->is_complete_result = self::is_connected();
 		}
 
