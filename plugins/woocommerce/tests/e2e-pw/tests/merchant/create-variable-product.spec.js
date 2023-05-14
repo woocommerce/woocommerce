@@ -44,13 +44,6 @@ async function deleteProductsAddedByTests( baseURL ) {
 }
 
 async function resetVariableProductTour( page ) {
-	await test.step(
-		'Go to the product page, so that the `window.wp.data` module is available',
-		async () => {
-			await page.goto( productPageURL );
-		}
-	);
-
 	const { id: userId, woocommerce_meta } = await test.step(
 		"Get the current user's ID and user preferences",
 		async () => {
@@ -221,12 +214,16 @@ test.describe( 'Add New Variable Product Page', () => {
 	test( 'can create product, attributes and variations', async ( {
 		page,
 	} ) => {
+		await test.step( 'Go to the "Add new product" page', async () => {
+			await page.goto( productPageURL );
+		} );
+
 		await test.step( 'Reset the variable product tour.', async () => {
 			await resetVariableProductTour( page );
 		} );
 
-		await test.step( 'Go to "Products > Add new" page.', async () => {
-			await page.goto( productPageURL );
+		await test.step( 'Reload the "Add new product" page', async () => {
+			await page.reload();
 		} );
 
 		await test.step(
@@ -823,7 +820,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		).not.toBeVisible();
 		await firstVariationContainer
 			.getByLabel( 'Stock quantity' )
-			.nth(1)
+			.nth( 1 )
 			.fill( stockAmount );
 		await page.selectOption( '#variable_backorders0', 'notify', {
 			force: true,
