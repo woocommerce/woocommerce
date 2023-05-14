@@ -76,7 +76,7 @@ async function resetVariableProductTour( page ) {
 	} );
 }
 
-async function createVariableProductFixture( baseURL ) {
+async function createVariableProductWithVariations( baseURL ) {
 	const api = new wcApi( {
 		url: baseURL,
 		consumerKey: process.env.CONSUMER_KEY,
@@ -195,25 +195,14 @@ async function createVariableProductFixture( baseURL ) {
 	} );
 }
 
-test.describe( 'Add New Variable Product Page', () => {
+test.describe( 'Add Variable Product', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
-
-	test.beforeAll( async ( { baseURL } ) => {
-		await test.step(
-			'Set up a variable product fixture through the REST API.',
-			async () => {
-				await createVariableProductFixture( baseURL );
-			}
-		);
-	} );
 
 	test.afterAll( async ( { baseURL } ) => {
 		await deleteProductsAddedByTests( baseURL );
 	} );
 
-	test( 'can create product, attributes and variations', async ( {
-		page,
-	} ) => {
+	test( 'can create a variable product', async ( { page } ) => {
 		await test.step( 'Go to the "Add new product" page', async () => {
 			await page.goto( productPageURL );
 		} );
@@ -284,101 +273,165 @@ test.describe( 'Add New Variable Product Page', () => {
 			);
 		}
 
-		await test.step( 'Add 3 attributes.', async () => {
-			for ( let i = 0; i < 3; i++ ) {
-				if ( i > 0 ) {
-					await test.step( "Click 'Add'.", async () => {
-						await page
-							.locator( '#product_attributes .toolbar-top' )
-							.getByRole( 'button', { name: 'Add new' } )
-							.click();
-					} );
-				}
+		await test.step( `Expect the "Variations" tab to appear`, async () => {
+			const variationsTab = page.getByRole( 'link', {
+				name: 'Variations',
+			} );
 
-				await test.step(
-					`Add the attribute "attr #${
-						i + 1
-					}" with values "val1 | val2"`,
-					async () => {
-						await test.step(
-							'Wait for the "Attribute name" input field to appear.',
-							async () => {
-								await page.waitForSelector(
-									`input[name="attribute_names[${ i }]"]`
-								);
-							}
-						);
-
-						await test.step(
-							`Type "attr #${
-								i + 1
-							}" in the "Attribute name" input field.`,
-							async () => {
-								await page
-									.locator(
-										`input[name="attribute_names[${ i }]"]`
-									)
-									.first()
-									.type( `attr #${ i + 1 }` );
-							}
-						);
-
-						await test.step(
-							'Type the attribute values "val1 | val2".',
-							async () => {
-								await page
-									.locator(
-										`textarea[name="attribute_values[${ i }]"]`
-									)
-									.first()
-									.type( 'val1 | val2' );
-							}
-						);
-
-						await test.step(
-							'Click "Save attributes".',
-							async () => {
-								await page
-									.getByRole( 'button', {
-										name: 'Save attributes',
-									} )
-									.click( { clickCount: 3 } );
-							}
-						);
-
-						await test.step(
-							"Wait for the tour's dismissal to be saved",
-							async () => {
-								await page.waitForResponse(
-									( response ) =>
-										response
-											.url()
-											.includes( '/post.php' ) &&
-										response.status() === 200
-								);
-							}
-						);
-					}
-				);
-			}
+			await expect( variationsTab ).toBeVisible();
 		} );
 
-		await test.step(
-			'Save before going to the Variations tab to prevent variations from all attributes to be automatically created.',
-			async () => {
-				await page.locator( '#save-post' ).click();
-			}
-		);
+		await test.step( 'Save draft.', async () => {
+			await page.locator( '#save-post' ).click();
+		} );
 
 		await test.step(
 			'Expect the "Product draft updated." notice to appear.',
 			async () => {
 				await expect(
-					page.getByText( 'Product draft updated. ' )
+					page.getByText( 'Product draft updated.' )
 				).toBeVisible();
 			}
 		);
 
+		await test.step(
+			'Expect the product type to be "Variable product"',
+			async () => {
+				const selectedProductType = page.locator(
+					'select#product-type [selected]'
+				);
+
+				await expect( selectedProductType ).toHaveText(
+					'Variable product'
+				);
+			}
+		);
+	} );
+
+	test.describe.only( 'Add custom product attributes', () => {
+		test.beforeAll( async ( { baseURL } ) => {
+			await test.step(
+				'Set up a variable product fixture through the REST API.',
+				async () => {
+					await createVariableProductWithVariations( baseURL );
+				}
+			);
+		} );
+
+		test( 'can add custom product attributes', async ( { page } ) => {
+			await test.step(
+				`Open "Edit product" page of product id ${ fixedVariableProductId }`,
+				async () => {
+					await page.goto(
+						`/wp-admin/post.php?post=${ fixedVariableProductId }&action=edit`
+					);
+				}
+			);
+
+			await test.step( 'Go to the "Attributes" tab.', async () => {
+				const attributesTab = page
+					.locator( '.attribute_tab' )
+					.getByRole( 'link', { name: 'Attributes' } );
+
+				await attributesTab.click();
+			} );
+
+			await test.step( 'Add 3 attributes.', async () => {
+				const attributeName = ` attr #${ i + 1 }`;
+				const attributeValues = 'val1 | val2';
+				for ( let i = 0; i < 3; i++ ) {
+					if ( i > 0 ) {
+						await test.step( "Click 'Add new'.", async () => {
+							await page
+								.locator( '#product_attributes .toolbar-top' )
+								.getByRole( 'button', { name: 'Add new' } )
+								.click();
+						} );
+					}
+
+					await test.step(
+						`Add the attribute "${ attributeName }" with values "${ attributeValues }"`,
+						async () => {
+							await test.step(
+								'Wait for the "Attribute name" input field to appear.',
+								async () => {
+									await page.waitForSelector(
+										`input[name="attribute_names[${ i }]"]`
+									);
+								}
+							);
+
+							await test.step(
+								`Type "${ attributeName }" in the "Attribute name" input field.`,
+								async () => {
+									await page
+										.getByLabel( 'Name:' )
+										.nth( i )
+										.type( attributeName );
+								}
+							);
+
+							await test.step(
+								`Type the attribute values "${ attributeValues }".`,
+								async () => {
+									await page
+										.getByLabel( 'Value(s):' )
+										.nth( i )
+										.type( attributeValues );
+								}
+							);
+
+							await test.step(
+								'Click "Save attributes".',
+								async () => {
+									await page
+										.getByRole( 'button', {
+											name: 'Save attributes',
+										} )
+										.click( { clickCount: 3 } );
+								}
+							);
+
+							await test.step(
+								"Wait for the tour's dismissal to be saved",
+								async () => {
+									await page.waitForResponse(
+										( response ) =>
+											response
+												.url()
+												.includes( '/post.php' ) &&
+											response.status() === 200
+									);
+								}
+							);
+
+							await test.step(
+								`Expect the attribute "${ attributeName }" to be saved`,
+								async () => {
+									const savedAttributeHeading = page.getByRole(
+										'heading',
+										attributeName
+									);
+
+									await expect(
+										savedAttributeHeading
+									).toBeVisible();
+								}
+							);
+						}
+					);
+				}
+			} );
+		} );
+	} );
+
+	test.describe.skip( 'Add variations', () => {
+		// mytodo
+	} );
+
+	test.skip( 'can create product, attributes and variations', async ( {
+		page,
+	} ) => {
 		await test.step( 'Click on the "Variations" tab.', async () => {
 			await page.click( 'a[href="#variable_product_options"]' );
 		} );
@@ -874,74 +927,5 @@ test.describe( 'Add New Variable Product Page', () => {
 		await expect( page.locator( '.woocommerce_variation' ) ).toHaveCount(
 			0
 		);
-	} );
-
-	// mytodo new updates
-
-	test.describe.only( 'Variable product', () => {
-		test( 'can create a variable product', async ( { page } ) => {
-			await test.step( 'Go to the "Add new product" page', async () => {
-				await page.goto( productPageURL );
-			} );
-
-			await test.step( 'Reset the variable product tour.', async () => {
-				await resetVariableProductTour( page );
-			} );
-
-			await test.step( 'Reload the "Add new product" page', async () => {
-				await page.reload();
-			} );
-
-			await test.step(
-				`Type "${ variableProductName }" into the "Product name" input field.`,
-				async () => {
-					await page
-						.getByLabel( 'Product name' )
-						.fill( variableProductName );
-				}
-			);
-
-			await test.step(
-				'Select the "Variable product" product type.',
-				async () => {
-					await page.selectOption( '#product-type', 'variable' );
-				}
-			);
-
-			await test.step(
-				`Expect the "Variations" tab to appear`,
-				async () => {
-					const variationsTab = page.getByRole( 'listitem', {
-						name: 'Variations',
-					} );
-
-					await expect( variationsTab ).toBeVisible();
-				}
-			);
-
-			await test.step( 'Save draft.', async () => {
-				await page.locator( '#save-post' ).click();
-			} );
-
-			await test.step(
-				'Expect the "Product draft updated." notice to appear.',
-				async () => {
-					await expect(
-						page.getByText( 'Product draft updated.' )
-					).toBeVisible();
-				}
-			);
-
-			await test.step(
-				'Expect the product type to be "Variable product"',
-				async () => {
-					const productTypeMenu = page.getByRole( 'menu', {
-						name: 'Product Type',
-					} );
-
-					await expect( productTypeMenu ).toHaveValue( 'variable' );
-				}
-			);
-		} );
 	} );
 } );
