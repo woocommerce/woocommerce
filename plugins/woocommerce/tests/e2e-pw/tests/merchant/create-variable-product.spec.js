@@ -875,4 +875,73 @@ test.describe( 'Add New Variable Product Page', () => {
 			0
 		);
 	} );
+
+	// mytodo new updates
+
+	test.describe.only( 'Variable product', () => {
+		test( 'can create a variable product', async ( { page } ) => {
+			await test.step( 'Go to the "Add new product" page', async () => {
+				await page.goto( productPageURL );
+			} );
+
+			await test.step( 'Reset the variable product tour.', async () => {
+				await resetVariableProductTour( page );
+			} );
+
+			await test.step( 'Reload the "Add new product" page', async () => {
+				await page.reload();
+			} );
+
+			await test.step(
+				`Type "${ variableProductName }" into the "Product name" input field.`,
+				async () => {
+					await page
+						.getByLabel( 'Product name' )
+						.fill( variableProductName );
+				}
+			);
+
+			await test.step(
+				'Select the "Variable product" product type.',
+				async () => {
+					await page.selectOption( '#product-type', 'variable' );
+				}
+			);
+
+			await test.step(
+				`Expect the "Variations" tab to appear`,
+				async () => {
+					const variationsTab = page.getByRole( 'listitem', {
+						name: 'Variations',
+					} );
+
+					await expect( variationsTab ).toBeVisible();
+				}
+			);
+
+			await test.step( 'Save draft.', async () => {
+				await page.locator( '#save-post' ).click();
+			} );
+
+			await test.step(
+				'Expect the "Product draft updated." notice to appear.',
+				async () => {
+					await expect(
+						page.getByText( 'Product draft updated.' )
+					).toBeVisible();
+				}
+			);
+
+			await test.step(
+				'Expect the product type to be "Variable product"',
+				async () => {
+					const productTypeMenu = page.getByRole( 'menu', {
+						name: 'Product Type',
+					} );
+
+					await expect( productTypeMenu ).toHaveValue( 'variable' );
+				}
+			);
+		} );
+	} );
 } );
