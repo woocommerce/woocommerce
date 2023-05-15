@@ -665,9 +665,6 @@ class Init {
 							array(
 								array(
 									'woocommerce/product-shipping-class-field',
-									array(
-										'title' => __( 'Shipping class', 'woocommerce' ),
-									),
 								),
 								array(
 									'woocommerce/product-shipping-dimensions-fields',

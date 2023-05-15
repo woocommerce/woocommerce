@@ -18,28 +18,21 @@ import {
 	Fragment,
 	createElement,
 	createInterpolateElement,
-	useEffect,
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
 import { useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
 import { ShippingClassBlockAttributes } from './types';
-import { useValidation } from '../../hooks/use-validation';
-import { RadioField } from '../../components/radio-field';
 import { AddNewShippingClassModal } from '../../components';
 import { ADD_NEW_SHIPPING_CLASS_OPTION_VALUE } from '../../constants';
 
 type ServerErrorResponse = {
 	code: string;
 };
-
-const FOLLOW_CLASS_OPTION_VALUE = 'follow_class';
-const FREE_SHIPPING_OPTION_VALUE = 'free_shipping';
 
 export const DEFAULT_SHIPPING_CLASS_OPTIONS: SelectControl.Option[] = [
 	{ value: '', label: __( 'No shipping class', 'woocommerce' ) },
@@ -57,17 +50,6 @@ function mapShippingClassToSelectOption(
 		label: name,
 	} ) );
 }
-
-const options = [
-	{
-		label: __( 'Follow class', 'woocommerce' ),
-		value: FOLLOW_CLASS_OPTION_VALUE,
-	},
-	{
-		label: __( 'Free shipping', 'woocommerce' ),
-		value: FREE_SHIPPING_OPTION_VALUE,
-	},
-];
 
 function extractDefaultShippingClassFromProduct(
 	categories?: PartialProduct[ 'categories' ],
@@ -87,18 +69,11 @@ function extractDefaultShippingClassFromProduct(
 	}
 }
 
-export function Edit( {
-	attributes,
-}: BlockEditProps< ShippingClassBlockAttributes > ) {
-	const { title } = attributes;
+export function Edit( {}: BlockEditProps< ShippingClassBlockAttributes > ) {
 	const [ showShippingClassModal, setShowShippingClassModal ] =
 		useState( false );
 
 	const blockProps = useBlockProps();
-
-	const [ option, setOption ] = useState< string >(
-		FREE_SHIPPING_OPTION_VALUE
-	);
 
 	const { createProductShippingClass, invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
@@ -149,114 +124,71 @@ export function Edit( {
 		};
 	}, [] );
 
-	const shippingClassControlId = useInstanceId( BaseControl ) as string;
-
-	const shippingClassValidationError = useValidation(
-		'product/shipping_class',
-		function shippingClassValidator() {
-			if ( option === FOLLOW_CLASS_OPTION_VALUE && ! shippingClass ) {
-				return __( 'The shipping class is required.', 'woocommerce' );
-			}
-		}
-	);
-
-	function handleOptionChange( value: string ) {
-		setOption( value );
-
-		if ( value === FOLLOW_CLASS_OPTION_VALUE ) {
-			const [ firstShippingClass ] = shippingClasses;
-			setShippingClass( firstShippingClass?.slug ?? '' );
-		} else {
-			setShippingClass( '' );
-		}
-	}
-
-	useEffect( () => {
-		if ( shippingClass ) {
-			setOption( FOLLOW_CLASS_OPTION_VALUE );
-		}
-	}, [ shippingClass ] );
+	const shippingClassControlId = useInstanceId(
+		BaseControl,
+		'wp-block-woocommerce-product-shipping-class-field'
+	) as string;
 
 	return (
 		<div { ...blockProps }>
 			<div className="wp-block-columns">
 				<div className="wp-block-column">
-					<RadioField
-						title={ title }
-						selected={ option }
-						options={ options }
-						onChange={ handleOptionChange }
+					<SelectControl
+						id={ shippingClassControlId }
+						name="shipping_class"
+						value={ shippingClass }
+						onChange={ ( value: string ) => {
+							if (
+								value === ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
+							) {
+								setShowShippingClassModal( true );
+								return;
+							}
+							setShippingClass( value );
+						} }
+						label={ __( 'Shipping class', 'woocommerce' ) }
+						options={ [
+							...DEFAULT_SHIPPING_CLASS_OPTIONS,
+							...mapShippingClassToSelectOption(
+								shippingClasses ?? []
+							),
+						] }
+						help={ createInterpolateElement(
+							__(
+								'Manage shipping classes and rates in <Link>global settings</Link>.',
+								'woocommerce'
+							),
+							{
+								Link: (
+									<Link
+										href={ getNewPath(
+											{
+												tab: 'shipping',
+												section: 'classes',
+											},
+											'',
+											{},
+											'wc-settings'
+										) }
+										target="_blank"
+										type="external"
+										onClick={ () => {
+											recordEvent(
+												'product_shipping_global_settings_link_click'
+											);
+										} }
+									>
+										<Fragment />
+									</Link>
+								),
+							}
+						) }
 					/>
 				</div>
+
+				<div className="wp-block-column"></div>
 			</div>
 
-			{ option === FOLLOW_CLASS_OPTION_VALUE && (
-				<div className="wp-block-columns">
-					<div
-						className={ classNames( 'wp-block-column', {
-							'has-error': shippingClassValidationError,
-						} ) }
-					>
-						<SelectControl
-							id={ shippingClassControlId }
-							name="shipping_class"
-							value={ shippingClass }
-							onChange={ ( value: string ) => {
-								if (
-									value ===
-									ADD_NEW_SHIPPING_CLASS_OPTION_VALUE
-								) {
-									setShowShippingClassModal( true );
-									return;
-								}
-								setShippingClass( value );
-							} }
-							label={ __( 'Shipping class', 'woocommerce' ) }
-							options={ [
-								...DEFAULT_SHIPPING_CLASS_OPTIONS,
-								...mapShippingClassToSelectOption(
-									shippingClasses ?? []
-								),
-							] }
-							help={
-								shippingClassValidationError ||
-								createInterpolateElement(
-									__(
-										'Manage shipping classes and rates in <Link>global settings</Link>.',
-										'woocommerce'
-									),
-									{
-										Link: (
-											<Link
-												href={ getNewPath(
-													{
-														tab: 'shipping',
-														section: 'classes',
-													},
-													'',
-													{},
-													'wc-settings'
-												) }
-												target="_blank"
-												type="external"
-												onClick={ () => {
-													recordEvent(
-														'product_shipping_global_settings_link_click'
-													);
-												} }
-											>
-												<Fragment />
-											</Link>
-										),
-									}
-								)
-							}
-						/>
-					</div>
-
-					<div className="wp-block-column"></div>
-				</div>
-			) }
 			{ showShippingClassModal && (
 				<AddNewShippingClassModal
 					shippingClass={ extractDefaultShippingClassFromProduct(
