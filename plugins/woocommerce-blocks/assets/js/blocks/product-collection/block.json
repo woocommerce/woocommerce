@@ -1,0 +1,56 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 2,
+    "name": "woocommerce/product-collection",
+    "version": "1.0.0",
+    "title": "Product Collection",
+    "description": "Display a collection of products from your store.",
+    "category": "woocommerce",
+    "keywords": [ "WooCommerce" ],
+    "textdomain": "woo-gutenberg-products-block",
+	"attributes": {
+		"queryId": {
+			"type": "number"
+		},
+		"query": {
+			"type": "object",
+			"default": {
+				"perPage": 9,
+				"pages": 0,
+				"offset": 0,
+				"postType": "product",
+				"order": "asc",
+				"orderBy": "title",
+				"author": "",
+				"search": "",
+				"exclude": [],
+				"sticky": "",
+				"inherit": false,
+				"taxQuery": null,
+				"parents": []
+			}
+		},
+		"tagName": {
+			"type": "string",
+			"default": "div"
+		},
+		"displayLayout": {
+			"type": "object",
+			"default": {
+				"type": "flex",
+				"columns": 3
+			}
+		}
+	},
+	"providesContext": {
+		"queryId": "queryId",
+		"query": "query",
+		"displayLayout": "displayLayout"
+	},
+	"supports": {
+		"align": [ "wide", "full" ],
+		"anchor": true,
+		"html": false,
+		"__experimentalLayout": true
+	}
+}
