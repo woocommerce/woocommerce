@@ -6,13 +6,25 @@ import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { App } from './app';
+import {
+	ProductDescriptionForm,
+	ProductDescriptionButton,
+} from './product-description';
 
 import './product-text-generation';
 import './index.scss';
 
-const appRoot = document.getElementById( 'woocommerce-ai-app-root' );
+const buttonRoot = document.getElementById(
+	'woocommerce-ai-app-product-gpt-button'
+);
+const formRoot = document.getElementById(
+	'woocommerce-ai-app-product-gpt-form'
+);
 
-if ( appRoot ) {
-	render( <App />, appRoot );
+if ( buttonRoot ) {
+	render( <ProductDescriptionButton />, buttonRoot );
+}
+
+if ( formRoot ) {
+	render( <ProductDescriptionForm />, formRoot );
 }

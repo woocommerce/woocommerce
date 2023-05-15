@@ -86,8 +86,7 @@ class Woo_AI_Product_Text_Generation {
 			return;
 		}
 
-		echo '<button class="button wp-media-button wc-write-it-for-me" type="button">' . esc_html__( 'Write it for me (beta)', 'woocommerce' ) . '</button>';
-
+		echo '<div id="woocommerce-ai-app-product-gpt-button"></div>';
 	}
 
 	/**
@@ -107,47 +106,7 @@ class Woo_AI_Product_Text_Generation {
 
 			if ( false !== $editor_container_position ) {
 				$gpt_form =
-					'<div class="woocommerce-gpt-integration">' .
-						'<a id="woocommerce-product-description-gpt-hide" href="#" title="' .
-							esc_html__( 'Hide', 'woocommerce' ) .
-						'"></a>' .
-						'<label for="woocommerce-product-description-gpt-about">' .
-							esc_html__( 'About your product', 'woocommerce' ) .
-						'</label>' .
-						'<div id="woocommerce-product-description-gpt-about-wrapper" class="textarea-wrapper field">' .
-							'<textarea id="woocommerce-product-description-gpt-about" placeholder="' . esc_html__( 'e.g. organic and sustainable skin cleanser for women', 'woocommerce' ) . '"></textarea>' .
-						'</div>' .
-						'<label for="woocommerce-product-description-gpt-voice-tone">' .
-							esc_html__( 'Tone of voice', 'woocommerce' ) .
-						'</label>' .
-						'<div id="woocommerce-product-description-gpt-voice-tone-wrapper" class="select-wrapper">' .
-						'<select id="woocommerce-product-description-gpt-voice-tone" class="field" aria-describedby="woocommerce-product-description-gpt-voice-tone-description">' .
-							'<option value="casual">' . esc_html__( 'Casual', 'woocommerce' ) . '</option>' .
-							'<option value="formal">' . esc_html__( 'Formal', 'woocommerce' ) . '</option>' .
-							'<option value="flowery">' . esc_html__( 'Flowery', 'woocommerce' ) . '</option>' .
-							'<option value="convincing">' . esc_html__( 'Convincing', 'woocommerce' ) . '</option>' .
-						'</select>' .
-						'<p id="woocommerce-product-description-gpt-voice-tone-description">' .
-							esc_html__( 'Relaxed, informal, conversational tone. Like chatting with a friend.', 'woocommerce' ) .
-						'</p>' .
-						'</div>' .
-						'<div class="woocommerce-gpt-actions-wrapper">' .
-						'<button id="woocommerce-product-description-gpt-action-accept" class="button button-primary gpt-action" action="write" type="button">' .
-							esc_html__( 'Write description', 'woocommerce' ) .
-						'</button>' .
-						'<div class="woocommerce-gpt-extra-actions-wrapper hidden">' .
-						'<button id="woocommerce-product-description-gpt-action-simplify" class="button button-tertiary gpt-action" action="simplify" type="button">' .
-							esc_html__( 'Simplify it', 'woocommerce' ) .
-						'</button>' .
-						'<button id="woocommerce-product-description-gpt-action-longer" class="button button-tertiary gpt-action" action="more" type="button">' .
-							esc_html__( 'Make it longer', 'woocommerce' ) .
-						'</button>' .
-						'<button id="woocommerce-product-description-gpt-action-rewrite" class="button button-primary gpt-action" action="rewrite" type="button">' .
-							esc_html__( 'Rewrite', 'woocommerce' ) .
-						'</button>' .
-						'</div>' .
-						'</div>' .
-					'</div>';
+					'<div id="woocommerce-ai-app-product-gpt-form"></div>';
 				$content  = $gpt_form . $content;
 			}
 		}
