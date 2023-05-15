@@ -12,4 +12,8 @@
 .wc-block-components-checkout-step__title {
 	display: flex;
 	width: 100%;
+
+	.block-editor-plain-text {
+		height: auto !important;
+	}
 }

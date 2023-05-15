@@ -76,7 +76,6 @@
 		content: "\00a0" counter(checkout-step) ".";
 		content: "\00a0" counter(checkout-step) "." / "";
 		position: absolute;
-		width: $gap-large;
 		left: -$gap-large;
 		top: 0;
 		text-align: center;
