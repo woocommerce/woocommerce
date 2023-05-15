@@ -19,13 +19,6 @@ class Woo_AI_Product_Text_Generation {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_woo_ai_register_script' ) );
 		add_action( 'media_buttons', array( $this, 'add_gpt_button' ), 40 );
 		add_filter( 'the_editor', array( $this, 'add_gpt_form' ), 10, 1 );
-
-		$ajax_event = 'generate_product_description';
-
-		add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
-		add_action( 'wp_ajax_nopriv_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
-		// WC AJAX can be used for frontend ajax requests.
-		add_action( 'wc_ajax_' . $ajax_event, array( __CLASS__, $ajax_event ) );
 	}
 
 	/**
@@ -112,89 +105,6 @@ class Woo_AI_Product_Text_Generation {
 		}
 
 		return $content;
-	}
-
-	/**
-	 * Generate ChatGPT product description via AJAX.
-	 *
-	 * @since 3.4.0
-	 */
-	public static function generate_product_description() {
-		$api_url = 'https://api.openai.com/v1/chat/completions';
-
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		$product_description  = isset( $_POST['product_description'] ) ? wc_clean( wp_unslash( $_POST['product_description'] ) ) : '';
-		$tone                 = isset( $_POST['tone'] ) ? wc_clean( wp_unslash( $_POST['tone'] ) ) : '';
-		$existing_description = isset( $_POST['existing_description'] ) ? wc_clean( wp_unslash( $_POST['existing_description'] ) ) : '';
-		$chatgpt_action       = isset( $_POST['chatgpt_action'] ) ? wc_clean( wp_unslash( $_POST['chatgpt_action'] ) ) : '';
-		// phpcs:enable
-
-		$prompt_by_action = array(
-			'more'     => 'Make my last message longer, without losing any important information.',
-			'simplify' => 'Simplify my last message, without losing any important information.',
-		);
-
-		$messages = array(
-			array(
-				'role'    => 'user',
-				'content' => "Write a product description with $tone tone, from the following features: '$product_description'.",
-			),
-		);
-
-		if ( $existing_description && array_key_exists( $chatgpt_action, $prompt_by_action ) ) {
-			$messages[] = array(
-				'role'    => 'assistant',
-				'content' => $existing_description,
-			);
-			$messages[] = array(
-				'role'    => 'user',
-				'content' => $prompt_by_action[ $chatgpt_action ],
-			);
-		}
-
-		// Configure curl request.
-		$ch = curl_init();
-		curl_setopt( $ch, CURLOPT_URL, $api_url );
-		curl_setopt( $ch, CURLOPT_POST, 1 );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt(
-			$ch,
-			CURLOPT_HTTPHEADER,
-			array(
-				'Content-Type: application/json',
-				'Authorization: Bearer ' . OPEN_AI_KEY,
-			)
-		);
-
-		// Prepare the POST data.
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
-		$post_data = array(
-			'messages'    => $messages,
-			'model'       => 'gpt-3.5-turbo',
-			'temperature' => apply_filters( 'experimental_woocommerce_chatgpt_product_description_temperature', 1 ),
-		);
-		// phpcs:enable
-		$post_data_json = json_encode( $post_data );
-		curl_setopt( $ch, CURLOPT_POSTFIELDS, $post_data_json );
-
-		// Execute the request and get the response.
-		$response = curl_exec( $ch );
-
-		// Check for errors.
-		if ( curl_error( $ch ) ) {
-			echo 'Error: ' . esc_html( curl_error( $ch ) );
-		} else {
-			// Decode the JSON response.
-			$response_data = json_decode( $response, true );
-
-			// Extract and display the generated text.
-			$generated_text = $response_data['choices'][0]['message']['content'];
-			echo $generated_text;
-		}
-
-		// Close the curl session.
-		curl_close( $ch );
-		wp_die();
 	}
 
 }
