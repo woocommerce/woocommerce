@@ -146,7 +146,12 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 
 		$this->assertEmpty( wc_order_search( 'admin@example.org' ) );
 
-		add_filter( 'woocommerce_shop_order_search_results', function () { return array( 5 ); } );
+		add_filter(
+			'woocommerce_shop_order_search_results',
+			function () {
+				return array( 5 );
+			}
+		);
 
 		$this->assertEquals( array( 5 ), wc_order_search( 'admin@example.org' ) );
 

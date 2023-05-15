@@ -42,12 +42,16 @@ class OrdersTableSearchQuery {
 		$this->query       = $query;
 		$this->search_term = "'" . esc_sql( '%' . urldecode( $query->get( 's' ) ) . '%' ) . "'";
 
-		/**
-		 * Compatibility for similarly named filter in the CPT data store.
-		 * If someone wants to query only billing email, phone, then fields query is a better option, so we don't list it here.
-		 */
 		$this->search_fields = array_map(
 			'wc_clean',
+			/**
+			 * Compatibility for similarly named filter in the CPT data store.
+			 * If someone wants to query only billing email, phone, then fields query is a better option, so we don't list it here.
+			 *
+			 * @since 7.8.0
+			 *
+			 * @param array
+			 */
 			apply_filters(
 				'woocommerce_shop_order_search_fields',
 				array(
