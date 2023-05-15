@@ -11,7 +11,7 @@ export type WPError = {
 	};
 };
 
-export function getErrorMessage( error: WPError ) {
+export function getProductErrorMessage( error: WPError ) {
 	if ( error.code === 'product_invalid_sku' ) {
 		return __( 'Invalid or duplicated SKU.', 'woocommerce' );
 	}

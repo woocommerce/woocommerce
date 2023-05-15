@@ -14,7 +14,7 @@ import { MouseEvent, ReactNode } from 'react';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
-import { WPError } from '../../../../utils/get-error-message';
+import { WPError } from '../../../../utils/get-product-error-message';
 
 export function useSaveDraft( {
 	disabled,

@@ -13,7 +13,7 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { getErrorMessage } from '../../../utils/get-error-message';
+import { getProductErrorMessage } from '../../../utils/get-product-error-message';
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { usePublish } from '../hooks/use-publish';
 
@@ -68,7 +68,7 @@ export function PublishButton(
 				? __( 'Failed to create product.', 'woocommerce' )
 				: __( 'Failed to publish product.', 'woocommerce' );
 
-			const message = getErrorMessage( error );
+			const message = getProductErrorMessage( error );
 			createErrorNotice( message || defaultMessage );
 		},
 	} );
