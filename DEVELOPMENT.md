@@ -95,7 +95,7 @@ Please check out [the official documentation](https://developer.wordpress.org/bl
 
 ### Installing PHP in Unix (e.g. Ubuntu)
 
-Many unix systems such as Ubuntu will have PHP already installed. Sometimes without the extra packages you need to run Wordpress and this will cause you to run into troubles.
+Many unix systems such as Ubuntu will have PHP already installed. Sometimes without the extra packages you need to run WordPress and this will cause you to run into troubles.
 
 Use your package manager to add the extra PHP packages you'll need.
 e.g. in Ubuntu you can run:
