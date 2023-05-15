@@ -36,9 +36,6 @@ import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
  */
 import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
-import { initBlocks } from './init-blocks';
-
-initBlocks();
 
 export type ProductEditorSettings = Partial<
 	EditorSettings & EditorBlockListSettings
