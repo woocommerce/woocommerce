@@ -217,7 +217,24 @@ const assignOptInDataSharing = assign( {
 		event.payload.optInDataSharing,
 } );
 
-const coreProfilerStateMachineDefinition = createMachine( {
+const coreProfilerMachineActions = {
+	updateTrackingOption,
+	handleTrackingOption,
+	recordTracksIntroCompleted,
+	recordTracksIntroSkipped,
+	recordTracksIntroViewed,
+	recordTracksSkipBusinessLocationViewed,
+	recordTracksSkipBusinessLocationCompleted,
+	assignOptInDataSharing,
+	handleCountries,
+	redirectToWooHome,
+};
+
+const coreProfilerMachineServices = {
+	getAllowTrackingOption,
+	getCountries,
+};
+export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
 	initial: 'initializing',
 	predictableActionArguments: true, // recommended setting: https://xstate.js.org/docs/guides/actions.html
@@ -477,28 +494,26 @@ const coreProfilerStateMachineDefinition = createMachine( {
 	},
 } );
 
-const CoreProfilerController = ( {} ) => {
+export const CoreProfilerController = ( {
+	actionOverrides,
+	servicesOverrides,
+}: {
+	actionOverrides: Partial< typeof coreProfilerMachineActions >;
+	servicesOverrides: Partial< typeof coreProfilerMachineServices >;
+} ) => {
 	const augmentedStateMachine = useMemo( () => {
 		// When adding extensibility, this is the place to manipulate the state machine definition.
 		return coreProfilerStateMachineDefinition.withConfig( {
 			actions: {
-				updateTrackingOption,
-				handleTrackingOption,
-				recordTracksIntroCompleted,
-				recordTracksIntroSkipped,
-				recordTracksIntroViewed,
-				recordTracksSkipBusinessLocationViewed,
-				recordTracksSkipBusinessLocationCompleted,
-				assignOptInDataSharing,
-				handleCountries,
-				redirectToWooHome,
+				...coreProfilerMachineActions,
+				...actionOverrides,
 			},
 			services: {
-				getAllowTrackingOption,
-				getCountries,
+				...coreProfilerMachineServices,
+				...servicesOverrides,
 			},
 		} );
-	}, [] );
+	}, [ actionOverrides, servicesOverrides ] );
 
 	const [ state, send ] = useMachine( augmentedStateMachine );
 	const stateValue =
@@ -510,7 +525,10 @@ const CoreProfilerController = ( {} ) => {
 		: undefined;
 	const navigationProgress = currentNodeMeta?.progress; // This value is defined in each state node's meta tag, we can assume it is 0-100
 	const CurrentComponent =
-		currentNodeMeta?.component ?? ( () => <div>Insert Spinner</div> ); // If no component is defined for the state then its a loading state
+		currentNodeMeta?.component ??
+		( () => (
+			<div data-testid="core-profiler-loading-screen">Insert Spinner</div>
+		) ); // If no component is defined for the state then its a loading state
 
 	useEffect( () => {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );
