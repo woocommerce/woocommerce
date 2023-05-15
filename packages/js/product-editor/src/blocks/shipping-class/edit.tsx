@@ -28,7 +28,7 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { ShippingFeeBlockAttributes } from './types';
+import { ShippingClassBlockAttributes } from './types';
 import { useValidation } from '../../hooks/use-validation';
 import { RadioField } from '../../components/radio-field';
 import { AddNewShippingClassModal } from '../../components';
@@ -89,7 +89,7 @@ function extractDefaultShippingClassFromProduct(
 
 export function Edit( {
 	attributes,
-}: BlockEditProps< ShippingFeeBlockAttributes > ) {
+}: BlockEditProps< ShippingClassBlockAttributes > ) {
 	const { title } = attributes;
 	const [ showShippingClassModal, setShowShippingClassModal ] =
 		useState( false );
