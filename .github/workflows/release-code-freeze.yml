@@ -23,11 +23,18 @@ env:
 permissions: {}
 
 jobs:
-    verify-code-freeze:
-        name: 'Verify that today is the day of the code freeze'
+    code-freeze-prep:
+        name: 'Verify that today is the day of the code freeze and prepare repository'
         runs-on: ubuntu-20.04
+        permissions:
+            contents: write
+            issues: write
+            pull-requests: write
         outputs:
             freeze: ${{ steps.check-freeze.outputs.freeze }}
+            nextReleaseBranch: ${{ steps.branch.outputs.nextReleaseBranch }}
+            nextReleaseVersion: ${{ steps.milestone.outputs.nextReleaseVersion }}
+            nextDevelopmentVersion: ${{ steps.milestone.outputs.nextDevelopmentVersion }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -36,105 +43,39 @@ jobs:
 
             - name: Install prerequisites
               run: |
-                  npm install -g pnpm@7
+                  npm install -g pnpm
                   pnpm install --filter monorepo-utils
 
             - name: 'Check whether today is the code freeze day'
               id: check-freeze
-              run: pnpm utils code-freeze verify-day -g -o $TIME_OVERRIDE
+              run: pnpm utils code-freeze verify-day -o $TIME_OVERRIDE
 
-    maybe-create-next-milestone-and-release-branch:
-        name: 'Maybe create next milestone and release branch'
-        runs-on: ubuntu-20.04
-        permissions:
-            contents: write
-            issues: write
-        needs: verify-code-freeze
-        if: needs.verify-code-freeze.outputs.freeze == 'true'
-        outputs:
-            branch: ${{ steps.freeze.outputs.branch }}
-            release_version: ${{ steps.freeze.outputs.release_version }}
-            next_version: ${{ steps.freeze.outputs.next_version }}
-        steps:
-            - name: 'Install PHP'
-              uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
-              with:
-                  php-version: '7.4'
-            - name: Checkout code
-              uses: actions/checkout@v3
-              with:
-                  fetch-depth: 100
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  build: false
-
-            - name: 'Run the script to enforce the code freeze'
-              id: freeze
-              run: php .github/workflows/scripts/release-code-freeze.php
+            - name: Create next milestone
+              id: milestone
+              if: steps.check-freeze.outputs.freeze == 'true'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  GITHUB_OUTPUTS: 1
+              run: pnpm run utils code-freeze milestone -o ${{ github.repository_owner }}
 
-    prep-trunk:
-        name: Preps trunk for next development cycle
-        runs-on: ubuntu-20.04
-        permissions:
-            contents: write
-            pull-requests: write
-        needs: maybe-create-next-milestone-and-release-branch
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
-              with:
-                  fetch-depth: 100
+            - name: Create next release branch
+              id: branch
+              if: steps.check-freeze.outputs.freeze == 'true'
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: pnpm run utils code-freeze branch -o ${{ github.repository_owner }}
 
-            - name: fetch-trunk
-              run: git fetch origin trunk
-
-            - name: checkout-trunk
-              run: git checkout trunk
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-
-            - name: Create branch
-              run: git checkout -b prep/trunk-for-next-dev-cycle-${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}
-
-            - name: Bump versions
-              working-directory: ./tools/version-bump
-              run: pnpm run version bump woocommerce -v ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}.0-dev
-
-            - name: Checkout pnpm-lock.yaml to prevent issues
-              run: git checkout pnpm-lock.yaml
-
-            - name: Commit changes
-              run: git commit -am "Prep trunk for ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }} cycle"
-
-            - name: Push branch up
-              run: git push --no-verify origin prep/trunk-for-next-dev-cycle-${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}
-
-            - name: Create the PR
-              uses: actions/github-script@v6
-              with:
-                  script: |
-                      const body = "This PR updates the versions in trunk to ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }} for next development cycle."
-
-                      const pr = await github.rest.pulls.create({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        title: "Prep trunk for ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }} cycle",
-                        head: "prep/trunk-for-next-dev-cycle-${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }}",
-                        base: "trunk",
-                        body: body
-                      })
+            - name: Prepare trunk for next development cycle
+              id: prep-trunk
+              if: steps.check-freeze.outputs.freeze == 'true'
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: pnpm run utils code-freeze version-bump -o ${{ github.repository_owner }} -v ${{ steps.milestone.outputs.nextDevelopmentVersion }}.0-dev
 
     notify-slack:
         name: 'Sends code freeze notification to Slack'
-        if: ${{ inputs.skipSlackPing != true }}
         runs-on: ubuntu-20.04
-        needs: maybe-create-next-milestone-and-release-branch
+        needs: code-freeze-prep
+        if: ${{ needs.code-freeze-prep.outputs.freeze == 'true' && inputs.skipSlackPing != true }}
         steps:
             - name: Slack
               uses: archive/github-actions-slack@v2.0.0
@@ -143,16 +84,17 @@ jobs:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
                   slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
                   slack-text: |
-                      :warning-8c: ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }} Code Freeze :ice_cube:
+                      :warning-8c: ${{ needs.code-freeze-prep.outputs.nextReleaseVersion }} Code Freeze :ice_cube:
 
-                      The automation to cut the release branch for ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }} has run. Any PRs that were not already merged will be a part of ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.next_version }} by default. If you have something that needs to make ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }} that hasn't yet been merged, please see the <${{ secrets.FG_LINK }}/code-freeze-for-woocommerce-core-release/|fieldguide page for the code freeze>.
+                      The automation to cut the release branch for ${{ needs.code-freeze-prep.outputs.nextReleaseVersion }} has run. Any PRs that were not already merged will be a part of ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.nextDevelopmentVersion }} by default. If you have something that needs to make ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.nextReleaseVersion }} that hasn't yet been merged, please see the <${{ secrets.FG_LINK }}/code-freeze-for-woocommerce-core-release/|fieldguide page for the code freeze>.
 
     trigger-changelog-action:
         name: 'Trigger changelog action'
         runs-on: ubuntu-20.04
         permissions:
             actions: write
-        needs: maybe-create-next-milestone-and-release-branch
+        needs: code-freeze-prep
+        if: needs.code-freeze-prep.outputs.freeze == 'true'
         steps:
             - name: 'Trigger changelog action'
               uses: actions/github-script@v6
@@ -164,7 +106,7 @@ jobs:
                         workflow_id: 'release-changelog.yml',
                         ref: 'trunk',
                         inputs: {
-                          releaseVersion: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.release_version }}",
-                          releaseBranch: "${{ needs.maybe-create-next-milestone-and-release-branch.outputs.branch }}"
+                          releaseVersion: "${{ needs.code-freeze-prep.outputs.nextReleaseVersion }}",
+                          releaseBranch: "${{ needs.code-freeze-prep.outputs.nextReleaseBranch }}"
                         }
                       })

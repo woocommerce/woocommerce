@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add the product name to the "Remove from cart" button's aria-label in the cart and mini cart.

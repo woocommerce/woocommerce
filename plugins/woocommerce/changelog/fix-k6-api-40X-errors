@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-skip k6 api order RUD tests on non-existant order when C test fails
+skip k6 api order RUD tests on non-existent order when C test fails

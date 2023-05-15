@@ -8,8 +8,10 @@
 	p,
 	button,
 	span,
+	label,
+	div,
 	input {
-		font-family: var(--wp--preset--font-family--system-font);
+		font-family: var( --wp--preset--font-family--system-font );
 	}
 
 	label {
@@ -38,6 +40,7 @@
 		max-width: 650px;
 		margin-left: auto;
 		margin-right: auto;
+		padding-bottom: 128px;
 	}
 
 	.components-input-control {
@@ -72,6 +75,7 @@
 
 	.wp-block-columns {
 		gap: $gap-large;
+		margin-bottom: 0;
 	}
 
 	.wp-block-woocommerce-product-section {
@@ -80,14 +84,25 @@
 				margin-top: 32px;
 			}
 
-			> .wp-block:not(:first-child) {
+			> .wp-block:not( :first-child ) {
 				margin-top: $gap-large;
 			}
 		}
 	}
+
+	.woocommerce-experimental-select-control__label {
+		text-transform: uppercase;
+		font-size: 11px;
+		color: $gray-900;
+		font-weight: 500;
+	}
+
+	.block-editor-block-list__layout .block-editor-block-list__block:not( [contenteditable] ):focus:after {
+		display: none; // use important or increase specificity.
+	}
 }
 
-.woocommerce-layout:has(.woocommerce-product-block-editor) {
+.woocommerce-layout:has( .woocommerce-product-block-editor ) {
 	.woocommerce-layout__header {
 		display: none;
 	}

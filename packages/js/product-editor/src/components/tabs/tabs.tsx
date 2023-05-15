@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	Fragment,
-	useEffect,
-	useState,
-} from '@wordpress/element';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import { ReactElement } from 'react';
 import { NavigableMenu, Slot } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -17,6 +12,7 @@ import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
+import { sortFillsByOrder } from '../../utils';
 import { TABS_SLOT_NAME } from './constants';
 
 type TabsProps = {
@@ -30,13 +26,6 @@ export type TabsFillProps = {
 export function Tabs( { onChange = () => {} }: TabsProps ) {
 	const [ selected, setSelected ] = useState< string | null >( null );
 	const query = getQuery() as Record< string, string >;
-
-	function onClick( tabId: string ) {
-		window.document.documentElement.scrollTop = 0;
-		navigateTo( {
-			url: getNewPath( { tab: tabId } ),
-		} );
-	}
 
 	useEffect( () => {
 		onChange( selected );
@@ -57,8 +46,7 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 			if ( fills[ i ][ 0 ].props.disabled ) {
 				continue;
 			}
-			// Remove the `.$` prefix on keys.  E.g., .$key => key
-			const tabId = fills[ i ][ 0 ].key?.toString().slice( 2 ) || null;
+			const tabId = fills[ i ][ 0 ].props?.children?.key || null;
 			setSelected( tabId );
 			return;
 		}
@@ -81,14 +69,21 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 			<Slot
 				fillProps={
 					{
-						onClick,
+						onClick: ( tabId ) =>
+							navigateTo( {
+								url: getNewPath( { tab: tabId } ),
+							} ),
 					} as TabsFillProps
 				}
 				name={ TABS_SLOT_NAME }
 			>
 				{ ( fills ) => {
+					if ( ! sortFillsByOrder ) {
+						return null;
+					}
+
 					maybeSetSelected( fills );
-					return <>{ fills }</>;
+					return sortFillsByOrder( fills );
 				} }
 			</Slot>
 		</NavigableMenu>

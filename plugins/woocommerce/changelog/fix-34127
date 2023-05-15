@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent login call if the user is already logged in.

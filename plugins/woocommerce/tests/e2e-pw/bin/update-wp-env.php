@@ -12,9 +12,9 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 
 		public function __construct() {
 			if ( file_exists( $this->wp_env_path ) ) {
-				$this->wp_json = json_decode( file_get_contents( $this->wp_env_path ), true );
+				$this->wp_json = json_decode( file_get_contents( $this->wp_env_path ), false );
 			} else {
-				throw new Exception( ".wp_env.json doesn't exist!" );
+				throw new Exception( ".wp-env.json doesn't exist!" );
 			}
 
 			$env = getenv();
@@ -38,48 +38,54 @@ if ( ! class_exists( UPDATE_WP_JSON::class ) ) {
 				}
 
 				echo "Set WP Version to $version \n";
-				$this->wp_json["core"] = $version;
+				$this->wp_json->core = $version;
 			}
 		}
 
 		public function revert_wp_version(){
-			unset( $this->wp_json["core"] );
+			unset( $this->wp_json->core );
 		}
 
 		public function set_wc_version(){
 			if ( $this->wc_version ) {
 				echo "Set WC Version to $this->wc_version \n";
-				$this->wp_json["plugins"] = [ "https://github.com/woocommerce/woocommerce/releases/download/$this->wc_version/woocommerce.zip" ];
+				$this->wp_json->plugins = [ "https://github.com/woocommerce/woocommerce/releases/download/$this->wc_version/woocommerce.zip" ];
 			}
 		}
 
 		public function revert_wc_version(){
-			$this->wp_json["plugins"] = [ "." ];
+			$this->wp_json->env->tests->plugins = array_filter( $this->wp_json->env->tests->plugins, function( $string ) {
+				return strpos( $string, "woocommerce.zip" ) === false;
+			} );
+
+			if ( ! in_array( ".", $this->wp_json->env->tests->plugins ) ) {
+				array_unshift( $this->wp_json->env->tests->plugins, "." );
+			}
 		}
 
 		public function set_php_version(){
 			if ( $this->php_version ) {
 				echo "Set PHP Version to $this->php_version \n";
-				$this->wp_json["phpVersion"] = $this->php_version;
+				$this->wp_json->phpVersion = $this->php_version;
 			}
 		}
 
 		public function revert_php_version(){
-			$this->wp_json["phpVersion"] = "7.4";
+			$this->wp_json->phpVersion = "7.4";
 		}
 
 		public function update(){
 			$this->set_wp_version();
 			$this->set_wc_version();
 			$this->set_php_version();
-			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT ) );
+			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 		}
 
 		public function revert(){
 			$this->revert_wp_version();
 			$this->revert_wc_version();
 			$this->revert_php_version();
-			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT ) );
+			file_put_contents( $this->wp_env_path, json_encode( $this->wp_json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 
 			echo "Reverted .wp-env.json \n";
 		}

@@ -471,7 +471,7 @@ class ListTable extends WP_List_Table {
 				$view_counts[ $slug ] = $total_in_status;
 			}
 
-			if ( ( get_post_status_object( $slug ) )->show_in_admin_all_list ) {
+			if ( ( get_post_status_object( $slug ) )->show_in_admin_all_list && 'auto-draft' !== $slug ) {
 				$all_count += $total_in_status;
 			}
 		}
@@ -550,8 +550,9 @@ class ListTable extends WP_List_Table {
 			array_merge(
 				wc_get_order_statuses(),
 				array(
-					'trash' => ( get_post_status_object( 'trash' ) )->label,
-					'draft' => ( get_post_status_object( 'draft' ) )->label,
+					'trash'      => ( get_post_status_object( 'trash' ) )->label,
+					'draft'      => ( get_post_status_object( 'draft' ) )->label,
+					'auto-draft' => ( get_post_status_object( 'auto-draft' ) )->label,
 				)
 			),
 			array_flip( get_post_stati( array( 'show_in_admin_status_list' => true ) ) )
@@ -916,7 +917,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		// Gracefully handle legacy statuses.
-		if ( in_array( $order->get_status(), array( 'trash', 'draft' ), true ) ) {
+		if ( in_array( $order->get_status(), array( 'trash', 'draft', 'auto-draft' ), true ) ) {
 			$status_name = ( get_post_status_object( $order->get_status() ) )->label;
 		} else {
 			$status_name = wc_get_order_status_name( $order->get_status() );

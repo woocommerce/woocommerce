@@ -6,7 +6,7 @@
  */
 
 /**
- * This is a workaround to bypass intalling the gateway plugins from WP.org.
+ * This is a workaround to bypass installing the gateway plugins from WP.org.
  * This is not necessary provided your suggestion is a valid WP.org plugin.
  *
  * @param array      $response Response data.

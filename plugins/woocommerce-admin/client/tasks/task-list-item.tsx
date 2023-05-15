@@ -10,14 +10,14 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
-import { useCallback, useContext, useEffect } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
+import { useLayoutContext } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
  */
-import { LayoutContext } from '~/layout';
 import './task-list.scss';
 
 export type TaskListItemProps = {
@@ -36,7 +36,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	task,
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const layoutContext = useContext( LayoutContext );
+	const { layoutString } = useLayoutContext();
 
 	const {
 		dismissTask,
@@ -67,7 +67,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 			recordEvent( 'tasklist_item_view', {
 				task_name: id,
 				is_complete: isComplete,
-				context: layoutContext.toString(),
+				context: layoutString,
 			} );
 		}
 		// run the effect only when component mounts
@@ -132,7 +132,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 	const trackClick = () => {
 		recordEvent( 'tasklist_click', {
 			task_name: id,
-			context: layoutContext.toString(),
+			context: layoutString,
 		} );
 
 		if ( ! isComplete ) {

@@ -25,7 +25,8 @@
 		display: none;
 	}
 
-	.components-modal__content {
+	.components-modal__content,
+	.components-modal__header + div {
 		display: flex;
 		flex-direction: column;
 		align-items: center;

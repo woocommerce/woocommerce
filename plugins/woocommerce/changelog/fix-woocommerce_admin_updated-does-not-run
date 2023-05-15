@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add missing woocommerce_run_on_woocommerce_admin_updated hook for the scheduled action registered in RemoteInboxNotificationsEngine

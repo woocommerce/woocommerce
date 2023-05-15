@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+skip k6 batch update when batch create fails

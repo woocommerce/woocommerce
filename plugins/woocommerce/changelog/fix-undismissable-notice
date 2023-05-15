@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix race condition that caused some store alerts to be undismissable

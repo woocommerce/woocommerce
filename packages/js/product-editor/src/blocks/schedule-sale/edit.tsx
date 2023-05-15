@@ -22,9 +22,7 @@ import { ScheduleSalePricingBlockAttributes } from './types';
 import { useValidation } from '../../hooks/use-validation';
 
 export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
-	const blockProps = useBlockProps( {
-		className: 'wp-block-woocommerce-product-schedule-sale-fields',
-	} );
+	const blockProps = useBlockProps();
 
 	const dateTimeFormat = getSettings().formats.datetime;
 

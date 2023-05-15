@@ -23,6 +23,7 @@ export * from './create-ordered-children';
 export * from './sort-fills-by-order';
 export * from './init-blocks';
 export * from './product-apifetch-middleware';
+export * from './sift';
 
 export {
 	AUTO_DRAFT_NAME,

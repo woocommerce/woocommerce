@@ -24,7 +24,7 @@ import {
 import { DeprecatedTasks } from './deprecated-tasks';
 import {
 	ExtensionList,
-	OnboardingProductType,
+	OnboardingProductTypes,
 	ProfileItems,
 	TaskListType,
 } from './types';
@@ -126,7 +126,7 @@ export function* getFreeExtensions() {
 
 export function* getProductTypes() {
 	try {
-		const results: OnboardingProductType[] = yield apiFetch( {
+		const results: OnboardingProductTypes = yield apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/onboarding/product-types',
 			method: 'GET',
 		} );

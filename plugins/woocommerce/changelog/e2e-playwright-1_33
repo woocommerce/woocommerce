@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update Playwright to 1.33 and introduce UI command

@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { getFilename, getPatches } from 'cli-core/src/git';
+import {
+	getFilename,
+	getPatches,
+} from '@woocommerce/monorepo-utils/src/core/git';
 
 export const scanForDBChanges = ( content: string ) => {
 	const matchPatches = /^a\/(.+).php/g;
