@@ -1,5 +1,15 @@
 const https = require( 'http' );
 
+/**
+	For convenience, this method will convert between a display-friendly version format and one used
+	internally by wp-env. We lean towards using WordPress.org ZIPs which requires us to reference
+	the full URL to the archive. For instance, instead of needing the action to fully define the
+	URL to the nightly build we can pass "nightly" to this function and retrieve it.
+	
+	@param {string} wpVersion The display-friendly version. Supports ("master", "trunk", "nightly",
+				  "latest", "X.X" for version lines, and "X.X.X" for specific versions)
+	@return {string} The wp-env "core" property".
+**/
 module.exports = async function parseWPVersion( wpVersion ) {
     	// Start with versions we can infer immediately.
 	switch ( wpVersion ) {
