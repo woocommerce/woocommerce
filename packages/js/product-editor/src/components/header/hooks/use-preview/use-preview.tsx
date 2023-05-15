@@ -118,7 +118,10 @@ export function usePreview( {
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				'product',
-				productId
+				productId,
+				{
+					throwOnError: true,
+				}
 			);
 
 			// Redirect using the default anchor behaviour. This way, the usage
