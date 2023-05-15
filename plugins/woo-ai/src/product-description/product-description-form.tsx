@@ -5,6 +5,15 @@ import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 
+type WooApiMessage = {
+	role: string;
+	content: string;
+};
+
+type WooApiResponse = {
+	generated_text: string;
+	previous_messages: WooApiMessage[];
+};
 type TinyContent = { setContent: ( str: string ) => void };
 declare const tinymce: { get: ( str: string ) => TinyContent };
 
@@ -135,14 +144,14 @@ export function ProductDescriptionForm() {
 					onClick={ async () => {
 						try {
 							setFetching( true );
-							const response: string = await apiFetch( {
+							const response = await apiFetch< WooApiResponse >( {
 								path: '/wc-admin/wooai/text-generation',
 								method: 'POST',
 								data: {
 									prompt: `Write a product description with ${ tone } tone, from the following features: ${ userProductDescription }.`,
 								},
 							} );
-							setTinyContent( response || '' );
+							setTinyContent( response.generated_text || '' );
 						} catch ( e ) {
 							setTinyContent(
 								__(
