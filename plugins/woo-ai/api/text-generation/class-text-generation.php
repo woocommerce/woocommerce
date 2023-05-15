@@ -99,8 +99,6 @@ class Text_Generation extends \WC_REST_Data_Controller {
 		$prompt        = $request->get_param( 'prompt' );
 		$request_model = $request->get_param( 'model' ) ? $request->get_param( 'model' ) : 'openai';
 
-		error_log( print_r( $request_model, true ) );
-
 		$model = $this->models[ $request_model ];
 
 		$api_url = $model['url'];
@@ -112,49 +110,36 @@ class Text_Generation extends \WC_REST_Data_Controller {
 			),
 		);
 
-		// Configure curl request.
-		$ch = curl_init();
-		curl_setopt( $ch, CURLOPT_URL, $api_url );
-		curl_setopt( $ch, CURLOPT_POST, 1 );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt(
-			$ch,
-			CURLOPT_HTTPHEADER,
-			array(
-				'Content-Type: application/json',
-				'Authorization: Bearer ' . OPEN_AI_KEY,
-			)
-		);
-
-		// Prepare the POST data.
-		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$post_data = array(
 			'messages'    => $messages,
 			'model'       => 'gpt-3.5-turbo',
-			'temperature' => apply_filters( 'experimental_woocommerce_chatgpt_product_description_temperature', 1 ),
+			'temperature' => 1,
 		);
-		// phpcs:enable
-		$post_data_json = json_encode( $post_data );
-		curl_setopt( $ch, CURLOPT_POSTFIELDS, $post_data_json );
 
-		// Execute the request and get the response.
-		$response = curl_exec( $ch );
+		$raw_response = wp_remote_post(
+			$api_url,
+			array(
+				'method'  => 'POST',
+				'body'    => wp_json_encode( $post_data ),
+				'timeout' => 45,
+				'headers' => array(
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . OPEN_AI_KEY,
+				),
+			)
+		);
 
-		// Check for errors.
-		if ( curl_error( $ch ) ) {
-			echo 'Error: ' . esc_html( curl_error( $ch ) );
-		} else {
-			// Decode the JSON response .
-			$response_data = json_decode( $response, true );
-
-			// Extract and display the generated text .
-			$generated_text = $response_data['choices'][0]['message']['content'];
-			return rest_ensure_response( $generated_text );
+		if ( is_wp_error( $raw_response ) ) {
+			$error_message = $raw_response->get_error_message();
+			return "Something went wrong: $error_message";
 		}
 
-		// Close the curl session.
-		curl_close( $ch );
-		wp_die();
+		$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
+
+		$generated_text = $response['choices'][0]['message']['content'];
+
+		return rest_ensure_response( $generated_text );
+
 	}
 
 }
