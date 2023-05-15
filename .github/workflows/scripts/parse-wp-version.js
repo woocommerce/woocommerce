@@ -3,7 +3,7 @@ const https = require( 'http' );
 module.exports = async function parseWPVersion( wpVersion ) {
     	// Start with versions we can infer immediately.
 	switch ( wpVersion ) {
-        case 'master':
+        	case 'master':
 		case 'trunk': {
 			return 'WordPress/WordPress#master';
 		}
