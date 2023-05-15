@@ -43,14 +43,14 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin';
+	protected $namespace = 'wooai';
 
 	/**
 	 * Route base.
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'wooai/text-generation';
+	protected $rest_base = 'text-generation';
 
 	/**
 	 * Register routes.
