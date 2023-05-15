@@ -7,7 +7,6 @@ import { Repository } from '@octokit/graphql-schema';
  * Internal dependencies
  */
 import { graphqlWithAuth, octokitWithAuth } from './api';
-import { Logger } from '../logger';
 import { PullRequestEndpointResponse } from './types';
 
 export const getLatestGithubReleaseVersion = async ( options: {

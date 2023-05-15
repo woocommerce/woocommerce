@@ -10,6 +10,7 @@ import { execSync } from 'child_process';
  */
 import { Logger } from '../core/logger';
 import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
+import { getPRDescription } from './lib';
 
 const changeLogHelper = new Command( 'changelog' )
 	.option(
@@ -40,6 +41,12 @@ const changeLogHelper = new Command( 'changelog' )
 			const message = `Add test changelog for PR #${ prNumber }`;
 			const significance = 'patch';
 			const type = 'fix';
+
+			const prData = await getPRDescription( options, prNumber );
+			const { body } = prData;
+
+			console.log( JSON.stringify( body, null, 2 ) );
+			process.exit( 0 );
 
 			const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } -e "${ message }" -n`;
 
