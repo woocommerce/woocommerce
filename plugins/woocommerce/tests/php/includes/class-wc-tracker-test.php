@@ -5,10 +5,13 @@
  * @package WooCommerce\Tests\WC_Tracker.
  */
 
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
  * Class WC_Tracker_Test
  */
 class WC_Tracker_Test extends \WC_Unit_Test_Case {
+	// phpcs:enable
+
 	/**
 	 * Test the tracking of wc_admin being disabled via filter.
 	 */
@@ -65,6 +68,9 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'no', $tracking_data['wc_admin_disabled'] );
 	}
 
+	/**
+	 * @testDox Test orders tracking data.
+	 */
 	public function test_get_tracking_data_orders() {
 		$dummy_product          = WC_Helper_Product::create_simple_product();
 		$status_entries         = array( 'wc-processing', 'wc-completed', 'wc-refunded', 'wc-pending' );
@@ -92,7 +98,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 
 		$order_data = WC_Tracker::get_tracking_data()['orders'];
 
-		print_r( $order_data );
 		foreach ( $status_entries as $status_entry ) {
 			$this->assertEquals( $order_count / count( $status_entries ), $order_data[ $status_entry ] );
 		}
@@ -110,7 +115,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( ( $order_count * 3 * 10 / count( $status_entries ) ), $order_data['gateway__USD_total'] );
 
 		foreach ( $created_via_entries as $created_via_entry ) {
-			$this->assertEquals( ( $order_count / count( $created_via_entries ) ), $order_data[ 'created_via'][ $created_via_entry ] );
+			$this->assertEquals( ( $order_count / count( $created_via_entries ) ), $order_data['created_via'][ $created_via_entry ] );
 		}
 	}
 }
