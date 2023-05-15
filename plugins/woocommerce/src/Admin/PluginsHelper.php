@@ -33,6 +33,7 @@ class PluginsHelper {
 	 */
 	public static function init() {
 		add_action( 'woocommerce_plugins_install_callback', array( __CLASS__, 'install_plugins' ), 10, 2 );
+		add_action( 'woocommerce_plugins_install_async_callback', array( __CLASS__, 'install_plugins_async_callback' ), 10, 2 );
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
 	}
 
@@ -314,6 +315,22 @@ class PluginsHelper {
 		);
 
 		return $data;
+	}
+
+	/**
+	 * Callback regsitered by OnboardingPlugins::install_async.
+	 *
+	 * It is used to call install_plugins with a custom logger.
+	 *
+	 * @param array  $plugins A list of plugins to install.
+	 * @param string $job_id An unique job I.D.
+	 * @return bool
+	 */
+	public function install_plugins_async_callback( array $plugins, string $job_id ) {
+		$option_name = 'woocommerce_onboarding_plugins_install_async_' . $job_id;
+		$logger      = new AsynPluginsInstallLogger( $option_name );
+		self::install_plugins( $plugins, $logger );
+		return true;
 	}
 
 	/**
