@@ -173,10 +173,40 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$found_shipping_classes = $this->find_shipping_classes( $package );
 			$highest_class_cost     = 0;
 
+			// Store products to be shipped with every shipping class.
+			$shippable_products = array();
+
+			// Flag for indicating whether or not we are able to ship the entire cart with a single class.
+			$found_product_not_shippable_with_all_classes = false;
+
+			// Store this is the first iteration of shipping classes loop.
+			$first_iteration = true;
+
 			foreach ( $found_shipping_classes as $shipping_class => $products ) {
 				// Also handles BW compatibility when slugs were used instead of ids.
 				$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
 				$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
+
+				foreach ( $products as $data ) {
+					// For the first iteration of classes, we store all the product or variation ids shippable with the first class.
+					if ( $first_iteration ) {
+						$shippable_products[] = ! empty( $data['variation_id'] ) ? $data['variation_id'] : $data['product_id'];
+					} else {
+						// For every next shipping class, we check if the product or variation is shippable with all previous classes.
+						if ( ! in_array( ! empty( $data['variation_id'] ) ? $data['variation_id'] : $data['product_id'], $shippable_products, true ) ) {
+							$found_product_not_shippable_with_all_classes = true;
+							break;
+						}
+					}
+				}
+
+				$first_iteration = false;
+
+				// If even one product is not shippable with all classes, we bail setting $has_costs to false to avoid the rate being added at all.
+				if ( $found_product_not_shippable_with_all_classes ) {
+					$has_costs = false;
+					break;
+				}
 
 				if ( '' === $class_cost_string ) {
 					continue;
