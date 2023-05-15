@@ -13,5 +13,6 @@
 		"WP_DEBUG_DISPLAY": false,
 		"SCRIPT_DEBUG": true,
 		"ALTERNATE_WP_CRON": true,
-	}
+	},
+	"afterSetup": "wp-env run cli \"wp option update wc_admin_helper_feature_values '{\\\"product-block-editor\\\": true}' --format=json\""
 }
