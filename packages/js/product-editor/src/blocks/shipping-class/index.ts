@@ -10,15 +10,15 @@ import { BlockConfiguration } from '@wordpress/blocks';
 import { initBlock } from '../../utils/init-blocks';
 import blockConfiguration from './block.json';
 import { Edit } from './edit';
-import { ShippingFeeBlockAttributes } from './types';
+import { ShippingClassBlockAttributes } from './types';
 
 const { name, ...metadata } =
-	blockConfiguration as BlockConfiguration< ShippingFeeBlockAttributes >;
+	blockConfiguration as BlockConfiguration< ShippingClassBlockAttributes >;
 
 export { metadata, name };
 
 export const settings: Partial<
-	BlockConfiguration< ShippingFeeBlockAttributes >
+	BlockConfiguration< ShippingClassBlockAttributes >
 > = {
 	example: {},
 	edit: Edit,

@@ -1,11 +1,11 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/product-shipping-fee-fields",
-	"title": "Product shipping fee fields",
+	"name": "woocommerce/product-shipping-class-field",
+	"title": "Product shipping class field",
 	"category": "woocommerce",
-	"description": "The product shipping fee fields.",
-	"keywords": [ "products", "shipping", "fee" ],
+	"description": "The product shipping class field.",
+	"keywords": [ "products", "shipping", "class" ],
 	"textdomain": "default",
 	"attributes": {
 		"title": {
