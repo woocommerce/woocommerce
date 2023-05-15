@@ -92,6 +92,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 
 		$order_data = WC_Tracker::get_tracking_data()['orders'];
 
+		print_r( $order_data );
 		foreach ( $status_entries as $status_entry ) {
 			$this->assertEquals( $order_count / count( $status_entries ), $order_data[ $status_entry ] );
 		}
