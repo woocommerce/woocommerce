@@ -80,4 +80,4 @@ function {{namespaceSnakeCase}}_{{slugSnakeCase}}_add_block_to_product_editor( $
 
 	return $args;
 }
-add_filter( 'woocommerce_register_post_type_product', '{{namespaceSnakeCase}}_{{slugSnakeCase}}_add_block_to_product_editor' );
+add_filter( 'woocommerce_register_post_type_product', '{{namespaceSnakeCase}}_{{slugSnakeCase}}_add_block_to_product_editor', 100 );
