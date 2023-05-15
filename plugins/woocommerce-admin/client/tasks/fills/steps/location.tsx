@@ -16,7 +16,7 @@ import {
 	getStoreAddressValidator,
 } from '../../../dashboard/components/settings/general/store-address';
 
-type FormValues = {
+export type FormValues = {
 	addressLine1: string;
 	addressLine2: string;
 	countryState: string;
@@ -50,6 +50,12 @@ type StoreLocationProps = {
 	settings?: {
 		[ key: string ]: string;
 	};
+	validate?: ( values: FormValues ) => { [ key: string ]: string };
+};
+
+export const defaultValidate = ( values: FormValues ) => {
+	const validator = getStoreAddressValidator();
+	return validator( values );
 };
 
 const StoreLocation = ( {
@@ -60,6 +66,7 @@ const StoreLocation = ( {
 	updateAndPersistSettingsForGroup,
 	settings,
 	buttonText = __( 'Continue', 'woocommerce' ),
+	validate = defaultValidate,
 }: StoreLocationProps ) => {
 	const { hasFinishedResolution } = useSelect( ( select ) => {
 		const countryStore = select( COUNTRIES_STORE_NAME );
@@ -105,11 +112,6 @@ const StoreLocation = ( {
 			countryState: settings?.woocommerce_default_country || '',
 			postCode: settings?.woocommerce_store_postcode || '',
 		};
-	};
-
-	const validate = ( values: FormValues ) => {
-		const validator = getStoreAddressValidator();
-		return validator( values );
 	};
 
 	if ( isSettingsRequesting || ! hasFinishedResolution ) {

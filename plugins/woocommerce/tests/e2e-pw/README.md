@@ -53,6 +53,7 @@ Other ways of running tests (make sure you are in the `plugins/woocommerce` fold
 -   `pnpm test:e2e-pw --headed` (headed -- displaying browser window and test interactions)
 -   `pnpm test:e2e-pw --debug` (runs tests in debug mode)
 -   `pnpm test:e2e-pw ./tests/e2e-pw/tests/activate-and-setup/basic-setup.spec.js` (runs a single test)
+-   `pnpm test:e2e-pw --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode))
 
 To see all options, make sure you are in the `plugins/woocommerce` folder and run `pnpm playwright test --help`
 
@@ -60,7 +61,7 @@ To see all options, make sure you are in the `plugins/woocommerce` folder and ru
 
 The default values are:
 
--   Latest stable WordPress version 
+-   Latest stable WordPress version
 -   PHP 7.4
 -   MariaDB
 -   URL: `http://localhost:8086/`
@@ -69,12 +70,13 @@ The default values are:
 If you want to customize the port or admin credentials, check the [Test Variables](#test-variables) section.
 
 If you would like to customize the `PHP`, `WordPress` or `WooCommerce` versions installed in the environment, you can define `UPDATE_WP_JSON_FILE=1` along with any or all of the following env vars when building the environment.
-- `WP_VERSION`
-  - Acceptable versions are `nightly`, `trunk`, and any version listed on [WordPress Releases] page.
-- `WC_VERSION`
-  - Acceptable versions can be found on the [WooCommerce Releases](https://github.com/woocommerce/woocommerce/releases) page
-- `PHP`
-  - Any PHP version you see it. Please note that WooCommerce requires a minimum of PHP 7.2.
+
+-   `WP_VERSION`
+    -   Acceptable versions are `nightly`, `trunk`, and any version listed on [WordPress Releases] page.
+-   `WC_VERSION`
+    -   Acceptable versions can be found on the [WooCommerce Releases](https://github.com/woocommerce/woocommerce/releases) page
+-   `PHP`
+    -   Any PHP version you see it. Please note that WooCommerce requires a minimum of PHP 7.2.
 
 **Example**
 
@@ -83,7 +85,6 @@ The command below will create and environment with WordPress version 6.2, WooCom
 `UPDATE_WP_JSON_FILE=1 WP_VERSION=6.2 WC_TEST_VERSION=7.5.1 PHP_VERSION=8.2 pnpm run env:test`
 
 If you'd like to run with the default configuration, simply remove the `UPDATE_WP_JSON_FILE`.
-
 
 For more information how to configure the test environment for `wp-env`, please checkout the [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) documentation.
 

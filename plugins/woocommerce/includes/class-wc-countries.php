@@ -1024,6 +1024,12 @@ class WC_Countries {
 							'hidden'   => true,
 						),
 					),
+					'ET' => array(
+						'state' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+					),
 					'FI' => array(
 						'postcode' => array(
 							'priority' => 65,
@@ -1391,6 +1397,12 @@ class WC_Countries {
 						'state'    => array(
 							'label'    => __( 'District', 'woocommerce' ),
 							'required' => false,
+						),
+					),
+					'RW' => array(
+						'state' => array(
+							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'SG' => array(

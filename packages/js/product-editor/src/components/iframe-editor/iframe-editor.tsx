@@ -39,7 +39,7 @@ export function IframeEditor( {
 	initialBlocks = [],
 	onChange,
 	onClose,
-	settings,
+	settings: __settings,
 }: IframeEditorProps ) {
 	const [ resizeObserver, sizes ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
@@ -61,11 +61,13 @@ export function IframeEditor( {
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
+	const settings = __settings || parentEditorSettings;
+
 	return (
 		<div className="woocommerce-iframe-editor">
 			<BlockEditorProvider
 				settings={ {
-					...( settings || parentEditorSettings ),
+					...settings,
 					hasFixedToolbar: true,
 					templateLock: false,
 				} }
@@ -103,7 +105,10 @@ export function IframeEditor( {
 						// @ts-ignore This accepts numbers or strings.
 						height={ sizes.height ?? '100%' }
 					>
-						<EditorCanvas enableResizing={ true }>
+						<EditorCanvas
+							enableResizing={ true }
+							settings={ settings }
+						>
 							{ resizeObserver }
 							<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
 						</EditorCanvas>

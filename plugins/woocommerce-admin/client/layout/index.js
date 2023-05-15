@@ -16,7 +16,6 @@ import {
 import { Children, cloneElement } from 'react';
 import PropTypes from 'prop-types';
 import { get, isFunction, identity, memoize } from 'lodash';
-import { parse } from 'qs';
 import {
 	CustomerEffortScoreModalContainer,
 	triggerExitPageCesSurvey,
@@ -186,15 +185,6 @@ class _Layout extends Component {
 		} );
 	}
 
-	getQuery( searchString ) {
-		if ( ! searchString ) {
-			return {};
-		}
-
-		const search = searchString.substring( 1 );
-		return parse( search );
-	}
-
 	isWCPaySettingsPage() {
 		const { page, section, tab } = getQuery();
 		return (
@@ -208,7 +198,9 @@ class _Layout extends Component {
 		const { isEmbedded, ...restProps } = this.props;
 		const { location, page } = this.props;
 		const { breadcrumbs } = page;
-		const query = this.getQuery( location && location.search );
+		const query = Object.fromEntries(
+			new URLSearchParams( location && location.search )
+		);
 
 		return (
 			<LayoutContextProvider

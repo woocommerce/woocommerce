@@ -168,19 +168,21 @@ class CLIRunner {
 			return WP_CLI::warning( __( 'There are no orders to sync, aborting.', 'woocommerce' ) );
 		}
 
-		$assoc_args  = wp_parse_args(
+		$assoc_args       = wp_parse_args(
 			$assoc_args,
 			array(
 				'batch-size' => 500,
 			)
 		);
-		$batch_size  = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
-		$progress    = WP_CLI\Utils\make_progress_bar( 'Order Data Sync', $order_count / $batch_size );
-		$processed   = 0;
-		$batch_count = 1;
-		$total_time  = 0;
+		$batch_size       = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
+		$progress         = WP_CLI\Utils\make_progress_bar( 'Order Data Sync', $order_count / $batch_size );
+		$processed        = 0;
+		$batch_count      = 1;
+		$total_time       = 0;
+		$orders_remaining = true;
 
-		while ( $order_count > 0 ) {
+		while ( $order_count > 0 || $orders_remaining ) {
+			$remaining_count = $order_count;
 
 			WP_CLI::debug(
 				sprintf(
@@ -213,11 +215,8 @@ class CLIRunner {
 
 			$progress->tick();
 
-			$remaining_count = $this->count_unmigrated( array(), array( 'log' => false ) );
-			if ( $remaining_count === $order_count ) {
-				return WP_CLI::error( __( 'Infinite loop detected, aborting.', 'woocommerce' ) );
-			}
-			$order_count = $remaining_count;
+			$orders_remaining = count( $this->synchronizer->get_next_batch_to_process( 1 ) ) > 0;
+			$order_count      = $remaining_count - $batch_size;
 		}
 
 		$progress->finish();
@@ -429,6 +428,7 @@ class CLIRunner {
 				)
 			);
 		} else {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a CLI command and debugging code is intended.
 			$errors = print_r( $failed_ids, true );
 
 			return WP_CLI::error(
@@ -517,8 +517,8 @@ class CLIRunner {
 		$order_ids_placeholder        = implode( ', ', array_fill( 0, count( $order_ids ), '%d' ) );
 		$meta_table                   = OrdersTableDataStore::get_meta_table_name();
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table names are hardcoded, orders_ids and excluded_columns are prepared.
-		$query           = $wpdb->prepare(
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- table names are hardcoded, orders_ids and excluded_columns are prepared.
+		$query       = $wpdb->prepare(
 			"
 SELECT {$wpdb->postmeta}.post_id as entity_id, {$wpdb->postmeta}.meta_key, {$wpdb->postmeta}.meta_value
 FROM $wpdb->postmeta
@@ -537,7 +537,7 @@ ORDER BY {$wpdb->postmeta}.post_id ASC, {$wpdb->postmeta}.meta_key ASC;
 
 		$normalized_source_data = $this->normalize_raw_meta_data( $source_data );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table names are hardcoded, orders_ids and excluded_columns are prepared.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- table names are hardcoded, orders_ids and excluded_columns are prepared.
 		$migrated_query = $wpdb->prepare(
 			"
 SELECT $meta_table.order_id as entity_id, $meta_table.meta_key, $meta_table.meta_value
@@ -556,17 +556,17 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		foreach ( $normalized_source_data as $order_id => $meta ) {
 			foreach ( $meta as $meta_key => $values ) {
 				$migrated_meta_values = isset( $normalized_migrated_meta_data[ $order_id ][ $meta_key ] ) ? $normalized_migrated_meta_data[ $order_id ][ $meta_key ] : array();
-				$diff = array_diff( $values, $migrated_meta_values );
+				$diff                 = array_diff( $values, $migrated_meta_values );
 
 				if ( count( $diff ) ) {
 					if ( ! isset( $failed_ids[ $order_id ] ) ) {
 						$failed_ids[ $order_id ] = array();
 					}
 					$failed_ids[ $order_id ][] = array(
-						'order_id'   => $order_id,
-						'meta_key'   => $meta_key,
+						'order_id'         => $order_id,
+						'meta_key'         => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Not a meta query.
 						'orig_meta_values' => $values,
-						'new_meta_values' => $migrated_meta_values,
+						'new_meta_values'  => $migrated_meta_values,
 					);
 				}
 			}
@@ -589,7 +589,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				$clubbed_data[ $row['entity_id'] ] = array();
 			}
 			if ( ! isset( $clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ] ) ) {
-				$clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ] = array();
+				$clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Not a meta query.
 			}
 			$clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ][] = $row['meta_value'];
 		}

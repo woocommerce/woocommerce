@@ -5,7 +5,13 @@ import { createMachine, assign, DoneInvokeEvent, actions } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
-import { ExtensionList, OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { navigateTo, getNewPath } from '@woocommerce/navigation';
+import {
+	ExtensionList,
+	OPTIONS_STORE_NAME,
+	COUNTRIES_STORE_NAME,
+	Country,
+} from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
 import { initializeExPlat } from '@woocommerce/explat';
@@ -17,6 +23,9 @@ import { IntroOptIn } from './pages/IntroOptIn';
 import { UserProfile } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
+import { getCountryStateOptions } from './services/country';
+import { Loader } from './pages/Loader';
+
 import './style.scss';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
@@ -73,6 +82,13 @@ export type CoreProfilerStateMachineContext = {
 	extensionsAvailable: ExtensionList[ 'plugins' ] | [];
 	extensionsSelected: string[]; // extension slugs
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
+	countries: { [ key: string ]: string };
+	loader: {
+		progress?: number;
+		className?: string;
+		useStages?: string;
+		stageIndex?: number;
+	};
 };
 
 const Extensions = ( {
@@ -115,6 +131,19 @@ const handleTrackingOption = assign( {
 	) => event.data !== 'no',
 } );
 
+const getCountries = async () =>
+	resolveSelect( COUNTRIES_STORE_NAME ).getCountries();
+
+const handleCountries = assign( {
+	countries: ( _context, event: DoneInvokeEvent< Country[] > ) => {
+		return getCountryStateOptions( event.data );
+	},
+} );
+
+const redirectToWooHome = () => {
+	navigateTo( { url: getNewPath( {}, '/', {} ) } );
+};
+
 const recordTracksIntroCompleted = () => {
 	recordEvent( 'storeprofiler_step_complete', {
 		step: 'store_details',
@@ -129,6 +158,20 @@ const recordTracksIntroSkipped = () => {
 const recordTracksIntroViewed = () => {
 	recordEvent( 'storeprofiler_step_view', {
 		step: 'store_details',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
+const recordTracksSkipBusinessLocationViewed = () => {
+	recordEvent( 'storeprofiler_step_view', {
+		step: 'skip_business_location',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
+const recordTracksSkipBusinessLocationCompleted = () => {
+	recordEvent( 'storeprofiler_step_complete', {
+		step: 'skp_business_location',
 		wc_version: getSetting( 'wcVersion' ),
 	} );
 };
@@ -154,6 +197,18 @@ const updateTrackingOption = (
 	} );
 };
 
+const updateBusinessLocation = ( countryAndState: string ) => {
+	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_default_country: countryAndState,
+	} );
+};
+
+const promiseDelay = ( milliseconds: number ) => {
+	return new Promise( ( resolve ) => {
+		setTimeout( resolve, milliseconds );
+	} );
+};
+
 /**
  * Assigns the optInDataSharing value from the event payload to the context
  */
@@ -175,6 +230,8 @@ const coreProfilerStateMachineDefinition = createMachine( {
 		businessInfo: { location: 'US:CA' },
 		extensionsAvailable: [],
 		extensionsSelected: [],
+		countries: {},
+		loader: {},
 	} as CoreProfilerStateMachineContext,
 	states: {
 		initializing: {
@@ -213,7 +270,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 				},
 				INTRO_SKIPPED: {
 					// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
-					target: 'skipFlowBusinessLocation',
+					target: 'preSkipFlowBusinessLocation',
 					actions: [
 						'assignOptInDataSharing',
 						'updateTrackingOption',
@@ -294,10 +351,24 @@ const coreProfilerStateMachineDefinition = createMachine( {
 				component: BusinessInfo,
 			},
 		},
+		preSkipFlowBusinessLocation: {
+			invoke: {
+				src: 'getCountries',
+				onDone: [
+					{
+						actions: [ 'handleCountries' ],
+						target: 'skipFlowBusinessLocation',
+					},
+				],
+				onError: {
+					target: 'skipFlowBusinessLocation',
+				},
+			},
+		},
 		skipFlowBusinessLocation: {
 			on: {
 				BUSINESS_LOCATION_COMPLETED: {
-					target: 'settingUpStore',
+					target: 'postSkipFlowBusinessLocation',
 					actions: [
 						assign( {
 							businessInfo: (
@@ -305,12 +376,72 @@ const coreProfilerStateMachineDefinition = createMachine( {
 								event: BusinessLocationEvent
 							) => event.payload.businessInfo, // assign context.businessInfo to the payload of the event
 						} ),
+						'recordTracksSkipBusinessLocationCompleted',
 					],
 				},
 			},
+			entry: [ 'recordTracksSkipBusinessLocationViewed' ],
 			meta: {
 				progress: 80,
 				component: BusinessLocation,
+			},
+		},
+		postSkipFlowBusinessLocation: {
+			initial: 'updateBusinessLocation',
+			states: {
+				updateBusinessLocation: {
+					entry: assign( {
+						loader: {
+							progress: 10,
+						},
+					} ),
+					invoke: {
+						src: ( context ) => {
+							return updateBusinessLocation(
+								context.businessInfo.location
+							);
+						},
+						onDone: {
+							target: 'progress20',
+						},
+					},
+				},
+				// Although we don't need to wait 3 seconds for the following states
+				// We will dispaly 20% and 80% progress for 1.5 seconds each
+				// for the sake of user experience.
+				progress20: {
+					entry: assign( {
+						loader: {
+							progress: 20,
+						},
+					} ),
+					invoke: {
+						src: () => {
+							return promiseDelay( 1500 );
+						},
+						onDone: {
+							target: 'progress80',
+						},
+					},
+				},
+				progress80: {
+					entry: assign( {
+						loader: {
+							progress: 80,
+						},
+					} ),
+					invoke: {
+						src: () => {
+							return promiseDelay( 1500 );
+						},
+						onDone: {
+							actions: [ 'redirectToWooHome' ],
+						},
+					},
+				},
+			},
+			meta: {
+				component: Loader,
 			},
 		},
 		preExtensions: {
@@ -356,18 +487,26 @@ const CoreProfilerController = ( {} ) => {
 				recordTracksIntroCompleted,
 				recordTracksIntroSkipped,
 				recordTracksIntroViewed,
+				recordTracksSkipBusinessLocationViewed,
+				recordTracksSkipBusinessLocationCompleted,
 				assignOptInDataSharing,
+				handleCountries,
+				redirectToWooHome,
 			},
 			services: {
 				getAllowTrackingOption,
+				getCountries,
 			},
 		} );
 	}, [] );
 
 	const [ state, send ] = useMachine( augmentedStateMachine );
-
-	const currentNodeMeta = state.meta[ `coreProfiler.${ state.value }` ]
-		? state.meta[ `coreProfiler.${ state.value }` ]
+	const stateValue =
+		typeof state.value === 'object'
+			? Object.keys( state.value )[ 0 ]
+			: state.value;
+	const currentNodeMeta = state.meta[ `coreProfiler.${ stateValue }` ]
+		? state.meta[ `coreProfiler.${ stateValue }` ]
 		: undefined;
 	const navigationProgress = currentNodeMeta?.progress; // This value is defined in each state node's meta tag, we can assume it is 0-100
 	const CurrentComponent =

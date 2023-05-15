@@ -7,7 +7,7 @@ import chalk from 'chalk';
 /**
  * Internal dependencies
  */
-import { getEnvVar } from './environment';
+import { getEnvVar, isGithubCI } from './environment';
 
 const LOGGING_LEVELS: Record< string, number > = {
 	verbose: 3,
@@ -25,10 +25,20 @@ export class Logger {
 		] as number;
 	}
 
-	static error( message: string ) {
+	static error( err: unknown, failOnErr = true ) {
 		if ( Logger.loggingLevel >= LOGGING_LEVELS.error ) {
-			error( chalk.red( message ) );
-			process.exit( 1 );
+			if ( err instanceof Error ) {
+				error( chalk.red( `${ err.message }\n${ err.stack }` ) );
+			} else if ( typeof err === 'string' ) {
+				error( chalk.red( err ) );
+			} else {
+				// Best effort to log the error when we don't know the type.
+				error( chalk.red( JSON.stringify( err, null, 2 ) ) );
+			}
+
+			if ( failOnErr ) {
+				process.exit( 1 );
+			}
 		}
 	}
 
@@ -45,21 +55,26 @@ export class Logger {
 	}
 
 	static startTask( message: string ) {
-		if ( Logger.loggingLevel > LOGGING_LEVELS.silent ) {
+		if ( Logger.loggingLevel > LOGGING_LEVELS.silent && ! isGithubCI() ) {
 			const spinner = ora( chalk.green( `${ message }...` ) ).start();
 			Logger.lastSpinner = spinner;
+		} else if ( isGithubCI() ) {
+			Logger.notice( message );
 		}
 	}
 
 	static endTask() {
 		if (
 			Logger.loggingLevel > LOGGING_LEVELS.silent &&
-			Logger.lastSpinner
+			Logger.lastSpinner &&
+			! isGithubCI()
 		) {
 			Logger.lastSpinner.succeed(
 				`${ Logger.lastSpinner.text } complete.`
 			);
 			Logger.lastSpinner = null;
+		} else if ( isGithubCI() ) {
+			Logger.notice( 'Task complete.' );
 		}
 	}
 }

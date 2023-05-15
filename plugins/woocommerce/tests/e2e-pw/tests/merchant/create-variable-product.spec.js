@@ -292,8 +292,8 @@ test.describe( 'Add New Variable Product Page', () => {
 				if ( i > 0 ) {
 					await test.step( "Click 'Add'.", async () => {
 						await page
-							.locator( '.add-attribute-container' )
-							.getByRole( 'button', { name: 'Add' } )
+							.locator( '#product_attributes .toolbar-top' )
+							.getByRole( 'button', { name: 'Add new' } )
 							.click();
 					} );
 				}
@@ -746,7 +746,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		// add 3 attributes
 		for ( let i = 0; i < 3; i++ ) {
 			if ( i > 0 ) {
-				await page.click( 'button.add_attribute' );
+				await page.click( 'button.add_custom_attribute' );
 			}
 			await page.waitForSelector(
 				`input[name="attribute_names[${ i }]"]`

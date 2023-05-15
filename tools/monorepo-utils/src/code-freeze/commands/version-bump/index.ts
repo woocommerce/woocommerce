@@ -9,7 +9,7 @@ import simpleGit from 'simple-git';
  */
 import { Logger } from '../../../core/logger';
 import { sparseCheckoutRepoShallow } from '../../../core/git';
-import { octokitWithAuth } from '../../../core/github/api';
+import { createPullRequest } from '../../../core/github/repo';
 import { getEnvVar } from '../../../core/environment';
 import { getMajorMinor } from '../../../core/version';
 import { bumpFiles } from './bump';
@@ -101,18 +101,16 @@ export const versionBumpCommand = new Command( 'version-bump' )
 
 		try {
 			Logger.startTask( 'Creating a pull request' );
-			const pr = await octokitWithAuth.request(
-				'POST /repos/{owner}/{repo}/pulls',
-				{
-					owner,
-					repo: name,
-					title: `Prep trunk for ${ majorMinor } cycle`,
-					body: `This PR updates the versions in trunk to ${ version } for next development cycle.`,
-					head: branch,
-					base,
-				}
-			);
-			Logger.notice( `Pull request created: ${ pr.data.html_url }` );
+
+			const pullRequest = await createPullRequest( {
+				owner,
+				name,
+				title: `Prep trunk for ${ majorMinor } cycle`,
+				body: `This PR updates the versions in trunk to ${ version } for next development cycle.`,
+				head: branch,
+				base,
+			} );
+			Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 			Logger.endTask();
 		} catch ( e ) {
 			Logger.error( e );
