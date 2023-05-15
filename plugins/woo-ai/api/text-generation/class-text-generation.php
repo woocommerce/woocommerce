@@ -64,10 +64,18 @@ class Text_Generation extends \WC_REST_Data_Controller {
 					'callback'            => array( $this, 'get_response' ),
 					'permission_callback' => array( $this, 'get_response_permission_check' ),
 					'args'                => array(
-						'prompt' => array(
+						'prompt'            => array(
 							'type'              => 'string',
 							'validate_callback' => 'rest_validate_request_arg',
 							'required'          => true,
+						),
+						'temperature'       => array(
+							'type'              => 'number',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+						'previous_messages' => array(
+							'description' => __( 'Optional parameter to get only specific task lists by id.', 'woocommerce' ),
+							'type'        => 'array',
 						),
 					),
 				),
@@ -76,7 +84,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to create a product.
+	 * Check if a given request has access to read.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -96,24 +104,25 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_response( $request ) {
-		$prompt        = $request->get_param( 'prompt' );
-		$request_model = $request->get_param( 'model' ) ? $request->get_param( 'model' ) : 'openai';
+		$prompt            = $request->get_param( 'prompt' );
+		$temperature       = $request->get_param( 'temperature' ) ? $request->get_param( 'temperature' ) : 1;
+		$previous_messages = $request->get_param( 'previous_messages' ) ? $request->get_param( 'previous_messages' ) : array();
+		$request_model     = $request->get_param( 'model' ) ? $request->get_param( 'model' ) : 'openai';
 
 		$model = $this->models[ $request_model ];
 
 		$api_url = $model['url'];
 
-		$messages = array(
-			array(
-				'role'    => 'user',
-				'content' => $prompt,
-			),
+		$messages   = $previous_messages;
+		$messages[] = array(
+			'role'    => 'user',
+			'content' => $prompt,
 		);
 
 		$post_data = array(
 			'messages'    => $messages,
 			'model'       => 'gpt-3.5-turbo',
-			'temperature' => 1,
+			'temperature' => $temperature,
 		);
 
 		$raw_response = wp_remote_post(
@@ -130,15 +139,29 @@ class Text_Generation extends \WC_REST_Data_Controller {
 		);
 
 		if ( is_wp_error( $raw_response ) ) {
-			$error_message = $raw_response->get_error_message();
-			return "Something went wrong: $error_message";
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task',
+				__( 'Sorry, there was an error accessing this service.', 'woocommerce' ),
+				array(
+					'status' => 500,
+				)
+			);
 		}
 
 		$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
 
-		$generated_text = $response['choices'][0]['message']['content'];
+		$last_choice = end( $response['choices'] );
 
-		return rest_ensure_response( $generated_text );
+		$generated_text = $last_choice['message']['content'];
+
+		$messages[] = $last_choice['message'];
+
+		return rest_ensure_response(
+			array(
+				'generated_text'    => $generated_text,
+				'previous_messages' => $messages,
+			)
+		);
 
 	}
 
