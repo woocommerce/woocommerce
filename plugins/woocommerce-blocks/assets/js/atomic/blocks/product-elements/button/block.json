@@ -43,7 +43,8 @@
 	"ancestor": [
 		"woocommerce/all-products",
 		"woocommerce/single-product",
-		"core/post-template"
+		"core/post-template",
+		"woocommerce/product-template"
 	],
 	"styles": [
 		{

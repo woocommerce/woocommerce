@@ -1,0 +1,49 @@
+$break-small: 600px;
+
+@mixin break-small() {
+	@media (min-width: #{ ($break-small) }) {
+		@content;
+	}
+}
+
+.wc-block-product-template {
+	margin-top: 0;
+	margin-bottom: 0;
+	max-width: 100%;
+	list-style: none;
+	padding: 0;
+
+	// Unset background colors that can be inherited from Global Styles with extra specificity.
+	&.wc-block-product-template {
+		background: none;
+	}
+
+	&.is-flex-container {
+		flex-direction: row;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1.25em;
+
+		> li {
+			margin: 0;
+			width: 100%;
+		}
+
+		@include break-small {
+			@for $i from 2 through 6 {
+				&.is-flex-container.columns-#{ $i } > li {
+					width: calc((100% / #{ $i }) - 1.25em + (1.25em / #{ $i }));
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Default spacing between product elements
+ */
+:where(.wc-block-product-template .wc-block-product) > * {
+	margin-bottom: 0.75rem;
+	margin-top: 0;
+}
+
