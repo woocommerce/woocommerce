@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { BlockInstance } from '@wordpress/blocks';
-import { createElement, useEffect, useRef, useState } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import {
 	EditorSettings,
 	EditorBlockListSettings,
@@ -29,28 +29,16 @@ export function ModalEditor( {
 	onClose,
 	title,
 }: ModalEditorProps ) {
-	const [ isDebouncing, setIsDebouncing ] = useState( false );
-	const [ isClosing, setIsClosing ] = useState( false );
-
-	useEffect( () => {
-		// Only close the modal once editor changes have persisted after debouncing.
-		if ( isClosing && ! isDebouncing ) {
-			onClose();
-		}
-	}, [ isDebouncing, isClosing, onClose ] );
-
 	const debouncedOnChange = useDebounce( ( blocks: BlockInstance[] ) => {
 		onChange( blocks );
-		setIsDebouncing( false );
 	}, 250 );
 
-	function handleInput( blocks: BlockInstance[] ) {
-		setIsDebouncing( true );
-		debouncedOnChange( blocks );
-	}
-
 	function handleClose() {
-		setIsClosing( true );
+		const blocks = debouncedOnChange.flush();
+		if ( blocks ) {
+			onChange( blocks );
+		}
+		onClose();
 	}
 
 	return (
@@ -62,7 +50,8 @@ export function ModalEditor( {
 		>
 			<IframeEditor
 				initialBlocks={ initialBlocks }
-				onInput={ handleInput }
+				onInput={ debouncedOnChange }
+				onChange={ debouncedOnChange }
 			/>
 		</Modal>
 	);
