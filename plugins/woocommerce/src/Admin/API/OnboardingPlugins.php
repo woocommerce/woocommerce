@@ -72,6 +72,19 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		);
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/install-and-activate',
+			array(
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( $this, 'install_and_activate' ),
+					'permission_callback' => array( $this, 'can_install_plugins' ),
+
+				),
+				'schema' => array( $this, 'get_install_activate_schema' ),
+			)
+		);
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/scheduled-installs/(?P<job_id>\w+)',
 			array(
 				array(
@@ -82,6 +95,21 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_install_async_schema' ),
 			)
 		);
+	}
+
+	/**
+	 * Install and activate a plugin.
+	 *
+	 * @param WP_REST_Request $request WP Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function install_and_activate( WP_REST_Request $request ) {
+		$response             = array();
+		$response['install']  = PluginsHelper::install_plugins( $request->get_param( 'plugins' ) );
+		$response['activate'] = PluginsHelper::activate_plugins( $response['install']['installed'] );
+
+		return new WP_REST_Response( $response );
 	}
 
 	/**
@@ -191,6 +219,92 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 						'type' => 'string',
 						'enum' => array( 'pending', 'complete', 'failed' ),
 					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * JSON Schema for install-and-activate endpoint.
+	 *
+	 * @return array
+	 */
+	public function get_install_activate_schema() {
+		$install_schema = array(
+			'type'       => 'object',
+			'properties' => array(
+				'installed' => array(
+					'type'  => 'array',
+					'items' => array(
+						'type' => 'string',
+					),
+				),
+				'results'   => array(
+					'type'  => 'array',
+					'items' => array(
+						'type' => 'string',
+					),
+				),
+				'errors'    => array(
+					'type'       => 'object',
+					'properties' => array(
+						'errors'     => array(
+							'type'  => 'array',
+							'items' => array(
+								'type' => 'string',
+							),
+						),
+						'error_data' => array(
+							'type'  => 'array',
+							'items' => array(
+								'type' => 'string',
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$activate_schema = array(
+			'type'       => 'object',
+			'properties' => array(
+				'activated' => array(
+					'type'  => 'array',
+					'items' => array(
+						'type' => 'string',
+					),
+				),
+				'active'    => array(
+					'type'  => 'array',
+					'items' => array(
+						'type' => 'string',
+					),
+				),
+				'errors'    => array(
+					'type'       => 'object',
+					'properties' => array(
+						'errors'     => array(
+							'type'  => 'array',
+							'items' => array( 'type' => 'string' ),
+						),
+						'error_data' => array(
+							'type'  => 'array',
+							'items' => array( 'type' => 'string' ),
+						),
+					),
+				),
+			),
+		);
+
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'Install and Activate Schema',
+			'type'       => 'object',
+			'properties' => array(
+				'type'       => 'object',
+				'properties' => array(
+					'install'  => $install_schema,
+					'activate' => $activate_schema,
 				),
 			),
 		);
