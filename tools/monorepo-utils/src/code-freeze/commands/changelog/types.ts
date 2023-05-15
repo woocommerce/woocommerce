@@ -3,4 +3,5 @@ export type Options = {
 	name: string;
 	version: string;
 	devRepoPath?: string;
+	override: string;
 };

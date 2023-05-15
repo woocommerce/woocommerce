@@ -13,7 +13,7 @@ import { updateTrunkChangelog, updateReleaseBranchChangelogs } from './lib';
 import { Options } from './types';
 
 export const changelogCommand = new Command( 'changelog' )
-	.description( 'Create a new release branch' )
+	.description( 'Make changelog pull requests to trunk and release branch' )
 	.option(
 		'-o --owner <owner>',
 		'Repository owner. Default: woocommerce',
@@ -27,6 +27,11 @@ export const changelogCommand = new Command( 'changelog' )
 	.option(
 		'-d --dev-repo-path <devRepoPath>',
 		'Path to existing repo. Use this option to avoid cloning a fresh repo for development purposes. Note that using this option assumes dependencies are already installed.'
+	)
+	.option(
+		'-o, --override <override>',
+		"Time Override: The time to use in checking whether the action should run (default: 'now').",
+		'now'
 	)
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options: Options ) => {
