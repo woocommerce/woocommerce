@@ -1,4 +1,4 @@
-# WooCommerce Beta Tester
+# WooCommerce AI
 
 A plugin to capture experiements in using AI to enhance the WooCommerce experience.
 
@@ -20,7 +20,5 @@ See [wp-scripts](https://github.com/WordPress/gutenberg/tree/master/packages/scr
 ## Usage
 
 You can get to the settings and features from your top admin bar under the name Woo AI.
-
-For more information about WooCommerce Admin Test Helper usage, click [here](./EXTENDING-WC-ADMIN-HELPER.md).
 
 Run `./bin/build-zip.sh` to make a zip file.
