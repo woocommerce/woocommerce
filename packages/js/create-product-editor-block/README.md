@@ -15,7 +15,7 @@ If you already have a local WordPress development environment configured, you ca
 ### Generate project folder
 
 ```
-npx @wordpress/create-block -t @woocommerce/create-product-editor-block my-extension-name
+npx @wordpress/create-block --template @woocommerce/create-product-editor-block my-extension-name
 ```
 
 ### Get started developing
@@ -43,7 +43,7 @@ npm run build # Build the javascript
 For development of this tool itself, you can also point to a local directory when creating a product editor block:
 
 ```bash
-npx @wordpress/create-block -t ./path/to/woocommerce/packages/js/create-product-editor-block my-extension-name
+npx @wordpress/create-block --template ./path/to/woocommerce/packages/js/create-product-editor-block my-extension-name
 ```
 
 This tool is a template to be used with [`@wordpress/create-block`](https://github.com/WordPress/gutenberg/tree/trunk/packages/create-block) to create a WooCommerce Product Editor Block starting point.
