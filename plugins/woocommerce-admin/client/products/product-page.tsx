@@ -28,7 +28,7 @@ export default function ProductPage() {
 	const product = useProductEntityRecord( productId );
 
 	useEffect( () => {
-		initBlocks();
+		return initBlocks();
 	}, [] );
 
 	if ( ! product?.id ) {
