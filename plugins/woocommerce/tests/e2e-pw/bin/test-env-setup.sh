@@ -26,7 +26,7 @@ wp-env run tests-cli "sudo cp /var/www/html/wp-content/plugins/woocommerce/tests
 	/var/www/sample.csv"
 
 if [ $ENABLE_HPOS == 1 ]; then
-	echo -e 'Enable the COT feature\n'
+	echo -e 'Enable High-Performance Order Tables\n'
 	wp-env run tests-cli "wp plugin install https://gist.github.com/vedanshujain/564afec8f5e9235a1257994ed39b1449/archive/b031465052fc3e04b17624acbeeb2569ef4d5301.zip --activate"
 fi
 
