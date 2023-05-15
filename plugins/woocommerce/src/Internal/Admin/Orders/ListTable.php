@@ -515,10 +515,17 @@ class ListTable extends WP_List_Table {
 	private function set_search_args(): void {
 		$search_term = trim( sanitize_text_field( $this->request['s'] ) );
 
-		if ( ! empty( $search_term ) ) {
-			$this->order_query_args['s'] = $search_term;
-			$this->has_filter            = true;
+		if ( empty( $search_term ) ) {
+			return;
 		}
+
+		if ( has_filter( 'woocommerce_shop_order_search_results' ) ) {
+			$order_ids                         = wc_order_search( $search_term );
+			$this->order_query_args['include'] = $order_ids;
+		} else {
+			$this->order_query_args['s'] = $search_term;
+		}
+		$this->has_filter = true;
 	}
 
 	/**
