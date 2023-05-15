@@ -86,7 +86,10 @@ export function useSaveDraft( {
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				'product',
-				productId
+				productId,
+				{
+					throwOnError: true,
+				}
 			);
 
 			if ( onSaveSuccess ) {

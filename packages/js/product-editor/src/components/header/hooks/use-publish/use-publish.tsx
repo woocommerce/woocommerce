@@ -77,7 +77,10 @@ export function usePublish( {
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				'product',
-				productId
+				productId,
+				{
+					throwOnError: true,
+				}
 			);
 
 			if ( publishedProduct && onPublishSuccess ) {
