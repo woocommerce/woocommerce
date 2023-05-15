@@ -11,7 +11,9 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -413,33 +415,52 @@ class WC_Tracker {
 	private static function get_order_totals() {
 		global $wpdb;
 
-		$gross_total = $wpdb->get_var(
-			"
-			SELECT
-				SUM( order_meta.meta_value ) AS 'gross_total'
-			FROM {$wpdb->prefix}posts AS orders
-			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
-			WHERE order_meta.meta_key = '_order_total'
-				AND orders.post_status in ( 'wc-completed', 'wc-refunded' )
-			GROUP BY order_meta.meta_key
-		"
-		);
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$gross_total = $wpdb->get_var("
+				SELECT SUM(total_amount) AS 'gross_total'
+				FROM $orders_table
+				WHERE status in ('wc-completed', 'wc-refunded');
+			");
+		} else {
+			$gross_total = $wpdb->get_var(
+				"
+					SELECT
+						SUM( order_meta.meta_value ) AS 'gross_total'
+					FROM {$wpdb->prefix}posts AS orders
+					LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
+					WHERE order_meta.meta_key = '_order_total'
+						AND orders.post_status in ( 'wc-completed', 'wc-refunded' )
+					GROUP BY order_meta.meta_key
+				"
+			);
+		}
 
 		if ( is_null( $gross_total ) ) {
 			$gross_total = 0;
 		}
 
-		$processing_gross_total = $wpdb->get_var(
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$processing_gross_total = $wpdb->get_var("
+				SELECT SUM(total_amount) AS 'gross_total'
+				FROM $orders_table
+				WHERE status = 'wc-processing';
+			");
+		} else {
+			$processing_gross_total = $wpdb->get_var(
+				"
+				SELECT
+					SUM( order_meta.meta_value ) AS 'gross_total'
+				FROM {$wpdb->prefix}posts AS orders
+				LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
+				WHERE order_meta.meta_key = '_order_total'
+					AND orders.post_status = 'wc-processing'
+				GROUP BY order_meta.meta_key
 			"
-			SELECT
-				SUM( order_meta.meta_value ) AS 'gross_total'
-			FROM {$wpdb->prefix}posts AS orders
-			LEFT JOIN {$wpdb->prefix}postmeta AS order_meta ON order_meta.post_id = orders.ID
-			WHERE order_meta.meta_key = '_order_total'
-				AND orders.post_status = 'wc-processing'
-			GROUP BY order_meta.meta_key
-		"
-		);
+			);
+		}
+
 
 		if ( is_null( $processing_gross_total ) ) {
 			$processing_gross_total = 0;
@@ -459,16 +480,28 @@ class WC_Tracker {
 	private static function get_order_dates() {
 		global $wpdb;
 
-		$min_max = $wpdb->get_row(
-			"
-			SELECT
-				MIN( post_date_gmt ) as 'first', MAX( post_date_gmt ) as 'last'
-			FROM {$wpdb->prefix}posts
-			WHERE post_type = 'shop_order'
-			AND post_status = 'wc-completed'
-		",
-			ARRAY_A
-		);
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$min_max = $wpdb->get_row("
+				SELECT
+					MIN( date_created_gmt ) as 'first', MAX( date_created_gmt ) as 'last'
+				FROM $orders_table
+				WHERE status = 'wc-completed';
+				",
+				ARRAY_A
+			);
+		} else {
+			$min_max = $wpdb->get_row(
+				"
+					SELECT
+						MIN( post_date_gmt ) as 'first', MAX( post_date_gmt ) as 'last'
+					FROM {$wpdb->prefix}posts
+					WHERE post_type = 'shop_order'
+					AND post_status = 'wc-completed'
+				",
+				ARRAY_A
+			);
+		}
 
 		if ( is_null( $min_max ) ) {
 			$min_max = array(
@@ -477,16 +510,27 @@ class WC_Tracker {
 			);
 		}
 
-		$processing_min_max = $wpdb->get_row(
-			"
-			SELECT
-				MIN( post_date_gmt ) as 'processing_first', MAX( post_date_gmt ) as 'processing_last'
-			FROM {$wpdb->prefix}posts
-			WHERE post_type = 'shop_order'
-			AND post_status = 'wc-processing'
-		",
-			ARRAY_A
-		);
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$processing_min_max = $wpdb->get_row("
+				SELECT
+					MIN( date_created_gmt ) as 'processing_first', MAX( date_created_gmt ) as 'processing_last'
+				FROM $orders_table
+				WHERE status = 'wc-processing';
+				",
+				ARRAY_A
+			);
+		} else {
+			$processing_min_max = $wpdb->get_row(
+				"
+				SELECT
+					MIN( post_date_gmt ) as 'processing_first', MAX( post_date_gmt ) as 'processing_last'
+				FROM {$wpdb->prefix}posts
+				WHERE post_type = 'shop_order'
+				AND post_status = 'wc-processing'
+			",
+				ARRAY_A
+			);
+		}
 
 		if ( is_null( $processing_min_max ) ) {
 			$processing_min_max = array(
@@ -569,28 +613,40 @@ class WC_Tracker {
 	private static function get_orders_by_gateway() {
 		global $wpdb;
 
-		$orders_and_gateway_details = $wpdb->get_results(
-			"
-			SELECT
-				gateway, currency, SUM(total) AS totals, COUNT(order_id) AS counts
-			FROM (
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$orders_table = OrdersTableDataStore::get_orders_table_name();
+			$orders_and_gateway_details = $wpdb->get_results(
+				"
+				SELECT payment_method AS gateway, currency AS currency, SUM( total_amount ) AS totals, count( id ) AS counts
+				FROM $orders_table
+				WHERE status IN ( 'wc-completed', 'wc-processing', 'wc-refunded' )
+				GROUP BY gateway, currency;
+				"
+			);
+		} else {
+			$orders_and_gateway_details = $wpdb->get_results(
+				"
 				SELECT
-					orders.id AS order_id,
-					MAX(CASE WHEN meta_key = '_payment_method' THEN meta_value END) gateway,
-					MAX(CASE WHEN meta_key = '_order_total' THEN meta_value END) total,
-					MAX(CASE WHEN meta_key = '_order_currency' THEN meta_value END) currency
-				FROM
-					{$wpdb->prefix}posts orders
-				LEFT JOIN
-					{$wpdb->prefix}postmeta order_meta ON order_meta.post_id = orders.id
-				WHERE orders.post_type = 'shop_order'
-					AND orders.post_status in ( 'wc-completed', 'wc-processing', 'wc-refunded' )
-					AND meta_key in( '_payment_method','_order_total','_order_currency')
-				GROUP BY orders.id
-			) order_gateways
-			GROUP BY gateway, currency
-			"
-		);
+					gateway, currency, SUM(total) AS totals, COUNT(order_id) AS counts
+				FROM (
+					SELECT
+						orders.id AS order_id,
+						MAX(CASE WHEN meta_key = '_payment_method' THEN meta_value END) gateway,
+						MAX(CASE WHEN meta_key = '_order_total' THEN meta_value END) total,
+						MAX(CASE WHEN meta_key = '_order_currency' THEN meta_value END) currency
+					FROM
+						{$wpdb->prefix}posts orders
+					LEFT JOIN
+						{$wpdb->prefix}postmeta order_meta ON order_meta.post_id = orders.id
+					WHERE orders.post_type = 'shop_order'
+						AND orders.post_status in ( 'wc-completed', 'wc-processing', 'wc-refunded' )
+						AND meta_key in( '_payment_method','_order_total','_order_currency')
+					GROUP BY orders.id
+				) order_gateways
+				GROUP BY gateway, currency
+				"
+			);
+		}
 
 		$orders_by_gateway_currency = array();
 
@@ -656,20 +712,31 @@ class WC_Tracker {
 	private static function get_orders_origins() {
 		global $wpdb;
 
-		$orders_origin = $wpdb->get_results(
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$op_table_name = OrdersTableDataStore::get_operational_data_table_name();
+			$orders_origin = $wpdb->get_results(
+				"
+				SELECT created_via as origin, COUNT( order_id ) as count
+				FROM $op_table_name
+				GROUP BY created_via;
+				"
+			);
+		} else {
+			$orders_origin = $wpdb->get_results(
+				"
+				SELECT
+					meta_value as origin, COUNT( DISTINCT ( orders.id ) ) as count
+				FROM
+					$wpdb->posts orders
+				LEFT JOIN
+					$wpdb->postmeta order_meta ON order_meta.post_id = orders.id
+				WHERE
+					meta_key = '_created_via'
+				GROUP BY
+					meta_value;
 			"
-			SELECT
-				meta_value as origin, COUNT( DISTINCT ( orders.id ) ) as count
-			FROM
-				$wpdb->posts orders
-			LEFT JOIN
-				$wpdb->postmeta order_meta ON order_meta.post_id = orders.id
-			WHERE
-				meta_key = '_created_via'
-			GROUP BY
-				meta_value;
-			"
-		);
+			);
+		}
 
 		// The associative array that is created as the result of array_reduce is passed to extract_group_key()
 		// This function has the logic that will remove specific identifiers that may sometimes be part of an origin.
