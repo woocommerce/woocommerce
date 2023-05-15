@@ -27,6 +27,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	protected $models = array(
 		'openai' => array(
 			'url' => 'https://api.openai.com/v1/chat/completions',
+			'key' => OPEN_AI_KEY,
 		),
 	);
 
@@ -112,6 +113,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 		$model = $this->models[ $request_model ];
 
 		$api_url = $model['url'];
+		$api_key = $model['key'];
 
 		$messages   = $previous_messages;
 		$messages[] = array(
@@ -133,7 +135,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 				'timeout' => 45,
 				'headers' => array(
 					'Content-Type'  => 'application/json',
-					'Authorization' => 'Bearer ' . OPEN_AI_KEY,
+					'Authorization' => 'Bearer ' . $api_key,
 				),
 			)
 		);
