@@ -62,7 +62,7 @@ const pinterest = {
 const amazon = {
 	title: 'Amazon, eBay & Walmart Integration for WooCommerce',
 	description:
-		'Convert Woocommerce into a fully-featured omnichannel commerce platform, leveraging powerful automation and real-time sync to connect your brand with millions of new customers on the world\u2019s largest online marketplaces.',
+		'Convert WooCommerce into a fully-featured omnichannel commerce platform, leveraging powerful automation and real-time sync to connect your brand with millions of new customers on the world’s largest online marketplaces.',
 	url: 'https://woocommerce.com/products/amazon-ebay-integration/?utm_source=marketingtab&utm_medium=product&utm_campaign=wcaddons',
 	direct_install: false,
 	icon: 'https://woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/amazon-ebay.svg',
