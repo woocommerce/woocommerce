@@ -8,7 +8,7 @@ const https = require( 'http' );
 	
 	@param {string} wpVersion The display-friendly version. Supports ("master", "trunk", "nightly",
 				  "latest", "X.X" for version lines, and "X.X.X" for specific versions)
-	@return {string} The wp-env "core" property".
+	@return {Promise.<string>} The wp-env "core" property".
 **/
 module.exports = async function parseWPVersion( wpVersion ) {
     	// Start with versions we can infer immediately.
