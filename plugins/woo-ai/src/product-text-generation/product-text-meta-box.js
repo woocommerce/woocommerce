@@ -21,8 +21,8 @@ jQuery( function ( $ ) {
 				);
 				gptForm.slideDown( {
 					duration: 'fast',
-					start: function () {
-						$( this ).css( 'display', 'grid' );
+					start: () => {
+						gptForm.css( 'display', 'grid' );
 					},
 				} );
 			}

@@ -1,3 +1,4 @@
+
 #postdivrich.woocommerce-product-description {
 	// hacks to fix visuals with "write it for me" button present
 	.wp-editor-tools {
@@ -27,8 +28,6 @@
 	border: 1px solid #C3C4C7;
 
 	&::before {
-		// content: url('../images/icons/accordion-expanded-tip-up.svg');
-
 		position: relative;
 		top: -28px;
 		left: 155px;
@@ -72,10 +71,13 @@
 	#woocommerce-product-description-gpt-hide {
 		grid-column: 3;
 		grid-row: 1;
+		cursor: pointer;
 
 		justify-self: right;
 
 		text-decoration: none;
+		border: none;
+		background-color: transparent;
 
 		&::before {
 			content: "\f335";
