@@ -37,7 +37,7 @@
 		"@wordpress/data-controls": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
 		"@wordpress/hooks": "wp-6.0",
-		"@wordpress/i18n": "^4.6.1",
+		"@wordpress/i18n": "wp-6.0",
 		"prop-types": "^15.8.1"
 	},
 	"peerDependencies": {

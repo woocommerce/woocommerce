@@ -2325,7 +2325,7 @@ importers:
         specifier: wp-6.0
         version: 3.6.1
       '@wordpress/i18n':
-        specifier: ^4.6.1
+        specifier: wp-6.0
         version: 4.6.1
       prop-types:
         specifier: ^15.8.1
