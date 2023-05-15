@@ -12,6 +12,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { getErrorMessage } from '../../../utils/get-error-message';
 import { usePreview } from '../hooks/use-preview';
 
 export function PreviewButton( {
@@ -36,9 +37,11 @@ export function PreviewButton( {
 				navigateTo( { url } );
 			}
 		},
-		onSaveError() {
+		onSaveError( error ) {
+			const message = getErrorMessage( error );
+
 			createErrorNotice(
-				__( 'Failed to preview product.', 'woocommerce' )
+				message || __( 'Failed to preview product.', 'woocommerce' )
 			);
 		},
 	} );
