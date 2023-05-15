@@ -939,7 +939,14 @@ WHERE
 		 * @param int[]  $order_ids Search results as an array of order IDs.
 		 * @param string $term      The search term.
 		 */
-		return array_map( 'intval', (array) apply_filters( 'woocommerce_cot_shop_order_search_results', $order_ids, $term ) );
+		$order_ids = array_map( 'intval', (array) apply_filters( 'woocommerce_cot_shop_order_search_results', $order_ids, $term ) );
+
+		/**
+		 * Adding actual compatibility as well with CPT's woocommerce_shop_order_search_results.
+		 *
+		 * @since 7.8.0.
+		 */
+		return array_map( 'intval', (array) apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term ) );
 	}
 
 	/**
