@@ -156,19 +156,19 @@ test.describe( 'Shopper > Update variable product', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 
-		await page.selectOption( '#size', 'Small' );
+		await page.locator( '#size' ).selectOption( 'Small' );
 
-		await page.selectOption( '#colour', 'Red' );
+		await page.locator( '#colour' ).selectOption( 'Red' );
 		await expect(
 			page.locator( '.woocommerce-variation-price' )
 		).toContainText( productPrice );
 
-		await page.selectOption( '#colour', 'Green' );
+		await page.locator( '#colour' ).selectOption( 'Green' );
 		await expect(
 			page.locator( '.woocommerce-variation-price' )
 		).toContainText( productPrice );
 
-		await page.selectOption( '#colour', 'Blue' );
+		await page.locator( '#colour' ).selectOption( 'Blue' );
 		await expect(
 			page.locator( '.woocommerce-variation-price' )
 		).toContainText( productPrice );
@@ -179,9 +179,9 @@ test.describe( 'Shopper > Update variable product', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 
-		await page.selectOption( '#colour', 'Red' );
+		await page.locator( '#colour' ).selectOption( 'Red' );
 
-		await page.selectOption( '#size', 'Small' );
+		await page.locator( '#size' ).selectOption( 'Small' );
 		await expect(
 			page.locator( '.woocommerce-variation-price' )
 		).toContainText( productPrice );
@@ -192,7 +192,7 @@ test.describe( 'Shopper > Update variable product', () => {
 			page.locator( '.woocommerce-product-attributes-item--dimensions' )
 		).toContainText( '5 × 10 × 10 cm' );
 
-		await page.selectOption( '#size', 'XLarge' );
+		await page.locator( '#size' ).selectOption( 'XLarge' );
 		await expect(
 			page.locator( '.woocommerce-variation-price' )
 		).toContainText( ( +productPrice * 2 ).toString() );
@@ -209,24 +209,24 @@ test.describe( 'Shopper > Update variable product', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 
-		await page.selectOption( '#colour', 'Red' );
+		await page.locator( '#colour' ).selectOption( 'Red' );
 
-		await page.selectOption( '#size', 'Small' );
+		await page.locator( '#size' ).selectOption( 'Small' );
 		await expect(
 			page.locator( '.woocommerce-variation-price' )
 		).toContainText( productPrice );
 
-		await page.selectOption( '#size', 'Medium' );
+		await page.locator( '#size' ).selectOption( 'Medium' );
 		await expect(
 			page.locator( '.woocommerce-variation-price' )
 		).toContainText( productPrice );
 
-		await page.selectOption( '#size', 'Large' );
+		await page.locator( '#size' ).selectOption( 'Large' );
 		await expect(
 			page.locator( '.woocommerce-variation-price' )
 		).toContainText( ( +productPrice * 2 ).toString() );
 
-		await page.selectOption( '#size', 'XLarge' );
+		await page.locator( '#size' ).selectOption( 'XLarge' );
 		await expect(
 			page.locator( '.woocommerce-variation-price' )
 		).toContainText( ( +productPrice * 2 ).toString() );
@@ -235,20 +235,20 @@ test.describe( 'Shopper > Update variable product', () => {
 	test( 'Shopper can reset variations', async ( { page } ) => {
 		await page.goto( `product/${ slug }` );
 
-		await page.selectOption( '#colour', 'Red' );
+		await page.locator( '#colour' ).selectOption( 'Red' );
 
-		await page.selectOption( '#size', 'Small' );
+		await page.locator( '#size' ).selectOption( 'Small' );
 		await expect(
 			page.locator( '.woocommerce-variation-price' )
 		).toContainText( productPrice );
 
-		await page.click( 'a.reset_variations' );
+		await page.locator( 'a.reset_variations' ).click();
 
 		// Verify the reset by attempting to add the product to the cart
 		page.on( 'dialog', async ( dialog ) => {
 			expect( dialog.message() ).toContain( cartDialogMessage );
 			await dialog.dismiss();
 		} );
-		await page.click( '.single_add_to_cart_button' );
+		await page.locator( '.single_add_to_cart_button' ).click();
 	} );
 } );
