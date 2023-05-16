@@ -139,9 +139,7 @@ describe( 'Shopper → Mini-Cart', () => {
 			// Wait for the drawer to fully open.
 			await page.waitForTimeout( 500 );
 
-			await page.click(
-				'.wc-block-mini-cart__drawer .components-modal__header button'
-			);
+			await page.click( '.wc-block-components-drawer__close' );
 
 			await expect( page ).not.toMatchElement(
 				'.wc-block-mini-cart__drawer',
