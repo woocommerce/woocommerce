@@ -13,6 +13,7 @@ export { DetailsDescriptionField as __experimentalDetailsDescriptionField } from
 export { WooProductMoreMenuItem as __experimentalWooProductMoreMenuItem } from './header';
 export {
 	Editor as __experimentalEditor,
+	initBlocks as __experimentalInitBlocks,
 	ProductEditorSettings,
 } from './editor';
 export {
