@@ -7,7 +7,6 @@
 	"description": "Contains the block elements used to render a product.",
 	"keywords": [ "WooCommerce" ],
     "textdomain": "woo-gutenberg-products-block",
-	"parent": [ "woocommerce/product-collection" ],
 	"usesContext": [
 		"queryId",
 		"query",
