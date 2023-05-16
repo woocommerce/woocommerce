@@ -115,3 +115,20 @@
 		display: none; // use important or increase specificity.
 	}
 }
+
+.woocommerce-layout:has(.woocommerce-product-block-editor) {
+	.woocommerce-layout__header {
+		display: none;
+	}
+}
+
+.wp-admin.woocommerce-feature-enabled-product-block-editor {
+	.components-modal {
+		&__frame {
+			border-radius: $gap-smaller;
+		}
+		&__header {
+			border: none;
+		}
+	}
+}
