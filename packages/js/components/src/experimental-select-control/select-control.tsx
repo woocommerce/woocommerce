@@ -58,6 +58,7 @@ export type SelectControlProps< ItemType > = {
 	) => void;
 	onRemove?: ( item: ItemType ) => void;
 	onSelect?: ( selected: ItemType ) => void;
+	onKeyDown?: ( e: KeyboardEvent ) => void;
 	onFocus?: ( data: { inputValue: string } ) => void;
 	stateReducer?: (
 		state: UseComboboxState< ItemType | null >,
@@ -118,6 +119,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	onRemove = () => null,
 	onSelect = () => null,
 	onFocus = () => null,
+	onKeyDown = () => null,
 	stateReducer = ( state, actionAndChanges ) => actionAndChanges.changes,
 	placeholder,
 	selected,
@@ -305,6 +307,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 							setIsFocused( false );
 						}
 					},
+					onKeyDown,
 					placeholder,
 					disabled,
 					...inputProps,
