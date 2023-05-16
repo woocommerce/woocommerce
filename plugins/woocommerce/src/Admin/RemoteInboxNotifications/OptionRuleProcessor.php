@@ -49,7 +49,7 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 		$rule_value = $rule->value;
 
 		if ( $is_siteurl_option ) {
-			$rule_value = $this->getRuleValue( $rule_value );
+			$rule_value   = $this->getRuleValue( $rule_value );
 			$option_value = $this->getRuleValue( $option_value );
 		}
 
@@ -63,11 +63,12 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 	/**
 	 * Helper function to get the rule value for 'siteurl' option.
 	 *
-	 * @param string $url
+	 * @param string $url The URL to parse.
+	 *
 	 * @return string
 	 */
 	protected function getRuleValue( $url ) {
-		$url_parts = parse_url( rtrim( $url, '/' ) );
+		$url_parts = wp_parse_url( rtrim( $url, '/' ) );
 		return isset( $url_parts['path'] ) ? $url_parts['host'] . $url_parts['path'] : $url_parts['host'];
 	}
 
