@@ -222,8 +222,8 @@ TaskLists::add_task(
 - `$task->get_parent_options(): array`: Returns the options of the parent task list.
 - `$task->get_parent_option($option_name): mixed|null`: Returns the value of a specific option from the parent task list.
 - `$task->prefix_event($event_name): string`: Returns the event name prefixed with the task list's event prefix.
-- `$task->get_additional_info(): string`: Returns additional information about the task.
-- `$task->get_additional_data(): mixed|null`: Returns additional data associated with the task.
+- `$task->get_additional_info(): string`: Returns additional information about the task. Typically includes details, notes, or instructions related to the task itself.
+- `$task->get_additional_data(): mixed|null`: Returns additional data associated with the task. It can be any type of data, such as arrays, objects, or simple values.
 - `$task->get_action_label(): string`: Returns the label for the action button of the task.
 - `$task->get_action_url(): string|null`: Returns the URL associated with the task's action.
 - `$task->is_dismissable(): bool`: Checks if the task is dismissable.
