@@ -167,3 +167,24 @@ export const createPullRequest = async ( options: {
 	//@ts-ignore There is a type mismatch between the graphql schema and the response. pullRequest.data.head.repo.has_discussions is a boolean, but the graphql schema doesn't have that field.
 	return pullRequest.data;
 };
+
+export const getPullRequest = async ( { owner, name }, prNumber ) => {
+	const pr = await octokitWithAuth().request(
+		'GET /repos/{owner}/{repo}/pulls/{pull_number}',
+		{
+			owner,
+			repo: name,
+			pull_number: prNumber,
+		}
+	);
+	return pr.data;
+};
+
+export const isCommunityPullRequest = ( pullRequestData ) => {
+	return (
+		pullRequestData.author_association === 'CONTRIBUTOR' ||
+		// Its possible a MEMBER can open a PR from thier own fork.
+		( pullRequestData.author_association === 'MEMBER' &&
+			pullRequestData.head.repo.full_name !== 'woocommerce/woocommerce' )
+	);
+};
