@@ -10,6 +10,7 @@ import {
 import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -33,11 +34,25 @@ const Edit = ( {
 		...context,
 	};
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
+	const { isDescendentOfSingleProductBlock } = useSelect( ( select ) => {
+		const { getBlockParentsByBlockName } = select( 'core/block-editor' );
+		const blockParentBlocksIds = getBlockParentsByBlockName(
+			blockProps?.id?.replace( 'block-', '' ),
+			[ 'woocommerce/single-product' ]
+		);
+		return {
+			isDescendentOfSingleProductBlock: blockParentBlocksIds.length > 0,
+		};
+	} );
 
-	useEffect(
-		() => setAttributes( { isDescendentOfQueryLoop } ),
-		[ setAttributes, isDescendentOfQueryLoop ]
-	);
+	useEffect( () => {
+		setAttributes( { isDescendentOfQueryLoop } );
+		setAttributes( { isDescendentOfSingleProductBlock } );
+	}, [
+		setAttributes,
+		isDescendentOfQueryLoop,
+		isDescendentOfSingleProductBlock,
+	] );
 
 	return (
 		<>
