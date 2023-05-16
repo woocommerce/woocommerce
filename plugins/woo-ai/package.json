@@ -14,6 +14,7 @@
 		"@types/react": "^17.0.2",
 		"@types/react-dom": "^17.0.2",
 		"@types/wordpress__components": "^19.10.3",
+		"@types/wordpress__plugins": "^3.0.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/env": "^7.0.0",
@@ -38,6 +39,7 @@
 		"@wordpress/element": "wp-6.0",
 		"@wordpress/hooks": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
+		"@wordpress/plugins": "wp-6.0",
 		"prop-types": "^15.8.1"
 	},
 	"peerDependencies": {
