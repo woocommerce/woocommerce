@@ -86,7 +86,7 @@ You can find a complete example of how to add a custom task as a WordPress plugi
 
 ### TaskLists
 
-The `TaskLists` class acts as a data store for tasks. It allows you to create, initialize, add tasks, retrieve task lists, and perform other operations related to task management.
+The `TaskLists` class serves as a data store for tasks, providing functionality to create, initialize, add tasks, retrieve task lists, and perform other task management operations.
 
 #### Methods
 
