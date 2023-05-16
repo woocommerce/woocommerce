@@ -1,5 +1,9 @@
 const { test, expect } = require( '@playwright/test' );
-const { createVariableProduct, showVariableProductTour } = require( './utils' );
+const {
+	createVariableProduct,
+	showVariableProductTour,
+	deleteProductsAddedByTests,
+} = require( './utils' );
 
 const productAttributes = [
 	{
