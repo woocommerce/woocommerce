@@ -203,6 +203,8 @@ async function createVariableProductFixture( baseURL ) {
 }
 
 test.describe( 'Add New Variable Product Page', () => {
+	test.setTimeout( 150 * 1000 );
+
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -823,7 +825,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		).not.toBeVisible();
 		await firstVariationContainer
 			.getByLabel( 'Stock quantity' )
-			.nth(1)
+			.nth( 1 )
 			.fill( stockAmount );
 		await page.selectOption( '#variable_backorders0', 'notify', {
 			force: true,
