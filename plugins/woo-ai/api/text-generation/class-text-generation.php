@@ -140,8 +140,6 @@ class Text_Generation extends \WC_REST_Data_Controller {
 			)
 		);
 
-		$res_status = $raw_response['response'];
-
 		if ( is_wp_error( $raw_response ) ) {
 			return new \WP_Error(
 				'wooai_api_error',
@@ -152,6 +150,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 			);
 		}
 
+		$res_status = $raw_response['response'];
 		if ( $res_status['code'] >= 400 ) {
 			return new \WP_Error(
 				'wooai_api_bad_status',
@@ -166,14 +165,10 @@ class Text_Generation extends \WC_REST_Data_Controller {
 
 		$last_choice = end( $response['choices'] );
 
-		$generated_text = $last_choice['message']['content'];
-
-		$messages[] = $last_choice['message'];
-
 		return rest_ensure_response(
 			array(
-				'generated_text'    => $generated_text,
-				'previous_messages' => $messages,
+				'generated_text'    => $last_choice['message']['content'],
+				'previous_messages' => array_merge( $messages, array( $last_choice['message'] ) ),
 			)
 		);
 
