@@ -14,10 +14,13 @@ const productWeight = '200';
 const productLength = '10';
 const productWidth = '20';
 const productHeight = '15';
+const stockAmount = '100';
+const lowStockAmount = '10';
 
 let productId_indivEdit,
 	productId_bulkEdit,
 	productId_deleteAll,
+	productId_manageStock,
 	variationIds_indivEdit;
 
 test.describe.only( 'Update variations', () => {
@@ -72,13 +75,36 @@ test.describe.only( 'Update variations', () => {
 			}
 		);
 
+		await test.step(
+			'Create variable product for "manage stock" test',
+			async () => {
+				productId_manageStock = await createVariableProduct(
+					baseURL,
+					productAttributes
+				);
+
+				const variation = sampleVariations.slice( 0, 1 );
+
+				await createVariations(
+					baseURL,
+					productId_manageStock,
+					variation
+				);
+			}
+		);
+
 		await test.step( 'Hide variable product tour', async () => {
 			await showVariableProductTour( browser, false );
 		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		const productIds = [ productId_indivEdit, productId_bulkEdit ];
+		const productIds = [
+			productId_indivEdit,
+			productId_bulkEdit,
+			productId_deleteAll,
+			productId_manageStock,
+		];
 
 		await deleteProductsAddedByTests( baseURL, productIds );
 	} );
@@ -367,6 +393,126 @@ test.describe.only( 'Update variations', () => {
 				await expect(
 					page.locator( '.woocommerce_variation' )
 				).toHaveCount( 0 );
+			}
+		);
+	} );
+
+	test( 'can manage stock levels', async ( { page } ) => {
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`/wp-admin/post.php?post=${ productId_manageStock }&action=edit`
+			);
+		} );
+
+		await test.step( 'Click on the "Variations" tab.', async () => {
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
+		} );
+
+		await test.step( 'Expand all variations', async () => {
+			await page
+				.locator(
+					'#variable_product_options .toolbar-top a.expand_all'
+				)
+				.click();
+		} );
+
+		const variationContainer = page.locator(
+			'.woocommerce_variations .woocommerce_variation'
+		);
+
+		await test.step( 'Check the "Manage stock?" box', async () => {
+			await variationContainer
+				.locator( 'input.checkbox.variable_manage_stock' )
+				.check();
+		} );
+
+		await test.step(
+			`Expect the "Stock status" text box to disappear`,
+			async () => {
+				await expect(
+					variationContainer.locator( 'p.variable_stock_status' )
+				).not.toBeVisible();
+			}
+		);
+
+		await test.step(
+			`Enter "${ variationOnePrice }" as the regular price`,
+			async () => {
+				await variationContainer
+					.getByPlaceholder( 'Variation price (required)' )
+					.fill( variationOnePrice );
+			}
+		);
+
+		await test.step(
+			`Enter "${ stockAmount }" as the stock quantity`,
+			async () => {
+				await variationContainer
+					.locator( 'input[name^="variable_stock"]' )
+					.fill( stockAmount );
+			}
+		);
+
+		await test.step(
+			'Select "Allow, but notify customer" from the "Allow backorders?" menu',
+			async () => {
+				await variationContainer
+					.locator( 'select[name^="variable_backorders"]' )
+					.selectOption( 'notify' );
+			}
+		);
+
+		await test.step(
+			`Enter "${ lowStockAmount }" in the "Low stock threshold" input field.`,
+			async () => {
+				await variationContainer
+					.getByPlaceholder( 'Store-wide threshold' )
+					.fill( lowStockAmount );
+			}
+		);
+
+		await test.step( 'Click "Save changes"', async () => {
+			await page.locator( 'button.save-variation-changes' ).click();
+		} );
+
+		await test.step( 'Expand all variations', async () => {
+			await page
+				.locator(
+					'#variable_product_options .toolbar-top a.expand_all'
+				)
+				.click();
+		} );
+
+		await test.step(
+			'Expect the stock quantity to be saved correctly',
+			async () => {
+				await expect(
+					variationContainer.locator(
+						'input[name^="variable_stock"]'
+					)
+				).toHaveValue( stockAmount );
+			}
+		);
+
+		await test.step(
+			'Expect the "Low stock threshold" value to be saved correctly',
+			async () => {
+				await expect(
+					variationContainer.getByPlaceholder(
+						'Store-wide threshold'
+					)
+				).toHaveValue( lowStockAmount );
+			}
+		);
+
+		await test.step(
+			'Expect the "Allow backorders?" value to be saved correctly',
+			async () => {
+				await expect(
+					variationContainer.locator(
+						'select[name^="variable_backorders"] > option[selected]'
+					)
+				).toHaveText( 'Allow, but notify customer' );
 			}
 		);
 	} );
