@@ -28,7 +28,10 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->useAdmin();
+	}
 
+	public function useAdmin() {
 		// Register an administrator user and log in.
 		$this->user = $this->factory->user->create(
 			array(
@@ -38,6 +41,10 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 	}
 
+	public function useUserWithoutPluginsPermission() {
+		$this->user = $this->factory->user->create();
+		wp_set_current_user( $this->user );
+	}
 	/**
 	 * Request to install-async endpoint.
 	 *
@@ -45,19 +52,13 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	 *
 	 * @return mixed
 	 */
-	private function request( $plugins ) {
-		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/install-async' );
+	private function request( $endpoint, $body ) {
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . $endpoint );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'plugins' => $plugins,
-				)
-			)
-		);
+		$request->set_body( $body );
 		$response = $this->server->dispatch( $request );
 
-		return $response->get_data();
+		return $response;
 	}
 
 	/**
@@ -79,7 +80,14 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_response_format() {
-		$data = $this->request( array( 'test' ) );
+		$data = $this->request(
+			'/install-async',
+			wp_json_encode(
+				array(
+					'plugins' => array( 'test' ),
+				)
+			)
+		)->get_data();
 		$this->assertArrayHasKey( 'job_id', $data );
 		$this->assertArrayHasKey( 'status', $data );
 		$this->assertArrayHasKey( 'plugins', $data );
@@ -93,11 +101,17 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_it_queues_action() {
 		$this->markTestSkipped( 'Skipping it for now until we find a better way of testing it.' );
-		$data      = $this->request( array( 'test' ) );
+		$data      = $this->request(
+			'/install-async',
+			wp_json_encode(
+				array(
+					'plugins' => array( 'test' ),
+				)
+			)
+		)->get_data();
 		$action_id = $data['job_id'];
 		$data      = $this->get( $action_id );
 		$this->assertIsArray( $data );
-
 		$this->assertEquals( $action_id, $data['job_id'] );
 	}
 
@@ -110,5 +124,25 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/scheduled-installs/i-do-not-exist' );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test permissions.
+	 *
+	 * @return void
+	 */
+	public function test_permissions() {
+		$this->useUserWithoutPluginsPermission();
+		foreach ( array( '/install-and-activate', '/install-async' ) as $endpoint ) {
+			$response = $this->request(
+				$endpoint,
+				wp_json_encode(
+					array(
+						'plugins' => array( 'test' ),
+					)
+				)
+			);
+			$this->assertEquals( 403, $response->get_status() );
+		}
 	}
 }
