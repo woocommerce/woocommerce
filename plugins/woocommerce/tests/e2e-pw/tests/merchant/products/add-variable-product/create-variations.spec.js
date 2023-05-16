@@ -12,7 +12,7 @@ let expectedGeneratedVariations,
 	productId_generateVariations,
 	variationsToManuallyCreate;
 
-test.describe.only( 'Add variations', () => {
+test.describe( 'Add variations', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL, browser } ) => {
