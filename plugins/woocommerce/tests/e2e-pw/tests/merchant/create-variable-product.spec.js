@@ -769,13 +769,6 @@ test.describe( 'Add New Variable Product Page', () => {
 				response.status() === 200
 		);
 
-		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
-		await page.locator( '#save-post' ).click();
-		await expect(
-			page.getByText( 'Product draft updated. ' )
-		).toBeVisible();
-		await page.click( '.updated.notice .notice-dismiss' );
-
 		// manually adds a variation
 		await page.click( 'a[href="#variable_product_options"]' );
 		await page.click( 'button.add_variation_manually' );
@@ -804,12 +797,12 @@ test.describe( 'Add New Variable Product Page', () => {
 		).toBeVisible();
 
 		// manage stock at variation level
-		await page.click( 'a[href="#variable_product_options"]' );
+		await page.locator( 'a[href="#variable_product_options"]' ).click();
 		await page.waitForLoadState( 'networkidle' );
-		await page.click(
+		await page.locator(
 			'#variable_product_options .toolbar-top a.expand_all'
-		);
-		await page.check( 'input.checkbox.variable_manage_stock' );
+		).click();
+		await page.locator( 'input.checkbox.variable_manage_stock' ).check();
 
 		const firstVariationContainer = await page
 			.locator( '.woocommerce_variations  .woocommerce_variation' )
