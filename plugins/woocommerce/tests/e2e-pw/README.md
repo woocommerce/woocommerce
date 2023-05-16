@@ -53,7 +53,7 @@ Other ways of running tests (make sure you are in the `plugins/woocommerce` fold
 -   `pnpm test:e2e-pw --headed` (headed -- displaying browser window and test interactions)
 -   `pnpm test:e2e-pw --debug` (runs tests in debug mode)
 -   `pnpm test:e2e-pw ./tests/e2e-pw/tests/activate-and-setup/basic-setup.spec.js` (runs a single test)
--   `pnpm test:e2e-pw --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)). You may need to increase the [test timeout](https://playwright.dev/docs/api/class-testconfig#test-config-timeout) from the 90-second default, as tests might take longer to execute when ran through the Playwright UI. You may do this by setting the `DEFAULT_TIMEOUT_OVERRIDE` environment variable like so:
+-   `pnpm test:e2e-pw --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)). You may need to increase the [test timeout](https://playwright.dev/docs/api/class-testconfig#test-config-timeout) as tests may take longer to run in UI mode. You may do this by setting the `DEFAULT_TIMEOUT_OVERRIDE` environment variable like so:
 	```bash
 	# Increase test timeout to 3 minutes
 	export DEFAULT_TIMEOUT_OVERRIDE=180000
