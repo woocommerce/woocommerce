@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Increase test timeout for create-variable-product spec.
