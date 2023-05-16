@@ -519,6 +519,8 @@ const attachProductAttributesTracks = () => {
 				page: 'product',
 				enable_archive: '',
 				default_sort_order: '',
+				name: null,
+				slug: null,
 				total_attributes_count:
 					globalAttributesCount + localAttributesCount,
 				local_attributes_count: localAttributesCount,
