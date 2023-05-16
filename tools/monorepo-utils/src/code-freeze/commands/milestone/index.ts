@@ -12,7 +12,7 @@ import { octokitWithAuth } from '../../../core/github/api';
 import { setGithubMilestoneOutputs } from './utils';
 import { WPIncrement } from '../../../core/version';
 import { Logger } from '../../../core/logger';
-import { getEnvVar } from '../../../core/environment';
+import { isGithubCI } from '../../../core/environment';
 
 export const milestoneCommand = new Command( 'milestone' )
 	.description( 'Create a milestone' )
@@ -33,7 +33,7 @@ export const milestoneCommand = new Command( 'milestone' )
 	)
 	.action( async ( options ) => {
 		const { owner, name, dryRun, milestone } = options;
-		const isGithub = getEnvVar( 'CI' );
+		const isGithub = isGithubCI();
 
 		if ( milestone && isGithub ) {
 			Logger.error(
