@@ -140,12 +140,24 @@ class Text_Generation extends \WC_REST_Data_Controller {
 			)
 		);
 
+		$res_status = $raw_response['response'];
+
 		if ( is_wp_error( $raw_response ) ) {
 			return new \WP_Error(
-				'woocommerce_rest_invalid_task',
+				'wooai_api_error',
 				__( 'Sorry, there was an error accessing this service.', 'woocommerce' ),
 				array(
 					'status' => 500,
+				)
+			);
+		}
+
+		if ( $res_status['code'] >= 400 ) {
+			return new \WP_Error(
+				'wooai_api_bad_status',
+				$res_status['message'],
+				array(
+					'status' => $res_status['code'],
 				)
 			);
 		}
