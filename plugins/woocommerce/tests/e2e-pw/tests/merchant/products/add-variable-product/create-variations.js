@@ -1,10 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const productPageURL = 'wp-admin/post-new.php?post_type=product';
-
-const variableProductName = 'Variable Product with Three Variations';
-const manualVariableProduct = 'Manual Variable Product';
 const variationOnePrice = '9.99';
 const variationTwoPrice = '11.99';
 const variationThreePrice = '20.00';
@@ -15,65 +11,16 @@ const productHeight = '15';
 const defaultAttributes = [ 'val2', 'val1', 'val2' ];
 const stockAmount = '100';
 const lowStockAmount = '10';
-const productAttributes = [
-	{
-		name: 'Colour',
-		visible: true,
-		variation: true,
-		options: [ 'Red', 'Green' ],
-	},
-	{
-		name: 'Size',
-		visible: true,
-		variation: true,
-		options: [ 'Small', 'Medium' ],
-	},
-	{
-		name: 'Logo',
-		visible: true,
-		variation: true,
-		options: [ 'Woo', 'WordPress' ],
-	},
-];
 
-let expectedGeneratedVariations,
-	fixedVariableProductId,
-	fixedVariationIds,
-	productId_addManually,
-	productId_generateVariations,
-	testProductIds = [],
-	variationsToManuallyCreate;
+let productId_indivEdit, fixedVariationIds;
 
-async function createVariableProduct( baseURL, attributes = [] ) {
-	const api = new wcApi( {
-		url: baseURL,
-		consumerKey: process.env.CONSUMER_KEY,
-		consumerSecret: process.env.CONSUMER_SECRET,
-		version: 'wc/v3',
-	} );
-	const randomNum = Math.floor( Math.random() * 1000 );
-	const payload = {
-		name: `Unbranded Granite Shirt ${ randomNum }`,
-		type: 'variable',
-		attributes,
-	};
-
-	const productId = await api
-		.post( 'products', payload )
-		.then( ( response ) => response.data.id );
-
-	testProductIds.push( productId );
-
-	return productId;
-}
-
-test.describe.skip( 'Update variations', () => {
-
+test.describe( 'Update variations', () => {
+	
 
 	test( 'can bulk edit variations', async ( { page } ) => {
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ fixedVariableProductId }&action=edit`
+				`/wp-admin/post.php?post=${ productId_indivEdit }&action=edit`
 			);
 		} );
 
@@ -115,7 +62,7 @@ test.describe.skip( 'Update variations', () => {
 	test( 'can delete all variations', async ( { page } ) => {
 		await test.step( 'Go to the "Edit product" page.', async () => {
 			await page.goto(
-				`/wp-admin/post.php?post=${ fixedVariableProductId }&action=edit`
+				`/wp-admin/post.php?post=${ productId_indivEdit }&action=edit`
 			);
 		} );
 
@@ -211,7 +158,6 @@ test.describe.skip( 'Update variations', () => {
 		// remove a variation
 		await page.click( 'a[href="#variable_product_options"]' );
 
-		// remove a variation
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await page.hover( '.woocommerce_variation' );
 		await page.click( '.remove_variation.delete' );
