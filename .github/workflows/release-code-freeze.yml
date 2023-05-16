@@ -118,11 +118,11 @@ jobs:
             - name: Slack
               id: notify
               run: |
-                  pnpm utils slack "${{ secrets.CODE_FREEZE_BOT_TOKEN }}" 
+                  pnpm utils slack "${{ secrets.CODE_FREEZE_BOT_TOKEN }}" \
                       <<EOF
                       :warning-8c: ${{ needs.code-freeze-prep.outputs.nextReleaseVersion }} Code Freeze :ice_cube:
                       The automation to cut the release branch for ${{ needs.code-freeze-prep.outputs.nextReleaseVersion }} has run. Any PRs that were not already merged will be a part of ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.nextDevelopmentVersion }} by default. If you have something that needs to make ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.nextReleaseVersion }} that hasn't yet been merged, please see the <${{ secrets.FG_LINK }}/code-freeze-for-woocommerce-core-release/|fieldguide page for the code freeze>.
-                      EOF
+                      EOF \
                       "${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}"
     trigger-changelog-action:
         name: 'Trigger changelog action'
