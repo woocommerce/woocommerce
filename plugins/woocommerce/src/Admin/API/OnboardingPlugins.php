@@ -189,7 +189,6 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function can_install_plugins() {
-		return true;
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_update',
