@@ -23,4 +23,4 @@ jobs:
               id: commits
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run utils changelog -o psealock
+              run: pnpm run utils changelog -o ${{ github.repository_owner }}

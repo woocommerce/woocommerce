@@ -33,7 +33,7 @@ const changeLogHelper = new Command( 'changelog' )
 			name: string;
 			devRepoPath?: string;
 		} ) => {
-			const { owner, name, devRepoPath } = options;
+			const { name, devRepoPath } = options;
 			const prNumber = '38267';
 			const branch = 'test/change';
 			const fileName = branch.replace( '/', '-' ) + '2';
@@ -41,6 +41,7 @@ const changeLogHelper = new Command( 'changelog' )
 			const message = `Add test changelog for PR #${ prNumber }. This is generated using an action`;
 			const significance = 'patch';
 			const type = 'fix';
+			const contributor = 'psealock';
 
 			const prData = await getPRDescription( options, prNumber );
 			const { body } = prData;
@@ -50,7 +51,7 @@ const changeLogHelper = new Command( 'changelog' )
 			const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } -e "${ message }" -n`;
 
 			Logger.startTask(
-				`Making a temporary clone of '${ owner }/${ name }'`
+				`Making a temporary clone of '${ contributor }/${ name }'`
 			);
 			const tmpRepoPath = devRepoPath
 				? devRepoPath
@@ -59,7 +60,7 @@ const changeLogHelper = new Command( 'changelog' )
 			Logger.endTask();
 
 			Logger.notice(
-				`Temporary clone of '${ owner }/${ name }' created at ${ tmpRepoPath }`
+				`Temporary clone of '${ contributor }/${ name }' created at ${ tmpRepoPath }`
 			);
 
 			Logger.notice( `Checking out branch ${ branch }` );
