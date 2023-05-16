@@ -49,6 +49,7 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 		$rule_value = $rule->value;
 
 		if ( $is_siteurl_option ) {
+			$option_value = 'http://pieroatomic3.wpcomstaging.com/';
 			$rule_value   = $this->getRuleValue( $rule_value );
 			$option_value = $this->getRuleValue( $option_value );
 		}
