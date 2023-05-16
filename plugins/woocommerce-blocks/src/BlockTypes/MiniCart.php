@@ -496,12 +496,9 @@ class MiniCart extends AbstractBlock {
 
 		return '<div class="' . esc_attr( $wrapper_classes ) . '" style="' . esc_attr( $wrapper_styles ) . '">
 			<button class="wc-block-mini-cart__button" aria-label="' . esc_attr( $aria_label ) . '">' . $button_html . '</button>
-			<div class="wc-block-mini-cart__drawer is-loading is-mobile wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
-				<div class="components-modal__frame wc-block-components-drawer">
-					<div class="components-modal__content">
-						<div class="components-modal__header">
-							<div class="components-modal__header-heading-container"></div>
-						</div>
+			<div class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
+				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
+					<div class="wc-block-components-drawer__content">
 						<div class="wc-block-mini-cart__template-part">'
 						. wp_kses_post( $template_part_contents ) .
 						'</div>

@@ -75,15 +75,6 @@ class MiniCartContents extends AbstractBlock {
 
 		$styles = array(
 			array(
-				'selector'   => '.wc-block-mini-cart__drawer .components-modal__header',
-				'properties' => array(
-					array(
-						'property' => 'color',
-						'value'    => $text_color ? $text_color['value'] : false,
-					),
-				),
-			),
-			array(
 				'selector'   => array(
 					'.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-checkout',
 					'.wc-block-mini-cart__footer .wc-block-mini-cart__footer-actions .wc-block-mini-cart__footer-checkout:hover',

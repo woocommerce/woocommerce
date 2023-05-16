@@ -111,44 +111,57 @@ $drawer-animation-duration: 0.3s;
 	}
 }
 
-.wc-block-components-drawer .components-modal__content {
-	padding: $gap-largest $gap;
-}
+// Important rules are needed to reset button styles.
+.wc-block-components-drawer__close {
+	@include reset-box();
+	background: transparent !important;
+	color: inherit !important;
+	position: absolute !important;
+	top: $gap-small;
+	right: $gap-small;
+	opacity: 0.6;
+	z-index: 2;
+	// Increase clickable area.
+	padding: 1em !important;
+	margin: -1em;
 
-.wc-block-components-drawer .components-modal__header {
-	position: relative;
+	&:hover,
+	&:focus,
+	&:active {
+		opacity: 1;
+	}
 
-	// Close button.
-	.components-button {
-		@include reset-box();
-		background: transparent;
-		color: inherit;
-		position: absolute;
-		opacity: 0.6;
-		z-index: 2;
-		// The SVG has some white spacing around, thus we have to set this magic number.
-		right: 8px;
-		top: 0;
-		// Increase clickable area.
-		padding: 1em;
-		margin: -1em;
+	// Don't show focus styles if the close button hasn't been focused by the
+	// user directly. This is done to prevent focus styles to appear when
+	// opening the drawer with the mouse, as the focus is moved inside
+	// programmatically.
+	&:focus:not(:focus-visible) {
+		box-shadow: none;
+		outline: none;
+	}
 
-		&:hover,
-		&:focus,
-		&:active {
-			opacity: 1;
-		}
-
-		> span {
-			@include visually-hidden();
-		}
+	> span {
+		@include visually-hidden();
+	}
+	svg {
+		fill: currentColor;
+		display: block;
 	}
 }
 
-// Same styles as `Title` component.
-.wc-block-components-drawer .components-modal__header-heading {
-	@include reset-box();
-	// We need the font size to be in rem so it doesn't change depending on the parent element.
-	@include font-size(large, 1rem);
-	word-break: break-word;
+.wc-block-components-drawer__content {
+	height: 100dvh;
+	position: relative;
+}
+
+.admin-bar .wc-block-components-drawer__content {
+	margin-top: 46px;
+	height: calc(100dvh - 46px);
+}
+
+@media only screen and (min-width: 783px) {
+	.admin-bar .wc-block-components-drawer__content {
+		margin-top: 32px;
+		height: calc(100dvh - 32px);
+	}
 }
