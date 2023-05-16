@@ -3,28 +3,8 @@ const {
 	createVariableProduct,
 	showVariableProductTour,
 	deleteProductsAddedByTests,
+	productAttributes,
 } = require( './utils' );
-
-const productAttributes = [
-	{
-		name: 'Colour',
-		visible: true,
-		variation: true,
-		options: [ 'Red', 'Green' ],
-	},
-	{
-		name: 'Size',
-		visible: true,
-		variation: true,
-		options: [ 'Small', 'Medium' ],
-	},
-	{
-		name: 'Logo',
-		visible: true,
-		variation: true,
-		options: [ 'Woo', 'WordPress' ],
-	},
-];
 
 let productId;
 

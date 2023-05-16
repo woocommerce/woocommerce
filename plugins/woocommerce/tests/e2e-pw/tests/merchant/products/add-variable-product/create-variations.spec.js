@@ -1,0 +1,198 @@
+const { test, expect } = require( '@playwright/test' );
+const {
+	createVariableProduct,
+	showVariableProductTour,
+	deleteProductsAddedByTests,
+	generateVariationsFromAttributes,
+	productAttributes,
+} = require( './utils' );
+
+let expectedGeneratedVariations,
+	productId_addManually,
+	productId_generateVariations,
+	variationsToManuallyCreate;
+
+test.describe( 'Add variations', () => {
+	test.beforeAll( async ( { baseURL, browser } ) => {
+		productId_generateVariations = await createVariableProduct(
+			baseURL,
+			productAttributes
+		);
+
+		productId_addManually = await createVariableProduct(
+			baseURL,
+			productAttributes
+		);
+
+		expectedGeneratedVariations = generateVariationsFromAttributes(
+			productAttributes
+		);
+
+		variationsToManuallyCreate = expectedGeneratedVariations.slice( 0, 3 );
+
+		await showVariableProductTour( browser, false );
+	} );
+
+	test.afterAll( async ( { baseURL } ) => {
+		const productIds = [
+			productId_generateVariations,
+			productId_addManually,
+		];
+
+		await deleteProductsAddedByTests( baseURL, productIds );
+	} );
+
+	test( 'can generate variations from product attributes', async ( {
+		page,
+	} ) => {
+		await test.step(
+			`Open "Edit product" page of product id ${ productId_generateVariations }`,
+			async () => {
+				await page.goto(
+					`/wp-admin/post.php?post=${ productId_generateVariations }&action=edit`
+				);
+			}
+		);
+
+		await test.step( 'Click on the "Variations" tab.', async () => {
+			await page.click( 'a[href="#variable_product_options"]' );
+		} );
+
+		await test.step(
+			'Click on the "Generate variations" button.',
+			async () => {
+				// event listener for handling the link_all_variations confirmation dialog
+				page.on( 'dialog', ( dialog ) => dialog.accept() );
+
+				await page.click( 'button.generate_variations' );
+			}
+		);
+
+		await test.step(
+			`Expect the number of variations to be ${ expectedGeneratedVariations.length }`,
+			async () => {
+				const variations = page.locator( '.woocommerce_variation' );
+
+				await expect( variations ).toHaveCount(
+					expectedGeneratedVariations.length
+				);
+			}
+		);
+
+		for ( const variation of expectedGeneratedVariations ) {
+			await test.step(
+				`Expect the variation "${ variation.join(
+					', '
+				) }" to be generated.`,
+				async () => {
+					let variationRow = page.locator(
+						'.woocommerce_variation h3'
+					);
+
+					for ( const attributeValue of variation ) {
+						variationRow = variationRow.filter( {
+							has: page.locator( 'option[selected]', {
+								hasText: attributeValue,
+							} ),
+						} );
+					}
+
+					await expect( variationRow ).toBeVisible();
+				}
+			);
+		}
+	} );
+
+	test( 'can manually add a variation', async ( { page } ) => {
+		await test.step(
+			`Open "Edit product" page of product id ${ productId_addManually }`,
+			async () => {
+				await page.goto(
+					`/wp-admin/post.php?post=${ productId_addManually }&action=edit`
+				);
+			}
+		);
+
+		await test.step( 'Click on the "Variations" tab.', async () => {
+			await page.click( 'a[href="#variable_product_options"]' );
+		} );
+
+		await test.step(
+			`Manually add ${ variationsToManuallyCreate.length } variations`,
+			async () => {
+				const variationRows = page.locator(
+					'.woocommerce_variation h3'
+				);
+				let variationRowsCount = await variationRows.count();
+
+				for ( const variationToCreate of variationsToManuallyCreate ) {
+					await test.step( 'Click "Add manually"', async () => {
+						const addManuallyButton = page.getByRole( 'button', {
+							name: 'Add manually',
+						} );
+
+						await addManuallyButton.click();
+
+						await expect( variationRows ).toHaveCount(
+							++variationRowsCount
+						);
+					} );
+
+					for ( const attributeValue of variationToCreate ) {
+						const attributeName = productAttributes.find(
+							( { options } ) =>
+								options.includes( attributeValue )
+						).name;
+						const addAttributeMenu = variationRows
+							.nth( 0 )
+							.locator( 'select', {
+								has: page.locator( 'option', {
+									hasText: attributeValue,
+								} ),
+							} );
+
+						await test.step(
+							`Select "${ attributeValue }" from the "${ attributeName }" attribute menu`,
+							async () => {
+								await addAttributeMenu.selectOption(
+									attributeValue
+								);
+							}
+						);
+					}
+
+					await test.step( 'Click "Save changes"', async () => {
+						await page
+							.getByRole( 'button', {
+								name: 'Save changes',
+							} )
+							.click();
+					} );
+
+					await test.step(
+						`Expect the variation ${ variationToCreate.join(
+							', '
+						) } to be successfully saved.`,
+						async () => {
+							let newlyAddedVariationRow;
+
+							for ( const attributeValue of variationToCreate ) {
+								newlyAddedVariationRow = (
+									newlyAddedVariationRow || variationRows
+								).filter( {
+									has: page.locator( 'option[selected]', {
+										hasText: attributeValue,
+									} ),
+								} );
+							}
+
+							await expect(
+								newlyAddedVariationRow
+							).toBeVisible();
+						}
+					);
+				}
+			}
+		);
+	} );
+} );
