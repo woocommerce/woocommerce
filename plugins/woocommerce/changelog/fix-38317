@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add support to verify specific order types.
