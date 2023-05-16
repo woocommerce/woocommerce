@@ -37,7 +37,7 @@ test.describe( 'Add product attributes', () => {
 		await showVariableProductTour( browser, false );
 	} );
 
-	test.afterAll( async ( { baseURL, browser } ) => {
+	test.afterAll( async ( { baseURL } ) => {
 		await deleteProductsAddedByTests( baseURL, [ productId ] );
 	} );
 
