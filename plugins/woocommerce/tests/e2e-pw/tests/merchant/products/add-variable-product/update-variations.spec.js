@@ -15,31 +15,75 @@ const productLength = '10';
 const productWidth = '20';
 const productHeight = '15';
 
-let productId_indivEdit, variationIds_indivEdit;
+let productId_indivEdit,
+	productId_bulkEdit,
+	productId_deleteAll,
+	variationIds_indivEdit;
 
-test.describe( 'Update variations', () => {
+test.describe.only( 'Update variations', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL, browser } ) => {
-		productId_indivEdit = await createVariableProduct(
-			baseURL,
-			productAttributes
+		await test.step(
+			'Create variable product for individual edit test',
+			async () => {
+				productId_indivEdit = await createVariableProduct(
+					baseURL,
+					productAttributes
+				);
+
+				variationIds_indivEdit = await createVariations(
+					baseURL,
+					productId_indivEdit,
+					sampleVariations
+				);
+			}
 		);
 
-		variationIds_indivEdit = await createVariations(
-			baseURL,
-			productId_indivEdit,
-			sampleVariations
+		await test.step(
+			'Create variable product for bulk edit test',
+			async () => {
+				productId_bulkEdit = await createVariableProduct(
+					baseURL,
+					productAttributes
+				);
+
+				await createVariations(
+					baseURL,
+					productId_bulkEdit,
+					sampleVariations
+				);
+			}
 		);
 
-		await showVariableProductTour( browser, false );
+		await test.step(
+			'Create variable product for "delete all" test',
+			async () => {
+				productId_deleteAll = await createVariableProduct(
+					baseURL,
+					productAttributes
+				);
+
+				await createVariations(
+					baseURL,
+					productId_deleteAll,
+					sampleVariations
+				);
+			}
+		);
+
+		await test.step( 'Hide variable product tour', async () => {
+			await showVariableProductTour( browser, false );
+		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		await deleteProductsAddedByTests( baseURL, [ productId_indivEdit ] );
+		const productIds = [ productId_indivEdit, productId_bulkEdit ];
+
+		await deleteProductsAddedByTests( baseURL, productIds );
 	} );
 
-	test.only( 'can individually edit variations', async ( { page } ) => {
+	test( 'can individually edit variations', async ( { page } ) => {
 		const variationRows = page.locator( '.woocommerce_variation' );
 		const firstVariation = variationRows.filter( {
 			hasText: `#${ variationIds_indivEdit[ 0 ] }`,
@@ -58,13 +102,15 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.click(
-				'#variable_product_options .toolbar-top a.expand_all'
-			);
+			await page
+				.locator(
+					'#variable_product_options .toolbar-top a.expand_all'
+				)
+				.click();
 		} );
 
 		await test.step( 'Edit the first variation.', async () => {
@@ -141,18 +187,20 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click "Save changes".', async () => {
-			await page.click( 'button.save-variation-changes' );
+			await page.locator( 'button.save-variation-changes' ).click();
 			await page.waitForLoadState( 'networkidle' );
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.click(
-				'#variable_product_options .toolbar-top a.expand_all'
-			);
+			await page
+				.locator(
+					'#variable_product_options .toolbar-top a.expand_all'
+				)
+				.click();
 		} );
 
 		await test.step(
@@ -245,6 +293,80 @@ test.describe( 'Update variations', () => {
 						name: 'Height',
 					} )
 				).toHaveValue( productHeight );
+			}
+		);
+	} );
+
+	test( 'can bulk edit variations', async ( { page } ) => {
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`/wp-admin/post.php?post=${ productId_bulkEdit }&action=edit`
+			);
+		} );
+
+		await test.step( 'Click on the "Variations" tab.', async () => {
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
+		} );
+
+		await test.step(
+			'Select the \'Toggle "Downloadable"\' bulk action.',
+			async () => {
+				await page
+					.locator( '#field_to_edit' )
+					.selectOption( 'toggle_downloadable' );
+			}
+		);
+
+		await test.step( 'Expand all variations.', async () => {
+			await page
+				.locator(
+					'#variable_product_options .toolbar-top a.expand_all'
+				)
+				.click();
+		} );
+
+		await test.step(
+			'Expect all "Downloadable" checkboxes to be checked.',
+			async () => {
+				const checkBoxes = page.locator(
+					'input[name^="variable_is_downloadable"]'
+				);
+				const count = await checkBoxes.count();
+
+				for ( let i = 0; i < count; i++ ) {
+					await expect( checkBoxes.nth( i ) ).toBeChecked();
+				}
+			}
+		);
+	} );
+
+	test( 'can delete all variations', async ( { page } ) => {
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`/wp-admin/post.php?post=${ productId_deleteAll }&action=edit`
+			);
+		} );
+
+		await test.step( 'Click on the "Variations" tab.', async () => {
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
+		} );
+
+		await test.step(
+			'Select the bulk action "Delete all variations".',
+			async () => {
+				page.on( 'dialog', ( dialog ) => dialog.accept() );
+				await page
+					.locator( '#field_to_edit' )
+					.selectOption( 'delete_all' );
+			}
+		);
+
+		await test.step(
+			'Expect that there are no more variations.',
+			async () => {
+				await expect(
+					page.locator( '.woocommerce_variation' )
+				).toHaveCount( 0 );
 			}
 		);
 	} );

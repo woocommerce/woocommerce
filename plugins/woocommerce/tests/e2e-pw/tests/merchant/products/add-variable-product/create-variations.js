@@ -5,81 +5,14 @@ const defaultAttributes = [ 'val2', 'val1', 'val2' ];
 const stockAmount = '100';
 const lowStockAmount = '10';
 
-let productId_indivEdit, fixedVariationIds;
+let productId_bulkEdit, fixedVariationIds;
 
 test.describe( 'Update variations', () => {
 	
 
-	test( 'can bulk edit variations', async ( { page } ) => {
-		await test.step( 'Go to the "Edit product" page.', async () => {
-			await page.goto(
-				`/wp-admin/post.php?post=${ productId_indivEdit }&action=edit`
-			);
-		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
-		} );
 
-		await test.step(
-			'Select the \'Toggle "Downloadable"\' bulk action.',
-			async () => {
-				await page.selectOption(
-					'#field_to_edit',
-					'toggle_downloadable'
-				);
-			}
-		);
 
-		await test.step( 'Expand all variations.', async () => {
-			await page.click(
-				'#variable_product_options .toolbar-top a.expand_all'
-			);
-		} );
-
-		await test.step(
-			'Expect all "Downloadable" checkboxes to be checked.',
-			async () => {
-				const checkBoxes = page.locator(
-					'input[name^="variable_is_downloadable"]'
-				);
-				const count = await checkBoxes.count();
-
-				for ( let i = 0; i < count; i++ ) {
-					await expect( checkBoxes.nth( i ) ).toBeChecked();
-				}
-			}
-		);
-	} );
-
-	test( 'can delete all variations', async ( { page } ) => {
-		await test.step( 'Go to the "Edit product" page.', async () => {
-			await page.goto(
-				`/wp-admin/post.php?post=${ productId_indivEdit }&action=edit`
-			);
-		} );
-
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
-		} );
-
-		await test.step(
-			'Select the bulk action "Delete all variations".',
-			async () => {
-				page.on( 'dialog', ( dialog ) => dialog.accept() );
-				await page.selectOption( '#field_to_edit', 'delete_all' );
-			}
-		);
-
-		await test.step(
-			'Expect that there are no more variations.',
-			async () => {
-				await expect(
-					page.locator( '.woocommerce_variation' )
-				).toHaveCount( 0 );
-			}
-		);
-	} );
 
 	test( 'can manage stock levels, set variation defaults and remove a variation', async ( {
 		page,
