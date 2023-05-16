@@ -3,43 +3,52 @@ const {
 	createVariableProduct,
 	showVariableProductTour,
 	deleteProductsAddedByTests,
-	generateVariationsFromAttributes,
 	productAttributes,
+	sampleVariations,
+	createVariations,
 } = require( './utils' );
+const variationOnePrice = '9.99';
+const variationTwoPrice = '11.99';
+const variationThreePrice = '20.00';
+const productWeight = '200';
+const productLength = '10';
+const productWidth = '20';
+const productHeight = '15';
 
-let productId;
+let productId_indivEdit, variationIds_indivEdit;
 
 test.describe( 'Update variations', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL, browser } ) => {
-		variationsToCreate = generateVariationsFromAttributes(
-			productAttributes
-		).slice( 0, 3 );
-
-		productId = await createVariableProduct(
+		productId_indivEdit = await createVariableProduct(
 			baseURL,
-			productAttributes,
-			variationsToCreate
+			productAttributes
+		);
+
+		variationIds_indivEdit = await createVariations(
+			baseURL,
+			productId_indivEdit,
+			sampleVariations
 		);
 
 		await showVariableProductTour( browser, false );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		await deleteProductsAddedByTests( baseURL, [ productId ] );
+		await deleteProductsAddedByTests( baseURL, [ productId_indivEdit ] );
 	} );
 
-	test( 'can individually edit variations', async ( { page } ) => {
+	test.only( 'can individually edit variations', async ( { page } ) => {
 		const variationRows = page.locator( '.woocommerce_variation' );
 		const firstVariation = variationRows.filter( {
-			hasText: `#${ fixedVariationIds[ 0 ] }`,
+			hasText: `#${ variationIds_indivEdit[ 0 ] }`,
 		} );
 		const secondVariation = variationRows.filter( {
-			hasText: `#${ fixedVariationIds[ 1 ] }`,
+			hasText: `#${ variationIds_indivEdit[ 1 ] }`,
 		} );
 		const thirdVariation = variationRows.filter( {
-			hasText: `#${ fixedVariationIds[ 2 ] }`,
+			hasText: `#${ variationIds_indivEdit[ 2 ] }`,
 		} );
 
 		await test.step( 'Go to the "Edit product" page.', async () => {

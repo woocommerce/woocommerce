@@ -21,6 +21,57 @@ const productAttributes = [
 	},
 ];
 
+const sampleVariations = [
+	{
+		attributes: [
+			{
+				name: 'Colour',
+				option: 'Red',
+			},
+			{
+				name: 'Size',
+				option: 'Small',
+			},
+			{
+				name: 'Logo',
+				option: 'Woo',
+			},
+		],
+	},
+	{
+		attributes: [
+			{
+				name: 'Colour',
+				option: 'Red',
+			},
+			{
+				name: 'Size',
+				option: 'Small',
+			},
+			{
+				name: 'Logo',
+				option: 'WordPress',
+			},
+		],
+	},
+	{
+		attributes: [
+			{
+				name: 'Colour',
+				option: 'Red',
+			},
+			{
+				name: 'Size',
+				option: 'Medium',
+			},
+			{
+				name: 'Logo',
+				option: 'Woo',
+			},
+		],
+	},
+];
+
 function newWCApi( baseURL ) {
 	return new wcApi( {
 		url: baseURL,
@@ -30,11 +81,7 @@ function newWCApi( baseURL ) {
 	} );
 }
 
-async function createVariableProduct(
-	baseURL,
-	attributes = [],
-	variations = []
-) {
+async function createVariableProduct( baseURL, attributes = [] ) {
 	const api = newWCApi( baseURL );
 	const randomNum = Math.floor( Math.random() * 1000 );
 	const payload = {
@@ -133,10 +180,25 @@ function generateVariationsFromAttributes( attributes ) {
 	return allVariations;
 }
 
+async function createVariations( baseURL, productId, variations ) {
+	const api = newWCApi( baseURL );
+
+	const response = await api.post(
+		`products/${ productId }/variations/batch`,
+		{
+			create: variations,
+		}
+	);
+
+	return response.data.create.map( ( { id } ) => id );
+}
+
 module.exports = {
 	createVariableProduct,
 	deleteProductsAddedByTests,
 	generateVariationsFromAttributes,
 	productAttributes,
 	showVariableProductTour,
+	sampleVariations,
+	createVariations,
 };

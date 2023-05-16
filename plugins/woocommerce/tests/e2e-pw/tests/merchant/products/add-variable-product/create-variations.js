@@ -1,13 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const variationOnePrice = '9.99';
-const variationTwoPrice = '11.99';
-const variationThreePrice = '20.00';
-const productWeight = '200';
-const productLength = '10';
-const productWidth = '20';
-const productHeight = '15';
 const defaultAttributes = [ 'val2', 'val1', 'val2' ];
 const stockAmount = '100';
 const lowStockAmount = '10';
