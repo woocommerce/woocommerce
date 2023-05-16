@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
-import { InnerBlockTemplate } from '@wordpress/blocks';
+import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
 
@@ -10,14 +10,9 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
-import { Attributes } from './types';
+import { ProductCollectionAttributes } from './types';
 import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
-
-interface Props {
-	className: string;
-	attributes: Attributes;
-	setAttributes: ( attributes: Attributes ) => void;
-}
+import InspectorControls from './inspector-controls';
 
 export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -76,7 +71,8 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 	[ 'core/query-no-results' ],
 ];
 
-const Edit = ( { attributes, setAttributes }: Props ) => {
+const Edit = ( props: BlockEditProps< ProductCollectionAttributes > ) => {
+	const { attributes, setAttributes } = props;
 	const { queryId } = attributes;
 
 	const blockProps = useBlockProps();
@@ -96,6 +92,7 @@ const Edit = ( { attributes, setAttributes }: Props ) => {
 
 	return (
 		<div { ...blockProps }>
+			<InspectorControls { ...props } />
 			<div { ...innerBlocksProps } />
 		</div>
 	);

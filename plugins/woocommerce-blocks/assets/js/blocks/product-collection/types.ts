@@ -1,6 +1,16 @@
-export interface Attributes {
-	queryId: number;
+export interface ProductCollectionAttributes {
 	query: ProductCollectionQuery;
+	queryId: number;
+	queryContext: [
+		{
+			page: number;
+		}
+	];
+	templateSlug: string;
+	displayLayout: {
+		type: string;
+		columns: number;
+	};
 }
 
 export interface ProductCollectionQuery {
@@ -17,19 +27,4 @@ export interface ProductCollectionQuery {
 	search: string;
 	sticky: string;
 	taxQuery: string;
-}
-
-export interface ProductCollectionContext {
-	query: ProductCollectionQuery;
-	queryId: number;
-	queryContext: [
-		{
-			page: number;
-		}
-	];
-	templateSlug: string;
-	displayLayout: {
-		type: string;
-		columns: number;
-	};
 }
