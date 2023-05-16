@@ -92,7 +92,7 @@ The `TaskLists` class serves as a data store for tasks, providing functionality 
 
 - `TaskLists::instance()`: Returns the class instance of the `TaskLists` interface.
 - `TaskLists::init()`: Initializes the task lists. This method should be called to set up the necessary configurations and hooks for task management.
-- `TaskLists::is_experiment_treatment($name)`: Checks if an experiment is the treatment or control.
+- `TaskLists::is_experiment_treatment($name)`: Checks if an experiment is the treatment or control. This is internally used by Woo.
 - `TaskLists::init_default_lists()`: Initializes the default task lists. This method adds predefined task lists with their properties and tasks.
 - `TaskLists::init_tasks()`: Initializes the tasks. This method should be called to initialize the tasks associated with the task lists.
 - `TaskLists::set_active_task()`: Temporarily stores the active task to persist across page loads when necessary. This method is used to manage active tasks.
