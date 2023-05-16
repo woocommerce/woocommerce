@@ -77,7 +77,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				array(
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'install_and_activate' ),
-					'permission_callback' => array( $this, 'can_install_plugins' ),
+					'permission_callback' => array( $this, 'can_install_and_activate_plugins' ),
 
 				),
 				'schema' => array( $this, 'get_install_activate_schema' ),
@@ -190,6 +190,23 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	 */
 	public function can_install_plugins() {
 		if ( ! current_user_can( 'install_plugins' ) ) {
+			return new WP_Error(
+				'woocommerce_rest_cannot_update',
+				__( 'Sorry, you cannot manage plugins.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check whether the current user has permission to install and activate plugins
+	 *
+	 * @return WP_Error|boolean
+	 */
+	public function can_install_and_activate_plugins() {
+		if ( ! current_user_can( 'install_plugins' ) || ! current_user_can( 'activate_plugins' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_update',
 				__( 'Sorry, you cannot manage plugins.', 'woocommerce' ),
