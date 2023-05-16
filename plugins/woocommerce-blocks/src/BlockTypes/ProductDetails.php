@@ -54,7 +54,7 @@ class ProductDetails extends AbstractBlock {
 	 */
 	protected function render_tabs() {
 		ob_start();
-
+		rewind_posts();
 		while ( have_posts() ) {
 			the_post();
 			woocommerce_output_product_data_tabs();
