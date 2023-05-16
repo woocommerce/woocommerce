@@ -1,3 +1,5 @@
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+
 function newWCApi( baseURL ) {
 	return new wcApi( {
 		url: baseURL,
@@ -23,7 +25,7 @@ async function createVariableProduct( browser, attributes = [] ) {
 	return productId;
 }
 
-async function deleteProductsAddedByTests( baseURL ) {
+async function deleteProductsAddedByTests( baseURL, productIds ) {
 	const api = newWCApi( baseURL );
 
 	await api.post( 'products/batch', { delete: productIds } );
@@ -40,12 +42,9 @@ async function showVariableProductTour( browser, show ) {
 	await addProductPage.goto( productPageURL );
 
 	// Get the current user's ID and user preferences
-	const { id: userId, woocommerce_meta } = await test.step(
-		"Get the current user's ID and user preferences",
-		async () => {
-			return await addProductPage.evaluate( () => {
-				return window.wp.data.select( 'core' ).getCurrentUser();
-			} );
+	const { id: userId, woocommerce_meta } = await addProductPage.evaluate(
+		() => {
+			return window.wp.data.select( 'core' ).getCurrentUser();
 		}
 	);
 
