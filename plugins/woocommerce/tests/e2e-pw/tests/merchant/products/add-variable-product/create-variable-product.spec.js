@@ -41,48 +41,10 @@ async function deleteProductsAddedByTests( baseURL ) {
 	await api.post( 'products/batch', { delete: productIds } );
 }
 
-// mytodo share commands with turnOffVariableProductTour
 /**
  * @param {import('@playwright/test').Page} page
  */
-async function resetVariableProductTour( page ) {
-	const { id: userId, woocommerce_meta } = await test.step(
-		"Get the current user's ID and user preferences",
-		async () => {
-			return await page.evaluate( () => {
-				return window.wp.data.select( 'core' ).getCurrentUser();
-			} );
-		}
-	);
-
-	const updatedWooCommerceMeta = await test.step(
-		'Reset the variable product tour preference, so that it will be shown again',
-		async () => {
-			return {
-				...woocommerce_meta,
-				variable_product_tour_shown: '',
-			};
-		}
-	);
-
-	await test.step( 'Save the updated user preferences', async () => {
-		await page.evaluate(
-			async ( { userId, updatedWooCommerceMeta } ) => {
-				await window.wp.data.dispatch( 'core' ).saveUser( {
-					id: userId,
-					woocommerce_meta: updatedWooCommerceMeta,
-				} );
-			},
-			{ userId, updatedWooCommerceMeta }
-		);
-	} );
-}
-
-// mytodo share commands with turnOffVariableProductTour
-/**
- * @param {import('@playwright/test').Page} page
- */
-async function turnOffVariableProductTour( page ) {
+async function toggleVariableProductTour( page, enableTour = true ) {
 	const { id: userId, woocommerce_meta } = await test.step(
 		"Get the current user's ID and user preferences",
 		async () => {
@@ -97,7 +59,7 @@ async function turnOffVariableProductTour( page ) {
 		() => {
 			return {
 				...woocommerce_meta,
-				variable_product_tour_shown: '"yes"',
+				variable_product_tour_shown: enableTour ? '' : '"yes"',
 			};
 		}
 	);
@@ -112,10 +74,6 @@ async function turnOffVariableProductTour( page ) {
 			},
 			{ userId, updatedWooCommerceMeta }
 		);
-	} );
-
-	await test.step( 'Reload the page', async () => {
-		await page.reload();
 	} );
 }
 
@@ -139,7 +97,7 @@ async function createVariableProduct( baseURL ) {
 test.describe.only( 'Add variable product', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async () => {
+	test.beforeAll( async ( { baseURL } ) => {
 		productId = await test.step(
 			'Create variable product with no attributes',
 			async () => {
@@ -158,7 +116,7 @@ test.describe.only( 'Add variable product', () => {
 		} );
 
 		await test.step( 'Reset the variable product tour.', async () => {
-			await resetVariableProductTour( page );
+			await toggleVariableProductTour( page );
 		} );
 
 		await test.step( 'Reload the "Add new product" page', async () => {
@@ -275,7 +233,11 @@ test.describe.only( 'Add variable product', () => {
 		);
 
 		await test.step( 'Turn off variable product tour.', async () => {
-			await turnOffVariableProductTour( page );
+			await toggleVariableProductTour( page, false );
+		} );
+
+		await test.step( 'Reload the page', async () => {
+			await page.reload();
 		} );
 
 		await test.step( 'Go to the "Attributes" tab.', async () => {
