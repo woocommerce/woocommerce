@@ -24,15 +24,15 @@ class Woo_AI {
 	 *
 	 * @var Woo_AI
 	 */
-	protected static $_instance = null;
+	protected static $instance = null;
 
 	/**
 	 * Main Instance.
 	 */
 	public static function instance() {
-		self::$_instance = is_null( self::$_instance ) ? new self() : self::$_instance;
+		self::$instance = is_null( self::$instance ) ? new self() : self::$instance;
 
-		return self::$_instance;
+		return self::$instance;
 	}
 
 	/**
