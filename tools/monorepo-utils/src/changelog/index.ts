@@ -10,7 +10,8 @@ import { execSync } from 'child_process';
  */
 import { Logger } from '../core/logger';
 import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
-import { getPRDescription } from './lib';
+import { getPullRequest, isCommunityPullRequest } from '../core/github/repo';
+import { getPullRequestData } from './lib';
 
 const changeLogHelper = new Command( 'changelog' )
 	.option(
@@ -27,43 +28,52 @@ const changeLogHelper = new Command( 'changelog' )
 		'-d --dev-repo-path <devRepoPath>',
 		'Path to existing repo. Use this option to avoid cloning a fresh repo for development purposes. Note that using this option assumes dependencies are already installed.'
 	)
+	.argument( '<pr-number>', 'Pull request number' )
 	.action(
-		async ( options: {
-			owner: string;
-			name: string;
-			devRepoPath?: string;
-		} ) => {
-			const { name, devRepoPath } = options;
-			const prNumber = '38267';
-			const branch = 'test/change';
-			const fileName = branch.replace( '/', '-' ) + '2';
+		async (
+			prNumber,
+			options: {
+				owner: string;
+				name: string;
+				devRepoPath?: string;
+			}
+		) => {
+			const { owner, name, devRepoPath } = options;
 			const project = 'woocommerce';
 			const message = `Add test changelog for PR #${ prNumber }. This is generated using an action`;
 			const significance = 'patch';
 			const type = 'fix';
-			const contributor = 'psealock';
 
-			const prData = await getPRDescription( options, prNumber );
-			const { body } = prData;
+			const { isCommunityPR, prOwner, branch, fileName } =
+				await getPullRequestData( { owner, name }, prNumber );
 
-			Logger.notice( JSON.stringify( body, null, 2 ) );
+			Logger.notice(
+				`PR #${ prNumber } ${
+					isCommunityPR ? 'is' : 'is not'
+				} a community PR. Making a clone of ${ prOwner }/${ name } and adding a changelog to branch ${ branch }`
+			);
+			// const { body } = prData;
+
+			// Logger.notice( JSON.stringify( prData, null, 2 ) );
+
+			process.exit( 0 );
 
 			const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } -e "${ message }" -n`;
 
 			Logger.startTask(
-				`Making a temporary clone of '${ contributor }/${ name }'`
+				`Making a temporary clone of '${ prOwner }/${ name }'`
 			);
 			const tmpRepoPath = devRepoPath
 				? devRepoPath
 				: await cloneAuthenticatedRepo(
-						{ owner: contributor, name },
+						{ owner: prOwner, name },
 						true
 				  );
 
 			Logger.endTask();
 
 			Logger.notice(
-				`Temporary clone of '${ contributor }/${ name }' created at ${ tmpRepoPath }`
+				`Temporary clone of '${ prOwner }/${ name }' created at ${ tmpRepoPath }`
 			);
 
 			Logger.notice( `Checking out branch ${ branch }` );
