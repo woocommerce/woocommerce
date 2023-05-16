@@ -1,5 +1,26 @@
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
+const productAttributes = [
+	{
+		name: 'Colour',
+		visible: true,
+		variation: true,
+		options: [ 'Red', 'Green' ],
+	},
+	{
+		name: 'Size',
+		visible: true,
+		variation: true,
+		options: [ 'Small', 'Medium' ],
+	},
+	{
+		name: 'Logo',
+		visible: true,
+		variation: true,
+		options: [ 'Woo', 'WordPress' ],
+	},
+];
+
 function newWCApi( baseURL ) {
 	return new wcApi( {
 		url: baseURL,
@@ -9,7 +30,7 @@ function newWCApi( baseURL ) {
 	} );
 }
 
-async function createVariableProduct( browser, attributes = [] ) {
+async function createVariableProduct( baseURL, attributes = [] ) {
 	const api = newWCApi( baseURL );
 	const randomNum = Math.floor( Math.random() * 1000 );
 	const payload = {
@@ -112,5 +133,6 @@ module.exports = {
 	createVariableProduct,
 	deleteProductsAddedByTests,
 	generateVariationsFromAttributes,
+	productAttributes,
 	showVariableProductTour,
 };
