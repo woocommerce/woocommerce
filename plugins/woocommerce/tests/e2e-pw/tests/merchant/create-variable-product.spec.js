@@ -243,7 +243,9 @@ test.describe( 'Add New Variable Product Page', () => {
 		await test.step(
 			'Select the "Variable product" product type.',
 			async () => {
-				await page.selectOption( '#product-type', 'variable' );
+				await page
+					.locator( '#product-type' )
+					.selectOption( 'variable' );
 			}
 		);
 
@@ -385,7 +387,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		);
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step(
@@ -394,7 +396,7 @@ test.describe( 'Add New Variable Product Page', () => {
 				// event listener for handling the link_all_variations confirmation dialog
 				page.on( 'dialog', ( dialog ) => dialog.accept() );
 
-				await page.click( 'button.generate_variations' );
+				await page.locator( 'button.generate_variations' ).click();
 			}
 		);
 
