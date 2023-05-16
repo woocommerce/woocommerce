@@ -30,7 +30,11 @@ function newWCApi( baseURL ) {
 	} );
 }
 
-async function createVariableProduct( baseURL, attributes = [] ) {
+async function createVariableProduct(
+	baseURL,
+	attributes = [],
+	variations = []
+) {
 	const api = newWCApi( baseURL );
 	const randomNum = Math.floor( Math.random() * 1000 );
 	const payload = {
