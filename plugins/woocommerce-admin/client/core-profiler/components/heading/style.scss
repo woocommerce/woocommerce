@@ -31,4 +31,22 @@
 			color: $gray-800;
 		}
 	}
+
+	&.woocommerce-profiler__stepper-heading {
+		margin-top: 72px;
+		@include breakpoint( '<782px' ) {
+			margin-top: 52px;
+			margin-bottom: 40px;
+			h1 {
+				font-size: 32px;
+				line-height: 40px;
+				text-align: left;
+			}
+			h2 {
+				text-align: left;
+				font-size: 16px;
+				margin-bottom: 0;
+			}
+		}
+	}
 }

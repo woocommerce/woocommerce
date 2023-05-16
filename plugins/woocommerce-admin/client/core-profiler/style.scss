@@ -19,6 +19,85 @@
 	@include breakpoint( '<782px' ) {
 		padding: 0 20px;
 	}
+
+	.woocommerce-profiler-button-container {
+		width: 100%;
+		max-width: 400px;
+		@include breakpoint( '<782px' ) {
+			position: absolute;
+			bottom: 20px;
+			padding: 0 20px;
+		}
+	}
+
+	.woocommerce-profiler-button {
+		display: flex;
+		width: 100%;
+		justify-content: center;
+		padding: 10px 16px;
+		height: 48px;
+		font-size: 14px;
+		font-weight: 500;
+	}
+
+	.woocommerce-select-control__option {
+		font-size: 13px;
+		height: 40px;
+		min-height: initial;
+
+		&:hover {
+			background: #eff2fd;
+			color: $gray-900;
+		}
+	}
+	.woocommerce-select-control__listbox {
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+		border: 1px solid #ccc;
+		margin-top: 8px;
+	}
+
+	.woocommerce-select-control__control {
+		height: 40px;
+		padding: 12px;
+		border: 1px solid #bbb;
+
+		label,
+		.woocommerce-select-control__control-input {
+			font-size: 13px;
+			color: var(--wp-components-color-foreground, #757575);
+			cursor: pointer;
+		}
+
+		.components-base-control__label {
+			font-size: 13px;
+			line-height: 16px;
+			color: $gray-700;
+		}
+
+		&.with-value {
+			.woocommerce-select-control__control-input {
+				margin: 0;
+				color: $gray-900;
+			}
+
+			.components-base-control__label {
+				display: none;
+			}
+		}
+
+		&.is-active {
+			border: 1px solid #3858e9;
+		}
+	}
+
+	#woocommerce-select-control__listbox-0 {
+		top: 40px !important;
+	}
+}
+
+.woocommerce-profiler-select-control__country {
+	max-width: 400px;
+	margin: auto auto 32px auto;
 }
 
 // Intro opt-in page
@@ -117,6 +196,11 @@
 				max-width: 514px;
 				margin-left: 10px;
 			}
+
+			.woocommerce-select-control__control-input {
+				font-size: 13px;
+				line-height: 16px;
+			}
 		}
 
 		a {
@@ -124,38 +208,8 @@
 		}
 	}
 }
-.woocommerce-profiler-select-control__country {
-	max-width: 400px;
-	margin: auto auto 32px auto;
-	.woocommerce-select-control__option {
-		font-size: 13px;
-		&:hover {
-			background: #eff2fd;
-		}
-	}
-	.woocommerce-select-control__listbox {
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-		border: 1px solid #ccc;
-		margin-top: 8px;
-	}
 
-	.woocommerce-select-control__control {
-		height: 40px;
-		padding: 12px;
-		border: 1px solid #bbb;
-		label,
-		input {
-			font-size: 13px;
-			color: var(--wp-components-color-foreground, #757575);
-		}
-		&.is-active {
-			border: 1px solid #3858e9;
-		}
-	}
-	#woocommerce-select-control__listbox-0 {
-		top: 40px !important;
-	}
-}
+// Business location page
 .woocommerce-profiler-business-location {
 	display: flex;
 	flex-direction: column;
@@ -169,42 +223,6 @@
 			width: 100%;
 		}
 
-		.woocommerce-profiler-heading {
-			margin-top: 72px;
-			@include breakpoint( '<782px' ) {
-				margin-top: 52px;
-				margin-bottom: 40px;
-				h1 {
-					font-size: 32px;
-					line-height: 40px;
-					text-align: left;
-				}
-				h2 {
-					text-align: left;
-					font-size: 16px;
-					margin-bottom: 0;
-				}
-			}
-		}
-		.woocommerce-profiler-go-to-mystore__button-container {
-			width: 100%;
-			max-width: 400px;
-			@include breakpoint( '<782px' ) {
-				position: absolute;
-				bottom: 20px;
-				padding: 0 20px;
-			}
-		}
-
-		.woocommerce-profiler-go-to-mystore__button {
-			display: flex;
-			width: 100%;
-			justify-content: center;
-			padding: 10px 16px;
-			height: 48px;
-			font-size: 14px;
-			font-weight: 500;
-		}
 		.components-base-control__field {
 			height: 40px;
 		}
@@ -232,6 +250,7 @@
 	}
 }
 
+// Loader page
 .woocommerce-profiler-loader {
 	width: 100%;
 	height: 100%;
@@ -281,5 +300,33 @@
 			font-size: 14px;
 			line-height: 20px;
 		}
+	}
+}
+
+// User profile page
+.woocommerce-profiler-user-profile {
+	.woocommerce-user-profile-choices {
+		margin-bottom: 32px;
+	}
+
+	.woocommerce-user-profile-choices fieldset {
+		display: flex;
+		gap: 18px;
+		flex-direction: column;
+	}
+
+	.woocommerce-profiler-choice-sub-options {
+		.woocommerce-profiler-question-label {
+			text-transform: uppercase;
+			color: $gray-900;
+			font-weight: 500;
+			font-size: 11px;
+			line-height: 16px;
+			margin: 0 0 8px;
+		}
+	}
+
+	.woocommerce-profiler-selling-platform {
+		margin-top: 20px;
 	}
 }
