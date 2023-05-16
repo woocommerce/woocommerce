@@ -13,6 +13,7 @@ import { useSelect } from '@wordpress/data';
  */
 import Block from './block';
 import type { Attributes } from './types';
+import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 
 const Edit = ( {
 	attributes,
@@ -28,6 +29,8 @@ const Edit = ( {
 		...context,
 	};
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
+	const { isDescendentOfSingleProductBlock } =
+		useIsDescendentOfSingleProductBlock( { blockClientId: blockProps.id } );
 
 	const isDescendentOfSingleProductTemplate = useSelect(
 		( select ) => {
@@ -51,11 +54,13 @@ const Edit = ( {
 			setAttributes( {
 				isDescendentOfQueryLoop,
 				isDescendentOfSingleProductTemplate,
+				isDescendentOfSingleProductBlock,
 			} ),
 		[
 			setAttributes,
 			isDescendentOfQueryLoop,
 			isDescendentOfSingleProductTemplate,
+			isDescendentOfSingleProductBlock,
 		]
 	);
 
