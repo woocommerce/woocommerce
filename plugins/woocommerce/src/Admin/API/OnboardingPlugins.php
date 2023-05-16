@@ -246,6 +246,18 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	 * @return array
 	 */
 	public function get_install_activate_schema() {
+		$error_schema = array(
+			'type'              => 'object',
+			'patternProperties' => array(
+				'^.*$' => array(
+					'type' => 'string',
+				),
+			),
+			'items'             => array(
+				'type' => 'string',
+			),
+		);
+
 		$install_schema = array(
 			'type'       => 'object',
 			'properties' => array(
@@ -264,18 +276,8 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				'errors'    => array(
 					'type'       => 'object',
 					'properties' => array(
-						'errors'     => array(
-							'type'  => 'array',
-							'items' => array(
-								'type' => 'string',
-							),
-						),
-						'error_data' => array(
-							'type'  => 'array',
-							'items' => array(
-								'type' => 'string',
-							),
-						),
+						'errors'     => $error_schema,
+						'error_data' => $error_schema,
 					),
 				),
 			),
@@ -299,14 +301,8 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				'errors'    => array(
 					'type'       => 'object',
 					'properties' => array(
-						'errors'     => array(
-							'type'  => 'array',
-							'items' => array( 'type' => 'string' ),
-						),
-						'error_data' => array(
-							'type'  => 'array',
-							'items' => array( 'type' => 'string' ),
-						),
+						'errors'     => $error_schema,
+						'error_data' => $error_schema,
 					),
 				),
 			),
