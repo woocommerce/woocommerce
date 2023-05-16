@@ -29,19 +29,17 @@ test.describe( 'Add New Coupon Page', () => {
 			waitUntil: 'networkidle',
 		} );
 
-		await page.fill( '#title', couponCode );
+		await page.locator( '#title' ).fill( couponCode );
 
-		await page.fill( '#woocommerce-coupon-description', 'test coupon' );
+		await page
+			.locator( '#woocommerce-coupon-description' )
+			.fill( 'test coupon' );
 
-		await page.fill( '#coupon_amount', '100' );
+		await page.locator( '#coupon_amount' ).fill( '100' );
 
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
-		await page.click( '#publish' );
+		await page.locator( '#publish:not(.disabled)' ).click();
 
-		await expect(
-			page
-				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Coupon updated.' } )
-		).toBeVisible();
+		await expect( page.getByText( 'Coupon updated.' ) ).toBeVisible();
 	} );
 } );
