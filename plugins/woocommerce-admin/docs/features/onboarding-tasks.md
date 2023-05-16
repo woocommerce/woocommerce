@@ -80,7 +80,7 @@ registerPlugin( 'add-task-content', {
 
 ### Example
 
-You can find an full example of how to add a custom task in the [examples directory](../examples/extensions/add-task/) as a WP plugin.
+You can find a complete example of how to add a custom task as a WordPress plugin in the [examples directory](../examples/extensions/add-task/).
 
 ## Models and classes
 
