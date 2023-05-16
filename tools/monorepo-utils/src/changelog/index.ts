@@ -44,7 +44,7 @@ const changeLogHelper = new Command( 'changelog' )
 			const significance = 'patch';
 			const type = 'fix';
 
-			const { isCommunityPR, prOwner, branch, fileName } =
+			const { prData, isCommunityPR, prOwner, branch, fileName } =
 				await getPullRequestData( { owner, name }, prNumber );
 
 			Logger.notice(
@@ -52,9 +52,10 @@ const changeLogHelper = new Command( 'changelog' )
 					isCommunityPR ? 'is' : 'is not'
 				} a community PR. Making a clone of ${ prOwner }/${ name } and adding a changelog to branch ${ branch }`
 			);
-			// const { body } = prData;
 
-			// Logger.notice( JSON.stringify( prData, null, 2 ) );
+			const { body } = prData;
+
+			Logger.notice( JSON.stringify( body, null, 2 ) );
 
 			process.exit( 0 );
 
