@@ -2,9 +2,25 @@ name: 'Changelog Auto Add'
 on: workflow_dispatch
 
 jobs:
-    hello-world:
-        name: 'Hello World'
+    add-commits:
+        name: 'Add changelog to open community PR'
         runs-on: ubuntu-20.04
+        permissions:
+            contents: write
+            issues: write
         steps:
-            - name: Hello
-              run: echo "Hello World"
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+
+            - name: Install prerequisites
+              run: |
+                  npm install -g pnpm
+                  pnpm install --filter monorepo-utils
+
+            - name: 'Make commits'
+              id: commits
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: pnpm run utils changelog -o psealock
