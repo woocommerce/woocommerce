@@ -25,13 +25,13 @@
 
 	.interface-interface-skeleton__header {
 		background-color: $white;
-		width: calc( 100% - $admin-menu-width );
+		width: calc(100% - $admin-menu-width);
 		left: $admin-menu-width;
 		top: $adminbar-height;
 		position: fixed;
 		@include breakpoint( '<960px' ) {
 			left: $admin-menu-width-collapsed;
-			width: calc( 100% - $admin-menu-width-collapsed );
+			width: calc(100% - $admin-menu-width-collapsed);
 		}
 		@include breakpoint( '<782px' ) {
 			top: $adminbar-height-mobile;
