@@ -302,7 +302,7 @@ class CLIRunner {
 	 * [--order-types]
 	 * : Comma seperated list of order types that needs to be verified. For example, --order-types=shop_order,shop_order_refund
 	 * ---
-	 * default: Output of function
+	 * default: Output of function `wc_get_order_types( 'cot-migration' )`
 	 *
 	 * ## EXAMPLES
 	 *
