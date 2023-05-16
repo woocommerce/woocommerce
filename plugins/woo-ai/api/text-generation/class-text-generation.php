@@ -85,7 +85,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to read.
+	 * Check if a given request has access to create.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
@@ -99,7 +99,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Get the onboarding tasks.
+	 * Get the text completion.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
@@ -108,9 +108,8 @@ class Text_Generation extends \WC_REST_Data_Controller {
 		$prompt            = $request->get_param( 'prompt' );
 		$temperature       = $request->get_param( 'temperature' ) ? $request->get_param( 'temperature' ) : 1;
 		$previous_messages = $request->get_param( 'previous_messages' ) ? $request->get_param( 'previous_messages' ) : array();
-		$request_model     = $request->get_param( 'model' ) ? $request->get_param( 'model' ) : 'openai';
 
-		$model = $this->models[ $request_model ];
+		$model = $this->models['openai'];
 
 		$api_url = $model['url'];
 		$api_key = $model['key'];
