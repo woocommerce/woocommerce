@@ -25,23 +25,18 @@ class AddToCartForm extends AbstractBlock {
 	 * @return string | void Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		global $product;
-
 		$post_id = $block->context['postId'];
 
 		if ( ! isset( $post_id ) ) {
 			return '';
 		}
 
+		$product = wc_get_product( $post_id );
 		if ( ! $product instanceof \WC_Product ) {
-			$product = wc_get_product( $post_id );
-			if ( ! $product instanceof \WC_Product ) {
-				return '';
-			}
+			return '';
 		}
 
 		ob_start();
-
 		/**
 		 * Trigger the single product add to cart action for each product type.
 		*
