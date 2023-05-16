@@ -11,7 +11,7 @@ const {
 const config = {
 	timeout: DEFAULT_TIMEOUT_OVERRIDE
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
-		: 180 * 1000,
+		: 150 * 1000,
 	expect: { timeout: 20 * 1000 },
 	outputDir: './test-results/report',
 	globalSetup: require.resolve( './global-setup' ),
