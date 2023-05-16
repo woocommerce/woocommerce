@@ -8,7 +8,7 @@ const variableProductName = 'Variable Product with Three Variations';
 
 let productId;
 
-test.describe.only( 'Add variable product', () => {
+test.describe( 'Add variable product', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { browser } ) => {
