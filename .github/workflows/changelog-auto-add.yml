@@ -1,4 +1,4 @@
-name: 'Add commits to PRs'
+name: 'Changelog Auto Add'
 on: workflow_dispatch
 
 jobs:
