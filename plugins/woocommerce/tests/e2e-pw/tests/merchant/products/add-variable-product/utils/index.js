@@ -1,0 +1,117 @@
+function newWCApi( baseURL ) {
+	return new wcApi( {
+		url: baseURL,
+		consumerKey: process.env.CONSUMER_KEY,
+		consumerSecret: process.env.CONSUMER_SECRET,
+		version: 'wc/v3',
+	} );
+}
+
+async function createVariableProduct( browser, attributes = [] ) {
+	const api = newWCApi( baseURL );
+	const randomNum = Math.floor( Math.random() * 1000 );
+	const payload = {
+		name: `Unbranded Granite Shirt ${ randomNum }`,
+		type: 'variable',
+		attributes,
+	};
+
+	const productId = await api
+		.post( 'products', payload )
+		.then( ( response ) => response.data.id );
+
+	return productId;
+}
+
+async function deleteProductsAddedByTests( baseURL ) {
+	const api = newWCApi( baseURL );
+
+	await api.post( 'products/batch', { delete: productIds } );
+}
+
+/**
+ * @param {import('@playwright/test').Browser} browser
+ */
+async function showVariableProductTour( browser, show ) {
+	const productPageURL = 'wp-admin/post-new.php?post_type=product';
+	const addProductPage = await browser.newPage();
+
+	// Go to "Add new product" page
+	await addProductPage.goto( productPageURL );
+
+	// Get the current user's ID and user preferences
+	const { id: userId, woocommerce_meta } = await test.step(
+		"Get the current user's ID and user preferences",
+		async () => {
+			return await addProductPage.evaluate( () => {
+				return window.wp.data.select( 'core' ).getCurrentUser();
+			} );
+		}
+	);
+
+	// Turn off the variable product tour
+	const updatedWooCommerceMeta = {
+		...woocommerce_meta,
+		variable_product_tour_shown: show ? '' : '"yes"',
+	};
+
+	// Save the updated user preferences
+	await addProductPage.evaluate(
+		async ( { userId, updatedWooCommerceMeta } ) => {
+			await window.wp.data.dispatch( 'core' ).saveUser( {
+				id: userId,
+				woocommerce_meta: updatedWooCommerceMeta,
+			} );
+		},
+		{ userId, updatedWooCommerceMeta }
+	);
+
+	// Close the page
+	await addProductPage.close();
+}
+
+function generateVariationsFromAttributes( attributes ) {
+	const combine = ( runningList, nextAttribute ) => {
+		const variations = [];
+		let newVar;
+
+		if ( ! Array.isArray( runningList[ 0 ] ) ) {
+			runningList = [ runningList ];
+		}
+
+		for ( const partialVariation of runningList ) {
+			if ( runningList.length === 1 ) {
+				for ( const startingAttribute of partialVariation ) {
+					for ( const nextAttrValue of nextAttribute ) {
+						newVar = [ startingAttribute, nextAttrValue ];
+						variations.push( newVar );
+					}
+				}
+			} else {
+				for ( const nextAttrValue of nextAttribute ) {
+					newVar = partialVariation.concat( [ nextAttrValue ] );
+					variations.push( newVar );
+				}
+			}
+		}
+
+		return variations;
+	};
+
+	let allVariations = attributes[ 0 ].options;
+
+	for ( let i = 1; i < attributes.length; i++ ) {
+		const nextAttribute = attributes[ i ].options;
+
+		allVariations = combine( allVariations, nextAttribute );
+	}
+
+	return allVariations;
+}
+
+module.exports = {
+	createVariableProduct,
+	deleteProductsAddedByTests,
+	generateVariationsFromAttributes,
+	showVariableProductTour,
+};
