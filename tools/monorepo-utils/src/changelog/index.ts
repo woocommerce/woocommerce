@@ -10,7 +10,6 @@ import { execSync } from 'child_process';
  */
 import { Logger } from '../core/logger';
 import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
-import { getPullRequest, isCommunityPullRequest } from '../core/github/repo';
 import { getPullRequestData } from './lib';
 
 const changeLogHelper = new Command( 'changelog' )
