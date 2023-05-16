@@ -8,11 +8,11 @@ import { render } from '@wordpress/element';
  */
 import {
 	ProductDescriptionForm,
-	ProductDescriptionButton,
+	DescriptionButtonContainer,
 } from './product-description';
 
-import './product-text-generation';
 import './index.scss';
+import './product-description/product-text-meta-box';
 
 const buttonRoot = document.getElementById(
 	'woocommerce-ai-app-product-gpt-button'
@@ -22,7 +22,7 @@ const formRoot = document.getElementById(
 );
 
 if ( buttonRoot ) {
-	render( <ProductDescriptionButton />, buttonRoot );
+	render( <DescriptionButtonContainer />, buttonRoot );
 }
 
 if ( formRoot ) {
