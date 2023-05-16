@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update the E2E test timeout to 90 sec, and update the E2E README.

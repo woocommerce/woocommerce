@@ -3,6 +3,6 @@
  */
 import { BlockAttributes } from '@wordpress/blocks';
 
-export interface ShippingFeeBlockAttributes extends BlockAttributes {
+export interface ShippingClassBlockAttributes extends BlockAttributes {
 	title: string;
 }

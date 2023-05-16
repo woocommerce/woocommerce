@@ -1,20 +1,52 @@
 /**
  * External dependencies
  */
-import { graphql } from '@octokit/graphql';
+import { graphql as gql } from '@octokit/graphql';
 import { Octokit } from 'octokit';
+import { graphql } from '@octokit/graphql/dist-types/types';
 
 /**
  * Internal dependencies
  */
 import { getEnvVar } from '../environment';
 
-export const graphqlWithAuth = graphql.defaults( {
-	headers: {
-		authorization: `Bearer ${ getEnvVar( 'GITHUB_TOKEN', true ) }`,
-	},
-} );
+let graphqlWithAuthInstance;
+let octokitWithAuthInstance;
 
-export const octokitWithAuth = new Octokit( {
-	auth: getEnvVar( 'GITHUB_TOKEN', true ),
-} );
+/**
+ * Returns a graphql instance with auth headers, throws an Exception if
+ * `GITHUB_TOKEN` env var is not present.
+ *
+ * @return graphql instance
+ */
+export const graphqlWithAuth = (): graphql => {
+	if ( graphqlWithAuthInstance ) {
+		return graphqlWithAuthInstance;
+	}
+
+	graphqlWithAuthInstance = gql.defaults( {
+		headers: {
+			authorization: `Bearer ${ getEnvVar( 'GITHUB_TOKEN', true ) }`,
+		},
+	} );
+
+	return graphqlWithAuthInstance;
+};
+
+/**
+ * Returns an Octokit instance with auth headers, throws an Exception if
+ * `GITHUB_TOKEN` env var is not present.
+ *
+ * @return graphql instance
+ */
+export const octokitWithAuth = (): Octokit => {
+	if ( octokitWithAuthInstance ) {
+		return octokitWithAuthInstance;
+	}
+
+	octokitWithAuthInstance = new Octokit( {
+		auth: getEnvVar( 'GITHUB_TOKEN', true ),
+	} );
+
+	return octokitWithAuthInstance;
+};

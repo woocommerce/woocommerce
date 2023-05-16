@@ -34,7 +34,10 @@ export const BusinessLocation = ( {
 	const inputLabel = __( 'Select country/region', 'woocommerce' );
 
 	return (
-		<div className="woocommerce-profiler-business-location">
+		<div
+			className="woocommerce-profiler-business-location"
+			data-testid="core-profiler-business-location"
+		>
 			<Navigation percentage={ navigationProgress } />
 			<div className="woocommerce-profiler-page__content woocommerce-profiler-business-location__content">
 				<Heading
