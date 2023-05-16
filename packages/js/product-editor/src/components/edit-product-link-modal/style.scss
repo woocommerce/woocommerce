@@ -1,5 +1,5 @@
 .woocommerce-product-link-edit-modal {
-	min-width: 650px;
+	max-width: 650px;
 
 	&__buttons {
 		margin-top: $gap-larger;
@@ -10,7 +10,7 @@
 	}
 
 	.components-modal__header {
-		border-color: $gray-300;
+		border: none;
 	}
 
 	.woocommerce-product-link-edit-modal__description {
