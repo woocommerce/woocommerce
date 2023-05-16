@@ -7,3 +7,4 @@ export * from './object-operations';
 export * from './products';
 export * from './shared-attributes';
 export * from './sanitize-html';
+export * from './is-site-editor-page';
