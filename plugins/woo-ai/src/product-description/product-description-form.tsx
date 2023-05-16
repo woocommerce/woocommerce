@@ -145,7 +145,7 @@ export function ProductDescriptionForm() {
 						try {
 							setFetching( true );
 							const response = await apiFetch< WooApiResponse >( {
-								path: '/wc-admin/wooai/text-generation',
+								path: '/wooai/text-generation',
 								method: 'POST',
 								data: {
 									prompt: `Write a product description with ${ tone } tone, from the following features: ${ userProductDescription }.`,
