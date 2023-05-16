@@ -55,7 +55,10 @@ const changeLogHelper = new Command( 'changelog' )
 			);
 			const tmpRepoPath = devRepoPath
 				? devRepoPath
-				: await cloneAuthenticatedRepo( options, true );
+				: await cloneAuthenticatedRepo(
+						{ owner: contributor, name },
+						true
+				  );
 
 			Logger.endTask();
 
