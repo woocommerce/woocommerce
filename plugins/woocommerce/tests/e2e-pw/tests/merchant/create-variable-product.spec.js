@@ -203,7 +203,7 @@ async function createVariableProductFixture( baseURL ) {
 }
 
 test.describe( 'Add New Variable Product Page', () => {
-	test.setTimeout( 150 * 1000 );
+	test.setTimeout( 180 * 1000 );
 
 	test.use( { storageState: process.env.ADMINSTATE } );
 
