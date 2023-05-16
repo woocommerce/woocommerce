@@ -257,7 +257,6 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 						'is-loading': cartIsLoading,
 					}
 				) }
-				title=""
 				isOpen={ isOpen }
 				onClose={ () => {
 					setIsOpen( false );
