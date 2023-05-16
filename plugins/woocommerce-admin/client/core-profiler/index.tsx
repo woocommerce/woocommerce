@@ -1,3 +1,4 @@
+/* eslint-disable xstate/no-inline-implementation */
 /**
  * External dependencies
  */
@@ -10,6 +11,7 @@ import {
 	ExtensionList,
 	OPTIONS_STORE_NAME,
 	COUNTRIES_STORE_NAME,
+	PLUGINS_STORE_NAME,
 	Country,
 	ONBOARDING_STORE_NAME,
 	Extension,
@@ -30,12 +32,13 @@ import {
 } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
+import { Extensions } from './pages/Extensions';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
 import { Extensions } from './pages/Extensions';
 
 import './style.scss';
-
+import { InstallAndActivatePlugins } from './services/installAndActivatePlugins';
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
 // https://stately.ai/blog/introducing-typescript-typegen-for-xstate
 
@@ -74,8 +77,8 @@ export type BusinessLocationEvent = {
 	};
 };
 
-export type ExtensionsEvent = {
-	type: 'EXTENSIONS_COMPLETED';
+export type ExtensionsSelectionSubmittedEvent = {
+	type: 'EXTENSIONS_SELECTION_SUBMITTED';
 	payload: {
 		extensionsSelected: CoreProfilerStateMachineContext[ 'extensionsSelected' ];
 	};
@@ -100,8 +103,10 @@ export type CoreProfilerStateMachineContext = {
 	geolocatedLocation: {
 		location: string;
 	};
-	extensionsAvailable: ExtensionList[ 'plugins' ] | [];
+	extensionsAvailable: ExtensionList[ 'plugins' ] | [  ];
 	extensionsSelected: string[]; // extension slugs
+	extensionsErrors: { plugin: string; error: string }[];
+	extensionsInstallationRetryCount: number;
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
 	loader: {
@@ -263,8 +268,12 @@ const updateTrackingOption = (
 const updateOnboardingProfileOption = (
 	context: CoreProfilerStateMachineContext
 ) => {
-	const { businessChoice, sellingOnlineAnswer, sellingPlatforms, ...rest } =
-		context.userProfile;
+	const {
+		businessChoice,
+		sellingOnlineAnswer,
+		sellingPlatforms,
+		...rest
+	} = context.userProfile;
 
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_onboarding_profile: {
@@ -361,6 +370,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		businessInfo: { location: 'US:CA' },
 		extensionsAvailable: [],
 		extensionsSelected: [],
+		extensionsErrors: [],
+		extensionsInstallationRetryCount: 0,
 		countries: {},
 		loader: {},
 	} as CoreProfilerStateMachineContext,
@@ -638,10 +649,44 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				EXTENSIONS_COMPLETED: {
 					target: 'settingUpStore',
 				},
+				EXTENSIONS_INSTALLATION_RETRY_THRESHOLD_REACHED: {
+					actions: 'redirectToWooHome',
+				},
+				EXTENSIONS_SELECTION_SUBMITTED: {
+					target: 'installExtensions',
+					actions: [
+						assign( {
+							extensionsSelected: (
+								_context,
+								event: ExtensionsSelectionSubmittedEvent
+							) => event.payload.extensionsSelected,
+						} ),
+					],
+				},
 			},
 			meta: {
 				progress: 80,
 				component: Extensions,
+			},
+		},
+		installExtensions: {
+			invoke: {
+				src: InstallAndActivatePlugins,
+				onDone: {
+					actions: 'redirectToWooHome',
+				},
+				onError: {
+					target: 'extensions',
+					actions: assign( {
+						extensionsErrors: ( _context, event ) => event.data,
+						extensionsInstallationRetryCount: ( context ) => {
+							return context.extensionsInstallationRetryCount + 1;
+						},
+					} ),
+				},
+			},
+			meta: {
+				component: Loader,
 			},
 		},
 		settingUpStore: {},
