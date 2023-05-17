@@ -26,17 +26,14 @@ test.describe( 'Add variable product', () => {
 		await test.step(
 			`Type "${ variableProductName }" into the "Product name" input field.`,
 			async () => {
-				await page
-					.getByLabel( 'Product name' )
-					.fill( variableProductName );
+				const productNameTextbox = page.getByLabel( 'Product name' );
+				const permalink = page.locator( '#sample-permalink' );
+
+				await productNameTextbox.fill( variableProductName );
+				await productNameTextbox.blur();
+				await expect( permalink ).toBeVisible();
 			}
 		);
-
-		await test.step( 'Expect permalink to appear.', async () => {
-			const permalink = page.locator( '#sample-permalink' );
-
-			await expect( permalink ).toBeVisible();
-		} );
 
 		await test.step(
 			'Select the "Variable product" product type.',
