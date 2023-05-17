@@ -118,7 +118,9 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 
 	const onSectionTitleUpdate = ( updatedKey ) => {
 		return ( updatedTitle ) => {
-			recordEvent( 'dash_section_rename', { key: updatedKey } );
+			recordEvent( 'dash_section_renameTHIS_IS_A_GOOOD_CHANGE', {
+				key: updatedKey,
+			} );
 			updateSection( updatedKey, { title: updatedTitle } );
 		};
 	};
@@ -240,8 +242,10 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 			query,
 			defaultDateRange
 		);
-		const { primary: primaryDate, secondary: secondaryDate } =
-			getCurrentDates( query, defaultDateRange );
+		const {
+			primary: primaryDate,
+			secondary: secondaryDate,
+		} = getCurrentDates( query, defaultDateRange );
 		const dateQuery = {
 			period,
 			compare,
