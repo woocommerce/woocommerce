@@ -1,11 +1,14 @@
 const { test, expect } = require( '@playwright/test' );
 const {
+	variableProducts: variableProductUtils,
+} = require( '../../../../utils' );
+const {
 	createVariableProduct,
 	showVariableProductTour,
 	deleteProductsAddedByTests,
 	generateVariationsFromAttributes,
 	productAttributes,
-} = require( './utils' );
+} = variableProductUtils;
 
 let expectedGeneratedVariations,
 	productId_addManually,

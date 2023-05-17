@@ -1,12 +1,15 @@
 const { test, expect } = require( '@playwright/test' );
 const {
+	variableProducts: variableProductUtils,
+} = require( '../../../../utils' );
+const {
 	createVariableProduct,
 	showVariableProductTour,
 	deleteProductsAddedByTests,
 	productAttributes,
 	sampleVariations,
 	createVariations,
-} = require( './utils' );
+} = variableProductUtils;
 const variationOnePrice = '9.99';
 const variationTwoPrice = '11.99';
 const variationThreePrice = '20.00';

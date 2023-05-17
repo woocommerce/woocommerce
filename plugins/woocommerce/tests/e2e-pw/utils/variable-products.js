@@ -130,10 +130,14 @@ async function createVariableProduct( baseURL, attributes = [] ) {
  * Clean up all products created by the test.
  *
  * @param {string} baseURL
- * @param {number[]} productIds
+ * @param {number} otherId
  */
-async function deleteProductsAddedByTests( baseURL ) {
+async function deleteProductsAddedByTests( baseURL, otherId ) {
 	const api = newWCApi( baseURL );
+
+	if ( otherId ) {
+		productIds.push( otherId );
+	}
 
 	await api.post( 'products/batch', { delete: productIds } );
 }
