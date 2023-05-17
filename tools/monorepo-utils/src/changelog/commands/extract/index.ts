@@ -77,10 +77,10 @@ export const extractCommand = new Command( 'extract' )
 				comment,
 			};
 
+			Logger.notice( JSON.stringify( extractedData, null, 2 ) );
+
 			if ( isGithubCI() ) {
 				setOutput( 'extractedData', JSON.stringify( extractedData ) );
-			} else {
-				Logger.notice( JSON.stringify( extractedData, null, 2 ) );
 			}
 		}
 	);
