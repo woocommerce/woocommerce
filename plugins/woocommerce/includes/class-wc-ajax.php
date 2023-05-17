@@ -3030,9 +3030,12 @@ class WC_AJAX {
 
 		$zone_id     = wc_clean( wp_unslash( $_POST['zone_id'] ) );
 		$zone        = new WC_Shipping_Zone( $zone_id );
+		do_action( 'woocommerce_update_shipping_setting', array( 'id' => 'zone_method' ) );
 		$instance_id = $zone->add_shipping_method( wc_clean( wp_unslash( $_POST['method_id'] ) ) );
 
-		do_action( 'woocommerce_update_option', array( 'id' => 'zone_id'  ));
+
+		global $current_tab;
+		$current_tab = 'shipping';
 		do_action( 'woocommerce_update_options' );
 
 		wp_send_json_success(
