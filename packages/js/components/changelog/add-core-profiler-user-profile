@@ -1,4 +1,4 @@
 Significance: patch
 Type: add
 
-Add onKeyDown option to experimentalSelectControl
+Add onKeyDown and readOnlyWhenClosed options to experimentalSelectControl
