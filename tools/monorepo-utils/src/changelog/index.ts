@@ -7,8 +7,8 @@ import { setOutput } from '@actions/core';
 /**
  * Internal dependencies
  */
-import { Logger } from '../../../core/logger';
-import { isGithubCI } from '../../../core/environment';
+import { Logger } from '../core/logger';
+import { isGithubCI } from '../core/environment';
 import {
 	getPullRequestData,
 	getChangelogSignificance,
@@ -18,7 +18,8 @@ import {
 	getChangelogComment,
 } from './lib';
 
-export const extractCommand = new Command( 'extract' )
+const program = new Command( 'changelog' )
+	.description( 'Changelog utilities' )
 	.option(
 		'-o --owner <owner>',
 		'Repository owner. Default: woocommerce',
@@ -84,3 +85,5 @@ export const extractCommand = new Command( 'extract' )
 			}
 		}
 	);
+
+export default program;
