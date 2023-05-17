@@ -61,8 +61,12 @@ for ( const currentPage of wcPages ) {
 						await page.goto(
 							'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 						);
-						await page.click( 'text=Skip setup store details' );
-						await page.click( 'button >> text=No thanks' );
+						await page
+							.locator( 'text=Skip setup store details' )
+							.click();
+						await page
+							.locator( 'button >> text=No thanks' )
+							.click();
 						await page.waitForLoadState( 'networkidle' );
 						await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 					}
@@ -81,10 +85,12 @@ for ( const currentPage of wcPages ) {
 						);
 					}
 
-					await page.click(
-						`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`,
-						{ waitForLoadState: 'networkidle' }
-					);
+					await page
+						.locator(
+							`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`,
+							{ waitForLoadState: 'networkidle' }
+						)
+						.click();
 
 					await expect(
 						page.locator( 'h1.components-text' )

@@ -21,7 +21,7 @@ module.exports = async ( config ) => {
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', admin.username );
 			await adminPage.fill( 'input[name="pwd"]', admin.password );
-			await adminPage.click( 'text=Log In' );
+			await adminPage.locator( 'text=Log In' ).click();
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
 			);

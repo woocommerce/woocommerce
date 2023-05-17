@@ -101,7 +101,7 @@ test.describe(
 				'#wp-block-search__input-1',
 				simpleProductName + ' 1'
 			);
-			await page.click( 'button.wp-block-search__button' );
+			await page.locator( 'button.wp-block-search__button' ).click();
 
 			await expect( page.locator( 'h1.page-title' ) ).toContainText(
 				`${ simpleProductName } 1`
@@ -116,8 +116,10 @@ test.describe(
 		} ) => {
 			// browse the Audio category
 			await page.goto( 'shop/' );
-			await page.click( `text=${ simpleProductName } 2` );
-			await page.click( 'span.posted_in > a', { hasText: categoryB } );
+			await page.locator( `text=${ simpleProductName } 2` ).click();
+			await page
+				.locator( 'span.posted_in > a', { hasText: categoryB } )
+				.click();
 
 			// verify the Audio category page
 			await expect( page.locator( 'h1.page-title' ) ).toContainText(
@@ -126,7 +128,7 @@ test.describe(
 			await expect(
 				page.locator( 'h2.woocommerce-loop-product__title' )
 			).toContainText( simpleProductName + ' 2' );
-			await page.click( `text=${ simpleProductName } 2` );
+			await page.locator( `text=${ simpleProductName } 2` ).click();
 			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 				simpleProductName + ' 2'
 			);

@@ -57,8 +57,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		} );
 		await page.fill( '#title', virtualProductName );
 		await page.fill( '#_regular_price', productPrice );
-		await page.click( '#_virtual' );
-		await page.click( '#publish' );
+		await page.locator( '#_virtual' ).click();
+		await page.locator( '#publish' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// When running in parallel, clicking the publish button sometimes saves products as a draft
@@ -67,7 +67,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 				'Draft'
 			)
 		) {
-			await page.click( '#publish' );
+			await page.locator( '#publish' ).click();
 			await page.waitForLoadState( 'networkidle' );
 		}
 
@@ -94,15 +94,17 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.click( 'text=Add to cart' );
-		await page.click( 'text=View cart' );
+		await page.locator( 'text=Add to cart' ).click();
+		await page.locator( 'text=View cart' ).click();
 		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
 			virtualProductName
 		);
 		await expect(
 			page.locator( 'a.shipping-calculator-button' )
 		).not.toBeVisible();
-		await page.click( `a.remove[data-product_id='${ virtualProductId }']` );
+		await page
+			.locator( `a.remove[data-product_id='${ virtualProductId }']` )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.locator( `a.remove[data-product_id='${ virtualProductId }']` )
@@ -116,7 +118,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.fill( '#title', nonVirtualProductName );
 		await page.fill( '#_regular_price', productPrice );
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
-		await page.click( '#publish' );
+		await page.locator( '#publish' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// When running in parallel, clicking the publish button sometimes saves products as a draft
@@ -125,7 +127,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 				'Draft'
 			)
 		) {
-			await page.click( '#publish' );
+			await page.locator( '#publish' ).click();
 			await page.waitForLoadState( 'networkidle' );
 		}
 
@@ -152,17 +154,17 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.click( 'text=Add to cart' );
-		await page.click( 'text=View cart' );
+		await page.locator( 'text=Add to cart' ).click();
+		await page.locator( 'text=View cart' ).click();
 		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
 			nonVirtualProductName
 		);
 		await expect(
 			page.locator( 'a.shipping-calculator-button' )
 		).toBeVisible();
-		await page.click(
-			`a.remove[data-product_id='${ nonVirtualProductId }']`
-		);
+		await page
+			.locator( `a.remove[data-product_id='${ nonVirtualProductId }']` )
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.locator(

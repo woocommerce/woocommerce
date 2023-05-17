@@ -28,9 +28,9 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		);
 		// clear out the email logs before each test
 		while ( ( await page.$( '#bulk-action-selector-top' ) ) !== null ) {
-			await page.click( '#cb-select-all-1' );
+			await page.locator( '#cb-select-all-1' ).click();
 			await page.selectOption( '#bulk-action-selector-top', 'delete' );
-			await page.click( '#doaction' );
+			await page.locator( '#doaction' ).click();
 		}
 	} );
 
@@ -71,7 +71,7 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		await page.fill( '#billing_phone', customer.billing.us.phone );
 		await page.fill( '#billing_email', customer.email );
 
-		await page.click( 'text=Place order' );
+		await page.locator( 'text=Place order' ).click();
 
 		await page.waitForSelector(
 			'li.woocommerce-order-overview__order > strong'

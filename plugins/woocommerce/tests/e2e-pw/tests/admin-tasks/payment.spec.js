@@ -8,8 +8,8 @@ test.describe( 'Payment setup task', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
-		await page.click( 'text=Skip setup store details' );
-		await page.click( 'button >> text=No thanks' );
+		await page.locator( 'text=Skip setup store details' ).click();
+		await page.locator( 'button >> text=No thanks' ).click();
 		await page.waitForLoadState( 'networkidle' );
 	} );
 
@@ -32,7 +32,7 @@ test.describe( 'Payment setup task', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.click( 'text=Set up payments' );
+		await page.locator( 'text=Set up payments' ).click();
 		await expect(
 			page.locator( '.woocommerce-layout__header-wrapper > h1' )
 		).toHaveText( 'Set up payments' );
@@ -57,7 +57,7 @@ test.describe( 'Payment setup task', () => {
 		await page.fill( '//input[@placeholder="Sort code"]', '12' );
 		await page.fill( '//input[@placeholder="IBAN"]', '12 3456 7890' );
 		await page.fill( '//input[@placeholder="BIC / Swift"]', 'ABBA' );
-		await page.click( 'text=Save' );
+		await page.locator( 'text=Save' ).click();
 
 		// check that bank transfers were set up
 		await expect(
@@ -114,9 +114,11 @@ test.describe( 'Payment setup task', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		// enable COD payment option
-		await page.click(
-			'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
-		);
+		await page
+			.locator(
+				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
+			)
+			.click();
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );

@@ -14,7 +14,7 @@ test.describe( 'WooCommerce Tax Settings > enable', () => {
 
 		// Enable tax calculation
 		await page.locator( '#woocommerce_calc_taxes' ).check();
-		await page.click( 'text=Save changes' );
+		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
@@ -82,7 +82,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		await page.selectOption( '#woocommerce_tax_display_cart', 'incl' );
 		// Display a single tax total
 		await page.selectOption( '#woocommerce_tax_total_display', 'single' );
-		await page.click( 'text=Save changes' );
+		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
@@ -119,7 +119,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 
 		// Clear out existing tax classes
 		await page.fill( '#woocommerce_tax_classes', '' );
-		await page.click( 'text=Save changes' );
+		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that the settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
@@ -131,7 +131,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 
 		// Add a "fancy" tax class
 		await page.fill( '#woocommerce_tax_classes', 'Fancy' );
-		await page.click( 'text=Save changes' );
+		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that the settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
@@ -157,33 +157,33 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		).toContainText( 'Fancy rates' );
 
 		// Create a state tax
-		await page.click( '.wc_tax_rates a.insert' );
+		await page.locator( '.wc_tax_rates a.insert' ).click();
 		await page.fill( 'input[name^="tax_rate_country[new-0"]', 'US' );
 		await page.fill( 'input[name^="tax_rate_state[new-0"]', 'CA' );
 		await page.fill( 'input[name^="tax_rate[new-0"]', '7.5' );
 		await page.fill( 'input[name^="tax_rate_name[new-0"]', 'CA State Tax' );
 
 		// Create a federal tax
-		await page.click( '.wc_tax_rates a.insert' );
+		await page.locator( '.wc_tax_rates a.insert' ).click();
 		await page.fill( 'input[name^="tax_rate_country[new-1"]', 'US' );
 		await page.fill( 'input[name^="tax_rate[new-1"]', '1.5' );
 		await page.fill( 'input[name^="tax_rate_priority[new-1"]', '2' );
 		await page.fill( 'input[name^="tax_rate_name[new-1"]', 'Federal Tax' );
-		await page.click( 'input[name^="tax_rate_shipping[new-1"]' );
+		await page.locator( 'input[name^="tax_rate_shipping[new-1"]' ).click();
 
 		// Save changes
-		await page.click( 'text=Save changes' );
+		await page.locator( 'text=Save changes' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// Verity that there are 2 rates
 		await expect( page.locator( '#rates tr' ) ).toHaveCount( 2 );
 
 		// Delete federal rate
-		await page.click( '#rates tr:nth-child(2) input' );
-		await page.click( '.wc_tax_rates a.remove_tax_rates' );
+		await page.locator( '#rates tr:nth-child(2) input' ).click();
+		await page.locator( '.wc_tax_rates a.remove_tax_rates' ).click();
 
 		// Save changes
-		await page.click( 'text=Save changes' );
+		await page.locator( 'text=Save changes' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
 		// Verity that there are 2 rates
@@ -195,9 +195,9 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		).toBeVisible();
 
 		// Delete State tax
-		await page.click( '#rates tr input' );
-		await page.click( '.wc_tax_rates a.remove_tax_rates' );
-		await page.click( 'text=Save changes' );
+		await page.locator( '#rates tr input' ).click();
+		await page.locator( '.wc_tax_rates a.remove_tax_rates' ).click();
+		await page.locator( 'text=Save changes' ).click();
 		await page.waitForLoadState( 'networkidle' );
 	} );
 
@@ -209,7 +209,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 
 		// Remove "Fancy" tax class
 		await page.fill( '#woocommerce_tax_classes', '' );
-		await page.click( 'text=Save changes' );
+		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(

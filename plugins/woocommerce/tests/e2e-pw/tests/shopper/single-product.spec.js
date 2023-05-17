@@ -90,7 +90,7 @@ test.describe( 'Single Product Page', () => {
 		await page.goto( `product/${ slug }` );
 
 		await page.fill( 'input.qty', '5' );
-		await page.click( 'text=Add to cart' );
+		await page.locator( 'text=Add to cart' ).click();
 
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			'have been added to your cart.'
@@ -113,7 +113,7 @@ test.describe( 'Single Product Page', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( 'cart/' );
-		await page.click( 'a.remove' );
+		await page.locator( 'a.remove' ).click();
 
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
 			'Your cart is currently empty.'
@@ -180,7 +180,7 @@ test.describe( 'Variable Product Page', () => {
 
 		for ( const attr of variations ) {
 			await page.selectOption( '#size', attr.attributes[ 0 ].option );
-			await page.click( 'text=Add to cart' );
+			await page.locator( 'text=Add to cart' ).click();
 			await expect(
 				page.locator( '.woocommerce-message' )
 			).toContainText( 'has been added to your cart.' );
@@ -200,10 +200,10 @@ test.describe( 'Variable Product Page', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 		await page.selectOption( '#size', 'Large' );
-		await page.click( 'text=Add to cart' );
+		await page.locator( 'text=Add to cart' ).click();
 
 		await page.goto( 'cart/' );
-		await page.click( 'a.remove' );
+		await page.locator( 'a.remove' ).click();
 
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
 			'Your cart is currently empty.'
@@ -281,14 +281,14 @@ test.describe( 'Grouped Product Page', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 
-		await page.click( 'text=Add to cart' );
+		await page.locator( 'text=Add to cart' ).click();
 		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
 			'Please choose the quantity of items you wish to add to your cart…'
 		);
 
 		await page.fill( 'div.quantity input.qty >> nth=0', '5' );
 		await page.fill( 'div.quantity input.qty >> nth=1', '5' );
-		await page.click( 'text=Add to cart' );
+		await page.locator( 'text=Add to cart' ).click();
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			`“${ simpleProduct1 }” and “${ simpleProduct2 }” have been added to your cart.`
 		);
@@ -311,11 +311,11 @@ test.describe( 'Grouped Product Page', () => {
 		await page.goto( `product/${ slug }` );
 		await page.fill( 'div.quantity input.qty >> nth=0', '1' );
 		await page.fill( 'div.quantity input.qty >> nth=1', '1' );
-		await page.click( 'text=Add to cart' );
+		await page.locator( 'text=Add to cart' ).click();
 
 		await page.goto( 'cart/' );
-		await page.click( 'a.remove >> nth=1' );
-		await page.click( 'a.remove >> nth=0' );
+		await page.locator( 'a.remove >> nth=1' ).click();
+		await page.locator( 'a.remove >> nth=0' ).click();
 
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
 			'Your cart is currently empty.'

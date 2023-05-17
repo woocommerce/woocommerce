@@ -87,7 +87,7 @@ test.describe( 'Cart applying coupons', () => {
 		} ) => {
 			await page.goto( '/cart/' );
 			await page.fill( '#coupon_code', coupons[ i ].code );
-			await page.click( 'text=Apply coupon' );
+			await page.locator( 'text=Apply coupon' ).click();
 
 			await expect(
 				page.locator( '.woocommerce-message' )
@@ -106,7 +106,7 @@ test.describe( 'Cart applying coupons', () => {
 	test( 'prevents cart applying same coupon twice', async ( { page } ) => {
 		await page.goto( '/cart/' );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+		await page.locator( 'text=Apply coupon' ).click();
 		// successful first time
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			'Coupon code applied successfully.'
@@ -115,7 +115,7 @@ test.describe( 'Cart applying coupons', () => {
 		// try to apply the same coupon
 		await page.goto( '/cart/' );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+		await page.locator( 'text=Apply coupon' ).click();
 		await page.waitForLoadState( 'networkidle' );
 		// error received
 		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
@@ -133,16 +133,16 @@ test.describe( 'Cart applying coupons', () => {
 	test( 'allows cart to apply multiple coupons', async ( { page } ) => {
 		await page.goto( '/cart/' );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+		await page.locator( 'text=Apply coupon' );
 		// successful
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			'Coupon code applied successfully.'
 		);
 
 		await page.waitForLoadState( 'networkidle' );
-		await page.click( '#coupon_code' );
+		await page.locator( '#coupon_code' );
 		await page.fill( '#coupon_code', coupons[ 2 ].code );
-		await page.click( 'text=Apply coupon' );
+		await page.locator( 'text=Apply coupon' );
 		// successful
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			'Coupon code applied successfully.'
@@ -164,7 +164,7 @@ test.describe( 'Cart applying coupons', () => {
 	} ) => {
 		await page.goto( '/cart/' );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( 'text=Apply coupon' );
+		await page.locator( 'text=Apply coupon' );
 
 		// confirm numbers
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(
@@ -174,7 +174,7 @@ test.describe( 'Cart applying coupons', () => {
 			totals[ 0 ]
 		);
 
-		await page.click( 'a.woocommerce-remove-coupon' );
+		await page.locator( 'a.woocommerce-remove-coupon' );
 		await page.waitForLoadState( 'networkidle' );
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(

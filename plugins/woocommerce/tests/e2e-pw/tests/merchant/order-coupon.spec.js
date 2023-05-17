@@ -76,26 +76,30 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
 
 		// open modal for adding line items
-		await page.click( 'button.add-line-item' );
-		await page.click( 'button.add-order-item' );
+		await page.locator( 'button.add-line-item' ).click();
+		await page.locator( 'button.add-order-item' ).click();
 
 		// search for product to add
-		await page.click( 'text=Search for a product…' );
+		await page.locator( 'text=Search for a product…' ).click();
 		await page.type(
 			'input:below(:text("Search for a product…"))',
 			productName
 		);
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
 
-		await page.click( 'button#btn-ok' );
+		await page.locator( 'button#btn-ok' ).click();
 
 		// apply coupon
 		page.on( 'dialog', ( dialog ) => dialog.accept( couponCode ) );
-		await page.click( 'button.add-coupon' );
+		await page.locator( 'button.add-coupon' ).click();
 
-		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).toBeVisible();
+		await expect(
+			page.locator( '.wc_coupon_list li', { hasText: couponCode } )
+		).toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
 		).toContainText( 'Coupon(s)' );
@@ -113,7 +117,9 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 	test( 'can remove a coupon', async ( { page } ) => {
 		await page.goto( `/wp-admin/post.php?post=${ orderId }&action=edit` );
 		// assert that there is a coupon on the order
-		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).toBeVisible();
+		await expect(
+			page.locator( '.wc_coupon_list li', { hasText: couponCode } )
+		).toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
 		).toContainText( 'Coupon(s)' );
@@ -130,7 +136,9 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await page.dispatchEvent( 'a.remove-coupon', 'click' ); // have to use dispatchEvent because nothing visible to click on
 
 		// make sure the coupon was removed
-		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).not.toBeVisible();
+		await expect(
+			page.locator( '.wc_coupon_list li', { hasText: couponCode } )
+		).not.toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
 		).toContainText( 'Order Total' );

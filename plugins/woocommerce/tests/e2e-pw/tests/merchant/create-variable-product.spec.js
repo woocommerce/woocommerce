@@ -463,13 +463,15 @@ test.describe( 'Add New Variable Product Page', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.click(
-				'#variable_product_options .toolbar-top a.expand_all'
-			);
+			await page
+				.locator(
+					'#variable_product_options .toolbar-top a.expand_all'
+				)
+				.click();
 		} );
 
 		await test.step( 'Edit the first variation.', async () => {
@@ -546,18 +548,20 @@ test.describe( 'Add New Variable Product Page', () => {
 		} );
 
 		await test.step( 'Click "Save changes".', async () => {
-			await page.click( 'button.save-variation-changes' );
+			await page.locator( 'button.save-variation-changes' ).click();
 			await page.waitForLoadState( 'networkidle' );
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( 'a[href="#variable_product_options"]' );
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.click(
-				'#variable_product_options .toolbar-top a.expand_all'
-			);
+			await page
+				.locator(
+					'#variable_product_options .toolbar-top a.expand_all'
+				)
+				.click();
 		} );
 
 		await test.step(
@@ -656,7 +660,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step(
@@ -670,9 +674,11 @@ test.describe( 'Add New Variable Product Page', () => {
 		);
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.click(
-				'#variable_product_options .toolbar-top a.expand_all'
-			);
+			await page
+				.locator(
+					'#variable_product_options .toolbar-top a.expand_all'
+				)
+				.click();
 		} );
 
 		await test.step(
@@ -698,7 +704,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step(
@@ -748,11 +754,11 @@ test.describe( 'Add New Variable Product Page', () => {
 			);
 		}
 
-		await page.click( 'a[href="#product_attributes"]' );
+		await page.locator( 'a[href="#product_attributes"]' ).click();
 		// add 3 attributes
 		for ( let i = 0; i < 3; i++ ) {
 			if ( i > 0 ) {
-				await page.click( 'button.add_custom_attribute' );
+				await page.locator( 'button.add_custom_attribute' ).click();
 			}
 			await page.waitForSelector(
 				`input[name="attribute_names[${ i }]"]`
@@ -767,7 +773,7 @@ test.describe( 'Add New Variable Product Page', () => {
 				.first()
 				.type( 'val1 | val2' );
 		}
-		await page.click( 'text=Save attributes' );
+		await page.locator( 'text=Save attributes' ).click();
 		// wait for the attributes to be saved
 		await page.waitForResponse(
 			( response ) =>
@@ -781,11 +787,11 @@ test.describe( 'Add New Variable Product Page', () => {
 		await expect(
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
-		await page.click( '.updated.notice .notice-dismiss' );
+		await page.locator( '.updated.notice .notice-dismiss' ).click();
 
 		// manually adds a variation
-		await page.click( 'a[href="#variable_product_options"]' );
-		await page.click( 'button.add_variation_manually' );
+		await page.locator( 'a[href="#variable_product_options"]' ).click();
+		await page.locator( 'button.add_variation_manually' ).click();
 		await expect( page.locator( '.variation-needs-update' ) ).toBeVisible();
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
 			await page.selectOption(
@@ -793,7 +799,7 @@ test.describe( 'Add New Variable Product Page', () => {
 				defaultAttributes[ i ]
 			);
 		}
-		await page.click( 'button.save-variation-changes' );
+		await page.locator( 'button.save-variation-changes' ).click();
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
 			await expect(
 				page
@@ -812,11 +818,11 @@ test.describe( 'Add New Variable Product Page', () => {
 		).toBeVisible();
 
 		// manage stock at variation level
-		await page.click( 'a[href="#variable_product_options"]' );
+		await page.locator( 'a[href="#variable_product_options"]' ).click();
 		await page.waitForLoadState( 'networkidle' );
-		await page.click(
-			'#variable_product_options .toolbar-top a.expand_all'
-		);
+		await page
+			.locator( '#variable_product_options .toolbar-top a.expand_all' )
+			.click();
 		await page.locator( 'input.checkbox.variable_manage_stock' ).check();
 
 		const firstVariationContainer = await page
@@ -839,10 +845,10 @@ test.describe( 'Add New Variable Product Page', () => {
 		await firstVariationContainer
 			.getByPlaceholder( 'Store-wide threshold (2)' )
 			.fill( lowStockAmount );
-		await page.click( 'button.save-variation-changes' );
-		await page.click(
-			'#variable_product_options .toolbar-top a.expand_all'
-		);
+		await page.locator( 'button.save-variation-changes' ).click();
+		await page
+			.locator( '#variable_product_options .toolbar-top a.expand_all' )
+			.click();
 		await expect( page.locator( '#variable_stock0' ) ).toHaveValue(
 			stockAmount
 		);
@@ -854,7 +860,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		).toHaveText( 'Allow, but notify customer' );
 
 		// set variation defaults
-		await page.click( 'a[href="#variable_product_options"]' );
+		await page.locator( 'a[href="#variable_product_options"]' ).click();
 
 		// set variation defaults
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
@@ -863,7 +869,7 @@ test.describe( 'Add New Variable Product Page', () => {
 				defaultAttributes[ i ]
 			);
 		}
-		await page.click( 'button.save-variation-changes' );
+		await page.locator( 'button.save-variation-changes' ).click();
 		await page.waitForSelector( 'input#variable_low_stock_amount0', {
 			state: 'hidden',
 		} );
@@ -876,12 +882,12 @@ test.describe( 'Add New Variable Product Page', () => {
 		}
 
 		// remove a variation
-		await page.click( 'a[href="#variable_product_options"]' );
+		await page.locator( 'a[href="#variable_product_options"]' ).click();
 
 		// remove a variation
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await page.hover( '.woocommerce_variation' );
-		await page.click( '.remove_variation.delete' );
+		await page.locator( '.remove_variation.delete' ).click();
 		await expect( page.locator( '.woocommerce_variation' ) ).toHaveCount(
 			0
 		);

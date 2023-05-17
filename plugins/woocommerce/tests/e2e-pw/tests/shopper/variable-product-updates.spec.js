@@ -242,13 +242,13 @@ test.describe( 'Shopper > Update variable product', () => {
 			page.locator( '.woocommerce-variation-price' )
 		).toContainText( productPrice );
 
-		await page.click( 'a.reset_variations' );
+		await page.locator( 'a.reset_variations' ).click();
 
 		// Verify the reset by attempting to add the product to the cart
 		page.on( 'dialog', async ( dialog ) => {
 			expect( dialog.message() ).toContain( cartDialogMessage );
 			await dialog.dismiss();
 		} );
-		await page.click( '.single_add_to_cart_button' );
+		await page.locator( '.single_add_to_cart_button' ).click();
 	} );
 } );

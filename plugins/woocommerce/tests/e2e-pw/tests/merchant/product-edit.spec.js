@@ -41,7 +41,7 @@ test.describe( 'Products > Edit Product', () => {
 
 		// make some edits
 		await page.fill( '#title', 'Awesome product' );
-		await page.click( '#content-html' ); // text mode to work around iframe
+		await page.locator( '#content-html' ).click(); // text mode to work around iframe
 		await page.fill(
 			'.wp-editor-area >> nth=0',
 			'This product is pretty awesome'
@@ -49,7 +49,7 @@ test.describe( 'Products > Edit Product', () => {
 		await page.fill( '#_regular_price', '100.05' );
 
 		// publish the edits
-		await page.click( '#publish' );
+		await page.locator( '#publish' ).click();
 
 		// verify the changes saved
 		await expect( page.locator( '#title' ) ).toHaveValue(

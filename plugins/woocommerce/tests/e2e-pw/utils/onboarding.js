@@ -12,12 +12,14 @@ const onboarding = {
 	completeStoreDetailsSection: async ( page, store ) => {
 		await page.goto( STORE_DETAILS_URL );
 		// Type the requested country/region
-		await page.click( '#woocommerce-select-control-0__control-input' );
+		await page
+			.locator( '#woocommerce-select-control-0__control-input' )
+			.click();
 		await page.fill(
 			'#woocommerce-select-control-0__control-input',
 			store.country
 		);
-		await page.click( `button >> text=${ store.country }` );
+		await page.locator( `button >> text=${ store.country }` ).click();
 		// Fill store's address - first line
 		await page.fill( '#inspector-text-control-0', store.address );
 		// Fill postcode of the store
@@ -29,10 +31,10 @@ const onboarding = {
 		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
 		await page.locator( '#inspector-checkbox-control-0' ).check();
 		// Click continue button
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 		// Usage tracking dialog
 		await page.textContent( '.components-modal__header-heading' );
-		await page.click( 'button >> text=No thanks' );
+		await page.locator( 'button >> text=No thanks' ).click();
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	},
 
@@ -61,7 +63,7 @@ const onboarding = {
 		}
 
 		for ( let industry of Object.values( industries ) ) {
-			await page.click( `label >> text=${ industry }` );
+			await page.locator( `label >> text=${ industry }` ).click();
 		}
 	},
 
@@ -70,9 +72,9 @@ const onboarding = {
 		await page.textContent( '.components-modal__header-heading' );
 
 		if ( saveChanges ) {
-			await page.click( 'button >> text=Save' );
+			await page.locator( 'button >> text=Save' ).click();
 		} else {
-			await page.click( 'button >> text=Discard' );
+			await page.locator( 'button >> text=Discard' ).click();
 		}
 		await page.waitForLoadState( 'networkidle' );
 	},
@@ -99,7 +101,9 @@ const onboarding = {
 		}
 
 		Object.keys( products ).forEach( async ( product ) => {
-			await page.click( `label >> text=${ products[ product ] }` );
+			await page
+				.locator( `label >> text=${ products[ product ] }` )
+				.click();
 		} );
 	},
 
@@ -110,30 +114,40 @@ const onboarding = {
 		);
 		expect( pageHeading ).toContain( 'Tell us about your business' );
 		// Select 1 - 10 for products
-		await page.click( '#woocommerce-select-control-0__control-input', {
-			force: true,
-		} );
-		await page.click( '#woocommerce-select-control__option-0-1-10' );
+		await page
+			.locator( '#woocommerce-select-control-0__control-input' )
+			.click( {
+				force: true,
+			} );
+		await page
+			.locator( '#woocommerce-select-control__option-0-1-10' )
+			.click();
 		// Select No for selling elsewhere
-		await page.click( '#woocommerce-select-control-1__control-input', {
-			force: true,
-		} );
-		await page.click( '#woocommerce-select-control__option-1-no' );
+		await page
+			.locator( '#woocommerce-select-control-1__control-input' )
+			.click( {
+				force: true,
+			} );
+		await page
+			.locator( '#woocommerce-select-control__option-1-no' )
+			.click();
 	},
 
 	unselectBusinessFeatures: async ( page, expect_wc_pay = true ) => {
 		await page.goto( BUSIENSS_DETAILS_URL );
 
 		// Click the Free features tab
-		await page.click( '#tab-panel-0-business-features' );
+		await page.locator( '#tab-panel-0-business-features' ).click();
 		const pageHeading = await page.textContent(
 			'div.woocommerce-profile-wizard__step-header > h2'
 		);
 		expect( pageHeading ).toContain( 'Included business features' );
 		// Expand list of features
-		await page.click(
-			'button.woocommerce-admin__business-details__selective-extensions-bundle__expand'
-		);
+		await page
+			.locator(
+				'button.woocommerce-admin__business-details__selective-extensions-bundle__expand'
+			)
+			.click();
 
 		if ( expect_wc_pay ) {
 			// Check to see if WC Payments is present
@@ -151,7 +165,7 @@ const onboarding = {
 		}
 		// Uncheck all business features
 		if ( page.isChecked( '.components-checkbox-control__input' ) ) {
-			await page.click( '.components-checkbox-control__input' );
+			await page.locator( '.components-checkbox-control__input' ).click();
 		}
 	},
 };

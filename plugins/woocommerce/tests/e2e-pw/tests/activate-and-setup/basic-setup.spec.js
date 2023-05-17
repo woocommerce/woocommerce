@@ -6,7 +6,7 @@ test.describe( 'Store owner can finish initial store setup', () => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings' );
 		// Check the enable taxes checkbox
 		await page.locator( '#woocommerce_calc_taxes' ).check();
-		await page.click( 'text=Save changes' );
+		await page.locator( 'text=Save changes' ).click();
 		// Verify changes have been saved
 		await expect( page.locator( '#woocommerce_calc_taxes' ) ).toBeChecked();
 	} );
@@ -19,7 +19,7 @@ test.describe( 'Store owner can finish initial store setup', () => {
 		await page.locator( 'label >> text=Custom base' ).check();
 		// Fill custom base slug to use
 		await page.fill( '#woocommerce_permalink_structure', '/product/' );
-		await page.click( '#submit' );
+		await page.locator( '#submit' ).click();
 		// Verify that settings have been saved
 		await expect(
 			page.locator( '#setting-error-settings_updated' )

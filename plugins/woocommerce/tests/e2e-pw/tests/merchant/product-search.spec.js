@@ -47,7 +47,7 @@ test.describe( 'Products > Search and View a product', () => {
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
 
 		await page.fill( '#post-search-input', searchString );
-		await page.click( '#search-submit' );
+		await page.locator( '#search-submit' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
 		await expect( page.locator( '.row-title' ) ).toContainText(
@@ -61,9 +61,9 @@ test.describe( 'Products > Search and View a product', () => {
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
 
 		await page.fill( '#post-search-input', productName );
-		await page.click( '#search-submit' );
+		await page.locator( '#search-submit' ).click();
 
-		await page.click( '.row-title' );
+		await page.locator( '.row-title' ).click();
 
 		await expect( page ).toHaveURL( productIdInURL );
 		await expect( page.locator( '#title' ) ).toHaveValue( productName );
@@ -78,7 +78,7 @@ test.describe( 'Products > Search and View a product', () => {
 		await page.goto( 'wp-admin/edit.php?post_type=product' );
 
 		await page.fill( '#post-search-input', 'abcd1234' );
-		await page.click( '#search-submit' );
+		await page.locator( '#search-submit' ).click();
 
 		await expect( page.locator( '.no-items' ) ).toContainText(
 			'No products found'

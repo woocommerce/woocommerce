@@ -39,7 +39,7 @@ test.describe( 'Merchant can add shipping classes', () => {
 
 		// Add shipping classes
 		for ( const { name, slug, description } of shippingClasses ) {
-			await page.click( 'text=Add shipping class' );
+			await page.locator( 'text=Add shipping class' ).click();
 			await page.fill(
 				'.editing:last-child [data-attribute="name"]',
 				name
@@ -53,7 +53,7 @@ test.describe( 'Merchant can add shipping classes', () => {
 				description
 			);
 		}
-		await page.click( 'text=Save shipping classes' );
+		await page.locator( 'text=Save shipping classes' ).click();
 
 		// Set the expected auto-generated slug
 		shippingClassNoSlug.slug = 'poster-pack';

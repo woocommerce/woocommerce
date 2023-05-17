@@ -230,7 +230,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await page.fill( 'input[name=order_date_hour]', '18' );
 		await page.fill( 'input[name=order_date_minute]', '55' );
 
-		await page.click( 'button.save_order' );
+		await page.locator( 'button.save_order' ).click();
 
 		await expect(
 			page.locator( 'div.updated.notice.notice-success.is-dismissible', {
@@ -251,47 +251,55 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
 
 		// open modal for adding line items
-		await page.click( 'button.add-line-item' );
-		await page.click( 'button.add-order-item' );
+		await page.locator( 'button.add-line-item' ).click();
+		await page.locator( 'button.add-order-item' ).click();
 
 		// search for each product to add
-		await page.click( 'text=Search for a product…' );
+		await page.locator( 'text=Search for a product…' ).click();
 		await page.type(
 			'input:below(:text("Search for a product…"))',
 			simpleProductName
 		);
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
 
-		await page.click( 'text=Search for a product…' );
+		await page.locator( 'text=Search for a product…' ).click();
 		await page.type(
 			'input:below(:text("Search for a product…"))',
 			variableProductName
 		);
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
 
-		await page.click( 'text=Search for a product…' );
+		await page.locator( 'text=Search for a product…' ).click();
 		await page.type(
 			'input:below(:text("Search for a product…"))',
 			groupedProductName
 		);
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
 
-		await page.click( 'text=Search for a product…' );
+		await page.locator( 'text=Search for a product…' ).click();
 		await page.type(
 			'input:below(:text("Search for a product…"))',
 			externalProductName
 		);
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
 
-		await page.click( 'button#btn-ok' );
+		await page.locator( 'button#btn-ok' ).click();
 
 		// assert that products added
 		await expect( page.locator( 'td.name > a >> nth=0' ) ).toContainText(
@@ -309,7 +317,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		// Recalculate taxes
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( 'text=Recalculate' );
+		await page.locator( 'text=Recalculate' ).click();
 
 		// verify tax names
 		let i = 0;

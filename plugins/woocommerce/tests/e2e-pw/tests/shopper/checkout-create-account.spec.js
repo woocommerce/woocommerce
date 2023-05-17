@@ -148,7 +148,7 @@ test.describe( 'Shopper Checkout Create Account', () => {
 
 		await page.locator( '#createaccount' ).check();
 
-		await page.click( '#place_order' );
+		await page.locator( '#place_order' ).click();
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'Order received'
@@ -169,11 +169,11 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'My account'
 		);
-		await page.click( 'text=Log out' );
+		await page.locator( 'text=Log out' ).click();
 		// sign in as admin to confirm account creation
 		await page.fill( '#username', admin.username );
 		await page.fill( '#password', admin.password );
-		await page.click( 'text=Log in' );
+		await page.locator( 'text=Log in' ).click();
 
 		await page.goto( 'wp-admin/users.php' );
 		await expect( page.locator( 'tbody#the-list' ) ).toContainText(

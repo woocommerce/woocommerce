@@ -73,7 +73,7 @@ test.describe( 'Shopper My Account Create Account', () => {
 		).toBeVisible();
 
 		await page.fill( 'input#reg_email', customerEmailAddress );
-		await page.click( 'button[name="register"]' );
+		await page.locator( 'button[name="register"]' ).click();
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'My account'

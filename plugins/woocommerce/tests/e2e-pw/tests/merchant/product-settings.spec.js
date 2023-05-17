@@ -29,7 +29,7 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 			.locator( '#woocommerce_downloads_redirect_fallback_allowed' )
 			.check();
 		await page.uncheck( '#woocommerce_downloads_add_hash_to_filename' );
-		await page.click( 'text=Save changes' );
+		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
@@ -67,7 +67,7 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		await page
 			.locator( '#woocommerce_downloads_add_hash_to_filename' )
 			.check();
-		await page.click( 'text=Save changes' );
+		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
@@ -92,7 +92,7 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		// Try the final option
 		await page.reload();
 		await page.selectOption( '#woocommerce_file_download_method', 'force' );
-		await page.click( 'text=Save changes' );
+		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(

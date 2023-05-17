@@ -58,7 +58,7 @@ module.exports = async ( config ) => {
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', admin.username );
 			await adminPage.fill( 'input[name="pwd"]', admin.password );
-			await adminPage.click( 'text=Log In' );
+			await adminPage.locator( 'text=Log In' ).click();
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.waitForLoadState( 'domcontentloaded' );
@@ -98,7 +98,7 @@ module.exports = async ( config ) => {
 			);
 			await adminPage.fill( '#key_description', 'Key for API access' );
 			await adminPage.selectOption( '#key_permissions', 'read_write' );
-			await adminPage.click( 'text=Generate API key' );
+			await adminPage.locator( 'text=Generate API key' ).click();
 			process.env.CONSUMER_KEY = await adminPage.inputValue(
 				'#key_consumer_key'
 			);
@@ -131,7 +131,7 @@ module.exports = async ( config ) => {
 			await customerPage.goto( `/wp-admin` );
 			await customerPage.fill( 'input[name="log"]', customer.username );
 			await customerPage.fill( 'input[name="pwd"]', customer.password );
-			await customerPage.click( 'text=Log In' );
+			await customerPage.locator( 'text=Log In' ).click();
 
 			await customerPage.goto( `/my-account` );
 			await expect(

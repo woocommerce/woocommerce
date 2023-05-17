@@ -26,7 +26,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			storeDetails.us.industries,
 			storeDetails.us.expectedNumberOfIndustries
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 		await expect( page ).toHaveURL( /.*step=product-types/ );
 		await expect(
 			page.locator( '.product-types button >> text=Continue' )
@@ -44,12 +44,12 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		);
 
 		// Navigate back to "Store Details" section
-		await page.click( 'button >> text=Store Details' );
+		await page.locator( 'button >> text=Store Details' ).click();
 		await onboarding.handleSaveChangesModal( page, { saveChanges: true } );
 		await page.locator( 'text="Welcome to WooCommerce"' ).waitFor();
 
 		// Navigate back to "Industry" section
-		await page.click( 'button >> text=Industry' );
+		await page.locator( 'button >> text=Industry' ).click();
 		await page.textContent( '.components-checkbox-control__input' );
 		for ( let industry of Object.values( storeDetails.us.industries2 ) ) {
 			await expect( page.getByLabel( industry ) ).toBeChecked();
@@ -67,12 +67,12 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		);
 
 		// Navigate back to "Store Details" section
-		await page.click( 'button >> text=Store Details' );
+		await page.locator( 'button >> text=Store Details' ).click();
 
 		await onboarding.handleSaveChangesModal( page, { saveChanges: false } );
 
 		// Navigate back to "Industry" section
-		await page.click( 'button >> text=Industry' );
+		await page.locator( 'button >> text=Industry' ).click();
 		await page.textContent( '.components-checkbox-control__input' );
 		for ( let industry of Object.values( storeDetails.us.industries2 ) ) {
 			await expect( page.getByLabel( industry ) ).toBeChecked();
@@ -85,7 +85,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			page,
 			storeDetails.us.products
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 	} );
 
 	// eslint-disable-next-line jest/expect-expect
@@ -96,16 +96,16 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			storeDetails.us.industries,
 			storeDetails.us.expectedNumberOfIndustries
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 
 		await onboarding.completeProductTypesSection(
 			page,
 			storeDetails.us.products
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 
 		await onboarding.completeBusinessDetailsSection( page );
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 	} );
 
 	// eslint-disable-next-line jest/expect-expect
@@ -129,7 +129,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		);
 
 		await onboarding.unselectBusinessFeatures( page );
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 	} );
 } );
 
@@ -151,7 +151,7 @@ test.describe(
 				storeDetails.liberia.industries,
 				storeDetails.liberia.expectedNumberOfIndustries
 			);
-			await page.click( 'button >> text=Continue' );
+			await page.locator( 'button >> text=Continue' ).click();
 		} );
 
 		// eslint-disable-next-line jest/expect-expect
@@ -165,7 +165,7 @@ test.describe(
 				storeDetails.liberia.industries,
 				storeDetails.liberia.expectedNumberOfIndustries
 			);
-			await page.click( 'button >> text=Continue' );
+			await page.locator( 'button >> text=Continue' ).click();
 
 			await onboarding.completeProductTypesSection(
 				page,
@@ -178,14 +178,14 @@ test.describe(
 				)
 			).toHaveCount( 0 );
 
-			await page.click( 'button >> text=Continue' );
+			await page.locator( 'button >> text=Continue' ).click();
 
 			await onboarding.completeBusinessDetailsSection( page );
-			await page.click( 'button >> text=Continue' );
+			await page.locator( 'button >> text=Continue' ).click();
 
 			await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
 
-			await page.click( 'button >> text=Continue' );
+			await page.locator( 'button >> text=Continue' ).click();
 		} );
 
 		// Skipping this test because it's very flaky.  Onboarding checklist changed so that the text
@@ -205,10 +205,10 @@ test.describe(
 			).toHaveCount( 3 );
 			// Checklist shows when completing setup wizard
 			await onboarding.completeBusinessDetailsSection( page );
-			await page.click( 'button >> text=Continue' );
+			await page.locator( 'button >> text=Continue' ).click();
 
 			await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
-			await page.click( 'button >> text=Continue' );
+			await page.locator( 'button >> text=Continue' ).click();
 
 			// Start test
 			await page.waitForLoadState( 'networkidle' );
@@ -234,12 +234,16 @@ test.describe.skip( 'Store owner can go through setup Task List', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
-		await page.click( '#woocommerce-select-control-0__control-input' );
+		await page
+			.locator( '#woocommerce-select-control-0__control-input' )
+			.click();
 		await page.fill(
 			'#woocommerce-select-control-0__control-input',
 			'United States (US) — California'
 		);
-		await page.click( 'button >> text=United States (US) — California' );
+		await page
+			.locator( 'button >> text=United States (US) — California' )
+			.click();
 		await page.fill( '#inspector-text-control-0', 'addr 1' );
 		await page.fill( '#inspector-text-control-1', '94107' );
 		await page.fill( '#inspector-text-control-2', 'San Francisco' );
@@ -248,31 +252,33 @@ test.describe.skip( 'Store owner can go through setup Task List', () => {
 			storeDetails.us.store.email
 		);
 		await page.locator( '#inspector-checkbox-control-0' ).check();
-		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=No thanks' );
-		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
+		await page.locator( 'button >> text=No thanks' ).click();
+		await page.locator( 'button >> text=Continue' ).click();
+		await page.locator( 'button >> text=Continue' ).click();
+		await page.locator( 'button >> text=Continue' ).click();
 		// Uncheck all business features
 		if ( page.isChecked( '.components-checkbox-control__input' ) ) {
-			await page.click( '.components-checkbox-control__input' );
+			await page.locator( '.components-checkbox-control__input' ).click();
 		}
-		await page.click( 'button >> text=Continue' );
+		await page.locator( 'button >> text=Continue' ).click();
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	} );
 
 	test( 'can setup shipping', async ( { page } ) => {
 		await page.goto( '/wp-admin/admin.php?page=wc-admin' );
-		await page.click( 'div >> text=Review Shipping Options' );
+		await page.locator( 'div >> text=Review Shipping Options' ).click();
 
 		// dismiss tourkit if visible
 		const tourkitVisible = await page
 			.locator( 'button.woocommerce-tour-kit-step-controls__close-btn' )
 			.isVisible();
 		if ( tourkitVisible ) {
-			await page.click(
-				'button.woocommerce-tour-kit-step-controls__close-btn'
-			);
+			await page
+				.locator(
+					'button.woocommerce-tour-kit-step-controls__close-btn'
+				)
+				.click();
 		}
 
 		// check for automatically added shipping zone

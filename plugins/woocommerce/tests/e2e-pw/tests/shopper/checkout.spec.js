@@ -191,7 +191,7 @@ test.describe( 'Checkout page', () => {
 			twoProductPrice
 		);
 
-		await page.click( '#ship-to-different-address' );
+		await page.locator( '#ship-to-different-address' ).click();
 
 		// asserting that you can fill in the shipping details
 		await expect( page.locator( '#shipping_first_name' ) ).toBeEditable();
@@ -228,10 +228,10 @@ test.describe( 'Checkout page', () => {
 		await page.fill( '#billing_phone', '555 555-5555' );
 		await page.fill( '#billing_email', guestEmail );
 
-		await page.click( 'text=Cash on delivery' );
+		await page.locator( 'text=Cash on delivery' ).click();
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
 
-		await page.click( 'text=Place order' );
+		await page.locator( 'text=Place order' ).click();
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'Order received'
@@ -250,7 +250,7 @@ test.describe( 'Checkout page', () => {
 		await page.goto( 'wp-login.php' );
 		await page.fill( 'input[name="log"]', admin.username );
 		await page.fill( 'input[name="pwd"]', admin.password );
-		await page.click( 'text=Log In' );
+		await page.locator( 'text=Log In' ).click();
 
 		// load the order placed as a guest
 		await page.goto(
@@ -278,7 +278,7 @@ test.describe( 'Checkout page', () => {
 		await page.goto( 'wp-admin/' );
 		await page.fill( 'input[name="log"]', customer.username );
 		await page.fill( 'input[name="pwd"]', customer.password );
-		await page.click( 'text=Log In' );
+		await page.locator( 'text=Log In' ).click();
 		await page.waitForLoadState( 'networkidle' );
 		for ( let i = 1; i < 3; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
@@ -303,10 +303,10 @@ test.describe( 'Checkout page', () => {
 		await page.fill( '#billing_phone', '555 555-5555' );
 		await page.fill( '#billing_email', customer.email );
 
-		await page.click( 'text=Cash on delivery' );
+		await page.locator( 'text=Cash on delivery' ).click();
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
 
-		await page.click( 'text=Place order' );
+		await page.locator( 'text=Place order' ).click();
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'Order received'
@@ -329,7 +329,7 @@ test.describe( 'Checkout page', () => {
 
 		await page.fill( 'input[name="log"]', admin.username );
 		await page.fill( 'input[name="pwd"]', admin.password );
-		await page.click( 'text=Log In' );
+		await page.locator( 'text=Log In' ).click();
 
 		// load the order placed as a customer
 		await page.goto(
