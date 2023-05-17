@@ -42,7 +42,12 @@ export function usePageClasses( page: Page ) {
 	}
 
 	useEffect( () => {
+		if ( ! page.path ) {
+			return;
+		}
+
 		const classes = getPathClassName( page.path );
+
 		document.body.classList.add( classes );
 		return () => {
 			document.body.classList.remove( classes );
