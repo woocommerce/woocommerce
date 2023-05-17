@@ -196,11 +196,12 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 
 		$values = array();
 		foreach ( array_values( $batch ) as $row ) {
-			$row_values   = array();
+			$row_values = array();
 			foreach ( $columns as $index => $column ) {
 				if ( ! isset( $row[ $column ] ) || is_null( $row[ $column ] ) ) {
 					$row_values[] = 'NULL';
 				} else {
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- $placeholders is a placeholder.
 					$row_values[] = $wpdb->prepare( $placeholders[ $index ], $row[ $column ] );
 				}
 			}
@@ -838,7 +839,7 @@ WHERE $where_clause
 		if ( is_null( $row[ $destination_alias ] ) ) {
 			$row[ $destination_alias ] = $this->get_type_defaults( $schema['type'] );
 		}
-		if ( in_array( $schema['type'], array( 'int', 'decimal' ), true ) ) {
+		if ( in_array( $schema['type'], array( 'int', 'decimal', 'float' ), true ) ) {
 			if ( '' === $row[ $alias ] || null === $row[ $alias ] ) {
 				$row[ $alias ] = 0; // $wpdb->prepare forces empty values to 0.
 			}
@@ -873,6 +874,7 @@ WHERE $where_clause
 		switch ( $type ) {
 			case 'float':
 			case 'int':
+			case 'decimal':
 				return 0;
 			case 'string':
 				return '';

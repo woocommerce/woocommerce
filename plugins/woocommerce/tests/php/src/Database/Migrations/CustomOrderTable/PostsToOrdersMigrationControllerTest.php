@@ -744,7 +744,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->sut->migrate_order( $order->get_id() );
 		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
 
-		$this->assertEmpty( $errors );
+		$this->assertEmpty( $errors, "Errors array is not empty: " . print_r( $errors, true ) );
 	}
 
 	/**
