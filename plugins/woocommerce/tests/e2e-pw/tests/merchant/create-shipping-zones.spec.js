@@ -62,10 +62,9 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.fill( '#zone_name', shippingZoneNameLocalPickup );
 
 			await page.locator( '.select2-search__field' ).click();
-			await page.type(
-				'.select2-search__field',
-				'British Columbia, Canada'
-			);
+			await page
+				.locator( '.select2-search__field' )
+				.type( 'British Columbia, Canada' );
 			await page
 				.locator(
 					'.select2-results__option.select2-results__option--highlighted'
@@ -120,10 +119,9 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.fill( '#zone_name', shippingZoneNameFreeShip );
 
 			await page.locator( '.select2-search__field' ).click();
-			await page.type(
-				'.select2-search__field',
-				'British Columbia, Canada'
-			);
+			await page
+				.locator( '.select2-search__field' )
+				.type( 'British Columbia, Canada' );
 			await page
 				.locator(
 					'.select2-results__option.select2-results__option--highlighted'
@@ -172,7 +170,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.fill( '#zone_name', shippingZoneNameFlatRate );
 
 			await page.locator( '.select2-search__field' ).click();
-			await page.type( '.select2-search__field', 'Canada' );
+			await page.locator( '.select2-search__field' ).type( 'Canada' );
 			await page
 				.locator(
 					'.select2-results__option.select2-results__option--highlighted'
@@ -227,7 +225,9 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.fill( '#zone_name', shippingZoneNameUSRegion );
 
 			await page.locator( '.select2-search__field' ).click();
-			await page.type( '.select2-search__field', 'United States' );
+			await page
+				.locator( '.select2-search__field' )
+				.type( 'United States' );
 			await page
 				.locator(
 					'.select2-results__option.select2-results__option--highlighted'

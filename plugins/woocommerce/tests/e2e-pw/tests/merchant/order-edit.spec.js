@@ -224,7 +224,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		);
 
 		// add downloadable product permissions
-		await page.type( 'input.select2-search__field', productName );
+		await page.locator( 'input.select2-search__field' ).type( productName );
 		await page
 			.locator(
 				'li.select2-results__option.select2-results__option--highlighted'
@@ -262,7 +262,9 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// add downloadable product permissions
-		await page.type( 'input.select2-search__field', product2Name );
+		await page
+			.locator( 'input.select2-search__field' )
+			.type( product2Name );
 		await page
 			.locator(
 				'li.select2-results__option.select2-results__option--highlighted'

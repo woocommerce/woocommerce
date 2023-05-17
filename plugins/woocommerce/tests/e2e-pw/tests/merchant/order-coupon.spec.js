@@ -81,10 +81,9 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 
 		// search for product to add
 		await page.locator( 'text=Search for a product…' ).click();
-		await page.type(
-			'input:below(:text("Search for a product…"))',
-			productName
-		);
+		await page
+			.locator( 'input:below(:text("Search for a product…"))' )
+			.type( productName );
 		await page
 			.locator(
 				'li.select2-results__option.select2-results__option--highlighted'

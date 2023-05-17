@@ -256,10 +256,9 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		// search for each product to add
 		await page.locator( 'text=Search for a product…' ).click();
-		await page.type(
-			'input:below(:text("Search for a product…"))',
-			simpleProductName
-		);
+		await page
+			.locator( 'input:below(:text("Search for a product…"))' )
+			.type( simpleProductName );
 		await page
 			.locator(
 				'li.select2-results__option.select2-results__option--highlighted'
@@ -267,10 +266,9 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			.click();
 
 		await page.locator( 'text=Search for a product…' ).click();
-		await page.type(
-			'input:below(:text("Search for a product…"))',
-			variableProductName
-		);
+		await page
+			.locator( 'input:below(:text("Search for a product…"))' )
+			.type( variableProductName );
 		await page
 			.locator(
 				'li.select2-results__option.select2-results__option--highlighted'
@@ -278,10 +276,9 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			.click();
 
 		await page.locator( 'text=Search for a product…' ).click();
-		await page.type(
-			'input:below(:text("Search for a product…"))',
-			groupedProductName
-		);
+		await page
+			.locator( 'input:below(:text("Search for a product…"))' )
+			.type( groupedProductName );
 		await page
 			.locator(
 				'li.select2-results__option.select2-results__option--highlighted'
@@ -289,10 +286,9 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			.click();
 
 		await page.locator( 'text=Search for a product…' ).click();
-		await page.type(
-			'input:below(:text("Search for a product…"))',
-			externalProductName
-		);
+		await page
+			.locator( 'input:below(:text("Search for a product…"))' )
+			.type( externalProductName );
 		await page
 			.locator(
 				'li.select2-results__option.select2-results__option--highlighted'
