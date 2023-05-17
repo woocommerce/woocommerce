@@ -3,6 +3,7 @@
  */
 import { Command } from '@commander-js/extra-typings';
 import { setOutput } from '@actions/core';
+import { execSync } from 'child_process';
 
 /**
  * Internal dependencies
@@ -128,7 +129,12 @@ const program = new Command( 'changelog' )
 					head,
 					fileName
 				);
-			console.log( touchedProjectsRequiringChangelog );
+
+			touchedProjectsRequiringChangelog.forEach( ( project ) => {
+				Logger.notice( `Running changelog command for ${ project }` );
+				const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } -e "${ message }" -n`;
+				execSync( cmd, { cwd: tmpRepoPath } );
+			} );
 		}
 	);
 

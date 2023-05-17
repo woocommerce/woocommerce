@@ -84,7 +84,6 @@ export const getTouchedProjectsRequiringChangelog = async (
 	head,
 	fileName
 ) => {
-	// Take into account woocommerce-admin changes get a woocommerce changelog
 	const changeloggerProjects = await getChangeloggerProjects( tmpRepoPath );
 	const touchedProjects = await getTouchedProjects(
 		tmpRepoPath,
