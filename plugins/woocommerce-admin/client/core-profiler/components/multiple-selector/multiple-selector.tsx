@@ -19,7 +19,7 @@ type Props = {
 	onSelect: (
 		selectedOptions: Array< { label: string; value: string } >
 	) => void;
-	initialValues?: Array< { label: string; value: string } >;
+	selectedOptions?: Array< { label: string; value: string } >;
 	placeholder?: string;
 	onOpenClose?: ( isOpen: boolean ) => void;
 };
@@ -27,17 +27,16 @@ type Props = {
 export const MultipleSelector = ( {
 	options,
 	onSelect,
-	initialValues = [],
+	selectedOptions = [],
 	placeholder = __( 'Select platforms', 'woocommerce' ),
 	onOpenClose = () => {},
 }: Props ) => {
-	const [ selectedOptions, setSelectedOptions ] = useState( initialValues );
-
 	return (
 		<SelectControl
 			label=""
 			multiple
 			__experimentalOpenMenuOnFocus
+			readOnlyWhenClosed={ false }
 			items={ options }
 			getFilteredItems={ ( allItems ) => allItems }
 			selected={ selectedOptions }
@@ -87,15 +86,10 @@ export const MultipleSelector = ( {
 								existingItem.value !== item.value
 					  )
 					: [ ...selectedOptions, item ];
-				setSelectedOptions( updatedPlatforms );
-				if ( onSelect ) {
-					onSelect( updatedPlatforms );
-				}
+				onSelect( updatedPlatforms );
 			} }
 			onRemove={ ( item ) =>
-				setSelectedOptions(
-					selectedOptions.filter( ( i ) => i !== item )
-				)
+				onSelect( selectedOptions.filter( ( i ) => i !== item ) )
 			}
 		>
 			{ renderMenu( { selectedOptions, onOpenClose } ) }

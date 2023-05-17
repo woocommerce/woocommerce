@@ -175,7 +175,7 @@ export const UserProfile = ( {
 							</p>
 							<MultipleSelector
 								options={ platformOptions }
-								initialValues={ platformOptions.filter(
+								selectedOptions={ platformOptions.filter(
 									( option ) =>
 										sellingPlatforms?.includes(
 											option.value
