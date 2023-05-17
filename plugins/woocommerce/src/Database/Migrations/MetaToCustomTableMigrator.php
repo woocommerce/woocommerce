@@ -193,16 +193,19 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 			$columns[]      = $schema['destination'];
 			$placeholders[] = MigrationHelper::get_wpdb_placeholder_for_type( $schema['type'] );
 		}
-		$placeholders = "'" . implode( "', '", $placeholders ) . "'";
 
 		$values = array();
 		foreach ( array_values( $batch ) as $row ) {
-			$query_params = array();
-			foreach ( $columns as $column ) {
-				$query_params[] = $row[ $column ] ?? null;
+			$row_values   = array();
+			foreach ( $columns as $index => $column ) {
+				if ( ! isset( $row[ $column ] ) || is_null( $row[ $column ] ) ) {
+					$row_values[] = 'NULL';
+				} else {
+					$row_values[] = $wpdb->prepare( $placeholders[ $index ], $row[ $column ] );
+				}
 			}
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $placeholders can only contain combination of placeholders described in MigrationHelper::get_wpdb_placeholder_for_type
-			$value_string = '(' . $wpdb->prepare( $placeholders, $query_params ) . ')';
+
+			$value_string = '(' . implode( ',', $row_values ) . ')';
 			$values[]     = $value_string;
 		}
 
@@ -831,6 +834,9 @@ WHERE $where_clause
 	private function pre_process_row( $row, $schema, $alias, $destination_alias ) {
 		if ( ! isset( $row[ $alias ] ) ) {
 			$row[ $alias ] = $this->get_type_defaults( $schema['type'] );
+		}
+		if ( is_null( $row[ $destination_alias ] ) ) {
+			$row[ $destination_alias ] = $this->get_type_defaults( $schema['type'] );
 		}
 		if ( in_array( $schema['type'], array( 'int', 'decimal' ), true ) ) {
 			if ( '' === $row[ $alias ] || null === $row[ $alias ] ) {
