@@ -11,7 +11,7 @@ use ActionScheduler;
 use ActionScheduler_DBStore;
 use ActionScheduler_QueueRunner;
 use Automatic_Upgrader_Skin;
-use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
+use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
 use Plugin_Upgrader;
 use WP_Error;
@@ -328,7 +328,7 @@ class PluginsHelper {
 	 */
 	public function install_plugins_async_callback( array $plugins, string $job_id ) {
 		$option_name = 'woocommerce_onboarding_plugins_install_async_' . $job_id;
-		$logger      = new AsynPluginsInstallLogger( $option_name );
+		$logger      = new AsyncPluginsInstallLogger( $option_name );
 		self::install_plugins( $plugins, $logger );
 		return true;
 	}
