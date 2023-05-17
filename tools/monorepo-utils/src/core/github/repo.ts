@@ -7,7 +7,10 @@ import { Repository } from '@octokit/graphql-schema';
  * Internal dependencies
  */
 import { graphqlWithAuth, octokitWithAuth } from './api';
-import { PullRequestEndpointResponse } from './types';
+import {
+	CreatePullRequestEndpointResponse,
+	PullRequestEndpointResponse,
+} from './types';
 
 export const getLatestGithubReleaseVersion = async ( options: {
 	owner?: string;
@@ -150,7 +153,7 @@ export const createPullRequest = async ( options: {
 	name: string;
 	title: string;
 	body: string;
-} ): Promise< PullRequestEndpointResponse[ 'data' ] > => {
+} ): Promise< CreatePullRequestEndpointResponse[ 'data' ] > => {
 	const { head, base, owner, name, title, body } = options;
 	const pullRequest = await octokitWithAuth().request(
 		'POST /repos/{owner}/{repo}/pulls',
@@ -168,19 +171,42 @@ export const createPullRequest = async ( options: {
 	return pullRequest.data;
 };
 
-export const getPullRequest = async ( { owner, name }, prNumber ) => {
+/**
+ * Get a pull request from Github.
+ *
+ * @param {Object} options
+ * @param {string} options.owner repository owner.
+ * @param {string} options.name  repository name.
+ * @param          prNumber      pull request number.
+ * @return {Promise<object>}     pull request data.
+ */
+export const getPullRequest = async (
+	options: { owner: string; name: string },
+	prNumber: string
+): Promise< PullRequestEndpointResponse[ 'data' ] > => {
+	const { owner, name } = options;
 	const pr = await octokitWithAuth().request(
 		'GET /repos/{owner}/{repo}/pulls/{pull_number}',
 		{
 			owner,
 			repo: name,
-			pull_number: prNumber,
+			pull_number: Number( prNumber ),
 		}
 	);
+
+	//@ts-ignore
 	return pr.data;
 };
 
-export const isCommunityPullRequest = ( pullRequestData ) => {
+/**
+ * Determine if a pull request is coming from a community contribution. ie, not from a member of the woocommerce org.
+ *
+ * @param {Object} pullRequestData pull request data.
+ * @return {boolean} if a pull request is coming from a community contribution.
+ */
+export const isCommunityPullRequest = (
+	pullRequestData: PullRequestEndpointResponse[ 'data' ]
+) => {
 	return (
 		pullRequestData.author_association === 'CONTRIBUTOR' ||
 		// Its possible a MEMBER can open a PR from thier own fork.
