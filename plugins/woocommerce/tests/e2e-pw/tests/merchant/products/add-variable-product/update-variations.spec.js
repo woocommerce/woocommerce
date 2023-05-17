@@ -22,6 +22,7 @@ let productId_indivEdit,
 	productId_deleteAll,
 	productId_manageStock,
 	productId_variationDefaults,
+	productId_removeVariation,
 	defaultVariation,
 	variationIds_indivEdit;
 
@@ -85,7 +86,7 @@ test.describe( 'Update variations', () => {
 					productAttributes
 				);
 
-				const variation = sampleVariations.slice( 0, 1 );
+				const variation = sampleVariations.slice( -1 );
 
 				await createVariations(
 					baseURL,
@@ -110,6 +111,22 @@ test.describe( 'Update variations', () => {
 				);
 
 				defaultVariation = sampleVariations[ 1 ].attributes;
+			}
+		);
+
+		await test.step(
+			'Create variable product with 1 variation for "remove variation" test',
+			async () => {
+				productId_removeVariation = await createVariableProduct(
+					baseURL,
+					productAttributes
+				);
+
+				await createVariations(
+					baseURL,
+					productId_removeVariation,
+					sampleVariations.slice( -1 )
+				);
 			}
 		);
 
@@ -592,5 +609,29 @@ test.describe( 'Update variations', () => {
 				}
 			}
 		);
+	} );
+
+	test( 'can remove a variation', async ( { page } ) => {
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`/wp-admin/post.php?post=${ productId_removeVariation }&action=edit`
+			);
+		} );
+
+		await test.step( 'Click on the "Variations" tab.', async () => {
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
+		} );
+
+		await test.step( 'Click "Remove" on a variation', async () => {
+			page.on( 'dialog', ( dialog ) => dialog.accept() );
+			await page.locator( '.woocommerce_variation' ).hover();
+			await page.locator( '.remove_variation.delete' ).click();
+		} );
+
+		await test.step( 'Expect the variation to be removed', async () => {
+			await expect(
+				page.locator( '.woocommerce_variation' )
+			).toHaveCount( 0 );
+		} );
 	} );
 } );
