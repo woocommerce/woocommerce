@@ -59,8 +59,14 @@ class WC_Settings_Tracking {
 	public function init() {
 		add_action( 'woocommerce_settings_page_init', array( $this, 'track_settings_page_view' ) );
 		add_action( 'woocommerce_update_option', array( $this, 'add_option_to_list' ) );
+		add_action( 'woocommerce_update_shipping_setting', array( $this, 'add_option_to_list_and_track_change' ) );
 		add_action( 'woocommerce_update_options', array( $this, 'send_settings_change_event' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_settings_tracking_scripts' ) );
+	}
+
+	public function add_option_to_list_and_track_change( $option ) {
+		$this->allowed_options[] = $option['id'];
+		$this->updated_options[] = $option['id'];
 	}
 
 	/**
