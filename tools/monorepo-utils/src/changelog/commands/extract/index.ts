@@ -37,7 +37,7 @@ export const extractCommand = new Command( 'extract' )
 			}
 		) => {
 			const { owner, name } = options;
-			const { prData, isCommunityPR, prOwner, branch, fileName } =
+			const { prData, isCommunityPR, headOwner, branch, fileName } =
 				await getPullRequestData( { owner, name }, prNumber );
 
 			const shouldAutomateChangelog = getShouldAutomateChangelog(
@@ -51,22 +51,23 @@ export const extractCommand = new Command( 'extract' )
 				process.exit( 0 );
 			}
 
-			Logger.notice(
-				`PR #${ prNumber } ${
-					isCommunityPR ? 'is' : 'is not'
-				} a community PR. Making a clone of ${ prOwner }/${ name } and adding a changelog to branch ${ branch } in a file called ${ fileName }`
-			);
-
 			const significance = getChangelogSignificance( prData.body );
 			const type = getChangelogType( prData.body );
 			const message = getChangelogMessage( prData.body );
 			const comment = getChangelogComment( prData.body );
 
-			Logger.notice( significance );
-			Logger.notice( type );
-			Logger.notice( message );
-			Logger.notice( comment );
-			// const { body } = prData;
-			// Logger.notice( JSON.stringify( body, null, 2 ) );
+			const extractedData = {
+				prNumber,
+				headOwner,
+				isCommunityPR,
+				branch,
+				fileName,
+				significance,
+				type,
+				message,
+				comment,
+			};
+
+			Logger.notice( JSON.stringify( extractedData, null, 2 ) );
 		}
 	);
