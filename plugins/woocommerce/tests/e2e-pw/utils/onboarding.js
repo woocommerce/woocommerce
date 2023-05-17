@@ -59,7 +59,7 @@ const onboarding = {
 		// Uncheck any currently checked industries
 		for ( let i = 0; i < expectedNumberOfIndustries; i++ ) {
 			const currentCheck = `#inspector-checkbox-control-${ i }`;
-			await page.uncheck( currentCheck );
+			await page.locator( currentCheck ).uncheck();
 		}
 
 		for ( let industry of Object.values( industries ) ) {
@@ -97,7 +97,7 @@ const onboarding = {
 		// Uncheck any currently checked products
 		for ( let i = 0; i < expectedProductTypes; i++ ) {
 			const currentCheck = `#inspector-checkbox-control-${ i }`;
-			await page.uncheck( currentCheck );
+			await page.locator( currentCheck ).uncheck();
 		}
 
 		Object.keys( products ).forEach( async ( product ) => {
