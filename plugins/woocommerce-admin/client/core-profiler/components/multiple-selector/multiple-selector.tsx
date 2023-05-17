@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
 import {
 	__experimentalSelectControl as SelectControl,
 	selectControlStateChangeTypes,
