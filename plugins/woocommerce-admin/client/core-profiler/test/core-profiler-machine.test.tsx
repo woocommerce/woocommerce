@@ -14,8 +14,6 @@ import { createMachine } from 'xstate';
  */
 import { CoreProfilerController } from '../';
 
-jest.mock( '@automattic/calypso-config' );
-
 // mock out the external dependencies which we don't want to test here
 const actionOverrides = {
 	updateTrackingOption: jest.fn(),

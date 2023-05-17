@@ -169,7 +169,7 @@ export const UserProfile = ( {
 						<div className="woocommerce-profiler-selling-platform">
 							<p className="woocommerce-profiler-question-label">
 								{ __(
-									'which platform(s) are you currently using?',
+									'Which platform(s) are you currently using?',
 									'woocommerce'
 								) }
 							</p>
