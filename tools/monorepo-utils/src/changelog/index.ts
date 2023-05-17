@@ -17,8 +17,8 @@ import {
 	getChangelogType,
 	getChangelogMessage,
 	getChangelogComment,
-	getChangeloggerProjects,
-} from './lib';
+} from './lib/github';
+import { getChangeloggerProjects, getTouchedProjects } from './lib/projects';
 
 const program = new Command( 'changelog' )
 	.description( 'Changelog utilities' )
@@ -47,12 +47,18 @@ const program = new Command( 'changelog' )
 			}
 		) => {
 			const { owner, name, devRepoPath } = options;
-			const { prData, isCommunityPR, headOwner, branch, fileName } =
-				await getPullRequestData( { owner, name }, prNumber );
+			const {
+				prBody,
+				isCommunityPR,
+				headOwner,
+				branch,
+				fileName,
+				head,
+				base,
+			} = await getPullRequestData( { owner, name }, prNumber );
 
-			const shouldAutomateChangelog = getShouldAutomateChangelog(
-				prData.body
-			);
+			const shouldAutomateChangelog =
+				getShouldAutomateChangelog( prBody );
 
 			const isGithub = isGithubCI();
 
@@ -68,10 +74,10 @@ const program = new Command( 'changelog' )
 				process.exit( 0 );
 			}
 
-			const significance = getChangelogSignificance( prData.body );
-			const type = getChangelogType( prData.body );
-			const message = getChangelogMessage( prData.body );
-			const comment = getChangelogComment( prData.body );
+			const significance = getChangelogSignificance( prBody );
+			const type = getChangelogType( prBody );
+			const message = getChangelogMessage( prBody );
+			const comment = getChangelogComment( prBody );
 
 			const extractedData = {
 				prNumber,
@@ -83,6 +89,8 @@ const program = new Command( 'changelog' )
 				type,
 				message,
 				comment,
+				head,
+				base,
 			};
 
 			Logger.notice( JSON.stringify( extractedData, null, 2 ) );
@@ -107,12 +115,20 @@ const program = new Command( 'changelog' )
 				`Temporary clone of '${ headOwner }/${ name }' created at ${ tmpRepoPath }`
 			);
 
-			// Logger.notice( `Checking out remote branch ${ branch }` );
-			// await checkoutRemoteBranch( tmpRepoPath, branch );
+			Logger.notice( `Checking out remote branch ${ branch }` );
+			await checkoutRemoteBranch( tmpRepoPath, branch );
 
-			const changeloggerProjects = await getChangeloggerProjects(
-				tmpRepoPath
+			// const changeloggerProjects = await getChangeloggerProjects(
+			// 	tmpRepoPath
+			// );
+
+			const touchedProjects = await getTouchedProjects(
+				tmpRepoPath,
+				base,
+				head
 			);
+
+			console.log( touchedProjects );
 		}
 	);
 
