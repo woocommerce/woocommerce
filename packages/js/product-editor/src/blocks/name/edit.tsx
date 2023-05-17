@@ -35,7 +35,7 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  */
 import { AUTO_DRAFT_NAME } from '../../utils';
 import { EditProductLinkModal } from '../../components/edit-product-link-modal';
-import { useValidation } from '../../hooks/use-validation';
+import { useValidation } from '../../contexts/validation-context';
 
 export function Edit() {
 	const blockProps = useBlockProps();
@@ -77,9 +77,13 @@ export function Edit() {
 		}
 	);
 
-	const nameValidationError = useValidation(
-		'product/name',
-		function nameValidator() {
+	const {
+		ref: nameRef,
+		error: nameValidationError,
+		validate: validateName,
+	} = useValidation< Product >(
+		'name',
+		async function nameValidator() {
 			if ( ! name || name === AUTO_DRAFT_NAME ) {
 				return __( 'This field is required.', 'woocommerce' );
 			}
@@ -90,7 +94,8 @@ export function Edit() {
 					'woocommerce'
 				);
 			}
-		}
+		},
+		[ name ]
 	);
 
 	const setSkuIfEmpty = () => {
@@ -153,6 +158,7 @@ export function Edit() {
 				>
 					<InputControl
 						id={ nameControlId }
+						ref={ nameRef }
 						name="name"
 						placeholder={ __(
 							'e.g. 12 oz Coffee Mug',
@@ -160,7 +166,10 @@ export function Edit() {
 						) }
 						onChange={ setName }
 						value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
-						onBlur={ setSkuIfEmpty }
+						onBlur={ () => {
+							setSkuIfEmpty();
+							validateName();
+						} }
 					/>
 				</BaseControl>
 

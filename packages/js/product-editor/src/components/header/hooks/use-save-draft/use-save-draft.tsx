@@ -10,6 +10,11 @@ import { check } from '@wordpress/icons';
 import { createElement, Fragment } from '@wordpress/element';
 import { MouseEvent, ReactNode } from 'react';
 
+/**
+ * Internal dependencies
+ */
+import { useValidations } from '../../../../contexts/validation-context';
+
 export function useSaveDraft( {
 	disabled,
 	onClick,
@@ -35,8 +40,6 @@ export function useSaveDraft( {
 		( select ) => {
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
-			const { isPostSavingLocked } = select( 'core/editor' );
-			const isSavingLocked = isPostSavingLocked();
 			const isSaving = isSavingEntityRecord< boolean >(
 				'postType',
 				'product',
@@ -44,7 +47,7 @@ export function useSaveDraft( {
 			);
 
 			return {
-				isDisabled: isSavingLocked || isSaving,
+				isDisabled: isSaving,
 				hasEdits: hasEditsForEntityRecord< boolean >(
 					'postType',
 					'product',
@@ -55,8 +58,13 @@ export function useSaveDraft( {
 		[ productId ]
 	);
 
+	const { isValidating, validate } = useValidations();
+
 	const ariaDisabled =
-		disabled || isDisabled || ( productStatus !== 'publish' && ! hasEdits );
+		disabled ||
+		isDisabled ||
+		( productStatus !== 'publish' && ! hasEdits ) ||
+		isValidating;
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
@@ -70,6 +78,8 @@ export function useSaveDraft( {
 		}
 
 		try {
+			await validate();
+
 			await editEntityRecord( 'postType', 'product', productId, {
 				status: 'draft',
 			} );
