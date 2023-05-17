@@ -203,7 +203,6 @@ async function createVariableProductFixture( baseURL ) {
 }
 
 test.describe( 'Add New Variable Product Page', () => {
-
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -375,6 +374,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			'Save before going to the Variations tab to prevent variations from all attributes to be automatically created.',
 			async () => {
 				await page.locator( '#save-post' ).click();
+				await page.waitForLoadState( 'networkidle' );
 			}
 		);
 
@@ -431,6 +431,7 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		await test.step( 'Click "Save Draft" button.', async () => {
 			await page.locator( '#save-post' ).click();
+			await page.waitForLoadState( 'networkidle' );
 		} );
 
 		await test.step(
@@ -776,6 +777,7 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
 		await page.locator( '#save-post' ).click();
+		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
@@ -804,6 +806,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		}
 
 		await page.locator( '#save-post' ).click();
+		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
