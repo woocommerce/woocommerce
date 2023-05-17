@@ -31,7 +31,9 @@ const getGeneratingContentPhrase = () =>
 		Math.floor( Math.random() * generatingContentPhrases.length )
 	];
 
-export function DescriptionButtonContainer() {
+const DESCCRIPTION_MAX_LENGTH = 325;
+
+export function WriteItForMeButtonContainer() {
 	const [ fetching, setFetching ] = useState( false );
 	const generatingContentPhraseInterval = useRef< number >();
 	const titleEl = useRef< HTMLInputElement >(
@@ -64,7 +66,7 @@ export function DescriptionButtonContainer() {
 		const instructions = [
 			`Write a product description with the following product title: ${ productTitle }.`,
 			'Use a 9th grade reading level.',
-			'Make the description 300 words or less.',
+			`Make the description ${ DESCCRIPTION_MAX_LENGTH } words or less.`,
 			'Structure the description using standard HTML paragraph, strong and list tags.',
 			'Do not include a heading at the very top of the description.',
 		];

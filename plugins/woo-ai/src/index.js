@@ -6,7 +6,7 @@ import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { DescriptionButtonContainer } from './product-description';
+import { WriteItForMeButtonContainer } from './product-description';
 
 import './index.scss';
 
@@ -15,5 +15,5 @@ const buttonRoot = document.getElementById(
 );
 
 if ( buttonRoot ) {
-	render( <DescriptionButtonContainer />, buttonRoot );
+	render( <WriteItForMeButtonContainer />, buttonRoot );
 }
