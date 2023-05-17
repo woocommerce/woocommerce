@@ -170,9 +170,6 @@ function _Layout( {
 	}, [] );
 
 	useEffect( () => {
-		if ( ! location?.pathname ) {
-			return;
-		}
 		recordPageViewTrack();
 		setTimeout( () => {
 			triggerExitPageCesSurvey();
