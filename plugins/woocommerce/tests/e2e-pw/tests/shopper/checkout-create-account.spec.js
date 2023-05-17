@@ -137,14 +137,16 @@ test.describe( 'Shopper Checkout Create Account', () => {
 
 	test( 'can create an account during checkout', async ( { page } ) => {
 		await page.goto( 'checkout/', { waitUntil: 'networkidle' } );
-		await page.fill( '#billing_first_name', 'Marge' );
-		await page.fill( '#billing_last_name', 'Simpson' );
-		await page.fill( '#billing_address_1', '742 Evergreen Terrace' );
-		await page.fill( '#billing_address_2', 'c/o Maggie Simpson' );
-		await page.fill( '#billing_city', 'Springfield' );
-		await page.fill( '#billing_postcode', '97403' );
-		await page.fill( '#billing_phone', '123456789' );
-		await page.fill( '#billing_email', billingEmail );
+		await page.locator( '#billing_first_name' ).fill( 'Marge' );
+		await page.locator( '#billing_last_name' ).fill( 'Simpson' );
+		await page
+			.locator( '#billing_address_1' )
+			.fill( '742 Evergreen Terrace' );
+		await page.locator( '#billing_address_2' ).fill( 'c/o Maggie Simpson' );
+		await page.locator( '#billing_city' ).fill( 'Springfield' );
+		await page.locator( '#billing_postcode' ).fill( '97403' );
+		await page.locator( '#billing_phone' ).fill( '123456789' );
+		await page.locator( '#billing_email' ).fill( billingEmail );
 
 		await page.locator( '#createaccount' ).check();
 
@@ -171,8 +173,8 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		);
 		await page.locator( 'text=Log out' ).click();
 		// sign in as admin to confirm account creation
-		await page.fill( '#username', admin.username );
-		await page.fill( '#password', admin.password );
+		await page.locator( '#username' ).fill( admin.username );
+		await page.locator( '#password' ).fill( admin.password );
 		await page.locator( 'text=Log in' ).click();
 
 		await page.goto( 'wp-admin/users.php' );

@@ -56,8 +56,12 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as admin...' );
 			await adminPage.goto( `/wp-admin` );
-			await adminPage.fill( 'input[name="log"]', admin.username );
-			await adminPage.fill( 'input[name="pwd"]', admin.password );
+			await adminPage
+				.locator( 'input[name="log"]' )
+				.fill( admin.username );
+			await adminPage
+				.locator( 'input[name="pwd"]' )
+				.fill( admin.password );
 			await adminPage.locator( 'text=Log In' ).click();
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto( `/wp-admin` );
@@ -96,7 +100,9 @@ module.exports = async ( config ) => {
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
-			await adminPage.fill( '#key_description', 'Key for API access' );
+			await adminPage
+				.locator( '#key_description' )
+				.fill( 'Key for API access' );
 			await adminPage
 				.locator( '#key_permissions' )
 				.selectOption( 'read_write' );
@@ -131,8 +137,12 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to log-in as customer...' );
 			await customerPage.goto( `/wp-admin` );
-			await customerPage.fill( 'input[name="log"]', customer.username );
-			await customerPage.fill( 'input[name="pwd"]', customer.password );
+			await customerPage
+				.locator( 'input[name="log"]' )
+				.fill( customer.username );
+			await customerPage
+				.locator( 'input[name="pwd"]' )
+				.fill( customer.password );
 			await customerPage.locator( 'text=Log In' ).click();
 
 			await customerPage.goto( `/my-account` );

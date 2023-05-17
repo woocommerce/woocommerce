@@ -55,8 +55,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product', {
 			waitUntil: 'networkidle',
 		} );
-		await page.fill( '#title', virtualProductName );
-		await page.fill( '#_regular_price', productPrice );
+		await page.locator( '#title' ).fill( virtualProductName );
+		await page.locator( '#_regular_price' ).fill( productPrice );
 		await page.locator( '#_virtual' ).click();
 		await page.locator( '#publish' ).click();
 		await page.waitForLoadState( 'networkidle' );
@@ -115,8 +115,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=product', {
 			waitUntil: 'networkidle',
 		} );
-		await page.fill( '#title', nonVirtualProductName );
-		await page.fill( '#_regular_price', productPrice );
+		await page.locator( '#title' ).fill( nonVirtualProductName );
+		await page.locator( '#_regular_price' ).fill( productPrice );
 		await expect( page.locator( '#publish:not(.disabled)' ) ).toBeVisible();
 		await page.locator( '#publish' ).click();
 		await page.waitForLoadState( 'networkidle' );

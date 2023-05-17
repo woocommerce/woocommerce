@@ -15,19 +15,18 @@ const onboarding = {
 		await page
 			.locator( '#woocommerce-select-control-0__control-input' )
 			.click();
-		await page.fill(
-			'#woocommerce-select-control-0__control-input',
-			store.country
-		);
+		await page
+			.locator( '#woocommerce-select-control-0__control-input' )
+			.fill( store.country );
 		await page.locator( `button >> text=${ store.country }` ).click();
 		// Fill store's address - first line
-		await page.fill( '#inspector-text-control-0', store.address );
+		await page.locator( '#inspector-text-control-0' ).fill( store.address );
 		// Fill postcode of the store
-		await page.fill( '#inspector-text-control-1', store.zip );
+		await page.locator( '#inspector-text-control-1' ).fill( store.zip );
 		// Fill the city where the store is located
-		await page.fill( '#inspector-text-control-2', store.city );
+		await page.locator( '#inspector-text-control-2' ).fill( store.city );
 		// Fill store's email address
-		await page.fill( '#inspector-text-control-3', store.email );
+		await page.locator( '#inspector-text-control-3' ).fill( store.email );
 		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
 		await page.locator( '#inspector-checkbox-control-0' ).check();
 		// Click continue button

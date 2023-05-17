@@ -176,7 +176,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 		page,
 	} ) => {
 		await page.goto( '/cart/' );
-		await page.fill( 'input.qty', '4' );
+		await page.locator( 'input.qty' ).fill( '4' );
 		await page.locator( 'text=Update cart' ).click();
 
 		// Set shipping country to France

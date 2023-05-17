@@ -19,8 +19,12 @@ module.exports = async ( config ) => {
 		try {
 			console.log( 'Trying to clear consumer token... Try:' + i );
 			await adminPage.goto( `/wp-admin` );
-			await adminPage.fill( 'input[name="log"]', admin.username );
-			await adminPage.fill( 'input[name="pwd"]', admin.password );
+			await adminPage
+				.locator( 'input[name="log"]' )
+				.fill( admin.username );
+			await adminPage
+				.locator( 'input[name="pwd"]' )
+				.fill( admin.password );
 			await adminPage.locator( 'text=Log In' ).click();
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`

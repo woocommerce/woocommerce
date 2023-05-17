@@ -89,7 +89,7 @@ test.describe( 'Single Product Page', () => {
 		const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 		await page.goto( `product/${ slug }` );
 
-		await page.fill( 'input.qty', '5' );
+		await page.locator( 'input.qty' ).fill( '5' );
 		await page.locator( 'text=Add to cart' ).click();
 
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
@@ -288,8 +288,8 @@ test.describe( 'Grouped Product Page', () => {
 			'Please choose the quantity of items you wish to add to your cart…'
 		);
 
-		await page.fill( 'div.quantity input.qty >> nth=0', '5' );
-		await page.fill( 'div.quantity input.qty >> nth=1', '5' );
+		await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '5' );
+		await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '5' );
 		await page.locator( 'text=Add to cart' ).click();
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 			`“${ simpleProduct1 }” and “${ simpleProduct2 }” have been added to your cart.`
@@ -311,8 +311,8 @@ test.describe( 'Grouped Product Page', () => {
 		page,
 	} ) => {
 		await page.goto( `product/${ slug }` );
-		await page.fill( 'div.quantity input.qty >> nth=0', '1' );
-		await page.fill( 'div.quantity input.qty >> nth=1', '1' );
+		await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '1' );
+		await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '1' );
 		await page.locator( 'text=Add to cart' ).click();
 
 		await page.goto( 'cart/' );

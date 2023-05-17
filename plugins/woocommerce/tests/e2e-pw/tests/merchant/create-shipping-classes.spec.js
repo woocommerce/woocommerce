@@ -40,18 +40,15 @@ test.describe( 'Merchant can add shipping classes', () => {
 		// Add shipping classes
 		for ( const { name, slug, description } of shippingClasses ) {
 			await page.locator( 'text=Add shipping class' ).click();
-			await page.fill(
-				'.editing:last-child [data-attribute="name"]',
-				name
-			);
-			await page.fill(
-				'.editing:last-child [data-attribute="slug"]',
-				slug
-			);
-			await page.fill(
-				'.editing:last-child [data-attribute="description"]',
-				description
-			);
+			await page
+				.locator( '.editing:last-child [data-attribute="name"]' )
+				.fill( name );
+			await page
+				.locator( '.editing:last-child [data-attribute="slug"]' )
+				.fill( slug );
+			await page
+				.locator( '.editing:last-child [data-attribute="description"]' )
+				.fill( description );
 		}
 		await page.locator( 'text=Save shipping classes' ).click();
 

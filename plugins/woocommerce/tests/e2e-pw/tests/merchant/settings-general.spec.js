@@ -63,9 +63,9 @@ test.describe( 'WooCommerce General Settings', () => {
 			.selectOption( 'US' );
 
 		// Set currency options
-		await page.fill( '#woocommerce_price_thousand_sep', ',' );
-		await page.fill( '#woocommerce_price_decimal_sep', '.' );
-		await page.fill( '#woocommerce_price_num_decimals', '2' );
+		await page.locator( '#woocommerce_price_thousand_sep' ).fill( ',' );
+		await page.locator( '#woocommerce_price_decimal_sep' ).fill( '.' );
+		await page.locator( '#woocommerce_price_num_decimals' ).fill( '2' );
 
 		await page.locator( 'text=Save changes' ).click();
 

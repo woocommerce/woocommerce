@@ -122,8 +122,8 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		await page.locator( 'text=Click here to login' ).click();
 
 		// fill in the customer account info
-		await page.fill( '#username', customer.username );
-		await page.fill( '#password', customer.password );
+		await page.locator( '#username' ).fill( customer.username );
+		await page.locator( '#password' ).fill( customer.password );
 		await page.locator( 'button[name="login"]' ).click();
 
 		// billing form should pre-populate

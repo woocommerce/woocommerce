@@ -226,9 +226,9 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		orderId = orderId[ 0 ].toString();
 
 		await page.locator( '#order_status' ).selectOption( 'wc-processing' );
-		await page.fill( 'input[name=order_date]', '2018-12-13' );
-		await page.fill( 'input[name=order_date_hour]', '18' );
-		await page.fill( 'input[name=order_date_minute]', '55' );
+		await page.locator( 'input[name=order_date]' ).fill( '2018-12-13' );
+		await page.locator( 'input[name=order_date_hour]' ).fill( '18' );
+		await page.locator( 'input[name=order_date_minute]' ).fill( '55' );
 
 		await page.locator( 'button.save_order' ).click();
 

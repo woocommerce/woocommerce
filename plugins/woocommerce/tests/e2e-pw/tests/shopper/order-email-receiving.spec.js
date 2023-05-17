@@ -55,13 +55,16 @@ test.describe( 'Shopper Order Email Receiving', () => {
 
 		await page.goto( '/checkout/' );
 
-		await page.fill(
-			'#billing_first_name',
-			customer.billing.us.first_name
-		);
-		await page.fill( '#billing_last_name', customer.billing.us.last_name );
-		await page.fill( '#billing_address_1', customer.billing.us.address );
-		await page.fill( '#billing_city', customer.billing.us.city );
+		await page
+			.locator( '#billing_first_name' )
+			.fill( customer.billing.us.first_name );
+		await page
+			.locator( '#billing_last_name' )
+			.fill( customer.billing.us.last_name );
+		await page
+			.locator( '#billing_address_1' )
+			.fill( customer.billing.us.address );
+		await page.locator( '#billing_city' ).fill( customer.billing.us.city );
 		await page
 			.locator( '#billing_country' )
 			.selectOption( customer.billing.us.country );
@@ -70,9 +73,13 @@ test.describe( 'Shopper Order Email Receiving', () => {
 			.locator( '#billing_state' )
 			.selectOption( customer.billing.us.state );
 
-		await page.fill( '#billing_postcode', customer.billing.us.zip );
-		await page.fill( '#billing_phone', customer.billing.us.phone );
-		await page.fill( '#billing_email', customer.email );
+		await page
+			.locator( '#billing_postcode' )
+			.fill( customer.billing.us.zip );
+		await page
+			.locator( '#billing_phone' )
+			.fill( customer.billing.us.phone );
+		await page.locator( '#billing_email' ).fill( customer.email );
 
 		await page.locator( 'text=Place order' ).click();
 

@@ -73,7 +73,7 @@ test.describe( 'Edit order', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// update order date
-		await page.fill( 'input[name=order_date]', '2018-12-14' );
+		await page.locator( 'input[name=order_date]' ).fill( '2018-12-14' );
 		await page.locator( 'button.save_order' ).click();
 
 		// verify changes
@@ -307,14 +307,16 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 			.click();
 
 		// edit download permissions
-		await page.fill(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short',
-			expectedDownloadsRemaining
-		);
-		await page.fill(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short',
-			expectedDownloadsExpirationDate
-		);
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
+			)
+			.fill( expectedDownloadsRemaining );
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
+			)
+			.fill( expectedDownloadsExpirationDate );
 		await page.locator( 'button.save_order' ).click();
 
 		// verify new downloadable product permissions
@@ -384,10 +386,11 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 			.click();
 
 		// edit download permissions
-		await page.fill(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short',
-			'0'
-		);
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
+			)
+			.fill( '0' );
 		await page.locator( 'button.save_order' ).click();
 
 		// get the download link
@@ -424,10 +427,11 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 			.click();
 
 		// edit download permissions
-		await page.fill(
-			'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short',
-			'2018-12-14'
-		);
+		await page
+			.locator(
+				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
+			)
+			.fill( '2018-12-14' );
 		await page.locator( 'button.save_order' ).click();
 
 		// get the download link

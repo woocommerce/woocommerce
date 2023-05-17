@@ -97,10 +97,9 @@ test.describe(
 		test( 'should let user search the store', async ( { page } ) => {
 			await page.goto( 'shop/' );
 
-			await page.fill(
-				'#wp-block-search__input-1',
-				simpleProductName + ' 1'
-			);
+			await page
+				.locator( '#wp-block-search__input-1' )
+				.fill( simpleProductName + ' 1' );
 			await page.locator( 'button.wp-block-search__button' ).click();
 
 			await expect( page.locator( 'h1.page-title' ) ).toContainText(

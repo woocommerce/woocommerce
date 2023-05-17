@@ -51,12 +51,22 @@ test.describe( 'Payment setup task', () => {
 			.catch( () => {} );
 
 		// fill in bank transfer form
-		await page.fill( '//input[@placeholder="Account name"]', 'Savings' );
-		await page.fill( '//input[@placeholder="Account number"]', '1234' );
-		await page.fill( '//input[@placeholder="Bank name"]', 'Test Bank' );
-		await page.fill( '//input[@placeholder="Sort code"]', '12' );
-		await page.fill( '//input[@placeholder="IBAN"]', '12 3456 7890' );
-		await page.fill( '//input[@placeholder="BIC / Swift"]', 'ABBA' );
+		await page
+			.locator( '//input[@placeholder="Account name"]' )
+			.fill( 'Savings' );
+		await page
+			.locator( '//input[@placeholder="Account number"]' )
+			.fill( '1234' );
+		await page
+			.locator( '//input[@placeholder="Bank name"]' )
+			.fill( 'Test Bank' );
+		await page.locator( '//input[@placeholder="Sort code"]' ).fill( '12' );
+		await page
+			.locator( '//input[@placeholder="IBAN"]' )
+			.fill( '12 3456 7890' );
+		await page
+			.locator( '//input[@placeholder="BIC / Swift"]' )
+			.fill( 'ABBA' );
 		await page.locator( 'text=Save' ).click();
 
 		// check that bank transfers were set up

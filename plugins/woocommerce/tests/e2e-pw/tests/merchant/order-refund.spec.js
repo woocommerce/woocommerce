@@ -67,8 +67,8 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		await expect( page.locator( '#restock_refunded_items' ) ).toBeChecked();
 
 		// Initiate a refund
-		await page.fill( '.refund_order_item_qty', '1' );
-		await page.fill( '#refund_reason', 'No longer wanted' );
+		await page.locator( '.refund_order_item_qty' ).fill( '1' );
+		await page.locator( '#refund_reason' ).fill( 'No longer wanted' );
 
 		// Confirm values
 		await expect( page.locator( '.refund_line_total' ) ).toHaveValue(
@@ -223,8 +223,8 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		await expect( page.locator( '#restock_refunded_items' ) ).toBeChecked();
 
 		// Initiate a refund
-		await page.fill( '.refund_order_item_qty >> nth=1', '2' );
-		await page.fill( '#refund_reason', 'No longer wanted' );
+		await page.locator( '.refund_order_item_qty >> nth=1' ).fill( '2' );
+		await page.locator( '#refund_reason' ).fill( 'No longer wanted' );
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 		await page
 			.locator( '.do-manual-refund', {

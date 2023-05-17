@@ -219,14 +219,16 @@ test.describe( 'Checkout page', () => {
 			twoProductPrice
 		);
 
-		await page.fill( '#billing_first_name', 'Lisa' );
-		await page.fill( '#billing_last_name', 'Simpson' );
-		await page.fill( '#billing_address_1', '123 Evergreen Terrace' );
-		await page.fill( '#billing_city', 'Springfield' );
+		await page.locator( '#billing_first_name' ).fill( 'Lisa' );
+		await page.locator( '#billing_last_name' ).fill( 'Simpson' );
+		await page
+			.locator( '#billing_address_1' )
+			.fill( '123 Evergreen Terrace' );
+		await page.locator( '#billing_city' ).fill( 'Springfield' );
 		await page.locator( '#billing_state' ).selectOption( 'OR' );
-		await page.fill( '#billing_postcode', '97403' );
-		await page.fill( '#billing_phone', '555 555-5555' );
-		await page.fill( '#billing_email', guestEmail );
+		await page.locator( '#billing_postcode' ).fill( '97403' );
+		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
+		await page.locator( '#billing_email' ).fill( guestEmail );
 
 		await page.locator( 'text=Cash on delivery' ).click();
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
@@ -248,8 +250,8 @@ test.describe( 'Checkout page', () => {
 		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
 		await page.goto( 'wp-login.php' );
-		await page.fill( 'input[name="log"]', admin.username );
-		await page.fill( 'input[name="pwd"]', admin.password );
+		await page.locator( 'input[name="log"]' ).fill( admin.username );
+		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
 		await page.locator( 'text=Log In' ).click();
 
 		// load the order placed as a guest
@@ -276,8 +278,8 @@ test.describe( 'Checkout page', () => {
 
 	test( 'allows existing customer to place order', async ( { page } ) => {
 		await page.goto( 'wp-admin/' );
-		await page.fill( 'input[name="log"]', customer.username );
-		await page.fill( 'input[name="pwd"]', customer.password );
+		await page.locator( 'input[name="log"]' ).fill( customer.username );
+		await page.locator( 'input[name="pwd"]' ).fill( customer.password );
 		await page.locator( 'text=Log In' ).click();
 		await page.waitForLoadState( 'networkidle' );
 		for ( let i = 1; i < 3; i++ ) {
@@ -293,15 +295,17 @@ test.describe( 'Checkout page', () => {
 			twoProductPrice
 		);
 
-		await page.fill( '#billing_first_name', 'Homer' );
-		await page.fill( '#billing_last_name', 'Simpson' );
-		await page.fill( '#billing_address_1', '123 Evergreen Terrace' );
-		await page.fill( '#billing_city', 'Springfield' );
+		await page.locator( '#billing_first_name' ).fill( 'Homer' );
+		await page.locator( '#billing_last_name' ).fill( 'Simpson' );
+		await page
+			.locator( '#billing_address_1' )
+			.fill( '123 Evergreen Terrace' );
+		await page.locator( '#billing_city' ).fill( 'Springfield' );
 		await page.locator( '#billing_country' ).selectOption( 'US' );
 		await page.locator( '#billing_state' ).selectOption( 'OR' );
-		await page.fill( '#billing_postcode', '97403' );
-		await page.fill( '#billing_phone', '555 555-5555' );
-		await page.fill( '#billing_email', customer.email );
+		await page.locator( '#billing_postcode' ).fill( '97403' );
+		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
+		await page.locator( '#billing_email' ).fill( customer.email );
 
 		await page.locator( 'text=Cash on delivery' ).click();
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
@@ -327,8 +331,8 @@ test.describe( 'Checkout page', () => {
 		await page.goto( 'wp-login.php?loggedout=true' );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.fill( 'input[name="log"]', admin.username );
-		await page.fill( 'input[name="pwd"]', admin.password );
+		await page.locator( 'input[name="log"]' ).fill( admin.username );
+		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
 		await page.locator( 'text=Log In' ).click();
 
 		// load the order placed as a customer

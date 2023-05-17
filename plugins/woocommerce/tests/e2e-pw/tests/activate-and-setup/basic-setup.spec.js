@@ -18,7 +18,9 @@ test.describe( 'Store owner can finish initial store setup', () => {
 		// Select "Custom base" in product permalinks section
 		await page.locator( 'label >> text=Custom base' ).check();
 		// Fill custom base slug to use
-		await page.fill( '#woocommerce_permalink_structure', '/product/' );
+		await page
+			.locator( '#woocommerce_permalink_structure' )
+			.fill( '/product/' );
 		await page.locator( '#submit' ).click();
 		// Verify that settings have been saved
 		await expect(

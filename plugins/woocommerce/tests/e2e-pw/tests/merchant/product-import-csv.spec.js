@@ -201,7 +201,7 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		await page.locator( 'text=View products' ).click();
 
 		// Search for "import" to narrow the results to just the products we imported
-		await page.fill( '#post-search-input', 'Imported' );
+		await page.locator( '#post-search-input' ).fill( 'Imported' );
 		await page.locator( '#search-submit' ).click();
 
 		// Compare imported products to what's expected
@@ -244,7 +244,7 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		await page.locator( 'text=View products' ).click();
 
 		// Search for "import" to narrow the results to just the products we imported
-		await page.fill( '#post-search-input', 'Imported' );
+		await page.locator( '#post-search-input' ).fill( 'Imported' );
 		await page.locator( '#search-submit' ).click();
 
 		// Compare imported products to what's expected

@@ -99,7 +99,7 @@ test.describe( 'Cart page', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/cart/' );
-		await page.fill( 'input.qty', '2' );
+		await page.locator( 'input.qty' ).fill( '2' );
 		await page.locator( 'text=Update cart' ).click();
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
@@ -143,7 +143,7 @@ test.describe( 'Cart page', () => {
 			`$${ productPrice }`
 		);
 
-		await page.fill( 'input.qty', '2' );
+		await page.locator( 'input.qty' ).fill( '2' );
 		await page.locator( 'text=Update cart' ).click();
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(

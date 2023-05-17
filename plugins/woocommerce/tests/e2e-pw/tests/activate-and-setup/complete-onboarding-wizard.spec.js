@@ -237,20 +237,20 @@ test.describe.skip( 'Store owner can go through setup Task List', () => {
 		await page
 			.locator( '#woocommerce-select-control-0__control-input' )
 			.click();
-		await page.fill(
-			'#woocommerce-select-control-0__control-input',
-			'United States (US) — California'
-		);
+		await page
+			.locator( '#woocommerce-select-control-0__control-input' )
+			.fill( 'United States (US) — California' );
 		await page
 			.locator( 'button >> text=United States (US) — California' )
 			.click();
-		await page.fill( '#inspector-text-control-0', 'addr 1' );
-		await page.fill( '#inspector-text-control-1', '94107' );
-		await page.fill( '#inspector-text-control-2', 'San Francisco' );
-		await page.fill(
-			'#inspector-text-control-3',
-			storeDetails.us.store.email
-		);
+		await page.locator( '#inspector-text-control-0' ).fill( 'addr 1' );
+		await page.locator( '#inspector-text-control-1' ).fill( '94107' );
+		await page
+			.locator( '#inspector-text-control-2' )
+			.fill( 'San Francisco' );
+		await page
+			.locator( '#inspector-text-control-3' )
+			.fill( storeDetails.us.store.email );
 		await page.locator( '#inspector-checkbox-control-0' ).check();
 		await page.locator( 'button >> text=Continue' ).click();
 		await page.locator( 'button >> text=No thanks' ).click();

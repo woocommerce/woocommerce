@@ -126,7 +126,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		);
 
 		// Clear out existing tax classes
-		await page.fill( '#woocommerce_tax_classes', '' );
+		await page.locator( '#woocommerce_tax_classes' ).fill( '' );
 		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that the settings have been saved
@@ -138,7 +138,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		);
 
 		// Add a "fancy" tax class
-		await page.fill( '#woocommerce_tax_classes', 'Fancy' );
+		await page.locator( '#woocommerce_tax_classes' ).fill( 'Fancy' );
 		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that the settings have been saved
@@ -166,17 +166,29 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 
 		// Create a state tax
 		await page.locator( '.wc_tax_rates a.insert' ).click();
-		await page.fill( 'input[name^="tax_rate_country[new-0"]', 'US' );
-		await page.fill( 'input[name^="tax_rate_state[new-0"]', 'CA' );
-		await page.fill( 'input[name^="tax_rate[new-0"]', '7.5' );
-		await page.fill( 'input[name^="tax_rate_name[new-0"]', 'CA State Tax' );
+		await page
+			.locator( 'input[name^="tax_rate_country[new-0"]' )
+			.fill( 'US' );
+		await page
+			.locator( 'input[name^="tax_rate_state[new-0"]' )
+			.fill( 'CA' );
+		await page.locator( 'input[name^="tax_rate[new-0"]' ).fill( '7.5' );
+		await page
+			.locator( 'input[name^="tax_rate_name[new-0"]' )
+			.fill( 'CA State Tax' );
 
 		// Create a federal tax
 		await page.locator( '.wc_tax_rates a.insert' ).click();
-		await page.fill( 'input[name^="tax_rate_country[new-1"]', 'US' );
-		await page.fill( 'input[name^="tax_rate[new-1"]', '1.5' );
-		await page.fill( 'input[name^="tax_rate_priority[new-1"]', '2' );
-		await page.fill( 'input[name^="tax_rate_name[new-1"]', 'Federal Tax' );
+		await page
+			.locator( 'input[name^="tax_rate_country[new-1"]' )
+			.fill( 'US' );
+		await page.locator( 'input[name^="tax_rate[new-1"]' ).fill( '1.5' );
+		await page
+			.locator( 'input[name^="tax_rate_priority[new-1"]' )
+			.fill( '2' );
+		await page
+			.locator( 'input[name^="tax_rate_name[new-1"]' )
+			.fill( 'Federal Tax' );
 		await page.locator( 'input[name^="tax_rate_shipping[new-1"]' ).click();
 
 		// Save changes
@@ -216,7 +228,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		);
 
 		// Remove "Fancy" tax class
-		await page.fill( '#woocommerce_tax_classes', '' );
+		await page.locator( '#woocommerce_tax_classes' ).fill( '' );
 		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved

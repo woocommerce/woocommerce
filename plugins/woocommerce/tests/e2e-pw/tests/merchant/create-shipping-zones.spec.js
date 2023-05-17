@@ -59,7 +59,9 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
 				{ waitUntil: 'networkidle' }
 			);
-			await page.fill( '#zone_name', shippingZoneNameLocalPickup );
+			await page
+				.locator( '#zone_name' )
+				.fill( shippingZoneNameLocalPickup );
 
 			await page.locator( '.select2-search__field' ).click();
 			await page
@@ -72,7 +74,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				.click();
 
 			await page.locator( '.wc-shipping-zone-postcodes-toggle' ).click();
-			await page.fill( '#zone_postcodes', maynePostal );
+			await page.locator( '#zone_postcodes' ).fill( maynePostal );
 
 			await page.locator( 'text=Add shipping method' ).click();
 
@@ -115,7 +117,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
 				{ waitUntil: 'networkidle' }
 			);
-			await page.fill( '#zone_name', shippingZoneNameFreeShip );
+			await page.locator( '#zone_name' ).fill( shippingZoneNameFreeShip );
 
 			await page.locator( '.select2-search__field' ).click();
 			await page
@@ -165,7 +167,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
 				{ waitUntil: 'networkidle' }
 			);
-			await page.fill( '#zone_name', shippingZoneNameFlatRate );
+			await page.locator( '#zone_name' ).fill( shippingZoneNameFlatRate );
 
 			await page.locator( '.select2-search__field' ).click();
 			await page.locator( '.select2-search__field' ).type( 'Canada' );
@@ -189,7 +191,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			).toBeVisible();
 
 			await page.locator( 'a.wc-shipping-zone-method-settings' ).click();
-			await page.fill( '#woocommerce_flat_rate_cost', '10' );
+			await page.locator( '#woocommerce_flat_rate_cost' ).fill( '10' );
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
 
@@ -219,7 +221,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
 			);
-			await page.fill( '#zone_name', shippingZoneNameUSRegion );
+			await page.locator( '#zone_name' ).fill( shippingZoneNameUSRegion );
 
 			await page.locator( '.select2-search__field' ).click();
 			await page
@@ -371,7 +373,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.locator( 'a.shipping-calculator-button' ).click();
 		await page.locator( '#calc_shipping_country' ).selectOption( 'CA' );
 		await page.locator( '#calc_shipping_state' ).selectOption( 'BC' );
-		await page.fill( '#calc_shipping_postcode', maynePostal );
+		await page.locator( '#calc_shipping_postcode' ).fill( maynePostal );
 		await page.locator( 'button[name=calc_shipping]' ).click();
 		await page.waitForSelector( 'button[name=calc_shipping]', {
 			state: 'hidden',
@@ -414,7 +416,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.locator( 'a.shipping-calculator-button' ).click();
 		await page.locator( '#calc_shipping_country' ).selectOption( 'CA' );
 		await page.locator( '#calc_shipping_state' ).selectOption( 'AB' );
-		await page.fill( '#calc_shipping_postcode', 'T2T 1B3' );
+		await page.locator( '#calc_shipping_postcode' ).fill( 'T2T 1B3' );
 		await page.locator( 'button[name=calc_shipping]' ).click();
 		await page.waitForSelector( 'button[name=calc_shipping]', {
 			state: 'hidden',
