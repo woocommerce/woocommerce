@@ -81,6 +81,14 @@ export type ExtensionsEvent = {
 	};
 };
 
+// TODO: add types as we develop the pages
+export type OnboardingProfile = {
+	business_choice: BusinessChoice;
+	selling_online_answer: SellingOnlineAnswer | null;
+	selling_platforms: SellingPlatform[] | null;
+	skip?: boolean;
+};
+
 export type CoreProfilerStateMachineContext = {
 	optInDataSharing: boolean;
 	userProfile: {
@@ -102,13 +110,6 @@ export type CoreProfilerStateMachineContext = {
 		useStages?: string;
 		stageIndex?: number;
 	};
-};
-
-// TODO: add more types here as we develop the pages
-export type OnboardingProfile = {
-	business_choice: BusinessChoice;
-	selling_online_answer: SellingOnlineAnswer | null;
-	selling_platforms: SellingPlatform[] | null;
 };
 
 const getAllowTrackingOption = async () =>

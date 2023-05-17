@@ -32,34 +32,32 @@ export const renderMenu =
 		}, [ isOpen ] );
 
 		return (
-			<>
-				<Menu
-					isOpen={ isOpen }
-					getMenuProps={ getMenuProps }
-					scrollIntoViewOnOpen={ true }
-				>
-					{ items.map( ( item, menuIndex ) => {
-						const isSelected = selectedOptions.includes( item );
-						return (
-							<MenuItem
-								key={ `${ item.value }` }
-								index={ menuIndex }
-								item={ item }
-								getItemProps={ getItemProps }
-								isActive={ highlightedIndex === menuIndex }
-								activeStyle={ {
-									backgroundColor: '#f6f7f7',
-								} }
-							>
-								<CheckboxControl
-									onChange={ () => {} }
-									checked={ isSelected }
-									label={ item.label }
-								/>
-							</MenuItem>
-						);
-					} ) }
-				</Menu>
-			</>
+			<Menu
+				isOpen={ isOpen }
+				getMenuProps={ getMenuProps }
+				scrollIntoViewOnOpen={ true }
+			>
+				{ items.map( ( item, menuIndex ) => {
+					const isSelected = selectedOptions.includes( item );
+					return (
+						<MenuItem
+							key={ `${ item.value }` }
+							index={ menuIndex }
+							item={ item }
+							getItemProps={ getItemProps }
+							isActive={ highlightedIndex === menuIndex }
+							activeStyle={ {
+								backgroundColor: '#f6f7f7',
+							} }
+						>
+							<CheckboxControl
+								onChange={ () => {} }
+								checked={ isSelected }
+								label={ item.label }
+							/>
+						</MenuItem>
+					);
+				} ) }
+			</Menu>
 		);
 	};

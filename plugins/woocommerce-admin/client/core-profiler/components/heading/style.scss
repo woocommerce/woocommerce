@@ -37,14 +37,18 @@
 		@include breakpoint( '<782px' ) {
 			margin-top: 52px;
 			margin-bottom: 40px;
-			h1 {
+
+			.woocommerce-profiler-heading__title {
 				font-size: 32px;
 				line-height: 40px;
 				text-align: left;
+				margin-bottom: 0;
 			}
-			h2 {
+			.woocommerce-profiler-heading__subtitle {
 				text-align: left;
 				font-size: 16px;
+				color: $gray-700;
+				margin-top: 12px;
 				margin-bottom: 0;
 			}
 		}

@@ -254,7 +254,7 @@ export const UserProfile = ( {
 									value={ value }
 									onChange={ ( _value ) => {
 										setBusinessChoice(
-											_value as typeof businessOptions[ 0 ][ 'value' ]
+											_value as BusinessChoice
 										);
 									} }
 									subOptionsComponent={
