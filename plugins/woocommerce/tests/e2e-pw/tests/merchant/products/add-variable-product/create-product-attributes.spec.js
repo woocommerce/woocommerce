@@ -1,13 +1,13 @@
 const { test, expect } = require( '@playwright/test' );
 const {
-	variableProducts: variableProductUtils,
+	variableProducts: utils,
 } = require( '../../../../utils' );
 const {
 	createVariableProduct,
 	showVariableProductTour,
 	deleteProductsAddedByTests,
 	productAttributes,
-} = variableProductUtils;
+} = utils;
 
 let productId;
 

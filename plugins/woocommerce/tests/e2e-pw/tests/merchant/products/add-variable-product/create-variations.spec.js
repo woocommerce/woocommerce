@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const {
-	variableProducts: variableProductUtils,
+	variableProducts: utils,
 } = require( '../../../../utils' );
 const {
 	createVariableProduct,
@@ -8,7 +8,7 @@ const {
 	deleteProductsAddedByTests,
 	generateVariationsFromAttributes,
 	productAttributes,
-} = variableProductUtils;
+} = utils;
 
 let expectedGeneratedVariations,
 	productId_addManually,
