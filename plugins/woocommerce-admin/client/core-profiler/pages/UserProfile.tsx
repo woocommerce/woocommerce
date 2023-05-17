@@ -142,7 +142,7 @@ export const UserProfile = ( {
 			<>
 				<div className="woocommerce-profiler-selling-online-question">
 					<p className="woocommerce-profiler-question-label">
-						{ __( 'Are your selling online?', 'woocommerce' ) }
+						{ __( 'Are you selling online?', 'woocommerce' ) }
 					</p>
 					<SelectControl
 						className="woocommerce-profiler-select-control__selling-online-question"
