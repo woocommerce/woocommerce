@@ -1,4 +1,11 @@
 /**
+ * External dependencies
+ */
+import fs from 'fs';
+import path from 'path';
+import { glob } from 'glob';
+
+/**
  * Internal dependencies
  */
 import { getPullRequest, isCommunityPullRequest } from '../../core/github/repo';
@@ -126,4 +133,46 @@ export const getChangelogComment = ( body: string ) => {
 	const match = commentRegex.exec( body );
 
 	return match ? match[ 2 ].trim() : '';
+};
+
+const getAllProjects = async ( tmpRepoPath: string ) => {
+	const workspaceYaml = fs.readFileSync(
+		path.join( tmpRepoPath, 'pnpm-workspace.yaml' ),
+		'utf8'
+	);
+	const rawProjects = workspaceYaml.split( '- ' );
+	// remove heading
+	rawProjects.shift();
+
+	const globbedProjects = await Promise.all(
+		rawProjects
+			.map( ( project ) => project.replace( /'/g, '' ).trim() )
+			.map( async ( project ) => {
+				if ( project.includes( '*' ) ) {
+					return await glob( project, { cwd: tmpRepoPath } );
+				}
+				return project;
+			} )
+	);
+	return globbedProjects.flat();
+};
+
+export const getChangeloggerProjects = async ( tmpRepoPath: string ) => {
+	const projects = await getAllProjects( tmpRepoPath );
+	const projectsWithComposer = projects.filter( ( project ) => {
+		return fs.existsSync( `${ tmpRepoPath }/${ project }/composer.json` );
+	} );
+	return projectsWithComposer.filter( ( project ) => {
+		const composer = JSON.parse(
+			fs.readFileSync(
+				`${ tmpRepoPath }/${ project }/composer.json`,
+				'utf8'
+			)
+		);
+		return (
+			( composer.require &&
+				composer.require[ 'automattic/jetpack-changelogger' ] ) ||
+			composer[ 'require-dev' ][ 'automattic/jetpack-changelogger' ]
+		);
+	} );
 };

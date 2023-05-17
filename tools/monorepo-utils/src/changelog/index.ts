@@ -17,6 +17,7 @@ import {
 	getChangelogType,
 	getChangelogMessage,
 	getChangelogComment,
+	getChangeloggerProjects,
 } from './lib';
 
 const program = new Command( 'changelog' )
@@ -106,8 +107,12 @@ const program = new Command( 'changelog' )
 				`Temporary clone of '${ headOwner }/${ name }' created at ${ tmpRepoPath }`
 			);
 
-			Logger.notice( `Checking out remote branch ${ branch }` );
-			await checkoutRemoteBranch( tmpRepoPath, branch );
+			// Logger.notice( `Checking out remote branch ${ branch }` );
+			// await checkoutRemoteBranch( tmpRepoPath, branch );
+
+			const changeloggerProjects = await getChangeloggerProjects(
+				tmpRepoPath
+			);
 		}
 	);
 
