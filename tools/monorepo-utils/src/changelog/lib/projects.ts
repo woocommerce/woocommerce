@@ -101,9 +101,18 @@ export const getTouchedProjectsRequiringChangelog = async (
 		}
 		return touchedProject;
 	} );
-	return changeloggerProjects.filter( ( project ) => {
-		return mappedTouchedProjects.some( ( touchedProject ) =>
-			touchedProject.includes( project + '/' )
-		);
+	const touchedProjectsRequiringChangelogFullPath =
+		changeloggerProjects.filter( ( project ) => {
+			return mappedTouchedProjects.some( ( touchedProject ) =>
+				touchedProject.includes( project + '/' )
+			);
+		} );
+	return touchedProjectsRequiringChangelogFullPath.map( ( project ) => {
+		if ( project.includes( 'plugins/' ) ) {
+			return project.replace( 'plugins/', '' );
+		} else if ( project.includes( 'packages/js/' ) ) {
+			return project.replace( 'packages/js/', '@woocommerce/' );
+		}
+		return project;
 	} );
 };

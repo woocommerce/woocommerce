@@ -133,7 +133,7 @@ const program = new Command( 'changelog' )
 			touchedProjectsRequiringChangelog.forEach( ( project ) => {
 				Logger.notice( `Running changelog command for ${ project }` );
 				const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } -e "${ message }" -n`;
-				execSync( cmd, { cwd: tmpRepoPath } );
+				execSync( cmd, { cwd: tmpRepoPath, stdio: 'inherit' } );
 			} );
 		}
 	);
