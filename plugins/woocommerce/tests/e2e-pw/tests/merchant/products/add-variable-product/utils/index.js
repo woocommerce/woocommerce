@@ -1,5 +1,13 @@
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
+/**
+ * Array to hold all product ID's to be deleted after test.
+ */
+const productIds = [];
+
+/**
+ * The `attributes` property to be used in the request payload for creating a variable product through the REST API.
+ */
 const productAttributes = [
 	{
 		name: 'Colour',
@@ -21,6 +29,9 @@ const productAttributes = [
 	},
 ];
 
+/**
+ * Request payload for creating variations.
+ */
 const sampleVariations = [
 	{
 		regular_price: '9.99',
@@ -75,6 +86,12 @@ const sampleVariations = [
 	},
 ];
 
+/**
+ * Create a [WooCommerceRestApi](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api) object
+ *
+ * @param {string} baseURL
+ * @returns [WooCommerceRestApi](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api) object
+ */
 function newWCApi( baseURL ) {
 	return new wcApi( {
 		url: baseURL,
@@ -84,6 +101,13 @@ function newWCApi( baseURL ) {
 	} );
 }
 
+/**
+ * Create a variable product using the WooCommerce REST API.
+ *
+ * @param {string} baseURL
+ * @param {{ name: string, visible: boolean, variation: boolean, options: string[] }[]} attributes
+ * @returns {Promise<number>} ID of the created variable product
+ */
 async function createVariableProduct( baseURL, attributes = [] ) {
 	const api = newWCApi( baseURL );
 	const randomNum = Math.floor( Math.random() * 1000 );
@@ -97,17 +121,28 @@ async function createVariableProduct( baseURL, attributes = [] ) {
 		.post( 'products', payload )
 		.then( ( response ) => response.data.id );
 
+	productIds.push( productId );
+
 	return productId;
 }
 
-async function deleteProductsAddedByTests( baseURL, productIds ) {
+/**
+ * Clean up all products created by the test.
+ *
+ * @param {string} baseURL
+ * @param {number[]} productIds
+ */
+async function deleteProductsAddedByTests( baseURL ) {
 	const api = newWCApi( baseURL );
 
 	await api.post( 'products/batch', { delete: productIds } );
 }
 
 /**
+ * Enable or disable the variable product tour through JavaScript.
+ *
  * @param {import('@playwright/test').Browser} browser
+ * @param {boolean} show Whether to show the variable product tour or not.
  */
 async function showVariableProductTour( browser, show ) {
 	const productPageURL = 'wp-admin/post-new.php?post_type=product';
@@ -144,6 +179,12 @@ async function showVariableProductTour( browser, show ) {
 	await addProductPage.close();
 }
 
+/**
+ * Generate all possible variations from the given attributes.
+ *
+ * @param {{ name: string, visible: boolean, variation: boolean, options: string[] }[]} attributes
+ * @returns All possible variations from the given attributes
+ */
 function generateVariationsFromAttributes( attributes ) {
 	const combine = ( runningList, nextAttribute ) => {
 		const variations = [];
@@ -183,6 +224,14 @@ function generateVariationsFromAttributes( attributes ) {
 	return allVariations;
 }
 
+/**
+ * Create variations through the WooCommerce REST API.
+ *
+ * @param {string} baseURL
+ * @param {number} productId Product ID to add variations to.
+ * @param {{regular_price: string, attributes: {name: string, option: string}[]}[]} variations
+ * @returns {Promise<number[]>} Array of variation ID's created.
+ */
 async function createVariations( baseURL, productId, variations ) {
 	const api = newWCApi( baseURL );
 
