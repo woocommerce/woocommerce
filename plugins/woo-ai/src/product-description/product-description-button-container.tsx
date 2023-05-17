@@ -89,6 +89,14 @@ export function DescriptionButtonContainer() {
 			className="button wp-media-button wc-write-it-for-me"
 			type="button"
 			disabled={ fetching || ! productTitle }
+			title={
+				productTitle && productTitle.length > 3
+					? undefined
+					: __(
+							'Please create a product title before generating a description.',
+							'woocommerce'
+					  )
+			}
 			onClick={ async () => {
 				try {
 					setFetching( true );
