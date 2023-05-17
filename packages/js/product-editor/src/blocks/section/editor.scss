@@ -14,16 +14,6 @@
         color: $gray-900;
         display: inline-flex;
         align-items: center;
-
-        .block-editor-block-icon {
-            margin-right: 14px;
-
-            > div {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-        }
     }
 
     &__description {
