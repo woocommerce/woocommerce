@@ -31,6 +31,11 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 		$this->useAdmin();
 	}
 
+	/**
+	 * Use a user with administrator role.
+	 *
+	 * @return void
+	 */
 	public function useAdmin() {
 		// Register an administrator user and log in.
 		$this->user = $this->factory->user->create(
@@ -41,14 +46,21 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 	}
 
+	/**
+	 * Use a user without any permissions.
+	 *
+	 * @return void
+	 */
 	public function useUserWithoutPluginsPermission() {
 		$this->user = $this->factory->user->create();
 		wp_set_current_user( $this->user );
 	}
+
 	/**
 	 * Request to install-async endpoint.
 	 *
-	 * @param array $plugins a list of plugins to install.
+	 * @param string $endpoint Request endpoint.
+	 * @param string $body Request body.
 	 *
 	 * @return mixed
 	 */
