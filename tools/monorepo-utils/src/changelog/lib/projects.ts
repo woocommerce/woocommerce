@@ -92,9 +92,19 @@ export const getTouchedProjectsRequiringChangelog = async (
 		head,
 		fileName
 	);
+
+	const mappedTouchedProjects = touchedProjects.map( ( touchedProject ) => {
+		if ( touchedProject.includes( 'plugins/woocommerce-admin' ) ) {
+			return touchedProject.replace(
+				'plugins/woocommerce-admin',
+				'plugins/woocommerce'
+			);
+		}
+		return touchedProject;
+	} );
 	return changeloggerProjects.filter( ( project ) => {
-		return touchedProjects.some( ( touchedProject ) =>
-			touchedProject.includes( project )
+		return mappedTouchedProjects.some( ( touchedProject ) =>
+			touchedProject.includes( project + '/' )
 		);
 	} );
 };
