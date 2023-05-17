@@ -7,7 +7,20 @@ import {
 } from '../../../../core/github/repo';
 import { Logger } from '../../../../core/logger';
 
-export const getPullRequestData = async ( { owner, name }, prNumber ) => {
+/**
+ * Get relevant data from a pull request.
+ *
+ * @param {Object} options
+ * @param {string} options.owner repository owner.
+ * @param {string} options.name  repository name.
+ * @param {string} prNumber      pull request number.
+ * @return {Promise<object>}     pull request data.
+ */
+export const getPullRequestData = async (
+	options: { owner: string; name: string },
+	prNumber: string
+) => {
+	const { owner, name } = options;
 	const prData = await getPullRequest( { owner, name }, prNumber );
 	const isCommunityPR = isCommunityPullRequest( prData );
 	const headOwner = isCommunityPR ? prData.head.repo.owner.login : owner;
@@ -22,13 +35,25 @@ export const getPullRequestData = async ( { owner, name }, prNumber ) => {
 	};
 };
 
-export const getShouldAutomateChangelog = ( body ) => {
+/**
+ * Determine if a pull request description activates the changelog automation.
+ *
+ * @param {string} body pull request description.
+ * @return {boolean} if the pull request description activates the changelog automation.
+ */
+export const getShouldAutomateChangelog = ( body: string ) => {
 	const regex =
 		/\[x\] Automatically create a changelog entry from the details/gm;
 	return regex.test( body );
 };
 
-export const getChangelogSignificance = ( body ) => {
+/**
+ * Get the changelog significance from a pull request description.
+ *
+ * @param {string} body pull request description.
+ * @return {void|string} changelog significance.
+ */
+export const getChangelogSignificance = ( body: string ) => {
 	const patchRegex = /\[x\] (Patch)\r\n/gms;
 	const minorRegex = /\[x\] (Minor)\r\n/gms;
 	const majorRegex = /\[x\] (Major)\r\n/gms;
@@ -45,7 +70,13 @@ export const getChangelogSignificance = ( body ) => {
 	return match[ 1 ].toLowerCase();
 };
 
-export const getChangelogType = ( body ) => {
+/**
+ * Get the changelog type from a pull request description.
+ *
+ * @param {string} body pull request description.
+ * @return {void|string} changelog type.
+ */
+export const getChangelogType = ( body: string ) => {
 	const fixRegex = /\[x\] (Fix) -/gm;
 	const addRegex = /\[x\] (Add) -/gm;
 	const updateRegex = /\[x\] (Update) -/gm;
@@ -70,7 +101,13 @@ export const getChangelogType = ( body ) => {
 	return match[ 1 ].toLowerCase();
 };
 
-export const getChangelogMessage = ( body ) => {
+/**
+ * Get the changelog message from a pull request description.
+ *
+ * @param {string} body pull request description.
+ * @return {void|string} changelog message.
+ */
+export const getChangelogMessage = ( body: string ) => {
 	const messageRegex = /#### Message\r\n<!--(.*)-->(.*)#### Comment/gms;
 	const match = messageRegex.exec( body );
 
@@ -81,7 +118,13 @@ export const getChangelogMessage = ( body ) => {
 	return match[ 2 ].trim();
 };
 
-export const getChangelogComment = ( body ) => {
+/**
+ * Get the changelog comment from a pull request description.
+ *
+ * @param {string} body pull request description.
+ * @return {void|string} changelog comment.
+ */
+export const getChangelogComment = ( body: string ) => {
 	const commentRegex = /#### Comment\r\n<!--(.*)-->(.*)<\/details>/gms;
 	const match = commentRegex.exec( body );
 
