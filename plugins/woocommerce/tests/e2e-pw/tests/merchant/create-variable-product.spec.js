@@ -203,7 +203,6 @@ async function createVariableProductFixture( baseURL ) {
 }
 
 test.describe( 'Add New Variable Product Page', () => {
-	test.setTimeout( 180 * 1000 );
 
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -223,6 +222,8 @@ test.describe( 'Add New Variable Product Page', () => {
 	test( 'can create product, attributes and variations', async ( {
 		page,
 	} ) => {
+		test.setTimeout( 180 * 1000 );
+
 		await test.step( 'Reset the variable product tour.', async () => {
 			await resetVariableProductTour( page );
 		} );
