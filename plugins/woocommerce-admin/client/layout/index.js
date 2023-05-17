@@ -170,14 +170,14 @@ function _Layout( {
 	}, [] );
 
 	useEffect( () => {
-		if ( ! location.pathname ) {
+		if ( ! location?.pathname ) {
 			return;
 		}
 		recordPageViewTrack();
 		setTimeout( () => {
 			triggerExitPageCesSurvey();
 		}, 0 );
-	}, [ location.pathname ] );
+	}, [ location?.pathname ] );
 
 	function isWCPaySettingsPage() {
 		const { page: queryPage, section, tab } = getQuery();
