@@ -617,12 +617,14 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		if ( ! isset( $available_gateways[ $request_payment_method ] ) ) {
+			$all_payment_gateways = WC()->payment_gateways->payment_gateways();
+			$gateway_title        = isset( $all_payment_gateways[ $request_payment_method ] ) ? $all_payment_gateways[ $request_payment_method ]->get_title() : $request_payment_method;
 			throw new RouteException(
 				'woocommerce_rest_checkout_payment_method_disabled',
 				sprintf(
 					// Translators: %s Payment method ID.
-					__( 'The %s payment gateway is not available.', 'woo-gutenberg-products-block' ),
-					esc_html( $request_payment_method )
+					__( '%s is not available for this order—please choose a different payment method', 'woo-gutenberg-products-block' ),
+					esc_html( $gateway_title )
 				),
 				400
 			);
