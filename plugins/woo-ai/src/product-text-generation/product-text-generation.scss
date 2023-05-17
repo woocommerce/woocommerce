@@ -1,0 +1,174 @@
+
+#postdivrich.woocommerce-product-description {
+	// hacks to fix visuals with "write it for me" button present
+	.wp-editor-tools {
+		top: -1px !important;
+		border-bottom: 0 !important;
+	}
+
+	.wp-switch-editor
+	{
+		position: relative;
+		z-index: 1;
+	}
+}
+
+.woocommerce-gpt-integration {
+	display: none;
+
+	// leave room in the 2nd column for tooltips
+	grid-template-columns: 180px minmax( calc(100% - 24px - 180px - 24px - 21px), 2000px ) auto;
+	justify-content: stretch;
+	gap: 24px;
+
+	margin: 20px 0;
+	padding: 16px 16px 24px;
+
+	background: #F6F7F7;
+	border: 1px solid #C3C4C7;
+
+	&::before {
+		position: relative;
+		top: -28px;
+		left: 155px;
+		width: 21px;
+	}
+
+	label, a, .select-wrapper, .textarea-wrapper {
+		align-self: baseline;
+	}
+
+	label {
+		font-weight: bold;
+
+		color: #1D2327;
+	}
+
+	.select-wrapper {
+		select {
+			width: 50%;
+			max-width: 500px;
+		}
+	}
+
+	.textarea-wrapper {
+		display: flex;
+
+		textarea {
+			width: 100%;
+			height: 72px;
+		}
+	}
+
+	label {
+		grid-column: 1;
+	}
+
+	.woocommerce-gpt-actions-wrapper {
+		grid-column: 2;
+	}
+
+	#woocommerce-product-description-gpt-hide {
+		grid-column: 3;
+		grid-row: 1;
+		cursor: pointer;
+
+		justify-self: right;
+
+		text-decoration: none;
+		border: none;
+		background-color: transparent;
+
+		&::before {
+			content: "\f335";
+
+			position: relative;
+			left: 2px;
+
+			font-family: "dashicons";
+			font-size: 1.5em;
+
+			color: #1D2327;
+		}
+	}
+
+	label[for="woocommerce-product-description-gpt-about"],
+	#woocommerce-product-description-gpt-about-wrapper {
+		grid-row: 2;
+	}
+
+	label[for="woocommerce-product-description-gpt-voice-tone"],
+	#woocommerce-product-description-gpt-voice-tone-wrapper {
+		grid-row: 3;
+	}
+
+	#woocommerce-product-description-gpt-about-wrapper,
+	#woocommerce-product-description-gpt-voice-tone-wrapper {
+		grid-column: span 2;
+	}
+
+	#woocommerce-product-description-gpt-voice-tone-description {
+		margin: 12px 0 0;
+
+		color: #2C3338;
+	}
+
+	.woocommerce-gpt-actions-wrapper {
+		grid-row: 4;
+
+		justify-self: left;
+	}
+
+	.woocommerce-gpt-actions-wrapper {
+		.button-tertiary {
+			border: none !important;
+		}
+	}
+
+	.woocommerce-gpt-extra-actions-wrapper {
+		gap: 12px;
+
+		// when jQuery show() is used, it sets the style to `block`, so override that
+		&[style*='block'] {
+			display: flex !important;
+			flex-wrap: wrap;
+		}
+	}
+
+	@media only screen and (max-width: 1200px) {
+		grid-template-columns: calc(100% - 24px - 21px) auto;
+
+		.select-wrapper {
+			select {
+				width: calc(100% - 25px);
+				max-width: calc(100% - 25px);
+			}
+		}
+
+		#woocommerce-product-description-gpt-hide {
+			grid-column: 2;
+			grid-row: 1;
+		}
+
+		label[for="woocommerce-product-description-gpt-about"] {
+			grid-row: 2;
+		}
+
+		#woocommerce-product-description-gpt-about-wrapper {
+			grid-row: 3;
+		}
+
+		label[for="woocommerce-product-description-gpt-voice-tone"] {
+			grid-row: 4;
+		}
+
+		#woocommerce-product-description-gpt-voice-tone-wrapper {
+			grid-row: 5;
+		}
+
+		.woocommerce-gpt-actions-wrapper {
+			grid-column: 1;
+			grid-row: 6;
+		}
+	}
+}
