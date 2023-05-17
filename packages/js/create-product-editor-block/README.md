@@ -6,6 +6,8 @@ Create Product Editor Block scaffolds a fully functional modern development envi
 
 You can use the built-in [wp-env](https://github.com/WordPress/gutenberg/tree/trunk/packages/env) support to easily get a local WordPress environment up and running. It is configured to load the latest released version of WordPress, the latest WooCommerce nightly build and the latest version of the [WooCommerce Beta Tester](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-beta-tester).
 
+If you want to change which version of WordPress and WooCommerce are used, you can do so by modifying the `.wp-env.override.json` file.
+
 Tooling support for linting, code formatting, and compilation are configured by default.
 
 If you already have a local WordPress development environment configured, you can map the generated project folder under your `plugins` folder.
