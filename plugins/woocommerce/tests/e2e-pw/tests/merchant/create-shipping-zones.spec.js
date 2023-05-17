@@ -52,7 +52,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
-		if ( await page.isVisible( `text=${ shippingZoneNameLocalPickup }` ) ) {
+		if (
+			await page
+				.locator( `text=${ shippingZoneNameLocalPickup }` )
+				.isVisible()
+		) {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
@@ -110,7 +114,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
-		if ( await page.isVisible( `text=${ shippingZoneNameFreeShip }` ) ) {
+		if (
+			await page
+				.locator( `text=${ shippingZoneNameFreeShip }` )
+				.isVisible()
+		) {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
@@ -160,7 +168,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 
 	test( 'add shipping zone for Canada with Flat rate', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
-		if ( await page.isVisible( `text=${ shippingZoneNameFlatRate }` ) ) {
+		if (
+			await page
+				.locator( `text=${ shippingZoneNameFlatRate }` )
+				.isVisible()
+		) {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(
@@ -215,7 +227,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
-		if ( await page.isVisible( `text=${ shippingZoneNameUSRegion }` ) ) {
+		if (
+			await page
+				.locator( `text=${ shippingZoneNameUSRegion }` )
+				.isVisible()
+		) {
 			// this shipping zone already exists, don't create it
 		} else {
 			await page.goto(

@@ -163,7 +163,9 @@ const onboarding = {
 			).toHaveCount( 0 );
 		}
 		// Uncheck all business features
-		if ( page.isChecked( '.components-checkbox-control__input' ) ) {
+		if (
+			page.locator( '.components-checkbox-control__input' ).isChecked()
+		) {
 			await page.locator( '.components-checkbox-control__input' ).click();
 		}
 	},

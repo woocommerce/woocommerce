@@ -258,7 +258,9 @@ test.describe.skip( 'Store owner can go through setup Task List', () => {
 		await page.locator( 'button >> text=Continue' ).click();
 		await page.locator( 'button >> text=Continue' ).click();
 		// Uncheck all business features
-		if ( page.isChecked( '.components-checkbox-control__input' ) ) {
+		if (
+			page.locator( '.components-checkbox-control__input' ).isChecked()
+		) {
 			await page.locator( '.components-checkbox-control__input' ).click();
 		}
 		await page.locator( 'button >> text=Continue' ).click();
