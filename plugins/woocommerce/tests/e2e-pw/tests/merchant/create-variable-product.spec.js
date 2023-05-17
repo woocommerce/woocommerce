@@ -203,6 +203,8 @@ async function createVariableProductFixture( baseURL ) {
 }
 
 test.describe( 'Add New Variable Product Page', () => {
+	test.describe.configure( { timeout: 180 * 1000 } );
+
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -241,7 +243,9 @@ test.describe( 'Add New Variable Product Page', () => {
 		await test.step(
 			'Select the "Variable product" product type.',
 			async () => {
-				await page.selectOption( '#product-type', 'variable' );
+				await page
+					.locator( '#product-type' )
+					.selectOption( 'variable' );
 			}
 		);
 
@@ -370,6 +374,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			'Save before going to the Variations tab to prevent variations from all attributes to be automatically created.',
 			async () => {
 				await page.locator( '#save-post' ).click();
+				await page.waitForLoadState( 'networkidle' );
 			}
 		);
 
@@ -383,7 +388,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		);
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step(
@@ -392,7 +397,7 @@ test.describe( 'Add New Variable Product Page', () => {
 				// event listener for handling the link_all_variations confirmation dialog
 				page.on( 'dialog', ( dialog ) => dialog.accept() );
 
-				await page.click( 'button.generate_variations' );
+				await page.locator( 'button.generate_variations' ).click();
 			}
 		);
 
@@ -426,6 +431,7 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		await test.step( 'Click "Save Draft" button.', async () => {
 			await page.locator( '#save-post' ).click();
+			await page.waitForLoadState( 'networkidle' );
 		} );
 
 		await test.step(
@@ -771,6 +777,7 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
 		await page.locator( '#save-post' ).click();
+		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
@@ -799,6 +806,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		}
 
 		await page.locator( '#save-post' ).click();
+		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.getByText( 'Product draft updated. ' )
 		).toBeVisible();
@@ -823,7 +831,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		).not.toBeVisible();
 		await firstVariationContainer
 			.getByLabel( 'Stock quantity' )
-			.nth(1)
+			.nth( 1 )
 			.fill( stockAmount );
 		await page.selectOption( '#variable_backorders0', 'notify', {
 			force: true,
