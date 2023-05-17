@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { TouchEvent, MouseEvent } from 'react';
 import { CheckboxControl } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import {
