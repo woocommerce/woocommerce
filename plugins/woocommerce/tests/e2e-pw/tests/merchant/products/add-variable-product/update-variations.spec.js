@@ -223,8 +223,11 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click "Save changes".', async () => {
-			await page.locator( 'button.save-variation-changes' ).click();
-			await page.waitForLoadState( 'networkidle' );
+			const saveButton = page.getByRole( 'button', {
+				name: 'Save changes',
+			} );
+			await saveButton.click();
+			await expect( saveButton ).toBeDisabled();
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
@@ -549,8 +552,11 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click "Save changes"', async () => {
-			await page.getByRole( 'button', { name: 'Save changes' } ).click();
-			await page.waitForLoadState( 'networkidle' );
+			const saveButton = page.getByRole( 'button', {
+				name: 'Save changes',
+			} );
+			await saveButton.click();
+			await expect( saveButton ).toBeDisabled();
 		} );
 
 		await test.step( 'View the product from the shop', async () => {

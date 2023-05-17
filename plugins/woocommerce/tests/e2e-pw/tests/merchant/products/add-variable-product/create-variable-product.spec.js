@@ -32,6 +32,12 @@ test.describe( 'Add variable product', () => {
 			}
 		);
 
+		await test.step( 'Expect permalink to appear.', async () => {
+			const permalink = page.locator( '#sample-permalink' );
+
+			await expect( permalink ).toBeVisible();
+		} );
+
 		await test.step(
 			'Select the "Variable product" product type.',
 			async () => {
