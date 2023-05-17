@@ -136,14 +136,7 @@ test.describe( 'Update variations', () => {
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		const productIds = [
-			productId_indivEdit,
-			productId_bulkEdit,
-			productId_deleteAll,
-			productId_manageStock,
-		];
-
-		await deleteProductsAddedByTests( baseURL, productIds );
+		await deleteProductsAddedByTests( baseURL );
 	} );
 
 	test( 'can individually edit variations', async ( { page } ) => {
