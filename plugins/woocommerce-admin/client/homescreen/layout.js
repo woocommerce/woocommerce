@@ -30,7 +30,11 @@ import InboxPanel from '../inbox-panel';
 import { IntroModal as NavigationIntroModal } from '../navigation/components/intro-modal';
 import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
-import { TasksPlaceholder, useActiveSetupTasklist } from '../tasks';
+import {
+	TasksPlaceholder,
+	useActiveSetupTasklist,
+	ProgressTitle,
+} from '../task-lists';
 import {
 	WELCOME_MODAL_DISMISSED_OPTION_NAME,
 	WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME,
@@ -41,14 +45,15 @@ import { MobileAppModal } from './mobile-app-modal';
 import './style.scss';
 import '../dashboard/style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { ProgressTitle } from '../task-lists';
 import { WooHomescreenHeaderBanner } from './header-banner-slot';
 import { WooHomescreenWCPayFeature } from './wcpay-feature-slot';
 
-const Tasks = lazy( () =>
-	import( /* webpackChunkName: "tasks" */ '../tasks' ).then( ( module ) => ( {
-		default: module.Tasks,
-	} ) )
+const TaskLists = lazy( () =>
+	import( /* webpackChunkName: "tasks" */ '../task-lists' ).then(
+		( module ) => ( {
+			default: module.TaskLists,
+		} )
+	)
 );
 
 export const Layout = ( {
@@ -127,7 +132,7 @@ export const Layout = ( {
 						<ProgressTitle taskListId={ activeSetupTaskList } />
 					</>
 				) }
-				<Tasks query={ query } />
+				<TaskLists query={ query } />
 			</Suspense>
 		);
 	};
