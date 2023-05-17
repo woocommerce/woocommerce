@@ -24,7 +24,10 @@ import {
  * Internal dependencies
  */
 import { ProductCategoryNode, useCategorySearch } from './use-category-search';
-import { mapFromCategoryType } from './category-field';
+import {
+	mapFromCategoriesToTreeItems,
+	mapFromCategoryToTreeItem,
+} from './category-field';
 
 type CreateCategoryModalProps = {
 	initialCategoryName?: string;
@@ -54,7 +57,7 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 		useState< ProductCategoryNode | null >( null );
 
 	const [ categoryParentTypedValue, setCategoryParentTypedValue ] =
-		useState< string >( '' );
+		useState( '' );
 
 	const onSave = async () => {
 		recordEvent( 'product_category_add', {
@@ -108,17 +111,14 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 					id="parent-category-field"
 					isLoading={ isSearching }
 					items={ getFilteredItemsForSelectTree(
-						mapFromCategoryType( categoriesSelectList ),
+						mapFromCategoriesToTreeItems( categoriesSelectList ),
 						categoryParentTypedValue,
 						[]
 					) }
 					shouldNotRecursivelySelect
 					selected={
 						categoryParent
-							? {
-									label: String( categoryParent?.name ),
-									value: String( categoryParent?.id ),
-							  }
+							? mapFromCategoryToTreeItem( categoryParent )
 							: undefined
 					}
 					onSelect={ ( item: Item ) =>

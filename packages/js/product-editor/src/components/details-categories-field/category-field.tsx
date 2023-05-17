@@ -55,31 +55,41 @@ function getSelectedWithParents(
 	return selected;
 }
 
-export function mapFromCategoryType(
-	categories: ProductCategoryNode[]
-): TreeItemType[] {
-	return categories.map( ( val ) =>
-		val.parent
-			? {
-					value: String( val.id ),
-					label: val.name,
-					parent: String( val.parent ),
-			  }
-			: {
-					value: String( val.id ),
-					label: val.name,
-			  }
-	);
+export function mapFromCategoryToTreeItem(
+	val: ProductCategoryNode
+): TreeItemType {
+	return val.parent
+		? {
+				value: String( val.id ),
+				label: val.name,
+				parent: String( val.parent ),
+		  }
+		: {
+				value: String( val.id ),
+				label: val.name,
+		  };
 }
 
-export function mapToCategoryType(
+export function mapFromTreeItemToCategory(
+	val: TreeItemType
+): ProductCategoryNode {
+	return {
+		id: +val.value,
+		name: val.label,
+		parent: val.parent ? +val.parent : 0,
+	};
+}
+
+export function mapFromCategoriesToTreeItems(
+	categories: ProductCategoryNode[]
+): TreeItemType[] {
+	return categories.map( mapFromCategoryToTreeItem );
+}
+
+export function mapFromTreeItemsToCategories(
 	categories: TreeItemType[]
 ): ProductCategoryNode[] {
-	return categories.map( ( cat ) => ( {
-		id: +cat.value,
-		name: cat.label,
-		parent: cat.parent ? +cat.parent : 0,
-	} ) );
+	return categories.map( mapFromTreeItemToCategory );
 }
 
 export const CategoryField: React.FC< CategoryFieldProps > = ( {
@@ -129,15 +139,15 @@ export const CategoryField: React.FC< CategoryFieldProps > = ( {
 					) === -1
 				}
 				items={ getFilteredItemsForSelectTree(
-					mapFromCategoryType( categoriesSelectList ),
+					mapFromCategoriesToTreeItems( categoriesSelectList ),
 					searchValue,
-					mapFromCategoryType( value )
+					mapFromCategoriesToTreeItems( value )
 				) }
-				selected={ mapFromCategoryType( value ) }
+				selected={ mapFromCategoriesToTreeItems( value ) }
 				onSelect={ ( selectedItems ) => {
 					if ( Array.isArray( selectedItems ) ) {
 						const newItems: ProductCategoryNode[] =
-							mapToCategoryType(
+							mapFromTreeItemsToCategories(
 								selectedItems.filter(
 									( { value: selectedItemValue } ) =>
 										! value.some(
