@@ -45,7 +45,7 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 										<span className="woocommerce-product-form__checkbox-tooltip-icon">
 											<Icon
 												icon={ help }
-												size={ 20 }
+												size={ 22 }
 												fill="#949494"
 											/>
 										</span>
