@@ -305,8 +305,22 @@
 
 // User profile page
 .woocommerce-profiler-user-profile {
+	.woocommerce-profiler-heading {
+		.woocommerce-profiler-heading__title {
+			margin-bottom: 0;
+		}
+
+		.woocommerce-profiler-heading__subtitle {
+			color: $gray-700;
+			margin-top: 12px;
+		}
+	}
+
+
 	.woocommerce-user-profile-choices {
 		margin-bottom: 32px;
+		max-width: 400px;
+		width: 100%;
 	}
 
 	.woocommerce-user-profile-choices fieldset {
