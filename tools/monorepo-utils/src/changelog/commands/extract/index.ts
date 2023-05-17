@@ -2,11 +2,13 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
+import { setOutput } from '@actions/core';
 
 /**
  * Internal dependencies
  */
 import { Logger } from '../../../core/logger';
+import { isGithubCI } from '../../../core/environment';
 import {
 	getPullRequestData,
 	getChangelogSignificance,
@@ -44,10 +46,17 @@ export const extractCommand = new Command( 'extract' )
 				prData.body
 			);
 
+			const isGithub = isGithubCI();
+
 			if ( ! shouldAutomateChangelog ) {
 				Logger.notice(
 					`PR #${ prNumber } does not have the "Automatically create a changelog entry from the details" checkbox checked. No changelog will be created.`
 				);
+
+				if ( isGithub ) {
+					setOutput( 'extractedData', null );
+				}
+
 				process.exit( 0 );
 			}
 
@@ -68,6 +77,10 @@ export const extractCommand = new Command( 'extract' )
 				comment,
 			};
 
-			Logger.notice( JSON.stringify( extractedData, null, 2 ) );
+			if ( isGithubCI() ) {
+				setOutput( 'extractedData', JSON.stringify( extractedData ) );
+			} else {
+				Logger.notice( JSON.stringify( extractedData, null, 2 ) );
+			}
 		}
 	);
