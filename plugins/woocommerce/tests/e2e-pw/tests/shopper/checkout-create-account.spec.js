@@ -146,7 +146,7 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await page.fill( '#billing_phone', '123456789' );
 		await page.fill( '#billing_email', billingEmail );
 
-		await page.check( '#createaccount' );
+		await page.locator( '#createaccount' ).check();
 
 		await page.click( '#place_order' );
 

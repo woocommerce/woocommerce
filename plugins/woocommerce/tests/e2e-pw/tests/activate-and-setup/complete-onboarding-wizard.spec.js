@@ -209,7 +209,7 @@ test.describe(
 
 			await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
 			await page.click( 'button >> text=Continue' );
-		
+
 			// Start test
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
@@ -247,7 +247,7 @@ test.describe.skip( 'Store owner can go through setup Task List', () => {
 			'#inspector-text-control-3',
 			storeDetails.us.store.email
 		);
-		await page.check( '#inspector-checkbox-control-0' );
+		await page.locator( '#inspector-checkbox-control-0' ).check();
 		await page.click( 'button >> text=Continue' );
 		await page.click( 'button >> text=No thanks' );
 		await page.click( 'button >> text=Continue' );

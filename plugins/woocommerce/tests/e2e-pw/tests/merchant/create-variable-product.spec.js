@@ -817,7 +817,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		await page.click(
 			'#variable_product_options .toolbar-top a.expand_all'
 		);
-		await page.check( 'input.checkbox.variable_manage_stock' );
+		await page.locator( 'input.checkbox.variable_manage_stock' ).check();
 
 		const firstVariationContainer = await page
 			.locator( '.woocommerce_variations  .woocommerce_variation' )

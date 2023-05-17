@@ -13,7 +13,7 @@ test.describe( 'WooCommerce Tax Settings > enable', () => {
 		);
 
 		// Enable tax calculation
-		await page.check( '#woocommerce_calc_taxes' );
+		await page.locator( '#woocommerce_calc_taxes' ).check();
 		await page.click( 'text=Save changes' );
 
 		// Verify that settings have been saved
@@ -66,7 +66,9 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		);
 
 		// Prices exclusive of tax
-		await page.check( 'text=No, I will enter prices exclusive of tax' );
+		await page
+			.locator( 'text=No, I will enter prices exclusive of tax' )
+			.check();
 		// Tax based on customer shipping address
 		await page.selectOption( '#woocommerce_tax_based_on', 'shipping' );
 		// Standard tax class for shipping

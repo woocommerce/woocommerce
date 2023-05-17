@@ -21,9 +21,13 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 			'#woocommerce_file_download_method',
 			'redirect'
 		);
-		await page.check( '#woocommerce_downloads_require_login' );
-		await page.check( '#woocommerce_downloads_grant_access_after_payment' );
-		await page.check( '#woocommerce_downloads_redirect_fallback_allowed' );
+		await page.locator( '#woocommerce_downloads_require_login' ).check();
+		await page
+			.locator( '#woocommerce_downloads_grant_access_after_payment' )
+			.check();
+		await page
+			.locator( '#woocommerce_downloads_redirect_fallback_allowed' )
+			.check();
 		await page.uncheck( '#woocommerce_downloads_add_hash_to_filename' );
 		await page.click( 'text=Save changes' );
 
@@ -60,7 +64,9 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		await page.uncheck(
 			'#woocommerce_downloads_redirect_fallback_allowed'
 		);
-		await page.check( '#woocommerce_downloads_add_hash_to_filename' );
+		await page
+			.locator( '#woocommerce_downloads_add_hash_to_filename' )
+			.check();
 		await page.click( 'text=Save changes' );
 
 		// Verify that settings have been saved

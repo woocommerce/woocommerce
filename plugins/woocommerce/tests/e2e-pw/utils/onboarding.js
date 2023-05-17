@@ -27,7 +27,7 @@ const onboarding = {
 		// Fill store's email address
 		await page.fill( '#inspector-text-control-3', store.email );
 		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
-		await page.check( '#inspector-checkbox-control-0' );
+		await page.locator( '#inspector-checkbox-control-0' ).check();
 		// Click continue button
 		await page.click( 'button >> text=Continue' );
 		// Usage tracking dialog
@@ -36,7 +36,11 @@ const onboarding = {
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	},
 
-	completeIndustrySection: async ( page, industries, expectedNumberOfIndustries ) => {
+	completeIndustrySection: async (
+		page,
+		industries,
+		expectedNumberOfIndustries
+	) => {
 		await page.goto( INDUSTRY_DETAILS_URL );
 		const pageHeading = await page.textContent(
 			'div.woocommerce-profile-wizard__step-header > h2'
