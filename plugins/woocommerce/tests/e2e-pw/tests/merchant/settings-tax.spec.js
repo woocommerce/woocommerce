@@ -70,18 +70,26 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 			.locator( 'text=No, I will enter prices exclusive of tax' )
 			.check();
 		// Tax based on customer shipping address
-		await page.selectOption( '#woocommerce_tax_based_on', 'shipping' );
+		await page
+			.locator( '#woocommerce_tax_based_on' )
+			.selectOption( 'shipping' );
 		// Standard tax class for shipping
-		await page.selectOption( '#woocommerce_shipping_tax_class', {
+		await page.locator( '#woocommerce_shipping_tax_class' ).selectOption( {
 			label: 'Standard',
 		} );
 		// Leave rounding unchecked
 		// Display prices excluding tax
-		await page.selectOption( '#woocommerce_tax_display_shop', 'excl' );
+		await page
+			.locator( '#woocommerce_tax_display_shop' )
+			.selectOption( 'excl' );
 		// Display prices including tax in cart and at checkout
-		await page.selectOption( '#woocommerce_tax_display_cart', 'incl' );
+		await page
+			.locator( '#woocommerce_tax_display_cart' )
+			.selectOption( 'incl' );
 		// Display a single tax total
-		await page.selectOption( '#woocommerce_tax_total_display', 'single' );
+		await page
+			.locator( '#woocommerce_tax_total_display' )
+			.selectOption( 'single' );
 		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved

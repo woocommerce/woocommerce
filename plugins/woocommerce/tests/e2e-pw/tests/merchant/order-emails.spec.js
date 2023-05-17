@@ -38,7 +38,9 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		// clear out the email logs before each test
 		while ( ( await page.$( '#bulk-action-selector-top' ) ) !== null ) {
 			await page.locator( '#cb-select-all-1' ).click();
-			await page.selectOption( '#bulk-action-selector-top', 'delete' );
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'delete' );
 			await page.locator( '#doaction' ).click();
 		}
 	} );
@@ -88,10 +90,9 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	test( 'can resend new order notification', async ( { page } ) => {
 		// resend the new order notification
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
-		await page.selectOption(
-			'li#actions > select',
-			'send_order_details_admin'
-		);
+		await page
+			.locator( 'li#actions > select' )
+			.selectOption( 'send_order_details_admin' );
 		await page.locator( 'button.wc-reload' ).click();
 		await page.waitForLoadState( 'networkidle' );
 
@@ -112,7 +113,9 @@ test.describe( 'Merchant > Order Action emails received', () => {
 	test( 'can email invoice/order details to customer', async ( { page } ) => {
 		// send the customer order details
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
-		await page.selectOption( 'li#actions > select', 'send_order_details' );
+		await page
+			.locator( 'li#actions > select' )
+			.selectOption( 'send_order_details' );
 		await page.locator( 'button.wc-reload' ).click();
 		await page.waitForLoadState( 'networkidle' );
 

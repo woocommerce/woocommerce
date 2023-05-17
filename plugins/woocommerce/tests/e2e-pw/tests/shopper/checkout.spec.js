@@ -223,7 +223,7 @@ test.describe( 'Checkout page', () => {
 		await page.fill( '#billing_last_name', 'Simpson' );
 		await page.fill( '#billing_address_1', '123 Evergreen Terrace' );
 		await page.fill( '#billing_city', 'Springfield' );
-		await page.selectOption( '#billing_state', 'OR' );
+		await page.locator( '#billing_state' ).selectOption( 'OR' );
 		await page.fill( '#billing_postcode', '97403' );
 		await page.fill( '#billing_phone', '555 555-5555' );
 		await page.fill( '#billing_email', guestEmail );
@@ -297,8 +297,8 @@ test.describe( 'Checkout page', () => {
 		await page.fill( '#billing_last_name', 'Simpson' );
 		await page.fill( '#billing_address_1', '123 Evergreen Terrace' );
 		await page.fill( '#billing_city', 'Springfield' );
-		await page.selectOption( '#billing_country', 'US' );
-		await page.selectOption( '#billing_state', 'OR' );
+		await page.locator( '#billing_country' ).selectOption( 'US' );
+		await page.locator( '#billing_state' ).selectOption( 'OR' );
 		await page.fill( '#billing_postcode', '97403' );
 		await page.fill( '#billing_phone', '555 555-5555' );
 		await page.fill( '#billing_email', customer.email );

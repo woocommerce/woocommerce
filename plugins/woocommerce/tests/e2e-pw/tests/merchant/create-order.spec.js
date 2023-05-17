@@ -225,7 +225,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		orderId = orderText.match( /([0-9])\w+/ );
 		orderId = orderId[ 0 ].toString();
 
-		await page.selectOption( '#order_status', 'wc-processing' );
+		await page.locator( '#order_status' ).selectOption( 'wc-processing' );
 		await page.fill( 'input[name=order_date]', '2018-12-13' );
 		await page.fill( 'input[name=order_date_hour]', '18' );
 		await page.fill( 'input[name=order_date_minute]', '55' );

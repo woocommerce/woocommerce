@@ -666,10 +666,9 @@ test.describe( 'Add New Variable Product Page', () => {
 		await test.step(
 			'Select the \'Toggle "Downloadable"\' bulk action.',
 			async () => {
-				await page.selectOption(
-					'#field_to_edit',
-					'toggle_downloadable'
-				);
+				await page
+					.locator( '#field_to_edit' )
+					.selectOption( 'toggle_downloadable' );
 			}
 		);
 
@@ -711,7 +710,9 @@ test.describe( 'Add New Variable Product Page', () => {
 			'Select the bulk action "Delete all variations".',
 			async () => {
 				page.on( 'dialog', ( dialog ) => dialog.accept() );
-				await page.selectOption( '#field_to_edit', 'delete_all' );
+				await page
+					.locator( '#field_to_edit' )
+					.selectOption( 'delete_all' );
 			}
 		);
 
@@ -730,7 +731,7 @@ test.describe( 'Add New Variable Product Page', () => {
 	} ) => {
 		await page.goto( productPageURL );
 		await page.getByLabel( 'Product name' ).fill( manualVariableProduct );
-		await page.selectOption( '#product-type', 'variable' );
+		await page.locator( '#product-type' ).selectOption( 'variable' );
 
 		await page
 			.locator( '.attribute_tab' )
@@ -794,10 +795,9 @@ test.describe( 'Add New Variable Product Page', () => {
 		await page.locator( 'button.add_variation_manually' ).click();
 		await expect( page.locator( '.variation-needs-update' ) ).toBeVisible();
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
-			await page.selectOption(
-				`.variation-needs-update h3 select >> nth=${ i }`,
-				defaultAttributes[ i ]
-			);
+			await page
+				.locator( `.variation-needs-update h3 select >> nth=${ i }` )
+				.selectOption( defaultAttributes[ i ] );
 		}
 		await page.locator( 'button.save-variation-changes' ).click();
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
@@ -839,7 +839,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			.getByLabel( 'Stock quantity' )
 			.nth( 1 )
 			.fill( stockAmount );
-		await page.selectOption( '#variable_backorders0', 'notify', {
+		await page.locator( '#variable_backorders0' ).selectOption( 'notify', {
 			force: true,
 		} );
 		await firstVariationContainer
@@ -864,10 +864,9 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		// set variation defaults
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
-			await page.selectOption(
-				`select[name="default_attribute_attr-${ i + 1 }"]`,
-				defaultAttributes[ i ]
-			);
+			await page
+				.locator( `select[name="default_attribute_attr-${ i + 1 }"]` )
+				.selectOption( defaultAttributes[ i ] );
 		}
 		await page.locator( 'button.save-variation-changes' ).click();
 		await page.waitForSelector( 'input#variable_low_stock_amount0', {

@@ -179,7 +179,9 @@ test.describe( 'Variable Product Page', () => {
 		await page.goto( `product/${ slug }` );
 
 		for ( const attr of variations ) {
-			await page.selectOption( '#size', attr.attributes[ 0 ].option );
+			await page
+				.locator( '#size' )
+				.selectOption( attr.attributes[ 0 ].option );
 			await page.locator( 'text=Add to cart' ).click();
 			await expect(
 				page.locator( '.woocommerce-message' )
@@ -199,7 +201,7 @@ test.describe( 'Variable Product Page', () => {
 		page,
 	} ) => {
 		await page.goto( `product/${ slug }` );
-		await page.selectOption( '#size', 'Large' );
+		await page.locator( '#size' ).selectOption( 'Large' );
 		await page.locator( 'text=Add to cart' ).click();
 
 		await page.goto( 'cart/' );

@@ -26,7 +26,9 @@ test.describe( 'WooCommerce General Settings', () => {
 
 		// Set selling location to all countries first so we can
 		// choose California as base location.
-		await page.selectOption( '#woocommerce_allowed_countries', 'all' );
+		await page
+			.locator( '#woocommerce_allowed_countries' )
+			.selectOption( 'all' );
 		await page.locator( 'text=Save changes' ).click();
 
 		// confirm setting saved
@@ -38,10 +40,9 @@ test.describe( 'WooCommerce General Settings', () => {
 		).toHaveValue( 'all' );
 
 		// set the base location with state CA.
-		await page.selectOption(
-			'select[name="woocommerce_default_country"]',
-			'US:CA'
-		);
+		await page
+			.locator( 'select[name="woocommerce_default_country"]' )
+			.selectOption( 'US:CA' );
 		await page.locator( 'text=Save changes' ).click();
 
 		// verify the settings have been saved
@@ -54,11 +55,12 @@ test.describe( 'WooCommerce General Settings', () => {
 
 		// Set selling location to specific countries first, so we can choose U.S as base location (without state).
 		// This will makes specific countries option appears.
-		await page.selectOption( '#woocommerce_allowed_countries', 'specific' );
-		await page.selectOption(
-			'select[data-placeholder="Choose countries / regions…"] >> nth=1',
-			'US'
-		);
+		await page.locator( '#woocommerce_allowed_countries', 'specific' );
+		await page
+			.locator(
+				'select[data-placeholder="Choose countries / regions…"] >> nth=1'
+			)
+			.selectOption( 'US' );
 
 		// Set currency options
 		await page.fill( '#woocommerce_price_thousand_sep', ',' );

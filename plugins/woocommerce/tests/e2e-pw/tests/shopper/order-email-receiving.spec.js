@@ -29,7 +29,9 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		// clear out the email logs before each test
 		while ( ( await page.$( '#bulk-action-selector-top' ) ) !== null ) {
 			await page.locator( '#cb-select-all-1' ).click();
-			await page.selectOption( '#bulk-action-selector-top', 'delete' );
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'delete' );
 			await page.locator( '#doaction' ).click();
 		}
 	} );
@@ -60,12 +62,13 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		await page.fill( '#billing_last_name', customer.billing.us.last_name );
 		await page.fill( '#billing_address_1', customer.billing.us.address );
 		await page.fill( '#billing_city', customer.billing.us.city );
-		await page.selectOption(
-			'#billing_country',
-			customer.billing.us.country
-		);
+		await page
+			.locator( '#billing_country' )
+			.selectOption( customer.billing.us.country );
 
-		await page.selectOption( '#billing_state', customer.billing.us.state );
+		await page
+			.locator( '#billing_state' )
+			.selectOption( customer.billing.us.state );
 
 		await page.fill( '#billing_postcode', customer.billing.us.zip );
 		await page.fill( '#billing_phone', customer.billing.us.phone );

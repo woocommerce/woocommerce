@@ -56,7 +56,7 @@ test.describe( 'Edit order', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// update order status to Completed
-		await page.selectOption( '#order_status', 'wc-completed' );
+		await page.locator( '#order_status' ).selectOption( 'wc-completed' );
 		await page.locator( 'button.save_order' ).click();
 
 		// verify order status changed and note added

@@ -140,7 +140,7 @@ test.describe(
 			await page.goto( 'shop/' );
 
 			// sort by price high to low
-			await page.selectOption( '.orderby', 'price-desc' );
+			await page.locator( '.orderby' ).selectOption( 'price-desc' );
 			// last product is most expensive
 			await expect(
 				page.locator( 'ul.products > li:nth-child(1)' )
@@ -150,7 +150,7 @@ test.describe(
 			).toContainText( `${ simpleProductName } 1` );
 
 			// sort by price low to high
-			await page.selectOption( '.orderby', 'price' );
+			await page.locator( '.orderby' ).selectOption( 'price' );
 			// last product is most expensive
 			await expect(
 				page.locator( 'ul.products > li:nth-last-child(3)' )

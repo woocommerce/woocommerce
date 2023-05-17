@@ -130,7 +130,9 @@ test.describe( 'Cart Calculate Shipping', () => {
 		await page.goto( '/cart/' );
 		// Set shipping country to Germany
 		await page.locator( 'a.shipping-calculator-button' ).click();
-		await page.selectOption( '#calc_shipping_country', shippingCountryDE );
+		await page
+			.locator( '#calc_shipping_country' )
+			.selectOption( shippingCountryDE );
 		await page.locator( 'button[name="calc_shipping"]' ).click();
 
 		// Verify shipping costs
@@ -148,7 +150,9 @@ test.describe( 'Cart Calculate Shipping', () => {
 		await page.goto( '/cart/' );
 		// Set shipping country to France
 		await page.locator( 'a.shipping-calculator-button' ).click();
-		await page.selectOption( '#calc_shipping_country', shippingCountryFR );
+		await page
+			.locator( '#calc_shipping_country' )
+			.selectOption( shippingCountryFR );
 		await page.locator( 'button[name="calc_shipping"]' ).click();
 
 		// Verify shipping costs
@@ -177,7 +181,9 @@ test.describe( 'Cart Calculate Shipping', () => {
 
 		// Set shipping country to France
 		await page.locator( 'a.shipping-calculator-button' ).click();
-		await page.selectOption( '#calc_shipping_country', shippingCountryFR );
+		await page
+			.locator( '#calc_shipping_country' )
+			.selectOption( shippingCountryFR );
 		await page.locator( 'button[name="calc_shipping"]' ).click();
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
@@ -193,7 +199,9 @@ test.describe( 'Cart Calculate Shipping', () => {
 
 		await page.goto( '/cart/' );
 		await page.locator( 'a.shipping-calculator-button' ).click();
-		await page.selectOption( '#calc_shipping_country', shippingCountryFR );
+		await page
+			.locator( '#calc_shipping_country' )
+			.selectOption( shippingCountryFR );
 		await page.locator( 'button[name="calc_shipping"]' ).click();
 
 		await expect( page.locator( '.shipping .amount' ) ).toContainText(
@@ -213,7 +221,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 		// Set shipping country to Spain
 		await page.goto( '/cart/' );
 		await page.locator( 'a.shipping-calculator-button' ).click();
-		await page.selectOption( '#calc_shipping_country', 'ES' );
+		await page.locator( '#calc_shipping_country' ).selectOption( 'ES' );
 		await page.locator( 'button[name="calc_shipping"]' ).click();
 
 		// Verify shipping costs

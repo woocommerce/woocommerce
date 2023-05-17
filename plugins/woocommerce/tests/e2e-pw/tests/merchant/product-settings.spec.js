@@ -17,10 +17,9 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		).toContainText( 'Downloadable products' );
 
 		// Set download options
-		await page.selectOption(
-			'#woocommerce_file_download_method',
-			'redirect'
-		);
+		await page
+			.locator( '#woocommerce_file_download_method' )
+			.selectOption( 'redirect' );
 		await page.locator( '#woocommerce_downloads_require_login' ).check();
 		await page
 			.locator( '#woocommerce_downloads_grant_access_after_payment' )
@@ -55,10 +54,9 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 
 		// Try setting different options
 		await page.reload();
-		await page.selectOption(
-			'#woocommerce_file_download_method',
-			'xsendfile'
-		);
+		await page
+			.locator( '#woocommerce_file_download_method' )
+			.selectOption( 'xsendfile' );
 		await page.locator( '#woocommerce_downloads_require_login' ).uncheck();
 		await page
 			.locator( '#woocommerce_downloads_grant_access_after_payment' )
@@ -93,7 +91,9 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 
 		// Try the final option
 		await page.reload();
-		await page.selectOption( '#woocommerce_file_download_method', 'force' );
+		await page
+			.locator( '#woocommerce_file_download_method' )
+			.selectOption( 'force' );
 		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved

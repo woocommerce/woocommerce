@@ -97,7 +97,9 @@ module.exports = async ( config ) => {
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1`
 			);
 			await adminPage.fill( '#key_description', 'Key for API access' );
-			await adminPage.selectOption( '#key_permissions', 'read_write' );
+			await adminPage
+				.locator( '#key_permissions' )
+				.selectOption( 'read_write' );
 			await adminPage.locator( 'text=Generate API key' ).click();
 			process.env.CONSUMER_KEY = await adminPage.inputValue(
 				'#key_consumer_key'
