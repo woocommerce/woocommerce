@@ -22,7 +22,7 @@ import { Button, Placeholder, Popover } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { box, Icon } from '@wordpress/icons';
 import { useDispatch, subscribe, useSelect, select } from '@wordpress/data';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 import { useEntityRecord } from '@wordpress/core-data';
 
@@ -100,12 +100,6 @@ const Edit = ( {
 
 	const { createInfoNotice } = useDispatch( noticesStore );
 
-	const blocks = getBlocks();
-
-	const clientIds = useMemo( () => {
-		pickBlockClientIds( blocks );
-	}, [ blocks ] );
-
 	const blockProps = useBlockProps();
 	const templateDetails = getTemplateDetailsBySlug(
 		attributes.template,
@@ -177,6 +171,11 @@ const Edit = ( {
 															'woo-gutenberg-products-block'
 														),
 														onClick: () => {
+															const clientIds =
+																pickBlockClientIds(
+																	getBlocks()
+																);
+
 															replaceBlocks(
 																clientIds,
 																createBlock(
