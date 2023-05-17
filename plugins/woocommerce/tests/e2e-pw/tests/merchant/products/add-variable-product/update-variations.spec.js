@@ -30,17 +30,15 @@ let productId_indivEdit,
 test.describe( 'Update variations', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async ( { baseURL, browser } ) => {
+	test.beforeAll( async ( { browser } ) => {
 		await test.step(
 			'Create variable product for individual edit test',
 			async () => {
 				productId_indivEdit = await createVariableProduct(
-					baseURL,
 					productAttributes
 				);
 
 				variationIds_indivEdit = await createVariations(
-					baseURL,
 					productId_indivEdit,
 					sampleVariations
 				);
@@ -51,15 +49,10 @@ test.describe( 'Update variations', () => {
 			'Create variable product for bulk edit test',
 			async () => {
 				productId_bulkEdit = await createVariableProduct(
-					baseURL,
 					productAttributes
 				);
 
-				await createVariations(
-					baseURL,
-					productId_bulkEdit,
-					sampleVariations
-				);
+				await createVariations( productId_bulkEdit, sampleVariations );
 			}
 		);
 
@@ -67,15 +60,10 @@ test.describe( 'Update variations', () => {
 			'Create variable product for "delete all" test',
 			async () => {
 				productId_deleteAll = await createVariableProduct(
-					baseURL,
 					productAttributes
 				);
 
-				await createVariations(
-					baseURL,
-					productId_deleteAll,
-					sampleVariations
-				);
+				await createVariations( productId_deleteAll, sampleVariations );
 			}
 		);
 
@@ -83,17 +71,12 @@ test.describe( 'Update variations', () => {
 			'Create variable product for "manage stock" test',
 			async () => {
 				productId_manageStock = await createVariableProduct(
-					baseURL,
 					productAttributes
 				);
 
 				const variation = sampleVariations.slice( -1 );
 
-				await createVariations(
-					baseURL,
-					productId_manageStock,
-					variation
-				);
+				await createVariations( productId_manageStock, variation );
 			}
 		);
 
@@ -101,12 +84,10 @@ test.describe( 'Update variations', () => {
 			'Create variable product for "variation defaults" test',
 			async () => {
 				productId_variationDefaults = await createVariableProduct(
-					baseURL,
 					productAttributes
 				);
 
 				await createVariations(
-					baseURL,
 					productId_variationDefaults,
 					sampleVariations
 				);
@@ -119,12 +100,10 @@ test.describe( 'Update variations', () => {
 			'Create variable product with 1 variation for "remove variation" test',
 			async () => {
 				productId_removeVariation = await createVariableProduct(
-					baseURL,
 					productAttributes
 				);
 
 				await createVariations(
-					baseURL,
 					productId_removeVariation,
 					sampleVariations.slice( -1 )
 				);
@@ -136,8 +115,8 @@ test.describe( 'Update variations', () => {
 		} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		await deleteProductsAddedByTests( baseURL );
+	test.afterAll( async () => {
+		await deleteProductsAddedByTests();
 	} );
 
 	test( 'can individually edit variations', async ( { page } ) => {

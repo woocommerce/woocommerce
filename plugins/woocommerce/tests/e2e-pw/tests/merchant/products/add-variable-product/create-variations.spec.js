@@ -1,7 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const {
-	variableProducts: utils,
-} = require( '../../../../utils' );
+const { variableProducts: utils } = require( '../../../../utils' );
 const {
 	createVariableProduct,
 	showVariableProductTour,
@@ -18,14 +16,12 @@ let expectedGeneratedVariations,
 test.describe( 'Add variations', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async ( { baseURL, browser } ) => {
+	test.beforeAll( async ( { browser } ) => {
 		productId_generateVariations = await createVariableProduct(
-			baseURL,
 			productAttributes
 		);
 
 		productId_addManually = await createVariableProduct(
-			baseURL,
 			productAttributes
 		);
 
@@ -38,13 +34,8 @@ test.describe( 'Add variations', () => {
 		await showVariableProductTour( browser, false );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const productIds = [
-			productId_generateVariations,
-			productId_addManually,
-		];
-
-		await deleteProductsAddedByTests( baseURL, productIds );
+	test.afterAll( async () => {
+		await deleteProductsAddedByTests();
 	} );
 
 	test( 'can generate variations from product attributes', async ( {

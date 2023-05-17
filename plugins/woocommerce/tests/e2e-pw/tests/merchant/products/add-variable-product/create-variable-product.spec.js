@@ -1,11 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
-const {
-	variableProducts: utils,
-} = require( '../../../../utils' );
-const {
-	showVariableProductTour,
-	deleteProductsAddedByTests,
-} = utils;
+const { variableProducts: utils, api } = require( '../../../../utils' );
+const { showVariableProductTour } = utils;
 const productPageURL = 'wp-admin/post-new.php?post_type=product';
 const variableProductName = 'Variable Product with Three Variations';
 
@@ -18,9 +13,9 @@ test.describe( 'Add variable product', () => {
 		await showVariableProductTour( browser, true );
 	} );
 
-	test.afterAll( async ( { baseURL, browser } ) => {
+	test.afterAll( async ( { browser } ) => {
 		await showVariableProductTour( browser, false );
-		await deleteProductsAddedByTests( baseURL, productId );
+		await api.deletePost.product( productId );
 	} );
 
 	test( 'can create a variable product', async ( { page } ) => {

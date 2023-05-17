@@ -1,4 +1,4 @@
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const api = require( './api' );
 
 /**
  * Array to hold all product ID's to be deleted after test.
@@ -7,6 +7,8 @@ const productIds = [];
 
 /**
  * The `attributes` property to be used in the request payload for creating a variable product through the REST API.
+ *
+ * @see {@link [Product - Attributes properties](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-attributes-properties)}
  */
 const productAttributes = [
 	{
@@ -31,6 +33,8 @@ const productAttributes = [
 
 /**
  * Request payload for creating variations.
+ *
+ * @see {@link [Product variation properties](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties)}
  */
 const sampleVariations = [
 	{
@@ -87,29 +91,12 @@ const sampleVariations = [
 ];
 
 /**
- * Create a [WooCommerceRestApi](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api) object
- *
- * @param {string} baseURL
- * @returns [WooCommerceRestApi](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api) object
- */
-function newWCApi( baseURL ) {
-	return new wcApi( {
-		url: baseURL,
-		consumerKey: process.env.CONSUMER_KEY,
-		consumerSecret: process.env.CONSUMER_SECRET,
-		version: 'wc/v3',
-	} );
-}
-
-/**
  * Create a variable product using the WooCommerce REST API.
  *
- * @param {string} baseURL
- * @param {{ name: string, visible: boolean, variation: boolean, options: string[] }[]} attributes
+ * @param {{ name: string, visible: boolean, variation: boolean, options: string[] }[]} attributes List of attributes. See [Product - Attributes properties](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-attributes-properties).
  * @returns {Promise<number>} ID of the created variable product
  */
-async function createVariableProduct( baseURL, attributes = [] ) {
-	const api = newWCApi( baseURL );
+async function createVariableProduct( attributes = [] ) {
 	const randomNum = Math.floor( Math.random() * 1000 );
 	const payload = {
 		name: `Unbranded Granite Shirt ${ randomNum }`,
@@ -117,9 +104,7 @@ async function createVariableProduct( baseURL, attributes = [] ) {
 		attributes,
 	};
 
-	const productId = await api
-		.post( 'products', payload )
-		.then( ( response ) => response.data.id );
+	const productId = await api.create.product( payload );
 
 	productIds.push( productId );
 
@@ -128,18 +113,9 @@ async function createVariableProduct( baseURL, attributes = [] ) {
 
 /**
  * Clean up all products created by the test.
- *
- * @param {string} baseURL
- * @param {number} otherId Product ID to include for deletion
  */
-async function deleteProductsAddedByTests( baseURL, otherId ) {
-	const api = newWCApi( baseURL );
-
-	if ( otherId ) {
-		productIds.push( otherId );
-	}
-
-	await api.post( 'products/batch', { delete: productIds } );
+async function deleteProductsAddedByTests() {
+	await api.deletePost.products( productIds );
 }
 
 /**
@@ -231,22 +207,12 @@ function generateVariationsFromAttributes( attributes ) {
 /**
  * Create variations through the WooCommerce REST API.
  *
- * @param {string} baseURL
  * @param {number} productId Product ID to add variations to.
- * @param {{regular_price: string, attributes: {name: string, option: string}[]}[]} variations
+ * @param {{regular_price: string, attributes: {name: string, option: string}[]}[]} variations List of variations to create.
  * @returns {Promise<number[]>} Array of variation ID's created.
  */
-async function createVariations( baseURL, productId, variations ) {
-	const api = newWCApi( baseURL );
-
-	const response = await api.post(
-		`products/${ productId }/variations/batch`,
-		{
-			create: variations,
-		}
-	);
-
-	return response.data.create.map( ( { id } ) => id );
+async function createVariations( productId, variations ) {
+	return await api.create.productVariations( productId, variations );
 }
 
 module.exports = {

@@ -1,7 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const {
-	variableProducts: utils,
-} = require( '../../../../utils' );
+const { variableProducts: utils } = require( '../../../../utils' );
 const {
 	createVariableProduct,
 	showVariableProductTour,
@@ -14,14 +12,14 @@ let productId;
 test.describe( 'Add product attributes', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async ( { baseURL, browser } ) => {
-		productId = await createVariableProduct( baseURL );
+	test.beforeAll( async ( { browser } ) => {
+		productId = await createVariableProduct();
 
 		await showVariableProductTour( browser, false );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		await deleteProductsAddedByTests( baseURL, [ productId ] );
+	test.afterAll( async () => {
+		await deleteProductsAddedByTests();
 	} );
 
 	test( 'can add custom product attributes', async ( { page } ) => {
