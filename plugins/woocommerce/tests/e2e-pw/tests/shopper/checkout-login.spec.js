@@ -160,13 +160,9 @@ test.describe( 'Shopper Checkout Login Account', () => {
 
 		await page.waitForLoadState( 'networkidle' );
 		// get order ID from the page
-		const orderReceivedHtmlElement = await page.$(
-			'.woocommerce-order-overview__order.order'
-		);
-		const orderReceivedText = await page.evaluate(
-			( element ) => element.textContent,
-			orderReceivedHtmlElement
-		);
+		const orderReceivedText = await page
+			.locator( '.woocommerce-order-overview__order.order' )
+			.textContent();
 		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
 		await expect( page.locator( 'ul > li.email' ) ).toContainText(

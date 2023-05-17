@@ -51,9 +51,9 @@ const onboarding = {
 			'In which industry does the store operate?'
 		);
 		// Check that there are the correct number of options listed
-		const numCheckboxes = await page.$$(
-			'.components-checkbox-control__input'
-		);
+		const numCheckboxes = await page
+			.locator( '.components-checkbox-control__input' )
+			.count();
 		expect( numCheckboxes ).toHaveLength( expectedNumberOfIndustries );
 		// Uncheck any currently checked industries
 		for ( let i = 0; i < expectedNumberOfIndustries; i++ ) {
@@ -89,9 +89,9 @@ const onboarding = {
 			'What type of products will be listed?'
 		);
 		// Check that there are the correct number of options listed
-		const numCheckboxes = await page.$$(
-			'.components-checkbox-control__input'
-		);
+		const numCheckboxes = await page
+			.locator( '.components-checkbox-control__input' )
+			.count();
 		expect( numCheckboxes ).toHaveLength( expectedProductTypes );
 		// Uncheck any currently checked products
 		for ( let i = 0; i < expectedProductTypes; i++ ) {

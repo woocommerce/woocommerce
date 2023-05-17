@@ -157,13 +157,9 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		);
 
 		// get order ID from the page
-		const orderReceivedHtmlElement = await page.$(
-			'.woocommerce-order-overview__order.order'
-		);
-		const orderReceivedText = await page.evaluate(
-			( element ) => element.textContent,
-			orderReceivedHtmlElement
-		);
+		const orderReceivedText = await page
+			.locator( '.woocommerce-order-overview__order.order' )
+			.textContent();
 		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
 		await page.goto( '/my-account/' );

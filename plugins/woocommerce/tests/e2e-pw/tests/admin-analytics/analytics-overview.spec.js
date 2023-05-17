@@ -10,10 +10,10 @@ test.describe( 'Analytics pages', () => {
 		);
 
 		// Grab all of the section headings
-		const sections = await page.$$(
-			'h2.woocommerce-section-header__title'
-		);
-		if ( sections.length < 3 ) {
+		const sections = await page
+			.locator( 'h2.woocommerce-section-header__title' )
+			.count();
+		if ( sections < 3 ) {
 			// performance section is hidden
 			await page
 				.locator( '//button[@title="Add more sections"]' )
@@ -174,10 +174,8 @@ test.describe( 'Analytics pages', () => {
 		await page.locator( 'text=Remove section' ).click();
 		// Grab all of the section headings
 		await page.waitForLoadState( 'networkidle' );
-		const sections = await page.$$(
-			'h2.woocommerce-section-header__title'
-		);
-		await expect( sections.length ).toEqual( 2 );
+		const sections = page.locator( 'h2.woocommerce-section-header__title' );
+		await expect( sections ).toHaveCount( 2 );
 	} );
 
 	test( 'should allow a user to add a section back in', async ( {

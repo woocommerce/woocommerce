@@ -240,13 +240,9 @@ test.describe( 'Checkout page', () => {
 		);
 
 		// get order ID from the page
-		const orderReceivedHtmlElement = await page.$(
-			'.woocommerce-order-overview__order.order'
-		);
-		const orderReceivedText = await page.evaluate(
-			( element ) => element.textContent,
-			orderReceivedHtmlElement
-		);
+		const orderReceivedText = await page
+			.locator( '.woocommerce-order-overview__order.order' )
+			.textContent();
 		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
 		await page.goto( 'wp-login.php' );
@@ -317,13 +313,9 @@ test.describe( 'Checkout page', () => {
 		);
 
 		// get order ID from the page
-		const orderReceivedHtmlElement = await page.$(
-			'.woocommerce-order-overview__order.order'
-		);
-		const orderReceivedText = await page.evaluate(
-			( element ) => element.textContent,
-			orderReceivedHtmlElement
-		);
+		const orderReceivedText = await page
+			.locator( '.woocommerce-order-overview__order.order' )
+			.textContent();
 		customerOrderId = await orderReceivedText
 			.split( /(\s+)/ )[ 6 ]
 			.toString();

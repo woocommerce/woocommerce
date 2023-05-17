@@ -215,13 +215,9 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		await page.waitForLoadState( 'networkidle' );
 		// get order ID from the page
-		const orderHtmlElement = await page.$(
-			'h2.woocommerce-order-data__heading'
-		);
-		const orderText = await page.evaluate(
-			( element ) => element.textContent,
-			orderHtmlElement
-		);
+		const orderText = await page
+			.locator( 'h2.woocommerce-order-data__heading' )
+			.textContent();
 		orderId = orderText.match( /([0-9])\w+/ );
 		orderId = orderId[ 0 ].toString();
 

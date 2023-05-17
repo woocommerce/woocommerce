@@ -27,7 +27,9 @@ test.describe( 'Shopper Order Email Receiving', () => {
 			) }`
 		);
 		// clear out the email logs before each test
-		while ( ( await page.$( '#bulk-action-selector-top' ) ) !== null ) {
+		while (
+			await page.locator( '#bulk-action-selector-top' ).isVisible()
+		) {
 			await page.locator( '#cb-select-all-1' ).click();
 			await page
 				.locator( '#bulk-action-selector-top' )
