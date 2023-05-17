@@ -8,6 +8,7 @@ import { useSelect, resolveSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { useCategorySearch } from '../use-category-search';
+import { mapFromCategoriesToTreeItems } from '../../details-categories-field/category-field';
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -192,10 +193,9 @@ describe( 'useCategorySearch', () => {
 			await waitForNextUpdate();
 
 			const filteredItems = result.current.getFilteredItemsForSelectTree(
-				result.current.categoriesSelectList.map( ( l ) => ( {
-					value: String( l.id ),
-					label: l.name,
-				} ) ),
+				mapFromCategoriesToTreeItems(
+					result.current.categoriesSelectList
+				),
 				'Rain',
 				[]
 			);
@@ -219,10 +219,9 @@ describe( 'useCategorySearch', () => {
 			await waitForNextUpdate();
 			expect( result.current.categoriesSelectList.length ).toEqual( 6 );
 			const filteredItems = result.current.getFilteredItemsForSelectTree(
-				result.current.categoriesSelectList.map( ( l ) => ( {
-					value: String( l.id ),
-					label: l.name,
-				} ) ),
+				mapFromCategoriesToTreeItems(
+					result.current.categoriesSelectList
+				),
 				'Bel',
 				[]
 			);
