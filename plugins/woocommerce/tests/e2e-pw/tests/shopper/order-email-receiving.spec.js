@@ -83,9 +83,9 @@ test.describe( 'Shopper Order Email Receiving', () => {
 
 		await page.locator( 'text=Place order' ).click();
 
-		await page.waitForSelector(
-			'li.woocommerce-order-overview__order > strong'
-		);
+		await expect(
+			page.locator( 'li.woocommerce-order-overview__order > strong' )
+		).toBeVisible();
 		orderId = await page.textContent(
 			'li.woocommerce-order-overview__order > strong'
 		);

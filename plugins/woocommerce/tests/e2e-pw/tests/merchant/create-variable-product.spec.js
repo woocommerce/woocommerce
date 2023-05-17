@@ -310,9 +310,11 @@ test.describe( 'Add New Variable Product Page', () => {
 						await test.step(
 							'Wait for the "Attribute name" input field to appear.',
 							async () => {
-								await page.waitForSelector(
-									`input[name="attribute_names[${ i }]"]`
-								);
+								await expect(
+									page.locator(
+										`input[name="attribute_names[${ i }]"]`
+									)
+								).toBeVisible();
 							}
 						);
 
@@ -761,9 +763,9 @@ test.describe( 'Add New Variable Product Page', () => {
 			if ( i > 0 ) {
 				await page.locator( 'button.add_custom_attribute' ).click();
 			}
-			await page.waitForSelector(
-				`input[name="attribute_names[${ i }]"]`
-			);
+			await expect(
+				page.locator( `input[name="attribute_names[${ i }]"]` )
+			).toBeVisible();
 
 			await page
 				.locator( `input[name="attribute_names[${ i }]"]` )
@@ -869,9 +871,9 @@ test.describe( 'Add New Variable Product Page', () => {
 				.selectOption( defaultAttributes[ i ] );
 		}
 		await page.locator( 'button.save-variation-changes' ).click();
-		await page.waitForSelector( 'input#variable_low_stock_amount0', {
-			state: 'hidden',
-		} );
+		await expect(
+			page.locator( 'input#variable_low_stock_amount0' )
+		).not.toBeVisible();
 		for ( let i = 0; i < defaultAttributes.length; i++ ) {
 			await expect(
 				page.locator(

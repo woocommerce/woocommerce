@@ -391,9 +391,9 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.locator( '#calc_shipping_state' ).selectOption( 'BC' );
 		await page.locator( '#calc_shipping_postcode' ).fill( maynePostal );
 		await page.locator( 'button[name=calc_shipping]' ).click();
-		await page.waitForSelector( 'button[name=calc_shipping]', {
-			state: 'hidden',
-		} );
+		await expect(
+			page.locator( 'button[name=calc_shipping]' )
+		).not.toBeVisible();
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
@@ -412,9 +412,9 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.locator( '#calc_shipping_country' ).selectOption( 'CA' );
 		await page.locator( '#calc_shipping_state' ).selectOption( 'BC' );
 		await page.locator( 'button[name=calc_shipping]' ).click();
-		await page.waitForSelector( 'button[name=calc_shipping]', {
-			state: 'hidden',
-		} );
+		await expect(
+			page.locator( 'button[name=calc_shipping]' )
+		).not.toBeVisible();
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
@@ -434,9 +434,9 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 		await page.locator( '#calc_shipping_state' ).selectOption( 'AB' );
 		await page.locator( '#calc_shipping_postcode' ).fill( 'T2T 1B3' );
 		await page.locator( 'button[name=calc_shipping]' ).click();
-		await page.waitForSelector( 'button[name=calc_shipping]', {
-			state: 'hidden',
-		} );
+		await expect(
+			page.locator( 'button[name=calc_shipping]' )
+		).not.toBeVisible();
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )

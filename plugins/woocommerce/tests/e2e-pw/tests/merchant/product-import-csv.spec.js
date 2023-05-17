@@ -205,10 +205,7 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		await page.locator( '#search-submit' ).click();
 
 		// Compare imported products to what's expected
-		await page.waitForSelector( 'a.row-title', {
-			state: 'visible',
-			timeout: 120000, // search can take a while
-		} );
+		await expect( page.locator( 'a.row-title' ) ).toBeVisible();
 		const productTitles = await page.$$eval( 'a.row-title', ( elements ) =>
 			elements.map( ( item ) => item.innerHTML )
 		);
@@ -248,7 +245,7 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		await page.locator( '#search-submit' ).click();
 
 		// Compare imported products to what's expected
-		await page.waitForSelector( 'a.row-title' );
+		await expect( page.locator( 'a.row-title' ) ).toBeVisible();
 		const productTitles = await page.$$eval( 'a.row-title', ( elements ) =>
 			elements.map( ( item ) => item.innerHTML )
 		);
@@ -258,7 +255,7 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		);
 
 		// Compare product prices to what's expected
-		await page.waitForSelector( 'td.price.column-price' );
+		await expect( page.locator( 'td.price.column-price' ) ).toBeVisible();
 		const productPrices = await page.$$eval( '.amount', ( elements ) =>
 			elements.map( ( item ) => item.innerText )
 		);

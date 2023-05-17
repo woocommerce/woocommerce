@@ -21,9 +21,9 @@ test.describe( 'Analytics pages', () => {
 			await page
 				.locator( '//button[@title="Add Performance section"]' )
 				.click();
-			await page.waitForSelector( 'h2:has-text("Performance")', {
-				state: 'visible',
-			} );
+			await expect(
+				page.locator( 'h2:has-text("Performance")' )
+			).toBeVisible();
 			await page.waitForLoadState( 'networkidle' );
 		}
 		const lastSection = await page.textContent(
