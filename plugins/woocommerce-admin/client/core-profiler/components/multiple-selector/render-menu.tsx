@@ -23,7 +23,6 @@ export const renderMenu =
 		isOpen,
 		getItemProps,
 		getMenuProps,
-		closeMenu,
 	}: ChildrenProps< {
 		label: string;
 		value: string;
@@ -32,36 +31,8 @@ export const renderMenu =
 			onOpenClose( isOpen );
 		}, [ isOpen ] );
 
-		const possiblyCloseMenu = ( event: TouchEvent | MouseEvent ) => {
-			if ( isOpen ) {
-				// eslint-disable-next-line max-len
-				// We need to use blur() and closeMenu() because closeMenu doesn't work as expected.
-				// We should fix it in upstream and remove blur() then.
-				document
-					.querySelector< HTMLInputElement >(
-						'.woocommerce-experimental-select-control__input'
-					)
-					?.blur();
-				closeMenu();
-				// Stop propagation to prevent the input from being focused.
-				event.preventDefault();
-				event.stopPropagation();
-			}
-		};
-
 		return (
 			<>
-				{ /*
-				This is a workaround to toggle the platform dropdown when clicking itself
-				because the select control doesn't support it.
-			*/ }
-				<div
-					aria-hidden="true"
-					className="woocommerce-experimental-select-control__input-overlay"
-					onTouchEnd={ possiblyCloseMenu }
-					onMouseDown={ possiblyCloseMenu }
-				/>
-
 				<Menu
 					isOpen={ isOpen }
 					getMenuProps={ getMenuProps }

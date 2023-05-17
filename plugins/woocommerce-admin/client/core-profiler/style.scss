@@ -22,7 +22,7 @@
 
 	.woocommerce-profiler-button-container {
 		width: 100%;
-		max-width: 400px;
+		max-width: 404px;
 		@include breakpoint( '<782px' ) {
 			position: absolute;
 			bottom: 20px;
@@ -96,7 +96,7 @@
 }
 
 .woocommerce-profiler-select-control__country {
-	max-width: 400px;
+	max-width: 404px;
 	margin: auto auto 32px auto;
 }
 
@@ -319,7 +319,7 @@
 
 	.woocommerce-user-profile-choices {
 		margin-bottom: 32px;
-		max-width: 400px;
+		max-width: 404px;
 		width: 100%;
 	}
 
