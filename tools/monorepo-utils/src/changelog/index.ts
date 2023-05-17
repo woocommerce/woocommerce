@@ -4,6 +4,7 @@
 import { Command } from '@commander-js/extra-typings';
 import { setOutput } from '@actions/core';
 import { execSync } from 'child_process';
+import simpleGit from 'simple-git';
 
 /**
  * Internal dependencies
@@ -135,6 +136,33 @@ const program = new Command( 'changelog' )
 				const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } -e "${ message }" -n`;
 				execSync( cmd, { cwd: tmpRepoPath, stdio: 'inherit' } );
 			} );
+
+			const git = simpleGit( {
+				baseDir: tmpRepoPath,
+				config: [ 'core.hooksPath=/dev/null' ],
+			} );
+
+			if ( isGithub ) {
+				await git.raw(
+					'config',
+					'--global',
+					'user.email',
+					'github-actions@github.com'
+				);
+				await git.raw(
+					'config',
+					'--global',
+					'user.name',
+					'github-actions'
+				);
+			}
+
+			Logger.notice( `Adding and committing changes` );
+			await git.add( '.' );
+			await git.commit( 'Adding changelog from automation.' );
+			await git.push( 'origin', branch );
+
+			Logger.notice( `Pushed changes to ${ branch }` );
 		}
 	);
 
