@@ -34,6 +34,14 @@
 
 	&.woocommerce-profiler__stepper-heading {
 		margin-top: 72px;
+
+		.woocommerce-profiler-heading__title {
+			margin-bottom: 0;
+		}
+		.woocommerce-profiler-heading__subtitle {
+			margin-top: 12px;
+		}
+
 		@include breakpoint( '<782px' ) {
 			margin-top: 52px;
 			margin-bottom: 40px;
@@ -42,13 +50,11 @@
 				font-size: 32px;
 				line-height: 40px;
 				text-align: left;
-				margin-bottom: 0;
 			}
 			.woocommerce-profiler-heading__subtitle {
 				text-align: left;
 				font-size: 16px;
 				color: $gray-700;
-				margin-top: 12px;
 				margin-bottom: 0;
 			}
 		}
