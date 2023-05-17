@@ -21,9 +21,11 @@ let productId_indivEdit,
 	productId_bulkEdit,
 	productId_deleteAll,
 	productId_manageStock,
+	productId_variationDefaults,
+	defaultVariation,
 	variationIds_indivEdit;
 
-test.describe.only( 'Update variations', () => {
+test.describe( 'Update variations', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL, browser } ) => {
@@ -90,6 +92,24 @@ test.describe.only( 'Update variations', () => {
 					productId_manageStock,
 					variation
 				);
+			}
+		);
+
+		await test.step(
+			'Create variable product for "variation defaults" test',
+			async () => {
+				productId_variationDefaults = await createVariableProduct(
+					baseURL,
+					productAttributes
+				);
+
+				await createVariations(
+					baseURL,
+					productId_variationDefaults,
+					sampleVariations
+				);
+
+				defaultVariation = sampleVariations[ 1 ].attributes;
 			}
 		);
 
@@ -513,6 +533,63 @@ test.describe.only( 'Update variations', () => {
 						'select[name^="variable_backorders"] > option[selected]'
 					)
 				).toHaveText( 'Allow, but notify customer' );
+			}
+		);
+	} );
+
+	test( 'can set variation defaults', async ( { page } ) => {
+		await test.step( 'Go to the "Edit product" page.', async () => {
+			await page.goto(
+				`/wp-admin/post.php?post=${ productId_variationDefaults }&action=edit`
+			);
+		} );
+
+		await test.step( 'Click on the "Variations" tab.', async () => {
+			await page.locator( 'a[href="#variable_product_options"]' ).click();
+		} );
+
+		await test.step( 'Select variation defaults', async () => {
+			for ( const attribute of defaultVariation ) {
+				const defaultAttributeMenu = page.locator( 'select', {
+					hasText: `No default ${ attribute.name }…`,
+				} );
+
+				await defaultAttributeMenu.selectOption( attribute.option );
+			}
+		} );
+
+		await test.step( 'Click "Save changes"', async () => {
+			await page.getByRole( 'button', { name: 'Save changes' } ).click();
+			await page.waitForLoadState( 'networkidle' );
+		} );
+
+		await test.step( 'View the product from the shop', async () => {
+			const permalink = await page
+				.locator( '#sample-permalink a' )
+				.getAttribute( 'href' );
+
+			await page.goto( permalink );
+		} );
+
+		await test.step(
+			'Expect the default attributes to be pre-selected',
+			async () => {
+				for ( const attribute of defaultVariation ) {
+					await test.step(
+						`Expect "${ attribute.option }" is selected as the default "${ attribute.name }"`,
+						async () => {
+							const defaultSelectedAttribute = page
+								.getByRole( 'row', {
+									name: attribute.name,
+								} )
+								.locator( 'option[selected]' );
+
+							await expect( defaultSelectedAttribute ).toHaveText(
+								attribute.option
+							);
+						}
+					);
+				}
 			}
 		);
 	} );

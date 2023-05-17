@@ -23,6 +23,7 @@ const productAttributes = [
 
 const sampleVariations = [
 	{
+		regular_price: '9.99',
 		attributes: [
 			{
 				name: 'Colour',
@@ -39,6 +40,7 @@ const sampleVariations = [
 		],
 	},
 	{
+		regular_price: '10.99',
 		attributes: [
 			{
 				name: 'Colour',
@@ -55,6 +57,7 @@ const sampleVariations = [
 		],
 	},
 	{
+		regular_price: '11.99',
 		attributes: [
 			{
 				name: 'Colour',
