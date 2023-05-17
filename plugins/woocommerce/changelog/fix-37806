@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+When deleting an administrator user, any existing webhook(s) owned to the user being deleted are re-assigned to the nominated user if the "Attribute all content to" option is chosen, or re-assigned to user id zero. This helps avoid `woocommerce_rest_cannot_view` webhook payload errors.

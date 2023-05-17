@@ -14,6 +14,7 @@ import * as actions from './actions';
 import * as resolvers from './resolvers';
 import reducer, { State } from './reducer';
 import { WPDataActions, WPDataSelectors } from '../types';
+import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
@@ -35,4 +36,7 @@ declare module '@wordpress/data' {
 		key: typeof STORE_NAME
 	): DispatchFromMap< typeof actions & WPDataActions >;
 	function select( key: typeof STORE_NAME ): OnboardingSelector;
+	function resolveSelect(
+		key: typeof STORE_NAME
+	): PromiseifySelectors< OnboardingSelector >;
 }

@@ -20,7 +20,8 @@ export const verifyDayCommand = new Command( 'verify-day' )
 	.description( 'Verify if today is the code freeze day' )
 	.option(
 		'-o, --override <override>',
-		"Time Override: The time to use in checking whether the action should run (default: 'now')."
+		"Time Override: The time to use in checking whether the action should run (default: 'now').",
+		'now'
 	)
 	.action( ( { override } ) => {
 		const today = getToday( override );

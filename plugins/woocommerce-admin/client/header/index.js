@@ -20,7 +20,7 @@ import { Text, useSlot } from '@woocommerce/experimental';
  */
 import './style.scss';
 import useIsScrolled from '../hooks/useIsScrolled';
-import { TasksReminderBar, useActiveSetupTasklist } from '../tasks';
+import { TasksReminderBar, useActiveSetupTasklist } from '../task-lists';
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 

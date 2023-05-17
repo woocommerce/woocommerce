@@ -10,7 +10,7 @@ export const UserProfile = ( {
 } ) => {
 	return (
 		<>
-			<div>User Profile</div>
+			<div data-testid="core-profiler-user-profile">User Profile</div>
 			<button
 				onClick={ () =>
 					sendEvent( {

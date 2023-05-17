@@ -3,11 +3,12 @@
  */
 import {
 	__experimentalEditor as Editor,
+	__experimentalInitBlocks as initBlocks,
 	ProductEditorSettings,
 	productApiFetchMiddleware,
 } from '@woocommerce/product-editor';
-
 import { Spinner } from '@wordpress/components';
+import { useEffect } from '@wordpress/element';
 import { useParams } from 'react-router-dom';
 
 /**
@@ -25,6 +26,10 @@ export default function ProductPage() {
 	const { productId } = useParams();
 
 	const product = useProductEntityRecord( productId );
+
+	useEffect( () => {
+		return initBlocks();
+	}, [] );
 
 	if ( ! product?.id ) {
 		return <Spinner />;

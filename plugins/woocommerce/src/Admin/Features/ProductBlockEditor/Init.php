@@ -664,10 +664,7 @@ class Init {
 							),
 							array(
 								array(
-									'woocommerce/product-shipping-fee-fields',
-									array(
-										'title' => __( 'Shipping fee', 'woocommerce' ),
-									),
+									'woocommerce/product-shipping-class-field',
 								),
 								array(
 									'woocommerce/product-shipping-dimensions-fields',
