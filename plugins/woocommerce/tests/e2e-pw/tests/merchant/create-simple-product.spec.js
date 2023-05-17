@@ -63,9 +63,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 
 		// When running in parallel, clicking the publish button sometimes saves products as a draft
 		if (
-			( await page.innerText( '#post-status-display' ) ).includes(
-				'Draft'
-			)
+			(
+				await page.locator( '#post-status-display' ).innerText()
+			 ).includes( 'Draft' )
 		) {
 			await page.locator( '#publish' ).click();
 			await page.waitForLoadState( 'networkidle' );
@@ -123,9 +123,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 
 		// When running in parallel, clicking the publish button sometimes saves products as a draft
 		if (
-			( await page.innerText( '#post-status-display' ) ).includes(
-				'Draft'
-			)
+			(
+				await page.locator( '#post-status-display' ).innerText()
+			 ).includes( 'Draft' )
 		) {
 			await page.locator( '#publish' ).click();
 			await page.waitForLoadState( 'networkidle' );

@@ -107,12 +107,12 @@ module.exports = async ( config ) => {
 				.locator( '#key_permissions' )
 				.selectOption( 'read_write' );
 			await adminPage.locator( 'text=Generate API key' ).click();
-			process.env.CONSUMER_KEY = await adminPage.inputValue(
-				'#key_consumer_key'
-			);
-			process.env.CONSUMER_SECRET = await adminPage.inputValue(
-				'#key_consumer_secret'
-			);
+			process.env.CONSUMER_KEY = await adminPage
+				.locator( '#key_consumer_key' )
+				.inputValue();
+			process.env.CONSUMER_SECRET = await adminPage
+				.locator( '#key_consumer_secret' )
+				.inputValue();
 			console.log( 'Added consumer token successfully.' );
 			customerKeyConfigured = true;
 			break;
