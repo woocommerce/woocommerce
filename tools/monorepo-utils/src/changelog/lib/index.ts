@@ -1,11 +1,8 @@
 /**
  * Internal dependencies
  */
-import {
-	getPullRequest,
-	isCommunityPullRequest,
-} from '../../../../core/github/repo';
-import { Logger } from '../../../../core/logger';
+import { getPullRequest, isCommunityPullRequest } from '../../core/github/repo';
+import { Logger } from '../../core/logger';
 
 /**
  * Get relevant data from a pull request.
