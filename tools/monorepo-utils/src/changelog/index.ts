@@ -9,6 +9,7 @@ import { setOutput } from '@actions/core';
  */
 import { Logger } from '../core/logger';
 import { isGithubCI } from '../core/environment';
+import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
 import {
 	getPullRequestData,
 	getChangelogSignificance,
@@ -30,6 +31,10 @@ const program = new Command( 'changelog' )
 		'Repository name. Default: woocommerce',
 		'woocommerce'
 	)
+	.option(
+		'-d --dev-repo-path <devRepoPath>',
+		'Path to existing repo. Use this option to avoid cloning a fresh repo for development purposes. Note that using this option assumes dependencies are already installed.'
+	)
 	.argument( '<pr-number>', 'Pull request number' )
 	.action(
 		async (
@@ -37,9 +42,10 @@ const program = new Command( 'changelog' )
 			options: {
 				owner: string;
 				name: string;
+				devRepoPath?: string;
 			}
 		) => {
-			const { owner, name } = options;
+			const { owner, name, devRepoPath } = options;
 			const { prData, isCommunityPR, headOwner, branch, fileName } =
 				await getPullRequestData( { owner, name }, prNumber );
 
@@ -83,6 +89,25 @@ const program = new Command( 'changelog' )
 			if ( isGithubCI() ) {
 				setOutput( 'extractedData', JSON.stringify( extractedData ) );
 			}
+
+			Logger.startTask(
+				`Making a temporary clone of '${ headOwner }/${ name }'`
+			);
+			const tmpRepoPath = devRepoPath
+				? devRepoPath
+				: await cloneAuthenticatedRepo(
+						{ owner: headOwner, name },
+						true
+				  );
+
+			Logger.endTask();
+
+			Logger.notice(
+				`Temporary clone of '${ headOwner }/${ name }' created at ${ tmpRepoPath }`
+			);
+
+			Logger.notice( `Checking out remote branch ${ branch }` );
+			await checkoutRemoteBranch( tmpRepoPath, branch );
 		}
 	);
 
