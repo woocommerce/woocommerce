@@ -76,7 +76,7 @@ class AdditionalPayments extends Payments {
 	 * @return bool
 	 */
 	public function is_complete() {
-		if ( $this->is_complete_result === null ) {
+		if ( null === $this->is_complete_result ) {
 			$this->is_complete_result = self::has_enabled_additional_gateways();
 		}
 
