@@ -48,7 +48,12 @@ export const getChangeloggerProjects = async ( tmpRepoPath: string ) => {
 	} );
 };
 
-export const getTouchedProjects = async ( tmpRepoPath, base, head ) => {
+export const getTouchedProjects = async (
+	tmpRepoPath,
+	base,
+	head,
+	fileName
+) => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
 		config: [ 'core.hooksPath=/dev/null' ],
@@ -67,5 +72,28 @@ export const getTouchedProjects = async ( tmpRepoPath, base, head ) => {
 		'--name-only',
 		`${ base }...${ head }`,
 	] );
-	return diff.split( '\n' ).filter( ( item ) => item.trim() );
+	return diff
+		.split( '\n' )
+		.filter( ( item ) => item.trim() )
+		.filter( ( item ) => ! item.includes( `changelog/${ fileName }` ) );
+};
+
+export const getTouchedProjectsRequiringChangelog = async (
+	tmpRepoPath,
+	base,
+	head,
+	fileName
+) => {
+	const changeloggerProjects = await getChangeloggerProjects( tmpRepoPath );
+	const touchedProjects = await getTouchedProjects(
+		tmpRepoPath,
+		base,
+		head,
+		fileName
+	);
+	return changeloggerProjects.filter( ( project ) => {
+		return touchedProjects.some( ( touchedProject ) =>
+			touchedProject.includes( project )
+		);
+	} );
 };

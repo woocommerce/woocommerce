@@ -18,7 +18,7 @@ import {
 	getChangelogMessage,
 	getChangelogComment,
 } from './lib/github';
-import { getChangeloggerProjects, getTouchedProjects } from './lib/projects';
+import { getTouchedProjectsRequiringChangelog } from './lib/projects';
 
 const program = new Command( 'changelog' )
 	.description( 'Changelog utilities' )
@@ -118,17 +118,17 @@ const program = new Command( 'changelog' )
 			Logger.notice( `Checking out remote branch ${ branch }` );
 			await checkoutRemoteBranch( tmpRepoPath, branch );
 
-			// const changeloggerProjects = await getChangeloggerProjects(
-			// 	tmpRepoPath
-			// );
-
-			const touchedProjects = await getTouchedProjects(
-				tmpRepoPath,
-				base,
-				head
+			Logger.notice(
+				`Getting all touched projects requiring a changelog`
 			);
-
-			console.log( touchedProjects );
+			const touchedProjectsRequiringChangelog =
+				await getTouchedProjectsRequiringChangelog(
+					tmpRepoPath,
+					base,
+					head,
+					fileName
+				);
+			console.log( touchedProjectsRequiringChangelog );
 		}
 	);
 
