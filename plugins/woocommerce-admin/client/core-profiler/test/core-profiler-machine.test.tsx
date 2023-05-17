@@ -19,9 +19,13 @@ jest.mock( '@automattic/calypso-config' );
 // mock out the external dependencies which we don't want to test here
 const actionOverrides = {
 	updateTrackingOption: jest.fn(),
+	updateOnboardingProfileOption: jest.fn(),
 	recordTracksIntroCompleted: jest.fn(),
 	recordTracksIntroSkipped: jest.fn(),
 	recordTracksIntroViewed: jest.fn(),
+	recordTracksUserProfileCompleted: jest.fn(),
+	recordTracksUserProfileSkipped: jest.fn(),
+	recordTracksUserProfileViewed: jest.fn(),
 	recordTracksSkipBusinessLocationViewed: jest.fn(),
 	recordTracksSkipBusinessLocationCompleted: jest.fn(),
 	redirectToWooHome: jest.fn(),
@@ -34,6 +38,7 @@ const servicesOverrides = {
 		.mockResolvedValue( [
 			{ code: 'US', name: 'United States', states: [] },
 		] ),
+	getOnboardingProfileOption: jest.fn().mockResolvedValue( {} ),
 };
 
 /**
