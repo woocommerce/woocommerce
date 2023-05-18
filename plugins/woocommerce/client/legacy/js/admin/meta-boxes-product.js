@@ -491,13 +491,6 @@ jQuery( function ( $ ) {
 			$( document.body ).trigger( 'woocommerce_added_attribute' );
 			jQuery.maybe_disable_save_button();
 		} );
-
-		if ( attribute ) {
-			$( 'select.attribute_taxonomy' )
-				.find( 'option[value="' + attribute + '"]' )
-				.attr( 'disabled', 'disabled' );
-			$( 'select.attribute_taxonomy' ).val( '' );
-		}
 	}
 
 	function add_if_not_exists( arr, item ) {
