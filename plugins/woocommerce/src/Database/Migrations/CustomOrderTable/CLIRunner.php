@@ -299,6 +299,11 @@ class CLIRunner {
 	 * default: false
 	 * ---
 	 *
+	 * [--order-types]
+	 * : Comma seperated list of order types that needs to be verified. For example, --order-types=shop_order,shop_order_refund
+	 * ---
+	 * default: Output of function `wc_get_order_types( 'cot-migration' )`
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Verify migrated order data, 500 orders at a time.
@@ -317,10 +322,11 @@ class CLIRunner {
 		$assoc_args = wp_parse_args(
 			$assoc_args,
 			array(
-				'batch-size' => 500,
-				'start-from' => 0,
-				'end-at'     => -1,
-				'verbose'    => false,
+				'batch-size'  => 500,
+				'start-from'  => 0,
+				'end-at'      => - 1,
+				'verbose'     => false,
+				'order-types' => '',
 			)
 		);
 
@@ -331,9 +337,27 @@ class CLIRunner {
 		$order_id_start = (int) $assoc_args['start-from'];
 		$order_id_end   = (int) $assoc_args['end-at'];
 		$order_id_end   = -1 === $order_id_end ? PHP_INT_MAX : $order_id_end;
-		$order_count    = $this->get_verify_order_count( $order_id_start, $order_id_end, false );
 		$batch_size     = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
 		$verbose        = (bool) $assoc_args['verbose'];
+		$order_types    = wc_get_order_types( 'cot-migration' );
+		if ( ! empty( $assoc_args['order-types'] ) ) {
+			$passed_order_types = array_map( 'trim', explode( ',', $assoc_args['order-types'] ) );
+			$order_types        = array_intersect( $order_types, $passed_order_types );
+		}
+
+		if ( 0 === count( $order_types ) ) {
+			return WP_CLI::error(
+				sprintf(
+				/* Translators: %s is the comma seperated list of order types. */
+					__( 'Passed order type does not match any registered order types. Following order types are registered: %s', 'woocommerce' ),
+					implode( ',', wc_get_order_types( 'cot-migration' ) )
+				)
+			);
+		}
+
+		$order_types_pl = implode( ',', array_fill( 0, count( $order_types ), '%s' ) );
+
+		$order_count = $this->get_verify_order_count( $order_id_start, $order_id_end, $order_types, false );
 
 		$progress = WP_CLI\Utils\make_progress_bar( 'Order Data Verification', $order_count / $batch_size );
 
@@ -351,14 +375,21 @@ class CLIRunner {
 				)
 			);
 
-			$order_ids                   = $wpdb->get_col(
+			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Inputs are prepared.
+			$order_ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID >= %d AND ID <= %d ORDER BY ID ASC LIMIT %d",
-					$order_id_start,
-					$order_id_end,
-					$batch_size
+					"SELECT ID FROM $wpdb->posts WHERE post_type in ( $order_types_pl ) AND ID >= %d AND ID <= %d ORDER BY ID ASC LIMIT %d",
+					array_merge(
+						$order_types,
+						array(
+							$order_id_start,
+							$order_id_end,
+							$batch_size,
+						)
+					)
 				)
 			);
+			// phpcs:enable
 			$batch_start_time            = microtime( true );
 			$failed_ids_in_current_batch = $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
 			$failed_ids_in_current_batch = $this->verify_meta_data( $order_ids, $failed_ids_in_current_batch );
@@ -399,7 +430,7 @@ class CLIRunner {
 			);
 
 			$order_id_start  = max( $order_ids ) + 1;
-			$remaining_count = $this->get_verify_order_count( $order_id_start, $order_id_end, false );
+			$remaining_count = $this->get_verify_order_count( $order_id_start, $order_id_end, $order_types, false );
 			if ( $remaining_count === $order_count ) {
 				return WP_CLI::error( __( 'Infinite loop detected, aborting. No errors found.', 'woocommerce' ) );
 			}
@@ -464,22 +495,32 @@ class CLIRunner {
 	/**
 	 * Helper method to get count for orders needing verification.
 	 *
-	 * @param int  $order_id_start Order ID to start from.
-	 * @param int  $order_id_end   Order ID to end at.
-	 * @param bool $log Whether to also log an error message.
+	 * @param int   $order_id_start Order ID to start from.
+	 * @param int   $order_id_end Order ID to end at.
+	 * @param array $order_types List of order types to verify.
+	 * @param bool  $log Whether to also log an error message.
 	 *
 	 * @return int Order count.
 	 */
-	private function get_verify_order_count( int $order_id_start, int $order_id_end, $log = true ) : int {
+	private function get_verify_order_count( int $order_id_start, int $order_id_end, array $order_types, bool $log = true ) : int {
 		global $wpdb;
 
+		$order_types_placeholder = implode( ',', array_fill( 0, count( $order_types ), '%s' ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Inputs are prepared.
 		$order_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID >= %d AND ID <= %d",
-				$order_id_start,
-				$order_id_end
+				"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type in ($order_types_placeholder) AND ID >= %d AND ID <= %d",
+				array_merge(
+					$order_types,
+					array(
+						$order_id_start,
+						$order_id_end,
+					)
+				)
 			)
 		);
+		// phpcs:enable
 
 		if ( $log ) {
 			WP_CLI::log(
