@@ -38,6 +38,7 @@ export const deletePlugin = async ( {
 		baseURL,
 		extraHTTPHeaders: {
 			Authorization: `Basic ${ encodeCredentials( username, password ) }`,
+			cookie: '',
 		},
 	} );
 	const listPluginsResponse = await apiContext.get(
