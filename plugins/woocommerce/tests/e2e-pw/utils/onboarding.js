@@ -163,12 +163,15 @@ const onboarding = {
 		} else {
 			await expect( wcPay ).not.toBeVisible();
 		}
+		
 		// Uncheck all business features
-		if (
-			page.locator( '.components-checkbox-control__input' ).isChecked()
-		) {
-			await page.locator( '.components-checkbox-control__input' ).click();
-		}
+		await page
+			.locator(
+				'.woocommerce-admin__business-details__selective-extensions-bundle__extension',
+				{ hasText: 'Add recommended business features to my site' }
+			)
+			.getByRole( 'checkbox' )
+			.uncheck();
 	},
 };
 
