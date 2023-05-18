@@ -27,7 +27,8 @@
 				"sticky": "",
 				"inherit": false,
 				"taxQuery": null,
-				"parents": []
+				"parents": [],
+				"isProductCollectionBlock": true
 			}
 		},
 		"tagName": {

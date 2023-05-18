@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { ProductCollectionAttributes } from '../types';
 import ColumnsControl from './columns-control';
+import OrderByControl from './order-by-control';
 
 const ProductCollectionInspectorControls = (
 	props: BlockEditProps< ProductCollectionAttributes >
@@ -21,6 +22,7 @@ const ProductCollectionInspectorControls = (
 				title={ __( 'Settings', 'woo-gutenberg-products-block' ) }
 			>
 				<ColumnsControl { ...props } />
+				<OrderByControl { ...props } />
 			</PanelBody>
 		</InspectorControls>
 	);
