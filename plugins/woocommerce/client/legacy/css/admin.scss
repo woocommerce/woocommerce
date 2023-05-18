@@ -2885,6 +2885,14 @@ ul.wc_coupon_list_block {
 	}
 }
 
+.woocommerce_page_wc-orders .wp-list-table .locked-indicator-icon {
+	margin-left: -2px;
+
+	&:before {
+		vertical-align: top;
+	}
+}
+
 .order-status {
 	display: inline-flex;
 	line-height: 2.5em;
