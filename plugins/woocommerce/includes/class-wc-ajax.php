@@ -3260,7 +3260,6 @@ class WC_AJAX {
 		do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'zone_method_settings' ) );
 		$shipping_method->set_post_data( wp_unslash( $_POST['data'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-
 		global $current_tab;
 		$current_tab = 'shipping';
 		/**
