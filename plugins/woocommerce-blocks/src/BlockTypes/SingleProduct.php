@@ -51,7 +51,7 @@ class SingleProduct extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$classname          = $attributes['className'] ?? '';
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classname ) );
+		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => trim( sprintf( 'woocommerce %1$s', $classname ) ) ) );
 
 		$html = sprintf(
 			'<div %1$s>
