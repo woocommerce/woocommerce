@@ -614,7 +614,11 @@ jQuery( function ( $ ) {
 					'button.cancel-variation-changes',
 					this.cancel_variations
 				)
-				.on( 'click', '.remove_variation', this.remove_variation )
+				.on(
+					'click',
+					'.remove_variation',
+					this.remove_variation_action
+				)
 				.on(
 					'click',
 					'.downloadable_files a.delete',
@@ -1009,12 +1013,8 @@ jQuery( function ( $ ) {
 			return false;
 		},
 
-		/**
-		 * Remove variation
-		 *
-		 * @return {Bool}
-		 */
-		remove_variation: function () {
+		remove_variation_action: function ( event ) {
+			event.stopPropagation();
 			wc_meta_boxes_product_variations_ajax.check_for_changes();
 
 			if (
@@ -1022,25 +1022,13 @@ jQuery( function ( $ ) {
 					woocommerce_admin_meta_boxes_variations.i18n_remove_variation
 				)
 			) {
-				var variation = $( this ).attr( 'rel' ),
-					variation_ids = [],
-					data = {
-						action: 'woocommerce_remove_variations',
-					};
-
 				wc_meta_boxes_product_variations_ajax.block();
+				const variation = $( this ).attr( 'rel' );
 
 				if ( 0 < variation ) {
-					variation_ids.push( variation );
-
-					data.variation_ids = variation_ids;
-					data.security =
-						woocommerce_admin_meta_boxes_variations.delete_variations_nonce;
-
-					$.post(
-						woocommerce_admin_meta_boxes_variations.ajax_url,
-						data,
-						function () {
+					wc_meta_boxes_product_variations_ajax
+						.remove_variation( variation )
+						.then( function () {
 							var wrapper = $( '#variable_product_options' ).find(
 									'.woocommerce_variations'
 								),
@@ -1084,8 +1072,7 @@ jQuery( function ( $ ) {
 								page,
 								-1
 							);
-						}
-					);
+						} );
 				} else {
 					wc_meta_boxes_product_variations_ajax.unblock();
 				}
@@ -1094,8 +1081,36 @@ jQuery( function ( $ ) {
 					action: 'remove_variation',
 				} );
 			}
+		},
 
-			return false;
+		/**
+		 * Remove variation
+		 *
+		 * @return {Bool}
+		 */
+		remove_variation: function ( variation ) {
+			return new Promise( ( resolve, reject ) => {
+				const variation_ids = [],
+					data = {
+						action: 'woocommerce_remove_variations',
+					};
+
+				variation_ids.push( variation );
+
+				data.variation_ids = variation_ids;
+				data.security =
+					woocommerce_admin_meta_boxes_variations.delete_variations_nonce;
+
+				$.post(
+					woocommerce_admin_meta_boxes_variations.ajax_url,
+					data,
+					function () {
+						resolve( true );
+					}
+				).fail( function ( jqXHR, textStatus, errorThrown ) {
+					reject( { jqXHR, textStatus, errorThrown } );
+				} );
+			} );
 		},
 
 		/**
