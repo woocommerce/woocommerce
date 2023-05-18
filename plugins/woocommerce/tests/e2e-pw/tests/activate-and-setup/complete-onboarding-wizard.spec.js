@@ -186,6 +186,8 @@ test.describe(
 			await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
 
 			await page.locator( 'button >> text=Continue' ).click();
+
+			await expect( page ).not.toHaveURL( /.*step=business-details/ );
 		} );
 
 		// Skipping this test because it's very flaky.  Onboarding checklist changed so that the text
