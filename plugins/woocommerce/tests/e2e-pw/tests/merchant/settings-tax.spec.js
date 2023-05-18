@@ -193,20 +193,22 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 
 		// Save changes
 		await page.locator( 'text=Save changes' ).click();
-		await page.waitForLoadState( 'networkidle' );
+		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
 
 		// Verity that there are 2 rates
 		await expect( page.locator( '#rates tr' ) ).toHaveCount( 2 );
 
 		// Delete federal rate
-		await page.locator( '#rates tr:nth-child(2) input' ).click();
-		await page.locator( '.wc_tax_rates a.remove_tax_rates' ).click();
+		await page.locator( 'input[value="Federal Tax"]' ).click();
+		await page
+			.getByRole( 'link', { name: 'Remove selected row(s)' } )
+			.click();
 
 		// Save changes
 		await page.locator( 'text=Save changes' ).click();
-		await page.waitForLoadState( 'networkidle' );
+		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
 
-		// Verity that there are 2 rates
+		// Verify that there is 1 tax rate left
 		await expect( page.locator( '#rates tr' ) ).toHaveCount( 1 );
 		await expect(
 			page.locator(
@@ -215,10 +217,10 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		).toBeVisible();
 
 		// Delete State tax
-		await page.locator( '#rates tr input' ).click();
+		await page.locator( '[value="CA State Tax"]' ).click();
 		await page.locator( '.wc_tax_rates a.remove_tax_rates' ).click();
 		await page.locator( 'text=Save changes' ).click();
-		await page.waitForLoadState( 'networkidle' );
+		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
 	} );
 
 	test( 'can remove tax classes', async ( { page } ) => {
@@ -230,6 +232,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		// Remove "Fancy" tax class
 		await page.locator( '#woocommerce_tax_classes' ).fill( '' );
 		await page.locator( 'text=Save changes' ).click();
+		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
