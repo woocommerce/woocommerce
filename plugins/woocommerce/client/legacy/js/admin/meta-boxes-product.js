@@ -500,7 +500,6 @@ jQuery( function ( $ ) {
 			const newAttributeListItemHtml = await get_new_attribute_list_item_html( numberOfAttributesInList, globalAttributeId );
 
 			const $attributesListContainer = $( '#product_attributes .product_attributes' );
-			const product_type = $( 'select#product-type' ).val();
 
 			const $attributeListItem = $( newAttributeListItemHtml ).appendTo( $attributesListContainer );
 
@@ -510,11 +509,7 @@ jQuery( function ( $ ) {
 
 			attribute_row_indexes();
 
-			$attributesListContainer
-				.find( '.woocommerce_attribute' )
-				.last()
-				.find( 'h3' )
-				.trigger( 'click' );
+			$attributeListItem.find( 'h3' ).trigger( 'click' );
 
 			jQuery.maybe_disable_save_button();
 		} finally {
