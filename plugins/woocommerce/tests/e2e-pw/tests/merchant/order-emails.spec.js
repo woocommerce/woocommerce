@@ -37,9 +37,9 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		);
 		// clear out the email logs before each test
 		while (
-			( await page.locator( '#bulk-action-selector-top' ) ) !== null
+			await page.locator( '#bulk-action-selector-top' ).isVisible()
 		) {
-			await page.locator( '#cb-select-all-1' ).click();
+			await page.locator( '#cb-select-all-1' ).check();
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'delete' );
