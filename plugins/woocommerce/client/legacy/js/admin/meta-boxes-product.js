@@ -492,6 +492,10 @@ jQuery( function ( $ ) {
 		$attributesTabContainer.unblock();
 	}
 
+	function toggle_expansion_of_attribute_list_item( $attributeListItem ) {
+		$attributeListItem.find( 'h3' ).trigger( 'click' );
+	}
+
 	async function add_attribute_to_list( globalAttributeId ) {
 		try {
 			block_attributes_tab_container();
@@ -509,7 +513,7 @@ jQuery( function ( $ ) {
 
 			update_attribute_row_indexes();
 
-			$attributeListItem.find( 'h3' ).trigger( 'click' );
+			toggle_expansion_of_attribute_list_item( $attributeListItem );
 
 			jQuery.maybe_disable_save_button();
 		} finally {
