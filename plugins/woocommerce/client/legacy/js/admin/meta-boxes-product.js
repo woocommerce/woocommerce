@@ -449,7 +449,7 @@ jQuery( function ( $ ) {
 
 	function add_attribute_to_list( globalAttributeId ) {
 		var numberOfAttributesInList = $( '.product_attributes .woocommerce_attribute' ).length;
-		var $wrapper = $( '#product_attributes' );
+		var $attributesTabContainer = $( '#product_attributes' );
 		var data = {
 			action: 'woocommerce_add_attribute',
 			taxonomy: globalAttributeId ?? '',
@@ -457,7 +457,7 @@ jQuery( function ( $ ) {
 			security: woocommerce_admin_meta_boxes.add_attribute_nonce,
 		};
 
-		$wrapper.block( {
+		$attributesTabContainer.block( {
 			message: null,
 			overlayCSS: {
 				background: '#fff',
@@ -466,28 +466,28 @@ jQuery( function ( $ ) {
 		} );
 
 		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function (
-			response
+			newAttributeListItem
 		) {
-			var $attributes = $wrapper.find( '.product_attributes' );
+			var $attributesList = $attributesTabContainer.find( '.product_attributes' );
 			var product_type = $( 'select#product-type' ).val();
 
-			$attributes.append( response );
+			$attributesList.append( newAttributeListItem );
 
 			if ( 'variable' !== product_type ) {
-				$attributes.find( '.enable_variation' ).hide();
+				$attributesList.find( '.enable_variation' ).hide();
 			}
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
 
 			attribute_row_indexes();
 
-			$attributes
+			$attributesList
 				.find( '.woocommerce_attribute' )
 				.last()
 				.find( 'h3' )
 				.trigger( 'click' );
 
-			$wrapper.unblock();
+			$attributesTabContainer.unblock();
 
 			$( document.body ).trigger( 'woocommerce_added_attribute' );
 			jQuery.maybe_disable_save_button();
