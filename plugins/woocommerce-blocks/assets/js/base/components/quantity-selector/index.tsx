@@ -6,6 +6,7 @@ import { speak } from '@wordpress/a11y';
 import classNames from 'classnames';
 import { useCallback, useLayoutEffect, useRef } from '@wordpress/element';
 import { DOWN, UP } from '@wordpress/keycodes';
+import { usePrevious } from '@woocommerce/base-hooks';
 import { useDebouncedCallback } from 'use-debounce';
 
 /**
@@ -74,6 +75,8 @@ const QuantitySelector = ( {
 	const canDecrease = ! disabled && quantity - step >= minimum;
 	const canIncrease =
 		! disabled && ( ! hasMaximum || quantity + step <= maximum );
+	const previousCanDecrease = usePrevious( canDecrease );
+	const previousCanIncrease = usePrevious( canIncrease );
 
 	// When the increase or decrease buttons get disabled, the focus
 	// gets moved to the `<body>` element. This was causing weird
@@ -95,6 +98,7 @@ const QuantitySelector = ( {
 
 		const currentDocument = inputRef.current.ownerDocument;
 		if (
+			previousCanDecrease &&
 			! canDecrease &&
 			( currentDocument.activeElement === decreaseButtonRef.current ||
 				currentDocument.activeElement === currentDocument.body )
@@ -102,13 +106,14 @@ const QuantitySelector = ( {
 			inputRef.current.focus();
 		}
 		if (
+			previousCanIncrease &&
 			! canIncrease &&
 			( currentDocument.activeElement === increaseButtonRef.current ||
 				currentDocument.activeElement === currentDocument.body )
 		) {
 			inputRef.current.focus();
 		}
-	}, [ canDecrease, canIncrease ] );
+	}, [ previousCanDecrease, previousCanIncrease, canDecrease, canIncrease ] );
 
 	/**
 	 * The goal of this function is to normalize what was inserted,
