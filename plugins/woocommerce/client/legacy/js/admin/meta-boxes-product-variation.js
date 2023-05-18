@@ -738,7 +738,7 @@ jQuery( function ( $ ) {
 		 * @param {Int} per_page (default: 10)
 		 */
 		load_variations: function ( page, per_page ) {
-			return new Promise( ( resolve, reject ) => {
+			return new Promise( function ( resolve, reject ) {
 				page = page || 1;
 				per_page =
 					per_page ||
@@ -812,7 +812,7 @@ jQuery( function ( $ ) {
 		 * @param {Function} callback Called once saving is complete
 		 */
 		save_changes: function ( callback ) {
-			return new Promise( ( resolve, reject ) => {
+			return new Promise( function ( resolve, reject ) {
 				var wrapper = $( '#variable_product_options' ).find(
 						'.woocommerce_variations'
 					),
@@ -978,43 +978,32 @@ jQuery( function ( $ ) {
 		 * @return {Bool}
 		 */
 		add_variation: function () {
-			wc_meta_boxes_product_variations_ajax.block();
+			return new Promise( ( resolve, reject ) => {
+				var data = {
+					action: 'woocommerce_add_variation',
+					post_id: woocommerce_admin_meta_boxes_variations.post_id,
+					loop: $( '.woocommerce_variation' ).length,
+					security:
+						woocommerce_admin_meta_boxes_variations.add_variation_nonce,
+				};
 
-			var data = {
-				action: 'woocommerce_add_variation',
-				post_id: woocommerce_admin_meta_boxes_variations.post_id,
-				loop: $( '.woocommerce_variation' ).length,
-				security:
-					woocommerce_admin_meta_boxes_variations.add_variation_nonce,
-			};
+				$.post(
+					woocommerce_admin_meta_boxes_variations.ajax_url,
+					data,
+					function ( response ) {
+						var variation = $( response );
+						variation.addClass( 'variation-needs-update' );
 
-			$.post(
-				woocommerce_admin_meta_boxes_variations.ajax_url,
-				data,
-				function ( response ) {
-					var variation = $( response );
-					variation.addClass( 'variation-needs-update' );
-
-					$( '.woocommerce-notice-invalid-variation' ).remove();
-					$( '#variable_product_options' )
-						.find( '.woocommerce_variations' )
-						.prepend( variation );
-					$(
-						'button.cancel-variation-changes, button.save-variation-changes'
-					).prop( 'disabled', false );
-
-					wc_meta_boxes_product_variations_pagenav.update_single_quantity();
-					wc_meta_boxes_product_variations_actions.variations_loaded(
-						null,
-						true
-					);
-
-					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
-					wc_meta_boxes_product_variations_ajax.unblock();
-				}
-			);
-
-			return false;
+						$( '.woocommerce-notice-invalid-variation' ).remove();
+						$( '#variable_product_options' )
+							.find( '.woocommerce_variations' )
+							.prepend( variation );
+						resolve( response );
+					}
+				).fail( function ( jqXHR, textStatus, errorThrown ) {
+					reject( { jqXHR, textStatus, errorThrown } );
+				} );
+			} );
 		},
 
 		remove_variation_action: function ( event ) {
@@ -1093,7 +1082,7 @@ jQuery( function ( $ ) {
 		 * @return {Bool}
 		 */
 		remove_variation: function ( variation ) {
-			return new Promise( ( resolve, reject ) => {
+			return new Promise( function ( resolve, reject ) {
 				const variation_ids = [],
 					data = {
 						action: 'woocommerce_remove_variations',
@@ -1355,7 +1344,7 @@ jQuery( function ( $ ) {
 		},
 
 		do_variation_action: function ( data, do_variation_action ) {
-			return new Promise( ( resolve, reject ) => {
+			return new Promise( function ( resolve, reject ) {
 				$.ajax( {
 					url: woocommerce_admin_meta_boxes_variations.ajax_url,
 					data: {
@@ -1411,7 +1400,23 @@ jQuery( function ( $ ) {
 		 * Add variation
 		 */
 		add_variation_manually: function () {
-			wc_meta_boxes_product_variations_ajax.add_variation();
+			wc_meta_boxes_product_variations_ajax.block();
+			wc_meta_boxes_product_variations_ajax
+				.add_variation()
+				.then( function () {
+					$(
+						'button.cancel-variation-changes, button.save-variation-changes'
+					).prop( 'disabled', false );
+
+					wc_meta_boxes_product_variations_pagenav.update_single_quantity();
+					wc_meta_boxes_product_variations_actions.variations_loaded(
+						null,
+						true
+					);
+
+					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
+					wc_meta_boxes_product_variations_ajax.unblock();
+				} );
 		},
 	};
 
