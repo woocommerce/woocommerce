@@ -253,7 +253,8 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		// search for each product to add
 		await page.locator( 'text=Search for a product…' ).click();
 		await page
-			.locator( 'input:below(:text("Search for a product…"))' )
+			.locator( '.select2-search--dropdown' )
+			.getByRole( 'combobox' )
 			.type( simpleProductName );
 		await page
 			.locator(
@@ -263,7 +264,8 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		await page.locator( 'text=Search for a product…' ).click();
 		await page
-			.locator( 'input:below(:text("Search for a product…"))' )
+			.locator( '.select2-search--dropdown' )
+			.getByRole( 'combobox' )
 			.type( variableProductName );
 		await page
 			.locator(
@@ -273,7 +275,8 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		await page.locator( 'text=Search for a product…' ).click();
 		await page
-			.locator( 'input:below(:text("Search for a product…"))' )
+			.locator( '.select2-search--dropdown' )
+			.getByRole( 'combobox' )
 			.type( groupedProductName );
 		await page
 			.locator(
@@ -283,7 +286,8 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		await page.locator( 'text=Search for a product…' ).click();
 		await page
-			.locator( 'input:below(:text("Search for a product…"))' )
+			.locator( '.select2-search--dropdown' )
+			.getByRole( 'combobox' )
 			.type( externalProductName );
 		await page
 			.locator(
