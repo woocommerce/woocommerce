@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Allow the Playwright e2e scripts to be executed on an ES and AR site
