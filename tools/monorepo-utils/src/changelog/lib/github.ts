@@ -132,3 +132,12 @@ export const getChangelogComment = ( body: string ) => {
 
 	return match ? match[ 2 ].trim() : '';
 };
+
+export const getChangelogDetails = ( body: string ) => {
+	return {
+		significance: getChangelogSignificance( body ),
+		type: getChangelogType( body ),
+		message: getChangelogMessage( body ),
+		comment: getChangelogComment( body ),
+	};
+};

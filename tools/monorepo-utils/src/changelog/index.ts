@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
-import { setOutput } from '@actions/core';
 import { execSync } from 'child_process';
 import simpleGit from 'simple-git';
 
@@ -14,11 +13,8 @@ import { isGithubCI } from '../core/environment';
 import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
 import {
 	getPullRequestData,
-	getChangelogSignificance,
 	getShouldAutomateChangelog,
-	getChangelogType,
-	getChangelogMessage,
-	getChangelogComment,
+	getChangelogDetails,
 } from './lib/github';
 import { getTouchedProjectsRequiringChangelog } from './lib/projects';
 
@@ -49,56 +45,18 @@ const program = new Command( 'changelog' )
 			}
 		) => {
 			const { owner, name, devRepoPath } = options;
-			const {
-				prBody,
-				isCommunityPR,
-				headOwner,
-				branch,
-				fileName,
-				head,
-				base,
-			} = await getPullRequestData( { owner, name }, prNumber );
+			const { prBody, headOwner, branch, fileName, head, base } =
+				await getPullRequestData( { owner, name }, prNumber );
 
 			const shouldAutomateChangelog =
 				getShouldAutomateChangelog( prBody );
-
-			const isGithub = isGithubCI();
 
 			if ( ! shouldAutomateChangelog ) {
 				Logger.notice(
 					`PR #${ prNumber } does not have the "Automatically create a changelog entry from the details" checkbox checked. No changelog will be created.`
 				);
 
-				if ( isGithub ) {
-					setOutput( 'extractedData', null );
-				}
-
 				process.exit( 0 );
-			}
-
-			const significance = getChangelogSignificance( prBody );
-			const type = getChangelogType( prBody );
-			const message = getChangelogMessage( prBody );
-			const comment = getChangelogComment( prBody );
-
-			const extractedData = {
-				prNumber,
-				headOwner,
-				isCommunityPR,
-				branch,
-				fileName,
-				significance,
-				type,
-				message,
-				comment,
-				head,
-				base,
-			};
-
-			Logger.notice( JSON.stringify( extractedData, null, 2 ) );
-
-			if ( isGithubCI() ) {
-				setOutput( 'extractedData', JSON.stringify( extractedData ) );
 			}
 
 			Logger.startTask(
@@ -130,19 +88,27 @@ const program = new Command( 'changelog' )
 					head,
 					fileName
 				);
+			const { significance, type, message, comment } =
+				getChangelogDetails( prBody );
 
 			touchedProjectsRequiringChangelog.forEach( ( project ) => {
 				Logger.notice( `Running changelog command for ${ project }` );
-				const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } -e "${ message }" -n`;
+				const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } -e "${ message }" -c "${ comment }" -n`;
 				execSync( cmd, { cwd: tmpRepoPath, stdio: 'inherit' } );
 			} );
+
+			Logger.notice(
+				`Changelogs created for ${ touchedProjectsRequiringChangelog.join(
+					', '
+				) }`
+			);
 
 			const git = simpleGit( {
 				baseDir: tmpRepoPath,
 				config: [ 'core.hooksPath=/dev/null' ],
 			} );
 
-			if ( isGithub ) {
+			if ( isGithubCI() ) {
 				await git.raw(
 					'config',
 					'--global',
