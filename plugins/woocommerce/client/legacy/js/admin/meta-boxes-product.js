@@ -447,14 +447,12 @@ jQuery( function ( $ ) {
 		selectedAttributes
 	);
 
-	function add_attribute( element, attribute ) {
+	function add_attribute_to_list( globalAttributeId ) {
 		var size = $( '.product_attributes .woocommerce_attribute' ).length;
-		var $wrapper = $( element ).closest( '#product_attributes' );
-		var $attributes = $wrapper.find( '.product_attributes' );
-		var product_type = $( 'select#product-type' ).val();
+		var $wrapper = $( '#product_attributes' );
 		var data = {
 			action: 'woocommerce_add_attribute',
-			taxonomy: attribute,
+			taxonomy: globalAttributeId ?? '',
 			i: size,
 			security: woocommerce_admin_meta_boxes.add_attribute_nonce,
 		};
@@ -470,6 +468,9 @@ jQuery( function ( $ ) {
 		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function (
 			response
 		) {
+			var $attributes = $wrapper.find( '.product_attributes' );
+			var product_type = $( 'select#product-type' ).val();
+
 			$attributes.append( response );
 
 			if ( 'variable' !== product_type ) {
@@ -491,6 +492,14 @@ jQuery( function ( $ ) {
 			$( document.body ).trigger( 'woocommerce_added_attribute' );
 			jQuery.maybe_disable_save_button();
 		} );
+	}
+
+	function add_global_attribute_to_list( globalAttributeId ) {
+		add_attribute_to_list( globalAttributeId );
+	}
+
+	function add_custom_attribute_to_list() {
+		add_attribute_to_list();
 	}
 
 	function add_if_not_exists( arr, item ) {
@@ -522,7 +531,7 @@ jQuery( function ( $ ) {
 		if ( attributeId ) {
 			remove_blank_custom_attribute_if_no_other_attributes();
 
-			add_attribute( this, attributeId );
+			add_global_attribute_to_list( attributeId );
 
 			selectedAttributes = add_if_not_exists( selectedAttributes, attributeId );
 			disable_in_attribute_search( selectedAttributes );
@@ -537,7 +546,7 @@ jQuery( function ( $ ) {
 	// Add rows.
 
 	$( 'button.add_custom_attribute' ).on( 'click', function () {
-		add_attribute( this, '' );
+		add_custom_attribute_to_list();
 
 		return false;
 	} );
