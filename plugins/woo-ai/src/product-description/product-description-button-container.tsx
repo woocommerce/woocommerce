@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
  * Internal dependencies
  */
 import { useTinyEditor } from '../hooks/useTinyEditor';
+import MagicIcon from '../../assets/images/icons/magic.svg';
 
 type WooApiMessage = {
 	role: string;
@@ -76,7 +77,7 @@ export function WriteItForMeButtonContainer() {
 
 	return (
 		<button
-			className="button wp-media-button wc-write-it-for-me"
+			className="button wp-media-button woo-ai-write-it-for-me-btn"
 			type="button"
 			disabled={ fetching || ! productTitle }
 			title={
@@ -111,6 +112,7 @@ export function WriteItForMeButtonContainer() {
 				setFetching( false );
 			} }
 		>
+			<img src={ MagicIcon } alt="magic button icon" />
 			{ __( 'Write it for me', 'woocommerce' ) }
 		</button>
 	);

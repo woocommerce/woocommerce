@@ -11,3 +11,18 @@
 		z-index: 1;
 	}
 }
+
+.wp-media-buttons {
+	.woo-ai-write-it-for-me-btn  {
+		&[disabled] {
+			img {
+				opacity: 0.2;
+			}
+		}
+
+		img {
+			padding: 0;
+		}
+	}
+}
+

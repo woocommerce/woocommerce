@@ -6,7 +6,8 @@
 	// Make sure we're not pulling types from external projects.
 		"typeRoots": [
 			"./typings",
-			"./node_modules/@types"
+			"./node_modules/@types",
+      "src/custom.d.ts",
 		],
 		
     // Search under node_modules for non-relative imports.
