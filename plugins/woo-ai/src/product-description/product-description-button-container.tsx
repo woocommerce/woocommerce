@@ -31,7 +31,7 @@ const getGeneratingContentPhrase = () =>
 		Math.floor( Math.random() * generatingContentPhrases.length )
 	];
 
-const DESCCRIPTION_MAX_LENGTH = 325;
+const DESCRIPTION_MAX_LENGTH = 325;
 
 export function WriteItForMeButtonContainer() {
 	const [ fetching, setFetching ] = useState( false );
@@ -64,24 +64,12 @@ export function WriteItForMeButtonContainer() {
 
 	const buildPrompt = () => {
 		const instructions = [
-			`Write a product description with the following product title: ${ productTitle }.`,
+			`Write a product description with the following product title: "${ productTitle }."`,
 			'Use a 9th grade reading level.',
-			`Make the description ${ DESCCRIPTION_MAX_LENGTH } words or less.`,
+			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
 			'Structure the description using standard HTML paragraph, strong and list tags.',
 			'Do not include a heading at the very top of the description.',
 		];
-
-		const existingListContents = ( tinyEditor.getContent() || '' )
-			.match( /<li[\s\S]*?>([\s\S]*?)<\/li>/gi )
-			?.map( ( item: string ) => item.replace( /<\/?li>/g, '' ) );
-
-		if ( existingListContents?.length ) {
-			instructions.push(
-				`This product also has the following key features: ${ existingListContents.join(
-					', '
-				) }.`
-			);
-		}
 
 		return instructions.join( '\n' );
 	};
