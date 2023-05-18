@@ -448,12 +448,12 @@ jQuery( function ( $ ) {
 	);
 
 	function add_attribute_to_list( globalAttributeId ) {
-		var size = $( '.product_attributes .woocommerce_attribute' ).length;
+		var numberOfAttributesInList = $( '.product_attributes .woocommerce_attribute' ).length;
 		var $wrapper = $( '#product_attributes' );
 		var data = {
 			action: 'woocommerce_add_attribute',
 			taxonomy: globalAttributeId ?? '',
-			i: size,
+			i: numberOfAttributesInList,
 			security: woocommerce_admin_meta_boxes.add_attribute_nonce,
 		};
 
