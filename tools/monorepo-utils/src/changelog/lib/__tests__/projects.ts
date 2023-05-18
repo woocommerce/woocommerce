@@ -17,11 +17,24 @@ packages:
 `;
 
 describe( 'getAllProjects', () => {
-	it( 'should provide a list of all projects supplied by pnpm-workspace.yml', () => {
+	it( 'should provide a list of all projects supplied by pnpm-workspace.yml', async () => {
 		const tmpRepoPath = path.join( __dirname, 'test-repo' );
-		const projects = getAllProjects( tmpRepoPath, sampleWorkspaceYaml );
-		console.log( tmpRepoPath );
-		console.log( projects );
-		expect( projects ).toEqual( [] );
+		const projects = await getAllProjects(
+			tmpRepoPath,
+			sampleWorkspaceYaml
+		);
+		const expectedProjects = [
+			'folder-with-lots-of-projects/project-b',
+			'folder-with-lots-of-projects/project-a',
+			'projects/cool-project',
+			'projects/very-cool-project',
+			'interesting-project',
+		];
+
+		expectedProjects.forEach( ( expectedProject ) => {
+			expect( projects ).toContain( expectedProject );
+		} );
+
+		expect( projects ).toHaveLength( expectedProjects.length );
 	} );
 } );
