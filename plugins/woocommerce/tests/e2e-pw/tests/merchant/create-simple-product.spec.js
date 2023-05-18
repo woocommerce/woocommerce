@@ -1,5 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTextForLanguage } = require( './../../test-data/data' );
+
 
 const virtualProductName = 'Virtual Product Name';
 const nonVirtualProductName = 'Non Virtual Product Name';
@@ -74,7 +76,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Product published.' } )
+				.filter( { hasText: `${getTextForLanguage()['Productpublished']}` } )
 		).toBeVisible();
 
 		// Save product ID
@@ -94,9 +96,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.click( 'text=Add to cart' );
-		await page.click( 'text=View cart' );
-		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
+		await page.click( `text=${getTextForLanguage()['Addtocart']}` );
+		await page.click( `text=${getTextForLanguage()['Viewcart']}` );
+		await expect( page.locator( `td[data-title=${getTextForLanguage()['Product']}]` ) ).toContainText(
 			virtualProductName
 		);
 		await expect(
@@ -132,7 +134,7 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: 'Product published.' } )
+				.filter( { hasText: `${getTextForLanguage()['Productpublished']}` } )
 		).toBeVisible();
 
 		// Save product ID
@@ -152,9 +154,9 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.click( 'text=Add to cart' );
-		await page.click( 'text=View cart' );
-		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
+		await page.click( `text=${getTextForLanguage()['Addtocart']}` );
+		await page.click( `text=${getTextForLanguage()['Viewcart']}` );
+		await expect( page.locator( `td[data-title=${getTextForLanguage()['Product']}]` ) ).toContainText(
 			nonVirtualProductName
 		);
 		await expect(

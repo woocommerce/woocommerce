@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTextForLanguage } = require( './../../test-data/data' );
 
 const productPrice = '18.16';
 const simpleProductName = 'Simple single product';
@@ -90,10 +91,10 @@ test.describe( 'Single Product Page', () => {
 		await page.goto( `product/${ slug }` );
 
 		await page.fill( 'input.qty', '5' );
-		await page.click( 'text=Add to cart' );
+		await page.click( `text=${getTextForLanguage()['Addtocart']}` );
 
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			'have been added to your cart.'
+			getTextForLanguage()['havebeenaddedtoyourcart']
 		);
 
 		await page.goto( 'cart/' );
@@ -116,7 +117,7 @@ test.describe( 'Single Product Page', () => {
 		await page.click( 'a.remove' );
 
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
-			'Your cart is currently empty.'
+			getTextForLanguage()['Yourcartiscurrentlyempty']
 		);
 	} );
 } );
@@ -180,10 +181,10 @@ test.describe( 'Variable Product Page', () => {
 
 		for ( const attr of variations ) {
 			await page.selectOption( '#size', attr.attributes[ 0 ].option );
-			await page.click( 'text=Add to cart' );
+			await page.click( `text=${getTextForLanguage()['Addtocart']}` );
 			await expect(
 				page.locator( '.woocommerce-message' )
-			).toContainText( 'has been added to your cart.' );
+			).toContainText( getTextForLanguage()['hasbeenaddedtoyourcart'] );
 		}
 
 		await page.goto( 'cart/' );
@@ -200,13 +201,13 @@ test.describe( 'Variable Product Page', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 		await page.selectOption( '#size', 'Large' );
-		await page.click( 'text=Add to cart' );
+		await page.click( `text=${getTextForLanguage()['Addtocart']}` );
 
 		await page.goto( 'cart/' );
 		await page.click( 'a.remove' );
 
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
-			'Your cart is currently empty.'
+			getTextForLanguage()['Yourcartiscurrentlyempty']
 		);
 	} );
 } );
@@ -281,16 +282,16 @@ test.describe( 'Grouped Product Page', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 
-		await page.click( 'text=Add to cart' );
+		await page.click( `text=${getTextForLanguage()['Addtocart']}` );
 		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
-			'Please choose the quantity of items you wish to add to your cart…'
+			getTextForLanguage()['Pleasechoosethequantityofitemsyouwishtoaddtoyourcart']
 		);
 
 		await page.fill( 'div.quantity input.qty >> nth=0', '5' );
 		await page.fill( 'div.quantity input.qty >> nth=1', '5' );
-		await page.click( 'text=Add to cart' );
+		await page.click( `text=${getTextForLanguage()['Addtocart']}` );
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			`“${ simpleProduct1 }” and “${ simpleProduct2 }” have been added to your cart.`
+			`“${ simpleProduct1 }” ${getTextForLanguage()['and']} “${ simpleProduct2 }” ${getTextForLanguage()['havebeenaddedtoyourcart']}`
 		);
 
 		await page.goto( 'cart/' );
@@ -311,14 +312,14 @@ test.describe( 'Grouped Product Page', () => {
 		await page.goto( `product/${ slug }` );
 		await page.fill( 'div.quantity input.qty >> nth=0', '1' );
 		await page.fill( 'div.quantity input.qty >> nth=1', '1' );
-		await page.click( 'text=Add to cart' );
+		await page.click( `text=${getTextForLanguage()['Addtocart']}` );
 
 		await page.goto( 'cart/' );
 		await page.click( 'a.remove >> nth=1' );
 		await page.click( 'a.remove >> nth=0' );
 
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
-			'Your cart is currently empty.'
+			getTextForLanguage()['Yourcartiscurrentlyempty']
 		);
 	} );
 } );

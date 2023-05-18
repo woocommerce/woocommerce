@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTextForLanguage } = require( './../../test-data/data' );
 
 const maynePostal = 'V0N 2J0';
 const shippingZoneNameUSRegion = 'USA Zone';
@@ -64,7 +65,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.click( '.select2-search__field' );
 			await page.type(
 				'.select2-search__field',
-				'British Columbia, Canada'
+				`${getTextForLanguage()['BritishColumbiaCanada']}`
 			);
 			await page.click(
 				'.select2-results__option.select2-results__option--highlighted'
@@ -73,7 +74,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.click( '.wc-shipping-zone-postcodes-toggle' );
 			await page.fill( '#zone_postcodes', maynePostal );
 
-			await page.click( 'text=Add shipping method' );
+			await page.click( `text=${getTextForLanguage()['Addshippingmethod']}` );
 
 			await page.selectOption(
 				'select[name=add_method_id]',
@@ -84,7 +85,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
-					.filter( { hasText: 'Local pickup' } )
+					.filter( { hasText: `${getTextForLanguage()['Localpickup']}` } )
 			).toBeVisible();
 
 			await page.goto(
@@ -97,10 +98,10 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			/Mayne Island with Local pickup.*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/British Columbia, V0N 2J0.*/
+			getTextForLanguage()['BritishColumbiaV0N2J0Regex']
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Local pickup.*/
+			getTextForLanguage()['LocalpickupRegex']
 		);
 	} );
 
@@ -120,13 +121,13 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.click( '.select2-search__field' );
 			await page.type(
 				'.select2-search__field',
-				'British Columbia, Canada'
+				`${getTextForLanguage()['BritishColumbiaCanada']}`
 			);
 			await page.click(
 				'.select2-results__option.select2-results__option--highlighted'
 			);
 
-			await page.click( 'text=Add shipping method' );
+			await page.click( `text=${getTextForLanguage()['Addshippingmethod']}` );
 
 			await page.selectOption(
 				'select[name=add_method_id]',
@@ -137,7 +138,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
-					.filter( { hasText: 'Free shipping' } )
+					.filter( { hasText: `${getTextForLanguage()['Freeshipping']}` } )
 			).toBeVisible();
 
 			await page.goto(
@@ -149,10 +150,10 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			/BC with Free shipping.*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/British Columbia.*/
+			getTextForLanguage()['BritishColumbiaRegex']
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Free shipping.*/
+			getTextForLanguage()['FreeshippingRegex']
 		);
 	} );
 
@@ -168,12 +169,12 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.fill( '#zone_name', shippingZoneNameFlatRate );
 
 			await page.click( '.select2-search__field' );
-			await page.type( '.select2-search__field', 'Canada' );
+			await page.type( '.select2-search__field', `${getTextForLanguage()['Canada']}` );
 			await page.click(
 				'.select2-results__option.select2-results__option--highlighted'
 			);
 
-			await page.click( 'text=Add shipping method' );
+			await page.click( `text=${getTextForLanguage()['Addshippingmethod']}` );
 
 			await page.selectOption(
 				'select[name=add_method_id]',
@@ -184,7 +185,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
-					.filter( { hasText: 'Flat rate' } )
+					.filter( { hasText: `${getTextForLanguage()['Flatrate']}` } )
 			).toBeVisible();
 
 			await page.click( 'a.wc-shipping-zone-method-settings' );
@@ -201,10 +202,10 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			/Canada with Flat rate*/
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Canada.*/
+			getTextForLanguage()['CanadaRegex']
 		);
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Flat rate.*/
+			getTextForLanguage()['FlatrateRegex']
 		);
 	} );
 
@@ -221,7 +222,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.fill( '#zone_name', shippingZoneNameUSRegion );
 
 			await page.click( '.select2-search__field' );
-			await page.type( '.select2-search__field', 'United States' );
+			await page.type( '.select2-search__field', `${getTextForLanguage()['UnitedStates']}` );
 			await page.click(
 				'.select2-results__option.select2-results__option--highlighted'
 			);
@@ -251,7 +252,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 
 		//prove that the Region has been removed (Everywhere will display)
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
-			/Everywhere.*/
+			getTextForLanguage()['EverywhereRegex']
 		);
 	} );
 } );
@@ -374,7 +375,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
-		).toContainText( 'Local pickup' );
+		).toContainText( `${getTextForLanguage()['Localpickup']}`);
 		await expect(
 			page.locator( 'td[data-title="Total"] > strong > .amount > bdi' )
 		).toContainText( '25.99' );
@@ -395,7 +396,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
-		).toContainText( 'Free shipping' );
+		).toContainText( `${getTextForLanguage()['Freeshipping']}` );
 		await expect(
 			page.locator( 'td[data-title="Total"] > strong > .amount > bdi' )
 		).toContainText( '25.99' );
@@ -417,7 +418,7 @@ test.describe( 'Verifies shipping options from customer perspective', () => {
 
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
-		).toContainText( 'Flat rate:' );
+		).toContainText(`${getTextForLanguage()['Flatrate']}` );
 		await expect(
 			page.locator( '.shipping ul#shipping_method > li > label' )
 		).toContainText( '10.00' );

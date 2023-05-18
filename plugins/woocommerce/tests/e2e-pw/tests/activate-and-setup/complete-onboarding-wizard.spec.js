@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { onboarding } = require( '../../utils' );
-const { storeDetails } = require( '../../test-data/data' );
+const { storeDetails, getTextForLanguage } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
 
 test.describe( 'Store owner can complete onboarding wizard', () => {
@@ -26,10 +26,10 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			storeDetails.us.industries,
 			storeDetails.us.expectedNumberOfIndustries
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 		await expect( page ).toHaveURL( /.*step=product-types/ );
 		await expect(
-			page.locator( '.product-types button >> text=Continue' )
+			page.locator( `.product-types button >> text=${getTextForLanguage()['Continue']}` )
 		).toBeVisible();
 	} );
 
@@ -44,12 +44,12 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		);
 
 		// Navigate back to "Store Details" section
-		await page.click( 'button >> text=Store Details' );
+		await page.click( `button >> text=${getTextForLanguage()['StoreDetails']}` );
 		await onboarding.handleSaveChangesModal( page, { saveChanges: true } );
-		await page.locator( 'text="Welcome to WooCommerce"' ).waitFor();
+		await page.locator( `text=${getTextForLanguage()['WelcometoWooCommerce']}` ).waitFor();
 
 		// Navigate back to "Industry" section
-		await page.click( 'button >> text=Industry' );
+		await page.click( `button >> text=${getTextForLanguage()['Industry']}` );
 		await page.textContent( '.components-checkbox-control__input' );
 		for ( let industry of Object.values( storeDetails.us.industries2 ) ) {
 			await expect( page.getByLabel( industry ) ).toBeChecked();
@@ -67,12 +67,12 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		);
 
 		// Navigate back to "Store Details" section
-		await page.click( 'button >> text=Store Details' );
+		await page.click( `button >> text=${getTextForLanguage()['StoreDetails']}` );
 
 		await onboarding.handleSaveChangesModal( page, { saveChanges: false } );
 
 		// Navigate back to "Industry" section
-		await page.click( 'button >> text=Industry' );
+		await page.click( `button >> text=${getTextForLanguage()['Industry']}` );
 		await page.textContent( '.components-checkbox-control__input' );
 		for ( let industry of Object.values( storeDetails.us.industries2 ) ) {
 			await expect( page.getByLabel( industry ) ).toBeChecked();
@@ -85,7 +85,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			page,
 			storeDetails.us.products
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 	} );
 
 	// eslint-disable-next-line jest/expect-expect
@@ -96,16 +96,16 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 			storeDetails.us.industries,
 			storeDetails.us.expectedNumberOfIndustries
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 
 		await onboarding.completeProductTypesSection(
 			page,
 			storeDetails.us.products
 		);
-		await page.click( 'button >> text=Continue' );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 
 		await onboarding.completeBusinessDetailsSection( page );
-		await page.click( 'button >> text=Continue' );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 	} );
 
 	// eslint-disable-next-line jest/expect-expect
@@ -129,7 +129,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		);
 
 		await onboarding.unselectBusinessFeatures( page );
-		await page.click( 'button >> text=Continue' );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 	} );
 } );
 
@@ -151,7 +151,7 @@ test.describe(
 				storeDetails.liberia.industries,
 				storeDetails.liberia.expectedNumberOfIndustries
 			);
-			await page.click( 'button >> text=Continue' );
+			await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 		} );
 
 		// eslint-disable-next-line jest/expect-expect
@@ -165,7 +165,7 @@ test.describe(
 				storeDetails.liberia.industries,
 				storeDetails.liberia.expectedNumberOfIndustries
 			);
-			await page.click( 'button >> text=Continue' );
+			await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 
 			await onboarding.completeProductTypesSection(
 				page,
@@ -178,14 +178,14 @@ test.describe(
 				)
 			).toHaveCount( 0 );
 
-			await page.click( 'button >> text=Continue' );
+			await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 
 			await onboarding.completeBusinessDetailsSection( page );
-			await page.click( 'button >> text=Continue' );
+			await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 
 			await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
 
-			await page.click( 'button >> text=Continue' );
+			await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 		} );
 
 		// Skipping this test because it's very flaky.  Onboarding checklist changed so that the text
@@ -205,10 +205,10 @@ test.describe(
 			).toHaveCount( 3 );
 			// Checklist shows when completing setup wizard
 			await onboarding.completeBusinessDetailsSection( page );
-			await page.click( 'button >> text=Continue' );
+			await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 
 			await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
-			await page.click( 'button >> text=Continue' );
+			await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 		
 			// Start test
 			await page.waitForLoadState( 'networkidle' );
@@ -216,7 +216,7 @@ test.describe(
 				page.locator(
 					':nth-match(.woocommerce-task-list__item-title, 3)'
 				)
-			).toContainText( 'Set up payments' );
+			).toContainText( `${getTextForLanguage()['Setuppayments']}` );
 			await expect(
 				page.locator(
 					':nth-match(.woocommerce-task-list__item-title, 3)'
@@ -248,16 +248,16 @@ test.describe.skip( 'Store owner can go through setup Task List', () => {
 			storeDetails.us.store.email
 		);
 		await page.check( '#inspector-checkbox-control-0' );
-		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=No thanks' );
-		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=Continue' );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
+		await page.click( `button >> text${getTextForLanguage()['Nothanks']}` );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 		// Uncheck all business features
 		if ( page.isChecked( '.components-checkbox-control__input' ) ) {
 			await page.click( '.components-checkbox-control__input' );
 		}
-		await page.click( 'button >> text=Continue' );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	} );
 

@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTextForLanguage } = require( './../../test-data/data' );
 
 const productPageURL = 'wp-admin/post-new.php?post_type=product';
 
@@ -233,7 +234,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			`Type "${ variableProductName }" into the "Product name" input field.`,
 			async () => {
 				await page
-					.getByLabel( 'Product name' )
+					.getByLabel( getTextForLanguage()['Productname'] )
 					.fill( variableProductName );
 			}
 		);
@@ -250,7 +251,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			async () => {
 				const attributesTab = page
 					.locator( '.attribute_tab' )
-					.getByRole( 'link', { name: 'Attributes' } );
+					.getByRole( 'link', { name: `${getTextForLanguage()['Attributes']}` } );
 
 				await attributesTab.scrollIntoViewIfNeeded();
 
@@ -271,7 +272,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		if ( tourWasDisplayed ) {
 			await test.step( 'Tour was displayed, so dismiss it.', async () => {
 				await page
-					.getByRole( 'button', { name: 'Close Tour' } )
+					.getByRole( 'button', { name: `${getTextForLanguage()['CloseTour']}` } )
 					.click();
 			} );
 
@@ -293,7 +294,7 @@ test.describe( 'Add New Variable Product Page', () => {
 					await test.step( "Click 'Add'.", async () => {
 						await page
 							.locator( '#product_attributes .toolbar-top' )
-							.getByRole( 'button', { name: 'Add new' } )
+							.getByRole( 'button', { name: `${getTextForLanguage()['Addnew']}` } )
 							.click();
 					} );
 				}
@@ -343,7 +344,7 @@ test.describe( 'Add New Variable Product Page', () => {
 							async () => {
 								await page
 									.getByRole( 'button', {
-										name: 'Save attributes',
+										name: `${getTextForLanguage()['Saveattributes']}`,
 									} )
 									.click( { clickCount: 3 } );
 							}
@@ -377,7 +378,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			'Expect the "Product draft updated." notice to appear.',
 			async () => {
 				await expect(
-					page.getByText( 'Product draft updated. ' )
+					page.getByText( `${getTextForLanguage()['Productdraftupdated']}`)
 				).toBeVisible();
 			}
 		);
@@ -433,7 +434,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			async () => {
 				await expect(
 					page.locator( '#message.notice-success' )
-				).toContainText( 'Product draft updated.' );
+				).toContainText( `${getTextForLanguage()['Productdraftupdated']}` );
 			}
 		);
 	} );
@@ -479,7 +480,7 @@ test.describe( 'Add New Variable Product Page', () => {
 				`Set regular price to "${ variationOnePrice }".`,
 				async () => {
 					await firstVariation
-						.getByRole( 'textbox', { name: 'Regular price' } )
+						.getByRole( 'textbox', { name: `${getTextForLanguage()['Regularprice']}` } )
 						.fill( variationOnePrice );
 				}
 			);
@@ -498,7 +499,7 @@ test.describe( 'Add New Variable Product Page', () => {
 				`Set regular price to "${ variationTwoPrice }".`,
 				async () => {
 					await secondVariation
-						.getByRole( 'textbox', { name: 'Regular price' } )
+						.getByRole( 'textbox', { name: `${getTextForLanguage()['Regularprice']}` } )
 						.fill( variationTwoPrice );
 				}
 			);
@@ -507,7 +508,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		await test.step( 'Edit the third variation.', async () => {
 			await test.step( 'Check "Manage stock?"', async () => {
 				await thirdVariation
-					.getByRole( 'checkbox', { name: 'Manage stock?' } )
+					.getByRole( 'checkbox', { name: `${getTextForLanguage()['Managestock']}` } )
 					.check();
 			} );
 
@@ -515,26 +516,26 @@ test.describe( 'Add New Variable Product Page', () => {
 				`Set regular price to "${ variationThreePrice }".`,
 				async () => {
 					await thirdVariation
-						.getByRole( 'textbox', { name: 'Regular price' } )
+						.getByRole( 'textbox', { name: `${getTextForLanguage()['Regularprice']}` } )
 						.fill( variationThreePrice );
 				}
 			);
 
 			await test.step( 'Set the weight and dimensions.', async () => {
 				await thirdVariation
-					.getByRole( 'textbox', { name: 'Weight' } )
+					.getByRole( 'textbox', { name: `${getTextForLanguage()['Weight']}` } )
 					.type( productWeight );
 
 				await thirdVariation
-					.getByRole( 'textbox', { name: 'Length' } )
+					.getByRole( 'textbox', { name: `${getTextForLanguage()['Length']}` } )
 					.type( productLength );
 
 				await thirdVariation
-					.getByRole( 'textbox', { name: 'Width' } )
+					.getByRole( 'textbox', { name: `${getTextForLanguage()['Width']}` } )
 					.type( productWidth );
 
 				await thirdVariation
-					.getByRole( 'textbox', { name: 'Height' } )
+					.getByRole( 'textbox', { name: `${getTextForLanguage()['Height']}` } )
 					.type( productHeight );
 			} );
 		} );
@@ -570,7 +571,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			async () => {
 				await expect(
 					firstVariation.getByRole( 'textbox', {
-						name: 'Regular price',
+						name: `${getTextForLanguage()['Regularprice']}`,
 					} )
 				).toHaveValue( variationOnePrice );
 			}
@@ -592,7 +593,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			async () => {
 				await expect(
 					secondVariation.getByRole( 'textbox', {
-						name: 'Regular price',
+						name: `${getTextForLanguage()['Regularprice']}`,
 					} )
 				).toHaveValue( variationTwoPrice );
 			}
@@ -603,7 +604,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			async () => {
 				await expect(
 					thirdVariation.getByRole( 'checkbox', {
-						name: 'Manage stock?',
+						name: `${getTextForLanguage()['Managestock']}`,
 					} )
 				).toBeChecked();
 			}
@@ -614,7 +615,7 @@ test.describe( 'Add New Variable Product Page', () => {
 			async () => {
 				await expect(
 					thirdVariation.getByRole( 'textbox', {
-						name: 'Regular price',
+						name: `${getTextForLanguage()['Regularprice']}`,
 					} )
 				).toHaveValue( variationThreePrice );
 			}
@@ -624,19 +625,19 @@ test.describe( 'Add New Variable Product Page', () => {
 			'Expect the weight and dimensions of the third variation to be correct.',
 			async () => {
 				await expect(
-					thirdVariation.getByRole( 'textbox', { name: 'Weight' } )
+					thirdVariation.getByRole( 'textbox', { name: `${getTextForLanguage()['Weight']}` } )
 				).toHaveValue( productWeight );
 
 				await expect(
-					thirdVariation.getByRole( 'textbox', { name: 'Length' } )
+					thirdVariation.getByRole( 'textbox', { name: `${getTextForLanguage()['Length']}` } )
 				).toHaveValue( productLength );
 
 				await expect(
-					thirdVariation.getByRole( 'textbox', { name: 'Width' } )
+					thirdVariation.getByRole( 'textbox', { name: `${getTextForLanguage()['Width']}` } )
 				).toHaveValue( productWidth );
 
 				await expect(
-					thirdVariation.getByRole( 'textbox', { name: 'Height' } )
+					thirdVariation.getByRole( 'textbox', { name: `${getTextForLanguage()['Height']}` } )
 				).toHaveValue( productHeight );
 			}
 		);
@@ -717,12 +718,12 @@ test.describe( 'Add New Variable Product Page', () => {
 		page,
 	} ) => {
 		await page.goto( productPageURL );
-		await page.getByLabel( 'Product name' ).fill( manualVariableProduct );
+		await page.getByLabel( getTextForLanguage()['Productname'] ).fill( manualVariableProduct );
 		await page.selectOption( '#product-type', 'variable' );
 
 		await page
 			.locator( '.attribute_tab' )
-			.getByRole( 'link', { name: 'Attributes' } )
+			.getByRole( 'link', { name: `${getTextForLanguage()['Attributes']}` } )
 			.scrollIntoViewIfNeeded();
 
 		// the tour only seems to display when not running headless, so just make sure
@@ -732,7 +733,7 @@ test.describe( 'Add New Variable Product Page', () => {
 				.isVisible()
 		) {
 			// dismiss the variable product tour
-			await page.getByRole( 'button', { name: 'Close Tour' } ).click();
+			await page.getByRole( 'button', { name: `${getTextForLanguage()['CloseTour']}` } ).click();
 
 			// wait for the tour's dismissal to be saved
 			await page.waitForResponse(
@@ -761,7 +762,7 @@ test.describe( 'Add New Variable Product Page', () => {
 				.first()
 				.type( 'val1 | val2' );
 		}
-		await page.click( 'text=Save attributes' );
+		await page.click( `text=${getTextForLanguage()['Saveattributes']}` );
 		// wait for the attributes to be saved
 		await page.waitForResponse(
 			( response ) =>
@@ -772,7 +773,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		// Save before going to the Variations tab to prevent variations from all attributes to be automatically created
 		await page.locator( '#save-post' ).click();
 		await expect(
-			page.getByText( 'Product draft updated. ' )
+			page.getByText( `${getTextForLanguage()['Productdraftupdated']}` )
 		).toBeVisible();
 		await page.click( '.updated.notice .notice-dismiss' );
 
@@ -800,7 +801,7 @@ test.describe( 'Add New Variable Product Page', () => {
 
 		await page.locator( '#save-post' ).click();
 		await expect(
-			page.getByText( 'Product draft updated. ' )
+			page.getByText( `${getTextForLanguage()['Productdraftupdated']}`)
 		).toBeVisible();
 
 		// manage stock at variation level
@@ -816,20 +817,20 @@ test.describe( 'Add New Variable Product Page', () => {
 			.first();
 
 		await firstVariationContainer
-			.getByPlaceholder( 'Variation price (required)' )
+			.getByPlaceholder( getTextForLanguage()['Variationpricerequired'] )
 			.fill( variationOnePrice );
 		await expect(
 			page.locator( 'p.variable_stock_status' )
 		).not.toBeVisible();
 		await firstVariationContainer
-			.getByLabel( 'Stock quantity' )
+			.getByLabel( getTextForLanguage()['Stockquantity'] )
 			.nth(1)
 			.fill( stockAmount );
 		await page.selectOption( '#variable_backorders0', 'notify', {
 			force: true,
 		} );
 		await firstVariationContainer
-			.getByPlaceholder( 'Store-wide threshold (2)' )
+			.getByPlaceholder( getTextForLanguage()['Storewidethreshold2'] )
 			.fill( lowStockAmount );
 		await page.click( 'button.save-variation-changes' );
 		await page.click(
@@ -843,7 +844,7 @@ test.describe( 'Add New Variable Product Page', () => {
 		).toHaveValue( lowStockAmount );
 		await expect(
 			page.locator( '#variable_backorders0 > option[selected]' )
-		).toHaveText( 'Allow, but notify customer' );
+		).toHaveText( `${getTextForLanguage()['Allowbutnotifycustomer']}` );
 
 		// set variation defaults
 		await page.click( 'a[href="#variable_product_options"]' );

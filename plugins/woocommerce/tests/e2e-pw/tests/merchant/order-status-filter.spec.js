@@ -1,19 +1,12 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTextForLanguage } = require( './../../test-data/data' );
 
 const orderBatchId = new Array();
 const statusColumnTextSelector = 'mark.order-status > span';
 
 // Define order statuses to filter against
-const orderStatus = [
-	[ 'Pending payment', 'wc-pending' ],
-	[ 'Processing', 'wc-processing' ],
-	[ 'On hold', 'wc-on-hold' ],
-	[ 'Completed', 'wc-completed' ],
-	[ 'Cancelled', 'wc-cancelled' ],
-	[ 'Refunded', 'wc-refunded' ],
-	[ 'Failed', 'wc-failed' ],
-];
+const orderStatus = getTextForLanguage()['orderStatus'];
 
 test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );

@@ -1,5 +1,6 @@
 const { chromium } = require( '@playwright/test' );
 const { admin } = require( './test-data/data' );
+const { getTextForLanguage } = require( './test-data/data' );
 
 module.exports = async ( config ) => {
 	const { baseURL, userAgent } = config.projects[ 0 ].use;
@@ -21,7 +22,7 @@ module.exports = async ( config ) => {
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', admin.username );
 			await adminPage.fill( 'input[name="pwd"]', admin.password );
-			await adminPage.click( 'text=Log In' );
+			await adminPage.click( `text=${getTextForLanguage()['LogIn']}` );
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
 			);

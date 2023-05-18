@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin } = require( '../../test-data/data' );
+const { admin, getTextForLanguage } = require( '../../test-data/data' );
 
 const billingEmail = 'marge-test-account@example.com';
 
@@ -151,7 +151,7 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await page.click( '#place_order' );
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
+			getTextForLanguage()['Orderreceived']
 		);
 
 		// get order ID from the page
@@ -162,7 +162,7 @@ test.describe( 'Shopper Checkout Create Account', () => {
 			( element ) => element.textContent,
 			orderReceivedHtmlElement
 		);
-		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+		orderId = orderReceivedText.split( /(\s+)/ )[ getTextForLanguage()['orderReceivedTextsplit'] ].toString();
 
 		await page.goto( '/my-account/' );
 		// confirms that an account was created
@@ -173,8 +173,9 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		// sign in as admin to confirm account creation
 		await page.fill( '#username', admin.username );
 		await page.fill( '#password', admin.password );
-		await page.click( 'text=Log in' );
-
+		await page.getByRole('button', { name: getTextForLanguage()['LogIn'] })
+			.click();
+		
 		await page.goto( 'wp-admin/users.php' );
 		await expect( page.locator( 'tbody#the-list' ) ).toContainText(
 			billingEmail

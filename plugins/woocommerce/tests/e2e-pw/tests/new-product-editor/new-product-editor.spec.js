@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { getTextForLanguage } = require( './../../test-data/data' );
 
 const ALL_PRODUCTS_URL = 'wp-admin/edit.php?post_type=product';
 const NEW_EDITOR_ADD_PRODUCT_URL =
@@ -11,7 +12,7 @@ const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 async function clickAddNewMenuItem( page ) {
 	await page
 		.locator( '#menu-posts-product' )
-		.getByRole( 'link', { name: 'Add New' } )
+		.getByRole( 'link', { name: getTextForLanguage()['AddNew'] } )
 		.click();
 }
 
@@ -41,7 +42,7 @@ async function dismissFeedbackModalIfShown( page ) {
 async function expectOldProductEditor( page ) {
 	await expect(
 		page.locator( '#woocommerce-product-data h2' )
-	).toContainText( 'Product data' );
+	).toContainText( getTextForLanguage()['Productdata'] );
 }
 
 async function expectNewProductEditor( page ) {

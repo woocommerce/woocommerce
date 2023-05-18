@@ -1,4 +1,5 @@
 const { expect } = require( '@playwright/test' );
+const { getTextForLanguage } = require( './../test-data/data' );
 
 const STORE_DETAILS_URL = 'wp-admin/admin.php?page=wc-admin&path=/setup-wizard';
 const INDUSTRY_DETAILS_URL =
@@ -29,10 +30,10 @@ const onboarding = {
 		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
 		await page.check( '#inspector-checkbox-control-0' );
 		// Click continue button
-		await page.click( 'button >> text=Continue' );
+		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
 		// Usage tracking dialog
 		await page.textContent( '.components-modal__header-heading' );
-		await page.click( 'button >> text=No thanks' );
+		await page.click( `button >> text=${getTextForLanguage()['Nothanks']}` );
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	},
 
@@ -43,7 +44,7 @@ const onboarding = {
 		);
 
 		expect( pageHeading ).toContain(
-			'In which industry does the store operate?'
+			`${getTextForLanguage()['Inwhichindustrydoesthestoreoperate']}`
 		);
 		// Check that there are the correct number of options listed
 		const numCheckboxes = await page.$$(
@@ -66,9 +67,9 @@ const onboarding = {
 		await page.textContent( '.components-modal__header-heading' );
 
 		if ( saveChanges ) {
-			await page.click( 'button >> text=Save' );
+			await page.click( `button >> text=${getTextForLanguage()['Save']}` );
 		} else {
-			await page.click( 'button >> text=Discard' );
+			await page.click( `button >> text=${getTextForLanguage()['Discard']}` );
 		}
 		await page.waitForLoadState( 'networkidle' );
 	},
@@ -81,7 +82,7 @@ const onboarding = {
 			'div.woocommerce-profile-wizard__step-header > h2'
 		);
 		expect( pageHeading ).toContain(
-			'What type of products will be listed?'
+			`${getTextForLanguage()['Whattypeofproductswillbelisted']}`
 		);
 		// Check that there are the correct number of options listed
 		const numCheckboxes = await page.$$(
@@ -104,7 +105,7 @@ const onboarding = {
 		const pageHeading = await page.textContent(
 			'div.woocommerce-profile-wizard__step-header > h2'
 		);
-		expect( pageHeading ).toContain( 'Tell us about your business' );
+		expect( pageHeading ).toContain( `${getTextForLanguage()['Tellusaboutyourbusiness']}` );
 		// Select 1 - 10 for products
 		await page.click( '#woocommerce-select-control-0__control-input', {
 			force: true,
@@ -125,7 +126,7 @@ const onboarding = {
 		const pageHeading = await page.textContent(
 			'div.woocommerce-profile-wizard__step-header > h2'
 		);
-		expect( pageHeading ).toContain( 'Included business features' );
+		expect( pageHeading ).toContain( `${getTextForLanguage()['Includedbusinessfeatures']}` );
 		// Expand list of features
 		await page.click(
 			'button.woocommerce-admin__business-details__selective-extensions-bundle__expand'

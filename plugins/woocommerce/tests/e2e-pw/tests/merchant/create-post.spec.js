@@ -1,5 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
+const { getTextForLanguage } = require( './../../test-data/data' );
 
 const postTitle = `Post-${ new Date().getTime().toString() }`;
 
@@ -40,7 +41,7 @@ test.describe( 'Can create a new post', () => {
 			async () => {
 				return await page
 					.getByRole( 'heading', {
-						name: 'Welcome to the block editor',
+						name: `${getTextForLanguage()['Welcometotheblockeditor']}`,
 					} )
 					.isVisible();
 			}
@@ -50,7 +51,7 @@ test.describe( 'Can create a new post', () => {
 			await test.step( 'Welcome modal appeared. Close it.', async () => {
 				await page
 					.getByRole( 'document' )
-					.getByRole( 'button', { name: 'Close' } )
+					.getByRole( 'button', { name: `${getTextForLanguage()['Close']}` } )
 					.click();
 			} );
 		} else {
@@ -60,29 +61,29 @@ test.describe( 'Can create a new post', () => {
 		}
 
 		await page
-			.getByRole( 'textbox', { name: 'Add Title' } )
+			.getByRole( 'textbox', { name: `${getTextForLanguage()['AddTitle']}` } )
 			.fill( postTitle );
 
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
+		await page.getByRole( 'button', { name: `${getTextForLanguage()['Adddefaultblock']}` } ).click();
 
 		await page
 			.getByRole( 'document', {
 				name:
-					'Empty block; start writing or type forward slash to choose a block',
+				`${getTextForLanguage()['Emptyblockstartwritingortypeforwardslashtochooseablock']}`,
 			} )
 			.fill( 'Test Post' );
 
 		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'button', { name: `${getTextForLanguage()['Publish']}`, exact: true } )
 			.click();
 
 		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'region', { name: `${getTextForLanguage()['Editorpublish']}` } )
+			.getByRole( 'button', { name: `${getTextForLanguage()['Publish']}`, exact: true } )
 			.click();
 
 		await expect(
-			page.getByText( `${ postTitle } is now live.` )
+			page.getByText( `${ postTitle } ${getTextForLanguage()['isnowlive']}` )
 		).toBeVisible();
 	} );
 } );

@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTextForLanguage } = require( './../../test-data/data' );
 
 test.describe( 'Payment setup task', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -8,8 +9,8 @@ test.describe( 'Payment setup task', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
-		await page.click( 'text=Skip setup store details' );
-		await page.click( 'button >> text=No thanks' );
+		await page.click( `text=${getTextForLanguage()['Skipsetupstoredetails']}` );
+		await page.click( `button >> text=${getTextForLanguage()['Nothanks']}` );
 		await page.waitForLoadState( 'networkidle' );
 	} );
 
@@ -32,10 +33,10 @@ test.describe( 'Payment setup task', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.click( 'text=Set up payments' );
+		await page.click( `text=${getTextForLanguage()['Setuppayments']}` );
 		await expect(
 			page.locator( '.woocommerce-layout__header-wrapper > h1' )
-		).toHaveText( 'Set up payments' );
+		).toHaveText( `${getTextForLanguage()['Setuppayments']}`);
 	} );
 
 	test( 'Saving valid bank account transfer details enables the payment method', async ( {
@@ -51,18 +52,18 @@ test.describe( 'Payment setup task', () => {
 			.catch( () => {} );
 
 		// fill in bank transfer form
-		await page.fill( '//input[@placeholder="Account name"]', 'Savings' );
-		await page.fill( '//input[@placeholder="Account number"]', '1234' );
-		await page.fill( '//input[@placeholder="Bank name"]', 'Test Bank' );
-		await page.fill( '//input[@placeholder="Sort code"]', '12' );
-		await page.fill( '//input[@placeholder="IBAN"]', '12 3456 7890' );
-		await page.fill( '//input[@placeholder="BIC / Swift"]', 'ABBA' );
-		await page.click( 'text=Save' );
+		await page.fill( `//input[@placeholder=${getTextForLanguage()['AccountnameInQuotes']}]`, 'Savings' );
+		await page.fill( `//input[@placeholder=${getTextForLanguage()['AccountnumberInQuotes']}]`, '1234' );
+		await page.fill( `//input[@placeholder=${getTextForLanguage()['BanknameInQuotes']}]`, 'Test Bank' );
+		await page.fill( `//input[@placeholder=${getTextForLanguage()['SortcodeInQuotes']}]`, '12' );
+		await page.fill( `//input[@placeholder=${getTextForLanguage()['IBANInQuotes']}]`, '12 3456 7890' );
+		await page.fill( `//input[@placeholder=${getTextForLanguage()['BICSwiftInQuotes']}]`, 'ABBA' );
+		await page.click( `text=${getTextForLanguage()['Save']}` );
 
 		// check that bank transfers were set up
 		await expect(
 			page.locator( 'div.components-snackbar__content' )
-		).toContainText( 'Direct bank transfer details added successfully' );
+		).toContainText( `${getTextForLanguage()['Directbanktransferdetailsaddedsuccessfully']}` );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
 

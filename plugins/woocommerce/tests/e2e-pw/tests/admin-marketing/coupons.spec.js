@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
-
+const { getTextForLanguage } = require( './../../test-data/data' );
+  
 test.describe( 'Coupons page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -10,10 +11,10 @@ test.describe( 'Coupons page', () => {
 			'wp-admin/edit.php?post_type=shop_coupon&legacy_coupon_menu=1'
 		);
 		await expect( page.locator( 'h1.wp-heading-inline' ) ).toHaveText(
-			'Coupons'
+			`${getTextForLanguage()['Coupons']}`
 		);
 		await expect( page.locator( 'a.page-title-action' ) ).toHaveText(
-			'Add coupon'
+			`${getTextForLanguage()['Addcoupon']}`
 		);
 	} );
 } );

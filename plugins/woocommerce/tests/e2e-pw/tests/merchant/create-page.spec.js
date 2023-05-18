@@ -1,5 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
+const { getTextForLanguage } = require( './../../test-data/data' );
 
 const pageTitle = `Page-${ new Date().getTime().toString() }`;
 
@@ -36,38 +37,38 @@ test.describe( 'Can create a new page', () => {
 
 		const welcomeModalVisible = await page
 			.getByRole( 'heading', {
-				name: 'Welcome to the block editor',
+				name: `${getTextForLanguage()['Welcometotheblockeditor']}`,
 			} )
 			.isVisible();
 
 		if ( welcomeModalVisible ) {
-			await page.getByRole( 'button', { name: 'Close' } ).click();
+			await page.getByRole( 'button', { name: `${getTextForLanguage()['Close']}` } ).click();
 		}
 
 		await page
-			.getByRole( 'textbox', { name: 'Add Title' } )
+			.getByRole( 'textbox', { name: `${getTextForLanguage()['AddTitle']}` } )
 			.fill( pageTitle );
 
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
+		await page.getByRole( 'button', { name: `${getTextForLanguage()['Adddefaultblock']}` } ).click();
 
 		await page
 			.getByRole( 'document', {
 				name:
-					'Empty block; start writing or type forward slash to choose a block',
+				`${getTextForLanguage()['Emptyblockstartwritingortypeforwardslashtochooseablock']}`,
 			} )
 			.fill( 'Test Page' );
 
 		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'button', { name: `${getTextForLanguage()['Publish']}`, exact: true } )
 			.click();
 
 		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.getByRole( 'region', { name: `${getTextForLanguage()['Editorpublish']}` } )
+			.getByRole( 'button', { name: `${getTextForLanguage()['Publish']}`, exact: true } )
 			.click();
 
 		await expect(
-			page.getByText( `${ pageTitle } is now live.` )
+			page.getByText( `${ pageTitle } ${getTextForLanguage()['isnowlive']}` )
 		).toBeVisible();
 	} );
 } );

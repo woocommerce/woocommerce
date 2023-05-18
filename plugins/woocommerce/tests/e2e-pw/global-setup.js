@@ -2,6 +2,7 @@ const { chromium, expect } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 const { site } = require( './utils' );
+const { getTextForLanguage } = require( './test-data/data' );
 
 module.exports = async ( config ) => {
 	const { stateDir, baseURL, userAgent } = config.projects[ 0 ].use;
@@ -50,7 +51,7 @@ module.exports = async ( config ) => {
 	const adminPage = await adminContext.newPage();
 	const customerPage = await customerContext.newPage();
 
-	// Sign in as admin user and save state
+		// Sign in as admin user and save state
 	const adminRetries = 5;
 	for ( let i = 0; i < adminRetries; i++ ) {
 		try {
@@ -58,13 +59,13 @@ module.exports = async ( config ) => {
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.fill( 'input[name="log"]', admin.username );
 			await adminPage.fill( 'input[name="pwd"]', admin.password );
-			await adminPage.click( 'text=Log In' );
+			await adminPage.click( `text=${getTextForLanguage()['LogIn']}` );
 			await adminPage.waitForLoadState( 'networkidle' );
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.waitForLoadState( 'domcontentloaded' );
 
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-				'Dashboard'
+				`${getTextForLanguage()['Dashboard']}`
 			);
 			await adminPage
 				.context()
@@ -98,7 +99,7 @@ module.exports = async ( config ) => {
 			);
 			await adminPage.fill( '#key_description', 'Key for API access' );
 			await adminPage.selectOption( '#key_permissions', 'read_write' );
-			await adminPage.click( 'text=Generate API key' );
+			await adminPage.click( `text=${getTextForLanguage()['GenerateAPIkey']}` );
 			process.env.CONSUMER_KEY = await adminPage.inputValue(
 				'#key_consumer_key'
 			);
@@ -131,7 +132,7 @@ module.exports = async ( config ) => {
 			await customerPage.goto( `/wp-admin` );
 			await customerPage.fill( 'input[name="log"]', customer.username );
 			await customerPage.fill( 'input[name="pwd"]', customer.password );
-			await customerPage.click( 'text=Log In' );
+			await customerPage.click( `text=${getTextForLanguage()['LogIn']}` );
 
 			await customerPage.goto( `/my-account` );
 			await expect(
@@ -143,7 +144,7 @@ module.exports = async ( config ) => {
 				customerPage.locator(
 					'div.woocommerce-MyAccount-content > p >> nth=0'
 				)
-			).toContainText( 'Hello' );
+			).toContainText( `${getTextForLanguage()['Hello']} `);
 
 			await customerPage
 				.context()

@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
-
+const { getTextForLanguage } = require( './../../test-data/data' );
+  
 test.describe( 'Marketing page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -11,7 +12,7 @@ test.describe( 'Marketing page', () => {
 
 		// Users should see the "Learn about marketing a store" card.
 		await expect(
-			page.locator( '"Learn about marketing a store"' )
+			page.locator( `${getTextForLanguage()['Learnaboutmarketingastoreinquotes']}` )
 		).toBeVisible();
 	} );
 } );

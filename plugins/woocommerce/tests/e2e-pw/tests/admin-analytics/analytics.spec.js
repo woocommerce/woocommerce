@@ -1,9 +1,11 @@
 const { test, expect } = require( '@playwright/test' );
+const { getTextForLanguage } = require( './../../test-data/data' );
+  //
 
 test.describe( 'Analytics pages', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	for ( const aPages of [
+	const aPages = [
 		'Overview',
 		'Products',
 		'Revenue',
@@ -15,18 +17,19 @@ test.describe( 'Analytics pages', () => {
 		'Downloads',
 		'Stock',
 		'Settings',
-	] ) {
-		test( `A user can view the ${ aPages } page without it crashing`, async ( {
+	];
+	for ( const [index,value] of aPages.entries() ) {
+		test( `A user can view the ${ value } page without it crashing`, async ( {
 			page,
 		} ) => {
-			const urlTitle = aPages.toLowerCase();
+			const urlTitle = value.toLowerCase();
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2F${ urlTitle }`
 			);
 			const pageTitle = page.locator(
 				'.woocommerce-layout__header-wrapper > h1'
 			);
-			await expect( pageTitle ).toContainText( aPages );
+			await expect( pageTitle ).toContainText( getTextForLanguage()['pageNames'][index] );
 			await expect(
 				page.locator( '#woocommerce-layout__primary' )
 			).toBeVisible();

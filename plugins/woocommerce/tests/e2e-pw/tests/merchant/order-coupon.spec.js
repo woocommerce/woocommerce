@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { getTextForLanguage } = require( './../../test-data/data' );
 
 let productId, couponId, orderId;
 
@@ -80,9 +81,9 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await page.click( 'button.add-order-item' );
 
 		// search for product to add
-		await page.click( 'text=Search for a product…' );
+		await page.click( `text=${getTextForLanguage()['Searchforaproduct']}` );
 		await page.type(
-			'input:below(:text("Search for a product…"))',
+			`input:below(:text(${getTextForLanguage()['SearchforaproductInQuotes']}))`,
 			productName
 		);
 		await page.click(
@@ -98,10 +99,10 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Coupon(s)' );
+		).toContainText( `${getTextForLanguage()['Coupons_']}` );
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=2' )
-		).toContainText( 'Order Total' );
+		).toContainText( `${getTextForLanguage()['OrderTotal']}` );
 		await expect(
 			page.locator( '.wc-order-totals td.total >> nth=1' )
 		).toContainText( couponAmount );
@@ -116,10 +117,10 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Coupon(s)' );
+		).toContainText( `${getTextForLanguage()['Coupons_']}` );
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=2' )
-		).toContainText( 'Order Total' );
+		).toContainText( `${getTextForLanguage()['OrderTotal']}` );
 		await expect(
 			page.locator( '.wc-order-totals td.total >> nth=1' )
 		).toContainText( couponAmount );
@@ -133,7 +134,7 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).not.toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
-		).toContainText( 'Order Total' );
+		).toContainText( `${getTextForLanguage()['OrderTotal']}` );
 		await expect(
 			page.locator( '.wc-order-totals td.total >> nth=1' )
 		).toContainText( productPrice );
