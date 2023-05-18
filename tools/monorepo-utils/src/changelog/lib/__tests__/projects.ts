@@ -6,7 +6,7 @@ import path from 'path';
 /**
  * Internal dependencies
  */
-import { getAllProjects } from '../projects';
+import { getAllProjects, getChangeloggerProjects } from '../projects';
 
 const sampleWorkspaceYaml = `
 packages:
@@ -15,10 +15,10 @@ packages:
     - 'projects/very-cool-project'
     - 'interesting-project'
 `;
+const tmpRepoPath = path.join( __dirname, 'test-repo' );
 
 describe( 'getAllProjects', () => {
 	it( 'should provide a list of all projects supplied by pnpm-workspace.yml', async () => {
-		const tmpRepoPath = path.join( __dirname, 'test-repo' );
 		const projects = await getAllProjects(
 			tmpRepoPath,
 			sampleWorkspaceYaml
@@ -36,5 +36,34 @@ describe( 'getAllProjects', () => {
 		} );
 
 		expect( projects ).toHaveLength( expectedProjects.length );
+	} );
+} );
+
+describe( 'getChangeloggerProjects', () => {
+	it( 'should provide a list of all projects that use Jetpack changelogger', async () => {
+		const projects = await getAllProjects(
+			tmpRepoPath,
+			sampleWorkspaceYaml
+		);
+		const changeloggerProjects = await getChangeloggerProjects(
+			tmpRepoPath,
+			projects
+		);
+
+		const expectedChangeLoggerProjects = [
+			'folder-with-lots-of-projects/project-b',
+			'folder-with-lots-of-projects/project-a',
+			'projects/very-cool-project',
+		];
+
+		expectedChangeLoggerProjects.forEach(
+			( expectedChangeLoggerProject ) => {
+				expect( projects ).toContain( expectedChangeLoggerProject );
+			}
+		);
+
+		expect( changeloggerProjects ).toHaveLength(
+			expectedChangeLoggerProjects.length
+		);
 	} );
 } );

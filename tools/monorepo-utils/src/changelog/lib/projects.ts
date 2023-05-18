@@ -44,7 +44,8 @@ export const getChangeloggerProjects = async (
 		return (
 			( composer.require &&
 				composer.require[ 'automattic/jetpack-changelogger' ] ) ||
-			composer[ 'require-dev' ][ 'automattic/jetpack-changelogger' ]
+			( composer[ 'require-dev' ] &&
+				composer[ 'require-dev' ][ 'automattic/jetpack-changelogger' ] )
 		);
 	} );
 };
