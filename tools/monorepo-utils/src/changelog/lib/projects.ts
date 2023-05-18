@@ -6,7 +6,10 @@ import path from 'path';
 import { glob } from 'glob';
 import simpleGit from 'simple-git';
 
-const getAllProjects = async ( tmpRepoPath: string, workspaceYaml: string ) => {
+export const getAllProjects = async (
+	tmpRepoPath: string,
+	workspaceYaml: string
+) => {
 	const rawProjects = workspaceYaml.split( '- ' );
 	// remove heading
 	rawProjects.shift();
