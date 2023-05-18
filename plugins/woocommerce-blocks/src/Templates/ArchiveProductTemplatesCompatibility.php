@@ -63,6 +63,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 		if ( ! $this->is_archive_template() ) {
 			return $block_content;
 		}
+
 		/**
 		 * If the block is not inherited, we don't need to inject hooks.
 		 */
@@ -71,6 +72,25 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 		}
 
 		$block_name = $block['blockName'];
+
+		$block_hooks = array_filter(
+			$this->hook_data,
+			function( $hook ) use ( $block_name ) {
+				return $hook['block_name'] === $block_name;
+			}
+		);
+
+		if ( 'core/post-template' === $block_name ) {
+			$this->restore_default_hooks();
+			$content = sprintf(
+				'%1$s%2$s%3$s',
+				$this->get_hooks_buffer( $block_hooks, 'before' ),
+				$block_content,
+				$this->get_hooks_buffer( $block_hooks, 'after' )
+			);
+			$this->remove_default_hooks();
+			return $content;
+		}
 
 		/**
 		 * The core/post-template has two different block names:
@@ -96,24 +116,32 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 			return $block_content;
 		}
 
-		/**
-		 * `core/query-no-result` is a special case because it can return two
-		 * different content depending on the context. We need to check if the
-		 * block content is empty to determine if we need to inject hooks.
-		 */
 		if (
-			'core/query-no-results' === $block_name &&
-			empty( trim( $block_content ) )
+			'core/query-no-results' === $block_name
 		) {
-			return $block_content;
-		}
 
-		$block_hooks = array_filter(
-			$this->hook_data,
-			function( $hook ) use ( $block_name ) {
-				return $hook['block_name'] === $block_name;
+			/**
+			 * `core/query-no-result` is a special case because it can return two
+			 * different content depending on the context. We need to check if the
+			 * block content is empty to determine if we need to inject hooks.
+			 */
+			if ( empty( trim( $block_content ) ) ) {
+				return $block_content;
 			}
-		);
+
+			$this->restore_default_hooks();
+
+			$content = sprintf(
+				'%1$s%2$s%3$s',
+				$this->get_hooks_buffer( $block_hooks, 'before' ),
+				$block_content,
+				$this->get_hooks_buffer( $block_hooks, 'after' )
+			);
+
+			$this->remove_default_hooks();
+
+			return $content;
+		}
 
 		return sprintf(
 			'%1$s%2$s%3$s',
@@ -136,6 +164,9 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	 *       <function-name> => <priority>,
 	 *        ...
 	 *     ],
+	 *     permanently_removed_actions => [
+	 *         <function-name>
+	 *    ]
 	 *  ],
 	 * ]
 	 * Where:
@@ -145,6 +176,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	 * - hooked is an array of functions hooked to the hook that will be
 	 *   replaced. The key is the function name and the value is the
 	 *   priority.
+	 * - permanently_removed_actions is an array of functions that we do not want to re-add after they have been removed to avoid duplicate content with the Products block and its inner blocks.
 	 */
 	protected function set_hook_data() {
 		$this->hook_data = array(
@@ -202,26 +234,37 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 				),
 			),
 			'woocommerce_before_shop_loop'            => array(
-				'block_name' => 'core/post-template',
-				'position'   => 'before',
-				'hooked'     => array(
+				'block_name'                  => 'core/post-template',
+				'position'                    => 'before',
+				'hooked'                      => array(
 					'woocommerce_output_all_notices' => 10,
 					'woocommerce_result_count'       => 20,
 					'woocommerce_catalog_ordering'   => 30,
 				),
+				'permanently_removed_actions' => array(
+					'woocommerce_output_all_notices',
+					'woocommerce_result_count',
+					'woocommerce_catalog_ordering',
+				),
 			),
 			'woocommerce_after_shop_loop'             => array(
-				'block_name' => 'core/post-template',
-				'position'   => 'after',
-				'hooked'     => array(
+				'block_name'                  => 'core/post-template',
+				'position'                    => 'after',
+				'hooked'                      => array(
 					'woocommerce_pagination' => 10,
+				),
+				'permanently_removed_actions' => array(
+					'woocommerce_pagination',
 				),
 			),
 			'woocommerce_no_products_found'           => array(
-				'block_name' => 'core/query-no-results',
-				'position'   => 'before',
-				'hooked'     => array(
+				'block_name'                  => 'core/query-no-results',
+				'position'                    => 'before',
+				'hooked'                      => array(
 					'wc_no_products_found' => 10,
+				),
+				'permanently_removed_actions' => array(
+					'wc_no_products_found',
 				),
 			),
 			'woocommerce_archive_description'         => array(
@@ -250,11 +293,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	 */
 	private function inner_blocks_walker( &$block ) {
 		if (
-			'core/query' === $block['blockName'] &&
-			isset( $block['attrs']['namespace'] ) &&
-			'woocommerce/product-query' === $block['attrs']['namespace'] &&
-			isset( $block['attrs']['query']['inherit'] ) &&
-			$block['attrs']['query']['inherit']
+			$this->is_products_block_with_inherit_query( $block )
 		) {
 			$this->inject_attribute( $block );
 			$this->remove_default_hooks();
@@ -263,6 +302,36 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 		if ( ! empty( $block['innerBlocks'] ) ) {
 			array_walk( $block['innerBlocks'], array( $this, 'inner_blocks_walker' ) );
 		}
+	}
+
+	/**
+	 * Restore default hooks except the ones that are not supposed to be re-added.
+	 */
+	private function restore_default_hooks() {
+		foreach ( $this->hook_data as $hook => $data ) {
+			if ( ! isset( $data['hooked'] ) ) {
+				continue;
+			}
+			foreach ( $data['hooked'] as $callback => $priority ) {
+				if ( ! in_array( $callback, $data['permanently_removed_actions'] ?? [], true ) ) {
+					add_action( $hook, $callback, $priority );
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * Check if the block is a Products block that inherits query from template.
+	 *
+	 * @param array $block Parsed block data.
+	 */
+	private function is_products_block_with_inherit_query( $block ) {
+		return 'core/query' === $block['blockName'] &&
+		isset( $block['attrs']['namespace'] ) &&
+		'woocommerce/product-query' === $block['attrs']['namespace'] &&
+		isset( $block['attrs']['query']['inherit'] ) &&
+		$block['attrs']['query']['inherit'];
 	}
 
 	/**
