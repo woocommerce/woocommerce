@@ -502,11 +502,9 @@ jQuery( function ( $ ) {
 			const $attributesListContainer = $( '#product_attributes .product_attributes' );
 			const product_type = $( 'select#product-type' ).val();
 
-			$attributesListContainer.append( newAttributeListItemHtml );
+			const $attributeListItem = $( newAttributeListItemHtml ).appendTo( $attributesListContainer );
 
-			if ( 'variable' !== product_type ) {
-				$attributesListContainer.find( '.enable_variation' ).hide();
-			}
+			show_and_hide_controls( $attributeListItem );
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
 
