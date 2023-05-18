@@ -276,11 +276,8 @@ const Layout = compose(
 			return;
 		}
 
-		const {
-			getActivePlugins,
-			getInstalledPlugins,
-			isJetpackConnected,
-		} = select( PLUGINS_STORE_NAME );
+		const { getActivePlugins, getInstalledPlugins, isJetpackConnected } =
+			select( PLUGINS_STORE_NAME );
 
 		return {
 			activePlugins: getActivePlugins(),
