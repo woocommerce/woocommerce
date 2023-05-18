@@ -123,10 +123,10 @@ test.describe( 'Shopper > Update variable product', () => {
 					},
 				],
 			} )
-			.then( ( response ) => {
+			.then( async ( response ) => {
 				variableProductId = response.data.id;
 				for ( const key in variations ) {
-					api.post(
+					await api.post(
 						`products/${ variableProductId }/variations`,
 						variations[ key ]
 					);
