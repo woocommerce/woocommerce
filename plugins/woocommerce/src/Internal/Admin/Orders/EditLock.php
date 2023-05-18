@@ -10,6 +10,8 @@ namespace Automattic\WooCommerce\Internal\Admin\Orders;
  */
 class EditLock {
 
+	const META_KEY_NAME = '_edit_lock';
+
 	/**
 	 * Obtains lock information for a given order. If the lock has expired or it's assigned to an invalid user,
 	 * the order is no longer considered locked.
@@ -18,7 +20,7 @@ class EditLock {
 	 * @return bool|array
 	 */
 	public function get_lock( \WC_Order $order ) {
-		$lock = $order->get_meta( '_edit_lock', true, 'edit' );
+		$lock = $order->get_meta( self::META_KEY_NAME, true, 'edit' );
 		if ( ! $lock ) {
 			return false;
 		}
@@ -56,6 +58,16 @@ class EditLock {
 	}
 
 	/**
+	 * Checks whether the order is being edited by any user.
+	 *
+	 * @param \WC_Order $order Order to check.
+	 * @return boolean TRUE if order is locked and currently being edited by a user. FALSE otherwise.
+	 */
+	public function is_locked( \WC_Order $order ) : bool {
+		return (bool) $this->get_lock( $order );
+	}
+
+	/**
 	 * Assigns an order's edit lock to the current user.
 	 *
 	 * @param \WC_Order $order The order to apply the lock to.
@@ -68,10 +80,10 @@ class EditLock {
 			return false;
 		}
 
-		$order->update_meta_data( '_edit_lock', time() . ':' . $user_id );
+		$order->update_meta_data( self::META_KEY_NAME, time() . ':' . $user_id );
 		$order->save_meta_data();
 
-		return $order->get_meta( '_edit_lock', true, 'edit' );
+		return $order->get_meta( self::META_KEY_NAME, true, 'edit' );
 	}
 
 	/**
