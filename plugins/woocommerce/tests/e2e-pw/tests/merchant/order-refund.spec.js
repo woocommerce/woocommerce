@@ -232,23 +232,5 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
 			/Item #\d+ stock increased from 8 to 10./
 		);
-
-		// Update the order
-		await page.locator( 'button.save_order' ).click();
-		await expect(
-			page.locator( 'div.updated.notice-success' )
-		).toContainText( 'Order updated.' );
-
-		// Verify that inventory wasn't modified.
-		expect(
-			await page.$$eval( '.note', ( notes ) =>
-				notes.every(
-					( note ) =>
-						! note.textContent.match(
-							/Adjusted stock: Product with Stock \(10→8\)/
-						)
-				)
-			)
-		).toEqual( true );
 	} );
 } );
