@@ -8,11 +8,6 @@
 		cursor: pointer;
 	}
 
-	ul {
-		list-style: none;
-		padding: 0;
-	}
-
 	.woocommerce-experimental-select-control__combox-box input {
 		font-size: 13px;
 		font-weight: 400;
@@ -53,6 +48,9 @@
 
 	.woocommerce-experimental-select-control__popover-menu-container {
 		overflow-y: initial;
+		list-style: none;
+		padding: 0;
+		width: 100% !important;
 	}
 
 	.components-popover {
@@ -66,7 +64,7 @@
 
 			ul li {
 				&:hover {
-					background-color: #f6f7f7 !important;
+					background-color: #eff2fd !important;
 					cursor: pointer;
 				}
 
