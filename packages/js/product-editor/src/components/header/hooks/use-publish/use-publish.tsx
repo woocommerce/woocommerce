@@ -54,7 +54,7 @@ export function usePublish( {
 
 	const isBusy = isSaving || isValidating;
 
-	const isCreating = productStatus === 'auto-draft';
+	const isPublished = productStatus === 'publish';
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
@@ -95,9 +95,9 @@ export function usePublish( {
 	}
 
 	return {
-		children: isCreating
-			? __( 'Add', 'woocommerce' )
-			: __( 'Save', 'woocommerce' ),
+		children: isPublished
+			? __( 'Update', 'woocommerce' )
+			: __( 'Add', 'woocommerce' ),
 		...props,
 		isBusy,
 		variant: 'primary',

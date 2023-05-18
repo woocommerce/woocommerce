@@ -26,7 +26,7 @@ export function PublishButton(
 		'status'
 	);
 
-	const isCreating = productStatus === 'auto-draft';
+	const isPublished = productStatus === 'publish';
 
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
@@ -36,9 +36,9 @@ export function PublishButton(
 		onPublishSuccess( savedProduct: Product ) {
 			recordProductEvent( 'product_update', savedProduct );
 
-			const noticeContent = isCreating
-				? __( 'Product successfully created.', 'woocommerce' )
-				: __( 'Product published.', 'woocommerce' );
+			const noticeContent = isPublished
+				? __( 'Product published.', 'woocommerce' )
+				: __( 'Product successfully created.', 'woocommerce' );
 			const noticeOptions = {
 				icon: '🎉',
 				actions: [
@@ -64,9 +64,9 @@ export function PublishButton(
 			}
 		},
 		onPublishError( error ) {
-			const defaultMessage = isCreating
-				? __( 'Failed to create product.', 'woocommerce' )
-				: __( 'Failed to publish product.', 'woocommerce' );
+			const defaultMessage = isPublished
+				? __( 'Failed to publish product.', 'woocommerce' )
+				: __( 'Failed to create product.', 'woocommerce' );
 
 			const message = getProductErrorMessage( error );
 			createErrorNotice( message || defaultMessage );
