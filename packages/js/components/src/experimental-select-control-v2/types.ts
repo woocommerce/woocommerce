@@ -1,3 +1,20 @@
+/**
+ * External dependencies
+ */
+import { ReactElement, Component } from 'react';
+
+export type ChildrenProps< Item > = {
+	items: Item[];
+	isOpen: boolean;
+	getItemLabel: getItemLabelType< Item >;
+	getItemValue: getItemValueType< Item >;
+	selectItem: ( item: Item ) => void;
+};
+export type Children< Item > = ( {
+	items,
+	isOpen,
+}: ChildrenProps< Item > ) => ReactElement | Component;
+
 export type DefaultItem = {
 	label: string;
 	value: string | number;

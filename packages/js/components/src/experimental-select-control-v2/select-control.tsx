@@ -6,11 +6,19 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { DefaultItem, getItemLabelType, getItemValueType } from './types';
+import {
+	Children,
+	DefaultItem,
+	getItemLabelType,
+	getItemValueType,
+} from './types';
+import { Menu } from './menu';
+import { MenuItem } from './menu-item';
 import { SelectedItems } from './selected-items';
 import { useDropdown } from './hooks/use-dropdown';
 
 type SelectControlProps< Item > = {
+	children?: Children< Item >;
 	getItemLabel?: getItemLabelType< Item >;
 	getItemValue?: getItemValueType< Item >;
 	initialSelected?: Item | Item[];
@@ -22,6 +30,7 @@ type SelectControlProps< Item > = {
 };
 
 export function SelectControl< Item = DefaultItem >( {
+	children,
 	getItemLabel = ( item: Item ) => ( item as DefaultItem ).label,
 	getItemValue = ( item: Item ) => ( item as DefaultItem ).value,
 	initialSelected,
@@ -41,6 +50,14 @@ export function SelectControl< Item = DefaultItem >( {
 		} );
 
 	const isReadOnly = false;
+	const isOpen = true;
+
+	function isSelected( item: Item ) {
+		if ( Array.isArray( selected ) ) {
+			return ( selected as Item[] ).includes( item );
+		}
+		return selected === item;
+	}
 
 	return (
 		<div className="woocommerce-experimental-select-control">
@@ -58,19 +75,34 @@ export function SelectControl< Item = DefaultItem >( {
 				/>
 			) }
 			<input type="text" value={ inputValue } />
-			<ul>
-				{ items.map( ( item ) => (
-					// Keyboard events will be added in a follow-up.
-					/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
-					<li
-						role="option"
-						key={ getItemValue( item ) }
-						onClick={ () => selectItem( item ) }
-					>
-						{ getItemLabel( item ) }
-					</li>
-				) ) }
-			</ul>
+			{ children ? (
+				children( {
+					isOpen,
+					getItemLabel,
+					getItemValue,
+					items,
+					selectItem,
+				} )
+			) : (
+				<Menu isOpen={ isOpen }>
+					{ items.map( ( item, index: number ) => (
+						<MenuItem
+							key={ `${ getItemValue( item ) }${ index }` }
+							isActive={ false }
+							item={ item }
+							onClick={ () => {
+								if ( multiple && isSelected( item ) ) {
+									deselectItem( item );
+									return;
+								}
+								selectItem( item );
+							} }
+						>
+							{ getItemLabel( item ) }
+						</MenuItem>
+					) ) }
+				</Menu>
+			) }
 		</div>
 	);
 }
