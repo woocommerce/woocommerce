@@ -12,6 +12,7 @@ import { MouseEvent } from 'react';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
+import { WPError } from '../../../../utils/get-product-error-message';
 
 export function usePublish( {
 	disabled,
@@ -21,7 +22,7 @@ export function usePublish( {
 	...props
 }: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' > & {
 	onPublishSuccess?( product: Product ): void;
-	onPublishError?( error: Error ): void;
+	onPublishError?( error: WPError ): void;
 } ): Button.ButtonProps {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
@@ -77,7 +78,10 @@ export function usePublish( {
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				'product',
-				productId
+				productId,
+				{
+					throwOnError: true,
+				}
 			);
 
 			if ( publishedProduct && onPublishSuccess ) {
@@ -85,7 +89,7 @@ export function usePublish( {
 			}
 		} catch ( error ) {
 			if ( onPublishError ) {
-				onPublishError( error as Error );
+				onPublishError( error as WPError );
 			}
 		}
 	}
