@@ -40,7 +40,7 @@ export function SelectControl< Item = DefaultItem >( {
 	onDeselect = () => null,
 	onSelect,
 }: SelectControlProps< Item > ) {
-	const { deselectItem, inputValue, selected, selectItem, setInputValue } =
+	const { deselectItem, inputProps, selected, selectItem } =
 		useDropdown< Item >( {
 			initialSelected,
 			items,
@@ -74,11 +74,9 @@ export function SelectControl< Item = DefaultItem >( {
 					} }
 				/>
 			) }
-			<input
-				type="text"
-				value={ inputValue }
-				onChange={ ( event ) => setInputValue( event.target.value ) }
-			/>
+			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+			{ /* @ts-ignore TS complains about autocomplete despite it being a valid property. */ }
+			<input type="text" { ...inputProps } />
 			{ children ? (
 				children( {
 					isOpen,

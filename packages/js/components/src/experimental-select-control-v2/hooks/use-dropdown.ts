@@ -7,6 +7,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { DefaultItem, getItemLabelType, getItemValueType } from '../types';
+import { useCombobox } from './use-combobox';
 
 type useDropdownProps< Item > = {
 	getItemLabel?: getItemLabelType< Item >;
@@ -25,6 +26,12 @@ export function useDropdown< Item = DefaultItem >( {
 	onDeselect = () => null,
 	onSelect = () => null,
 }: useDropdownProps< Item > ) {
+	const {
+		props: inputProps,
+		value: inputValue,
+		setValue: setInputValue,
+	} = useCombobox();
+
 	function getInitialSelected(): Item[] {
 		if ( ! initialSelected ) {
 			return [];
@@ -38,7 +45,6 @@ export function useDropdown< Item = DefaultItem >( {
 	const [ selected, setSelected ] = useState< Item[] >(
 		getInitialSelected()
 	);
-	const [ inputValue, setInputValue ] = useState< string >( '' );
 
 	function getSelected() {
 		if ( multiple ) {
@@ -61,6 +67,7 @@ export function useDropdown< Item = DefaultItem >( {
 	}
 
 	return {
+		inputProps,
 		inputValue,
 		selected: getSelected(),
 		selectItem,
