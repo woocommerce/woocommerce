@@ -467,8 +467,7 @@ jQuery( function ( $ ) {
 		} );
 	}
 
-	async function add_attribute_to_list( globalAttributeId ) {
-		const numberOfAttributesInList = $( '.product_attributes .woocommerce_attribute' ).length;
+	function block_attributes_tab_container() {
 		const $attributesTabContainer = $( '#product_attributes' );
 
 		$attributesTabContainer.block( {
@@ -478,31 +477,43 @@ jQuery( function ( $ ) {
 				opacity: 0.6,
 			},
 		} );
+	}
 
-		const newAttributeListItemHtml = await get_new_attribute_list_item_html( numberOfAttributesInList, globalAttributeId );
-
-		const $attributesListContainer = $attributesTabContainer.find( '.product_attributes' );
-		const product_type = $( 'select#product-type' ).val();
-
-		$attributesListContainer.append( newAttributeListItemHtml );
-
-		if ( 'variable' !== product_type ) {
-			$attributesListContainer.find( '.enable_variation' ).hide();
-		}
-
-		$( document.body ).trigger( 'wc-enhanced-select-init' );
-
-		attribute_row_indexes();
-
-		$attributesListContainer
-			.find( '.woocommerce_attribute' )
-			.last()
-			.find( 'h3' )
-			.trigger( 'click' );
-
+	function unblock_attributes_tab_container() {
+		const $attributesTabContainer = $( '#product_attributes' );
 		$attributesTabContainer.unblock();
+	}
 
-		jQuery.maybe_disable_save_button();
+	async function add_attribute_to_list( globalAttributeId ) {
+		try {
+			block_attributes_tab_container();
+
+			const numberOfAttributesInList = $( '.product_attributes .woocommerce_attribute' ).length;
+			const newAttributeListItemHtml = await get_new_attribute_list_item_html( numberOfAttributesInList, globalAttributeId );
+
+			const $attributesListContainer = $( '#product_attributes .product_attributes' );
+			const product_type = $( 'select#product-type' ).val();
+
+			$attributesListContainer.append( newAttributeListItemHtml );
+
+			if ( 'variable' !== product_type ) {
+				$attributesListContainer.find( '.enable_variation' ).hide();
+			}
+
+			$( document.body ).trigger( 'wc-enhanced-select-init' );
+
+			attribute_row_indexes();
+
+			$attributesListContainer
+				.find( '.woocommerce_attribute' )
+				.last()
+				.find( 'h3' )
+				.trigger( 'click' );
+
+			jQuery.maybe_disable_save_button();
+		} finally {
+			unblock_attributes_tab_container();
+		}
 	}
 
 	function add_global_attribute_to_list( globalAttributeId ) {
