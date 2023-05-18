@@ -80,7 +80,7 @@ class OnboardingFreeExtensions extends WC_REST_Data_Controller {
 	public function get_available_extensions( $request ) {
 		$extensions = RemoteFreeExtensions::get_extensions();
 		/**
-		* Remove Jetpack, WooCommerce Shipping & Tax when woocommerce_suggest_jetpack is false.
+		* Remove Jetpack when woocommerce_suggest_jetpack is false.
 		 *
 		 * @since 7.8
 		*/
