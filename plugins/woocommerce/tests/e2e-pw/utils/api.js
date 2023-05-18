@@ -51,7 +51,6 @@ const throwCustomError = (
 
 const update = {
 	storeDetails: async ( store ) => {
-		// ensure store address is US
 		const res = await api.post( 'settings/general/batch', {
 			update: [
 				{
