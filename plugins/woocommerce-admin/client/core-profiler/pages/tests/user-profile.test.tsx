@@ -60,7 +60,7 @@ describe( 'UserProfile', () => {
 		expect( radioInput.checked ).toBe( true );
 
 		const onlineSellingQuestion = screen.getByText(
-			/Are your selling online?/i
+			/Are you selling online?/i
 		);
 		expect( onlineSellingQuestion ).toBeInTheDocument();
 	} );
