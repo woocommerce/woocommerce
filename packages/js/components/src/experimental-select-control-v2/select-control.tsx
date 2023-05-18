@@ -6,11 +6,13 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { DefaultItemType, useDropdown } from './hooks/use-dropdown';
+import { DefaultItem, getItemLabelType, getItemValueType } from './types';
+import { SelectedItems } from './selected-items';
+import { useDropdown } from './hooks/use-dropdown';
 
 type SelectControlProps< Item > = {
-	getItemLabel?: ( item: Item ) => string;
-	getItemValue?: ( item: Item ) => string | number;
+	getItemLabel?: getItemLabelType< Item >;
+	getItemValue?: getItemValueType< Item >;
 	initialSelected?: Item | Item[];
 	items: Item[];
 	label: string;
@@ -19,28 +21,42 @@ type SelectControlProps< Item > = {
 	multiple?: boolean;
 };
 
-export function SelectControl< Item = DefaultItemType >( {
-	getItemLabel = ( item: Item ) => ( item as DefaultItemType ).label,
-	getItemValue = ( item: Item ) => ( item as DefaultItemType ).value,
+export function SelectControl< Item = DefaultItem >( {
+	getItemLabel = ( item: Item ) => ( item as DefaultItem ).label,
+	getItemValue = ( item: Item ) => ( item as DefaultItem ).value,
 	initialSelected,
 	items,
 	label,
 	multiple = false,
-	onDeselect,
+	onDeselect = () => null,
 	onSelect,
 }: SelectControlProps< Item > ) {
-	const { inputValue, selected, selectItem } = useDropdown< Item >( {
-		initialSelected,
-		items,
-		multiple,
-		onDeselect,
-		onSelect,
-	} );
+	const { deselectItem, inputValue, selected, selectItem } =
+		useDropdown< Item >( {
+			initialSelected,
+			items,
+			multiple,
+			onDeselect,
+			onSelect,
+		} );
+
+	const isReadOnly = false;
 
 	return (
 		<div className="woocommerce-experimental-select-control">
 			<label htmlFor={ '@todo' }>{ label }</label>
-			selected: { JSON.stringify( selected ) }
+			{ multiple && (
+				<SelectedItems
+					items={ selected as Item[] }
+					isReadOnly={ isReadOnly }
+					getItemLabel={ getItemLabel }
+					getItemValue={ getItemValue }
+					onRemove={ ( item ) => {
+						deselectItem( item );
+						onDeselect( item );
+					} }
+				/>
+			) }
 			<input type="text" value={ inputValue } />
 			<ul>
 				{ items.map( ( item ) => (
