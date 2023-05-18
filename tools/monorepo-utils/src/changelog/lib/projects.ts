@@ -50,7 +50,11 @@ export const getChangeloggerProjects = async (
 	} );
 };
 
-export const getTouchedProjects = async ( tmpRepoPath, base, head ) => {
+export const getTouchedFiles = async (
+	tmpRepoPath: string,
+	base: string,
+	head: string
+) => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
 		config: [ 'core.hooksPath=/dev/null' ],
@@ -72,11 +76,11 @@ export const getTouchedProjects = async ( tmpRepoPath, base, head ) => {
 	return diff.split( '\n' ).filter( ( item ) => item.trim() );
 };
 
-export const intersectTouchedProjectsAndChangeloggerProjects = (
-	touchedProjects: Array< string >,
+export const intersectTouchedFilesWithChangeloggerProjects = (
+	touchedFiles: Array< string >,
 	changeloggerProjects: Array< string >
 ) => {
-	const mappedTouchedProjects = touchedProjects.map( ( touchedProject ) => {
+	const mappedTouchedFiles = touchedFiles.map( ( touchedProject ) => {
 		if ( touchedProject.includes( 'plugins/woocommerce-admin' ) ) {
 			return touchedProject.replace(
 				'plugins/woocommerce-admin',
@@ -87,7 +91,7 @@ export const intersectTouchedProjectsAndChangeloggerProjects = (
 	} );
 	const touchedProjectsRequiringChangelogFullPath =
 		changeloggerProjects.filter( ( project ) => {
-			return mappedTouchedProjects.some( ( touchedProject ) =>
+			return mappedTouchedFiles.some( ( touchedProject ) =>
 				touchedProject.includes( project + '/' )
 			);
 		} );
@@ -115,10 +119,10 @@ export const getTouchedProjectsRequiringChangelog = async (
 		tmpRepoPath,
 		projects
 	);
-	const touchedProjects = await getTouchedProjects( tmpRepoPath, base, head );
+	const touchedFiles = await getTouchedFiles( tmpRepoPath, base, head );
 
-	return intersectTouchedProjectsAndChangeloggerProjects(
-		touchedProjects,
+	return intersectTouchedFilesWithChangeloggerProjects(
+		touchedFiles,
 		changeloggerProjects
 	);
 };
