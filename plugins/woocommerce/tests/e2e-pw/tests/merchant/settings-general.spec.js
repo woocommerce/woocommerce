@@ -55,7 +55,9 @@ test.describe( 'WooCommerce General Settings', () => {
 
 		// Set selling location to specific countries first, so we can choose U.S as base location (without state).
 		// This will makes specific countries option appears.
-		await page.locator( '#woocommerce_allowed_countries', 'specific' );
+		await page
+			.locator( '#woocommerce_allowed_countries' )
+			.selectOption( 'specific' );
 		await page
 			.locator(
 				'select[data-placeholder="Choose countries / regions…"] >> nth=1'
