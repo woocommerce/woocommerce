@@ -3063,9 +3063,13 @@ class WC_AJAX {
 		);
 		$instance_id = $zone->add_shipping_method( $zone_id );
 
-
 		global $current_tab;
 		$current_tab = 'shipping';
+		/**
+		 * Completes the saving process for options.
+		 *
+		 * @since 7.8.0
+		 */
 		do_action( 'woocommerce_update_options' );
 
 		wp_send_json_success(
@@ -3104,11 +3108,21 @@ class WC_AJAX {
 		$changes = wp_unslash( $_POST['changes'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( isset( $changes['zone_name'] ) ) {
+			/**
+			 * Completes the saving process for options.
+			 *
+			 * @since 7.8.0
+			 */
 			do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'zone_name' ) );
 			$zone->set_zone_name( wc_clean( $changes['zone_name'] ) );
 		}
 
 		if ( isset( $changes['zone_locations'] ) ) {
+			/**
+			 * Completes the saving process for options.
+			 *
+			 * @since 7.8.0
+			 */
 			do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'zone_locations' ) );
 			$zone->clear_locations( array( 'state', 'country', 'continent' ) );
 			$locations = array_filter( array_map( 'wc_clean', (array) $changes['zone_locations'] ) );
@@ -3130,6 +3144,11 @@ class WC_AJAX {
 		}
 
 		if ( isset( $changes['zone_postcodes'] ) ) {
+			/**
+			 * Completes the saving process for options.
+			 *
+			 * @since 7.8.0
+			 */
 			do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'zone_postcodes' ) );
 			$zone->clear_locations( 'postcode' );
 			$postcodes = array_filter( array_map( 'strtoupper', array_map( 'wc_clean', explode( "\n", $changes['zone_postcodes'] ) ) ) );
@@ -3139,6 +3158,11 @@ class WC_AJAX {
 		}
 
 		if ( isset( $changes['methods'] ) ) {
+			/**
+			 * Completes the saving process for options.
+			 *
+			 * @since 7.8.0
+			 */
 			do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'zone_methods' ) );
 			foreach ( $changes['methods'] as $instance_id => $data ) {
 				$method_id = $wpdb->get_var( $wpdb->prepare( "SELECT method_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d", $instance_id ) );
@@ -3162,11 +3186,21 @@ class WC_AJAX {
 				);
 
 				if ( isset( $method_data['method_order'] ) ) {
+					/**
+					 * Completes the saving process for options.
+					 *
+					 * @since 7.8.0
+					 */
 					do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'zone_methods_order' ) );
 					$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'method_order' => absint( $method_data['method_order'] ) ), array( 'instance_id' => absint( $instance_id ) ) );
 				}
 
 				if ( isset( $method_data['enabled'] ) ) {
+					/**
+					 * Completes the saving process for options.
+					 *
+					 * @since 7.8.0
+					 */
 					do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'zone_methods_enabled' ) );
 					$is_enabled = absint( 'yes' === $method_data['enabled'] );
 					if ( $wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => $is_enabled ), array( 'instance_id' => absint( $instance_id ) ) ) ) {
@@ -3180,6 +3214,11 @@ class WC_AJAX {
 
 		global $current_tab;
 		$current_tab = 'shipping';
+		/**
+		 * Completes the saving process for options.
+		 *
+		 * @since 7.8.0
+		 */
 		do_action( 'woocommerce_update_options' );
 
 		wp_send_json_success(
@@ -3213,12 +3252,22 @@ class WC_AJAX {
 		$instance_id     = absint( $_POST['instance_id'] );
 		$zone            = WC_Shipping_Zones::get_zone_by( 'instance_id', $instance_id );
 		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+		/**
+		 * Notify that a non-option setting has been updated.
+		 *
+		 * @since 7.8.0
+		 */
 		do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'zone_method_settings' ) );
 		$shipping_method->set_post_data( wp_unslash( $_POST['data'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 
 		global $current_tab;
 		$current_tab = 'shipping';
+		/**
+		 * Completes the saving process for options.
+		 *
+		 * @since 7.8.0
+		 */
 		do_action( 'woocommerce_update_options' );
 		$shipping_method->process_admin_options();
 
@@ -3271,16 +3320,31 @@ class WC_AJAX {
 			$update_args = array();
 
 			if ( isset( $data['name'] ) ) {
+				/**
+				 * Notify that a non-option setting has been updated.
+				 *
+				 * @since 7.8.0
+				 */
 				do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'shipping_class_name' ) );
 				$update_args['name'] = wc_clean( $data['name'] );
 			}
 
 			if ( isset( $data['slug'] ) ) {
+				/**
+				 * Notify that a non-option setting has been updated.
+				 *
+				 * @since 7.8.0
+				 */
 				do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'shipping_class_slug' ) );
 				$update_args['slug'] = wc_clean( $data['slug'] );
 			}
 
 			if ( isset( $data['description'] ) ) {
+				/**
+				 * Notify that a non-option setting has been updated.
+				 *
+				 * @since 7.8.0
+				 */
 				do_action( 'woocommerce_update_non_option_setting', array( 'id' => 'shipping_class_description' ) );
 				$update_args['description'] = wc_clean( $data['description'] );
 			}
@@ -3302,6 +3366,11 @@ class WC_AJAX {
 		global $current_tab, $current_section;
 		$current_tab     = 'shipping';
 		$current_section = 'classes';
+		/**
+		 * Completes the saving process for options.
+		 *
+		 * @since 7.8.0
+		 */
 		do_action( 'woocommerce_update_options' );
 		$wc_shipping = WC_Shipping::instance();
 
