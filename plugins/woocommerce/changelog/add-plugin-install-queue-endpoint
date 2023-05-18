@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add new REST endpoints at onboarding/plugins to support async plugin installation with real time error tracking.
