@@ -148,19 +148,14 @@ const onboarding = {
 			)
 			.click();
 
+		// Check to see if WC Payments is present or
+		const wcPay = page.locator(
+			'.woocommerce-admin__business-details__selective-extensions-bundle__description a[href*=woocommerce-payments]'
+		);
 		if ( expect_wc_pay ) {
-			// Check to see if WC Payments is present
-			const wcPay = await page.locator(
-				'.woocommerce-admin__business-details__selective-extensions-bundle__description a[href*=woocommerce-payments]'
-			);
-			expect( wcPay ).toBeVisible();
+			await expect( wcPay ).toBeVisible();
 		} else {
-			// Make sure WC Payments is NOT present
-			await expect(
-				page.locator(
-					'.woocommerce-admin__business-details__selective-extensions-bundle__description a[href*=woocommerce-payments]'
-				)
-			).not.toBeVisible();
+			await expect( wcPay ).not.toBeVisible();
 		}
 		// Uncheck all business features
 		if (
