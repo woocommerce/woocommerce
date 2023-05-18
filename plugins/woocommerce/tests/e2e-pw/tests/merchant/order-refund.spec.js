@@ -115,12 +115,7 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page
-			.locator( 'a.delete_refund', {
-				force: true,
-				waitForLoadState: 'networkidle',
-			} )
-			.click(); // have to force it because not visible
+		await page.getByRole( 'button', { name: 'Refund' } ).click();
 
 		// Verify the refunded row item is no longer showing
 		await expect( page.locator( 'tr.refund' ) ).toHaveCount( 0 );
