@@ -115,7 +115,8 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.getByRole( 'button', { name: 'Refund' } ).click();
+		await page.getByRole( 'row', { name: /Refund #\d+/ } ).hover();
+		await page.locator( '.delete_refund' ).click();
 
 		// Verify the refunded row item is no longer showing
 		await expect( page.locator( 'tr.refund' ) ).toHaveCount( 0 );
