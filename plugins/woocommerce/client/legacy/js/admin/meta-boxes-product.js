@@ -398,7 +398,7 @@ jQuery( function ( $ ) {
 	$( function add_blank_custom_attribute_if_no_attributes() {
 
 		if ( woocommerce_attribute_items.length === 0  ) {
-			$( 'button.add_custom_attribute' ).trigger( 'click' );
+			add_custom_attribute_to_list();
 		}
 	} );
 
