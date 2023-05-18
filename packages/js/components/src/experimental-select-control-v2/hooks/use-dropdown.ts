@@ -65,5 +65,6 @@ export function useDropdown< Item = DefaultItem >( {
 		selected: getSelected(),
 		selectItem,
 		deselectItem,
+		setInputValue,
 	};
 }

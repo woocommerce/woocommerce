@@ -40,7 +40,7 @@ export function SelectControl< Item = DefaultItem >( {
 	onDeselect = () => null,
 	onSelect,
 }: SelectControlProps< Item > ) {
-	const { deselectItem, inputValue, selected, selectItem } =
+	const { deselectItem, inputValue, selected, selectItem, setInputValue } =
 		useDropdown< Item >( {
 			initialSelected,
 			items,
@@ -74,7 +74,11 @@ export function SelectControl< Item = DefaultItem >( {
 					} }
 				/>
 			) }
-			<input type="text" value={ inputValue } />
+			<input
+				type="text"
+				value={ inputValue }
+				onChange={ ( event ) => setInputValue( event.target.value ) }
+			/>
 			{ children ? (
 				children( {
 					isOpen,
