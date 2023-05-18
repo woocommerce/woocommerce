@@ -60,7 +60,7 @@ test.describe( 'Cart > Redirect to cart from shop', () => {
 			.click();
 		await page.waitForLoadState( 'networkidle' );
 
-		await expect( page.url() ).toContain( '/cart/' );
+		await expect( page ).toHaveURL( /.*\/cart/ );
 		await expect( page.locator( 'td.product-name' ) ).toContainText(
 			productName
 		);
