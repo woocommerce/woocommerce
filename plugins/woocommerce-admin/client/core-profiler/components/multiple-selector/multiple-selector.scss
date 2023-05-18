@@ -9,7 +9,7 @@
 	}
 
 	&.has-selected-items {
-		.woocommerce-experimental-select-control__input {
+		.woocommerce-experimental-select-control__combox-box {
 			position: absolute;
 			width: 0;
 		}
@@ -47,10 +47,6 @@
 		border: none;
 		left: 0 !important;
 		width: 100%;
-	}
-
-	.woocommerce-experimental-select-control__selected-items {
-		flex-wrap: wrap;
 	}
 
 	.woocommerce-experimental-select-control__popover-menu-container {
