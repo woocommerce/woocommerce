@@ -205,12 +205,14 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		await page.locator( '#search-submit' ).click();
 
 		// Compare imported products to what's expected
-		await expect( page.locator( 'a.row-title' ) ).toBeVisible();
-		const productTitles = await page.$$eval( 'a.row-title', ( elements ) =>
-			elements.map( ( item ) => item.innerHTML )
+		await expect( page.locator( 'a.row-title' ) ).toHaveCount(
+			productNames.length
 		);
+		const productTitles = await page
+			.locator( 'a.row-title' )
+			.allTextContents();
 
-		await expect( productTitles.sort() ).toEqual( productNames.sort() );
+		expect( productTitles.sort() ).toEqual( productNames.sort() );
 	} );
 
 	test( 'can override the existing products via CSV import', async ( {
@@ -245,22 +247,22 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 		await page.locator( '#search-submit' ).click();
 
 		// Compare imported products to what's expected
-		await expect( page.locator( 'a.row-title' ) ).toBeVisible();
-		const productTitles = await page.$$eval( 'a.row-title', ( elements ) =>
-			elements.map( ( item ) => item.innerHTML )
+		await expect( page.locator( 'a.row-title' ) ).toHaveCount(
+			productNamesOverride.length
 		);
+		const productTitles = await page
+			.locator( 'a.row-title' )
+			.allInnerTexts();
 
-		await expect( productTitles.sort() ).toEqual(
-			productNamesOverride.sort()
-		);
+		expect( productTitles.sort() ).toEqual( productNamesOverride.sort() );
 
 		// Compare product prices to what's expected
-		await expect( page.locator( 'td.price.column-price' ) ).toBeVisible();
-		const productPrices = await page.$$eval( '.amount', ( elements ) =>
-			elements.map( ( item ) => item.innerText )
+		await expect( page.locator( '.amount' ) ).toHaveCount(
+			productPricesOverride.length
 		);
+		const productPrices = await page.locator( '.amount' ).allInnerTexts();
 
-		await expect( productPrices.sort() ).toStrictEqual(
+		expect( productPrices.sort() ).toStrictEqual(
 			productPricesOverride.sort()
 		);
 	} );
