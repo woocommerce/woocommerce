@@ -52,8 +52,8 @@ export type DateTimePickerControlProps = {
 	onChangeDebounceWait?: number;
 } & Omit< React.HTMLAttributes< HTMLInputElement >, 'onChange' >;
 
-export const DateTimePickerControl: React.FC< DateTimePickerControlProps > =
-	forwardRef( function ForwardedDateTimePickerControl(
+export const DateTimePickerControl = forwardRef(
+	function ForwardedDateTimePickerControl(
 		{
 			currentDate,
 			isDateOnlyPicker = false,
@@ -374,4 +374,5 @@ export const DateTimePickerControl: React.FC< DateTimePickerControlProps > =
 				} }
 			/>
 		);
-	} );
+	}
+);
