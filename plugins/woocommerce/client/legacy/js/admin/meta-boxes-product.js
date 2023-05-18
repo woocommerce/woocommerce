@@ -595,7 +595,7 @@ jQuery( function ( $ ) {
 	}
 
 	$( 'select.wc-attribute-search' ).on( 'select2:select', function ( e ) {
-		const attributeId = e && eparams && e.params.data && e.params.data.id;
+		const attributeId = e && e.params && e.params.data && e.params.data.id;
 
 		if ( attributeId ) {
 			remove_blank_custom_attribute_if_no_other_attributes();
