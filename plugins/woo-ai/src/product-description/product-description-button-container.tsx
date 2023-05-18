@@ -31,7 +31,7 @@ const getGeneratingContentPhrase = () =>
 		Math.floor( Math.random() * generatingContentPhrases.length )
 	];
 
-const DESCRIPTION_MAX_LENGTH = 325;
+const DESCRIPTION_MAX_LENGTH = 300;
 
 export function WriteItForMeButtonContainer() {
 	const [ fetching, setFetching ] = useState( false );
