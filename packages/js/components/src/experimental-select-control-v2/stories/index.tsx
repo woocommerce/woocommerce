@@ -6,10 +6,10 @@ import React, { createElement } from 'react';
 /**
  * Internal dependencies
  */
-import { DefaultItemType } from '../hooks/use-dropdown';
+import { DefaultItem } from '../types';
 import { SelectControl } from '../';
 
-const sampleItems: DefaultItemType[] = [
+const sampleItems: DefaultItem[] = [
 	{ value: 'apple', label: 'Apple' },
 	{ value: 'pear', label: 'Pear' },
 	{ value: 'orange', label: 'Orange' },

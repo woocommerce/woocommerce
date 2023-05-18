@@ -3,14 +3,14 @@
  */
 import { useState } from '@wordpress/element';
 
-export type DefaultItemType = {
-	label: string;
-	value: string | number;
-};
+/**
+ * Internal dependencies
+ */
+import { DefaultItem, getItemLabelType, getItemValueType } from '../types';
 
 type useDropdownProps< Item > = {
-	getItemLabel?: ( item: Item ) => string;
-	getItemValue?: ( item: Item ) => string | number;
+	getItemLabel?: getItemLabelType< Item >;
+	getItemValue?: getItemValueType< Item >;
 	initialSelected?: Item | Item[];
 	items: Item[];
 	multiple?: boolean;
@@ -18,8 +18,8 @@ type useDropdownProps< Item > = {
 	onSelect?: ( item: Item ) => void;
 };
 
-export function useDropdown< Item = DefaultItemType >( {
-	getItemLabel = ( item: Item ) => ( item as DefaultItemType ).label,
+export function useDropdown< Item = DefaultItem >( {
+	getItemLabel = ( item: Item ) => ( item as DefaultItem ).label,
 	initialSelected,
 	multiple = false,
 	onDeselect = () => null,
