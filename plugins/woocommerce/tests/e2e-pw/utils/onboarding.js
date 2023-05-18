@@ -51,10 +51,10 @@ const onboarding = {
 			'In which industry does the store operate?'
 		);
 		// Check that there are the correct number of options listed
-		const numCheckboxes = await page
-			.locator( '.components-checkbox-control__input' )
-			.count();
-		expect( numCheckboxes ).toHaveLength( expectedNumberOfIndustries );
+		const numCheckboxes = page.locator(
+			'.components-checkbox-control__input'
+		);
+		await expect( numCheckboxes ).toHaveCount( expectedNumberOfIndustries );
 		// Uncheck any currently checked industries
 		for ( let i = 0; i < expectedNumberOfIndustries; i++ ) {
 			const currentCheck = `#inspector-checkbox-control-${ i }`;
@@ -62,7 +62,7 @@ const onboarding = {
 		}
 
 		for ( let industry of Object.values( industries ) ) {
-			await page.locator( `label >> text=${ industry }` ).click();
+			await page.getByLabel( industry, { exact: true } ).click();
 		}
 	},
 
@@ -89,10 +89,10 @@ const onboarding = {
 			'What type of products will be listed?'
 		);
 		// Check that there are the correct number of options listed
-		const numCheckboxes = await page
-			.locator( '.components-checkbox-control__input' )
-			.count();
-		expect( numCheckboxes ).toHaveLength( expectedProductTypes );
+		const numCheckboxes = page.locator(
+			'.components-checkbox-control__input'
+		);
+		await expect( numCheckboxes ).toHaveCount( expectedProductTypes );
 		// Uncheck any currently checked products
 		for ( let i = 0; i < expectedProductTypes; i++ ) {
 			const currentCheck = `#inspector-checkbox-control-${ i }`;
@@ -101,7 +101,7 @@ const onboarding = {
 
 		Object.keys( products ).forEach( async ( product ) => {
 			await page
-				.locator( `label >> text=${ products[ product ] }` )
+				.getByLabel( products[ product ], { exact: true } )
 				.click();
 		} );
 	},
@@ -160,7 +160,7 @@ const onboarding = {
 				page.locator(
 					'.woocommerce-admin__business-details__selective-extensions-bundle__description a[href*=woocommerce-payments]'
 				)
-			).toHaveCount( 0 );
+			).not.toBeVisible();
 		}
 		// Uncheck all business features
 		if (
