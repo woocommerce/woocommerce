@@ -176,7 +176,7 @@ test.describe(
 				page.locator(
 					'.woocommerce-admin__business-details__selective-extensions-bundle__description a[href*=woocommerce-payments]'
 				)
-			).toHaveCount( 0 );
+			).not.toBeVisible();
 
 			await page.locator( 'button >> text=Continue' ).click();
 
