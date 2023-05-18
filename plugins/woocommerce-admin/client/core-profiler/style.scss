@@ -311,6 +311,10 @@
 		width: 100%;
 	}
 
+	.woocommerce-profiler-heading__title {
+		max-width: 480px;
+	}
+
 	.woocommerce-user-profile-choices fieldset {
 		display: flex;
 		gap: 18px;
