@@ -4,6 +4,7 @@
 import classNames from 'classnames';
 import { Link } from '@woocommerce/components';
 import { CurrencyContext } from '@woocommerce/currency';
+import { Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useBlockProps } from '@wordpress/block-editor';
@@ -28,10 +29,11 @@ import {
 import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
 import { formatCurrencyDisplayValue } from '../../utils';
 import { SalePriceBlockAttributes } from './types';
-import { useValidation } from '../../hooks/use-validation';
+import { useValidation } from '../../contexts/validation-context';
 
 export function Edit( {
 	attributes,
+	clientId,
 }: BlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useBlockProps();
 	const { label, help } = attributes;
@@ -71,9 +73,13 @@ export function Edit( {
 		'wp-block-woocommerce-product-regular-price-field'
 	) as string;
 
-	const regularPriceValidationError = useValidation(
-		'product/regular_price',
-		function regularPriceValidator() {
+	const {
+		ref: regularPriceRef,
+		error: regularPriceValidationError,
+		validate: validateRegularPrice,
+	} = useValidation< Product >(
+		`regular_price-${ clientId }`,
+		async function regularPriceValidator() {
 			const listPrice = Number.parseFloat( regularPrice );
 			if ( listPrice ) {
 				if ( listPrice < 0 ) {
@@ -92,7 +98,8 @@ export function Edit( {
 					);
 				}
 			}
-		}
+		},
+		[ regularPrice, salePrice ]
 	);
 
 	return (
@@ -112,6 +119,7 @@ export function Edit( {
 					{ ...inputProps }
 					id={ regularPriceId }
 					name={ 'regular_price' }
+					ref={ regularPriceRef }
 					label={ label }
 					value={ formatCurrencyDisplayValue(
 						String( regularPrice ),
@@ -119,6 +127,7 @@ export function Edit( {
 						formatAmount
 					) }
 					onChange={ setRegularPrice }
+					onBlur={ validateRegularPrice }
 				/>
 			</BaseControl>
 		</div>

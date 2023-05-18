@@ -36,9 +36,7 @@ import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
  */
 import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
-import { initBlocks } from './init-blocks';
-
-initBlocks();
+import { ValidationProvider } from '../../contexts/validation-context';
 
 export type ProductEditorSettings = Partial<
 	EditorSettings & EditorBlockListSettings
@@ -65,31 +63,33 @@ export function Editor( { product, settings }: EditorProps ) {
 					<ShortcutProvider>
 						<FullscreenMode isActive={ false } />
 						<SlotFillProvider>
-							<InterfaceSkeleton
-								header={
-									<Header
-										productName={ product.name }
-										onTabSelect={ setSelectedTab }
-									/>
-								}
-								content={
-									<>
-										<BlockEditor
-											settings={ settings }
-											product={ product }
-											context={ {
-												selectedTab,
-												postType: 'product',
-												postId: product.id,
-											} }
+							<ValidationProvider initialValue={ product }>
+								<InterfaceSkeleton
+									header={
+										<Header
+											productName={ product.name }
+											onTabSelect={ setSelectedTab }
 										/>
-										{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-										<PluginArea scope="woocommerce-product-block-editor" />
-									</>
-								}
-							/>
+									}
+									content={
+										<>
+											<BlockEditor
+												settings={ settings }
+												product={ product }
+												context={ {
+													selectedTab,
+													postType: 'product',
+													postId: product.id,
+												} }
+											/>
+											{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+											<PluginArea scope="woocommerce-product-block-editor" />
+										</>
+									}
+								/>
 
-							<Popover.Slot />
+								<Popover.Slot />
+							</ValidationProvider>
 						</SlotFillProvider>
 					</ShortcutProvider>
 				</EntityProvider>

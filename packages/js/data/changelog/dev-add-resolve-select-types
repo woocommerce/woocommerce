@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Added types for resolveSelect where applicable.

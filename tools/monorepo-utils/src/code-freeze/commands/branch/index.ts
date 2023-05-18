@@ -20,7 +20,7 @@ import {
 } from '../../../core/github/repo';
 import { WPIncrement } from '../../../core/version';
 import { Logger } from '../../../core/logger';
-import { getEnvVar } from '../../../core/environment';
+import { isGithubCI } from '../../../core/environment';
 
 const getNextReleaseBranch = async ( options: {
 	owner?: string;
@@ -57,7 +57,7 @@ export const branchCommand = new Command( 'branch' )
 	)
 	.action( async ( options ) => {
 		const { source, branch, owner, name, dryRun } = options;
-		const isGithub = getEnvVar( 'CI' );
+		const isGithub = isGithubCI();
 
 		let nextReleaseBranch;
 

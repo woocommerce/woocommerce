@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createMachine, assign, DoneInvokeEvent, actions } from 'xstate';
+import { createMachine, assign, DoneInvokeEvent, actions, spawn } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
@@ -11,6 +11,8 @@ import {
 	OPTIONS_STORE_NAME,
 	COUNTRIES_STORE_NAME,
 	Country,
+	ONBOARDING_STORE_NAME,
+	Extension,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
@@ -25,6 +27,7 @@ import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
+import { Extensions } from './pages/Extensions';
 
 import './style.scss';
 
@@ -91,34 +94,6 @@ export type CoreProfilerStateMachineContext = {
 	};
 };
 
-const Extensions = ( {
-	context,
-	sendEvent,
-}: {
-	context: CoreProfilerStateMachineContext;
-	sendEvent: ( payload: ExtensionsEvent ) => void;
-} ) => {
-	return (
-		// TOOD: we need to fetch the extensions list from the API as part of initializing the profiler
-		<>
-			<div>Extensions</div>
-			<div>{ context.extensionsAvailable }</div>
-			<button
-				onClick={ () =>
-					sendEvent( {
-						type: 'EXTENSIONS_COMPLETED',
-						payload: {
-							extensionsSelected: [ 'woocommerce-payments' ],
-						},
-					} )
-				}
-			>
-				Next
-			</button>
-		</>
-	);
-};
-
 const getAllowTrackingOption = async () =>
 	resolveSelect( OPTIONS_STORE_NAME ).getOption(
 		'woocommerce_allow_tracking'
@@ -129,6 +104,17 @@ const handleTrackingOption = assign( {
 		_context,
 		event: DoneInvokeEvent< 'no' | 'yes' | undefined >
 	) => event.data !== 'no',
+} );
+
+/**
+ * Prefetch it so that @wp/data caches it and there won't be a loading delay when its used
+ */
+const preFetchGetCountries = assign( {
+	spawnGetCountriesRef: () =>
+		spawn(
+			resolveSelect( COUNTRIES_STORE_NAME ).getCountries(),
+			'core-profiler-prefetch-countries'
+		),
 } );
 
 const getCountries = async () =>
@@ -217,7 +203,54 @@ const assignOptInDataSharing = assign( {
 		event.payload.optInDataSharing,
 } );
 
-const coreProfilerStateMachineDefinition = createMachine( {
+/**
+ * Prefetch it so that @wp/data caches it and there won't be a loading delay when its used
+ */
+const preFetchGetExtensions = assign( {
+	extensionsRef: () =>
+		spawn(
+			resolveSelect( ONBOARDING_STORE_NAME ).getFreeExtensions(),
+			'core-profiler-prefetch-extensions'
+		),
+} );
+
+const getExtensions = async () => {
+	const extensionsBundles = await resolveSelect(
+		ONBOARDING_STORE_NAME
+	).getFreeExtensions();
+	return (
+		extensionsBundles.find( ( bundle ) => bundle.key === 'obw/grow' )
+			?.plugins || []
+	);
+};
+
+const handleExtensions = assign( {
+	extensionsAvailable: ( _context, event: DoneInvokeEvent< Extension[] > ) =>
+		event.data,
+} );
+
+const coreProfilerMachineActions = {
+	updateTrackingOption,
+	preFetchGetExtensions,
+	preFetchGetCountries,
+	handleTrackingOption,
+	handleExtensions,
+	recordTracksIntroCompleted,
+	recordTracksIntroSkipped,
+	recordTracksIntroViewed,
+	recordTracksSkipBusinessLocationViewed,
+	recordTracksSkipBusinessLocationCompleted,
+	assignOptInDataSharing,
+	handleCountries,
+	redirectToWooHome,
+};
+
+const coreProfilerMachineServices = {
+	getAllowTrackingOption,
+	getCountries,
+	getExtensions,
+};
+export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
 	initial: 'initializing',
 	predictableActionArguments: true, // recommended setting: https://xstate.js.org/docs/guides/actions.html
@@ -240,6 +273,7 @@ const coreProfilerStateMachineDefinition = createMachine( {
 					target: 'introOptIn',
 				},
 			},
+			entry: [ 'preFetchGetExtensions', 'preFetchGetCountries' ],
 			invoke: [
 				{
 					src: 'getAllowTrackingOption',
@@ -445,13 +479,12 @@ const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		preExtensions: {
-			always: [
-				// immediately transition to extensions without any events as long as extensions fetching parallel has completed
-				{
-					target: 'extensions',
-					cond: () => true, // TODO: use a custom function to check on the parallel state using meta when we implement that. https://xstate.js.org/docs/guides/guards.html#guards-condition-functions
-				},
-			],
+			invoke: {
+				src: 'getExtensions',
+				onDone: [
+					{ target: 'extensions', actions: 'handleExtensions' },
+				],
+			},
 			// add exit action to filter the extensions using a custom function here and assign it to context.extensionsAvailable
 			exit: assign( {
 				extensionsAvailable: ( context ) => {
@@ -477,28 +510,26 @@ const coreProfilerStateMachineDefinition = createMachine( {
 	},
 } );
 
-const CoreProfilerController = ( {} ) => {
+export const CoreProfilerController = ( {
+	actionOverrides,
+	servicesOverrides,
+}: {
+	actionOverrides: Partial< typeof coreProfilerMachineActions >;
+	servicesOverrides: Partial< typeof coreProfilerMachineServices >;
+} ) => {
 	const augmentedStateMachine = useMemo( () => {
 		// When adding extensibility, this is the place to manipulate the state machine definition.
 		return coreProfilerStateMachineDefinition.withConfig( {
 			actions: {
-				updateTrackingOption,
-				handleTrackingOption,
-				recordTracksIntroCompleted,
-				recordTracksIntroSkipped,
-				recordTracksIntroViewed,
-				recordTracksSkipBusinessLocationViewed,
-				recordTracksSkipBusinessLocationCompleted,
-				assignOptInDataSharing,
-				handleCountries,
-				redirectToWooHome,
+				...coreProfilerMachineActions,
+				...actionOverrides,
 			},
 			services: {
-				getAllowTrackingOption,
-				getCountries,
+				...coreProfilerMachineServices,
+				...servicesOverrides,
 			},
 		} );
-	}, [] );
+	}, [ actionOverrides, servicesOverrides ] );
 
 	const [ state, send ] = useMachine( augmentedStateMachine );
 	const stateValue =
@@ -510,7 +541,10 @@ const CoreProfilerController = ( {} ) => {
 		: undefined;
 	const navigationProgress = currentNodeMeta?.progress; // This value is defined in each state node's meta tag, we can assume it is 0-100
 	const CurrentComponent =
-		currentNodeMeta?.component ?? ( () => <div>Insert Spinner</div> ); // If no component is defined for the state then its a loading state
+		currentNodeMeta?.component ??
+		( () => (
+			<div data-testid="core-profiler-loading-screen">Insert Spinner</div>
+		) ); // If no component is defined for the state then its a loading state
 
 	useEffect( () => {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );
