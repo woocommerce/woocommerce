@@ -167,7 +167,10 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'My account'
 		);
-		await page.locator( 'text=Log out' ).click();
+		await page
+			.getByRole( 'navigation' )
+			.getByRole( 'link', { name: 'Log out' } )
+			.click();
 		// sign in as admin to confirm account creation
 		await page.locator( '#username' ).fill( admin.username );
 		await page.locator( '#password' ).fill( admin.password );

@@ -71,9 +71,9 @@ test.describe( 'Cart > Redirect to cart from shop', () => {
 		await page.locator( `text=${ productName }` ).click();
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.locator( 'text=Add to cart' ).click();
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 
-		await expect( page.url() ).toContain( '/cart/' );
+		await expect( page ).toHaveURL( /.*\/cart/ );
 		await expect( page.locator( 'td.product-name' ) ).toContainText(
 			productName
 		);
