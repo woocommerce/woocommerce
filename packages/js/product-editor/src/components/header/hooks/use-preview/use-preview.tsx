@@ -13,6 +13,7 @@ import { MouseEvent } from 'react';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
+import { WPError } from '../../../../utils/get-product-error-message';
 
 export function usePreview( {
 	disabled,
@@ -22,7 +23,7 @@ export function usePreview( {
 	...props
 }: Omit< Button.AnchorProps, 'aria-disabled' | 'variant' | 'href' > & {
 	onSaveSuccess?( product: Product ): void;
-	onSaveError?( error: Error ): void;
+	onSaveError?( error: WPError ): void;
 } ): Button.AnchorProps {
 	const anchorRef = useRef< HTMLAnchorElement >();
 
@@ -117,7 +118,10 @@ export function usePreview( {
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				'product',
-				productId
+				productId,
+				{
+					throwOnError: true,
+				}
 			);
 
 			// Redirect using the default anchor behaviour. This way, the usage
@@ -129,7 +133,7 @@ export function usePreview( {
 			}
 		} catch ( error ) {
 			if ( onSaveError ) {
-				onSaveError( error as Error );
+				onSaveError( error as WPError );
 			}
 		}
 	}
