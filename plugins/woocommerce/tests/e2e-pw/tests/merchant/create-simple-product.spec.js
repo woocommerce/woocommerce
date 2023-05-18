@@ -94,8 +94,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.locator( 'text=Add to cart' ).click();
-		await page.locator( 'text=View cart' ).click();
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'link', { name: 'View cart' } ).click();
 		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
 			virtualProductName
 		);
@@ -154,8 +154,8 @@ test.describe.serial( 'Add New Simple Product Page', () => {
 		await expect(
 			page.locator( '.summary .woocommerce-Price-amount' )
 		).toContainText( productPrice );
-		await page.locator( 'text=Add to cart' ).click();
-		await page.locator( 'text=View cart' ).click();
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'link', { name: 'View cart' } ).click();
 		await expect( page.locator( 'td[data-title=Product]' ) ).toContainText(
 			nonVirtualProductName
 		);
