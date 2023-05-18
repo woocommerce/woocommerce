@@ -183,7 +183,7 @@ jQuery( function ( $ ) {
 		}
 	}
 
-	function show_and_hide_panels() {
+	function show_and_hide_controls( context ) {
 		var product_type = $( 'select#product-type' ).val();
 		var is_virtual = $( 'input#_virtual:checked' ).length;
 		var is_downloadable = $( 'input#_downloadable:checked' ).length;
@@ -200,15 +200,15 @@ jQuery( function ( $ ) {
 			show_classes = show_classes + ', .show_if_' + value;
 		} );
 
-		$( hide_classes ).show();
-		$( show_classes ).hide();
+		$( hide_classes, context ).show();
+		$( show_classes, context ).hide();
 
 		// Shows rules.
 		if ( is_downloadable ) {
-			$( '.show_if_downloadable' ).show();
+			$( '.show_if_downloadable', context ).show();
 		}
 		if ( is_virtual ) {
-			$( '.show_if_virtual' ).show();
+			$( '.show_if_virtual', context ).show();
 
 			// If user enables virtual while on shipping tab, switch to general tab.
 			if ( $( '.shipping_options.shipping_tab' ).hasClass( 'active' ) ) {
@@ -216,17 +216,21 @@ jQuery( function ( $ ) {
 			}
 		}
 
-		$( '.show_if_' + product_type ).show();
+		$( '.show_if_' + product_type, context ).show();
 
 		// Hide rules.
 		if ( is_downloadable ) {
-			$( '.hide_if_downloadable' ).hide();
+			$( '.hide_if_downloadable', context ).hide();
 		}
 		if ( is_virtual ) {
-			$( '.hide_if_virtual' ).hide();
+			$( '.hide_if_virtual', context ).hide();
 		}
 
-		$( '.hide_if_' + product_type ).hide();
+		$( '.hide_if_' + product_type, context ).hide();
+	}
+
+	function show_and_hide_panels() {
+		show_and_hide_controls();
 
 		$( 'input#_manage_stock' ).trigger( 'change' );
 
