@@ -67,13 +67,12 @@ class WC_Settings_Tracking {
 	/**
 	 * Adds the option to the allowed and updated options directly.
 	 * Currently used for settings that don't use update_option.
+	 *
+	 * @param array $option WooCommerce option that should be updated.
 	 */
 	public function add_option_to_list_and_track_setting_change( $option ) {
 		if ( ! in_array( $option['id'], $this->allowed_options, true ) ) {
 			$this->allowed_options[] = $option['id'];
-		}
-		if ( array_key_exists( 'new_value', $option ) ) {
-			$this->modified_options['id'] = $option['new_value'];
 		}
 		if ( ! in_array( $option['id'], $this->updated_options, true ) ) {
 			$this->updated_options[] = $option['id'];

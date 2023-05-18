@@ -3057,8 +3057,7 @@ class WC_AJAX {
 		do_action(
 			'woocommerce_update_non_option_setting',
 			array(
-				'id'        => 'zone_method',
-				'new_value' => $zone_id,
+				'id'        => 'zone_method'
 			)
 		);
 		$instance_id = $zone->add_shipping_method( $zone_id );
