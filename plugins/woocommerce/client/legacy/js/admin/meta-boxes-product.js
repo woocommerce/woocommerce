@@ -246,12 +246,12 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			var $invisble = $children.filter( function () {
+			var $invisible = $children.filter( function () {
 				return 'none' === $( this ).css( 'display' );
 			} );
 
 			// Hide panel.
-			if ( $invisble.length === $children.length ) {
+			if ( $invisible.length === $children.length ) {
 				var $id = $( this ).prop( 'id' );
 				$( '.product_data_tabs' )
 					.find( 'li a[href="#' + $id + '"]' )
