@@ -419,7 +419,7 @@ jQuery( function ( $ ) {
 		$( '.product_attributes' ).append( el );
 	} );
 
-	function attribute_row_indexes() {
+	function update_attribute_row_indexes() {
 		$( '.product_attributes .woocommerce_attribute' ).each( function (
 			index,
 			el
@@ -507,7 +507,7 @@ jQuery( function ( $ ) {
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
 
-			attribute_row_indexes();
+			update_attribute_row_indexes();
 
 			$attributeListItem.find( 'h3' ).trigger( 'click' );
 
@@ -694,7 +694,7 @@ jQuery( function ( $ ) {
 				} else {
 					$parent.find( 'select, input[type=text]' ).val( '' );
 					$parent.hide();
-					attribute_row_indexes();
+					update_attribute_row_indexes();
 				}
 
 				$parent.remove();
@@ -725,7 +725,7 @@ jQuery( function ( $ ) {
 		},
 		stop: function ( event, ui ) {
 			ui.item.removeAttr( 'style' );
-			attribute_row_indexes();
+			update_attribute_row_indexes();
 		},
 	} );
 
