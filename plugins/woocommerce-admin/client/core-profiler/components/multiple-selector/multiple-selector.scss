@@ -8,7 +8,14 @@
 		cursor: pointer;
 	}
 
-	.woocommerce-experimental-select-control__combox-box input {
+	&.has-selected-items {
+		.woocommerce-experimental-select-control__input {
+			position: absolute;
+			width: 0;
+		}
+	}
+
+	.woocommerce-experimental-select-control__combox-box .woocommerce-experimental-select-control__input {
 		font-size: 13px;
 		font-weight: 400;
 		line-height: 16px;
