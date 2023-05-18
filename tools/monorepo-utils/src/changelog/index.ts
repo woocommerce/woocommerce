@@ -85,8 +85,7 @@ const program = new Command( 'changelog' )
 				await getTouchedProjectsRequiringChangelog(
 					tmpRepoPath,
 					base,
-					head,
-					fileName
+					head
 				);
 			const { significance, type, message, comment } =
 				getChangelogDetails( prBody );

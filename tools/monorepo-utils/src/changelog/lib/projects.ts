@@ -6,11 +6,7 @@ import path from 'path';
 import { glob } from 'glob';
 import simpleGit from 'simple-git';
 
-const getAllProjects = async ( tmpRepoPath: string ) => {
-	const workspaceYaml = fs.readFileSync(
-		path.join( tmpRepoPath, 'pnpm-workspace.yaml' ),
-		'utf8'
-	);
+const getAllProjects = async ( tmpRepoPath: string, workspaceYaml: string ) => {
 	const rawProjects = workspaceYaml.split( '- ' );
 	// remove heading
 	rawProjects.shift();
@@ -28,8 +24,10 @@ const getAllProjects = async ( tmpRepoPath: string ) => {
 	return globbedProjects.flat();
 };
 
-export const getChangeloggerProjects = async ( tmpRepoPath: string ) => {
-	const projects = await getAllProjects( tmpRepoPath );
+export const getChangeloggerProjects = async (
+	tmpRepoPath: string,
+	projects: Array< string >
+) => {
 	const projectsWithComposer = projects.filter( ( project ) => {
 		return fs.existsSync( `${ tmpRepoPath }/${ project }/composer.json` );
 	} );
@@ -48,12 +46,7 @@ export const getChangeloggerProjects = async ( tmpRepoPath: string ) => {
 	} );
 };
 
-export const getTouchedProjects = async (
-	tmpRepoPath,
-	base,
-	head,
-	fileName
-) => {
+export const getTouchedProjects = async ( tmpRepoPath, base, head ) => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
 		config: [ 'core.hooksPath=/dev/null' ],
@@ -72,26 +65,13 @@ export const getTouchedProjects = async (
 		'--name-only',
 		`${ base }...${ head }`,
 	] );
-	return diff
-		.split( '\n' )
-		.filter( ( item ) => item.trim() )
-		.filter( ( item ) => ! item.includes( `changelog/${ fileName }` ) );
+	return diff.split( '\n' ).filter( ( item ) => item.trim() );
 };
 
-export const getTouchedProjectsRequiringChangelog = async (
-	tmpRepoPath,
-	base,
-	head,
-	fileName
+export const intersectTouchedProjectsAndChangeloggerProjects = (
+	touchedProjects: Array< string >,
+	changeloggerProjects: Array< string >
 ) => {
-	const changeloggerProjects = await getChangeloggerProjects( tmpRepoPath );
-	const touchedProjects = await getTouchedProjects(
-		tmpRepoPath,
-		base,
-		head,
-		fileName
-	);
-
 	const mappedTouchedProjects = touchedProjects.map( ( touchedProject ) => {
 		if ( touchedProject.includes( 'plugins/woocommerce-admin' ) ) {
 			return touchedProject.replace(
@@ -115,4 +95,26 @@ export const getTouchedProjectsRequiringChangelog = async (
 		}
 		return project;
 	} );
+};
+
+export const getTouchedProjectsRequiringChangelog = async (
+	tmpRepoPath: string,
+	base: string,
+	head: string
+) => {
+	const workspaceYaml = fs.readFileSync(
+		path.join( tmpRepoPath, 'pnpm-workspace.yaml' ),
+		'utf8'
+	);
+	const projects = await getAllProjects( tmpRepoPath, workspaceYaml );
+	const changeloggerProjects = await getChangeloggerProjects(
+		tmpRepoPath,
+		projects
+	);
+	const touchedProjects = await getTouchedProjects( tmpRepoPath, base, head );
+
+	return intersectTouchedProjectsAndChangeloggerProjects(
+		touchedProjects,
+		changeloggerProjects
+	);
 };
