@@ -496,6 +496,10 @@ jQuery( function ( $ ) {
 		$attributeListItem.find( 'h3' ).trigger( 'click' );
 	}
 
+	function init_select_controls() {
+		$( document.body ).trigger( 'wc-enhanced-select-init' );
+	}
+
 	async function add_attribute_to_list( globalAttributeId ) {
 		try {
 			block_attributes_tab_container();
@@ -509,7 +513,7 @@ jQuery( function ( $ ) {
 
 			show_and_hide_controls( $attributeListItem );
 
-			$( document.body ).trigger( 'wc-enhanced-select-init' );
+			init_select_controls(); // make sure any new select controls in the new list item are initialized
 
 			update_attribute_row_indexes();
 
