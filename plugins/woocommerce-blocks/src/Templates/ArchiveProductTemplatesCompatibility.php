@@ -80,7 +80,9 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 			}
 		);
 
-		if ( 'core/post-template' === $block_name ) {
+		// We want to inject hooks to the core/post-template block only when the products exist:
+		// https://github.com/woocommerce/woocommerce-blocks/issues/9463.
+		if ( 'core/post-template' === $block_name && ! empty( $block_content ) ) {
 			$this->restore_default_hooks();
 			$content = sprintf(
 				'%1$s%2$s%3$s',
