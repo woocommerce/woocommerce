@@ -489,7 +489,6 @@ jQuery( function ( $ ) {
 
 			$attributesTabContainer.unblock();
 
-			$( document.body ).trigger( 'woocommerce_added_attribute' );
 			jQuery.maybe_disable_save_button();
 		} );
 	}
