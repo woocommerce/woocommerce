@@ -132,6 +132,12 @@ const onboarding = {
 			.click();
 	},
 
+	/**
+	 * Uncheck all checkboxes in the 'Included business features' screen.
+	 *
+	 * @param {import('@playwright/test').Page} page
+	 * @param {boolean} expect_wc_pay
+	 */
 	unselectBusinessFeatures: async ( page, expect_wc_pay = true ) => {
 		await page.goto( BUSIENSS_DETAILS_URL );
 
