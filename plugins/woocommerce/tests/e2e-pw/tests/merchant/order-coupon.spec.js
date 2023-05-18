@@ -82,7 +82,8 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		// search for product to add
 		await page.locator( 'text=Search for a product…' ).click();
 		await page
-			.locator( 'input:below(:text("Search for a product…"))' )
+			.locator( '.select2-search--dropdown' )
+			.getByRole( 'combobox' )
 			.type( productName );
 		await page
 			.locator(
