@@ -6,6 +6,13 @@ import path from 'path';
 import { glob } from 'glob';
 import simpleGit from 'simple-git';
 
+/**
+ * Get all projects listed in the workspace yaml file.
+ *
+ * @param {string} tmpRepoPath   Path to the temporary repository.
+ * @param {string} workspaceYaml Contents of the workspace yaml file.
+ * @return {Array<string>} List of projects.
+ */
 export const getAllProjects = async (
 	tmpRepoPath: string,
 	workspaceYaml: string
@@ -27,6 +34,13 @@ export const getAllProjects = async (
 	return globbedProjects.flat();
 };
 
+/**
+ *	Get all projects that have Jetpack changelogger enabled
+ *
+ * @param {string}        tmpRepoPath Path to the temporary repository.
+ * @param {Array<string>} projects    all projects listed in the workspace yaml file
+ * @return {Array<string>} List of projects that have Jetpack changelogger enabled.
+ */
 export const getChangeloggerProjects = async (
 	tmpRepoPath: string,
 	projects: Array< string >
@@ -50,6 +64,14 @@ export const getChangeloggerProjects = async (
 	} );
 };
 
+/**
+ * Get an array of all files changed in a PR.
+ *
+ * @param {string} tmpRepoPath Path to the temporary repository.
+ * @param {string} base        base hash
+ * @param {string} head        head hash
+ * @return {Array<string>} List of files changed in a PR.
+ */
 export const getTouchedFiles = async (
 	tmpRepoPath: string,
 	base: string,
@@ -76,6 +98,13 @@ export const getTouchedFiles = async (
 	return diff.split( '\n' ).filter( ( item ) => item.trim() );
 };
 
+/**
+ * Get an array of projects that have Jetpack changelogger enabled and have files changed in a PR. This function also maps names of projects that have been renamed in the monorepo from their paths.
+ *
+ * @param {Array<string>} touchedFiles         List of files changed in a PR. touchedFiles
+ * @param {Array<string>} changeloggerProjects List of projects that have Jetpack changelogger enabled.
+ * @return {Array<string>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
+ */
 export const intersectTouchedFilesWithChangeloggerProjects = (
 	touchedFiles: Array< string >,
 	changeloggerProjects: Array< string >
@@ -105,6 +134,14 @@ export const intersectTouchedFilesWithChangeloggerProjects = (
 	} );
 };
 
+/**
+ * Get an array of projects that have Jetpack changelogger enabled and have files changed in a PR.
+ *
+ * @param {string} tmpRepoPath Path to the temporary repository.
+ * @param {string} base        base hash
+ * @param {string} head        head hash
+ * @return {Array<string>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
+ */
 export const getTouchedProjectsRequiringChangelog = async (
 	tmpRepoPath: string,
 	base: string,
