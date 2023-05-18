@@ -447,15 +447,29 @@ jQuery( function ( $ ) {
 		selectedAttributes
 	);
 
-	function add_attribute_to_list( globalAttributeId ) {
+	function get_new_attribute_list_item_html( indexInList, globalAttributeId ) {
+		return new Promise( function ( resolve, reject ) {
+			$.post( {
+				url: woocommerce_admin_meta_boxes.ajax_url,
+				data: {
+					action: 'woocommerce_add_attribute',
+					taxonomy: globalAttributeId ?? '',
+					i: indexInList,
+					security: woocommerce_admin_meta_boxes.add_attribute_nonce,
+				},
+				success: function ( newAttributeListItemHtml ) {
+					resolve( newAttributeListItemHtml );
+				},
+				error: function ( jqXHR, textStatus, errorThrown ) {
+					reject( { jqXHR, textStatus, errorThrown } );
+				}
+			} );
+		} );
+	}
+
+	async function add_attribute_to_list( globalAttributeId ) {
 		var numberOfAttributesInList = $( '.product_attributes .woocommerce_attribute' ).length;
 		var $attributesTabContainer = $( '#product_attributes' );
-		var data = {
-			action: 'woocommerce_add_attribute',
-			taxonomy: globalAttributeId ?? '',
-			i: numberOfAttributesInList,
-			security: woocommerce_admin_meta_boxes.add_attribute_nonce,
-		};
 
 		$attributesTabContainer.block( {
 			message: null,
@@ -465,32 +479,30 @@ jQuery( function ( $ ) {
 			},
 		} );
 
-		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function (
-			newAttributeListItem
-		) {
-			var $attributesList = $attributesTabContainer.find( '.product_attributes' );
-			var product_type = $( 'select#product-type' ).val();
+		const newAttributeListItemHtml = await get_new_attribute_list_item_html( numberOfAttributesInList, globalAttributeId );
 
-			$attributesList.append( newAttributeListItem );
+		var $attributesList = $attributesTabContainer.find( '.product_attributes' );
+		var product_type = $( 'select#product-type' ).val();
 
-			if ( 'variable' !== product_type ) {
-				$attributesList.find( '.enable_variation' ).hide();
-			}
+		$attributesList.append( newAttributeListItemHtml );
 
-			$( document.body ).trigger( 'wc-enhanced-select-init' );
+		if ( 'variable' !== product_type ) {
+			$attributesList.find( '.enable_variation' ).hide();
+		}
 
-			attribute_row_indexes();
+		$( document.body ).trigger( 'wc-enhanced-select-init' );
 
-			$attributesList
-				.find( '.woocommerce_attribute' )
-				.last()
-				.find( 'h3' )
-				.trigger( 'click' );
+		attribute_row_indexes();
 
-			$attributesTabContainer.unblock();
+		$attributesList
+			.find( '.woocommerce_attribute' )
+			.last()
+			.find( 'h3' )
+			.trigger( 'click' );
 
-			jQuery.maybe_disable_save_button();
-		} );
+		$attributesTabContainer.unblock();
+
+		jQuery.maybe_disable_save_button();
 	}
 
 	function add_global_attribute_to_list( globalAttributeId ) {
