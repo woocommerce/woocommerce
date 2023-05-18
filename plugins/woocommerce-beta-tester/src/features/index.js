@@ -23,6 +23,12 @@ function Features() {
 
 	const sortedFeatureNames = Object.keys( features ).sort();
 
+	const afterToggleCallback = {
+		'new-product-management-experience': () => {
+			location.reload();
+		},
+	};
+
 	return (
 		<div id="wc-admin-test-helper-features">
 			<h2>
@@ -43,8 +49,11 @@ function Features() {
 							<ToggleControl
 								label={ feature_name }
 								checked={ features[ feature_name ] }
-								onChange={ () => {
-									toggleFeature( feature_name );
+								onChange={ async () => {
+									await toggleFeature( feature_name );
+									if ( afterToggleCallback[ feature_name ] ) {
+										afterToggleCallback[ feature_name ]();
+									}
 								} }
 							/>
 						</li>
