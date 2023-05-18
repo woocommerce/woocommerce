@@ -125,6 +125,8 @@ class SingleProduct extends AbstractBlock {
 		if ( $this->single_product_inner_blocks_names ) {
 			$block_name = array_pop( $this->single_product_inner_blocks_names );
 
+			static $global_post_variable_changed;
+
 			if ( $block_name === $block['blockName'] ) {
 				/**
 				 * This is a temporary fix to ensure the Post Title and Excerpt blocks work as expected
@@ -136,14 +138,15 @@ class SingleProduct extends AbstractBlock {
 				if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
 					global $post;
 					// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-					$post = get_post( $this->product_id );
-					setup_postdata( $post );
+					$post                         = get_post( $this->product_id );
+					$global_post_variable_changed = setup_postdata( $post );
 				}
 				$context['postId'] = $this->product_id;
 			}
 
-			if ( ! $this->single_product_inner_blocks_names ) {
+			if ( ! $this->single_product_inner_blocks_names && $global_post_variable_changed ) {
 				wp_reset_postdata();
+				$global_post_variable_changed = false;
 			}
 		}
 	}
