@@ -202,7 +202,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 					.filter( { hasText: 'Flat rate' } )
 			).toBeVisible();
 
-			await page.locator( 'a.wc-shipping-zone-method-settings' ).click();
+			await page.getByRole( 'link', { name: 'Flat rate' } ).click();
 			await page.locator( '#woocommerce_flat_rate_cost' ).fill( '10' );
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
