@@ -468,8 +468,8 @@ jQuery( function ( $ ) {
 	}
 
 	async function add_attribute_to_list( globalAttributeId ) {
-		var numberOfAttributesInList = $( '.product_attributes .woocommerce_attribute' ).length;
-		var $attributesTabContainer = $( '#product_attributes' );
+		const numberOfAttributesInList = $( '.product_attributes .woocommerce_attribute' ).length;
+		const $attributesTabContainer = $( '#product_attributes' );
 
 		$attributesTabContainer.block( {
 			message: null,
@@ -481,20 +481,20 @@ jQuery( function ( $ ) {
 
 		const newAttributeListItemHtml = await get_new_attribute_list_item_html( numberOfAttributesInList, globalAttributeId );
 
-		var $attributesList = $attributesTabContainer.find( '.product_attributes' );
-		var product_type = $( 'select#product-type' ).val();
+		const $attributesListContainer = $attributesTabContainer.find( '.product_attributes' );
+		const product_type = $( 'select#product-type' ).val();
 
-		$attributesList.append( newAttributeListItemHtml );
+		$attributesListContainer.append( newAttributeListItemHtml );
 
 		if ( 'variable' !== product_type ) {
-			$attributesList.find( '.enable_variation' ).hide();
+			$attributesListContainer.find( '.enable_variation' ).hide();
 		}
 
 		$( document.body ).trigger( 'wc-enhanced-select-init' );
 
 		attribute_row_indexes();
 
-		$attributesList
+		$attributesListContainer
 			.find( '.woocommerce_attribute' )
 			.last()
 			.find( 'h3' )
