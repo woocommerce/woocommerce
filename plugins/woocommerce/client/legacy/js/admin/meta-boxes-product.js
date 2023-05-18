@@ -151,8 +151,17 @@ jQuery( function ( $ ) {
 		} )
 		.trigger( 'change' );
 
-	$( 'input#_downloadable, input#_virtual' ).on( 'change', function () {
+	$( 'input#_downloadable' ).on( 'change', function () {
 		show_and_hide_panels();
+	} );
+
+	$( 'input#_virtual' ).on( 'change', function () {
+		show_and_hide_panels();
+
+		// If user enables virtual while on shipping tab, switch to general tab.
+		if ( $( this ).is( ':checked' ) && $( '.shipping_options.shipping_tab' ).hasClass( 'active' ) ) {
+			$( '.general_options.general_tab > a' ).trigger( 'click' );
+		}
 	} );
 
 	function change_product_type_tip( content ) {
@@ -209,11 +218,6 @@ jQuery( function ( $ ) {
 		}
 		if ( is_virtual ) {
 			$( '.show_if_virtual', context ).show();
-
-			// If user enables virtual while on shipping tab, switch to general tab.
-			if ( $( '.shipping_options.shipping_tab' ).hasClass( 'active' ) ) {
-				$( '.general_options.general_tab > a' ).trigger( 'click' );
-			}
 		}
 
 		$( '.show_if_' + product_type, context ).show();
