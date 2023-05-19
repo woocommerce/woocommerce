@@ -454,6 +454,17 @@ const attachAddExistingAttributeTracks = () => {
 };
 
 /**
+ * Gets number of attributes with 'Used for variations' checked.
+ */
+const getUsedForVariationsAttributesCount = () =>
+	( document.querySelector( '#product-type' ) as HTMLSelectElement )
+		?.value === 'variable'
+		? document.querySelectorAll(
+				'input[name^="attribute_variation"]:checked'
+		  ).length
+		: 0;
+
+/**
  * Attaches product attributes tracks.
  */
 const attachProductAttributesTracks = () => {
@@ -507,20 +518,16 @@ const attachProductAttributesTracks = () => {
 				return;
 			}
 
-			const globalAttributesCount = document.querySelectorAll(
+			const localAttributesCount = document.querySelectorAll(
 				'.woocommerce_attribute:not(.taxonomy)'
 			).length;
 
-			const localAttributesCount = document.querySelectorAll(
+			const globalAttributesCount = document.querySelectorAll(
 				'.woocommerce_attribute.taxonomy'
 			).length;
 
-			recordEvent( 'product_attributes_add', {
+			recordEvent( 'product_attributes_save', {
 				page: 'product',
-				enable_archive: '',
-				default_sort_order: '',
-				name: null,
-				slug: null,
 				total_attributes_count:
 					globalAttributesCount + localAttributesCount,
 				local_attributes_count: localAttributesCount,
@@ -529,15 +536,7 @@ const attachProductAttributesTracks = () => {
 					'input[name^="attribute_visibility"]:checked'
 				).length,
 				used_for_variations_count:
-					(
-						document.querySelector(
-							'#product-type'
-						) as HTMLSelectElement
-					 )?.value === 'variable'
-						? document.querySelectorAll(
-								'input[name^="attribute_variation"]:checked'
-						  ).length
-						: null,
+					getUsedForVariationsAttributesCount(),
 			} );
 		} );
 };

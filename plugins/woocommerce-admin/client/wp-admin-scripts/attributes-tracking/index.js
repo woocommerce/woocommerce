@@ -19,11 +19,6 @@ addNewAttribute?.addEventListener( 'click', function () {
 		name: name?.value,
 		slug: slug?.value,
 		page: 'attributes',
-		total_attributes_count: null,
-		local_attributes_count: null,
-		global_attributes_count: null,
-		visible_on_product_page_count: null,
-		used_for_variations_count: null,
 	} );
 } );
 
