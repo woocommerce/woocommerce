@@ -12,44 +12,44 @@ import {
 	useLayoutEffect,
 } from '@wordpress/element';
 
-type MenuProps = {
+type ListboxProps = {
 	children?: JSX.Element | JSX.Element[];
 	isOpen: boolean;
 	className?: string;
 };
 
-export const Menu = ( { children, isOpen, className }: MenuProps ) => {
+export const Listbox = ( { children, isOpen, className }: ListboxProps ) => {
 	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
-	const selectControlMenuRef = useRef< HTMLDivElement >( null );
+	const selectControlListboxRef = useRef< HTMLDivElement >( null );
 
 	useLayoutEffect( () => {
 		if (
-			selectControlMenuRef.current?.parentElement &&
-			selectControlMenuRef.current?.parentElement.clientWidth > 0
+			selectControlListboxRef.current?.parentElement &&
+			selectControlListboxRef.current?.parentElement.clientWidth > 0
 		) {
 			setBoundingRect(
-				selectControlMenuRef.current.parentElement.getBoundingClientRect()
+				selectControlListboxRef.current.parentElement.getBoundingClientRect()
 			);
 		}
 	}, [
-		selectControlMenuRef.current,
-		selectControlMenuRef.current?.clientWidth,
+		selectControlListboxRef.current,
+		selectControlListboxRef.current?.clientWidth,
 	] );
 
 	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 	/* Disabled because of the onmouseup on the ul element below. */
 	return (
 		<div
-			ref={ selectControlMenuRef }
-			className="woocommerce-experimental-select-control__menu"
+			ref={ selectControlListboxRef }
+			className="woocommerce-experimental-select-control__listbox"
 		>
 			<div>
 				<Popover
 					// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
-					__unstableSlotName="woocommerce-select-control-menu"
+					__unstableSlotName="woocommerce-select-control-listbox"
 					focusOnMount={ false }
 					className={ classnames(
-						'woocommerce-experimental-select-control__popover-menu',
+						'woocommerce-experimental-select-control__popover-listbox',
 						{
 							'is-open': isOpen,
 							'has-results': Children.count( children ) > 0,
@@ -60,7 +60,7 @@ export const Menu = ( { children, isOpen, className }: MenuProps ) => {
 				>
 					<ul
 						className={ classnames(
-							'woocommerce-experimental-select-control__popover-menu-container',
+							'woocommerce-experimental-select-control__popover-listbox-container',
 							className
 						) }
 						style={ {
@@ -80,11 +80,11 @@ export const Menu = ( { children, isOpen, className }: MenuProps ) => {
 	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 };
 
-export const MenuSlot: React.FC = () =>
+export const ListboxSlot: React.FC = () =>
 	createPortal(
 		<div aria-live="off">
 			{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
-			<Popover.Slot name="woocommerce-select-control-menu" />
+			<Popover.Slot name="woocommerce-select-control-Listbox" />
 		</div>,
 		document.body
 	);

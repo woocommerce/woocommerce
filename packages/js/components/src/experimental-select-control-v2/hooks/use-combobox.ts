@@ -4,7 +4,12 @@
 import { useState } from '@wordpress/element';
 import { ChangeEvent } from 'react';
 
-export function useCombobox() {
+type useComboboxProps = {
+	closeListbox: () => void;
+	openListbox: () => void;
+};
+
+export function useCombobox( { closeListbox, openListbox }: useComboboxProps ) {
 	const [ value, setValue ] = useState< string >( '' );
 
 	return {
@@ -16,8 +21,12 @@ export function useCombobox() {
 			'aria-expanded': 'true', // @todo
 			'aria-haspopup': 'true',
 			'aria-labelledby': 'label-id', //@todo
+			onBlur: closeListbox,
 			onChange: ( event: ChangeEvent< HTMLInputElement > ) =>
 				setValue( event.target?.value ),
+			onFocus: () => {
+				openListbox();
+			},
 			role: 'combobox',
 			value,
 		},

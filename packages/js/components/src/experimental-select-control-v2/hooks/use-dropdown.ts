@@ -8,6 +8,7 @@ import { useState } from '@wordpress/element';
  */
 import { DefaultItem, getItemLabelType, getItemValueType } from '../types';
 import { useCombobox } from './use-combobox';
+import { useListbox } from './use-listbox';
 
 type useDropdownProps< Item > = {
 	getItemLabel?: getItemLabelType< Item >;
@@ -27,10 +28,18 @@ export function useDropdown< Item = DefaultItem >( {
 	onSelect = () => null,
 }: useDropdownProps< Item > ) {
 	const {
-		props: inputProps,
+		close: closeListbox,
+		props: listboxProps,
+		isOpen: isListboxOpen,
+		open: openListbox,
+	} = useListbox( {
+		multiple,
+	} );
+	const {
+		props: comboboxProps,
 		value: inputValue,
 		setValue: setInputValue,
-	} = useCombobox();
+	} = useCombobox( { closeListbox, openListbox } );
 
 	function getInitialSelected(): Item[] {
 		if ( ! initialSelected ) {
@@ -67,8 +76,10 @@ export function useDropdown< Item = DefaultItem >( {
 	}
 
 	return {
-		inputProps,
+		comboboxProps,
 		inputValue,
+		isListboxOpen,
+		listboxProps,
 		selected: getSelected(),
 		selectItem,
 		deselectItem,

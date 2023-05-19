@@ -12,8 +12,8 @@ import {
 	getItemLabelType,
 	getItemValueType,
 } from './types';
-import { Menu } from './menu';
-import { MenuItem } from './menu-item';
+import { Listbox } from './listbox';
+import { Option } from './option';
 import { SelectedItems } from './selected-items';
 import { useDropdown } from './hooks/use-dropdown';
 
@@ -40,7 +40,7 @@ export function SelectControl< Item = DefaultItem >( {
 	onDeselect = () => null,
 	onSelect,
 }: SelectControlProps< Item > ) {
-	const { deselectItem, inputProps, selected, selectItem } =
+	const { deselectItem, comboboxProps, isListboxOpen, selected, selectItem } =
 		useDropdown< Item >( {
 			initialSelected,
 			items,
@@ -50,7 +50,6 @@ export function SelectControl< Item = DefaultItem >( {
 		} );
 
 	const isReadOnly = false;
-	const isOpen = true;
 
 	function isSelected( item: Item ) {
 		if ( Array.isArray( selected ) ) {
@@ -76,19 +75,19 @@ export function SelectControl< Item = DefaultItem >( {
 			) }
 			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 			{ /* @ts-ignore TS complains about autocomplete despite it being a valid property. */ }
-			<input type="text" { ...inputProps } />
+			<input type="text" { ...comboboxProps } />
 			{ children ? (
 				children( {
-					isOpen,
+					isListboxOpen,
 					getItemLabel,
 					getItemValue,
 					items,
 					selectItem,
 				} )
 			) : (
-				<Menu isOpen={ isOpen }>
+				<Listbox isOpen={ isListboxOpen }>
 					{ items.map( ( item, index: number ) => (
-						<MenuItem
+						<Option
 							key={ `${ getItemValue( item ) }${ index }` }
 							isActive={ false }
 							item={ item }
@@ -101,9 +100,9 @@ export function SelectControl< Item = DefaultItem >( {
 							} }
 						>
 							{ getItemLabel( item ) }
-						</MenuItem>
+						</Option>
 					) ) }
-				</Menu>
+				</Listbox>
 			) }
 		</div>
 	);

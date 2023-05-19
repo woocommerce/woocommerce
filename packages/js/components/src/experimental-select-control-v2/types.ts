@@ -5,14 +5,14 @@ import { ReactElement, Component } from 'react';
 
 export type ChildrenProps< Item > = {
 	items: Item[];
-	isOpen: boolean;
+	isListboxOpen: boolean;
 	getItemLabel: getItemLabelType< Item >;
 	getItemValue: getItemValueType< Item >;
 	selectItem: ( item: Item ) => void;
 };
 export type Children< Item > = ( {
 	items,
-	isOpen,
+	isListboxOpen,
 }: ChildrenProps< Item > ) => ReactElement | Component;
 
 export type DefaultItem = {

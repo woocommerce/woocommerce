@@ -2,20 +2,20 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import { createElement, ReactElement } from 'react';
+import { createElement, MouseEvent, ReactElement } from 'react';
 
-export type MenuItemProps< Item > = {
+export type OptionProps< Item > = {
 	isActive?: boolean;
 	item: Item;
 	children: ReactElement | string;
-	onClick: () => void;
+	onClick: ( event: MouseEvent< HTMLLIElement > ) => void;
 };
 
-export const MenuItem = < Item, >( {
+export const Option = < Item, >( {
 	children,
 	isActive = false,
 	onClick,
-}: MenuItemProps< Item > ) => {
+}: OptionProps< Item > ) => {
 	const classes = classNames(
 		'woocommerce-experimental-select-control__menu-item',
 		{
@@ -25,7 +25,11 @@ export const MenuItem = < Item, >( {
 	return (
 		/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 		/* Disabled because of the onmouseup on the ul element below. */
-		<li className={ classes } onClick={ onClick }>
+		<li
+			className={ classes }
+			onClick={ onClick }
+			onMouseDown={ ( event ) => event.preventDefault() }
+		>
 			{ children }
 		</li>
 	);
