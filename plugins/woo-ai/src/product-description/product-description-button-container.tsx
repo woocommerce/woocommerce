@@ -2,7 +2,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 
 /**
@@ -33,6 +33,7 @@ const getGeneratingContentPhrase = () =>
 	];
 
 const DESCRIPTION_MAX_LENGTH = 300;
+const MIN_TITLE_LENGTH = 20;
 
 export function WriteItForMeButtonContainer() {
 	const [ fetching, setFetching ] = useState( false );
@@ -44,6 +45,9 @@ export function WriteItForMeButtonContainer() {
 		titleEl.current?.value || ''
 	);
 	const tinyEditor = useTinyEditor();
+
+	const writeItForMeDisabled =
+		fetching || ! productTitle || productTitle.length < MIN_TITLE_LENGTH;
 
 	useEffect( () => {
 		titleEl.current?.addEventListener( 'keyup', ( e ) =>
@@ -79,14 +83,18 @@ export function WriteItForMeButtonContainer() {
 		<button
 			className="button wp-media-button woo-ai-write-it-for-me-btn"
 			type="button"
-			disabled={ fetching || ! productTitle }
+			disabled={ writeItForMeDisabled }
 			title={
-				productTitle && productTitle.length > 3
-					? undefined
-					: __(
-							'Please create a product title before generating a description.',
-							'woocommerce'
+				writeItForMeDisabled
+					? sprintf(
+							/* translators: %d: Minimum characters for product title */
+							__(
+								'Please create a product title before generating a description. It must be %d characters or longer.',
+								'woocommerce'
+							),
+							MIN_TITLE_LENGTH
 					  )
+					: undefined
 			}
 			onClick={ async () => {
 				try {
