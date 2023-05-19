@@ -18,7 +18,10 @@ import {
 	getShouldAutomateChangelog,
 	getChangelogDetails,
 } from './lib/github';
-import { getTouchedProjectsRequiringChangelog } from './lib/projects';
+import {
+	getAllProjectPaths,
+	getTouchedProjectsRequiringChangelog,
+} from './lib/projects';
 
 const program = new Command( 'changelog' )
 	.description( 'Changelog utilities' )
@@ -107,48 +110,42 @@ const program = new Command( 'changelog' )
 					head
 				);
 			try {
-				touchedProjectsRequiringChangelog.forEach(
-					( { project, path } ) => {
-						if (
-							existsSync(
-								nodePath.join(
-									tmpRepoPath,
-									path,
-									'changelog',
-									fileName
-								)
-							)
-						) {
-							Logger.notice(
-								`Remove existing changelog file for ${ project }`
-							);
+				const allProjectPaths = await getAllProjectPaths( tmpRepoPath );
 
-							execSync(
-								`rm ${ nodePath.join(
-									path,
-									'changelog',
-									fileName
-								) }`,
-								{
-									cwd: tmpRepoPath,
-									stdio: 'inherit',
-								}
-							);
-						}
+				// Remove any already existing changelog files in case a change is reverted and the entry is no longer needed.
+				allProjectPaths.forEach( ( projectPath ) => {
+					const path = nodePath.join(
+						tmpRepoPath,
+						projectPath,
+						'changelog',
+						fileName
+					);
 
+					if ( existsSync( path ) ) {
 						Logger.notice(
-							`Running changelog command for ${ project }`
+							`Remove existing changelog file ${ path }`
 						);
-						const messageExpression = message
-							? `-e "${ message }"`
-							: '';
-						const commentExpression = comment
-							? `-c "${ comment }"`
-							: '';
-						const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } ${ messageExpression } ${ commentExpression } -n`;
-						execSync( cmd, { cwd: tmpRepoPath, stdio: 'inherit' } );
+
+						execSync( `rm ${ path }`, {
+							cwd: tmpRepoPath,
+							stdio: 'inherit',
+						} );
 					}
-				);
+				} );
+
+				touchedProjectsRequiringChangelog.forEach( ( { project } ) => {
+					Logger.notice(
+						`Running changelog command for ${ project }`
+					);
+					const messageExpression = message
+						? `-e "${ message }"`
+						: '';
+					const commentExpression = comment
+						? `-c "${ comment }"`
+						: '';
+					const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } ${ messageExpression } ${ commentExpression } -n`;
+					execSync( cmd, { cwd: tmpRepoPath, stdio: 'inherit' } );
+				} );
 			} catch ( e ) {
 				Logger.error( e );
 			}

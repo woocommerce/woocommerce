@@ -141,6 +141,14 @@ export const getTouchedChangeloggerProjectsMapped = (
 	} );
 };
 
+export const getAllProjectPaths = async ( tmpRepoPath: string ) => {
+	const workspaceYaml = await readFile(
+		path.join( tmpRepoPath, 'pnpm-workspace.yaml' ),
+		'utf8'
+	);
+	return await getAllProjects( tmpRepoPath, workspaceYaml );
+};
+
 /**
  * Get an array of projects that have Jetpack changelogger enabled and have files changed in a PR.
  *
@@ -154,14 +162,10 @@ export const getTouchedProjectsRequiringChangelog = async (
 	base: string,
 	head: string
 ) => {
-	const workspaceYaml = await readFile(
-		path.join( tmpRepoPath, 'pnpm-workspace.yaml' ),
-		'utf8'
-	);
-	const projects = await getAllProjects( tmpRepoPath, workspaceYaml );
+	const allProjectPaths = await getAllProjectPaths( tmpRepoPath );
 	const changeloggerProjects = await getChangeloggerProjects(
 		tmpRepoPath,
-		projects
+		allProjectPaths
 	);
 	const touchedFiles = await getTouchedFiles( tmpRepoPath, base, head );
 
