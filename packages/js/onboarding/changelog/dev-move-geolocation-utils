@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Moved geolocation country matching functions to @woocommerce/onboarding
