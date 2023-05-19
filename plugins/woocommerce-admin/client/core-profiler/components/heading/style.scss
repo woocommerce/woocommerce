@@ -46,7 +46,7 @@
 			margin: 12px 0 0;
 		}
 
-		@include breakpoint( '<782px' ) {
+		@media (max-width: #{ ($break-mobile) }) {
 			margin-top: 52px 0 40px;
 
 			.woocommerce-profiler-heading__title {
