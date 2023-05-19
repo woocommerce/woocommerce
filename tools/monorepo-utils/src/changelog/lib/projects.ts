@@ -136,6 +136,12 @@ export const getTouchedChangeloggerProjectsPathsMappedToProjects = (
 	} );
 };
 
+/**
+ * Get all projects listed in the workspace yaml file.
+ *
+ * @param {string} tmpRepoPath Path to the temporary repository.
+ * @return {Array<string>} List of projects.
+ */
 export const getAllProjectPaths = async ( tmpRepoPath: string ) => {
 	const workspaceYaml = await readFile(
 		path.join( tmpRepoPath, 'pnpm-workspace.yaml' ),
