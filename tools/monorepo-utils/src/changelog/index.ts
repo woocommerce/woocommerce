@@ -103,12 +103,14 @@ const program = new Command( 'changelog' )
 			Logger.notice(
 				`Getting all touched projects requiring a changelog`
 			);
+
 			const touchedProjectsRequiringChangelog =
 				await getTouchedProjectsRequiringChangelog(
 					tmpRepoPath,
 					base,
 					head
 				);
+
 			try {
 				const allProjectPaths = await getAllProjectPaths( tmpRepoPath );
 
@@ -133,7 +135,7 @@ const program = new Command( 'changelog' )
 					}
 				} );
 
-				touchedProjectsRequiringChangelog.forEach( ( { project } ) => {
+				touchedProjectsRequiringChangelog.forEach( ( project ) => {
 					Logger.notice(
 						`Running changelog command for ${ project }`
 					);
@@ -151,9 +153,9 @@ const program = new Command( 'changelog' )
 			}
 
 			Logger.notice(
-				`Changelogs created for ${ touchedProjectsRequiringChangelog
-					.map( ( p ) => p.project )
-					.join( ', ' ) }`
+				`Changelogs created for ${ touchedProjectsRequiringChangelog.join(
+					', '
+				) }`
 			);
 
 			const git = simpleGit( {

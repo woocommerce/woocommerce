@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { glob } from 'glob';
@@ -14,7 +14,7 @@ import simpleGit from 'simple-git';
  * @param {string} workspaceYaml Contents of the workspace yaml file.
  * @return {Array<string>} List of projects.
  */
-export const getAllProjects = async (
+export const getAllProjectsPathsFromWorkspace = async (
 	tmpRepoPath: string,
 	workspaceYaml: string
 ) => {
@@ -42,16 +42,16 @@ export const getAllProjects = async (
  * @param {Array<string>} projects    all projects listed in the workspace yaml file
  * @return {Array<string>} List of projects that have Jetpack changelogger enabled.
  */
-export const getChangeloggerProjects = async (
+export const getChangeloggerProjectPaths = async (
 	tmpRepoPath: string,
 	projects: Array< string >
 ) => {
 	const projectsWithComposer = projects.filter( ( project ) => {
 		return existsSync( `${ tmpRepoPath }/${ project }/composer.json` );
 	} );
-	return projectsWithComposer.filter( async ( project ) => {
+	return projectsWithComposer.filter( ( project ) => {
 		const composer = JSON.parse(
-			await readFile(
+			readFileSync(
 				`${ tmpRepoPath }/${ project }/composer.json`,
 				'utf8'
 			)
@@ -73,7 +73,7 @@ export const getChangeloggerProjects = async (
  * @param {string} head        head hash
  * @return {Array<string>} List of files changed in a PR.
  */
-export const getTouchedFiles = async (
+export const getTouchedFilePaths = async (
 	tmpRepoPath: string,
 	base: string,
 	head: string
@@ -104,9 +104,9 @@ export const getTouchedFiles = async (
  *
  * @param {Array<string>} touchedFiles         List of files changed in a PR. touchedFiles
  * @param {Array<string>} changeloggerProjects List of projects that have Jetpack changelogger enabled.
- * @return {Array<object>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
+ * @return {Array<string>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
  */
-export const getTouchedChangeloggerProjectsMapped = (
+export const getTouchedChangeloggerProjectsPathsMappedToProjects = (
 	touchedFiles: Array< string >,
 	changeloggerProjects: Array< string >
 ) => {
@@ -119,25 +119,20 @@ export const getTouchedChangeloggerProjectsMapped = (
 		}
 		return touchedProject;
 	} );
-	const touchedProjectsRequiringChangelogFullPath =
-		changeloggerProjects.filter( ( project ) => {
+	const touchedProjectPathsRequiringChangelog = changeloggerProjects.filter(
+		( project ) => {
 			return mappedTouchedFiles.some( ( touchedProject ) =>
 				touchedProject.includes( project + '/' )
 			);
-		} );
-	return touchedProjectsRequiringChangelogFullPath.map( ( project ) => {
-		if ( project.includes( 'plugins/' ) ) {
-			return {
-				project: project.replace( 'plugins/', '' ),
-				path: project,
-			};
-		} else if ( project.includes( 'packages/js/' ) ) {
-			return {
-				project: project.replace( 'packages/js/', '@woocommerce/' ),
-				path: project,
-			};
 		}
-		return { path: project, project };
+	);
+	return touchedProjectPathsRequiringChangelog.map( ( project ) => {
+		if ( project.includes( 'plugins/' ) ) {
+			return project.replace( 'plugins/', '' );
+		} else if ( project.includes( 'packages/js/' ) ) {
+			return project.replace( 'packages/js/', '@woocommerce/' );
+		}
+		return project;
 	} );
 };
 
@@ -146,7 +141,7 @@ export const getAllProjectPaths = async ( tmpRepoPath: string ) => {
 		path.join( tmpRepoPath, 'pnpm-workspace.yaml' ),
 		'utf8'
 	);
-	return await getAllProjects( tmpRepoPath, workspaceYaml );
+	return await getAllProjectsPathsFromWorkspace( tmpRepoPath, workspaceYaml );
 };
 
 /**
@@ -155,7 +150,7 @@ export const getAllProjectPaths = async ( tmpRepoPath: string ) => {
  * @param {string} tmpRepoPath Path to the temporary repository.
  * @param {string} base        base hash
  * @param {string} head        head hash
- * @return {Array<object>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
+ * @return {Array<string>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
  */
 export const getTouchedProjectsRequiringChangelog = async (
 	tmpRepoPath: string,
@@ -163,14 +158,18 @@ export const getTouchedProjectsRequiringChangelog = async (
 	head: string
 ) => {
 	const allProjectPaths = await getAllProjectPaths( tmpRepoPath );
-	const changeloggerProjects = await getChangeloggerProjects(
+	const changeloggerProjectsPaths = await getChangeloggerProjectPaths(
 		tmpRepoPath,
 		allProjectPaths
 	);
-	const touchedFiles = await getTouchedFiles( tmpRepoPath, base, head );
+	const touchedFilePaths = await getTouchedFilePaths(
+		tmpRepoPath,
+		base,
+		head
+	);
 
-	return getTouchedChangeloggerProjectsMapped(
-		touchedFiles,
-		changeloggerProjects
+	return getTouchedChangeloggerProjectsPathsMappedToProjects(
+		touchedFilePaths,
+		changeloggerProjectsPaths
 	);
 };
