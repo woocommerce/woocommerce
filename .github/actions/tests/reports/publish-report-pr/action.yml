@@ -50,11 +50,11 @@ runs:
 
         - name: Upload report
           shell: bash
-          working-directory: ${{ inputs.allure-report-dir }}
           env:
-              DESTINATION: ${{ steps.upload-path.outputs.result }}
+              SOURCE: ${{ inputs.allure-report-dir }}
+              TARGET: ${{ steps.upload-path.outputs.result }}
           run: |
-              aws s3 cp . ${{ env.DESTINATION }} \
+              aws s3 cp ${{ env.SOURCE }} ${{ env.TARGET }} \
                 --recursive \
                 --only-show-errors
 
