@@ -92,7 +92,14 @@ const program = new Command( 'changelog' )
 
 			touchedProjectsRequiringChangelog.forEach( ( project ) => {
 				Logger.notice( `Running changelog command for ${ project }` );
-				const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } -e "${ message }" -c "${ comment }" -n`;
+				// remove changelog file if it exists.
+				execSync( `rm ${ fileName }`, {
+					cwd: tmpRepoPath,
+					stdio: 'inherit',
+				} );
+				const messageExpression = message ? `-e "${ message }"` : '';
+				const commentExpression = comment ? `-c "${ comment }"` : '';
+				const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } ${ messageExpression } ${ commentExpression } -n`;
 				execSync( cmd, { cwd: tmpRepoPath, stdio: 'inherit' } );
 			} );
 
