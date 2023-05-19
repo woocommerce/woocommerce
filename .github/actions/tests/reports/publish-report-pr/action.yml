@@ -1,11 +1,60 @@
-name: Publish E2E report
+name: Publish PR test report
 permissions: {}
 
 inputs:
-    #mytodo
+    key-id:
+        required: true
+    region:
+        required: true
+    access-key:
+        required: true
+    reports-home:
+        required: true
+    allure-report-dir:
+        required: true
+        description: Path to allure-report folder.
+    feat-slug:
+        description: Slug for enabled feature flags.
+    test-type:
+        required: true
+        type: choice
+        options:
+            - api
+            - e2e
+            - k6
 
 runs:
     using: composite
     steps:
-        #mytodo
-        - name: step 1
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+              aws-region: ${{ inputs.region }}
+              aws-access-key-id: ${{ inputs.key-id }}
+              aws-secret-access-key: ${{ inputs.access-key }}
+
+        - name: Set upload path
+          uses: actions/github-script@v6
+          id: upload-path
+          env:
+              SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/set-upload-path.js
+          with:
+              result-encoding: string
+              script: |
+                  const script = require( process.env.SCRIPT_PATH );
+                  return script(
+                    { github },
+                    ${{ inputs.reports-home }},
+                    ${{ inputs.feat-slug }},
+                    ${{ inputs.test-type }}
+                  );
+
+        - name: Upload report
+          shell: bash
+          working-directory: ${{ inputs.allure-report-dir }}
+          env:
+              DESTINATION: ${{ steps.upload-path.outputs.result }}
+          run: |
+              aws s3 cp . ${{ env.DESTINATION }} --quiet
+
+          # mytodo add link to report

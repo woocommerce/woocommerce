@@ -14,7 +14,7 @@ env:
     FEATURE_SLUG: hpos
 
 jobs:
-    cot-api-tests-run:
+    hpos-api-tests-run:
         name: Runs API tests
         runs-on: ubuntu-20.04
         permissions:
@@ -44,22 +44,21 @@ jobs:
                   report-title: API Test report for "${{ env.PR_TITLE }} (#${{ env.PR_NUMBER }})" with HPOS
                   tests: hello # mytodo remove
 
-
-            # mytodo enable
-            # - name: Publish report
-            #   if: success() || ( failure() && steps.api-action.result == 'failure' )
-            #   uses: ./.github/actions/tests/reports/publish-report-pr
-            #   with:
-            #       aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
-            #       aws-region: ${{ secrets.REPORTS_AWS_REGION }}
-            #       aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-            #       s3-bucket: ${{ secrets.REPORTS_BUCKET }}
-            #       feat-slug: ${{ env.FEATURE_SLUG }}
-            #       report-path: ${{ env.allure-report }}
+            - name: Publish report
+              if: success() || ( failure() && steps.api-action.result == 'failure' )
+              uses: ./.github/actions/tests/reports/publish-report-pr
+              with:
+                  key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  region: ${{ secrets.REPORTS_AWS_REGION }}
+                  access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  reports-home: ${{ secrets.REPORTS_BUCKET }}
+                  allure-report-dir: ${{ env.ALLURE_REPORT_DIR }}
+                  feat-slug: ${{ env.FEATURE_SLUG }}
+                  test-type: api
 # mytodo enable
-# cot-e2e-tests-run:
+# hpos-e2e-tests-run:
 #     name: Runs E2E tests
-#     needs: [cot-api-tests-run]
+#     needs: [hpos-api-tests-run]
 #     runs-on: ubuntu-20.04
 #     permissions:
 #         contents: read
