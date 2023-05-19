@@ -8,9 +8,6 @@ inputs:
         required: true
     tests:
         description: Specific tests to run, separated by single whitespace. See https://playwright.dev/docs/test-cli
-    playwright-config:
-        description: The Playwright configuration file to use.
-        default: playwright.config.js
 
 outputs:
     result:
@@ -29,13 +26,9 @@ runs:
           id: run-e2e-tests
           env:
               FORCE_COLOR: 1
-              USE_WP_ENV: 1
           working-directory: plugins/woocommerce
           shell: bash
-          run: |
-              pnpm exec playwright test \
-              --config=tests/e2e-pw/${{ inputs.playwright-config }} \
-              ${{ inputs.tests }}
+          run: pnpm test:e2e-pw ${{ inputs.tests }}
 
         - name: Generate Test report.
           if: success() || ( failure() && steps.run-e2e-tests.conclusion == 'failure' )

@@ -21,10 +21,7 @@ runs:
           id: run-api-tests
           working-directory: plugins/woocommerce
           shell: bash
-          run: |
-              pnpm exec playwright test \
-              --config=tests/api-core-tests/playwright.config.js \
-              ${{ inputs.tests }}
+          run: pnpm test:api-pw ${{ inputs.tests }}
 
         - name: Generate Test report.
           if: success() || ( failure() && steps.run-api-tests.conclusion == 'failure' )
