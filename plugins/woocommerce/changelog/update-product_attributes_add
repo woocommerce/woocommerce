@@ -1,4 +1,4 @@
 Significance: minor
 Type: enhancement
 
-Change attributes of product_attribute_add tracks event
+Rename tracks event product_attributes_add to product_attributes_save on the product page and update attributes
