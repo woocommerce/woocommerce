@@ -38,6 +38,7 @@ runs:
           id: upload-path
           env:
               SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/set-upload-path.js
+              PR_NUMBER: ${{ github.event.pull_request.number }}
               REPORTS_HOME: ${{ inputs.reports-home }}
               FEAT_SLUG: ${{ inputs.feat-slug }}
               TEST_TYPE: ${{ inputs.test-type }}
@@ -45,12 +46,7 @@ runs:
               result-encoding: string
               script: |
                   const script = require( process.env.SCRIPT_PATH );
-                  return script(
-                    { github },
-                    process.env.REPORTS_HOME,
-                    process.env.FEAT_SLUG,
-                    process.env.TEST_TYPE
-                  );
+                  return script();
 
         - name: Upload report
           shell: bash
