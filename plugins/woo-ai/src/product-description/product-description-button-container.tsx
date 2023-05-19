@@ -21,6 +21,14 @@ type WooApiResponse = {
 	previous_messages: WooApiMessage[];
 };
 
+type WPAPIError = {
+	code: string;
+	message: string;
+	data: {
+		status: number;
+	};
+};
+
 const generatingContentPhrases = [
 	__( 'Please wait…', 'woocommerce' ),
 	__( 'Just a little longer…', 'woocommerce' ),
@@ -50,20 +58,26 @@ export function WriteItForMeButtonContainer() {
 		fetching || ! productTitle || productTitle.length < MIN_TITLE_LENGTH;
 
 	useEffect( () => {
-		titleEl.current?.addEventListener( 'keyup', ( e ) =>
-			setProductTitle( ( e.target as HTMLInputElement ).value || '' )
-		);
+		const title = titleEl.current;
+		const titleKeyupHandler = ( e: KeyboardEvent ) =>
+			setProductTitle( ( e.target as HTMLInputElement ).value || '' );
+
+		title?.addEventListener( 'keyup', titleKeyupHandler );
+
+		return () => {
+			title?.removeEventListener( 'keyup', titleKeyupHandler );
+		};
 	}, [ titleEl ] );
 
 	useEffect( () => {
+		clearInterval( generatingContentPhraseInterval.current );
+
 		if ( fetching ) {
 			tinyEditor.setContent( getGeneratingContentPhrase() );
 			generatingContentPhraseInterval.current = setInterval(
 				() => tinyEditor.setContent( getGeneratingContentPhrase() ),
 				2000
 			);
-		} else {
-			clearInterval( generatingContentPhraseInterval.current );
 		}
 	}, [ fetching ] );
 
@@ -77,6 +91,53 @@ export function WriteItForMeButtonContainer() {
 		];
 
 		return instructions.join( '\n' );
+	};
+
+	const getApiError = ( status?: number ) => {
+		const errorMessagesByStatus: Record< number, string > = {
+			429: __(
+				'There have been too many requests. Please wait for a few minutes and try again.',
+				'woocommerce'
+			),
+			408: __(
+				'It seems the server is taking too long to respond. This is an experimental feature, so please try again later.',
+				'woocommerce'
+			),
+		};
+
+		if ( status && errorMessagesByStatus[ status ] ) {
+			return errorMessagesByStatus[ status ];
+		}
+
+		return __(
+			`Apologies, this is an experimental feature and there was an error with this service. Please try again.`,
+			'woocommerce'
+		);
+	};
+
+	const generateDescription = async () => {
+		try {
+			setFetching( true );
+			const response = await apiFetch< WooApiResponse >( {
+				path: '/wooai/text-generation',
+				method: 'POST',
+				data: {
+					prompt: buildPrompt(),
+				},
+			} );
+			tinyEditor.setContent( response.generated_text || '' );
+		} catch ( e ) {
+			if ( ! ( e as WPAPIError )?.data?.status ) {
+				tinyEditor.setContent( getApiError() );
+			}
+
+			tinyEditor.setContent(
+				getApiError( ( e as WPAPIError ).data.status )
+			);
+			/* eslint-disable no-console */
+			console.error( e );
+		}
+		setFetching( false );
 	};
 
 	return (
@@ -96,29 +157,7 @@ export function WriteItForMeButtonContainer() {
 					  )
 					: undefined
 			}
-			onClick={ async () => {
-				try {
-					setFetching( true );
-					const response = await apiFetch< WooApiResponse >( {
-						path: '/wooai/text-generation',
-						method: 'POST',
-						data: {
-							prompt: buildPrompt(),
-						},
-					} );
-					tinyEditor.setContent( response.generated_text || '' );
-				} catch ( e ) {
-					tinyEditor.setContent(
-						__(
-							'Error encountered, please try again.',
-							'woocommerce'
-						)
-					);
-					/* eslint-disable no-console */
-					console.error( e );
-				}
-				setFetching( false );
-			} }
+			onClick={ generateDescription }
 		>
 			<img src={ MagicIcon } alt="magic button icon" />
 			{ __( 'Write it for me', 'woocommerce' ) }
