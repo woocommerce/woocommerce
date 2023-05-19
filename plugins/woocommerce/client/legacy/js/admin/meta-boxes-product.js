@@ -520,6 +520,9 @@ jQuery( function ( $ ) {
 			toggle_expansion_of_attribute_list_item( $attributeListItem );
 
 			jQuery.maybe_disable_save_button();
+		} catch ( error ) {
+			alert( woocommerce_admin_meta_boxes.i18n_add_attribute_error_notice );
+			throw error;
 		} finally {
 			unblock_attributes_tab_container();
 		}
