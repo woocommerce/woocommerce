@@ -8,6 +8,7 @@ import {
 	EditorBlockListSettings,
 } from '@wordpress/block-editor';
 import { Modal } from '@wordpress/components';
+import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -28,16 +29,29 @@ export function ModalEditor( {
 	onClose,
 	title,
 }: ModalEditorProps ) {
+	const debouncedOnChange = useDebounce( ( blocks: BlockInstance[] ) => {
+		onChange( blocks );
+	}, 250 );
+
+	function handleClose() {
+		const blocks = debouncedOnChange.flush();
+		if ( blocks ) {
+			onChange( blocks );
+		}
+		onClose();
+	}
+
 	return (
 		<Modal
 			className="woocommerce-modal-editor"
 			title={ title }
-			onRequestClose={ onClose }
+			onRequestClose={ handleClose }
 			shouldCloseOnClickOutside={ false }
 		>
 			<IframeEditor
 				initialBlocks={ initialBlocks }
-				onChange={ onChange }
+				onInput={ debouncedOnChange }
+				onChange={ debouncedOnChange }
 			/>
 		</Modal>
 	);

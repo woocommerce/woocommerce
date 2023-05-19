@@ -30,15 +30,17 @@ import { ResizableEditor } from './resizable-editor';
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
-	onChange: ( blocks: BlockInstance[] ) => void;
+	onChange?: ( blocks: BlockInstance[] ) => void;
 	onClose?: () => void;
+	onInput?: ( blocks: BlockInstance[] ) => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
 export function IframeEditor( {
 	initialBlocks = [],
-	onChange,
+	onChange = () => {},
 	onClose,
+	onInput,
 	settings: __settings,
 }: IframeEditorProps ) {
 	const [ resizeObserver, sizes ] = useResizeObserver();
@@ -76,6 +78,7 @@ export function IframeEditor( {
 					setBlocks( updatedBlocks );
 					onChange( updatedBlocks );
 				} }
+				onInput={ onInput }
 				useSubRegistry={ true }
 			>
 				<BlockTools

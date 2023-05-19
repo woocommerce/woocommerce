@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Product } from '@woocommerce/data';
 import { BlockEditProps } from '@wordpress/blocks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
@@ -17,10 +18,11 @@ import {
  * Internal dependencies
  */
 import { TrackInventoryBlockAttributes } from './types';
+import { useValidation } from '../../contexts/validation-context';
 
-import { useValidation } from '../../hooks/use-validation';
-
-export function Edit( {}: BlockEditProps< TrackInventoryBlockAttributes > ) {
+export function Edit( {
+	clientId,
+}: BlockEditProps< TrackInventoryBlockAttributes > ) {
 	const blockProps = useBlockProps();
 
 	const [ manageStock ] = useEntityProp< boolean >(
@@ -40,16 +42,21 @@ export function Edit( {}: BlockEditProps< TrackInventoryBlockAttributes > ) {
 		'product_stock_quantity'
 	) as string;
 
-	const stockQuantityValidationError = useValidation(
-		'product/stock_quantity',
-		function stockQuantityValidator() {
+	const {
+		ref: stockQuantityRef,
+		error: stockQuantityValidationError,
+		validate: validateStockQuantity,
+	} = useValidation< Product >(
+		`stock_quantity-${ clientId }`,
+		async function stockQuantityValidator() {
 			if ( manageStock && stockQuantity && stockQuantity < 0 ) {
 				return __(
 					'Stock quantity must be a positive number.',
 					'woocommerce'
 				);
 			}
-		}
+		},
+		[ manageStock, stockQuantity ]
 	);
 
 	useEffect( () => {
@@ -72,9 +79,11 @@ export function Edit( {}: BlockEditProps< TrackInventoryBlockAttributes > ) {
 						<InputControl
 							id={ stockQuantityId }
 							name="stock_quantity"
+							ref={ stockQuantityRef }
 							label={ __( 'Available quantity', 'woocommerce' ) }
 							value={ stockQuantity }
 							onChange={ setStockQuantity }
+							onBlur={ validateStockQuantity }
 							type="number"
 							min={ 0 }
 						/>
