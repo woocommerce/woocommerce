@@ -3,7 +3,7 @@
     // Target latest version of ECMAScript.
 		"target": "esnext",
 
-	// Make sure we're not pulling types from external projects.
+    // Make sure we're not pulling types from external projects.
 		"typeRoots": [
 			"./typings",
 			"./node_modules/@types",
