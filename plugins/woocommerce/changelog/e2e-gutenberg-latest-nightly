@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add Gutenberg nightly and latest stable into the daily and release smoke tests.
