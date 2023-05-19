@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@wordpress/element';
+import { render, createRoot } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -14,6 +14,16 @@ const buttonRoot = document.getElementById(
 	'woocommerce-ai-app-product-gpt-button'
 );
 
-if ( buttonRoot ) {
-	render( <WriteItForMeButtonContainer />, buttonRoot );
-}
+const renderRoot = () => {
+	if ( ! buttonRoot ) {
+		return;
+	}
+
+	if ( createRoot ) {
+		createRoot( buttonRoot ).render( <WriteItForMeButtonContainer /> );
+	} else {
+		render( <WriteItForMeButtonContainer />, buttonRoot );
+	}
+};
+
+renderRoot();
