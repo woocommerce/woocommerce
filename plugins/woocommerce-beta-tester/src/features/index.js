@@ -25,7 +25,10 @@ function Features() {
 
 	const afterToggleCallback = {
 		'new-product-management-experience': () => {
-			location.reload();
+			window.location.reload();
+		},
+		'product-block-editor': () => {
+			window.location.reload();
 		},
 	};
 
@@ -51,9 +54,7 @@ function Features() {
 								checked={ features[ feature_name ] }
 								onChange={ async () => {
 									await toggleFeature( feature_name );
-									if ( afterToggleCallback[ feature_name ] ) {
-										afterToggleCallback[ feature_name ]();
-									}
+									afterToggleCallback[ feature_name ]?.();
 								} }
 							/>
 						</li>
