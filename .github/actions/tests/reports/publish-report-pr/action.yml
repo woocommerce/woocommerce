@@ -1,0 +1,12 @@
+name: Publish E2E report
+description: Upload Allure files to bucket.
+permissions: {}
+
+inputs:
+    #mytodo
+
+runs:
+    using: composite
+    steps:
+        #mytodo
+        - name: step 1
