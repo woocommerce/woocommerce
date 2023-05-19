@@ -646,7 +646,7 @@ jQuery( function ( $ ) {
 			var $parent = $( this ).parent().parent();
 			var confirmMessage = $parent
 				.find( 'input[name^="attribute_variation"]' )
-				.is( ':checked' )
+				.is( ':visible:checked' )
 				? woocommerce_admin_meta_boxes.i18n_remove_used_attribute_confirmation_message
 				: woocommerce_admin_meta_boxes.remove_attribute;
 
