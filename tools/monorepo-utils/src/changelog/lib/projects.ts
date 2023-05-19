@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import fs from 'fs';
+import { existsSync } from 'fs';
+import { readFile } from 'fs/promises';
 import path from 'path';
 import { glob } from 'glob';
 import simpleGit from 'simple-git';
@@ -46,11 +47,11 @@ export const getChangeloggerProjects = async (
 	projects: Array< string >
 ) => {
 	const projectsWithComposer = projects.filter( ( project ) => {
-		return fs.existsSync( `${ tmpRepoPath }/${ project }/composer.json` );
+		return existsSync( `${ tmpRepoPath }/${ project }/composer.json` );
 	} );
-	return projectsWithComposer.filter( ( project ) => {
+	return projectsWithComposer.filter( async ( project ) => {
 		const composer = JSON.parse(
-			fs.readFileSync(
+			await readFile(
 				`${ tmpRepoPath }/${ project }/composer.json`,
 				'utf8'
 			)
@@ -153,7 +154,7 @@ export const getTouchedProjectsRequiringChangelog = async (
 	base: string,
 	head: string
 ) => {
-	const workspaceYaml = fs.readFileSync(
+	const workspaceYaml = await readFile(
 		path.join( tmpRepoPath, 'pnpm-workspace.yaml' ),
 		'utf8'
 	);
