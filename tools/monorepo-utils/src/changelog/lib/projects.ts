@@ -184,7 +184,6 @@ export const getTouchedProjectsRequiringChangelog = async (
 		head,
 		fileName
 	);
-	console.log( touchedFilePaths );
 
 	return getTouchedChangeloggerProjectsPathsMappedToProjects(
 		touchedFilePaths,
