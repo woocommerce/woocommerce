@@ -103,9 +103,7 @@ export const getTouchedFilePaths = async (
 			.split( '\n' )
 			.filter( ( item ) => item.trim() )
 			// Don't count changelogs themselves as touched files.
-			.filter(
-				( item ) => ! item.includes( `/changeglog/${ fileName }` )
-			)
+			.filter( ( item ) => ! item.includes( `/changelog/${ fileName }` ) )
 	);
 };
 
@@ -186,6 +184,7 @@ export const getTouchedProjectsRequiringChangelog = async (
 		head,
 		fileName
 	);
+	console.log( touchedFilePaths );
 
 	return getTouchedChangeloggerProjectsPathsMappedToProjects(
 		touchedFilePaths,
