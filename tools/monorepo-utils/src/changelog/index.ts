@@ -85,6 +85,15 @@ const program = new Command( 'changelog' )
 				`Temporary clone of '${ headOwner }/${ name }' created at ${ tmpRepoPath }`
 			);
 
+			// When a devRepoPath is provided, assume that the dependencies are already installed.
+			if ( ! devRepoPath ) {
+				Logger.notice( `Installing dependencies in ${ tmpRepoPath }` );
+				execSync( 'pnpm install', {
+					cwd: tmpRepoPath,
+					stdio: 'inherit',
+				} );
+			}
+
 			Logger.notice( `Checking out remote branch ${ branch }` );
 			await checkoutRemoteBranch( tmpRepoPath, branch );
 
