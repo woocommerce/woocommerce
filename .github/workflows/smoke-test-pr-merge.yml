@@ -39,7 +39,7 @@ jobs:
               id: run-api-composite-action
               uses: ./.github/actions/tests/run-api-tests
               with:
-                  report-name: ${{ env.ARTIFACT_NAME }}
+                  artifact-name: ${{ env.ARTIFACT_NAME }}
 
             - name: Upload Allure files to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
@@ -103,7 +103,7 @@ jobs:
               env:
                   E2E_MAX_FAILURES: 15
               with:
-                  report-name: ${{ env.ARTIFACT_NAME }}
+                  artifact-name: ${{ env.ARTIFACT_NAME }}
 
             - name: Upload Allure files to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )

@@ -1,5 +1,4 @@
 name: Publish E2E report
-description: Upload Allure files to bucket.
 permissions: {}
 
 inputs:

@@ -3,7 +3,7 @@ description: Runs the WooCommerce Core E2E tests and generates Allure report.
 permissions: {}
 
 inputs:
-    report-name:
+    artifact-name:
         description: Name of Allure report to be generated.
         required: true
     tests:
@@ -40,7 +40,7 @@ runs:
           if: success() || ( failure() && steps.run-e2e-tests.conclusion == 'failure' )
           uses: actions/upload-artifact@v3
           with:
-              name: ${{ inputs.report-name }}
+              name: ${{ inputs.artifact-name }}
               path: |
                   ${{ env.ALLURE_RESULTS_DIR }}
                   ${{ env.ALLURE_REPORT_DIR }}

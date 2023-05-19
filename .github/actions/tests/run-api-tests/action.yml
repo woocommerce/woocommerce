@@ -1,14 +1,18 @@
 name: Run API tests
-description: Runs the WooCommerce Core API tests and generates Allure report.
+description: Run WooCommerce Core API tests, generate Allure report and upload it as artifact.
 permissions: {}
 
 inputs:
-    report-name:
-        description: Name of Allure report to be generated.
-        required: true
+    artifact-name:
+        default: API test report
+        description: Artifact with allure-results, allure-report folders.
     tests:
-        description: Specific tests to run, separated by single whitespace. See https://playwright.dev/docs/test-cli
-
+        description: |
+            Specific tests to run, separated by single whitespace.
+            See https://playwright.dev/docs/test-cli.
+    report-title:
+        default: API test report
+        description: Title to appear on Allure Overview page.
 outputs:
     result:
         description: Whether the test passed or failed.
@@ -29,11 +33,23 @@ runs:
           shell: bash
           run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
+        # mytodo copy to e2e
+        - name: Update report title
+          uses: actions/github-script@v6
+          env:
+              SCRIPT_PATH: ./.github/actions/tests/reports/scripts/set-report-title.js
+          with: |
+              const script = require( process.env.SCRIPT_PATH );
+              script(
+                ${{ env.ALLURE_REPORT_DIR }},
+                ${{ inputs.report-title }}
+              );
+
         - name: Archive test report
           if: success() || ( failure() && steps.run-api-tests.conclusion == 'failure' )
           uses: actions/upload-artifact@v3
           with:
-              name: ${{ inputs.report-name }}
+              name: ${{ inputs.artifact-name }}
               path: |
                   ${{ env.ALLURE_RESULTS_DIR }}
                   ${{ env.ALLURE_REPORT_DIR }}
