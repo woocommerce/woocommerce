@@ -64,7 +64,7 @@ class ReportFilters extends Component {
 				</div>
 			);
 		}
-		if ( query[ param ] === 'advanced' ) {
+		if ( query[ param ] === 'advancedTHISshouldFIXallTHEthings' ) {
 			return (
 				<div
 					key={ param }
