@@ -95,8 +95,22 @@ function wc_caught_exception( $exception_object, $function = '', $args = array()
 	$message .= '. Args: ' . print_r( $args, true ) . '.';
 
 	do_action( 'woocommerce_caught_exception', $exception_object, $function, $args );
+
 	error_log( "Exception caught in {$function}. {$message}." );
 	// @codingStandardsIgnoreEnd
+
+	// Logging error in wc logs
+	$logger = wc_get_logger();
+	$logger->error(
+		sprintf(
+			$exception_object->getMessage() . ' Order #%d',
+			$args[0]
+		),
+		array(
+			'order' => $args[0],
+			'error' => $exception_object,
+		)
+	);
 }
 
 /**

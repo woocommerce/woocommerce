@@ -9,9 +9,8 @@
 
 ### Changes proposed in this Pull Request:
 
-<!-- Describe the changes made to this Pull Request and the reason for such changes. -->
-
-Closes # .
+Moved the WC Logger code into the "wc_caught_exception" function in the wc-deprecated-functions.php file.
+So that the users get access to these logs anywhere the "wc_caught_exception" is being used.
 
 <!-- Begin testing instructions -->
 
@@ -21,8 +20,10 @@ Closes # .
 
 Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions), include your detailed testing instructions:
 
-1.
-2.
-3.
+1. Manually create a subscription
+2. Modify the _schedule_start postmeta of the subscription and change it's value into a bool
+3. This should trigger the error
+4. Check the log in the WP Admin Dashboard
+5. The admin dashboard should log the exact exception causing the Invalid Subscription error.
 
 <!-- End testing instructions -->

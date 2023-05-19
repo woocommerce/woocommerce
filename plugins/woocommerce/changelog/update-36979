@@ -2,3 +2,5 @@ Significance: minor
 Type: update
 
 Log get_order() exception using standard WC Logger
+
+Moved the logger code to "wc_caught_exception" function.
