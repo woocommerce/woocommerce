@@ -17,3 +17,4 @@ export { default as Alert } from './library/alert';
 export { default as customerAccount } from './library/customer-account';
 export { default as customerAccountStyle } from './library/customer-account-style';
 export { default as customerAccountStyleAlt } from './library/customer-account-style-alt';
+export { default as productDetails } from './library/product-details';
