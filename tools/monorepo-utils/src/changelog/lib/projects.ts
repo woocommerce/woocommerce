@@ -71,12 +71,14 @@ export const getChangeloggerProjectPaths = async (
  * @param {string} tmpRepoPath Path to the temporary repository.
  * @param {string} base        base hash
  * @param {string} head        head hash
+ * @param {string} fileName    changelog file name
  * @return {Array<string>} List of files changed in a PR.
  */
 export const getTouchedFilePaths = async (
 	tmpRepoPath: string,
 	base: string,
-	head: string
+	head: string,
+	fileName: string
 ) => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
@@ -96,7 +98,15 @@ export const getTouchedFilePaths = async (
 		'--name-only',
 		`${ base }...${ head }`,
 	] );
-	return diff.split( '\n' ).filter( ( item ) => item.trim() );
+	return (
+		diff
+			.split( '\n' )
+			.filter( ( item ) => item.trim() )
+			// Don't count changelogs themselves as touched files.
+			.filter(
+				( item ) => ! item.includes( `/changeglog/${ fileName }` )
+			)
+	);
 };
 
 /**
@@ -156,12 +166,14 @@ export const getAllProjectPaths = async ( tmpRepoPath: string ) => {
  * @param {string} tmpRepoPath Path to the temporary repository.
  * @param {string} base        base hash
  * @param {string} head        head hash
+ * @param {string} fileName    changelog file name
  * @return {Array<string>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
  */
 export const getTouchedProjectsRequiringChangelog = async (
 	tmpRepoPath: string,
 	base: string,
-	head: string
+	head: string,
+	fileName: string
 ) => {
 	const allProjectPaths = await getAllProjectPaths( tmpRepoPath );
 	const changeloggerProjectsPaths = await getChangeloggerProjectPaths(
@@ -171,7 +183,8 @@ export const getTouchedProjectsRequiringChangelog = async (
 	const touchedFilePaths = await getTouchedFilePaths(
 		tmpRepoPath,
 		base,
-		head
+		head,
+		fileName
 	);
 
 	return getTouchedChangeloggerProjectsPathsMappedToProjects(

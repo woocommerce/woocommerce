@@ -108,7 +108,8 @@ const program = new Command( 'changelog' )
 				await getTouchedProjectsRequiringChangelog(
 					tmpRepoPath,
 					base,
-					head
+					head,
+					fileName
 				);
 
 			try {
