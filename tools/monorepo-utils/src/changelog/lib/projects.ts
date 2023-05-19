@@ -103,9 +103,9 @@ export const getTouchedFiles = async (
  *
  * @param {Array<string>} touchedFiles         List of files changed in a PR. touchedFiles
  * @param {Array<string>} changeloggerProjects List of projects that have Jetpack changelogger enabled.
- * @return {Array<string>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
+ * @return {Array<object>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
  */
-export const intersectTouchedFilesWithChangeloggerProjects = (
+export const getTouchedChangeloggerProjectsMapped = (
 	touchedFiles: Array< string >,
 	changeloggerProjects: Array< string >
 ) => {
@@ -126,11 +126,17 @@ export const intersectTouchedFilesWithChangeloggerProjects = (
 		} );
 	return touchedProjectsRequiringChangelogFullPath.map( ( project ) => {
 		if ( project.includes( 'plugins/' ) ) {
-			return project.replace( 'plugins/', '' );
+			return {
+				project: project.replace( 'plugins/', '' ),
+				path: project,
+			};
 		} else if ( project.includes( 'packages/js/' ) ) {
-			return project.replace( 'packages/js/', '@woocommerce/' );
+			return {
+				project: project.replace( 'packages/js/', '@woocommerce/' ),
+				path: project,
+			};
 		}
-		return project;
+		return { path: project, project };
 	} );
 };
 
@@ -140,7 +146,7 @@ export const intersectTouchedFilesWithChangeloggerProjects = (
  * @param {string} tmpRepoPath Path to the temporary repository.
  * @param {string} base        base hash
  * @param {string} head        head hash
- * @return {Array<string>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
+ * @return {Array<object>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
  */
 export const getTouchedProjectsRequiringChangelog = async (
 	tmpRepoPath: string,
@@ -158,7 +164,7 @@ export const getTouchedProjectsRequiringChangelog = async (
 	);
 	const touchedFiles = await getTouchedFiles( tmpRepoPath, base, head );
 
-	return intersectTouchedFilesWithChangeloggerProjects(
+	return getTouchedChangeloggerProjectsMapped(
 		touchedFiles,
 		changeloggerProjects
 	);

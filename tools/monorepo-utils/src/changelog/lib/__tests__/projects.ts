@@ -9,8 +9,9 @@ import path from 'path';
 import {
 	getAllProjects,
 	getChangeloggerProjects,
-	intersectTouchedFilesWithChangeloggerProjects,
+	getTouchedChangeloggerProjectsMapped,
 } from '../projects';
+import exp from 'constants';
 
 const sampleWorkspaceYaml = `
 packages:
@@ -69,7 +70,7 @@ describe( 'Changelog project functions', () => {
 		);
 	} );
 
-	it( 'intersectTouchedFilesWithChangeloggerProjects should combine touched and changelogger projects and return a list that is a subset of both', async () => {
+	it( 'getTouchedChangeloggerProjectsMapped should combine touched and changelogger projects and return a list that is a subset of both', async () => {
 		const touchedFiles = [
 			'folder-with-lots-of-projects/project-b/src/index.js',
 			'projects/very-cool-project/src/index.js',
@@ -79,20 +80,24 @@ describe( 'Changelog project functions', () => {
 			'folder-with-lots-of-projects/project-a',
 			'projects/very-cool-project',
 		];
-		const intersectedProjects =
-			intersectTouchedFilesWithChangeloggerProjects(
-				touchedFiles,
-				changeLoggerProjects
-			);
+		const intersectedProjects = getTouchedChangeloggerProjectsMapped(
+			touchedFiles,
+			changeLoggerProjects
+		);
 
 		expect( intersectedProjects ).toHaveLength( 2 );
-		expect( intersectedProjects ).toContain(
+		const intersectedProjectsPaths = intersectedProjects.map(
+			( i ) => i.path
+		);
+		expect( intersectedProjectsPaths ).toContain(
 			'folder-with-lots-of-projects/project-b'
 		);
-		expect( intersectedProjects ).toContain( 'projects/very-cool-project' );
+		expect( intersectedProjectsPaths ).toContain(
+			'projects/very-cool-project'
+		);
 	} );
 
-	it( 'intersectTouchedFilesWithChangeloggerProjects should map plugins and js packages to the correct name', async () => {
+	it( 'getTouchedChangeloggerProjectsMapped should map plugins and js packages to the correct name', async () => {
 		const touchedFiles = [
 			'plugins/beta-tester/src/index.js',
 			'plugins/woocommerce/src/index.js',
@@ -105,20 +110,38 @@ describe( 'Changelog project functions', () => {
 			'packages/js/data',
 			'packages/js/components',
 		];
-		const intersectedProjects =
-			intersectTouchedFilesWithChangeloggerProjects(
-				touchedFiles,
-				changeLoggerProjects
-			);
+		const mappedTouchedProjects = getTouchedChangeloggerProjectsMapped(
+			touchedFiles,
+			changeLoggerProjects
+		);
 
-		expect( intersectedProjects ).toHaveLength( 4 );
-		expect( intersectedProjects ).toContain( 'woocommerce' );
-		expect( intersectedProjects ).toContain( 'beta-tester' );
-		expect( intersectedProjects ).toContain( '@woocommerce/components' );
-		expect( intersectedProjects ).toContain( '@woocommerce/data' );
+		expect( mappedTouchedProjects ).toHaveLength( 4 );
+
+		const woocommerce = mappedTouchedProjects.find(
+			( p ) => p.project === 'woocommerce'
+		);
+		const betaTester = mappedTouchedProjects.find(
+			( p ) => p.project === 'beta-tester'
+		);
+		const components = mappedTouchedProjects.find(
+			( p ) => p.project === '@woocommerce/components'
+		);
+		const data = mappedTouchedProjects.find(
+			( p ) => p.project === '@woocommerce/data'
+		);
+
+		expect( woocommerce ).toBeDefined();
+		expect( betaTester ).toBeDefined();
+		expect( components ).toBeDefined();
+		expect( data ).toBeDefined();
+
+		expect( woocommerce.path ).toBe( 'plugins/woocommerce' );
+		expect( betaTester.path ).toBe( 'plugins/beta-tester' );
+		expect( components.path ).toBe( 'packages/js/components' );
+		expect( data.path ).toBe( 'packages/js/data' );
 	} );
 
-	it( 'intersectTouchedFilesWithChangeloggerProjects should handle woocommerce-admin projects mapped to woocommerce core', async () => {
+	it( 'getTouchedChangeloggerProjectsMapped should handle woocommerce-admin projects mapped to woocommerce core', async () => {
 		const touchedFiles = [
 			'plugins/beta-tester/src/index.js',
 			'plugins/woocommerce-admin/src/index.js',
@@ -127,14 +150,24 @@ describe( 'Changelog project functions', () => {
 			'plugins/woocommerce',
 			'plugins/beta-tester',
 		];
-		const intersectedProjects =
-			intersectTouchedFilesWithChangeloggerProjects(
-				touchedFiles,
-				changeLoggerProjects
-			);
+		const mappedTouchedProjects = getTouchedChangeloggerProjectsMapped(
+			touchedFiles,
+			changeLoggerProjects
+		);
 
-		expect( intersectedProjects ).toHaveLength( 2 );
-		expect( intersectedProjects ).toContain( 'woocommerce' );
-		expect( intersectedProjects ).toContain( 'beta-tester' );
+		expect( mappedTouchedProjects ).toHaveLength( 2 );
+
+		const woocommerce = mappedTouchedProjects.find(
+			( p ) => p.project === 'woocommerce'
+		);
+		const betaTester = mappedTouchedProjects.find(
+			( p ) => p.project === 'beta-tester'
+		);
+
+		expect( woocommerce ).toBeDefined();
+		expect( betaTester ).toBeDefined();
+
+		expect( woocommerce.path ).toBe( 'plugins/woocommerce' );
+		expect( betaTester.path ).toBe( 'plugins/beta-tester' );
 	} );
 } );

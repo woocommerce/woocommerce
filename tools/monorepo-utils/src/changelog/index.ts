@@ -4,6 +4,7 @@
 import { Command } from '@commander-js/extra-typings';
 import { execSync } from 'child_process';
 import simpleGit from 'simple-git';
+import nodePath from 'path';
 
 /**
  * Internal dependencies
@@ -90,23 +91,34 @@ const program = new Command( 'changelog' )
 			const { significance, type, message, comment } =
 				getChangelogDetails( prBody );
 
-			touchedProjectsRequiringChangelog.forEach( ( project ) => {
-				Logger.notice( `Running changelog command for ${ project }` );
-				// remove changelog file if it exists.
-				execSync( `rm ${ fileName }`, {
-					cwd: tmpRepoPath,
-					stdio: 'inherit',
-				} );
-				const messageExpression = message ? `-e "${ message }"` : '';
-				const commentExpression = comment ? `-c "${ comment }"` : '';
-				const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } ${ messageExpression } ${ commentExpression } -n`;
-				execSync( cmd, { cwd: tmpRepoPath, stdio: 'inherit' } );
-			} );
+			touchedProjectsRequiringChangelog.forEach(
+				( { project, path } ) => {
+					Logger.notice(
+						`Running changelog command for ${ project }`
+					);
+					// remove changelog file if it exists.
+					execSync(
+						`rm ${ nodePath.join( path, 'changelog', fileName ) }`,
+						{
+							cwd: tmpRepoPath,
+							stdio: 'inherit',
+						}
+					);
+					const messageExpression = message
+						? `-e "${ message }"`
+						: '';
+					const commentExpression = comment
+						? `-c "${ comment }"`
+						: '';
+					const cmd = `pnpm --filter=${ project } run changelog add -f ${ fileName } -s ${ significance } -t ${ type } ${ messageExpression } ${ commentExpression } -n`;
+					execSync( cmd, { cwd: tmpRepoPath, stdio: 'inherit' } );
+				}
+			);
 
 			Logger.notice(
-				`Changelogs created for ${ touchedProjectsRequiringChangelog.join(
-					', '
-				) }`
+				`Changelogs created for ${ touchedProjectsRequiringChangelog
+					.map( ( p ) => p.project )
+					.join( ', ' ) }`
 			);
 
 			const git = simpleGit( {
@@ -129,12 +141,20 @@ const program = new Command( 'changelog' )
 				);
 			}
 
-			Logger.notice( `Adding and committing changes` );
-			await git.add( '.' );
-			await git.commit( 'Adding changelog from automation.' );
-			await git.push( 'origin', branch );
+			const diff = await git.diff( [ '--name-only' ] );
 
-			Logger.notice( `Pushed changes to ${ branch }` );
+			if ( diff.length > 0 ) {
+				Logger.notice( `Adding and committing changes` );
+				await git.add( '.' );
+				await git.commit( 'Adding changelog from automation.' );
+				await git.push( 'origin', branch );
+
+				Logger.notice( `Pushed changes to ${ branch }` );
+			} else {
+				Logger.notice(
+					`No changes in changelog files. Nothing to commit`
+				);
+			}
 		}
 	);
 
