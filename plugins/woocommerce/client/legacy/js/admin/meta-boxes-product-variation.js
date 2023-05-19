@@ -108,7 +108,7 @@ jQuery( function ( $ ) {
 				} );
 		},
 
-		create_variations: function ( event ) {
+		create_variations: function () {
 			return new Promise( function ( resolve, reject ) {
 				var new_attribute_data = $(
 					'.woocommerce_variation_new_attribute_data'
