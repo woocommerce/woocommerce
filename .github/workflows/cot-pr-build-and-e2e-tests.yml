@@ -52,7 +52,7 @@ jobs:
                   region: ${{ secrets.REPORTS_AWS_REGION }}
                   access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   reports-home: ${{ secrets.REPORTS_BUCKET }}
-                  allure-report-dir: ${{ env.ALLURE_REPORT_DIR }}
+                  allure-report-dir: ${{ steps.api-action.outputs.allure-report-dir }}
                   feat-slug: ${{ env.FEATURE_SLUG }}
                   test-type: api
 # mytodo enable

@@ -54,9 +54,7 @@ runs:
               SOURCE: ${{ inputs.allure-report-dir }}
               TARGET: ${{ steps.upload-path.outputs.result }}
           run: |
-              echo "SOURCE" "$SOURCE"
-              echo "TARGET" "$TARGET"
-              aws s3 cp ${{ env.SOURCE }} ${{ env.TARGET }} \
+              aws s3 cp "${{ env.SOURCE }}" "${{ env.TARGET }}" \
                 --recursive \
                 --only-show-errors
 
