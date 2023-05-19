@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Report e2e, api tests with HPOS enabled.
