@@ -10,6 +10,10 @@ export const useTinyEditor = () => {
 		typeof tinymce === 'object' ? tinymce.get( 'content' ) : null;
 
 	const setTinyContent = ( str: string ) => {
+		if ( ! str.length ) {
+			return;
+		}
+
 		const contentTinyMCE = getTinyContentObject();
 		if ( contentTinyMCE ) {
 			contentTinyMCE.setContent( str );
