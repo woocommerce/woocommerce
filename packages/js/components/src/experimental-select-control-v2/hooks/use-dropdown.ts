@@ -23,24 +23,11 @@ type useDropdownProps< Item > = {
 export function useDropdown< Item = DefaultItem >( {
 	getItemLabel = ( item: Item ) => ( item as DefaultItem ).label,
 	initialSelected,
+	items,
 	multiple = false,
 	onDeselect = () => null,
 	onSelect = () => null,
 }: useDropdownProps< Item > ) {
-	const {
-		close: closeListbox,
-		props: listboxProps,
-		isOpen: isListboxOpen,
-		open: openListbox,
-	} = useListbox( {
-		multiple,
-	} );
-	const {
-		props: comboboxProps,
-		value: inputValue,
-		setValue: setInputValue,
-	} = useCombobox( { closeListbox, openListbox } );
-
 	function getInitialSelected(): Item[] {
 		if ( ! initialSelected ) {
 			return [];
@@ -74,6 +61,31 @@ export function useDropdown< Item = DefaultItem >( {
 			setInputValue( getItemLabel( item ) );
 		}
 	}
+
+	const {
+		close: closeListbox,
+		props: listboxProps,
+		highlightedOption,
+		highlightNextOption,
+		highlightPreviousOption,
+		isOpen: isListboxOpen,
+		open: openListbox,
+	} = useListbox( {
+		multiple,
+		options: items,
+	} );
+	const {
+		props: comboboxProps,
+		value: inputValue,
+		setValue: setInputValue,
+	} = useCombobox( {
+		closeListbox,
+		highlightedOption,
+		highlightNextOption,
+		highlightPreviousOption,
+		openListbox,
+		selectItem,
+	} );
 
 	return {
 		comboboxProps,

@@ -2,15 +2,55 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, KeyboardEvent } from 'react';
 
-type useComboboxProps = {
+/**
+ * Internal dependencies
+ */
+import { DefaultItem } from '../types';
+
+type useComboboxProps< Item > = {
 	closeListbox: () => void;
 	openListbox: () => void;
+	highlightedOption: Item | null;
+	highlightNextOption: () => void;
+	highlightPreviousOption: () => void;
+	selectItem: ( item: Item ) => void;
 };
 
-export function useCombobox( { closeListbox, openListbox }: useComboboxProps ) {
+export function useCombobox< Item = DefaultItem >( {
+	closeListbox,
+	highlightedOption,
+	highlightNextOption,
+	highlightPreviousOption,
+	openListbox,
+	selectItem,
+}: useComboboxProps< Item > ) {
 	const [ value, setValue ] = useState< string >( '' );
+
+	function onKeyDown( event: KeyboardEvent< HTMLInputElement > ) {
+		switch ( event.key ) {
+			case 'ArrowDown':
+				openListbox();
+				highlightNextOption();
+				break;
+			case 'ArrowUp':
+				openListbox();
+				highlightPreviousOption();
+				break;
+			case 'Enter':
+				if ( highlightedOption ) {
+					selectItem( highlightedOption );
+				}
+				break;
+			case 'Escape':
+				setValue( '' );
+				closeListbox();
+				break;
+			default:
+				openListbox();
+		}
+	}
 
 	return {
 		setValue,
@@ -27,6 +67,7 @@ export function useCombobox( { closeListbox, openListbox }: useComboboxProps ) {
 			onFocus: () => {
 				openListbox();
 			},
+			onKeyDown,
 			role: 'combobox',
 			value,
 		},
