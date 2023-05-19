@@ -202,15 +202,19 @@ export const getPullRequest = async (
  * Determine if a pull request is coming from a community contribution. ie, not from a member of the woocommerce org.
  *
  * @param {Object} pullRequestData pull request data.
+ * @param {string} owner           repository owner.
+ * @param {string} name            repository name.
  * @return {boolean} if a pull request is coming from a community contribution.
  */
 export const isCommunityPullRequest = (
-	pullRequestData: PullRequestEndpointResponse[ 'data' ]
+	pullRequestData: PullRequestEndpointResponse[ 'data' ],
+	owner: string,
+	name: string
 ) => {
 	return (
 		pullRequestData.author_association === 'CONTRIBUTOR' ||
 		// Its possible a MEMBER can open a PR from thier own fork.
 		( pullRequestData.author_association === 'MEMBER' &&
-			pullRequestData.head.repo.full_name !== 'woocommerce/woocommerce' )
+			pullRequestData.head.repo.full_name !== `${ owner }/${ name }` )
 	);
 };
