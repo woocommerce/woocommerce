@@ -1,4 +1,4 @@
-name: Run tests against PR in an environment with COT enabled
+name: Run tests against PR (with HPOS)
 on:
     pull_request:
     workflow_dispatch:
@@ -9,66 +9,11 @@ concurrency:
 
 permissions: {}
 
+env:
+    ENABLE_HPOS: 1
+    FEATURE_SLUG: hpos
+
 jobs:
-    cot-e2e-tests-run:
-        name: Runs E2E tests with COT enabled.
-        runs-on: ubuntu-20.04
-        permissions:
-            contents: read
-        env:
-            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
-            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
-            ARTIFACT_NAME: e2e-pr-hpos-${{ github.event.pull_request.number }}-run-${{ github.run_number }}
-            ENABLE_HPOS: 1
-            FEATURE_SLUG: hpos
-        steps:
-            - uses: actions/checkout@v3
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  build-filters: woocommerce
-
-            - name: Setup local test environment
-              uses: ./.github/actions/tests/setup-local-test-environment
-              with:
-                  test-type: e2e
-
-            - name: Run E2E tests
-              id: e2e-action
-              timeout-minutes: 60
-              uses: ./.github/actions/tests/run-e2e-tests
-              env:
-                  E2E_MAX_FAILURES: 15
-              with:
-                  report-name: ${{ env.ARTIFACT_NAME }}
-                  tests: basic.spec.js # mytodo remove
-
-            - name: Upload Allure files to bucket
-              if: success() || ( failure() && steps.e2e-action.result == 'failure' )
-              uses: ./.github/actions/tests/upload-allure-files-to-bucket
-              with:
-                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
-                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
-                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  artifact-name: ${{ env.ARTIFACT_NAME }}
-                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
-
-            - name: Publish Allure report
-              if: success() || ( failure() && steps.e2e-action.result == 'failure' )
-              env:
-                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-              run: |
-                  gh workflow run publish-test-reports-pr.yml \
-                    -f run_id=$RUN_ID \
-                    -f api_artifact=$API_ARTIFACT \
-                    -f e2e_artifact=$E2E_ARTIFACT \
-                    -f pr_number=$PR_NUMBER \
-                    -f commit_sha=$COMMIT_SHA \
-                    -f s3_root=public \
-                    -f feat_slug=${{ env.FEATURE_SLUG }} \# mytodo add feature support on REP repo
-                    --repo woocommerce/woocommerce-test-reports
-
     cot-api-tests-run:
         name: Runs API tests with COT enabled.
         runs-on: ubuntu-20.04
@@ -78,7 +23,6 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
             ARTIFACT_NAME: api-pr-hpos-${{ github.event.pull_request.number }}-run-${{ github.run_number }}
-            ENABLE_HPOS: 1
         steps:
             - uses: actions/checkout@v3
 
@@ -121,5 +65,63 @@ jobs:
                     -f pr_number=$PR_NUMBER \
                     -f commit_sha=$COMMIT_SHA \
                     -f s3_root=public \
-                  -f feat_slug=${{ env.FEATURE_SLUG }} \ # mytodo add feature support on REP repo
+                    -f feat_slug=${{ env.FEATURE_SLUG }} \ # mytodo add feature support on REP repo
                     --repo woocommerce/woocommerce-test-reports
+
+cot-e2e-tests-run:
+    name: Runs E2E tests with COT enabled.
+    needs: [cot-api-tests-run]
+    runs-on: ubuntu-20.04
+    permissions:
+        contents: read
+    env:
+        ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
+        ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
+        ARTIFACT_NAME: e2e-pr-hpos-${{ github.event.pull_request.number }}-run-${{ github.run_number }}
+    steps:
+        - uses: actions/checkout@v3
+
+        - name: Setup WooCommerce Monorepo
+          uses: ./.github/actions/setup-woocommerce-monorepo
+          with:
+              build-filters: woocommerce
+
+        - name: Setup local test environment
+          uses: ./.github/actions/tests/setup-local-test-environment
+          with:
+              test-type: e2e
+
+        - name: Run E2E tests
+          id: e2e-action
+          timeout-minutes: 60
+          uses: ./.github/actions/tests/run-e2e-tests
+          env:
+              E2E_MAX_FAILURES: 15
+          with:
+              report-name: ${{ env.ARTIFACT_NAME }}
+              tests: basic.spec.js # mytodo remove
+
+        - name: Upload Allure files to bucket
+          if: success() || ( failure() && steps.e2e-action.result == 'failure' )
+          uses: ./.github/actions/tests/upload-allure-files-to-bucket
+          with:
+              aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+              aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+              aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+              artifact-name: ${{ env.ARTIFACT_NAME }}
+              s3-bucket: ${{ secrets.REPORTS_BUCKET }}
+
+        - name: Publish Allure report
+          if: success() || ( failure() && steps.e2e-action.result == 'failure' )
+          env:
+              GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+          run: |
+              gh workflow run publish-test-reports-pr.yml \
+                -f run_id=$RUN_ID \
+                -f api_artifact=$API_ARTIFACT \
+                -f e2e_artifact=$E2E_ARTIFACT \
+                -f pr_number=$PR_NUMBER \
+                -f commit_sha=$COMMIT_SHA \
+                -f s3_root=public \
+                -f feat_slug=${{ env.FEATURE_SLUG }} \# mytodo add feature support on REP repo
+                --repo woocommerce/woocommerce-test-reports
