@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix product task import for cases when user locale is en_US

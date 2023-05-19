@@ -18,8 +18,10 @@ import {
 	BlockTools,
 	EditorSettings,
 	EditorBlockListSettings,
-	WritingFlow,
 	ObserveTyping,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
+	__unstableEditorStyles as EditorStyles,
 } from '@wordpress/block-editor';
 // It doesn't seem to notice the External dependency block whn @ts-ignore is added.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -101,16 +103,15 @@ export function BlockEditor( {
 					onChange={ onChange }
 					settings={ settings }
 				>
+					<EditorStyles styles={ settings?.styles } />
 					<div className="editor-styles-wrapper">
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 						{ /* @ts-ignore No types for this exist yet. */ }
 						<BlockEditorKeyboardShortcuts.Register />
 						<BlockTools>
-							<WritingFlow>
-								<ObserveTyping>
-									<BlockList className="woocommerce-product-block-editor__block-list" />
-								</ObserveTyping>
-							</WritingFlow>
+							<ObserveTyping>
+								<BlockList className="woocommerce-product-block-editor__block-list" />
+							</ObserveTyping>
 						</BlockTools>
 					</div>
 				</BlockEditorProvider>

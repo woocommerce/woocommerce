@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Removed global enqueue of wc-cart-fragments. Moved to the cart widget (its main consumer).

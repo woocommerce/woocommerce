@@ -790,4 +790,36 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$errors = $this->sut->verify_migrated_orders( array( $order1->get_id(), $order2->get_id() ) );
 		$this->assertEmpty( $errors );
 	}
+
+	/**
+	 * @testDox Test migration when SQL mode does not allow 0 dates.
+	 */
+	public function test_migration_with_null_date_and_strict_sql_mode() {
+		global $wpdb;
+
+		$order = OrderHelper::create_order();
+		delete_post_meta( $order->get_id(), '_date_paid' );
+
+		$sql_mode = $wpdb->get_var( 'SELECT @@sql_mode' );
+
+		// Set SQL mode to strict to disallow 0 dates.
+		$wpdb->query( "SET sql_mode = 'TRADITIONAL'" );
+
+		// Assert that strict mode was indeed enabled, by trying to insert 0 date.
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$wpdb->suppress_errors();
+
+		// phpcs:ignore -- Ignoring this error because we are testing for it.
+		$result = $wpdb->query( "INSERT INTO $orders_table (date_created_gmt) VALUES ('0000-00-00 00:00:00')" );
+		$this->assertFalse( $result );
+		$wpdb->suppress_errors( false );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+		$this->assertEmpty( $errors ); // _customer_user_agent
+
+		// phpcs:ignore -- Hardcoded value.
+		$wpdb->query( "SET sql_mode = '$sql_mode' " );
+	}
 }

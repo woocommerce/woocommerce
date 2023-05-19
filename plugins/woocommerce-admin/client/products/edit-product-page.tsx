@@ -21,7 +21,7 @@ import { useParams } from 'react-router-dom';
 import { ProductForm } from './product-form';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductVariationForm } from './product-variation-form';
-import './product-page.scss';
+import './add-edit-product-page.scss';
 import './fills';
 
 const EditProductPage: React.FC = () => {
@@ -94,7 +94,7 @@ const EditProductPage: React.FC = () => {
 	);
 
 	useEffect( () => {
-		// used for determening the wasDeletedUsingAction condition.
+		// used for determining the wasDeletedUsingAction condition.
 		if (
 			previousProductRef.current &&
 			product &&

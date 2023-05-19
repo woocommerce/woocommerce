@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix tracks user ID mismatch between PHP and JS when Jetpack is active and connected

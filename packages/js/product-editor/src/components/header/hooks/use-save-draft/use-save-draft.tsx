@@ -10,6 +10,12 @@ import { check } from '@wordpress/icons';
 import { createElement, Fragment } from '@wordpress/element';
 import { MouseEvent, ReactNode } from 'react';
 
+/**
+ * Internal dependencies
+ */
+import { useValidations } from '../../../../contexts/validation-context';
+import { WPError } from '../../../../utils/get-product-error-message';
+
 export function useSaveDraft( {
 	disabled,
 	onClick,
@@ -18,14 +24,14 @@ export function useSaveDraft( {
 	...props
 }: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' > & {
 	onSaveSuccess?( product: Product ): void;
-	onSaveError?( error: Error ): void;
+	onSaveError?( error: WPError ): void;
 } ): Button.ButtonProps {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
 		'product',
 		'id'
 	);
-	const [ productStatus ] = useEntityProp< ProductStatus | 'auto-draft' >(
+	const [ productStatus ] = useEntityProp< ProductStatus >(
 		'postType',
 		'product',
 		'status'
@@ -35,8 +41,6 @@ export function useSaveDraft( {
 		( select ) => {
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
-			const { isPostSavingLocked } = select( 'core/editor' );
-			const isSavingLocked = isPostSavingLocked();
 			const isSaving = isSavingEntityRecord< boolean >(
 				'postType',
 				'product',
@@ -44,7 +48,7 @@ export function useSaveDraft( {
 			);
 
 			return {
-				isDisabled: isSavingLocked || isSaving,
+				isDisabled: isSaving,
 				hasEdits: hasEditsForEntityRecord< boolean >(
 					'postType',
 					'product',
@@ -55,8 +59,13 @@ export function useSaveDraft( {
 		[ productId ]
 	);
 
+	const { isValidating, validate } = useValidations();
+
 	const ariaDisabled =
-		disabled || isDisabled || ( productStatus !== 'publish' && ! hasEdits );
+		disabled ||
+		isDisabled ||
+		( productStatus !== 'publish' && ! hasEdits ) ||
+		isValidating;
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
@@ -70,13 +79,18 @@ export function useSaveDraft( {
 		}
 
 		try {
+			await validate();
+
 			await editEntityRecord( 'postType', 'product', productId, {
 				status: 'draft',
 			} );
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				'product',
-				productId
+				productId,
+				{
+					throwOnError: true,
+				}
 			);
 
 			if ( onSaveSuccess ) {
@@ -84,7 +98,7 @@ export function useSaveDraft( {
 			}
 		} catch ( error ) {
 			if ( onSaveError ) {
-				onSaveError( error as Error );
+				onSaveError( error as WPError );
 			}
 		}
 	}

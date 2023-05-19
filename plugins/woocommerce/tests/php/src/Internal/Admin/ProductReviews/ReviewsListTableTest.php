@@ -89,7 +89,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $review_status  The review status.
 	 * @param string $column_name    The current column name being output.
-	 * @param string $primary_column The primary colum name.
+	 * @param string $primary_column The primary column name.
 	 * @param bool   $user_can_edit  Whether the current user can edit reviews.
 	 *
 	 * @return void

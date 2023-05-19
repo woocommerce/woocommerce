@@ -74,7 +74,6 @@ describe( 'CategoryField', () => {
 			</Form>
 		);
 		queryByPlaceholderText( 'Search or create category…' )?.focus();
-		expect( queryAllByText( 'Test' ) ).toHaveLength( 2 );
-		expect( queryAllByText( 'Clothing' ) ).toHaveLength( 2 );
+		expect( queryAllByText( 'Test, Clothing' ) ).toHaveLength( 1 );
 	} );
 } );

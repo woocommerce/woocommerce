@@ -11,11 +11,15 @@ import {
 	Dropdown,
 	SelectControl,
 } from '@wordpress/components';
-import { createElement, Component, createRef } from '@wordpress/element';
+import {
+	createElement,
+	createInterpolateElement,
+	Component,
+	createRef,
+} from '@wordpress/element';
 import { partial, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import AddOutlineIcon from 'gridicons/dist/add-outline';
-import interpolateComponents from '@automattic/interpolate-components';
 import {
 	getActiveFiltersFromQuery,
 	getDefaultOptionValue,
@@ -143,22 +147,19 @@ class AdvancedFilters extends Component {
 	getTitle() {
 		const { match } = this.state;
 		const { config } = this.props;
-		return interpolateComponents( {
-			mixedString: config.title,
-			components: {
-				select: (
-					<SelectControl
-						className="woocommerce-filters-advanced__title-select"
-						options={ matches }
-						value={ match }
-						onChange={ this.onMatchChange }
-						aria-label={ __(
-							'Choose to apply any or all filters',
-							'woocommerce'
-						) }
-					/>
-				),
-			},
+		return createInterpolateElement( config.title, {
+			select: (
+				<SelectControl
+					className="woocommerce-filters-advanced__title-select"
+					options={ matches }
+					value={ match }
+					onChange={ this.onMatchChange }
+					aria-label={ __(
+						'Choose to apply any or all filters',
+						'woocommerce'
+					) }
+				/>
+			),
 		} );
 	}
 

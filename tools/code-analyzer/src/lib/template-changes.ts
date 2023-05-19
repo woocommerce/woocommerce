@@ -7,8 +7,8 @@ import {
 	getPullRequestNumberFromHash,
 	getPatches,
 	getLineCommitHash,
-} from 'cli-core/src/git';
-import { Logger } from 'cli-core/src/logger';
+} from '@woocommerce/monorepo-utils/src/core/git';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 
 export type TemplateChangeDescription = {
 	filePath: string;

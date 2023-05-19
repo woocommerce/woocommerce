@@ -24,9 +24,7 @@ import {
 import { useEntityProp } from '@wordpress/core-data';
 
 export function Edit() {
-	const blockProps = useBlockProps( {
-		className: 'woocommerce-product-form__inventory-email',
-	} );
+	const blockProps = useBlockProps();
 	const notifyLowStockAmount = getSetting( 'notifyLowStockAmount', 2 );
 
 	const [ lowStockAmount, setLowStockAmount ] = useEntityProp(

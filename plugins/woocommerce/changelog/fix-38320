@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Support strict SQL modes in HPOS migration that dont allow zero date values.

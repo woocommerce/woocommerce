@@ -1,24 +1,26 @@
 /**
  * External dependencies
  */
-import { Product, ProductStatus } from '@woocommerce/data';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
-import { Button } from '@wordpress/components';
-import { useEntityProp } from '@wordpress/core-data';
-import { useDispatch } from '@wordpress/data';
-import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { createElement } from '@wordpress/element';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { MouseEvent } from 'react';
+import { Product, ProductStatus } from '@woocommerce/data';
+import { useDispatch } from '@wordpress/data';
+import { useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
+import { getProductErrorMessage } from '../../../utils/get-product-error-message';
+import { recordProductEvent } from '../../../utils/record-product-event';
 import { usePublish } from '../hooks/use-publish';
 
 export function PublishButton(
 	props: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' >
 ) {
-	const [ productStatus ] = useEntityProp< ProductStatus | 'auto-draft' >(
+	const [ productStatus ] = useEntityProp< ProductStatus >(
 		'postType',
 		'product',
 		'status'
@@ -32,6 +34,8 @@ export function PublishButton(
 	const publishButtonProps = usePublish( {
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
+			recordProductEvent( 'product_update', savedProduct );
+
 			const noticeContent = isCreating
 				? __( 'Product successfully created.', 'woocommerce' )
 				: __( 'Product published.', 'woocommerce' );
@@ -59,12 +63,13 @@ export function PublishButton(
 				navigateTo( { url } );
 			}
 		},
-		onPublishError() {
-			const noticeContent = isCreating
+		onPublishError( error ) {
+			const defaultMessage = isCreating
 				? __( 'Failed to create product.', 'woocommerce' )
 				: __( 'Failed to publish product.', 'woocommerce' );
 
-			createErrorNotice( noticeContent );
+			const message = getProductErrorMessage( error );
+			createErrorNotice( message || defaultMessage );
 		},
 	} );
 

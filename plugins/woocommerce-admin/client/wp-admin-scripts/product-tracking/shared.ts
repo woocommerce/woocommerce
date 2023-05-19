@@ -26,6 +26,37 @@ const getProductType = () => {
 		?.value;
 };
 
+type ProductTypeOption = {
+	id: string | null;
+	isEnabled: boolean;
+};
+
+function getProductTypeOptions() {
+	const productTypeOptionsCheckboxes = Array.from(
+		document.querySelectorAll(
+			'input[type="checkbox"][data-product-type-option-id]'
+		)
+	) as HTMLInputElement[];
+	const productTypeOptions = productTypeOptionsCheckboxes.map(
+		( checkbox ) => {
+			return {
+				id: checkbox.getAttribute( 'data-product-type-option-id' ),
+				isEnabled: checkbox.checked,
+			};
+		}
+	);
+	return productTypeOptions;
+}
+
+function getProductTypeOptionsString(
+	productTypeOptions: ProductTypeOption[]
+) {
+	return productTypeOptions
+		.filter( ( productTypeOption ) => productTypeOption.isEnabled )
+		.map( ( productTypeOption ) => productTypeOption.id )
+		.join( ', ' );
+}
+
 const getProductData = () => {
 	const isBlockEditor =
 		document.querySelectorAll( '.block-editor' ).length > 0;
@@ -55,10 +86,15 @@ const getProductData = () => {
 		 )?.value;
 	}
 
+	const productTypeOptions = getProductTypeOptions();
+	const productTypeOptionsString =
+		getProductTypeOptionsString( productTypeOptions );
+
 	const productData = {
 		product_id: ( document.querySelector( '#post_ID' ) as HTMLInputElement )
 			?.value,
 		product_type: getProductType(),
+		product_type_options: productTypeOptionsString,
 		is_downloadable: (
 			document.querySelector( '#_downloadable' ) as HTMLInputElement
 		 )?.checked
@@ -376,59 +412,64 @@ const attachProductTagsTracks = () => {
  * Attaches attributes tracks.
  */
 const attachAttributesTracks = () => {
-	function addNewTermEventHandler() {
-		recordEvent( 'product_attributes_add_term', {
-			page: 'product',
-		} );
-	}
+	attachEventListenerToParentForChildren( '#product_attributes', [
+		{
+			eventName: 'click',
+			childQuery: '.add_new_attribute',
+			callback: () => {
+				recordEvent( 'product_attributes_add_term', {
+					page: 'product',
+				} );
+			},
+		},
+	] );
+};
 
-	function addNewAttributeTermTracks() {
-		const addNewTermButtons = document.querySelectorAll(
-			'.woocommerce_attribute .add_new_attribute'
-		);
-		addNewTermButtons.forEach( ( button ) => {
-			button.removeEventListener( 'click', addNewTermEventHandler );
-			button.addEventListener( 'click', addNewTermEventHandler );
-		} );
-	}
-	addNewAttributeTermTracks();
-
+/**
+ * Attaches Tracks event for when a new custom attribute is added to a product.
+ */
+const attachAddCustomAttributeTracks = () => {
 	document
-		.querySelector( '.add_attribute' )
+		.querySelector( '#product_attributes .add_custom_attribute' )
 		?.addEventListener( 'click', () => {
-			setTimeout( () => {
-				addNewAttributeTermTracks();
-			}, 1000 );
+			recordEvent( 'product_attributes_buttons', {
+				action: 'add_new',
+			} );
 		} );
 };
+
+/**
+ * Attaches Tracks event for when an existing global attribute is added to a product.
+ */
+const attachAddExistingAttributeTracks = () => {
+	window
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore Need to use jQuery to hook up to the select2:select event since the select2 component is jQuery-based
+		?.jQuery( 'select.wc-attribute-search' )
+		.on( 'select2:select', function () {
+			recordEvent( 'product_attributes_buttons', {
+				action: 'add_existing',
+			} );
+		} );
+};
+
+/**
+ * Gets number of attributes with 'Used for variations' checked.
+ */
+const getUsedForVariationsAttributesCount = () =>
+	( document.querySelector( '#product-type' ) as HTMLSelectElement )
+		?.value === 'variable'
+		? document.querySelectorAll(
+				'input[name^="attribute_variation"]:checked'
+		  ).length
+		: 0;
 
 /**
  * Attaches product attributes tracks.
  */
 const attachProductAttributesTracks = () => {
-	document
-		.querySelector( '#product_attributes .add_custom_attribute' )
-		?.addEventListener( 'click', () => {
-			recordEvent( 'product_attributes_buttons', {
-				action: 'add_first_attribute',
-			} );
-		} );
-	document
-		.querySelector( '#product_attributes .add_attribute' )
-		?.addEventListener( 'click', () => {
-			// We verify that we are not adding an existing attribute to not
-			// duplicate the recorded event.
-			const selectElement = document.querySelector(
-				'.attribute_taxonomy'
-			) as HTMLSelectElement;
-			// Get the index of the selected option
-			const selectedIndex = selectElement.selectedIndex;
-			if ( selectElement.options[ selectedIndex ]?.value === '' ) {
-				recordEvent( 'product_attributes_buttons', {
-					action: 'add_new',
-				} );
-			}
-		} );
+	attachAddCustomAttributeTracks();
+	attachAddExistingAttributeTracks();
 
 	const attributesSection = '#product_attributes';
 
@@ -466,10 +507,6 @@ const attachProductAttributesTracks = () => {
 		},
 	] );
 
-	const attributesCount = document.querySelectorAll(
-		'.woocommerce_attribute'
-	).length;
-
 	document
 		.querySelector( '.save_attributes' )
 		?.addEventListener( 'click', ( event ) => {
@@ -480,37 +517,27 @@ const attachProductAttributesTracks = () => {
 				// skip in case the button is disabled
 				return;
 			}
-			const newAttributesCount = document.querySelectorAll(
-				'.woocommerce_attribute'
+
+			const localAttributesCount = document.querySelectorAll(
+				'.woocommerce_attribute:not(.taxonomy)'
 			).length;
-			if ( newAttributesCount > attributesCount ) {
-				const local_attributes = [
-					...document.querySelectorAll(
-						'.woocommerce_attribute:not(.pa_glbattr)'
-					),
-				].map( ( attr ) => {
-					const terms =
-						(
-							attr.querySelector(
-								"[name^='attribute_values']"
-							) as HTMLTextAreaElement
-						 )?.value.split( '|' ).length ?? 0;
-					return {
-						name: (
-							attr.querySelector(
-								'[name^="attribute_names"]'
-							) as HTMLInputElement
-						 )?.value,
-						terms,
-					};
-				} );
-				recordEvent( 'product_attributes_add', {
-					page: 'product',
-					enable_archive: '',
-					default_sort_order: '',
-					local_attributes,
-				} );
-			}
+
+			const globalAttributesCount = document.querySelectorAll(
+				'.woocommerce_attribute.taxonomy'
+			).length;
+
+			recordEvent( 'product_attributes_save', {
+				page: 'product',
+				total_attributes_count:
+					globalAttributesCount + localAttributesCount,
+				local_attributes_count: localAttributesCount,
+				global_attributes_count: globalAttributesCount,
+				visible_on_product_page_count: document.querySelectorAll(
+					'input[name^="attribute_visibility"]:checked'
+				).length,
+				used_for_variations_count:
+					getUsedForVariationsAttributesCount(),
+			} );
 		} );
 };
 

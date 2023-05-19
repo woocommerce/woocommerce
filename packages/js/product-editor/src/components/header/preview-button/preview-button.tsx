@@ -12,6 +12,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { getProductErrorMessage } from '../../../utils/get-product-error-message';
 import { usePreview } from '../hooks/use-preview';
 
 export function PreviewButton( {
@@ -20,7 +21,7 @@ export function PreviewButton( {
 	Button.AnchorProps,
 	'aria-disabled' | 'variant' | 'href' | 'children'
 > ) {
-	const [ productStatus ] = useEntityProp< ProductStatus | 'auto-draft' >(
+	const [ productStatus ] = useEntityProp< ProductStatus >(
 		'postType',
 		'product',
 		'status'
@@ -36,9 +37,11 @@ export function PreviewButton( {
 				navigateTo( { url } );
 			}
 		},
-		onSaveError() {
+		onSaveError( error ) {
+			const message = getProductErrorMessage( error );
+
 			createErrorNotice(
-				__( 'Failed to preview product.', 'woocommerce' )
+				message || __( 'Failed to preview product.', 'woocommerce' )
 			);
 		},
 	} );

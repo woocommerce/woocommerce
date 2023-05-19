@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add e2e test for Merchant > Pages > Can create a new page
