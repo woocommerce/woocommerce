@@ -142,11 +142,7 @@ jQuery( function ( $ ) {
 		 * @param {Int} qty
 		 */
 		reload: function () {
-			wc_meta_boxes_product_variations_ajax
-				.load_variations( 1 )
-				.then( function () {
-					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state;
-				} );
+			wc_meta_boxes_product_variations_ajax.load_variations( 1 );
 			wc_meta_boxes_product_variations_pagenav.set_paginav( 0 );
 		},
 
@@ -743,18 +739,39 @@ jQuery( function ( $ ) {
 		 * @param {Int} per_page (default: 10)
 		 */
 		load_variations: function ( page, per_page ) {
+			console.log( 'load_variations' );
+			page = page || 1;
+			per_page =
+				per_page ||
+				woocommerce_admin_meta_boxes_variations.variations_per_page;
+
+			var wrapper = $( '#variable_product_options' ).find(
+				'.woocommerce_variations'
+			);
+
+			wc_meta_boxes_product_variations_ajax.block();
+
+			wc_meta_boxes_product_variations_ajax
+				.load_variations_action( page, per_page, wrapper )
+				.then( function ( response ) {
+					wrapper
+						.empty()
+						.append( response )
+						.attr( 'data-page', page );
+
+					$( '#woocommerce-product-data' ).trigger(
+						'woocommerce_variations_loaded'
+					);
+
+					wc_meta_boxes_product_variations_ajax.unblock();
+				} )
+				.catch( function ( { errorThrown } ) {
+					window.alert( errorThrown );
+				} );
+		},
+
+		load_variations_action: function ( page, per_page, wrapper ) {
 			return new Promise( function ( resolve, reject ) {
-				page = page || 1;
-				per_page =
-					per_page ||
-					woocommerce_admin_meta_boxes_variations.variations_per_page;
-
-				var wrapper = $( '#variable_product_options' ).find(
-					'.woocommerce_variations'
-				);
-
-				wc_meta_boxes_product_variations_ajax.block();
-
 				$.ajax( {
 					url: woocommerce_admin_meta_boxes_variations.ajax_url,
 					data: {
@@ -769,21 +786,9 @@ jQuery( function ( $ ) {
 					},
 					type: 'POST',
 					success: function ( response ) {
-						wrapper
-							.empty()
-							.append( response )
-							.attr( 'data-page', page );
-
-						$( '#woocommerce-product-data' ).trigger(
-							'woocommerce_variations_loaded'
-						);
-
-						wc_meta_boxes_product_variations_ajax.unblock();
-
 						resolve( response );
 					},
 					error: function ( jqXHR, textStatus, errorThrown ) {
-						wc_meta_boxes_product_variations_ajax.unblock();
 						reject( { jqXHR, textStatus, errorThrown } );
 					},
 				} );
@@ -1639,11 +1644,7 @@ jQuery( function ( $ ) {
 				selected,
 				parseInt( wrapper.attr( 'data-total_pages' ), 10 )
 			);
-			wc_meta_boxes_product_variations_ajax
-				.load_variations( selected )
-				.then( function () {
-					wc_meta_boxes_product_variations_ajax.show_hide_variation_empty_state();
-				} );
+			wc_meta_boxes_product_variations_ajax.load_variations( selected );
 		},
 
 		/**
