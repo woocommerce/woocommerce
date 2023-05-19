@@ -38,12 +38,13 @@ runs:
           uses: actions/github-script@v6
           env:
               SCRIPT_PATH: ./.github/actions/tests/reports/scripts/set-report-title.js
-          with: |
-              const script = require( process.env.SCRIPT_PATH );
-              script(
-                ${{ env.ALLURE_REPORT_DIR }},
-                ${{ inputs.report-title }}
-              );
+          with:
+              script: |
+                  const script = require( process.env.SCRIPT_PATH );
+                  script(
+                    process.env.ALLURE_REPORT_DIR,
+                    ${{ inputs.report-title }}
+                  );
 
         - name: Archive test report
           if: success() || ( failure() && steps.run-api-tests.conclusion == 'failure' )
