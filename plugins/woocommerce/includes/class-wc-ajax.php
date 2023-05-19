@@ -3047,7 +3047,7 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		$zone_id = wc_clean( wp_unslash( $_POST['method_id'] ) );
+		$zone_id = wc_clean( wp_unslash( $_POST['zone_id'] ) );
 		$zone    = new WC_Shipping_Zone( $zone_id );
 		/**
 		 * Notify that a non-option setting has been updated.
@@ -3060,7 +3060,7 @@ class WC_AJAX {
 				'id' => 'zone_method',
 			)
 		);
-		$instance_id = $zone->add_shipping_method( $zone_id );
+		$instance_id = $zone->add_shipping_method( wc_clean( wp_unslash( $_POST['method_id'] ) ) );
 
 		global $current_tab;
 		$current_tab = 'shipping';
