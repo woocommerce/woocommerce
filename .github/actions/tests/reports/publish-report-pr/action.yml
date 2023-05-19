@@ -54,6 +54,8 @@ runs:
           env:
               DESTINATION: ${{ steps.upload-path.outputs.result }}
           run: |
-              aws s3 cp . ${{ env.DESTINATION }} --quiet
+              aws s3 cp . ${{ env.DESTINATION }} \
+                --recursive \
+                --only-show-errors
 
           # mytodo add link to report
