@@ -6,6 +6,7 @@ import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { SelectControl } from '@woocommerce/components';
 import { Icon, chevronDown } from '@wordpress/icons';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -136,6 +137,8 @@ export const UserProfile = ( {
 		useState< Array< SellingPlatform > | null >(
 			context.userProfile.sellingPlatforms || null
 		);
+	const [ isPlatformDropdownOpen, setIsPlatformDropdownOpen ] =
+		useState( false );
 
 	const renderAlreadySellingOptions = () => {
 		return (
@@ -189,6 +192,7 @@ export const UserProfile = ( {
 										)
 									);
 								} }
+								onOpenClose={ setIsPlatformDropdownOpen }
 							/>
 						</div>
 					) }
@@ -230,7 +234,14 @@ export const UserProfile = ( {
 					} )
 				}
 			/>
-			<div className="woocommerce-profiler-page__content woocommerce-profiler-user-profile__content">
+			<div
+				className={ classnames(
+					'woocommerce-profiler-page__content woocommerce-profiler-user-profile__content',
+					{
+						'is-platform-selector-open': isPlatformDropdownOpen,
+					}
+				) }
+			>
 				<Heading
 					className="woocommerce-profiler__stepper-heading"
 					title={ __(

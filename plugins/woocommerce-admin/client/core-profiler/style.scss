@@ -305,6 +305,14 @@
 
 // User profile page
 .woocommerce-profiler-user-profile {
+	.woocommerce-profiler-user-profile__content {
+		min-height: 630px;
+
+		&.is-platform-selector-open {
+			padding-bottom: 145px;
+		}
+	}
+
 	.woocommerce-user-profile-choices {
 		margin-bottom: 32px;
 		max-width: 404px;

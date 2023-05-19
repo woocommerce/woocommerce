@@ -12,6 +12,7 @@
 		.woocommerce-experimental-select-control__combox-box {
 			position: absolute;
 			width: 0;
+			z-index: -1;
 		}
 	}
 
@@ -57,6 +58,8 @@
 	}
 
 	.components-popover {
+		transform: none !important;
+
 		.components-popover__content {
 			transform: none;
 			width: 100%;
