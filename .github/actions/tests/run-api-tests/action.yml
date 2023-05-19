@@ -38,12 +38,13 @@ runs:
           uses: actions/github-script@v6
           env:
               SCRIPT_PATH: ./.github/actions/tests/reports/scripts/set-report-title.js
+              REPORT_TITLE: ${{ inputs.report-title }}
           with:
               script: |
                   const script = require( process.env.SCRIPT_PATH );
                   script(
                     process.env.ALLURE_REPORT_DIR,
-                    ${{ inputs.report-title }}
+                    process.env.REPORT_TITLE
                   );
 
         - name: Archive test report
