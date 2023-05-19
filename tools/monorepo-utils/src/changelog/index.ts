@@ -56,9 +56,6 @@ const program = new Command( 'changelog' )
 			const { prBody, headOwner, branch, fileName, head, base } =
 				await getPullRequestData( { owner, name }, prNumber );
 
-			const { significance, type, message, comment } =
-				getChangelogDetails( prBody );
-
 			Logger.endTask();
 
 			const shouldAutomateChangelog =
@@ -71,6 +68,9 @@ const program = new Command( 'changelog' )
 
 				process.exit( 0 );
 			}
+
+			const { significance, type, message, comment } =
+				getChangelogDetails( prBody );
 
 			Logger.startTask(
 				`Making a temporary clone of '${ headOwner }/${ name }'`
