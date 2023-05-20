@@ -97,34 +97,26 @@ jobs:
                   reports-home: ${{ secrets.REPORTS_BUCKET }}
                   test-type: e2e
 
-    # mytodo refactor k6 tests
-    # k6-tests-run:
-    #     name: Runs k6 Performance tests
-    #     needs: [api-tests-run]
-    #     runs-on: ubuntu-20.04
-    #     permissions:
-    #         contents: read
-    #     steps:
-    #         - uses: actions/checkout@v3
+    k6-tests-run:
+        name: Runs k6 Performance tests
+        needs: [api-tests-run]
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@v3
 
-    #         - name: Setup WooCommerce Monorepo
-    #           uses: ./.github/actions/setup-woocommerce-monorepo
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
 
-    #         - name: Load docker images and start containers.
-    #           working-directory: plugins/woocommerce
-    #           env:
-    #               ENABLE_HPOS: 0
-    #           run: |
-    #               pnpm env:dev --filter=woocommerce
-    #               pnpm env:performance-init --filter=woocommerce
+            - name: Setup local test environment
+              uses: ./.github/actions/tests/setup-local-test-environment
+              with:
+                  test-type: k6
 
-    #         - name: Install k6
-    #           run: |
-    #               curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
-
-    #         - name: Run k6 tests
-    #           run: |
-    #               ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
+            - name: Run k6 performance tests
+              id: run-k6-composite-action
+              uses: './.github/actions/tests/run-k6-tests'
 # mytodo add links to HPOS tests
 # test-summary:
 #     name: Post test results
