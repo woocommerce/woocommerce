@@ -1,7 +1,7 @@
 /**
  * Output `statistic` field from `allure-report/widgets/summary.json`.
  *
- * @param {*} defArgs Default arguments passed by actions/github-script.
+ * @param {*} defArgs Arguments from `actions/github-script`. See https://github.com/actions/github-script#actionsgithub-script.
  * @returns {string} `statistic` JSON object automatically stringified by `actions/github-script`.
  */
 module.exports = ( { core } ) => {
