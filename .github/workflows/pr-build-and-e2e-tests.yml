@@ -204,6 +204,8 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
             contents: read
+        outputs:
+            stats: ${{ steps.stats.outputs.stats }}        
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
