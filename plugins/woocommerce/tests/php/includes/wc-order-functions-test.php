@@ -97,6 +97,15 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$order->update_status( 'processing' );
 		$this->assertEquals( 1, $product->get_total_sales() );
 
+		// Test order trash / un-trash.
+		if ( $order->delete( false ) ) {
+			$this->assertEquals( 0, $product->get_total_sales() );
+
+			wp_untrash_post( $order->get_id() );
+			$this->assertEquals( 1, $product->get_total_sales() );
+		}
+
+		// Test force delete.
 		if ( $order->delete( true ) ) {
 			$this->assertEquals( 0, $product->get_total_sales() );
 		}
