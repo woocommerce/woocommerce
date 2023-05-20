@@ -6,7 +6,6 @@ const {
 	E2E_PW_SUMMARY_PATH,
 	SHA,
 	PR_NUMBER,
-	E2E_GRAND_TOTAL,
 } = process.env;
 
 /**
@@ -90,21 +89,6 @@ const createE2ETableRow = () => {
 };
 
 /**
- * Add a warning when the number of executed Playwright E2E tests were fewer than the total.
- */
-const addWarningE2EIncomplete = ( warnings ) => {
-	const { statistic } = require( E2E_PW_SUMMARY_PATH );
-	const { total } = statistic;
-	const expectedTotal = Number( E2E_GRAND_TOTAL );
-
-	if ( total < expectedTotal ) {
-		warnings.push(
-			`INCOMPLETE E2E TEST RUN. We have a total of ${ expectedTotal } E2E tests, but only ${ total } were executed. Note that in CI, E2E tests automatically end when they encounter too many failures.`
-		);
-	}
-};
-
-/**
  *
  * Add a warning when there are failures and broken tests.
  */
@@ -130,7 +114,6 @@ const addSummaryWarnings = ( core ) => {
 	const warnings = [];
 
 	addWarningFailuresBrokenTests( warnings );
-	addWarningE2EIncomplete( warnings );
 	if ( warnings.length > 0 ) {
 		core.summary
 			.addHeading( ':warning: Warning', 3 )

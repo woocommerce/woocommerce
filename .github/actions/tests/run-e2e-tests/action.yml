@@ -16,9 +16,6 @@ outputs:
     result:
         description: Whether the test passed or failed.
         value: ${{ steps.run-e2e-tests.conclusion }}
-    total:
-        description: Expected number of tests to be ran.
-        value: ${{ steps.get-total.outputs.total }}
 
 runs:
     using: composite
@@ -27,12 +24,6 @@ runs:
           working-directory: plugins/woocommerce
           shell: bash
           run: pnpm exec playwright install chromium
-
-        - name: Output total number of tests to run
-          id: get-total
-          shell: bash
-          run: |
-              bash .github/actions/tests/run-e2e-tests/scripts/get-total.sh
 
         - name: Run E2E tests.
           id: run-e2e-tests

@@ -78,7 +78,6 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
         outputs:
-            total: ${{ steps.e2e-action.outputs.total }}
             stats: ${{ steps.stats.outputs.stats }}
         steps:
             - uses: actions/checkout@v3
