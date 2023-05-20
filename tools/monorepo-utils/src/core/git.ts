@@ -15,6 +15,13 @@ import { URL } from 'node:url';
  */
 import { getEnvVar } from './environment';
 
+export type PatchLine = {
+	filename?: string;
+	lineNumber?: number;
+	content?: string;
+};
+
+
 /**
  * Get filename from patch
  *
@@ -60,6 +67,47 @@ export const getPatches = ( content: string, regex: RegExp ): string[] => {
 	}
 
 	return changes;
+};
+
+/**
+ * Get patch additions formatted as array of PatchLine.
+ *
+ * @param {string} content Patch content.
+ * @param {RegExp} regex   Regex to find specific patches.
+ * @return {PatchLine[]} Array of patch lines.
+ */
+export const getPatchAdditions = ( content: string, regex: RegExp ): PatchLine[] => {
+	const patches = getPatches( content, regex );
+
+	return patches.map( ( patch: string ): PatchLine[] => {
+		const filename = getFilename( patch.split( /\n/ )[0] );
+		const parts = patch.split( /^@@ \-(\d+,\d+) \+(\d+,\d+) @@/m );
+		const additions = [];
+		// Splitting with a RegExp includes matches in the resulting array.
+		// We start with i = 1 to bypass the header (which contains filename).
+		for ( let i = 1; i < parts.length; i += 3 ) {
+			const subtractionLine = parts[ i ]; // First match.
+			const additionLine = parts[ i + 1 ]; // Second match.
+			const content = parts[ i + 2 ]; // Split content.
+			const lines = content.split( /\n/ );
+			let lineNumber = parseInt( additionLine.split( ',' )[0], 10 );
+			for ( let j = 0; j < lines.length; j++ ) {
+				if ( lines[ j ].match( /^\-/ ) ) {
+					// Subtraction lines do not count toward line number
+					continue;
+				}
+				if ( lines[ j ].match( /^\+/ ) ) {
+					additions.push( {
+						filename,
+						lineNumber: lineNumber - 1,
+						content: lines[ j ].substr( 1 ),
+					} );
+				}
+				lineNumber++;
+			}
+		}
+		return additions.flat();
+	} ).flat();
 };
 
 /**

@@ -11,6 +11,7 @@ import { milestoneCommand } from './milestone';
 import { branchCommand } from './branch';
 import { versionBumpCommand } from './version-bump';
 import { changelogCommand } from './changelog';
+import { versionPlaceholderCommand } from './version-placeholder';
 
 const program = new Command( 'code-freeze' )
 	.description( 'Code freeze utilities' )
@@ -18,6 +19,7 @@ const program = new Command( 'code-freeze' )
 	.addCommand( milestoneCommand )
 	.addCommand( branchCommand )
 	.addCommand( versionBumpCommand )
-	.addCommand( changelogCommand );
+	.addCommand( changelogCommand )
+	.addCommand( versionPlaceholderCommand );
 
 export default program;
