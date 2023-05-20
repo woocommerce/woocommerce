@@ -16,7 +16,7 @@ env:
     PR_TITLE: ${{ github.event.pull_request.title }}
 
 jobs:
-    api-tests-run:
+    api:
         name: Runs API tests.
         if: github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-20.04
@@ -55,9 +55,9 @@ jobs:
                   reports-home: ${{ secrets.REPORTS_BUCKET }}
                   test-type: api
 
-    e2e-tests-run:
+    e2e:
         name: Runs E2E tests.
-        needs: [api-tests-run]
+        needs: [api]
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -99,7 +99,7 @@ jobs:
 
     k6-tests-run:
         name: Runs k6 Performance tests
-        needs: [api-tests-run]
+        needs: [api]
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -129,13 +129,13 @@ jobs:
 #           contains( needs.*.result, 'failure' )
 #         )
 #     runs-on: ubuntu-20.04
-#     needs: [api-tests-run, e2e-tests-run]
+#     needs: [api, e2e]
 #     permissions:
 #         contents: read
 #         issues: write
 #         pull-requests: write
 #     env:
-#         E2E_GRAND_TOTAL: ${{needs.e2e-tests-run.outputs.E2E_GRAND_TOTAL}}
+#         E2E_GRAND_TOTAL: ${{needs.e2e.outputs.E2E_GRAND_TOTAL}}
 #     steps:
 #         - name: Create dirs
 #           run: |
@@ -202,7 +202,7 @@ jobs:
 #           contains( needs.*.result, 'failure' )
 #         )
 #     runs-on: ubuntu-20.04
-#     needs: [api-tests-run, e2e-tests-run, k6-tests-run]
+#     needs: [api, e2e, k6-tests-run]
 #     env:
 #         GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
 #         PR_NUMBER: ${{ github.event.number }}

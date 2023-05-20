@@ -14,7 +14,7 @@ env:
     PR_TITLE: ${{ github.event.pull_request.title }}
 
 jobs:
-    hpos-api-tests-run:
+    api-hpos:
         name: Runs API tests (HPOS enabled)
         if: github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-20.04
@@ -56,9 +56,9 @@ jobs:
                   feat-slug: hpos
                   test-type: api
 
-    hpos-e2e-tests-run:
+    e2e-hpos:
         name: Runs E2E tests (HPOS enabled)
-        needs: [hpos-api-tests-run]
+        needs: [api-hpos]
         runs-on: ubuntu-20.04
         permissions:
             contents: read
