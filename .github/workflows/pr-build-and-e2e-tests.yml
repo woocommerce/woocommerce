@@ -117,6 +117,93 @@ jobs:
             - name: Run k6 performance tests
               id: run-k6-composite-action
               uses: './.github/actions/tests/run-k6-tests'
+
+    api-hpos:
+        name: Runs API tests (HPOS enabled)
+        if: github.event.pull_request.user.login != 'github-actions[bot]'
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        env:
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
+            ENABLE_HPOS: 1
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build-filters: woocommerce
+
+            - name: Setup local test environment
+              uses: ./.github/actions/tests/setup-local-test-environment
+              with:
+                  test-type: api
+
+            - name: Run API tests
+              id: api-action
+              uses: ./.github/actions/tests/run-api-tests
+              with:
+                  artifact-name: API Test report (HPOS enabled)
+                  report-title: API Test report (HPOS enabled) for "${{ env.PR_TITLE }} (#${{ env.PR_NUMBER }})"
+                  tests: hello # mytodo remove
+
+            - name: Publish report
+              if: success() || ( failure() && steps.api-action.result == 'failure' )
+              uses: ./.github/actions/tests/reports/publish-report-pr
+              with:
+                  key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  region: ${{ secrets.REPORTS_AWS_REGION }}
+                  access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  reports-home: ${{ secrets.REPORTS_BUCKET }}
+                  feat-slug: hpos
+                  test-type: api
+
+    e2e-hpos:
+        name: Runs E2E tests (HPOS enabled)
+        needs: [api-hpos]
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        env:
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            ENABLE_HPOS: 1
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  build-filters: woocommerce
+
+            - name: Setup local test environment
+              uses: ./.github/actions/tests/setup-local-test-environment
+              with:
+                  test-type: e2e
+
+            - name: Run E2E tests
+              id: e2e-action
+              timeout-minutes: 60
+              uses: ./.github/actions/tests/run-e2e-tests
+              env:
+                  E2E_MAX_FAILURES: 15
+              with:
+                  artifact-name: E2E Test report (HPOS enabled)
+                  report-title: E2E Test report (HPOS enabled) for "${{ env.PR_TITLE }} (#${{ env.PR_NUMBER }})"
+                  tests: basic.spec.js # mytodo remove
+
+            - name: Publish report
+              if: success() || ( failure() && steps.e2e-action.result == 'failure' )
+              uses: ./.github/actions/tests/reports/publish-report-pr
+              with:
+                  key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  region: ${{ secrets.REPORTS_AWS_REGION }}
+                  access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  reports-home: ${{ secrets.REPORTS_BUCKET }}
+                  feat-slug: hpos
+                  test-type: e2e
 # mytodo add links to HPOS tests
 # pr-comment:
 #     name: Post test results
@@ -191,34 +278,3 @@ jobs:
 #               body: ${{ steps.prepare-test-summary.outputs.result }}
 #               edit-mode: replace
 
-# publish-test-reports:
-#     name: Publish test reports
-#     if: |
-#         always() &&
-#         ! github.event.pull_request.head.repo.fork &&
-#         github.event.pull_request.user.login != 'github-actions[bot]' &&
-#         (
-#           contains( needs.*.result, 'success' ) ||
-#           contains( needs.*.result, 'failure' )
-#         )
-#     runs-on: ubuntu-20.04
-#     needs: [api, e2e, k6-tests-run]
-#     env:
-#         GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-#         PR_NUMBER: ${{ github.event.number }}
-#         RUN_ID: ${{ github.run_id }}
-#         COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
-#     steps:
-#         - name: Publish test reports
-#           env:
-#               API_ARTIFACT: api-test-report---pr-${{ github.event.number }}
-#               E2E_ARTIFACT: e2e-test-report---pr-${{ github.event.number }}
-#           run: |
-#               gh workflow run publish-test-reports-pr.yml \
-#                 -f run_id=$RUN_ID \
-#                 -f api_artifact=$API_ARTIFACT \
-#                 -f e2e_artifact=$E2E_ARTIFACT \
-#                 -f pr_number=$PR_NUMBER \
-#                 -f commit_sha=$COMMIT_SHA \
-#                 -f s3_root=public \
-#                 --repo woocommerce/woocommerce-test-reports
