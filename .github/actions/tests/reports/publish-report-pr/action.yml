@@ -1,4 +1,5 @@
 name: Publish PR test report
+description: Upload allure-report folder to bucket. Add link on WooCommerce Test Reports Dashboard.
 permissions: {}
 
 inputs:
@@ -10,9 +11,6 @@ inputs:
         required: true
     reports-home:
         required: true
-    allure-report-dir:
-        required: true
-        description: Path to allure-report folder.
     feat-slug:
         description: Slug for enabled feature flags.
     test-type:
@@ -51,11 +49,9 @@ runs:
         - name: Upload report
           shell: bash
           env:
-              SOURCE: ${{ inputs.allure-report-dir }}
+              SOURCE: ${{ env.ALLURE_REPORT_DIR }}
               TARGET: ${{ steps.upload-path.outputs.result }}
           run: |
               aws s3 cp "${{ env.SOURCE }}" "${{ env.TARGET }}" \
                 --recursive \
                 --only-show-errors
-
-          # mytodo add link to report

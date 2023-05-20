@@ -8,11 +8,17 @@ inputs:
         required: true
     tests:
         description: Specific tests to run, separated by single whitespace. See https://playwright.dev/docs/test-cli
+    report-title:
+        default: E2E test report
+        description: Title to appear on Allure Overview page.
 
 outputs:
     result:
         description: Whether the test passed or failed.
         value: ${{ steps.run-e2e-tests.conclusion }}
+    allure-report-dir:
+        description: Path to allure-report dir.
+        value: ${{ steps.allure-report-dir.outputs.allure-report-dir }}
 
 runs:
     using: composite
@@ -36,6 +42,19 @@ runs:
           shell: bash
           run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
+        - name: Update report title
+          uses: actions/github-script@v6
+          env:
+              SCRIPT_PATH: ./.github/actions/tests/reports/scripts/set-report-title.js
+              REPORT_TITLE: ${{ inputs.report-title }}
+          with:
+              script: |
+                  const script = require( process.env.SCRIPT_PATH );
+                  script(
+                    process.env.ALLURE_REPORT_DIR,
+                    process.env.REPORT_TITLE
+                  );
+
         - name: Archive test report
           if: success() || ( failure() && steps.run-e2e-tests.conclusion == 'failure' )
           uses: actions/upload-artifact@v3
@@ -45,3 +64,9 @@ runs:
                   ${{ env.ALLURE_RESULTS_DIR }}
                   ${{ env.ALLURE_REPORT_DIR }}
               retention-days: 20
+
+        - name: Output 'allure-report' path
+          id: allure-report-dir
+          shell: bash
+          run: |
+              echo "allure-report-dir=\"${{ env.ALLURE_REPORT_DIR }}\"" >> "$GITHUB_OUTPUT"

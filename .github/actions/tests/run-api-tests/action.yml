@@ -36,7 +36,6 @@ runs:
           shell: bash
           run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
-        # mytodo copy to e2e
         - name: Update report title
           uses: actions/github-script@v6
           env:
@@ -60,7 +59,7 @@ runs:
                   ${{ env.ALLURE_REPORT_DIR }}
               retention-days: 20
 
-        - name: Output 'allure-report' path # mytodo copy to e2e
+        - name: Output 'allure-report' path
           id: allure-report-dir
           shell: bash
           run: |
