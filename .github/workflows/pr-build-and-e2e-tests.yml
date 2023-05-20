@@ -277,12 +277,16 @@ jobs:
               id: prepare-test-summary
               uses: actions/github-script@v6
               env:
-                  SHA: ${{ github.event.pull_request.head.sha }}
+                  SCRIPT_PATH: ./.github/workflows/scripts/prepare-test-summary.js
+                  API_STATS: ${{ needs.api.outputs.stats }}
+                  E2E_STATS: ${{ needs.e2e.outputs.stats }}
+                  API_HPOS_STATS: ${{ needs.api-hpos.outputs.stats }}
+                  E2E_HPOS_STATS: ${{ needs.e2e-hpos.outputs.stats }}
               with:
                   result-encoding: string
                   script: |
-                      const script = require( './.github/workflows/scripts/prepare-test-summary.js' )
-                      return await script( { core } )
+                      const script = require( process.env.SCRIPT_PATH );
+                      return await script( { context, core } )
 
             # - name: Find PR comment by github-actions[bot]
             #   uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
