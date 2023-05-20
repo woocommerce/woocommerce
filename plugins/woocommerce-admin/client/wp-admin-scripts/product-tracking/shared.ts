@@ -454,6 +454,17 @@ const attachAddExistingAttributeTracks = () => {
 };
 
 /**
+ * Gets number of attributes with 'Used for variations' checked.
+ */
+const getUsedForVariationsAttributesCount = () =>
+	( document.querySelector( '#product-type' ) as HTMLSelectElement )
+		?.value === 'variable'
+		? document.querySelectorAll(
+				'input[name^="attribute_variation"]:checked'
+		  ).length
+		: 0;
+
+/**
  * Attaches product attributes tracks.
  */
 const attachProductAttributesTracks = () => {
@@ -496,10 +507,6 @@ const attachProductAttributesTracks = () => {
 		},
 	] );
 
-	const attributesCount = document.querySelectorAll(
-		'.woocommerce_attribute'
-	).length;
-
 	document
 		.querySelector( '.save_attributes' )
 		?.addEventListener( 'click', ( event ) => {
@@ -510,37 +517,27 @@ const attachProductAttributesTracks = () => {
 				// skip in case the button is disabled
 				return;
 			}
-			const newAttributesCount = document.querySelectorAll(
-				'.woocommerce_attribute'
+
+			const localAttributesCount = document.querySelectorAll(
+				'.woocommerce_attribute:not(.taxonomy)'
 			).length;
-			if ( newAttributesCount > attributesCount ) {
-				const local_attributes = [
-					...document.querySelectorAll(
-						'.woocommerce_attribute:not(.pa_glbattr)'
-					),
-				].map( ( attr ) => {
-					const terms =
-						(
-							attr.querySelector(
-								"[name^='attribute_values']"
-							) as HTMLTextAreaElement
-						 )?.value.split( '|' ).length ?? 0;
-					return {
-						name: (
-							attr.querySelector(
-								'[name^="attribute_names"]'
-							) as HTMLInputElement
-						 )?.value,
-						terms,
-					};
-				} );
-				recordEvent( 'product_attributes_add', {
-					page: 'product',
-					enable_archive: '',
-					default_sort_order: '',
-					local_attributes,
-				} );
-			}
+
+			const globalAttributesCount = document.querySelectorAll(
+				'.woocommerce_attribute.taxonomy'
+			).length;
+
+			recordEvent( 'product_attributes_save', {
+				page: 'product',
+				total_attributes_count:
+					globalAttributesCount + localAttributesCount,
+				local_attributes_count: localAttributesCount,
+				global_attributes_count: globalAttributesCount,
+				visible_on_product_page_count: document.querySelectorAll(
+					'input[name^="attribute_visibility"]:checked'
+				).length,
+				used_for_variations_count:
+					getUsedForVariationsAttributesCount(),
+			} );
 		} );
 };
 

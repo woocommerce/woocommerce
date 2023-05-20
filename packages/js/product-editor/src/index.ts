@@ -14,3 +14,5 @@ export * from './utils';
  * Hooks
  */
 export * from './hooks';
+export { useValidation, useValidations } from './contexts/validation-context';
+export * from './contexts/validation-context/types';

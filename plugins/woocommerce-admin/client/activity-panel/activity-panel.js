@@ -43,7 +43,7 @@ import { getUnapprovedReviews } from '../homescreen/activity-panel/reviews/utils
 import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-notifications-panel';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getUrlParams } from '~/utils';
-import { useActiveSetupTasklist } from '~/tasks';
+import { useActiveSetupTasklist } from '~/task-lists';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
 import { FeedbackIcon } from '~/products/images/feedback-icon';
 import { ProductFeedbackTour } from '~/guided-tours/add-product-feedback-tour';

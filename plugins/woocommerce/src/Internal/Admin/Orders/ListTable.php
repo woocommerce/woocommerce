@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_List_Table;
 use WP_Screen;
@@ -107,6 +108,44 @@ class ListTable extends WP_List_Table {
 		set_screen_options();
 
 		add_action( 'manage_' . wc_get_page_screen_id( $this->order_type ) . '_custom_column', array( $this, 'render_column' ), 10, 2 );
+	}
+
+	/**
+	 * Generates content for a single row of the table.
+	 *
+	 * @since 7.8.0
+	 *
+	 * @param \WC_Order $order The current order.
+	 */
+	public function single_row( $order ) {
+		/**
+		 * Filters the list of CSS class names for a given order row in the orders list table.
+		 *
+		 * @since 7.8.0
+		 *
+		 * @param string[]  $classes An array of CSS class names.
+		 * @param \WC_Order $order   The order object.
+		 */
+		$css_classes = apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_order_css_classes',
+			array(
+				'order-' . $order->get_id(),
+				'type-' . $order->get_type(),
+				'status-' . $order->get_status(),
+			),
+			$order
+		);
+		$css_classes = array_unique( array_map( 'trim', $css_classes ) );
+
+		// Is locked?
+		$edit_lock = wc_get_container()->get( EditLock::class );
+		if ( $edit_lock->is_locked_by_another_user( $order ) ) {
+			$css_classes[] = 'wp-locked';
+		}
+
+		echo '<tr id="order-' . esc_attr( $order->get_id() ) . '" class="' . esc_attr( implode( ' ', $css_classes ) ) . '">';
+		$this->single_row_columns( $order );
+		echo '</tr>';
 	}
 
 	/**
@@ -274,6 +313,37 @@ class ListTable extends WP_List_Table {
 		}
 
 		return $actions;
+	}
+
+	/**
+	 * Gets a list of CSS classes for the WP_List_Table table tag.
+	 *
+	 * @since 7.8.0
+	 *
+	 * @return string[] Array of CSS classes for the table tag.
+	 */
+	protected function get_table_classes() {
+		/**
+		 * Filters the list of CSS class names for the orders list table.
+		 *
+		 * @since 7.8.0
+		 *
+		 * @param string[] $classes    An array of CSS class names.
+		 * @param string   $order_type The order type.
+		 */
+		$css_classes = apply_filters(
+			'woocommerce_' . $this->order_type . '_list_table_css_classes',
+			array_merge(
+				parent::get_table_classes(),
+				array(
+					'wc-orders-list-table',
+					'wc-orders-list-table-' . $this->order_type,
+				)
+			),
+			$this->order_type
+		);
+
+		return array_unique( array_map( 'trim', $css_classes ) );
 	}
 
 	/**
@@ -795,7 +865,21 @@ class ListTable extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $item ) {
-		return sprintf( '<input type="checkbox" name="%1$s[]" value="%2$s" />', esc_attr( $this->_args['singular'] ), esc_attr( $item->get_id() ) );
+		ob_start();
+		?>
+		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="<?php echo esc_attr( $this->_args['singular'] ); ?>" value="<?php echo esc_attr( $item->get_id() ); ?>" />
+
+		<div class="locked-indicator">
+			<span class="locked-indicator-icon" aria-hidden="true"></span>
+			<span class="screen-reader-text">
+				<?php
+				// translators: %s is an order ID.
+				echo esc_html( sprintf( __( 'Order %s is locked.', 'woocommerce' ), $item->get_id() ) );
+				?>
+			</span>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
@@ -1113,7 +1197,7 @@ class ListTable extends WP_List_Table {
 
 			$action = 'delete';
 		} else {
-			$ids = isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', $_REQUEST['order'] ) ) : array();
+			$ids = isset( $_REQUEST['order'] ) ? array_reverse( array_map( 'absint', (array) $_REQUEST['order'] ) ) : array();
 		}
 
 		/**

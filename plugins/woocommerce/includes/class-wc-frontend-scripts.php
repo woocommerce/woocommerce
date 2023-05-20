@@ -430,7 +430,6 @@ class WC_Frontend_Scripts {
 
 		// Global frontend scripts.
 		self::enqueue_script( 'woocommerce' );
-		self::enqueue_script( 'wc-cart-fragments' );
 
 		// CSS Styles.
 		$enqueue_styles = self::get_styles();

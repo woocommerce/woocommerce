@@ -1141,7 +1141,6 @@ $default-line-height: 18px;
 	}
 	.toolbar-top {
 		.button,
-		.attribute_taxonomy,
 		.select2-container {
 			margin: 1px;
 		}
@@ -2800,6 +2799,10 @@ ul.wc_coupon_list_block {
 			padding: 1em 1em 1em 1em !important;
 			vertical-align: middle;
 
+			.locked-indicator {
+				margin-left: 0;
+			}
+
 			input {
 				vertical-align: text-top;
 				margin: 1px 0;
@@ -2878,6 +2881,14 @@ ul.wc_coupon_list_block {
 				background-size: 71%;
 			}
 		}
+	}
+}
+
+.woocommerce_page_wc-orders .wp-list-table .locked-indicator-icon {
+	margin-left: -2px;
+
+	&:before {
+		vertical-align: top;
 	}
 }
 

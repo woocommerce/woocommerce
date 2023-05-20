@@ -21,16 +21,17 @@ import { Spinner } from '@woocommerce/components';
  */
 import getReports from '../analytics/report/get-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { isFeatureEnabled } from '~/utils/features';
 import { NoMatch } from './NoMatch';
 
+const AddProductPage = lazy( () =>
+	import(
+		/* webpackChunkName: "edit-product-page" */ '../products/add-product-page'
+	)
+);
 const EditProductPage = lazy( () =>
 	import(
 		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
-	)
-);
-const AddProductPage = lazy( () =>
-	import(
-		/* webpackChunkName: "add-product-page" */ '../products/add-product-page'
 	)
 );
 const ProductPage = lazy( () =>
@@ -171,9 +172,18 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures[ 'product-block-editor' ] ) {
-		pages.push( {
+	if ( isFeatureEnabled( 'product_block_editor' ) ) {
+		const productPage = {
 			container: ProductPage,
+			layout: {
+				header: false,
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		};
+
+		pages.push( {
+			...productPage,
 			path: '/add-product',
 			breadcrumbs: [
 				[ '/add-product', __( 'Product', 'woocommerce' ) ],
@@ -182,12 +192,10 @@ export const getPages = () => {
 			navArgs: {
 				id: 'woocommerce-add-product',
 			},
-			wpOpenMenu: 'menu-posts-product',
-			capability: 'manage_woocommerce',
 		} );
 
 		pages.push( {
-			container: ProductPage,
+			...productPage,
 			path: '/product/:productId',
 			breadcrumbs: [
 				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
@@ -196,8 +204,6 @@ export const getPages = () => {
 			navArgs: {
 				id: 'woocommerce-edit-product',
 			},
-			wpOpenMenu: 'menu-posts-product',
-			capability: 'manage_woocommerce',
 		} );
 	} else if (
 		window.wcAdminFeatures[ 'new-product-management-experience' ]
@@ -454,9 +460,10 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 window.wpNavMenuUrlUpdate = function ( query ) {
 	const nextQuery = getPersistedQuery( query );
 	const excludedScreens = getQueryExcludedScreens();
+	const anchors = document.querySelectorAll( '#adminmenu a' );
 
-	Array.from( document.querySelectorAll( '#adminmenu a' ) ).forEach(
-		( item ) => updateLinkHref( item, nextQuery, excludedScreens )
+	Array.from( anchors ).forEach( ( item ) =>
+		updateLinkHref( item, nextQuery, excludedScreens )
 	);
 };
 

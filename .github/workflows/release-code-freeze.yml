@@ -71,6 +71,13 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: pnpm run utils code-freeze version-bump -o ${{ github.repository_owner }} -v ${{ steps.milestone.outputs.nextDevelopmentVersion }}.0-dev
 
+            - name: Generate changelog changes
+              id: changelog
+              if: steps.check-freeze.outputs.freeze == 'true'
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: pnpm run utils code-freeze changelog -o ${{ github.repository_owner }} -v ${{ steps.milestone.outputs.nextReleaseVersion }}
+
     notify-slack:
         name: 'Sends code freeze notification to Slack'
         runs-on: ubuntu-20.04
@@ -87,26 +94,3 @@ jobs:
                       :warning-8c: ${{ needs.code-freeze-prep.outputs.nextReleaseVersion }} Code Freeze :ice_cube:
 
                       The automation to cut the release branch for ${{ needs.code-freeze-prep.outputs.nextReleaseVersion }} has run. Any PRs that were not already merged will be a part of ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.nextDevelopmentVersion }} by default. If you have something that needs to make ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.nextReleaseVersion }} that hasn't yet been merged, please see the <${{ secrets.FG_LINK }}/code-freeze-for-woocommerce-core-release/|fieldguide page for the code freeze>.
-
-    trigger-changelog-action:
-        name: 'Trigger changelog action'
-        runs-on: ubuntu-20.04
-        permissions:
-            actions: write
-        needs: code-freeze-prep
-        if: needs.code-freeze-prep.outputs.freeze == 'true'
-        steps:
-            - name: 'Trigger changelog action'
-              uses: actions/github-script@v6
-              with:
-                  script: |
-                      github.rest.actions.createWorkflowDispatch({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        workflow_id: 'release-changelog.yml',
-                        ref: 'trunk',
-                        inputs: {
-                          releaseVersion: "${{ needs.code-freeze-prep.outputs.nextReleaseVersion }}",
-                          releaseBranch: "${{ needs.code-freeze-prep.outputs.nextReleaseBranch }}"
-                        }
-                      })
