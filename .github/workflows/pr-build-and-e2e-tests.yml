@@ -97,7 +97,7 @@ jobs:
                   reports-home: ${{ secrets.REPORTS_BUCKET }}
                   test-type: e2e
 
-    k6-tests-run:
+    k6:
         name: Runs k6 Performance tests
         needs: [api]
         runs-on: ubuntu-20.04
@@ -118,7 +118,7 @@ jobs:
               id: run-k6-composite-action
               uses: './.github/actions/tests/run-k6-tests'
 # mytodo add links to HPOS tests
-# test-summary:
+# pr-comment:
 #     name: Post test results
 #     if: |
 #         always() &&
