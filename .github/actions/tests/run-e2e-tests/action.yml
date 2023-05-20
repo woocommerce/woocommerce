@@ -4,8 +4,8 @@ permissions: {}
 
 inputs:
     artifact-name:
-        description: Name of Allure report to be generated.
-        required: true
+        default: E2E test report
+        description: Artifact to be generated. Contains allure-results, allure-report folders.
     tests:
         description: Specific tests to run, separated by single whitespace. See https://playwright.dev/docs/test-cli
     report-title:
@@ -16,9 +16,9 @@ outputs:
     result:
         description: Whether the test passed or failed.
         value: ${{ steps.run-e2e-tests.conclusion }}
-    allure-report-dir:
-        description: Path to allure-report dir.
-        value: ${{ steps.allure-report-dir.outputs.allure-report-dir }}
+    total:
+        description: Expected number of tests to be ran.
+        value: ${{ steps.get-total.outputs.total }}
 
 runs:
     using: composite
@@ -27,6 +27,12 @@ runs:
           working-directory: plugins/woocommerce
           shell: bash
           run: pnpm exec playwright install chromium
+
+        - name: Output total number of tests to run
+          id: get-total
+          shell: bash
+          run: |
+              bash .github/actions/tests/run-e2e-tests/scripts/get-total.sh
 
         - name: Run E2E tests.
           id: run-e2e-tests

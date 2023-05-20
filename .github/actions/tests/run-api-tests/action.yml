@@ -5,7 +5,7 @@ permissions: {}
 inputs:
     artifact-name:
         default: API test report
-        description: Artifact with allure-results, allure-report folders.
+        description: Artifact to be generated. Contains allure-results, allure-report folders.
     tests:
         description: |
             Specific tests to run, separated by single whitespace.
@@ -17,9 +17,6 @@ outputs:
     result:
         description: Whether the test passed or failed.
         value: ${{ steps.run-api-tests.conclusion }}
-    allure-report-dir:
-        description: Path to allure-report dir.
-        value: ${{ steps.allure-report-dir.outputs.allure-report-dir }}
 
 runs:
     using: composite

@@ -2,11 +2,12 @@ name: Run tests against PR (with HPOS)
 on:
     pull_request:
     workflow_dispatch:
-permissions: {}
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
+
+permissions: {}
 
 env:
     PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -14,8 +15,8 @@ env:
 
 jobs:
     hpos-api-tests-run:
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
-        name: Runs API tests
+        name: Runs API tests (HPOS enabled)
+        if: github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -40,7 +41,8 @@ jobs:
               id: api-action
               uses: ./.github/actions/tests/run-api-tests
               with:
-                  report-title: API Test report for "${{ env.PR_TITLE }} (#${{ env.PR_NUMBER }})" with HPOS
+                  artifact-name: API Test report (HPOS enabled)
+                  report-title: API Test report (HPOS enabled) for "${{ env.PR_TITLE }} (#${{ env.PR_NUMBER }})"
                   tests: hello # mytodo remove
 
             - name: Publish report
@@ -55,7 +57,7 @@ jobs:
                   test-type: api
 
     hpos-e2e-tests-run:
-        name: Runs E2E tests
+        name: Runs E2E tests (HPOS enabled)
         needs: [hpos-api-tests-run]
         runs-on: ubuntu-20.04
         permissions:
@@ -84,7 +86,8 @@ jobs:
               env:
                   E2E_MAX_FAILURES: 15
               with:
-                  report-title: E2E Test report for "${{ env.PR_TITLE }} (#${{ env.PR_NUMBER }})" with HPOS
+                  artifact-name: E2E Test report (HPOS enabled)
+                  report-title: E2E Test report (HPOS enabled) for "${{ env.PR_TITLE }} (#${{ env.PR_NUMBER }})"
                   tests: basic.spec.js # mytodo remove
 
             - name: Publish report
