@@ -55,9 +55,3 @@ runs:
                   ${{ env.ALLURE_RESULTS_DIR }}
                   ${{ env.ALLURE_REPORT_DIR }}
               retention-days: 20
-
-        - name: Output 'allure-report' path
-          id: allure-report-dir
-          shell: bash
-          run: |
-              echo "allure-report-dir=\"${{ env.ALLURE_REPORT_DIR }}\"" >> "$GITHUB_OUTPUT"
