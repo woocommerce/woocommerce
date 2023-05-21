@@ -258,6 +258,10 @@ jobs:
                       const script = require( process.env.SCRIPT_PATH );
                       await script( { github, core } );
 
+            - name: Post job summary
+              run: |
+                  echo "${{ steps.compose-summary.outputs.summary }}" >> $GITHUB_STEP_SUMMARY
+
             - name: Find PR comment by github-actions[bot]
               uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
               id: find-comment
