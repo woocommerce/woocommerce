@@ -1,14 +1,17 @@
 /**
- * Extract `statistic` field from `allure-report/widgets/summary.json` and output as `stats`.
+ * Get statistics from `allure-report/widgets/summary.json`.
  *
  * @param {*} defArgs Arguments from `actions/github-script`. See https://github.com/actions/github-script#actionsgithub-script.
- * @yields `stats` output. It is the `statistic` field from `allure-report/widgets/summary.json`, automatically stringified by `actions/github-script`.
+ * @yields `stats` output.
  */
 module.exports = ( { core } ) => {
 	const { ALLURE_REPORT_DIR } = process.env;
 	const {
 		statistic,
+		time,
 	} = require( `${ ALLURE_REPORT_DIR }/widgets/summary.json` );
+
+	statistic.duration = time.duration;
 
 	core.setOutput( 'stats', statistic );
 };
