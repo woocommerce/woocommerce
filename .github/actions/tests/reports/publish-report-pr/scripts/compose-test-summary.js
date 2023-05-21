@@ -48,7 +48,7 @@ const insertRow = ( content, rowTitle, reportURL, stats ) => {
 		total.toString(),
 		fmtDuration,
 	];
-	const row = `| ${ cells.join( ' | ' ) } |`;
+	const row = `| ${ cells.join( ' | ' ) } |\n`;
 
 	return content.replace( placeHolder, row + placeHolder );
 };
