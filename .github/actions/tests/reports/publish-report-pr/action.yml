@@ -21,6 +21,14 @@ inputs:
             - e2e
             - k6
 
+outputs:
+    report-url:
+        description: Link to view published report.
+        value: ${{ steps.upload-path.outputs.report-url }}
+    stats:
+        description: Stringified JSON of test result stats.
+        value: ${{ steps.stats.outputs.stats }}
+
 runs:
     using: composite
     steps:
@@ -44,14 +52,24 @@ runs:
               result-encoding: string
               script: |
                   const script = require( process.env.SCRIPT_PATH );
-                  return script();
+                  script( { core } );
 
         - name: Upload report
           shell: bash
           env:
               SOURCE: ${{ env.ALLURE_REPORT_DIR }}
-              TARGET: ${{ steps.upload-path.outputs.result }}
+              TARGET: ${{ steps.upload-path.outputs.upload-path }}
           run: |
               aws s3 cp "${{ env.SOURCE }}" "${{ env.TARGET }}" \
                 --recursive \
                 --only-show-errors
+
+        - name: Output test stats
+          id: stats
+          uses: actions/github-script@v6
+          env:
+              SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/output-stats.js
+          with:
+              script: |
+                  const script = require( process.env.SCRIPT_PATH );
+                  script( { core } );

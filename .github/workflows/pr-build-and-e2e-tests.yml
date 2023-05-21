@@ -26,7 +26,8 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
         outputs:
-            stats: ${{ steps.stats.outputs.stats }}
+            stats: ${{ steps.report.outputs.stats }}
+            report-url: ${{ steps.report.outputs.report-url }}
         steps:
             - uses: actions/checkout@v3
 
@@ -48,6 +49,7 @@ jobs:
                   tests: hello # mytodo remove
 
             - name: Publish report
+              id: report
               if: success() || ( failure() && steps.api-action.result == 'failure' )
               uses: ./.github/actions/tests/reports/publish-report-pr
               with:
@@ -56,17 +58,6 @@ jobs:
                   access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   reports-home: ${{ secrets.REPORTS_BUCKET }}
                   test-type: api
-
-            - name: Output test stats
-              if: success() || ( failure() && steps.api-action.result == 'failure' )
-              id: stats
-              uses: actions/github-script@v6
-              env:
-                  SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/output-stats.js
-              with:
-                  script: |
-                      const script = require( process.env.SCRIPT_PATH );
-                      script( { core } );
 
     e2e:
         name: Runs E2E tests.
@@ -78,7 +69,8 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
         outputs:
-            stats: ${{ steps.stats.outputs.stats }}
+            stats: ${{ steps.report.outputs.stats }}
+            report-url: ${{ steps.report.outputs.report-url }}
         steps:
             - uses: actions/checkout@v3
 
@@ -101,6 +93,7 @@ jobs:
                   tests: basic.spec.js # mytodo remove
 
             - name: Publish report
+              id: report
               if: success() || ( failure() && steps.e2e-action.result == 'failure' )
               uses: ./.github/actions/tests/reports/publish-report-pr
               with:
@@ -109,17 +102,6 @@ jobs:
                   access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   reports-home: ${{ secrets.REPORTS_BUCKET }}
                   test-type: e2e
-
-            - name: Output test stats
-              if: success() || ( failure() && steps.e2e-action.result == 'failure' )
-              id: stats
-              uses: actions/github-script@v6
-              env:
-                  SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/output-stats.js
-              with:
-                  script: |
-                      const script = require( process.env.SCRIPT_PATH );
-                      script( { core } );
 
     k6:
         name: Runs k6 Performance tests
@@ -153,7 +135,8 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
             ENABLE_HPOS: 1
         outputs:
-            stats: ${{ steps.stats.outputs.stats }}
+            stats: ${{ steps.report.outputs.stats }}
+            report-url: ${{ steps.report.outputs.report-url }}
         steps:
             - uses: actions/checkout@v3
 
@@ -176,6 +159,7 @@ jobs:
                   tests: hello # mytodo remove
 
             - name: Publish report
+              id: report
               if: success() || ( failure() && steps.api-action.result == 'failure' )
               uses: ./.github/actions/tests/reports/publish-report-pr
               with:
@@ -186,17 +170,6 @@ jobs:
                   feat-slug: hpos
                   test-type: api
 
-            - name: Output test stats
-              if: success() || ( failure() && steps.api-action.result == 'failure' )
-              id: stats
-              uses: actions/github-script@v6
-              env:
-                  SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/output-stats.js
-              with:
-                  script: |
-                      const script = require( process.env.SCRIPT_PATH );
-                      script( { core } );
-
     e2e-hpos:
         name: Runs E2E tests (HPOS enabled)
         needs: [api-hpos]
@@ -204,7 +177,8 @@ jobs:
         permissions:
             contents: read
         outputs:
-            stats: ${{ steps.stats.outputs.stats }}        
+            stats: ${{ steps.report.outputs.stats }}
+            report-url: ${{ steps.report.outputs.report-url }}
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
@@ -234,6 +208,7 @@ jobs:
                   tests: basic.spec.js # mytodo remove
 
             - name: Publish report
+              id: report
               if: success() || ( failure() && steps.e2e-action.result == 'failure' )
               uses: ./.github/actions/tests/reports/publish-report-pr
               with:
@@ -243,17 +218,6 @@ jobs:
                   reports-home: ${{ secrets.REPORTS_BUCKET }}
                   feat-slug: hpos
                   test-type: e2e
-
-            - name: Output test stats
-              if: success() || ( failure() && steps.e2e-action.result == 'failure' )
-              id: stats
-              uses: actions/github-script@v6
-              env:
-                  SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/output-stats.js
-              with:
-                  script: |
-                      const script = require( process.env.SCRIPT_PATH );
-                      script( { core } );
 
     # mytodo add links to HPOS tests
     pr-comment:
@@ -274,11 +238,11 @@ jobs:
         steps:
             - uses: actions/checkout@v3
 
-            - name: Prepare test summary
+            - name: Compose test summary
               id: prepare-test-summary
               uses: actions/github-script@v6
               env:
-                  SCRIPT_PATH: ./.github/workflows/scripts/prepare-test-summary.js
+                  SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/compose-test-summary.js
                   API_STATS: ${{ needs.api.outputs.stats }}
                   E2E_STATS: ${{ needs.e2e.outputs.stats }}
                   API_HPOS_STATS: ${{ needs.api-hpos.outputs.stats }}
