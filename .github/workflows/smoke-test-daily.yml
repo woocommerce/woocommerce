@@ -5,8 +5,8 @@ on:
     workflow_dispatch:
 
 env:
-    API_ARTIFACT: api-daily--run-${{ github.run_number }}
-    E2E_ARTIFACT: e2e-daily--run-${{ github.run_number }}
+    API_ARTIFACT: API tests against nightly smoke test site
+    E2E_ARTIFACT: E2E tests against nightly smoke test site
     FORCE_COLOR: 1
 
 concurrency:
@@ -16,7 +16,7 @@ concurrency:
 permissions: {}
 
 jobs:
-    api-tests:
+    api:
         name: API tests on nightly build
         runs-on: ubuntu-20.04
         permissions:
@@ -40,45 +40,41 @@ jobs:
                   install-filters: woocommerce
                   build: false
 
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-
-            - name: Run 'Update WooCommerce' test.
-              working-directory: plugins/woocommerce
-              env:
-                  UPDATE_WC: nightly
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
-
-            - name: Run API tests.
-              working-directory: plugins/woocommerce
-              env:
-                  USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
-                  USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
-              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js hello.test.js
-
-            - name: Generate API Test report.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
-
-            - name: Archive API test report
-              if: success() || failure()
-              uses: actions/upload-artifact@v3
+            - name: Update to WooCommerce nightly
+              timeout-minutes: 60
+              uses: ./.github/actions/tests/run-e2e-tests
               with:
-                  name: ${{ env.API_ARTIFACT }}
-                  path: |
-                      ${{ env.ALLURE_RESULTS_DIR }}
-                      ${{ env.ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
+                  artifact-name: ${{ env.E2E_ARTIFACT }}
+                  tests: update-woocommerce.spec.js
+                  report-title: Update to WooCommerce nightly
+              env:
+                  RESET_SITE: true
+                  UPDATE_WC: nightly
 
-    e2e-tests:
+            - name: Run API tests
+              id: api-action
+              uses: ./.github/actions/tests/run-api-tests
+              with:
+                  artifact-name: ${{ env.API_ARTIFACT }}
+                  tests: hello # mytodo remove
+
+            - name: Publish report
+              id: report
+              if: success() || ( failure() && steps.api-action.result == 'failure' )
+              uses: ./.github/actions/tests/reports/publish-report-daily
+              with:
+                  key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  region: ${{ secrets.REPORTS_AWS_REGION }}
+                  access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  reports-home: ${{ secrets.REPORTS_BUCKET }}
+                  test-type: api
+
+    e2e:
         name: E2E tests on nightly build
         runs-on: ubuntu-20.04
         permissions:
             contents: read
-        needs: [api-tests]
+        needs: [api]
         env:
             ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
             ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -127,12 +123,12 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-    k6-tests:
+    k6:
         name: k6 tests on nightly build
         runs-on: ubuntu-20.04
         permissions:
             contents: read
-        needs: [api-tests]
+        needs: [api]
         if: success() || failure()
         steps:
             - uses: actions/checkout@v3
@@ -177,12 +173,12 @@ jobs:
               run: |
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
-    test-plugins:
-        name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed
+    plugins:
+        name: E2E tests with ${{ matrix.plugin }}
         runs-on: ubuntu-20.04
         permissions:
             contents: read
-        needs: [api-tests]
+        needs: [api]
         env:
             USE_WP_ENV: 1
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
@@ -250,102 +246,5 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-    trunk-results:
-        name: Publish report on smoke tests on nightly build
-        if: |
-            ( success() || failure() ) &&
-            ! github.event.pull_request.head.repo.fork
-        runs-on: ubuntu-20.04
-        permissions:
-            contents: read
-        needs: [e2e-tests, test-plugins, k6-tests]
-        steps:
-            - name: Create dirs
-              run: |
-                  mkdir -p repo
-                  mkdir -p artifacts/api
-                  mkdir -p artifacts/e2e
-                  mkdir -p output
-
-            - name: Checkout code
-              uses: actions/checkout@v3
-              with:
-                  path: repo
-
-            - name: Download API test report artifact
-              uses: actions/download-artifact@v3
-              with:
-                  name: ${{ env.API_ARTIFACT }}
-                  path: artifacts/api
-
-            - name: Download E2E test report artifact
-              uses: actions/download-artifact@v3
-              with:
-                  name: ${{ env.E2E_ARTIFACT }}
-                  path: artifacts/e2e
-
-            - name: Post test summary
-              uses: actions/github-script@v6
-              env:
-                  API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
-                  E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
-              with:
-                  result-encoding: string
-                  script: |
-                      const script = require( './repo/.github/workflows/scripts/prepare-test-summary-daily.js' )
-                      return await script( { core } )
-
-            - name: Publish report
-              env:
-                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-                  RUN_ID: ${{ github.run_id }}
-              run: |
-                  gh workflow run publish-test-reports-daily.yml \
-                    -f run_id=$RUN_ID \
-                    -f api_artifact="$API_ARTIFACT" \
-                    -f e2e_artifact="$E2E_ARTIFACT" \
-                    -f s3_root=public \
-                    --repo woocommerce/woocommerce-test-reports
-
-    plugins-results:
-        name: Publish report on Smoke tests on trunk with plugins
-        if: |
-            ( success() || failure() ) &&
-            ! github.event.pull_request.head.repo.fork
-        runs-on: ubuntu-20.04
-        needs: [e2e-tests, test-plugins, k6-tests]
-        env:
-            GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-            RUN_ID: ${{ github.run_id }}
-            ARTIFACT: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
-        strategy:
-            fail-fast: false
-            matrix:
-                include:
-                    - plugin: 'WooCommerce Payments'
-                      slug: woocommerce-payments
-                    - plugin: 'WooCommerce PayPal Payments'
-                      slug: woocommerce-paypal-payments
-                    - plugin: 'WooCommerce Shipping & Tax'
-                      slug: woocommerce-services
-                    - plugin: 'WooCommerce Subscriptions'
-                      slug: woocommerce-subscriptions
-                    - plugin: 'Gutenberg'
-                      slug: gutenberg
-                    - plugin: 'Gutenberg - Nightly'
-                      slug: gutenberg-nightly
-        steps:
-            - name: Download test report artifact
-              uses: actions/download-artifact@v3
-              with:
-                  name: ${{ env.ARTIFACT }}
-
-            - name: Publish reports
-              run: |
-                  gh workflow run publish-test-reports-daily-plugins.yml \
-                    -f run_id=$RUN_ID \
-                    -f artifact="${{ env.ARTIFACT }}" \
-                    -f plugin="${{ matrix.plugin }}" \
-                    -f slug="${{ matrix.slug }}" \
-                    -f s3_root=public \
-                    --repo woocommerce/woocommerce-test-reports
+    e2e-hpos:
+    # mytodo

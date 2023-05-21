@@ -1,0 +1,66 @@
+name: Publish PR test report
+description: Upload allure-report folder to bucket. Add link on WooCommerce Test Reports Dashboard.
+permissions: {}
+
+inputs:
+    key-id:
+        required: true
+    region:
+        required: true
+    access-key:
+        required: true
+    reports-home:
+        required: true
+    feat-slug:
+        description: Slug for enabled feature flags.
+    test-type:
+        required: true
+        type: choice
+        options:
+            - api
+            - e2e
+            - k6
+
+outputs:
+    report-url:
+        description: Link to view published report.
+        value: ${{ steps.upload-path.outputs.report-url }}
+    stats:
+        description: Stringified JSON of test result stats.
+        value: ${{ steps.stats.outputs.stats }}
+
+runs:
+    using: composite
+    steps:
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v2
+          with:
+              aws-region: ${{ inputs.region }}
+              aws-access-key-id: ${{ inputs.key-id }}
+              aws-secret-access-key: ${{ inputs.access-key }}
+
+        - name: Download history from previous report
+          shell: bash
+          env:
+              SOURCE: ${{ inputs.reports-home }}/public/daily/${{ inputs.test-type }}/history
+              TARGET: ${{ env.ALLURE_RESULTS_DIR }}
+          run: |
+              aws s3 cp "${{ env.SOURCE }}" "${{ env.TARGET }}" \
+                --recursive \
+                --only-show-errors
+
+        - name: Regenerate report
+          shell: bash
+          working-directory: plugins/woocommerce
+          run: |
+              pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+        - name: Upload report
+          shell: bash
+          env:
+              SOURCE: ${{ env.ALLURE_REPORT_DIR }}
+              TARGET: ${{ inputs.reports-home }}/public/daily/${{ inputs.test-type }}
+          run: |
+              aws s3 cp "${{ env.SOURCE }}" "${{ env.TARGET }}" \
+                --recursive \
+                --only-show-errors
