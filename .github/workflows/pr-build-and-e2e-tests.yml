@@ -221,7 +221,7 @@ jobs:
 
     # mytodo add links to HPOS tests
     pr-comment:
-        name: Post test results
+        name: Post test results on PR
         runs-on: ubuntu-20.04
         needs: [api, e2e, api-hpos, e2e-hpos]
         if: |
@@ -239,7 +239,7 @@ jobs:
             - uses: actions/checkout@v3
 
             - name: Compose test summary
-              id: prepare-test-summary
+              id: compose-summary
               uses: actions/github-script@v6
               env:
                   SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/compose-test-summary.js
@@ -247,24 +247,25 @@ jobs:
                   E2E_STATS: ${{ needs.e2e.outputs.stats }}
                   API_HPOS_STATS: ${{ needs.api-hpos.outputs.stats }}
                   E2E_HPOS_STATS: ${{ needs.e2e-hpos.outputs.stats }}
+                  SHA: ${{ github.event.pull_request.head.sha }}
               with:
                   result-encoding: string
                   script: |
                       const script = require( process.env.SCRIPT_PATH );
-                      return await script( { context, core } )
+                      await script( { github, core } )
 
-            # - name: Find PR comment by github-actions[bot]
-            #   uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
-            #   id: find-comment
-            #   with:
-            #       issue-number: ${{ github.event.pull_request.number }}
-            #       comment-author: 'github-actions[bot]'
-            #       body-includes: Test Results Summary
+            - name: Find PR comment by github-actions[bot]
+              uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
+              id: find-comment
+              with:
+                  issue-number: ${{ github.event.pull_request.number }}
+                  comment-author: 'github-actions[bot]'
+                  body-includes: Test results for ${{ github.event.pull_request.head.sha }}
 
-            # - name: Create or update PR comment
-            #   uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
-            #   with:
-            #       comment-id: ${{ steps.find-comment.outputs.comment-id }}
-            #       issue-number: ${{ github.event.pull_request.number }}
-            #       body: ${{ steps.prepare-test-summary.outputs.result }}
-            #       edit-mode: replace
+            - name: Create or update PR comment
+              uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
+              with:
+                  comment-id: ${{ steps.find-comment.outputs.comment-id }}
+                  issue-number: ${{ github.event.pull_request.number }}
+                  body: ${{ steps.compose-summary.outputs.summary }}
+                  edit-mode: replace
