@@ -247,6 +247,10 @@ jobs:
                   E2E_STATS: ${{ needs.e2e.outputs.stats }}
                   API_HPOS_STATS: ${{ needs.api-hpos.outputs.stats }}
                   E2E_HPOS_STATS: ${{ needs.e2e-hpos.outputs.stats }}
+                  API_REPORT_URL: ${{ needs.api.outputs.report-url }}
+                  E2E_REPORT_URL: ${{ needs.e2e.outputs.report-url }}
+                  API_HPOS_REPORT_URL: ${{ needs.api-hpos.outputs.report-url }}
+                  E2E_HPOS_REPORT_URL: ${{ needs.e2e-hpos.outputs.report-url }}
                   SHA: ${{ github.event.pull_request.head.sha }}
               with:
                   result-encoding: string
