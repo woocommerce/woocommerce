@@ -56,21 +56,16 @@ const addTable = ( core ) => {
 	const apiHposStats = JSON.parse( API_HPOS_STATS );
 	const e2eHposStats = JSON.parse( E2E_HPOS_STATS );
 
-	const apiReportURL = JSON.parse( API_REPORT_URL );
-	const e2eReportURL = JSON.parse( E2E_REPORT_URL );
-	const apiHposReportURL = JSON.parse( API_HPOS_REPORT_URL );
-	const e2eHposReportURL = JSON.parse( E2E_HPOS_REPORT_URL );
-
-	const apiRow = addRow( 'API Tests', apiReportURL, apiStats );
-	const e2eRow = addRow( 'E2E Tests', e2eReportURL, e2eStats );
+	const apiRow = addRow( 'API Tests', API_REPORT_URL, apiStats );
+	const e2eRow = addRow( 'E2E Tests', E2E_REPORT_URL, e2eStats );
 	const apiHposRow = addRow(
 		'API Tests (HPOS enabled)',
-		apiHposReportURL,
+		API_HPOS_REPORT_URL,
 		apiHposStats
 	);
 	const e2eHposRow = addRow(
 		'E2E Tests (HPOS enabled)',
-		e2eHposReportURL,
+		E2E_HPOS_REPORT_URL,
 		e2eHposStats
 	);
 
