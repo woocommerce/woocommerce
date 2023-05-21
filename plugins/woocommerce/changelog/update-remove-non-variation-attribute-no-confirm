@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Don't show confirmation message when removing a non-variation attribute from a product.
