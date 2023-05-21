@@ -31,10 +31,9 @@ const getFormattedDuration = ( duration ) => {
 const addRow = ( rowTitle, reportURL, stats ) => {
 	const { passed, failed, skipped, broken, unknown, total, duration } = stats;
 	const durationFormatted = getFormattedDuration( duration );
-	const reportLink = `[${ rowTitle }](${ reportURL })`;
 
 	return [
-		reportLink,
+		rowTitle,
 		passed.toString(),
 		failed.toString(),
 		broken.toString(),
