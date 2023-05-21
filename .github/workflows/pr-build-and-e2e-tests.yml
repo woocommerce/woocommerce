@@ -62,7 +62,7 @@ jobs:
               id: stats
               uses: actions/github-script@v6
               env:
-                  SCRIPT_PATH: ./.github/workflows/scripts/output-stats.js
+                  SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/output-stats.js
               with:
                   script: |
                       const script = require( process.env.SCRIPT_PATH );
@@ -115,7 +115,7 @@ jobs:
               id: stats
               uses: actions/github-script@v6
               env:
-                  SCRIPT_PATH: ./.github/workflows/scripts/output-stats.js
+                  SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/output-stats.js
               with:
                   script: |
                       const script = require( process.env.SCRIPT_PATH );
@@ -191,7 +191,7 @@ jobs:
               id: stats
               uses: actions/github-script@v6
               env:
-                  SCRIPT_PATH: ./.github/workflows/scripts/output-stats.js
+                  SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/output-stats.js
               with:
                   script: |
                       const script = require( process.env.SCRIPT_PATH );
@@ -249,7 +249,7 @@ jobs:
               id: stats
               uses: actions/github-script@v6
               env:
-                  SCRIPT_PATH: ./.github/workflows/scripts/output-stats.js
+                  SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-pr/scripts/output-stats.js
               with:
                   script: |
                       const script = require( process.env.SCRIPT_PATH );
