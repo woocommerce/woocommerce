@@ -77,7 +77,7 @@ const addTable = ( core ) => {
 	core.summary.addTable( [
 		[
 			{
-				data: 'Test (click to view full report) :test_tube:',
+				data: 'Test :test_tube:',
 				header: true,
 			},
 			{
