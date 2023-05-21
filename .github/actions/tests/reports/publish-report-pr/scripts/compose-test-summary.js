@@ -75,10 +75,6 @@ const addTable = ( core ) => {
 				data: 'Test :test_tube:',
 				header: true,
 			},
-			{
-				data: 'Full report :chart_with_upwards_trend:',
-				header: true,
-			},
 			{ data: 'Passed :white_check_mark:', header: true },
 			{ data: 'Failed :rotating_light:', header: true },
 			{ data: 'Broken :construction:', header: true },
