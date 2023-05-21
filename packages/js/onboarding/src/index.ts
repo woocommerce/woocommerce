@@ -15,3 +15,4 @@ export { WooPaymentGatewayConfigure } from './components/WooPaymentGatewayConfig
 export { WooOnboardingTaskListItem } from './components/WooOnboardingTaskListItem';
 export { WooOnboardingTaskListHeader } from './components/WooOnboardingTaskListHeader';
 export { WooOnboardingTask } from './components/WooOnboardingTask';
+export * from './utils/countries';

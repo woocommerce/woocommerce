@@ -657,12 +657,12 @@ jobs:
                       repo: WC_SUBSCRIPTIONS_REPO
                       private: true
                       env_description: 'woocommerce-subscriptions'
-                    - plugin: 'WordPress SEO' # Yoast SEO in the UI, but the slug is wordpress-seo
-                      repo: 'Yoast/wordpress-seo'
-                      env_description: 'wordpress-seo'
-                    - plugin: 'Contact Form 7'
-                      repo: 'takayukister/contact-form-7'
-                      env_description: 'contact-form-7'
+                    - plugin: 'Gutenberg'
+                      repo: 'WordPress/gutenberg'
+                      env_description: 'gutenberg'
+                    - plugin: 'Gutenberg - Nightly'
+                      repo: 'bph/gutenberg'
+                      env_description: 'gutenberg-nightly'
         steps:
             - name: Checkout
               uses: actions/checkout@v3

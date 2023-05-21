@@ -62,7 +62,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_shipping_phone',
 		'_completed_date',
 		'_paid_date',
-		'_edit_lock',
 		'_edit_last',
 		'_cart_discount',
 		'_cart_discount_tax',
