@@ -219,7 +219,6 @@ jobs:
                   feat-slug: hpos
                   test-type: e2e
 
-    # mytodo add links to HPOS tests
     pr-comment:
         name: Post test results on PR
         runs-on: ubuntu-20.04
