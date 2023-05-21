@@ -102,7 +102,8 @@ const addCommitDetails = async ( github, core ) => {
 	const response = await github.request( requestURL );
 	const message = response.data.commit.message;
 
-	core.summary.addRaw( `Commit SHA: ${ SHA }`, true );
+	core.summary.addRaw( `Commit SHA: ${ SHA }` );
+	core.summary.addBreak();
 	core.summary.addRaw( `Commit Message: ${ message }`, true );
 	core.summary.addBreak();
 };
