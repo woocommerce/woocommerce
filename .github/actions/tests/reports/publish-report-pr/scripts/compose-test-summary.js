@@ -31,9 +31,12 @@ const getFormattedDuration = ( duration ) => {
 const addRow = ( rowTitle, reportURL, stats ) => {
 	const { passed, failed, skipped, broken, unknown, total, duration } = stats;
 	const durationFormatted = getFormattedDuration( duration );
+	const rowTitleCell = {
+		data: `[${ rowTitle }](${ reportURL })`,
+	};
 
 	return [
-		rowTitle,
+		rowTitleCell,
 		passed.toString(),
 		failed.toString(),
 		broken.toString(),
@@ -55,10 +58,18 @@ const addTable = ( core ) => {
 	const apiHposStats = JSON.parse( API_HPOS_STATS );
 	const e2eHposStats = JSON.parse( E2E_HPOS_STATS );
 
-	const apiRow = addRow( 'API Tests', apiStats );
-	const e2eRow = addRow( 'E2E Tests', e2eStats );
-	const apiHposRow = addRow( 'API Tests (HPOS enabled)', apiHposStats );
-	const e2eHposRow = addRow( 'E2E Tests (HPOS enabled)', e2eHposStats );
+	const apiRow = addRow( 'API Tests', API_REPORT_URL, apiStats );
+	const e2eRow = addRow( 'E2E Tests', E2E_REPORT_URL, e2eStats );
+	const apiHposRow = addRow(
+		'API Tests (HPOS enabled)',
+		API_HPOS_REPORT_URL,
+		apiHposStats
+	);
+	const e2eHposRow = addRow(
+		'E2E Tests (HPOS enabled)',
+		E2E_HPOS_REPORT_URL,
+		e2eHposStats
+	);
 
 	core.summary.addTable( [
 		[
@@ -82,17 +93,18 @@ const addTable = ( core ) => {
 };
 
 const addHeading = ( core ) => {
-	core.summary.addHeading( `Test results for ${ SHA }` );
+	core.summary.addHeading( 'Test results summary' );
 };
 
-const addCommitMessage = async ( github, core ) => {
+const addCommitDetails = async ( github, core ) => {
 	const requestURL = `https://api.github.com/repos/woocommerce/woocommerce/commits/${ SHA }`;
 
 	const response = await github.request( requestURL );
 	const message = response.data.commit.message;
 
-	core.summary.addRaw( 'Commit Message:', true );
-	core.summary.addQuote( message );
+	core.summary.addRaw( `Commit SHA: ${ SHA }`, true );
+	core.summary.addRaw( `Commit Message: ${ message }`, true );
+	core.summary.addBreak();
 };
 
 /**
@@ -103,7 +115,7 @@ const addCommitMessage = async ( github, core ) => {
  */
 module.exports = async ( { github, core } ) => {
 	addHeading( core );
-	await addCommitMessage( github, core );
+	await addCommitDetails( github, core );
 	addTable( core );
 
 	const summary = core.summary.stringify();
