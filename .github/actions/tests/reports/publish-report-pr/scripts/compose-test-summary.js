@@ -59,7 +59,7 @@ module.exports = async ( { github, core } ) => {
 	const e2eStats = JSON.parse( E2E_STATS );
 	const apiHposStats = JSON.parse( API_HPOS_STATS );
 	const e2eHposStats = JSON.parse( E2E_HPOS_STATS );
-	const content = fs
+	let content = fs
 		.readFileSync(
 			'./.github/actions/tests/reports/publish-report-pr/scripts/test-summary-template.md'
 		)
