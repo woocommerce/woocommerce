@@ -59,9 +59,11 @@ module.exports = async ( { github, core } ) => {
 	const e2eStats = JSON.parse( E2E_STATS );
 	const apiHposStats = JSON.parse( API_HPOS_STATS );
 	const e2eHposStats = JSON.parse( E2E_HPOS_STATS );
-	const content = fs.readFileSync(
-		'./.github/actions/tests/reports/publish-report-pr/scripts/test-summary-template.md'
-	);
+	const content = fs
+		.readFileSync(
+			'./.github/actions/tests/reports/publish-report-pr/scripts/test-summary-template.md'
+		)
+		.toString();
 
 	content = await insertCommitDetails( github, content );
 	content = insertRow( content, 'API Tests', API_REPORT_URL, apiStats );
