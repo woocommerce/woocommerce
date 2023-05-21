@@ -17,111 +17,47 @@ const {
  * @param {Number} duration Duration in millisecods, as read from either the `summary.json` file in the Allure report, or from the `test-results.json` file from the Jest-Puppeteer report.
  * @returns String in "5m 23s" format.
  */
-const getFormattedDuration = ( duration ) => {
+const formatDuration = ( duration ) => {
 	const durationMinutes = Math.floor( duration / 1000 / 60 );
 	const durationSeconds = Math.floor( ( duration / 1000 ) % 60 );
 	return `${ durationMinutes }m ${ durationSeconds }s`;
 };
 
-/**
- * Construct array of row values.
- *
- * @returns {string[]} Array of test result stats.
- */
-const addRow = ( rowTitle, reportURL, stats ) => {
-	const { passed, failed, skipped, broken, unknown, total, duration } = stats;
-	const durationFormatted = getFormattedDuration( duration );
-	const rowTitleCell = {
-		data: `[${ rowTitle }](${ reportURL })`,
-	};
+const parseRow = async ( { github, content, stats, rowTitle, reportUrl } ) => {
+	const duration = formatDuration( stats.duration );
 
-	return [
-		rowTitleCell,
-		passed.toString(),
-		failed.toString(),
-		broken.toString(),
-		skipped.toString(),
-		unknown.toString(),
-		total.toString(),
-		durationFormatted,
-	];
+	return content.replace( '$API_TITLE', rowTitle ).replace( '' );
 };
 
-/**
- * Add results table to core object.
- *
- * @param core The GitHub Actions toolkit core object
- */
-const addTable = ( core ) => {
+const getCommitMessage = async () => {
+	const requestURL = `https://api.github.com/repos/woocommerce/woocommerce/commits/${ SHA }`;
+
+	const response = await github.request( requestURL );
+	const message = response.data.commit.message;
+};
+
+module.exports = async ( { github, core } ) => {
+	const fs = require( 'fs' );
+
 	const apiStats = JSON.parse( API_STATS );
 	const e2eStats = JSON.parse( E2E_STATS );
 	const apiHposStats = JSON.parse( API_HPOS_STATS );
 	const e2eHposStats = JSON.parse( E2E_HPOS_STATS );
 
-	const apiRow = addRow( 'API Tests', API_REPORT_URL, apiStats );
-	const e2eRow = addRow( 'E2E Tests', E2E_REPORT_URL, e2eStats );
-	const apiHposRow = addRow(
-		'API Tests (HPOS enabled)',
-		API_HPOS_REPORT_URL,
-		apiHposStats
-	);
-	const e2eHposRow = addRow(
-		'E2E Tests (HPOS enabled)',
-		E2E_HPOS_REPORT_URL,
-		e2eHposStats
+	const commitMessage = getCommitMessage();
+
+	const content = fs.readFileSync(
+		'./.github/actions/tests/reports/publish-report-pr/scripts/test-summary-template.md'
 	);
 
-	core.summary.addTable( [
-		[
-			{
-				data: 'Test :test_tube:',
-				header: true,
-			},
-			{ data: 'Passed :white_check_mark:', header: true },
-			{ data: 'Failed :rotating_light:', header: true },
-			{ data: 'Broken :construction:', header: true },
-			{ data: 'Skipped :next_track_button:', header: true },
-			{ data: 'Unknown :grey_question:', header: true },
-			{ data: 'Total :bar_chart:', header: true },
-			{ data: 'Duration :stopwatch:', header: true },
-		],
-		apiRow,
-		e2eRow,
-		apiHposRow,
-		e2eHposRow,
-	] );
-};
-
-const addHeading = ( core ) => {
-	core.summary.addHeading( 'Test results summary' );
-};
-
-const addCommitDetails = async ( github, core ) => {
-	const requestURL = `https://api.github.com/repos/woocommerce/woocommerce/commits/${ SHA }`;
-
-	const response = await github.request( requestURL );
-	const message = response.data.commit.message;
-
-	core.summary.addRaw( `Commit SHA: ${ SHA }` );
-	core.summary.addBreak();
-	core.summary.addRaw( `Commit Message: ${ message }`, true );
-	core.summary.addBreak();
-};
-
-/**
- * Generate the contents of the test results summary and post it on the workflow run.
- *
- * @param {*} params Objects passed from the calling GitHub Action workflow.
- * @yields `summary` step output. It is the stringified content of the test results summary.
- */
-module.exports = async ( { github, core } ) => {
-	addHeading( core );
-	await addCommitDetails( github, core );
-	addTable( core );
-
-	const summary = core.summary.stringify();
-
-	await core.summary.write();
+	// Parse API row
+	content = await parseRow( {
+		github,
+		content,
+		stats: apiStats,
+		rowTitle: 'API Tests',
+		reportUrl: API_REPORT_URL,
+	} );
 
 	core.setOutput( 'summary', summary );
 };
