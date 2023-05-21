@@ -8,7 +8,6 @@ const {
 	API_HPOS_REPORT_URL,
 	E2E_HPOS_REPORT_URL,
 	SHA,
-	PR_NUMBER,
 } = process.env;
 
 /**
@@ -105,15 +104,10 @@ const addHeading = ( core ) => {
 };
 
 const addCommitMessage = async ( github, core ) => {
-	const params = {
-		owner: 'woocommerce',
-		repo: 'woocommerce',
-		pull_number: PR_NUMBER,
-	};
+	const requestURL = `https://api.github.com/repos/woocommerce/woocommerce/commits/${ SHA }`;
 
-	const response = await github.rest.pulls.listCommits( params );
-	const message = response.data.find( ( { sha } ) => sha === SHA ).commit
-		.message;
+	const response = await github.request( requestURL );
+	const message = response.data.commit.message;
 
 	core.summary.addRaw( 'Commit Message:', true );
 	core.summary.addQuote( message );
