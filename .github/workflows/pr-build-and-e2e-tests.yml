@@ -256,7 +256,7 @@ jobs:
                   result-encoding: string
                   script: |
                       const script = require( process.env.SCRIPT_PATH );
-                      await script( { github, core } )
+                      await script( { github, core } );
 
             - name: Find PR comment by github-actions[bot]
               uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
