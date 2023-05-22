@@ -6,11 +6,7 @@ import { getPluginSlug } from '~/utils';
 /**
  * External dependencies
  */
-import {
-	ONBOARDING_STORE_NAME,
-	PLUGINS_STORE_NAME,
-	PluginNames,
-} from '@woocommerce/data';
+import { PLUGINS_STORE_NAME, PluginNames } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 import { differenceWith } from 'lodash';
 
@@ -41,38 +37,32 @@ export type PluginInstallError = {
 
 const createInstallationCompletedWithErrorsEvent = (
 	errors: PluginInstallError[]
-): PluginsInstallationCompletedWithErrorsEvent => {
-	return {
-		type: 'PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS',
-		payload: {
-			errors,
-		},
-	};
-};
+): PluginsInstallationCompletedWithErrorsEvent => ( {
+	type: 'PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS',
+	payload: {
+		errors,
+	},
+} );
 
 const createInstallationCompletedEvent = (
 	installationCompletedResult: InstallationCompletedResult
-): PluginsInstallationCompletedEvent => {
-	return {
-		type: 'PLUGINS_INSTALLATION_COMPLETED',
-		payload: {
-			installationCompletedResult,
-		},
-	};
-};
+): PluginsInstallationCompletedEvent => ( {
+	type: 'PLUGINS_INSTALLATION_COMPLETED',
+	payload: {
+		installationCompletedResult,
+	},
+} );
 
 const createPluginInstalledAndActivatedEvent = (
 	pluginsCount: number,
 	installedPluginIndex: number
-): PluginInstalledAndActivatedEvent => {
-	return {
-		type: 'PLUGIN_INSTALLED_AND_ACTIVATED',
-		payload: {
-			pluginsCount,
-			installedPluginIndex,
-		},
-	};
-};
+): PluginInstalledAndActivatedEvent => ( {
+	type: 'PLUGIN_INSTALLED_AND_ACTIVATED',
+	payload: {
+		pluginsCount,
+		installedPluginIndex,
+	},
+} );
 
 export const InstallAndActivatePlugins = (
 	context: CoreProfilerStateMachineContext
@@ -85,7 +75,6 @@ export const InstallAndActivatePlugins = (
 	) => void
 ) => {
 	let continueInstallation = true;
-	let pluginIndex = 0;
 	const errors: PluginInstallError[] = [];
 	const installationCompletedResult: InstallationCompletedResult = {
 		installedPlugins: [],
@@ -98,14 +87,14 @@ export const InstallAndActivatePlugins = (
 	};
 
 	/**
-	 * When the timer is up, stop the installation
-	 * Reject the promise with errors if any
+	 * When the timer is up, stop the installation.
+	 * Reject the promise with errors if any.
 	 * Otherwise, queue the remaining plugins to the action scheduler and resolve.
 	 */
 	let timer = setTimeout( async () => {
 		continueInstallation = false;
 
-		if ( errors.length > 0 ) {
+		if ( errors.length ) {
 			return send( createInstallationCompletedWithErrorsEvent( errors ) );
 		}
 
@@ -130,12 +119,12 @@ export const InstallAndActivatePlugins = (
 		// so that we can reference errors later.
 	}, 1000 * 30 );
 
-	/**
-	 * Install plugins one by one in sync
-	 */
-	while ( continueInstallation ) {
-		const plugin = getPluginSlug( context.pluginsSelected[ pluginIndex ] );
-
+	for ( let index in context.pluginsSelected ) {
+		// Set by timer when it's up
+		if ( ! continueInstallation ) {
+			break;
+		}
+		const plugin = getPluginSlug( context.pluginsSelected[ index ] );
 		try {
 			const response = await dispatch(
 				PLUGINS_STORE_NAME
@@ -149,7 +138,7 @@ export const InstallAndActivatePlugins = (
 			send(
 				createPluginInstalledAndActivatedEvent(
 					context.pluginsSelected.length,
-					pluginIndex + 1
+					parseInt( index ) + 1
 				)
 			);
 		} catch ( error ) {
@@ -158,27 +147,21 @@ export const InstallAndActivatePlugins = (
 				error: error instanceof Error ? error.message : String( error ),
 			} );
 		}
-
-		if ( context.pluginsSelected.length - 1 > pluginIndex ) {
-			pluginIndex++;
-		} else {
-			/**
-			 * When everything is done, stop the installation
-			 * Reject the promise with errors if any
-			 * Otherwise, resolve.
-			 */
-			continueInstallation = false;
-			if ( errors.length ) {
-				return send(
-					createInstallationCompletedWithErrorsEvent( errors )
-				);
-			}
-
-			setInstallationCompletedTime();
-			clearTimeout( timer );
-			return send(
-				createInstallationCompletedEvent( installationCompletedResult )
-			);
-		}
 	}
+
+	/**
+	 * When everything is done, stop the installation
+	 * Reject the promise with errors if any
+	 * Otherwise, resolve.
+	 */
+	clearTimeout( timer );
+	if ( errors.length ) {
+		return send( createInstallationCompletedWithErrorsEvent( errors ) );
+	}
+
+	setInstallationCompletedTime();
+
+	return send(
+		createInstallationCompletedEvent( installationCompletedResult )
+	);
 };
