@@ -11,6 +11,9 @@ use Exception;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Attribute Suggestion Request class.
+ */
 class Attribute_Suggestion_Request {
 	const REQUESTED_ATTRIBUTE_NAME        = 'name';
 	const REQUESTED_ATTRIBUTE_DESCRIPTION = 'description';

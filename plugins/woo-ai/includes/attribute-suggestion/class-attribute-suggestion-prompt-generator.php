@@ -9,6 +9,9 @@ namespace Automattic\WooCommerce\AI\AttributeSuggestion;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Attribute Suggestion Prompt Generator Class
+ */
 class Attribute_Suggestion_Prompt_Generator {
 	public const SYSTEM_PROMPT = <<<SYSTEM_PROMPT
 You are a SEO and marketing expert specializing in e-commerce stores built using WooCommerce.

@@ -11,6 +11,9 @@ use Exception;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Completion Service Interface.
+ */
 interface Completion_Service_Interface {
 	/**
 	 * Gets the completion from the OpenAI API.

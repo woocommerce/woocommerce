@@ -13,6 +13,9 @@ use JsonException;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Attribute Suggestion Service class.
+ */
 class Attribute_Suggestion_Service {
 	/**
 	 * The prompt generator.

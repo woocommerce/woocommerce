@@ -12,6 +12,9 @@ use JsonException;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Completion Service class.
+ */
 class Completion_Service implements Completion_Service_Interface {
 	/**
 	 * Gets the completion from the API.

@@ -1,4 +1,9 @@
 <?php
+/**
+ * API initialization for ai plugin.
+ *
+ * @package Woo_AI
+ */
 
 defined( 'ABSPATH' ) || exit;
 

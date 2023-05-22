@@ -9,6 +9,9 @@ namespace Automattic\WooCommerce\AI\PromptUtils;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Product Category Formatter class.
+ */
 class Product_Category_Formatter {
 	/**
 	 * Get the category names from the category ids from WooCommerce and recursively get all the parent categories and prepend them to the category names separated by >.
