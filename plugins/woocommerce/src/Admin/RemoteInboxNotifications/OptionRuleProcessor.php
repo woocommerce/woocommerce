@@ -20,11 +20,10 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 	 * @return bool The result of the operation.
 	 */
 	public function process( $rule, $stored_state ) {
-		$is_contains       = $rule->operation && strpos( $rule->operation, 'contains' ) !== false;
-		$default_value     = $is_contains ? array() : false;
-		$default           = isset( $rule->default ) ? $rule->default : $default_value;
-		$option_value      = get_option( $rule->option_name, $default );
-		$is_siteurl_option = 'siteurl' === $rule->option_name;
+		$is_contains   = $rule->operation && strpos( $rule->operation, 'contains' ) !== false;
+		$default_value = $is_contains ? array() : false;
+		$default       = isset( $rule->default ) ? $rule->default : $default_value;
+		$option_value  = get_option( $rule->option_name, $default );
 
 		if ( $is_contains && ! is_array( $option_value ) ) {
 			$logger = wc_get_logger();
@@ -46,30 +45,11 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 			$option_value = TransformerService::apply( $option_value, $rule->transformers, $default );
 		}
 
-		$rule_value = $rule->value;
-
-		if ( $is_siteurl_option ) {
-			$rule_value   = $this->getRuleValue( $rule_value );
-			$option_value = $this->getRuleValue( $option_value );
-		}
-
 		return ComparisonOperation::compare(
 			$option_value,
-			$rule_value,
+			$rule->value,
 			$rule->operation
 		);
-	}
-
-	/**
-	 * Helper function to get the rule value for 'siteurl' option.
-	 *
-	 * @param string $url The URL to parse.
-	 *
-	 * @return string
-	 */
-	protected function getRuleValue( $url ) {
-		$url_parts = wp_parse_url( rtrim( $url, '/' ) );
-		return isset( $url_parts['path'] ) ? $url_parts['host'] . $url_parts['path'] : $url_parts['host'];
 	}
 
 	/**
