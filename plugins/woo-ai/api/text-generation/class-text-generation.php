@@ -163,13 +163,9 @@ class Text_Generation extends \WC_REST_Data_Controller {
 		}
 
 		$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
-
 		$last_choice = end( $response['choices'] );
-
-		$generated_text = wp_kses_post( $last_choice['message']['content'] );
-
 		$messages[] = $last_choice['message'];
-		// Make sure all messages are sanitized.
+		// Sanitize message content for allowed post content HTML tags.
 		array_map ( function( $message ) {
 			$message['content'] = wp_kses_post( $message['content'] );
 			return $message;
