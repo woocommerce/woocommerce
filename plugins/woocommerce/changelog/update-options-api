@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Make option API fail when using a disallowed option name in non-produciton environments
