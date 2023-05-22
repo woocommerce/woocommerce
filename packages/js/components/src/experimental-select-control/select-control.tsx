@@ -58,6 +58,7 @@ export type SelectControlProps< ItemType > = {
 	) => void;
 	onRemove?: ( item: ItemType ) => void;
 	onSelect?: ( selected: ItemType ) => void;
+	onKeyDown?: ( e: KeyboardEvent ) => void;
 	onFocus?: ( data: { inputValue: string } ) => void;
 	stateReducer?: (
 		state: UseComboboxState< ItemType | null >,
@@ -70,6 +71,8 @@ export type SelectControlProps< ItemType > = {
 	inputProps?: GetInputPropsOptions;
 	suffix?: JSX.Element | null;
 	showToggleButton?: boolean;
+	readOnlyWhenClosed?: boolean;
+
 	/**
 	 * This is a feature already implemented in downshift@7.0.0 through the
 	 * reducer. In order for us to use it this prop is added temporarily until
@@ -118,6 +121,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	onRemove = () => null,
 	onSelect = () => null,
 	onFocus = () => null,
+	onKeyDown = () => null,
 	stateReducer = ( state, actionAndChanges ) => actionAndChanges.changes,
 	placeholder,
 	selected,
@@ -126,6 +130,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 	inputProps = {},
 	suffix = <SuffixIcon icon={ chevronDown } />,
 	showToggleButton = false,
+	readOnlyWhenClosed = true,
 	__experimentalOpenMenuOnFocus = false,
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
@@ -247,7 +252,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 		onRemove( item );
 	};
 
-	const isReadOnly = ! isOpen && ! isFocused;
+	const isReadOnly = readOnlyWhenClosed && ! isOpen && ! isFocused;
 
 	const selectedItemTags = multiple ? (
 		<SelectedItems
@@ -305,6 +310,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 							setIsFocused( false );
 						}
 					},
+					onKeyDown,
 					placeholder,
 					disabled,
 					...inputProps,

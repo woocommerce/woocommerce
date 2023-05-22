@@ -53,7 +53,10 @@ export const slackMessageCommand = new Command( 'message' )
 			try {
 				const { statusCode, body } = await requestAsync(
 					options,
-					JSON.stringify( { channel, text } )
+					JSON.stringify( {
+						channel,
+						text: text.replace( /\\n/g, '\n' ),
+					} )
 				);
 
 				Logger.endTask();

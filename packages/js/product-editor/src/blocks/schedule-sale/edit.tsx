@@ -88,7 +88,7 @@ export function Edit( {
 	const _dateOnSaleTo = moment( dateOnSaleToGmt, moment.ISO_8601, true );
 
 	const {
-		// ref: dateOnSaleFromGmtRef,
+		ref: dateOnSaleFromGmtRef,
 		error: dateOnSaleFromGmtValidationError,
 		validate: validateDateOnSaleFromGmt,
 	} = useValidation< Product >(
@@ -111,7 +111,7 @@ export function Edit( {
 	);
 
 	const {
-		// ref: dateOnSaleToGmtRef,
+		ref: dateOnSaleToGmtRef,
 		error: dateOnSaleToGmtValidationError,
 		validate: validateDateOnSaleToGmt,
 	} = useValidation< Product >(
@@ -146,7 +146,9 @@ export function Edit( {
 				<div className="wp-block-columns">
 					<div className="wp-block-column">
 						<DateTimePickerControl
-							// ref={ dateOnSaleFromGmtRef }
+							ref={
+								dateOnSaleFromGmtRef as React.Ref< HTMLInputElement >
+							}
 							label={ __( 'From', 'woocommerce' ) }
 							placeholder={ __(
 								'Sale start date and time (optional)',
@@ -165,7 +167,9 @@ export function Edit( {
 
 					<div className="wp-block-column">
 						<DateTimePickerControl
-							// ref={ dateOnSaleToGmtRef }
+							ref={
+								dateOnSaleToGmtRef as React.Ref< HTMLInputElement >
+							}
 							label={ __( 'To', 'woocommerce' ) }
 							placeholder={ __(
 								'Sale end date and time (optional)',
