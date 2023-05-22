@@ -5,6 +5,7 @@ module.exports = {
 	...defaultConfig,
 	entry: {
 		...defaultConfig.entry,
+		'wc-docs': './client/index.tsx',
 	},
 	module: {
 		...defaultConfig.module,

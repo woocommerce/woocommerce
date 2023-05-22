@@ -4,11 +4,12 @@
 	"description": "WooCommerce Docs Plugin",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "wp-scripts build"
 	},
 	"keywords": [],
 	"author": "",
-	"license": "ISC",
+	"license": "GPL-3.0+",
 	"devDependencies": {
 		"@types/react": "17.0.2",
 		"@types/react-dom": "17.0.2",
