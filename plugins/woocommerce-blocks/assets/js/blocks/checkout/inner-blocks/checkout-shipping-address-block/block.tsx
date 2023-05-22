@@ -119,6 +119,7 @@ const Block = ( {
 						setShippingAddress( values );
 						if ( useShippingAsBilling ) {
 							setBillingAddress( { ...values, email } );
+							dispatchCheckoutEvent( 'set-billing-address' );
 						}
 						dispatchCheckoutEvent( 'set-shipping-address' );
 					} }
