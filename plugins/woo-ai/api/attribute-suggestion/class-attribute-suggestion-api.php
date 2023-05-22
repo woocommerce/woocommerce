@@ -153,7 +153,7 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 	 */
 	public function get_response_permission_check( WP_REST_Request $request ) {
 		if ( ! wc_rest_check_post_permissions( 'product', 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
