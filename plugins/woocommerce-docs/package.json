@@ -1,0 +1,16 @@
+{
+	"name": "woocommerce-docs",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@wordpress/prettier-config": "^2.16.0",
+		"prettier": "^2.8.8"
+	}
+}
