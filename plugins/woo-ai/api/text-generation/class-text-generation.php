@@ -111,6 +111,11 @@ class Text_Generation extends \WC_REST_Data_Controller {
 		$temperature       = $request->get_param( 'temperature' ) ? $request->get_param( 'temperature' ) : 1;
 		$previous_messages = $request->get_param( 'previous_messages' ) ? $request->get_param( 'previous_messages' ) : array();
 
+		array_map ( function( $message ) {
+			$message['content'] = wp_strip_all_tags( $message['content'] );
+			return $message;
+		}, $previous_messages );
+
 		$model = $this->models['openai'];
 
 		$api_url = $model['url'];
