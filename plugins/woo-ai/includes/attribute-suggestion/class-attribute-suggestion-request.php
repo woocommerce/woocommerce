@@ -73,6 +73,8 @@ class Attribute_Suggestion_Request {
 	 * @param string[] $tags                The product tags.
 	 * @param string[] $categories          Categories of the product as an associative array.
 	 * @param array[]  $attributes          Other attributes of the product as an associative array.
+	 *
+	 * @throws Exception If the requested attribute is invalid.
 	 */
 	public function __construct( string $requested_attribute, string $name, string $description, array $tags = array(), array $categories = array(), array $attributes = array() ) {
 		$this->validate_requested_attribute( $requested_attribute );
@@ -94,17 +96,15 @@ class Attribute_Suggestion_Request {
 	 *
 	 * @throws Exception If the requested attribute is invalid.
 	 */
-	protected function validate_requested_attribute( string $requested_attribute ): void {
-		if ( ! in_array(
-			$requested_attribute,
-			array(
-				self::REQUESTED_ATTRIBUTE_NAME,
-				self::REQUESTED_ATTRIBUTE_DESCRIPTION,
-				self::REQUESTED_ATTRIBUTE_TAGS,
-				self::REQUESTED_ATTRIBUTE_CATEGORIES,
-			),
-			true
-		) ) {
+	private function validate_requested_attribute( string $requested_attribute ): void {
+		$valid_requested_attributes = array(
+			self::REQUESTED_ATTRIBUTE_NAME,
+			self::REQUESTED_ATTRIBUTE_DESCRIPTION,
+			self::REQUESTED_ATTRIBUTE_TAGS,
+			self::REQUESTED_ATTRIBUTE_CATEGORIES,
+		);
+
+		if ( ! in_array( $requested_attribute, $valid_requested_attributes, true ) ) {
 			throw new Exception( 'Invalid requested attribute.' );
 		}
 	}
