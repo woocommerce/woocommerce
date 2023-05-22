@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Fix RIM rules processor
+Add "PrepareUrl" transformer to RIM rules processor
