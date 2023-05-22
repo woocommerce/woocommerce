@@ -7,6 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\Jetpack\Connection\Initial_State as Connection_Initial_State;
+
 /**
  * Settings Class.
  */
@@ -46,6 +48,7 @@ class Woo_AI_Product_Text_Generation {
 			true
 		);
 		wp_enqueue_script( 'woo-ai' );
+		wp_add_inline_script( 'woo-ai', Connection_Initial_State::render(), 'before' );
 
 		$css_file_version = filemtime( dirname( __FILE__ ) . '/../build/index.css' );
 

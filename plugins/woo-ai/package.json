@@ -10,6 +10,7 @@
 	"version": "0.1.0",
 	"homepage": "http://github.com/woocommerce/woo-ai",
 	"devDependencies": {
+		"@types/debug": "^4.1.7",
 		"@types/jquery": "^3.5.16",
 		"@types/react": "^17.0.2",
 		"@types/react-dom": "^17.0.2",
@@ -40,6 +41,7 @@
 		"@wordpress/hooks": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/plugins": "wp-6.0",
+		"debug": "^4.3.3",
 		"prop-types": "^15.8.1"
 	},
 	"peerDependencies": {
