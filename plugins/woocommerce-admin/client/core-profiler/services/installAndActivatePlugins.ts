@@ -61,12 +61,12 @@ const createInstallationCompletedEvent = (
 	};
 };
 
-const createPluginsInstalledAndActivatedEvent = (
+const createPluginInstalledAndActivatedEvent = (
 	pluginsCount: number,
 	installedPluginIndex: number
 ): PluginInstalledAndActivatedEvent => {
 	return {
-		type: 'PLUGINS_INSTALLED_AND_ACTIVATED',
+		type: 'PLUGIN_INSTALLED_AND_ACTIVATED',
 		payload: {
 			pluginsCount,
 			installedPluginIndex,
@@ -147,7 +147,7 @@ export const InstallAndActivatePlugins = (
 			} );
 
 			send(
-				createPluginsInstalledAndActivatedEvent(
+				createPluginInstalledAndActivatedEvent(
 					context.pluginsSelected.length,
 					pluginIndex + 1
 				)
