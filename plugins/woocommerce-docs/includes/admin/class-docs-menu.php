@@ -1,18 +1,14 @@
 <?php
 /**
- * WooCommerce Docs Menu
+ * Docs_Menu class file.
  *
- * Set up UI and menus for the WooCommerce Docs plugin.
- *
- * @class       WooCommerce_Docs_Menu
- * @version     1.0.0
- * @package     WooCommerce_Docs
+ * @package  WooCommerce_Docs
  */
 
 /**
- * Aclass to set up menus for this WordPress plugin
+ * A class to set up menus for this WordPress plugin
  */
-class WooCommerce_Docs_Menu {
+class Docs_Menu {
 
 	/**
 	 * Define the constructor
@@ -41,8 +37,8 @@ class WooCommerce_Docs_Menu {
 	 * Render admin page
 	 */
 	public function render_admin_page() {
-		// Include the admin page template. TODO: add this file.
-		include_once plugin_dir_path( __FILE__ ) . 'views/admin.php';
+		// Include the admin page template.
+		include_once plugin_dir_path( __FILE__ ) . 'includes/views/admin.php';
 	}
 }
 

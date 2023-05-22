@@ -8,3 +8,5 @@
  * Author URI: https://woocommerce.com
  **/
 require __DIR__ . '/vendor/autoload.php';
+
+new \WooCommerce_Docs\Docs_Menu();
