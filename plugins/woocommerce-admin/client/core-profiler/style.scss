@@ -377,10 +377,10 @@
 	}
 }
 
-.woocommerce-profiler-extensions {
+.woocommerce-profiler-plugins {
 	display: flex;
 	flex-direction: column;
-	.woocommerce-profiler-extensions__content {
+	.woocommerce-profiler-plugins__content {
 		display: flex;
 		align-items: center;
 		align-self: center;
@@ -394,7 +394,7 @@
 	.woocommerce-profiler-heading__subtitle {
 		margin: 0 0 48px 0;
 	}
-	.woocommerce-profiler-extensions__list {
+	.woocommerce-profiler-plugins__list {
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
@@ -402,7 +402,7 @@
 		flex: 50%;
 	}
 
-	.woocommerce-profiler-extensions-continue-button {
+	.woocommerce-profiler-plugins-continue-button {
 		width: 200px;
 		height: 48px;
 		margin-top: 28px;
@@ -421,7 +421,7 @@
 		}
 	}
 
-	.woocommerce-profiler-extensions-jetpack-agreement {
+	.woocommerce-profiler-plugins-jetpack-agreement {
 		color: #757575;
 		font-size: 12px;
 		a {

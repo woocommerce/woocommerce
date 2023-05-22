@@ -37,30 +37,28 @@ export const Plugins = ( {
 	) => void;
 	navigationProgress: number;
 } ) => {
-	const [ extensionsSelected, setExtensionsSelected ] = useState<
+	const [ selectedPlugins, setSelectedPlugins ] = useState<
 		ExtensionList[ 'plugins' ]
 	>( context.pluginsAvailable.filter( ( plugin ) => ! plugin.is_installed ) );
 
-	const setExtensionSelected = ( plugin: Extension ) => {
-		setExtensionsSelected(
-			extensionsSelected.some( ( item ) => item.key === plugin.key )
-				? extensionsSelected.filter(
-						( item ) => item.key !== plugin.key
-				  )
-				: [ ...extensionsSelected, plugin ]
+	const setSelectedPlugin = ( plugin: Extension ) => {
+		setSelectedPlugins(
+			selectedPlugins.some( ( item ) => item.key === plugin.key )
+				? selectedPlugins.filter( ( item ) => item.key !== plugin.key )
+				: [ ...selectedPlugins, plugin ]
 		);
 	};
 
-	const skipExtensions = () => {
+	const skipPluginsPage = () => {
 		return sendEvent( {
 			type: 'PLUGINS_PAGE_SKIPPED',
 		} );
 	};
-	const submitExtensionsSelection = () => {
+	const submitInstallationRequest = () => {
 		return sendEvent( {
 			type: 'PLUGINS_INSTALLATION_REQUESTED',
 			payload: {
-				plugins: extensionsSelected.map( ( plugin ) =>
+				plugins: selectedPlugins.map( ( plugin ) =>
 					plugin.key.replace( ':alt', '' )
 				),
 			},
@@ -82,27 +80,29 @@ export const Plugins = ( {
 				),
 				components: {
 					link: (
-						<Button isLink onClick={ submitExtensionsSelection } />
+						<Button isLink onClick={ submitInstallationRequest } />
 					),
 				},
 		  } )
 		: null;
 
-	const pluginsWithAgreement = extensionsSelected.filter(
+	const pluginsWithAgreement = selectedPlugins.filter(
 		( plugin ) =>
-			plugin.key === 'jetpack' || plugin.key === 'woocommerce-services'
+			plugin.key === 'jetpack' ||
+			plugin.key === 'woocommerce-services:shipping' ||
+			plugin.key === 'woocommerce-services:tax'
 	);
 
 	return (
 		<div
-			className="woocommerce-profiler-extensions"
-			data-testid="core-profiler-extensions"
+			className="woocommerce-profiler-plugins"
+			data-testid="core-profiler-plugins"
 		>
 			<Navigation
 				percentage={ navigationProgress }
-				onSkip={ skipExtensions }
+				onSkip={ skipPluginsPage }
 			/>
-			<div className="woocommerce-profiler-page__content woocommerce-profiler-extensions__content">
+			<div className="woocommerce-profiler-page__content woocommerce-profiler-plugins__content">
 				<Heading
 					title={ __(
 						'Get a boost with our free features',
@@ -116,17 +116,17 @@ export const Plugins = ( {
 				{ errorMessage && (
 					<p className="plugin-error">{ errorMessage }</p>
 				) }
-				<div className="woocommerce-profiler-extensions__list">
+				<div className="woocommerce-profiler-plugins__list">
 					{ context.pluginsAvailable.map( ( plugin ) => {
 						return (
 							<PluginCard
 								key={ `checkbox-control-${ plugin.key }` }
 								installed={ plugin.is_installed }
 								onChange={ () => {
-									setExtensionSelected( plugin );
+									setSelectedPlugin( plugin );
 								} }
 								checked={
-									extensionsSelected.filter(
+									selectedPlugins.filter(
 										( item ) => item.key === plugin.key
 									).length > 0
 								}
@@ -145,18 +145,18 @@ export const Plugins = ( {
 					} ) }
 				</div>
 				<Button
-					className="woocommerce-profiler-extensions-continue-button"
+					className="woocommerce-profiler-plugins-continue-button"
 					variant="primary"
 					onClick={
-						extensionsSelected.length
-							? submitExtensionsSelection
-							: skipExtensions
+						selectedPlugins.length
+							? submitInstallationRequest
+							: skipPluginsPage
 					}
 				>
 					{ __( 'Continue', 'woocommerce' ) }
 				</Button>
 				{ pluginsWithAgreement.length > 0 && (
-					<p className="woocommerce-profiler-extensions-jetpack-agreement">
+					<p className="woocommerce-profiler-plugins-jetpack-agreement">
 						{ interpolateComponents( {
 							mixedString: sprintf(
 								/* translators: %s: a list of plugins, e.g. Jetpack */
@@ -168,7 +168,7 @@ export const Plugins = ( {
 								),
 								joinWithAnd(
 									pluginsWithAgreement.map(
-										( plugin ) => plugin.key
+										( plugin ) => plugin.name
 									)
 								)
 							),
