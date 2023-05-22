@@ -57,6 +57,7 @@ jobs:
                   region: ${{ secrets.REPORTS_AWS_REGION }}
                   access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   reports-home: ${{ secrets.REPORTS_BUCKET }}
+                  reports-token: ${{ secrets.REPORTS_TOKEN }}
                   test-type: api
 
     e2e:
@@ -101,6 +102,7 @@ jobs:
                   region: ${{ secrets.REPORTS_AWS_REGION }}
                   access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   reports-home: ${{ secrets.REPORTS_BUCKET }}
+                  reports-token: ${{ secrets.REPORTS_TOKEN }}
                   test-type: e2e
 
     k6:
@@ -167,6 +169,7 @@ jobs:
                   region: ${{ secrets.REPORTS_AWS_REGION }}
                   access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   reports-home: ${{ secrets.REPORTS_BUCKET }}
+                  reports-token: ${{ secrets.REPORTS_TOKEN }}
                   feat-slug: hpos
                   test-type: api
 
@@ -216,6 +219,7 @@ jobs:
                   region: ${{ secrets.REPORTS_AWS_REGION }}
                   access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   reports-home: ${{ secrets.REPORTS_BUCKET }}
+                  reports-token: ${{ secrets.REPORTS_TOKEN }}
                   feat-slug: hpos
                   test-type: e2e
 

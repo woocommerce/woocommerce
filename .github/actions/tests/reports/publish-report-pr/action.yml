@@ -11,6 +11,8 @@ inputs:
         required: true
     reports-home:
         required: true
+    reports-token:
+        required: true
     feat-slug:
         description: Slug for enabled feature flags.
     test-type:
@@ -73,3 +75,12 @@ runs:
               script: |
                   const script = require( process.env.SCRIPT_PATH );
                   script( { core } );
+
+        - name: Add report to dashboard
+          env:
+              GITHUB_TOKEN: ${{ inputs.reports-token }}
+              REPORT_URL: ${{ steps.upload-path.outputs.report-url }}
+          run: |
+              gh workflow run add-reports-pr.yml \
+                -f report-url=${{ env.REPORT_URL }} \
+                -R woocommerce/woocommerce-test-reports
