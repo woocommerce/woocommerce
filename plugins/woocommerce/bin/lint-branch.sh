@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Lint branch
 #
@@ -14,4 +14,4 @@ baseBranch=${1:-"trunk"}
 changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only -- '*.php')
 
 # Only complete this if changed files are detected.
-[ -z $changedFiles ] || composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles
+[[ -z $changedFiles ]] || composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles
