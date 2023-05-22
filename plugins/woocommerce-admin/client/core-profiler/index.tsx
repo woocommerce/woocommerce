@@ -11,7 +11,6 @@ import {
 	ExtensionList,
 	OPTIONS_STORE_NAME,
 	COUNTRIES_STORE_NAME,
-	PLUGINS_STORE_NAME,
 	Country,
 	ONBOARDING_STORE_NAME,
 	Extension,
@@ -32,13 +31,18 @@ import {
 } from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
-import { Extensions } from './pages/Extensions';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
-import { Extensions } from './pages/Extensions';
-
+import { Plugins } from './pages/Plugins';
+import { getPluginTrackKey, getTimeFrame } from '~/utils';
 import './style.scss';
-import { InstallAndActivatePlugins } from './services/installAndActivatePlugins';
+import {
+	InstallationCompletedResult,
+	InstallAndActivatePlugins,
+	InstalledPlugin,
+	PluginInstallError,
+} from './services/installAndActivatePlugins';
+
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
 // https://stately.ai/blog/introducing-typescript-typegen-for-xstate
 
@@ -77,10 +81,10 @@ export type BusinessLocationEvent = {
 	};
 };
 
-export type ExtensionsSelectionSubmittedEvent = {
-	type: 'EXTENSIONS_SELECTION_SUBMITTED';
+export type PluginsInstallationRequestedEvent = {
+	type: 'PLUGINS_INSTALLATION_REQUESTED';
 	payload: {
-		extensionsSelected: CoreProfilerStateMachineContext[ 'extensionsSelected' ];
+		plugins: CoreProfilerStateMachineContext[ 'pluginsSelected' ];
 	};
 };
 
@@ -92,6 +96,32 @@ export type OnboardingProfile = {
 	skip?: boolean;
 };
 
+export type PluginsPageSkippedEvent = {
+	type: 'PLUGINS_PAGE_SKIPPED';
+};
+
+export type PluginInstalledAndActivatedEvent = {
+	type: 'PLUGINS_INSTALLED_AND_ACTIVATED';
+	payload: {
+		pluginsCount: number;
+		installedPluginIndex: number;
+	};
+};
+export type PluginsInstallationCompletedEvent = {
+	type: 'PLUGINS_INSTALLATION_COMPLETED';
+	payload: {
+		installationCompletedResult: InstallationCompletedResult;
+	};
+};
+
+export type PluginsInstallationCompletedWithErrorsEvent = {
+	type: 'PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS';
+	payload: {
+		errors: PluginInstallError[];
+	};
+};
+
+export type ExtensionErrors = { plugin: string; error: string }[];
 export type CoreProfilerStateMachineContext = {
 	optInDataSharing: boolean;
 	userProfile: {
@@ -103,10 +133,9 @@ export type CoreProfilerStateMachineContext = {
 	geolocatedLocation: {
 		location: string;
 	};
-	extensionsAvailable: ExtensionList[ 'plugins' ] | [  ];
-	extensionsSelected: string[]; // extension slugs
-	extensionsErrors: { plugin: string; error: string }[];
-	extensionsInstallationRetryCount: number;
+	pluginsAvailable: ExtensionList[ 'plugins' ] | [  ];
+	pluginsSelected: string[]; // extension slugs
+	pluginsInstallationErrors: ExtensionErrors;
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
 	loader: {
@@ -208,6 +237,13 @@ const recordTracksUserProfileViewed = () => {
 	} );
 };
 
+const recordTracksPluginsViewed = () => {
+	recordEvent( 'storeprofiler_step_view', {
+		step: 'plugins',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
 const recordTracksUserProfileCompleted = (
 	_context: CoreProfilerStateMachineContext,
 	event: Extract< UserProfileEvent, { type: 'USER_PROFILE_COMPLETED' } >
@@ -228,6 +264,10 @@ const recordTracksUserProfileCompleted = (
 
 const recordTracksUserProfileSkipped = () => {
 	recordEvent( 'storeprofiler_user_profile_skip' );
+};
+
+const recordTracksPluginsSkipped = () => {
+	recordEvent( 'storeprofiler_plugins_skip' );
 };
 
 const recordTracksSkipBusinessLocationViewed = () => {
@@ -308,7 +348,7 @@ const assignOptInDataSharing = assign( {
 /**
  * Prefetch it so that @wp/data caches it and there won't be a loading delay when its used
  */
-const preFetchGetExtensions = assign( {
+const preFetchGetPlugins = assign( {
 	extensionsRef: () =>
 		spawn(
 			resolveSelect( ONBOARDING_STORE_NAME ).getFreeExtensions(),
@@ -316,7 +356,10 @@ const preFetchGetExtensions = assign( {
 		),
 } );
 
-const getExtensions = async () => {
+const getPlugins = async () => {
+	dispatch( ONBOARDING_STORE_NAME ).invalidateResolution(
+		'getFreeExtensions'
+	);
 	const extensionsBundles = await resolveSelect(
 		ONBOARDING_STORE_NAME
 	).getFreeExtensions();
@@ -326,23 +369,25 @@ const getExtensions = async () => {
 	);
 };
 
-const handleExtensions = assign( {
-	extensionsAvailable: ( _context, event: DoneInvokeEvent< Extension[] > ) =>
+const handlePlugins = assign( {
+	pluginsAvailable: ( _context, event: DoneInvokeEvent< Extension[] > ) =>
 		event.data,
 } );
 
 const coreProfilerMachineActions = {
 	updateTrackingOption,
-	preFetchGetExtensions,
+	preFetchGetPlugins,
 	preFetchGetCountries,
 	handleTrackingOption,
-	handleExtensions,
+	handlePlugins,
 	recordTracksIntroCompleted,
 	recordTracksIntroSkipped,
 	recordTracksIntroViewed,
 	recordTracksUserProfileCompleted,
 	recordTracksUserProfileSkipped,
 	recordTracksUserProfileViewed,
+	recordTracksPluginsViewed,
+	recordTracksPluginsSkipped,
 	recordTracksSkipBusinessLocationViewed,
 	recordTracksSkipBusinessLocationCompleted,
 	assignOptInDataSharing,
@@ -354,8 +399,8 @@ const coreProfilerMachineActions = {
 const coreProfilerMachineServices = {
 	getAllowTrackingOption,
 	getCountries,
-	getExtensions,
 	getOnboardingProfileOption,
+	getPlugins,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -368,10 +413,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		userProfile: { skipped: true },
 		geolocatedLocation: { location: 'US:CA' },
 		businessInfo: { location: 'US:CA' },
-		extensionsAvailable: [],
-		extensionsSelected: [],
-		extensionsErrors: [],
-		extensionsInstallationRetryCount: 0,
+		pluginsAvailable: [],
+		pluginsSelected: [],
+		pluginsInstallationErrors: [],
 		countries: {},
 		loader: {},
 	} as CoreProfilerStateMachineContext,
@@ -382,7 +426,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					target: 'introOptIn',
 				},
 			},
-			entry: [ 'preFetchGetExtensions', 'preFetchGetCountries' ],
+			entry: [ 'preFetchGetPlugins', 'preFetchGetCountries' ],
 			invoke: [
 				{
 					src: 'getAllowTrackingOption',
@@ -518,7 +562,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		businessInfo: {
 			on: {
 				BUSINESS_INFO_COMPLETED: {
-					target: 'preExtensions',
+					target: 'prePlugins',
 					actions: [
 						assign( {
 							businessInfo: (
@@ -627,63 +671,181 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				component: Loader,
 			},
 		},
-		preExtensions: {
+		prePlugins: {
 			invoke: {
-				src: 'getExtensions',
-				onDone: [
-					{ target: 'extensions', actions: 'handleExtensions' },
-				],
+				src: 'getPlugins',
+				onDone: [ { target: 'plugins', actions: 'handlePlugins' } ],
 			},
 			// add exit action to filter the extensions using a custom function here and assign it to context.extensionsAvailable
 			exit: assign( {
-				extensionsAvailable: ( context ) => {
-					return context.extensionsAvailable.filter( () => true );
+				pluginsAvailable: ( context ) => {
+					return context.pluginsAvailable.filter( () => true );
 				}, // TODO : define an extensible filter function here
 			} ),
 			meta: {
 				progress: 70,
 			},
 		},
-		extensions: {
+		pluginsSkipped: {
+			entry: assign( {
+				loader: {
+					progress: 80,
+				},
+			} ),
+			invoke: {
+				src: () => {
+					dispatch( ONBOARDING_STORE_NAME ).updateProfileItems( {
+						plugins_page_skipped: true,
+					} );
+					return promiseDelay( 3000 );
+				},
+				onDone: {
+					actions: [ 'redirectToWooHome' ],
+				},
+			},
+			meta: {
+				component: Loader,
+			},
+		},
+		plugins: {
+			entry: [ 'recordTracksPluginsViewed' ],
 			on: {
-				EXTENSIONS_COMPLETED: {
-					target: 'settingUpStore',
+				PLUGINS_PAGE_SKIPPED: {
+					actions: [ 'recordTracksPluginsSkipped' ],
+					target: 'pluginsSkipped',
 				},
-				EXTENSIONS_INSTALLATION_RETRY_THRESHOLD_REACHED: {
-					actions: 'redirectToWooHome',
-				},
-				EXTENSIONS_SELECTION_SUBMITTED: {
-					target: 'installExtensions',
+				PLUGINS_INSTALLATION_REQUESTED: {
+					target: 'installPlugins',
 					actions: [
 						assign( {
-							extensionsSelected: (
+							pluginsSelected: (
 								_context,
-								event: ExtensionsSelectionSubmittedEvent
-							) => event.payload.extensionsSelected,
+								event: PluginsInstallationRequestedEvent
+							) => event.payload.plugins,
 						} ),
 					],
 				},
 			},
 			meta: {
 				progress: 80,
-				component: Extensions,
+				component: Plugins,
 			},
 		},
-		installExtensions: {
+		postPluginInstallation: {
 			invoke: {
-				src: InstallAndActivatePlugins,
+				src: async ( _context, event ) => {
+					return await dispatch(
+						ONBOARDING_STORE_NAME
+					).updateProfileItems( {
+						business_extensions: event.payload.installationCompletedResult.installedPlugins.map(
+							( extension: InstalledPlugin ) => extension.plugin
+						),
+					} );
+				},
 				onDone: {
 					actions: 'redirectToWooHome',
 				},
-				onError: {
-					target: 'extensions',
-					actions: assign( {
-						extensionsErrors: ( _context, event ) => event.data,
-						extensionsInstallationRetryCount: ( context ) => {
-							return context.extensionsInstallationRetryCount + 1;
-						},
-					} ),
+			},
+			meta: {
+				progress: 100,
+			},
+		},
+		installPlugins: {
+			on: {
+				PLUGIN_INSTALLED_AND_ACTIVATED: {
+					actions: [
+						assign( {
+							loader: (
+								_context,
+								event: PluginInstalledAndActivatedEvent
+							) => {
+								return {
+									progress: Math.round(
+										( event.payload.installedPluginIndex /
+											event.payload.pluginsCount ) *
+											100
+									),
+								};
+							},
+						} ),
+					],
 				},
+				PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS: {
+					target: 'prePlugins',
+					actions: [
+						assign( {
+							pluginsInstallationErrors: ( _context, event ) =>
+								event.payload.errors,
+						} ),
+						( _context, event ) => {
+							recordEvent(
+								'storeprofiler_store_extensions_installed_and_activated',
+								{
+									success: false,
+									failed_extensions: event.payload.errors.map(
+										( error: PluginInstallError ) =>
+											getPluginTrackKey( error.plugin )
+									),
+								}
+							);
+						},
+					],
+				},
+				PLUGINS_INSTALLATION_COMPLETED: {
+					target: 'postPluginInstallation',
+					actions: [
+						( _context, event ) => {
+							const installationCompletedResult =
+								event.payload.installationCompletedResult;
+
+							const trackData: {
+								success: boolean;
+								installed_extensions: string[];
+								total_time: string;
+								[ key: string ]:
+									| number
+									| boolean
+									| string
+									| string[];
+							} = {
+								success: true,
+								installed_extensions: installationCompletedResult.installedPlugins.map(
+									( installedPlugin: InstalledPlugin ) =>
+										getPluginTrackKey(
+											installedPlugin.plugin
+										)
+								),
+								total_time: getTimeFrame(
+									installationCompletedResult.totalTime
+								),
+							};
+
+							for ( const installedPlugin of installationCompletedResult.installedPlugins ) {
+								trackData[
+									'install_time_' +
+										getPluginTrackKey(
+											installedPlugin.plugin
+										)
+								] = getTimeFrame( installedPlugin.installTime );
+							}
+
+							recordEvent(
+								'storeprofiler_store_extensions_installed_and_activated',
+								trackData
+							);
+						},
+					],
+				},
+			},
+			entry: [
+				assign( {
+					loader: {
+						progress: 10,
+					},
+				} ),
+			],
+			invoke: {
+				src: InstallAndActivatePlugins,
 			},
 			meta: {
 				component: Loader,

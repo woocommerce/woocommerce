@@ -5,22 +5,18 @@ import { __, sprintf, _n } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
+import { Extension, ExtensionList } from '@woocommerce/data';
+import { useState } from 'react';
+
 /**
  * Internal dependencies
  */
-import {
-	CoreProfilerStateMachineContext,
-	ExtensionsSelectionSubmittedEvent,
-	ExtentionsInstallationRetryThresholdReachedEvent,
-} from '../index';
+import { CoreProfilerStateMachineContext } from '../index';
+import { PluginsInstallationRequestedEvent, PluginsPageSkippedEvent } from '..';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
-import { ExtensionBox } from '../components/extension-box/extension-box';
-import IconWoo from '../assets/images/icon-woo.svg';
-import IconTikTok from '../assets/images/icon-tiktok.svg';
-import { useState } from 'react';
+import { PluginCard } from '../components/plugin-card/plugin-card';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { join } from 'path';
 
 const locale = getAdminSetting( 'locale' ).siteLocale.replace( '_', '-' );
 const joinWithAnd = ( items: string[] ) => {
@@ -30,49 +26,47 @@ const joinWithAnd = ( items: string[] ) => {
 	} ).format( items );
 };
 
-export const Extensions = ( {
+export const Plugins = ( {
 	context,
 	navigationProgress,
 	sendEvent,
 }: {
 	context: CoreProfilerStateMachineContext;
 	sendEvent: (
-		payload:
-			| ExtensionsSelectionSubmittedEvent
-			| ExtentionsInstallationRetryThresholdReachedEvent
+		payload: PluginsInstallationRequestedEvent | PluginsPageSkippedEvent
 	) => void;
 	navigationProgress: number;
 } ) => {
-	const maxRetryCount = 2;
-	const plugins = [
-		'woocommerce-payments',
-		'jetpack',
-		'mailpoet',
-		'tiktok-for-woocommerce',
-		'google-listings-and-ads',
-		'woocommerce-services',
-	];
-	const [ extensionsSelected, setExtensionsSelected ] = useState< string[] >(
-		plugins
-	);
+	const [ extensionsSelected, setExtensionsSelected ] = useState<
+		ExtensionList[ 'plugins' ]
+	>( context.pluginsAvailable.filter( ( plugin ) => ! plugin.is_installed ) );
 
-	const setExtensionSelected = ( plugin: string ) => {
-		if ( extensionsSelected.includes( plugin ) ) {
-			setExtensionsSelected(
-				extensionsSelected.filter( ( item ) => item !== plugin )
-			);
-		} else {
-			setExtensionsSelected( [ ...extensionsSelected, plugin ] );
-		}
+	const setExtensionSelected = ( plugin: Extension ) => {
+		setExtensionsSelected(
+			extensionsSelected.some( ( item ) => item.key === plugin.key )
+				? extensionsSelected.filter(
+						( item ) => item.key !== plugin.key
+				  )
+				: [ ...extensionsSelected, plugin ]
+		);
 	};
-	const submitExtensionsSelection = () => {
-		sendEvent( {
-			type: 'EXTENSIONS_SELECTION_SUBMITTED',
-			payload: { extensionsSelected },
+
+	const skipExtensions = () => {
+		return sendEvent( {
+			type: 'PLUGINS_PAGE_SKIPPED',
 		} );
 	};
-	const IconWooImage = <img src={ IconWoo } alt="icon-woo" />;
-	const errorMessage = context.extensionsErrors.length
+	const submitExtensionsSelection = () => {
+		return sendEvent( {
+			type: 'PLUGINS_INSTALLATION_REQUESTED',
+			payload: {
+				plugins: extensionsSelected.map( ( plugin ) =>
+					plugin.key.replace( ':alt', '' )
+				),
+			},
+		} );
+	};
+	const errorMessage = context.pluginsInstallationErrors.length
 		? interpolateComponents( {
 				mixedString: sprintf(
 					// Translators: %s is a list of plugins that does not need to be translated
@@ -81,7 +75,7 @@ export const Extensions = ( {
 						'woocommerce'
 					),
 					joinWithAnd(
-						context.extensionsErrors.map(
+						context.pluginsInstallationErrors.map(
 							( error ) => error.plugin
 						)
 					)
@@ -95,7 +89,8 @@ export const Extensions = ( {
 		: null;
 
 	const pluginsWithAgreement = extensionsSelected.filter(
-		( plugin ) => plugin === 'jetpack' || plugin === 'woocommerce-services'
+		( plugin ) =>
+			plugin.key === 'jetpack' || plugin.key === 'woocommerce-services'
 	);
 
 	return (
@@ -103,7 +98,10 @@ export const Extensions = ( {
 			className="woocommerce-profiler-extensions"
 			data-testid="core-profiler-extensions"
 		>
-			<Navigation percentage={ navigationProgress } />
+			<Navigation
+				percentage={ navigationProgress }
+				onSkip={ skipExtensions }
+			/>
 			<div className="woocommerce-profiler-page__content woocommerce-profiler-extensions__content">
 				<Heading
 					title={ __(
@@ -119,19 +117,29 @@ export const Extensions = ( {
 					<p className="plugin-error">{ errorMessage }</p>
 				) }
 				<div className="woocommerce-profiler-extensions__list">
-					{ plugins.map( ( plugin ) => {
+					{ context.pluginsAvailable.map( ( plugin ) => {
 						return (
-							<ExtensionBox
-								key={ `checkbox-control-${ plugin }` }
+							<PluginCard
+								key={ `checkbox-control-${ plugin.key }` }
+								installed={ plugin.is_installed }
 								onChange={ () => {
 									setExtensionSelected( plugin );
 								} }
-								checked={ extensionsSelected.includes(
-									plugin
-								) }
-								icon={ IconWooImage }
-								title="Get paid with WooCommerce Payments"
-								description="Securely accept payments and manage payment activity – straight from your store's dashboard. Learn more"
+								checked={
+									extensionsSelected.filter(
+										( item ) => item.key === plugin.key
+									).length > 0
+								}
+								icon={
+									plugin.image_url ? (
+										<img
+											src={ plugin.image_url }
+											alt={ plugin.key }
+										/>
+									) : null
+								}
+								title={ plugin.name }
+								description={ plugin.description }
 							/>
 						);
 					} ) }
@@ -140,21 +148,14 @@ export const Extensions = ( {
 					className="woocommerce-profiler-extensions-continue-button"
 					variant="primary"
 					onClick={
-						context.extensionsInstallationRetryCount < maxRetryCount
-							? () => submitExtensionsSelection()
-							: () =>
-									sendEvent( {
-										type:
-											'EXTENSIONS_INSTALLATION_RETRY_THRESHOLD_REACHED',
-									} )
+						extensionsSelected.length
+							? submitExtensionsSelection
+							: skipExtensions
 					}
 				>
-					{ errorMessage &&
-					context.extensionsInstallationRetryCount < maxRetryCount
-						? __( 'Please try again', 'woocommerce' )
-						: __( 'Continue', 'woocommerce' ) }
+					{ __( 'Continue', 'woocommerce' ) }
 				</Button>
-				{ pluginsWithAgreement.length && (
+				{ pluginsWithAgreement.length > 0 && (
 					<p className="woocommerce-profiler-extensions-jetpack-agreement">
 						{ interpolateComponents( {
 							mixedString: sprintf(
@@ -165,7 +166,11 @@ export const Extensions = ( {
 									pluginsWithAgreement.length,
 									'woocommerce'
 								),
-								joinWithAnd( pluginsWithAgreement )
+								joinWithAnd(
+									pluginsWithAgreement.map(
+										( plugin ) => plugin.key
+									)
+								)
 							),
 							components: {
 								link: (
