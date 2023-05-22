@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@wordpress/element';
+import { render, createRoot } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -11,6 +11,18 @@ import { ProductNameSuggestions } from './product-name';
 
 import './index.scss';
 
+const renderComponent = ( Component, rootElement ) => {
+	if ( ! rootElement ) {
+		return;
+	}
+
+	if ( createRoot ) {
+		createRoot( rootElement ).render( <Component /> );
+	} else {
+		render( <Component />, rootElement );
+	}
+};
+
 const descriptionButtonRoot = document.getElementById(
 	'woocommerce-ai-app-product-gpt-button'
 );
@@ -18,9 +30,5 @@ const nameSuggestionsRoot = document.getElementById(
 	'woocommerce-ai-app-product-name-suggestions'
 );
 
-if ( descriptionButtonRoot ) {
-	render( <WriteItForMeButtonContainer />, descriptionButtonRoot );
-}
-if ( nameSuggestionsRoot ) {
-	render( <ProductNameSuggestions />, nameSuggestionsRoot );
-}
+renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
+renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
