@@ -52,7 +52,6 @@ final class BlockTypesController {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
-		add_filter( 'allowed_block_types_all', array( $this, 'disable_blocks_depending_on_context' ), 10, 2 );
 	}
 
 	/**
@@ -162,51 +161,13 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Disable specific woocommerce blocks on the widgets area, post and page editor.
-	 *
-	 * @param bool|string[]           $allowed_block_types Array of block type slugs, or boolean to enable/disable all. Default true (all registered block types supported).
-	 * @param WP_Block_Editor_Context $block_editor_context The current block editor context.
-	 *
-	 * @return array|bool The updated allowed block types depending on context
-	 */
-	public function disable_blocks_depending_on_context( $allowed_block_types, $block_editor_context ) {
-		$registered_blocks = \WP_Block_Type_Registry::get_instance()->get_all_registered();
-
-		/**
-		 * This disables specific blocks in Widget Areas.
-		 */
-		if ( 'core/edit-widgets' === $block_editor_context->name && is_array( $registered_blocks ) && ! empty( $registered_blocks ) ) {
-			unset( $registered_blocks['woocommerce/cart'] );
-			unset( $registered_blocks['woocommerce/all-products'] );
-			unset( $registered_blocks['woocommerce/checkout'] );
-
-			return array_keys( $registered_blocks );
-		}
-
-		/**
-		 * This disables specific blocks in Post and Page editor.
-		 */
-		if ( 'core/edit-post' === $block_editor_context->name && is_array( $registered_blocks ) && ! empty( $registered_blocks ) ) {
-			unset( $registered_blocks['woocommerce/add-to-cart-form'] );
-			unset( $registered_blocks['woocommerce/breadcrumbs'] );
-			unset( $registered_blocks['woocommerce/catalog-sorting'] );
-			unset( $registered_blocks['woocommerce/legacy-template'] );
-			unset( $registered_blocks['woocommerce/product-results-count'] );
-			unset( $registered_blocks['woocommerce/product-details'] );
-			unset( $registered_blocks['woocommerce/store-notices'] );
-
-			return array_keys( $registered_blocks );
-		}
-
-		return $allowed_block_types;
-	}
-
-	/**
 	 * Get list of block types.
 	 *
 	 * @return array
 	 */
 	protected function get_block_types() {
+		global $pagenow;
+
 		$block_types = [
 			'ActiveFilters',
 			'AddToCartForm',
@@ -266,6 +227,38 @@ final class BlockTypesController {
 			$block_types[] = 'SingleProduct';
 			$block_types[] = 'ProductCollection';
 			$block_types[] = 'ProductTemplate';
+		}
+
+		/**
+		 * This disables specific blocks in Widget Areas by not registering them.
+		 */
+		if ( in_array( $pagenow, [ 'widgets.php', 'themes.php', 'customize.php' ], true ) && ( empty( $_GET['page'] ) || 'gutenberg-edit-site' !== $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$block_types = array_diff(
+				$block_types,
+				[
+					'AllProducts',
+					'Cart',
+					'Checkout',
+				]
+			);
+		}
+
+		/**
+		 * This disables specific blocks in Post and Page editor by not registering them.
+		 */
+		if ( in_array( $pagenow, [ 'post.php', 'post-new.php' ], true ) ) {
+			$block_types = array_diff(
+				$block_types,
+				[
+					'AddToCartForm',
+					'Breadcrumbs',
+					'CatalogSorting',
+					'ClassicTemplate',
+					'ProductResultsCount',
+					'ProductDetails',
+					'StoreNotices',
+				]
+			);
 		}
 
 		return $block_types;
