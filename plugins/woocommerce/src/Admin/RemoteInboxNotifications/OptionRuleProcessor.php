@@ -25,7 +25,7 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 		$default       = isset( $rule->default ) ? $rule->default : $default_value;
 		$option_value  = get_option( $rule->option_name, $default );
 
-		if ( $is_contains && ! is_array( $option_value ) ) {
+		if ( $is_contains && ! is_array( $option_value ) && ( ! is_string( $option_value ) || ! is_string( $rule->value ) ) ) {
 			$logger = wc_get_logger();
 			$logger->warning(
 				sprintf(
