@@ -22,7 +22,12 @@ import { initializeExPlat } from '@woocommerce/explat';
  * Internal dependencies
  */
 import { IntroOptIn } from './pages/IntroOptIn';
-import { UserProfile } from './pages/UserProfile';
+import {
+	UserProfile,
+	BusinessChoice,
+	SellingOnlineAnswer,
+	SellingPlatform,
+} from './pages/UserProfile';
 import { BusinessInfo } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
@@ -76,9 +81,22 @@ export type ExtensionsEvent = {
 	};
 };
 
+// TODO: add types as we develop the pages
+export type OnboardingProfile = {
+	business_choice: BusinessChoice;
+	selling_online_answer: SellingOnlineAnswer | null;
+	selling_platforms: SellingPlatform[] | null;
+	skip?: boolean;
+};
+
 export type CoreProfilerStateMachineContext = {
 	optInDataSharing: boolean;
-	userProfile: { foo: { bar: 'qux' }; skipped: false } | { skipped: true };
+	userProfile: {
+		businessChoice?: BusinessChoice;
+		sellingOnlineAnswer?: SellingOnlineAnswer | null;
+		sellingPlatforms?: SellingPlatform[] | null;
+		skipped?: boolean;
+	};
 	geolocatedLocation: {
 		location: string;
 	};
@@ -126,6 +144,36 @@ const handleCountries = assign( {
 	},
 } );
 
+const getOnboardingProfileOption = async () =>
+	resolveSelect( OPTIONS_STORE_NAME ).getOption(
+		'woocommerce_onboarding_profile'
+	);
+
+const handleOnboardingProfileOption = assign( {
+	userProfile: (
+		_context,
+		event: DoneInvokeEvent< OnboardingProfile | undefined >
+	) => {
+		if ( ! event.data ) {
+			return {};
+		}
+
+		const {
+			business_choice: businessChoice,
+			selling_online_answer: sellingOnlineAnswer,
+			selling_platforms: sellingPlatforms,
+			...rest
+		} = event.data;
+
+		return {
+			...rest,
+			businessChoice,
+			sellingOnlineAnswer,
+			sellingPlatforms,
+		};
+	},
+} );
+
 const redirectToWooHome = () => {
 	navigateTo( { url: getNewPath( {}, '/', {} ) } );
 };
@@ -146,6 +194,35 @@ const recordTracksIntroViewed = () => {
 		step: 'store_details',
 		wc_version: getSetting( 'wcVersion' ),
 	} );
+};
+
+const recordTracksUserProfileViewed = () => {
+	recordEvent( 'storeprofiler_step_view', {
+		step: 'user_profile',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
+const recordTracksUserProfileCompleted = (
+	_context: CoreProfilerStateMachineContext,
+	event: Extract< UserProfileEvent, { type: 'USER_PROFILE_COMPLETED' } >
+) => {
+	recordEvent( 'storeprofiler_step_complete', {
+		step: 'user_profile',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+
+	recordEvent( 'storeprofiler_user_profile', {
+		business_choice: event.payload.userProfile.businessChoice,
+		selling_online_answer: event.payload.userProfile.sellingOnlineAnswer,
+		selling_platforms: event.payload.userProfile.sellingPlatforms
+			? event.payload.userProfile.sellingPlatforms.join()
+			: null,
+	} );
+};
+
+const recordTracksUserProfileSkipped = () => {
+	recordEvent( 'storeprofiler_user_profile_skip' );
 };
 
 const recordTracksSkipBusinessLocationViewed = () => {
@@ -180,6 +257,22 @@ const updateTrackingOption = (
 	const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
 	dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_allow_tracking: trackingValue,
+	} );
+};
+
+const updateOnboardingProfileOption = (
+	context: CoreProfilerStateMachineContext
+) => {
+	const { businessChoice, sellingOnlineAnswer, sellingPlatforms, ...rest } =
+		context.userProfile;
+
+	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_onboarding_profile: {
+			...rest,
+			business_choice: businessChoice,
+			selling_online_answer: sellingOnlineAnswer,
+			selling_platforms: sellingPlatforms,
+		},
 	} );
 };
 
@@ -238,10 +331,14 @@ const coreProfilerMachineActions = {
 	recordTracksIntroCompleted,
 	recordTracksIntroSkipped,
 	recordTracksIntroViewed,
+	recordTracksUserProfileCompleted,
+	recordTracksUserProfileSkipped,
+	recordTracksUserProfileViewed,
 	recordTracksSkipBusinessLocationViewed,
 	recordTracksSkipBusinessLocationCompleted,
 	assignOptInDataSharing,
 	handleCountries,
+	handleOnboardingProfileOption,
 	redirectToWooHome,
 };
 
@@ -249,6 +346,7 @@ const coreProfilerMachineServices = {
 	getAllowTrackingOption,
 	getCountries,
 	getExtensions,
+	getOnboardingProfileOption,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -296,7 +394,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		introOptIn: {
 			on: {
 				INTRO_COMPLETED: {
-					target: 'userProfile',
+					target: 'preUserProfile',
 					actions: [
 						'assignOptInDataSharing',
 						'updateTrackingOption',
@@ -328,10 +426,25 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				component: IntroOptIn,
 			},
 		},
+		preUserProfile: {
+			invoke: {
+				src: 'getOnboardingProfileOption',
+				onDone: [
+					{
+						actions: [ 'handleOnboardingProfileOption' ],
+						target: 'userProfile',
+					},
+				],
+				onError: {
+					target: 'userProfile',
+				},
+			},
+		},
 		userProfile: {
+			entry: [ 'recordTracksUserProfileViewed' ],
 			on: {
 				USER_PROFILE_COMPLETED: {
-					target: 'preBusinessInfo',
+					target: 'postUserProfile',
 					actions: [
 						assign( {
 							userProfile: ( context, event: UserProfileEvent ) =>
@@ -340,7 +453,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					],
 				},
 				USER_PROFILE_SKIPPED: {
-					target: 'preBusinessInfo',
+					target: 'postUserProfile',
 					actions: [
 						assign( {
 							userProfile: ( context, event: UserProfileEvent ) =>
@@ -349,9 +462,34 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					],
 				},
 			},
+			exit: actions.choose( [
+				{
+					cond: ( _context, event ) =>
+						event.type === 'USER_PROFILE_COMPLETED',
+					actions: 'recordTracksUserProfileCompleted',
+				},
+				{
+					cond: ( _context, event ) =>
+						event.type === 'USER_PROFILE_SKIPPED',
+					actions: 'recordTracksUserProfileSkipped',
+				},
+			] ),
 			meta: {
 				progress: 40,
 				component: UserProfile,
+			},
+		},
+		postUserProfile: {
+			invoke: {
+				src: ( context ) => {
+					return updateOnboardingProfileOption( context );
+				},
+				onDone: {
+					target: 'preBusinessInfo',
+				},
+				onError: {
+					target: 'preBusinessInfo',
+				},
 			},
 		},
 		preBusinessInfo: {
