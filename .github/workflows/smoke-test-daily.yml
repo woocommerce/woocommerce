@@ -21,6 +21,9 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
             contents: read
+        outputs:
+            stats: ${{ steps.report.outputs.stats }}
+            report-url: ${{ steps.report.outputs.report-url }}
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
@@ -46,7 +49,7 @@ jobs:
               with:
                   artifact-name: ${{ env.E2E_ARTIFACT }}
                   tests: update-woocommerce.spec.js
-                  report-title: Update to WooCommerce nightly
+                  report-title: E2E Update to WooCommerce nightly
               env:
                   RESET_SITE: true
                   UPDATE_WC: nightly
@@ -58,7 +61,7 @@ jobs:
                   artifact-name: ${{ env.API_ARTIFACT }}
                   tests: hello # mytodo remove
 
-            - name: Publish report
+            - name: Upload report to bucket
               id: report
               if: success() || ( failure() && steps.api-action.result == 'failure' )
               uses: ./.github/actions/tests/reports/publish-report-daily
@@ -75,6 +78,9 @@ jobs:
         permissions:
             contents: read
         needs: [api]
+        outputs:
+            stats: ${{ steps.report.outputs.stats }}
+            report-url: ${{ steps.report.outputs.report-url }}
         env:
             ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
             ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
@@ -85,7 +91,6 @@ jobs:
             CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_CUSTOMER_PASSWORD }}
             CUSTOMER_USER: ${{ secrets.SMOKE_TEST_CUSTOMER_USER }}
             DEFAULT_TIMEOUT_OVERRIDE: 120000
-
         steps:
             - uses: actions/checkout@v3
 
@@ -95,33 +100,23 @@ jobs:
                   install-filters: woocommerce
                   build: false
 
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-
-            - name: Run E2E tests.
-              timeout-minutes: 60
-              working-directory: plugins/woocommerce
-              env:
-                  E2E_MAX_FAILURES: 25
-                  RESET_SITE: true
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
-
-            - name: Generate Playwright E2E Test report.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
-
-            - name: Archive E2E test report
-              if: success() || failure()
-              uses: actions/upload-artifact@v3
+            - name: Run E2E tests
+              id: e2e-action
+              uses: ./.github/actions/tests/run-e2e-tests
               with:
-                  name: ${{ env.E2E_ARTIFACT }}
-                  path: |
-                      ${{ env.ALLURE_RESULTS_DIR }}
-                      ${{ env.ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
+                  artifact-name: ${{ env.E2E_ARTIFACT }}
+                  tests: basic.spec.js # mytodo remove
+
+            - name: Upload report to bucket
+              id: report
+              if: success() || ( failure() && steps.e2e-action.result == 'failure' )
+              uses: ./.github/actions/tests/reports/publish-report-daily
+              with:
+                  key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  region: ${{ secrets.REPORTS_AWS_REGION }}
+                  access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  reports-home: ${{ secrets.REPORTS_BUCKET }}
+                  test-type: e2e
 
     k6:
         name: k6 tests on nightly build
@@ -139,12 +134,14 @@ jobs:
                   install-filters: woocommerce
                   build: false
 
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
-
             - name: Update performance test site with E2E test
-              working-directory: plugins/woocommerce
+              continue-on-error: true
+              id: update-wc
+              uses: ./.github/actions/tests/run-e2e-tests
+              with:
+                  artifact-name: k6 Update to WooCommerce nightly
+                  tests: update-woocommerce.spec.js
+                  report-title: k6 Update to WooCommerce nightly
               env:
                   BASE_URL: ${{ secrets.SMOKE_TEST_PERF_URL }}/
                   ADMIN_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
@@ -153,15 +150,10 @@ jobs:
                   CUSTOMER_PASSWORD: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
                   UPDATE_WC: nightly
                   DEFAULT_TIMEOUT_OVERRIDE: 120000
-              run: |
-                  pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js update-woocommerce.spec.js
-              continue-on-error: true
 
-            - name: Install k6
-              run: |
-                  curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
-
-            - name: Run k6 smoke tests
+            - name: Run k6 performance tests
+              id: k6-action
+              uses: './.github/actions/tests/run-k6-tests'
               env:
                   URL: ${{ secrets.SMOKE_TEST_PERF_URL }}
                   HOST: ${{ secrets.SMOKE_TEST_PERF_HOST }}
@@ -170,8 +162,6 @@ jobs:
                   C_USER: ${{ secrets.SMOKE_TEST_PERF_ADMIN_USER }}
                   C_PW: ${{ secrets.SMOKE_TEST_PERF_ADMIN_PASSWORD }}
                   P_ID: 22733
-              run: |
-                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
     plugins:
         name: E2E tests with ${{ matrix.plugin }}
@@ -180,26 +170,32 @@ jobs:
             contents: read
         needs: [api]
         env:
-            USE_WP_ENV: 1
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
+            ARTIFACT_NAME: E2E with ${{ matrix.plugin }}
         strategy:
             fail-fast: false
             matrix:
                 include:
                     - plugin: 'WooCommerce Payments'
                       repo: 'automattic/woocommerce-payments'
+                      slug: 'woocommerce-payments'
                     - plugin: 'WooCommerce PayPal Payments'
                       repo: 'woocommerce/woocommerce-paypal-payments'
+                      slug: 'woocommerce-paypal-payments'
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
+                      slug: 'woocommerce-services'
                     - plugin: 'WooCommerce Subscriptions'
                       repo: WC_SUBSCRIPTIONS_REPO
                       private: true
+                      slug: 'woocommerce-subscriptions'
                     - plugin: 'Gutenberg'
                       repo: 'WordPress/gutenberg'
+                      slug: 'gutenberg'
                     - plugin: 'Gutenberg - Nightly'
                       repo: 'bph/gutenberg'
+                      slug: 'gutenberg-nightly'
         steps:
             - uses: actions/checkout@v3
 
@@ -208,43 +204,48 @@ jobs:
               with:
                   build-filters: woocommerce
 
-            - name: Launch wp-env e2e environment
-              working-directory: plugins/woocommerce
-              run: pnpm env:test --filter=woocommerce
-
-            - name: Download and install Chromium browser.
-              working-directory: plugins/woocommerce
-              run: pnpm exec playwright install chromium
+            - name: Setup local test environment
+              uses: ./.github/actions/tests/setup-local-test-environment
+              with:
+                  test-type: e2e
 
             - name: Run 'Upload plugin' test
-              working-directory: plugins/woocommerce
+              id: upload-plugin
+              timeout-minutes: 60
+              uses: ./.github/actions/tests/run-e2e-tests
               env:
+                  E2E_MAX_FAILURES: 15
                   PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-              run: pnpm test:e2e-pw upload-plugin.spec.js
+              with:
+                  report-title: ${{ env.ARTIFACT_NAME }}
+                  artifact-name: ${{ env.ARTIFACT_NAME }}
+                  tests: upload-plugin.spec.js # mytodo remove
 
-            - name: Run the rest of E2E tests
-              working-directory: plugins/woocommerce
+            - name: Run rest of E2E tests
+              id: e2e-action
+              timeout-minutes: 60
+              uses: ./.github/actions/tests/run-e2e-tests
               env:
                   E2E_MAX_FAILURES: 15
-              run: pnpm test:e2e-pw
-
-            - name: Generate E2E Test report.
-              if: success() || failure()
-              working-directory: plugins/woocommerce
-              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
-
-            - name: Archive E2E test report
-              if: success() || failure()
-              uses: actions/upload-artifact@v3
               with:
-                  name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
-                  path: |
-                      ${{ env.ALLURE_RESULTS_DIR }}
-                      ${{ env.ALLURE_REPORT_DIR }}
-                  if-no-files-found: ignore
-                  retention-days: 5
+                  report-title: ${{ env.ARTIFACT_NAME }}
+                  artifact-name: ${{ env.ARTIFACT_NAME }}
+                  tests: basic.spec.js # mytodo remove
 
-    # mytodo
+            - name: Upload report to bucket
+              id: report
+              if: success() || ( failure() && steps.api-action.result == 'failure' )
+              uses: ./.github/actions/tests/reports/publish-report-daily
+              with:
+                  key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  region: ${{ secrets.REPORTS_AWS_REGION }}
+                  access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  reports-home: ${{ secrets.REPORTS_BUCKET }}
+                  test-type: e2e
+                  plugin-name: ${{ matrix.plugin }}
+                  plugin-slug: ${{ matrix.slug }}
+
+    # mytodo job: e2e-hpos
     # e2e-hpos:

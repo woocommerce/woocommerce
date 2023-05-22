@@ -13,6 +13,8 @@ inputs:
         required: true
     feat-slug:
         description: Slug for enabled feature flags.
+    plugin-name:
+    plugin-slug:
     test-type:
         required: true
         type: choice
@@ -39,10 +41,24 @@ runs:
               aws-access-key-id: ${{ inputs.key-id }}
               aws-secret-access-key: ${{ inputs.access-key }}
 
+        - name: Get bucket URL
+          id: bucket-url
+          uses: actions/github-script@v6
+          env:
+              FEAT_SLUG: ${{ inputs.feat-slug }}
+              PLUGIN_SLUG: ${{ inputs.plugin-slug }}
+              TEST_TYPE: ${{ inputs.test-type }}
+              REPORTS_HOME: ${{ inputs.reports-home }}
+              SCRIPT_PATH: ./.github/actions/tests/reports/publish-report-daily/scripts/get-bucket-url.js
+          with:
+              script: |
+                  const script = require( process.env.SCRIPT_PATH );
+                  script( { core } );
+
         - name: Download history from previous report
           shell: bash
           env:
-              SOURCE: ${{ inputs.reports-home }}/public/daily/${{ inputs.test-type }}/history
+              SOURCE: ${{ steps.bucket-url.outputs.bucket-url }}/history
               TARGET: ${{ env.ALLURE_RESULTS_DIR }}/history
           run: |
               aws s3 cp "${{ env.SOURCE }}" "${{ env.TARGET }}" \
@@ -59,8 +75,18 @@ runs:
           shell: bash
           env:
               SOURCE: ${{ env.ALLURE_REPORT_DIR }}
-              TARGET: ${{ inputs.reports-home }}/public/daily/${{ inputs.test-type }}
+              TARGET: ${{ steps.bucket-url.outputs.bucket-url }}/history
           run: |
               aws s3 cp "${{ env.SOURCE }}" "${{ env.TARGET }}" \
                 --recursive \
                 --only-show-errors
+
+        - name: Output test stats
+          id: stats
+          uses: actions/github-script@v6
+          env:
+              SCRIPT_PATH: ./.github/actions/tests/reports/scripts/output-stats.js
+          with:
+              script: |
+                  const script = require( process.env.SCRIPT_PATH );
+                  script( { core } );
