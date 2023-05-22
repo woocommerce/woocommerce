@@ -121,7 +121,6 @@ export type PluginsInstallationCompletedWithErrorsEvent = {
 	};
 };
 
-export type ExtensionErrors = { plugin: string; error: string }[];
 export type CoreProfilerStateMachineContext = {
 	optInDataSharing: boolean;
 	userProfile: {
@@ -135,7 +134,7 @@ export type CoreProfilerStateMachineContext = {
 	};
 	pluginsAvailable: ExtensionList[ 'plugins' ] | [  ];
 	pluginsSelected: string[]; // extension slugs
-	pluginsInstallationErrors: ExtensionErrors;
+	pluginsInstallationErrors: PluginInstallError[];
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
 	loader: {
