@@ -21,7 +21,7 @@ class PrepareUrl implements TransformerInterface {
 	 * @return mixed|null
 	 */
 	public function transform( $value, stdClass $arguments = null, $default = null ) {
-		$url_parts = wp_parse_url( rtrim( $url, '/' ) );
+		$url_parts = wp_parse_url( rtrim( $value, '/' ) );
 		return isset( $url_parts['path'] ) ? $url_parts['host'] . $url_parts['path'] : $url_parts['host'];
 	}
 
