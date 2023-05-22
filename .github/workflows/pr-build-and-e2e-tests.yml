@@ -62,7 +62,6 @@ jobs:
 
     e2e:
         name: Runs E2E tests.
-        needs: [api]
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -109,7 +108,6 @@ jobs:
 
     k6:
         name: Runs k6 Performance tests
-        needs: [api]
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -177,7 +175,6 @@ jobs:
 
     e2e-hpos:
         name: Runs E2E tests (HPOS enabled)
-        needs: [api-hpos]
         runs-on: ubuntu-20.04
         permissions:
             contents: read
