@@ -45,12 +45,6 @@ class Woo_AI_Product_Text_Generation {
 			true
 		);
 
-		// Add a nonce to all requests
-		wp_add_inline_script(
-		'woo-ai',
-		"apiFetch.use( apiFetch.createNonceMiddleware( '. wp_create_nonce( 'woo-ai-prod-description' ) .' ) )",
-		)	;
-
 		wp_enqueue_script( 'woo-ai' );
 
 		$css_file_version = filemtime( dirname( __FILE__ ) . '/../build/index.css' );

@@ -42,6 +42,7 @@ const getGeneratingContentPhrase = () =>
 
 const DESCRIPTION_MAX_LENGTH = 300;
 const MIN_TITLE_LENGTH = 20;
+const MAX_TITLE_LENGTH = 150;
 
 export function WriteItForMeButtonContainer() {
 	const [ fetching, setFetching ] = useState( false );
@@ -83,7 +84,7 @@ export function WriteItForMeButtonContainer() {
 
 	const buildPrompt = () => {
 		const instructions = [
-			`Write a product description with the following product title: "${ productTitle }."`,
+			`Write a product description with the following product title: "${ productTitle.slice( 0, MAX_TITLE_LENGTH ) }."`,
 			'Use a 9th grade reading level.',
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
 			'Structure the description using standard HTML paragraph, strong and list tags.',
