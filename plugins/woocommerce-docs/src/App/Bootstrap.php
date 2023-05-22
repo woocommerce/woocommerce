@@ -1,29 +1,30 @@
 <?php
 /**
- * Docs_Menu class file.
+ * Bootstrap class file.
  *
- * @package  WooCommerce_Docs
+ * @package  WooCommerceDocs
  */
 
-namespace WooCommerce_Docs\Admin;
+namespace WooCommerceDocs\App;
 
 /**
- * A class to set up menus for this WordPress plugin
+ * A class to set up the plugin.
  */
-class Docs_Menu {
+class Bootstrap {
 
 	/**
-	 * Define the constructor
+	 * Bootstrap the plugin.
 	 */
-	public function __construct() {
-		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
+	public static function bootstrap() {
+		add_action( 'admin_menu', array( '\WooCommerceDocs\App\Bootstrap', 'add_admin_menu' ) );
+		add_action( 'admin_enqueue_scripts', array( '\WooCommerceDocs\App\Bootstrap', 'register_scripts' ) );
+		add_action( 'rest_api_init', array( '\WooCommerceDocs\App\Bootstrap', 'register_api_endpoints' ) );
 	}
 
 	/**
 	 * Register client-side scripts.
 	 */
-	public function register_scripts() {
+	public static function register_scripts() {
 		$script_path       = 'build/wc-docs.js';
 		$script_asset_path = WOOCOMMERCE_DOCS_PLUGIN_PATH . '/build/wc-docs.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
@@ -47,14 +48,14 @@ class Docs_Menu {
 	/**
 	 * Define the add_admin_menu function
 	 */
-	public function add_admin_menu() {
+	public static function add_admin_menu() {
 		// Add a top-level menu item to the admin menu.
 		add_menu_page(
 			'WooCommerce Docs',
 			'WooCommerce Docs',
 			'manage_options',
 			'woocommerce-docs',
-			array( $this, 'render_admin_page' ),
+			array( '\WooCommerceDocs\App\Bootstrap', 'render_admin_page' ),
 			'dashicons-media-document',
 			6
 		);
@@ -63,9 +64,16 @@ class Docs_Menu {
 	/**
 	 * Render admin page
 	 */
-	public function render_admin_page() {
+	public static function render_admin_page() {
 		// Include the admin page template.
-		include_once WOOCOMMERCE_DOCS_PLUGIN_PATH . '/includes/views/admin.php';
+		include_once WOOCOMMERCE_DOCS_PLUGIN_PATH . '/src/views/admin.php';
+	}
+
+	/**
+	 * Register API endpoints
+	 */
+	public static function register_api_endpoints() {
+		\WooCommerceDocs\API\ManifestAPI::register_routes();
 	}
 }
 

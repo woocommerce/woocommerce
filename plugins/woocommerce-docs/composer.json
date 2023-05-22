@@ -7,7 +7,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"WooCommerce_Docs\\": "includes/"
+			"WooCommerceDocs\\": "src/"
 		}
 	},
 	"require-dev": {

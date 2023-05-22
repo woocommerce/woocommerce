@@ -1,12 +1,27 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import 'react';
 import ReactDOM from 'react-dom';
 
+/**
+ * Internal dependencies
+ */
+import { useManifests } from './data/useManifests';
+
 const App = () => {
-	return <h1>WooCommerce Docs Administration</h1>;
+	const { isLoading, manifests } = useManifests();
+
+	return (
+		<>
+			<h1>WooCommerce Docs Administration</h1>
+			<p>Manifests:</p>
+			{ ! isLoading &&
+				manifests.map( ( manifest ) => (
+					<p key={ manifest }>{ manifest }</p>
+				) ) }
+		</>
+	);
 };
 
-// render the app with react
 ReactDOM.render( <App />, document.getElementById( 'root' ) );

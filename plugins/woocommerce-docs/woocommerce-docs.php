@@ -12,4 +12,6 @@ require __DIR__ . '/vendor/autoload.php';
 define( 'WOOCOMMERCE_DOCS_ROOT_URL', plugin_dir_url( __FILE__ ) );
 const WOOCOMMERCE_DOCS_PLUGIN_PATH = __DIR__;
 
-new \WooCommerce_Docs\Admin\Docs_Menu();
+\WooCommerceDocs\App\Bootstrap::bootstrap();
+
+

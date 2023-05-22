@@ -15,6 +15,7 @@
 		"@types/react-dom": "17.0.2",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/api-fetch": "^6.3.1",
 		"@wordpress/prettier-config": "^2.16.0",
 		"@wordpress/scripts": "^26.4.0",
 		"eslint": "^8.32.0",
