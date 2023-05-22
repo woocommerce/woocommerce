@@ -62,7 +62,28 @@ SYSTEM_PROMPT;
 	 * @return string
 	 */
 	public function get_user_prompt( Attribute_Suggestion_Request $request ): string {
-		$request_template = <<<REQUEST_PROMPT_TEMPLATE
+		$request_template = $this->get_request_template();
+
+		return sprintf(
+			$request_template,
+			$request->requested_attribute,
+			$request->requested_attribute,
+			$request->requested_attribute,
+			$request->name,
+			$request->description,
+			implode( ', ', $request->tags ),
+			implode( ', ', $request->categories ),
+			$this->format_attributes( $request->attributes )
+		);
+	}
+
+	/**
+	 * Get request template for attribute suggestions.
+	 *
+	 * @return string
+	 */
+	private function get_request_template(): string {
+		return <<<REQUEST_PROMPT_TEMPLATE
 You are a WooCommerce SEO and marketing expert who speaks only JSON (RFC 8259).
 You provide multiple suggestions for optimizing a product's %s to improve the store's SEO performance and sales.
 Return only the optimized alternative value for product's %s in the "content" part of your JSON response.
@@ -74,23 +95,22 @@ Tags (comma separated): "%s"
 Categories (comma separated, child categories separated with >): "%s"
 %s
 REQUEST_PROMPT_TEMPLATE;
+	}
 
-		// Convert the attributes from the { "name": "name", "value": "value" } format to the "name": "value" format.
-		$other_attributes = '';
-		foreach ( $request->attributes as $attribute ) {
-			$other_attributes .= sprintf( "%s: \"%s\"\n", $attribute['name'], $attribute['value'] );
+	/**
+	 * Format attributes for prompt template
+	 *
+	 * @param array $attributes An associative array of attributes with the format { "name": "name", "value": "value" }.
+	 *
+	 * @return string
+	 */
+	private function format_attributes( array $attributes ): string {
+		$formatted_attributes = '';
+
+		foreach ( $attributes as $attribute ) {
+			$formatted_attributes .= sprintf( "%s: \"%s\"\n", $attribute['name'], $attribute['value'] );
 		}
 
-		return sprintf(
-			$request_template,
-			$request->requested_attribute,
-			$request->requested_attribute,
-			$request->requested_attribute,
-			$request->name,
-			$request->description,
-			implode( ', ', $request->tags ),
-			implode( ', ', $request->categories ),
-			$other_attributes
-		);
+		return $formatted_attributes;
 	}
 }
