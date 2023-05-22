@@ -17,13 +17,13 @@ defined( 'ABSPATH' ) || exit;
  * Attribute Suggestion Service class.
  */
 class Attribute_Suggestion_Service {
+
 	/**
 	 * The prompt generator.
 	 *
 	 * @var Attribute_Suggestion_Prompt_Generator
 	 */
 	protected $prompt_generator;
-
 
 	/**
 	 * The completion service.
@@ -52,7 +52,7 @@ class Attribute_Suggestion_Service {
 	 *               - content: The suggested content.
 	 *               - reason: The reason for the suggestion.
 	 *
-	 * @throws Exception If the getting the suggestions fails.
+	 * @throws Exception If getting the suggestions fails.
 	 */
 	public function get_suggestions( Attribute_Suggestion_Request $request ): array {
 		$messages = array(
@@ -68,23 +68,10 @@ class Attribute_Suggestion_Service {
 
 		$completion  = $this->completion_service->get_completion( $messages, array( 'temperature' => 0.9 ) );
 		$suggestions = $this->validate_and_decode_json( $completion );
-		if ( null === $suggestions ) {
-			$messages[] = array(
-				'role'    => 'assistant',
-				'content' => $completion,
-			);
-			// Add another message and explicitly ask for a JSON response.
-			$messages[] = array(
-				'role'    => 'user',
-				'content' => 'You respond only in JSON. Do not speak normal text.',
-			);
-			$completion = $this->completion_service->get_completion( $messages );
-		}
 
-		$suggestions = $this->validate_and_decode_json( $completion );
 		if ( null === $suggestions ) {
-			// If we still don't have a valid JSON response, throw an exception.
-			throw new Exception( 'Invalid response from the API. Please try again.' );
+			// If we don't have a valid JSON response, try once more.
+			$suggestions = $this->retry_get_json_response( $completion );
 		}
 
 		return $suggestions;
@@ -106,4 +93,39 @@ class Attribute_Suggestion_Service {
 
 		return $data_array;
 	}
+
+	/**
+	 * Get JSON response with a retry.
+	 *
+	 * @param string $completion The completion data.
+	 *
+	 * @return array|null Decodes and returns the response as an associative array if it is valid JSON, returns null otherwise.
+	 *
+	 * @throws Exception If getting the completion fails.
+	 */
+	protected function retry_get_json_response( string $completion ): ?array {
+		$messages = array(
+			array(
+				'role'    => 'assistant',
+				'content' => $completion,
+			),
+			// Add another message and explicitly ask for a JSON response.
+			array(
+				'role'    => 'user',
+				'content' => 'You respond only in JSON. Do not speak normal text.',
+			),
+		);
+
+		$completion = $this->completion_service->get_completion( $messages, array( 'temperature' => 0.7 ) );
+
+		$suggestions = $this->validate_and_decode_json( $completion );
+
+		if ( null === $suggestions ) {
+			// If we still don't have a valid JSON response, throw an exception.
+			throw new Exception( 'Invalid response from the API. Please try again.' );
+		}
+
+		return $suggestions;
+	}
+
 }
