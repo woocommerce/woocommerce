@@ -1,0 +1,28 @@
+#postdivrich.woocommerce-product-description {
+	// hacks to fix visuals with "write it for me" button present
+	.wp-editor-tools {
+		top: -1px !important;
+		border-bottom: 0 !important;
+	}
+
+	.wp-switch-editor
+	{
+		position: relative;
+		z-index: 1;
+	}
+}
+
+.wp-media-buttons {
+	.woo-ai-write-it-for-me-btn  {
+		&[disabled] {
+			img {
+				opacity: 0.2;
+			}
+		}
+
+		img {
+			padding: 0;
+		}
+	}
+}
+
