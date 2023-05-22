@@ -6,6 +6,8 @@ const {
 	deleteProductsAddedByTests,
 	productAttributes,
 } = utils;
+const { getTextForLanguage } = require( './../../../../test-data/data' );
+
 
 let productId;
 
@@ -35,7 +37,7 @@ test.describe( 'Add product attributes', () => {
 		await test.step( 'Go to the "Attributes" tab.', async () => {
 			const attributesTab = page
 				.locator( '.attribute_tab' )
-				.getByRole( 'link', { name: 'Attributes' } );
+				.getByRole( 'link', { name: getTextForLanguage()['Attributes']} );
 
 			await attributesTab.click();
 		} );
@@ -53,7 +55,7 @@ test.describe( 'Add product attributes', () => {
 						await test.step( "Click 'Add new'.", async () => {
 							await page
 								.locator( '#product_attributes .toolbar-top' )
-								.getByRole( 'button', { name: 'Add new' } )
+								.getByRole( 'button', { name: getTextForLanguage()['Addnew']} )
 								.click();
 						} );
 					}
@@ -66,7 +68,7 @@ test.describe( 'Add product attributes', () => {
 								async () => {
 									await page
 										.getByPlaceholder(
-											'f.e. size or color'
+											getTextForLanguage()['fesizeorcolor']
 										)
 										.nth( i )
 										.type( attributeName );
@@ -78,7 +80,7 @@ test.describe( 'Add product attributes', () => {
 								async () => {
 									await page
 										.getByPlaceholder(
-											'Enter options for customers to choose from'
+											getTextForLanguage()['Enteroptionsforcustomerstochoosefrom']
 										)
 										.nth( i )
 										.type( attributeValues );
@@ -90,7 +92,7 @@ test.describe( 'Add product attributes', () => {
 								async () => {
 									await page
 										.getByRole( 'button', {
-											name: 'Save attributes',
+											name: getTextForLanguage()['Saveattributes'],
 										} )
 										.click( { clickCount: 3 } );
 								}

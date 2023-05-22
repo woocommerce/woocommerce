@@ -243,8 +243,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 
 		await page.locator( 'a:has-text("USA Zone") >> nth=0' ).click();
 
+		await page.waitForLoadState( 'networkidle' );
+
 		//delete
 		await page.locator( 'text=×' ).click();
+
 		//save changes
 		await page.click( '#submit' );
 
