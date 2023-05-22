@@ -43,7 +43,7 @@ runs:
           shell: bash
           env:
               SOURCE: ${{ inputs.reports-home }}/public/daily/${{ inputs.test-type }}/history
-              TARGET: ${{ env.ALLURE_RESULTS_DIR }}
+              TARGET: ${{ env.ALLURE_RESULTS_DIR }}/history
           run: |
               aws s3 cp "${{ env.SOURCE }}" "${{ env.TARGET }}" \
                 --recursive \
