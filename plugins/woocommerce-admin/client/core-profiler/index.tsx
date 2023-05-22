@@ -101,7 +101,7 @@ export type PluginsPageSkippedEvent = {
 };
 
 export type PluginInstalledAndActivatedEvent = {
-	type: 'PLUGINS_INSTALLED_AND_ACTIVATED';
+	type: 'PLUGIN_INSTALLED_AND_ACTIVATED';
 	payload: {
 		pluginsCount: number;
 		installedPluginIndex: number;
@@ -759,12 +759,21 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								_context,
 								event: PluginInstalledAndActivatedEvent
 							) => {
+								const progress = Math.round(
+									( event.payload.installedPluginIndex /
+										event.payload.pluginsCount ) *
+										100
+								);
+
 								return {
-									progress: Math.round(
-										( event.payload.installedPluginIndex /
-											event.payload.pluginsCount ) *
-											100
-									),
+									useStages: 'plugins',
+									progress,
+									stageIndex:
+										progress > 30
+											? progress > 60
+												? 2
+												: 1
+											: 0,
 								};
 							},
 						} ),
@@ -841,6 +850,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				assign( {
 					loader: {
 						progress: 10,
+						useStages: 'plugins',
 					},
 				} ),
 			],
