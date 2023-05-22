@@ -208,7 +208,8 @@ const handleOnboardingProfileOption = assign( {
 } );
 
 const redirectToWooHome = () => {
-	navigateTo( { url: getNewPath( {}, '/', {} ) } );
+	window.location.href = '/wp-admin/admin.php?page=wc-admin';
+	// navigateTo( { url: getNewPath( {}, '/', {} ) } );
 };
 
 const recordTracksIntroCompleted = () => {
@@ -740,6 +741,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						business_extensions: event.payload.installationCompletedResult.installedPlugins.map(
 							( extension: InstalledPlugin ) => extension.plugin
 						),
+						completed: true,
 					} );
 				},
 				onDone: {
@@ -747,6 +749,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				},
 			},
 			meta: {
+				component: Loader,
 				progress: 100,
 			},
 		},
