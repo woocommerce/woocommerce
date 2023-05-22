@@ -81,6 +81,8 @@ runs:
               GITHUB_TOKEN: ${{ inputs.reports-token }}
               REPORT_URL: ${{ steps.upload-path.outputs.report-url }}
           run: |
-              gh workflow run add-reports-pr.yml \
+              gh workflow run publish-test-reports-pr@v2.yml \
                 -f report-url=${{ env.REPORT_URL }} \
+                -f pr-number=${{ env.PR_NUMBER }} \
+                -f test-type=${{ inputs.test-type }} \
                 -R woocommerce/woocommerce-test-reports
