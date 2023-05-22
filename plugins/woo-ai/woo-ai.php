@@ -24,8 +24,6 @@ if ( ! defined( 'WOO_AI_FILE' ) ) {
 
 /**
  * Load text domain before all other code.
- *
- * @since 2.0.0
  */
 function _woo_ai_load_textdomain() {
 	load_plugin_textdomain( 'woo-ai', false, basename( dirname( __FILE__ ) ) . '/languages' );
@@ -58,6 +56,12 @@ add_action(
 	'wp_loaded',
 	function() {
 		require 'api/api.php';
+		require_once dirname( __FILE__ ) . '/includes/completion/interface-completion-service.php';
+		require_once dirname( __FILE__ ) . '/includes/completion/class-completion-service.php';
+		require_once dirname( __FILE__ ) . '/includes/prompt-utils/class-product-category-formatter.php';
+		require_once dirname( __FILE__ ) . '/includes/attribute-suggestion/class-attribute-suggestion-request.php';
+		require_once dirname( __FILE__ ) . '/includes/attribute-suggestion/class-attribute-suggestion-prompt-generator.php';
+		require_once dirname( __FILE__ ) . '/includes/attribute-suggestion/class-attribute-suggestion-service.php';
 	}
 );
 
