@@ -107,7 +107,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_response( WP_REST_Request $request ): WP_Error|WP_REST_Response {
-		$prompt            = $request->get_param( 'prompt' );
+		$prompt            = wp_strip_all_tags( $request->get_param( 'prompt' ) );
 		$temperature       = $request->get_param( 'temperature' ) ? $request->get_param( 'temperature' ) : 1;
 		$previous_messages = $request->get_param( 'previous_messages' ) ? $request->get_param( 'previous_messages' ) : array();
 
