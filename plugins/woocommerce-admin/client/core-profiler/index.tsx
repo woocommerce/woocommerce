@@ -363,8 +363,9 @@ const getPlugins = async () => {
 		ONBOARDING_STORE_NAME
 	).getFreeExtensions();
 	return (
-		extensionsBundles.find( ( bundle ) => bundle.key === 'obw/grow' )
-			?.plugins || []
+		extensionsBundles.find(
+			( bundle ) => bundle.key === 'obw/core-profiler'
+		)?.plugins || []
 	);
 };
 
