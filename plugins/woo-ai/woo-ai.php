@@ -27,7 +27,7 @@ if ( ! defined( 'WOO_AI_FILE' ) ) {
  *
  * @since 2.0.0
  */
-function _woo_ai_load_textdomain() {
+function _woo_ai_load_textdomain(): void {
 	load_plugin_textdomain( 'woo-ai', false, basename( dirname( __FILE__ ) ) . '/languages' );
 }
 
@@ -36,7 +36,7 @@ add_action( 'plugins_loaded', '_woo_ai_load_textdomain' );
 /**
  * Bootstrap plugin.
  */
-function _woo_ai_bootstrap() {
+function _woo_ai_bootstrap(): void {
 
 	// Check if WooCommerce is enabled.
 	if ( ! class_exists( 'WooCommerce' ) ) {
@@ -56,7 +56,7 @@ function _woo_ai_bootstrap() {
 
 add_action(
 	'wp_loaded',
-	function() {
+	function () {
 		require 'api/api.php';
 	}
 );

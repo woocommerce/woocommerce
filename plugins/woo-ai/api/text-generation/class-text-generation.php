@@ -9,6 +9,8 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use WP_Error, WP_REST_Request, WP_REST_Server, WP_REST_Response;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -24,7 +26,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	 *
 	 * @var array
 	 */
-	protected $models = array(
+	protected array $models = array(
 		'openai' => array(
 			'url' => 'https://api.openai.com/v1/chat/completions',
 			'key' => OPEN_AI_KEY,
@@ -61,7 +63,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
+					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'get_response' ),
 					'permission_callback' => array( $this, 'get_response_permission_check' ),
 					'args'                => array(
@@ -87,12 +89,11 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	/**
 	 * Check if a given request has access to create.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_response_permission_check( $request ) {
+	public function get_response_permission_check(): WP_Error|bool {
 		if ( ! wc_rest_check_post_permissions( 'product', 'create' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -102,9 +103,10 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	 * Get the text completion.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
+	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_response( $request ) {
+	public function get_response( WP_REST_Request $request ): WP_Error|WP_REST_Response {
 		$prompt            = $request->get_param( 'prompt' );
 		$temperature       = $request->get_param( 'temperature' ) ? $request->get_param( 'temperature' ) : 1;
 		$previous_messages = $request->get_param( 'previous_messages' ) ? $request->get_param( 'previous_messages' ) : array();
@@ -163,6 +165,15 @@ class Text_Generation extends \WC_REST_Data_Controller {
 		$response = json_decode( wp_remote_retrieve_body( $raw_response ), true );
 
 		$last_choice = end( $response['choices'] );
+
+		$generated_text = wp_kses_post( $last_choice['message']['content'] );
+
+		$messages[] = $last_choice['message'];
+		// Make sure all messages are sanitized.
+		array_map ( function( $message ) {
+			$message['content'] = wp_kses_post( $message['content'] );
+			return $message;
+		}, $messages );
 
 		return rest_ensure_response(
 			array(
