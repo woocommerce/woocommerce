@@ -1,0 +1,82 @@
+.woocommerce-profiler-plugins-plugin-card {
+	width: 492px;
+	display: flex;
+	flex-direction: row;
+	box-sizing: border-box;
+	border: 1px solid #e0e0e0;
+	border-radius: 2px;
+	padding: 26px;
+	align-items: flex-start;
+	input {
+		margin: 3px 26px 0px 0px;
+		width: 20px;
+		height: 20px;
+		border: 1px solid #757575;
+		border-radius: 2px;
+		background: #fff;
+	}
+	img {
+		margin-right: 12px;
+		width: 25px;
+		height: 25px;
+	}
+	h3 {
+		font-size: 14px;
+		line-height: 20px;
+		margin: 0 0 8px 0;
+		padding: 0;
+	}
+
+	p {
+		font-size: 13px;
+		line-height: 16px;
+		color: #757575;
+		margin: 0;
+		padding: 0;
+		a {
+			color: inherit;
+		}
+	}
+
+	.components-checkbox-control {
+		.components-checkbox-control__input,
+		components-checkbox-control__input-container {
+			width: 16px;
+			height: 16px;
+			&:focus {
+				box-shadow: none;
+			}
+		}
+		.components-checkbox-control__input[type='checkbox']:checked {
+			box-shadow: 0 0 0 1px #fff,
+				0 0 0 2px
+					var(
+						--wp-components-color-accent,
+						var( --wp-admin-theme-color, #007cba )
+					);
+			outline: 1px solid transparent;
+		}
+		.components-checkbox-control__checked {
+			left: -1px;
+			top: -1px;
+			width: 18px;
+			height: 18px;
+		}
+	}
+	.woocommerce-profiler-plugins-plugin-card-text-header {
+		display: flex;
+		gap: 8px;
+
+		&.installed {
+			span {
+				padding: 0px 10px;
+				height: 20px;
+				background: #b8e6bf;
+				border-radius: 2px;
+				color: #00450c;
+				font-size: 11px;
+				font-weight: 500;
+			}
+		}
+	}
+}
