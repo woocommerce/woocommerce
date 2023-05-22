@@ -60,6 +60,9 @@ jobs:
               with:
                   artifact-name: ${{ env.API_ARTIFACT }}
                   tests: hello # mytodo remove
+              env:
+                  USER_KEY: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
+                  USER_SECRET: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
 
             - name: Upload report to bucket
               id: report
@@ -236,7 +239,7 @@ jobs:
 
             - name: Upload report to bucket
               id: report
-              if: success() || ( failure() && steps.api-action.result == 'failure' )
+              if: success() || ( failure() && steps.e2e-action.result == 'failure' )
               uses: ./.github/actions/tests/reports/publish-report-daily
               with:
                   key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
