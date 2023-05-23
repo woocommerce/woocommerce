@@ -27,7 +27,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	protected $models = array(
 		'openai' => array(
 			'url' => 'https://api.openai.com/v1/chat/completions',
-			'key' => OPEN_AI_KEY,
+			'key' => '',
 		),
 	);
 
@@ -36,6 +36,10 @@ class Text_Generation extends \WC_REST_Data_Controller {
 	 */
 	public function __construct() {
 		$this->register_routes();
+
+		if ( defined( 'OPEN_AI_KEY' ) ) {
+			$this->models['openai']['key'] = OPEN_AI_KEY;
+		}
 	}
 
 	/**
@@ -113,6 +117,16 @@ class Text_Generation extends \WC_REST_Data_Controller {
 
 		$api_url = $model['url'];
 		$api_key = $model['key'];
+
+		if ( ! $api_key ) {
+			return new \WP_Error(
+				'wooai_api_error',
+				__( 'Sorry, the service is config fully configured', 'woocommerce' ),
+				array(
+					'status' => 500,
+				)
+			);
+		}
 
 		$messages   = $previous_messages;
 		$messages[] = array(
