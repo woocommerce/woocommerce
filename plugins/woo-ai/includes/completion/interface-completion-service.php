@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  */
 interface Completion_Service_Interface {
 	/**
-	 * Gets the completion from the OpenAI API.
+	 * Gets the completion from the API.
 	 *
 	 * @param array $messages An array of messages to send to the API.
 	 * @param array $options An array of options to send to the API.
