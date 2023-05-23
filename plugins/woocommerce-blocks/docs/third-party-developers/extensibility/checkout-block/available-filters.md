@@ -128,11 +128,9 @@ By using the `additionalCartCheckoutInnerBlockTypes` filter it is possible to ad
 
 This filter is called once for each inner block area, so it is possible to be very granular when determining what blocks can be added where. See the [Allowing blocks in specific areas in the Cart and Checkout blocks.](#allowing-blocks-in-specific-areas-in-the-cart-and-checkout-blocks) example for more information.
 
-| Filter name                             | Description                              | Return type   |
-| --------------------------------------- | ---------------------------------------- | ------------- |
-| `allowedBlockTypes`                     | The new array of allowwed block types.   | `string[]`    |
-| -------------------                     | ---------------------------------------- | ------------- |
-| `additionalCartCheckoutInnerBlockTypes` | The new array of allowwed block types.   | `string[]`    |
+| Filter name                             | Description                             | Return type   |
+| -------------------                     | --------------------------------------- | ------------- |
+| `additionalCartCheckoutInnerBlockTypes` | The new array of allowed block types.   | `string[]`    |
 
 ## Examples
 
@@ -186,7 +184,7 @@ In our extension we could register a filter satisfy both of these conditions lik
 
 ```tsx
 registerCheckoutFilters( 'newsletter-plugin', {
-	allowedBlockTypes: ( value, extensions, { block } ) => {
+	additionalCartCheckoutInnerBlockTypes: ( value, extensions, { block } ) => {
 		// Remove the ability to add `core/separator`
 		value = value.filter( ( blockName ) => blockName !== 'core/separator' );
 
