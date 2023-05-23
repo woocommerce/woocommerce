@@ -213,7 +213,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Use waitUntil instead of waitForLoadState in page.goto() and page.click(). [[#37831]](https://github.com/woocommerce/woocommerce/pull/37831)
 * Fix - When creating default storefront pages, the site language (and not the language of the current user) should be used. [[#37795]](https://github.com/woocommerce/woocommerce/pull/37795)
 * Add - Add admin-side order edit lock for HPOS. [[#38230]](https://github.com/woocommerce/woocommerce/pull/38230)
-* Add - Add a filter to free extensions REST endpoint [[#38286]](https://github.com/woocommerce/woocommerce/pull/38286)
+* Add - Add a filter to exclude Jetpack from suggested free extensions REST endpoint. [[#38286]](https://github.com/woocommerce/woocommerce/pull/38286)
 * Add - Add a function to get the aria-describedby description for the add to cart button.
   Add default description for the Select options button. [[#37880]](https://github.com/woocommerce/woocommerce/pull/37880)
 * Add - Add Business Location page to the new core profiler [[#38019]](https://github.com/woocommerce/woocommerce/pull/38019)
