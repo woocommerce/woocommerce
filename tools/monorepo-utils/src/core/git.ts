@@ -11,6 +11,11 @@ import { mkdir, rm } from 'fs/promises';
 import { URL } from 'node:url';
 
 /**
+ * Internal dependencies
+ */
+import { getEnvVar } from './environment';
+
+/**
  * Get filename from patch
  *
  * @param {string} str String to extract filename from.
@@ -108,6 +113,29 @@ export const cloneRepo = async (
  */
 export const cloneRepoShallow = async ( repoPath: string ) => {
 	return await cloneRepo( repoPath, { '--depth': 1 } );
+};
+
+/**
+ * Clone a repo using the authenticated token `GITHUB_TOKEN`. This allows the script to push branches to origin.
+ *
+ * @param {Object}  options       CLI options
+ * @param {string}  options.owner repo owner
+ * @param {string}  options.name  repo name
+ * @param {boolean} isShallow     whether to do a shallow clone or not.
+ * @return {string} temporary repo path
+ */
+export const cloneAuthenticatedRepo = async (
+	options: { owner: string; name: string },
+	isShallow = true
+): Promise< string > => {
+	const { owner, name } = options;
+	const source = `github.com/${ owner }/${ name }`;
+	const token = getEnvVar( 'GITHUB_TOKEN' );
+	const remote = `https://${ owner }:${ token }@${ source }`;
+
+	return isShallow
+		? await cloneRepoShallow( remote )
+		: await cloneRepo( remote );
 };
 
 /**
@@ -390,4 +418,24 @@ export const generateDiff = async (
 
 		return '';
 	}
+};
+
+/**
+ *
+ * @param {string} tmpRepoPath path to temporary repo
+ * @param {string} branch      remote branch to checkout
+ */
+export const checkoutRemoteBranch = async (
+	tmpRepoPath: string,
+	branch: string
+): Promise< void > => {
+	const git = simpleGit( {
+		baseDir: tmpRepoPath,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
+
+	// When the clone is shallow, we need to call this before fetching.
+	await git.raw( [ 'remote', 'set-branches', '--add', 'origin', branch ] );
+	await git.raw( [ 'fetch', 'origin', branch ] );
+	await git.raw( [ 'checkout', '-b', branch, `origin/${ branch }` ] );
 };

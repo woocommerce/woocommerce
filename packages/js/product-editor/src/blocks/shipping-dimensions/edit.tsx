@@ -3,7 +3,11 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
-import { OPTIONS_STORE_NAME, ProductDimensions } from '@woocommerce/data';
+import {
+	OPTIONS_STORE_NAME,
+	Product,
+	ProductDimensions,
+} from '@woocommerce/data';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
@@ -29,9 +33,11 @@ import {
 	HighlightSides,
 	ShippingDimensionsImage,
 } from '../../components/shipping-dimensions-image';
-import { useValidation } from '../../hooks/use-validation';
+import { useValidation } from '../../contexts/validation-context';
 
-export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) {
+export function Edit( {
+	clientId,
+}: BlockEditProps< ShippingDimensionsBlockAttributes > ) {
 	const blockProps = useBlockProps();
 
 	const [ dimensions, setDimensions ] =
@@ -79,12 +85,70 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 		};
 	}
 
+	const {
+		ref: dimensionsWidthRef,
+		error: dimensionsWidthValidationError,
+		validate: validateDimensionsWidth,
+	} = useValidation< Product >(
+		`dimensions_width-${ clientId }`,
+		async function dimensionsWidthValidator() {
+			if ( dimensions?.width && +dimensions.width <= 0 ) {
+				return __( 'Width must be greater than zero.', 'woocommerce' );
+			}
+		},
+		[ dimensions?.width ]
+	);
+
+	const {
+		ref: dimensionsLengthRef,
+		error: dimensionsLengthValidationError,
+		validate: validateDimensionsLength,
+	} = useValidation< Product >(
+		`dimensions_length-${ clientId }`,
+		async function dimensionsLengthValidator() {
+			if ( dimensions?.length && +dimensions.length <= 0 ) {
+				return __( 'Length must be greater than zero.', 'woocommerce' );
+			}
+		},
+		[ dimensions?.length ]
+	);
+
+	const {
+		ref: dimensionsHeightRef,
+		error: dimensionsHeightValidationError,
+		validate: validateDimensionsHeight,
+	} = useValidation< Product >(
+		`dimensions_height-${ clientId }`,
+		async function dimensionsHeightValidator() {
+			if ( dimensions?.height && +dimensions.height <= 0 ) {
+				return __( 'Height must be greater than zero.', 'woocommerce' );
+			}
+		},
+		[ dimensions?.height ]
+	);
+
+	const {
+		ref: weightRef,
+		error: weightValidationError,
+		validate: validateWeight,
+	} = useValidation< Product >(
+		`weight-${ clientId }`,
+		async function weightValidator() {
+			if ( weight && +weight <= 0 ) {
+				return __( 'Weight must be greater than zero.', 'woocommerce' );
+			}
+		},
+		[ weight ]
+	);
+
 	const dimensionsWidthProps = {
 		...getDimensionsControlProps( 'width', 'A' ),
 		id: useInstanceId(
 			BaseControl,
 			`product_shipping_dimensions_width`
 		) as string,
+		ref: dimensionsWidthRef,
+		onBlur: validateDimensionsWidth,
 	};
 	const dimensionsLengthProps = {
 		...getDimensionsControlProps( 'length', 'B' ),
@@ -92,6 +156,8 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 			BaseControl,
 			`product_shipping_dimensions_length`
 		) as string,
+		ref: dimensionsLengthRef,
+		onBlur: validateDimensionsLength,
 	};
 	const dimensionsHeightProps = {
 		...getDimensionsControlProps( 'height', 'C' ),
@@ -99,6 +165,8 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 			BaseControl,
 			`product_shipping_dimensions_height`
 		) as string,
+		ref: dimensionsHeightRef,
+		onBlur: validateDimensionsHeight,
 	};
 	const weightProps = {
 		id: useInstanceId( BaseControl, `product_shipping_weight` ) as string,
@@ -106,40 +174,9 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 		value: formatNumber( String( weight ) ),
 		onChange: ( value: string ) => setWeight( parseNumber( value ) ),
 		suffix: weightUnit,
+		ref: weightRef,
+		onBlur: validateWeight,
 	};
-
-	const dimensionsWidthValidationError = useValidation(
-		'product/dimensions/width',
-		function dimensionsWidthValidator() {
-			if ( dimensions?.width && +dimensions.width <= 0 ) {
-				return __( 'Width must be greater than zero.', 'woocommerce' );
-			}
-		}
-	);
-	const dimensionsLengthValidationError = useValidation(
-		'product/dimensions/length',
-		function dimensionsLengthValidator() {
-			if ( dimensions?.length && +dimensions.length <= 0 ) {
-				return __( 'Length must be greater than zero.', 'woocommerce' );
-			}
-		}
-	);
-	const dimensionsHeightValidationError = useValidation(
-		'product/dimensions/height',
-		function dimensionsHeightValidator() {
-			if ( dimensions?.height && +dimensions.height <= 0 ) {
-				return __( 'Height must be greater than zero.', 'woocommerce' );
-			}
-		}
-	);
-	const weightValidationError = useValidation(
-		'product/weight',
-		function weightValidator() {
-			if ( weight && +weight <= 0 ) {
-				return __( 'Weight must be greater than zero.', 'woocommerce' );
-			}
-		}
-	);
 
 	return (
 		<div { ...blockProps }>
@@ -205,6 +242,17 @@ export function Edit( {}: BlockEditProps< ShippingDimensionsBlockAttributes > ) 
 					<ShippingDimensionsImage
 						highlight={ highlightSide }
 						className="wp-block-woocommerce-product-shipping-dimensions-fields__dimensions-image"
+						labels={ {
+							A: dimensionsWidthProps.value?.length
+								? dimensionsWidthProps.value
+								: undefined,
+							B: dimensionsLengthProps.value?.length
+								? dimensionsLengthProps.value
+								: undefined,
+							C: dimensionsHeightProps.value?.length
+								? dimensionsHeightProps.value
+								: undefined,
+						} }
 					/>
 				</div>
 			</div>

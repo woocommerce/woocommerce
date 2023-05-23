@@ -75,6 +75,7 @@
 
 	.wp-block-columns {
 		gap: $gap-large;
+		margin-bottom: 0;
 	}
 
 	.wp-block-woocommerce-product-section {
@@ -98,11 +99,5 @@
 
 	.block-editor-block-list__layout .block-editor-block-list__block:not( [contenteditable] ):focus:after {
 		display: none; // use important or increase specificity.
-	}
-}
-
-.woocommerce-layout:has( .woocommerce-product-block-editor ) {
-	.woocommerce-layout__header {
-		display: none;
 	}
 }

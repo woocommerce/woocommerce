@@ -38,6 +38,7 @@ export const deletePlugin = async ( {
 		baseURL,
 		extraHTTPHeaders: {
 			Authorization: `Basic ${ encodeCredentials( username, password ) }`,
+			cookie: '',
 		},
 	} );
 	const listPluginsResponse = await apiContext.get(
@@ -55,37 +56,12 @@ export const deletePlugin = async ( {
 	if ( pluginToDelete ) {
 		const { plugin } = pluginToDelete;
 		const requestURL = `/wp-json/wp/v2/plugins/${ plugin }`;
-		let response;
 
-		// Some plugins do not respond to some of the WP REST API endpoints like Contact Form 7.
-		// Print warning in such cases.
-		const warn = async ( response, warningMsg ) => {
-			console.warn( warningMsg );
-			console.warn(
-				`Response status: ${ response.status() } ${ response.statusText() }`
-			);
-			console.warn( `Response body:` );
-			console.warn( await response.json() );
-			console.warn( '\n' );
-		};
-
-		response = await apiContext.put( requestURL, {
+		await apiContext.put( requestURL, {
 			data: { status: 'inactive' },
 		} );
-		if ( ! response.ok() ) {
-			await warn(
-				response,
-				`WARNING: Failed to deactivate plugin ${ plugin }`
-			);
-		}
 
-		response = await apiContext.delete( requestURL );
-		if ( ! response.ok() ) {
-			await warn(
-				response,
-				`WARNING: Failed to delete plugin ${ plugin }`
-			);
-		}
+		await apiContext.delete( requestURL );
 	}
 };
 
@@ -164,10 +140,8 @@ export const downloadZip = async ( {
  * @param {string} zipFilePath Local file path to the ZIP.
  */
 export const deleteZip = async ( zipFilePath ) => {
-	console.log( `Deleting file located in ${ zipFilePath }...` );
 	await fs.unlink( zipFilePath, ( err ) => {
 		if ( err ) throw err;
-		console.log( `Successfully deleted!` );
 	} );
 };
 

@@ -3,7 +3,6 @@
  */
 import { Suspense, lazy } from '@wordpress/element';
 import { useRef, useEffect } from 'react';
-import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
@@ -22,16 +21,17 @@ import { Spinner } from '@woocommerce/components';
  */
 import getReports from '../analytics/report/get-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { isFeatureEnabled } from '~/utils/features';
 import { NoMatch } from './NoMatch';
 
+const AddProductPage = lazy( () =>
+	import(
+		/* webpackChunkName: "edit-product-page" */ '../products/add-product-page'
+	)
+);
 const EditProductPage = lazy( () =>
 	import(
 		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
-	)
-);
-const AddProductPage = lazy( () =>
-	import(
-		/* webpackChunkName: "add-product-page" */ '../products/add-product-page'
 	)
 );
 const ProductPage = lazy( () =>
@@ -172,9 +172,18 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures[ 'product-block-editor' ] ) {
-		pages.push( {
+	if ( isFeatureEnabled( 'product_block_editor' ) ) {
+		const productPage = {
 			container: ProductPage,
+			layout: {
+				header: false,
+			},
+			wpOpenMenu: 'menu-posts-product',
+			capability: 'manage_woocommerce',
+		};
+
+		pages.push( {
+			...productPage,
 			path: '/add-product',
 			breadcrumbs: [
 				[ '/add-product', __( 'Product', 'woocommerce' ) ],
@@ -183,12 +192,10 @@ export const getPages = () => {
 			navArgs: {
 				id: 'woocommerce-add-product',
 			},
-			wpOpenMenu: 'menu-posts-product',
-			capability: 'manage_woocommerce',
 		} );
 
 		pages.push( {
-			container: ProductPage,
+			...productPage,
 			path: '/product/:productId',
 			breadcrumbs: [
 				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
@@ -197,8 +204,6 @@ export const getPages = () => {
 			navArgs: {
 				id: 'woocommerce-edit-product',
 			},
-			wpOpenMenu: 'menu-posts-product',
-			capability: 'manage_woocommerce',
 		} );
 	} else if (
 		window.wcAdminFeatures[ 'new-product-management-experience' ]
@@ -289,7 +294,7 @@ export const getPages = () => {
 			container: SettingsGroup,
 			path: '/settings/:page',
 			breadcrumbs: ( { match } ) => {
-				// @todo This might need to be refactored to retreive groups via data store.
+				// @todo This might need to be refactored to retrieve groups via data store.
 				const settingsPages = getAdminSetting( 'settingsPages' );
 				const page = settingsPages[ match.params.page ];
 				if ( ! page ) {
@@ -424,18 +429,22 @@ export const Controller = ( { ...props } ) => {
  */
 export function updateLinkHref( item, nextQuery, excludedScreens ) {
 	if ( isWCAdmin( item.href ) ) {
+		// If we accept a full HTMLAnchorElement, then we should be able to use `.search`.
+		// const query = new URLSearchParams( item.search );
+		// but to remain backward compatible, we support any object with `href` property.
 		const search = last( item.href.split( '?' ) );
-		const query = parse( search );
-		const path = query.path || 'homescreen';
+		let query = new URLSearchParams( search );
+		const path = query.get( 'path' ) || 'homescreen';
 		const screen = getScreenFromPath( path );
 
-		const isExcludedScreen = excludedScreens.includes( screen );
+		if ( ! excludedScreens.includes( screen ) ) {
+			query = new URLSearchParams( {
+				...Object.fromEntries( query ),
+				...nextQuery,
+			} );
+		}
 
-		const href =
-			'admin.php?' +
-			stringify(
-				Object.assign( query, isExcludedScreen ? {} : nextQuery )
-			);
+		const href = 'admin.php?' + query.toString();
 
 		// Replace the href so you can see the url on hover.
 		item.href = href;
@@ -451,9 +460,10 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 window.wpNavMenuUrlUpdate = function ( query ) {
 	const nextQuery = getPersistedQuery( query );
 	const excludedScreens = getQueryExcludedScreens();
+	const anchors = document.querySelectorAll( '#adminmenu a' );
 
-	Array.from( document.querySelectorAll( '#adminmenu a' ) ).forEach(
-		( item ) => updateLinkHref( item, nextQuery, excludedScreens )
+	Array.from( anchors ).forEach( ( item ) =>
+		updateLinkHref( item, nextQuery, excludedScreens )
 	);
 };
 

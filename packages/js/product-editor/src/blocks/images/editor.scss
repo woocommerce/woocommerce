@@ -1,7 +1,4 @@
 .wp-block-woocommerce-product-images-field {
-	.woocommerce-image-gallery {
-		margin-top: $gap-largest;
-	}
     .woocommerce-media-uploader {
         text-align: left;
     }
@@ -12,6 +9,12 @@
         margin-top: 0;
         padding: 0;
     }
+
+	&.has-images {
+		.woocommerce-image-gallery {
+			margin-top: $gap-largest;
+		}
+	}
 
     &:not(.has-images) {
         .woocommerce-sortable {

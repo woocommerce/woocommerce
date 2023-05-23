@@ -577,7 +577,7 @@ Chart.propTypes = {
 		PropTypes.func,
 	] ),
 	/**
-	 * Wether header UI controls must be displayed.
+	 * Whether header UI controls must be displayed.
 	 */
 	showHeaderControls: PropTypes.bool,
 	/**

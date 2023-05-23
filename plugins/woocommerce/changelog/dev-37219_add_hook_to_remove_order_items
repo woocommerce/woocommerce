@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add action hooks to WC_Abstract_Order::remove_order_items

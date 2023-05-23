@@ -558,7 +558,7 @@ test.describe('Products API tests: CRUD', () => {
 			const response = await request.post('wp-json/wc/v3/products/reviews', {
 				data: {
 					product_id: 999,
-					review: "A non existant product!",
+					review: "A non existent product!",
 					reviewer: "John Do Not",
 					reviewer_email: "john.do.not@example.com",
 					rating: 5

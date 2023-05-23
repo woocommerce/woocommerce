@@ -11,9 +11,8 @@ import { getLatestGithubReleaseVersion } from '../../../core/github/repo';
 import { octokitWithAuth } from '../../../core/github/api';
 import { setGithubMilestoneOutputs } from './utils';
 import { WPIncrement } from '../../../core/version';
-import { Options } from './types';
 import { Logger } from '../../../core/logger';
-import { getEnvVar } from '../../../core/environment';
+import { isGithubCI } from '../../../core/environment';
 
 export const milestoneCommand = new Command( 'milestone' )
 	.description( 'Create a milestone' )
@@ -32,9 +31,9 @@ export const milestoneCommand = new Command( 'milestone' )
 		'-m --milestone <milestone>',
 		'Milestone to create. Next milestone is gathered from Github if none is supplied'
 	)
-	.action( async ( options: Options ) => {
+	.action( async ( options ) => {
 		const { owner, name, dryRun, milestone } = options;
-		const isGithub = getEnvVar( 'CI' );
+		const isGithub = isGithubCI();
 
 		if ( milestone && isGithub ) {
 			Logger.error(
@@ -90,7 +89,7 @@ export const milestoneCommand = new Command( 'milestone' )
 		}
 
 		try {
-			await octokitWithAuth.request(
+			await octokitWithAuth().request(
 				`POST /repos/${ owner }/${ name }/milestones`,
 				{
 					title: nextMilestone,

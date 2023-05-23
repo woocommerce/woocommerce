@@ -8,6 +8,12 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { MouseEvent } from 'react';
 
+/**
+ * Internal dependencies
+ */
+import { useValidations } from '../../../../contexts/validation-context';
+import { WPError } from '../../../../utils/get-product-error-message';
+
 export function usePublish( {
 	disabled,
 	onClick,
@@ -16,7 +22,7 @@ export function usePublish( {
 	...props
 }: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' > & {
 	onPublishSuccess?( product: Product ): void;
-	onPublishError?( error: Error ): void;
+	onPublishError?( error: WPError ): void;
 } ): Button.ButtonProps {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
@@ -29,22 +35,14 @@ export function usePublish( {
 		'status'
 	);
 
-	const { hasEdits, isDisabled, isBusy } = useSelect(
+	const { isValidating, validate } = useValidations();
+
+	const { isSaving } = useSelect(
 		( select ) => {
-			const { hasEditsForEntityRecord, isSavingEntityRecord } =
-				select( 'core' );
-			const { isPostSavingLocked } = select( 'core/editor' );
-			const isSavingLocked = isPostSavingLocked();
-			const isSaving = isSavingEntityRecord< boolean >(
-				'postType',
-				'product',
-				productId
-			);
+			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
-				isDisabled: isSavingLocked || isSaving,
-				isBusy: isSaving,
-				hasEdits: hasEditsForEntityRecord< boolean >(
+				isSaving: isSavingEntityRecord< boolean >(
 					'postType',
 					'product',
 					productId
@@ -54,22 +52,20 @@ export function usePublish( {
 		[ productId ]
 	);
 
+	const isBusy = isSaving || isValidating;
+
 	const isCreating = productStatus === 'auto-draft';
-	const ariaDisabled =
-		disabled || isDisabled || ( productStatus === 'publish' && ! hasEdits );
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
-		if ( ariaDisabled ) {
-			return event.preventDefault();
-		}
-
 		if ( onClick ) {
 			onClick( event );
 		}
 
 		try {
+			await validate();
+
 			// The publish button click not only change the status of the product
 			// but also save all the pending changes. So even if the status is
 			// publish it's possible to save the product too.
@@ -82,15 +78,18 @@ export function usePublish( {
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				'product',
-				productId
+				productId,
+				{
+					throwOnError: true,
+				}
 			);
 
-			if ( onPublishSuccess ) {
+			if ( publishedProduct && onPublishSuccess ) {
 				onPublishSuccess( publishedProduct );
 			}
 		} catch ( error ) {
 			if ( onPublishError ) {
-				onPublishError( error as Error );
+				onPublishError( error as WPError );
 			}
 		}
 	}
@@ -100,7 +99,6 @@ export function usePublish( {
 			? __( 'Add', 'woocommerce' )
 			: __( 'Save', 'woocommerce' ),
 		...props,
-		'aria-disabled': ariaDisabled,
 		isBusy,
 		variant: 'primary',
 		onClick: handleClick,

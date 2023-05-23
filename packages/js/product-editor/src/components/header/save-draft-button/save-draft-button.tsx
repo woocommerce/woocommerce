@@ -12,6 +12,7 @@ import { useEntityProp } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
+import { getProductErrorMessage } from '../../../utils/get-product-error-message';
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { useSaveDraft } from '../hooks/use-save-draft';
 
@@ -41,9 +42,11 @@ export function SaveDraftButton(
 				navigateTo( { url } );
 			}
 		},
-		onSaveError() {
+		onSaveError( error ) {
+			const message = getProductErrorMessage( error );
+
 			createErrorNotice(
-				__( 'Failed to update product.', 'woocommerce' )
+				message || __( 'Failed to update product.', 'woocommerce' )
 			);
 		},
 	} );
