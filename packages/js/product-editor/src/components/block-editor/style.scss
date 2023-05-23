@@ -119,18 +119,6 @@
 		margin-bottom: 0;
 	}
 
-	.wp-block-woocommerce-product-section {
-		> .block-editor-inner-blocks > .block-editor-block-list__layout {
-			> .wp-block:first-child {
-				margin-top: 32px;
-			}
-
-			> .wp-block:not(:first-child) {
-				margin-top: $gap-large;
-			}
-		}
-	}
-
 	.woocommerce-experimental-select-control__label {
 		text-transform: uppercase;
 		font-size: 11px;
