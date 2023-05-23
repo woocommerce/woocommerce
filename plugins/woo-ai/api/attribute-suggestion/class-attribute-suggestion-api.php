@@ -120,7 +120,7 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 							),
 							'default'           => array(),
 						),
-						'other_attributes'    => array(
+						'attributes'          => array(
 							'type'              => 'array',
 							'validate_callback' => 'rest_validate_request_arg',
 							'default'           => array(),
