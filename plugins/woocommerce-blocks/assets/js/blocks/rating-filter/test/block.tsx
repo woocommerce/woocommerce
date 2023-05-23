@@ -2,7 +2,7 @@
  * External dependencies
  */
 import React from '@wordpress/element';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import * as hooks from '@woocommerce/base-context/hooks';
 import userEvent from '@testing-library/user-event';
 
@@ -18,7 +18,6 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 } ) );
 
 const setWindowUrl = ( { url }: { url: string } ) => {
-	global.window = Object.create( window );
 	Object.defineProperty( window, 'location', {
 		value: {
 			href: url,
@@ -258,7 +257,9 @@ describe( 'Filter by Rating block', () => {
 			);
 
 			if ( removeRating4Button ) {
-				userEvent.click( removeRating4Button );
+				act( () => {
+					userEvent.click( removeRating4Button );
+				} );
 				acceptErrorWithDuplicatedKeys();
 			}
 
@@ -346,7 +347,9 @@ describe( 'Filter by Rating block', () => {
 			);
 
 			if ( removeRating4Button ) {
-				userEvent.click( removeRating4Button );
+				act( () => {
+					userEvent.click( removeRating4Button );
+				} );
 			}
 
 			expect( getRating2Chips() ).toBeInTheDocument();
