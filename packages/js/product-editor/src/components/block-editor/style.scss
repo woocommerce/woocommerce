@@ -60,6 +60,10 @@
 		}
 	}
 
+	.woocommerce-collapsible-content .woocommerce-collapsible-content__content {
+		margin-top: calc(2 * $gap);
+	}
+
 	.editor-styles-wrapper {
 		h4 {
 			font-size: 16px;
