@@ -117,6 +117,7 @@
 		"@storybook/addons": "6.5.9",
 		"@storybook/client-api": "6.5.14",
 		"@storybook/react": "6.5.15",
+		"@testing-library/dom": "9.3.0",
 		"@testing-library/jest-dom": "5.16.5",
 		"@testing-library/react": "12.1.5",
 		"@testing-library/react-hooks": "7.0.2",
