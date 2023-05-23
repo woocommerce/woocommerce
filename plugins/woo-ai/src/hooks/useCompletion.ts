@@ -9,7 +9,7 @@ import { useRef, useState } from '@wordpress/element';
 import { askQuestion } from '../utils';
 
 type UseCompletionProps = {
-	onStreamMessage: ( message: string ) => void;
+	onStreamMessage: ( message: string, chunk: string ) => void;
 	onCompletionFinished?: ( previousContent: string ) => void;
 	onStreamError?: ( event: Event ) => void;
 };
@@ -42,7 +42,7 @@ export const useCompletion = ( {
 		const chunk = data.choices[ 0 ].delta.content;
 		if ( chunk ) {
 			previousContent.current += chunk;
-			onStreamMessage( previousContent.current );
+			onStreamMessage( previousContent.current, chunk );
 		}
 	};
 

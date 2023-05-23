@@ -46,7 +46,13 @@ export function WriteItForMeButtonContainer() {
 	const tinyEditor = useTinyEditor();
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
-			onStreamMessage: ( content ) => tinyEditor.setContent( content ),
+			onStreamMessage: ( content ) => {
+				// This prevents printing out incomplete HTML tags.
+				const ignoreRegex = new RegExp( /<\/?\w*[^>]*$/g );
+				if ( ! ignoreRegex.test( content ) ) {
+					tinyEditor.setContent( content );
+				}
+			},
 			onStreamError: ( error ) => {
 				// eslint-disable-next-line no-console
 				console.debug( 'Streaming error encoutered', error );
