@@ -118,9 +118,7 @@
 
 .woocommerce-layout:has(.woocommerce-product-block-editor) {
 	.woocommerce-layout__primary {
-		@include breakpoint("<782px") {
-			margin-top: calc($gap-largest + $gap-smaller);
-		}
+		margin-top: calc($gap-largest + $gap-smaller);
 	}
 	.woocommerce-layout__header {
 		display: none;
