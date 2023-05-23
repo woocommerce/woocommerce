@@ -1,5 +1,5 @@
 .woocommerce-profiler-plugins-plugin-card {
-	width: 492px;
+	max-width: 492px;
 	display: flex;
 	flex-direction: row;
 	box-sizing: border-box;
@@ -7,6 +7,15 @@
 	border-radius: 2px;
 	padding: 26px;
 	align-items: flex-start;
+	flex: 0 0 48%;
+
+	@include breakpoint( '<782px' ) {
+		width: 100%;
+		padding: 16px;
+		flex: 100%;
+		max-width: 100%;
+	}
+
 	input {
 		margin: 3px 26px 0px 0px;
 		width: 20px;
@@ -19,12 +28,18 @@
 		margin-right: 12px;
 		width: 25px;
 		height: 25px;
+		@include breakpoint( '<782px' ) {
+			align-self: center;
+		}
 	}
 	h3 {
 		font-size: 14px;
 		line-height: 20px;
 		margin: 0 0 8px 0;
 		padding: 0;
+		@include breakpoint( '<782px' ) {
+			margin: 0px;
+		}
 	}
 
 	p {
@@ -35,6 +50,9 @@
 		padding: 0;
 		a {
 			color: inherit;
+		}
+		@include breakpoint( '<782px' ) {
+			display: none;
 		}
 	}
 
@@ -63,6 +81,26 @@
 			height: 18px;
 		}
 	}
+
+	.components-checkbox-control {
+		align-self: center;
+		.components-base-control__field {
+			@include breakpoint( '<782px' ) {
+				margin-bottom: 0px !important;
+			}
+			.components-checkbox-control__input-container {
+				@include breakpoint( '<782px' ) {
+					height: inherit;
+				}
+			}
+		}
+	}
+
+	.woocommerce-profiler-plugins-plugin-card-text {
+		@include breakpoint( '<782px' ) {
+			align-self: center;
+		}
+	}
 	.woocommerce-profiler-plugins-plugin-card-text-header {
 		display: flex;
 		gap: 8px;
@@ -76,6 +114,9 @@
 				color: #00450c;
 				font-size: 11px;
 				font-weight: 500;
+				@include breakpoint( '<782px' ) {
+					display: none;
+				}
 			}
 		}
 	}
