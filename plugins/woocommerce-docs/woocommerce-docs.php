@@ -1,13 +1,24 @@
 <?php
 /**
  * Plugin Name: WooCommerce Docs
- * Plugin URI: https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-docs
- * Description: This plugin ingests WooCommerce documentation from multiple remote sources.
+ * Plugin URI: https://woocommerce.com/
+ * Description: A plugin for consolidating Markdown documentation from remote sources.
  * Version: 1.0
- * Author: WooCommerce
+ * Author: Automattic
  * Author URI: https://woocommerce.com
- **/
-require __DIR__ . '/vendor/autoload.php';
+ * Text Domain: woocommerce-docs
+ * Domain Path: /i18n/languages/
+ * Requires at least: 6.1
+ * Requires PHP: 7.3
+ *
+ * @package WooCommerce
+ */
+
+$autoload = __DIR__ . '/vendor/autoload.php';
+
+
+// Get around lint that complains upstream files autoloaded don't have file comments.
+require $autoload;
 
 define( 'WOOCOMMERCE_DOCS_ROOT_URL', plugin_dir_url( __FILE__ ) );
 const WOOCOMMERCE_DOCS_PLUGIN_PATH = __DIR__;
