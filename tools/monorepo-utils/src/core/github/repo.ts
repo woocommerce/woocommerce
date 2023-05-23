@@ -180,11 +180,12 @@ export const createPullRequest = async ( options: {
  * @param          prNumber      pull request number.
  * @return {Promise<object>}     pull request data.
  */
-export const getPullRequest = async (
-	options: { owner: string; name: string },
-	prNumber: string
-): Promise< GetPullRequestEndpointResponse[ 'data' ] > => {
-	const { owner, name } = options;
+export const getPullRequest = async ( options: {
+	owner: string;
+	name: string;
+	prNumber: string;
+} ): Promise< GetPullRequestEndpointResponse[ 'data' ] > => {
+	const { owner, name, prNumber } = options;
 	const pr = await octokitWithAuth().request(
 		'GET /repos/{owner}/{repo}/pulls/{pull_number}',
 		{

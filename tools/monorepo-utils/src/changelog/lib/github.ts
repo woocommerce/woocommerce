@@ -18,7 +18,7 @@ export const getPullRequestData = async (
 	prNumber: string
 ) => {
 	const { owner, name } = options;
-	const prData = await getPullRequest( { owner, name }, prNumber );
+	const prData = await getPullRequest( { owner, name, prNumber } );
 	const isCommunityPR = isCommunityPullRequest( prData, owner, name );
 	const headOwner = isCommunityPR ? prData.head.repo.owner.login : owner;
 	const branch = prData.head.ref;
