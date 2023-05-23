@@ -48,7 +48,10 @@ class Woo_AI_Product_Text_Generation {
 			true
 		);
 		wp_enqueue_script( 'woo-ai' );
-		wp_add_inline_script( 'woo-ai', Connection_Initial_State::render(), 'before' );
+
+		if ( class_exists( '\Automattic\Jetpack\Connection\Initial_State' ) ) {
+			wp_add_inline_script( 'woo-ai', Connection_Initial_State::render(), 'before' );
+		}
 
 		$css_file_version = filemtime( dirname( __FILE__ ) . '/../build/index.css' );
 
