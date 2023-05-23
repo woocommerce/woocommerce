@@ -51,5 +51,11 @@
 		&--block-gap-2xlg > * + * {
 			margin-top: calc(2 * $gap);
 		}
+
+		.wp-block-woocommerce-product-section {
+			margin-top: 0;
+			padding-bottom: 0;
+			border-bottom: none;
+		}
 	}
 }
