@@ -40,23 +40,22 @@ export function SelectControl< Item = DefaultItem >( {
 	onDeselect = () => null,
 	onSelect,
 }: SelectControlProps< Item > ) {
-	const { deselectItem, comboboxProps, isListboxOpen, selected, selectItem } =
-		useDropdown< Item >( {
-			initialSelected,
-			items,
-			multiple,
-			onDeselect,
-			onSelect,
-		} );
+	const {
+		deselectItem,
+		comboboxProps,
+		getItemProps,
+		isListboxOpen,
+		selected,
+		selectItem,
+	} = useDropdown< Item >( {
+		initialSelected,
+		items,
+		multiple,
+		onDeselect,
+		onSelect,
+	} );
 
 	const isReadOnly = false;
-
-	function isSelected( item: Item ) {
-		if ( Array.isArray( selected ) ) {
-			return ( selected as Item[] ).includes( item );
-		}
-		return selected === item;
-	}
 
 	return (
 		<div className="woocommerce-experimental-select-control">
@@ -86,22 +85,17 @@ export function SelectControl< Item = DefaultItem >( {
 				} )
 			) : (
 				<Listbox isOpen={ isListboxOpen }>
-					{ items.map( ( item, index: number ) => (
-						<Option
-							key={ `${ getItemValue( item ) }${ index }` }
-							isActive={ false }
-							item={ item }
-							onClick={ () => {
-								if ( multiple && isSelected( item ) ) {
-									deselectItem( item );
-									return;
-								}
-								selectItem( item );
-							} }
-						>
-							{ getItemLabel( item ) }
-						</Option>
-					) ) }
+					{ items.map( ( item, index: number ) => {
+						const itemProps = getItemProps( item );
+						return (
+							<Option
+								key={ `${ getItemValue( item ) }${ index }` }
+								{ ...itemProps }
+							>
+								{ getItemLabel( item ) }
+							</Option>
+						);
+					} ) }
 				</Listbox>
 			) }
 		</div>

@@ -8,6 +8,7 @@ import { useState } from '@wordpress/element';
  */
 import { DefaultItem, getItemLabelType, getItemValueType } from '../types';
 import { useCombobox } from './use-combobox';
+import { useItem } from './use-item';
 import { useListbox } from './use-listbox';
 
 type useDropdownProps< Item > = {
@@ -86,9 +87,17 @@ export function useDropdown< Item = DefaultItem >( {
 		openListbox,
 		selectItem,
 	} );
+	const { getItemProps } = useItem( {
+		deselectItem,
+		highlightedOption,
+		multiple,
+		selected,
+		selectItem,
+	} );
 
 	return {
 		comboboxProps,
+		getItemProps,
 		inputValue,
 		isListboxOpen,
 		listboxProps,

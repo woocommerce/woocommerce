@@ -4,22 +4,27 @@
 import classNames from 'classnames';
 import { createElement, MouseEvent, ReactElement } from 'react';
 
-export type OptionProps< Item > = {
-	isActive?: boolean;
-	item: Item;
+export type OptionProps = {
+	isHighlighted?: boolean;
+	isSelected?: boolean;
 	children: ReactElement | string;
 	onClick: ( event: MouseEvent< HTMLLIElement > ) => void;
+	onMouseDown: ( event: MouseEvent< HTMLLIElement > ) => void;
 };
 
-export const Option = < Item, >( {
+export const Option = ( {
 	children,
-	isActive = false,
+	isHighlighted = false,
+	isSelected = false,
 	onClick,
-}: OptionProps< Item > ) => {
+	onMouseDown,
+	...restProps
+}: OptionProps ) => {
 	const classes = classNames(
 		'woocommerce-experimental-select-control__menu-item',
 		{
-			'is-active': isActive,
+			'is-highlighted': isHighlighted,
+			'is-selected': isSelected,
 		}
 	);
 	return (
@@ -28,7 +33,8 @@ export const Option = < Item, >( {
 		<li
 			className={ classes }
 			onClick={ onClick }
-			onMouseDown={ ( event ) => event.preventDefault() }
+			onMouseDown={ onMouseDown }
+			{ ...restProps }
 		>
 			{ children }
 		</li>
