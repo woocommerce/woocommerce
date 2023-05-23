@@ -56,7 +56,7 @@ export const getShouldAutomateChangelog = ( body: string ) => {
  * @return {void|string} changelog significance.
  */
 export const getChangelogSignificance = ( body: string ) => {
-	const regex = /\[x\] (Patch|Minor|Major)\r\n/gms;
+	const regex = /\[x\] (Patch|Minor|Major)\r\n/gm;
 	const matches = body.match( regex );
 
 	if ( matches === null ) {
@@ -84,28 +84,26 @@ export const getChangelogSignificance = ( body: string ) => {
  * @return {void|string} changelog type.
  */
 export const getChangelogType = ( body: string ) => {
-	const fixRegex = /\[x\] (Fix) -/gm;
-	const addRegex = /\[x\] (Add) -/gm;
-	const updateRegex = /\[x\] (Update) -/gm;
-	const devRegex = /\[x\] (Dev) -/gm;
-	const tweakRegex = /\[x\] (Tweak) -/gm;
-	const performanceRegex = /\[x\] (Performance) -/gm;
-	const enhancementRegex = /\[x\] (Enhancement) -/gm;
+	const regex =
+		/\[x\] (Fix|Add|Update|Dev|Tweak|Performance|Enhancement) -/gm;
+	const matches = body.match( regex );
 
-	const match =
-		fixRegex.exec( body ) ||
-		addRegex.exec( body ) ||
-		updateRegex.exec( body ) ||
-		devRegex.exec( body ) ||
-		tweakRegex.exec( body ) ||
-		performanceRegex.exec( body ) ||
-		enhancementRegex.exec( body );
-
-	if ( ! match ) {
+	if ( matches === null ) {
 		Logger.error( 'No changelog type found' );
+		// Logger.error has a process.exit( 1 ) call, this return is purely for testing purposes.
+		return;
 	}
 
-	return match[ 1 ].toLowerCase();
+	if ( matches.length > 1 ) {
+		Logger.error(
+			'Multiple changelog types found. Only one can be entered'
+		);
+		// Logger.error has a process.exit( 1 ) call, this return is purely for testing purposes.
+		return;
+	}
+
+	const type = regex.exec( body );
+	return type[ 1 ].toLowerCase();
 };
 
 /**
