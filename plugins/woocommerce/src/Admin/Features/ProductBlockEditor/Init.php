@@ -368,45 +368,52 @@ class Init {
 									'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
+								'blockGap'    => '2xlg',
 							),
 							array(
 								array(
-									'core/columns',
+									'woocommerce/product-section',
 									array(),
 									array(
 										array(
-											'core/column',
-											array(
-												'templateLock' => 'all',
-											),
+											'core/columns',
+											array(),
 											array(
 												array(
-													'woocommerce/product-regular-price-field',
+													'core/column',
 													array(
-														'name'  => 'regular_price',
-														'label' => __( 'List price', 'woocommerce' ),
+														'templateLock' => 'all',
+													),
+													array(
+														array(
+															'woocommerce/product-regular-price-field',
+															array(
+																'name'  => 'regular_price',
+																'label' => __( 'List price', 'woocommerce' ),
+															),
+														),
+													),
+												),
+												array(
+													'core/column',
+													array(
+														'templateLock' => 'all',
+													),
+													array(
+														array(
+															'woocommerce/product-sale-price-field',
+															array(
+																'label' => __( 'Sale price', 'woocommerce' ),
+															),
+														),
 													),
 												),
 											),
 										),
 										array(
-											'core/column',
-											array(
-												'templateLock' => 'all',
-											),
-											array(
-												array(
-													'woocommerce/product-sale-price-field',
-													array(
-														'label' => __( 'Sale price', 'woocommerce' ),
-													),
-												),
-											),
+											'woocommerce/product-schedule-sale-fields',
 										),
 									),
-								),
-								array(
-									'woocommerce/product-schedule-sale-fields',
 								),
 								array(
 									'woocommerce/product-radio-field',
