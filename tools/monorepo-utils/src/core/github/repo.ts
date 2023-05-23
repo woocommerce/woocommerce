@@ -172,7 +172,7 @@ export const createPullRequest = async ( options: {
 };
 
 /**
- * Get a pull request from Github.
+ * Get a pull request from GitHub.
  *
  * @param {Object} options
  * @param {string} options.owner repository owner.
@@ -200,7 +200,7 @@ export const getPullRequest = async ( options: {
 };
 
 /**
- * Determine if a pull request is coming from a community contribution. ie, not from a member of the woocommerce org.
+ * Determine if a pull request is coming from a community contribution, i.e., not from a member of the WooCommerce organization.
  *
  * @param {Object} pullRequestData pull request data.
  * @param {string} owner           repository owner.
@@ -214,7 +214,7 @@ export const isCommunityPullRequest = (
 ) => {
 	return (
 		pullRequestData.author_association === 'CONTRIBUTOR' ||
-		// Its possible a MEMBER can open a PR from thier own fork.
+		// It's possible a MEMBER can open a PR from their own fork.
 		( pullRequestData.author_association === 'MEMBER' &&
 			pullRequestData.head.repo.full_name !== `${ owner }/${ name }` )
 	);
