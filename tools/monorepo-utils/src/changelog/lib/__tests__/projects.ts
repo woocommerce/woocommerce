@@ -60,7 +60,9 @@ describe( 'Changelog project functions', () => {
 
 		expectedChangeLoggerProjects.forEach(
 			( expectedChangeLoggerProject ) => {
-				expect( projects ).toContain( expectedChangeLoggerProject );
+				expect( changeloggerProjects ).toContain(
+					expectedChangeLoggerProject
+				);
 			}
 		);
 
