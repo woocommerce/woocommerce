@@ -675,7 +675,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		prePlugins: {
 			invoke: {
 				src: 'getPlugins',
-				onDone: [ { target: 'plugins', actions: 'handlePlugins' } ],
+				onDone: [
+					{
+						target: 'pluginsSkipped',
+						cond: ( context, event ) => event.data.length === 0,
+					},
+					{ target: 'plugins', actions: 'handlePlugins' },
+				],
 			},
 			// add exit action to filter the extensions using a custom function here and assign it to context.extensionsAvailable
 			exit: assign( {
@@ -697,6 +703,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				src: () => {
 					dispatch( ONBOARDING_STORE_NAME ).updateProfileItems( {
 						plugins_page_skipped: true,
+						completed: true,
 					} );
 					return promiseDelay( 3000 );
 				},
