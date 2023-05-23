@@ -14,6 +14,7 @@ type useComboboxProps< Item > = {
 	highlightedOption: Item | null;
 	highlightNextOption: () => void;
 	highlightPreviousOption: () => void;
+	inputValue: string;
 	selectItem: ( item: Item ) => void;
 	setInputValue: ( value: string ) => void;
 };
@@ -23,6 +24,7 @@ export function useCombobox< Item = DefaultItem >( {
 	highlightedOption,
 	highlightNextOption,
 	highlightPreviousOption,
+	inputValue,
 	openListbox,
 	selectItem,
 	setInputValue,
@@ -65,5 +67,6 @@ export function useCombobox< Item = DefaultItem >( {
 		},
 		onKeyDown,
 		role: 'combobox',
+		value: inputValue,
 	};
 }

@@ -6,13 +6,14 @@ import { MouseEvent } from 'react';
 /**
  * Internal dependencies
  */
-import { DefaultItem } from '../types';
+import { DefaultItem, Selected } from '../types';
+import { isSelected } from '../utils/is-selected';
 
 type useItemProps< Item > = {
 	deselectItem: ( item: Item ) => void;
 	highlightedOption: Item | null;
 	multiple: boolean;
-	selected: Item[];
+	selected: Selected< Item >;
 	selectItem: ( item: Item ) => void;
 };
 
@@ -27,12 +28,8 @@ export function useItem< Item = DefaultItem >( {
 		return item === highlightedOption;
 	}
 
-	function isSelected( item: Item ) {
-		return selected.includes( item );
-	}
-
 	function onClick( item: Item ) {
-		if ( multiple && isSelected( item ) ) {
+		if ( multiple && isSelected( item, selected ) ) {
 			deselectItem( item );
 			return;
 		}
@@ -45,9 +42,9 @@ export function useItem< Item = DefaultItem >( {
 
 	function getItemProps( item: Item ) {
 		return {
-			'aria-selected': isSelected( item ),
+			'aria-selected': isSelected( item, selected ),
 			isHighlighted: isHighlighted( item ),
-			isSelected: isSelected( item ),
+			isSelected: isSelected( item, selected ),
 			onClick: () => onClick( item ),
 			onMouseDown,
 			role: 'option',

@@ -6,11 +6,17 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { DefaultItem, getItemLabelType, getItemValueType } from '../types';
+import {
+	DefaultItem,
+	getItemLabelType,
+	getItemValueType,
+	Selected,
+} from '../types';
 import { useCombobox } from './use-combobox';
 import { useItem } from './use-item';
 import { useFilter } from './use-filter';
 import { useListbox } from './use-listbox';
+import { useSelection } from './use-selection';
 
 type useDropdownProps< Item > = {
 	getItemLabel: getItemLabelType< Item >;
@@ -20,51 +26,28 @@ type useDropdownProps< Item > = {
 	onDeselect?: ( item: Item ) => void;
 	options: Item[];
 	onSelect?: ( item: Item ) => void;
+	selected: Selected< Item >;
 };
 
 export function useDropdown< Item = DefaultItem >( {
 	getItemLabel,
-	initialSelected,
 	multiple = false,
 	options,
-	onDeselect = () => null,
-	onSelect = () => null,
+	onDeselect,
+	onSelect,
+	selected,
 }: useDropdownProps< Item > ) {
 	const [ inputValue, setInputValue ] = useState< string >( '' );
 
-	function getInitialSelected(): Item[] {
-		if ( ! initialSelected ) {
-			return [];
-		}
-		if ( Array.isArray( initialSelected ) ) {
-			return initialSelected;
-		}
-		return [ initialSelected ];
-	}
-
-	const [ selected, setSelected ] = useState< Item[] >(
-		getInitialSelected()
-	);
-
-	function getSelected() {
-		if ( multiple ) {
-			return selected;
-		}
-		return selected.length ? selected[ 0 ] : null;
-	}
-
-	function deselectItem( item: Item ) {
-		setSelected( selected.filter( ( i ) => i !== item ) );
-		onDeselect( item );
-	}
-
-	function selectItem( item: Item ) {
-		setSelected( [ ...selected, item ] );
-		onSelect( item );
-		if ( ! multiple ) {
-			setInputValue( getItemLabel( item ) );
-		}
-	}
+	const { deselectItem, selectItem } = useSelection( {
+		getItemLabel,
+		multiple,
+		options,
+		onDeselect,
+		onSelect,
+		selected,
+		setInputValue,
+	} );
 
 	const { filteredOptions } = useFilter< Item >( {
 		getItemLabel,
@@ -89,6 +72,7 @@ export function useDropdown< Item = DefaultItem >( {
 		highlightedOption,
 		highlightNextOption,
 		highlightPreviousOption,
+		inputValue,
 		openListbox,
 		selectItem,
 		setInputValue,
@@ -108,7 +92,7 @@ export function useDropdown< Item = DefaultItem >( {
 		inputValue,
 		isListboxOpen,
 		listboxProps,
-		selected: getSelected(),
+		selected,
 		selectItem,
 		deselectItem,
 		setInputValue,

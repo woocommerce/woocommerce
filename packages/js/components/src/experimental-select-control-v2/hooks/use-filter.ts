@@ -6,13 +6,14 @@ import { useMemo } from 'react';
 /**
  * Internal dependencies
  */
-import { DefaultItem, getItemLabelType } from '../types';
+import { DefaultItem, getItemLabelType, Selected } from '../types';
+import { isSelected } from '../utils/is-selected';
 
 type useFilterProps< Item > = {
 	getItemLabel: getItemLabelType< Item >;
 	inputValue: string;
 	options: Item[];
-	selected: Item[];
+	selected: Selected< Item >;
 };
 
 export function useFilter< Item = DefaultItem >( {
@@ -30,7 +31,7 @@ export function useFilter< Item = DefaultItem >( {
 
 		return options.filter( ( item ) => {
 			return (
-				selected.indexOf( item ) < 0 &&
+				! isSelected( item, selected ) &&
 				re.test( getItemLabel( item ).toLowerCase() )
 			);
 		} );

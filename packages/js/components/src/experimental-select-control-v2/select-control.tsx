@@ -22,24 +22,24 @@ type SelectControlProps< Item > = {
 	children?: Children< Item >;
 	getItemLabel?: getItemLabelType< Item >;
 	getItemValue?: getItemValueType< Item >;
-	initialSelected?: Item | Item[];
 	label: string;
 	onDeselect?: ( item: Item ) => void;
 	options: Item[];
 	onSelect?: ( item: Item ) => void;
 	multiple?: boolean;
+	selected: Item | Item[] | null;
 };
 
 export function SelectControl< Item = DefaultItem >( {
 	children,
 	getItemLabel = defaultGetItemLabel,
 	getItemValue = ( item: Item ) => ( item as DefaultItem ).value,
-	initialSelected,
 	label,
 	multiple = false,
 	options,
 	onDeselect = () => null,
 	onSelect,
+	selected,
 }: SelectControlProps< Item > ) {
 	const {
 		deselectItem,
@@ -47,15 +47,14 @@ export function SelectControl< Item = DefaultItem >( {
 		filteredOptions,
 		getItemProps,
 		isListboxOpen,
-		selected,
 		selectItem,
 	} = useDropdown< Item >( {
 		getItemLabel,
-		initialSelected,
 		multiple,
 		onDeselect,
 		onSelect,
 		options,
+		selected,
 	} );
 
 	const isReadOnly = false;

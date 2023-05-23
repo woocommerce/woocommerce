@@ -24,3 +24,5 @@ export type DefaultItem = {
 export type getItemLabelType< Item > = ( item: Item ) => string;
 
 export type getItemValueType< Item > = ( item: Item ) => string | number;
+
+export type Selected< Item > = Item | Item[] | null;

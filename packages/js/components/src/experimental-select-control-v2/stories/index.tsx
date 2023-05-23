@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createElement } from 'react';
+import React, { createElement, useState } from 'react';
 
 /**
  * Internal dependencies
@@ -18,20 +18,36 @@ const sampleOptions: DefaultItem[] = [
 ];
 
 export const Single: React.FC = () => {
+	const [ selected, setSelected ] = useState< DefaultItem | null >( null );
+
 	return (
 		<>
-			<SelectControl options={ sampleOptions } label="Single value" />
+			<SelectControl
+				options={ sampleOptions }
+				label="Single value"
+				selected={ selected }
+				onSelect={ ( option ) => setSelected( option ) }
+			/>
 		</>
 	);
 };
 
 export const Multiple: React.FC = () => {
+	const [ selected, setSelected ] = useState< DefaultItem[] >( [] );
+
 	return (
 		<>
 			<SelectControl
+				multiple
 				options={ sampleOptions }
 				label="Multiple values"
-				multiple
+				selected={ selected }
+				onSelect={ ( option ) =>
+					setSelected( [ ...selected, option ] )
+				}
+				onDeselect={ ( option ) =>
+					setSelected( selected.filter( ( o ) => o !== option ) )
+				}
 			/>
 		</>
 	);
