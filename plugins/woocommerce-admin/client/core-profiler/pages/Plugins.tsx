@@ -105,6 +105,7 @@ export const Plugins = ( {
 			/>
 			<div className="woocommerce-profiler-page__content woocommerce-profiler-plugins__content">
 				<Heading
+					className="woocommerce-profiler__stepper-heading"
 					title={ __(
 						'Get a boost with our free features',
 						'woocommerce'
@@ -145,17 +146,19 @@ export const Plugins = ( {
 						);
 					} ) }
 				</div>
-				<Button
-					className="woocommerce-profiler-plugins-continue-button"
-					variant="primary"
-					onClick={
-						selectedPlugins.length
-							? submitInstallationRequest
-							: skipPluginsPage
-					}
-				>
-					{ __( 'Continue', 'woocommerce' ) }
-				</Button>
+				<div className="woocommerce-profiler-plugins-continue-button-container">
+					<Button
+						className="woocommerce-profiler-plugins-continue-button"
+						variant="primary"
+						onClick={
+							selectedPlugins.length
+								? submitInstallationRequest
+								: skipPluginsPage
+						}
+					>
+						{ __( 'Continue', 'woocommerce' ) }
+					</Button>
+				</div>
 				{ pluginsWithAgreement.length > 0 && (
 					<p className="woocommerce-profiler-plugins-jetpack-agreement">
 						{ interpolateComponents( {

@@ -1,3 +1,9 @@
+.woocommerce-layout .woocommerce-layout__main {
+	@include breakpoint( '<782px' ) {
+		padding-top: 0px !important;
+	}
+}
+
 .woocommerce-profile-wizard__body {
 	background-color: #fff;
 
@@ -392,7 +398,10 @@
 		margin: 58px 0 0 0;
 	}
 	.woocommerce-profiler-heading__subtitle {
-		margin: 0 0 48px 0;
+		margin: 0 0 48px 0 !important;
+		@include breakpoint( '<782px' ) {
+			margin-top: 12px !important;
+		}
 	}
 	.woocommerce-profiler-plugins__list {
 		display: flex;
@@ -426,6 +435,21 @@
 		font-size: 12px;
 		a {
 			color: inherit;
+		}
+	}
+
+	.woocommerce-profiler-plugins-continue-button-container {
+		@include breakpoint( '<782px' ) {
+			position: absolute;
+			bottom: 20px;
+			padding: 0 20px;
+			width: 100%;
+		}
+
+		.woocommerce-profiler-plugins-continue-button {
+			@include breakpoint( '<782px' ) {
+				width: 100%;
+			}
 		}
 	}
 }
