@@ -42,6 +42,20 @@
 		}
 	}
 
+	.components-toggle-control {
+		margin-bottom: 0;
+
+		.components-form-toggle {
+			display: flex;
+			align-items: center;
+		}
+
+		.components-toggle-control__label {
+			display: flex;
+			align-items: center;
+		}
+	}
+
 	.editor-styles-wrapper {
 		h4 {
 			font-size: 16px;
