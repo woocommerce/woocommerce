@@ -9,7 +9,7 @@ import { Repository } from '@octokit/graphql-schema';
 import { graphqlWithAuth, octokitWithAuth } from './api';
 import {
 	CreatePullRequestEndpointResponse,
-	PullRequestEndpointResponse,
+	GetPullRequestEndpointResponse,
 } from './types';
 
 export const getLatestGithubReleaseVersion = async ( options: {
@@ -183,7 +183,7 @@ export const createPullRequest = async ( options: {
 export const getPullRequest = async (
 	options: { owner: string; name: string },
 	prNumber: string
-): Promise< PullRequestEndpointResponse[ 'data' ] > => {
+): Promise< GetPullRequestEndpointResponse[ 'data' ] > => {
 	const { owner, name } = options;
 	const pr = await octokitWithAuth().request(
 		'GET /repos/{owner}/{repo}/pulls/{pull_number}',
@@ -207,7 +207,7 @@ export const getPullRequest = async (
  * @return {boolean} if a pull request is coming from a community contribution.
  */
 export const isCommunityPullRequest = (
-	pullRequestData: PullRequestEndpointResponse[ 'data' ],
+	pullRequestData: GetPullRequestEndpointResponse[ 'data' ],
 	owner: string,
 	name: string
 ) => {
