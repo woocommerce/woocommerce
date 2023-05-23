@@ -213,7 +213,7 @@ export const isCommunityPullRequest = (
 ) => {
 	return (
 		pullRequestData.author_association === 'CONTRIBUTOR' ||
-		// Its possible a MEMBER can open a PR from thier own fork.
+		// It's possible a MEMBER can open a PR from their own fork.
 		( pullRequestData.author_association === 'MEMBER' &&
 			pullRequestData.head.repo.full_name !== `${ owner }/${ name }` )
 	);
