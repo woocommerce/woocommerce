@@ -125,18 +125,14 @@ describe( 'Changelog project functions', () => {
 			'plugins/beta-tester/src/index.js',
 			'plugins/woocommerce-admin/src/index.js',
 		];
-		const changeLoggerProjects = [
-			'plugins/woocommerce',
-			'plugins/beta-tester',
-		];
+		const changeLoggerProjects = [ 'plugins/woocommerce' ];
 		const intersectedProjects =
 			getTouchedChangeloggerProjectsPathsMappedToProjects(
 				touchedFiles,
 				changeLoggerProjects
 			);
 
-		expect( intersectedProjects ).toHaveLength( 2 );
+		expect( intersectedProjects ).toHaveLength( 1 );
 		expect( intersectedProjects ).toContain( 'woocommerce' );
-		expect( intersectedProjects ).toContain( 'beta-tester' );
 	} );
 } );

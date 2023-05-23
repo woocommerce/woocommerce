@@ -56,20 +56,25 @@ export const getShouldAutomateChangelog = ( body: string ) => {
  * @return {void|string} changelog significance.
  */
 export const getChangelogSignificance = ( body: string ) => {
-	const patchRegex = /\[x\] (Patch)\r\n/gms;
-	const minorRegex = /\[x\] (Minor)\r\n/gms;
-	const majorRegex = /\[x\] (Major)\r\n/gms;
+	const regex = /\[x\] (Patch|Minor|Major)\r\n/gms;
+	const matches = body.match( regex );
 
-	const match =
-		patchRegex.exec( body ) ||
-		minorRegex.exec( body ) ||
-		majorRegex.exec( body );
-
-	if ( ! match ) {
+	if ( matches === null ) {
 		Logger.error( 'No changelog significance found' );
+		// Logger.error has a process.exit( 1 ) call, this return is purely for testing purposes.
+		return;
 	}
 
-	return match[ 1 ].toLowerCase();
+	if ( matches.length > 1 ) {
+		Logger.error(
+			'Multiple changelog significances found. Only one can be entered'
+		);
+		// Logger.error has a process.exit( 1 ) call, this return is purely for testing purposes.
+		return;
+	}
+	const significance = regex.exec( body );
+
+	return significance[ 1 ].toLowerCase();
 };
 
 /**
