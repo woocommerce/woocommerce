@@ -1,0 +1,13 @@
+.woocommerce-experimental-select-control__option {
+	padding: $gap-small;
+	margin: 0;
+
+	&.is-highlighted {
+		background-color: #bde4ff;
+	}
+
+	&.is-selected {
+		background-color: $studio-wordpress-blue-50;
+		color: $white;
+	}
+}

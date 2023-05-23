@@ -21,7 +21,7 @@ export const Option = ( {
 	...restProps
 }: OptionProps ) => {
 	const classes = classNames(
-		'woocommerce-experimental-select-control__menu-item',
+		'woocommerce-experimental-select-control__option',
 		{
 			'is-highlighted': isHighlighted,
 			'is-selected': isSelected,
