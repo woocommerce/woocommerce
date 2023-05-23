@@ -119,9 +119,7 @@ jobs:
 
       - name: Install Node dependencies
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: |
-          sed -i 's/"@wordpress\/env": ".*"/"@wordpress\/env": "^4.9.0"/' package.json
-          npm install --no-optional --no-audit
+        run: npm install --no-optional --no-audit
 
       - name: Build Assets
         run: FORCE_REDUCED_MOTION=true npm run build

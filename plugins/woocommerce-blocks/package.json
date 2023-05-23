@@ -163,7 +163,7 @@
 		"@wordpress/e2e-test-utils-playwright": "https://github.com/woocommerce/woocommerce-blocks/files/11286971/wordpress-e2e-test-utils-playwright-0.0.0.tgz",
 		"@wordpress/e2e-tests": "^4.6.0",
 		"@wordpress/element": "4.20.0",
-		"@wordpress/env": "5.16.0",
+		"@wordpress/env": "7.0.0",
 		"@wordpress/html-entities": "3.24.0",
 		"@wordpress/i18n": "4.24.0",
 		"@wordpress/is-shallow-equal": "4.24.0",
