@@ -86,45 +86,41 @@ export const InstallAndActivatePlugins = (
 			window.performance.now() - installationStartTime;
 	};
 
-	/**
-	 * When the timer is up, stop the installation.
-	 * Reject the promise with errors if any.
-	 * Otherwise, queue the remaining plugins to the action scheduler and resolve.
-	 */
-	let timer = setTimeout( async () => {
-		continueInstallation = false;
-
+	const handleInstallationCompleted = () => {
 		if ( errors.length ) {
 			return send( createInstallationCompletedWithErrorsEvent( errors ) );
 		}
+		setInstallationCompletedTime();
+		send( createInstallationCompletedEvent( installationCompletedResult ) );
+	};
 
-		const remainingPlugins = differenceWith(
-			context.pluginsSelected,
-			installationCompletedResult.installedPlugins.map(
-				( plugin ) => plugin.plugin
+	const handlePluginInstalledAndActivated = (
+		installedPluginIndex: number
+	) => {
+		send(
+			createPluginInstalledAndActivatedEvent(
+				context.pluginsSelected.length,
+				installedPluginIndex + 1
 			)
 		);
+	};
 
-		// todo: replace it with onboarding/install-and-activate-async endpoint
-		await dispatch( PLUGINS_STORE_NAME ).installPlugins(
-			remainingPlugins as PluginNames[],
-			true
-		);
+	const handlePluginInstallError = ( plugin: string, error: unknown ) => {
+		errors.push( {
+			plugin,
+			error: error instanceof Error ? error.message : String( error ),
+		} );
+	};
 
-		setInstallationCompletedTime();
-		return send(
-			createInstallationCompletedEvent( installationCompletedResult )
-		);
-		// todo: grab job_id from onboarding/install-and-activate and save it to cookie
-		// so that we can reference errors later.
-	}, 1000 * 30 );
-
-	for ( let index in context.pluginsSelected ) {
+	const handlePluginInstallation = async ( installedPluginIndex: number ) => {
 		// Set by timer when it's up
 		if ( ! continueInstallation ) {
-			break;
+			return;
 		}
-		const plugin = getPluginSlug( context.pluginsSelected[ index ] );
+
+		const plugin = getPluginSlug(
+			context.pluginsSelected[ installedPluginIndex ]
+		);
 		try {
 			const response = await dispatch(
 				PLUGINS_STORE_NAME
@@ -135,33 +131,37 @@ export const InstallAndActivatePlugins = (
 				installTime: response.data?.install_time?.[ plugin ] || 0,
 			} );
 
-			send(
-				createPluginInstalledAndActivatedEvent(
-					context.pluginsSelected.length,
-					parseInt( index ) + 1
-				)
-			);
+			handlePluginInstalledAndActivated( installedPluginIndex );
 		} catch ( error ) {
-			errors.push( {
-				plugin,
-				error: error instanceof Error ? error.message : String( error ),
-			} );
+			handlePluginInstallError( plugin, error );
 		}
+	};
+
+	const handleTimerExpired = async () => {
+		console.log( 'handleTimerExpired' );
+		continueInstallation = false;
+
+		const remainingPlugins = differenceWith(
+			context.pluginsSelected,
+			installationCompletedResult.installedPlugins.map(
+				( plugin ) => plugin.plugin
+			)
+		);
+
+		await dispatch( PLUGINS_STORE_NAME ).installPlugins(
+			remainingPlugins as PluginNames[],
+			true
+		);
+
+		handleInstallationCompleted();
+	};
+
+	const timer = setTimeout( handleTimerExpired, 1000 * 30 );
+
+	for ( let index = 0; index < context.pluginsSelected.length; index++ ) {
+		await handlePluginInstallation( index );
 	}
 
-	/**
-	 * When everything is done, stop the installation
-	 * Reject the promise with errors if any
-	 * Otherwise, resolve.
-	 */
 	clearTimeout( timer );
-	if ( errors.length ) {
-		return send( createInstallationCompletedWithErrorsEvent( errors ) );
-	}
-
-	setInstallationCompletedTime();
-
-	return send(
-		createInstallationCompletedEvent( installationCompletedResult )
-	);
+	handleInstallationCompleted();
 };
