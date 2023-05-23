@@ -172,7 +172,7 @@ export const createPullRequest = async ( options: {
 };
 
 /**
- * Get a pull request from Github.
+ * Get a pull request from GitHub.
  *
  * @param {Object} options
  * @param {string} options.owner repository owner.
