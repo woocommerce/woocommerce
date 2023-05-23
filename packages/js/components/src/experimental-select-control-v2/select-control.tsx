@@ -12,6 +12,7 @@ import {
 	getItemLabelType,
 	getItemValueType,
 } from './types';
+import { defaultGetItemLabel } from './utils/default-get-item-label';
 import { Listbox } from './listbox';
 import { Option } from './option';
 import { SelectedItems } from './selected-items';
@@ -22,37 +23,39 @@ type SelectControlProps< Item > = {
 	getItemLabel?: getItemLabelType< Item >;
 	getItemValue?: getItemValueType< Item >;
 	initialSelected?: Item | Item[];
-	items: Item[];
 	label: string;
 	onDeselect?: ( item: Item ) => void;
+	options: Item[];
 	onSelect?: ( item: Item ) => void;
 	multiple?: boolean;
 };
 
 export function SelectControl< Item = DefaultItem >( {
 	children,
-	getItemLabel = ( item: Item ) => ( item as DefaultItem ).label,
+	getItemLabel = defaultGetItemLabel,
 	getItemValue = ( item: Item ) => ( item as DefaultItem ).value,
 	initialSelected,
-	items,
 	label,
 	multiple = false,
+	options,
 	onDeselect = () => null,
 	onSelect,
 }: SelectControlProps< Item > ) {
 	const {
 		deselectItem,
 		comboboxProps,
+		filteredOptions,
 		getItemProps,
 		isListboxOpen,
 		selected,
 		selectItem,
 	} = useDropdown< Item >( {
+		getItemLabel,
 		initialSelected,
-		items,
 		multiple,
 		onDeselect,
 		onSelect,
+		options,
 	} );
 
 	const isReadOnly = false;
@@ -77,15 +80,16 @@ export function SelectControl< Item = DefaultItem >( {
 			<input type="text" { ...comboboxProps } />
 			{ children ? (
 				children( {
+					filteredOptions,
 					isListboxOpen,
 					getItemLabel,
 					getItemValue,
-					items,
+					options,
 					selectItem,
 				} )
 			) : (
 				<Listbox isOpen={ isListboxOpen }>
-					{ items.map( ( item, index: number ) => {
+					{ filteredOptions.map( ( item, index: number ) => {
 						const itemProps = getItemProps( item );
 						return (
 							<Option

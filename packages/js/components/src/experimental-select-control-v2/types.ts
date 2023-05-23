@@ -4,14 +4,15 @@
 import { ReactElement, Component } from 'react';
 
 export type ChildrenProps< Item > = {
-	items: Item[];
+	filteredOptions: Item[];
+	options: Item[];
 	isListboxOpen: boolean;
 	getItemLabel: getItemLabelType< Item >;
 	getItemValue: getItemValueType< Item >;
 	selectItem: ( item: Item ) => void;
 };
 export type Children< Item > = ( {
-	items,
+	options,
 	isListboxOpen,
 }: ChildrenProps< Item > ) => ReactElement | Component;
 

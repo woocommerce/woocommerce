@@ -9,26 +9,29 @@ import { useState } from '@wordpress/element';
 import { DefaultItem, getItemLabelType, getItemValueType } from '../types';
 import { useCombobox } from './use-combobox';
 import { useItem } from './use-item';
+import { useFilter } from './use-filter';
 import { useListbox } from './use-listbox';
 
 type useDropdownProps< Item > = {
-	getItemLabel?: getItemLabelType< Item >;
+	getItemLabel: getItemLabelType< Item >;
 	getItemValue?: getItemValueType< Item >;
 	initialSelected?: Item | Item[];
-	items: Item[];
 	multiple?: boolean;
 	onDeselect?: ( item: Item ) => void;
+	options: Item[];
 	onSelect?: ( item: Item ) => void;
 };
 
 export function useDropdown< Item = DefaultItem >( {
-	getItemLabel = ( item: Item ) => ( item as DefaultItem ).label,
+	getItemLabel,
 	initialSelected,
-	items,
 	multiple = false,
+	options,
 	onDeselect = () => null,
 	onSelect = () => null,
 }: useDropdownProps< Item > ) {
+	const [ inputValue, setInputValue ] = useState< string >( '' );
+
 	function getInitialSelected(): Item[] {
 		if ( ! initialSelected ) {
 			return [];
@@ -63,6 +66,12 @@ export function useDropdown< Item = DefaultItem >( {
 		}
 	}
 
+	const { filteredOptions } = useFilter< Item >( {
+		getItemLabel,
+		inputValue,
+		options,
+		selected,
+	} );
 	const {
 		close: closeListbox,
 		props: listboxProps,
@@ -71,23 +80,20 @@ export function useDropdown< Item = DefaultItem >( {
 		highlightPreviousOption,
 		isOpen: isListboxOpen,
 		open: openListbox,
-	} = useListbox( {
+	} = useListbox< Item >( {
 		multiple,
-		options: items,
+		options: filteredOptions,
 	} );
-	const {
-		props: comboboxProps,
-		value: inputValue,
-		setValue: setInputValue,
-	} = useCombobox( {
+	const comboboxProps = useCombobox< Item >( {
 		closeListbox,
 		highlightedOption,
 		highlightNextOption,
 		highlightPreviousOption,
 		openListbox,
 		selectItem,
+		setInputValue,
 	} );
-	const { getItemProps } = useItem( {
+	const { getItemProps } = useItem< Item >( {
 		deselectItem,
 		highlightedOption,
 		multiple,
@@ -97,6 +103,7 @@ export function useDropdown< Item = DefaultItem >( {
 
 	return {
 		comboboxProps,
+		filteredOptions,
 		getItemProps,
 		inputValue,
 		isListboxOpen,

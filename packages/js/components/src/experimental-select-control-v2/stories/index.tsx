@@ -9,7 +9,7 @@ import React, { createElement } from 'react';
 import { DefaultItem } from '../types';
 import { SelectControl } from '../';
 
-const sampleItems: DefaultItem[] = [
+const sampleOptions: DefaultItem[] = [
 	{ value: 'apple', label: 'Apple' },
 	{ value: 'pear', label: 'Pear' },
 	{ value: 'orange', label: 'Orange' },
@@ -20,7 +20,7 @@ const sampleItems: DefaultItem[] = [
 export const Single: React.FC = () => {
 	return (
 		<>
-			<SelectControl items={ sampleItems } label="Single value" />
+			<SelectControl options={ sampleOptions } label="Single value" />
 		</>
 	);
 };
@@ -29,7 +29,7 @@ export const Multiple: React.FC = () => {
 	return (
 		<>
 			<SelectControl
-				items={ sampleItems }
+				options={ sampleOptions }
 				label="Multiple values"
 				multiple
 			/>
