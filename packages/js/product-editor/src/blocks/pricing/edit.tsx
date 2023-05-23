@@ -2,18 +2,13 @@
  * External dependencies
  */
 import { Link } from '@woocommerce/components';
-import { CurrencyContext } from '@woocommerce/currency';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
-import {
-	createElement,
-	useContext,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -25,7 +20,6 @@ import {
  * Internal dependencies
  */
 import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
-import { formatCurrencyDisplayValue } from '../../utils';
 import { PricingBlockAttributes } from './types';
 
 export function Edit( {
@@ -38,12 +32,9 @@ export function Edit( {
 		'product',
 		name
 	);
-	const context = useContext( CurrencyContext );
-	const { getCurrencyConfig, formatAmount } = context;
-	const currencyConfig = getCurrencyConfig();
 	const inputProps = useCurrencyInputProps( {
 		value: price,
-		setValue: setPrice,
+		onChange: setPrice,
 	} );
 
 	const interpolatedHelp = help
@@ -71,13 +62,7 @@ export function Edit( {
 					{ ...inputProps }
 					id={ priceId }
 					name={ name }
-					onChange={ setPrice }
 					label={ label || __( 'Price', 'woocommerce' ) }
-					value={ formatCurrencyDisplayValue(
-						String( price ),
-						currencyConfig,
-						formatAmount
-					) }
 				/>
 			</BaseControl>
 		</div>

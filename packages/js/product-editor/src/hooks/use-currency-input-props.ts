@@ -8,37 +8,45 @@ import { useContext } from '@wordpress/element';
  * Internal dependencies
  */
 import { useProductHelper } from './use-product-helper';
+import { formatCurrencyDisplayValue } from '../utils';
 
 export type CurrencyInputProps = {
 	prefix: string;
 	className: string;
+	value: string;
 	sanitize: ( value: string | number ) => string;
+	onChange: ( value: string ) => void;
 	onFocus: ( event: React.FocusEvent< HTMLInputElement > ) => void;
 	onKeyUp: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 };
 
 type Props = {
 	value: string;
-	setValue: ( value: string ) => void;
+	onChange: ( value: string ) => void;
 	onFocus?: ( event: React.FocusEvent< HTMLInputElement > ) => void;
 	onKeyUp?: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 };
 
 export const useCurrencyInputProps = ( {
 	value,
-	setValue,
+	onChange,
 	onFocus,
 	onKeyUp,
 }: Props ) => {
 	const { sanitizePrice } = useProductHelper();
 
 	const context = useContext( CurrencyContext );
-	const { getCurrencyConfig } = context;
+	const { getCurrencyConfig, formatAmount } = context;
 	const currencyConfig = getCurrencyConfig();
 
 	const currencyInputProps: CurrencyInputProps = {
 		prefix: currencyConfig.symbol,
-		className: 'half-width-field components-currency-control',
+		className: 'components-currency-control',
+		value: formatCurrencyDisplayValue(
+			String( value ),
+			currencyConfig,
+			formatAmount
+		),
 		sanitize: ( val: string | number ) => {
 			return sanitizePrice( String( val ) );
 		},
@@ -63,13 +71,19 @@ export const useCurrencyInputProps = ( {
 			const amount = Number.parseFloat( sanitizePrice( value || '0' ) );
 			const step = Number( event.currentTarget.step || '1' );
 			if ( event.code === 'ArrowUp' ) {
-				setValue( String( amount + step ) );
+				onChange( String( amount + step ) );
 			}
 			if ( event.code === 'ArrowDown' ) {
-				setValue( String( amount - step ) );
+				onChange( String( amount - step ) );
 			}
 			if ( onKeyUp ) {
 				onKeyUp( event );
+			}
+		},
+		onChange( value: string ) {
+			const sanitizeValue = sanitizePrice( value || '0' );
+			if ( onChange ) {
+				onChange( sanitizeValue );
 			}
 		},
 	};
