@@ -152,6 +152,9 @@ class PageController {
 	 * Perform initialization for the current action.
 	 */
 	private function handle_load_page_action() {
+		$screen            = get_current_screen();
+		$screen->post_type = $this->order_type;
+
 		if ( method_exists( $this, 'setup_action_' . $this->current_action ) ) {
 			$this->{"setup_action_{$this->current_action}"}();
 		}
