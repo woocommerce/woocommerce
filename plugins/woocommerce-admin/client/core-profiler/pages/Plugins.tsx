@@ -86,11 +86,12 @@ export const Plugins = ( {
 		  } )
 		: null;
 
-	const pluginsWithAgreement = selectedPlugins.filter(
-		( plugin ) =>
-			plugin.key === 'jetpack' ||
-			plugin.key === 'woocommerce-services:shipping' ||
-			plugin.key === 'woocommerce-services:tax'
+	const pluginsWithAgreement = selectedPlugins.filter( ( plugin ) =>
+		[
+			'jetpack',
+			'woocommerce-services:shipping',
+			'woocommerce-services:tax',
+		].includes( plugin.key )
 	);
 
 	return (

@@ -768,15 +768,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 										100
 								);
 
+								let stageIndex = 0;
+
+								if ( progress > 30 ) {
+									stageIndex = 1;
+								} else if ( progress > 60 ) {
+									stageIndex = 2;
+								}
+
 								return {
 									useStages: 'plugins',
 									progress,
-									stageIndex:
-										progress > 30
-											? progress > 60
-												? 2
-												: 1
-											: 0,
+									stageIndex,
 								};
 							},
 						} ),
