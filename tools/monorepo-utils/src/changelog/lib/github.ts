@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { sign } from 'crypto';
 import { getPullRequest, isCommunityPullRequest } from '../../core/github/repo';
 import { Logger } from '../../core/logger';
 
@@ -137,10 +138,31 @@ export const getChangelogComment = ( body: string ) => {
 };
 
 export const getChangelogDetails = ( body: string ) => {
+	const message = getChangelogMessage( body );
+	const comment = getChangelogComment( body );
+
+	if ( comment && message ) {
+		Logger.error(
+			'Both a message and comment were found. Only one can be entered'
+		);
+		// Logger.error has a process.exit( 1 ) call, this return is purely for testing purposes.
+		return;
+	}
+
+	const significance = getChangelogSignificance( body );
+
+	if ( comment && significance !== 'patch' ) {
+		Logger.error(
+			'Only patch changes can have a comment. Please change the significance to patch or remove the comment'
+		);
+		// Logger.error has a process.exit( 1 ) call, this return is purely for testing purposes.
+		return;
+	}
+
 	return {
-		significance: getChangelogSignificance( body ),
+		significance,
 		type: getChangelogType( body ),
-		message: getChangelogMessage( body ),
-		comment: getChangelogComment( body ),
+		message,
+		comment,
 	};
 };
