@@ -102,9 +102,9 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 						'categories'          => array(
 							'type'              => 'array',
 							'validate_callback' => 'rest_validate_request_arg',
+							'sanitize_callback' => 'wp_parse_id_list',
 							'items'             => array(
-								'type'              => 'string',
-								'sanitize_callback' => 'sanitize_text_field',
+								'type' => 'integer',
 							),
 							'default'           => array(),
 						),

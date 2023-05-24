@@ -67,12 +67,12 @@ class Attribute_Suggestion_Request {
 	/**
 	 * Constructor
 	 *
-	 * @param string   $requested_attribute The attribute that suggestions are being requested for.
-	 * @param string   $name                The name of the product.
-	 * @param string   $description         The description of the product.
-	 * @param string[] $tags                The product tags.
-	 * @param string[] $categories          Categories of the product as an associative array.
-	 * @param array[]  $attributes          Other attributes of the product as an associative array.
+	 * @param string    $requested_attribute The attribute that suggestions are being requested for.
+	 * @param string    $name                The name of the product.
+	 * @param string    $description         The description of the product.
+	 * @param string[]  $tags                The product tags.
+	 * @param integer[] $categories          Category IDs of the product as an associative array.
+	 * @param array[]   $attributes          Other attributes of the product as an associative array.
 	 *
 	 * @throws Exception If the requested attribute is invalid.
 	 */
