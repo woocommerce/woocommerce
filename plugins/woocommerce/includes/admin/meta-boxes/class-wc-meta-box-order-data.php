@@ -250,6 +250,9 @@ class WC_Meta_Box_Order_Data {
 
 					?>
 				</p>
+				<div>
+					<?php do_action( 'woocommerce_order_details_after_payment_info' ); ?>
+				</div>
 				<div class="order_data_column_container">
 					<div class="order_data_column">
 						<h3><?php esc_html_e( 'General', 'woocommerce' ); ?></h3>
