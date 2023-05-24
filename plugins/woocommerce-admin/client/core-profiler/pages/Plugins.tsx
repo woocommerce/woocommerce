@@ -23,7 +23,7 @@ const joinWithAnd = ( items: string[] ) => {
 	return new Intl.ListFormat( locale, {
 		style: 'long',
 		type: 'conjunction',
-	} ).format( items );
+	} ).formatToParts( items );
 };
 
 export const Plugins = ( {
@@ -64,6 +64,13 @@ export const Plugins = ( {
 			},
 		} );
 	};
+
+	const composeListFormatParts = ( part ) => {
+		if ( part.type === 'element' ) {
+			return '{{span}}' + part.value + '{{/span}}';
+		}
+		return part.value;
+	};
 	const errorMessage = context.pluginsInstallationErrors.length
 		? interpolateComponents( {
 				mixedString: sprintf(
@@ -77,8 +84,11 @@ export const Plugins = ( {
 							( error ) => error.plugin
 						)
 					)
+						.map( composeListFormatParts )
+						.join( '' )
 				),
 				components: {
+					span: <span />,
 					link: (
 						<Button isLink onClick={ submitInstallationRequest } />
 					),
@@ -175,8 +185,11 @@ export const Plugins = ( {
 										( plugin ) => plugin.name
 									)
 								)
+									.map( composeListFormatParts )
+									.join( '' )
 							),
 							components: {
+								span: <span />,
 								link: (
 									<Link
 										href="https://wordpress.com/tos/"
