@@ -75,9 +75,9 @@ export function ProductNameSuggestions() {
 	};
 
 	return (
-		<div className="title-suggestions-container">
+		<div className="wc-product-name-suggestions-container">
 			{ suggestions.length > 0 && ! fetching && (
-				<ul className="suggested-titles">
+				<ul className="wc-product-name-suggestions__suggested-names">
 					{ suggestions.map( ( suggestion, index ) => (
 						<SuggestionItem
 							key={ index }
@@ -89,7 +89,7 @@ export function ProductNameSuggestions() {
 			) }
 			{ ! fetching && (
 				<button
-					className="button woo-ai-write-it-for-me-btn"
+					className="button woo-ai-get-suggestions-btn"
 					type="button"
 					disabled={ fetching }
 					onClick={ getSuggestions }
@@ -102,17 +102,17 @@ export function ProductNameSuggestions() {
 				</button>
 			) }
 			{ fetching && (
-				<p className="loading-message">
+				<p className="wc-product-name-suggestions__loading-message">
 					<RandomLoadingMessage isLoading={ fetching } />
 				</p>
 			) }
 			{ fetching && (
-				<p className="tip-message">
+				<p className="wc-product-name-suggestions__tip-message">
 					<RandomTipMessage />
 				</p>
 			) }
 			{ failed && (
-				<p className="error-message">
+				<p className="wc-product-name-suggestions__error-message">
 					<ErrorMessage error={ error } />
 					<button
 						className="notice-dismiss"
