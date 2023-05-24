@@ -36,7 +36,7 @@ class Product_Data_Suggestion_Service {
 	 * Constructor
 	 *
 	 * @param Product_Data_Suggestion_Prompt_Generator $prompt_generator   The prompt generator.
-	 * @param Completion_Service_Interface          $completion_service The completion service.
+	 * @param Completion_Service_Interface             $completion_service The completion service.
 	 */
 	public function __construct( Product_Data_Suggestion_Prompt_Generator $prompt_generator, Completion_Service_Interface $completion_service ) {
 		$this->prompt_generator   = $prompt_generator;
