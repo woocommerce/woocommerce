@@ -134,4 +134,22 @@ final class OrderUtil {
 	public static function get_order_admin_new_url() : string {
 		return wc_get_container()->get( PageController::class )->get_new_page_url();
 	}
+
+	/**
+	 * Get the name of the database table that's currently in use for orders.
+	 *
+	 * @return string
+	 */
+	public static function get_table_for_orders() {
+		return wc_get_container()->get( COTMigrationUtil::class )->get_table_for_orders();
+	}
+
+	/**
+	 * Get the name of the database table that's currently in use for orders.
+	 *
+	 * @return string
+	 */
+	public static function get_table_for_order_meta() {
+		return wc_get_container()->get( COTMigrationUtil::class )->get_table_for_order_meta();
+	}
 }

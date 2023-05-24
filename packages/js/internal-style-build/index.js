@@ -11,6 +11,11 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 module.exports = {
 	webpackConfig: {
+		parser: {
+			javascript: {
+				exportsPresence: 'error',
+			},
+		},
 		rules: [
 			{
 				test: /\.s?css$/,

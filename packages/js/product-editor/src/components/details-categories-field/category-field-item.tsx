@@ -9,6 +9,11 @@ import { ProductCategory } from '@woocommerce/data';
 import { __experimentalSelectControlMenuItemProps as MenuItemProps } from '@woocommerce/components';
 import classNames from 'classnames';
 
+/**
+ * Internal dependencies
+ */
+import { ProductCategoryNode } from './use-category-search';
+
 export type CategoryTreeItem = {
 	data: ProductCategory;
 	children: CategoryTreeItem[];
@@ -19,13 +24,10 @@ export type CategoryTreeItem = {
 type CategoryFieldItemProps = {
 	item: CategoryTreeItem;
 	selectedIds: number[];
-	items: Pick< ProductCategory, 'id' | 'name' >[];
+	items: ProductCategoryNode[];
 	highlightedIndex: number;
 	openParent?: () => void;
-} & Pick<
-	MenuItemProps< Pick< ProductCategory, 'id' | 'name' > >,
-	'getItemProps'
->;
+} & Pick< MenuItemProps< ProductCategoryNode >, 'getItemProps' >;
 
 export const CategoryFieldItem: React.FC< CategoryFieldItemProps > = ( {
 	item,

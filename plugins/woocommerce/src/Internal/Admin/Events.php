@@ -260,7 +260,7 @@ class Events {
 	 *   - RemoteFreeExtensionsDataSourcePoller
 	 */
 	protected function possibly_refresh_data_source_pollers() {
-		$completed_tasks = get_option( 'woocommerce_task_list_tracked_completed_tasks' );
+		$completed_tasks = get_option( 'woocommerce_task_list_tracked_completed_tasks', array() );
 
 		if ( ! in_array( 'payments', $completed_tasks, true ) && ! in_array( 'woocommerce-payments', $completed_tasks, true ) ) {
 			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->read_specs_from_data_sources();

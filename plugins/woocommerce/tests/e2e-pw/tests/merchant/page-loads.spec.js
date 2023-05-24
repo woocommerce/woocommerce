@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 
-// a represenation of the menu structure for WC
+// a representation of the menu structure for WC
 const wcPages = [
 	{
 		name: 'WooCommerce',

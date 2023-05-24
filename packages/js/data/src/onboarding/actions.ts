@@ -16,7 +16,7 @@ import {
 	ProfileItems,
 	TaskListType,
 	TaskType,
-	OnboardingProductType,
+	OnboardingProductTypes,
 } from './types';
 import { Plugin } from '../plugins/types';
 
@@ -267,9 +267,7 @@ export function actionTaskSuccess( task: Partial< TaskType > ) {
 	};
 }
 
-export function getProductTypesSuccess(
-	productTypes: OnboardingProductType[]
-) {
+export function getProductTypesSuccess( productTypes: OnboardingProductTypes ) {
 	return {
 		type: TYPES.GET_PRODUCT_TYPES_SUCCESS,
 		productTypes,

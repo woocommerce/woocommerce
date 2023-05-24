@@ -9,6 +9,7 @@ import {
 	ProductCategory,
 } from '@woocommerce/data';
 import { escapeRegExp } from 'lodash';
+import { TreeItemType } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -32,6 +33,11 @@ function openParents(
 		}
 	}
 }
+
+export type ProductCategoryNode = Pick<
+	ProductCategory,
+	'id' | 'name' | 'parent'
+>;
 
 /**
  * Sort function for category tree items, sorts by popularity and then alphabetically.
@@ -251,22 +257,19 @@ export const useCategorySearch = () => {
 
 	const categoryTreeKeyValues = categoriesAndNewItem[ 2 ];
 
-	/**
-	 * getFilteredItems callback for use in the SelectControl component.
-	 */
-	const getFilteredItems = useCallback(
+	const getFilteredItemsForSelectTree = useCallback(
 		(
-			allItems: Pick< ProductCategory, 'id' | 'name' >[],
+			allItems: TreeItemType[],
 			inputValue: string,
-			selectedItems: Pick< ProductCategory, 'id' | 'name' >[]
+			selectedItems: TreeItemType[]
 		) => {
 			const searchRegex = new RegExp( escapeRegExp( inputValue ), 'i' );
 			return allItems.filter(
 				( item ) =>
 					selectedItems.indexOf( item ) < 0 &&
-					( searchRegex.test( item.name ) ||
-						( categoryTreeKeyValues[ item.id ] &&
-							categoryTreeKeyValues[ item.id ].isOpen ) )
+					( searchRegex.test( item.label ) ||
+						( categoryTreeKeyValues[ +item.value ] &&
+							categoryTreeKeyValues[ +item.value ].isOpen ) )
 			);
 		},
 		[ categoriesAndNewItem ]
@@ -274,7 +277,7 @@ export const useCategorySearch = () => {
 
 	return {
 		searchCategories,
-		getFilteredItems,
+		getFilteredItemsForSelectTree,
 		categoriesSelectList: categoriesAndNewItem[ 0 ],
 		categories: categoriesAndNewItem[ 1 ],
 		isSearching,

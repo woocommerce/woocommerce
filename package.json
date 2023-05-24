@@ -4,8 +4,8 @@
 	"description": "Monorepo for the WooCommerce ecosystem",
 	"homepage": "https://woocommerce.com/",
 	"engines": {
-		"node": "^16.13.1",
-		"pnpm": "^7.13.3"
+		"node": "^16.14.1",
+		"pnpm": "^8.3.1"
 	},
 	"private": true,
 	"repository": {
@@ -17,6 +17,9 @@
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
+	"bin": {
+		"utils": "./tools/monorepo-utils/bin/run"
+	},
 	"scripts": {
 		"build": "pnpm exec turbo run turbo:build",
 		"test": "pnpm exec turbo run turbo:test",
@@ -26,7 +29,8 @@
 		"git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && husky install",
 		"create-extension": "node ./tools/create-extension/index.js",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
-		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches"
+		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
+		"utils": "node ./tools/monorepo-utils/dist/index.js"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.20.2",
@@ -55,7 +59,7 @@
 		"sass": "^1.59.3",
 		"sass-loader": "^10.4.1",
 		"syncpack": "^9.8.4",
-		"turbo": "^1.8.5",
+		"turbo": "^1.9.3",
 		"typescript": "^4.9.5",
 		"url-loader": "^1.1.2",
 		"webpack": "^5.76.2"

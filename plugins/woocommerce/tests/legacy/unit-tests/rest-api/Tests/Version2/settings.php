@@ -6,10 +6,13 @@
  * @since 3.0.0
  */
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+
 /**
  * Class Settings_V2.
  */
 class Settings_V2 extends WC_REST_Unit_Test_Case {
+	use ArraySubsetAsserts;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -50,7 +53,18 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		$this->assertContains(
+		$this->assertEquals( 200, $response->get_status() );
+		$matching_settings_data = current(
+			array_filter(
+				$data,
+				function( $settings ) {
+					return 'test' === $settings['id'];
+				}
+			)
+		);
+		$this->assertIsArray( $matching_settings_data );
+
+		$this->assertArraySubset(
 			array(
 				'id'          => 'test',
 				'label'       => 'Test extension',
@@ -65,10 +79,20 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-			$data
+			$matching_settings_data
 		);
 
-		$this->assertContains(
+		$matching_settings_data = current(
+			array_filter(
+				$data,
+				function( $settings ) {
+					return 'sub-test' === $settings['id'];
+				}
+			)
+		);
+		$this->assertIsArray( $matching_settings_data );
+
+		$this->assertArraySubset(
 			array(
 				'id'          => 'sub-test',
 				'label'       => 'Sub test',
@@ -83,7 +107,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-			$data
+			$matching_settings_data
 		);
 	}
 

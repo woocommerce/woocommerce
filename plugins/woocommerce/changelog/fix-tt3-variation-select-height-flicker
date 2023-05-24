@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevented an issue with height flickering when selecting a variation

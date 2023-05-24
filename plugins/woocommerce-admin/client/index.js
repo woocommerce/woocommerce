@@ -18,6 +18,7 @@ import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
 import { EmbeddedBodyLayout } from './embedded-body-layout';
 import { WcAdminPaymentsGatewaysBannerSlot } from './payments/payments-settings-banner-slotfill';
 import { WcAdminConflictErrorSlot } from './settings/conflict-error-slotfill.js';
+import './xstate.js';
 
 // Modify webpack pubilcPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase

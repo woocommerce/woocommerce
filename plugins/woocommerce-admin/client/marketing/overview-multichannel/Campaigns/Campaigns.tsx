@@ -158,6 +158,8 @@ export const Campaigns = () => {
 		);
 	};
 
+	const showFooter = !! ( total && total > perPage );
+
 	return (
 		<Card className="woocommerce-marketing-campaigns-card">
 			<CardHeader>
@@ -170,14 +172,14 @@ export const Campaigns = () => {
 				>
 					{ __( 'Create new campaign', 'woocommerce' ) }
 				</Button>
-				{ !! isModalOpen && (
+				{ isModalOpen && (
 					<CreateNewCampaignModal
 						onRequestClose={ () => setModalOpen( false ) }
 					/>
 				) }
 			</CardHeader>
 			{ getContent() }
-			{ !! ( total && total > perPage ) && (
+			{ showFooter && (
 				<CardFooter className="woocommerce-marketing-campaigns-card__footer">
 					<Pagination
 						showPerPagePicker={ false }

@@ -170,6 +170,16 @@ class WC_Meta_Box_Product_Data {
 	}
 
 	/**
+	 * Filter callback for finding non-variation attributes.
+	 *
+	 * @param  WC_Product_Attribute $attribute Product attribute.
+	 * @return bool
+	 */
+	private static function filter_non_variation_attributes( $attribute ) {
+		return false === $attribute->get_variation();
+	}
+
+	/**
 	 * Show options for the variable product type.
 	 */
 	public static function output_variations() {

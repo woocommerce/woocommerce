@@ -9,7 +9,6 @@ declare global {
 		wcAdminFeatures: {
 			'activity-panels': boolean;
 			analytics: boolean;
-			'block-editor-feature-enabled': boolean;
 			coupons: boolean;
 			'customer-effort-score-tracks': boolean;
 			homescreen: boolean;
@@ -48,6 +47,9 @@ declare global {
 				isDirty: () => boolean;
 			};
 		};
+		getUserSetting?: ( name: string ) => string | undefined;
+		setUserSetting?: ( name: string, value: string ) => void;
+		deleteUserSetting?: ( name: string ) => void;
 	}
 }
 

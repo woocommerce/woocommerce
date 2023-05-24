@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix incorrect usage of dispatch, useSelect, and setState calls in homescreen along with settings and onboarding package

@@ -1,0 +1,5 @@
+Significance: minor
+Type: add
+
+Add a function to get the aria-describedby description for the add to cart button.
+Add default description for the Select options button.

@@ -1,0 +1,10 @@
+name: 'Changelog Auto Add'
+on: workflow_dispatch
+
+jobs:
+    hello-world:
+        name: 'Hello World'
+        runs-on: ubuntu-20.04
+        steps:
+            - name: Hello
+              run: echo "Hello World"

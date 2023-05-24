@@ -11,8 +11,8 @@
 		"puppeteer"
 	],
 	"engines": {
-		"node": "^16.13.1",
-		"pnpm": "^7.13.3"
+		"node": "^16.14.1",
+		"pnpm": "^8.3.1"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/e2e-environment/README.md",
 	"bugs": {
@@ -69,7 +69,7 @@
 		"build": "pnpm -w exec turbo run turbo:build --filter=$npm_package_name",
 		"clean": "rm -rf ./build ./build-module",
 		"compile": "e2e-builds",
-		"prepare": "pnpm run build",
+		"prepack": "pnpm run build",
 		"docker:up": "./bin/docker-compose.sh up",
 		"docker:wait": "bash ./bin/wait-for-build.sh",
 		"docker:down": "./bin/docker-compose.sh down",

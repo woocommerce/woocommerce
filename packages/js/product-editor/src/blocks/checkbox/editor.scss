@@ -1,0 +1,27 @@
+
+.woocommerce-product-form__checkbox {
+
+	.components-base-control__field {
+		display: flex;
+		align-items: center;
+	}
+
+	.components-checkbox-control__label {
+		display: flex;
+	}
+
+	&-tooltip-icon {
+		margin: -2px 0 0 $gap-small;
+		display: flex;
+		align-items: center;
+	}
+}
+
+.woocommerce-product-form__checkbox-tooltip {
+	.components-popover__content {
+		width: 200px;
+		min-width: auto;
+		white-space: normal !important;
+	}
+}
+

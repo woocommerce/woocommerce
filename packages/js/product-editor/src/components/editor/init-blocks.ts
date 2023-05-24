@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { BlockInstance, getBlockType } from '@wordpress/blocks';
+import {
+	BlockInstance,
+	getBlockType,
+	unregisterBlockType,
+} from '@wordpress/blocks';
 import {
 	registerCoreBlocks,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -12,14 +16,9 @@ import {
 /**
  * Internal dependencies
  */
-import { init as initName } from '../details-name-block';
-import { init as initSummary } from '../details-summary-block';
-import { init as initSection } from '../section';
-import { init as initTab } from '../tab';
-import { init as initPricing } from '../pricing-block';
-import { init as initCollapsible } from '../collapsible-block';
+import * as productBlocks from '../../blocks';
 
-export const initBlocks = () => {
+export function initBlocks() {
 	const coreBlocks = __experimentalGetCoreBlocks();
 	const blocks = coreBlocks.filter( ( block: BlockInstance ) => {
 		return ! getBlockType( block.name );
@@ -28,10 +27,15 @@ export const initBlocks = () => {
 	// @ts-ignore An argument is allowed to specify which blocks to register.
 	registerCoreBlocks( blocks );
 
-	initName();
-	initSummary();
-	initSection();
-	initTab();
-	initPricing();
-	initCollapsible();
-};
+	const woocommerceBlocks = Object.values( productBlocks ).map( ( init ) =>
+		init()
+	);
+
+	const registeredBlocks = [ ...blocks, ...woocommerceBlocks ];
+
+	return function unregisterBlocks() {
+		registeredBlocks.forEach(
+			( block ) => block && unregisterBlockType( block.name )
+		);
+	};
+}

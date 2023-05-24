@@ -148,9 +148,7 @@ const TableCard: React.VFC< TableCardProps > = ( {
 						) }
 						renderContent={ () => (
 							<Fragment>
-								{ /* @ts-expect-error: Ignoring the error until we migrate ellipsis-menu to TS*/ }
 								<MenuTitle>
-									{ /* @ts-expect-error: Allow string */ }
 									{ __( 'Columns:', 'woocommerce' ) }
 								</MenuTitle>
 								{ allHeaders.map(

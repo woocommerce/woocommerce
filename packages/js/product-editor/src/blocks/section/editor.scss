@@ -1,0 +1,29 @@
+.wp-block-woocommerce-product-section {
+    margin-bottom: 48px;
+	padding-top: 48px;
+
+	&:first-child {
+		padding-top: 64px;
+	}
+
+    .wp-block-woocommerce-product-section__title {
+        margin-top: 0;
+        margin-bottom: 0;
+        font-size: 20px;
+        font-weight: 500;
+        color: $gray-900;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    &__description {
+        margin-top: $gap-small;
+        font-size: 13px;
+        color: $gray-700;
+        line-height: 1.5;
+    }
+}
+
+.wp-block-woocommerce-product-section + .wp-block-woocommerce-product-section {
+	border-top: 1px solid #ddd;
+}

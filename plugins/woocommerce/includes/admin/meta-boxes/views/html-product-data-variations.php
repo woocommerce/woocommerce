@@ -8,31 +8,34 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+$add_attributes_img_url = WC_ADMIN_IMAGES_FOLDER_URL . '/icons/info.svg';
+$background_img_url     = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-background-image.svg';
+$arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variation-arrow.svg';
 ?>
 <div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 	<div id="variable_product_options_inner">
 
 		<?php if ( ! count( $variation_attributes ) ) : ?>
 
-		<div id="message" class="inline notice woocommerce-message">
-			<p>
-				<?php echo esc_html_e( 'Offer customers multiple product options, like size and color. Start by creating a new custom attribute and enter available values (they’ll be shown as selectable product options).', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/#add-variations"><?php esc_html_e( 'Learn more about creating variations', 'woocommerce' ); ?></a>
-			</p>
-		</div>
-		<div class="wc-metabox">
-			<div class="woocommerce_variation_new_attribute_data wc-metabox-content">
-			<?php
-				$i                    = 0;
-				$is_variations_screen = true;
-				$attribute            = new WC_Product_Attribute();
-				$attribute->set_variation( true );
-				require __DIR__ . '/html-product-attribute-inner.php';
-			?>
-				<div class="toolbar">
-					<button type="button" class="button button-primary create-variations" disabled="disabled" title="<?php echo esc_html_e( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ); ?>"><?php esc_html_e( 'Create variations', 'woocommerce' ); ?></button>
-				</div>
+		<div class="add-attributes-container">
+			<div class="add-attributes-message">
+				<img src="<?php echo esc_url( $add_attributes_img_url ); ?>" />
+				<p>
+					<?php
+						echo wp_kses_post(
+							sprintf(
+								/* translators: %1$s: url for attributes tab, %2$s: url for variable product documentation */
+								__( 'Add some attributes in the <a class="variations-add-attributes-link" href="%1$s">Attributes</a> tab to generate variations. Make sure to check the <b>Used for variations</b> box. <a class="variations-learn-more-link" href="%2$s" target="_blank" rel="noreferrer">Learn more</a>', 'woocommerce' ),
+								esc_url( '#product_attributes' ),
+								esc_url( 'https://woocommerce.com/document/variable-product/' )
+							)
+						);
+					?>
+				</p>
 			</div>
 		</div>
+
 		<?php else : ?>
 
 			<div class="toolbar toolbar-variations-defaults">
@@ -71,9 +74,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php /* phpcs:enable */ ?>
 
 			<div class="toolbar toolbar-top">
-				<select id="field_to_edit" class="variation_actions">
-					<option data-global="true" value="add_variation"><?php esc_html_e( 'Add variation', 'woocommerce' ); ?></option>
-					<option data-global="true" value="link_all_variations"><?php esc_html_e( 'Create variations from all attributes', 'woocommerce' ); ?></option>
+				<button type="button" class="button generate_variations"><?php esc_html_e( 'Generate variations', 'woocommerce' ); ?></button>
+				<button type="button" class="button add_variation_manually"><?php esc_html_e( 'Add manually', 'woocommerce' ); ?></button>
+				<select id="field_to_edit" class="select variation_actions hidden">
+					<option value="bulk_actions" disabled>Bulk actions</option>
 					<option value="delete_all"><?php esc_html_e( 'Delete all variations', 'woocommerce' ); ?></option>
 					<optgroup label="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
 						<option value="toggle_enabled"><?php esc_html_e( 'Toggle &quot;Enabled&quot;', 'woocommerce' ); ?></option>
@@ -111,7 +115,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php do_action( 'woocommerce_variable_product_bulk_edit_actions' ); ?>
 					<?php /* phpcs:enable */ ?>
 				</select>
-				<a class="button bulk_edit do_variation_action"><?php esc_html_e( 'Go', 'woocommerce' ); ?></a>
 
 				<div class="variations-pagenav">
 					<?php /* translators: variations count */ ?>
@@ -138,6 +141,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</div>
 				<div class="clear"></div>
+			</div>
+
+			<div class="add-variation-container">
+				<div class="arrow-image-wrapper">
+					<img src="<?php echo esc_url( $arrow_img_url ); ?>" />
+				</div>
+				<img src="<?php echo esc_url( $background_img_url ); ?>" />
+				<p>
+					<?php
+					esc_html_e(
+						'No variations yet. Generate them from all added attributes or add a new variation manually.',
+						'woocommerce'
+					);
+					?>
+				</p>
 			</div>
 
 			<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>

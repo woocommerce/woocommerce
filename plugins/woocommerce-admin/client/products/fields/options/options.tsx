@@ -5,12 +5,12 @@ import { __ } from '@wordpress/i18n';
 import { Product, ProductAttribute } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useFormContext } from '@woocommerce/components';
+import { AttributeControl } from '@woocommerce/product-editor/src/components/attribute-control';
+import { useProductAttributes } from '@woocommerce/product-editor/src/hooks/use-product-attributes';
 
 /**
  * Internal dependencies
  */
-import { AttributeControl } from '../attribute-control';
-import { useProductAttributes } from '~/products/hooks/use-product-attributes';
 import { useProductVariationsHelper } from '../../hooks/use-product-variations-helper';
 
 type OptionsProps = {

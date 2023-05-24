@@ -6,7 +6,6 @@ import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import qs from 'qs';
 
 /**
  * Internal dependencies
@@ -25,8 +24,8 @@ const WCAddonsTour = () => {
 	const defaultAutoScrollBlock: ScrollLogicalPosition = 'center';
 
 	useEffect( () => {
-		const query = qs.parse( window.location.search.slice( 1 ) );
-		if ( query?.tutorial === 'true' ) {
+		const query = new URLSearchParams( location.search );
+		if ( query.get( 'tutorial' ) === 'true' ) {
 			const intervalId = waitUntilElementTopNotChange(
 				steps[ 0 ].referenceElements?.desktop || '',
 				() => {

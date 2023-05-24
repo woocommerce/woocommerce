@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes a race condition when adding the first attribute form to the product edit screen.

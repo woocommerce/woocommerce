@@ -76,7 +76,7 @@ class CLIRunner {
 					sprintf(
 						// translators: %s - link to testing instructions webpage.
 						__( 'Custom order table usage is not enabled. If you are testing, you can enable it by following the testing instructions in %s', 'woocommerce' ),
-						'https://developer.woocommerce.com/' // TODO: Change the link when testing instructin page is live.
+						'https://github.com/woocommerce/woocommerce/wiki/High-Performance-Order-Storage-Upgrade-Recipe-Book'
 					)
 				);
 			}
@@ -168,19 +168,21 @@ class CLIRunner {
 			return WP_CLI::warning( __( 'There are no orders to sync, aborting.', 'woocommerce' ) );
 		}
 
-		$assoc_args  = wp_parse_args(
+		$assoc_args       = wp_parse_args(
 			$assoc_args,
 			array(
 				'batch-size' => 500,
 			)
 		);
-		$batch_size  = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
-		$progress    = WP_CLI\Utils\make_progress_bar( 'Order Data Sync', $order_count / $batch_size );
-		$processed   = 0;
-		$batch_count = 1;
-		$total_time  = 0;
+		$batch_size       = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
+		$progress         = WP_CLI\Utils\make_progress_bar( 'Order Data Sync', $order_count / $batch_size );
+		$processed        = 0;
+		$batch_count      = 1;
+		$total_time       = 0;
+		$orders_remaining = true;
 
-		while ( $order_count > 0 ) {
+		while ( $order_count > 0 || $orders_remaining ) {
+			$remaining_count = $order_count;
 
 			WP_CLI::debug(
 				sprintf(
@@ -213,11 +215,8 @@ class CLIRunner {
 
 			$progress->tick();
 
-			$remaining_count = $this->count_unmigrated( array(), array( 'log' => false ) );
-			if ( $remaining_count === $order_count ) {
-				return WP_CLI::error( __( 'Infinite loop detected, aborting.', 'woocommerce' ) );
-			}
-			$order_count = $remaining_count;
+			$orders_remaining = count( $this->synchronizer->get_next_batch_to_process( 1 ) ) > 0;
+			$order_count      = $remaining_count - $batch_size;
 		}
 
 		$progress->finish();
@@ -288,10 +287,27 @@ class CLIRunner {
 	 * default: 0
 	 * ---
 	 *
+	 * [--end-at=<order_id>]
+	 * : Order ID to end at.
+	 * ---
+	 * default: -1
+	 * ---
+	 *
+	 * [--verbose]
+	 * : Whether to output errors as they happen in batch, or output them all together at the end.
+	 * ---
+	 * default: false
+	 * ---
+	 *
+	 * [--order-types]
+	 * : Comma seperated list of order types that needs to be verified. For example, --order-types=shop_order,shop_order_refund
+	 * ---
+	 * default: Output of function `wc_get_order_types( 'cot-migration' )`
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Verify migrated order data, 500 orders at a time.
-	 *     wp wc cot verify_cot_data --batch-size=500 --start-from=0
+	 *     wp wc cot verify_cot_data --batch-size=500 --start-from=0 --end-at=10000
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -306,8 +322,11 @@ class CLIRunner {
 		$assoc_args = wp_parse_args(
 			$assoc_args,
 			array(
-				'batch-size' => 500,
-				'start-from' => 0,
+				'batch-size'  => 500,
+				'start-from'  => 0,
+				'end-at'      => - 1,
+				'verbose'     => false,
+				'order-types' => '',
 			)
 		);
 
@@ -316,8 +335,29 @@ class CLIRunner {
 		$failed_ids     = array();
 		$processed      = 0;
 		$order_id_start = (int) $assoc_args['start-from'];
-		$order_count    = $this->get_verify_order_count( $order_id_start );
+		$order_id_end   = (int) $assoc_args['end-at'];
+		$order_id_end   = -1 === $order_id_end ? PHP_INT_MAX : $order_id_end;
 		$batch_size     = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
+		$verbose        = (bool) $assoc_args['verbose'];
+		$order_types    = wc_get_order_types( 'cot-migration' );
+		if ( ! empty( $assoc_args['order-types'] ) ) {
+			$passed_order_types = array_map( 'trim', explode( ',', $assoc_args['order-types'] ) );
+			$order_types        = array_intersect( $order_types, $passed_order_types );
+		}
+
+		if ( 0 === count( $order_types ) ) {
+			return WP_CLI::error(
+				sprintf(
+				/* Translators: %s is the comma seperated list of order types. */
+					__( 'Passed order type does not match any registered order types. Following order types are registered: %s', 'woocommerce' ),
+					implode( ',', wc_get_order_types( 'cot-migration' ) )
+				)
+			);
+		}
+
+		$order_types_pl = implode( ',', array_fill( 0, count( $order_types ), '%s' ) );
+
+		$order_count = $this->get_verify_order_count( $order_id_start, $order_id_end, $order_types, false );
 
 		$progress = WP_CLI\Utils\make_progress_bar( 'Order Data Verification', $order_count / $batch_size );
 
@@ -335,20 +375,47 @@ class CLIRunner {
 				)
 			);
 
-			$order_ids        = $wpdb->get_col(
+			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Inputs are prepared.
+			$order_ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID > %d ORDER BY ID ASC LIMIT %d",
-					$order_id_start,
-					$batch_size
+					"SELECT ID FROM $wpdb->posts WHERE post_type in ( $order_types_pl ) AND ID >= %d AND ID <= %d ORDER BY ID ASC LIMIT %d",
+					array_merge(
+						$order_types,
+						array(
+							$order_id_start,
+							$order_id_end,
+							$batch_size,
+						)
+					)
 				)
 			);
-			$batch_start_time = microtime( true );
-			$failed_ids       = $failed_ids + $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
-			$failed_ids       = $this->verify_meta_data( $order_ids, $failed_ids );
-			$processed       += count( $order_ids );
-			$batch_total_time = microtime( true ) - $batch_start_time;
+			// phpcs:enable
+			$batch_start_time            = microtime( true );
+			$failed_ids_in_current_batch = $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
+			$failed_ids_in_current_batch = $this->verify_meta_data( $order_ids, $failed_ids_in_current_batch );
+			$failed_ids                  = $verbose ? array() : $failed_ids + $failed_ids_in_current_batch;
+			$processed                  += count( $order_ids );
+			$batch_total_time            = microtime( true ) - $batch_start_time;
 			$batch_count ++;
 			$total_time += $batch_total_time;
+
+			if ( $verbose && count( $failed_ids_in_current_batch ) > 0 ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a CLI command and debugging code is intended.
+				$errors = print_r( $failed_ids_in_current_batch, true );
+				WP_CLI::warning(
+					sprintf(
+					/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
+						_n(
+							'%1$d error found: %2$s. Please review the error above.',
+							'%1$d errors found: %2$s. Please review the errors above.',
+							count( $failed_ids_in_current_batch ),
+							'woocommerce'
+						),
+						count( $failed_ids_in_current_batch ),
+						$errors
+					)
+				);
+			}
 
 			$progress->tick();
 
@@ -362,8 +429,8 @@ class CLIRunner {
 				)
 			);
 
-			$order_id_start  = max( $order_ids );
-			$remaining_count = $this->get_verify_order_count( $order_id_start, false );
+			$order_id_start  = max( $order_ids ) + 1;
+			$remaining_count = $this->get_verify_order_count( $order_id_start, $order_id_end, $order_types, false );
 			if ( $remaining_count === $order_count ) {
 				return WP_CLI::error( __( 'Infinite loop detected, aborting. No errors found.', 'woocommerce' ) );
 			}
@@ -372,6 +439,10 @@ class CLIRunner {
 
 		$progress->finish();
 		WP_CLI::log( __( 'Verification completed.', 'woocommerce' ) );
+
+		if ( $verbose ) {
+			return;
+		}
 
 		if ( 0 === count( $failed_ids ) ) {
 			return WP_CLI::success(
@@ -388,6 +459,7 @@ class CLIRunner {
 				)
 			);
 		} else {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a CLI command and debugging code is intended.
 			$errors = print_r( $failed_ids, true );
 
 			return WP_CLI::error(
@@ -423,20 +495,32 @@ class CLIRunner {
 	/**
 	 * Helper method to get count for orders needing verification.
 	 *
-	 * @param int  $order_id_start Order ID to start from.
-	 * @param bool $log Whether to also log an error message.
+	 * @param int   $order_id_start Order ID to start from.
+	 * @param int   $order_id_end Order ID to end at.
+	 * @param array $order_types List of order types to verify.
+	 * @param bool  $log Whether to also log an error message.
 	 *
 	 * @return int Order count.
 	 */
-	private function get_verify_order_count( int $order_id_start, $log = true ) : int {
+	private function get_verify_order_count( int $order_id_start, int $order_id_end, array $order_types, bool $log = true ) : int {
 		global $wpdb;
 
+		$order_types_placeholder = implode( ',', array_fill( 0, count( $order_types ), '%s' ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Inputs are prepared.
 		$order_count = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'shop_order' AND ID > %d",
-				$order_id_start
+				"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type in ($order_types_placeholder) AND ID >= %d AND ID <= %d",
+				array_merge(
+					$order_types,
+					array(
+						$order_id_start,
+						$order_id_end,
+					)
+				)
 			)
 		);
+		// phpcs:enable
 
 		if ( $log ) {
 			WP_CLI::log(
@@ -474,8 +558,8 @@ class CLIRunner {
 		$order_ids_placeholder        = implode( ', ', array_fill( 0, count( $order_ids ), '%d' ) );
 		$meta_table                   = OrdersTableDataStore::get_meta_table_name();
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table names are hardcoded, orders_ids and excluded_columns are prepared.
-		$query           = $wpdb->prepare(
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- table names are hardcoded, orders_ids and excluded_columns are prepared.
+		$query       = $wpdb->prepare(
 			"
 SELECT {$wpdb->postmeta}.post_id as entity_id, {$wpdb->postmeta}.meta_key, {$wpdb->postmeta}.meta_value
 FROM $wpdb->postmeta
@@ -494,7 +578,7 @@ ORDER BY {$wpdb->postmeta}.post_id ASC, {$wpdb->postmeta}.meta_key ASC;
 
 		$normalized_source_data = $this->normalize_raw_meta_data( $source_data );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- table names are hardcoded, orders_ids and excluded_columns are prepared.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- table names are hardcoded, orders_ids and excluded_columns are prepared.
 		$migrated_query = $wpdb->prepare(
 			"
 SELECT $meta_table.order_id as entity_id, $meta_table.meta_key, $meta_table.meta_value
@@ -513,17 +597,17 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		foreach ( $normalized_source_data as $order_id => $meta ) {
 			foreach ( $meta as $meta_key => $values ) {
 				$migrated_meta_values = isset( $normalized_migrated_meta_data[ $order_id ][ $meta_key ] ) ? $normalized_migrated_meta_data[ $order_id ][ $meta_key ] : array();
-				$diff = array_diff( $values, $migrated_meta_values );
+				$diff                 = array_diff( $values, $migrated_meta_values );
 
 				if ( count( $diff ) ) {
 					if ( ! isset( $failed_ids[ $order_id ] ) ) {
 						$failed_ids[ $order_id ] = array();
 					}
 					$failed_ids[ $order_id ][] = array(
-						'order_id'   => $order_id,
-						'meta_key'   => $meta_key,
+						'order_id'         => $order_id,
+						'meta_key'         => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Not a meta query.
 						'orig_meta_values' => $values,
-						'new_meta_values' => $migrated_meta_values,
+						'new_meta_values'  => $migrated_meta_values,
 					);
 				}
 			}
@@ -546,7 +630,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				$clubbed_data[ $row['entity_id'] ] = array();
 			}
 			if ( ! isset( $clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ] ) ) {
-				$clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ] = array();
+				$clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Not a meta query.
 			}
 			$clubbed_data[ $row['entity_id'] ][ $row['meta_key'] ][] = $row['meta_value'];
 		}

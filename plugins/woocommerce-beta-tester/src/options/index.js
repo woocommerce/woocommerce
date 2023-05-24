@@ -3,14 +3,14 @@
  */
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
-import { Modal, Notice } from '@wordpress/components';
+import { Notice } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { STORE_KEY } from './data/constants';
-import { default as OptionEditor } from './OptionEditor';
+import { OptionModal } from './option-modal';
 import './data';
 
 function shorten( input ) {
@@ -131,17 +131,13 @@ function Options( {
 	return (
 		<>
 			{ isEditModalOpen && (
-				<Modal
-					title={ editingOption.name }
+				<OptionModal
 					onRequestClose={ () => {
 						setEditModalOpen( false );
 					} }
-				>
-					<OptionEditor
-						option={ editingOption }
-						onSave={ handleSaveOption }
-					></OptionEditor>
-				</Modal>
+					option={ editingOption }
+					onSave={ handleSaveOption }
+				/>
 			) }
 			<div id="wc-admin-test-helper-options">
 				{ notice.message.length > 0 && (
@@ -224,12 +220,8 @@ function Options( {
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			getOptions,
-			getOptionForEditing,
-			getNotice,
-			isLoading,
-		} = select( STORE_KEY );
+		const { getOptions, getOptionForEditing, getNotice, isLoading } =
+			select( STORE_KEY );
 		const options = getOptions();
 		const editingOption = getOptionForEditing();
 		const notice = getNotice();

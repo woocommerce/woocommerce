@@ -44,11 +44,18 @@ if ( cot_status === true ) {
 	admin_orders_completed = 'post_status=wc-completed';
 }
 
-export function orders() {
+export function orders( includeTests = {} ) {
 	let response;
 	let api_x_wp_nonce;
 	let apiNonceHeader;
 	let heartbeat_nonce;
+	let includedTests = Object.assign( {
+			completed: true,
+			heartbeat: true,
+			other: true,
+		},
+		includeTests
+	);
 
 	group( 'All Orders', function () {
 		const requestHeaders = Object.assign(
@@ -89,102 +96,108 @@ export function orders() {
 
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 
-	group( 'All Orders - Other Requests', function () {
-		const requestHeaders = Object.assign(
-			{},
-			jsonAPIRequestHeader,
-			commonRequestHeaders,
-			commonAPIGetRequestHeaders,
-			apiNonceHeader,
-			commonNonStandardHeaders
-		);
+	if ( includedTests.other ) {
+		group( 'All Orders - Other Requests', function () {
+			const requestHeaders = Object.assign(
+				{},
+				jsonAPIRequestHeader,
+				commonRequestHeaders,
+				commonAPIGetRequestHeaders,
+				apiNonceHeader,
+				commonNonStandardHeaders
+			);
 
-		response = http.get(
-			`${ base_url }/wp-json/wc-admin/onboarding/tasks?_locale=user`,
-			{
-				headers: requestHeaders,
-				tags: { name: 'Merchant - wc-admin/onboarding/tasks?' },
-			}
-		);
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
+			response = http.get(
+				`${ base_url }/wp-json/wc-admin/onboarding/tasks?_locale=user`,
+				{
+					headers: requestHeaders,
+					tags: { name: 'Merchant - wc-admin/onboarding/tasks?' },
+				}
+			);
+			check( response, {
+				'is status 200': ( r ) => r.status === 200,
+			} );
+
+			response = http.get(
+				`${ base_url }/wp-json/wc-analytics/admin/notes?page=1&per_page=25&` +
+					`type=error%2Cupdate&status=unactioned&_locale=user`,
+				{
+					headers: requestHeaders,
+					tags: { name: 'Merchant - wc-analytics/admin/notes?' },
+				}
+			);
+			check( response, {
+				'is status 200': ( r ) => r.status === 200,
+			} );
+
+			response = http.get(
+				`${ base_url }/wp-json/wc-admin/options?options=woocommerce_ces_tracks_queue&_locale=user`,
+				{
+					headers: requestHeaders,
+					tags: {
+						name: 'Merchant - wc-admin/options?options=woocommerce_ces_tracks_queue',
+					},
+				}
+			);
+			check( response, {
+				'is status 200': ( r ) => r.status === 200,
+			} );
+		} );
+	}
+
+	if ( includedTests.heartbeat ) {
+		group( 'WP Admin Heartbeat', function () {
+			const requestHeaders = Object.assign(
+				{},
+				jsonRequestHeader,
+				commonRequestHeaders,
+				contentTypeRequestHeader,
+				commonPostRequestHeaders,
+				commonNonStandardHeaders
+			);
+
+			response = http.post(
+				`${ base_url }/wp-admin/admin-ajax.php`,
+				`_nonce=${ heartbeat_nonce }&action=heartbeat&has_focus=true&interval=15&screen_id=shop_order`,
+				{
+					headers: requestHeaders,
+					tags: { name: 'Merchant - action=heartbeat' },
+				}
+			);
+			check( response, {
+				'is status 200': ( r ) => r.status === 200,
+			} );
 		} );
 
-		response = http.get(
-			`${ base_url }/wp-json/wc-analytics/admin/notes?page=1&per_page=25&` +
-				`type=error%2Cupdate&status=unactioned&_locale=user`,
-			{
-				headers: requestHeaders,
-				tags: { name: 'Merchant - wc-analytics/admin/notes?' },
-			}
-		);
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
+		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+	}
+
+	if ( includedTests.completed ) {
+		group( 'Completed Orders', function () {
+			const requestHeaders = Object.assign(
+				{},
+				htmlRequestHeader,
+				commonRequestHeaders,
+				commonGetRequestHeaders,
+				commonNonStandardHeaders
+			);
+
+			response = http.get(
+				`${ base_url }/wp-admin/${ admin_orders_base }&${ admin_orders_completed }`,
+				{
+					headers: requestHeaders,
+					tags: { name: 'Merchant - Completed Orders' },
+				}
+			);
+			check( response, {
+				'is status 200': ( r ) => r.status === 200,
+				"body contains: 'Orders' header": ( response ) =>
+					response.body.includes( 'Orders</h1>' ),
+			} );
 		} );
 
-		response = http.get(
-			`${ base_url }/wp-json/wc-admin/options?options=woocommerce_ces_tracks_queue&_locale=user`,
-			{
-				headers: requestHeaders,
-				tags: {
-					name: 'Merchant - wc-admin/options?options=woocommerce_ces_tracks_queue',
-				},
-			}
-		);
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-		} );
-	} );
-
-	group( 'WP Admin Heartbeat', function () {
-		const requestHeaders = Object.assign(
-			{},
-			jsonRequestHeader,
-			commonRequestHeaders,
-			contentTypeRequestHeader,
-			commonPostRequestHeaders,
-			commonNonStandardHeaders
-		);
-
-		response = http.post(
-			`${ base_url }/wp-admin/admin-ajax.php`,
-			`_nonce=${ heartbeat_nonce }&action=heartbeat&has_focus=true&interval=15&screen_id=shop_order`,
-			{
-				headers: requestHeaders,
-				tags: { name: 'Merchant - action=heartbeat' },
-			}
-		);
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-		} );
-	} );
-
-	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
-
-	group( 'Completed Orders', function () {
-		const requestHeaders = Object.assign(
-			{},
-			htmlRequestHeader,
-			commonRequestHeaders,
-			commonGetRequestHeaders,
-			commonNonStandardHeaders
-		);
-
-		response = http.get(
-			`${ base_url }/wp-admin/${ admin_orders_base }&${ admin_orders_completed }`,
-			{
-				headers: requestHeaders,
-				tags: { name: 'Merchant - Completed Orders' },
-			}
-		);
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Orders' header": ( response ) =>
-				response.body.includes( 'Orders</h1>' ),
-		} );
-	} );
-
-	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+	}
 }
 
 export default function () {

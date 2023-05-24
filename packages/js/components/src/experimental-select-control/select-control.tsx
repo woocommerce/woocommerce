@@ -9,13 +9,14 @@ import {
 	useMultipleSelection,
 	GetInputPropsOptions,
 } from 'downshift';
+import { useInstanceId } from '@wordpress/compose';
 import {
 	useState,
 	useEffect,
 	createElement,
 	Fragment,
 } from '@wordpress/element';
-import { search } from '@wordpress/icons';
+import { chevronDown } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -57,6 +58,7 @@ export type SelectControlProps< ItemType > = {
 	) => void;
 	onRemove?: ( item: ItemType ) => void;
 	onSelect?: ( selected: ItemType ) => void;
+	onKeyDown?: ( e: KeyboardEvent ) => void;
 	onFocus?: ( data: { inputValue: string } ) => void;
 	stateReducer?: (
 		state: UseComboboxState< ItemType | null >,
@@ -68,6 +70,9 @@ export type SelectControlProps< ItemType > = {
 	disabled?: boolean;
 	inputProps?: GetInputPropsOptions;
 	suffix?: JSX.Element | null;
+	showToggleButton?: boolean;
+	readOnlyWhenClosed?: boolean;
+
 	/**
 	 * This is a feature already implemented in downshift@7.0.0 through the
 	 * reducer. In order for us to use it this prop is added temporarily until
@@ -116,17 +121,24 @@ function SelectControl< ItemType = DefaultItemType >( {
 	onRemove = () => null,
 	onSelect = () => null,
 	onFocus = () => null,
+	onKeyDown = () => null,
 	stateReducer = ( state, actionAndChanges ) => actionAndChanges.changes,
 	placeholder,
 	selected,
 	className,
 	disabled,
 	inputProps = {},
-	suffix = <SuffixIcon icon={ search } />,
+	suffix = <SuffixIcon icon={ chevronDown } />,
+	showToggleButton = false,
+	readOnlyWhenClosed = true,
 	__experimentalOpenMenuOnFocus = false,
 }: SelectControlProps< ItemType > ) {
 	const [ isFocused, setIsFocused ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
+	const instanceId = useInstanceId(
+		SelectControl,
+		'woocommerce-experimental-select-control'
+	);
 
 	let selectedItems = selected === null ? [] : selected;
 	selectedItems = Array.isArray( selectedItems )
@@ -154,12 +166,13 @@ function SelectControl< ItemType = DefaultItemType >( {
 		}
 
 		setInputValue( getItemLabel( singleSelectedItem ) );
-	}, [ singleSelectedItem ] );
+	}, [ getItemLabel, multiple, singleSelectedItem ] );
 
 	const {
 		isOpen,
 		getLabelProps,
 		getMenuProps,
+		getToggleButtonProps,
 		getInputProps,
 		getComboboxProps,
 		highlightedIndex,
@@ -174,8 +187,13 @@ function SelectControl< ItemType = DefaultItemType >( {
 		items: filteredItems,
 		selectedItem: multiple ? null : singleSelectedItem,
 		itemToString: getItemLabel,
-		onSelectedItemChange: ( { selectedItem } ) =>
-			selectedItem && onSelect( selectedItem ),
+		onSelectedItemChange: ( { selectedItem } ) => {
+			if ( selectedItem ) {
+				onSelect( selectedItem );
+			} else if ( singleSelectedItem ) {
+				onRemove( singleSelectedItem );
+			}
+		},
 		onInputValueChange: ( { inputValue: value, ...changes } ) => {
 			if ( value !== undefined ) {
 				setInputValue( value );
@@ -190,8 +208,13 @@ function SelectControl< ItemType = DefaultItemType >( {
 					// Set input back to selected item if there is a selected item, blank otherwise.
 					newChanges = {
 						...changes,
+						selectedItem:
+							! changes.inputValue?.length && ! multiple
+								? null
+								: changes.selectedItem,
 						inputValue:
 							changes.selectedItem === state.selectedItem &&
+							changes.inputValue?.length &&
 							! multiple
 								? getItemLabel( comboboxSingleSelectedItem )
 								: '',
@@ -217,15 +240,24 @@ function SelectControl< ItemType = DefaultItemType >( {
 		},
 	} );
 
+	const isEventOutside = ( event: React.FocusEvent ) => {
+		return ! document
+			.querySelector( '.' + instanceId )
+			?.contains( event.relatedTarget );
+	};
+
 	const onRemoveItem = ( item: ItemType ) => {
 		selectItem( null );
 		removeSelectedItem( item );
 		onRemove( item );
 	};
 
+	const isReadOnly = readOnlyWhenClosed && ! isOpen && ! isFocused;
+
 	const selectedItemTags = multiple ? (
 		<SelectedItems
 			items={ selectedItems }
+			isReadOnly={ isReadOnly }
 			getItemLabel={ getItemLabel }
 			getItemValue={ getItemValue }
 			getSelectedItemProps={ getSelectedItemProps }
@@ -238,8 +270,12 @@ function SelectControl< ItemType = DefaultItemType >( {
 			className={ classnames(
 				'woocommerce-experimental-select-control',
 				className,
+				instanceId,
 				{
+					'is-read-only': isReadOnly,
 					'is-focused': isFocused,
+					'is-multiple': multiple,
+					'has-selected-items': selectedItems.length,
 				}
 			) }
 		>
@@ -256,6 +292,7 @@ function SelectControl< ItemType = DefaultItemType >( {
 			{ /* eslint-enable jsx-a11y/label-has-for */ }
 			<ComboBox
 				comboBoxProps={ getComboboxProps() }
+				getToggleButtonProps={ getToggleButtonProps }
 				inputProps={ getInputProps( {
 					...getDropdownProps( {
 						preventKeyAction: isOpen,
@@ -268,12 +305,18 @@ function SelectControl< ItemType = DefaultItemType >( {
 							openMenu();
 						}
 					},
-					onBlur: () => setIsFocused( false ),
+					onBlur: ( event: React.FocusEvent ) => {
+						if ( isEventOutside( event ) ) {
+							setIsFocused( false );
+						}
+					},
+					onKeyDown,
 					placeholder,
 					disabled,
 					...inputProps,
 				} ) }
 				suffix={ suffix }
+				showToggleButton={ showToggleButton }
 			>
 				<>
 					{ children( {
