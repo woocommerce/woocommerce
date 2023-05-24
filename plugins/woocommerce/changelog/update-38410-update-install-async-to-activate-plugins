@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Renamed install-async to install-activate-async to activate installed plugins
