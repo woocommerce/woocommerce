@@ -11,9 +11,9 @@ import { __ } from '@wordpress/i18n';
 import { shuffleArray } from './utils';
 
 // Define the Property types for the RandomLoadingMessage component
-interface RandomLoadingMessageProps {
+type RandomLoadingMessageProps = {
 	isLoading: boolean;
-}
+};
 
 const earlyLoadingPhrases = [
 	__( '🚀 Launching into the creative cosmos…', 'woocommerce' ),
