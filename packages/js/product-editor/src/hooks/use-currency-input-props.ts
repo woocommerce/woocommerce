@@ -80,8 +80,8 @@ export const useCurrencyInputProps = ( {
 				onKeyUp( event );
 			}
 		},
-		onChange( value: string ) {
-			const sanitizeValue = sanitizePrice( value || '0' );
+		onChange( newValue: string ) {
+			const sanitizeValue = sanitizePrice( newValue || '0' );
 			if ( onChange ) {
 				onChange( sanitizeValue );
 			}
