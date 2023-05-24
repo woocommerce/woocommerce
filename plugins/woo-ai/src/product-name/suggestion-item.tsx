@@ -17,10 +17,7 @@ const SuggestionItem = ( {
 			onClick={ () => onSuggestionClick( suggestion ) }
 		>
 			<p className="suggestion-content">{ suggestion.content }</p>
-			<p className="suggestion-reason">
-				<span className="dashicons dashicons-info"></span>
-				<span>{ suggestion.reason }</span>
-			</p>
+			<p className="suggestion-reason">{ suggestion.reason }</p>
 		</button>
 	</li>
 );
