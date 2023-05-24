@@ -568,61 +568,69 @@ class Init {
 									),
 									array(
 										array(
-											'woocommerce/conditional',
+											'woocommerce/product-section',
 											array(
-												'mustMatch' => array(
-													'manage_stock' => array( true ),
-												),
+												'blockGap' => '2xlg',
 											),
 											array(
 												array(
-													'woocommerce/product-radio-field',
+													'woocommerce/conditional',
 													array(
-														'title'    => __( 'When out of stock', 'woocommerce' ),
-														'property' => 'backorders',
-														'options'  => array(
+														'mustMatch' => array(
+															'manage_stock' => array( true ),
+														),
+													),
+													array(
+														array(
+															'woocommerce/product-radio-field',
 															array(
-																'label' => __( 'Allow purchases', 'woocommerce' ),
-																'value' => 'yes',
-															),
-															array(
-																'label' => __(
-																	'Allow purchases, but notify customers',
-																	'woocommerce'
+																'title'    => __( 'When out of stock', 'woocommerce' ),
+																'property' => 'backorders',
+																'options'  => array(
+																	array(
+																		'label' => __( 'Allow purchases', 'woocommerce' ),
+																		'value' => 'yes',
+																	),
+																	array(
+																		'label' => __(
+																			'Allow purchases, but notify customers',
+																			'woocommerce'
+																		),
+																		'value' => 'notify',
+																	),
+																	array(
+																		'label' => __( "Don't allow purchases", 'woocommerce' ),
+																		'value' => 'no',
+																	),
 																),
-																'value' => 'notify',
 															),
-															array(
-																'label' => __( "Don't allow purchases", 'woocommerce' ),
-																'value' => 'no',
-															),
+														),
+														array(
+															'woocommerce/product-inventory-email-field',
 														),
 													),
 												),
 												array(
-													'woocommerce/product-inventory-email-field',
+													'woocommerce/product-checkbox-field',
+													array(
+														'title'    => __(
+															'Restrictions',
+															'woocommerce'
+														),
+														'label'    => __(
+															'Limit purchases to 1 item per order',
+															'woocommerce'
+														),
+														'property' => 'sold_individually',
+														'tooltip'  => __(
+															'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
+															'woocommerce'
+														),
+													),
 												),
-											),
-										),
-										array(
-											'woocommerce/product-checkbox-field',
-											array(
-												'title'    => __(
-													'Restrictions',
-													'woocommerce'
-												),
-												'label'    => __(
-													'Limit purchases to 1 item per order',
-													'woocommerce'
-												),
-												'property' => 'sold_individually',
-												'tooltip'  => __(
-													'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
-													'woocommerce'
-												),
-											),
-										),
 
+											),
+										),
 									),
 								),
 
