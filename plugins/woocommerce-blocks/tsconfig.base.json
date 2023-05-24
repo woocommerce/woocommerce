@@ -65,7 +65,7 @@
 			"@woocommerce/e2e-utils": [ "tests/e2e-pw/utils" ],
 			"@woocommerce/e2e-types": [ "tests/e2e-pw/types" ],
 			"@woocommerce/e2e-playwright-utils": [ "tests/e2e-pw/playwright-utils" ],
-			"@woocommerce/templates/*": [ "assets/js/templates/*" ],
+			"@woocommerce/templates/*": [ "assets/js/templates/*" ]
 		}
 	}
 }
