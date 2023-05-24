@@ -23,7 +23,7 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 		$is_contains   = $rule->operation && strpos( $rule->operation, 'contains' ) !== false;
 		$default_value = $is_contains ? array() : false;
 		$default       = isset( $rule->default ) ? $rule->default : $default_value;
-		$option_value = $this->get_option_value( $rule, $default, $is_contains );
+		$option_value  = $this->get_option_value( $rule, $default, $is_contains );
 
 		if ( isset( $rule->transformers ) && is_array( $rule->transformers ) ) {
 			$option_value = TransformerService::apply( $option_value, $rule->transformers, $default );
@@ -46,7 +46,7 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 	 * @return mixed The option value.
 	 */
 	private function get_option_value( $rule, $default, $is_contains ) {
-		$option_value = get_option( $rule->option_name, $default );
+		$option_value      = get_option( $rule->option_name, $default );
 		$is_contains_valid = $is_contains && ( is_array( $option_value ) || ( is_string( $option_value ) && is_string( $rule->value ) ) );
 
 		if ( ! $is_contains_valid ) {
