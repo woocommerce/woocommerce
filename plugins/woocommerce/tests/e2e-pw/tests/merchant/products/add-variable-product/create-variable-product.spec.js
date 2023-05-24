@@ -99,7 +99,7 @@ test.describe( 'Add variable product', () => {
 			'Expect the "Product draft updated." notice to appear.',
 			async () => {
 				await expect(
-					page.getByText( getTextForLanguage()['Productdraftupdated.'] )
+					page.getByText( getTextForLanguage()['Productdraftupdated'] )
 				).toBeVisible();
 			}
 		);
