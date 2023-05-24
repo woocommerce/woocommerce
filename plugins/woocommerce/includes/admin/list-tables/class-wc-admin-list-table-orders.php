@@ -646,11 +646,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	public function search_custom_fields( $wp ) {
 		global $pagenow;
 
-		if ( 'edit.php' !== $pagenow || empty( $wp->query_vars['s'] ) || 'shop_order' !== $wp->query_vars['post_type'] || ! isset( $_GET['s'] ) ) { // phpcs:ignore  WordPress.Security.NonceVerification.Recommended
+		if ( 'edit.php' !== $pagenow || 'shop_order' !== $wp->query_vars['post_type'] ) { // phpcs:ignore  WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
-		$post_ids = wc_order_search( wc_clean( wp_unslash( $_GET['s'] ) ) ); // WPCS: input var ok, sanitization ok.
+		$post_ids = isset( $_GET['s'] ) && ! empty( $wp->query_vars['s'] ) ? wc_order_search( wc_clean( wp_unslash( $_GET['s'] ) ) ) : array(); // WPCS: input var ok, sanitization ok.
 
 		if ( ! empty( $post_ids ) ) {
 			// Remove "s" - we don't want to search order name.
@@ -661,6 +661,24 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 			// Search by found posts.
 			$wp->query_vars['post__in'] = array_merge( $post_ids, array( 0 ) );
+		}
+
+		if ( isset( $_GET['m'] ) ) {
+			$date_option = get_option( 'woocommerce_date_type', 'date_paid' );
+			$date_query  = wc_clean( wp_unslash( $_GET['m'] ) );
+
+			unset( $wp->query_vars['m'] );
+
+			if ( 'date_paid' === $date_option || 'date_completed' === $date_option ) {
+				$date_start = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 00:00:00" );
+				$date_end   = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 23:59:59" );
+
+				if ( $date_start && $date_end ) {
+					$wp->query_vars['meta_key']     = "_$date_option";
+					$wp->query_vars['meta_value']   = array( strval( $date_start->getTimestamp() ), strval( $date_end->getTimestamp() ) );
+					$wp->query_vars['meta_compare'] = 'BETWEEN';
+				}
+			}
 		}
 	}
 }
