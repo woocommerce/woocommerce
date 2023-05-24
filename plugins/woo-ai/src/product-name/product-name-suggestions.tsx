@@ -46,11 +46,12 @@ export function ProductNameSuggestions() {
 		document.querySelector( '#title' )
 	);
 
-	const titleChangeHandler = () => {
-		clearError();
-	};
 	useEffect( () => {
 		const name = nameEl.current;
+
+		const titleChangeHandler = () => {
+			clearError();
+		};
 
 		name?.addEventListener( 'keyup', titleChangeHandler );
 		name?.addEventListener( 'change', titleChangeHandler );
