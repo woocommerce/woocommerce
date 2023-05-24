@@ -6,7 +6,7 @@ import { createElement } from '@wordpress/element';
 import type { BlockEditProps } from '@wordpress/blocks';
 import {
 	useBlockProps,
-	// @ts-ignore no exported member.
+	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 
