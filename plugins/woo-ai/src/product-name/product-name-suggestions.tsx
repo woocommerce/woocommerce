@@ -49,16 +49,12 @@ export function ProductNameSuggestions() {
 	useEffect( () => {
 		const name = nameEl.current;
 
-		const titleChangeHandler = () => {
-			clearError();
-		};
-
-		name?.addEventListener( 'keyup', titleChangeHandler );
-		name?.addEventListener( 'change', titleChangeHandler );
+		name?.addEventListener( 'keyup', clearError );
+		name?.addEventListener( 'change', clearError );
 
 		return () => {
-			name?.removeEventListener( 'keyup', titleChangeHandler );
-			name?.removeEventListener( 'change', titleChangeHandler );
+			name?.removeEventListener( 'keyup', clearError );
+			name?.removeEventListener( 'change', clearError );
 		};
 	}, [ nameEl ] );
 
