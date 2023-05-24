@@ -1,11 +1,6 @@
 /**
  * External dependencies
  */
-import { getPluginSlug } from '~/utils';
-
-/**
- * External dependencies
- */
 import { PLUGINS_STORE_NAME, PluginNames } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 import { differenceWith } from 'lodash';
@@ -17,8 +12,9 @@ import {
 	PluginInstalledAndActivatedEvent,
 	PluginsInstallationCompletedEvent,
 	PluginsInstallationCompletedWithErrorsEvent,
+	CoreProfilerStateMachineContext,
 } from '..';
-import { CoreProfilerStateMachineContext } from '..';
+import { getPluginSlug } from '~/utils';
 
 export type InstalledPlugin = {
 	plugin: string;
@@ -64,104 +60,109 @@ const createPluginInstalledAndActivatedEvent = (
 	},
 } );
 
-export const InstallAndActivatePlugins = (
-	context: CoreProfilerStateMachineContext
-) => async (
-	send: (
-		event:
-			| PluginInstalledAndActivatedEvent
-			| PluginsInstallationCompletedEvent
-			| PluginsInstallationCompletedWithErrorsEvent
-	) => void
-) => {
-	let continueInstallation = true;
-	const errors: PluginInstallError[] = [];
-	const installationCompletedResult: InstallationCompletedResult = {
-		installedPlugins: [],
-		totalTime: 0,
-	};
-	const installationStartTime = window.performance.now();
-	const setInstallationCompletedTime = () => {
-		installationCompletedResult.totalTime =
-			window.performance.now() - installationStartTime;
-	};
-
-	const handleInstallationCompleted = () => {
-		if ( errors.length ) {
-			return send( createInstallationCompletedWithErrorsEvent( errors ) );
-		}
-		setInstallationCompletedTime();
-		send( createInstallationCompletedEvent( installationCompletedResult ) );
-	};
-
-	const handlePluginInstalledAndActivated = (
-		installedPluginIndex: number
+export const InstallAndActivatePlugins =
+	( context: CoreProfilerStateMachineContext ) =>
+	async (
+		send: (
+			event:
+				| PluginInstalledAndActivatedEvent
+				| PluginsInstallationCompletedEvent
+				| PluginsInstallationCompletedWithErrorsEvent
+		) => void
 	) => {
-		send(
-			createPluginInstalledAndActivatedEvent(
-				context.pluginsSelected.length,
-				installedPluginIndex + 1
-			)
-		);
-	};
+		let continueInstallation = true;
+		const errors: PluginInstallError[] = [];
+		const installationCompletedResult: InstallationCompletedResult = {
+			installedPlugins: [],
+			totalTime: 0,
+		};
+		const installationStartTime = window.performance.now();
+		const setInstallationCompletedTime = () => {
+			installationCompletedResult.totalTime =
+				window.performance.now() - installationStartTime;
+		};
 
-	const handlePluginInstallError = ( plugin: string, error: unknown ) => {
-		errors.push( {
-			plugin,
-			error: error instanceof Error ? error.message : String( error ),
-		} );
-	};
+		const handleInstallationCompleted = () => {
+			if ( errors.length ) {
+				return send(
+					createInstallationCompletedWithErrorsEvent( errors )
+				);
+			}
+			setInstallationCompletedTime();
+			send(
+				createInstallationCompletedEvent( installationCompletedResult )
+			);
+		};
 
-	const handlePluginInstallation = async ( installedPluginIndex: number ) => {
-		// Set by timer when it's up
-		if ( ! continueInstallation ) {
-			return;
-		}
+		const handlePluginInstalledAndActivated = (
+			installedPluginIndex: number
+		) => {
+			send(
+				createPluginInstalledAndActivatedEvent(
+					context.pluginsSelected.length,
+					installedPluginIndex + 1
+				)
+			);
+		};
 
-		const plugin = getPluginSlug(
-			context.pluginsSelected[ installedPluginIndex ]
-		);
-		try {
-			const response = await dispatch(
-				PLUGINS_STORE_NAME
-			).installAndActivatePlugins( [ plugin ] );
-
-			installationCompletedResult.installedPlugins.push( {
+		const handlePluginInstallError = ( plugin: string, error: unknown ) => {
+			errors.push( {
 				plugin,
-				installTime: response.data?.install_time?.[ plugin ] || 0,
+				error: error instanceof Error ? error.message : String( error ),
 			} );
+		};
 
-			handlePluginInstalledAndActivated( installedPluginIndex );
-		} catch ( error ) {
-			handlePluginInstallError( plugin, error );
+		const handlePluginInstallation = async (
+			installedPluginIndex: number
+		) => {
+			// Set by timer when it's up
+			if ( ! continueInstallation ) {
+				return;
+			}
+
+			const plugin = getPluginSlug(
+				context.pluginsSelected[ installedPluginIndex ]
+			);
+			try {
+				const response = await dispatch(
+					PLUGINS_STORE_NAME
+				).installAndActivatePlugins( [ plugin ] );
+
+				installationCompletedResult.installedPlugins.push( {
+					plugin,
+					installTime: response.data?.install_time?.[ plugin ] || 0,
+				} );
+
+				handlePluginInstalledAndActivated( installedPluginIndex );
+			} catch ( error ) {
+				handlePluginInstallError( plugin, error );
+			}
+		};
+
+		const handleTimerExpired = async () => {
+			continueInstallation = false;
+
+			const remainingPlugins = differenceWith(
+				context.pluginsSelected,
+				installationCompletedResult.installedPlugins.map(
+					( plugin ) => plugin.plugin
+				)
+			);
+
+			await dispatch( PLUGINS_STORE_NAME ).installPlugins(
+				remainingPlugins as PluginNames[],
+				true
+			);
+
+			handleInstallationCompleted();
+		};
+
+		const timer = setTimeout( handleTimerExpired, 1000 * 30 );
+
+		for ( let index = 0; index < context.pluginsSelected.length; index++ ) {
+			await handlePluginInstallation( index );
 		}
-	};
 
-	const handleTimerExpired = async () => {
-		console.log( 'handleTimerExpired' );
-		continueInstallation = false;
-
-		const remainingPlugins = differenceWith(
-			context.pluginsSelected,
-			installationCompletedResult.installedPlugins.map(
-				( plugin ) => plugin.plugin
-			)
-		);
-
-		await dispatch( PLUGINS_STORE_NAME ).installPlugins(
-			remainingPlugins as PluginNames[],
-			true
-		);
-
+		clearTimeout( timer );
 		handleInstallationCompleted();
 	};
-
-	const timer = setTimeout( handleTimerExpired, 1000 * 30 );
-
-	for ( let index = 0; index < context.pluginsSelected.length; index++ ) {
-		await handlePluginInstallation( index );
-	}
-
-	clearTimeout( timer );
-	handleInstallationCompleted();
-};
