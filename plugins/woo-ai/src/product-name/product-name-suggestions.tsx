@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useRef, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import React from 'react';
 
 /**
@@ -42,11 +42,30 @@ export function ProductNameSuggestions() {
 	const nameEl = useRef< HTMLInputElement >(
 		document.querySelector( '#title' )
 	);
+	useEffect( () => {
+		const name = nameEl.current;
+		const titleChangeHandler = () => {
+			setFailed( false );
+		};
+
+		name?.addEventListener( 'keyup', titleChangeHandler );
+		name?.addEventListener( 'change', titleChangeHandler );
+
+		return () => {
+			name?.removeEventListener( 'keyup', titleChangeHandler );
+			name?.removeEventListener( 'change', titleChangeHandler );
+		};
+	}, [ nameEl ] );
+
+	const updateProductName = ( newName: string ) => {
+		if ( ! nameEl.current || ! newName.length ) return;
+		nameEl.current.value = newName;
+		nameEl.current.setAttribute( 'value', newName );
+	};
 
 	const handleSuggestionClick = ( suggestion: ProductDataSuggestion ) => {
-		if ( ! nameEl.current || ! suggestion.content.length ) return;
 		// Set the product name to the suggestion.
-		nameEl.current.value = suggestion.content;
+		updateProductName( suggestion.content );
 		setSuggestions( [] );
 	};
 
