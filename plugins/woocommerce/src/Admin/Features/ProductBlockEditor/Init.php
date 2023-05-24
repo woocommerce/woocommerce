@@ -526,7 +526,7 @@ class Init {
 												),
 											),
 										),
-									)
+									),
 								),
 								array(
 									'woocommerce/conditional',
