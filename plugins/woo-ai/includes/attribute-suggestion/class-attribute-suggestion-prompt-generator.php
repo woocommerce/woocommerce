@@ -8,6 +8,7 @@
 namespace Automattic\WooCommerce\AI\AttributeSuggestion;
 
 use Automattic\WooCommerce\AI\PromptFormatter\Json_Request_Formatter;
+use Automattic\WooCommerce\AI\PromptFormatter\Product_Attribute_Formatter;
 use Automattic\WooCommerce\AI\PromptFormatter\Product_Category_Formatter;
 
 defined( 'ABSPATH' ) || exit;
@@ -64,14 +65,23 @@ EXAMPLE_JSON_RESPONSE;
 	protected $json_request_formatter;
 
 	/**
+	 * The product attribute formatter.
+	 *
+	 * @var Product_Attribute_Formatter
+	 */
+	protected $product_attribute_formatter;
+
+	/**
 	 * Attribute_Suggestion_Prompt_Generator constructor.
 	 *
-	 * @param Product_Category_Formatter $product_category_formatter The product category formatter.
-	 * @param Json_Request_Formatter     $json_request_formatter     The JSON request formatter.
+	 * @param Product_Category_Formatter  $product_category_formatter The product category formatter.
+	 * @param Product_Attribute_Formatter $product_attribute_formatter The product attribute formatter.
+	 * @param Json_Request_Formatter      $json_request_formatter     The JSON request formatter.
 	 */
-	public function __construct( Product_Category_Formatter $product_category_formatter, Json_Request_Formatter $json_request_formatter ) {
-		$this->product_category_formatter = $product_category_formatter;
-		$this->json_request_formatter     = $json_request_formatter;
+	public function __construct( Product_Category_Formatter $product_category_formatter, Product_Attribute_Formatter $product_attribute_formatter, Json_Request_Formatter $json_request_formatter ) {
+		$this->product_category_formatter  = $product_category_formatter;
+		$this->product_attribute_formatter = $product_attribute_formatter;
+		$this->json_request_formatter      = $json_request_formatter;
 	}
 
 	/**
@@ -138,27 +148,10 @@ EXAMPLE_JSON_RESPONSE;
 		if ( ! empty( $request->attributes ) ) {
 			$request_prompt .= sprintf(
 				"\n%s",
-				$this->format_attributes( $request->attributes )
+				$this->product_attribute_formatter->format( $request->attributes )
 			);
 		}
 
 		return $request_prompt;
-	}
-
-	/**
-	 * Format attributes for prompt template
-	 *
-	 * @param array $attributes An associative array of attributes with the format { "name": "name", "value": "value" }.
-	 *
-	 * @return string
-	 */
-	private function format_attributes( array $attributes ): string {
-		$formatted_attributes = '';
-
-		foreach ( $attributes as $attribute ) {
-			$formatted_attributes .= sprintf( "%s: \"%s\"\n", $attribute['name'], $attribute['value'] );
-		}
-
-		return $formatted_attributes;
 	}
 }

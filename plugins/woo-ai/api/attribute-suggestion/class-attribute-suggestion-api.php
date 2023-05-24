@@ -14,6 +14,7 @@ use Automattic\WooCommerce\AI\AttributeSuggestion\Attribute_Suggestion_Request;
 use Automattic\WooCommerce\AI\AttributeSuggestion\Attribute_Suggestion_Service;
 use Automattic\WooCommerce\AI\Completion\Completion_Service;
 use Automattic\WooCommerce\AI\PromptFormatter\Json_Request_Formatter;
+use Automattic\WooCommerce\AI\PromptFormatter\Product_Attribute_Formatter;
 use Automattic\WooCommerce\AI\PromptFormatter\Product_Category_Formatter;
 use Exception;
 use WC_REST_Data_Controller;
@@ -59,7 +60,8 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 	public function __construct() {
 		$json_request_formatter             = new Json_Request_Formatter();
 		$product_category_formatter         = new Product_Category_Formatter();
-		$prompt_generator                   = new Attribute_Suggestion_Prompt_Generator( $product_category_formatter, $json_request_formatter );
+		$product_attribute_formatter        = new Product_Attribute_Formatter();
+		$prompt_generator                   = new Attribute_Suggestion_Prompt_Generator( $product_category_formatter, $product_attribute_formatter, $json_request_formatter );
 		$completion_service                 = new Completion_Service();
 		$this->attribute_suggestion_service = new Attribute_Suggestion_Service( $prompt_generator, $completion_service );
 
@@ -177,22 +179,6 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 		// Check if enough data is provided in the name and description to get suggestions.
 		if ( strlen( $name ) < 10 && strlen( $description ) < 50 ) {
 			return new WP_Error( 'error', __( 'Please provide a name with at least 10 characters, or a description with at least 50 characters.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
-
-		// Map the attribute labels to their name.
-		if ( ! empty( $attributes ) ) {
-			$attribute_labels = wc_get_attribute_taxonomy_labels();
-			$attributes       = array_map(
-				function ( $attribute ) use ( $attribute_labels ) {
-					$attribute_name = $attribute['name'];
-					if ( ! empty( $attribute_labels[ $attribute_name ] ) ) {
-						$attribute['name'] = $attribute_labels[ $attribute_name ];
-					}
-
-					return $attribute;
-				},
-				$attributes
-			);
 		}
 
 		try {

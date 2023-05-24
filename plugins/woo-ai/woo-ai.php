@@ -60,6 +60,7 @@ add_action(
 		require_once dirname( __FILE__ ) . '/includes/completion/class-completion-service.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/interface-prompt-formatter.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-product-category-formatter.php';
+		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-product-attribute-formatter.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-json-request-formatter.php';
 		require_once dirname( __FILE__ ) . '/includes/attribute-suggestion/class-attribute-suggestion-request.php';
 		require_once dirname( __FILE__ ) . '/includes/attribute-suggestion/class-attribute-suggestion-prompt-generator.php';
