@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\AI\PromptFormatter;
 
+use InvalidArgumentException;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -27,11 +29,29 @@ JSON_REQUEST_PROMPT;
 	 * @param string $data An example JSON response to include in the request.
 	 *
 	 * @return string
+	 *
+	 * @throws InvalidArgumentException If the input data is not valid.
 	 */
 	public function format( $data ): string {
+		if ( ! $this->validate_data( $data ) ) {
+			throw new InvalidArgumentException( 'Invalid input data. Provide a string.' );
+		}
+
 		return sprintf(
 			self::JSON_REQUEST_PROMPT,
 			$data
 		);
 	}
+
+	/**
+	 * Validates the data to make sure it can be formatted.
+	 *
+	 * @param mixed $data The data to format.
+	 *
+	 * @return bool True if the data is valid, false otherwise.
+	 */
+	public function validate_data( $data ): bool {
+		return ! empty( $data ) && is_string( $data );
+	}
+
 }

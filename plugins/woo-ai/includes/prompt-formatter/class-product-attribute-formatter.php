@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\AI\PromptFormatter;
 
+use InvalidArgumentException;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -33,17 +35,19 @@ class Product_Attribute_Formatter implements Prompt_Formatter_Interface {
 	 * @param array $data An associative array of attributes with the format { "name": "name", "value": "value" }.
 	 *
 	 * @return string A string containing the formatted attributes.
+	 *
+	 * @throws InvalidArgumentException If the input data is not valid.
 	 */
 	public function format( $data ): string {
-		// Return an empty array if the input category ids is empty.
-		if ( empty( $data ) || ! is_array( $data ) ) {
-			return '';
+		if ( ! $this->validate_data( $data ) ) {
+			throw new InvalidArgumentException( 'Invalid input data. Provide an array of attributes.' );
 		}
 
 		$formatted_attributes = '';
 
 		foreach ( $data as $attribute ) {
-			if ( empty( $attribute['name'] ) || $attribute['value'] || empty( $this->attribute_labels[ $attribute['name'] ] ) ) {
+			// Skip if the attribute value is empty or if the attribute label is empty.
+			if ( empty( $attribute['value'] ) || empty( $this->attribute_labels[ $attribute['name'] ] ) ) {
 				continue;
 			}
 			$label = $this->attribute_labels[ $attribute['name'] ];
@@ -52,6 +56,27 @@ class Product_Attribute_Formatter implements Prompt_Formatter_Interface {
 		}
 
 		return $formatted_attributes;
+	}
+
+	/**
+	 * Validates the data to make sure it can be formatted.
+	 *
+	 * @param mixed $data The data to format.
+	 *
+	 * @return bool True if the data is valid, false otherwise.
+	 */
+	public function validate_data( $data ): bool {
+		if ( empty( $data ) || ! is_array( $data ) ) {
+			return false;
+		}
+
+		foreach ( $data as $attribute ) {
+			if ( empty( $attribute['name'] ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 }

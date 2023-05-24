@@ -21,4 +21,13 @@ interface Prompt_Formatter_Interface {
 	 * @return string The formatted prompt.
 	 */
 	public function format( $data ): string;
+
+	/**
+	 * Validates the data to make sure it can be formatted.
+	 *
+	 * @param mixed $data The data to format.
+	 *
+	 * @return bool True if the data is valid, false otherwise.
+	 */
+	public function validate_data( $data ): bool;
 }

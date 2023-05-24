@@ -7,6 +7,9 @@
 
 namespace Automattic\WooCommerce\AI\PromptFormatter;
 
+use Exception;
+use InvalidArgumentException;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -20,19 +23,22 @@ class Product_Category_Formatter implements Prompt_Formatter_Interface {
 	 * @param array $data The category ids.
 	 *
 	 * @return string A string containing the formatted categories. E.g., "Books > Fiction, Books > Novels > Fiction"
+	 *
+	 * @throws InvalidArgumentException If the input data is not an array.
 	 */
 	public function format( $data ): string {
-		// Return an empty array if the input category ids is empty.
-		if ( empty( $data ) || ! is_array( $data ) ) {
-			return '';
+		if ( ! $this->validate_data( $data ) ) {
+			throw new InvalidArgumentException( 'Invalid input data. Provide an array of category ids.' );
 		}
 
-		$categories = array_map(
-			function ( $category_id ) {
-				return $this->format_category_name( $category_id );
-			},
-			$data
-		);
+		$categories = array();
+		foreach ( $data as $category_id ) {
+			try {
+				$categories[] = $this->format_category_name( $category_id );
+			} catch ( Exception $e ) {
+				continue;
+			}
+		}
 
 		return implode( ', ', $categories );
 	}
@@ -43,9 +49,17 @@ class Product_Category_Formatter implements Prompt_Formatter_Interface {
 	 * @param int $category_id The category id.
 	 *
 	 * @return string The formatted category name.
+	 *
+	 * @throws Exception If the category is not found.
 	 */
 	private function format_category_name( int $category_id ): string {
-		$category            = get_term( $category_id, 'product_cat' );
+		$category = get_term( $category_id, 'product_cat' );
+
+		// If the category is not found, throw an exception.
+		if ( ( ! $category || is_wp_error( $category ) ) ) {
+			throw new Exception( 'Category not found.' );
+		}
+
 		$parent_categories   = $this->get_parent_categories( $category_id );
 		$parent_categories[] = $category->name;
 
@@ -61,6 +75,11 @@ class Product_Category_Formatter implements Prompt_Formatter_Interface {
 	 */
 	private function get_parent_categories( int $category_id ): array {
 		$parent_category_ids = get_ancestors( $category_id, 'product_cat' );
+
+		if ( empty( $parent_category_ids ) ) {
+			return array();
+		}
+
 		$parent_category_ids = array_reverse( $parent_category_ids );
 
 		return array_map(
@@ -71,6 +90,17 @@ class Product_Category_Formatter implements Prompt_Formatter_Interface {
 			},
 			$parent_category_ids
 		);
+	}
+
+	/**
+	 * Validates the data to make sure it can be formatted.
+	 *
+	 * @param mixed $data The data to format.
+	 *
+	 * @return bool True if the data is valid, false otherwise.
+	 */
+	public function validate_data( $data ): bool {
+		return ! empty( $data ) && is_array( $data );
 	}
 
 }
