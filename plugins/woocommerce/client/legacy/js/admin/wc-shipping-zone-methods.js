@@ -85,6 +85,7 @@
 					this.listenTo( this.model, 'change:methods', this.setUnloadConfirmation );
 					this.listenTo( this.model, 'saved:methods', this.clearUnloadConfirmation );
 					this.listenTo( this.model, 'saved:methods', this.render );
+					this.listenTo( this.model, 'rerender', this.render );
 					$tbody.on( 'change', { view: this }, this.updateModelOnChange );
 					$tbody.on( 'sortupdate', { view: this }, this.updateModelOnSort );
 					$( window ).on( 'beforeunload', { view: this }, this.unloadConfirmation );
@@ -388,11 +389,12 @@
 								}
 								// Trigger save if there are changes, or just re-render
 								if ( _.size( shippingMethodView.model.changes ) ) {
-									shippingMethodView.model.save();
+									shippingMethodView.model.set( 'methods', response.data.methods );
+									shippingMethodView.model.trigger( 'change:methods' );
+									shippingMethodView.model.trigger( 'rerender' );
 								} else {
 									shippingMethodView.model.set( 'methods', response.data.methods );
 									shippingMethodView.model.trigger( 'change:methods' );
-									shippingMethodView.model.changes = {};
 									shippingMethodView.model.trigger( 'saved:methods' );
 								}
 							}
