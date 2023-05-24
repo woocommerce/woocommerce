@@ -36,6 +36,7 @@ class Product_Category_Formatter implements Prompt_Formatter_Interface {
 			try {
 				$categories[] = $this->format_category_name( $category_id );
 			} catch ( Exception $e ) {
+				// If the category is not found, skip it.
 				continue;
 			}
 		}
