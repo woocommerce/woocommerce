@@ -1927,9 +1927,6 @@ importers:
 
   packages/js/onboarding:
     dependencies:
-      '@automattic/interpolate-components':
-        specifier: ^1.2.0
-        version: 1.2.1(@types/react@17.0.50)(react@17.0.2)
       '@woocommerce/components':
         specifier: workspace:*
         version: link:../components
@@ -4897,7 +4894,7 @@ packages:
       '@babel/core': ^7.13.0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/helper-skip-transparent-expression-wrappers': 7.18.9
       '@babel/plugin-proposal-optional-chaining': 7.18.9(@babel/core@7.17.8)
     dev: true
@@ -4909,7 +4906,7 @@ packages:
       '@babel/core': ^7.13.0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/helper-skip-transparent-expression-wrappers': 7.18.9
       '@babel/plugin-proposal-optional-chaining': 7.18.9(@babel/core@7.21.3)
 
@@ -7991,7 +7988,7 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-module-transforms': 7.21.2
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8004,7 +8001,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-module-transforms': 7.21.2
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
     transitivePeerDependencies:
       - supports-color
 
@@ -8087,7 +8084,7 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-module-transforms': 7.21.2
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/helper-simple-access': 7.20.2
     transitivePeerDependencies:
       - supports-color
@@ -8101,7 +8098,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-module-transforms': 7.21.2
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/helper-simple-access': 7.20.2
     transitivePeerDependencies:
       - supports-color
