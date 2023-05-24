@@ -67,7 +67,7 @@ class DefaultFreeExtensions {
 			array(
 				'key'     => 'obw/core-profiler',
 				'title'   => __( 'Grow your store', 'woocommerce' ),
-				'plugins' => self::withCoreProfilerFields(
+				'plugins' => self::with_core_profiler_fields(
 					array(
 						self::get_plugin( 'woocommerce-payments' ),
 						self::get_plugin( 'woocommerce-services:shipping' ),
@@ -811,7 +811,17 @@ class DefaultFreeExtensions {
 		return $plugin;
 	}
 
-	public static function withCoreProfilerFields( $plugins ) {
+	/**
+	 * Decorate plugin data with core profiler fields.
+	 *
+	 * - Updated description for the core-profiler.
+	 * - Adds learn_more_link and label.
+	 *
+	 * @param array $plugins Array of plugins.
+	 *
+	 * @return array
+	 */
+	public static function with_core_profiler_fields( array $plugins ) {
 		$_plugins = array(
 			'woocommerce-payments'          => array(
 				'label'           => __( 'Get paid with WooCommerce Payments', 'woocommerce' ),
@@ -866,7 +876,7 @@ class DefaultFreeExtensions {
 						return array_filter(
 							$rule['operand'],
 							function( $operand ) {
-								return $operand['type'] !== 'plugins_activated';
+								return 'plugins_activated' !== $operand['type'];
 							}
 						);
 					},
