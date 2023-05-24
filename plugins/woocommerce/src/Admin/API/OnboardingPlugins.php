@@ -44,12 +44,12 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/install-async',
+			'/' . $this->rest_base . '/install-activate-async',
 			array(
 				array(
 					'methods'             => 'POST',
-					'callback'            => array( $this, 'install_async' ),
-					'permission_callback' => array( $this, 'can_install_plugins' ),
+					'callback'            => array( $this, 'install_activate_async' ),
+					'permission_callback' => array( $this, 'can_install_and_activate_plugins' ),
 					'args'                => array(
 						'plugins' => array(
 							'description'       => 'A list of plugins to install',
@@ -119,7 +119,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	 *
 	 * @return array
 	 */
-	public function install_async( WP_REST_Request $request ) {
+	public function install_activate_async( WP_REST_Request $request ) {
 		$plugins = $request->get_param( 'plugins' );
 		$job_id  = uniqid();
 
