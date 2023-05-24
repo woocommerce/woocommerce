@@ -6,7 +6,6 @@ import { createMachine, assign, DoneInvokeEvent, actions, spawn } from 'xstate';
 import { useMachine } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
-import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import {
 	ExtensionList,
 	OPTIONS_STORE_NAME,
@@ -132,7 +131,7 @@ export type CoreProfilerStateMachineContext = {
 	geolocatedLocation: {
 		location: string;
 	};
-	pluginsAvailable: ExtensionList[ 'plugins' ] | [  ];
+	pluginsAvailable: ExtensionList[ 'plugins' ] | [];
 	pluginsSelected: string[]; // extension slugs
 	pluginsInstallationErrors: PluginInstallError[];
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
@@ -208,8 +207,10 @@ const handleOnboardingProfileOption = assign( {
 } );
 
 const redirectToWooHome = () => {
+	/**
+	 * @todo replace with navigateTo
+	 */
 	window.location.href = '/wp-admin/admin.php?page=wc-admin';
-	// navigateTo( { url: getNewPath( {}, '/', {} ) } );
 };
 
 const recordTracksIntroCompleted = () => {
@@ -308,12 +309,8 @@ const updateTrackingOption = (
 const updateOnboardingProfileOption = (
 	context: CoreProfilerStateMachineContext
 ) => {
-	const {
-		businessChoice,
-		sellingOnlineAnswer,
-		sellingPlatforms,
-		...rest
-	} = context.userProfile;
+	const { businessChoice, sellingOnlineAnswer, sellingPlatforms, ...rest } =
+		context.userProfile;
 
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_onboarding_profile: {
@@ -745,9 +742,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					return await dispatch(
 						ONBOARDING_STORE_NAME
 					).updateProfileItems( {
-						business_extensions: event.payload.installationCompletedResult.installedPlugins.map(
-							( extension: InstalledPlugin ) => extension.plugin
-						),
+						business_extensions:
+							event.payload.installationCompletedResult.installedPlugins.map(
+								( extension: InstalledPlugin ) =>
+									extension.plugin
+							),
 						completed: true,
 					} );
 				},
@@ -831,12 +830,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 									| string[];
 							} = {
 								success: true,
-								installed_extensions: installationCompletedResult.installedPlugins.map(
-									( installedPlugin: InstalledPlugin ) =>
-										getPluginTrackKey(
-											installedPlugin.plugin
-										)
-								),
+								installed_extensions:
+									installationCompletedResult.installedPlugins.map(
+										( installedPlugin: InstalledPlugin ) =>
+											getPluginTrackKey(
+												installedPlugin.plugin
+											)
+									),
 								total_time: getTimeFrame(
 									installationCompletedResult.totalTime
 								),
