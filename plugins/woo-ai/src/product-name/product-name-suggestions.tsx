@@ -20,33 +20,35 @@ import {
 import SuggestionItem from './suggestion-item';
 import RandomTipMessage from '../shared/random-tip-message';
 
+enum SuggestionsState {
+	Fetching = 'fetching',
+	Failed = 'failed',
+	None = 'none',
+}
+
 export function ProductNameSuggestions() {
-	const [ fetching, setFetching ] = useState( false );
-	const [ failed, setFailed ] = useState( false );
+	const [ suggestionsState, setSuggestionsState ] =
+		useState< SuggestionsState >( SuggestionsState.None );
 	const [ error, setError ] = useState( '' );
 	const [ suggestions, setSuggestions ] = useState< ProductDataSuggestion[] >(
 		[]
 	);
 	const { fetchSuggestions } = useProductDataSuggestions();
 
-	const updateFailedStateWithError = ( errorMessage: string ) => {
-		setError( errorMessage );
-		setFailed( true );
-	};
-
 	const clearError = () => {
 		setError( '' );
-		setFailed( false );
+		setSuggestionsState( SuggestionsState.None );
 	};
 
 	const nameEl = useRef< HTMLInputElement >(
 		document.querySelector( '#title' )
 	);
+
+	const titleChangeHandler = () => {
+		clearError();
+	};
 	useEffect( () => {
 		const name = nameEl.current;
-		const titleChangeHandler = () => {
-			setFailed( false );
-		};
 
 		name?.addEventListener( 'keyup', titleChangeHandler );
 		name?.addEventListener( 'change', titleChangeHandler );
@@ -64,7 +66,6 @@ export function ProductNameSuggestions() {
 	};
 
 	const handleSuggestionClick = ( suggestion: ProductDataSuggestion ) => {
-		// Set the product name to the suggestion.
 		updateProductName( suggestion.content );
 		setSuggestions( [] );
 	};
@@ -72,45 +73,42 @@ export function ProductNameSuggestions() {
 	const getSuggestions = async () => {
 		clearError();
 		setSuggestions( [] );
-		setFetching( true );
+		setSuggestionsState( SuggestionsState.Fetching );
 		try {
 			const currentProductData = productData();
 			const request: ProductDataSuggestionRequest = {
 				requested_data: 'name',
-				name: currentProductData.name,
-				description: currentProductData.description,
-				categories: currentProductData.categories,
-				tags: currentProductData.tags,
-				attributes: currentProductData.attributes,
+				...currentProductData,
 			};
 			setSuggestions( await fetchSuggestions( request ) );
+			setSuggestionsState( SuggestionsState.None );
 		} catch ( e ) {
 			/* eslint-disable no-console */
 			console.error( e );
 
-			updateFailedStateWithError( e instanceof Error ? e.message : '' );
+			setError( e instanceof Error ? e.message : '' );
+			setSuggestionsState( SuggestionsState.Failed );
 		}
-		setFetching( false );
 	};
 
 	return (
 		<div className="wc-product-name-suggestions-container">
-			{ suggestions.length > 0 && ! fetching && (
-				<ul className="wc-product-name-suggestions__suggested-names">
-					{ suggestions.map( ( suggestion, index ) => (
-						<SuggestionItem
-							key={ index }
-							suggestion={ suggestion }
-							onSuggestionClick={ handleSuggestionClick }
-						/>
-					) ) }
-				</ul>
-			) }
-			{ ! fetching && (
+			{ suggestions.length > 0 &&
+				suggestionsState !== SuggestionsState.Fetching && (
+					<ul className="wc-product-name-suggestions__suggested-names">
+						{ suggestions.map( ( suggestion, index ) => (
+							<SuggestionItem
+								key={ index }
+								suggestion={ suggestion }
+								onSuggestionClick={ handleSuggestionClick }
+							/>
+						) ) }
+					</ul>
+				) }
+			{ suggestionsState !== SuggestionsState.Fetching && (
 				<button
 					className="button woo-ai-get-suggestions-btn"
 					type="button"
-					disabled={ fetching }
 					onClick={ getSuggestions }
 				>
 					<img src={ MagicIcon } alt="magic button icon" />
@@ -120,17 +118,21 @@ export function ProductNameSuggestions() {
 						__( 'Get Suggestions (beta)', 'woocommerce' ) }
 				</button>
 			) }
-			{ fetching && (
+			{ suggestionsState === SuggestionsState.Fetching && (
 				<p className="wc-product-name-suggestions__loading-message">
-					<RandomLoadingMessage isLoading={ fetching } />
+					<RandomLoadingMessage
+						isLoading={
+							suggestionsState === SuggestionsState.Fetching
+						}
+					/>
 				</p>
 			) }
-			{ fetching && (
+			{ suggestionsState === SuggestionsState.Fetching && (
 				<p className="wc-product-name-suggestions__tip-message">
 					<RandomTipMessage />
 				</p>
 			) }
-			{ failed && (
+			{ suggestionsState === SuggestionsState.Failed && (
 				<p className="wc-product-name-suggestions__error-message">
 					<ErrorMessage error={ error } />
 					<button
