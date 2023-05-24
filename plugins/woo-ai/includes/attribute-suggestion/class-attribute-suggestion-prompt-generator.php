@@ -7,28 +7,33 @@
 
 namespace Automattic\WooCommerce\AI\AttributeSuggestion;
 
+use Automattic\WooCommerce\AI\PromptFormatter\Json_Request_Formatter;
+use Automattic\WooCommerce\AI\PromptFormatter\Product_Category_Formatter;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Attribute Suggestion Prompt Generator Class
  */
 class Attribute_Suggestion_Prompt_Generator {
-	public const SYSTEM_PROMPT = <<<SYSTEM_PROMPT
+	private const PROMPT_TEMPLATE = <<<PROMPT_TEMPLATE
 You are a SEO and marketing expert specializing in e-commerce stores built using WooCommerce.
 
 You are given the product's name, description, tags, categories, and other attributes. You will also be given a requested attribute.
 Your task is to provide three optimized alternatives to the requested attribute to enhance the online store's SEO performance and sales.
 Suppose the requested attribute is the name. In that case, you will provide the best possible option for the product's name based on the other attributes, such as the given product name, description, tags, and categories.
 
-Only return suggestions for the requested attribute in the "content" part of your JSON response. The request will be in the following format, the value of each attribute will be inside double quotation marks:
+You provide suggestions for optimizing a product's %s to improve the store's SEO performance and sales.
+Return only the optimized alternative value for product's %s in the "content" part of your JSON response.
+Return a short and concise reason for each suggestion in seven words in the "reason" part of your JSON response.
+The product's properties are:
 
-Requested Attribute:
-Name:
-Description:
-Tags (comma separated):
-Categories (comma separated, child categories separated with >):
+%s
 
-Structure your response as JSON (RFC 8259), similar to this example:
+Do not include the request in your response. Do not make up the request or missing attributes.
+PROMPT_TEMPLATE;
+
+	const EXAMPLE_JSON_RESPONSE = <<<EXAMPLE_JSON_RESPONSE
 {
     "suggestions": [
         {
@@ -41,17 +46,32 @@ Structure your response as JSON (RFC 8259), similar to this example:
         }
     ]
 }
+EXAMPLE_JSON_RESPONSE;
 
-You speak only JSON (RFC 8259). Output only the JSON response. Do not say anything else or use normal text. Do not include the request in your response. If no requested attribute is included in the request, respond with an empty array of suggestions. Do not make up the request or missing attributes. Wait for the request.
-SYSTEM_PROMPT;
 
 	/**
-	 * Build the system prompt.
+	 * The product category formatter.
 	 *
-	 * @return string
+	 * @var Product_Category_Formatter
 	 */
-	public function get_system_prompt(): string {
-		return self::SYSTEM_PROMPT;
+	protected $product_category_formatter;
+
+	/**
+	 * The JSON request formatter.
+	 *
+	 * @var Json_Request_Formatter
+	 */
+	protected $json_request_formatter;
+
+	/**
+	 * Attribute_Suggestion_Prompt_Generator constructor.
+	 *
+	 * @param Product_Category_Formatter $product_category_formatter The product category formatter.
+	 * @param Json_Request_Formatter     $json_request_formatter     The JSON request formatter.
+	 */
+	public function __construct( Product_Category_Formatter $product_category_formatter, Json_Request_Formatter $json_request_formatter ) {
+		$this->product_category_formatter = $product_category_formatter;
+		$this->json_request_formatter     = $json_request_formatter;
 	}
 
 	/**
@@ -62,39 +82,67 @@ SYSTEM_PROMPT;
 	 * @return string
 	 */
 	public function get_user_prompt( Attribute_Suggestion_Request $request ): string {
-		$request_template = $this->get_request_template();
+		$request_prompt = $this->get_request_prompt( $request );
 
-		return sprintf(
-			$request_template,
+		$prompt = sprintf(
+			self::PROMPT_TEMPLATE,
 			$request->requested_attribute,
 			$request->requested_attribute,
-			$request->requested_attribute,
-			$request->name,
-			$request->description,
-			implode( ', ', $request->tags ),
-			implode( ', ', $request->categories ),
-			$this->format_attributes( $request->attributes )
+			$request_prompt
 		);
+
+		// Append the JSON request prompt.
+		$prompt .= "\n" . $this->json_request_formatter->format( self::EXAMPLE_JSON_RESPONSE );
+
+		return $prompt;
 	}
 
 	/**
-	 * Get request template for attribute suggestions.
+	 * Build a prompt for the request.
+	 *
+	 * @param Attribute_Suggestion_Request $request The request to build the prompt for.
 	 *
 	 * @return string
 	 */
-	private function get_request_template(): string {
-		return <<<REQUEST_PROMPT_TEMPLATE
-You are a WooCommerce SEO and marketing expert who speaks only JSON (RFC 8259).
-You provide multiple suggestions for optimizing a product's %s to improve the store's SEO performance and sales.
-Return only the optimized alternative value for product's %s in the "content" part of your JSON response.
-Return a short and concise reason for each suggestion in seven words in the "reason" part of your JSON response.
-The product's properties are:
-Name: "%s"
-Description: "%s"
-Tags (comma separated): "%s"
-Categories (comma separated, child categories separated with >): "%s"
-%s
-REQUEST_PROMPT_TEMPLATE;
+	private function get_request_prompt( Attribute_Suggestion_Request $request ): string {
+		$request_prompt = '';
+
+		if ( ! empty( $request->name ) ) {
+			$request_prompt .= sprintf(
+				"\nName: %s",
+				$request->name
+			);
+		}
+
+		if ( ! empty( $request->description ) ) {
+			$request_prompt .= sprintf(
+				"\nDescription: %s",
+				$request->description
+			);
+		}
+
+		if ( ! empty( $request->tags ) ) {
+			$request_prompt .= sprintf(
+				"\nTags (comma separated): %s",
+				implode( ', ', $request->tags )
+			);
+		}
+
+		if ( ! empty( $request->categories ) ) {
+			$request_prompt .= sprintf(
+				"\nCategories (comma separated, child categories separated with >): %s",
+				$this->product_category_formatter->format( $request->categories )
+			);
+		}
+
+		if ( ! empty( $request->attributes ) ) {
+			$request_prompt .= sprintf(
+				"\n%s",
+				$this->format_attributes( $request->attributes )
+			);
+		}
+
+		return $request_prompt;
 	}
 
 	/**

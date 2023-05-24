@@ -57,10 +57,6 @@ class Attribute_Suggestion_Service {
 	public function get_suggestions( Attribute_Suggestion_Request $request ): array {
 		$messages = array(
 			array(
-				'role'    => 'system',
-				'content' => $this->prompt_generator->get_system_prompt(),
-			),
-			array(
 				'role'    => 'user',
 				'content' => $this->prompt_generator->get_user_prompt( $request ),
 			),

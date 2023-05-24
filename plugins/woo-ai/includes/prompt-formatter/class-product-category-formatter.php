@@ -5,34 +5,36 @@
  * @package Woo_AI
  */
 
-namespace Automattic\WooCommerce\AI\PromptUtils;
+namespace Automattic\WooCommerce\AI\PromptFormatter;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Product Category Formatter class.
  */
-class Product_Category_Formatter {
+class Product_Category_Formatter implements Prompt_Formatter_Interface {
 
 	/**
 	 * Get the category names from the category ids from WooCommerce and recursively get all the parent categories and prepend them to the category names separated by >.
 	 *
-	 * @param array $category_ids The category ids.
+	 * @param array $data The category ids.
 	 *
-	 * @return string[] An array of category names.
+	 * @return string A string containing the formatted categories. E.g., "Books > Fiction, Books > Novels > Fiction"
 	 */
-	public function get_category_names( array $category_ids ): array {
-		// Return an empty array if the input category_ids is empty.
-		if ( empty( $category_ids ) ) {
-			return array();
+	public function format( $data ): string {
+		// Return an empty array if the input category ids is empty.
+		if ( empty( $data ) ) {
+			return '';
 		}
 
-		return array_map(
+		$categories = array_map(
 			function ( $category_id ) {
 				return $this->format_category_name( $category_id );
 			},
-			$category_ids
+			$data
 		);
+
+		return implode( ', ', $categories );
 	}
 
 	/**

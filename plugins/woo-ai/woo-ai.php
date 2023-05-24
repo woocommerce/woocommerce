@@ -58,7 +58,9 @@ add_action(
 		require 'api/api.php';
 		require_once dirname( __FILE__ ) . '/includes/completion/interface-completion-service.php';
 		require_once dirname( __FILE__ ) . '/includes/completion/class-completion-service.php';
-		require_once dirname( __FILE__ ) . '/includes/prompt-utils/class-product-category-formatter.php';
+		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/interface-prompt-formatter.php';
+		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-product-category-formatter.php';
+		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-json-request-formatter.php';
 		require_once dirname( __FILE__ ) . '/includes/attribute-suggestion/class-attribute-suggestion-request.php';
 		require_once dirname( __FILE__ ) . '/includes/attribute-suggestion/class-attribute-suggestion-prompt-generator.php';
 		require_once dirname( __FILE__ ) . '/includes/attribute-suggestion/class-attribute-suggestion-service.php';

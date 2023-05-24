@@ -13,7 +13,8 @@ use Automattic\WooCommerce\AI\AttributeSuggestion\Attribute_Suggestion_Prompt_Ge
 use Automattic\WooCommerce\AI\AttributeSuggestion\Attribute_Suggestion_Request;
 use Automattic\WooCommerce\AI\AttributeSuggestion\Attribute_Suggestion_Service;
 use Automattic\WooCommerce\AI\Completion\Completion_Service;
-use Automattic\WooCommerce\AI\PromptUtils\Product_Category_Formatter;
+use Automattic\WooCommerce\AI\PromptFormatter\Json_Request_Formatter;
+use Automattic\WooCommerce\AI\PromptFormatter\Product_Category_Formatter;
 use Exception;
 use WC_REST_Data_Controller;
 use WP_Error;
@@ -39,13 +40,6 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 	protected $attribute_suggestion_service;
 
 	/**
-	 * The product category formatter.
-	 *
-	 * @var Product_Category_Formatter
-	 */
-	protected $product_category_formatter;
-
-	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
@@ -63,10 +57,11 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 	 * Constructor
 	 */
 	public function __construct() {
-		$prompt_generator                   = new Attribute_Suggestion_Prompt_Generator();
+		$json_request_formatter             = new Json_Request_Formatter();
+		$product_category_formatter         = new Product_Category_Formatter();
+		$prompt_generator                   = new Attribute_Suggestion_Prompt_Generator( $product_category_formatter, $json_request_formatter );
 		$completion_service                 = new Completion_Service();
 		$this->attribute_suggestion_service = new Attribute_Suggestion_Service( $prompt_generator, $completion_service );
-		$this->product_category_formatter   = new Product_Category_Formatter();
 
 		$this->register_routes();
 	}
@@ -199,8 +194,6 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 				$attributes
 			);
 		}
-
-		$categories = $this->product_category_formatter->get_category_names( $categories );
 
 		try {
 			$attribute_request = new Attribute_Suggestion_Request( $requested_attribute, $name, $description, $tags, $categories, $attributes );
