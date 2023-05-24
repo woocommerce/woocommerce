@@ -14,5 +14,5 @@
 		"SCRIPT_DEBUG": true,
 		"ALTERNATE_WP_CRON": true,
 	},
-	"afterSetup": "npx wp-env run cli \"wp option update wc_admin_helper_feature_values '{\\\"product-block-editor\\\": true}' --format=json\""
+	"afterSetup": "npx wp-env run cli \"wp option update woocommerce_feature_product_block_editor_enabled 'yes'\""
 }
