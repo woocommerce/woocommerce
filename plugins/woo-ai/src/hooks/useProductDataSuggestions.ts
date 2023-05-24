@@ -8,16 +8,18 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import {
-	AttributeSuggestion,
-	AttributeSuggestionRequest,
+	ProductDataSuggestion,
+	ProductDataSuggestionRequest,
 } from '../shared/types';
 
 type WooApiResponse = {
-	suggestions: AttributeSuggestion[];
+	suggestions: ProductDataSuggestion[];
 };
 
-export const useAttributeSuggestions = () => {
-	const fetchSuggestions = async ( request: AttributeSuggestionRequest ) => {
+export const useProductDataSuggestions = () => {
+	const fetchSuggestions = async (
+		request: ProductDataSuggestionRequest
+	) => {
 		if ( request.name.length < 10 && request.description.length < 50 ) {
 			throw new Error(
 				__(
@@ -28,7 +30,7 @@ export const useAttributeSuggestions = () => {
 		}
 
 		const response = await apiFetch< WooApiResponse >( {
-			path: '/wooai/attribute-suggestions',
+			path: '/wooai/product-data-suggestions',
 			method: 'POST',
 			data: request,
 		} );

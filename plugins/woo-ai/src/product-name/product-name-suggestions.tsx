@@ -12,10 +12,10 @@ import MagicIcon from '../../assets/images/icons/magic.svg';
 import { productData } from '../shared/productData';
 import RandomLoadingMessage from '../shared/random-loading-message';
 import ErrorMessage from '../shared/error-message';
-import { useAttributeSuggestions } from '../hooks/useAttributeSuggestions';
+import { useProductDataSuggestions } from '../hooks/useProductDataSuggestions';
 import {
-	AttributeSuggestion,
-	AttributeSuggestionRequest,
+	ProductDataSuggestion,
+	ProductDataSuggestionRequest,
 } from '../shared/types';
 import SuggestionItem from './suggestion-item';
 import RandomTipMessage from '../shared/random-tip-message';
@@ -24,10 +24,10 @@ export function ProductNameSuggestions() {
 	const [ fetching, setFetching ] = useState( false );
 	const [ failed, setFailed ] = useState( false );
 	const [ error, setError ] = useState( '' );
-	const [ suggestions, setSuggestions ] = useState< AttributeSuggestion[] >(
+	const [ suggestions, setSuggestions ] = useState< ProductDataSuggestion[] >(
 		[]
 	);
-	const { fetchSuggestions } = useAttributeSuggestions();
+	const { fetchSuggestions } = useProductDataSuggestions();
 
 	const updateFailedStateWithError = ( errorMessage: string ) => {
 		setError( errorMessage );
@@ -43,7 +43,7 @@ export function ProductNameSuggestions() {
 		document.querySelector( '#title' )
 	);
 
-	const handleSuggestionClick = ( suggestion: AttributeSuggestion ) => {
+	const handleSuggestionClick = ( suggestion: ProductDataSuggestion ) => {
 		if ( ! nameEl.current || ! suggestion.content.length ) return;
 		// Set the product name to the suggestion.
 		nameEl.current.value = suggestion.content;
@@ -56,8 +56,8 @@ export function ProductNameSuggestions() {
 		setFetching( true );
 		try {
 			const currentProductData = productData();
-			const request: AttributeSuggestionRequest = {
-				requested_attribute: 'name',
+			const request: ProductDataSuggestionRequest = {
+				requested_data: 'name',
 				name: currentProductData.name,
 				description: currentProductData.description,
 				categories: currentProductData.categories,

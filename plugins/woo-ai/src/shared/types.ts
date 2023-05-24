@@ -19,13 +19,13 @@ export type ProductData = {
 	is_virtual: string;
 };
 
-export type AttributeSuggestion = {
+export type ProductDataSuggestion = {
 	reason: string;
 	content: string;
 };
 
-export type AttributeSuggestionRequest = {
-	requested_attribute: string;
+export type ProductDataSuggestionRequest = {
+	requested_data: string;
 	name: string;
 	description: string;
 	categories: string[];

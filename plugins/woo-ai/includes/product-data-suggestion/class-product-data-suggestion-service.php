@@ -5,7 +5,7 @@
  * @package Woo_AI
  */
 
-namespace Automattic\WooCommerce\AI\AttributeSuggestion;
+namespace Automattic\WooCommerce\AI\ProductDataSuggestion;
 
 use Automattic\WooCommerce\AI\Completion\Completion_Service_Interface;
 use Exception;
@@ -16,12 +16,12 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Attribute Suggestion Service class.
  */
-class Attribute_Suggestion_Service {
+class Product_Data_Suggestion_Service {
 
 	/**
 	 * The prompt generator.
 	 *
-	 * @var Attribute_Suggestion_Prompt_Generator
+	 * @var Product_Data_Suggestion_Prompt_Generator
 	 */
 	protected $prompt_generator;
 
@@ -35,10 +35,10 @@ class Attribute_Suggestion_Service {
 	/**
 	 * Constructor
 	 *
-	 * @param Attribute_Suggestion_Prompt_Generator $prompt_generator   The prompt generator.
+	 * @param Product_Data_Suggestion_Prompt_Generator $prompt_generator   The prompt generator.
 	 * @param Completion_Service_Interface          $completion_service The completion service.
 	 */
-	public function __construct( Attribute_Suggestion_Prompt_Generator $prompt_generator, Completion_Service_Interface $completion_service ) {
+	public function __construct( Product_Data_Suggestion_Prompt_Generator $prompt_generator, Completion_Service_Interface $completion_service ) {
 		$this->prompt_generator   = $prompt_generator;
 		$this->completion_service = $completion_service;
 	}
@@ -46,7 +46,7 @@ class Attribute_Suggestion_Service {
 	/**
 	 * Get suggestions for the given request.
 	 *
-	 * @param Attribute_Suggestion_Request $request The request.
+	 * @param Product_Data_Suggestion_Request $request The request.
 	 *
 	 * @return array An array of suggestions. Each suggestion is an associative array with the following keys:
 	 *               - content: The suggested content.
@@ -54,7 +54,7 @@ class Attribute_Suggestion_Service {
 	 *
 	 * @throws Exception If getting the suggestions fails.
 	 */
-	public function get_suggestions( Attribute_Suggestion_Request $request ): array {
+	public function get_suggestions( Product_Data_Suggestion_Request $request ): array {
 		$messages = array(
 			array(
 				'role'    => 'user',

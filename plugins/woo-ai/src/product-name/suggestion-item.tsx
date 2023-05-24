@@ -1,14 +1,14 @@
 /**
  * Internal dependencies
  */
-import { AttributeSuggestion } from '../shared/types';
+import { ProductDataSuggestion } from '../shared/types';
 
 const SuggestionItem = ( {
 	suggestion,
 	onSuggestionClick,
 }: {
-	suggestion: AttributeSuggestion;
-	onSuggestionClick: ( suggestion: AttributeSuggestion ) => void;
+	suggestion: ProductDataSuggestion;
+	onSuggestionClick: ( suggestion: ProductDataSuggestion ) => void;
 } ) => (
 	<li className="suggestion-item">
 		<button

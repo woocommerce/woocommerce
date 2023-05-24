@@ -62,9 +62,9 @@ add_action(
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-product-category-formatter.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-product-attribute-formatter.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-json-request-formatter.php';
-		require_once dirname( __FILE__ ) . '/includes/attribute-suggestion/class-attribute-suggestion-request.php';
-		require_once dirname( __FILE__ ) . '/includes/attribute-suggestion/class-attribute-suggestion-prompt-generator.php';
-		require_once dirname( __FILE__ ) . '/includes/attribute-suggestion/class-attribute-suggestion-service.php';
+		require_once dirname( __FILE__ ) . '/includes/product-data-suggestion/class-product-data-suggestion-request.php';
+		require_once dirname( __FILE__ ) . '/includes/product-data-suggestion/class-product-data-suggestion-prompt-generator.php';
+		require_once dirname( __FILE__ ) . '/includes/product-data-suggestion/class-product-data-suggestion-service.php';
 	}
 );
 

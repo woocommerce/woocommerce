@@ -2,16 +2,16 @@
 /**
  * REST API Attribute Suggestion Controller
  *
- * Handles requests to /wc-admin/wooai/attribute-suggestions
+ * Handles requests to /wc-admin/wooai/product-data-suggestions
  *
  * @package Woo_AI
  */
 
 namespace Automattic\WooCommerce\Admin\API;
 
-use Automattic\WooCommerce\AI\AttributeSuggestion\Attribute_Suggestion_Prompt_Generator;
-use Automattic\WooCommerce\AI\AttributeSuggestion\Attribute_Suggestion_Request;
-use Automattic\WooCommerce\AI\AttributeSuggestion\Attribute_Suggestion_Service;
+use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Prompt_Generator;
+use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Request;
+use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Service;
 use Automattic\WooCommerce\AI\Completion\Completion_Service;
 use Automattic\WooCommerce\AI\PromptFormatter\Json_Request_Formatter;
 use Automattic\WooCommerce\AI\PromptFormatter\Product_Attribute_Formatter;
@@ -32,13 +32,13 @@ defined( 'ABSPATH' ) || exit;
  * @internal
  * @extends WC_REST_Data_Controller
  */
-class Attribute_Suggestion_API extends WC_REST_Data_Controller {
+class Product_Data_Suggestion_API extends WC_REST_Data_Controller {
 	/**
-	 * The attribute suggestion service.
+	 * The product data suggestion service.
 	 *
-	 * @var Attribute_Suggestion_Service
+	 * @var Product_Data_Suggestion_Service
 	 */
-	protected $attribute_suggestion_service;
+	protected $product_data_suggestion_service;
 
 	/**
 	 * Endpoint namespace.
@@ -52,18 +52,18 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'attribute-suggestions';
+	protected $rest_base = 'product-data-suggestions';
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		$json_request_formatter             = new Json_Request_Formatter();
-		$product_category_formatter         = new Product_Category_Formatter();
-		$product_attribute_formatter        = new Product_Attribute_Formatter();
-		$prompt_generator                   = new Attribute_Suggestion_Prompt_Generator( $product_category_formatter, $product_attribute_formatter, $json_request_formatter );
-		$completion_service                 = new Completion_Service();
-		$this->attribute_suggestion_service = new Attribute_Suggestion_Service( $prompt_generator, $completion_service );
+		$json_request_formatter                = new Json_Request_Formatter();
+		$product_category_formatter            = new Product_Category_Formatter();
+		$product_attribute_formatter           = new Product_Attribute_Formatter();
+		$prompt_generator                      = new Product_Data_Suggestion_Prompt_Generator( $product_category_formatter, $product_attribute_formatter, $json_request_formatter );
+		$completion_service                    = new Completion_Service();
+		$this->product_data_suggestion_service = new Product_Data_Suggestion_Service( $prompt_generator, $completion_service );
 
 		$this->register_routes();
 	}
@@ -81,25 +81,25 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 					'callback'            => array( $this, 'get_response' ),
 					'permission_callback' => array( $this, 'get_response_permission_check' ),
 					'args'                => array(
-						'requested_attribute' => array(
+						'requested_data' => array(
 							'type'              => 'string',
 							'validate_callback' => 'rest_validate_request_arg',
 							'sanitize_callback' => 'sanitize_text_field',
 							'required'          => true,
 						),
-						'name'                => array(
+						'name'           => array(
 							'type'              => 'string',
 							'validate_callback' => 'rest_validate_request_arg',
 							'sanitize_callback' => 'sanitize_text_field',
 							'default'           => '',
 						),
-						'description'         => array(
+						'description'    => array(
 							'type'              => 'string',
 							'validate_callback' => 'rest_validate_request_arg',
 							'sanitize_callback' => 'sanitize_text_field',
 							'default'           => '',
 						),
-						'categories'          => array(
+						'categories'     => array(
 							'type'              => 'array',
 							'validate_callback' => 'rest_validate_request_arg',
 							'sanitize_callback' => 'wp_parse_id_list',
@@ -108,7 +108,7 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 							),
 							'default'           => array(),
 						),
-						'tags'                => array(
+						'tags'           => array(
 							'type'              => 'array',
 							'validate_callback' => 'rest_validate_request_arg',
 							'items'             => array(
@@ -117,7 +117,7 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 							),
 							'default'           => array(),
 						),
-						'attributes'          => array(
+						'attributes'     => array(
 							'type'              => 'array',
 							'validate_callback' => 'rest_validate_request_arg',
 							'default'           => array(),
@@ -157,19 +157,19 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Get the attribute suggestions.
+	 * Get the product-data suggestions.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
 	 * @return WP_Error|WP_HTTP_Response|WP_REST_Response
 	 */
 	public function get_response( WP_REST_Request $request ) {
-		$requested_attribute = $request->get_param( 'requested_attribute' );
-		$name                = $request->get_param( 'name' );
-		$description         = $request->get_param( 'description' );
-		$categories          = $request->get_param( 'categories' );
-		$tags                = $request->get_param( 'tags' );
-		$attributes          = $request->get_param( 'attributes' );
+		$requested_data = $request->get_param( 'requested_data' );
+		$name           = $request->get_param( 'name' );
+		$description    = $request->get_param( 'description' );
+		$categories     = $request->get_param( 'categories' );
+		$tags           = $request->get_param( 'tags' );
+		$attributes     = $request->get_param( 'attributes' );
 
 		// Strip HTML tags from the description.
 		if ( ! empty( $description ) ) {
@@ -182,8 +182,8 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 		}
 
 		try {
-			$attribute_request = new Attribute_Suggestion_Request( $requested_attribute, $name, $description, $tags, $categories, $attributes );
-			$suggestions       = $this->attribute_suggestion_service->get_suggestions( $attribute_request );
+			$product_data_request = new Product_Data_Suggestion_Request( $requested_data, $name, $description, $tags, $categories, $attributes );
+			$suggestions          = $this->product_data_suggestion_service->get_suggestions( $product_data_request );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
@@ -194,4 +194,4 @@ class Attribute_Suggestion_API extends WC_REST_Data_Controller {
 
 }
 
-new Attribute_Suggestion_API();
+new Product_Data_Suggestion_API();
