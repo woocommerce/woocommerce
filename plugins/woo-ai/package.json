@@ -31,6 +31,7 @@
 		"@types/prop-types": "^15.7.4",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/data": "workspace:*",
+		"@woocommerce/tracks": "workspace:^",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/components": "wp-6.0",
 		"@wordpress/compose": "wp-6.0",

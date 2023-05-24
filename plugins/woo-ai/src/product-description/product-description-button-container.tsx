@@ -1,9 +1,16 @@
+// declare window._tkq as a global var
+declare global {
+	interface Window {
+		_tkq: any;
+	}
+}
 /**
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -116,13 +123,17 @@ export function WriteItForMeButtonContainer() {
 	};
 
 	const generateDescription = async () => {
+		const prompt = buildPrompt();
+		recordEvent( 'woo_ai_product_description_generator_button_click', {
+			prompt,
+		} );
 		try {
 			setFetching( true );
 			const response = await apiFetch< WooApiResponse >( {
 				path: '/wooai/text-generation',
 				method: 'POST',
 				data: {
-					prompt: buildPrompt(),
+					prompt,
 				},
 			} );
 			tinyEditor.setContent( response.generated_text || '' );
@@ -131,11 +142,18 @@ export function WriteItForMeButtonContainer() {
 				tinyEditor.setContent( getApiError() );
 			}
 
+			const apiError = getApiError( ( e as WPAPIError ).data.status );
+
 			tinyEditor.setContent(
-				getApiError( ( e as WPAPIError ).data.status )
+				apiError
 			);
 			/* eslint-disable no-console */
 			console.error( e );
+			recordEvent( 'woo_ai_product_description_generator_failed', {
+				prompt,
+				raw_error: e,
+				api_error: apiError,
+			} );
 		}
 		setFetching( false );
 	};
