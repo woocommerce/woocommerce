@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { ProductDataSuggestion } from '../shared/types';
+import { ProductDataSuggestion } from '../utils/types';
 
 const SuggestionItem = ( {
 	suggestion,

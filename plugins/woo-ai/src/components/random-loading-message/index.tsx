@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { shuffleArray } from './utils';
+import { shuffleArray } from '../../utils';
 
 // Define the Property types for the RandomLoadingMessage component
 type RandomLoadingMessageProps = {
@@ -171,7 +171,7 @@ const getRandomLoadingPhrase = (
 	return poppedMessage;
 };
 
-const RandomLoadingMessage: React.FC< RandomLoadingMessageProps > = ( {
+export const RandomLoadingMessage: React.FC< RandomLoadingMessageProps > = ( {
 	isLoading,
 } ) => {
 	const messageUpdateTimeout = useRef< number >();

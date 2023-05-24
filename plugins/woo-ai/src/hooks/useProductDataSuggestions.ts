@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	ProductDataSuggestion,
 	ProductDataSuggestionRequest,
-} from '../shared/types';
+} from '../utils/types';
 
 type WooApiResponse = {
 	suggestions: ProductDataSuggestion[];

@@ -85,7 +85,7 @@ const getRandomTip = (): string => {
 	];
 };
 
-const RandomTipMessage = () => {
+export const RandomTipMessage = () => {
 	return <span>💡 Tip: { getRandomTip() }</span>;
 };
 

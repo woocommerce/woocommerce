@@ -73,12 +73,12 @@ const errorMessages = [
 const getRandomErrorMessage = () =>
 	errorMessages[ Math.floor( Math.random() * errorMessages.length ) ];
 
-function ErrorMessage( { error }: ErrorMessageProps ) {
+export const ErrorMessage = ( { error }: ErrorMessageProps ) => {
 	return (
 		<span>
 			{ error && error.length > 0 ? error : getRandomErrorMessage() }
 		</span>
 	);
-}
+};
 
 export default ErrorMessage;

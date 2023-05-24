@@ -9,16 +9,18 @@ import React from 'react';
  * Internal dependencies
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
-import { productData } from '../shared/productData';
-import RandomLoadingMessage from '../shared/random-loading-message';
-import ErrorMessage from '../shared/error-message';
+import { productData } from '../utils';
 import { useProductDataSuggestions } from '../hooks/useProductDataSuggestions';
 import {
 	ProductDataSuggestion,
 	ProductDataSuggestionRequest,
-} from '../shared/types';
+} from '../utils/types';
 import SuggestionItem from './suggestion-item';
-import RandomTipMessage from '../shared/random-tip-message';
+import {
+	RandomTipMessage,
+	RandomLoadingMessage,
+	ErrorMessage,
+} from '../components';
 
 enum SuggestionsState {
 	Fetching = 'fetching',
