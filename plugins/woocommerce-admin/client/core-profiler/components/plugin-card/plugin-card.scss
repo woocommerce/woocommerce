@@ -83,7 +83,9 @@
 	}
 
 	.components-checkbox-control {
-		align-self: center;
+		@include breakpoint( '<782px' ) {
+			align-self: center;
+		}
 		.components-base-control__field {
 			@include breakpoint( '<782px' ) {
 				margin-bottom: 0px !important;
