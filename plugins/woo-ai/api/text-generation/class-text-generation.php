@@ -121,7 +121,7 @@ class Text_Generation extends \WC_REST_Data_Controller {
 		if ( ! $api_key ) {
 			return new \WP_Error(
 				'wooai_api_error',
-				__( 'Sorry, the service is config fully configured', 'woocommerce' ),
+				__( 'The service is not fully configured', 'woocommerce' ),
 				array(
 					'status' => 500,
 				)
