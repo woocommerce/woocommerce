@@ -31,6 +31,11 @@ import {
 	useEntityBlockEditor,
 } from '@wordpress/core-data';
 
+/**
+ * Internal dependencies
+ */
+import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
+
 type BlockEditorProps = {
 	context: {
 		[ key: string ]: unknown;
@@ -48,6 +53,8 @@ export function BlockEditor( {
 	settings: _settings,
 	product,
 }: BlockEditorProps ) {
+	useConfirmUnsavedProductChanges();
+
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
 		return canUser( 'create', 'media', '' ) !== false;
