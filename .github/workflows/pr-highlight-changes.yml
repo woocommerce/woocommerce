@@ -21,7 +21,7 @@ jobs:
             - name: Install prerequisites
               run: |
                   npm install -g pnpm
-                  npm -g i @wordpress/env@5.1.0
+                  npm -g i @wordpress/env@8.0.0
                   pnpm install --filter code-analyzer --filter monorepo-utils
             - name: Run analyzer
               id: run

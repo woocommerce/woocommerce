@@ -12,7 +12,9 @@
     "mappings": {
         "wp-cli.yml": "./tests/wp-cli.yml"
     },
-    "afterSetup": "./tests/e2e-pw/bin/test-env-setup.sh",
+    "lifecycleScripts": {
+        "afterStart": "./tests/e2e-pw/bin/test-env-setup.sh"
+    },
     "env": {
         "development": {},
         "tests": {
