@@ -495,31 +495,38 @@ class Init {
 									'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
+								'blockGap'    => '2xlg',
 							),
 							array(
 								array(
-									'woocommerce/product-sku-field',
-								),
-								array(
-									'woocommerce/product-toggle-field',
-									array(
-										'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
-										'property' => 'manage_stock',
-										'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
-									),
-								),
-								array(
-									'woocommerce/conditional',
-									array(
-										'mustMatch' => array(
-											'manage_stock' => array( true ),
-										),
-									),
+									'woocommerce/product-section',
+									array(),
 									array(
 										array(
-											'woocommerce/product-inventory-quantity-field',
+											'woocommerce/product-sku-field',
 										),
-									),
+										array(
+											'woocommerce/product-toggle-field',
+											array(
+												'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
+												'property' => 'manage_stock',
+												'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
+											),
+										),
+										array(
+											'woocommerce/conditional',
+											array(
+												'mustMatch' => array(
+													'manage_stock' => array( true ),
+												),
+											),
+											array(
+												array(
+													'woocommerce/product-inventory-quantity-field',
+												),
+											),
+										),
+									)
 								),
 								array(
 									'woocommerce/conditional',
