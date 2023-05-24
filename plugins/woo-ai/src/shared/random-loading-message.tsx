@@ -184,6 +184,7 @@ const RandomLoadingMessage: React.FC< RandomLoadingMessageProps > = ( {
 	// Recursive function to update the message on an increasing time interval
 	const updateMessage = useCallback(
 		( delay: number ) => {
+			clearTimeout( messageUpdateTimeout.current );
 			messageUpdateTimeout.current = window.setTimeout( () => {
 				const elapsedTime = Date.now() - startTimeRef.current;
 				setCurrentMessage(
