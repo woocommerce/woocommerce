@@ -3370,12 +3370,12 @@
 <error line="118" column="6" severity="error" message="Type &apos;{ label: string; onChange: (statusLabels: readonly Value[]) =&gt; void; suggestions: string[]; validateInput: (value: string) =&gt; boolean; value: string[]; __experimentalExpandOnFocus: boolean; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; Props &amp; { children?: ReactNode; }&apos;.
   Property &apos;label&apos; does not exist on type &apos;IntrinsicAttributes &amp; Props &amp; { children?: ReactNode; }&apos;." source="TS2322" />
 </file>
-<file name="assets/js/blocks/product-search/block.js">
+<file name="assets/js/blocks/product-search/block.tsx">
 <error line="38" column="37" severity="error" message="Type &apos;unknown&apos; is not assignable to type &apos;string | undefined&apos;." source="TS2322" />
 <error line="61" column="7" severity="error" message="Type &apos;{ children: Element; type: &quot;submit&quot;; className: string; label: string; }&apos; is not assignable to type &apos;DetailedHTMLProps&lt;ButtonHTMLAttributes&lt;HTMLButtonElement&gt;, HTMLButtonElement&gt;&apos;.
   Property &apos;label&apos; does not exist on type &apos;DetailedHTMLProps&lt;ButtonHTMLAttributes&lt;HTMLButtonElement&gt;, HTMLButtonElement&gt;&apos;." source="TS2322" />
 </file>
-<file name="assets/js/blocks/product-search/edit.js">
+<file name="assets/js/blocks/product-search/edit.tsx">
 <error line="109" column="7" severity="error" message="Type &apos;string&apos; is not assignable to type &apos;number&apos;." source="TS2322" />
 <error line="149" column="32" severity="error" message="Argument of type &apos;{ ({ attributes: { label, placeholder, formId, className, hasLabel, align }, instanceId, setAttributes, }: {    attributes: {        label: string;        placeholder: string;        formId: string;        className: string;        hasLabel: boolean;        align: string;    };    instanceId: string;    setAttribute...&apos; is not assignable to parameter of type &apos;ComponentType&lt;{ attributes: { label: string; placeholder: string; formId: string; className: string; hasLabel: boolean; align: string; }; instanceId: string; setAttributes: (arg0: any) =&gt; any; }&gt;&apos;.
   Type &apos;{ ({ attributes: { label, placeholder, formId, className, hasLabel, align }, instanceId, setAttributes, }: {    attributes: {        label: string;        placeholder: string;        formId: string;        className: string;        hasLabel: boolean;        align: string;    };    instanceId: string;    setAttribute...&apos; is not assignable to type &apos;FunctionComponent&lt;{ attributes: { label: string; placeholder: string; formId: string; className: string; hasLabel: boolean; align: string; }; instanceId: string; setAttributes: (arg0: any) =&gt; any; }&gt;&apos;.

@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import PropTypes from 'prop-types';
 import { HOME_URL } from '@woocommerce/settings';
 
 /**
@@ -24,9 +23,20 @@ import './style.scss';
  * @param {boolean} props.attributes.hasLabel
  * @param {string}  props.attributes.align
  */
+
+interface ProductSearchBlockProps {
+	attributes: {
+		label: string;
+		placeholder: string;
+		formId: string;
+		className: string;
+		hasLabel: boolean;
+		align: string;
+	};
+}
 const ProductSearchBlock = ( {
 	attributes: { label, placeholder, formId, className, hasLabel, align },
-} ) => {
+}: ProductSearchBlockProps ) => {
 	const classes = classnames(
 		'wc-block-product-search',
 		align ? 'align' + align : '',
@@ -58,7 +68,10 @@ const ProductSearchBlock = ( {
 					<button
 						type="submit"
 						className="wc-block-product-search__button"
-						label={ __( 'Search', 'woo-gutenberg-products-block' ) }
+						aria-label={ __(
+							'Search',
+							'woo-gutenberg-products-block'
+						) }
 					>
 						<svg
 							aria-hidden="true"
@@ -77,13 +90,6 @@ const ProductSearchBlock = ( {
 			</form>
 		</div>
 	);
-};
-
-ProductSearchBlock.propTypes = {
-	/**
-	 * The attributes for this block.
-	 */
-	attributes: PropTypes.object.isRequired,
 };
 
 export default ProductSearchBlock;
