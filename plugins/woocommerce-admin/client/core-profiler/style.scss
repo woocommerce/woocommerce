@@ -1,6 +1,6 @@
 .woocommerce-layout .woocommerce-layout__main {
 	@include breakpoint( '<782px' ) {
-		padding-top: 0px !important;
+		padding-top: 0 !important;
 	}
 }
 
@@ -57,7 +57,7 @@
 		}
 	}
 	.woocommerce-select-control__listbox {
-		box-shadow: 0 2px 6px rgba( 0, 0, 0, 0.05 );
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 		border: 1px solid #ccc;
 		margin-top: 8px;
 		top: 40px;
@@ -92,7 +92,7 @@
 		}
 
 		&.is-active {
-			border: 1px solid var( --wp-admin-theme-color );
+			border: 1px solid var(--wp-admin-theme-color);
 		}
 	}
 
@@ -129,12 +129,12 @@
 		margin-bottom: 48px;
 		width: 266px;
 		height: 172px;
-		background: url( ./assets/images/welcome-desktop.svg ) no-repeat center
+		background: url(./assets/images/welcome-desktop.svg) no-repeat center
 			center;
 
 		@include breakpoint( '<782px' ) {
 			margin-bottom: 40px;
-			background: url( ./assets/images/welcome-mobile.svg ) no-repeat
+			background: url(./assets/images/welcome-mobile.svg) no-repeat
 				center center;
 			width: 222px;
 			height: 144px;
@@ -225,7 +225,7 @@
 		}
 	}
 	.woocommerce-select-control__listbox {
-		box-shadow: 0 2px 6px rgba( 0, 0, 0, 0.05 );
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 		border: 1px solid #ccc;
 		margin-top: 8px;
 	}
@@ -237,7 +237,7 @@
 		label,
 		input {
 			font-size: 13px;
-			color: var( --wp-components-color-foreground, #757575 );
+			color: var(--wp-components-color-foreground, #757575);
 		}
 		&.is-active {
 			border: 1px solid #3858e9;
@@ -275,13 +275,13 @@
 			}
 
 			.woocommerce-select-control.is-searchable
-				.woocommerce-select-control__control-input {
+			.woocommerce-select-control__control-input {
 				margin: 0;
 				padding: 0;
 			}
 
 			.woocommerce-select-control.is-searchable
-				.components-base-control__label {
+			.components-base-control__label {
 				left: 13px;
 			}
 		}
