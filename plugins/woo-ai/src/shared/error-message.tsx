@@ -3,10 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 
-// Define the Property types for the RandomLoadingMessage component
-interface ErrorMessageProps {
+// Define the Property types for the ErrorMessage component
+type ErrorMessageProps = {
 	error?: string;
-}
+};
 
 // The list of possible error messages
 const errorMessages = [
