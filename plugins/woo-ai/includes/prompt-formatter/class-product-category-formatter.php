@@ -23,7 +23,7 @@ class Product_Category_Formatter implements Prompt_Formatter_Interface {
 	 */
 	public function format( $data ): string {
 		// Return an empty array if the input category ids is empty.
-		if ( empty( $data ) ) {
+		if ( empty( $data ) || ! is_array( $data ) ) {
 			return '';
 		}
 
