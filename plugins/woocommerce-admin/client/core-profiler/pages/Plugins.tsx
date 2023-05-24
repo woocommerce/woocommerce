@@ -65,7 +65,10 @@ export const Plugins = ( {
 		} );
 	};
 
-	const composeListFormatParts = ( part ) => {
+	const composeListFormatParts = ( part: {
+		type: string;
+		value: string;
+	} ) => {
 		if ( part.type === 'element' ) {
 			return '{{span}}' + part.value + '{{/span}}';
 		}
