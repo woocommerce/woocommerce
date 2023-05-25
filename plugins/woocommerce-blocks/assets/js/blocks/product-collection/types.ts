@@ -7,10 +7,12 @@ export interface ProductCollectionAttributes {
 		}
 	];
 	templateSlug: string;
-	displayLayout: {
-		type: string;
-		columns: number;
-	};
+	displayLayout: ProductCollectionDisplayLayout;
+}
+
+export interface ProductCollectionDisplayLayout {
+	type: string;
+	columns: number;
 }
 
 export interface ProductCollectionQuery {
@@ -27,6 +29,7 @@ export interface ProductCollectionQuery {
 	search: string;
 	sticky: string;
 	taxQuery: string;
+	woocommerceOnSale: boolean;
 }
 
 export type TProductCollectionOrder = 'asc' | 'desc';

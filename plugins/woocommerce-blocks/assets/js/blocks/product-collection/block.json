@@ -28,7 +28,8 @@
 				"inherit": false,
 				"taxQuery": null,
 				"parents": [],
-				"isProductCollectionBlock": true
+				"isProductCollectionBlock": true,
+				"woocommerceOnSale": false
 			}
 		},
 		"tagName": {

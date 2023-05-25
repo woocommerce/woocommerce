@@ -1,9 +1,14 @@
 /**
  * External dependencies
  */
-import { SelectControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { BlockEditProps } from '@wordpress/blocks';
+import {
+	SelectControl,
+	// @ts-expect-error Using experimental features
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -13,6 +18,7 @@ import {
 	TProductCollectionOrder,
 	TProductCollectionOrderBy,
 } from '../types';
+import { getDefaultSettings } from './constants';
 
 const orderOptions = [
 	{
@@ -45,22 +51,40 @@ const OrderByControl = (
 	props: BlockEditProps< ProductCollectionAttributes >
 ) => {
 	const { order, orderBy } = props.attributes.query;
+	const defaultSettings = getDefaultSettings( props.attributes );
+
 	return (
-		<SelectControl
+		<ToolsPanelItem
 			label={ __( 'Order by', 'woo-gutenberg-products-block' ) }
-			value={ `${ orderBy }/${ order }` }
-			options={ orderOptions }
-			onChange={ ( value ) => {
-				const [ newOrderBy, newOrder ] = value.split( '/' );
+			hasValue={ () =>
+				order !== defaultSettings.query?.order ||
+				orderBy !== defaultSettings.query?.orderBy
+			}
+			isShownByDefault
+			onDeselect={ () => {
 				props.setAttributes( {
 					query: {
 						...props.attributes.query,
-						order: newOrder as TProductCollectionOrder,
-						orderBy: newOrderBy as TProductCollectionOrderBy,
+						...defaultSettings.query,
 					},
 				} );
 			} }
-		/>
+		>
+			<SelectControl
+				value={ `${ orderBy }/${ order }` }
+				options={ orderOptions }
+				onChange={ ( value ) => {
+					const [ newOrderBy, newOrder ] = value.split( '/' );
+					props.setAttributes( {
+						query: {
+							...props.attributes.query,
+							order: newOrder as TProductCollectionOrder,
+							orderBy: newOrderBy as TProductCollectionOrderBy,
+						},
+					} );
+				} }
+			/>
+		</ToolsPanelItem>
 	);
 };
 
