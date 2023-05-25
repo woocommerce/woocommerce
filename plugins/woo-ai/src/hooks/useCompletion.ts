@@ -8,9 +8,14 @@ import { useRef, useState } from '@wordpress/element';
  */
 import { askQuestion } from '../utils';
 
+type StopReason = 'abort' | 'finished' | 'error' | 'interrupted';
+
 type UseCompletionProps = {
 	onStreamMessage: ( message: string, chunk: string ) => void;
-	onCompletionFinished?: ( reason: string, previousContent: string ) => void;
+	onCompletionFinished?: (
+		reason: StopReason,
+		previousContent: string
+	) => void;
 	onStreamError?: ( event: Event ) => void;
 };
 
@@ -23,7 +28,7 @@ export const useCompletion = ( {
 	const previousContent = useRef< string >( '' );
 	const [ completionActive, setCompletionActive ] = useState( false );
 
-	const stopCompletion = ( reason: string ) => {
+	const stopCompletion = ( reason: StopReason ) => {
 		if ( completionSource.current?.close ) {
 			completionSource.current.close();
 		}

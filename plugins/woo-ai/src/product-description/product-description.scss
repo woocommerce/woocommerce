@@ -12,7 +12,19 @@
 	}
 }
 
+#wpcontent {
+	.components-snackbar__action:has( .woo-ai-feedback-snackbar_positive ) {
+		text-decoration: none;
 
+		span + span {
+			margin-left: 10px;
+		}
+
+		span {
+			font-size: 1.4em;
+		}
+	}
+}
 
 .wp-media-buttons {
 	.woo-ai-write-it-for-me-btn  {

@@ -9,14 +9,16 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { useTinyEditor, useCompletion } from '../hooks';
 import { MIN_TITLE_LENGTH } from '../constants';
 import { WriteItForMeBtn, StopCompletionBtn } from '../components';
+import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
 const getPostId = () =>
-	( document.querySelector( '#post_ID' ) as HTMLInputElement )?.value;
+	Number(
+		( document.querySelector( '#post_ID' ) as HTMLInputElement )?.value
+	);
 
 const getApiError = () => {
 	return __(
@@ -24,6 +26,15 @@ const getApiError = () => {
 		'woocommerce'
 	);
 };
+
+const recordDescriptionTracks = (
+	name: string,
+	properties?: Record< string, string | number >
+) =>
+	recordEvent( `woo_ai_product_description_completion_${ name }`, {
+		post_id: getPostId(),
+		...properties,
+	} );
 
 export function WriteItForMeButtonContainer() {
 	const titleEl = useRef< HTMLInputElement >(
@@ -34,6 +45,7 @@ export function WriteItForMeButtonContainer() {
 		titleEl.current?.value || ''
 	);
 	const tinyEditor = useTinyEditor();
+	const { showSnackbar } = useFeedbackSnackbar();
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
 			onStreamMessage: ( content ) => {
@@ -50,12 +62,31 @@ export function WriteItForMeButtonContainer() {
 				tinyEditor.setContent( getApiError() );
 			},
 			onCompletionFinished: ( reason, content ) => {
-				recordEvent( 'woo_ai_product_description_completion_stop', {
-					post_id: getPostId(),
+				recordDescriptionTracks( 'stop', {
 					reason,
 					character_count: content.length,
 				} );
+
 				setFetching( false );
+
+				if ( reason !== 'abort' ) {
+					showSnackbar( {
+						label: __(
+							'Description added. How is it?',
+							'woocommerce'
+						),
+						onPositiveResponse: () => {
+							recordDescriptionTracks( 'feedback', {
+								response: 'positive',
+							} );
+						},
+						onNegativeResponse: () => {
+							recordDescriptionTracks( 'feedback', {
+								response: 'negative',
+							} );
+						},
+					} );
+				}
 			},
 		} );
 
@@ -79,8 +110,8 @@ export function WriteItForMeButtonContainer() {
 			`Write a product description with the following product title: "${ productTitle }."`,
 			'Use a 9th grade reading level.',
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
-			'Structure the description into standard paragraphs using standard HTML tags.',
-			'Only if appropriate, use <ul> and <li> tags to list features.',
+			'Structure the description into paragraphs using standard HTML <p> tags.',
+			'Only if appropriate, use <ul> and <li> tags to list product features.',
 			'When appropriate, use <strong> and <em> tags to emphasize text.',
 			'Do not include a top-level heading at the beginning description.',
 		];
@@ -96,9 +127,8 @@ export function WriteItForMeButtonContainer() {
 			onClick={ () => {
 				setFetching( true );
 				const prompt = buildPrompt();
-				recordEvent( 'woo_ai_product_description_completion_start', {
+				recordDescriptionTracks( 'start', {
 					prompt,
-					post_id: getPostId(),
 				} );
 				requestCompletion( prompt );
 			} }
