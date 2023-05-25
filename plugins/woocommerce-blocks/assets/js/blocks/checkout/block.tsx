@@ -4,7 +4,10 @@
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { createInterpolateElement, useEffect } from '@wordpress/element';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import {
+	useStoreCart,
+	useShowShippingTotalWarning,
+} from '@woocommerce/base-context/hooks';
 import { CheckoutProvider, noticeContexts } from '@woocommerce/base-context';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { SidebarLayout } from '@woocommerce/base-components/sidebar-layout';
@@ -161,6 +164,7 @@ const Block = ( {
 	children: React.ReactChildren;
 	scrollToTop: ( props: Record< string, unknown > ) => void;
 } ): JSX.Element => {
+	useShowShippingTotalWarning();
 	return (
 		<BlockErrorBoundary
 			header={ __(
