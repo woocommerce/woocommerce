@@ -23,7 +23,7 @@ import {
 	getTouchedProjectsRequiringChangelog,
 } from './lib/projects';
 
-const program = new Command( 'changelog' )
+const program = new Command( 'changefile' )
 	.description( 'Changelog utilities' )
 	.option(
 		'-o --owner <owner>',
