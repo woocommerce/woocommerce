@@ -9,10 +9,7 @@ import {
 	unregisterBlockType,
 } from '@wordpress/blocks';
 import type { BlockEditProps } from '@wordpress/blocks';
-import {
-	isExperimentalBuild,
-	WC_BLOCKS_IMAGE_URL,
-} from '@woocommerce/block-settings';
+import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import {
 	useBlockProps,
 	BlockPreview,
@@ -340,55 +337,46 @@ const registerClassicTemplateBlock = ( {
 
 let currentTemplateId: string | undefined;
 
-if ( isExperimentalBuild() ) {
-	subscribe( () => {
-		const previousTemplateId = currentTemplateId;
-		const store = select( 'core/edit-site' );
-		currentTemplateId = store?.getEditedPostId() as string | undefined;
+subscribe( () => {
+	const previousTemplateId = currentTemplateId;
+	const store = select( 'core/edit-site' );
+	currentTemplateId = store?.getEditedPostId() as string | undefined;
 
-		if ( previousTemplateId === currentTemplateId ) {
-			return;
-		}
+	if ( previousTemplateId === currentTemplateId ) {
+		return;
+	}
 
-		const parsedTemplate = currentTemplateId?.split( '//' )[ 1 ];
+	const parsedTemplate = currentTemplateId?.split( '//' )[ 1 ];
 
-		if ( parsedTemplate === null || parsedTemplate === undefined ) {
-			return;
-		}
+	if ( parsedTemplate === null || parsedTemplate === undefined ) {
+		return;
+	}
 
-		const block = getBlockType( BLOCK_SLUG );
+	const block = getBlockType( BLOCK_SLUG );
 
-		if (
-			block !== undefined &&
-			( ! hasTemplateSupportForClassicTemplateBlock(
-				parsedTemplate,
-				TEMPLATES
-			) ||
-				isClassicTemplateBlockRegisteredWithAnotherTitle(
-					block,
-					parsedTemplate
-				) )
-		) {
-			unregisterBlockType( BLOCK_SLUG );
-			currentTemplateId = undefined;
-			return;
-		}
+	if (
+		block !== undefined &&
+		( ! hasTemplateSupportForClassicTemplateBlock(
+			parsedTemplate,
+			TEMPLATES
+		) ||
+			isClassicTemplateBlockRegisteredWithAnotherTitle(
+				block,
+				parsedTemplate
+			) )
+	) {
+		unregisterBlockType( BLOCK_SLUG );
+		currentTemplateId = undefined;
+		return;
+	}
 
-		if (
-			block === undefined &&
-			hasTemplateSupportForClassicTemplateBlock(
-				parsedTemplate,
-				TEMPLATES
-			)
-		) {
-			registerClassicTemplateBlock( {
-				template: parsedTemplate,
-				inserter: true,
-			} );
-		}
-	} );
-} else {
-	registerClassicTemplateBlock( {
-		inserter: false,
-	} );
-}
+	if (
+		block === undefined &&
+		hasTemplateSupportForClassicTemplateBlock( parsedTemplate, TEMPLATES )
+	) {
+		registerClassicTemplateBlock( {
+			template: parsedTemplate,
+			inserter: true,
+		} );
+	}
+} );
