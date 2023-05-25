@@ -22,10 +22,6 @@ type RatingProps = {
 	parentClassName?: string;
 };
 
-type AddReviewProps = {
-	href?: string;
-};
-
 const getAverageRating = (
 	product: Omit< ProductResponseItem, 'average_rating' > & {
 		average_rating: string;
@@ -34,11 +30,6 @@ const getAverageRating = (
 	const rating = parseFloat( product.average_rating );
 
 	return Number.isFinite( rating ) && rating > 0 ? rating : 0;
-};
-
-const getReviewsHref = ( product: ProductResponseItem ) => {
-	const { permalink } = product;
-	return `${ permalink }#reviews`;
 };
 
 const getRatingCount = ( product: ProductResponseItem ) => {
@@ -89,17 +80,6 @@ const Rating = ( props: RatingProps ): JSX.Element => {
 	);
 };
 
-const AddReview = ( props: AddReviewProps ): JSX.Element | null => {
-	const { href } = props;
-	const label = __( 'Add review', 'woo-gutenberg-products-block' );
-
-	return href ? (
-		<a className="wc-block-components-product-rating__link" href={ href }>
-			{ label }
-		</a>
-	) : null;
-};
-
 const ReviewsCount = ( props: { reviews: number } ): JSX.Element => {
 	const { reviews } = props;
 
@@ -128,16 +108,20 @@ interface ProductRatingProps {
 	isDescendentOfQueryLoop: boolean;
 	postId: number;
 	productId: number;
+	shouldDisplayMockedReviewsWhenProductHasNoReviews: boolean;
 }
 
 export const Block = ( props: ProductRatingProps ): JSX.Element | null => {
-	const { textAlign, isDescendentOfSingleProductBlock } = props;
+	const {
+		textAlign,
+		isDescendentOfSingleProductBlock,
+		shouldDisplayMockedReviewsWhenProductHasNoReviews,
+	} = props;
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const rating = getAverageRating( product );
 	const reviews = getRatingCount( product );
-	const href = getReviewsHref( product );
 
 	const className = classnames(
 		styleProps.className,
@@ -147,6 +131,13 @@ export const Block = ( props: ProductRatingProps ): JSX.Element | null => {
 			[ `has-text-align-${ textAlign }` ]: textAlign,
 		}
 	);
+	const mockedRatings = shouldDisplayMockedReviewsWhenProductHasNoReviews ? (
+		<Rating
+			rating={ 0 }
+			reviews={ 0 }
+			parentClassName={ parentClassName }
+		/>
+	) : null;
 
 	const content = reviews ? (
 		<Rating
@@ -155,7 +146,7 @@ export const Block = ( props: ProductRatingProps ): JSX.Element | null => {
 			parentClassName={ parentClassName }
 		/>
 	) : (
-		<AddReview href={ href } />
+		mockedRatings
 	);
 
 	return (

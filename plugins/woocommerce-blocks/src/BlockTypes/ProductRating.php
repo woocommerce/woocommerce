@@ -166,8 +166,7 @@ class ProductRating extends AbstractBlock {
 						$is_descendent_of_single_product_block ? $reviews_count_html : ''
 					);
 				} else {
-					$product_review_url = esc_url( $product_permalink . '#reviews' );
-					$html               = '<a class="wc-block-components-product-rating__link" href="' . $product_review_url . '">' . __( 'Add review', 'woo-gutenberg-products-block' ) . '</a>';
+					$html               = '';
 				}
 
 				return $html;
