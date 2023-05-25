@@ -3002,7 +3002,7 @@ class WC_AJAX {
 				do_action(
 					'woocommerce_delete_non_option_setting',
 					array(
-						'id'      => 'shipping_zone'
+						'id' => 'shipping_zone',
 					)
 				);
 				WC_Shipping_Zones::delete_zone( $zone_id );
@@ -3075,7 +3075,7 @@ class WC_AJAX {
 
 		$zone_id = wc_clean( wp_unslash( $_POST['zone_id'] ) );
 		$zone    = new WC_Shipping_Zone( $zone_id );
-		if ( $zone_id === '') {
+		if ( '' === $zone_id ) {
 			/**
 			 * Notified that a non-option setting has been added.
 			 *
@@ -3138,7 +3138,7 @@ class WC_AJAX {
 
 		$zone_id = wc_clean( wp_unslash( $_POST['zone_id'] ) );
 		$zone    = new WC_Shipping_Zone( $zone_id );
-		if ( $zone_id === '') {
+		if ( '' === $zone_id ) {
 			/**
 			 * Notifies that a non-option setting has been added.
 			 *
