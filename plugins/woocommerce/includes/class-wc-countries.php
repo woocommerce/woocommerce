@@ -474,6 +474,11 @@ class WC_Countries {
 			foreach ( $this->countries as $key => $value ) {
 				$states = $this->get_states( $key );
 				if ( $states ) {
+					// Maybe default the selected state as the first one.
+					if ( '*' === $selected_state ) {
+						$selected_state = key( $states );						
+					}
+
 					echo '<optgroup label="' . esc_attr( $value ) . '">';
 					foreach ( $states as $state_key => $state_value ) {
 						echo '<option value="' . esc_attr( $key ) . ':' . esc_attr( $state_key ) . '"';
