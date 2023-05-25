@@ -44,9 +44,17 @@ const PackageRates = ( {
 
 	// Update the selected option if there is no rate selected on mount.
 	useEffect( () => {
-		if ( ! selectedOption && rates[ 0 ] ) {
-			setSelectedOption( rates[ 0 ].rate_id );
-			onSelectRate( rates[ 0 ].rate_id );
+		// Check the rates to see if any are marked as selected. At least one should be. If no rate is selected, it could be
+		// that the user toggled quickly from local pickup back to shipping.
+		const isRateSelectedInDataStore = rates.some(
+			( { selected } ) => selected
+		);
+		if (
+			( ! selectedOption && rates[ 0 ] ) ||
+			! isRateSelectedInDataStore
+		) {
+			setSelectedOption( rates[ 0 ]?.rate_id );
+			onSelectRate( rates[ 0 ]?.rate_id );
 		}
 	}, [ onSelectRate, rates, selectedOption ] );
 
