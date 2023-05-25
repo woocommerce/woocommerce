@@ -57,7 +57,7 @@ add_action(
 	function() {
 		require 'api/api.php';
 		require_once dirname( __FILE__ ) . '/includes/completion/interface-completion-service.php';
-		require_once dirname( __FILE__ ) . '/includes/completion/class-completion-service.php';
+		require_once dirname( __FILE__ ) . '/includes/completion/class-jetpack-completion-service.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/interface-prompt-formatter.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-product-category-formatter.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-product-attribute-formatter.php';
