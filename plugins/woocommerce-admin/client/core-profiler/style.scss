@@ -98,10 +98,10 @@
 .woocommerce-profile-wizard__spinner {
 	align-items: center;
 	display: flex;
-	height: 500px;
 	margin: 0 auto;
+	max-height: 480px;
+	height: 100vh;
 	justify-content: center;
-	width: 500px;
 }
 
 .woocommerce-profiler-select-control__country {
