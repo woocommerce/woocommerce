@@ -262,11 +262,11 @@ class WC_Admin_Notices {
 	 * edit screen, using `woocommerce_order_details_after_payment_info` hook.
 	 *
 	 * @param string $notice_html Notice message. Can be rich html (e.g. bold, italics, links).
-	 * @param string $severity    Severity of the notice. Can be 'error', 'warning', 'success', 'info'.
-	 * @param string $button_text Button text (plain text).
-	 * @param string $button_url  URL to link to.
+	 * @param string $severity    (optional) Severity of the notice. Can be 'error', 'warning', 'success', 'info'.
+	 * @param string $button_text (optional) Button text (plain text). If empty, button is not rendered.
+	 * @param string $button_url  (optional) URL to link to. If empty, button is not rendered.
 	 */
-	public static function render_contextual_notice( $notice_html, $severity, $button_text, $button_url ) {
+	public static function render_contextual_notice( $notice_html, $severity = 'info', $button_text = '', $button_url = '' ) {
 		include dirname( __FILE__ ) . '/views/html-notice-contextual.php';
 	}
 
