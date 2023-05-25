@@ -1,8 +1,11 @@
 <?php
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+
+require_once __DIR__ . '/../../../../helpers/HPOSToggleTrait.php';
 
 /**
  * Class OrdersTableQueryTests.
@@ -133,4 +136,112 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, count( $queried_orders ) );
 		$this->assertContains( $orders[1]->get_id(), $queried_orders );
 	}
+
+	//phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+
+	/**
+	 * @testDox Old syntax can be used to query for code fields.
+	 */
+	public function test_old_query_syntax_is_supported_for_core_fields() {
+		$order1 = OrderHelper::create_order();
+		$order2 = OrderHelper::create_order();
+
+		$order1->set_payment_method( 'SOME_METHOD' );
+		$order1->save();
+
+		$order2->set_payment_method( 'ANOTHER_DIFFERENT_METHOD' );
+		$order2->save();
+
+		$query  = new OrdersTableQuery(
+			array(
+				'return'     => 'ids',
+				'meta_query' => array(
+					array(
+						'key'   => '_payment_method',
+						'value' => 'SOME_METHOD',
+					),
+				),
+			)
+		);
+		$result = $query->orders;
+
+		$this->assertEquals( array( $order1->get_id() ), $result );
+	}
+
+	/**
+	 * @testDox Old syntax can be used to query for operational data.
+	 */
+	public function test_old_query_syntax_is_supported_for_operational_data() {
+		$order1 = OrderHelper::create_order();
+		$order2 = OrderHelper::create_order();
+
+		$order1->set_order_key( 'order_key_1' );
+		$order1->save();
+
+		$order2->set_version( 'order_key_2' );
+		$order2->save();
+
+		$query  = new OrdersTableQuery(
+			array(
+				'return'     => 'ids',
+				'meta_query' => array(
+					array(
+						'key'   => '_order_key',
+						'value' => 'order_key_1',
+					),
+				),
+			)
+		);
+		$result = $query->orders;
+
+		$this->assertEquals( array( $order1->get_id() ), $result );
+	}
+
+	/**
+	 * @testDox Old syntax can be used to query for addresses fields.
+	 */
+	public function test_old_query_syntax_is_supported_for_address_data() {
+		$order1 = OrderHelper::create_order();
+		$order2 = OrderHelper::create_order();
+
+		$order1->set_address( array( 'country' => 'JP' ), 'billing' );
+		$order1->set_address( array( 'country' => 'ES' ), 'shipping' );
+		$order1->save();
+
+		$order2->set_address( array( 'country' => 'ES' ), 'billing' );
+		$order2->set_address( array( 'country' => 'JP' ), 'shipping' );
+		$order2->save();
+
+		$query  = new OrdersTableQuery(
+			array(
+				'return'     => 'ids',
+				'meta_query' => array(
+					array(
+						'key'   => '_billing_country',
+						'value' => 'JP',
+					),
+				),
+			)
+		);
+		$result = $query->orders;
+
+		$this->assertEquals( array( $order1->get_id() ), $result );
+
+		$query  = new OrdersTableQuery(
+			array(
+				'return'     => 'ids',
+				'meta_query' => array(
+					array(
+						'key'   => '_shipping_country',
+						'value' => 'JP',
+					),
+				),
+			)
+		);
+		$result = $query->orders;
+
+		$this->assertEquals( array( $order2->get_id() ), $result );
+	}
+
+	//phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 }
