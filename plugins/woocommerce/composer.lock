@@ -628,16 +628,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "10.2.0",
+            "version": "10.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "d836f1a0886ab2c5cb8f0b49b16cf050523a78af"
+                "reference": "7b5192d251e9c6f5502d2c8ab147498639f0eb84"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/d836f1a0886ab2c5cb8f0b49b16cf050523a78af",
-                "reference": "d836f1a0886ab2c5cb8f0b49b16cf050523a78af",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/7b5192d251e9c6f5502d2c8ab147498639f0eb84",
+                "reference": "7b5192d251e9c6f5502d2c8ab147498639f0eb84",
                 "shasum": ""
             },
             "require": {
@@ -683,9 +683,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v10.2.0"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v10.2.1"
             },
-            "time": "2023-05-11T11:21:00+00:00"
+            "time": "2023-05-25T12:56:45+00:00"
         }
     ],
     "packages-dev": [

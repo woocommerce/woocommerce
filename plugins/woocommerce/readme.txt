@@ -239,6 +239,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Track stock quantity for this product should be disabled when Enable stock management within settings is disabled, and enabled otherwise [[#37957]](https://github.com/woocommerce/woocommerce/pull/37957)
 * Add - Update List price Pricing link on the general tab to navigate to the Pricing tab [[#37961]](https://github.com/woocommerce/woocommerce/pull/37961)
 * Add - Update shipping class block to match new designs#38044 [[#38301]](https://github.com/woocommerce/woocommerce/pull/38301)
+* Update - Update WooCommerce Blocks to 10.2.1 [#38449](https://github.com/woocommerce/woocommerce/pull/38449)
 * Update - Add action hooks to WC_Abstract_Order::remove_order_items [[#37822]](https://github.com/woocommerce/woocommerce/pull/37822)
 * Update - Add new REST endpoints at onboarding/plugins to support async plugin installation with real time error tracking. [[#38174]](https://github.com/woocommerce/woocommerce/pull/38174)
 * Update - add pagination navigation below Settings Tax list table [[#37916]](https://github.com/woocommerce/woocommerce/pull/37916)
