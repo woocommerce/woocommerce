@@ -679,9 +679,6 @@ const ShippingWrapper = compose(
 			settings.woocommerce_default_country
 		);
 
-		const isShippingPartnerResolving = select(
-			ONBOARDING_STORE_NAME
-		).isResolving( 'getShippingPartnerSuggestions' );
 		const shippingPartners = select(
 			ONBOARDING_STORE_NAME
 		).getShippingPartnerSuggestions( true );
@@ -698,7 +695,6 @@ const ShippingWrapper = compose(
 			activePlugins,
 			isJetpackConnected: isJetpackConnected(),
 			shippingPartners,
-			isShippingPartnerResolving,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

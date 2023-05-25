@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add shipping partner recommendations API consumption and its relevant types
+Update shipping partner suggestions to use data from API, fix default partners data, replaced hardcoded JS components and added relevant types
