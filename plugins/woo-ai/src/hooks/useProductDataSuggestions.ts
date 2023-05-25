@@ -23,7 +23,7 @@ export const useProductDataSuggestions = () => {
 		if ( request.name.length < 10 && request.description.length < 50 ) {
 			throw new Error(
 				__(
-					"🧐 We need more details about your product! Please add a descriptive title or description. Categories, tags, and attributes are a plus for better results!'",
+					'Enter a few descriptive words or add product description, tags, or attributes to generate name ideas.',
 					'woocommerce'
 				)
 			);
