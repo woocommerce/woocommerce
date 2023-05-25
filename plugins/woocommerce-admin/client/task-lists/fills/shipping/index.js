@@ -393,7 +393,6 @@ export class Shipping extends Component {
 						'By installing Jetpack you agree to the {{link}}Terms of Service{{/link}}.',
 						'woocommerce'
 				  );
-					console.log(pluginsToPromote.map( ( plugin ) => plugin.name) )
 			const shippingSmartDefaultsSteps = {
 				rates: {
 					label: __( 'Review your shipping options', 'woocommerce' ),
