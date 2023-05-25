@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add query syntax compatibility with old arguments in OrdersTableQuery
