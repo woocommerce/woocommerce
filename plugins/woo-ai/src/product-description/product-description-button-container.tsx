@@ -4,6 +4,7 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -14,22 +15,10 @@ import { WriteItForMeBtn, StopCompletionBtn } from '../components';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
-const getApiError = ( status?: number ) => {
-	const errorMessagesByStatus: Record< number, string > = {
-		429: __(
-			'There have been too many requests. Please wait for a few minutes and try again.',
-			'woocommerce'
-		),
-		408: __(
-			'It seems the server is taking too long to respond. This is an experimental feature, so please try again later.',
-			'woocommerce'
-		),
-	};
+const getPostId = () =>
+	( document.querySelector( '#post_ID' ) as HTMLInputElement )?.value;
 
-	if ( status && errorMessagesByStatus[ status ] ) {
-		return errorMessagesByStatus[ status ];
-	}
-
+const getApiError = () => {
 	return __(
 		`Apologies, this is an experimental feature and there was an error with this service. Please try again.`,
 		'woocommerce'
@@ -60,7 +49,11 @@ export function WriteItForMeButtonContainer() {
 
 				tinyEditor.setContent( getApiError() );
 			},
-			onCompletionFinished: () => {
+			onCompletionFinished: ( reason ) => {
+				recordEvent( 'woo_ai_product_description_completion_stop', {
+					post_id: getPostId(),
+					reason,
+				} );
 				setFetching( false );
 			},
 		} );
@@ -99,7 +92,12 @@ export function WriteItForMeButtonContainer() {
 			disabled={ writeItForMeDisabled }
 			onClick={ () => {
 				setFetching( true );
-				requestCompletion( buildPrompt() );
+				const prompt = buildPrompt();
+				recordEvent( 'woo_ai_product_description_completion_start', {
+					prompt,
+					post_id: getPostId(),
+				} );
+				requestCompletion( prompt );
 			} }
 		/>
 	);
