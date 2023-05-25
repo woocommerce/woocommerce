@@ -15,6 +15,7 @@
 		"@octokit/types": "^9.2.0",
 		"@types/uuid": "^9.0.1",
 		"chalk": "^4.1.2",
+		"cli-table": "^0.3.11",
 		"commander": "^10.0.1",
 		"dotenv": "^10.0.0",
 		"figlet": "^1.6.0",

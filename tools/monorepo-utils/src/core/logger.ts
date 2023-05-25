@@ -3,6 +3,7 @@
  */
 import ora, { Ora } from 'ora';
 import chalk from 'chalk';
+import Table from 'cli-table';
 
 /**
  * Internal dependencies
@@ -60,6 +61,16 @@ export class Logger {
 			Logger.lastSpinner = spinner;
 		} else if ( isGithubCI() ) {
 			Logger.notice( message );
+		}
+	}
+
+	static table(
+		head: Array< string >,
+		rows: Array< Array< number | string > >
+	) {
+		if ( Logger.loggingLevel > LOGGING_LEVELS.silent ) {
+			const table = new Table( { head, rows } );
+			log( table.toString() );
 		}
 	}
 
