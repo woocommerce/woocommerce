@@ -135,8 +135,11 @@ export function ProductNameSuggestions() {
 					>
 						<img src={ MagicIcon } alt="magic button icon" />
 						{ suggestions.length > 0
-							? __( 'Suggest Alternatives', 'woocommerce' )
-							: __( 'Get Suggestions (beta)', 'woocommerce' ) }
+							? __( 'Get more ideas', 'woocommerce' )
+							: __(
+									'Generate name ideas with AI',
+									'woocommerce'
+							  ) }
 					</button>
 				) }
 				{ suggestionsState === SuggestionsState.Fetching && (
