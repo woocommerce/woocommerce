@@ -32,6 +32,7 @@ const Edit = ( {
 	const blockAttrs = {
 		...attributes,
 		...context,
+		shouldDisplayMockedReviewsWhenProductHasNoReviews: true,
 	};
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
 	const { isDescendentOfSingleProductBlock } =
