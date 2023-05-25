@@ -123,7 +123,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		$plugins = $request->get_param( 'plugins' );
 		$job_id  = uniqid();
 
-		WC()->queue()->add( 'woocommerce_plugins_install_async_callback', array( $plugins, $job_id ) );
+		WC()->queue()->add( 'woocommerce_plugins_install_and_activate_async_callback', array( $plugins, $job_id ) );
 
 		$plugin_status = array();
 		foreach ( $plugins as $plugin ) {
@@ -152,7 +152,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 
 		$actions = WC()->queue()->search(
 			array(
-				'hook'    => 'woocommerce_plugins_install_async_callback',
+				'hook'    => 'woocommerce_plugins_install_and_activate_async_callback',
 				'search'  => $job_id,
 				'orderby' => 'date',
 				'order'   => 'DESC',
@@ -175,7 +175,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 			'status' => $actions[0]['status'],
 		);
 
-		$option = get_option( 'woocommerce_onboarding_plugins_install_async_' . $job_id );
+		$option = get_option( 'woocommerce_onboarding_plugins_install_and_activate_async_' . $job_id );
 		if ( isset( $option['plugins'] ) ) {
 			$response['plugins'] = $option['plugins'];
 		}
