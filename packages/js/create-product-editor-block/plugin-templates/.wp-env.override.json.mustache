@@ -14,5 +14,7 @@
 		"SCRIPT_DEBUG": true,
 		"ALTERNATE_WP_CRON": true,
 	},
-	"afterSetup": "npx wp-env run cli \"wp option update woocommerce_feature_product_block_editor_enabled 'yes'\""
+	"lifecycleScripts": {
+		"afterStart": "npx wp-env run cli wp option update woocommerce_feature_product_block_editor_enabled 'yes'"
+	}
 }
