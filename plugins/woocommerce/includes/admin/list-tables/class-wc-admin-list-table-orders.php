@@ -663,21 +663,24 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$wp->query_vars['post__in'] = array_merge( $post_ids, array( 0 ) );
 		}
 
-		if ( isset( $_GET['m'] ) ) {
+		if ( isset( $_GET['order_date_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$date_option = get_option( 'woocommerce_date_type', 'date_paid' );
-			$date_query  = wc_clean( wp_unslash( $_GET['m'] ) );
-
-			unset( $wp->query_vars['m'] );
+			$date_query  = wc_clean( wp_unslash( $_GET['order_date_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			if ( 'date_paid' === $date_option || 'date_completed' === $date_option ) {
 				$date_start = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 00:00:00" );
 				$date_end   = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 23:59:59" );
 
+				unset( $wp->query_vars['m'] );
+
 				if ( $date_start && $date_end ) {
-					$wp->query_vars['meta_key']     = "_$date_option";
-					$wp->query_vars['meta_value']   = array( strval( $date_start->getTimestamp() ), strval( $date_end->getTimestamp() ) );
+					$wp->query_vars['meta_key']     = "_$date_option"; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					$wp->query_vars['meta_value']   = array( strval( $date_start->getTimestamp() ), strval( $date_end->getTimestamp() ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 					$wp->query_vars['meta_compare'] = 'BETWEEN';
 				}
+			} else { // should be date_created, so use normal 'm' (month) query_var.
+				$wp->query_vars['m'] = $date_query;
+
 			}
 		}
 	}

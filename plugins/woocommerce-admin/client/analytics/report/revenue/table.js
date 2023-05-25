@@ -148,7 +148,7 @@ class RevenueReportTable extends Component {
 			const orderLink = (
 				<Link
 					href={
-						'edit.php?post_type=shop_order&m=' +
+						'edit.php?post_type=shop_order&order_date_type=' +
 						formatDate( 'Ymd', row.date_start )
 					}
 					type="wp-admin"
