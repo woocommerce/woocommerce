@@ -1,9 +1,21 @@
+#woocommerce-ai-app-product-name-suggestions {
+  position: relative;
+}
+
 .wc-product-name-suggestions-container {
   margin-top: 0.3em;
   margin-bottom: 1em;
   border: 1px solid #8c8f94;
   border-radius: 4px;
   overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  box-sizing: border-box;
 
   .woo-ai-get-suggestions-btn {
     border: none;
@@ -18,18 +30,15 @@
     }
   }
 
-  .woo-ai-get-suggestions-btn.woo-ai-get-more-suggestions-btn {
-    border-top: 1px solid #dcdcde;
-  }
-
   .woo-ai-get-suggestions-btn:hover {
     background-color: #f0f0f1;
   }
 
   .wc-product-name-suggestions__suggested-names {
-    list-style-type: none;
+    list-style: none;
     padding: 0;
     margin: 0;
+    border-bottom: 1px solid #dcdcde;
 
     .suggestion-item {
       background-color: #fff;
@@ -108,4 +117,8 @@
 
 #titlediv #title {
   margin-bottom: 0;
+}
+
+.woocommerce-layout__header {
+  z-index: 1002;
 }

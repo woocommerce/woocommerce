@@ -125,14 +125,6 @@ export function ProductNameSuggestions() {
 		}
 	};
 
-	const getSuggestionButtonClassName = useCallback( () => {
-		let classNames = 'button woo-ai-get-suggestions-btn';
-		if ( suggestions.length > 0 ) {
-			classNames += ' woo-ai-get-more-suggestions-btn';
-		}
-		return classNames;
-	}, [ suggestions ] );
-
 	const shouldRenderSuggestionsButton = useCallback( () => {
 		return (
 			productName.length >= 10 &&
@@ -177,7 +169,7 @@ export function ProductNameSuggestions() {
 				) }
 				{ shouldRenderSuggestionsButton() && (
 					<button
-						className={ getSuggestionButtonClassName() }
+						className="button woo-ai-get-suggestions-btn"
 						type="button"
 						onClick={ fetchProductSuggestions }
 					>
