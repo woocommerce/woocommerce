@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import React from 'react';
 import OutsideClickHandler from 'react-outside-click-handler';
 
@@ -125,6 +125,27 @@ export function ProductNameSuggestions() {
 		}
 	};
 
+	const getSuggestionButtonClassName = useCallback( () => {
+		let classNames = 'button woo-ai-get-suggestions-btn';
+		if ( suggestions.length > 0 ) {
+			classNames += ' woo-ai-get-more-suggestions-btn';
+		}
+		return classNames;
+	}, [ suggestions ] );
+
+	const shouldRenderSuggestionsButton = useCallback( () => {
+		return (
+			productName.length >= 10 &&
+			suggestionsState !== SuggestionsState.Fetching
+		);
+	}, [ productName, suggestionsState ] );
+
+	const getSuggestionsButtonLabel = useCallback( () => {
+		return suggestions.length > 0
+			? __( 'Get more ideas', 'woocommerce' )
+			: __( 'Generate name ideas with AI', 'woocommerce' );
+	}, [ suggestions ] );
+
 	return (
 		<OutsideClickHandler
 			onOutsideClick={ onOutsideClick }
@@ -154,22 +175,16 @@ export function ProductNameSuggestions() {
 						) }
 					</p>
 				) }
-				{ productName.length >= 10 &&
-					suggestionsState !== SuggestionsState.Fetching && (
-						<button
-							className="button woo-ai-get-suggestions-btn"
-							type="button"
-							onClick={ fetchProductSuggestions }
-						>
-							<img src={ MagicIcon } alt="magic button icon" />
-							{ suggestions.length > 0
-								? __( 'Get more ideas', 'woocommerce' )
-								: __(
-										'Generate name ideas with AI',
-										'woocommerce'
-								  ) }
-						</button>
-					) }
+				{ shouldRenderSuggestionsButton() && (
+					<button
+						className={ getSuggestionButtonClassName() }
+						type="button"
+						onClick={ fetchProductSuggestions }
+					>
+						<img src={ MagicIcon } alt="magic button icon" />
+						{ getSuggestionsButtonLabel() }
+					</button>
+				) }
 				{ suggestionsState === SuggestionsState.Fetching && (
 					<p className="wc-product-name-suggestions__loading-message">
 						<RandomLoadingMessage

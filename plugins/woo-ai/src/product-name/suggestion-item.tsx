@@ -16,8 +16,11 @@ const SuggestionItem = ( {
 			type="button"
 			onClick={ () => onSuggestionClick( suggestion ) }
 		>
-			<p className="suggestion-content">{ suggestion.content }</p>
-			<p className="suggestion-reason">{ suggestion.reason }</p>
+			<div className="suggestion-content-container">
+				<p className="suggestion-content">{ suggestion.content }</p>
+				<p className="suggestion-reason">{ suggestion.reason }</p>
+			</div>
+			<div className="button use-suggestion">Use</div>
 		</button>
 	</li>
 );
