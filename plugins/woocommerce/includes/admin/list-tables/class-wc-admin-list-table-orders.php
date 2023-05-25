@@ -650,7 +650,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			return;
 		}
 
-		$post_ids = isset( $_GET['s'] ) && ! empty( $wp->query_vars['s'] ) ? wc_order_search( wc_clean( wp_unslash( $_GET['s'] ) ) ) : array(); // WPCS: input var ok, sanitization ok.
+		$post_ids = isset( $_GET['s'] ) && ! empty( $wp->query_vars['s'] ) ? wc_order_search( wc_clean( wp_unslash( $_GET['s'] ) ) ) : array(); // phpcs:ignore  WordPress.Security.NonceVerification.Recommended
 
 		if ( ! empty( $post_ids ) ) {
 			// Remove "s" - we don't want to search order name.
