@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add admin-side order edit lock for HPOS.

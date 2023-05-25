@@ -7,7 +7,7 @@ let productId, orderId;
 const product = {
 	name: 'Order email product',
 	type: 'simple',
-	price: '42.77',
+	regular_price: '42.77',
 };
 
 const storeName = 'WooCommerce Core E2E Test Suite';

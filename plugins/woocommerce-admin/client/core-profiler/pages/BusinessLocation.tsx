@@ -34,10 +34,14 @@ export const BusinessLocation = ( {
 	const inputLabel = __( 'Select country/region', 'woocommerce' );
 
 	return (
-		<div className="woocommerce-profiler-business-location">
+		<div
+			className="woocommerce-profiler-business-location"
+			data-testid="core-profiler-business-location"
+		>
 			<Navigation percentage={ navigationProgress } />
 			<div className="woocommerce-profiler-page__content woocommerce-profiler-business-location__content">
 				<Heading
+					className="woocommerce-profiler__stepper-heading"
 					title={ __(
 						'Where is your business located?',
 						'woocommerce'
@@ -71,9 +75,9 @@ export const BusinessLocation = ( {
 					showAllOnFocus
 					isSearchable
 				/>
-				<div className="woocommerce-profiler-go-to-mystore__button-container">
+				<div className="woocommerce-profiler-button-container woocommerce-profiler-go-to-mystore__button-container">
 					<Button
-						className="woocommerce-profiler-go-to-mystore__button"
+						className="woocommerce-profiler-button"
 						variant="primary"
 						disabled={ ! storeCountry.key }
 						onClick={ () => {

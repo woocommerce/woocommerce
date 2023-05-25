@@ -3,18 +3,14 @@
  */
 import classNames from 'classnames';
 import { Link } from '@woocommerce/components';
-import { CurrencyContext } from '@woocommerce/currency';
+import { Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
-import {
-	createElement,
-	useContext,
-	createInterpolateElement,
-} from '@wordpress/element';
+import { createElement, createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -25,13 +21,13 @@ import {
 /**
  * Internal dependencies
  */
+import { useValidation } from '../../contexts/validation-context';
 import { useCurrencyInputProps } from '../../hooks/use-currency-input-props';
-import { formatCurrencyDisplayValue } from '../../utils';
 import { SalePriceBlockAttributes } from './types';
-import { useValidation } from '../../hooks/use-validation';
 
 export function Edit( {
 	attributes,
+	clientId,
 }: BlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useBlockProps();
 	const { label, help } = attributes;
@@ -45,12 +41,9 @@ export function Edit( {
 		'product',
 		'sale_price'
 	);
-	const context = useContext( CurrencyContext );
-	const { getCurrencyConfig, formatAmount } = context;
-	const currencyConfig = getCurrencyConfig();
 	const inputProps = useCurrencyInputProps( {
 		value: regularPrice,
-		setValue: setRegularPrice,
+		onChange: setRegularPrice,
 	} );
 
 	const interpolatedHelp = help
@@ -71,9 +64,13 @@ export function Edit( {
 		'wp-block-woocommerce-product-regular-price-field'
 	) as string;
 
-	const regularPriceValidationError = useValidation(
-		'product/regular_price',
-		function regularPriceValidator() {
+	const {
+		ref: regularPriceRef,
+		error: regularPriceValidationError,
+		validate: validateRegularPrice,
+	} = useValidation< Product >(
+		`regular_price-${ clientId }`,
+		async function regularPriceValidator() {
 			const listPrice = Number.parseFloat( regularPrice );
 			if ( listPrice ) {
 				if ( listPrice < 0 ) {
@@ -92,7 +89,8 @@ export function Edit( {
 					);
 				}
 			}
-		}
+		},
+		[ regularPrice, salePrice ]
 	);
 
 	return (
@@ -112,13 +110,9 @@ export function Edit( {
 					{ ...inputProps }
 					id={ regularPriceId }
 					name={ 'regular_price' }
+					ref={ regularPriceRef }
 					label={ label }
-					value={ formatCurrencyDisplayValue(
-						String( regularPrice ),
-						currencyConfig,
-						formatAmount
-					) }
-					onChange={ setRegularPrice }
+					onBlur={ validateRegularPrice }
 				/>
 			</BaseControl>
 		</div>

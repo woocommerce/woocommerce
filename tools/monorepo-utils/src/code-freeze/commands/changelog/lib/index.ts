@@ -3,6 +3,8 @@
  */
 import simpleGit from 'simple-git';
 import { execSync } from 'child_process';
+import { readFile, writeFile } from 'fs/promises';
+import path from 'path';
 
 /**
  * Internal dependencies
@@ -11,6 +13,58 @@ import { Logger } from '../../../../core/logger';
 import { checkoutRemoteBranch } from '../../../../core/git';
 import { createPullRequest } from '../../../../core/github/repo';
 import { Options } from '../types';
+import { getToday } from '../../verify-day/utils';
+
+/**
+ * Perform changelog adjustments after Jetpack Changelogger has run.
+ *
+ * @param {string} override    Time override.
+ * @param {string} tmpRepoPath Path where the temporary repo is cloned.
+ */
+const updateReleaseChangelogs = async (
+	override: string,
+	tmpRepoPath: string
+) => {
+	const today = getToday( override );
+
+	// The release date is 22 days after the code freeze.
+	const releaseTime = new Date( today.getTime() + 22 * 24 * 60 * 60 * 1000 );
+	const releaseDate = releaseTime.toISOString().split( 'T' )[ 0 ];
+
+	const readmeFile = path.join(
+		tmpRepoPath,
+		'plugins',
+		'woocommerce',
+		'readme.txt'
+	);
+	const nextLogFile = path.join(
+		tmpRepoPath,
+		'plugins',
+		'woocommerce',
+		'NEXT_CHANGELOG.md'
+	);
+
+	let readme = await readFile( readmeFile, 'utf-8' );
+	let nextLog = await readFile( nextLogFile, 'utf-8' );
+
+	nextLog = nextLog.replace(
+		/= (\d+\.\d+\.\d+) YYYY-mm-dd =/,
+		`= $1 ${ releaseDate } =`
+	);
+
+	// Convert PR number to markdown link.
+	nextLog = nextLog.replace(
+		/\[#(\d+)\]/g,
+		'[$&](https://github.com/woocommerce/woocommerce/pull/$1)'
+	);
+
+	readme = readme.replace(
+		/== Changelog ==\n(.*?)\[See changelog for all versions\]/s,
+		`== Changelog ==\n\n${ nextLog }\n\n[See changelog for all versions]`
+	);
+
+	await writeFile( readmeFile, readme );
+};
 
 /**
  * Perform changelog operations on release branch by submitting a pull request. The release branch is a remote branch.
@@ -67,10 +121,7 @@ export const updateReleaseBranchChangelogs = async (
 		Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
 
 		Logger.notice( `Updating readme.txt in ${ tmpRepoPath }` );
-		execSync( 'php .github/workflows/scripts/release-changelog.php', {
-			cwd: tmpRepoPath,
-			stdio: 'inherit',
-		} );
+		await updateReleaseChangelogs( options.override, tmpRepoPath );
 
 		Logger.notice(
 			`Committing readme.txt changes in ${ branch } on ${ tmpRepoPath }`

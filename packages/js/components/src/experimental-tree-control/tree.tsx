@@ -33,34 +33,36 @@ export const Tree = forwardRef( function ForwardedTree(
 
 	return (
 		<>
-			<ol
-				{ ...treeProps }
-				className={ classNames(
-					treeProps.className,
-					'experimental-woocommerce-tree',
-					`experimental-woocommerce-tree--level-${ level }`
-				) }
-			>
-				{ items.map( ( child, index ) => (
-					<TreeItem
-						{ ...treeItemProps }
-						isExpanded={ props.isExpanded }
-						key={ child.data.value }
-						item={ child }
-						index={ index }
-						// Button ref is not working, so need to use CSS directly
-						onLastItemLoop={ () => {
-							(
-								rootListRef.current
-									?.closest( 'ol[role="tree"]' )
-									?.parentElement?.querySelector(
-										'.experimental-woocommerce-tree__button'
-									) as HTMLButtonElement
-							 )?.focus();
-						} }
-					/>
-				) ) }
-			</ol>
+			{ items.length || isCreateButtonVisible ? (
+				<ol
+					{ ...treeProps }
+					className={ classNames(
+						treeProps.className,
+						'experimental-woocommerce-tree',
+						`experimental-woocommerce-tree--level-${ level }`
+					) }
+				>
+					{ items.map( ( child, index ) => (
+						<TreeItem
+							{ ...treeItemProps }
+							isExpanded={ props.isExpanded }
+							key={ child.data.value }
+							item={ child }
+							index={ index }
+							// Button ref is not working, so need to use CSS directly
+							onLastItemLoop={ () => {
+								(
+									rootListRef.current
+										?.closest( 'ol[role="tree"]' )
+										?.parentElement?.querySelector(
+											'.experimental-woocommerce-tree__button'
+										) as HTMLButtonElement
+								 )?.focus();
+							} }
+						/>
+					) ) }
+				</ol>
+			) : null }
 			{ isCreateButtonVisible && (
 				<Button
 					className="experimental-woocommerce-tree__button"

@@ -15,14 +15,6 @@ use WP_Block_Editor_Context;
  * Loads assets related to the product block editor.
  */
 class Init {
-
-	const FEATURE_ID = 'product-block-editor';
-
-	/**
-	 * Option name used to toggle this feature.
-	 */
-	const TOGGLE_OPTION_NAME = 'woocommerce_' . self::FEATURE_ID . '_enabled';
-
 	/**
 	 * The context name used to identify the editor.
 	 */
@@ -32,11 +24,11 @@ class Init {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( ! Features::is_enabled( 'new-product-management-experience' ) && Features::is_enabled( self::FEATURE_ID ) ) {
-			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-			add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
-		}
-		if ( Features::is_enabled( self::FEATURE_ID ) ) {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
+				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+				add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
+			}
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_product_template' ) );
 			$block_registry = new BlockRegistry();
@@ -240,9 +232,6 @@ class Init {
 							array(
 								'title'       => __( 'Basic details', 'woocommerce' ),
 								'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_basic.svg', WC_PLUGIN_FILE ),
-								),
 							),
 							array(
 								array(
@@ -297,9 +286,6 @@ class Init {
 							array(
 								'title'       => __( 'Description', 'woocommerce' ),
 								'description' => __( 'What makes this product unique? What are its most important features? Enrich the product page by adding rich content using blocks.', 'woocommerce' ),
-								'icon'        => array(
-									'src' => '<svg width="14" height="17" viewBox="0 0 14 17" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="9.91663" y1="16.5" x2="9.91663" y2="1.38889" stroke="#1E1E1E" stroke-width="1.5"/><line x1="5.47217" y1="16.5" x2="5.47217" y2="1.38889" stroke="#1E1E1E" stroke-width="1.5"/><line x1="13.3334" y1="1.25" x2="4.44448" y2="1.25" stroke="#1E1E1E" stroke-width="1.5"/><path d="M4.13889 5.38889V9.46C2.21109 9.10713 0.75 7.41864 0.75 5.38889C0.75 3.35914 2.21109 1.67065 4.13889 1.31778V5.38889Z" fill="#1E1E1E" stroke="#1E1E1E" stroke-width="1.5"/></svg>',
-								),
 							),
 							array(
 								array(
@@ -316,9 +302,6 @@ class Init {
 									__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s', 'woocommerce' ),
 									'<a href="http://woocommerce.com/#" target="_blank" rel="noreferrer">',
 									'</a>'
-								),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_images.svg', WC_PLUGIN_FILE ),
 								),
 							),
 							array(
@@ -355,9 +338,6 @@ class Init {
 									'<a href="https://woocommerce.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_attributes.svg', WC_PLUGIN_FILE ),
-								),
 							),
 							array(
 								array(
@@ -384,9 +364,6 @@ class Init {
 									__( 'Set a competitive price, put the product on sale, and manage tax calculations. %1$sHow to price your product?%2$s', 'woocommerce' ),
 									'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
 									'</a>'
-								),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_pricing.svg', WC_PLUGIN_FILE ),
 								),
 							),
 							array(
@@ -507,9 +484,6 @@ class Init {
 									__( 'Set up and manage inventory for this product, including status and available quantity. %1$sManage store inventory settings%2$s', 'woocommerce' ),
 									'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
 									'</a>'
-								),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_inventory.svg', WC_PLUGIN_FILE ),
 								),
 							),
 							array(
@@ -658,16 +632,10 @@ class Init {
 									'<a href="https://woocommerce.com/posts/how-to-calculate-shipping-costs-for-your-woocommerce-store/" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_shipping.svg', WC_PLUGIN_FILE ),
-								),
 							),
 							array(
 								array(
-									'woocommerce/product-shipping-fee-fields',
-									array(
-										'title' => __( 'Shipping fee', 'woocommerce' ),
-									),
+									'woocommerce/product-shipping-class-field',
 								),
 								array(
 									'woocommerce/product-shipping-dimensions-fields',

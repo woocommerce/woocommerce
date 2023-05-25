@@ -41,10 +41,24 @@ jobs:
               with:
                   fetch-depth: 0
 
+            - name: Setup PNPM
+              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              with:
+                  version: '8.3.1'
+
+            - name: Setup Node
+              uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+              with:
+                  node-version-file: .nvmrc
+                  cache: pnpm
+                  registry-url: 'https://registry.npmjs.org'
+
             - name: Install prerequisites
               run: |
-                  npm install -g pnpm
-                  pnpm install --filter monorepo-utils
+                  pnpm install --filter monorepo-utils --ignore-scripts
+                  # ignore scripts speeds up setup signficantly, but we still need to build monorepo utils
+                  pnpm build
+              working-directory: tools/monorepo-utils
 
             - name: 'Check whether today is the code freeze day'
               id: check-freeze
@@ -71,42 +85,47 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: pnpm run utils code-freeze version-bump -o ${{ github.repository_owner }} -v ${{ steps.milestone.outputs.nextDevelopmentVersion }}.0-dev
 
+            - name: Generate changelog changes
+              id: changelog
+              if: steps.check-freeze.outputs.freeze == 'true'
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: pnpm run utils code-freeze changelog -o ${{ github.repository_owner }} -v ${{ steps.milestone.outputs.nextReleaseVersion }}
+
     notify-slack:
         name: 'Sends code freeze notification to Slack'
         runs-on: ubuntu-20.04
         needs: code-freeze-prep
         if: ${{ needs.code-freeze-prep.outputs.freeze == 'true' && inputs.skipSlackPing != true }}
         steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+
+            - name: Setup PNPM
+              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              with:
+                  version: '8.3.1'
+
+            - name: Setup Node
+              uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+              with:
+                  node-version-file: .nvmrc
+                  cache: pnpm
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Install prerequisites
+              run: |
+                  pnpm install --filter monorepo-utils --ignore-scripts
+                  # ignore scripts speeds up setup signficantly, but we still need to build monorepo utils
+                  pnpm build
+              working-directory: tools/monorepo-utils
+
             - name: Slack
-              uses: archive/github-actions-slack@v2.0.0
               id: notify
-              with:
-                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-                  slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
-                  slack-text: |
-                      :warning-8c: ${{ needs.code-freeze-prep.outputs.nextReleaseVersion }} Code Freeze :ice_cube:
-
-                      The automation to cut the release branch for ${{ needs.code-freeze-prep.outputs.nextReleaseVersion }} has run. Any PRs that were not already merged will be a part of ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.nextDevelopmentVersion }} by default. If you have something that needs to make ${{ needs.maybe-create-next-milestone-and-release-branch.outputs.nextReleaseVersion }} that hasn't yet been merged, please see the <${{ secrets.FG_LINK }}/code-freeze-for-woocommerce-core-release/|fieldguide page for the code freeze>.
-
-    trigger-changelog-action:
-        name: 'Trigger changelog action'
-        runs-on: ubuntu-20.04
-        permissions:
-            actions: write
-        needs: code-freeze-prep
-        if: needs.code-freeze-prep.outputs.freeze == 'true'
-        steps:
-            - name: 'Trigger changelog action'
-              uses: actions/github-script@v6
-              with:
-                  script: |
-                      github.rest.actions.createWorkflowDispatch({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        workflow_id: 'release-changelog.yml',
-                        ref: 'trunk',
-                        inputs: {
-                          releaseVersion: "${{ needs.code-freeze-prep.outputs.nextReleaseVersion }}",
-                          releaseBranch: "${{ needs.code-freeze-prep.outputs.nextReleaseBranch }}"
-                        }
-                      })
+              run: |
+                  pnpm utils slack "${{ secrets.CODE_FREEZE_BOT_TOKEN }}" "
+                  :warning-8c: ${{ needs.code-freeze-prep.outputs.nextReleaseVersion }} Code Freeze :ice_cube:
+                  The automation to cut the release branch for ${{ needs.code-freeze-prep.outputs.nextReleaseVersion }} has run. Any PRs that were not already merged will be a part of ${{ needs.code-freeze-prep.outputs.nextDevelopmentVersion }} by default. If you have something that needs to make ${{ needs.code-freeze-prep.outputs.nextReleaseVersion }} that hasn't yet been merged, please see the <${{ secrets.FG_LINK }}/code-freeze-for-woocommerce-core-release/|fieldguide page for the code freeze>.
+                  " "${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}"

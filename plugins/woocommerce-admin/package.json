@@ -171,6 +171,7 @@
 		"@wordpress/scripts": "^12.6.1",
 		"@wordpress/stylelint-config": "^20.0.2",
 		"@xstate/inspect": "0.8.0",
+		"@xstate/test": "0.5.1",
 		"autoprefixer": "^10.4.2",
 		"await-exec": "^0.1.2",
 		"babel-jest": "^27.5.1",

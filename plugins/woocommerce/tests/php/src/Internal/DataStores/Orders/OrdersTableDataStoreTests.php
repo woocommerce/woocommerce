@@ -50,6 +50,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	 * Initializes system under test.
 	 */
 	public function setUp(): void {
+		$this->reset_legacy_proxy_mocks();
 		$this->original_time_zone = wp_timezone_string();
 		//phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- We need to change the timezone to test the date sync fields.
 		update_option( 'timezone_string', 'Asia/Kolkata' );
@@ -58,8 +59,10 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		$this->setup_cot();
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->toggle_cot( false );
-		$this->sut            = wc_get_container()->get( OrdersTableDataStore::class );
-		$this->migrator       = wc_get_container()->get( PostsToOrdersMigrationController::class );
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$this->sut            = $container->get( OrdersTableDataStore::class );
+		$this->migrator       = $container->get( PostsToOrdersMigrationController::class );
 		$this->cpt_data_store = new WC_Order_Data_Store_CPT();
 	}
 
@@ -2020,9 +2023,17 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox When parent order is deleted, child orders should be upshifted.
+	 * @testDox When parent order is deleted, and the post order type is hierarchical, child orders should be upshifted.
 	 */
-	public function test_child_orders_are_promoted_when_parent_is_deleted() {
+	public function test_child_orders_are_promoted_when_parent_is_deleted_if_order_type_is_hierarchical() {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'is_post_type_hierarchical' => function( $post_type ) {
+					return 'shop_order' === $post_type || is_post_type_hierarchical( $post_type );
+				},
+			)
+		);
+
 		$this->toggle_cot( true );
 		$order = new WC_Order();
 		$order->save();
@@ -2037,6 +2048,34 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 0, $child_order->get_parent_id() );
 	}
+
+	/**
+	 * @testDox When parent order is deleted, and the post order type is NOT hierarchical, child orders should be deleted.
+	 */
+	public function test_child_orders_are_promoted_when_parent_is_deleted_if_order_type_is_not_hierarchical() {
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'is_post_type_hierarchical' => function( $post_type ) {
+					return 'shop_order' === $post_type ? false : is_post_type_hierarchical( $post_type );
+				},
+			)
+		);
+
+		$this->toggle_cot( true );
+		$order = new WC_Order();
+		$order->save();
+
+		$child_order = new WC_Order();
+		$child_order->set_parent_id( $order->get_id() );
+		$child_order->save();
+
+		$this->assertEquals( $order->get_id(), $child_order->get_parent_id() );
+		$this->sut->delete( $order, array( 'force_delete' => true ) );
+		$child_order = wc_get_order( $child_order->get_id() );
+
+		$this->assertFalse( $child_order );
+	}
+
 
 	/**
 	 * @testDox Make sure get_order return false when checking an order of different order types without warning.
