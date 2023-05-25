@@ -315,7 +315,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Added a button to download SSR to a file. [[#38110]](https://github.com/woocommerce/woocommerce/pull/38110)
 * Enhancement - Added missing button element classes in account orders and downloads pages [[#37933]](https://github.com/woocommerce/woocommerce/pull/37933)
 * Enhancement - Add order note to display held stock inventory to provide more visibility to merchants. [[#37833]](https://github.com/woocommerce/woocommerce/pull/37833)
-* Enhancement - Add `featured` field to the images array for Product REST API [[#37815]](https://github.com/woocommerce/woocommerce/pull/37815)
 * Enhancement - Change from using a figure to using a div around the single product image to improve accessibility [[#37853]](https://github.com/woocommerce/woocommerce/pull/37853)
 * Enhancement - Fix comment list styling in TT2 [[#37894]](https://github.com/woocommerce/woocommerce/pull/37894)
 * Enhancement - Fixed the attributes table styling in TT3 tabs content area [[#37895]](https://github.com/woocommerce/woocommerce/pull/37895)
