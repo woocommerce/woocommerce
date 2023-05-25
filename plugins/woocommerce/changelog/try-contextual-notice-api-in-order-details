@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Experimental branch, can I skip changelog? This branch is a prototype adding a new hook so clients / extenders can add a notice or other content in context in the edit order screen payment details page.
