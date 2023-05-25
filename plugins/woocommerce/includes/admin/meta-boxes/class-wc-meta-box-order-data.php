@@ -250,9 +250,24 @@ class WC_Meta_Box_Order_Data {
 
 					?>
 				</p>
-				<div>
-					<?php do_action( 'woocommerce_order_details_after_payment_info' ); ?>
-				</div>
+				<?php
+					/**
+					 * Hook allowing extenders to render custom content
+					 * within the Order details box.
+					 *
+					 * This allows urgent notices or other important
+					 * order-related info to be displayed upfront in
+					 * the order page. Example: display a notice if
+					 * the order is disputed.
+					 *
+					 * WC_Admin_Notices::render_contextual_notice() can be
+					 * used to render a prominent notice with a CTA button.
+					 *
+					 * @param $order WC_Order The order object being displayed.
+					 * @since 3.0.0
+					 */
+					do_action( 'woocommerce_admin_order_data_after_payment_info', $order );
+				?>
 				<div class="order_data_column_container">
 					<div class="order_data_column">
 						<h3><?php esc_html_e( 'General', 'woocommerce' ); ?></h3>
