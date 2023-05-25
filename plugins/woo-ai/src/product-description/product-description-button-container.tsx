@@ -105,7 +105,8 @@ export function WriteItForMeButtonContainer() {
 					stopCompletion();
 				} }
 			>
-				{ __( 'Stop writing', 'woocommerce' ) }
+				<img src={ MagicIcon } alt="" />
+				{ __( 'Stop writing…', 'woocommerce' ) }
 			</button>
 		);
 	}

@@ -16,6 +16,8 @@
 
 .wp-media-buttons {
 	.woo-ai-write-it-for-me-btn  {
+		min-width: 126px;
+
 		&[disabled] {
 			img {
 				opacity: 0.2;
