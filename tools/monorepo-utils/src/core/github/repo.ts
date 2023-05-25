@@ -195,7 +195,7 @@ export const getPullRequest = async ( options: {
 		}
 	);
 
-	//@ts-ignore
+	//@ts-ignore Not sure why this error comes up. All versions are up to date and the schema is correct.
 	return pr.data;
 };
 

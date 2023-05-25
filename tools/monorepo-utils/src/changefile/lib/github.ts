@@ -44,7 +44,7 @@ export const getPullRequestData = async (
  * @param {string} body pull request description.
  * @return {boolean} if the pull request description activates the changelog automation.
  */
-export const getShouldAutomateChangelog = ( body: string ) => {
+export const shouldAutomateChangelog = ( body: string ) => {
 	const regex =
 		/\[x\] Automatically create a changelog entry from the details/gm;
 	return regex.test( body );

@@ -15,7 +15,7 @@ import { isGithubCI } from '../core/environment';
 import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
 import {
 	getPullRequestData,
-	getShouldAutomateChangelog,
+	shouldAutomateChangelog,
 	getChangelogDetails,
 } from './lib/github';
 import {
@@ -58,10 +58,7 @@ const program = new Command( 'changefile' )
 
 			Logger.endTask();
 
-			const shouldAutomateChangelog =
-				getShouldAutomateChangelog( prBody );
-
-			if ( ! shouldAutomateChangelog ) {
+			if ( ! shouldAutomateChangelog( prBody ) ) {
 				Logger.notice(
 					`PR #${ prNumber } does not have the "Automatically create a changelog entry from the details" checkbox checked. No changelog will be created.`
 				);
