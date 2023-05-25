@@ -49,10 +49,11 @@ export function WriteItForMeButtonContainer() {
 
 				tinyEditor.setContent( getApiError() );
 			},
-			onCompletionFinished: ( reason ) => {
+			onCompletionFinished: ( reason, content ) => {
 				recordEvent( 'woo_ai_product_description_completion_stop', {
 					post_id: getPostId(),
 					reason,
+					character_count: content.length,
 				} );
 				setFetching( false );
 			},
@@ -78,8 +79,10 @@ export function WriteItForMeButtonContainer() {
 			`Write a product description with the following product title: "${ productTitle }."`,
 			'Use a 9th grade reading level.',
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
-			'Structure the description using standard HTML paragraph, strong and list tags.',
-			'Do not include a heading at the very top of the description.',
+			'Structure the description into standard paragraphs using standard HTML tags.',
+			'Only if appropriate, use <ul> and <li> tags to list features.',
+			'When appropriate, use <strong> and <em> tags to emphasize text.',
+			'Do not include a top-level heading at the beginning description.',
 		];
 
 		return instructions.join( '\n' );
