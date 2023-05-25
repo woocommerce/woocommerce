@@ -41,6 +41,9 @@ export function ProductNameSuggestions() {
 	const nameInputRef = useRef< HTMLInputElement >(
 		document.querySelector( '#title' )
 	);
+	const [ productName, setProductName ] = useState< string >(
+		nameInputRef.current?.value || ''
+	);
 
 	const resetError = () => {
 		setError( '' );
@@ -59,9 +62,23 @@ export function ProductNameSuggestions() {
 		const onFocus = () => {
 			setVisible( true );
 		};
+		const onKeyUp = ( e: KeyboardEvent ) => {
+			if ( e.key === 'Escape' ) {
+				setVisible( false );
+			}
+
+			setProductName( ( e.target as HTMLInputElement ).value || '' );
+		};
+
+		const onChange = ( e: Event ) => {
+			setProductName( ( e.target as HTMLInputElement ).value || '' );
+		};
 
 		if ( nameInput ) {
 			nameInput.addEventListener( 'focus', onFocus );
+			nameInput.addEventListener( 'keyup', onKeyUp );
+			nameInput.addEventListener( 'change', onChange );
+
 			// Initially hide the container unless the input is already in focus
 			const inputOwnerDocument = nameInput.ownerDocument;
 			setVisible( inputOwnerDocument?.activeElement === nameInput );
@@ -70,6 +87,8 @@ export function ProductNameSuggestions() {
 		return () => {
 			if ( nameInput ) {
 				nameInput.removeEventListener( 'focus', onFocus );
+				nameInput.removeEventListener( 'keyup', onKeyUp );
+				nameInput.removeEventListener( 'change', onChange );
 			}
 		};
 	}, [ nameInputRef ] );
@@ -127,21 +146,30 @@ export function ProductNameSuggestions() {
 							) ) }
 						</ul>
 					) }
-				{ suggestionsState !== SuggestionsState.Fetching && (
-					<button
-						className="button woo-ai-get-suggestions-btn"
-						type="button"
-						onClick={ fetchProductSuggestions }
-					>
-						<img src={ MagicIcon } alt="magic button icon" />
-						{ suggestions.length > 0
-							? __( 'Get more ideas', 'woocommerce' )
-							: __(
-									'Generate name ideas with AI',
-									'woocommerce'
-							  ) }
-					</button>
+				{ productName.length < 10 && (
+					<p className="wc-product-name-suggestions__tip-message">
+						{ __(
+							'Enter a few descriptive words to generate product name using AI (beta).',
+							'woocommerce'
+						) }
+					</p>
 				) }
+				{ productName.length >= 10 &&
+					suggestionsState !== SuggestionsState.Fetching && (
+						<button
+							className="button woo-ai-get-suggestions-btn"
+							type="button"
+							onClick={ fetchProductSuggestions }
+						>
+							<img src={ MagicIcon } alt="magic button icon" />
+							{ suggestions.length > 0
+								? __( 'Get more ideas', 'woocommerce' )
+								: __(
+										'Generate name ideas with AI',
+										'woocommerce'
+								  ) }
+						</button>
+					) }
 				{ suggestionsState === SuggestionsState.Fetching && (
 					<p className="wc-product-name-suggestions__loading-message">
 						<RandomLoadingMessage
