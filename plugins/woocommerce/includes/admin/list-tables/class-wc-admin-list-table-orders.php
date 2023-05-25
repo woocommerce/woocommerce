@@ -667,6 +667,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			$date_option = get_option( 'woocommerce_date_type', 'date_paid' );
 			$date_query  = wc_clean( wp_unslash( $_GET['order_date_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
+			// date_paid and date_completed are stored in postmeta, so we need to do a meta query.
 			if ( 'date_paid' === $date_option || 'date_completed' === $date_option ) {
 				$date_start = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 00:00:00" );
 				$date_end   = \DateTime::createFromFormat( 'Ymd H:i:s', "$date_query 23:59:59" );
