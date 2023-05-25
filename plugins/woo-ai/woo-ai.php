@@ -17,6 +17,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// If the key is not defined, don't load the plugin.
+if ( ! defined( 'OPEN_AI_KEY' ) || ! OPEN_AI_KEY ) {
+	return;
+}
+
 // Define WOO_AI_FILE.
 if ( ! defined( 'WOO_AI_FILE' ) ) {
 	define( 'WOO_AI_FILE', __FILE__ );
@@ -56,7 +61,7 @@ function _woo_ai_bootstrap() {
 
 add_action(
 	'wp_loaded',
-	function() {
+	function () {
 		require 'api/api.php';
 	}
 );
