@@ -1207,7 +1207,11 @@ export const CoreProfilerController = ( {
 	const CurrentComponent =
 		currentNodeMeta?.component ??
 		( () => (
-			<div data-testid="core-profiler-loading-screen">Insert Spinner</div>
+			<div className={ `woocommerce-profile-wizard__spinner` }>
+				<div data-testid="core-profiler-loading-screen">
+					<Spinner />
+				</div>
+			</div>
 		) ); // If no component is defined for the state then its a loading state
 
 	useEffect( () => {
