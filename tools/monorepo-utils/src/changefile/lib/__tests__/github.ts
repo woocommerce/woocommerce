@@ -96,7 +96,8 @@ describe( 'getChangelogSignificance', () => {
 			'\r\n' +
 			'</details>';
 
-		getChangelogSignificance( body );
+		const significance = getChangelogSignificance( body );
+		expect( significance ).toBeUndefined();
 		expect( Logger.error ).toHaveBeenCalledWith(
 			'No changelog significance found'
 		);
@@ -137,7 +138,8 @@ describe( 'getChangelogSignificance', () => {
 			'\r\n' +
 			'</details>';
 
-		getChangelogSignificance( body );
+		const significance = getChangelogSignificance( body );
+		expect( significance ).toBeUndefined();
 		expect( Logger.error ).toHaveBeenCalledWith(
 			'Multiple changelog significances found. Only one can be entered'
 		);
@@ -219,7 +221,8 @@ describe( 'getChangelogType', () => {
 			'\r\n' +
 			'</details>';
 
-		getChangelogType( body );
+		const type = getChangelogType( body );
+		expect( type ).toBeUndefined();
 		expect( Logger.error ).toHaveBeenCalledWith(
 			'No changelog type found'
 		);
@@ -260,7 +263,8 @@ describe( 'getChangelogType', () => {
 			'\r\n' +
 			'</details>';
 
-		getChangelogType( body );
+		const type = getChangelogType( body );
+		expect( type ).toBeUndefined();
 		expect( Logger.error ).toHaveBeenCalledWith(
 			'Multiple changelog types found. Only one can be entered'
 		);
@@ -346,7 +350,8 @@ describe( 'getChangelogDetails', () => {
 			'\r\n' +
 			'</details>';
 
-		getChangelogDetails( body );
+		const details = getChangelogDetails( body );
+		expect( details ).toBeUndefined();
 		expect( Logger.error ).toHaveBeenCalledWith(
 			'Both a message and comment were found. Only one can be entered'
 		);
@@ -387,7 +392,8 @@ describe( 'getChangelogDetails', () => {
 			'\r\n' +
 			'</details>';
 
-		getChangelogDetails( body );
+		const details = getChangelogDetails( body );
+		expect( details ).toBeUndefined();
 		expect( Logger.error ).toHaveBeenCalledWith(
 			'Only patch changes can have a comment. Please change the significance to patch or remove the comment'
 		);
