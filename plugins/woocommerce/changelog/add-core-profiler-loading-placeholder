@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Added spinner animation for component loading states in the core profiler.
