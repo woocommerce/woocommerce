@@ -17,6 +17,7 @@ import {
 	TaskListType,
 	TaskType,
 	OnboardingProductTypes,
+	ShippingMethod,
 } from './types';
 import { Plugin } from '../plugins/types';
 
@@ -235,6 +236,13 @@ export function setPaymentMethods( paymentMethods: Plugin[] ) {
 	return {
 		type: TYPES.GET_PAYMENT_METHODS_SUCCESS,
 		paymentMethods,
+	};
+}
+
+export function setShippingMethods( shippingMethods: ShippingMethod[] ) {
+	return {
+		type: TYPES.GET_SHIPPING_METHODS_SUCCESS,
+		shippingMethods,
 	};
 }
 
@@ -495,6 +503,7 @@ export type Action = ReturnType<
 	| typeof keepCompletedTaskListSuccess
 	| typeof visitedTask
 	| typeof setPaymentMethods
+	| typeof setShippingMethods
 	| typeof setEmailPrefill
 	| typeof actionTaskError
 	| typeof actionTaskSuccess

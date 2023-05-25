@@ -17,6 +17,7 @@ import {
 	setProfileItems,
 	setError,
 	setPaymentMethods,
+	setShippingMethods,
 	setEmailPrefill,
 	getProductTypesSuccess,
 	getProductTypesError,
@@ -26,6 +27,7 @@ import {
 	ExtensionList,
 	OnboardingProductTypes,
 	ProfileItems,
+	ShippingMethod,
 	TaskListType,
 } from './types';
 import { Plugin } from '../plugins/types';
@@ -106,6 +108,25 @@ export function* getPaymentGatewaySuggestions(
 		} );
 
 		yield setPaymentMethods( results );
+	} catch ( error ) {
+		yield setError( 'getPaymentGatewaySuggestions', error );
+	}
+}
+
+export function* getShippingPartnerSuggestions(
+	forceDefaultSuggestions = false
+) {
+	let path = WC_ADMIN_NAMESPACE + '/shipping-partner-suggestions';
+	if ( forceDefaultSuggestions ) {
+		path += '?force_default_suggestions=true';
+	}
+	try {
+		const results: ShippingMethod[] = yield apiFetch( {
+			path,
+			method: 'GET',
+		} );
+
+		yield setShippingMethods( results );
 	} catch ( error ) {
 		yield setError( 'getPaymentGatewaySuggestions', error );
 	}
