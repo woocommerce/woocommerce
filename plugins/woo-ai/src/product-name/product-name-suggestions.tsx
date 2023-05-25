@@ -33,6 +33,7 @@ export function ProductNameSuggestions() {
 	const [ suggestionsState, setSuggestionsState ] =
 		useState< SuggestionsState >( SuggestionsState.None );
 	const [ error, setError ] = useState< string >( '' );
+	const [ isFirstLoad, setIsFirstLoad ] = useState< boolean >( true );
 	const [ visible, setVisible ] = useState< boolean >( false );
 	const [ suggestions, setSuggestions ] = useState< ProductDataSuggestion[] >(
 		[]
@@ -91,7 +92,7 @@ export function ProductNameSuggestions() {
 				nameInput.removeEventListener( 'change', onChange );
 			}
 		};
-	}, [ nameInputRef ] );
+	}, [] );
 
 	const updateProductName = ( newName: string ) => {
 		if ( ! nameInputRef.current || ! newName.length ) return;
@@ -116,6 +117,7 @@ export function ProductNameSuggestions() {
 			};
 			setSuggestions( await fetchSuggestions( request ) );
 			setSuggestionsState( SuggestionsState.None );
+			setIsFirstLoad( false );
 		} catch ( e ) {
 			/* eslint-disable no-console */
 			console.error( e );
@@ -133,10 +135,10 @@ export function ProductNameSuggestions() {
 	}, [ productName, suggestionsState ] );
 
 	const getSuggestionsButtonLabel = useCallback( () => {
-		return suggestions.length > 0
-			? __( 'Get more ideas', 'woocommerce' )
-			: __( 'Generate name ideas with AI', 'woocommerce' );
-	}, [ suggestions ] );
+		return isFirstLoad
+			? __( 'Generate name ideas with AI', 'woocommerce' )
+			: __( 'Get more ideas', 'woocommerce' );
+	}, [ isFirstLoad ] );
 
 	return (
 		<OutsideClickHandler
