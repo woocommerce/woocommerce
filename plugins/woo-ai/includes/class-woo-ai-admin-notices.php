@@ -18,4 +18,11 @@ class Woo_AI_Admin_Notices {
 	public function woocoommerce_not_installed() {
 		include_once dirname( __FILE__ ) . '/views/html-admin-missing-woocommerce.php';
 	}
+
+	/**
+	 * Jetpack not installed notice.
+	 */
+	public function jetpack_not_installed() {
+		include_once dirname( __FILE__ ) . '/views/html-admin-missing-jetpack.php';
+	}
 }

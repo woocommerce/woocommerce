@@ -42,7 +42,23 @@ function _woo_ai_bootstrap() {
 		$notices = new Woo_AI_Admin_Notices();
 
 		add_action( 'admin_notices', array( $notices, 'woocoommerce_not_installed' ) );
-	} elseif ( ! class_exists( 'Woo_AI' ) ) {
+
+		// Stop here.
+		return;
+	}
+
+	// Check if Jetpack is enabled.
+	if ( ! class_exists( 'Jetpack' ) ) {
+		include dirname( __FILE__ ) . '/includes/class-woo-ai-admin-notices.php';
+		$notices = new Woo_AI_Admin_Notices();
+
+		add_action( 'admin_notices', array( $notices, 'jetpack_not_installed' ) );
+
+		// Stop here.
+		return;
+	}
+
+	if ( ! class_exists( 'Woo_AI' ) ) {
 		include dirname( __FILE__ ) . '/includes/class-woo-ai.php';
 
 		register_activation_hook( __FILE__, array( 'Woo_AI', 'activate' ) );
