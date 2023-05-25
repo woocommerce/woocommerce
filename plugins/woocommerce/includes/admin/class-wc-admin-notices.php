@@ -266,7 +266,7 @@ class WC_Admin_Notices {
 	 * @param string $button_text Button text (plain text).
 	 * @param string $button_url  URL to link to.
 	 */
-	public static function render_contextual_notice( $notice_html, $button_text, $severity, $button_url ) {
+	public static function render_contextual_notice( $notice_html, $severity, $button_text, $button_url ) {
 		include dirname( __FILE__ ) . '/views/html-notice-contextual.php';
 	}
 
