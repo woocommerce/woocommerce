@@ -95,6 +95,15 @@
 	}
 }
 
+.woocommerce-profile-wizard__spinner {
+	align-items: center;
+	display: flex;
+	height: 500px;
+	margin: 0 auto;
+	justify-content: center;
+	width: 500px;
+}
+
 .woocommerce-profiler-select-control__country {
 	max-width: 404px;
 	margin: auto auto 32px auto;
