@@ -346,6 +346,7 @@ export const DateTimePickerControl = forwardRef(
 					</BaseControl>
 				) }
 				popoverProps={ {
+					anchor: inputControl.current,
 					className: 'woocommerce-date-time-picker-control__popover',
 					placement: 'bottom-start',
 				} }
