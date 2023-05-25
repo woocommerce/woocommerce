@@ -77,10 +77,12 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$orderby = $request->get_param( 'orderby' );
+		$on_sale = $request->get_param( 'woocommerceOnSale' ) === 'true';
 
 		$orderby_query = $orderby ? $this->get_custom_orderby_query( $orderby ) : [];
+		$on_sale_query = $this->get_on_sale_products_query( $on_sale );
 
-		return array_merge( $args, $orderby_query );
+		return array_merge( $args, $orderby_query, $on_sale_query );
 	}
 
 	/**
@@ -126,9 +128,12 @@ class ProductCollection extends AbstractBlock {
 			'tax_query'      => array(),
 		);
 
+		$is_on_sale = $block->context['query']['woocommerceOnSale'] ?? false;
+
 		$merged_query = $this->merge_queries(
 			$common_query_values,
-			$this->get_custom_orderby_query( $query['orderby'] )
+			$this->get_custom_orderby_query( $query['orderby'] ),
+			$this->get_on_sale_products_query( $is_on_sale )
 		);
 
 		return $merged_query;
@@ -196,6 +201,23 @@ class ProductCollection extends AbstractBlock {
 		return array(
 			'meta_key' => $meta_keys[ $orderby ],
 			'orderby'  => 'meta_value_num',
+		);
+	}
+
+	/**
+	 * Return a query for on sale products.
+	 *
+	 * @param bool $is_on_sale Whether to query for on sale products.
+	 *
+	 * @return array
+	 */
+	private function get_on_sale_products_query( $is_on_sale ) {
+		if ( ! $is_on_sale ) {
+			return array();
+		}
+
+		return array(
+			'post__in' => wc_get_product_ids_on_sale(),
 		);
 	}
 
