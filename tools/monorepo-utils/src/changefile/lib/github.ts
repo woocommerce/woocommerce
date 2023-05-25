@@ -1,7 +1,6 @@
 /**
  * Internal dependencies
  */
-import { sign } from 'crypto';
 import { getPullRequest, isCommunityPullRequest } from '../../core/github/repo';
 import { Logger } from '../../core/logger';
 
@@ -114,14 +113,14 @@ export const getChangelogType = ( body: string ) => {
  * @return {void|string} changelog message.
  */
 export const getChangelogMessage = ( body: string ) => {
-	const messageRegex = /#### Message\r\n<!--(.*)-->(.*)#### Comment/gms;
+	const messageRegex = /#### Message\r\n(<!--(.*)-->)?(.*)#### Comment/gms;
 	const match = messageRegex.exec( body );
 
 	if ( ! match ) {
 		Logger.error( 'No changelog message found' );
 	}
 
-	return match[ 2 ].trim();
+	return match[ 3 ].trim();
 };
 
 /**
@@ -131,10 +130,10 @@ export const getChangelogMessage = ( body: string ) => {
  * @return {void|string} changelog comment.
  */
 export const getChangelogComment = ( body: string ) => {
-	const commentRegex = /#### Comment\r\n<!--(.*)-->(.*)<\/details>/gms;
+	const commentRegex = /#### Comment\r\n(<!--(.*)-->)?(.*)<\/details>/gms;
 	const match = commentRegex.exec( body );
 
-	return match ? match[ 2 ].trim() : '';
+	return match ? match[ 3 ].trim() : '';
 };
 
 export const getChangelogDetails = ( body: string ) => {
