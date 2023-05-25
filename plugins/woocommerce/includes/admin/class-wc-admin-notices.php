@@ -253,6 +253,24 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Render a custom contextual notice.
+	 *
+	 * This is a wrapper for a contextual notice template.
+	 * Allows Woo or extensions to render a relevant notice in
+	 * a specific section of the Woo UI.
+	 * For example, rendering a payment dispute notice in order
+	 * edit screen, using `woocommerce_order_details_after_payment_info` hook.
+	 *
+	 * @param string $notice_html Notice message. Can be rich html (e.g. bold, italics, links).
+	 * @param string $severity    Severity of the notice. Can be 'error', 'warning', 'success', 'info'.
+	 * @param string $button_text Button text (plain text).
+	 * @param string $button_url  URL to link to.
+	 */
+	public static function render_contextual_notice( $notice_html, $button_text, $severity, $button_url ) {
+		include dirname( __FILE__ ) . '/views/html-notice-contextual.php';
+	}
+
+	/**
 	 * Output any stored custom notices.
 	 */
 	public static function output_custom_notices() {

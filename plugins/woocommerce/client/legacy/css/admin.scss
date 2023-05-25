@@ -8019,3 +8019,52 @@ table.bar_chart {
 		width: calc(100% - 24px);
 	}
 }
+
+.woocommerce-contextual-notice {
+	margin-top: 1em;
+	background-color: lightgray;
+	padding: 12px 16px;
+
+	.woocommerce-contextual-notice-cta {
+		padding-top: 1em;
+	}
+
+	// Default to "info" theme.
+	background-color: #F0F6FC;
+}
+
+.woocommerce-contextual-notice-success {
+	// These are shared / Gutenberg colours, replace with variables :)
+	background-color: #f0fcf0;
+
+	.woocommerce-contextual-notice-cta .components-button,
+	.woocommerce-contextual-notice-cta .components-button:hover:not(:disabled) {
+		box-shadow: inset 0 0 0 1px #18cc3f;
+		border-color: #18cc3f;
+		color: #18cc3f;
+	}
+}
+
+.woocommerce-contextual-notice-warning {
+	// These are shared / Gutenberg colours, replace with variables :)
+	background-color: #FCF9E8;
+
+	.woocommerce-contextual-notice-cta .components-button,
+	.woocommerce-contextual-notice-cta .components-button:hover:not(:disabled) {
+		box-shadow: inset 0 0 0 1px #BD8600;
+		border-color: #BD8600;
+		color: #BD8600;
+	}
+}
+
+.woocommerce-contextual-notice-error {
+	// These are shared / Gutenberg colours, replace with variables :)
+	background-color: #FCF0F1;
+
+	.woocommerce-contextual-notice-cta .components-button,
+	.woocommerce-contextual-notice-cta .components-button:hover:not(:disabled) {
+		box-shadow: inset 0 0 0 1px #CC1818;
+		border-color: #CC1818;
+		color: #CC1818;
+	}
+}
