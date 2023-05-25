@@ -18,7 +18,10 @@ import { Navigation } from '../components/navigation/navigation';
 import { PluginCard } from '../components/plugin-card/plugin-card';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-const locale = ( getAdminSetting( 'locale' ) || 'en_US' ).replace( '_', '-' );
+const locale = ( getAdminSetting( 'locale' )?.siteLocale || 'en_US' ).replace(
+	'_',
+	'-'
+);
 const joinWithAnd = ( items: string[] ) => {
 	return new Intl.ListFormat( locale, {
 		style: 'long',
