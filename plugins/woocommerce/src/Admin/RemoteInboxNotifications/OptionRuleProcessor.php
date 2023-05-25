@@ -49,7 +49,7 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 		$option_value      = get_option( $rule->option_name, $default );
 		$is_contains_valid = $is_contains && ( is_array( $option_value ) || ( is_string( $option_value ) && is_string( $rule->value ) ) );
 
-		if ( ! $is_contains_valid ) {
+		if ( $is_contains && ! $is_contains_valid ) {
 			$logger = wc_get_logger();
 			$logger->warning(
 				sprintf(
