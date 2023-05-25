@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Woo AI
- * Plugin URI: https://github.com/woocommerce/woo-ai
+ * Plugin URI: https://github.com/woocommerce
  * Description: Enable AI experiments within the WooCommerce experience.
  * Version: 0.1.0
  * Author: WooCommerce
