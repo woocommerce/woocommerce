@@ -202,11 +202,6 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.fill( '#woocommerce_flat_rate_cost', '10' );
 			await page.click( '#btn-ok' );
 			await page.waitForLoadState( 'networkidle' );
-			await page.click( '#submit' );
-			await page.waitForFunction( () => {
-				const button = document.querySelector( '#submit' );
-				return button && button.disabled;
-			} );
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
