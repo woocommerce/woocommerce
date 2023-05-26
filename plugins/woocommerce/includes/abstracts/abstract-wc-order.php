@@ -106,7 +106,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Indicates if set_parent_id will throw an error if no order exists with the supplied id.
 	 *
-	 * @since 7.7.0
+	 * @since 7.9.0
 	 * @var bool
 	 */
 	private $verify_parent_id = true;

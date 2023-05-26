@@ -2596,7 +2596,7 @@ function wc_update_770_remove_multichannel_marketing_feature_options() {
   *
  * @return void
  */
-function wc_update_780_delete_stray_order_records() {
+function wc_update_790_delete_stray_order_records() {
 	global $wpdb;
 
 	$orders_table_name = OrdersTableDataStore::get_orders_table_name();
