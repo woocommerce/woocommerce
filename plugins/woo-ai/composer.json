@@ -8,7 +8,8 @@
 	"minimum-stability": "dev",
 	"version": "0.1.0",
 	"require": {
-		"composer/installers": "~1.7"
+		"composer/installers": "~1.7",
+		"ext-json": "*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^6.5 || ^7.5",
