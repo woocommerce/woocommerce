@@ -8,7 +8,6 @@
 namespace Automattic\WooCommerce\AI\Completion;
 
 use Automattic\Jetpack\Connection\Client;
-use Automattic\WooCommerce\AI\ProductDataSuggestion\Completion_Exception;
 use Jetpack;
 use Jetpack_Options;
 use JsonException;

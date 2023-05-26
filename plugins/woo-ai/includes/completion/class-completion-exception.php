@@ -5,7 +5,7 @@
  * @package Woo_AI
  */
 
-namespace Automattic\WooCommerce\AI\ProductDataSuggestion;
+namespace Automattic\WooCommerce\AI\Completion;
 
 use Automattic\WooCommerce\AI\Exception\Woo_AI_Exception;
 
