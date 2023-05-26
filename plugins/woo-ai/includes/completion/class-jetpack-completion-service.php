@@ -56,11 +56,21 @@ class Jetpack_Completion_Service implements Completion_Service_Interface {
 		}
 
 		try {
-			// Extract the string from the response. Response is wrapped in quotes and escaped. E.g. "{ \n \"foo\": \"bar\" \n }".
-			$response = json_decode( $response['body'], true, 512, JSON_THROW_ON_ERROR );
+			$response_body = wp_remote_retrieve_body( $response );
+			// Extract the string from the response. Response might be wrapped in quotes and escaped. E.g. "{ \n \"foo\": \"bar\" \n }".
+			if ( is_string( $response_body ) ) {
+				$response_body = json_decode( $response_body, true, 512, JSON_THROW_ON_ERROR );
+			}
+
+			$decoded = json_decode( $response_body, true, 512, JSON_THROW_ON_ERROR );
 		} catch ( JsonException $e ) {
 			/* translators: %s: The error message. */
 			throw new Completion_Exception( sprintf( __( 'Failed to decode completion response: %s', 'woocommerce' ), $e->getMessage() ), 500, $e );
+		}
+
+		if ( empty( $decoded ) || ! is_array( $decoded ) || ! isset( $decoded['completion'] ) ) {
+			/* translators: %s: The response body. */
+			throw new Completion_Exception( sprintf( __( 'Invalid or empty completion response: %s', 'woocommerce' ), $response_body ), 500 );
 		}
 
 		return $response;
