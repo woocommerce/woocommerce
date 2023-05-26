@@ -14,6 +14,7 @@ import {
  * Internal dependencies
  */
 import { ProductCollectionAttributes } from '../types';
+import { setQueryAttribute } from './utils';
 
 const OnSaleControl = (
 	props: BlockEditProps< ProductCollectionAttributes >
@@ -23,14 +24,11 @@ const OnSaleControl = (
 	return (
 		<ToolsPanelItem
 			label={ __( 'On Sale', 'woo-gutenberg-products-block' ) }
-			hasValue={ () => query.woocommerceOnSale }
+			hasValue={ () => query.woocommerceOnSale === true }
 			isShownByDefault
 			onDeselect={ () => {
-				props.setAttributes( {
-					query: {
-						...query,
-						woocommerceOnSale: false,
-					},
+				setQueryAttribute( props, {
+					woocommerceOnSale: false,
 				} );
 			} }
 		>
@@ -41,11 +39,8 @@ const OnSaleControl = (
 				) }
 				checked={ query.woocommerceOnSale || false }
 				onChange={ ( woocommerceOnSale ) => {
-					props.setAttributes( {
-						query: {
-							...query,
-							woocommerceOnSale,
-						},
+					setQueryAttribute( props, {
+						woocommerceOnSale,
 					} );
 				} }
 			/>

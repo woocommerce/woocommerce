@@ -53,7 +53,7 @@ class ProductCollection extends AbstractBlock {
 			'query_loop_block_query_vars',
 			array( $this, 'build_query' ),
 			10,
-			2
+			3
 		);
 
 		// Update the query for Editor.
@@ -76,13 +76,76 @@ class ProductCollection extends AbstractBlock {
 			return $args;
 		}
 
-		$orderby = $request->get_param( 'orderby' );
-		$on_sale = $request->get_param( 'woocommerceOnSale' ) === 'true';
+		$orderby      = $request->get_param( 'orderBy' );
+		$on_sale      = $request->get_param( 'woocommerceOnSale' ) === 'true';
+		$stock_status = $request->get_param( 'woocommerceStockStatus' );
 
-		$orderby_query = $orderby ? $this->get_custom_orderby_query( $orderby ) : [];
-		$on_sale_query = $this->get_on_sale_products_query( $on_sale );
+		return $this->get_final_query_args(
+			$args,
+			array(
+				'orderby'      => $orderby,
+				'on_sale'      => $on_sale,
+				'stock_status' => $stock_status,
+			)
+		);
+	}
 
-		return array_merge( $args, $orderby_query, $on_sale_query );
+	/**
+	 * Get final query args based on provided values
+	 *
+	 * @param array $common_query_values Common query values.
+	 * @param array $query               Query from block context.
+	 */
+	private function get_final_query_args( $common_query_values, $query ) {
+		$orderby_query    = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : [];
+		$on_sale_query    = $this->get_on_sale_products_query( $query['on_sale'] );
+		$stock_query      = $this->get_stock_status_query( $query['stock_status'] );
+		$visibility_query = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query ) : [];
+		$tax_query        = $this->merge_tax_queries( $visibility_query );
+
+		return $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query );
+	}
+
+	/**
+	 * Return a custom query based on attributes, filters and global WP_Query.
+	 *
+	 * @param WP_Query $query The WordPress Query.
+	 * @param WP_Block $block The block being rendered.
+	 * @param int      $page  The page number.
+	 *
+	 * @return array
+	 */
+	public function build_query( $query, $block, $page ) {
+		// If not in context of product collection block, return the query as is.
+		$is_product_collection_block = $block->context['query']['isProductCollectionBlock'] ?? false;
+		if ( ! $is_product_collection_block ) {
+			return $query;
+		}
+
+		$block_context_query = $block->context['query'];
+
+		$common_query_values = array(
+			'meta_query'     => array(),
+			'posts_per_page' => $block_context_query['perPage'],
+			'order'          => $block_context_query['order'],
+			'offset'         => $block_context_query['offset'],
+			'post__in'       => array(),
+			'post_status'    => 'publish',
+			'post_type'      => 'product',
+			'tax_query'      => array(),
+			'paged'          => $page,
+		);
+
+		$is_on_sale = $block_context_query['woocommerceOnSale'] ?? false;
+
+		return $this->get_final_query_args(
+			$common_query_values,
+			array(
+				'on_sale'      => $is_on_sale,
+				'stock_status' => $block_context_query['woocommerceStockStatus'],
+				'orderby'      => $block_context_query['orderBy'],
+			)
+		);
 	}
 
 	/**
@@ -99,44 +162,6 @@ class ProductCollection extends AbstractBlock {
 		$original_enum             = isset( $params['orderby']['enum'] ) ? $params['orderby']['enum'] : array();
 		$params['orderby']['enum'] = array_unique( array_merge( $original_enum, $this->custom_order_opts ) );
 		return $params;
-	}
-
-	/**
-	 * Return a custom query based on attributes, filters and global WP_Query.
-	 *
-	 * @param WP_Query $query The WordPress Query.
-	 * @param WP_Block $block The block being rendered.
-	 *
-	 * @return array
-	 */
-	public function build_query( $query, $block ) {
-		// If not in context of product collection block, return the query as is.
-		$is_product_collection_block = $block->context['query']['isProductCollectionBlock'] ?? false;
-		if ( ! $is_product_collection_block ) {
-			return $query;
-		}
-
-		$common_query_values = array(
-			'meta_query'     => array(),
-			'posts_per_page' => $query['posts_per_page'],
-			'orderby'        => $query['orderby'],
-			'order'          => $query['order'],
-			'offset'         => $query['offset'],
-			'post__in'       => array(),
-			'post_status'    => 'publish',
-			'post_type'      => 'product',
-			'tax_query'      => array(),
-		);
-
-		$is_on_sale = $block->context['query']['woocommerceOnSale'] ?? false;
-
-		$merged_query = $this->merge_queries(
-			$common_query_values,
-			$this->get_custom_orderby_query( $query['orderby'] ),
-			$this->get_on_sale_products_query( $is_on_sale )
-		);
-
-		return $merged_query;
 	}
 
 	/**
@@ -325,5 +350,95 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		return $base;
+	}
+
+	/**
+	 * Return a query for products depending on their stock status.
+	 *
+	 * @param array $stock_statuses An array of acceptable stock statuses.
+	 * @return array
+	 */
+	private function get_stock_status_query( $stock_statuses ) {
+		if ( ! is_array( $stock_statuses ) ) {
+			return array();
+		}
+
+		$stock_status_options = array_keys( wc_get_product_stock_status_options() );
+
+		/**
+		 * If all available stock status are selected, we don't need to add the
+		 * meta query for stock status.
+		 */
+		if (
+			count( $stock_statuses ) === count( $stock_status_options ) &&
+			array_diff( $stock_statuses, $stock_status_options ) === array_diff( $stock_status_options, $stock_statuses )
+		) {
+			return array();
+		}
+
+		/**
+		 * If all stock statuses are selected except 'outofstock', we use the
+		 * product visibility query to filter out out of stock products.
+		 *
+		 * @see get_product_visibility_query()
+		 */
+		$diff = array_diff( $stock_status_options, $stock_statuses );
+		if ( count( $diff ) === 1 && in_array( 'outofstock', $diff, true ) ) {
+			return array();
+		}
+
+		return array(
+			'meta_query' => array(
+				array(
+					'key'     => '_stock_status',
+					'value'   => (array) $stock_statuses,
+					'compare' => 'IN',
+				),
+			),
+		);
+	}
+
+	/**
+	 * Return a query for product visibility depending on their stock status.
+	 *
+	 * @param array $stock_query Stock status query.
+	 *
+	 * @return array Tax query for product visibility.
+	 */
+	private function get_product_visibility_query( $stock_query ) {
+		$product_visibility_terms  = wc_get_product_visibility_term_ids();
+		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
+
+		// Hide out of stock products.
+		if ( empty( $stock_query ) && 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$product_visibility_not_in[] = $product_visibility_terms['outofstock'];
+		}
+
+		return array(
+			'tax_query' => array(
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'term_taxonomy_id',
+					'terms'    => $product_visibility_not_in,
+					'operator' => 'NOT IN',
+				),
+			),
+		);
+	}
+
+	/**
+	 * Merge tax_queries from various queries.
+	 *
+	 * @param array ...$queries Query arrays to be merged.
+	 * @return array
+	 */
+	private function merge_tax_queries( ...$queries ) {
+		$tax_query = [];
+		foreach ( $queries as $query ) {
+			if ( ! empty( $query['tax_query'] ) ) {
+				$tax_query = array_merge( $tax_query, $query['tax_query'] );
+			}
+		}
+		return [ 'tax_query' => $tax_query ];
 	}
 }

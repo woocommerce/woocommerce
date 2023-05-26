@@ -18,7 +18,7 @@ import {
 	TProductCollectionOrder,
 	TProductCollectionOrderBy,
 } from '../types';
-import { getDefaultSettings } from './constants';
+import { getDefaultSettings } from '../constants';
 
 const orderOptions = [
 	{

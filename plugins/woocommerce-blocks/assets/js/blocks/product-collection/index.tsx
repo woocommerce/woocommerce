@@ -16,9 +16,6 @@ import './variations';
 if ( isExperimentalBuild() ) {
 	registerBlockType( metadata, {
 		icon,
-		attributes: {
-			...metadata.attributes,
-		},
 		edit,
 		save,
 	} );
