@@ -2592,11 +2592,8 @@ function wc_update_770_remove_multichannel_marketing_feature_options() {
 }
 
 /**
- * Delete stray order records in both posts table and the orders table:
- *
- * - Posts of type "shop_order_placeholder" with no matching order in the orders table.
- * - Records of type "shop_order_refund" with a zero parent order id in both tables.
- *
+ * Delete posts of type "shop_order_placeholder" with no matching order in the orders table.
+  *
  * @return void
  */
 function wc_update_780_delete_stray_order_records() {
@@ -2614,20 +2611,6 @@ function wc_update_780_delete_stray_order_records() {
 		$wpdb->prepare(
 			"DELETE FROM {$wpdb->posts} WHERE post_type = %s AND ID NOT IN (SELECT id FROM $orders_table_name)",
 			'shop_order_placehold'
-		)
-	);
-
-	$wpdb->query(
-		$wpdb->prepare(
-			"DELETE FROM {$wpdb->posts} WHERE post_type = %s AND post_parent = 0",
-			'shop_order_refund'
-		)
-	);
-
-	$wpdb->query(
-		$wpdb->prepare(
-			"DELETE FROM {$orders_table_name} WHERE type = %s AND (parent_order_id = 0 OR parent_order_id is null)",
-			'shop_order_refund'
 		)
 	);
 
