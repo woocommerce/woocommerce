@@ -55,25 +55,27 @@ class Jetpack_Completion_Service implements Completion_Service_Interface {
 			throw new Completion_Exception( sprintf( __( 'Failed to get completion: %s', 'woocommerce' ), $response->get_error_message() ), $response->get_error_code() );
 		}
 
-		try {
-			$response_body = wp_remote_retrieve_body( $response );
-			// Extract the string from the response. Response might be wrapped in quotes and escaped. E.g. "{ \n \"foo\": \"bar\" \n }".
-			if ( is_string( $response_body ) ) {
-				$response_body = json_decode( $response_body, true, 512, JSON_THROW_ON_ERROR );
-			}
+		$response_body = wp_remote_retrieve_body( $response );
 
+		try {
+			// Extract the string from the response. Response might be wrapped in quotes and escaped. E.g. "{ \n \"foo\": \"bar\" \n }".
 			$decoded = json_decode( $response_body, true, 512, JSON_THROW_ON_ERROR );
 		} catch ( JsonException $e ) {
 			/* translators: %s: The error message. */
 			throw new Completion_Exception( sprintf( __( 'Failed to decode completion response: %s', 'woocommerce' ), $e->getMessage() ), 500, $e );
 		}
 
-		if ( empty( $decoded ) || ! is_array( $decoded ) || ! isset( $decoded['completion'] ) ) {
+		// If the decoded response is not a string, it means that the response was not wrapped in quotes and escaped so we can use it as is.
+		if ( ! is_string( $decoded ) ) {
+			$decoded = $response_body;
+		}
+
+		if ( empty( $decoded ) || ! is_string( $decoded ) ) {
 			/* translators: %s: The response body. */
 			throw new Completion_Exception( sprintf( __( 'Invalid or empty completion response: %s', 'woocommerce' ), $response_body ), 500 );
 		}
 
-		return $response;
+		return $decoded;
 	}
 
 	/**
