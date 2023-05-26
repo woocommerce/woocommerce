@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "7.8.0",
+	"version": "7.9.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
@@ -21,7 +21,7 @@
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
 		"woocommerce/action-scheduler": "3.5.4",
-		"woocommerce/woocommerce-blocks": "10.2.0"
+		"woocommerce/woocommerce-blocks": "10.2.1"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -89,10 +89,13 @@
 			"phpcs -s -p"
 		],
 		"lint": [
-			"chg=$(git diff --relative --name-only -- '*.php'); [ -z $chg ] || phpcs-changed -s --git --git-unstaged $chg"
+			"chg=$(git diff --relative --name-only -- '*.php'); [[ -z $chg ]] || phpcs-changed -s --git --git-unstaged $chg"
 		],
 		"lint-staged": [
-			"chg=$(git diff HEAD --relative --name-only -- '*.php'); [ -z $chg ] || phpcs-changed -s --git $chg"
+			"chg=$(git diff HEAD --relative --name-only -- '*.php'); [[ -z $chg ]] || phpcs-changed -s --git $chg"
+		],
+		"lint-branch": [
+			"sh ./bin/lint-branch.sh"
 		],
 		"phpcbf": [
 			"phpcbf -p"

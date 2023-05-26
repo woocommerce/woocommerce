@@ -205,15 +205,6 @@ const webpackConfig = {
 			],
 		} ),
 
-		new CopyWebpackPlugin( {
-			patterns: [
-				{
-					from: '../../packages/js/product-editor/assets',
-					to: './product-editor',
-				},
-			],
-		} ),
-
 		// React Fast Refresh.
 		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
 

@@ -67,15 +67,17 @@ class DefaultFreeExtensions {
 			array(
 				'key'     => 'obw/core-profiler',
 				'title'   => __( 'Grow your store', 'woocommerce' ),
-				'plugins' => array(
-					self::get_plugin( 'woocommerce-payments' ),
-					self::get_plugin( 'woocommerce-services:shipping' ),
-					self::get_plugin( 'jetpack' ),
-					self::get_plugin( 'pinterest-for-woocommerce' ),
-					self::get_plugin( 'mailpoet' ),
-					self::get_plugin( 'tiktok-for-business:alt' ),
-					self::get_plugin( 'google-listings-and-ads' ),
-					self::get_plugin( 'woocommerce-services:tax' ),
+				'plugins' => self::with_core_profiler_fields(
+					array(
+						self::get_plugin( 'woocommerce-payments' ),
+						self::get_plugin( 'woocommerce-services:shipping' ),
+						self::get_plugin( 'jetpack' ),
+						self::get_plugin( 'pinterest-for-woocommerce' ),
+						self::get_plugin( 'mailpoet' ),
+						self::get_plugin( 'tiktok-for-business' ),
+						self::get_plugin( 'google-listings-and-ads' ),
+						self::get_plugin( 'woocommerce-services:tax' ),
+					)
 				),
 			),
 		);
@@ -195,6 +197,8 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => true,
 			),
 			'woocommerce-payments'              => array(
+				'name'           => __( 'WooCommerce Payments', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/wcpay.svg', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Accept credit cards and other popular payment methods with %1$sWooCommerce Payments%2$s', 'woocommerce' ),
@@ -368,7 +372,8 @@ class DefaultFreeExtensions {
 				'min_wp_version' => '5.9',
 			),
 			'woocommerce-services:shipping'     => array(
-				'name'           => 'WooCommerce Shipping',
+				'name'           => __( 'WooCommerce Shipping', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/woo.svg', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
 				/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Print shipping labels with %1$sWooCommerce Shipping%2$s', 'woocommerce' ),
@@ -436,7 +441,8 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => true,
 			),
 			'woocommerce-services:tax'          => array(
-				'name'           => 'WooCommerce Tax',
+				'name'           => __( 'WooCommerce Tax', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/woo.svg', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Get automated sales tax with %1$sWooCommerce Tax%2$s', 'woocommerce' ),
@@ -517,7 +523,8 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => true,
 			),
 			'jetpack'                           => array(
-				'name'           => 'Jetpack',
+				'name'           => __( 'Jetpack', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/jetpack.svg', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Enhance speed and security with %1$sJetpack%2$s', 'woocommerce' ),
@@ -540,6 +547,7 @@ class DefaultFreeExtensions {
 			),
 			'mailpoet'                          => array(
 				'name'           => __( 'MailPoet', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/mailpoet.png', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Level up your email marketing with %1$sMailPoet%2$s', 'woocommerce' ),
@@ -801,5 +809,93 @@ class DefaultFreeExtensions {
 		$plugin['key'] = $slug;
 
 		return $plugin;
+	}
+
+	/**
+	 * Decorate plugin data with core profiler fields.
+	 *
+	 * - Updated description for the core-profiler.
+	 * - Adds learn_more_link and label.
+	 *
+	 * @param array $plugins Array of plugins.
+	 *
+	 * @return array
+	 */
+	public static function with_core_profiler_fields( array $plugins ) {
+		$_plugins = array(
+			'woocommerce-payments'          => array(
+				'label'           => __( 'Get paid with WooCommerce Payments', 'woocommerce' ),
+				'description'     => __( 'Accept credit cards and other popular payment methods smoothly.', 'woocommerce' ),
+				'learn_more_link' => 'https://woocommerce.com/products/woocommerce-payments',
+			),
+			'woocommerce-services:shipping' => array(
+				'label'           => __( 'Print shipping labels with WooCommerce Shipping', 'woocommerce' ),
+				'description'     => __( 'Print USPS and DHL labels directly from your dashboard and save on shipping.', 'woocommerce' ),
+				'learn_more_link' => 'https://woocommerce.com/woocommerce-shipping',
+			),
+			'jetpack'                       => array(
+				'label'           => __( 'Enhance security with Jetpack', 'woocommerce' ),
+				'description'     => __( 'Get auto real-time backups, malware scans, and spam protection.', 'woocommerce' ),
+				'learn_more_link' => 'https://woocommerce.com/products/jetpack',
+			),
+			'pinterest-for-woocommerce'     => array(
+				'label'           => __( 'Showcase your products with Pinterest', 'woocommerce' ),
+				'description'     => __( 'Get your products in front of a highly engaged audience.', 'woocommerce' ),
+				'learn_more_link' => 'https://woocommerce.com/products/pinterest-for-woocommerce',
+			),
+			'mailpoet'                      => array(
+				'label'           => __( 'Reach your customers with MailPoet', 'woocommerce' ),
+				'description'     => __( 'Send purchase follow-up emails, newsletters, and promotional campaigns.', 'woocommerce' ),
+				'learn_more_link' => 'https://woocommerce.com/products/mailpoet',
+			),
+			'tiktok-for-business'           => array(
+				'label'           => __( 'Create ad campaigns with TikTok', 'woocommerce' ),
+				'description'     => __( 'Create advertising campaigns and reach one billion global users.', 'woocommerce' ),
+				'learn_more_link' => 'https://woocommerce.com/products/tiktok-for-woocommerce',
+			),
+			'google-listings-and-ads'       => array(
+				'label'           => __( 'Drive sales with Google Listings & Ads', 'woocommerce' ),
+				'description'     => __( 'Reach millions of active shoppers across Google with free product listings and ads.', 'woocommerce' ),
+				'learn_more_link' => 'https://woocommerce.com/products/google-listings-and-ads',
+			),
+			'woocommerce-services:tax'      => array(
+				'label'           => __( 'Get automated tax rates with WooCommerce Tax', 'woocommerce' ),
+				'description'     => __( 'Automatically calculate how much sales tax should be collected – by city, country, or state.', 'woocommerce' ),
+				'learn_more_link' => 'https://woocommerce.com/products/tax',
+			),
+		);
+
+		$remove_plugins_activated_rule = function( $is_visible ) {
+			$is_visible = array_filter(
+				array_map(
+					function( $rule ) {
+						if ( is_object( $rule ) || ! isset( $rule['operand'] ) ) {
+							return $rule;
+						}
+
+						return array_filter(
+							$rule['operand'],
+							function( $operand ) {
+								return 'plugins_activated' !== $operand['type'];
+							}
+						);
+					},
+					$is_visible
+				)
+			);
+
+			return empty( $is_visible ) ? true : $is_visible;
+		};
+
+		foreach ( $plugins as &$plugin ) {
+			if ( isset( $_plugins[ $plugin['key'] ] ) ) {
+				$plugin = array_merge( $plugin, $_plugins[ $plugin['key'] ] );
+				if ( isset( $plugin['is_visible'] ) && is_array( $plugin['is_visible'] ) ) {
+					$plugin['is_visible'] = $remove_plugins_activated_rule( $plugin['is_visible'] );
+				}
+			}
+		}
+
+		return $plugins;
 	}
 }

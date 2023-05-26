@@ -680,13 +680,12 @@ jQuery( function ( $ ) {
 		'.product_attributes .remove_row',
 		function () {
 			var $parent = $( this ).parent().parent();
-			var confirmMessage = $parent
-				.find( 'input[name^="attribute_variation"]' )
-				.is( ':visible:checked' )
-				? woocommerce_admin_meta_boxes.i18n_remove_used_attribute_confirmation_message
-				: woocommerce_admin_meta_boxes.remove_attribute;
+			var isUsedForVariations = $parent
+			.find( 'input[name^="attribute_variation"]' )
+			.is( ':visible:checked' )
 
-			if ( window.confirm( confirmMessage ) ) {
+			if ( ! isUsedForVariations
+					|| window.confirm( woocommerce_admin_meta_boxes.i18n_remove_used_attribute_confirmation_message ) ) {
 				if ( $parent.is( '.taxonomy' ) ) {
 					$parent.find( 'select, input[type=text]' ).val( '' );
 					$parent.hide();

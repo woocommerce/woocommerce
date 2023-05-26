@@ -7,7 +7,10 @@ import { Repository } from '@octokit/graphql-schema';
  * Internal dependencies
  */
 import { graphqlWithAuth, octokitWithAuth } from './api';
-import { PullRequestEndpointResponse } from './types';
+import {
+	CreatePullRequestEndpointResponse,
+	GetPullRequestEndpointResponse,
+} from './types';
 
 export const getLatestGithubReleaseVersion = async ( options: {
 	owner?: string;
@@ -150,7 +153,7 @@ export const createPullRequest = async ( options: {
 	name: string;
 	title: string;
 	body: string;
-} ): Promise< PullRequestEndpointResponse[ 'data' ] > => {
+} ): Promise< CreatePullRequestEndpointResponse[ 'data' ] > => {
 	const { head, base, owner, name, title, body } = options;
 	const pullRequest = await octokitWithAuth().request(
 		'POST /repos/{owner}/{repo}/pulls',
@@ -166,4 +169,53 @@ export const createPullRequest = async ( options: {
 
 	//@ts-ignore There is a type mismatch between the graphql schema and the response. pullRequest.data.head.repo.has_discussions is a boolean, but the graphql schema doesn't have that field.
 	return pullRequest.data;
+};
+
+/**
+ * Get a pull request from GitHub.
+ *
+ * @param {Object} options
+ * @param {string} options.owner repository owner.
+ * @param {string} options.name  repository name.
+ * @param          prNumber      pull request number.
+ * @return {Promise<object>}     pull request data.
+ */
+export const getPullRequest = async ( options: {
+	owner: string;
+	name: string;
+	prNumber: string;
+} ): Promise< GetPullRequestEndpointResponse[ 'data' ] > => {
+	const { owner, name, prNumber } = options;
+	const pr = await octokitWithAuth().request(
+		'GET /repos/{owner}/{repo}/pulls/{pull_number}',
+		{
+			owner,
+			repo: name,
+			pull_number: Number( prNumber ),
+		}
+	);
+
+	//@ts-ignore Not sure why this error comes up. All versions are up to date and the schema is correct.
+	return pr.data;
+};
+
+/**
+ * Determine if a pull request is coming from a community contribution, i.e., not from a member of the WooCommerce organization.
+ *
+ * @param {Object} pullRequestData pull request data.
+ * @param {string} owner           repository owner.
+ * @param {string} name            repository name.
+ * @return {boolean} if a pull request is coming from a community contribution.
+ */
+export const isCommunityPullRequest = (
+	pullRequestData: GetPullRequestEndpointResponse[ 'data' ],
+	owner: string,
+	name: string
+) => {
+	return (
+		pullRequestData.author_association === 'CONTRIBUTOR' ||
+		// It's possible a MEMBER can open a PR from their own fork.
+		( pullRequestData.author_association === 'MEMBER' &&
+			pullRequestData.head.repo.full_name !== `${ owner }/${ name }` )
+	);
 };
