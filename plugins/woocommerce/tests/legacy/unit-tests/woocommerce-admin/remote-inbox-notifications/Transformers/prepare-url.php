@@ -20,12 +20,12 @@ class WC_Admin_Tests_RemoteInboxNotifications_Transformers_PrepareUrl extends WC
 			'https://www.example.com/',
 			'http://www.example.com',
 			'http://www.example.com/',
-			'test://www.example.com/'
+			'test://www.example.com/',
 		);
 
 		$prepare_url = new PrepareUrl();
 
-		foreach( $urls as $url ) {
+		foreach ( $urls as $url ) {
 			$result = $prepare_url->transform( $url );
 			$this->assertEquals( 'www.example.com', $result );
 		}
