@@ -9,15 +9,13 @@ import { Icon } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import Block from './block';
+import metadata from './block.json';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';
+import { Edit } from './edit';
 
-const blockTypeName = 'woocommerce/product-top-rated';
-
-registerBlockType( blockTypeName, {
-	title: __( 'Top Rated Products', 'woo-gutenberg-products-block' ),
+registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
@@ -32,19 +30,16 @@ registerBlockType( blockTypeName, {
 		'Display a grid of your top rated products.',
 		'woo-gutenberg-products-block'
 	),
-	supports: {
-		align: [ 'wide', 'full' ],
-		html: false,
-	},
 	attributes: {
 		...sharedAttributes,
+		...metadata.attributes,
 	},
 	transforms: {
 		from: [
 			{
 				type: 'block',
 				blocks: sharedAttributeBlockTypes.filter(
-					( value ) => value !== blockTypeName
+					( value ) => value !== 'woocommerce/product-top-rated'
 				),
 				transform: ( attributes ) =>
 					createBlock( 'woocommerce/product-top-rated', attributes ),
@@ -57,9 +52,7 @@ registerBlockType( blockTypeName, {
 	 *
 	 * @param {Object} props Props to pass to block.
 	 */
-	edit( props ) {
-		return <Block { ...props } />;
-	},
+	edit: Edit,
 
 	save() {
 		return null;
