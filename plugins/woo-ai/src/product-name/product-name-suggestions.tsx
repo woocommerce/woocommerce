@@ -25,7 +25,19 @@ enum SuggestionsState {
 	None = 'none',
 }
 
-export function ProductNameSuggestions() {
+type TinyEditor = {
+	on: ( eventName: string, handler: () => void ) => void;
+};
+
+declare const tinymce: {
+	on: (
+		eventName: 'addeditor',
+		handler: ( event: Event & { editor: TinyEditor } ) => void,
+		thing?: boolean
+	) => void;
+};
+
+export const ProductNameSuggestions = () => {
 	const [ suggestionsState, setSuggestionsState ] =
 		useState< SuggestionsState >( SuggestionsState.None );
 	const [ error, setError ] = useState< string >( '' );
@@ -79,20 +91,32 @@ export function ProductNameSuggestions() {
 			}
 		};
 
+		// Necessary since tinymce does not bubble click events.
+		const onDOMLoad = () => {
+			tinymce.on(
+				'addeditor',
+				( event ) =>
+					event.editor.on( 'click', () => setVisible( false ) ),
+				true
+			);
+		};
+
 		if ( nameInput ) {
 			nameInput.addEventListener( 'focus', onFocus );
 			nameInput.addEventListener( 'keyup', onKeyUp );
 			nameInput.addEventListener( 'change', onChange );
-			document.body.addEventListener( 'click', onBodyClick );
 		}
+		document.body.addEventListener( 'click', onBodyClick );
+		document.addEventListener( 'DOMContentLoaded', onDOMLoad );
 
 		return () => {
 			if ( nameInput ) {
 				nameInput.removeEventListener( 'focus', onFocus );
 				nameInput.removeEventListener( 'keyup', onKeyUp );
 				nameInput.removeEventListener( 'change', onChange );
-				document.body.removeEventListener( 'click', onBodyClick );
 			}
+			document.body.removeEventListener( 'click', onBodyClick );
+			document.removeEventListener( 'DOMContentLoaded', onDOMLoad );
 		};
 	}, [] );
 
@@ -198,4 +222,4 @@ export function ProductNameSuggestions() {
 			) }
 		</div>
 	);
-}
+};
