@@ -97,7 +97,6 @@ const RandomLoadingMessage: React.FC< RandomLoadingMessageProps > = ( {
 	isLoading,
 } ) => {
 	const messageUpdateTimeout = useRef< number >();
-	const startTimeRef = useRef< number >( 0 );
 	const [ currentMessage, setCurrentMessage ] = useState(
 		__( 'Brainstorming ideas… hold on tight.', 'woocommerce' )
 	);
@@ -117,8 +116,6 @@ const RandomLoadingMessage: React.FC< RandomLoadingMessageProps > = ( {
 		};
 
 		if ( isLoading ) {
-			startTimeRef.current = Date.now();
-
 			updateMessage( 3000 );
 		} else {
 			clearTimeout( messageUpdateTimeout.current );
