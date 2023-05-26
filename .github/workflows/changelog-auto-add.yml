@@ -1,10 +1,38 @@
 name: 'Changelog Auto Add'
-on: workflow_dispatch
+on:
+    workflow_dispatch:
+        inputs:
+            prNumber:
+                description: Pull request number
+                required: true
 
 jobs:
-    hello-world:
-        name: 'Hello World'
+    add-changelog:
+        name: 'Add changelog to PR'
         runs-on: ubuntu-20.04
+        permissions:
+            contents: write
+            issues: write
+            pull-requests: write
         steps:
-            - name: Hello
-              run: echo "Hello World"
+            - name: Setup PNPM
+              uses: pnpm/action-setup@c3b53f6a16e57305370b4ae5a540c2077a1d50dd
+              with:
+                  version: '8.3.1'
+
+            - name: Setup Node
+              uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+              with:
+                  node-version-file: .nvmrc
+                  cache: pnpm
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Install prerequisites
+              run: |
+                  pnpm install --filter monorepo-utils --ignore-scripts
+                  # ignore scripts speeds up setup signficantly, but we still need to build monorepo utils
+                  pnpm build
+              working-directory: tools/monorepo-utils
+
+            - name: Add changelog
+              run: pnpm utils changefile ${{inputs.prNumber}} -o ${{ github.repository_owner }}
