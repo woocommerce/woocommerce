@@ -5,8 +5,6 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
-require_once __DIR__ . '/../../../../helpers/HPOSToggleTrait.php';
-
 /**
  * Class OrdersTableQueryTests.
  */
