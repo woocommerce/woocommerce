@@ -17,8 +17,9 @@ import {
 	TaskListType,
 	TaskType,
 	OnboardingProductTypes,
+	InstallAndActivatePluginsAsyncResponse,
 } from './types';
-import { Plugin } from '../plugins/types';
+import { Plugin, PluginNames } from '../plugins/types';
 
 export function getFreeExtensionsError( error: unknown ) {
 	return {
@@ -465,6 +466,27 @@ export function* actionTask( id: string ) {
 	}
 }
 
+export function* installAndActivatePluginsAsync(
+	plugins: Partial< PluginNames >[]
+) {
+	yield setIsRequesting( 'installAndActivatePluginsAsync', true );
+
+	try {
+		const results: InstallAndActivatePluginsAsyncResponse = yield apiFetch(
+			{
+				path: `${ WC_ADMIN_NAMESPACE }/onboarding/plugins/install-and-activate-async`,
+				method: 'POST',
+				data: { plugins },
+			}
+		);
+
+		return results;
+	} catch ( error ) {
+		throw error;
+	} finally {
+		yield setIsRequesting( 'installAndActivatePluginsAsync', false );
+	}
+}
 export type Action = ReturnType<
 	| typeof getFreeExtensionsError
 	| typeof getFreeExtensionsSuccess
