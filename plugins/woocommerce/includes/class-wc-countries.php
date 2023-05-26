@@ -475,8 +475,8 @@ class WC_Countries {
 				$states = $this->get_states( $key );
 				if ( $states ) {
 					// Maybe default the selected state as the first one.
-					if ( '*' === $selected_state ) {
-						$selected_state = key( $states );
+					if ( $selected_country === $key && '*' === $selected_state ) {
+						$selected_state = key( $states ) ?? '*';
 					}
 
 					echo '<optgroup label="' . esc_attr( $value ) . '">';
