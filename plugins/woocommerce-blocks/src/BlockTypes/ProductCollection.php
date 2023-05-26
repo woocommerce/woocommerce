@@ -134,6 +134,7 @@ class ProductCollection extends AbstractBlock {
 			'post_type'      => 'product',
 			'tax_query'      => array(),
 			'paged'          => $page,
+			's'              => $block_context_query['search'],
 		);
 
 		$is_on_sale = $block_context_query['woocommerceOnSale'] ?? false;
