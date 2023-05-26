@@ -113,7 +113,7 @@ export const getChangelogType = ( body: string ) => {
  * @return {void|string} changelog message.
  */
 export const getChangelogMessage = ( body: string ) => {
-	const messageRegex = /#### Message\r\n(<!--(.*)-->)?(.*)#### Comment/gms;
+	const messageRegex = /#### Message (<!--(.*)-->)?(.*)#### Comment/gms;
 	const match = messageRegex.exec( body );
 
 	if ( ! match ) {
@@ -130,7 +130,7 @@ export const getChangelogMessage = ( body: string ) => {
  * @return {void|string} changelog comment.
  */
 export const getChangelogComment = ( body: string ) => {
-	const commentRegex = /#### Comment\r\n(<!--(.*)-->)?(.*)<\/details>/gms;
+	const commentRegex = /#### Comment (<!--(.*)-->)?(.*)<\/details>/gms;
 	const match = commentRegex.exec( body );
 
 	return match ? match[ 3 ].trim() : '';

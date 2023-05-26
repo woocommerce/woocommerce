@@ -8,6 +8,10 @@ import { glob } from 'glob';
 import simpleGit from 'simple-git';
 
 /**
+ * Internal dependencies
+ */
+import { getAuthenticatedRemote } from '../../core/git';
+/**
  * Get all projects listed in the workspace yaml file.
  *
  * @param {string} tmpRepoPath   Path to the temporary repository.
@@ -32,7 +36,8 @@ export const getAllProjectsPathsFromWorkspace = async (
 				return project;
 			} )
 	);
-	return globbedProjects.flat();
+	const r = globbedProjects.flat();
+	return r;
 };
 
 /**
@@ -78,21 +83,24 @@ export const getTouchedFilePaths = async (
 	tmpRepoPath: string,
 	base: string,
 	head: string,
-	fileName: string
+	fileName: string,
+	baseOwner: string
 ) => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 
-	// make sure base sha is available.
+	//make sure base sha is available.
 	await git.raw( [
 		'remote',
 		'add',
-		'woocommerce',
-		'git@github.com:woocommerce/woocommerce.git',
+		baseOwner,
+		getAuthenticatedRemote( { owner: baseOwner, name: 'woocommerce' } ),
 	] );
-	await git.raw( [ 'fetch', 'woocommerce', base ] );
+
+	await git.raw( [ 'fetch', baseOwner, base ] );
+
 	const diff = await git.raw( [
 		'diff',
 		'--name-only',
@@ -101,7 +109,7 @@ export const getTouchedFilePaths = async (
 	return (
 		diff
 			.split( '\n' )
-			.filter( ( item ) => item.trim() )
+			.map( ( item ) => item.trim() )
 			// Don't count changelogs themselves as touched files.
 			.filter( ( item ) => ! item.includes( `/changelog/${ fileName }` ) )
 	);
@@ -171,7 +179,8 @@ export const getTouchedProjectsRequiringChangelog = async (
 	tmpRepoPath: string,
 	base: string,
 	head: string,
-	fileName: string
+	fileName: string,
+	baseOwner: string
 ) => {
 	const allProjectPaths = await getAllProjectPaths( tmpRepoPath );
 	const changeloggerProjectsPaths = await getChangeloggerProjectPaths(
@@ -182,7 +191,8 @@ export const getTouchedProjectsRequiringChangelog = async (
 		tmpRepoPath,
 		base,
 		head,
-		fileName
+		fileName,
+		baseOwner
 	);
 
 	return getTouchedChangeloggerProjectsPathsMappedToProjects(
