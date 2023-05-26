@@ -13,6 +13,7 @@ import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 import { ProductCollectionAttributes } from './types';
 import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
 import InspectorControls from './inspector-controls';
+import { DEFAULT_ATTRIBUTES } from './constants';
 
 export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -82,11 +83,19 @@ const Edit = ( props: BlockEditProps< ProductCollectionAttributes > ) => {
 
 	const instanceId = useInstanceId( Edit );
 
+	/**
+	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,
+	 * We are using this workaround to set default attributes.
+	 */
+	useEffect( () => {
+		setAttributes( { ...DEFAULT_ATTRIBUTES, ...attributes } );
+	}, [ setAttributes ] );
+
 	// We need this for multi-query block pagination.
 	// Query parameters for each block are scoped to their ID.
 	useEffect( () => {
 		if ( ! Number.isFinite( queryId ) ) {
-			setAttributes( { queryId: instanceId } );
+			setAttributes( { queryId: Number( instanceId ) } );
 		}
 	}, [ queryId, instanceId, setAttributes ] );
 
