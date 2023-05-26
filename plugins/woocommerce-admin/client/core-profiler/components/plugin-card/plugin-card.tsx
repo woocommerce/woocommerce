@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
@@ -11,6 +11,7 @@ import classnames from 'classnames';
  */
 import sanitizeHTML from '~/lib/sanitize-html';
 import './plugin-card.scss';
+import { Link } from '@woocommerce/components';
 
 export const PluginCard = ( {
 	installed = false,
@@ -19,6 +20,7 @@ export const PluginCard = ( {
 	onChange,
 	checked = false,
 	description,
+	learnMoreLink,
 }: {
 	// Checkbox will be hidden if true
 	installed?: boolean;
@@ -28,6 +30,7 @@ export const PluginCard = ( {
 	description: string | ReactNode;
 	checked?: boolean;
 	onChange?: () => void;
+	learnMoreLink?: ReactNode;
 } ) => {
 	return (
 		<div className="woocommerce-profiler-plugins-plugin-card">
@@ -53,6 +56,7 @@ export const PluginCard = ( {
 					) }
 				</div>
 				<p dangerouslySetInnerHTML={ sanitizeHTML( description ) } />
+				{ learnMoreLink }
 			</div>
 		</div>
 	);

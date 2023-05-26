@@ -87,6 +87,14 @@ export type PluginsInstallationRequestedEvent = {
 	};
 };
 
+export type PluginsLearnMoreLinkClicked = {
+	type: 'PLUGINS_LEARN_MORE_LINK_CLICKED';
+	payload: {
+		plugin: string;
+		learnMoreLink: string;
+	};
+};
+
 // TODO: add types as we develop the pages
 export type OnboardingProfile = {
 	business_choice: BusinessChoice;
@@ -271,6 +279,16 @@ const recordTracksPluginsSkipped = () => {
 	recordEvent( 'storeprofiler_plugins_skip' );
 };
 
+const recordTracksPluginsLearnMoreLinkClicked = (
+	_context: CoreProfilerStateMachineContext,
+	event: PluginsLearnMoreLinkClicked
+) => {
+	recordEvent( 'storeprofiler_plugins_learn_more_link_click', {
+		plugin_name: event.payload.plugin,
+		learn_more_link: event.payload.learnMoreLink,
+	} );
+};
+
 const recordTracksSkipBusinessLocationViewed = () => {
 	recordEvent( 'storeprofiler_step_view', {
 		step: 'skip_business_location',
@@ -386,6 +404,7 @@ const coreProfilerMachineActions = {
 	recordTracksUserProfileViewed,
 	recordTracksPluginsViewed,
 	recordTracksPluginsSkipped,
+	recordTracksPluginsLearnMoreLinkClicked,
 	recordTracksSkipBusinessLocationViewed,
 	recordTracksSkipBusinessLocationCompleted,
 	assignOptInDataSharing,
@@ -718,6 +737,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				PLUGINS_PAGE_SKIPPED: {
 					actions: [ 'recordTracksPluginsSkipped' ],
 					target: 'pluginsSkipped',
+				},
+				PLUGINS_LEARN_MORE_LINK_CLICKED: {
+					actions: [ 'recordTracksPluginsLearnMoreLinkClicked' ],
 				},
 				PLUGINS_INSTALLATION_REQUESTED: {
 					target: 'installPlugins',
