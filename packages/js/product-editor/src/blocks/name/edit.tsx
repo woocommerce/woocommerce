@@ -35,12 +35,14 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  */
 import { AUTO_DRAFT_NAME } from '../../utils';
 import { EditProductLinkModal } from '../../components/edit-product-link-modal';
+import { useProductType } from '../../hooks/use-product-type';
 import { useValidation } from '../../contexts/validation-context';
 
 export function Edit() {
 	const blockProps = useBlockProps();
 
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
+	const [ templateName, setTemplateName ] = useState( 'simple' );
 
 	const [ showProductLinkEditModal, setShowProductLinkEditModal ] =
 		useState( false );
@@ -136,9 +138,22 @@ export function Edit() {
 		'product_name'
 	) as string;
 
+	const { setProductType } = useProductType();
+
 	return (
 		<>
 			<div { ...blockProps }>
+				<Button
+					onClick={ () => {
+						const newTemplate =
+							templateName === 'simple' ? 'variable' : 'simple';
+						setProductType( newTemplate );
+						setTemplateName( newTemplate );
+					} }
+					variant="primary"
+				>
+					Toggle template
+				</Button>
 				<BaseControl
 					id={ nameControlId }
 					label={ createInterpolateElement(
