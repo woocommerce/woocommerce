@@ -179,7 +179,7 @@ class Product_Data_Suggestion_API extends WC_REST_Data_Controller {
 
 		// Check if enough data is provided in the name and description to get suggestions.
 		if ( strlen( $name ) < 10 && strlen( $description ) < 50 ) {
-			return new WP_Error( 'error', __( 'Please provide a name with at least 10 characters, or a description with at least 50 characters.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'error', __( 'Enter a few descriptive words or add product description, tags, or attributes to generate name ideas.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		try {
