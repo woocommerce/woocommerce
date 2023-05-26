@@ -1,7 +1,19 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { createElement, Fragment } from '@wordpress/element';
+import {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
+	__unstableIframe as Iframe,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
+	__unstableEditorStyles as EditorStyles,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	store as blockEditorStore,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -47,13 +59,35 @@ const CONTENT_ATTR = [
 ];
 
 export function ContentPreview( { content }: ContentPreviewProps ) {
+	const parentEditorSettings = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		return select( blockEditorStore ).getSettings();
+	} );
+
 	return (
-		<div
-			className="woocommerce-content-preview"
-			dangerouslySetInnerHTML={ sanitizeHTML( content, {
-				tags: CONTENT_TAGS,
-				attr: CONTENT_ATTR,
-			} ) }
-		/>
+		<div className="woocommerce-content-preview">
+			<Iframe
+				head={
+					<>
+						<EditorStyles styles={ parentEditorSettings?.styles } />
+						<style>
+							{ `body {
+									overflow: hidden;
+								}` }
+						</style>
+					</>
+				}
+				className="woocommerce-content-preview__iframe"
+			>
+				<div
+					className="woocommerce-content-preview__content"
+					dangerouslySetInnerHTML={ sanitizeHTML( content, {
+						tags: CONTENT_TAGS,
+						attr: CONTENT_ATTR,
+					} ) }
+				/>
+			</Iframe>
+		</div>
 	);
 }
