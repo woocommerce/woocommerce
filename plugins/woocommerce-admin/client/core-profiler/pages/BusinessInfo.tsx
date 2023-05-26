@@ -10,7 +10,7 @@ import {
 	useEffect,
 	useState,
 } from '@wordpress/element';
-import { findCountryOption } from '@woocommerce/onboarding';
+import { findCountryOption, getCountry } from '@woocommerce/onboarding';
 /**
  * Internal dependencies
  */
@@ -120,20 +120,23 @@ export const BusinessInfo = ( {
 	} );
 
 	useEffect( () => {
-		if ( geolocatedLocation && ! isStoreCountrySet ) {
-			const countryOption = findCountryOption(
+		if ( geolocatedLocation ) {
+			const foundCountryOption = findCountryOption(
 				countries,
 				geolocatedLocation
 			);
-			if ( countryOption ) {
-				setStoreCountry( countryOption );
-				setGeolocationMatch( countryOption );
+			if ( foundCountryOption ) {
+				setGeolocationMatch( foundCountryOption );
+				if ( ! isStoreCountrySet ) {
+					setStoreCountry( foundCountryOption );
+				}
 			}
 		}
 	}, [ countries, isStoreCountrySet, geolocatedLocation ] );
 
 	const geolocationOverruled =
-		geolocatedLocation && storeCountry.key !== geolocationMatch.key;
+		geolocatedLocation &&
+		getCountry( storeCountry.key ) !== getCountry( geolocationMatch.key );
 
 	const [ industry, setIndustry ] = useState<
 		IndustryChoiceOption | undefined
@@ -259,6 +262,8 @@ export const BusinessInfo = ( {
 						showAllOnFocus
 						isSearchable
 					/>
+					{ /* woocommerce-profiler-select-control__country-spacer exists purely because the select-control above has an unremovable and unstyleable div and that's preventing margin collapse */ }
+					<div className="woocommerce-profiler-select-control__country-spacer" />
 					{ geolocationOverruled && ! dismissedGeolocationNotice && (
 						<Notice
 							className="woocommerce-profiler-geolocation-notice"
@@ -276,11 +281,18 @@ export const BusinessInfo = ( {
 									),
 									{
 										geolocatedCountry: (
-											<span className="geolocation-notice-geolocated-country">
+											<Button className="geolocation-notice-geolocated-country"
+												variant="link"
+												onClick={ () =>
+													setStoreCountry(
+														geolocationMatch
+													)
+												}
+											>
 												{
 													geolocatedLocation?.country_long
 												}
-											</span>
+											</Button>
 										),
 										selectedCountry: (
 											<span className="geolocation-notice-selected-country">

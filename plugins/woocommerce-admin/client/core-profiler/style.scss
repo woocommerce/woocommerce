@@ -521,6 +521,19 @@
 			margin-bottom: 20px;
 		}
 
+		.woocommerce-profiler-select-control__country {
+			max-width: 404px;
+			margin: 0;
+		}
+		
+		.woocommerce-profiler-select-control__country-spacer {			
+			margin: auto auto 12px auto;
+		}
+
+		.woocommerce-profiler-button-container {
+			margin-top: 32px;
+		}
+
 		.woocommerce-select-control__control-icon {
 			display: none;
 		}
@@ -544,8 +557,9 @@
 
 		.woocommerce-profiler-geolocation-notice {
 			margin: 0;
-			margin-bottom: 32px;
+			margin-bottom: 0;
 			padding-right: 0;
+			color: $gray-900;
 
 			@include breakpoint( '<782px' ) {
 				margin-bottom: 100px;
@@ -569,12 +583,15 @@
 
 				.geolocation-notice-geolocated-country {
 					color: #3858e9;
+					text-decoration: none;
 				}
 			}
 
 			.woocommerce-profiler-geolocation-notice__list {
 				list-style-type: unset;
 				padding-left: 20px;
+				font-weight: 500;
+				line-height: 20px;
 			}
 		}
 	}

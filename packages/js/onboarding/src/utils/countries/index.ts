@@ -77,3 +77,12 @@ export const findCountryOption = (
 	}
 	return match;
 };
+
+/**
+ * Returns just the country portion of a country:state string that is delimited with a colon.
+ *
+ * @param  countryPossiblyWithState Country string that may or may not have a state. e.g 'US:CA', 'UG:UG312'
+ * @return Just the country portion of the string, or undefined if input is undefined. e.g 'US', 'UG'
+ */
+export const getCountry = ( countryPossiblyWithState: string ) =>
+	countryPossiblyWithState?.split( ':' )[ 0 ] ?? undefined;
