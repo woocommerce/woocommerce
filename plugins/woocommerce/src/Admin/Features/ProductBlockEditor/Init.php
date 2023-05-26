@@ -658,7 +658,7 @@ class Init {
 	public function set_current_screen_to_block_editor_if_wc_admin() {
 		$screen = get_current_screen();
 
-		// we can't check the $_GET['path'] because client-side routing is used within wc-admin,
+		// we can't check the 'path' query param because client-side routing is used within wc-admin,
 		// so this action handler is only called on the initial page load from the server, which might
 		// not be the product edit page (it mostly likely isn't).
 		if ( isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'] ) {
