@@ -5,6 +5,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 use Exception;
 use WP_REST_Request;
 
+
 /**
  * Product Query filters class.
  */
@@ -275,6 +276,7 @@ class ProductQueryFilters {
 
 		global $wpdb;
 		$counts = $wpdb->get_results(
+		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 			$wpdb->prepare(
 				"
 				SELECT attributes.term_id as term_count_id, coalesce(term_count, 0) as term_count
@@ -296,6 +298,7 @@ class ProductQueryFilters {
 			)
 		);
 
+		// phpcs:enable
 		$results = array_map( 'absint', wp_list_pluck( $counts, 'term_count', 'term_count_id' ) );
 
 		set_transient( $transient_key, $results, 24 * HOUR_IN_SECONDS );
@@ -411,6 +414,7 @@ class ProductQueryFilters {
 			$where_clause = implode( ' AND ', $where );
 			$where_clause = sprintf( $where_clause, ...$params );
 
+		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 			$results = $wpdb->get_col(
 				$wpdb->prepare(
 					"SELECT DISTINCT product_id FROM {$wpdb->prefix}wc_product_meta_lookup WHERE %1s",
@@ -418,6 +422,7 @@ class ProductQueryFilters {
 				)
 			);
 		}
+		// phpcs:enable
 
 		return $results;
 	}
@@ -440,6 +445,7 @@ class ProductQueryFilters {
 
 		if ( 'or' === $query_type ) {
 			$results = $wpdb->get_col(
+			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 				$wpdb->prepare(
 					"
 					SELECT DISTINCT `product_or_parent_id`
@@ -450,11 +456,13 @@ class ProductQueryFilters {
 					$taxonomy,
 					$term_ids
 				)
+			// phpcs:enable
 			);
 		}
 
 		if ( 'and' === $query_type ) {
 			$results = $wpdb->get_col(
+			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 				$wpdb->prepare(
 					"
 					SELECT DISTINCT `product_or_parent_id`
@@ -468,6 +476,7 @@ class ProductQueryFilters {
 					$term_ids,
 					$term_count
 				)
+			// phpcs:enable
 			);
 		}
 
