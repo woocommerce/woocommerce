@@ -14,6 +14,7 @@ const CUSTOM_REGEXES = new Map< string, RegExp >( [
 	[ 'LI', /^(94[8-9][0-9])$/ ],
 	[ 'NL', /^([1-9][0-9]{3})(\s?)(?!SA|SD|SS)[A-Z]{2}$/i ],
 	[ 'SI', /^([1-9][0-9]{3})$/ ],
+	[ 'KH', /^[0-9]{6}$/ ], // Cambodia (6-digit postal code)
 ] );
 
 const DEFAULT_REGEXES = new Map< string, RegExp >( [
