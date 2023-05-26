@@ -25,6 +25,14 @@ interface PluginsInstallLogger {
 	public function installed( string $plugin_name, int $duration);
 
 	/**
+	 * Called when a plugin activated successfully.
+	 *
+	 * @param string $plugin_name plugin name.
+	 * @return mixed
+	 */
+	public function activated( string $plugin_name );
+
+	/**
 	 * Called when an error occurred while installing a plugin.
 	 *
 	 * @param string      $plugin_name plugin name.
