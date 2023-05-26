@@ -85,15 +85,6 @@ const program = new Command( 'changefile' )
 				`Temporary clone of '${ headOwner }/${ name }' created at ${ tmpRepoPath }`
 			);
 
-			// When a devRepoPath is provided, assume that the dependencies are already installed.
-			if ( ! devRepoPath ) {
-				Logger.notice( `Installing dependencies in ${ tmpRepoPath }` );
-				execSync( 'pnpm install', {
-					cwd: tmpRepoPath,
-					stdio: 'inherit',
-				} );
-			}
-
 			Logger.notice( `Checking out remote branch ${ branch }` );
 			await checkoutRemoteBranch( tmpRepoPath, branch );
 
@@ -106,13 +97,16 @@ const program = new Command( 'changefile' )
 					tmpRepoPath,
 					base,
 					head,
-					fileName
+					fileName,
+					owner
 				);
 
 			try {
 				const allProjectPaths = await getAllProjectPaths( tmpRepoPath );
 
-				// Remove any already existing changelog files in case a change is reverted and the entry is no longer needed.
+				Logger.notice(
+					'Removing existing changelog files in case a change is reverted and the entry is no longer needed'
+				);
 				allProjectPaths.forEach( ( projectPath ) => {
 					const path = nodePath.join(
 						tmpRepoPath,
@@ -132,6 +126,22 @@ const program = new Command( 'changefile' )
 						} );
 					}
 				} );
+
+				if ( touchedProjectsRequiringChangelog.length === 0 ) {
+					Logger.notice( 'No projects require a changelog' );
+					process.exit( 0 );
+				}
+
+				// When a devRepoPath is provided, assume that the dependencies are already installed.
+				if ( ! devRepoPath ) {
+					Logger.notice(
+						`Installing dependencies in ${ tmpRepoPath }`
+					);
+					execSync( 'pnpm install', {
+						cwd: tmpRepoPath,
+						stdio: 'inherit',
+					} );
+				}
 
 				touchedProjectsRequiringChangelog.forEach( ( project ) => {
 					Logger.notice(
