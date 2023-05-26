@@ -167,6 +167,11 @@ describe( 'isPostcode', () => {
 		[ true, '99577-0727', 'US' ],
 		[ false, 'ABCDE', 'US' ],
 		[ false, 'ABCDE-9999', 'US' ],
+
+		// Cambodian postcodes
+		[ false, '12345', 'KH' ],
+		[ false, '1234', 'KH' ],
+		[ true, '123456', 'KH' ],
 	];
 
 	test.each( cases )( '%s: %s for %s', ( result, postcode, country ) =>
