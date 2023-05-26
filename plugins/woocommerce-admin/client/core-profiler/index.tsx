@@ -1207,9 +1207,9 @@ export const CoreProfilerController = ( {
 	const CurrentComponent =
 		currentNodeMeta?.component ??
 		( () => (
-			<div 
+			<div
 				className={ `woocommerce-profile-wizard__spinner` }
-			 	data-testid="core-profiler-loading-screen"
+				data-testid="core-profiler-loading-screen"
 			>
 				<Spinner />
 			</div>
