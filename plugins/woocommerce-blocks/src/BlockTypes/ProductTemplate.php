@@ -37,7 +37,8 @@ class ProductTemplate extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$page_key = isset( $block->context['queryId'] ) ? 'query-' . $block->context['queryId'] . '-page' : 'query-page';
-		$page     = empty( $_GET[ $page_key ] ) ? 1 : (int) $_GET[ $page_key ];
+		// phpcs:ignore WordPress.Security.NonceVerification
+		$page = empty( $_GET[ $page_key ] ) ? 1 : (int) $_GET[ $page_key ];
 
 		// Use global query if needed.
 		$use_global_query = ( isset( $block->context['query']['inherit'] ) && $block->context['query']['inherit'] );
