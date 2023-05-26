@@ -17,11 +17,8 @@ import {
 	ProductDataSuggestionRequest,
 } from '../utils/types';
 import SuggestionItem from './suggestion-item';
-import {
-	RandomTipMessage,
-	RandomLoadingMessage,
-	ErrorMessage,
-} from '../components';
+import RandomLoadingMessage from '../components/random-loading-message';
+import ErrorMessage from '../components/error-message';
 
 enum SuggestionsState {
 	Fetching = 'fetching',
@@ -163,6 +160,7 @@ export function ProductNameSuggestions() {
 					) }
 				{ productName.length < 10 && (
 					<p className="wc-product-name-suggestions__tip-message">
+						<img src={ MagicIcon } alt="magic button icon" />
 						{ __(
 							'Enter a few descriptive words to generate product name using AI (beta).',
 							'woocommerce'
@@ -186,11 +184,6 @@ export function ProductNameSuggestions() {
 								suggestionsState === SuggestionsState.Fetching
 							}
 						/>
-					</p>
-				) }
-				{ suggestionsState === SuggestionsState.Fetching && (
-					<p className="wc-product-name-suggestions__tip-message">
-						<RandomTipMessage />
 					</p>
 				) }
 				{ suggestionsState === SuggestionsState.Failed && (

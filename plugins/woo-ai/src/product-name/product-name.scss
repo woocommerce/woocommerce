@@ -24,6 +24,8 @@
     background-color: #fff;
     padding: 10px;
     border-radius: 0;
+    display: flex;
+    align-items: center;
 
     img {
       vertical-align: middle;
@@ -99,6 +101,17 @@
     margin: 0;
     background-color: #f0f0f1;
     padding: 10px;
+    display: flex;
+    align-items: center;
+
+    .woo-ai-loading-message_spinner {
+      svg.woocommerce-spinner {
+        width: 28px;
+        height: 28px;
+        vertical-align: middle;
+        margin-right: 0.5em;
+      }
+    }
   }
 
   .wc-product-name-suggestions__error-message {
@@ -109,9 +122,13 @@
 
   .wc-product-name-suggestions__tip-message {
     margin: 0;
-    padding: 5px 10px;
-    color: gray;
-    font-size: 0.8em;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+
+    img {
+      vertical-align: middle;
+    }
   }
 }
 

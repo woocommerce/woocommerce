@@ -73,7 +73,7 @@ const errorMessages = [
 const getRandomErrorMessage = () =>
 	errorMessages[ Math.floor( Math.random() * errorMessages.length ) ];
 
-export const ErrorMessage = ( { error }: ErrorMessageProps ) => {
+const ErrorMessage = ( { error }: ErrorMessageProps ) => {
 	return (
 		<span>
 			{ error && error.length > 0 ? error : getRandomErrorMessage() }
