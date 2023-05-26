@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Only register blocks when user navigates to the product edit page#38200

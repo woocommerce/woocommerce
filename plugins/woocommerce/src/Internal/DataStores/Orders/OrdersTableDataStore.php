@@ -62,7 +62,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_shipping_phone',
 		'_completed_date',
 		'_paid_date',
-		'_edit_lock',
 		'_edit_last',
 		'_cart_discount',
 		'_cart_discount_tax',
@@ -1920,7 +1919,7 @@ FROM $order_meta_table
 
 	/**
 	 * Set the parent id of child orders to the parent order's parent if the post type
-	 * for the order is hierarchical, just deletes the child orders otherwise.
+	 * for the order is hierarchical, just delete the child orders otherwise.
 	 *
 	 * @param \WC_Abstract_Order $order Order object.
 	 *
@@ -1948,10 +1947,14 @@ FROM $order_meta_table
 					$order->get_id()
 				)
 			);
-			foreach ( $child_order_ids as $child_order_id ) {
-				$this->delete_order_data_from_custom_order_tables( $child_order_id );
-			}
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+			foreach ( $child_order_ids as $child_order_id ) {
+				$child_order = wc_get_order( $child_order_id );
+				if ( $child_order ) {
+					$child_order->delete( true );
+				}
+			}
 		}
 	}
 

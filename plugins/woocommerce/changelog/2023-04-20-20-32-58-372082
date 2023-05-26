@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Handle updating customer when user_registered is 0000-00-00 00:00:00.

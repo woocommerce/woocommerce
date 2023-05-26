@@ -8,13 +8,11 @@ import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { BlockIcon } from '../../components/block-icon';
 import { SectionBlockAttributes } from './types';
 import { sanitizeHTML } from '../../utils/sanitize-html';
 
 export function Edit( {
 	attributes,
-	clientId,
 }: BlockEditProps< SectionBlockAttributes > ) {
 	const blockProps = useBlockProps();
 	const { description, title } = attributes;
@@ -22,7 +20,6 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<h2 className="wp-block-woocommerce-product-section__title">
-				<BlockIcon clientId={ clientId } />
 				<span>{ title }</span>
 			</h2>
 			{ description && (

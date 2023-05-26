@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Makes more information available to handlers for the `checkout_place_order` (and related) events.

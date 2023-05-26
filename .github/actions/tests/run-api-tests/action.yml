@@ -9,6 +9,11 @@ inputs:
     tests:
         description: Specific tests to run, separated by single whitespace. See https://playwright.dev/docs/test-cli
 
+outputs:
+    result:
+        description: Whether the test passed or failed.
+        value: ${{ steps.run-api-tests.conclusion }}
+
 runs:
     using: composite
     steps:

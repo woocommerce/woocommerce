@@ -12,7 +12,7 @@ The fastest way to get started is by creating an example plugin from WooCommerce
 
 `WC_EXT=add-navigation-items pnpm example --filter=woocommerce/client/admin`
 
-This will create a new plugin that covers various features of the navigation and helps to register some intial items and categories within the new navigation menu.  After running the command above, you can make edits directly to the files at `docs/examples/extensions/add-navigation-items` and they will be built and copied to your `wp-content/add-navigation-items` folder on save.
+This will create a new plugin that covers various features of the navigation and helps to register some initial items and categories within the new navigation menu.  After running the command above, you can make edits directly to the files at `docs/examples/extensions/add-navigation-items` and they will be built and copied to your `wp-content/add-navigation-items` folder on save.
 
 If you need to enable the WP Toolbar for debugging purposes in the new navigation, you can add the following filter to do so:
 

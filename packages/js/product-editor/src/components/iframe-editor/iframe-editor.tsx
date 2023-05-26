@@ -4,13 +4,8 @@
 import { BlockInstance } from '@wordpress/blocks';
 import { Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import {
-	createElement,
-	useCallback,
-	useEffect,
-	useState,
-} from '@wordpress/element';
-import { useDebounce, useResizeObserver } from '@wordpress/compose';
+import { createElement, useEffect, useState } from '@wordpress/element';
+import { useResizeObserver } from '@wordpress/compose';
 import {
 	BlockEditorProvider,
 	BlockInspector,
@@ -35,16 +30,18 @@ import { ResizableEditor } from './resizable-editor';
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
-	onChange: ( blocks: BlockInstance[] ) => void;
+	onChange?: ( blocks: BlockInstance[] ) => void;
 	onClose?: () => void;
+	onInput?: ( blocks: BlockInstance[] ) => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 };
 
 export function IframeEditor( {
 	initialBlocks = [],
-	onChange,
+	onChange = () => {},
 	onClose,
-	settings,
+	onInput,
+	settings: __settings,
 }: IframeEditorProps ) {
 	const [ resizeObserver, sizes ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
@@ -66,28 +63,22 @@ export function IframeEditor( {
 		updateSettings( productBlockEditorSettings );
 	}, [] );
 
-	const handleChange = useCallback(
-		( updatedBlocks: BlockInstance[] ) => {
-			onChange( updatedBlocks );
-		},
-		[ onChange ]
-	);
-
-	const debouncedOnChange = useDebounce( handleChange, 200 );
+	const settings = __settings || parentEditorSettings;
 
 	return (
 		<div className="woocommerce-iframe-editor">
 			<BlockEditorProvider
 				settings={ {
-					...( settings || parentEditorSettings ),
+					...settings,
 					hasFixedToolbar: true,
 					templateLock: false,
 				} }
 				value={ blocks }
 				onChange={ ( updatedBlocks: BlockInstance[] ) => {
 					setBlocks( updatedBlocks );
-					debouncedOnChange( updatedBlocks );
+					onChange( updatedBlocks );
 				} }
+				onInput={ onInput }
 				useSubRegistry={ true }
 			>
 				<BlockTools
@@ -104,14 +95,23 @@ export function IframeEditor( {
 					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 					{ /* @ts-ignore */ }
 					<BlockEditorKeyboardShortcuts.Register />
-					{ onClose && <BackButton onClick={ onClose } /> }
+					{ onClose && (
+						<BackButton
+							onClick={ () => {
+								setTimeout( onClose, 550 );
+							} }
+						/>
+					) }
 					<ResizableEditor
 						enableResizing={ true }
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore This accepts numbers or strings.
 						height={ sizes.height ?? '100%' }
 					>
-						<EditorCanvas enableResizing={ true }>
+						<EditorCanvas
+							enableResizing={ true }
+							settings={ settings }
+						>
 							{ resizeObserver }
 							<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
 						</EditorCanvas>

@@ -14,3 +14,7 @@ export const getEnvVar = ( varName: string, isRequired = false ) => {
 
 	return value || '';
 };
+
+export const isGithubCI = () => {
+	return process.env.GITHUB_ACTIONS === 'true';
+};

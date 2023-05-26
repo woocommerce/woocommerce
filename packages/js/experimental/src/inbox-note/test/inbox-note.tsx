@@ -185,7 +185,7 @@ describe( 'InboxNoteCard', () => {
 			);
 		} );
 
-		it( 'should call onVisible when visiblity sensor calls it', () => {
+		it( 'should call onVisible when visibility sensor calls it', () => {
 			const onVisible = jest.fn();
 			const { getByText } = render(
 				<InboxNoteCard
@@ -199,7 +199,7 @@ describe( 'InboxNoteCard', () => {
 			expect( onVisible ).toHaveBeenCalledWith( note );
 		} );
 
-		it( 'should call onVisible when visiblity sensor calls it, but only once', () => {
+		it( 'should call onVisible when visibility sensor calls it, but only once', () => {
 			const onVisible = jest.fn();
 			const { getByText } = render(
 				<InboxNoteCard

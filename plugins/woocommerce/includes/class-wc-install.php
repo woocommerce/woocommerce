@@ -894,10 +894,42 @@ class WC_Install {
 			);
 		}
 
-		foreach ( $obsolete_notes_names as $obsolete_notes_name ) {
-			$wpdb->delete( $wpdb->prefix . 'wc_admin_notes', array( 'name' => $obsolete_notes_name ) );
-			$wpdb->delete( $wpdb->prefix . 'wc_admin_note_actions', array( 'name' => $obsolete_notes_name ) );
+		$note_names_placeholder = substr( str_repeat( ',%s', count( $obsolete_notes_names ) ), 1 );
+
+		$note_ids = $wpdb->get_results(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Ignored for allowing interpolation in the IN statement.
+			$wpdb->prepare(
+				"SELECT note_id FROM {$wpdb->prefix}wc_admin_notes WHERE name IN ( $note_names_placeholder )",
+				$obsolete_notes_names
+			),
+			ARRAY_N
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare.
+		);
+
+		if ( ! $note_ids ) {
+			return;
 		}
+
+		$note_ids             = array_column( $note_ids, 0 );
+		$note_ids_placeholder = substr( str_repeat( ',%d', count( $note_ids ) ), 1 );
+
+		$wpdb->query(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Ignored for allowing interpolation in the IN statement.
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_admin_notes WHERE note_id IN ( $note_ids_placeholder )",
+				$note_ids
+			)
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare.
+		);
+
+		$wpdb->query(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Ignored for allowing interpolation in the IN statement.
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_admin_note_actions WHERE note_id IN ( $note_ids_placeholder )",
+				$note_ids
+			)
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare.
+		);
 	}
 
 	/**
@@ -1515,7 +1547,9 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 		$tables = self::get_tables();
 
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 	}
 
@@ -1541,7 +1575,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 		}
 
 		if ( ! isset( $wp_roles ) ) {
-			$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
+			$wp_roles = new WP_Roles(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
 		// Dummy gettext calls to get strings in the catalog.
@@ -1671,7 +1705,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 		}
 
 		if ( ! isset( $wp_roles ) ) {
-			$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
+			$wp_roles = new WP_Roles(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
 		$capabilities = self::get_core_capabilities();

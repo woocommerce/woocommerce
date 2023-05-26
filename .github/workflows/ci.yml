@@ -58,23 +58,24 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm run build:feature-config
 
-            - name: Add PHP8 Compatibility.
-              run: |
-                  if [ "$(php -r "echo version_compare(PHP_VERSION,'8.0','>=');")" ]; then
-                     cd plugins/woocommerce
-                     curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
-                     unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
-                     composer bin phpunit config --unset platform
-                     composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
-                     composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
-                     rm -rf ./vendor/phpunit/
-                     composer dump-autoload
-                   fi
+            - id: parseMatrix
+              name: Parse Matrix Variables
+              uses: actions/github-script@v6
+              with:
+                script: |
+                    const parseWPVersion = require( './.github/workflows/scripts/parse-wp-version' );
+                    parseWPVersion( '${{ matrix.wp }}' ).then( ( version ) => {
+                      core.setOutput( 'wpVersion', version );
+                    } );
 
-            - name: Init DB and WP
-              working-directory: plugins/woocommerce
-              run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
+            - name: Prepare Testing Environment
+              env:
+                WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
+                WP_ENV_PHP_VERSION: ${{ matrix.php }}
+              run: pnpm --filter=woocommerce env:test
 
-            - name: Run tests
-              working-directory: plugins/woocommerce
-              run: pnpm run test --color
+            - name: Run Tests
+              env:
+                WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
+                WP_ENV_PHP_VERSION: ${{ matrix.php }}
+              run: pnpm --filter=woocommerce test:unit:env

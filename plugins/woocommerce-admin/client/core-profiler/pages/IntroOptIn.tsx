@@ -28,7 +28,10 @@ export const IntroOptIn = ( {
 	);
 
 	return (
-		<div className="woocommerce-profiler-intro-opt-in">
+		<div
+			className="woocommerce-profiler-intro-opt-in"
+			data-testid="core-profiler-intro-opt-in-screen"
+		>
 			<Navigation
 				percentage={ navigationProgress }
 				skipText={ __( 'Skip guided setup', 'woocommerce' ) }

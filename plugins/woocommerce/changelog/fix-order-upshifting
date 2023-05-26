@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: when order is deleted child orders should be deleted too, not set to parent id 0, unless the post type for the order is hierarchical
