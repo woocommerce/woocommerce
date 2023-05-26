@@ -17,7 +17,7 @@ import {
 	ProductCollectionAttributes,
 	ProductCollectionDisplayLayout,
 } from '../types';
-import { getDefaultSettings } from './constants';
+import { getDefaultSettings } from '../constants';
 
 const ColumnsControl = (
 	props: BlockEditProps< ProductCollectionAttributes >

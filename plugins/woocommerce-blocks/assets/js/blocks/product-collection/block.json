@@ -13,35 +13,13 @@
 			"type": "number"
 		},
 		"query": {
-			"type": "object",
-			"default": {
-				"perPage": 9,
-				"pages": 0,
-				"offset": 0,
-				"postType": "product",
-				"order": "asc",
-				"orderBy": "title",
-				"author": "",
-				"search": "",
-				"exclude": [],
-				"sticky": "",
-				"inherit": false,
-				"taxQuery": null,
-				"parents": [],
-				"isProductCollectionBlock": true,
-				"woocommerceOnSale": false
-			}
+			"type": "object"
 		},
 		"tagName": {
-			"type": "string",
-			"default": "div"
+			"type": "string"
 		},
 		"displayLayout": {
-			"type": "object",
-			"default": {
-				"type": "flex",
-				"columns": 3
-			}
+			"type": "object"
 		}
 	},
 	"providesContext": {
