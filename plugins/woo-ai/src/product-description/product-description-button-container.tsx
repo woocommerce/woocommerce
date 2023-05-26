@@ -93,11 +93,7 @@ export function WriteItForMeButtonContainer() {
 	};
 
 	return completionActive ? (
-		<StopCompletionBtn
-			onClick={ () => {
-				stopCompletion();
-			} }
-		/>
+		<StopCompletionBtn onClick={ stopCompletion } />
 	) : (
 		<WriteItForMeBtn
 			disabled={ writeItForMeDisabled }
