@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { PLUGINS_STORE_NAME, PluginNames } from '@woocommerce/data';
+import {
+	ONBOARDING_STORE_NAME,
+	PLUGINS_STORE_NAME,
+	PluginNames,
+} from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 import { differenceWith } from 'lodash';
 
@@ -149,9 +153,10 @@ export const InstallAndActivatePlugins =
 				)
 			);
 
-			await dispatch( PLUGINS_STORE_NAME ).installPlugins(
-				remainingPlugins as PluginNames[],
-				true
+			await dispatch(
+				ONBOARDING_STORE_NAME
+			).installAndActivatePluginsAsync(
+				remainingPlugins as PluginNames[]
 			);
 
 			handleInstallationCompleted();
