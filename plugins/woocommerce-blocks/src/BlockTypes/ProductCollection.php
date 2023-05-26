@@ -125,6 +125,7 @@ class ProductCollection extends AbstractBlock {
 		$block_context_query = $block->context['query'];
 
 		$common_query_values = array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			'meta_query'     => array(),
 			'posts_per_page' => $block_context_query['perPage'],
 			'order'          => $block_context_query['order'],
@@ -132,6 +133,7 @@ class ProductCollection extends AbstractBlock {
 			'post__in'       => array(),
 			'post_status'    => 'publish',
 			'post_type'      => 'product',
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'tax_query'      => array(),
 			'paged'          => $page,
 			's'              => $block_context_query['search'],
@@ -225,6 +227,7 @@ class ProductCollection extends AbstractBlock {
 		);
 
 		return array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_key' => $meta_keys[ $orderby ],
 			'orderby'  => 'meta_value_num',
 		);
@@ -389,6 +392,7 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		return array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			'meta_query' => array(
 				array(
 					'key'     => '_stock_status',
@@ -416,6 +420,7 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		return array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'tax_query' => array(
 				array(
 					'taxonomy' => 'product_visibility',
@@ -440,6 +445,7 @@ class ProductCollection extends AbstractBlock {
 				$tax_query = array_merge( $tax_query, $query['tax_query'] );
 			}
 		}
+		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 		return [ 'tax_query' => $tax_query ];
 	}
 }
