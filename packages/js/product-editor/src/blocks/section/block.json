@@ -14,9 +14,6 @@
 		"description": {
 			"type": "string",
 			"__experimentalRole": "content"
-		},
-		"icon": {
-			"type": "object"
 		}
 	},
 	"supports": {
