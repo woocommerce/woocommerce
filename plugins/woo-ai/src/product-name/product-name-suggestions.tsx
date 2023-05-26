@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import React from 'react';
-import OutsideClickHandler from 'react-outside-click-handler';
 import { Pill } from '@woocommerce/components';
 
 /**
@@ -48,12 +47,6 @@ export function ProductNameSuggestions() {
 		setSuggestionsState( SuggestionsState.None );
 	};
 
-	const onOutsideClick = ( e: MouseEvent ) => {
-		if ( e.target instanceof Node && e.target !== nameInputRef.current ) {
-			setVisible( false );
-		}
-	};
-
 	useEffect( () => {
 		const nameInput = nameInputRef.current;
 
@@ -72,14 +65,25 @@ export function ProductNameSuggestions() {
 			setProductName( ( e.target as HTMLInputElement ).value || '' );
 		};
 
+		const onBodyClick = ( e: MouseEvent ) => {
+			const target = e.target as HTMLElement;
+
+			// Need to capture errant handlediv click that happens on load as well
+			if (
+				target?.matches( '.handlediv' ) ||
+				! target?.matches(
+					'#woocommerce-ai-app-product-name-suggestions *, #title'
+				)
+			) {
+				setVisible( false );
+			}
+		};
+
 		if ( nameInput ) {
 			nameInput.addEventListener( 'focus', onFocus );
 			nameInput.addEventListener( 'keyup', onKeyUp );
 			nameInput.addEventListener( 'change', onChange );
-
-			// Initially hide the container unless the input is already in focus
-			const inputOwnerDocument = nameInput.ownerDocument;
-			setVisible( inputOwnerDocument?.activeElement === nameInput );
+			document.body.addEventListener( 'click', onBodyClick );
 		}
 
 		return () => {
@@ -87,6 +91,7 @@ export function ProductNameSuggestions() {
 				nameInput.removeEventListener( 'focus', onFocus );
 				nameInput.removeEventListener( 'keyup', onKeyUp );
 				nameInput.removeEventListener( 'change', onChange );
+				document.body.removeEventListener( 'click', onBodyClick );
 			}
 		};
 	}, [] );
@@ -137,64 +142,60 @@ export function ProductNameSuggestions() {
 	}, [ isFirstLoad ] );
 
 	return (
-		<OutsideClickHandler
-			onOutsideClick={ onOutsideClick }
-			display="contents"
+		<div
+			className="wc-product-name-suggestions-container"
+			hidden={ ! visible }
 		>
-			<div
-				className="wc-product-name-suggestions-container"
-				hidden={ ! visible }
+			{ suggestions.length > 0 &&
+				suggestionsState !== SuggestionsState.Fetching && (
+					<ul className="wc-product-name-suggestions__suggested-names">
+						{ suggestions.map( ( suggestion, index ) => (
+							<SuggestionItem
+								key={ index }
+								suggestion={ suggestion }
+								onSuggestionClick={ handleSuggestionClick }
+							/>
+						) ) }
+					</ul>
+				) }
+			{ productName.length < 10 &&
+				suggestionsState !== SuggestionsState.Fetching && (
+					<p className="wc-product-name-suggestions__tip-message">
+						<img src={ MagicIcon } alt="magic button icon" />
+						{ __(
+							'Enter a few descriptive words to generate product name using AI (beta).',
+							'woocommerce'
+						) }
+					</p>
+				) }
+			<button
+				className="button woo-ai-get-suggestions-btn"
+				type="button"
+				onClick={ fetchProductSuggestions }
+				style={ {
+					display: shouldRenderSuggestionsButton() ? 'block' : 'none',
+				} }
 			>
-				{ suggestions.length > 0 &&
-					suggestionsState !== SuggestionsState.Fetching && (
-						<ul className="wc-product-name-suggestions__suggested-names">
-							{ suggestions.map( ( suggestion, index ) => (
-								<SuggestionItem
-									key={ index }
-									suggestion={ suggestion }
-									onSuggestionClick={ handleSuggestionClick }
-								/>
-							) ) }
-						</ul>
-					) }
-				{ productName.length < 10 &&
-					suggestionsState !== SuggestionsState.Fetching && (
-						<p className="wc-product-name-suggestions__tip-message">
-							<img src={ MagicIcon } alt="magic button icon" />
-							{ __(
-								'Enter a few descriptive words to generate product name using AI (beta).',
-								'woocommerce'
-							) }
-						</p>
-					) }
-				{ shouldRenderSuggestionsButton() && (
-					<button
-						className="button woo-ai-get-suggestions-btn"
-						type="button"
-						onClick={ fetchProductSuggestions }
-					>
-						<div className="woo-ai-get-suggestions-btn__content">
-							<img src={ MagicIcon } alt="magic button icon" />
-							{ getSuggestionsButtonLabel() }
-						</div>
-						<Pill>{ __( 'Experimental', 'woocommerce' ) }</Pill>
-					</button>
-				) }
-				{ suggestionsState === SuggestionsState.Fetching && (
-					<p className="wc-product-name-suggestions__loading-message">
-						<RandomLoadingMessage
-							isLoading={
-								suggestionsState === SuggestionsState.Fetching
-							}
-						/>
-					</p>
-				) }
-				{ suggestionsState === SuggestionsState.Failed && (
-					<p className="wc-product-name-suggestions__error-message">
-						{ error }
-					</p>
-				) }
-			</div>
-		</OutsideClickHandler>
+				<div className="woo-ai-get-suggestions-btn__content">
+					<img src={ MagicIcon } alt="magic button icon" />
+					{ getSuggestionsButtonLabel() }
+				</div>
+				<Pill>{ __( 'Experimental', 'woocommerce' ) }</Pill>
+			</button>
+			{ suggestionsState === SuggestionsState.Fetching && (
+				<p className="wc-product-name-suggestions__loading-message">
+					<RandomLoadingMessage
+						isLoading={
+							suggestionsState === SuggestionsState.Fetching
+						}
+					/>
+				</p>
+			) }
+			{ suggestionsState === SuggestionsState.Failed && (
+				<p className="wc-product-name-suggestions__error-message">
+					{ error }
+				</p>
+			) }
+		</div>
 	);
 }
