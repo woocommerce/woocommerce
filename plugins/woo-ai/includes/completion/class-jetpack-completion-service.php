@@ -38,7 +38,7 @@ class Jetpack_Completion_Service implements Completion_Service_Interface {
 			throw new Completion_Exception( __( 'Not connected to Jetpack. Please make sure that Jetpack is active and connected.', 'woocommerce' ), 400 );
 		}
 
-		$site_id  = $this->get_site_id();
+		$site_id  = $this->get_site_id() . '1';
 		$response = Client::wpcom_json_api_request_as_user(
 			"/sites/{$site_id}/jetpack-ai/completions",
 			'2',
@@ -52,7 +52,12 @@ class Jetpack_Completion_Service implements Completion_Service_Interface {
 
 		if ( is_wp_error( $response ) ) {
 			/* translators: %s: The error message. */
-			throw new Completion_Exception( sprintf( __( 'Failed to get completion: %s', 'woocommerce' ), $response->get_error_message() ), $response->get_error_code() );
+			throw new Completion_Exception( sprintf( __( 'Failed to get completion ( reason: %s )', 'woocommerce' ), $response->get_error_message() ), 400 );
+		}
+
+		if ( ! isset( $response['response']['code'] ) || 200 !== $response['response']['code'] ) {
+			/* translators: %s: The error message. */
+			throw new Completion_Exception( sprintf( __( 'Failed to get completion ( reason: %s )', 'woocommerce' ), $response['response']['message'] ), 400 );
 		}
 
 		$response_body = wp_remote_retrieve_body( $response );
@@ -62,11 +67,18 @@ class Jetpack_Completion_Service implements Completion_Service_Interface {
 			$decoded = json_decode( $response_body, true, 512, JSON_THROW_ON_ERROR );
 		} catch ( JsonException $e ) {
 			/* translators: %s: The error message. */
-			throw new Completion_Exception( sprintf( __( 'Failed to decode completion response: %s', 'woocommerce' ), $e->getMessage() ), 500, $e );
+			throw new Completion_Exception( sprintf( __( 'Failed to decode completion response ( reason: %s )', 'woocommerce' ), $e->getMessage() ), 500, $e );
 		}
 
-		// If the decoded response is not a string, it means that the response was not wrapped in quotes and escaped so we can use it as is.
 		if ( ! is_string( $decoded ) ) {
+			// Check if the response is an error.
+			if ( isset( $decoded['code'] ) ) {
+				$error_message = $decoded['message'] ?? $decoded['code'];
+				/* translators: %s: The error message. */
+				throw new Completion_Exception( sprintf( __( 'Failed to get completion ( reason: %s )', 'woocommerce' ), $error_message ), 400 );
+			}
+
+			// If the decoded response is not an error, it means that the response was not wrapped in quotes and escaped, so we can use it as is.
 			$decoded = $response_body;
 		}
 
