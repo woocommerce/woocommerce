@@ -10,32 +10,45 @@ import { __ } from '@wordpress/i18n';
 import {
 	ProductDataSuggestion,
 	ProductDataSuggestionRequest,
+	ApiErrorResponse,
 } from '../utils/types';
 
-type WooApiResponse = {
+type ProductDataSuggestionSuccessResponse = {
 	suggestions: ProductDataSuggestion[];
 };
+
+type ProductDataSuggestionErrorResponse = ApiErrorResponse;
 
 export const useProductDataSuggestions = () => {
 	const fetchSuggestions = async (
 		request: ProductDataSuggestionRequest
 	) => {
-		if ( request.name.length < 10 && request.description.length < 50 ) {
+		try {
+			const response =
+				await apiFetch< ProductDataSuggestionSuccessResponse >( {
+					path: '/wooai/product-data-suggestions',
+					method: 'POST',
+					data: request,
+				} );
+
+			return response.suggestions;
+		} catch ( e ) {
+			/* eslint-disable no-console */
+			console.error( e );
+
+			if ( ! ( e as ProductDataSuggestionErrorResponse )?.data?.status ) {
+				throw new Error(
+					__(
+						`Apologies, this is an experimental feature and there was an error with this service. Please try again.`,
+						'woocommerce'
+					)
+				);
+			}
+
 			throw new Error(
-				__(
-					'Enter a few descriptive words or add product description, tags, or attributes to generate name ideas.',
-					'woocommerce'
-				)
+				( e as ProductDataSuggestionErrorResponse ).message
 			);
 		}
-
-		const response = await apiFetch< WooApiResponse >( {
-			path: '/wooai/product-data-suggestions',
-			method: 'POST',
-			data: request,
-		} );
-
-		return response.suggestions;
 	};
 
 	return {
