@@ -10,13 +10,13 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\AI\Completion\Jetpack_Completion_Service;
+use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Exception;
 use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Prompt_Generator;
 use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Request;
 use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Service;
 use Automattic\WooCommerce\AI\PromptFormatter\Json_Request_Formatter;
 use Automattic\WooCommerce\AI\PromptFormatter\Product_Attribute_Formatter;
 use Automattic\WooCommerce\AI\PromptFormatter\Product_Category_Formatter;
-use Exception;
 use WC_REST_Data_Controller;
 use WP_Error;
 use WP_HTTP_Response;
@@ -185,8 +185,8 @@ class Product_Data_Suggestion_API extends WC_REST_Data_Controller {
 		try {
 			$product_data_request = new Product_Data_Suggestion_Request( $requested_data, $name, $description, $tags, $categories, $attributes );
 			$suggestions          = $this->product_data_suggestion_service->get_suggestions( $product_data_request );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		} catch ( Product_Data_Suggestion_Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		return rest_ensure_response( $suggestions );

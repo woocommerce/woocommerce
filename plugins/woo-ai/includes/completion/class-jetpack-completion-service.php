@@ -8,7 +8,7 @@
 namespace Automattic\WooCommerce\AI\Completion;
 
 use Automattic\Jetpack\Connection\Client;
-use Exception;
+use Automattic\WooCommerce\AI\ProductDataSuggestion\Completion_Exception;
 use Jetpack;
 use Jetpack_Options;
 use JsonException;
@@ -32,11 +32,11 @@ class Jetpack_Completion_Service implements Completion_Service_Interface {
 	 *
 	 * @return string The completion response.
 	 *
-	 * @throws Exception If the request fails.
+	 * @throws Completion_Exception If the request fails.
 	 */
 	public function get_completion( array $arguments ): string {
 		if ( ! $this->is_jetpack_ready() ) {
-			throw new Exception( 'Not connected to Jetpack' );
+			throw new Completion_Exception( __( 'Not connected to Jetpack. Please make sure that Jetpack is active and connected.', 'woocommerce' ), 400 );
 		}
 
 		$site_id  = $this->get_site_id();
@@ -51,34 +51,20 @@ class Jetpack_Completion_Service implements Completion_Service_Interface {
 			$arguments
 		);
 
-		if ( is_wp_error( $response ) || ! isset( $response['body'] ) ) {
-			throw new Exception( 'Failed to get completion: ' . $response->get_error_message() );
+		if ( is_wp_error( $response ) ) {
+			/* translators: %s: The error message. */
+			throw new Completion_Exception( sprintf( __( 'Failed to get completion: %s', 'woocommerce' ), $response->get_error_message() ), $response->get_error_code() );
 		}
 
 		try {
 			// Extract the string from the response. Response is wrapped in quotes and escaped. E.g. "{ \n \"foo\": \"bar\" \n }".
 			$response = json_decode( $response['body'], true, 512, JSON_THROW_ON_ERROR );
 		} catch ( JsonException $e ) {
-			throw new Exception( 'Failed to decode completion response: ' . $e->getMessage() );
+			/* translators: %s: The error message. */
+			throw new Completion_Exception( sprintf( __( 'Failed to decode completion response: %s', 'woocommerce' ), $e->getMessage() ), 500, $e );
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Gets the Jetpack Site ID.
-	 *
-	 * @return string The Jetpack Site ID.
-	 *
-	 * @throws Exception If no Jetpack Site ID is found.
-	 */
-	private function get_site_id(): string {
-		$site_id = Jetpack_Options::get_option( 'id' );
-		if ( ! $site_id ) {
-			throw new Exception( 'No Jetpack Site ID found' );
-		}
-
-		return (string) $site_id;
 	}
 
 	/**
@@ -89,5 +75,21 @@ class Jetpack_Completion_Service implements Completion_Service_Interface {
 	private function is_jetpack_ready(): bool {
 		return Jetpack::connection()->has_connected_owner() && Jetpack::is_connection_ready();
 
+	}
+
+	/**
+	 * Gets the Jetpack Site ID.
+	 *
+	 * @return string The Jetpack Site ID.
+	 *
+	 * @throws Completion_Exception If no Jetpack Site ID is found.
+	 */
+	private function get_site_id(): string {
+		$site_id = Jetpack_Options::get_option( 'id' );
+		if ( ! $site_id ) {
+			throw new Completion_Exception( __( 'No Jetpack Site ID found. Please make sure that Jetpack is active and connected.', 'woocommerce' ), 400 );
+		}
+
+		return (string) $site_id;
 	}
 }

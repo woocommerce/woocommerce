@@ -7,7 +7,7 @@
 
 namespace Automattic\WooCommerce\AI\Completion;
 
-use Exception;
+use Automattic\WooCommerce\AI\ProductDataSuggestion\Completion_Exception;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,7 +22,7 @@ interface Completion_Service_Interface {
 	 *
 	 * @return string The completion response.
 	 *
-	 * @throws Exception If the request fails.
+	 * @throws Completion_Exception If the request fails.
 	 */
 	public function get_completion( array $arguments ): string;
 }
