@@ -26,9 +26,22 @@
     border-radius: 0;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    margin: 0;
 
     img {
       vertical-align: middle;
+    }
+
+    &__content {
+      display: flex;
+      align-items: center;
+    }
+
+    .woocommerce-pill {
+      display: inline-block;
+      font-size: .8em;
+      color: #757575;
     }
   }
 
@@ -136,6 +149,6 @@
   margin-bottom: 0;
 }
 
-.woocommerce-layout__header {
+.woocommerce-layout > .woocommerce-layout__header {
   z-index: 1002;
 }

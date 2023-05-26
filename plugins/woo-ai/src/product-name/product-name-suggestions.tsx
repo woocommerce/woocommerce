@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import React from 'react';
 import OutsideClickHandler from 'react-outside-click-handler';
+import { Pill } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -172,8 +173,11 @@ export function ProductNameSuggestions() {
 						type="button"
 						onClick={ fetchProductSuggestions }
 					>
-						<img src={ MagicIcon } alt="magic button icon" />
-						{ getSuggestionsButtonLabel() }
+						<div className="woo-ai-get-suggestions-btn__content">
+							<img src={ MagicIcon } alt="magic button icon" />
+							{ getSuggestionsButtonLabel() }
+						</div>
+						<Pill>{ __( 'Experimental', 'woocommerce' ) }</Pill>
 					</button>
 				) }
 				{ suggestionsState === SuggestionsState.Fetching && (
