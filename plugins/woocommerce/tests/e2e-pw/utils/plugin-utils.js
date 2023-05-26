@@ -238,7 +238,7 @@ export const getLatestReleaseZipUrl = async ( {
 export const installPluginThruWpCli = async ( pluginPath ) => {
 	const runWpCliCommand = async ( command ) => {
 		const { stdout, stderr } = await execAsync(
-			`pnpm exec wp-env run tests-cli "${ command }"`
+			`pnpm exec wp-env run tests-cli -- ${ command }`
 		);
 
 		console.log( stdout );
