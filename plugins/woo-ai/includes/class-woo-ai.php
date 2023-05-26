@@ -65,6 +65,7 @@ class Woo_AI {
 			'repo_url'           => 'https://wordpress.org/plugins/woocommerce/',
 		);
 
+		add_filter( 'jetpack_offline_mode', '__return_false' );
 		add_action( 'current_screen', array( $this, 'includes' ) );
 	}
 
