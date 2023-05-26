@@ -18,7 +18,6 @@ import {
 } from '../utils/types';
 import SuggestionItem from './suggestion-item';
 import RandomLoadingMessage from '../components/random-loading-message';
-import ErrorMessage from '../components/error-message';
 
 enum SuggestionsState {
 	Fetching = 'fetching',
@@ -116,11 +115,8 @@ export function ProductNameSuggestions() {
 			setSuggestionsState( SuggestionsState.None );
 			setIsFirstLoad( false );
 		} catch ( e ) {
-			/* eslint-disable no-console */
-			console.error( e );
-
-			setError( e instanceof Error ? e.message : '' );
 			setSuggestionsState( SuggestionsState.Failed );
+			setError( e instanceof Error ? e.message : '' );
 		}
 	};
 
@@ -188,16 +184,7 @@ export function ProductNameSuggestions() {
 				) }
 				{ suggestionsState === SuggestionsState.Failed && (
 					<p className="wc-product-name-suggestions__error-message">
-						<ErrorMessage error={ error } />
-						<button
-							className="notice-dismiss"
-							type="button"
-							onClick={ resetError }
-						>
-							<span className="screen-reader-text">
-								{ __( 'Dismiss this notice.', 'woocommerce' ) }
-							</span>
-						</button>
+						{ error }
 					</p>
 				) }
 			</div>
