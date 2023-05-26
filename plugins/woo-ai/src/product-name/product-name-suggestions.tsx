@@ -173,7 +173,7 @@ export function ProductNameSuggestions() {
 				type="button"
 				onClick={ fetchProductSuggestions }
 				style={ {
-					display: shouldRenderSuggestionsButton() ? 'block' : 'none',
+					display: shouldRenderSuggestionsButton() ? 'flex' : 'none',
 				} }
 			>
 				<div className="woo-ai-get-suggestions-btn__content">
