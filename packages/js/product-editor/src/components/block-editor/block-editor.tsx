@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { synchronizeBlocksWithTemplate, Template } from '@wordpress/blocks';
-import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
+import { Template } from '@wordpress/blocks';
+import { createElement, useMemo } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
 import { useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
@@ -30,6 +30,11 @@ import {
 	// @ts-ignore store should be included.
 	useEntityBlockEditor,
 } from '@wordpress/core-data';
+
+/**
+ * Internal dependencies
+ */
+import { BlocksTemplate } from '../blocks-template';
 
 type BlockEditorProps = {
 	context: {
@@ -83,13 +88,6 @@ export function BlockEditor( {
 		{ id: product.id }
 	);
 
-	useLayoutEffect( () => {
-		onChange(
-			synchronizeBlocksWithTemplate( [], _settings?.template ),
-			{}
-		);
-	}, [ product.id ] );
-
 	if ( ! blocks ) {
 		return null;
 	}
@@ -103,6 +101,7 @@ export function BlockEditor( {
 					onChange={ onChange }
 					settings={ settings }
 				>
+					<BlocksTemplate />
 					<EditorStyles styles={ settings?.styles } />
 					<div className="editor-styles-wrapper">
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }

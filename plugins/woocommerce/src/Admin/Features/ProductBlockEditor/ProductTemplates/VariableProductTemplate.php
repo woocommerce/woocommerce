@@ -26,7 +26,7 @@ class VariableProductTemplate implements ProductTemplateInterface {
             array(
                 'woocommerce/product-tab',
                 array(
-                    'id'    => 'variable',
+                    'id'    => 'general',
                     'title' => __( 'General', 'woocommerce' ),
                     'order' => 10,
                 ),
