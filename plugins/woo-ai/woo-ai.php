@@ -72,12 +72,15 @@ add_action(
 	'wp_loaded',
 	function() {
 		require 'api/api.php';
+		require_once dirname( __FILE__ ) . '/includes/exception/class-woo-ai-exception.php';
+		require_once dirname( __FILE__ ) . '/includes/completion/class-completion-exception.php';
 		require_once dirname( __FILE__ ) . '/includes/completion/interface-completion-service.php';
 		require_once dirname( __FILE__ ) . '/includes/completion/class-jetpack-completion-service.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/interface-prompt-formatter.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-product-category-formatter.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-product-attribute-formatter.php';
 		require_once dirname( __FILE__ ) . '/includes/prompt-formatter/class-json-request-formatter.php';
+		require_once dirname( __FILE__ ) . '/includes/product-data-suggestion/class-product-data-suggestion-exception.php';
 		require_once dirname( __FILE__ ) . '/includes/product-data-suggestion/class-product-data-suggestion-request.php';
 		require_once dirname( __FILE__ ) . '/includes/product-data-suggestion/class-product-data-suggestion-prompt-generator.php';
 		require_once dirname( __FILE__ ) . '/includes/product-data-suggestion/class-product-data-suggestion-service.php';
