@@ -7,6 +7,7 @@
 
 namespace Automattic\WooCommerce\AI\ProductDataSuggestion;
 
+use Automattic\WooCommerce\AI\Completion\Completion_Exception;
 use Automattic\WooCommerce\AI\Completion\Completion_Service_Interface;
 use JsonException;
 

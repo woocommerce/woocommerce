@@ -7,8 +7,6 @@
 
 namespace Automattic\WooCommerce\AI\Completion;
 
-use Automattic\WooCommerce\AI\ProductDataSuggestion\Completion_Exception;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
