@@ -7,7 +7,7 @@
   margin-bottom: 1em;
   border: 1px solid #8c8f94;
   border-radius: 4px;
-  overflow: hidden;
+  overflow: visible;
   position: absolute;
   top: 0;
   left: 0;
@@ -152,4 +152,12 @@
 
 .woocommerce-layout > .woocommerce-layout__header {
   z-index: 1002;
+}
+
+.woo-ai-get-suggestions__experimental-tooltip {
+	.components-popover__content {
+		width: 200px;
+		min-width: auto;
+		white-space: normal !important;
+	}
 }
