@@ -2,17 +2,17 @@
  * External dependencies
  */
 import React from 'react';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useTinyEditor, useCompletion } from '../hooks';
-import MagicIcon from '../../assets/images/icons/magic.svg';
+import { MIN_TITLE_LENGTH } from '../constants';
+import { WriteItForMeBtn, StopCompletionBtn } from '../components';
 
 const DESCRIPTION_MAX_LENGTH = 300;
-const MIN_TITLE_LENGTH = 20;
 
 const getApiError = ( status?: number ) => {
 	const errorMessagesByStatus: Record< number, string > = {
@@ -92,49 +92,19 @@ export function WriteItForMeButtonContainer() {
 		return instructions.join( '\n' );
 	};
 
-	if ( completionActive ) {
-		return (
-			<button
-				className="button wp-media-button woo-ai-write-it-for-me-btn"
-				type="button"
-				title={ __(
-					'Stop generating the description.',
-					'woocommerce'
-				) }
-				onClick={ () => {
-					stopCompletion();
-				} }
-			>
-				<img src={ MagicIcon } alt="" />
-				{ __( 'Stop writing…', 'woocommerce' ) }
-			</button>
-		);
-	}
-
-	return (
-		<button
-			className="button wp-media-button woo-ai-write-it-for-me-btn"
-			type="button"
+	return completionActive ? (
+		<StopCompletionBtn
+			onClick={ () => {
+				stopCompletion();
+			} }
+		/>
+	) : (
+		<WriteItForMeBtn
 			disabled={ writeItForMeDisabled }
-			title={
-				writeItForMeDisabled
-					? sprintf(
-							/* translators: %d: Minimum characters for product title */
-							__(
-								'Please create a product title before generating a description. It must be %d characters or longer.',
-								'woocommerce'
-							),
-							MIN_TITLE_LENGTH
-					  )
-					: undefined
-			}
 			onClick={ () => {
 				setFetching( true );
 				requestCompletion( buildPrompt() );
 			} }
-		>
-			<img src={ MagicIcon } alt="" />
-			{ __( 'Write it for me', 'woocommerce' ) }
-		</button>
+		/>
 	);
 }
