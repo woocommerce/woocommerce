@@ -94,11 +94,13 @@ export function ProductNameSuggestions() {
 		if ( ! nameInputRef.current || ! newName.length ) return;
 		nameInputRef.current.value = newName;
 		nameInputRef.current.setAttribute( 'value', newName );
+		setProductName( newName );
 	};
 
 	const handleSuggestionClick = ( suggestion: ProductDataSuggestion ) => {
 		updateProductName( suggestion.content );
 		setSuggestions( [] );
+		resetError();
 	};
 
 	const fetchProductSuggestions = async () => {
@@ -154,15 +156,16 @@ export function ProductNameSuggestions() {
 							) ) }
 						</ul>
 					) }
-				{ productName.length < 10 && (
-					<p className="wc-product-name-suggestions__tip-message">
-						<img src={ MagicIcon } alt="magic button icon" />
-						{ __(
-							'Enter a few descriptive words to generate product name using AI (beta).',
-							'woocommerce'
-						) }
-					</p>
-				) }
+				{ productName.length < 10 &&
+					suggestionsState !== SuggestionsState.Fetching && (
+						<p className="wc-product-name-suggestions__tip-message">
+							<img src={ MagicIcon } alt="magic button icon" />
+							{ __(
+								'Enter a few descriptive words to generate product name using AI (beta).',
+								'woocommerce'
+							) }
+						</p>
+					) }
 				{ shouldRenderSuggestionsButton() && (
 					<button
 						className="button woo-ai-get-suggestions-btn"
