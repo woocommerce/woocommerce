@@ -14,7 +14,7 @@ $zIndexHeader: 1002;
   margin: 0.3em 0 1em;
   border: 1px solid $borderColor;
   border-radius: 4px;
-  overflow: hidden;
+  overflow: visible;
   position: absolute;
   top: 0;
   left: 0;
@@ -152,4 +152,12 @@ $zIndexHeader: 1002;
 
 .woocommerce-layout > .woocommerce-layout__header {
   z-index: $zIndexHeader;
+}
+
+.woo-ai-get-suggestions__experimental-tooltip {
+	.components-popover__content {
+		width: 200px;
+		min-width: auto;
+		white-space: normal !important;
+	}
 }

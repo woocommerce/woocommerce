@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import React from 'react';
 import { Pill } from '@woocommerce/components';
+import { Tooltip } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -25,7 +26,19 @@ enum SuggestionsState {
 	None = 'none',
 }
 
-export function ProductNameSuggestions() {
+type TinyEditor = {
+	on: ( eventName: string, handler: () => void ) => void;
+};
+
+declare const tinymce: {
+	on: (
+		eventName: 'addeditor',
+		handler: ( event: Event & { editor: TinyEditor } ) => void,
+		thing?: boolean
+	) => void;
+};
+
+export const ProductNameSuggestions = () => {
 	const [ suggestionsState, setSuggestionsState ] =
 		useState< SuggestionsState >( SuggestionsState.None );
 	const [ error, setError ] = useState< string >( '' );
@@ -79,20 +92,32 @@ export function ProductNameSuggestions() {
 			}
 		};
 
+		// Necessary since tinymce does not bubble click events.
+		const onDOMLoad = () => {
+			tinymce.on(
+				'addeditor',
+				( event ) =>
+					event.editor.on( 'click', () => setVisible( false ) ),
+				true
+			);
+		};
+
 		if ( nameInput ) {
 			nameInput.addEventListener( 'focus', onFocus );
 			nameInput.addEventListener( 'keyup', onKeyUp );
 			nameInput.addEventListener( 'change', onChange );
-			document.body.addEventListener( 'click', onBodyClick );
 		}
+		document.body.addEventListener( 'click', onBodyClick );
+		document.addEventListener( 'DOMContentLoaded', onDOMLoad );
 
 		return () => {
 			if ( nameInput ) {
 				nameInput.removeEventListener( 'focus', onFocus );
 				nameInput.removeEventListener( 'keyup', onKeyUp );
 				nameInput.removeEventListener( 'change', onChange );
-				document.body.removeEventListener( 'click', onBodyClick );
 			}
+			document.body.removeEventListener( 'click', onBodyClick );
+			document.removeEventListener( 'DOMContentLoaded', onDOMLoad );
 		};
 	}, [] );
 
@@ -161,9 +186,9 @@ export function ProductNameSuggestions() {
 			{ productName.length < 10 &&
 				suggestionsState !== SuggestionsState.Fetching && (
 					<p className="wc-product-name-suggestions__tip-message">
-						<img src={ MagicIcon } alt="magic button icon" />
+						<img src={ MagicIcon } alt="" />
 						{ __(
-							'Enter a few descriptive words to generate product name using AI (beta).',
+							'Enter a few descriptive words to generate product name using AI.',
 							'woocommerce'
 						) }
 					</p>
@@ -180,7 +205,21 @@ export function ProductNameSuggestions() {
 					<img src={ MagicIcon } alt="magic button icon" />
 					{ getSuggestionsButtonLabel() }
 				</div>
-				<Pill>{ __( 'Experimental', 'woocommerce' ) }</Pill>
+				<Tooltip
+					text={ __(
+						'AI features are in their experimental phase. While we strive to provide accurate and useful results, there is a possibility of generating misleading or incorrect content.',
+						'woocommerce'
+					) }
+					position="top center"
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore Incorrect types.
+					className={ 'woo-ai-get-suggestions__experimental-tooltip' }
+					delay={ 0 }
+				>
+					<span>
+						<Pill>{ __( 'Experimental', 'woocommerce' ) }</Pill>
+					</span>
+				</Tooltip>
 			</button>
 			{ suggestionsState === SuggestionsState.Fetching && (
 				<p className="wc-product-name-suggestions__loading-message">
@@ -198,4 +237,4 @@ export function ProductNameSuggestions() {
 			) }
 		</div>
 	);
-}
+};
