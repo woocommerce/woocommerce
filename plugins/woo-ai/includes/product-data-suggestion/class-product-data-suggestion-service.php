@@ -68,10 +68,16 @@ class Product_Data_Suggestion_Service {
 		}
 
 		try {
-			return json_decode( $completion, true, 512, JSON_THROW_ON_ERROR );
+			$completion = json_decode( $completion, true, 512, JSON_THROW_ON_ERROR );
 		} catch ( JsonException $e ) {
-			throw new Product_Data_Suggestion_Exception( 'Failed to decode the suggestions. Please try again.', 400, $e );
+			throw new Product_Data_Suggestion_Exception( __( 'Failed to decode the suggestions. Please try again.', 'woocommerce' ), 400, $e );
 		}
+
+		if ( ! isset( $completion['suggestions'] ) ) {
+			throw new Product_Data_Suggestion_Exception( __( 'Failed to decode the suggestions. Please try again.', 'woocommerce' ), 400 );
+		}
+
+		return $completion;
 	}
 
 }
