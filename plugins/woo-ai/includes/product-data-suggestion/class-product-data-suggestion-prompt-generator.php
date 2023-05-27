@@ -52,9 +52,9 @@ PROMPT_TEMPLATE;
 	/**
 	 * Product_Data_Suggestion_Prompt_Generator constructor.
 	 *
-	 * @param Product_Category_Formatter  $product_category_formatter The product category formatter.
+	 * @param Product_Category_Formatter  $product_category_formatter  The product category formatter.
 	 * @param Product_Attribute_Formatter $product_attribute_formatter The product attribute formatter.
-	 * @param Json_Request_Formatter      $json_request_formatter     The JSON request formatter.
+	 * @param Json_Request_Formatter      $json_request_formatter      The JSON request formatter.
 	 */
 	public function __construct( Product_Category_Formatter $product_category_formatter, Product_Attribute_Formatter $product_attribute_formatter, Json_Request_Formatter $json_request_formatter ) {
 		$this->product_category_formatter  = $product_category_formatter;
