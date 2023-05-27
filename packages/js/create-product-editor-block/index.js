@@ -40,7 +40,6 @@ module.exports = {
 		wpEnv: true,
 		editorScript: 'file:./index.js',
 		editorStyle: 'file:./index.css',
-		style: 'file:./index.css',
 	},
 	pluginTemplatesPath: join( __dirname, 'plugin-templates' ),
 	blockTemplatesPath: join( __dirname, 'block-templates' ),
