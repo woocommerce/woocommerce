@@ -30,5 +30,7 @@ const nameSuggestionsRoot = document.getElementById(
 	'woocommerce-ai-app-product-name-suggestions'
 );
 
-renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
-renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
+if ( window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
+	renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
+	renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
+}
