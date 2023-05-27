@@ -122,3 +122,13 @@ function add_extension_register_script() {
 }
 
 add_action( 'admin_enqueue_scripts', 'add_extension_register_script' );
+
+add_action(
+	'before_woocommerce_init',
+	function() {
+		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'product_block_editor', __FILE__, true );
+		}
+	}
+);
