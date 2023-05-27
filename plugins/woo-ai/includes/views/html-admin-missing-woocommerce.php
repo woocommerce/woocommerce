@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 	<p>
 		<?php
 		// Translators: %s Plugin name.
-		echo sprintf( esc_html__( '%s requires WooCommerce to be installed and activated in order to serve updates.', 'woocommerce' ), '<strong>' . esc_html__( 'WooCommerce Beta Tester', 'woocommerce' ) . '</strong>' );
+		echo sprintf( esc_html__( '%s requires WooCommerce to be installed and activated in order to serve updates.', 'woocommerce' ), '<strong>' . esc_html__( 'Woo AI', 'woocommerce' ) . '</strong>' );
 		?>
 	</p>
 
@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
 			<a href="<?php echo esc_url( wp_nonce_url( self_admin_url( 'plugins.php?action=activate&plugin=woocommerce/woocommerce.php&plugin_status=active' ), 'activate-plugin_woocommerce/woocommerce.php' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Activate WooCommerce', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 			<?php if ( current_user_can( 'deactivate_plugin', 'woo-ai/woo-ai.php' ) ) : ?>
-				<a href="<?php echo esc_url( wp_nonce_url( 'plugins.php?action=deactivate&plugin=woo-ai/woo-ai.php&plugin_status=inactive', 'deactivate-plugin_woo-ai/woo-ai.php' ) ); ?>" class="button button-secondary"><?php esc_html_e( 'Turn off Beta Tester plugin', 'woocommerce' ); ?></a>
+				<a href="<?php echo esc_url( wp_nonce_url( 'plugins.php?action=deactivate&plugin=woo-ai/woo-ai.php&plugin_status=inactive', 'deactivate-plugin_woo-ai/woo-ai.php' ) ); ?>" class="button button-secondary"><?php esc_html_e( 'Turn off Woo AI plugin', 'woocommerce' ); ?></a>
 			<?php endif; ?>
 		</p>
 	<?php else : ?>
