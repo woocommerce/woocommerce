@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "wp-scripts build"
+		"build": "wp-scripts build",
+		"postinstall": "composer install"
 	},
 	"keywords": [],
 	"author": "",
