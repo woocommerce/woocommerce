@@ -3070,6 +3070,16 @@ importers:
         version: 3.14.5
 
   plugins/woocommerce-docs:
+    dependencies:
+      '@wordpress/api-fetch':
+        specifier: wp-6.0
+        version: 6.3.1
+      react:
+        specifier: ^17.0.2
+        version: 17.0.2
+      react-dom:
+        specifier: ^17.0.2
+        version: 17.0.2(react@17.0.2)
     devDependencies:
       '@types/react':
         specifier: ^17.0.2
@@ -3083,9 +3093,6 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
-      '@wordpress/api-fetch':
-        specifier: wp-6.0
-        version: 6.3.1
       '@wordpress/prettier-config':
         specifier: ^2.16.0
         version: 2.16.0(wp-prettier@2.6.2)
@@ -3098,12 +3105,6 @@ importers:
       prettier:
         specifier: npm:wp-prettier@^2.6.2
         version: /wp-prettier@2.6.2
-      react:
-        specifier: ^17.0.2
-        version: 17.0.2
-      react-dom:
-        specifier: ^17.0.2
-        version: 17.0.2(react@17.0.2)
       ts-loader:
         specifier: ^9.4.1
         version: 9.4.1(typescript@4.9.5)(webpack@5.76.3)
@@ -17414,6 +17415,7 @@ packages:
       '@babel/runtime': 7.21.0
       '@wordpress/i18n': 4.6.1
       '@wordpress/url': 3.7.1
+    dev: false
 
   /@wordpress/autop@3.19.0:
     resolution: {integrity: sha512-Vl164Ilwmkx3M0LEyXkFdgksHjs3/FnHtw76tvdjjnLXtErUUIZ2y+hdCe+Esh8BhAUYXW420JU5KKvbidmykg==}

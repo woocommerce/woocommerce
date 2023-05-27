@@ -10,18 +10,20 @@
 	"keywords": [],
 	"author": "",
 	"license": "GPL-3.0+",
+	"dependencies": {
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
+		"@wordpress/api-fetch": "wp-6.0"
+	},
 	"devDependencies": {
 		"@types/react": "^17.0.2",
 		"@types/react-dom": "^17.0.2",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/prettier-config": "^2.16.0",
 		"@wordpress/scripts": "^26.4.0",
 		"eslint": "^8.32.0",
 		"prettier": "npm:wp-prettier@^2.6.2",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
 		"ts-loader": "^9.4.1",
 		"typescript": "^4.9.5"
 	}
