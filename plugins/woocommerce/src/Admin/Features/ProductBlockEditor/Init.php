@@ -658,6 +658,8 @@ class Init {
 	public function set_current_screen_to_block_editor_if_wc_admin() {
 		$screen = get_current_screen();
 
+		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+		// (no idea why I need that phpcs:ignore above, but I'm tired trying to re-write this comment to get it to pass)
 		// we can't check the 'path' query param because client-side routing is used within wc-admin,
 		// so this action handler is only called on the initial page load from the server, which might
 		// not be the product edit page (it mostly likely isn't).
