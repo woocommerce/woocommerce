@@ -2,7 +2,15 @@
 /**
  * External dependencies
  */
-import { createMachine, assign, DoneInvokeEvent, actions, spawn } from 'xstate';
+import {
+	createMachine,
+	assign,
+	send,
+	DoneInvokeEvent,
+	actions,
+	spawn,
+	interpret,
+} from 'xstate';
 import { useMachine } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
@@ -40,7 +48,10 @@ import {
 	InstallAndActivatePlugins,
 	InstalledPlugin,
 	PluginInstallError,
+	InstallAndActivatePluginsTimedOut,
 } from './services/installAndActivatePlugins';
+import { sendTo } from 'xstate/lib/actions';
+import { installAndActivatePlugins } from '@woocommerce/data/build-types/plugins/actions';
 
 // TODO: Typescript support can be improved, but for now lets write the types ourselves
 // https://stately.ai/blog/introducing-typescript-typegen-for-xstate
@@ -110,7 +121,8 @@ export type PluginsPageSkippedEvent = {
 export type PluginInstalledAndActivatedEvent = {
 	type: 'PLUGIN_INSTALLED_AND_ACTIVATED';
 	payload: {
-		pluginsCount: number;
+		pluginName: string;
+		installTime: number;
 		installedPluginIndex: number;
 	};
 };
@@ -142,6 +154,7 @@ export type CoreProfilerStateMachineContext = {
 	pluginsAvailable: ExtensionList[ 'plugins' ] | [];
 	pluginsSelected: string[]; // extension slugs
 	pluginsInstallationErrors: PluginInstallError[];
+	pluginsInstallationCompleted: InstallationCompletedResult;
 	businessInfo: { foo?: { bar: 'qux' }; location: string };
 	countries: { [ key: string ]: string };
 	loader: {
@@ -433,6 +446,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		pluginsAvailable: [],
 		pluginsSelected: [],
 		pluginsInstallationErrors: [],
+		pluginsInstallationTimerExpired: false,
+		pluginsInstallationCompleted: {
+			installedPlugins: [],
+			totalTime: 0,
+		},
 		countries: {},
 		loader: {},
 	} as CoreProfilerStateMachineContext,
@@ -760,17 +778,16 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		},
 		postPluginInstallation: {
 			invoke: {
-				src: async ( _context, event ) => {
-					return await dispatch(
-						ONBOARDING_STORE_NAME
-					).updateProfileItems( {
-						business_extensions:
-							event.payload.installationCompletedResult.installedPlugins.map(
-								( extension: InstalledPlugin ) =>
-									extension.plugin
-							),
-						completed: true,
-					} );
+				src: ( context ) => {
+					return dispatch( ONBOARDING_STORE_NAME ).updateProfileItems(
+						{
+							business_extensions:
+								context.pluginsInstallationCompleted.installedPlugins.map(
+									( plugin: InstalledPlugin ) => plugin.plugin
+								),
+							completed: true,
+						}
+					);
 				},
 				onDone: {
 					actions: 'redirectToWooHome',
@@ -786,13 +803,35 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				PLUGIN_INSTALLED_AND_ACTIVATED: {
 					actions: [
 						assign( {
+							pluginsInstallationCompleted: (
+								context,
+								event: PluginInstalledAndActivatedEvent
+							) => {
+								const installedPlugins = [
+									...context.pluginsInstallationCompleted
+										.installedPlugins,
+									{
+										plugin: event.payload.pluginName,
+										installTime: event.payload.installTime,
+									},
+								];
+
+								return {
+									installedPlugins,
+									totalTime:
+										context.pluginsInstallationCompleted
+											.totalTime,
+								};
+							},
+						} ),
+						assign( {
 							loader: (
-								_context,
+								context,
 								event: PluginInstalledAndActivatedEvent
 							) => {
 								const progress = Math.round(
-									( event.payload.installedPluginIndex /
-										event.payload.pluginsCount ) *
+									( event.payload.installedPluginIndex +
+										1 / context.pluginsSelected.length ) *
 										100
 								);
 
@@ -817,8 +856,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					target: 'prePlugins',
 					actions: [
 						assign( {
-							pluginsInstallationErrors: ( _context, event ) =>
-								event.payload.errors,
+							pluginsInstallationErrors: (
+								_context,
+								event: PluginsInstallationCompletedWithErrorsEvent
+							) => event.payload.errors,
 						} ),
 						( _context, event ) => {
 							recordEvent(
@@ -837,10 +878,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				PLUGINS_INSTALLATION_COMPLETED: {
 					target: 'postPluginInstallation',
 					actions: [
-						( _context, event ) => {
-							const installationCompletedResult =
-								event.payload.installationCompletedResult;
-
+						( context ) => {
 							const trackData: {
 								success: boolean;
 								installed_extensions: string[];
@@ -853,18 +891,21 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							} = {
 								success: true,
 								installed_extensions:
-									installationCompletedResult.installedPlugins.map(
+									context.pluginsInstallationCompleted.installedPlugins.map(
 										( installedPlugin: InstalledPlugin ) =>
 											getPluginTrackKey(
 												installedPlugin.plugin
 											)
 									),
 								total_time: getTimeFrame(
-									installationCompletedResult.totalTime
+									context.pluginsInstallationCompleted
+										.totalTime
 								),
 							};
 
-							for ( const installedPlugin of installationCompletedResult.installedPlugins ) {
+							for ( const installedPlugin of context
+								.pluginsInstallationCompleted
+								.installedPlugins ) {
 								trackData[
 									'install_time_' +
 										getPluginTrackKey(
@@ -881,6 +922,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					],
 				},
 			},
+			invoke: {
+				id: 'installAndActivatePlugins',
+				src: InstallAndActivatePlugins,
+			},
 			entry: [
 				assign( {
 					loader: {
@@ -889,8 +934,25 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					},
 				} ),
 			],
+			exit: send(
+				{ type: 'PLUGINS_INSTALLATION_TIMED_OUT' },
+				{ to: 'installAndActivatePlugins' }
+			),
+			after: {
+				30000: {
+					target: 'installPluginsTimedOut',
+				},
+			},
+			meta: {
+				component: Loader,
+			},
+		},
+		installPluginsTimedOut: {
 			invoke: {
-				src: InstallAndActivatePlugins,
+				src: InstallAndActivatePluginsTimedOut,
+				onDone: {
+					target: 'postPluginInstallation',
+				},
 			},
 			meta: {
 				component: Loader,
