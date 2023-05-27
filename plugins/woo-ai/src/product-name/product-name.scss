@@ -1,27 +1,34 @@
+$borderColor: #8c8f94;
+$baseBgColor: #fff;
+$hoverBgColor: #f0f0f1;
+$baseTextColor: #757575;
+$errorMessageBgColor: #eeaeaf;
+$zIndexContainer: 1001;
+$zIndexHeader: 1002;
+
 #woocommerce-ai-app-product-name-suggestions {
   position: relative;
 }
 
 .wc-product-name-suggestions-container {
-  margin-top: 0.3em;
-  margin-bottom: 1em;
-  border: 1px solid #8c8f94;
+  margin: 0.3em 0 1em;
+  border: 1px solid $borderColor;
   border-radius: 4px;
   overflow: hidden;
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  background: #fff;
+  background: $baseBgColor;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-  z-index: 1001;
+  z-index: $zIndexContainer;
   box-sizing: border-box;
 
   .woo-ai-get-suggestions-btn {
     border: none;
     width: 100%;
     text-align: left;
-    background-color: #fff;
+    background-color: $baseBgColor;
     padding: 10px;
     border-radius: 0;
     display: flex;
@@ -41,13 +48,13 @@
     .woocommerce-pill {
       display: inline-block;
       font-size: .8em;
-      color: #757575;
+      color: $baseTextColor;
       padding: 2px 8px;
     }
   }
 
   .woo-ai-get-suggestions-btn:hover {
-    background-color: #f0f0f1;
+    background-color: $hoverBgColor;
   }
 
   .wc-product-name-suggestions__suggested-names {
@@ -57,24 +64,21 @@
     border-bottom: 1px solid #dcdcde;
 
     .suggestion-item {
-      background-color: #fff;
+      background-color: $baseBgColor;
       margin-bottom: 0;
       cursor: pointer;
-
 
       .suggestion-content-container {
         display: flex;
         flex-direction: column;
 
         .suggestion-content {
-          margin-bottom: .25em;
-          margin-top: .8em;
+          margin: .8em 0 .25em;
         }
 
         .suggestion-reason {
           color: grey;
-          margin-top: .25em;
-          margin-bottom: .8em;
+          margin: .25em 0 .8em;
         }
       }
 
@@ -104,16 +108,12 @@
           }
         }
       }
-
-      button.select-suggestion:hover {
-        background-color: #f0f0f1;
-      }
     }
   }
 
   .wc-product-name-suggestions__loading-message {
     margin: 0;
-    background-color: #f0f0f1;
+    background-color: $hoverBgColor;
     padding: 10px;
     display: flex;
     align-items: center;
@@ -131,7 +131,7 @@
   .wc-product-name-suggestions__error-message {
     margin: 0;
     padding: 10px;
-    background-color: #eeaeaf;
+    background-color: $errorMessageBgColor;
   }
 
   .wc-product-name-suggestions__tip-message {
@@ -151,5 +151,5 @@
 }
 
 .woocommerce-layout > .woocommerce-layout__header {
-  z-index: 1002;
+  z-index: $zIndexHeader;
 }
