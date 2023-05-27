@@ -1,36 +1,36 @@
-$borderColor: #8c8f94;
-$baseBgColor: #fff;
-$hoverBgColor: #f0f0f1;
-$baseTextColor: #757575;
-$errorMessageBgColor: #eeaeaf;
-$zIndexContainer: 1001;
-$zIndexHeader: 1002;
+$border-color: #8c8f94;
+$base-bg-color: #fff;
+$hover-bg-color: #f0f0f1;
+$base-text-color: #757575;
+$error-message-bg-color: #eeaeaf;
+$z-index-container: 1001;
+$z-index-header: 1002;
+$border-radius: 4px;
 
 #woocommerce-ai-app-product-name-suggestions {
   position: relative;
 }
 
 .wc-product-name-suggestions-container {
-  margin: 0.3em 0 1em;
-  border: 1px solid $borderColor;
-  border-radius: 4px;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
   overflow: visible;
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  background: $baseBgColor;
+  background: $base-bg-color;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-  z-index: $zIndexContainer;
+  z-index: $z-index-container;
   box-sizing: border-box;
 
   .woo-ai-get-suggestions-btn {
     border: none;
     width: 100%;
     text-align: left;
-    background-color: $baseBgColor;
+    background-color: $base-bg-color;
     padding: 10px;
-    border-radius: 0;
+    border-radius: $border-radius;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -48,13 +48,13 @@ $zIndexHeader: 1002;
     .woocommerce-pill {
       display: inline-block;
       font-size: .8em;
-      color: $baseTextColor;
+      color: $base-text-color;
       padding: 2px 8px;
     }
   }
 
   .woo-ai-get-suggestions-btn:hover {
-    background-color: $hoverBgColor;
+    background-color: $hover-bg-color;
   }
 
   .wc-product-name-suggestions__suggested-names {
@@ -64,7 +64,7 @@ $zIndexHeader: 1002;
     border-bottom: 1px solid #dcdcde;
 
     .suggestion-item {
-      background-color: $baseBgColor;
+      background-color: $base-bg-color;
       margin-bottom: 0;
       cursor: pointer;
 
@@ -86,7 +86,7 @@ $zIndexHeader: 1002;
         border: none;
         width: 100%;
         text-align: left;
-        background-color: #fff;
+        background-color: $base-bg-color;
         color: inherit;
         display: flex;
         justify-content: space-between;
@@ -103,6 +103,8 @@ $zIndexHeader: 1002;
         }
 
         &:hover {
+          background-color: $hover-bg-color;
+
           .button.use-suggestion {
             visibility: visible;
           }
@@ -112,8 +114,9 @@ $zIndexHeader: 1002;
   }
 
   .wc-product-name-suggestions__loading-message {
+    border-radius: $border-radius;
     margin: 0;
-    background-color: $hoverBgColor;
+    background-color: $hover-bg-color;
     padding: 10px;
     display: flex;
     align-items: center;
@@ -131,7 +134,7 @@ $zIndexHeader: 1002;
   .wc-product-name-suggestions__error-message {
     margin: 0;
     padding: 10px;
-    background-color: $errorMessageBgColor;
+    background-color: $error-message-bg-color;
   }
 
   .wc-product-name-suggestions__tip-message {
@@ -146,12 +149,8 @@ $zIndexHeader: 1002;
   }
 }
 
-#titlediv #title {
-  margin-bottom: 0;
-}
-
 .woocommerce-layout > .woocommerce-layout__header {
-  z-index: $zIndexHeader;
+  z-index: $z-index-header;
 }
 
 .woo-ai-get-suggestions__experimental-tooltip {
