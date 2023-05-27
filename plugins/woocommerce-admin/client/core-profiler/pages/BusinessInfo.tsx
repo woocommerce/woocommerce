@@ -281,7 +281,8 @@ export const BusinessInfo = ( {
 									),
 									{
 										geolocatedCountry: (
-											<Button className="geolocation-notice-geolocated-country"
+											<Button
+												className="geolocation-notice-geolocated-country"
 												variant="link"
 												onClick={ () =>
 													setStoreCountry(
