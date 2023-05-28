@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useState, useEffect } from '@wordpress/element';
-import PropTypes from 'prop-types';
 import type { HTMLElementEvent } from '@woocommerce/types';
 
 /**
@@ -38,11 +37,6 @@ const ProductListContainer = ( {
 			sortValue={ currentSort }
 		/>
 	);
-};
-
-ProductListContainer.propTypes = {
-	attributes: PropTypes.object.isRequired,
-	hideOutOfStockItems: PropTypes.bool,
 };
 
 export default ProductListContainer;
