@@ -10,10 +10,9 @@ import { ACTION_TYPES } from './action-types';
 import { ShippingMethod } from './types';
 import { Actions } from './actions';
 
-
 export type ShippingMethodsState = {
 	shippingMethods: ShippingMethod[];
-	isUpdating: boolean,
+	isUpdating: boolean;
 	errors: Record< string, unknown >;
 };
 
@@ -24,7 +23,7 @@ const reducer: Reducer< ShippingMethodsState, Actions > = (
 		errors: {},
 	},
 	payload
-)  => {
+) => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
 			case ACTION_TYPES.GET_SHIPPING_METHODS_REQUEST:
@@ -51,6 +50,5 @@ const reducer: Reducer< ShippingMethodsState, Actions > = (
 	}
 	return state;
 };
-
 
 export default reducer;

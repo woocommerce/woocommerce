@@ -14,9 +14,7 @@ import {
 import { ShippingMethod } from './types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
 
-export function* getShippingMethods(
-	forceDefaultSuggestions = false
-) {
+export function* getShippingMethods( forceDefaultSuggestions = false ) {
 	let path = WC_ADMIN_NAMESPACE + '/shipping-partner-suggestions';
 	if ( forceDefaultSuggestions ) {
 		path += '?force_default_suggestions=true';

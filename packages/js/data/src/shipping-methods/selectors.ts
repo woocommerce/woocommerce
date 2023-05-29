@@ -11,7 +11,9 @@ export const getShippingMethods = (
 	return state.shippingMethods || [];
 };
 
-export function isShippingMethodsUpdating( state: ShippingMethodsState ): boolean {
+export function isShippingMethodsUpdating(
+	state: ShippingMethodsState
+): boolean {
 	return state.isUpdating || false;
 }
 export type ShippingMethodsSelectors = {

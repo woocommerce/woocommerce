@@ -17,8 +17,8 @@ export const SHIPPING_METHODS_STORE_NAME = STORE_KEY;
 export const store = createReduxStore( SHIPPING_METHODS_STORE_NAME, {
 	reducer,
 	selectors,
-  resolvers,
-  controls,
+	resolvers,
+	controls,
 	actions,
 } );
 
