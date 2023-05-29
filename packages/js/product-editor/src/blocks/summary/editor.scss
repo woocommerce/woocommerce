@@ -1,3 +1,10 @@
+.wp-block-woocommerce-product-summary-field-wrapper {
+	& .wp-block-woocommerce-product-summary-field {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+}
+
 .components-summary-control {
 	width: 100%;
 	min-height: calc($gap-larger * 3);

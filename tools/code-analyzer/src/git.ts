@@ -3,7 +3,11 @@
  */
 import { join } from 'path';
 import { simpleGit } from 'simple-git';
-import { execAsync, startWPEnv, stopWPEnv } from 'cli-core/src/util';
+import { execAsync } from '@woocommerce/monorepo-utils/src/core/util';
+import {
+	startWPEnv,
+	stopWPEnv,
+} from '@woocommerce/monorepo-utils/src/core/wpenv';
 
 export type SchemaDump = {
 	schema: string;
@@ -28,7 +32,7 @@ export const getSchema = async (
 
 		// Get the WooCommerce schema from wp cli
 		const schemaOutput = await execAsync(
-			`wp-env run cli "wp eval-file '${ getSchemaPath }'"`,
+			`wp-env run cli wp eval-file '${ getSchemaPath }'`,
 			{
 				cwd: pluginPath,
 				encoding: 'utf-8',
@@ -37,7 +41,7 @@ export const getSchema = async (
 
 		// Get the OrdersTableDataStore schema.
 		const ordersTableOutput = await execAsync(
-			'wp-env run cli "wp eval \'echo (new Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore)->get_database_schema();\'"',
+			'wp-env run cli wp eval \'echo (new Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore)->get_database_schema();\'',
 			{
 				cwd: pluginPath,
 				encoding: 'utf-8',

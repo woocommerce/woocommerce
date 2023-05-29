@@ -5,8 +5,8 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
-const BundleAnalyzerPlugin =
-	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin = require( 'webpack-bundle-analyzer' )
+	.BundleAnalyzerPlugin;
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
@@ -201,15 +201,6 @@ const webpackConfig = {
 				{
 					from: '../../packages/js/product-editor/build/blocks',
 					to: './product-editor/blocks',
-				},
-			],
-		} ),
-
-		new CopyWebpackPlugin( {
-			patterns: [
-				{
-					from: '../../packages/js/product-editor/assets/icons',
-					to: './product-editor/icons',
 				},
 			],
 		} ),

@@ -13,7 +13,6 @@ permissions: {}
 
 jobs:
     e2e-tests-run:
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
         name: Runs E2E tests.
         runs-on: ubuntu-20.04
         permissions:
@@ -137,6 +136,7 @@ jobs:
 
     k6-tests-run:
         name: Runs k6 Performance tests
+        if: github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -167,6 +167,7 @@ jobs:
         if: |
             always() && 
             ! github.event.pull_request.head.repo.fork &&
+            github.event.pull_request.user.login != 'github-actions[bot]' &&
             (
               contains( needs.*.result, 'success' ) ||
               contains( needs.*.result, 'failure' )
@@ -239,6 +240,7 @@ jobs:
         if: |
             always() && 
             ! github.event.pull_request.head.repo.fork &&
+            github.event.pull_request.user.login != 'github-actions[bot]' &&
             (
               contains( needs.*.result, 'success' ) ||
               contains( needs.*.result, 'failure' )

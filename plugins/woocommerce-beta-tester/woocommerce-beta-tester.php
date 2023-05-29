@@ -44,7 +44,7 @@ function _wc_beta_tester_load_textdomain() {
 add_action( 'plugins_loaded', '_wc_beta_tester_load_textdomain' );
 
 /**
- * Boostrap plugin.
+ * Bootstrap plugin.
  */
 function _wc_beta_tester_bootstrap() {
 
@@ -88,6 +88,8 @@ function add_extension_register_script() {
 		);
 	$script_url        = plugins_url( $script_path, __FILE__ );
 
+	$script_asset['dependencies'][] = WC_ADMIN_APP; // Add WCA as a dependency to ensure it loads first.
+
 	wp_register_script(
 		'woocommerce-admin-test-helper',
 		$script_url,
@@ -120,3 +122,13 @@ function add_extension_register_script() {
 }
 
 add_action( 'admin_enqueue_scripts', 'add_extension_register_script' );
+
+add_action(
+	'before_woocommerce_init',
+	function() {
+		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'product_block_editor', __FILE__, true );
+		}
+	}
+);

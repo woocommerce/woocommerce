@@ -747,7 +747,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'state'            => $customer->get_billing_state( 'edit' ),
 			'postcode'         => $customer->get_billing_postcode( 'edit' ),
 			'country'          => $customer->get_billing_country( 'edit' ),
-			'date_registered'  => $customer->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
+			'date_registered'  => $customer->get_date_created( 'edit' ) ? $customer->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ) : null,
 			'date_last_active' => $last_active ? gmdate( 'Y-m-d H:i:s', $last_active ) : null,
 		);
 		$format      = array(

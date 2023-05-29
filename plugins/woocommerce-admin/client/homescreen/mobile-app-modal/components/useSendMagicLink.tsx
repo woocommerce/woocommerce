@@ -47,7 +47,7 @@ export const useSendMagicLink = () => {
 					setRequestState( SendMagicLinkStates.ERROR );
 					createNotice(
 						'error',
-						__( 'Sorry, an unknown error occured.', 'woocommerce' )
+						__( 'Sorry, an unknown error occurred.', 'woocommerce' )
 					);
 				}
 			} )

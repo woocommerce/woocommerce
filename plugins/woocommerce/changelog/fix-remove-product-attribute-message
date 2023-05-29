@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show correct confirmation message when removing an attribute from a product.

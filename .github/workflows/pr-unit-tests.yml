@@ -13,54 +13,63 @@ concurrency:
 permissions: {}
 
 jobs:
-  test:
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'github-actions[bot]' }}
-    name: PHP ${{ matrix.php }} WP ${{ matrix.wp }} ${{ matrix.hpos && 'HPOS' || '' }}
-    timeout-minutes: 30
-    runs-on: ubuntu-20.04
-    permissions:
-      contents: read
-    continue-on-error: ${{ matrix.wp == 'nightly' }}
-    env:
-      HPOS: ${{ matrix.hpos }}
-    strategy:
-      fail-fast: false
-      matrix:
-        php: [ '7.4', '8.0' ]
-        wp: [ "latest" ]
-        include:
-          - wp: nightly
-            php: '7.4'
-          - wp: '6.0'
-            php: 7.4
-          - wp: 'latest'
-            php: '7.4'
-            hpos: true
-    services:
-      database:
-        image: mysql:5.6
+    test:
+        if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' }}
+        name: PHP ${{ matrix.php }} WP ${{ matrix.wp }} ${{ matrix.hpos && 'HPOS' || '' }}
+        timeout-minutes: 30
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+        continue-on-error: ${{ matrix.wp == 'nightly' }}
         env:
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
-    steps:
-      - uses: actions/checkout@v3
+            HPOS: ${{ matrix.hpos }}
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ['7.4', '8.0']
+                wp: ['latest']
+                include:
+                    - wp: nightly
+                      php: '7.4'
+                    - wp: '6.1'
+                      php: 7.4
+                    - wp: 'latest'
+                      php: '7.4'
+                      hpos: true
+        services:
+            database:
+                image: mysql:5.6
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                ports:
+                    - 3306:3306
+                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+        steps:
+            - uses: actions/checkout@v3
 
-      - name: Setup WooCommerce Monorepo
-        uses: ./.github/actions/setup-woocommerce-monorepo
-        with:
-            php-version: ${{ matrix.php }}
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  php-version: ${{ matrix.php }}
 
-      - name: Tool versions
-        run: |
-            php --version
-            composer --version
+            - id: parseMatrix
+              name: Parse Matrix Variables
+              uses: actions/github-script@v6
+              with:
+                script: |
+                    const parseWPVersion = require( './.github/workflows/scripts/parse-wp-version' );
+                    parseWPVersion( '${{ matrix.wp }}' ).then( ( version ) => {
+                      core.setOutput( 'wpVersion', version );
+                    } );
 
-      - name: Init DB and WP
-        working-directory: plugins/woocommerce
-        run: ./tests/bin/install.sh woo_test root root 127.0.0.1 ${{ matrix.wp }}
+            - name: Prepare Testing Environment
+              env:
+                WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
+                WP_ENV_PHP_VERSION: ${{ matrix.php }}
+              run: pnpm --filter=woocommerce env:test
 
-      - name: Run tests
-        working-directory: plugins/woocommerce
-        run: pnpm run test --filter=woocommerce --color
+            - name: Run Tests
+              env:
+                WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
+                WP_ENV_PHP_VERSION: ${{ matrix.php }}
+              run: pnpm --filter=woocommerce test:unit:env

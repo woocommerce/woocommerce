@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { DateTimePickerControl } from '@woocommerce/components';
+import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
@@ -19,9 +20,11 @@ import { getSettings } from '@wordpress/date';
  * Internal dependencies
  */
 import { ScheduleSalePricingBlockAttributes } from './types';
-import { useValidation } from '../../hooks/use-validation';
+import { useValidation } from '../../contexts/validation-context';
 
-export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
+export function Edit( {
+	clientId,
+}: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
 	const blockProps = useBlockProps();
 
 	const dateTimeFormat = getSettings().formats.datetime;
@@ -84,9 +87,13 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 	const _dateOnSaleFrom = moment( dateOnSaleFromGmt, moment.ISO_8601, true );
 	const _dateOnSaleTo = moment( dateOnSaleToGmt, moment.ISO_8601, true );
 
-	const dateOnSaleFromGmtValidationError = useValidation(
-		'product/date_on_sale_from_gmt',
-		function dateOnSaleFromValidator() {
+	const {
+		ref: dateOnSaleFromGmtRef,
+		error: dateOnSaleFromGmtValidationError,
+		validate: validateDateOnSaleFromGmt,
+	} = useValidation< Product >(
+		`date_on_sale_from_gmt-${ clientId }`,
+		async function dateOnSaleFromValidator() {
 			if ( showScheduleSale && dateOnSaleFromGmt ) {
 				if ( ! _dateOnSaleFrom.isValid() ) {
 					return __( 'Please enter a valid date.', 'woocommerce' );
@@ -99,12 +106,17 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 					);
 				}
 			}
-		}
+		},
+		[ showScheduleSale, dateOnSaleFromGmt, _dateOnSaleFrom, _dateOnSaleTo ]
 	);
 
-	const dateOnSaleToGmtValidationError = useValidation(
-		'product/date_on_sale_to_gmt',
-		function dateOnSaleToValidator() {
+	const {
+		ref: dateOnSaleToGmtRef,
+		error: dateOnSaleToGmtValidationError,
+		validate: validateDateOnSaleToGmt,
+	} = useValidation< Product >(
+		`date_on_sale_to_gmt-${ clientId }`,
+		async function dateOnSaleToValidator() {
 			if ( showScheduleSale && dateOnSaleToGmt ) {
 				if ( ! _dateOnSaleTo.isValid() ) {
 					return __( 'Please enter a valid date.', 'woocommerce' );
@@ -117,7 +129,8 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 					);
 				}
 			}
-		}
+		},
+		[ showScheduleSale, dateOnSaleFromGmt, _dateOnSaleFrom, _dateOnSaleTo ]
 	);
 
 	return (
@@ -133,6 +146,9 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 				<div className="wp-block-columns">
 					<div className="wp-block-column">
 						<DateTimePickerControl
+							ref={
+								dateOnSaleFromGmtRef as React.Ref< HTMLInputElement >
+							}
 							label={ __( 'From', 'woocommerce' ) }
 							placeholder={ __(
 								'Sale start date and time (optional)',
@@ -145,11 +161,15 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 								dateOnSaleFromGmtValidationError && 'has-error'
 							}
 							help={ dateOnSaleFromGmtValidationError as string }
+							onBlur={ validateDateOnSaleFromGmt }
 						/>
 					</div>
 
 					<div className="wp-block-column">
 						<DateTimePickerControl
+							ref={
+								dateOnSaleToGmtRef as React.Ref< HTMLInputElement >
+							}
 							label={ __( 'To', 'woocommerce' ) }
 							placeholder={ __(
 								'Sale end date and time (optional)',
@@ -164,6 +184,7 @@ export function Edit( {}: BlockEditProps< ScheduleSalePricingBlockAttributes > )
 										.toISOString()
 								)
 							}
+							onBlur={ validateDateOnSaleToGmt }
 							className={
 								dateOnSaleToGmtValidationError && 'has-error'
 							}

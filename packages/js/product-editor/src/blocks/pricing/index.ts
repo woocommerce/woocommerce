@@ -1,22 +1,27 @@
 /**
+ * External dependencies
+ */
+import { BlockConfiguration } from '@wordpress/blocks';
+
+/**
  * Internal dependencies
  */
-import { initBlock } from '../../utils';
-import metadata from './block.json';
+import { initBlock } from '../../utils/init-blocks';
+import blockConfiguration from './block.json';
 import { Edit } from './edit';
+import { PricingBlockAttributes } from './types';
 
-const { name } = metadata;
+const { name, ...metadata } =
+	blockConfiguration as BlockConfiguration< PricingBlockAttributes >;
 
 export { metadata, name };
 
-export const settings = {
-	example: {},
-	edit: Edit,
-};
+export const settings: Partial< BlockConfiguration< PricingBlockAttributes > > =
+	{
+		example: {},
+		edit: Edit,
+	};
 
-export const init = () =>
-	initBlock( {
-		name,
-		metadata: metadata as never,
-		settings,
-	} );
+export function init() {
+	return initBlock( { name, metadata, settings } );
+}

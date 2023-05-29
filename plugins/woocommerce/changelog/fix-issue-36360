@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the default text in "Additional content" being sent for all emails when the field is empty for Admin New Order email

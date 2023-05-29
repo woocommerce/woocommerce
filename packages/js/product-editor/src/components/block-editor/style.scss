@@ -9,6 +9,7 @@
 	button,
 	span,
 	label,
+	div,
 	input {
 		font-family: var( --wp--preset--font-family--system-font );
 	}
@@ -40,6 +41,10 @@
 		margin-left: auto;
 		margin-right: auto;
 		padding-bottom: 128px;
+
+		h4 {
+			font-size: 16px;
+		}
 	}
 
 	.components-input-control {
@@ -74,6 +79,7 @@
 
 	.wp-block-columns {
 		gap: $gap-large;
+		margin-bottom: 0;
 	}
 
 	.wp-block-woocommerce-product-section {
@@ -94,10 +100,8 @@
 		color: $gray-900;
 		font-weight: 500;
 	}
-}
 
-.woocommerce-layout:has( .woocommerce-product-block-editor ) {
-	.woocommerce-layout__header {
-		display: none;
+	.block-editor-block-list__layout .block-editor-block-list__block:not( [contenteditable] ):focus:after {
+		display: none; // use important or increase specificity.
 	}
 }

@@ -1,0 +1,29 @@
+.woocommerce-products-load-sample-product-confirm-modal-overlay {
+	@media (min-width: 783px ) {
+		& {
+			left: 35px;
+		}
+	}
+
+	@include break-large {
+		& {
+			left: 160px;
+		}
+	}
+}
+
+.woocommerce-products-load-sample-product-confirm-modal {
+	.components-truncate.components-text.woocommerce-confirmation-modal__message {
+		color: $studio-gray-60;
+	}
+
+	.woocommerce-confirmation-modal-actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: $gap;
+
+		button {
+			margin-left: $gap;
+		}
+	}
+}

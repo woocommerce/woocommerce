@@ -3,11 +3,7 @@
  */
 import { Octokit } from '@octokit/rest';
 import shuffle from 'lodash.shuffle';
-
-/**
- * Internal dependencies
- */
-import { getEnvVar } from './environment';
+import { getEnvVar } from '@woocommerce/monorepo-utils/src/core/environment';
 
 export type ContributorData = {
 	totalCommits: number;

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add instruction to run Playwright UI mode in E2E readme.

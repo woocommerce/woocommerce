@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9b9f6dff1c579d1d1e86436b8e1fb6a7",
+    "content-hash": "f1ac527bc0de498e3c9e37bb255945c1",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -628,16 +628,16 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "10.0.2",
+            "version": "10.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-blocks.git",
-                "reference": "d7275884591bc05f7e780c8cd7919d50b79b9ffa"
+                "reference": "7b5192d251e9c6f5502d2c8ab147498639f0eb84"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/d7275884591bc05f7e780c8cd7919d50b79b9ffa",
-                "reference": "d7275884591bc05f7e780c8cd7919d50b79b9ffa",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-blocks/zipball/7b5192d251e9c6f5502d2c8ab147498639f0eb84",
+                "reference": "7b5192d251e9c6f5502d2c8ab147498639f0eb84",
                 "shasum": ""
             },
             "require": {
@@ -647,10 +647,10 @@
                 "ext-json": "*"
             },
             "require-dev": {
-                "mockery/mockery": "^1.4",
+                "mockery/mockery": "^1",
+                "phpunit/phpunit": "^8",
                 "woocommerce/woocommerce-sniffs": "0.1.3",
                 "wp-hooks/generator": "^0.9.0",
-                "wp-phpunit/wp-phpunit": "^6.0",
                 "yoast/phpunit-polyfills": "^1.0"
             },
             "type": "wordpress-plugin",
@@ -683,9 +683,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woocommerce/woocommerce-blocks/issues",
-                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v10.0.2"
+                "source": "https://github.com/woocommerce/woocommerce-blocks/tree/v10.2.1"
             },
-            "time": "2023-04-19T08:04:13+00:00"
+            "time": "2023-05-25T12:56:45+00:00"
         }
     ],
     "packages-dev": [

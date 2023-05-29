@@ -1968,7 +1968,7 @@ test.describe('Settings API tests: CRUD', () => {
 
 	test.describe('List all Email Customer Processing Order settings', () => {
 
-		test('can retrieve all email customer processsing order settings', async ({
+		test('can retrieve all email customer processing order settings', async ({
 			request
 		}) => {
 			// call API to retrieve all settings options
