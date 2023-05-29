@@ -1,8 +1,7 @@
 /**
  * Internal dependencies
  */
-import type { Plugin } from '../plugins/types';
-import type { ShippingMethod } from './shipping-method-types';
+import { Plugin } from '../plugins/types';
 
 export type TaskType = {
 	actionLabel?: string;
@@ -76,7 +75,6 @@ export type OnboardingState = {
 	profileItems: ProfileItems;
 	taskLists: Record< string, TaskListType >;
 	paymentMethods: Plugin[];
-	shippingMethods: ShippingMethod[];
 	productTypes: OnboardingProductTypes;
 	emailPrefill: string;
 	// TODO clarify what the error record's type is
@@ -184,5 +182,3 @@ export type Extension = {
 	is_built_by_wc: boolean;
 	is_visible: boolean;
 };
-
-export type { ShippingMethod };

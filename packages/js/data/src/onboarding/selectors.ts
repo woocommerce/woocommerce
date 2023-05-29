@@ -12,7 +12,6 @@ import {
 	OnboardingState,
 	ExtensionList,
 	ProfileItems,
-	ShippingMethod,
 } from './types';
 import { WPDataSelectors } from '../types';
 import { Plugin } from '../plugins/types';
@@ -72,12 +71,6 @@ export const getPaymentGatewaySuggestions = (
 	state: OnboardingState
 ): Plugin[] => {
 	return state.paymentMethods || [];
-};
-
-export const getShippingPartnerSuggestions = (
-	state: OnboardingState
-): ShippingMethod[] => {
-	return state.shippingMethods || [];
 };
 
 export const getOnboardingError = (

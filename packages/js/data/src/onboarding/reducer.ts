@@ -35,7 +35,6 @@ export const defaultState: OnboardingState = {
 	},
 	emailPrefill: '',
 	paymentMethods: [],
-	shippingMethods: [],
 	productTypes: {},
 	requesting: {},
 	taskLists: {},
@@ -104,11 +103,6 @@ const reducer: Reducer< OnboardingState, Action > = (
 			return {
 				...state,
 				paymentMethods: action.paymentMethods,
-			};
-		case TYPES.GET_SHIPPING_METHODS_SUCCESS:
-			return {
-				...state,
-				shippingMethods: action.shippingMethods,
 			};
 		case TYPES.GET_PRODUCT_TYPES_SUCCESS:
 			return {
