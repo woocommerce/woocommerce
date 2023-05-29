@@ -3328,12 +3328,12 @@
   Overload 2 of 2, &apos;(name: string, settings: BlockConfiguration&lt;{ columns: unknown; rows: unknown; alignButtons: unknown; categories: unknown; catOperator: unknown; contentVisibility: unknown; isPreview: unknown; stockStatus: unknown; editMode: unknown; orderby: unknown; }&gt;): Block&lt;...&gt; | undefined&apos;, gave the following error.
     Argument of type &apos;{ name: string; title: string; category: string; keywords: string[]; description: string; supports: { align: string[]; html: boolean; }; example: { attributes: { isPreview: boolean; }; }; attributes: { columns: { ...; }; ... 8 more ...; orderby: { ...; }; }; textdomain: string; apiVersion: number; $schema: string; }&apos; is not assignable to parameter of type &apos;string&apos;." source="TS2769" />
 </file>
-<file name="assets/js/blocks/product-new/block.js">
+<file name="assets/js/blocks/product-new/block.tsx">
 <error line="8" column="30" severity="error" message="Could not find a declaration file for module &apos;@wordpress/server-side-render&apos;. &apos;/home/runner/work/woocommerce-blocks/woocommerce-blocks/node_modules/@wordpress/server-side-render/build/index.js&apos; implicitly has an &apos;any&apos; type.
   Try `npm i --save-dev @types/wordpress__server-side-render` if it exists or add a new declaration (.d.ts) file containing `declare module &apos;@wordpress/server-side-render&apos;;`" source="TS7016" />
 <error line="82" column="20" severity="error" message="Parameter &apos;value&apos; implicitly has an &apos;any[]&apos; type." source="TS7006" />
 </file>
-<file name="assets/js/blocks/product-new/index.js">
+<file name="assets/js/blocks/product-new/index.tsx">
 <error line="17" column="1" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;{ columns: unknown; rows: unknown; alignButtons: unknown; categories: unknown; catOperator: unknown; contentVisibility: unknown; isPreview: unknown; stockStatus: unknown; }&gt;, settings?: Partial&lt;BlockConfiguration&lt;{ columns: unknown; rows: unknown; ... 5 more ...; stockStatus: unknown; }&gt;&gt; | undefined): Block&lt;...&gt; | undefined&apos;, gave the following error.
     Argument of type &apos;string&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{ columns: unknown; rows: unknown; alignButtons: unknown; categories: unknown; catOperator: unknown; contentVisibility: unknown; isPreview: unknown; stockStatus: unknown; }&gt;&apos;.
