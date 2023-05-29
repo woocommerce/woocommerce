@@ -39,7 +39,7 @@ msgstr ""
 #: assets/js/blocks/handpicked-products/block.js:42
 #: assets/js/blocks/product-best-sellers/block.js:34
 #: assets/js/blocks/product-category/block.js:157
-#: assets/js/blocks/product-new/block.js:36
+#: assets/js/blocks/product-new/block.tsx:36
 #: assets/js/blocks/product-on-sale/block.js:52
 #: assets/js/blocks/product-tag/block.js:121
 #: assets/js/blocks/product-top-rated/block.js:36

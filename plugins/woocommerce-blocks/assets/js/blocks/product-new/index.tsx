@@ -8,12 +8,13 @@ import { Icon, sparkles } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import Block from './block';
 import sharedAttributes, {
 	sharedAttributeBlockTypes,
 } from '../../utils/shared-attributes';
+import { Edit } from './edit';
+import metadata from './block.json';
 
-registerBlockType( 'woocommerce/product-new', {
+registerBlockType( metadata, {
 	title: __( 'Newest Products', 'woo-gutenberg-products-block' ),
 	icon: {
 		src: (
@@ -23,18 +24,9 @@ registerBlockType( 'woocommerce/product-new', {
 			/>
 		),
 	},
-	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
-	description: __(
-		'Display a grid of your newest products.',
-		'woo-gutenberg-products-block'
-	),
-	supports: {
-		align: [ 'wide', 'full' ],
-		html: false,
-	},
 	attributes: {
 		...sharedAttributes,
+		...metadata.attributes,
 	},
 	transforms: {
 		from: [
@@ -52,12 +44,8 @@ registerBlockType( 'woocommerce/product-new', {
 	/**
 	 * Renders and manages the block.
 	 *
-	 * @param {Object} props Props to pass to block.
 	 */
-	edit( props ) {
-		return <Block { ...props } />;
-	},
-
+	edit: Edit,
 	save() {
 		return null;
 	},
