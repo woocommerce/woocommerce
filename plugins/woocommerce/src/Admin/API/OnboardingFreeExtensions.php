@@ -80,7 +80,7 @@ class OnboardingFreeExtensions extends WC_REST_Data_Controller {
 	public function get_available_extensions( $request ) {
 		$extensions = RemoteFreeExtensions::get_extensions();
 		/**
-		* Remove Jetpack when woocommerce_suggest_jetpack is false.
+		* When false, Jetpack is removed from the list of suggested extensions.
 		 *
 		 * @since 7.8
 		*/
