@@ -87,7 +87,7 @@ class Jetpack_Completion_Service implements Completion_Service_Interface {
 	 *
 	 * @return array|WP_Error The response from the API.
 	 */
-	private function send_request_to_api( string $site_id, array $arguments ): array {
+	private function send_request_to_api( string $site_id, array $arguments ) {
 		return Client::wpcom_json_api_request_as_user(
 			"/sites/{$site_id}/jetpack-ai/completions",
 			'2',
