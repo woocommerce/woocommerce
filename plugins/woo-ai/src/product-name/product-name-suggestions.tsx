@@ -161,7 +161,7 @@ export const ProductNameSuggestions = () => {
 			productName.length >= 10 &&
 			suggestionsState !== SuggestionsState.Fetching
 		);
-	}, [ productName, suggestionsState ] );
+	}, [ isFirstLoad, productName, suggestionsState ] );
 
 	const getSuggestionsButtonLabel = useCallback( () => {
 		return isFirstLoad
