@@ -284,7 +284,6 @@ export const DateTimePickerControl = forwardRef(
 					'woocommerce-date-time-picker-control',
 					className
 				) }
-				position="bottom left"
 				focusOnMount={ false }
 				// @ts-expect-error `onToggle` does exist.
 				onToggle={ callOnBlurIfDropdownIsNotOpening }
@@ -347,7 +346,9 @@ export const DateTimePickerControl = forwardRef(
 					</BaseControl>
 				) }
 				popoverProps={ {
+					anchor: inputControl.current,
 					className: 'woocommerce-date-time-picker-control__popover',
+					placement: 'bottom-start',
 				} }
 				renderContent={ () => {
 					const Picker = isDateOnlyPicker
