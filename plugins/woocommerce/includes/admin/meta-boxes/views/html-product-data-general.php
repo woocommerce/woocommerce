@@ -36,7 +36,20 @@ defined( 'ABSPATH' ) || exit;
 		?>
 	</div>
 
-	<div class="options_group pricing show_if_simple show_if_external hidden">
+	<div class="inline notice woocommerce-message show_if_variable">
+		<p>
+			<?php echo esc_html_e( 'You can manage pricing and other details individually for each product variation.', 'woocommerce' ); ?> <a href="#product_attributes"><?php esc_html_e( 'Go to Variations', 'woocommerce' ); ?></a>
+		</p>
+	</div>
+
+	<div class="inline notice woocommerce-message show_if_grouped">
+		<p>
+			<?php echo esc_html_e( 'You can manage pricing and other details individually for each product added to this group.', 'woocommerce' ); ?> <a href="#product_attributes"><?php esc_html_e( 'Go to Linked Products', 'woocommerce' ); ?></a>
+		</p>
+	</div>
+
+
+	<div class="options_group pricing show_if_simple show_if_external show_if_variable show_if_grouped hidden">
 		<?php
 		woocommerce_wp_text_input(
 			array(
