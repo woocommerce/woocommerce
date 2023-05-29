@@ -41,8 +41,12 @@ export function useProductEdits() {
 		[ productId ]
 	);
 
+	function hasEdit( fieldName: string ) {
+		return edits.hasOwnProperty( fieldName );
+	}
+
 	return {
+		hasEdit,
 		hasEdits: Object.keys( edits ).length > 0,
-		edits,
 	};
 }

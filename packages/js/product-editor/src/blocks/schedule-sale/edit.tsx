@@ -27,7 +27,7 @@ export function Edit( {
 	clientId,
 }: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
 	const blockProps = useBlockProps();
-	const { edits } = useProductEdits();
+	const { hasEdit } = useProductEdits();
 
 	const dateTimeFormat = getSettings().formats.datetime;
 
@@ -71,10 +71,7 @@ export function Edit( {
 	// Hide and clean date fields if the user manually changes
 	// the sale price to zero or less.
 	useEffect( () => {
-		if (
-			edits.hasOwnProperty( 'sale_price' ) &&
-			! isSalePriceGreaterThanZero
-		) {
+		if ( hasEdit( 'sale_price' ) && ! isSalePriceGreaterThanZero ) {
 			setShowScheduleSale( false );
 			setDateOnSaleFromGmt( '' );
 			setDateOnSaleToGmt( '' );
