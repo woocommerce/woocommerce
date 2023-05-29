@@ -17,6 +17,7 @@ import {
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	COUNTRIES_STORE_NAME,
+	SHIPPING_METHODS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
@@ -679,8 +680,8 @@ const ShippingWrapper = compose(
 		);
 
 		const shippingPartners = select(
-			ONBOARDING_STORE_NAME
-		).getShippingPartnerSuggestions( true );
+			SHIPPING_METHODS_STORE_NAME
+		).getShippingMethods( true );
 
 		const country = countryCode ? getCountry( countryCode ) : null;
 		const countryName = country ? country.name : null;
