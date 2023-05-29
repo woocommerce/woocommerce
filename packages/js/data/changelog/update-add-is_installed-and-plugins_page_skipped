@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add is_installed and plugins_page_skipped type and added async option for installPlugins.
