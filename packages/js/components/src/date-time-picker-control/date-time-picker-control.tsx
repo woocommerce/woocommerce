@@ -369,6 +369,10 @@ export const DateTimePickerControl = forwardRef(
 								)
 							}
 							is12Hour={ is12HourPicker }
+							// Opt out of the Reset and Help buttons, as they are going to be removed.
+							// These properties are removed in @wordpress/components 25.0.0 (Gutenberg 15.9.0).
+							__nextRemoveResetButton
+							__nextRemoveHelpButton
 						/>
 					);
 				} }
