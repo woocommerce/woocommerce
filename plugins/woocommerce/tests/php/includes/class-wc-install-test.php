@@ -105,4 +105,85 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $db_delta_result );
 	}
 
+	/**
+	 * Test that verify_base_tables_light identifies missing tables from previous dbDelta run.
+	 */
+	public function test_verify_base_tables_light_finds_missing_tables() {
+		global $wpdb;
+
+		// Remove drop filter because we do want to drop temp table if it exists.
+		// This filter was added to only allow dropping temporary tables which will then be rollbacked after the test.
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		$original_table_name = "{$wpdb->prefix}wc_tax_rate_classes";
+		$changed_table_name  = "{$wpdb->prefix}wc_tax_rate_classes_2";
+		$clear_query         = 'DROP TABLE IF EXISTS %s;';
+		$rename_table_query  = 'RENAME TABLE %s to %s;';
+
+		// Workaround to call a private function.
+		$schema = function () {
+			return static::get_schema();
+		};
+
+		// Restore correct state.
+		dbDelta( $schema->call( new \WC_Install() ) );
+
+		// Rename a base table to simulate it as non-existing.
+		$wpdb->query( sprintf( $clear_query, $changed_table_name ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( sprintf( $rename_table_query, $original_table_name, $changed_table_name ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		// Run dbDelta to get dbDelta output for the tested method, but don't fix the tables
+		$db_delta_result = dbDelta( $schema->call( new \WC_Install() ), false );
+
+		$missing_tables = WC_Install::verify_base_tables_light( false, $db_delta_result );
+		$this->assertEquals( array( $original_table_name ), $missing_tables );
+
+		// Restore correct state.
+		dbDelta( $schema->call( new \WC_Install() ) );
+	}
+
+	public function _filter_function_for_verify_base_tables_light( $query ) {
+		$this->fail( 'dbDelta should not be called' );
+	}
+
+	/**
+	 * Test that verify_base_tables_light doesn't run dbDelta even if there are differences in db tables.
+	 */
+	public function test_verify_base_tables_light_doesnt_run_dbDelta() {
+		global $wpdb;
+
+		// Remove drop filter because we do want to drop temp table if it exists.
+		// This filter was added to only allow dropping temporary tables which will then be rollbacked after the test.
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+
+		$original_table_name = "{$wpdb->prefix}wc_tax_rate_classes";
+		$changed_table_name  = "{$wpdb->prefix}wc_tax_rate_classes_2";
+		$clear_query         = 'DROP TABLE IF EXISTS %s;';
+		$rename_table_query  = 'RENAME TABLE %s to %s;';
+
+		// Workaround to call a private function.
+		$schema = function () {
+			return static::get_schema();
+		};
+
+		// Restore correct state.
+		dbDelta( $schema->call( new \WC_Install() ) );
+
+		// Rename a base table to simulate it as non-existing.
+		$wpdb->query( sprintf( $clear_query, $changed_table_name ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( sprintf( $rename_table_query, $original_table_name, $changed_table_name ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		// Run dbDelta to get dbDelta output for the tested method, but don't fix the tables
+		$db_delta_result = dbDelta( $schema->call( new \WC_Install() ), false );
+
+		add_filter( 'dbdelta_queries', array( $this, '_filter_function_for_verify_base_tables_light' ), 10, 1 );
+
+		$missing_tables = WC_Install::verify_base_tables_light( false, $db_delta_result );
+
+		remove_filter( 'dbdelta_queries', array( $this, '_filter_function_for_verify_base_tables_light' ), 10, 1 );
+
+		// Restore correct state.
+		dbDelta( $schema->call( new \WC_Install() ) );
+	}
+
 }
