@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import classnames from 'classnames';
 import {
 	AddToCartFormContextProvider,
@@ -83,10 +82,6 @@ const Block = ( { className, showFormElements }: Props ) => {
 			</div>
 		</AddToCartFormContextProvider>
 	);
-};
-
-Block.propTypes = {
-	className: PropTypes.string,
 };
 
 export default withProductDataContext( Block );
