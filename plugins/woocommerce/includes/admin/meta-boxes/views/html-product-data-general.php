@@ -53,10 +53,12 @@ defined( 'ABSPATH' ) || exit;
 		<?php
 		woocommerce_wp_text_input(
 			array(
-				'id'        => '_regular_price',
-				'value'     => $product_object->get_regular_price( 'edit' ),
-				'label'     => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-				'data_type' => 'price',
+				'id'          => '_regular_price',
+				'value'       => $product_object->get_regular_price( 'edit' ),
+				'label'       => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
+				'label_class' => 'disable_if_variable disable_if_grouped',
+				'data_type'   => 'price',
+				'class'       => 'disable_if_variable disable_if_grouped',
 			)
 		);
 
@@ -66,7 +68,9 @@ defined( 'ABSPATH' ) || exit;
 				'value'       => $product_object->get_sale_price( 'edit' ),
 				'data_type'   => 'price',
 				'label'       => __( 'Sale price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-				'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>',
+				'label_class' => 'disable_if_variable disable_if_grouped',
+				'description' => '<a href="#" class="sale_schedule hide_if_variable hide_if_grouped">' . __( 'Schedule', 'woocommerce' ) . '</a>',
+				'class'       => 'disable_if_variable disable_if_grouped',
 			)
 		);
 

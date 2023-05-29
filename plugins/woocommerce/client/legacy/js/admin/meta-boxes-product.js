@@ -139,6 +139,7 @@ jQuery( function ( $ ) {
 			}
 
 			show_and_hide_panels();
+			disable_or_enable_fields();
 			change_product_type_tip( get_product_tip_content( select_val ) );
 
 			$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
@@ -257,6 +258,33 @@ jQuery( function ( $ ) {
 					.find( 'li a[href="#' + $id + '"]' )
 					.parent()
 					.hide();
+			}
+		} );
+	}
+
+	function disable_or_enable_fields() {
+		var product_type = $( 'select#product-type' ).val();
+		$( `.disable_if_grouped` ).each( function () {
+			if ( $( this ).is( 'label' ) ) {
+				$( this ).removeClass( 'disabled' );
+			} else {
+				$( this ).prop( 'disabled', false ).css( 'cursor', 'initial' );
+			}
+		} );
+		$( `.disable_if_variable` ).each( function () {
+			if ( $( this ).is( 'label' ) ) {
+				$( this ).removeClass( 'disabled' );
+			} else {
+				$( this ).prop( 'disabled', false ).css( 'cursor', 'initial' );
+			}
+		} );
+		$( `.disable_if_${ product_type }` ).each( function () {
+			if ( $( this ).is( 'label' ) ) {
+				$( this ).addClass( 'disabled' );
+			} else {
+				$( this )
+					.prop( 'disabled', true )
+					.css( 'cursor', 'not-allowed' );
 			}
 		} );
 	}

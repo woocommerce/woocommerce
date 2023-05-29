@@ -5364,6 +5364,10 @@ img.help_tip {
 		padding: 0;
 		margin: 0 0 0 -150px;
 
+		&.disabled {
+			opacity: 0.5;
+		}
+
 		.req {
 			font-weight: 700;
 			font-style: normal;
