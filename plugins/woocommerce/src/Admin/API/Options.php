@@ -112,7 +112,7 @@ class Options extends \WC_REST_Data_Controller {
 			return false;
 		}
 
-		wc_deprecated_function( 'Automattic\WooCommerce\Admin\API\Options::' . ( $is_update ? 'update_options' : 'get_options' ), '3.1' );
+		wc_deprecated_function( 'Automattic\WooCommerce\Admin\API\Options::' . ( $is_update ? 'update_options' : 'get_options' ), '6.3' );
 		return current_user_can( 'manage_options' );
 	}
 
@@ -146,7 +146,7 @@ class Options extends \WC_REST_Data_Controller {
 	 */
 	public function get_option_permissions( $request ) {
 		$permissions = self::get_default_option_permissions();
-		return apply_filters_deprecated( 'woocommerce_rest_api_option_permissions', array( $permissions, $request ), '3.1.0' );
+		return apply_filters_deprecated( 'woocommerce_rest_api_option_permissions', array( $permissions, $request ), '6.3.0' );
 	}
 
 	/**
