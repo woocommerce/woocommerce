@@ -18,12 +18,11 @@ interface Completion_Service_Interface {
 	/**
 	 * Gets the completion from the API.
 	 *
-	 * @param array $messages An array of messages to send to the API.
-	 * @param array $options An array of options to send to the API.
+	 * @param array $arguments An array of arguments to send to the API.
 	 *
-	 * @return string
+	 * @return string The completion response.
 	 *
 	 * @throws Exception If the request fails.
 	 */
-	public function get_completion( array $messages, array $options = array() ): string;
+	public function get_completion( array $arguments ): string;
 }
