@@ -1,5 +1,7 @@
 name: 'Changelog Auto Add'
 on:
+    pull_request:
+        types: [opened, edited]
     workflow_dispatch:
         inputs:
             prNumber:
