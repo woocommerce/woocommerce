@@ -38,13 +38,13 @@ defined( 'ABSPATH' ) || exit;
 
 	<div class="inline notice woocommerce-message show_if_variable">
 		<p>
-			<?php echo esc_html_e( 'You can manage pricing and other details individually for each product variation.', 'woocommerce' ); ?> <a href="#variable_product_options"><?php esc_html_e( 'Go to Variations', 'woocommerce' ); ?></a>
+			<?php echo esc_html_e( 'You can manage pricing and other details individually for each product variation.', 'woocommerce' ); ?> <a class="variations-tab-navigation-link" href="#variable_product_options"><?php esc_html_e( 'Go to Variations', 'woocommerce' ); ?></a>
 		</p>
 	</div>
 
 	<div class="inline notice woocommerce-message show_if_grouped">
 		<p>
-			<?php echo esc_html_e( 'You can manage pricing and other details individually for each product added to this group.', 'woocommerce' ); ?> <a href="#linked_product_data"><?php esc_html_e( 'Go to Linked Products', 'woocommerce' ); ?></a>
+			<?php echo esc_html_e( 'You can manage pricing and other details individually for each product added to this group.', 'woocommerce' ); ?> <a class="linked-products-navigation-link" href="#linked_product_data"><?php esc_html_e( 'Go to Linked Products', 'woocommerce' ); ?></a>
 		</p>
 	</div>
 
