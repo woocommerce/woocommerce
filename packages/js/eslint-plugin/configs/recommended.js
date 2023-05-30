@@ -16,6 +16,7 @@ module.exports = {
 		radix: 'error',
 		yoda: [ 'error', 'never' ],
 		// temporary conversion to warnings until the below are all handled.
+		'jsdoc/check-line-alignment': 'warn',
 		'@wordpress/i18n-translator-comments': 'warn',
 		'@wordpress/i18n-text-domain': [
 			'error',
