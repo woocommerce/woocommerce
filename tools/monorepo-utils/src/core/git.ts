@@ -115,6 +115,14 @@ export const cloneRepoShallow = async ( repoPath: string ) => {
 	return await cloneRepo( repoPath, { '--depth': 1 } );
 };
 
+/**
+ * Add a remote using the authenticated token `GITHUB_TOKEN`
+ *
+ * @param {Object} options       CLI options
+ * @param {string} options.owner repo owner
+ * @param {string} options.name  repo name
+ * @return {string} remote
+ */
 export const getAuthenticatedRemote = ( options: {
 	owner: string;
 	name: string;

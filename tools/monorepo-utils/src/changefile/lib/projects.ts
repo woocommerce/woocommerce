@@ -77,6 +77,8 @@ export const getChangeloggerProjectPaths = async (
  * @param {string} base        base hash
  * @param {string} head        head hash
  * @param {string} fileName    changelog file name
+ * @param {string} baseOwner   PR base owner
+ * @param {string} baseName    PR base name
  * @return {Array<string>} List of files changed in a PR.
  */
 export const getTouchedFilePaths = async (
@@ -84,7 +86,8 @@ export const getTouchedFilePaths = async (
 	base: string,
 	head: string,
 	fileName: string,
-	baseOwner: string
+	baseOwner: string,
+	baseName: string
 ) => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
@@ -96,9 +99,8 @@ export const getTouchedFilePaths = async (
 		'remote',
 		'add',
 		baseOwner,
-		getAuthenticatedRemote( { owner: baseOwner, name: 'woocommerce' } ),
+		getAuthenticatedRemote( { owner: baseOwner, name: baseName } ),
 	] );
-
 	await git.raw( [ 'fetch', baseOwner, base ] );
 
 	const diff = await git.raw( [
@@ -173,6 +175,8 @@ export const getAllProjectPaths = async ( tmpRepoPath: string ) => {
  * @param {string} base        base hash
  * @param {string} head        head hash
  * @param {string} fileName    changelog file name
+ * @param {string} baseOwner   PR base owner
+ * @param {string} baseName    PR base name
  * @return {Array<string>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
  */
 export const getTouchedProjectsRequiringChangelog = async (
@@ -180,7 +184,8 @@ export const getTouchedProjectsRequiringChangelog = async (
 	base: string,
 	head: string,
 	fileName: string,
-	baseOwner: string
+	baseOwner: string,
+	baseName: string
 ) => {
 	const allProjectPaths = await getAllProjectPaths( tmpRepoPath );
 	const changeloggerProjectsPaths = await getChangeloggerProjectPaths(
@@ -192,7 +197,8 @@ export const getTouchedProjectsRequiringChangelog = async (
 		base,
 		head,
 		fileName,
-		baseOwner
+		baseOwner,
+		baseName
 	);
 
 	return getTouchedChangeloggerProjectsPathsMappedToProjects(
