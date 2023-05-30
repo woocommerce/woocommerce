@@ -66,6 +66,7 @@ module.exports = {
 		'import/core-modules': [ '@woocommerce/settings', 'lodash', 'react' ],
 		react: {
 			pragma: 'createElement',
+			version: '17.0.2',
 		},
 	},
 	overrides: [
