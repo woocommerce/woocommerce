@@ -46,7 +46,7 @@ export const useFeedbackSnackbar = () => {
 							),
 						}
 					),
-					onClick: ( e ) => {
+					onClick: ( e: React.MouseEvent< HTMLButtonElement > ) => {
 						const response = (
 							e.target as HTMLSpanElement
 						 ).getAttribute( 'data-response' );
