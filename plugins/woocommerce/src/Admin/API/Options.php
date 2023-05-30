@@ -77,6 +77,14 @@ class Options extends \WC_REST_Data_Controller {
 
 		foreach ( $params as $option ) {
 			if ( ! $this->user_has_permission( $option, $request ) ) {
+				if ( 'production' !== wp_get_environment_type() ) {
+					return new \WP_Error(
+						'woocommerce_rest_cannot_view',
+						__( 'Sorry, you cannot view these options, please remember to update the option permissions in Options API to allow viewing these options in non-production environments.', 'woocommerce' ),
+						array( 'status' => rest_authorization_required_code() )
+					);
+				}
+
 				return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view these options.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 			}
 		}
@@ -99,7 +107,12 @@ class Options extends \WC_REST_Data_Controller {
 			return $permissions[ $option ];
 		}
 
-		wc_deprecated_function( 'Automattic\WooCommerce\Admin\API\Options::' . ( $is_update ? 'update_options' : 'get_options' ), '3.1' );
+		// Don't allow to update options in non-production environments if the option is not whitelisted. This is to force developers to update the option permissions when adding new options.
+		if ( 'production' !== wp_get_environment_type() ) {
+			return false;
+		}
+
+		wc_deprecated_function( 'Automattic\WooCommerce\Admin\API\Options::' . ( $is_update ? 'update_options' : 'get_options' ), '6.3' );
 		return current_user_can( 'manage_options' );
 	}
 
@@ -133,7 +146,7 @@ class Options extends \WC_REST_Data_Controller {
 	 */
 	public function get_option_permissions( $request ) {
 		$permissions = self::get_default_option_permissions();
-		return apply_filters_deprecated( 'woocommerce_rest_api_option_permissions', array( $permissions, $request ), '3.1.0' );
+		return apply_filters_deprecated( 'woocommerce_rest_api_option_permissions', array( $permissions, $request ), '6.3.0' );
 	}
 
 	/**
@@ -191,6 +204,11 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_product_tour_modal_hidden',
 			'woocommerce_revenue_report_date_tour_shown',
 			'woocommerce_date_type',
+			'date_format',
+			'time_format',
+			// WC Test helper options.
+			'wc-admin-test-helper-rest-api-filters',
+			'wc_admin_helper_feature_values',
 		);
 
 		$theme_permissions = array(
