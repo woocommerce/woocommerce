@@ -51,6 +51,10 @@ interface Props {
 	hasHiddenPrice: boolean;
 }
 
+function getScrollbarWidth() {
+	return window.innerWidth - document.documentElement.clientWidth;
+}
+
 const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 	const {
 		isInitiallyOpen = false,
@@ -91,10 +95,14 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 	useEffect( () => {
 		const body = document.querySelector( 'body' );
 		if ( body ) {
+			const scrollBarWidth = getScrollbarWidth();
 			if ( isOpen ) {
-				Object.assign( body.style, { overflow: 'hidden' } );
+				Object.assign( body.style, {
+					overflow: 'hidden',
+					paddingRight: scrollBarWidth + 'px',
+				} );
 			} else {
-				Object.assign( body.style, { overflow: '' } );
+				Object.assign( body.style, { overflow: '', paddingRight: 0 } );
 			}
 		}
 	}, [ isOpen ] );
