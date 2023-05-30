@@ -20,7 +20,6 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 import { STORE_KEY } from './constants';
 import { VALIDATION_STORE_KEY } from '../validation';
 import { processErrorResponse } from '../utils';
-import { shippingAddressHasValidationErrors } from './utils';
 
 type CustomerData = {
 	billingAddress: CartBillingAddress;
