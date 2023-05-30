@@ -6,7 +6,7 @@
 	"main": "build.js",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.3.1"
+		"pnpm": "^8.6.0"
 	},
 	"bin": {
 		"e2e-builds": "./build.js"

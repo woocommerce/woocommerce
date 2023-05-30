@@ -12,7 +12,7 @@
 	"license": "GPL-3.0-or-later",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.3.1"
+		"pnpm": "^8.6.0"
 	},
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
