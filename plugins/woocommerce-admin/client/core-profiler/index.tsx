@@ -13,10 +13,12 @@ import {
 	Country,
 	ONBOARDING_STORE_NAME,
 	Extension,
+	GeolocationResponse,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting } from '@woocommerce/settings';
 import { initializeExPlat } from '@woocommerce/explat';
+import { CountryStateOption } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
@@ -28,7 +30,11 @@ import {
 	SellingOnlineAnswer,
 	SellingPlatform,
 } from './pages/UserProfile';
-import { BusinessInfo } from './pages/BusinessInfo';
+import {
+	BusinessInfo,
+	IndustryChoice,
+	POSSIBLY_DEFAULT_STORE_NAMES,
+} from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
@@ -41,9 +47,6 @@ import {
 	InstalledPlugin,
 	PluginInstallError,
 } from './services/installAndActivatePlugins';
-
-// TODO: Typescript support can be improved, but for now lets write the types ourselves
-// https://stately.ai/blog/introducing-typescript-typegen-for-xstate
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -69,14 +72,17 @@ export type UserProfileEvent =
 export type BusinessInfoEvent = {
 	type: 'BUSINESS_INFO_COMPLETED';
 	payload: {
-		businessInfo: CoreProfilerStateMachineContext[ 'businessInfo' ];
+		storeName?: string;
+		industry?: IndustryChoice;
+		storeLocation: CountryStateOption[ 'key' ];
+		geolocationOverruled: boolean;
 	};
 };
 
 export type BusinessLocationEvent = {
 	type: 'BUSINESS_LOCATION_COMPLETED';
 	payload: {
-		businessInfo: CoreProfilerStateMachineContext[ 'businessInfo' ];
+		storeLocation: CountryStateOption[ 'key' ];
 	};
 };
 
@@ -90,9 +96,11 @@ export type PluginsInstallationRequestedEvent = {
 // TODO: add types as we develop the pages
 export type OnboardingProfile = {
 	business_choice: BusinessChoice;
+	industry: Array< IndustryChoice >;
 	selling_online_answer: SellingOnlineAnswer | null;
 	selling_platforms: SellingPlatform[] | null;
 	skip?: boolean;
+	is_store_country_set: boolean | null;
 };
 
 export type PluginsPageSkippedEvent = {
@@ -128,20 +136,23 @@ export type CoreProfilerStateMachineContext = {
 		sellingPlatforms?: SellingPlatform[] | null;
 		skipped?: boolean;
 	};
-	geolocatedLocation: {
-		location: string;
-	};
 	pluginsAvailable: ExtensionList[ 'plugins' ] | [];
 	pluginsSelected: string[]; // extension slugs
 	pluginsInstallationErrors: PluginInstallError[];
-	businessInfo: { foo?: { bar: 'qux' }; location: string };
-	countries: { [ key: string ]: string };
+	geolocatedLocation: GeolocationResponse | undefined;
+	businessInfo: {
+		storeName?: string | undefined;
+		industry?: string | undefined;
+		location?: string;
+	};
+	countries: CountryStateOption[];
 	loader: {
 		progress?: number;
 		className?: string;
 		useStages?: string;
 		stageIndex?: number;
 	};
+	onboardingProfile: OnboardingProfile;
 };
 
 const getAllowTrackingOption = async () =>
@@ -156,6 +167,40 @@ const handleTrackingOption = assign( {
 	) => event.data !== 'no',
 } );
 
+const getStoreNameOption = async () =>
+	resolveSelect( OPTIONS_STORE_NAME ).getOption( 'blogname' );
+
+const handleStoreNameOption = assign( {
+	businessInfo: (
+		context: CoreProfilerStateMachineContext,
+		event: DoneInvokeEvent< string | undefined >
+	) => {
+		return {
+			...context.businessInfo,
+			storeName: POSSIBLY_DEFAULT_STORE_NAMES.includes( event.data ) // if its empty or the default, show empty to the user
+				? undefined
+				: event.data,
+		};
+	},
+} );
+
+const getStoreCountryOption = async () =>
+	resolveSelect( OPTIONS_STORE_NAME ).getOption(
+		'woocommerce_default_country'
+	);
+
+const handleStoreCountryOption = assign( {
+	businessInfo: (
+		context: CoreProfilerStateMachineContext,
+		event: DoneInvokeEvent< string | undefined >
+	) => {
+		return {
+			...context.businessInfo,
+			location: event.data,
+		};
+	},
+} );
+
 /**
  * Prefetch it so that @wp/data caches it and there won't be a loading delay when its used
  */
@@ -165,6 +210,20 @@ const preFetchGetCountries = assign( {
 			resolveSelect( COUNTRIES_STORE_NAME ).getCountries(),
 			'core-profiler-prefetch-countries'
 		),
+} );
+
+const preFetchOptions = assign( {
+	spawnPrefetchOptionsRef: ( _ctx, _evt, { action } ) => {
+		spawn(
+			Promise.all( [
+				// @ts-expect-error -- not sure its possible to type this yet, maybe in xstate v5
+				action.options.map( ( optionName: string ) =>
+					resolveSelect( OPTIONS_STORE_NAME ).getOption( optionName )
+				),
+			] ),
+			'core-profiler-prefetch-options'
+		);
+	},
 } );
 
 const getCountries = async () =>
@@ -196,13 +255,43 @@ const handleOnboardingProfileOption = assign( {
 			selling_platforms: sellingPlatforms,
 			...rest
 		} = event.data;
-
 		return {
 			...rest,
 			businessChoice,
 			sellingOnlineAnswer,
 			sellingPlatforms,
 		};
+	},
+} );
+
+const assignOnboardingProfile = assign( {
+	onboardingProfile: (
+		_context,
+		event: DoneInvokeEvent< OnboardingProfile | undefined >
+	) => event.data,
+} );
+
+const getGeolocation = async ( context: CoreProfilerStateMachineContext ) => {
+	if ( context.optInDataSharing ) {
+		return resolveSelect( COUNTRIES_STORE_NAME ).geolocate();
+	}
+	return undefined;
+};
+
+const preFetchGeolocation = assign( {
+	spawnGeolocationRef: ( context: CoreProfilerStateMachineContext ) =>
+		spawn(
+			getGeolocation( context ),
+			'core-profiler-prefetch-geolocation'
+		),
+} );
+
+const handleGeolocation = assign( {
+	geolocatedLocation: (
+		_context,
+		event: DoneInvokeEvent< GeolocationResponse >
+	) => {
+		return event.data;
 	},
 } );
 
@@ -271,6 +360,35 @@ const recordTracksPluginsSkipped = () => {
 	recordEvent( 'storeprofiler_plugins_skip' );
 };
 
+const recordTracksBusinessInfoViewed = () => {
+	recordEvent( 'storeprofiler_step_view', {
+		step: 'business_info',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+};
+
+const recordTracksBusinessInfoCompleted = (
+	_context: CoreProfilerStateMachineContext,
+	event: Extract< BusinessInfoEvent, { type: 'BUSINESS_INFO_COMPLETED' } >
+) => {
+	recordEvent( 'storeprofiler_step_complete', {
+		step: 'business_info',
+		wc_version: getSetting( 'wcVersion' ),
+	} );
+
+	recordEvent( 'storeprofiler_business_info', {
+		business_name_filled:
+			POSSIBLY_DEFAULT_STORE_NAMES.findIndex(
+				( name ) => name === event.payload.storeName
+			) === -1,
+		industry: event.payload.industry,
+		store_location_previously_set:
+			_context.onboardingProfile.is_store_country_set || false,
+		geolocation_success: _context.geolocatedLocation !== undefined,
+		geolocation_overruled: event.payload.geolocationOverruled,
+	} );
+};
+
 const recordTracksSkipBusinessLocationViewed = () => {
 	recordEvent( 'storeprofiler_step_view', {
 		step: 'skip_business_location',
@@ -280,7 +398,7 @@ const recordTracksSkipBusinessLocationViewed = () => {
 
 const recordTracksSkipBusinessLocationCompleted = () => {
 	recordEvent( 'storeprofiler_step_complete', {
-		step: 'skp_business_location',
+		step: 'skip_business_location',
 		wc_version: getSetting( 'wcVersion' ),
 	} );
 };
@@ -306,15 +424,16 @@ const updateTrackingOption = (
 	} );
 };
 
+// TODO: move the data references over to the context.onboardingProfile object which stores the entire woocommerce_onboarding_profile contents
 const updateOnboardingProfileOption = (
 	context: CoreProfilerStateMachineContext
 ) => {
-	const { businessChoice, sellingOnlineAnswer, sellingPlatforms, ...rest } =
+	const { businessChoice, sellingOnlineAnswer, sellingPlatforms } =
 		context.userProfile;
 
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_onboarding_profile: {
-			...rest,
+			...context.onboardingProfile,
 			business_choice: businessChoice,
 			selling_online_answer: sellingOnlineAnswer,
 			selling_platforms: sellingPlatforms,
@@ -327,6 +446,35 @@ const updateBusinessLocation = ( countryAndState: string ) => {
 		woocommerce_default_country: countryAndState,
 	} );
 };
+
+const updateBusinessInfo = async (
+	_ctx: CoreProfilerStateMachineContext,
+	event: BusinessInfoEvent
+) => {
+	const refreshedOnboardingProfile = ( await resolveSelect(
+		OPTIONS_STORE_NAME
+	).getOption( 'woocommerce_onboarding_profile' ) ) as OnboardingProfile;
+	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		blogname: event.payload.storeName,
+		woocommerce_default_country: event.payload.storeLocation,
+		woocommerce_onboarding_profile: {
+			...refreshedOnboardingProfile,
+			is_store_country_set: true,
+			industry: [ event.payload.industry ],
+		},
+	} );
+};
+
+const persistBusinessInfo = assign( {
+	persistBusinessInfoRef: (
+		_ctx: CoreProfilerStateMachineContext,
+		event: BusinessInfoEvent
+	) =>
+		spawn(
+			updateBusinessInfo( _ctx, event ),
+			'core-profiler-update-business-info'
+		),
+} );
 
 const promiseDelay = ( milliseconds: number ) => {
 	return new Promise( ( resolve ) => {
@@ -372,12 +520,14 @@ const handlePlugins = assign( {
 		event.data,
 } );
 
-const coreProfilerMachineActions = {
-	updateTrackingOption,
+export const preFetchActions = {
 	preFetchGetPlugins,
 	preFetchGetCountries,
-	handleTrackingOption,
-	handlePlugins,
+	preFetchGeolocation,
+	preFetchOptions,
+};
+
+export const recordTracksActions = {
 	recordTracksIntroCompleted,
 	recordTracksIntroSkipped,
 	recordTracksIntroViewed,
@@ -388,15 +538,33 @@ const coreProfilerMachineActions = {
 	recordTracksPluginsSkipped,
 	recordTracksSkipBusinessLocationViewed,
 	recordTracksSkipBusinessLocationCompleted,
+	recordTracksBusinessInfoViewed,
+	recordTracksBusinessInfoCompleted,
+};
+
+const coreProfilerMachineActions = {
+	...preFetchActions,
+	...recordTracksActions,
+	handlePlugins,
+	updateTrackingOption,
+	handleTrackingOption,
+	handleGeolocation,
+	handleStoreNameOption,
+	handleStoreCountryOption,
 	assignOptInDataSharing,
 	handleCountries,
 	handleOnboardingProfileOption,
+	assignOnboardingProfile,
+	persistBusinessInfo,
 	redirectToWooHome,
 };
 
 const coreProfilerMachineServices = {
 	getAllowTrackingOption,
+	getStoreNameOption,
+	getStoreCountryOption,
 	getCountries,
+	getGeolocation,
 	getOnboardingProfileOption,
 	getPlugins,
 };
@@ -409,37 +577,66 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		// actual defaults displayed to the user should be handled in the steps themselves
 		optInDataSharing: false,
 		userProfile: { skipped: true },
-		geolocatedLocation: { location: 'US:CA' },
-		businessInfo: { location: 'US:CA' },
+		geolocatedLocation: undefined,
+		businessInfo: {
+			storeName: undefined,
+			industry: undefined,
+			storeCountryPreviouslySet: false,
+			location: 'US:CA',
+		},
+		countries: [] as CountryStateOption[],
 		pluginsAvailable: [],
-		pluginsSelected: [],
 		pluginsInstallationErrors: [],
-		countries: {},
+		pluginsSelected: [],
 		loader: {},
+		onboardingProfile: {} as OnboardingProfile,
 	} as CoreProfilerStateMachineContext,
 	states: {
 		initializing: {
-			on: {
-				INITIALIZATION_COMPLETE: {
-					target: 'introOptIn',
-				},
-			},
-			entry: [ 'preFetchGetPlugins', 'preFetchGetCountries' ],
-			invoke: [
+			entry: [
+				// these prefetch tasks are spawned actors in the background and do not block progression of the state machine
+				'preFetchGetPlugins',
+				'preFetchGetCountries',
 				{
-					src: 'getAllowTrackingOption',
-					// eslint-disable-next-line xstate/no-ondone-outside-compound-state -- The invoke.onDone property refers to the invocation (invoke.src) being done, not the onDone property on a state node.
-					onDone: [
-						{
-							actions: [ 'handleTrackingOption' ],
-							target: 'introOptIn',
-						},
+					type: 'preFetchOptions',
+					options: [
+						'blogname',
+						'woocommerce_onboarding_profile',
+						'woocommerce_default_country',
 					],
-					onError: {
-						target: 'introOptIn', // leave it as initialised default on error
-					},
 				},
 			],
+			type: 'parallel',
+			states: {
+				// if we have any other init tasks to do in parallel, add them as a parallel state here.
+				// this blocks the introOptIn UI from loading keep that in mind when adding new tasks here
+				trackingOption: {
+					initial: 'fetching',
+					states: {
+						fetching: {
+							invoke: {
+								src: 'getAllowTrackingOption',
+								onDone: [
+									{
+										actions: [ 'handleTrackingOption' ],
+										target: 'done',
+									},
+								],
+								onError: {
+									target: 'done', // leave it as initialised default on error
+								},
+							},
+						},
+						done: {
+							type: 'final',
+						},
+					},
+				},
+			},
+			onDone: {
+				target: 'introOptIn',
+				// TODO: at this point, we can handle the URL path param if any and jump to the correct page
+			},
 			meta: {
 				progress: 0,
 			},
@@ -484,7 +681,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				src: 'getOnboardingProfileOption',
 				onDone: [
 					{
-						actions: [ 'handleOnboardingProfileOption' ],
+						actions: [
+							'handleOnboardingProfileOption',
+							'assignOnboardingProfile',
+						],
 						target: 'userProfile',
 					},
 				],
@@ -494,7 +694,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		userProfile: {
-			entry: [ 'recordTracksUserProfileViewed' ],
+			entry: [ 'recordTracksUserProfileViewed', 'preFetchGeolocation' ],
 			on: {
 				USER_PROFILE_COMPLETED: {
 					target: 'postUserProfile',
@@ -546,28 +746,117 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		preBusinessInfo: {
-			always: [
-				// immediately transition to businessInfo without any events as long as geolocation parallel has completed
-				{
-					target: 'businessInfo',
-					cond: () => true, // TODO: use a custom function to check on the parallel state using meta when we implement that. https://xstate.js.org/docs/guides/guards.html#guards-condition-functions
+			type: 'parallel',
+			states: {
+				geolocation: {
+					initial: 'checkDataOptIn',
+					states: {
+						checkDataOptIn: {
+							// if the user has opted out of data sharing, we skip the geolocation step
+							always: [
+								{
+									cond: ( context ) =>
+										context.optInDataSharing,
+									target: 'fetching',
+								},
+								{
+									target: 'done',
+								},
+							],
+						},
+						fetching: {
+							invoke: {
+								src: 'getGeolocation',
+								onDone: {
+									target: 'done',
+									actions: 'handleGeolocation',
+								},
+								// onError TODO: handle error
+							},
+						},
+						done: {
+							type: 'final',
+						},
+					},
 				},
-			],
+				storeCountryOption: {
+					initial: 'fetching',
+					states: {
+						fetching: {
+							invoke: {
+								src: 'getStoreCountryOption',
+								onDone: [
+									{
+										actions: [ 'handleStoreCountryOption' ],
+										target: 'done',
+									},
+								],
+								onError: {
+									target: 'done',
+								},
+							},
+						},
+						done: {
+							type: 'final',
+						},
+					},
+				},
+				storeNameOption: {
+					initial: 'fetching',
+					states: {
+						fetching: {
+							invoke: {
+								src: 'getStoreNameOption',
+								onDone: [
+									{
+										actions: [ 'handleStoreNameOption' ],
+										target: 'done',
+									},
+								],
+								onError: {
+									target: 'done', // leave it as initialised default on error
+								},
+							},
+						},
+						done: {
+							type: 'final',
+						},
+					},
+				},
+				countries: {
+					initial: 'fetching',
+					states: {
+						fetching: {
+							invoke: {
+								src: 'getCountries',
+								onDone: {
+									target: 'done',
+									actions: 'handleCountries',
+								},
+							},
+						},
+						done: {
+							type: 'final',
+						},
+					},
+				},
+			},
+			// onDone is reached when child parallel states are all at their final states
+			onDone: {
+				target: 'businessInfo',
+			},
 			meta: {
 				progress: 50,
 			},
 		},
 		businessInfo: {
+			entry: [ 'recordTracksBusinessInfoViewed' ],
 			on: {
 				BUSINESS_INFO_COMPLETED: {
 					target: 'prePlugins',
 					actions: [
-						assign( {
-							businessInfo: (
-								_context,
-								event: BusinessInfoEvent
-							) => event.payload.businessInfo, // assign context.businessInfo to the payload of the event
-						} ),
+						'persistBusinessInfo',
+						'recordTracksBusinessInfoCompleted',
 					],
 				},
 			},
@@ -599,7 +888,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							businessInfo: (
 								_context,
 								event: BusinessLocationEvent
-							) => event.payload.businessInfo, // assign context.businessInfo to the payload of the event
+							) => {
+								return {
+									..._context.businessInfo,
+									location: event.payload.storeLocation,
+								};
+							},
 						} ),
 						'recordTracksSkipBusinessLocationCompleted',
 					],
@@ -623,7 +917,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					invoke: {
 						src: ( context ) => {
 							return updateBusinessLocation(
-								context.businessInfo.location
+								context.businessInfo.location as string
 							);
 						},
 						onDone: {
@@ -899,7 +1193,9 @@ export const CoreProfilerController = ( {
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
 
-	const [ state, send ] = useMachine( augmentedStateMachine );
+	const [ state, send ] = useMachine( augmentedStateMachine, {
+		devTools: process.env.NODE_ENV === 'development',
+	} );
 	const stateValue =
 		typeof state.value === 'object'
 			? Object.keys( state.value )[ 0 ]

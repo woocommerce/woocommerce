@@ -3,10 +3,12 @@
  */
 import { apiFetch, select } from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
+import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
  */
+import * as actions from './actions';
 import {
 	getLocalesSuccess,
 	getLocalesError,
@@ -14,7 +16,7 @@ import {
 	getCountriesError,
 } from './actions';
 import { NAMESPACE } from '../constants';
-import { Locales, Country } from './types';
+import { Locales, Country, GeolocationResponse } from './types';
 import { STORE_NAME } from './constants';
 
 const resolveSelect =
@@ -55,3 +57,18 @@ export function* getCountries() {
 		return getCountriesError( error );
 	}
 }
+
+export const geolocate =
+	() =>
+	async ( { dispatch }: { dispatch: DispatchFromMap< typeof actions > } ) => {
+		try {
+			const url = `https://public-api.wordpress.com/geo/?v=${ new Date().getTime() }`;
+			const response = await fetch( url, {
+				method: 'GET',
+			} );
+			const result: GeolocationResponse = await response.json();
+			dispatch.geolocationSuccess( result );
+		} catch ( error ) {
+			dispatch.geolocationError( error );
+		}
+	};
