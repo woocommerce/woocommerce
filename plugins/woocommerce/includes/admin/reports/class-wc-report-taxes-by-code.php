@@ -158,6 +158,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 		// Merge.
 		$tax_rows = array();
+		// Initialize an associative array to store unique post_ids
+		$unique_post_ids = [];
 
 		foreach ( $tax_rows_orders + $tax_rows_partial_refunds as $tax_row ) {
 			$key                                    = $tax_row->rate_id;
@@ -166,11 +168,12 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				'shipping_tax_amount' => 0,
 				'total_orders'        => 0,
 			);
-			$tax_rows[ $key ]->total_orders        += 1;
+			$unique_post_ids[ $tax_row->post_id ]   = true;
 			$tax_rows[ $key ]->tax_rate             = $tax_row->tax_rate;
 			$tax_rows[ $key ]->tax_amount          += wc_round_tax_total( $tax_row->tax_amount );
 			$tax_rows[ $key ]->shipping_tax_amount += wc_round_tax_total( $tax_row->shipping_tax_amount );
 		}
+		$tax_rows[ $key ]->total_orders = count( $unique_post_ids );
 
 		foreach ( $tax_rows_full_refunds as $tax_row ) {
 			$key                                    = $tax_row->rate_id;
