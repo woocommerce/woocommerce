@@ -19,11 +19,10 @@ export const useFeedbackSnackbar = () => {
 		onPositiveResponse,
 		onNegativeResponse,
 	}: ShowSnackbarProps ) => {
-		createNotice( 'success', label, {
+		createNotice( 'info', label, {
 			type: 'snackbar',
 			actions: [
 				{
-					variant: 'secondary',
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore
 					label: createInterpolateElement(
