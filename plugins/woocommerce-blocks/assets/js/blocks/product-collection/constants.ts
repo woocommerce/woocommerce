@@ -49,6 +49,7 @@ export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
 		isProductCollectionBlock: true,
 		woocommerceOnSale: false,
 		woocommerceStockStatus: getDefaultStockStatuses(),
+		woocommerceAttributes: [],
 	},
 	tagName: 'div',
 	displayLayout: {
@@ -75,4 +76,5 @@ export const DEFAULT_FILTERS = {
 	woocommerceOnSale: ( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery )
 		.woocommerceOnSale,
 	woocommerceStockStatus: getDefaultStockStatuses(),
+	woocommerceAttributes: [],
 };
