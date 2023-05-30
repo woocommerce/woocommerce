@@ -66,7 +66,7 @@ Run through the ["Writing Your First Block Type" tutorial](https://developer.wor
 
 For deeper dive, try looking at the [core blocks code,](https://github.com/WordPress/gutenberg/tree/master/packages/block-library/src) or see what [components are available.](https://github.com/WordPress/gutenberg/tree/master/packages/components/src)
 
-To begin contributing to the WooCommerce Blocks plugin, see our [getting started guide](./docs/contributors/contributing/getting-started.md) and [developer handbook](./docs/README.md).
+To begin contributing to the WooCommerce Blocks plugin, see our [getting started guide](./docs/contributors/getting-started.md) and [developer handbook](./docs/README.md).
 
 Other useful docs to explore:
 

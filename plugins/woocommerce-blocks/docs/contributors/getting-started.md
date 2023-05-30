@@ -2,18 +2,18 @@
 
 ## Table of contents <!-- omit in toc -->
 
-- [Cloning the Git Repository](#cloning-the-git-repository)
-- [Configuring your WordPress site](#configuring-your-wordpress-site)
-- [Installing dependencies](#installing-dependencies)
-- [Building the plugin files](#building-the-plugin-files)
-- [Create a plugin package in ZIP format](#create-a-plugin-package-in-zip-format)
-- [Linting](#linting)
-- [Running the Blocks plugin](#running-the-blocks-plugin)
-- [Developer Tools (Visual Studio Code)](#developer-tools-visual-studio-code)
-    - [EditorConfig](#editorconfig)
-    - [ESLint](#eslint)
-    - [Prettier](#prettier)
-- [Testing](#testing)
+-   [Cloning the Git Repository](#cloning-the-git-repository)
+-   [Configuring your WordPress site](#configuring-your-wordpress-site)
+-   [Installing dependencies](#installing-dependencies)
+-   [Building the plugin files](#building-the-plugin-files)
+-   [Create a plugin package in ZIP format](#create-a-plugin-package-in-zip-format)
+-   [Linting](#linting)
+-   [Running the Blocks plugin](#running-the-blocks-plugin)
+-   [Developer Tools (Visual Studio Code)](#developer-tools-visual-studio-code)
+    -   [EditorConfig](#editorconfig)
+    -   [ESLint](#eslint)
+    -   [Prettier](#prettier)
+-   [Testing](#testing)
 
 Before you can begin contributing to the Blocks plugin there are several steps and tools required to setup your local development environment.
 
@@ -48,12 +48,14 @@ define( 'SCRIPT_DEBUG', true );
 
 To install dependencies, you will need the following tools installed on your machine:
 
-- `node` and `npm` via [NVM](https://github.com/nvm-sh/nvm#installing-and-updating): While you can always install Node or NPM through other means, we recommend using NVM to ensure you're aligned with the version used by our development teams. Our repository contains [an `.nvmrc` file](../../../.nvmrc) which helps ensure you are using the correct version of Node.
-- [PHP](https://www.php.net/manual/en/install.php): WooCommerce Blocks requires PHP. It is also needed to run Composer and various project build scripts.
-- [Composer](https://getcomposer.org/doc/00-intro.md): We use Composer to manage all of the dependencies for PHP packages and plugins.
+-   `node` and `npm` via [NVM](https://github.com/nvm-sh/nvm#installing-and-updating): While you can always install Node or NPM through other means, we recommend using NVM to ensure you're aligned with the version used by our development teams. Our repository contains [an `.nvmrc` file](../../.nvmrc) which helps ensure you are using the correct version of Node.
+-   [PHP](https://www.php.net/manual/en/install.php): WooCommerce Blocks requires PHP. It is also needed to run Composer and various project build scripts.
+-   [Composer](https://getcomposer.org/doc/00-intro.md): We use Composer to manage all of the dependencies for PHP packages and plugins.
 
-See [`package.json` `engines`](../../../package.json) and [`readme.txt`](../../../readme.txt#L6) for details on required versions.
+See [`package.json` `engines`](../../package.json) and [`readme.txt`](../../readme.txt#L6) for details on required versions.
+
 <!--  -->
+
 Once you the above setup, install the dependencies from the command line:
 
 -   Change directory to your repo folder, e.g. `$ cd woocommerce-blocks`.
@@ -86,9 +88,9 @@ Run `$ npm run lint` to check code against our linting rules.
 
 This script runs 3 sub-commands: `lint:php`, `lint:css`, `lint:js`. Use these to run linters across the codebase (linters check for valid syntax).
 
--   `lint:php` runs phpcs via composer, which uses the [phpcs.xml](../../../phpcs.xml) rule set.
--   `lint:css` runs stylelint over all the scss code in `assets/css`, using the rules in [.stylelintrc.json.](../../../.stylelintrc.json)
--   `lint:js` runs eslint over all the JavaScript, using the rules in [.eslintrc.js.](../../../.eslintrc.js)
+-   `lint:php` runs phpcs via composer, which uses the [phpcs.xml](../../phpcs.xml) rule set.
+-   `lint:css` runs stylelint over all the scss code in `assets/css`, using the rules in [.stylelintrc.json.](../../.stylelintrc.json)
+-   `lint:js` runs eslint over all the JavaScript, using the rules in [.eslintrc.js.](../../.eslintrc.js)
 
 Note; linters are also ran before commits via Git. If there are any violations, you will not be able to commit your changes until they are fixed, unless you add the `--no-verify` flag to your commit command.
 
@@ -138,7 +140,7 @@ You’ll find a handful of scripts in `package.json` that performs the automated
 -   JS tests: `npm run test`
 -   Run `npm run wp-env` command to setup the development environment in Docker.
 
-To find out more about how to run automated JavaScript tests, check out the documentation on [JavaScript Testing](../../contributors/contributing/javascript-testing.md).
+To find out more about how to run automated JavaScript tests, check out the documentation on [JavaScript Testing](javascript-testing.md).
 
 <!-- FEEDBACK -->
 
@@ -146,7 +148,6 @@ To find out more about how to run automated JavaScript tests, check out the docu
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/contributing/getting-started.md)
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/getting-started.md)
 
 <!-- /FEEDBACK -->
-

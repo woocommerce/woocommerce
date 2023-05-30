@@ -2,11 +2,12 @@
 
 ## Table of contents <!-- omit in toc -->
 
-- [How to run JavaScript unit tests](#how-to-run-javascript-unit-tests)
-- [How to run end-to-end tests](#how-to-run-end-to-end-tests)
-    - [Debugging e2e tests using generated reports](#debugging-e2e-tests-using-generated-reports)
-    - [Modify the local environment used by end-to-end tests](#modify-the-local-environment-used-by-end-to-end-tests)
-    - [WordPress versions and end-to-end tests suites](#wordpress-versions-and-end-to-end-tests-suites)
+-   [How to run JavaScript unit tests](#how-to-run-javascript-unit-tests)
+-   [How to run end-to-end tests with deprecated infrastructure](#how-to-run-end-to-end-tests-with-deprecated-infrastructure)
+-   [How to run end-to-end tests](#how-to-run-end-to-end-tests)
+    -   [Debugging e2e tests using generated reports](#debugging-e2e-tests-using-generated-reports)
+    -   [Modify the local environment used by end-to-end tests](#modify-the-local-environment-used-by-end-to-end-tests)
+    -   [WordPress versions and end-to-end tests suites](#wordpress-versions-and-end-to-end-tests-suites)
 
 Tests for JavaScript in the Blocks plugin are powered by [Jest](https://jestjs.io/). The Blocks plugin follows the same patterns as Gutenberg, therefore for instructions on writing tests you can [refer to this page in the Gutenberg Handbook](https://developer.wordpress.org/block-editor/contributors/develop/testing-overview/).
 
@@ -62,7 +63,7 @@ When you're done, you may want to shut down the test environment:
 
 ## How to run end-to-end tests
 
-Visit the [dedicated documentation](../../../tests/e2e-pw/README.md).
+Visit the [dedicated documentation](../../tests/e2e-pw/README.md).
 
 ### Debugging e2e tests using generated reports
 
@@ -114,7 +115,6 @@ When preparing for a new version of WordPress, it's a good practice to search fo
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/contributing/javascript-testing.md)
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/javascript-testing.md)
 
 <!-- /FEEDBACK -->
-
