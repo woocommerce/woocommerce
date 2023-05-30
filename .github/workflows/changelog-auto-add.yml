@@ -1,7 +1,7 @@
 name: 'Changelog Auto Add'
 on:
     pull_request:
-        types: [opened, edited]
+        types: [opened, synchronize, reopened, edited]
     workflow_dispatch:
         inputs:
             prNumber:
@@ -11,6 +11,7 @@ on:
 jobs:
     add-changelog:
         name: 'Add changelog to PR'
+        if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' }}
         runs-on: ubuntu-20.04
         permissions:
             contents: write
