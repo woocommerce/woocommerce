@@ -545,10 +545,9 @@ export const recordTracksActions = {
 const coreProfilerMachineActions = {
 	...preFetchActions,
 	...recordTracksActions,
-    handlePlugins,
+	handlePlugins,
 	updateTrackingOption,
 	handleTrackingOption,
-	handleExtensions,
 	handleGeolocation,
 	handleStoreNameOption,
 	handleStoreCountryOption,
