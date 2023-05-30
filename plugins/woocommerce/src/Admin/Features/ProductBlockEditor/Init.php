@@ -663,7 +663,7 @@ class Init {
 		// we can't check the 'path' query param because client-side routing is used within wc-admin,
 		// so this action handler is only called on the initial page load from the server, which might
 		// not be the product edit page (it mostly likely isn't).
-		if ( isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'] ) {
+		if ( PageController::is_admin_page() ) {
 			$screen->is_block_editor( true );
 		}
 	}
