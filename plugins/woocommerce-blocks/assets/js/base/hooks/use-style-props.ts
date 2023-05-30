@@ -2,8 +2,9 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { isObject } from '@woocommerce/types';
-import { parseStyle } from '@woocommerce/base-utils';
+import { isString, isObject } from '@woocommerce/types';
+import type { Style as StyleEngineProperties } from '@wordpress/style-engine/src/types';
+import type { CSSProperties } from 'react';
 
 /**
  * Internal dependencies
@@ -13,16 +14,48 @@ import {
 	getColorClassesAndStyles,
 	getBorderClassesAndStyles,
 	getSpacingClassesAndStyles,
-	WithStyle,
 } from '../utils';
 
-type blockAttributes = {
-	style: Record< string, unknown > | string;
+export type StyleProps = {
+	className: string;
+	style: CSSProperties;
 };
 
-type StyleProps = {
-	className: string;
-	style: Record< string, unknown >;
+type BlockAttributes = {
+	style?: StyleEngineProperties | string | undefined;
+};
+
+type StyleAttributes = Record< string, unknown > & {
+	style: StyleEngineProperties;
+};
+
+/**
+ * Parses incoming props.
+ *
+ * This may include style properties at the top level, or may include a nested `style` object. This ensures the expected
+ * values are present and converts any string based values to objects as required.
+ */
+const parseStyleAttributes = ( rawProps: BlockAttributes ): StyleAttributes => {
+	const props = isObject( rawProps )
+		? rawProps
+		: {
+				style: {},
+		  };
+
+	let style = props.style;
+
+	if ( isString( style ) ) {
+		style = JSON.parse( style ) || {};
+	}
+
+	if ( ! isObject( style ) ) {
+		style = {};
+	}
+
+	return {
+		...props,
+		style,
+	};
 };
 
 /**
@@ -31,31 +64,12 @@ type StyleProps = {
  * This hook (and its utilities) borrow functionality from the Gutenberg Block Editor package--something we don't want
  * to import on the frontend.
  */
-export const useStyleProps = ( props: blockAttributes ): StyleProps => {
-	const propsObject = isObject( props )
-		? props
-		: {
-				style: {},
-		  };
-
-	const style = parseStyle( propsObject.style );
-
-	const colorProps = getColorClassesAndStyles( {
-		...propsObject,
-		style,
-	} as WithStyle );
-
-	const borderProps = getBorderClassesAndStyles( {
-		...propsObject,
-		style,
-	} as WithStyle );
-
-	const spacingProps = getSpacingClassesAndStyles( {
-		...propsObject,
-		style,
-	} as WithStyle );
-
-	const typographyProps = useTypographyProps( propsObject );
+export const useStyleProps = ( props: BlockAttributes ): StyleProps => {
+	const styleAttributes = parseStyleAttributes( props );
+	const colorProps = getColorClassesAndStyles( styleAttributes );
+	const borderProps = getBorderClassesAndStyles( styleAttributes );
+	const spacingProps = getSpacingClassesAndStyles( styleAttributes );
+	const typographyProps = useTypographyProps( styleAttributes );
 
 	return {
 		className: classnames(

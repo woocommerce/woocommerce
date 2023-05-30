@@ -2,30 +2,25 @@
  * External dependencies
  */
 import { isObject, isString } from '@woocommerce/types';
-import { parseStyle } from '@woocommerce/base-utils';
+import type { Style as StyleEngineProperties } from '@wordpress/style-engine/src/types';
 
-type WithClass = {
-	className: string;
-};
-
-type WithStyle = {
-	style: Record< string, unknown >;
-};
+/**
+ * Internal dependencies
+ */
+import type { StyleProps } from './use-style-props';
 
 type blockAttributes = {
-	style?: Record< string, unknown > | string | undefined;
+	style: StyleEngineProperties;
+	// String identifier for the font size preset--not an absolute value.
 	fontSize?: string | undefined;
+	// String identifier for the font family preset, not the actual font family.
 	fontFamily?: string | undefined;
 };
 
-export const useTypographyProps = (
-	props: blockAttributes
-): WithStyle & WithClass => {
-	const styleObject = parseStyle( props.style );
-	const typography = isObject( styleObject.typography )
-		? ( styleObject.typography as Record< string, string > )
+export const useTypographyProps = ( props: blockAttributes ): StyleProps => {
+	const typography = isObject( props.style.typography )
+		? props.style.typography
 		: {};
-
 	const classNameFallback = isString( typography.fontFamily )
 		? typography.fontFamily
 		: '';

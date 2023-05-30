@@ -7,7 +7,6 @@ export * from './get-valid-block-attributes';
 export * from './product-data';
 export * from './derive-selected-shipping-rates';
 export * from './get-icons-from-payment-methods';
-export * from './parse-style';
 export * from './create-notice';
 export * from './get-navigation-type';
 export * from './map-keys';
