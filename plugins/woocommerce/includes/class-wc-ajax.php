@@ -3118,8 +3118,8 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		$zone_id = wc_clean( wp_unslash( $_POST['zone_id'] ) );
-		$zone    = new WC_Shipping_Zone( $zone_id );
+		$zone_id     = wc_clean( wp_unslash( $_POST['zone_id'] ) );
+		$zone        = new WC_Shipping_Zone( $zone_id );
 		$instance_id = wc_clean( wp_unslash( $_POST['instance_id'] ) );
 
 		/**
