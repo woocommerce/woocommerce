@@ -57,6 +57,10 @@ class WC_Beta_Tester_Live_Branches_Installer {
 
 		$obj = json_decode( $body );
 
+		if ( $obj->master->branch === $branch ) {
+			return $obj->master;
+		}
+
 		foreach ( $obj->pr as $key => $value ) {
 			if ( $value->branch === $branch ) {
 				return $value;
