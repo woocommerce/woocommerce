@@ -26,7 +26,7 @@ export const POSSIBLY_DEFAULT_STORE_NAMES = [
 	'Site Title',
 	'',
 ];
-export type IndustryChoice = typeof industryChoices[ number ][ 'key' ];
+export type IndustryChoice = ( typeof industryChoices )[ number ][ 'key' ];
 export const industryChoices = [
 	{
 		label: __( 'Clothing and accessories', 'woocommerce' ),
@@ -58,7 +58,7 @@ export const industryChoices = [
 	},
 ];
 
-export type IndustryChoiceOption = typeof industryChoices[ number ];
+export type IndustryChoiceOption = ( typeof industryChoices )[ number ];
 
 export const selectIndustryMapping = {
 	im_just_starting_my_business: __(
@@ -221,7 +221,9 @@ export const BusinessInfo = ( {
 						excludeSelectedOptions={ false }
 						help={ <Icon icon={ chevronDown } /> }
 						onChange={ (
-							results: Array< typeof industryChoices[ number ] >
+							results: Array<
+								( typeof industryChoices )[ number ]
+							>
 						) => {
 							if ( results.length ) {
 								setIndustry( results[ 0 ] );
