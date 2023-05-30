@@ -48,15 +48,6 @@ const reducer: Reducer< CartState > = (
 	action: Partial< CartAction >
 ) => {
 	switch ( action.type ) {
-		case types.SET_FULL_SHIPPING_ADDRESS_PUSHED:
-			state = {
-				...state,
-				metaData: {
-					...state.metaData,
-					fullShippingAddressPushed: action.fullShippingAddressPushed,
-				},
-			};
-			break;
 		case types.SET_ERROR_DATA:
 			if ( action.error ) {
 				state = {
