@@ -1,0 +1,87 @@
+/**
+ * External dependencies
+ */
+import { Button, VisuallyHidden } from '@wordpress/components';
+import { close } from '@wordpress/icons';
+import {
+	useViewportMatch,
+	__experimentalUseDialog as useDialog,
+} from '@wordpress/compose';
+import {
+	createElement,
+	useCallback,
+	useEffect,
+	useRef,
+} from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
+import {
+	store as blockEditorStore,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore This is actively used in the GB repo and probably safe to use.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalLibrary as Library,
+} from '@wordpress/block-editor';
+
+type InserterSidebarProps = {
+	setIsInserterOpened: ( value: boolean ) => void;
+};
+
+export default function InserterSidebar( {
+	setIsInserterOpened,
+}: InserterSidebarProps ) {
+	const isMobileViewport = useViewportMatch( 'medium', '<' );
+	const { rootClientId, insertionIndex } = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore These selectors are available in the block data store.
+		const { getBlockSelectionEnd, getBlockRootClientId } =
+			select( blockEditorStore );
+
+		return {
+			insertionIndex: getBlockSelectionEnd(),
+			rootClientId: getBlockRootClientId(),
+		};
+	} );
+
+	const closeInserter = useCallback( () => {
+		return setIsInserterOpened( false );
+	}, [ setIsInserterOpened ] );
+
+	const TagName = ! isMobileViewport ? VisuallyHidden : 'div';
+	const [ inserterDialogRef, inserterDialogProps ] = useDialog( {
+		onClose: closeInserter,
+		focusOnMount: false,
+	} );
+
+	const libraryRef = useRef< Library | null >( null );
+	useEffect( () => {
+		libraryRef.current?.focusSearch();
+	}, [] );
+
+	return (
+		<div
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore Types are not provided by useDialog.
+			ref={ inserterDialogRef }
+			{ ...inserterDialogProps }
+			className="edit-widgets-layout__inserter-panel"
+		>
+			<TagName className="edit-widgets-layout__inserter-panel-header">
+				<Button
+					icon={ close }
+					onClick={ closeInserter }
+					label={ __( 'Close block inserter', 'woocommerce' ) }
+				/>
+			</TagName>
+			<div className="edit-widgets-layout__inserter-panel-content">
+				<Library
+					showInserterHelpPanel
+					shouldFocusBlock={ isMobileViewport }
+					rootClientId={ rootClientId }
+					__experimentalInsertionIndex={ insertionIndex }
+					ref={ libraryRef }
+				/>
+			</div>
+		</div>
+	);
+}

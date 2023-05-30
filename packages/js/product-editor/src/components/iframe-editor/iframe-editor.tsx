@@ -26,7 +26,9 @@ import {
  */
 import { BackButton } from './back-button';
 import { EditorCanvas } from './editor-canvas';
+import { HeaderToolbar } from './header-toolbar';
 import { ResizableEditor } from './resizable-editor';
+import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -45,6 +47,7 @@ export function IframeEditor( {
 }: IframeEditorProps ) {
 	const [ resizeObserver, sizes ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
+	const [ isInserterOpened, setIsInserterOpened ] = useState( false );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock, updateSettings } =
@@ -81,6 +84,14 @@ export function IframeEditor( {
 				onInput={ onInput }
 				useSubRegistry={ true }
 			>
+				<HeaderToolbar
+					isInserterOpened={ isInserterOpened }
+					setIsInserterOpened={ setIsInserterOpened }
+				/>
+				<SecondarySidebar
+					isInserterOpened={ isInserterOpened }
+					setIsInserterOpened={ setIsInserterOpened }
+				/>
 				<BlockTools
 					className={ 'woocommerce-iframe-editor__content' }
 					onClick={ (
