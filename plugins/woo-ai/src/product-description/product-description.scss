@@ -13,16 +13,16 @@
 }
 
 #wpcontent {
-	.components-snackbar__action:has( .woo-ai-feedback-snackbar_positive ) {
+	.woo-ai-feedback-snackbar-action {
+		font-size: 1.4em;
+	}
+
+	.woo-ai-feedback-snackbar-action + .woo-ai-feedback-snackbar-action {
+		margin-left: 10px;
+	}
+
+	.components-snackbar__action:has( .woo-ai-feedback-snackbar-action) {
 		text-decoration: none;
-
-		span + span {
-			margin-left: 10px;
-		}
-
-		span {
-			font-size: 1.4em;
-		}
 	}
 }
 

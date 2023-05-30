@@ -31,7 +31,7 @@ export const useFeedbackSnackbar = () => {
 						{
 							ThumbsUp: (
 								<span
-									className="woo-ai-feedback-snackbar_positive"
+									className="woo-ai-feedback-snackbar-action"
 									data-response="positive"
 								>
 									👍
@@ -39,7 +39,7 @@ export const useFeedbackSnackbar = () => {
 							),
 							ThumbsDown: (
 								<span
-									className="woo-ai-feedback-snackbar_negative"
+									className="woo-ai-feedback-snackbar-action"
 									data-response="negative"
 								>
 									👎
