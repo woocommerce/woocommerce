@@ -17,14 +17,14 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 
 > Want to contribute to the WooCommerce Blocks plugin? The following documents offer information that can help you get started.
 
--   [Contributing](contributors/contributing/README.md)
-    -   [Getting Started](contributors/contributing/getting-started.md)
-    -   [Coding Guidelines](contributors/contributing/coding-guidelines.md)
-    -   [Block Script Assets](contributors/contributing/block-assets.md)
-    -   [CSS Build System](contributors/contributing/css-build-system.md)
-    -   [JavaScript Build System](contributors/contributing/javascript-build-system.md)
-    -   [JavaScript Testing](contributors/contributing/javascript-testing.md)
-    -   [Storybook & Components](contributors/contributing/storybook-and-components.md)
+-   [Contributing](contributors/README.md)
+    -   [Getting Started](contributors/getting-started.md)
+    -   [Coding Guidelines](contributors/coding-guidelines.md)
+    -   [Block Script Assets](contributors/block-assets.md)
+    -   [CSS Build System](contributors/css-build-system.md)
+    -   [JavaScript Build System](contributors/javascript-build-system.md)
+    -   [JavaScript Testing](contributors/javascript-testing.md)
+    -   [Storybook & Components](contributors/storybook-and-components.md)
 
 ## Internal developers
 
@@ -151,4 +151,3 @@ The following tutorials from [developer.woocommerce.com](https://developer.wooco
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/README.md)
 
 <!-- /FEEDBACK -->
-

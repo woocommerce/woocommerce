@@ -2,7 +2,7 @@
 
 Thanks for your interest in contributing to WooCommerce Blocks!
 
-If you wish to contribute code, to get started we recommend first reading our [Getting Started Guide](../docs/contributors/contributing/getting-started.md).
+If you wish to contribute code, to get started we recommend first reading our [Getting Started Guide](../docs/contributors/getting-started.md).
 
 All other documentation for contributors can be found [in the docs directory](../docs/README.md).
 

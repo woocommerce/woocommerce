@@ -2,14 +2,14 @@
 
 ## Table of contents <!-- omit in toc -->
 
-- [When are assets needed?](#when-are-assets-needed)
-- [Choosing Handles for Assets (and scripts in general)](#choosing-handles-for-assets-and-scripts-in-general)
-- [Using the `AbstractBlock` class](#using-the-abstractblock-class)
-    - [AbstractBlock::render](#abstractblockrender)
-    - [AbstractBlock::enqueue_editor_assets](#abstractblockenqueue_editor_assets)
-    - [AbstractBlock::enqueue_assets](#abstractblockenqueue_assets)
-    - [AbstractBlock::enqueue_data](#abstractblockenqueue_data)
-- [woocommerce_shared_settings deprecated filter](#woocommerce_shared_settings-deprecated-filter)
+-   [When are assets needed?](#when-are-assets-needed)
+-   [Choosing Handles for Assets (and scripts in general)](#choosing-handles-for-assets-and-scripts-in-general)
+-   [Using the `AbstractBlock` class](#using-the-abstractblock-class)
+    -   [AbstractBlock::render](#abstractblockrender)
+    -   [AbstractBlock::enqueue_editor_assets](#abstractblockenqueue_editor_assets)
+    -   [AbstractBlock::enqueue_assets](#abstractblockenqueue_assets)
+    -   [AbstractBlock::enqueue_data](#abstractblockenqueue_data)
+-   [woocommerce_shared_settings deprecated filter](#woocommerce_shared_settings-deprecated-filter)
 
 [Block Types](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/src/BlockTypes) are often responsible for enqueuing script assets that make blocks functional on both the front-end and within the editor. Additionally, some block scripts require extra data from the server and thus have extra dependencies that need to be loaded.
 
@@ -95,7 +95,6 @@ wc.wcSettings.getSetting( 'key' );
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/contributing/block-assets.md)
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/documentation-guidelines.md)
 
 <!-- /FEEDBACK -->
-

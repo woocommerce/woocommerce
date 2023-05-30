@@ -2,32 +2,32 @@
 
 ## Table of contents <!-- omit in toc -->
 
-- [Use active instead of passive voice](#use-active-instead-of-passive-voice)
-    - [Example](#example)
-- [Use the personal pronoun “you”](#use-the-personal-pronoun-you)
-- [Don’t use gendered pronouns](#dont-use-gendered-pronouns)
-- [Filename must resemble the title](#filename-must-resemble-the-title)
-    - [Example](#example-1)
-- [Use correct heading hierarchy](#use-correct-heading-hierarchy)
-    - [Example](#example-2)
-- [Use semantically correct markup](#use-semantically-correct-markup)
-- [Use correct spelling](#use-correct-spelling)
-    - [Example](#example-3)
-- [Use images not wider than 50% width](#use-images-not-wider-than-50-width)
-- [Use descriptive links](#use-descriptive-links)
-    - [Example](#example-4)
-- [Explain arguments](#explain-arguments)
-    - [Example](#example-5)
-- [Explicitly define language for code examples](#explicitly-define-language-for-code-examples)
-    - [Example](#example-6)
-        - [CSS code example](#css-code-example)
-        - [JS code example](#js-code-example)
-- [Use table of contents for top-level readme](#use-table-of-contents-for-top-level-readme)
-- [Use internal links](#use-internal-links)
-- [Sort releases descending](#sort-releases-descending)
-    - [Example](#example-7)
-- [Structure “How to” instructions](#structure-how-to-instructions)
-- [Link references](#link-references)
+-   [Use active instead of passive voice](#use-active-instead-of-passive-voice)
+    -   [Example](#example)
+-   [Use the personal pronoun “you”](#use-the-personal-pronoun-you)
+-   [Don’t use gendered pronouns](#dont-use-gendered-pronouns)
+-   [Filename must resemble the title](#filename-must-resemble-the-title)
+    -   [Example](#example-1)
+-   [Use correct heading hierarchy](#use-correct-heading-hierarchy)
+    -   [Example](#example-2)
+-   [Use semantically correct markup](#use-semantically-correct-markup)
+-   [Use correct spelling](#use-correct-spelling)
+    -   [Example](#example-3)
+-   [Use images not wider than 50% width](#use-images-not-wider-than-50-width)
+-   [Use descriptive links](#use-descriptive-links)
+    -   [Example](#example-4)
+-   [Explain arguments](#explain-arguments)
+    -   [Example](#example-5)
+-   [Explicitly define language for code examples](#explicitly-define-language-for-code-examples)
+    -   [Example](#example-6)
+        -   [CSS code example](#css-code-example)
+        -   [JS code example](#js-code-example)
+-   [Use table of contents for top-level readme](#use-table-of-contents-for-top-level-readme)
+-   [Use internal links](#use-internal-links)
+-   [Sort releases descending](#sort-releases-descending)
+    -   [Example](#example-7)
+-   [Structure “How to” instructions](#structure-how-to-instructions)
+-   [Link references](#link-references)
 
 ## Use active instead of passive voice
 
@@ -165,7 +165,6 @@ When referencing other documentations, the corresponding document should be link
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/contributing/documentation-guidelines.md)
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/documentation-guidelines.md)
 
 <!-- /FEEDBACK -->
-

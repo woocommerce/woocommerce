@@ -6,7 +6,7 @@
 -   [Playwright](#playwright)
     -   [Structure](#structure-1)
 
-This living document serves to prescribe coding guidelines specific to the WooCommerce Blocks project E2E tests. For more information on how to run Playwright end-to-end (E2E) tests, please refer to the [dedicated resource](../../../tests/e2e-pw/README.md).
+This living document serves to prescribe coding guidelines specific to the WooCommerce Blocks project E2E tests. For more information on how to run Playwright end-to-end (E2E) tests, please refer to the [dedicated resource](../../tests/e2e-pw/README.md).
 
 ## Structure
 
@@ -20,12 +20,12 @@ The first folder is named "e2e" and it contains all the E2E tests that were crea
 
 There are two Playwright projects configuration:
 
-- blockTheme
-- classicTheme
+-   blockTheme
+-   classicTheme
 
-The blockTheme project runs the tests with the suffix *block_theme*. In this case, the theme is a block theme. The block theme is the default WordPress theme. Currently, it is Twenty-Twenty Three. You should use this configuration if you want test the block with the Site Editor.
+The blockTheme project runs the tests with the suffix _block_theme_. In this case, the theme is a block theme. The block theme is the default WordPress theme. Currently, it is Twenty-Twenty Three. You should use this configuration if you want test the block with the Site Editor.
 
-The classicTheme project runs the tests with the suffix *classic_theme*. In this case, the theme is a Twenty Twenty-One. You should use this configuration if you want test the block with a classic theme.
+The classicTheme project runs the tests with the suffix _classic_theme_. In this case, the theme is a Twenty Twenty-One. You should use this configuration if you want test the block with a classic theme.
 
 Each block should have a dedicated folder with a scoped util file if you want share some logic related to the block.
 
@@ -47,9 +47,18 @@ In order to write end to end tests we need to first find elements on the webpage
 
 In order to make the codebase cleaner, you should import the function from the packages:
 
-- "@woocommerce/e2e-utils": Contains generic utils for interactive with the page.
-- "@woocommerce/e2e-types": Contains generic types.
-- "@woocommerce/e2e-playwright-utils": Contains utils for playwright for example custom hooks.
+-   "@woocommerce/e2e-utils": Contains generic utils for interactive with the page.
+-   "@woocommerce/e2e-types": Contains generic types.
+-   "@woocommerce/e2e-playwright-utils": Contains utils for playwright for example custom hooks.
 
 By using these packages, you can make your code more modular and easier to maintain.
 
+<!-- FEEDBACK -->
+
+---
+
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/documentation-guidelines.md)
+
+<!-- /FEEDBACK -->
