@@ -163,10 +163,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 7.7.1 2023-05-26 =
+= 7.7.2 2023-06-01 =
 
 **WooCommerce**
 
-* Update - Update WooCommerce Blocks to 10.0.5 [#38427](https://github.com/woocommerce/woocommerce/pull/38427)
+* Update - Update WooCommerce Blocks to 10.0.6 [#38533](https://github.com/woocommerce/woocommerce/pull/38533)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
