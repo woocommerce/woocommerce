@@ -7,7 +7,7 @@
  */
 import classNames from 'classnames';
 import { useDebounce } from 'use-debounce';
-import type { ForwardedRef, KeyboardEvent } from 'react';
+import type { ForwardedRef, KeyboardEvent, RefObject } from 'react';
 import { __ } from '@wordpress/i18n';
 import {
 	createPortal,
@@ -40,6 +40,33 @@ interface DrawerProps {
 	slideIn?: boolean;
 	slideOut?: boolean;
 }
+
+interface CloseButtonPortalProps {
+	onClick: () => void;
+	contentRef: RefObject< HTMLDivElement >;
+}
+
+const CloseButtonPortal = ( {
+	onClick,
+	contentRef,
+}: CloseButtonPortalProps ) => {
+	const closeButtonWrapper = contentRef?.current?.querySelector(
+		'.wc-block-components-drawer__close-wrapper'
+	);
+
+	return closeButtonWrapper
+		? createPortal(
+				<Button
+					className="wc-block-components-drawer__close"
+					icon={ close }
+					onClick={ onClick }
+					label={ __( 'Close', 'woo-gutenberg-products-block' ) }
+					showTooltip={ false }
+				/>,
+				closeButtonWrapper
+		  )
+		: null;
+};
 
 const UnforwardedDrawer = (
 	{
@@ -137,12 +164,9 @@ const UnforwardedDrawer = (
 					role="document"
 					ref={ contentRef }
 				>
-					<Button
-						className="wc-block-components-drawer__close"
+					<CloseButtonPortal
+						contentRef={ contentRef }
 						onClick={ onRequestClose }
-						icon={ close }
-						label={ __( 'Close', 'woo-gutenberg-products-block' ) }
-						showTooltip={ false }
 					/>
 					{ children }
 				</div>
@@ -152,6 +176,7 @@ const UnforwardedDrawer = (
 	);
 };
 
-export const Drawer = forwardRef( UnforwardedDrawer );
+const Drawer = forwardRef( UnforwardedDrawer );
 
 export default Drawer;
+export { default as DrawerCloseButton } from './close-button';
