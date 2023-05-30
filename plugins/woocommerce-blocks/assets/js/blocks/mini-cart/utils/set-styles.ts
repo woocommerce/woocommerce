@@ -26,12 +26,10 @@ function setStyles() {
 	const firstMiniCartButton = document.querySelector(
 		'.wc-block-mini-cart__button'
 	);
-	const badgeTextColor = firstMiniCartButton
-		? getClosestColor( firstMiniCartButton, 'backgroundColor' )
-		: 'inherit';
-	const badgeBackgroundColor = firstMiniCartButton
-		? getClosestColor( firstMiniCartButton, 'color' )
-		: 'inherit';
+	const badgeTextColor =
+		getClosestColor( firstMiniCartButton, 'backgroundColor' ) || '#fff';
+	const badgeBackgroundColor =
+		getClosestColor( firstMiniCartButton, 'color' ) || '#000';
 
 	// We use :where here to reduce specificity so customized colors and theme
 	// CSS take priority.
