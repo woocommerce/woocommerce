@@ -4,6 +4,8 @@
 import type { BlockEditProps } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
+import { useMemo } from '@wordpress/element';
+import { AttributeMetadata } from '@woocommerce/types';
 import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -21,10 +23,16 @@ import { setQueryAttribute } from './utils';
 import { DEFAULT_FILTERS, getDefaultSettings } from '../constants';
 import StockStatusControl from './stock-status-control';
 import KeywordControl from './keyword-control';
+import AttributesControl from './attributes-control';
 
 const ProductCollectionInspectorControls = (
 	props: BlockEditProps< ProductCollectionAttributes >
 ) => {
+	const setQueryAttributeBind = useMemo(
+		() => setQueryAttribute.bind( null, props ),
+		[ props ]
+	);
+
 	return (
 		<InspectorControls>
 			<ToolsPanel
@@ -50,6 +58,14 @@ const ProductCollectionInspectorControls = (
 				<OnSaleControl { ...props } />
 				<StockStatusControl { ...props } />
 				<KeywordControl { ...props } />
+				<AttributesControl
+					woocommerceAttributes={
+						props.attributes.query &&
+						( props.attributes.query
+							.woocommerceAttributes as AttributeMetadata[] )
+					}
+					setQueryAttribute={ setQueryAttributeBind }
+				/>
 			</ToolsPanel>
 		</InspectorControls>
 	);
