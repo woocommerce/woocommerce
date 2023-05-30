@@ -27,7 +27,7 @@ type BlockRepresentation = {
  *
  * @param {Object} block The block to be registered.
  *
- * @return {?WPBlockType} The block, if it has been successfully registered;
+ * @return {WPBlockType|void} The block, if it has been successfully registered;
  *                        otherwise `undefined`.
  */
 export default function initBlock( block: BlockRepresentation ) {

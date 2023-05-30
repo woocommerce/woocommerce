@@ -3,7 +3,6 @@ lockfileVersion: '6.0'
 overrides:
   '@types/react': ^17.0.2
   react: ^17.0.2
-  prettier: npm:wp-prettier@^2.8.5
 
 importers:
 
@@ -1365,13 +1364,16 @@ importers:
         version: 5.54.0(eslint@8.32.0)(typescript@4.9.5)
       '@wordpress/eslint-plugin':
         specifier: 14.7.0
-        version: 14.7.0(@babel/core@7.17.8)(eslint@8.32.0)(jest@27.5.1)(prettier@2.3.0)(typescript@4.9.5)
+        version: 14.7.0(@babel/core@7.17.8)(eslint@8.32.0)(jest@27.5.1)(typescript@4.9.5)(wp-prettier@2.8.5)
       eslint-plugin-react-hooks:
         specifier: ^4.6.0
         version: 4.6.0(eslint@8.32.0)
       eslint-plugin-testing-library:
         specifier: ^5.10.2
         version: 5.10.2(eslint@8.32.0)(typescript@4.9.5)
+      prettier:
+        specifier: npm:wp-prettier@^2.8.5
+        version: /wp-prettier@2.8.5
     devDependencies:
       '@babel/core':
         specifier: ^7.17.5
@@ -13505,7 +13507,7 @@ packages:
       lodash: 4.17.21
       nanoid: 3.1.30
       p-limit: 3.1.0
-      prettier: /wp-prettier@2.8.5
+      prettier: 2.3.0
       prop-types: 15.8.1
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
@@ -13618,7 +13620,7 @@ packages:
       lodash: 4.17.21
       nanoid: 3.1.30
       p-limit: 3.1.0
-      prettier: /wp-prettier@2.8.5
+      prettier: 2.3.0
       prop-types: 15.8.1
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
@@ -13730,7 +13732,7 @@ packages:
       core-js: 3.21.1
       estraverse: 5.3.0
       loader-utils: 2.0.2
-      prettier: /wp-prettier@2.8.5
+      prettier: 2.3.0
       prop-types: 15.8.1
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
@@ -14805,7 +14807,7 @@ packages:
       global: 4.4.0
       js-string-escape: 1.0.1
       lodash: 4.17.21
-      prettier: /wp-prettier@2.8.5
+      prettier: 2.3.0
       regenerator-runtime: 0.13.11
       ts-dedent: 2.2.0
     transitivePeerDependencies:
@@ -15235,7 +15237,7 @@ packages:
       global: 4.4.0
       loader-utils: 2.0.4
       lodash: 4.17.21
-      prettier: /wp-prettier@2.8.5
+      prettier: 2.3.0
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
       regenerator-runtime: 0.13.11
@@ -17576,7 +17578,7 @@ packages:
       '@wordpress/style-engine': 0.15.0
       '@wordpress/token-list': 2.19.0
       '@wordpress/url': 3.29.0
-      '@wordpress/warning': 2.19.0
+      '@wordpress/warning': 2.34.0
       '@wordpress/wordcount': 3.19.0
       change-case: 4.1.2
       classnames: 2.3.1
@@ -18889,7 +18891,7 @@ packages:
       - supports-color
     dev: true
 
-  /@wordpress/eslint-plugin@14.7.0(@babel/core@7.17.8)(eslint@8.32.0)(jest@27.5.1)(prettier@2.3.0)(typescript@4.9.5):
+  /@wordpress/eslint-plugin@14.7.0(@babel/core@7.17.8)(eslint@8.32.0)(jest@27.5.1)(typescript@4.9.5)(wp-prettier@2.8.5):
     resolution: {integrity: sha512-UpK+FC7BPIBdOKien9hNlloju252zNiYgJkuSHFNA/RgSkkF993in1PYbf0/ppsTtF2VwbOyFxy2uCHCvJFAEw==}
     engines: {node: '>=14', npm: '>=6.14.4'}
     peerDependencies:
@@ -18908,7 +18910,7 @@ packages:
       '@typescript-eslint/eslint-plugin': 5.54.0(@typescript-eslint/parser@5.54.0)(eslint@8.32.0)(typescript@4.9.5)
       '@typescript-eslint/parser': 5.54.0(eslint@8.32.0)(typescript@4.9.5)
       '@wordpress/babel-preset-default': 7.18.0
-      '@wordpress/prettier-config': 2.17.0(prettier@2.3.0)
+      '@wordpress/prettier-config': 2.17.0(wp-prettier@2.8.5)
       cosmiconfig: 7.0.1
       eslint: 8.32.0
       eslint-config-prettier: 8.5.0(eslint@8.32.0)
@@ -18916,11 +18918,11 @@ packages:
       eslint-plugin-jest: 27.2.1(@typescript-eslint/eslint-plugin@5.54.0)(eslint@8.32.0)(jest@27.5.1)(typescript@4.9.5)
       eslint-plugin-jsdoc: 39.9.1(eslint@8.32.0)
       eslint-plugin-jsx-a11y: 6.5.1(eslint@8.32.0)
-      eslint-plugin-prettier: 3.4.1(eslint-config-prettier@8.5.0)(eslint@8.32.0)(prettier@2.3.0)
+      eslint-plugin-prettier: 3.4.1(eslint-config-prettier@8.5.0)(eslint@8.32.0)(wp-prettier@2.8.5)
       eslint-plugin-react: 7.29.4(eslint@8.32.0)
       eslint-plugin-react-hooks: 4.6.0(eslint@8.32.0)
       globals: 13.19.0
-      prettier: 2.3.0
+      prettier: /wp-prettier@2.8.5
       requireindex: 1.2.0
       typescript: 4.9.5
     transitivePeerDependencies:
@@ -18944,11 +18946,11 @@ packages:
       eslint-plugin-jest: 23.20.0(eslint@7.32.0)(typescript@4.9.5)
       eslint-plugin-jsdoc: 30.7.13(eslint@7.32.0)
       eslint-plugin-jsx-a11y: 6.5.1(eslint@7.32.0)
-      eslint-plugin-prettier: 3.4.1(eslint-config-prettier@6.15.0)(eslint@7.32.0)(wp-prettier@2.8.5)
+      eslint-plugin-prettier: 3.4.1(eslint-config-prettier@6.15.0)(eslint@7.32.0)(wp-prettier@2.2.1-beta-1)
       eslint-plugin-react: 7.29.4(eslint@7.32.0)
       eslint-plugin-react-hooks: 4.6.0(eslint@7.32.0)
       globals: 12.4.0
-      prettier: /wp-prettier@2.8.5
+      prettier: /wp-prettier@2.2.1-beta-1
       requireindex: 1.2.0
     transitivePeerDependencies:
       - supports-color
@@ -18968,7 +18970,7 @@ packages:
       '@babel/eslint-parser': 7.17.0(@babel/core@7.21.3)(eslint@7.32.0)
       '@typescript-eslint/eslint-plugin': 4.33.0(@typescript-eslint/parser@4.33.0)(eslint@7.32.0)(typescript@4.9.5)
       '@typescript-eslint/parser': 4.33.0(eslint@8.32.0)(typescript@4.9.5)
-      '@wordpress/prettier-config': 1.4.0(wp-prettier@2.8.5)
+      '@wordpress/prettier-config': 1.4.0(wp-prettier@2.2.1-beta-1)
       cosmiconfig: 7.0.1
       eslint: 7.32.0
       eslint-config-prettier: 7.2.0(eslint@7.32.0)
@@ -18976,11 +18978,11 @@ packages:
       eslint-plugin-jest: 24.7.0(@typescript-eslint/eslint-plugin@4.33.0)(eslint@7.32.0)(typescript@4.9.5)
       eslint-plugin-jsdoc: 36.1.1(eslint@7.32.0)
       eslint-plugin-jsx-a11y: 6.5.1(eslint@7.32.0)
-      eslint-plugin-prettier: 3.4.1(eslint-config-prettier@7.2.0)(eslint@7.32.0)(wp-prettier@2.8.5)
+      eslint-plugin-prettier: 3.4.1(eslint-config-prettier@7.2.0)(eslint@7.32.0)(wp-prettier@2.2.1-beta-1)
       eslint-plugin-react: 7.29.4(eslint@7.32.0)
       eslint-plugin-react-hooks: 4.6.0(eslint@7.32.0)
       globals: 12.4.0
-      prettier: /wp-prettier@2.8.5
+      prettier: /wp-prettier@2.2.1-beta-1
       requireindex: 1.2.0
       typescript: 4.9.5
     transitivePeerDependencies:
@@ -19492,23 +19494,14 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /@wordpress/prettier-config@1.4.0(wp-prettier@2.8.5):
+  /@wordpress/prettier-config@1.4.0(wp-prettier@2.2.1-beta-1):
     resolution: {integrity: sha512-uvrgUAhRnOvIysXjcXH9VDsrKLqH9r3BfdGoy+WFLSHFnTfdMhW7bdDQXl4F4UIUuefUwGi+ZvT/rChg9zoBkQ==}
     engines: {node: '>=12'}
     peerDependencies:
       prettier: '>=2'
     dependencies:
-      prettier: /wp-prettier@2.8.5
+      prettier: /wp-prettier@2.2.1-beta-1
     dev: true
-
-  /@wordpress/prettier-config@2.17.0(prettier@2.3.0):
-    resolution: {integrity: sha512-g4TEQIRDwNW/O8cAf895YV8a3eFfJr7RNLjqu70r8JFH4jmt2clJNu/9nxRburBxJZwqQnykrnDUz0HvXSbcsA==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      prettier: '>=2'
-    dependencies:
-      prettier: 2.3.0
-    dev: false
 
   /@wordpress/prettier-config@2.17.0(wp-prettier@2.8.5):
     resolution: {integrity: sha512-g4TEQIRDwNW/O8cAf895YV8a3eFfJr7RNLjqu70r8JFH4jmt2clJNu/9nxRburBxJZwqQnykrnDUz0HvXSbcsA==}
@@ -19517,7 +19510,6 @@ packages:
       prettier: '>=2'
     dependencies:
       prettier: /wp-prettier@2.8.5
-    dev: true
 
   /@wordpress/primitives@3.17.0:
     resolution: {integrity: sha512-alFOs74tqKeP2ByRqVOT9QYjXPLVZV+hM+8myusCN+60VB0hCTrUwTktFTAkftGbfpjoBOTe46pQ5eS/BZ1u/A==}
@@ -19732,7 +19724,7 @@ packages:
       minimist: 1.2.5
       npm-package-json-lint: 5.4.2
       postcss-loader: 3.0.0
-      prettier: /wp-prettier@2.8.5
+      prettier: /wp-prettier@2.2.1-beta-1
       puppeteer: /puppeteer-core@3.0.0
       read-pkg-up: 1.0.1
       resolve-bin: 0.4.3
@@ -19779,7 +19771,7 @@ packages:
       '@wordpress/jest-preset-default': 7.1.3(@babel/core@7.21.3)(jest@26.6.3)(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/npm-package-json-lint-config': 4.2.0(npm-package-json-lint@5.4.2)
       '@wordpress/postcss-plugins-preset': 3.6.1(postcss@8.4.12)
-      '@wordpress/prettier-config': 1.4.0(wp-prettier@2.8.5)
+      '@wordpress/prettier-config': 1.4.0(wp-prettier@2.2.1-beta-1)
       '@wordpress/stylelint-config': 19.1.0(stylelint@13.13.1)
       babel-jest: 26.6.3(@babel/core@7.21.3)
       babel-loader: 8.2.3(@babel/core@7.21.3)(webpack@5.70.0)
@@ -19808,7 +19800,7 @@ packages:
       npm-package-json-lint: 5.4.2
       postcss: 8.4.12
       postcss-loader: 6.2.1(postcss@8.4.12)(webpack@5.70.0)
-      prettier: /wp-prettier@2.8.5
+      prettier: /wp-prettier@2.2.1-beta-1
       puppeteer-core: 10.4.0
       read-pkg-up: 1.0.1
       resolve-bin: 0.4.3
@@ -25876,7 +25868,7 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-plugin-prettier@3.4.1(eslint-config-prettier@6.15.0)(eslint@7.32.0)(wp-prettier@2.8.5):
+  /eslint-plugin-prettier@3.4.1(eslint-config-prettier@6.15.0)(eslint@7.32.0)(wp-prettier@2.2.1-beta-1):
     resolution: {integrity: sha512-htg25EUYUeIhKHXjOinK4BgCcDwtLHjqaxCDsMy5nbnUMkKFvIhMVCp+5GFUXQ4Nr8lBsPqtGAqBenbpFqAA2g==}
     engines: {node: '>=6.0.0'}
     peerDependencies:
@@ -25889,11 +25881,11 @@ packages:
     dependencies:
       eslint: 7.32.0
       eslint-config-prettier: 6.15.0(eslint@7.32.0)
-      prettier: /wp-prettier@2.8.5
+      prettier: /wp-prettier@2.2.1-beta-1
       prettier-linter-helpers: 1.0.0
     dev: true
 
-  /eslint-plugin-prettier@3.4.1(eslint-config-prettier@7.2.0)(eslint@7.32.0)(wp-prettier@2.8.5):
+  /eslint-plugin-prettier@3.4.1(eslint-config-prettier@7.2.0)(eslint@7.32.0)(wp-prettier@2.2.1-beta-1):
     resolution: {integrity: sha512-htg25EUYUeIhKHXjOinK4BgCcDwtLHjqaxCDsMy5nbnUMkKFvIhMVCp+5GFUXQ4Nr8lBsPqtGAqBenbpFqAA2g==}
     engines: {node: '>=6.0.0'}
     peerDependencies:
@@ -25906,26 +25898,9 @@ packages:
     dependencies:
       eslint: 7.32.0
       eslint-config-prettier: 7.2.0(eslint@7.32.0)
-      prettier: /wp-prettier@2.8.5
+      prettier: /wp-prettier@2.2.1-beta-1
       prettier-linter-helpers: 1.0.0
     dev: true
-
-  /eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.5.0)(eslint@8.32.0)(prettier@2.3.0):
-    resolution: {integrity: sha512-htg25EUYUeIhKHXjOinK4BgCcDwtLHjqaxCDsMy5nbnUMkKFvIhMVCp+5GFUXQ4Nr8lBsPqtGAqBenbpFqAA2g==}
-    engines: {node: '>=6.0.0'}
-    peerDependencies:
-      eslint: '>=5.0.0'
-      eslint-config-prettier: '*'
-      prettier: '>=1.13.0'
-    peerDependenciesMeta:
-      eslint-config-prettier:
-        optional: true
-    dependencies:
-      eslint: 8.32.0
-      eslint-config-prettier: 8.5.0(eslint@8.32.0)
-      prettier: 2.3.0
-      prettier-linter-helpers: 1.0.0
-    dev: false
 
   /eslint-plugin-prettier@3.4.1(eslint-config-prettier@8.5.0)(eslint@8.32.0)(wp-prettier@2.8.5):
     resolution: {integrity: sha512-htg25EUYUeIhKHXjOinK4BgCcDwtLHjqaxCDsMy5nbnUMkKFvIhMVCp+5GFUXQ4Nr8lBsPqtGAqBenbpFqAA2g==}
@@ -25942,7 +25917,6 @@ packages:
       eslint-config-prettier: 8.5.0(eslint@8.32.0)
       prettier: /wp-prettier@2.8.5
       prettier-linter-helpers: 1.0.0
-    dev: true
 
   /eslint-plugin-react-hooks@2.5.1(eslint@8.32.0):
     resolution: {integrity: sha512-Y2c4b55R+6ZzwtTppKwSmK/Kar8AdLiC2f9NADCuxbcTgPPg41Gyqa6b9GppgXSvCtkRw43ZE86CT5sejKC6/g==}
@@ -37220,7 +37194,7 @@ packages:
     resolution: {integrity: sha512-kXtO4s0Lz/DW/IJ9QdWhAf7/NmPWQXkFr/r/WkR3vyI+0v8amTDxiaQSLzs8NBlytfLWX/7uQUMIW677yLKl4w==}
     engines: {node: '>=10.13.0'}
     hasBin: true
-    dev: false
+    dev: true
 
   /pretty-bytes@3.0.1:
     resolution: {integrity: sha512-eb7ZAeUTgfh294cElcu51w+OTRp/6ItW758LjwJSK72LDevcuJn0P4eD71PLMDGPwwatXmAmYHTkzvpKlJE3ow==}
@@ -43755,6 +43729,18 @@ packages:
       uppercamelcase: 1.1.0
     dev: false
 
+  /wp-prettier@1.19.1:
+    resolution: {integrity: sha512-mqAC2r1NDmRjG+z3KCJ/i61tycKlmADIjxnDhQab+KBxSAGbF/W7/zwB2guy/ypIeKrrftNsIYkNZZQKf3vJcg==}
+    engines: {node: '>=4'}
+    hasBin: true
+    dev: false
+
+  /wp-prettier@2.2.1-beta-1:
+    resolution: {integrity: sha512-+JHkqs9LC/JPp51yy1hzs3lQ7qeuWCwOcSzpQNeeY/G7oSpnF61vxt7hRh87zNRTr6ob2ndy0W8rVzhgrcA+Gw==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
+    dev: true
+
   /wp-prettier@2.8.5:
     resolution: {integrity: sha512-gkphzYtVksWV6D7/V530bTehKkhrABUru/Gy4reOLOHJoKH4i9lcE1SxqU2VDxC3gCOx/Nk9alZmWk6xL/IBCw==}
     engines: {node: '>=10.13.0'}
@@ -44306,7 +44292,7 @@ packages:
       config: 3.3.7
       eslint: 6.7.2
       jest: 24.9.0
-      prettier: /wp-prettier@2.8.5
+      prettier: /wp-prettier@1.19.1
       puppeteer: 2.1.1
     transitivePeerDependencies:
       - bufferutil
