@@ -161,10 +161,11 @@ const program = new Command( 'changefile' )
 				Logger.error( e );
 			}
 
+			const touchedProjectsString =
+				touchedProjectsRequiringChangelog.join( ', ' );
+
 			Logger.notice(
-				`Changelogs created for ${ touchedProjectsRequiringChangelog.join(
-					', '
-				) }`
+				`Changelogs created for ${ touchedProjectsString }`
 			);
 
 			const git = simpleGit( {
@@ -198,7 +199,9 @@ const program = new Command( 'changefile' )
 
 			Logger.notice( `Adding and committing changes` );
 			await git.add( '.' );
-			await git.commit( 'Adding changelog from automation.' );
+			await git.commit(
+				`Add changefile(s) from automation for the following project(s): ${ touchedProjectsString }`
+			);
 			await git.push( 'origin', branch );
 			Logger.notice( `Pushed changes to ${ branch }` );
 		}
