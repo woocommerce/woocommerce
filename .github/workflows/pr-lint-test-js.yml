@@ -22,7 +22,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  build: false
+                  install-filters: '@woocommerce/*'
+                  build-filters: '@woocommerce/*'
 
             - name: Lint
               run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
