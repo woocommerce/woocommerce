@@ -22,10 +22,12 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                  install-filters: 'woocommerce/client/admin...
+                  install-filters: 'woocommerce/client/admin
+                      ./packages/js/*
                       !@woocommerce/e2e*
                       !@woocommerce/api'
-                  build-filters: 'woocommerce/client/admin...
+                  build-filters: 'woocommerce/client/admin
+                      ./packages/js/*
                       !@woocommerce/e2e*
                       !@woocommerce/api'
 
