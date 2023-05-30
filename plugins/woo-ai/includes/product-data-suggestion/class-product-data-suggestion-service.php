@@ -7,8 +7,8 @@
 
 namespace Automattic\WooCommerce\AI\ProductDataSuggestion;
 
+use Automattic\WooCommerce\AI\Completion\Completion_Exception;
 use Automattic\WooCommerce\AI\Completion\Completion_Service_Interface;
-use Exception;
 use JsonException;
 
 defined( 'ABSPATH' ) || exit;
@@ -52,19 +52,25 @@ class Product_Data_Suggestion_Service {
 	 *               - content: The suggested content.
 	 *               - reason: The reason for the suggestion.
 	 *
-	 * @throws Exception If getting the suggestions fails.
+	 * @throws Product_Data_Suggestion_Exception If If getting the suggestions fails or the suggestions cannot be decoded from JSON.
 	 */
 	public function get_suggestions( Product_Data_Suggestion_Request $request ): array {
-		$arguments  = array(
+		$arguments = array(
 			'content'    => $this->prompt_generator->get_user_prompt( $request ),
 			'skip_cache' => true,
 		);
-		$completion = $this->completion_service->get_completion( $arguments );
+
+		try {
+			$completion = $this->completion_service->get_completion( $arguments );
+		} catch ( Completion_Exception $e ) {
+			/* translators: %s: The error message. */
+			throw new Product_Data_Suggestion_Exception( sprintf( __( 'Failed to fetch the suggestions: %s', 'woocommerce' ), $e->getMessage() ), $e->getCode(), $e );
+		}
 
 		try {
 			return json_decode( $completion, true, 512, JSON_THROW_ON_ERROR );
 		} catch ( JsonException $e ) {
-			throw new Exception( 'Failed to decode the suggestions. Please try again.', 400, $e );
+			throw new Product_Data_Suggestion_Exception( 'Failed to decode the suggestions. Please try again.', 400, $e );
 		}
 	}
 

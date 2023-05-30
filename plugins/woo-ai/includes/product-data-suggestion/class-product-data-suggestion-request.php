@@ -7,8 +7,6 @@
 
 namespace Automattic\WooCommerce\AI\ProductDataSuggestion;
 
-use Exception;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -74,7 +72,7 @@ class Product_Data_Suggestion_Request {
 	 * @param integer[] $categories     Category IDs of the product as an associative array.
 	 * @param array[]   $attributes     Other attributes of the product as an associative array.
 	 *
-	 * @throws Exception If the requested attribute is invalid.
+	 * @throws Product_Data_Suggestion_Exception If the requested attribute is invalid.
 	 */
 	public function __construct( string $requested_data, string $name, string $description, array $tags = array(), array $categories = array(), array $attributes = array() ) {
 		$this->validate_requested_data( $requested_data );
@@ -94,7 +92,7 @@ class Product_Data_Suggestion_Request {
 	 *
 	 * @return void
 	 *
-	 * @throws Exception If the requested data is invalid.
+	 * @throws Product_Data_Suggestion_Exception If the requested data is invalid.
 	 */
 	private function validate_requested_data( string $requested_data ): void {
 		$valid_requested_data_keys = array(
@@ -105,7 +103,7 @@ class Product_Data_Suggestion_Request {
 		);
 
 		if ( ! in_array( $requested_data, $valid_requested_data_keys, true ) ) {
-			throw new Exception( 'Invalid requested data.' );
+			throw new Product_Data_Suggestion_Exception( 'Invalid requested data.', 400 );
 		}
 	}
 }

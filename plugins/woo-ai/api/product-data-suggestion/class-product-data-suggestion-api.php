@@ -10,13 +10,13 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\AI\Completion\Jetpack_Completion_Service;
+use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Exception;
 use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Prompt_Generator;
 use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Request;
 use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Service;
 use Automattic\WooCommerce\AI\PromptFormatter\Json_Request_Formatter;
 use Automattic\WooCommerce\AI\PromptFormatter\Product_Attribute_Formatter;
 use Automattic\WooCommerce\AI\PromptFormatter\Product_Category_Formatter;
-use Exception;
 use WC_REST_Data_Controller;
 use WP_Error;
 use WP_HTTP_Response;
@@ -179,14 +179,14 @@ class Product_Data_Suggestion_API extends WC_REST_Data_Controller {
 
 		// Check if enough data is provided in the name and description to get suggestions.
 		if ( strlen( $name ) < 10 && strlen( $description ) < 50 ) {
-			return new WP_Error( 'error', __( 'Please provide a name with at least 10 characters, or a description with at least 50 characters.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'error', __( 'Enter a few descriptive words or add product description, tags, or attributes to generate name ideas.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		try {
 			$product_data_request = new Product_Data_Suggestion_Request( $requested_data, $name, $description, $tags, $categories, $attributes );
 			$suggestions          = $this->product_data_suggestion_service->get_suggestions( $product_data_request );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		} catch ( Product_Data_Suggestion_Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		return rest_ensure_response( $suggestions );
