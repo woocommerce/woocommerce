@@ -154,14 +154,11 @@ export const ProductNameSuggestions = () => {
 	};
 
 	const shouldRenderSuggestionsButton = useCallback( () => {
-		// Only show the button if this is the first load because the completion API caches results, and we don't want to show stale results on subsequent loads.
-		// @todo: remove the isFirstLoad check one we have a way to invalidate the cache.
 		return (
-			isFirstLoad &&
 			productName.length >= 10 &&
 			suggestionsState !== SuggestionsState.Fetching
 		);
-	}, [ isFirstLoad, productName, suggestionsState ] );
+	}, [ productName, suggestionsState ] );
 
 	const getSuggestionsButtonLabel = useCallback( () => {
 		return isFirstLoad
