@@ -16,7 +16,7 @@ export interface BlockAttributes {
 
 export interface AddToCartButtonPlaceholderAttributes {
 	className: string;
-	style: Record< string, unknown >;
+	style: React.CSSProperties;
 }
 
 export interface AddToCartButtonAttributes
