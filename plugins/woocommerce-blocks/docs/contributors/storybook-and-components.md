@@ -12,9 +12,9 @@ This repo includes [Storybook](https://storybook.js.org) tooling so we can test 
 
 We have components in a few folders, for different contexts.
 
--   [`assets/js/base/components`](../../../assets/js/base/components)
--   [`assets/js/editor-components`](../../../assets/js/editor-components)
--   [`assets/js/icons`](../../../assets/js/icons)
+-   [`assets/js/base/components`](../../assets/js/base/components)
+-   [`assets/js/editor-components`](../../assets/js/editor-components)
+-   [`assets/js/icons`](../../assets/js/icons)
 
 **`assets/js/base/components`** are used in front-end code, as well as editor & admin.
 These components help us build consistent interfaces across the front end (shopper) experience and elsewhere.
@@ -50,7 +50,6 @@ If you're stuck, copy source of an existing story to get started.
 
 [We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/contributing/storybook-and-components.md)
+🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/storybook-and-components.md)
 
 <!-- /FEEDBACK -->
-
