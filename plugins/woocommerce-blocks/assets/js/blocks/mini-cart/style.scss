@@ -175,11 +175,13 @@ h2.wc-block-mini-cart__title {
 		}
 
 		.wp-block-woocommerce-mini-cart-cart-button-block {
-			display: none;
-
 			@media only screen and (min-width: 480px) {
 				display: inline-flex;
 			}
+		}
+
+		@media only screen and (max-width: 480px) {
+			flex-direction: column;
 		}
 	}
 
