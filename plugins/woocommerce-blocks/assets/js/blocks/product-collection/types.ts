@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { AttributeMetadata } from '@woocommerce/types';
+
 export interface ProductCollectionAttributes {
 	query: ProductCollectionQuery;
 	queryId: number;
@@ -45,6 +50,7 @@ export interface ProductCollectionQuery {
 	 * ```
 	 */
 	woocommerceStockStatus?: string[];
+	woocommerceAttributes?: AttributeMetadata[];
 	isProductCollectionBlock?: boolean;
 }
 
