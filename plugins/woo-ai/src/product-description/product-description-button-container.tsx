@@ -4,7 +4,6 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -12,6 +11,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { MIN_TITLE_LENGTH } from '../constants';
 import { WriteItForMeBtn, StopCompletionBtn } from '../components';
 import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
+import { recordTracksFactory } from '../utils';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
@@ -27,14 +27,12 @@ const getApiError = () => {
 	);
 };
 
-const recordDescriptionTracks = (
-	name: string,
-	properties?: Record< string, string | number >
-) =>
-	recordEvent( `woo_ai_product_description_completion_${ name }`, {
+const recordDescriptionTracks = recordTracksFactory(
+	'description_completion',
+	() => ( {
 		post_id: getPostId(),
-		...properties,
-	} );
+	} )
+);
 
 export function WriteItForMeButtonContainer() {
 	const titleEl = useRef< HTMLInputElement >(
