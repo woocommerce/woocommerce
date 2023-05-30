@@ -26,7 +26,7 @@ JSON_REQUEST_PROMPT;
 	/**
 	 * Generates a prompt so that we can get a JSON response from the completion API.
 	 *
-	 * @param string $data An example JSON response to include in the request.
+	 * @param array $data An example array of data to include in the request as a possible JSON response.
 	 *
 	 * @return string
 	 *
@@ -34,12 +34,12 @@ JSON_REQUEST_PROMPT;
 	 */
 	public function format( $data ): string {
 		if ( ! $this->validate_data( $data ) ) {
-			throw new InvalidArgumentException( 'Invalid input data. Provide a string.' );
+			throw new InvalidArgumentException( 'Invalid input data. Provide an array.' );
 		}
 
 		return sprintf(
 			self::JSON_REQUEST_PROMPT,
-			$data
+			wp_json_encode( $data )
 		);
 	}
 
@@ -51,7 +51,7 @@ JSON_REQUEST_PROMPT;
 	 * @return bool True if the data is valid, false otherwise.
 	 */
 	public function validate_data( $data ): bool {
-		return ! empty( $data ) && is_string( $data );
+		return ! empty( $data ) && is_array( $data );
 	}
 
 }
