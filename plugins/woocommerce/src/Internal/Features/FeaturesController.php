@@ -815,6 +815,10 @@ class FeaturesController {
 	 * there's already a "You are viewing
 	 */
 	private function maybe_display_feature_incompatibility_warning(): void {
+		if ( ! current_user_can( 'activate_plugins' ) ) {
+			return;
+		}
+
 		$incompatible_plugins = false;
 
 		foreach ( $this->plugin_util->get_woocommerce_aware_plugins( true ) as $plugin ) {
