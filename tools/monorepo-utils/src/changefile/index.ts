@@ -98,7 +98,8 @@ const program = new Command( 'changefile' )
 					base,
 					head,
 					fileName,
-					owner
+					owner,
+					name
 				);
 
 			try {
