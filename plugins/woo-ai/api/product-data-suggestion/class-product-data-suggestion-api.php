@@ -9,10 +9,10 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use Automattic\WooCommerce\AI\Completion\Jetpack_Completion_Service;
 use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Prompt_Generator;
 use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Request;
 use Automattic\WooCommerce\AI\ProductDataSuggestion\Product_Data_Suggestion_Service;
-use Automattic\WooCommerce\AI\Completion\Completion_Service;
 use Automattic\WooCommerce\AI\PromptFormatter\Json_Request_Formatter;
 use Automattic\WooCommerce\AI\PromptFormatter\Product_Attribute_Formatter;
 use Automattic\WooCommerce\AI\PromptFormatter\Product_Category_Formatter;
@@ -58,11 +58,12 @@ class Product_Data_Suggestion_API extends WC_REST_Data_Controller {
 	 * Constructor
 	 */
 	public function __construct() {
-		$json_request_formatter                = new Json_Request_Formatter();
-		$product_category_formatter            = new Product_Category_Formatter();
-		$product_attribute_formatter           = new Product_Attribute_Formatter();
-		$prompt_generator                      = new Product_Data_Suggestion_Prompt_Generator( $product_category_formatter, $product_attribute_formatter, $json_request_formatter );
-		$completion_service                    = new Completion_Service();
+		$json_request_formatter      = new Json_Request_Formatter();
+		$product_category_formatter  = new Product_Category_Formatter();
+		$product_attribute_formatter = new Product_Attribute_Formatter();
+		$prompt_generator            = new Product_Data_Suggestion_Prompt_Generator( $product_category_formatter, $product_attribute_formatter, $json_request_formatter );
+		$completion_service          = new Jetpack_Completion_Service();
+
 		$this->product_data_suggestion_service = new Product_Data_Suggestion_Service( $prompt_generator, $completion_service );
 
 		$this->register_routes();

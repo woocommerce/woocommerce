@@ -33,5 +33,4 @@ const nameSuggestionsRoot = document.getElementById(
 if ( window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
 	renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
 	renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
-	renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
 }
