@@ -76,7 +76,7 @@ const program = new Command( 'changefile' )
 				? devRepoPath
 				: await cloneAuthenticatedRepo(
 						{ owner: headOwner, name },
-						true
+						false
 				  );
 
 			Logger.endTask();
