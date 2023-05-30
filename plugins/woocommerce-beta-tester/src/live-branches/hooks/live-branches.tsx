@@ -16,31 +16,44 @@ export type Branch = {
 	install_status: PluginStatus;
 };
 
+type LiveBranchesResponse = {
+	pr: { [ key: string ]: Branch };
+	master: Branch;
+};
+
 export const useLiveBranchesData = () => {
 	const [ branches, setBranches ] = useState< Branch[] >( [] );
 	const [ loading, setLoading ] = useState< boolean >( true );
+	const [ isError, setIsError ] = useState< boolean >( false );
 
 	useEffect( () => {
 		const getBranches = async () => {
-			const res = await apiFetch( {
-				path: `${ API_NAMESPACE }/live-branches/manifest/v1`,
-				method: 'GET',
-			} );
+			try {
+				const res = await apiFetch< LiveBranchesResponse >( {
+					path: `${ API_NAMESPACE }/live-branches/manifest/v1`,
+					method: 'GET',
+				} );
 
-			setBranches(
-				// @ts-ignore
-				Object.entries( res.pr ).map( ( [ , value ] ) => {
-					return value;
-				} ) as Branch[]
-			);
+				const prBranches = Object.entries( res.pr ).map(
+					( [ , value ] ) => {
+						return value;
+					}
+				) as Branch[];
 
-			setLoading( false );
+				console.log( res.master, prBranches );
+
+				setBranches( [ res.master, ...prBranches ] );
+				setLoading( false );
+			} catch ( e ) {
+				setIsError( true );
+				setLoading( false );
+			}
 		};
 
 		getBranches();
 	}, [] );
 
-	return { branches, isLoading: loading };
+	return { branches, isLoading: loading, isError };
 };
 
 export const useLiveBranchInstall = (

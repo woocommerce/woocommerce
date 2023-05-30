@@ -29,5 +29,7 @@ function fetch_live_branches_manifest() {
 		$value->install_status = $installer->check_install_status( $value->version );
 	}
 
+	$obj->master->install_status = $installer->check_install_status( $obj->master->version );
+
 	return new WP_REST_Response( $obj, 200 );
 }
