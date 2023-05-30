@@ -5364,9 +5364,6 @@ img.help_tip {
 		padding: 0;
 		margin: 0 0 0 -150px;
 
-		&.disabled {
-			opacity: 0.5;
-		}
 
 		.req {
 			font-weight: 700;
@@ -5382,6 +5379,14 @@ img.help_tip {
 		margin: 0 0 0 7px;
 		clear: none;
 		display: inline;
+	}
+
+	label,
+	input {
+		&.disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
 	}
 
 	input:not([type="checkbox"]):not([type="radio"]) + .description {

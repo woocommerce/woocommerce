@@ -265,26 +265,21 @@ jQuery( function ( $ ) {
 	function disable_or_enable_fields() {
 		var product_type = $( 'select#product-type' ).val();
 		$( `.disable_if_grouped` ).each( function () {
-			if ( $( this ).is( 'label' ) ) {
-				$( this ).removeClass( 'disabled' );
-			} else {
-				$( this ).prop( 'disabled', false ).css( 'cursor', 'initial' );
+			$( this ).removeClass( 'disabled' );
+			if ( $( this ).is('input')) {
+				$( this ).prop( 'disabled', false )
 			}
 		} );
 		$( `.disable_if_variable` ).each( function () {
-			if ( $( this ).is( 'label' ) ) {
-				$( this ).removeClass( 'disabled' );
-			} else {
-				$( this ).prop( 'disabled', false ).css( 'cursor', 'initial' );
+			$( this ).removeClass( 'disabled' );
+			if ( $( this ).is('input')) {
+				$( this ).prop( 'disabled', false )
 			}
 		} );
 		$( `.disable_if_${ product_type }` ).each( function () {
-			if ( $( this ).is( 'label' ) ) {
-				$( this ).addClass( 'disabled' );
-			} else {
-				$( this )
-					.prop( 'disabled', true )
-					.css( 'cursor', 'not-allowed' );
+			$( this ).addClass( 'disabled' );
+			if ( $( this ).is('input')) {
+				$( this ).prop( 'disabled', true )
 			}
 		} );
 	}
@@ -929,6 +924,34 @@ jQuery( function ( $ ) {
 			return false;
 		}
 	);
+
+	// Go to variations tab when clicking on link in the general tab message
+	$( document.body ).on(
+		'click',
+		'#general_product_data .woocommerce-message a[href="#variable_product_options"]',
+		function () {
+			$(
+				'#woocommerce-product-data .variations_tab a[href="#variable_product_options"]'
+			).trigger( 'click' );
+			return false;
+		}
+	);
+
+	// Go to linked products tab when clicking on link in the general tab message
+	$( document.body ).on(
+		'click',
+		'#general_product_data .woocommerce-message a[href="#linked_product_data"]',
+		function () {
+			$(
+				'#woocommerce-product-data .linked_product_tab a[href="#linked_product_data"]'
+			).trigger( 'click' );
+			return false;
+		}
+	);
+
+
+
+
 
 	// Uploading files.
 	var downloadable_file_frame;
