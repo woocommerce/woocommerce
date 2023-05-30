@@ -2119,7 +2119,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 		 * @param int $limit number of upsell products.
 		 * @since 3.0.0
 		 */
-		$limit   = intval( apply_filters( 'woocommerce_upsells_total', $args['posts_per_page'] ?? $limit ) );
+		$limit = intval( apply_filters( 'woocommerce_upsells_total', $args['posts_per_page'] ?? $limit ) );
 
 		// Get visible upsells then sort them at random, then limit result set.
 		$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' ), $orderby, $order );
