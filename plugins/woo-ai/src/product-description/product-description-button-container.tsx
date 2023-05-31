@@ -38,7 +38,7 @@ export function WriteItForMeButtonContainer() {
 		titleEl.current?.value || ''
 	);
 	const tinyEditor = useTinyEditor();
-	const { showSnackbar } = useFeedbackSnackbar();
+	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
 			onStreamMessage: ( content ) => {
@@ -62,7 +62,7 @@ export function WriteItForMeButtonContainer() {
 
 				setFetching( false );
 
-				if ( reason !== 'abort' ) {
+				if ( reason === 'finished' ) {
 					showSnackbar( {
 						label: __(
 							'Description added. How is it?',
@@ -112,19 +112,23 @@ export function WriteItForMeButtonContainer() {
 		return instructions.join( '\n' );
 	};
 
+	const onWriteItForMeClick = () => {
+		setFetching( true );
+		removeSnackbar();
+
+		const prompt = buildPrompt();
+		recordDescriptionTracks( 'start', {
+			prompt,
+		} );
+		requestCompletion( prompt );
+	};
+
 	return completionActive ? (
 		<StopCompletionBtn onClick={ stopCompletion } />
 	) : (
 		<WriteItForMeBtn
 			disabled={ writeItForMeDisabled }
-			onClick={ () => {
-				setFetching( true );
-				const prompt = buildPrompt();
-				recordDescriptionTracks( 'start', {
-					prompt,
-				} );
-				requestCompletion( prompt );
-			} }
+			onClick={ onWriteItForMeClick }
 		/>
 	);
 }

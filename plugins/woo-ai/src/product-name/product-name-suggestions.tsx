@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
-import React from 'react';
 import { Pill } from '@woocommerce/components';
 import { Tooltip } from '@wordpress/components';
 
