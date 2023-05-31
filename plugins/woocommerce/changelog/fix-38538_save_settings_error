@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix issue where undefined query params where not removed from links, causing unexpected behaviour in Analytics.
