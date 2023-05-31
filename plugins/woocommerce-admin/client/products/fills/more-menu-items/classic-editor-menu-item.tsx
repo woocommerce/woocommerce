@@ -26,9 +26,8 @@ export const ClassicEditorMenuItem = ( {
 	const { showProductMVPFeedbackModal } = useDispatch( CES_STORE_KEY );
 
 	const { allowTracking, resolving: isLoading } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } = select(
-			OPTIONS_STORE_NAME
-		);
+		const { getOption, hasFinishedResolution } =
+			select( OPTIONS_STORE_NAME );
 
 		const allowTrackingOption =
 			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';

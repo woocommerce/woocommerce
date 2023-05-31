@@ -1091,19 +1091,21 @@ class FeaturesController {
 	/**
 	 * Changes the feature given it's id and a toggle value as a query param.
 	 *
-	 * `/wp-admin/post.php?product_block_editor=1`, 1 for on 
+	 * `/wp-admin/post.php?product_block_editor=1`, 1 for on
 	 * `/wp-admin/post.php?product_block_editor=0`, 0 for off
 	 */
 	private function change_feature_enable_from_query_params(): void {
-		if ( ! is_admin() ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
 		foreach ( array_keys( $this->features ) as $feature_id ) {
-			if ( isset( $_GET[ $feature_id ] ) ) {
-				if ( '1' === $_GET[ $feature_id ] ) {
+			if ( isset( $_GET[ $feature_id ] ) && is_numeric( $_GET[ $feature_id ] ) ) {
+				$value = absint( $_GET[ $feature_id ] );
+
+				if ( 1 === $value ) {
 					$this->change_feature_enable( $feature_id, true );
-				} elseif ( '0' === $_GET[ $feature_id ] ) {
+				} elseif ( 0 === $value ) {
 					$this->change_feature_enable( $feature_id, false );
 				}
 			}

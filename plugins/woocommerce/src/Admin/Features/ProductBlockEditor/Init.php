@@ -42,32 +42,38 @@ class Init {
 	}
 
 	/**
-	 * Redirects from old product form to the new product form if the 
-	 * feature `product_block_editor` is enabled. If the feature is 
+	 * Redirects from old product form to the new product form if the
+	 * feature `product_block_editor` is enabled. If the feature is
 	 * disabled then the redirection happens in reverse order.
 	 */
 	public function maybe_swap_old_product_form_and_new_product_block_editor(): void {
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			if ( 0 === strpos( $_SERVER['REQUEST_URI'], '/wp-admin/post-new.php') && 'product' === $_GET['post_type'] ) {
-				wp_safe_redirect( '/wp-admin/admin.php?page=wc-admin&path=/add-product' );
-				exit();
-			}
+			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+				$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 
-			if ( 0 === strpos( $_SERVER['REQUEST_URI'], '/wp-admin/post.php') && isset( $_GET['post'] ) && 'edit' === $_GET['action'] ) {
-				$product_id = $_GET['post'];
-				wp_safe_redirect( '/wp-admin/admin.php?page=wc-admin&path=/product/' . $product_id );
-				exit();
-			}
-		} else {
-			if ( \Automattic\WooCommerce\Admin\PageController::is_admin_page() ) {
-				if ( '/add-product' === $_GET['path'] ) {
-					wp_safe_redirect( '/wp-admin/post-new.php?post_type=product' );
+				if ( preg_match( '/^\/wp-admin\/post-new.php/', $request_uri ) && isset( $_GET['post_type'] ) && 'product' === $_GET['post_type'] ) {
+					wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) );
 					exit();
 				}
 
-				if ( preg_match( '/^\/product\/(.*)/', $_GET['path'], $matches ) ) {
-					$product_id = $matches[1];
-					wp_safe_redirect( '/wp-admin/post.php?post=' . $product_id . '&action=edit' );
+				if ( preg_match( '/^\/wp-admin\/post.php/', $request_uri ) && isset( $_GET['post'] ) && isset( $_GET['action'] ) && 'edit' === $_GET['action'] ) {
+					$product_id = absint( $_GET['post'] );
+					wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/product/' . $product_id ) );
+					exit();
+				}
+			}
+		} else {
+			if ( \Automattic\WooCommerce\Admin\PageController::is_admin_page() && isset( $_GET['path'] ) ) {
+				$path = esc_url_raw( wp_unslash( $_GET['path'] ) );
+
+				if ( preg_match( '/^\/add-product$/', $path ) ) {
+					wp_safe_redirect( admin_url( 'post-new.php?post_type=product' ) );
+					exit();
+				}
+
+				if ( preg_match( '/^\/product\/(\d+)$/', $path, $matches ) ) {
+					$product_id = absint( $matches[1] );
+					wp_safe_redirect( admin_url( 'post.php?post=' . $product_id . '&action=edit' ) );
 					exit();
 				}
 			}
