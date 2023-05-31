@@ -20,12 +20,14 @@ import { getSettings } from '@wordpress/date';
  * Internal dependencies
  */
 import { ScheduleSalePricingBlockAttributes } from './types';
+import { useProductEdits } from '../../hooks/use-product-edits';
 import { useValidation } from '../../contexts/validation-context';
 
 export function Edit( {
 	clientId,
 }: BlockEditProps< ScheduleSalePricingBlockAttributes > ) {
 	const blockProps = useBlockProps();
+	const { hasEdit } = useProductEdits();
 
 	const dateTimeFormat = getSettings().formats.datetime;
 
@@ -66,10 +68,10 @@ export function Edit( {
 		}
 	}
 
-	// Hide and clean date fields if the user manually change
+	// Hide and clean date fields if the user manually changes
 	// the sale price to zero or less.
 	useEffect( () => {
-		if ( ! isSalePriceGreaterThanZero ) {
+		if ( hasEdit( 'sale_price' ) && ! isSalePriceGreaterThanZero ) {
 			setShowScheduleSale( false );
 			setDateOnSaleFromGmt( '' );
 			setDateOnSaleToGmt( '' );
