@@ -20,7 +20,8 @@ import {
 } from '../utils/types';
 import SuggestionItem from './suggestion-item';
 import { RandomLoadingMessage } from '../components';
-import { MIN_TITLE_LENGTH } from '../constants';
+
+const MIN_TITLE_LENGTH = 10;
 
 enum SuggestionsState {
 	Fetching = 'fetching',
@@ -133,6 +134,7 @@ export const ProductNameSuggestions = () => {
 		if ( ! nameInputRef.current || ! newName.length ) return;
 		nameInputRef.current.value = newName;
 		nameInputRef.current.setAttribute( 'value', newName );
+		nameInputRef.current.setAttribute( 'data-generated', 'ai' );
 		setProductName( newName );
 	};
 

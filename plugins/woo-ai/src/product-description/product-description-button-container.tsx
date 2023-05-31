@@ -8,7 +8,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { MIN_TITLE_LENGTH } from '../constants';
+import { MIN_TITLE_LENGTH_FOR_DESCRIPTION } from '../constants';
 import { WriteItForMeBtn, StopCompletionBtn } from '../components';
 import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
 import { recordTracksFactory, getPostId } from '../utils';
@@ -34,6 +34,8 @@ export function WriteItForMeButtonContainer() {
 		document.querySelector( '#title' )
 	);
 	const [ fetching, setFetching ] = useState< boolean >( false );
+	const [ titleIsGenerated, setTitleIsGenerated ] =
+		useState< boolean >( false );
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
@@ -85,20 +87,43 @@ export function WriteItForMeButtonContainer() {
 
 	useEffect( () => {
 		const title = titleEl.current;
-		const titleKeyupHandler = ( e: KeyboardEvent ) =>
+		const titleKeyupHandler = ( e: KeyboardEvent ) => {
+			setTitleIsGenerated( false );
 			setProductTitle(
 				( e.target as HTMLInputElement ).value.trim() || ''
 			);
-
+		};
 		title?.addEventListener( 'keyup', titleKeyupHandler );
+
+		// This observer is used to detect when the title is generated.
+		const titleObserver = new MutationObserver( ( mutations ) => {
+			const generatedAttrs = mutations.filter(
+				( mutation ) =>
+					mutation.type === 'attributes' &&
+					mutation.attributeName === 'data-generated'
+			);
+			if ( generatedAttrs.length ) {
+				setTitleIsGenerated( true );
+			}
+		} );
+
+		if ( title ) {
+			titleObserver.observe( title, {
+				attributes: true,
+			} );
+		}
 
 		return () => {
 			title?.removeEventListener( 'keyup', titleKeyupHandler );
+			titleObserver.disconnect();
 		};
 	}, [ titleEl ] );
 
-	const writeItForMeDisabled =
-		fetching || ! productTitle || productTitle.length < MIN_TITLE_LENGTH;
+	const writeItForMeEnabled =
+		productTitle.length &&
+		! fetching &&
+		( titleIsGenerated ||
+			productTitle.length >= MIN_TITLE_LENGTH_FOR_DESCRIPTION );
 
 	const buildPrompt = () => {
 		const instructions = [
@@ -130,7 +155,7 @@ export function WriteItForMeButtonContainer() {
 		<StopCompletionBtn onClick={ stopCompletion } />
 	) : (
 		<WriteItForMeBtn
-			disabled={ writeItForMeDisabled }
+			disabled={ ! writeItForMeEnabled }
 			onClick={ onWriteItForMeClick }
 		/>
 	);
