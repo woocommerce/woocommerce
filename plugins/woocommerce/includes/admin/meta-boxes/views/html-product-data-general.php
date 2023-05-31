@@ -38,19 +38,37 @@ defined( 'ABSPATH' ) || exit;
 
 	<div class="inline notice woocommerce-message show_if_variable">
 		<p>
-			<?php echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product variation.', 'woocommerce' ), 'variable' ) ); ?> <a class="variations-tab-navigation-link" href="#variable_product_options"><?php esc_html_e( 'Go to Variations', 'woocommerce' ); ?></a>
+			<?php
+			/**
+			 * Allow developers to change the general pricing message.
+			 *
+			 * @since 7.9.0
+			 */
+			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product variation.', 'woocommerce' ), 'variable' ) ); ?> <a class="variations-tab-navigation-link" href="#variable_product_options"><?php esc_html_e( 'Go to Variations', 'woocommerce' ); ?></a>
 		</p>
 	</div>
 
 	<div class="inline notice woocommerce-message show_if_grouped">
 		<p>
-			<?php echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product added to this group.', 'woocommerce' ), 'grouped' ) ); ?> <a class="linked-products-navigation-link" href="#linked_product_data"><?php esc_html_e( 'Go to Linked Products', 'woocommerce' ); ?></a>
+			<?php
+			/**
+			 * Allow developers to change the general pricing message.
+			 *
+			 * @since 7.9.0
+			 */
+			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product added to this group.', 'woocommerce' ), 'grouped' ) ); ?> <a class="linked-products-navigation-link" href="#linked_product_data"><?php esc_html_e( 'Go to Linked Products', 'woocommerce' ); ?></a>
 		</p>
 	</div>
 
 	<div class="inline notice woocommerce-message pricing_disabled_fallback_message">
 		<p>
-			<?php echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details in one of the other tabs.', 'woocommerce' ), 'grouped' ) ); ?>
+			<?php
+			/**
+			 * Allow developers to change the general pricing message.
+			 *
+			 * @since 7.9.0
+			 */
+			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details in one of the other tabs.', 'woocommerce' ), 'grouped' ) ); ?>
 		</p>
 	</div>
 
