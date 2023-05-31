@@ -86,7 +86,9 @@ export function WriteItForMeButtonContainer() {
 	useEffect( () => {
 		const title = titleEl.current;
 		const titleKeyupHandler = ( e: KeyboardEvent ) =>
-			setProductTitle( ( e.target as HTMLInputElement ).value || '' );
+			setProductTitle(
+				( e.target as HTMLInputElement ).value.trim() || ''
+			);
 
 		title?.addEventListener( 'keyup', titleKeyupHandler );
 
