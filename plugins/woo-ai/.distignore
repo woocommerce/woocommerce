@@ -25,3 +25,4 @@ node_modules/
 bin/
 vendor/
 woo-ai/
+src/
