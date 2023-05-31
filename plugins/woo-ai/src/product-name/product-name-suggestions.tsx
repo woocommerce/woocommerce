@@ -169,6 +169,10 @@ export const ProductNameSuggestions = () => {
 			setSuggestionsState( SuggestionsState.None );
 			setIsFirstLoad( false );
 		} catch ( e ) {
+			recordNameTracks( 'stop', {
+				reason: 'error',
+				error: ( e as { message?: string } )?.message || '',
+			} );
 			setSuggestionsState( SuggestionsState.Failed );
 		}
 	};
