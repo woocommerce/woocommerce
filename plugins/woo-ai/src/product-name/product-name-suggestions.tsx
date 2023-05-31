@@ -19,7 +19,8 @@ import {
 	ProductDataSuggestionRequest,
 } from '../utils/types';
 import SuggestionItem from './suggestion-item';
-import RandomLoadingMessage from '../components/random-loading-message';
+import { RandomLoadingMessage } from '../components';
+import { MIN_TITLE_LENGTH } from '../constants';
 
 enum SuggestionsState {
 	Fetching = 'fetching',
@@ -179,7 +180,7 @@ export const ProductNameSuggestions = () => {
 
 	const shouldRenderSuggestionsButton = useCallback( () => {
 		return (
-			productName.length >= 10 &&
+			productName.length >= MIN_TITLE_LENGTH &&
 			suggestionsState !== SuggestionsState.Fetching
 		);
 	}, [ productName, suggestionsState ] );
@@ -207,7 +208,7 @@ export const ProductNameSuggestions = () => {
 						) ) }
 					</ul>
 				) }
-			{ productName.length < 10 &&
+			{ productName.length < MIN_TITLE_LENGTH &&
 				suggestionsState === SuggestionsState.None && (
 					<p className="wc-product-name-suggestions__tip-message">
 						<img src={ MagicIcon } alt="" />

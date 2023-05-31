@@ -1,1 +1,1 @@
-export const MIN_TITLE_LENGTH = 20;
+export const MIN_TITLE_LENGTH = 10;
