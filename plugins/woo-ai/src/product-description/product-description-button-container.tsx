@@ -8,33 +8,31 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { useTinyEditor, useCompletion } from '../hooks';
 import { MIN_TITLE_LENGTH } from '../constants';
 import { WriteItForMeBtn, StopCompletionBtn } from '../components';
+import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
+import { recordTracksFactory } from '../utils';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
-const getApiError = ( status?: number ) => {
-	const errorMessagesByStatus: Record< number, string > = {
-		429: __(
-			'There have been too many requests. Please wait for a few minutes and try again.',
-			'woocommerce'
-		),
-		408: __(
-			'It seems the server is taking too long to respond. This is an experimental feature, so please try again later.',
-			'woocommerce'
-		),
-	};
+const getPostId = () =>
+	Number(
+		( document.querySelector( '#post_ID' ) as HTMLInputElement )?.value
+	);
 
-	if ( status && errorMessagesByStatus[ status ] ) {
-		return errorMessagesByStatus[ status ];
-	}
-
+const getApiError = () => {
 	return __(
 		`Apologies, this is an experimental feature and there was an error with this service. Please try again.`,
 		'woocommerce'
 	);
 };
+
+const recordDescriptionTracks = recordTracksFactory(
+	'description_completion',
+	() => ( {
+		post_id: getPostId(),
+	} )
+);
 
 export function WriteItForMeButtonContainer() {
 	const titleEl = useRef< HTMLInputElement >(
@@ -45,6 +43,7 @@ export function WriteItForMeButtonContainer() {
 		titleEl.current?.value || ''
 	);
 	const tinyEditor = useTinyEditor();
+	const { showSnackbar } = useFeedbackSnackbar();
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
 			onStreamMessage: ( content ) => {
@@ -60,8 +59,32 @@ export function WriteItForMeButtonContainer() {
 
 				tinyEditor.setContent( getApiError() );
 			},
-			onCompletionFinished: () => {
+			onCompletionFinished: ( reason, content ) => {
+				recordDescriptionTracks( 'stop', {
+					reason,
+					character_count: content.length,
+				} );
+
 				setFetching( false );
+
+				if ( reason !== 'abort' ) {
+					showSnackbar( {
+						label: __(
+							'Description added. How is it?',
+							'woocommerce'
+						),
+						onPositiveResponse: () => {
+							recordDescriptionTracks( 'feedback', {
+								response: 'positive',
+							} );
+						},
+						onNegativeResponse: () => {
+							recordDescriptionTracks( 'feedback', {
+								response: 'negative',
+							} );
+						},
+					} );
+				}
 			},
 		} );
 
@@ -85,8 +108,10 @@ export function WriteItForMeButtonContainer() {
 			`Write a product description with the following product title: "${ productTitle }."`,
 			'Use a 9th grade reading level.',
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
-			'Structure the description using standard HTML paragraph, strong and list tags.',
-			'Do not include a heading at the very top of the description.',
+			'Structure the description into paragraphs using standard HTML <p> tags.',
+			'Only if appropriate, use <ul> and <li> tags to list product features.',
+			'When appropriate, use <strong> and <em> tags to emphasize text.',
+			'Do not include a top-level heading at the beginning description.',
 		];
 
 		return instructions.join( '\n' );
@@ -99,7 +124,11 @@ export function WriteItForMeButtonContainer() {
 			disabled={ writeItForMeDisabled }
 			onClick={ () => {
 				setFetching( true );
-				requestCompletion( buildPrompt() );
+				const prompt = buildPrompt();
+				recordDescriptionTracks( 'start', {
+					prompt,
+				} );
+				requestCompletion( prompt );
 			} }
 		/>
 	);
