@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 test.describe( 'Merchant > Order Action emails received', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -83,7 +83,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		).toContainText( admin.email );
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
-		).toContainText( `[${ storeName }]${getTextForLanguage()['Neworder']}${ newOrderId }` )
+		).toContainText( `[${ storeName }]${getTranslationFor(': New order #')}${ newOrderId }` )
 	} );
 
 	test( 'can resend new order notification', async ( { page } ) => {
@@ -106,7 +106,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			admin.email
 		);
 		await expect( page.locator( 'td.column-subject' ) ).toContainText(
-			`[${ storeName }]${getTextForLanguage()['Neworder']}${ orderId }`
+			`[${ storeName }]${getTranslationFor(': New order #')}${ orderId }`
 		);
 	} );
 
@@ -127,7 +127,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			customerBilling.email
 		);
 		await expect( page.locator( 'td.column-subject' ) ).toContainText(
-			`${getTextForLanguage()['Invoicefororder']}${ orderId } ${getTextForLanguage()['on']} ${ storeName }`
+			`${getTranslationFor('Invoice for order #')}${ orderId } ${getTranslationFor('on')} ${ storeName }`
 		);
 	} );
 } );

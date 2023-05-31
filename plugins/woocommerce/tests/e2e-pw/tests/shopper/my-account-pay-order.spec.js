@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 const randomNum = new Date().getTime().toString();
 const customer = {
@@ -86,18 +86,18 @@ test.describe( 'Customer can pay for their order through My Account', () => {
 		// sign in as the "customer" user
 		await page.fill( '#username', customer.username );
 		await page.fill( '#password', customer.password );
-		await page.getByRole('button', { name: getTextForLanguage()['LogIn'] })
+		await page.getByRole('button', { name: getTranslationFor('Log In') })
 			.click();
 
 		await page.click( 'a.pay' );
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			getTextForLanguage()['Payfororder']
+			getTranslationFor('Pay for order')
 		);
 		await page.click( '#place_order' );
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			getTextForLanguage()['Orderreceived']
+			getTranslationFor('Order received')
 		);
 	} );
 } );

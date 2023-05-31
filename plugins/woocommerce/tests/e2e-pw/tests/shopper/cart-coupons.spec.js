@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 const firstProductName = 'Coupon test product';
 const coupons = [
@@ -88,11 +88,11 @@ test.describe( 'Cart applying coupons', () => {
 		} ) => {
 			await page.goto( '/cart/' );
 			await page.fill( '#coupon_code', coupons[ i ].code );
-			await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+			await page.click( `text=${getTranslationFor('Apply coupon')}` );
 
 			await expect(
 				page.locator( '.woocommerce-message' )
-			).toContainText( getTextForLanguage()['Couponcodeappliedsuccessfully'] );
+			).toContainText( getTranslationFor('Coupon code applied successfully.') );
 			// Checks the coupon amount is credited properly
 			await expect(
 				page.locator( '.cart-discount .amount' )
@@ -107,20 +107,20 @@ test.describe( 'Cart applying coupons', () => {
 	test( 'prevents cart applying same coupon twice', async ( { page } ) => {
 		await page.goto( '/cart/' );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+		await page.click( `text=${getTranslationFor('Apply coupon')}` );
 		// successful first time
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			getTextForLanguage()['Couponcodeappliedsuccessfully']
+			getTranslationFor('Coupon code applied successfully.')
 		);
 		await page.waitForLoadState( 'networkidle' );
 		// try to apply the same coupon
 		await page.goto( '/cart/' );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+		await page.click( `text=${getTranslationFor('Apply coupon')}` );
 		await page.waitForLoadState( 'networkidle' );
 		// error received
 		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
-			getTextForLanguage()['Couponcodealreadyapplied']
+			getTranslationFor('Coupon code already applied!')
 		);
 		// check cart total
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(
@@ -134,19 +134,19 @@ test.describe( 'Cart applying coupons', () => {
 	test( 'allows cart to apply multiple coupons', async ( { page } ) => {
 		await page.goto( '/cart/' );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+		await page.click( `text=${getTranslationFor('Apply coupon')}` );
 		// successful
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			getTextForLanguage()['Couponcodeappliedsuccessfully']
+			getTranslationFor('Coupon code applied successfully.')
 		);
 
 		await page.waitForLoadState( 'networkidle' );
 		await page.click( '#coupon_code' );
 		await page.fill( '#coupon_code', coupons[ 2 ].code );
-		await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+		await page.click( `text=${getTranslationFor('Apply coupon')}` );
 		// successful
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			getTextForLanguage()['Couponcodeappliedsuccessfully']
+			getTranslationFor('Coupon code applied successfully.')
 		);
 		// check cart total
 		await expect(
@@ -165,7 +165,7 @@ test.describe( 'Cart applying coupons', () => {
 	} ) => {
 		await page.goto( '/cart/' );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+		await page.click( `text=${getTranslationFor('Apply coupon')}` );
 
 		// confirm numbers
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(

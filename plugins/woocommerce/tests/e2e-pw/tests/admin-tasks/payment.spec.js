@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 test.describe( 'Payment setup task', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -9,8 +9,8 @@ test.describe( 'Payment setup task', () => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 		);
-		await page.click( `text=${getTextForLanguage()['Skipsetupstoredetails']}` );
-		await page.click( `button >> text=${getTextForLanguage()['Nothanks']}` );
+		await page.click( `text=${getTranslationFor('Skip setup store details')}` );
+		await page.click( `button >> text=${getTranslationFor('No thanks')}` );
 		await page.waitForLoadState( 'networkidle' );
 	} );
 
@@ -33,10 +33,10 @@ test.describe( 'Payment setup task', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.click( `text=${getTextForLanguage()['Setuppayments']}` );
+		await page.click( `text=${getTranslationFor('Set up payments')}` );
 		await expect(
 			page.locator( '.woocommerce-layout__header-wrapper > h1' )
-		).toHaveText( `${getTextForLanguage()['Setuppayments']}`);
+		).toHaveText( `${getTranslationFor('Set up payments')}`);
 	} );
 
 	test( 'Saving valid bank account transfer details enables the payment method', async ( {
@@ -52,18 +52,18 @@ test.describe( 'Payment setup task', () => {
 			.catch( () => {} );
 
 		// fill in bank transfer form
-		await page.fill( `//input[@placeholder=${getTextForLanguage()['AccountnameInQuotes']}]`, 'Savings' );
-		await page.fill( `//input[@placeholder=${getTextForLanguage()['AccountnumberInQuotes']}]`, '1234' );
-		await page.fill( `//input[@placeholder=${getTextForLanguage()['BanknameInQuotes']}]`, 'Test Bank' );
-		await page.fill( `//input[@placeholder=${getTextForLanguage()['SortcodeInQuotes']}]`, '12' );
-		await page.fill( `//input[@placeholder=${getTextForLanguage()['IBANInQuotes']}]`, '12 3456 7890' );
-		await page.fill( `//input[@placeholder=${getTextForLanguage()['BICSwiftInQuotes']}]`, 'ABBA' );
-		await page.click( `text=${getTextForLanguage()['Save']}` );
+		await page.fill( `//input[@placeholder=${getTranslationFor('"Account name"')}]`, 'Savings' );
+		await page.fill( `//input[@placeholder=${getTranslationFor('"Account number"')}]`, '1234' );
+		await page.fill( `//input[@placeholder=${getTranslationFor('"Bank name"')}]`, 'Test Bank' );
+		await page.fill( `//input[@placeholder=${getTranslationFor('"Sort code"')}]`, '12' );
+		await page.fill( `//input[@placeholder=${getTranslationFor('"IBAN"')}]`, '12 3456 7890' );
+		await page.fill( `//input[@placeholder=${getTranslationFor('"BIC / Swift"')}]`, 'ABBA' );
+		await page.click( `text=${getTranslationFor('Save')}` );
 
 		// check that bank transfers were set up
 		await expect(
 			page.locator( 'div.components-snackbar__content' )
-		).toContainText( `${getTextForLanguage()['Directbanktransferdetailsaddedsuccessfully']}` );
+		).toContainText( `${getTranslationFor('Direct bank transfer details added successfully')}` );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
 

@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
   //
 
 test.describe( 'Analytics pages', () => {
@@ -29,7 +29,7 @@ test.describe( 'Analytics pages', () => {
 			const pageTitle = page.locator(
 				'.woocommerce-layout__header-wrapper > h1'
 			);
-			await expect( pageTitle ).toContainText( getTextForLanguage()['pageNames'][index] );
+			await expect( pageTitle ).toContainText( getTranslationFor('pageNames')[index] );
 			await expect(
 				page.locator( '#woocommerce-layout__primary' )
 			).toBeVisible();

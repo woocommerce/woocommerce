@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { customer, storeDetails, getTextForLanguage } = require( '../../test-data/data' );
+const { customer, storeDetails, getTranslationFor } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
 
 let productId, orderId;
@@ -71,7 +71,7 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		await page.fill( '#billing_phone', customer.billing.us.phone );
 		await page.fill( '#billing_email', customer.email );
 
-		await page.click( `text=${getTextForLanguage()['Placeorder']}` );
+		await page.click( `text=${getTranslationFor('Place order')}` );
 
 		await page.waitForSelector(
 			'li.woocommerce-order-overview__order > strong'
@@ -92,6 +92,6 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		).toContainText( customer.email );
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
-		).toContainText( `[${ storeName }]${getTextForLanguage()['Neworder']}${ orderId }` );
+		).toContainText( `[${ storeName }]${getTranslationFor(': New order #')}${ orderId }` );
 	} );
 } );

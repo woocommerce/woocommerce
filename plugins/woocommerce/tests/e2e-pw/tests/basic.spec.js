@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { getTextForLanguage } = require( './../test-data/data' );
+const { getTranslationFor } = require( './../test-data/data' );
 
 test.describe(
 	'A basic set of tests to ensure WP, wp-admin and my-account load',
@@ -19,7 +19,7 @@ test.describe(
 			test( 'Load wp-admin', async ( { page } ) => {
 				await page.goto( '/wp-admin' );
 				const title = page.locator( 'div.wrap > h1' );
-				await expect( title ).toHaveText( `${getTextForLanguage()['Dashboard']}` );
+				await expect( title ).toHaveText( `${getTranslationFor('Dashboard')}` );
 			} );
 		} );
 

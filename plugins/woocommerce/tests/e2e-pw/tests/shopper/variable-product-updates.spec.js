@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 const variableProductName = 'Variable Product Updates';
 const productPrice = '11.16';
@@ -91,7 +91,7 @@ const variations = [
 	},
 ];
 
-const cartDialogMessage = getTextForLanguage()['Pleaseselectsomeproductoptionsbeforeaddingthisproducttoyourcart'];
+const cartDialogMessage = getTranslationFor('Please select some product options before adding this product to your cart.');
 test.describe( 'Shopper > Update variable product', () => {
 	let variableProductId;
 	const slug = variableProductName.replace( / /gi, '-' ).toLowerCase();

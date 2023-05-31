@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 const couponCode = `code-${ new Date().getTime().toString() }`;
 
@@ -48,7 +48,7 @@ test.describe( 'Add New Coupon Page', () => {
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: `${getTextForLanguage()['Couponupdated']}` } )
+				.filter( { hasText: `${getTranslationFor('Coupon updated.')}` } )
 		).toBeVisible();
 	} );
 } );

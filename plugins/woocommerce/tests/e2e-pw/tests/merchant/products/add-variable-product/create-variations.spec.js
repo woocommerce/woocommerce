@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { variableProducts: utils } = require( '../../../../utils' );
-const { getTextForLanguage } = require( './../../../../test-data/data' );
+const { getTranslationFor } = require( './../../../../test-data/data' );
 const {
 	createVariableProduct,
 	showVariableProductTour,
@@ -125,7 +125,7 @@ test.describe( 'Add variations', () => {
 				for ( const variationToCreate of variationsToManuallyCreate ) {
 					await test.step( 'Click "Add manually"', async () => {
 						const addManuallyButton = page.getByRole( 'button', {
-							name: getTextForLanguage()['Addmanually'],
+							name: getTranslationFor('Add manually'),
 						} );
 
 						await addManuallyButton.click();
@@ -161,7 +161,7 @@ test.describe( 'Add variations', () => {
 					await test.step( 'Click "Save changes"', async () => {
 						await page
 							.getByRole( 'button', {
-								name: getTextForLanguage()['Savechanges'],
+								name: getTranslationFor('Save changes'),
 							} )
 							.click();
 					} );

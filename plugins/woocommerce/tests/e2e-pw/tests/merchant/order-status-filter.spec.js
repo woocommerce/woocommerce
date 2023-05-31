@@ -1,12 +1,12 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 const orderBatchId = new Array();
 const statusColumnTextSelector = 'mark.order-status > span';
 
 // Define order statuses to filter against
-const orderStatus = getTextForLanguage()['orderStatus'];
+const orderStatus = getTranslationFor('orderStatus');
 
 test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );

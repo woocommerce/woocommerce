@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const uuid = require( 'uuid' );
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 test.describe( 'Edit order', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
@@ -40,7 +40,7 @@ test.describe( 'Edit order', () => {
 
 		// confirm we're on the orders page
 		await expect( page.locator( 'h1.components-text' ) ).toContainText(
-			`${getTextForLanguage()['Orders']}`
+			`${getTranslationFor('Orders')}`
 		);
 
 		// open order we created
@@ -48,7 +48,7 @@ test.describe( 'Edit order', () => {
 
 		// make sure we're on the order details page
 		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
-			getTextForLanguage()['EditOrderRegex']
+			getTranslationFor('/Edit [oO]rder/')
 		);
 	} );
 
@@ -66,7 +66,7 @@ test.describe( 'Edit order', () => {
 		);
 		await expect(
 			page.locator( '#woocommerce-order-notes .note_content >> nth=0' )
-		).toContainText( `${getTextForLanguage()['OrderstatuschangedfromProcessingtoCompleted']}` );
+		).toContainText( `${getTranslationFor('Order status changed from Processing to Completed.')}` );
 	} );
 
 	test( 'can update order details', async ( { page } ) => {
@@ -81,7 +81,7 @@ test.describe( 'Edit order', () => {
 		await expect(
 			page
 				.locator( 'div.notice-success > p' )
-				.filter( { hasText: `${getTextForLanguage()['Orderupdated']}` } )
+				.filter( { hasText: `${getTranslationFor('Order updated.')}` } )
 		).toBeVisible();
 		await expect( page.locator( 'input[name=order_date]' ) ).toHaveValue(
 			'2018-12-14'
@@ -241,16 +241,16 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 			page.locator(
 				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(1) > input.short'
 			)
-		).toHaveAttribute( 'placeholder', `${getTextForLanguage()['Unlimited']}` );
+		).toHaveAttribute( 'placeholder', `${getTranslationFor('Unlimited')}` );
 		await expect(
 			page.locator(
 				'#woocommerce-order-downloads > div.inside > div > div.wc-metaboxes > div > table > tbody > tr > td:nth-child(2) > input.short'
 			)
-		).toHaveAttribute( 'placeholder', `${getTextForLanguage()['Never']}` );
+		).toHaveAttribute( 'placeholder', `${getTranslationFor('Never')}` );
 		await expect( page.locator( 'button.revoke_access' ) ).toBeVisible();
-		await expect( page.locator( `a:has-text(${getTextForLanguage()['CopylinkInQuotes']})` ) ).toBeVisible();
+		await expect( page.locator( `a:has-text(${getTranslationFor('"Copy link"')})` ) ).toBeVisible();
 		await expect(
-			page.locator(`a:has-text(${getTextForLanguage()['ViewreportInQuotes']})`)
+			page.locator(`a:has-text(${getTranslationFor('"View report"')})`)
 		).toBeVisible();
 	} );
 
@@ -279,12 +279,12 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 			page.locator(
 				'#woocommerce-order-downloads input[name^="downloads_remaining"] >> nth=-1'
 			)
-		).toHaveAttribute( 'placeholder', `${getTextForLanguage()['Unlimited']}` );
+		).toHaveAttribute( 'placeholder', `${getTranslationFor('Unlimited')}` );
 		await expect(
 			page.locator(
 				'#woocommerce-order-downloads input[name^="access_expires"] >> nth=-1'
 			)
-		).toHaveAttribute( 'placeholder', `${getTextForLanguage()['Never']}` );
+		).toHaveAttribute( 'placeholder', `${getTranslationFor('Never')}` );
 	} );
 
 	test( 'can edit downloadable product permissions', async ( { page } ) => {
@@ -359,7 +359,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		page,
 	} ) => {
 		const expectedReason =
-		`${getTextForLanguage()['Sorryyouhavereachedyourdownloadlimitforthisfile']}`;
+		`${getTranslationFor('Sorry, you have reached your download limit for this file')}`;
 
 		// open the order that already has a product assigned
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
@@ -395,7 +395,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 	test( 'should not allow downloading a product if expiration date has passed', async ( {
 		page,
 	} ) => {
-		const expectedReason = `${getTextForLanguage()['Sorrythisdownloadhasexpired']}`;
+		const expectedReason = `${getTranslationFor('Sorry, this download has expired')}`;
 
 		// open the order that already has a product assigned
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );

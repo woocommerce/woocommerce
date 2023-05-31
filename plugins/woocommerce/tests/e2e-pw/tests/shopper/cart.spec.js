@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 const productName = 'Cart product test';
 const productPrice = '13.99';
@@ -52,7 +52,7 @@ test.describe( 'Cart page', () => {
 	test( 'should display no item in the cart', async ( { page } ) => {
 		await page.goto( '/cart/' );
 		await expect( page.locator( '.cart-empty' ) ).toContainText(
-			getTextForLanguage()['Yourcartiscurrentlyempty']
+			getTranslationFor('Your cart is currently empty.')
 		);
 	} );
 
@@ -99,7 +99,7 @@ test.describe( 'Cart page', () => {
 
 		await page.goto( '/cart/' );
 		await page.fill( 'input.qty', '2' );
-		await page.click( `text=${getTextForLanguage()['Updatecart']}` );
+		await page.click( `text=${getTranslationFor('Update cart')}` );
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			`$${ twoProductPrice }`
@@ -124,7 +124,7 @@ test.describe( 'Cart page', () => {
 		await page.click( 'a.remove' );
 
 		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
-			getTextForLanguage()['Yourcartiscurrentlyempty']
+			getTranslationFor('Your cart is currently empty.')
 		);
 	} );
 
@@ -143,7 +143,7 @@ test.describe( 'Cart page', () => {
 		);
 
 		await page.fill( 'input.qty', '2' );
-		await page.click( `text=${getTextForLanguage()['Updatecart']}` );
+		await page.click( `text=${getTranslationFor('Update cart')}` );
 
 		await expect( page.locator( '.order-total .amount' ) ).toContainText(
 			`$${ twoProductPrice }`

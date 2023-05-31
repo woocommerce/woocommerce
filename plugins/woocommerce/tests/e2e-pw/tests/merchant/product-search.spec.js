@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 let productId;
 const productName = `Unique thing that we sell ${ new Date()
@@ -82,7 +82,7 @@ test.describe( 'Products > Search and View a product', () => {
 		await page.click( '#search-submit' );
 
 		await expect( page.locator( '.no-items' ) ).toContainText(
-			getTextForLanguage()['Noproductsfound']
+			getTranslationFor('No products found')
 		);
 	} );
 } );

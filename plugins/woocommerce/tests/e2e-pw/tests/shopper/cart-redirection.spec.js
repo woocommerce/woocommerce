@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 test.describe( 'Cart > Redirect to cart from shop', () => {
 	let productId;
@@ -72,7 +72,7 @@ test.describe( 'Cart > Redirect to cart from shop', () => {
 		await page.click( `text=${ productName }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.click( `text=${getTextForLanguage()['Addtocart']}` );
+		await page.click( `text=${getTranslationFor('Add to cart')}` );
 
 		await expect( page.url() ).toContain( '/cart/' );
 		await expect( page.locator( 'td.product-name' ) ).toContainText(

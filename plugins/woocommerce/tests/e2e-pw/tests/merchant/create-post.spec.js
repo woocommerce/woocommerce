@@ -1,6 +1,6 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 const postTitle = `Post-${ new Date().getTime().toString() }`;
 
@@ -41,7 +41,7 @@ test.describe( 'Can create a new post', () => {
 			async () => {
 				return await page
 					.getByRole( 'heading', {
-						name: `${getTextForLanguage()['Welcometotheblockeditor']}`,
+						name: `${getTranslationFor('Welcome to the block editor')}`,
 					} )
 					.isVisible();
 			}
@@ -51,7 +51,7 @@ test.describe( 'Can create a new post', () => {
 			await test.step( 'Welcome modal appeared. Close it.', async () => {
 				await page
 					.getByRole( 'document' )
-					.getByRole( 'button', { name: `${getTextForLanguage()['Close']}` } )
+					.getByRole( 'button', { name: `${getTranslationFor('Close')}` } )
 					.click();
 			} );
 		} else {
@@ -61,29 +61,29 @@ test.describe( 'Can create a new post', () => {
 		}
 
 		await page
-			.getByRole( 'textbox', { name: `${getTextForLanguage()['AddTitle']}` } )
+			.getByRole( 'textbox', { name: `${getTranslationFor('Add Title')}` } )
 			.fill( postTitle );
 
-		await page.getByRole( 'button', { name: `${getTextForLanguage()['Adddefaultblock']}` } ).click();
+		await page.getByRole( 'button', { name: `${getTranslationFor('Add default block')}` } ).click();
 
 		await page
 			.getByRole( 'document', {
 				name:
-				`${getTextForLanguage()['Emptyblockstartwritingortypeforwardslashtochooseablock']}`,
+				`${getTranslationFor('Empty block; start writing or type forward slash to choose a block')}`,
 			} )
 			.fill( 'Test Post' );
 
 		await page
-			.getByRole( 'button', { name: `${getTextForLanguage()['Publish']}`, exact: true } )
+			.getByRole( 'button', { name: `${getTranslationFor('Publish')}`, exact: true } )
 			.click();
 
 		await page
-			.getByRole( 'region', { name: `${getTextForLanguage()['Editorpublish']}` } )
-			.getByRole( 'button', { name: `${getTextForLanguage()['Publish']}`, exact: true } )
+			.getByRole( 'region', { name: `${getTranslationFor('Editor publish')}` } )
+			.getByRole( 'button', { name: `${getTranslationFor('Publish')}`, exact: true } )
 			.click();
 
 		await expect(
-			page.getByText( `${ postTitle } ${getTextForLanguage()['isnowlive']}` )
+			page.getByText( `${ postTitle } ${getTranslationFor('is now live.')}` )
 		).toBeVisible();
 	} );
 } );

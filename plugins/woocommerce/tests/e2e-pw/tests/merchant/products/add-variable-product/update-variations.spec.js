@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { variableProducts: utils } = require( '../../../../utils' );
-const { getTextForLanguage } = require( './../../../../test-data/data' );
+const { getTranslationFor } = require( './../../../../test-data/data' );
 const {
 	createVariableProduct,
 	showVariableProductTour,
@@ -154,7 +154,7 @@ test.describe( 'Update variations', () => {
 			await test.step( 'Check the "Virtual" checkbox.', async () => {
 				await firstVariation
 					.getByRole( 'checkbox', {
-						name: getTextForLanguage()['Virtual'],
+						name: getTranslationFor('Virtual'),
 					} )
 					.check();
 			} );
@@ -163,7 +163,7 @@ test.describe( 'Update variations', () => {
 				`Set regular price to "${ variationOnePrice }".`,
 				async () => {
 					await firstVariation
-						.getByRole( 'textbox', { name: getTextForLanguage()['Regularprice'] } )
+						.getByRole( 'textbox', { name: getTranslationFor('Regular price') } )
 						.fill( variationOnePrice );
 				}
 			);
@@ -173,7 +173,7 @@ test.describe( 'Update variations', () => {
 			await test.step( 'Check the "Virtual" checkbox.', async () => {
 				await secondVariation
 					.getByRole( 'checkbox', {
-						name: getTextForLanguage()['Virtual'],
+						name: getTranslationFor('Virtual'),
 					} )
 					.check();
 			} );
@@ -182,7 +182,7 @@ test.describe( 'Update variations', () => {
 				`Set regular price to "${ variationTwoPrice }".`,
 				async () => {
 					await secondVariation
-						.getByRole( 'textbox', { name: getTextForLanguage()['Regularprice'] } )
+						.getByRole( 'textbox', { name: getTranslationFor('Regular price') } )
 						.fill( variationTwoPrice );
 				}
 			);
@@ -191,7 +191,7 @@ test.describe( 'Update variations', () => {
 		await test.step( 'Edit the third variation.', async () => {
 			await test.step( 'Check "Manage stock?"', async () => {
 				await thirdVariation
-					.getByRole( 'checkbox', { name: getTextForLanguage()['Managestock'] } )
+					.getByRole( 'checkbox', { name: getTranslationFor('Manage stock?') } )
 					.check();
 			} );
 
@@ -199,33 +199,33 @@ test.describe( 'Update variations', () => {
 				`Set regular price to "${ variationThreePrice }".`,
 				async () => {
 					await thirdVariation
-						.getByRole( 'textbox', { name: getTextForLanguage()['Regularprice'] } )
+						.getByRole( 'textbox', { name: getTranslationFor('Regular price') } )
 						.fill( variationThreePrice );
 				}
 			);
 
 			await test.step( 'Set the weight and dimensions.', async () => {
 				await thirdVariation
-					.getByRole( 'textbox', { name: getTextForLanguage()['Weight'] } )
+					.getByRole( 'textbox', { name: getTranslationFor('Weight') } )
 					.type( productWeight );
 
 				await thirdVariation
-					.getByRole( 'textbox', { name: getTextForLanguage()['Length'] } )
+					.getByRole( 'textbox', { name: getTranslationFor('Length') } )
 					.type( productLength );
 
 				await thirdVariation
-					.getByRole( 'textbox', { name: getTextForLanguage()['Width'] } )
+					.getByRole( 'textbox', { name: getTranslationFor('Width') } )
 					.type( productWidth );
 
 				await thirdVariation
-					.getByRole( 'textbox', { name: getTextForLanguage()['Height'] } )
+					.getByRole( 'textbox', { name: getTranslationFor('Height') } )
 					.type( productHeight );
 			} );
 		} );
 
 		await test.step( 'Click "Save changes".', async () => {
 			const saveButton = await page.getByRole( 'button', {
-				name: getTextForLanguage()['Savechanges'],
+				name: getTranslationFor('Save changes'),
 			} );
 			await saveButton.click();
 			await expect( saveButton ).toBeDisabled();
@@ -248,7 +248,7 @@ test.describe( 'Update variations', () => {
 			async () => {
 				await expect(
 					firstVariation.getByRole( 'checkbox', {
-						name: getTextForLanguage()['Virtual'],
+						name: getTranslationFor('Virtual'),
 					} )
 				).toBeChecked();
 			}
@@ -259,7 +259,7 @@ test.describe( 'Update variations', () => {
 			async () => {
 				await expect(
 					firstVariation.getByRole( 'textbox', {
-						name: getTextForLanguage()['Regularprice'],
+						name: getTranslationFor('Regular price'),
 					} )
 				).toHaveValue( variationOnePrice );
 			}
@@ -270,7 +270,7 @@ test.describe( 'Update variations', () => {
 			async () => {
 				await expect(
 					secondVariation.getByRole( 'checkbox', {
-						name: getTextForLanguage()['Virtual'],
+						name: getTranslationFor('Virtual'),
 					} )
 				).toBeChecked();
 			}
@@ -281,7 +281,7 @@ test.describe( 'Update variations', () => {
 			async () => {
 				await expect(
 					secondVariation.getByRole( 'textbox', {
-						name: getTextForLanguage()['Regularprice'],
+						name: getTranslationFor('Regular price'),
 					} )
 				).toHaveValue( variationTwoPrice );
 			}
@@ -292,7 +292,7 @@ test.describe( 'Update variations', () => {
 			async () => {
 				await expect(
 					thirdVariation.getByRole( 'checkbox', {
-						name: getTextForLanguage()['Managestock'],
+						name: getTranslationFor('Manage stock?'),
 					} )
 				).toBeChecked();
 			}
@@ -303,7 +303,7 @@ test.describe( 'Update variations', () => {
 			async () => {
 				await expect(
 					thirdVariation.getByRole( 'textbox', {
-						name: getTextForLanguage()['Regularprice'],
+						name: getTranslationFor('Regular price'),
 					} )
 				).toHaveValue( variationThreePrice );
 			}
@@ -314,23 +314,23 @@ test.describe( 'Update variations', () => {
 			async () => {
 				await expect(
 					thirdVariation.getByRole( 'textbox', {
-						name: getTextForLanguage()['Weight'],
+						name: getTranslationFor('Weight'),
 					} )
 				).toHaveValue( productWeight );
 
 				await expect(
 					thirdVariation.getByRole( 'textbox', {
-						name: getTextForLanguage()['Length'],
+						name: getTranslationFor('Length'),
 					} )
 				).toHaveValue( productLength );
 
 				await expect(
-					thirdVariation.getByRole( 'textbox', { name: getTextForLanguage()['Width'] } )
+					thirdVariation.getByRole( 'textbox', { name: getTranslationFor('Width') } )
 				).toHaveValue( productWidth );
 
 				await expect(
 					thirdVariation.getByRole( 'textbox', {
-						name: getTextForLanguage()['Height'],
+						name: getTranslationFor('Height'),
 					} )
 				).toHaveValue( productHeight );
 			}
@@ -453,7 +453,7 @@ test.describe( 'Update variations', () => {
 			`Enter "${ variationOnePrice }" as the regular price`,
 			async () => {
 				await variationContainer
-					.getByPlaceholder( getTextForLanguage()['Variationpricerequired'] )
+					.getByPlaceholder( getTranslationFor('Variation price (required)') )
 					.fill( variationOnePrice );
 			}
 		);
@@ -480,7 +480,7 @@ test.describe( 'Update variations', () => {
 			`Enter "${ lowStockAmount }" in the "Low stock threshold" input field.`,
 			async () => {
 				await variationContainer
-					.getByPlaceholder( getTextForLanguage()['Storewidethreshold'] )
+					.getByPlaceholder( getTranslationFor('Store-wide threshold') )
 					.fill( lowStockAmount );
 			}
 		);
@@ -513,7 +513,7 @@ test.describe( 'Update variations', () => {
 			async () => {
 				await expect(
 					variationContainer.getByPlaceholder(
-						getTextForLanguage()['Storewidethreshold']
+						getTranslationFor('Store-wide threshold')
 					)
 				).toHaveValue( lowStockAmount );
 			}
@@ -526,7 +526,7 @@ test.describe( 'Update variations', () => {
 					variationContainer.locator(
 						'select[name^="variable_backorders"] > option[selected]'
 					)
-				).toHaveText( getTextForLanguage()['Allowbutnotifycustomer'] );
+				).toHaveText( getTranslationFor('Allow, but notify customer') );
 			}
 		);
 	} );
@@ -545,7 +545,7 @@ test.describe( 'Update variations', () => {
 		await test.step( 'Select variation defaults', async () => {
 			for ( const attribute of defaultVariation ) {
 
-				const No_default_attribute_name = getTextForLanguage()['Nodefaultattributename'].replace('attributename',attribute.name);
+				const No_default_attribute_name = getTranslationFor('No default attributename…').replace('attributename',attribute.name);
 				const defaultAttributeMenu = page.locator( 'select', {
 					hasText: No_default_attribute_name,
 				} );
@@ -558,7 +558,7 @@ test.describe( 'Update variations', () => {
 		await test.step( 'Click "Save changes"', async () => {
 			
 			const saveButton = await page.getByRole( 'button', {
-				name: getTextForLanguage()['Savechanges'],
+				name: getTranslationFor('Save changes'),
 			} );
 			await saveButton.click();
 			await page.waitForLoadState( 'networkidle' );

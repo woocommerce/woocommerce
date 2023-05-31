@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin, customer, getTextForLanguage } = require( '../../test-data/data' );
+const { admin, customer, getTranslationFor } = require( '../../test-data/data' );
 
 const guestEmail = 'checkout-guest@example.com';
 
@@ -228,13 +228,13 @@ test.describe( 'Checkout page', () => {
 		await page.fill( '#billing_phone', '555 555-5555' );
 		await page.fill( '#billing_email', guestEmail );
 
-		await page.click( `text=${getTextForLanguage()['Cashondelivery']}` );
+		await page.click( `text=${getTranslationFor('Cash on delivery')}` );
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
 
-		await page.click( `text=${getTextForLanguage()['Placeorder']}` );
+		await page.click( `text=${getTranslationFor('Place order')}` );
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			getTextForLanguage()['Orderreceived']
+			getTranslationFor('Order received')
 		);
 
 		// get order ID from the page
@@ -245,19 +245,19 @@ test.describe( 'Checkout page', () => {
 			( element ) => element.textContent,
 			orderReceivedHtmlElement
 		);
-		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ getTextForLanguage()['orderReceivedTextsplit'] ].toString();
+		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ getTranslationFor('orderReceivedTextsplit') ].toString();
 
 		await page.goto( 'wp-login.php' );
 		await page.fill( 'input[name="log"]', admin.username );
 		await page.fill( 'input[name="pwd"]', admin.password );
-		await page.click( `text=${getTextForLanguage()['LogIn']}`);
+		await page.click( `text=${getTranslationFor('Log In')}`);
 
 		// load the order placed as a guest
 		await page.goto(
 			`wp-admin/post.php?post=${ guestOrderId }&action=edit`
 		);
 
-		const orderDetails = getTextForLanguage()['Orderdetails'].replace('OrderId',guestOrderId);
+		const orderDetails = getTranslationFor('Order #OrderId details').replace('OrderId',guestOrderId);
 		await expect(
 			page.locator( 'h2.woocommerce-order-data__heading' )
 		).toContainText( orderDetails );
@@ -279,7 +279,7 @@ test.describe( 'Checkout page', () => {
 		await page.goto( 'wp-admin/' );
 		await page.fill( 'input[name="log"]', customer.username );
 		await page.fill( 'input[name="pwd"]', customer.password );
-		await page.click( `text=${getTextForLanguage()['LogIn']}`);
+		await page.click( `text=${getTranslationFor('Log In')}`);
 		await page.waitForLoadState( 'networkidle' );
 		for ( let i = 1; i < 3; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
@@ -304,13 +304,13 @@ test.describe( 'Checkout page', () => {
 		await page.fill( '#billing_phone', '555 555-5555' );
 		await page.fill( '#billing_email', customer.email );
 
-		await page.click( `text=${getTextForLanguage()['Cashondelivery']}` );
+		await page.click( `text=${getTranslationFor('Cash on delivery')}` );
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
 
-		await page.click( `text=${getTextForLanguage()['Placeorder']}` );
+		await page.click( `text=${getTranslationFor('Place order')}` );
 
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			getTextForLanguage()['Orderreceived']
+			getTranslationFor('Order received')
 		);
 
 		// get order ID from the page
@@ -322,7 +322,7 @@ test.describe( 'Checkout page', () => {
 			orderReceivedHtmlElement
 		);
 		customerOrderId = await orderReceivedText
-			.split( /(\s+)/ )[ getTextForLanguage()['orderReceivedTextsplit'] ]
+			.split( /(\s+)/ )[ getTranslationFor('orderReceivedTextsplit') ]
 			.toString();
 
 		await page.goto( 'wp-login.php?loggedout=true' );
@@ -330,14 +330,14 @@ test.describe( 'Checkout page', () => {
 
 		await page.fill( 'input[name="log"]', admin.username );
 		await page.fill( 'input[name="pwd"]', admin.password );
-		await page.click( `text=${getTextForLanguage()['LogIn']}`);
+		await page.click( `text=${getTranslationFor('Log In')}`);
 
 		// load the order placed as a customer
 		await page.goto(
 			`wp-admin/post.php?post=${ customerOrderId }&action=edit`
 		);
 
-		const orderDetails = getTextForLanguage()['Orderdetails'].replace('OrderId',customerOrderId);
+		const orderDetails = getTranslationFor('Order #OrderId details').replace('OrderId',customerOrderId);
 		await expect(
 			page.locator( 'h2.woocommerce-order-data__heading' )
 		).toContainText( orderDetails );

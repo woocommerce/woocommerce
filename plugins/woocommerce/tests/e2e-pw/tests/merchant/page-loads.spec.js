@@ -1,20 +1,20 @@
 const { test, expect } = require( '@playwright/test' );
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 // a representation of the menu structure for WC
 const wcPages = [
 	{
 		name: 'WooCommerce',
-		subpages: getTextForLanguage()['WooCommercesubpages'],
+		subpages: getTranslationFor('WooCommerce subpages'),
 	},
 	{
-		name: getTextForLanguage()['Products'],
-		subpages: getTextForLanguage()['Productssubpages'],
+		name: getTranslationFor('Products'),
+		subpages: getTranslationFor('Products subpages'),
 	},
 	// analytics is handled through a separate test
 	{
 		name: 'Marketing',
-		subpages: getTextForLanguage()['Marketingsubpages'],
+		subpages: getTranslationFor('Marketing subpages'),
 	},
 ];
 
@@ -27,7 +27,7 @@ for ( const currentPage of wcPages ) {
 			test.beforeEach( async ( { page } ) => {
 				if ( currentPage.name === 'WooCommerce' ) {
 					await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-				} else if ( currentPage.name === getTextForLanguage()['Products'] ) {
+				} else if ( currentPage.name === getTranslationFor('Products') ) {
 					await page.goto( 'wp-admin/edit.php?post_type=product' );
 				} else if ( currentPage.name === 'Marketing' ) {
 					await page.goto(
@@ -41,18 +41,18 @@ for ( const currentPage of wcPages ) {
 					page,
 				} ) => {
 					// deal with the onboarding wizard
-					if ( currentPage.subpages[ i ].name === getTextForLanguage()['Home'] ) {
+					if ( currentPage.subpages[ i ].name === getTranslationFor('Home') ) {
 						await page.goto(
 							'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
 						);
-						await page.click( `text=${getTextForLanguage()['Skipsetupstoredetails']}` );
-						await page.click( `button >> text=${getTextForLanguage()['Nothanks']}` );
+						await page.click( `text=${getTranslationFor('Skip setup store details')}` );
+						await page.click( `button >> text=${getTranslationFor('No thanks')}` );
 						await page.waitForLoadState( 'networkidle' );
 						await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 					}
 
 					// deal with cases where the 'Coupons' legacy menu had already been removed.
-					if ( currentPage.subpages[ i ].name === getTextForLanguage()['Coupons'] ) {
+					if ( currentPage.subpages[ i ].name === getTranslationFor('Coupons') ) {
 						const couponsMenuVisible = await page
 							.locator(
 								`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`

@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
   
 
 test.describe( 'Analytics pages', () => {
@@ -17,9 +17,9 @@ test.describe( 'Analytics pages', () => {
 		);
 		if ( sections.length < 3 ) {
 			// performance section is hidden
-			await page.click( `//button[@title=${getTextForLanguage()['AddmoresectionsInQuotes']}]` );
-			await page.click( `//button[@title=${getTextForLanguage()['AddPerformancesectionInQuotes']}]` );
-			await page.waitForSelector( `h2:has-text(${getTextForLanguage()['PerformanceInQuotes']})`, {
+			await page.click( `//button[@title=${getTranslationFor('"Add more sections"')}]` );
+			await page.click( `//button[@title=${getTranslationFor('"Add Performance section"')}]` );
+			await page.waitForSelector( `h2:has-text(${getTranslationFor('"Performance"')})`, {
 				state: 'visible',
 			} );
 			await page.waitForLoadState( 'networkidle' );
@@ -27,16 +27,16 @@ test.describe( 'Analytics pages', () => {
 		const lastSection = await page.textContent(
 			'h2.woocommerce-section-header__title >> nth=2'
 		);
-		if ( lastSection === getTextForLanguage()['Performance'] ) {
+		if ( lastSection === getTranslationFor('Performance') ) {
 			// sections are in the wrong order
 			await page.click(
-				`//button[@title=${getTextForLanguage()['Choosewhichanalyticstodisplayandthesectionnameinquotes']}]`
+				`//button[@title=${getTranslationFor('"Choose which analytics to display and the section name"')}]`
 			);
-			await page.click( `text=${getTextForLanguage()['Moveup']}` );
+			await page.click( `text=${getTranslationFor('Move up')}` );
 			await page.click(
-				`//button[@title=${getTextForLanguage()['Choosewhichanalyticstodisplayandthesectionnameinquotes']}]`
+				`//button[@title=${getTranslationFor('"Choose which analytics to display and the section name"')}]`
 			);
-			await page.click( `text=${getTextForLanguage()['Moveup']}` );
+			await page.click( `text=${getTranslationFor('Move up')}` );
 
 			// wait for the changes to be saved
 			await page.waitForResponse(
@@ -55,7 +55,7 @@ test.describe( 'Analytics pages', () => {
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
 
-		for ( const expectedSection of getTextForLanguage()['arrExpectedSections'] ) {
+		for ( const expectedSection of getTranslationFor('arrExpectedSections') ) {
 			await test.step(
 				`Assert that the "${ expectedSection }" section is visible`,
 				async () => {
@@ -83,8 +83,8 @@ test.describe( 'Analytics pages', () => {
 				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
 				.first()
 				.click();
-			await expect( page.locator( `text=${getTextForLanguage()['Moveup']}` ) ).not.toBeVisible();
-			await expect( page.locator( `text=${getTextForLanguage()['Movedown']}` ) ).toBeVisible();
+			await expect( page.locator( `text=${getTranslationFor('Move up')}` ) ).not.toBeVisible();
+			await expect( page.locator( `text=${getTranslationFor('Move down')}` ) ).toBeVisible();
 			await page.keyboard.press( 'Escape' );
 
 			// check the bottom section
@@ -92,8 +92,8 @@ test.describe( 'Analytics pages', () => {
 				.locator( 'button.woocommerce-ellipsis-menu__toggle' )
 				.last()
 				.click();
-			await expect( page.locator( `text=${getTextForLanguage()['Movedown']}` ) ).not.toBeVisible();
-			await expect( page.locator( `text=${getTextForLanguage()['Moveup']}` ) ).toBeVisible();
+			await expect( page.locator( `text=${getTranslationFor('Move down')}` ) ).not.toBeVisible();
+			await expect( page.locator( `text=${getTranslationFor('Move up')}` ) ).toBeVisible();
 			await page.keyboard.press( 'Escape' );
 		} );
 
@@ -113,7 +113,7 @@ test.describe( 'Analytics pages', () => {
 			await page.click(
 				'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=0'
 			);
-			await page.click( `text=${getTextForLanguage()['Movedown']}` );
+			await page.click( `text=${getTranslationFor('Move down')}` );
 
 			// second section becomes first section, first becomes second
 			await expect(
@@ -140,7 +140,7 @@ test.describe( 'Analytics pages', () => {
 			await page.click(
 				'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=1'
 			);
-			await page.click( `text=${getTextForLanguage()['Moveup']}` );
+			await page.click( `text=${getTranslationFor('Move up')}` );
 
 			// second section becomes first section, first becomes second
 			await expect(
@@ -157,8 +157,8 @@ test.describe( 'Analytics pages', () => {
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
 		// clicks the first button to the right of the Performance heading
-		await page.click( `button:right-of(:text(${getTextForLanguage()['PerformanceInQuotes']})) >> nth=0` );
-		await page.click( `text=${getTextForLanguage()['Removesection']}` );
+		await page.click( `button:right-of(:text(${getTranslationFor('"Performance"')})) >> nth=0` );
+		await page.click( `text=${getTranslationFor('Remove section')}` );
 		// Grab all of the section headings
 		await page.waitForLoadState( 'networkidle' );
 		const sections = await page.$$(
@@ -174,14 +174,14 @@ test.describe( 'Analytics pages', () => {
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
 		// button only shows when not all sections visible, so remove a section
-		await page.click( `button:right-of(:text(${getTextForLanguage()['PerformanceInQuotes']})) >> nth=0` );
-		await page.click( `text=${getTextForLanguage()['Removesection']}` );
+		await page.click( `button:right-of(:text(${getTranslationFor('"Performance"')})) >> nth=0` );
+		await page.click( `text=${getTranslationFor('Remove section')}` );
 		
 		// add section
-		await page.click( `//button[@title=${getTextForLanguage()['AddmoresectionsInQuotes']}]` );
-		await page.click( `//button[@title=${getTextForLanguage()['AddPerformancesectionInQuotes']}]` );
+		await page.click( `//button[@title=${getTranslationFor('"Add more sections"')}]` );
+		await page.click( `//button[@title=${getTranslationFor('"Add Performance section"')}]` );
 		await expect(
 			page.locator( 'h2.woocommerce-section-header__title >> nth=2' )
-		).toContainText( `${getTextForLanguage()['Performance']}` );
+		).toContainText( `${getTranslationFor('Performance')}` );
 	} );
 } );

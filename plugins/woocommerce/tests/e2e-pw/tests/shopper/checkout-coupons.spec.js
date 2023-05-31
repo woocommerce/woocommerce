@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 const firstProductName = 'Coupon checkout test product';
 const coupons = [
@@ -87,13 +87,13 @@ test.describe( 'Checkout coupons', () => {
 			page,
 		} ) => {
 			await page.goto( '/checkout/', { waitUntil: 'networkidle' } );
-			await page.click( `text=${getTextForLanguage()['Clickheretoenteryourcode']}` );
+			await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
 			await page.fill( '#coupon_code', coupons[ i ].code );
-			await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+			await page.click( `text=${getTranslationFor('Apply coupon')}` );
 
 			await expect(
 				page.locator( '.woocommerce-message' )
-			).toContainText( getTextForLanguage()['Couponcodeappliedsuccessfully'] );
+			).toContainText( getTranslationFor('Coupon code applied successfully.') );
 			await expect(
 				page.locator( '.cart-discount .amount' )
 			).toContainText( discounts[ i ] );
@@ -107,20 +107,20 @@ test.describe( 'Checkout coupons', () => {
 		page,
 	} ) => {
 		await page.goto( '/checkout/' );
-		await page.click( `text=${getTextForLanguage()['Clickheretoenteryourcode']}` );
+		await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+		await page.click( `text=${getTranslationFor('Apply coupon')}` );
 		// successful first time
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			getTextForLanguage()['Couponcodeappliedsuccessfully']
+			getTranslationFor('Coupon code applied successfully.')
 		);
 		// try to apply the same coupon
-		await page.click( `text=${getTextForLanguage()['Clickheretoenteryourcode']}` );
+		await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+		await page.click( `text=${getTranslationFor('Apply coupon')}` );
 		// error received
 		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
-			getTextForLanguage()['Couponcodealreadyapplied']
+			getTranslationFor('Coupon code already applied!')
 		);
 		// check cart total
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(
@@ -133,19 +133,19 @@ test.describe( 'Checkout coupons', () => {
 
 	test( 'allows checkout to apply multiple coupons', async ( { page } ) => {
 		await page.goto( '/checkout/' );
-		await page.click( `text=${getTextForLanguage()['Clickheretoenteryourcode']}` );
+		await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+		await page.click( `text=${getTranslationFor('Apply coupon')}` );
 		// successful
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			getTextForLanguage()['Couponcodeappliedsuccessfully']
+			getTranslationFor('Coupon code applied successfully.')
 		);
-		await page.click( `text=${getTextForLanguage()['Clickheretoenteryourcode']}` );
+		await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
 		await page.fill( '#coupon_code', coupons[ 2 ].code );
-		await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+		await page.click( `text=${getTranslationFor('Apply coupon')}` );
 		// successful
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			getTextForLanguage()['Couponcodeappliedsuccessfully']
+			getTranslationFor('Coupon code applied successfully.')
 		);
 		// check cart total
 		await expect(
@@ -163,9 +163,9 @@ test.describe( 'Checkout coupons', () => {
 		page,
 	} ) => {
 		await page.goto( '/checkout/' );
-		await page.click( `text=${getTextForLanguage()['Clickheretoenteryourcode']}` );
+		await page.click( `text=${getTranslationFor('Click here to enter your code')}` );
 		await page.fill( '#coupon_code', coupons[ 0 ].code );
-		await page.click( `text=${getTextForLanguage()['Applycoupon']}` );
+		await page.click( `text=${getTranslationFor('Apply coupon')}` );
 
 		// confirm numbers
 		await expect( page.locator( '.cart-discount .amount' ) ).toContainText(

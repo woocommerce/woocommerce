@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 let productId, orderId;
 const productName = 'Simple Product Name';
@@ -69,12 +69,12 @@ test.describe(
 			// verify that the order is pending payment
 			await expect(
 				page.locator( '#select2-order_status-container' )
-			).toContainText( `${getTextForLanguage()['Pendingpayment']}` );
+			).toContainText( `${getTranslationFor('Pending payment')}` );
 
 			//verify that the customer payment page link is displayed
 			await expect(
 				page.locator( 'label[for=order_status] > a' )
-			).toContainText( `${getTextForLanguage()['Customerpaymentpage']}` );
+			).toContainText( `${getTranslationFor('Customer payment page →')}` );
 		} );
 
 		test( 'should load the customer payment page', async ( { page } ) => {
@@ -87,7 +87,7 @@ test.describe(
 
 			// verify we landed on the customer payment page
 			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-				`${getTextForLanguage()['Payfororder']}`
+				`${getTranslationFor('Pay for order')}`
 			);
 			await expect( page.locator( 'td.product-name' ) ).toContainText(
 				productName
@@ -111,7 +111,7 @@ test.describe(
 
 			// Verify we landed on the order received page
 			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-				`${getTextForLanguage()['Orderreceived']}`
+				`${getTranslationFor('Order received')}`
 			);
 			await expect(
 				page.locator( 'li.woocommerce-order-overview__order.order' )

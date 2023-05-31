@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 	let productId, orderId, currencySymbol;
@@ -83,8 +83,8 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		);
 		await expect( page.locator( '#refund_amount' ) ).toHaveValue( '9.99' );
 		await expect( page.locator( '.do-manual-refund' ) ).toContainText(
-			`${ getTextForLanguage()[ 'Refund' ] } ${ currencySymbol }9.99 ${
-				getTextForLanguage()[ 'manually' ]
+			`${ getTranslationFor('Refund') } ${ currencySymbol }9.99 ${
+				getTranslationFor('manually')
 			}`
 		);
 
@@ -112,11 +112,7 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 
 		// Verify system note was added
 		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
-			`${
-				getTextForLanguage()[
-					'OrderstatuschangedfromCompletedtoRefunded'
-				]
-			}`
+			getTranslationFor('Order status changed from Completed to Refunded.')
 		);
 	} );
 
@@ -223,9 +219,7 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 
 		// Verify stock reduction system note was added
 		await expect( page.locator( '.system-note >> nth=1' ) ).toContainText(
-			getTextForLanguage()[
-				'StocklevelsreducedProductwithstock10to8Regex'
-			]
+			getTranslationFor('/Stock levels reduced: Product with stock \(#\d+\) 10→8/')
 		);
 
 		// Click the Refund button
@@ -247,14 +241,14 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 
 		// Verify restock system note was added
 		await expect( page.locator( '.system-note >> nth=0' ) ).toContainText(
-			getTextForLanguage()[ 'Itemstockincreasedfrom8to10Regex' ]
+			getTranslationFor('/Item #\d+ stock increased from 8 to 10./')
 		);
 
 		// Update the order
 		await page.click( 'button.save_order' );
 		await expect(
 			page.locator( 'div.updated.notice-success' )
-		).toContainText( `${ getTextForLanguage()[ 'Orderupdated' ] }` );
+		).toContainText( `${ getTranslationFor('Order updated.') }` );
 
 		// Verify that inventory wasn't modified.
 		expect(
@@ -264,9 +258,7 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 					notes.every(
 						( note ) => ! note.textContent.match( pattern )
 					),
-				getTextForLanguage()[
-					'AdjustedstockProductwithStock10to8Regex'
-				]
+				getTranslationFor('/Adjusted stock: Product with Stock \(10→8\)/')
 			)
 		).toEqual( true );
 	} );

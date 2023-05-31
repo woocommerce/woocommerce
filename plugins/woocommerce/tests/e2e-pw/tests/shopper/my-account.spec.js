@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
-const { customer, getTextForLanguage } = require( '../../test-data/data' );
+const { customer, getTranslationFor } = require( '../../test-data/data' );
 
-const pages = getTextForLanguage()['pages'];
+const pages = getTranslationFor('pages');
 
 test.describe( 'My account page', () => {
 	test.use( { storageState: process.env.CUSTOMERSTATE } );
@@ -19,28 +19,28 @@ test.describe( 'My account page', () => {
 		// assert that navigation is visible
 		await expect(
 			page.locator( '.woocommerce-MyAccount-navigation-link--dashboard' )
-		).toContainText( getTextForLanguage()['Dashboard'] );
+		).toContainText( getTranslationFor('Dashboard') );
 		await expect(
 			page.locator( '.woocommerce-MyAccount-navigation-link--orders' )
-		).toContainText( getTextForLanguage()['Orders'] );
+		).toContainText( getTranslationFor('Orders') );
 		await expect(
 			page.locator( '.woocommerce-MyAccount-navigation-link--downloads' )
-		).toContainText( getTextForLanguage()['Downloads']  );
+		).toContainText( getTranslationFor('Downloads')  );
 		await expect(
 			page.locator(
 				'.woocommerce-MyAccount-navigation-link--edit-address'
 			)
-		).toContainText( getTextForLanguage()['Addresses'] );
+		).toContainText( getTranslationFor('Addresses') );
 		await expect(
 			page.locator(
 				'.woocommerce-MyAccount-navigation-link--edit-account'
 			)
-		).toContainText( getTextForLanguage()['Accountdetails'] );
+		).toContainText( getTranslationFor('Account details') );
 		await expect(
 			page.locator(
 				'.woocommerce-MyAccount-navigation-link--customer-logout'
 			)
-		).toContainText( getTextForLanguage()['Logout'] );
+		).toContainText( getTranslationFor('Log out') );
 	} );
 
 	for ( let i = 0; i < pages.length; i++ ) {

@@ -1,5 +1,5 @@
 const { expect } = require( '@playwright/test' );
-const { getTextForLanguage } = require( './../test-data/data' );
+const { getTranslationFor } = require( './../test-data/data' );
 
 const STORE_DETAILS_URL = 'wp-admin/admin.php?page=wc-admin&path=/setup-wizard';
 const INDUSTRY_DETAILS_URL =
@@ -30,10 +30,10 @@ const onboarding = {
 		// Verify that checkbox next to "Get tips, product updates and inspiration straight to your mailbox" is selected
 		await page.check( '#inspector-checkbox-control-0' );
 		// Click continue button
-		await page.click( `button >> text=${getTextForLanguage()['Continue']}` );
+		await page.click( `button >> text=${getTranslationFor('Continue')}` );
 		// Usage tracking dialog
 		await page.textContent( '.components-modal__header-heading' );
-		await page.click( `button >> text=${getTextForLanguage()['Nothanks']}` );
+		await page.click( `button >> text=${getTranslationFor('No thanks')}` );
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	},
 
@@ -44,7 +44,7 @@ const onboarding = {
 		);
 
 		expect( pageHeading ).toContain(
-			`${getTextForLanguage()['Inwhichindustrydoesthestoreoperate']}`
+			`${getTranslationFor('In which industry does the store operate?')}`
 		);
 		// Check that there are the correct number of options listed
 		const numCheckboxes = await page.$$(
@@ -67,9 +67,9 @@ const onboarding = {
 		await page.textContent( '.components-modal__header-heading' );
 
 		if ( saveChanges ) {
-			await page.click( `button >> text=${getTextForLanguage()['Save']}` );
+			await page.click( `button >> text=${getTranslationFor('Save')}` );
 		} else {
-			await page.click( `button >> text=${getTextForLanguage()['Discard']}` );
+			await page.click( `button >> text=${getTranslationFor('Discard')}` );
 		}
 		await page.waitForLoadState( 'networkidle' );
 	},
@@ -82,7 +82,7 @@ const onboarding = {
 			'div.woocommerce-profile-wizard__step-header > h2'
 		);
 		expect( pageHeading ).toContain(
-			`${getTextForLanguage()['Whattypeofproductswillbelisted']}`
+			`${getTranslationFor('What type of products will be listed?')}`
 		);
 		// Check that there are the correct number of options listed
 		const numCheckboxes = await page.$$(
@@ -105,7 +105,7 @@ const onboarding = {
 		const pageHeading = await page.textContent(
 			'div.woocommerce-profile-wizard__step-header > h2'
 		);
-		expect( pageHeading ).toContain( `${getTextForLanguage()['Tellusaboutyourbusiness']}` );
+		expect( pageHeading ).toContain( `${getTranslationFor('Tell us about your business')}` );
 		// Select 1 - 10 for products
 		await page.click( '#woocommerce-select-control-0__control-input', {
 			force: true,
@@ -126,7 +126,7 @@ const onboarding = {
 		const pageHeading = await page.textContent(
 			'div.woocommerce-profile-wizard__step-header > h2'
 		);
-		expect( pageHeading ).toContain( `${getTextForLanguage()['Includedbusinessfeatures']}` );
+		expect( pageHeading ).toContain( `${getTranslationFor('Included business features')}` );
 		// Expand list of features
 		await page.click(
 			'button.woocommerce-admin__business-details__selective-extensions-bundle__expand'

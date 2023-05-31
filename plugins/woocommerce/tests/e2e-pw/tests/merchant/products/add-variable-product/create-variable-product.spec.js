@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { variableProducts: utils, api } = require( '../../../../utils' );
-const { getTextForLanguage } = require( './../../../../test-data/data' );
+const { getTranslationFor } = require( './../../../../test-data/data' );
 const { showVariableProductTour } = utils;
 const productPageURL = 'wp-admin/post-new.php?post_type=product';
 const variableProductName = 'Variable Product with Three Variations';
@@ -27,7 +27,7 @@ test.describe( 'Add variable product', () => {
 		await test.step(
 			`Type "${ variableProductName }" into the "Product name" input field.`,
 			async () => {
-				const productNameTextbox = page.getByLabel( getTextForLanguage()['Productname'] );
+				const productNameTextbox = page.getByLabel( getTranslationFor('Product name') );
 				const permalink = page.locator( '#sample-permalink' );
 
 				await productNameTextbox.fill( variableProductName );
@@ -48,7 +48,7 @@ test.describe( 'Add variable product', () => {
 			async () => {
 				const attributesTab = page
 					.locator( '.attribute_tab' )
-					.getByRole( 'link', { name: getTextForLanguage()['Attributes'] } );
+					.getByRole( 'link', { name: getTranslationFor('Attributes') } );
 
 				await attributesTab.scrollIntoViewIfNeeded();
 
@@ -69,7 +69,7 @@ test.describe( 'Add variable product', () => {
 		if ( tourWasDisplayed ) {
 			await test.step( 'Tour was displayed, so dismiss it.', async () => {
 				await page
-					.getByRole( 'button', { name: getTextForLanguage()['CloseTour'] } )
+					.getByRole( 'button', { name: getTranslationFor('Close Tour') } )
 					.click();
 			} );
 
@@ -99,7 +99,7 @@ test.describe( 'Add variable product', () => {
 			'Expect the "Product draft updated." notice to appear.',
 			async () => {
 				await expect(
-					page.getByText( getTextForLanguage()['Productdraftupdated'] )
+					page.getByText( getTranslationFor('Product draft updated. ') )
 				).toBeVisible();
 			}
 		);
@@ -112,7 +112,7 @@ test.describe( 'Add variable product', () => {
 				);
 
 				await expect( selectedProductType ).toHaveText(
-					'Variable product'
+					getTranslationFor('Variable product')
 				);
 			}
 		);

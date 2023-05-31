@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { getTextForLanguage } = require( './../../test-data/data' );
+const { getTranslationFor } = require( './../../test-data/data' );
 
 const simpleProductName = 'Add new order simple product';
 const variableProductName = 'Add new order variable product';
@@ -211,7 +211,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 	test( 'can create new order', async ( { page } ) => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
 		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
-			`${getTextForLanguage()['Addneworder']}`
+			`${getTranslationFor('Add new order')}`
 		);
 
 		await page.waitForLoadState( 'networkidle' );
@@ -237,12 +237,12 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			page.locator( 'div.updated.notice.notice-success.is-dismissible', {
 				has: page.locator( 'p' ),
 			} )
-		).toContainText( `${getTextForLanguage()['Orderupdated']}` );
+		).toContainText( `${getTranslationFor('Order updated.')}` );
 		await expect( page.locator( '#order_status' ) ).toHaveValue(
 			'wc-processing'
 		);
 		await expect( page.locator( 'div.note_content' ) ).toContainText(
-			`${getTextForLanguage()['OrderstatuschangedfromPendingpaymenttoProcessing']}`
+			`${getTranslationFor('Order status changed from Pending payment to Processing.')}`
 		);
 	} );
 
@@ -256,36 +256,36 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await page.click( 'button.add-order-item' );
 
 		// search for each product to add
-		await page.click( `text=${getTextForLanguage()['Searchforaproduct']}` );
+		await page.click( `text=${getTranslationFor('Search for a product…')}` );
 		await page.type(
-			`input:below(:text(${getTextForLanguage()['SearchforaproductInQuotes']}))`,
+			`input:below(:text(${getTranslationFor('"Search for a product…"')}))`,
 			simpleProductName
 		);
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
 		);
 
-		await page.click( `text=${getTextForLanguage()['Searchforaproduct']}` );
+		await page.click( `text=${getTranslationFor('Search for a product…')}` );
 		await page.type(
-			`input:below(:text(${getTextForLanguage()['SearchforaproductInQuotes']}))`,
+			`input:below(:text(${getTranslationFor('"Search for a product…"')}))`,
 			variableProductName
 		);
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
 		);
 
-		await page.click( `text=${getTextForLanguage()['Searchforaproduct']}` );
+		await page.click( `text=${getTranslationFor('Search for a product…')}` );
 		await page.type(
-			`input:below(:text(${getTextForLanguage()['SearchforaproductInQuotes']}))`,
+			`input:below(:text(${getTranslationFor('"Search for a product…"')}))`,
 			groupedProductName
 		);
 		await page.click(
 			'li.select2-results__option.select2-results__option--highlighted'
 		);
 
-		await page.click( `text=${getTextForLanguage()['Searchforaproduct']}` );
+		await page.click( `text=${getTranslationFor('Search for a product…')}` );
 		await page.type(
-			`input:below(:text(${getTextForLanguage()['SearchforaproductInQuotes']}))`,
+			`input:below(:text(${getTranslationFor('"Search for a product…"')}))`,
 			externalProductName
 		);
 		await page.click(
@@ -310,7 +310,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		// Recalculate taxes
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( `text=${getTextForLanguage()['Recalculate']}` );
+		await page.click( `text=${getTranslationFor('Recalculate')}` );
 
 		// verify tax names
 		let i = 0;
