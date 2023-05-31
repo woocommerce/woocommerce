@@ -137,6 +137,7 @@ class FeaturesController {
 		self::add_action( 'after_plugin_row', array( $this, 'handle_plugin_list_rows' ), 10, 2 );
 		self::add_action( 'current_screen', array( $this, 'enqueue_script_to_fix_plugin_list_html' ), 10, 1 );
 		self::add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
+		self::add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
 	}
 
 	/**
@@ -1085,5 +1086,27 @@ class FeaturesController {
 			'all'                       => $all_link,
 			'incompatible_with_feature' => $incompatible_link,
 		);
+	}
+
+	/**
+	 * Changes the feature given it's id and a toggle value as a query param.
+	 *
+	 * `/wp-admin/post.php?product_block_editor=1`, 1 for on 
+	 * `/wp-admin/post.php?product_block_editor=0`, 0 for off
+	 */
+	private function change_feature_enable_from_query_params(): void {
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		foreach ( array_keys( $this->features ) as $feature_id ) {
+			if ( isset( $_GET[ $feature_id ] ) ) {
+				if ( '1' === $_GET[ $feature_id ] ) {
+					$this->change_feature_enable( $feature_id, true );
+				} elseif ( '0' === $_GET[ $feature_id ] ) {
+					$this->change_feature_enable( $feature_id, false );
+				}
+			}
+		}
 	}
 }
