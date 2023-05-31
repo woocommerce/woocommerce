@@ -36,6 +36,7 @@ export const Edit = ( {
 						checkoutButtonLabel: content,
 					} );
 				} }
+				style={ blockProps.style }
 			/>
 		</div>
 	);
