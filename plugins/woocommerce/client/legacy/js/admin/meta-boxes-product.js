@@ -264,24 +264,35 @@ jQuery( function ( $ ) {
 
 	function disable_or_enable_fields() {
 		var product_type = $( 'select#product-type' ).val();
-		$( `.disable_if_grouped` ).each( function () {
-			$( this ).removeClass( 'disabled' );
-			if ( $( this ).is('input')) {
-				$( this ).prop( 'disabled', false )
-			}
-		} );
-		$( `.disable_if_variable` ).each( function () {
-			$( this ).removeClass( 'disabled' );
-			if ( $( this ).is('input')) {
-				$( this ).prop( 'disabled', false )
-			}
-		} );
-		$( `.disable_if_${ product_type }` ).each( function () {
+		var hasDisabledFields = true;
+		$( `.enable_if_simple` ).each( function () {
 			$( this ).addClass( 'disabled' );
-			if ( $( this ).is('input')) {
-				$( this ).prop( 'disabled', true )
+			if ( $( this ).is( 'input' ) ) {
+				$( this ).prop( 'disabled', true );
 			}
 		} );
+		$( `.enable_if_external` ).each( function () {
+			$( this ).addClass( 'disabled' );
+			if ( $( this ).is( 'input' ) ) {
+				$( this ).prop( 'disabled', true );
+			}
+		} );
+		$( `.enable_if_${ product_type }` ).each( function () {
+			hasDisabledFields = false;
+			$( this ).removeClass( 'disabled' );
+			if ( $( this ).is( 'input' ) ) {
+				$( this ).prop( 'disabled', false );
+			}
+		} );
+
+		if (
+			hasDisabledFields &&
+			! $( '#general_product_data .woocommerce-message' ).is( ':visible' )
+		) {
+			$( `.pricing_disabled_fallback_message` ).show();
+		} else {
+			$( `.pricing_disabled_fallback_message` ).hide();
+		}
 	}
 
 	// Sale price schedule.

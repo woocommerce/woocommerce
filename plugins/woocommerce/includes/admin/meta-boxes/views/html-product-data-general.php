@@ -48,17 +48,22 @@ defined( 'ABSPATH' ) || exit;
 		</p>
 	</div>
 
+	<div class="inline notice woocommerce-message pricing_disabled_fallback_message">
+		<p>
+			<?php echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details in one of the other tabs.', 'woocommerce' ), 'grouped' ) ); ?>
+		</p>
+	</div>
 
-	<div class="options_group pricing show_if_simple show_if_external show_if_variable show_if_grouped hidden">
+	<div class="options_group pricing">
 		<?php
 		woocommerce_wp_text_input(
 			array(
 				'id'          => '_regular_price',
 				'value'       => $product_object->get_regular_price( 'edit' ),
 				'label'       => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-				'label_class' => 'disable_if_variable disable_if_grouped',
+				'label_class' => 'enable_if_simple enable_if_external',
 				'data_type'   => 'price',
-				'class'       => 'disable_if_variable disable_if_grouped',
+				'class'       => 'enable_if_simple enable_if_external',
 			)
 		);
 
@@ -68,9 +73,9 @@ defined( 'ABSPATH' ) || exit;
 				'value'       => $product_object->get_sale_price( 'edit' ),
 				'data_type'   => 'price',
 				'label'       => __( 'Sale price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-				'label_class' => 'disable_if_variable disable_if_grouped',
-				'description' => '<a href="#" class="sale_schedule hide_if_variable hide_if_grouped">' . __( 'Schedule', 'woocommerce' ) . '</a>',
-				'class'       => 'disable_if_variable disable_if_grouped',
+				'label_class' => 'enable_if_simple enable_if_external',
+				'description' => '<a href="#" class="sale_schedule show_if_simple show_if_external">' . __( 'Schedule', 'woocommerce' ) . '</a>',
+				'class'       => 'enable_if_simple enable_if_external',
 			)
 		);
 
