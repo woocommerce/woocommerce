@@ -10,32 +10,52 @@ import { __ } from '@wordpress/i18n';
 import {
 	ProductDataSuggestion,
 	ProductDataSuggestionRequest,
+	ApiErrorResponse,
 } from '../utils/types';
 
-type WooApiResponse = {
+type ProductDataSuggestionSuccessResponse = {
 	suggestions: ProductDataSuggestion[];
 };
+
+type ProductDataSuggestionErrorResponse = ApiErrorResponse;
 
 export const useProductDataSuggestions = () => {
 	const fetchSuggestions = async (
 		request: ProductDataSuggestionRequest
-	) => {
-		if ( request.name.length < 10 && request.description.length < 50 ) {
-			throw new Error(
-				__(
-					"🧐 We need more details about your product! Please add a descriptive title or description. Categories, tags, and attributes are a plus for better results!'",
-					'woocommerce'
-				)
-			);
+	): Promise< ProductDataSuggestion[] > => {
+		try {
+			const response =
+				await apiFetch< ProductDataSuggestionSuccessResponse >( {
+					path: '/wooai/product-data-suggestions',
+					method: 'POST',
+					data: request,
+				} );
+
+			return response.suggestions;
+		} catch ( error ) {
+			/* eslint-disable-next-line no-console */
+			console.error( error );
+
+			const errorResponse = error as ProductDataSuggestionErrorResponse;
+			const hasStatus = errorResponse?.data?.status;
+			const hasMessage = errorResponse?.message;
+
+			// Check if the status is 500 or greater.
+			const isStatusGte500 =
+				errorResponse?.data?.status && errorResponse.data.status >= 500;
+
+			// If the error response doesn't have a status or message, or if the status is 500 or greater, throw a generic error.
+			if ( ! hasStatus || ! hasMessage || isStatusGte500 ) {
+				throw new Error(
+					__(
+						`Apologies, this is an experimental feature and there was an error with this service. Please try again.`,
+						'woocommerce'
+					)
+				);
+			}
+
+			throw new Error( errorResponse.message );
 		}
-
-		const response = await apiFetch< WooApiResponse >( {
-			path: '/wooai/product-data-suggestions',
-			method: 'POST',
-			data: request,
-		} );
-
-		return response.suggestions;
 	};
 
 	return {

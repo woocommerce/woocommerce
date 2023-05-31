@@ -17,7 +17,6 @@ defined( 'ABSPATH' ) || exit;
  * Register the Woo AI route.
  */
 function woo_ai_rest_api_init() {
-	require_once dirname( __FILE__ ) . '/text-generation/class-text-generation.php';
 	require_once dirname( __FILE__ ) . '/product-data-suggestion/class-product-data-suggestion-api.php';
 }
 

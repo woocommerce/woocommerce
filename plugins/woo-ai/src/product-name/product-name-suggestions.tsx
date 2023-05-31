@@ -2,8 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import React from 'react';
+import { Pill } from '@woocommerce/components';
+import { Tooltip } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -16,11 +18,7 @@ import {
 	ProductDataSuggestionRequest,
 } from '../utils/types';
 import SuggestionItem from './suggestion-item';
-import {
-	RandomTipMessage,
-	RandomLoadingMessage,
-	ErrorMessage,
-} from '../components';
+import RandomLoadingMessage from '../components/random-loading-message';
 
 enum SuggestionsState {
 	Fetching = 'fetching',
@@ -28,49 +26,116 @@ enum SuggestionsState {
 	None = 'none',
 }
 
-export function ProductNameSuggestions() {
+type TinyEditor = {
+	on: ( eventName: string, handler: () => void ) => void;
+};
+
+declare const tinymce: {
+	on: (
+		eventName: 'addeditor',
+		handler: ( event: Event & { editor: TinyEditor } ) => void,
+		thing?: boolean
+	) => void;
+};
+
+export const ProductNameSuggestions = () => {
 	const [ suggestionsState, setSuggestionsState ] =
 		useState< SuggestionsState >( SuggestionsState.None );
-	const [ error, setError ] = useState( '' );
+	const [ error, setError ] = useState< string >( '' );
+	const [ isFirstLoad, setIsFirstLoad ] = useState< boolean >( true );
+	const [ visible, setVisible ] = useState< boolean >( false );
 	const [ suggestions, setSuggestions ] = useState< ProductDataSuggestion[] >(
 		[]
 	);
 	const { fetchSuggestions } = useProductDataSuggestions();
+	const nameInputRef = useRef< HTMLInputElement >(
+		document.querySelector( '#title' )
+	);
+	const [ productName, setProductName ] = useState< string >(
+		nameInputRef.current?.value || ''
+	);
 
-	const clearError = () => {
+	const resetError = () => {
 		setError( '' );
 		setSuggestionsState( SuggestionsState.None );
 	};
 
-	const nameEl = useRef< HTMLInputElement >(
-		document.querySelector( '#title' )
-	);
-
 	useEffect( () => {
-		const name = nameEl.current;
+		const nameInput = nameInputRef.current;
 
-		name?.addEventListener( 'keyup', clearError );
-		name?.addEventListener( 'change', clearError );
+		const onFocus = () => {
+			setVisible( true );
+		};
+		const onKeyUp = ( e: KeyboardEvent ) => {
+			if ( e.key === 'Escape' ) {
+				setVisible( false );
+			}
+
+			setProductName( ( e.target as HTMLInputElement ).value || '' );
+		};
+
+		const onChange = ( e: Event ) => {
+			setProductName( ( e.target as HTMLInputElement ).value || '' );
+		};
+
+		const onBodyClick = ( e: MouseEvent ) => {
+			const target = e.target as HTMLElement;
+
+			// Need to capture errant handlediv click that happens on load as well
+			if (
+				target?.matches( '.handlediv' ) ||
+				! target?.matches(
+					'#woocommerce-ai-app-product-name-suggestions *, #title'
+				)
+			) {
+				setVisible( false );
+			}
+		};
+
+		// Necessary since tinymce does not bubble click events.
+		const onDOMLoad = () => {
+			tinymce.on(
+				'addeditor',
+				( event ) =>
+					event.editor.on( 'click', () => setVisible( false ) ),
+				true
+			);
+		};
+
+		if ( nameInput ) {
+			nameInput.addEventListener( 'focus', onFocus );
+			nameInput.addEventListener( 'keyup', onKeyUp );
+			nameInput.addEventListener( 'change', onChange );
+		}
+		document.body.addEventListener( 'click', onBodyClick );
+		document.addEventListener( 'DOMContentLoaded', onDOMLoad );
 
 		return () => {
-			name?.removeEventListener( 'keyup', clearError );
-			name?.removeEventListener( 'change', clearError );
+			if ( nameInput ) {
+				nameInput.removeEventListener( 'focus', onFocus );
+				nameInput.removeEventListener( 'keyup', onKeyUp );
+				nameInput.removeEventListener( 'change', onChange );
+			}
+			document.body.removeEventListener( 'click', onBodyClick );
+			document.removeEventListener( 'DOMContentLoaded', onDOMLoad );
 		};
-	}, [ nameEl ] );
+	}, [] );
 
 	const updateProductName = ( newName: string ) => {
-		if ( ! nameEl.current || ! newName.length ) return;
-		nameEl.current.value = newName;
-		nameEl.current.setAttribute( 'value', newName );
+		if ( ! nameInputRef.current || ! newName.length ) return;
+		nameInputRef.current.value = newName;
+		nameInputRef.current.setAttribute( 'value', newName );
+		setProductName( newName );
 	};
 
 	const handleSuggestionClick = ( suggestion: ProductDataSuggestion ) => {
 		updateProductName( suggestion.content );
 		setSuggestions( [] );
+		resetError();
 	};
 
-	const getSuggestions = async () => {
-		clearError();
+	const fetchProductSuggestions = async () => {
+		resetError();
 		setSuggestions( [] );
 		setSuggestionsState( SuggestionsState.Fetching );
 		try {
@@ -81,17 +146,31 @@ export function ProductNameSuggestions() {
 			};
 			setSuggestions( await fetchSuggestions( request ) );
 			setSuggestionsState( SuggestionsState.None );
+			setIsFirstLoad( false );
 		} catch ( e ) {
-			/* eslint-disable no-console */
-			console.error( e );
-
-			setError( e instanceof Error ? e.message : '' );
 			setSuggestionsState( SuggestionsState.Failed );
+			setError( e instanceof Error ? e.message : '' );
 		}
 	};
 
+	const shouldRenderSuggestionsButton = useCallback( () => {
+		return (
+			productName.length >= 10 &&
+			suggestionsState !== SuggestionsState.Fetching
+		);
+	}, [ productName, suggestionsState ] );
+
+	const getSuggestionsButtonLabel = useCallback( () => {
+		return isFirstLoad
+			? __( 'Generate name ideas with AI', 'woocommerce' )
+			: __( 'Get more ideas', 'woocommerce' );
+	}, [ isFirstLoad ] );
+
 	return (
-		<div className="wc-product-name-suggestions-container">
+		<div
+			className="wc-product-name-suggestions-container"
+			hidden={ ! visible }
+		>
 			{ suggestions.length > 0 &&
 				suggestionsState !== SuggestionsState.Fetching && (
 					<ul className="wc-product-name-suggestions__suggested-names">
@@ -104,19 +183,44 @@ export function ProductNameSuggestions() {
 						) ) }
 					</ul>
 				) }
-			{ suggestionsState !== SuggestionsState.Fetching && (
-				<button
-					className="button woo-ai-get-suggestions-btn"
-					type="button"
-					onClick={ getSuggestions }
-				>
+			{ productName.length < 10 &&
+				suggestionsState !== SuggestionsState.Fetching && (
+					<p className="wc-product-name-suggestions__tip-message">
+						<img src={ MagicIcon } alt="" />
+						{ __(
+							'Enter a few descriptive words to generate product name using AI.',
+							'woocommerce'
+						) }
+					</p>
+				) }
+			<button
+				className="button woo-ai-get-suggestions-btn"
+				type="button"
+				onClick={ fetchProductSuggestions }
+				style={ {
+					display: shouldRenderSuggestionsButton() ? 'flex' : 'none',
+				} }
+			>
+				<div className="woo-ai-get-suggestions-btn__content">
 					<img src={ MagicIcon } alt="magic button icon" />
-					{ suggestions.length > 0 &&
-						__( 'Suggest Alternatives', 'woocommerce' ) }
-					{ ! suggestions.length &&
-						__( 'Get Suggestions (beta)', 'woocommerce' ) }
-				</button>
-			) }
+					{ getSuggestionsButtonLabel() }
+				</div>
+				<Tooltip
+					text={ __(
+						'AI features are in their experimental phase. While we strive to provide accurate and useful results, there is a possibility of generating misleading or incorrect content.',
+						'woocommerce'
+					) }
+					position="top center"
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore Incorrect types.
+					className={ 'woo-ai-get-suggestions__experimental-tooltip' }
+					delay={ 0 }
+				>
+					<span>
+						<Pill>{ __( 'Experimental', 'woocommerce' ) }</Pill>
+					</span>
+				</Tooltip>
+			</button>
 			{ suggestionsState === SuggestionsState.Fetching && (
 				<p className="wc-product-name-suggestions__loading-message">
 					<RandomLoadingMessage
@@ -126,25 +230,11 @@ export function ProductNameSuggestions() {
 					/>
 				</p>
 			) }
-			{ suggestionsState === SuggestionsState.Fetching && (
-				<p className="wc-product-name-suggestions__tip-message">
-					<RandomTipMessage />
-				</p>
-			) }
 			{ suggestionsState === SuggestionsState.Failed && (
 				<p className="wc-product-name-suggestions__error-message">
-					<ErrorMessage error={ error } />
-					<button
-						className="notice-dismiss"
-						type="button"
-						onClick={ clearError }
-					>
-						<span className="screen-reader-text">
-							{ __( 'Dismiss this notice.', 'woocommerce' ) }
-						</span>
-					</button>
+					{ error }
 				</p>
 			) }
 		</div>
 	);
-}
+};

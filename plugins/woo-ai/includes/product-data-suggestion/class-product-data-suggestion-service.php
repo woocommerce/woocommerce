@@ -7,8 +7,8 @@
 
 namespace Automattic\WooCommerce\AI\ProductDataSuggestion;
 
+use Automattic\WooCommerce\AI\Completion\Completion_Exception;
 use Automattic\WooCommerce\AI\Completion\Completion_Service_Interface;
-use Exception;
 use JsonException;
 
 defined( 'ABSPATH' ) || exit;
@@ -52,76 +52,26 @@ class Product_Data_Suggestion_Service {
 	 *               - content: The suggested content.
 	 *               - reason: The reason for the suggestion.
 	 *
-	 * @throws Exception If getting the suggestions fails.
+	 * @throws Product_Data_Suggestion_Exception If If getting the suggestions fails or the suggestions cannot be decoded from JSON.
 	 */
 	public function get_suggestions( Product_Data_Suggestion_Request $request ): array {
-		$messages = array(
-			array(
-				'role'    => 'user',
-				'content' => $this->prompt_generator->get_user_prompt( $request ),
-			),
+		$arguments = array(
+			'content'    => $this->prompt_generator->get_user_prompt( $request ),
+			'skip_cache' => true,
 		);
 
-		$completion  = $this->completion_service->get_completion( $messages, array( 'temperature' => 0.9 ) );
-		$suggestions = $this->validate_and_decode_json( $completion );
-
-		if ( null === $suggestions ) {
-			// If we don't have a valid JSON response, try once more.
-			$suggestions = $this->retry_get_json_response( $completion );
-		}
-
-		return $suggestions;
-	}
-
-	/**
-	 * Validate and decode the JSON data.
-	 *
-	 * @param string $data The response to validate.
-	 *
-	 * @return array|null Decodes and returns the data as an associative array if it is valid JSON, returns null otherwise.
-	 */
-	protected function validate_and_decode_json( string $data ): ?array {
 		try {
-			$data_array = json_decode( $data, true, 512, JSON_THROW_ON_ERROR );
+			$completion = $this->completion_service->get_completion( $arguments );
+		} catch ( Completion_Exception $e ) {
+			/* translators: %s: The error message. */
+			throw new Product_Data_Suggestion_Exception( sprintf( __( 'Failed to fetch the suggestions: %s', 'woocommerce' ), $e->getMessage() ), $e->getCode(), $e );
+		}
+
+		try {
+			return json_decode( $completion, true, 512, JSON_THROW_ON_ERROR );
 		} catch ( JsonException $e ) {
-			return null;
+			throw new Product_Data_Suggestion_Exception( 'Failed to decode the suggestions. Please try again.', 400, $e );
 		}
-
-		return $data_array;
-	}
-
-	/**
-	 * Get JSON response with a retry.
-	 *
-	 * @param string $completion The completion data.
-	 *
-	 * @return array|null Decodes and returns the response as an associative array if it is valid JSON, returns null otherwise.
-	 *
-	 * @throws Exception If getting the completion fails.
-	 */
-	protected function retry_get_json_response( string $completion ): ?array {
-		$messages = array(
-			array(
-				'role'    => 'assistant',
-				'content' => $completion,
-			),
-			// Add another message and explicitly ask for a JSON response.
-			array(
-				'role'    => 'user',
-				'content' => 'You respond only in JSON. Do not speak normal text.',
-			),
-		);
-
-		$completion = $this->completion_service->get_completion( $messages, array( 'temperature' => 0.7 ) );
-
-		$suggestions = $this->validate_and_decode_json( $completion );
-
-		if ( null === $suggestions ) {
-			// If we still don't have a valid JSON response, throw an exception.
-			throw new Exception( 'Invalid response from the API. Please try again.' );
-		}
-
-		return $suggestions;
 	}
 
 }
