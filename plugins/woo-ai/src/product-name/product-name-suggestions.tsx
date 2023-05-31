@@ -11,6 +11,7 @@ import { Tooltip } from '@wordpress/components';
  * Internal dependencies
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
+import AlertIcon from '../../assets/images/icons/alert.svg';
 import { productData, recordTracksFactory, getPostId } from '../utils';
 import { useProductDataSuggestions } from '../hooks/useProductDataSuggestions';
 import {
@@ -52,8 +53,7 @@ const recordNameTracks = recordTracksFactory< TracksData >(
 
 export const ProductNameSuggestions = () => {
 	const [ suggestionsState, setSuggestionsState ] =
-		useState< SuggestionsState >( SuggestionsState.None );
-	const [ error, setError ] = useState< string >( '' );
+		useState< SuggestionsState >( SuggestionsState.Failed );
 	const [ isFirstLoad, setIsFirstLoad ] = useState< boolean >( true );
 	const [ visible, setVisible ] = useState< boolean >( false );
 	const [ suggestions, setSuggestions ] = useState< ProductDataSuggestion[] >(
@@ -66,11 +66,6 @@ export const ProductNameSuggestions = () => {
 	const [ productName, setProductName ] = useState< string >(
 		nameInputRef.current?.value || ''
 	);
-
-	const resetError = () => {
-		setError( '' );
-		setSuggestionsState( SuggestionsState.None );
-	};
 
 	useEffect( () => {
 		const nameInput = nameInputRef.current;
@@ -147,11 +142,9 @@ export const ProductNameSuggestions = () => {
 
 		updateProductName( suggestion.content );
 		setSuggestions( [] );
-		resetError();
 	};
 
 	const fetchProductSuggestions = async () => {
-		resetError();
 		setSuggestions( [] );
 		setSuggestionsState( SuggestionsState.Fetching );
 		try {
@@ -177,7 +170,6 @@ export const ProductNameSuggestions = () => {
 			setIsFirstLoad( false );
 		} catch ( e ) {
 			setSuggestionsState( SuggestionsState.Failed );
-			setError( e instanceof Error ? e.message : '' );
 		}
 	};
 
@@ -212,7 +204,7 @@ export const ProductNameSuggestions = () => {
 					</ul>
 				) }
 			{ productName.length < 10 &&
-				suggestionsState !== SuggestionsState.Fetching && (
+				suggestionsState === SuggestionsState.None && (
 					<p className="wc-product-name-suggestions__tip-message">
 						<img src={ MagicIcon } alt="" />
 						{ __(
@@ -230,7 +222,7 @@ export const ProductNameSuggestions = () => {
 				} }
 			>
 				<div className="woo-ai-get-suggestions-btn__content">
-					<img src={ MagicIcon } alt="magic button icon" />
+					<img src={ MagicIcon } alt="" />
 					{ getSuggestionsButtonLabel() }
 				</div>
 				<Tooltip
@@ -260,7 +252,11 @@ export const ProductNameSuggestions = () => {
 			) }
 			{ suggestionsState === SuggestionsState.Failed && (
 				<p className="wc-product-name-suggestions__error-message">
-					{ error }
+					<img src={ AlertIcon } alt="" />
+					{ __(
+						`We're currently experiencing high demand for our experimental feature. Please check back in shortly!`,
+						'woocommerce'
+					) }
 				</p>
 			) }
 		</div>
