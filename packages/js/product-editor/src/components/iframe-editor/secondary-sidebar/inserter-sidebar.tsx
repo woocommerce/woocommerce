@@ -31,14 +31,12 @@ export default function InserterSidebar( {
 	setIsInserterOpened,
 }: InserterSidebarProps ) {
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
-	const { rootClientId, insertionIndex } = useSelect( ( select ) => {
+	const { rootClientId } = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore These selectors are available in the block data store.
-		const { getBlockSelectionEnd, getBlockRootClientId } =
-			select( blockEditorStore );
+		const { getBlockRootClientId } = select( blockEditorStore );
 
 		return {
-			insertionIndex: getBlockSelectionEnd(),
 			rootClientId: getBlockRootClientId(),
 		};
 	} );
@@ -78,7 +76,6 @@ export default function InserterSidebar( {
 					showInserterHelpPanel
 					shouldFocusBlock={ isMobileViewport }
 					rootClientId={ rootClientId }
-					__experimentalInsertionIndex={ insertionIndex }
 					ref={ libraryRef }
 				/>
 			</div>
