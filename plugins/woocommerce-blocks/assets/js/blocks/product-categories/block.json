@@ -39,7 +39,11 @@
     "isHierarchical": {
       "type": "boolean",
       "default": true
-    }
+    },
+	"showChildrenOnly": {
+	  "type": "boolean",
+	  "default": false
+	}
   },
   "example": {
     "attributes": {
