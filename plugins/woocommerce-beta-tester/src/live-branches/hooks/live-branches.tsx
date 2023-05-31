@@ -40,8 +40,6 @@ export const useLiveBranchesData = () => {
 					}
 				) as Branch[];
 
-				console.log( res.master, prBranches );
-
 				setBranches( [ res.master, ...prBranches ] );
 				setLoading( false );
 			} catch ( e ) {
