@@ -158,8 +158,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 		// Merge.
 		$tax_rows = array();
-		// Initialize an associative array to store unique post_ids
-		$unique_post_ids = [];
+		// Initialize an associative array to store unique post_ids.
+		$unique_post_ids = array();
 
 		foreach ( $tax_rows_orders + $tax_rows_partial_refunds as $tax_row ) {
 			$key                                    = $tax_row->rate_id;
