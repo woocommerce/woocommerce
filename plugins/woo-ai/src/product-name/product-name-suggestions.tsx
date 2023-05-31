@@ -53,7 +53,7 @@ const recordNameTracks = recordTracksFactory< TracksData >(
 
 export const ProductNameSuggestions = () => {
 	const [ suggestionsState, setSuggestionsState ] =
-		useState< SuggestionsState >( SuggestionsState.Failed );
+		useState< SuggestionsState >( SuggestionsState.None );
 	const [ isFirstLoad, setIsFirstLoad ] = useState< boolean >( true );
 	const [ visible, setVisible ] = useState< boolean >( false );
 	const [ suggestions, setSuggestions ] = useState< ProductDataSuggestion[] >(
