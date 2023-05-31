@@ -368,7 +368,7 @@ class Init {
 									'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
-								'blockGap'    => '2xlg',
+								'blockGap'    => 'unit-40',
 							),
 							array(
 								array(
@@ -495,7 +495,7 @@ class Init {
 									'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
-								'blockGap'    => '2xlg',
+								'blockGap'    => 'unit-40',
 							),
 							array(
 								array(
@@ -570,7 +570,7 @@ class Init {
 										array(
 											'woocommerce/product-section',
 											array(
-												'blockGap' => '2xlg',
+												'blockGap' => 'unit-40',
 											),
 											array(
 												array(

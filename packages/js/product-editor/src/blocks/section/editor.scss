@@ -44,12 +44,12 @@
 	}
 
 	&__content {
-		&--block-gap-lg > * + * {
-			margin-top: $gap-large;
+		&--block-gap-unit-30 > * + * {
+			margin-top: $grid-unit-30;
 		}
 
-		&--block-gap-2xlg > * + * {
-			margin-top: calc(2 * $gap);
+		&--block-gap-unit-40 > * + * {
+			margin-top: $grid-unit-40;
 		}
 
 		.wp-block-woocommerce-product-section {
