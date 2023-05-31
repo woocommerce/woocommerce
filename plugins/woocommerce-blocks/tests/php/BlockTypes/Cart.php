@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Tests\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Tests\Mocks\CartMock;
+use Automattic\WooCommerce\Blocks\Tests\Mocks\CartCheckoutUtilsMock;
 
 /**
  * Tests for the Cart block type
@@ -9,20 +9,6 @@ use Automattic\WooCommerce\Blocks\Tests\Mocks\CartMock;
  * @since $VID:$
  */
 class Cart extends \WP_UnitTestCase {
-	/**
-	 * This variable holds our cart object.
-	 *
-	 * @var CartMock
-	 */
-	private $cart_block_instance;
-
-	/**
-	 * Initiate the cart mock.
-	 */
-	protected function setUp(): void {
-		$this->cart_block_instance = new CartMock();
-	}
-
 	/**
 	 * We ensure deep sort works with all sort of arrays.
 	 */
@@ -37,7 +23,7 @@ class Cart extends \WP_UnitTestCase {
 			'2',
 			'3',
 		);
-		$this->assertEquals( $test_array_1, $this->cart_block_instance->deep_sort_test( $test_array_1 ), '' );
-		$this->assertEquals( $test_array_2, $this->cart_block_instance->deep_sort_test( $test_array_2 ), '' );
+		$this->assertEquals( $test_array_1, CartCheckoutUtilsMock::deep_sort_test( $test_array_1 ), '' );
+		$this->assertEquals( $test_array_2, CartCheckoutUtilsMock::deep_sort_test( $test_array_2 ), '' );
 	}
 }

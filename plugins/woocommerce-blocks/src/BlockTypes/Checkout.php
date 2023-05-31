@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
 /**
  * Checkout class.
@@ -184,54 +185,7 @@ class Checkout extends AbstractBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 
-		$this->asset_data_registry->add(
-			'allowedCountries',
-			function() {
-				return $this->deep_sort_with_accents( WC()->countries->get_allowed_countries() );
-			},
-			true
-		);
-		$this->asset_data_registry->add(
-			'allowedStates',
-			function() {
-				return $this->deep_sort_with_accents( WC()->countries->get_allowed_country_states() );
-			},
-			true
-		);
-		if ( wc_shipping_enabled() ) {
-			$this->asset_data_registry->add(
-				'shippingCountries',
-				function() {
-					return $this->deep_sort_with_accents( WC()->countries->get_shipping_countries() );
-				},
-				true
-			);
-			$this->asset_data_registry->add(
-				'shippingStates',
-				function() {
-					return $this->deep_sort_with_accents( WC()->countries->get_shipping_country_states() );
-				},
-				true
-			);
-		}
-
-		$this->asset_data_registry->add(
-			'countryLocale',
-			function() {
-				// Merge country and state data to work around https://github.com/woocommerce/woocommerce/issues/28944.
-				$country_locale = wc()->countries->get_country_locale();
-				$states         = wc()->countries->get_states();
-
-				foreach ( $states as $country => $states ) {
-					if ( empty( $states ) ) {
-						$country_locale[ $country ]['state']['required'] = false;
-						$country_locale[ $country ]['state']['hidden']   = true;
-					}
-				}
-				return $country_locale;
-			},
-			true
-		);
+		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data(), true );
 		$this->asset_data_registry->add( 'baseLocation', wc_get_base_location(), true );
 		$this->asset_data_registry->add(
 			'checkoutAllowsGuest',
@@ -371,26 +325,6 @@ class Checkout extends AbstractBlock {
 		$screen = get_current_screen();
 
 		return $screen && $screen->is_block_editor();
-	}
-
-	/**
-	 * Removes accents from an array of values, sorts by the values, then returns the original array values sorted.
-	 *
-	 * @param array $array Array of values to sort.
-	 * @return array Sorted array.
-	 */
-	protected function deep_sort_with_accents( $array ) {
-		if ( ! is_array( $array ) || empty( $array ) ) {
-			return $array;
-		}
-
-		if ( is_array( reset( $array ) ) ) {
-			return array_map( [ $this, 'deep_sort_with_accents' ], $array );
-		}
-
-		$array_without_accents = array_map( 'remove_accents', array_map( 'wc_strtolower', array_map( 'html_entity_decode', $array ) ) );
-		asort( $array_without_accents );
-		return array_replace( $array_without_accents, $array );
 	}
 
 	/**
