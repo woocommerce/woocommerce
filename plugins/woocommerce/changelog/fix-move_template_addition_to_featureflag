@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Only add product template when new editor feature flag is enabled.

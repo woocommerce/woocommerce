@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Replacing hardcoded info and error notices with the correct wp_print_notice functions.
