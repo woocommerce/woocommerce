@@ -15,7 +15,7 @@ package.json
 webpack.config.js
 phpcs.xml
 NEXT_CHANGELOG.md
-README.md
+DEVELOPMENT.md
 
 changelog/
 

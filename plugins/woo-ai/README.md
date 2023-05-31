@@ -1,24 +1,30 @@
-# WooCommerce AI
+# Woo AI
 
-A plugin to capture experiements in using AI to enhance the WooCommerce experience.
+Woo AI is a WooCommerce plugin that utilizes the power of artificial intelligence to enhance your eCommerce experience. With features like AI-powered product title optimization and automated product description generation, Woo AI is designed to boost your store's efficiency and sales potential.
 
 ## Installation
 
-You can either install the latest version from [wp.org](https://wordpress.org/plugins/woo-ai/) or symlink this directory by running `ln -s ./ :path-to-your-wp-plugin-directory/woo-ai`
-
-## Development
-
-To get started, run the following commands:
-
-```text
-pnpm install
-pnpm run start
-```
-
-See [wp-scripts](https://github.com/WordPress/gutenberg/tree/master/packages/scripts) for more usage information.
+1. Download the Woo AI plugin zip file.
+2. Go to your WordPress Dashboard, then navigate to `Plugins > Add New > Upload Plugin`.
+3. Select the downloaded Woo AI zip file to upload.
+4. After uploading, click on `Activate Plugin`.
 
 ## Usage
 
-You can get to the settings and features from your top admin bar under the name Woo AI.
+**Improve Product Titles using AI Recommendations**
 
-Run `./bin/build-zip.sh` to make a zip file.
+1. Go to the WooCommerce `Products` page.
+2. Select a product and click `Edit` or `Add New` to create a new product.
+3. Start typing a product title.
+4. Review and apply AI-generated title recommendations.
+
+**Generate Product Descriptions based on existing product data**
+
+1. Go to the WooCommerce `Products` page.
+2. Select a product and click `Edit`.
+3. Make sure the product has a sufficient title length and click on the `Write It For Me` button.
+4. Review and apply the AI-generated product description.
+
+## License
+
+This plugin is licensed under the GPL v3 or later.
