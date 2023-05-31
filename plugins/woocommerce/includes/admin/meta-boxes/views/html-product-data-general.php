@@ -46,7 +46,7 @@ defined( 'ABSPATH' ) || exit;
 			 */
 			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product variation.', 'woocommerce' ), 'variable' ) );
 			?>
-			 <a class="variations-tab-navigation-link" href="#variable_product_options">
+			<a class="variations-tab-navigation-link" href="#variable_product_options">
 			<?php
 			esc_html_e( 'Go to Variations', 'woocommerce' );
 			?>
@@ -64,7 +64,7 @@ defined( 'ABSPATH' ) || exit;
 			 */
 			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product added to this group.', 'woocommerce' ), 'grouped' ) );
 			?>
-			 <a class="linked-products-navigation-link" href="#linked_product_data"><?php esc_html_e( 'Go to Linked Products', 'woocommerce' ); ?></a>
+			<a class="linked-products-navigation-link" href="#linked_product_data"><?php esc_html_e( 'Go to Linked Products', 'woocommerce' ); ?></a>
 		</p>
 	</div>
 
@@ -142,7 +142,7 @@ defined( 'ABSPATH' ) || exit;
 
 					if ( $downloadable_files ) {
 						foreach ( $downloadable_files as $key => $file ) {
-							$disabled_download = isset( $file['enabled'] ) && false === $file['enabled'];
+							$disabled_download         = isset( $file['enabled'] ) && false === $file['enabled'];
 							$disabled_downloads_count += (int) $disabled_download;
 							include __DIR__ . '/html-product-download.php';
 						}
@@ -154,8 +154,8 @@ defined( 'ABSPATH' ) || exit;
 						<th colspan="2">
 							<a href="#" class="button insert" data-row="
 							<?php
-								$key  = '';
-								$file = array(
+								$key               = '';
+								$file              = array(
 									'file' => '',
 									'name' => '',
 								);
