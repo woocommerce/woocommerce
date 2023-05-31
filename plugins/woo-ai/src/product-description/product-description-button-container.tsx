@@ -101,6 +101,7 @@ export function WriteItForMeButtonContainer() {
 	const buildPrompt = () => {
 		const instructions = [
 			`Write a product description with the following product title: "${ productTitle }."`,
+			'Identify the language used in this product title and use the same language in your response.',
 			'Use a 9th grade reading level.',
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
 			'Structure the description into paragraphs using standard HTML <p> tags.',
