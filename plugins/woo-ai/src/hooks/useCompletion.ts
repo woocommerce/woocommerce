@@ -8,9 +8,14 @@ import { useRef, useState } from '@wordpress/element';
  */
 import { askQuestion } from '../utils';
 
+type StopReason = 'abort' | 'finished' | 'error' | 'interrupted';
+
 type UseCompletionProps = {
 	onStreamMessage: ( message: string, chunk: string ) => void;
-	onCompletionFinished?: ( previousContent: string ) => void;
+	onCompletionFinished?: (
+		reason: StopReason,
+		previousContent: string
+	) => void;
 	onStreamError?: ( event: Event ) => void;
 };
 
@@ -23,18 +28,18 @@ export const useCompletion = ( {
 	const previousContent = useRef< string >( '' );
 	const [ completionActive, setCompletionActive ] = useState( false );
 
-	const stopCompletion = () => {
+	const stopCompletion = ( reason: StopReason ) => {
 		if ( completionSource.current?.close ) {
 			completionSource.current.close();
 		}
-		onCompletionFinished( previousContent.current );
+		onCompletionFinished( reason, previousContent.current );
 		completionSource.current = null;
 		setCompletionActive( false );
 	};
 
 	const onMessage = ( event: MessageEvent ) => {
 		if ( event.data === '[DONE]' ) {
-			stopCompletion();
+			stopCompletion( 'finished' );
 			return;
 		}
 
@@ -49,13 +54,13 @@ export const useCompletion = ( {
 	const onError = ( event: Event ) => {
 		// eslint-disable-next-line no-console
 		console.debug( 'Streaming error encountered', event );
-		stopCompletion();
+		stopCompletion( 'error' );
 		onStreamError( event );
 	};
 
 	const requestCompletion = async ( question: string ) => {
 		if ( completionSource.current ) {
-			stopCompletion();
+			stopCompletion( 'interrupted' );
 		}
 		previousContent.current = '';
 
@@ -70,11 +75,13 @@ export const useCompletion = ( {
 		);
 
 		completionSource.current = suggestionsSource;
+
+		return suggestionsSource;
 	};
 
 	return {
 		requestCompletion,
 		completionActive,
-		stopCompletion,
+		stopCompletion: stopCompletion.bind( null, 'abort' ),
 	};
 };
