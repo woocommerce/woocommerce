@@ -113,9 +113,10 @@ const platformOptions = [
 	},
 ];
 
-export type BusinessChoice = typeof businessOptions[ 0 ][ 'value' ];
-export type SellingOnlineAnswer = typeof sellingOnlineOptions[ 0 ][ 'value' ];
-export type SellingPlatform = typeof platformOptions[ 0 ][ 'value' ];
+export type BusinessChoice = ( typeof businessOptions )[ 0 ][ 'value' ];
+export type SellingOnlineAnswer =
+	( typeof sellingOnlineOptions )[ 0 ][ 'value' ];
+export type SellingPlatform = ( typeof platformOptions )[ 0 ][ 'value' ];
 
 export const UserProfile = ( {
 	sendEvent,

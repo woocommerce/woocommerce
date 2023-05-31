@@ -9,22 +9,18 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Coupons;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * REST API Reports coupons controller class.
  *
  * @internal
- * @extends WC_REST_Reports_Controller
+ * @extends GenericController
  */
-class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
+class Controller extends GenericController implements ExportableInterface {
 
 	/**
 	 * Route base.
@@ -71,46 +67,24 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			$data[] = $this->prepare_response_for_collection( $item );
 		}
 
-		$response = rest_ensure_response( $data );
-		$response->header( 'X-WP-Total', (int) $report_data->total );
-		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
-
-		$page      = $report_data->page_no;
-		$max_pages = $report_data->pages;
-		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-		if ( $page > 1 ) {
-			$prev_page = $page - 1;
-			if ( $prev_page > $max_pages ) {
-				$prev_page = $max_pages;
-			}
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
-		}
-		if ( $max_pages > $page ) {
-			$next_page = $page + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
-			$response->link_header( 'next', $next_link );
-		}
-
-		return $response;
+		return $this->add_pagination_headers(
+			$request,
+			$data,
+			(int) $report_data->total,
+			(int) $report_data->page_no,
+			(int) $report_data->pages
+		);
 	}
 
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param array           $report  Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = $report;
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$response = parent::prepare_item_for_response( $report, $request );
 		$response->add_links( $this->prepare_links( $report ) );
 
 		/**
@@ -221,57 +195,15 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                  = array();
-		$params['context']       = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']          = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 1,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-			'minimum'           => 1,
+		$params                       = parent::get_collection_params();
+		$params['orderby']['default'] = 'coupon_id';
+		$params['orderby']['enum']    = array(
+			'coupon_id',
+			'code',
+			'amount',
+			'orders_count',
 		);
-		$params['per_page']      = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 10,
-			'minimum'           => 1,
-			'maximum'           => 100,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['after']         = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['before']        = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['order']         = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'desc',
-			'enum'              => array( 'asc', 'desc' ),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['orderby']       = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'coupon_id',
-			'enum'              => array(
-				'coupon_id',
-				'code',
-				'amount',
-				'orders_count',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['coupons']       = array(
+		$params['coupons']            = array(
 			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -280,17 +212,11 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 				'type' => 'integer',
 			),
 		);
-		$params['extended_info'] = array(
+		$params['extended_info']      = array(
 			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['force_cache_refresh'] = array(
-			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
-			'type'              => 'boolean',
-			'sanitize_callback' => 'wp_validate_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
