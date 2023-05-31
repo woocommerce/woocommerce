@@ -11,7 +11,7 @@ import { Tooltip } from '@wordpress/components';
  * Internal dependencies
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
-import { productData } from '../utils';
+import { productData, recordTracksFactory, getPostId } from '../utils';
 import { useProductDataSuggestions } from '../hooks/useProductDataSuggestions';
 import {
 	ProductDataSuggestion,
@@ -37,6 +37,18 @@ declare const tinymce: {
 		thing?: boolean
 	) => void;
 };
+
+type TracksData = Record<
+	string,
+	string | number | Array< Record< string, string | number > >
+>;
+
+const recordNameTracks = recordTracksFactory< TracksData >(
+	'name_completion',
+	() => ( {
+		post_id: getPostId(),
+	} )
+);
 
 export const ProductNameSuggestions = () => {
 	const [ suggestionsState, setSuggestionsState ] =
@@ -129,6 +141,10 @@ export const ProductNameSuggestions = () => {
 	};
 
 	const handleSuggestionClick = ( suggestion: ProductDataSuggestion ) => {
+		recordNameTracks( 'select', {
+			selectedTitle: suggestion.content,
+		} );
+
 		updateProductName( suggestion.content );
 		setSuggestions( [] );
 		resetError();
@@ -140,11 +156,23 @@ export const ProductNameSuggestions = () => {
 		setSuggestionsState( SuggestionsState.Fetching );
 		try {
 			const currentProductData = productData();
+
+			recordNameTracks( 'start', {
+				currentTitle: currentProductData.name,
+			} );
+
 			const request: ProductDataSuggestionRequest = {
 				requested_data: 'name',
 				...currentProductData,
 			};
-			setSuggestions( await fetchSuggestions( request ) );
+
+			const suggestionResults = await fetchSuggestions( request );
+
+			recordNameTracks( 'stop', {
+				reason: 'finished',
+				suggestions: suggestionResults,
+			} );
+			setSuggestions( suggestionResults );
 			setSuggestionsState( SuggestionsState.None );
 			setIsFirstLoad( false );
 		} catch ( e ) {

@@ -11,14 +11,9 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import { MIN_TITLE_LENGTH } from '../constants';
 import { WriteItForMeBtn, StopCompletionBtn } from '../components';
 import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
-import { recordTracksFactory } from '../utils';
+import { recordTracksFactory, getPostId } from '../utils';
 
 const DESCRIPTION_MAX_LENGTH = 300;
-
-const getPostId = () =>
-	Number(
-		( document.querySelector( '#post_ID' ) as HTMLInputElement )?.value
-	);
 
 const getApiError = () => {
 	return __(
