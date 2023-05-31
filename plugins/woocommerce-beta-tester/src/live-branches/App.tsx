@@ -22,7 +22,8 @@ export const App = () => {
 				Live Branches - Install and test WooCommerce PRs
 			</Heading>
 			{ isError && <p>Something Went Wrong!</p> }
-			{ isLoading ? <Spinner /> : <BranchList branches={ branches } /> }
+			{ isLoading && <Spinner /> }
+			{ ! isError && ! isLoading && <BranchList branches={ branches } /> }
 		</>
 	);
 };
