@@ -1,11 +1,11 @@
-.woocommerce-iframe-editor__toolbar {
+.woocommerce-iframe-editor__header-toolbar {
     height: 60px;
     border: 0;
     border-bottom: 1px solid $gray-400;
     display: flex;
     align-items: center;
 
-    .woocommerce-iframe-editor__toolbar-inserter-toggle.components-button.has-icon {
+    .woocommerce-iframe-editor__header-toolbar-inserter-toggle.components-button.has-icon {
         height: 32px;
         margin-right: 8px;
         min-width: 32px;

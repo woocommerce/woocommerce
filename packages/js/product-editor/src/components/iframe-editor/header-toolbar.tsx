@@ -63,14 +63,14 @@ export function HeaderToolbar( {
 
 	return (
 		<NavigableToolbar
-			className="woocommerce-iframe-editor__toolbar"
+			className="woocommerce-iframe-editor__header-toolbar"
 			aria-label={ toolbarAriaLabel }
 		>
-			<div className="woocommerce-iframe-editor__toolbar-left">
+			<div className="woocommerce-iframe-editor__header-toolbar-left">
 				<ToolbarItem
 					ref={ inserterButton }
 					as={ Button }
-					className="woocommerce-iframe-editor__toolbar-inserter-toggle"
+					className="woocommerce-iframe-editor__header-toolbar-inserter-toggle"
 					variant="primary"
 					isPressed={ isInserterOpened }
 					onMouseDown={ (
