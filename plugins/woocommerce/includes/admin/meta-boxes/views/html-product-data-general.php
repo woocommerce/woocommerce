@@ -44,7 +44,13 @@ defined( 'ABSPATH' ) || exit;
 			 *
 			 * @since 7.9.0
 			 */
-			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product variation.', 'woocommerce' ), 'variable' ) ); ?> <a class="variations-tab-navigation-link" href="#variable_product_options"><?php esc_html_e( 'Go to Variations', 'woocommerce' ); ?></a>
+			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product variation.', 'woocommerce' ), 'variable' ) );
+			?>
+			 <a class="variations-tab-navigation-link" href="#variable_product_options">
+			<?php
+			esc_html_e( 'Go to Variations', 'woocommerce' );
+			?>
+			</a>
 		</p>
 	</div>
 
@@ -56,7 +62,9 @@ defined( 'ABSPATH' ) || exit;
 			 *
 			 * @since 7.9.0
 			 */
-			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product added to this group.', 'woocommerce' ), 'grouped' ) ); ?> <a class="linked-products-navigation-link" href="#linked_product_data"><?php esc_html_e( 'Go to Linked Products', 'woocommerce' ); ?></a>
+			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product added to this group.', 'woocommerce' ), 'grouped' ) );
+			?>
+			 <a class="linked-products-navigation-link" href="#linked_product_data"><?php esc_html_e( 'Go to Linked Products', 'woocommerce' ); ?></a>
 		</p>
 	</div>
 
@@ -68,7 +76,8 @@ defined( 'ABSPATH' ) || exit;
 			 *
 			 * @since 7.9.0
 			 */
-			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details in one of the other tabs.', 'woocommerce' ), 'grouped' ) ); ?>
+			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details in one of the other tabs.', 'woocommerce' ), 'grouped' ) );
+			?>
 		</p>
 	</div>
 
