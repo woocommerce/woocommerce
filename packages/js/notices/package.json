@@ -27,9 +27,9 @@
 	"types": "build-types",
 	"react-native": "src/index",
 	"dependencies": {
-		"@wordpress/a11y": "wp-6.0",
-		"@wordpress/data": "wp-6.0",
-		"@wordpress/notices": "wp-6.0"
+		"@wordpress/a11y": "wp-6.1",
+		"@wordpress/data": "wp-6.1",
+		"@wordpress/notices": "wp-6.1"
 	},
 	"peerDependencies": {
 		"lodash": "^4.17.0",
