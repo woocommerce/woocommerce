@@ -5,7 +5,6 @@ require( '@wordpress/data' );
 global.wcSettings = {
 	adminUrl: 'https://vagrant.local/wp/wp-admin/',
 	shippingMethodsExist: true,
-	countries: [],
 	currency: {
 		code: 'USD',
 		precision: 2,
@@ -32,14 +31,40 @@ global.wcSettings = {
 		userLocale: 'en_US',
 		weekdaysShort: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
 	},
-	shippingCountries: {
+	countries: {
 		AT: 'Austria',
 		CA: 'Canada',
 		GB: 'United Kingdom (UK)',
 	},
-	shippingStates: {
+	countryData: {
+		AT: {
+			states: {},
+			allowBilling: true,
+			allowShipping: true,
+			locale: {
+				postcode: { priority: 65 },
+				state: { required: false, hidden: true },
+			},
+		},
 		CA: {
-			ON: 'Ontario',
+			states: {
+				ON: 'Ontario',
+			},
+			allowBilling: true,
+			allowShipping: true,
+			locale: {
+				postcode: { label: 'Postal code' },
+				state: { label: 'Province' },
+			},
+		},
+		GB: {
+			states: {},
+			allowBilling: true,
+			allowShipping: true,
+			locale: {
+				postcode: { label: 'Postcode' },
+				state: { label: 'County', required: false },
+			},
 		},
 	},
 	storePages: {
@@ -72,20 +97,6 @@ global.wcSettings = {
 			id: 0,
 			title: '',
 			permalink: '',
-		},
-	},
-	countryLocale: {
-		GB: {
-			postcode: { label: 'Postcode' },
-			state: { label: 'County', required: false },
-		},
-		AT: {
-			postcode: { priority: 65 },
-			state: { required: false, hidden: true },
-		},
-		CA: {
-			postcode: { label: 'Postal code' },
-			state: { label: 'Province' },
 		},
 	},
 	attributes: [

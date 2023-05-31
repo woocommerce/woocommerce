@@ -20,8 +20,8 @@ export interface AddressField {
 	index: number;
 }
 
-export interface LocaleSpecificAddressField extends AddressField {
-	priority: number;
+export interface LocaleSpecificAddressField extends Partial< AddressField > {
+	priority?: number | undefined;
 }
 
 export interface AddressFields {

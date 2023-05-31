@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { getSetting, STORE_PAGES } from '@woocommerce/settings';
+import {
+	getSetting,
+	STORE_PAGES,
+	LocaleSpecificAddressField,
+} from '@woocommerce/settings';
 
 export type WordCountType =
 	| 'words'
@@ -41,22 +45,69 @@ export const CART_URL = STORE_PAGES.cart.permalink;
 export const LOGIN_URL = STORE_PAGES.myaccount.permalink
 	? STORE_PAGES.myaccount.permalink
 	: getSetting( 'wpLoginUrl', '/wp-login.php' );
-export const SHIPPING_COUNTRIES = getSetting< Record< string, string > >(
-	'shippingCountries',
-	{}
-);
-export const ALLOWED_COUNTRIES = getSetting< Record< string, string > >(
-	'allowedCountries',
-	{}
-);
-export const SHIPPING_STATES = getSetting<
-	Record< string, Record< string, string > >
->( 'shippingStates', {} );
-export const ALLOWED_STATES = getSetting< Record< string, string > >(
-	'allowedStates',
-	{}
-);
 export const LOCAL_PICKUP_ENABLED = getSetting< boolean >(
 	'localPickupEnabled',
 	false
+);
+
+type CountryData = {
+	allowBilling: boolean;
+	allowShipping: boolean;
+	states: Record< string, string >;
+	locale: Record< string, LocaleSpecificAddressField >;
+};
+
+// Contains country names.
+const countries = getSetting< Record< string, string > >( 'countries', {} );
+
+// Contains country settings.
+const countryData = getSetting< Record< string, CountryData > >(
+	'countryData',
+	{}
+);
+
+export const ALLOWED_COUNTRIES = Object.fromEntries(
+	Object.keys( countryData )
+		.filter( ( countryCode ) => {
+			return countryData[ countryCode ].allowBilling === true;
+		} )
+		.map( ( countryCode ) => {
+			return [ countryCode, countries[ countryCode ] || '' ];
+		} )
+);
+
+export const ALLOWED_STATES = Object.fromEntries(
+	Object.keys( countryData )
+		.filter( ( countryCode ) => {
+			return countryData[ countryCode ].allowBilling === true;
+		} )
+		.map( ( countryCode ) => {
+			return [ countryCode, countryData[ countryCode ].states || [] ];
+		} )
+);
+
+export const SHIPPING_COUNTRIES = Object.fromEntries(
+	Object.keys( countryData )
+		.filter( ( countryCode ) => {
+			return countryData[ countryCode ].allowShipping === true;
+		} )
+		.map( ( countryCode ) => {
+			return [ countryCode, countries[ countryCode ] || '' ];
+		} )
+);
+
+export const SHIPPING_STATES = Object.fromEntries(
+	Object.keys( countryData )
+		.filter( ( countryCode ) => {
+			return countryData[ countryCode ].allowShipping === true;
+		} )
+		.map( ( countryCode ) => {
+			return [ countryCode, countryData[ countryCode ].states || [] ];
+		} )
+);
+
+export const COUNTRY_LOCALE = Object.fromEntries(
+	Object.keys( countryData ).map( ( countryCode ) => {
+		return [ countryCode, countryData[ countryCode ].locale || [] ];
+	} )
 );
