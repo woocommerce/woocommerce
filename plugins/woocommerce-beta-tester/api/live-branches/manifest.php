@@ -19,25 +19,25 @@ register_woocommerce_admin_test_helper_rest_route(
  * API endpoint to fetch the manifest of live branches.
  */
 function fetch_live_branches_manifest() {
-	$response  = wp_remote_get( 'https://betadownload.jetpack.me/woocommerce-branches.json' );
+	$response = wp_remote_get( 'https://betadownload.jetpack.me/woocommerce-branches.json' );
 
 	if ( is_wp_error( $response ) ) {
-		// Handle the error case
+		// Handle the error case.
 		$error_message = $response->get_error_message();
 		return new WP_REST_Response( array( 'error' => $error_message ), 500 );
 	}
-	
+
 	$body      = wp_remote_retrieve_body( $response );
 	$installer = new WC_Beta_Tester_Live_Branches_Installer();
 
 	$obj = json_decode( $body );
 
 	if ( json_last_error() !== JSON_ERROR_NONE ) {
-		// Handle JSON decoding error
+		// Handle JSON decoding error.
 		return new WP_REST_Response( array( 'error' => 'Error decoding JSON' ), 500 );
 	}
 
-	// Check if the expected properties exist in the JSON
+	// Check if the expected properties exist in the JSON.
 	if ( ! isset( $obj->pr ) || ! isset( $obj->master ) ) {
 		return new WP_REST_Response( array( 'error' => 'Missing properties in JSON' ), 500 );
 	}
