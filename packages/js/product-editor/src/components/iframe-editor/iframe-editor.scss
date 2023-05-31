@@ -1,12 +1,51 @@
 .woocommerce-iframe-editor {
-	align-items: flex-start;
 	display: flex;
-	flex-direction: row;
-	flex-grow: 1;
-	height: 100%;
-	width: 100%;
-	overflow: hidden;
-	z-index: 1000;
+    flex-direction: column;
+    height: 100%;
+
+	&__toolbar {
+		height: 60px;
+		border: 0;
+		border-bottom: 1px solid $gray-400;
+		display: flex;
+		align-items: center;
+
+		.woocommerce-iframe-editor__toolbar-inserter-toggle.components-button.has-icon {
+			height: 32px;
+			margin-right: 8px;
+			min-width: 32px;
+			padding: 0;
+			width: 32px;
+
+			svg {
+				transition: transform .2s cubic-bezier(.165,.84,.44,1);
+			}
+
+			&.is-pressed:before {
+				width: 100%;
+				left: 0;
+			}
+
+			&.is-pressed svg {
+				transform: rotate(45deg);
+			}
+		}
+	}
+
+	&__toolbar-left {
+		padding-left: $gap-large;
+	}
+
+	&__main {
+		align-items: flex-start;
+		display: flex;
+		flex-direction: row;
+		flex-grow: 1;
+		height: 100%;
+		width: 100%;
+		overflow: hidden;
+		z-index: 1000;
+	}
 
 	iframe {
 		width: 100%;

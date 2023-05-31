@@ -64,16 +64,16 @@ export default function InserterSidebar( {
 			// @ts-ignore Types are not provided by useDialog.
 			ref={ inserterDialogRef }
 			{ ...inserterDialogProps }
-			className="edit-widgets-layout__inserter-panel"
+			className="woocommerce-iframe-editor__inserter-panel"
 		>
-			<TagName className="edit-widgets-layout__inserter-panel-header">
+			<TagName className="woocommerce-iframe-editor__inserter-panel-header">
 				<Button
 					icon={ close }
 					onClick={ closeInserter }
 					label={ __( 'Close block inserter', 'woocommerce' ) }
 				/>
 			</TagName>
-			<div className="edit-widgets-layout__inserter-panel-content">
+			<div className="woocommerce-iframe-editor__inserter-panel-content">
 				<Library
 					showInserterHelpPanel
 					shouldFocusBlock={ isMobileViewport }
