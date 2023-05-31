@@ -29,8 +29,12 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 	const productId = _productId ?? values.id;
 
 	const classicEditorUrl = productId
-		? getAdminLink( `post.php?post=${ productId }&action=edit` )
-		: getAdminLink( 'post-new.php?post_type=product' );
+		? getAdminLink(
+				`post.php?post=${ productId }&action=edit&product_block_editor=0`
+		  )
+		: getAdminLink(
+				'post-new.php?post_type=product&product_block_editor=0'
+		  );
 
 	const recordScore = ( checked: string[], comments: string ) => {
 		recordEvent( 'product_mvp_feedback', {
