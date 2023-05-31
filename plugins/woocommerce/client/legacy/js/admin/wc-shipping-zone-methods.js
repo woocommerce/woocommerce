@@ -198,30 +198,29 @@
 						model   = view.model,
 						methods   = _.indexBy( model.get( 'methods' ), 'instance_id' ),
 						changes = {},
-						instance_id = $( this ).closest('tr').data('id');
+						instance_id = $( this ).closest( 'tr' ).data( 'id' );
 
 					event.preventDefault();
 					shippingMethodView.block();
 
 					// Add method to zone via ajax call
-					$.post({
-				    	url: ajaxurl + (ajaxurl.indexOf('?') > 0 ? '&' : '?') + 'action=woocommerce_shipping_zone_remove_method',
+					$.post( {
+				    	url: ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?') + 'action=woocommerce_shipping_zone_remove_method',
 						data: {
 							wc_shipping_zones_nonce: data.wc_shipping_zones_nonce,
 							instance_id: instance_id,
 							zone_id: data.zone_id,
 						},
-						success: function(response) {
+						success: function( { data } ) {
 							delete methods[instance_id];
-							changes.methods = changes.methods || { methods: {} };
-							changes.methods[instance_id] = _.extend(changes.methods[instance_id] || {}, { deleted: 'deleted' });
+							changes.methods = changes.methods || data.methods;
 							model.set('methods', methods);
-							model.logChanges(changes);
+							model.logChanges( changes );
 							view.render();
 							shippingMethodView.unblock();
 						},
-						error: function(jqXHR, textStatus, errorThrown) {
-							console.error('There was an error removing the shipping method.', errorThrown);
+						error: function( jqXHR, textStatus, errorThrown ) {
+							console.error( 'There was an error removing the shipping method.', errorThrown );
 							shippingMethodView.unblock();
 						},
 						dataType: 'json'
