@@ -147,6 +147,7 @@ Every release includes specific testing instructions for new features and bug fi
 -   [10.1.0](./1010.md)
 -   [10.2.0](./1020.md)
     -   [10.2.1](./1021.md)
+    -   [10.2.2](./1022.md)
 -   [10.3.0](./1030.md)
 <!-- FEEDBACK -->
 
