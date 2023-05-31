@@ -443,6 +443,12 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 				...nextQuery,
 			} );
 		}
+		// Remove undefined keys.
+		for ( const [ key, value ] of Array.from( query.entries() ) ) {
+			if ( value === 'undefined' || value === undefined ) {
+				query.delete( key );
+			}
+		}
 
 		const href = 'admin.php?' + query.toString();
 
