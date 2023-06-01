@@ -10,7 +10,6 @@ import {
 import { Spinner } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { useParams } from 'react-router-dom';
-import { TourKit } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -19,6 +18,7 @@ import { __ } from '@wordpress/i18n';
 import { useProductEntityRecord } from './hooks/use-product-entity-record';
 import './fills/product-block-editor-fills';
 import './product-page.scss';
+import BlockEditorTour from './tour/block-editor/block-editor-tour';
 
 declare const productBlockEditorSettings: ProductEditorSettings;
 
@@ -43,18 +43,7 @@ export default function ProductPage() {
 				product={ product }
 				settings={ productBlockEditorSettings || {} }
 			/>
-			<TourKit config={ { steps: [{
-				meta: {
-					name: 'todo',
-					primaryButton: {
-						text: __( 'View highlights' , 'woocommerce' ),
-					},
-					descriptions: {
-						desktop: __( 'We designed a brand new product editing experience to let you focus on what\'s important.' , 'woocommerce' ),
-					},
-					heading: __( 'Meet a streamlined product form' , 'woocommerce' ),
-				},
-			}], closeHandler: () => {}} } />
+			<BlockEditorTour />
 		</>
 	);
 }
