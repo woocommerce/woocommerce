@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-attribute",
+	"title": "Product attribute",
+	"category": "widgets",
+	"description": "A product attribute.",
+	"keywords": [ "products", "attributes", "attribute" ],
+	"textdomain": "default",
+	"attributes": {
+		"entityAttribute": {
+			"type": "object",
+			"__experimentalRole": "content"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"editorStyle": "file:./editor.css"
+}
