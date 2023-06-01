@@ -17,7 +17,7 @@ const DESCRIPTION_MAX_LENGTH = 300;
 
 const getApiError = () => {
 	return __(
-		`❗ We're currently experiencing high demand for our experimental feature. Please check back in shortly!`,
+		`❗ We're currently experiencing high demand for our experimental feature. Please check back in shortly.`,
 		'woocommerce'
 	);
 };
