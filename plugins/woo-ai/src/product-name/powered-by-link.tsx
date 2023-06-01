@@ -17,7 +17,7 @@ export const PoweredByLink = () => (
 			{
 				link: (
 					<Link
-						href={ `` }
+						href="https://wordpress.org/documentation/"
 						target="_blank"
 						type="external"
 						onClick={ () => {
