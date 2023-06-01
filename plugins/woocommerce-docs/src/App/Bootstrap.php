@@ -19,6 +19,9 @@ class Bootstrap {
 		add_action( 'admin_menu', array( '\WooCommerceDocs\App\Bootstrap', 'add_admin_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( '\WooCommerceDocs\App\Bootstrap', 'register_scripts' ) );
 		add_action( 'rest_api_init', array( '\WooCommerceDocs\App\Bootstrap', 'register_api_endpoints' ) );
+
+		// Register the manifest job.
+		new \WooCommerceDocs\Job\ManifestJob();
 	}
 
 	/**
@@ -75,6 +78,7 @@ class Bootstrap {
 	 */
 	public static function register_api_endpoints() {
 		\WooCommerceDocs\API\ManifestAPI::register_routes();
+		\WooCommerceDocs\API\JobAPI::register_routes();
 	}
 }
 

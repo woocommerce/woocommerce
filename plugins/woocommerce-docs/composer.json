@@ -3,7 +3,7 @@
 	"description": "The WooCommerce documentation plugin.",
 	"type": "wordpress-plugin",
 	"require": {
-		"woocommerce/action-scheduler": "^3.0"
+		"woocommerce/action-scheduler": "^3.6"
 	},
 	"autoload": {
 		"psr-4": {

@@ -19,11 +19,13 @@ import {
  */
 import { useManifests } from './data/useManifests';
 import { isURL } from './util/url';
+import { useCompletedJobs } from './data/useJobs';
 
 const App = () => {
 	const { isLoading, manifests, createManifest, deleteManifest } =
 		useManifests();
 	const [ newManifest, setNewManifest ] = useState< string >( '' );
+	const { jobs, isLoading: jobsLoading } = useCompletedJobs();
 
 	return (
 		<>
@@ -77,6 +79,20 @@ const App = () => {
 						Add manifest URL
 					</Button>
 				</CardFooter>
+			</Card>
+
+			<Card elevation={ 3 }>
+				<CardHeader>
+					<h2>Completed Jobs</h2>
+				</CardHeader>
+				<CardBody>
+					<ItemGroup>
+						{ ! jobsLoading &&
+							jobs.map( ( job ) => (
+								<Item key={ job }>{ job }</Item>
+							) ) }
+					</ItemGroup>
+				</CardBody>
 			</Card>
 		</>
 	);
