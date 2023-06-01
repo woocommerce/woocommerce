@@ -2,8 +2,12 @@
  * External dependencies
  */
 import React from 'react';
-import { useDispatch } from '@wordpress/data';
 import { createInterpolateElement, useState } from '@wordpress/element';
+// TODO: Re-add "@types/wordpress__data" package to resolve this, causing other issues until pnpm 8.6.0 is usable
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useDispatch } from '@wordpress/data';
 
 type ShowSnackbarProps = {
 	label: string;
