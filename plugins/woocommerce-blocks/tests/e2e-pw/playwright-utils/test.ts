@@ -10,7 +10,11 @@ import {
 	RequestUtils,
 } from '@wordpress/e2e-test-utils-playwright';
 
-import { TemplateApiUtils, STORAGE_STATE_PATH } from '@woocommerce/e2e-utils';
+import {
+	TemplateApiUtils,
+	STORAGE_STATE_PATH,
+	EditorUtils,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -100,6 +104,7 @@ const test = base.extend<
 		editor: Editor;
 		pageUtils: PageUtils;
 		templateApiUtils: TemplateApiUtils;
+		editorUtils: EditorUtils;
 		snapshotConfig: void;
 	},
 	{
@@ -129,6 +134,9 @@ const test = base.extend<
 	},
 	templateApiUtils: async ( {}, use ) =>
 		await use( new TemplateApiUtils( request ) ),
+	editorUtils: async ( { editor }, use ) => {
+		await use( new EditorUtils( editor ) );
+	},
 	requestUtils: [
 		async ( {}, use, workerInfo ) => {
 			const requestUtils = await RequestUtils.setup( {

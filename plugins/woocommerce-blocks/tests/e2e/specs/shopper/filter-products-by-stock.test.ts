@@ -94,7 +94,7 @@ describe( `${ block.name } Block`, () => {
 		} );
 	} );
 
-	describe( 'with PHP classic template', () => {
+	describe( 'with PHP classic template (Products Block and Classic Template Block)', () => {
 		const productCatalogTemplateId =
 			'woocommerce/woocommerce//archive-product';
 
@@ -105,6 +105,7 @@ describe( `${ block.name } Block`, () => {
 			await goToTemplateEditor( {
 				postId: productCatalogTemplateId,
 			} );
+			await insertBlock( 'WooCommerce Product Grid Block' );
 			await insertBlock( block.name );
 			await saveTemplate();
 			await goToShopPage();
@@ -124,7 +125,12 @@ describe( `${ block.name } Block`, () => {
 				selectors.frontend.classicProductsList
 			);
 
+			const productsBlockProductsList = await page.$$(
+				selectors.frontend.queryProductsList
+			);
+
 			expect( products ).toHaveLength( 5 );
+			expect( productsBlockProductsList ).toHaveLength( 5 );
 		} );
 
 		it( 'should show only products that match the filter', async () => {
@@ -147,11 +153,18 @@ describe( `${ block.name } Block`, () => {
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
 			);
+
+			const productsBlockProductsList = await page.$$(
+				selectors.frontend.queryProductsList
+			);
+
 			const pageURL = page.url();
 			const parsedURL = new URL( pageURL );
 
 			expect( isRefreshed ).toBeCalledTimes( 1 );
 			expect( products ).toHaveLength( 1 );
+			expect( productsBlockProductsList ).toHaveLength( 1 );
+
 			await expect( page ).toMatch( block.foundProduct );
 			expect( parsedURL.search ).toEqual(
 				block.urlSearchParamWhenFilterIsApplied
@@ -197,8 +210,13 @@ describe( `${ block.name } Block`, () => {
 				selectors.frontend.classicProductsList
 			);
 
+			const productsBlockProductsList = await page.$$(
+				selectors.frontend.queryProductsList
+			);
+
 			expect( isRefreshed ).toBeCalledTimes( 1 );
 			expect( products ).toHaveLength( 1 );
+			expect( productsBlockProductsList ).toHaveLength( 1 );
 			await expect( page ).toMatch( block.foundProduct );
 			expect( parsedURL.search ).toEqual(
 				block.urlSearchParamWhenFilterIsApplied

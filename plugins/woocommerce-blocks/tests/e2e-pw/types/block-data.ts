@@ -1,4 +1,4 @@
-export type BlockData< T = undefined > = {
+export type BlockData< T = unknown > = {
 	name: string;
 	mainClass: string;
 	selectors: Record< 'editor' | 'frontend', Record< string, unknown > >;

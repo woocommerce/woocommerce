@@ -96,7 +96,7 @@ class Bootstrap {
 		$this->register_dependencies();
 		$this->register_payment_methods();
 
-		if ( $this->package->is_experimental_build() && is_admin() ) {
+		if ( is_admin() ) {
 			if ( $this->package->get_version() !== $this->package->get_version_stored_on_db() ) {
 				$this->migration->run_migrations();
 				$this->package->set_version_stored_on_db();

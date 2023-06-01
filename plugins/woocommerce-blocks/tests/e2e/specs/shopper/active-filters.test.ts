@@ -47,6 +47,7 @@ const block = {
 			stockFilterBlock: '.wc-block-stock-filter-list',
 			attributeFilterBlock: '.wc-block-attribute-filter-list',
 			productsList: '.wc-block-grid__products > li',
+			productsBlockProducts: '.wp-block-post-template > li',
 			classicProductsList: '.products.columns-3 > li',
 		},
 	},
@@ -209,7 +210,7 @@ describe( 'Shopper → Active Filters Block', () => {
 			expect( isRefreshed ).not.toHaveBeenCalled();
 		} );
 	} );
-	describe( 'With PHP Templates', () => {
+	describe( 'With PHP Templates (Products Block and Classic Template Block)', () => {
 		useTheme( 'emptytheme' );
 		beforeAll( async () => {
 			await deleteAllTemplates( 'wp_template_part' );
@@ -218,6 +219,7 @@ describe( 'Shopper → Active Filters Block', () => {
 				postId: 'woocommerce/woocommerce//archive-product',
 			} );
 
+			await insertBlock( 'WooCommerce Product Grid Block' );
 			await insertBlocks();
 
 			const canvasEl = canvas();
@@ -273,12 +275,17 @@ describe( 'Shopper → Active Filters Block', () => {
 			const activeFilterNameText = await getActiveFilterNameText();
 			expect( activeFilterNameText ).toBe( FILTER_STOCK_STATUS_PROPERTY );
 
-			const products = await page.$$(
+			const classicProductsList = await page.$$(
 				selectors.frontend.classicProductsList
+			);
+
+			const products = await page.$$(
+				selectors.frontend.productsBlockProducts
 			);
 
 			expect( isRefreshed ).toHaveBeenCalledTimes( 2 );
 			expect( products ).toHaveLength( 1 );
+			expect( classicProductsList ).toHaveLength( 1 );
 			await expect( page ).toMatch( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		} );
 
@@ -306,14 +313,19 @@ describe( 'Shopper → Active Filters Block', () => {
 
 			await clickLink( selectors.frontend.removeFilterButton );
 
-			const products = await page.$$(
+			const classicProductsList = await page.$$(
 				selectors.frontend.classicProductsList
+			);
+
+			const products = await page.$$(
+				selectors.frontend.productsBlockProducts
 			);
 
 			expect( page.url() ).not.toMatch( 'instock' );
 			expect( page.url() ).toMatch( FILTER_CAPACITY_PROPERTY );
 			expect( isRefreshed ).toHaveBeenCalledTimes( 3 );
 			expect( products ).toHaveLength( 1 );
+			expect( classicProductsList ).toHaveLength( 1 );
 			await expect( page ).toMatch( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		} );
 
@@ -332,13 +344,18 @@ describe( 'Shopper → Active Filters Block', () => {
 
 			await clickLink( selectors.frontend.removeAllFiltersButton );
 
-			const products = await page.$$(
+			const classicProductsList = await page.$$(
 				selectors.frontend.classicProductsList
+			);
+
+			const products = await page.$$(
+				selectors.frontend.productsBlockProducts
 			);
 
 			expect( page.url() ).not.toMatch( 'instock' );
 			expect( page.url() ).toMatch( SHOP_PAGE );
 			expect( isRefreshed ).toHaveBeenCalledTimes( 2 );
+			expect( classicProductsList ).toHaveLength( 5 );
 			expect( products ).toHaveLength( 5 );
 		} );
 	} );

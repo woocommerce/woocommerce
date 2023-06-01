@@ -3,7 +3,7 @@
  */
 import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { BASE_URL, getBlockByName } from '@woocommerce/e2e-utils';
+import { BASE_URL, cli, getBlockByName } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -105,6 +105,11 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
+	test.beforeAll( async () => {
+		await cli(
+			'npm run wp-env run tests-cli "wp option update wc_blocks_use_blockified_product_grid_block_as_template false"'
+		);
+	} );
 	test.beforeEach( async ( { admin, page, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
@@ -177,5 +182,11 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			.all();
 
 		expect( products ).toHaveLength( 1 );
+	} );
+
+	test.afterAll( async () => {
+		await cli(
+			'npm run wp-env run tests-cli "wp option delete wc_blocks_use_blockified_product_grid_block_as_template"'
+		);
 	} );
 } );

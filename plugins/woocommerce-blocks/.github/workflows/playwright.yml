@@ -61,4 +61,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: playwright-report
-          path: ./tests/e2e-pw/artifacts/test-results
+          path: playwright-report
