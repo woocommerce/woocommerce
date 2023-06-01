@@ -79,9 +79,11 @@ export const ProductNameSuggestions = () => {
 
 			// Need to capture errant handlediv click that happens on load as well
 			if (
-				target?.matches( '.handlediv' ) ||
-				! target?.matches(
-					'#woocommerce-ai-app-product-name-suggestions *, #title'
+				! (
+					target?.matches( 'h3:has(.handlediv)' ) ||
+					target?.matches(
+						'#woocommerce-ai-app-product-name-suggestions *, #title'
+					)
 				)
 			) {
 				setVisible( false );
