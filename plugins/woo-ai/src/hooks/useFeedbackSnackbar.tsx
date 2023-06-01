@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { useDispatch } from '@wordpress/data';
-import { createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement, useState } from '@wordpress/element';
 
 type ShowSnackbarProps = {
 	label: string;
@@ -11,16 +11,22 @@ type ShowSnackbarProps = {
 	onNegativeResponse: () => void;
 };
 
-export const useFeedbackSnackbar = () => {
-	const { createNotice } = useDispatch( 'core/notices' );
+type NoticeItem = {
+	notice: { id: string };
+};
 
-	const showSnackbar = ( {
+export const useFeedbackSnackbar = () => {
+	const { createNotice, removeNotice } = useDispatch( 'core/notices' );
+	const [ noticeId, setNoticeId ] = useState< string | null >( null );
+
+	const showSnackbar = async ( {
 		label,
 		onPositiveResponse,
 		onNegativeResponse,
 	}: ShowSnackbarProps ) => {
-		createNotice( 'info', label, {
+		const noticePromise: unknown = createNotice( 'info', label, {
 			type: 'snackbar',
+			explicitDismiss: true,
 			actions: [
 				{
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -62,7 +68,21 @@ export const useFeedbackSnackbar = () => {
 				},
 			],
 		} );
+
+		( noticePromise as Promise< NoticeItem > ).then(
+			( item: NoticeItem ) => {
+				setNoticeId( item.notice.id );
+			}
+		);
+		return noticePromise as Promise< NoticeItem >;
 	};
 
-	return { showSnackbar };
+	return {
+		showSnackbar,
+		removeSnackbar: () => {
+			if ( noticeId ) {
+				removeNotice( noticeId );
+			}
+		},
+	};
 };

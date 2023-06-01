@@ -8,21 +8,16 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { MAX_TITLE_LENGTH, MIN_TITLE_LENGTH } from '../constants';
+import { MAX_TITLE_LENGTH, MIN_TITLE_LENGTH, MIN_TITLE_LENGTH_FOR_DESCRIPTION } from '../constants';
 import { WriteItForMeBtn, StopCompletionBtn } from '../components';
 import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
-import { recordTracksFactory } from '../utils';
+import { recordTracksFactory, getPostId } from '../utils';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
-const getPostId = () =>
-	Number(
-		( document.querySelector( '#post_ID' ) as HTMLInputElement )?.value
-	);
-
 const getApiError = () => {
 	return __(
-		`Apologies, this is an experimental feature and there was an error with this service. Please try again.`,
+		`❗ We're currently experiencing high demand for our experimental feature. Please check back in shortly.`,
 		'woocommerce'
 	);
 };
@@ -43,7 +38,7 @@ export function WriteItForMeButtonContainer() {
 		titleEl.current?.value || ''
 	);
 	const tinyEditor = useTinyEditor();
-	const { showSnackbar } = useFeedbackSnackbar();
+	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
 			onStreamMessage: ( content ) => {
@@ -63,11 +58,12 @@ export function WriteItForMeButtonContainer() {
 				recordDescriptionTracks( 'stop', {
 					reason,
 					character_count: content.length,
+					current_title: productTitle,
 				} );
 
 				setFetching( false );
 
-				if ( reason !== 'abort' ) {
+				if ( reason === 'finished' ) {
 					showSnackbar( {
 						label: __(
 							'Description added. How is it?',
@@ -90,9 +86,11 @@ export function WriteItForMeButtonContainer() {
 
 	useEffect( () => {
 		const title = titleEl.current;
-		const titleKeyupHandler = ( e: KeyboardEvent ) =>
-			setProductTitle( ( e.target as HTMLInputElement ).value || '' );
-
+		const titleKeyupHandler = ( e: KeyboardEvent ) => {
+			setProductTitle(
+				( e.target as HTMLInputElement ).value.trim() || ''
+			);
+		};
 		title?.addEventListener( 'keyup', titleKeyupHandler );
 
 		return () => {
@@ -100,12 +98,13 @@ export function WriteItForMeButtonContainer() {
 		};
 	}, [ titleEl ] );
 
-	const writeItForMeDisabled =
-		fetching || ! productTitle || productTitle.length < MIN_TITLE_LENGTH;
+	const writeItForMeEnabled =
+		! fetching && productTitle.length >= MIN_TITLE_LENGTH_FOR_DESCRIPTION;
 
 	const buildPrompt = () => {
 		const instructions = [
 			`Write a product description with the following product title: "${ productTitle.slice( 0, MAX_TITLE_LENGTH ) }."`,
+      'Identify the language used in this product title and use the same language in your response.',
 			'Use a 9th grade reading level.',
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
 			'Structure the description into paragraphs using standard HTML <p> tags.',
@@ -117,19 +116,23 @@ export function WriteItForMeButtonContainer() {
 		return instructions.join( '\n' );
 	};
 
+	const onWriteItForMeClick = () => {
+		setFetching( true );
+		removeSnackbar();
+
+		const prompt = buildPrompt();
+		recordDescriptionTracks( 'start', {
+			prompt,
+		} );
+		requestCompletion( prompt );
+	};
+
 	return completionActive ? (
 		<StopCompletionBtn onClick={ stopCompletion } />
 	) : (
 		<WriteItForMeBtn
-			disabled={ writeItForMeDisabled }
-			onClick={ () => {
-				setFetching( true );
-				const prompt = buildPrompt();
-				recordDescriptionTracks( 'start', {
-					prompt,
-				} );
-				requestCompletion( prompt );
-			} }
+			disabled={ ! writeItForMeEnabled }
+			onClick={ onWriteItForMeClick }
 		/>
 	);
 }
