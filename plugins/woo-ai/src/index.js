@@ -7,23 +7,30 @@ import { render, createRoot } from '@wordpress/element';
  * Internal dependencies
  */
 import { WriteItForMeButtonContainer } from './product-description';
+import { ProductNameSuggestions } from './product-name';
 
 import './index.scss';
 
-const buttonRoot = document.getElementById(
-	'woocommerce-ai-app-product-gpt-button'
-);
-
-const renderRoot = () => {
-	if ( ! buttonRoot ) {
+const renderComponent = ( Component, rootElement ) => {
+	if ( ! rootElement ) {
 		return;
 	}
 
 	if ( createRoot ) {
-		createRoot( buttonRoot ).render( <WriteItForMeButtonContainer /> );
+		createRoot( rootElement ).render( <Component /> );
 	} else {
-		render( <WriteItForMeButtonContainer />, buttonRoot );
+		render( <Component />, rootElement );
 	}
 };
 
-renderRoot();
+const descriptionButtonRoot = document.getElementById(
+	'woocommerce-ai-app-product-gpt-button'
+);
+const nameSuggestionsRoot = document.getElementById(
+	'woocommerce-ai-app-product-name-suggestions'
+);
+
+if ( window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
+	renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
+	renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
+}

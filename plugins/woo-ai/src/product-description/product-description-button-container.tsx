@@ -1,62 +1,92 @@
 /**
  * External dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
-import { __, sprintf } from '@wordpress/i18n';
+import React from 'react';
+import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { useTinyEditor } from '../hooks/useTinyEditor';
-import MagicIcon from '../../assets/images/icons/magic.svg';
-
-type WooApiMessage = {
-	role: string;
-	content: string;
-};
-
-type WooApiResponse = {
-	generated_text: string;
-	previous_messages: WooApiMessage[];
-};
-
-type WPAPIError = {
-	code: string;
-	message: string;
-	data: {
-		status: number;
-	};
-};
-
-const generatingContentPhrases = [
-	__( 'Please wait…', 'woocommerce' ),
-	__( 'Just a little longer…', 'woocommerce' ),
-	__( 'Almost there…', 'woocommerce' ),
-];
-
-const getGeneratingContentPhrase = () =>
-	generatingContentPhrases[
-		Math.floor( Math.random() * generatingContentPhrases.length )
-	];
+import { MAX_TITLE_LENGTH, MIN_TITLE_LENGTH } from '../constants';
+import { WriteItForMeBtn, StopCompletionBtn } from '../components';
+import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
+import { recordTracksFactory } from '../utils';
 
 const DESCRIPTION_MAX_LENGTH = 300;
-const MIN_TITLE_LENGTH = 20;
-const MAX_TITLE_LENGTH = 150;
+
+const getPostId = () =>
+	Number(
+		( document.querySelector( '#post_ID' ) as HTMLInputElement )?.value
+	);
+
+const getApiError = () => {
+	return __(
+		`Apologies, this is an experimental feature and there was an error with this service. Please try again.`,
+		'woocommerce'
+	);
+};
+
+const recordDescriptionTracks = recordTracksFactory(
+	'description_completion',
+	() => ( {
+		post_id: getPostId(),
+	} )
+);
 
 export function WriteItForMeButtonContainer() {
-	const [ fetching, setFetching ] = useState( false );
-	const generatingContentPhraseInterval = useRef< number >();
 	const titleEl = useRef< HTMLInputElement >(
 		document.querySelector( '#title' )
 	);
+	const [ fetching, setFetching ] = useState< boolean >( false );
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
 	const tinyEditor = useTinyEditor();
+	const { showSnackbar } = useFeedbackSnackbar();
+	const { requestCompletion, completionActive, stopCompletion } =
+		useCompletion( {
+			onStreamMessage: ( content ) => {
+				// This prevents printing out incomplete HTML tags.
+				const ignoreRegex = new RegExp( /<\/?\w*[^>]*$/g );
+				if ( ! ignoreRegex.test( content ) ) {
+					tinyEditor.setContent( content );
+				}
+			},
+			onStreamError: ( error ) => {
+				// eslint-disable-next-line no-console
+				console.debug( 'Streaming error encountered', error );
 
-	const writeItForMeDisabled =
-		fetching || ! productTitle || productTitle.length < MIN_TITLE_LENGTH;
+				tinyEditor.setContent( getApiError() );
+			},
+			onCompletionFinished: ( reason, content ) => {
+				recordDescriptionTracks( 'stop', {
+					reason,
+					character_count: content.length,
+				} );
+
+				setFetching( false );
+
+				if ( reason !== 'abort' ) {
+					showSnackbar( {
+						label: __(
+							'Description added. How is it?',
+							'woocommerce'
+						),
+						onPositiveResponse: () => {
+							recordDescriptionTracks( 'feedback', {
+								response: 'positive',
+							} );
+						},
+						onNegativeResponse: () => {
+							recordDescriptionTracks( 'feedback', {
+								response: 'negative',
+							} );
+						},
+					} );
+				}
+			},
+		} );
 
 	useEffect( () => {
 		const title = titleEl.current;
@@ -70,98 +100,36 @@ export function WriteItForMeButtonContainer() {
 		};
 	}, [ titleEl ] );
 
-	useEffect( () => {
-		clearInterval( generatingContentPhraseInterval.current );
-
-		if ( fetching ) {
-			tinyEditor.setContent( getGeneratingContentPhrase() );
-			generatingContentPhraseInterval.current = setInterval(
-				() => tinyEditor.setContent( getGeneratingContentPhrase() ),
-				2000
-			);
-		}
-	}, [ fetching ] );
+	const writeItForMeDisabled =
+		fetching || ! productTitle || productTitle.length < MIN_TITLE_LENGTH;
 
 	const buildPrompt = () => {
 		const instructions = [
 			`Write a product description with the following product title: "${ productTitle.slice( 0, MAX_TITLE_LENGTH ) }."`,
 			'Use a 9th grade reading level.',
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
-			'Structure the description using standard HTML paragraph, strong and list tags.',
-			'Do not include a heading at the very top of the description.',
+			'Structure the description into paragraphs using standard HTML <p> tags.',
+			'Only if appropriate, use <ul> and <li> tags to list product features.',
+			'When appropriate, use <strong> and <em> tags to emphasize text.',
+			'Do not include a top-level heading at the beginning description.',
 		];
 
 		return instructions.join( '\n' );
 	};
 
-	const getApiError = ( status?: number ) => {
-		const errorMessagesByStatus: Record< number, string > = {
-			429: __(
-				'There have been too many requests. Please wait for a few minutes and try again.',
-				'woocommerce'
-			),
-			408: __(
-				'It seems the server is taking too long to respond. This is an experimental feature, so please try again later.',
-				'woocommerce'
-			),
-		};
-
-		if ( status && errorMessagesByStatus[ status ] ) {
-			return errorMessagesByStatus[ status ];
-		}
-
-		return __(
-			`Apologies, this is an experimental feature and there was an error with this service. Please try again.`,
-			'woocommerce'
-		);
-	};
-
-	const generateDescription = async () => {
-		try {
-			setFetching( true );
-			const response = await apiFetch< WooApiResponse >( {
-				path: '/wooai/text-generation',
-				method: 'POST',
-				data: {
-					prompt: buildPrompt(),
-				},
-			} );
-			tinyEditor.setContent( response.generated_text || '' );
-		} catch ( e ) {
-			if ( ! ( e as WPAPIError )?.data?.status ) {
-				tinyEditor.setContent( getApiError() );
-			}
-
-			tinyEditor.setContent(
-				getApiError( ( e as WPAPIError ).data.status )
-			);
-			/* eslint-disable no-console */
-			console.error( e );
-		}
-		setFetching( false );
-	};
-
-	return (
-		<button
-			className="button wp-media-button woo-ai-write-it-for-me-btn"
-			type="button"
+	return completionActive ? (
+		<StopCompletionBtn onClick={ stopCompletion } />
+	) : (
+		<WriteItForMeBtn
 			disabled={ writeItForMeDisabled }
-			title={
-				writeItForMeDisabled
-					? sprintf(
-							/* translators: %d: Minimum characters for product title */
-							__(
-								'Please create a product title before generating a description. It must be %d characters or longer.',
-								'woocommerce'
-							),
-							MIN_TITLE_LENGTH
-					  )
-					: undefined
-			}
-			onClick={ generateDescription }
-		>
-			<img src={ MagicIcon } alt="magic button icon" />
-			{ __( 'Write it for me', 'woocommerce' ) }
-		</button>
+			onClick={ () => {
+				setFetching( true );
+				const prompt = buildPrompt();
+				recordDescriptionTracks( 'start', {
+					prompt,
+				} );
+				requestCompletion( prompt );
+			} }
+		/>
 	);
 }

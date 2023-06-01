@@ -7,6 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\Jetpack\Connection\Initial_State as Connection_Initial_State;
+
 /**
  * Settings Class.
  */
@@ -18,6 +20,7 @@ class Woo_AI_Product_Text_Generation {
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_woo_ai_register_script' ) );
 		add_action( 'media_buttons', array( $this, 'add_gpt_button' ), 40 );
+		add_action( 'edit_form_before_permalink', array( $this, 'add_name_generation_form' ) );
 		add_filter( 'the_editor', array( $this, 'add_gpt_form' ), 10, 1 );
 	}
 
@@ -47,6 +50,10 @@ class Woo_AI_Product_Text_Generation {
 
 		wp_enqueue_script( 'woo-ai' );
 
+		if ( class_exists( '\Automattic\Jetpack\Connection\Initial_State' ) ) {
+			wp_add_inline_script( 'woo-ai', Connection_Initial_State::render(), 'before' );
+		}
+
 		$css_file_version = filemtime( dirname( __FILE__ ) . '/../build/index.css' );
 
 		wp_register_style(
@@ -69,7 +76,6 @@ class Woo_AI_Product_Text_Generation {
 		wp_enqueue_style( 'woo-ai' );
 	}
 
-
 	/**
 	 * Add gpt button to the editor.
 	 *
@@ -81,6 +87,17 @@ class Woo_AI_Product_Text_Generation {
 		}
 
 		echo '<div id="woocommerce-ai-app-product-gpt-button"></div>';
+	}
+
+	/**
+	 * Add the form and button for generating product title suggestions to the editor.
+	 */
+	public function add_name_generation_form() {
+		if ( ! current_user_can( 'edit_posts' ) && ! current_user_can( 'edit_pages' ) ) {
+			return;
+		}
+
+		echo '<div id="woocommerce-ai-app-product-name-suggestions"></div>';
 	}
 
 	/**
