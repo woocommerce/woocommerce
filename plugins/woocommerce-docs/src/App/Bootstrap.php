@@ -43,6 +43,7 @@ class Bootstrap {
 			true
 		);
 		wp_enqueue_script( 'wc_docs' );
+		wp_enqueue_style( 'wp-components' );
 	}
 
 	/**

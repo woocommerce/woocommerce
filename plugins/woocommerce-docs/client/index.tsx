@@ -3,6 +3,16 @@
  */
 import { useState } from 'react';
 import ReactDOM from 'react-dom';
+import {
+	Button,
+	__experimentalItem as Item,
+	__experimentalItemGroup as ItemGroup,
+	__experimentalHeading as Heading,
+	Card,
+	CardBody,
+	CardHeader,
+	CardFooter,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -17,46 +27,57 @@ const App = () => {
 
 	return (
 		<>
-			<h1>WooCommerce Docs Administration</h1>
-			<p>Manifests:</p>
+			<Heading level={ 1 }>WooCommerce Docs Administration</Heading>
+
 			{ isLoading && <p>Loading...</p> }
 
-			{ ! isLoading &&
-				manifests.map( ( manifest ) => (
-					<div key={ manifest }>
-						<p>{ manifest }</p>{ ' ' }
-						<button
-							onClick={ () => {
-								deleteManifest( manifest );
-							} }
-						>
-							Remove this manifest
-						</button>
-					</div>
-				) ) }
-
-			<p>Add manifest url:</p>
-			<input
-				type="text"
-				value={ newManifest }
-				onChange={ ( e ) => setNewManifest( e.target.value ) }
-			/>
-			{ !! newManifest.length && ! isURL( newManifest ) && (
-				<p>Invalid URL</p>
-			) }
-			<button
-				disabled={
-					! newManifest &&
-					! newManifest.length &&
-					! isURL( newManifest )
-				}
-				onClick={ () => {
-					createManifest( newManifest );
-					setNewManifest( '' );
-				} }
-			>
-				Save manifest
-			</button>
+			<Card elevation={ 3 }>
+				<CardHeader>
+					<h2>Manifests</h2>
+				</CardHeader>
+				<CardBody>
+					<ItemGroup>
+						{ ! isLoading &&
+							manifests.map( ( manifest ) => (
+								<Item key={ manifest }>
+									{ manifest }
+									<Button
+										variant="tertiary"
+										onClick={ () => {
+											deleteManifest( manifest );
+										} }
+									>
+										Remove this manifest
+									</Button>
+								</Item>
+							) ) }
+					</ItemGroup>
+				</CardBody>
+				<CardFooter>
+					<input
+						type="text"
+						value={ newManifest }
+						onChange={ ( e ) => setNewManifest( e.target.value ) }
+					/>
+					{ !! newManifest.length && ! isURL( newManifest ) && (
+						<p>Invalid URL</p>
+					) }
+					<Button
+						variant="primary"
+						disabled={
+							! newManifest &&
+							! newManifest.length &&
+							! isURL( newManifest )
+						}
+						onClick={ () => {
+							createManifest( newManifest );
+							setNewManifest( '' );
+						} }
+					>
+						Add manifest URL
+					</Button>
+				</CardFooter>
+			</Card>
 		</>
 	);
 };
