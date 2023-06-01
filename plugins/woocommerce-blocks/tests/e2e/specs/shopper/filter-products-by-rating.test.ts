@@ -93,7 +93,7 @@ describe( `${ block.name } Block`, () => {
 		} );
 	} );
 
-	describe( 'with PHP classic template', () => {
+	describe( 'with PHP classic template (Products Block and Classic Template Block)', () => {
 		const productCatalogTemplateId =
 			'woocommerce/woocommerce//archive-product';
 
@@ -104,6 +104,7 @@ describe( `${ block.name } Block`, () => {
 			await goToTemplateEditor( {
 				postId: productCatalogTemplateId,
 			} );
+			await insertBlock( 'WooCommerce Product Grid Block' );
 			await insertBlock( block.name );
 			await saveTemplate();
 			await goToShopPage();
@@ -142,11 +143,19 @@ describe( `${ block.name } Block`, () => {
 			const products = await page.$$(
 				selectors.frontend.classicProductsList
 			);
+
+			const productsBlockProductsList = await page.$$(
+				selectors.frontend.queryProductsList
+			);
+
 			const pageURL = page.url();
 			const parsedURL = new URL( pageURL );
 
 			expect( isRefreshed ).toBeCalledTimes( 1 );
 			expect( products ).toHaveLength( FIVE_STAR_PRODUCTS_AMOUNT );
+			expect( productsBlockProductsList ).toHaveLength(
+				FIVE_STAR_PRODUCTS_AMOUNT
+			);
 			expect( parsedURL.search ).toEqual(
 				block.urlSearchParamWhenFilterIsApplied
 			);
@@ -191,8 +200,16 @@ describe( `${ block.name } Block`, () => {
 				selectors.frontend.classicProductsList
 			);
 
+			const productsBlockProductsList = await page.$$(
+				selectors.frontend.queryProductsList
+			);
+
 			expect( isRefreshed ).toBeCalledTimes( 1 );
 			expect( products ).toHaveLength( FIVE_STAR_PRODUCTS_AMOUNT );
+			expect( productsBlockProductsList ).toHaveLength(
+				FIVE_STAR_PRODUCTS_AMOUNT
+			);
+
 			expect( parsedURL.search ).toEqual(
 				block.urlSearchParamWhenFilterIsApplied
 			);
@@ -213,7 +230,6 @@ describe( `${ block.name } Block`, () => {
 
 			await insertBlock( 'Products (Beta)' );
 			await insertBlock( block.name );
-			await page.waitForNetworkIdle();
 			await publishPost();
 
 			editorPageUrl = page.url();
@@ -260,7 +276,7 @@ describe( `${ block.name } Block`, () => {
 			await selectBlockByName( block.slug );
 			await switchBlockInspectorTab( 'Settings' );
 			await setCheckbox(
-				await getToggleIdByLabel( "Show 'Apply filters' button", 1 )
+				await getToggleIdByLabel( "Show 'Apply filters' button" )
 			);
 
 			await saveOrPublish();

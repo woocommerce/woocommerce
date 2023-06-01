@@ -50,4 +50,25 @@ export class TemplateApiUtils {
 			}
 		);
 	}
+
+	async getTemplates() {
+		const storageState = JSON.parse(
+			await fs.readFile( STORAGE_STATE_PATH, 'utf-8' )
+		);
+
+		const requestUtils = await this.request.newContext( {
+			baseURL: BASE_URL,
+			storageState: storageState && {
+				cookies: storageState.cookies,
+				origins: [],
+			},
+		} );
+		const response = await requestUtils.get( `/wp-json/wp/v2/templates`, {
+			headers: {
+				'X-WP-Nonce': storageState.nonce,
+			},
+		} );
+
+		return await response.json();
+	}
 }
