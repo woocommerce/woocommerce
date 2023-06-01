@@ -1,9 +1,8 @@
 /**
  * Internal dependencies
  */
-import { Attribute, ProductData, TinyContent } from './types';
-
-declare const tinymce: { get: ( str: string ) => TinyContent };
+import { Attribute, ProductData } from './types';
+import { getTinyContent } from '../utils/tiny-tools';
 
 const isElementVisible = ( element: HTMLElement ) =>
 	! ( window.getComputedStyle( element ).display === 'none' );
@@ -70,26 +69,23 @@ const getDescription = (): string => {
 	const isBlockEditor =
 		document.querySelectorAll( '.block-editor' ).length > 0;
 
-	let description_value = '';
-
 	if ( ! isBlockEditor ) {
 		const content = document.querySelector(
 			'#content'
 		) as HTMLInputElement;
+		const tinyContent = getTinyContent();
 		if ( content && isElementVisible( content ) ) {
-			description_value = content.value;
-		} else if ( typeof tinymce === 'object' && tinymce.get( 'content' ) ) {
-			description_value = tinymce.get( 'content' ).getContent();
+			return content.value;
+		} else if ( tinyContent ) {
+			return tinyContent;
 		}
-	} else {
-		description_value = (
-			document.querySelector(
-				'.block-editor-rich-text__editable'
-			) as HTMLInputElement
-		 )?.value;
 	}
 
-	return description_value;
+	return (
+		document.querySelector(
+			'.block-editor-rich-text__editable'
+		) as HTMLInputElement
+	 )?.value;
 };
 
 const getProductName = (): string => {
