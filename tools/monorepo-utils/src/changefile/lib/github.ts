@@ -136,32 +136,56 @@ export const getChangelogComment = ( body: string ) => {
 	return match ? match[ 3 ].trim() : '';
 };
 
+/**
+ * Get the changelog details from a pull request description.
+ *
+ * @param {string} body Pull request description
+ * @return {Object}     Changelog details
+ */
 export const getChangelogDetails = ( body: string ) => {
-	const message = getChangelogMessage( body );
-	const comment = getChangelogComment( body );
-
-	if ( comment && message ) {
-		Logger.error(
-			'Both a message and comment were found. Only one can be entered'
-		);
-		// Logger.error has a process.exit( 1 ) call, this return is purely for testing purposes.
-		return;
-	}
-
-	const significance = getChangelogSignificance( body );
-
-	if ( comment && significance !== 'patch' ) {
-		Logger.error(
-			'Only patch changes can have a comment. Please change the significance to patch or remove the comment'
-		);
-		// Logger.error has a process.exit( 1 ) call, this return is purely for testing purposes.
-		return;
-	}
-
 	return {
-		significance,
+		significance: getChangelogSignificance( body ),
 		type: getChangelogType( body ),
-		message,
-		comment,
+		message: getChangelogMessage( body ),
+		comment: getChangelogComment( body ),
 	};
+};
+
+/**
+ * Determine if a pull request description contains changelog input errors.
+ *
+ * @param {Object} details              changelog details.
+ * @param {string} details.significance changelog significance.
+ * @param {string} details.type         changelog type.
+ * @param {string} details.message      changelog message.
+ * @param {string} details.comment      changelog comment.
+ * @return {string|null} error message, or null if none found
+ */
+export const getChangelogDetailsError = ( {
+	significance,
+	type,
+	message,
+	comment,
+}: {
+	significance: string;
+	type: string;
+	message: string;
+	comment: string;
+} ) => {
+	if ( comment && message ) {
+		return 'Both a message and comment were found. Only one can be entered';
+	}
+	if ( comment && significance !== 'patch' ) {
+		return 'Only patch changes can have a comment. Please change the significance to patch or remove the comment';
+	}
+	if ( ! significance ) {
+		return 'No changelog significance found';
+	}
+	if ( ! type ) {
+		return 'No changelog type found';
+	}
+	if ( ! comment || message ) {
+		return 'No changelog message or comment found';
+	}
+	return null;
 };
