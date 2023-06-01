@@ -94,14 +94,12 @@ export const getTouchedFilePaths = async (
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 
-	//make sure base sha is available.
-	await git.raw( [
-		'remote',
-		'add',
+	// make sure base sha is available.
+	await git.addRemote(
 		baseOwner,
-		getAuthenticatedRemote( { owner: baseOwner, name: baseName } ),
-	] );
-	await git.raw( [ 'fetch', baseOwner, base ] );
+		getAuthenticatedRemote( { owner: baseOwner, name: baseName } )
+	);
+	await git.fetch( baseOwner, base );
 
 	const diff = await git.raw( [
 		'diff',
