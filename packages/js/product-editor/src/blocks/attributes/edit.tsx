@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { BlockInstance, createBlock } from '@wordpress/blocks';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
-import { useBlockProps } from '@wordpress/block-editor';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -21,7 +25,38 @@ export function Edit() {
 
 	const productId = useEntityId( 'postType', 'product' );
 
+	const [ attributeBlocks, setAttributeBlocks ] =
+		useState< BlockInstance[] >();
+
+	useEffect( () => {
+		setAttributeBlocks(
+			entityAttributes.map( ( entityAttribute ) => {
+				console.log( 'entityAttribute', entityAttribute );
+
+				return createBlock( 'woocommerce/product-attribute', {
+					entityAttribute,
+				} );
+			} )
+		);
+	}, [ entityAttributes ] );
+
 	const blockProps = useBlockProps();
+
+	const { children, ...innerBlocksProps } = useInnerBlocksProps(
+		{},
+		{
+			allowedBlocks: [ 'woocommerce/product-attribute' ],
+			value: attributeBlocks,
+			onInput: () => {
+				console.log( 'onInput' );
+			},
+			onChange: () => {
+				console.log( 'onChange' );
+			},
+			templateInsertUpdatesSelection: false,
+			templateLock: 'insert',
+		}
+	);
 
 	return (
 		<div { ...blockProps }>
@@ -30,6 +65,7 @@ export function Edit() {
 				value={ entityAttributes }
 				onChange={ setEntityAttributes }
 			/>
+			<div { ...innerBlocksProps }>{ children }</div>
 		</div>
 	);
 }
