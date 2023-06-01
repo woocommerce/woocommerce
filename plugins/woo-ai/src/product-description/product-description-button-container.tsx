@@ -8,7 +8,10 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { MAX_TITLE_LENGTH, MIN_TITLE_LENGTH, MIN_TITLE_LENGTH_FOR_DESCRIPTION } from '../constants';
+import {
+	MAX_TITLE_LENGTH,
+	MIN_TITLE_LENGTH_FOR_DESCRIPTION,
+} from '../constants';
 import { WriteItForMeBtn, StopCompletionBtn } from '../components';
 import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
 import { recordTracksFactory, getPostId } from '../utils';
@@ -103,8 +106,11 @@ export function WriteItForMeButtonContainer() {
 
 	const buildPrompt = () => {
 		const instructions = [
-			`Write a product description with the following product title: "${ productTitle.slice( 0, MAX_TITLE_LENGTH ) }."`,
-      'Identify the language used in this product title and use the same language in your response.',
+			`Write a product description with the following product title: "${ productTitle.slice(
+				0,
+				MAX_TITLE_LENGTH
+			) }."`,
+			'Identify the language used in this product title and use the same language in your response.',
 			'Use a 9th grade reading level.',
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
 			'Structure the description into paragraphs using standard HTML <p> tags.',
