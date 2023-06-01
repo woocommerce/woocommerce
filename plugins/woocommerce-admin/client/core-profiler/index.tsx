@@ -39,7 +39,8 @@ import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
 import { Plugins } from './pages/Plugins';
-import { getPluginTrackKey, getTimeFrame } from '~/utils';
+import { getPluginTrackKey, getTimeFrame } from '~/utils';import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
+
 import './style.scss';
 import {
 	InstallationCompletedResult,
@@ -1205,15 +1206,7 @@ export const CoreProfilerController = ( {
 		: undefined;
 	const navigationProgress = currentNodeMeta?.progress; // This value is defined in each state node's meta tag, we can assume it is 0-100
 	const CurrentComponent =
-		currentNodeMeta?.component ??
-		( () => (
-			<div
-				className={ `woocommerce-profile-wizard__spinner` }
-				data-testid="core-profiler-loading-screen"
-			>
-				<Spinner />
-			</div>
-		) ); // If no component is defined for the state then its a loading state
+		currentNodeMeta?.component ?? ( () => ( <ProfileSpinner /> ) ); // If no component is defined for the state then its a loading state
 
 	useEffect( () => {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );
