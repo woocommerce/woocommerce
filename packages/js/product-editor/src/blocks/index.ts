@@ -20,3 +20,4 @@ export { init as initTab } from './tab';
 export { init as initInventoryQuantity } from './inventory-quantity';
 export { init as initToggle } from './toggle';
 export { init as attributesInit } from './attributes';
+export { init as attributeInit } from './attribute';
