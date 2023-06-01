@@ -118,9 +118,15 @@ export const ProductNameSuggestions = () => {
 	}, [] );
 
 	const updateProductName = ( newName: string ) => {
-		if ( ! nameInputRef.current || ! newName.length ) return;
+		if ( ! nameInputRef.current || ! newName.length ) {
+			return;
+		}
 		nameInputRef.current.value = newName;
 		nameInputRef.current.setAttribute( 'value', newName );
+
+		// Ensure change event is fired for other interactions.
+		nameInputRef.current.dispatchEvent( new Event( 'change' ) );
+
 		setProductName( newName );
 	};
 

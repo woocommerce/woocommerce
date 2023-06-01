@@ -89,15 +89,19 @@ export function WriteItForMeButtonContainer() {
 
 	useEffect( () => {
 		const title = titleEl.current;
-		const titleKeyupHandler = ( e: KeyboardEvent ) => {
+
+		const updateTitleHandler = ( e: Event ) => {
 			setProductTitle(
 				( e.target as HTMLInputElement ).value.trim() || ''
 			);
 		};
-		title?.addEventListener( 'keyup', titleKeyupHandler );
+
+		title?.addEventListener( 'keyup', updateTitleHandler );
+		title?.addEventListener( 'change', updateTitleHandler );
 
 		return () => {
-			title?.removeEventListener( 'keyup', titleKeyupHandler );
+			title?.removeEventListener( 'keyup', updateTitleHandler );
+			title?.removeEventListener( 'change', updateTitleHandler );
 		};
 	}, [ titleEl ] );
 
