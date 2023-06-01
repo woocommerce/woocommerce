@@ -212,17 +212,31 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		  parseInt( cartTotals.total_items_tax, 10 )
 		: parseInt( cartTotals.total_items, 10 );
 
-	const ariaLabel = sprintf(
-		/* translators: %1$d is the number of products in the cart. %2$s is the cart total */
-		_n(
-			'%1$d item in cart, total price of %2$s',
-			'%1$d items in cart, total price of %2$s',
-			cartItemsCount,
-			'woo-gutenberg-products-block'
-		),
-		cartItemsCount,
-		formatPrice( subTotal, getCurrencyFromPriceResponse( cartTotals ) )
-	);
+	const ariaLabel = hasHiddenPrice
+		? sprintf(
+				/* translators: %1$d is the number of products in the cart. */
+				_n(
+					'%1$d item in cart',
+					'%1$d items in cart',
+					cartItemsCount,
+					'woo-gutenberg-products-block'
+				),
+				cartItemsCount
+		  )
+		: sprintf(
+				/* translators: %1$d is the number of products in the cart. %2$s is the cart total */
+				_n(
+					'%1$d item in cart, total price of %2$s',
+					'%1$d items in cart, total price of %2$s',
+					cartItemsCount,
+					'woo-gutenberg-products-block'
+				),
+				cartItemsCount,
+				formatPrice(
+					subTotal,
+					getCurrencyFromPriceResponse( cartTotals )
+				)
+		  );
 
 	const colorStyle = {
 		backgroundColor: style?.color?.background,
