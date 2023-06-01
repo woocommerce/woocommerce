@@ -15,6 +15,7 @@ import {
  * Internal dependencies
  */
 import { ClassicEditorIcon } from '../../images/classic-editor-icon';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export const ClassicEditorMenuItem = ( {
 	onClose,
@@ -42,12 +43,14 @@ export const ClassicEditorMenuItem = ( {
 		};
 	} );
 
+	const { _feature_nonce } = getAdminSetting( '_feature_nonce' );
+
 	const classicEditorUrl = productId
 		? getAdminLink(
-				`post.php?post=${ productId }&action=edit&product_block_editor=0`
+				`post.php?post=${ productId }&action=edit&product_block_editor=0&_feature_nonce=${ _feature_nonce }`
 		  )
 		: getAdminLink(
-				'post-new.php?post_type=product&product_block_editor=0'
+				`post-new.php?post_type=product&product_block_editor=0&_feature_nonce=${ _feature_nonce }`
 		  );
 
 	if ( isLoading ) {
