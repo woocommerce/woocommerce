@@ -34,8 +34,6 @@ export function WriteItForMeButtonContainer() {
 		document.querySelector( '#title' )
 	);
 	const [ fetching, setFetching ] = useState< boolean >( false );
-	const [ titleIsGenerated, setTitleIsGenerated ] =
-		useState< boolean >( false );
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
@@ -88,42 +86,19 @@ export function WriteItForMeButtonContainer() {
 	useEffect( () => {
 		const title = titleEl.current;
 		const titleKeyupHandler = ( e: KeyboardEvent ) => {
-			setTitleIsGenerated( false );
 			setProductTitle(
 				( e.target as HTMLInputElement ).value.trim() || ''
 			);
 		};
 		title?.addEventListener( 'keyup', titleKeyupHandler );
 
-		// This observer is used to detect when the title is generated.
-		const titleObserver = new MutationObserver( ( mutations ) => {
-			const generatedAttrs = mutations.filter(
-				( mutation ) =>
-					mutation.type === 'attributes' &&
-					mutation.attributeName === 'data-generated'
-			);
-			if ( generatedAttrs.length ) {
-				setTitleIsGenerated( true );
-			}
-		} );
-
-		if ( title ) {
-			titleObserver.observe( title, {
-				attributes: true,
-			} );
-		}
-
 		return () => {
 			title?.removeEventListener( 'keyup', titleKeyupHandler );
-			titleObserver.disconnect();
 		};
 	}, [ titleEl ] );
 
 	const writeItForMeEnabled =
-		productTitle.length &&
-		! fetching &&
-		( titleIsGenerated ||
-			productTitle.length >= MIN_TITLE_LENGTH_FOR_DESCRIPTION );
+		! fetching && productTitle.length >= MIN_TITLE_LENGTH_FOR_DESCRIPTION;
 
 	const buildPrompt = () => {
 		const instructions = [

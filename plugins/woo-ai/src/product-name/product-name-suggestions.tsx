@@ -134,7 +134,6 @@ export const ProductNameSuggestions = () => {
 		if ( ! nameInputRef.current || ! newName.length ) return;
 		nameInputRef.current.value = newName;
 		nameInputRef.current.setAttribute( 'value', newName );
-		nameInputRef.current.setAttribute( 'data-generated', 'ai' );
 		setProductName( newName );
 	};
 
