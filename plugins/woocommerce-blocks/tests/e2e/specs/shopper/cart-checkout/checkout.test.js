@@ -130,7 +130,7 @@ describe( 'Shopper → Checkout', () => {
 		 * but cannot be reproduced manually.
 		 */
 		// eslint-disable-next-line jest/no-disabled-tests
-		it.skip( 'Switching between local pickup and shipping does not affect the address', async () => {
+		it( 'Switching between local pickup and shipping does not affect the address', async () => {
 			await shopper.block.emptyCart();
 			await shopper.block.goToShop();
 			await shopper.addToCartFromShopPage( SIMPLE_PHYSICAL_PRODUCT_NAME );
@@ -157,7 +157,7 @@ describe( 'Shopper → Checkout', () => {
 			);
 
 			await page.waitForXPath(
-				`//div[contains(@class, "wc-block-components-totals-item__description")][contains(text(), "${ NORMAL_SHIPPING_NAME }")]`
+				`//span[contains(@class, "wc-block-components-radio-control__label")][contains(text(), "${ NORMAL_SHIPPING_NAME }")]`
 			);
 
 			const enteredEmail = await page.evaluate( () => {
