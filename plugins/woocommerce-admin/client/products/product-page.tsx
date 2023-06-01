@@ -10,6 +10,8 @@ import {
 import { Spinner } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import { useParams } from 'react-router-dom';
+import { TourKit } from '@woocommerce/components';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -36,9 +38,23 @@ export default function ProductPage() {
 	}
 
 	return (
-		<Editor
-			product={ product }
-			settings={ productBlockEditorSettings || {} }
-		/>
+		<>
+			<Editor
+				product={ product }
+				settings={ productBlockEditorSettings || {} }
+			/>
+			<TourKit config={ { steps: [{
+				meta: {
+					name: 'todo',
+					primaryButton: {
+						text: __( 'View highlights' , 'woocommerce' ),
+					},
+					descriptions: {
+						desktop: __( 'We designed a brand new product editing experience to let you focus on what\'s important.' , 'woocommerce' ),
+					},
+					heading: __( 'Meet a streamlined product form' , 'woocommerce' ),
+				},
+			}], closeHandler: () => {}} } />
+		</>
 	);
 }
