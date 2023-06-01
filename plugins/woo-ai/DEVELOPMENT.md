@@ -31,11 +31,18 @@ pnpm install
 pnpm run start
 ```
 
+To build the /woo-ai/ plugin directory (when loading the plugin via symlink), run:
+
+```text
+pnpm install
+pnpm run build
+```
+
 To build the plugin ZIP file, run:
 
 ```text
 pnpm install
-pnpm run pnpm run build:zip
+pnpm run build:zip
 ```
 
 See [wp-scripts](https://github.com/WordPress/gutenberg/tree/master/packages/scripts) for more usage information.
