@@ -152,6 +152,9 @@ class PageController {
 	 * Perform initialization for the current action.
 	 */
 	private function handle_load_page_action() {
+		$screen            = get_current_screen();
+		$screen->post_type = $this->order_type;
+
 		if ( method_exists( $this, 'setup_action_' . $this->current_action ) ) {
 			$this->{"setup_action_{$this->current_action}"}();
 		}
@@ -425,4 +428,89 @@ class PageController {
 		return admin_url( 'admin.php?page=wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type ) );
 	}
 
+	/**
+	 * Helper method to check if the current admin screen is related to orders.
+	 *
+	 * @param string $type   Optional. The order type to check for. Default shop_order.
+	 * @param string $action Optional. The purpose of the screen to check for. 'list', 'edit', or 'new'.
+	 *                       Leave empty to check for any order screen.
+	 *
+	 * @return bool
+	 */
+	public function is_order_screen( $type = 'shop_order', $action = '' ) : bool {
+		if ( ! did_action( 'current_screen' ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					// translators: %s is the name of a function.
+					esc_html__( '%s must be called after the current_screen action.', 'woocommerce' ),
+					esc_html( __METHOD__ )
+				),
+				'x.x.x'
+			);
+
+			return false;
+		}
+
+		$valid_types = wc_get_order_types( 'view-order' );
+		if ( ! in_array( $type, $valid_types, true ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					// translators: %s is the name of an order type.
+					esc_html__( '%s is not a valid order type.', 'woocommerce' ),
+					esc_html( $type )
+				),
+				'x.x.x'
+			);
+
+			return false;
+		}
+
+		if ( wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
+			if ( $action ) {
+				switch ( $action ) {
+					case 'edit':
+						$is_action = 'edit_order' === $this->current_action;
+						break;
+					case 'list':
+						$is_action = 'list_orders' === $this->current_action;
+						break;
+					case 'new':
+						$is_action = 'new_order' === $this->current_action;
+						break;
+					default:
+						$is_action = false;
+						break;
+				}
+			}
+
+			$type_match   = $type === $this->order_type;
+			$action_match = ! $action || $is_action;
+		} else {
+			$screen = get_current_screen();
+
+			if ( $action ) {
+				switch ( $action ) {
+					case 'edit':
+						$screen_match = 'post' === $screen->base && filter_input( INPUT_GET, 'post', FILTER_VALIDATE_INT );
+						break;
+					case 'list':
+						$screen_match = 'edit' === $screen->base;
+						break;
+					case 'new':
+						$screen_match = 'post' === $screen->base && 'add' === $screen->action;
+						break;
+					default:
+						$screen_match = false;
+						break;
+				}
+			}
+
+			$type_match   = $type === $screen->post_type;
+			$action_match = ! $action || $screen_match;
+		}
+
+		return $type_match && $action_match;
+	}
 }
