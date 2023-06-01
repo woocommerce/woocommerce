@@ -19,9 +19,6 @@ import {
 	EditorSettings,
 	EditorBlockListSettings,
 	ObserveTyping,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	__unstableEditorStyles as EditorStyles,
 } from '@wordpress/block-editor';
 // It doesn't seem to notice the External dependency block whn @ts-ignore is added.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -30,6 +27,11 @@ import {
 	// @ts-ignore store should be included.
 	useEntityBlockEditor,
 } from '@wordpress/core-data';
+
+/**
+ * Internal dependencies
+ */
+import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
 
 type BlockEditorProps = {
 	context: {
@@ -48,6 +50,8 @@ export function BlockEditor( {
 	settings: _settings,
 	product,
 }: BlockEditorProps ) {
+	useConfirmUnsavedProductChanges();
+
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
 		return canUser( 'create', 'media', '' ) !== false;
@@ -103,7 +107,6 @@ export function BlockEditor( {
 					onChange={ onChange }
 					settings={ settings }
 				>
-					<EditorStyles styles={ settings?.styles } />
 					<div className="editor-styles-wrapper">
 						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 						{ /* @ts-ignore No types for this exist yet. */ }

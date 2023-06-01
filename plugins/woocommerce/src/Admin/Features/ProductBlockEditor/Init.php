@@ -31,6 +31,9 @@ class Init {
 			}
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_product_template' ) );
+
+			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
+
 			$block_registry = new BlockRegistry();
 			$block_registry->init();
 		}
@@ -647,5 +650,21 @@ class Init {
 			);
 		}
 		return $args;
+	}
+
+	/**
+	 * Sets the current screen to the block editor if a wc-admin page.
+	 */
+	public function set_current_screen_to_block_editor_if_wc_admin() {
+		$screen = get_current_screen();
+
+		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+		// (no idea why I need that phpcs:ignore above, but I'm tired trying to re-write this comment to get it to pass)
+		// we can't check the 'path' query param because client-side routing is used within wc-admin,
+		// so this action handler is only called on the initial page load from the server, which might
+		// not be the product edit page (it mostly likely isn't).
+		if ( PageController::is_admin_page() ) {
+			$screen->is_block_editor( true );
+		}
 	}
 }

@@ -84,9 +84,7 @@ export const BusinessLocation = ( {
 							sendEvent( {
 								type: 'BUSINESS_LOCATION_COMPLETED',
 								payload: {
-									businessInfo: {
-										location: storeCountry.key,
-									},
+									storeLocation: storeCountry.key,
 								},
 							} );
 						} }

@@ -23,9 +23,33 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 		$is_contains   = $rule->operation && strpos( $rule->operation, 'contains' ) !== false;
 		$default_value = $is_contains ? array() : false;
 		$default       = isset( $rule->default ) ? $rule->default : $default_value;
-		$option_value  = get_option( $rule->option_name, $default );
+		$option_value  = $this->get_option_value( $rule, $default, $is_contains );
 
-		if ( $is_contains && ! is_array( $option_value ) ) {
+		if ( isset( $rule->transformers ) && is_array( $rule->transformers ) ) {
+			$option_value = TransformerService::apply( $option_value, $rule->transformers, $default );
+		}
+
+		return ComparisonOperation::compare(
+			$option_value,
+			$rule->value,
+			$rule->operation
+		);
+	}
+
+	/**
+	 * Retrieves the option value and handles logging if necessary.
+	 *
+	 * @param object $rule         The specific rule being processed.
+	 * @param mixed  $default      The default value.
+	 * @param bool   $is_contains  Indicates whether the operation is "contains".
+	 *
+	 * @return mixed The option value.
+	 */
+	private function get_option_value( $rule, $default, $is_contains ) {
+		$option_value      = get_option( $rule->option_name, $default );
+		$is_contains_valid = $is_contains && ( is_array( $option_value ) || ( is_string( $option_value ) && is_string( $rule->value ) ) );
+
+		if ( $is_contains && ! $is_contains_valid ) {
 			$logger = wc_get_logger();
 			$logger->warning(
 				sprintf(
@@ -41,15 +65,7 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 			$option_value = array();
 		}
 
-		if ( isset( $rule->transformers ) && is_array( $rule->transformers ) ) {
-			$option_value = TransformerService::apply( $option_value, $rule->transformers, $default );
-		}
-
-		return ComparisonOperation::compare(
-			$option_value,
-			$rule->value,
-			$rule->operation
-		);
+		return $option_value;
 	}
 
 	/**
