@@ -837,15 +837,16 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->sut->migrate_order( $order->get_id() );
 
 		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- Intentional for informative debug message.
 		$this->assertEmpty( $errors, 'Errors found in migrated data: ' . print_r( $errors, true ) );
 
-		$order_tax = $wpdb->get_var( "SELECT tax_amount FROM {$wpdb->prefix}wc_orders WHERE id = {$order->get_id()}" );
+		$order_tax = $wpdb->get_var( $wpdb->prepare( "SELECT tax_amount FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) );
 		$this->assertEquals( 0, $order_tax );
 
-		$order_total = $wpdb->get_var( "SELECT total_amount FROM {$wpdb->prefix}wc_orders WHERE id = {$order->get_id()}" );
+		$order_total = $wpdb->get_var( $wpdb->prepare( "SELECT total_amount FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) );
 		$this->assertEquals( 0.12, $order_total );
 
-		$cart_discount_tax = $wpdb->get_var( "SELECT discount_tax_amount FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = {$order->get_id()}" );
+		$cart_discount_tax = $wpdb->get_var( $wpdb->prepare( "SELECT discount_tax_amount FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) );
 		$this->assertEquals( 12.37, $cart_discount_tax );
 	}
 }
