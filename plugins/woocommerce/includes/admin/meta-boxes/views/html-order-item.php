@@ -10,7 +10,8 @@
 defined( 'ABSPATH' ) || exit;
 
 $product      = $item->get_product();
-$product_link = $product ? apply_filters( 'woocommerce_admin_order_item_product_link', admin_url( 'post.php?post=' . $item->get_product_id() . '&action=edit' ), $item_id, $item ) : '';
+$product_link = $product ? admin_url( 'post.php?post=' . $item->get_product_id() . '&action=edit' ) : '';
+$product_link = apply_filters( 'woocommerce_admin_order_item_product_link_meta_box', $product_link, $product, $item_id, $item );
 $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
 $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empty( $class ) ? $class : '', $item, $order );
 ?>
