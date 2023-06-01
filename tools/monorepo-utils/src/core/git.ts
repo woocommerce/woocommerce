@@ -129,7 +129,7 @@ export const getAuthenticatedRemote = ( options: {
 } ) => {
 	const { owner, name } = options;
 	const source = `github.com/${ owner }/${ name }`;
-	const token = getEnvVar( 'GITHUB_TOKEN' );
+	const token = getEnvVar( 'GITHUB_TOKEN', true );
 	return `https://${ owner }:${ token }@${ source }`;
 };
 
