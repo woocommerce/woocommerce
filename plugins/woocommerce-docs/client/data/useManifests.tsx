@@ -25,5 +25,31 @@ export const useManifests = () => {
 		getManifests();
 	}, [] );
 
-	return { manifests, isLoading: loading };
+	const deleteManifest = async ( manifest: string ) => {
+		setLoading( true );
+
+		const res = await apiFetch< string[] >( {
+			path: `${ API_NAMESPACE }/manifests`,
+			method: 'DELETE',
+			data: { manifest },
+		} );
+
+		setManifests( res );
+		setLoading( false );
+	};
+
+	const createManifest = async ( manifest: string ) => {
+		setLoading( true );
+
+		const res = await apiFetch< string[] >( {
+			path: `${ API_NAMESPACE }/manifests`,
+			method: 'POST',
+			data: { manifest },
+		} );
+
+		setManifests( res );
+		setLoading( false );
+	};
+
+	return { manifests, isLoading: loading, createManifest, deleteManifest };
 };

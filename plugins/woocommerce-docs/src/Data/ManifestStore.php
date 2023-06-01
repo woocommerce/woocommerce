@@ -19,7 +19,13 @@ class ManifestStore {
 	 * @param string $manifest_url The url of the manifest to add.
 	 */
 	public static function add_manifest_url( $manifest_url ) {
-		$manifest_list   = get_option( self::MANIFEST_OPTION, array() );
+		$manifest_list = get_option( self::MANIFEST_OPTION, array() );
+		$index         = array_search( $manifest_url, $manifest_list, true );
+
+		if ( false !== $index ) {
+			return;
+		}
+
 		$manifest_list[] = $manifest_url;
 		self::save( $manifest_list );
 	}
@@ -32,8 +38,9 @@ class ManifestStore {
 	public static function remove_manifest_url( $manifest_url ) {
 		$manifest_list = get_option( self::MANIFEST_OPTION, array() );
 		$index         = array_search( $manifest_url, $manifest_list, true );
+
 		if ( false !== $index ) {
-			unset( $manifest_list[ $index ] );
+			array_splice( $manifest_list, $index, 1 );
 			self::save( $manifest_list );
 		}
 	}
@@ -51,7 +58,7 @@ class ManifestStore {
 	 *
 	 * @param array $manifest_list The list of manifest urls to save.
 	 */
-	private static function save( $manifest_list ) {
+	public static function save( $manifest_list ) {
 		update_option( self::MANIFEST_OPTION, $manifest_list );
 	}
 }
