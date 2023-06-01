@@ -165,6 +165,7 @@ class WC_Tax {
 	 */
 	public static function calc_exclusive_tax( $price, $rates ) {
 		$taxes = array();
+		$price = (float) $price;
 
 		if ( ! empty( $rates ) ) {
 			foreach ( $rates as $key => $rate ) {
@@ -172,13 +173,13 @@ class WC_Tax {
 					continue;
 				}
 
-				$tax_amount = $price * ( $rate['rate'] / 100 );
+				$tax_amount = $price * ( floatval( $rate['rate'] ) / 100 );
 				$tax_amount = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price ); // ADVANCED: Allow third parties to modify this rate.
 
 				if ( ! isset( $taxes[ $key ] ) ) {
-					$taxes[ $key ] = $tax_amount;
+					$taxes[ $key ] = (float) $tax_amount;
 				} else {
-					$taxes[ $key ] += $tax_amount;
+					$taxes[ $key ] += (float) $tax_amount;
 				}
 			}
 
@@ -189,14 +190,14 @@ class WC_Tax {
 				if ( 'no' === $rate['compound'] ) {
 					continue;
 				}
-				$the_price_inc_tax = $price + ( $pre_compound_total );
-				$tax_amount        = $the_price_inc_tax * ( $rate['rate'] / 100 );
+				$the_price_inc_tax = $price + $pre_compound_total;
+				$tax_amount        = $the_price_inc_tax * ( floatval( $rate['rate'] ) / 100 );
 				$tax_amount        = apply_filters( 'woocommerce_price_ex_tax_amount', $tax_amount, $key, $rate, $price, $the_price_inc_tax, $pre_compound_total ); // ADVANCED: Allow third parties to modify this rate.
 
 				if ( ! isset( $taxes[ $key ] ) ) {
-					$taxes[ $key ] = $tax_amount;
+					$taxes[ $key ] = (float) $tax_amount;
 				} else {
-					$taxes[ $key ] += $tax_amount;
+					$taxes[ $key ] += (float) $tax_amount;
 				}
 
 				$pre_compound_total = array_sum( $taxes );
