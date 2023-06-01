@@ -220,34 +220,40 @@ export const ProductNameSuggestions = () => {
 						) }
 					</p>
 				) }
-			<button
-				className="button woo-ai-get-suggestions-btn"
-				type="button"
-				onClick={ fetchProductSuggestions }
-				style={ {
-					display: shouldRenderSuggestionsButton() ? 'flex' : 'none',
-				} }
-			>
-				<div className="woo-ai-get-suggestions-btn__content">
-					<img src={ MagicIcon } alt="" />
-					{ getSuggestionsButtonLabel() }
-				</div>
-				<Tooltip
-					text={ __(
-						'AI features are in their experimental phase. While we strive to provide accurate and useful results, there is a possibility of generating misleading or incorrect content.',
-						'woocommerce'
-					) }
-					position="top center"
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore Incorrect types.
-					className={ 'woo-ai-get-suggestions__experimental-tooltip' }
-					delay={ 0 }
+			{ suggestionsState !== SuggestionsState.Failed && (
+				<button
+					className="button woo-ai-get-suggestions-btn"
+					type="button"
+					onClick={ fetchProductSuggestions }
+					style={ {
+						display: shouldRenderSuggestionsButton()
+							? 'flex'
+							: 'none',
+					} }
 				>
-					<span>
-						<Pill>{ __( 'Experimental', 'woocommerce' ) }</Pill>
-					</span>
-				</Tooltip>
-			</button>
+					<div className="woo-ai-get-suggestions-btn__content">
+						<img src={ MagicIcon } alt="" />
+						{ getSuggestionsButtonLabel() }
+					</div>
+					<Tooltip
+						text={ __(
+							'AI features are in their experimental phase. While we strive to provide accurate and useful results, there is a possibility of generating misleading or incorrect content.',
+							'woocommerce'
+						) }
+						position="top center"
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore Incorrect types.
+						className={
+							'woo-ai-get-suggestions__experimental-tooltip'
+						}
+						delay={ 0 }
+					>
+						<span>
+							<Pill>{ __( 'Experimental', 'woocommerce' ) }</Pill>
+						</span>
+					</Tooltip>
+				</button>
+			) }
 			{ suggestionsState === SuggestionsState.Fetching && (
 				<p className="wc-product-name-suggestions__loading-message">
 					<RandomLoadingMessage
