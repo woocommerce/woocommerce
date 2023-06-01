@@ -106,7 +106,7 @@ class OrdersTableQuery {
 	 *
 	 * @var array
 	 */
-	private $results = array();
+	private $orders = array();
 
 	/**
 	 * Final SQL query to run after processing of args.
@@ -1156,7 +1156,7 @@ class OrdersTableQuery {
 				return $this->max_num_pages;
 			case 'posts':
 			case 'orders':
-				return $this->results;
+				return $this->orders;
 			case 'request':
 				return $this->sql;
 			default:
