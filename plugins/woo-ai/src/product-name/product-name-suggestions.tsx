@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
-import React from 'react';
 import { Pill } from '@woocommerce/components';
 import { Tooltip } from '@wordpress/components';
 
@@ -11,14 +11,17 @@ import { Tooltip } from '@wordpress/components';
  * Internal dependencies
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
-import { productData } from '../utils';
+import AlertIcon from '../../assets/images/icons/alert.svg';
+import { productData, recordTracksFactory, getPostId } from '../utils';
 import { useProductDataSuggestions } from '../hooks/useProductDataSuggestions';
 import {
 	ProductDataSuggestion,
 	ProductDataSuggestionRequest,
 } from '../utils/types';
 import SuggestionItem from './suggestion-item';
-import RandomLoadingMessage from '../components/random-loading-message';
+import { RandomLoadingMessage } from '../components';
+
+const MIN_TITLE_LENGTH = 10;
 
 enum SuggestionsState {
 	Fetching = 'fetching',
@@ -38,10 +41,21 @@ declare const tinymce: {
 	) => void;
 };
 
+type TracksData = Record<
+	string,
+	string | number | Array< Record< string, string | number > >
+>;
+
+const recordNameTracks = recordTracksFactory< TracksData >(
+	'name_completion',
+	() => ( {
+		post_id: getPostId(),
+	} )
+);
+
 export const ProductNameSuggestions = () => {
 	const [ suggestionsState, setSuggestionsState ] =
 		useState< SuggestionsState >( SuggestionsState.None );
-	const [ error, setError ] = useState< string >( '' );
 	const [ isFirstLoad, setIsFirstLoad ] = useState< boolean >( true );
 	const [ visible, setVisible ] = useState< boolean >( false );
 	const [ suggestions, setSuggestions ] = useState< ProductDataSuggestion[] >(
@@ -55,11 +69,6 @@ export const ProductNameSuggestions = () => {
 		nameInputRef.current?.value || ''
 	);
 
-	const resetError = () => {
-		setError( '' );
-		setSuggestionsState( SuggestionsState.None );
-	};
-
 	useEffect( () => {
 		const nameInput = nameInputRef.current;
 
@@ -71,6 +80,7 @@ export const ProductNameSuggestions = () => {
 				setVisible( false );
 			}
 
+			setSuggestions( [] );
 			setProductName( ( e.target as HTMLInputElement ).value || '' );
 		};
 
@@ -129,33 +139,50 @@ export const ProductNameSuggestions = () => {
 	};
 
 	const handleSuggestionClick = ( suggestion: ProductDataSuggestion ) => {
+		recordNameTracks( 'select', {
+			selectedTitle: suggestion.content,
+		} );
+
 		updateProductName( suggestion.content );
 		setSuggestions( [] );
-		resetError();
 	};
 
 	const fetchProductSuggestions = async () => {
-		resetError();
 		setSuggestions( [] );
 		setSuggestionsState( SuggestionsState.Fetching );
 		try {
 			const currentProductData = productData();
+
+			recordNameTracks( 'start', {
+				currentTitle: currentProductData.name,
+			} );
+
 			const request: ProductDataSuggestionRequest = {
 				requested_data: 'name',
 				...currentProductData,
 			};
-			setSuggestions( await fetchSuggestions( request ) );
+
+			const suggestionResults = await fetchSuggestions( request );
+
+			recordNameTracks( 'stop', {
+				reason: 'finished',
+				suggestions: suggestionResults,
+			} );
+			setSuggestions( suggestionResults );
 			setSuggestionsState( SuggestionsState.None );
 			setIsFirstLoad( false );
 		} catch ( e ) {
+			recordNameTracks( 'stop', {
+				reason: 'error',
+				error: ( e as { message?: string } )?.message || '',
+			} );
 			setSuggestionsState( SuggestionsState.Failed );
-			setError( e instanceof Error ? e.message : '' );
 		}
 	};
 
 	const shouldRenderSuggestionsButton = useCallback( () => {
 		return (
-			productName.length >= 10 &&
+			productName.length >= MIN_TITLE_LENGTH &&
 			suggestionsState !== SuggestionsState.Fetching
 		);
 	}, [ productName, suggestionsState ] );
@@ -183,8 +210,8 @@ export const ProductNameSuggestions = () => {
 						) ) }
 					</ul>
 				) }
-			{ productName.length < 10 &&
-				suggestionsState !== SuggestionsState.Fetching && (
+			{ productName.length < MIN_TITLE_LENGTH &&
+				suggestionsState === SuggestionsState.None && (
 					<p className="wc-product-name-suggestions__tip-message">
 						<img src={ MagicIcon } alt="" />
 						{ __(
@@ -202,7 +229,7 @@ export const ProductNameSuggestions = () => {
 				} }
 			>
 				<div className="woo-ai-get-suggestions-btn__content">
-					<img src={ MagicIcon } alt="magic button icon" />
+					<img src={ MagicIcon } alt="" />
 					{ getSuggestionsButtonLabel() }
 				</div>
 				<Tooltip
@@ -232,7 +259,11 @@ export const ProductNameSuggestions = () => {
 			) }
 			{ suggestionsState === SuggestionsState.Failed && (
 				<p className="wc-product-name-suggestions__error-message">
-					{ error }
+					<img src={ AlertIcon } alt="" />
+					{ __(
+						`We're currently experiencing high demand for our experimental feature. Please check back in shortly!`,
+						'woocommerce'
+					) }
 				</p>
 			) }
 		</div>

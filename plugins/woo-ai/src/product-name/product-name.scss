@@ -2,7 +2,6 @@ $border-color: #8c8f94;
 $base-bg-color: #fff;
 $hover-bg-color: #f0f0f1;
 $base-text-color: #757575;
-$error-message-bg-color: #eeaeaf;
 $z-index-container: 1001;
 $z-index-header: 1002;
 $border-radius: 4px;
@@ -132,9 +131,14 @@ $border-radius: 4px;
   }
 
   .wc-product-name-suggestions__error-message {
+	display: flex;
+	align-items: center;
     margin: 0;
     padding: 10px;
-    background-color: $error-message-bg-color;
+
+	img {
+		margin-right: 10px;
+	}
   }
 
   .wc-product-name-suggestions__tip-message {

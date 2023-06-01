@@ -93,7 +93,7 @@ const getRandomLoadingPhrase = ( phrasesStack: string[] ): string => {
 	return poppedMessage;
 };
 
-const RandomLoadingMessage: React.FC< RandomLoadingMessageProps > = ( {
+export const RandomLoadingMessage: React.FC< RandomLoadingMessageProps > = ( {
 	isLoading,
 } ) => {
 	const messageUpdateTimeout = useRef< number >();
@@ -135,5 +135,3 @@ const RandomLoadingMessage: React.FC< RandomLoadingMessageProps > = ( {
 		</>
 	);
 };
-
-export default RandomLoadingMessage;
