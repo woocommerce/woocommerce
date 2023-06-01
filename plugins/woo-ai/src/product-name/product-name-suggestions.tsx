@@ -80,6 +80,7 @@ export const ProductNameSuggestions = () => {
 				setVisible( false );
 			}
 
+			setSuggestions( [] );
 			setProductName( ( e.target as HTMLInputElement ).value || '' );
 		};
 

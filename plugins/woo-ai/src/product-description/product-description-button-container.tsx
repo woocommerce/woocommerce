@@ -58,6 +58,7 @@ export function WriteItForMeButtonContainer() {
 				recordDescriptionTracks( 'stop', {
 					reason,
 					character_count: content.length,
+					current_title: productTitle,
 				} );
 
 				setFetching( false );
