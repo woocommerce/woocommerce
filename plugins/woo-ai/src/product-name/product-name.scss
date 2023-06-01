@@ -146,6 +146,7 @@ $border-radius: 4px;
     padding: 10px;
     display: flex;
     align-items: center;
+	justify-content: space-between;
 
     img {
       vertical-align: middle;
@@ -157,10 +158,20 @@ $border-radius: 4px;
   z-index: $z-index-header;
 }
 
-.woo-ai-get-suggestions__experimental-tooltip {
-	.components-popover__content {
-		width: 200px;
-		min-width: auto;
-		white-space: normal !important;
+.woo-ai-get-suggestions-legal_text {
+	color: #8d8b8b;
+
+	a {
+		text-decoration: none;
+		padding: 3px;
+
+		&:after {
+			font: 16px/11px dashicons;
+			content: "\f504";
+			font-weight: normal;
+			top: 2px;
+			position: relative;
+			margin-left: 3px;
+		}
 	}
 }

@@ -4,21 +4,19 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
-import { Pill } from '@woocommerce/components';
-import { Tooltip } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
 import AlertIcon from '../../assets/images/icons/alert.svg';
-import { productData, recordTracksFactory, getPostId } from '../utils';
+import { productData } from '../utils';
 import { useProductDataSuggestions } from '../hooks/useProductDataSuggestions';
 import {
 	ProductDataSuggestion,
 	ProductDataSuggestionRequest,
 } from '../utils/types';
-import SuggestionItem from './suggestion-item';
+import { SuggestionItem, PoweredByLink, recordNameTracks } from './index';
 import { RandomLoadingMessage } from '../components';
 
 const MIN_TITLE_LENGTH = 10;
@@ -40,18 +38,6 @@ declare const tinymce: {
 		thing?: boolean
 	) => void;
 };
-
-type TracksData = Record<
-	string,
-	string | number | Array< Record< string, string | number > >
->;
-
-const recordNameTracks = recordTracksFactory< TracksData >(
-	'name_completion',
-	() => ( {
-		post_id: getPostId(),
-	} )
-);
 
 export const ProductNameSuggestions = () => {
 	const [ suggestionsState, setSuggestionsState ] =
@@ -147,7 +133,12 @@ export const ProductNameSuggestions = () => {
 		setSuggestions( [] );
 	};
 
-	const fetchProductSuggestions = async () => {
+	const fetchProductSuggestions = async (
+		event: React.MouseEvent< HTMLElement >
+	) => {
+		if ( ( event.target as Element )?.closest( 'a' ) ) {
+			return;
+		}
 		setSuggestions( [] );
 		setSuggestionsState( SuggestionsState.Fetching );
 		try {
@@ -212,13 +203,18 @@ export const ProductNameSuggestions = () => {
 				) }
 			{ productName.length < MIN_TITLE_LENGTH &&
 				suggestionsState === SuggestionsState.None && (
-					<p className="wc-product-name-suggestions__tip-message">
-						<img src={ MagicIcon } alt="" />
-						{ __(
-							'Enter a few descriptive words to generate product name using AI.',
-							'woocommerce'
-						) }
-					</p>
+					<>
+						<div className="wc-product-name-suggestions__tip-message">
+							<div>
+								<img src={ MagicIcon } alt="" />
+								{ __(
+									'Enter a few descriptive words to generate product name.',
+									'woocommerce'
+								) }
+							</div>
+							<PoweredByLink />
+						</div>
+					</>
 				) }
 			{ suggestionsState !== SuggestionsState.Failed && (
 				<button
@@ -235,23 +231,7 @@ export const ProductNameSuggestions = () => {
 						<img src={ MagicIcon } alt="" />
 						{ getSuggestionsButtonLabel() }
 					</div>
-					<Tooltip
-						text={ __(
-							'AI features are in their experimental phase. While we strive to provide accurate and useful results, there is a possibility of generating misleading or incorrect content.',
-							'woocommerce'
-						) }
-						position="top center"
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore Incorrect types.
-						className={
-							'woo-ai-get-suggestions__experimental-tooltip'
-						}
-						delay={ 0 }
-					>
-						<span>
-							<Pill>{ __( 'Experimental', 'woocommerce' ) }</Pill>
-						</span>
-					</Tooltip>
+					<PoweredByLink />
 				</button>
 			) }
 			{ suggestionsState === SuggestionsState.Fetching && (
