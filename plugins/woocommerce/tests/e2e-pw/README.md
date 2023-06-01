@@ -62,6 +62,29 @@ Other ways of running tests (make sure you are in the `plugins/woocommerce` fold
 
 To see all options, make sure you are in the `plugins/woocommerce` folder and run `pnpm playwright test --help`
 
+### Running the tests against a site using a different language
+
+To change the site language:
+- Update Site Language setting via Dashboard > Settings > General
+- Change the Site language
+- Click Save changes
+- Update language translations via Dashboard > Updates
+- Click button to update translations
+
+In order to execute the tests against a site that has its language setting changed use the following:
+
+   ```bash
+    # Run tests against a site with Spanish language 
+    export LANGUAGE=es_ES
+    pnpm test:e2e-pw #or use any of the ways mentioned previously in 'Other ways of running tests'
+```
+Currently, the tests can be executed against a site using one of the following languages:
+- en_US (English US)
+- es_ES (Spanish/Espanol).
+
+If no LANGUAGE parameter is specified then the tests will execute using the default en_US translations.
+
+
 ### About the environment
 
 The default values are:
