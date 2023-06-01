@@ -822,4 +822,30 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		// phpcs:ignore -- Hardcoded value.
 		$wpdb->query( "SET sql_mode = '$sql_mode' " );
 	}
+
+	/**
+	 * @testDox Test that values in exponential notation are migrated properly.
+	 */
+	public function test_migration_with_numbers_in_exponential_notation() {
+		global $wpdb;
+
+		$order = OrderHelper::create_order();
+		update_post_meta( $order->get_id(), '_order_tax', '7.1054273576E-15' ); // 0
+		update_post_meta( $order->get_id(), '_order_total', '12E-2' ); // 0.12
+		update_post_meta( $order->get_id(), '_cart_discount_tax', '1237E-2' ); // 12.37
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+		$this->assertEmpty( $errors, 'Errors found in migrated data: ' . print_r( $errors, true ) );
+
+		$order_tax = $wpdb->get_var( "SELECT tax_amount FROM {$wpdb->prefix}wc_orders WHERE id = {$order->get_id()}" );
+		$this->assertEquals( 0, $order_tax );
+
+		$order_total = $wpdb->get_var( "SELECT total_amount FROM {$wpdb->prefix}wc_orders WHERE id = {$order->get_id()}" );
+		$this->assertEquals( 0.12, $order_total );
+
+		$cart_discount_tax = $wpdb->get_var( "SELECT discount_tax_amount FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = {$order->get_id()}" );
+		$this->assertEquals( 12.37, $cart_discount_tax );
+	}
 }
