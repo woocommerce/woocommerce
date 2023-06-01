@@ -18,12 +18,15 @@ The first folder is named "e2e" and it contains all the E2E tests that were crea
 
 #### Structure
 
-There are two Playwright projects configuration:
+There are three Playwright projects configuration:
 
--   blockTheme
--   classicTheme
+- blockTheme
+- blockThemeWithGlobalSideEffects
+- classicTheme
 
 The blockTheme project runs the tests with the suffix _block_theme_. In this case, the theme is a block theme. The block theme is the default WordPress theme. Currently, it is Twenty-Twenty Three. You should use this configuration if you want test the block with the Site Editor.
+
+The blockThemeWithGlobalSideEffects project runs the tests with the suffix _block_theme.side_effects_. These tests have side effects that can potentially impact other end-to-end (E2E) tests. Due to the nature of these tests and their potential impact, they are not executed in parallel with other tests.
 
 The classicTheme project runs the tests with the suffix _classic_theme_. In this case, the theme is a Twenty Twenty-One. You should use this configuration if you want test the block with a classic theme.
 
