@@ -60,6 +60,13 @@ class WC_Countries {
 	 */
 	public function get_countries() {
 		if ( empty( $this->geo_cache['countries'] ) ) {
+			/**
+			 * Allows filtering of the list of countries in WC.
+			 *
+			 * @since 1.5.3
+			 *
+			 * @param array $countries
+			 */
 			$this->geo_cache['countries'] = apply_filters( 'woocommerce_countries', include WC()->plugin_path() . '/i18n/countries.php' );
 			if ( apply_filters( 'woocommerce_sort_countries', true ) ) {
 				wc_asort_by_locale( $this->geo_cache['countries'] );
@@ -87,6 +94,13 @@ class WC_Countries {
 	 */
 	public function get_continents() {
 		if ( empty( $this->geo_cache['continents'] ) ) {
+			/**
+			 * Allows filtering of continents in WC.
+			 *
+			 * @since 2.6.0
+			 *
+			 * @param array[array] $continents
+			 */
 			$this->geo_cache['continents'] = apply_filters( 'woocommerce_continents', include WC()->plugin_path() . '/i18n/continents.php' );
 		}
 
@@ -166,7 +180,15 @@ class WC_Countries {
 	public function load_country_states() {
 		global $states;
 
-		$states       = include WC()->plugin_path() . '/i18n/states.php';
+		$states = include WC()->plugin_path() . '/i18n/states.php';
+
+		/**
+		 * Allows filtering of country states in WC.
+		 *
+		 * @since 1.5.3
+		 *
+		 * @param array $states
+		 */
 		$this->geo_cache['states'] = apply_filters( 'woocommerce_states', $states );
 	}
 
@@ -178,6 +200,13 @@ class WC_Countries {
 	 */
 	public function get_states( $cc = null ) {
 		if ( ! isset( $this->geo_cache['states'] ) ) {
+			/**
+			 * Allows filtering of country states in WC.
+			 *
+			 * @since 1.5.3
+			 *
+			 * @param array $states
+			 */
 			$this->geo_cache['states'] = apply_filters( 'woocommerce_states', include WC()->plugin_path() . '/i18n/states.php' );
 		}
 
