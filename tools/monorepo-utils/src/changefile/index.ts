@@ -17,6 +17,7 @@ import {
 	getPullRequestData,
 	shouldAutomateChangelog,
 	getChangelogDetails,
+	getChangelogDetailsError,
 } from './lib/github';
 import {
 	getAllProjectPaths,
@@ -66,8 +67,13 @@ const program = new Command( 'changefile' )
 				process.exit( 0 );
 			}
 
-			const { significance, type, message, comment } =
-				getChangelogDetails( prBody );
+			const details = getChangelogDetails( prBody );
+			const { significance, type, message, comment } = details;
+			const changelogDetailsError = getChangelogDetailsError( details );
+
+			if ( changelogDetailsError ) {
+				Logger.error( changelogDetailsError );
+			}
 
 			Logger.startTask(
 				`Making a temporary clone of '${ headOwner }/${ name }'`

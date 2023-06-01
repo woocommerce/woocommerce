@@ -10,6 +10,7 @@ import {
 	getChangelogSignificance,
 	getChangelogType,
 	getChangelogDetails,
+	getChangelogDetailsError,
 } from '../github';
 import { Logger } from '../../../core/logger';
 
@@ -314,7 +315,7 @@ describe( 'getChangelogDetails', () => {
 		expect( details.comment ).toEqual( '' );
 	} );
 
-	it( 'should error if a comment and message are added', () => {
+	it( 'should provide comment and message when both are added', () => {
 		const body =
 			'### Changelog entry\r\n' +
 			'\r\n' +
@@ -351,13 +352,11 @@ describe( 'getChangelogDetails', () => {
 			'</details>';
 
 		const details = getChangelogDetails( body );
-		expect( details ).toBeUndefined();
-		expect( Logger.error ).toHaveBeenCalledWith(
-			'Both a message and comment were found. Only one can be entered'
-		);
+		expect( details.message ).toEqual( 'This is a very useful fix.' );
+		expect( details.comment ).toEqual( 'This is a very useful comment.' );
 	} );
 
-	it( 'should error if a comment is entered with a significance other than patch', () => {
+	it( 'should return a comment even when it is entered with a significance other than patch', () => {
 		const body =
 			'### Changelog entry\r\n' +
 			'\r\n' +
@@ -393,9 +392,63 @@ describe( 'getChangelogDetails', () => {
 			'</details>';
 
 		const details = getChangelogDetails( body );
-		expect( details ).toBeUndefined();
-		expect( Logger.error ).toHaveBeenCalledWith(
+		expect( details.comment ).toEqual( 'This is a very useful comment.' );
+		expect( details.significance ).toEqual( 'minor' );
+	} );
+} );
+
+describe( 'getChangelogDetailsError', () => {
+	it( 'should return an error when both a message and comment provided', () => {
+		const error = getChangelogDetailsError( {
+			message: 'message',
+			comment: 'comment',
+			type: 'fix',
+			significance: 'minor',
+		} );
+		expect( error ).toEqual(
+			'Both a message and comment were found. Only one can be entered'
+		);
+	} );
+
+	it( 'should return an error when a comment is provided with a significance other than patch', () => {
+		const error = getChangelogDetailsError( {
+			message: '',
+			comment: 'comment',
+			type: 'fix',
+			significance: 'minor',
+		} );
+		expect( error ).toEqual(
 			'Only patch changes can have a comment. Please change the significance to patch or remove the comment'
 		);
+	} );
+
+	it( 'should return an error when no sifnificance found', () => {
+		const error = getChangelogDetailsError( {
+			message: 'message',
+			comment: '',
+			type: 'fix',
+			significance: '',
+		} );
+		expect( error ).toEqual( 'No changelog significance found' );
+	} );
+
+	it( 'should return an error when no type found', () => {
+		const error = getChangelogDetailsError( {
+			message: 'message',
+			comment: '',
+			type: '',
+			significance: 'minor',
+		} );
+		expect( error ).toEqual( 'No changelog type found' );
+	} );
+
+	it( 'should return an error when neither a comment or message is provided', () => {
+		const error = getChangelogDetailsError( {
+			message: '',
+			comment: '',
+			type: 'fix',
+			significance: 'minor',
+		} );
+		expect( error ).toEqual( 'No changelog message or comment found' );
 	} );
 } );
