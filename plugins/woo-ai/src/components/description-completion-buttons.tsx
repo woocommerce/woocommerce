@@ -8,7 +8,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
-import { MIN_TITLE_LENGTH } from '../constants';
+import { MIN_TITLE_LENGTH_FOR_DESCRIPTION } from '../constants';
 
 type MagicButtonProps = {
 	title?: string;
@@ -54,7 +54,7 @@ export const WriteItForMeBtn = ( {
 								'Please create a product title before generating a description. It must be %d characters or longer.',
 								'woocommerce'
 							),
-							MIN_TITLE_LENGTH
+							MIN_TITLE_LENGTH_FOR_DESCRIPTION
 					  )
 					: undefined
 			}

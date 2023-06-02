@@ -47,6 +47,7 @@ class Woo_AI_Product_Text_Generation {
 			$script_asset['version'],
 			true
 		);
+
 		wp_enqueue_script( 'woo-ai' );
 
 		if ( class_exists( '\Automattic\Jetpack\Connection\Initial_State' ) ) {

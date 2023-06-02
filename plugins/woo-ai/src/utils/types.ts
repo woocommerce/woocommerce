@@ -1,8 +1,3 @@
-export type TinyContent = {
-	getContent: () => string;
-	setContent: ( str: string ) => void;
-};
-
 export type Attribute = {
 	name: string;
 	value: string;

@@ -18,11 +18,13 @@ defined( 'ABSPATH' ) || exit;
  */
 class Product_Data_Suggestion_Prompt_Generator {
 	private const PROMPT_TEMPLATE = <<<PROMPT_TEMPLATE
-You are a SEO and marketing expert specializing in e-commerce stores built using WooCommerce.
-You are given the product's name, description, tags, categories, and other attributes.
-Your task is to provide three optimized alternatives to the product's %s to enhance the online store's SEO performance and sales.
-You provide the best possible option for the product's %s based on the product properties.
-Return only the optimized alternative value for product's %s in the "content" part of your response.
+You are a WooCommerce SEO and marketing expert.
+Using the product's name, description, tags, categories, and other attributes,
+provide three optimized alternatives to the product's %s to enhance the store's SEO performance and sales.
+Provide the best option for the product's %s based on the product properties.
+Identify the language used in the given title and use the same language in your response.
+Return only the alternative value for product's %s in the "content" part of your response.
+Product titles should contain at least 20 characters.
 Return a short and concise reason for each suggestion in seven words in the "reason" part of your response.
 The product's properties are:
 %s
