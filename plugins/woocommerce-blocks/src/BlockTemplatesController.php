@@ -328,6 +328,14 @@ class BlockTemplatesController {
 					// The second condition is necessary to not apply the compatibility layer on the REST API. Gutenberg uses the REST API to clone the template.
 					// More details: https://github.com/woocommerce/woocommerce-blocks/issues/9662.
 					if ( ( ! is_admin() && ! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) && ! BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
+						// Add the product class to the body. We should move this to a more appropriate place.
+						add_filter(
+							'body_class',
+							function( $classes ) {
+								return array_merge( $classes, wc_get_product_class() );
+							}
+						);
+
 						$new_content       = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
 						$template->content = $new_content;
 					}
