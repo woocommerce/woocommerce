@@ -25,9 +25,9 @@ import { Button, ToolbarItem } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { EditorContext } from './context';
-import EditorHistoryRedo from './header-toolbar/editor-history-redo';
-import EditorHistoryUndo from './header-toolbar/editor-history-undo';
+import { EditorContext } from '../context';
+import EditorHistoryRedo from './editor-history-redo';
+import EditorHistoryUndo from './editor-history-undo';
 
 export function HeaderToolbar() {
 	const { isInserterOpened, setIsInserterOpened } =
