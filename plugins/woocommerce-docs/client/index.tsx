@@ -19,13 +19,13 @@ import {
  */
 import { useManifests } from './data/useManifests';
 import { isURL } from './util/url';
-import { useCompletedJobs } from './data/useJobs';
+import { useJobLog } from './data/useJobs';
 
 const App = () => {
 	const { isLoading, manifests, createManifest, deleteManifest } =
 		useManifests();
 	const [ newManifest, setNewManifest ] = useState< string >( '' );
-	const { jobs, isLoading: jobsLoading } = useCompletedJobs();
+	const { jobs, isLoading: jobsLoading } = useJobLog();
 
 	return (
 		<>
@@ -83,17 +83,20 @@ const App = () => {
 
 			<Card elevation={ 3 }>
 				<CardHeader>
-					<h2>Completed Jobs</h2>
+					<h2>Job Log</h2>
 				</CardHeader>
 				<CardBody>
 					<ItemGroup>
 						{ ! jobsLoading &&
 							jobs.map( ( job ) => (
-								<Item key={ job.completed_date }>
-									Status: { job.status }
-									<br></br>
-									Ran at: { job.completed_date }
-								</Item>
+								<>
+									<Item key={ job.action_id }>
+										Message: { job.message }
+										<br></br>
+										Logged at: { job.date }
+									</Item>
+									<hr />
+								</>
 							) ) }
 					</ItemGroup>
 				</CardBody>

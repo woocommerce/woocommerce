@@ -6,23 +6,23 @@ import apiFetch from '@wordpress/api-fetch';
 
 const API_NAMESPACE = 'woocommerce-docs/v1';
 
-export const useCompletedJobs = () => {
-	const [ jobs, setJobs ] = useState< string[] >( [] );
+export const useJobLog = () => {
+	const [ jobLog, setJobLog ] = useState< string[] >( [] );
 	const [ loading, setLoading ] = useState< boolean >( true );
 
 	useEffect( () => {
-		const getCompletedJobs = async () => {
+		const getJobLog = async () => {
 			const res = await apiFetch< string[] >( {
-				path: `${ API_NAMESPACE }/completed_jobs`,
+				path: `${ API_NAMESPACE }/job_log`,
 				method: 'GET',
 			} );
 
-			setJobs( res );
+			setJobLog( res );
 			setLoading( false );
 		};
 
-		getCompletedJobs();
+		getJobLog();
 	}, [] );
 
-	return { jobs, isLoading: loading };
+	return { jobs: jobLog, isLoading: loading };
 };

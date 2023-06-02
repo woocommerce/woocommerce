@@ -32,10 +32,30 @@ class ManifestJob {
 	 * Run the job
 	 */
 	public function run_job() {
-
-		\WooCommerceDocs\Data\ManifestStore::add_manifest_url(
-			substr( str_shuffle( md5( time() ) ), 0, 20 )
+		$action_id = \ActionScheduler::store()->query_action(
+			array(
+				'hook' => current_action(),
+				'args' => func_get_args(),
+			)
 		);
 
+		// Query the manifests
+		$manifests = \WooCommerceDocs\Data\ManifestStore::get_manifest_list();
+
+		// Loop through the manifests and update the data.
+		foreach ( $manifests as $manifest ) {
+			// $manifest_data = \WooCommerceDocs\Data\ManifestStore::get_manifest( $manifest );
+
+			// // Get the manifest data.
+			// $manifest_data = \WooCommerceDocs\API\ManifestAPI::get_manifest_data( $manifest_data['url'] );
+
+			// // Update the manifest data.
+			// \WooCommerceDocs\Data\ManifestStore::update_manifest( $manifest, $manifest_data );
+		}
+
+		// Log the execution.
+		\ActionScheduler_Logger::instance()->log( $action_id, 'Manifest job completed.' );
 	}
+
 }
+

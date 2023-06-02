@@ -22,6 +22,6 @@
 
 		// Skip type checking of declaration files because some libraries define two copies of the same type in an inconsistent way
 		"skipLibCheck": true,
-		"module": "esnext"
+		"module": "CommonJS"
 	}
 }
