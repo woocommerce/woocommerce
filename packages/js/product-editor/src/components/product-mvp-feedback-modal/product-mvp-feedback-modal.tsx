@@ -71,7 +71,7 @@ function ProductMVPFeedbackModal( {
 		.map( ( checkbox ) => checkbox.key );
 
 	const onSendFeedback = () => {
-		recordScoreCallback( checked, comments );
+		recordScoreCallback( checked, comments, email );
 	};
 
 	const isSendButtonDisabled =

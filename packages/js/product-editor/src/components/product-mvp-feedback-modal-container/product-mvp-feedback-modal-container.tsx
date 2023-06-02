@@ -32,11 +32,16 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 		? getAdminLink( `post.php?post=${ productId }&action=edit` )
 		: getAdminLink( 'post-new.php?post_type=product' );
 
-	const recordScore = ( checked: string[], comments: string ) => {
+	const recordScore = (
+		checked: string[],
+		comments: string,
+		email: string
+	) => {
 		recordEvent( 'product_mvp_feedback', {
 			action: 'disable',
 			checked,
 			comments: comments || '',
+			email,
 		} );
 		hideProductMVPFeedbackModal();
 		window.location.href = `${ classicEditorUrl }&new-product-experience-disabled=true`;
