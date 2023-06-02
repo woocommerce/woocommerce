@@ -28,6 +28,28 @@ class WC_Shipping_Legacy_Flat_Rate extends WC_Shipping_Method {
 	protected $fee_cost = '';
 
 	/**
+	 * Shipping method cost.
+	 *
+	 * @var string
+	 */
+	public $cost;
+
+	/**
+	 * Shipping method type.
+	 *
+	 * @var string
+	 */
+	public $type;
+
+	/**
+	 * Shipping method options.
+	 *
+	 * @deprecated 2.4.0
+	 * @var string
+	 */
+	public $options;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
