@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment, useState } from '@wordpress/element';
+import {
+	createElement,
+	createInterpolateElement,
+	Fragment,
+	useState,
+} from '@wordpress/element';
 import PropTypes from 'prop-types';
 import {
 	CheckboxControl,
@@ -86,6 +91,12 @@ function ProductMVPFeedbackModal( {
 		! slowBuggyOrBroken &&
 		! other;
 
+	const optionalElement = (
+		<span className="woocommerce-product-mvp-feedback-modal__optional">
+			{ __( '(optional)', 'woocommerce' ) }
+		</span>
+	);
+
 	return (
 		<FeedbackModal
 			title={ __(
@@ -129,9 +140,14 @@ function ProductMVPFeedbackModal( {
 
 				<div className="woocommerce-product-mvp-feedback-modal__comments">
 					<TextareaControl
-						label={ __(
-							'Additional thoughts (optional)',
-							'woocommerce'
+						label={ createInterpolateElement(
+							__(
+								'Additional thoughts <optional/>',
+								'woocommerce'
+							),
+							{
+								optional: optionalElement,
+							}
 						) }
 						value={ comments }
 						onChange={ ( value: string ) => setComments( value ) }
@@ -140,9 +156,14 @@ function ProductMVPFeedbackModal( {
 				</div>
 				<div className="woocommerce-product-mvp-feedback-modal__email">
 					<TextControl
-						label={ __(
-							'Your email address (optional)',
-							'woocommerce'
+						label={ createInterpolateElement(
+							__(
+								'Your email address <optional/>',
+								'woocommerce'
+							),
+							{
+								optional: optionalElement,
+							}
 						) }
 						value={ email }
 						onChange={ ( value: string ) => setEmail( value ) }

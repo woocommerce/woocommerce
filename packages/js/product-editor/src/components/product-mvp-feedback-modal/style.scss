@@ -1,6 +1,8 @@
+$modal-header-height: 84px;
+
 .woocommerce-product-mvp-feedback-modal {
 	.components-modal__header {
-		height: 84px;
+		height: $modal-header-height;
 
 		&-heading {
 			font-weight: 500;
@@ -9,7 +11,16 @@
 	}
 
 	.components-modal__content {
-		margin-top: 108px;
+		margin-top: $modal-header-height;
+	}
+
+	legend,
+	label {
+		color: $gray-900;
+	}
+
+	.woocommerce-product-mvp-feedback-modal__optional {
+		color: $gray-700;
 	}
 
 	legend {
