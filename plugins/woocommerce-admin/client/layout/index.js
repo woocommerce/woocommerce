@@ -188,9 +188,7 @@ function _Layout( {
 	const { breadcrumbs, layout = { header: true, footer: true } } = page;
 	const { header: showHeader = true, footer: showFooter = true } = layout;
 
-	const query = Object.fromEntries(
-		new URLSearchParams( location && location.search )
-	);
+	const query = getQuery();
 
 	return (
 		<LayoutContextProvider
