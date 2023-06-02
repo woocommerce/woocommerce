@@ -14,7 +14,7 @@ import {
  * Internal dependencies
  */
 import { ProductCollectionAttributes } from '../types';
-import { setQueryAttribute } from './utils';
+import { setQueryAttribute } from '../utils';
 
 const OnSaleControl = (
 	props: BlockEditProps< ProductCollectionAttributes >

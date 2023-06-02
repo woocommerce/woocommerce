@@ -6,7 +6,7 @@ import { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { ProductCollectionAttributes, ProductCollectionQuery } from '../types';
+import { ProductCollectionAttributes, ProductCollectionQuery } from './types';
 
 /**
  * Sets the new query arguments of a Product Query block
