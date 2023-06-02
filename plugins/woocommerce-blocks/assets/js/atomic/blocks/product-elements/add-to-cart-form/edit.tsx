@@ -1,23 +1,38 @@
 /**
  * External dependencies
  */
+import { useEffect } from '@wordpress/element';
 import { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { Button, Disabled, Tooltip } from '@wordpress/components';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { BlockEditProps } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import './editor.scss';
+import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
 export interface Attributes {
 	className?: string;
+	isDescendentOfSingleProductBlock: boolean;
 }
 
-const Edit = () => {
+const Edit = ( props: BlockEditProps< Attributes > ) => {
+	const { setAttributes } = props;
 	const blockProps = useBlockProps( {
 		className: 'wc-block-add-to-cart-form',
 	} );
+	const { isDescendentOfSingleProductBlock } =
+		useIsDescendentOfSingleProductBlock( {
+			blockClientId: blockProps?.id,
+		} );
+
+	useEffect( () => {
+		setAttributes( {
+			isDescendentOfSingleProductBlock,
+		} );
+	}, [ setAttributes, isDescendentOfSingleProductBlock ] );
 
 	return (
 		<div { ...blockProps }>
