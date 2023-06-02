@@ -34,7 +34,7 @@ export interface ProductCollectionQuery {
 	postType: string;
 	search: string;
 	sticky: string;
-	taxQuery: string;
+	taxQuery: Record< string, number[] >;
 	woocommerceOnSale: boolean;
 	/**
 	 * Filter products by their stock status.

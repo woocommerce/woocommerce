@@ -14,6 +14,7 @@ import { ProductCollectionAttributes } from './types';
 import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
 import InspectorControls from './inspector-controls';
 import { DEFAULT_ATTRIBUTES } from './constants';
+import './editor.scss';
 
 export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 	[
