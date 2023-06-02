@@ -17,7 +17,7 @@ export const PoweredByLink = () => (
 			{
 				link: (
 					<Link
-						href="https://wordpress.org/documentation/"
+						href="https://automattic.com/ai-guidelines"
 						target="_blank"
 						type="external"
 						onClick={ () => {

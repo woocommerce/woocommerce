@@ -42,7 +42,7 @@ declare const tinymce: {
 const MagicImage = () => (
 	<img
 		className="wc-product-name-suggestions__magic-image"
-		src={ `${ MagicIcon }` }
+		src={ MagicIcon }
 		alt=""
 	/>
 );
