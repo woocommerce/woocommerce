@@ -37,6 +37,7 @@ export const useBlockEditorTourOptions = () => {
 		isTourOpen,
 		isTourClosed,
 		openGuide: () => setIsGuideOpen( true ),
+		closeGuide: () => setIsGuideOpen( false ),
 		isGuideOpen,
 	};
 };
