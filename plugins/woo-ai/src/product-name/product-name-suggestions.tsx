@@ -143,7 +143,7 @@ export const ProductNameSuggestions = () => {
 
 	const handleSuggestionClick = ( suggestion: ProductDataSuggestion ) => {
 		recordNameTracks( 'select', {
-			selectedTitle: suggestion.content,
+			selected_title: suggestion.content,
 		} );
 
 		updateProductName( suggestion.content );
@@ -162,7 +162,7 @@ export const ProductNameSuggestions = () => {
 			const currentProductData = productData();
 
 			recordNameTracks( 'start', {
-				currentTitle: currentProductData.name,
+				current_title: currentProductData.name,
 			} );
 
 			const request: ProductDataSuggestionRequest = {
