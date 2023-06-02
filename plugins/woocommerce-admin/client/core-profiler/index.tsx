@@ -38,8 +38,12 @@ import {
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
+import { Extensions } from './pages/Extensions';
+import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import { Plugins } from './pages/Plugins';
-import { getPluginTrackKey, getTimeFrame } from '~/utils';import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
+import { getPluginTrackKey, getTimeFrame } from '~/utils';
+import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
+
 
 import './style.scss';
 import {
