@@ -5,7 +5,7 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 
-export const TODO_RENAME =
+export const BLOCK_EDITOR_TOUR_SHOWN_OPTION =
 	'woocommerce_block_product_tour_shown';
 
 export const useBlockEditorTour = () => {
@@ -15,9 +15,9 @@ export const useBlockEditorTour = () => {
 		const { getOption, hasFinishedResolution } =
 			select( OPTIONS_STORE_NAME );
 
-		const isTourClosed = getOption( TODO_RENAME ) === 'yes' ||
+		const isTourClosed = getOption( BLOCK_EDITOR_TOUR_SHOWN_OPTION ) === 'yes' ||
 		! hasFinishedResolution( 'getOption', [
-			TODO_RENAME,
+			BLOCK_EDITOR_TOUR_SHOWN_OPTION,
 		] );
 
 		return {
@@ -28,7 +28,7 @@ export const useBlockEditorTour = () => {
 
 	const dismissModal = () => {
 		updateOptions( {
-			[ TODO_RENAME ]: 'yes',
+			[ BLOCK_EDITOR_TOUR_SHOWN_OPTION ]: 'yes',
 		} );
 	};
 

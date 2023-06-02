@@ -1,18 +1,39 @@
 .woocommerce-block-editor-guide {
+	&__background1 {
+		height: 220px;
+		background-color: #F2EDFF;
+	}
+	&__background2 {
+		height: 220px;
+		background-color: #DFD1FB;
+	}
+	&__background3 {
+		height: 220px;
+		background-color: #CFB9F6;
+	}
+	&__background4 {
+		height: 220px;
+		background-color: #BEA0F2;
+	}
 	&.components-modal__frame {
 		width: 320px;
-		max-height: 480px;
 	}
-	h1, p {
-		margin: 24px;
+	&__heading, &__text {
+		margin: 12px 24px;
 	}
-	h1 {
-		line-height: 30px;
-		font-size: 24px;
-	}
-	p {
 
-		height: 60px; // testing a fixed height
+	&__heading {
+		font-size: 24px;
+		line-height: 30px;
+	}
+
+	&__text {
+		height: 80px;
+	}
+	.components-guide {
+		&__page-control {
+			margin-top: 12px;
+		}
 	}
 	.components-guide__footer {
 		width: unset;
