@@ -8,10 +8,10 @@ import { Icon, commentContent } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import Editor from './edit';
-import sharedAttributes from '../attributes';
+import { Edit } from './edit';
+import sharedAttributes from '../attributes.js';
 import save from '../save.js';
-import { example } from '../example';
+import { example } from '../example.js';
 
 /**
  * Register and run the "Reviews by category" block.
@@ -73,9 +73,7 @@ registerBlockType( 'woocommerce/reviews-by-category', {
 	 *
 	 * @param {Object} props Props to pass to block.
 	 */
-	edit( props ) {
-		return <Editor { ...props } />;
-	},
+	edit: Edit,
 
 	/**
 	 * Save the props to post content.

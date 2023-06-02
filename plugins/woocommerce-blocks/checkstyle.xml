@@ -3621,7 +3621,7 @@
 <error line="71" column="26" severity="error" message="Property &apos;instance&apos; does not exist on type &apos;{ showProductName: unknown; editMode: unknown; imageType: unknown; orderby: unknown; reviewsOnLoadMore: unknown; reviewsOnPageLoad: unknown; showLoadMore: unknown; showOrderby: unknown; showReviewDate: unknown; showReviewerName: unknown; showReviewImage: unknown; showReviewRating: unknown; showReviewContent: unknown...&apos;." source="TS2339" />
 <error line="73" column="20" severity="error" message="Property &apos;instance&apos; does not exist on type &apos;{ showProductName: unknown; editMode: unknown; imageType: unknown; orderby: unknown; reviewsOnLoadMore: unknown; reviewsOnPageLoad: unknown; showLoadMore: unknown; showOrderby: unknown; showReviewDate: unknown; showReviewerName: unknown; showReviewImage: unknown; showReviewRating: unknown; showReviewContent: unknown...&apos;." source="TS2339" />
 </file>
-<file name="assets/js/blocks/reviews/reviews-by-category/edit.js">
+<file name="assets/js/blocks/reviews/reviews-by-category/edit.tsx">
 <error line="41" column="10" severity="error" message="Property &apos;editMode&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
 <error line="41" column="20" severity="error" message="Property &apos;categoryIds&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
 <error line="51" column="29" severity="error" message="Property &apos;categoryIds&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
@@ -3632,7 +3632,7 @@
 <error line="124" column="20" severity="error" message="Parameter &apos;value&apos; implicitly has an &apos;any[]&apos; type." source="TS7006" />
 <error line="163" column="26" severity="error" message="Type &apos;() =&gt; JSX.Element&apos; is not assignable to type &apos;ReactElementLike&apos;." source="TS2322" />
 </file>
-<file name="assets/js/blocks/reviews/reviews-by-category/index.js">
+<file name="assets/js/blocks/reviews/reviews-by-category/index.tsx">
 <error line="19" column="1" severity="error" message="No overload matches this call.
   Overload 1 of 2, &apos;(metadata: BlockConfiguration&lt;{ categoryIds: unknown; showProductName: unknown; editMode: unknown; imageType: unknown; orderby: unknown; reviewsOnLoadMore: unknown; reviewsOnPageLoad: unknown; showLoadMore: unknown; showOrderby: unknown; showReviewDate: unknown; showReviewerName: unknown; showReviewImage: unknown; showReviewRating: unknown; showReviewContent: unknown; previewReviews: unknown; }&gt;, settings?: Partial&lt;...&gt; | undefined): Block&lt;...&gt; | undefined&apos;, gave the following error.
     Argument of type &apos;string&apos; is not assignable to parameter of type &apos;BlockConfiguration&lt;{ categoryIds: unknown; showProductName: unknown; editMode: unknown; imageType: unknown; orderby: unknown; reviewsOnLoadMore: unknown; reviewsOnPageLoad: unknown; showLoadMore: unknown; showOrderby: unknown; showReviewDate: unknown; showReviewerName: unknown; showReviewImage: unknown; showReviewRa...&apos;.

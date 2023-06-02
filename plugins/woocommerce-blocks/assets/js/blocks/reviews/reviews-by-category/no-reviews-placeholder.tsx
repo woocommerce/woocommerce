@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Placeholder } from '@wordpress/components';
 import { Icon, commentContent } from '@wordpress/icons';
-const NoReviewsPlaceholder = () => {
+const NoReviewsPlaceholder = (): JSX.Element => {
 	return (
 		<Placeholder
 			className="wc-block-reviews-by-category"
