@@ -31,25 +31,30 @@ class JobAPI {
 	 * Get a list of ActionScheduler completed jobs
 	 */
 	public static function get_completed_jobs() {
-		$completed_actions = \ActionScheduler_Store::instance()->query_actions(
+		$actions = as_get_scheduled_actions(
 			array(
-				'status' => 'complete',
-				'hook'   => 'woocommerce_docs_manifest_job',
+				'hook' => 'woocommerce_docs_manifest_job',
 			)
 		);
 
-		$jobs_array = array();
+		$log_entries = array();
 
-		foreach ( $completed_actions as $completed_action ) {
-			$jobs_array[] = array(
-				'action_id'   => $completed_action->get_id(),
-				'action_data' => $completed_action->get_data(),
-				'started'     => $completed_action->get_started_date()->format( 'Y-m-d H:i:s' ),
-				'completed'   => $completed_action->get_completed_date()->format( 'Y-m-d H:i:s' ),
+		foreach ( $actions as $action ) {
+			$log_entries = array_merge( $log_entries, \ActionScheduler::logger()->get_logs( $action ) );
+		}
+
+		$entries = array();
+
+		foreach ( $log_entries as $log_entry ) {
+			$entries[] = array(
+				'id'        => $log_entry->get_id(),
+				'action_id' => $log_entry->get_action_id(),
+				'message'   => $log_entry->get_message(),
+				'date'      => $log_entry->get_date()->format( 'Y-m-d H:i:s' ),
 			);
 		}
 
-		$response = new \WP_REST_Response( $jobs_array );
+		$response = new \WP_REST_Response( $entries );
 		$response->set_status( 200 );
 
 		return $response;

@@ -89,7 +89,11 @@ const App = () => {
 					<ItemGroup>
 						{ ! jobsLoading &&
 							jobs.map( ( job ) => (
-								<Item key={ job }>{ job }</Item>
+								<Item key={ job.completed_date }>
+									Status: { job.status }
+									<br></br>
+									Ran at: { job.completed_date }
+								</Item>
 							) ) }
 					</ItemGroup>
 				</CardBody>
