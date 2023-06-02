@@ -8,7 +8,7 @@ import { useState } from '@wordpress/element';
 export const BLOCK_EDITOR_TOUR_SHOWN_OPTION =
 	'woocommerce_block_product_tour_shown';
 
-export const useBlockEditorTour = () => {
+export const useBlockEditorTourOptions = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const [ isGuideOpen, setIsGuideOpen ] = useState( false );
 	const { isTourOpen, isTourClosed } = useSelect( ( select ) => {

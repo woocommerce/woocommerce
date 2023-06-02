@@ -5,7 +5,7 @@
 import { TourKit } from '@woocommerce/components';
 import { Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { useBlockEditorTour } from './use-block-editor-tour';
+import { useBlockEditorTourOptions } from './use-block-editor-tour-options';
 
 /*
  * Internal dependencies
@@ -13,18 +13,24 @@ import { useBlockEditorTour } from './use-block-editor-tour';
 
 import './style.scss';
 
-const BlockEditorTour = () => {
-	const {
-		isTourOpen,
-		dismissModal,
-		openGuide,
-		isGuideOpen,
-	} = useBlockEditorTour();
+interface Props {
+	isTourOpen: boolean;
+	dismissModal: () => void;
+	openGuide: () => void;
+	isGuideOpen: boolean;
+}
 
+const BlockEditorTour = ( {
+	isTourOpen,
+	dismissModal,
+	openGuide,
+	isGuideOpen,
+}: Props ) => {
 	if ( isGuideOpen ) {
 		return (
 			<Guide
-				className='woocommerce-block-editor-guide'
+				className="woocommerce-block-editor-guide"
+				finishButtonText={ __( 'Close', 'woocommerce' ) }
 				pages={ [
 					{
 						content: (
@@ -43,7 +49,9 @@ const BlockEditorTour = () => {
 								</p>
 							</>
 						),
-						image: <div className="woocommerce-block-editor-guide__background1"></div>
+						image: (
+							<div className="woocommerce-block-editor-guide__background1"></div>
+						),
 					},
 					{
 						content: (
@@ -62,7 +70,9 @@ const BlockEditorTour = () => {
 								</p>
 							</>
 						),
-						image: <div className="woocommerce-block-editor-guide__background2"></div>
+						image: (
+							<div className="woocommerce-block-editor-guide__background2"></div>
+						),
 					},
 					{
 						content: (
@@ -81,7 +91,9 @@ const BlockEditorTour = () => {
 								</p>
 							</>
 						),
-						image: <div className="woocommerce-block-editor-guide__background3"></div>
+						image: (
+							<div className="woocommerce-block-editor-guide__background3"></div>
+						),
 					},
 					{
 						content: (
@@ -100,7 +112,9 @@ const BlockEditorTour = () => {
 								</p>
 							</>
 						),
-						image: <div className="woocommerce-block-editor-guide__background4"></div>
+						image: (
+							<div className="woocommerce-block-editor-guide__background4"></div>
+						),
 					},
 				] }
 			/>

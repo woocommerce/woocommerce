@@ -18,7 +18,7 @@ import { __ } from '@wordpress/i18n';
 import { useProductEntityRecord } from './hooks/use-product-entity-record';
 import './fills/product-block-editor-fills';
 import './product-page.scss';
-import BlockEditorTour from './tour/block-editor/block-editor-tour';
+import BlockEditorTourWrapper from './tour/block-editor/block-editor-tour-wrapper';
 
 declare const productBlockEditorSettings: ProductEditorSettings;
 
@@ -43,7 +43,7 @@ export default function ProductPage() {
 				product={ product }
 				settings={ productBlockEditorSettings || {} }
 			/>
-			<BlockEditorTour />
+			<BlockEditorTourWrapper />
 		</>
 	);
 }
