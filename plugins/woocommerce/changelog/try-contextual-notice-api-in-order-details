@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Experimental branch, can I skip changelog? This branch is a prototype adding a new hook so clients / extenders can add a notice or other content in context in the edit order screen payment details page.
+Added new hook `woocommerce_admin_order_data_after_payment_info` allowing extensions to render content in order details payment info metabox.

@@ -264,7 +264,7 @@ class WC_Meta_Box_Order_Data {
 					 * used to render a prominent notice with a CTA button.
 					 *
 					 * @param $order WC_Order The order object being displayed.
-					 * @since 3.0.0
+					 * @since 7.9.0
 					 */
 					do_action( 'woocommerce_admin_order_data_after_payment_info', $order );
 				?>
