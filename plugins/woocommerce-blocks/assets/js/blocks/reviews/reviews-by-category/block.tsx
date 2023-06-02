@@ -10,7 +10,6 @@ import {
 	ToggleControl,
 	withSpokenMessages,
 } from '@wordpress/components';
-import PropTypes from 'prop-types';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import { Icon, commentContent } from '@wordpress/icons';
 
@@ -18,12 +17,13 @@ import { Icon, commentContent } from '@wordpress/icons';
  * Internal dependencies
  */
 import EditorContainerBlock from '../editor-container-block.js';
-import NoReviewsPlaceholder from './no-reviews-placeholder.js';
+import NoReviewsPlaceholder from './no-reviews-placeholder';
 import {
 	getBlockControls,
 	getSharedReviewContentControls,
 	getSharedReviewListControls,
 } from '../edit-utils.js';
+import type { ReviewsByCategoryEditorProps } from './types';
 
 /**
  * Component to handle edit mode of "Reviews by Category".
@@ -37,7 +37,7 @@ const ReviewsByCategoryEditor = ( {
 	attributes,
 	debouncedSpeak,
 	setAttributes,
-} ) => {
+}: ReviewsByCategoryEditorProps ) => {
 	const { editMode, categoryIds } = attributes;
 
 	const getInspectorControls = () => {
@@ -160,27 +160,10 @@ const ReviewsByCategoryEditor = ( {
 					'Reviews by Category',
 					'woo-gutenberg-products-block'
 				) }
-				noReviewsPlaceholder={ NoReviewsPlaceholder }
+				noReviewsPlaceholder={ NoReviewsPlaceholder() }
 			/>
 		</>
 	);
-};
-
-ReviewsByCategoryEditor.propTypes = {
-	/**
-	 * The attributes for this block.
-	 */
-	attributes: PropTypes.object.isRequired,
-	/**
-	 * The register block name.
-	 */
-	name: PropTypes.string.isRequired,
-	/**
-	 * A callback to update attributes.
-	 */
-	setAttributes: PropTypes.func.isRequired,
-	// from withSpokenMessages
-	debouncedSpeak: PropTypes.func.isRequired,
 };
 
 export default withSpokenMessages( ReviewsByCategoryEditor );
