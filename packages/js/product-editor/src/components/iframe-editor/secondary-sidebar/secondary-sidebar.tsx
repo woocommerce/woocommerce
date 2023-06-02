@@ -1,24 +1,19 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, useContext } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
+import { EditorContext } from '../context';
 import InserterSidebar from './inserter-sidebar';
 
-type SecondarySidebarProps = {
-	isInserterOpened: boolean;
-	setIsInserterOpened: ( value: boolean ) => void;
-};
+export function SecondarySidebar() {
+	const { isInserterOpened } = useContext( EditorContext );
 
-export function SecondarySidebar( {
-	isInserterOpened,
-	setIsInserterOpened,
-}: SecondarySidebarProps ) {
 	if ( isInserterOpened ) {
-		return <InserterSidebar setIsInserterOpened={ setIsInserterOpened } />;
+		return <InserterSidebar />;
 	}
 
 	return null;

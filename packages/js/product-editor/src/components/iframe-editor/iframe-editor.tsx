@@ -79,7 +79,9 @@ export function IframeEditor( {
 				value={ {
 					hasRedo,
 					hasUndo,
+					isInserterOpened,
 					redo,
+					setIsInserterOpened,
 					undo,
 				} }
 			>
@@ -98,15 +100,9 @@ export function IframeEditor( {
 					onInput={ onInput }
 					useSubRegistry={ true }
 				>
-					<HeaderToolbar
-						isInserterOpened={ isInserterOpened }
-						setIsInserterOpened={ setIsInserterOpened }
-					/>
+					<HeaderToolbar />
 					<div className="woocommerce-iframe-editor__main">
-						<SecondarySidebar
-							isInserterOpened={ isInserterOpened }
-							setIsInserterOpened={ setIsInserterOpened }
-						/>
+						<SecondarySidebar />
 						<BlockTools
 							className={ 'woocommerce-iframe-editor__content' }
 							onClick={ (

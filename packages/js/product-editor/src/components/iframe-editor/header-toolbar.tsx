@@ -14,6 +14,7 @@ import {
 	Fragment,
 	useRef,
 	useCallback,
+	useContext,
 } from '@wordpress/element';
 import { MouseEvent } from 'react';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -24,18 +25,13 @@ import { Button, ToolbarItem } from '@wordpress/components';
 /**
  * Internal dependencies
  */
+import { EditorContext } from './context';
 import EditorHistoryRedo from './header-toolbar/editor-history-redo';
 import EditorHistoryUndo from './header-toolbar/editor-history-undo';
 
-type HeaderToolbarProps = {
-	isInserterOpened: boolean;
-	setIsInserterOpened: ( value: boolean ) => void;
-};
-
-export function HeaderToolbar( {
-	isInserterOpened,
-	setIsInserterOpened,
-}: HeaderToolbarProps ) {
+export function HeaderToolbar() {
+	const { isInserterOpened, setIsInserterOpened } =
+		useContext( EditorContext );
 	const isWideViewport = useViewportMatch( 'wide' );
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
 	const { isInserterEnabled } = useSelect( ( select ) => {
