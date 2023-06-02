@@ -36,7 +36,7 @@ class WooSubscriptionsNotes {
 	 * Hook all the things.
 	 */
 	public function __construct() {
-		add_action( 'admin_init', array( $this, 'admin_init' ) );
+		add_action( 'admin_head', array( $this, 'admin_head' ) );
 		add_action( 'update_option_woocommerce_helper_data', array( $this, 'update_option_woocommerce_helper_data' ), 10, 2 );
 	}
 
@@ -75,17 +75,13 @@ class WooSubscriptionsNotes {
 	}
 
 	/**
-	 * Things to do on admin_init.
+	 * Things to do on admin_head.
 	 */
-	public function admin_init() {
-		if ( ! isset( $_GET['page'] ) ) {
-			// If the page parameter is not set, then the request is not initiated from the wc admin dashboard.
-			return;
-		}
-
-		if ( 'wc-addons' !== $_GET['page'] && 'wc-admin' !== $_GET['page'] ) {
+	public function admin_head() {
+		if ( ! \Automattic\WooCommerce\Admin\PageController::is_admin_or_embed_page() ) {
 			// To avoid unnecessarily calling Helper API, we only want to refresh subscription notes,
-			// if the request is initiated from the wc admin dashboard.
+			// if the request is initiated from the wc admin dashboard or a WC related page which includes
+			// the Activity button in WC header.
 			return;
 		}
 
