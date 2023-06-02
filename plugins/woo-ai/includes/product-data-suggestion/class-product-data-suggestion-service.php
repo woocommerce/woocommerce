@@ -58,6 +58,7 @@ class Product_Data_Suggestion_Service {
 		$arguments = array(
 			'content'    => $this->prompt_generator->get_user_prompt( $request ),
 			'skip_cache' => true,
+			'feature'    => 'woo-ai-plugin'
 		);
 
 		try {

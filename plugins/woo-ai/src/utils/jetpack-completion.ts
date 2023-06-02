@@ -3,6 +3,7 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import debugFactory from 'debug';
+import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
 
 const debugToken = debugFactory( 'jetpack-ai-assistant:token' );
 
@@ -88,6 +89,7 @@ export async function askQuestion( question: string, postId = null ) {
 	);
 	url.searchParams.append( 'question', question );
 	url.searchParams.append( 'token', token );
+	url.searchParams.append( 'feature', WOO_AI_PLUGIN_FEATURE_NAME );
 
 	if ( postId ) {
 		url.searchParams.append( 'post_id', postId );
