@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+"woocommerce_cot_query_*" hooks added to allow alterations to directly to SQL statement the orders table.
