@@ -8,6 +8,5 @@ export type PublishButtonProps = Omit<
 	Button.ButtonProps,
 	'aria-disabled' | 'variant' | 'children'
 > & {
-	productId: Product[ 'id' ];
 	productStatus: Product[ 'status' ];
 };

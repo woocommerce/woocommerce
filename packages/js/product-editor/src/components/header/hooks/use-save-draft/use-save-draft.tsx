@@ -3,6 +3,7 @@
  */
 import { Product } from '@woocommerce/data';
 import { Button, Icon } from '@wordpress/components';
+import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { check } from '@wordpress/icons';
@@ -17,7 +18,6 @@ import { WPError } from '../../../../utils/get-product-error-message';
 import { SaveDraftButtonProps } from '../../save-draft-button';
 
 export function useSaveDraft( {
-	productId,
 	productStatus,
 	disabled,
 	onClick,
@@ -28,6 +28,12 @@ export function useSaveDraft( {
 	onSaveSuccess?( product: Product ): void;
 	onSaveError?( error: WPError ): void;
 } ): Button.ButtonProps {
+	const [ productId ] = useEntityProp< number >(
+		'postType',
+		'product',
+		'id'
+	);
+
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =

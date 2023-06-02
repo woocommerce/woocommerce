@@ -17,7 +17,6 @@ import { WPError } from '../../../../utils/get-product-error-message';
 import { PreviewButtonProps } from '../../preview-button';
 
 export function usePreview( {
-	productId,
 	productStatus,
 	disabled,
 	onClick,
@@ -29,6 +28,12 @@ export function usePreview( {
 	onSaveError?( error: WPError ): void;
 } ): Button.AnchorProps {
 	const anchorRef = useRef< HTMLAnchorElement >();
+
+	const [ productId ] = useEntityProp< number >(
+		'postType',
+		'product',
+		'id'
+	);
 
 	const [ permalink ] = useEntityProp< string >(
 		'postType',

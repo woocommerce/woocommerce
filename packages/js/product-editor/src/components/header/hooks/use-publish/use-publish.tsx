@@ -3,6 +3,7 @@
  */
 import { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
+import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { MouseEvent } from 'react';
@@ -15,7 +16,6 @@ import { WPError } from '../../../../utils/get-product-error-message';
 import { PublishButtonProps } from '../../publish-button';
 
 export function usePublish( {
-	productId,
 	productStatus,
 	disabled,
 	onClick,
@@ -27,6 +27,12 @@ export function usePublish( {
 	onPublishError?( error: WPError ): void;
 } ): Button.ButtonProps {
 	const { isValidating, validate } = useValidations();
+
+	const [ productId ] = useEntityProp< number >(
+		'postType',
+		'product',
+		'id'
+	);
 
 	const { isSaving } = useSelect(
 		( select ) => {

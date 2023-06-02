@@ -8,6 +8,5 @@ export type SaveDraftButtonProps = Omit<
 	Button.ButtonProps,
 	'aria-disabled' | 'variant' | 'children'
 > & {
-	productId: Product[ 'id' ];
 	productStatus: Product[ 'status' ];
 };

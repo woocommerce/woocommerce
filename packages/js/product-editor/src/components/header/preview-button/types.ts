@@ -8,6 +8,5 @@ export type PreviewButtonProps = Omit<
 	Button.AnchorProps,
 	'aria-disabled' | 'variant' | 'href' | 'children'
 > & {
-	productId: Product[ 'id' ];
 	productStatus: Product[ 'status' ];
 };

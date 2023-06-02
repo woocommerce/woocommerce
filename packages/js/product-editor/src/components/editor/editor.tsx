@@ -67,7 +67,6 @@ export function Editor( { product, settings }: EditorProps ) {
 								<InterfaceSkeleton
 									header={
 										<Header
-											productId={ product.id }
 											onTabSelect={ setSelectedTab }
 										/>
 									}
