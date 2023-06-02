@@ -51,6 +51,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected $context = 'coupons';
 
 	/**
+	 * SQL columns to select in the db query.
+	 *
+	 * @var array
+	 */
+	protected $report_columns;
+
+	/**
 	 * Assign report columns once full table name has been assigned.
 	 */
 	protected function assign_report_columns() {
