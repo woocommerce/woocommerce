@@ -49,13 +49,13 @@ import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
 import { Plugins } from './pages/Plugins';
-import { getPluginTrackKey, getTimeFrame } from '~/utils';
+import { getPluginSlug, getPluginTrackKey, getTimeFrame } from '~/utils';
 import './style.scss';
 import {
 	InstallationCompletedResult,
-	InstallAndActivatePlugins,
 	InstalledPlugin,
 	PluginInstallError,
+	pluginInstallerMachine,
 } from './services/installAndActivatePlugins';
 import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import recordTracksActions from './actions/tracks';
@@ -442,8 +442,8 @@ const browserPopstateHandler = () => ( sendBack: Sender< AnyEventObject > ) => {
 };
 
 const handlePlugins = assign( {
-	pluginsAvailable: ( _context, event: DoneInvokeEvent< Extension[] > ) =>
-		event.data,
+	// @ts-expect-error -- seems to be a flakey type error, will need to investigate further
+	pluginsAvailable: ( _context, event ) => event.data,
 } );
 
 type ActType = (
@@ -1113,7 +1113,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 									pluginsSelected: (
 										_context,
 										event: PluginsInstallationRequestedEvent
-									) => event.payload.plugins,
+									) => {
+								        return event.payload.plugins.map(
+									        getPluginSlug
+								        );
+                                    },
 								} ),
 							],
 						},
@@ -1268,8 +1272,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						} ),
 					],
 					invoke: {
-						src: InstallAndActivatePlugins,
-					},
+			            src: pluginInstallerMachine,
+				        data: ( context ) => {
+					        return {
+						        selectedPlugins: context.pluginsSelected,
+					        };
+				        },					
+                    },
 					meta: {
 						component: Loader,
 					},
