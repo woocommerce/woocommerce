@@ -77,9 +77,10 @@ export const ProductNameSuggestions = () => {
 		const onBodyClick = ( e: MouseEvent ) => {
 			const target = e.target as HTMLElement;
 
-			// Need to capture errant handlediv click that happens on load as well
 			if (
 				! (
+					nameInput?.ownerDocument.activeElement === nameInput ||
+					// Need to capture errant handlediv click that happens on load as well
 					Boolean( target.querySelector( ':scope > .handlediv' ) ) ||
 					target?.matches(
 						'#woocommerce-ai-app-product-name-suggestions *, #title'
