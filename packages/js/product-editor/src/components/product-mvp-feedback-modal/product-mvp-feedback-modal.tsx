@@ -24,7 +24,11 @@ function ProductMVPFeedbackModal( {
 	recordScoreCallback,
 	onCloseModal,
 }: {
-	recordScoreCallback: ( checked: string[], comments: string ) => void;
+	recordScoreCallback: (
+		checked: string[],
+		comments: string,
+		email: string
+	) => void;
 	onCloseModal?: () => void;
 } ): JSX.Element | null {
 	const [ missingFeatures, setMissingFeatures ] = useState( false );
