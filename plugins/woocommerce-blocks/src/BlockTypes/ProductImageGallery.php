@@ -22,7 +22,7 @@ class ProductImageGallery extends AbstractBlock {
 	/**
 	 *  Register the context
 	 *
-	 * @var string
+	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
 		return [ 'query', 'queryId', 'postId' ];
@@ -43,8 +43,13 @@ class ProductImageGallery extends AbstractBlock {
 			return '';
 		}
 
-		$product = wc_get_product( $post_id );
+		global $product;
+
+		$previous_product = $product;
+		$product          = wc_get_product( $post_id );
 		if ( ! $product instanceof \WC_Product ) {
+			$product = $previous_product;
+
 			return '';
 		}
 
@@ -53,48 +58,21 @@ class ProductImageGallery extends AbstractBlock {
 			$frontend_scripts::load_scripts();
 		}
 
-		$classname         = $attributes['className'] ?? '';
-		$sale_badge_html   = $product->is_on_sale() ? '<span class="onsale">' . esc_html__( 'Sale!', 'woo-gutenberg-products-block' ) . '</span>' : '';
-		$columns           = 4;
-		$post_thumbnail_id = $product->get_image_id();
-		$wrapper_classes   = array(
-			'woocommerce-product-gallery',
-			'woocommerce-product-gallery--' . ( $post_thumbnail_id ? 'with-images' : 'without-images' ),
-			'woocommerce-product-gallery--columns-' . absint( $columns ),
-			'images',
-		);
 		ob_start();
-		?>
-		<div class="<?php echo esc_attr( implode( ' ', array_map( 'sanitize_html_class', $wrapper_classes ) ) ); ?>" data-columns="<?php echo esc_attr( $columns ); ?>" style="opacity: 0; transition: opacity .25s ease-in-out;">
-			<div class="woocommerce-product-gallery__wrapper">
-				<?php
-				if ( $post_thumbnail_id ) {
-					$html = wc_get_gallery_image_html( $post_thumbnail_id, true );
-				} else {
-					$html  = '<div class="woocommerce-product-gallery__image--placeholder">';
-					$html .= sprintf( '<img src="%s" alt="%s" class="wp-post-image" />', esc_url( wc_placeholder_img_src( 'woo-gutenberg-products-block' ) ), esc_html__( 'Awaiting product image', 'woo-gutenberg-products-block' ) );
-					$html .= '</div>';
-				}
+		woocommerce_show_product_sale_flash();
+		$sale_badge_html = ob_get_clean();
 
-				echo wp_kses_post( $html );
-				$attachment_ids = $product->get_gallery_image_ids();
-				if ( $attachment_ids && $product->get_image_id() ) {
-					foreach ( $attachment_ids as $attachment_id ) {
-						echo wc_get_gallery_image_html( $attachment_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					}
-				}
-				?>
-			</div>
-		</div>
-		<?php
+		ob_start();
+		woocommerce_show_product_images();
 		$product_image_gallery_html = ob_get_clean();
 
+		$product   = $previous_product;
+		$classname = $attributes['className'] ?? '';
 		return sprintf(
 			'<div class="wp-block-woocommerce-product-image-gallery %1$s">%2$s %3$s</div>',
 			esc_attr( $classname ),
 			$sale_badge_html,
 			$product_image_gallery_html
 		);
-
 	}
 }
