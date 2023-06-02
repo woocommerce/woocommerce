@@ -1,23 +1,44 @@
 .woocommerce-product-mvp-feedback-modal {
+	.components-modal__header {
+		height: 84px;
+
+		&-heading {
+			font-weight: 500;
+			font-size: 20px;
+		}
+	}
+
+	legend {
+		font-size: 11px;
+		font-weight: 500;
+		line-height: 1.4;
+		text-transform: uppercase;
+		display: inline-block;
+		margin-bottom: $gap-smaller;
+		padding: 0;
+	}
+
 	&__subtitle {
 		margin-top: $gap-smaller !important;
 	}
+
 	&__checkboxes {
-		margin: $gap-small 0;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
 	}
+
 	&__comments {
 		margin-top: 2em;
 		margin-bottom: 1.5em;
 
-		label {
-			display: block;
-			font-weight: bold;
-			text-transform: none;
-			font-size: 14px;
-		}
-
 		textarea {
 			width: 100%;
 		}
+	}
+
+	&__reason,
+	&__comments,
+	&__email {
+		margin-bottom: $gap-large;
 	}
 }
