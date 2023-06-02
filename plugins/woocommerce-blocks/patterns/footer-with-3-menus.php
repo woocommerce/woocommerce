@@ -56,11 +56,16 @@
 
 				<!-- wp:paragraph {"align":"right","style":{"typography":{"fontSize":"12px"}}} -->
 				<p class="has-text-align-right" style="font-size:12px">
-					<?php echo sprintf(
-						__( 'Powered by %s with %s', 'woo-gutenberg-products-block' ),
-						'<a href="https://wordpress.org">WordPress</a>',
-						'<a href="https://woocommerce.com">WooCommerce</a>'
-					) ?>
+					<?php
+						echo sprintf(
+							esc_html(
+								/* translators: Footer powered by text. %1$s being WordPress, %2$s being WooCommerce */
+								__( 'Powered by %1$s with %2$s', 'woo-gutenberg-products-block' )
+							),
+							'<a href="https://wordpress.org">WordPress</a>',
+							'<a href="https://woocommerce.com">WooCommerce</a>'
+						);
+						?>
 				</p>
 				<!-- /wp:paragraph -->
 			</div>
