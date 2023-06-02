@@ -11,7 +11,7 @@ import { __ } from '@wordpress/i18n';
 import { recordNameTracks } from './index';
 
 export const PoweredByLink = () => (
-	<span className="woo-ai-get-suggestions-legal_text">
+	<span className="woo-ai-get-suggestions-powered_by">
 		{ createInterpolateElement(
 			__( 'Powered by experimental AI. <link/>', 'woocommerce' ),
 			{
