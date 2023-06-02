@@ -1,0 +1,36 @@
+.woocommerce-block-editor-guide {
+	&.components-modal__frame {
+		width: 320px;
+		max-height: 480px;
+	}
+	h1, p {
+		margin: 24px;
+	}
+	h1 {
+		line-height: 30px;
+		font-size: 24px;
+	}
+	p {
+
+		height: 60px; // testing a fixed height
+	}
+	.components-guide__footer {
+		width: unset;
+		margin: 32px 24px;
+		.components-button {
+
+		}
+		.components-guide__back-button {
+			left: 0px;
+			padding: 6px 12px;
+		}
+		.components-guide__forward-button {
+			right: 0px;
+			padding: 6px 12px;
+		}
+		.components-guide__finish-button {
+			right: 0px;
+		}
+
+	}
+}
