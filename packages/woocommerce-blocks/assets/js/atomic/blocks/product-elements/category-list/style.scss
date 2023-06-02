@@ -1,0 +1,23 @@
+.wc-block-components-product-category-list {
+	margin-top: 0;
+	margin-bottom: em($gap-small);
+
+	ul {
+		margin: 0;
+		padding: 0;
+		display: inline;
+
+		li {
+			display: inline;
+			list-style: none;
+		}
+
+		li::after {
+			content: ", ";
+		}
+
+		li:last-child::after {
+			content: "";
+		}
+	}
+}

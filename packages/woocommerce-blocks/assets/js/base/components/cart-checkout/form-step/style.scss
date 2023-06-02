@@ -1,0 +1,97 @@
+.wc-block-components-form {
+	counter-reset: checkout-step;
+}
+
+.wc-block-components-form .wc-block-components-checkout-step {
+	position: relative;
+	border: none;
+	padding: 0 0 0 $gap-larger;
+	background: none;
+	margin: 0;
+
+	.is-large & {
+		padding-right: $gap-large;
+	}
+
+	.wc-block-components-checkout-step__heading::after {
+		content: "";
+		border-left: 1px solid;
+		opacity: 0.3;
+		position: absolute;
+		left: -$gap-larger/2;
+		top: 2.5em;
+		bottom: em($gap) * -1;
+	}
+}
+
+.wc-block-components-checkout-step--disabled {
+	opacity: 0.6;
+}
+
+.wc-block-components-checkout-step__container {
+	position: relative;
+}
+
+.wc-block-components-checkout-step__content {
+	padding-bottom: em($gap-large);
+}
+
+.wc-block-components-checkout-step__heading {
+	display: flex;
+	justify-content: space-between;
+	align-content: center;
+	flex-wrap: wrap;
+	margin: em($gap-small) 0 em($gap);
+	position: relative;
+	align-items: center;
+	gap: em($gap);
+}
+
+.wc-block-components-checkout-step:first-child .wc-block-components-checkout-step__heading {
+	margin-top: 0;
+}
+
+.wc-block-components-checkout-step__title {
+	margin: 0 $gap-small 0 0;
+}
+
+.wc-block-components-checkout-step__heading-content {
+	@include font-size(smaller);
+
+	a {
+		font-weight: bold;
+		color: inherit;
+	}
+}
+
+.wc-block-components-checkout-step__description {
+	@include font-size(small);
+	line-height: 1.25;
+	margin-bottom: $gap;
+}
+
+.wc-block-components-checkout-step--with-step-number {
+	.wc-block-components-checkout-step__title::before {
+		@include reset-box();
+		background: transparent;
+		counter-increment: checkout-step;
+		content: "\00a0" counter(checkout-step) ".";
+		content: "\00a0" counter(checkout-step) "." / "";
+		position: absolute;
+		width: $gap-larger;
+		left: -$gap-larger/2;
+		top: 0;
+		text-align: center;
+		transform: translateX(-50%);
+	}
+
+	.wc-block-components-checkout-step__container::after {
+		content: "";
+		height: 100%;
+		border-left: 1px solid;
+		opacity: 0.3;
+		position: absolute;
+		left: -$gap-larger/2;
+		top: 0;
+	}
+}

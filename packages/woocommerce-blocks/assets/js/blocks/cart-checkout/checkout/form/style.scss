@@ -1,0 +1,58 @@
+.wc-block-checkout__form {
+	margin: 0;
+	max-width: 100%;
+}
+.wc-block-checkout__create-account,
+.wc-block-checkout__use-address-for-billing {
+	margin-top: em($gap-large);
+}
+
+.wc-block-checkout__shipping-option {
+	.wc-block-components-shipping-rates-control__package:not(:first-of-type) {
+		margin-top: $gap-larger;
+	}
+}
+
+.is-small,
+.is-medium,
+.is-large {
+	.wc-block-checkout__billing-fields,
+	.wc-block-checkout__shipping-fields {
+		.wc-block-components-address-form {
+			margin-left: #{-$gap-small / 2};
+			margin-right: #{-$gap-small / 2};
+
+			&::after {
+				content: "";
+				clear: both;
+				display: block;
+			}
+
+			.wc-block-components-text-input,
+			.wc-block-components-country-input,
+			.wc-block-components-state-input {
+				float: left;
+				margin-left: #{$gap-small / 2};
+				margin-right: #{$gap-small / 2};
+				position: relative;
+				width: calc(50% - #{$gap-small});
+
+				&:nth-of-type(2),
+				&:first-of-type {
+					margin-top: 0;
+				}
+			}
+
+			.wc-block-components-address-form__company,
+			.wc-block-components-address-form__address_1,
+			.wc-block-components-address-form__address_2 {
+				width: calc(100% - #{$gap-small});
+			}
+
+			.wc-block-components-checkbox {
+				clear: both;
+			}
+
+		}
+	}
+}

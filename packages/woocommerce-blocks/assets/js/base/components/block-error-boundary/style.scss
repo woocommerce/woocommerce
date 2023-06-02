@@ -1,0 +1,37 @@
+.wc-block-components-error {
+	display: flex;
+	background-color: $gray-100;
+	border-left: 4px solid $gray-300;
+	padding: $gap-larger $gap;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	color: $gray-700;
+}
+
+.wc-block-components-error__header {
+	@include font-size(larger);
+	font-weight: bold;
+	margin: 0;
+}
+
+.wc-block-components-error__image {
+	max-width: 25%;
+}
+.wc-block-components-error__text {
+	margin: 0;
+}
+.wc-block-components-error__message {
+	margin: 1em 0 0 0;
+	font-style: italic;
+}
+
+@include breakpoint(">480px") {
+	.wc-block-components-error {
+		flex-direction: row;
+	}
+
+	.wc-block-components-error__image + .wc-block-components-error__content {
+		margin-left: $gap-large;
+	}
+}

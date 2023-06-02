@@ -1,0 +1,86 @@
+.wc-block-components-checkbox {
+	@include reset-typography();
+	align-items: center;
+	display: flex;
+	height: 1em;
+	position: relative;
+
+	.wc-block-components-checkbox__input[type="checkbox"] {
+		appearance: none;
+		border: 2px solid $input-border-gray;
+		border-radius: 2px;
+		height: em(24px);
+		width: em(24px);
+		margin: 0;
+		min-height: 24px;
+		min-width: 24px;
+		overflow: hidden;
+		position: static;
+		vertical-align: middle;
+		background-color: #fff;
+
+		&:checked {
+			background: #fff;
+			border-color: $input-border-gray;
+		}
+
+		&:not(:checked) + .wc-block-components-checkbox__mark {
+			display: none;
+		}
+
+		.has-dark-controls & {
+			border-color: $controls-border-dark;
+			background-color: $input-background-dark;
+
+			&:checked {
+				background: $input-background-dark;
+				border-color: $controls-border-dark;
+			}
+		}
+	}
+
+	.wc-block-components-checkbox__mark {
+		fill: #000;
+		position: absolute;
+		left: em(3px);
+		top: em(-2px);
+		width: em(18px);
+		height: em(18px);
+
+		.has-dark-controls & {
+			fill: #fff;
+		}
+	}
+
+	.wc-block-components-checkbox__label {
+		padding-left: $gap;
+		vertical-align: middle;
+	}
+}
+
+// Hack to hide the check mark in IE11
+// See comment: https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2320/#issuecomment-621936576
+@include ie11() {
+	.wc-block-components-checkbox__mark {
+		display: none;
+	}
+}
+
+.theme-twentytwentyone {
+	.wc-block-components-checkbox__input[type="checkbox"],
+	.has-dark-controls .wc-block-components-checkbox__input[type="checkbox"] {
+		background-color: #fff;
+		border-color: var(--form--border-color);
+		position: relative;
+	}
+
+	.wc-block-components-checkbox__input[type="checkbox"]:checked,
+	.has-dark-controls .wc-block-components-checkbox__input[type="checkbox"]:checked {
+		background-color: #fff;
+		border-color: var(--form--border-color);
+	}
+
+	.wc-block-components-checkbox__mark {
+		display: none;
+	}
+}
