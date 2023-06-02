@@ -16,7 +16,7 @@ import {
  * Internal dependencies
  */
 import { ProductCollectionAttributes } from '../types';
-import { setQueryAttribute } from './utils';
+import { setQueryAttribute } from '../utils';
 
 const KeywordControl = (
 	props: BlockEditProps< ProductCollectionAttributes >

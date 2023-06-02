@@ -31,26 +31,28 @@ export const getDefaultStockStatuses = () => {
 		: Object.keys( STOCK_STATUS_OPTIONS );
 };
 
+export const DEFAULT_QUERY: ProductCollectionQuery = {
+	perPage: 9,
+	pages: 0,
+	offset: 0,
+	postType: 'product',
+	order: 'asc',
+	orderBy: 'title',
+	author: '',
+	search: '',
+	exclude: [],
+	sticky: '',
+	inherit: false,
+	taxQuery: {},
+	parents: [],
+	isProductCollectionBlock: true,
+	woocommerceOnSale: false,
+	woocommerceStockStatus: getDefaultStockStatuses(),
+	woocommerceAttributes: [],
+};
+
 export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
-	query: {
-		perPage: 9,
-		pages: 0,
-		offset: 0,
-		postType: 'product',
-		order: 'asc',
-		orderBy: 'title',
-		author: '',
-		search: '',
-		exclude: [],
-		sticky: '',
-		inherit: false,
-		taxQuery: '',
-		parents: [],
-		isProductCollectionBlock: true,
-		woocommerceOnSale: false,
-		woocommerceStockStatus: getDefaultStockStatuses(),
-		woocommerceAttributes: [],
-	},
+	query: DEFAULT_QUERY,
 	tagName: 'div',
 	displayLayout: {
 		type: 'flex',
@@ -65,16 +67,14 @@ export const getDefaultSettings = (
 		DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout,
 	query: {
 		...currentAttributes.query,
-		orderBy: ( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery )
-			.orderBy as TProductCollectionOrderBy,
-		order: ( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery )
-			.order as TProductCollectionOrder,
+		orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
+		order: DEFAULT_QUERY.order as TProductCollectionOrder,
 	},
 } );
 
 export const DEFAULT_FILTERS = {
-	woocommerceOnSale: ( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery )
-		.woocommerceOnSale,
+	woocommerceOnSale: DEFAULT_QUERY.woocommerceOnSale,
 	woocommerceStockStatus: getDefaultStockStatuses(),
 	woocommerceAttributes: [],
+	taxQuery: DEFAULT_QUERY.taxQuery,
 };
