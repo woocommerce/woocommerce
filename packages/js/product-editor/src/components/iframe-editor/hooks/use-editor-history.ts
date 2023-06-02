@@ -5,16 +5,22 @@ import { BlockInstance } from '@wordpress/blocks';
 import { useState } from '@wordpress/element';
 
 type useEditorHistoryProps = {
+	maxHistory?: number;
 	setBlocks: ( blocks: BlockInstance[] ) => void;
 };
 
-export function useEditorHistory( { setBlocks }: useEditorHistoryProps ) {
+const DEFAULT_MAX_HISTORY = 50;
+
+export function useEditorHistory( {
+	maxHistory = DEFAULT_MAX_HISTORY,
+	setBlocks,
+}: useEditorHistoryProps ) {
 	const [ edits, setEdits ] = useState< BlockInstance[][] >( [] );
 	const [ offsetIndex, setOffsetIndex ] = useState< number >( 0 );
 
 	function appendEdit( edit: BlockInstance[] ) {
 		const currentEdits = edits.slice( 0, offsetIndex + 1 );
-		const newEdits = [ ...currentEdits, edit ];
+		const newEdits = [ ...currentEdits, edit ].slice( maxHistory * -1 );
 		setEdits( newEdits );
 		setOffsetIndex( newEdits.length - 1 );
 	}
