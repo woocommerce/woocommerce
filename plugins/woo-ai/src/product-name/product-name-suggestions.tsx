@@ -39,6 +39,14 @@ declare const tinymce: {
 	) => void;
 };
 
+const MagicImage = () => (
+	<img
+		className="wc-product-name-suggestions__magic-image"
+		src={ `${ MagicIcon }` }
+		alt=""
+	/>
+);
+
 export const ProductNameSuggestions = () => {
 	const [ suggestionsState, setSuggestionsState ] =
 		useState< SuggestionsState >( SuggestionsState.None );
@@ -215,7 +223,7 @@ export const ProductNameSuggestions = () => {
 					<>
 						<div className="wc-product-name-suggestions__tip-message">
 							<div>
-								<img src={ MagicIcon } alt="" />
+								<MagicImage />
 								{ __(
 									'Enter a few descriptive words to generate product name.',
 									'woocommerce'
@@ -237,7 +245,7 @@ export const ProductNameSuggestions = () => {
 					} }
 				>
 					<div className="woo-ai-get-suggestions-btn__content">
-						<img src={ MagicIcon } alt="" />
+						<MagicImage />
 						{ getSuggestionsButtonLabel() }
 					</div>
 					<PoweredByLink />

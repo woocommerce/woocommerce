@@ -23,6 +23,11 @@ $border-radius: 4px;
   z-index: $z-index-container;
   box-sizing: border-box;
 
+  .wc-product-name-suggestions__magic-image {
+	height: 24px;
+	width: 24px;
+  }
+
   .woo-ai-get-suggestions-btn {
     border: none;
     width: 100%;
@@ -34,6 +39,7 @@ $border-radius: 4px;
     align-items: center;
     justify-content: space-between;
     margin: 0;
+	line-height: 18px;
 
     img {
       vertical-align: middle;
