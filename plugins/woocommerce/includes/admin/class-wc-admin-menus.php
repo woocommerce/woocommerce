@@ -319,8 +319,8 @@ class WC_Admin_Menus {
 	 */
 	public function orders_menu(): void {
 		if ( wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ) {
-			$this->orders_page_controller = wc_get_container()->get( Custom_Orders_PageController::class );
-			$this->orders_page_controller->setup();
+			$orders_page_controller = wc_get_container()->get( Custom_Orders_PageController::class );
+			$orders_page_controller->setup();
 		} else {
 			wc_get_container()->get( COTRedirectionController::class )->setup();
 		}
