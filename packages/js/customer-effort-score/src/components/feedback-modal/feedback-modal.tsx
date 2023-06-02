@@ -5,6 +5,7 @@ import { createElement, useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { Button, Modal } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
+import classnames from 'classnames';
 
 /**
  * Provides a modal requesting customer feedback.
@@ -30,6 +31,7 @@ function FeedbackModal( {
 	isSubmitButtonDisabled,
 	submitButtonLabel,
 	cancelButtonLabel,
+	className,
 }: {
 	onSubmit: () => void;
 	title: string;
@@ -39,6 +41,7 @@ function FeedbackModal( {
 	isSubmitButtonDisabled?: boolean;
 	submitButtonLabel?: string;
 	cancelButtonLabel?: string;
+	className: string;
 } ): JSX.Element | null {
 	const [ isOpen, setOpen ] = useState( true );
 
@@ -55,21 +58,23 @@ function FeedbackModal( {
 
 	return (
 		<Modal
-			className="woocommerce-feedback-modal"
+			className={ classnames( 'woocommerce-feedback-modal', className ) }
 			title={ title }
 			onRequestClose={ closeModal }
 			shouldCloseOnClickOutside={ false }
 		>
-			<Text
-				variant="body"
-				as="p"
-				className="woocommerce-feedback-modal__description"
-				size={ 14 }
-				lineHeight="20px"
-				marginBottom="1.5em"
-			>
-				{ description }
-			</Text>
+			{ description && (
+				<Text
+					variant="body"
+					as="p"
+					className="woocommerce-feedback-modal__description"
+					size={ 14 }
+					lineHeight="20px"
+					marginBottom="1.5em"
+				>
+					{ description }
+				</Text>
+			) }
 			{ children }
 			<div className="woocommerce-feedback-modal__buttons">
 				<Button isTertiary onClick={ closeModal } name="cancel">

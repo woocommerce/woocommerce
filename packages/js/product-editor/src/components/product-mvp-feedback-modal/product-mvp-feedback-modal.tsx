@@ -3,7 +3,11 @@
  */
 import { createElement, Fragment, useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { CheckboxControl, TextareaControl } from '@wordpress/components';
+import {
+	CheckboxControl,
+	TextareaControl,
+	TextControl,
+} from '@wordpress/components';
 import { FeedbackModal } from '@woocommerce/customer-effort-score';
 import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
@@ -61,11 +65,12 @@ function ProductMVPFeedbackModal( {
 		},
 	];
 	const [ comments, setComments ] = useState( '' );
+	const [ email, setEmail ] = useState( '' );
+	const checked = checkboxes
+		.filter( ( checkbox ) => checkbox.checked )
+		.map( ( checkbox ) => checkbox.key );
 
 	const onSendFeedback = () => {
-		const checked = checkboxes
-			.filter( ( checkbox ) => checkbox.checked )
-			.map( ( checkbox ) => checkbox.key );
 		recordScoreCallback( checked, comments );
 	};
 
@@ -80,11 +85,7 @@ function ProductMVPFeedbackModal( {
 	return (
 		<FeedbackModal
 			title={ __(
-				'Thanks for trying out the new product editor!',
-				'woocommerce'
-			) }
-			description={ __(
-				'We’re working on making it better, and your feedback will help improve the experience for thousands of merchants like you.',
+				'Thanks for trying out the new product form!',
 				'woocommerce'
 			) }
 			onSubmit={ onSendFeedback }
@@ -92,6 +93,7 @@ function ProductMVPFeedbackModal( {
 			isSubmitButtonDisabled={ isSendButtonDisabled }
 			submitButtonLabel={ __( 'Send feedback', 'woocommerce' ) }
 			cancelButtonLabel={ __( 'Skip', 'woocommerce' ) }
+			className="woocommerce-product-mvp-feedback-modal"
 		>
 			<>
 				<Text
@@ -100,43 +102,51 @@ function ProductMVPFeedbackModal( {
 					weight="600"
 					size="14"
 					lineHeight="20px"
-				>
-					{ __(
-						'What made you switch back to the classic product editor?',
-						'woocommerce'
-					) }
-				</Text>
-				<Text
-					weight="400"
-					size="12"
-					as="p"
-					lineHeight="16px"
-					color="#757575"
-					className="woocommerce-product-mvp-feedback-modal__subtitle"
-				>
-					{ __( '(Check all that apply)', 'woocommerce' ) }
-				</Text>
-				<div className="woocommerce-product-mvp-feedback-modal__checkboxes">
-					{ checkboxes.map( ( checkbox, index ) => (
-						<CheckboxControl
-							key={ index }
-							label={ checkbox.label }
-							name={ checkbox.key }
-							checked={ checkbox.checked }
-							onChange={ checkbox.onChange }
-						/>
-					) ) }
-				</div>
-				<div className="woocommerce-product-mvp-feedback-modal__comments">
-					<TextareaControl
-						label={ __( 'Additional comments', 'woocommerce' ) }
-						value={ comments }
-						placeholder={ __(
-							'Optional, but much apprecated. We love reading your feedback!',
+				></Text>
+				<fieldset className="woocommerce-product-mvp-feedback-modal__reason">
+					<legend>
+						{ __(
+							'What made you turn off the new product form?',
 							'woocommerce'
 						) }
+					</legend>
+					<div className="woocommerce-product-mvp-feedback-modal__checkboxes">
+						{ checkboxes.map( ( checkbox, index ) => (
+							<CheckboxControl
+								key={ index }
+								label={ checkbox.label }
+								name={ checkbox.key }
+								checked={ checkbox.checked }
+								onChange={ checkbox.onChange }
+							/>
+						) ) }
+					</div>
+				</fieldset>
+
+				<div className="woocommerce-product-mvp-feedback-modal__comments">
+					<TextareaControl
+						label={ __(
+							'Additional thoughts (optional)',
+							'woocommerce'
+						) }
+						value={ comments }
 						onChange={ ( value: string ) => setComments( value ) }
 						rows={ 5 }
+					/>
+				</div>
+				<div className="woocommerce-product-mvp-feedback-modal__email">
+					<TextControl
+						label={ __(
+							'Your email address (optional)',
+							'woocommerce'
+						) }
+						value={ email }
+						onChange={ ( value: string ) => setEmail( value ) }
+						rows={ 5 }
+						help={ __(
+							'In case you want to participate in further discussion and future user research.',
+							'woocommerce'
+						) }
 					/>
 				</div>
 			</>
