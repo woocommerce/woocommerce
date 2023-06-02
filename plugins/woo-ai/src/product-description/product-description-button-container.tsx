@@ -69,7 +69,7 @@ export function WriteItForMeButtonContainer() {
 				if ( reason === 'finished' ) {
 					showSnackbar( {
 						label: __(
-							'Description added. How is it?',
+							'Was the AI-generated description helpful?',
 							'woocommerce'
 						),
 						onPositiveResponse: () => {
