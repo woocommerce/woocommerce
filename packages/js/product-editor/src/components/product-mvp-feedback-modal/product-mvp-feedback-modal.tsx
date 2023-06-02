@@ -83,14 +83,6 @@ function ProductMVPFeedbackModal( {
 		recordScoreCallback( checked, comments, email );
 	};
 
-	const isSendButtonDisabled =
-		! comments &&
-		! missingFeatures &&
-		! missingPlugins &&
-		! difficultToUse &&
-		! slowBuggyOrBroken &&
-		! other;
-
 	const optionalElement = (
 		<span className="woocommerce-product-mvp-feedback-modal__optional">
 			{ __( '(optional)', 'woocommerce' ) }
@@ -105,7 +97,7 @@ function ProductMVPFeedbackModal( {
 			) }
 			onSubmit={ onSendFeedback }
 			onModalClose={ onCloseModal }
-			isSubmitButtonDisabled={ isSendButtonDisabled }
+			isSubmitButtonDisabled={ ! checked.length }
 			submitButtonLabel={ __( 'Send feedback', 'woocommerce' ) }
 			cancelButtonLabel={ __( 'Skip', 'woocommerce' ) }
 			className="woocommerce-product-mvp-feedback-modal"
