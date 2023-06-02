@@ -1,24 +1,25 @@
 .woocommerce-block-editor-guide {
 	&__background1 {
 		height: 220px;
-		background-color: #F2EDFF;
+		background-color: #f2edff;
 	}
 	&__background2 {
 		height: 220px;
-		background-color: #DFD1FB;
+		background-color: #dfd1fb;
 	}
 	&__background3 {
 		height: 220px;
-		background-color: #CFB9F6;
+		background-color: #cfb9f6;
 	}
 	&__background4 {
 		height: 220px;
-		background-color: #BEA0F2;
+		background-color: #bea0f2;
 	}
 	&.components-modal__frame {
 		width: 320px;
 	}
-	&__heading, &__text {
+	&__heading,
+	&__text {
 		margin: 12px 24px;
 	}
 
@@ -34,24 +35,20 @@
 		&__page-control {
 			margin-top: 12px;
 		}
-	}
-	.components-guide__footer {
-		width: unset;
-		margin: 32px 24px;
-		.components-button {
-
+		&__footer {
+			width: unset;
+			margin: 32px 24px;
+			.components-guide__back-button {
+				left: 0;
+				padding: 6px 12px;
+			}
+			.components-guide__forward-button {
+				right: 0;
+				padding: 6px 12px;
+			}
+			.components-guide__finish-button {
+				right: 0;
+			}
 		}
-		.components-guide__back-button {
-			left: 0px;
-			padding: 6px 12px;
-		}
-		.components-guide__forward-button {
-			right: 0px;
-			padding: 6px 12px;
-		}
-		.components-guide__finish-button {
-			right: 0px;
-		}
-
 	}
 }
