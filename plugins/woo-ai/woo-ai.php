@@ -47,6 +47,12 @@ function _woo_ai_bootstrap(): void {
 		return;
 	}
 
+	add_action( 'before_woocommerce_init', function() {
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+		}
+	} );
+
 	// Check if Jetpack is enabled.
 	if ( ! class_exists( 'Jetpack' ) ) {
 		include dirname( __FILE__ ) . '/includes/class-woo-ai-admin-notices.php';
