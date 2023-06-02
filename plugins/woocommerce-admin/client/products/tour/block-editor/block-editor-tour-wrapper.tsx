@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import BlockEditorTour from './block-editor-tour';
 import { useBlockEditorTourOptions } from './use-block-editor-tour-options';
 

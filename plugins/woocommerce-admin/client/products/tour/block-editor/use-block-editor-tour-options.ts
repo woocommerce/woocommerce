@@ -15,14 +15,15 @@ export const useBlockEditorTourOptions = () => {
 		const { getOption, hasFinishedResolution } =
 			select( OPTIONS_STORE_NAME );
 
-		const isTourClosed = getOption( BLOCK_EDITOR_TOUR_SHOWN_OPTION ) === 'yes' ||
-		! hasFinishedResolution( 'getOption', [
-			BLOCK_EDITOR_TOUR_SHOWN_OPTION,
-		] );
+		const tourClosed =
+			getOption( BLOCK_EDITOR_TOUR_SHOWN_OPTION ) === 'yes' ||
+			! hasFinishedResolution( 'getOption', [
+				BLOCK_EDITOR_TOUR_SHOWN_OPTION,
+			] );
 
 		return {
-			isTourClosed,
-			isTourOpen: !isTourClosed,
+			isTourClosed: tourClosed,
+			isTourOpen: ! tourClosed,
 		};
 	} );
 

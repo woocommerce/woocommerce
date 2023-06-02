@@ -1,14 +1,13 @@
 /**
  * External dependencies
  */
-
 import { TourKit } from '@woocommerce/components';
 import { Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 
-/*
+/**
  * Internal dependencies
  */
 
@@ -65,7 +64,7 @@ const BlockEditorTour = ( {
 							},
 						},
 					],
-					closeHandler: ( _, __, source ) => {
+					closeHandler: ( _steps, _currentStepIndex, source ) => {
 						dismissModal();
 						if ( source === 'done-btn' ) {
 							recordEvent(
@@ -87,9 +86,8 @@ const BlockEditorTour = ( {
 								resize: true,
 							},
 						},
-						portalParentElement: document.getElementById(
-							'wpbody'
-						),
+						portalParentElement:
+							document.getElementById( 'wpbody' ),
 						popperModifiers: [
 							{
 								name: 'bottom-left',
