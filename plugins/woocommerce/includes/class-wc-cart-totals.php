@@ -118,6 +118,13 @@ final class WC_Cart_Totals {
 	);
 
 	/**
+	 * Cache of tax rates for a given tax class.
+	 *
+	 * @var array
+	 */
+	protected $item_tax_rates;
+
+	/**
 	 * Sets up the items provided, and calculate totals.
 	 *
 	 * @since 3.2.0
