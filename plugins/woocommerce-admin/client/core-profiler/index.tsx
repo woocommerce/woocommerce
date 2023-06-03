@@ -1206,8 +1206,7 @@ export const CoreProfilerController = ( {
 		: undefined;
 	const navigationProgress = currentNodeMeta?.progress; // This value is defined in each state node's meta tag, we can assume it is 0-100
 	const CurrentComponent =
-		currentNodeMeta?.component ??
-		( () => ( <ProfileSpinner /> ) ); // If no component is defined for the state then its a loading state
+		currentNodeMeta?.component ?? ( () => <ProfileSpinner /> ); // If no component is defined for the state then its a loading state
 
 	useEffect( () => {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );
