@@ -160,10 +160,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 						<Button
 							className="woocommerce-product-mvp-ces-footer__close-button"
 							icon={ closeSmall }
-							label={ __(
-								'Remove share feedback',
-								'woocommerce'
-							) }
+							label={ __( 'Hide this message', 'woocommerce' ) }
 							onClick={ onDisablingCES }
 						></Button>
 					</div>
