@@ -47,6 +47,7 @@ import {
 	InstalledPlugin,
 	PluginInstallError,
 } from './services/installAndActivatePlugins';
+import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -1206,9 +1207,7 @@ export const CoreProfilerController = ( {
 	const navigationProgress = currentNodeMeta?.progress; // This value is defined in each state node's meta tag, we can assume it is 0-100
 	const CurrentComponent =
 		currentNodeMeta?.component ??
-		( () => (
-			<div data-testid="core-profiler-loading-screen">Insert Spinner</div>
-		) ); // If no component is defined for the state then its a loading state
+		( () => ( <ProfileSpinner /> ) ); // If no component is defined for the state then its a loading state
 
 	useEffect( () => {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );
