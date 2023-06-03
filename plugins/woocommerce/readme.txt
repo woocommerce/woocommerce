@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix a bug where text overlapped the image in the task list header. [#38585](https://github.com/woocommerce/woocommerce/pull/38585)
 * Fix - Fix issue where undefined query params where not removed from links, causing unexpected behaviour in Analytics. [#38542](https://github.com/woocommerce/woocommerce/pull/38542)
 * Fix - Above notification threshold when "Out of stock threshold" filed value is empty [[#37855]](https://github.com/woocommerce/woocommerce/pull/37855)
 * Fix - Added numeric check for Regular price in bulk edits. [[#37812]](https://github.com/woocommerce/woocommerce/pull/37812)
