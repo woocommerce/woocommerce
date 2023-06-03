@@ -4,7 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { createElement, Fragment } from '@wordpress/element';
+import {
+	createElement,
+	createInterpolateElement,
+	Fragment,
+} from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { Pill } from '@woocommerce/components';
@@ -125,24 +129,33 @@ export const ProductMVPCESFooter: React.FC = () => {
 			{ showCESFooter && (
 				<WooFooterItem>
 					<div className="woocommerce-product-mvp-ces-footer">
-						<div className="woocommerce-product-mvp-ces-footer__container">
-							<Pill>{ __( 'BETA', 'woocommerce' ) }</Pill>
-							{ __(
-								"You're using the new product editor (currently in development). How is your experience so far?",
-								'woocommerce'
+						<Pill>Beta</Pill>
+						<div className="woocommerce-product-mvp-ces-footer__message">
+							{ createInterpolateElement(
+								__(
+									'How is your experience with the new product form? <span><shareButton>Share feedback</shareButton> or <turnOffButton>turn it off</turnOffButton></span>',
+									'woocommerce'
+								),
+								{
+									span: (
+										<span className="woocommerce-product-mvp-ces-footer__message-buttons" />
+									),
+									shareButton: (
+										<Button
+											variant="link"
+											onClick={ shareFeedback }
+										/>
+									),
+									turnOffButton: (
+										<Button
+											onClick={
+												onDisablingNewProductExperience
+											}
+											variant="link"
+										/>
+									),
+								}
 							) }
-							<Button
-								variant="secondary"
-								onClick={ shareFeedback }
-							>
-								{ __( 'Share feedback', 'woocommerce' ) }
-							</Button>
-							<Button
-								onClick={ onDisablingNewProductExperience }
-								variant="tertiary"
-							>
-								{ __( 'Turn it off', 'woocommerce' ) }
-							</Button>
 						</div>
 						<Button
 							className="woocommerce-product-mvp-ces-footer__close-button"

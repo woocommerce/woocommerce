@@ -3,25 +3,37 @@
 	flex-direction: row;
 	justify-content: center;
 	align-items: center;
-	padding: $gap-smaller $gap;
+	padding: $gap calc(2 * $gap + $gap-small);
+	gap: $gap;
 
-	.woocommerce-pill {
-		margin-right: $gap-smaller;
+	@include breakpoint(">782px") {
+		padding: $gap 0;
+		max-width: 650px;
+		margin: 0 auto;
 	}
 
-	.components-button {
-		margin-left: $gap;
+	.woocommerce-pill {
+		background-color: $studio-yellow-5;
+		border: 0;
+		font-size: 1em;
 	}
 
 	&__close-button {
-		position: absolute;
-		right: $gap;
+		padding: 0;
 	}
 
-	&__container {
-		margin-right: $gap-larger;
-		flex-wrap: nowrap;
-		display: flex;
+	&__message {
+		flex: 1;
+		flex-wrap: wrap;
 		align-items: center;
+		white-space: pre-wrap;
+	}
+
+	&__message-buttons {
+		white-space: nowrap;
+
+		button.is-link {
+			text-decoration: none;
+		}
 	}
 }
