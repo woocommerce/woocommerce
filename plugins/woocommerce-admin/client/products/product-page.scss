@@ -47,6 +47,12 @@
 			top: $adminbar-height-mobile;
 		}
 	}
+
+	.interface-interface-skeleton__footer {
+		// by default, on mobile the footer is hidden,
+		// so we override that here
+		display: flex;
+	}
 }
 
 html.interface-interface-skeleton__html-container {
