@@ -21,7 +21,7 @@ trait SchedulerTraits {
 	/**
 	 * Queue instance.
 	 *
-	 * @var WC_Queue_Interface
+	 * @var \WC_Queue_Interface
 	 */
 	protected static $queue = null;
 
@@ -38,7 +38,7 @@ trait SchedulerTraits {
 	/**
 	 * Get queue instance.
 	 *
-	 * @return WC_Queue_Interface
+	 * @return \WC_Queue_Interface
 	 */
 	public static function queue() {
 		if ( is_null( self::$queue ) ) {
@@ -51,7 +51,7 @@ trait SchedulerTraits {
 	/**
 	 * Set queue instance.
 	 *
-	 * @param WC_Queue_Interface $queue Queue instance.
+	 * @param \WC_Queue_Interface $queue Queue instance.
 	 */
 	public static function set_queue( $queue ) {
 		self::$queue = $queue;
@@ -163,8 +163,7 @@ trait SchedulerTraits {
 			}
 		}
 
-		$string = '[' . implode( ',', $flattened ) . ']';
-		return $string;
+		return '[' . implode( ',', $flattened ) . ']';
 	}
 
 	/**
@@ -208,7 +207,7 @@ trait SchedulerTraits {
 	 * Get the next blocking job for an action.
 	 *
 	 * @param string $action_name Action name.
-	 * @return false|ActionScheduler_Action
+	 * @return false|\ActionScheduler_Action
 	 */
 	public static function get_next_blocking_job( $action_name ) {
 		$dependency = self::get_dependency( $action_name );
@@ -265,7 +264,7 @@ trait SchedulerTraits {
 	 * This function allows backwards compatibility with Action Scheduler < v3.0.
 	 *
 	 * @param \ActionScheduler_Action $action Action.
-	 * @return DateTime|null
+	 * @return \DateTime|null
 	 */
 	public static function get_next_action_time( $action ) {
 		if ( method_exists( $action->get_schedule(), 'get_next' ) ) {
@@ -318,9 +317,8 @@ trait SchedulerTraits {
 	 * @return void
 	 */
 	public static function queue_batches( $range_start, $range_end, $single_batch_action, $action_args = array() ) {
-		$batch_size       = static::get_batch_size( 'queue_batches' );
-		$range_size       = 1 + ( $range_end - $range_start );
-		$action_timestamp = time() + 5;
+		$batch_size = static::get_batch_size( 'queue_batches' );
+		$range_size = 1 + ( $range_end - $range_start );
 
 		if ( $range_size > $batch_size ) {
 			// If the current batch range is larger than a single batch,
