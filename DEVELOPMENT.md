@@ -74,7 +74,7 @@ pnpm --filter=woocommerce run build:zip
 
 ## Plugin Development Environments
 
-The plugins in our repository make use of [the `@wordpress/env` package](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/). This supplies convenient commands for creating, destroying, cleaning, and testing WordPress environments.
+The plugins in our repository make use of [the `@wordpress/env` package](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/). This supplies convenient commands for creating, destroying, cleaning, and testing WordPress environments. You do not have to install `@wordpress/env` globally, as this repo will install it as a project dependency for you. Just make sure you have [Docker](https://www.docker.com/products/docker-desktop/) installed and running.
 
 ```bash
 # Make sure you are in the working directory of the plugin you are interested in setting up the environment for
