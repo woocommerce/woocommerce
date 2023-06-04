@@ -60,3 +60,7 @@ For peer to peer support, real-time announcements, and office hours, please [joi
 ## Contributing to WooCommerce
 
 If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) for more information on how you can do this.
+
+## Roadmap
+
+If you'd like a better understanding of upcoming initiatives planned for future versions of WooCommerce, check out [our roadmap available on the developer site](https://developer.woocommerce.com/roadmap/).
