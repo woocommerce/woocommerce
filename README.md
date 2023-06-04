@@ -55,7 +55,7 @@ NOTE: Unfortunately, we are unable to honor support requests in issues on this r
 
 ## Community
 
-For peer to peer support, real-time announcements, and office hours, please [join our slack community](https://woocommerce.com/community-slack/)!
+For peer to peer support, real-time announcements, and office hours, please [join our Slack community](https://woocommerce.com/community-slack/)!
 
 ## Contributing to WooCommerce
 
