@@ -52,6 +52,10 @@ function _woo_ai_bootstrap(): void {
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
 		}
 	} );
+	
+	if ( class_exists( 'Automattic\Jetpack\Forms\ContactForm\Admin' ) ) {
+		remove_action( 'media_buttons', array( Automattic\Jetpack\Forms\ContactForm\Admin::init(), 'grunion_media_button' ), 999 );
+	}
 
 	// Check if Jetpack is enabled.
 	if ( ! class_exists( 'Jetpack' ) ) {
