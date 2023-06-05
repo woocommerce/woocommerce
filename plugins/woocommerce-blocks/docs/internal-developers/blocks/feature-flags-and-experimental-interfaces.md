@@ -35,7 +35,6 @@ The majority of our feature flagging is blocks, this is a list of them:
 
 ### Experimental flag
 
--   Single Product block ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/cb11cd2537e35561a9c930f893ee72d82ab6bc75/src/BlockTypesController.php#L227) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/cb11cd2537e35561a9c930f893ee72d82ab6bc75/bin/webpack-entries.js#L68)).
 -   Product Collection ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/17007169ea5f61e36903d7ca79902794cbb45100/src/BlockTypesController.php#L228) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/17007169ea5f61e36903d7ca79902794cbb45100/bin/webpack-entries.js#L71-L73)).
 -   Product Template ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/17007169ea5f61e36903d7ca79902794cbb45100/src/BlockTypesController.php#L229) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/17007169ea5f61e36903d7ca79902794cbb45100/bin/webpack-entries.js#L74-L76)).
 -   ⚛️ Add to cart ([JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/dfd2902bd8a247b5d048577db6753c5e901fc60f/assets/js/atomic/blocks/product-elements/add-to-cart/index.ts#L26-L29)).
