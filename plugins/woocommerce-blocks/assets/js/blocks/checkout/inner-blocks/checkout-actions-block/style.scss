@@ -9,6 +9,10 @@
 			padding: 1em;
 			height: auto;
 
+			&--full-width {
+				width: 100%;
+			}
+
 			.wc-block-components-button__text {
 				> svg {
 					fill: $white;
