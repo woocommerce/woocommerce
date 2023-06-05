@@ -25,6 +25,12 @@ export const useFeedbackBar = () => {
 		} );
 	};
 
+	const hideFeedbackBar = () => {
+		updateOptions( {
+			[ PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME ]: 'no',
+		} );
+	};
+
 	const onSaveDraft = async () => {
 		if ( ( await wasFeedbackBarPreviouslyHidden() ) === false ) {
 			showFeedbackBar();
@@ -37,5 +43,5 @@ export const useFeedbackBar = () => {
 		}
 	};
 
-	return { onSaveDraft, onPublish, showFeedbackBar };
+	return { onSaveDraft, onPublish, showFeedbackBar, hideFeedbackBar };
 };

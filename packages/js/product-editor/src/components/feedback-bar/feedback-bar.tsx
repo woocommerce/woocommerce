@@ -28,6 +28,7 @@ import {
 	PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
 	NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME,
 } from '../../constants';
+import { useFeedbackBar } from '../../hooks/use-feedback-bar';
 
 export type FeedbackBarProps = {
 	product: Partial< Product >;
@@ -38,9 +39,10 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 		useDispatch( STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const {
-		wasFeedbackBarPreviouslyHidden,
+		isFeedbackBarSetToShow,
 		allowTracking,
 		cesShownForActions,
+		wasFeedbackModalPreviouslyShown,
 		resolving: isLoading,
 	} = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } =
@@ -69,11 +71,25 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 
 		return {
 			cesShownForActions: shownForActions,
+			wasFeedbackModalPreviouslyShown: shownForActions.includes(
+				PRODUCT_EDITOR_FEEDBACK_CES_ACTION
+			),
 			allowTracking: allowTrackingOption === 'yes',
-			wasFeedbackBarPreviouslyHidden: showFeedbackBarOptionValue === 'no',
+			isFeedbackBarSetToShow: showFeedbackBarOptionValue === 'yes',
 			resolving,
 		};
 	} );
+
+	const { hideFeedbackBar } = useFeedbackBar();
+
+	const markFeedbackModalAsShown = () => {
+		updateOptions( {
+			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
+				PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
+				...cesShownForActions,
+			],
+		} );
+	};
 
 	const getProductTracksProps = () => {
 		const tracksProps = {
@@ -116,12 +132,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 			}
 		);
 
-		updateOptions( {
-			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-				PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
-				...cesShownForActions,
-			],
-		} );
+		markFeedbackModalAsShown();
 	};
 
 	const onTurnOffEditorClick = () => {
@@ -129,12 +140,12 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 			...getProductTracksProps(),
 		} );
 
-		updateOptions( {
-			[ PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME ]: 'no',
-		} );
+		hideFeedbackBar();
+
 		updateOptions( {
 			[ NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME ]: 'no',
 		} );
+
 		showProductMVPFeedbackModal();
 	};
 
@@ -143,17 +154,18 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 			...getProductTracksProps(),
 		} );
 
-		updateOptions( {
-			[ PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME ]: 'no',
-		} );
+		hideFeedbackBar();
 	};
 
-	const showFooter =
-		! isLoading && allowTracking && ! wasFeedbackBarPreviouslyHidden;
+	const shouldRenderFeedbackBar =
+		! isLoading &&
+		allowTracking &&
+		! wasFeedbackModalPreviouslyShown &&
+		isFeedbackBarSetToShow;
 
 	return (
 		<>
-			{ showFooter && (
+			{ shouldRenderFeedbackBar && (
 				<WooFooterItem>
 					<div className="woocommerce-product-mvp-ces-footer">
 						<Pill>Beta</Pill>
