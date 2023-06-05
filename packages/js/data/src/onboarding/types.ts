@@ -184,3 +184,13 @@ export type Extension = {
 	is_visible: boolean;
 	is_installed?: boolean;
 };
+
+export type InstallAndActivatePluginsAsyncResponse = {
+	job_id: string;
+	status: 'pendi<ng' | 'in-progress' | 'completed' | 'failed';
+	plugins: Array< {
+		status: 'pending' | 'installing' | 'installed' | 'activated' | 'failed';
+		errors: string[];
+		install_duration?: number;
+	} >;
+};
