@@ -143,7 +143,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 			'woocommerce_orders_table_query_sql',
 		);
 
-		$filters_called = 0;
+		$filters_called  = 0;
 		$filter_callback = function ( $arg ) use ( &$filters_called ) {
 			$filters_called++;
 			return $arg;
@@ -153,19 +153,19 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 			add_filter( $hook, $filter_callback );
 		}
 
-		// suppress_filters = false
+		// Check that suppress_filters = false is honored.
 		foreach ( $hooks as $hook ) {
 			wc_get_orders( array() );
 		}
 
 		$this->assertNotEquals( $filters_called, 0 );
 
-		// suppress_filters = true
+		// Check that suppress_filters = true is honored.
 		$filters_called = 0;
 		foreach ( $hooks as $hook ) {
 			wc_get_orders(
 				array(
-					'suppress_filters' => true
+					'suppress_filters' => true,
 				)
 			);
 		}
@@ -233,19 +233,5 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		);
 		remove_all_filters( 'woocommerce_orders_table_query_clauses' );
 	}
-
-		// $logged_messages = array();
-
-		// $log_watcher = function ( string $logged_message ) use ( &$logged_messages ) {
-		// 	$logged_messages[] = $logged_message;
-		// };
-
-		// add_filter( 'woocommerce_logger_log_message', $log_watcher );
-
-		// suppress_filters.
-		// $this->database_service = $this->getMockBuilder( 'WC_Integration_maxMind_Database_Service' )
-		// 	->disableOriginalConstructor()
-		// 	->getMock();
-		// add_filter( 'woocommerce_maxmind_geolocation_database_service', array( $this, 'override_integration_service' ) );
 
 }

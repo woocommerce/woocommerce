@@ -171,6 +171,11 @@ class OrdersTableQuery {
 	 */
 	private $order_datastore = null;
 
+	/**
+	 * Whether to run filters to modify the query or not.
+	 *
+	 * @var boolean
+	 */
 	private $suppress_filters = false;
 
 	/**
@@ -770,8 +775,6 @@ class OrdersTableQuery {
 		}
 		$orders_table    = $this->tables['orders'];
 		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where";
-
-		//date ASC
 	}
 
 	/**
