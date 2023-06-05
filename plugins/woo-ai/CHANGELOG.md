@@ -1,3 +1,5 @@
-## [0.1.0](https://github.com/woocommerce/woocommerce/) - 2023-xx-xx 
+## [0.1.0](https://github.com/woocommerce/woocommerce/releases/tag/0.1.0) - 2023-06-05 
 
--   Minor - Release of experimental Woo AI plugin.
+-   Patch - Unhook a duplicate Jetpack Contact Form button hook.
+-   Minor - Declare HPOS compatibility.
+-   Minor - Truncating product title before sending.
