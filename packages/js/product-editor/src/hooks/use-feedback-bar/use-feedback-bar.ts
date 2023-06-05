@@ -37,21 +37,7 @@ export const useFeedbackBar = () => {
 		} );
 	};
 
-	const onSaveDraft = async () => {
-		if ( ( await wasFeedbackBarPreviouslyHidden() ) === false ) {
-			showFeedbackBar();
-		}
-	};
-
-	const onPublish = async () => {
-		if ( ( await wasFeedbackBarPreviouslyHidden() ) === false ) {
-			showFeedbackBar();
-		}
-	};
-
 	return {
-		onSaveDraft,
-		onPublish,
 		showFeedbackBar,
 		showFeedbackBarIfNotPreviouslyHidden,
 		hideFeedbackBar,
