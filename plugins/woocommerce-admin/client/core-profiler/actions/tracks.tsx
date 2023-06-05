@@ -11,8 +11,8 @@ import {
 	CoreProfilerStateMachineContext,
 	UserProfileEvent,
 	BusinessInfoEvent,
-} from '../../';
-import { POSSIBLY_DEFAULT_STORE_NAMES } from '../../pages/BusinessInfo';
+} from '..';
+import { POSSIBLY_DEFAULT_STORE_NAMES } from '../pages/BusinessInfo';
 
 const recordTracksStepViewed = (
 	_ctx: unknown,
