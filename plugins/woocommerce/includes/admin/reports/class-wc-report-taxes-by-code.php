@@ -173,8 +173,8 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			$tax_rows[ $key ]->tax_amount          += wc_round_tax_total( $tax_row->tax_amount );
 			$tax_rows[ $key ]->shipping_tax_amount += wc_round_tax_total( $tax_row->shipping_tax_amount );
 			if ( ! isset( $unique_post_ids[ $key ] ) || ! in_array( $tax_row->post_id, $unique_post_ids[ $key ], true ) ) {
-				$unique_post_ids[ $key ] = isset( $unique_post_ids[ $key ] ) ? $unique_post_ids[ $key ] : array();
-				$unique_post_ids[ $key ][] = $tax_row->post_id;
+				$unique_post_ids[ $key ]         = isset( $unique_post_ids[ $key ] ) ? $unique_post_ids[ $key ] : array();
+				$unique_post_ids[ $key ][]       = $tax_row->post_id;
 				$tax_rows[ $key ]->total_orders += 1;
 			}
 		}
