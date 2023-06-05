@@ -17,7 +17,7 @@ import { useCustomerEffortScoreExitPageTracker } from '@woocommerce/customer-eff
 import {
 	preventLeavingProductForm,
 	__experimentalUseProductHelper as useProductHelper,
-	__experimentalUseProductEditorFeedbackFooter as useProductEditorFeedbackFooter,
+	__experimentalUseFeedbackBar as useFeedbackBar,
 } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -45,7 +45,7 @@ export const ProductFormActions: React.FC = () => {
 	} = useProductHelper();
 
 	const { onPublish: triggerPublishCES, onSaveDraft: triggerDraftCES } =
-		useProductEditorFeedbackFooter();
+		useFeedbackBar();
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 

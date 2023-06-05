@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __experimentalUseProductEditorFeedbackFooter as useProductEditorFeedbackFooter } from '@woocommerce/product-editor';
+import { __experimentalUseFeedbackBar as useFeedbackBar } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
@@ -13,14 +13,14 @@ import { useProductTour } from './use-product-tour';
 export const ProductTourContainer: React.FC = () => {
 	const { dismissModal, endTour, isModalHidden, isTouring, startTour } =
 		useProductTour();
-	const { showCesFooter } = useProductEditorFeedbackFooter();
+	const { showFeedbackBar } = useFeedbackBar();
 
 	if ( isTouring ) {
 		return (
 			<ProductTour
 				onClose={ () => {
 					endTour();
-					showCesFooter();
+					showFeedbackBar();
 				} }
 			/>
 		);
@@ -34,7 +34,7 @@ export const ProductTourContainer: React.FC = () => {
 		<ProductTourModal
 			onClose={ () => {
 				dismissModal();
-				showCesFooter();
+				showFeedbackBar();
 			} }
 			onStart={ startTour }
 		/>

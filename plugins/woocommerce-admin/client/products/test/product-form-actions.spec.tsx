@@ -42,7 +42,7 @@ jest.mock( '@woocommerce/product-editor', () => {
 			copyProductWithStatus,
 			deleteProductAndRedirect,
 		} ),
-		__experimentalUseProductEditorFeedbackFooter: () => ( {
+		__experimentalUseFeedbackBar: () => ( {
 			onPublish: onPublishCES,
 			onSaveDraft: onDraftCES,
 		} ),
