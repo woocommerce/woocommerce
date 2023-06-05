@@ -203,6 +203,21 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.click( '#btn-ok' );
 			await page.waitForLoadState( 'networkidle' );
 
+			await page.hover( '.wc-shipping-zone-method-settings' );
+			await page.waitForSelector( 'text=Delete', {
+				state: 'visible',
+			} );
+
+			page.on( 'dialog', ( dialog ) => dialog.accept() );
+
+			await page.click( 'text=Delete' );
+
+			await expect(
+				page.locator( '.wc-shipping-zone-method-blank-state' )
+			).toHaveText(
+				/You can add multiple shipping methods within this zone. Only customers within the zone will see them.*/
+			);
+
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
 			);
