@@ -1,4 +1,4 @@
-const en_US = {
+const en_GB = {
     'Account details': 'Account details',
     '"Account name"': '"Account name"',
     '"Account number"': '"Account number"',
@@ -15,7 +15,7 @@ const en_US = {
     'Add shipping class': 'Add shipping class',
     'Add shipping method': 'Add shipping method',
     'Add Title': 'Add Title',
-    'Add to cart': 'Add to cart',
+    'Add to cart': 'Add to basket',
     '/Adjusted stock: Product with Stock \(10→8\)/': /Adjusted stock: Product with Stock \(10→8\)/,
     'Allow, but notify customer': 'Allow, but notify customer',
     'and': 'and',
@@ -31,7 +31,7 @@ const en_US = {
     'Canada': 'Canada',
     '/Canada.*/': /Canada.*/,
     'Cash on delivery': 'Cash on delivery',
-    '"Choose countries / regions…"': '"Choose countries / regions…"',
+    '"Choose countries / regions…"': '"Choose countries/regions…"',
     '"Choose which analytics to display and the section name"':
         '"Choose which analytics to display and the section name"',
     'Click here to enter your code': 'Click here to enter your code',
@@ -42,7 +42,7 @@ const en_US = {
     'continue': 'Continue',
     '"Continue"': '"Continue"',
     '"Copy link"': '"Copy link"',
-    'Coupon(s)': 'Coupon(s)',
+    'Coupon(s)': 'Voucher(s)',
     'Coupons': 'Coupons',
     'Coupon updated.': 'Coupon updated.',
     'Coupon code already applied!': 'Coupon code already applied!',
@@ -74,8 +74,8 @@ const en_US = {
     '/Free shipping.*/': /Free shipping.*/,
     'General': 'General',
     'Generate API key': 'Generate API key',
-    'has been added to your cart.': 'has been added to your cart.',
-    'have been added to your cart.': 'have been added to your cart.',
+    'has been added to your cart.': 'has been added to your basket.',
+    'have been added to your cart.': 'have been added to your basket.',
     'Health and beauty': 'Health and beauty',
     'Height': 'Height',
     'Hello': 'Hello',
@@ -168,9 +168,9 @@ const en_US = {
     'Physical products': 'Physical products',
     'Place order': 'Place order',
     'Please choose the quantity of items you wish to add to your cart…':
-        'Please choose the quantity of items you wish to add to your cart…',
+        'Please choose the quantity of items you wish to add to your basket',
     'Please select some product options before adding this product to your cart.':
-        'Please select some product options before adding this product to your cart.',
+        'Please select some product options before adding this product to your basket.',
     'Post name': 'Post name',
     'Product': 'Product',
     'Product name': 'Product name',
@@ -231,10 +231,10 @@ const en_US = {
     'United States': 'United States',
     'United States (US) — California': 'United States (US) — California',
     'Unlimited': 'Unlimited',
-    'Update cart': 'Update cart',
+    'Update cart': 'Update basket',
     'Variable product': 'Variable product',
     'Variation price (required)': 'Variation price (required)',
-    'View cart': 'View cart',
+    'View cart': 'View basket',
     '"View report"': '"View report"',
     'View products': 'View products',
     'Virtual': 'Virtual',
@@ -273,10 +273,10 @@ const en_US = {
             heading: 'System status',
         },
     ],
-    'Your cart is currently empty.': 'Your cart is currently empty.',
+    'Your cart is currently empty.': 'Your basket is currently empty.',
     'Your settings have been saved.': 'Your settings have been saved.',
 }
 
 module.exports = {
-    en_US
+    en_GB
 };

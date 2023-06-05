@@ -52,12 +52,16 @@ const customer = {
 	},
 };
 
+const { en_GB } = require('./language/en-GB');
 const { en_US } = require('./language/en-US');
 const { es_ES } = require('./language/es-ES');
+const { fr_FR } = require('./language/fr-FR');
 
 const languageObject = {
 	en_US,
+	en_GB,
 	es_ES,
+	fr_FR
 };
 
 const storeDetails = {
@@ -128,13 +132,12 @@ function getTranslationFor(textToTranslate) {
 	let langCode = 'en_US';
 
 	if ( LANGUAGE ) {
-		if ( [ 'en_US', 'es_ES' ].includes( LANGUAGE ) ) {
+		if ( [ 'en_US', 'en_GB', 'es_ES', 'fr_FR' ].includes( LANGUAGE ) ) {
 			langCode = LANGUAGE;
 		} else {
-			console.log( 'LANGUAGE input must be en_US or es_ES' );
+			console.log( 'LANGUAGE input must be en_US, en_GB, es_ES or fr_FR' );
 		}
 	}
-
 	return languageObject[ langCode ][ textToTranslate ];
 }
 
