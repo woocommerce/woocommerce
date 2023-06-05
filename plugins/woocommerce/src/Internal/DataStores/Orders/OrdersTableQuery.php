@@ -706,7 +706,7 @@ class OrdersTableQuery {
 		 * Filters all query clauses at once.
 		 * Covers the fields (SELECT), JOIN, WHERE, GROUP BY, ORDER BY, and LIMIT clauses.
 		 *
-		 * @since 7.4.0
+		 * @since 7.9.0
 		 *
 		 * @param string[]         $clauses {
 		 *     Associative array of the clauses for the query.
@@ -720,7 +720,7 @@ class OrdersTableQuery {
 		 * }
 		 * @param OrdersTableQuery $query   The OrdersTableQuery instance (passed by reference).
 		 */
-		$clauses = (array) apply_filters_ref_array( 'woocommerce_order_table_orders_clauses', array( $pieces, &$this ) );
+		$clauses = (array) apply_filters_ref_array( 'woocommerce_orders_table_query_clauses', array( $pieces, &$this ) );
 
 		$fields  = $clauses['fields'] ?? '';
 		$join    = $clauses['join'] ?? '';
@@ -734,12 +734,12 @@ class OrdersTableQuery {
 		/**
 		 * Filters the completed SQL query.
 		 *
-		 * @since 7.4.0
+		 * @since 7.9.0
 		 *
 		 * @param string           $sql   The complete SQL query.
 		 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
 		 */
-		$this->sql = apply_filters_ref_array( 'woocommerce_order_table_orders_request', array( $this->sql, &$this ) );
+		$this->sql = apply_filters_ref_array( 'woocommerce_orders_table_query_sql', array( $this->sql, &$this ) );
 
 		$this->build_count_query( $fields, $join, $where, $groupby );
 	}
