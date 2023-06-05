@@ -16,7 +16,7 @@ async function isProductMVPCESHidden(): Promise< boolean > {
 	return optionValue === 'no';
 }
 
-export const useProductMVPCESFooter = () => {
+export const useProductEditorFeedbackFooter = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const showCesFooter = ( actionName = 'show' ) => {

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __experimentalUseProductMVPCESFooter as useProductMVPCESFooter } from '@woocommerce/product-editor';
+import { __experimentalUseProductEditorFeedbackFooter as useProductEditorFeedbackFooter } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
@@ -13,7 +13,7 @@ import { useProductTour } from './use-product-tour';
 export const ProductTourContainer: React.FC = () => {
 	const { dismissModal, endTour, isModalHidden, isTouring, startTour } =
 		useProductTour();
-	const { showCesFooter } = useProductMVPCESFooter();
+	const { showCesFooter } = useProductEditorFeedbackFooter();
 
 	if ( isTouring ) {
 		return (
