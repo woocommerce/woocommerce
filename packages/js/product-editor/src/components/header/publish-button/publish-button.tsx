@@ -58,7 +58,10 @@ export function PublishButton(
 
 			createSuccessNotice( noticeContent, noticeOptions );
 
-			if ( productStatus === 'auto-draft' ) {
+			if (
+				productStatus === 'auto-draft' ||
+				productStatus === 'publish'
+			) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );
 				navigateTo( { url } );
 			}
