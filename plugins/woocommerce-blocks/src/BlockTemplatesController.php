@@ -313,16 +313,6 @@ class BlockTemplatesController {
 		 */
 		$query_result = array_map(
 			function( $template ) {
-				if ( 'theme' === $template->origin && BlockTemplateUtils::template_has_title( $template ) ) {
-					return $template;
-				}
-				if ( $template->title === $template->slug ) {
-					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
-				}
-				if ( ! $template->description ) {
-					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
-				}
-
 				if ( str_contains( $template->slug, 'single-product' ) ) {
 					// We don't want to add the compatibility layer on the Editor Side.
 					// The second condition is necessary to not apply the compatibility layer on the REST API. Gutenberg uses the REST API to clone the template.
@@ -339,7 +329,16 @@ class BlockTemplatesController {
 						$new_content       = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
 						$template->content = $new_content;
 					}
+				}
+
+				if ( 'theme' === $template->origin && BlockTemplateUtils::template_has_title( $template ) ) {
 					return $template;
+				}
+				if ( $template->title === $template->slug ) {
+					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
+				}
+				if ( ! $template->description ) {
+					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
 				}
 
 				return $template;
