@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Pill, TourKit } from '@woocommerce/components';
-import { Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect, useState } from '@wordpress/element';
