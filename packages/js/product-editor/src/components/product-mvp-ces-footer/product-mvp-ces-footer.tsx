@@ -74,7 +74,19 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 		};
 	} );
 
-	const shareFeedback = () => {
+	const getProductTracksProps = () => {
+		const tracksProps = {
+			product_type: product.type,
+		};
+
+		return tracksProps;
+	};
+
+	const onShareFeedbackClick = () => {
+		recordEvent( 'product_editor_feedback_bar_share_feedback_click', {
+			...getProductTracksProps(),
+		} );
+
 		showCesModal(
 			{
 				action: cesAction,
@@ -110,7 +122,11 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 		} );
 	};
 
-	const onDisablingNewProductExperience = () => {
+	const onTurnOffEditorClick = () => {
+		recordEvent( 'product_editor_feedback_bar_turnoff_editor_click', {
+			...getProductTracksProps(),
+		} );
+
 		updateOptions( {
 			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
 		} );
@@ -120,7 +136,11 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 		showProductMVPFeedbackModal();
 	};
 
-	const onDisablingCES = () => {
+	const onHideFeedbackBarClick = () => {
+		recordEvent( 'product_editor_feedback_bar_dismiss_click', {
+			...getProductTracksProps(),
+		} );
+
 		updateOptions( {
 			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
 		} );
@@ -148,14 +168,12 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 									shareButton: (
 										<Button
 											variant="link"
-											onClick={ shareFeedback }
+											onClick={ onShareFeedbackClick }
 										/>
 									),
 									turnOffButton: (
 										<Button
-											onClick={
-												onDisablingNewProductExperience
-											}
+											onClick={ onTurnOffEditorClick }
 											variant="link"
 										/>
 									),
@@ -166,7 +184,7 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 							className="woocommerce-product-mvp-ces-footer__close-button"
 							icon={ closeSmall }
 							label={ __( 'Hide this message', 'woocommerce' ) }
-							onClick={ onDisablingCES }
+							onClick={ onHideFeedbackBarClick }
 						></Button>
 					</div>
 				</WooFooterItem>
