@@ -53,7 +53,10 @@ const Block = ( {
 						link={ getSetting( 'page-' + cartPageId, false ) }
 					/>
 				) }
-				<PlaceOrderButton label={ label } />
+				<PlaceOrderButton
+					label={ label }
+					fullWidth={ ! showReturnToCart }
+				/>
 			</div>
 		</div>
 	);
