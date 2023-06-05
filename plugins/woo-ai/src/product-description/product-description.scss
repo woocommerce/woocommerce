@@ -27,6 +27,9 @@
 }
 
 .wp-media-buttons {
+	button#insert-jetpack-contact-form {
+		display: none;
+	}
 	.woo-ai-write-it-for-me-btn  {
 		min-width: 126px;
 
