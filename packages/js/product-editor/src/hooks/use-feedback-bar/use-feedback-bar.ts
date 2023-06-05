@@ -38,7 +38,6 @@ export const useFeedbackBar = () => {
 	};
 
 	return {
-		showFeedbackBar,
 		showFeedbackBarIfNotPreviouslyHidden,
 		hideFeedbackBar,
 	};
