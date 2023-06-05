@@ -730,6 +730,7 @@ class OrdersTableQuery {
 			 *     @type string $limits  The LIMIT clause of the query.
 			 * }
 			 * @param OrdersTableQuery $query   The OrdersTableQuery instance (passed by reference).
+			 * @param array            $args    Query args.
 			 */
 			$clauses = (array) apply_filters_ref_array( 'woocommerce_orders_table_query_clauses', array( $pieces, &$this, $this->args ) );
 
@@ -754,6 +755,7 @@ class OrdersTableQuery {
 			 *
 			 * @param string           $sql   The complete SQL query.
 			 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
+			 * @param array            $args  Query args.
 			 */
 			$this->sql = apply_filters_ref_array( 'woocommerce_orders_table_query_sql', array( $this->sql, &$this, $this->args ) );
 		}
