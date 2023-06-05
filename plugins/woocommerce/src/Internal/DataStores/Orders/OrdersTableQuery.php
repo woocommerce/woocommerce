@@ -682,6 +682,8 @@ class OrdersTableQuery {
 		/**
 		 * Filters the JOIN clause of the query.
 		 *
+		 * @since 7.9.0
+		 *
 		 * @param string $join The JOIN clause of the query.
 		 * @param array  $args The query arguments.
 		 * @param object $query The `OrdersTableQuery` instance.
@@ -697,6 +699,8 @@ class OrdersTableQuery {
 		/**
 		 * Filters the WHERE clause of the query.
 		 *
+		 * @since 7.9.0
+		 *
 		 * @param string $where The WHERE clause of the query.
 		 * @param array  $args  The query arguments.
 		 * @param object $query The `OrdersTableQuery` instance.
@@ -708,6 +712,8 @@ class OrdersTableQuery {
 
 		/**
 		 * Filters the ORDER BY clause of the query.
+		 *
+		 * @since 7.9.0
 		 *
 		 * @param string $orderby The ORDER BY clause of the query.
 		 * @param array  $args    The query arguments.
@@ -729,6 +735,8 @@ class OrdersTableQuery {
 
 		/**
 		 * Filters the GROUP BY clause of the query.
+		 *
+		 * @since 7.9.0
 		 *
 		 * @param string $groupby The GROUP BY clause of the query.
 		 * @param array  $args    The query arguments.
