@@ -40,12 +40,35 @@ const getRatingCount = ( product: ProductResponseItem ) => {
 	return Number.isFinite( count ) && count > 0 ? count : 0;
 };
 
+const getStarStyle = ( rating: number ) => ( {
+	width: ( rating / 5 ) * 100 + '%',
+} );
+
+const NoRating = ( { parentClassName }: { parentClassName: string } ) => {
+	const starStyle = getStarStyle( 0 );
+
+	return (
+		<div
+			className={ classnames(
+				'wc-block-components-product-rating__norating-container',
+				`${ parentClassName }-product-rating__norating-container`
+			) }
+		>
+			<div
+				className={ 'wc-block-components-product-rating__norating' }
+				role="img"
+			>
+				<span style={ starStyle } />
+			</div>
+			<span>{ __( 'No Reviews', 'woo-gutenberg-products-block' ) }</span>
+		</div>
+	);
+};
+
 const Rating = ( props: RatingProps ): JSX.Element => {
 	const { rating, reviews, parentClassName } = props;
 
-	const starStyle = {
-		width: ( rating / 5 ) * 100 + '%',
-	};
+	const starStyle = getStarStyle( rating );
 
 	const ratingText = sprintf(
 		/* translators: %f is referring to the average rating value */
@@ -132,11 +155,7 @@ export const Block = ( props: ProductRatingProps ): JSX.Element | null => {
 		}
 	);
 	const mockedRatings = shouldDisplayMockedReviewsWhenProductHasNoReviews ? (
-		<Rating
-			rating={ 0 }
-			reviews={ 0 }
-			parentClassName={ parentClassName }
-		/>
+		<NoRating parentClassName={ parentClassName } />
 	) : null;
 
 	const content = reviews ? (
