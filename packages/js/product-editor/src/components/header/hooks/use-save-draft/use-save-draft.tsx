@@ -103,7 +103,7 @@ export function useSaveDraft( {
 	let children: ReactNode;
 	if ( productStatus === 'publish' ) {
 		children = __( 'Switch to draft', 'woocommerce' );
-	} else if ( hasEdits ) {
+	} else if ( hasEdits || productStatus === 'auto-draft' ) {
 		children = __( 'Save draft', 'woocommerce' );
 	} else {
 		children = (
