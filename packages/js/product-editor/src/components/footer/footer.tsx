@@ -9,7 +9,7 @@ import { Product } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { ProductMVPCESFooter } from '../product-mvp-ces-footer';
+import { FeedbackBar } from '../feedback-bar';
 import { ProductMVPFeedbackModalContainer } from '../product-mvp-feedback-modal-container';
 
 export type FooterProps = {
@@ -26,7 +26,7 @@ export function Footer( { product }: FooterProps ) {
 		>
 			<WooFooterItem.Slot name="product" />
 
-			<ProductMVPCESFooter product={ product } />
+			<FeedbackBar product={ product } />
 			<ProductMVPFeedbackModalContainer productId={ product.id } />
 		</div>
 	);

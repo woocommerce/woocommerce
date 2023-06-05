@@ -9,33 +9,33 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
  */
 import { PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME } from '../../constants';
 
-async function isProductMVPCESHidden(): Promise< boolean > {
+async function wasFeedbackBarPreviouslyHidden(): Promise< boolean > {
 	const optionValue: string = await resolveSelect(
 		OPTIONS_STORE_NAME
 	).getOption( PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME );
 	return optionValue === 'no';
 }
 
-export const useProductEditorFeedbackFooter = () => {
+export const useFeedbackBar = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
-	const showCesFooter = ( actionName = 'show' ) => {
+	const showFeedbackBar = () => {
 		updateOptions( {
-			[ PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME ]: actionName,
+			[ PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME ]: 'yes',
 		} );
 	};
 
 	const onSaveDraft = async () => {
-		if ( ( await isProductMVPCESHidden() ) === false ) {
-			showCesFooter( 'new_product' );
+		if ( ( await wasFeedbackBarPreviouslyHidden() ) === false ) {
+			showFeedbackBar();
 		}
 	};
 
 	const onPublish = async () => {
-		if ( ( await isProductMVPCESHidden() ) === false ) {
-			showCesFooter( 'new_product' );
+		if ( ( await wasFeedbackBarPreviouslyHidden() ) === false ) {
+			showFeedbackBar();
 		}
 	};
 
-	return { onSaveDraft, onPublish, showCesFooter };
+	return { onSaveDraft, onPublish, showFeedbackBar };
 };

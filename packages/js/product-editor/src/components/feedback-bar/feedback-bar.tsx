@@ -29,11 +29,11 @@ import {
 	NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME,
 } from '../../constants';
 
-export type ProductMVPCESFooterProps = {
+export type FeedbackBarProps = {
 	product: Partial< Product >;
 };
 
-export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
+export function FeedbackBar( { product }: FeedbackBarProps ) {
 	const { showCesModal, showProductMVPFeedbackModal } =
 		useDispatch( STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
