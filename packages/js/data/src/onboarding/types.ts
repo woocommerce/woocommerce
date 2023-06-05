@@ -180,9 +180,11 @@ export type Extension = {
 	image_url: string;
 	manage_url: string;
 	name: string;
+	label?: string;
 	is_built_by_wc: boolean;
 	is_visible: boolean;
 	is_installed?: boolean;
+	learn_more_link?: string;
 };
 
 export type InstallAndActivatePluginsAsyncResponse = {
