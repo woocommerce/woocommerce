@@ -171,6 +171,8 @@ class OrdersTableQuery {
 	 */
 	private $order_datastore = null;
 
+	private $suppress_filters = false;
+
 	/**
 	 * Sets up and runs the query after processing arguments.
 	 *
@@ -182,6 +184,9 @@ class OrdersTableQuery {
 
 		$this->tables   = $this->order_datastore::get_all_table_names_with_id();
 		$this->mappings = $this->order_datastore->get_all_order_column_mappings();
+
+		$this->suppress_filters = array_key_exists( 'suppress_filters', $args ) ? (bool) $args['suppress_filters'] : false;
+		unset( $args['suppress_filters'] );
 
 		$this->args = $args;
 
@@ -686,7 +691,7 @@ class OrdersTableQuery {
 		}
 
 		// ORDER BY.
-		$orderby = $this->orderby ? ( 'ORDER BY ' . implode( ', ', $this->orderby ) ) : '';
+		$orderby = $this->orderby ? implode( ', ', $this->orderby ) : '';
 
 		// LIMITS.
 		$limits = '';
@@ -698,48 +703,55 @@ class OrdersTableQuery {
 		}
 
 		// GROUP BY.
-		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
+		$groupby = $this->groupby ? implode( ', ', (array) $this->groupby ) : '';
 
 		$pieces = compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' );
 
-		/**
-		 * Filters all query clauses at once.
-		 * Covers the fields (SELECT), JOIN, WHERE, GROUP BY, ORDER BY, and LIMIT clauses.
-		 *
-		 * @since 7.9.0
-		 *
-		 * @param string[]         $clauses {
-		 *     Associative array of the clauses for the query.
-		 *
-		 *     @type string $fields  The SELECT clause of the query.
-		 *     @type string $join    The JOIN clause of the query.
-		 *     @type string $where   The WHERE clause of the query.
-		 *     @type string $groupby The GROUP BY clause of the query.
-		 *     @type string $orderby The ORDER BY clause of the query.
-		 *     @type string $limits  The LIMIT clause of the query.
-		 * }
-		 * @param OrdersTableQuery $query   The OrdersTableQuery instance (passed by reference).
-		 */
-		$clauses = (array) apply_filters_ref_array( 'woocommerce_orders_table_query_clauses', array( $pieces, &$this ) );
+		if ( ! $this->suppress_filters ) {
+			/**
+			 * Filters all query clauses at once.
+			 * Covers the fields (SELECT), JOIN, WHERE, GROUP BY, ORDER BY, and LIMIT clauses.
+			 *
+			 * @since 7.9.0
+			 *
+			 * @param string[]         $clauses {
+			 *     Associative array of the clauses for the query.
+			 *
+			 *     @type string $fields  The SELECT clause of the query.
+			 *     @type string $join    The JOIN clause of the query.
+			 *     @type string $where   The WHERE clause of the query.
+			 *     @type string $groupby The GROUP BY clause of the query.
+			 *     @type string $orderby The ORDER BY clause of the query.
+			 *     @type string $limits  The LIMIT clause of the query.
+			 * }
+			 * @param OrdersTableQuery $query   The OrdersTableQuery instance (passed by reference).
+			 */
+			$clauses = (array) apply_filters_ref_array( 'woocommerce_orders_table_query_clauses', array( $pieces, &$this, $this->args ) );
 
-		$fields  = $clauses['fields'] ?? '';
-		$join    = $clauses['join'] ?? '';
-		$where   = $clauses['where'] ?? '';
-		$groupby = $clauses['groupby'] ?? '';
-		$orderby = $clauses['orderby'] ?? '';
-		$limits  = $clauses['limits'] ?? '';
+			$fields  = $clauses['fields'] ?? '';
+			$join    = $clauses['join'] ?? '';
+			$where   = $clauses['where'] ?? '';
+			$groupby = $clauses['groupby'] ?? '';
+			$orderby = $clauses['orderby'] ?? '';
+			$limits  = $clauses['limits'] ?? '';
+		}
+
+		$groupby = $groupby ? ( 'GROUP BY ' . $groupby ) : '';
+		$orderby = $orderby ? ( 'ORDER BY ' . $orderby ) : '';
 
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 
-		/**
-		 * Filters the completed SQL query.
-		 *
-		 * @since 7.9.0
-		 *
-		 * @param string           $sql   The complete SQL query.
-		 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
-		 */
-		$this->sql = apply_filters_ref_array( 'woocommerce_orders_table_query_sql', array( $this->sql, &$this ) );
+		if ( ! $this->suppress_filters ) {
+			/**
+			 * Filters the completed SQL query.
+			 *
+			 * @since 7.9.0
+			 *
+			 * @param string           $sql   The complete SQL query.
+			 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
+			 */
+			$this->sql = apply_filters_ref_array( 'woocommerce_orders_table_query_sql', array( $this->sql, &$this, $this->args ) );
+		}
 
 		$this->build_count_query( $fields, $join, $where, $groupby );
 	}
@@ -758,6 +770,8 @@ class OrdersTableQuery {
 		}
 		$orders_table    = $this->tables['orders'];
 		$this->count_sql = "SELECT COUNT(DISTINCT $fields) FROM  $orders_table $join WHERE $where";
+
+		//date ASC
 	}
 
 	/**
