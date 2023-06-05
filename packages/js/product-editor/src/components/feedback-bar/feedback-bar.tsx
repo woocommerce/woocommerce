@@ -26,7 +26,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import {
 	PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME,
 	PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
-	NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME,
 } from '../../constants';
 import { useFeedbackBar } from '../../hooks/use-feedback-bar';
 
@@ -141,10 +140,6 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 		} );
 
 		hideFeedbackBar();
-
-		updateOptions( {
-			[ NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME ]: 'no',
-		} );
 
 		showProductMVPFeedbackModal();
 	};
