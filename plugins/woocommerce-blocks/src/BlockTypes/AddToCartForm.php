@@ -20,11 +20,16 @@ class AddToCartForm extends AbstractBlock {
 	 * to prevent displaying the Cart Notice when the block is inside the Single Product block
 	 * and the Add to Cart button is clicked.
 	 *
+	 * It also hooks into the `woocommerce_add_to_cart_redirect` filter to prevent redirecting
+	 * to another page when the block is inside the Single Product block and the Add to Cart button
+	 * is clicked.
+	 *
 	 * @return void
 	 */
 	protected function initialize() {
 		parent::initialize();
 		add_filter( 'wc_add_to_cart_message_html', array( $this, 'add_to_cart_message_html_filter' ), 10, 2 );
+		add_filter( 'woocommerce_add_to_cart_redirect', array( $this, 'add_to_cart_redirect_filter' ), 10, 2 );
 	}
 
 	/**
@@ -142,6 +147,24 @@ class AddToCartForm extends AbstractBlock {
 			return false;
 		}
 		return $message;
+	}
+
+	/**
+	 * Hooks into the `woocommerce_add_to_cart_redirect` filter to prevent redirecting
+	 * to another page when the block is inside the Single Product block and the Add to Cart button
+	 * is clicked.
+	 *
+	 * @param string $url The URL to redirect to after the product is added to the cart.
+	 * @param object $product The product being added to the cart.
+	 * @return string The filtered redirect URL.
+	 */
+	public function add_to_cart_redirect_filter( $url, $product ) {
+		// phpcs:ignore
+		if ( isset( $_POST['is-descendent-of-single-product-block'] ) && 'true' == $_POST['is-descendent-of-single-product-block'] ) {
+			return wp_validate_redirect( wp_get_referer(), $url );
+		}
+
+		return $url;
 	}
 
 	/**
