@@ -1,40 +1,45 @@
 /**
  * External dependencies
  */
-import { TourKit } from '@woocommerce/components';
+import { Pill, TourKit } from '@woocommerce/components';
 import { Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 
 import './style.scss';
+import BlockEditorGuide from './block-editor-guide';
 
 interface Props {
-	isTourOpen: boolean;
+	shouldTourBeShown: boolean;
 	dismissModal: () => void;
-	openGuide: () => void;
-	closeGuide: () => void;
-	isGuideOpen: boolean;
 }
 
-const BlockEditorTour = ( {
-	isTourOpen,
-	dismissModal,
-	openGuide,
-	isGuideOpen,
-	closeGuide,
-}: Props ) => {
+const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 	useEffect( () => {
-		if ( isTourOpen ) {
+		if ( shouldTourBeShown ) {
 			recordEvent( 'block_product_editor_spotlight_view' );
 		}
-	}, [ isTourOpen ] );
+	}, [ shouldTourBeShown ] );
 
-	if ( isTourOpen ) {
+	const [ isGuideOpen, setIsGuideOpen ] = useState( false );
+
+	const openGuide = () => {
+		setIsGuideOpen( true );
+	};
+
+	const closeGuide = () => {
+		recordEvent( 'block_product_editor_spotlight_completed' );
+		setIsGuideOpen( false );
+	};
+
+	if ( isGuideOpen ) {
+		return <BlockEditorGuide onCloseGuide={ closeGuide } />;
+	} else if ( shouldTourBeShown ) {
 		return (
 			<TourKit
 				config={ {
@@ -54,9 +59,18 @@ const BlockEditorTour = ( {
 										'woocommerce'
 									),
 								},
-								heading: __(
-									'Meet a streamlined product form',
-									'woocommerce'
+								heading: (
+									<>
+										<span>
+											{ __(
+												'Meet a streamlined product form',
+												'woocommerce'
+											) }
+										</span>{ ' ' }
+										<Pill className="woocommerce-block-editor-guide__pill">
+											{ __( 'Beta', 'woocommerce' ) }
+										</Pill>
+									</>
 								),
 							},
 							referenceElements: {
@@ -86,8 +100,9 @@ const BlockEditorTour = ( {
 								resize: true,
 							},
 						},
-						portalParentElement:
-							document.getElementById( 'wpbody' ),
+						portalParentElement: document.getElementById(
+							'wpbody'
+						),
 						popperModifiers: [
 							{
 								name: 'bottom-left',
@@ -105,103 +120,6 @@ const BlockEditorTour = ( {
 						],
 					},
 				} }
-			/>
-		);
-	} else if ( isGuideOpen ) {
-		return (
-			<Guide
-				className="woocommerce-block-editor-guide"
-				finishButtonText={ __( 'Close', 'woocommerce' ) }
-				onFinish={ () => {
-					recordEvent( 'block_product_editor_spotlight_completed' );
-					closeGuide();
-				} }
-				pages={ [
-					{
-						content: (
-							<>
-								<h1 className="woocommerce-block-editor-guide__heading">
-									{ __(
-										'Refreshed, streamlined interface',
-										'woocommerce'
-									) }
-								</h1>
-								<p className="woocommerce-block-editor-guide__text">
-									{ __(
-										'Experience a simpler, more focused interface with a modern design that enhances usability.',
-										'woocommerce'
-									) }
-								</p>
-							</>
-						),
-						image: (
-							<div className="woocommerce-block-editor-guide__background1"></div>
-						),
-					},
-					{
-						content: (
-							<>
-								<h1 className="woocommerce-block-editor-guide__heading">
-									{ __(
-										'Content-rich product descriptions',
-										'woocommerce'
-									) }
-								</h1>
-								<p className="woocommerce-block-editor-guide__text">
-									{ __(
-										'Create compelling product pages with blocks, media, images, videos, and any content you desire to engage customers.',
-										'woocommerce'
-									) }
-								</p>
-							</>
-						),
-						image: (
-							<div className="woocommerce-block-editor-guide__background2"></div>
-						),
-					},
-					{
-						content: (
-							<>
-								<h1 className="woocommerce-block-editor-guide__heading">
-									{ __(
-										'Improved speed & performance',
-										'woocommerce'
-									) }
-								</h1>
-								<p className="woocommerce-block-editor-guide__text">
-									{ __(
-										'Enjoy a seamless experience without page reloads. Our modern technology ensures reliability and lightning-fast performance.',
-										'woocommerce'
-									) }
-								</p>
-							</>
-						),
-						image: (
-							<div className="woocommerce-block-editor-guide__background3"></div>
-						),
-					},
-					{
-						content: (
-							<>
-								<h1 className="woocommerce-block-editor-guide__heading">
-									{ __(
-										'More features are on the way',
-										'woocommerce'
-									) }
-								</h1>
-								<p className="woocommerce-block-editor-guide__text">
-									{ __(
-										'While we currently support physical products, exciting updates are coming to accommodate more types, like digital products, variations, and more. Stay tuned!',
-										'woocommerce'
-									) }
-								</p>
-							</>
-						),
-						image: (
-							<div className="woocommerce-block-editor-guide__background4"></div>
-						),
-					},
-				] }
 			/>
 		);
 	}
