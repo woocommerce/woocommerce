@@ -681,7 +681,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * @param string $value Field value.
 	 *
-	 * @return float|string
+	 * @return int|string
 	 */
 	public function parse_published_field( $value ) {
 		if ( '' === $value ) {
@@ -695,7 +695,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return wc_string_to_bool( $value ) ? 1 : -1;
 		}
 
-		return floatval( $value );
+		return intval( $value );
 	}
 
 	/**
