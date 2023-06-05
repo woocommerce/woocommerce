@@ -310,29 +310,25 @@ const recordTracksIntroCompleted = () => {
 	} );
 };
 
-const recordTracksIntroSkipped = () => {
-	recordEvent( 'storeprofiler_store_details_skip' );
-};
-
-const recordTracksIntroViewed = () => {
+const recordTracksStepViewed = (
+	_ctx: unknown,
+	_evt: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { step } = action as { step: string };
 	recordEvent( 'storeprofiler_step_view', {
-		step: 'store_details',
+		step,
 		wc_version: getSetting( 'wcVersion' ),
 	} );
 };
 
-const recordTracksUserProfileViewed = () => {
-	recordEvent( 'storeprofiler_step_view', {
-		step: 'user_profile',
-		wc_version: getSetting( 'wcVersion' ),
-	} );
-};
-
-const recordTracksPluginsViewed = () => {
-	recordEvent( 'storeprofiler_step_view', {
-		step: 'plugins',
-		wc_version: getSetting( 'wcVersion' ),
-	} );
+const recordTracksStepSkipped = (
+	_ctx: unknown,
+	_evt: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { step } = action as { step: string };
+	recordEvent( `storeprofiler_${ step }_skip` );
 };
 
 const recordTracksUserProfileCompleted = (
@@ -350,21 +346,6 @@ const recordTracksUserProfileCompleted = (
 		selling_platforms: event.payload.userProfile.sellingPlatforms
 			? event.payload.userProfile.sellingPlatforms.join()
 			: null,
-	} );
-};
-
-const recordTracksUserProfileSkipped = () => {
-	recordEvent( 'storeprofiler_user_profile_skip' );
-};
-
-const recordTracksPluginsSkipped = () => {
-	recordEvent( 'storeprofiler_plugins_skip' );
-};
-
-const recordTracksBusinessInfoViewed = () => {
-	recordEvent( 'storeprofiler_step_view', {
-		step: 'business_info',
-		wc_version: getSetting( 'wcVersion' ),
 	} );
 };
 
@@ -387,13 +368,6 @@ const recordTracksBusinessInfoCompleted = (
 			_context.onboardingProfile.is_store_country_set || false,
 		geolocation_success: _context.geolocatedLocation !== undefined,
 		geolocation_overruled: event.payload.geolocationOverruled,
-	} );
-};
-
-const recordTracksSkipBusinessLocationViewed = () => {
-	recordEvent( 'storeprofiler_step_view', {
-		step: 'skip_business_location',
-		wc_version: getSetting( 'wcVersion' ),
 	} );
 };
 
@@ -529,17 +503,11 @@ export const preFetchActions = {
 };
 
 export const recordTracksActions = {
+	recordTracksStepViewed,
+	recordTracksStepSkipped,
 	recordTracksIntroCompleted,
-	recordTracksIntroSkipped,
-	recordTracksIntroViewed,
 	recordTracksUserProfileCompleted,
-	recordTracksUserProfileSkipped,
-	recordTracksUserProfileViewed,
-	recordTracksPluginsViewed,
-	recordTracksPluginsSkipped,
-	recordTracksSkipBusinessLocationViewed,
 	recordTracksSkipBusinessLocationCompleted,
-	recordTracksBusinessInfoViewed,
 	recordTracksBusinessInfoCompleted,
 };
 
@@ -660,7 +628,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					],
 				},
 			},
-			entry: [ 'recordTracksIntroViewed' ],
+			entry: [
+				{ type: 'recordTracksStepViewed', step: 'store_details' },
+			],
 			exit: actions.choose( [
 				{
 					cond: ( _context, event ) =>
@@ -669,7 +639,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				},
 				{
 					cond: ( _context, event ) => event.type === 'INTRO_SKIPPED',
-					actions: 'recordTracksIntroSkipped',
+					actions: [
+						{
+							type: 'recordTracksStepSkipped',
+							step: 'store_details',
+						},
+					],
 				},
 			] ),
 			meta: {
@@ -695,7 +670,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		userProfile: {
-			entry: [ 'recordTracksUserProfileViewed', 'preFetchGeolocation' ],
+			entry: [
+				{ type: 'recordTracksStepViewed', step: 'user_profile' },
+				'preFetchGeolocation',
+			],
 			on: {
 				USER_PROFILE_COMPLETED: {
 					target: 'postUserProfile',
@@ -725,7 +703,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				{
 					cond: ( _context, event ) =>
 						event.type === 'USER_PROFILE_SKIPPED',
-					actions: 'recordTracksUserProfileSkipped',
+					actions: [
+						{
+							type: 'recordTracksStepSkipped',
+							step: 'user_profile',
+						},
+					],
 				},
 			] ),
 			meta: {
@@ -851,7 +834,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		businessInfo: {
-			entry: [ 'recordTracksBusinessInfoViewed' ],
+			entry: [
+				{ type: 'recordTracksStepViewed', step: 'business_info' },
+			],
 			on: {
 				BUSINESS_INFO_COMPLETED: {
 					target: 'prePlugins',
@@ -900,7 +885,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					],
 				},
 			},
-			entry: [ 'recordTracksSkipBusinessLocationViewed' ],
+			entry: [
+				{
+					type: 'recordTracksStepViewed',
+					step: 'skip_business_location',
+				},
+			],
 			meta: {
 				progress: 80,
 				component: BusinessLocation,
@@ -1008,10 +998,15 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		plugins: {
-			entry: [ 'recordTracksPluginsViewed' ],
+			entry: [ { type: 'recordTracksStepViewed', step: 'plugins' } ],
 			on: {
 				PLUGINS_PAGE_SKIPPED: {
-					actions: [ 'recordTracksPluginsSkipped' ],
+					actions: [
+						{
+							type: 'recordTracksStepSkipped',
+							step: 'plugins',
+						},
+					],
 					target: 'pluginsSkipped',
 				},
 				PLUGINS_INSTALLATION_REQUESTED: {
