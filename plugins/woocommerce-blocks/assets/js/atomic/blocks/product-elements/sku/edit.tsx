@@ -6,7 +6,6 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import EditProductLink from '@woocommerce/editor-components/edit-product-link';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 import { useEffect } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -14,6 +13,7 @@ import { useSelect } from '@wordpress/data';
 import Block from './block';
 import type { Attributes } from './types';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
+import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
 const Edit = ( {
 	attributes,
@@ -32,22 +32,12 @@ const Edit = ( {
 	const { isDescendentOfSingleProductBlock } =
 		useIsDescendentOfSingleProductBlock( { blockClientId: blockProps.id } );
 
-	const isDescendentOfSingleProductTemplate = useSelect(
-		( select ) => {
-			const store = select( 'core/edit-site' );
-			const postId = store?.getEditedPostId< string | undefined >();
+	let { isDescendentOfSingleProductTemplate } =
+		useIsDescendentOfSingleProductTemplate();
 
-			if ( ! postId ) {
-				return false;
-			}
-
-			return (
-				postId.includes( '//single-product' ) &&
-				! isDescendentOfQueryLoop
-			);
-		},
-		[ isDescendentOfQueryLoop ]
-	);
+	if ( isDescendentOfQueryLoop ) {
+		isDescendentOfSingleProductTemplate = false;
+	}
 
 	useEffect(
 		() =>

@@ -9,7 +9,6 @@ import {
 import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -18,6 +17,7 @@ import Block from './block';
 import { BlockAttributes } from './types';
 import './editor.scss';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
+import { useIsDescendentOfSingleProductTemplate } from '../shared/use-is-descendent-of-single-product-template';
 
 const Edit = (
 	props: BlockEditProps< BlockAttributes > & { context: Context }
@@ -36,21 +36,12 @@ const Edit = (
 		useIsDescendentOfSingleProductBlock( {
 			blockClientId: blockProps?.id,
 		} );
-	const { isDescendentOfSingleProductTemplate } = useSelect(
-		( select ) => {
-			const store = select( 'core/edit-site' );
-			const postId = store?.getEditedPostId< string | undefined >();
+	let { isDescendentOfSingleProductTemplate } =
+		useIsDescendentOfSingleProductTemplate();
 
-			return {
-				isDescendentOfSingleProductTemplate: Boolean(
-					postId?.includes( '//single-product' ) &&
-						! isDescendentOfQueryLoop &&
-						! isDescendentOfSingleProductBlock
-				),
-			};
-		},
-		[ isDescendentOfQueryLoop, isDescendentOfSingleProductBlock ]
-	);
+	if ( isDescendentOfQueryLoop || isDescendentOfSingleProductBlock ) {
+		isDescendentOfSingleProductTemplate = false;
+	}
 
 	useEffect( () => {
 		setAttributes( {
