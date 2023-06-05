@@ -3,7 +3,7 @@
  */
 import { ProductDataSuggestion } from '../utils/types';
 
-const SuggestionItem = ( {
+export const SuggestionItem = ( {
 	suggestion,
 	onSuggestionClick,
 }: {
@@ -24,5 +24,3 @@ const SuggestionItem = ( {
 		</button>
 	</li>
 );
-
-export default SuggestionItem;

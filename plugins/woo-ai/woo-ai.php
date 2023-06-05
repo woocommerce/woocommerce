@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Woo AI
  * Plugin URI: https://github.com/woocommerce/woocommerce/
- * Description: Enable AI experiments within the WooCommerce experience.
+ * Description: Enable AI experiments within the WooCommerce experience. <a href="https://automattic.com/ai-guidelines" target="_blank" rel="noopener noreferrer">Learn more</a>.
  * Version: 0.1.0
  * Author: WooCommerce
  * Author URI: http://woocommerce.com/

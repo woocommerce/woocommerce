@@ -45,7 +45,7 @@ export const WriteItForMeBtn = ( {
 		<MagicButton
 			disabled={ disabled }
 			onClick={ onClick }
-			label={ __( 'Write it for me', 'woocommerce' ) }
+			label={ __( 'Write with AI', 'woocommerce' ) }
 			title={
 				disabled
 					? sprintf(
