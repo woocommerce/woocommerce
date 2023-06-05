@@ -38,8 +38,8 @@ class Init {
 			$block_registry->init();
 		}
 
-		add_action( 'admin_init', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
-		add_action( 'admin_init', array( $this, 'maybe_redirect_to_old_editor' ), 30, 0 );
+		add_action( 'current_screen', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
+		add_action( 'current_screen', array( $this, 'maybe_redirect_to_old_editor' ), 30, 0 );
 	}
 
 	/**
@@ -48,15 +48,15 @@ class Init {
 	 */
 	public function maybe_redirect_to_new_editor(): void {
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-				$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+			$screen = get_current_screen();
 
-				if ( preg_match( '/^\/wp-admin\/post-new.php/', $request_uri ) && isset( $_GET['post_type'] ) && 'product' === $_GET['post_type'] ) {
+			if ( 'post' === $screen->base && 'product' === $screen->post_type ) {
+				if ( 'add' === $screen->action ) {
 					wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) );
 					exit();
 				}
 
-				if ( preg_match( '/^\/wp-admin\/post.php/', $request_uri ) && isset( $_GET['post'] ) && isset( $_GET['action'] ) && 'edit' === $_GET['action'] ) {
+				if ( isset( $_GET['post'] ) && isset( $_GET['action'] ) && 'edit' === $_GET['action'] ) {
 					$product_id = absint( $_GET['post'] );
 					wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/product/' . $product_id ) );
 					exit();
