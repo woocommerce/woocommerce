@@ -6,11 +6,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import LightBulbImage from './assets/images/loader-lightbulb.svg';
-import DevelopingImage from './assets/images/loader-developing.svg';
-import LayoutImage from './assets/images/loader-layout.svg';
+import LightBulbImage from '../assets/images/loader-lightbulb.svg';
+import DevelopingImage from '../assets/images/loader-developing.svg';
+import LayoutImage from '../assets/images/loader-layout.svg';
 
-import { Stages } from './pages/Loader';
+import { Stages } from '../pages/Loader';
 
 const LightbulbStage = {
 	title: __( 'Turning on the lights', 'woocommerce' ),
