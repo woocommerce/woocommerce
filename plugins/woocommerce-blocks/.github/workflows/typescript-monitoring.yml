@@ -46,7 +46,7 @@ jobs:
 
             - name: Get branch name
               id: branch-name
-              uses: tj-actions/branch-names@v6
+              uses: tj-actions/branch-names@v7
 
             - name: Monitor TypeScript errors
               uses: ./.github/monitor-typescript-errors
