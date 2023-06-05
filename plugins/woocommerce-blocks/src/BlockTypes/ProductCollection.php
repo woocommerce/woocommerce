@@ -490,7 +490,7 @@ class ProductCollection extends AbstractBlock {
 		);
 
 		return array(
-			// phpcs:ignore WordPress.DB.SlowDBQuery
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'tax_query' => array_values( $grouped_attributes ),
 		);
 	}

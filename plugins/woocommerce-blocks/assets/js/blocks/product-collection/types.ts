@@ -24,7 +24,7 @@ export interface ProductCollectionDisplayLayout {
 export interface ProductCollectionQuery {
 	author: string;
 	exclude: string[];
-	inherit: boolean;
+	inherit: boolean | null;
 	offset: number;
 	order: TProductCollectionOrder;
 	orderBy: TProductCollectionOrderBy;

@@ -42,7 +42,7 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	search: '',
 	exclude: [],
 	sticky: '',
-	inherit: false,
+	inherit: null,
 	taxQuery: {},
 	parents: [],
 	isProductCollectionBlock: true,
@@ -69,6 +69,7 @@ export const getDefaultSettings = (
 		...currentAttributes.query,
 		orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
 		order: DEFAULT_QUERY.order as TProductCollectionOrder,
+		inherit: DEFAULT_QUERY.inherit,
 	},
 } );
 
