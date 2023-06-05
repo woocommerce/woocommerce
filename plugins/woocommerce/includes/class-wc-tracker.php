@@ -176,7 +176,7 @@ class WC_Tracker {
 		// Shipping method info.
 		$data['shipping_methods'] = self::get_active_shipping_methods();
 
-		// Features
+		// Features.
 		$data['enabled_features'] = self::get_enabled_features();
 
 		// Get all WooCommerce options info.
