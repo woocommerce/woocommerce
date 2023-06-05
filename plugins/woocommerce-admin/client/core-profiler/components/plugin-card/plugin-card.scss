@@ -43,17 +43,20 @@
 	}
 
 	p {
+		display: inline;
 		font-size: 13px;
 		line-height: 16px;
 		color: $gray-700;
 		margin: 0;
 		padding: 0;
-		a {
-			color: inherit;
-		}
 		@include breakpoint( '<782px' ) {
 			display: none;
 		}
+	}
+
+	a {
+		color: $gray-700;
+		margin-left: 5px;
 	}
 
 	.components-checkbox-control {
