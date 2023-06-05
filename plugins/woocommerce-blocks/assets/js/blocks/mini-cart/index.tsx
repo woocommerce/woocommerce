@@ -20,7 +20,7 @@ const settings: BlockConfiguration = {
 		src: (
 			<Icon
 				icon={ miniCartAlt }
-				className="wc-block-editor-components-block-icon"
+				className="wc-block-editor-components-block-icon wc-block-editor-mini-cart__icon"
 			/>
 		),
 	},

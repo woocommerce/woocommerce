@@ -9,3 +9,9 @@
 .wc-block-editor-mini-cart__drawer-link {
 	margin-bottom: 24px;
 }
+
+.wc-block-editor-mini-cart__icon {
+	html[dir="rtl"] & {
+		transform: scaleX(-1);
+	}
+}
