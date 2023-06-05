@@ -133,4 +133,119 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, count( $queried_orders ) );
 		$this->assertContains( $orders[1]->get_id(), $queried_orders );
 	}
+
+	/**
+	 * @testDox 'suppress_filters' arg is honored in queries.
+	 */
+	public function test_query_suppress_filters() {
+		$hooks = array(
+			'woocommerce_orders_table_query_clauses',
+			'woocommerce_orders_table_query_sql',
+		);
+
+		$filters_called = 0;
+		$filter_callback = function ( $arg ) use ( &$filters_called ) {
+			$filters_called++;
+			return $arg;
+		};
+
+		foreach ( $hooks as $hook ) {
+			add_filter( $hook, $filter_callback );
+		}
+
+		// suppress_filters = false
+		foreach ( $hooks as $hook ) {
+			wc_get_orders( array() );
+		}
+
+		$this->assertNotEquals( $filters_called, 0 );
+
+		// suppress_filters = true
+		$filters_called = 0;
+		foreach ( $hooks as $hook ) {
+			wc_get_orders(
+				array(
+					'suppress_filters' => true
+				)
+			);
+		}
+		$this->assertEquals( $filters_called, 0 );
+
+		foreach ( $hooks as $hook ) {
+			remove_all_filters( $hook );
+		}
+	}
+
+	/**
+	 * @testdox Query filters successfully allow modificatio of order queries.
+	 */
+	public function test_query_filters() {
+		$order1 = new \WC_Order();
+		$order1->save();
+
+		$order2 = new \WC_Order();
+		$order2->save();
+
+		$this->assertCount( 2, wc_get_orders( array() ) );
+
+		// Force a query that returns nothing.
+		$filter_callback = function( $clauses ) {
+			$clauses['where'] .= ' AND 1=0 ';
+			return $clauses;
+		};
+
+		add_filter( 'woocommerce_orders_table_query_clauses', $filter_callback );
+		$this->assertCount( 0, wc_get_orders( array() ) );
+		remove_all_filters( 'woocommerce_orders_table_query_clauses' );
+
+		// Force a query that sorts orders by id DESC (as opposed to the default date ASC) if a query arg is present.
+		$filter_callback = function( $clauses, $query, $query_args ) use ( $order1 ) {
+			if ( ! empty( $query_args['my_custom_arg'] ) ) {
+				$clauses['orderby'] = $query->get_table_name( 'orders' ) . '.id DESC';
+			}
+
+			return $clauses;
+		};
+
+		add_filter( 'woocommerce_orders_table_query_clauses', $filter_callback, 10, 3 );
+		$this->assertEquals(
+			wc_get_orders(
+				array(
+					'return' => 'ids',
+				)
+			),
+			array(
+				$order1->get_id(),
+				$order2->get_id(),
+			)
+		);
+		$this->assertEquals(
+			wc_get_orders(
+				array(
+					'return'        => 'ids',
+					'my_custom_arg' => true,
+				)
+			),
+			array(
+				$order2->get_id(),
+				$order1->get_id(),
+			)
+		);
+		remove_all_filters( 'woocommerce_orders_table_query_clauses' );
+	}
+
+		// $logged_messages = array();
+
+		// $log_watcher = function ( string $logged_message ) use ( &$logged_messages ) {
+		// 	$logged_messages[] = $logged_message;
+		// };
+
+		// add_filter( 'woocommerce_logger_log_message', $log_watcher );
+
+		// suppress_filters.
+		// $this->database_service = $this->getMockBuilder( 'WC_Integration_maxMind_Database_Service' )
+		// 	->disableOriginalConstructor()
+		// 	->getMock();
+		// add_filter( 'woocommerce_maxmind_geolocation_database_service', array( $this, 'override_integration_service' ) );
+
 }
