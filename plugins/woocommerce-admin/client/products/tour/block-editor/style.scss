@@ -1,26 +1,33 @@
+$background-height: 220px;
+$yellow: #f5e6ab;
+
 .woocommerce-block-editor-guide {
 	&__background1 {
-		height: 220px;
+		height: $background-height;
 		background-color: #f2edff;
 	}
 	&__background2 {
-		height: 220px;
+		height: $background-height;
 		background-color: #dfd1fb;
 	}
 	&__background3 {
-		height: 220px;
+		height: $background-height;
 		background-color: #cfb9f6;
 	}
 	&__background4 {
-		height: 220px;
+		height: $background-height;
 		background-color: #bea0f2;
 	}
+	&__pill {
+		border: 1px solid $yellow;
+		background-color: $yellow;
+	}
 	&.components-modal__frame {
-		width: 320px;
+		max-width: 320px;
 	}
 	&__heading,
 	&__text {
-		margin: 12px 24px;
+		margin: $gap-small $gap-large;
 	}
 
 	&__heading {
@@ -28,23 +35,20 @@
 		line-height: 30px;
 	}
 
-	&__text {
-		height: 80px;
-	}
 	.components-guide {
 		&__page-control {
-			margin-top: 12px;
+			margin-top: $gap-small;
 		}
 		&__footer {
 			width: unset;
-			margin: 32px 24px;
+			margin: $gap-large $gap-large;
 			.components-guide__back-button {
 				left: 0;
-				padding: 6px 12px;
+				padding: $gap-smaller $gap-small;
 			}
 			.components-guide__forward-button {
 				right: 0;
-				padding: 6px 12px;
+				padding: $gap-smaller $gap-small;
 			}
 			.components-guide__finish-button {
 				right: 0;
