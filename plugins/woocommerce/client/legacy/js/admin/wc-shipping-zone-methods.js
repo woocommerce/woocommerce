@@ -201,9 +201,9 @@
 						instance_id = $( this ).closest( 'tr' ).data( 'id' );
 
 					event.preventDefault();
-					shippingMethodView.block();
 
 					if ( window.confirm( data.strings.delete_shipping_method_confirmation ) ) {
+						shippingMethodView.block();
 
 						// Add method to zone via ajax call
 						$.post( {
