@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 6.2
 Tested up to: 6.2
 Requires PHP: 7.3
-Stable tag: 10.4.2
+Stable tag: 10.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -81,26 +81,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
-= 10.4.2 - 2023-06-12 =
-
-#### Bug Fixes
-
-- Update the Product Collections: Featured Collections to replace the Unsplash image with a CCO licensed image from Pxhere. ([9766](https://github.com/woocommerce/woocommerce-blocks/pull/9766))
-- Update the Featured Category patterns to replace the Unsplash image with a CCO licensed image from Pxhere. ([9765](https://github.com/woocommerce/woocommerce-blocks/pull/9765))
-- Update the Product Details patterns to replace the Unsplash images with CCO licensed images from Pxhere. ([9764](https://github.com/woocommerce/woocommerce-blocks/pull/9764))
-- Update the Hero Product Split pattern to replace the Unsplash image with a CCO licensed image from Pxhere. ([9762](https://github.com/woocommerce/woocommerce-blocks/pull/9762))
-- Update the Hero Product Chessboard pattern to replace the Unsplash image with a CCO licensed image from Pxhere. ([9761](https://github.com/woocommerce/woocommerce-blocks/pull/9761))
-- Update the banner pattern to replace the Unsplash image with a CCO licensed image from Pxhere. ([9760](https://github.com/woocommerce/woocommerce-blocks/pull/9760))
-- Fix error on clearing customizations on Woo Templates that prevented WooCommerce Classic Template block from being displayed. ([9759](https://github.com/woocommerce/woocommerce-blocks/pull/9759))
-
-= 10.2.3 - 2023-06-09 =
-
-#### Bug Fixes
-
-- Update the Featured Category patterns to replace the Unsplash image with a CCO licensed image from Pxhere. ([9765](https://github.com/woocommerce/woocommerce-blocks/pull/9765))
-- Update the Hero Product Split pattern to replace the Unsplash image with a CCO licensed image from Pxhere. ([9762](https://github.com/woocommerce/woocommerce-blocks/pull/9762))
-
-= 10.4.0 - 2023-06-05 =
+= 10.3.0 - 2023-06-05 =
 
 #### Enhancements
 
@@ -109,13 +90,18 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Blockified Single Product Template: Use h1 for the Product Title. ([9698](https://github.com/woocommerce/woocommerce-blocks/pull/9698))
 - Blockified Single Product Template: Add product-classes. ([9697](https://github.com/woocommerce/woocommerce-blocks/pull/9697))
 - Blockified Single Product Template: Show upsells. ([9636](https://github.com/woocommerce/woocommerce-blocks/pull/9636))
+- Product Collection: Add Taxonomy filters to sidebar settings. ([9634](https://github.com/woocommerce/woocommerce-blocks/pull/9634))
 - Template Placeholder Design for the Order Received Template. ([9602](https://github.com/woocommerce/woocommerce-blocks/pull/9602))
+- Product Collection: Add `Attributes` filter control to sidebar settings. ([9600](https://github.com/woocommerce/woocommerce-blocks/pull/9600))
+- Product Collection - Add keyword control to sidebar settings. ([9583](https://github.com/woocommerce/woocommerce-blocks/pull/9583))
+- Product Collection: Add stock status control to sidebar settings. ([9580](https://github.com/woocommerce/woocommerce-blocks/pull/9580))
 - Mini-Cart: Update cart error notices to be non-dismissable (to match the behavior of the regular Cart). ([9578](https://github.com/woocommerce/woocommerce-blocks/pull/9578))
 - Classic Product Template block visible in the inserter. ([9573](https://github.com/woocommerce/woocommerce-blocks/pull/9573))
 - Hide the Product Rating when the product has no reviews. Previously, a link to the Reviews section was displayed. ([9556](https://github.com/woocommerce/woocommerce-blocks/pull/9556))
 - Reduced the amount of settings data consumed by the cart and checkout blocks. ([9552](https://github.com/woocommerce/woocommerce-blocks/pull/9552))
 - Enable blockified templates. ([9551](https://github.com/woocommerce/woocommerce-blocks/pull/9551))
 - Product Categories List: Add "Show child categories only" toggle. ([9550](https://github.com/woocommerce/woocommerce-blocks/pull/9550))
+- Product Collection: Add 'on sale' filter and enhance settings management in product collection block. ([9549](https://github.com/woocommerce/woocommerce-blocks/pull/9549))
 - Add Product Rating block to the default Single Product template. ([9510](https://github.com/woocommerce/woocommerce-blocks/pull/9510))
 - Add support for the Product Rating block within the Single Product template. ([9499](https://github.com/woocommerce/woocommerce-blocks/pull/9499))
 - The Mini-Cart block is now compatible with caching plugins. ([9493](https://github.com/woocommerce/woocommerce-blocks/pull/9493))
@@ -141,7 +127,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Fix alignment of the close button in the Mini-Cart drawer when it has borders. ([9507](https://github.com/woocommerce/woocommerce-blocks/pull/9507))
 - Add to Cart with Options Block: Remove global variable overwrite. ([9457](https://github.com/woocommerce/woocommerce-blocks/pull/9457))
 - Fix total shipping display info when no shipping method is available. ([8819](https://github.com/woocommerce/woocommerce-blocks/pull/8819))
-- Blockified Single Product Template: use h1 for the Product Title when transforming from Classic template. ([9748]((https://github.com/woocommerce/woocommerce-blocks/pull/9748))
 
 = 10.2.2 - 2023-05-31 =
 
