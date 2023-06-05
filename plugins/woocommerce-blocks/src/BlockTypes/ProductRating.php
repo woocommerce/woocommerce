@@ -183,7 +183,7 @@ class ProductRating extends AbstractBlock {
 
 			remove_filter(
 				'woocommerce_product_get_rating_html',
-				[ $this, 'filter_rating_html' ],
+				$filter_rating_html,
 				10
 			);
 
