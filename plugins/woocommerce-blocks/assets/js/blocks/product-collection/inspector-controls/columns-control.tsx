@@ -43,6 +43,7 @@ const ColumnsControl = (
 			} }
 		>
 			<RangeControl
+				label={ __( 'Columns', 'woo-gutenberg-products-block' ) }
 				value={ columns }
 				onChange={ ( value: number ) =>
 					props.setAttributes( {
