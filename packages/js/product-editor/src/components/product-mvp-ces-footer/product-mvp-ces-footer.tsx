@@ -17,7 +17,8 @@ import {
 	SHOWN_FOR_ACTIONS_OPTION_NAME,
 	STORE_KEY,
 } from '@woocommerce/customer-effort-score';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -27,7 +28,11 @@ import {
 	NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME,
 } from '../../constants';
 
-export const ProductMVPCESFooter: React.FC = () => {
+export type ProductMVPCESFooterProps = {
+	product: Partial< Product >;
+};
+
+export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 	const { showCesModal, showProductMVPFeedbackModal } =
 		useDispatch( STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
@@ -168,4 +173,4 @@ export const ProductMVPCESFooter: React.FC = () => {
 			) }
 		</>
 	);
-};
+}
