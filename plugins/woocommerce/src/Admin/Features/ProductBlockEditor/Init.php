@@ -38,15 +38,15 @@ class Init {
 			$block_registry->init();
 		}
 
-		add_action( 'admin_init', array( $this, 'maybe_swap_old_product_form_and_new_product_block_editor' ), 30, 0 );
+		add_action( 'admin_init', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
+		add_action( 'admin_init', array( $this, 'maybe_redirect_to_old_editor' ), 30, 0 );
 	}
 
 	/**
 	 * Redirects from old product form to the new product form if the
-	 * feature `product_block_editor` is enabled. If the feature is
-	 * disabled then the redirection happens in reverse order.
+	 * feature `product_block_editor` is enabled.
 	 */
-	public function maybe_swap_old_product_form_and_new_product_block_editor(): void {
+	public function maybe_redirect_to_new_editor(): void {
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
 				$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
@@ -62,7 +62,15 @@ class Init {
 					exit();
 				}
 			}
-		} else {
+		}
+	}
+
+	/**
+	 * Redirects from new product form to the old product form if the
+	 * feature `product_block_editor` is enabled.
+	 */
+	public function maybe_redirect_to_old_editor(): void {
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			if ( \Automattic\WooCommerce\Admin\PageController::is_admin_page() && isset( $_GET['path'] ) ) {
 				$path = esc_url_raw( wp_unslash( $_GET['path'] ) );
 
