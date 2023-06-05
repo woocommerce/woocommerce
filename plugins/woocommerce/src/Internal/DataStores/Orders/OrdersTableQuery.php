@@ -679,14 +679,41 @@ class OrdersTableQuery {
 		// JOIN.
 		$join = implode( ' ', array_unique( array_filter( array_map( 'trim', $this->join ) ) ) );
 
+		/**
+		 * Filters the JOIN clause of the query.
+		 *
+		 * @param string $join The JOIN clause of the query.
+		 * @param array  $args The query arguments.
+		 * @param object $query The `OrdersTableQuery` instance.
+		 */
+		$join = apply_filters( 'woocommerce_cot_query_join', $join, $this->args, $this );
+
 		// WHERE.
 		$where = '1=1';
 		foreach ( $this->where as $_where ) {
 			$where .= " AND ({$_where})";
 		}
 
+		/**
+		 * Filters the WHERE clause of the query.
+		 *
+		 * @param string $where The WHERE clause of the query.
+		 * @param array  $args  The query arguments.
+		 * @param object $query The `OrdersTableQuery` instance.
+		 */
+		$where = apply_filters( 'woocommerce_cot_query_where', $where, $this->args, $this );
+
 		// ORDER BY.
 		$orderby = $this->orderby ? ( 'ORDER BY ' . implode( ', ', $this->orderby ) ) : '';
+
+		/**
+		 * Filters the ORDER BY clause of the query.
+		 *
+		 * @param string $orderby The ORDER BY clause of the query.
+		 * @param array  $args    The query arguments.
+		 * @param object $query   The `OrdersTableQuery` instance.
+		 */
+		$orderby = apply_filters( 'woocommerce_cot_query_orderby', $orderby, $this->args, $this );
 
 		// LIMITS.
 		$limits = '';
@@ -699,6 +726,15 @@ class OrdersTableQuery {
 
 		// GROUP BY.
 		$groupby = $this->groupby ? 'GROUP BY ' . implode( ', ', (array) $this->groupby ) : '';
+
+		/**
+		 * Filters the GROUP BY clause of the query.
+		 *
+		 * @param string $groupby The GROUP BY clause of the query.
+		 * @param array  $args    The query arguments.
+		 * @param object $query   The `OrdersTableQuery` instance.
+		 */
+		$groupby = apply_filters( 'woocommerce_cot_query_groupby', $groupby, $this->args, $this );
 
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 		$this->build_count_query( $fields, $join, $where, $groupby );

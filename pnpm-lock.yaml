@@ -1,4 +1,8 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
 
 overrides:
   '@types/react': ^17.0.2
@@ -5069,7 +5073,7 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-create-class-features-plugin': 7.19.0(@babel/core@7.12.9)
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
     transitivePeerDependencies:
       - supports-color
 
@@ -5081,7 +5085,7 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-create-class-features-plugin': 7.19.0(@babel/core@7.17.8)
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8097,7 +8101,7 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-module-transforms': 7.21.2
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
       '@babel/helper-simple-access': 7.20.2
     transitivePeerDependencies:
       - supports-color
@@ -8111,7 +8115,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-module-transforms': 7.21.2
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
       '@babel/helper-simple-access': 7.20.2
     transitivePeerDependencies:
       - supports-color
@@ -17935,7 +17939,7 @@ packages:
       '@wordpress/style-engine': 0.15.0
       '@wordpress/token-list': 2.19.0
       '@wordpress/url': 3.29.0
-      '@wordpress/warning': 2.34.0
+      '@wordpress/warning': 2.19.0
       '@wordpress/wordcount': 3.19.0
       change-case: 4.1.2
       classnames: 2.3.1
