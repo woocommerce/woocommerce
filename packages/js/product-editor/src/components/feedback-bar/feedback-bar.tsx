@@ -48,7 +48,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 		const { getOption, hasFinishedResolution } =
 			select( OPTIONS_STORE_NAME );
 
-		const showFeedbackBarOptionValue = getOption(
+		const showFeedbackBarOption = getOption(
 			PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME
 		) as string;
 
@@ -75,7 +75,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 				PRODUCT_EDITOR_FEEDBACK_CES_ACTION
 			),
 			allowTracking: allowTrackingOption === 'yes',
-			isFeedbackBarSetToShow: showFeedbackBarOptionValue === 'yes',
+			isFeedbackBarSetToShow: showFeedbackBarOption === 'yes',
 			resolving,
 		};
 	} );
