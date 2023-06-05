@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Unhook a duplicate Jetpack Contact Form button hook.

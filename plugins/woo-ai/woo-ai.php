@@ -53,6 +53,8 @@ function _woo_ai_bootstrap(): void {
 		}
 	} );
 
+	remove_action( 'media_buttons', array( Automattic\Jetpack\Forms\ContactForm\Admin::init(), 'grunion_media_button' ), 999 );
+
 	// Check if Jetpack is enabled.
 	if ( ! class_exists( 'Jetpack' ) ) {
 		include dirname( __FILE__ ) . '/includes/class-woo-ai-admin-notices.php';
