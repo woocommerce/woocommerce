@@ -13,14 +13,14 @@ import { useProductTour } from './use-product-tour';
 export const ProductTourContainer: React.FC = () => {
 	const { dismissModal, endTour, isModalHidden, isTouring, startTour } =
 		useProductTour();
-	const { showFeedbackBar } = useFeedbackBar();
+	const { showFeedbackBarIfNotPreviouslyHidden } = useFeedbackBar();
 
 	if ( isTouring ) {
 		return (
 			<ProductTour
 				onClose={ () => {
 					endTour();
-					showFeedbackBar();
+					showFeedbackBarIfNotPreviouslyHidden();
 				} }
 			/>
 		);
@@ -34,7 +34,7 @@ export const ProductTourContainer: React.FC = () => {
 		<ProductTourModal
 			onClose={ () => {
 				dismissModal();
-				showFeedbackBar();
+				showFeedbackBarIfNotPreviouslyHidden();
 			} }
 			onStart={ startTour }
 		/>

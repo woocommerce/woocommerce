@@ -18,8 +18,6 @@ const createProductWithStatus = jest.fn();
 const updateProductWithStatus = jest.fn();
 const copyProductWithStatus = jest.fn();
 const deleteProductAndRedirect = jest.fn();
-const onPublishCES = jest.fn().mockResolvedValue( {} );
-const onDraftCES = jest.fn().mockResolvedValue( {} );
 
 jest.mock( '@wordpress/plugins', () => ( { registerPlugin: jest.fn() } ) );
 
@@ -43,8 +41,9 @@ jest.mock( '@woocommerce/product-editor', () => {
 			deleteProductAndRedirect,
 		} ),
 		__experimentalUseFeedbackBar: () => ( {
-			onPublish: onPublishCES,
-			onSaveDraft: onDraftCES,
+			showFeedbackBarIfNotPreviouslyHidden: jest
+				.fn()
+				.mockResolvedValue( {} ),
 		} ),
 	};
 } );
