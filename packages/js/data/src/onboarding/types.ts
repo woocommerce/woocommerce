@@ -191,16 +191,6 @@ export type Extension = {
 
 export type InstallAndActivatePluginsAsyncResponse = {
 	job_id: string;
-	status: 'pending' | 'in-progress' | 'completed' | 'failed';
-	plugins: Array< {
-		status: 'pending' | 'installing' | 'installed' | 'activated' | 'failed';
-		errors: string[];
-		install_duration?: number;
-	} >;
-};
-
-export type InstallAndActivatePluginsAsyncResponse = {
-	job_id: string;
 	status: 'pendi<ng' | 'in-progress' | 'completed' | 'failed';
 	plugins: Array< {
 		status: 'pending' | 'installing' | 'installed' | 'activated' | 'failed';
