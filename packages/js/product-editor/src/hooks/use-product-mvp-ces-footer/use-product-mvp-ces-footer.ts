@@ -7,13 +7,13 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { PRODUCT_MVP_CES_ACTION_OPTION_NAME } from '../../constants';
+import { PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME } from '../../constants';
 
 async function isProductMVPCESHidden(): Promise< boolean > {
-	const productCESAction: string = await resolveSelect(
+	const optionValue: string = await resolveSelect(
 		OPTIONS_STORE_NAME
-	).getOption( PRODUCT_MVP_CES_ACTION_OPTION_NAME );
-	return productCESAction === 'hide';
+	).getOption( PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME );
+	return optionValue === 'no';
 }
 
 export const useProductMVPCESFooter = () => {
@@ -21,7 +21,7 @@ export const useProductMVPCESFooter = () => {
 
 	const showCesFooter = ( actionName = 'show' ) => {
 		updateOptions( {
-			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: actionName,
+			[ PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME ]: actionName,
 		} );
 	};
 

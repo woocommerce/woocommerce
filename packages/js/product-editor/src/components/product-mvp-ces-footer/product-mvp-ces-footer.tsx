@@ -24,7 +24,8 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import {
-	PRODUCT_MVP_CES_ACTION_OPTION_NAME,
+	PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME,
+	PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
 	NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME,
 } from '../../constants';
 
@@ -37,7 +38,7 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 		useDispatch( STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const {
-		cesAction,
+		wasFeedbackBarPreviouslyHidden,
 		allowTracking,
 		cesShownForActions,
 		resolving: isLoading,
@@ -45,8 +46,8 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 		const { getOption, hasFinishedResolution } =
 			select( OPTIONS_STORE_NAME );
 
-		const action = getOption(
-			PRODUCT_MVP_CES_ACTION_OPTION_NAME
+		const showFeedbackBarOptionValue = getOption(
+			PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME
 		) as string;
 
 		const shownForActions =
@@ -60,7 +61,7 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 				SHOWN_FOR_ACTIONS_OPTION_NAME,
 			] ) ||
 			! hasFinishedResolution( 'getOption', [
-				PRODUCT_MVP_CES_ACTION_OPTION_NAME,
+				PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME,
 			] ) ||
 			! hasFinishedResolution( 'getOption', [
 				ALLOW_TRACKING_OPTION_NAME,
@@ -69,7 +70,7 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 		return {
 			cesShownForActions: shownForActions,
 			allowTracking: allowTrackingOption === 'yes',
-			cesAction: action,
+			wasFeedbackBarPreviouslyHidden: showFeedbackBarOptionValue === 'no',
 			resolving,
 		};
 	} );
@@ -89,7 +90,7 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 
 		showCesModal(
 			{
-				action: cesAction,
+				action: PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
 				title: __(
 					"How's your experience with the product editor?",
 					'woocommerce'
@@ -114,9 +115,10 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 				icon: <span>🌟</span>,
 			}
 		);
+
 		updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-				cesAction,
+				PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
 				...cesShownForActions,
 			],
 		} );
@@ -128,7 +130,7 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 		} );
 
 		updateOptions( {
-			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
+			[ PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME ]: 'no',
 		} );
 		updateOptions( {
 			[ NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME ]: 'no',
@@ -142,16 +144,16 @@ export function ProductMVPCESFooter( { product }: ProductMVPCESFooterProps ) {
 		} );
 
 		updateOptions( {
-			[ PRODUCT_MVP_CES_ACTION_OPTION_NAME ]: 'hide',
+			[ PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME ]: 'no',
 		} );
 	};
 
-	const showCESFooter =
-		! isLoading && allowTracking && cesAction && cesAction !== 'hide';
+	const showFooter =
+		! isLoading && allowTracking && ! wasFeedbackBarPreviouslyHidden;
 
 	return (
 		<>
-			{ showCESFooter && (
+			{ showFooter && (
 				<WooFooterItem>
 					<div className="woocommerce-product-mvp-ces-footer">
 						<Pill>Beta</Pill>
