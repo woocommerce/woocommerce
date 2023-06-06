@@ -160,7 +160,7 @@ export const pluginInstallerMachine = createMachine(
 				invoke: {
 					src: 'queueRemainingPluginsAsync',
 					onDone: {
-						target: 'reportSuccess',
+						target: 'finished',
 					},
 				},
 			},
