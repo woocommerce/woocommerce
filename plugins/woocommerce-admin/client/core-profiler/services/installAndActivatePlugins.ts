@@ -126,7 +126,6 @@ export const pluginInstallerMachine = createMachine(
 									onDone: {
 										actions: [
 											'assignInstallationSuccessDetails',
-											'updateParentWithPluginProgress',
 										],
 										target: 'removeFromQueue',
 									},
@@ -138,7 +137,10 @@ export const pluginInstallerMachine = createMachine(
 								},
 							},
 							removeFromQueue: {
-								entry: 'removePluginFromQueue',
+								entry: [
+									'removePluginFromQueue',
+									'updateParentWithPluginProgress',
+								],
 								always: [
 									{
 										target: 'installing',
