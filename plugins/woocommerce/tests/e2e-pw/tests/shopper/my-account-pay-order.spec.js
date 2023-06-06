@@ -86,7 +86,7 @@ test.describe( 'Customer can pay for their order through My Account', () => {
 		// sign in as the "customer" user
 		await page.fill( '#username', customer.username );
 		await page.fill( '#password', customer.password );
-		await page.getByRole('button', { name: getTranslationFor('Log In') })
+		await page.getByRole('button', { name: getTranslationFor('Log in') })
 			.click();
 
 		await page.click( 'a.pay' );

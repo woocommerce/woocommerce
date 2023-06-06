@@ -173,7 +173,7 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		// sign in as admin to confirm account creation
 		await page.fill( '#username', admin.username );
 		await page.fill( '#password', admin.password );
-		await page.getByRole('button', { name: getTranslationFor('Log In') })
+		await page.getByRole('button', { name: getTranslationFor('Log in') })
 			.click();
 		
 		await page.goto( 'wp-admin/users.php' );

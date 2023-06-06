@@ -96,6 +96,7 @@ const en_US = {
     'Local pickup': 'Local pickup',
     '/Local pickup.*/': /Local pickup.*/,
     'Log In': 'Log In',
+    'Log in': 'Log In',
     'Log out': 'Log out',
     'Manage stock?': 'Manage stock?',
     'Marketing subpages': [
@@ -173,6 +174,8 @@ const en_US = {
         'Please select some product options before adding this product to your cart.',
     'Post name': 'Post name',
     'Product': 'Product',
+    'Product Left Surround/Quotes': '"',
+	'Product Right Surround/Quotes': '"',
     'Product name': 'Product name',
     'Products': 'Products',
     'Product data': 'Product data',

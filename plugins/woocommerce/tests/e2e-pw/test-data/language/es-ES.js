@@ -97,6 +97,7 @@ const es_ES = {
     'Local pickup': 'Recogida local',
     '/Local pickup.*/': /Recogida local.*/,
     'Log In': 'Acceder',
+    'Log in': 'Acceder',
     'Log out': 'Log out',
     'Manage stock?': '¿Gestionar inventario?',
     'manually': 'manualmente',
