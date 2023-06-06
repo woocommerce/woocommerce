@@ -77,7 +77,7 @@ An exception to the above are the [placeholder records](#placeholder-records): t
 
 ## Placeholder records
 
-Order ids must match in both the authoritative tables and the backup tables, otherwise synchronization wouldn't be possible. The order ids that are compared for order identification and synchronization purposes are the ones from the `id` field in both the `wp_wc_orders` table and the posts table.
+Order IDs must match in both the authoritative tables and the backup tables, otherwise synchronization wouldn't be possible. The order IDs that are compared for order identification and synchronization purposes are the ones from the `id` field in both the `wp_wc_orders` table and the posts table.
 
 If the posts table is authoritative achieving order id match is easy: the record in `wp_wc_orders` is created with the same id and that's it. However when the new orders tables are authoritative there's a problem: the posts table is used to store multiple types of data, not only orders; and by the time synchronization needs to happen, a non-order post could already exist having the same id as the order to synchronize.
 
