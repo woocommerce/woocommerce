@@ -146,6 +146,7 @@ class PageController {
 		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
 
 		self::add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
+		self::add_action( 'admin_title', array( $this, 'set_page_title' ) );
 	}
 
 	/**
@@ -158,6 +159,48 @@ class PageController {
 		if ( method_exists( $this, 'setup_action_' . $this->current_action ) ) {
 			$this->{"setup_action_{$this->current_action}"}();
 		}
+	}
+
+	/**
+	 * Set the document title for Orders screens to match what it would be with the shop_order CPT.
+	 *
+	 * @param string $admin_title
+	 *
+	 * @return string
+	 */
+	private function set_page_title( $admin_title ) {
+		if ( ! $this->is_order_screen( $this->order_type ) ) {
+			return $admin_title;
+		}
+
+		$wp_order_type = get_post_type_object( $this->order_type );
+		$labels        = get_post_type_labels( $wp_order_type );
+
+		if ( $this->is_order_screen( $this->order_type, 'list' ) ) {
+			$admin_title = sprintf(
+				// translators: 1. The label for an order type; 2. The name of the website;
+				esc_html__( '%1$s &lsaquo; %2$s &#8212; WordPress', 'woocommerce' ),
+				esc_html( $labels->name ),
+				esc_html( get_bloginfo( 'name' ) )
+			);
+		} else if ( $this->is_order_screen( $this->order_type, 'edit' ) ) {
+			$admin_title = sprintf(
+				// translators: 1. The label for an order type; 2. The title of the order; 3. The name of the website;
+				esc_html__( '%1$s &#8220;%2$s&#8221; &lsaquo; %3$s &#8212; WordPress', 'woocommerce' ),
+				esc_html( $labels->edit_item ),
+				esc_html( $this->order->get_title() ),
+				esc_html( get_bloginfo( 'name' ) )
+			);
+		} else if ( $this->is_order_screen( $this->order_type, 'new' ) ) {
+			$admin_title = sprintf(
+				// translators: 1. The label for an order type; 2. The name of the website;
+				esc_html__( '%1$s &lsaquo; %2$s &#8212; WordPress', 'woocommerce' ),
+				esc_html( $labels->add_new_item ),
+				esc_html( get_bloginfo( 'name' ) )
+			);
+		}
+
+		return $admin_title;
 	}
 
 	/**
