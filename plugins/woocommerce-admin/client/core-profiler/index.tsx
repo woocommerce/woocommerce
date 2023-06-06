@@ -1262,13 +1262,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						} ),
 					],
 					invoke: {
-			            src: pluginInstallerMachine,
-				        data: ( context ) => {
-					        return {
-						        selectedPlugins: context.pluginsSelected,
-					        };
-				        },					
-                    },
+						src: pluginInstallerMachine,
+						data: ( context ) => {
+							return {
+								selectedPlugins: context.pluginsSelected,
+							};
+						},
+					},
 					meta: {
 						component: Loader,
 					},
