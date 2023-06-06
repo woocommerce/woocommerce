@@ -21,7 +21,7 @@ For HPOS to be usable, the HPOS feature must first be enabled. This should be do
 
 ## Authoritative tables
 
-At any given time while the HPOS feature is enabled there are two roles for the involved set database tables: _authoritative_ and _backup_. The authoritative tables are the working tables, where order data will be stored to and retrieved from during normal operation of the store. The _backup_ tables will receive a copy of the authoritative data whenever [synchronization](#synchronization) happens. 
+At any given time, while the HPOS feature is enabled, there are two roles for the involved database tables: _authoritative_ and _backup_. The authoritative tables are the working tables, where order data will be stored to and retrieved from during normal operation of the store. The _backup_ tables will receive a copy of the authoritative data whenever [synchronization](#synchronization) happens. 
 
 If the `woocommerce_custom_orders_table_enabled` options is set to true, HPOS is active and [the new tables](#database-tables) are authoritative, while the posts and post meta tables act as the backup tables. If the option is set to false, it's the other way around. The option can be changed via admin UI (WooCommerce - Settings - Advanced - Custom data stores).
 
