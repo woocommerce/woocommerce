@@ -1289,11 +1289,11 @@ class WC_Countries {
 					'KN' => array(
 						'postcode' => array(
 							'required' => false,
-							'label' => __( 'Postal code', 'woocommerce' ),
+							'label'    => __( 'Postal code', 'woocommerce' ),
 						),
 						'state'    => array(
 							'required' => true,
-							'label' => __( 'Parish', 'woocommerce' ),
+							'label'    => __( 'Parish', 'woocommerce' ),
 						),
 					),
 					'KR' => array(
