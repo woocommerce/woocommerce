@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTempla
 /**
  * Simple product template.
  */
-class SimpleProductTemplate implements ProductTemplateInterface {
+class SimpleProductTemplate extends BaseProductTemplate implements ProductTemplateInterface {
 
 	/**
 	 * Get the name of the template.
@@ -21,7 +21,7 @@ class SimpleProductTemplate implements ProductTemplateInterface {
 	 *
 	 * @return array Array of blocks
 	 */
-    public function get_template() {
+    public function get_template_old() {
         return array(
             array(
                 'woocommerce/product-tab',
