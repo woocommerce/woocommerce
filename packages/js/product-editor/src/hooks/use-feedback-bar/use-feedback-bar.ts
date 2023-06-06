@@ -25,7 +25,7 @@ export const useFeedbackBar = () => {
 		} );
 	};
 
-	const showFeedbackBarIfNotPreviouslyHidden = async () => {
+	const maybeShowFeedbackBar = async () => {
 		if ( ( await wasFeedbackBarPreviouslyHidden() ) === false ) {
 			showFeedbackBar();
 		}
@@ -38,7 +38,7 @@ export const useFeedbackBar = () => {
 	};
 
 	return {
-		showFeedbackBarIfNotPreviouslyHidden,
+		maybeShowFeedbackBar,
 		hideFeedbackBar,
 	};
 };
