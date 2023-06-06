@@ -99,9 +99,8 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 								resize: true,
 							},
 						},
-						portalParentElement: document.getElementById(
-							'wpbody'
-						),
+						portalParentElement:
+							document.getElementById( 'wpbody' ),
 						popperModifiers: [
 							{
 								name: 'bottom-left',

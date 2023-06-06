@@ -5,6 +5,9 @@
 import { Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
 import './style.scss';
 
 interface Props {
