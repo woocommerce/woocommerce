@@ -88,10 +88,3 @@ describe( 'pluginInstallerMachine', () => {
 		} );
 	} );
 } );
-
-// TODO: write more tests, I ran out of time and it's friday night
-// we need tests for:
-// 1. when given multiple plugins it should call the installPlugin service multiple times with the right plugins
-// 2. when given multiple plugins and a mocked delay using the config, we can mock the installs to take longer than the timeout and then some plugins should not finish installing, then it should add the remaining to async queue
-// 3. when a plugin gives an error it should report the error to the parents. we can check this by mocking 'updateParentWithInstallationErrors'
-// 4. it should update parent with the plugin installation progress, we can check this by mocking the action 'updateParentWithPluginProgress'
