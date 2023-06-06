@@ -75,8 +75,6 @@ class WC_Settings_Tracking {
 		add_action( 'woocommerce_settings_page_init', array( $this, 'track_settings_page_view' ) );
 		add_action( 'woocommerce_update_option', array( $this, 'add_option_to_list' ) );
 		add_action( 'woocommerce_update_non_option_setting', array( $this, 'add_option_to_list_and_track_setting_change' ) );
-		add_action( 'woocommerce_delete_non_option_setting', array( $this, 'add_option_to_list_and_track_setting_delete' ) );
-		add_action( 'woocommerce_add_non_option_setting', array( $this, 'add_option_to_list_and_track_setting_added' ) );
 		add_action( 'woocommerce_update_options', array( $this, 'send_settings_change_event' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_settings_tracking_scripts' ) );
 	}
@@ -91,38 +89,12 @@ class WC_Settings_Tracking {
 		if ( ! in_array( $option['id'], $this->allowed_options, true ) ) {
 			$this->allowed_options[] = $option['id'];
 		}
-		if ( ! in_array( $option['id'], $this->updated_options, true ) ) {
-			$this->updated_options[] = $option['id'];
-		}
-	}
-
-	/**
-	 * Adds the option to the allowed and deleted options directly.
-	 * Currently used for settings that don't use update_option.
-	 *
-	 * @param array $option WooCommerce option that should be deleted.
-	 */
-	public function add_option_to_list_and_track_setting_delete( $option ) {
-		if ( ! in_array( $option['id'], $this->allowed_options, true ) ) {
-			$this->allowed_options[] = $option['id'];
-		}
-		if ( ! in_array( $option['id'], $this->deleted_options, true ) ) {
-			$this->deleted_options[] = $option['id'];
-		}
-	}
-
-	/**
-	 * Adds the option to the allowed and added options directly.
-	 * Currently used for settings that don't use update_option.
-	 *
-	 * @param array $option WooCommerce option that should be added.
-	 */
-	public function add_option_to_list_and_track_setting_added( $option ) {
-		if ( ! in_array( $option['id'], $this->allowed_options, true ) ) {
-			$this->allowed_options[] = $option['id'];
-		}
-		if ( ! in_array( $option['id'], $this->added_options, true ) ) {
+		if ( 'add' === $option['action'] ) {
 			$this->added_options[] = $option['id'];
+		} elseif ( 'delete' === $option['action'] ) {
+			$this->deleted_options[] = $option['id'];
+		} elseif ( ! in_array( $option['id'], $this->updated_options, true ) ) {
+			$this->updated_options[] = $option['id'];
 		}
 	}
 

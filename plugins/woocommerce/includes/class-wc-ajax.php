@@ -3000,9 +3000,10 @@ class WC_AJAX {
 				 * @since 7.8.0
 				 */
 				do_action(
-					'woocommerce_delete_non_option_setting',
+					'woocommerce_update_non_option_setting',
 					array(
-						'id' => 'shipping_zone',
+						'id'     => 'shipping_zone',
+						'action' => 'delete',
 					)
 				);
 				WC_Shipping_Zones::delete_zone( $zone_id );
@@ -3075,13 +3076,20 @@ class WC_AJAX {
 
 		$zone_id = wc_clean( wp_unslash( $_POST['zone_id'] ) );
 		$zone    = new WC_Shipping_Zone( $zone_id );
+		// A shipping zone can be created here if the user is adding a method without first saving the shipping zone.
 		if ( '' === $zone_id ) {
 			/**
 			 * Notified that a non-option setting has been added.
 			 *
 			 * @since 7.8.0
 			 */
-			do_action( 'woocommerce_add_non_option_setting', array( 'id' => 'shipping_zone' ) );
+			do_action(
+				'woocommerce_update_non_option_setting',
+				array(
+					'id'     => 'shipping_zone',
+					'action' => 'add',
+				)
+			);
 		}
 		/**
 		 * Notify that a non-option setting has been added.
@@ -3089,9 +3097,10 @@ class WC_AJAX {
 		 * @since 7.8.0
 		 */
 		do_action(
-			'woocommerce_add_non_option_setting',
+			'woocommerce_update_non_option_setting',
 			array(
-				'id' => 'zone_method',
+				'id'     => 'zone_method',
+				'action' => 'add',
 			)
 		);
 		$instance_id = $zone->add_shipping_method( wc_clean( wp_unslash( $_POST['method_id'] ) ) );
@@ -3138,13 +3147,20 @@ class WC_AJAX {
 
 		$zone_id = wc_clean( wp_unslash( $_POST['zone_id'] ) );
 		$zone    = new WC_Shipping_Zone( $zone_id );
+		// A shipping zone can be created here if the user is adding a method without first saving the shipping zone.
 		if ( '' === $zone_id ) {
 			/**
 			 * Notifies that a non-option setting has been added.
 			 *
 			 * @since 7.8.0
 			 */
-			do_action( 'woocommerce_add_non_option_setting', array( 'id' => 'shipping_zone' ) );
+			do_action(
+				'woocommerce_update_non_option_setting',
+				array(
+					'id'     => 'shipping_zone',
+					'action' => 'add',
+				)
+			);
 		}
 		$changes = wp_unslash( $_POST['changes'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
@@ -3212,7 +3228,13 @@ class WC_AJAX {
 						 *
 						 * @since 7.8.0
 						 */
-						do_action( 'woocommerce_delete_non_option_setting', array( 'id' => 'zone_method' ) );
+						do_action(
+							'woocommerce_update_non_option_setting',
+							array(
+								'id'     => 'zone_method',
+								'action' => 'delete',
+							)
+						);
 						do_action( 'woocommerce_shipping_zone_method_deleted', $instance_id, $method_id, $zone_id );
 					}
 					continue;
@@ -3358,7 +3380,13 @@ class WC_AJAX {
 				 *
 				 * @since 7.8.0
 				 */
-				do_action( 'woocommerce_delete_non_option_setting', array( 'id' => 'shipping_class' ) );
+				do_action(
+					'woocommerce_update_non_option_setting',
+					array(
+						'id'     => 'shipping_class',
+						'action' => 'delete',
+					)
+				);
 				wp_delete_term( $term_id, 'product_shipping_class' );
 				continue;
 			}
@@ -3405,7 +3433,13 @@ class WC_AJAX {
 				 *
 				 * @since 7.8.0
 				 */
-				do_action( 'woocommerce_add_non_option_setting', array( 'id' => 'shipping_class' ) );
+				do_action(
+					'woocommerce_update_non_option_setting',
+					array(
+						'id'     => 'shipping_class',
+						'action' => 'add',
+					)
+				);
 				$inserted_term = wp_insert_term( $update_args['name'], 'product_shipping_class', $update_args );
 				$term_id       = is_wp_error( $inserted_term ) ? 0 : $inserted_term['term_id'];
 			} else {
