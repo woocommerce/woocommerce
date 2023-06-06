@@ -68,7 +68,7 @@ If the `woocommerce_auto_flip_authoritative_table_roles` option is set to true (
 
 ### Deletion synchronization
 
-Synchronization of order deletions is tricky: if an order exists in one set of tables (new tables or posts) but not in the other, it's not clear if the missing orders need to be created or if the existing orders need to be deleted. Theorically, the orders missing from the backup tables imply the former and the orders missing from the authoritative tables imply the later; but that's dangerous as a bug in the involved code could easily lead to the deletion of legitimate orders.
+Synchronization of order deletions is tricky: if an order exists in one set of tables (new tables or posts) but not in the other, it's not clear if the missing orders need to be created or if the existing orders need to be deleted. Theoretically, the orders missing from the backup tables imply the former and the orders missing from the authoritative tables imply the latter; but that's dangerous as a bug in the involved code could easily lead to the deletion of legitimate orders.
 
 To achieve a robust order deletion syncrhonization mechanism the following is done. Whenever an order is deleted and immediate synchronization is disabled, a record is created in the `wp_wc_orders_meta` table that has `deleted_from` as the key and the name of the authoritative table the order was deleted from (`wp_wc_orders` or the posts table). Then at synchronization time these records are processed (the corresponding orders are deleted from the corresponding tables) and deleted afterwards.
 
