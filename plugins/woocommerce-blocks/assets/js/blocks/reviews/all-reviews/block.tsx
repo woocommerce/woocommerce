@@ -4,18 +4,18 @@
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl } from '@wordpress/components';
-import PropTypes from 'prop-types';
 import { Icon, postComments } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import EditorContainerBlock from '../editor-container-block.js';
-import NoReviewsPlaceholder from './no-reviews-placeholder.js';
+import NoReviewsPlaceholder from './no-reviews-placeholder';
 import {
 	getSharedReviewContentControls,
 	getSharedReviewListControls,
 } from '../edit-utils.js';
+import type { AllReviewsEditorProps } from './types';
 
 /**
  * Component to handle edit mode of "All Reviews".
@@ -24,7 +24,10 @@ import {
  * @param {Object}            props.attributes    Incoming block attributes.
  * @param {function(any):any} props.setAttributes Setter for block attributes.
  */
-const AllReviewsEditor = ( { attributes, setAttributes } ) => {
+const AllReviewsEditor = ( {
+	attributes,
+	setAttributes,
+}: AllReviewsEditorProps ) => {
 	const getInspectorControls = () => {
 		return (
 			<InspectorControls key="inspector">
@@ -72,25 +75,10 @@ const AllReviewsEditor = ( { attributes, setAttributes } ) => {
 					/>
 				}
 				name={ __( 'All Reviews', 'woo-gutenberg-products-block' ) }
-				noReviewsPlaceholder={ NoReviewsPlaceholder }
+				noReviewsPlaceholder={ NoReviewsPlaceholder() }
 			/>
 		</>
 	);
-};
-
-AllReviewsEditor.propTypes = {
-	/**
-	 * The attributes for this block.
-	 */
-	attributes: PropTypes.object.isRequired,
-	/**
-	 * The register block name.
-	 */
-	name: PropTypes.string.isRequired,
-	/**
-	 * A callback to update attributes.
-	 */
-	setAttributes: PropTypes.func.isRequired,
 };
 
 export default AllReviewsEditor;

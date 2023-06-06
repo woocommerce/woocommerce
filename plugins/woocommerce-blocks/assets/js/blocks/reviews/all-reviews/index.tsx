@@ -9,10 +9,11 @@ import { Icon, postComments } from '@wordpress/icons';
  * Internal dependencies
  */
 import '../editor.scss';
-import edit from './edit';
+import { Edit } from './edit';
 import sharedAttributes from '../attributes';
 import save from '../save.js';
 import { example } from '../example';
+import type { AllReviewsEditorProps } from './types';
 
 /**
  * Register and run the "All Reviews" block.
@@ -68,7 +69,7 @@ registerBlockType( 'woocommerce/all-reviews', {
 				type: 'block',
 				blocks: [ 'core/legacy-widget' ],
 				// We can't transform if raw instance isn't shown in the REST API.
-				isMatch: ( { idBase, instance } ) =>
+				isMatch: ( { idBase, instance }: AllReviewsEditorProps ) =>
 					idBase === 'woocommerce_recent_reviews' && !! instance?.raw,
 				transform: ( { instance } ) =>
 					createBlock( 'woocommerce/all-reviews', {
@@ -83,6 +84,6 @@ registerBlockType( 'woocommerce/all-reviews', {
 		],
 	},
 
-	edit,
+	edit: Edit,
 	save,
 } );
