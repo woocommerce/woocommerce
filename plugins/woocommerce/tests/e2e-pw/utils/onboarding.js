@@ -1,5 +1,6 @@
 const { expect } = require( '@playwright/test' );
 const { getTranslationFor } = require( './../test-data/data' );
+const {	LANGUAGE } = process.env;
 
 const STORE_DETAILS_URL = 'wp-admin/admin.php?page=wc-admin&path=/setup-wizard';
 const INDUSTRY_DETAILS_URL =
@@ -19,6 +20,18 @@ const onboarding = {
 			store.country
 		);
 		await page.click( `button >> text=${ store.country }` );
+
+		// There is a bug with French Sites where the previous
+		// action does not take on first attempt:
+		// https://github.com/woocommerce/woocommerce/issues/38622
+		if ( LANGUAGE === 'fr_FR' ) {
+			await page.click( '#woocommerce-select-control-0__control-input' );
+			await page.fill(
+				'#woocommerce-select-control-0__control-input',
+				store.country
+			);
+			await page.click( `button >> text=${ store.country }` );
+		}
 		// Fill store's address - first line
 		await page.fill( '#inspector-text-control-0', store.address );
 		// Fill postcode of the store

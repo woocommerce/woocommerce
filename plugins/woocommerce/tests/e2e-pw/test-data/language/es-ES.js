@@ -176,6 +176,8 @@ const es_ES = {
         'Elige las opciones del producto antes de añadir este producto a tu carrito.',
     'Post name': 'Nombre de la entrada',
     'Product': 'Producto',
+    'Product Left Surround/Quotes': '“',
+	'Product Right Surround/Quotes': '”',
     'Product draft updated. ': 'Borrador del producto actualizado. ',
     'Product name': 'Nombre del producto',
     'Products': 'Productos',
