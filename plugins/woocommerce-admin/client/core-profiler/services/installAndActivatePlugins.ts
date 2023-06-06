@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Extension, PLUGINS_STORE_NAME, PluginNames } from '@woocommerce/data';
+import { PLUGINS_STORE_NAME, PluginNames } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 import { differenceWith } from 'lodash';
 

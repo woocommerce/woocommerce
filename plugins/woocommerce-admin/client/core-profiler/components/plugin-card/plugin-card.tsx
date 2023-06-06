@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 import { CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { Link } from '@woocommerce/components';
+
 /**
  * Internal dependencies
  */
