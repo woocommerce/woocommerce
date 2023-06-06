@@ -48,6 +48,7 @@ describe( 'pluginInstallerMachine', () => {
 			.withContext( {
 				...defaultContext,
 				selectedPlugins: [ 'woocommerce-payments' ],
+				pluginsAvailable: [],
 			} );
 
 		dispatchInstallPluginMock.mockImplementationOnce( ( context ) => {
