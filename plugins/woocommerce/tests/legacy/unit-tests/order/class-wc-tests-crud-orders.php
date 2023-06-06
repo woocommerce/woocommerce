@@ -751,7 +751,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		WC()->cart->calculate_shipping();
 
 		// product 3 is shippable to illinois and california with a different rate.
-		$this->assertEquals( (string) ( 10 * $shipping_class_4['term_id'] ), WC()->cart->get_shipping_total() );
+		$this->assertEquals( (string) ( ( 10 * $shipping_class_4['term_id'] ) + ( 10 * $shipping_class_3['term_id'] ) ), WC()->cart->get_shipping_total() );
 
 		WC()->cart->add_to_cart( $product_4->get_id(), 1 );
 
