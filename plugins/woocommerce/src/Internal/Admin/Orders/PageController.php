@@ -164,9 +164,9 @@ class PageController {
 	/**
 	 * Set the document title for Orders screens to match what it would be with the shop_order CPT.
 	 *
-	 * @param string $admin_title
+	 * @param string $admin_title The admin screen title before it's filtered.
 	 *
-	 * @return string
+	 * @return string The filtered admin title.
 	 */
 	private function set_page_title( $admin_title ) {
 		if ( ! $this->is_order_screen( $this->order_type ) ) {
@@ -178,22 +178,22 @@ class PageController {
 
 		if ( $this->is_order_screen( $this->order_type, 'list' ) ) {
 			$admin_title = sprintf(
-				// translators: 1: The label for an order type 2: The name of the website
+				// translators: 1: The label for an order type 2: The name of the website.
 				esc_html__( '%1$s &lsaquo; %2$s &#8212; WordPress', 'woocommerce' ),
 				esc_html( $labels->name ),
 				esc_html( get_bloginfo( 'name' ) )
 			);
-		} else if ( $this->is_order_screen( $this->order_type, 'edit' ) ) {
+		} elseif ( $this->is_order_screen( $this->order_type, 'edit' ) ) {
 			$admin_title = sprintf(
-				// translators: 1: The label for an order type 2: The title of the order 3: The name of the website
+				// translators: 1: The label for an order type 2: The title of the order 3: The name of the website.
 				esc_html__( '%1$s #%2$s &lsaquo; %3$s &#8212; WordPress', 'woocommerce' ),
 				esc_html( $labels->edit_item ),
 				absint( $this->order->get_id() ),
 				esc_html( get_bloginfo( 'name' ) )
 			);
-		} else if ( $this->is_order_screen( $this->order_type, 'new' ) ) {
+		} elseif ( $this->is_order_screen( $this->order_type, 'new' ) ) {
 			$admin_title = sprintf(
-				// translators: 1: The label for an order type 2: The name of the website
+				// translators: 1: The label for an order type 2: The name of the website.
 				esc_html__( '%1$s &lsaquo; %2$s &#8212; WordPress', 'woocommerce' ),
 				esc_html( $labels->add_new_item ),
 				esc_html( get_bloginfo( 'name' ) )
