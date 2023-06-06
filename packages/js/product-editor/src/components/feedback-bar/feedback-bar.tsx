@@ -38,10 +38,8 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 		useDispatch( STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const {
-		isFeedbackBarSetToShow,
-		allowTracking,
+		shouldShowFeedbackBar,
 		cesShownForActions,
-		wasFeedbackModalPreviouslyShown,
 		resolving: isLoading,
 	} = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } =
@@ -70,11 +68,12 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 
 		return {
 			cesShownForActions: shownForActions,
-			wasFeedbackModalPreviouslyShown: shownForActions.includes(
-				PRODUCT_EDITOR_FEEDBACK_CES_ACTION
-			),
-			allowTracking: allowTrackingOption === 'yes',
-			isFeedbackBarSetToShow: showFeedbackBarOption === 'yes',
+			shouldShowFeedbackBar:
+				allowTrackingOption === 'yes' &&
+				! shownForActions.includes(
+					PRODUCT_EDITOR_FEEDBACK_CES_ACTION
+				) &&
+				showFeedbackBarOption === 'yes',
 			resolving,
 		};
 	} );
@@ -152,11 +151,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 		hideFeedbackBar();
 	};
 
-	const shouldRenderFeedbackBar =
-		! isLoading &&
-		allowTracking &&
-		! wasFeedbackModalPreviouslyShown &&
-		isFeedbackBarSetToShow;
+	const shouldRenderFeedbackBar = ! isLoading && shouldShowFeedbackBar;
 
 	return (
 		<>
