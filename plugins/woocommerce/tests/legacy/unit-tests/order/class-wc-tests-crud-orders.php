@@ -790,7 +790,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		// product_3 cant be combined with product_4. Each flat rate has cost only for one of those classes.
 		$this->assertEquals( '0', WC()->cart->get_shipping_total() );
 
-		WC_Helper_Shipping_Zones::remove_mock_zones();
+		$zone_1->delete( true );
+		$zone_2->delete( true );
+		$zone_3->delete( true );
 	}
 
 	/**
