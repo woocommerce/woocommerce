@@ -1286,6 +1286,16 @@ class WC_Countries {
 							'priority' => 69,
 						),
 					),
+					'KN' => array(
+						'postcode' => array(
+							'required' => false,
+							'label' => __( 'Postal code', 'woocommerce' ),
+						),
+						'state'    => array(
+							'required' => true,
+							'label' => __( 'Parish', 'woocommerce' ),
+						),
+					),
 					'KR' => array(
 						'state' => array(
 							'required' => false,
