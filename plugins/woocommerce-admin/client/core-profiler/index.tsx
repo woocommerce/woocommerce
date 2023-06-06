@@ -459,7 +459,7 @@ const coreProfilerMachineServices = {
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
-	initial: 'initializing',
+	initial: 'introOptIn',
 	predictableActionArguments: true, // recommended setting: https://xstate.js.org/docs/guides/actions.html
 	context: {
 		// these are safe default values if for some reason the steps fail to complete correctly
@@ -481,95 +481,106 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		onboardingProfile: {} as OnboardingProfile,
 	} as CoreProfilerStateMachineContext,
 	states: {
-		initializing: {
-			entry: [
-				// these prefetch tasks are spawned actors in the background and do not block progression of the state machine
-				'preFetchGetPlugins',
-				'preFetchGetCountries',
-				{
-					type: 'preFetchOptions',
-					options: [
-						'blogname',
-						'woocommerce_onboarding_profile',
-						'woocommerce_default_country',
-					],
-				},
-			],
-			type: 'parallel',
+		introOptIn: {
+			id: 'introOptIn',
+			initial: 'preIntroOptIn',
 			states: {
-				// if we have any other init tasks to do in parallel, add them as a parallel state here.
-				// this blocks the introOptIn UI from loading keep that in mind when adding new tasks here
-				trackingOption: {
-					initial: 'fetching',
+				preIntroOptIn: {
+					entry: [
+						// these prefetch tasks are spawned actors in the background and do not block progression of the state machine
+						'preFetchGetPlugins',
+						'preFetchGetCountries',
+						{
+							type: 'preFetchOptions',
+							options: [
+								'blogname',
+								'woocommerce_onboarding_profile',
+								'woocommerce_default_country',
+							],
+						},
+					],
+					type: 'parallel',
 					states: {
-						fetching: {
-							invoke: {
-								src: 'getAllowTrackingOption',
-								onDone: [
-									{
-										actions: [ 'handleTrackingOption' ],
-										target: 'done',
+						// if we have any other init tasks to do in parallel, add them as a parallel state here.
+						// this blocks the introOptIn UI from loading keep that in mind when adding new tasks here
+						trackingOption: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getAllowTrackingOption',
+										onDone: [
+											{
+												actions: [
+													'handleTrackingOption',
+												],
+												target: 'done',
+											},
+										],
+										onError: {
+											target: 'done', // leave it as initialised default on error
+										},
 									},
-								],
-								onError: {
-									target: 'done', // leave it as initialised default on error
+								},
+								done: {
+									type: 'final',
 								},
 							},
 						},
-						done: {
-							type: 'final',
-						},
+					},
+					onDone: {
+						target: 'introOptIn',
+					},
+					meta: {
+						progress: 0,
 					},
 				},
-			},
-			onDone: {
-				target: '#introOptIn',
-			},
-			meta: {
-				progress: 0,
-			},
-		},
-		introOptIn: {
-			id: 'introOptIn',
-			on: {
-				INTRO_COMPLETED: {
-					target: '#userProfile',
-					actions: [
-						'assignOptInDataSharing',
-						'updateTrackingOption',
-					],
-				},
-				INTRO_SKIPPED: {
-					// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
-					target: '#skipGuidedSetup',
-					actions: [
-						'assignOptInDataSharing',
-						'updateTrackingOption',
-					],
-				},
-			},
-			entry: [
-				{ type: 'recordTracksStepViewed', step: 'store_details' },
-			],
-			exit: actions.choose( [
-				{
-					cond: ( _context, event ) =>
-						event.type === 'INTRO_COMPLETED',
-					actions: 'recordTracksIntroCompleted',
-				},
-				{
-					cond: ( _context, event ) => event.type === 'INTRO_SKIPPED',
-					actions: [
+				introOptIn: {
+					on: {
+						INTRO_COMPLETED: {
+							target: '#userProfile',
+							actions: [
+								'assignOptInDataSharing',
+								'updateTrackingOption',
+							],
+						},
+						INTRO_SKIPPED: {
+							// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
+							target: '#skipGuidedSetup',
+							actions: [
+								'assignOptInDataSharing',
+								'updateTrackingOption',
+							],
+						},
+					},
+					entry: [
 						{
-							type: 'recordTracksStepSkipped',
+							type: 'recordTracksStepViewed',
 							step: 'store_details',
 						},
 					],
+					exit: actions.choose( [
+						{
+							cond: ( _context, event ) =>
+								event.type === 'INTRO_COMPLETED',
+							actions: 'recordTracksIntroCompleted',
+						},
+						{
+							cond: ( _context, event ) =>
+								event.type === 'INTRO_SKIPPED',
+							actions: [
+								{
+									type: 'recordTracksStepSkipped',
+									step: 'store_details',
+								},
+							],
+						},
+					] ),
+					meta: {
+						progress: 20,
+						component: IntroOptIn,
+					},
 				},
-			] ),
-			meta: {
-				progress: 20,
-				component: IntroOptIn,
 			},
 		},
 		userProfile: {
