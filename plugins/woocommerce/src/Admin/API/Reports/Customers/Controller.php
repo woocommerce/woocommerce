@@ -354,6 +354,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'name',
 				'username',
 				'email',
+				'all',
 			),
 		);
 		$params['name_includes']           = array(

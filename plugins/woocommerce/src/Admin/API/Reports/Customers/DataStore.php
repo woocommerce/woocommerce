@@ -297,6 +297,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'name',
 			'username',
 			'email',
+			'all',
 		);
 
 		if ( ! empty( $query_args['search'] ) ) {
@@ -304,6 +305,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			if ( empty( $query_args['searchby'] ) || 'name' === $query_args['searchby'] || ! in_array( $query_args['searchby'], $search_params, true ) ) {
 				$searchby = "CONCAT_WS( ' ', first_name, last_name )";
+			} elseif ( 'all' === $query_args['searchby'] ) {
+				$searchby = "CONCAT_WS( ' ', first_name, last_name, username, email )";
 			} else {
 				$searchby = $query_args['searchby'];
 			}
