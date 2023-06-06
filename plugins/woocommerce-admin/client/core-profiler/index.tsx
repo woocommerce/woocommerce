@@ -16,7 +16,6 @@ import {
 	GeolocationResponse,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { getSetting } from '@woocommerce/settings';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
 
@@ -48,6 +47,7 @@ import {
 	PluginInstallError,
 } from './services/installAndActivatePlugins';
 import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
+import recordTracksActions from './actions/tracks';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -208,20 +208,23 @@ const handleStoreCountryOption = assign( {
 const preFetchGetCountries = assign( {
 	spawnGetCountriesRef: () =>
 		spawn(
-			resolveSelect( COUNTRIES_STORE_NAME ).getCountries(),
+			() => resolveSelect( COUNTRIES_STORE_NAME ).getCountries(),
 			'core-profiler-prefetch-countries'
 		),
 } );
 
 const preFetchOptions = assign( {
-	spawnPrefetchOptionsRef: ( _ctx, _evt, { action } ) => {
+	spawnPrefetchOptionsRef: ( _context, _event, { action } ) => {
 		spawn(
-			Promise.all( [
-				// @ts-expect-error -- not sure its possible to type this yet, maybe in xstate v5
-				action.options.map( ( optionName: string ) =>
-					resolveSelect( OPTIONS_STORE_NAME ).getOption( optionName )
-				),
-			] ),
+			() =>
+				Promise.all( [
+					// @ts-expect-error -- not sure its possible to type this yet, maybe in xstate v5
+					action.options.map( ( optionName: string ) =>
+						resolveSelect( OPTIONS_STORE_NAME ).getOption(
+							optionName
+						)
+					),
+				] ),
 			'core-profiler-prefetch-options'
 		);
 	},
@@ -282,7 +285,7 @@ const getGeolocation = async ( context: CoreProfilerStateMachineContext ) => {
 const preFetchGeolocation = assign( {
 	spawnGeolocationRef: ( context: CoreProfilerStateMachineContext ) =>
 		spawn(
-			getGeolocation( context ),
+			() => getGeolocation( context ),
 			'core-profiler-prefetch-geolocation'
 		),
 } );
@@ -301,107 +304,6 @@ const redirectToWooHome = () => {
 	 * @todo replace with navigateTo
 	 */
 	window.location.href = '/wp-admin/admin.php?page=wc-admin';
-};
-
-const recordTracksIntroCompleted = () => {
-	recordEvent( 'storeprofiler_step_complete', {
-		step: 'store_details',
-		wc_version: getSetting( 'wcVersion' ),
-	} );
-};
-
-const recordTracksIntroSkipped = () => {
-	recordEvent( 'storeprofiler_store_details_skip' );
-};
-
-const recordTracksIntroViewed = () => {
-	recordEvent( 'storeprofiler_step_view', {
-		step: 'store_details',
-		wc_version: getSetting( 'wcVersion' ),
-	} );
-};
-
-const recordTracksUserProfileViewed = () => {
-	recordEvent( 'storeprofiler_step_view', {
-		step: 'user_profile',
-		wc_version: getSetting( 'wcVersion' ),
-	} );
-};
-
-const recordTracksPluginsViewed = () => {
-	recordEvent( 'storeprofiler_step_view', {
-		step: 'plugins',
-		wc_version: getSetting( 'wcVersion' ),
-	} );
-};
-
-const recordTracksUserProfileCompleted = (
-	_context: CoreProfilerStateMachineContext,
-	event: Extract< UserProfileEvent, { type: 'USER_PROFILE_COMPLETED' } >
-) => {
-	recordEvent( 'storeprofiler_step_complete', {
-		step: 'user_profile',
-		wc_version: getSetting( 'wcVersion' ),
-	} );
-
-	recordEvent( 'storeprofiler_user_profile', {
-		business_choice: event.payload.userProfile.businessChoice,
-		selling_online_answer: event.payload.userProfile.sellingOnlineAnswer,
-		selling_platforms: event.payload.userProfile.sellingPlatforms
-			? event.payload.userProfile.sellingPlatforms.join()
-			: null,
-	} );
-};
-
-const recordTracksUserProfileSkipped = () => {
-	recordEvent( 'storeprofiler_user_profile_skip' );
-};
-
-const recordTracksPluginsSkipped = () => {
-	recordEvent( 'storeprofiler_plugins_skip' );
-};
-
-const recordTracksBusinessInfoViewed = () => {
-	recordEvent( 'storeprofiler_step_view', {
-		step: 'business_info',
-		wc_version: getSetting( 'wcVersion' ),
-	} );
-};
-
-const recordTracksBusinessInfoCompleted = (
-	_context: CoreProfilerStateMachineContext,
-	event: Extract< BusinessInfoEvent, { type: 'BUSINESS_INFO_COMPLETED' } >
-) => {
-	recordEvent( 'storeprofiler_step_complete', {
-		step: 'business_info',
-		wc_version: getSetting( 'wcVersion' ),
-	} );
-
-	recordEvent( 'storeprofiler_business_info', {
-		business_name_filled:
-			POSSIBLY_DEFAULT_STORE_NAMES.findIndex(
-				( name ) => name === event.payload.storeName
-			) === -1,
-		industry: event.payload.industry,
-		store_location_previously_set:
-			_context.onboardingProfile.is_store_country_set || false,
-		geolocation_success: _context.geolocatedLocation !== undefined,
-		geolocation_overruled: event.payload.geolocationOverruled,
-	} );
-};
-
-const recordTracksSkipBusinessLocationViewed = () => {
-	recordEvent( 'storeprofiler_step_view', {
-		step: 'skip_business_location',
-		wc_version: getSetting( 'wcVersion' ),
-	} );
-};
-
-const recordTracksSkipBusinessLocationCompleted = () => {
-	recordEvent( 'storeprofiler_step_complete', {
-		step: 'skip_business_location',
-		wc_version: getSetting( 'wcVersion' ),
-	} );
 };
 
 const updateTrackingOption = (
@@ -449,7 +351,7 @@ const updateBusinessLocation = ( countryAndState: string ) => {
 };
 
 const updateBusinessInfo = async (
-	_ctx: CoreProfilerStateMachineContext,
+	_context: CoreProfilerStateMachineContext,
 	event: BusinessInfoEvent
 ) => {
 	const refreshedOnboardingProfile = ( await resolveSelect(
@@ -468,11 +370,11 @@ const updateBusinessInfo = async (
 
 const persistBusinessInfo = assign( {
 	persistBusinessInfoRef: (
-		_ctx: CoreProfilerStateMachineContext,
+		context: CoreProfilerStateMachineContext,
 		event: BusinessInfoEvent
 	) =>
 		spawn(
-			updateBusinessInfo( _ctx, event ),
+			() => updateBusinessInfo( context, event ),
 			'core-profiler-update-business-info'
 		),
 } );
@@ -497,7 +399,7 @@ const assignOptInDataSharing = assign( {
 const preFetchGetPlugins = assign( {
 	extensionsRef: () =>
 		spawn(
-			resolveSelect( ONBOARDING_STORE_NAME ).getFreeExtensions(),
+			() => resolveSelect( ONBOARDING_STORE_NAME ).getFreeExtensions(),
 			'core-profiler-prefetch-extensions'
 		),
 } );
@@ -526,21 +428,6 @@ export const preFetchActions = {
 	preFetchGetCountries,
 	preFetchGeolocation,
 	preFetchOptions,
-};
-
-export const recordTracksActions = {
-	recordTracksIntroCompleted,
-	recordTracksIntroSkipped,
-	recordTracksIntroViewed,
-	recordTracksUserProfileCompleted,
-	recordTracksUserProfileSkipped,
-	recordTracksUserProfileViewed,
-	recordTracksPluginsViewed,
-	recordTracksPluginsSkipped,
-	recordTracksSkipBusinessLocationViewed,
-	recordTracksSkipBusinessLocationCompleted,
-	recordTracksBusinessInfoViewed,
-	recordTracksBusinessInfoCompleted,
 };
 
 const coreProfilerMachineActions = {
@@ -660,7 +547,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					],
 				},
 			},
-			entry: [ 'recordTracksIntroViewed' ],
+			entry: [
+				{ type: 'recordTracksStepViewed', step: 'store_details' },
+			],
 			exit: actions.choose( [
 				{
 					cond: ( _context, event ) =>
@@ -669,7 +558,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				},
 				{
 					cond: ( _context, event ) => event.type === 'INTRO_SKIPPED',
-					actions: 'recordTracksIntroSkipped',
+					actions: [
+						{
+							type: 'recordTracksStepSkipped',
+							step: 'store_details',
+						},
+					],
 				},
 			] ),
 			meta: {
@@ -695,7 +589,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		userProfile: {
-			entry: [ 'recordTracksUserProfileViewed', 'preFetchGeolocation' ],
+			entry: [
+				{ type: 'recordTracksStepViewed', step: 'user_profile' },
+				'preFetchGeolocation',
+			],
 			on: {
 				USER_PROFILE_COMPLETED: {
 					target: 'postUserProfile',
@@ -725,7 +622,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				{
 					cond: ( _context, event ) =>
 						event.type === 'USER_PROFILE_SKIPPED',
-					actions: 'recordTracksUserProfileSkipped',
+					actions: [
+						{
+							type: 'recordTracksStepSkipped',
+							step: 'user_profile',
+						},
+					],
 				},
 			] ),
 			meta: {
@@ -851,7 +753,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		businessInfo: {
-			entry: [ 'recordTracksBusinessInfoViewed' ],
+			entry: [
+				{ type: 'recordTracksStepViewed', step: 'business_info' },
+			],
 			on: {
 				BUSINESS_INFO_COMPLETED: {
 					target: 'prePlugins',
@@ -887,11 +791,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					actions: [
 						assign( {
 							businessInfo: (
-								_context,
+								context,
 								event: BusinessLocationEvent
 							) => {
 								return {
-									..._context.businessInfo,
+									...context.businessInfo,
 									location: event.payload.storeLocation,
 								};
 							},
@@ -900,7 +804,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					],
 				},
 			},
-			entry: [ 'recordTracksSkipBusinessLocationViewed' ],
+			entry: [
+				{
+					type: 'recordTracksStepViewed',
+					step: 'skip_business_location',
+				},
+			],
 			meta: {
 				progress: 80,
 				component: BusinessLocation,
@@ -1008,10 +917,15 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		plugins: {
-			entry: [ 'recordTracksPluginsViewed' ],
+			entry: [ { type: 'recordTracksStepViewed', step: 'plugins' } ],
 			on: {
 				PLUGINS_PAGE_SKIPPED: {
-					actions: [ 'recordTracksPluginsSkipped' ],
+					actions: [
+						{
+							type: 'recordTracksStepSkipped',
+							step: 'plugins',
+						},
+					],
 					target: 'pluginsSkipped',
 				},
 				PLUGINS_INSTALLATION_REQUESTED: {
