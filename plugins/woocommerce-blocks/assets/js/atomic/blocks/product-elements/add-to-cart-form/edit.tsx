@@ -49,6 +49,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 							className={
 								'wc-block-editor-add-to-cart-form__quantity'
 							}
+							readOnly
 						/>
 						<Button
 							variant={ 'primary' }
