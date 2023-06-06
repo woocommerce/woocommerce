@@ -3,6 +3,9 @@
 	flex-direction: row;
 	justify-content: center;
 	align-items: center;
+	// the left/right padding is set to this to match the padding of
+	// .block-editor-block-list__layout.is-root-container and
+	// .editor-styles-wrapper combined
 	padding: $gap calc(2 * $gap + $gap-small);
 	gap: $gap;
 
