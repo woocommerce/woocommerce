@@ -13,7 +13,6 @@ import { closeSmall } from '@wordpress/icons';
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { Pill } from '@woocommerce/components';
 import {
-	ALLOW_TRACKING_OPTION_NAME,
 	SHOWN_FOR_ACTIONS_OPTION_NAME,
 	STORE_KEY,
 } from '@woocommerce/customer-effort-score';
@@ -23,10 +22,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import {
-	PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME,
-	PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
-} from '../../constants';
+import { PRODUCT_EDITOR_FEEDBACK_CES_ACTION } from '../../constants';
 import { useFeedbackBar } from '../../hooks/use-feedback-bar';
 
 export type FeedbackBarProps = {
@@ -37,48 +33,18 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 	const { showCesModal, showProductMVPFeedbackModal } =
 		useDispatch( STORE_KEY );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const {
-		shouldShowFeedbackBar,
-		cesShownForActions,
-		resolving: isLoading,
-	} = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
-
-		const showFeedbackBarOption = getOption(
-			PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME
-		) as string;
+	const { cesShownForActions } = useSelect( ( select ) => {
+		const { getOption } = select( OPTIONS_STORE_NAME );
 
 		const shownForActions =
 			( getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) as string[] ) || [];
 
-		const allowTrackingOption =
-			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
-
-		const resolving =
-			! hasFinishedResolution( 'getOption', [
-				SHOWN_FOR_ACTIONS_OPTION_NAME,
-			] ) ||
-			! hasFinishedResolution( 'getOption', [
-				PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME,
-			] ) ||
-			! hasFinishedResolution( 'getOption', [
-				ALLOW_TRACKING_OPTION_NAME,
-			] );
-
 		return {
 			cesShownForActions: shownForActions,
-			shouldShowFeedbackBar:
-				allowTrackingOption === 'yes' &&
-				! shownForActions.includes(
-					PRODUCT_EDITOR_FEEDBACK_CES_ACTION
-				) &&
-				showFeedbackBarOption === 'yes',
-			resolving,
 		};
 	} );
 
-	const { hideFeedbackBar } = useFeedbackBar();
+	const { hideFeedbackBar, shouldShowFeedbackBar } = useFeedbackBar();
 
 	const markFeedbackModalAsShown = () => {
 		updateOptions( {
@@ -151,11 +117,9 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 		hideFeedbackBar();
 	};
 
-	const shouldRenderFeedbackBar = ! isLoading && shouldShowFeedbackBar;
-
 	return (
 		<>
-			{ shouldRenderFeedbackBar && (
+			{ shouldShowFeedbackBar && (
 				<WooFooterItem>
 					<div className="woocommerce-product-mvp-ces-footer">
 						<Pill>Beta</Pill>
