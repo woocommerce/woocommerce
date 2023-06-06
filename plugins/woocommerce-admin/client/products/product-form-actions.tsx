@@ -44,7 +44,7 @@ export const ProductFormActions: React.FC = () => {
 		isDeleting,
 	} = useProductHelper();
 
-	const { showFeedbackBarIfNotPreviouslyHidden } = useFeedbackBar();
+	const { maybeShowFeedbackBar } = useFeedbackBar();
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 
@@ -96,7 +96,7 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
-		await showFeedbackBarIfNotPreviouslyHidden();
+		await maybeShowFeedbackBar();
 	};
 
 	const onPublish = async () => {
@@ -122,7 +122,7 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
-		await showFeedbackBarIfNotPreviouslyHidden();
+		await maybeShowFeedbackBar();
 	};
 
 	const onPublishAndDuplicate = async () => {

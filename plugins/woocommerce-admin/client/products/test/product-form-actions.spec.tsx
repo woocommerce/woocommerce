@@ -41,9 +41,7 @@ jest.mock( '@woocommerce/product-editor', () => {
 			deleteProductAndRedirect,
 		} ),
 		__experimentalUseFeedbackBar: () => ( {
-			showFeedbackBarIfNotPreviouslyHidden: jest
-				.fn()
-				.mockResolvedValue( {} ),
+			maybeShowFeedbackBar: jest.fn().mockResolvedValue( {} ),
 		} ),
 	};
 } );
