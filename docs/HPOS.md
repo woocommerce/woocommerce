@@ -27,7 +27,7 @@ If the `woocommerce_custom_orders_table_enabled` options is set to true, HPOS is
 
 [The CustomOrdersTableController class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/CustomOrdersTableController.php) hooks on the `woocommerce_order_data_store` filter so that `WC_Data_Store::load( 'order' );` will return either an instance of [OrdersTableDataStore](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/DataStores/Orders/OrdersTableDataStore.php) or an instance of [WC_Order_Data_Store_CPT](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/data-stores/class-wc-order-data-store-cpt.php), depending on which are the authoritative tables.
 
-In order to preserve data integrity switching the authoritative tables (from the new tables to the posts table or the other way around) isn't allowed while there are orders pending synchronization.
+In order to preserve data integrity, switching the authoritative tables (from the new tables to the posts table or the other way around) isn't allowed while there are orders pending synchronization.
 
 
 ## Synchronization
