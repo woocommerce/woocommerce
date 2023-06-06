@@ -214,6 +214,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - use correct escaping function [[#36868]](https://github.com/woocommerce/woocommerce/pull/36868)
 * Fix - Use waitUntil instead of waitForLoadState in page.goto() and page.click(). [[#37831]](https://github.com/woocommerce/woocommerce/pull/37831)
 * Fix - When creating default storefront pages, the site language (and not the language of the current user) should be used. [[#37795]](https://github.com/woocommerce/woocommerce/pull/37795)
+* Fix - Fix Layout Controller forwarding arrays from the URL query string. [#38593](https://github.com/woocommerce/woocommerce/pull/38593)
 * Add - Added SSR to WCCOM endpoints. [#38433](https://github.com/woocommerce/woocommerce/pull/38433)
 * Add - Add admin-side order edit lock for HPOS. [[#38230]](https://github.com/woocommerce/woocommerce/pull/38230)
 * Add - Add a filter to exclude Jetpack from suggested free extensions REST endpoint. [[#38286]](https://github.com/woocommerce/woocommerce/pull/38286)
