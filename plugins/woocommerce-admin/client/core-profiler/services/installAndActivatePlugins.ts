@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { PLUGINS_STORE_NAME, PluginNames } from '@woocommerce/data';
+import { Extension, PLUGINS_STORE_NAME, PluginNames } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 import { differenceWith } from 'lodash';
 
@@ -82,6 +82,22 @@ export const InstallAndActivatePlugins =
 				window.performance.now() - installationStartTime;
 		};
 
+		// Sort selected plugins by install_priority.
+		const sortedPlugins = context.pluginsSelected
+			.slice()
+			.sort( ( a, b ) => {
+				const aIndex = context.pluginsAvailable.find(
+					( plugin ) => plugin.key === a
+				);
+				const bIndex = context.pluginsAvailable.find(
+					( plugin ) => plugin.key === b
+				);
+				return (
+					( aIndex?.install_priority ?? 99 ) -
+					( bIndex?.install_priority ?? 99 )
+				);
+			} );
+
 		const handleInstallationCompleted = () => {
 			if ( errors.length ) {
 				return send(
@@ -121,7 +137,7 @@ export const InstallAndActivatePlugins =
 			}
 
 			const plugin = getPluginSlug(
-				context.pluginsSelected[ installedPluginIndex ]
+				sortedPlugins[ installedPluginIndex ]
 			);
 			try {
 				const response = await dispatch(
@@ -159,7 +175,7 @@ export const InstallAndActivatePlugins =
 
 		const timer = setTimeout( handleTimerExpired, 1000 * 30 );
 
-		for ( let index = 0; index < context.pluginsSelected.length; index++ ) {
+		for ( let index = 0; index < sortedPlugins.length; index++ ) {
 			await handlePluginInstallation( index );
 		}
 
