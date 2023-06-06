@@ -185,6 +185,7 @@ export type Extension = {
 	is_visible: boolean;
 	is_installed?: boolean;
 	learn_more_link?: string;
+	install_priority?: number;
 };
 
 export type InstallAndActivatePluginsAsyncResponse = {

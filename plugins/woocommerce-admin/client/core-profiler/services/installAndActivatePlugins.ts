@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { PLUGINS_STORE_NAME, PluginNames } from '@woocommerce/data';
+import { Extension, PLUGINS_STORE_NAME, PluginNames } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 import {
 	assign,
