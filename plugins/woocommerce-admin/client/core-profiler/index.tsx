@@ -1102,6 +1102,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				data: ( context ) => {
 					return {
 						selectedPlugins: context.pluginsSelected,
+						pluginsAvailable: context.pluginsAvailable,
 					};
 				},
 			},
