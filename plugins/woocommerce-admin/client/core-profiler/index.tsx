@@ -1289,7 +1289,8 @@ export const CoreProfilerController = ( {
 	const augmentedStateMachine = useMemo( () => {
 		// When adding extensibility, this is the place to manipulate the state machine definition.
 		return coreProfilerStateMachineDefinition.withConfig( {
-			// @ts-expect-error -- flaky types?
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore -- there seems to be a flaky error here - it fails sometimes and then not on recompile, will need to investigate further.
 			actions: {
 				...coreProfilerMachineActions,
 				...actionOverrides,
