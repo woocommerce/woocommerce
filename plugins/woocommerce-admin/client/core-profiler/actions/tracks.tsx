@@ -15,8 +15,8 @@ import {
 import { POSSIBLY_DEFAULT_STORE_NAMES } from '../pages/BusinessInfo';
 
 const recordTracksStepViewed = (
-	_ctx: unknown,
-	_evt: unknown,
+	_context: unknown,
+	_event: unknown,
 	{ action }: { action: unknown }
 ) => {
 	const { step } = action as { step: string };
@@ -27,8 +27,8 @@ const recordTracksStepViewed = (
 };
 
 const recordTracksStepSkipped = (
-	_ctx: unknown,
-	_evt: unknown,
+	_context: unknown,
+	_event: unknown,
 	{ action }: { action: unknown }
 ) => {
 	const { step } = action as { step: string };

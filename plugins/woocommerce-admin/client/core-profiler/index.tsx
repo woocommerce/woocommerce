@@ -214,7 +214,7 @@ const preFetchGetCountries = assign( {
 } );
 
 const preFetchOptions = assign( {
-	spawnPrefetchOptionsRef: ( _ctx, _evt, { action } ) => {
+	spawnPrefetchOptionsRef: ( _context, _event, { action } ) => {
 		spawn(
 			() =>
 				Promise.all( [
@@ -351,7 +351,7 @@ const updateBusinessLocation = ( countryAndState: string ) => {
 };
 
 const updateBusinessInfo = async (
-	_ctx: CoreProfilerStateMachineContext,
+	_context: CoreProfilerStateMachineContext,
 	event: BusinessInfoEvent
 ) => {
 	const refreshedOnboardingProfile = ( await resolveSelect(
@@ -370,11 +370,11 @@ const updateBusinessInfo = async (
 
 const persistBusinessInfo = assign( {
 	persistBusinessInfoRef: (
-		_ctx: CoreProfilerStateMachineContext,
+		context: CoreProfilerStateMachineContext,
 		event: BusinessInfoEvent
 	) =>
 		spawn(
-			() => updateBusinessInfo( _ctx, event ),
+			() => updateBusinessInfo( context, event ),
 			'core-profiler-update-business-info'
 		),
 } );
@@ -791,11 +791,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					actions: [
 						assign( {
 							businessInfo: (
-								_context,
+								context,
 								event: BusinessLocationEvent
 							) => {
 								return {
-									..._context.businessInfo,
+									...context.businessInfo,
 									location: event.payload.storeLocation,
 								};
 							},
