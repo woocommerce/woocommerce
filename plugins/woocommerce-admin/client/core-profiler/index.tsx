@@ -208,7 +208,7 @@ const handleStoreCountryOption = assign( {
 const preFetchGetCountries = assign( {
 	spawnGetCountriesRef: () =>
 		spawn(
-			resolveSelect( COUNTRIES_STORE_NAME ).getCountries(),
+			() => resolveSelect( COUNTRIES_STORE_NAME ).getCountries(),
 			'core-profiler-prefetch-countries'
 		),
 } );
@@ -216,12 +216,15 @@ const preFetchGetCountries = assign( {
 const preFetchOptions = assign( {
 	spawnPrefetchOptionsRef: ( _ctx, _evt, { action } ) => {
 		spawn(
-			Promise.all( [
-				// @ts-expect-error -- not sure its possible to type this yet, maybe in xstate v5
-				action.options.map( ( optionName: string ) =>
-					resolveSelect( OPTIONS_STORE_NAME ).getOption( optionName )
-				),
-			] ),
+			() =>
+				Promise.all( [
+					// @ts-expect-error -- not sure its possible to type this yet, maybe in xstate v5
+					action.options.map( ( optionName: string ) =>
+						resolveSelect( OPTIONS_STORE_NAME ).getOption(
+							optionName
+						)
+					),
+				] ),
 			'core-profiler-prefetch-options'
 		);
 	},
@@ -282,7 +285,7 @@ const getGeolocation = async ( context: CoreProfilerStateMachineContext ) => {
 const preFetchGeolocation = assign( {
 	spawnGeolocationRef: ( context: CoreProfilerStateMachineContext ) =>
 		spawn(
-			getGeolocation( context ),
+			() => getGeolocation( context ),
 			'core-profiler-prefetch-geolocation'
 		),
 } );
@@ -371,7 +374,7 @@ const persistBusinessInfo = assign( {
 		event: BusinessInfoEvent
 	) =>
 		spawn(
-			updateBusinessInfo( _ctx, event ),
+			() => updateBusinessInfo( _ctx, event ),
 			'core-profiler-update-business-info'
 		),
 } );
@@ -396,7 +399,7 @@ const assignOptInDataSharing = assign( {
 const preFetchGetPlugins = assign( {
 	extensionsRef: () =>
 		spawn(
-			resolveSelect( ONBOARDING_STORE_NAME ).getFreeExtensions(),
+			() => resolveSelect( ONBOARDING_STORE_NAME ).getFreeExtensions(),
 			'core-profiler-prefetch-extensions'
 		),
 } );
