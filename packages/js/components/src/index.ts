@@ -111,3 +111,4 @@ export {
 	ProductFieldSection as __experimentalProductFieldSection,
 } from './product-section-layout';
 export { DisplayState } from './display-state';
+export { default as Guide } from './guide';
