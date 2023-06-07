@@ -275,7 +275,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 			$manager->get_authorization_url( null, $redirect_url )
 		);
 
-		// return new WP_REST_Response( $manager->get_authorization_url( null, $final_url ) );
+		 return new WP_REST_Response( $manager->get_authorization_url( null, $final_url ) );
 	}
 
 	/**
