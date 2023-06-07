@@ -15,7 +15,9 @@
 	],
 	"require": {
 		"php": ">=7.3",
-		"automattic/jetpack-autoloader": "2.10.1",
+		"automattic/jetpack-autoloader": "^2.11",
+		"automattic/jetpack-config": "^1.15",
+		"automattic/jetpack-connection": "^1.21",
 		"automattic/jetpack-constants": "1.5.1",
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
