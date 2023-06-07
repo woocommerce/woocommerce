@@ -21,6 +21,7 @@ import {
 	defaultTableDateFormat,
 	getCurrentDates,
 } from '@woocommerce/date';
+import { stringify } from 'qs';
 import { CurrencyContext } from '@woocommerce/currency';
 
 /**
@@ -309,7 +310,7 @@ const formatProps = memoize(
 		[
 			isError,
 			isRequesting,
-			new URLSearchParams( tableQuery ).toString(),
+			stringify( tableQuery ),
 			get( revenueData, [ 'totalResults' ], 0 ),
 			get( revenueData, [ 'data', 'intervals' ], EMPTY_ARRAY ).length,
 			dateType,

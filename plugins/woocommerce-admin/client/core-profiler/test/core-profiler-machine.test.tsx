@@ -12,11 +12,8 @@ import { createMachine } from 'xstate';
 /**
  * Internal dependencies
  */
-import {
-	preFetchActions,
-	recordTracksActions,
-	CoreProfilerController,
-} from '../';
+import { preFetchActions, CoreProfilerController } from '../';
+import recordTracksActions from '../actions/tracks';
 
 const preFetchActionsMocks = Object.fromEntries(
 	Object.entries( preFetchActions ).map( ( [ key ] ) => [ key, jest.fn() ] )

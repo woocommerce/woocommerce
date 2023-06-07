@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+fix string + string for PHP 8.X

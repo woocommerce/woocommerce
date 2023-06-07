@@ -1927,9 +1927,6 @@ importers:
 
   packages/js/onboarding:
     dependencies:
-      '@automattic/interpolate-components':
-        specifier: ^1.2.0
-        version: 1.2.1(@types/react@17.0.50)(react@17.0.2)
       '@woocommerce/components':
         specifier: workspace:*
         version: link:../components
@@ -2579,6 +2576,9 @@ importers:
       memize:
         specifier: ^1.1.0
         version: 1.1.0
+      qs:
+        specifier: ^6.10.3
+        version: 6.10.3
       react:
         specifier: ^17.0.2
         version: 17.0.2
@@ -3100,7 +3100,7 @@ importers:
         version: link:../../packages/js/eslint-plugin
       '@wordpress/prettier-config':
         specifier: 2.17.0
-        version: 2.17.0(wp-prettier@2.8.5)
+        version: 2.17.0(wp-prettier@2.6.2)
       '@wordpress/scripts':
         specifier: ^26.4.0
         version: 26.4.0(@types/node@16.18.21)(acorn@8.8.1)(react-dom@17.0.2)(react@17.0.2)(typescript@4.9.5)
@@ -3109,7 +3109,7 @@ importers:
         version: 8.32.0
       prettier:
         specifier: npm:wp-prettier@^2.6.2
-        version: /wp-prettier@2.8.5
+        version: /wp-prettier@2.6.2
       ts-loader:
         specifier: ^9.4.1
         version: 9.4.1(typescript@4.9.5)(webpack@5.76.3)
@@ -3906,7 +3906,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@jridgewell/trace-mapping': 0.3.16
+      '@jridgewell/trace-mapping': 0.3.17
       commander: 4.1.1
       convert-source-map: 1.8.0
       fs-readdir-recursive: 1.1.0
@@ -4897,7 +4897,7 @@ packages:
       '@babel/core': ^7.13.0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/helper-skip-transparent-expression-wrappers': 7.18.9
       '@babel/plugin-proposal-optional-chaining': 7.18.9(@babel/core@7.17.8)
     dev: true
@@ -4909,7 +4909,7 @@ packages:
       '@babel/core': ^7.13.0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/helper-skip-transparent-expression-wrappers': 7.18.9
       '@babel/plugin-proposal-optional-chaining': 7.18.9(@babel/core@7.21.3)
 
@@ -4990,7 +4990,7 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-environment-visitor': 7.18.9
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/helper-remap-async-to-generator': 7.18.9(@babel/core@7.17.8)
       '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.17.8)
     transitivePeerDependencies:
@@ -5005,7 +5005,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-environment-visitor': 7.18.9
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/helper-remap-async-to-generator': 7.18.9(@babel/core@7.21.3)
       '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.21.3)
     transitivePeerDependencies:
@@ -6106,7 +6106,7 @@ packages:
       '@babel/core': 7.17.8
       '@babel/helper-annotate-as-pure': 7.18.6
       '@babel/helper-create-class-features-plugin': 7.19.0(@babel/core@7.17.8)
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.17.8)
     transitivePeerDependencies:
       - supports-color
@@ -6121,7 +6121,7 @@ packages:
       '@babel/core': 7.21.3
       '@babel/helper-annotate-as-pure': 7.18.6
       '@babel/helper-create-class-features-plugin': 7.19.0(@babel/core@7.21.3)
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.21.3)
     transitivePeerDependencies:
       - supports-color
@@ -6549,6 +6549,15 @@ packages:
       '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
+  /@babel/plugin-syntax-jsx@7.18.6(@babel/core@7.17.8):
+    resolution: {integrity: sha512-6mmljtAedFGTWu2p/8WIORGwy+61PLgOMPOdazc7YoJ9ZCWUyFy3A6CpPkRKLKD1ToAesxX8KGEViAiLo9N+7Q==}
+    engines: {node: '>=6.9.0'}
+    peerDependencies:
+      '@babel/core': ^7.0.0-0
+    dependencies:
+      '@babel/core': 7.17.8
+      '@babel/helper-plugin-utils': 7.21.5
+
   /@babel/plugin-syntax-jsx@7.18.6(@babel/core@7.21.3):
     resolution: {integrity: sha512-6mmljtAedFGTWu2p/8WIORGwy+61PLgOMPOdazc7YoJ9ZCWUyFy3A6CpPkRKLKD1ToAesxX8KGEViAiLo9N+7Q==}
     engines: {node: '>=6.9.0'}
@@ -6575,6 +6584,7 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-plugin-utils': 7.21.5
+    dev: true
 
   /@babel/plugin-syntax-jsx@7.21.4(@babel/core@7.21.3):
     resolution: {integrity: sha512-5hewiLct5OKyh6PLKEYaFclcqtIgCb6bmELouxjF6up5q3Sov7rOayW4RwhbaBL0dit8rA80GNfY+UuDp2mBbQ==}
@@ -7991,7 +8001,7 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-module-transforms': 7.21.2
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8004,7 +8014,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-module-transforms': 7.21.2
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
     transitivePeerDependencies:
       - supports-color
 
@@ -8087,7 +8097,7 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-module-transforms': 7.21.2
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/helper-simple-access': 7.20.2
     transitivePeerDependencies:
       - supports-color
@@ -8101,7 +8111,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-module-transforms': 7.21.2
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/helper-simple-access': 7.20.2
     transitivePeerDependencies:
       - supports-color
@@ -8823,9 +8833,9 @@ packages:
       '@babel/core': 7.21.3
       '@babel/helper-annotate-as-pure': 7.16.7
       '@babel/helper-module-imports': 7.16.7
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.18.9
       '@babel/plugin-syntax-jsx': 7.16.7(@babel/core@7.21.3)
-      '@babel/types': 7.22.4
+      '@babel/types': 7.17.0
     dev: true
 
   /@babel/plugin-transform-react-jsx@7.19.0(@babel/core@7.17.8):
@@ -10333,8 +10343,8 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.20.2
-      '@babel/helper-validator-option': 7.18.6
+      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-validator-option': 7.21.0
       '@babel/plugin-transform-react-display-name': 7.16.7(@babel/core@7.21.3)
       '@babel/plugin-transform-react-jsx': 7.19.0(@babel/core@7.21.3)
       '@babel/plugin-transform-react-jsx-development': 7.16.7(@babel/core@7.21.3)
@@ -10635,8 +10645,8 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-module-imports': 7.21.4
-      '@babel/plugin-syntax-jsx': 7.21.4(@babel/core@7.17.8)
+      '@babel/helper-module-imports': 7.18.6
+      '@babel/plugin-syntax-jsx': 7.18.6(@babel/core@7.17.8)
       '@babel/runtime': 7.21.0
       '@emotion/hash': 0.9.0
       '@emotion/memoize': 0.8.0
@@ -12121,6 +12131,7 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.14
+    dev: true
 
   /@jridgewell/trace-mapping@0.3.17:
     resolution: {integrity: sha512-MCNzAp77qzKca9+W/+I0+sEpaUnZoeasnghNeVc41VZCEKaCH73Vq3BZZ/SzWIgrqE4H4ceI+p+b6C0mHf9T4g==}
@@ -19947,6 +19958,15 @@ packages:
       prettier: /wp-prettier@2.2.1-beta-1
     dev: true
 
+  /@wordpress/prettier-config@2.17.0(wp-prettier@2.6.2):
+    resolution: {integrity: sha512-g4TEQIRDwNW/O8cAf895YV8a3eFfJr7RNLjqu70r8JFH4jmt2clJNu/9nxRburBxJZwqQnykrnDUz0HvXSbcsA==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      prettier: '>=2'
+    dependencies:
+      prettier: /wp-prettier@2.6.2
+    dev: true
+
   /@wordpress/prettier-config@2.17.0(wp-prettier@2.8.5):
     resolution: {integrity: sha512-g4TEQIRDwNW/O8cAf895YV8a3eFfJr7RNLjqu70r8JFH4jmt2clJNu/9nxRburBxJZwqQnykrnDUz0HvXSbcsA==}
     engines: {node: '>=14'}
@@ -21421,8 +21441,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
     dependencies:
-      browserslist: 4.21.4
-      caniuse-lite: 1.0.30001418
+      browserslist: 4.20.2
+      caniuse-lite: 1.0.30001352
       fraction.js: 4.2.0
       normalize-range: 0.1.2
       picocolors: 1.0.0
@@ -22987,7 +23007,6 @@ packages:
       escalade: 3.1.1
       node-releases: 2.0.6
       picocolors: 1.0.0
-    dev: true
 
   /browserslist@4.20.4:
     resolution: {integrity: sha512-ok1d+1WpnU24XYN7oC3QWgTyMhY/avPJ/r9T00xxvUOIparA/gc+UPUMaod3i+G6s+nI2nUb9xZ5k794uIwShw==}
@@ -45120,6 +45139,12 @@ packages:
 
   /wp-prettier@2.2.1-beta-1:
     resolution: {integrity: sha512-+JHkqs9LC/JPp51yy1hzs3lQ7qeuWCwOcSzpQNeeY/G7oSpnF61vxt7hRh87zNRTr6ob2ndy0W8rVzhgrcA+Gw==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
+    dev: true
+
+  /wp-prettier@2.6.2:
+    resolution: {integrity: sha512-AV33EzqiFJ3fj+mPlKABN59YFPReLkDxQnj067Z3uEOeRQf3g05WprL0RDuqM7UBhSRo9W1rMSC2KvZmjE5UOA==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     dev: true
