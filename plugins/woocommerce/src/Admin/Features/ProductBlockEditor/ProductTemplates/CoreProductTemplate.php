@@ -6,6 +6,32 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 trait CoreProductTemplate {
+    protected function get_general_tab_args() {
+        return array(
+            'id'    => 'general',
+            'title' => __( 'General', 'woocommerce' ),
+            'order' => 10,
+        );
+    }
+
+    protected function get_basic_section_args() {
+        return array(
+            'id'          => 'basic-details',
+            'title'       => __( 'Basic details', 'woocommerce' ),
+            'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
+            'parent'      => 'general',
+        );
+    }
+
+    protected function get_name_field_args() {
+        return array(
+            'woocommerce/product-name-field',
+            array(
+                'name' => 'Product name',
+            ),
+        );
+    }
+
     protected function get_general_block() {
         return array( 'woocommerce/product-tab',
             array(
