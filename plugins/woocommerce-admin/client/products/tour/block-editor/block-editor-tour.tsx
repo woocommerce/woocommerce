@@ -35,6 +35,7 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 		return (
 			<BlockEditorGuide
 				onCloseGuide={ ( currentPage, source ) => {
+					dismissModal();
 					if ( source === 'finish' ) {
 						recordEvent(
 							'block_product_editor_spotlight_tell_me_more_click'
@@ -92,13 +93,13 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 						},
 					],
 					closeHandler: ( _steps, _currentStepIndex, source ) => {
-						dismissModal();
 						if ( source === 'done-btn' ) {
 							recordEvent(
 								'block_product_editor_spotlight_view_highlights'
 							);
 							openGuide();
 						} else {
+							dismissModal();
 							recordEvent(
 								'block_product_editor_spotlight_dismissed',
 								{
