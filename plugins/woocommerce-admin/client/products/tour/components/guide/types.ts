@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { ReactNode, KeyboardEvent, SyntheticEvent } from 'react';
+import type { ReactNode } from 'react';
 
 export type Page = {
 	/**
@@ -36,11 +36,14 @@ export type GuideProps = {
 	 */
 	finishButtonText?: string;
 	/**
-	 * A function which is called when the guide is finished.
+	 * Use this to customize href of the _Finish_ button shown at the end of the guide.
+	 *
 	 */
-	onFinish: (
-		event?: KeyboardEvent< HTMLDivElement > | SyntheticEvent
-	) => void;
+	finishButtonLink?: string;
+	/**
+	 * A function which is called when the guide is closed, either through closing the dialog or clicking the Finish button.
+	 */
+	onFinish: ( currentPage: number, origin: 'close' | 'finish' ) => void;
 	/**
 	 * A list of objects describing each page in the guide. Each object **must** contain a `'content'` property and may optionally contain a `'image'` property.
 	 *
