@@ -1,0 +1,31 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+parameters:
+    paths:
+        - woocommerce.php
+        - includes/
+        - src/
+        #- packages/
+    bootstrapFiles:
+        - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+    scanDirectories:
+        - packages/action-scheduler/
+        - packages/action-scheduler/lib/
+        - packages/action-scheduler/lib/cron-expression/
+        - packages/action-scheduler/deprecated/
+        - packages/action-scheduler/classes/
+        - packages/action-scheduler/classes/actions/
+        - packages/action-scheduler/classes/WP_CLI/
+        - packages/action-scheduler/classes/data-stores/
+        - packages/action-scheduler/classes/abstracts/
+        - packages/action-scheduler/classes/schema/
+        - packages/action-scheduler/classes/schedules/
+        - packages/action-scheduler/classes/migration/
+    level: 2
+    ignoreErrors:
+        # TODO Dynamic properties
+        - '#^Access to an undefined (static )?property#'
+        # TODO Traits expect parent class
+        - '#does not extend any class\.$#'
+        # Legacy classes call non-legacy methods
+        - '#^Call to an undefined method WC_(Abstract|Legacy)_#'
