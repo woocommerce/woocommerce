@@ -3038,7 +3038,7 @@
 <error line="55" column="6" severity="error" message="Type &apos;{ selected: number[]; onChange: (value?: never[]) =&gt; void; }&apos; is not assignable to type &apos;IntrinsicAttributes &amp; { selected: number[]; }&apos;.
   Property &apos;onChange&apos; does not exist on type &apos;IntrinsicAttributes &amp; { selected: number[]; }&apos;." source="TS2322" />
 </file>
-<file name="assets/js/editor-components/grid-content-control/index.js">
+<file name="assets/js/editor-components/grid-content-control/index.tsx">
 <error line="16" column="10" severity="error" message="Property &apos;image&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
 <error line="16" column="17" severity="error" message="Property &apos;button&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
 <error line="16" column="25" severity="error" message="Property &apos;price&apos; does not exist on type &apos;Object&apos;." source="TS2339" />
