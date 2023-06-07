@@ -22,7 +22,7 @@ const EditProductLink = ( props: EditProductLinkProps ): JSX.Element | null => {
 	const product = productDataContext.product || {};
 	const productId = product.id || props.productId || 0;
 
-	if ( ! productId ) {
+	if ( ! productId || productId === 1 ) {
 		return null;
 	}
 
