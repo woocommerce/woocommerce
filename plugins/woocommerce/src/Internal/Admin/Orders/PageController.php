@@ -492,7 +492,7 @@ class PageController {
 					esc_html__( '%s must be called after the current_screen action.', 'woocommerce' ),
 					esc_html( __METHOD__ )
 				),
-				'x.x.x'
+				'7.9.0'
 			);
 
 			return false;
@@ -507,7 +507,7 @@ class PageController {
 					esc_html__( '%s is not a valid order type.', 'woocommerce' ),
 					esc_html( $type )
 				),
-				'x.x.x'
+				'7.9.0'
 			);
 
 			return false;
