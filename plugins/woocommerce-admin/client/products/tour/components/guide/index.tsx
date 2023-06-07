@@ -12,6 +12,16 @@ import { Modal, Button } from '@wordpress/components';
 import PageControl from './page-control';
 import type { GuideProps } from './types';
 
+/*
+ * This component was copied from @wordpress/components since we needed
+ * additional functionality and also found some issues.
+ * 1: The Close button was being focused every time the page changed.
+ * 2: It was not possible to know if the Guide was closed because the modal was closed or because the Finish button was clicked.
+ * 3: It was not possible to know which was the current page when the modal was closed.
+ * 4: It was not possible to provide a link to the Finish button.
+ *
+ * If/when all those are implemented at some point, we can migrate to the original component.
+ */
 function Guide( {
 	className,
 	contentLabel,
