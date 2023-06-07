@@ -14,6 +14,8 @@
  * @package WooCommerce
  */
 
+use Automattic\Jetpack\Sync\Data_Settings;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
@@ -27,6 +29,12 @@ require __DIR__ . '/src/Packages.php';
 if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 	return;
 }
+
+// Jetpack's Rest_Authentication needs to be initialized even before plugins_loaded.
+if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
+	\Automattic\Jetpack\Connection\Rest_Authentication::init();
+}
+
 \Automattic\WooCommerce\Packages::init();
 
 // Include the main WooCommerce class.
@@ -60,3 +68,29 @@ function wc_get_container() {
 
 // Global for backwards compatibility.
 $GLOBALS['woocommerce'] = WC();
+
+/**
+ * Initialize the Jetpack functionalities: connection, identity crisis, etc.
+ */
+function wc_jetpack_init() {
+	$jetpack_config = new Automattic\Jetpack\Config();
+	$jetpack_config->ensure(
+		'connection',
+		array(
+			'slug' => 'woocommerce',
+			'name' => __( 'WooCommerce', 'woocommerce' ),
+		)
+	);
+	$jetpack_config->ensure(
+		'identity_crisis',
+		array(
+			'slug'       => 'woocommerce',
+			'logo'       => plugins_url( 'assets/images/woocommerce_logo.svg', WC_PLUGIN_FILE ),
+			'admin_page' => '/wp-admin/admin.php?page=wc-admin',
+			'priority'   => 5,
+		)
+	);
+}
+
+// Jetpack-config will initialize the modules on "plugins_loaded" with priority 2, so this code needs to be run before that.
+add_action( 'plugins_loaded', 'wc_jetpack_init', 1 );
