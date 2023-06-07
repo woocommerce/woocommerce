@@ -331,9 +331,9 @@ class WC_Tracker {
 			if ( isset( $v['PluginURI'] ) ) {
 				$formatted['plugin_uri'] = wp_strip_all_tags( $v['PluginURI'] );
 			}
-			$formatted['feature_compat'] = array();
+			$formatted['feature_compatibility'] = array();
 			if ( wc_get_container()->get( PluginUtil::class )->is_woocommerce_aware_plugin( $k ) ) {
-				$formatted['feature_compat'] = array_filter( FeaturesUtil::get_compatible_features_for_plugin( $k ) );
+				$formatted['feature_compatibility'] = array_filter( FeaturesUtil::get_compatible_features_for_plugin( $k ) );
 			}
 			if ( in_array( $k, $active_plugins_keys, true ) ) {
 				// Remove active plugins from list so we can show active and inactive separately.
