@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	createElement,
 	createInterpolateElement,
@@ -12,11 +11,8 @@ import {
 import { closeSmall } from '@wordpress/icons';
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { Pill } from '@woocommerce/components';
-import {
-	SHOWN_FOR_ACTIONS_OPTION_NAME,
-	STORE_KEY,
-} from '@woocommerce/customer-effort-score';
-import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
+import { useCustomerEffortScoreModal } from '@woocommerce/customer-effort-score';
+import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -30,30 +26,9 @@ export type FeedbackBarProps = {
 };
 
 export function FeedbackBar( { product }: FeedbackBarProps ) {
-	const { showCesModal, showProductMVPFeedbackModal } =
-		useDispatch( STORE_KEY );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
-	const { cesShownForActions } = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
-
-		const shownForActions =
-			( getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) as string[] ) || [];
-
-		return {
-			cesShownForActions: shownForActions,
-		};
-	} );
-
 	const { hideFeedbackBar, shouldShowFeedbackBar } = useFeedbackBar();
-
-	const markFeedbackModalAsShown = () => {
-		updateOptions( {
-			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
-				PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
-				...cesShownForActions,
-			],
-		} );
-	};
+	const { showCesModal, showProductMVPFeedbackModal, wasPreviouslyShown } =
+		useCustomerEffortScoreModal();
 
 	const getProductTracksProps = () => {
 		const tracksProps = {
@@ -95,8 +70,6 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 				icon: <span>🌟</span>,
 			}
 		);
-
-		markFeedbackModalAsShown();
 	};
 
 	const onTurnOffEditorClick = () => {
@@ -119,44 +92,48 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 
 	return (
 		<>
-			{ shouldShowFeedbackBar && (
-				<WooFooterItem>
-					<div className="woocommerce-product-mvp-ces-footer">
-						<Pill>Beta</Pill>
-						<div className="woocommerce-product-mvp-ces-footer__message">
-							{ createInterpolateElement(
-								__(
-									'How is your experience with the new product form? <span><shareButton>Share feedback</shareButton> or <turnOffButton>turn it off</turnOffButton></span>',
+			{ shouldShowFeedbackBar &&
+				! wasPreviouslyShown( PRODUCT_EDITOR_FEEDBACK_CES_ACTION ) && (
+					<WooFooterItem>
+						<div className="woocommerce-product-mvp-ces-footer">
+							<Pill>Beta</Pill>
+							<div className="woocommerce-product-mvp-ces-footer__message">
+								{ createInterpolateElement(
+									__(
+										'How is your experience with the new product form? <span><shareButton>Share feedback</shareButton> or <turnOffButton>turn it off</turnOffButton></span>',
+										'woocommerce'
+									),
+									{
+										span: (
+											<span className="woocommerce-product-mvp-ces-footer__message-buttons" />
+										),
+										shareButton: (
+											<Button
+												variant="link"
+												onClick={ onShareFeedbackClick }
+											/>
+										),
+										turnOffButton: (
+											<Button
+												onClick={ onTurnOffEditorClick }
+												variant="link"
+											/>
+										),
+									}
+								) }
+							</div>
+							<Button
+								className="woocommerce-product-mvp-ces-footer__close-button"
+								icon={ closeSmall }
+								label={ __(
+									'Hide this message',
 									'woocommerce'
-								),
-								{
-									span: (
-										<span className="woocommerce-product-mvp-ces-footer__message-buttons" />
-									),
-									shareButton: (
-										<Button
-											variant="link"
-											onClick={ onShareFeedbackClick }
-										/>
-									),
-									turnOffButton: (
-										<Button
-											onClick={ onTurnOffEditorClick }
-											variant="link"
-										/>
-									),
-								}
-							) }
+								) }
+								onClick={ onHideFeedbackBarClick }
+							></Button>
 						</div>
-						<Button
-							className="woocommerce-product-mvp-ces-footer__close-button"
-							icon={ closeSmall }
-							label={ __( 'Hide this message', 'woocommerce' ) }
-							onClick={ onHideFeedbackBarClick }
-						></Button>
-					</div>
-				</WooFooterItem>
-			) }
+					</WooFooterItem>
+				) }
 		</>
 	);
 }
