@@ -65,7 +65,6 @@
 		"@wordpress/media-utils": "wp-6.0",
 		"@wordpress/rich-text": "wp-6.0",
 		"@wordpress/url": "wp-6.0",
-		"@wordpress/primitives": "wp-6.0",
 		"@wordpress/viewport": "^4.1.2",
 		"classnames": "^2.3.1",
 		"core-js": "^3.21.1",
