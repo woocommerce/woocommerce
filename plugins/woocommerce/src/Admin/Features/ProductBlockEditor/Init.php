@@ -70,6 +70,13 @@ class Init {
 			'before'
 		);
 		wp_tinymce_inline_scripts();
+
+		/**
+		 * Enqueue any product block editor related assets.
+		 *
+		 * @since 7.8.0
+		 */
+		do_action( 'woocommerce_enqueue_product_block_editor_assets' );
 	}
 
 	/**
