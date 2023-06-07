@@ -12,6 +12,8 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import { GlobalPaymentMethod } from '@woocommerce/types';
 import { useSelect } from '@wordpress/data';
 import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
+import { blocksConfig } from '@woocommerce/block-settings';
+import { trimCharacters, trimWords } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -49,6 +51,7 @@ export const Edit = ( {
 		'Incompatible with block-based checkout',
 		'woo-gutenberg-products-block'
 	);
+	const wordCountType = blocksConfig.wordCountType;
 
 	return (
 		<FormStepBlock
@@ -77,12 +80,32 @@ export const Edit = ( {
 							const isIncompatible =
 								!! incompatiblePaymentMethods[ method.id ];
 
+							let trimmedDescription;
+
+							if ( wordCountType === 'words' ) {
+								trimmedDescription = trimWords(
+									method.description,
+									30,
+									undefined,
+									false
+								);
+							} else {
+								trimmedDescription = trimCharacters(
+									method.description,
+									30,
+									wordCountType ===
+										'characters_including_spaces',
+									undefined,
+									false
+								);
+							}
+
 							return (
 								<ExternalLinkCard
 									key={ method.id }
 									href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout&section=${ method.id }` }
 									title={ method.title }
-									description={ method.description }
+									description={ trimmedDescription }
 									{ ...( isIncompatible
 										? {
 												warning:
