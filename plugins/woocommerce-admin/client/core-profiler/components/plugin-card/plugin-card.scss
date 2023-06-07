@@ -61,6 +61,9 @@
 	a {
 		color: $gray-700;
 		margin-left: 5px;
+		@include breakpoint( '<782px' ) {
+			display: none;
+		}
 	}
 
 	.components-checkbox-control {
