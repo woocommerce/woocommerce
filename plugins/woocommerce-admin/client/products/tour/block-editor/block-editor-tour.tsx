@@ -116,6 +116,7 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 								},
 							},
 						],
+						classNames: 'woocommerce-block-editor-tourkit',
 					},
 				} }
 			/>
