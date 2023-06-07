@@ -131,6 +131,8 @@ class PageController {
 	 * @return void
 	 */
 	public function setup(): void {
+		global $plugin_page, $pagenow;
+
 		$this->redirection_controller = new PostsRedirectionController( $this );
 
 		// Register menu.
@@ -138,6 +140,11 @@ class PageController {
 			$this->register_menu();
 		} else {
 			add_action( 'admin_menu', 'register_menu', 9 );
+		}
+
+		// Not on an Orders page.
+		if ( 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
+			return;
 		}
 
 		$this->set_order_type();
@@ -209,11 +216,7 @@ class PageController {
 	 * @return void
 	 */
 	private function set_order_type() {
-		global $plugin_page, $pagenow;
-
-		if ( 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
-			return;
-		}
+		global $plugin_page;
 
 		$this->order_type = str_replace( array( 'wc-orders--', 'wc-orders' ), '', $plugin_page );
 		$this->order_type = empty( $this->order_type ) ? 'shop_order' : $this->order_type;
@@ -489,7 +492,7 @@ class PageController {
 					esc_html__( '%s must be called after the current_screen action.', 'woocommerce' ),
 					esc_html( __METHOD__ )
 				),
-				'x.x.x'
+				'7.9.0'
 			);
 
 			return false;
@@ -504,7 +507,7 @@ class PageController {
 					esc_html__( '%s is not a valid order type.', 'woocommerce' ),
 					esc_html( $type )
 				),
-				'x.x.x'
+				'7.9.0'
 			);
 
 			return false;
