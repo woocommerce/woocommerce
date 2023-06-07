@@ -25,9 +25,9 @@
 
 					<!-- wp:buttons -->
 					<div class="wp-block-buttons">
-						<!-- wp:button {"backgroundColor":"background","textColor":"foreground"} -->
+						<!-- wp:button {"style":{"color":{"background":"#ffffff","text":"#000000"}}} -->
 						<div class="wp-block-button">
-							<a class="wp-block-button__link has-foreground-color has-background-background-color has-text-color has-background wp-element-button">Shop now</a>
+							<a class="wp-block-button__link has-text-color has-background wp-element-button" style="color:#000000;background-color:#ffffff">Shop now</a>
 						</div>
 						<!-- /wp:button -->
 					</div>
