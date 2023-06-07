@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Featured Products 5-item grid
+ * Title: Featured Products 5-item grid
  * Slug: woocommerce-blocks/featured-products-5-item-grid
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query
@@ -29,7 +29,7 @@
 		<!-- /wp:cover -->
 
 		<!-- wp:post-title {"level":3,"isLink":true,"style":{"spacing":{"margin":{"top":"0","right":"0","bottom":"0rem"}},"typography":{"fontStyle":"normal","fontWeight":"700"}},"fontSize":"small","__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
-	
+
 		<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"left","fontSize":"small","style":{"spacing":{"margin":{"bottom":"0","top":"var:preset|spacing|20"}}}} /-->
 
 	<!-- /wp:post-template -->
