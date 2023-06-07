@@ -31,13 +31,27 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 		setIsGuideOpen( true );
 	};
 
-	const closeGuide = () => {
-		recordEvent( 'block_product_editor_spotlight_completed' );
-		setIsGuideOpen( false );
-	};
-
 	if ( isGuideOpen ) {
-		return <BlockEditorGuide onCloseGuide={ closeGuide } />;
+		return (
+			<BlockEditorGuide
+				onCloseGuide={ ( source ) => {
+					if ( source === 'finish-btn' ) {
+						recordEvent(
+							'block_product_editor_spotlight_tell_me_more_click'
+						);
+						window.open(
+							'https://woocommerce.com/product-form-beta',
+							'_blank'
+						);
+					} else {
+						recordEvent(
+							'block_product_editor_spotlight_dismissed'
+						);
+					}
+					setIsGuideOpen( false );
+				} }
+			/>
+		);
 	} else if ( shouldTourBeShown ) {
 		return (
 			<TourKit

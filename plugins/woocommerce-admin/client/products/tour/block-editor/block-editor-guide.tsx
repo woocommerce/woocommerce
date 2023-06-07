@@ -2,7 +2,7 @@
  * External dependencies
  */
 
-import { Guide } from '@wordpress/components';
+import { Guide } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -11,15 +11,26 @@ import { __ } from '@wordpress/i18n';
 import './style.scss';
 
 interface Props {
-	onCloseGuide: () => void;
+	onCloseGuide: ( source: 'finish-btn' | 'close-btn' ) => void;
 }
 
 const BlockEditorGuide = ( { onCloseGuide }: Props ) => {
 	return (
 		<Guide
 			className="woocommerce-block-editor-guide"
-			finishButtonText={ __( 'Close', 'woocommerce' ) }
-			onFinish={ onCloseGuide }
+			contentLabel=""
+			finishButtonText={ __( 'Tell me more', 'woocommerce' ) }
+			onFinish={ ( event ) => {
+				if (
+					event?.currentTarget?.classList?.contains(
+						'components-guide__finish-button'
+					)
+				) {
+					onCloseGuide( 'finish-btn' );
+				} else {
+					onCloseGuide( 'close-btn' );
+				}
+			} }
 			pages={ [
 				{
 					content: (
