@@ -2,9 +2,20 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import { ToggleControl } from '@wordpress/components';
 
+interface GridContentControlProps {
+	onChange: ( settings: GridContentSettings ) => void;
+	settings: GridContentSettings;
+}
+
+interface GridContentSettings {
+	image: boolean;
+	button: boolean;
+	price: boolean;
+	rating: boolean;
+	title: boolean;
+}
 /**
  * A combination of toggle controls for content visibility in product grids.
  *
@@ -12,7 +23,10 @@ import { ToggleControl } from '@wordpress/components';
  * @param {function(any):any} props.onChange
  * @param {Object}            props.settings
  */
-const GridContentControl = ( { onChange, settings } ) => {
+const GridContentControl = ( {
+	onChange,
+	settings,
+}: GridContentControlProps ) => {
 	const { image, button, price, rating, title } = settings;
 	// If `image` is undefined, that might be because it's a block that was
 	// created before the `image` attribute existed, so we default to true.
@@ -51,23 +65,6 @@ const GridContentControl = ( { onChange, settings } ) => {
 			/>
 		</>
 	);
-};
-
-GridContentControl.propTypes = {
-	/**
-	 * The current title visibility.
-	 */
-	settings: PropTypes.shape( {
-		image: PropTypes.bool.isRequired,
-		button: PropTypes.bool.isRequired,
-		price: PropTypes.bool.isRequired,
-		rating: PropTypes.bool.isRequired,
-		title: PropTypes.bool.isRequired,
-	} ).isRequired,
-	/**
-	 * Callback to update the layout settings.
-	 */
-	onChange: PropTypes.func.isRequired,
 };
 
 export default GridContentControl;
