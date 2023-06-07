@@ -53,8 +53,7 @@ export const useFeedbackBar = () => {
 					showFeedbackBarOption === 'yes',
 			};
 		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[ isCesModalOptionsLoading ]
+		[ isCesModalOptionsLoading, wasPreviouslyShown ]
 	);
 
 	const showFeedbackBar = () => {
