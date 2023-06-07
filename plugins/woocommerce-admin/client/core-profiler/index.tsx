@@ -1113,7 +1113,7 @@ export const CoreProfilerController = ( {
 	const augmentedStateMachine = useMemo( () => {
 		// When adding extensibility, this is the place to manipulate the state machine definition.
 		return coreProfilerStateMachineDefinition.withConfig( {
-			// @ts-ignore - flaky types?
+			// @ts-expect-error flasky
 			actions: {
 				...coreProfilerMachineActions,
 				...actionOverrides,
