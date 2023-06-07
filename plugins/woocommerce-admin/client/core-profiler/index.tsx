@@ -813,17 +813,6 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				BUSINESS_LOCATION_COMPLETED: {
 					target: 'postSkipFlowBusinessLocation',
 					actions: [
-						assign( {
-							businessInfo: (
-								context,
-								event: BusinessLocationEvent
-							) => {
-								return {
-									...context.businessInfo,
-									location: event.payload.storeLocation,
-								};
-							},
-						} ),
 						'assignStoreLocation',
 						'recordTracksSkipBusinessLocationCompleted',
 					],
@@ -1124,7 +1113,7 @@ export const CoreProfilerController = ( {
 	const augmentedStateMachine = useMemo( () => {
 		// When adding extensibility, this is the place to manipulate the state machine definition.
 		return coreProfilerStateMachineDefinition.withConfig( {
-			// @ts-expect - flaky types?
+			// @ts-ignore - flaky types?
 			actions: {
 				...coreProfilerMachineActions,
 				...actionOverrides,
