@@ -76,19 +76,21 @@ class ProductCollection extends AbstractBlock {
 			return $args;
 		}
 
-		$orderby            = $request->get_param( 'orderBy' );
-		$on_sale            = $request->get_param( 'woocommerceOnSale' ) === 'true';
-		$stock_status       = $request->get_param( 'woocommerceStockStatus' );
-		$product_attributes = $request->get_param( 'woocommerceAttributes' );
-		$args['author']     = $request->get_param( 'author' ) ?? '';
+		$orderby             = $request->get_param( 'orderBy' );
+		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
+		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
+		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
+		$handpicked_products = $request->get_param( 'woocommerceHandPickedProducts' );
+		$args['author']      = $request->get_param( 'author' ) ?? '';
 
 		return $this->get_final_query_args(
 			$args,
 			array(
-				'orderby'            => $orderby,
-				'on_sale'            => $on_sale,
-				'stock_status'       => $stock_status,
-				'product_attributes' => $product_attributes,
+				'orderby'             => $orderby,
+				'on_sale'             => $on_sale,
+				'stock_status'        => $stock_status,
+				'product_attributes'  => $product_attributes,
+				'handpicked_products' => $handpicked_products,
 			)
 		);
 	}
@@ -100,15 +102,18 @@ class ProductCollection extends AbstractBlock {
 	 * @param array $query               Query from block context.
 	 */
 	private function get_final_query_args( $common_query_values, $query ) {
-		$orderby_query    = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : [];
-		$on_sale_query    = $this->get_on_sale_products_query( $query['on_sale'] );
-		$stock_query      = $this->get_stock_status_query( $query['stock_status'] );
-		$visibility_query = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query ) : [];
-		$attributes_query = $this->get_product_attributes_query( $query['product_attributes'] );
-		$taxonomies_query = $query['taxonomies_query'] ?? [];
-		$tax_query        = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query );
+		$handpicked_products = $query['handpicked_products'] ?? [];
+		$orderby_query       = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : [];
+		$on_sale_query       = $this->get_on_sale_products_query( $query['on_sale'] );
+		$stock_query         = $this->get_stock_status_query( $query['stock_status'] );
+		$visibility_query    = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query ) : [];
+		$attributes_query    = $this->get_product_attributes_query( $query['product_attributes'] );
+		$taxonomies_query    = $query['taxonomies_query'] ?? [];
+		$tax_query           = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query );
 
-		return $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query );
+		$merged_query = $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query );
+
+		return $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
 	}
 
 	/**
@@ -147,17 +152,19 @@ class ProductCollection extends AbstractBlock {
 			'author'         => $block_context_query['author'] ?? '',
 		);
 
-		$is_on_sale       = $block_context_query['woocommerceOnSale'] ?? false;
-		$taxonomies_query = $this->get_filter_by_taxonomies_query( $query['tax_query'] ?? [] );
+		$is_on_sale          = $block_context_query['woocommerceOnSale'] ?? false;
+		$taxonomies_query    = $this->get_filter_by_taxonomies_query( $query['tax_query'] ?? [] );
+		$handpicked_products = $block_context_query['woocommerceHandPickedProducts'] ?? [];
 
 		return $this->get_final_query_args(
 			$common_query_values,
 			array(
-				'on_sale'            => $is_on_sale,
-				'stock_status'       => $block_context_query['woocommerceStockStatus'],
-				'orderby'            => $block_context_query['orderBy'],
-				'product_attributes' => $block_context_query['woocommerceAttributes'],
-				'taxonomies_query'   => $taxonomies_query,
+				'on_sale'             => $is_on_sale,
+				'stock_status'        => $block_context_query['woocommerceStockStatus'],
+				'orderby'             => $block_context_query['orderBy'],
+				'product_attributes'  => $block_context_query['woocommerceAttributes'],
+				'taxonomies_query'    => $taxonomies_query,
+				'handpicked_products' => $handpicked_products,
 			)
 		);
 	}
@@ -540,5 +547,22 @@ class ProductCollection extends AbstractBlock {
 
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		return ! empty( $result ) ? [ 'tax_query' => $result ] : [];
+	}
+
+	/**
+	 * Apply the query only to a subset of products
+	 *
+	 * @param array $query  The query.
+	 * @param array $ids  Array of selected product ids.
+	 *
+	 * @return array
+	 */
+	private function filter_query_to_only_include_ids( $query, $ids ) {
+		if ( ! empty( $ids ) ) {
+			$query['post__in'] = empty( $query['post__in'] ) ?
+				$ids : array_intersect( $ids, $query['post__in'] );
+		}
+
+		return $query;
 	}
 }
