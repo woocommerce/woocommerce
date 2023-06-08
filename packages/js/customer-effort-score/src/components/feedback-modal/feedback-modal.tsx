@@ -42,7 +42,7 @@ function FeedbackModal( {
 	isSubmitButtonDisabled?: boolean;
 	submitButtonLabel?: string;
 	cancelButtonLabel?: string;
-	className: string;
+	className?: string;
 } ): JSX.Element | null {
 	const [ isOpen, setOpen ] = useState( true );
 
