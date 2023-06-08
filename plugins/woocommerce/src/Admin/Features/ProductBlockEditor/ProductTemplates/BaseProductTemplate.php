@@ -80,10 +80,10 @@ abstract class BaseProductTemplate {
             $blocks = &$this->cache[ $parent ][ self::CHILD_BLOCKS_INDEX ];
         }
 
-        $index = $id ? $id : count( $blocks );
-        $blocks[ $index ] = $block;
+        $blocks[] = $block;
 
         if ( $id ) {
+            $index = key( end( $blocks ) );
             $this->cache[ $id ] = &$blocks[ $index ];
         }
     }
@@ -142,7 +142,6 @@ abstract class BaseProductTemplate {
      * Get the template.
      */
     public function get_template() {
-        // @todo Remove associative array keys.
         // @todo Reorder array based on order property.
         return $this->template;
     }
