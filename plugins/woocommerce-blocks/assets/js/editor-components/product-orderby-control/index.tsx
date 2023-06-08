@@ -3,7 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { SelectControl } from '@wordpress/components';
-import PropTypes from 'prop-types';
+
+/**
+ * Internal dependencies
+ */
+import type { ProductOrderbyControlProps } from './types';
 
 /**
  * A pre-configured SelectControl for product orderby settings.
@@ -12,7 +16,10 @@ import PropTypes from 'prop-types';
  * @param {string}            props.value
  * @param {function(any):any} props.setAttributes Setter for block attributes.
  */
-const ProductOrderbyControl = ( { value, setAttributes } ) => {
+const ProductOrderbyControl = ( {
+	value,
+	setAttributes,
+}: ProductOrderbyControlProps ) => {
 	return (
 		<SelectControl
 			label={ __( 'Order products by', 'woo-gutenberg-products-block' ) }
@@ -68,17 +75,6 @@ const ProductOrderbyControl = ( { value, setAttributes } ) => {
 			onChange={ ( orderby ) => setAttributes( { orderby } ) }
 		/>
 	);
-};
-
-ProductOrderbyControl.propTypes = {
-	/**
-	 * Callback to update the order setting.
-	 */
-	setAttributes: PropTypes.func.isRequired,
-	/**
-	 * The selected order setting.
-	 */
-	value: PropTypes.string.isRequired,
 };
 
 export default ProductOrderbyControl;
