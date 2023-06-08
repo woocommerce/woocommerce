@@ -94,7 +94,7 @@ abstract class BaseProductTemplate {
         $blocks[] = $block;
 
         if ( $id ) {
-            $index = key( end( $blocks ) );
+            $index = count( $blocks ) - 1;
             $this->cache[ $id ] = &$blocks[ $index ];
         }
     }
