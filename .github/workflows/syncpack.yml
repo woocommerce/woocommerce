@@ -25,7 +25,7 @@ jobs:
                   node-version: 16
 
             - name: 'Install Syncpack'
-              run: npm install -g syncpack@^9.8.4
+              run: npm install -g syncpack@^10.1.0
 
             - name: 'List Mismatches'
               run: syncpack list-mismatches
