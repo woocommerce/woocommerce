@@ -1108,17 +1108,20 @@ class FeaturesController {
 	 * `/wp-admin/post.php?product_block_editor=0&_feature_nonce=1234`, 0 for off
 	 */
 	private function change_feature_enable_from_query_params(): void {
-		if ( ! isset( $_GET['_feature_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_feature_nonce'] ) ), 'change_feature_enable' ) ) {
-			return;
-		}
-
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
 
+		$is_feature_nonce_invalid = ( ! isset( $_GET['_feature_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_feature_nonce'] ) ), 'change_feature_enable' ) );
+
 		foreach ( array_keys( $this->features ) as $feature_id ) {
 			if ( isset( $_GET[ $feature_id ] ) && is_numeric( $_GET[ $feature_id ] ) ) {
 				$value = absint( $_GET[ $feature_id ] );
+
+				if ( $is_feature_nonce_invalid ) {
+					wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+					return;
+				}
 
 				if ( 1 === $value ) {
 					$this->change_feature_enable( $feature_id, true );
