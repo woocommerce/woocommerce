@@ -12,7 +12,7 @@ import {
 	__experimentalToggleGroupControl as ToggleGroupControl,
 } from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
-import { __ } from '@wordpress/i18n';
+import { __, isRTL } from '@wordpress/i18n';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
@@ -119,7 +119,11 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						<>
 							<img
 								className="wc-block-editor-mini-cart__drawer-image"
-								src="/wp-content/plugins/woocommerce-blocks/images/blocks/mini-cart/cart-drawer.svg"
+								src={
+									isRTL()
+										? '/wp-content/plugins/woocommerce-blocks/images/blocks/mini-cart/cart-drawer-rtl.svg'
+										: '/wp-content/plugins/woocommerce-blocks/images/blocks/mini-cart/cart-drawer.svg'
+								}
 								alt=""
 							/>
 							<p>
