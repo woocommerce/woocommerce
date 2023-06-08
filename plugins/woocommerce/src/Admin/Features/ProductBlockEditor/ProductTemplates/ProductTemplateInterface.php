@@ -11,6 +11,26 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTempla
 interface ProductTemplateInterface {
 
 	/**
+     * General group ID.
+     */
+    const GENERAL_GROUP = 'group/general';
+
+	/**
+     * Basic details ID.
+     */
+    const BASIC_DETAILS_SECTION = 'section/basic-details';
+
+    /**
+     * Pricing group ID.
+     */
+    const PRICING_GROUP = 'group/pricing';
+
+	/**
+     * Pricing section ID.
+     */
+    const PRICING_SECTION = 'section/pricing';
+
+	/**
 	 * Get the name of the template.
 	 *
 	 * @return string Template name
