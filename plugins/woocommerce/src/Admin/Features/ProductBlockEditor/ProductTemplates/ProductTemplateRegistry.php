@@ -43,7 +43,7 @@ final class ProductTemplateRegistry {
         );
 
         foreach ( $template_instances as $instance ) {
-            $this->register( $instance->get_name(), $instance->get_template() );
+            $this->register( $instance->get_name(), $instance );
         }
     }
 

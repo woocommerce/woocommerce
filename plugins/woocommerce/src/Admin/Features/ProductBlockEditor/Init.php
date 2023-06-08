@@ -39,7 +39,7 @@ class Init {
 			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_product_template' ) );
 			$block_registry = new BlockRegistry();
 			$block_registry->init();
-			$this->template_registry = new ProductTemplateRegistry();
+			$this->template_registry = ProductTemplateRegistry::get_instance();
 			$this->template_registry->register_core_templates();
 		}
 	}
@@ -57,7 +57,7 @@ class Init {
 		$editor_settings = array();
 		if ( ! empty( $post_type_object->template ) ) {
 			$editor_settings['template']                 = $post_type_object->template;
-			$editor_settings['templates']                = $this->template_registry->get_all_registered();
+			$editor_settings['templates']                = array_map( function( $template ) { return $template->get_template(); }, $this->template_registry->get_all_registered() );
 			$editor_settings['templateLock']             = ! empty( $post_type_object->template_lock ) ? $post_type_object->template_lock : false;
 			$editor_settings['__unstableResolvedAssets'] = $this->get_resolved_assets();
 		}
@@ -227,7 +227,7 @@ class Init {
 	public function add_product_template( $args ) {
 		if ( ! isset( $args['template'] ) ) {
 			$args['template_lock'] = 'all';
-			$args['template']      = $this->template_registry->get_registered( 'simple' );
+			$args['template']      = $this->template_registry->get_registered( 'simple' )->get_template();
 		}
 		return $args;
 	}
