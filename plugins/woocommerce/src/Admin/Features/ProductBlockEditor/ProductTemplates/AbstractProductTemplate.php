@@ -68,7 +68,7 @@ abstract class AbstractProductTemplate {
     /**
      * Add a field to the existing template.
      */
-    protected function add_field( $field ) {
+    public function add_field( $field ) {
         $args   = wp_parse_args( $field, array( 'order' => 10 ) );
         $id     = $args['id'] ?? null;
         $block  = $args['block'];
@@ -101,7 +101,7 @@ abstract class AbstractProductTemplate {
     /**
      * Add a group to the template.
      */
-    protected function add_group( $args = array() ) {
+    public function add_group( $args = array() ) {
         $args = wp_parse_args( $args, array( 'order' => 10 ) );
 
         $group = array(
@@ -127,7 +127,7 @@ abstract class AbstractProductTemplate {
     /**
      * Add a section to the template.
      */
-    protected function add_section( $args = array() ) {
+    public function add_section( $args = array() ) {
         $section = array(
             'woocommerce/product-section',
             array(
