@@ -13,7 +13,7 @@ const FrequentlyAskedQuestionsSimple: React.FC = () => {
 		<div className="faq__card">
 			<div className="help-section-simple">
 				<Icon icon={ help } />
-				<span>{ strings.faq.haveMoreQuestions }</span>
+				<span>{ strings.faq.haveQuestions } </span>
 				<a
 					href="https://www.woocommerce.com/my-account/tickets/"
 					target="_blank"

@@ -374,7 +374,7 @@ export default {
 			}
 		),
 
-		haveMoreQuestions: __( 'Have more questions?', 'woocommerce' ),
+		haveQuestions: __( 'Have questions?', 'woocommerce' ),
 
 		getInTouch: __( 'Get in touch', 'woocommerce' ),
 	},
