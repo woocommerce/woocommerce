@@ -71,8 +71,9 @@ class MiniCart extends AbstractBlock {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
 		add_action( 'wp_print_footer_scripts', array( $this, 'enqueue_wc_settings' ), 1 );
-		// We need this action to run after the equivalent in AssetDataRegistry.
-		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 3 );
+		// We need this action to run after enqueue_wc_settings() and dequeue_wc_settings(),
+		// otherwise it might incorrectly consider wc_settings script to be enqueued.
+		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 4 );
 	}
 
 	/**
@@ -220,7 +221,7 @@ class MiniCart extends AbstractBlock {
 		// AssetDataRegistry knows it's going to load.
 		wp_enqueue_script( 'wc-settings' );
 		// After AssetDataRegistry function runs, we dequeue `wc-settings`.
-		add_action( 'wp_print_footer_scripts', array( $this, 'dequeue_wc_settings' ), 4 );
+		add_action( 'wp_print_footer_scripts', array( $this, 'dequeue_wc_settings' ), 3 );
 	}
 
 	/**
@@ -332,7 +333,7 @@ class MiniCart extends AbstractBlock {
 		$wp_scripts = wp_scripts();
 
 		// This script and its dependencies have already been appended.
-		if ( ! $script || array_key_exists( $script->handle, $this->scripts_to_lazy_load ) || isset( $wp_scripts->queue[ $script->handle ] ) ) {
+		if ( ! $script || array_key_exists( $script->handle, $this->scripts_to_lazy_load ) || wp_script_is( $script->handle, 'enqueued' ) ) {
 			return;
 		}
 
