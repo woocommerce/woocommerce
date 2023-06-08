@@ -72,15 +72,16 @@ class Init {
 	public function maybe_redirect_to_old_editor(): void {
 		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			if ( \Automattic\WooCommerce\Admin\PageController::is_admin_page() && isset( $_GET['path'] ) ) {
-				$path = esc_url_raw( wp_unslash( $_GET['path'] ) );
+				$path        = esc_url_raw( wp_unslash( $_GET['path'] ) );
+				$parsed_path = explode( '/', wp_parse_url( $path, PHP_URL_PATH ) );
 
-				if ( preg_match( '/^\/add-product$/', $path ) ) {
+				if ( 'add-product' === $parsed_path[1] ) {
 					wp_safe_redirect( admin_url( 'post-new.php?post_type=product' ) );
 					exit();
 				}
 
-				if ( preg_match( '/^\/product\/(\d+)$/', $path, $matches ) ) {
-					$product_id = absint( $matches[1] );
+				if ( 'product' === $parsed_path[1] ) {
+					$product_id = absint( $parsed_path[2] );
 					wp_safe_redirect( admin_url( 'post.php?post=' . $product_id . '&action=edit' ) );
 					exit();
 				}
