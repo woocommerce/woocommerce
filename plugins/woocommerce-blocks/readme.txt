@@ -81,6 +81,49 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 10.4.0 - 2023-06-05 =
+
+#### Enhancements
+
+- Enable Single Product Block. ([9714](https://github.com/woocommerce/woocommerce-blocks/pull/9714))
+- Product Price: Remove underline on sale price. ([9702](https://github.com/woocommerce/woocommerce-blocks/pull/9702))
+- Blockified Single Product Template: Use h1 for the Product Title. ([9698](https://github.com/woocommerce/woocommerce-blocks/pull/9698))
+- Blockified Single Product Template: Add product-classes. ([9697](https://github.com/woocommerce/woocommerce-blocks/pull/9697))
+- Blockified Single Product Template: Show upsells. ([9636](https://github.com/woocommerce/woocommerce-blocks/pull/9636))
+- Template Placeholder Design for the Order Received Template. ([9602](https://github.com/woocommerce/woocommerce-blocks/pull/9602))
+- Mini-Cart: Update cart error notices to be non-dismissable (to match the behavior of the regular Cart). ([9578](https://github.com/woocommerce/woocommerce-blocks/pull/9578))
+- Classic Product Template block visible in the inserter. ([9573](https://github.com/woocommerce/woocommerce-blocks/pull/9573))
+- Hide the Product Rating when the product has no reviews. Previously, a link to the Reviews section was displayed. ([9556](https://github.com/woocommerce/woocommerce-blocks/pull/9556))
+- Reduced the amount of settings data consumed by the cart and checkout blocks. ([9552](https://github.com/woocommerce/woocommerce-blocks/pull/9552))
+- Enable blockified templates. ([9551](https://github.com/woocommerce/woocommerce-blocks/pull/9551))
+- Product Categories List: Add "Show child categories only" toggle. ([9550](https://github.com/woocommerce/woocommerce-blocks/pull/9550))
+- Add Product Rating block to the default Single Product template. ([9510](https://github.com/woocommerce/woocommerce-blocks/pull/9510))
+- Add support for the Product Rating block within the Single Product template. ([9499](https://github.com/woocommerce/woocommerce-blocks/pull/9499))
+- The Mini-Cart block is now compatible with caching plugins. ([9493](https://github.com/woocommerce/woocommerce-blocks/pull/9493))
+- On-Sale Badge: Use background and text color of the button element if not defined in theme.json. ([9068](https://github.com/woocommerce/woocommerce-blocks/pull/9068))
+
+#### Bug Fixes
+
+- Fix aria-label displaying wrong information on mini-cart. ([9672](https://github.com/woocommerce/woocommerce-blocks/pull/9672))
+- Allow plugin based template parts in templates. ([9667](https://github.com/woocommerce/woocommerce-blocks/pull/9667))
+- Prevent horizontal shift when opening the Mini-Cart drawer if scrollbars are visible. ([9648](https://github.com/woocommerce/woocommerce-blocks/pull/9648))
+- Fix text alignment issue on various widths for Just arrived full hero pattern. ([9640](https://github.com/woocommerce/woocommerce-blocks/pull/9640))
+- Product Image Gallery Block: Reintroduce filters and override-restore the global product variable. ([9630](https://github.com/woocommerce/woocommerce-blocks/pull/9630))
+- Remove propTypes definitions from Product List container. ([9616](https://github.com/woocommerce/woocommerce-blocks/pull/9616))
+- Remove propTypes definitions from Add to Cart. ([9615](https://github.com/woocommerce/woocommerce-blocks/pull/9615))
+- Revalidate the postcode when changing country in the Checkout form. ([9611](https://github.com/woocommerce/woocommerce-blocks/pull/9611))
+- Fix an issue where changing country could cause shipping rates to constantly reload. ([9606](https://github.com/woocommerce/woocommerce-blocks/pull/9606))
+- Fix non visible cart button on mini cart in certain themes. ([9603](https://github.com/woocommerce/woocommerce-blocks/pull/9603))
+- Fix Mini-Cart badge not visible in themes without a `<body>` background color. ([9601](https://github.com/woocommerce/woocommerce-blocks/pull/9601))
+- Fix Cambodian postcode validation. ([9597](https://github.com/woocommerce/woocommerce-blocks/pull/9597))
+- Product Image Gallery block: Fix magnifying glass appearing outside the block content area. ([9594](https://github.com/woocommerce/woocommerce-blocks/pull/9594))
+- Exclude already-enqueued scripts from scripts to lazy load in the Mini Cart block. ([9587](https://github.com/woocommerce/woocommerce-blocks/pull/9587))
+- Fix: Ensure the global product variable is restored to its original value after being overridden within the Add to Cart with Options block. ([9581](https://github.com/woocommerce/woocommerce-blocks/pull/9581))
+- Fix alignment of the close button in the Mini-Cart drawer when it has borders. ([9507](https://github.com/woocommerce/woocommerce-blocks/pull/9507))
+- Add to Cart with Options Block: Remove global variable overwrite. ([9457](https://github.com/woocommerce/woocommerce-blocks/pull/9457))
+- Fix total shipping display info when no shipping method is available. ([8819](https://github.com/woocommerce/woocommerce-blocks/pull/8819))
+- Blockified Single Product Template: use h1 for the Product Title when transforming from Classic template. ([9748]((https://github.com/woocommerce/woocommerce-blocks/pull/9748))
+
 = 10.2.2 - 2023-05-31 =
 
 #### Bug Fixes
