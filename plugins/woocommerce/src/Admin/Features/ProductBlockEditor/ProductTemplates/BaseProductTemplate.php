@@ -21,7 +21,12 @@ abstract class BaseProductTemplate {
     /**
      * Index for the child blocks.
      */
-    const CHILD_BLOCKS_INDEX = 2;
+    const BLOCK_CHILDREN_INDEX = 2;
+
+    /**
+     * Property for the internal order.
+     */
+    const ORDER_PROPERTY = '_order';
 
     /**
      * The block template.
@@ -37,7 +42,13 @@ abstract class BaseProductTemplate {
      * Set up the template.
      */
     public function __construct() {
+        $this->add_tab( array(
+            'id'    => 'general2',
+            'title' => __( 'General2', 'woocommerce' ),
+            'order' => 20,
+        ) );
         $this->add_tab( $this->get_general_tab_args() );
+
         $this->add_section( $this->get_basic_section_args() );
         $this->add_field(
             array(
@@ -65,7 +76,7 @@ abstract class BaseProductTemplate {
         $parent = $args['parent'];
         $order  = $args['order'];
 
-        $block[ self::BLOCK_PROPERTIES_INDEX ]['_order'] = $order;
+        $block[ self::BLOCK_PROPERTIES_INDEX ][ self::ORDER_PROPERTY ] = $order;
 
         $this->insert_block( $parent, $block, $id );
     }
@@ -77,7 +88,7 @@ abstract class BaseProductTemplate {
         if ( $parent === self::ROOT ) {
             $blocks = &$this->template;
         } else {
-            $blocks = &$this->cache[ $parent ][ self::CHILD_BLOCKS_INDEX ];
+            $blocks = &$this->cache[ $parent ][ self::BLOCK_CHILDREN_INDEX ];
         }
 
         $blocks[] = $block;
@@ -139,10 +150,24 @@ abstract class BaseProductTemplate {
     }
 
     /**
+     * Sort blocks recursively by the internal block attribute order property.
+     */
+    private function sort_by_order( $blocks ) {
+        usort( $blocks, function( $a, $b ) {
+            return $a[ self::BLOCK_PROPERTIES_INDEX ][ self::ORDER_PROPERTY ] > $b[ self::BLOCK_PROPERTIES_INDEX ][ self::ORDER_PROPERTY ] ? 1 : -1;
+        } );
+        foreach( $blocks as $index => $block ) {
+            if ( isset( $block[ self::BLOCK_CHILDREN_INDEX ] ) ) {
+                $blocks[ $index ][ self::BLOCK_CHILDREN_INDEX ] = $this->sort_by_order( $block[ self::BLOCK_CHILDREN_INDEX ] );
+            }
+        }
+        return $blocks;
+    }
+
+    /**
      * Get the template.
      */
     public function get_template() {
-        // @todo Reorder array based on order property.
-        return $this->template;
+        return $this->sort_by_order( $this->template );
     }
 }
