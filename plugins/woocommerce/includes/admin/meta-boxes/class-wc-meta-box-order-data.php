@@ -260,9 +260,6 @@ class WC_Meta_Box_Order_Data {
 					 * the order page. Example: display a notice if
 					 * the order is disputed.
 					 *
-					 * WC_Admin_Notices::render_contextual_notice() can be
-					 * used to render a prominent notice with a CTA button.
-					 *
 					 * @param $order WC_Order The order object being displayed.
 					 * @since 7.9.0
 					 */
