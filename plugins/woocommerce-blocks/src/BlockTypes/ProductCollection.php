@@ -80,6 +80,7 @@ class ProductCollection extends AbstractBlock {
 		$on_sale            = $request->get_param( 'woocommerceOnSale' ) === 'true';
 		$stock_status       = $request->get_param( 'woocommerceStockStatus' );
 		$product_attributes = $request->get_param( 'woocommerceAttributes' );
+		$args['author']     = $request->get_param( 'author' ) ?? '';
 
 		return $this->get_final_query_args(
 			$args,
@@ -127,13 +128,15 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$block_context_query = $block->context['query'];
+		$offset              = $block_context_query['offset'] ?? 0;
+		$per_page            = $block_context_query['perPage'] ?? 9;
 
 		$common_query_values = array(
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			'meta_query'     => array(),
 			'posts_per_page' => $block_context_query['perPage'],
 			'order'          => $block_context_query['order'],
-			'offset'         => $block_context_query['offset'],
+			'offset'         => ( $per_page * ( $page - 1 ) ) + $offset,
 			'post__in'       => array(),
 			'post_status'    => 'publish',
 			'post_type'      => 'product',
@@ -141,6 +144,7 @@ class ProductCollection extends AbstractBlock {
 			'tax_query'      => array(),
 			'paged'          => $page,
 			's'              => $block_context_query['search'],
+			'author'         => $block_context_query['author'] ?? '',
 		);
 
 		$is_on_sale       = $block_context_query['woocommerceOnSale'] ?? false;
