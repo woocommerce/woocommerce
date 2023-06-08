@@ -1,42 +1,32 @@
 /**
  * External dependencies
  */
-import { Card, CardBody, CardHeader, Button } from '@wordpress/components';
+import {
+	Card,
+	CardBody,
+	CardHeader,
+	Button,
+	CardDivider,
+} from '@wordpress/components';
+import { Pill } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import strings from './strings';
 import GiftIcon from './gift';
+import WooPaymentsLogo from './woopayments.svg';
 import WCPayOfferIcon from './wcpay-offer.svg';
 import ExitSurveyModal from './exit-survey-modal';
 import PaymentMethods from './payment-methods';
 
-const LearnMore = () => {
-	const handleClick = () => {
-		recordEvent( 'wcpay_welcome_learn_more', {} );
-	};
-	return (
-		<a
-			onClick={ handleClick }
-			href="https://woocommerce.com/payments/"
-			target="_blank"
-			rel="noreferrer"
-		>
-			{ strings.learnMore }
-		</a>
-	);
-};
-
-const Banner = ( {
-	isSubmitted,
-	handleSetup,
-}: {
+interface Props {
 	isSubmitted: boolean;
 	handleSetup: () => void;
-} ) => {
+}
+
+const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
 
 	const [ isExitSurveyModalOpen, setExitSurveyModalOpen ] = useState( false );
@@ -47,71 +37,45 @@ const Banner = ( {
 	};
 
 	return (
-		<Card className="connect-account__card">
-			<CardHeader>
-				<div>
-					<h1 className="banner-heading-copy">
-						{ strings.bannerHeading }
-					</h1>
-					<p className="wcpay-connect-account-page-terms-of-service">
-						{ strings.terms }
-					</p>
-				</div>
-				<div className="connect-account__action">
-					<Button
-						isSecondary
-						isBusy={ isNoThanksClicked && isExitSurveyModalOpen }
-						disabled={ isNoThanksClicked && isExitSurveyModalOpen }
-						onClick={ handleNoThanks }
-						className="btn-nothanks"
-					>
-						{ strings.nothanks }
-					</Button>
-					<Button
-						isPrimary
-						isBusy={ isSubmitted }
-						disabled={ isSubmitted }
-						onClick={ handleSetup }
-						className="btn-install"
-					>
-						{ strings.button }
-					</Button>
-					{ isExitSurveyModalOpen && (
-						<ExitSurveyModal
-							setExitSurveyModalOpen={ setExitSurveyModalOpen }
-						/>
-					) }
-				</div>
-			</CardHeader>
-			<CardBody>
-				<div className="content">
-					<p className="onboarding-description">
-						{ strings.onboarding.description } <LearnMore />
-					</p>
-
-					<p className="accepted-payment-methods">
-						{ strings.paymentMethodsHeading }
-					</p>
-
-					<PaymentMethods />
-				</div>
+		<Card className="__CLASS__">
+			<CardBody className="woopayments-welcome-page__banner-header">
+				<img src={ WooPaymentsLogo } />
+				<h1>{ strings.heading }</h1>
 			</CardBody>
-			<CardBody>
-				<div className="limited-time-offer">
-					<div className="offer-header">
-						<GiftIcon className="gift-icon" />
-						{ strings.limitedTimeOffer }
-					</div>
-					<h1 className="offer-copy">{ strings.bannerCopy }</h1>
-					<p>{ strings.discountCopy }</p>
-					<p>{ strings.termsAndConditions }</p>
+			<CardBody className="woopayments-welcome-page__banner-offer">
+				<div className="woopayments-welcome-page__banner-offer__pill">
+					{ strings.limitedTimeOffer }
 				</div>
-				<img
-					className="banner-offer-icon"
-					src={ WCPayOfferIcon }
-					alt="WCPay Offer icon"
+				<h2>{ strings.offerHeading }</h2>
+				<Button
+					variant="primary"
+					isBusy={ isSubmitted }
+					disabled={ isSubmitted }
+					onClick={ handleSetup }
+				>
+					{ strings.install }
+				</Button>
+				<Button
+					variant="tertiary"
+					isBusy={ isNoThanksClicked && isExitSurveyModalOpen }
+					disabled={ isNoThanksClicked && isExitSurveyModalOpen }
+					onClick={ handleNoThanks }
+				>
+					{ strings.noThanks }
+				</Button>
+				<p>{ strings.TosAndPp }</p>
+				<p>{ strings.termsAndConditions }</p>
+			</CardBody>
+			<CardDivider />
+			<CardBody className="woopayments-welcome-page__banner-payments">
+				<p>{ strings.paymentOptions }</p>
+				<PaymentMethods />
+			</CardBody>
+			{ isExitSurveyModalOpen && (
+				<ExitSurveyModal
+					setExitSurveyModalOpen={ setExitSurveyModalOpen }
 				/>
-			</CardBody>
+			) }
 		</Card>
 	);
 };

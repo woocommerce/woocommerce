@@ -85,41 +85,41 @@ function ExitSurveyModal( {}: {
 	return (
 		<Modal
 			className="wc-calypso-bridge-payments-welcome-survey"
-			title={ strings.surveyTitle }
+			title={ strings.survey.title }
 			onRequestClose={ closeModal }
 			shouldCloseOnClickOutside={ false }
 		>
 			<p className="wc-calypso-bridge-payments-welcome-survey__intro">
-				{ strings.surveyIntro }
+				{ strings.survey.intro }
 			</p>
 
 			<p className="wc-calypso-bridge-payments-welcome-survey__question">
-				{ strings.surveyQuestion }
+				{ strings.survey.question }
 			</p>
 
 			<div className="wc-calypso-bridge-payments-welcome-survey__selection">
 				<CheckboxControl
-					label={ strings.surveyHappyLabel }
+					label={ strings.survey.happyLabel }
 					checked={ isHappyChecked }
 					onChange={ setHappyChecked }
 				/>
 				<CheckboxControl
-					label={ strings.surveyInstallLabel }
+					label={ strings.survey.installLabel }
 					checked={ isInstallChecked }
 					onChange={ setInstallChecked }
 				/>
 				<CheckboxControl
-					label={ strings.surveyMoreInfoLabel }
+					label={ strings.survey.moreInfoLabel }
 					checked={ isMoreInfoChecked }
 					onChange={ setMoreInfoChecked }
 				/>
 				<CheckboxControl
-					label={ strings.surveyAnotherTimeLabel }
+					label={ strings.survey.anotherTimeLabel }
 					checked={ isAnotherTimeChecked }
 					onChange={ setAnotherTimeChecked }
 				/>
 				<CheckboxControl
-					label={ strings.surveySomethingElseLabel }
+					label={ strings.survey.somethingElseLabel }
 					checked={ isSomethingElseChecked }
 					onChange={ setSomethingElseChecked }
 				/>
@@ -127,7 +127,7 @@ function ExitSurveyModal( {}: {
 
 			<div className="wc-calypso-bridge-payments-welcome-survey__comments">
 				<TextareaControl
-					label={ strings.surveyCommentsLabel }
+					label={ strings.survey.commentsLabel }
 					value={ comments }
 					onChange={ ( value: string ) => setComments( value ) }
 					rows={ 3 }
@@ -141,10 +141,10 @@ function ExitSurveyModal( {}: {
 					onClick={ exitSurvey }
 					name="cancel"
 				>
-					{ strings.surveyCancelButton }
+					{ strings.survey.cancelButton }
 				</Button>
 				<Button isSecondary onClick={ sendFeedback } name="send">
-					{ strings.surveySubmitButton }
+					{ strings.survey.submitButton }
 				</Button>
 			</div>
 		</Modal>

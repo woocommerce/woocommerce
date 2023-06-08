@@ -39,7 +39,7 @@ const ConnectAccountPage = () => {
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { installAndActivatePlugins } = useDispatch( 'wc/admin/plugins' );
 	const [ isSubmitted, setSubmitted ] = useState( false );
-	const [ errorMessage, setErrorMessage ] = useState( 'Sample error' );
+	const [ errorMessage, setErrorMessage ] = useState( '' );
 	const [ enabledApms, setEnabledApms ] = useState( new Set< Apm >() );
 
 	const { isJetpackConnected, connectUrl, hasViewedWelcomePage } = useSelect(
@@ -130,23 +130,18 @@ const ConnectAccountPage = () => {
 	};
 
 	return (
-		<div className="connect-account-page">
-			<div className="woocommerce-payments-page is-narrow connect-account">
-				{ errorMessage && (
-					<Notice status="error" isDismissible={ false }>
-						{ errorMessage }
-					</Notice>
-				) }
-				<Banner
-					isSubmitted={ isSubmitted }
-					handleSetup={ handleSetup }
-				/>
-				<ApmList
-					enabledApms={ enabledApms }
-					setEnabledApms={ setEnabledApms }
-				/>
-				<FrequentlyAskedQuestionsSimple />
-			</div>
+		<div className="woopayments-welcome-page">
+			{ errorMessage && (
+				<Notice status="error" isDismissible={ false }>
+					{ errorMessage }
+				</Notice>
+			) }
+			<Banner isSubmitted={ isSubmitted } handleSetup={ handleSetup } />
+			<ApmList
+				enabledApms={ enabledApms }
+				setEnabledApms={ setEnabledApms }
+			/>
+			<FrequentlyAskedQuestionsSimple />
 		</div>
 	);
 };

@@ -4,14 +4,13 @@
 import {
 	Visa,
 	MasterCard,
-	Maestro,
 	Amex,
 	ApplePay,
+	GooglePay,
 	CB,
-	DinersClub,
-	Discover,
-	JCB,
 	UnionPay,
+	JCB,
+	Sofort,
 } from '@woocommerce/onboarding';
 
 /**
@@ -21,17 +20,16 @@ import strings from './strings';
 
 const PaymentMethods: React.FC = () => {
 	return (
-		<div className="wcpay-connect-account-page-payment-methods">
+		<div className="woopayments-welcome-page__payment-methods">
 			<Visa />
 			<MasterCard />
-			<Maestro />
 			<Amex />
-			<DinersClub />
+			<ApplePay />
+			<GooglePay />
 			<CB />
-			<Discover />
 			<UnionPay />
 			<JCB />
-			<ApplePay />
+			<Sofort /> { strings.andMore }
 		</div>
 	);
 };
