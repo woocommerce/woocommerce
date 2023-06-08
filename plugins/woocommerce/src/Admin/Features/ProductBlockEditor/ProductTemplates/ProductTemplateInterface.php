@@ -31,6 +31,11 @@ interface ProductTemplateInterface {
     const PRICING_SECTION = 'section/pricing';
 
 	/**
+	 * Set up the template.
+	 */
+	public function __construct();
+
+	/**
 	 * Get the name of the template.
 	 *
 	 * @return string Template name

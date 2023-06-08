@@ -7,6 +7,11 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTempla
  */
 class VariableProductTemplate implements ProductTemplateInterface {
 
+    /**
+     * Setup the template.
+     */
+    public function __construct() {}
+
 	/**
 	 * Get the name of the template.
 	 *
