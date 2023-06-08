@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
-import {
-	ALLOW_TRACKING_OPTION_NAME,
-	useCustomerEffortScoreModal,
-} from '@woocommerce/customer-effort-score';
+import { useCustomerEffortScoreModal } from '@woocommerce/customer-effort-score';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 /**
@@ -31,21 +28,14 @@ export const useFeedbackBar = () => {
 				PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME
 			) as string;
 
-			const allowTrackingOption =
-				getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
-
-			const resolving =
-				! hasFinishedResolution( 'getOption', [
-					PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME,
-				] ) ||
-				! hasFinishedResolution( 'getOption', [
-					ALLOW_TRACKING_OPTION_NAME,
-				] );
+			const resolving = ! hasFinishedResolution( 'getOption', [
+				PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME,
+			] );
 
 			return {
 				shouldShowFeedbackBar:
 					! resolving &&
-					allowTrackingOption === 'yes' &&
+					window.wcTracks?.isEnabled &&
 					! isCesModalOptionsLoading &&
 					! wasPreviouslyShown(
 						PRODUCT_EDITOR_FEEDBACK_CES_ACTION
@@ -69,22 +59,16 @@ export const useFeedbackBar = () => {
 			PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME
 		) ) as string;
 
-		const allowTrackingOption = await getOption(
-			ALLOW_TRACKING_OPTION_NAME
-		);
-
 		return {
 			showFeedbackBarOption,
-			allowTrackingOption,
 		};
 	};
 
 	const maybeShowFeedbackBar = async () => {
-		const { allowTrackingOption, showFeedbackBarOption } =
-			await getOptions();
+		const { showFeedbackBarOption } = await getOptions();
 
 		if (
-			allowTrackingOption === 'yes' &&
+			window.wcTracks?.isEnabled &&
 			! wasPreviouslyShown( PRODUCT_EDITOR_FEEDBACK_CES_ACTION ) &&
 			showFeedbackBarOption !== 'no'
 		) {
