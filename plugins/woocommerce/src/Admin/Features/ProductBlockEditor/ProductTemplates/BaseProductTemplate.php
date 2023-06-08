@@ -24,45 +24,42 @@ abstract class BaseProductTemplate {
     protected $template = array();
 
     /**
+     * Cache of reference to inserted blocks location in tree.
+     */
+    protected $cache = array();
+
+    /**
      * Set up the template.
      */
     public function __construct() {
         $this->add_tab( $this->get_general_tab_args() );
         $this->add_section( $this->get_basic_section_args() );
-        $this->add_field( array( 'general', 'basic-details' ), $this->get_name_field_args() );
-        
-        $test_block = array(
-            'my-test-block'
-        );
-        // $this->add_field( 'root', $test_block );
-        $this->add_field( 'general', $test_block );
-        $this->add_field( array( 'general', 'basic-details' ), $test_block );
+        $this->add_field( 'basic-details', $this->get_name_field_args() );
     }
 
     /**
      * Add a field to the existing template.
      */
-    protected function add_field( $parent, $block ) {
-        $this->insert_block( $parent, $block );
+    protected function add_field( $parent, $block, $id = null ) {
+        $this->insert_block( $parent, $block, $id );
     }
 
-    private function insert_block( $parent, $block ) {
-        $id = isset( $block[1]['id'] ) ? $block[1]['id'] : null;
-
+    /**
+     * Insert a block into the template tree.
+     */
+    private function insert_block( $parent, $block, $id ) {
         if ( $parent === self::ROOT ) {
-            $insertion_point = &$this->template;
-        } elseif ( is_array( $parent ) ) {
-            $insertion_point = &$this->template[ $parent[0] ][ self::CHILD_BLOCKS_INDEX ];
-            for ( $i = 1; $i < count( $parent ); $i++ ) {
-                $insertion_point = &$insertion_point[ $parent[ $i ] ][ self::CHILD_BLOCKS_INDEX ];
-            }
+            $blocks = &$this->template;
         } else {
-            $insertion_point = &$this->template[ $parent ][ self::CHILD_BLOCKS_INDEX ];
+            $blocks = &$this->cache[ $parent ][ self::CHILD_BLOCKS_INDEX ];
         }
 
-        $index = $id ? $id : count( $insertion_point );
+        $index = $id ? $id : count( $blocks );
+        $blocks[ $index ] = $block;
 
-        $insertion_point[ $index ] = $block;
+        if ( $id ) {
+            $this->cache[ $id ] = &$blocks[ $index ];
+        }
     }
 
     /**
@@ -81,7 +78,7 @@ abstract class BaseProductTemplate {
             array(),
         );
 
-        $this->add_field( self::ROOT, $tab );
+        $this->add_field( self::ROOT, $tab, $args['id'] );
     }
 
     /**
@@ -101,7 +98,7 @@ abstract class BaseProductTemplate {
             array(),
         );
 
-        $this->add_field( $args['parent'], $tab );
+        $this->add_field( $args['parent'], $tab, $args['id'] );
     }
 
     /**
