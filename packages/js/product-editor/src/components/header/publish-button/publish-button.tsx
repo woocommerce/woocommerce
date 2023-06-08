@@ -6,9 +6,8 @@ import { Button } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { MouseEvent } from 'react';
-import { Product, ProductStatus } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
-import { useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -16,29 +15,26 @@ import { useEntityProp } from '@wordpress/core-data';
 import { getProductErrorMessage } from '../../../utils/get-product-error-message';
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { usePublish } from '../hooks/use-publish';
+import { PublishButtonProps } from './types';
 
-export function PublishButton(
-	props: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' >
-) {
-	const [ productStatus ] = useEntityProp< ProductStatus >(
-		'postType',
-		'product',
-		'status'
-	);
-
-	const isPublished = productStatus === 'publish';
-
+export function PublishButton( {
+	productStatus,
+	...props
+}: PublishButtonProps ) {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
 
 	const publishButtonProps = usePublish( {
+		productStatus,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
 			recordProductEvent( 'product_update', savedProduct );
 
+			const isPublished = productStatus === 'publish';
+
 			const noticeContent = isPublished
-				? __( 'Product published.', 'woocommerce' )
-				: __( 'Product successfully created.', 'woocommerce' );
+				? __( 'Product updated.', 'woocommerce' )
+				: __( 'Product added.', 'woocommerce' );
 			const noticeOptions = {
 				icon: '🎉',
 				actions: [
@@ -64,12 +60,8 @@ export function PublishButton(
 			}
 		},
 		onPublishError( error ) {
-			const defaultMessage = isPublished
-				? __( 'Failed to publish product.', 'woocommerce' )
-				: __( 'Failed to create product.', 'woocommerce' );
-
 			const message = getProductErrorMessage( error );
-			createErrorNotice( message || defaultMessage );
+			createErrorNotice( message );
 		},
 	} );
 
