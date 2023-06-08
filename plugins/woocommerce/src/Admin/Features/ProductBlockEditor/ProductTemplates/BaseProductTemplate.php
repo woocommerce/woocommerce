@@ -14,6 +14,11 @@ abstract class BaseProductTemplate {
     const ROOT = 'root';
 
     /**
+     * Index for the block properties.
+     */
+    const BLOCK_PROPERTIES_INDEX = 1;
+
+    /**
      * Index for the child blocks.
      */
     const CHILD_BLOCKS_INDEX = 2;
@@ -34,13 +39,34 @@ abstract class BaseProductTemplate {
     public function __construct() {
         $this->add_tab( $this->get_general_tab_args() );
         $this->add_section( $this->get_basic_section_args() );
-        $this->add_field( 'basic-details', $this->get_name_field_args() );
+        $this->add_field(
+            array(
+                'parent' => 'basic-details',
+                'block'  => $this->get_name_field_args(),
+                'order'  => '20',
+            )
+        );
+        $this->add_field(
+            array(
+                'parent' => 'basic-details',
+                'block'  => array( 'test-block' ),
+                'order'  => '10',
+            )
+        );
     }
 
     /**
      * Add a field to the existing template.
      */
-    protected function add_field( $parent, $block, $id = null ) {
+    protected function add_field( $field ) {
+        $args   = wp_parse_args( $field, array( 'order' => 10 ) );
+        $id     = $args['id'] ?? null;
+        $block  = $args['block'];
+        $parent = $args['parent'];
+        $order  = $args['order'];
+
+        $block[ self::BLOCK_PROPERTIES_INDEX ]['_order'] = $order;
+
         $this->insert_block( $parent, $block, $id );
     }
 
@@ -78,27 +104,38 @@ abstract class BaseProductTemplate {
             array(),
         );
 
-        $this->add_field( self::ROOT, $tab, $args['id'] );
+        $this->add_field(
+            array(
+                'id'     => $args['id'],
+                'parent' => self::ROOT,
+                'block'  => $tab,
+                'order'  => $args['order'] ?? null,
+            )
+        );
     }
 
     /**
      * Add a section to the template.
      */
     protected function add_section( $args = array() ) {
-        $args = wp_parse_args( $args, array( 'order' => 10 ) );
-
-        $tab = array(
+        $section = array(
             'woocommerce/product-section',
             array(
                 'id'          => $args['id'],
                 'title'       => $args['title'],
                 'description' => $args['description'],
-                'order'       => $args['order'],
             ),
             array(),
         );
 
-        $this->add_field( $args['parent'], $tab, $args['id'] );
+        $this->add_field(
+            array(
+                'id'     => $args['id'],
+                'parent' => $args['parent'],
+                'block'  => $section,
+                'order'  => $args['order'] ?? null,
+            )
+        );
     }
 
     /**
