@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Added new hook `woocommerce_admin_order_data_after_payment_info` allowing extensions to render content in order details payment info metabox.
