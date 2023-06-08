@@ -42,12 +42,12 @@ abstract class BaseProductTemplate {
      * Set up the template.
      */
     public function __construct() {
-        $this->add_tab( array(
+        $this->add_group( array(
             'id'    => 'general2',
             'title' => __( 'General2', 'woocommerce' ),
             'order' => 20,
         ) );
-        $this->add_tab( $this->get_general_tab_args() );
+        $this->add_group( $this->get_general_tab_args() );
 
         $this->add_section( $this->get_basic_section_args() );
         $this->add_field(
@@ -100,12 +100,12 @@ abstract class BaseProductTemplate {
     }
 
     /**
-     * Add a tab to the template.
+     * Add a group to the template.
      */
-    protected function add_tab( $args = array() ) {
+    protected function add_group( $args = array() ) {
         $args = wp_parse_args( $args, array( 'order' => 10 ) );
 
-        $tab = array(
+        $group = array(
             'woocommerce/product-tab',
             array(
                 'id'    => $args['id'],
@@ -119,7 +119,7 @@ abstract class BaseProductTemplate {
             array(
                 'id'     => $args['id'],
                 'parent' => self::ROOT,
-                'block'  => $tab,
+                'block'  => $group,
                 'order'  => $args['order'] ?? null,
             )
         );
