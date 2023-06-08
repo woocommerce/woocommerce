@@ -38,34 +38,6 @@ abstract class AbstractProductTemplate {
     protected $cache = array();
 
     /**
-     * Set up the template.
-     */
-    public function __construct() {
-        $this->add_group( array(
-            'id'    => 'general2',
-            'title' => __( 'General2', 'woocommerce' ),
-            'order' => 20,
-        ) );
-        $this->add_group( $this->get_general_tab_args() );
-
-        $this->add_section( $this->get_basic_section_args() );
-        $this->add_field(
-            array(
-                'parent' => 'basic-details',
-                'block'  => $this->get_name_field_args(),
-                'order'  => '20',
-            )
-        );
-        $this->add_field(
-            array(
-                'parent' => 'basic-details',
-                'block'  => array( 'test-block' ),
-                'order'  => '10',
-            )
-        );
-    }
-
-    /**
      * Add a field to the existing template.
      */
     public function add_field( $field ) {
