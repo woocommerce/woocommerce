@@ -47,7 +47,7 @@ const amazonPay = {
 
 describe( 'getSplitGateways()', () => {
 	it( 'Returns WCPay gateways', () => {
-		const [ wcpayGateways ] = getSplitGateways( [ wcpay, cod, paypal ] );
+		const [ wcpayGateways ] = getSplitGateways( [ wcpay, cod, paypal ], 'US', true );
 		expect( wcpayGateways ).toEqual( [ wcpay ] );
 	} );
 

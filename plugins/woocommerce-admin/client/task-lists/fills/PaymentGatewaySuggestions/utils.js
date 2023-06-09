@@ -107,12 +107,15 @@ export const getSplitGateways = (
 				// mainList is the list of gateways that is shown in the payments task.
 				const [ wcPay, offline, mainList ] = all;
 
-				if (
-					getIsGatewayWCPay( gateway ) &&
-					! ( gateway.installed && ! gateway.needsSetup )
-				) {
-					// WCPay is always shown when it's installed but not setup.
-					wcPay.push( gateway );
+				if ( getIsGatewayWCPay( gateway ) ) {
+					if (
+						isWCPaySupported &&
+						! ( gateway.installed && ! gateway.needsSetup )
+					) {
+						// WCPay is always shown when it's installed but not setup.
+						wcPay.push( gateway );
+					}
+					// WCPay is ignored if it reaches here.
 				} else if ( gateway.is_offline ) {
 					// Offline gateways are always shown.
 					offline.push( gateway );
