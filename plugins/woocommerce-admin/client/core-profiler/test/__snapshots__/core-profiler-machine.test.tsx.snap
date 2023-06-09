@@ -1897,7 +1897,7 @@ Object {
     />
     <div>
       <div
-        class="woocommerce-profile-wizard__container woocommerce-profile-wizard__step-skipFlowBusinessLocation"
+        class="woocommerce-profile-wizard__container woocommerce-profile-wizard__step-skipGuidedSetup"
       >
         <div
           class="woocommerce-profiler-business-location"
@@ -2049,7 +2049,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="woocommerce-profile-wizard__container woocommerce-profile-wizard__step-skipFlowBusinessLocation"
+      class="woocommerce-profile-wizard__container woocommerce-profile-wizard__step-skipGuidedSetup"
     >
       <div
         class="woocommerce-profiler-business-location"

@@ -2,10 +2,21 @@
 /**
  * External dependencies
  */
-import { createMachine, assign, DoneInvokeEvent, actions, spawn } from 'xstate';
-import { useMachine } from '@xstate/react';
+import {
+	createMachine,
+	ActionMeta,
+	assign,
+	DoneInvokeEvent,
+	actions,
+	spawn,
+	AnyEventObject,
+	BaseActionObject,
+	Sender,
+} from 'xstate';
+import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
+import { updateQueryString, getQuery } from '@woocommerce/navigation';
 import {
 	ExtensionList,
 	OPTIONS_STORE_NAME,
@@ -38,16 +49,17 @@ import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
 import { Plugins } from './pages/Plugins';
-import { getPluginTrackKey, getTimeFrame } from '~/utils';
+import { getPluginSlug, getPluginTrackKey, getTimeFrame } from '~/utils';
 import './style.scss';
 import {
 	InstallationCompletedResult,
-	InstallAndActivatePlugins,
 	InstalledPlugin,
 	PluginInstallError,
+	pluginInstallerMachine,
 } from './services/installAndActivatePlugins';
 import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import recordTracksActions from './actions/tracks';
+import { findComponentMeta } from './utils/find-component';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -350,6 +362,23 @@ const updateBusinessLocation = ( countryAndState: string ) => {
 	} );
 };
 
+const assignStoreLocation = assign( {
+	businessInfo: (
+		context: CoreProfilerStateMachineContext,
+		event: BusinessLocationEvent
+	) => {
+		return {
+			...context.businessInfo,
+			location: event.payload.storeLocation,
+		};
+	},
+} );
+
+const assignUserProfile = assign( {
+	userProfile: ( context, event: UserProfileEvent ) =>
+		event.payload.userProfile, // sets context.userProfile to the payload of the event
+} );
+
 const updateBusinessInfo = async (
 	_context: CoreProfilerStateMachineContext,
 	event: BusinessInfoEvent
@@ -418,9 +447,42 @@ const getPlugins = async () => {
 	);
 };
 
+/** Special callback that is used to trigger a navigation event if the user uses the browser's back or foward buttons */
+const browserPopstateHandler = () => ( sendBack: Sender< AnyEventObject > ) => {
+	const popstateHandler = () => {
+		sendBack( 'EXTERNAL_URL_UPDATE' );
+	};
+	window.addEventListener( 'popstate', popstateHandler );
+	return () => {
+		window.removeEventListener( 'popstate', popstateHandler );
+	};
+};
+
 const handlePlugins = assign( {
-	pluginsAvailable: ( _context, event: DoneInvokeEvent< Extension[] > ) =>
-		event.data,
+	pluginsAvailable: ( _context, event ) =>
+		( event as DoneInvokeEvent< Extension[] > ).data,
+} );
+
+type ActType = (
+	ctx: CoreProfilerStateMachineContext,
+	evt: AnyEventObject,
+	{
+		action: { step },
+	}: ActionMeta< unknown, AnyEventObject, BaseActionObject >
+) => void;
+
+const updateQueryStep: ActType = ( _context, _evt, { action } ) => {
+	const { step } = getQuery() as { step: string };
+	// only update the query string if it has changed
+	if ( action.step !== step ) {
+		updateQueryString( { step: action.step } );
+	}
+};
+
+const assignPluginsSelected = assign( {
+	pluginsSelected: ( _context, event: PluginsInstallationRequestedEvent ) => {
+		return event.payload.plugins.map( getPluginSlug );
+	},
 } );
 
 export const preFetchActions = {
@@ -434,12 +496,16 @@ const coreProfilerMachineActions = {
 	...preFetchActions,
 	...recordTracksActions,
 	handlePlugins,
+	updateQueryStep,
 	updateTrackingOption,
 	handleTrackingOption,
 	handleGeolocation,
 	handleStoreNameOption,
 	handleStoreCountryOption,
 	assignOptInDataSharing,
+	assignStoreLocation,
+	assignPluginsSelected,
+	assignUserProfile,
 	handleCountries,
 	handleOnboardingProfileOption,
 	assignOnboardingProfile,
@@ -455,11 +521,20 @@ const coreProfilerMachineServices = {
 	getGeolocation,
 	getOnboardingProfileOption,
 	getPlugins,
+	browserPopstateHandler,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
-	initial: 'initializing',
+	initial: 'navigate',
 	predictableActionArguments: true, // recommended setting: https://xstate.js.org/docs/guides/actions.html
+	invoke: {
+		src: 'browserPopstateHandler',
+	},
+	on: {
+		EXTERNAL_URL_UPDATE: {
+			target: 'navigate',
+		},
+	},
 	context: {
 		// these are safe default values if for some reason the steps fail to complete correctly
 		// actual defaults displayed to the user should be handled in the steps themselves
@@ -480,380 +555,520 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		onboardingProfile: {} as OnboardingProfile,
 	} as CoreProfilerStateMachineContext,
 	states: {
-		initializing: {
-			entry: [
-				// these prefetch tasks are spawned actors in the background and do not block progression of the state machine
-				'preFetchGetPlugins',
-				'preFetchGetCountries',
+		navigate: {
+			always: [
+				/**
+				 * The 'navigate' state forwards the progress to whichever step is
+				 *  specified in the query string. If no step is specified, it will
+				 *  default to introOptIn.
+				 *
+				 *  Each top level state must be responsible for populating their own
+				 *  context data dependencies, as it is possible that they are the
+				 *  first state to be loaded due to the navigation jump.
+				 *
+				 *  Each top level state must also be responsible for updating the
+				 *  query string to reflect their own state, using the 'updateQueryStep'
+				 *  action.
+				 */
 				{
-					type: 'preFetchOptions',
-					options: [
-						'blogname',
-						'woocommerce_onboarding_profile',
-						'woocommerce_default_country',
-					],
+					target: '#introOptIn',
+					cond: {
+						type: 'hasStepInUrl',
+						step: 'intro-opt-in',
+					},
+				},
+				{
+					target: '#userProfile',
+					cond: { type: 'hasStepInUrl', step: 'user-profile' },
+				},
+				{
+					target: '#businessInfo',
+					cond: { type: 'hasStepInUrl', step: 'business-info' },
+				},
+				{
+					target: '#plugins',
+					cond: { type: 'hasStepInUrl', step: 'plugins' },
+				},
+				{
+					target: '#skipGuidedSetup',
+					cond: { type: 'hasStepInUrl', step: 'skip-guided-setup' },
+				},
+				{
+					target: 'introOptIn',
 				},
 			],
-			type: 'parallel',
+		},
+		introOptIn: {
+			id: 'introOptIn',
+			initial: 'preIntroOptIn',
 			states: {
-				// if we have any other init tasks to do in parallel, add them as a parallel state here.
-				// this blocks the introOptIn UI from loading keep that in mind when adding new tasks here
-				trackingOption: {
-					initial: 'fetching',
+				preIntroOptIn: {
+					entry: [
+						// these prefetch tasks are spawned actors in the background and do not block progression of the state machine
+						'preFetchGetPlugins',
+						'preFetchGetCountries',
+						{
+							type: 'preFetchOptions',
+							options: [
+								'blogname',
+								'woocommerce_onboarding_profile',
+								'woocommerce_default_country',
+							],
+						},
+					],
+					type: 'parallel',
 					states: {
-						fetching: {
-							invoke: {
-								src: 'getAllowTrackingOption',
-								onDone: [
-									{
-										actions: [ 'handleTrackingOption' ],
-										target: 'done',
+						// if we have any other init tasks to do in parallel, add them as a parallel state here.
+						// this blocks the introOptIn UI from loading keep that in mind when adding new tasks here
+						trackingOption: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getAllowTrackingOption',
+										onDone: [
+											{
+												actions: [
+													'handleTrackingOption',
+												],
+												target: 'done',
+											},
+										],
+										onError: {
+											target: 'done', // leave it as initialised default on error
+										},
 									},
-								],
-								onError: {
-									target: 'done', // leave it as initialised default on error
+								},
+								done: {
+									type: 'final',
 								},
 							},
 						},
-						done: {
-							type: 'final',
-						},
+					},
+					onDone: {
+						target: 'introOptIn',
+					},
+					meta: {
+						progress: 0,
 					},
 				},
-			},
-			onDone: {
-				target: 'introOptIn',
-				// TODO: at this point, we can handle the URL path param if any and jump to the correct page
-			},
-			meta: {
-				progress: 0,
-			},
-		},
-		introOptIn: {
-			on: {
-				INTRO_COMPLETED: {
-					target: 'preUserProfile',
-					actions: [
-						'assignOptInDataSharing',
-						'updateTrackingOption',
-					],
-				},
-				INTRO_SKIPPED: {
-					// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
-					target: 'preSkipFlowBusinessLocation',
-					actions: [
-						'assignOptInDataSharing',
-						'updateTrackingOption',
-					],
-				},
-			},
-			entry: [
-				{ type: 'recordTracksStepViewed', step: 'store_details' },
-			],
-			exit: actions.choose( [
-				{
-					cond: ( _context, event ) =>
-						event.type === 'INTRO_COMPLETED',
-					actions: 'recordTracksIntroCompleted',
-				},
-				{
-					cond: ( _context, event ) => event.type === 'INTRO_SKIPPED',
-					actions: [
+				introOptIn: {
+					on: {
+						INTRO_COMPLETED: {
+							target: '#userProfile',
+							actions: [
+								'assignOptInDataSharing',
+								'updateTrackingOption',
+							],
+						},
+						INTRO_SKIPPED: {
+							// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
+							target: '#skipGuidedSetup',
+							actions: [
+								'assignOptInDataSharing',
+								'updateTrackingOption',
+							],
+						},
+					},
+					entry: [
 						{
-							type: 'recordTracksStepSkipped',
+							type: 'recordTracksStepViewed',
 							step: 'store_details',
 						},
+						{ type: 'updateQueryStep', step: 'intro-opt-in' },
 					],
-				},
-			] ),
-			meta: {
-				progress: 20,
-				component: IntroOptIn,
-			},
-		},
-		preUserProfile: {
-			invoke: {
-				src: 'getOnboardingProfileOption',
-				onDone: [
-					{
-						actions: [
-							'handleOnboardingProfileOption',
-							'assignOnboardingProfile',
-						],
-						target: 'userProfile',
+					exit: actions.choose( [
+						{
+							cond: ( _context, event ) =>
+								event.type === 'INTRO_COMPLETED',
+							actions: 'recordTracksIntroCompleted',
+						},
+						{
+							cond: ( _context, event ) =>
+								event.type === 'INTRO_SKIPPED',
+							actions: [
+								{
+									type: 'recordTracksStepSkipped',
+									step: 'store_details',
+								},
+							],
+						},
+					] ),
+					meta: {
+						progress: 20,
+						component: IntroOptIn,
 					},
-				],
-				onError: {
-					target: 'userProfile',
 				},
 			},
 		},
 		userProfile: {
-			entry: [
-				{ type: 'recordTracksStepViewed', step: 'user_profile' },
-				'preFetchGeolocation',
-			],
-			on: {
-				USER_PROFILE_COMPLETED: {
-					target: 'postUserProfile',
-					actions: [
-						assign( {
-							userProfile: ( context, event: UserProfileEvent ) =>
-								event.payload.userProfile, // sets context.userProfile to the payload of the event
-						} ),
-					],
+			id: 'userProfile',
+			initial: 'preUserProfile',
+			states: {
+				preUserProfile: {
+					invoke: {
+						src: 'getOnboardingProfileOption',
+						onDone: [
+							{
+								actions: [
+									'handleOnboardingProfileOption',
+									'assignOnboardingProfile',
+								],
+								target: 'userProfile',
+							},
+						],
+						onError: {
+							target: 'userProfile',
+						},
+					},
 				},
-				USER_PROFILE_SKIPPED: {
-					target: 'postUserProfile',
-					actions: [
-						assign( {
-							userProfile: ( context, event: UserProfileEvent ) =>
-								event.payload.userProfile, // assign context.userProfile to the payload of the event
-						} ),
-					],
-				},
-			},
-			exit: actions.choose( [
-				{
-					cond: ( _context, event ) =>
-						event.type === 'USER_PROFILE_COMPLETED',
-					actions: 'recordTracksUserProfileCompleted',
-				},
-				{
-					cond: ( _context, event ) =>
-						event.type === 'USER_PROFILE_SKIPPED',
-					actions: [
+				userProfile: {
+					meta: {
+						progress: 40,
+						component: UserProfile,
+					},
+					entry: [
 						{
-							type: 'recordTracksStepSkipped',
+							type: 'recordTracksStepViewed',
 							step: 'user_profile',
 						},
+						{ type: 'updateQueryStep', step: 'user-profile' },
+						'preFetchGeolocation',
 					],
-				},
-			] ),
-			meta: {
-				progress: 40,
-				component: UserProfile,
-			},
-		},
-		postUserProfile: {
-			invoke: {
-				src: ( context ) => {
-					return updateOnboardingProfileOption( context );
-				},
-				onDone: {
-					target: 'preBusinessInfo',
-				},
-				onError: {
-					target: 'preBusinessInfo',
-				},
-			},
-		},
-		preBusinessInfo: {
-			type: 'parallel',
-			states: {
-				geolocation: {
-					initial: 'checkDataOptIn',
-					states: {
-						checkDataOptIn: {
-							// if the user has opted out of data sharing, we skip the geolocation step
-							always: [
+					on: {
+						USER_PROFILE_COMPLETED: {
+							target: 'postUserProfile',
+							actions: [ 'assignUserProfile' ],
+						},
+						USER_PROFILE_SKIPPED: {
+							target: 'postUserProfile',
+							actions: [ 'assignUserProfile' ],
+						},
+					},
+					exit: actions.choose( [
+						{
+							cond: ( _context, event ) =>
+								event.type === 'USER_PROFILE_COMPLETED',
+							actions: 'recordTracksUserProfileCompleted',
+						},
+						{
+							cond: ( _context, event ) =>
+								event.type === 'USER_PROFILE_SKIPPED',
+							actions: [
 								{
-									cond: ( context ) =>
-										context.optInDataSharing,
-									target: 'fetching',
-								},
-								{
-									target: 'done',
+									type: 'recordTracksStepSkipped',
+									step: 'user_profile',
 								},
 							],
 						},
-						fetching: {
-							invoke: {
-								src: 'getGeolocation',
-								onDone: {
-									target: 'done',
-									actions: 'handleGeolocation',
-								},
-								// onError TODO: handle error
-							},
+					] ),
+				},
+				postUserProfile: {
+					invoke: {
+						src: ( context ) => {
+							return updateOnboardingProfileOption( context );
 						},
-						done: {
-							type: 'final',
+						onDone: {
+							target: '#businessInfo',
+						},
+						onError: {
+							target: '#businessInfo',
 						},
 					},
 				},
-				storeCountryOption: {
-					initial: 'fetching',
-					states: {
-						fetching: {
-							invoke: {
-								src: 'getStoreCountryOption',
-								onDone: [
-									{
-										actions: [ 'handleStoreCountryOption' ],
-										target: 'done',
-									},
-								],
-								onError: {
-									target: 'done',
-								},
-							},
-						},
-						done: {
-							type: 'final',
-						},
-					},
-				},
-				storeNameOption: {
-					initial: 'fetching',
-					states: {
-						fetching: {
-							invoke: {
-								src: 'getStoreNameOption',
-								onDone: [
-									{
-										actions: [ 'handleStoreNameOption' ],
-										target: 'done',
-									},
-								],
-								onError: {
-									target: 'done', // leave it as initialised default on error
-								},
-							},
-						},
-						done: {
-							type: 'final',
-						},
-					},
-				},
-				countries: {
-					initial: 'fetching',
-					states: {
-						fetching: {
-							invoke: {
-								src: 'getCountries',
-								onDone: {
-									target: 'done',
-									actions: 'handleCountries',
-								},
-							},
-						},
-						done: {
-							type: 'final',
-						},
-					},
-				},
-			},
-			// onDone is reached when child parallel states are all at their final states
-			onDone: {
-				target: 'businessInfo',
-			},
-			meta: {
-				progress: 50,
 			},
 		},
 		businessInfo: {
-			entry: [
-				{ type: 'recordTracksStepViewed', step: 'business_info' },
-			],
-			on: {
-				BUSINESS_INFO_COMPLETED: {
-					target: 'prePlugins',
-					actions: [
-						'persistBusinessInfo',
-						'recordTracksBusinessInfoCompleted',
-					],
-				},
-			},
-			meta: {
-				progress: 60,
-				component: BusinessInfo,
-			},
-		},
-		preSkipFlowBusinessLocation: {
-			invoke: {
-				src: 'getCountries',
-				onDone: [
-					{
-						actions: [ 'handleCountries' ],
-						target: 'skipFlowBusinessLocation',
-					},
-				],
-				onError: {
-					target: 'skipFlowBusinessLocation',
-				},
-			},
-		},
-		skipFlowBusinessLocation: {
-			on: {
-				BUSINESS_LOCATION_COMPLETED: {
-					target: 'postSkipFlowBusinessLocation',
-					actions: [
-						assign( {
-							businessInfo: (
-								context,
-								event: BusinessLocationEvent
-							) => {
-								return {
-									...context.businessInfo,
-									location: event.payload.storeLocation,
-								};
-							},
-						} ),
-						'recordTracksSkipBusinessLocationCompleted',
-					],
-				},
-			},
-			entry: [
-				{
-					type: 'recordTracksStepViewed',
-					step: 'skip_business_location',
-				},
-			],
-			meta: {
-				progress: 80,
-				component: BusinessLocation,
-			},
-		},
-		postSkipFlowBusinessLocation: {
-			initial: 'updateBusinessLocation',
+			id: 'businessInfo',
+			initial: 'preBusinessInfo',
+			entry: [ { type: 'updateQueryStep', step: 'business-info' } ],
 			states: {
-				updateBusinessLocation: {
-					entry: assign( {
-						loader: {
-							progress: 10,
+				preBusinessInfo: {
+					type: 'parallel',
+					states: {
+						geolocation: {
+							initial: 'checkDataOptIn',
+							states: {
+								checkDataOptIn: {
+									invoke: {
+										src: 'getAllowTrackingOption',
+										onDone: [
+											{
+												actions: [
+													'handleTrackingOption',
+												],
+												target: 'fetching',
+											},
+										],
+										onError: {
+											target: 'done', // leave it as initialised default on error
+										},
+									},
+								},
+								fetching: {
+									invoke: {
+										src: 'getGeolocation',
+										onDone: {
+											target: 'done',
+											actions: 'handleGeolocation',
+										},
+										onError: {
+											target: 'done',
+										},
+									},
+								},
+								done: {
+									type: 'final',
+								},
+							},
 						},
-					} ),
+						storeCountryOption: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getStoreCountryOption',
+										onDone: [
+											{
+												actions: [
+													'handleStoreCountryOption',
+												],
+												target: 'done',
+											},
+										],
+										onError: {
+											target: 'done',
+										},
+									},
+								},
+								done: {
+									type: 'final',
+								},
+							},
+						},
+						onboardingProfileOption: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getOnboardingProfileOption',
+										onDone: [
+											{
+												actions: [
+													'assignOnboardingProfile',
+												],
+												target: 'done',
+											},
+										],
+										onError: {
+											target: 'done',
+										},
+									},
+								},
+								done: {
+									type: 'final',
+								},
+							},
+						},
+						storeNameOption: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getStoreNameOption',
+										onDone: [
+											{
+												actions: [
+													'handleStoreNameOption',
+												],
+												target: 'done',
+											},
+										],
+										onError: {
+											target: 'done', // leave it as initialised default on error
+										},
+									},
+								},
+								done: {
+									type: 'final',
+								},
+							},
+						},
+						countries: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getCountries',
+										onDone: {
+											target: 'done',
+											actions: 'handleCountries',
+										},
+									},
+								},
+								done: {
+									type: 'final',
+								},
+							},
+						},
+					},
+					// onDone is reached when child parallel states fo fetching are resolved (reached final states)
+					onDone: {
+						target: 'businessInfo',
+					},
+				},
+				businessInfo: {
+					meta: {
+						progress: 60,
+						component: BusinessInfo,
+					},
+					entry: [
+						{
+							type: 'recordTracksStepViewed',
+							step: 'business_info',
+						},
+					],
+					on: {
+						BUSINESS_INFO_COMPLETED: {
+							target: '#plugins',
+							actions: [
+								'persistBusinessInfo',
+								'recordTracksBusinessInfoCompleted',
+							],
+						},
+					},
+				},
+			},
+		},
+		skipGuidedSetup: {
+			id: 'skipGuidedSetup',
+			initial: 'preSkipFlowBusinessLocation',
+			entry: [ { type: 'updateQueryStep', step: 'skip-guided-setup' } ],
+			states: {
+				preSkipFlowBusinessLocation: {
 					invoke: {
-						src: ( context ) => {
-							return updateBusinessLocation(
-								context.businessInfo.location as string
+						src: 'getCountries',
+						onDone: [
+							{
+								actions: [ 'handleCountries' ],
+								target: 'skipFlowBusinessLocation',
+							},
+						],
+						onError: {
+							target: 'skipFlowBusinessLocation',
+						},
+					},
+				},
+				skipFlowBusinessLocation: {
+					on: {
+						BUSINESS_LOCATION_COMPLETED: {
+							target: 'postSkipFlowBusinessLocation',
+							actions: [
+								'assignStoreLocation',
+								'recordTracksSkipBusinessLocationCompleted',
+							],
+						},
+					},
+					entry: [
+						{
+							type: 'recordTracksStepViewed',
+							step: 'skip_business_location',
+						},
+					],
+					meta: {
+						progress: 80,
+						component: BusinessLocation,
+					},
+				},
+				postSkipFlowBusinessLocation: {
+					initial: 'updateBusinessLocation',
+					states: {
+						updateBusinessLocation: {
+							entry: assign( {
+								loader: {
+									progress: 10,
+								},
+							} ),
+							invoke: {
+								src: ( context ) => {
+									return updateBusinessLocation(
+										context.businessInfo.location as string
+									);
+								},
+								onDone: {
+									target: 'progress20',
+								},
+							},
+						},
+						// Although we don't need to wait 3 seconds for the following states
+						// We will dispaly 20% and 80% progress for 1.5 seconds each
+						// for the sake of user experience.
+						progress20: {
+							entry: assign( {
+								loader: {
+									progress: 20,
+								},
+							} ),
+							invoke: {
+								src: () => {
+									return promiseDelay( 1500 );
+								},
+								onDone: {
+									target: 'progress80',
+								},
+							},
+						},
+						progress80: {
+							entry: assign( {
+								loader: {
+									progress: 80,
+								},
+							} ),
+							invoke: {
+								src: () => {
+									return promiseDelay( 1500 );
+								},
+								onDone: {
+									actions: [ 'redirectToWooHome' ],
+								},
+							},
+						},
+					},
+					meta: {
+						component: Loader,
+					},
+				},
+			},
+		},
+		plugins: {
+			id: 'plugins',
+			initial: 'prePlugins',
+			states: {
+				prePlugins: {
+					invoke: {
+						src: 'getPlugins',
+						onDone: [
+							{
+								target: 'pluginsSkipped',
+								cond: ( context, event ) =>
+									event.data.length === 0,
+							},
+							{ target: 'plugins', actions: 'handlePlugins' },
+						],
+					},
+					// add exit action to filter the extensions using a custom function here and assign it to context.extensionsAvailable
+					exit: assign( {
+						pluginsAvailable: ( context ) => {
+							return context.pluginsAvailable.filter(
+								() => true
 							);
-						},
-						onDone: {
-							target: 'progress20',
-						},
-					},
-				},
-				// Although we don't need to wait 3 seconds for the following states
-				// We will dispaly 20% and 80% progress for 1.5 seconds each
-				// for the sake of user experience.
-				progress20: {
-					entry: assign( {
-						loader: {
-							progress: 20,
-						},
+						}, // TODO : define an extensible filter function here
 					} ),
-					invoke: {
-						src: () => {
-							return promiseDelay( 1500 );
-						},
-						onDone: {
-							target: 'progress80',
-						},
+					meta: {
+						progress: 70,
 					},
 				},
-				progress80: {
+				pluginsSkipped: {
 					entry: assign( {
 						loader: {
 							progress: 80,
@@ -861,226 +1076,203 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					} ),
 					invoke: {
 						src: () => {
-							return promiseDelay( 1500 );
+							dispatch(
+								ONBOARDING_STORE_NAME
+							).updateProfileItems( {
+								plugins_page_skipped: true,
+								completed: true,
+							} );
+							return promiseDelay( 3000 );
 						},
 						onDone: {
 							actions: [ 'redirectToWooHome' ],
 						},
 					},
-				},
-			},
-			meta: {
-				component: Loader,
-			},
-		},
-		prePlugins: {
-			invoke: {
-				src: 'getPlugins',
-				onDone: [
-					{
-						target: 'pluginsSkipped',
-						cond: ( context, event ) => event.data.length === 0,
+					meta: {
+						component: Loader,
 					},
-					{ target: 'plugins', actions: 'handlePlugins' },
-				],
-			},
-			// add exit action to filter the extensions using a custom function here and assign it to context.extensionsAvailable
-			exit: assign( {
-				pluginsAvailable: ( context ) => {
-					return context.pluginsAvailable.filter( () => true );
-				}, // TODO : define an extensible filter function here
-			} ),
-			meta: {
-				progress: 70,
-			},
-		},
-		pluginsSkipped: {
-			entry: assign( {
-				loader: {
-					progress: 80,
 				},
-			} ),
-			invoke: {
-				src: () => {
-					dispatch( ONBOARDING_STORE_NAME ).updateProfileItems( {
-						plugins_page_skipped: true,
-						completed: true,
-					} );
-					return promiseDelay( 3000 );
-				},
-				onDone: {
-					actions: [ 'redirectToWooHome' ],
-				},
-			},
-			meta: {
-				component: Loader,
-			},
-		},
-		plugins: {
-			entry: [ { type: 'recordTracksStepViewed', step: 'plugins' } ],
-			on: {
-				PLUGINS_PAGE_SKIPPED: {
-					actions: [
-						{
-							type: 'recordTracksStepSkipped',
-							step: 'plugins',
+				plugins: {
+					entry: [
+						{ type: 'recordTracksStepViewed', step: 'plugins' },
+						{ type: 'updateQueryStep', step: 'plugins' },
+					],
+					on: {
+						PLUGINS_PAGE_SKIPPED: {
+							actions: [
+								{
+									type: 'recordTracksStepSkipped',
+									step: 'plugins',
+								},
+							],
+							target: 'pluginsSkipped',
 						},
-					],
-					target: 'pluginsSkipped',
+						PLUGINS_INSTALLATION_REQUESTED: {
+							target: 'installPlugins',
+							actions: [ 'assignPluginsSelected' ],
+						},
+					},
+					meta: {
+						progress: 80,
+						component: Plugins,
+					},
 				},
-				PLUGINS_INSTALLATION_REQUESTED: {
-					target: 'installPlugins',
-					actions: [
+				postPluginInstallation: {
+					invoke: {
+						src: async ( _context, event ) => {
+							return await dispatch(
+								ONBOARDING_STORE_NAME
+							).updateProfileItems( {
+								business_extensions:
+									event.payload.installationCompletedResult.installedPlugins.map(
+										( extension: InstalledPlugin ) =>
+											extension.plugin
+									),
+								completed: true,
+							} );
+						},
+						onDone: {
+							actions: 'redirectToWooHome',
+						},
+					},
+					meta: {
+						component: Loader,
+						progress: 100,
+					},
+				},
+				installPlugins: {
+					on: {
+						PLUGIN_INSTALLED_AND_ACTIVATED: {
+							actions: [
+								assign( {
+									loader: (
+										_context,
+										event: PluginInstalledAndActivatedEvent
+									) => {
+										const progress = Math.round(
+											( event.payload
+												.installedPluginIndex /
+												event.payload.pluginsCount ) *
+												100
+										);
+
+										let stageIndex = 0;
+
+										if ( progress > 30 ) {
+											stageIndex = 1;
+										} else if ( progress > 60 ) {
+											stageIndex = 2;
+										}
+
+										return {
+											useStages: 'plugins',
+											progress,
+											stageIndex,
+										};
+									},
+								} ),
+							],
+						},
+						PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS: {
+							target: 'prePlugins',
+							actions: [
+								assign( {
+									pluginsInstallationErrors: (
+										_context,
+										event
+									) => event.payload.errors,
+								} ),
+								( _context, event ) => {
+									recordEvent(
+										'storeprofiler_store_extensions_installed_and_activated',
+										{
+											success: false,
+											failed_extensions:
+												event.payload.errors.map(
+													(
+														error: PluginInstallError
+													) =>
+														getPluginTrackKey(
+															error.plugin
+														)
+												),
+										}
+									);
+								},
+							],
+						},
+						PLUGINS_INSTALLATION_COMPLETED: {
+							target: 'postPluginInstallation',
+							actions: [
+								( _context, event ) => {
+									const installationCompletedResult =
+										event.payload
+											.installationCompletedResult;
+
+									const trackData: {
+										success: boolean;
+										installed_extensions: string[];
+										total_time: string;
+										[ key: string ]:
+											| number
+											| boolean
+											| string
+											| string[];
+									} = {
+										success: true,
+										installed_extensions:
+											installationCompletedResult.installedPlugins.map(
+												(
+													installedPlugin: InstalledPlugin
+												) =>
+													getPluginTrackKey(
+														installedPlugin.plugin
+													)
+											),
+										total_time: getTimeFrame(
+											installationCompletedResult.totalTime
+										),
+									};
+
+									for ( const installedPlugin of installationCompletedResult.installedPlugins ) {
+										trackData[
+											'install_time_' +
+												getPluginTrackKey(
+													installedPlugin.plugin
+												)
+										] = getTimeFrame(
+											installedPlugin.installTime
+										);
+									}
+
+									recordEvent(
+										'storeprofiler_store_extensions_installed_and_activated',
+										trackData
+									);
+								},
+							],
+						},
+					},
+					entry: [
 						assign( {
-							pluginsSelected: (
-								_context,
-								event: PluginsInstallationRequestedEvent
-							) => event.payload.plugins,
-						} ),
-					],
-				},
-			},
-			meta: {
-				progress: 80,
-				component: Plugins,
-			},
-		},
-		postPluginInstallation: {
-			invoke: {
-				src: async ( _context, event ) => {
-					return await dispatch(
-						ONBOARDING_STORE_NAME
-					).updateProfileItems( {
-						business_extensions:
-							event.payload.installationCompletedResult.installedPlugins.map(
-								( extension: InstalledPlugin ) =>
-									extension.plugin
-							),
-						completed: true,
-					} );
-				},
-				onDone: {
-					actions: 'redirectToWooHome',
-				},
-			},
-			meta: {
-				component: Loader,
-				progress: 100,
-			},
-		},
-		installPlugins: {
-			on: {
-				PLUGIN_INSTALLED_AND_ACTIVATED: {
-					actions: [
-						assign( {
-							loader: (
-								_context,
-								event: PluginInstalledAndActivatedEvent
-							) => {
-								const progress = Math.round(
-									( event.payload.installedPluginIndex /
-										event.payload.pluginsCount ) *
-										100
-								);
-
-								let stageIndex = 0;
-
-								if ( progress > 30 ) {
-									stageIndex = 1;
-								} else if ( progress > 60 ) {
-									stageIndex = 2;
-								}
-
-								return {
-									useStages: 'plugins',
-									progress,
-									stageIndex,
-								};
+							loader: {
+								progress: 10,
+								useStages: 'plugins',
 							},
 						} ),
 					],
-				},
-				PLUGINS_INSTALLATION_COMPLETED_WITH_ERRORS: {
-					target: 'prePlugins',
-					actions: [
-						assign( {
-							pluginsInstallationErrors: ( _context, event ) =>
-								event.payload.errors,
-						} ),
-						( _context, event ) => {
-							recordEvent(
-								'storeprofiler_store_extensions_installed_and_activated',
-								{
-									success: false,
-									failed_extensions: event.payload.errors.map(
-										( error: PluginInstallError ) =>
-											getPluginTrackKey( error.plugin )
-									),
-								}
-							);
-						},
-					],
-				},
-				PLUGINS_INSTALLATION_COMPLETED: {
-					target: 'postPluginInstallation',
-					actions: [
-						( _context, event ) => {
-							const installationCompletedResult =
-								event.payload.installationCompletedResult;
-
-							const trackData: {
-								success: boolean;
-								installed_extensions: string[];
-								total_time: string;
-								[ key: string ]:
-									| number
-									| boolean
-									| string
-									| string[];
-							} = {
-								success: true,
-								installed_extensions:
-									installationCompletedResult.installedPlugins.map(
-										( installedPlugin: InstalledPlugin ) =>
-											getPluginTrackKey(
-												installedPlugin.plugin
-											)
-									),
-								total_time: getTimeFrame(
-									installationCompletedResult.totalTime
-								),
+					invoke: {
+						src: pluginInstallerMachine,
+						data: ( context ) => {
+							return {
+								selectedPlugins: context.pluginsSelected,
 							};
-
-							for ( const installedPlugin of installationCompletedResult.installedPlugins ) {
-								trackData[
-									'install_time_' +
-										getPluginTrackKey(
-											installedPlugin.plugin
-										)
-								] = getTimeFrame( installedPlugin.installTime );
-							}
-
-							recordEvent(
-								'storeprofiler_store_extensions_installed_and_activated',
-								trackData
-							);
 						},
-					],
-				},
-			},
-			entry: [
-				assign( {
-					loader: {
-						progress: 10,
-						useStages: 'plugins',
 					},
-				} ),
-			],
-			invoke: {
-				src: InstallAndActivatePlugins,
-			},
-			meta: {
-				component: Loader,
+					meta: {
+						component: Loader,
+					},
+				},
 			},
 		},
 		settingUpStore: {},
@@ -1097,6 +1289,8 @@ export const CoreProfilerController = ( {
 	const augmentedStateMachine = useMemo( () => {
 		// When adding extensibility, this is the place to manipulate the state machine definition.
 		return coreProfilerStateMachineDefinition.withConfig( {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore -- there seems to be a flaky error here - it fails sometimes and then not on recompile, will need to investigate further.
 			actions: {
 				...coreProfilerMachineActions,
 				...actionOverrides,
@@ -1105,22 +1299,34 @@ export const CoreProfilerController = ( {
 				...coreProfilerMachineServices,
 				...servicesOverrides,
 			},
+			guards: {
+				hasStepInUrl: ( _ctx, _evt, { cond }: { cond: unknown } ) => {
+					const { step = undefined } = getQuery() as { step: string };
+					return (
+						step === ( cond as { step: string | undefined } ).step
+					);
+				},
+			},
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
 
-	const [ state, send ] = useMachine( augmentedStateMachine, {
+	const [ state, send, service ] = useMachine( augmentedStateMachine, {
 		devTools: process.env.NODE_ENV === 'development',
 	} );
-	const stateValue =
-		typeof state.value === 'object'
-			? Object.keys( state.value )[ 0 ]
-			: state.value;
-	const currentNodeMeta = state.meta[ `coreProfiler.${ stateValue }` ]
-		? state.meta[ `coreProfiler.${ stateValue }` ]
-		: undefined;
-	const navigationProgress = currentNodeMeta?.progress; // This value is defined in each state node's meta tag, we can assume it is 0-100
+
+	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
+	const currentNodeMeta = useSelector( service, ( currentState ) =>
+		findComponentMeta( currentState?.meta ?? undefined )
+	);
+
+	const navigationProgress = currentNodeMeta?.progress;
 	const CurrentComponent =
 		currentNodeMeta?.component ?? ( () => <ProfileSpinner /> ); // If no component is defined for the state then its a loading state
+
+	const currentNodeCssLabel =
+		state.value instanceof Object
+			? Object.keys( state.value )[ 0 ]
+			: state.value;
 
 	useEffect( () => {
 		document.body.classList.remove( 'woocommerce-admin-is-loading' );
@@ -1139,7 +1345,7 @@ export const CoreProfilerController = ( {
 	return (
 		<>
 			<div
-				className={ `woocommerce-profile-wizard__container woocommerce-profile-wizard__step-${ state.value }` }
+				className={ `woocommerce-profile-wizard__container woocommerce-profile-wizard__step-${ currentNodeCssLabel }` }
 			>
 				{
 					<CurrentComponent

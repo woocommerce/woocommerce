@@ -30,6 +30,7 @@ const recordTracksActionsMocks = Object.fromEntries(
 const actionOverrides = {
 	...preFetchActionsMocks,
 	...recordTracksActionsMocks,
+	updateQueryStep: jest.fn(),
 	updateTrackingOption: jest.fn(),
 	updateOnboardingProfileOption: jest.fn(),
 	redirectToWooHome: jest.fn(),
@@ -52,6 +53,9 @@ const servicesOverrides = {
  *  We can insert other states to test the pre and post-conditions as well.
  */
 describe( 'All states in CoreProfilerMachine should be reachable', () => {
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
 	const testMachine = createMachine( {
 		id: 'coreProfilerTestMachine',
 		initial: 'initializing',

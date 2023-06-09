@@ -12,11 +12,9 @@ describe( 'getProductErrorMessage', () => {
 		expect( message ).toBe( 'Invalid or duplicated SKU.' );
 	} );
 
-	it( 'should return null when no error message exists', () => {
-		const error = {
-			code: 'unanticipated_error_code',
-		} as WPError;
-		const status = getProductErrorMessage( error );
-		expect( status ).toBeNull();
+	it( 'should return a default message when the error code is not mapped', () => {
+		const error = {} as WPError;
+		const message = getProductErrorMessage( error );
+		expect( message ).toBe( 'Failed to save product.' );
 	} );
 } );

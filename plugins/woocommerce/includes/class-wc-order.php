@@ -109,6 +109,14 @@ class WC_Order extends WC_Abstract_Order {
 	);
 
 	/**
+	 * Refunds for an order. Use {@see get_refunds()} instead.
+	 *
+	 * @deprecated 2.2.0
+	 * @var stdClass|WC_Order[]
+	 */
+	public $refunds;
+
+	/**
 	 * When a payment is complete this function is called.
 	 *
 	 * Most of the time this should mark an order as 'processing' so that admin can process/post the items.
@@ -798,7 +806,7 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Get transaction d.
+	 * Get transaction id.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
