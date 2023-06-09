@@ -10,12 +10,12 @@ import {
 	ALLOW_TRACKING_OPTION_NAME,
 	STORE_KEY as CES_STORE_KEY,
 } from '@woocommerce/customer-effort-score';
-import { NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
  */
 import { ClassicEditorIcon } from '../../images/classic-editor-icon';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export const ClassicEditorMenuItem = ( {
 	onClose,
@@ -25,7 +25,6 @@ export const ClassicEditorMenuItem = ( {
 	onClose: () => void;
 } ) => {
 	const { showProductMVPFeedbackModal } = useDispatch( CES_STORE_KEY );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
 	const { allowTracking, resolving: isLoading } = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } =
@@ -44,9 +43,15 @@ export const ClassicEditorMenuItem = ( {
 		};
 	} );
 
+	const { _feature_nonce } = getAdminSetting( '_feature_nonce' );
+
 	const classicEditorUrl = productId
-		? getAdminLink( `post.php?post=${ productId }&action=edit` )
-		: getAdminLink( 'post-new.php?post_type=product' );
+		? getAdminLink(
+				`post.php?post=${ productId }&action=edit&product_block_editor=0&_feature_nonce=${ _feature_nonce }`
+		  )
+		: getAdminLink(
+				`post-new.php?post_type=product&product_block_editor=0&_feature_nonce=${ _feature_nonce }`
+		  );
 
 	if ( isLoading ) {
 		return null;
@@ -56,15 +61,11 @@ export const ClassicEditorMenuItem = ( {
 		<MenuItem
 			onClick={ () => {
 				if ( allowTracking ) {
-					updateOptions( {
-						[ NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME ]: 'no',
-					} );
 					showProductMVPFeedbackModal();
-					onClose();
 				} else {
 					window.location.href = classicEditorUrl;
-					onClose();
 				}
+				onClose();
 			} }
 			icon={ <ClassicEditorIcon /> }
 			iconPosition="right"
