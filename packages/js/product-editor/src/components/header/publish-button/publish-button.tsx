@@ -16,6 +16,7 @@ import { getProductErrorMessage } from '../../../utils/get-product-error-message
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { usePublish } from '../hooks/use-publish';
 import { PublishButtonProps } from './types';
+import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 
 export function PublishButton( {
 	productStatus,
@@ -23,6 +24,8 @@ export function PublishButton( {
 }: PublishButtonProps ) {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
+
+	const { maybeShowFeedbackBar } = useFeedbackBar();
 
 	const publishButtonProps = usePublish( {
 		productStatus,
@@ -53,6 +56,8 @@ export function PublishButton( {
 			};
 
 			createSuccessNotice( noticeContent, noticeOptions );
+
+			maybeShowFeedbackBar();
 
 			if ( productStatus === 'auto-draft' ) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );

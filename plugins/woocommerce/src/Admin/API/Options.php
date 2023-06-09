@@ -200,7 +200,7 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_marketing_overview_multichannel_banner_dismissed',
 			'woocommerce_dimension_unit',
 			'woocommerce_weight_unit',
-			'woocommerce_ces_product_mvp_ces_action',
+			'woocommerce_product_editor_show_feedback_bar',
 			'woocommerce_product_tour_modal_hidden',
 			'woocommerce_block_product_tour_shown',
 			'woocommerce_revenue_report_date_tour_shown',

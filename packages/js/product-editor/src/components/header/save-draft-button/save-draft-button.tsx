@@ -15,6 +15,7 @@ import { getProductErrorMessage } from '../../../utils/get-product-error-message
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { useSaveDraft } from '../hooks/use-save-draft';
 import { SaveDraftButtonProps } from './types';
+import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 
 export function SaveDraftButton( {
 	productStatus,
@@ -22,6 +23,8 @@ export function SaveDraftButton( {
 }: SaveDraftButtonProps ) {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
+
+	const { maybeShowFeedbackBar } = useFeedbackBar();
 
 	const saveDraftButtonProps = useSaveDraft( {
 		productStatus,
@@ -32,6 +35,8 @@ export function SaveDraftButton( {
 			createSuccessNotice(
 				__( 'Product saved as draft.', 'woocommerce' )
 			);
+
+			maybeShowFeedbackBar();
 
 			if ( productStatus === 'auto-draft' ) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );

@@ -34,6 +34,7 @@ import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
 /**
  * Internal dependencies
  */
+import { Footer } from '../footer';
 import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
 import { ValidationProvider } from '../../contexts/validation-context';
@@ -85,6 +86,7 @@ export function Editor( { product, settings }: EditorProps ) {
 											<PluginArea scope="woocommerce-product-block-editor" />
 										</>
 									}
+									footer={ <Footer product={ product } /> }
 								/>
 
 								<Popover.Slot />

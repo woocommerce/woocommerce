@@ -15,9 +15,6 @@ import { getStoreAgeInWeeks } from '../../utils';
 import { STORE_KEY } from '../../store';
 import { ADMIN_INSTALL_TIMESTAMP_OPTION_NAME } from '../../constants';
 
-export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =
-	'woocommerce_ces_product_mvp_ces_action';
-
 export const CustomerEffortScoreModalContainer: React.FC = () => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 	const { hideCesModal } = useDispatch( STORE_KEY );
