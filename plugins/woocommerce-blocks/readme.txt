@@ -81,6 +81,13 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 10.2.3 - 2023-06-09 =
+
+#### Bug Fixes
+
+- Update the Featured Category patterns to replace the Unsplash image with a CCO licensed image from Pxhere. ([9765](https://github.com/woocommerce/woocommerce-blocks/pull/9765))
+- Update the Hero Product Split pattern to replace the Unsplash image with a CCO licensed image from Pxhere. ([9762](https://github.com/woocommerce/woocommerce-blocks/pull/9762))
+
 = 10.4.0 - 2023-06-05 =
 
 #### Enhancements
