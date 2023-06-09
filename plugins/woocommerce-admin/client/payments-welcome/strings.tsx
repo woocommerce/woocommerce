@@ -8,14 +8,15 @@ import { createInterpolateElement } from '@wordpress/element';
 export default {
 	install: __( 'Install WooPayments for free', 'woocommerce' ),
 	noThanks: __( 'No thanks', 'woocommerce' ),
-	heading: sprintf(
-		/* translators: %s: first name of the merchant, if it exists. */
-		__(
-			'Hi%s, run your business and manage your payments all in one place, with no setup costs or monthly fees.',
-			'woocommerce'
+	heading: ( firstName?: string ) =>
+		sprintf(
+			/* translators: %s: first name of the merchant, if it exists. */
+			__(
+				'Hi%s, run your business and manage your payments all in one place, with no setup costs or monthly fees.',
+				'woocommerce'
+			),
+			firstName ? ` ${ firstName }` : ''
 		),
-		' FirstName' // TODO: Get current user first name. And prepend a space if it exists.
-	),
 	limitedTimeOffer: __( 'Limited time offer', 'woocommerce' ),
 	offerHeading: createInterpolateElement(
 		sprintf(
