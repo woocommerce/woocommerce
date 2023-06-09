@@ -100,11 +100,7 @@ describe( 'getSplitGateways()', () => {
 				true,
 				true
 			);
-			expect( mainList ).toEqual( [
-				stripe,
-				klarna,
-				amazonPay,
-			] );
+			expect( mainList ).toEqual( [ stripe, klarna, amazonPay ] );
 		} );
 	} );
 
