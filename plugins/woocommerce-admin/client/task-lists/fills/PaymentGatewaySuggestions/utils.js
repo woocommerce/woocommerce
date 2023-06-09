@@ -86,11 +86,11 @@ export const getIsWCPayOrOtherCategoryDoneSetup = (
 /**
  * Splits up gateways to WCPay, offline and main list.
  *
- * @param {*} paymentGateways                 Payment gateway list.
- * @param {*} countryCode                     Store country code.
- * @param {*} isWCPaySupported                Whether WCPay is supported in the store.
- * @param {*} isWCPayOrOtherCategoryDoneSetup Whether WCPay or "other" category gateway is done setup.
- * @return Array of [ WCPay, offline, main list ].
+ * @param {Array}   paymentGateways                 Payment gateway list.
+ * @param {string}  countryCode                     Store country code.
+ * @param {boolean} isWCPaySupported                Whether WCPay is supported in the store.
+ * @param {boolean} isWCPayOrOtherCategoryDoneSetup Whether WCPay or "other" category gateway is done setup.
+ * @return {Array} Array of [ WCPay, offline, main list ].
  */
 export const getSplitGateways = (
 	paymentGateways,
