@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-// TODO: Once WooCommerce requires PHP 7.4, the "$x = $x ?? ''" constructs can be replaced with "$x ??= ''".
+// Once WooCommerce requires PHP 7.4, the "$x = $x ?? ''" constructs can be replaced with "$x ??= ''".
 
 /**
  * Converts a string (e.g. 'yes' or 'no') to a bool.
