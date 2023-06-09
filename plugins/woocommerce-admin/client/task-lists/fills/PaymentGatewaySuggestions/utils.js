@@ -1,6 +1,8 @@
 /**
  * Internal dependencies
  */
+import { get } from 'lodash';
+import { isWcPaySupported } from '~/payments/utils';
 import { getPluginSlug } from '~/utils';
 
 export const comparePaymentGatewaysByPriority = ( a, b ) =>
@@ -83,6 +85,15 @@ export const getIsWCPayOrOtherCategoryDoneSetup = (
 	return false;
 };
 
+/**
+ * Splits up gateways to WCPay, offline and main list.
+ *
+ * @param {*} paymentGateways                 Payment gateway list.
+ * @param {*} countryCode                     Store country code.
+ * @param {*} isWCPaySupported                Whether WCPay is supported in the store.
+ * @param {*} isWCPayOrOtherCategoryDoneSetup Whether WCPay or "other" category gateway is done setup.
+ * @return Array
+ */
 export const getSplitGateways = (
 	paymentGateways,
 	countryCode,
@@ -93,34 +104,34 @@ export const getSplitGateways = (
 		.sort( comparePaymentGatewaysByPriority )
 		.reduce(
 			( all, gateway ) => {
-				const [ wcPay, offline, additional ] = all;
+				// mainList is the list of gateways that is shown in the payments task.
+				const [ wcPay, offline, mainList ] = all;
 
-				// WCPay is handled separately when not installed and configured
 				if (
 					getIsGatewayWCPay( gateway ) &&
 					! ( gateway.installed && ! gateway.needsSetup )
 				) {
+					// WCPay is always shown when it's installed but not setup.
 					wcPay.push( gateway );
 				} else if ( gateway.is_offline ) {
+					// Offline gateways are always shown.
 					offline.push( gateway );
 				} else if ( gateway.enabled ) {
 					// Enabled gateways should be ignored.
 				} else if ( isWCPayOrOtherCategoryDoneSetup ) {
-					// If WCPay or "other" gateway is enabled in an WCPay-eligible country, only
-					// allow to list "additional" gateways.
 					if (
 						getIsGatewayAdditionalCategory( gateway, countryCode )
 					) {
-						additional.push( gateway );
+						// If WCPay or "other" gateway is enabled, only
+						// allow to list "additional" gateways.
+						mainList.push( gateway );
 					}
-				} else if ( ! isWCPaySupported ) {
-					// When WCPay-ineligible, just show all gateways.
-					additional.push( gateway );
+					// "other" gateways would be ignored here since we shouldn't promote competing gateways.
 				} else if (
 					getIsGatewayOtherCategory( gateway, countryCode )
 				) {
-					// When nothing is set up and eligible for WCPay, only show "other" gateways.
-					additional.push( gateway );
+					// When no WCPay or "other" gateway is enabled.
+					mainList.push( gateway );
 				}
 
 				return all;
