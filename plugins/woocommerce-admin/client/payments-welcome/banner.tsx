@@ -1,23 +1,14 @@
 /**
  * External dependencies
  */
-import {
-	Card,
-	CardBody,
-	CardHeader,
-	Button,
-	CardDivider,
-} from '@wordpress/components';
-import { Pill } from '@woocommerce/components';
+import { Card, CardBody, Button, CardDivider } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import strings from './strings';
-import GiftIcon from './gift';
 import WooPaymentsLogo from './woopayments.svg';
-import WCPayOfferIcon from './wcpay-offer.svg';
 import ExitSurveyModal from './exit-survey-modal';
 import PaymentMethods from './payment-methods';
 
@@ -38,12 +29,12 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 
 	return (
 		<Card className="__CLASS__">
-			<CardBody className="woopayments-welcome-page__banner-header">
+			<CardBody className="woopayments-welcome-page__header">
 				<img src={ WooPaymentsLogo } />
 				<h1>{ strings.heading }</h1>
 			</CardBody>
-			<CardBody className="woopayments-welcome-page__banner-offer">
-				<div className="woopayments-welcome-page__banner-offer__pill">
+			<CardBody className="woopayments-welcome-page__offer">
+				<div className="woopayments-welcome-page__offer-pill">
 					{ strings.limitedTimeOffer }
 				</div>
 				<h2>{ strings.offerHeading }</h2>
@@ -67,7 +58,7 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 				<p>{ strings.termsAndConditions }</p>
 			</CardBody>
 			<CardDivider />
-			<CardBody className="woopayments-welcome-page__banner-payments">
+			<CardBody className="woopayments-welcome-page__payments">
 				<p>{ strings.paymentOptions }</p>
 				<PaymentMethods />
 			</CardBody>
