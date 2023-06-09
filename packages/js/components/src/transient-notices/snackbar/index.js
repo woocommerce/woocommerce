@@ -5,6 +5,7 @@ import { noop } from 'lodash';
 import classnames from 'classnames';
 import { speak } from '@wordpress/a11y';
 import {
+	createElement,
 	RawHTML,
 	useEffect,
 	forwardRef,

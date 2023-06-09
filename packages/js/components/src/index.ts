@@ -77,6 +77,7 @@ export { default as TextControl } from './text-control';
 export { default as TextControlWithAffixes } from './text-control-with-affixes';
 export { default as Timeline } from './timeline';
 export { Tooltip as __experimentalTooltip } from './tooltip';
+export { TransientNotices } from './transient-notices';
 export { default as ViewMoreList } from './view-more-list';
 export { default as WebPreview } from './web-preview';
 export { Badge } from './badge';

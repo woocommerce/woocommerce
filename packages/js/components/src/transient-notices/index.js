@@ -6,18 +6,17 @@ import classnames from 'classnames';
 import { OPTIONS_STORE_NAME, USER_STORE_NAME } from '@woocommerce/data';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import SnackbarList from './snackbar/list';
-import './style.scss';
 
 const QUEUE_OPTION = 'woocommerce_admin_transient_notices_queue';
 const QUEUED_NOTICE_FILTER = 'woocommerce_admin_queued_notice_filter';
 
-function TransientNotices( props ) {
+export function TransientNotices( props ) {
 	const { removeNotice: onRemove } = useDispatch( 'core/notices' );
 	const { createNotice: createNotice2, removeNotice: onRemove2 } =
 		useDispatch( 'core/notices2' );
@@ -108,5 +107,3 @@ TransientNotices.propTypes = {
 	 */
 	notices: PropTypes.array,
 };
-
-export default TransientNotices;

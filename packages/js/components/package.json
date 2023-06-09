@@ -33,6 +33,7 @@
 		"@automattic/calypso-color-schemes": "^2.1.1",
 		"@automattic/interpolate-components": "^1.2.0",
 		"@automattic/tour-kit": "^1.1.1",
+		"@react-spring/web": "^9.4.3",
 		"@types/wordpress__block-editor": "^7.0.0",
 		"@types/wordpress__block-library": "^2.6.1",
 		"@types/wordpress__blocks": "^11.0.7",

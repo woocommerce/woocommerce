@@ -5,12 +5,12 @@ import classnames from 'classnames';
 import { omit, noop } from 'lodash';
 import { useTransition, animated } from '@react-spring/web';
 import { useReducedMotion } from '@wordpress/compose';
-import { useState } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import Snackbar from './';
+import Snackbar from '.';
 
 /**
  * Renders a list of notices.
