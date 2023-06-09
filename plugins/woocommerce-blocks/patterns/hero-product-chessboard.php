@@ -27,7 +27,7 @@
 			<!-- wp:group {"style":{"spacing":{"padding":{"top":"50px","right":"50px","bottom":"50px","left":"50px"}}},"layout":{"type":"flex","orientation":"vertical","verticalAlignment":"center","justifyContent":"stretch"}} -->
 			<div class="wp-block-group" style="padding-top:50px;padding-right:50px;padding-bottom:50px;padding-left:50px">
 				<!-- wp:heading {"textAlign":"left","level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"600"}},"fontSize":"large"} -->
-				<h3 class="wp-block-heading has-text-align-left has-large-font-size" style="font-style:normal;font-weight:600">Unisex Leather Winter Jacket</h3>
+				<h3 class="wp-block-heading has-text-align-left has-large-font-size" style="font-style:normal;font-weight:600">The Fall Collection</h3>
 				<!-- /wp:heading -->
 
 				<!-- wp:paragraph {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}},"typography":{"fontSize":"14px"}}} -->
