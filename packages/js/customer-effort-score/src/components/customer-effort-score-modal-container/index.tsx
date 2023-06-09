@@ -91,6 +91,7 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 			} }
 			shouldShowComments={ visibleCESModalData.props?.shouldShowComments }
 			extraFields={ visibleCESModalData.extraFields }
+			validateExtraFields={ visibleCESModalData.validateExtraFields }
 		/>
 	);
 };

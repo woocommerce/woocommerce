@@ -74,6 +74,12 @@ export const ProductMVPCESFooter: React.FC = () => {
 		};
 	} );
 
+	const isValidEmail = ( email: string ) => {
+		const re =
+			/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+		return re.test( String( email ).toLowerCase() );
+	};
+
 	const shareFeedback = () => {
 		showCesModal(
 			{
@@ -95,15 +101,23 @@ export const ProductMVPCESFooter: React.FC = () => {
 					"Thanks for the feedback. We'll put it to good use!",
 					'woocommerce'
 				),
-				shouldShowComments: () => true,
+				shouldShowComments: () => false,
 				extraFields: (
-					values: { [ key: string ]: string },
-					setValues: ( value: { [ key: string ]: string } ) => void
+					values: {
+						email?: string;
+						additionalThoughts?: string;
+						errors?: { [ key: string ]: string };
+					},
+					setValues: ( value: {
+						email?: string;
+						additionalThoughts?: string;
+						errors?: { [ key: string ]: string };
+					} ) => void
 				) => (
 					<Fragment>
 						<BaseControl
 							id={ 'feedback_additional_thoughts' }
-							className="woocommerce-product-form_inventory-sku"
+							className="woocommerce-product-feedback__additional-thoughts"
 							label={ createInterpolateElement(
 								__(
 									'ADDITIONAL THOUGHTS <optional />',
@@ -111,7 +125,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 								),
 								{
 									optional: (
-										<span className="woocommerce-product-form__optional-input">
+										<span className="woocommerce-product-feedback__optional-input">
 											{ __(
 												'(OPTIONAL)',
 												'woocommerce'
@@ -129,11 +143,12 @@ export const ProductMVPCESFooter: React.FC = () => {
 										additionalThoughts: value,
 									} )
 								}
+								help={ values.errors?.additionalThoughts || '' }
 							/>
 						</BaseControl>
 						<BaseControl
 							id={ 'feedback_email' }
-							className="woocommerce-product-form_inventory-sku"
+							className="woocommerce-product-feedback__email"
 							label={ createInterpolateElement(
 								__(
 									'YOUR EMAIL ADDRESS <optional />',
@@ -141,7 +156,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 								),
 								{
 									optional: (
-										<span className="woocommerce-product-form__optional-input">
+										<span className="woocommerce-product-feedback__optional-input">
 											{ __(
 												'(OPTIONAL)',
 												'woocommerce'
@@ -156,6 +171,7 @@ export const ProductMVPCESFooter: React.FC = () => {
 								onChange={ ( value: string ) =>
 									setValues( { ...values, email: value } )
 								}
+								help={ values.errors?.email || '' }
 							/>
 							<span>
 								{ __(
@@ -166,6 +182,28 @@ export const ProductMVPCESFooter: React.FC = () => {
 						</BaseControl>
 					</Fragment>
 				),
+				validateExtraFields: ( {
+					email = '',
+					additionalThoughts = '',
+				}: {
+					email?: string;
+					additionalThoughts?: string;
+				} ) => {
+					const errors: { [ key: string ]: string } = {};
+					if ( email.length > 0 && ! isValidEmail( email ) ) {
+						errors.email = __(
+							'Please enter a valid email address.',
+							'woocommerce'
+						);
+					}
+					if ( additionalThoughts?.length > 500 ) {
+						errors.additionalThoughts = __(
+							'Please enter no more than 500 characters.',
+							'woocommerce'
+						);
+					}
+					return errors;
+				},
 			},
 			{},
 			{

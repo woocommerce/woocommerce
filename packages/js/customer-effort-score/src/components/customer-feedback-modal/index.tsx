@@ -35,6 +35,7 @@ import { __ } from '@wordpress/i18n';
  * @param {Function} props.customOptions       List of custom score options, contains label and value.
  * @param {Function} props.shouldShowComments  A function to determine whether or not the comments field shown be shown.
  * @param {Function} props.extraFields         Function that returns the extra fields to be shown.
+ * @param {Function} props.validateExtraFields Function that validates the extra fields.
  */
 function CustomerFeedbackModal( {
 	recordScoreCallback,
@@ -51,6 +52,7 @@ function CustomerFeedbackModal( {
 			( score ) => score === 1 || score === 2
 		),
 	extraFields,
+	validateExtraFields,
 }: {
 	recordScoreCallback: (
 		score: number,
@@ -74,6 +76,9 @@ function CustomerFeedbackModal( {
 		extraFieldsValues: { [ key: string ]: string },
 		setExtraFieldsValues: ( values: { [ key: string ]: string } ) => void
 	) => JSX.Element;
+	validateExtraFields?: ( values: { [ key: string ]: string } ) => {
+		[ key: string ]: string;
+	};
 } ): JSX.Element | null {
 	const options =
 		customOptions && customOptions.length > 0
@@ -134,6 +139,14 @@ function CustomerFeedbackModal( {
 			( secondQuestion && ! Number.isInteger( secondQuestionScore ) )
 		) {
 			setShowNoScoreMessage( true );
+			return;
+		}
+		const errors =
+			typeof validateExtraFields === 'function'
+				? validateExtraFields( extraFieldsValues )
+				: false;
+		if ( Object.keys( errors ).length !== 0 ) {
+			setExtraFieldsValues( { ...extraFieldsValues, errors } );
 			return;
 		}
 		setOpen( false );
@@ -288,6 +301,7 @@ CustomerFeedbackModal.propTypes = {
 	defaultScore: PropTypes.number,
 	onCloseModal: PropTypes.func,
 	extraFields: PropTypes.func,
+	validateExtraFields: PropTypes.func,
 };
 
 export { CustomerFeedbackModal };

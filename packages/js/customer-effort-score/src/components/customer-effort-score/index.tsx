@@ -38,6 +38,9 @@ type CustomerEffortScoreProps = {
 		extraFieldsValues: { [ key: string ]: string },
 		setExtraFieldsValues: ( values: { [ key: string ]: string } ) => void
 	) => JSX.Element;
+	validateExtraFields?: ( values: { [ key: string ]: string } ) => {
+		[ key: string ]: string;
+	};
 };
 
 /**
@@ -61,6 +64,7 @@ type CustomerEffortScoreProps = {
  * @param {Function} props.shouldShowComments        Callback to determine if comments section should be shown.
  * @param {Object}   props.icon                      Icon (React component) to be shown on the notice.
  * @param {Object}   props.extraFields               Function that returns the extra fields to be shown.
+ * @param {Object}   props.validateExtraFields       Function that validates the extra fields.
  */
 const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 	recordScoreCallback,
@@ -80,6 +84,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 			( score ) => score === 1 || score === 2
 		),
 	extraFields,
+	validateExtraFields,
 } ) => {
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
 	const [ visible, setVisible ] = useState( false );
@@ -129,6 +134,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 			onCloseModal={ onModalDismissedCallback }
 			shouldShowComments={ shouldShowComments }
 			extraFields={ extraFields }
+			validateExtraFields={ validateExtraFields }
 		/>
 	);
 };
