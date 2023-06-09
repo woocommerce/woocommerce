@@ -131,6 +131,8 @@ class PageController {
 	 * @return void
 	 */
 	public function setup(): void {
+		global $plugin_page, $pagenow;
+
 		$this->redirection_controller = new PostsRedirectionController( $this );
 
 		// Register menu.
@@ -140,12 +142,18 @@ class PageController {
 			add_action( 'admin_menu', 'register_menu', 9 );
 		}
 
+		// Not on an Orders page.
+		if ( 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
+			return;
+		}
+
 		$this->set_order_type();
 		$this->set_action();
 
 		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
 
 		self::add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
+		self::add_action( 'admin_title', array( $this, 'set_page_title' ) );
 	}
 
 	/**
@@ -161,16 +169,54 @@ class PageController {
 	}
 
 	/**
+	 * Set the document title for Orders screens to match what it would be with the shop_order CPT.
+	 *
+	 * @param string $admin_title The admin screen title before it's filtered.
+	 *
+	 * @return string The filtered admin title.
+	 */
+	private function set_page_title( $admin_title ) {
+		if ( ! $this->is_order_screen( $this->order_type ) ) {
+			return $admin_title;
+		}
+
+		$wp_order_type = get_post_type_object( $this->order_type );
+		$labels        = get_post_type_labels( $wp_order_type );
+
+		if ( $this->is_order_screen( $this->order_type, 'list' ) ) {
+			$admin_title = sprintf(
+				// translators: 1: The label for an order type 2: The name of the website.
+				esc_html__( '%1$s &lsaquo; %2$s &#8212; WordPress', 'woocommerce' ),
+				esc_html( $labels->name ),
+				esc_html( get_bloginfo( 'name' ) )
+			);
+		} elseif ( $this->is_order_screen( $this->order_type, 'edit' ) ) {
+			$admin_title = sprintf(
+				// translators: 1: The label for an order type 2: The title of the order 3: The name of the website.
+				esc_html__( '%1$s #%2$s &lsaquo; %3$s &#8212; WordPress', 'woocommerce' ),
+				esc_html( $labels->edit_item ),
+				absint( $this->order->get_id() ),
+				esc_html( get_bloginfo( 'name' ) )
+			);
+		} elseif ( $this->is_order_screen( $this->order_type, 'new' ) ) {
+			$admin_title = sprintf(
+				// translators: 1: The label for an order type 2: The name of the website.
+				esc_html__( '%1$s &lsaquo; %2$s &#8212; WordPress', 'woocommerce' ),
+				esc_html( $labels->add_new_item ),
+				esc_html( get_bloginfo( 'name' ) )
+			);
+		}
+
+		return $admin_title;
+	}
+
+	/**
 	 * Determines the order type for the current screen.
 	 *
 	 * @return void
 	 */
 	private function set_order_type() {
-		global $plugin_page, $pagenow;
-
-		if ( 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
-			return;
-		}
+		global $plugin_page;
 
 		$this->order_type = str_replace( array( 'wc-orders--', 'wc-orders' ), '', $plugin_page );
 		$this->order_type = empty( $this->order_type ) ? 'shop_order' : $this->order_type;
@@ -446,7 +492,7 @@ class PageController {
 					esc_html__( '%s must be called after the current_screen action.', 'woocommerce' ),
 					esc_html( __METHOD__ )
 				),
-				'x.x.x'
+				'7.9.0'
 			);
 
 			return false;
@@ -461,7 +507,7 @@ class PageController {
 					esc_html__( '%s is not a valid order type.', 'woocommerce' ),
 					esc_html( $type )
 				),
-				'x.x.x'
+				'7.9.0'
 			);
 
 			return false;
