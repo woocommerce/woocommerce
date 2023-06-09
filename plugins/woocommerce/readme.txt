@@ -243,6 +243,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Track stock quantity for this product should be disabled when Enable stock management within settings is disabled, and enabled otherwise [[#37957]](https://github.com/woocommerce/woocommerce/pull/37957)
 * Add - Update List price Pricing link on the general tab to navigate to the Pricing tab [[#37961]](https://github.com/woocommerce/woocommerce/pull/37961)
 * Add - Update shipping class block to match new designs#38044 [[#38301]](https://github.com/woocommerce/woocommerce/pull/38301)
+* Update - Update WooCommerce Blocks to 10.2.3 [#38663](https://github.com/woocommerce/woocommerce/pull/38663)
 * Update - Update WooCommerce Blocks to 10.2.2 [#38545](https://github.com/woocommerce/woocommerce/pull/38545)
 * Update - Update WooCommerce Blocks to 10.2.1 [#38449](https://github.com/woocommerce/woocommerce/pull/38449)
 * Update - Add action hooks to WC_Abstract_Order::remove_order_items [[#37822]](https://github.com/woocommerce/woocommerce/pull/37822)
