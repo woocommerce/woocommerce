@@ -24,6 +24,9 @@ declare global {
 		wcSettings: {
 			admin: {
 				wcpay_welcome_page_connect_nonce: string;
+				currentUserData: {
+					first_name: string;
+				};
 			};
 		};
 	}

@@ -7,10 +7,11 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import strings from './strings';
+import { getAdminSetting } from '~/utils/admin-settings';
 import WooPaymentsLogo from './woopayments.svg';
 import ExitSurveyModal from './exit-survey-modal';
 import PaymentMethods from './payment-methods';
+import strings from './strings';
 
 interface Props {
 	isSubmitted: boolean;
@@ -18,8 +19,9 @@ interface Props {
 }
 
 const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
-	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
+	const { first_name } = getAdminSetting( 'currentUserData', {} );
 
+	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
 	const [ isExitSurveyModalOpen, setExitSurveyModalOpen ] = useState( false );
 
 	const handleNoThanks = () => {
@@ -31,7 +33,7 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 		<Card className="__CLASS__">
 			<CardBody className="woopayments-welcome-page__header">
 				<img src={ WooPaymentsLogo } />
-				<h1>{ strings.heading }</h1>
+				<h1>{ strings.heading( first_name ) }</h1>
 			</CardBody>
 			<CardBody className="woopayments-welcome-page__offer">
 				<div className="woopayments-welcome-page__offer-pill">
