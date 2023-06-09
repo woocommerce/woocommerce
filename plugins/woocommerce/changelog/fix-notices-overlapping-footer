@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Move TransientNotices to @woocommerce/components
