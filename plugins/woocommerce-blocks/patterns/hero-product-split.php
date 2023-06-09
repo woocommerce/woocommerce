@@ -10,7 +10,7 @@
 <div class="wp-block-media-text alignfull has-media-on-the-right is-stacked-on-mobile has-text-color has-background" style="color:#ffffff;background-color:#000000">
 	<div class="wp-block-media-text__content">
 		<!-- wp:heading {"style":{"color":{"text":"#ffffff"}}} -->
-		<h2 class="wp-block-heading has-text-color" style="color:#ffffff;"><?php esc_html_e( 'Get cozy this fall with flannel shirts', 'woo-gutenberg-products-block' ); ?></h2>
+		<h2 class="wp-block-heading has-text-color" style="color:#ffffff;"><?php esc_html_e( 'Get cozy this fall with knit sweaters', 'woo-gutenberg-products-block' ); ?></h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:buttons {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} -->
