@@ -44,12 +44,12 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/install-async',
+			'/' . $this->rest_base . '/install-and-activate-async',
 			array(
 				array(
 					'methods'             => 'POST',
-					'callback'            => array( $this, 'install_async' ),
-					'permission_callback' => array( $this, 'can_install_plugins' ),
+					'callback'            => array( $this, 'install_and_activate_async' ),
+					'permission_callback' => array( $this, 'can_install_and_activate_plugins' ),
 					'args'                => array(
 						'plugins' => array(
 							'description'       => 'A list of plugins to install',
@@ -119,11 +119,11 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	 *
 	 * @return array
 	 */
-	public function install_async( WP_REST_Request $request ) {
+	public function install_and_activate_async( WP_REST_Request $request ) {
 		$plugins = $request->get_param( 'plugins' );
 		$job_id  = uniqid();
 
-		WC()->queue()->add( 'woocommerce_plugins_install_async_callback', array( $plugins, $job_id ) );
+		WC()->queue()->add( 'woocommerce_plugins_install_and_activate_async_callback', array( $plugins, $job_id ) );
 
 		$plugin_status = array();
 		foreach ( $plugins as $plugin ) {
@@ -152,7 +152,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 
 		$actions = WC()->queue()->search(
 			array(
-				'hook'    => 'woocommerce_plugins_install_async_callback',
+				'hook'    => 'woocommerce_plugins_install_and_activate_async_callback',
 				'search'  => $job_id,
 				'orderby' => 'date',
 				'order'   => 'DESC',
@@ -175,7 +175,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 			'status' => $actions[0]['status'],
 		);
 
-		$option = get_option( 'woocommerce_onboarding_plugins_install_async_' . $job_id );
+		$option = get_option( 'woocommerce_onboarding_plugins_install_and_activate_async_' . $job_id );
 		if ( isset( $option['plugins'] ) ) {
 			$response['plugins'] = $option['plugins'];
 		}

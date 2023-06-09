@@ -1,11 +1,14 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Card, CardFooter, CardBody } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
-import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 
 /**
@@ -50,12 +53,12 @@ export const WCPayBannerText: React.VFC< {
 				size="12"
 				lineHeight="16px"
 			>
-				{ interpolateComponents( {
-					mixedString: __(
-						'By using WooCommerce Payments you agree to be bound by our {{tosLink}}Terms of Service{{/tosLink}} and acknowledge that you have read our {{privacyLink}}Privacy Policy{{/privacyLink}} ',
+				{ createInterpolateElement(
+					__(
+						'By using WooCommerce Payments you agree to be bound by our <tosLink>Terms of Service</tosLink> and acknowledge that you have read our <privacyLink>Privacy Policy</privacyLink> ',
 						'woocommerce'
 					),
-					components: {
+					{
 						tosLink: (
 							<Link
 								href="https://wordpress.com/tos/"
@@ -74,8 +77,8 @@ export const WCPayBannerText: React.VFC< {
 								<></>
 							</Link>
 						),
-					},
-				} ) }
+					}
+				) }
 			</Text>
 			{ actionButton }
 		</div>

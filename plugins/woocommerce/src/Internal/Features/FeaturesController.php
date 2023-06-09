@@ -90,32 +90,32 @@ class FeaturesController {
 	 */
 	public function __construct() {
 		$features = array(
-			'analytics'              => array(
+			'analytics'            => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
 				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
 				'is_experimental'    => false,
 				'enabled_by_default' => true,
 				'disable_ui'         => false,
 			),
-			'new_navigation'         => array(
+			'new_navigation'       => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
 				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
 				'is_experimental' => false,
 				'disable_ui'      => false,
 			),
-			'new_product_management' => array(
+			'product_block_editor' => array(
 				'name'            => __( 'New product editor', 'woocommerce' ),
 				'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 				'is_experimental' => true,
 				'disable_ui'      => false,
 			),
-			'custom_order_tables'    => array(
+			'custom_order_tables'  => array(
 				'name'            => __( 'High-Performance order storage (COT)', 'woocommerce' ),
 				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
 				'is_experimental' => true,
 				'disable_ui'      => false,
 			),
-			'cart_checkout_blocks'   => array(
+			'cart_checkout_blocks' => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
 				'is_experimental' => false,
@@ -123,7 +123,7 @@ class FeaturesController {
 			),
 		);
 
-		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'new_product_management' );
+		$this->legacy_feature_ids = array( 'analytics', 'new_navigation' );
 
 		$this->init_features( $features );
 
@@ -137,6 +137,8 @@ class FeaturesController {
 		self::add_action( 'after_plugin_row', array( $this, 'handle_plugin_list_rows' ), 10, 2 );
 		self::add_action( 'current_screen', array( $this, 'enqueue_script_to_fix_plugin_list_html' ), 10, 1 );
 		self::add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
+		self::add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
+		self::add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
 	}
 
 	/**
@@ -409,8 +411,6 @@ class FeaturesController {
 			return Analytics::TOGGLE_OPTION_NAME;
 		} elseif ( 'new_navigation' === $feature_id ) {
 			return Init::TOGGLE_OPTION_NAME;
-		} elseif ( 'new_product_management' === $feature_id ) {
-			return NewProductManagementExperience::TOGGLE_OPTION_NAME;
 		}
 
 		return "woocommerce_feature_{$feature_id}_enabled";
@@ -480,8 +480,6 @@ class FeaturesController {
 			$feature_id = 'analytics';
 		} elseif ( Init::TOGGLE_OPTION_NAME === $option ) {
 			$feature_id = 'new_navigation';
-		} elseif ( NewProductManagementExperience::TOGGLE_OPTION_NAME === $option ) {
-			$feature_id = 'new_product_management';
 		} else {
 			$feature_id = $matches[1];
 		}
@@ -657,9 +655,11 @@ class FeaturesController {
 			}
 		}
 
-		if ( 'new_product_management' === $feature_id ) {
-			$disabled = true;
-			$desc_tip = __( '⚠ This feature will be available soon. Stay tuned!', 'woocommerce' );
+		if ( 'product_block_editor' === $feature_id ) {
+			$disabled = version_compare( get_bloginfo( 'version' ), '6.2', '<' );
+			if ( $disabled ) {
+				$desc_tip = __( '⚠ This feature is compatible with WordPress version 6.2 or higher.', 'woocommerce' );
+			}
 		}
 
 		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
@@ -817,6 +817,10 @@ class FeaturesController {
 	 * there's already a "You are viewing
 	 */
 	private function maybe_display_feature_incompatibility_warning(): void {
+		if ( ! current_user_can( 'activate_plugins' ) ) {
+			return;
+		}
+
 		$incompatible_plugins = false;
 
 		foreach ( $this->plugin_util->get_woocommerce_aware_plugins( true ) as $plugin ) {
@@ -1083,5 +1087,48 @@ class FeaturesController {
 			'all'                       => $all_link,
 			'incompatible_with_feature' => $incompatible_link,
 		);
+	}
+
+	/**
+	 * Set the feature nonce to be sent from client side.
+	 *
+	 * @param array $settings Component settings.
+	 *
+	 * @return array
+	 */
+	public function set_change_feature_enable_nonce( $settings ) {
+		$settings['_feature_nonce'] = wp_create_nonce( 'change_feature_enable' );
+		return $settings;
+	}
+
+	/**
+	 * Changes the feature given it's id, a toggle value and nonce as a query param.
+	 *
+	 * `/wp-admin/post.php?product_block_editor=1&_feature_nonce=1234`, 1 for on
+	 * `/wp-admin/post.php?product_block_editor=0&_feature_nonce=1234`, 0 for off
+	 */
+	private function change_feature_enable_from_query_params(): void {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		$is_feature_nonce_invalid = ( ! isset( $_GET['_feature_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_feature_nonce'] ) ), 'change_feature_enable' ) );
+
+		foreach ( array_keys( $this->features ) as $feature_id ) {
+			if ( isset( $_GET[ $feature_id ] ) && is_numeric( $_GET[ $feature_id ] ) ) {
+				$value = absint( $_GET[ $feature_id ] );
+
+				if ( $is_feature_nonce_invalid ) {
+					wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+					return;
+				}
+
+				if ( 1 === $value ) {
+					$this->change_feature_enable( $feature_id, true );
+				} elseif ( 0 === $value ) {
+					$this->change_feature_enable( $feature_id, false );
+				}
+			}
+		}
 	}
 }

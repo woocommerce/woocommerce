@@ -1,4 +1,5 @@
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { async } = require( 'regenerator-runtime' );
 const config = require( '../playwright.config' );
 
 let api;
@@ -242,13 +243,27 @@ const get = {
 
 const create = {
 	product: async ( product ) => {
-		const response = await api.post( 'products', {
-			name: product.name,
-			type: product.type,
-			regular_price: product.price,
-		} );
+		const response = await api.post( 'products', product );
 
 		return response.data.id;
+	},
+	/**
+	 * Batch create product variations.
+	 *
+	 * @see {@link [Batch update product variations](https://woocommerce.github.io/woocommerce-rest-api-docs/#batch-update-product-variations)}
+	 * @param {number|string} productId Product ID to add variations to
+	 * @param {object[]} variations Array of variations to add. See [Product variation properties](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties)
+	 * @returns {Promise<number[]>} Array of variation ID's.
+	 */
+	productVariations: async ( productId, variations ) => {
+		const response = await api.post(
+			`products/${ productId }/variations/batch`,
+			{
+				create: variations,
+			}
+		);
+
+		return response.data.create.map( ( { id } ) => id );
 	},
 };
 

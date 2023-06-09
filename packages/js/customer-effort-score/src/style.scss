@@ -107,8 +107,18 @@
 	}
 }
 
+.components-modal__content {
+	padding-bottom: 100px;
+}
+
 .woocommerce-customer-effort-score__buttons {
 	text-align: right;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #fff;
+	padding: calc( 2 * $gap );
 
 	.components-button {
 		margin-left: 1em;

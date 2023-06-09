@@ -15,14 +15,6 @@ use WP_Block_Editor_Context;
  * Loads assets related to the product block editor.
  */
 class Init {
-
-	const FEATURE_ID = 'product-block-editor';
-
-	/**
-	 * Option name used to toggle this feature.
-	 */
-	const TOGGLE_OPTION_NAME = 'woocommerce_' . self::FEATURE_ID . '_enabled';
-
 	/**
 	 * The context name used to identify the editor.
 	 */
@@ -32,15 +24,68 @@ class Init {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( ! Features::is_enabled( 'new-product-management-experience' ) && Features::is_enabled( self::FEATURE_ID ) ) {
-			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-			add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
-		}
-		if ( Features::is_enabled( self::FEATURE_ID ) ) {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
+				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+				add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
+			}
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_product_template' ) );
+
+			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
+
 			$block_registry = new BlockRegistry();
 			$block_registry->init();
+		}
+
+		add_action( 'current_screen', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
+		add_action( 'current_screen', array( $this, 'maybe_redirect_to_old_editor' ), 30, 0 );
+	}
+
+	/**
+	 * Redirects from old product form to the new product form if the
+	 * feature `product_block_editor` is enabled.
+	 */
+	public function maybe_redirect_to_new_editor(): void {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			$screen = get_current_screen();
+
+			if ( 'post' === $screen->base && 'product' === $screen->post_type ) {
+				if ( 'add' === $screen->action ) {
+					wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) );
+					exit();
+				}
+
+				if ( isset( $_GET['post'] ) && isset( $_GET['action'] ) && 'edit' === $_GET['action'] ) {
+					$product_id = absint( $_GET['post'] );
+					wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/product/' . $product_id ) );
+					exit();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Redirects from new product form to the old product form if the
+	 * feature `product_block_editor` is enabled.
+	 */
+	public function maybe_redirect_to_old_editor(): void {
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			if ( \Automattic\WooCommerce\Admin\PageController::is_admin_page() && isset( $_GET['path'] ) ) {
+				$path        = esc_url_raw( wp_unslash( $_GET['path'] ) );
+				$parsed_path = explode( '/', wp_parse_url( $path, PHP_URL_PATH ) );
+
+				if ( 'add-product' === $parsed_path[1] ) {
+					wp_safe_redirect( admin_url( 'post-new.php?post_type=product' ) );
+					exit();
+				}
+
+				if ( 'product' === $parsed_path[1] ) {
+					$product_id = absint( $parsed_path[2] );
+					wp_safe_redirect( admin_url( 'post.php?post=' . $product_id . '&action=edit' ) );
+					exit();
+				}
+			}
 		}
 	}
 
@@ -240,9 +285,6 @@ class Init {
 							array(
 								'title'       => __( 'Basic details', 'woocommerce' ),
 								'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_basic.svg', WC_PLUGIN_FILE ),
-								),
 							),
 							array(
 								array(
@@ -297,9 +339,6 @@ class Init {
 							array(
 								'title'       => __( 'Description', 'woocommerce' ),
 								'description' => __( 'What makes this product unique? What are its most important features? Enrich the product page by adding rich content using blocks.', 'woocommerce' ),
-								'icon'        => array(
-									'src' => '<svg width="14" height="17" viewBox="0 0 14 17" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="9.91663" y1="16.5" x2="9.91663" y2="1.38889" stroke="#1E1E1E" stroke-width="1.5"/><line x1="5.47217" y1="16.5" x2="5.47217" y2="1.38889" stroke="#1E1E1E" stroke-width="1.5"/><line x1="13.3334" y1="1.25" x2="4.44448" y2="1.25" stroke="#1E1E1E" stroke-width="1.5"/><path d="M4.13889 5.38889V9.46C2.21109 9.10713 0.75 7.41864 0.75 5.38889C0.75 3.35914 2.21109 1.67065 4.13889 1.31778V5.38889Z" fill="#1E1E1E" stroke="#1E1E1E" stroke-width="1.5"/></svg>',
-								),
 							),
 							array(
 								array(
@@ -316,9 +355,6 @@ class Init {
 									__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s', 'woocommerce' ),
 									'<a href="http://woocommerce.com/#" target="_blank" rel="noreferrer">',
 									'</a>'
-								),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_images.svg', WC_PLUGIN_FILE ),
 								),
 							),
 							array(
@@ -355,9 +391,6 @@ class Init {
 									'<a href="https://woocommerce.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_attributes.svg', WC_PLUGIN_FILE ),
-								),
 							),
 							array(
 								array(
@@ -385,48 +418,52 @@ class Init {
 									'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_pricing.svg', WC_PLUGIN_FILE ),
-								),
+								'blockGap'    => 'unit-40',
 							),
 							array(
 								array(
-									'core/columns',
+									'woocommerce/product-section',
 									array(),
 									array(
 										array(
-											'core/column',
-											array(
-												'templateLock' => 'all',
-											),
+											'core/columns',
+											array(),
 											array(
 												array(
-													'woocommerce/product-regular-price-field',
+													'core/column',
 													array(
-														'name'  => 'regular_price',
-														'label' => __( 'List price', 'woocommerce' ),
+														'templateLock' => 'all',
+													),
+													array(
+														array(
+															'woocommerce/product-regular-price-field',
+															array(
+																'name'  => 'regular_price',
+																'label' => __( 'List price', 'woocommerce' ),
+															),
+														),
+													),
+												),
+												array(
+													'core/column',
+													array(
+														'templateLock' => 'all',
+													),
+													array(
+														array(
+															'woocommerce/product-sale-price-field',
+															array(
+																'label' => __( 'Sale price', 'woocommerce' ),
+															),
+														),
 													),
 												),
 											),
 										),
 										array(
-											'core/column',
-											array(
-												'templateLock' => 'all',
-											),
-											array(
-												array(
-													'woocommerce/product-sale-price-field',
-													array(
-														'label' => __( 'Sale price', 'woocommerce' ),
-													),
-												),
-											),
+											'woocommerce/product-schedule-sale-fields',
 										),
 									),
-								),
-								array(
-									'woocommerce/product-schedule-sale-fields',
 								),
 								array(
 									'woocommerce/product-radio-field',
@@ -508,32 +545,36 @@ class Init {
 									'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_inventory.svg', WC_PLUGIN_FILE ),
-								),
+								'blockGap'    => 'unit-40',
 							),
 							array(
 								array(
-									'woocommerce/product-sku-field',
-								),
-								array(
-									'woocommerce/product-toggle-field',
-									array(
-										'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
-										'property' => 'manage_stock',
-										'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
-									),
-								),
-								array(
-									'woocommerce/conditional',
-									array(
-										'mustMatch' => array(
-											'manage_stock' => array( true ),
-										),
-									),
+									'woocommerce/product-section',
+									array(),
 									array(
 										array(
-											'woocommerce/product-inventory-quantity-field',
+											'woocommerce/product-sku-field',
+										),
+										array(
+											'woocommerce/product-toggle-field',
+											array(
+												'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
+												'property' => 'manage_stock',
+												'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
+											),
+										),
+										array(
+											'woocommerce/conditional',
+											array(
+												'mustMatch' => array(
+													'manage_stock' => array( true ),
+												),
+											),
+											array(
+												array(
+													'woocommerce/product-inventory-quantity-field',
+												),
+											),
 										),
 									),
 								),
@@ -577,61 +618,69 @@ class Init {
 									),
 									array(
 										array(
-											'woocommerce/conditional',
+											'woocommerce/product-section',
 											array(
-												'mustMatch' => array(
-													'manage_stock' => array( true ),
-												),
+												'blockGap' => 'unit-40',
 											),
 											array(
 												array(
-													'woocommerce/product-radio-field',
+													'woocommerce/conditional',
 													array(
-														'title'    => __( 'When out of stock', 'woocommerce' ),
-														'property' => 'backorders',
-														'options'  => array(
+														'mustMatch' => array(
+															'manage_stock' => array( true ),
+														),
+													),
+													array(
+														array(
+															'woocommerce/product-radio-field',
 															array(
-																'label' => __( 'Allow purchases', 'woocommerce' ),
-																'value' => 'yes',
-															),
-															array(
-																'label' => __(
-																	'Allow purchases, but notify customers',
-																	'woocommerce'
+																'title'    => __( 'When out of stock', 'woocommerce' ),
+																'property' => 'backorders',
+																'options'  => array(
+																	array(
+																		'label' => __( 'Allow purchases', 'woocommerce' ),
+																		'value' => 'yes',
+																	),
+																	array(
+																		'label' => __(
+																			'Allow purchases, but notify customers',
+																			'woocommerce'
+																		),
+																		'value' => 'notify',
+																	),
+																	array(
+																		'label' => __( "Don't allow purchases", 'woocommerce' ),
+																		'value' => 'no',
+																	),
 																),
-																'value' => 'notify',
 															),
-															array(
-																'label' => __( "Don't allow purchases", 'woocommerce' ),
-																'value' => 'no',
-															),
+														),
+														array(
+															'woocommerce/product-inventory-email-field',
 														),
 													),
 												),
 												array(
-													'woocommerce/product-inventory-email-field',
+													'woocommerce/product-checkbox-field',
+													array(
+														'title'    => __(
+															'Restrictions',
+															'woocommerce'
+														),
+														'label'    => __(
+															'Limit purchases to 1 item per order',
+															'woocommerce'
+														),
+														'property' => 'sold_individually',
+														'tooltip'  => __(
+															'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
+															'woocommerce'
+														),
+													),
 												),
-											),
-										),
-										array(
-											'woocommerce/product-checkbox-field',
-											array(
-												'title'    => __(
-													'Restrictions',
-													'woocommerce'
-												),
-												'label'    => __(
-													'Limit purchases to 1 item per order',
-													'woocommerce'
-												),
-												'property' => 'sold_individually',
-												'tooltip'  => __(
-													'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
-													'woocommerce'
-												),
-											),
-										),
 
+											),
+										),
 									),
 								),
 
@@ -658,9 +707,6 @@ class Init {
 									'<a href="https://woocommerce.com/posts/how-to-calculate-shipping-costs-for-your-woocommerce-store/" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
-								'icon'        => array(
-									'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_shipping.svg', WC_PLUGIN_FILE ),
-								),
 							),
 							array(
 								array(
@@ -676,5 +722,21 @@ class Init {
 			);
 		}
 		return $args;
+	}
+
+	/**
+	 * Sets the current screen to the block editor if a wc-admin page.
+	 */
+	public function set_current_screen_to_block_editor_if_wc_admin() {
+		$screen = get_current_screen();
+
+		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+		// (no idea why I need that phpcs:ignore above, but I'm tired trying to re-write this comment to get it to pass)
+		// we can't check the 'path' query param because client-side routing is used within wc-admin,
+		// so this action handler is only called on the initial page load from the server, which might
+		// not be the product edit page (it mostly likely isn't).
+		if ( PageController::is_admin_page() ) {
+			$screen->is_block_editor( true );
+		}
 	}
 }

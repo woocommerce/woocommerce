@@ -11,7 +11,7 @@
 	label,
 	div,
 	input {
-		font-family: var( --wp--preset--font-family--system-font );
+		font-family: var(--wp--preset--font-family--system-font);
 	}
 
 	label {
@@ -36,11 +36,52 @@
 		}
 	}
 
+	.components-base-control {
+		.components-base-control__field {
+			margin-bottom: 0;
+		}
+
+		.components-base-control__help {
+			margin-bottom: 0;
+		}
+	}
+
+	.components-toggle-control {
+		margin-bottom: 0;
+
+		.components-form-toggle {
+			display: flex;
+			align-items: center;
+		}
+
+		.components-toggle-control__label {
+			display: flex;
+			align-items: center;
+		}
+	}
+
+	.woocommerce-collapsible-content .woocommerce-collapsible-content__content {
+		margin-top: calc(2 * $gap);
+	}
+
 	.editor-styles-wrapper {
-		max-width: 650px;
-		margin-left: auto;
-		margin-right: auto;
-		padding-bottom: 128px;
+		h4 {
+			font-size: 16px;
+		}
+
+		.block-editor-block-list__layout.is-root-container {
+			padding-left: calc(2 * $gap);
+			padding-right: calc(2 * $gap);
+			padding-bottom: 128px;
+
+			@include breakpoint(">782px") {
+				padding-left: 0;
+				padding-right: 0;
+				max-width: 650px;
+				margin-left: auto;
+				margin-right: auto;
+			}
+		}
 	}
 
 	.components-input-control {
@@ -78,18 +119,6 @@
 		margin-bottom: 0;
 	}
 
-	.wp-block-woocommerce-product-section {
-		> .block-editor-inner-blocks > .block-editor-block-list__layout {
-			> .wp-block:first-child {
-				margin-top: 32px;
-			}
-
-			> .wp-block:not( :first-child ) {
-				margin-top: $gap-large;
-			}
-		}
-	}
-
 	.woocommerce-experimental-select-control__label {
 		text-transform: uppercase;
 		font-size: 11px;
@@ -97,13 +126,28 @@
 		font-weight: 500;
 	}
 
-	.block-editor-block-list__layout .block-editor-block-list__block:not( [contenteditable] ):focus:after {
+	.block-editor-block-list__layout
+		.block-editor-block-list__block:not([contenteditable]):focus:after {
 		display: none; // use important or increase specificity.
 	}
 }
 
-.woocommerce-layout:has( .woocommerce-product-block-editor ) {
+.woocommerce-layout:has(.woocommerce-product-block-editor) {
+	.woocommerce-layout__primary {
+		margin-top: calc($gap-largest + $gap-smaller);
+	}
 	.woocommerce-layout__header {
 		display: none;
+	}
+}
+
+.wp-admin.woocommerce-feature-enabled-product-block-editor {
+	.components-modal {
+		&__frame {
+			border-radius: $gap-smaller;
+		}
+		&__header {
+			border: none;
+		}
 	}
 }

@@ -1,17 +1,21 @@
-
 .woocommerce-product-form__checkbox {
+	.components-base-control__field,
+	.components-checkbox-control__label,
+	&-wrapper,
+	&-tooltip-icon {
+		display: flex;
+		align-items: center;
+	}
 
 	.components-base-control__field {
 		display: flex;
+		align-items: center;
+		margin-bottom: 0;
 	}
+}
 
-	.components-checkbox-control__label {
-		display: flex;
-	}
-
-	&-tooltip-icon {
-		margin: -2px 0 0 $gap-small;
-	}
+.woocommerce-product-form__checkbox-wrapper {
+	gap: $gap-smallest;
 }
 
 .woocommerce-product-form__checkbox-tooltip {
@@ -21,4 +25,3 @@
 		white-space: normal !important;
 	}
 }
-

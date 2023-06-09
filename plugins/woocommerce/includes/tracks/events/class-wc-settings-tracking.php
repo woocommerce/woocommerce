@@ -59,8 +59,24 @@ class WC_Settings_Tracking {
 	public function init() {
 		add_action( 'woocommerce_settings_page_init', array( $this, 'track_settings_page_view' ) );
 		add_action( 'woocommerce_update_option', array( $this, 'add_option_to_list' ) );
+		add_action( 'woocommerce_update_non_option_setting', array( $this, 'add_option_to_list_and_track_setting_change' ) );
 		add_action( 'woocommerce_update_options', array( $this, 'send_settings_change_event' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_settings_tracking_scripts' ) );
+	}
+
+	/**
+	 * Adds the option to the allowed and updated options directly.
+	 * Currently used for settings that don't use update_option.
+	 *
+	 * @param array $option WooCommerce option that should be updated.
+	 */
+	public function add_option_to_list_and_track_setting_change( $option ) {
+		if ( ! in_array( $option['id'], $this->allowed_options, true ) ) {
+			$this->allowed_options[] = $option['id'];
+		}
+		if ( ! in_array( $option['id'], $this->updated_options, true ) ) {
+			$this->updated_options[] = $option['id'];
+		}
 	}
 
 	/**

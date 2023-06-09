@@ -5,7 +5,7 @@ import { chevronDown } from '@wordpress/icons';
 import classNames from 'classnames';
 import { createElement, useState } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
-import { TextControl } from '@wordpress/components';
+import { BaseControl, TextControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -130,61 +130,55 @@ export const SelectTree = function SelectTree( {
 					}
 				) }
 			>
-				<label
-					htmlFor={ `${ props.id }-input` }
-					id={ `${ props.id }-label` }
-					className="woocommerce-experimental-select-control__label"
-				>
-					{ props.label }
-				</label>
-				{ props.multiple ? (
-					<ComboBox
-						comboBoxProps={ {
-							className:
-								'woocommerce-experimental-select-control__combo-box-wrapper',
-							role: 'combobox',
-							'aria-expanded': isOpen,
-							'aria-haspopup': 'tree',
-							'aria-labelledby': `${ props.id }-label`,
-							'aria-owns': `${ props.id }-menu`,
-						} }
-						inputProps={ inputProps }
-						suffix={ suffix }
-					>
-						<SelectedItems
-							isReadOnly={ isReadOnly }
-							items={ ( props.selected as Item[] ) || [] }
-							getItemLabel={ ( item ) => item?.label || '' }
-							getItemValue={ ( item ) => item?.value || '' }
-							onRemove={ ( item ) => {
-								if (
-									! Array.isArray( item ) &&
-									props.onRemove
-								) {
-									props.onRemove( item );
+				<BaseControl label={ props.label } id={ `${ props.id }-input` }>
+					{ props.multiple ? (
+						<ComboBox
+							comboBoxProps={ {
+								className:
+									'woocommerce-experimental-select-control__combo-box-wrapper',
+								role: 'combobox',
+								'aria-expanded': isOpen,
+								'aria-haspopup': 'tree',
+								'aria-owns': `${ props.id }-menu`,
+							} }
+							inputProps={ inputProps }
+							suffix={ suffix }
+						>
+							<SelectedItems
+								isReadOnly={ isReadOnly }
+								items={ ( props.selected as Item[] ) || [] }
+								getItemLabel={ ( item ) => item?.label || '' }
+								getItemValue={ ( item ) => item?.value || '' }
+								onRemove={ ( item ) => {
+									if (
+										! Array.isArray( item ) &&
+										props.onRemove
+									) {
+										props.onRemove( item );
+									}
+								} }
+								getSelectedItemProps={ () => ( {} ) }
+							/>
+						</ComboBox>
+					) : (
+						<TextControl
+							{ ...inputProps }
+							value={ props.createValue || '' }
+							onChange={ ( value ) => {
+								if ( onInputChange ) onInputChange( value );
+								const item = items.find(
+									( i ) => i.label === value
+								);
+								if ( props.onSelect && item ) {
+									props.onSelect( item );
+								}
+								if ( ! value && props.onRemove ) {
+									props.onRemove( props.selected as Item );
 								}
 							} }
-							getSelectedItemProps={ () => ( {} ) }
 						/>
-					</ComboBox>
-				) : (
-					<TextControl
-						{ ...inputProps }
-						value={ props.createValue || '' }
-						onChange={ ( value ) => {
-							if ( onInputChange ) onInputChange( value );
-							const item = items.find(
-								( i ) => i.label === value
-							);
-							if ( props.onSelect && item ) {
-								props.onSelect( item );
-							}
-							if ( ! value && props.onRemove ) {
-								props.onRemove( props.selected as Item );
-							}
-						} }
-					/>
-				) }
+					) }
+				</BaseControl>
 			</div>
 			<SelectTreeMenu
 				{ ...props }

@@ -790,4 +790,63 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$errors = $this->sut->verify_migrated_orders( array( $order1->get_id(), $order2->get_id() ) );
 		$this->assertEmpty( $errors );
 	}
+
+	/**
+	 * @testDox Test migration when SQL mode does not allow 0 dates.
+	 */
+	public function test_migration_with_null_date_and_strict_sql_mode() {
+		global $wpdb;
+
+		$order = OrderHelper::create_order();
+		delete_post_meta( $order->get_id(), '_date_paid' );
+
+		$sql_mode = $wpdb->get_var( 'SELECT @@sql_mode' );
+
+		// Set SQL mode to strict to disallow 0 dates.
+		$wpdb->query( "SET sql_mode = 'TRADITIONAL'" );
+
+		// Assert that strict mode was indeed enabled, by trying to insert 0 date.
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$wpdb->suppress_errors();
+
+		// phpcs:ignore -- Ignoring this error because we are testing for it.
+		$result = $wpdb->query( "INSERT INTO $orders_table (date_created_gmt) VALUES ('0000-00-00 00:00:00')" );
+		$this->assertFalse( $result );
+		$wpdb->suppress_errors( false );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+		$this->assertEmpty( $errors ); // _customer_user_agent
+
+		// phpcs:ignore -- Hardcoded value.
+		$wpdb->query( "SET sql_mode = '$sql_mode' " );
+	}
+
+	/**
+	 * @testDox Test that values in exponential notation are migrated properly.
+	 */
+	public function test_migration_with_numbers_in_exponential_notation() {
+		global $wpdb;
+
+		$order = OrderHelper::create_order();
+		update_post_meta( $order->get_id(), '_order_tax', '7.1054273576E-15' ); // 0
+		update_post_meta( $order->get_id(), '_order_total', '12E-2' ); // 0.12
+		update_post_meta( $order->get_id(), '_cart_discount_tax', '1237E-2' ); // 12.37
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- Intentional for informative debug message.
+		$this->assertEmpty( $errors, 'Errors found in migrated data: ' . print_r( $errors, true ) );
+
+		$order_tax = $wpdb->get_var( $wpdb->prepare( "SELECT tax_amount FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) );
+		$this->assertEquals( 0, $order_tax );
+
+		$order_total = $wpdb->get_var( $wpdb->prepare( "SELECT total_amount FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) );
+		$this->assertEquals( 0.12, $order_total );
+
+		$cart_discount_tax = $wpdb->get_var( $wpdb->prepare( "SELECT discount_tax_amount FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) );
+		$this->assertEquals( 12.37, $cart_discount_tax );
+	}
 }

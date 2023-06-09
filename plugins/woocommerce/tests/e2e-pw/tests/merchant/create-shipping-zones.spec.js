@@ -93,6 +93,12 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 					.filter( { hasText: 'Local pickup' } )
 			).toBeVisible();
 
+			await page.click( '#submit' );
+			await page.waitForFunction( () => {
+				const button = document.querySelector( '#submit' );
+				return button && button.disabled;
+			} );
+
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
 			);
@@ -150,6 +156,11 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 					.filter( { hasText: 'Free shipping' } )
 			).toBeVisible();
 
+			await page.click( '#submit' );
+			await page.waitForFunction( () => {
+				const button = document.querySelector( '#submit' );
+				return button && button.disabled;
+			} );
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
 			);
@@ -250,6 +261,10 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				.click();
 
 			await page.locator( '#submit' ).click();
+			await page.waitForFunction( () => {
+				const button = document.querySelector( '#submit' );
+				return button && button.disabled;
+			} );
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -269,6 +284,10 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		await page.locator( 'text=×' ).click();
 		//save changes
 		await page.locator( '#submit' ).click();
+		await page.waitForFunction( () => {
+			const button = document.querySelector( '#submit' );
+			return button && button.disabled;
+		} );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
 
@@ -276,6 +295,58 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(
 			/Everywhere.*/
 		);
+	} );
+	test( 'add and delete shipping method', async ( { page } ) => {
+		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+		if ( await page.isVisible( `text=${ shippingZoneNameFlatRate }` ) ) {
+			// this shipping zone already exists, don't create it
+		} else {
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
+				{ waitUntil: 'networkidle' }
+			);
+			await page.fill( '#zone_name', shippingZoneNameFlatRate );
+
+			await page.click( '.select2-search__field' );
+			await page.type( '.select2-search__field', 'Canada' );
+			await page.click(
+				'.select2-results__option.select2-results__option--highlighted'
+			);
+
+			await page.click( 'text=Add shipping method' );
+
+			await page.selectOption(
+				'select[name=add_method_id]',
+				'flat_rate'
+			);
+			await page.click( '#btn-ok' );
+			await page.waitForLoadState( 'networkidle' );
+			await expect(
+				page
+					.locator( '.wc-shipping-zone-method-title' )
+					.filter( { hasText: 'Flat rate' } )
+			).toBeVisible();
+
+			await page.click( 'a.wc-shipping-zone-method-settings' );
+			await page.fill( '#woocommerce_flat_rate_cost', '10' );
+			await page.click( '#btn-ok' );
+			await page.waitForLoadState( 'networkidle' );
+
+			await page.hover( '.wc-shipping-zone-method-settings' );
+			await page.waitForSelector( 'text=Delete', {
+				state: 'visible',
+			} );
+
+			page.on( 'dialog', ( dialog ) => dialog.accept() );
+
+			await page.click( 'text=Delete' );
+
+			await expect(
+				page.locator( '.wc-shipping-zone-method-blank-state' )
+			).toHaveText(
+				/You can add multiple shipping methods within this zone. Only customers within the zone will see them.*/
+			);
+		}
 	} );
 } );
 

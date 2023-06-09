@@ -1,4 +1,4 @@
 export { useProductHelper as __experimentalUseProductHelper } from './use-product-helper';
-export { useProductMVPCESFooter as __experimentalUseProductMVPCESFooter } from './use-product-mvp-ces-footer';
+export { useFeedbackBar as __experimentalUseFeedbackBar } from './use-feedback-bar';
 export { useVariationsOrder as __experimentalUseVariationsOrder } from './use-variations-order';
 export { useCurrencyInputProps as __experimentalUseCurrencyInputProps } from './use-currency-input-props';
