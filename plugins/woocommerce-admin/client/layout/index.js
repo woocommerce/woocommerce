@@ -185,8 +185,15 @@ function _Layout( {
 		);
 	}
 
-	const { breadcrumbs, layout = { header: true, footer: true } } = page;
-	const { header: showHeader = true, footer: showFooter = true } = layout;
+	const {
+		breadcrumbs,
+		layout = { header: true, footer: true, transientNotices: true },
+	} = page;
+	const {
+		header: showHeader = true,
+		footer: showFooter = true,
+		transientNotices: showTransientNotices = true,
+	} = layout;
 
 	const query = getQuery();
 
@@ -209,7 +216,7 @@ function _Layout( {
 							query={ query }
 						/>
 					) }
-					<TransientNotices />
+					{ showTransientNotices && <TransientNotices /> }
 					{ ! isEmbedded && (
 						<PrimaryLayout>
 							<div className="woocommerce-layout__main">
