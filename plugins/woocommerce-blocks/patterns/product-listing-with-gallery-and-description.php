@@ -12,25 +12,25 @@
 	<div class="wp-block-column">
 		<!-- wp:columns {"isStackedOnMobile":false,"style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"margin":{"top":"0","bottom":"0"},"blockGap":{"top":"1.5rem","left":"1.5rem"}}}} -->
 		<div class="wp-block-columns is-not-stacked-on-mobile" style="margin-top:0;margin-bottom:0;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
-			<!-- wp:column {"width":"33.33%","style":{"spacing":{"padding":{"top":"0","right":"var:preset|spacing|20","bottom":"0","left":"0"},"blockGap":"0"}},"layout":{"type":"constrained","wideSize":"80px"}} -->
-			<div class="wp-block-column" style="padding-top:0;padding-right:var(--wp--preset--spacing--20);padding-bottom:0;padding-left:0;flex-basis:33.33%">
+			<!-- wp:column {"width":"15%","style":{"spacing":{"padding":{"top":"0","right":"var:preset|spacing|20","bottom":"0","left":"0"},"blockGap":"0"}},"layout":{"type":"constrained","wideSize":"80px"}} -->
+			<div class="wp-block-column" style="padding-top:0;padding-right:var(--wp--preset--spacing--20);padding-bottom:0;padding-left:0;flex-basis:15%">
 				<!-- wp:group {"style":{"spacing":{"blockGap":"1rem"}},"layout":{"type":"flex","orientation":"vertical","verticalAlignment":"center","justifyContent":"center"}} -->
 				<div class="wp-block-group">
-					<!-- wp:image {"sizeSlug":"thumbnail","linkDestination":"none","style":{"border":{"color":"#dddddd","width":"1px","radius":"5px"}}} -->
-					<figure class="wp-block-image size-thumbnail is-resized has-custom-border">
-						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-furniture-1.png', dirname( __FILE__ ) ) ); ?>" alt="" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
+					<!-- wp:image {"sizeSlug":"thumbnail","linkDestination":"none","style":{"border":{"color":"#dddddd","width":"1px","radius":"5px"}},"className":"is-resized"} -->
+					<figure class="wp-block-image size-thumbnail has-custom-border is-resized">
+						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/desk-table-wood-chair-floor-home-square.png', dirname( __FILE__ ) ) ); ?>" alt="" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
 					</figure>
 					<!-- /wp:image -->
 
-					<!-- wp:image {"sizeSlug":"thumbnail","linkDestination":"none","style":{"border":{"color":"#dddddd","width":"1px","radius":"5px"}}} -->
-					<figure class="wp-block-image size-thumbnail is-resized has-custom-border">
-						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-furniture-2.png', dirname( __FILE__ ) ) ); ?>" alt="" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
+					<!-- wp:image {"sizeSlug":"thumbnail","linkDestination":"none","style":{"border":{"color":"#dddddd","width":"1px","radius":"5px"}},"className":"is-resized"} -->
+					<figure class="wp-block-image size-thumbnail has-custom-border is-resized">
+						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square.png', dirname( __FILE__ ) ) ); ?>" alt="" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
 					</figure>
 					<!-- /wp:image -->
 
-					<!-- wp:image {"sizeSlug":"thumbnail","linkDestination":"none","style":{"border":{"color":"#dddddd","width":"1px","radius":"5px"}}} -->
-					<figure class="wp-block-image size-thumbnail is-resized has-custom-border">
-						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-furniture-4.png', dirname( __FILE__ ) ) ); ?>" alt="" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
+					<!-- wp:image {"sizeSlug":"thumbnail","linkDestination":"none","style":{"border":{"color":"#dddddd","width":"1px","radius":"5px"}},"className":"is-resized"} -->
+					<figure class="wp-block-image size-thumbnail has-custom-border is-resized">
+						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-home-living-room-furniture-room-square.png', dirname( __FILE__ ) ) ); ?>" alt="" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
 					</figure>
 					<!-- /wp:image -->
 				</div>
@@ -38,11 +38,11 @@
 			</div>
 			<!-- /wp:column -->
 
-			<!-- wp:column {"width":"66.66%","style":{"spacing":{"blockGap":"0","padding":{"right":"0","bottom":"0","left":"0","top":"20px"}}}} -->
-			<div class="wp-block-column" style="padding-top:20px;padding-right:0;padding-bottom:0;padding-left:0;flex-basis:66.66%">
+			<!-- wp:column {"width":"85%","style":{"spacing":{"blockGap":"0"}}} -->
+			<div class="wp-block-column" style="flex-basis:85%">
 				<!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
 				<figure class="wp-block-image size-full">
-					<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-furniture-4.png', dirname( __FILE__ ) ) ); ?>" alt="" />
+					<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-wood-chair-floor-living-room-furniture-vertical.png', dirname( __FILE__ ) ) ); ?>" alt=""/>
 				</figure>
 				<!-- /wp:image -->
 			</div>
@@ -55,7 +55,7 @@
 	<!-- wp:column -->
 	<div class="wp-block-column">
 		<!-- wp:heading {"style":{"typography":{"fontSize":"48px","fontStyle":"normal","fontWeight":"700"}},"textColor":"foreground"} -->
-		<h2 class="wp-block-heading has-foreground-color has-text-color" style="font-size:48px;font-style:normal;font-weight:700">Wicker Back Dining Chair, Blue Seat, Wood Base</h2>
+		<h2 class="wp-block-heading has-foreground-color has-text-color" style="font-size:48px;font-style:normal;font-weight:700">Patterned Upright, Orange and White, Wood Legs</h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:group {"style":{"spacing":{"padding":{"top":"0px","right":"0px","bottom":"0px","left":"0px"},"blockGap":"0px","margin":{"top":"10px","bottom":"0px"}}},"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"center"}} -->
@@ -93,13 +93,7 @@
 		<!-- wp:group {"layout":{"type":"constrained","justifyContent":"left"}} -->
 		<div class="wp-block-group">
 			<!-- wp:paragraph {"style":{"typography":{"fontSize":"18px"}},"textColor":"foreground"} -->
-			<p class="has-foreground-color has-text-color" style="font-size:18px">Crafted from solid wood with a rich
-				walnut finish, this table exudes warmth and sophistication. The clean lines and minimalist design
-				effortlessly complement a variety of interior styles, from modern to rustic. With its spacious tabletop,
-				the Urban Loft Dining Table comfortably seats six guests, making it ideal for family dinners, social
-				gatherings, and special occasions. The sturdy construction ensures lasting durability, while the
-				easy-to-clean surface allows for hassle-free maintenance.
-			</p>
+			<p class="has-foreground-color has-text-color" style="font-size:18px">Designed with your well-being in mind, this chair features a contoured backrest that provides exceptional lumbar support, helping to reduce strain on your back during long hours of sitting. The adjustable height and tilt mechanisms allow you to customize the chair to your preferred sitting position, ensuring a comfortable and productive workday. Upholstered in premium fabric and available in a variety of colors, the Harmony Ergonomic Chair adds a touch of elegance to any room.</p>
 			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:group -->
