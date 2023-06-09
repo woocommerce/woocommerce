@@ -11,7 +11,7 @@
 	<div class="wp-block-column" style="padding:0">
 		<!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image size-full">
-			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-details-product-listing.jpg', dirname( __FILE__ ) ) ); ?>" alt="" />
+			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-wood-chair-floor-living-room-furniture-horizontal.png', dirname( __FILE__ ) ) ); ?>" alt="" />
 		</figure>
 		<!-- /wp:image -->
 		<!-- wp:group {"align":"full","style":{"spacing":{"padding":"0px","blockGap":"0px","margin":{"top":"30px","bottom":"20px","left":"0px"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"center","verticalAlignment":"center"}} -->
@@ -31,7 +31,7 @@
 		<!-- /wp:group -->
 
 		<!-- wp:heading {"style":{"spacing":{"margin":{"bottom":"20px"}},"typography":{"fontSize":"48px","fontStyle":"normal","fontWeight":"700","lineHeight":"120%"}},"textColor":"black","fontSize":"x-large"} -->
-		<h2 class="wp-block-heading has-black-color has-text-color has-text-align-center has-x-large-font-size" style="font-size:48px;font-style:normal;font-weight:700;line-height:120%;margin-bottom:20px;">Bella Pro Series - 1.6-qt. Deep Fryer - Stainless Steel</h2>
+		<h2 class="wp-block-heading has-black-color has-text-color has-text-align-center has-x-large-font-size" style="font-size:48px;font-style:normal;font-weight:700;line-height:120%;margin-bottom:20px;">Patterned Upright, Orange and White, Wood Legs</h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:group {"align":"full","style":{"spacing":{"padding":"0px","blockGap":"0px","margin":{"top":"0px","bottom":"40px","left":"0px"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"center","verticalAlignment":"center"}} -->
