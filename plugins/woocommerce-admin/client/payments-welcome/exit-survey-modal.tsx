@@ -84,20 +84,20 @@ function ExitSurveyModal( {}: {
 
 	return (
 		<Modal
-			className="wc-calypso-bridge-payments-welcome-survey"
+			className="woopayments-welcome-page__survey"
 			title={ strings.survey.title }
 			onRequestClose={ closeModal }
 			shouldCloseOnClickOutside={ false }
 		>
-			<p className="wc-calypso-bridge-payments-welcome-survey__intro">
+			<p className="woopayments-welcome-page__survey-intro">
 				{ strings.survey.intro }
 			</p>
 
-			<p className="wc-calypso-bridge-payments-welcome-survey__question">
+			<p className="woopayments-welcome-page__survey-question">
 				{ strings.survey.question }
 			</p>
 
-			<div className="wc-calypso-bridge-payments-welcome-survey__selection">
+			<div className="woopayments-welcome-page__survey-selection">
 				<CheckboxControl
 					label={ strings.survey.happyLabel }
 					checked={ isHappyChecked }
@@ -125,7 +125,7 @@ function ExitSurveyModal( {}: {
 				/>
 			</div>
 
-			<div className="wc-calypso-bridge-payments-welcome-survey__comments">
+			<div className="woopayments-welcome-page__survey-comments">
 				<TextareaControl
 					label={ strings.survey.commentsLabel }
 					value={ comments }
@@ -134,7 +134,7 @@ function ExitSurveyModal( {}: {
 				/>
 			</div>
 
-			<div className="wc-calypso-bridge-payments-welcome-survey__buttons">
+			<div className="woopayments-welcome-page__survey-buttons">
 				<Button
 					isTertiary
 					isDestructive
