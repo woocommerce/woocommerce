@@ -17,6 +17,7 @@ import {
 	EditorBlockListSettings,
 } from '@wordpress/block-editor';
 import { Popover, SlotFillProvider } from '@wordpress/components';
+import { TransientNotices } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -86,7 +87,12 @@ export function Editor( { product, settings }: EditorProps ) {
 											<PluginArea scope="woocommerce-product-block-editor" />
 										</>
 									}
-									footer={ <Footer product={ product } /> }
+									footer={
+										<>
+											<TransientNotices />
+											<Footer product={ product } />
+										</>
+									}
 								/>
 
 								<Popover.Slot />
