@@ -2290,8 +2290,6 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Attempts to restore the specified order back to its original status (after having been trashed).
 	 *
-	 * @param WC_Order $order The order to be untrashed.
-	 *
 	 * @return bool If the operation was successful.
 	 */
 	public function untrash(): bool {
