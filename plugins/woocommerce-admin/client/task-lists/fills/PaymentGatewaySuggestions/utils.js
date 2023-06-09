@@ -1,8 +1,6 @@
 /**
  * Internal dependencies
  */
-import { get } from 'lodash';
-import { isWcPaySupported } from '~/payments/utils';
 import { getPluginSlug } from '~/utils';
 
 export const comparePaymentGatewaysByPriority = ( a, b ) =>
