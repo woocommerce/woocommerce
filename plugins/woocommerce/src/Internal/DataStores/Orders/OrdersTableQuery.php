@@ -6,7 +6,11 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostToOrderAddressTableMigrator;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostToOrderOpTableMigrator;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostToOrderTableMigrator;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -172,6 +176,13 @@ class OrdersTableQuery {
 	private $order_datastore = null;
 
 	/**
+	 * Known types of order addresses.
+	 *
+	 * @var string[]
+	 */
+	private static $address_types = array( 'billing', 'shipping' );
+
+	/**
 	 * Sets up and runs the query after processing arguments.
 	 *
 	 * @param array $args Array of query vars.
@@ -269,6 +280,49 @@ class OrdersTableQuery {
 			} else {
 				$this->args['meta_query'] = array( $shortcut_meta_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			}
+		}
+	}
+
+	/**
+	 * Remap some of the old WP_Query-style query arguments to the new syntax.
+	 *
+	 * @param array  $mapping_config An array of old to new key names, in the format [ 'old_name' => [ 'destination' => 'new_name' ] ].
+	 * @param bool   $is_field_query True if the new arguments will go inside a 'field_query' element, false if they will go directly in the main arguments array.
+	 * @param string $new_key_prefix Prefix to add to the new key names.
+	 * @return void
+	 */
+	private function maybe_remap_meta_args( array $mapping_config, bool $is_field_query = null, string $new_key_prefix = '' ) {
+		$remapped_args = array();
+
+		foreach ( $this->args['meta_query'] as $meta_query_key => $meta_key_value_pair ) {
+			if ( array_key_exists( $meta_key_value_pair['key'], $mapping_config ) ) {
+				$meta_key                       = $meta_key_value_pair['key'];
+				$remapped_key                   = $new_key_prefix . $mapping_config[ $meta_key ]['destination'];
+				$remapped_args[ $remapped_key ] = $meta_key_value_pair['value'];
+
+				unset( $this->args['meta_query'][ $meta_query_key ] );
+			}
+		}
+
+		if ( empty( $remapped_args ) ) {
+			return;
+		}
+
+		if ( $is_field_query ) {
+			ArrayUtil::ensure_key_is_array( $this->args, 'field_query' );
+			$remapped_args_as_key_value_pairs = array_map(
+				function( $value, $key ) {
+					return array(
+						'field' => $key,
+						'value' => $value,
+					);
+				},
+				$remapped_args,
+				array_keys( $remapped_args )
+			);
+			$this->args['field_query']        = array_merge( $this->args['field_query'], $remapped_args_as_key_value_pairs );
+		} else {
+			$this->args = array_merge( $this->args, $remapped_args );
 		}
 	}
 
@@ -626,6 +680,14 @@ class OrdersTableQuery {
 	 */
 	private function build_query(): void {
 		$this->maybe_remap_args();
+
+		if ( array_key_exists( 'meta_query', $this->args ) ) {
+			$this->maybe_remap_meta_args( ( new PostToOrderTableMigrator() )->get_meta_column_config(), true );
+			$this->maybe_remap_meta_args( ( new PostToOrderOpTableMigrator() )->get_meta_column_config(), false );
+			foreach ( self::$address_types as $address_type ) {
+				$this->maybe_remap_meta_args( ( new PostToOrderAddressTableMigrator( $address_type ) )->get_meta_column_config(), false, $address_type . '_' );
+			}
+		}
 
 		// Field queries.
 		if ( ! empty( $this->args['field_query'] ) ) {
