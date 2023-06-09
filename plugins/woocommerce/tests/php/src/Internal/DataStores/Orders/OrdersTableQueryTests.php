@@ -133,4 +133,29 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, count( $queried_orders ) );
 		$this->assertContains( $orders[1]->get_id(), $queried_orders );
 	}
+
+	/**
+	 * @testDox Search query is fully customizable and compatible with filters from CPT data store too.
+	 */
+	public function test_search_query_is_fully_customizable() {
+		$order = OrderHelper::create_order();
+
+		$this->assertEquals( array( $order->get_id() ), wc_order_search( 'admin@example.org' ) );
+
+		add_filter( 'woocommerce_shop_order_search_fields', '__return_empty_array' );
+
+		$this->assertEmpty( wc_order_search( 'admin@example.org' ) );
+
+		add_filter(
+			'woocommerce_shop_order_search_results',
+			function () {
+				return array( 5 );
+			}
+		);
+
+		$this->assertEquals( array( 5 ), wc_order_search( 'admin@example.org' ) );
+
+		remove_filter( 'woocommerce_shop_order_search_fields', '__return_empty_array' );
+		remove_all_filters( 'woocommerce_shop_order_search_results' );
+	}
 }

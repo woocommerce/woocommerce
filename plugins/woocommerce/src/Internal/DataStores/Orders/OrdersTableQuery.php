@@ -215,6 +215,7 @@ class OrdersTableQuery {
 			'posts_per_page'      => 'limit',
 			'p'                   => 'id',
 			'post__in'            => 'id',
+			'include'             => 'id',
 			'post_type'           => 'type',
 			'fields'              => 'return',
 

@@ -25,6 +25,13 @@ class OrdersTableSearchQuery {
 	private $search_term;
 
 	/**
+	 * Fields to search through in the meta query.
+	 *
+	 * @var array
+	 */
+	private $search_fields;
+
+	/**
 	 * Creates the JOIN and WHERE clauses needed to execute a search of orders.
 	 *
 	 * @internal
@@ -34,6 +41,25 @@ class OrdersTableSearchQuery {
 	public function __construct( OrdersTableQuery $query ) {
 		$this->query       = $query;
 		$this->search_term = "'" . esc_sql( '%' . urldecode( $query->get( 's' ) ) . '%' ) . "'";
+
+		$this->search_fields = array_map(
+			'wc_clean',
+			/**
+			 * Compatibility for similarly named filter in the CPT data store.
+			 * If someone wants to query only billing email, phone, then fields query is a better option, so we don't list it here.
+			 *
+			 * @since 7.8.0
+			 *
+			 * @param array
+			 */
+			apply_filters(
+				'woocommerce_shop_order_search_fields',
+				array(
+					'_billing_address_index',
+					'_shipping_address_index',
+				)
+			)
+		);
 	}
 
 	/**
@@ -62,6 +88,9 @@ class OrdersTableSearchQuery {
 	 * @return string
 	 */
 	private function generate_join(): string {
+		if ( empty( $this->search_fields ) ) {
+			return '';
+		}
 		$orders_table = $this->query->get_table_name( 'orders' );
 		$items_table  = $this->query->get_table_name( 'items' );
 
@@ -85,6 +114,14 @@ class OrdersTableSearchQuery {
 		// Support the passing of an order ID as the search term.
 		if ( (string) $this->query->get( 's' ) === $possible_order_id ) {
 			$where = "`$order_table`.id = $possible_order_id OR ";
+		}
+
+		if ( empty( $this->search_fields ) ) {
+			/**
+			 * If search_fields are empty, then likely `woocommerce_shop_order_search_fields` is being used to replace the DB search process.
+			 * So let's shot the query in this case.
+			 */
+			return $where . ' 1=0 ';
 		}
 
 		$meta_sub_query = $this->generate_where_for_meta_table();
@@ -139,13 +176,10 @@ GROUP BY search_query_meta.order_id
 		 */
 		$meta_keys = apply_filters(
 			'woocommerce_order_table_search_query_meta_keys',
-			array(
-				'_billing_address_index',
-				'_shipping_address_index',
-			)
+			$this->search_fields
 		);
 
-		$meta_keys = (array) array_map(
+		$meta_keys = array_map(
 			function ( string $meta_key ): string {
 				return "'" . esc_sql( wc_clean( $meta_key ) ) . "'";
 			},
