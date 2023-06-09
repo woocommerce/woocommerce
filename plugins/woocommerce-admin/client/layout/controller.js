@@ -178,6 +178,7 @@ export const getPages = () => {
 			container: ProductPage,
 			layout: {
 				header: false,
+				transientNotices: false,
 			},
 			wpOpenMenu: 'menu-posts-product',
 			capability: 'manage_woocommerce',
