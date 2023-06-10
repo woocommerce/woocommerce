@@ -10,6 +10,7 @@
 return array(
 	'current_user_can',
 	'get_bloginfo',
+	'get_plugins',
 	'get_woocommerce_currencies',
 	'get_woocommerce_currency_symbol',
 	'wc_get_price_excluding_tax',
