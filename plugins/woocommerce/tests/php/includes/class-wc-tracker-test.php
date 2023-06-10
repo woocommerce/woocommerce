@@ -80,7 +80,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			'get_plugins' => function() {
 				return array(
 					'plugin1' => array(
-						'Name' => 'Plugin 1'
+						'Name' => 'Plugin 1',
 					),
 					'plugin2' => array(
 						'Name' => 'Plugin 2',
@@ -89,13 +89,14 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 						'Name' => 'Plugin 3',
 					),
 				);
-			}
+			},
 		);
 		FunctionsMockerHack::add_function_mocks( $legacy_mocks );
 
 		update_option( 'active_plugins', array( 'plugin1', 'plugin2' ) );
 
 		$pluginutil_mock = new class() extends PluginUtil {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			public function is_woocommerce_aware_plugin( $plugin ): bool {
 				if ( 'plugin1' === $plugin ) {
 					return false;
@@ -106,9 +107,10 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		};
 
 		$featurescontroller_mock = new class() extends FeaturesController {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false ): array {
 				$compat = array();
-				switch( $plugin_name ) {
+				switch ( $plugin_name ) {
 					case 'plugin2':
 						$compat = array(
 							'compatible'   => array( 'feature1' ),
@@ -151,8 +153,8 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		);
 		$this->assertEquals(
 			array(
-				'compatible'   => array( 'feature2' ),
-				'uncertain'    => array( 'feature1', 'feature3' ),
+				'compatible' => array( 'feature2' ),
+				'uncertain'  => array( 'feature1', 'feature3' ),
 			),
 			$tracking_data['inactive_plugins']['plugin3']['feature_compatibility']
 		);
