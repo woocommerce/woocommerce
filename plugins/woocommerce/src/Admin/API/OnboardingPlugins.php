@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Admin\API;
 defined( 'ABSPATH' ) || exit;
 
 use ActionScheduler;
+use Automattic\Jetpack\Connection\Manager;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use WC_REST_Data_Controller;
@@ -93,6 +94,17 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 					'permission_callback' => array( $this, 'can_install_plugins' ),
 				),
 				'schema' => array( $this, 'get_install_async_schema' ),
+			)
+		);
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/jetpack-authoriation-url',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( $this, 'get_jetpack_authorization_url' ),
+					'permission_callback' => '__return_true',
+				),
 			)
 		);
 	}
@@ -181,6 +193,38 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		}
 
 		return $response;
+	}
+
+
+	/**
+	 * Return Jetpack authorization URL.
+	 *
+	 * @return array
+	 * @throws \Exception
+	 */
+	public function get_jetpack_authorization_url() {
+		$manager = new Manager( 'woocommerce' );
+		// Register the site to wp.com.
+		if ( ! $manager->is_connected() ) {
+
+			$result = $manager->try_registration();
+			if ( is_wp_error( $result ) ) {
+				 throw new \Exception( $result->get_error_message() );
+			}
+		}
+
+		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( admin_url( 'admin.php?page=wc-admin' ) ) );
+		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, [ 'development', 'wpcalypso', 'horizon', 'stage' ], true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+
+		return [
+			'url' => add_query_arg(
+				[
+					'from'        => apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_from_arg', 'woocommerce-onboarding' ),
+					'calypso_env' => $calypso_env,
+				],
+				$manager->get_authorization_url( null, $redirect_url )
+			),
+		];
 	}
 
 	/**
