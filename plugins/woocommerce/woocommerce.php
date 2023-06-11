@@ -60,3 +60,45 @@ function wc_get_container() {
 
 // Global for backwards compatibility.
 $GLOBALS['woocommerce'] = WC();
+
+// Jetpack's Rest_Authentication needs to be initialized even before plugins_loaded.
+if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
+	\Automattic\Jetpack\Connection\Rest_Authentication::init();
+}
+
+/**
+ * Initialize the Jetpack functionalities: connection, identity crisis, etc.
+ */
+function wc_jetpack_init() {
+	$config = new Automattic\Jetpack\Config();
+	$config->ensure(
+		'connection',
+		array(
+			'slug' => 'woocommerce',
+			'name' => __( 'WooCommerce', 'woocommerce' ),
+		)
+	);
+
+	// When only WooCommerce is active, minimize the data to send back to WP.com for supporting Woo Mobile apps.
+	$config->ensure(
+		'sync',
+		array_merge_recursive(
+			\Automattic\Jetpack\Sync\Data_Settings::MUST_SYNC_DATA_SETTINGS,
+			array(
+				'jetpack_sync_modules'           => array(
+					'Automattic\\Jetpack\\Sync\\Modules\\Options',
+					'Automattic\\Jetpack\\Sync\\Modules\\Full_Sync',
+				),
+				'jetpack_sync_options_whitelist' => array(
+					'active_plugins',
+					'blogdescription',
+					'blogname',
+					'timezone_string',
+					'gmt_offset',
+				),
+			)
+		)
+	);
+}
+
+add_action( 'plugins_loaded', 'wc_jetpack_init', 1 );
