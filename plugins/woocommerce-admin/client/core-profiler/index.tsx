@@ -105,6 +105,14 @@ export type PluginsInstallationRequestedEvent = {
 	};
 };
 
+export type PluginsLearnMoreLinkClicked = {
+	type: 'PLUGINS_LEARN_MORE_LINK_CLICKED';
+	payload: {
+		plugin: string;
+		learnMoreLink: string;
+	};
+};
+
 // TODO: add types as we develop the pages
 export type OnboardingProfile = {
 	business_choice: BusinessChoice;
