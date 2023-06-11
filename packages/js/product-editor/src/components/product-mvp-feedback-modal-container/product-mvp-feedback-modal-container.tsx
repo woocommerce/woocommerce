@@ -5,7 +5,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { STORE_KEY } from '@woocommerce/customer-effort-score';
 import { recordEvent } from '@woocommerce/tracks';
-import { getAdminLink } from '@woocommerce/settings';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import { useFormContext } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 
@@ -28,9 +28,18 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 
 	const productId = _productId ?? values.id;
 
+	const { _feature_nonce } = getSetting< { _feature_nonce: string } >(
+		'admin',
+		{}
+	);
+
 	const classicEditorUrl = productId
-		? getAdminLink( `post.php?post=${ productId }&action=edit` )
-		: getAdminLink( 'post-new.php?post_type=product' );
+		? getAdminLink(
+				`post.php?post=${ productId }&action=edit&product_block_editor=0&_feature_nonce=${ _feature_nonce }`
+		  )
+		: getAdminLink(
+				`post-new.php?post_type=product&product_block_editor=0&_feature_nonce=${ _feature_nonce }`
+		  );
 
 	const recordScore = ( checked: string[], comments: string ) => {
 		recordEvent( 'product_mvp_feedback', {

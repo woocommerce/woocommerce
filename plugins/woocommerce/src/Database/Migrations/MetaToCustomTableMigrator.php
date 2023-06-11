@@ -571,7 +571,7 @@ WHERE
 	private function validate_data( $value, string $type ) {
 		switch ( $type ) {
 			case 'decimal':
-				$value = wc_format_decimal( $value, false, true );
+				$value = wc_format_decimal( floatval( $value ), false, true );
 				break;
 			case 'int':
 				$value = (int) $value;
@@ -843,8 +843,8 @@ WHERE $where_clause
 			if ( '' === $row[ $alias ] || null === $row[ $alias ] ) {
 				$row[ $alias ] = 0; // $wpdb->prepare forces empty values to 0.
 			}
-			$row[ $alias ]             = wc_format_decimal( $row[ $alias ], false, true );
-			$row[ $destination_alias ] = wc_format_decimal( $row[ $destination_alias ], false, true );
+			$row[ $alias ]             = wc_format_decimal( floatval( $row[ $alias ] ), false, true );
+			$row[ $destination_alias ] = wc_format_decimal( floatval( $row[ $destination_alias ] ), false, true );
 		}
 		if ( 'bool' === $schema['type'] ) {
 			$row[ $alias ]             = wc_string_to_bool( $row[ $alias ] );

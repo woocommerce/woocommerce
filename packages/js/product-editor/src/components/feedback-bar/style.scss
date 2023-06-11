@@ -1,0 +1,42 @@
+.woocommerce-product-mvp-ces-footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	// the left/right padding is set to this to match the padding of
+	// .block-editor-block-list__layout.is-root-container and
+	// .editor-styles-wrapper combined
+	padding: $gap calc(2 * $gap + $gap-small);
+	gap: $gap;
+
+	@include breakpoint(">782px") {
+		padding: $gap 0;
+		max-width: 650px;
+		margin: 0 auto;
+	}
+
+	.woocommerce-pill {
+		background-color: $studio-yellow-5;
+		border: 0;
+		font-size: 1em;
+	}
+
+	&__close-button {
+		padding: 0;
+	}
+
+	&__message {
+		flex: 1;
+		flex-wrap: wrap;
+		align-items: center;
+		white-space: pre-wrap;
+	}
+
+	&__message-buttons {
+		white-space: nowrap;
+
+		button.is-link {
+			text-decoration: none;
+		}
+	}
+}

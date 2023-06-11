@@ -136,6 +136,39 @@ final class OrderUtil {
 	}
 
 	/**
+	 * Check if the current admin screen is an order list table.
+	 *
+	 * @param string $order_type Optional. The order type to check for. Default shop_order.
+	 *
+	 * @return bool
+	 */
+	public static function is_order_list_table_screen( $order_type = 'shop_order' ) : bool {
+		return wc_get_container()->get( PageController::class )->is_order_screen( $order_type, 'list' );
+	}
+
+	/**
+	 * Check if the current admin screen is for editing an order.
+	 *
+	 * @param string $order_type Optional. The order type to check for. Default shop_order.
+	 *
+	 * @return bool
+	 */
+	public static function is_order_edit_screen( $order_type = 'shop_order' ) : bool {
+		return wc_get_container()->get( PageController::class )->is_order_screen( $order_type, 'edit' );
+	}
+
+	/**
+	 * Check if the current admin screen is adding a new order.
+	 *
+	 * @param string $order_type Optional. The order type to check for. Default shop_order.
+	 *
+	 * @return bool
+	 */
+	public static function is_new_order_screen( $order_type = 'shop_order' ) : bool {
+		return wc_get_container()->get( PageController::class )->is_order_screen( $order_type, 'new' );
+	}
+
+	/**
 	 * Get the name of the database table that's currently in use for orders.
 	 *
 	 * @return string
