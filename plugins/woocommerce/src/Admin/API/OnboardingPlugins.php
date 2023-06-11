@@ -103,7 +103,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				array(
 					'methods'             => 'GET',
 					'callback'            => array( $this, 'get_jetpack_authorization_url' ),
-					'permission_callback' => '__return_true',
+					'permission_callback' => array( $this, 'can_install_plugins' ),
 				),
 			)
 		);
