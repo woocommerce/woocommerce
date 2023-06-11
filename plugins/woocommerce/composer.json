@@ -20,6 +20,7 @@
 		"automattic/jetpack-connection": "1.51.7",
 		"automattic/jetpack-constants": "^1.6.22",
 		"automattic/jetpack-identity-crisis": "0.8.43",
+		"automattic/jetpack-sync": "1.47.7",
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",

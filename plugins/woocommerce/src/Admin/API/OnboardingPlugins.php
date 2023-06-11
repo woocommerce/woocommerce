@@ -10,12 +10,14 @@ namespace Automattic\WooCommerce\Admin\API;
 defined( 'ABSPATH' ) || exit;
 
 use ActionScheduler;
+use Automattic\Jetpack\Sync\Main;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use WC_REST_Data_Controller;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use Automattic\Jetpack\Connection\Manager;
+use Automattic\Jetpack\Config;
 
 /**
  * Onboarding Plugins controller.
@@ -100,8 +102,9 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 			'/' . $this->rest_base . '/jetpack-authoriation-url',
 			array(
 				array(
-					'methods'  => 'GET',
-					'callback' => array( $this, 'get_jetpack_authorization_url' ),
+					'methods'             => 'GET',
+					'callback'            => array( $this, 'get_jetpack_authorization_url' ),
+					'permission_callback' => '__return_true',
 				),
 			)
 		);
@@ -250,33 +253,102 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		);
 	}
 
-	public function get_jetpack_authorization_url() {
+	// Note that Automattic\Jetpack\Connection\Rest_Authentication::init(); must be inited
+	public function get_jetpack_authorization_url1() {
+		// Plugin_Storage::configure is called on plugins_loaded action in Manager::cnfigure();
+		// Since plugins_loaded already fired, we need to call it manually.
+		\Automattic\Jetpack\Connection\Plugin_Storage::configure();
 		$manager = new Manager( 'woocommerce' );
-		$manager->enable_plugin();
+		Manager::configure();
 
 		// Register the site to wp.com.
 		if ( ! $manager->is_connected() ) {
+
 			$result = $manager->try_registration();
 			if ( is_wp_error( $result ) ) {
 				write_log( $result );
+
+				// throw new \Exception( $result->get_error_message() );
 			}
 		}
 
-		$url          = admin_url( 'admin.php?page=wc-admin' );
-		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( $url ) );
+		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( admin_url( 'admin.php?page=wc-admin' ) ) );
+		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, [ 'development', 'wpcalypso', 'horizon', 'stage' ], true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
 
-		$calypso_env = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, [ 'development', 'wpcalypso', 'horizon', 'stage' ], true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
-
-		$final_url = add_query_arg(
-			[
-				'from'        => 'woocommerce-payments',
-				'calypso_env' => $calypso_env,
-			],
-			$manager->get_authorization_url( null, $redirect_url )
-		);
-
-		 return new WP_REST_Response( $manager->get_authorization_url( null, $final_url ) );
+		return [
+			'auth_url' => add_query_arg(
+				[
+					'from'        => 'woocommerce',
+					'calypso_env' => $calypso_env,
+				],
+				$manager->get_authorization_url( null, $redirect_url )
+			),
+		];
 	}
+
+	public function get_jetpack_authorization_url() {
+		//
+		// $config = new \Automattic\Jetpack\Config();
+		// $config->on_plugins_loaded();
+		// $config->ensure(
+		// 'connection',
+		// array(
+		// 'slug' => 'woocommerce',
+		// 'name' => __( 'WooCommerce', 'woocommerce' ),
+		// )
+		// );
+		//
+		// When only WooCommerce is active, minimize the data to send back to WP.com for supporting Woo Mobile apps.
+		// $config->ensure(
+		// 'sync',
+		// array_merge_recursive(
+		// \Automattic\Jetpack\Sync\Data_Settings::MUST_SYNC_DATA_SETTINGS,
+		// array(
+		// 'jetpack_sync_modules'           => array(
+		// 'Automattic\\Jetpack\\Sync\\Modules\\Options',
+		// 'Automattic\\Jetpack\\Sync\\Modules\\Full_Sync',
+		// ),
+		// 'jetpack_sync_options_whitelist' => array(
+		// 'active_plugins',
+		// 'blogdescription',
+		// 'blogname',
+		// 'timezone_string',
+		// 'gmt_offset',
+		// ),
+		// )
+		// )
+		// );
+
+		// \Automattic\Jetpack\Connection\Plugin_Storage::configure();
+		$manager = new Manager( 'woocommerce' );
+		// Manager::configure();
+		// Main::configure();
+
+		// Register the site to wp.com.
+		if ( ! $manager->is_connected() ) {
+
+			$result = $manager->try_registration();
+			if ( is_wp_error( $result ) ) {
+				write_log( $result );
+
+				// throw new \Exception( $result->get_error_message() );
+			}
+		}
+
+		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( admin_url( 'admin.php?page=wc-admin' ) ) );
+		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, [ 'development', 'wpcalypso', 'horizon', 'stage' ], true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+
+		return [
+			'auth_url' => add_query_arg(
+				[
+					'from'        => 'woocommerce-onboarding',
+					'calypso_env' => $calypso_env,
+				],
+				$manager->get_authorization_url( null, $redirect_url )
+			),
+		];
+	}
+
 
 	/**
 	 * JSON Schema for install-and-activate endpoint.

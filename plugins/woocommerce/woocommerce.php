@@ -14,8 +14,6 @@
  * @package WooCommerce
  */
 
-use Automattic\Jetpack\Sync\Data_Settings;
-
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
@@ -25,14 +23,11 @@ if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 // Load core packages and the autoloader.
 require __DIR__ . '/src/Autoloader.php';
 require __DIR__ . '/src/Packages.php';
+require_once __DIR__ . '/vendor/autoload_packages.php';
+
 
 if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 	return;
-}
-
-// Jetpack's Rest_Authentication needs to be initialized even before plugins_loaded.
-if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
-	\Automattic\Jetpack\Connection\Rest_Authentication::init();
 }
 
 \Automattic\WooCommerce\Packages::init();
@@ -69,28 +64,48 @@ function wc_get_container() {
 // Global for backwards compatibility.
 $GLOBALS['woocommerce'] = WC();
 
+
 /**
  * Initialize the Jetpack functionalities: connection, identity crisis, etc.
  */
 function wc_jetpack_init() {
-	$jetpack_config = new Automattic\Jetpack\Config();
-	$jetpack_config->ensure(
+
+	$config = new Automattic\Jetpack\Config();
+	$config->ensure(
 		'connection',
 		array(
 			'slug' => 'woocommerce',
 			'name' => __( 'WooCommerce', 'woocommerce' ),
 		)
 	);
-	$jetpack_config->ensure(
-		'identity_crisis',
-		array(
-			'slug'       => 'woocommerce',
-			'logo'       => plugins_url( 'assets/images/woocommerce_logo.svg', WC_PLUGIN_FILE ),
-			'admin_page' => '/wp-admin/admin.php?page=wc-admin',
-			'priority'   => 5,
+
+	// When only WooCommerce is active, minimize the data to send back to WP.com for supporting Woo Mobile apps.
+	$config->ensure(
+		'sync',
+		array_merge_recursive(
+			\Automattic\Jetpack\Sync\Data_Settings::MUST_SYNC_DATA_SETTINGS,
+			array(
+				'jetpack_sync_modules'           => array(
+					'Automattic\\Jetpack\\Sync\\Modules\\Options',
+					'Automattic\\Jetpack\\Sync\\Modules\\Full_Sync',
+				),
+				'jetpack_sync_options_whitelist' => array(
+					'active_plugins',
+					'blogdescription',
+					'blogname',
+					'timezone_string',
+					'gmt_offset',
+				),
+			)
 		)
 	);
 }
 
+// Automattic\Jetpack\Connection\Rest_Authentication::init();
 // Jetpack-config will initialize the modules on "plugins_loaded" with priority 2, so this code needs to be run before that.
-add_action( 'plugins_loaded', 'wc_jetpack_init', 1 );
+ add_action( 'plugins_loaded', 'wc_jetpack_init', 1 );
+//
+// if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
+// Automattic\Jetpack\Connection\Rest_Authentication::init();
+// Automattic\Jetpack\Connection\Manager::configure();
+// }
