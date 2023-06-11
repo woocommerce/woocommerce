@@ -20,6 +20,7 @@ import {
 	setEmailPrefill,
 	getProductTypesSuccess,
 	getProductTypesError,
+	setJetpackAuthUrl,
 } from './actions';
 import { DeprecatedTasks } from './deprecated-tasks';
 import {
@@ -134,5 +135,22 @@ export function* getProductTypes() {
 		yield getProductTypesSuccess( results );
 	} catch ( error ) {
 		yield getProductTypesError( error );
+	}
+}
+
+export function* getJetpackAuthUrl() {
+	try {
+		const results: {
+			url: string;
+		} = yield apiFetch( {
+			path:
+				WC_ADMIN_NAMESPACE +
+				'/onboarding/plugins/jetpack-authoriation-url',
+			method: 'GET',
+		} );
+
+		yield setJetpackAuthUrl( results.url );
+	} catch ( error ) {
+		yield setError( 'getJetpackAuthUrl', error );
 	}
 }

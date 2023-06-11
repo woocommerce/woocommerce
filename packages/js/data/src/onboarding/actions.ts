@@ -488,6 +488,13 @@ export function* installAndActivatePluginsAsync(
 	}
 }
 
+export function setJetpackAuthUrl( jetpackAuthUrl: string ) {
+	return {
+		type: TYPES.SET_JETPACK_AUTH_URL,
+		jetpackAuthUrl,
+	};
+}
+
 export type Action = ReturnType<
 	| typeof getFreeExtensionsError
 	| typeof getFreeExtensionsSuccess
@@ -524,4 +531,5 @@ export type Action = ReturnType<
 	| typeof actionTaskRequest
 	| typeof getProductTypesError
 	| typeof getProductTypesSuccess
+	| typeof setJetpackAuthUrl
 >;
