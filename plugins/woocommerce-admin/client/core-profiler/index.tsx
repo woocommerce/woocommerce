@@ -15,7 +15,7 @@ import {
 } from 'xstate';
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
-import { resolveSelect, dispatch } from '@wordpress/data';
+import { resolveSelect, dispatch, select } from '@wordpress/data';
 import { updateQueryString, getQuery } from '@woocommerce/navigation';
 import {
 	ExtensionList,
@@ -173,6 +173,7 @@ export type CoreProfilerStateMachineContext = {
 		stageIndex?: number;
 	};
 	onboardingProfile: OnboardingProfile;
+	jetpackAuthUrl?: string;
 };
 
 const getAllowTrackingOption = async () =>
@@ -572,6 +573,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		pluginsSelected: [],
 		loader: {},
 		onboardingProfile: {} as OnboardingProfile,
+		jetpackAuthUrl: undefined,
 	} as CoreProfilerStateMachineContext,
 	states: {
 		navigate: {
@@ -1170,13 +1172,35 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								completed: true,
 							} );
 						},
-						onDone: {
-							actions: 'redirectToWooHome',
-						},
+						onDone: [
+							{
+								target: 'sendToJetpackAuthPage',
+								cond: ( _context ) =>
+									_context.pluginsSelected.find(
+										( plugin ) => plugin === 'jetpack'
+									) !== undefined,
+							},
+							{ actions: 'redirectToWooHome' },
+						],
 					},
 					meta: {
 						component: Loader,
 						progress: 100,
+					},
+				},
+				sendToJetpackAuthPage: {
+					invoke: {
+						src: async () =>
+							await resolveSelect(
+								ONBOARDING_STORE_NAME
+							).getJetpackAuthUrl(),
+						onDone: {
+							actions: [
+								( _context, event ) => {
+									window.location.href = event.data;
+								},
+							],
+						},
 					},
 				},
 				installPlugins: {
