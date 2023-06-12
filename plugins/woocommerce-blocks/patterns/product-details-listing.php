@@ -11,7 +11,7 @@
 	<div class="wp-block-column" style="padding:0">
 		<!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image size-full">
-			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-wood-chair-floor-living-room-furniture-horizontal.png', dirname( __FILE__ ) ) ); ?>" alt="" />
+			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-wood-chair-floor-living-room-furniture-horizontal.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a product banner.', 'woo-gutenberg-products-block' ); ?>" />
 		</figure>
 		<!-- /wp:image -->
 		<!-- wp:group {"align":"full","style":{"spacing":{"padding":"0px","blockGap":"0px","margin":{"top":"30px","bottom":"20px","left":"0px"}}},"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"center","verticalAlignment":"center"}} -->
