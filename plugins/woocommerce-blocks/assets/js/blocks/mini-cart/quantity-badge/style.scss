@@ -35,8 +35,9 @@
 
 .wc-block-mini-cart__icon {
 	display: block;
-	height: em(24px);
-	width: em(24px);
+	height: em(32px);
+	width: em(32px);
+	margin: -0.25em;
 
 	html[dir="rtl"] & {
 		transform: scaleX(-1);

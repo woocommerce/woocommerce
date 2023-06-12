@@ -17,6 +17,8 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
 import { select } from '@wordpress/data';
+import { cartOutline, bag, bagAlt } from '@woocommerce/icons';
+import { Icon } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -25,6 +27,7 @@ import QuantityBadge from './quantity-badge';
 import './editor.scss';
 
 interface Attributes {
+	miniCartIcon: 'cart' | 'bag' | 'bag-alt';
 	addToCartBehaviour: string;
 	hasHiddenPrice: boolean;
 	cartAndCheckoutRenderStyle: boolean;
@@ -36,8 +39,12 @@ interface Props {
 }
 
 const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
-	const { addToCartBehaviour, hasHiddenPrice, cartAndCheckoutRenderStyle } =
-		attributes;
+	const {
+		miniCartIcon,
+		addToCartBehaviour,
+		hasHiddenPrice,
+		cartAndCheckoutRenderStyle,
+	} = attributes;
 	const blockProps = useBlockProps( {
 		className: `wc-block-mini-cart`,
 	} );
@@ -58,22 +65,57 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 				<PanelBody
 					title={ __( 'Settings', 'woo-gutenberg-products-block' ) }
 				>
-					<ToggleControl
+					<ToggleGroupControl
+						className="wc-block-editor-mini-cart__cart-icon-toggle"
+						isBlock={ true }
 						label={ __(
-							'Display total price',
+							'Cart Icon',
 							'woo-gutenberg-products-block'
 						) }
-						help={ __(
-							'Toggle to display the total price of products in the shopping cart. If no products have been added, the price will not display.',
-							'woo-gutenberg-products-block'
-						) }
-						checked={ ! hasHiddenPrice }
-						onChange={ () =>
+						value={ miniCartIcon }
+						onChange={ ( value ) => {
 							setAttributes( {
-								hasHiddenPrice: ! hasHiddenPrice,
-							} )
-						}
-					/>
+								miniCartIcon: value,
+							} );
+						} }
+					>
+						<ToggleGroupControlOption
+							value={ 'cart' }
+							label={ <Icon size={ 32 } icon={ cartOutline } /> }
+						/>
+						<ToggleGroupControlOption
+							value={ 'bag' }
+							label={ <Icon size={ 32 } icon={ bag } /> }
+						/>
+						<ToggleGroupControlOption
+							value={ 'bag-alt' }
+							label={ <Icon size={ 32 } icon={ bagAlt } /> }
+						/>
+					</ToggleGroupControl>
+					<BaseControl
+						id="wc-block-mini-cart__display-toggle"
+						label={ __(
+							'Display',
+							'woo-gutenberg-products-block'
+						) }
+					>
+						<ToggleControl
+							label={ __(
+								'Display total price',
+								'woo-gutenberg-products-block'
+							) }
+							help={ __(
+								'Toggle to display the total price of products in the shopping cart. If no products have been added, the price will not display.',
+								'woo-gutenberg-products-block'
+							) }
+							checked={ ! hasHiddenPrice }
+							onChange={ () =>
+								setAttributes( {
+									hasHiddenPrice: ! hasHiddenPrice,
+								} )
+							}
+						/>
+					</BaseControl>
 					{ isSiteEditor && (
 						<ToggleGroupControl
 							className="wc-block-editor-mini-cart__render-in-cart-and-checkout-toggle"
@@ -177,7 +219,10 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							{ formatPrice( productTotal ) }
 						</span>
 					) }
-					<QuantityBadge count={ productCount } />
+					<QuantityBadge
+						count={ productCount }
+						icon={ miniCartIcon }
+					/>
 				</button>
 			</Noninteractive>
 		</div>

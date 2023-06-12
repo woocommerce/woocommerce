@@ -34,6 +34,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
+import type { BlockAttributes } from './types';
 import QuantityBadge from './quantity-badge';
 import { MiniCartContentsBlock } from './mini-cart-contents/block';
 import './style.scss';
@@ -42,14 +43,7 @@ import {
 	attributes as miniCartContentsAttributes,
 } from './mini-cart-contents/attributes';
 
-interface Props {
-	isInitiallyOpen?: boolean;
-	colorClassNames?: string;
-	style?: Record< string, Record< string, string > >;
-	contents: string;
-	addToCartBehaviour: string;
-	hasHiddenPrice: boolean;
-}
+type Props = BlockAttributes;
 
 function getScrollbarWidth() {
 	return window.innerWidth - document.documentElement.clientWidth;
@@ -61,6 +55,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		colorClassNames,
 		style,
 		contents = '',
+		miniCartIcon,
 		addToCartBehaviour = 'none',
 		hasHiddenPrice = false,
 	} = attributes;
@@ -269,7 +264,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 						{ taxLabel }
 					</small>
 				) }
-				<QuantityBadge count={ cartItemsCount } />
+				<QuantityBadge count={ cartItemsCount } icon={ miniCartIcon } />
 			</button>
 			<Drawer
 				className={ classnames(
