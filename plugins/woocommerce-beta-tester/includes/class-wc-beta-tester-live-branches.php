@@ -16,7 +16,7 @@ class WC_Beta_Tester_Live_Branches {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_page' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'admin_init', array( $this, 'register_scripts' ) );
 	}
 
 	/**
