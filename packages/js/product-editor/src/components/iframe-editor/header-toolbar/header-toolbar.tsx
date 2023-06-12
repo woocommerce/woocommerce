@@ -7,6 +7,9 @@ import { __ } from '@wordpress/i18n';
 import {
 	NavigableToolbar,
 	store as blockEditorStore,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore ToolSelector exists in WordPress components.
+	ToolSelector,
 } from '@wordpress/block-editor';
 import { plus } from '@wordpress/icons';
 import {
@@ -33,8 +36,9 @@ export function HeaderToolbar() {
 	const { isInserterOpened, setIsInserterOpened } =
 		useContext( EditorContext );
 	const isWideViewport = useViewportMatch( 'wide' );
+	const isLargeViewport = useViewportMatch( 'medium' );
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
-	const { isInserterEnabled } = useSelect( ( select ) => {
+	const { isInserterEnabled, isTextModeEnabled } = useSelect( ( select ) => {
 		const {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore These selectors are available in the block data store.
@@ -45,9 +49,13 @@ export function HeaderToolbar() {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore These selectors are available in the block data store.
 			getBlockSelectionEnd,
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore These selectors are available in the block data store.
+			__unstableGetEditorMode: getEditorMode,
 		} = select( blockEditorStore );
 
 		return {
+			isTextModeEnabled: getEditorMode() === 'text',
 			isInserterEnabled: hasInserterItems(
 				getBlockRootClientId( getBlockSelectionEnd() )
 			),
@@ -98,6 +106,12 @@ export function HeaderToolbar() {
 				/>
 				{ isWideViewport && (
 					<>
+						{ isLargeViewport && (
+							<ToolbarItem
+								as={ ToolSelector }
+								disabled={ isTextModeEnabled }
+							/>
+						) }
 						<ToolbarItem as={ EditorHistoryUndo } />
 						<ToolbarItem as={ EditorHistoryRedo } />
 					</>
