@@ -41,6 +41,7 @@ const renderMiniCartFrontend = () => {
 				isInitiallyOpen: el.dataset.isInitiallyOpen === 'true',
 				colorClassNames,
 				style: el.dataset.style ? JSON.parse( el.dataset.style ) : {},
+				miniCartIcon: el.dataset.miniCartIcon,
 				addToCartBehaviour: el.dataset.addToCartBehaviour || 'none',
 				hasHiddenPrice: el.dataset.hasHiddenPrice,
 				contents:

@@ -53,6 +53,10 @@ const settings: BlockConfiguration = {
 			type: 'boolean',
 			default: false,
 		},
+		miniCartIcon: {
+			type: 'string',
+			default: 'cart',
+		},
 		addToCartBehaviour: {
 			type: 'string',
 			default: 'none',
