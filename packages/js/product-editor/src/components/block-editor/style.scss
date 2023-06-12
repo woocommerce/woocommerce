@@ -14,6 +14,10 @@
 		font-family: var(--wp--preset--font-family--system-font);
 	}
 
+	h4 {
+		font-size: 16px;
+	}
+
 	label {
 		color: $gray-900;
 	}
@@ -64,26 +68,6 @@
 		margin-top: calc(2 * $gap);
 	}
 
-	.editor-styles-wrapper {
-		h4 {
-			font-size: 16px;
-		}
-
-		.block-editor-block-list__layout.is-root-container {
-			padding-left: calc(2 * $gap);
-			padding-right: calc(2 * $gap);
-			padding-bottom: 128px;
-
-			@include breakpoint(">782px") {
-				padding-left: 0;
-				padding-right: 0;
-				max-width: 650px;
-				margin-left: auto;
-				margin-right: auto;
-			}
-		}
-	}
-
 	.components-input-control {
 		&__input::placeholder {
 			color: $gray-700;
@@ -126,9 +110,24 @@
 		font-weight: 500;
 	}
 
-	.block-editor-block-list__layout
+	.block-editor-block-list__layout {
+		&.is-root-container {
+			padding-left: calc(2 * $gap);
+			padding-right: calc(2 * $gap);
+			padding-bottom: 128px;
+
+			@include breakpoint(">782px") {
+				padding-left: 0;
+				padding-right: 0;
+				max-width: 650px;
+				margin-left: auto;
+				margin-right: auto;
+			}
+		}
+
 		.block-editor-block-list__block:not([contenteditable]):focus:after {
-		display: none; // use important or increase specificity.
+			display: none; // use important or increase specificity.
+		}
 	}
 }
 
