@@ -145,7 +145,7 @@ export function* getJetpackAuthUrl() {
 		} = yield apiFetch( {
 			path:
 				WC_ADMIN_NAMESPACE +
-				'/onboarding/plugins/jetpack-authoriation-url',
+				'/onboarding/plugins/jetpack-authorization-url',
 			method: 'GET',
 		} );
 
