@@ -50,22 +50,29 @@ $gutenberg-blue: var(--wp-admin-theme-color);
 	> .components-base-control {
 		margin-top: $gap-small;
 	}
-	.woocommerce-customer-effort-score__selection {
-		.components-radio-control__option {
-			margin-right: 0;
-			label {
-				color: $gray-900;
-				padding: 1em 0;
-				width: 8.8em;
-				height: 80px;
-				&::before {
-					margin: $gap-smaller 0;
+	.woocommerce-customer-effort-score {
+		&__selection {
+			.components-radio-control__option {
+				margin-right: 0;
+				label {
+					color: $gray-900;
+					padding: 1em 0;
+					width: 8.8em;
+					height: 80px;
+					&::before {
+						margin: $gap-smaller 0;
+					}
+					&:hover {
+						box-shadow: 0 0 0 1.5px $gutenberg-blue;
+						border-radius: 2px;
+						background-color: #fff;
+					}
 				}
-				&:hover {
-					box-shadow: 0 0 0 1.5px $gutenberg-blue;
-					border-radius: 2px;
-					background-color: #fff;
-				}
+			}
+		}
+		&__errors {
+			> p {
+				color: $error-red;
 			}
 		}
 	}
