@@ -184,6 +184,7 @@ export type Extension = {
 	is_built_by_wc: boolean;
 	is_visible: boolean;
 	is_installed?: boolean;
+	is_activated?: boolean;
 	learn_more_link?: string;
 	install_priority?: number;
 };

@@ -48,7 +48,7 @@ export const Plugins = ( {
 } ) => {
 	const [ selectedPlugins, setSelectedPlugins ] = useState<
 		ExtensionList[ 'plugins' ]
-	>( context.pluginsAvailable.filter( ( plugin ) => ! plugin.is_installed ) );
+	>( context.pluginsAvailable.filter( ( plugin ) => ! plugin.is_activated ) );
 
 	const setSelectedPlugin = ( plugin: Extension ) => {
 		setSelectedPlugins(
@@ -164,7 +164,7 @@ export const Plugins = ( {
 						return (
 							<PluginCard
 								key={ `checkbox-control-${ plugin.key }` }
-								installed={ plugin.is_installed }
+								installed={ plugin.is_activated }
 								onChange={ () => {
 									setSelectedPlugin( plugin );
 								} }
