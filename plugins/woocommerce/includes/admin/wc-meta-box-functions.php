@@ -66,14 +66,10 @@ function woocommerce_wp_text_input( $field, WC_Data $data = null ) {
 		}
 	}
 
+	$label_class = ! empty( $field['label_class'] ) ? 'class="' . esc_attr( $field['label_class'] ) . '" ' : '';
+
 	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
-		<label ';
-
-	if ( ! empty( $field['label_class'] ) ) {
-		echo 'class="' . esc_attr( $field['label_class'] ) . '" ';
-	}
-
-	echo 'for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
+		<label ' . esc_attr( $label_class ) . ' for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
 
 	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
 		echo wc_help_tip( $field['description'] );
