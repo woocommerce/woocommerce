@@ -181,6 +181,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	 */
 	public function test_query_filters() {
 		$order1 = new \WC_Order();
+		$order1->set_date_created( time() - HOUR_IN_SECONDS );
 		$order1->save();
 
 		$order2 = new \WC_Order();
@@ -198,10 +199,10 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertCount( 0, wc_get_orders( array() ) );
 		remove_all_filters( 'woocommerce_orders_table_query_clauses' );
 
-		// Force a query that sorts orders by id DESC (as opposed to the default date ASC) if a query arg is present.
+		// Force a query that sorts orders by id ASC (as opposed to the default date DESC) if a query arg is present.
 		$filter_callback = function( $clauses, $query, $query_args ) use ( $order1 ) {
 			if ( ! empty( $query_args['my_custom_arg'] ) ) {
-				$clauses['orderby'] = $query->get_table_name( 'orders' ) . '.id DESC';
+				$clauses['orderby'] = $query->get_table_name( 'orders' ) . '.id ASC';
 			}
 
 			return $clauses;
@@ -212,6 +213,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 			wc_get_orders(
 				array(
 					'return' => 'ids',
+					'my_custom_arg' => true,
 				)
 			),
 			array(
@@ -223,7 +225,6 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 			wc_get_orders(
 				array(
 					'return'        => 'ids',
-					'my_custom_arg' => true,
 				)
 			),
 			array(
