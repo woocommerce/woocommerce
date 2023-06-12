@@ -118,7 +118,7 @@ jobs:
 
       - name: Docker container debug information
         run: |
-          # npm run wp-env run tests-mysql "mysql --version"
+          npm run wp-env run tests-mysql mysql -- --version
           npm run wp-env run tests-wordpress "php --version"
           npm run wp-env run tests-wordpress "php -m"
           npm run wp-env run tests-wordpress "php -i"
