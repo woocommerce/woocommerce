@@ -2,10 +2,21 @@
 /**
  * External dependencies
  */
-import { createMachine, assign, DoneInvokeEvent, actions, spawn } from 'xstate';
+import {
+	createMachine,
+	ActionMeta,
+	assign,
+	DoneInvokeEvent,
+	actions,
+	spawn,
+	AnyEventObject,
+	BaseActionObject,
+	Sender,
+} from 'xstate';
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
+import { updateQueryString, getQuery } from '@woocommerce/navigation';
 import {
 	ExtensionList,
 	OPTIONS_STORE_NAME,
@@ -38,13 +49,13 @@ import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
 import { Plugins } from './pages/Plugins';
-import { getPluginTrackKey, getTimeFrame } from '~/utils';
+import { getPluginSlug, getPluginTrackKey, getTimeFrame } from '~/utils';
 import './style.scss';
 import {
 	InstallationCompletedResult,
-	InstallAndActivatePlugins,
 	InstalledPlugin,
 	PluginInstallError,
+	pluginInstallerMachine,
 } from './services/installAndActivatePlugins';
 import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import recordTracksActions from './actions/tracks';
@@ -351,6 +362,23 @@ const updateBusinessLocation = ( countryAndState: string ) => {
 	} );
 };
 
+const assignStoreLocation = assign( {
+	businessInfo: (
+		context: CoreProfilerStateMachineContext,
+		event: BusinessLocationEvent
+	) => {
+		return {
+			...context.businessInfo,
+			location: event.payload.storeLocation,
+		};
+	},
+} );
+
+const assignUserProfile = assign( {
+	userProfile: ( context, event: UserProfileEvent ) =>
+		event.payload.userProfile, // sets context.userProfile to the payload of the event
+} );
+
 const updateBusinessInfo = async (
 	_context: CoreProfilerStateMachineContext,
 	event: BusinessInfoEvent
@@ -419,9 +447,42 @@ const getPlugins = async () => {
 	);
 };
 
+/** Special callback that is used to trigger a navigation event if the user uses the browser's back or foward buttons */
+const browserPopstateHandler = () => ( sendBack: Sender< AnyEventObject > ) => {
+	const popstateHandler = () => {
+		sendBack( 'EXTERNAL_URL_UPDATE' );
+	};
+	window.addEventListener( 'popstate', popstateHandler );
+	return () => {
+		window.removeEventListener( 'popstate', popstateHandler );
+	};
+};
+
 const handlePlugins = assign( {
-	pluginsAvailable: ( _context, event: DoneInvokeEvent< Extension[] > ) =>
-		event.data,
+	pluginsAvailable: ( _context, event ) =>
+		( event as DoneInvokeEvent< Extension[] > ).data,
+} );
+
+type ActType = (
+	ctx: CoreProfilerStateMachineContext,
+	evt: AnyEventObject,
+	{
+		action: { step },
+	}: ActionMeta< unknown, AnyEventObject, BaseActionObject >
+) => void;
+
+const updateQueryStep: ActType = ( _context, _evt, { action } ) => {
+	const { step } = getQuery() as { step: string };
+	// only update the query string if it has changed
+	if ( action.step !== step ) {
+		updateQueryString( { step: action.step } );
+	}
+};
+
+const assignPluginsSelected = assign( {
+	pluginsSelected: ( _context, event: PluginsInstallationRequestedEvent ) => {
+		return event.payload.plugins.map( getPluginSlug );
+	},
 } );
 
 export const preFetchActions = {
@@ -435,12 +496,16 @@ const coreProfilerMachineActions = {
 	...preFetchActions,
 	...recordTracksActions,
 	handlePlugins,
+	updateQueryStep,
 	updateTrackingOption,
 	handleTrackingOption,
 	handleGeolocation,
 	handleStoreNameOption,
 	handleStoreCountryOption,
 	assignOptInDataSharing,
+	assignStoreLocation,
+	assignPluginsSelected,
+	assignUserProfile,
 	handleCountries,
 	handleOnboardingProfileOption,
 	assignOnboardingProfile,
@@ -456,11 +521,20 @@ const coreProfilerMachineServices = {
 	getGeolocation,
 	getOnboardingProfileOption,
 	getPlugins,
+	browserPopstateHandler,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
-	initial: 'introOptIn',
+	initial: 'navigate',
 	predictableActionArguments: true, // recommended setting: https://xstate.js.org/docs/guides/actions.html
+	invoke: {
+		src: 'browserPopstateHandler',
+	},
+	on: {
+		EXTERNAL_URL_UPDATE: {
+			target: 'navigate',
+		},
+	},
 	context: {
 		// these are safe default values if for some reason the steps fail to complete correctly
 		// actual defaults displayed to the user should be handled in the steps themselves
@@ -481,6 +555,49 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		onboardingProfile: {} as OnboardingProfile,
 	} as CoreProfilerStateMachineContext,
 	states: {
+		navigate: {
+			always: [
+				/**
+				 * The 'navigate' state forwards the progress to whichever step is
+				 *  specified in the query string. If no step is specified, it will
+				 *  default to introOptIn.
+				 *
+				 *  Each top level state must be responsible for populating their own
+				 *  context data dependencies, as it is possible that they are the
+				 *  first state to be loaded due to the navigation jump.
+				 *
+				 *  Each top level state must also be responsible for updating the
+				 *  query string to reflect their own state, using the 'updateQueryStep'
+				 *  action.
+				 */
+				{
+					target: '#introOptIn',
+					cond: {
+						type: 'hasStepInUrl',
+						step: 'intro-opt-in',
+					},
+				},
+				{
+					target: '#userProfile',
+					cond: { type: 'hasStepInUrl', step: 'user-profile' },
+				},
+				{
+					target: '#businessInfo',
+					cond: { type: 'hasStepInUrl', step: 'business-info' },
+				},
+				{
+					target: '#plugins',
+					cond: { type: 'hasStepInUrl', step: 'plugins' },
+				},
+				{
+					target: '#skipGuidedSetup',
+					cond: { type: 'hasStepInUrl', step: 'skip-guided-setup' },
+				},
+				{
+					target: 'introOptIn',
+				},
+			],
+		},
 		introOptIn: {
 			id: 'introOptIn',
 			initial: 'preIntroOptIn',
@@ -558,6 +675,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							type: 'recordTracksStepViewed',
 							step: 'store_details',
 						},
+						{ type: 'updateQueryStep', step: 'intro-opt-in' },
 					],
 					exit: actions.choose( [
 						{
@@ -614,30 +732,17 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							type: 'recordTracksStepViewed',
 							step: 'user_profile',
 						},
+						{ type: 'updateQueryStep', step: 'user-profile' },
 						'preFetchGeolocation',
 					],
 					on: {
 						USER_PROFILE_COMPLETED: {
 							target: 'postUserProfile',
-							actions: [
-								assign( {
-									userProfile: (
-										context,
-										event: UserProfileEvent
-									) => event.payload.userProfile, // sets context.userProfile to the payload of the event
-								} ),
-							],
+							actions: [ 'assignUserProfile' ],
 						},
 						USER_PROFILE_SKIPPED: {
 							target: 'postUserProfile',
-							actions: [
-								assign( {
-									userProfile: (
-										context,
-										event: UserProfileEvent
-									) => event.payload.userProfile, // assign context.userProfile to the payload of the event
-								} ),
-							],
+							actions: [ 'assignUserProfile' ],
 						},
 					},
 					exit: actions.choose( [
@@ -676,6 +781,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		businessInfo: {
 			id: 'businessInfo',
 			initial: 'preBusinessInfo',
+			entry: [ { type: 'updateQueryStep', step: 'business-info' } ],
 			states: {
 				preBusinessInfo: {
 					type: 'parallel',
@@ -684,17 +790,20 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							initial: 'checkDataOptIn',
 							states: {
 								checkDataOptIn: {
-									// if the user has opted out of data sharing, we skip the geolocation step
-									always: [
-										{
-											cond: ( context ) =>
-												context.optInDataSharing,
-											target: 'fetching',
+									invoke: {
+										src: 'getAllowTrackingOption',
+										onDone: [
+											{
+												actions: [
+													'handleTrackingOption',
+												],
+												target: 'fetching',
+											},
+										],
+										onError: {
+											target: 'done', // leave it as initialised default on error
 										},
-										{
-											target: 'done',
-										},
-									],
+									},
 								},
 								fetching: {
 									invoke: {
@@ -703,7 +812,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 											target: 'done',
 											actions: 'handleGeolocation',
 										},
-										// onError TODO: handle error
+										onError: {
+											target: 'done',
+										},
 									},
 								},
 								done: {
@@ -721,6 +832,30 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 											{
 												actions: [
 													'handleStoreCountryOption',
+												],
+												target: 'done',
+											},
+										],
+										onError: {
+											target: 'done',
+										},
+									},
+								},
+								done: {
+									type: 'final',
+								},
+							},
+						},
+						onboardingProfileOption: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getOnboardingProfileOption',
+										onDone: [
+											{
+												actions: [
+													'assignOnboardingProfile',
 												],
 												target: 'done',
 											},
@@ -777,7 +912,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							},
 						},
 					},
-					// onDone is reached when child parallel states are all at their final states
+					// onDone is reached when child parallel states fo fetching are resolved (reached final states)
 					onDone: {
 						target: 'businessInfo',
 					},
@@ -808,6 +943,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		skipGuidedSetup: {
 			id: 'skipGuidedSetup',
 			initial: 'preSkipFlowBusinessLocation',
+			entry: [ { type: 'updateQueryStep', step: 'skip-guided-setup' } ],
 			states: {
 				preSkipFlowBusinessLocation: {
 					invoke: {
@@ -828,18 +964,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						BUSINESS_LOCATION_COMPLETED: {
 							target: 'postSkipFlowBusinessLocation',
 							actions: [
-								assign( {
-									businessInfo: (
-										_context,
-										event: BusinessLocationEvent
-									) => {
-										return {
-											..._context.businessInfo,
-											location:
-												event.payload.storeLocation,
-										};
-									},
-								} ),
+								'assignStoreLocation',
 								'recordTracksSkipBusinessLocationCompleted',
 							],
 						},
@@ -970,6 +1095,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				plugins: {
 					entry: [
 						{ type: 'recordTracksStepViewed', step: 'plugins' },
+						{ type: 'updateQueryStep', step: 'plugins' },
 					],
 					on: {
 						PLUGINS_PAGE_SKIPPED: {
@@ -983,14 +1109,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 						PLUGINS_INSTALLATION_REQUESTED: {
 							target: 'installPlugins',
-							actions: [
-								assign( {
-									pluginsSelected: (
-										_context,
-										event: PluginsInstallationRequestedEvent
-									) => event.payload.plugins,
-								} ),
-							],
+							actions: [ 'assignPluginsSelected' ],
 						},
 					},
 					meta: {
@@ -1143,7 +1262,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						} ),
 					],
 					invoke: {
-						src: InstallAndActivatePlugins,
+						src: pluginInstallerMachine,
+						data: ( context ) => {
+							return {
+								selectedPlugins: context.pluginsSelected,
+							};
+						},
 					},
 					meta: {
 						component: Loader,
@@ -1165,6 +1289,8 @@ export const CoreProfilerController = ( {
 	const augmentedStateMachine = useMemo( () => {
 		// When adding extensibility, this is the place to manipulate the state machine definition.
 		return coreProfilerStateMachineDefinition.withConfig( {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore -- there seems to be a flaky error here - it fails sometimes and then not on recompile, will need to investigate further.
 			actions: {
 				...coreProfilerMachineActions,
 				...actionOverrides,
@@ -1172,6 +1298,14 @@ export const CoreProfilerController = ( {
 			services: {
 				...coreProfilerMachineServices,
 				...servicesOverrides,
+			},
+			guards: {
+				hasStepInUrl: ( _ctx, _evt, { cond }: { cond: unknown } ) => {
+					const { step = undefined } = getQuery() as { step: string };
+					return (
+						step === ( cond as { step: string | undefined } ).step
+					);
+				},
 			},
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
