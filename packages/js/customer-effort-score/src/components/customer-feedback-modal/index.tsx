@@ -74,7 +74,8 @@ function CustomerFeedbackModal( {
 	) => boolean;
 	getExtraFieldsToBeShown?: (
 		extraFieldsValues: { [ key: string ]: string },
-		setExtraFieldsValues: ( values: { [ key: string ]: string } ) => void
+		setExtraFieldsValues: ( values: { [ key: string ]: string } ) => void,
+		errors: Record< string, string > | undefined
 	) => JSX.Element;
 	validateExtraFields?: ( values: { [ key: string ]: string } ) => {
 		[ key: string ]: string;
@@ -115,7 +116,12 @@ function CustomerFeedbackModal( {
 	const [ comments, setComments ] = useState( '' );
 	const [ showNoScoreMessage, setShowNoScoreMessage ] = useState( false );
 	const [ isOpen, setOpen ] = useState( true );
-	const [ extraFieldsValues, setExtraFieldsValues ] = useState( {} );
+	const [ extraFieldsValues, setExtraFieldsValues ] = useState< {
+		[ key: string ]: string;
+	} >( {} );
+	const [ errors, setErrors ] = useState<
+		Record< string, string > | undefined
+	>( {} );
 
 	const closeModal = () => {
 		setOpen( false );
@@ -134,19 +140,19 @@ function CustomerFeedbackModal( {
 	};
 
 	const sendScore = () => {
-		if (
+		const missingFirstOrSecondQuestions =
 			! Number.isInteger( firstQuestionScore ) ||
-			( secondQuestion && ! Number.isInteger( secondQuestionScore ) )
-		) {
+			( secondQuestion && ! Number.isInteger( secondQuestionScore ) );
+		if ( missingFirstOrSecondQuestions ) {
 			setShowNoScoreMessage( true );
-			return;
 		}
-		const errors =
+		const extraFieldsErrors =
 			typeof validateExtraFields === 'function'
 				? validateExtraFields( extraFieldsValues )
-				: false;
-		if ( Object.keys( errors ).length !== 0 ) {
-			setExtraFieldsValues( { ...extraFieldsValues, errors } );
+				: {};
+		const validExtraFields = Object.keys( extraFieldsErrors ).length === 0;
+		if ( missingFirstOrSecondQuestions || ! validExtraFields ) {
+			setErrors( extraFieldsErrors );
 			return;
 		}
 		setOpen( false );
@@ -281,7 +287,8 @@ function CustomerFeedbackModal( {
 			{ typeof getExtraFieldsToBeShown === 'function' &&
 				getExtraFieldsToBeShown(
 					extraFieldsValues,
-					setExtraFieldsValues
+					setExtraFieldsValues,
+					errors
 				) }
 
 			<div className="woocommerce-customer-effort-score__buttons">

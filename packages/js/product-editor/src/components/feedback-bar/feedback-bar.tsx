@@ -74,13 +74,12 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 					values: {
 						email?: string;
 						additionalThoughts?: string;
-						errors?: { [ key: string ]: string };
 					},
 					setValues: ( value: {
 						email?: string;
 						additionalThoughts?: string;
-						errors?: { [ key: string ]: string };
-					} ) => void
+					} ) => void,
+					errors: Record< string, string > | undefined
 				) => (
 					<Fragment>
 						<BaseControl
@@ -111,7 +110,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 										additionalThoughts: value,
 									} )
 								}
-								help={ values.errors?.additionalThoughts || '' }
+								help={ errors?.additionalThoughts || '' }
 							/>
 						</BaseControl>
 						<BaseControl
@@ -139,7 +138,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 								onChange={ ( value: string ) =>
 									setValues( { ...values, email: value } )
 								}
-								help={ values.errors?.email || '' }
+								help={ errors?.email || '' }
 							/>
 							<span>
 								{ __(
@@ -157,7 +156,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 					email?: string;
 					additionalThoughts?: string;
 				} ) => {
-					const errors: { [ key: string ]: string } = {};
+					const errors: Record< string, string > | undefined = {};
 					if ( email.length > 0 && ! isValidEmail( email ) ) {
 						errors.email = __(
 							'Please enter a valid email address.',

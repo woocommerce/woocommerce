@@ -49,14 +49,13 @@ export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 						getExtraFieldsToBeShown: (
 							values: {
 								email?: string;
-								additionalThoughts?: string;
-								errors?: { [ key: string ]: string };
+								additional_thoughts?: string;
 							},
 							setValues: ( value: {
 								email?: string;
-								additionalThoughts?: string;
-								errors?: { [ key: string ]: string };
-							} ) => void
+								additional_thoughts?: string;
+							} ) => void,
+							errors: Record< string, string > | undefined
 						) => (
 							<Fragment>
 								<BaseControl
@@ -81,17 +80,16 @@ export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 								>
 									<TextareaControl
 										value={
-											values.additionalThoughts || ''
+											values.additional_thoughts || ''
 										}
 										onChange={ ( value: string ) =>
 											setValues( {
 												...values,
-												additionalThoughts: value,
+												additional_thoughts: value,
 											} )
 										}
 										help={
-											values.errors?.additionalThoughts ||
-											''
+											errors?.additional_thoughts || ''
 										}
 									/>
 								</BaseControl>
@@ -123,7 +121,7 @@ export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 												email: value,
 											} )
 										}
-										help={ values.errors?.email || '' }
+										help={ errors?.email || '' }
 									/>
 									<span>
 										{ __(
@@ -136,20 +134,21 @@ export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 						),
 						validateExtraFields: ( {
 							email = '',
-							additionalThoughts = '',
+							additional_thoughts = '',
 						}: {
 							email?: string;
-							additionalThoughts?: string;
+							additional_thoughts?: string;
 						} ) => {
-							const errors: { [ key: string ]: string } = {};
+							const errors: Record< string, string > | undefined =
+								{};
 							if ( email.length > 0 && ! isValidEmail( email ) ) {
 								errors.email = __(
 									'Please enter a valid email address.',
 									'woocommerce'
 								);
 							}
-							if ( additionalThoughts?.length > 500 ) {
-								errors.additionalThoughts = __(
+							if ( additional_thoughts?.length > 500 ) {
+								errors.additional_thoughts = __(
 									'Please enter no more than 500 characters.',
 									'woocommerce'
 								);

@@ -36,7 +36,8 @@ type CustomerEffortScoreProps = {
 	) => boolean;
 	getExtraFieldsToBeShown?: (
 		extraFieldsValues: { [ key: string ]: string },
-		setExtraFieldsValues: ( values: { [ key: string ]: string } ) => void
+		setExtraFieldsValues: ( values: { [ key: string ]: string } ) => void,
+		errors: Record< string, string > | undefined
 	) => JSX.Element;
 	validateExtraFields?: ( values: { [ key: string ]: string } ) => {
 		[ key: string ]: string;
