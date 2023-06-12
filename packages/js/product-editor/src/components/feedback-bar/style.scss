@@ -47,6 +47,9 @@ $gutenberg-blue: var(--wp-admin-theme-color);
 		text-transform: uppercase;
 		color: $gray-900;
 	}
+	> .components-base-control {
+		margin-top: $gap-small;
+	}
 	.woocommerce-customer-effort-score__selection {
 		.components-radio-control__option {
 			margin-right: 0;
@@ -56,7 +59,7 @@ $gutenberg-blue: var(--wp-admin-theme-color);
 				width: 8.8em;
 				height: 80px;
 				&::before {
-					margin: 8px 0;
+					margin: $gap-smaller 0;
 				}
 				&:hover {
 					box-shadow: 0 0 0 1.5px $gutenberg-blue;
@@ -65,9 +68,6 @@ $gutenberg-blue: var(--wp-admin-theme-color);
 				}
 			}
 		}
-	}
-	.components-base-control {
-		margin-top: 10px;
 	}
 	.woocommerce-product-feedback__additional-thoughts,
 	.woocommerce-product-feedback__email {
