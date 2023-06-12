@@ -925,7 +925,7 @@ jQuery( function ( $ ) {
 	} );
 
 	// Go to attributes tab when clicking on link in variations message
-	$( document.body ).on(
+	$( '#woocommerce-product-data' ).on(
 		'click',
 		'#variable_product_options .add-attributes-message a[href="#product_attributes"]',
 		function () {
@@ -937,7 +937,7 @@ jQuery( function ( $ ) {
 	);
 
 	// Go to variations tab when clicking on link in the general tab message
-	$( document.body ).on(
+	$( '#woocommerce-product-data' ).on(
 		'click',
 		'#general_product_data .woocommerce-message a[href="#variable_product_options"]',
 		function () {
@@ -949,7 +949,7 @@ jQuery( function ( $ ) {
 	);
 
 	// Go to linked products tab when clicking on link in the general tab message
-	$( document.body ).on(
+	$( '#woocommerce-product-data' ).on(
 		'click',
 		'#general_product_data .woocommerce-message a[href="#linked_product_data"]',
 		function () {
