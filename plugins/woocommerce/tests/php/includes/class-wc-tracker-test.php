@@ -132,7 +132,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		};
 
 		$container = wc_get_container();
-		$container->get( PluginUtil::class );
+		$container->get( PluginUtil::class ); // Ensure that the class is loaded.
 		$container->reset_all_resolved();
 		$container->replace( PluginUtil::class, $pluginutil_mock );
 		$container->replace( FeaturesController::class, $featurescontroller_mock );
@@ -158,6 +158,10 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			),
 			$tracking_data['inactive_plugins']['plugin3']['feature_compatibility']
 		);
+
+		// Reset the mocked classes so they don't affect other tests.
+		$container->replace( PluginUtil::class, PluginUtil::class );
+		$container->replace( FeaturesController::class, FeaturesController::class );
 	}
 
 	/**
