@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import ServerSideRender from '@wordpress/server-side-render';
-import PropTypes from 'prop-types';
 import { Icon, listView } from '@wordpress/icons';
 import { isSiteEditorPage, isWidgetEditorPage } from '@woocommerce/utils';
 import { useSelect } from '@wordpress/data';
@@ -18,6 +17,10 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
+/**
+ * Internal dependencies
+ */
+import type { ProductCategoriesBlockProps } from './types';
 
 const EmptyPlaceholder = () => (
 	<Placeholder
@@ -43,9 +46,15 @@ const EmptyPlaceholder = () => (
  * @param {function(any):any} props.setAttributes Setter for block attributes.
  * @param {string}            props.name          Name for block.
  */
-const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
-	const editSiteStore = useSelect( 'core/edit-site' );
-	const editWidgetStore = useSelect( 'core/edit-widgets' );
+const ProductCategoriesBlock = ( {
+	attributes,
+	setAttributes,
+	name,
+}: ProductCategoriesBlockProps ) => {
+	const editSiteStore = useSelect( ( select ) => select( 'core/edit-site' ) );
+	const editWidgetStore = useSelect( ( select ) =>
+		select( 'core/edit-widgets' )
+	);
 	const isSiteEditor = isSiteEditorPage( editSiteStore );
 	const isWidgetEditor = isWidgetEditorPage( editWidgetStore );
 	const getInspectorControls = () => {
@@ -73,7 +82,7 @@ const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 							'woo-gutenberg-products-block'
 						) }
 						value={ isDropdown ? 'dropdown' : 'list' }
-						onChange={ ( value ) =>
+						onChange={ ( value: string ) =>
 							setAttributes( {
 								isDropdown: value === 'dropdown',
 							} )
@@ -193,21 +202,6 @@ const ProductCategoriesBlock = ( { attributes, setAttributes, name } ) => {
 			</Disabled>
 		</div>
 	);
-};
-
-ProductCategoriesBlock.propTypes = {
-	/**
-	 * The attributes for this block
-	 */
-	attributes: PropTypes.object.isRequired,
-	/**
-	 * The register block name.
-	 */
-	name: PropTypes.string.isRequired,
-	/**
-	 * A callback to update attributes
-	 */
-	setAttributes: PropTypes.func.isRequired,
 };
 
 export default ProductCategoriesBlock;
