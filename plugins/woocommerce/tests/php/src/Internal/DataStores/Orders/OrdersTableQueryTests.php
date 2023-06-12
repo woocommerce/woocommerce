@@ -200,7 +200,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_orders_table_query_clauses' );
 
 		// Force a query that sorts orders by id ASC (as opposed to the default date DESC) if a query arg is present.
-		$filter_callback = function( $clauses, $query, $query_args ) use ( $order1 ) {
+		$filter_callback = function( $clauses, $query, $query_args ) {
 			if ( ! empty( $query_args['my_custom_arg'] ) ) {
 				$clauses['orderby'] = $query->get_table_name( 'orders' ) . '.id ASC';
 			}
@@ -212,7 +212,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			wc_get_orders(
 				array(
-					'return' => 'ids',
+					'return'        => 'ids',
 					'my_custom_arg' => true,
 				)
 			),
@@ -224,7 +224,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			wc_get_orders(
 				array(
-					'return'        => 'ids',
+					'return' => 'ids',
 				)
 			),
 			array(
