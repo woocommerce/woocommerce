@@ -53,7 +53,7 @@ type CustomerEffortScoreProps = {
  * @param {Function} props.recordScoreCallback       Function to call when the score should be recorded.
  * @param {string}   [props.title]                   The title displayed in the modal.
  * @param {string}   props.description               The description displayed in the modal.
- * @param {string}   props.showDescription           Show description in the modal.
+ * @param {boolean}  props.showDescription           Show description in the modal.
  * @param {string}   props.noticeLabel               The notice label displayed in the notice.
  * @param {string}   props.firstQuestion             The first survey question.
  * @param {string}   [props.secondQuestion]          The second survey question.
@@ -63,8 +63,8 @@ type CustomerEffortScoreProps = {
  * @param {Function} props.onModalDismissedCallback  Function to call when modal is dismissed.
  * @param {Function} props.shouldShowComments        Callback to determine if comments section should be shown.
  * @param {Object}   props.icon                      Icon (React component) to be shown on the notice.
- * @param {Object}   props.extraFields               Function that returns the extra fields to be shown.
- * @param {Object}   props.validateExtraFields       Function that validates the extra fields.
+ * @param {Function} props.extraFields               Function that returns the extra fields to be shown.
+ * @param {Function} props.validateExtraFields       Function that validates the extra fields.
  */
 const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 	recordScoreCallback,
