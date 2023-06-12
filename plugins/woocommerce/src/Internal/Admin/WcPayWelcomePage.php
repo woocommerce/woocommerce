@@ -48,6 +48,11 @@ class WcPayWelcomePage {
 			return;
 		}
 
+		// Has processed orders.
+		if ( count( wc_get_orders( [ 'status' => [ 'wc-completed' ] ] ) ) < 1 ) {
+			return;
+		}
+
 		// Suggestions may be disabled via a setting.
 		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
 			return;
