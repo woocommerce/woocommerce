@@ -139,6 +139,7 @@ jQuery( function ( $ ) {
 			}
 
 			show_and_hide_panels();
+			disable_or_enable_fields();
 			change_product_type_tip( get_product_tip_content( select_val ) );
 
 			$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
@@ -259,6 +260,39 @@ jQuery( function ( $ ) {
 					.hide();
 			}
 		} );
+	}
+
+	function disable_or_enable_fields() {
+		var product_type = $( 'select#product-type' ).val();
+		var hasDisabledFields = true;
+		$( `.enable_if_simple` ).each( function () {
+			$( this ).addClass( 'disabled' );
+			if ( $( this ).is( 'input' ) ) {
+				$( this ).prop( 'disabled', true );
+			}
+		} );
+		$( `.enable_if_external` ).each( function () {
+			$( this ).addClass( 'disabled' );
+			if ( $( this ).is( 'input' ) ) {
+				$( this ).prop( 'disabled', true );
+			}
+		} );
+		$( `.enable_if_${ product_type }` ).each( function () {
+			hasDisabledFields = false;
+			$( this ).removeClass( 'disabled' );
+			if ( $( this ).is( 'input' ) ) {
+				$( this ).prop( 'disabled', false );
+			}
+		} );
+
+		if (
+			hasDisabledFields &&
+			! $( '#general_product_data .woocommerce-message' ).is( ':visible' )
+		) {
+			$( `.pricing_disabled_fallback_message` ).show();
+		} else {
+			$( `.pricing_disabled_fallback_message` ).hide();
+		}
 	}
 
 	// Sale price schedule.
@@ -891,7 +925,7 @@ jQuery( function ( $ ) {
 	} );
 
 	// Go to attributes tab when clicking on link in variations message
-	$( document.body ).on(
+	$( '#woocommerce-product-data' ).on(
 		'click',
 		'#variable_product_options .add-attributes-message a[href="#product_attributes"]',
 		function () {
@@ -901,6 +935,34 @@ jQuery( function ( $ ) {
 			return false;
 		}
 	);
+
+	// Go to variations tab when clicking on link in the general tab message
+	$( '#woocommerce-product-data' ).on(
+		'click',
+		'#general_product_data .woocommerce-message a[href="#variable_product_options"]',
+		function () {
+			$(
+				'#woocommerce-product-data .variations_tab a[href="#variable_product_options"]'
+			).trigger( 'click' );
+			return false;
+		}
+	);
+
+	// Go to linked products tab when clicking on link in the general tab message
+	$( '#woocommerce-product-data' ).on(
+		'click',
+		'#general_product_data .woocommerce-message a[href="#linked_product_data"]',
+		function () {
+			$(
+				'#woocommerce-product-data .linked_product_tab a[href="#linked_product_data"]'
+			).trigger( 'click' );
+			return false;
+		}
+	);
+
+
+
+
 
 	// Uploading files.
 	var downloadable_file_frame;
