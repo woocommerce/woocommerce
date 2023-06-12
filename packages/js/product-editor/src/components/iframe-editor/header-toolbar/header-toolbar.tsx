@@ -2,29 +2,37 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
+import { useViewportMatch } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import {
 	NavigableToolbar,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { plus } from '@wordpress/icons';
-import { createElement, useRef, useCallback } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	useRef,
+	useCallback,
+	useContext,
+} from '@wordpress/element';
 import { MouseEvent } from 'react';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore ToolbarItem exists in WordPress components.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { Button, ToolbarItem } from '@wordpress/components';
 
-type HeaderToolbarProps = {
-	isInserterOpened: boolean;
-	setIsInserterOpened: ( value: boolean ) => void;
-};
+/**
+ * Internal dependencies
+ */
+import { EditorContext } from '../context';
+import EditorHistoryRedo from './editor-history-redo';
+import EditorHistoryUndo from './editor-history-undo';
 
-export function HeaderToolbar( {
-	isInserterOpened,
-	setIsInserterOpened,
-}: HeaderToolbarProps ) {
-	// console.log( editPost );
+export function HeaderToolbar() {
+	const { isInserterOpened, setIsInserterOpened } =
+		useContext( EditorContext );
+	const isWideViewport = useViewportMatch( 'wide' );
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
 	const { isInserterEnabled } = useSelect( ( select ) => {
 		const {
@@ -88,6 +96,12 @@ export function HeaderToolbar( {
 					}
 					showTooltip
 				/>
+				{ isWideViewport && (
+					<>
+						<ToolbarItem as={ EditorHistoryUndo } />
+						<ToolbarItem as={ EditorHistoryRedo } />
+					</>
+				) }
 			</div>
 		</NavigableToolbar>
 	);
