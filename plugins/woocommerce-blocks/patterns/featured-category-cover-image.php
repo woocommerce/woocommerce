@@ -8,7 +8,7 @@
 <!-- wp:cover {"url":"<?php echo esc_url( plugins_url( 'images/pattern-placeholders/wood-leather-fur-shop-jeans-shelf.png', dirname( __FILE__ ) ) ); ?>","id":1,"dimRatio":0,"focalPoint":{"x":0,"y":0},"contentPosition":"top left","align":"wide","style":{"spacing":{"padding":{"top":"2em","right":"2.25em","bottom":"2.25em","left":"2.25em"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-cover alignwide has-custom-content-position is-position-top-left" style="padding-top:2em;padding-right:2.25em;padding-bottom:2.25em;padding-left:2.25em">
 	<span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span>
-	<img class="wp-block-cover__image-background wp-image-1" alt="" src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/wood-leather-fur-shop-jeans-shelf.png', dirname( __FILE__ ) ) ); ?>" style="object-position:0% 0%" data-object-fit="cover" data-object-position="0% 0%"/>
+	<img class="wp-block-cover__image-background wp-image-1" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a featured category section.', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/wood-leather-fur-shop-jeans-shelf.png', dirname( __FILE__ ) ) ); ?>" style="object-position:0% 0%" data-object-fit="cover" data-object-position="0% 0%"/>
 
 	<div class="wp-block-cover__inner-container">
 		<!-- wp:paragraph {"align":"left","placeholder":"Write title…","style":{"typography":{"lineHeight":"1.5","fontSize":"2.2em","textColor":"background"},"color":{"text":"#ffffff"},"spacing":{"margin":{"bottom":"0px","top":"0px"}}}} -->

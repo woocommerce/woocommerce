@@ -36,7 +36,7 @@
 				<!-- /wp:group -->
 			</div>
 			<figure class="wp-block-media-text__media">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/hand-guitar-finger-tshirt-clothing-rack.png', dirname( __FILE__ ) ) ); ?>" alt="" class="wp-image-3800 size-full" />
+				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/hand-guitar-finger-tshirt-clothing-rack.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-3800 size-full" />
 			</figure>
 		</div>
 		<!-- /wp:media-text -->
