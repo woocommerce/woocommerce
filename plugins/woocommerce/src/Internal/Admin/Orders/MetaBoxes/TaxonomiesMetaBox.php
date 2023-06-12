@@ -31,6 +31,10 @@ class TaxonomiesMetaBox {
 				$taxonomy->meta_box_cb = array( $this, 'order_categories_meta_box' );
 			}
 
+			if ( 'post_tags_meta_box' === $taxonomy->meta_box_cb ) {
+				$taxonomy->meta_box_cb = array( $this, 'order_tags_meta_box' );
+			}
+
 			$label = $taxonomy->labels->name;
 
 			if ( ! is_taxonomy_hierarchical( $tax_name ) ) {
@@ -181,5 +185,18 @@ class TaxonomiesMetaBox {
 	public function order_categories_meta_box( $order, $box ) {
 		$post = get_post( $order->get_id() );
 		post_categories_meta_box( $post, $box );
+	}
+
+	/**
+	 * Add the tags meta box to the order screen. This is just a wrapper around the post_tags_meta_box.
+	 *
+	 * @param \WC_Abstract_Order $order Order object.
+	 * @param array              $box   Meta box args.
+	 *
+	 * @return void
+	 */
+	public function order_tags_meta_box( $order, $box ) {
+		$post = get_post( $order->get_id() );
+		post_tags_meta_box( $post, $box );
 	}
 }
