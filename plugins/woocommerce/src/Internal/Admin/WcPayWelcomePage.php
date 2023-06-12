@@ -12,7 +12,8 @@ use Automattic\WooCommerce\Admin\WCAdminHelper;
  */
 class WcPayWelcomePage {
 
-	const EXPERIMENT_NAME = 'woocommerce_payments_menu_promo_us_2022';
+	const EXPERIMENT_NAME    = 'woocommerce_payments_menu_promo_us_2022';
+	const ELIGIBLE_COUNTRIES = array( 'US', 'ES' );
 
 	/**
 	 * WCPayWelcomePage constructor.
@@ -37,8 +38,8 @@ class WcPayWelcomePage {
 			return;
 		}
 
-		// Must be a US based business.
-		if ( WC()->countries->get_base_country() !== 'US' ) {
+		// Business country must be in the eligible ones.
+		if ( ! in_array( WC()->countries->get_base_country(), self::ELIGIBLE_COUNTRIES ) ) {
 			return;
 		}
 
