@@ -98,7 +98,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		);
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/jetpack-authoriation-url',
+			'/' . $this->rest_base . '/jetpack-authorization-url',
 			array(
 				array(
 					'methods'             => 'GET',
