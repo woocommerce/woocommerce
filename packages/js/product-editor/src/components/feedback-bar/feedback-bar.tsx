@@ -25,6 +25,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { PRODUCT_EDITOR_FEEDBACK_CES_ACTION } from '../../constants';
 import { useFeedbackBar } from '../../hooks/use-feedback-bar';
+import { isValidEmail } from '../../utils';
 
 export type FeedbackBarProps = {
 	product: Partial< Product >;
@@ -41,12 +42,6 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 		};
 
 		return tracksProps;
-	};
-
-	const isValidEmail = ( email: string ) => {
-		const re =
-			/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-		return re.test( String( email ).toLowerCase() );
 	};
 
 	const onShareFeedbackClick = () => {
