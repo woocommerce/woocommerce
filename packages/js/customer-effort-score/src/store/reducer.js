@@ -34,7 +34,8 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				onSubmitNoticeProps: action.onSubmitNoticeProps || {},
 				props: action.props,
 				tracksProps: action.tracksProps,
-				extraFields: action.surveyProps.extraFields,
+				getExtraFieldsToBeShown:
+					action.surveyProps.getExtraFieldsToBeShown,
 				validateExtraFields: action.surveyProps.validateExtraFields,
 			};
 			return {

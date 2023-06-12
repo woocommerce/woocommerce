@@ -90,7 +90,9 @@ export const CustomerEffortScoreModalContainer: React.FC = () => {
 				hideCesModal();
 			} }
 			shouldShowComments={ visibleCESModalData.props?.shouldShowComments }
-			extraFields={ visibleCESModalData.extraFields }
+			getExtraFieldsToBeShown={
+				visibleCESModalData.getExtraFieldsToBeShown
+			}
 			validateExtraFields={ visibleCESModalData.validateExtraFields }
 		/>
 	);

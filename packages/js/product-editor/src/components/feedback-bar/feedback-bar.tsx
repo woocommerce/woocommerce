@@ -70,7 +70,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 					'woocommerce'
 				),
 				shouldShowComments: () => false,
-				extraFields: (
+				getExtraFieldsToBeShown: (
 					values: {
 						email?: string;
 						additionalThoughts?: string;

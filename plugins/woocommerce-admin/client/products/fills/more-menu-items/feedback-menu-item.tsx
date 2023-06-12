@@ -46,7 +46,7 @@ export const FeedbackMenuItem = ( { onClose }: { onClose: () => void } ) => {
 							"The product editing screen's functionality meets my needs",
 							'woocommerce'
 						),
-						extraFields: (
+						getExtraFieldsToBeShown: (
 							values: {
 								email?: string;
 								additionalThoughts?: string;

@@ -23,19 +23,19 @@ import { __ } from '@wordpress/i18n';
  *
  * Upon completion, the score and comments is sent to a callback function.
  *
- * @param {Object}   props                     Component props.
- * @param {Function} props.recordScoreCallback Function to call when the results are sent.
- * @param {string}   props.title               Title displayed in the modal.
- * @param {string}   props.description         Description displayed in the modal.
- * @param {boolean}  props.showDescription     Show description in the modal.
- * @param {string}   props.firstQuestion       The first survey question.
- * @param {string}   [props.secondQuestion]    An optional second survey question.
- * @param {string}   props.defaultScore        Default score.
- * @param {Function} props.onCloseModal        Callback for when user closes modal by clicking cancel.
- * @param {Function} props.customOptions       List of custom score options, contains label and value.
- * @param {Function} props.shouldShowComments  A function to determine whether or not the comments field shown be shown.
- * @param {Function} props.extraFields         Function that returns the extra fields to be shown.
- * @param {Function} props.validateExtraFields Function that validates the extra fields.
+ * @param {Object}   props                         Component props.
+ * @param {Function} props.recordScoreCallback     Function to call when the results are sent.
+ * @param {string}   props.title                   Title displayed in the modal.
+ * @param {string}   props.description             Description displayed in the modal.
+ * @param {boolean}  props.showDescription         Show description in the modal.
+ * @param {string}   props.firstQuestion           The first survey question.
+ * @param {string}   [props.secondQuestion]        An optional second survey question.
+ * @param {string}   props.defaultScore            Default score.
+ * @param {Function} props.onCloseModal            Callback for when user closes modal by clicking cancel.
+ * @param {Function} props.customOptions           List of custom score options, contains label and value.
+ * @param {Function} props.shouldShowComments      A function to determine whether or not the comments field shown be shown.
+ * @param {Function} props.getExtraFieldsToBeShown Function that returns the extra fields to be shown.
+ * @param {Function} props.validateExtraFields     Function that validates the extra fields.
  */
 function CustomerFeedbackModal( {
 	recordScoreCallback,
@@ -51,7 +51,7 @@ function CustomerFeedbackModal( {
 		[ firstQuestionScore, secondQuestionScore ].some(
 			( score ) => score === 1 || score === 2
 		),
-	extraFields,
+	getExtraFieldsToBeShown,
 	validateExtraFields,
 }: {
 	recordScoreCallback: (
@@ -72,7 +72,7 @@ function CustomerFeedbackModal( {
 		firstQuestionScore: number,
 		secondQuestionScore: number
 	) => boolean;
-	extraFields?: (
+	getExtraFieldsToBeShown?: (
 		extraFieldsValues: { [ key: string ]: string },
 		setExtraFieldsValues: ( values: { [ key: string ]: string } ) => void
 	) => JSX.Element;
@@ -278,8 +278,11 @@ function CustomerFeedbackModal( {
 				</div>
 			) }
 
-			{ typeof extraFields === 'function' &&
-				extraFields( extraFieldsValues, setExtraFieldsValues ) }
+			{ typeof getExtraFieldsToBeShown === 'function' &&
+				getExtraFieldsToBeShown(
+					extraFieldsValues,
+					setExtraFieldsValues
+				) }
 
 			<div className="woocommerce-customer-effort-score__buttons">
 				<Button isTertiary onClick={ closeModal } name="cancel">
@@ -300,7 +303,7 @@ CustomerFeedbackModal.propTypes = {
 	secondQuestion: PropTypes.string,
 	defaultScore: PropTypes.number,
 	onCloseModal: PropTypes.func,
-	extraFields: PropTypes.func,
+	getExtraFieldsToBeShown: PropTypes.func,
 	validateExtraFields: PropTypes.func,
 };
 

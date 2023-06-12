@@ -34,7 +34,7 @@ type CustomerEffortScoreProps = {
 		firstQuestionScore: number,
 		secondQuestionScore: number
 	) => boolean;
-	extraFields?: (
+	getExtraFieldsToBeShown?: (
 		extraFieldsValues: { [ key: string ]: string },
 		setExtraFieldsValues: ( values: { [ key: string ]: string } ) => void
 	) => JSX.Element;
@@ -63,7 +63,7 @@ type CustomerEffortScoreProps = {
  * @param {Function} props.onModalDismissedCallback  Function to call when modal is dismissed.
  * @param {Function} props.shouldShowComments        Callback to determine if comments section should be shown.
  * @param {Object}   props.icon                      Icon (React component) to be shown on the notice.
- * @param {Function} props.extraFields               Function that returns the extra fields to be shown.
+ * @param {Function} props.getExtraFieldsToBeShown   Function that returns the extra fields to be shown.
  * @param {Function} props.validateExtraFields       Function that validates the extra fields.
  */
 const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
@@ -83,7 +83,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 		[ firstQuestionScore, secondQuestionScore ].some(
 			( score ) => score === 1 || score === 2
 		),
-	extraFields,
+	getExtraFieldsToBeShown,
 	validateExtraFields,
 } ) => {
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
@@ -133,7 +133,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 			recordScoreCallback={ recordScoreCallback }
 			onCloseModal={ onModalDismissedCallback }
 			shouldShowComments={ shouldShowComments }
-			extraFields={ extraFields }
+			getExtraFieldsToBeShown={ getExtraFieldsToBeShown }
 			validateExtraFields={ validateExtraFields }
 		/>
 	);
