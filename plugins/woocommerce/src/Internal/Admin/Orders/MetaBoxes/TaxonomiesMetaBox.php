@@ -2,10 +2,30 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+
 /**
  * TaxonomiesMetaBox class, renders taxonomy sidebar widget on order edit screen.
  */
 class TaxonomiesMetaBox {
+
+	/**
+	 * Order Table data store class.
+	 *
+	 * @var OrdersTableDataStore
+	 */
+	private $orders_table_data_store;
+
+	/**
+	 * Dependency injection init method.
+	 *
+	 * @param OrdersTableDataStore $orders_table_data_store Order Table data store class.
+	 *
+	 * @return void
+	 */
+	public function init( OrdersTableDataStore $orders_table_data_store ) {
+		$this->orders_table_data_store = $orders_table_data_store;
+	}
 
 	/**
 	 * Registers meta boxes to be rendered in order edit screen for taxonomies.
@@ -71,8 +91,8 @@ class TaxonomiesMetaBox {
 
 		$sanitized_tax_input = $this->sanitize_tax_input( $taxonomy_input );
 
-		$this->set_default_taxonomies( $order, $sanitized_tax_input );
-		$this->set_custom_taxonomies( $order, $sanitized_tax_input );
+		$sanitized_tax_input = $this->orders_table_data_store->init_default_taxonomies( $order, $sanitized_tax_input );
+		$this->orders_table_data_store->set_custom_taxonomies( $order, $sanitized_tax_input );
 	}
 
 	/**
@@ -97,81 +117,6 @@ class TaxonomiesMetaBox {
 		}
 
 		return $sanitized_tax_input;
-	}
-
-	/**
-	 * Set default taxonomies for the order.
-	 *
-	 * Note: This is re-implementation of part of WP core's `wp_insert_post` function. Since the code block that set default taxonomies is not filterable, we have to re-implement it.
-	 *
-	 * @param \WC_Abstract_Order $order               Order object.
-	 * @param array              $sanitized_tax_input Sanitized taxonomy input.
-	 *
-	 * @return void
-	 */
-	private function set_default_taxonomies( \WC_Abstract_Order $order, array $sanitized_tax_input ) {
-		if ( 'auto-draft' === $order->get_status() ) {
-			return;
-		}
-
-		foreach ( get_object_taxonomies( $order->get_type(), 'object' ) as $taxonomy => $tax_object ) {
-			if ( empty( $tax_object->default_term ) ) {
-				return;
-			}
-
-			// Filter out empty terms.
-			if ( isset( $sanitized_tax_input[ $taxonomy ] ) && is_array( $sanitized_tax_input[ $taxonomy ] ) ) {
-				$sanitized_tax_input[ $taxonomy ] = array_filter( $sanitized_tax_input[ $taxonomy ] );
-			}
-
-			// Passed custom taxonomy list overwrites the existing list if not empty.
-			$terms = wp_get_object_terms( $order->get_id(), $taxonomy, array( 'fields' => 'ids' ) );
-			if ( ! empty( $terms ) && empty( $sanitized_tax_input[ $taxonomy ] ) ) {
-				$sanitized_tax_input[ $taxonomy ] = $terms;
-			}
-
-			if ( empty( $sanitized_tax_input[ $taxonomy ] ) ) {
-				$default_term_id = get_option( 'default_term_' . $taxonomy );
-				if ( ! empty( $default_term_id ) ) {
-					$sanitized_tax_input[ $taxonomy ] = array( (int) $default_term_id );
-				}
-			}
-		}
-	}
-
-	/**
-	 * Set custom taxonomies for the order.
-	 *
-	 * Note: This is re-implementation of part of WP core's `wp_insert_post` function. Since the code block that set custom taxonomies is not filterable, we have to re-implement it.
-	 *
-	 * @param \WC_Abstract_Order $order               Order object.
-	 * @param array              $sanitized_tax_input Sanitized taxonomy input.
-	 *
-	 * @return void
-	 */
-	private function set_custom_taxonomies( \WC_Abstract_Order $order, array $sanitized_tax_input ) {
-		if ( empty( $sanitized_tax_input ) ) {
-			return;
-		}
-
-		foreach ( $sanitized_tax_input as $taxonomy => $tags ) {
-			$taxonomy_obj = get_taxonomy( $taxonomy );
-
-			if ( ! $taxonomy_obj ) {
-				/* translators: %s: Taxonomy name. */
-				_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Invalid taxonomy: %s.', 'woocommerce' ), $taxonomy ) ), '7.9.0' );
-				continue;
-			}
-
-			// array = hierarchical, string = non-hierarchical.
-			if ( is_array( $tags ) ) {
-				$tags = array_filter( $tags );
-			}
-
-			if ( current_user_can( $taxonomy_obj->cap->assign_terms ) ) {
-				wp_set_post_terms( $order->get_id(), $tags, $taxonomy );
-			}
-		}
 	}
 
 	/**

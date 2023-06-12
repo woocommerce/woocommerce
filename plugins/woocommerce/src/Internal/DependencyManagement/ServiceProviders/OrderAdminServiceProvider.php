@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
 /**
@@ -43,6 +44,6 @@ class OrderAdminServiceProvider extends AbstractServiceProvider {
 		$this->share( Edit::class )->addArgument( PageController::class );
 		$this->share( ListTable::class )->addArgument( PageController::class );
 		$this->share( EditLock::class );
-		$this->share( TaxonomiesMetaBox::class );
+		$this->share( TaxonomiesMetaBox::class )->addArgument( OrdersTableDataStore::class );
 	}
 }
