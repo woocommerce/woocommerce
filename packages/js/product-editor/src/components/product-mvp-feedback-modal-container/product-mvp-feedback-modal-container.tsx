@@ -41,11 +41,16 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 				`post-new.php?post_type=product&product_block_editor=0&_feature_nonce=${ _feature_nonce }`
 		  );
 
-	const recordScore = ( checked: string[], comments: string ) => {
+	const recordScore = (
+		checked: string[],
+		comments: string,
+		email: string
+	) => {
 		recordEvent( 'product_mvp_feedback', {
 			action: 'disable',
 			checked,
 			comments: comments || '',
+			email,
 		} );
 		hideProductMVPFeedbackModal();
 		window.location.href = `${ classicEditorUrl }&new-product-experience-disabled=true`;
