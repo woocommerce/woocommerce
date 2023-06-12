@@ -5,6 +5,7 @@ import { Pill, TourKit } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect, useState } from '@wordpress/element';
+import { __experimentalUseFeedbackBar as useFeedbackBar } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
@@ -27,6 +28,8 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 
 	const [ isGuideOpen, setIsGuideOpen ] = useState( false );
 
+	const { maybeShowFeedbackBar } = useFeedbackBar();
+
 	const openGuide = () => {
 		setIsGuideOpen( true );
 	};
@@ -34,6 +37,7 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 	const closeGuide = () => {
 		recordEvent( 'block_product_editor_spotlight_completed' );
 		setIsGuideOpen( false );
+		maybeShowFeedbackBar();
 	};
 
 	if ( isGuideOpen ) {
@@ -88,6 +92,7 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 							recordEvent(
 								'block_product_editor_spotlight_dismissed'
 							);
+							maybeShowFeedbackBar();
 						}
 					},
 					options: {
