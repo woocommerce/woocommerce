@@ -7,6 +7,7 @@ import {
 	getBlockType,
 	registerBlockType,
 	unregisterBlockType,
+	parse,
 } from '@wordpress/blocks';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
@@ -18,10 +19,17 @@ import {
 import { Button, Placeholder, Popover } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { box, Icon } from '@wordpress/icons';
-import { useDispatch, subscribe, useSelect, select } from '@wordpress/data';
+import {
+	useDispatch,
+	subscribe,
+	useSelect,
+	select,
+	dispatch,
+} from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 import { useEntityRecord } from '@wordpress/core-data';
+import { debounce } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -333,6 +341,44 @@ const registerClassicTemplateBlock = ( {
 	} );
 };
 
+/**
+ * Attempts to recover the Classic Template block if it fails to render on the Single Product template
+ * due to the user resetting customizations without refreshing the page.
+ *
+ * When the Classic Template block fails to render, it is replaced by the 'core/missing' block, which
+ * displays an error message stating that the WooCommerce Classic template block is unsupported.
+ *
+ * This function replaces the 'core/missing' block with the original Classic Template block that failed
+ * to render, allowing the block to be displayed correctly.
+ *
+ * @see {@link https://github.com/woocommerce/woocommerce-blocks/issues/9637|Issue: Block error is displayed on clearing customizations for Woo Templates}
+ *
+ */
+const tryToRecoverClassicTemplateBlockWhenItFailsToRender = debounce( () => {
+	const blocks = select( 'core/block-editor' ).getBlocks();
+	const blocksIncludingInnerBlocks = blocks.flatMap( ( block ) => [
+		block,
+		...block.innerBlocks,
+	] );
+	const classicTemplateThatFailedToRender = blocksIncludingInnerBlocks.find(
+		( block ) =>
+			block.name === 'core/missing' &&
+			block.attributes.originalName === BLOCK_SLUG
+	);
+
+	if ( classicTemplateThatFailedToRender ) {
+		const blockToReplaceClassicTemplateBlockThatFailedToRender = parse(
+			classicTemplateThatFailedToRender.attributes.originalContent
+		);
+		if ( blockToReplaceClassicTemplateBlockThatFailedToRender ) {
+			dispatch( 'core/block-editor' ).replaceBlock(
+				classicTemplateThatFailedToRender.clientId,
+				blockToReplaceClassicTemplateBlockThatFailedToRender
+			);
+		}
+	}
+}, 100 );
+
 // @todo Refactor when there will be possible to show a block according on a template/post with a Gutenberg API. https://github.com/WordPress/gutenberg/pull/41718
 
 let currentTemplateId: string | undefined;
@@ -341,11 +387,6 @@ subscribe( () => {
 	const previousTemplateId = currentTemplateId;
 	const store = select( 'core/edit-site' );
 	currentTemplateId = store?.getEditedPostId() as string | undefined;
-
-	if ( previousTemplateId === currentTemplateId ) {
-		return;
-	}
-
 	const parsedTemplate = currentTemplateId?.split( '//' )[ 1 ];
 
 	if ( parsedTemplate === null || parsedTemplate === undefined ) {
@@ -353,9 +394,21 @@ subscribe( () => {
 	}
 
 	const block = getBlockType( BLOCK_SLUG );
+	const isBlockRegistered = Boolean( block );
 
 	if (
-		block !== undefined &&
+		isBlockRegistered &&
+		hasTemplateSupportForClassicTemplateBlock( parsedTemplate, TEMPLATES )
+	) {
+		tryToRecoverClassicTemplateBlockWhenItFailsToRender();
+	}
+
+	if ( previousTemplateId === currentTemplateId ) {
+		return;
+	}
+
+	if (
+		isBlockRegistered &&
 		( ! hasTemplateSupportForClassicTemplateBlock(
 			parsedTemplate,
 			TEMPLATES
@@ -371,7 +424,7 @@ subscribe( () => {
 	}
 
 	if (
-		block === undefined &&
+		! isBlockRegistered &&
 		hasTemplateSupportForClassicTemplateBlock( parsedTemplate, TEMPLATES )
 	) {
 		registerClassicTemplateBlock( {
@@ -379,4 +432,4 @@ subscribe( () => {
 			inserter: true,
 		} );
 	}
-} );
+}, 'core/blocks-editor' );
