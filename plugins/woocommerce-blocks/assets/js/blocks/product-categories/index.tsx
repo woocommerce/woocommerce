@@ -11,6 +11,7 @@ import './editor.scss';
 import metadata from './block.json';
 import './style.scss';
 import { Edit } from './edit';
+import type { ProductCategoriesIndexProps } from './types';
 
 registerBlockType( metadata, {
 	icon: {
@@ -27,7 +28,10 @@ registerBlockType( metadata, {
 				type: 'block',
 				blocks: [ 'core/legacy-widget' ],
 				// We can't transform if raw instance isn't shown in the REST API.
-				isMatch: ( { idBase, instance } ) =>
+				isMatch: ( {
+					idBase,
+					instance,
+				}: ProductCategoriesIndexProps ) =>
 					idBase === 'woocommerce_product_categories' &&
 					!! instance?.raw,
 				transform: ( { instance } ) =>
@@ -77,10 +81,10 @@ registerBlockType( metadata, {
 			migrate( attributes ) {
 				return attributes;
 			},
-			save( props ) {
+			save( props: ProductCategoriesIndexProps ) {
 				const { hasCount, hasEmpty, isDropdown, isHierarchical } =
-					props.attributes;
-				const data = {};
+					props;
+				const data: { [ key: string ]: boolean } = {};
 				if ( hasCount ) {
 					data[ 'data-has-count' ] = true;
 				}
