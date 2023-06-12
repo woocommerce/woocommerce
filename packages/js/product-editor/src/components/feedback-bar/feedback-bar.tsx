@@ -73,11 +73,11 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 				getExtraFieldsToBeShown: (
 					values: {
 						email?: string;
-						additionalThoughts?: string;
+						additional_thoughts?: string;
 					},
 					setValues: ( value: {
 						email?: string;
-						additionalThoughts?: string;
+						additional_thoughts?: string;
 					} ) => void,
 					errors: Record< string, string > | undefined
 				) => (
@@ -103,14 +103,14 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 							) }
 						>
 							<TextareaControl
-								value={ values.additionalThoughts || '' }
+								value={ values.additional_thoughts || '' }
 								onChange={ ( value: string ) =>
 									setValues( {
 										...values,
-										additionalThoughts: value,
+										additional_thoughts: value,
 									} )
 								}
-								help={ errors?.additionalThoughts || '' }
+								help={ errors?.additional_thoughts || '' }
 							/>
 						</BaseControl>
 						<BaseControl
@@ -151,10 +151,10 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 				),
 				validateExtraFields: ( {
 					email = '',
-					additionalThoughts = '',
+					additional_thoughts = '',
 				}: {
 					email?: string;
-					additionalThoughts?: string;
+					additional_thoughts?: string;
 				} ) => {
 					const errors: Record< string, string > | undefined = {};
 					if ( email.length > 0 && ! isValidEmail( email ) ) {
@@ -163,8 +163,8 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 							'woocommerce'
 						);
 					}
-					if ( additionalThoughts?.length > 500 ) {
-						errors.additionalThoughts = __(
+					if ( additional_thoughts?.length > 500 ) {
+						errors.additional_thoughts = __(
 							'Please enter no more than 500 characters.',
 							'woocommerce'
 						);
