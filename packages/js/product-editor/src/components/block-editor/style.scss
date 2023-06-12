@@ -26,6 +26,20 @@
 		text-decoration: none;
 	}
 
+	/*
+	 * Override default block margins and layout applied for themes without a theme.json file.
+	 *
+	 * If we no longer call `is_block_editor( true )` in the future for the product editor,
+	 * we can remove this.
+	 *
+	 * See: `wp_add_editor_classic_theme_styles()`
+	 */
+	:where(.wp-block) {
+		margin-bottom: 0;
+		margin-top: 0;
+		max-width: unset;
+	}
+
 	.has-error {
 		.components-base-control {
 			margin-bottom: 0;
