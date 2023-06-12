@@ -11,7 +11,7 @@
 	<div class="wp-block-column" style="padding-top:0;padding-right:40px;padding-bottom:0;padding-left:0px">
 		<!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
 		<figure class="wp-block-image size-full">
-			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-home-living-room-furniture-room.png', dirname( __FILE__ ) ) ); ?>" alt="" class="wp-image-1"/>
+			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-home-living-room-furniture-room.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a product details banner. 1 out of 3.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1"/>
 		</figure>
 		<!-- /wp:image -->
 
@@ -21,7 +21,7 @@
 			<div class="wp-block-column" style="padding-top:0px;padding-right:5px;padding-bottom:0px;padding-left:0px;">
 				<!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
 				<figure class="wp-block-image size-full">
-					<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-white-chair-floor-shelf-lamp-square-lg.png', dirname( __FILE__ ) ) ); ?>" alt="" class="wp-image-1"/>
+					<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-white-chair-floor-shelf-lamp-square-lg.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a product details banner. 2 out of 3.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1"/>
 				</figure>
 				<!-- /wp:image --></div>
 			<!-- /wp:column -->
@@ -30,7 +30,7 @@
 			<div class="wp-block-column" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0;">
 				<!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
 				<figure class="wp-block-image size-full">
-					<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png', dirname( __FILE__ ) ) ); ?>" alt="" class="wp-image-1"/>
+					<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a product details banner. 3 out of 3.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1"/>
 				</figure>
 				<!-- /wp:image --></div>
 			<!-- /wp:column --></div>

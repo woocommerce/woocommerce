@@ -18,19 +18,19 @@
 				<div class="wp-block-group">
 					<!-- wp:image {"sizeSlug":"thumbnail","linkDestination":"none","style":{"border":{"color":"#dddddd","width":"1px","radius":"5px"}},"className":"is-resized"} -->
 					<figure class="wp-block-image size-thumbnail has-custom-border is-resized">
-						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/desk-table-wood-chair-floor-home-square.png', dirname( __FILE__ ) ) ); ?>" alt="" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
+						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/desk-table-wood-chair-floor-home-square.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a product gallery. Secondary image - 1 out of 3.', 'woo-gutenberg-products-block' ); ?>" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
 					</figure>
 					<!-- /wp:image -->
 
 					<!-- wp:image {"sizeSlug":"thumbnail","linkDestination":"none","style":{"border":{"color":"#dddddd","width":"1px","radius":"5px"}},"className":"is-resized"} -->
 					<figure class="wp-block-image size-thumbnail has-custom-border is-resized">
-						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square.png', dirname( __FILE__ ) ) ); ?>" alt="" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
+						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a product gallery. Secondary image - 2 out of 3.', 'woo-gutenberg-products-block' ); ?>" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
 					</figure>
 					<!-- /wp:image -->
 
 					<!-- wp:image {"sizeSlug":"thumbnail","linkDestination":"none","style":{"border":{"color":"#dddddd","width":"1px","radius":"5px"}},"className":"is-resized"} -->
 					<figure class="wp-block-image size-thumbnail has-custom-border is-resized">
-						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-home-living-room-furniture-room-square.png', dirname( __FILE__ ) ) ); ?>" alt="" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
+						<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-home-living-room-furniture-room-square.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a product gallery. Secondary image - 3 out of 3.', 'woo-gutenberg-products-block' ); ?>" class="has-border-color" style="border-color:#dddddd;border-width:1px;border-radius:5px"/>
 					</figure>
 					<!-- /wp:image -->
 				</div>
@@ -42,7 +42,7 @@
 			<div class="wp-block-column" style="flex-basis:85%">
 				<!-- wp:image {"sizeSlug":"full","linkDestination":"none"} -->
 				<figure class="wp-block-image size-full">
-					<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-wood-chair-floor-living-room-furniture-vertical.png', dirname( __FILE__ ) ) ); ?>" alt=""/>
+					<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-wood-chair-floor-living-room-furniture-vertical.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a product gallery as a main image', 'woo-gutenberg-products-block' ); ?>"/>
 				</figure>
 				<!-- /wp:image -->
 			</div>

@@ -25,7 +25,7 @@
 	</div>
 
 	<figure class="wp-block-media-text__media">
-		<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/pattern-fashion-clothing-outerwear-wool-scarf.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Woman in red, black, and white plaid hoodie.', 'woo-gutenberg-products-block' ); ?>" />
+		<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/pattern-fashion-clothing-outerwear-wool-scarf.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" />
 	</figure>
 </div>
 <!-- /wp:media-text -->
