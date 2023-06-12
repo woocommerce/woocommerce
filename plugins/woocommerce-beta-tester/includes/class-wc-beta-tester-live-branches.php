@@ -23,9 +23,7 @@ class WC_Beta_Tester_Live_Branches {
 	 * Register live branches scripts.
 	 */
 	public function register_scripts() {
-		if ( ! method_exists( 'Automattic\WooCommerce\Admin\PageController', 'is_admin_or_embed_page' ) ||
-			! \Automattic\WooCommerce\Admin\PageController::is_admin_or_embed_page()
-		) {
+		if ( ! is_admin() ) {
 			return;
 		}
 
@@ -44,6 +42,7 @@ class WC_Beta_Tester_Live_Branches {
 			$script_url,
 			$script_asset['dependencies'],
 			$script_asset['version'],
+			true
 		);
 
 		wp_enqueue_script( 'woocommerce-beta-tester-live-branches' );
