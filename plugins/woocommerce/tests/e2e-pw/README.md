@@ -76,11 +76,14 @@ In order to execute the tests against a site that has its language setting chang
    ```bash
     # Run tests against a site with Spanish language 
     export LANGUAGE=es_ES
-    pnpm test:e2e-pw #or use any of the ways mentioned previously in 'Other ways of running tests'
+    pnpm test:e2e-pw # or use any of the ways mentioned previously in 'Other ways of running tests'
 ```
 Currently, the tests can be executed against a site using one of the following languages:
+- ar_AR (Arabic/العربية)
+- en_GB (English UK)
 - en_US (English US)
-- es_ES (Spanish/Espanol).
+- es_ES (Spanish/Espanol)
+- fr_FR (French/Français)
 
 If no LANGUAGE parameter is specified then the tests will execute using the default en_US translations.
 

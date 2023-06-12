@@ -290,8 +290,9 @@ test.describe( 'Grouped Product Page', () => {
 		await page.fill( 'div.quantity input.qty >> nth=0', '5' );
 		await page.fill( 'div.quantity input.qty >> nth=1', '5' );
 		await page.click( `text=${getTranslationFor('Add to cart')}` );
+
 		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			`${getTranslationFor('Product Left Surround/Quotes')}${ simpleProduct1 }${getTranslationFor('Product Right Surround/Quotes')} ${getTranslationFor('and')} ${getTranslationFor('Product Left Surround/Quotes')}${ simpleProduct2 }${getTranslationFor('Product Right Surround/Quotes')} ${getTranslationFor('have been added to your cart.')}`
+			getTranslationFor('expectedGroupProductsAddedMessage')
 		);
 
 		await page.goto( 'cart/' );

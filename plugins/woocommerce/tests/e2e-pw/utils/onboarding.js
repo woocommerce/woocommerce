@@ -111,6 +111,12 @@ const onboarding = {
 		Object.keys( products ).forEach( async ( product ) => {
 			await page.click( `label >> text=${ products[ product ] }` );
 		} );
+
+		// Handle RTL differently as data within objects
+		if (LANGUAGE === 'ar_AR') {
+			await page.getByLabel('المنتجات المادية').check();
+			await page.getByLabel('التنزيلات').check();
+		}
 	},
 
 	completeBusinessDetailsSection: async ( page ) => {

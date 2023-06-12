@@ -1,4 +1,8 @@
 const es_ES = {
+    '5 × 10 × 10 cm': '5 × 10 × 10 cm',
+    '20 × 40 × 30 cm': '20 × 40 × 30 cm',
+    '100 kg': '100 kg',
+    '400 kg': '400 kg',
     'Account details': 'Detalles de la cuenta',
     '"Account name"': '"Nombre de la cuenta"',
     '"Account number"': '"Número de cuenta"',
@@ -50,7 +54,8 @@ const es_ES = {
         'El código de cupón se ha aplicado correctamente.',
     'Custom base': 'Base personalizada',
     'Customer payment page →': 'Página de pago del cliente →',
-    'Dashboard': 'Escritorio',
+    'Dashboard_WC': 'Escritorio',
+    'Dashboard_WP': 'Escritorio',
     'Direct bank transfer details added successfully':
         'Detalles para transferencia bancaria directa añadidos correctamente',
     'Discard': 'Descartar',
@@ -64,6 +69,7 @@ const es_ES = {
     'Enter options for customers to choose from':
         'Introduce las opciones entre las que podrán elegir los clientes',
     '/Everywhere.*/': /En todas partes.*/,
+    'expectedGroupProductsAddedMessage': '“Simple single product 1” y “Simple single product 2” han sido añadidos a tu carrito.',
     'Fancy rates': 'Tarifas Fancy',
     '"Fancy rates"': '"Tarifas Fancy"',
     'f.e. size or color': 'por ejemplo, la talla o el color',

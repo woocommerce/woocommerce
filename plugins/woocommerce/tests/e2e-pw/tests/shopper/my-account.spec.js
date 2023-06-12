@@ -19,7 +19,7 @@ test.describe( 'My account page', () => {
 		// assert that navigation is visible
 		await expect(
 			page.locator( '.woocommerce-MyAccount-navigation-link--dashboard' )
-		).toContainText( getTranslationFor('Dashboard') );
+		).toContainText( getTranslationFor('Dashboard_WC') );
 		await expect(
 			page.locator( '.woocommerce-MyAccount-navigation-link--orders' )
 		).toContainText( getTranslationFor('Orders') );

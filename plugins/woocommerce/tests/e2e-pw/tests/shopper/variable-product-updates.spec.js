@@ -186,10 +186,10 @@ test.describe( 'Shopper > Update variable product', () => {
 		).toContainText( productPrice );
 		await expect(
 			page.locator( '.woocommerce-product-attributes-item--weight' )
-		).toContainText( '100 kg' );
+		).toContainText( getTranslationFor('100 kg') );
 		await expect(
 			page.locator( '.woocommerce-product-attributes-item--dimensions' )
-		).toContainText( '5 × 10 × 10 cm' );
+		).toContainText( getTranslationFor('5 × 10 × 10 cm') );
 
 		await page.selectOption( '#size', 'XLarge' );
 		await expect(
@@ -197,10 +197,10 @@ test.describe( 'Shopper > Update variable product', () => {
 		).toContainText( ( +productPrice * 2 ).toString() );
 		await expect(
 			page.locator( '.woocommerce-product-attributes-item--weight' )
-		).toContainText( '400 kg' );
+		).toContainText( getTranslationFor('400 kg') );
 		await expect(
 			page.locator( '.woocommerce-product-attributes-item--dimensions' )
-		).toContainText( '20 × 40 × 30 cm' );
+		).toContainText( getTranslationFor('20 × 40 × 30 cm') );
 	} );
 
 	test( 'Shopper can change variable product attributes to variation with a different price', async ( {

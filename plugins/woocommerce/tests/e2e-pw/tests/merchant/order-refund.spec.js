@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { getTranslationFor } = require( './../../test-data/data' );
+const {	LANGUAGE } = process.env;
 
 test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 	let productId, orderId, currencySymbol;
@@ -82,11 +83,18 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 			'9.99'
 		);
 		await expect( page.locator( '#refund_amount' ) ).toHaveValue( '9.99' );
-		await expect( page.locator( '.do-manual-refund' ) ).toContainText(
-			`${ getTranslationFor('Refund') } ${ currencySymbol }9.99 ${
-				getTranslationFor('manually')
-			}`
-		);
+
+		if (LANGUAGE === 'ar_AR') {
+			await expect( page.locator( '.do-manual-refund' ) ).toContainText(
+				'مبلغ مُستردّ $9.99 يدويًا'
+			);
+		} else {
+			await expect( page.locator( '.do-manual-refund' ) ).toContainText(
+				`${ getTranslationFor('Refund') } ${ currencySymbol }9.99 ${
+					getTranslationFor('manually')
+				}`
+			);
+		}
 
 		// Do the refund
 		page.on( 'dialog', ( dialog ) => dialog.accept() );

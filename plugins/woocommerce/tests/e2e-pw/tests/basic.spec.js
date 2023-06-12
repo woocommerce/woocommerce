@@ -19,7 +19,7 @@ test.describe(
 			test( 'Load wp-admin', async ( { page } ) => {
 				await page.goto( '/wp-admin' );
 				const title = page.locator( 'div.wrap > h1' );
-				await expect( title ).toHaveText( `${getTranslationFor('Dashboard')}` );
+				await expect( title ).toHaveText( `${getTranslationFor('Dashboard_WP')}` );
 			} );
 		} );
 

@@ -65,7 +65,7 @@ module.exports = async ( config ) => {
 			await adminPage.waitForLoadState( 'domcontentloaded' );
 
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
-				`${getTranslationFor('Dashboard')}`
+				`${getTranslationFor('Dashboard_WP')}`
 			);
 			await adminPage
 				.context()

@@ -1,4 +1,8 @@
 const en_US = {
+    '5 × 10 × 10 cm': '5 × 10 × 10 cm',
+    '20 × 40 × 30 cm': '20 × 40 × 30 cm',
+    '100 kg': '100 kg',
+    '400 kg': '400 kg',
     'Account details': 'Account details',
     '"Account name"': '"Account name"',
     '"Account number"': '"Account number"',
@@ -49,7 +53,8 @@ const en_US = {
     'Coupon code applied successfully.': 'Coupon code applied successfully.',
     'Custom base': 'Custom base',
     'Customer payment page →': 'Customer payment page →',
-    'Dashboard': 'Dashboard',
+    'Dashboard_WC': 'Dashboard',
+    'Dashboard_WP': 'Dashboard',
     'Direct bank transfer details added successfully':
         'Direct bank transfer details added successfully',
     'Downloadable products': 'Downloadable products',
@@ -63,6 +68,7 @@ const en_US = {
     'Enter options for customers to choose from':
         'Enter options for customers to choose from',
     '/Everywhere.*/': /Everywhere.*/,
+    'expectedGroupProductsAddedMessage': '“Simple single product 1” and “Simple single product 2” have been added to your cart.',
     'Fancy rates': 'Fancy rates',
     '"Fancy rates"': '"Fancy rates"',
     'Fashion, apparel, and accessories': 'Fashion, apparel, and accessories',
