@@ -108,6 +108,7 @@ function Guide( {
 							className="components-guide__finish-button"
 							href={ finishButtonLink }
 							target={ finishButtonLink ? '_blank' : undefined }
+							rel={ finishButtonLink ? 'noopener' : undefined }
 							onClick={ () => onFinish( currentPage, 'finish' ) }
 						>
 							{ finishButtonText }
