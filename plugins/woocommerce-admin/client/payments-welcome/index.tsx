@@ -27,6 +27,12 @@ declare global {
 				currentUserData: {
 					first_name: string;
 				};
+				wcpayIncentive: {
+					id: string;
+					description: string;
+					cta: string;
+					tos_link: string;
+				};
 			};
 		};
 	}
@@ -36,9 +42,8 @@ interface activatePromoResponse {
 	success: boolean;
 }
 
-const PROMO_NAME = 'wcpay-promo-2022-us-incentive-20-off';
-
 const ConnectAccountPage = () => {
+	const incentive = getAdminSetting( 'wcpayIncentive' );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { installAndActivatePlugins } = useDispatch( 'wc/admin/plugins' );
 	const [ isSubmitted, setSubmitted ] = useState( false );
@@ -89,7 +94,7 @@ const ConnectAccountPage = () => {
 
 	const activatePromo = async () => {
 		const activatePromoRequest: activatePromoResponse = await apiFetch( {
-			path: `/wc-analytics/admin/notes/experimental-activate-promo/${ PROMO_NAME }`,
+			path: `/wc-analytics/admin/notes/experimental-activate-promo/${ incentive.id }`,
 			method: 'POST',
 		} );
 		if ( activatePromoRequest?.success ) {
