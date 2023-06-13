@@ -18,7 +18,7 @@
 		<div class="wp-block-buttons">
 			<!-- wp:button {"style":{"spacing":{"padding":{"left":"18px","right":"18px","top":"9px","bottom":"9px"}},"typography":{"fontSize":"16px"},"color":{"background":"#000000","text":"#ffffff"}}} -->
 			<div class="wp-block-button has-custom-font-size" style="font-size:16px">
-				<a class="wp-block-button__link has-text-color has-background wp-element-button" style="color:#ffffff;background-color:#000000;padding-top:9px;padding-right:18px;padding-bottom:9px;padding-left:18px">Shop tech</a>
+				<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="wp-block-button__link has-text-color has-background wp-element-button" style="color:#ffffff;background-color:#000000;padding-top:9px;padding-right:18px;padding-bottom:9px;padding-left:18px">Shop tech</a>
 			</div>
 			<!-- /wp:button -->
 		</div>
@@ -26,15 +26,15 @@
 
 		<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
 		<div class="wp-block-group">
-			<!-- wp:image {"width":94,"height":108,"sizeSlug":"full","linkDestination":"none"} -->
+			<!-- wp:image {"width":140,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-electronics-1.png', dirname( __FILE__ ) ) ); ?>" alt="" width="94" height="108" />
+				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/technology-white-camera-photography-vintage-photographer.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a left side of a banner. 1 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" />
 			</figure>
 			<!-- /wp:image -->
 
-			<!-- wp:image {"width":80,"height":108,"sizeSlug":"full","linkDestination":"none"} -->
+			<!-- wp:image {"width":140,"height":100,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-apparel-7.png', dirname( __FILE__ ) ) ); ?>" alt="" width="80" height="108" />
+				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/leather-guitar-typewriter-red-gadget-sofa.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a left side of a banner. 2 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
 			</figure>
 			<!-- /wp:image -->
 		</div>
@@ -52,7 +52,7 @@
 		<div class="wp-block-buttons">
 			<!-- wp:button {"style":{"spacing":{"padding":{"left":"18px","right":"18px","top":"9px","bottom":"9px"}},"typography":{"fontSize":"16px"},"color":{"background":"#000000","text":"#ffffff"}}} -->
 			<div class="wp-block-button has-custom-font-size" style="font-size:16px">
-				<a class="wp-block-button__link has-text-color has-background wp-element-button" style="color:#ffffff;background-color:#000000;padding-top:9px;padding-right:18px;padding-bottom:9px;padding-left:18px">Shop games</a>
+				<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="wp-block-button__link has-text-color has-background wp-element-button" style="color:#ffffff;background-color:#000000;padding-top:9px;padding-right:18px;padding-bottom:9px;padding-left:18px">Shop games</a>
 			</div>
 			<!-- /wp:button -->
 		</div>
@@ -60,15 +60,15 @@
 
 		<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
 		<div class="wp-block-group">
-			<!-- wp:image {"width":100,"height":60,"sizeSlug":"full","linkDestination":"none"} -->
+			<!-- wp:image {"width":140,"height":100,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-electronics-3.png', dirname( __FILE__ ) ) ); ?>" alt="" width="100" height="60" />
+				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/music-technology-play-equipment-studio-gadget.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a right side of a banner. 1 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
 			</figure>
 			<!-- /wp:image -->
 
-			<!-- wp:image {"width":100,"height":100,"sizeSlug":"full","linkDestination":"none"} -->
+			<!-- wp:image {"width":140,"height":100,"sizeSlug":"full","linkDestination":"none"} -->
 			<figure class="wp-block-image size-full is-resized">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-electronics-2.png', dirname( __FILE__ ) ) ); ?>" alt="" width="100" height="100" />
+				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/technology-joystick-gadget-console-games-playstation.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent products being showcased in a right side of a banner. 2 out of 2.', 'woo-gutenberg-products-block' ); ?>" width="140" height="100" />
 			</figure>
 			<!-- /wp:image -->
 		</div>

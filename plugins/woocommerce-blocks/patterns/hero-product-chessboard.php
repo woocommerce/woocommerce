@@ -12,9 +12,9 @@
 	<div class="wp-block-columns alignwide" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
 		<!-- wp:column -->
 		<div class="wp-block-column">
-			<!-- wp:cover {"url":"<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-apparel-5.jpg', dirname( __FILE__ ) ) ); ?>","dimRatio":0,"focalPoint":{"x":0.54,"y":0.52},"isDark":false,"style":{"color":{}}} -->
+			<!-- wp:cover {"url":"<?php echo esc_url( plugins_url( 'images/pattern-placeholders/person-winter-blur-wood-girl-woman.png', dirname( __FILE__ ) ) ); ?>","dimRatio":0,"focalPoint":{"x":0.54,"y":0.52},"isDark":false,"style":{"color":{}}} -->
 			<div class="wp-block-cover is-light">
-				<img class="wp-block-cover__image-background" alt="" src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-apparel-5.jpg', dirname( __FILE__ ) ) ); ?>" style="object-position:54% 52%" data-object-fit="cover" data-object-position="54% 52%"/>
+				<img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section. 1 out of 2.', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/person-winter-blur-wood-girl-woman.png', dirname( __FILE__ ) ) ); ?>" style="object-position:54% 52%" data-object-fit="cover" data-object-position="54% 52%"/>
 				<div class="wp-block-cover__inner-container">
 				</div>
 			</div>
@@ -27,7 +27,7 @@
 			<!-- wp:group {"style":{"spacing":{"padding":{"top":"50px","right":"50px","bottom":"50px","left":"50px"}}},"layout":{"type":"flex","orientation":"vertical","verticalAlignment":"center","justifyContent":"stretch"}} -->
 			<div class="wp-block-group" style="padding-top:50px;padding-right:50px;padding-bottom:50px;padding-left:50px">
 				<!-- wp:heading {"textAlign":"left","level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"600"}},"fontSize":"large"} -->
-				<h3 class="wp-block-heading has-text-align-left has-large-font-size" style="font-style:normal;font-weight:600">Unisex Leather Winter Jacket</h3>
+				<h3 class="wp-block-heading has-text-align-left has-large-font-size" style="font-style:normal;font-weight:600">The Fall Collection</h3>
 				<!-- /wp:heading -->
 
 				<!-- wp:paragraph {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}},"typography":{"fontSize":"14px"}}} -->
@@ -118,9 +118,9 @@
 
 		<!-- wp:column {"verticalAlignment":"center"} -->
 		<div class="wp-block-column is-vertically-aligned-center">
-			<!-- wp:cover {"url":"<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-apparel-6.jpg', dirname( __FILE__ ) ) ); ?>","dimRatio":0,"focalPoint":{"x":0.33,"y":0.06},"style":{"color":{}}} -->
+			<!-- wp:cover {"url":"<?php echo esc_url( plugins_url( 'images/pattern-placeholders/man-person-winter-photography-statue-coat.png', dirname( __FILE__ ) ) ); ?>","dimRatio":0,"focalPoint":{"x":0.33,"y":0.06},"style":{"color":{}}} -->
 			<div class="wp-block-cover">
-				<img class="wp-block-cover__image-background" alt="" src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-apparel-6.jpg', dirname( __FILE__ ) ) ); ?>" style="object-position:33% 6%" data-object-fit="cover" data-object-position="33% 6%"/>
+				<img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section. 2 out of 2.', 'woo-gutenberg-products-block' ); ?>" src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/man-person-winter-photography-statue-coat.png', dirname( __FILE__ ) ) ); ?>" style="object-position:33% 6%" data-object-fit="cover" data-object-position="33% 6%"/>
 				<div class="wp-block-cover__inner-container">
 				</div>
 			</div>
