@@ -1229,7 +1229,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: {
 							actions: [
 								( _context, event ) => {
-									// window.location.href = event.data;
+									window.location.href =
+										event.data + '&installed_ext_success=1';
 								},
 							],
 						},
