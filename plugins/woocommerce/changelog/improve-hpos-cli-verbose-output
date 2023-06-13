@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+use wp_json_encode instead of print_r in CLI output
