@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { MenuItem } from '@wordpress/components';
 import { info, Icon } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -21,6 +22,9 @@ export const AboutTheEditorMenuItem = ( {
 		<>
 			<MenuItem
 				onClick={ () => {
+					recordEvent(
+						'block_product_editor_about_the_editor_menu_item_clicked'
+					);
 					setIsGuideOpen( true );
 				} }
 				icon={ <Icon icon={ info } /> }
