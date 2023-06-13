@@ -28,6 +28,7 @@ class WcPayWelcomePage {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_payments_welcome_page' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'shared_settings' ) );
+		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'allowed_promo_notes' ) );
 	}
 
 	/**
@@ -128,6 +129,20 @@ class WcPayWelcomePage {
 		$settings['wcpayIncentive'] = $this->get_incentive();
 
 		return $settings;
+	}
+
+	/**
+	 * Adds allowed promo notes from WCPay incentive.
+	 *
+	 * @param array $promo_notes Allowed promo notes.
+	 * @return array
+	 */
+	public function allowed_promo_notes( $promo_notes = [] ) {
+		if ( self::get_incentive() ) {
+			$promo_notes[] = self::get_incentive()['id'];
+		}
+
+		return $promo_notes;
 	}
 
 	/**
