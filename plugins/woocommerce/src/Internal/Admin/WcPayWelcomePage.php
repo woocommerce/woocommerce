@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
+use Automattic\WooCommerce\Admin\PageController;
 
 /**
  * Class WCPayWelcomePage
@@ -12,46 +13,21 @@ use Automattic\WooCommerce\Admin\WCAdminHelper;
  */
 class WcPayWelcomePage {
 
-	const EXPERIMENT_NAME = 'woocommerce_payments_menu_promo_us_2022';
-	const OTHER_GATEWAYS  = [
-		'affirm',
-		'afterpay',
-		'amazon_payments_advanced_express',
-		'amazon_payments_advanced',
-		'authorize_net_cim_credit_card',
-		'authorize_net_cim_echeck',
-		'bacs',
-		'bambora_credit_card',
-		'braintree_credit_card',
-		'braintree_paypal',
-		'chase_paymentech',
-		'cybersource_credit_card',
-		'elavon_converge_credit_card',
-		'elavon_converge_echeck',
-		'gocardless',
-		'intuit_payments_credit_card',
-		'intuit_payments_echeck',
-		'kco',
-		'klarna_payments',
-		'payfast',
-		'paypal',
-		'paytrace',
-		'ppcp-gateway',
-		'psigate',
-		'sagepaymentsusaapi',
-		'square_credit_card',
-		'stripe_alipay',
-		'stripe_multibanco',
-		'stripe',
-		'trustcommerce',
-		'usa_epay_credit_card',
-	];
+	const TRANSIENT_NAME = 'wcpay_welcome_page_incentive';
+
+	/**
+	 * Eligible incentive for the store.
+	 *
+	 * @var array
+	 */
+	private $_incentive = null;
 
 	/**
 	 * WCPayWelcomePage constructor.
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_payments_welcome_page' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'shared_settings' ) );
 	}
 
 	/**
@@ -60,32 +36,7 @@ class WcPayWelcomePage {
 	public function register_payments_welcome_page() {
 		global $menu;
 
-		// WC Payment must not be installed.
-		if ( WooCommercePayments::is_installed() ) {
-			return;
-		}
-
-		// Live store for at least 90 days.
-		if ( ! WCAdminHelper::is_wc_admin_active_for( DAY_IN_SECONDS * 90 ) ) {
-			return;
-		}
-
-		// Must be a US based business.
-		if ( WC()->countries->get_base_country() !== 'US' ) {
-			return;
-		}
-
-		// Has another payment gateway installed.
-		if ( ! $this->is_another_payment_gateway_installed() ) {
-			return;
-		}
-
-		// No existing WCPay account.
-		if ( $this->has_wcpay_account() ) {
-			return;
-		}
-
-		// Suggestions may be disabled via a setting.
+		// Suggestions not disabled via a setting.
 		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
 			return;
 		}
@@ -101,13 +52,13 @@ class WcPayWelcomePage {
 			return;
 		}
 
-		// Manually dismissed.
+		// Promotion manually dismissed.
 		if ( get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) === 'yes' ) {
 			return;
 		}
 
-		// Users must be in the experiment.
-		if ( ! $this->is_user_in_treatment_mode() ) {
+		// Available incentives for the store.
+		if ( empty( $this->get_incentive() ) ) {
 			return;
 		}
 
@@ -158,6 +109,28 @@ class WcPayWelcomePage {
 	}
 
 	/**
+	 * Adds shared settings for WCPay incentive.
+	 *
+	 * @param array $settings Shared settings.
+	 * @return array
+	 */
+	public function shared_settings( $settings ) {
+		// Return early if not on a wc-admin powered page.
+		if ( ! PageController::is_admin_page() ) {
+			return $settings;
+		}
+
+		// Return early if there is no eligible incentive.
+		if ( empty( $this->get_incentive() ) ) {
+			return $settings;
+		}
+
+		$settings['wcpayIncentive'] = $this->get_incentive();
+
+		return $settings;
+	}
+
+	/**
 	 * Whether a WCPay account exists. By checking account data cache.
 	 *
 	 * @return boolean
@@ -168,37 +141,91 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Checks if user is in the experiment.
+	 * Fetches and cache eligible incentive from WCPay API.
 	 *
-	 * @return bool Whether the user is in the treatment group.
+	 * @return array|null Array of eligible incentive or null.
 	 */
-	private function is_user_in_treatment_mode() {
-		$anon_id        = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : '';
-		$allow_tracking = get_option( 'woocommerce_allow_tracking' ) === 'yes';
-		$abtest         = new \WooCommerce\Admin\Experimental_Abtest(
-			$anon_id,
-			'woocommerce',
-			$allow_tracking
-		);
-
-		return $abtest->get_variation( self::EXPERIMENT_NAME ) === 'treatment';
-	}
-
-	/**
-	 * Checks if there is another payment gateway installed using a static list of US gateways from WC Store.
-	 *
-	 * @return bool Whether there is another payment gateway installed.
-	 */
-	private function is_another_payment_gateway_installed() {
-		$available_gateways = wp_list_pluck( WC()->payment_gateways()->get_available_payment_gateways(), 'id' );
-
-		foreach ( $available_gateways as $gateway ) {
-			if ( in_array( $gateway, self::OTHER_GATEWAYS, true ) ) {
-				return true;
-			}
+	private function get_incentive() {
+		// Return local cached incentive if it exists.
+		if ( ! empty( $this->_incentive ) ) {
+			return $this->_incentive;
 		}
 
-		return false;
-	}
+		// Return transient cached incentive if it exists.
+		if ( ! empty( get_transient( self::TRANSIENT_NAME ) ) ) {
+			return get_transient( self::TRANSIENT_NAME );
+		}
 
+		// Request incentive from WCPAY API.
+		$url = add_query_arg(
+			[
+				// Store ISO-2 country code, e.g. `US`.
+				'country'      => WC()->countries->get_base_country(),
+				// Store locale, e.g. `en_US`.
+				'locale'       => get_locale(),
+				// WooCommerce install timestamp.
+				'active_for'   => get_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION ),
+				// Whether the store has completed orders.
+				'has_orders'   => ! empty(
+					wc_get_orders(
+						[
+							'status' => [ 'wc-completed' ],
+							'return' => 'ids',
+							'limit'  => 1,
+						]
+					)
+				),
+				// Whether the store has at least one payment gateways enabled.
+				'has_payments' => ! empty( WC()->payment_gateways()->get_available_payment_gateways() ),
+				// Whether the store has a WooCommerce Payments account or it's installed.
+				'has_wcpay'    => $this->has_wcpay_account() ?? WooCommercePayments::is_installed(),
+			],
+			'https://public-api.wordpress.com/wpcom/v2/wcpay/incentives',
+		);
+
+		$response = wp_remote_get( $url );
+
+		// Return early if there is an error.
+		if ( is_wp_error( $response ) || ! is_array( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return;
+		}
+
+		// Decode the results.
+		$results = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		// Return early if there are no results.
+		if ( empty( $results ) ) {
+			return;
+		}
+
+		// Find a `welcome_page` incentive.
+		$incentive = current(
+			array_filter(
+				$results,
+				function( $incentive ) {
+					return 'welcome_page' === $incentive['type'];
+				}
+			)
+		);
+
+		// Return early if there isn't an eligible incentive.
+		if ( empty( $incentive ) ) {
+			return;
+		}
+
+		// Store incentive in local cache.
+		$this->_incentive = $incentive;
+
+		$cache_for = wp_remote_retrieve_header( $response, 'cache-for' );
+
+		// Skip transient cache if `cache-for` header equals zero.
+		if ( '0' === $cache_for ) {
+			return $incentive;
+		}
+
+		// Store incentive in transient cache for the given seconds or 24h.
+		set_transient( self::TRANSIENT_NAME, $incentive, $cache_for ? (int) $cache_for : DAY_IN_SECONDS );
+
+		return $incentive;
+	}
 }
