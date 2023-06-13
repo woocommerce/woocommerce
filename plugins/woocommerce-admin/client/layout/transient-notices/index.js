@@ -3,6 +3,7 @@
  */
 import { applyFilters } from '@wordpress/hooks';
 import classnames from 'classnames';
+import { WooFooterItem } from '@woocommerce/admin-layout';
 import { OPTIONS_STORE_NAME, USER_STORE_NAME } from '@woocommerce/data';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -89,12 +90,14 @@ function TransientNotices( props ) {
 	const combinedNotices = getNotices();
 
 	return (
-		<SnackbarList
-			notices={ combinedNotices }
-			className={ classes }
-			onRemove={ onRemove }
-			onRemove2={ onRemove2 }
-		/>
+		<WooFooterItem>
+			<SnackbarList
+				notices={ combinedNotices }
+				className={ classes }
+				onRemove={ onRemove }
+				onRemove2={ onRemove2 }
+			/>
+		</WooFooterItem>
 	);
 }
 
