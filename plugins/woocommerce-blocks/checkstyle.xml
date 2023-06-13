@@ -1982,7 +1982,7 @@
 <error line="174" column="35" severity="error" message="Argument of type &apos;unknown&apos; is not assignable to parameter of type &apos;StoreAttributes[]&apos;." source="TS2345" />
 <error line="182" column="35" severity="error" message="Parameter &apos;attribute&apos; implicitly has an &apos;any&apos; type." source="TS7006" />
 </file>
-<file name="assets/js/editor-components/block-title/index.js">
+<file name="assets/js/editor-components/block-title/index.tsx">
 <error line="15" column="2" severity="error" message="Binding element &apos;className&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
 <error line="16" column="2" severity="error" message="Binding element &apos;headingLevel&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
 <error line="17" column="2" severity="error" message="Binding element &apos;onChange&apos; implicitly has an &apos;any&apos; type." source="TS7031" />
