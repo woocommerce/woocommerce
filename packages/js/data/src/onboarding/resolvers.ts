@@ -138,18 +138,32 @@ export function* getProductTypes() {
 	}
 }
 
-export function* getJetpackAuthUrl() {
+export function* getJetpackAuthUrl( query: {
+	redirectUrl: string;
+	from?: string;
+} ) {
 	try {
+		let path =
+			WC_ADMIN_NAMESPACE +
+			'/onboarding/plugins/jetpack-authorization-url?redirect_url=' +
+			encodeURIComponent( query.redirectUrl );
+
+		if ( query.from ) {
+			path += '&from=' + query.from;
+		}
+
 		const results: {
 			url: string;
 		} = yield apiFetch( {
-			path:
-				WC_ADMIN_NAMESPACE +
-				'/onboarding/plugins/jetpack-authorization-url',
+			path,
 			method: 'GET',
 		} );
 
-		yield setJetpackAuthUrl( results.url );
+		yield setJetpackAuthUrl(
+			results.url,
+			query.redirectUrl,
+			query.from ?? ''
+		);
 	} catch ( error ) {
 		yield setError( 'getJetpackAuthUrl', error );
 	}

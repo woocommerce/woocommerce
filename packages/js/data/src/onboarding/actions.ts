@@ -488,10 +488,16 @@ export function* installAndActivatePluginsAsync(
 	}
 }
 
-export function setJetpackAuthUrl( jetpackAuthUrl: string ) {
+export function setJetpackAuthUrl(
+	jetpackAuthUrl: string,
+	redirectUrl: string,
+	from = ''
+) {
 	return {
 		type: TYPES.SET_JETPACK_AUTH_URL,
 		jetpackAuthUrl,
+		redirectUrl,
+		from,
 	};
 }
 
