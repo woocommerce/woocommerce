@@ -14,7 +14,6 @@ import {
 /**
  * Internal dependencies
  */
-import { ClassicEditorIcon } from '../../images/classic-editor-icon';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 export const ClassicEditorMenuItem = ( {
@@ -67,10 +66,12 @@ export const ClassicEditorMenuItem = ( {
 				}
 				onClose();
 			} }
-			icon={ <ClassicEditorIcon /> }
-			iconPosition="right"
+			info={ __(
+				'Save changes and go back to the classic product editing screen.',
+				'woocommerce'
+			) }
 		>
-			{ __( 'Use the classic editor', 'woocommerce' ) }
+			{ __( 'Turn off the new product form', 'woocommerce' ) }
 		</MenuItem>
 	);
 };
