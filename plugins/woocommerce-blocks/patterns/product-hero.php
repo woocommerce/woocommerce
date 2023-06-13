@@ -11,7 +11,7 @@
 	<div class="wp-block-columns">
 		<!-- wp:column {"width":"40%"} -->
 		<div class="wp-block-column" style="flex-basis:40%"><!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
-			<figure class="wp-block-image size-full"><img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-electronics-1.png', dirname( __FILE__ ) ) ); ?>" alt="" class="wp-image-1"/></figure>
+			<figure class="wp-block-image size-full"><img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/leather-guitar-typewriter-red-gadget-sofa.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1"/></figure>
 			<!-- /wp:image --></div>
 		<!-- /wp:column -->
 
@@ -29,14 +29,14 @@
 			<div class="wp-block-buttons">
 				<!-- wp:button {"style":{"typography":{"fontSize":"0.8em"},"spacing":{"padding":{"left":"2em","right":"2em"}},"color":{"text":"#ffffff","background":"#000000"},"border":{"width":"0px","style":"none"}}} -->
 				<div class="wp-block-button has-custom-font-size" style="font-size:0.8em">
-					<a class="wp-block-button__link has-text-color has-background wp-element-button" style="border-style:none;border-width:0px;color:#ffffff;background-color:#000000;padding-right:2em;padding-left:2em">Add to cart</a>
+					<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="wp-block-button__link has-text-color has-background wp-element-button" style="border-style:none;border-width:0px;color:#ffffff;background-color:#000000;padding-right:2em;padding-left:2em">Add to cart</a>
 				</div>
 				<!-- /wp:button -->
 			</div>
 			<!-- /wp:buttons -->
 
 			<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.8em"},"color":{"text":"#ffffff"}}} -->
-			<p class="has-text-color" style="color:#ffffff;font-size:0.8em">Do anything you can imagine with a single unit. Chorus, distortion, echo, wah, volume and more can all be applied and controlled from a single pedal-sized unit. The all-in-one Mini 5 Dreamer is on the pedal board of your favorite artists.</p>
+			<p class="has-text-color" style="color:#ffffff;font-size:0.8em">The Bluetooth keyboard, a striking homage to classic typewriters with its round, tactile keys and vintage aesthetic, merges nostalgia with modern connectivity for a unique typing experience.</p>
 			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:column -->

@@ -16,7 +16,7 @@
 				<!-- wp:group {"style":{"spacing":{"padding":{"top":"0","left":"20px","right":"20px"}}},"layout":{"type":"flex","orientation":"vertical"}} -->
 				<div class="wp-block-group" style="padding-top:0;padding-right:20px;padding-left:20px">
 					<!-- wp:heading {"style":{"typography":{"fontStyle":"normal","fontWeight":"700"}},"fontSize":"large"} -->
-					<h2 class="wp-block-heading has-large-font-size" style="font-style:normal;font-weight:700">New in: 3-in-1 parka</h2>
+					<h2 class="wp-block-heading has-large-font-size" style="font-style:normal;font-weight:700">Endless Tee's</h2>
 					<!-- /wp:heading -->
 
 					<!-- wp:paragraph {"fontSize":"small"} -->
@@ -36,7 +36,7 @@
 				<!-- /wp:group -->
 			</div>
 			<figure class="wp-block-media-text__media">
-				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/product-apparel-4.jpg', dirname( __FILE__ ) ) ); ?>" alt="" class="wp-image-3800 size-full" />
+				<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/hand-guitar-finger-tshirt-clothing-rack.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-3800 size-full" />
 			</figure>
 		</div>
 		<!-- /wp:media-text -->
