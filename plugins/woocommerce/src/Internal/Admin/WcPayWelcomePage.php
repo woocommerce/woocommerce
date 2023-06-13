@@ -205,13 +205,8 @@ class WcPayWelcomePage {
 			return;
 		}
 
-		// Decode the results.
-		$results = json_decode( wp_remote_retrieve_body( $response ), true );
-
-		// Return early if there are no results.
-		if ( empty( $results ) ) {
-			return;
-		}
+		// Decode the results, falling back to an empty array.
+		$results = json_decode( wp_remote_retrieve_body( $response ), true ) ?? [];
 
 		// Find a `welcome_page` incentive.
 		$incentive = current(
@@ -222,11 +217,6 @@ class WcPayWelcomePage {
 				}
 			)
 		);
-
-		// Return early if there isn't an eligible incentive.
-		if ( empty( $incentive ) ) {
-			return;
-		}
 
 		// Store incentive in local cache.
 		$this->_incentive = $incentive;
