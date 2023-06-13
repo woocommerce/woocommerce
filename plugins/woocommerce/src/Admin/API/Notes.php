@@ -39,9 +39,22 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 *
 	 * @var array
 	 */
-	protected $allowed_promo_notes = array(
-		'wcpay-promo-2022-us-incentive-20-off',
-	);
+	protected $allowed_promo_notes;
+
+	/**
+	 * Initialize allowed promo notes.
+	 */
+	public function __construct() {
+		/**
+		 * Filter the allowed promo notes.
+		 *
+		 * Enables adding allowed promo notes for experimental-activate-promo.
+		 *
+		 * @param array     $promo_notes    Array of allowed promo notes.
+		 * @since 7.8.0
+		 */
+		$this->allowed_promo_notes = apply_filters( 'woocommerce_admin_allowed_promo_notes', $this->allowed_promo_notes );
+	}
 
 	/**
 	 * Register the routes for admin notes.
