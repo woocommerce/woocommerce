@@ -9,9 +9,9 @@
  * Register the JS and CSS.
  */
 function add_extension_register_script() {
-	if ( 
+	if (
 		! method_exists( 'Automattic\WooCommerce\Admin\Loader', 'is_admin_or_embed_page' ) ||
-		! \Automattic\WooCommerce\Admin\Loader::is_admin_or_embed_page()
+		! \Automattic\WooCommerce\Admin\PageController::is_admin_or_embed_page()
 	) {
 		return;
 	}
