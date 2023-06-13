@@ -92,6 +92,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			},
 		);
 		FunctionsMockerHack::add_function_mocks( $legacy_mocks );
+		$this->register_legacy_proxy_function_mocks( $legacy_mocks );
 
 		update_option( 'active_plugins', array( 'plugin1', 'plugin2' ) );
 
@@ -161,7 +162,10 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 
 		// Reset the mocked classes so they don't affect other tests.
 		$container->replace( PluginUtil::class, PluginUtil::class );
+		$container->get( PluginUtil::class );
 		$container->replace( FeaturesController::class, FeaturesController::class );
+
+		$this->reset_legacy_proxy_mocks();
 	}
 
 	/**
