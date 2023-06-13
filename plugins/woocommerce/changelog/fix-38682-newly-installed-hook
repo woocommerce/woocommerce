@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Trigger "woocommerce_newly_installed" hook for new installations
