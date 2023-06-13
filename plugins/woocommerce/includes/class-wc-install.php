@@ -235,11 +235,19 @@ class WC_Install {
 	);
 
 	/**
+	 * Option name used to track new installations of WooCommerce.
+	 *
+	 * @var string
+	 */
+	const NEWLY_INSTALLED_OPTION = 'woocommerce_newly_installed';
+
+	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
+		add_action( 'admin_init', array( __CLASS__, 'newly_installed' ) );
 		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
@@ -250,6 +258,25 @@ class WC_Install {
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
+	}
+
+	/**
+	 * Trigger `woocommerce_newly_installed` action for new installations.
+	 *
+	 * @since x.x.x
+	 */
+	public static function newly_installed() {
+		if ( 'yes' === get_option( self::NEWLY_INSTALLED_OPTION, false ) ) {
+			/**
+			 * Run when WooCommerce has been installed for the first time.
+			 *
+			 * @since 6.5.0
+			 */
+			do_action( 'woocommerce_newly_installed' );
+			do_action_deprecated( 'woocommerce_admin_newly_installed', array(), '6.5.1', 'woocommerce_newly_installed' );
+
+			update_option( self::NEWLY_INSTALLED_OPTION, 'no' );
+		}
 	}
 
 	/**
@@ -270,16 +297,6 @@ class WC_Install {
 			 */
 			do_action( 'woocommerce_updated' );
 			do_action_deprecated( 'woocommerce_admin_updated', array(), $wc_code_version, 'woocommerce_updated' );
-			// If there is no woocommerce_version option, consider it as a new install.
-			if ( ! $wc_version ) {
-				/**
-				 * Run when WooCommerce has been installed for the first time.
-				 *
-				 * @since 6.5.0
-				 */
-				do_action( 'woocommerce_newly_installed' );
-				do_action_deprecated( 'woocommerce_admin_newly_installed', array(), $wc_code_version, 'woocommerce_newly_installed' );
-			}
 		}
 	}
 
@@ -390,6 +407,10 @@ class WC_Install {
 		// If we made it till here nothing is running yet, lets set the transient now.
 		set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		wc_maybe_define_constant( 'WC_INSTALLING', true );
+
+		if ( self::is_new_install() && ! get_option( self::NEWLY_INSTALLED_OPTION, false ) ) {
+			update_option( self::NEWLY_INSTALLED_OPTION, 'yes' );
+		}
 
 		WC()->wpdb_table_fix();
 		self::remove_admin_notices();
