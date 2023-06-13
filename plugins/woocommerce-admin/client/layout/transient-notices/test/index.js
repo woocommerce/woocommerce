@@ -7,7 +7,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import TransientNotices from '..';
+import { TransientNotices } from '..';
 
 jest.mock( '@wordpress/data', () => {
 	// Require the original module to not be mocked...
