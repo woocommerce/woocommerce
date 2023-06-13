@@ -3,6 +3,10 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import debugFactory from 'debug';
+
+/**
+ * Internal dependencies
+ */
 import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
 
 const debugToken = debugFactory( 'jetpack-ai-assistant:token' );
@@ -34,6 +38,7 @@ async function requestToken() {
 			tokenData = JSON.parse( token );
 		} catch ( err ) {
 			debugToken( 'Error parsing token', err );
+			throw new Error( 'Error parsing cached token' );
 		}
 	}
 
@@ -44,35 +49,37 @@ async function requestToken() {
 
 	const apiNonce = window.JP_CONNECTION_INITIAL_STATE?.apiNonce;
 	const siteSuffix = window.JP_CONNECTION_INITIAL_STATE?.siteSuffix;
-	const isJetpackSite = false; //! window.wpcomFetch;
+	try {
+		const data: { token: string; blog_id: string } = await apiFetch( {
+			path: '/jetpack/v4/jetpack-ai-jwt?_cacheBuster=' + Date.now(),
+			credentials: 'same-origin',
+			headers: {
+				'X-WP-Nonce': apiNonce,
+			},
+			method: 'POST',
+		} );
 
-	const data: { token: string; blog_id: string } = await apiFetch( {
-		path: '/jetpack/v4/jetpack-ai-jwt?_cacheBuster=' + Date.now(),
-		credentials: 'same-origin',
-		headers: {
-			'X-WP-Nonce': apiNonce,
-		},
-		method: 'POST',
-	} );
+		const newTokenData = {
+			token: data.token,
+			/**
+			 * TODO: make sure we return id from the .com token acquisition endpoint too
+			 */
+			blogId: siteSuffix,
 
-	const newTokenData = {
-		token: data.token,
-		/**
-		 * TODO: make sure we return id from the .com token acquisition endpoint too
-		 */
-		blogId: isJetpackSite ? data.blog_id : siteSuffix,
+			/**
+			 * Let's expire the token in 2 minutes
+			 */
+			expire: Date.now() + JWT_TOKEN_EXPIRATION_TIME,
+		};
 
-		/**
-		 * Let's expire the token in 2 minutes
-		 */
-		expire: Date.now() + JWT_TOKEN_EXPIRATION_TIME,
-	};
+		// Store the token in localStorage
+		debugToken( 'Storing new token' );
+		localStorage.setItem( JWT_TOKEN_ID, JSON.stringify( newTokenData ) );
 
-	// Store the token in localStorage
-	debugToken( 'Storing new token' );
-	localStorage.setItem( JWT_TOKEN_ID, JSON.stringify( newTokenData ) );
-
-	return newTokenData;
+		return newTokenData;
+	} catch ( e ) {
+		throw new Error( 'Error fetching new token' );
+	}
 }
 
 /**
