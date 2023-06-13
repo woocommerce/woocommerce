@@ -233,9 +233,13 @@ class Options extends \WC_REST_Data_Controller {
 	 * @return array Options object with option values.
 	 */
 	public function get_options( $request ) {
-		$params  = ( isset( $request['options'] ) && is_string( $request['options'] ) ) ? explode( ',', $request['options'] ) : array();
 		$options = array();
 
+		if ( empty( $request['options'] ) || ! is_string( $request['options'] ) ) {
+			return $options;
+		}
+
+		$params = explode( ',', $request['options'] );
 		foreach ( $params as $option ) {
 			$options[ $option ] = get_option( $option );
 		}
