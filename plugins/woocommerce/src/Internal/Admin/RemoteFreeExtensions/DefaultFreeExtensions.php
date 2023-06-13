@@ -816,6 +816,7 @@ class DefaultFreeExtensions {
 	 *
 	 * - Updated description for the core-profiler.
 	 * - Adds learn_more_link and label.
+	 * - Adds install_priority, which is used to sort the plugins. The value is determined by the plugin size. Lower = smaller.
 	 *
 	 * @param array $plugins Array of plugins.
 	 *

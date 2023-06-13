@@ -195,6 +195,9 @@ export const pluginInstallerMachine = createMachine(
 			} ),
 			assignPluginsInstallationQueue: assign( {
 				pluginsInstallationQueue: ( ctx ) => {
+					// Sort the plugins by install_priority so that the smaller plugins are installed first
+					// install_priority is set by plugin's size
+					// Lower install_prioirty means the plugin is smaller
 					return ctx.selectedPlugins.slice().sort( ( a, b ) => {
 						const aIndex = ctx.pluginsAvailable.find(
 							( plugin ) => plugin.key === a
