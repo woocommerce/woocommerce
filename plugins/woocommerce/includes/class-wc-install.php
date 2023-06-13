@@ -273,7 +273,7 @@ class WC_Install {
 			 * @since 6.5.0
 			 */
 			do_action( 'woocommerce_newly_installed' );
-			do_action_deprecated( 'woocommerce_admin_newly_installed', array(), '6.5.1', 'woocommerce_newly_installed' );
+			do_action_deprecated( 'woocommerce_admin_newly_installed', array(), '6.5.0', 'woocommerce_newly_installed' );
 
 			update_option( self::NEWLY_INSTALLED_OPTION, 'no' );
 		}
