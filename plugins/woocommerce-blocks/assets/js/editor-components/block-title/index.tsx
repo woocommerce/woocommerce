@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import PropTypes from 'prop-types';
 import { PlainText } from '@wordpress/block-editor';
 import { withInstanceId } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
@@ -10,15 +9,21 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './editor.scss';
-
+interface BlockTitleProps {
+	className: string;
+	headingLevel: number;
+	onChange: ( value: string ) => void;
+	heading: string;
+	instanceId: number;
+}
 const BlockTitle = ( {
 	className,
 	headingLevel,
 	onChange,
 	heading,
 	instanceId,
-} ) => {
-	const TagName = `h${ headingLevel }`;
+}: BlockTitleProps ) => {
+	const TagName = `h${ headingLevel }` as keyof JSX.IntrinsicElements;
 	return (
 		<TagName className={ className }>
 			<label
@@ -36,25 +41,6 @@ const BlockTitle = ( {
 			/>
 		</TagName>
 	);
-};
-
-BlockTitle.propTypes = {
-	/**
-	 * Classname to add to title in addition to the defaults.
-	 */
-	className: PropTypes.string,
-	/**
-	 * The value of the heading.
-	 */
-	value: PropTypes.string,
-	/**
-	 * Callback to update the attribute when text is changed.
-	 */
-	onChange: PropTypes.func,
-	/**
-	 * Level of the heading tag (1, 2, 3... will render <h1>, <h2>, <h3>... elements).
-	 */
-	headingLevel: PropTypes.number,
 };
 
 export default withInstanceId( BlockTitle );
