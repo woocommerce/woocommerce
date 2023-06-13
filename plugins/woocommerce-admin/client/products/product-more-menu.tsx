@@ -17,7 +17,6 @@ import { ALLOW_TRACKING_OPTION_NAME } from '@woocommerce/customer-effort-score';
 import {
 	FeedbackMenuItem,
 	ClassicEditorMenuItem,
-	AboutTheEditorMenuItem,
 } from './fills/more-menu-items';
 
 import './product-more-menu.scss';
@@ -55,7 +54,6 @@ export const ProductMoreMenu = () => {
 							productId={ values.id }
 							onClose={ onClose }
 						/>
-						<AboutTheEditorMenuItem />
 					</>
 				) }
 			</DropdownMenu>
