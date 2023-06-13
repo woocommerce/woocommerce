@@ -305,7 +305,7 @@ class CLIRunner {
 	 * default: Output of function `wc_get_order_types( 'cot-migration' )`
 	 *
 	 * [--re-migrate]
-	 * : Attempt to re-migrate orders that failed verification. You should only use this option when you have never run the site with HPOS as authoritative source of order data yet, otherwise, you risk stale data overwriting the more recent data.
+	 * : Attempt to re-migrate orders that failed verification. You should only use this option when you have never run the site with HPOS as authoritative source of order data yet, or you have manually checked the reported errors, otherwise, you risk stale data overwriting the more recent data.
 	 * This option can only be enabled when --verbose flag is also set.
 	 * default: false
 	 *
@@ -425,7 +425,7 @@ class CLIRunner {
 				if ( $remigrate ) {
 					WP_CLI::warning(
 						sprintf(
-							__( 'Attempting to remigrate...', 'woocommerce')
+							__( 'Attempting to remigrate...', 'woocommerce' )
 						)
 					);
 					$failed_ids = array_keys( $failed_ids_in_current_batch );
