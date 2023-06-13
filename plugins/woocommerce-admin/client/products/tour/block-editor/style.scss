@@ -1,10 +1,11 @@
 $background-height: 220px;
 $yellow: #f5e6ab;
+$light-purple: #f2edff;
 
 .woocommerce-block-editor-guide {
 	&__background1 {
 		height: $background-height;
-		background-color: #f2edff;
+		background-color: $light-purple;
 	}
 	&__background2 {
 		height: $background-height;
@@ -54,5 +55,14 @@ $yellow: #f5e6ab;
 				right: 0;
 			}
 		}
+	}
+}
+
+.woocommerce-block-editor-tourkit {
+	.components-card__header {
+		align-items: flex-start;
+		height: 200px;
+		background-color: $light-purple;
+		margin-bottom: $gap;
 	}
 }
