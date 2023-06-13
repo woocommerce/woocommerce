@@ -89,6 +89,15 @@ const recordTracksBusinessInfoCompleted = (
 	} );
 };
 
+const recordTracksPluginsLearnMoreLinkClicked = (
+	_context: unknown,
+	_event: unknown,
+	{ action }: { action: unknown }
+) => {
+	const { step } = action as { step: string };
+	recordEvent( `storeprofiler_${ step }_learn_more_link_clicked` );
+};
+
 export default {
 	recordTracksStepViewed,
 	recordTracksStepSkipped,
@@ -96,4 +105,5 @@ export default {
 	recordTracksUserProfileCompleted,
 	recordTracksSkipBusinessLocationCompleted,
 	recordTracksBusinessInfoCompleted,
+	recordTracksPluginsLearnMoreLinkClicked,
 };

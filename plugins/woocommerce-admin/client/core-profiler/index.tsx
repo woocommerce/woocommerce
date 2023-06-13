@@ -1117,7 +1117,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 						PLUGINS_LEARN_MORE_LINK_CLICKED: {
 							actions: [
-								'recordTracksPluginsLearnMoreLinkClicked',
+								{
+									type: 'recordTracksPluginsLearnMoreLinkClicked',
+									step: 'plugins',
+								},
 							],
 						},
 						PLUGINS_INSTALLATION_REQUESTED: {
