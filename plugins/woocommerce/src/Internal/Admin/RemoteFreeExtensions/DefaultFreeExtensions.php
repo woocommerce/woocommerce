@@ -881,7 +881,7 @@ class DefaultFreeExtensions {
 			),
 		);
 
-		// Copy shipping for the core-profiler and remove is_visible conditions, except fo the country restriction.
+		// Copy shipping for the core-profiler and remove is_visible conditions, except for the country restriction.
 		$_plugins['woocommerce-services:shipping']['is_visible'] = [
 			array(
 				'type'      => 'base_location_country',
