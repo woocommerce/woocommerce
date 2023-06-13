@@ -38,7 +38,7 @@ export const defaultState: OnboardingState = {
 	productTypes: {},
 	requesting: {},
 	taskLists: {},
-	jetpackAuthUrl: '',
+	jetpackAuthUrls: {},
 };
 
 const getUpdatedTaskLists = (
@@ -432,7 +432,10 @@ const reducer: Reducer< OnboardingState, Action > = (
 		case TYPES.SET_JETPACK_AUTH_URL:
 			return {
 				...state,
-				jetpackAuthUrl: action.jetpackAuthUrl,
+				jetpackAuthUrls: {
+					...state.jetpackAuthUrls,
+					[ action.redirectUrl ]: action.jetpackAuthUrl,
+				},
 			};
 		default:
 			return state;

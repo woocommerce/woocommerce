@@ -104,6 +104,21 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 					'methods'             => 'GET',
 					'callback'            => array( $this, 'get_jetpack_authorization_url' ),
 					'permission_callback' => array( $this, 'can_install_plugins' ),
+					'args'                => array(
+						'redirect_url' => array(
+							'description'       => 'The URL to redirect to after authorization',
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'required'          => true,
+						),
+						'from'         => array(
+							'description'       => 'from value for the jetpack authorization page',
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'required'          => false,
+							'default'           => 'woocommerce-onboarding',
+						),
+					),
 				),
 			)
 		);
@@ -199,27 +214,28 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	/**
 	 * Return Jetpack authorization URL.
 	 *
+	 * @param WP_REST_Request $request WP_REST_Request object.
+	 *
 	 * @return array
 	 * @throws \Exception
 	 */
-	public function get_jetpack_authorization_url() {
+	public function get_jetpack_authorization_url( WP_REST_Request $request ) {
 		$manager = new Manager( 'woocommerce' );
 		// Register the site to wp.com.
 		if ( ! $manager->is_connected() ) {
-
 			$result = $manager->try_registration();
 			if ( is_wp_error( $result ) ) {
 				 throw new \Exception( $result->get_error_message() );
 			}
 		}
 
-		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( admin_url( 'admin.php?page=wc-admin' ) ) );
+		$redirect_url = $request->get_param( 'redirect_url' );
 		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, [ 'development', 'wpcalypso', 'horizon', 'stage' ], true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
 
 		return [
 			'url' => add_query_arg(
 				[
-					'from'        => apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_from_arg', 'woocommerce-onboarding' ),
+					'from'        => $request->get_param( 'from' ),
 					'calypso_env' => $calypso_env,
 				],
 				$manager->get_authorization_url( null, $redirect_url )

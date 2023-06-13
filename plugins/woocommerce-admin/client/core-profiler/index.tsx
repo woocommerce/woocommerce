@@ -29,6 +29,7 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -1152,10 +1153,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'sendToJetpackAuthPage',
-								cond: ( _context ) =>
-									_context.pluginsSelected.find(
-										( plugin ) => plugin === 'jetpack'
-									) !== undefined,
+								cond: ( _context ) => {
+									return (
+										_context.pluginsSelected.find(
+											( plugin ) => plugin === 'jetpack'
+										) !== undefined ||
+										_context.pluginsAvailable.find(
+											( plugin: Extension ) =>
+												plugin.key === 'jetpack' &&
+												plugin.is_activated
+										) !== undefined
+									);
+								},
 							},
 							{ actions: 'redirectToWooHome' },
 						],
@@ -1170,7 +1179,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						src: async () =>
 							await resolveSelect(
 								ONBOARDING_STORE_NAME
-							).getJetpackAuthUrl(),
+							).getJetpackAuthUrl( {
+								redirectUrl: getAdminLink(
+									'admin.php?page=wc-admin'
+								),
+							} ),
 						onDone: {
 							actions: [
 								( _context, event ) => {
