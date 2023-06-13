@@ -1202,6 +1202,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								redirectUrl: getAdminLink(
 									'admin.php?page=wc-admin'
 								),
+								from: 'woocommerce-core-profiler',
 							} ),
 						onDone: {
 							actions: [
