@@ -20,6 +20,7 @@ interface Props {
 
 const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 	const { first_name } = getAdminSetting( 'currentUserData', {} );
+	const { description, cta, tos_link } = getAdminSetting( 'wcpayIncentive' );
 
 	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
 	const [ isExitSurveyModalOpen, setExitSurveyModalOpen ] = useState( false );
@@ -32,21 +33,21 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 	return (
 		<Card className="__CLASS__">
 			<CardBody className="woopayments-welcome-page__header">
-				<img src={ WooPaymentsLogo } />
+				<img src={ WooPaymentsLogo } alt="WooPayments logo" />
 				<h1>{ strings.heading( first_name ) }</h1>
 			</CardBody>
 			<CardBody className="woopayments-welcome-page__offer">
 				<div className="woopayments-welcome-page__offer-pill">
 					{ strings.limitedTimeOffer }
 				</div>
-				<h2>{ strings.offerHeading }</h2>
+				<h2>{ description }</h2>
 				<Button
 					variant="primary"
 					isBusy={ isSubmitted }
 					disabled={ isSubmitted }
 					onClick={ handleSetup }
 				>
-					{ strings.install }
+					{ cta }
 				</Button>
 				<Button
 					variant="tertiary"
@@ -57,7 +58,7 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 					{ strings.noThanks }
 				</Button>
 				<p>{ strings.TosAndPp }</p>
-				<p>{ strings.termsAndConditions }</p>
+				<p>{ strings.termsAndConditions( tos_link ) }</p>
 			</CardBody>
 			<CardDivider />
 			<CardBody className="woopayments-welcome-page__payments">

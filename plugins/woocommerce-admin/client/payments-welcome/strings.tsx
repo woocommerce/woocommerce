@@ -6,7 +6,6 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 
 export default {
-	install: __( 'Install WooPayments for free', 'woocommerce' ),
 	noThanks: __( 'No thanks', 'woocommerce' ),
 	heading: ( firstName?: string ) =>
 		sprintf(
@@ -18,19 +17,6 @@ export default {
 			firstName ? ` ${ firstName }` : ''
 		),
 	limitedTimeOffer: __( 'Limited time offer', 'woocommerce' ),
-	offerHeading: createInterpolateElement(
-		sprintf(
-			/* translators: %s: offer percentage number. */
-			__(
-				'<b>Save %s%%</b> on payment processing costs in your first six months when you sign up today.*',
-				'woocommerce'
-			),
-			20 // TODO: Get offer percentage.
-		),
-		{
-			b: <b />,
-		}
-	),
 	TosAndPp: createInterpolateElement(
 		__(
 			'By using WooPayments you agree to our <a1>Terms of Service</a2> and acknowledge that you have read our <a2>Privacy Policy</a2>. Discount will be applied to payments processed via WooPayments upon completion of installation, setup, and connection. ',
@@ -55,20 +41,19 @@ export default {
 			),
 		}
 	),
-	termsAndConditions: createInterpolateElement(
-		__( '*See <a>Terms and Conditions</a> for details.', 'woocommerce' ),
-		{
-			a: (
-				// eslint-disable-next-line jsx-a11y/anchor-has-content
-				// TODO: Update link to point to the correct URL.
-				<a
-					href="https://woocommerce.com/terms-conditions/woocommerce-payments-promotion-2022/"
-					target="_blank"
-					rel="noopener noreferrer"
-				/>
+	termsAndConditions: ( url: string ) =>
+		createInterpolateElement(
+			__(
+				'*See <a>Terms and Conditions</a> for details.',
+				'woocommerce'
 			),
-		}
-	),
+			{
+				a: (
+					// eslint-disable-next-line jsx-a11y/anchor-has-content
+					<a href={ url } target="_blank" rel="noopener noreferrer" />
+				),
+			}
+		),
 	paymentOptions: __(
 		'WooPayments is pre-integrated with all popular payment options',
 		'woocommerce'
