@@ -398,8 +398,12 @@
 		max-width: 615px;
 		margin: 58px 0 0 0;
 	}
+	.woocommerce-profiler-heading__title {
+		color: $gray-900;
+		padding: 0;
+	}
 	.woocommerce-profiler-heading__subtitle {
-		margin: 0 0 48px 0 !important;
+		margin: 12px 0 48px 0 !important;
 		@include breakpoint( '<782px' ) {
 			margin-top: 12px !important;
 		}
@@ -418,6 +422,7 @@
 		margin-top: 28px;
 		text-align: center;
 		display: block;
+		font-size: 14px;
 	}
 
 	.plugin-error {
