@@ -277,7 +277,7 @@ function CustomerFeedbackModal( {
 				>
 					<Text variant="body" as="p">
 						{ __(
-							'Please provide feedback by selecting an option above.',
+							'Please tell us to what extent you agree or disagree with the statements above.',
 							'woocommerce'
 						) }
 					</Text>
