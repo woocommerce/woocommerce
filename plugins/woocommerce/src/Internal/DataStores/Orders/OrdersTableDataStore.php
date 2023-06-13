@@ -1738,8 +1738,8 @@ FROM $order_meta_table
 
 		$changes['type'] = $order->get_type();
 
-		// Make sure 'status' is correct.
-		if ( array_key_exists( 'status', $column_mapping ) ) {
+		// Make sure 'status' is correctly prefixed.
+		if ( array_key_exists( 'status', $column_mapping ) && array_key_exists( 'status', $changes ) ) {
 			$changes['status'] = $this->get_post_status( $order );
 		}
 
