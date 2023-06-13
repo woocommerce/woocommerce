@@ -8,6 +8,10 @@
 	z-index: 1001;
 	/* on top of #wp-content-editor-tools */
 
+	.woocommerce-profile-wizard__body & {
+		width: 100%;
+	}
+
 	@include breakpoint('782px-960px') {
 		width: calc(100% - 36px);
 	}
