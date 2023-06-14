@@ -8,6 +8,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import sanitizeHTML from '~/lib/sanitize-html';
 import WooPaymentsLogo from './woopayments.svg';
 import ExitSurveyModal from './exit-survey-modal';
 import PaymentMethods from './payment-methods';
@@ -41,7 +42,7 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 				<div className="woopayments-welcome-page__offer-pill">
 					{ strings.limitedTimeOffer }
 				</div>
-				<h2>{ description }</h2>
+				<h2 dangerouslySetInnerHTML={ sanitizeHTML( description ) } />
 				<Button
 					variant="primary"
 					isBusy={ isSubmitted }
