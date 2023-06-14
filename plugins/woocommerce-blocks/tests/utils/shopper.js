@@ -171,11 +171,10 @@ export const shopper = {
 				await uiUnblocked();
 			}
 
-			await page.waitForSelector( '.woocommerce-info' );
-			// eslint-disable-next-line jest/no-standalone-expect
-			await expect( page ).toMatchElement(
-				'.woocommerce-info.cart-empty'
-			);
+			// Wait for form to be hidden.
+			await page.waitForSelector( '.woocommerce-cart-form', {
+				hidden: true,
+			} );
 		},
 
 		placeOrder: async () => {
