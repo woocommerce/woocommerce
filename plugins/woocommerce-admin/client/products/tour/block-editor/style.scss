@@ -65,4 +65,10 @@ $light-purple: #f2edff;
 		background-color: $light-purple;
 		margin-bottom: $gap;
 	}
+
+	.woocommerce-tour-kit-step__heading {
+		.woocommerce-pill {
+			margin-left: $gap-small;
+		}
+	}
 }
