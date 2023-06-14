@@ -40,7 +40,10 @@ function ExitSurveyModal( {}: {
 
 		// Record that the modal was dismissed.
 		updateOptions( {
-			wc_calypso_bridge_payments_dismissed: 'yes',
+			wcpay_welcome_page_incentives_dismissed: [
+				...dismissedIncentives,
+				incentive.id,
+			],
 		} );
 
 		// Redirect back to the admin page.
@@ -70,9 +73,8 @@ function ExitSurveyModal( {}: {
 		if ( isMoreInfoChecked ) {
 			// Record that the user would possibly consider installing WCPay with more information in the future.
 			updateOptions( {
-				wc_pay_exit_survey_more_info_needed_timestamp: Math.floor(
-					Date.now() / 1000
-				),
+				wcpay_welcome_page_exit_survey_more_info_needed_timestamp:
+					Math.floor( Date.now() / 1000 ),
 			} );
 		}
 		closeModal();

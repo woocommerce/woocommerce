@@ -50,48 +50,32 @@ const ConnectAccountPage = () => {
 	const [ errorMessage, setErrorMessage ] = useState( '' );
 	const [ enabledApms, setEnabledApms ] = useState( new Set< Apm >() );
 
-	const { isJetpackConnected, connectUrl, hasViewedWelcomePage } = useSelect(
-		( select ) => {
-			const { getOption } = select( OPTIONS_STORE_NAME );
-			let pageViewTimestamp = getOption(
-				'wc_pay_welcome_page_viewed_timestamp'
-			);
-			pageViewTimestamp =
-				typeof pageViewTimestamp === 'undefined' ||
-				typeof pageViewTimestamp === 'string'
-					? true
-					: false;
-
-			return {
-				isJetpackConnected:
-					select( 'wc/admin/plugins' ).isJetpackConnected(),
-				connectUrl:
-					'admin.php?wcpay-connect=1&_wpnonce=' +
-					getAdminSetting( 'wcpay_welcome_page_connect_nonce' ),
-				hasViewedWelcomePage: pageViewTimestamp,
-			};
-		}
-	);
+	const { isJetpackConnected, connectUrl } = useSelect( ( select ) => {
+		return {
+			isJetpackConnected:
+				select( 'wc/admin/plugins' ).isJetpackConnected(),
+			connectUrl:
+				'admin.php?wcpay-connect=1&_wpnonce=' +
+				getAdminSetting( 'wcpay_welcome_page_connect_nonce' ),
+		};
+	} );
 
 	/**
-	 * Submits a request to store viewing welcome time.
+	 * Record page view and save viewed timestamp.
 	 */
-	const storeViewWelcome = () => {
-		if ( ! hasViewedWelcomePage ) {
-			updateOptions( {
-				wc_pay_welcome_page_viewed_timestamp: Math.floor(
-					Date.now() / 1000
-				),
-			} );
-		}
-	};
 	useEffect( () => {
 		recordEvent( 'page_view', {
 			path: 'payments_connect_core_test',
 			incentive_id: incentive.id,
 		} );
-		storeViewWelcome();
-	}, [ hasViewedWelcomePage ] );
+		updateOptions( {
+			wcpay_welcome_page_viewed_timestamp: Math.floor(
+				Date.now() / 1000
+			),
+		} );
+		// We only want to record this once, so we don't want to re-run this effect.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 
 	const activatePromo = async () => {
 		const activatePromoRequest: activatePromoResponse = await apiFetch( {
