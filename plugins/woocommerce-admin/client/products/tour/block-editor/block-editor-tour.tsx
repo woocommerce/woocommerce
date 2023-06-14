@@ -129,7 +129,7 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 								heading: (
 									<>
 										<span>{ heading }</span>
-										<Pill className="woocommerce-block-editor-guide__pill">
+										<Pill>
 											{ __( 'Beta', 'woocommerce' ) }
 										</Pill>
 									</>
