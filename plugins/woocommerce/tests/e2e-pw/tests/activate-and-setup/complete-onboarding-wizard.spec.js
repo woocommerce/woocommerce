@@ -72,11 +72,17 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		// Navigate to "Store Details" section to show Save Changes modal prompt
 		await page.click( 'button >> text=Store Details' );
 
-		// Save the changes to ensure the test is now in the correct state
-		// independent of the previous test results
-		await onboarding.handleSaveChangesModal( page, { saveChanges: true } );
+		// handle save changes modal if displayed
+		const saveChangesModalVisible = await page
+			.locator( '.components-modal__header-heading' )
+			.isVisible();
+		if ( saveChangesModalVisible ) {
+			// Save the changes to ensure the test is now in the correct state
+			// independent of the previous test results
+			await onboarding.handleSaveChangesModal( page, { saveChanges: true } );
+		}
 
-		// // test proper begins
+		// test proper begins
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
