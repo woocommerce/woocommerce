@@ -18,8 +18,8 @@
 		padding-top: 0;
 
 		@include breakpoint( '<782px' ) {
-			font-size: 28px !important;
-			line-height: 36px !important;
+			font-size: 28px;
+			line-height: 36px;
 		}
 	}
 
@@ -50,8 +50,6 @@
 			margin: 52px 0 40px;
 
 			.woocommerce-profiler-heading__title {
-				font-size: 32px;
-				line-height: 40px;
 				text-align: left;
 			}
 			.woocommerce-profiler-heading__subtitle {
