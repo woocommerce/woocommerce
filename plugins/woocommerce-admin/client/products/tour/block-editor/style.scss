@@ -1,22 +1,26 @@
-$background-height: 220px;
 $yellow: #f5e6ab;
 $light-purple: #f2edff;
 
 .woocommerce-block-editor-guide {
 	&__header {
-		height: $background-height;
-		background-color: #f6f7f7; /* WP Gray 0 */
+		width: 312px;
+		height: 222px;
+		background-color: #f6f7f7; /* WP Gray 0; no var available */
 
 		&-1 {
+			background-image: url(./images/guide-1.svg);
 		}
 
 		&-2 {
+			background-image: url(./images/guide-2.svg);
 		}
 
 		&-3 {
+			background-image: url(./images/guide-3.svg);
 		}
 
 		&-4 {
+			background-image: url(./images/guide-4.svg);
 		}
 	}
 
@@ -25,7 +29,7 @@ $light-purple: #f2edff;
 		background-color: $yellow;
 	}
 	&.components-modal__frame {
-		max-width: 320px;
+		max-width: 312px;
 	}
 	&__heading,
 	&__text {
