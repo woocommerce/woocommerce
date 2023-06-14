@@ -13,6 +13,7 @@ export function getTabTracksData( tabId: string, product: Product ) {
     const data = {
         product_tab: tabId,
         product_type: product.type,
+        source: 'product-block-editor-v1',
     }
 
     if ( tabId === 'inventory' ) {

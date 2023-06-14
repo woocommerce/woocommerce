@@ -45,7 +45,7 @@ class Tracks {
      */
     public function add_product_source( $source ) {
         if ( $this->is_product_editor_page( wp_get_referer() ) ) {
-            return 'product-blocks-editor-v1';
+            return 'product-block-editor-v1';
         }
 
         return $source;
