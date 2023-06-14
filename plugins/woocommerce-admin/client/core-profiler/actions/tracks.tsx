@@ -21,7 +21,7 @@ const recordTracksStepViewed = (
 	{ action }: { action: unknown }
 ) => {
 	const { step } = action as { step: string };
-	recordEvent( 'storeprofiler_step_view', {
+	recordEvent( 'coreprofiler_step_view', {
 		step,
 		wc_version: getSetting( 'wcVersion' ),
 	} );
@@ -33,12 +33,12 @@ const recordTracksStepSkipped = (
 	{ action }: { action: unknown }
 ) => {
 	const { step } = action as { step: string };
-	recordEvent( `storeprofiler_${ step }_skip` );
+	recordEvent( `coreprofiler_${ step }_skip` );
 };
 
 const recordTracksIntroCompleted = () => {
-	recordEvent( 'storeprofiler_step_complete', {
-		step: 'store_details',
+	recordEvent( 'coreprofiler_step_complete', {
+		step: 'intro_optin',
 		wc_version: getSetting( 'wcVersion' ),
 	} );
 };
@@ -47,12 +47,12 @@ const recordTracksUserProfileCompleted = (
 	_context: CoreProfilerStateMachineContext,
 	event: Extract< UserProfileEvent, { type: 'USER_PROFILE_COMPLETED' } >
 ) => {
-	recordEvent( 'storeprofiler_step_complete', {
+	recordEvent( 'coreprofiler_step_complete', {
 		step: 'user_profile',
 		wc_version: getSetting( 'wcVersion' ),
 	} );
 
-	recordEvent( 'storeprofiler_user_profile', {
+	recordEvent( 'coreprofiler_user_profile', {
 		business_choice: event.payload.userProfile.businessChoice,
 		selling_online_answer: event.payload.userProfile.sellingOnlineAnswer,
 		selling_platforms: event.payload.userProfile.sellingPlatforms
@@ -62,7 +62,7 @@ const recordTracksUserProfileCompleted = (
 };
 
 const recordTracksSkipBusinessLocationCompleted = () => {
-	recordEvent( 'storeprofiler_step_complete', {
+	recordEvent( 'coreprofiler_step_complete', {
 		step: 'skip_business_location',
 		wc_version: getSetting( 'wcVersion' ),
 	} );
@@ -72,12 +72,12 @@ const recordTracksBusinessInfoCompleted = (
 	_context: CoreProfilerStateMachineContext,
 	event: Extract< BusinessInfoEvent, { type: 'BUSINESS_INFO_COMPLETED' } >
 ) => {
-	recordEvent( 'storeprofiler_step_complete', {
+	recordEvent( 'coreprofiler_step_complete', {
 		step: 'business_info',
 		wc_version: getSetting( 'wcVersion' ),
 	} );
 
-	recordEvent( 'storeprofiler_business_info', {
+	recordEvent( 'coreprofiler_business_info', {
 		business_name_filled:
 			POSSIBLY_DEFAULT_STORE_NAMES.findIndex(
 				( name ) => name === event.payload.storeName
@@ -96,7 +96,7 @@ const recordTracksPluginsLearnMoreLinkClicked = (
 	{ action }: { action: unknown }
 ) => {
 	const { step } = action as { step: string };
-	recordEvent( `storeprofiler_${ step }_learn_more_link_clicked`, {
+	recordEvent( `coreprofiler_${ step }_learn_more_link_clicked`, {
 		plugin: _event.payload.plugin,
 		link: _event.payload.learnMoreLink,
 	} );
