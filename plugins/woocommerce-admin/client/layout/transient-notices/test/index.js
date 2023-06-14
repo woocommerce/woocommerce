@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { WooFooterItem } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -24,6 +25,18 @@ jest.mock( '@wordpress/data', () => {
 useDispatch.mockReturnValue( {
 	removeNotice: jest.fn(),
 	createNotice: jest.fn(),
+} );
+
+jest.mock( '@woocommerce/admin-layout', () => {
+	const originalModule = jest.requireActual( '@woocommerce/admin-layout' );
+
+	return {
+		__esModule: true, // Use it when dealing with esModules
+		...originalModule,
+		WooFooterItem: jest.fn( ( { children } ) => {
+			return <div>{ children }</div>;
+		} ),
+	};
 } );
 
 jest.mock( '../snackbar/list', () =>
