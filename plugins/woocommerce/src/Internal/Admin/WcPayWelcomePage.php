@@ -12,10 +12,24 @@ use Automattic\WooCommerce\Admin\PageController;
  * @package Automattic\WooCommerce\Admin\Features
  */
 class WcPayWelcomePage {
-
 	const TRANSIENT_NAME = 'wcpay_welcome_page_incentive';
-	const SCRIPT_NAME = 'wcpay-welcome-page-incentive';
+	const SCRIPT_NAME    = 'wcpay-welcome-page-incentive';
 
+	/**
+	 * Plugin instance.
+	 *
+	 * @var WcPayWelcomePage
+	 */
+	protected static $instance = null;
+
+	/**
+	 * Main Instance.
+	 */
+	public static function instance() {
+		self::$instance = is_null( self::$instance ) ? new self() : self::$instance;
+
+		return self::$instance;
+	}
 	/**
 	 * Eligible incentive for the store.
 	 *
@@ -27,20 +41,20 @@ class WcPayWelcomePage {
 	 * WCPayWelcomePage constructor.
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', array( $this, 'register_payments_welcome_page' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'allowed_promo_notes' ) );
+		add_action( 'admin_menu', [ $this, 'register_payments_welcome_page' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+		add_filter( 'woocommerce_admin_allowed_promo_notes', [ $this, 'allowed_promo_notes' ] );
 	}
 
 	/**
-	 * Registers the WooCommerce Payments welcome page.
+	 * Whether the WCPay welcome page is visible.
+	 *
+	 * @return boolean
 	 */
-	public function register_payments_welcome_page() {
-		global $menu;
-
+	public function must_be_visible() {
 		// Suggestions not disabled via a setting.
 		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
-			return;
+			return false;
 		}
 
 		/**
@@ -51,16 +65,34 @@ class WcPayWelcomePage {
 		 * @since 3.6.0
 		 */
 		if ( ! apply_filters( 'woocommerce_allow_marketplace_suggestions', true ) ) {
-			return;
+			return false;
 		}
 
-		// Promotion manually dismissed.
-		if ( get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) === 'yes' ) {
-			return;
+		// WCPay not installed and no existing account.
+		if ( $this->has_wcpay() ) {
+			return false;
 		}
 
-		// Available incentives for the store.
+		// Incentive available.
 		if ( empty( $this->get_incentive() ) ) {
+			return false;
+		}
+
+		// Incentive not manually dismissed.
+		if ( $this->is_incentive_dismissed() ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Registers the WooCommerce Payments welcome page.
+	 */
+	public function register_payments_welcome_page() {
+		global $menu;
+
+		if ( ! $this->must_be_visible() ) {
 			return;
 		}
 
@@ -115,7 +147,7 @@ class WcPayWelcomePage {
 	 *
 	 * @return void
 	 */
-	public function enqueue_scripts( ) {
+	public function enqueue_scripts() {
 		// Return early if not on WCPay welcome page.
 		if ( ! PageController::is_admin_page() || ! isset( $_GET['path'] ) || '/wc-pay-welcome-page' !== esc_url_raw( wp_unslash( $_GET['path'] ) ) ) {
 			return;
@@ -142,8 +174,8 @@ class WcPayWelcomePage {
 	 * @return array
 	 */
 	public function allowed_promo_notes( $promo_notes = [] ) {
-		if ( self::get_incentive() ) {
-			$promo_notes[] = self::get_incentive()['id'];
+		if ( $this->get_incentive() ) {
+			$promo_notes[] = $this->get_incentive()['id'];
 		}
 
 		return $promo_notes;
@@ -156,10 +188,33 @@ class WcPayWelcomePage {
 	 * @return boolean
 	 */
 	private function has_wcpay(): bool {
-		if (WooCommercePayments::is_installed()) return true;
+		if ( WooCommercePayments::is_installed() ) {
+			return true;
+		}
 
 		$account_data = get_option( 'wcpay_account_data' );
 		return isset( $account_data['data'] ) && is_array( $account_data['data'] ) && ! empty( $account_data['data'] );
+	}
+
+	/**
+	 * Whether the current incentive has been manually dismissed.
+	 *
+	 * @return boolean
+	 */
+	private function is_incentive_dismissed() {
+
+		// Return early if there is no eligible incentive.
+		if ( empty( $this->get_incentive() ) ) {
+			return true;
+		}
+
+		$dismissed_incentives = get_option( 'wcpay_welcome_page_incentives_dismissed', [] );
+
+		if ( in_array( $this->get_incentive()['id'], $dismissed_incentives, true ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -175,7 +230,8 @@ class WcPayWelcomePage {
 
 		// Return transient cached incentive if it exists.
 		if ( false !== get_transient( self::TRANSIENT_NAME ) ) {
-			return get_transient( self::TRANSIENT_NAME );
+			$this->_incentive = get_transient( self::TRANSIENT_NAME );
+			return $this->_incentive;
 		}
 
 		// Request incentive from WCPAY API.
@@ -216,7 +272,7 @@ class WcPayWelcomePage {
 		$cache_for = wp_remote_retrieve_header( $response, 'cache-for' );
 		$incentive = null;
 
-		if (200 === wp_remote_retrieve_response_code( $response )) {
+		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 			// Decode the results, falling back to an empty array.
 			$results = json_decode( wp_remote_retrieve_body( $response ), true ) ?? [];
 
@@ -231,9 +287,8 @@ class WcPayWelcomePage {
 			);
 
 			// Set incentive to null if it's empty.
-			$incentive = empty($incentive) ? null : $incentive;
+			$incentive = empty( $incentive ) ? null : $incentive;
 		}
-
 
 		// Store incentive in local cache.
 		$this->_incentive = $incentive;
@@ -244,7 +299,7 @@ class WcPayWelcomePage {
 		}
 
 		// Store incentive in transient cache for the given seconds or 24h.
-		set_transient( self::TRANSIENT_NAME, $incentive, !empty($cache_for) ? (int) $cache_for : DAY_IN_SECONDS );
+		set_transient( self::TRANSIENT_NAME, $incentive, ! empty( $cache_for ) ? (int) $cache_for : DAY_IN_SECONDS );
 
 		return $incentive;
 	}

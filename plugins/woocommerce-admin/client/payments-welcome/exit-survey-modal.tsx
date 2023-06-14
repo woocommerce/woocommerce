@@ -8,7 +8,7 @@ import {
 	CheckboxControl,
 	TextareaControl,
 } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -25,6 +25,7 @@ function ExitSurveyModal( {}: {
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	setExitSurveyModalOpen: Function;
 } ): JSX.Element | null {
+	const incentive = window.wcpayWelcomePageIncentive;
 	const [ isOpen, setOpen ] = useState( true );
 	const [ isHappyChecked, setHappyChecked ] = useState( false );
 	const [ isInstallChecked, setInstallChecked ] = useState( false );
@@ -34,6 +35,15 @@ function ExitSurveyModal( {}: {
 		useState( false );
 	const [ comments, setComments ] = useState( '' );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+
+	const dismissedIncentives = useSelect( ( select ) => {
+		const { getOption } = select( OPTIONS_STORE_NAME );
+		return (
+			( getOption(
+				'wcpay_welcome_page_incentives_dismissed'
+			) as string[] ) || []
+		);
+	} );
 
 	const closeModal = () => {
 		setOpen( false );
