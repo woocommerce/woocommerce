@@ -327,6 +327,7 @@ class WC_Products_Tracking {
 			'product_type_options' => $product_type_options_string,
 			'purchase_note'        => $product->get_purchase_note() ? 'yes' : 'no',
 			'sale_price'           => $product->get_sale_price() ? 'yes' : 'no',
+			'source'               => apply_filters( 'woocommerce_product_source', '' ),
 			'short_description'    => $product->get_short_description() ? 'yes' : 'no',
 			'tags'                 => count( $product->get_tag_ids() ),
 			'upsells'              => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',
