@@ -49,10 +49,10 @@ export const ProductMoreMenu = () => {
 			>
 				{ ( { onClose } ) => (
 					<>
-						<FeedbackMenuItem onClose={ onClose } />
+						<FeedbackMenuItem onClick={ onClose } />
 						<ClassicEditorMenuItem
 							productId={ values.id }
-							onClose={ onClose }
+							onClick={ onClose }
 						/>
 					</>
 				) }

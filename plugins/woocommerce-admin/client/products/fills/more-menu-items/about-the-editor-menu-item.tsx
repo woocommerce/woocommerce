@@ -14,9 +14,9 @@ import BlockEditorGuide from '~/products/tour/block-editor/block-editor-guide';
 import { usePublishedProductsCount } from '~/products/tour/block-editor/use-published-products-count';
 
 export const AboutTheEditorMenuItem = ( {
-	onClose,
+	onCloseGuide,
 }: {
-	onClose: () => void;
+	onCloseGuide: () => void;
 } ) => {
 	const [ isGuideOpen, setIsGuideOpen ] = useState( false );
 	const { isNewUser } = usePublishedProductsCount();
@@ -39,7 +39,7 @@ export const AboutTheEditorMenuItem = ( {
 					isNewUser={ isNewUser }
 					onCloseGuide={ () => {
 						setIsGuideOpen( false );
-						onClose();
+						onCloseGuide();
 					} }
 				/>
 			) }

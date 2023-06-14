@@ -18,11 +18,11 @@ import { recordEvent } from '@woocommerce/tracks';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 export const ClassicEditorMenuItem = ( {
-	onClose,
+	onClick,
 	productId,
 }: {
 	productId: number;
-	onClose: () => void;
+	onClick: () => void;
 } ) => {
 	const { showProductMVPFeedbackModal } = useDispatch( CES_STORE_KEY );
 
@@ -81,7 +81,7 @@ export const ClassicEditorMenuItem = ( {
 		} else {
 			window.location.href = classicEditorUrl;
 		}
-		onClose();
+		onClick();
 	}
 
 	return (

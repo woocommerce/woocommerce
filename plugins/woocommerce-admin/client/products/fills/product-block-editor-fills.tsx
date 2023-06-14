@@ -5,6 +5,7 @@ import {
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
 } from '@woocommerce/product-editor';
+import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooHeaderItem } from '@woocommerce/admin-layout';
 
@@ -25,11 +26,23 @@ import {
 const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
 	const [ id ] = useEntityProp( 'postType', 'product', 'id' );
 
+	const handleClick = ( optionName: string ) => {
+		recordEvent( 'product_dropdown_option_click', {
+			selected_option: optionName,
+		} );
+		onClose();
+	};
+
 	return (
 		<>
-			<FeedbackMenuItem onClose={ onClose } />
-			<ClassicEditorMenuItem productId={ id } onClose={ onClose } />
-			<AboutTheEditorMenuItem onClose={ onClose } />
+			<FeedbackMenuItem onClick={ () => handleClick( 'feedback' ) } />
+			<ClassicEditorMenuItem
+				productId={ id }
+				onClick={ () => {
+					handleClick( 'classic_editor' );
+				} }
+			/>
+			<AboutTheEditorMenuItem onCloseGuide={ onClose } />
 		</>
 	);
 };
