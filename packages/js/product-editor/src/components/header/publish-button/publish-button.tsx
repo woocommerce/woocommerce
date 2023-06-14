@@ -31,9 +31,11 @@ export function PublishButton( {
 		productStatus,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
-			recordProductEvent( 'product_update', savedProduct );
-
 			const isPublished = productStatus === 'publish';
+
+			if ( isPublished ) {
+				recordProductEvent( 'product_update', savedProduct );
+			}
 
 			const noticeContent = isPublished
 				? __( 'Product updated.', 'woocommerce' )
