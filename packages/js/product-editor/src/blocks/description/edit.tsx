@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { createElement, useState } from '@wordpress/element';
 import { parse, serialize } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
 
@@ -31,7 +32,10 @@ export function Edit() {
 		<div { ...blockProps }>
 			<Button
 				variant="secondary"
-				onClick={ () => setIsModalOpen( true ) }
+				onClick={ () => {
+					setIsModalOpen( true );
+					recordEvent( 'product_add_description_click' );
+				} }
 			>
 				{ description.length
 					? __( 'Edit description', 'woocommerce' )
