@@ -3,7 +3,6 @@
  */
 import { render } from '@testing-library/react';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { WooFooterItem } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
