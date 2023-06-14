@@ -19,7 +19,7 @@ class WcPayWelcomePage {
 	/**
 	 * Eligible incentive for the store.
 	 *
-	 * @var array
+	 * @var array|null
 	 */
 	private $_incentive = null;
 
@@ -169,12 +169,12 @@ class WcPayWelcomePage {
 	 */
 	private function get_incentive() {
 		// Return local cached incentive if it exists.
-		if ( ! empty( $this->_incentive ) ) {
+		if ( isset( $this->_incentive ) ) {
 			return $this->_incentive;
 		}
 
 		// Return transient cached incentive if it exists.
-		if ( ! empty( get_transient( self::TRANSIENT_NAME ) ) ) {
+		if ( false !== get_transient( self::TRANSIENT_NAME ) ) {
 			return get_transient( self::TRANSIENT_NAME );
 		}
 
@@ -207,28 +207,36 @@ class WcPayWelcomePage {
 
 		$response = wp_remote_get( $url );
 
-		// Return early if there is an error.
-		if ( is_wp_error( $response ) || ! is_array( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		// Return early if there is an error, waiting 6h before the next attempt.
+		if ( is_wp_error( $response ) ) {
+			set_transient( self::TRANSIENT_NAME, null, HOUR_IN_SECONDS * 6 );
 			return;
 		}
 
-		// Decode the results, falling back to an empty array.
-		$results = json_decode( wp_remote_retrieve_body( $response ), true ) ?? [];
+		$cache_for = wp_remote_retrieve_header( $response, 'cache-for' );
+		$incentive = null;
 
-		// Find a `welcome_page` incentive.
-		$incentive = current(
-			array_filter(
-				$results,
-				function( $incentive ) {
-					return 'welcome_page' === $incentive['type'];
-				}
-			)
-		);
+		if (200 === wp_remote_retrieve_response_code( $response )) {
+			// Decode the results, falling back to an empty array.
+			$results = json_decode( wp_remote_retrieve_body( $response ), true ) ?? [];
+
+			// Find a `welcome_page` incentive.
+			$incentive = current(
+				array_filter(
+					$results,
+					function( $incentive ) {
+						return 'welcome_page' === $incentive['type'];
+					}
+				)
+			);
+
+			// Set incentive to null if it's empty.
+			$incentive = empty($incentive) ? null : $incentive;
+		}
+
 
 		// Store incentive in local cache.
 		$this->_incentive = $incentive;
-
-		$cache_for = wp_remote_retrieve_header( $response, 'cache-for' );
 
 		// Skip transient cache if `cache-for` header equals zero.
 		if ( '0' === $cache_for ) {
@@ -236,7 +244,7 @@ class WcPayWelcomePage {
 		}
 
 		// Store incentive in transient cache for the given seconds or 24h.
-		set_transient( self::TRANSIENT_NAME, $incentive, $cache_for ? (int) $cache_for : DAY_IN_SECONDS );
+		set_transient( self::TRANSIENT_NAME, $incentive, !empty($cache_for) ? (int) $cache_for : DAY_IN_SECONDS );
 
 		return $incentive;
 	}
