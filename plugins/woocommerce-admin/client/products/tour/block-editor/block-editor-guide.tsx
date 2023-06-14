@@ -2,23 +2,25 @@
  * External dependencies
  */
 
-import { Guide } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
+import Guide from '../components/guide';
 import './style.scss';
 
 interface Props {
-	onCloseGuide: () => void;
+	onCloseGuide: ( currentPage: number, origin: 'close' | 'finish' ) => void;
 }
 
 const BlockEditorGuide = ( { onCloseGuide }: Props ) => {
 	return (
 		<Guide
 			className="woocommerce-block-editor-guide"
-			finishButtonText={ __( 'Close', 'woocommerce' ) }
+			contentLabel=""
+			finishButtonText={ __( 'Tell me more', 'woocommerce' ) }
+			finishButtonLink="https://woocommerce.com/product-form-beta"
 			onFinish={ onCloseGuide }
 			pages={ [
 				{

@@ -138,7 +138,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.locator( '.variations_tab > a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
@@ -231,7 +231,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.locator( '.variations_tab > a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
@@ -344,7 +344,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.locator( '.variations_tab > a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step(
@@ -387,7 +387,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.locator( '.variations_tab > a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step(
@@ -418,7 +418,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.locator( '.variations_tab > a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step( 'Expand all variations', async () => {
@@ -538,7 +538,11 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.locator( '.variations_tab > a[href="#variable_product_options"]' ).click();
+		} );
+
+		await test.step( 'Wait for block overlay to disappear.', async () => {
+			await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
 		} );
 
 		await test.step( 'Select variation defaults', async () => {
@@ -598,7 +602,7 @@ test.describe( 'Update variations', () => {
 		} );
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.locator( 'a[href="#variable_product_options"]' ).click();
+			await page.locator( '.variations_tab > a[href="#variable_product_options"]' ).click();
 		} );
 
 		await test.step( 'Click "Remove" on a variation', async () => {

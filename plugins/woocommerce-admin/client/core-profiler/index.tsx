@@ -106,6 +106,14 @@ export type PluginsInstallationRequestedEvent = {
 	};
 };
 
+export type PluginsLearnMoreLinkClicked = {
+	type: 'PLUGINS_LEARN_MORE_LINK_CLICKED';
+	payload: {
+		plugin: string;
+		learnMoreLink: string;
+	};
+};
+
 // TODO: add types as we develop the pages
 export type OnboardingProfile = {
 	business_choice: BusinessChoice;
@@ -1107,6 +1115,14 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							],
 							target: 'pluginsSkipped',
 						},
+						PLUGINS_LEARN_MORE_LINK_CLICKED: {
+							actions: [
+								{
+									type: 'recordTracksPluginsLearnMoreLinkClicked',
+									step: 'plugins',
+								},
+							],
+						},
 						PLUGINS_INSTALLATION_REQUESTED: {
 							target: 'installPlugins',
 							actions: [ 'assignPluginsSelected' ],
@@ -1266,6 +1282,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						data: ( context ) => {
 							return {
 								selectedPlugins: context.pluginsSelected,
+								pluginsAvailable: context.pluginsAvailable,
 							};
 						},
 					},

@@ -275,4 +275,22 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test the untrashing an order works as expected when done in an agnostic way (ie, not depending directly on
+	 * functions such as `wp_untrash_post()`.
+	 *
+	 * @return void
+	 */
+	public function test_untrash(): void {
+		$order           = WC_Helper_Order::create_order();
+		$order_id        = $order->get_id();
+		$original_status = $order->get_status();
+
+		$order->delete();
+		$this->assertEquals( 'trash', $order->get_status(), 'The order was successfully trashed.' );
+
+		$order = wc_get_order( $order_id );
+		$this->assertTrue( $order->untrash(), 'The order was restored from the trash.' );
+		$this->assertEquals( $original_status, $order->get_status(), 'The original order status is restored following untrash.' );
+	}
 }

@@ -1,0 +1,5 @@
+Significance: patch
+Type: enhancement
+Comment: Add wcadmin_settings_change tracks event when adding/removing entries in shipping
+
+

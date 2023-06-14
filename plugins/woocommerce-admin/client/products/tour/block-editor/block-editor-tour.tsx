@@ -5,6 +5,7 @@ import { Pill, TourKit } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect, useState } from '@wordpress/element';
+import { __experimentalUseFeedbackBar as useFeedbackBar } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
@@ -27,17 +28,35 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 
 	const [ isGuideOpen, setIsGuideOpen ] = useState( false );
 
+	const { maybeShowFeedbackBar } = useFeedbackBar();
+
 	const openGuide = () => {
 		setIsGuideOpen( true );
 	};
 
-	const closeGuide = () => {
-		recordEvent( 'block_product_editor_spotlight_completed' );
-		setIsGuideOpen( false );
-	};
-
 	if ( isGuideOpen ) {
-		return <BlockEditorGuide onCloseGuide={ closeGuide } />;
+		return (
+			<BlockEditorGuide
+				onCloseGuide={ ( currentPage, source ) => {
+					dismissModal();
+					if ( source === 'finish' ) {
+						recordEvent(
+							'block_product_editor_spotlight_tell_me_more_click'
+						);
+					} else {
+						//  adding 1 to consider the TourKit as page 0
+						recordEvent(
+							'block_product_editor_spotlight_dismissed',
+							{
+								current_page: currentPage + 1,
+							}
+						);
+					}
+					setIsGuideOpen( false );
+					maybeShowFeedbackBar();
+				} }
+			/>
+		);
 	} else if ( shouldTourBeShown ) {
 		return (
 			<TourKit
@@ -78,16 +97,20 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 						},
 					],
 					closeHandler: ( _steps, _currentStepIndex, source ) => {
-						dismissModal();
 						if ( source === 'done-btn' ) {
 							recordEvent(
 								'block_product_editor_spotlight_view_highlights'
 							);
 							openGuide();
 						} else {
+							dismissModal();
 							recordEvent(
-								'block_product_editor_spotlight_dismissed'
+								'block_product_editor_spotlight_dismissed',
+								{
+									current_page: 0,
+								}
 							);
+							maybeShowFeedbackBar();
 						}
 					},
 					options: {
@@ -116,6 +139,7 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 								},
 							},
 						],
+						classNames: 'woocommerce-block-editor-tourkit',
 					},
 				} }
 			/>
