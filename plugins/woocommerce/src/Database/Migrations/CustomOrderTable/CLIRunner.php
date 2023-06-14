@@ -304,6 +304,11 @@ class CLIRunner {
 	 * ---
 	 * default: Output of function `wc_get_order_types( 'cot-migration' )`
 	 *
+	 * [--re-migrate]
+	 * : Attempt to re-migrate orders that failed verification. You should only use this option when you have never run the site with HPOS as authoritative source of order data yet, or you have manually checked the reported errors, otherwise, you risk stale data overwriting the more recent data.
+	 * This option can only be enabled when --verbose flag is also set.
+	 * default: false
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Verify migrated order data, 500 orders at a time.
@@ -327,6 +332,7 @@ class CLIRunner {
 				'end-at'      => - 1,
 				'verbose'     => false,
 				'order-types' => '',
+				're-migrate'  => false,
 			)
 		);
 
@@ -340,6 +346,7 @@ class CLIRunner {
 		$batch_size     = ( (int) $assoc_args['batch-size'] ) === 0 ? 500 : (int) $assoc_args['batch-size'];
 		$verbose        = (bool) $assoc_args['verbose'];
 		$order_types    = wc_get_order_types( 'cot-migration' );
+		$remigrate      = (bool) $assoc_args['re-migrate'];
 		if ( ! empty( $assoc_args['order-types'] ) ) {
 			$passed_order_types = array_map( 'trim', explode( ',', $assoc_args['order-types'] ) );
 			$order_types        = array_intersect( $order_types, $passed_order_types );
@@ -415,6 +422,36 @@ class CLIRunner {
 						$errors
 					)
 				);
+				if ( $remigrate ) {
+					WP_CLI::warning(
+						sprintf(
+							__( 'Attempting to remigrate...', 'woocommerce' )
+						)
+					);
+					$failed_ids = array_keys( $failed_ids_in_current_batch );
+					$this->synchronizer->process_batch( $failed_ids );
+					$errors_in_remigrate_batch = $this->post_to_cot_migrator->verify_migrated_orders( $failed_ids );
+					$errors_in_remigrate_batch = $this->verify_meta_data( $failed_ids, $errors_in_remigrate_batch );
+					if ( count( $errors_in_remigrate_batch ) > 0 ) {
+						// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a CLI command and debugging code is intended.
+						$formatted_errors = print_r( $errors_in_remigrate_batch, true );
+						WP_CLI::warning(
+							sprintf(
+							/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
+								_n(
+									'%1$d error found: %2$s when re-migrating order. Please review the error above.',
+									'%1$d errors found: %2$s when re-migrating orders. Please review the errors above.',
+									count( $errors_in_remigrate_batch ),
+									'woocommerce'
+								),
+								count( $errors_in_remigrate_batch ),
+								$formatted_errors
+							)
+						);
+					} else {
+						WP_CLI::warning( 'Re-migration successful.', 'woocommerce' );
+					}
+				}
 			}
 
 			$progress->tick();
