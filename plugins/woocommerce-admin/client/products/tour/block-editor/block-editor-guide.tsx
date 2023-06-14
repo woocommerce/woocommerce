@@ -41,17 +41,28 @@ const PageImage = ( {
 );
 
 interface BlockEditorGuideProps {
+	isNewUser: boolean;
 	onCloseGuide: ( currentPage: number, origin: 'close' | 'finish' ) => void;
 }
 
-const BlockEditorGuide = ( { onCloseGuide }: BlockEditorGuideProps ) => {
+const BlockEditorGuide = ( {
+	isNewUser,
+	onCloseGuide,
+}: BlockEditorGuideProps ) => {
 	const pagesConfig = [
 		{
-			heading: __( 'Refreshed, streamlined interface', 'woocommerce' ),
-			text: __(
-				'Experience a simpler, more focused interface with a modern design that enhances usability.',
-				'woocommerce'
-			),
+			heading: isNewUser
+				? __( 'Fresh and modern interface', 'woocommerce' )
+				: __( 'Refreshed, streamlined interface', 'woocommerce' ),
+			text: isNewUser
+				? __(
+						'Using the product form means less clicking around. Product details are neatly grouped by tabs, so you always know where to go.',
+						'woocommerce'
+				  )
+				: __(
+						'Experience a simpler, more focused interface with a modern design that enhances usability.',
+						'woocommerce'
+				  ),
 		},
 		{
 			heading: __( 'Content-rich product descriptions', 'woocommerce' ),
@@ -61,11 +72,18 @@ const BlockEditorGuide = ( { onCloseGuide }: BlockEditorGuideProps ) => {
 			),
 		},
 		{
-			heading: __( 'Improved speed & performance', 'woocommerce' ),
-			text: __(
-				'Enjoy a seamless experience without page reloads. Our modern technology ensures reliability and lightning-fast performance.',
-				'woocommerce'
-			),
+			heading: isNewUser
+				? __( 'Speed & performance', 'woocommerce' )
+				: __( 'Improved speed & performance', 'woocommerce' ),
+			text: isNewUser
+				? __(
+						'Create a product from start to finish without page reloads. Our modern technology ensures reliability and lightning-fast performance.',
+						'woocommerce'
+				  )
+				: __(
+						'Enjoy a seamless experience without page reloads. Our modern technology ensures reliability and lightning-fast performance.',
+						'woocommerce'
+				  ),
 		},
 		{
 			heading: __( 'More features are on the way', 'woocommerce' ),

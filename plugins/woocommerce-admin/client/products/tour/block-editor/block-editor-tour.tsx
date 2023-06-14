@@ -86,6 +86,7 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 	if ( isGuideOpen ) {
 		return (
 			<BlockEditorGuide
+				isNewUser={ isNewUser }
 				onCloseGuide={ ( currentPage, source ) => {
 					dismissModal();
 					if ( source === 'finish' ) {
