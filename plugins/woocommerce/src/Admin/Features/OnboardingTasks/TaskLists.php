@@ -41,6 +41,7 @@ class TaskLists {
 	 * @var array
 	 */
 	const DEFAULT_TASKS = array(
+		'CoreProfiler',
 		'StoreDetails',
 		'Purchase',
 		'Products',
@@ -108,21 +109,28 @@ class TaskLists {
 	 * Initialize default lists.
 	 */
 	public static function init_default_lists() {
+		$tasks = array(
+			'Purchase',
+			'Products',
+			'WooCommercePayments',
+			'Payments',
+			'Tax',
+			'Shipping',
+			'Marketing',
+			'Appearance',
+		);
+
+		if ( Features::is_enabled( 'core-profiler' ) ) {
+			array_unshift( $tasks, 'CoreProfiler' );
+		} else {
+			array_unshift( $tasks, 'StoreDetails' );
+		}
+
 		self::add_list(
 			array(
 				'id'                      => 'setup',
 				'title'                   => __( 'Get ready to start selling', 'woocommerce' ),
-				'tasks'                   => array(
-					'StoreDetails',
-					'Purchase',
-					'Products',
-					'WooCommercePayments',
-					'Payments',
-					'Tax',
-					'Shipping',
-					'Marketing',
-					'Appearance',
-				),
+				'tasks'                   => $tasks,
 				'display_progress_header' => true,
 				'event_prefix'            => 'tasklist_',
 				'options'                 => array(
