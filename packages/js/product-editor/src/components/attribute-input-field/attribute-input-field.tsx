@@ -23,6 +23,7 @@ import {
  * Internal dependencies
  */
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
+import { TRACKS_SOURCE } from '../../constants';
 
 type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
 
@@ -112,7 +113,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			onSelect={ ( attribute ) => {
 				if ( isNewAttributeListItem( attribute ) ) {
 					recordEvent( 'product_attribute_add_custom_attribute', {
-						new_product_page: true,
+						source: TRACKS_SOURCE,
 					} );
 				}
 				onChange(

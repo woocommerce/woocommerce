@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Product } from '@woocommerce/data';
+import { TRACKS_SOURCE } from '../../../constants';
 
 /**
  * Get the data for a tab click.
@@ -13,7 +14,7 @@ export function getTabTracksData( tabId: string, product: Product ) {
     const data = {
         product_tab: tabId,
         product_type: product.type,
-        source: 'product-block-editor-v1',
+        source: TRACKS_SOURCE,
     }
 
     if ( tabId === 'inventory' ) {

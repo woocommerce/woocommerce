@@ -14,6 +14,7 @@ import { useDispatch } from '@wordpress/data';
 import { getProductErrorMessage } from '../../../utils/get-product-error-message';
 import { usePreview } from '../hooks/use-preview';
 import { PreviewButtonProps } from './types';
+import { TRACKS_SOURCE } from '../../../constants';
 
 export function PreviewButton( {
 	productStatus,
@@ -25,7 +26,7 @@ export function PreviewButton( {
 		productStatus,
 		...props,
 		onClick() {
-			recordEvent( 'product_preview_changes', { source: 'product-block-editor-v1' } );
+			recordEvent( 'product_preview_changes', { source: TRACKS_SOURCE } );
 		},
 		onSaveSuccess( savedProduct: Product ) {
 			if ( productStatus === 'auto-draft' ) {
