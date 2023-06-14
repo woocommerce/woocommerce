@@ -1,6 +1,3 @@
-$yellow: #f5e6ab;
-$light-purple: #f2edff;
-
 .woocommerce-block-editor-guide {
 	&__header {
 		width: 312px;
@@ -24,10 +21,6 @@ $light-purple: #f2edff;
 		}
 	}
 
-	&__pill {
-		border: 1px solid $yellow;
-		background-color: $yellow;
-	}
 	&.components-modal__frame {
 		max-width: 312px;
 	}
@@ -70,7 +63,7 @@ $light-purple: #f2edff;
 		.components-card__header {
 			align-items: flex-start;
 			height: 194px;
-			background-color: $light-purple;
+			background-color: #d4aaf6; /* no var available */
 			background-image: url(./images/tour-header.svg);
 			border-bottom: 1px solid $gray-200;
 			margin-bottom: $gap;
@@ -79,6 +72,8 @@ $light-purple: #f2edff;
 		&__heading {
 			.woocommerce-pill {
 				margin-left: $gap-small;
+				background-color: $studio-yellow-5;
+				border: 0;
 			}
 		}
 	}
