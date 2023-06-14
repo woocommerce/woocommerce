@@ -8,10 +8,15 @@ import { NavigableMenu, Slot } from '@wordpress/components';
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
+import { Product } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
+import { useSelect } from '@wordpress/data';
+import { useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
- */
+*/
+import { getTabTracksData } from './utils/get-tab-tracks-data';
 import { sortFillsByOrder } from '../../utils';
 import { TABS_SLOT_NAME } from './constants';
 
@@ -26,6 +31,18 @@ export type TabsFillProps = {
 export function Tabs( { onChange = () => {} }: TabsProps ) {
 	const [ selected, setSelected ] = useState< string | null >( null );
 	const query = getQuery() as Record< string, string >;
+	const [ productId ] = useEntityProp< number >(
+		'postType',
+		'product',
+		'id'
+	);
+	const product: Product = useSelect( ( select ) =>
+		select( 'core' ).getEditedEntityRecord(
+			'postType',
+			'product',
+			productId
+		)
+	);
 
 	useEffect( () => {
 		onChange( selected );
@@ -69,10 +86,12 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 			<Slot
 				fillProps={
 					{
-						onClick: ( tabId ) =>
+						onClick: ( tabId ) => {
 							navigateTo( {
 								url: getNewPath( { tab: tabId } ),
-							} ),
+							} );
+							recordEvent( 'product_tab_click', getTabTracksData( tabId, product ) );
+						}
 					} as TabsFillProps
 				}
 				name={ TABS_SLOT_NAME }
