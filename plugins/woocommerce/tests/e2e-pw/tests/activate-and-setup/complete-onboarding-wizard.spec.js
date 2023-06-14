@@ -60,6 +60,23 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 	test( 'can discard industry changes when navigating back to "Store Details"', async ( {
 		page,
 	} ) => {
+
+		// set up pre-condition to ensure Industries stored in 
+		// storeDetails.us.industries2 have been set 
+		await onboarding.completeIndustrySection(
+			page,
+			storeDetails.us.industries2,
+			storeDetails.us.expectedNumberOfIndustries
+		);
+
+		// Navigate to "Store Details" section to show Save Changes modal prompt
+		await page.click( 'button >> text=Store Details' );
+
+		// Save the changes to ensure the test is now in the correct state
+		// independent of the previous test results
+		await onboarding.handleSaveChangesModal( page, { saveChanges: true } );
+
+		// // test proper begins
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
