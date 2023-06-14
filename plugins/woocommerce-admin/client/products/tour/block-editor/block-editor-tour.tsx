@@ -30,8 +30,27 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 
 	const { maybeShowFeedbackBar } = useFeedbackBar();
 
+	const isNewUser = true;
+
 	const openGuide = () => {
 		setIsGuideOpen( true );
+	};
+
+	const getTourText = () => {
+		return {
+			heading: isNewUser
+				? __( 'Meet the product editing form', 'woocommerce' )
+				: __( 'A new way to edit your products', 'woocommerce' ),
+			description: isNewUser
+				? __(
+						"Discover the form's unique features designed to help you make this product stand out.",
+						'woocommerce'
+				  )
+				: __(
+						'Introducing the upgraded experience designed to help you create and edit products easier.',
+						'woocommerce'
+				  ),
+		};
 	};
 
 	if ( isGuideOpen ) {
@@ -58,6 +77,8 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 			/>
 		);
 	} else if ( shouldTourBeShown ) {
+		const { heading, description } = getTourText();
+
 		return (
 			<TourKit
 				config={ {
@@ -72,19 +93,11 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 									),
 								},
 								descriptions: {
-									desktop: __(
-										"We designed a brand new product editing experience to let you focus on what's important.",
-										'woocommerce'
-									),
+									desktop: description,
 								},
 								heading: (
 									<>
-										<span>
-											{ __(
-												'Meet a streamlined product form',
-												'woocommerce'
-											) }
-										</span>{ ' ' }
+										<span>{ heading }</span>{ ' ' }
 										<Pill className="woocommerce-block-editor-guide__pill">
 											{ __( 'Beta', 'woocommerce' ) }
 										</Pill>
