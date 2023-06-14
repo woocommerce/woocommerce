@@ -12,8 +12,15 @@ import {
 	UserProfileEvent,
 	BusinessInfoEvent,
 	PluginsLearnMoreLinkClicked,
+	PluginsInstallationCompletedWithErrorsEvent,
+	PluginsInstallationCompletedEvent,
 } from '..';
 import { POSSIBLY_DEFAULT_STORE_NAMES } from '../pages/BusinessInfo';
+import {
+	InstalledPlugin,
+	PluginInstallError,
+} from '../services/installAndActivatePlugins';
+import { getPluginTrackKey, getTimeFrame } from '~/utils';
 
 const recordTracksStepViewed = (
 	_context: unknown,
@@ -38,7 +45,7 @@ const recordTracksStepSkipped = (
 
 const recordTracksIntroCompleted = () => {
 	recordEvent( 'coreprofiler_step_complete', {
-		step: 'intro_optin',
+		step: 'intro_opt_in',
 		wc_version: getSetting( 'wcVersion' ),
 	} );
 };
@@ -102,6 +109,51 @@ const recordTracksPluginsLearnMoreLinkClicked = (
 	} );
 };
 
+const recordFailedPluginInstallations = (
+	_context: unknown,
+	_event: PluginsInstallationCompletedWithErrorsEvent
+) => {
+	recordEvent( 'coreprofiler_store_extensions_installed_and_activated', {
+		success: false,
+		failed_extensions: _event.payload.errors.map(
+			( error: PluginInstallError ) => getPluginTrackKey( error.plugin )
+		),
+	} );
+};
+
+const recordSuccessfulPluginInstallation = (
+	_context: unknown,
+	_event: PluginsInstallationCompletedEvent
+) => {
+	const installationCompletedResult =
+		_event.payload.installationCompletedResult;
+
+	const trackData: {
+		success: boolean;
+		installed_extensions: string[];
+		total_time: string;
+		[ key: string ]: number | boolean | string | string[];
+	} = {
+		success: true,
+		installed_extensions: installationCompletedResult.installedPlugins.map(
+			( installedPlugin: InstalledPlugin ) =>
+				getPluginTrackKey( installedPlugin.plugin )
+		),
+		total_time: getTimeFrame( installationCompletedResult.totalTime ),
+	};
+
+	for ( const installedPlugin of installationCompletedResult.installedPlugins ) {
+		trackData[
+			'install_time_' + getPluginTrackKey( installedPlugin.plugin )
+		] = getTimeFrame( installedPlugin.installTime );
+	}
+
+	recordEvent(
+		'coreprofiler_store_extensions_installed_and_activated',
+		trackData
+	);
+};
+
 export default {
 	recordTracksStepViewed,
 	recordTracksStepSkipped,
@@ -110,4 +162,6 @@ export default {
 	recordTracksSkipBusinessLocationCompleted,
 	recordTracksBusinessInfoCompleted,
 	recordTracksPluginsLearnMoreLinkClicked,
+	recordFailedPluginInstallations,
+	recordSuccessfulPluginInstallation,
 };
