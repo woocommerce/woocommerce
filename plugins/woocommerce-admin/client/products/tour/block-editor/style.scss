@@ -3,21 +3,22 @@
 		width: 312px;
 		height: 222px;
 		background-color: #f6f7f7; /* WP Gray 0; no var available */
+		background-size: cover;
 
 		&-1 {
 			background-image: url(./images/guide-1.svg);
 		}
 
 		&-2 {
-			background-image: url(./images/guide-2.svg);
+			background-image: url(./images/guide-2.png);
 		}
 
 		&-3 {
-			background-image: url(./images/guide-3.svg);
+			background-image: url(./images/guide-3.png);
 		}
 
 		&-4 {
-			background-image: url(./images/guide-4.svg);
+			background-image: url(./images/guide-4.png);
 		}
 	}
 
