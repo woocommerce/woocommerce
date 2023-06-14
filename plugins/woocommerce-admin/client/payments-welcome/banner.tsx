@@ -20,7 +20,8 @@ interface Props {
 
 const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 	const { first_name } = getAdminSetting( 'currentUserData', {} );
-	const { description, cta, tos_link } = getAdminSetting( 'wcpayIncentive' );
+	const { description, cta_label, tos_link } =
+		window.wcpayWelcomePageIncentive;
 
 	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
 	const [ isExitSurveyModalOpen, setExitSurveyModalOpen ] = useState( false );
@@ -47,7 +48,7 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 					disabled={ isSubmitted }
 					onClick={ handleSetup }
 				>
-					{ cta }
+					{ cta_label }
 				</Button>
 				<Button
 					variant="tertiary"

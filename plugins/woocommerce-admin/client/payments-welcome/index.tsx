@@ -27,13 +27,13 @@ declare global {
 				currentUserData: {
 					first_name: string;
 				};
-				wcpayIncentive: {
-					id: string;
-					description: string;
-					cta: string;
-					tos_link: string;
-				};
 			};
+		};
+		wcpayWelcomePageIncentive: {
+			id: string;
+			description: string;
+			cta_label: string;
+			tos_link: string;
 		};
 	}
 }
@@ -43,7 +43,7 @@ interface activatePromoResponse {
 }
 
 const ConnectAccountPage = () => {
-	const incentive = getAdminSetting( 'wcpayIncentive' );
+	const incentive = window.wcpayWelcomePageIncentive;
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { installAndActivatePlugins } = useDispatch( 'wc/admin/plugins' );
 	const [ isSubmitted, setSubmitted ] = useState( false );
@@ -136,6 +136,8 @@ const ConnectAccountPage = () => {
 			}
 		}
 	};
+
+	if ( ! incentive ) return null;
 
 	return (
 		<div className="woopayments-welcome-page">
