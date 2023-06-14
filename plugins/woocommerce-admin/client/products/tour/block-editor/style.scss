@@ -59,16 +59,24 @@ $light-purple: #f2edff;
 }
 
 .woocommerce-block-editor-tourkit {
-	.components-card__header {
-		align-items: flex-start;
-		height: 200px;
-		background-color: $light-purple;
-		margin-bottom: $gap;
-	}
+	.woocommerce-tour-kit-step {
+		width: 381px;
 
-	.woocommerce-tour-kit-step__heading {
-		.woocommerce-pill {
-			margin-left: $gap-small;
+		.components-card__header {
+			align-items: flex-start;
+			height: 194px;
+			background-color: $light-purple;
+			background-image: url(./images/tour-header.svg);
+			border-bottom: 1px solid $gray-200;
+			margin-bottom: $gap;
+		}
+
+		&__heading {
+			.woocommerce-pill {
+				margin-left: $gap-small;
+			}
 		}
 	}
+
+
 }
