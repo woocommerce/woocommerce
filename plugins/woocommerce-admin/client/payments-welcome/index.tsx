@@ -88,6 +88,7 @@ const ConnectAccountPage = () => {
 	useEffect( () => {
 		recordEvent( 'page_view', {
 			path: 'payments_connect_core_test',
+			incentive_id: incentive.id,
 		} );
 		storeViewWelcome();
 	}, [ hasViewedWelcomePage ] );
