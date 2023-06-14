@@ -5,21 +5,18 @@ $light-purple: #f2edff;
 .woocommerce-block-editor-guide {
 	&__header {
 		height: $background-height;
+		background-color: #f6f7f7; /* WP Gray 0 */
 
 		&-1 {
-			background-color: $light-purple;
 		}
 
 		&-2 {
-			background-color: #dfd1fb;
 		}
 
 		&-3 {
-			background-color: #cfb9f6;
 		}
 
 		&-4 {
-			background-color: #bea0f2;
 		}
 	}
 
