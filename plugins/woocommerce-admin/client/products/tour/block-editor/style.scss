@@ -3,22 +3,26 @@ $yellow: #f5e6ab;
 $light-purple: #f2edff;
 
 .woocommerce-block-editor-guide {
-	&__background1 {
+	&__header {
 		height: $background-height;
-		background-color: $light-purple;
+
+		&-1 {
+			background-color: $light-purple;
+		}
+
+		&-2 {
+			background-color: #dfd1fb;
+		}
+
+		&-3 {
+			background-color: #cfb9f6;
+		}
+
+		&-4 {
+			background-color: #bea0f2;
+		}
 	}
-	&__background2 {
-		height: $background-height;
-		background-color: #dfd1fb;
-	}
-	&__background3 {
-		height: $background-height;
-		background-color: #cfb9f6;
-	}
-	&__background4 {
-		height: $background-height;
-		background-color: #bea0f2;
-	}
+
 	&__pill {
 		border: 1px solid $yellow;
 		background-color: $yellow;
