@@ -1,11 +1,12 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import { Product } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -23,6 +24,9 @@ export function PreviewButton( {
 	const previewButtonProps = usePreview( {
 		productStatus,
 		...props,
+		onClick() {
+			recordEvent( 'product_preview_changes', { source: 'product-block-editor-v1' } );
+		},
 		onSaveSuccess( savedProduct: Product ) {
 			if ( productStatus === 'auto-draft' ) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );
