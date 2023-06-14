@@ -150,11 +150,14 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Whether a WCPay account exists. By checking account data cache.
+	 * Whether WCPay is installed or an account exists.
+	 * By checking account data cache.
 	 *
 	 * @return boolean
 	 */
-	private function has_wcpay_account(): bool {
+	private function has_wcpay(): bool {
+		if (WooCommercePayments::is_installed()) return true;
+
 		$account_data = get_option( 'wcpay_account_data' );
 		return isset( $account_data['data'] ) && is_array( $account_data['data'] ) && ! empty( $account_data['data'] );
 	}
@@ -197,7 +200,7 @@ class WcPayWelcomePage {
 				// Whether the store has at least one payment gateways enabled.
 				'has_payments' => ! empty( WC()->payment_gateways()->get_available_payment_gateways() ),
 				// Whether the store has a WooCommerce Payments account or it's installed.
-				'has_wcpay'    => $this->has_wcpay_account() ?? WooCommercePayments::is_installed(),
+				'has_wcpay'    => $this->has_wcpay(),
 			],
 			'https://public-api.wordpress.com/wpcom/v2/wcpay/incentives',
 		);
