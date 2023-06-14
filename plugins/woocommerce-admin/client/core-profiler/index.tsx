@@ -416,6 +416,11 @@ const persistBusinessInfo = assign( {
 		),
 } );
 
+const markAsComplete = async () => {
+	return await dispatch( ONBOARDING_STORE_NAME ).updateProfileItems( {
+		completed: true,
+	} );
+};
 const promiseDelay = ( milliseconds: number ) => {
 	return new Promise( ( resolve ) => {
 		setTimeout( resolve, milliseconds );
@@ -530,6 +535,7 @@ const coreProfilerMachineServices = {
 	getOnboardingProfileOption,
 	getPlugins,
 	browserPopstateHandler,
+	markAsComplete,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -1003,6 +1009,19 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 										context.businessInfo.location as string
 									);
 								},
+								onDone: {
+									target: 'markAsCompleted',
+								},
+							},
+						},
+						markAsCompleted: {
+							entry: assign( {
+								loader: {
+									progress: 15,
+								},
+							} ),
+							invoke: {
+								src: 'markAsCompleted',
 								onDone: {
 									target: 'progress20',
 								},
