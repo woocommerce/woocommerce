@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Handle possibly empty refund value in reports (PHP 8.1+).

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Do not add script prop to generated block.json

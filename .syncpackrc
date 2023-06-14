@@ -75,11 +75,9 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/eslint-plugin",
 				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/babel-preset-default",
 				"@wordpress/stylelint-config",
-				"@wordpress/prettier-config",
 				"@wordpress/scripts",
 				"@wordpress/jest-console",
 				"@wordpress/dependency-extraction-webpack-plugin",
@@ -114,6 +112,24 @@
 				"@woocommerce/experimental"
 			],
 			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/prettier-config"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "2.17.0"
+		},
+		{
+			"dependencies": [
+				"@wordpress/eslint-plugin"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "14.7.0"
 		},
 		{
 			"dependencies": [

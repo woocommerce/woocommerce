@@ -69,6 +69,20 @@ describe( 'updateLinkHref', () => {
 
 		expect( item.href ).toBe( WP_ADMIN_URL );
 	} );
+
+	it( 'should filter out undefined query values', () => {
+		const item = { href: REPORT_URL };
+		updateLinkHref(
+			item,
+			{ ...nextQuery, test: undefined, anotherParam: undefined },
+			timeExcludedScreens
+		);
+		const encodedPath = encodeURIComponent( '/analytics/orders' );
+
+		expect( item.href ).toBe(
+			`admin.php?page=wc-admin&path=${ encodedPath }&fruit=apple&dish=cobbler`
+		);
+	} );
 } );
 
 describe( 'Layout', () => {

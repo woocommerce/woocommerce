@@ -209,12 +209,29 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'row', 'column' ),
 			),
 			array(
-				'title'             => 'WooCommerce Shipping',
+				'name'              => 'WooCommerce Shipping',
 				'slug'              => 'woocommerce-services',
 				'description'       => __( 'Save time and money by printing your shipping labels right from your computer with WooCommerce Shipping. Try WooCommerce Shipping for free.', 'woocommerce' ),
+				'dependencies'      => array( 'jetpack' ),
 				'layout_column'     => array(
 					'image'    => $asset_base_url . 'wcs-column.svg',
-					'features' => $column_layout_features,
+					'features' => array(
+						array(
+							'icon'        => $asset_base_url . 'printer.svg',
+							'title'       => __( 'Buy postage when you need it', 'woocommerce' ),
+							'description' => __( 'No need to wonder where that stampbook went.', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $asset_base_url . 'paper.svg',
+							'title'       => __( 'Print at home', 'woocommerce' ),
+							'description' => __( 'Pick up an order, then just pay, print, package and post.', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $asset_base_url . 'discount.svg',
+							'title'       => __( 'Discounted rates', 'woocommerce' ),
+							'description' => __( 'Access discounted shipping rates with DHL and USPS.', 'woocommerce' ),
+						),
+					),
 				),
 				'learn_more_link'   => 'https://woocommerce.com/products/shipping/',
 				'is_visible'        => array(

@@ -17,6 +17,7 @@ import {
 	ONBOARDING_STORE_NAME,
 	PLUGINS_STORE_NAME,
 	COUNTRIES_STORE_NAME,
+	SHIPPING_METHODS_STORE_NAME,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
@@ -31,9 +32,12 @@ import Connect from '../../../dashboard/components/connect';
 import { getCountryCode } from '../../../dashboard/utils';
 import StoreLocation from '../steps/location';
 import ShippingRates from './rates';
-import { getShippingProviders } from './shipping-providers/shipping-providers';
 import { createNoticesFromResponse } from '../../../lib/notices';
 import './shipping.scss';
+import {
+	ShippingLayoutColumn,
+	ShippingLayoutRow,
+} from './shipping-providers/partners';
 
 export class Shipping extends Component {
 	constructor( props ) {
@@ -55,6 +59,7 @@ export class Shipping extends Component {
 			window.wcAdminFeatures[ 'shipping-smart-defaults' ];
 
 		this.storeLocationCompleted = false;
+		this.shippingPartners = props.shippingPartners;
 	}
 
 	componentDidMount() {
@@ -194,8 +199,10 @@ export class Shipping extends Component {
 			settings,
 			task,
 			updateAndPersistSettingsForGroup,
+			shippingPartners,
 		} = this.props;
-		const pluginsToPromote = getShippingProviders( this.props.countryCode );
+		const pluginsToPromote = shippingPartners;
+
 		const pluginsToActivate = pluginsToPromote.map( ( pluginToPromote ) => {
 			return pluginToPromote.slug;
 		} );
@@ -426,7 +433,7 @@ export class Shipping extends Component {
 						pluginsToPromote.length === 1
 							? getSinglePluginDescription(
 									pluginsToPromote[ 0 ].name,
-									pluginsToPromote[ 0 ].url
+									pluginsToPromote[ 0 ].learn_more_link
 							  )
 							: __(
 									'Save time and money by printing your shipping labels right from your computer with one of these shipping solutions.',
@@ -436,24 +443,28 @@ export class Shipping extends Component {
 					content: (
 						<>
 							{ pluginsToPromote.length === 1 ? (
-								pluginsToPromote[ 0 ][
-									'single-partner-layout'
-								]()
+								<ShippingLayoutColumn
+									shippingMethod={ pluginsToPromote[ 0 ] }
+								/>
 							) : (
 								<div className="woocommerce-task-shipping-recommendation_plugins-install-container">
 									{ pluginsToPromote.map(
-										( pluginToPromote ) => {
+										( shippingMethod ) => {
 											const pluginsForPartner = [
-												pluginToPromote?.slug,
-												pluginToPromote?.dependencies,
+												shippingMethod?.slug,
+												...( shippingMethod?.dependencies ??
+													[] ),
 											].filter(
 												( element ) =>
 													element !== undefined
 											); // remove undefineds
-											return pluginToPromote[
-												'dual-partner-layout'
-											]( {
-												children: (
+											return (
+												<ShippingLayoutRow
+													shippingMethod={
+														shippingMethod
+													}
+													key={ shippingMethod.name }
+												>
 													<div className="woocommerce-task-shipping-recommendations_plugins-buttons">
 														<Plugins
 															onComplete={ (
@@ -486,13 +497,13 @@ export class Shipping extends Component {
 																'woocommerce'
 															) }
 															learnMoreLink={
-																pluginToPromote.url
+																shippingMethod.learn_more_link
 															}
 															onLearnMore={ () => {
 																recordEvent(
 																	'tasklist_shipping_label_printing_learn_more',
 																	{
-																		plugin: pluginToPromote.slug,
+																		plugin: shippingMethod.slug,
 																	}
 																);
 															} }
@@ -504,8 +515,8 @@ export class Shipping extends Component {
 															}
 														/>
 													</div>
-												),
-											} );
+												</ShippingLayoutRow>
+											);
 										}
 									) }
 								</div>
@@ -513,7 +524,10 @@ export class Shipping extends Component {
 							{ pluginsToPromote.length === 1 &&
 								pluginsToPromote[ 0 ].slug === undefined && ( // if it doesn't have a slug we just show a download button
 									<a
-										href={ pluginsToPromote[ 0 ].url }
+										href={
+											pluginsToPromote[ 0 ]
+												.learn_more_link
+										}
 										target="_blank"
 										rel="noreferrer"
 									>
@@ -665,6 +679,10 @@ const ShippingWrapper = compose(
 			settings.woocommerce_default_country
 		);
 
+		const shippingPartners = select(
+			SHIPPING_METHODS_STORE_NAME
+		).getShippingMethods( true );
+
 		const country = countryCode ? getCountry( countryCode ) : null;
 		const countryName = country ? country.name : null;
 		const activePlugins = getActivePlugins();
@@ -676,6 +694,7 @@ const ShippingWrapper = compose(
 			settings,
 			activePlugins,
 			isJetpackConnected: isJetpackConnected(),
+			shippingPartners,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

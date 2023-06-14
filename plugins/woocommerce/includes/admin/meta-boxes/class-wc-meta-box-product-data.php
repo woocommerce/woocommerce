@@ -89,7 +89,7 @@ class WC_Meta_Box_Product_Data {
 				'general'        => array(
 					'label'    => __( 'General', 'woocommerce' ),
 					'target'   => 'general_product_data',
-					'class'    => array( 'hide_if_grouped' ),
+					'class'    => array(),
 					'priority' => 10,
 				),
 				'inventory'      => array(

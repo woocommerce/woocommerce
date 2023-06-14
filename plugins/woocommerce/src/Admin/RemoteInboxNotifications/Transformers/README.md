@@ -365,4 +365,38 @@ Let's count # of users with `count`
 
 **Output:** 3
 
+## prepare_url
 
+This prepares the site URL by removing the protocol and the last slash.
+
+#### Arguments: N/A
+
+####Definition:
+
+```php
+"transformers": [
+    {
+        "use": "prepare_url"
+    }
+],
+```
+
+#### Example:
+
+Given the following data
+
+```php
+$siteurl = "https://mysite.com/"
+```
+
+Removes the protocol and the last slash.
+
+```php
+"transformers": [
+    {
+        "use": "prepare_url",
+    }
+],
+```
+
+**Output:** "mysite.com"

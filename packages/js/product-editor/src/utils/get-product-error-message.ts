@@ -3,8 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 
+export type WPErrorCode =
+	| 'product_invalid_sku'
+	| 'product_create_error'
+	| 'product_publish_error'
+	| 'product_preview_error';
+
 export type WPError = {
-	code: string;
+	code: WPErrorCode;
 	message: string;
 	data: {
 		[ key: string ]: unknown;
@@ -12,9 +18,16 @@ export type WPError = {
 };
 
 export function getProductErrorMessage( error: WPError ) {
-	if ( error.code === 'product_invalid_sku' ) {
-		return __( 'Invalid or duplicated SKU.', 'woocommerce' );
+	switch ( error.code ) {
+		case 'product_invalid_sku':
+			return __( 'Invalid or duplicated SKU.', 'woocommerce' );
+		case 'product_create_error':
+			return __( 'Failed to create product.', 'woocommerce' );
+		case 'product_publish_error':
+			return __( 'Failed to publish product.', 'woocommerce' );
+		case 'product_preview_error':
+			return __( 'Failed to preview product.', 'woocommerce' );
+		default:
+			return __( 'Failed to save product.', 'woocommerce' );
 	}
-
-	return null;
 }

@@ -9,8 +9,6 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
-require_once __DIR__ . '/../../../../helpers/HPOSToggleTrait.php';
-
 /**
  * Class OrdersTableDataStoreTests.
  *
@@ -1718,7 +1716,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			),
 		);
 		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
-		$this->assertCount( 0, $query->posts );
+		$this->assertCount( 3, $query->posts );
 
 		// Test combinations of field_query with regular query args.
 		$args  = array(

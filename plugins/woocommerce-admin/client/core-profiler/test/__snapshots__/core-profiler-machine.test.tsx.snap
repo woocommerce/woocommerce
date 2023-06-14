@@ -1897,7 +1897,7 @@ Object {
     />
     <div>
       <div
-        class="woocommerce-profile-wizard__container woocommerce-profile-wizard__step-skipFlowBusinessLocation"
+        class="woocommerce-profile-wizard__container woocommerce-profile-wizard__step-skipGuidedSetup"
       >
         <div
           class="woocommerce-profiler-business-location"
@@ -2049,7 +2049,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="woocommerce-profile-wizard__container woocommerce-profile-wizard__step-skipFlowBusinessLocation"
+      class="woocommerce-profile-wizard__container woocommerce-profile-wizard__step-skipGuidedSetup"
     >
       <div
         class="woocommerce-profiler-business-location"
@@ -3086,7 +3086,7 @@ Object {
                   class="components-button woocommerce-profiler-navigation-skip-link is-link"
                   type="button"
                 >
-                  Skip this setup
+                  Skip this step
                 </button>
               </div>
             </div>
@@ -3267,7 +3267,7 @@ Object {
                 class="components-button woocommerce-profiler-navigation-skip-link is-link"
                 type="button"
               >
-                Skip this setup
+                Skip this step
               </button>
             </div>
           </div>

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Added getCountry utility for splitting colon delimited country:state strings

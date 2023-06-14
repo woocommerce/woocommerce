@@ -284,7 +284,6 @@ export const DateTimePickerControl = forwardRef(
 					'woocommerce-date-time-picker-control',
 					className
 				) }
-				position="bottom left"
 				focusOnMount={ false }
 				// @ts-expect-error `onToggle` does exist.
 				onToggle={ callOnBlurIfDropdownIsNotOpening }
@@ -347,7 +346,9 @@ export const DateTimePickerControl = forwardRef(
 					</BaseControl>
 				) }
 				popoverProps={ {
+					anchor: inputControl.current,
 					className: 'woocommerce-date-time-picker-control__popover',
+					placement: 'bottom-start',
 				} }
 				renderContent={ () => {
 					const Picker = isDateOnlyPicker
@@ -369,6 +370,10 @@ export const DateTimePickerControl = forwardRef(
 								)
 							}
 							is12Hour={ is12HourPicker }
+							// Opt out of the Reset and Help buttons, as they are going to be removed.
+							// These properties are removed in @wordpress/components 25.0.0 (Gutenberg 15.9.0).
+							__nextRemoveResetButton
+							__nextRemoveHelpButton
 						/>
 					);
 				} }
