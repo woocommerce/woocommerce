@@ -2,10 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import PropTypes from 'prop-types';
 import { RangeControl, ToggleControl } from '@wordpress/components';
 
-const clamp = ( number, boundOne, boundTwo ) => {
+interface ClampProps {
+	( number: number, boundOne: number, boundTwo?: number ): number;
+}
+
+const clamp: ClampProps = ( number, boundOne, boundTwo ) => {
 	if ( ! boundTwo ) {
 		return Math.max( number, boundOne ) === boundOne ? number : boundOne;
 	} else if ( Math.min( number, boundOne ) === number ) {
@@ -15,6 +18,17 @@ const clamp = ( number, boundOne, boundTwo ) => {
 	}
 	return number;
 };
+
+interface GridLayoutControlProps {
+	columns: number;
+	rows: number;
+	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	alignButtons: boolean;
+	minColumns?: number;
+	maxColumns?: number;
+	minRows?: number;
+	maxRows?: number;
+}
 
 /**
  * A combination of range controls for product grid layout settings.
@@ -38,13 +52,13 @@ const GridLayoutControl = ( {
 	maxColumns = 6,
 	minRows = 1,
 	maxRows = 6,
-} ) => {
+}: GridLayoutControlProps ) => {
 	return (
 		<>
 			<RangeControl
 				label={ __( 'Columns', 'woo-gutenberg-products-block' ) }
 				value={ columns }
-				onChange={ ( value ) => {
+				onChange={ ( value: number ) => {
 					const newValue = clamp( value, minColumns, maxColumns );
 					setAttributes( {
 						columns: Number.isNaN( newValue ) ? '' : newValue,
@@ -56,7 +70,7 @@ const GridLayoutControl = ( {
 			<RangeControl
 				label={ __( 'Rows', 'woo-gutenberg-products-block' ) }
 				value={ rows }
-				onChange={ ( value ) => {
+				onChange={ ( value: number ) => {
 					const newValue = clamp( value, minRows, maxRows );
 					setAttributes( {
 						rows: Number.isNaN( newValue ) ? '' : newValue,
@@ -88,24 +102,6 @@ const GridLayoutControl = ( {
 			/>
 		</>
 	);
-};
-
-GridLayoutControl.propTypes = {
-	// The current columns count.
-	columns: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] )
-		.isRequired,
-	// The current rows count.
-	rows: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] )
-		.isRequired,
-	// Whether or not buttons are aligned horizontally across items.
-	alignButtons: PropTypes.bool.isRequired,
-	// Callback to update the layout settings.
-	setAttributes: PropTypes.func.isRequired,
-	// Min and max constraints.
-	minColumns: PropTypes.number,
-	maxColumns: PropTypes.number,
-	minRows: PropTypes.number,
-	maxRows: PropTypes.number,
 };
 
 export default GridLayoutControl;
