@@ -41,12 +41,12 @@ const PageImage = ( {
 );
 
 interface BlockEditorGuideProps {
-	isNewUser: boolean;
+	isNewUser?: boolean;
 	onCloseGuide: ( currentPage: number, origin: 'close' | 'finish' ) => void;
 }
 
 const BlockEditorGuide = ( {
-	isNewUser,
+	isNewUser = false,
 	onCloseGuide,
 }: BlockEditorGuideProps ) => {
 	const pagesConfig = [
