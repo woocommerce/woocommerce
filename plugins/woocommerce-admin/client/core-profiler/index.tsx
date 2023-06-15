@@ -364,6 +364,16 @@ const updateOnboardingProfileOption = (
 	} );
 };
 
+const spawnUpdateOnboardingProfileOption = assign( {
+	spawnUpdateOnboardingProfileOptionRef: (
+		context: CoreProfilerStateMachineContext
+	) =>
+		spawn(
+			() => updateOnboardingProfileOption( context ),
+			'update-onboarding-profile'
+		),
+} );
+
 const updateBusinessLocation = ( countryAndState: string ) => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_default_country: countryAndState,
@@ -389,7 +399,7 @@ const assignUserProfile = assign( {
 
 const updateBusinessInfo = async (
 	_context: CoreProfilerStateMachineContext,
-	event: BusinessInfoEvent
+	event: AnyEventObject
 ) => {
 	const refreshedOnboardingProfile = ( await resolveSelect(
 		OPTIONS_STORE_NAME
@@ -518,6 +528,7 @@ const coreProfilerMachineActions = {
 	handleOnboardingProfileOption,
 	assignOnboardingProfile,
 	persistBusinessInfo,
+	spawnUpdateOnboardingProfileOption,
 	redirectToWooHome,
 };
 
@@ -530,6 +541,7 @@ const coreProfilerMachineServices = {
 	getOnboardingProfileOption,
 	getPlugins,
 	browserPopstateHandler,
+	updateBusinessInfo,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -772,16 +784,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					] ),
 				},
 				postUserProfile: {
-					invoke: {
-						src: ( context ) => {
-							return updateOnboardingProfileOption( context );
-						},
-						onDone: {
-							target: '#businessInfo',
-						},
-						onError: {
-							target: '#businessInfo',
-						},
+					entry: [ 'spawnUpdateOnboardingProfileOption' ],
+					always: {
+						target: '#businessInfo',
 					},
 				},
 			},
@@ -938,11 +943,19 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					],
 					on: {
 						BUSINESS_INFO_COMPLETED: {
+							target: 'postBusinessInfo',
+							actions: [ 'recordTracksBusinessInfoCompleted' ],
+						},
+					},
+				},
+				postBusinessInfo: {
+					invoke: {
+						src: 'updateBusinessInfo',
+						onDone: {
 							target: '#plugins',
-							actions: [
-								'persistBusinessInfo',
-								'recordTracksBusinessInfoCompleted',
-							],
+						},
+						onError: {
+							target: '#plugins',
 						},
 					},
 				},
@@ -1348,8 +1361,8 @@ export const CoreProfilerController = ( {
 	);
 
 	const navigationProgress = currentNodeMeta?.progress;
-	const CurrentComponent =
-		currentNodeMeta?.component ?? ( () => <ProfileSpinner /> ); // If no component is defined for the state then its a loading state
+
+	const CurrentComponent = currentNodeMeta?.component;
 
 	const currentNodeCssLabel =
 		state.value instanceof Object
@@ -1375,13 +1388,15 @@ export const CoreProfilerController = ( {
 			<div
 				className={ `woocommerce-profile-wizard__container woocommerce-profile-wizard__step-${ currentNodeCssLabel }` }
 			>
-				{
+				{ CurrentComponent ? (
 					<CurrentComponent
 						navigationProgress={ navigationProgress }
 						sendEvent={ send }
 						context={ state.context }
 					/>
-				}
+				) : (
+					<ProfileSpinner />
+				) }
 			</div>
 		</>
 	);

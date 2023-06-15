@@ -91,6 +91,7 @@ export const BusinessInfo = ( {
 		onboardingProfile: {
 			is_store_country_set: isStoreCountrySet,
 			industry: industryFromOnboardingProfile,
+			business_choice: businessChoiceFromOnboardingProfile,
 		},
 	} = context;
 
@@ -152,7 +153,9 @@ export const BusinessInfo = ( {
 	const selectCountryLabel = __( 'Select country/region', 'woocommerce' );
 	const selectIndustryQuestionLabel =
 		selectIndustryMapping[
-			businessChoice || 'im_just_starting_my_business'
+			businessChoice ||
+				businessChoiceFromOnboardingProfile ||
+				'im_just_starting_my_business'
 		];
 
 	const [ dismissedGeolocationNotice, setDismissedGeolocationNotice ] =
