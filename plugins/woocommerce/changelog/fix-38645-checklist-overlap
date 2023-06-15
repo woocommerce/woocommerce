@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed a visual bug where text overlapped the image in the task list header.

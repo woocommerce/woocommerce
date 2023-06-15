@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Support values written in exponential notation for HPOS migrations.

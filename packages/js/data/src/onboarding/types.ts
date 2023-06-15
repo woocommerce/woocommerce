@@ -117,7 +117,7 @@ export type RevenueTypeSlug =
 	| 'more-than-250000';
 
 export type ProfileItems = {
-	business_extensions?: [] | null;
+	business_extensions?: string[] | null;
 	completed?: boolean | null;
 	industry?: Industry[] | null;
 	number_employees?: string | null;
@@ -180,7 +180,21 @@ export type Extension = {
 	image_url: string;
 	manage_url: string;
 	name: string;
+	label?: string;
 	is_built_by_wc: boolean;
 	is_visible: boolean;
 	is_installed?: boolean;
+	is_activated?: boolean;
+	learn_more_link?: string;
+	install_priority?: number;
+};
+
+export type InstallAndActivatePluginsAsyncResponse = {
+	job_id: string;
+	status: 'pending' | 'in-progress' | 'completed' | 'failed';
+	plugins: Array< {
+		status: 'pending' | 'installing' | 'installed' | 'activated' | 'failed';
+		errors: string[];
+		install_duration?: number;
+	} >;
 };

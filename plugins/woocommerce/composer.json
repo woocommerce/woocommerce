@@ -20,8 +20,8 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.5.4",
-		"woocommerce/woocommerce-blocks": "10.2.1"
+		"woocommerce/action-scheduler": "3.6.1",
+		"woocommerce/woocommerce-blocks": "10.2.3"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",

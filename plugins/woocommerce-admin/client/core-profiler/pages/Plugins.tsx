@@ -11,7 +11,10 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
-import { CoreProfilerStateMachineContext } from '../index';
+import {
+	CoreProfilerStateMachineContext,
+	PluginsLearnMoreLinkClicked,
+} from '../index';
 import { PluginsInstallationRequestedEvent, PluginsPageSkippedEvent } from '..';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
@@ -36,13 +39,16 @@ export const Plugins = ( {
 }: {
 	context: CoreProfilerStateMachineContext;
 	sendEvent: (
-		payload: PluginsInstallationRequestedEvent | PluginsPageSkippedEvent
+		payload:
+			| PluginsInstallationRequestedEvent
+			| PluginsPageSkippedEvent
+			| PluginsLearnMoreLinkClicked
 	) => void;
 	navigationProgress: number;
 } ) => {
 	const [ selectedPlugins, setSelectedPlugins ] = useState<
 		ExtensionList[ 'plugins' ]
-	>( context.pluginsAvailable.filter( ( plugin ) => ! plugin.is_installed ) );
+	>( context.pluginsAvailable.filter( ( plugin ) => ! plugin.is_activated ) );
 
 	const setSelectedPlugin = ( plugin: Extension ) => {
 		setSelectedPlugins(
@@ -136,10 +142,29 @@ export const Plugins = ( {
 				) }
 				<div className="woocommerce-profiler-plugins__list">
 					{ context.pluginsAvailable.map( ( plugin ) => {
+						const learnMoreLink = plugin.learn_more_link ? (
+							<Link
+								onClick={ () => {
+									sendEvent( {
+										type: 'PLUGINS_LEARN_MORE_LINK_CLICKED',
+										payload: {
+											plugin: plugin.key,
+											learnMoreLink:
+												plugin.learn_more_link ?? '',
+										},
+									} );
+								} }
+								href={ plugin.learn_more_link }
+								target="_blank"
+								type="external"
+							>
+								{ __( 'Learn More', 'woocommerce' ) }
+							</Link>
+						) : null;
 						return (
 							<PluginCard
 								key={ `checkbox-control-${ plugin.key }` }
-								installed={ plugin.is_installed }
+								installed={ plugin.is_activated }
 								onChange={ () => {
 									setSelectedPlugin( plugin );
 								} }
@@ -156,8 +181,9 @@ export const Plugins = ( {
 										/>
 									) : null
 								}
-								title={ plugin.name }
+								title={ plugin.label }
 								description={ plugin.description }
+								learnMoreLink={ learnMoreLink }
 							/>
 						);
 					} ) }

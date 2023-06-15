@@ -43,7 +43,7 @@ import { Controller, getPages } from './controller';
 import { Header } from '../header';
 import { Footer } from './footer';
 import Notices from './notices';
-import TransientNotices from './transient-notices';
+import { TransientNotices } from './transient-notices';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { usePageClasses } from './hooks/use-page-classes';
 import '~/activity-panel';
@@ -188,9 +188,7 @@ function _Layout( {
 	const { breadcrumbs, layout = { header: true, footer: true } } = page;
 	const { header: showHeader = true, footer: showFooter = true } = layout;
 
-	const query = Object.fromEntries(
-		new URLSearchParams( location && location.search )
-	);
+	const query = getQuery();
 
 	return (
 		<LayoutContextProvider

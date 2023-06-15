@@ -541,6 +541,27 @@ const attachProductAttributesTracks = () => {
 		} );
 };
 
+const attachGeneralTabTracks = () => {
+	document
+		.querySelector(
+			'#general_product_data .woocommerce-message .variations-tab-navigation-link'
+		)
+		?.addEventListener( 'click', () => {
+			recordEvent( 'disabled_general_tab', {
+				action: 'go_to_variations',
+			} );
+		} );
+	document
+		.querySelector(
+			'#general_product_data .woocommerce-message .linked-products-navigation-link'
+		)
+		?.addEventListener( 'click', () => {
+			recordEvent( 'disabled_general_tab', {
+				action: 'go_to_linked_products',
+			} );
+		} );
+};
+
 /**
  * Attaches product variations tracks.
  */
@@ -731,6 +752,7 @@ export const initProductScreenTracks = () => {
 	attachProductVariationsTracks();
 	attachProductTabsTracks();
 	attachProductInventoryTabTracks();
+	attachGeneralTabTracks();
 };
 
 export function addExitPageListener( pageId: string ) {

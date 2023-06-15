@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Refactored Core Profiler's plugin installation step to use XState

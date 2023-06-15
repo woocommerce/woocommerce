@@ -227,7 +227,7 @@ export const UserProfile = ( {
 		>
 			<Navigation
 				percentage={ navigationProgress }
-				skipText={ __( 'Skip this setup', 'woocommerce' ) }
+				skipText={ __( 'Skip this step', 'woocommerce' ) }
 				onSkip={ () =>
 					sendEvent( {
 						type: 'USER_PROFILE_SKIPPED',
