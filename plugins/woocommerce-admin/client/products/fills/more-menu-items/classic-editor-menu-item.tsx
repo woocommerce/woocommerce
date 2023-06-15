@@ -1,20 +1,20 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 import { getAdminLink } from '@woocommerce/settings';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, Product } from '@woocommerce/data';
 import { MenuItem } from '@wordpress/components';
 import {
 	ALLOW_TRACKING_OPTION_NAME,
 	STORE_KEY as CES_STORE_KEY,
 } from '@woocommerce/customer-effort-score';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { ClassicEditorIcon } from '../../images/classic-editor-icon';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 export const ClassicEditorMenuItem = ( {
@@ -53,24 +53,46 @@ export const ClassicEditorMenuItem = ( {
 				`post-new.php?post_type=product&product_block_editor=0&_feature_nonce=${ _feature_nonce }`
 		  );
 
+	const { type: productType, status: productStatus } = useSelect(
+		( select ) => {
+			const { getEntityRecord } = select( 'core' );
+			return getEntityRecord(
+				'postType',
+				'product',
+				productId
+			) as Product;
+		},
+		[ productId ]
+	);
+
 	if ( isLoading ) {
 		return null;
 	}
 
+	function handleMenuItemClick() {
+		recordEvent( 'product_editor_options_turn_off_editor_click', {
+			product_id: productId,
+			product_type: productType,
+			product_status: productStatus,
+		} );
+
+		if ( allowTracking ) {
+			showProductMVPFeedbackModal();
+		} else {
+			window.location.href = classicEditorUrl;
+		}
+		onClose();
+	}
+
 	return (
 		<MenuItem
-			onClick={ () => {
-				if ( allowTracking ) {
-					showProductMVPFeedbackModal();
-				} else {
-					window.location.href = classicEditorUrl;
-				}
-				onClose();
-			} }
-			icon={ <ClassicEditorIcon /> }
-			iconPosition="right"
+			onClick={ handleMenuItemClick }
+			info={ __(
+				'Save changes and go back to the classic product editing screen.',
+				'woocommerce'
+			) }
 		>
-			{ __( 'Use the classic editor', 'woocommerce' ) }
+			{ __( 'Turn off the new product form', 'woocommerce' ) }
 		</MenuItem>
 	);
 };
