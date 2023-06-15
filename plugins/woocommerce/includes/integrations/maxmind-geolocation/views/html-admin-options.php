@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 <table class="form-table">
 	<tr valign="top">
 		<th scope="row" class="titledesc">
-			<label><?php esc_html_e( 'Database File Path', 'woocommerce' ); ?></label>
+			<label><?php esc_html_e( 'Database file path', 'woocommerce' ); ?></label>
 		</th>
 		<td class="forminp">
 			<fieldset>

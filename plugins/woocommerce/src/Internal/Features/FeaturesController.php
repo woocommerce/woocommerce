@@ -576,7 +576,7 @@ class FeaturesController {
 					);
 
 					$feature_settings[] = array(
-						'title' => __( 'Experimental features', 'woocommerce' ),
+						'title' => __( 'Experimental Features', 'woocommerce' ),
 						'type'  => 'title',
 						'desc'  => __( 'These features are either experimental or incomplete, enable them at your own risk!', 'woocommerce' ),
 						'id'    => 'experimental_features_options',

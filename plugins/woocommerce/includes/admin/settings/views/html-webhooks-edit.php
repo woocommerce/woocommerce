@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <input type="hidden" name="webhook_id" value="<?php echo esc_attr( $webhook->get_id() ); ?>" />
 
 <div id="webhook-options" class="settings-panel">
-	<h2><?php esc_html_e( 'Webhook data', 'woocommerce' ); ?></h2>
+	<h2><?php esc_html_e( 'Webhook Data', 'woocommerce' ); ?></h2>
 	<table class="form-table">
 		<tbody>
 			<tr valign="top">
@@ -131,7 +131,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr valign="top">
 				<th scope="row" class="titledesc">
 					<label for="webhook_api_version">
-						<?php esc_html_e( 'API Version', 'woocommerce' ); ?>
+						<?php esc_html_e( 'API version', 'woocommerce' ); ?>
 						<?php echo wc_help_tip( __( 'REST API version used in the webhook deliveries.', 'woocommerce' ) ); ?>
 					</label>
 				</th>
@@ -163,7 +163,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 
 <div id="webhook-actions" class="settings-panel">
-	<h2><?php esc_html_e( 'Webhook actions', 'woocommerce' ); ?></h2>
+	<h2><?php esc_html_e( 'Webhook Actions', 'woocommerce' ); ?></h2>
 	<table class="form-table">
 		<tbody>
 			<?php if ( $webhook->get_date_created() && '0000-00-00 00:00:00' !== $webhook->get_date_created()->date( 'Y-m-d H:i:s' ) ) : ?>

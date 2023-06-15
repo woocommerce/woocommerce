@@ -54,7 +54,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		$settings =
 			array(
 				array(
-					'title' => __( 'Page setup', 'woocommerce' ),
+					'title' => __( 'Page Setup', 'woocommerce' ),
 					'desc'  => __( 'These pages need to be set so that WooCommerce knows where to send users to checkout.', 'woocommerce' ),
 					'type'  => 'title',
 					'id'    => 'advanced_page_options',
@@ -171,7 +171,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 
 				array(
-					'title' => __( 'Checkout endpoints', 'woocommerce' ),
+					'title' => __( 'Checkout Endpoints', 'woocommerce' ),
 					'type'  => 'title',
 					'desc'  => __( 'Endpoints are appended to your page URLs to handle specific actions during the checkout process. They should be unique.', 'woocommerce' ),
 					'id'    => 'checkout_endpoint_options',
@@ -228,7 +228,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 
 				array(
-					'title' => __( 'Account endpoints', 'woocommerce' ),
+					'title' => __( 'Account Endpoints', 'woocommerce' ),
 					'type'  => 'title',
 					'desc'  => __( 'Endpoints are appended to your page URLs to handle specific actions on the accounts pages. They should be unique and can be left blank to disable the endpoint.', 'woocommerce' ),
 					'id'    => 'account_endpoint_options',
@@ -359,7 +359,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'desc'  => __( 'We show contextual suggestions for official extensions that may be helpful to your store.', 'woocommerce' ),
 				),
 				array(
-					'title'         => __( 'Show Suggestions', 'woocommerce' ),
+					'title'         => __( 'Show suggestions', 'woocommerce' ),
 					'desc'          => __( 'Display suggestions within WooCommerce', 'woocommerce' ),
 					'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to see suggested extensions.', 'woocommerce' ),
 					'id'            => 'woocommerce_show_marketplace_suggestions',

@@ -664,7 +664,7 @@ class LookupDataStore {
 	private function add_product_attributes_lookup_table_settings( array $settings, string $section_id ): array {
 		if ( $section_id === 'advanced' && $this->check_lookup_table_exists() ) {
 			$title_item = array(
-				'title' => __( 'Product attributes lookup table', 'woocommerce' ),
+				'title' => __( 'Product Attributes Lookup Table', 'woocommerce' ),
 				'type'  => 'title',
 			);
 

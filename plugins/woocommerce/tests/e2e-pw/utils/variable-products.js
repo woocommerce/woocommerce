@@ -128,7 +128,7 @@ async function showVariableProductTour( browser, show ) {
 	const productPageURL = 'wp-admin/post-new.php?post_type=product';
 	const addProductPage = await browser.newPage();
 
-	// Go to "Add new product" page
+	// Go to "Add New Product" page
 	await addProductPage.goto( productPageURL );
 
 	// Get the current user's ID and user preferences

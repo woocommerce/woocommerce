@@ -40,7 +40,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 		return array(
 			''             => __( 'General', 'woocommerce' ),
 			'inventory'    => __( 'Inventory', 'woocommerce' ),
-			'downloadable' => __( 'Downloadable products', 'woocommerce' ),
+			'downloadable' => __( 'Downloadable Products', 'woocommerce' ),
 		);
 	}
 
@@ -53,7 +53,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 		$settings =
 			array(
 				array(
-					'title' => __( 'Shop pages', 'woocommerce' ),
+					'title' => __( 'Shop Pages', 'woocommerce' ),
 					'type'  => 'title',
 					'desc'  => '',
 					'id'    => 'catalog_options',

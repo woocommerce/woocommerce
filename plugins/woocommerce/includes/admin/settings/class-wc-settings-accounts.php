@@ -136,7 +136,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'id'   => 'account_registration_options',
 			),
 			array(
-				'title' => __( 'Privacy policy', 'woocommerce' ),
+				'title' => __( 'Privacy Policy', 'woocommerce' ),
 				'type'  => 'title',
 				'id'    => 'privacy_policy_options',
 				/* translators: %s: privacy page link. */
@@ -167,7 +167,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'id'   => 'privacy_policy_options',
 			),
 			array(
-				'title' => __( 'Personal data retention', 'woocommerce' ),
+				'title' => __( 'Personal Data Retention', 'woocommerce' ),
 				'desc'  => __( 'Choose how long to retain personal data when it\'s no longer needed for processing. Leave the following options blank to retain this data indefinitely.', 'woocommerce' ),
 				'type'  => 'title',
 				'id'    => 'personal_data_retention',

@@ -54,7 +54,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$settings =
 			array(
 				array(
-					'title' => __( 'Email notifications', 'woocommerce' ),
+					'title' => __( 'Email Notifications', 'woocommerce' ),
 					/* translators: %s: help description with link to WP Mail logging and support page. */
 					'desc'  => sprintf( __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.<br>%s', 'woocommerce' ), $desc_help_text ),
 					'type'  => 'title',
@@ -74,7 +74,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 
 				array(
-					'title' => __( 'Email sender options', 'woocommerce' ),
+					'title' => __( 'Email Sender Options', 'woocommerce' ),
 					'type'  => 'title',
 					'desc'  => '',
 					'id'    => 'email_options',
@@ -111,7 +111,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 
 				array(
-					'title' => __( 'Email template', 'woocommerce' ),
+					'title' => __( 'Email Template', 'woocommerce' ),
 					'type'  => 'title',
 					/* translators: %s: Nonced email preview link */
 					'desc'  => sprintf( __( 'This section lets you customize the WooCommerce emails. <a href="%s" target="_blank">Click here to preview your email template</a>.', 'woocommerce' ), wp_nonce_url( admin_url( '?preview_woocommerce_mail=true' ), 'preview-mail' ) ),
@@ -197,7 +197,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 
 				array(
-					'title' => __( 'Store management insights', 'woocommerce' ),
+					'title' => __( 'Store Management Insights', 'woocommerce' ),
 					'type'  => 'title',
 					'id'    => 'email_merchant_notes',
 				),

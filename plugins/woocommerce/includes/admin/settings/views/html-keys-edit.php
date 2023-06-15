@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <div id="key-fields" class="settings-panel">
-	<h2><?php esc_html_e( 'Key details', 'woocommerce' ); ?></h2>
+	<h2><?php esc_html_e( 'Key Details', 'woocommerce' ); ?></h2>
 
 	<input type="hidden" id="key_id" value="<?php echo esc_attr( $key_id ); ?>" />
 

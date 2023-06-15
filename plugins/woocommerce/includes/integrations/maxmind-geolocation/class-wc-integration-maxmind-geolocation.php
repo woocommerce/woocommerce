@@ -98,7 +98,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'license_key' => array(
-				'title'       => __( 'MaxMind License Key', 'woocommerce' ),
+				'title'       => __( 'MaxMind license key', 'woocommerce' ),
 				'type'        => 'password',
 				'description' => sprintf(
 					/* translators: %1$s: Documentation URL */
