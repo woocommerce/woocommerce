@@ -26,7 +26,6 @@ import {
 	Extension,
 	GeolocationResponse,
 } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
 
@@ -49,7 +48,7 @@ import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
 import { Plugins } from './pages/Plugins';
-import { getPluginSlug, getPluginTrackKey, getTimeFrame } from '~/utils';
+import { getPluginSlug } from '~/utils';
 import './style.scss';
 import {
 	InstallationCompletedResult,
