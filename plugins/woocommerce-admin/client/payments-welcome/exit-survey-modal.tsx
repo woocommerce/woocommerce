@@ -46,11 +46,11 @@ function ExitSurveyModal( {}: {
 		);
 	} );
 
-	const closeModal = () => {
+	const closeModal = async () => {
 		setOpen( false );
 
 		// Record that the modal was dismissed.
-		updateOptions( {
+		await updateOptions( {
 			wcpay_welcome_page_incentives_dismissed: [
 				...dismissedIncentives,
 				incentive.id,
