@@ -1280,10 +1280,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 
 										let stageIndex = 0;
 
-										if ( progress > 30 ) {
-											stageIndex = 1;
-										} else if ( progress > 60 ) {
+										if ( progress > 60 ) {
 											stageIndex = 2;
+										} else if ( progress > 30 ) {
+											stageIndex = 1;
 										}
 
 										return {
