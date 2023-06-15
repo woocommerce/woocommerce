@@ -106,6 +106,14 @@ export type PluginsInstallationRequestedEvent = {
 	};
 };
 
+export type PluginsLearnMoreLinkClicked = {
+	type: 'PLUGINS_LEARN_MORE_LINK_CLICKED';
+	payload: {
+		plugin: string;
+		learnMoreLink: string;
+	};
+};
+
 // TODO: add types as we develop the pages
 export type OnboardingProfile = {
 	business_choice: BusinessChoice;
@@ -991,9 +999,20 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							} ),
 							invoke: {
 								src: ( context ) => {
-									return updateBusinessLocation(
-										context.businessInfo.location as string
-									);
+									const skipped = dispatch(
+										ONBOARDING_STORE_NAME
+									).updateProfileItems( {
+										skipped: true,
+									} );
+									const businessLocation =
+										updateBusinessLocation(
+											context.businessInfo
+												.location as string
+										);
+									return Promise.all( [
+										skipped,
+										businessLocation,
+									] );
 								},
 								onDone: {
 									target: 'progress20',
@@ -1106,6 +1125,14 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								},
 							],
 							target: 'pluginsSkipped',
+						},
+						PLUGINS_LEARN_MORE_LINK_CLICKED: {
+							actions: [
+								{
+									type: 'recordTracksPluginsLearnMoreLinkClicked',
+									step: 'plugins',
+								},
+							],
 						},
 						PLUGINS_INSTALLATION_REQUESTED: {
 							target: 'installPlugins',
@@ -1266,6 +1293,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						data: ( context ) => {
 							return {
 								selectedPlugins: context.pluginsSelected,
+								pluginsAvailable: context.pluginsAvailable,
 							};
 						},
 					},

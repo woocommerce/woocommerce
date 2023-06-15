@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
+use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
 
 /**
  * Class Edit.
@@ -25,6 +26,13 @@ class Edit {
 	 * @var CustomMetaBox
 	 */
 	private $custom_meta_box;
+
+	/**
+	 * Instance of the TaxonomiesMetaBox class. Used to render meta box for taxonomies.
+	 *
+	 * @var TaxonomiesMetaBox
+	 */
+	private $taxonomies_meta_box;
 
 	/**
 	 * Instance of WC_Order to be used in metaboxes.
@@ -110,10 +118,16 @@ class Edit {
 		if ( ! isset( $this->custom_meta_box ) ) {
 			$this->custom_meta_box = wc_get_container()->get( CustomMetaBox::class );
 		}
+
+		if ( ! isset( $this->taxonomies_meta_box ) ) {
+			$this->taxonomies_meta_box = wc_get_container()->get( TaxonomiesMetaBox::class );
+		}
+
 		$this->add_save_meta_boxes();
 		$this->handle_order_update();
 		$this->add_order_meta_boxes( $this->screen_id, __( 'Order', 'woocommerce' ) );
 		$this->add_order_specific_meta_box();
+		$this->add_order_taxonomies_meta_box();
 
 		/**
 		 * From wp-admin/includes/meta-boxes.php.
@@ -160,6 +174,15 @@ class Edit {
 	}
 
 	/**
+	 * Render custom meta box.
+	 *
+	 * @return void
+	 */
+	private function add_order_taxonomies_meta_box() {
+		$this->taxonomies_meta_box->add_taxonomies_meta_boxes( $this->screen_id, $this->order->get_type() );
+	}
+
+	/**
 	 * Takes care of updating order data. Fires action that metaboxes can hook to for order data updating.
 	 *
 	 * @return void
@@ -175,6 +198,10 @@ class Edit {
 		}
 
 		check_admin_referer( $this->get_order_edit_nonce_action() );
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized later on by taxonomies_meta_box object.
+		$taxonomy_input = isset( $_POST['tax_input'] ) ? wp_unslash( $_POST['tax_input'] ) : null;
+		$this->taxonomies_meta_box->save_taxonomies( $this->order, $taxonomy_input );
 
 		/**
 		 * Save meta for shop order.

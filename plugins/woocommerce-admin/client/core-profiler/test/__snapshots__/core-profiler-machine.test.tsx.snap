@@ -3086,7 +3086,7 @@ Object {
                   class="components-button woocommerce-profiler-navigation-skip-link is-link"
                   type="button"
                 >
-                  Skip this setup
+                  Skip this step
                 </button>
               </div>
             </div>
@@ -3267,7 +3267,7 @@ Object {
                 class="components-button woocommerce-profiler-navigation-skip-link is-link"
                 type="button"
               >
-                Skip this setup
+                Skip this step
               </button>
             </div>
           </div>

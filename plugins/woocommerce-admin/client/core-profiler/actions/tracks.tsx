@@ -11,6 +11,7 @@ import {
 	CoreProfilerStateMachineContext,
 	UserProfileEvent,
 	BusinessInfoEvent,
+	PluginsLearnMoreLinkClicked,
 } from '..';
 import { POSSIBLY_DEFAULT_STORE_NAMES } from '../pages/BusinessInfo';
 
@@ -89,6 +90,18 @@ const recordTracksBusinessInfoCompleted = (
 	} );
 };
 
+const recordTracksPluginsLearnMoreLinkClicked = (
+	_context: unknown,
+	_event: PluginsLearnMoreLinkClicked,
+	{ action }: { action: unknown }
+) => {
+	const { step } = action as { step: string };
+	recordEvent( `storeprofiler_${ step }_learn_more_link_clicked`, {
+		plugin: _event.payload.plugin,
+		link: _event.payload.learnMoreLink,
+	} );
+};
+
 export default {
 	recordTracksStepViewed,
 	recordTracksStepSkipped,
@@ -96,4 +109,5 @@ export default {
 	recordTracksUserProfileCompleted,
 	recordTracksSkipBusinessLocationCompleted,
 	recordTracksBusinessInfoCompleted,
+	recordTracksPluginsLearnMoreLinkClicked,
 };

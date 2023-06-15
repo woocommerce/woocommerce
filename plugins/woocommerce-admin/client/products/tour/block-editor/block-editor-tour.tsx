@@ -1,11 +1,13 @@
 /**
  * External dependencies
  */
-import { Pill, TourKit } from '@woocommerce/components';
-import { __ } from '@wordpress/i18n';
-import { recordEvent } from '@woocommerce/tracks';
+import { useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { Pill, TourKit } from '@woocommerce/components';
+import { PRODUCTS_STORE_NAME } from '@woocommerce/data';
 import { __experimentalUseFeedbackBar as useFeedbackBar } from '@woocommerce/product-editor';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -19,7 +21,30 @@ interface Props {
 	dismissModal: () => void;
 }
 
+const PUBLISHED_PRODUCTS_QUERY_PARAMS = {
+	status: 'publish',
+	_fields: [ 'id' ],
+};
+
 const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
+	const { publishedProductsCount, loadingPublishedProductsCount } = useSelect(
+		( select ) => {
+			const { getProductsTotalCount, hasFinishedResolution } =
+				select( PRODUCTS_STORE_NAME );
+
+			return {
+				publishedProductsCount: getProductsTotalCount(
+					PUBLISHED_PRODUCTS_QUERY_PARAMS,
+					0
+				),
+				loadingPublishedProductsCount: ! hasFinishedResolution(
+					'getProductsTotalCount',
+					[ PUBLISHED_PRODUCTS_QUERY_PARAMS, 0 ]
+				),
+			};
+		}
+	);
+
 	useEffect( () => {
 		if ( shouldTourBeShown ) {
 			recordEvent( 'block_product_editor_spotlight_view' );
@@ -30,13 +55,38 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 
 	const { maybeShowFeedbackBar } = useFeedbackBar();
 
+	// we consider a user new if they have no published products
+	const isNewUser = publishedProductsCount < 1;
+
 	const openGuide = () => {
 		setIsGuideOpen( true );
 	};
 
+	const getTourText = () => {
+		return {
+			heading: isNewUser
+				? __( 'Meet the product editing form', 'woocommerce' )
+				: __( 'A new way to edit your products', 'woocommerce' ),
+			description: isNewUser
+				? __(
+						"Discover the form's unique features designed to help you make this product stand out.",
+						'woocommerce'
+				  )
+				: __(
+						'Introducing the upgraded experience designed to help you create and edit products easier.',
+						'woocommerce'
+				  ),
+		};
+	};
+
+	if ( loadingPublishedProductsCount ) {
+		return null;
+	}
+
 	if ( isGuideOpen ) {
 		return (
 			<BlockEditorGuide
+				isNewUser={ isNewUser }
 				onCloseGuide={ ( currentPage, source ) => {
 					dismissModal();
 					if ( source === 'finish' ) {
@@ -58,6 +108,8 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 			/>
 		);
 	} else if ( shouldTourBeShown ) {
+		const { heading, description } = getTourText();
+
 		return (
 			<TourKit
 				config={ {
@@ -72,20 +124,12 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 									),
 								},
 								descriptions: {
-									desktop: __(
-										"We designed a brand new product editing experience to let you focus on what's important.",
-										'woocommerce'
-									),
+									desktop: description,
 								},
 								heading: (
 									<>
-										<span>
-											{ __(
-												'Meet a streamlined product form',
-												'woocommerce'
-											) }
-										</span>{ ' ' }
-										<Pill className="woocommerce-block-editor-guide__pill">
+										<span>{ heading }</span>
+										<Pill>
 											{ __( 'Beta', 'woocommerce' ) }
 										</Pill>
 									</>
@@ -139,6 +183,7 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 								},
 							},
 						],
+						classNames: 'woocommerce-block-editor-tourkit',
 					},
 				} }
 			/>
