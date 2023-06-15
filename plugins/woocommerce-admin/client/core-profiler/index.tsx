@@ -1177,18 +1177,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'isJetpackConnected',
-								cond: ( _context ) => {
-									return (
-										_context.pluginsSelected.find(
-											( plugin ) => plugin === 'jetpack'
-										) !== undefined ||
-										_context.pluginsAvailable.find(
-											( plugin: Extension ) =>
-												plugin.key === 'jetpack' &&
-												plugin.is_activated
-										) !== undefined
-									);
-								},
+								cond: 'hasJetpackSelected',
 							},
 							{ actions: 'redirectToWooHome' },
 						],
@@ -1214,6 +1203,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							},
 							{ actions: 'redirectToWooHome' },
 						],
+					},
+					meta: {
+						component: Loader,
+						progress: 100,
 					},
 				},
 				sendToJetpackAuthPage: {
@@ -1345,6 +1338,17 @@ export const CoreProfilerController = ( {
 					const { step = undefined } = getQuery() as { step: string };
 					return (
 						step === ( cond as { step: string | undefined } ).step
+					);
+				},
+				hasJetpackSelected: ( context ) => {
+					return (
+						context.pluginsSelected.find(
+							( plugin ) => plugin === 'jetpack'
+						) !== undefined ||
+						context.pluginsAvailable.find(
+							( plugin: Extension ) =>
+								plugin.key === 'jetpack' && plugin.is_activated
+						) !== undefined
 					);
 				},
 			},
