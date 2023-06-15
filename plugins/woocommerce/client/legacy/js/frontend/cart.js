@@ -110,7 +110,7 @@ jQuery( function( $ ) {
 			}
 
 			// No items to display now! Replace all cart content.
-			var $cart_html = $( '.cart-empty', $html ).closest( '.woocommerce' );
+			var $cart_html = $( '.wc-empty-cart-message', $html ).closest( '.woocommerce' );
 			$( '.woocommerce-cart-form__contents' ).closest( '.woocommerce' ).replaceWith( $cart_html );
 
 			// Display errors
@@ -157,7 +157,7 @@ jQuery( function( $ ) {
 	var show_notice = function( html_element, $target ) {
 		if ( ! $target ) {
 			$target = $( '.woocommerce-notices-wrapper:first' ) ||
-				$( '.cart-empty' ).closest( '.woocommerce' ) ||
+				$( '.wc-empty-cart-message' ).closest( '.woocommerce' ) ||
 				$( '.woocommerce-cart-form' );
 		}
 		$target.prepend( html_element );
