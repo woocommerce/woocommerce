@@ -160,6 +160,10 @@
 	}
 
 	&__survey {
+		.components-modal__content {
+			padding: 0 $gap-larger $gap-larger;
+		}
+
 		p {
 			margin-bottom: 1em;
 		}
