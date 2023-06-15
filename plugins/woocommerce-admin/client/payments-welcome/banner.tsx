@@ -21,8 +21,9 @@ interface Props {
 
 const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 	const { first_name } = getAdminSetting( 'currentUserData', {} );
-	const { description, cta_label, tos_url } =
-		window.wcpayWelcomePageIncentive;
+	const { description, cta_label, tos_url } = getAdminSetting(
+		'wcpayWelcomePageIncentive'
+	);
 
 	const [ isNoThanksClicked, setNoThanksClicked ] = useState( false );
 	const [ isExitSurveyModalOpen, setExitSurveyModalOpen ] = useState( false );

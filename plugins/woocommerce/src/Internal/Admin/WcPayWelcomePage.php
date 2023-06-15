@@ -42,7 +42,7 @@ class WcPayWelcomePage {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'register_payments_welcome_page' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'shared_settings' ) );
 		add_filter( 'woocommerce_admin_allowed_promo_notes', [ $this, 'allowed_promo_notes' ] );
 	}
 
@@ -143,28 +143,25 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Enqueues scripts to preload incentive data, only on `wc-pay-welcome-page`.
+	 * Adds shared settings for WCPay incentive.
 	 *
-	 * @return void
+	 * @param array $settings Shared settings.
+	 * @return array
 	 */
-	public function enqueue_scripts() {
-		// Return early if not on WCPay welcome page.
-		if ( ! PageController::is_admin_page() || ! isset( $_GET['path'] ) || '/wc-pay-welcome-page' !== esc_url_raw( wp_unslash( $_GET['path'] ) ) ) {
-			return;
+	public function shared_settings( $settings ) {
+		// Return early if not on a wc-admin powered page.
+		if ( ! PageController::is_admin_page() ) {
+			return $settings;
 		}
 
 		// Return early if there is no eligible incentive.
 		if ( empty( $this->get_incentive() ) ) {
-			return;
+			return $settings;
 		}
 
-		wp_register_script( self::SCRIPT_NAME, '', [], WC_VERSION, false );
-		wp_localize_script(
-			self::SCRIPT_NAME,
-			'wcpayWelcomePageIncentive',
-			$this->get_incentive()
-		);
-		wp_enqueue_script( self::SCRIPT_NAME );
+		$settings['wcpayWelcomePageIncentive'] = $this->get_incentive();
+
+		return $settings;
 	}
 
 	/**

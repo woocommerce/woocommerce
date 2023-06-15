@@ -15,6 +15,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import { getAdminSetting } from '~/utils/admin-settings';
 import strings from './strings';
 
 /**
@@ -25,7 +26,7 @@ function ExitSurveyModal( {}: {
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	setExitSurveyModalOpen: Function;
 } ): JSX.Element | null {
-	const incentive = window.wcpayWelcomePageIncentive;
+	const incentive = getAdminSetting( 'wcpayWelcomePageIncentive' );
 	const [ isOpen, setOpen ] = useState( true );
 	const [ isHappyChecked, setHappyChecked ] = useState( false );
 	const [ isInstallChecked, setInstallChecked ] = useState( false );

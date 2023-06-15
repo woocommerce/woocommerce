@@ -27,13 +27,13 @@ declare global {
 				currentUserData: {
 					first_name: string;
 				};
+				wcpayWelcomePageIncentive: {
+					id: string;
+					description: string;
+					cta_label: string;
+					tos_url: string;
+				};
 			};
-		};
-		wcpayWelcomePageIncentive: {
-			id: string;
-			description: string;
-			cta_label: string;
-			tos_url: string;
 		};
 	}
 }
@@ -43,7 +43,7 @@ interface activatePromoResponse {
 }
 
 const ConnectAccountPage = () => {
-	const incentive = window.wcpayWelcomePageIncentive;
+	const incentive = getAdminSetting( 'wcpayWelcomePageIncentive' );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { installAndActivatePlugins } = useDispatch( 'wc/admin/plugins' );
 	const [ isSubmitted, setSubmitted ] = useState( false );
