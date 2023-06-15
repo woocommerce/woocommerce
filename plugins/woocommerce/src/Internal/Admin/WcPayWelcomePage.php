@@ -241,13 +241,13 @@ class WcPayWelcomePage {
 				'country'      => WC()->countries->get_base_country(),
 				// Store locale, e.g. `en_US`.
 				'locale'       => get_locale(),
-				// WooCommerce install timestamp.
-				'active_for'   => get_option( WCAdminHelper::WC_ADMIN_TIMESTAMP_OPTION ),
-				// Whether the store has completed orders.
+				// WooCommerce active for duration in seconds.
+				'active_for'   => WCAdminHelper::get_wcadmin_active_for_in_seconds(),
+				// Whether the store has paid orders.
 				'has_orders'   => ! empty(
 					wc_get_orders(
 						[
-							'status' => [ 'wc-completed' ],
+							'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
 							'return' => 'ids',
 							'limit'  => 1,
 						]
@@ -261,12 +261,18 @@ class WcPayWelcomePage {
 			'https://public-api.wordpress.com/wpcom/v2/wcpay/incentives',
 		);
 
-		$response = wp_remote_get( $url );
+		$response = wp_remote_get(
+			$url,
+			array(
+				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+			)
+		);
 
 		// Return early if there is an error, waiting 6h before the next attempt.
 		if ( is_wp_error( $response ) ) {
 			set_transient( self::TRANSIENT_NAME, null, HOUR_IN_SECONDS * 6 );
-			return;
+
+			return null;
 		}
 
 		$cache_for = wp_remote_retrieve_header( $response, 'cache-for' );
