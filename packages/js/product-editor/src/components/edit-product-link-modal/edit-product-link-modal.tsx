@@ -12,6 +12,10 @@ import { useDispatch } from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
 import { TRACKS_SOURCE } from '../../constants';
 
 type EditProductLinkModalProps = {

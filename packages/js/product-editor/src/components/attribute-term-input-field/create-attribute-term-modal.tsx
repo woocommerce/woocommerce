@@ -18,6 +18,10 @@ import {
 	ProductAttributeTerm,
 	QueryProductAttribute,
 } from '@woocommerce/data';
+
+/**
+ * Internal dependencies
+ */
 import { TRACKS_SOURCE } from '../../constants';
 
 type CreateAttributeTermModalProps = {

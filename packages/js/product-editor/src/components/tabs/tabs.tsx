@@ -4,18 +4,18 @@
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { ReactElement } from 'react';
 import { NavigableMenu, Slot } from '@wordpress/components';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
-*/
+ */
 import { getTabTracksData } from './utils/get-tab-tracks-data';
 import { sortFillsByOrder } from '../../utils';
 import { TABS_SLOT_NAME } from './constants';
@@ -90,8 +90,11 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 							navigateTo( {
 								url: getNewPath( { tab: tabId } ),
 							} );
-							recordEvent( 'product_tab_click', getTabTracksData( tabId, product ) );
-						}
+							recordEvent(
+								'product_tab_click',
+								getTabTracksData( tabId, product )
+							);
+						},
 					} as TabsFillProps
 				}
 				name={ TABS_SLOT_NAME }

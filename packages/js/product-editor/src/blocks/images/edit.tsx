@@ -88,9 +88,7 @@ export function Edit() {
 						onError={ () => null }
 						onFileUploadChange={ onFileUpload }
 						onMediaGalleryOpen={ () => {
-							recordEvent(
-								'product_images_media_gallery_open'
-							);
+							recordEvent( 'product_images_media_gallery_open' );
 						} }
 						onSelect={ ( files ) => {
 							const newImages = files.filter(
