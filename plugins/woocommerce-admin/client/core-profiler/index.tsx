@@ -1023,6 +1023,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							entry: assign( {
 								loader: {
 									progress: 10,
+									useStages: 'skippedGuidedSetup',
 								},
 							} ),
 							invoke: {
@@ -1054,6 +1055,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							entry: assign( {
 								loader: {
 									progress: 20,
+									useStages: 'skippedGuidedSetup',
 								},
 							} ),
 							invoke: {
@@ -1069,6 +1071,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							entry: assign( {
 								loader: {
 									progress: 80,
+									useStages: 'skippedGuidedSetup',
+									stageIndex: 1,
 								},
 							} ),
 							invoke: {
