@@ -26,25 +26,33 @@ import {
 const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
 	const [ id ] = useEntityProp( 'postType', 'product', 'id' );
 
-	const handleClick = ( optionName: string ) => {
+	const recordClick = ( optionName: string ) => {
 		recordEvent( 'product_dropdown_option_click', {
 			selected_option: optionName,
 		} );
-		onClose();
 	};
 
 	return (
 		<>
-			<FeedbackMenuItem onClick={ () => handleClick( 'feedback' ) } />
+			<FeedbackMenuItem
+				onClick={ () => {
+					recordClick( 'feedback' );
+					onClose();
+				} }
+			/>
 			<ClassicEditorMenuItem
 				productId={ id }
 				onClick={ () => {
-					handleClick( 'classic_editor' );
+					recordClick( 'classic_editor' );
+					onClose();
 				} }
 			/>
 			<AboutTheEditorMenuItem
+				onClick={ () => {
+					recordClick( 'about' );
+				} }
 				onCloseGuide={ () => {
-					handleClick( 'about' );
+					onClose();
 				} }
 			/>
 		</>
