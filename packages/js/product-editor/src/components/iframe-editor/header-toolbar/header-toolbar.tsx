@@ -4,13 +4,6 @@
 import { useSelect } from '@wordpress/data';
 import { useViewportMatch } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import {
-	NavigableToolbar,
-	store as blockEditorStore,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore ToolSelector exists in WordPress components.
-	ToolSelector,
-} from '@wordpress/block-editor';
 import { plus } from '@wordpress/icons';
 import {
 	createElement,
@@ -20,6 +13,13 @@ import {
 	useContext,
 } from '@wordpress/element';
 import { MouseEvent } from 'react';
+import {
+	NavigableToolbar,
+	store as blockEditorStore,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore ToolSelector exists in WordPress components.
+	ToolSelector,
+} from '@wordpress/block-editor';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore ToolbarItem exists in WordPress components.
 // eslint-disable-next-line @woocommerce/dependency-group
