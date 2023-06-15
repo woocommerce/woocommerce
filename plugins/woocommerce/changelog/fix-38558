@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fire bulk action orders hook for all custom actions.
