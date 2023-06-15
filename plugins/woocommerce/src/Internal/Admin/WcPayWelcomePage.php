@@ -68,8 +68,13 @@ class WcPayWelcomePage {
 			return false;
 		}
 
-		// WCPay not installed and no existing account.
-		if ( $this->has_wcpay() ) {
+		// WCPay must not be active.
+		if ( class_exists( '\WC_Payments' ) ) {
+			return false;
+		}
+
+		// The store must be in a supported country.
+		if ( ! WooCommercePayments::is_supported() ) {
 			return false;
 		}
 
