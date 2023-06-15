@@ -15,7 +15,7 @@ import {
 } from 'xstate';
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
-import { resolveSelect, dispatch, select } from '@wordpress/data';
+import { resolveSelect, dispatch } from '@wordpress/data';
 import { updateQueryString, getQuery } from '@woocommerce/navigation';
 import {
 	ExtensionList,
