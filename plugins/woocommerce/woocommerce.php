@@ -60,3 +60,5 @@ function wc_get_container() {
 
 // Global for backwards compatibility.
 $GLOBALS['woocommerce'] = WC();
+
+Automattic\WooCommerce\Internal\RestApi\Infrastructure\RestApiEngine::initialize();
