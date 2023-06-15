@@ -61,12 +61,9 @@ export default {
 	andMore: __( '& more', 'woocommerce' ),
 	learnMore: __( 'Learn more', 'woocommerce' ),
 	survey: {
-		title: __(
-			'No thanks, I don’t want WooCommerce Payments',
-			'woocommerce'
-		),
+		title: __( 'No thanks, I don’t want WooPayments', 'woocommerce' ),
 		intro: __(
-			'Note that the extension hasn’t been installed, this will simply remove WooCommerce Payments from the navigation. Please take a moment to tell us why you’d like to dismiss WooCommerce Payments.',
+			'Note that the extension hasn’t been installed, this will simply remove WooPayments from the navigation. Please take a moment to tell us why you’d like to dismiss WooPayments.',
 			'woocommerce'
 		),
 		question: __(
@@ -82,7 +79,7 @@ export default {
 			'woocommerce'
 		),
 		moreInfoLabel: __(
-			'I need more information about WooCommerce Payments',
+			'I need more information about WooPayments',
 			'woocommerce'
 		),
 		anotherTimeLabel: __(
@@ -94,7 +91,7 @@ export default {
 			'woocommerce'
 		),
 		commentsLabel: __( 'Comments (Optional)', 'woocommerce' ),
-		cancelButton: __( 'Just dismiss WooCommerce Payments', 'woocommerce' ),
+		cancelButton: __( 'Just dismiss WooPayments', 'woocommerce' ),
 		submitButton: __( 'Dismiss and send feedback', 'woocommerce' ),
 	},
 	faq: {
@@ -110,28 +107,28 @@ export default {
 		paypal: {
 			title: __( 'PayPal Payments', 'woocommerce' ),
 			description: __(
-				'Enable PayPal Payments alongside WooCommerce Payments. Give your customers another way to pay safely and conveniently via PayPal, PayLater, and Venmo.',
+				'Enable PayPal Payments alongside WooPayments. Give your customers another way to pay safely and conveniently via PayPal, PayLater, and Venmo.',
 				'woocommerce'
 			),
 		},
 		amazonpay: {
 			title: __( 'Amazon Pay', 'woocommerce' ),
 			description: __(
-				'Enable Amazon Pay alongside WooCommerce Payments and give buyers the ability to pay via Amazon Pay. Transactions take place via Amazon embedded widgets, so the buyer never leaves your site.',
+				'Enable Amazon Pay alongside WooPayments and give buyers the ability to pay via Amazon Pay. Transactions take place via Amazon embedded widgets, so the buyer never leaves your site.',
 				'woocommerce'
 			),
 		},
 		klarna: {
 			title: __( 'Klarna', 'woocommerce' ),
 			description: __(
-				'Enable Klarna alongside WooCommerce Payments. With Klarna Payments buyers can choose the payment installment option they want, Pay Now, Pay Later, or Slice It. No credit card numbers, no passwords, no worries.',
+				'Enable Klarna alongside WooPayments. With Klarna Payments buyers can choose the payment installment option they want, Pay Now, Pay Later, or Slice It. No credit card numbers, no passwords, no worries.',
 				'woocommerce'
 			),
 		},
 		affirm: {
 			title: __( 'Affirm', 'woocommerce' ),
 			description: __(
-				'Enable Affirm alongside WooCommerce Payments and give buyers the ability to pick the payment option that works for them and their budget — from 4 interest-free payments every 2 weeks to monthly installments.',
+				'Enable Affirm alongside WooPayments and give buyers the ability to pick the payment option that works for them and their budget — from 4 interest-free payments every 2 weeks to monthly installments.',
 				'woocommerce'
 			),
 		},
@@ -141,8 +138,8 @@ export default {
 				sprintf(
 					/* translators: %s = names of the installed extensions */
 					_n(
-						'Installing <strong>WooCommerce Payments</strong> will automatically activate <strong>%s</strong> extension in your store.',
-						'Installing <strong>WooCommerce Payments</strong> will automatically activate <strong>%s</strong> extensions in your store.',
+						'Installing <strong>WooPayments</strong> will automatically activate <strong>%s</strong> extension in your store.',
+						'Installing <strong>WooPayments</strong> will automatically activate <strong>%s</strong> extensions in your store.',
 						extensionsNumber,
 						'woocommerce'
 					),
