@@ -224,14 +224,18 @@ class WC_AJAX {
 		woocommerce_mini_cart();
 
 		$mini_cart = ob_get_clean();
+		$fragments = array(
+			'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
+		);
+
+		// Handle deprecated add_to_cart_fragment hook.
+		if ( has_filter( 'add_to_cart_fragments' ) ) {
+			wc_deprecated_hook( 'add_to_cart_fragments', '3.0.0', 'woocommerce_add_to_cart_fragments' );
+			$fragments = apply_filters( 'add_to_cart_fragments', $fragments );
+		}
 
 		$data = array(
-			'fragments' => apply_filters(
-				'woocommerce_add_to_cart_fragments',
-				array(
-					'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
-				)
-			),
+			'fragments' => apply_filters( 'woocommerce_add_to_cart_fragments', $fragments ),
 			'cart_hash' => WC()->cart->get_cart_hash(),
 		);
 
