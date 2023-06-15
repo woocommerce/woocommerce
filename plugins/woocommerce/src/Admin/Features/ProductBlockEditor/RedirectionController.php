@@ -14,6 +14,8 @@ class RedirectionController {
 
 	/**
 	 * Supported post types.
+	 *
+	 * @var array
 	 */
 	private $supported_post_types;
 
@@ -74,7 +76,7 @@ class RedirectionController {
 		}
 
 		if ( $this->is_legacy_edit_screen() ) {
-			$product_id = absint( $_GET['post'] );
+			$product_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : null;
 			if ( ! $this->is_product_supported( $product_id ) ) {
 				return;
 			}
@@ -90,12 +92,12 @@ class RedirectionController {
 	public function maybe_redirect_to_old_editor(): void {
 		$route = $this->get_parsed_route();
 
-		if ( $route['page'] === 'add-product' ) {
+		if ( 'add-product' === $route['page'] ) {
 			wp_safe_redirect( admin_url( 'post-new.php?post_type=product' ) );
 			exit();
 		}
 
-		if ( $route['page'] === 'product' ) {
+		if ( 'product' === $route['page'] ) {
 			wp_safe_redirect( admin_url( 'post.php?post=' . $route['product_id'] . '&action=edit' ) );
 			exit();
 		}
@@ -117,7 +119,7 @@ class RedirectionController {
 
 		return array(
 			'page'       => $path_pieces[1],
-			'product_id' => $path_pieces[1] === 'product' ? absint( $path_pieces[2] ) : null,
+			'product_id' => 'product' === $path_pieces[1] ? absint( $path_pieces[2] ) : null,
 		);
 	}
 
@@ -128,7 +130,7 @@ class RedirectionController {
 		$route      = $this->get_parsed_route();
 		$product_id = $route['product_id'];
 
-		if ( $route['page'] === 'product' && ! $this->is_product_supported( $product_id ) ) {
+		if ( 'product' === $route['page'] && ! $this->is_product_supported( $product_id ) ) {
 			wp_safe_redirect( admin_url( 'post.php?post=' . $route['product_id'] . '&action=edit' ) );
 			exit();
 		}
