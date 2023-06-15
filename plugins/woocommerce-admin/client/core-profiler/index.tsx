@@ -999,9 +999,20 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							} ),
 							invoke: {
 								src: ( context ) => {
-									return updateBusinessLocation(
-										context.businessInfo.location as string
-									);
+									const skipped = dispatch(
+										ONBOARDING_STORE_NAME
+									).updateProfileItems( {
+										skipped: true,
+									} );
+									const businessLocation =
+										updateBusinessLocation(
+											context.businessInfo
+												.location as string
+										);
+									return Promise.all( [
+										skipped,
+										businessLocation,
+									] );
 								},
 								onDone: {
 									target: 'progress20',
