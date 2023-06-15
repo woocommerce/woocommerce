@@ -33,7 +33,7 @@ declare global {
 			id: string;
 			description: string;
 			cta_label: string;
-			tos_link: string;
+			tos_url: string;
 		};
 	}
 }
