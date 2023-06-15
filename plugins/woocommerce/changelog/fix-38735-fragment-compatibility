@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Load the wc-cart-fragments script globally if a theme uses the woocommerce_add_to_cart_fragments filter for custom functionality.
