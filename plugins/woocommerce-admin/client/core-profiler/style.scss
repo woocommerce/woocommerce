@@ -359,6 +359,11 @@
 		}
 	}
 
+	.woocommerce-experimental-select-control .components-popover .components-popover__content ul li:hover {
+		background-color: var(--wp-admin-theme-color) !important;
+		color: var(--wp-components-color-accent-inverted, #fff);
+	}
+
 	.woocommerce-user-profile-choices {
 		margin-bottom: 32px;
 		max-width: 404px;
@@ -458,7 +463,6 @@
 
 	.woocommerce-profiler-plugins-continue-button-container {
 		@include breakpoint( '<782px' ) {
-			padding: 0 20px;
 			width: 100%;
 		}
 
