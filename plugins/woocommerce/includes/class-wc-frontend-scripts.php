@@ -431,6 +431,12 @@ class WC_Frontend_Scripts {
 		// Global frontend scripts.
 		self::enqueue_script( 'woocommerce' );
 
+		// Only enqueue the cart fragment script if a theme/plugin is using it to update custom fragments.
+		// The cart widget handles the enqueue internally when needed, so no global enqueue is needed by default.
+		if ( has_filter( 'woocommerce_add_to_cart_fragments' ) || has_filter( 'add_to_cart_fragments' ) ) {
+			wp_enqueue_script( 'wc-cart-fragments' );
+		}
+
 		// CSS Styles.
 		$enqueue_styles = self::get_styles();
 		if ( $enqueue_styles ) {
