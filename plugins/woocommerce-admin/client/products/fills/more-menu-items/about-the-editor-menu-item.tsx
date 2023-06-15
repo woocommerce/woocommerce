@@ -11,6 +11,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import BlockEditorGuide from '~/products/tour/block-editor/block-editor-guide';
+import { usePublishedProductsCount } from '~/products/tour/block-editor/use-published-products-count';
 
 export const AboutTheEditorMenuItem = ( {
 	onClose,
@@ -18,6 +19,7 @@ export const AboutTheEditorMenuItem = ( {
 	onClose: () => void;
 } ) => {
 	const [ isGuideOpen, setIsGuideOpen ] = useState( false );
+	const { isNewUser } = usePublishedProductsCount();
 	return (
 		<>
 			<MenuItem
@@ -34,6 +36,7 @@ export const AboutTheEditorMenuItem = ( {
 			</MenuItem>
 			{ isGuideOpen && (
 				<BlockEditorGuide
+					isNewUser={ isNewUser }
 					onCloseGuide={ () => {
 						setIsGuideOpen( false );
 						onClose();

@@ -1,11 +1,9 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Pill, TourKit } from '@woocommerce/components';
-import { PRODUCTS_STORE_NAME } from '@woocommerce/data';
 import { __experimentalUseFeedbackBar as useFeedbackBar } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -15,35 +13,16 @@ import { recordEvent } from '@woocommerce/tracks';
 
 import './style.scss';
 import BlockEditorGuide from './block-editor-guide';
+import { usePublishedProductsCount } from './use-published-products-count';
 
 interface Props {
 	shouldTourBeShown: boolean;
 	dismissModal: () => void;
 }
 
-const PUBLISHED_PRODUCTS_QUERY_PARAMS = {
-	status: 'publish',
-	_fields: [ 'id' ],
-};
-
 const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
-	const { publishedProductsCount, loadingPublishedProductsCount } = useSelect(
-		( select ) => {
-			const { getProductsTotalCount, hasFinishedResolution } =
-				select( PRODUCTS_STORE_NAME );
-
-			return {
-				publishedProductsCount: getProductsTotalCount(
-					PUBLISHED_PRODUCTS_QUERY_PARAMS,
-					0
-				),
-				loadingPublishedProductsCount: ! hasFinishedResolution(
-					'getProductsTotalCount',
-					[ PUBLISHED_PRODUCTS_QUERY_PARAMS, 0 ]
-				),
-			};
-		}
-	);
+	const { isNewUser, loadingPublishedProductsCount } =
+		usePublishedProductsCount();
 
 	useEffect( () => {
 		if ( shouldTourBeShown ) {
@@ -54,9 +33,6 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 	const [ isGuideOpen, setIsGuideOpen ] = useState( false );
 
 	const { maybeShowFeedbackBar } = useFeedbackBar();
-
-	// we consider a user new if they have no published products
-	const isNewUser = publishedProductsCount < 1;
 
 	const openGuide = () => {
 		setIsGuideOpen( true );
