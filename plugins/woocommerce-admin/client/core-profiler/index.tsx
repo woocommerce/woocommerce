@@ -26,7 +26,6 @@ import {
 	Extension,
 	GeolocationResponse,
 } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
 
@@ -49,7 +48,7 @@ import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
 import { Loader } from './pages/Loader';
 import { Plugins } from './pages/Plugins';
-import { getPluginSlug, getPluginTrackKey, getTimeFrame } from '~/utils';
+import { getPluginSlug } from '~/utils';
 import './style.scss';
 import {
 	InstallationCompletedResult,
@@ -693,7 +692,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					entry: [
 						{
 							type: 'recordTracksStepViewed',
-							step: 'store_details',
+							step: 'intro_opt_in',
 						},
 						{ type: 'updateQueryStep', step: 'intro-opt-in' },
 					],
@@ -709,7 +708,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							actions: [
 								{
 									type: 'recordTracksStepSkipped',
-									step: 'store_details',
+									step: 'intro_opt_in',
 								},
 							],
 						},
@@ -1222,73 +1221,16 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 										event
 									) => event.payload.errors,
 								} ),
-								( _context, event ) => {
-									recordEvent(
-										'storeprofiler_store_extensions_installed_and_activated',
-										{
-											success: false,
-											failed_extensions:
-												event.payload.errors.map(
-													(
-														error: PluginInstallError
-													) =>
-														getPluginTrackKey(
-															error.plugin
-														)
-												),
-										}
-									);
+								{
+									type: 'recordFailedPluginInstallations',
 								},
 							],
 						},
 						PLUGINS_INSTALLATION_COMPLETED: {
 							target: 'postPluginInstallation',
 							actions: [
-								( _context, event ) => {
-									const installationCompletedResult =
-										event.payload
-											.installationCompletedResult;
-
-									const trackData: {
-										success: boolean;
-										installed_extensions: string[];
-										total_time: string;
-										[ key: string ]:
-											| number
-											| boolean
-											| string
-											| string[];
-									} = {
-										success: true,
-										installed_extensions:
-											installationCompletedResult.installedPlugins.map(
-												(
-													installedPlugin: InstalledPlugin
-												) =>
-													getPluginTrackKey(
-														installedPlugin.plugin
-													)
-											),
-										total_time: getTimeFrame(
-											installationCompletedResult.totalTime
-										),
-									};
-
-									for ( const installedPlugin of installationCompletedResult.installedPlugins ) {
-										trackData[
-											'install_time_' +
-												getPluginTrackKey(
-													installedPlugin.plugin
-												)
-										] = getTimeFrame(
-											installedPlugin.installTime
-										);
-									}
-
-									recordEvent(
-										'storeprofiler_store_extensions_installed_and_activated',
-										trackData
-									);
+								{
+									type: 'recordSuccessfulPluginInstallation',
 								},
 							],
 						},
