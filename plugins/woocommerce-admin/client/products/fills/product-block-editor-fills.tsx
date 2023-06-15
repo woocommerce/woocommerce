@@ -42,7 +42,11 @@ const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
 					handleClick( 'classic_editor' );
 				} }
 			/>
-			<AboutTheEditorMenuItem onCloseGuide={ onClose } />
+			<AboutTheEditorMenuItem
+				onCloseGuide={ () => {
+					handleClick( 'about' );
+				} }
+			/>
 		</>
 	);
 };
