@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Enable core-profiler flag to replace profile wizard with the new core profiler
