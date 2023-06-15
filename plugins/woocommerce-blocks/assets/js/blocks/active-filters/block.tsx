@@ -6,7 +6,6 @@ import { useQueryStateByKey } from '@woocommerce/base-context/hooks';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
 import { useMemo, useEffect, useState } from '@wordpress/element';
 import classnames from 'classnames';
-import PropTypes from 'prop-types';
 import Label from '@woocommerce/base-components/label';
 import {
 	isAttributeQueryCollection,
@@ -18,6 +17,7 @@ import {
 import { getUrlParameter } from '@woocommerce/utils';
 import FilterTitlePlaceholder from '@woocommerce/base-components/filter-placeholder';
 import { useIsMounted } from '@woocommerce/base-hooks';
+import type { BlockAttributes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -34,23 +34,26 @@ import {
 } from './utils';
 import ActiveAttributeFilters from './active-attribute-filters';
 import FilterPlaceholders from './filter-placeholders';
-import { Attributes } from './types';
 import { useSetWraperVisibility } from '../filter-wrapper/context';
+
+interface ActiveFiltersBlockProps {
+	/**
+	 * The attributes for this block.
+	 */
+	attributes: BlockAttributes;
+	/**
+	 * Whether it's in the editor or frontend display.
+	 */
+	isEditor: boolean;
+}
 
 /**
  * Component displaying active filters.
- *
- * @param {Object}  props            Incoming props for the component.
- * @param {Object}  props.attributes Incoming attributes for the block.
- * @param {boolean} props.isEditor   Whether or not in the editor context.
  */
 const ActiveFiltersBlock = ( {
 	attributes: blockAttributes,
 	isEditor = false,
-}: {
-	attributes: Attributes;
-	isEditor?: boolean;
-} ) => {
+}: ActiveFiltersBlockProps ) => {
 	const setWrapperVisibility = useSetWraperVisibility();
 	const isMounted = useIsMounted();
 	const componentHasMounted = isMounted();
@@ -411,17 +414,6 @@ const ActiveFiltersBlock = ( {
 			</div>
 		</>
 	);
-};
-
-ActiveFiltersBlock.propTypes = {
-	/**
-	 * The attributes for this block.
-	 */
-	attributes: PropTypes.object.isRequired,
-	/**
-	 * Whether it's in the editor or frontend display.
-	 */
-	isEditor: PropTypes.bool,
 };
 
 export default ActiveFiltersBlock;
