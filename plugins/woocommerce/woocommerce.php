@@ -23,7 +23,6 @@ if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 // Load core packages and the autoloader.
 require __DIR__ . '/src/Autoloader.php';
 require __DIR__ . '/src/Packages.php';
-require_once __DIR__ . '/vendor/autoload_packages.php';
 
 if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 	return;
