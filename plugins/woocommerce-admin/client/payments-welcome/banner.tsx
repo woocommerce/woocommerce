@@ -43,7 +43,11 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 				<div className="woopayments-welcome-page__offer-pill">
 					{ strings.limitedTimeOffer }
 				</div>
-				<h2 dangerouslySetInnerHTML={ sanitizeHTML( description + '<span class="tos-asterix">*</span>' ) } />
+				<h2
+					dangerouslySetInnerHTML={ sanitizeHTML(
+						description + '<span class="tos-asterix">*</span>'
+					) }
+				/>
 				<Button
 					variant="primary"
 					isBusy={ isSubmitted }
