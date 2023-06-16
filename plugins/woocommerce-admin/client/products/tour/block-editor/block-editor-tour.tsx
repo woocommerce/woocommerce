@@ -1,10 +1,11 @@
 /**
  * External dependencies
  */
-import { Pill, TourKit } from '@woocommerce/components';
-import { __ } from '@wordpress/i18n';
-import { recordEvent } from '@woocommerce/tracks';
 import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { Pill, TourKit } from '@woocommerce/components';
+import { __experimentalUseFeedbackBar as useFeedbackBar } from '@woocommerce/product-editor';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -12,6 +13,7 @@ import { useEffect, useState } from '@wordpress/element';
 
 import './style.scss';
 import BlockEditorGuide from './block-editor-guide';
+import { usePublishedProductsCount } from './use-published-products-count';
 
 interface Props {
 	shouldTourBeShown: boolean;
@@ -19,6 +21,9 @@ interface Props {
 }
 
 const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
+	const { isNewUser, loadingPublishedProductsCount } =
+		usePublishedProductsCount();
+
 	useEffect( () => {
 		if ( shouldTourBeShown ) {
 			recordEvent( 'block_product_editor_spotlight_view' );
@@ -27,18 +32,60 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 
 	const [ isGuideOpen, setIsGuideOpen ] = useState( false );
 
+	const { maybeShowFeedbackBar } = useFeedbackBar();
+
 	const openGuide = () => {
 		setIsGuideOpen( true );
 	};
 
-	const closeGuide = () => {
-		recordEvent( 'block_product_editor_spotlight_completed' );
-		setIsGuideOpen( false );
+	const getTourText = () => {
+		return {
+			heading: isNewUser
+				? __( 'Meet the product editing form', 'woocommerce' )
+				: __( 'A new way to edit your products', 'woocommerce' ),
+			description: isNewUser
+				? __(
+						"Discover the form's unique features designed to help you make this product stand out.",
+						'woocommerce'
+				  )
+				: __(
+						'Introducing the upgraded experience designed to help you create and edit products easier.',
+						'woocommerce'
+				  ),
+		};
 	};
 
+	if ( loadingPublishedProductsCount ) {
+		return null;
+	}
+
 	if ( isGuideOpen ) {
-		return <BlockEditorGuide onCloseGuide={ closeGuide } />;
+		return (
+			<BlockEditorGuide
+				isNewUser={ isNewUser }
+				onCloseGuide={ ( currentPage, source ) => {
+					dismissModal();
+					if ( source === 'finish' ) {
+						recordEvent(
+							'block_product_editor_spotlight_tell_me_more_click'
+						);
+					} else {
+						//  adding 1 to consider the TourKit as page 0
+						recordEvent(
+							'block_product_editor_spotlight_dismissed',
+							{
+								current_page: currentPage + 1,
+							}
+						);
+					}
+					setIsGuideOpen( false );
+					maybeShowFeedbackBar();
+				} }
+			/>
+		);
 	} else if ( shouldTourBeShown ) {
+		const { heading, description } = getTourText();
+
 		return (
 			<TourKit
 				config={ {
@@ -53,20 +100,12 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 									),
 								},
 								descriptions: {
-									desktop: __(
-										"We designed a brand new product editing experience to let you focus on what's important.",
-										'woocommerce'
-									),
+									desktop: description,
 								},
 								heading: (
 									<>
-										<span>
-											{ __(
-												'Meet a streamlined product form',
-												'woocommerce'
-											) }
-										</span>{ ' ' }
-										<Pill className="woocommerce-block-editor-guide__pill">
+										<span>{ heading }</span>
+										<Pill>
 											{ __( 'Beta', 'woocommerce' ) }
 										</Pill>
 									</>
@@ -78,16 +117,20 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 						},
 					],
 					closeHandler: ( _steps, _currentStepIndex, source ) => {
-						dismissModal();
 						if ( source === 'done-btn' ) {
 							recordEvent(
 								'block_product_editor_spotlight_view_highlights'
 							);
 							openGuide();
 						} else {
+							dismissModal();
 							recordEvent(
-								'block_product_editor_spotlight_dismissed'
+								'block_product_editor_spotlight_dismissed',
+								{
+									current_page: 0,
+								}
 							);
+							maybeShowFeedbackBar();
 						}
 					},
 					options: {
@@ -116,6 +159,7 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 								},
 							},
 						],
+						classNames: 'woocommerce-block-editor-tourkit',
 					},
 				} }
 			/>

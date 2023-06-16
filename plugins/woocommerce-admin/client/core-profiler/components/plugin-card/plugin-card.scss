@@ -16,6 +16,14 @@
 		max-width: 100%;
 	}
 
+	.components-checkbox-control__input-container {
+		margin-top: 6px;
+	}
+
+	.components-checkbox-control__input-container {
+		margin-top: 6px;
+	}
+
 	input {
 		margin: 3px 26px 0 0;
 		width: 20px;
@@ -26,8 +34,7 @@
 	}
 	img {
 		margin-right: 12px;
-		width: 25px;
-		height: 25px;
+		width: 28px;
 		@include breakpoint( '<782px' ) {
 			align-self: center;
 		}
@@ -35,6 +42,7 @@
 	h3 {
 		font-size: 14px;
 		line-height: 20px;
+		font-weight: 500;
 		margin: 0 0 8px 0;
 		padding: 0;
 		@include breakpoint( '<782px' ) {
@@ -43,14 +51,20 @@
 	}
 
 	p {
+		display: inline;
 		font-size: 13px;
 		line-height: 16px;
 		color: $gray-700;
 		margin: 0;
 		padding: 0;
-		a {
-			color: inherit;
+		@include breakpoint( '<782px' ) {
+			display: none;
 		}
+	}
+
+	a {
+		color: $gray-700;
+		margin-left: 5px;
 		@include breakpoint( '<782px' ) {
 			display: none;
 		}
@@ -63,6 +77,7 @@
 			height: 16px;
 			&:focus {
 				box-shadow: none;
+				border-color: #1e1e1e;
 			}
 		}
 		.components-checkbox-control__input[type='checkbox']:checked {

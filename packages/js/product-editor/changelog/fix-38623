@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix empty state for currency inputs in product editor

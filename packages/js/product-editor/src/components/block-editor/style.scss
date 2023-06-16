@@ -14,12 +14,30 @@
 		font-family: var(--wp--preset--font-family--system-font);
 	}
 
+	h4 {
+		font-size: 16px;
+	}
+
 	label {
 		color: $gray-900;
 	}
 
 	a {
 		text-decoration: none;
+	}
+
+	/*
+	 * Override default block margins and layout applied for themes without a theme.json file.
+	 *
+	 * If we no longer call `is_block_editor( true )` in the future for the product editor,
+	 * we can remove this.
+	 *
+	 * See: `wp_add_editor_classic_theme_styles()`
+	 */
+	:where(.wp-block) {
+		margin-bottom: 0;
+		margin-top: 0;
+		max-width: unset;
 	}
 
 	.has-error {
@@ -64,26 +82,6 @@
 		margin-top: calc(2 * $gap);
 	}
 
-	.editor-styles-wrapper {
-		h4 {
-			font-size: 16px;
-		}
-
-		.block-editor-block-list__layout.is-root-container {
-			padding-left: calc(2 * $gap);
-			padding-right: calc(2 * $gap);
-			padding-bottom: 128px;
-
-			@include breakpoint(">782px") {
-				padding-left: 0;
-				padding-right: 0;
-				max-width: 650px;
-				margin-left: auto;
-				margin-right: auto;
-			}
-		}
-	}
-
 	.components-input-control {
 		&__input::placeholder {
 			color: $gray-700;
@@ -126,9 +124,24 @@
 		font-weight: 500;
 	}
 
-	.block-editor-block-list__layout
+	.block-editor-block-list__layout {
+		&.is-root-container {
+			padding-left: calc(2 * $gap);
+			padding-right: calc(2 * $gap);
+			padding-bottom: 128px;
+
+			@include breakpoint(">782px") {
+				padding-left: 0;
+				padding-right: 0;
+				max-width: 650px;
+				margin-left: auto;
+				margin-right: auto;
+			}
+		}
+
 		.block-editor-block-list__block:not([contenteditable]):focus:after {
-		display: none; // use important or increase specificity.
+			display: none; // use important or increase specificity.
+		}
 	}
 }
 

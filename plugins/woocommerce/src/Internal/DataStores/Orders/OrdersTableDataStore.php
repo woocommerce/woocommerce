@@ -1641,6 +1641,84 @@ FROM $order_meta_table
 
 		$changes = $order->get_changes();
 		$this->update_address_index_meta( $order, $changes );
+		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
+		$this->set_custom_taxonomies( $order, $default_taxonomies );
+	}
+
+	/**
+	 * Set default taxonomies for the order.
+	 *
+	 * Note: This is re-implementation of part of WP core's `wp_insert_post` function. Since the code block that set default taxonomies is not filterable, we have to re-implement it.
+	 *
+	 * @param \WC_Abstract_Order $order               Order object.
+	 * @param array              $sanitized_tax_input Sanitized taxonomy input.
+	 *
+	 * @return array Sanitized tax input with default taxonomies.
+	 */
+	public function init_default_taxonomies( \WC_Abstract_Order $order, array $sanitized_tax_input ) {
+		if ( 'auto-draft' === $order->get_status() ) {
+			return $sanitized_tax_input;
+		}
+
+		foreach ( get_object_taxonomies( $order->get_type(), 'object' ) as $taxonomy => $tax_object ) {
+			if ( empty( $tax_object->default_term ) ) {
+				return $sanitized_tax_input;
+			}
+
+			// Filter out empty terms.
+			if ( isset( $sanitized_tax_input[ $taxonomy ] ) && is_array( $sanitized_tax_input[ $taxonomy ] ) ) {
+				$sanitized_tax_input[ $taxonomy ] = array_filter( $sanitized_tax_input[ $taxonomy ] );
+			}
+
+			// Passed custom taxonomy list overwrites the existing list if not empty.
+			$terms = wp_get_object_terms( $order->get_id(), $taxonomy, array( 'fields' => 'ids' ) );
+			if ( ! empty( $terms ) && empty( $sanitized_tax_input[ $taxonomy ] ) ) {
+				$sanitized_tax_input[ $taxonomy ] = $terms;
+			}
+
+			if ( empty( $sanitized_tax_input[ $taxonomy ] ) ) {
+				$default_term_id = get_option( 'default_term_' . $taxonomy );
+				if ( ! empty( $default_term_id ) ) {
+					$sanitized_tax_input[ $taxonomy ] = array( (int) $default_term_id );
+				}
+			}
+		}
+		return $sanitized_tax_input;
+	}
+
+	/**
+	 * Set custom taxonomies for the order.
+	 *
+	 * Note: This is re-implementation of part of WP core's `wp_insert_post` function. Since the code block that set custom taxonomies is not filterable, we have to re-implement it.
+	 *
+	 * @param \WC_Abstract_Order $order               Order object.
+	 * @param array              $sanitized_tax_input Sanitized taxonomy input.
+	 *
+	 * @return void
+	 */
+	public function set_custom_taxonomies( \WC_Abstract_Order $order, array $sanitized_tax_input ) {
+		if ( empty( $sanitized_tax_input ) ) {
+			return;
+		}
+
+		foreach ( $sanitized_tax_input as $taxonomy => $tags ) {
+			$taxonomy_obj = get_taxonomy( $taxonomy );
+
+			if ( ! $taxonomy_obj ) {
+				/* translators: %s: Taxonomy name. */
+				_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Invalid taxonomy: %s.', 'woocommerce' ), $taxonomy ) ), '7.9.0' );
+				continue;
+			}
+
+			// array = hierarchical, string = non-hierarchical.
+			if ( is_array( $tags ) ) {
+				$tags = array_filter( $tags );
+			}
+
+			if ( current_user_can( $taxonomy_obj->cap->assign_terms ) ) {
+				wp_set_post_terms( $order->get_id(), $tags, $taxonomy );
+			}
+		}
 	}
 
 	/**
@@ -1738,8 +1816,8 @@ FROM $order_meta_table
 
 		$changes['type'] = $order->get_type();
 
-		// Make sure 'status' is correct.
-		if ( array_key_exists( 'status', $column_mapping ) ) {
+		// Make sure 'status' is correctly prefixed.
+		if ( array_key_exists( 'status', $column_mapping ) && array_key_exists( 'status', $changes ) ) {
 			$changes['status'] = $this->get_post_status( $order );
 		}
 
