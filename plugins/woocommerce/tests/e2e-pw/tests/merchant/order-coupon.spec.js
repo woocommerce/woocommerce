@@ -133,7 +133,7 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 			page.locator( '.wc-order-totals td.total >> nth=2' )
 		).toContainText( discountedPrice );
 		// remove the coupon
-		await page.dispatchEvent( 'a.remove-coupon', 'click' ); // have to use dispatchEvent because nothing visible to click on
+		await page.locator( 'a.remove-coupon' ).dispatchEvent( 'click' ); // have to use dispatchEvent because nothing visible to click on
 
 		// make sure the coupon was removed
 		await expect(
