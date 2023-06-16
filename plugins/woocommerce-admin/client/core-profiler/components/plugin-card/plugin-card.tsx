@@ -35,7 +35,7 @@ export const PluginCard = ( {
 		<div className="woocommerce-profiler-plugins-plugin-card">
 			{ ! installed && (
 				<CheckboxControl
-					className='core-profiler__checkbox'
+					className="core-profiler__checkbox"
 					checked={ checked }
 					onChange={ onChange ? onChange : () => {} }
 				/>
