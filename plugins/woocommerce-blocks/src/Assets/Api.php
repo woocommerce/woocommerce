@@ -19,6 +19,20 @@ class Api {
 	private $inline_scripts = [];
 
 	/**
+	 * Determines if caching is enabled for script data.
+	 *
+	 * @var boolean
+	 */
+	private $disable_cache = false;
+
+	/**
+	 * Stores loaded script data for the current request
+	 *
+	 * @var array|null
+	 */
+	private $script_data = null;
+
+	/**
 	 * Reference to the Package instance
 	 *
 	 * @var Package
@@ -31,7 +45,9 @@ class Api {
 	 * @param Package $package An instance of Package.
 	 */
 	public function __construct( Package $package ) {
-		$this->package = $package;
+		$this->package       = $package;
+		$this->disable_cache = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! $this->package->feature()->is_production_environment();
+		add_action( 'shutdown', array( $this, 'update_script_data_cache' ), 20 );
 	}
 
 	/**
@@ -77,6 +93,44 @@ class Api {
 	}
 
 	/**
+	 * Initialize and load cached script data from the transient cache.
+	 *
+	 * @return array
+	 */
+	private function get_cached_script_data() {
+		if ( $this->disable_cache ) {
+			return [];
+		}
+
+		$transient_value = json_decode( (string) get_transient( 'woocommerce_blocks_asset_api_script_data' ), true );
+
+		if ( empty( $transient_value ) || empty( $transient_value['script_data'] ) || empty( $transient_value['version'] ) || $transient_value['version'] !== $this->package->get_version() ) {
+			return [];
+		}
+
+		return (array) ( $transient_value['script_data'] ?? [] );
+	}
+
+	/**
+	 * Store all cached script data in the transient cache.
+	 */
+	public function update_script_data_cache() {
+		if ( is_null( $this->script_data ) || $this->disable_cache ) {
+			return;
+		}
+		set_transient(
+			'woocommerce_blocks_asset_api_script_data',
+			wp_json_encode(
+				array(
+					'script_data' => $this->script_data,
+					'version'     => $this->package->get_version(),
+				)
+			),
+			DAY_IN_SECONDS * 30
+		);
+	}
+
+	/**
 	 * Get src, version and dependencies given a script relative src.
 	 *
 	 * @param string $relative_src Relative src to the script.
@@ -85,31 +139,37 @@ class Api {
 	 * @return array src, version and dependencies of the script.
 	 */
 	public function get_script_data( $relative_src, $dependencies = [] ) {
-		$src     = '';
-		$version = '1';
-
-		if ( $relative_src ) {
-			$src        = $this->get_asset_url( $relative_src );
-			$asset_path = $this->package->get_path(
-				str_replace( '.js', '.asset.php', $relative_src )
+		if ( ! $relative_src ) {
+			return array(
+				'src'          => '',
+				'version'      => '1',
+				'dependencies' => $dependencies,
 			);
-
-			if ( file_exists( $asset_path ) ) {
-				// The following require is safe because we are checking if the file exists and it is not a user input.
-				// nosemgrep audit.php.lang.security.file.inclusion-arg.
-				$asset        = require $asset_path;
-				$dependencies = isset( $asset['dependencies'] ) ? array_merge( $asset['dependencies'], $dependencies ) : $dependencies;
-				$version      = ! empty( $asset['version'] ) ? $asset['version'] : $this->get_file_version( $relative_src );
-			} else {
-				$version = $this->get_file_version( $relative_src );
-			}
 		}
 
-		return array(
-			'src'          => $src,
-			'version'      => $version,
-			'dependencies' => $dependencies,
-		);
+		if ( is_null( $this->script_data ) ) {
+			$this->script_data = $this->get_cached_script_data();
+		}
+
+		if ( empty( $this->script_data[ $relative_src ] ) ) {
+			$asset_path = $this->package->get_path( str_replace( '.js', '.asset.php', $relative_src ) );
+			// The following require is safe because we are checking if the file exists and it is not a user input.
+			// nosemgrep audit.php.lang.security.file.inclusion-arg.
+			$asset = file_exists( $asset_path ) ? require $asset_path : [];
+
+			$this->script_data[ $relative_src ] = array(
+				'src'          => $this->get_asset_url( $relative_src ),
+				'version'      => ! empty( $asset['version'] ) ? $asset['version'] : $this->get_file_version( $relative_src ),
+				'dependencies' => ! empty( $asset['dependencies'] ) ? $asset['dependencies'] : [],
+			);
+		}
+
+		// Return asset details as well as the requested dependencies array.
+		return [
+			'src'          => $this->script_data[ $relative_src ]['src'],
+			'version'      => $this->script_data[ $relative_src ]['version'],
+			'dependencies' => array_merge( $this->script_data[ $relative_src ]['dependencies'], $dependencies ),
+		];
 	}
 
 	/**
