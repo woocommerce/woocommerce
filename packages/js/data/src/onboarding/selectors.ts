@@ -95,6 +95,16 @@ export const getProductTypes = ( state: OnboardingState ) => {
 	return state.productTypes || {};
 };
 
+export const getJetpackAuthUrl = (
+	state: OnboardingState,
+	query: {
+		redirectUrl: string;
+		from?: string;
+	}
+): string => {
+	return state.jetpackAuthUrls[ query.redirectUrl ] || '';
+};
+
 export type OnboardingSelectors = {
 	getProfileItems: () => ReturnType< typeof getProfileItems >;
 	getPaymentGatewaySuggestions: () => ReturnType<

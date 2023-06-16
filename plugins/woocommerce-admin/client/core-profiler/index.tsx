@@ -25,9 +25,11 @@ import {
 	ONBOARDING_STORE_NAME,
 	Extension,
 	GeolocationResponse,
+	PLUGINS_STORE_NAME,
 } from '@woocommerce/data';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -173,6 +175,7 @@ export type CoreProfilerStateMachineContext = {
 		stageIndex?: number;
 	};
 	onboardingProfile: OnboardingProfile;
+	jetpackAuthUrl?: string;
 };
 
 const getAllowTrackingOption = async () =>
@@ -572,6 +575,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		pluginsSelected: [],
 		loader: {},
 		onboardingProfile: {} as OnboardingProfile,
+		jetpackAuthUrl: undefined,
 	} as CoreProfilerStateMachineContext,
 	states: {
 		navigate: {
@@ -1170,8 +1174,59 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								completed: true,
 							} );
 						},
+						onDone: [
+							{
+								target: 'isJetpackConnected',
+								cond: 'hasJetpackSelected',
+							},
+							{ actions: 'redirectToWooHome' },
+						],
+					},
+					meta: {
+						component: Loader,
+						progress: 100,
+					},
+				},
+				isJetpackConnected: {
+					invoke: {
+						src: async () => {
+							return await resolveSelect(
+								PLUGINS_STORE_NAME
+							).isJetpackConnected();
+						},
+						onDone: [
+							{
+								target: 'sendToJetpackAuthPage',
+								cond: ( _context, event ) => {
+									return ! event.data;
+								},
+							},
+							{ actions: 'redirectToWooHome' },
+						],
+					},
+					meta: {
+						component: Loader,
+						progress: 100,
+					},
+				},
+				sendToJetpackAuthPage: {
+					invoke: {
+						src: async () =>
+							await resolveSelect(
+								ONBOARDING_STORE_NAME
+							).getJetpackAuthUrl( {
+								redirectUrl: getAdminLink(
+									'admin.php?page=wc-admin'
+								),
+								from: 'woocommerce-core-profiler',
+							} ),
 						onDone: {
-							actions: 'redirectToWooHome',
+							actions: [
+								( _context, event ) => {
+									window.location.href =
+										event.data + '&installed_ext_success=1';
+								},
+							],
 						},
 					},
 					meta: {
@@ -1287,6 +1342,17 @@ export const CoreProfilerController = ( {
 					const { step = undefined } = getQuery() as { step: string };
 					return (
 						step === ( cond as { step: string | undefined } ).step
+					);
+				},
+				hasJetpackSelected: ( context ) => {
+					return (
+						context.pluginsSelected.find(
+							( plugin ) => plugin === 'jetpack'
+						) !== undefined ||
+						context.pluginsAvailable.find(
+							( plugin: Extension ) =>
+								plugin.key === 'jetpack' && plugin.is_activated
+						) !== undefined
 					);
 				},
 			},
