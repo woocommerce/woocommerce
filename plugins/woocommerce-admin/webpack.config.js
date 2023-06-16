@@ -216,6 +216,11 @@ const webpackConfig = {
 						// The external wp.components does not include ui components, so we need to skip requesting to external here.
 						return null;
 					}
+
+					if ( request.startsWith( '@wordpress/edit-site' ) ) {
+						// The external wp.editSite does not include edit-site components, so we need to skip requesting to external here.
+						return null;
+					}
 				},
 			} ),
 		// Reduces data for moment-timezone.
