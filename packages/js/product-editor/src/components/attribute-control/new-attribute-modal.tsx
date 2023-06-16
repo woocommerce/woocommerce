@@ -102,8 +102,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 
 	const hasTermsOrOptions = ( attribute: EnhancedProductAttribute ) => {
 		return (
-			( attribute.terms || [] ).length > 0 ||
-			( attribute.options || [] ).length > 0
+			( attribute.terms && attribute.terms.length > 0 ) ||
+			( attribute.options && attribute.options.length > 0 )
 		);
 	};
 
