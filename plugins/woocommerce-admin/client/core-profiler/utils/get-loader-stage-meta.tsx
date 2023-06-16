@@ -32,7 +32,7 @@ const LayoutStage = {
 		{
 			label: __( '#FunWooFact: ', 'woocommerce' ),
 			text: __(
-				'#FunWooFact: Did you know that Woo powers almost 4 million stores worldwide? You’re in good company.',
+				'Did you know that Woo powers almost 4 million stores worldwide? You’re in good company.',
 				'woocommerce'
 			),
 		},
