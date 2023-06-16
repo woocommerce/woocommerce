@@ -16,7 +16,12 @@ import {
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
-import { updateQueryString, getQuery } from '@woocommerce/navigation';
+import {
+	updateQueryString,
+	getQuery,
+	getNewPath,
+	navigateTo,
+} from '@woocommerce/navigation';
 import {
 	ExtensionList,
 	OPTIONS_STORE_NAME,
@@ -322,10 +327,9 @@ const handleGeolocation = assign( {
 } );
 
 const redirectToWooHome = () => {
-	/**
-	 * @todo replace with navigateTo
-	 */
-	window.location.href = '/wp-admin/admin.php?page=wc-admin';
+	navigateTo( {
+		url: getNewPath( {}, '/', {} ),
+	} );
 };
 
 const redirectToJetpackAuthPage = (
