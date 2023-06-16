@@ -29,6 +29,7 @@ class WcPayWelcomePage {
 
 		return self::$instance;
 	}
+
 	/**
 	 * Eligible incentive for the store.
 	 *
