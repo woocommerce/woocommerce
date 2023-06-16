@@ -219,7 +219,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	 * @param WP_REST_Request $request WP_REST_Request object.
 	 *
 	 * @return array
-	 * @throws \Exception
+	 * @throws \Exception If there is an error registering the site.
 	 */
 	public function get_jetpack_authorization_url( WP_REST_Request $request ) {
 		$manager = new Manager( 'woocommerce' );
@@ -227,7 +227,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		if ( ! $manager->is_connected() ) {
 			$result = $manager->try_registration();
 			if ( is_wp_error( $result ) ) {
-				 throw new \Exception( $result->get_error_message() );
+				throw new \Exception( $result->get_error_message() );
 			}
 		}
 
