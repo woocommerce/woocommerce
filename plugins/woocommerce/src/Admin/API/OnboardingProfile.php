@@ -449,6 +449,13 @@ class OnboardingProfile extends \WC_REST_Data_Controller {
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
+			'plugins_page_skipped' => array(
+				'type'              => 'boolean',
+				'description'       => __( 'Whether or not plugins step in core profiler was skipped.', 'woocommerce' ),
+				'context'           => array( 'view' ),
+				'readonly'          => true,
+				'validate_callback' => 'rest_validate_request_arg',
+			),
 		);
 
 		return apply_filters( 'woocommerce_rest_onboarding_profile_properties', $properties );
