@@ -824,6 +824,9 @@ class WC_AJAX {
 	public static function link_all_variations() {
 		check_ajax_referer( 'link-variations', 'security' );
 
+		define( 'WC_MAX_LINKED_VARIATIONS', 100 );
+		$time = microtime( true );
+
 		if ( ! current_user_can( 'edit_products' ) ) {
 			wp_die( -1 );
 		}
@@ -839,6 +842,9 @@ class WC_AJAX {
 
 		$product        = wc_get_product( $post_id );
 		$number_created = self::create_all_product_variations( $product );
+
+		$totaltime = microtime( true ) - $time;
+		wc_get_logger()->log( 'info', 'link_all_variations: ' . $totaltime );
 
 		echo esc_html( $number_created );
 
@@ -1899,6 +1905,8 @@ class WC_AJAX {
 	public static function json_search_taxonomy_terms() {
 		ob_start();
 
+		$time = microtime( true );
+
 		check_ajax_referer( 'search-taxonomy-terms', 'security' );
 
 		if ( ! current_user_can( 'edit_products' ) ) {
@@ -1930,6 +1938,9 @@ class WC_AJAX {
 		 */
 		$terms = get_terms( apply_filters( 'woocommerce_product_attribute_terms', $args ) );
 
+		$totaltime = microtime( true ) - $time;
+		wc_get_logger()->log( 'info', 'json_search_taxonomy_terms: ' . $totaltime );
+
 		/**
 		 * Filter the product attribute terms search results.
 		 *
@@ -1945,6 +1956,8 @@ class WC_AJAX {
 	 */
 	public static function json_search_product_attributes() {
 		ob_start();
+
+		$time = microtime( true );
 
 		check_ajax_referer( 'search-product-attributes', 'security' );
 
@@ -1974,6 +1987,9 @@ class WC_AJAX {
 				break;
 			}
 		}
+
+		$totaltime = microtime( true ) - $time;
+		wc_get_logger()->log( 'info', 'json_search_product_attributes: ' . $totaltime );
 
 		/**
 		 * Filter the product category search results.
