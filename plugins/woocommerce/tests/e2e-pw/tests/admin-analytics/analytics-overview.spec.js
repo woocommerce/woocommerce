@@ -26,9 +26,9 @@ test.describe( 'Analytics pages', () => {
 			).toBeVisible();
 			await page.waitForLoadState( 'networkidle' );
 		}
-		const lastSection = await page.textContent(
-			'h2.woocommerce-section-header__title >> nth=2'
-		);
+		const lastSection = await page
+			.locator( 'h2.woocommerce-section-header__title >> nth=2' )
+			.textContent();
 		if ( lastSection === 'Performance' ) {
 			// sections are in the wrong order
 			await page
@@ -63,16 +63,13 @@ test.describe( 'Analytics pages', () => {
 		);
 
 		for ( const expectedSection of arrExpectedSections ) {
-			await test.step(
-				`Assert that the "${ expectedSection }" section is visible`,
-				async () => {
-					await expect(
-						page.locator( 'h2.woocommerce-section-header__title', {
-							hasText: expectedSection,
-						} )
-					).toBeVisible();
-				}
-			);
+			await test.step( `Assert that the "${ expectedSection }" section is visible`, async () => {
+				await expect(
+					page.locator( 'h2.woocommerce-section-header__title', {
+						hasText: expectedSection,
+					} )
+				).toBeVisible();
+			} );
 		}
 	} );
 

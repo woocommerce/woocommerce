@@ -88,9 +88,9 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		await expect(
 			page.locator( 'li.woocommerce-order-overview__order > strong' )
 		).toBeVisible();
-		orderId = await page.textContent(
-			'li.woocommerce-order-overview__order > strong'
-		);
+		orderId = await page
+			.locator( 'li.woocommerce-order-overview__order > strong' )
+			.textContent();
 
 		// search to narrow it down to just the messages we want
 		await page.goto(

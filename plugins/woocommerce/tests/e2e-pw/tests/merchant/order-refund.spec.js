@@ -54,9 +54,9 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 
 		// get currency symbol
-		currencySymbol = await page.textContent(
-			'.woocommerce-Price-currencySymbol'
-		);
+		currencySymbol = await page
+			.locator( '.woocommerce-Price-currencySymbol' )
+			.textContent();
 
 		await page.locator( 'button.refund-items' ).click();
 

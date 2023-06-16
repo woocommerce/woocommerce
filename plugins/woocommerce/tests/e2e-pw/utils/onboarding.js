@@ -32,7 +32,7 @@ const onboarding = {
 		// Click continue button
 		await page.locator( 'button >> text=Continue' ).click();
 		// Usage tracking dialog
-		await page.textContent( '.components-modal__header-heading' );
+		await page.locator( '.components-modal__header-heading' ).textContent();
 		await page.locator( 'button >> text=No thanks' ).click();
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	},
@@ -43,9 +43,9 @@ const onboarding = {
 		expectedNumberOfIndustries
 	) => {
 		await page.goto( INDUSTRY_DETAILS_URL );
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
+		const pageHeading = await page
+			.locator( 'div.woocommerce-profile-wizard__step-header > h2' )
+			.textContent();
 
 		expect( pageHeading ).toContain(
 			'In which industry does the store operate?'
@@ -68,7 +68,7 @@ const onboarding = {
 
 	handleSaveChangesModal: async ( page, { saveChanges } ) => {
 		// Save changes? Modal
-		await page.textContent( '.components-modal__header-heading' );
+		await page.locator( '.components-modal__header-heading' ).textContent();
 
 		if ( saveChanges ) {
 			await page.locator( 'button >> text=Save' ).click();
@@ -82,9 +82,9 @@ const onboarding = {
 		// There are 7 checkboxes on the page, adjust this constant if we change that
 		const expectedProductTypes = 7;
 		await page.goto( PRODUCT_TYPES_URL );
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
+		const pageHeading = await page
+			.locator( 'div.woocommerce-profile-wizard__step-header > h2' )
+			.textContent();
 		expect( pageHeading ).toContain(
 			'What type of products will be listed?'
 		);
@@ -108,9 +108,9 @@ const onboarding = {
 
 	completeBusinessDetailsSection: async ( page ) => {
 		await page.goto( BUSIENSS_DETAILS_URL );
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
+		const pageHeading = await page
+			.locator( 'div.woocommerce-profile-wizard__step-header > h2' )
+			.textContent();
 		expect( pageHeading ).toContain( 'Tell us about your business' );
 		// Select 1 - 10 for products
 		await page
@@ -143,9 +143,9 @@ const onboarding = {
 
 		// Click the Free features tab
 		await page.locator( '#tab-panel-0-business-features' ).click();
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
+		const pageHeading = await page
+			.locator( 'div.woocommerce-profile-wizard__step-header > h2' )
+			.textContent();
 		expect( pageHeading ).toContain( 'Included business features' );
 		// Expand list of features
 		await page
@@ -163,7 +163,7 @@ const onboarding = {
 		} else {
 			await expect( wcPay ).not.toBeVisible();
 		}
-		
+
 		// Uncheck all business features
 		await page
 			.locator(
