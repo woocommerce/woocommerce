@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Admin\PageController;
  */
 class WcPayWelcomePage {
 	const TRANSIENT_NAME = 'wcpay_welcome_page_incentive';
-	const SCRIPT_NAME    = 'wcpay-welcome-page-incentive';
 
 	/**
 	 * Plugin instance.
