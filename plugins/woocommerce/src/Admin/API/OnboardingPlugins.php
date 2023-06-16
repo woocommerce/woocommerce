@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Admin\API;
 defined( 'ABSPATH' ) || exit;
 
 use ActionScheduler;
+use Automattic\Jetpack\Connection\Manager;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use WC_REST_Data_Controller;
@@ -93,6 +94,34 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 					'permission_callback' => array( $this, 'can_install_plugins' ),
 				),
 				'schema' => array( $this, 'get_install_async_schema' ),
+			)
+		);
+
+		// This is an experimental endpoint and is subject to change in the future.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/jetpack-authorization-url',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( $this, 'get_jetpack_authorization_url' ),
+					'permission_callback' => array( $this, 'can_install_plugins' ),
+					'args'                => array(
+						'redirect_url' => array(
+							'description'       => 'The URL to redirect to after authorization',
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'required'          => true,
+						),
+						'from'         => array(
+							'description'       => 'from value for the jetpack authorization page',
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'required'          => false,
+							'default'           => 'woocommerce-onboarding',
+						),
+					),
+				),
 			)
 		);
 	}
@@ -181,6 +210,43 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		}
 
 		return $response;
+	}
+
+
+	/**
+	 * Return Jetpack authorization URL.
+	 *
+	 * @param WP_REST_Request $request WP_REST_Request object.
+	 *
+	 * @return array
+	 * @throws \Exception If there is an error registering the site.
+	 */
+	public function get_jetpack_authorization_url( WP_REST_Request $request ) {
+		$manager = new Manager( 'woocommerce' );
+		$errors  = new WP_Error();
+
+		// Register the site to wp.com.
+		if ( ! $manager->is_connected() ) {
+			$result = $manager->try_registration();
+			if ( is_wp_error( $result ) ) {
+				$errors->add( $result->get_error_code(), $result->get_error_message() );
+			}
+		}
+
+		$redirect_url = $request->get_param( 'redirect_url' );
+		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, [ 'development', 'wpcalypso', 'horizon', 'stage' ], true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+
+		return [
+			'success' => ! $errors->has_errors(),
+			'errors'  => $errors->get_error_messages(),
+			'url'     => add_query_arg(
+				[
+					'from'        => $request->get_param( 'from' ),
+					'calypso_env' => $calypso_env,
+				],
+				$manager->get_authorization_url( null, $redirect_url )
+			),
+		];
 	}
 
 	/**

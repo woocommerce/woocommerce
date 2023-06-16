@@ -19,6 +19,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import {
 	FeedbackMenuItem,
 	ClassicEditorMenuItem,
+	AboutTheEditorMenuItem,
 } from '../fills/more-menu-items';
 
 const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
@@ -28,6 +29,7 @@ const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
 		<>
 			<FeedbackMenuItem onClose={ onClose } />
 			<ClassicEditorMenuItem productId={ id } onClose={ onClose } />
+			<AboutTheEditorMenuItem onClose={ onClose } />
 		</>
 	);
 };

@@ -312,6 +312,10 @@ export function useProductHelper() {
 	 */
 	const sanitizePrice = useCallback(
 		( price: string ) => {
+			if ( ! price.length ) {
+				return '';
+			}
+
 			const { getCurrencyConfig } = context;
 			const { decimalSeparator } = getCurrencyConfig();
 			// Build regex to strip out everything except digits, decimal point and minus sign.

@@ -80,10 +80,17 @@ export type OnboardingState = {
 	// TODO clarify what the error record's type is
 	errors: Record< string, unknown >;
 	requesting: Record< string, boolean >;
+	jetpackAuthUrls: Record< string, GetJetpackAuthUrlResponse >;
 };
 
 export type Industry = {
 	slug: string;
+};
+
+export type GetJetpackAuthUrlResponse = {
+	url: string;
+	success: boolean;
+	errors: string[];
 };
 
 export type ProductCount = '0' | '1-10' | '11-100' | '101 - 1000' | '1000+';
@@ -191,7 +198,7 @@ export type Extension = {
 
 export type InstallAndActivatePluginsAsyncResponse = {
 	job_id: string;
-	status: 'pending' | 'in-progress' | 'completed' | 'failed';
+	status: 'pendi<ng' | 'in-progress' | 'completed' | 'failed';
 	plugins: Array< {
 		status: 'pending' | 'installing' | 'installed' | 'activated' | 'failed';
 		errors: string[];

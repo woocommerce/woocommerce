@@ -18,6 +18,7 @@ import {
 	getTruncatedProductVariationTitle,
 } from './get-product-variation-title';
 import { preventLeavingProductForm } from './prevent-leaving-product-form';
+import { isValidEmail } from './validate-email';
 
 export * from './create-ordered-children';
 export * from './sort-fills-by-order';
@@ -38,6 +39,7 @@ export {
 	getProductTitle,
 	getProductVariationTitle,
 	getTruncatedProductVariationTitle,
+	isValidEmail,
 	preventLeavingProductForm,
 	PRODUCT_STATUS_LABELS,
 };

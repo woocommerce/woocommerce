@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add re-migrate support to HPOS CLI.
