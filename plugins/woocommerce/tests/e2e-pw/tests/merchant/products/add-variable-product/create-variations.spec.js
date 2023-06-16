@@ -51,7 +51,7 @@ test.describe( 'Add variations', () => {
 		);
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( '.variations_tab' ).click();
 		} );
 
 		await test.step(
@@ -60,7 +60,7 @@ test.describe( 'Add variations', () => {
 				// event listener for handling the link_all_variations confirmation dialog
 				page.on( 'dialog', ( dialog ) => dialog.accept() );
 
-				await page.click( 'button.generate_variations' );
+				await page.locator( 'button.generate_variations' ).click();
 			}
 		);
 
@@ -110,7 +110,7 @@ test.describe( 'Add variations', () => {
 		);
 
 		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.click( 'a[href="#variable_product_options"]' );
+			await page.locator( '.variations_tab' ).click();
 		} );
 
 		await test.step(
