@@ -223,11 +223,13 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	 */
 	public function get_jetpack_authorization_url( WP_REST_Request $request ) {
 		$manager = new Manager( 'woocommerce' );
+		$errors  = new WP_Error();
+
 		// Register the site to wp.com.
 		if ( ! $manager->is_connected() ) {
 			$result = $manager->try_registration();
 			if ( is_wp_error( $result ) ) {
-				throw new \Exception( $result->get_error_message() );
+				$errors->add( $result->get_error_code(), $result->get_error_message() );
 			}
 		}
 
@@ -235,7 +237,9 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, [ 'development', 'wpcalypso', 'horizon', 'stage' ], true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
 
 		return [
-			'url' => add_query_arg(
+			'success' => ! $errors->has_errors(),
+			'errors'  => $errors->get_error_messages(),
+			'url'     => add_query_arg(
 				[
 					'from'        => $request->get_param( 'from' ),
 					'calypso_env' => $calypso_env,
