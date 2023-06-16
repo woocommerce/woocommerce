@@ -23,7 +23,7 @@
 
 		@media (min-width: #{ ($break-small) }) {
 			padding-right: $gap-larger + 217px;
-			background: url("./incentive.svg") no-repeat;
+			background: url(./incentive.svg) no-repeat;
 			background-position: right $gap-larger center;
 		}
 	}
@@ -128,7 +128,7 @@
 			margin: 0 0 $gap-large 0;
 			padding: 0;
 			background-color: #f0f6fc;
-			box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 0px 1px;
+			box-shadow: rgba(0, 0, 0, 0.1) 0 0 0 1px;
 
 			.components-notice__content {
 				margin: 0;
