@@ -47,7 +47,7 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Whether the WCPay welcome page is visible.
+	 * Whether the WooPayments welcome page is visible.
 	 *
 	 * @return boolean
 	 */
@@ -92,7 +92,7 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Registers the WooCommerce Payments welcome page.
+	 * Registers the WooPayments welcome page.
 	 */
 	public function register_payments_welcome_page() {
 		global $menu;
@@ -281,7 +281,7 @@ class WcPayWelcomePage {
 				),
 				// Whether the store has at least one payment gateway enabled.
 				'has_payments' => ! empty( WC()->payment_gateways()->get_available_payment_gateways() ),
-				// Whether the store has WooCommerce Payments active, connected, and a WooCommerce Payments account.
+				// Whether the store has WooPayments active, connected, and a WooPayments account.
 				'has_wcpay'    => $this->has_wcpay(),
 			],
 			'https://public-api.wordpress.com/wpcom/v2/wcpay/incentives',
