@@ -1,4 +1,4 @@
-@import '../../shared';
+@import '../../shared.scss';
 
 .woocommerce-profiler-plugins-plugin-card {
 	max-width: 492px;
@@ -72,7 +72,7 @@
 		}
 	}
 
-  .components-checkbox-control__input-container {
+	.components-checkbox-control__input-container {
 		margin-right: 24px;
 
 		@include breakpoint( '<782px' ) {
