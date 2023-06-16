@@ -68,8 +68,8 @@ class WcPayWelcomePage {
 			return false;
 		}
 
-		// WCPay must not be active.
-		if ( class_exists( '\WC_Payments' ) ) {
+		// WCPay must not be in use or previously used.
+		if ( $this->has_wcpay() ) {
 			return false;
 		}
 
@@ -184,17 +184,41 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Whether WCPay is connected and an account exists, by checking account data cache.
+	 * Whether WCPay is installed, connected, an account exists, or there are orders processed with it.
 	 *
 	 * @return boolean
 	 */
 	private function has_wcpay(): bool {
-		if ( ! WooCommercePayments::is_connected() ) {
-			return false;
+		// Installed.
+		if ( class_exists( '\WC_Payments' ) ) {
+			return true;
 		}
 
+		// Currently connected.
+		if ( WooCommercePayments::is_connected() ) {
+			return true;
+		}
+
+		// Account data in cache.
 		$account_data = get_option( 'wcpay_account_data' );
-		return isset( $account_data['data'] ) && is_array( $account_data['data'] ) && ! empty( $account_data['data'] );
+		if ( isset( $account_data['data'] ) && is_array( $account_data['data'] ) && ! empty( $account_data['data'] ) ) {
+			return true;
+		}
+
+		// Orders processed with it.
+		if ( ! empty(
+			wc_get_orders(
+				[
+					'payment_method' => 'woocommerce_payments',
+					'return'         => 'ids',
+					'limit'          => 1,
+				]
+			)
+		) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -244,13 +268,14 @@ class WcPayWelcomePage {
 				'locale'       => get_locale(),
 				// WooCommerce active for duration in seconds.
 				'active_for'   => WCAdminHelper::get_wcadmin_active_for_in_seconds(),
-				// Whether the store has paid orders.
+				// Whether the store has paid orders in the last 90 days.
 				'has_orders'   => ! empty(
 					wc_get_orders(
 						[
-							'status' => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
-							'return' => 'ids',
-							'limit'  => 1,
+							'status'       => array_map( 'wc_get_order_status_name', wc_get_is_paid_statuses() ),
+							'date_created' => '>=' . strtotime( '-90 days' ),
+							'return'       => 'ids',
+							'limit'        => 1,
 						]
 					)
 				),
