@@ -80,11 +80,17 @@ export type OnboardingState = {
 	// TODO clarify what the error record's type is
 	errors: Record< string, unknown >;
 	requesting: Record< string, boolean >;
-	jetpackAuthUrls: Record< string, string >;
+	jetpackAuthUrls: Record< string, GetJetpackAuthUrlResponse >;
 };
 
 export type Industry = {
 	slug: string;
+};
+
+export type GetJetpackAuthUrlResponse = {
+	url: string;
+	success: boolean;
+	errors: string[];
 };
 
 export type ProductCount = '0' | '1-10' | '11-100' | '101 - 1000' | '1000+';

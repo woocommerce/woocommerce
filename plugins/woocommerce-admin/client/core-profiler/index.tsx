@@ -16,7 +16,12 @@ import {
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
-import { updateQueryString, getQuery } from '@woocommerce/navigation';
+import {
+	updateQueryString,
+	getQuery,
+	getNewPath,
+	navigateTo,
+} from '@woocommerce/navigation';
 import {
 	ExtensionList,
 	OPTIONS_STORE_NAME,
@@ -322,10 +327,16 @@ const handleGeolocation = assign( {
 } );
 
 const redirectToWooHome = () => {
-	/**
-	 * @todo replace with navigateTo
-	 */
-	window.location.href = '/wp-admin/admin.php?page=wc-admin';
+	navigateTo( {
+		url: getNewPath( {}, '/', {} ),
+	} );
+};
+
+const redirectToJetpackAuthPage = (
+	_context: CoreProfilerStateMachineContext,
+	event: { data: { url: string } }
+) => {
+	window.location.href = event.data.url + '&installed_ext_success=1';
 };
 
 const updateTrackingOption = (
@@ -532,6 +543,7 @@ const coreProfilerMachineActions = {
 	persistBusinessInfo,
 	spawnUpdateOnboardingProfileOption,
 	redirectToWooHome,
+	redirectToJetpackAuthPage,
 };
 
 const coreProfilerMachineServices = {
@@ -1221,12 +1233,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								from: 'woocommerce-core-profiler',
 							} ),
 						onDone: {
-							actions: [
-								( _context, event ) => {
-									window.location.href =
-										event.data + '&installed_ext_success=1';
+							actions: actions.choose( [
+								{
+									cond: ( _context, event ) =>
+										event.data.success === true,
+									actions: 'redirectToJetpackAuthPage',
 								},
-							],
+								{
+									cond: ( _context, event ) =>
+										event.data.success === false,
+									actions: 'redirectToWooHome',
+								},
+							] ),
 						},
 					},
 					meta: {
