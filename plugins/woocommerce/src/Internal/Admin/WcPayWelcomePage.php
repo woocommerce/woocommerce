@@ -35,7 +35,7 @@ class WcPayWelcomePage {
 	 *
 	 * @var array|null
 	 */
-	private $_incentive = null;
+	private $incentive = null;
 
 	/**
 	 * WCPayWelcomePage constructor.
@@ -225,14 +225,14 @@ class WcPayWelcomePage {
 	 */
 	private function get_incentive() {
 		// Return local cached incentive if it exists.
-		if ( isset( $this->_incentive ) ) {
-			return $this->_incentive;
+		if ( isset( $this->incentive ) ) {
+			return $this->incentive;
 		}
 
 		// Return transient cached incentive if it exists.
 		if ( false !== get_transient( self::TRANSIENT_NAME ) ) {
-			$this->_incentive = get_transient( self::TRANSIENT_NAME );
-			return $this->_incentive;
+			$this->incentive = get_transient( self::TRANSIENT_NAME );
+			return $this->incentive;
 		}
 
 		// Request incentive from WCPAY API.
@@ -298,7 +298,7 @@ class WcPayWelcomePage {
 		}
 
 		// Store incentive in local cache.
-		$this->_incentive = $incentive;
+		$this->incentive = $incentive;
 
 		// Skip transient cache if `cache-for` header equals zero.
 		if ( '0' === $cache_for ) {
