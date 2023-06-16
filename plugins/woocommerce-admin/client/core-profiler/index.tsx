@@ -328,6 +328,13 @@ const redirectToWooHome = () => {
 	window.location.href = '/wp-admin/admin.php?page=wc-admin';
 };
 
+const redirectToJetpackAuthPage = (
+	_context: CoreProfilerStateMachineContext,
+	event: { data: { url: string } }
+) => {
+	window.location.href = event.data.url;
+};
+
 const updateTrackingOption = (
 	_context: CoreProfilerStateMachineContext,
 	event: IntroOptInEvent
@@ -532,6 +539,7 @@ const coreProfilerMachineActions = {
 	persistBusinessInfo,
 	spawnUpdateOnboardingProfileOption,
 	redirectToWooHome,
+	redirectToJetpackAuthPage,
 };
 
 const coreProfilerMachineServices = {
@@ -1221,12 +1229,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								from: 'woocommerce-core-profiler',
 							} ),
 						onDone: {
-							actions: [
-								( _context, event ) => {
-									window.location.href =
-										event.data + '&installed_ext_success=1';
+							actions: actions.choose( [
+								{
+									cond: ( _context, event ) =>
+										event.data.success === true,
+									actions: 'recordTracksIntroCompleted',
 								},
-							],
+								{
+									cond: ( _context, event ) =>
+										event.data.success === false,
+									actions: 'redirectToWooHome',
+								},
+							] ),
 						},
 					},
 					meta: {
