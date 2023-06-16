@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow plugins_page_skipped parameter in Onboarding API endpoint
