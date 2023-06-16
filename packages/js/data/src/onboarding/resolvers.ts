@@ -25,6 +25,7 @@ import {
 import { DeprecatedTasks } from './deprecated-tasks';
 import {
 	ExtensionList,
+	GetJetpackAuthUrlResponse,
 	OnboardingProductTypes,
 	ProfileItems,
 	TaskListType,
@@ -152,9 +153,7 @@ export function* getJetpackAuthUrl( query: {
 			path += '&from=' + query.from;
 		}
 
-		const results: {
-			url: string;
-		} = yield apiFetch( {
+		const results: GetJetpackAuthUrlResponse = yield apiFetch( {
 			path,
 			method: 'GET',
 		} );
