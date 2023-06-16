@@ -105,7 +105,7 @@ class WcPayWelcomePage {
 
 		$menu_data = array(
 			'id'       => 'wc-calypso-bridge-payments-welcome-page',
-			'title'    => __( 'Payments', 'woocommerce' ),
+			'title'    => esc_html__( 'Payments', 'woocommerce' ),
 			'path'     => '/wc-pay-welcome-page',
 			'position' => '56',
 			'nav_args' => [
@@ -125,8 +125,8 @@ class WcPayWelcomePage {
 		// WooCommerce menu.
 		if ( get_option( 'woocommerce_navigation_enabled', 'no' ) === 'yes' ) {
 			$menu_with_nav_data = array(
-				__( 'Payments', 'woocommerce' ),
-				__( 'Payments', 'woocommerce' ),
+				esc_html__( 'Payments', 'woocommerce' ),
+				esc_html__( 'Payments', 'woocommerce' ),
 				'view_woocommerce_reports',
 				'admin.php?page=wc-admin&path=/wc-pay-welcome-page',
 				null,
