@@ -336,7 +336,7 @@ const redirectToJetpackAuthPage = (
 	_context: CoreProfilerStateMachineContext,
 	event: { data: { url: string } }
 ) => {
-	window.location.href = event.data.url;
+	window.location.href = event.data.url + '&installed_ext_success=1';
 };
 
 const updateTrackingOption = (
