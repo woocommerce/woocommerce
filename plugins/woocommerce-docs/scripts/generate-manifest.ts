@@ -1,23 +1,44 @@
 /**
  * External dependencies
  */
-import directoryTree from 'directory-tree';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as matter from 'gray-matter';
 
-// A prototype for generating a manifest file format from a directory of markdown files.
+interface MarkdownFile {
+	frontmatter: any;
+	children: MarkdownFile[];
+}
 
-// @ts-ignore
-const generateMetadataForDirectory = ( item, path, stat ) => {};
+function traverseDirectory( dirPath: string ): MarkdownFile[] {
+	const files = fs.readdirSync( dirPath );
+	const markdownFiles: MarkdownFile[] = [];
 
-// @ts-ignore
-const generateMetadataForFile = ( item, path, stat ) => {
-	console.log( item, path, stat );
-};
+	for ( const file of files ) {
+		const filePath = path.join( dirPath, file );
+		const stats = fs.statSync( filePath );
 
-const tree = directoryTree(
-	'./example_docs',
-	{ extensions: /\.md$/, attributes: [ 'type' ] },
-	generateMetadataForDirectory,
-	generateMetadataForFile
-);
+		if ( stats.isDirectory() ) {
+			const children = traverseDirectory( filePath );
+			markdownFiles.push( ...children );
+		} else if ( stats.isFile() && path.extname( file ) === '.md' ) {
+			const content = fs.readFileSync( filePath, 'utf-8' );
+			const { data: frontmatter } = matter( content );
 
-console.log( tree );
+			const markdownFile: MarkdownFile = {
+				frontmatter,
+				children: [],
+			};
+
+			markdownFiles.push( markdownFile );
+		}
+	}
+
+	return markdownFiles;
+}
+
+const directoryPath = '/path/to/markdown/files';
+const markdownTree = traverseDirectory( directoryPath );
+const jsonTree = JSON.stringify( markdownTree, null, 2 );
+
+console.log( jsonTree );
