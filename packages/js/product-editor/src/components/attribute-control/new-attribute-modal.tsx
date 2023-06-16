@@ -114,6 +114,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 						: attr.options;
 				newAttributesToAdd.push( {
 					...( attr as EnhancedProductAttribute ),
+					// default visible to true if not explicitly set
+					visible: attr.visible !== undefined ? attr.visible : true,
 					options,
 				} );
 			}
