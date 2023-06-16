@@ -73,12 +73,7 @@ class WcPayWelcomePage {
 			return false;
 		}
 
-		// The store must be in a supported country.
-		if ( ! WooCommercePayments::is_supported() ) {
-			return false;
-		}
-
-		// Incentive available.
+		// Incentive is available.
 		if ( empty( $this->get_incentive() ) ) {
 			return false;
 		}
