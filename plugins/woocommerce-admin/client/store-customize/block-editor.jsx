@@ -108,7 +108,6 @@ export default function BlockEditor( { blocks, template } ) {
 	const settings = useSettings( {
 		templateType: template?.type,
 	} );
-
 	return (
 		<BlockEditorProvider
 			settings={ settings }

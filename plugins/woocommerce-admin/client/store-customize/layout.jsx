@@ -24,6 +24,7 @@ import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/
 import { GlobalStylesProvider } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
 import useInitEditedEntityFromURL from '@wordpress/edit-site/build-module/components/sync-state-with-url/use-init-edited-entity-from-url';
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
+import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 /**
  * Internal dependencies
  */
@@ -70,6 +71,7 @@ export const Layout = () => {
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
 	const [ canvasResizer, canvasSize ] = useResizeObserver();
+	const isEditorLoading = useIsSiteEditorLoading();
 
 	useEffect( () => {
 		if ( ! hasLoadedTemplate ) {
@@ -174,11 +176,14 @@ export const Layout = () => {
 									} }
 								>
 									<ResizableFrame
-										isReady={ true }
+										isReady={ ! isEditorLoading }
 										isFullWidth={ false }
 										oversizedClassName="edit-site-layout__resizable-frame-oversized"
 									>
-										<Editor blocks={ blocks } />
+										<Editor
+											blocks={ blocks }
+											isLoading={ isEditorLoading }
+										/>
 									</ResizableFrame>
 								</motion.div>
 							) }
