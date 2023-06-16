@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, TextControl, Notice } from '@wordpress/components';
+import { Button, TextControl, Notice, Spinner } from '@wordpress/components';
 import { SelectControl } from '@woocommerce/components';
 import { Icon, chevronDown } from '@wordpress/icons';
 import {
@@ -160,6 +160,8 @@ export const BusinessInfo = ( {
 
 	const [ dismissedGeolocationNotice, setDismissedGeolocationNotice ] =
 		useState( false );
+
+	const [ hasSubmitted, setHasSubmitted ] = useState( false );
 
 	return (
 		<div
@@ -347,9 +349,14 @@ export const BusinessInfo = ( {
 										geolocationOverruled || false,
 								},
 							} );
+							setHasSubmitted( true );
 						} }
 					>
-						{ __( 'Continue', 'woocommerce' ) }
+						{ hasSubmitted ? (
+							<Spinner />
+						) : (
+							__( 'Continue', 'woocommerce' )
+						) }
 					</Button>
 				</div>
 			</div>
