@@ -1233,7 +1233,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								{
 									cond: ( _context, event ) =>
 										event.data.success === true,
-									actions: 'recordTracksIntroCompleted',
+									actions: 'redirectToJetpackAuthPage',
 								},
 								{
 									cond: ( _context, event ) =>
