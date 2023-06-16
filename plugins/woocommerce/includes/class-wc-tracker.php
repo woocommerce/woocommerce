@@ -12,8 +12,8 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
-use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -153,7 +153,6 @@ class WC_Tracker {
 		$data['inactive_plugins'] = $all_plugins['inactive_plugins'];
 
 		// Jetpack & WooCommerce Connect.
-
 		$data['jetpack_version']    = Constants::is_defined( 'JETPACK__VERSION' ) ? Constants::get_constant( 'JETPACK__VERSION' ) : 'none';
 		$data['jetpack_connected']  = ( class_exists( 'Jetpack' ) && is_callable( 'Jetpack::is_active' ) && Jetpack::is_active() ) ? 'yes' : 'no';
 		$data['jetpack_is_staging'] = self::is_jetpack_staging_site() ? 'yes' : 'no';
@@ -176,6 +175,9 @@ class WC_Tracker {
 
 		// Shipping method info.
 		$data['shipping_methods'] = self::get_active_shipping_methods();
+
+		// Features.
+		$data['enabled_features'] = self::get_enabled_features();
 
 		// Get all WooCommerce options info.
 		$data['settings'] = self::get_all_woocommerce_options_values();
@@ -328,6 +330,10 @@ class WC_Tracker {
 			}
 			if ( isset( $v['PluginURI'] ) ) {
 				$formatted['plugin_uri'] = wp_strip_all_tags( $v['PluginURI'] );
+			}
+			$formatted['feature_compatibility'] = array();
+			if ( wc_get_container()->get( PluginUtil::class )->is_woocommerce_aware_plugin( $k ) ) {
+				$formatted['feature_compatibility'] = array_filter( FeaturesUtil::get_compatible_features_for_plugin( $k ) );
 			}
 			if ( in_array( $k, $active_plugins_keys, true ) ) {
 				// Remove active plugins from list so we can show active and inactive separately.
@@ -902,6 +908,23 @@ class WC_Tracker {
 		}
 
 		return $active_methods;
+	}
+
+	/**
+	 * Get an array of slugs for WC features that are enabled on the site.
+	 *
+	 * @return string[]
+	 */
+	private static function get_enabled_features() {
+		$all_features     = FeaturesUtil::get_features( true, true );
+		$enabled_features = array_filter(
+			$all_features,
+			function( $feature ) {
+				return $feature['is_enabled'];
+			}
+		);
+
+		return array_keys( $enabled_features );
 	}
 
 	/**

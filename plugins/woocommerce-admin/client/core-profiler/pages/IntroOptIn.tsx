@@ -17,15 +17,13 @@ import { Navigation } from '../components/navigation/navigation';
 export const IntroOptIn = ( {
 	sendEvent,
 	navigationProgress,
-	context,
 }: {
 	sendEvent: ( event: IntroOptInEvent ) => void;
 	navigationProgress: number;
 	context: CoreProfilerStateMachineContext;
 } ) => {
-	const [ iOptInDataSharing, setIsOptInDataSharing ] = useState< boolean >(
-		context.optInDataSharing
-	);
+	const [ iOptInDataSharing, setIsOptInDataSharing ] =
+		useState< boolean >( true );
 
 	return (
 		<div

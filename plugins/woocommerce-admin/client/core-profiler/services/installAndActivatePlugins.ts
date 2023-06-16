@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { PLUGINS_STORE_NAME, PluginNames } from '@woocommerce/data';
+import {
+	ExtensionList,
+	ONBOARDING_STORE_NAME,
+	PLUGINS_STORE_NAME,
+	PluginNames,
+} from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 import {
 	assign,
@@ -68,6 +73,7 @@ const createPluginInstalledAndActivatedEvent = (
 
 export type PluginInstallerMachineContext = {
 	selectedPlugins: PluginNames[];
+	pluginsAvailable: ExtensionList[ 'plugins' ] | [];
 	pluginsInstallationQueue: PluginNames[];
 	installedPlugins: InstalledPlugin[];
 	startTime: number;
@@ -93,6 +99,7 @@ export const pluginInstallerMachine = createMachine(
 		initial: 'installing',
 		context: {
 			selectedPlugins: [] as PluginNames[],
+			pluginsAvailable: [] as ExtensionList[ 'plugins' ] | [],
 			pluginsInstallationQueue: [] as PluginNames[],
 			installedPlugins: [] as InstalledPlugin[],
 			startTime: 0,
@@ -160,7 +167,7 @@ export const pluginInstallerMachine = createMachine(
 				invoke: {
 					src: 'queueRemainingPluginsAsync',
 					onDone: {
-						target: 'finished',
+						target: 'reportSuccess',
 					},
 				},
 			},
@@ -188,7 +195,21 @@ export const pluginInstallerMachine = createMachine(
 			} ),
 			assignPluginsInstallationQueue: assign( {
 				pluginsInstallationQueue: ( ctx ) => {
-					return ctx.selectedPlugins;
+					// Sort the plugins by install_priority so that the smaller plugins are installed first
+					// install_priority is set by plugin's size
+					// Lower install_prioirty means the plugin is smaller
+					return ctx.selectedPlugins.slice().sort( ( a, b ) => {
+						const aIndex = ctx.pluginsAvailable.find(
+							( plugin ) => plugin.key === a
+						);
+						const bIndex = ctx.pluginsAvailable.find(
+							( plugin ) => plugin.key === b
+						);
+						return (
+							( aIndex?.install_priority ?? 99 ) -
+							( bIndex?.install_priority ?? 99 )
+						);
+					} );
 				},
 			} ),
 			assignStartTime: assign( {
@@ -262,9 +283,10 @@ export const pluginInstallerMachine = createMachine(
 				);
 			},
 			queueRemainingPluginsAsync: ( ctx ) => {
-				return dispatch( PLUGINS_STORE_NAME ).installPlugins(
-					ctx.pluginsInstallationQueue,
-					true
+				return dispatch(
+					ONBOARDING_STORE_NAME
+				).installAndActivatePluginsAsync(
+					ctx.pluginsInstallationQueue
 				);
 			},
 		},

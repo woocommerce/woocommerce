@@ -15,13 +15,15 @@
 	],
 	"require": {
 		"php": ">=7.3",
-		"automattic/jetpack-autoloader": "2.10.1",
-		"automattic/jetpack-constants": "1.5.1",
+		"automattic/jetpack-autoloader": "2.11.18",
+		"automattic/jetpack-config": "1.15.2",
+		"automattic/jetpack-connection": "1.51.7",
+		"automattic/jetpack-constants": "^1.6.22",
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.5.4",
-		"woocommerce/woocommerce-blocks": "10.2.3"
+		"woocommerce/action-scheduler": "3.6.1",
+		"woocommerce/woocommerce-blocks": "10.4.2"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",

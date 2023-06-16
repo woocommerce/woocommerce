@@ -118,4 +118,13 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			$this->assertEquals( ( $order_count / count( $created_via_entries ) ), $order_data['created_via'][ $created_via_entry ] );
 		}
 	}
+
+	/**
+	 * @testDox Test enabled features tracking data.
+	 */
+	public function test_get_tracking_data_enabled_features() {
+		$tracking_data = WC_Tracker::get_tracking_data();
+
+		$this->assertIsArray( $tracking_data['enabled_features'] );
+	}
 }

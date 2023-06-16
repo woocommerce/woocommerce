@@ -2,12 +2,8 @@
 
 namespace Automattic\WooCommerce\RestApi\UnitTests;
 
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
-use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use WC_Data_Store;
 
 /**
  * Trait HPOSToggleTrait.

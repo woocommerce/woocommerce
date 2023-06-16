@@ -114,7 +114,7 @@ describe( 'UserProfile', () => {
 		);
 		screen
 			.getByRole( 'button', {
-				name: /Skip this setup/i,
+				name: /Skip this step/i,
 			} )
 			.click();
 		expect( props.sendEvent ).toHaveBeenCalledWith( {

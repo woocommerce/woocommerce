@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Notes;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
-use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -38,18 +38,13 @@ class PaymentsRemindMeLater {
 	 * @return bool
 	 */
 	public static function should_display_note() {
-		// Installed WCPay.
-		$installed_plugins = PluginsHelper::get_installed_plugin_slugs();
-		if ( in_array( 'woocommerce-payments', $installed_plugins, true ) ) {
-			return false;
-		}
-		// Dismissed WCPay welcome page.
-		if ( 'yes' === get_option( 'wc_calypso_bridge_payments_dismissed', 'no' ) ) {
+		// WCPay welcome page must be visible.
+		if ( ! WcPayWelcomePage::instance()->must_be_visible() ) {
 			return false;
 		}
 
 		// Less than 3 days since viewing welcome page.
-		$view_timestamp = get_option( 'wc_pay_welcome_page_viewed_timestamp', false );
+		$view_timestamp = get_option( 'wcpay_welcome_page_viewed_timestamp', false );
 		if ( ! $view_timestamp ||
 			( time() - $view_timestamp < 3 * DAY_IN_SECONDS )
 		) {

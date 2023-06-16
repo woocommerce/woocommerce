@@ -8,13 +8,14 @@ import {
 	CheckboxControl,
 	TextareaControl,
 } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
+import { getAdminSetting } from '~/utils/admin-settings';
 import strings from './strings';
 
 /**
@@ -25,6 +26,7 @@ function ExitSurveyModal( {}: {
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	setExitSurveyModalOpen: Function;
 } ): JSX.Element | null {
+	const incentive = getAdminSetting( 'wcpayWelcomePageIncentive' );
 	const [ isOpen, setOpen ] = useState( true );
 	const [ isHappyChecked, setHappyChecked ] = useState( false );
 	const [ isInstallChecked, setInstallChecked ] = useState( false );
@@ -35,12 +37,24 @@ function ExitSurveyModal( {}: {
 	const [ comments, setComments ] = useState( '' );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
-	const closeModal = () => {
+	const dismissedIncentives = useSelect( ( select ) => {
+		const { getOption } = select( OPTIONS_STORE_NAME );
+		return (
+			( getOption(
+				'wcpay_welcome_page_incentives_dismissed'
+			) as string[] ) || []
+		);
+	} );
+
+	const closeModal = async () => {
 		setOpen( false );
 
 		// Record that the modal was dismissed.
-		updateOptions( {
-			wc_calypso_bridge_payments_dismissed: 'yes',
+		await updateOptions( {
+			wcpay_welcome_page_incentives_dismissed: [
+				...dismissedIncentives,
+				incentive.id,
+			],
 		} );
 
 		// Redirect back to the admin page.
@@ -70,9 +84,8 @@ function ExitSurveyModal( {}: {
 		if ( isMoreInfoChecked ) {
 			// Record that the user would possibly consider installing WCPay with more information in the future.
 			updateOptions( {
-				wc_pay_exit_survey_more_info_needed_timestamp: Math.floor(
-					Date.now() / 1000
-				),
+				wcpay_welcome_page_exit_survey_more_info_needed_timestamp:
+					Math.floor( Date.now() / 1000 ),
 			} );
 		}
 		closeModal();
@@ -84,67 +97,67 @@ function ExitSurveyModal( {}: {
 
 	return (
 		<Modal
-			className="wc-calypso-bridge-payments-welcome-survey"
-			title={ strings.surveyTitle }
+			className="woopayments-welcome-page__survey"
+			title={ strings.survey.title }
 			onRequestClose={ closeModal }
 			shouldCloseOnClickOutside={ false }
 		>
-			<p className="wc-calypso-bridge-payments-welcome-survey__intro">
-				{ strings.surveyIntro }
+			<p className="woopayments-welcome-page__survey-intro">
+				{ strings.survey.intro }
 			</p>
 
-			<p className="wc-calypso-bridge-payments-welcome-survey__question">
-				{ strings.surveyQuestion }
+			<p className="woopayments-welcome-page__survey-question">
+				{ strings.survey.question }
 			</p>
 
-			<div className="wc-calypso-bridge-payments-welcome-survey__selection">
+			<div className="woopayments-welcome-page__survey-selection">
 				<CheckboxControl
-					label={ strings.surveyHappyLabel }
+					label={ strings.survey.happyLabel }
 					checked={ isHappyChecked }
 					onChange={ setHappyChecked }
 				/>
 				<CheckboxControl
-					label={ strings.surveyInstallLabel }
+					label={ strings.survey.installLabel }
 					checked={ isInstallChecked }
 					onChange={ setInstallChecked }
 				/>
 				<CheckboxControl
-					label={ strings.surveyMoreInfoLabel }
+					label={ strings.survey.moreInfoLabel }
 					checked={ isMoreInfoChecked }
 					onChange={ setMoreInfoChecked }
 				/>
 				<CheckboxControl
-					label={ strings.surveyAnotherTimeLabel }
+					label={ strings.survey.anotherTimeLabel }
 					checked={ isAnotherTimeChecked }
 					onChange={ setAnotherTimeChecked }
 				/>
 				<CheckboxControl
-					label={ strings.surveySomethingElseLabel }
+					label={ strings.survey.somethingElseLabel }
 					checked={ isSomethingElseChecked }
 					onChange={ setSomethingElseChecked }
 				/>
 			</div>
 
-			<div className="wc-calypso-bridge-payments-welcome-survey__comments">
+			<div className="woopayments-welcome-page__survey-comments">
 				<TextareaControl
-					label={ strings.surveyCommentsLabel }
+					label={ strings.survey.commentsLabel }
 					value={ comments }
 					onChange={ ( value: string ) => setComments( value ) }
 					rows={ 3 }
 				/>
 			</div>
 
-			<div className="wc-calypso-bridge-payments-welcome-survey__buttons">
+			<div className="woopayments-welcome-page__survey-buttons">
 				<Button
 					isTertiary
 					isDestructive
 					onClick={ exitSurvey }
 					name="cancel"
 				>
-					{ strings.surveyCancelButton }
+					{ strings.survey.cancelButton }
 				</Button>
 				<Button isSecondary onClick={ sendFeedback } name="send">
-					{ strings.surveySubmitButton }
+					{ strings.survey.submitButton }
 				</Button>
 			</div>
 		</Modal>
