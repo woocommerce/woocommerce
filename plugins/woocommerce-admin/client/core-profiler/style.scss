@@ -116,6 +116,15 @@
 	flex-direction: column;
 }
 
+.core-profiler-intro-opt-in-screen {
+	.woocommerce-profiler-heading {
+		.woocommerce-profiler-heading__title {
+			font-size: 40px;
+			line-height: 46px;
+		}
+	}
+}
+
 .woocommerce-profiler-intro-opt-in__content {
 	padding-top: 110px;
 	flex: 1;
