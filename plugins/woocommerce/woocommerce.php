@@ -66,19 +66,3 @@ $GLOBALS['woocommerce'] = WC();
 if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
 	\Automattic\Jetpack\Connection\Rest_Authentication::init();
 }
-
-/**
- * Initialize the Jetpack functionalities: connection, identity crisis, etc.
- */
-function wc_jetpack_init() {
-	$config = new Automattic\Jetpack\Config();
-	$config->ensure(
-		'connection',
-		array(
-			'slug' => 'woocommerce',
-			'name' => __( 'WooCommerce', 'woocommerce' ),
-		)
-	);
-}
-
-add_action( 'plugins_loaded', 'wc_jetpack_init', 1 );
