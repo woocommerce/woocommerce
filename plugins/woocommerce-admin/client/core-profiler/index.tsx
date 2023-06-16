@@ -1114,16 +1114,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'pluginsSkipped',
-								cond: ( context, event ) => {
+								cond: ( _context, event ) => {
 									// Skip the plugins page
 									// When there is 0 plugin returned from the server
 									// Or all the plugins are activated already.
-									return (
-										event.data.length === 0 ||
-										event.data.filter(
-											( plugin: Extension ) =>
-												plugin.is_activated === false
-										).length === 0
+									return event.data?.every(
+										( plugin: Extension ) =>
+											plugin.is_activated
 									);
 								},
 							},
