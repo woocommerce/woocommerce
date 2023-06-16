@@ -29,7 +29,10 @@ module.exports = async ( config ) => {
 			await adminPage.goto(
 				`/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`
 			);
-			await adminPage.dispatchEvent( 'a.submitdelete', 'click' );
+			await adminPage
+				.getByRole( 'link', { name: 'Revoke', includeHidden: true } )
+				.first()
+				.dispatchEvent( 'click' );
 			console.log( 'Cleared up consumer token successfully.' );
 			consumerTokenCleared = true;
 			break;
