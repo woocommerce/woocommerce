@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Removed page spinners between core profiler pages and added a button spinner instead
