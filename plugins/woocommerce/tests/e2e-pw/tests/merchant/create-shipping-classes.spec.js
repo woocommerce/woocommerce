@@ -9,15 +9,13 @@ test.describe( 'Merchant can add shipping classes', () => {
 			'wp-admin/admin.php?page=wc-settings&tab=shipping&section=classes'
 		);
 
-		await page.dispatchEvent(
-			'.wc-shipping-class-delete >> nth=0',
-			'click'
-		);
-		await page.dispatchEvent(
-			'.wc-shipping-class-delete >> nth=0',
-			'click'
-		);
-		await page.dispatchEvent( 'text=Save shipping classes', 'click' );
+		await page
+			.locator( '.wc-shipping-class-delete >> nth=0' )
+			.dispatchEvent( 'click' );
+		await page
+			.locator( '.wc-shipping-class-delete >> nth=0' )
+			.dispatchEvent( 'click' );
+		await page.locator( 'text=Save shipping classes' ).click();
 	} );
 
 	test( 'can add shipping classes', async ( { page } ) => {
