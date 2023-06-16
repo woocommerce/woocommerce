@@ -48,7 +48,7 @@ export const ShippingAddress = ( {
 			) : (
 				<ShippingLocation formattedLocation={ formattedLocation } />
 			) }
-			{ showCalculator && ! prefersCollection ? (
+			{ showCalculator && (
 				<CalculatorButton
 					label={ __(
 						'Change address',
@@ -57,7 +57,7 @@ export const ShippingAddress = ( {
 					isShippingCalculatorOpen={ isShippingCalculatorOpen }
 					setIsShippingCalculatorOpen={ setIsShippingCalculatorOpen }
 				/>
-			) : null }
+			) }
 		</>
 	);
 };
