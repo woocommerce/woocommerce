@@ -109,7 +109,7 @@ class WcPayWelcomePage {
 			'path'     => '/wc-pay-welcome-page',
 			'position' => '56',
 			'nav_args' => [
-				'title'        => __( 'WooCommerce Payments', 'woocommerce' ),
+				'title'        => esc_html__( 'WooPayments', 'woocommerce' ),
 				'is_category'  => false,
 				'menuId'       => 'plugins',
 				'is_top_level' => true,
