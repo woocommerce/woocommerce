@@ -96,6 +96,8 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_install_async_schema' ),
 			)
 		);
+
+		// This is an experimental endpoint and is subject to change in the future.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/jetpack-authorization-url',
