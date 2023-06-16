@@ -159,11 +159,7 @@ export function* getJetpackAuthUrl( query: {
 			method: 'GET',
 		} );
 
-		yield setJetpackAuthUrl(
-			results.url,
-			query.redirectUrl,
-			query.from ?? ''
-		);
+		yield setJetpackAuthUrl( results, query.redirectUrl, query.from ?? '' );
 	} catch ( error ) {
 		yield setError( 'getJetpackAuthUrl', error );
 	}

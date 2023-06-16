@@ -87,6 +87,12 @@ export type Industry = {
 	slug: string;
 };
 
+export type GetJetpackAuthUrlResponse = {
+	url: string;
+	success: boolean;
+	errors: string[];
+};
+
 export type ProductCount = '0' | '1-10' | '11-100' | '101 - 1000' | '1000+';
 
 export type ProductTypeSlug =

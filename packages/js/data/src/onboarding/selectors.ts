@@ -12,6 +12,7 @@ import {
 	OnboardingState,
 	ExtensionList,
 	ProfileItems,
+	GetJetpackAuthUrlResponse,
 } from './types';
 import { WPDataSelectors } from '../types';
 import { Plugin } from '../plugins/types';
@@ -101,7 +102,7 @@ export const getJetpackAuthUrl = (
 		redirectUrl: string;
 		from?: string;
 	}
-): string => {
+): GetJetpackAuthUrlResponse => {
 	return state.jetpackAuthUrls[ query.redirectUrl ] || '';
 };
 

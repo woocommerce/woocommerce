@@ -434,7 +434,7 @@ const reducer: Reducer< OnboardingState, Action > = (
 				...state,
 				jetpackAuthUrls: {
 					...state.jetpackAuthUrls,
-					[ action.redirectUrl ]: action.jetpackAuthUrl,
+					[ action.redirectUrl ]: action.results,
 				},
 			};
 		default:
