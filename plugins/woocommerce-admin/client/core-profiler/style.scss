@@ -1,3 +1,5 @@
+@import './shared.scss';
+
 .woocommerce-layout .woocommerce-layout__main {
 	@include breakpoint( '<782px' ) {
 		padding-top: 0 !important;
@@ -167,49 +169,17 @@
 			margin: 16px auto 20px;
 		}
 
-		.woocommerce-profiler-intro-opt-in__checkbox {
-			input {
-				outline: 2px solid transparent;
-				width: 16px;
-				height: 16px;
-				border-radius: 2px;
-			}
+		.components-checkbox-control__input-container {
+			margin-left: 5px;
+		}
 
-			.components-checkbox-control__input-container {
-				width: 16px;
-				height: 16px;
-				margin-left: 5px;
-			}
-
-			svg.components-checkbox-control__checked {
-				width: 20px;
-				height: 20px;
-
-				@include breakpoint( '<782px' ) {
-					width: 16px;
-					height: 16px;
-				}
-			}
-
-			.components-base-control__field {
-				margin-bottom: 0;
-				display: flex;
-				align-items: center;
-			}
-
-			.components-checkbox-control__label {
-				display: inline-block;
-				color: $gray-700;
-				font-size: 13px;
-				line-height: 16px;
-				max-width: 514px;
-				margin-left: 10px;
-			}
-
-			.woocommerce-select-control__control-input {
-				font-size: 13px;
-				line-height: 16px;
-			}
+		.components-checkbox-control__label {
+			display: inline-block;
+			color: $gray-700;
+			font-size: 13px;
+			line-height: 16px;
+			max-width: 514px;
+			margin-left: 10px;
 		}
 
 		a {
