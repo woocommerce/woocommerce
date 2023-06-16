@@ -1229,6 +1229,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							],
 						},
 					},
+					meta: {
+						component: Loader,
+						progress: 100,
+					},
 				},
 				installPlugins: {
 					on: {
