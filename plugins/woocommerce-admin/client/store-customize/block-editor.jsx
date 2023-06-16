@@ -1,3 +1,5 @@
+// Ref: https://github.com/WordPress/gutenberg/blob/release/16.0/packages/edit-site/src/components/block-editor/index.js
+
 /**
  * External dependencies
  */

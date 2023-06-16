@@ -1,4 +1,4 @@
-// ref: https://github.com/WordPress/gutenberg/blob/trunk/packages/edit-site/src/index.js
+// Ref: https://github.com/WordPress/gutenberg/blob/release/16.0/packages/edit-site/src/index.js
 
 /**
  * External dependencies
