@@ -1,3 +1,4 @@
+@import '../../shared.scss';
 
 .woocommerce-experimental-select-control {
 	&:hover,
@@ -67,47 +68,6 @@
 			box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 			border-radius: 2px;
 			overflow-x: hidden !important;
-
-			ul li {
-				&:hover {
-					background-color: #eff2fd !important;
-					cursor: pointer;
-				}
-
-				.components-base-control__field {
-					margin-bottom: 0 !important;
-				}
-
-				.components-checkbox-control__label {
-					cursor: pointer;
-					font-size: 13px;
-					font-weight: normal !important;
-					pointer-events: none;
-				}
-
-				.components-checkbox-control__input-container {
-					border: 1px solid #757575;
-					border-radius: 2px;
-					height: 20px !important;
-					padding: 1px;
-					width: 20px !important;
-
-					.components-checkbox-control__input[type='checkbox'] {
-						border: none;
-						height: 16px !important;
-						width: 16px !important;
-						&:checked {
-							border-radius: 2px;
-						}
-					}
-
-					svg {
-						height: 20px;
-						top: -1px;
-						width: 22px;
-					}
-				}
-			}
 		}
 	}
 }
