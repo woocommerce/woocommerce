@@ -1,44 +1,83 @@
 /**
  * External dependencies
  */
-import * as fs from 'fs';
-import * as path from 'path';
-import * as matter from 'gray-matter';
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
+import { glob } from 'glob';
+import crypto from 'crypto';
 
-interface MarkdownFile {
-	frontmatter: any;
-	children: MarkdownFile[];
+interface Category {
+	[ key: string ]: unknown;
 }
 
-function traverseDirectory( dirPath: string ): MarkdownFile[] {
-	const files = fs.readdirSync( dirPath );
-	const markdownFiles: MarkdownFile[] = [];
+interface Page {
+	[ key: string ]: unknown;
+}
 
-	for ( const file of files ) {
-		const filePath = path.join( dirPath, file );
-		const stats = fs.statSync( filePath );
+function generatePageId( filePath: string, prefix = '' ) {
+	const hash = crypto.createHash( 'sha1' );
+	hash.update( prefix + filePath );
+	return hash.digest( 'hex' );
+}
 
-		if ( stats.isDirectory() ) {
-			const children = traverseDirectory( filePath );
-			markdownFiles.push( ...children );
-		} else if ( stats.isFile() && path.extname( file ) === '.md' ) {
-			const content = fs.readFileSync( filePath, 'utf-8' );
-			const { data: frontmatter } = matter( content );
+async function processDirectory(
+	directory: string,
+	projectName: string,
+	checkReadme = true
+): Promise< Category > {
+	let category: Category = {};
 
-			const markdownFile: MarkdownFile = {
-				frontmatter,
-				children: [],
-			};
-
-			markdownFiles.push( markdownFile );
-		}
+	// Process README.md (if exists) for the category definition.
+	const readmePath = path.join( directory, 'README.md' );
+	if ( checkReadme && fs.existsSync( readmePath ) ) {
+		const readmeContent = fs.readFileSync( readmePath, 'utf-8' );
+		const readmeFrontmatter = matter( readmeContent ).data;
+		category = { ...readmeFrontmatter };
 	}
 
-	return markdownFiles;
+	// Process markdown files in the directory.
+	category.pages = [];
+	const markdownFiles = glob.sync( path.join( directory, '*.md' ) );
+	markdownFiles.forEach( ( filePath ) => {
+		if ( filePath !== readmePath || ! checkReadme ) {
+			// Skip README.md which we have already processed.
+			const fileContent = fs.readFileSync( filePath, 'utf-8' );
+			const fileFrontmatter = matter( fileContent ).data;
+			const page: Page = { ...fileFrontmatter };
+			// @ts-ignore
+			category.pages.push( {
+				...page,
+				id: generatePageId( filePath, projectName ),
+			} );
+		}
+	} );
+
+	// Recursively process subdirectories.
+	category.categories = [];
+	const subdirectories = fs
+		.readdirSync( directory, { withFileTypes: true } )
+		.filter( ( dirent ) => dirent.isDirectory() )
+		.map( ( dirent ) => path.join( directory, dirent.name ) );
+	for ( const subdirectory of subdirectories ) {
+		const subcategory = await processDirectory( subdirectory, projectName );
+		//  @ts-ignore
+		category.categories.push( subcategory );
+	}
+
+	return category;
 }
 
-const directoryPath = '/path/to/markdown/files';
-const markdownTree = traverseDirectory( directoryPath );
-const jsonTree = JSON.stringify( markdownTree, null, 2 );
+async function processRootDirectory( directory: string, projectName: string ) {
+	// Call processDirectory with false for checkReadme for the top-level directory.
+	return processDirectory( directory, projectName, false );
+}
 
-console.log( jsonTree );
+// Use the processRootDirectory function.
+processRootDirectory( path.join( __dirname, '../example-docs' ), 'test-docs' )
+	.then( ( root ) => {
+		console.log( JSON.stringify( root, null, 2 ) );
+	} )
+	.catch( ( err ) => {
+		console.error( err );
+	} );
