@@ -27,7 +27,7 @@ function generateGithubFileUrl(
 	filePath: string
 ): string {
 	const relativePath = path.relative( repoPath, filePath );
-	const githubUrl = `https://github.com/${ owner }/${ repo }/blob/main/${ relativePath }`;
+	const githubUrl = `https://github.com/${ owner }/${ repo }/blob/trunk/${ relativePath }`;
 	return githubUrl.replace( /\\/g, '/' ); // Ensure we use forward slashes in the URL.
 }
 async function processDirectory(
@@ -59,7 +59,7 @@ async function processDirectory(
 				url: generateGithubFileUrl(
 					'woocommerce',
 					'woocommerce',
-					path.join( __dirname, '../../' ),
+					path.join( __dirname, '../../../' ),
 					filePath
 				),
 				id: generatePageId( filePath, projectName ),
@@ -89,7 +89,11 @@ async function processRootDirectory( directory: string, projectName: string ) {
 // Use the processRootDirectory function.
 processRootDirectory( path.join( __dirname, '../example-docs' ), 'test-docs' )
 	.then( ( root ) => {
-		console.log( JSON.stringify( root, null, 2 ) );
+		// write it to a file in this directory
+		fs.writeFileSync(
+			path.join( __dirname, 'manifest.json' ),
+			JSON.stringify( root, null, 2 )
+		);
 	} )
 	.catch( ( err ) => {
 		console.error( err );
