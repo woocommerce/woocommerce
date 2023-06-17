@@ -360,7 +360,7 @@
 	}
 
 	.woocommerce-experimental-select-control .components-popover .components-popover__content ul li:hover {
-		background-color: #f6f7f7; // Gray-0
+		background-color: #f6f7f7 !important; // Gray-0
 		color: $gray-900;
 	}
 
