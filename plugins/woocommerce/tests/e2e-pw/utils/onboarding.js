@@ -66,15 +66,23 @@ const onboarding = {
 		}
 	},
 
+	/**
+	 * @param {import('@playwright/test').Page} page
+	 * @param {{saveChanges: boolean}} options
+	 */
 	handleSaveChangesModal: async ( page, { saveChanges } ) => {
 		// Save changes? Modal
-		await page.locator( '.components-modal__header-heading' ).textContent();
+		const saveChangesModalShown = await page
+			.locator( '.components-modal__header-heading' )
+			.isVisible();
+		const saveOrDiscardButton = saveChanges
+			? page.getByRole( 'button', { name: 'Save' } )
+			: page.getByRole( 'button', { name: 'Discard' } );
 
-		if ( saveChanges ) {
-			await page.locator( 'button >> text=Save' ).click();
-		} else {
-			await page.locator( 'button >> text=Discard' ).click();
+		if ( saveChangesModalShown ) {
+			await saveOrDiscardButton.click();
 		}
+
 		await page.waitForLoadState( 'networkidle' );
 	},
 
