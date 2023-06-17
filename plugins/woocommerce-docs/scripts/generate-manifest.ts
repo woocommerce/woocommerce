@@ -20,7 +20,16 @@ function generatePageId( filePath: string, prefix = '' ) {
 	hash.update( prefix + filePath );
 	return hash.digest( 'hex' );
 }
-
+function generateGithubFileUrl(
+	owner: string,
+	repo: string,
+	repoPath: string,
+	filePath: string
+): string {
+	const relativePath = path.relative( repoPath, filePath );
+	const githubUrl = `https://github.com/${ owner }/${ repo }/blob/main/${ relativePath }`;
+	return githubUrl.replace( /\\/g, '/' ); // Ensure we use forward slashes in the URL.
+}
 async function processDirectory(
 	directory: string,
 	projectName: string,
@@ -34,10 +43,9 @@ async function processDirectory(
 		const readmeContent = fs.readFileSync( readmePath, 'utf-8' );
 		const readmeFrontmatter = matter( readmeContent ).data;
 		category = { ...readmeFrontmatter };
+		category.pages = [];
 	}
 
-	// Process markdown files in the directory.
-	category.pages = [];
 	const markdownFiles = glob.sync( path.join( directory, '*.md' ) );
 	markdownFiles.forEach( ( filePath ) => {
 		if ( filePath !== readmePath || ! checkReadme ) {
@@ -48,6 +56,12 @@ async function processDirectory(
 			// @ts-ignore
 			category.pages.push( {
 				...page,
+				url: generateGithubFileUrl(
+					'woocommerce',
+					'woocommerce',
+					path.join( __dirname, '../../' ),
+					filePath
+				),
 				id: generatePageId( filePath, projectName ),
 			} );
 		}
@@ -69,7 +83,6 @@ async function processDirectory(
 }
 
 async function processRootDirectory( directory: string, projectName: string ) {
-	// Call processDirectory with false for checkReadme for the top-level directory.
 	return processDirectory( directory, projectName, false );
 }
 
