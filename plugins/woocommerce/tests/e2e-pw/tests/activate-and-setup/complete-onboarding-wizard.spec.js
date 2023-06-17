@@ -50,9 +50,6 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 
 		// Navigate back to "Industry" section
 		await page.locator( 'button >> text=Industry' ).click();
-		await page
-			.locator( '.components-checkbox-control__input' )
-			.textContent();
 		for ( let industry of Object.values( storeDetails.us.industries2 ) ) {
 			await expect( page.getByLabel( industry ) ).toBeChecked();
 		}
@@ -75,9 +72,6 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 
 		// Navigate back to "Industry" section
 		await page.locator( 'button >> text=Industry' ).click();
-		await page
-			.locator( '.components-checkbox-control__input' )
-			.textContent();
 		for ( let industry of Object.values( storeDetails.us.industries2 ) ) {
 			await expect( page.getByLabel( industry ) ).toBeChecked();
 		}
