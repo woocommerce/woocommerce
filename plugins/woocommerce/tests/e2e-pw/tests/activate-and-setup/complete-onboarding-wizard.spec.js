@@ -3,7 +3,8 @@ const { onboarding } = require( '../../utils' );
 const { storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
 
-test.describe( 'Store owner can complete onboarding wizard', () => {
+// Skipping Onbaording tests as we're replacing StoreDetails with Core Profiler
+test.describe.skip( 'Store owner can complete onboarding wizard', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async () => {
@@ -12,7 +13,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 	} );
 
 	// eslint-disable-next-line jest/expect-expect
-	test( 'can complete the "Store Details" section', async ( { page } ) => {
+	test.skip( 'can complete the "Store Details" section', async ( { page } ) => {
 		await onboarding.completeStoreDetailsSection(
 			page,
 			storeDetails.us.store
@@ -133,8 +134,9 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 	} );
 } );
 
+// Skipping Onbaording tests as we're replacing StoreDetails with Core Profiler
 // !Changed from Japanese to Liberian store, as Japanese Yen does not use decimals
-test.describe(
+test.describe.skip(
 	'A Liberian store can complete the selective bundle install but does not include WCPay.',
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
