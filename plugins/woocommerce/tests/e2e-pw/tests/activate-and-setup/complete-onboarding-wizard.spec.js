@@ -2,9 +2,12 @@ const { test, expect } = require( '@playwright/test' );
 const { onboarding } = require( '../../utils' );
 const { storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
+const { features } = require( '../../utils' );
 
-// Skipping Onbaording tests as we're replacing StoreDetails with Core Profiler
-test.describe.skip( 'Store owner can complete onboarding wizard', () => {
+// Skipping Onbaording tests when the core-profiler is enabled.
+const testRunner = features.is_enabled( 'core-profiler' ) ? test.describe.skip : test.describe;
+
+testRunner( 'Store owner can complete onboarding wizard', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async () => {
@@ -13,7 +16,7 @@ test.describe.skip( 'Store owner can complete onboarding wizard', () => {
 	} );
 
 	// eslint-disable-next-line jest/expect-expect
-	test.skip( 'can complete the "Store Details" section', async ( { page } ) => {
+	test( 'can complete the "Store Details" section', async ( { page } ) => {
 		await onboarding.completeStoreDetailsSection(
 			page,
 			storeDetails.us.store
@@ -136,7 +139,7 @@ test.describe.skip( 'Store owner can complete onboarding wizard', () => {
 
 // Skipping Onbaording tests as we're replacing StoreDetails with Core Profiler
 // !Changed from Japanese to Liberian store, as Japanese Yen does not use decimals
-test.describe.skip(
+testRunner(
 	'A Liberian store can complete the selective bundle install but does not include WCPay.',
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
@@ -229,7 +232,7 @@ test.describe.skip(
 );
 
 // Skipping this test because it's very flaky.
-test.describe.skip( 'Store owner can go through setup Task List', () => {
+testRunner( 'Store owner can go through setup Task List', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
