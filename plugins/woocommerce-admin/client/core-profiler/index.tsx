@@ -1126,7 +1126,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							dispatch(
 								ONBOARDING_STORE_NAME
 							).updateProfileItems( {
-								plugins_page_skipped: true,
+								is_plugins_page_skipped: true,
 								completed: true,
 							} );
 							return promiseDelay( 3000 );

@@ -150,7 +150,19 @@ class WC_Admin {
 	public function prevent_admin_access() {
 		$prevent_access = false;
 
-		if ( apply_filters( 'woocommerce_disable_admin_bar', true ) && ! wp_doing_ajax() && isset( $_SERVER['SCRIPT_FILENAME'] ) && basename( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_FILENAME'] ) ) ) !== 'admin-post.php' ) {
+		// Do not interfere with admin-post or admin-ajax requests.
+		$exempted_paths = array( 'admin-post.php', 'admin-ajax.php' );
+
+		if (
+			/**
+			 * This filter is documented in ../wc-user-functions.php
+			 *
+			 * @since 3.6.0
+			 */
+			apply_filters( 'woocommerce_disable_admin_bar', true )
+			&& isset( $_SERVER['SCRIPT_FILENAME'] )
+			&& ! in_array( basename( sanitize_text_field( wp_unslash( $_SERVER['SCRIPT_FILENAME'] ) ) ), $exempted_paths, true )
+		) {
 			$has_cap     = false;
 			$access_caps = array( 'edit_posts', 'manage_woocommerce', 'view_admin_dashboard' );
 
