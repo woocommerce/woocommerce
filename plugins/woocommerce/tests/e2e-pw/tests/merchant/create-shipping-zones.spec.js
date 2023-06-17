@@ -338,9 +338,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.waitForLoadState( 'networkidle' );
 
 			await page.locator( '.wc-shipping-zone-method-settings' ).hover();
-			await page.waitForSelector( 'text=Delete', {
-				state: 'visible',
-			} );
+			await page.locator( 'text=Delete' ).waitFor();
 
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
 
