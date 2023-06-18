@@ -37,6 +37,7 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => array(
 					self::get_plugin( 'mailpoet' ),
+					self::get_plugin( 'zero-bs-crm' ),
 					self::get_plugin( 'codistoconnect' ),
 					self::get_plugin( 'google-listings-and-ads' ),
 					self::get_plugin( 'pinterest-for-woocommerce' ),
@@ -49,6 +50,7 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Reach out to customers', 'woocommerce' ),
 				'plugins' => array(
 					self::get_plugin( 'mailpoet:alt' ),
+					self::get_plugin( 'zero-bs-crm:alt' ),
 					self::get_plugin( 'mailchimp-for-woocommerce' ),
 					self::get_plugin( 'creative-mail-by-constant-contact' ),
 				),
@@ -574,6 +576,35 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( '/assets/images/onboarding/mailpoet.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailpoet-newsletters',
 				'is_built_by_wc' => true,
+			),
+			'zero-bs-crm'                       => array(
+				'name'           => __( 'Jetpack CRM', 'woocommerce' ),
+				'description'    => sprintf(
+					/* translators: 1: opening product link tag. 2: closing link tag */
+					__( 'Effectively manage and nurture customer relationships and optimize sales opportunities with %1$sJetpack CRM%2$s', 'woocommerce' ),
+					'<a href="https://woocommerce.com/products/jetpack-crm" target="_blank">',
+					'</a>'
+				),
+				'manage_url'     => 'admin.php?page=zerobscrm-dash',
+				'is_visible'     => array(
+					array(
+						'type'    => 'not',
+						'operand' => array(
+							array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'zero-bs-crm' ),
+							),
+						),
+					),
+				),
+				'is_built_by_wc' => false,
+			),
+			'zero-bs-crm:alt'                   => array(
+				'name'           => __( 'Jetpack CRM', 'woocommerce' ),
+				'description'    => __( 'Effectively manage and nurture customer relationships, optimize sales opportunities, and enhance customer satisfaction with a customer relationship management system.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/jetpack-crm.svg', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=zerobscrm-dash',
+				'is_built_by_wc' => false,
 			),
 			'tiktok-for-business'               => array(
 				'name'           => __( 'TikTok for WooCommerce', 'woocommerce' ),

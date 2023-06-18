@@ -61,4 +61,5 @@ export const pluginNames = {
 	),
 	'tiktok-for-business:alt': __( 'TikTok for WooCommerce', 'woocommerce' ),
 	codistoconnect: __( 'Omnichannel for WooCommerce', 'woocommerce' ),
+	'zero-bs-crm': __( 'Jetpack CRM', 'woocommerce' ),
 };
