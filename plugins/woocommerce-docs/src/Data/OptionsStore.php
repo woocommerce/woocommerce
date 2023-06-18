@@ -15,6 +15,8 @@ class OptionsStore {
 
 	/**
 	 * Retrieve a plugin option
+	 *
+	 * @param string $option_name The name of the option to retrieve.
 	 */
 	public static function get_option( $option_name ) {
 		return get_option( self::OPTIONS_PREFIX . $option_name );

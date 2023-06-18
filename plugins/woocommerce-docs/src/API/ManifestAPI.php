@@ -72,7 +72,7 @@ class ManifestAPI {
 			return new \WP_Error( 'invalid_manifest_url', __( 'Invalid manifest url', 'woocommerce-docs' ), array( 'status' => 400 ) );
 		}
 
-		\WooCommerceDocs\Data\ManifestStore::add_manifest_url( $manifest_url );
+		\WooCommerceDocs\Data\ManifestStore::add_manifest( $manifest_url );
 
 		return new \WP_REST_Response( \WooCommerceDocs\Data\ManifestStore::get_manifest_list(), 200 );
 	}
@@ -88,14 +88,13 @@ class ManifestAPI {
 			return new \WP_Error( 'no_manifest_url', __( 'Manifest url not passed', 'woocommerce-docs' ), array( 'status' => 400 ) );
 		}
 
-		$manifests = \WooCommerceDocs\Data\ManifestStore::get_manifest_list();
+		$manifest = \WooCommerceDocs\Data\ManifestStore::get_manifest_by_url( $manifest_url );
 
-		$index = array_search( $manifest_url, $manifests, true );
-		if ( false === $index ) {
+		if ( ! $manifest ) {
 			return new \WP_Error( 'invalid_manifest_url', __( 'Invalid manifest url', 'woocommerce-docs' ), array( 'status' => 400 ) );
 		}
 
-		\WooCommerceDocs\Data\ManifestStore::remove_manifest_url( $manifest_url );
+		\WooCommerceDocs\Data\ManifestStore::remove_manifest( $manifest_url );
 
 		return new \WP_REST_Response( \WooCommerceDocs\Data\ManifestStore::get_manifest_list(), 200 );
 	}

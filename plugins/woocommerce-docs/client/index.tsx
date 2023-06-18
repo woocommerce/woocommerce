@@ -27,6 +27,8 @@ const App = () => {
 	const [ newManifest, setNewManifest ] = useState< string >( '' );
 	const { jobs, isLoading: jobsLoading } = useJobLog();
 
+	console.log( 'manifests', manifests );
+
 	return (
 		<>
 			<Heading level={ 1 }>WooCommerce Docs Administration</Heading>
@@ -40,13 +42,13 @@ const App = () => {
 				<CardBody>
 					<ItemGroup>
 						{ ! isLoading &&
-							manifests.map( ( manifest ) => (
-								<Item key={ manifest }>
-									{ manifest }
+							manifests.map( ( [ manifestUrl ] ) => (
+								<Item key={ manifestUrl }>
+									{ manifestUrl }
 									<Button
 										variant="tertiary"
 										onClick={ () => {
-											deleteManifest( manifest );
+											deleteManifest( manifestUrl );
 										} }
 									>
 										Remove this manifest

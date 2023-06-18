@@ -39,21 +39,23 @@ class ManifestJob {
 			)
 		);
 
-		// Query the manifests
-		$manifests = \WooCommerceDocs\Data\ManifestStore::get_manifest_list();
+		$manifest_urls = \WooCommerceDocs\Data\ManifestStore::get_manifest_list();
 
-		// Loop through the manifests and update the data.
-		foreach ( $manifests as $manifest ) {
-			// $manifest_data = \WooCommerceDocs\Data\ManifestStore::get_manifest( $manifest );
+		foreach ( $manifest_urls as $manifest_url ) {			
+			$response = wp_remote_get($manifest_url);
 
-			// // Get the manifest data.
-			// $manifest_data = \WooCommerceDocs\API\ManifestAPI::get_manifest_data( $manifest_data['url'] );
+			if ( is_wp_error( $response ) ) {
+				\ActionScheduler_Logger::instance()->log( $action_id, 'Error retrieving manifest: ' . $response->get_error_message() );
+			}
 
-			// // Update the manifest data.
-			// \WooCommerceDocs\Data\ManifestStore::update_manifest( $manifest, $manifest_data );
+			$json = json_decode( wp_remote_retrieve_body( $response ), true );
+			if (json_last_error() != JSON_ERROR_NONE) {
+				\ActionScheduler_Logger::instance()->log( $action_id, 'Error decoding manifest: ' . json_last_error_msg() );
+			}
+
+			
 		}
 
-		// Log the execution.
 		\ActionScheduler_Logger::instance()->log( $action_id, 'Manifest job completed.' );
 	}
 
