@@ -6,8 +6,10 @@
     -   [Passed parameters](#passed-parameters)
 -   [ExperimentalOrderShippingPackages](#experimentalordershippingpackages)
     -   [Passed parameters](#passed-parameters-1)
+-   [ExperimentalOrderLocalPickupPackages](#experimentalorderlocalpickuppackages)
+    -   [Passed parameters](#passed-parameters-2)
 -   [ExperimentalDiscountsMeta](#experimentaldiscountsmeta)
-    -   [Passed paramters](#passed-paramters)
+    -   [Passed parameters](#passed-parameters-3)
 
 This document presents the list of available Slots that you can use for adding your custom content (Fill).
 
@@ -84,7 +86,7 @@ Checkout:
 
 ![Checkout showing ExperimentalDiscountsMeta location](https://user-images.githubusercontent.com/5656702/122779606-efd3bd00-d2a5-11eb-8c84-6525eca5d704.png)
 
-### Passed paramters
+### Passed parameters
 
 -   `cart`: `wc/store/cart` data but in `camelCase` instead of `snake_case`. [Object breakdown.](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/c00da597efe4c16fcf5481c213d8052ec5df3766/assets/js/type-defs/cart.ts#L172-L188)
 -   `extensions`: external data registered by third-party developers using `ExtendSchema`, if you used `ExtendSchema` on `wc/store/cart` you would find your data under your namespace here.
