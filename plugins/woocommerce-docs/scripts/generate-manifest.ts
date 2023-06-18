@@ -20,6 +20,11 @@ function generatePageId( filePath: string, prefix = '' ) {
 	hash.update( prefix + filePath );
 	return hash.digest( 'hex' );
 }
+
+function generateHashOfString( str: string ) {
+	return crypto.createHash( 'sha256' ).update( str ).digest( 'hex' );
+}
+
 function generateGithubFileUrl(
 	owner: string,
 	repo: string,
@@ -89,6 +94,11 @@ async function processRootDirectory( directory: string, projectName: string ) {
 // Use the processRootDirectory function.
 processRootDirectory( path.join( __dirname, '../example-docs' ), 'test-docs' )
 	.then( ( root ) => {
+		const rootHash = generateHashOfString( JSON.stringify( root ) );
+
+		// Add the root hash to the root object.
+		root.hash = rootHash;
+
 		// write it to a file in this directory
 		fs.writeFileSync(
 			path.join( __dirname, 'manifest.json' ),
