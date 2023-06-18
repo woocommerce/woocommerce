@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import {
 	Button,
@@ -27,8 +27,6 @@ const App = () => {
 	const [ newManifest, setNewManifest ] = useState< string >( '' );
 	const { jobs, isLoading: jobsLoading } = useJobLog();
 
-	console.log( 'manifests', manifests );
-
 	return (
 		<>
 			<Heading level={ 1 }>WooCommerce Docs Administration</Heading>
@@ -42,6 +40,7 @@ const App = () => {
 				<CardBody>
 					<ItemGroup>
 						{ ! isLoading &&
+							!! manifests.length &&
 							manifests.map( ( [ manifestUrl ] ) => (
 								<Item key={ manifestUrl }>
 									{ manifestUrl }
@@ -55,6 +54,9 @@ const App = () => {
 									</Button>
 								</Item>
 							) ) }
+						{ ! isLoading && manifests.length === 0 && (
+							<p>No manifests found.</p>
+						) }
 					</ItemGroup>
 				</CardBody>
 				<CardFooter>
@@ -91,14 +93,14 @@ const App = () => {
 					<ItemGroup>
 						{ ! jobsLoading &&
 							jobs.map( ( job ) => (
-								<>
-									<Item key={ job.action_id }>
+								<div key={ job.action_id }>
+									<Item>
 										Message: { job.message }
 										<br></br>
 										Logged at: { job.date }
 									</Item>
 									<hr />
-								</>
+								</div>
 							) ) }
 					</ItemGroup>
 				</CardBody>
