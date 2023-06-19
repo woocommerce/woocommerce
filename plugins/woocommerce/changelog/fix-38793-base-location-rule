@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add another check in base location rule to fix OBW extensions bug
