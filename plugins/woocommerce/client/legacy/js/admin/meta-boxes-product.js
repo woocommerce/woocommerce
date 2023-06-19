@@ -1,5 +1,11 @@
 /*global woocommerce_admin_meta_boxes */
 jQuery( function ( $ ) {
+	let isPageUnloading = false;
+
+	$( window ).on( 'beforeunload', function () {
+		isPageUnloading = true;
+	} );
+
 	// Scroll to first checked category
 	// https://github.com/scribu/wp-category-checklist-tree/blob/d1c3c1f449e1144542efa17dde84a9f52ade1739/category-checklist-tree.php
 	$( function () {
@@ -571,9 +577,13 @@ jQuery( function ( $ ) {
 			disable_or_enable_fields();
 			jQuery.maybe_disable_save_button();
 		} catch ( error ) {
-			alert(
-				woocommerce_admin_meta_boxes.i18n_add_attribute_error_notice
-			);
+			if ( isPageUnloading ) {
+				// If the page is unloading, the outstanding ajax fetch may fail in Firefox (and possible other browsers, too).
+				// We don't want to show an error message in this case, because it was caused by the user leaving the page.
+				return;
+			}
+
+			alert( woocommerce_admin_meta_boxes.i18n_add_attribute_error_notice );
 			throw error;
 		} finally {
 			unblock_attributes_tab_container();
