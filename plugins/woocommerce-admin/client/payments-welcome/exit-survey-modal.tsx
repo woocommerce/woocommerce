@@ -63,7 +63,8 @@ function ExitSurveyModal( {}: {
 
 	const exitSurvey = () => {
 		recordEvent( 'wcpay_exit_survey', {
-			just_remove: true /* eslint-disable-line camelcase */,
+			just_remove: true,
+			incentive_id: incentive.id,
 		} );
 
 		closeModal();
@@ -71,14 +72,13 @@ function ExitSurveyModal( {}: {
 
 	const sendFeedback = () => {
 		recordEvent( 'wcpay_exit_survey', {
-			/* eslint-disable camelcase */
 			happy: isHappyChecked ? 'Yes' : 'No',
 			install: isInstallChecked ? 'Yes' : 'No',
 			more_info: isMoreInfoChecked ? 'Yes' : 'No',
 			another_time: isAnotherTimeChecked ? 'Yes' : 'No',
 			something_else: isSomethingElseChecked ? 'Yes' : 'No',
 			comments,
-			/* eslint-enable camelcase */
+			incentive_id: incentive.id,
 		} );
 
 		if ( isMoreInfoChecked ) {
