@@ -11,6 +11,8 @@ import {
 	useState,
 } from '@wordpress/element';
 import { findCountryOption, getCountry } from '@woocommerce/onboarding';
+import { decodeEntities } from '@wordpress/html-entities';
+
 /**
  * Internal dependencies
  */
@@ -189,7 +191,7 @@ export const BusinessInfo = ( {
 						onChange={ ( value ) => {
 							setStoreName( value );
 						} }
-						value={ storeName }
+						value={ decodeEntities( storeName ) }
 						label={
 							<>
 								{ __(
