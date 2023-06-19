@@ -74,7 +74,7 @@ EditorContainerBlock.propTypes = {
 	attributes: PropTypes.object.isRequired,
 	icon: PropTypes.node.isRequired,
 	name: PropTypes.string.isRequired,
-	noReviewsPlaceholder: PropTypes.element.isRequired,
+	noReviewsPlaceholder: PropTypes.elementType.isRequired,
 	className: PropTypes.string,
 };
 
