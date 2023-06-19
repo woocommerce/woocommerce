@@ -53,6 +53,7 @@ export function IframeEditor( {
 		setBlocks,
 	} );
 	const [ isInserterOpened, setIsInserterOpened ] = useState( false );
+	const [ isListViewOpened, setIsListViewOpened ] = useState( false );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock, updateSettings } =
@@ -80,8 +81,10 @@ export function IframeEditor( {
 					hasRedo,
 					hasUndo,
 					isInserterOpened,
+					isDocumentOverviewOpened: isListViewOpened,
 					redo,
 					setIsInserterOpened,
+					setIsDocumentOverviewOpened: setIsListViewOpened,
 					undo,
 				} }
 			>
