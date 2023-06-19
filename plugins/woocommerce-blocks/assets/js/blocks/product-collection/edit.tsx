@@ -19,6 +19,7 @@ import InspectorControls from './inspector-controls';
 import { DEFAULT_ATTRIBUTES } from './constants';
 import './editor.scss';
 import { getDefaultValueOfInheritQueryFromTemplate } from './utils';
+import ToolbarControls from './toolbar-controls';
 
 export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -124,6 +125,7 @@ const Edit = ( props: BlockEditProps< ProductCollectionAttributes > ) => {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls { ...props } />
+			<ToolbarControls { ...props } />
 			<div { ...innerBlocksProps } />
 		</div>
 	);
