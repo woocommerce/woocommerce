@@ -160,7 +160,7 @@ const ReviewsByCategoryEditor = ( {
 					'Reviews by Category',
 					'woo-gutenberg-products-block'
 				) }
-				noReviewsPlaceholder={ NoReviewsPlaceholder() }
+				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>
 		</>
 	);
