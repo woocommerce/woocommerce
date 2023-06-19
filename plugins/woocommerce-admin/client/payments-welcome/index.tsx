@@ -55,7 +55,7 @@ const ConnectAccountPage = () => {
 			isJetpackConnected:
 				select( 'wc/admin/plugins' ).isJetpackConnected(),
 			connectUrl:
-				'admin.php?wcpay-connect=1&promo=' + incentive.id +
+				'admin.php?wcpay-connect=1&promo=' + encodeURIComponent( incentive.id ) +
 				'&_wpnonce=' + getAdminSetting( 'wcpay_welcome_page_connect_nonce' ),
 		};
 	} );
