@@ -80,5 +80,9 @@ class Bootstrap {
 		\WooCommerceDocs\API\ManifestAPI::register_routes();
 		\WooCommerceDocs\API\JobAPI::register_routes();
 	}
+
+	public static function register_post_types() {
+		\WoocommerceDocs\Data\DocsStore::hook_post_type();
+	}
 }
 

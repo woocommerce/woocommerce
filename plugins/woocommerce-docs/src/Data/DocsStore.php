@@ -1,4 +1,9 @@
 <?php
+/**
+ * DocsStore class file
+ *
+ * @package  WooCommerceDocs
+ */
 
 namespace WooCommerceDocs\Data;
 
@@ -83,26 +88,30 @@ class DocsStore {
 	public static function delete_docs_post( $post_id ) {
 		return wp_delete_post( $post_id );
 	}
+
+	public static function hook_post_type() {
+		// add_action( 'init', 'register_woocommerce_doc_post_type' );
+		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
+	}
+
+	public static function register_post_type() {
+		register_post_type(
+			'woocommerce_doc',
+			array(
+				'labels'      => array(
+					'name'          => __( 'WooCommerce Docs' ),
+					'singular_name' => __( 'WooCommerce Doc' ),
+				),
+				'public'      => true,
+				'has_archive' => true,
+				'supports'    => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
+				'rewrite'     => array( 'slug' => 'docs' ),
+			)
+		);
+	}
 }
 
-/**
- * Register the WooCommerce Doc post type.
- */
-function register_woocommerce_doc_post_type() {
-	register_post_type(
-		'woocommerce_doc',
-		array(
-			'labels'      => array(
-				'name'          => __( 'WooCommerce Docs' ),
-				'singular_name' => __( 'WooCommerce Doc' ),
-			),
-			'public'      => true,
-			'has_archive' => true,
-			'supports'    => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
-			'rewrite'     => array( 'slug' => 'docs' ),
-		)
-	);
-}
 
-add_action( 'init', 'register_woocommerce_doc_post_type' );
+
+
 

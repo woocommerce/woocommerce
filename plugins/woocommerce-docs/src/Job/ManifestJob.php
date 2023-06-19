@@ -42,30 +42,29 @@ class ManifestJob {
 		// Manifests are a list of tuples like ["url", {...}].
 		$manifests = \WooCommerceDocs\Data\ManifestStore::get_manifest_list();
 
-		foreach ( $manifests as $manifest ) {
-			$manifest_url = $manifest[0];
-			$response     = wp_remote_get( $manifest_url );
+		try {
+			foreach ( $manifests as $manifest ) {
 
-			if ( is_wp_error( $response ) ) {
-				\ActionScheduler_Logger::instance()->log( $action_id, 'Error retrieving manifest: ' . $response->get_error_message() );
+				$manifest_url = $manifest[0];
+				$response     = wp_remote_get( $manifest_url );
+
+				if ( is_wp_error( $response ) ) {
+					\ActionScheduler_Logger::instance()->log( $action_id, 'Error retrieving manifest: ' . $response->get_error_message() );
+				}
+
+				$json = json_decode( wp_remote_retrieve_body( $response ), true );
+
+				if ( json_last_error() !== JSON_ERROR_NONE ) {
+					\ActionScheduler_Logger::instance()->log( $action_id, 'Error decoding manifest: ' . json_last_error_msg() );
+				}
+
+				// first check if the manifest has changed.
+				// $existing_manifest = \WooCommerceDocs\Data\ManifestStore::get_manifest_by_url( $manifest_url );
+
+				\WooCommerceDocs\Manifest\ManifestProcessor::process_manifest( $json, $action_id );
 			}
-
-			$json = json_decode( wp_remote_retrieve_body( $response ), true );
-
-			if ( json_last_error() !== JSON_ERROR_NONE ) {
-				\ActionScheduler_Logger::instance()->log( $action_id, 'Error decoding manifest: ' . json_last_error_msg() );
-			}
-
-			// first check if the manifest has changed.
-			$existing_manifest = \WooCommerceDocs\Data\ManifestStore::get_manifest_by_url( $manifest_url );
-
-			if ( $existing_manifest && $existing_manifest['hash'] !== $json['hash'] ) {
-				// update the manifest if it changed.
-				\WooCommerceDocs\Data\ManifestStore::update_manifest( $manifest_url, $json );
-
-				// process the manifest.
-				\WooCommerceDocs\Data\ManifestProcessor::process_manifest( $json );
-			}
+		} catch ( \Exception $e ) {
+			\ActionScheduler_Logger::instance()->log( $action_id, 'Error processing manifests: ' . $e->getMessage() );
 		}
 
 		\ActionScheduler_Logger::instance()->log( $action_id, 'Manifest job completed.' );

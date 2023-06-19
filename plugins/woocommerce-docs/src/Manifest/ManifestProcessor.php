@@ -13,20 +13,20 @@ class ManifestProcessor {
 	 *
 	 * @param Object $manifest The manifest to process.
 	 */
-	public static function process_manifest( $manifest ) {
-		self::process_categories( $manifest->categories );
+	public static function process_manifest( $manifest, $logger_action_id ) {
+		self::process_categories( $manifest['categories'], $logger_action_id );
 	}
 
 	/**
 	 * Get the parsedown parser
 	 */
-	private static function get_parser() {
-		static $parser = null;
-		if ( null === $parser ) {
-			$parser = new \Parsedown();
-		}
-		return $parser;
-	}
+	// private static function get_parser() {
+	// static $parser = null;
+	// if ( null === $parser ) {
+	// $parser = new \Parsedown();
+	// }
+	// return $parser;
+	// }
 
 	/**
 	 * Process categories
@@ -34,11 +34,8 @@ class ManifestProcessor {
 	 * @param array $categories The categories to process.
 	 * @param int   $parent_id The parent ID.
 	 */
-	private static function process_categories( $categories, $parent_id = 0 ) {
+	private static function process_categories( $categories, $logger_action_id, $parent_id = 0 ) {
 		foreach ( $categories as $category ) {
-			// TODO - for each category we will need to query any existing pages that arent in the manifest
-			// and remove them.
-
 			$term = term_exists( $category['title'], 'category' );
 
 			// If the category doesn't exist, create it.
@@ -63,37 +60,57 @@ class ManifestProcessor {
 
 			// Now, process the pages for this category.
 			foreach ( $category['pages'] as $page ) {
+				// log the page
+				\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Processing page: ' . $page['title'] . 'with id: ' . $page['id'] );
+
 				$existing_post = \WooCommerceDocs\Data\DocsStore::get_post( $page['id'] );
 
-				$markdown_content = wp_remote_get( $page['url'] );
+				$response         = wp_remote_get( $page['url'] );
+				$markdown_content = wp_remote_retrieve_body( $response );
+
+				// check for error
+				if ( is_wp_error( $response ) ) {
+					\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Error retrieving page: ' . $page['url'] );
+					continue;
+				} else {
+					// log that we retrieved page
+					\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Retrieved page: ' . $markdown_content );
+				}
 
 				// Strip frontmatter.
-				$markdown_content = preg_replace( '/^---(.*)---/s', '', $markdown_content );
+				// $markdown_content = preg_replace( '/^---(.*)---/s', '', $markdown_content );
+
+				// log the page content
+				// \ActionScheduler_Logger::instance()->log( $logger_action_id, 'Page content: ' . $markdown_content );
 
 				// Parse to HTML.
-				$content = self::get_parser()->text( $markdown_content );
+				// $content = self::get_parser()->text( $markdown_content );
+
+				$content = '<p>Hello World</p>';
 
 				// If the page doesn't exist, create it.
-				if ( ! $existing_post ) {
+				// if ( ! $existing_post ) {
 					$post_id = \WooCommerceDocs\Data\DocsStore::insert_docs_post(
 						array(
 							'post_title'   => $page['title'],
 							'post_content' => $content,
 							'post_status'  => 'publish',
 							'post_type'    => 'woocommerce_doc',
-						)
+						),
+						$page['id']
 					);
 
-				} else {
-					// If the page exists, update it.
-					\WoocommerceDocs\Data\DocsStore::update_docs_post(
-						array(
-							'ID'           => $existing_post->ID,
-							'post_title'   => $page['title'],
-							'post_content' => $content,
-						)
-					);
-				}
+				// } else {
+				// If the page exists, update it.
+				// \WoocommerceDocs\Data\DocsStore::update_docs_post(
+				// array(
+				// 'ID'           => $existing_post->ID,
+				// 'post_title'   => $page['title'],
+				// 'post_content' => $content,
+				// ),
+				// $page['id']
+				// );
+				// }
 			}
 
 			// Process any sub-categories.
