@@ -5,6 +5,10 @@ import { CHECKOUT_URL } from '@woocommerce/block-settings';
 import Button from '@woocommerce/base-components/button';
 import classNames from 'classnames';
 import { useStyleProps } from '@woocommerce/base-hooks';
+import {
+	isErrorResponse,
+	useCartEventsContext,
+} from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -24,6 +28,7 @@ const Block = ( {
 	style,
 }: MiniCartCheckoutButtonBlockProps ): JSX.Element | null => {
 	const styleProps = useStyleProps( { style } );
+	const { dispatchOnProceedToCheckout } = useCartEventsContext();
 
 	if ( ! CHECKOUT_URL ) {
 		return null;
@@ -39,6 +44,13 @@ const Block = ( {
 			variant={ getVariant( className, 'contained' ) }
 			style={ styleProps.style }
 			href={ CHECKOUT_URL }
+			onClick={ ( e ) => {
+				dispatchOnProceedToCheckout().then( ( observerResponses ) => {
+					if ( observerResponses.some( isErrorResponse ) ) {
+						e.preventDefault();
+					}
+				} );
+			} }
 		>
 			{ checkoutButtonLabel || defaultCheckoutButtonLabel }
 		</Button>

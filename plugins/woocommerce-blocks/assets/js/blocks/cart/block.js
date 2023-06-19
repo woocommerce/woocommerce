@@ -5,11 +5,15 @@ import { __ } from '@wordpress/i18n';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
-import { CartProvider, noticeContexts } from '@woocommerce/base-context';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { translateJQueryEventToNative } from '@woocommerce/base-utils';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
+import {
+	CartEventsProvider,
+	CartProvider,
+	noticeContexts,
+} from '@woocommerce/base-context';
 import {
 	SlotFillProvider,
 	StoreNoticesContainer,
@@ -85,8 +89,10 @@ const Block = ( { attributes, children, scrollToTop } ) => (
 		<StoreNoticesContainer context={ noticeContexts.CART } />
 		<SlotFillProvider>
 			<CartProvider>
-				<Cart attributes={ attributes }>{ children }</Cart>
-				<ScrollOnError scrollToTop={ scrollToTop } />
+				<CartEventsProvider>
+					<Cart attributes={ attributes }>{ children }</Cart>
+					<ScrollOnError scrollToTop={ scrollToTop } />
+				</CartEventsProvider>
 			</CartProvider>
 		</SlotFillProvider>
 	</BlockErrorBoundary>
