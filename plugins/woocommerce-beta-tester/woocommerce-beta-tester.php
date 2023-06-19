@@ -78,6 +78,9 @@ add_action( 'plugins_loaded', '_wc_beta_tester_bootstrap' );
  * Register the JS.
  */
 function add_extension_register_script() {
+	if ( ! defined( 'WC_ADMIN_APP' ) ) {
+		return;
+	}
 	$script_path       = '/build/index.js';
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
 	$script_asset      = file_exists( $script_asset_path )
