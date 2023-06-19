@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Use the same height for the loader images to prevent unwanted shift
