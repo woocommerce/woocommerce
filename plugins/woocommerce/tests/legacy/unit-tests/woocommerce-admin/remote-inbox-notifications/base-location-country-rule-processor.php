@@ -117,6 +117,22 @@ class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationCountryRuleProcessor e
 	}
 
 	/**
+	 * Tests that the processor returns true if profiler option's `is_store_country_set` is true.
+	 *
+	 * @group fast
+	 */
+	public function test_spec_succeeds_if_base_location_is_default_and_is_store_country_set_is_true() {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( OnboardingProfile::DATA_OPTION, array( 'is_store_country_set' => true ) );
+
+		$processor = new BaseLocationCountryRuleProcessor();
+
+		$result = $processor->process( $this->get_rule(), new stdClass() );
+
+		$this->assertEquals( true, $result );
+	}
+
+	/**
 	 * Tests that the processor returns true if country is default but address is updated.
 	 *
 	 * @group fast
