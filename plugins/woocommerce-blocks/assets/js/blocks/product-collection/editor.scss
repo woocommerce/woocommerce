@@ -3,3 +3,9 @@
 		margin-bottom: $grid-unit-30;
 	}
 }
+
+.wc-block-editor-product-collection__display-settings {
+	.components-popover__content {
+		min-width: 230px;
+	}
+}
