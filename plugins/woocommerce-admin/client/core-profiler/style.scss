@@ -47,6 +47,10 @@
 		height: 48px;
 		font-size: 14px;
 		font-weight: normal;
+
+		svg.components-spinner {
+			margin: 0;
+		}
 	}
 
 	.woocommerce-select-control__option {
@@ -280,6 +284,12 @@
 	position: absolute;
 	@include breakpoint( '<782px' ) {
 		padding: 0 20px;
+	}
+
+	.loader-hearticon {
+		position: relative;
+		top: 2px;
+		left: 2px;
 	}
 
 	h1 {

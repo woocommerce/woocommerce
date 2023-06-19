@@ -14,7 +14,7 @@ import {
 	Sender,
 } from 'xstate';
 import { useMachine, useSelector } from '@xstate/react';
-import { useEffect, useMemo } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
 import {
 	updateQueryString,
@@ -120,7 +120,12 @@ export type PluginsLearnMoreLinkClicked = {
 	};
 };
 
-// TODO: add types as we develop the pages
+export type CoreProfilerPageComponent = ( props: {
+	navigationProgress: number | undefined;
+	sendEvent: Sender< AnyEventObject >;
+	context: CoreProfilerStateMachineContext;
+} ) => React.ReactElement | null;
+
 export type OnboardingProfile = {
 	business_choice: BusinessChoice;
 	industry: Array< IndustryChoice >;
@@ -489,20 +494,28 @@ const browserPopstateHandler = () => ( sendBack: Sender< AnyEventObject > ) => {
 	};
 };
 
-const handlePlugins = assign( {
+const handlePlugins = assign< CoreProfilerStateMachineContext >( {
 	pluginsAvailable: ( _context, event ) =>
 		( event as DoneInvokeEvent< Extension[] > ).data,
 } );
 
-type ActType = (
+export type CoreProfilerMachineAssign = (
 	ctx: CoreProfilerStateMachineContext,
 	evt: AnyEventObject,
 	{
 		action: { step },
-	}: ActionMeta< unknown, AnyEventObject, BaseActionObject >
+	}: ActionMeta<
+		CoreProfilerStateMachineContext,
+		AnyEventObject,
+		BaseActionObject
+	>
 ) => void;
 
-const updateQueryStep: ActType = ( _context, _evt, { action } ) => {
+const updateQueryStep: CoreProfilerMachineAssign = (
+	_context,
+	_evt,
+	{ action }
+) => {
 	const { step } = getQuery() as { step: string };
 	// only update the query string if it has changed
 	if ( action.step !== step ) {
@@ -1023,6 +1036,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							entry: assign( {
 								loader: {
 									progress: 10,
+									useStages: 'skippedGuidedSetup',
 								},
 							} ),
 							invoke: {
@@ -1054,6 +1068,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							entry: assign( {
 								loader: {
 									progress: 20,
+									useStages: 'skippedGuidedSetup',
 								},
 							} ),
 							invoke: {
@@ -1069,6 +1084,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							entry: assign( {
 								loader: {
 									progress: 80,
+									useStages: 'skippedGuidedSetup',
+									stageIndex: 1,
 								},
 							} ),
 							invoke: {
@@ -1097,8 +1114,15 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						onDone: [
 							{
 								target: 'pluginsSkipped',
-								cond: ( context, event ) =>
-									event.data.length === 0,
+								cond: ( _context, event ) => {
+									// Skip the plugins page
+									// When there is 0 plugin returned from the server
+									// Or all the plugins are activated already.
+									return event.data?.every(
+										( plugin: Extension ) =>
+											plugin.is_activated
+									);
+								},
 							},
 							{ target: 'plugins', actions: 'handlePlugins' },
 						],
@@ -1270,10 +1294,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 
 										let stageIndex = 0;
 
-										if ( progress > 30 ) {
-											stageIndex = 1;
-										} else if ( progress > 60 ) {
+										if ( progress > 60 ) {
 											stageIndex = 2;
+										} else if ( progress > 30 ) {
+											stageIndex = 1;
 										}
 
 										return {
@@ -1388,7 +1412,13 @@ export const CoreProfilerController = ( {
 
 	const navigationProgress = currentNodeMeta?.progress;
 
-	const CurrentComponent = currentNodeMeta?.component;
+	const [ CurrentComponent, setCurrentComponent ] =
+		useState< CoreProfilerPageComponent | null >( null );
+	useEffect( () => {
+		if ( currentNodeMeta?.component ) {
+			setCurrentComponent( () => currentNodeMeta?.component );
+		}
+	}, [ CurrentComponent, currentNodeMeta?.component ] );
 
 	const currentNodeCssLabel =
 		state.value instanceof Object
