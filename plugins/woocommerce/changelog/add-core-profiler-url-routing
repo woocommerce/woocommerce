@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Added ability for the core profiler state machine to navigate by using the 'step' URL query param
