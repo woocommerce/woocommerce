@@ -64,6 +64,7 @@ class ManifestJob {
 				\WooCommerceDocs\Data\ManifestStore::update_manifest( $manifest_url, $json );
 
 				// process the manifest.
+				\WooCommerceDocs\Data\ManifestProcessor::process_manifest( $json );
 			}
 		}
 
