@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import {
+	InspectorControls,
+	useBlockProps,
+	withColors,
+	__experimentalColorGradientSettingsDropdown as ColorGradientSettingsDropdown,
+	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
+} from '@wordpress/block-editor';
 import { formatPrice } from '@woocommerce/price-format';
 import {
 	PanelBody,
@@ -17,6 +23,7 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
 import { select } from '@wordpress/data';
+import classNames from 'classnames';
 import { cartOutline, bag, bagAlt } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 
@@ -31,23 +38,49 @@ interface Attributes {
 	addToCartBehaviour: string;
 	hasHiddenPrice: boolean;
 	cartAndCheckoutRenderStyle: boolean;
+	priceColor: string;
+	iconColor: string;
+	productCountColor: string;
+	priceColorValue: string;
+	iconColorValue: string;
+	productCountColorValue: string;
 }
 
 interface Props {
 	attributes: Attributes;
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	clientId: number;
+	setPriceColor: ( colorValue: string | undefined ) => void;
+	setIconColor: ( colorValue: string | undefined ) => void;
+	setProductCountColor: ( colorValue: string | undefined ) => void;
 }
 
-const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
+const Edit = ( {
+	attributes,
+	setAttributes,
+	clientId,
+	setPriceColor,
+	setIconColor,
+	setProductCountColor,
+}: Props ): ReactElement => {
 	const {
-		miniCartIcon,
+		cartAndCheckoutRenderStyle,
 		addToCartBehaviour,
 		hasHiddenPrice,
-		cartAndCheckoutRenderStyle,
+		priceColorValue,
+		iconColorValue,
+		productCountColorValue,
+		miniCartIcon,
 	} = attributes;
-	const blockProps = useBlockProps( {
-		className: `wc-block-mini-cart`,
+
+	const className = classNames( {
+		'wc-block-mini-cart': true,
+		'has-price-color': priceColorValue,
+		'has-icon-color': iconColorValue,
+		'has-product-count-color': productCountColorValue,
 	} );
+
+	const blockProps = useBlockProps( { className } );
 
 	const isSiteEditor = isSiteEditorPage( select( 'core/edit-site' ) );
 
@@ -58,6 +91,47 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 
 	const productCount = 0;
 	const productTotal = 0;
+
+	const colorGradientSettings = useMultipleOriginColorsAndGradients();
+
+	const colorSettings = [
+		{
+			value: priceColorValue,
+			onChange: ( colorValue: string ) => {
+				setPriceColor( colorValue );
+				setAttributes( { priceColorValue: colorValue } );
+			},
+			label: __( 'Price', 'woo-gutenberg-products-block' ),
+			resetAllFilter: () => {
+				setPriceColor( undefined );
+				setAttributes( { priceColorValue: undefined } );
+			},
+		},
+		{
+			value: iconColorValue,
+			onChange: ( colorValue: string ) => {
+				setIconColor( colorValue );
+				setAttributes( { iconColorValue: colorValue } );
+			},
+			label: __( 'Icon', 'woo-gutenberg-products-block' ),
+			resetAllFilter: () => {
+				setIconColor( undefined );
+				setAttributes( { iconColorValue: undefined } );
+			},
+		},
+		{
+			value: productCountColorValue,
+			onChange: ( colorValue: string ) => {
+				setProductCountColor( colorValue );
+				setAttributes( { productCountColorValue: colorValue } );
+			},
+			label: __( 'Product count', 'woo-gutenberg-products-block' ),
+			resetAllFilter: () => {
+				setProductCountColor( undefined );
+				setAttributes( { productCountColorValue: undefined } );
+			},
+		},
+	];
 
 	return (
 		<div { ...blockProps }>
@@ -73,7 +147,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							'woo-gutenberg-products-block'
 						) }
 						value={ miniCartIcon }
-						onChange={ ( value ) => {
+						onChange={ ( value: 'cart' | 'bag' | 'bag-alt' ) => {
 							setAttributes( {
 								miniCartIcon: value,
 							} );
@@ -124,7 +198,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 								'woo-gutenberg-products-block'
 							) }
 							value={ cartAndCheckoutRenderStyle }
-							onChange={ ( value ) => {
+							onChange={ ( value: boolean ) => {
 								setAttributes( {
 									cartAndCheckoutRenderStyle: value,
 								} );
@@ -212,15 +286,45 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					</BaseControl>
 				</PanelBody>
 			</InspectorControls>
+			{ colorGradientSettings.hasColorsOrGradients && (
+				// @ts-to-do: Fix outdated InspectorControls type definitions in DefinitelyTyped and/or Gutenberg.
+				<InspectorControls group="color">
+					{ colorSettings.map(
+						( { onChange, label, value, resetAllFilter } ) => (
+							<ColorGradientSettingsDropdown
+								key={ `mini-cart-color-${ label }` }
+								__experimentalIsRenderedInSidebar
+								settings={ [
+									{
+										colorValue: value,
+										label,
+										onColorChange: onChange,
+										isShownByDefault: true,
+										resetAllFilter,
+										enableAlpha: true,
+									},
+								] }
+								panelId={ clientId }
+								{ ...colorGradientSettings }
+							/>
+						)
+					) }
+				</InspectorControls>
+			) }
 			<Noninteractive>
 				<button className="wc-block-mini-cart__button">
 					{ ! hasHiddenPrice && (
-						<span className="wc-block-mini-cart__amount">
+						<span
+							className="wc-block-mini-cart__amount"
+							style={ { color: priceColorValue } }
+						>
 							{ formatPrice( productTotal ) }
 						</span>
 					) }
 					<QuantityBadge
 						count={ productCount }
+						iconColor={ iconColorValue }
+						productCountColor={ productCountColorValue }
 						icon={ miniCartIcon }
 					/>
 				</button>
@@ -229,4 +333,16 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 	);
 };
 
-export default Edit;
+const miniCartColorAttributes = {
+	priceColor: 'price-color',
+	iconColor: 'icon-color',
+	productCountColor: 'product-count-color',
+};
+
+// @ts-expect-error: TypeScript doesn't resolve the shared React dependency and cannot resolve the type returned by `withColors`.
+// Similar issue example: https://github.com/microsoft/TypeScript/issues/47663
+const EditWithColors: JSX.Element = withColors( miniCartColorAttributes )(
+	Edit
+);
+
+export default EditWithColors;
