@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { DrawerCloseButton } from '@woocommerce/base-components/drawer';
+import { CartEventsProvider } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -20,8 +21,10 @@ export const MiniCartContentsBlock = (
 
 	return (
 		<>
-			<DrawerCloseButton />
-			{ children }
+			<CartEventsProvider>
+				<DrawerCloseButton />
+				{ children }
+			</CartEventsProvider>
 		</>
 	);
 };

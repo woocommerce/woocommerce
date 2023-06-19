@@ -86,7 +86,7 @@ global.wcSettings = {
 		checkout: {
 			id: 0,
 			title: '',
-			permalink: '',
+			permalink: 'https://local/checkout/',
 		},
 		privacy: {
 			id: 0,
