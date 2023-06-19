@@ -52,78 +52,12 @@ Object {
               r="50"
               vector-effect="non-scaling-stroke"
             />
-            <div
-              class="woocommerce-profiler-heading"
-            >
-              <h1
-                class="woocommerce-profiler-heading__title"
-              >
-                Welcome to Woo!
-              </h1>
-              <h2
-                class="woocommerce-profiler-heading__subtitle"
-              >
-                It's great to have you here with us! We'll be guiding you through the setup process – first, answer a few questions to tailor your experience.
-              </h2>
-            </div>
-            <button
-              class="components-button woocommerce-profiler-setup-store__button is-primary"
-              type="button"
-            >
-              Set up my store
-            </button>
-            <div
-              class="woocommerce-profiler-intro-opt-in__footer"
-            >
-              <div
-                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
-              >
-                <div
-                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
-                >
-                  <span
-                    class="components-checkbox-control__input-container"
-                  >
-                    <input
-                      checked=""
-                      class="components-checkbox-control__input"
-                      id="inspector-checkbox-control-0"
-                      type="checkbox"
-                      value="1"
-                    />
-                    <svg
-                      aria-hidden="true"
-                      class="components-checkbox-control__checked"
-                      focusable="false"
-                      height="24"
-                      role="presentation"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
-                      />
-                    </svg>
-                  </span>
-                  <label
-                    class="components-checkbox-control__label"
-                    for="inspector-checkbox-control-0"
-                  >
-                    I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
-                    <a
-                      data-link-type="external"
-                      href="https://woocommerce.com/usage-tracking?utm_medium=product"
-                      target="_blank"
-                    >
-                      Learn more about usage tracking
-                    </a>
-                    .
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
+            <path
+              class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+              d="m 50 0 a 50 50 0 0 1 50 50"
+              vector-effect="non-scaling-stroke"
+            />
+          </svg>
         </div>
       </div>
     </div>
@@ -150,78 +84,12 @@ Object {
             r="50"
             vector-effect="non-scaling-stroke"
           />
-          <div
-            class="woocommerce-profiler-heading"
-          >
-            <h1
-              class="woocommerce-profiler-heading__title"
-            >
-              Welcome to Woo!
-            </h1>
-            <h2
-              class="woocommerce-profiler-heading__subtitle"
-            >
-              It's great to have you here with us! We'll be guiding you through the setup process – first, answer a few questions to tailor your experience.
-            </h2>
-          </div>
-          <button
-            class="components-button woocommerce-profiler-setup-store__button is-primary"
-            type="button"
-          >
-            Set up my store
-          </button>
-          <div
-            class="woocommerce-profiler-intro-opt-in__footer"
-          >
-            <div
-              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
-            >
-              <div
-                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
-              >
-                <span
-                  class="components-checkbox-control__input-container"
-                >
-                  <input
-                    checked=""
-                    class="components-checkbox-control__input"
-                    id="inspector-checkbox-control-0"
-                    type="checkbox"
-                    value="1"
-                  />
-                  <svg
-                    aria-hidden="true"
-                    class="components-checkbox-control__checked"
-                    focusable="false"
-                    height="24"
-                    role="presentation"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
-                    />
-                  </svg>
-                </span>
-                <label
-                  class="components-checkbox-control__label"
-                  for="inspector-checkbox-control-0"
-                >
-                  I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
-                  <a
-                    data-link-type="external"
-                    href="https://woocommerce.com/usage-tracking?utm_medium=product"
-                    target="_blank"
-                  >
-                    Learn more about usage tracking
-                  </a>
-                  .
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
+          <path
+            class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+            d="m 50 0 a 50 50 0 0 1 50 50"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
       </div>
     </div>
   </div>,
@@ -331,78 +199,12 @@ Object {
               r="50"
               vector-effect="non-scaling-stroke"
             />
-            <div
-              class="woocommerce-profiler-heading"
-            >
-              <h1
-                class="woocommerce-profiler-heading__title"
-              >
-                Welcome to Woo!
-              </h1>
-              <h2
-                class="woocommerce-profiler-heading__subtitle"
-              >
-                It's great to have you here with us! We'll be guiding you through the setup process – first, answer a few questions to tailor your experience.
-              </h2>
-            </div>
-            <button
-              class="components-button woocommerce-profiler-setup-store__button is-primary"
-              type="button"
-            >
-              Set up my store
-            </button>
-            <div
-              class="woocommerce-profiler-intro-opt-in__footer"
-            >
-              <div
-                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
-              >
-                <div
-                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
-                >
-                  <span
-                    class="components-checkbox-control__input-container"
-                  >
-                    <input
-                      checked=""
-                      class="components-checkbox-control__input"
-                      id="inspector-checkbox-control-1"
-                      type="checkbox"
-                      value="1"
-                    />
-                    <svg
-                      aria-hidden="true"
-                      class="components-checkbox-control__checked"
-                      focusable="false"
-                      height="24"
-                      role="presentation"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
-                      />
-                    </svg>
-                  </span>
-                  <label
-                    class="components-checkbox-control__label"
-                    for="inspector-checkbox-control-1"
-                  >
-                    I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
-                    <a
-                      data-link-type="external"
-                      href="https://woocommerce.com/usage-tracking?utm_medium=product"
-                      target="_blank"
-                    >
-                      Learn more about usage tracking
-                    </a>
-                    .
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
+            <path
+              class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+              d="m 50 0 a 50 50 0 0 1 50 50"
+              vector-effect="non-scaling-stroke"
+            />
+          </svg>
         </div>
       </div>
     </div>
@@ -429,78 +231,12 @@ Object {
             r="50"
             vector-effect="non-scaling-stroke"
           />
-          <div
-            class="woocommerce-profiler-heading"
-          >
-            <h1
-              class="woocommerce-profiler-heading__title"
-            >
-              Welcome to Woo!
-            </h1>
-            <h2
-              class="woocommerce-profiler-heading__subtitle"
-            >
-              It's great to have you here with us! We'll be guiding you through the setup process – first, answer a few questions to tailor your experience.
-            </h2>
-          </div>
-          <button
-            class="components-button woocommerce-profiler-setup-store__button is-primary"
-            type="button"
-          >
-            Set up my store
-          </button>
-          <div
-            class="woocommerce-profiler-intro-opt-in__footer"
-          >
-            <div
-              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
-            >
-              <div
-                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
-              >
-                <span
-                  class="components-checkbox-control__input-container"
-                >
-                  <input
-                    checked=""
-                    class="components-checkbox-control__input"
-                    id="inspector-checkbox-control-1"
-                    type="checkbox"
-                    value="1"
-                  />
-                  <svg
-                    aria-hidden="true"
-                    class="components-checkbox-control__checked"
-                    focusable="false"
-                    height="24"
-                    role="presentation"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
-                    />
-                  </svg>
-                </span>
-                <label
-                  class="components-checkbox-control__label"
-                  for="inspector-checkbox-control-1"
-                >
-                  I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
-                  <a
-                    data-link-type="external"
-                    href="https://woocommerce.com/usage-tracking?utm_medium=product"
-                    target="_blank"
-                  >
-                    Learn more about usage tracking
-                  </a>
-                  .
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
+          <path
+            class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+            d="m 50 0 a 50 50 0 0 1 50 50"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
       </div>
     </div>
   </div>,
@@ -983,78 +719,12 @@ Object {
               r="50"
               vector-effect="non-scaling-stroke"
             />
-            <div
-              class="woocommerce-profiler-heading"
-            >
-              <h1
-                class="woocommerce-profiler-heading__title"
-              >
-                Welcome to Woo!
-              </h1>
-              <h2
-                class="woocommerce-profiler-heading__subtitle"
-              >
-                It's great to have you here with us! We'll be guiding you through the setup process – first, answer a few questions to tailor your experience.
-              </h2>
-            </div>
-            <button
-              class="components-button woocommerce-profiler-setup-store__button is-primary"
-              type="button"
-            >
-              Set up my store
-            </button>
-            <div
-              class="woocommerce-profiler-intro-opt-in__footer"
-            >
-              <div
-                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
-              >
-                <div
-                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
-                >
-                  <span
-                    class="components-checkbox-control__input-container"
-                  >
-                    <input
-                      checked=""
-                      class="components-checkbox-control__input"
-                      id="inspector-checkbox-control-3"
-                      type="checkbox"
-                      value="1"
-                    />
-                    <svg
-                      aria-hidden="true"
-                      class="components-checkbox-control__checked"
-                      focusable="false"
-                      height="24"
-                      role="presentation"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
-                      />
-                    </svg>
-                  </span>
-                  <label
-                    class="components-checkbox-control__label"
-                    for="inspector-checkbox-control-3"
-                  >
-                    I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
-                    <a
-                      data-link-type="external"
-                      href="https://woocommerce.com/usage-tracking?utm_medium=product"
-                      target="_blank"
-                    >
-                      Learn more about usage tracking
-                    </a>
-                    .
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
+            <path
+              class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+              d="m 50 0 a 50 50 0 0 1 50 50"
+              vector-effect="non-scaling-stroke"
+            />
+          </svg>
         </div>
       </div>
     </div>
@@ -1081,78 +751,12 @@ Object {
             r="50"
             vector-effect="non-scaling-stroke"
           />
-          <div
-            class="woocommerce-profiler-heading"
-          >
-            <h1
-              class="woocommerce-profiler-heading__title"
-            >
-              Welcome to Woo!
-            </h1>
-            <h2
-              class="woocommerce-profiler-heading__subtitle"
-            >
-              It's great to have you here with us! We'll be guiding you through the setup process – first, answer a few questions to tailor your experience.
-            </h2>
-          </div>
-          <button
-            class="components-button woocommerce-profiler-setup-store__button is-primary"
-            type="button"
-          >
-            Set up my store
-          </button>
-          <div
-            class="woocommerce-profiler-intro-opt-in__footer"
-          >
-            <div
-              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
-            >
-              <div
-                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
-              >
-                <span
-                  class="components-checkbox-control__input-container"
-                >
-                  <input
-                    checked=""
-                    class="components-checkbox-control__input"
-                    id="inspector-checkbox-control-3"
-                    type="checkbox"
-                    value="1"
-                  />
-                  <svg
-                    aria-hidden="true"
-                    class="components-checkbox-control__checked"
-                    focusable="false"
-                    height="24"
-                    role="presentation"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
-                    />
-                  </svg>
-                </span>
-                <label
-                  class="components-checkbox-control__label"
-                  for="inspector-checkbox-control-3"
-                >
-                  I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
-                  <a
-                    data-link-type="external"
-                    href="https://woocommerce.com/usage-tracking?utm_medium=product"
-                    target="_blank"
-                  >
-                    Learn more about usage tracking
-                  </a>
-                  .
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
+          <path
+            class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+            d="m 50 0 a 50 50 0 0 1 50 50"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
       </div>
     </div>
   </div>,
@@ -2022,78 +1626,12 @@ Object {
               r="50"
               vector-effect="non-scaling-stroke"
             />
-            <div
-              class="woocommerce-profiler-heading"
-            >
-              <h1
-                class="woocommerce-profiler-heading__title"
-              >
-                Welcome to Woo!
-              </h1>
-              <h2
-                class="woocommerce-profiler-heading__subtitle"
-              >
-                It's great to have you here with us! We'll be guiding you through the setup process – first, answer a few questions to tailor your experience.
-              </h2>
-            </div>
-            <button
-              class="components-button woocommerce-profiler-setup-store__button is-primary"
-              type="button"
-            >
-              Set up my store
-            </button>
-            <div
-              class="woocommerce-profiler-intro-opt-in__footer"
-            >
-              <div
-                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
-              >
-                <div
-                  class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
-                >
-                  <span
-                    class="components-checkbox-control__input-container"
-                  >
-                    <input
-                      checked=""
-                      class="components-checkbox-control__input"
-                      id="inspector-checkbox-control-2"
-                      type="checkbox"
-                      value="1"
-                    />
-                    <svg
-                      aria-hidden="true"
-                      class="components-checkbox-control__checked"
-                      focusable="false"
-                      height="24"
-                      role="presentation"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
-                      />
-                    </svg>
-                  </span>
-                  <label
-                    class="components-checkbox-control__label"
-                    for="inspector-checkbox-control-2"
-                  >
-                    I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
-                    <a
-                      data-link-type="external"
-                      href="https://woocommerce.com/usage-tracking?utm_medium=product"
-                      target="_blank"
-                    >
-                      Learn more about usage tracking
-                    </a>
-                    .
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
+            <path
+              class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+              d="m 50 0 a 50 50 0 0 1 50 50"
+              vector-effect="non-scaling-stroke"
+            />
+          </svg>
         </div>
       </div>
     </div>
@@ -2120,78 +1658,12 @@ Object {
             r="50"
             vector-effect="non-scaling-stroke"
           />
-          <div
-            class="woocommerce-profiler-heading"
-          >
-            <h1
-              class="woocommerce-profiler-heading__title"
-            >
-              Welcome to Woo!
-            </h1>
-            <h2
-              class="woocommerce-profiler-heading__subtitle"
-            >
-              It's great to have you here with us! We'll be guiding you through the setup process – first, answer a few questions to tailor your experience.
-            </h2>
-          </div>
-          <button
-            class="components-button woocommerce-profiler-setup-store__button is-primary"
-            type="button"
-          >
-            Set up my store
-          </button>
-          <div
-            class="woocommerce-profiler-intro-opt-in__footer"
-          >
-            <div
-              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
-            >
-              <div
-                class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
-              >
-                <span
-                  class="components-checkbox-control__input-container"
-                >
-                  <input
-                    checked=""
-                    class="components-checkbox-control__input"
-                    id="inspector-checkbox-control-2"
-                    type="checkbox"
-                    value="1"
-                  />
-                  <svg
-                    aria-hidden="true"
-                    class="components-checkbox-control__checked"
-                    focusable="false"
-                    height="24"
-                    role="presentation"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
-                    />
-                  </svg>
-                </span>
-                <label
-                  class="components-checkbox-control__label"
-                  for="inspector-checkbox-control-2"
-                >
-                  I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. 
-                  <a
-                    data-link-type="external"
-                    href="https://woocommerce.com/usage-tracking?utm_medium=product"
-                    target="_blank"
-                  >
-                    Learn more about usage tracking
-                  </a>
-                  .
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
+          <path
+            class="css-7c7ebc-SpinnerIndicator-commonPathProps e1bj2jdf0"
+            d="m 50 0 a 50 50 0 0 1 50 50"
+            vector-effect="non-scaling-stroke"
+          />
+        </svg>
       </div>
     </div>
   </div>,
