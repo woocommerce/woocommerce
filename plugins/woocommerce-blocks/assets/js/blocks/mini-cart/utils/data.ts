@@ -10,15 +10,11 @@ import { CartResponse, isBoolean } from '@woocommerce/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 
 const getPrice = ( cartResponse: CartResponse, showIncludingTax: boolean ) => {
-	const { totals } = cartResponse;
-	const currency = getCurrencyFromPriceResponse( totals );
+	const currency = getCurrencyFromPriceResponse( cartResponse.totals );
 
-	const subTotal = showIncludingTax
-		? parseInt( totals.total_items, 10 ) +
-		  parseInt( totals.total_items_tax, 10 )
-		: parseInt( totals.total_items, 10 );
-
-	return formatPrice( subTotal, currency );
+	return showIncludingTax
+		? formatPrice( cartResponse.totals.total_price, currency )
+		: formatPrice( cartResponse.totals.total_items, currency );
 };
 
 export const updateTotals = ( totals: [ string, number ] | undefined ) => {
