@@ -75,7 +75,7 @@ const AllReviewsEditor = ( {
 					/>
 				}
 				name={ __( 'All Reviews', 'woo-gutenberg-products-block' ) }
-				noReviewsPlaceholder={ NoReviewsPlaceholder() }
+				noReviewsPlaceholder={ NoReviewsPlaceholder }
 			/>
 		</>
 	);
