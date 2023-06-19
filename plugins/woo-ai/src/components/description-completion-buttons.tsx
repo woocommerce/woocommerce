@@ -33,6 +33,8 @@ const MagicButton = ( {
 		>
 			<img src={ MagicIcon } alt="" />
 			{ label }
+
+			<span className="dashicons dashicons-admin-generic"></span>
 		</button>
 	);
 };

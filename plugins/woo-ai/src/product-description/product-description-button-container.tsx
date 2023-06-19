@@ -12,7 +12,11 @@ import {
 	MAX_TITLE_LENGTH,
 	MIN_TITLE_LENGTH_FOR_DESCRIPTION,
 } from '../constants';
-import { WriteItForMeBtn, StopCompletionBtn } from '../components';
+import {
+	WriteItForMeBtn,
+	StopCompletionBtn,
+	WriteItModal,
+} from '../components';
 import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
 import { recordTracksFactory, getPostId } from '../utils';
 
@@ -37,6 +41,7 @@ export function WriteItForMeButtonContainer() {
 		document.querySelector( '#title' )
 	);
 	const [ fetching, setFetching ] = useState< boolean >( false );
+	const [ showModal, setShowModal ] = useState< boolean >( false );
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
@@ -127,6 +132,8 @@ export function WriteItForMeButtonContainer() {
 	};
 
 	const onWriteItForMeClick = () => {
+		setShowModal( true );
+		return;
 		setFetching( true );
 		removeSnackbar();
 
@@ -140,9 +147,11 @@ export function WriteItForMeButtonContainer() {
 	return completionActive ? (
 		<StopCompletionBtn onClick={ stopCompletion } />
 	) : (
-		<WriteItForMeBtn
-			disabled={ ! writeItForMeEnabled }
-			onClick={ onWriteItForMeClick }
-		/>
+		<>
+			<WriteItForMeBtn onClick={ onWriteItForMeClick } />
+			{ showModal && (
+				<WriteItModal onRequestClose={ () => setShowModal( false ) } />
+			) }
+		</>
 	);
 }

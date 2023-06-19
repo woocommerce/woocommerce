@@ -40,14 +40,18 @@
 		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/plugins": "wp-6.0",
 		"debug": "^4.3.3",
-		"prop-types": "^15.8.1"
+		"prop-types": "^15.8.1",
+		"react-draggable": "^4.4.5",
+		"@wordpress/icons": "wp-6.0",
+		"@wordpress/dom": "wp-6.0",
+		"classnames": "^2.3.1"
 	},
 	"peerDependencies": {
 		"@types/react": "^17.0.2",
 		"@types/react-dom": "^17.0.2",
+		"@wordpress/data": "wp-6.0",
 		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
-		"@wordpress/data": "wp-6.0"
+		"react-dom": "^17.0.2"
 	},
 	"scripts": {
 		"postinstall": "composer install",
