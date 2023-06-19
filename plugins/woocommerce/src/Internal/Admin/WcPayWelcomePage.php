@@ -267,7 +267,7 @@ class WcPayWelcomePage {
 				'has_orders'   => ! empty(
 					wc_get_orders(
 						[
-							'status'       => ['wc-completed', 'wc-processing'],
+							'status'       => [ 'wc-completed', 'wc-processing' ],
 							'date_created' => '>=' . strtotime( '-90 days' ),
 							'return'       => 'ids',
 							'limit'        => 1,
