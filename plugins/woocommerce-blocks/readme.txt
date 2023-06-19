@@ -101,6 +101,7 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Add RTL preview support for mini-cart. ([9756](https://github.com/woocommerce/woocommerce-blocks/pull/9756))
 - Fix mini cart icon not displaying correctly in RTL sites. ([9707](https://github.com/woocommerce/woocommerce-blocks/pull/9707))
 - Prevent Mini-Cart drawer to show horizontal scrollbar if the system has visible scrollbars. ([9676](https://github.com/woocommerce/woocommerce-blocks/pull/9676))
+- Fix error when adding the Reviews by Category block to a store without any product reviews ([9869](https://github.com/woocommerce/woocommerce-blocks/pull/9869))
 
 #### Dependencies
 
