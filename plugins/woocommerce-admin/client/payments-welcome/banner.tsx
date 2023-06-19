@@ -21,7 +21,7 @@ interface Props {
 
 const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 	const { first_name } = getAdminSetting( 'currentUserData', {} );
-	const { description, cta_label, tos_url } = getAdminSetting(
+	const { description, cta_label, tc_url } = getAdminSetting(
 		'wcpayWelcomePageIncentive'
 	);
 
@@ -65,7 +65,7 @@ const Banner: React.FC< Props > = ( { isSubmitted, handleSetup } ) => {
 					{ strings.noThanks }
 				</Button>
 				<p>{ strings.TosAndPp }</p>
-				<p>{ strings.termsAndConditions( tos_url ) }</p>
+				<p>{ strings.termsAndConditions( tc_url ) }</p>
 			</CardBody>
 			<CardDivider />
 			<CardBody className="woopayments-welcome-page__payments">

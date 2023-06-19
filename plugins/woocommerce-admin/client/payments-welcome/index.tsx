@@ -31,7 +31,7 @@ declare global {
 					id: string;
 					description: string;
 					cta_label: string;
-					tos_url: string;
+					tc_url: string;
 				};
 			};
 		};
