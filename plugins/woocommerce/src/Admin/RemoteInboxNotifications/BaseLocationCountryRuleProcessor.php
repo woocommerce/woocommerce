@@ -36,7 +36,7 @@ class BaseLocationCountryRuleProcessor implements RuleProcessorInterface {
 			'CA' === $base_location['state'] &&
 			empty( get_option( 'woocommerce_store_address', '' ) ) &&
 			OnboardingProfile::needs_completion() &&
-			! $onboarding_profile['is_store_country_set']
+			isset( $onboarding_profile['is_store_country_set'] ) && ! $onboarding_profile['is_store_country_set']
 			) {
 			return false;
 		}
