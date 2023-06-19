@@ -12,11 +12,17 @@ import { IconType } from '.././types';
 
 interface Props {
 	count: number;
-	colorClassNames?: string;
 	icon?: IconType;
+	iconColor?: string;
+	productCountColor?: string;
 }
 
-const QuantityBadge = ( { count, icon }: Props ): JSX.Element => {
+const QuantityBadge = ( {
+	count,
+	icon,
+	iconColor,
+	productCountColor,
+}: Props ): JSX.Element => {
 	function getIcon( iconName?: 'cart' | 'bag' | 'bag-alt' ) {
 		switch ( iconName ) {
 			case 'cart':
@@ -34,10 +40,14 @@ const QuantityBadge = ( { count, icon }: Props ): JSX.Element => {
 		<span className="wc-block-mini-cart__quantity-badge">
 			<Icon
 				className="wc-block-mini-cart__icon"
-				size={ 32 }
+				color={ iconColor }
+				size={ 20 }
 				icon={ getIcon( icon ) }
 			/>
-			<span className="wc-block-mini-cart__badge">
+			<span
+				className="wc-block-mini-cart__badge"
+				style={ { background: productCountColor } }
+			>
 				{ count > 0 ? count : '' }
 			</span>
 		</span>

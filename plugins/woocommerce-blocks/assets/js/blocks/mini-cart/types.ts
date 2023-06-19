@@ -1,4 +1,4 @@
-export type IconType = 'cart' | 'bag' | 'bag-alt';
+export type IconType = 'cart' | 'bag' | 'bag-alt' | undefined;
 
 export interface BlockAttributes {
 	isInitiallyOpen?: boolean;
@@ -8,4 +8,7 @@ export interface BlockAttributes {
 	miniCartIcon?: IconType;
 	addToCartBehaviour: string;
 	hasHiddenPrice: boolean;
+	priceColorValue: string;
+	iconColorValue: string;
+	productCountColorValue: string;
 }
