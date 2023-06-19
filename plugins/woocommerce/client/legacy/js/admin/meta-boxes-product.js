@@ -873,6 +873,8 @@ jQuery( function ( $ ) {
 				// Hide the 'Used for variations' checkbox if not viewing a variable product
 				show_and_hide_panels();
 
+				disable_or_enable_fields();
+
 				// Make sure the dropdown is not disabled for empty value attributes.
 				$( 'select.attribute_taxonomy' )
 					.find( 'option' )
