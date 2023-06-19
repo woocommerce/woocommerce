@@ -123,7 +123,7 @@ Object {
               class="woocommerce-profiler-intro-opt-in__footer"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
               >
                 <div
                   class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -268,7 +268,7 @@ Object {
             class="woocommerce-profiler-intro-opt-in__footer"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
             >
               <div
                 class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -496,7 +496,7 @@ Object {
               class="woocommerce-profiler-intro-opt-in__footer"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
               >
                 <div
                   class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -641,7 +641,7 @@ Object {
             class="woocommerce-profiler-intro-opt-in__footer"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
             >
               <div
                 class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -869,7 +869,7 @@ Object {
               class="woocommerce-profiler-intro-opt-in__footer"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
               >
                 <div
                   class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -1014,7 +1014,7 @@ Object {
             class="woocommerce-profiler-intro-opt-in__footer"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
             >
               <div
                 class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -1242,7 +1242,7 @@ Object {
               class="woocommerce-profiler-intro-opt-in__footer"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
               >
                 <div
                   class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -1387,7 +1387,7 @@ Object {
             class="woocommerce-profiler-intro-opt-in__footer"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
             >
               <div
                 class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -1615,7 +1615,7 @@ Object {
               class="woocommerce-profiler-intro-opt-in__footer"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
               >
                 <div
                   class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -1760,7 +1760,7 @@ Object {
             class="woocommerce-profiler-intro-opt-in__footer"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
             >
               <div
                 class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -2375,7 +2375,7 @@ Object {
               class="woocommerce-profiler-intro-opt-in__footer"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
               >
                 <div
                   class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -2520,7 +2520,7 @@ Object {
             class="woocommerce-profiler-intro-opt-in__footer"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
             >
               <div
                 class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -2748,7 +2748,7 @@ Object {
               class="woocommerce-profiler-intro-opt-in__footer"
             >
               <div
-                class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+                class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
               >
                 <div
                   class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
@@ -2893,7 +2893,7 @@ Object {
             class="woocommerce-profiler-intro-opt-in__footer"
           >
             <div
-              class="components-base-control components-checkbox-control woocommerce-profiler-intro-opt-in__checkbox css-wdf2ti-Wrapper ej5x27r4"
+              class="components-base-control components-checkbox-control core-profiler__checkbox css-wdf2ti-Wrapper ej5x27r4"
             >
               <div
                 class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"

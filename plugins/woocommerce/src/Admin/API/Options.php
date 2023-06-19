@@ -210,6 +210,9 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_onboarding_profile',
 			'woocommerce_default_country',
 			'blogname',
+			'wcpay_welcome_page_incentives_dismissed',
+			'wcpay_welcome_page_viewed_timestamp',
+			'wcpay_welcome_page_exit_survey_more_info_needed_timestamp',
 			// WC Test helper options.
 			'wc-admin-test-helper-rest-api-filters',
 			'wc_admin_helper_feature_values',

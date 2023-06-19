@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix infinite redirect from homescreen when onboarding isn't completed using useEffect to remove unintentional rerendering

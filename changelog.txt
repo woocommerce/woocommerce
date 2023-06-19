@@ -1,10 +1,17 @@
 == Changelog ==
 
+= 7.7.2 2023-06-01 =
+
+**WooCommerce**
+
+* Update - Update WooCommerce Blocks to 10.0.6 [#38533](https://github.com/woocommerce/woocommerce/pull/38533)
+
 = 7.7.1 2023-05-26 =
 
 **WooCommerce**
 
 * Update - Update WooCommerce Blocks to 10.0.5 [#38427](https://github.com/woocommerce/woocommerce/pull/38427)
+
 
 = 7.7.0 2023-05-10 =
 

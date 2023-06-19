@@ -18,6 +18,7 @@ import {
 	TaskType,
 	OnboardingProductTypes,
 	InstallAndActivatePluginsAsyncResponse,
+	GetJetpackAuthUrlResponse,
 } from './types';
 import { Plugin, PluginNames } from '../plugins/types';
 
@@ -488,6 +489,19 @@ export function* installAndActivatePluginsAsync(
 	}
 }
 
+export function setJetpackAuthUrl(
+	results: GetJetpackAuthUrlResponse,
+	redirectUrl: string,
+	from = ''
+) {
+	return {
+		type: TYPES.SET_JETPACK_AUTH_URL,
+		results,
+		redirectUrl,
+		from,
+	};
+}
+
 export type Action = ReturnType<
 	| typeof getFreeExtensionsError
 	| typeof getFreeExtensionsSuccess
@@ -524,4 +538,5 @@ export type Action = ReturnType<
 	| typeof actionTaskRequest
 	| typeof getProductTypesError
 	| typeof getProductTypesSuccess
+	| typeof setJetpackAuthUrl
 >;

@@ -8,6 +8,7 @@ import {
 	Form,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 } from '@woocommerce/components';
+import { ProductAttributeTerm } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import {
 	Button,
@@ -99,22 +100,52 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		scrollAttributeIntoView( values.attributes.length );
 	};
 
+	const hasTermsOrOptions = ( attribute: EnhancedProductAttribute ) => {
+		return (
+			( attribute.terms && attribute.terms.length > 0 ) ||
+			( attribute.options && attribute.options.length > 0 )
+		);
+	};
+
+	const isGlobalAttribute = ( attribute: EnhancedProductAttribute ) => {
+		return attribute.id !== 0;
+	};
+
+	const mapTermsToOptions = ( terms: ProductAttributeTerm[] | undefined ) => {
+		if ( ! terms ) {
+			return [];
+		}
+
+		return terms.map( ( term ) => term.name );
+	};
+
+	const getOptions = ( attribute: EnhancedProductAttribute ) => {
+		return isGlobalAttribute( attribute )
+			? mapTermsToOptions( attribute.terms )
+			: attribute.options;
+	};
+
+	const isAttributeFilledOut = (
+		attribute: EnhancedProductAttribute | null
+	): attribute is EnhancedProductAttribute => {
+		return (
+			attribute !== null &&
+			attribute.name.length > 0 &&
+			hasTermsOrOptions( attribute )
+		);
+	};
+
+	const getVisibleOrTrue = ( attribute: EnhancedProductAttribute ) =>
+		attribute.visible !== undefined ? attribute.visible : true;
+
 	const onAddingAttributes = ( values: AttributeForm ) => {
 		const newAttributesToAdd: EnhancedProductAttribute[] = [];
 		values.attributes.forEach( ( attr ) => {
-			if (
-				attr !== null &&
-				attr.name &&
-				( ( attr.terms || [] ).length > 0 ||
-					( attr.options || [] ).length > 0 )
-			) {
-				const options =
-					attr.id !== 0
-						? ( attr.terms || [] ).map( ( term ) => term.name )
-						: attr.options;
+			if ( isAttributeFilledOut( attr ) ) {
 				newAttributesToAdd.push( {
-					...( attr as EnhancedProductAttribute ),
-					options,
+					...attr,
+					visible: getVisibleOrTrue( attr ),
+					options: getOptions( attr ),
 				} );
 			}
 		} );

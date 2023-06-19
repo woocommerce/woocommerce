@@ -57,6 +57,7 @@ describe( 'plugins reducer', () => {
 				emailPrefill: '',
 				errors: {},
 				requesting: {},
+				jetpackAuthUrls: {},
 			},
 			{
 				type: TYPES.SET_PROFILE_ITEMS,
@@ -79,6 +80,7 @@ describe( 'plugins reducer', () => {
 				emailPrefill: '',
 				errors: {},
 				requesting: {},
+				jetpackAuthUrls: {},
 			},
 			{
 				type: TYPES.SET_PROFILE_ITEMS,
