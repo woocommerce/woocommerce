@@ -14,7 +14,7 @@ import { Stages } from '../pages/Loader';
 
 const LightbulbStage = {
 	title: __( 'Turning on the lights', 'woocommerce' ),
-	image: <img src={ LightBulbImage } alt="loader-lightbulb" />,
+	image: <img src={ LightBulbImage } alt="loader-lightbulb" height="140" />,
 	paragraphs: [
 		{
 			label: __( '#FunWooFact: ', 'woocommerce' ),
@@ -27,7 +27,7 @@ const LightbulbStage = {
 };
 const LayoutStage = {
 	title: __( "Extending your store's capabilities", 'woocommerce' ),
-	image: <img src={ LayoutImage } alt="loader-lightbulb" />,
+	image: <img src={ LayoutImage } alt="loader-lightbulb" height="140" />,
 	paragraphs: [
 		{
 			label: __( '#FunWooFact: ', 'woocommerce' ),
@@ -41,7 +41,7 @@ const LayoutStage = {
 
 const DevelopingStage = {
 	title: __( "Woo! Let's get your features ready", 'woocommerce' ),
-	image: <img src={ DevelopingImage } alt="loader-developng" />,
+	image: <img src={ DevelopingImage } alt="loader-developng" height="140" />,
 	paragraphs: [
 		{
 			label: __( '#FunWooFact: ', 'woocommerce' ),
