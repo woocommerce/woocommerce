@@ -64,10 +64,7 @@ export class Logger {
 		}
 	}
 
-	static table(
-		head: Array< string >,
-		rows: Array< Array< number | string > >
-	) {
+	static table( head: Array< string >, rows: Array< string[] | number[] > ) {
 		if ( Logger.loggingLevel > LOGGING_LEVELS.silent ) {
 			const table = new Table( { head, rows } );
 			log( table.toString() );
