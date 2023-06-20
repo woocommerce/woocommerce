@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Track stock quantity for this product should be disabled when Enable stock management within settings is disabled, and enabled otherwise

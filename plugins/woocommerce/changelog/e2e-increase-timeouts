@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Increase default timeout and test timeout of create-variable-product spec.

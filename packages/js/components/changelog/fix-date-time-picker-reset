@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Opt out of Reset and Help buttons in DateTimePickerControl, as these will be removed in a future @wordpress/components version.

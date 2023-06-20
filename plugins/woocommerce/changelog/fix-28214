@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-fix stock status is not correct in JSON structure data if product is onbackorder

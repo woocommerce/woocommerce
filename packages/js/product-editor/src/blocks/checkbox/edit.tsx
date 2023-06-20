@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, createInterpolateElement } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import type { BlockAttributes } from '@wordpress/blocks';
 import { CheckboxControl, Tooltip } from '@wordpress/components';
 import { useBlockProps } from '@wordpress/block-editor';
@@ -25,38 +25,30 @@ export function Edit( { attributes }: { attributes: BlockAttributes } ) {
 
 	return (
 		<div { ...blockProps }>
-			<h4> { title } </h4>
-			<CheckboxControl
-				label={
-					tooltip
-						? createInterpolateElement( `<label /> <tooltip />`, {
-								label: <span>{ label }</span>,
-								tooltip: (
-									<Tooltip
-										text={ <span>{ tooltip }</span> }
-										position="top center"
-										// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-										// @ts-ignore Incorrect types.
-										className={
-											'woocommerce-product-form__checkbox-tooltip'
-										}
-										delay={ 0 }
-									>
-										<span className="woocommerce-product-form__checkbox-tooltip-icon">
-											<Icon
-												icon={ help }
-												size={ 22 }
-												fill="#949494"
-											/>
-										</span>
-									</Tooltip>
-								),
-						  } )
-						: label
-				}
-				checked={ value }
-				onChange={ ( selected ) => setValue( selected ) }
-			/>
+			<h4>{ title }</h4>
+			<div className="woocommerce-product-form__checkbox-wrapper">
+				<CheckboxControl
+					label={ label }
+					checked={ value }
+					onChange={ ( selected ) => setValue( selected ) }
+				/>
+				{ tooltip && (
+					<Tooltip
+						text={ <span>{ tooltip }</span> }
+						position="top center"
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore Incorrect types.
+						className={
+							'woocommerce-product-form__checkbox-tooltip'
+						}
+						delay={ 0 }
+					>
+						<span className="woocommerce-product-form__checkbox-tooltip-icon">
+							<Icon icon={ help } size={ 21.94 } fill="#949494" />
+						</span>
+					</Tooltip>
+				) }
+			</div>
 		</div>
 	);
 }

@@ -390,10 +390,58 @@ class DefaultPaymentGateways {
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/paypal.png',
 				'plugins'             => array( 'woocommerce-paypal-payments' ),
 				'is_visible'          => array(
-					(object) array(
-						'type'      => 'base_location_country',
-						'value'     => 'IN',
-						'operation' => '!=',
+					self::get_rules_for_countries(
+						array(
+							'US',
+							'CA',
+							'MX',
+							'BR',
+							'AR',
+							'CL',
+							'CO',
+							'EC',
+							'PE',
+							'UY',
+							'VE',
+							'AT',
+							'BE',
+							'BG',
+							'HR',
+							'CH',
+							'CY',
+							'CZ',
+							'DK',
+							'EE',
+							'ES',
+							'FI',
+							'FR',
+							'DE',
+							'GB',
+							'GR',
+							'HU',
+							'IE',
+							'IT',
+							'LV',
+							'LT',
+							'LU',
+							'MT',
+							'NL',
+							'NO',
+							'PL',
+							'PT',
+							'RO',
+							'SK',
+							'SL',
+							'SE',
+							'AU',
+							'NZ',
+							'HK',
+							'JP',
+							'SG',
+							'CN',
+							'ID',
+							'IN',
+						)
 					),
 					self::get_rules_for_cbd( false ),
 				),
@@ -446,7 +494,6 @@ class DefaultPaymentGateways {
 					'SG',
 					'CN',
 					'ID',
-					'IN',
 				),
 				'category_additional' => array(
 					'US',
@@ -500,6 +547,7 @@ class DefaultPaymentGateways {
 					'SG',
 					'CN',
 					'ID',
+					'IN',
 				),
 			),
 			array(
@@ -548,7 +596,13 @@ class DefaultPaymentGateways {
 										'JP',
 									)
 								),
-								self::get_rules_for_selling_venues( array( 'brick-mortar', 'brick-mortar-other' ) ),
+								(object) array(
+									'type'     => 'or',
+									'operands' => (object) array(
+										self::get_rules_for_selling_venues( array( 'brick-mortar', 'brick-mortar-other' ) ),
+										self::get_rules_selling_offline(),
+									),
+								),
 							),
 						),
 					),
@@ -677,6 +731,7 @@ class DefaultPaymentGateways {
 							'AR',
 							'CL',
 							'CO',
+							'EC',
 							'PE',
 							'UY',
 							'MX',
@@ -689,6 +744,7 @@ class DefaultPaymentGateways {
 					'AR',
 					'CL',
 					'CO',
+					'EC',
 					'PE',
 					'UY',
 					'MX',
@@ -908,6 +964,29 @@ class DefaultPaymentGateways {
 	}
 
 	/**
+	 * Get rules for when selling offline for core profiler.
+	 *
+	 * @return object Rules to match.
+	 */
+	public static function get_rules_selling_offline() {
+		return (object) array(
+			'type'         => 'option',
+			'transformers' => array(
+				(object) array(
+					'use'       => 'dot_notation',
+					'arguments' => (object) array(
+						'path' => 'selling_online_answer',
+					),
+				),
+			),
+			'option_name'  => 'woocommerce_onboarding_profile',
+			'operation'    => 'contains',
+			'value'        => 'no_im_selling_offline',
+			'default'      => array(),
+		);
+	}
+
+	/**
 	 * Get default rules for CBD based on given argument.
 	 *
 	 * @param bool $should_have Whether or not the store should have CBD as an industry (true) or not (false).
@@ -1107,7 +1186,7 @@ class DefaultPaymentGateways {
 			'BO' => [],
 			'CL' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
 			'CO' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
-			'EC' => [ 'ppcp-gateway' ],
+			'EC' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
 			'FK' => [],
 			'GF' => [],
 			'GY' => [],
@@ -1153,9 +1232,9 @@ class DefaultPaymentGateways {
 			'GU' => [],
 			'ID' => [ 'stripe', 'ppcp-gateway' ],
 			'IN' => [ 'stripe', 'razorpay', 'payubiz', 'ppcp-gateway' ],
-			'ZA' => [ 'payfast', 'paystack', 'ppcp-gateway' ],
-			'NG' => [ 'paystack', 'ppcp-gateway' ],
-			'GH' => [ 'paystack', 'ppcp-gateway' ],
+			'ZA' => [ 'payfast', 'paystack' ],
+			'NG' => [ 'paystack' ],
+			'GH' => [ 'paystack' ],
 		);
 
 		// If the country code is not in the list, return default priority.

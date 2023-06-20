@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Fallback to simply not display any prices rather than empty prices and re-enable Purchase unit tests

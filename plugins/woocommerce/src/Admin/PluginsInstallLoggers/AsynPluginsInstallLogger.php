@@ -101,6 +101,20 @@ class AsyncPluginsInstallLogger implements PluginsInstallLogger {
 	}
 
 	/**
+	 * Change status to activated.
+	 *
+	 * @param string $plugin_name plugin name.
+	 *
+	 * @return void
+	 */
+	public function activated( string $plugin_name ) {
+		$option = $this->get();
+
+		$option['plugins'][ $plugin_name ]['status'] = 'activated';
+		$this->update( $option );
+	}
+
+	/**
 	 * Add an error.
 	 *
 	 * @param string      $plugin_name plugin name.

@@ -1,12 +1,18 @@
 .woocommerce-iframe-editor {
-	align-items: flex-start;
 	display: flex;
-	flex-direction: row;
-	flex-grow: 1;
-	height: 100%;
-	width: 100%;
-	overflow: hidden;
-	z-index: 1000;
+    flex-direction: column;
+    height: 100%;
+
+	&__main {
+		align-items: flex-start;
+		display: flex;
+		flex-direction: row;
+		flex-grow: 1;
+		height: 100%;
+		width: 100%;
+		overflow: hidden;
+		z-index: 1000;
+	}
 
 	iframe {
 		width: 100%;

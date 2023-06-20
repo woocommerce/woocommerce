@@ -8,6 +8,7 @@ import {
 	LayoutContextProvider,
 	getLayoutContextValue,
 } from '@woocommerce/admin-layout';
+import QueryString, { parse } from 'qs';
 
 /**
  * Internal dependencies
@@ -20,8 +21,10 @@ import './style.scss';
 
 type QueryParams = EmbeddedBodyProps;
 
-function isWPPage( params: URLSearchParams ): boolean {
-	return params.get( 'page' ) !== null;
+function isWPPage(
+	params: QueryParams | QueryString.ParsedQs
+): params is QueryParams {
+	return ( params as QueryParams ).page !== undefined;
 }
 
 const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
@@ -41,10 +44,10 @@ export const EmbeddedBodyLayout = () => {
 		triggerExitPageCesSurvey();
 	}, [] );
 
-	const query = new URLSearchParams( location.search );
+	const query = parse( location.search.substring( 1 ) );
 	let queryParams: QueryParams = { page: '', tab: '' };
 	if ( isWPPage( query ) ) {
-		queryParams = Object.fromEntries( query ) as QueryParams;
+		queryParams = query;
 	}
 	/**
 	 * Filter an array of body components for WooCommerce non-react pages.

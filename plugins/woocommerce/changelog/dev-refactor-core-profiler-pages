@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Refactored core profiler state machine by modularising each page

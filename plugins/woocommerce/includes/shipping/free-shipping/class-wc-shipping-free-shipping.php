@@ -37,6 +37,15 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	public $requires = '';
 
 	/**
+	 * Ignore discounts.
+	 *
+	 * If set, free shipping would be available based on pre-discount order amount.
+	 *
+	 * @var string
+	 */
+	public $ignore_discounts;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int $instance_id Shipping method instance.

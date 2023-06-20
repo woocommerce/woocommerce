@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Product, ProductStatus } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { Button, Icon } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -15,14 +15,16 @@ import { MouseEvent, ReactNode } from 'react';
  */
 import { useValidations } from '../../../../contexts/validation-context';
 import { WPError } from '../../../../utils/get-product-error-message';
+import { SaveDraftButtonProps } from '../../save-draft-button';
 
 export function useSaveDraft( {
+	productStatus,
 	disabled,
 	onClick,
 	onSaveSuccess,
 	onSaveError,
 	...props
-}: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' > & {
+}: SaveDraftButtonProps & {
 	onSaveSuccess?( product: Product ): void;
 	onSaveError?( error: WPError ): void;
 } ): Button.ButtonProps {
@@ -30,11 +32,6 @@ export function useSaveDraft( {
 		'postType',
 		'product',
 		'id'
-	);
-	const [ productStatus ] = useEntityProp< ProductStatus >(
-		'postType',
-		'product',
-		'status'
 	);
 
 	const { hasEdits, isDisabled } = useSelect(
@@ -106,7 +103,7 @@ export function useSaveDraft( {
 	let children: ReactNode;
 	if ( productStatus === 'publish' ) {
 		children = __( 'Switch to draft', 'woocommerce' );
-	} else if ( hasEdits ) {
+	} else if ( hasEdits || productStatus === 'auto-draft' ) {
 		children = __( 'Save draft', 'woocommerce' );
 	} else {
 		children = (

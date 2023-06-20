@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+cast url to string for str_replace

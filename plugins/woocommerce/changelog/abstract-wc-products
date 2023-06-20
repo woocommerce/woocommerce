@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Fixed visibility and tax values convert to lowercase as issue facing in importing.

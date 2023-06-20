@@ -36,14 +36,61 @@ defined( 'ABSPATH' ) || exit;
 		?>
 	</div>
 
-	<div class="options_group pricing show_if_simple show_if_external hidden">
+	<div class="inline notice woocommerce-message show_if_variable">
+		<p>
+			<?php
+			/**
+			 * Allow developers to change the general pricing message.
+			 *
+			 * @since 7.9.0
+			 */
+			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product variation.', 'woocommerce' ), 'variable' ) );
+			?>
+			<a class="variations-tab-navigation-link" href="#variable_product_options">
+			<?php
+			esc_html_e( 'Go to Variations', 'woocommerce' );
+			?>
+			</a>
+		</p>
+	</div>
+
+	<div class="inline notice woocommerce-message show_if_grouped">
+		<p>
+			<?php
+			/**
+			 * Allow developers to change the general pricing message.
+			 *
+			 * @since 7.9.0
+			 */
+			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details individually for each product added to this group.', 'woocommerce' ), 'grouped' ) );
+			?>
+			<a class="linked-products-navigation-link" href="#linked_product_data"><?php esc_html_e( 'Go to Linked Products', 'woocommerce' ); ?></a>
+		</p>
+	</div>
+
+	<div class="inline notice woocommerce-message pricing_disabled_fallback_message">
+		<p>
+			<?php
+			/**
+			 * Allow developers to change the general pricing message.
+			 *
+			 * @since 7.9.0
+			 */
+			echo esc_html( apply_filters( 'woocommerce_general_pricing_disabled_message', __( 'You can manage pricing and other details in one of the other tabs.', 'woocommerce' ), 'grouped' ) );
+			?>
+		</p>
+	</div>
+
+	<div class="options_group pricing">
 		<?php
 		woocommerce_wp_text_input(
 			array(
-				'id'        => '_regular_price',
-				'value'     => $product_object->get_regular_price( 'edit' ),
-				'label'     => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-				'data_type' => 'price',
+				'id'          => '_regular_price',
+				'value'       => $product_object->get_regular_price( 'edit' ),
+				'label'       => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
+				'label_class' => 'enable_if_simple enable_if_external',
+				'data_type'   => 'price',
+				'class'       => 'enable_if_simple enable_if_external',
 			)
 		);
 
@@ -53,7 +100,9 @@ defined( 'ABSPATH' ) || exit;
 				'value'       => $product_object->get_sale_price( 'edit' ),
 				'data_type'   => 'price',
 				'label'       => __( 'Sale price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
-				'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>',
+				'label_class' => 'enable_if_simple enable_if_external',
+				'description' => '<a href="#" class="sale_schedule show_if_simple show_if_external">' . __( 'Schedule', 'woocommerce' ) . '</a>',
+				'class'       => 'enable_if_simple enable_if_external',
 			)
 		);
 
@@ -93,7 +142,7 @@ defined( 'ABSPATH' ) || exit;
 
 					if ( $downloadable_files ) {
 						foreach ( $downloadable_files as $key => $file ) {
-							$disabled_download = isset( $file['enabled'] ) && false === $file['enabled'];
+							$disabled_download         = isset( $file['enabled'] ) && false === $file['enabled'];
 							$disabled_downloads_count += (int) $disabled_download;
 							include __DIR__ . '/html-product-download.php';
 						}
@@ -105,8 +154,8 @@ defined( 'ABSPATH' ) || exit;
 						<th colspan="2">
 							<a href="#" class="button insert" data-row="
 							<?php
-								$key  = '';
-								$file = array(
+								$key               = '';
+								$file              = array(
 									'file' => '',
 									'name' => '',
 								);

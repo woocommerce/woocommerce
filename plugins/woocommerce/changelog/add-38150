@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Override the interface skeleton container so it can be scrollable

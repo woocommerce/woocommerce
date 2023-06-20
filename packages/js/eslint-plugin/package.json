@@ -32,9 +32,10 @@
 	"dependencies": {
 		"@typescript-eslint/parser": "^5.54.0",
 		"@typescript-eslint/eslint-plugin": "^5.54.0",
-		"@wordpress/eslint-plugin": "^14.0.0",
+		"@wordpress/eslint-plugin": "14.7.0",
 		"eslint-plugin-react-hooks": "^4.6.0",
-		"eslint-plugin-testing-library": "^5.10.2"
+		"eslint-plugin-testing-library": "^5.10.2",
+		"prettier": "npm:wp-prettier@^2.8.5"
 	},
 	"publishConfig": {
 		"access": "public"

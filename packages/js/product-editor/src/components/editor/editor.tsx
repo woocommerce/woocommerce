@@ -34,6 +34,7 @@ import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
 /**
  * Internal dependencies
  */
+import { Footer } from '../footer';
 import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
 import { ValidationProvider } from '../../contexts/validation-context';
@@ -67,7 +68,6 @@ export function Editor( { product, settings }: EditorProps ) {
 								<InterfaceSkeleton
 									header={
 										<Header
-											productName={ product.name }
 											onTabSelect={ setSelectedTab }
 										/>
 									}
@@ -92,6 +92,11 @@ export function Editor( { product, settings }: EditorProps ) {
 							</ValidationProvider>
 						</SlotFillProvider>
 					</ShortcutProvider>
+					{ /* We put Footer here instead of in InterfaceSkeleton because Footer uses
+					WooFooterItem to actually render in the WooFooterItem.Slot defined by
+					WooCommerce Admin. And, we need to put it outside of the SlotFillProvider
+					we create in this component. */ }
+					<Footer product={ product } />
 				</EntityProvider>
 			</StrictMode>
 		</LayoutContextProvider>

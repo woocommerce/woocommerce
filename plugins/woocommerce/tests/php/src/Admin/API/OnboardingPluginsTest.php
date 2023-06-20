@@ -93,7 +93,7 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_response_format() {
 		$data = $this->request(
-			'/install-async',
+			'/install-and-activate-async',
 			wp_json_encode(
 				array(
 					'plugins' => array( 'test' ),
@@ -133,7 +133,7 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_it_returns_404_with_unknown_job_id() {
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/scheduled-installs/i-do-not-exist' );
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/scheduled-installs/646e6a35121601' );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 404, $response->get_status() );
 	}
@@ -145,7 +145,7 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_permissions() {
 		$this->useUserWithoutPluginsPermission();
-		foreach ( array( '/install-and-activate', '/install-async' ) as $endpoint ) {
+		foreach ( array( '/install-and-activate', '/install-and-activate-async' ) as $endpoint ) {
 			$response = $this->request(
 				$endpoint,
 				wp_json_encode(

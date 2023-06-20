@@ -17,6 +17,7 @@ import { useParams } from 'react-router-dom';
 import { useProductEntityRecord } from './hooks/use-product-entity-record';
 import './fills/product-block-editor-fills';
 import './product-page.scss';
+import BlockEditorTourWrapper from './tour/block-editor/block-editor-tour-wrapper';
 
 declare const productBlockEditorSettings: ProductEditorSettings;
 
@@ -36,9 +37,12 @@ export default function ProductPage() {
 	}
 
 	return (
-		<Editor
-			product={ product }
-			settings={ productBlockEditorSettings || {} }
-		/>
+		<>
+			<Editor
+				product={ product }
+				settings={ productBlockEditorSettings || {} }
+			/>
+			<BlockEditorTourWrapper />
+		</>
 	);
 }

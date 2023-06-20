@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Added async fetching for extensions and countries lists in new core profiler

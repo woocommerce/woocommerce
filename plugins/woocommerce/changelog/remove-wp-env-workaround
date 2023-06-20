@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Removed wp-env workaround since the bug has been fixed

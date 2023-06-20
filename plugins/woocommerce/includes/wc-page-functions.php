@@ -133,8 +133,8 @@ function wc_nav_menu_items( $items ) {
 				if ( empty( $item->url ) ) {
 					continue;
 				}
-				$path  = wp_parse_url( $item->url, PHP_URL_PATH );
-				$query = wp_parse_url( $item->url, PHP_URL_QUERY );
+				$path  = wp_parse_url( $item->url, PHP_URL_PATH ) ?? '';
+				$query = wp_parse_url( $item->url, PHP_URL_QUERY ) ?? '';
 
 				if ( strstr( $path, $customer_logout ) || strstr( $query, $customer_logout ) ) {
 					unset( $items[ $key ] );

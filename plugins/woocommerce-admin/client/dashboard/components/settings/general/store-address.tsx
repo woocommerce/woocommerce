@@ -39,7 +39,7 @@ export function getStoreAddressValidator(/* locale: Locale = {} */) {
 	 * @return {Object} Key value of fields and error messages, { myField: 'This field is required' }
 	 */
 	return (
-		values: Record< typeof storeAddressFields[ number ], string >
+		values: Record< ( typeof storeAddressFields )[ number ], string >
 	) => {
 		const errors: {
 			[ key: string ]: string;

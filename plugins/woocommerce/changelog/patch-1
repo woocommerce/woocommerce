@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add null-coalerscing operators for compatibility with PHP 8
