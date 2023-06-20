@@ -81,7 +81,7 @@ export const useCurrencyInputProps = ( {
 			}
 		},
 		onChange( newValue: string ) {
-			const sanitizeValue = sanitizePrice( newValue || '0' );
+			const sanitizeValue = sanitizePrice( newValue );
 			if ( onChange ) {
 				onChange( sanitizeValue );
 			}

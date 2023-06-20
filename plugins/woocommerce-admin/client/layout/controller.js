@@ -3,6 +3,7 @@
  */
 import { Suspense, lazy } from '@wordpress/element';
 import { useRef, useEffect } from 'react';
+import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
@@ -323,11 +324,8 @@ export const getPages = () => {
 			container: WCPaymentsWelcomePage,
 			path: '/wc-pay-welcome-page',
 			breadcrumbs: [
-				[
-					'/wc-pay-welcome-page',
-					__( 'WooCommerce Payments', 'woocommerce' ),
-				],
-				__( 'WooCommerce Payments', 'woocommerce' ),
+				[ '/wc-pay-welcome-page', __( 'WooPayments', 'woocommerce' ) ],
+				__( 'WooPayments', 'woocommerce' ),
 			],
 			navArgs: {
 				id: 'woocommerce-wc-pay-welcome-page',
@@ -429,28 +427,18 @@ export const Controller = ( { ...props } ) => {
  */
 export function updateLinkHref( item, nextQuery, excludedScreens ) {
 	if ( isWCAdmin( item.href ) ) {
-		// If we accept a full HTMLAnchorElement, then we should be able to use `.search`.
-		// const query = new URLSearchParams( item.search );
-		// but to remain backward compatible, we support any object with `href` property.
 		const search = last( item.href.split( '?' ) );
-		let query = new URLSearchParams( search );
-		const path = query.get( 'path' ) || 'homescreen';
+		const query = parse( search );
+		const path = query.path || 'homescreen';
 		const screen = getScreenFromPath( path );
 
-		if ( ! excludedScreens.includes( screen ) ) {
-			query = new URLSearchParams( {
-				...Object.fromEntries( query ),
-				...nextQuery,
-			} );
-		}
-		// Remove undefined keys.
-		for ( const [ key, value ] of Array.from( query.entries() ) ) {
-			if ( value === 'undefined' || value === undefined ) {
-				query.delete( key );
-			}
-		}
+		const isExcludedScreen = excludedScreens.includes( screen );
 
-		const href = 'admin.php?' + query.toString();
+		const href =
+			'admin.php?' +
+			stringify(
+				Object.assign( query, isExcludedScreen ? {} : nextQuery )
+			);
 
 		// Replace the href so you can see the url on hover.
 		item.href = href;

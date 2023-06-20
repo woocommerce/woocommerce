@@ -23,23 +23,35 @@
 		width: 280px;
 	}
 
-	.interface-interface-skeleton__header {
+	.interface-interface-skeleton__header,
+	.interface-interface-skeleton__footer {
 		background-color: $white;
 		width: calc(100% - $admin-menu-width);
 		left: $admin-menu-width;
-		top: $adminbar-height;
 		position: fixed;
 		@include breakpoint( '<960px' ) {
 			left: $admin-menu-width-collapsed;
 			width: calc(100% - $admin-menu-width-collapsed);
 		}
 		@include breakpoint( '<782px' ) {
-			top: $adminbar-height-mobile;
 			left: 0;
 			width: 100%;
 		}
 		// Higher than the sidebar which has a z-index of 90.
 		z-index: 100;
+	}
+
+	.interface-interface-skeleton__header {
+		top: $adminbar-height;
+		@include breakpoint( '<782px' ) {
+			top: $adminbar-height-mobile;
+		}
+	}
+
+	.interface-interface-skeleton__footer {
+		// by default, on mobile the footer is hidden,
+		// so we override that here
+		display: flex;
 	}
 }
 

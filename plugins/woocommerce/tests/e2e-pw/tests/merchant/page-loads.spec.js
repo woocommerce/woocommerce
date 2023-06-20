@@ -1,4 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
+const { features } = require( '../../utils' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 // a representation of the menu structure for WC
 const wcPages = [
@@ -40,7 +42,9 @@ for ( const currentPage of wcPages ) {
 		() => {
 			test.use( { storageState: process.env.ADMINSTATE } );
 
-			test.beforeEach( async ( { page } ) => {
+			const coreProfilerEnabled = features.is_enabled( 'core-profiler' );
+
+			test.beforeEach( async ( { page, baseURL } ) => {
 				if ( currentPage.name === 'WooCommerce' ) {
 					await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 				} else if ( currentPage.name === 'Products' ) {
@@ -49,6 +53,16 @@ for ( const currentPage of wcPages ) {
 					await page.goto(
 						'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing'
 					);
+				} else if (currentPage.name === 'Home' && coreProfilerEnabled) {
+					await new wcApi( {
+						url: baseURL,
+						consumerKey: process.env.CONSUMER_KEY,
+						consumerSecret: process.env.CONSUMER_SECRET,
+						version: 'wc-admin',
+					} ).post( 'onboarding/profile', {
+						'skipped': true,
+					});
+					await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 				}
 			} );
 
@@ -58,13 +72,15 @@ for ( const currentPage of wcPages ) {
 				} ) => {
 					// deal with the onboarding wizard
 					if ( currentPage.subpages[ i ].name === 'Home' ) {
-						await page.goto(
-							'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
-						);
-						await page.click( 'text=Skip setup store details' );
-						await page.click( 'button >> text=No thanks' );
-						await page.waitForLoadState( 'networkidle' );
-						await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+						if ( ! coreProfilerEnabled ) {
+							await page.goto(
+								'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
+							);
+							await page.click( 'text=Skip setup store details' );
+							await page.click( 'button >> text=No thanks' );
+							await page.waitForLoadState( 'networkidle' );
+							await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+						}
 					}
 
 					// deal with cases where the 'Coupons' legacy menu had already been removed.

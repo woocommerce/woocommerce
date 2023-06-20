@@ -1,5 +1,6 @@
-export const PRODUCT_MVP_CES_ACTION_OPTION_NAME =
-	'woocommerce_ces_product_mvp_ces_action';
+export const PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME =
+	'woocommerce_product_editor_show_feedback_bar';
+export const PRODUCT_EDITOR_FEEDBACK_CES_ACTION = 'product_editor';
 export const NEW_PRODUCT_MANAGEMENT_ENABLED_OPTION_NAME =
 	'woocommerce_new_product_management_enabled';
 

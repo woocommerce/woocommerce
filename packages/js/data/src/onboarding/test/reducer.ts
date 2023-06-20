@@ -49,12 +49,20 @@ describe( 'plugins reducer', () => {
 	it( 'should handle SET_PROFILE_ITEMS', () => {
 		const state = reducer(
 			{
-				// @ts-expect-error - we're only testing profileItems
 				profileItems,
+				freeExtensions: [],
+				taskLists: {},
+				paymentMethods: [],
+				productTypes: {},
+				emailPrefill: '',
+				errors: {},
+				requesting: {},
+				jetpackAuthUrls: {},
 			},
 			{
 				type: TYPES.SET_PROFILE_ITEMS,
 				profileItems: { is_agree_marketing: true },
+				replace: false,
 			}
 		);
 
@@ -64,8 +72,15 @@ describe( 'plugins reducer', () => {
 	it( 'should handle SET_PROFILE_ITEMS with replace', () => {
 		const state = reducer(
 			{
-				// @ts-expect-error - we're only testing profileItems
 				profileItems,
+				freeExtensions: [],
+				taskLists: {},
+				paymentMethods: [],
+				productTypes: {},
+				emailPrefill: '',
+				errors: {},
+				requesting: {},
+				jetpackAuthUrls: {},
 			},
 			{
 				type: TYPES.SET_PROFILE_ITEMS,

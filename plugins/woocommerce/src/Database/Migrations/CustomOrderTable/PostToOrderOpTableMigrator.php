@@ -23,7 +23,7 @@ class PostToOrderOpTableMigrator extends MetaToCustomTableMigrator {
 	protected function get_schema_config(): array {
 		global $wpdb;
 		// TODO: Remove hardcoding.
-		$this->table_names = array(
+		$table_names = array(
 			'orders'    => $wpdb->prefix . 'wc_orders',
 			'addresses' => $wpdb->prefix . 'wc_order_addresses',
 			'op_data'   => $wpdb->prefix . 'wc_order_operational_data',
@@ -33,7 +33,7 @@ class PostToOrderOpTableMigrator extends MetaToCustomTableMigrator {
 		return array(
 			'source'      => array(
 				'entity' => array(
-					'table_name'             => $this->table_names['orders'],
+					'table_name'             => $table_names['orders'],
 					'meta_rel_column'        => 'id',
 					'destination_rel_column' => 'id',
 					'primary_key'            => 'id',
@@ -47,7 +47,7 @@ class PostToOrderOpTableMigrator extends MetaToCustomTableMigrator {
 				),
 			),
 			'destination' => array(
-				'table_name'        => $this->table_names['op_data'],
+				'table_name'        => $table_names['op_data'],
 				'source_rel_column' => 'order_id',
 				'primary_key'       => 'id',
 				'primary_key_type'  => 'int',

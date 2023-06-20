@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+fix deprecated warning in dashboard setup

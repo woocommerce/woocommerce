@@ -119,11 +119,11 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function read_children( &$product, $force_read = false ) {
 		$children_transient_name = 'wc_product_children_' . $product->get_id();
 		$children                = get_transient( $children_transient_name );
-		if ( false === $children ) {
+		if ( empty( $children ) || ! is_array( $children ) ) {
 			$children = array();
 		}
 
-		if ( empty( $children ) || ! is_array( $children ) || ! isset( $children['all'] ) || ! isset( $children['visible'] ) || $force_read ) {
+		if ( ! isset( $children['all'] ) || ! isset( $children['visible'] ) || $force_read ) {
 			$all_args = array(
 				'post_parent' => $product->get_id(),
 				'post_type'   => 'product_variation',

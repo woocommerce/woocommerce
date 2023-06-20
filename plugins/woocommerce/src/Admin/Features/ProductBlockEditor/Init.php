@@ -37,6 +37,56 @@ class Init {
 			$block_registry = new BlockRegistry();
 			$block_registry->init();
 		}
+
+		add_action( 'current_screen', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
+		add_action( 'current_screen', array( $this, 'maybe_redirect_to_old_editor' ), 30, 0 );
+	}
+
+	/**
+	 * Redirects from old product form to the new product form if the
+	 * feature `product_block_editor` is enabled.
+	 */
+	public function maybe_redirect_to_new_editor(): void {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			$screen = get_current_screen();
+
+			if ( 'post' === $screen->base && 'product' === $screen->post_type ) {
+				if ( 'add' === $screen->action ) {
+					wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) );
+					exit();
+				}
+
+				if ( isset( $_GET['post'] ) && isset( $_GET['action'] ) && 'edit' === $_GET['action'] ) {
+					$product_id = absint( $_GET['post'] );
+					wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/product/' . $product_id ) );
+					exit();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Redirects from new product form to the old product form if the
+	 * feature `product_block_editor` is enabled.
+	 */
+	public function maybe_redirect_to_old_editor(): void {
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			if ( \Automattic\WooCommerce\Admin\PageController::is_admin_page() && isset( $_GET['path'] ) ) {
+				$path        = esc_url_raw( wp_unslash( $_GET['path'] ) );
+				$parsed_path = explode( '/', wp_parse_url( $path, PHP_URL_PATH ) );
+
+				if ( 'add-product' === $parsed_path[1] ) {
+					wp_safe_redirect( admin_url( 'post-new.php?post_type=product' ) );
+					exit();
+				}
+
+				if ( 'product' === $parsed_path[1] ) {
+					$product_id = absint( $parsed_path[2] );
+					wp_safe_redirect( admin_url( 'post.php?post=' . $product_id . '&action=edit' ) );
+					exit();
+				}
+			}
+		}
 	}
 
 	/**
@@ -368,45 +418,52 @@ class Init {
 									'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
+								'blockGap'    => 'unit-40',
 							),
 							array(
 								array(
-									'core/columns',
+									'woocommerce/product-section',
 									array(),
 									array(
 										array(
-											'core/column',
-											array(
-												'templateLock' => 'all',
-											),
+											'core/columns',
+											array(),
 											array(
 												array(
-													'woocommerce/product-regular-price-field',
+													'core/column',
 													array(
-														'name'  => 'regular_price',
-														'label' => __( 'List price', 'woocommerce' ),
+														'templateLock' => 'all',
+													),
+													array(
+														array(
+															'woocommerce/product-regular-price-field',
+															array(
+																'name'  => 'regular_price',
+																'label' => __( 'List price', 'woocommerce' ),
+															),
+														),
+													),
+												),
+												array(
+													'core/column',
+													array(
+														'templateLock' => 'all',
+													),
+													array(
+														array(
+															'woocommerce/product-sale-price-field',
+															array(
+																'label' => __( 'Sale price', 'woocommerce' ),
+															),
+														),
 													),
 												),
 											),
 										),
 										array(
-											'core/column',
-											array(
-												'templateLock' => 'all',
-											),
-											array(
-												array(
-													'woocommerce/product-sale-price-field',
-													array(
-														'label' => __( 'Sale price', 'woocommerce' ),
-													),
-												),
-											),
+											'woocommerce/product-schedule-sale-fields',
 										),
 									),
-								),
-								array(
-									'woocommerce/product-schedule-sale-fields',
 								),
 								array(
 									'woocommerce/product-radio-field',
@@ -488,29 +545,36 @@ class Init {
 									'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
 									'</a>'
 								),
+								'blockGap'    => 'unit-40',
 							),
 							array(
 								array(
-									'woocommerce/product-sku-field',
-								),
-								array(
-									'woocommerce/product-toggle-field',
-									array(
-										'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
-										'property' => 'manage_stock',
-										'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
-									),
-								),
-								array(
-									'woocommerce/conditional',
-									array(
-										'mustMatch' => array(
-											'manage_stock' => array( true ),
-										),
-									),
+									'woocommerce/product-section',
+									array(),
 									array(
 										array(
-											'woocommerce/product-inventory-quantity-field',
+											'woocommerce/product-sku-field',
+										),
+										array(
+											'woocommerce/product-toggle-field',
+											array(
+												'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
+												'property' => 'manage_stock',
+												'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
+											),
+										),
+										array(
+											'woocommerce/conditional',
+											array(
+												'mustMatch' => array(
+													'manage_stock' => array( true ),
+												),
+											),
+											array(
+												array(
+													'woocommerce/product-inventory-quantity-field',
+												),
+											),
 										),
 									),
 								),
@@ -554,61 +618,69 @@ class Init {
 									),
 									array(
 										array(
-											'woocommerce/conditional',
+											'woocommerce/product-section',
 											array(
-												'mustMatch' => array(
-													'manage_stock' => array( true ),
-												),
+												'blockGap' => 'unit-40',
 											),
 											array(
 												array(
-													'woocommerce/product-radio-field',
+													'woocommerce/conditional',
 													array(
-														'title'    => __( 'When out of stock', 'woocommerce' ),
-														'property' => 'backorders',
-														'options'  => array(
+														'mustMatch' => array(
+															'manage_stock' => array( true ),
+														),
+													),
+													array(
+														array(
+															'woocommerce/product-radio-field',
 															array(
-																'label' => __( 'Allow purchases', 'woocommerce' ),
-																'value' => 'yes',
-															),
-															array(
-																'label' => __(
-																	'Allow purchases, but notify customers',
-																	'woocommerce'
+																'title'    => __( 'When out of stock', 'woocommerce' ),
+																'property' => 'backorders',
+																'options'  => array(
+																	array(
+																		'label' => __( 'Allow purchases', 'woocommerce' ),
+																		'value' => 'yes',
+																	),
+																	array(
+																		'label' => __(
+																			'Allow purchases, but notify customers',
+																			'woocommerce'
+																		),
+																		'value' => 'notify',
+																	),
+																	array(
+																		'label' => __( "Don't allow purchases", 'woocommerce' ),
+																		'value' => 'no',
+																	),
 																),
-																'value' => 'notify',
 															),
-															array(
-																'label' => __( "Don't allow purchases", 'woocommerce' ),
-																'value' => 'no',
-															),
+														),
+														array(
+															'woocommerce/product-inventory-email-field',
 														),
 													),
 												),
 												array(
-													'woocommerce/product-inventory-email-field',
+													'woocommerce/product-checkbox-field',
+													array(
+														'title'    => __(
+															'Restrictions',
+															'woocommerce'
+														),
+														'label'    => __(
+															'Limit purchases to 1 item per order',
+															'woocommerce'
+														),
+														'property' => 'sold_individually',
+														'tooltip'  => __(
+															'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
+															'woocommerce'
+														),
+													),
 												),
-											),
-										),
-										array(
-											'woocommerce/product-checkbox-field',
-											array(
-												'title'    => __(
-													'Restrictions',
-													'woocommerce'
-												),
-												'label'    => __(
-													'Limit purchases to 1 item per order',
-													'woocommerce'
-												),
-												'property' => 'sold_individually',
-												'tooltip'  => __(
-													'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
-													'woocommerce'
-												),
-											),
-										),
 
+											),
+										),
 									),
 								),
 

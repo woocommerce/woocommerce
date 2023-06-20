@@ -145,7 +145,7 @@ export function Edit( {
 			/>
 
 			{ showScheduleSale && (
-				<div className="wp-block-columns">
+				<div className="wp-block-columns wp-block-woocommerce-product-schedule-sale-fields__content">
 					<div className="wp-block-column">
 						<DateTimePickerControl
 							ref={

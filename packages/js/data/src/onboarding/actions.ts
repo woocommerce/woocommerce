@@ -17,8 +17,10 @@ import {
 	TaskListType,
 	TaskType,
 	OnboardingProductTypes,
+	InstallAndActivatePluginsAsyncResponse,
+	GetJetpackAuthUrlResponse,
 } from './types';
-import { Plugin } from '../plugins/types';
+import { Plugin, PluginNames } from '../plugins/types';
 
 export function getFreeExtensionsError( error: unknown ) {
 	return {
@@ -465,6 +467,41 @@ export function* actionTask( id: string ) {
 	}
 }
 
+export function* installAndActivatePluginsAsync(
+	plugins: Partial< PluginNames >[]
+) {
+	yield setIsRequesting( 'installAndActivatePluginsAsync', true );
+
+	try {
+		const results: InstallAndActivatePluginsAsyncResponse = yield apiFetch(
+			{
+				path: `${ WC_ADMIN_NAMESPACE }/onboarding/plugins/install-and-activate-async`,
+				method: 'POST',
+				data: { plugins },
+			}
+		);
+
+		return results;
+	} catch ( error ) {
+		throw error;
+	} finally {
+		yield setIsRequesting( 'installAndActivatePluginsAsync', false );
+	}
+}
+
+export function setJetpackAuthUrl(
+	results: GetJetpackAuthUrlResponse,
+	redirectUrl: string,
+	from = ''
+) {
+	return {
+		type: TYPES.SET_JETPACK_AUTH_URL,
+		results,
+		redirectUrl,
+		from,
+	};
+}
+
 export type Action = ReturnType<
 	| typeof getFreeExtensionsError
 	| typeof getFreeExtensionsSuccess
@@ -501,4 +538,5 @@ export type Action = ReturnType<
 	| typeof actionTaskRequest
 	| typeof getProductTypesError
 	| typeof getProductTypesSuccess
+	| typeof setJetpackAuthUrl
 >;

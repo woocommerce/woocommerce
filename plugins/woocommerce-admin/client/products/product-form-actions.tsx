@@ -17,7 +17,7 @@ import { useCustomerEffortScoreExitPageTracker } from '@woocommerce/customer-eff
 import {
 	preventLeavingProductForm,
 	__experimentalUseProductHelper as useProductHelper,
-	__experimentalUseProductMVPCESFooter as useProductMVPCESFooter,
+	__experimentalUseFeedbackBar as useFeedbackBar,
 } from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -44,8 +44,7 @@ export const ProductFormActions: React.FC = () => {
 		isDeleting,
 	} = useProductHelper();
 
-	const { onPublish: triggerPublishCES, onSaveDraft: triggerDraftCES } =
-		useProductMVPCESFooter();
+	const { maybeShowFeedbackBar } = useFeedbackBar();
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 
@@ -97,7 +96,7 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
-		await triggerDraftCES();
+		await maybeShowFeedbackBar();
 	};
 
 	const onPublish = async () => {
@@ -123,7 +122,7 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
-		await triggerPublishCES();
+		await maybeShowFeedbackBar();
 	};
 
 	const onPublishAndDuplicate = async () => {

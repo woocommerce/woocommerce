@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Allow passing react elements to heading in TourKit
+
+

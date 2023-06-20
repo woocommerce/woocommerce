@@ -131,7 +131,7 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 17, $properties );
+		$this->assertCount( 18, $properties );
 		$this->assertArrayHasKey( 'completed', $properties );
 		$this->assertArrayHasKey( 'skipped', $properties );
 		$this->assertArrayHasKey( 'industry', $properties );
@@ -149,6 +149,7 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'is_agree_marketing', $properties );
 		$this->assertArrayHasKey( 'store_email', $properties );
 		$this->assertArrayHasKey( 'is_store_country_set', $properties );
+		$this->assertArrayHasKey( 'is_plugins_page_skipped', $properties );
 	}
 
 	/**

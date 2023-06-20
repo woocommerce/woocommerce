@@ -1,10 +1,12 @@
 /**
  * External dependencies
  */
+import { WooHeaderItem } from '@woocommerce/admin-layout';
+import { Product } from '@woocommerce/data';
 import { useEntityProp } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { WooHeaderItem } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -18,10 +20,27 @@ import { Tabs } from '../tabs';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
-	productName: string;
 };
 
-export function Header( { onTabSelect, productName }: HeaderProps ) {
+export function Header( { onTabSelect }: HeaderProps ) {
+	const [ productId ] = useEntityProp< number >(
+		'postType',
+		'product',
+		'id'
+	);
+
+	const lastPersistedProduct = useSelect(
+		( select ) => {
+			const { getEntityRecord } = select( 'core' );
+			return getEntityRecord< Product >(
+				'postType',
+				'product',
+				productId
+			);
+		},
+		[ productId ]
+	);
+
 	const [ editedProductName ] = useEntityProp< string >(
 		'postType',
 		'product',
@@ -39,15 +58,24 @@ export function Header( { onTabSelect, productName }: HeaderProps ) {
 				<div />
 
 				<h1 className="woocommerce-product-header__title">
-					{ getHeaderTitle( editedProductName, productName ) }
+					{ getHeaderTitle(
+						editedProductName,
+						lastPersistedProduct.name
+					) }
 				</h1>
 
 				<div className="woocommerce-product-header__actions">
-					<SaveDraftButton />
+					<SaveDraftButton
+						productStatus={ lastPersistedProduct.status }
+					/>
 
-					<PreviewButton />
+					<PreviewButton
+						productStatus={ lastPersistedProduct.status }
+					/>
 
-					<PublishButton />
+					<PublishButton
+						productStatus={ lastPersistedProduct.status }
+					/>
 
 					<WooHeaderItem.Slot name="product" />
 					<MoreMenu />

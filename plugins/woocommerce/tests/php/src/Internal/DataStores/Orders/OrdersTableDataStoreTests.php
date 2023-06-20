@@ -9,8 +9,6 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
-require_once __DIR__ . '/../../../../helpers/HPOSToggleTrait.php';
-
 /**
  * Class OrdersTableDataStoreTests.
  *
@@ -1718,7 +1716,7 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 			),
 		);
 		$query       = new OrdersTableQuery( array( 'field_query' => $field_query ) );
-		$this->assertCount( 0, $query->posts );
+		$this->assertCount( 3, $query->posts );
 
 		// Test combinations of field_query with regular query args.
 		$args  = array(
@@ -2131,5 +2129,21 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( 1, $result );
+	}
+
+	/**
+	 * @testDox When saving an order, status is automatically prefixed even if it was not earlier.
+	 */
+	public function test_get_db_row_from_order_only_prefixed_status_is_written_to_db() {
+		$order = wc_create_order();
+
+		$order->set_status( 'completed' );
+		$db_row_callback = function ( $order, $only_changes ) {
+			return $this->get_db_row_from_order( $order, $this->order_column_mapping, $only_changes );
+		};
+
+		$db_row = $db_row_callback->call( $this->sut, $order, false );
+
+		$this->assertEquals( 'wc-completed', $db_row['data']['status'] );
 	}
 }

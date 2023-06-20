@@ -40,7 +40,7 @@ class PostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 	protected function get_meta_config(): array {
 		global $wpdb;
 		// TODO: Remove hardcoding.
-		$this->table_names = array(
+		$table_names = array(
 			'orders'    => $wpdb->prefix . 'wc_orders',
 			'addresses' => $wpdb->prefix . 'wc_order_addresses',
 			'op_data'   => $wpdb->prefix . 'wc_order_operational_data',
@@ -57,7 +57,7 @@ class PostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 					'meta_value_column' => 'meta_value',
 				),
 				'entity'        => array(
-					'table_name'       => $this->table_names['orders'],
+					'table_name'       => $table_names['orders'],
 					'source_id_column' => 'id',
 					'id_column'        => 'id',
 				),
@@ -65,7 +65,7 @@ class PostMetaToOrderMetaMigrator extends MetaToMetaTableMigrator {
 			),
 			'destination' => array(
 				'meta' => array(
-					'table_name'        => $this->table_names['meta'],
+					'table_name'        => $table_names['meta'],
 					'entity_id_column'  => 'order_id',
 					'meta_key_column'   => 'meta_key',
 					'meta_value_column' => 'meta_value',
