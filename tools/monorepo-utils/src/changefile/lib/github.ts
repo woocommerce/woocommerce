@@ -184,7 +184,7 @@ export const getChangelogDetailsError = ( {
 	if ( ! type ) {
 		return 'No changelog type found';
 	}
-	if ( ! comment || message ) {
+	if ( ! comment && ! message ) {
 		return 'No changelog message or comment found';
 	}
 	return null;
