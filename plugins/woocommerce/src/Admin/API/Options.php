@@ -69,9 +69,9 @@ class Options extends \WC_REST_Data_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		$params = explode( ',', $request['options'] );
+		$params = ( isset( $request['options'] ) && is_string( $request['options'] ) ) ? explode( ',', $request['options'] ) : array();
 
-		if ( ! isset( $request['options'] ) || ! is_array( $params ) ) {
+		if ( ! $params ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'You must supply an array of options.', 'woocommerce' ), 500 );
 		}
 
@@ -210,6 +210,9 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_onboarding_profile',
 			'woocommerce_default_country',
 			'blogname',
+			'wcpay_welcome_page_incentives_dismissed',
+			'wcpay_welcome_page_viewed_timestamp',
+			'wcpay_welcome_page_exit_survey_more_info_needed_timestamp',
 			// WC Test helper options.
 			'wc-admin-test-helper-rest-api-filters',
 			'wc_admin_helper_feature_values',
@@ -233,13 +236,13 @@ class Options extends \WC_REST_Data_Controller {
 	 * @return array Options object with option values.
 	 */
 	public function get_options( $request ) {
-		$params  = explode( ',', $request['options'] );
 		$options = array();
 
-		if ( ! is_array( $params ) ) {
-			return array();
+		if ( empty( $request['options'] ) || ! is_string( $request['options'] ) ) {
+			return $options;
 		}
 
+		$params = explode( ',', $request['options'] );
 		foreach ( $params as $option ) {
 			$options[ $option ] = get_option( $option );
 		}

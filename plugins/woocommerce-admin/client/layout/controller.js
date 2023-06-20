@@ -324,11 +324,8 @@ export const getPages = () => {
 			container: WCPaymentsWelcomePage,
 			path: '/wc-pay-welcome-page',
 			breadcrumbs: [
-				[
-					'/wc-pay-welcome-page',
-					__( 'WooCommerce Payments', 'woocommerce' ),
-				],
-				__( 'WooCommerce Payments', 'woocommerce' ),
+				[ '/wc-pay-welcome-page', __( 'WooPayments', 'woocommerce' ) ],
+				__( 'WooPayments', 'woocommerce' ),
 			],
 			navArgs: {
 				id: 'woocommerce-wc-pay-welcome-page',

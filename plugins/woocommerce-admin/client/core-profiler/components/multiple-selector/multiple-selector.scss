@@ -1,3 +1,4 @@
+@import '../../shared.scss';
 
 .woocommerce-experimental-select-control {
 	&:hover,
@@ -70,7 +71,6 @@
 
 			ul li {
 				&:hover {
-					background-color: #eff2fd !important;
 					cursor: pointer;
 				}
 

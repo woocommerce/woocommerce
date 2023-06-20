@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Card } from '@wordpress/components';
 import { Icon, help } from '@wordpress/icons';
 
 /**
@@ -10,19 +11,17 @@ import strings from './strings';
 
 const FrequentlyAskedQuestionsSimple: React.FC = () => {
 	return (
-		<div className="faq__card">
-			<div className="help-section-simple">
-				<Icon icon={ help } />
-				<span>{ strings.faq.haveMoreQuestions }</span>
-				<a
-					href="https://www.woocommerce.com/my-account/tickets/"
-					target="_blank"
-					rel="noreferrer"
-				>
-					{ strings.faq.getInTouch }
-				</a>
-			</div>
-		</div>
+		<Card className="woopayments-welcome-page__faq">
+			<Icon icon={ help } />
+			<span>{ strings.faq.haveQuestions } </span>
+			<a
+				href="https://www.woocommerce.com/my-account/tickets/"
+				target="_blank"
+				rel="noreferrer"
+			>
+				{ strings.faq.getInTouch }
+			</a>
+		</Card>
 	);
 };
 

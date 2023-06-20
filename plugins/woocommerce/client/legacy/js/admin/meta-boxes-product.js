@@ -553,6 +553,7 @@ jQuery( function ( $ ) {
 
 			toggle_expansion_of_attribute_list_item( $attributeListItem );
 
+			disable_or_enable_fields();
 			jQuery.maybe_disable_save_button();
 		} catch ( error ) {
 			alert( woocommerce_admin_meta_boxes.i18n_add_attribute_error_notice );
@@ -871,6 +872,8 @@ jQuery( function ( $ ) {
 
 				// Hide the 'Used for variations' checkbox if not viewing a variable product
 				show_and_hide_panels();
+
+				disable_or_enable_fields();
 
 				// Make sure the dropdown is not disabled for empty value attributes.
 				$( 'select.attribute_taxonomy' )

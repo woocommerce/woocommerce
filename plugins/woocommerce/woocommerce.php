@@ -60,3 +60,8 @@ function wc_get_container() {
 
 // Global for backwards compatibility.
 $GLOBALS['woocommerce'] = WC();
+
+// Jetpack's Rest_Authentication needs to be initialized even before plugins_loaded.
+if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
+	\Automattic\Jetpack\Connection\Rest_Authentication::init();
+}

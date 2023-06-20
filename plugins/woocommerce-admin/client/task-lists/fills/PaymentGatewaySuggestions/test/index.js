@@ -97,6 +97,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
 			paymentGatewaySuggestions,
+			countryCode: 'US',
 			installedPaymentGateways: [],
 		} ) );
 
@@ -116,6 +117,9 @@ describe( 'PaymentGatewaySuggestions', () => {
 		);
 
 		expect( paymentTitles ).toEqual( [
+			'Stripe',
+			'PayPal Payments',
+			'Eway',
 			'Cash on delivery',
 			'Direct bank transfer',
 		] );
@@ -136,6 +140,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
 			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
+			countryCode: 'US',
 			installedPaymentGateways: [],
 		} ) );
 
@@ -200,6 +205,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
 			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
+			countryCode: 'US',
 			installedPaymentGateways: [
 				{
 					id: 'ppcp-gateway',
@@ -324,6 +330,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 			isResolving: false,
 			getPaymentGateway: jest.fn(),
 			paymentGatewaySuggestions: paymentGatewaySuggestionsWithoutWCPay,
+			countryCode: 'US',
 			installedPaymentGateways: [
 				{
 					id: 'ppcp-gateway',

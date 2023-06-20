@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { createElement, Fragment } from '@wordpress/element';
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { Product } from '@woocommerce/data';
 
@@ -18,16 +17,11 @@ export type FooterProps = {
 
 export function Footer( { product }: FooterProps ) {
 	return (
-		<div
-			className="woocommerce-product-footer"
-			role="region"
-			aria-label={ __( 'Product Editor bottom bar.', 'woocommerce' ) }
-			tabIndex={ -1 }
-		>
-			<WooFooterItem.Slot name="product" />
-
-			<FeedbackBar product={ product } />
-			<ProductMVPFeedbackModalContainer productId={ product.id } />
-		</div>
+		<WooFooterItem>
+			<>
+				<FeedbackBar product={ product } />
+				<ProductMVPFeedbackModalContainer productId={ product.id } />
+			</>
+		</WooFooterItem>
 	);
 }

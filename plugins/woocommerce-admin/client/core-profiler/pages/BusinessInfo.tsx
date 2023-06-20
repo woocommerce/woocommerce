@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, TextControl, Notice } from '@wordpress/components';
+import { Button, TextControl, Notice, Spinner } from '@wordpress/components';
 import { SelectControl } from '@woocommerce/components';
 import { Icon, chevronDown } from '@wordpress/icons';
 import {
@@ -11,6 +11,8 @@ import {
 	useState,
 } from '@wordpress/element';
 import { findCountryOption, getCountry } from '@woocommerce/onboarding';
+import { decodeEntities } from '@wordpress/html-entities';
+
 /**
  * Internal dependencies
  */
@@ -91,6 +93,7 @@ export const BusinessInfo = ( {
 		onboardingProfile: {
 			is_store_country_set: isStoreCountrySet,
 			industry: industryFromOnboardingProfile,
+			business_choice: businessChoiceFromOnboardingProfile,
 		},
 	} = context;
 
@@ -152,11 +155,15 @@ export const BusinessInfo = ( {
 	const selectCountryLabel = __( 'Select country/region', 'woocommerce' );
 	const selectIndustryQuestionLabel =
 		selectIndustryMapping[
-			businessChoice || 'im_just_starting_my_business'
+			businessChoice ||
+				businessChoiceFromOnboardingProfile ||
+				'im_just_starting_my_business'
 		];
 
 	const [ dismissedGeolocationNotice, setDismissedGeolocationNotice ] =
 		useState( false );
+
+	const [ hasSubmitted, setHasSubmitted ] = useState( false );
 
 	return (
 		<div
@@ -186,7 +193,7 @@ export const BusinessInfo = ( {
 						onChange={ ( value ) => {
 							setStoreName( value );
 						} }
-						value={ storeName }
+						value={ decodeEntities( storeName ) }
 						label={
 							<>
 								{ __(
@@ -344,9 +351,14 @@ export const BusinessInfo = ( {
 										geolocationOverruled || false,
 								},
 							} );
+							setHasSubmitted( true );
 						} }
 					>
-						{ __( 'Continue', 'woocommerce' ) }
+						{ hasSubmitted ? (
+							<Spinner />
+						) : (
+							__( 'Continue', 'woocommerce' )
+						) }
 					</Button>
 				</div>
 			</div>

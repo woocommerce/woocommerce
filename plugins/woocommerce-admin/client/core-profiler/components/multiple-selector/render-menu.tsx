@@ -50,6 +50,7 @@ export const renderMenu =
 							} }
 						>
 							<CheckboxControl
+								className="core-profiler__checkbox"
 								onChange={ () => {} }
 								checked={ isSelected }
 								label={ item.label }
