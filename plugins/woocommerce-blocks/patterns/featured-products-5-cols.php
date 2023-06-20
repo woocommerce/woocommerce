@@ -16,8 +16,9 @@
 <div class="wp-block-query alignwide">
 	<!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template", "layout":{"type":"grid","columnCount":3}} -->
 
-		<!-- wp:cover {"useFeaturedImage":true,"dimRatio":0,"minHeight":190,"minHeightUnit":"px","contentPosition":"top right","isDark":false,"align":"right","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} -->
-		<div class="wp-block-cover alignright is-light has-custom-content-position is-position-top-right" style="margin-bottom:var(--wp--preset--spacing--40);min-height:190px"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span>
+		<!-- wp:cover {"useFeaturedImage":true,"dimRatio":0,"minHeight":190,"minHeightUnit":"px","contentPosition":"top right","isDark":false,"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} -->
+		<div class="wp-block-cover is-light has-custom-content-position is-position-top-right" style="margin-bottom:var(--wp--preset--spacing--40);min-height:190px">
+			<span aria-hidden="true" class="wp-block-cover__background has-background-dim-0 has-background-dim"></span>
 			<div class="wp-block-cover__inner-container">
 				<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
 				<div class="wp-block-group">
