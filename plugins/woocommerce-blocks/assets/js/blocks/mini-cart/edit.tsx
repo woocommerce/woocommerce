@@ -19,6 +19,7 @@ import type { ReactElement } from 'react';
 import { select } from '@wordpress/data';
 import { cartOutline, bag, bagAlt } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
+import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -163,8 +164,8 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 								className="wc-block-editor-mini-cart__drawer-image"
 								src={
 									isRTL()
-										? '/wp-content/plugins/woocommerce-blocks/images/blocks/mini-cart/cart-drawer-rtl.svg'
-										: '/wp-content/plugins/woocommerce-blocks/images/blocks/mini-cart/cart-drawer.svg'
+										? `${ WC_BLOCKS_IMAGE_URL }blocks/mini-cart/cart-drawer-rtl.svg`
+										: `${ WC_BLOCKS_IMAGE_URL }blocks/mini-cart/cart-drawer.svg`
 								}
 								alt=""
 							/>
