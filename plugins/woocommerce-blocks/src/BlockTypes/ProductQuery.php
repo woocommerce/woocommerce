@@ -76,6 +76,38 @@ class ProductQuery extends AbstractBlock {
 	}
 
 	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
+		parent::enqueue_data( $attributes );
+
+		$gutenberg_version = '';
+
+		if ( is_plugin_active( 'gutenberg/gutenberg.php' ) ) {
+			if ( defined( 'GUTENBERG_VERSION' ) ) {
+				$gutenberg_version = GUTENBERG_VERSION;
+			}
+
+			if ( ! $gutenberg_version ) {
+				$gutenberg_data    = get_file_data(
+					WP_PLUGIN_DIR . '/gutenberg/gutenberg.php',
+					array( 'Version' => 'Version' )
+				);
+				$gutenberg_version = $gutenberg_data['Version'];
+			}
+		}
+
+		$this->asset_data_registry->add(
+			'post_template_has_support_for_grid_view',
+			version_compare( $gutenberg_version, '16.0', '>=' )
+		);
+	}
+
+	/**
 	 * Check if a given block
 	 *
 	 * @param array $parsed_block The block being rendered.
