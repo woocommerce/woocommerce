@@ -494,8 +494,7 @@ class CLIRunner {
 				)
 			);
 		} else {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a CLI command and debugging code is intended.
-			$errors = print_r( $failed_ids, true );
+			$errors = wp_json_encode( $failed_ids, JSON_PRETTY_PRINT );
 
 			return WP_CLI::error(
 				sprintf(

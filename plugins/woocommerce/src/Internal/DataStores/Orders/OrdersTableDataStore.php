@@ -1308,8 +1308,7 @@ WHERE
 	 * @return void
 	 */
 	private function log_diff( array $diff ): void {
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a log function.
-		$this->error_logger->notice( 'Diff found: ' . print_r( $diff, true ) );
+		$this->error_logger->notice( 'Diff found: ' . wp_json_encode( $diff, JSON_PRETTY_PRINT ) );
 	}
 
 	/**
