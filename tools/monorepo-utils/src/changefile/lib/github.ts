@@ -167,10 +167,10 @@ export const getChangelogDetailsError = ( {
 	message,
 	comment,
 }: {
-	significance: string;
-	type: string;
-	message: string;
-	comment: string;
+	significance?: string;
+	type?: string;
+	message?: string;
+	comment?: string;
 } ) => {
 	if ( comment && message ) {
 		return 'Both a message and comment were found. Only one can be entered';
