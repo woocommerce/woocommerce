@@ -130,7 +130,7 @@ export const getChangelogMessage = ( body: string ) => {
  * @return {void|string} changelog comment.
  */
 export const getChangelogComment = ( body: string ) => {
-	const commentRegex = /#### Comment (<!--(.*)-->)?(.*)<\/details>/gms;
+	const commentRegex = /#### Comment ?(<!--(.*)-->)?(.*)<\/details>/gms;
 	const match = commentRegex.exec( body );
 
 	return match ? match[ 3 ].trim() : '';
