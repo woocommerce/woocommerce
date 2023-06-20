@@ -81,6 +81,10 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 		'core/post-template',
 		{
 			__woocommerceNamespace: PRODUCT_TEMPLATE_ID,
+			layout: {
+				type: 'grid',
+				columnsCount: 3,
+			},
 			/**
 			 * This class is used to add default styles for inner blocks.
 			 */

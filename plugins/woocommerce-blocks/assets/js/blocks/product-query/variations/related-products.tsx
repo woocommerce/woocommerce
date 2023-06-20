@@ -63,9 +63,10 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 		'core/post-template',
 		{
 			__woocommerceNamespace: PRODUCT_TEMPLATE_ID,
-			...( postTemplateHasSupportForGridView && {
-				layout: { type: 'grid', columnCount: 3 },
-			} ),
+			layout: {
+				type: 'grid',
+				columnsCount: 3,
+			},
 		},
 		[
 			[
