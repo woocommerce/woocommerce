@@ -259,15 +259,13 @@ class WC_Install {
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
-
-		// Register the `woocommerce_newly_installed` action using AccessiblePrivateMethods::add_action().
 		self::add_action( 'admin_init', array( __CLASS__, 'newly_installed' ) );
 	}
 
 	/**
 	 * Trigger `woocommerce_newly_installed` action for new installations.
 	 *
-	 * @since x.x.x
+	 * @since 8.0.0
 	 */
 	private static function newly_installed() {
 		if ( 'yes' === get_option( self::NEWLY_INSTALLED_OPTION, false ) ) {
