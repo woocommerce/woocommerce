@@ -19,8 +19,9 @@ const responseMock = {
 	ok: true,
 	json: async () => ( {
 		totals: {
-			total_price: '1600',
+			total_price: '1800',
 			total_items: '1400',
+			total_items_tax: '200',
 			currency_code: 'USD',
 			currency_symbol: '$',
 			currency_minor_unit: 2,
@@ -34,8 +35,9 @@ const responseMock = {
 } as Response;
 const localStorageMock = {
 	totals: {
-		total_price: '1600',
+		total_price: '1800',
 		total_items: '1400',
+		total_items_tax: '200',
 		currency_code: 'USD',
 		currency_symbol: '$',
 		currency_minor_unit: 2,
