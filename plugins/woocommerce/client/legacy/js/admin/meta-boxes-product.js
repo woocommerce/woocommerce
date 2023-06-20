@@ -438,28 +438,27 @@ jQuery( function ( $ ) {
 			} );
 	} );
 
-	// Attribute Tables.
+	// Set up attributes, if current page has the attributes list.
+	const $product_attributes = $( '.product_attributes' );
+	if ( $product_attributes.length === 1 ) {
+		var woocommerce_attribute_items = $product_attributes.find( '.woocommerce_attribute' ).get();
 
-	// Initial order.
-	var woocommerce_attribute_items = $( '.product_attributes' )
-		.find( '.woocommerce_attribute' )
-		.get();
-
-	// If the product has no attributes, add an empty attribute to be filled out by the user.
-	$( function add_blank_custom_attribute_if_no_attributes() {
-		if ( woocommerce_attribute_items.length === 0 ) {
+		// If the product has no attributes, add an empty attribute to be filled out by the user.
+		if ( woocommerce_attribute_items.length === 0  ) {
 			add_custom_attribute_to_list();
 		}
-	} );
 
-	woocommerce_attribute_items.sort( function ( a, b ) {
-		var compA = parseInt( $( a ).attr( 'rel' ), 10 );
-		var compB = parseInt( $( b ).attr( 'rel' ), 10 );
-		return compA < compB ? -1 : compA > compB ? 1 : 0;
-	} );
-	$( woocommerce_attribute_items ).each( function ( index, el ) {
-		$( '.product_attributes' ).append( el );
-	} );
+		// Sort the attributes by their position.
+		woocommerce_attribute_items.sort( function ( a, b ) {
+			var compA = parseInt( $( a ).attr( 'rel' ), 10 );
+			var compB = parseInt( $( b ).attr( 'rel' ), 10 );
+			return compA < compB ? -1 : compA > compB ? 1 : 0;
+		} );
+
+		$( woocommerce_attribute_items ).each( function ( index, el ) {
+			$product_attributes.append( el );
+		} );
+	}
 
 	function update_attribute_row_indexes() {
 		$( '.product_attributes .woocommerce_attribute' ).each( function (
