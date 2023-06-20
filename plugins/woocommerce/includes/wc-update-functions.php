@@ -2593,7 +2593,7 @@ function wc_update_770_remove_multichannel_marketing_feature_options() {
 
 /**
  * Delete posts of type "shop_order_placeholder" with no matching order in the orders table.
-  *
+ *
  * @return void
  */
 function wc_update_790_delete_stray_order_records() {

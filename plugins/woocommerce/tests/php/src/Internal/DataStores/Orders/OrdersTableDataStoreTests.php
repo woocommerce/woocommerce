@@ -2312,7 +2312,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	}
 
 	/**
-	* @testDox When saving an order, status is automatically prefixed even if it was not earlier.
+	 * @testDox When saving an order, status is automatically prefixed even if it was not earlier.
 	 */
 	public function test_get_db_row_from_order_only_prefixed_status_is_written_to_db() {
 		$order = wc_create_order();
