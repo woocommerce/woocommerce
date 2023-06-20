@@ -11,7 +11,7 @@
 	<!-- wp:group {"style":{"spacing":{"blockGap":"40px"}},"layout":{"type":"flex","flexWrap":"wrap"}} -->
 	<div class="wp-block-group">
 		<!-- wp:site-logo {"shouldSyncIcon":false} /-->
-		<!-- wp:search {"label":"Search","showLabel":false,"buttonText":"Search","buttonUseIcon":true} /-->
+		<!-- wp:search {"label":"","showLabel":false,"placeholder":"Search products…","buttonText":"Search","buttonUseIcon":true,"query":{"post_type":"product"}} /-->
 		<!-- wp:navigation {"textColor":"background","layout":{"type":"flex","justifyContent":"center"}} /-->
 	</div>
 	<!-- /wp:group -->
