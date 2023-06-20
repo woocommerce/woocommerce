@@ -13,6 +13,7 @@ import { CreateNewCampaignModal } from '~/marketing/components';
 import {
 	useRegisteredChannels,
 	useRecommendedChannels,
+	useCampaignTypes,
 } from '~/marketing/hooks';
 import './IntroductionBanner.scss';
 import wooIconUrl from './woo.svg';
@@ -30,8 +31,11 @@ export const IntroductionBanner = ( {
 	const [ isModalOpen, setModalOpen ] = useState( false );
 	const { data: dataRegistered } = useRegisteredChannels();
 	const { data: dataRecommended } = useRecommendedChannels();
+	const { data: dataCampaignTypes } = useCampaignTypes();
 
-	const showCreateCampaignButton = !! dataRegistered?.length;
+	const showCreateCampaignButton = !! (
+		dataRegistered?.length && dataCampaignTypes?.length
+	);
 
 	/**
 	 * Boolean to display the "Add channels" button in the introduction banner.
