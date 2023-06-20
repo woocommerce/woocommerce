@@ -422,7 +422,7 @@ describe( 'getChangelogDetailsError', () => {
 		);
 	} );
 
-	it( 'should return an error when no sifnificance found', () => {
+	it( 'should return an error when no significance found', () => {
 		const error = getChangelogDetailsError( {
 			message: 'message',
 			comment: '',
