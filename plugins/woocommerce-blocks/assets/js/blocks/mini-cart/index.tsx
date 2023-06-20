@@ -7,6 +7,7 @@ import { Icon } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
 import type { BlockConfiguration } from '@wordpress/blocks';
 import { isFeaturePluginBuild } from '@woocommerce/block-settings';
+import { addFilter } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -99,3 +100,28 @@ const settings: BlockConfiguration = {
 };
 
 registerBlockType( 'woocommerce/mini-cart', settings );
+
+// Remove the Mini Cart template part from the block inserter.
+addFilter(
+	'blocks.registerBlockType',
+	'woocommerce/mini-cart',
+	function ( blockSettings, blockName ) {
+		if ( blockName === 'core/template-part' ) {
+			return {
+				...blockSettings,
+				variations: blockSettings.variations.map(
+					( variation: { name: string } ) => {
+						if ( variation.name === 'instance_mini-cart' ) {
+							return {
+								...variation,
+								scope: [],
+							};
+						}
+						return variation;
+					}
+				),
+			};
+		}
+		return blockSettings;
+	}
+);
