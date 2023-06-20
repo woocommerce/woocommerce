@@ -539,7 +539,7 @@ class Controller extends GenericController implements ExportableInterface {
 						'region',
 						'postcode',
 					),
-				)
+				),
 			),
 		);
 
