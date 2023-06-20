@@ -27,12 +27,9 @@ class RedirectionController {
 	public function __construct( $supported_post_types ) {
 		$this->supported_post_types = $supported_post_types;
 
-		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			add_action( 'current_screen', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
-			add_action( 'current_screen', array( $this, 'redirect_non_supported_product_types' ), 30, 0 );
-		} else {
-			add_action( 'current_screen', array( $this, 'maybe_redirect_to_old_editor' ), 30, 0 );
-		}
+		add_action( 'current_screen', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
+		add_action( 'current_screen', array( $this, 'maybe_redirect_to_old_editor' ), 30, 0 );
+		add_action( 'current_screen', array( $this, 'redirect_non_supported_product_types' ), 30, 0 );
 	}
 
 	/**
@@ -70,18 +67,20 @@ class RedirectionController {
 	 * feature `product_block_editor` is enabled.
 	 */
 	public function maybe_redirect_to_new_editor(): void {
-		if ( $this->is_legacy_add_new_screen() ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) );
-			exit();
-		}
-
-		if ( $this->is_legacy_edit_screen() ) {
-			$product_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : null;
-			if ( ! $this->is_product_supported( $product_id ) ) {
-				return;
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			if ( $this->is_legacy_add_new_screen() ) {
+				wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) );
+				exit();
 			}
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/product/' . $product_id ) );
-			exit();
+
+			if ( $this->is_legacy_edit_screen() ) {
+				$product_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : null;
+				if ( ! $this->is_product_supported( $product_id ) ) {
+					return;
+				}
+				wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/product/' . $product_id ) );
+				exit();
+			}
 		}
 	}
 
@@ -90,16 +89,18 @@ class RedirectionController {
 	 * feature `product_block_editor` is enabled.
 	 */
 	public function maybe_redirect_to_old_editor(): void {
-		$route = $this->get_parsed_route();
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			$route = $this->get_parsed_route();
 
-		if ( 'add-product' === $route['page'] ) {
-			wp_safe_redirect( admin_url( 'post-new.php?post_type=product' ) );
-			exit();
-		}
+			if ( 'add-product' === $route['page'] ) {
+				wp_safe_redirect( admin_url( 'post-new.php?post_type=product' ) );
+				exit();
+			}
 
-		if ( 'product' === $route['page'] ) {
-			wp_safe_redirect( admin_url( 'post.php?post=' . $route['product_id'] . '&action=edit' ) );
-			exit();
+			if ( 'product' === $route['page'] ) {
+				wp_safe_redirect( admin_url( 'post.php?post=' . $route['product_id'] . '&action=edit' ) );
+				exit();
+			}
 		}
 	}
 
@@ -127,12 +128,14 @@ class RedirectionController {
 	 * Redirect non supported product types to legacy editor.
 	 */
 	public function redirect_non_supported_product_types(): void {
-		$route      = $this->get_parsed_route();
-		$product_id = $route['product_id'];
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			$route      = $this->get_parsed_route();
+			$product_id = $route['product_id'];
 
-		if ( 'product' === $route['page'] && ! $this->is_product_supported( $product_id ) ) {
-			wp_safe_redirect( admin_url( 'post.php?post=' . $route['product_id'] . '&action=edit' ) );
-			exit();
+			if ( 'product' === $route['page'] && ! $this->is_product_supported( $product_id ) ) {
+				wp_safe_redirect( admin_url( 'post.php?post=' . $route['product_id'] . '&action=edit' ) );
+				exit();
+			}
 		}
 	}
 
