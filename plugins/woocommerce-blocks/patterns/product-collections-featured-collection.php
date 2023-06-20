@@ -23,7 +23,7 @@
 	<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:66.66%">
 		<!-- wp:query {"queryId":5,"query":{"perPage":"3","pages":0,"offset":0,"postType":"product","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":false,"__woocommerceAttributes":[],"__woocommerceStockStatus":["instock","onbackorder"]},"displayLayout":{"type":"flex","columns":3},"namespace":"woocommerce/product-query"} -->
 		<div class="wp-block-query">
-			<!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template","layout":{"type":"grid","columnCount":3}} -->
+			<!-- wp:post-template {"__woocommerceNamespace":"woocommerce/product-query/product-template"} -->
 
 
 				<!-- wp:group {"style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"blockGap":"0"},"color":{"background":"#484848"},"border":{"radius":{"topLeft":"0px","topRight":"0px","bottomLeft":"4px","bottomRight":"4px"}}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"stretch"}} -->
