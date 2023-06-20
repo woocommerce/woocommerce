@@ -10,6 +10,7 @@ import {
 import {
 	createElement,
 	useCallback,
+	useContext,
 	useEffect,
 	useRef,
 } from '@wordpress/element';
@@ -23,13 +24,13 @@ import {
 	__experimentalLibrary as Library,
 } from '@wordpress/block-editor';
 
-type InserterSidebarProps = {
-	setIsInserterOpened: ( value: boolean ) => void;
-};
+/**
+ * Internal dependencies
+ */
+import { EditorContext } from '../context';
 
-export default function InserterSidebar( {
-	setIsInserterOpened,
-}: InserterSidebarProps ) {
+export default function InserterSidebar() {
+	const { setIsInserterOpened } = useContext( EditorContext );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const { rootClientId } = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -80,10 +80,17 @@ export type OnboardingState = {
 	// TODO clarify what the error record's type is
 	errors: Record< string, unknown >;
 	requesting: Record< string, boolean >;
+	jetpackAuthUrls: Record< string, GetJetpackAuthUrlResponse >;
 };
 
 export type Industry = {
 	slug: string;
+};
+
+export type GetJetpackAuthUrlResponse = {
+	url: string;
+	success: boolean;
+	errors: string[];
 };
 
 export type ProductCount = '0' | '1-10' | '11-100' | '101 - 1000' | '1000+';
@@ -117,7 +124,7 @@ export type RevenueTypeSlug =
 	| 'more-than-250000';
 
 export type ProfileItems = {
-	business_extensions?: [] | null;
+	business_extensions?: string[] | null;
 	completed?: boolean | null;
 	industry?: Industry[] | null;
 	number_employees?: string | null;
@@ -129,7 +136,7 @@ export type ProfileItems = {
 	selling_venues?: string | null;
 	setup_client?: boolean | null;
 	skipped?: boolean | null;
-	plugins_page_skipped?: boolean | null;
+	is_plugins_page_skipped?: boolean | null;
 	/** @deprecated This is always null, the theme step has been removed since WC 7.7. */
 	theme?: string | null;
 	wccom_connected?: boolean | null;
@@ -180,7 +187,21 @@ export type Extension = {
 	image_url: string;
 	manage_url: string;
 	name: string;
+	label?: string;
 	is_built_by_wc: boolean;
 	is_visible: boolean;
 	is_installed?: boolean;
+	is_activated?: boolean;
+	learn_more_link?: string;
+	install_priority?: number;
+};
+
+export type InstallAndActivatePluginsAsyncResponse = {
+	job_id: string;
+	status: 'pendi<ng' | 'in-progress' | 'completed' | 'failed';
+	plugins: Array< {
+		status: 'pending' | 'installing' | 'installed' | 'activated' | 'failed';
+		errors: string[];
+		install_duration?: number;
+	} >;
 };

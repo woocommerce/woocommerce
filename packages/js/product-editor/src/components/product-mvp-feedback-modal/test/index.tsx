@@ -48,6 +48,7 @@ describe( 'ProductMVPFeedbackModal', () => {
 		fireEvent.click( screen.getByRole( 'checkbox', { name: /other/i } ) );
 		expect( mockRecordScoreCallback ).toHaveBeenCalledWith(
 			[ 'other' ],
+			'',
 			''
 		);
 	} );

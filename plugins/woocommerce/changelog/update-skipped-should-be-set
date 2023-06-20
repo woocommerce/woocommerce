@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Set woocommerce_onboarding_profile.skipped when guided set is skipped

@@ -93,28 +93,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tr>
 		<td>
 			<div class="enable_variation show_if_variable">
-				<label><input type="checkbox" class="woocommerce_attribute_used_for_variations checkbox" <?php checked( $attribute->get_variation(), true ); ?> <?php echo esc_attr( isset( $is_variations_screen ) ? 'disabled' : '' ); ?> name="attribute_variation[<?php echo esc_attr( $i ); ?>]" value="1" /> <?php esc_html_e( 'Used for variations', 'woocommerce' ); ?></label>
-				<?php
-				if ( isset( $is_variations_screen ) ) {
-					?>
-					<input type="hidden" name="attribute_variation[<?php echo esc_attr( $i ); ?>]" value="1" />
-					<?php
-				}
-				?>
+				<label><input type="checkbox" disabled class="woocommerce_attribute_used_for_variations checkbox enable_if_variable" <?php checked( $attribute->get_variation(), true ); ?> name="attribute_variation[<?php echo esc_attr( $i ); ?>]" value="1" /> <?php esc_html_e( 'Used for variations', 'woocommerce' ); ?></label>
 			</div>
 		</td>
 	</tr>
 	<?php
-	if ( ! isset( $is_variations_screen ) ) {
-		/**
-		 * Hook to display custom attribute terms.
-		 *
-		 * @since 3.4.0
-		 * @param WC_Product_Attribute $attribute Attribute object.
-		 * @param number $i Attribute index.
-		 */
-		do_action( 'woocommerce_after_product_attribute_settings', $attribute, $i );
-	}
+	/**
+	 * Hook to display custom attribute terms.
+	 *
+	 * @since 3.4.0
+	 * @param WC_Product_Attribute $attribute Attribute object.
+	 * @param number $i Attribute index.
+	 */
+	do_action( 'woocommerce_after_product_attribute_settings', $attribute, $i );
 	?>
 	</tbody>
 </table>

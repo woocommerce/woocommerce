@@ -16,7 +16,7 @@ type UseCompletionProps = {
 		reason: StopReason,
 		previousContent: string
 	) => void;
-	onStreamError?: ( event: Event ) => void;
+	onStreamError?: ( error: string ) => void;
 };
 
 export const useCompletion = ( {
@@ -51,11 +51,9 @@ export const useCompletion = ( {
 		}
 	};
 
-	const onError = ( event: Event ) => {
-		// eslint-disable-next-line no-console
-		console.debug( 'Streaming error encountered', event );
+	const onCompletionError = ( error: string ) => {
 		stopCompletion( 'error' );
-		onStreamError( event );
+		onStreamError( error );
 	};
 
 	const requestCompletion = async ( question: string ) => {
@@ -64,14 +62,31 @@ export const useCompletion = ( {
 		}
 		previousContent.current = '';
 
-		const suggestionsSource = await askQuestion( question );
+		let suggestionsSource;
+
+		try {
+			suggestionsSource = await askQuestion( question );
+		} catch ( e ) {
+			// eslint-disable-next-line no-console
+			console.debug( 'Completion connection error encountered', e );
+			onCompletionError( 'connection_error' );
+			return;
+		}
+
 		setCompletionActive( true );
 
-		suggestionsSource.addEventListener( 'message', ( e ) =>
-			onMessage( e )
-		);
-		suggestionsSource.addEventListener( 'error', ( event ) =>
-			onError( event )
+		suggestionsSource.addEventListener( 'message', ( e ) => {
+			onMessage( e );
+		} );
+		suggestionsSource.addEventListener(
+			'error',
+			( event: MessageEvent ) => {
+				// eslint-disable-next-line no-console
+				console.debug( 'Streaming error encountered', event );
+				onCompletionError(
+					typeof event === 'string' ? event : event.data
+				);
+			}
 		);
 
 		completionSource.current = suggestionsSource;

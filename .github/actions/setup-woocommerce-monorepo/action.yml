@@ -43,7 +43,7 @@ runs:
           with:
               php-version: ${{ inputs.php-version }}
               coverage: none
-              tools: phpcs, sirbrillig/phpcs-changed
+              tools: phpcs, sirbrillig/phpcs-changed:2.10.2
 
         - name: Cache Composer Dependencies
           uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8

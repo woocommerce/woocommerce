@@ -264,6 +264,7 @@ class WC_Unit_Tests_Bootstrap {
 
 		// Traits.
 		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/HPOSToggleTrait.php';
 	}
 
 	/**

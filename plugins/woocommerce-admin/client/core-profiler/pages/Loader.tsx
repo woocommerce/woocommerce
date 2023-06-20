@@ -17,6 +17,7 @@ export type Stage = {
 		label: string;
 		text: string;
 		duration?: number;
+		element?: JSX.Element;
 	} >;
 };
 
@@ -67,6 +68,7 @@ export const Loader = ( {
 						{ currentStage.paragraphs[ currentParagraph ]?.label }{ ' ' }
 					</b>
 					{ currentStage.paragraphs[ currentParagraph ]?.text }
+					{ currentStage.paragraphs[ currentParagraph ]?.element }
 				</p>
 			</div>
 		</div>

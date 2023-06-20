@@ -18,11 +18,19 @@ import { recordTracksFactory, getPostId } from '../utils';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
-const getApiError = () => {
-	return __(
-		`❗ We're currently experiencing high demand for our experimental feature. Please check back in shortly.`,
-		'woocommerce'
-	);
+const getApiError = ( error: string ) => {
+	switch ( error ) {
+		case 'connection_error':
+			return __(
+				'❗ We were unable to reach the experimental service. Please check back in shortly.',
+				'woocommerce'
+			);
+		default:
+			return __(
+				`❗ We're currently experiencing high demand for our experimental feature. Please check back in shortly.`,
+				'woocommerce'
+			);
+	}
 };
 
 const recordDescriptionTracks = recordTracksFactory(
@@ -55,7 +63,7 @@ export function WriteItForMeButtonContainer() {
 				// eslint-disable-next-line no-console
 				console.debug( 'Streaming error encountered', error );
 
-				tinyEditor.setContent( getApiError() );
+				tinyEditor.setContent( getApiError( error ) );
 			},
 			onCompletionFinished: ( reason, content ) => {
 				recordDescriptionTracks( 'stop', {

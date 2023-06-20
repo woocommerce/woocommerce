@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+add HPOSToggleTrait.php to unit test loader

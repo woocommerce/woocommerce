@@ -26,9 +26,11 @@ import {
  */
 import { BackButton } from './back-button';
 import { EditorCanvas } from './editor-canvas';
-import { HeaderToolbar } from './header-toolbar';
+import { EditorContext } from './context';
+import { HeaderToolbar } from './header-toolbar/header-toolbar';
 import { ResizableEditor } from './resizable-editor';
 import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
+import { useEditorHistory } from './hooks/use-editor-history';
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -47,6 +49,9 @@ export function IframeEditor( {
 }: IframeEditorProps ) {
 	const [ resizeObserver, sizes ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
+	const { appendEdit, hasRedo, hasUndo, redo, undo } = useEditorHistory( {
+		setBlocks,
+	} );
 	const [ isInserterOpened, setIsInserterOpened ] = useState( false );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
@@ -70,74 +75,80 @@ export function IframeEditor( {
 
 	return (
 		<div className="woocommerce-iframe-editor">
-			<BlockEditorProvider
-				settings={ {
-					...settings,
-					hasFixedToolbar: true,
-					templateLock: false,
+			<EditorContext.Provider
+				value={ {
+					hasRedo,
+					hasUndo,
+					isInserterOpened,
+					redo,
+					setIsInserterOpened,
+					undo,
 				} }
-				value={ blocks }
-				onChange={ ( updatedBlocks: BlockInstance[] ) => {
-					setBlocks( updatedBlocks );
-					onChange( updatedBlocks );
-				} }
-				onInput={ onInput }
-				useSubRegistry={ true }
 			>
-				<HeaderToolbar
-					isInserterOpened={ isInserterOpened }
-					setIsInserterOpened={ setIsInserterOpened }
-				/>
-				<div className="woocommerce-iframe-editor__main">
-					<SecondarySidebar
-						isInserterOpened={ isInserterOpened }
-						setIsInserterOpened={ setIsInserterOpened }
-					/>
-					<BlockTools
-						className={ 'woocommerce-iframe-editor__content' }
-						onClick={ (
-							event: React.MouseEvent<
-								HTMLDivElement,
-								MouseEvent
-							>
-						) => {
-							// Clear selected block when clicking on the gray background.
-							if ( event.target === event.currentTarget ) {
-								clearSelectedBlock();
-							}
-						} }
-					>
-						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-						{ /* @ts-ignore */ }
-						<BlockEditorKeyboardShortcuts.Register />
-						{ onClose && (
-							<BackButton
-								onClick={ () => {
-									setTimeout( onClose, 550 );
-								} }
-							/>
-						) }
-						<ResizableEditor
-							enableResizing={ true }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore This accepts numbers or strings.
-							height={ sizes.height ?? '100%' }
+				<BlockEditorProvider
+					settings={ {
+						...settings,
+						hasFixedToolbar: true,
+						templateLock: false,
+					} }
+					value={ blocks }
+					onChange={ ( updatedBlocks: BlockInstance[] ) => {
+						appendEdit( updatedBlocks );
+						setBlocks( updatedBlocks );
+						onChange( updatedBlocks );
+					} }
+					onInput={ onInput }
+					useSubRegistry={ true }
+				>
+					<HeaderToolbar />
+					<div className="woocommerce-iframe-editor__main">
+						<SecondarySidebar />
+						<BlockTools
+							className={ 'woocommerce-iframe-editor__content' }
+							onClick={ (
+								event: React.MouseEvent<
+									HTMLDivElement,
+									MouseEvent
+								>
+							) => {
+								// Clear selected block when clicking on the gray background.
+								if ( event.target === event.currentTarget ) {
+									clearSelectedBlock();
+								}
+							} }
 						>
-							<EditorCanvas
+							{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+							{ /* @ts-ignore */ }
+							<BlockEditorKeyboardShortcuts.Register />
+							{ onClose && (
+								<BackButton
+									onClick={ () => {
+										setTimeout( onClose, 550 );
+									} }
+								/>
+							) }
+							<ResizableEditor
 								enableResizing={ true }
-								settings={ settings }
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore This accepts numbers or strings.
+								height={ sizes.height ?? '100%' }
 							>
-								{ resizeObserver }
-								<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
-							</EditorCanvas>
-							<Popover.Slot />
-						</ResizableEditor>
-					</BlockTools>
-					<div className="woocommerce-iframe-editor__sidebar">
-						<BlockInspector />
+								<EditorCanvas
+									enableResizing={ true }
+									settings={ settings }
+								>
+									{ resizeObserver }
+									<BlockList className="edit-site-block-editor__block-list wp-site-blocks" />
+								</EditorCanvas>
+								<Popover.Slot />
+							</ResizableEditor>
+						</BlockTools>
+						<div className="woocommerce-iframe-editor__sidebar">
+							<BlockInspector />
+						</div>
 					</div>
-				</div>
-			</BlockEditorProvider>
+				</BlockEditorProvider>
+			</EditorContext.Provider>
 		</div>
 	);
 }
