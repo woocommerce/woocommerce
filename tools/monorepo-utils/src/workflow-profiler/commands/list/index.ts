@@ -10,7 +10,7 @@ import { getAllWorkflows } from '../../lib';
 import { Logger } from '../../../core/logger';
 
 const program = new Command( 'list' )
-	.description( 'List all Github workflows in the WooCommerce Monorepo' )
+	.description( 'List all Github workflows in a repository' )
 	.option(
 		'-o --owner <owner>',
 		'Repository owner. Default: woocommerce',
