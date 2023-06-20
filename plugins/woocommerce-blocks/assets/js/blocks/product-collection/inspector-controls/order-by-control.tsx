@@ -73,6 +73,7 @@ const OrderByControl = (
 			<SelectControl
 				value={ `${ orderBy }/${ order }` }
 				options={ orderOptions }
+				label={ __( 'Order by', 'woo-gutenberg-products-block' ) }
 				onChange={ ( value ) => {
 					const [ newOrderBy, newOrder ] = value.split( '/' );
 					props.setAttributes( {
