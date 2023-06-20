@@ -43,8 +43,8 @@ tests/cli/vendor
 
 # E2E tests
 /tests/e2e-tests/config/local-*.json
-/tests/e2e-pw/test-results/
-/tests/e2e-pw/artifacts/
+**/e2e-pw/test-results/
+**/e2e-pw/artifacts/
 /artifacts/
 
 # Logs
