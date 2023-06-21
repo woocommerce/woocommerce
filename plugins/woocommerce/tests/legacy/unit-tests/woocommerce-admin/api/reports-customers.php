@@ -335,7 +335,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $reports );
 		$this->assertEquals( $test_customers[0]->get_id(), $reports[0]['user_id'] );
 
-		// Test filter_empty param by name
+		// Test filter_empty param by name.
 		$request->set_query_params(
 			array(
 				'filter_empty' => array( 'name' ),
@@ -347,7 +347,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 10, $reports );
 
-		// Test filter_empty param by name and email
+		// Test filter_empty param by name and email.
 		$request->set_query_params(
 			array(
 				'filter_empty' => array( 'name', 'email' ),
@@ -356,7 +356,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 10, $reports );
 
-		// Test filter_empty param by name and email
+		// Test filter_empty param by name and email.
 		$request->set_query_params(
 			array(
 				'filter_empty' => array( 'name', 'country' ),
@@ -365,16 +365,16 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 10, $reports );
 
-		// Test filter_empty param by state
+		// Test filter_empty param by state.
 		$request->set_query_params(
 			array(
-				'filter_empty' => array( 'state' )
+				'filter_empty' => array( 'state' ),
 			)
 		);
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 10, $reports );
 
-		// Test filter_empty param by postcode
+		// Test filter_empty param by postcode.
 		$request->set_query_params(
 			array(
 				'filter_empty' => array( 'postcode' ),
@@ -383,10 +383,11 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 10, $reports );
 
-		// Test filter_empty with new customer
-		$customer = WC_Helper_Customer::create_customer( "customer11", 'password' );
-		$customer->set_postcode(null);
+		// Test filter_empty with new customer.
+		$customer = WC_Helper_Customer::create_customer( 'customer_11', 'password', 'customer@example.com' );
+		$customer->set_postcode( null );
 		$customer->save();
+		WC_Helper_Queue::run_all_pending();
 
 		$request->set_query_params(
 			array(
@@ -396,7 +397,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 10, $reports );
 
-		// Test filter_empty param by email
+		// Test filter_empty param by email.
 		$request->set_query_params(
 			array(
 				'filter_empty' => array( 'email' ),
@@ -405,10 +406,10 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 11, $reports );
 
-		// Test filter_empty param by name
+		// Test filter_empty param by state.
 		$request->set_query_params(
 			array(
-				'filter_empty' => array( 'name' ),
+				'filter_empty' => array( 'state' ),
 			)
 		);
 		$this->assertEquals( 200, $response->get_status() );
