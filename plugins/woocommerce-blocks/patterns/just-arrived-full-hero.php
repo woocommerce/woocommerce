@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Just Arrived Full Hero
+ * Title: Just Arrived Full Hero
  * Slug: woocommerce-blocks/just-arrived-full-hero
  * Categories: WooCommerce
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Large Image Product Gallery
+ * Title: Large Image Product Gallery
  * Slug: woocommerce-blocks/product-query-large-image-product-gallery
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query

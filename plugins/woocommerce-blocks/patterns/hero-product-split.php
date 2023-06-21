@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Hero Product - Split
+ * Title: Hero Product Split
  * Slug: woocommerce-blocks/hero-product-split
  * Categories: WooCommerce
  */

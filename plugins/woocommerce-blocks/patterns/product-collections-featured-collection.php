@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Product Collections: Featured Collection
+ * Title: Product Collections Featured Collection
  * Slug: woocommerce-blocks/product-collections-featured-collection
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query

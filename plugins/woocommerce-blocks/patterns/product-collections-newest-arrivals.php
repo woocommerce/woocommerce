@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Product Collections: Newest Arrivals
+ * Title: Product Collections Newest Arrivals
  * Slug: woocommerce-blocks/product-collections-newest-arrivals
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query

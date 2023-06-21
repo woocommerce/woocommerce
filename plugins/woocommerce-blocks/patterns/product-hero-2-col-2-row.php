@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Product Hero 2 Column 2 Row
+ * Title: Product Hero 2 Column 2 Row
  * Slug: woocommerce-blocks/product-hero-2-col-2-row
  * Categories: WooCommerce
  */

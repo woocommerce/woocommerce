@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Header Centered Menu with Search
+ * Title: Centered Header Menu with Search
  * Slug: woocommerce-blocks/header-centered-menu-with-search
  * Categories: WooCommerce
  * Block Types: core/template-part/header

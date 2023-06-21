@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Minimal Product List
+ * Title: Minimal Product List
  * Slug: woocommerce-blocks/product-query-minimal-product-list
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query
