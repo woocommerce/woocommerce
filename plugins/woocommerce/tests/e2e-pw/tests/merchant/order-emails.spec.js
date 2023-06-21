@@ -109,7 +109,9 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		);
 	} );
 
-	test( 'can email invoice/order details to customer', async ( { page } ) => {
+	// temporarily skipping as GH env started to behave differently to that locally
+	// June 21, 2023 - to be investigated
+	test.skip( 'can email invoice/order details to customer', async ( { page } ) => {
 		// send the customer order details
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
 		await page.selectOption( 'li#actions > select', 'send_order_details' );
