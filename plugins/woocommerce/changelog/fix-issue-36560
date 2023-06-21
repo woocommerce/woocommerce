@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Taxonomy specific templates take precedence over 'taxonomy-product_attribute.php' template.
