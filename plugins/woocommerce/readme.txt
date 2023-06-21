@@ -227,6 +227,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Show feedback bar for product editor. [[#38599]](https://github.com/woocommerce/woocommerce/pull/38599)
 * Add - Show spotlight for first time visitors of block product editor [[#38590]](https://github.com/woocommerce/woocommerce/pull/38590)
 * Add - Updated payment gateway suggestions for 2023 Q3 [[#38646]](https://github.com/woocommerce/woocommerce/pull/38646)
+* Update - Update WooCommerce Blocks to 10.4.3 [#38839](https://github.com/woocommerce/woocommerce/pull/38839)
 * Update - Add 'Tell me more' button to end of block editor tour for more information [[#38639]](https://github.com/woocommerce/woocommerce/pull/38639)
 * Update - Add descriptive document titles to HPOS order admin screens [[#38617]](https://github.com/woocommerce/woocommerce/pull/38617)
 * Update - Add obw/core-profiler to the free-extensions endpoint [[#38418]](https://github.com/woocommerce/woocommerce/pull/38418)
