@@ -332,9 +332,7 @@ const handleGeolocation = assign( {
 } );
 
 const redirectToWooHome = () => {
-	navigateTo( {
-		url: getNewPath( {}, '/', {} ),
-	} );
+	window.location.href = getNewPath( {}, '/', {} );
 };
 
 const redirectToJetpackAuthPage = (
