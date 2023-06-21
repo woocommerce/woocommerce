@@ -316,15 +316,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'name',
 			'country',
 			'city',
-			'region',
+			'state',
 			'postcode',
 		);
 
 		if ( ! empty( $query_args['filter_empty'] ) ) {
 			$fields_to_filter_by       = array_intersect( $query_args['filter_empty'], $filter_empty_params );
+            if ( in_array( 'name', $fields_to_filter_by, true ) ) {
+                $fields_to_filter_by   = array_diff( $fields_to_filter_by, array( 'name' ) );
+                $fields_to_filter_by[] = "CONCAT_WS( ' ', first_name, last_name )";
+            }
 			$fields_with_not_condition = array_map(
 				function ( $field ) {
-					return $field . ' IS NOT NULL';
+					return $field . ' <> \'\'';
 				},
 				$fields_to_filter_by
 			);
