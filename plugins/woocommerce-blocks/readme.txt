@@ -4,7 +4,7 @@ Tags: gutenberg, woocommerce, woo commerce, products, blocks, woocommerce blocks
 Requires at least: 6.2
 Tested up to: 6.2
 Requires PHP: 7.3
-Stable tag: 10.4.2
+Stable tag: 10.4.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -81,6 +81,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 10.4.3 - 2023-06-20 =
+
+#### Bug Fixes
+
+- Products block: fix compatibility with Gutenberg 16. ([9878](https://github.com/woocommerce/woocommerce-blocks/pull/9878))
+
 = 10.4.2 - 2023-06-12 =
 
 #### Bug Fixes
@@ -92,13 +98,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Update the Hero Product Chessboard pattern to replace the Unsplash image with a CCO licensed image from Pxhere. ([9761](https://github.com/woocommerce/woocommerce-blocks/pull/9761))
 - Update the banner pattern to replace the Unsplash image with a CCO licensed image from Pxhere. ([9760](https://github.com/woocommerce/woocommerce-blocks/pull/9760))
 - Fix error on clearing customizations on Woo Templates that prevented WooCommerce Classic Template block from being displayed. ([9759](https://github.com/woocommerce/woocommerce-blocks/pull/9759))
-
-= 10.2.3 - 2023-06-09 =
-
-#### Bug Fixes
-
-- Update the Featured Category patterns to replace the Unsplash image with a CCO licensed image from Pxhere. ([9765](https://github.com/woocommerce/woocommerce-blocks/pull/9765))
-- Update the Hero Product Split pattern to replace the Unsplash image with a CCO licensed image from Pxhere. ([9762](https://github.com/woocommerce/woocommerce-blocks/pull/9762))
 
 = 10.4.0 - 2023-06-05 =
 
@@ -141,7 +140,14 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Fix alignment of the close button in the Mini-Cart drawer when it has borders. ([9507](https://github.com/woocommerce/woocommerce-blocks/pull/9507))
 - Add to Cart with Options Block: Remove global variable overwrite. ([9457](https://github.com/woocommerce/woocommerce-blocks/pull/9457))
 - Fix total shipping display info when no shipping method is available. ([8819](https://github.com/woocommerce/woocommerce-blocks/pull/8819))
-- Blockified Single Product Template: use h1 for the Product Title when transforming from Classic template. ([9748]((https://github.com/woocommerce/woocommerce-blocks/pull/9748))
+- Blockified Single Product Template: use h1 for the Product Title when transforming from Classic template. ([9748]((https://github.com/woocommerce/woocommerce-blocks/pull/9748)))
+
+= 10.2.3 - 2023-06-09 =
+
+#### Bug Fixes
+
+- Update the Featured Category patterns to replace the Unsplash image with a CCO licensed image from Pxhere. ([9765](https://github.com/woocommerce/woocommerce-blocks/pull/9765))
+- Update the Hero Product Split pattern to replace the Unsplash image with a CCO licensed image from Pxhere. ([9762](https://github.com/woocommerce/woocommerce-blocks/pull/9762))
 
 = 10.2.2 - 2023-05-31 =
 
