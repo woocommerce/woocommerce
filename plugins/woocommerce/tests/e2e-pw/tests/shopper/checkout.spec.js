@@ -275,9 +275,9 @@ test.describe( 'Checkout page', () => {
 	} );
 
 	test( 'allows existing customer to place order', async ( { page } ) => {
-		await page.goto( 'wp-admin/' );
-		await page.fill( 'input[name="log"]', customer.username );
-		await page.fill( 'input[name="pwd"]', customer.password );
+		await page.goto( 'my-account/' );
+		await page.fill( 'input[name="username"]', customer.username );
+		await page.fill( 'input[name="password"]', customer.password );
 		await page.click( 'text=Log In' );
 		await page.waitForLoadState( 'networkidle' );
 		for ( let i = 1; i < 3; i++ ) {
@@ -292,16 +292,6 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'td.product-total' ) ).toContainText(
 			twoProductPrice
 		);
-
-		await page.fill( '#billing_first_name', 'Homer' );
-		await page.fill( '#billing_last_name', 'Simpson' );
-		await page.fill( '#billing_address_1', '123 Evergreen Terrace' );
-		await page.fill( '#billing_city', 'Springfield' );
-		await page.selectOption( '#billing_country', 'US' );
-		await page.selectOption( '#billing_state', 'OR' );
-		await page.fill( '#billing_postcode', '97403' );
-		await page.fill( '#billing_phone', '555 555-5555' );
-		await page.fill( '#billing_email', customer.email );
 
 		await page.click( 'text=Cash on delivery' );
 		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
