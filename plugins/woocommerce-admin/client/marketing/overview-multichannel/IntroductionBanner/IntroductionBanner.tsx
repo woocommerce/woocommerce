@@ -33,7 +33,7 @@ export const IntroductionBanner = ( {
 	const { data: dataRecommended } = useRecommendedChannels();
 	const { data: dataCampaignTypes } = useCampaignTypes();
 
-	const showCreateCampaignButton = !! (
+	const showButtons = !! (
 		dataRegistered?.length && dataCampaignTypes?.length
 	);
 
@@ -46,19 +46,13 @@ export const IntroductionBanner = ( {
 	 * and it does not make sense to display the "Add channels" button in this introduction banner
 	 * that will do nothing upon click.
 	 *
-	 * This also depends on the `showCreateCampaignButton` above.
-	 * If "create campaign" button is not shown, then "add channels" button should not be shown either.
-	 * This is to make it look better in the UI.
-	 *
 	 * If there are registered channels and recommended channels,
 	 * the Channels card will display the  "Add channels" toggle button,
 	 * and clicking on the "Add channels" button in this introduction banner
 	 * will scroll to the button in Channels card.
 	 */
 	const showAddChannelsButton = !! (
-		dataRegistered?.length &&
-		dataRecommended?.length &&
-		showCreateCampaignButton
+		dataRegistered?.length && dataRecommended?.length
 	);
 
 	return (
@@ -112,21 +106,19 @@ export const IntroductionBanner = ( {
 						</Flex>
 					</FlexItem>
 				</Flex>
-				{ ( showCreateCampaignButton || showAddChannelsButton ) && (
+				{ showButtons && (
 					<Flex
 						className="woocommerce-marketing-introduction-banner-buttons"
 						justify="flex-start"
 					>
-						{ showCreateCampaignButton && (
-							<Button
-								variant="primary"
-								onClick={ () => {
-									setModalOpen( true );
-								} }
-							>
-								{ __( 'Create a campaign', 'woocommerce' ) }
-							</Button>
-						) }
+						<Button
+							variant="primary"
+							onClick={ () => {
+								setModalOpen( true );
+							} }
+						>
+							{ __( 'Create a campaign', 'woocommerce' ) }
+						</Button>
 						{ showAddChannelsButton && (
 							<Button
 								variant="secondary"
