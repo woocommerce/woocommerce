@@ -321,14 +321,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		if ( ! empty( $query_args['filter_empty'] ) ) {
-			$fields_to_filter_by = array_intersect($query_args['filter_empty'], $filter_empty_params);
+			$fields_to_filter_by       = array_intersect( $query_args['filter_empty'], $filter_empty_params );
 			$fields_with_not_condition = array_map(
-				function ($field) {
+				function ( $field ) {
 					return $field . ' IS NOT NULL';
 				},
 				$fields_to_filter_by
 			);
-			$where_clauses[] = '(' . implode( ' AND ', $fields_with_not_condition ) . ')';
+			$where_clauses[]           = '(' . implode( ' AND ', $fields_with_not_condition ) . ')';
 		}
 
 		// Allow a list of customer IDs to be specified.
