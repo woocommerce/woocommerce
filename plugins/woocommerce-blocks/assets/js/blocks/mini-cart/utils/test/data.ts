@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { getByTestId, waitFor } from '@testing-library/dom';
+import { getSettingWithCoercion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -18,7 +19,9 @@ const responseMock = {
 	ok: true,
 	json: async () => ( {
 		totals: {
-			total_price: '1600',
+			total_price: '1800',
+			total_items: '1400',
+			total_items_tax: '200',
 			currency_code: 'USD',
 			currency_symbol: '$',
 			currency_minor_unit: 2,
@@ -32,7 +35,9 @@ const responseMock = {
 } as Response;
 const localStorageMock = {
 	totals: {
-		total_price: '1600',
+		total_price: '1800',
+		total_items: '1400',
+		total_items_tax: '200',
 		currency_code: 'USD',
 		currency_symbol: '$',
 		currency_minor_unit: 2,
@@ -67,7 +72,21 @@ const getMiniCartDOM = () => {
 	return div;
 };
 
-describe( 'Mini-Cart frontend script', () => {
+jest.mock( '@woocommerce/settings', () => {
+	return {
+		...jest.requireActual( '@woocommerce/settings' ),
+		getSettingWithCoercion: jest.fn(),
+	};
+} );
+
+describe( 'Mini-Cart frontend script when "the display prices during cart and checkout" option is set to "Including Tax"', () => {
+	beforeAll( () => {
+		( getSettingWithCoercion as jest.Mock ).mockReturnValue( true );
+	} );
+
+	afterAll( () => {
+		jest.resetModules();
+	} );
 	it( 'updates the cart contents based on the localStorage values', async () => {
 		initializeLocalStorage();
 		const container = getMiniCartDOM();
@@ -114,6 +133,68 @@ describe( 'Mini-Cart frontend script', () => {
 		await waitFor( () =>
 			expect( getByTestId( container, 'amount' ).textContent ).toBe(
 				'$16.00'
+			)
+		);
+		// Assert that we are rendering the quantity.
+		await waitFor( () =>
+			expect( getByTestId( container, 'quantity' ).textContent ).toBe(
+				'2'
+			)
+		);
+		jest.restoreAllMocks();
+	} );
+} );
+
+describe( 'Mini-Cart frontend script when "the display prices during cart and checkout" option is set to "Excluding Tax"', () => {
+	beforeAll( () => {
+		( getSettingWithCoercion as jest.Mock ).mockReturnValue( false );
+	} );
+	it( 'updates the cart contents based on the localStorage values', async () => {
+		initializeLocalStorage();
+		const container = getMiniCartDOM();
+		document.body.appendChild( container );
+
+		updateTotals( getMiniCartTotalsFromLocalStorage() );
+
+		// Assert that we are rendering the amount.
+		await waitFor( () =>
+			expect( getByTestId( container, 'amount' ).textContent ).toBe(
+				'$14.00'
+			)
+		);
+		// Assert that we are rendering the quantity.
+		await waitFor( () =>
+			expect( getByTestId( container, 'quantity' ).textContent ).toBe(
+				'2'
+			)
+		);
+	} );
+
+	it( 'updates the cart contents based on the API response', async () => {
+		jest.spyOn( window, 'fetch' ).mockResolvedValue( responseMock );
+		const container = getMiniCartDOM();
+		document.body.appendChild( container );
+
+		getMiniCartTotalsFromServer().then( updateTotals );
+
+		// Assert we called the correct endpoint.
+		await waitFor( () =>
+			expect( window.fetch ).toHaveBeenCalledWith(
+				'/wp-json/wc/store/v1/cart/'
+			)
+		);
+
+		// Assert we saved the values returned to the localStorage.
+		await waitFor( () =>
+			expect( window.localStorage.setItem.mock.calls[ 0 ][ 1 ] ).toEqual(
+				JSON.stringify( localStorageMock )
+			)
+		);
+
+		// Assert that we are rendering the amount.
+		await waitFor( () =>
+			expect( getByTestId( container, 'amount' ).textContent ).toBe(
+				'$14.00'
 			)
 		);
 		// Assert that we are rendering the quantity.

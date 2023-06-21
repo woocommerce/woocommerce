@@ -6,7 +6,20 @@ import {
 	getCurrencyFromPriceResponse,
 	formatPrice,
 } from '@woocommerce/price-format';
-import { CartResponse } from '@woocommerce/types';
+import { CartResponse, isBoolean } from '@woocommerce/types';
+import { getSettingWithCoercion } from '@woocommerce/settings';
+
+const getPrice = ( cartResponse: CartResponse, showIncludingTax: boolean ) => {
+	const { totals } = cartResponse;
+	const currency = getCurrencyFromPriceResponse( totals );
+
+	const subTotal = showIncludingTax
+		? parseInt( totals.total_items, 10 ) +
+		  parseInt( totals.total_items_tax, 10 )
+		: parseInt( totals.total_items, 10 );
+
+	return formatPrice( subTotal, currency );
+};
 
 export const updateTotals = ( totals: [ string, number ] | undefined ) => {
 	if ( ! totals ) {
@@ -86,11 +99,12 @@ export const getMiniCartTotalsFromLocalStorage = ():
 		return undefined;
 	}
 	const miniCartTotals = JSON.parse( rawMiniCartTotals );
-	const currency = getCurrencyFromPriceResponse( miniCartTotals.totals );
-	const formattedPrice = formatPrice(
-		miniCartTotals.totals.total_price,
-		currency
+	const showIncludingTax = getSettingWithCoercion(
+		'displayCartPricesIncludingTax',
+		false,
+		isBoolean
 	);
+	const formattedPrice = getPrice( miniCartTotals, showIncludingTax );
 	return [ formattedPrice, miniCartTotals.itemsCount ] as [ string, number ];
 };
 
@@ -107,11 +121,12 @@ export const getMiniCartTotalsFromServer = async (): Promise<
 			return response.json();
 		} )
 		.then( ( data: CartResponse ) => {
-			const currency = getCurrencyFromPriceResponse( data.totals );
-			const formattedPrice = formatPrice(
-				data.totals.total_price,
-				currency
+			const showIncludingTax = getSettingWithCoercion(
+				'displayCartPricesIncludingTax',
+				false,
+				isBoolean
 			);
+			const formattedPrice = getPrice( data, showIncludingTax );
 			// Save server data to local storage, so we can re-fetch it faster
 			// on the next page load.
 			localStorage.setItem(
