@@ -123,7 +123,7 @@ class FeaturesController {
 			),
 		);
 
-		$this->legacy_feature_ids = array( 'analytics', 'new_navigation' );
+		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'product_block_editor' );
 
 		$this->init_features( $features );
 
