@@ -36,6 +36,10 @@ class ClassWithDependencies {
 	 */
 	public $dependency_class = null;
 
+	public function __construct() {
+		self::$instances_count++;
+	}
+
 	/**
 	 * Initialize the class instance.
 	 *
@@ -45,8 +49,7 @@ class ClassWithDependencies {
 	 * @param int             $some_number Some number we need for some reason.
 	 */
 	final public function init( DependencyClass $dependency_class, int $some_number = self::SOME_NUMBER ) {
-		self::$instances_count++;
 		$this->dependency_class = $dependency_class;
-		$this->some_number      = self::SOME_NUMBER;
+		$this->some_number      = $some_number;
 	}
 }
