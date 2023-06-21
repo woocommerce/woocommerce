@@ -52,6 +52,9 @@ class Init {
 
 			$block_registry = new BlockRegistry();
 			$block_registry->init();
+
+			$tracks = new Tracks();
+			$tracks->init();
 		}
 	}
 

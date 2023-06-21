@@ -6,6 +6,7 @@ import { Fragment } from '@wordpress/element';
 import { Form, FormContextType } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { TRACKS_SOURCE } from '@woocommerce/product-editor';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -111,7 +112,7 @@ describe( 'ProductFormActions', () => {
 				'draft'
 			);
 			expect( recordEvent ).toHaveBeenCalledWith( 'product_edit', {
-				new_product_page: true,
+				source: TRACKS_SOURCE,
 				product_id: undefined,
 				product_type: undefined,
 				is_downloadable: undefined,
@@ -133,7 +134,7 @@ describe( 'ProductFormActions', () => {
 				'publish'
 			);
 			expect( recordEvent ).toHaveBeenCalledWith( 'product_update', {
-				new_product_page: true,
+				source: TRACKS_SOURCE,
 				product_id: undefined,
 				product_type: undefined,
 				is_downloadable: undefined,
@@ -222,7 +223,7 @@ describe( 'ProductFormActions', () => {
 				'draft'
 			);
 			expect( recordEvent ).toHaveBeenCalledWith( 'product_edit', {
-				new_product_page: true,
+				source: TRACKS_SOURCE,
 				product_id: 5,
 				product_type: 'simple',
 				is_downloadable: false,
@@ -252,7 +253,7 @@ describe( 'ProductFormActions', () => {
 			);
 			publishButton?.click();
 			expect( recordEvent ).toHaveBeenCalledWith( 'product_update', {
-				new_product_page: true,
+				source: TRACKS_SOURCE,
 				product_id: 5,
 				product_type: 'simple',
 				is_downloadable: false,
@@ -330,7 +331,7 @@ describe( 'ProductFormActions', () => {
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'product_preview_changes',
 				{
-					new_product_page: true,
+					source: TRACKS_SOURCE,
 					product_id: 5,
 					product_type: 'simple',
 					is_downloadable: false,
@@ -364,7 +365,7 @@ describe( 'ProductFormActions', () => {
 			).toEqual( false );
 			moveToTrashButton?.click();
 			expect( recordEvent ).toHaveBeenCalledWith( 'product_delete', {
-				new_product_page: true,
+				source: TRACKS_SOURCE,
 				product_id: 5,
 				product_type: 'simple',
 				is_downloadable: false,
@@ -399,7 +400,7 @@ describe( 'ProductFormActions', () => {
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'product_publish_and_copy',
 				{
-					new_product_page: true,
+					source: TRACKS_SOURCE,
 					product_id: 5,
 					product_type: 'simple',
 					is_downloadable: false,
@@ -438,7 +439,7 @@ describe( 'ProductFormActions', () => {
 			const copyToANewDraftButton = queryByText( 'Copy to a new draft' );
 			copyToANewDraftButton?.click();
 			expect( recordEvent ).toHaveBeenCalledWith( 'product_copy', {
-				new_product_page: true,
+				source: TRACKS_SOURCE,
 				product_id: 5,
 				product_type: 'simple',
 				is_downloadable: false,
