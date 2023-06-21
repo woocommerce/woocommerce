@@ -1,4 +1,4 @@
-Significance: minor
+Significance: patch
 Type: fix
 
-Taxonomy specific templates take precedence over 'taxonomy-product_attribute.php' template.
+Fix attribute taxonomy templates when a templates for specific product attribute exists.
