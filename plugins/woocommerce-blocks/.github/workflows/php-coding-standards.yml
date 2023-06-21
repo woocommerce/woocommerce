@@ -61,4 +61,4 @@ jobs:
               run: phpcs -i
 
             - name: Run PHPCS on all files
-              run: phpcs ./src -q -n --report=checkstyle | cs2pr
+              run: phpcs ./src -n --report=checkstyle | cs2pr
