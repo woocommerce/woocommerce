@@ -1346,11 +1346,31 @@ WHERE
 					continue;
 				}
 
-				if ( 'date' === $prop_details['type'] ) {
-					$prop_value = $this->string_to_timestamp( $prop_value );
-				}
+				try {
+					if ( 'date' === $prop_details['type'] ) {
+						$prop_value = $this->string_to_timestamp( $prop_value );
+					}
 
-				$this->set_order_prop( $order, $prop_details['name'], $prop_value );
+					$this->set_order_prop( $order, $prop_details['name'], $prop_value );
+				} catch ( \Exception $e ) {
+					$order_id = $order->get_id();
+					$this->error_logger->warning(
+						sprintf(
+						/* translators: %1$d = peoperty name, %2$d = order ID, %3$s = error message. */
+							__( 'Error when setting property \'%1$s\' for order %2$d: %3$s', 'woocommerce' ),
+							$prop_details['name'],
+							$order_id,
+							$e->getMessage()
+						),
+						array(
+							'exception_code' => $e->getCode(),
+							'exception_msg'  => $e->getMessage(),
+							'origin'         => __METHOD__,
+							'order_id'       => $order_id,
+							'property_name'  => $prop_details['name'],
+						)
+					);
+				}
 			}
 		}
 	}
