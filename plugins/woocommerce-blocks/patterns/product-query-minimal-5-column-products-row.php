@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Minimal 5-Column Products Row
+ * Title: Minimal 5-Column Product Row
  * Slug: woocommerce-blocks/product-query-minimal-5-column-products-row
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query

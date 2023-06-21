@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce 4-Column Product Row
+ * Title: 4-Column Product Row
  * Slug: woocommerce-blocks/product-query-4-column-product-row
  * Categories: WooCommerce
  * Block Types: core/query/woocommerce/product-query
