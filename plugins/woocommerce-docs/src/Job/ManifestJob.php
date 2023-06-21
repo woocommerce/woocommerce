@@ -7,6 +7,9 @@
 
 namespace WooCommerceDocs\Job;
 
+use WooCommerceDocs\Data;
+use WooCommerceDocs\Manifest;
+
 /**
  * A class to handle the manifest job.
  */
@@ -40,7 +43,7 @@ class ManifestJob {
 		);
 
 		// Manifests are a list of tuples like ["url", {...}].
-		$manifests = \WooCommerceDocs\Data\ManifestStore::get_manifest_list();
+		$manifests = Data\ManifestStore::get_manifest_list();
 
 		try {
 			foreach ( $manifests as $manifest ) {
@@ -61,7 +64,7 @@ class ManifestJob {
 				// first check if the manifest has changed.
 				// $existing_manifest = \WooCommerceDocs\Data\ManifestStore::get_manifest_by_url( $manifest_url );
 
-				\WooCommerceDocs\Manifest\ManifestProcessor::process_manifest( $json, $action_id );
+				Manifest\ManifestProcessor::process_manifest( $json, $action_id );
 			}
 		} catch ( \Exception $e ) {
 			\ActionScheduler_Logger::instance()->log( $action_id, 'Error processing manifests: ' . $e->getMessage() );

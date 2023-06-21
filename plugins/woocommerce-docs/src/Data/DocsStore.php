@@ -19,11 +19,11 @@ class DocsStore {
 	 */
 	public static function get_posts() {
 		$args = array(
-			'post_type'      => 'woocommerce_doc',
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
 			'orderby'        => 'title',
 			'order'          => 'ASC',
+			'tag'            => 'woocommerce_docs',
 		);
 
 		return get_posts( $args );
@@ -36,9 +36,9 @@ class DocsStore {
 	 */
 	public static function get_post( $doc_id ) {
 		$args = array(
-			'post_type'  => 'woocommerce_doc',
 			'meta_key'   => 'docs_id',
 			'meta_value' => $doc_id,
+			'tag'        => 'woocommerce_docs',
 		);
 
 		$existing_page = get_posts( $args );
@@ -54,7 +54,9 @@ class DocsStore {
 	 */
 	public static function insert_docs_post( $post, $doc_id ) {
 		$post_id = wp_insert_post( $post );
+
 		update_post_meta( $post_id, 'docs_id', $doc_id );
+		wp_set_post_tags( $post_id, 'woocommerce_docs', true );
 
 		return $post_id;
 	}
@@ -67,9 +69,9 @@ class DocsStore {
 	 */
 	public static function update_docs_post( $post, $doc_id ) {
 		$args = array(
-			'post_type'  => 'woocommerce_doc',
 			'meta_key'   => 'docs_id',
 			'meta_value' => $doc_id,
+			'tag'        => 'woocommerce_docs',
 		);
 
 		$existing_page = get_posts( $args );
@@ -89,25 +91,28 @@ class DocsStore {
 		return wp_delete_post( $post_id );
 	}
 
-	public static function hook_post_type() {
-		// add_action( 'init', 'register_woocommerce_doc_post_type' );
-		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
+	/**
+	 * Initialize the docs store.
+	 */
+	public static function setup() {
+		self::create_docs_tag();
 	}
 
-	public static function register_post_type() {
-		register_post_type(
-			'woocommerce_doc',
-			array(
-				'labels'      => array(
-					'name'          => __( 'WooCommerce Docs' ),
-					'singular_name' => __( 'WooCommerce Doc' ),
-				),
-				'public'      => true,
-				'has_archive' => true,
-				'supports'    => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
-				'rewrite'     => array( 'slug' => 'docs' ),
-			)
-		);
+	/**
+	 * Create the docs tag
+	 */
+	private static function create_docs_tag() {
+		$tag      = 'woocommerce_docs';
+		$taxonomy = 'post_tag';
+
+		$existing_tag = term_exists( $tag, $taxonomy );
+
+		if ( ! $existing_tag ) {
+			$tag_args = array(
+				'slug' => sanitize_title( $tag ),
+			);
+			wp_insert_term( $tag, $taxonomy, $tag_args );
+		}
 	}
 }
 
