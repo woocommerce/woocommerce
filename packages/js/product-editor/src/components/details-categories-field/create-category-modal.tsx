@@ -28,6 +28,7 @@ import {
 	mapFromCategoriesToTreeItems,
 	mapFromCategoryToTreeItem,
 } from './category-field';
+import { TRACKS_SOURCE } from '../../constants';
 
 type CreateCategoryModalProps = {
 	initialCategoryName?: string;
@@ -61,7 +62,7 @@ export const CreateCategoryModal: React.FC< CreateCategoryModalProps > = ( {
 
 	const onSave = async () => {
 		recordEvent( 'product_category_add', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 		} );
 		setIsCreating( true );
 		try {
