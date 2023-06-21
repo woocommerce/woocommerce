@@ -206,6 +206,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Support custom editor-only blocks in the block-based product editor. [[#38495]](https://github.com/woocommerce/woocommerce/pull/38495)
 * Fix - Support values written in exponential notation for HPOS migrations. [[#38561]](https://github.com/woocommerce/woocommerce/pull/38561)
 * Fix - Update status only when it's changed. [[#38696]](https://github.com/woocommerce/woocommerce/pull/38696)
+* Add - Add source property to product tracking data [#38728](https://github.com/woocommerce/woocommerce/pull/38728)
 * Add - Add an admin notice about the upcoming PHP version requirement change for PHP 7.3 users [[#38604]](https://github.com/woocommerce/woocommerce/pull/38604)
 * Add - Add an animated spinner to the Core Profiler to be displayed when assets are loading. [[#38598]](https://github.com/woocommerce/woocommerce/pull/38598)
 * Add - Added ability for the core profiler state machine to navigate by using the 'step' URL query param [[#38620]](https://github.com/woocommerce/woocommerce/pull/38620)
