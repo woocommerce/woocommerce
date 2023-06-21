@@ -1128,6 +1128,7 @@ class FeaturesController {
 				} elseif ( 0 === $value ) {
 					$this->change_feature_enable( $feature_id, false );
 				}
+				wp_safe_redirect( remove_query_arg( array( $feature_id, '_feature_nonce' ), wp_get_referer() ) );
 			}
 		}
 	}
