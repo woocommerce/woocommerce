@@ -91,6 +91,7 @@ class ManifestStore {
 	 * @param array  $data The data to update the manifest with.
 	 */
 	public static function update_manifest( $url, $data ) {
+		// TODO - fix this to update the value with already json decoded data.
 		$default_value = wp_json_encode( array() );
 		$json          = get_option( self::MANIFEST_OPTION, $default_value );
 		$data          = json_decode( $json, true );
