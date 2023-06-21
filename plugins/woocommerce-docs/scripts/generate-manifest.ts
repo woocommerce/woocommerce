@@ -6,6 +6,9 @@ import path from 'path';
 import matter from 'gray-matter';
 import { glob } from 'glob';
 import crypto from 'crypto';
+import process from 'process';
+
+const branch = process.argv[ 2 ] || 'trunk'; // Use 'trunk' as the default branch if no argument is provided
 
 interface Category {
 	[ key: string ]: unknown;
@@ -25,14 +28,15 @@ function generateHashOfString( str: string ) {
 	return crypto.createHash( 'sha256' ).update( str ).digest( 'hex' );
 }
 
-function generateGithubFileUrl(
+function generateRawGithubFileUrl(
 	owner: string,
 	repo: string,
+	gitBranch: string,
 	repoPath: string,
 	filePath: string
 ): string {
 	const relativePath = path.relative( repoPath, filePath );
-	const githubUrl = `https://github.com/${ owner }/${ repo }/blob/trunk/${ relativePath }`;
+	const githubUrl = `https://raw.githubusercontent.com/${ owner }/${ repo }/${ gitBranch }/${ relativePath }`;
 	return githubUrl.replace( /\\/g, '/' ); // Ensure we use forward slashes in the URL.
 }
 async function processDirectory(
@@ -61,9 +65,10 @@ async function processDirectory(
 			// @ts-ignore
 			category.pages.push( {
 				...page,
-				url: generateGithubFileUrl(
+				url: generateRawGithubFileUrl(
 					'woocommerce',
 					'woocommerce',
+					branch,
 					path.join( __dirname, '../../../' ),
 					filePath
 				),

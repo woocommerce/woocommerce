@@ -27,7 +27,8 @@ class ManifestJob {
 	 */
 	public function schedule_job() {
 		if ( ! as_has_scheduled_action( 'woocommerce_docs_manifest_job' ) ) {
-			as_schedule_recurring_action( time(), 15, 'woocommerce_docs_manifest_job', array(), '', false );
+			as_enqueue_async_action( 'woocommerce_docs_manifest_job', array(), '', false );
+			as_schedule_recurring_action( time() + 60, 60, 'woocommerce_docs_manifest_job', array(), '', false );
 		}
 	}
 
@@ -47,11 +48,10 @@ class ManifestJob {
 
 		try {
 			foreach ( $manifests as $manifest ) {
-
 				$manifest_url = $manifest[0];
 				$response     = wp_remote_get( $manifest_url );
 
-				if ( is_wp_error( $response ) ) {
+				if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
 					\ActionScheduler_Logger::instance()->log( $action_id, 'Error retrieving manifest: ' . $response->get_error_message() );
 				}
 
@@ -62,9 +62,19 @@ class ManifestJob {
 				}
 
 				// first check if the manifest has changed.
-				// $existing_manifest = \WooCommerceDocs\Data\ManifestStore::get_manifest_by_url( $manifest_url );
+				$existing_manifest = Data\ManifestStore::get_manifest_by_url( $manifest_url );
+				$hash              = $json['hash'];
 
-				Manifest\ManifestProcessor::process_manifest( $json, $action_id );
+				if ( $existing_manifest['hash'] === $hash ) {
+					\ActionScheduler_Logger::instance()->log( $action_id, "Manifest with hash: `$hash` has not changed, no further action taken" );
+				} else {
+					\ActionScheduler_Logger::instance()->log( $action_id, "Old manifest:" . print_r( $existing_manifest, true ) );
+					\ActionScheduler_Logger::instance()->log( $action_id, "Manifest hash changed: `$hash`, processing manifest." );
+					Manifest\ManifestProcessor::process_manifest( $json, $action_id );
+
+					// Update the manifest in the store.
+					Data\ManifestStore::update_manifest( $manifest_url, $json );
+				}
 			}
 		} catch ( \Exception $e ) {
 			\ActionScheduler_Logger::instance()->log( $action_id, 'Error processing manifests: ' . $e->getMessage() );

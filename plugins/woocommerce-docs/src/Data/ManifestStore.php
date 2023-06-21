@@ -62,7 +62,7 @@ class ManifestStore {
 
 		foreach ( $data as $tuple ) {
 			if ( $tuple[0] === $url ) {
-				return $tuple[1];
+				return json_decode( $tuple[1], true );
 			}
 		}
 

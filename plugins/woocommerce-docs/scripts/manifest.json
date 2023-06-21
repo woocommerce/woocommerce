@@ -5,7 +5,7 @@
       "pages": [
         {
           "title": "Local Development",
-          "url": "https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/add/wc-docs-manifest/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
           "id": "052b40518676aa0fdf57bc0b71fdca8cd033f151"
         }
       ],
@@ -15,7 +15,7 @@
           "pages": [
             {
               "title": "What Went Wrong?",
-              "url": "https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/add/wc-docs-manifest/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
               "id": "ce53918354bdeaa9d16db3e0964b56e1699c8220"
             }
           ],
@@ -28,12 +28,12 @@
       "pages": [
         {
           "title": "Unit Testing",
-          "url": "https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/add/wc-docs-manifest/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
           "id": "c9916c10ae1962ecaa4193ccdadd043241b8ec05"
         }
       ],
       "categories": []
     }
   ],
-  "hash": "273dbe89d2b593852a1b4c777eb53792f71f56bee12a0b00b9c238cd22d53a7c"
+  "hash": "ff7e14fe3b9e6b720dae23a88f139278fd55c10025f2158ecb5408516879d9d0"
 }

@@ -20,18 +20,19 @@ class ManifestProcessor {
 	/**
 	 * Get the parsedown parser
 	 */
-	// private static function get_parser() {
-	// static $parser = null;
-	// if ( null === $parser ) {
-	// $parser = new \Parsedown();
-	// }
-	// return $parser;
-	// }
+	private static function get_parser() {
+		static $parser = null;
+		if ( null === $parser ) {
+			$parser = new \Parsedown();
+		}
+		return $parser;
+	}
 
 	/**
 	 * Process categories
 	 *
 	 * @param array $categories The categories to process.
+	 * @param int   $logger_action_id The logger action ID.
 	 * @param int   $parent_id The parent ID.
 	 */
 	private static function process_categories( $categories, $logger_action_id, $parent_id = 0 ) {
@@ -60,29 +61,30 @@ class ManifestProcessor {
 
 			// Now, process the pages for this category.
 			foreach ( $category['pages'] as $page ) {
-				\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Processing page: ' . $page['title'] . ' with id: ' . $page['id'] );
-
 				$existing_post = \WooCommerceDocs\Data\DocsStore::get_post( $page['id'] );
 				$response      = wp_remote_get( $page['url'] );
 				$content       = wp_remote_retrieve_body( $response );
 
-				// if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-				// $error_code = wp_remote_retrieve_response_code( $response );
-				// \ActionScheduler_Logger::instance()->log( $logger_action_id, 'Could not retrieve ' . $page['url'] . '. status: ' . $error_code );
-				// continue;
-				// } else {
-				// $markdown_content = wp_remote_retrieve_body( $response );
-				// \ActionScheduler_Logger::instance()->log( $logger_action_id, 'Retrieved page: ' . $markdown_content );
-				// }
+				if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+					$error_code = wp_remote_retrieve_response_code( $response );
+					\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Could not retrieve ' . $page['url'] . '. status: ' . $error_code );
+					continue;
+				}
 
-				$content = '<p>Hello World</p>';
+				$content = wp_remote_retrieve_body( $response );
+
+				// Strip frontmatter.
+				$content = preg_replace( '/^---[\s\S]*?---/', '', $content );
+
+				// Parse markdown.
+				$markdown_content = self::get_parser()->text( $content );
 
 				// If the page doesn't exist, create it.
 				if ( ! $existing_post ) {
 					$post_id = \WooCommerceDocs\Data\DocsStore::insert_docs_post(
 						array(
 							'post_title'   => $page['title'],
-							'post_content' => $content,
+							'post_content' => $markdown_content,
 							'post_status'  => 'publish',
 						),
 						$page['id']
@@ -96,18 +98,20 @@ class ManifestProcessor {
 						array(
 							'ID'           => $existing_post->ID,
 							'post_title'   => $page['title'],
-							'post_content' => $content,
+							'post_content' => $markdown_content,
 						),
 						$page['id']
 					);
 
 					\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Updated page with id: ' . $post_id );
 				}
+
+				wp_set_post_categories( $post_id, array( $term['term_id'] ), $parent_id );
 			}
 
 			// Process any sub-categories.
 			if ( ! empty( $category['categories'] ) ) {
-				self::process_categories( $category['categories'], $term['term_id'] );
+				self::process_categories( $category['categories'], $logger_action_id, $term['term_id'] );
 			}
 		}
 	}
