@@ -2,7 +2,7 @@
 	"name": "woocommerce/product-top-rated",
 	"title": "Top Rated Products",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce", "woo-gutenberg-products-block" ],
+	"keywords": [ "WooCommerce" ],
 	"description": "Display a grid of your top rated products.",
 	"supports": {
 		"align": [ "wide", "full" ],
