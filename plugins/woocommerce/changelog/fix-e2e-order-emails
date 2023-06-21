@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: e2e update not included in release package
+
+
