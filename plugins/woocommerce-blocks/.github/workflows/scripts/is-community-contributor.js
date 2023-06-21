@@ -6,7 +6,7 @@ const core = require( '@actions/core' );
 // this won't work.
 const octokit = new Octokit();
 
-const ignoredUsernames = [ 'dependabot' ];
+const ignoredUsernames = [ 'dependabot[bot]' ];
 const checkIfIgnoredUsername = ( username ) =>
 	ignoredUsernames.includes( username );
 
