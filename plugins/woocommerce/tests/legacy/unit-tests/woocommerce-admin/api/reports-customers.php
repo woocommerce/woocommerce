@@ -335,83 +335,84 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $reports );
 		$this->assertEquals( $test_customers[0]->get_id(), $reports[0]['user_id'] );
 
-        // Test filter_empty param by name
-        $request->set_query_params(
-            array(
-                'filter_empty' => array('name'),
-            )
-        );
+		// Test filter_empty param by name
+		$request->set_query_params(
+			array(
+				'filter_empty' => array( 'name' ),
+			)
+		);
 
-        $response = $this->server->dispatch( $request );
-        $reports  = $response->get_data();
-        $this->assertEquals( 200, $response->get_status() );
-        $this->assertCount( 10, $reports );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 10, $reports );
 
-        // Test filter_empty param by name and email
-        $request->set_query_params(
-            array(
-                'filter_empty' => array('name', 'email'),
-            )
-        );
-        $this->assertEquals( 200, $response->get_status() );
-        $this->assertCount( 10, $reports );
+		// Test filter_empty param by name and email
+		$request->set_query_params(
+			array(
+				'filter_empty' => array( 'name', 'email' ),
+			)
+		);
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 10, $reports );
 
-        // Test filter_empty param by name and email
-        $request->set_query_params(
-            array(
-                'filter_empty' => array('name', 'country'),
-            )
-        );
-        $this->assertEquals( 200, $response->get_status() );
-        $this->assertCount( 10, $reports );
+		// Test filter_empty param by name and email
+		$request->set_query_params(
+			array(
+				'filter_empty' => array( 'name', 'country' ),
+			)
+		);
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 10, $reports );
 
-        // Test filter_empty param by state
-        $request->set_query_params(
-            array(
-                'filter_empty' => array('state')
-            )
-        );
-        $this->assertEquals( 200, $response->get_status() );
-        $this->assertCount( 10, $reports );
+		// Test filter_empty param by state
+		$request->set_query_params(
+			array(
+				'filter_empty' => array( 'state' )
+			)
+		);
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 10, $reports );
 
-        // Test filter_empty param by state
-        $request->set_query_params(
-            array(
-                'filter_empty' => array('postcode'),
-            )
-        );
-        $this->assertEquals( 200, $response->get_status() );
-        $this->assertCount( 10, $reports );
+		// Test filter_empty param by postcode
+		$request->set_query_params(
+			array(
+				'filter_empty' => array( 'postcode' ),
+			)
+		);
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 10, $reports );
 
-        $customer = WC_Helper_Customer::create_customer( "customer11", 'password', "" );
-        $customer->set_postcode(null);
-        $customer->save();
+		// Test filter_empty with new customer
+		$customer = WC_Helper_Customer::create_customer( "customer11", 'password' );
+		$customer->set_postcode(null);
+		$customer->save();
 
-        $request->set_query_params(
-            array(
-                'filter_empty' => array('postcode'),
-            )
-        );
-        $this->assertEquals( 200, $response->get_status() );
-        $this->assertCount( 10, $reports );
+		$request->set_query_params(
+			array(
+				'filter_empty' => array( 'postcode' ),
+			)
+		);
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 10, $reports );
 
-        // Test filter_empty param by email
-        $request->set_query_params(
-            array(
-                'filter_empty' => array('email'),
-            )
-        );
-        $this->assertEquals( 200, $response->get_status() );
-        $this->assertCount( 10, $reports );
+		// Test filter_empty param by email
+		$request->set_query_params(
+			array(
+				'filter_empty' => array( 'email' ),
+			)
+		);
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 11, $reports );
 
-        // Test filter_empty param by name
-        $request->set_query_params(
-            array(
-                'filter_empty' => array('name'),
-            )
-        );
-        $this->assertEquals( 200, $response->get_status() );
-        $this->assertCount( 10, $reports );
+		// Test filter_empty param by name
+		$request->set_query_params(
+			array(
+				'filter_empty' => array( 'name' ),
+			)
+		);
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 11, $reports );
 	}
 
 	/**
