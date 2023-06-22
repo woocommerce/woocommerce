@@ -80,7 +80,7 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
  * @param {number} id Workflow id
  * @return {Object} Workflow data
  */
-export const getWorkflowData = async ( id: number ) => {
+export const getWorkflowData = async ( id: number | string ) => {
 	const { data } = await octokitWithAuth().request(
 		'GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}',
 		{
@@ -105,7 +105,7 @@ export const getWorkflowData = async ( id: number ) => {
  * @return {Object} totals
  */
 export const getWorkflowRunData = async ( options: {
-	id: number;
+	id: number | string;
 	owner: string;
 	name: string;
 	start: string;
