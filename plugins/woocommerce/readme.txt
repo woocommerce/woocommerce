@@ -304,6 +304,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Use locator.fill to fill variation values in the form instead of page.fill [[#37854]](https://github.com/woocommerce/woocommerce/pull/37854)
 * Dev - Variations - Remove separator between buttons and empty state screen [[#38123]](https://github.com/woocommerce/woocommerce/pull/38123)
 * Dev - Variations - Rename Generate variations button after variations are created. [[#38084]](https://github.com/woocommerce/woocommerce/pull/38084)
+* Tweak - Always pass default product type options to product_type_options filter [#38854](https://github.com/woocommerce/woocommerce/pull/38854)
 * Tweak - Add a 24px spacing to store management body [[#38088]](https://github.com/woocommerce/woocommerce/pull/38088)
 * Tweak - Add context to translatable strings for credit card labels. [[#36364]](https://github.com/woocommerce/woocommerce/pull/36364)
 * Tweak - Add product type options tracking to product publish and update events. [[#38017]](https://github.com/woocommerce/woocommerce/pull/38017)
