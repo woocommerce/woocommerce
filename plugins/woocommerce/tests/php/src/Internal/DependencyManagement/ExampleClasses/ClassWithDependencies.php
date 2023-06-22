@@ -36,6 +36,9 @@ class ClassWithDependencies {
 	 */
 	public $dependency_class = null;
 
+	/**
+	 * Creates a new instance of the class.
+	 */
 	public function __construct() {
 		self::$instances_count++;
 	}
