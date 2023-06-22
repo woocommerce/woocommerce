@@ -24,6 +24,13 @@ class ProductCollection extends AbstractBlock {
 	protected $valid_query_vars;
 
 	/**
+	 * All the query args related to the filter by attributes block.
+	 *
+	 * @var array
+	 */
+	protected $attributes_filter_query_args = array();
+
+	/**
 	 * Orderby options not natively supported by WordPress REST API
 	 *
 	 * @var array
@@ -51,13 +58,20 @@ class ProductCollection extends AbstractBlock {
 		// Update query for frontend rendering.
 		add_filter(
 			'query_loop_block_query_vars',
-			array( $this, 'build_query' ),
+			array( $this, 'build_frontend_query' ),
 			10,
 			3
 		);
 
+		add_filter(
+			'pre_render_block',
+			array( $this, 'add_support_for_filter_blocks' ),
+			10,
+			2
+		);
+
 		// Update the query for Editor.
-		add_filter( 'rest_product_query', array( $this, 'update_rest_query' ), 10, 2 );
+		add_filter( 'rest_product_query', array( $this, 'update_rest_query_in_editor' ), 10, 2 );
 
 		// Extend allowed `collection_params` for the REST API.
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
@@ -69,7 +83,7 @@ class ProductCollection extends AbstractBlock {
 	 * @param array           $args    Query args.
 	 * @param WP_REST_Request $request Request.
 	 */
-	public function update_rest_query( $args, $request ): array {
+	public function update_rest_query_in_editor( $args, $request ): array {
 		// Only update the query if this is a product collection block.
 		$is_product_collection_block = $request->get_param( 'isProductCollectionBlock' );
 		if ( ! $is_product_collection_block ) {
@@ -96,24 +110,41 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Get final query args based on provided values
+	 * Add support for filter blocks:
+	 * - Price filter block
+	 * - Attributes filter block
+	 * - Rating filter block
+	 * - In stock filter block etc.
 	 *
-	 * @param array $common_query_values Common query values.
-	 * @param array $query               Query from block context.
+	 * @param array $pre_render   The pre-rendered block.
+	 * @param array $parsed_block The parsed block.
 	 */
-	private function get_final_query_args( $common_query_values, $query ) {
-		$handpicked_products = $query['handpicked_products'] ?? [];
-		$orderby_query       = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : [];
-		$on_sale_query       = $this->get_on_sale_products_query( $query['on_sale'] );
-		$stock_query         = $this->get_stock_status_query( $query['stock_status'] );
-		$visibility_query    = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query ) : [];
-		$attributes_query    = $this->get_product_attributes_query( $query['product_attributes'] );
-		$taxonomies_query    = $query['taxonomies_query'] ?? [];
-		$tax_query           = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query );
+	public function add_support_for_filter_blocks( $pre_render, $parsed_block ) {
+		$is_product_collection_block = $parsed_block['attrs']['query']['isProductCollectionBlock'] ?? false;
 
-		$merged_query = $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query );
+		if ( ! $is_product_collection_block ) {
+			return;
+		}
 
-		return $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
+		$this->asset_data_registry->add( 'has_filterable_products', true, true );
+		/**
+		 * It enables the page to refresh when a filter is applied, ensuring that the product collection block,
+		 * which is a server-side rendered (SSR) block, retrieves the products that match the filters.
+		 */
+		$this->asset_data_registry->add( 'is_rendering_php_template', true, true );
+
+		$frontend_query = $this->get_final_frontend_query( $parsed_block['attrs']['query'], null, true );
+		// Override the query to get all products.
+		$fields_to_override = [
+			'posts_per_page' => -1,
+			'paged'          => null,
+		];
+		$new_array          = array_merge( $frontend_query, $fields_to_override );
+
+		$products    = new \WP_Query( $new_array );
+		$product_ids = wp_list_pluck( $products->posts, 'ID' );
+		// Add the product ids to the asset data registry, so that filter blocks can use it.
+		$this->asset_data_registry->add( 'product_ids', $product_ids, true );
 	}
 
 	/**
@@ -125,7 +156,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @return array
 	 */
-	public function build_query( $query, $block, $page ) {
+	public function build_frontend_query( $query, $block, $page ) {
 		// If not in context of product collection block, return the query as is.
 		$is_product_collection_block = $block->context['query']['isProductCollectionBlock'] ?? false;
 		if ( ! $is_product_collection_block ) {
@@ -133,14 +164,26 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$block_context_query = $block->context['query'];
-		$offset              = $block_context_query['offset'] ?? 0;
-		$per_page            = $block_context_query['perPage'] ?? 9;
+		return $this->get_final_frontend_query( $block_context_query, $page );
+	}
+
+
+	/**
+	 * Get the final query arguments for the frontend.
+	 *
+	 * @param array $query The query arguments.
+	 * @param int   $page  The page number.
+	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
+	 */
+	private function get_final_frontend_query( $query, $page = 1, $is_exclude_applied_filters = false ) {
+		$offset   = $query['offset'] ?? 0;
+		$per_page = $query['perPage'] ?? 9;
 
 		$common_query_values = array(
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			'meta_query'     => array(),
-			'posts_per_page' => $block_context_query['perPage'],
-			'order'          => $block_context_query['order'],
+			'posts_per_page' => $query['perPage'],
+			'order'          => $query['order'],
 			'offset'         => ( $per_page * ( $page - 1 ) ) + $offset,
 			'post__in'       => array(),
 			'post_status'    => 'publish',
@@ -148,25 +191,53 @@ class ProductCollection extends AbstractBlock {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'tax_query'      => array(),
 			'paged'          => $page,
-			's'              => $block_context_query['search'],
-			'author'         => $block_context_query['author'] ?? '',
+			's'              => $query['search'],
+			'author'         => $query['author'] ?? '',
 		);
 
-		$is_on_sale          = $block_context_query['woocommerceOnSale'] ?? false;
+		$is_on_sale          = $query['woocommerceOnSale'] ?? false;
 		$taxonomies_query    = $this->get_filter_by_taxonomies_query( $query['tax_query'] ?? [] );
-		$handpicked_products = $block_context_query['woocommerceHandPickedProducts'] ?? [];
+		$handpicked_products = $query['woocommerceHandPickedProducts'] ?? [];
 
-		return $this->get_final_query_args(
+		$final_query = $this->get_final_query_args(
 			$common_query_values,
 			array(
 				'on_sale'             => $is_on_sale,
-				'stock_status'        => $block_context_query['woocommerceStockStatus'],
-				'orderby'             => $block_context_query['orderBy'],
-				'product_attributes'  => $block_context_query['woocommerceAttributes'],
+				'stock_status'        => $query['woocommerceStockStatus'],
+				'orderby'             => $query['orderBy'],
+				'product_attributes'  => $query['woocommerceAttributes'],
 				'taxonomies_query'    => $taxonomies_query,
 				'handpicked_products' => $handpicked_products,
-			)
+			),
+			$is_exclude_applied_filters
 		);
+
+		return $final_query;
+	}
+
+	/**
+	 * Get final query args based on provided values
+	 *
+	 * @param array $common_query_values Common query values.
+	 * @param array $query               Query from block context.
+	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
+	 */
+	private function get_final_query_args( $common_query_values, $query, $is_exclude_applied_filters = false ) {
+		$handpicked_products = $query['handpicked_products'] ?? [];
+		$orderby_query       = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : [];
+		$on_sale_query       = $this->get_on_sale_products_query( $query['on_sale'] );
+		$stock_query         = $this->get_stock_status_query( $query['stock_status'] );
+		$visibility_query    = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query ) : [];
+		$attributes_query    = $this->get_product_attributes_query( $query['product_attributes'] );
+		$taxonomies_query    = $query['taxonomies_query'] ?? [];
+		$tax_query           = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query );
+
+		// We exclude applied filters to generate product ids for the filter blocks.
+		$applied_filters_query = $is_exclude_applied_filters ? [] : $this->get_queries_by_applied_filters();
+
+		$merged_query = $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query, $applied_filters_query );
+
+		return $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
 	}
 
 	/**
@@ -564,5 +635,221 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		return $query;
+	}
+
+	/**
+	 * Return queries that are generated by query args.
+	 *
+	 * @return array
+	 */
+	private function get_queries_by_applied_filters() {
+		return array(
+			'price_filter'        => $this->get_filter_by_price_query(),
+			'attributes_filter'   => $this->get_filter_by_attributes_query(),
+			'stock_status_filter' => $this->get_filter_by_stock_status_query(),
+			'rating_filter'       => $this->get_filter_by_rating_query(),
+		);
+	}
+
+	/**
+	 * Return a query that filters products by price.
+	 *
+	 * @return array
+	 */
+	private function get_filter_by_price_query() {
+		$min_price = get_query_var( PriceFilter::MIN_PRICE_QUERY_VAR );
+		$max_price = get_query_var( PriceFilter::MAX_PRICE_QUERY_VAR );
+
+		$max_price_query = empty( $max_price ) ? array() : [
+			'key'     => '_price',
+			'value'   => $max_price,
+			'compare' => '<',
+			'type'    => 'numeric',
+		];
+
+		$min_price_query = empty( $min_price ) ? array() : [
+			'key'     => '_price',
+			'value'   => $min_price,
+			'compare' => '>=',
+			'type'    => 'numeric',
+		];
+
+		if ( empty( $min_price_query ) && empty( $max_price_query ) ) {
+			return array();
+		}
+
+		return array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'meta_query' => array(
+				array(
+					'relation' => 'AND',
+					$max_price_query,
+					$min_price_query,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Return a query that filters products by attributes.
+	 *
+	 * @return array
+	 */
+	private function get_filter_by_attributes_query() {
+		$attributes_filter_query_args = $this->get_filter_by_attributes_query_vars();
+
+		$queries = array_reduce(
+			$attributes_filter_query_args,
+			function( $acc, $query_args ) {
+				$attribute_name       = $query_args['filter'];
+				$attribute_query_type = $query_args['query_type'];
+
+				$attribute_value = get_query_var( $attribute_name );
+				$attribute_query = get_query_var( $attribute_query_type );
+
+				if ( empty( $attribute_value ) ) {
+					return $acc;
+				}
+
+				// It is necessary explode the value because $attribute_value can be a string with multiple values (e.g. "red,blue").
+				$attribute_value = explode( ',', $attribute_value );
+
+				$acc[] = array(
+					'taxonomy' => str_replace( AttributeFilter::FILTER_QUERY_VAR_PREFIX, 'pa_', $attribute_name ),
+					'field'    => 'slug',
+					'terms'    => $attribute_value,
+					'operator' => 'and' === $attribute_query ? 'AND' : 'IN',
+				);
+
+				return $acc;
+			},
+			array()
+		);
+
+		if ( empty( $queries ) ) {
+			return array();
+		}
+
+		return array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery
+			'tax_query' => array(
+				array(
+					'relation' => 'AND',
+					$queries,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Get all the query args related to the filter by attributes block.
+	 *
+	 * @return array
+	 * [color] => Array
+	 *   (
+	 *        [filter] => filter_color
+	 *        [query_type] => query_type_color
+	 *    )
+	 *
+	 * [size] => Array
+	 *    (
+	 *        [filter] => filter_size
+	 *        [query_type] => query_type_size
+	 *    )
+	 * )
+	 */
+	private function get_filter_by_attributes_query_vars() {
+		if ( ! empty( $this->attributes_filter_query_args ) ) {
+			return $this->attributes_filter_query_args;
+		}
+
+		$this->attributes_filter_query_args = array_reduce(
+			wc_get_attribute_taxonomies(),
+			function( $acc, $attribute ) {
+				$acc[ $attribute->attribute_name ] = array(
+					'filter'     => AttributeFilter::FILTER_QUERY_VAR_PREFIX . $attribute->attribute_name,
+					'query_type' => AttributeFilter::QUERY_TYPE_QUERY_VAR_PREFIX . $attribute->attribute_name,
+				);
+				return $acc;
+			},
+			array()
+		);
+
+		return $this->attributes_filter_query_args;
+	}
+
+	/**
+	 * Return a query that filters products by stock status.
+	 *
+	 * @return array
+	 */
+	private function get_filter_by_stock_status_query() {
+		$filter_stock_status_values = get_query_var( StockFilter::STOCK_STATUS_QUERY_VAR );
+
+		if ( empty( $filter_stock_status_values ) ) {
+			return array();
+		}
+
+		$filtered_stock_status_values = array_filter(
+			explode( ',', $filter_stock_status_values ),
+			function( $stock_status ) {
+				return in_array( $stock_status, StockFilter::get_stock_status_query_var_values(), true );
+			}
+		);
+
+		if ( empty( $filtered_stock_status_values ) ) {
+			return array();
+		}
+
+		return array(
+			// Ignoring the warning of not using meta queries.
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			'meta_query' => array(
+				array(
+					'key'      => '_stock_status',
+					'value'    => $filtered_stock_status_values,
+					'operator' => 'IN',
+				),
+			),
+		);
+	}
+
+	/**
+	 * Return a query that filters products by rating.
+	 *
+	 * @return array
+	 */
+	private function get_filter_by_rating_query() {
+		$filter_rating_values = get_query_var( RatingFilter::RATING_QUERY_VAR );
+		if ( empty( $filter_rating_values ) ) {
+			return array();
+		}
+
+		$parsed_filter_rating_values = explode( ',', $filter_rating_values );
+		$product_visibility_terms    = wc_get_product_visibility_term_ids();
+
+		if ( empty( $parsed_filter_rating_values ) || empty( $product_visibility_terms ) ) {
+			return array();
+		}
+
+		$rating_terms = array_map(
+			function( $rating ) use ( $product_visibility_terms ) {
+				return $product_visibility_terms[ 'rated-' . $rating ];
+			},
+			$parsed_filter_rating_values
+		);
+
+		return array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery
+			'tax_query' => array(
+				array(
+					'field'         => 'term_taxonomy_id',
+					'taxonomy'      => 'product_visibility',
+					'terms'         => $rating_terms,
+					'operator'      => 'IN',
+					'rating_filter' => true,
+				),
+			),
+		);
 	}
 }
