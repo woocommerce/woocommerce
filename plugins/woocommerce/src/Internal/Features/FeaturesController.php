@@ -1114,6 +1114,8 @@ class FeaturesController {
 
 		$is_feature_nonce_invalid = ( ! isset( $_GET['_feature_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_feature_nonce'] ) ), 'change_feature_enable' ) );
 
+		$query_params_to_remove = array( '_feature_nonce' );
+
 		foreach ( array_keys( $this->features ) as $feature_id ) {
 			if ( isset( $_GET[ $feature_id ] ) && is_numeric( $_GET[ $feature_id ] ) ) {
 				$value = absint( $_GET[ $feature_id ] );
@@ -1128,7 +1130,11 @@ class FeaturesController {
 				} elseif ( 0 === $value ) {
 					$this->change_feature_enable( $feature_id, false );
 				}
+				$query_params_to_remove[] = $feature_id;
 			}
+		}
+		if ( count( $query_params_to_remove ) > 1 ) {
+			wp_safe_redirect( remove_query_arg( $query_params_to_remove, wp_get_referer() ) );
 		}
 	}
 }
