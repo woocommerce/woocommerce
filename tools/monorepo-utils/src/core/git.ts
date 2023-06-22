@@ -116,6 +116,24 @@ export const cloneRepoShallow = async ( repoPath: string ) => {
 };
 
 /**
+ * Add a remote using the authenticated token `GITHUB_TOKEN`
+ *
+ * @param {Object} options       CLI options
+ * @param {string} options.owner repo owner
+ * @param {string} options.name  repo name
+ * @return {string} remote
+ */
+export const getAuthenticatedRemote = ( options: {
+	owner: string;
+	name: string;
+} ) => {
+	const { owner, name } = options;
+	const source = `github.com/${ owner }/${ name }`;
+	const token = getEnvVar( 'GITHUB_TOKEN', true );
+	return `https://${ owner }:${ token }@${ source }`;
+};
+
+/**
  * Clone a repo using the authenticated token `GITHUB_TOKEN`. This allows the script to push branches to origin.
  *
  * @param {Object}  options       CLI options
@@ -128,10 +146,7 @@ export const cloneAuthenticatedRepo = async (
 	options: { owner: string; name: string },
 	isShallow = true
 ): Promise< string > => {
-	const { owner, name } = options;
-	const source = `github.com/${ owner }/${ name }`;
-	const token = getEnvVar( 'GITHUB_TOKEN' );
-	const remote = `https://${ owner }:${ token }@${ source }`;
+	const remote = getAuthenticatedRemote( options );
 
 	return isShallow
 		? await cloneRepoShallow( remote )

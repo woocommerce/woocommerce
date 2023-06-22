@@ -212,10 +212,6 @@ export const isCommunityPullRequest = (
 	owner: string,
 	name: string
 ) => {
-	return (
-		pullRequestData.author_association === 'CONTRIBUTOR' ||
-		// It's possible a MEMBER can open a PR from their own fork.
-		( pullRequestData.author_association === 'MEMBER' &&
-			pullRequestData.head.repo.full_name !== `${ owner }/${ name }` )
-	);
+	// We can't use author_association here because it can be changed by PR authors. Instead check PR source.
+	return pullRequestData.head.repo.full_name !== `${ owner }/${ name }`;
 };
