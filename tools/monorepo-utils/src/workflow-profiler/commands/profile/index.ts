@@ -44,7 +44,6 @@ const program = new Command( 'profile' )
 					start,
 					end,
 				} );
-				// Logger.endTask();
 				return result;
 			} )
 		).then( ( results ) => logWorkflowRunResults( results ) );
