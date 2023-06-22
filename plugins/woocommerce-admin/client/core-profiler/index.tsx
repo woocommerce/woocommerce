@@ -20,7 +20,6 @@ import {
 	updateQueryString,
 	getQuery,
 	getNewPath,
-	navigateTo,
 } from '@woocommerce/navigation';
 import {
 	ExtensionList,
