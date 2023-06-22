@@ -83,6 +83,12 @@ class CheckoutSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
+			'order_number'      => [
+				'description' => __( 'Order number used for display.', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			'customer_note'     => [
 				'description' => __( 'Note added to the order by the customer during checkout.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
@@ -188,6 +194,7 @@ class CheckoutSchema extends AbstractSchema {
 			'order_id'          => $order->get_id(),
 			'status'            => $order->get_status(),
 			'order_key'         => $order->get_order_key(),
+			'order_number'      => $order->get_order_number(),
 			'customer_note'     => $order->get_customer_note(),
 			'customer_id'       => $order->get_customer_id(),
 			'billing_address'   => $this->billing_address_schema->get_item_response( $order ),
