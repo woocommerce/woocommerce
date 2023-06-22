@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Always pass default product type options to product_type_options filter

@@ -230,18 +230,20 @@ class WC_Products_Tracking {
 	 * @return array
 	 */
 	private static function get_possible_product_type_options_ids() {
-		$product_type_options_ids = array_merge(
+		$product_type_options_ids =
 			array_values(
 				array_map(
 					function ( $product_type_option ) {
 						return $product_type_option['id'];
 					},
 					/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
-					apply_filters( 'product_type_options', array() )
+					apply_filters(
+						'product_type_options',
+						wc_get_default_product_type_options(),
+					)
+					/* phpcs: enable */
 				)
-			),
-			array( '_downloadable', '_virtual' )
-		);
+			);
 
 		return $product_type_options_ids;
 	}
