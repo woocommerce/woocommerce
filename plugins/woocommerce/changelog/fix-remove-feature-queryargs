@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove feature related query args after enabling/disabling it
