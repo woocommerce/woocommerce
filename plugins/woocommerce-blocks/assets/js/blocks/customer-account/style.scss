@@ -1,4 +1,23 @@
+@mixin flex-justify-content($justification) {
+	float: none;
+	justify-content: $justification;
+}
+
+.is-layout-constrained > .wp-block-woocommerce-customer-account.alignright {
+	@include flex-justify-content(flex-end);
+}
+
+.is-layout-constrained > .wp-block-woocommerce-customer-account.alignleft {
+	@include flex-justify-content(flex-start);
+}
+
+.is-layout-constrained > .wp-block-woocommerce-customer-account.aligncenter {
+	@include flex-justify-content(center);
+}
+
 .wp-block-woocommerce-customer-account {
+	display: flex;
+
 	a {
 		text-decoration: none !important;
 		align-items: center;
