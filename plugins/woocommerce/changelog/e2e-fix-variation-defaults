@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix flakiness in `can set variation defaults` test.

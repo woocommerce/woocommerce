@@ -25,6 +25,7 @@ import { AUTO_DRAFT_NAME, getDerivedProductType } from '../index';
 import {
 	NUMBERS_AND_DECIMAL_SEPARATOR,
 	ONLY_ONE_DECIMAL_SEPARATOR,
+	TRACKS_SOURCE,
 } from '../constants';
 import { ProductVariationsOrder } from './use-variations-order';
 
@@ -44,7 +45,7 @@ function getNoticePreviewActions( status: ProductStatus, permalink: string ) {
 					label: __( 'View in store', 'woocommerce' ),
 					onClick: () => {
 						recordEvent( 'product_preview_changes', {
-							new_product_page: true,
+							source: TRACKS_SOURCE,
 						} );
 						window.open( permalink, '_blank' );
 					},
