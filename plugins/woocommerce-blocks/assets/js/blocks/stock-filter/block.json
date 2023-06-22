@@ -23,7 +23,7 @@
 		},
 		"showCounts": {
 			"type": "boolean",
-			"default": true
+			"default": false
 		},
 		"showFilterButton": {
 			"type": "boolean",
