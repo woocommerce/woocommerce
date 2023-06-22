@@ -1,4 +1,19 @@
+@import "./style";
+
+.editor-styles-wrapper .is-layout-constrained > .wc-block-editor-customer-account.alignright {
+	@include flex-justify-content(flex-end);
+}
+
+.editor-styles-wrapper .is-layout-constrained > .wc-block-editor-customer-account.alignleft {
+	@include flex-justify-content(flex-start);
+}
+
+.editor-styles-wrapper .is-layout-constrained > .wc-block-editor-customer-account.aligncenter {
+	@include flex-justify-content(center);
+}
+
 .wc-block-editor-customer-account {
+	display: flex;
 	padding: em($gap-smaller) em($gap-smaller);
 }
 
