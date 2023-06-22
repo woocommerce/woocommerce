@@ -4,7 +4,7 @@
 import { octokitWithAuth } from '../../core/github/api';
 import { Logger } from '../../core/logger';
 import { requestPaginatedData, PaginatedDataTotals } from './github';
-import { MAXIMUM_WORKFLOW_MINUTES } from '../config';
+import config from '../config';
 
 /**
  * Get all workflows from the WooCommerce repository.
@@ -98,6 +98,7 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 	const { workflow_runs, total_count } = data;
 	totals.total_count = total_count;
 	totals.count += workflow_runs.length;
+	const { MAXIMUM_WORKFLOW_MINUTES } = config;
 
 	workflow_runs.forEach( ( run ) => {
 		totals[ run.conclusion ]++;
