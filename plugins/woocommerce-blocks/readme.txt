@@ -170,6 +170,12 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 - Fix total shipping display info when no shipping method is available. ([8819](https://github.com/woocommerce/woocommerce-blocks/pull/8819))
 - Blockified Single Product Template: use h1 for the Product Title when transforming from Classic template. ([9748]((https://github.com/woocommerce/woocommerce-blocks/pull/9748)))
 
+= 10.2.4 - 2023-06-22 =
+
+#### Bug Fixes
+
+- Fix filter blocks using the old markup not rendering and fix missing translations in those blocks. ([9954](https://github.com/woocommerce/woocommerce-blocks/pull/9954))
+
 = 10.2.3 - 2023-06-09 =
 
 #### Bug Fixes
