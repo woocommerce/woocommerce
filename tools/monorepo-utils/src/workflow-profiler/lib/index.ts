@@ -4,6 +4,7 @@
 import { octokitWithAuth } from '../../core/github/api';
 import { Logger } from '../../core/logger';
 import { requestPaginatedData, PaginatedDataTotals } from './github';
+import { calculateMean, calculateMedian, get90thPercentile } from './math';
 import config from '../config';
 
 /**
@@ -41,50 +42,6 @@ export const getAllWorkflows = async ( owner: string, name: string ) => {
 	);
 
 	return totals.workflows;
-};
-
-/**
- * Calculate the mean value of an array of numbers.
- *
- * @param {Array} numbers Array of numbers
- * @return {number} Mean value
- */
-export const calculateMean = ( numbers: Array< number > ) => {
-	if ( numbers.length === 0 ) {
-		return 0;
-	}
-
-	const sum = numbers.reduce( function ( a, b ) {
-		return a + b;
-	}, 0 );
-
-	return sum / numbers.length;
-};
-
-/**
- * Calculate the median value of an array of numbers.
- *
- * @param {Array} numbers Array of numbers
- * @return {number} Median value
- */
-export const calculateMedian = ( numbers: Array< number > ) => {
-	if ( numbers.length === 0 ) {
-		return 0;
-	}
-
-	// Sort the numbers in ascending order
-	numbers.sort( function ( a, b ) {
-		return a - b;
-	} );
-
-	const middleIndex = Math.floor( numbers.length / 2 );
-
-	if ( numbers.length % 2 === 0 ) {
-		// If the array length is even, return the average of the two middle values
-		return ( numbers[ middleIndex - 1 ] + numbers[ middleIndex ] ) / 2;
-	}
-	// If the array length is odd, return the middle value
-	return numbers[ middleIndex ];
 };
 
 /**
@@ -208,6 +165,11 @@ export const getWorkflowRunData = async ( options: {
 			1000 /
 			60
 		).toFixed( 2 ), // in minutes
+		'90th_percentile_in_minutes': (
+			get90thPercentile( totals.times ) /
+			1000 /
+			60
+		).toFixed( 2 ),
 	};
 };
 
@@ -228,6 +190,7 @@ export const logWorkflowRunResults = ( results ) => {
 			'median (min)',
 			'longest (min)',
 			'shortest (min)',
+			'90th percentile (min)',
 		],
 		results.map( ( result ) => [
 			result.name,
@@ -239,6 +202,7 @@ export const logWorkflowRunResults = ( results ) => {
 			result.median_time_in_minutes,
 			result.longest_time_in_minutes,
 			result.shortest_time_in_minutes,
+			result[ '90th_percentile_in_minutes' ],
 		] )
 	);
 };
