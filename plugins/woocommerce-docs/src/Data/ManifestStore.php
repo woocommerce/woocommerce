@@ -88,25 +88,24 @@ class ManifestStore {
 	 * Update the manifest data for a given url
 	 *
 	 * @param string $url The url of the manifest to update.
-	 * @param array  $data The data to update the manifest with.
+	 * @param array  $new_data The data to update the manifest with.
 	 */
-	public static function update_manifest( $url, $data ) {
-		// TODO - fix this to update the value with already json decoded data.
+	public static function update_manifest( $url, $new_data ) {
 		$default_value = wp_json_encode( array() );
-		$json          = get_option( self::MANIFEST_OPTION, $default_value );
-		$data          = json_decode( $json, true );
-		$data          = array_map(
-			function( $tuple ) use ( $url, $data ) {
+		$existing_data = json_decode( get_option( self::MANIFEST_OPTION, $default_value ), true );
+
+		$updated_data = array_map(
+			function( $tuple ) use ( $url, $new_data ) {
 				if ( $tuple[0] === $url ) {
-					return array( $url, wp_json_encode( $data ) );
+					return array( $url, json_encode( $new_data, true ) );
 				}
 
 				return $tuple;
 			},
-			$data
+			$existing_data
 		);
 
-		$json = wp_json_encode( $data );
+		$json = wp_json_encode( $updated_data );
 		self::save( $json );
 	}
 
