@@ -167,7 +167,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
-
 * Update - Update WooCommerce Blocks to 10.2.4 [#38891](https://github.com/woocommerce/woocommerce/pull/38891)
 * Fix - Do not show "Adding new attribute failed" error message when loading of product screens is interrupted by page unload. [[#38815]](https://github.com/woocommerce/woocommerce/pull/38815)
 * Tweak - Always pass default product type options to product_type_options filter. [[#38854]](https://github.com/woocommerce/woocommerce/pull/38854)
