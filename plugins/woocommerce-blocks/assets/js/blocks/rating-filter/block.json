@@ -19,7 +19,7 @@
 		},
 		"showCounts": {
 			"type": "boolean",
-			"default": true
+			"default": false
 		},
 		"displayStyle": {
 			"type": "string",
