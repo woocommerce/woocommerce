@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Perform feature flag change and redirection in the same request
+Perform feature flag change and redirection in the same request and remove feature related query args after enabling/disabling it
