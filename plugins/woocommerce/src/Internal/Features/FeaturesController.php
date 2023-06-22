@@ -121,6 +121,13 @@ class FeaturesController {
 				'is_experimental' => false,
 				'disable_ui'      => true,
 			),
+			'marketplace' => array(
+				'name'            => __( 'Marketplace', 'woocommerce' ),
+				'description'     => __( 'New, faster way to find extensions and themes for your WooCommerce store', 'woocommerce' ),
+				'is_experimental' => false,
+				'enabled_by_default' => true,
+				'disable_ui'      => false,
+			),
 		);
 
 		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'product_block_editor' );
