@@ -20,7 +20,6 @@ import {
 	updateQueryString,
 	getQuery,
 	getNewPath,
-	navigateTo,
 } from '@woocommerce/navigation';
 import {
 	ExtensionList,
@@ -332,9 +331,7 @@ const handleGeolocation = assign( {
 } );
 
 const redirectToWooHome = () => {
-	navigateTo( {
-		url: getNewPath( {}, '/', {} ),
-	} );
+	window.location.href = getNewPath( {}, '/', {} );
 };
 
 const redirectToJetpackAuthPage = (
