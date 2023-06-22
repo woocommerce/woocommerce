@@ -269,7 +269,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// Meta boxes.
 			/* phpcs:disable */
-			if ( in_array( $screen_id, array( 'product', 'edit-product' ) ) ) {
+			if ( in_array( $screen_id, array( 'product' ) ) ) {
 				wp_enqueue_media();
 				wp_register_script( 'wc-admin-product-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'media-models' ), $version );
 				wp_register_script( 'wc-admin-variation-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-product-variation' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'serializejson', 'media-models', 'backbone', 'jquery-ui-sortable', 'wc-backbone-modal' ), $version );
