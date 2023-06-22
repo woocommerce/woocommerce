@@ -20,6 +20,7 @@ import { SuggestionItem, PoweredByLink, recordNameTracks } from './index';
 import { RandomLoadingMessage } from '../components';
 
 const MIN_TITLE_LENGTH = 10;
+import { useProductSlug } from '../hooks/useProductSlug';
 
 enum SuggestionsState {
 	Fetching = 'fetching',
@@ -56,6 +57,7 @@ export const ProductNameSuggestions = () => {
 		[]
 	);
 	const { fetchSuggestions } = useProductDataSuggestions();
+	const { updateProductSlug } = useProductSlug();
 	const nameInputRef = useRef< HTMLInputElement >(
 		document.querySelector( '#title' )
 	);
@@ -148,6 +150,19 @@ export const ProductNameSuggestions = () => {
 
 		updateProductName( suggestion.content );
 		setSuggestions( [] );
+
+		// Update product slug.
+		const currentProductData = productData();
+		try {
+			updateProductSlug(
+				suggestion.content,
+				currentProductData.product_id
+			);
+		} catch ( e ) {
+			// Log silently if slug update fails.
+			/* eslint-disable-next-line no-console */
+			console.error( e );
+		}
 	};
 
 	const fetchProductSuggestions = async (
