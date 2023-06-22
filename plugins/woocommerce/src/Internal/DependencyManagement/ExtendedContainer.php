@@ -6,6 +6,8 @@
 namespace Automattic\WooCommerce\Internal\DependencyManagement;
 
 use Automattic\WooCommerce\Container;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Vendor\League\Container\Container as BaseContainer;
 use Automattic\WooCommerce\Vendor\League\Container\Definition\DefinitionInterface;
@@ -94,7 +96,9 @@ class ExtendedContainer extends BaseContainer {
 		}
 
 		if ( ! array_key_exists( $class_name, $this->original_concretes ) ) {
-			$this->original_concretes[ $class_name ] = $this->extend( $class_name )->getConcrete( $concrete );
+			// LegacyProxy is a special case: we replace it with MockableLegacyProxy at unit testing bootstrap time.
+			$original_concrete                       = LegacyProxy::class === $class_name ? MockableLegacyProxy::class : $this->extend( $class_name )->getConcrete( $concrete );
+			$this->original_concretes[ $class_name ] = $original_concrete;
 		}
 
 		return $this->extend( $class_name )->setConcrete( $concrete );

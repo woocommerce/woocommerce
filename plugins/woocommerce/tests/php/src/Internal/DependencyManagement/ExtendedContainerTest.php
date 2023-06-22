@@ -7,6 +7,9 @@ namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement;
 
 use Automattic\WooCommerce\Internal\DependencyManagement\ContainerException;
 use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\StoreApi\Legacy;
+use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithDependencies;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DependencyClass;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\DerivedDependencyClass;
@@ -216,5 +219,41 @@ class ExtendedContainerTest extends \WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( DependencyClass::class, $this->sut->get( ClassWithDependencies::class )->dependency_class );
 		$this->assertInstanceOf( ClassWithDependencies::class, $this->sut->get( ClassWithDependencies::class ) );
+	}
+
+	/**
+	 * @testDox 'reset_replacement' treats LegacyProxy as an exception: it reverts is to MockableLegacyProxy.
+	 */
+	public function test_reset_replacement_resets_legacy_proxy_to_mockable_legacy_proxy() {
+		// For this test we need the original container that gets initialized in tests/legacy/bootstrap.php
+		// (where LegacyProxy is replaced with MockableLegacyProxy).
+		$sut = wc_get_container();
+
+		$some_other_proxy = new class() extends LegacyProxy {};
+		$sut->replace( LegacyProxy::class, $some_other_proxy );
+
+		$this->assertSame( $some_other_proxy, $sut->get( LegacyProxy::class ) );
+
+		$sut->reset_replacement( LegacyProxy::class );
+
+		$this->assertInstanceOf( MockableLegacyProxy::class, $sut->get( LegacyProxy::class ) );
+	}
+
+	/**
+	 * @testDox 'reset_all_replacements' treats LegacyProxy as an exception: it reverts is to MockableLegacyProxy.
+	 */
+	public function test_reset_all_replacements_resets_legacy_proxy_to_mockable_legacy_proxy() {
+		// For this test we need the original container that gets initialized in tests/legacy/bootstrap.php
+		// (where LegacyProxy is replaced with MockableLegacyProxy).
+		$sut = wc_get_container();
+
+		$some_other_proxy = new class() extends LegacyProxy {};
+		$sut->replace( LegacyProxy::class, $some_other_proxy );
+
+		$this->assertSame( $some_other_proxy, $sut->get( LegacyProxy::class ) );
+
+		$sut->reset_all_replacements();
+
+		$this->assertInstanceOf( MockableLegacyProxy::class, $sut->get( LegacyProxy::class ) );
 	}
 }
