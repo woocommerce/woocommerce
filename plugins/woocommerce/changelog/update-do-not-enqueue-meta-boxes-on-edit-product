@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Do not enqueue meta-boxes-product on edit-product screen
