@@ -101,7 +101,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		if ( $order->delete( false ) ) {
 			$this->assertEquals( 0, $product->get_total_sales() );
 
-			wp_untrash_post( $order->get_id() );
+			$order->untrash();
 			$this->assertEquals( 1, $product->get_total_sales() );
 		}
 
