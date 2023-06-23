@@ -97,7 +97,7 @@ class ManifestStore {
 		$updated_data = array_map(
 			function( $tuple ) use ( $url, $new_data ) {
 				if ( $tuple[0] === $url ) {
-					return array( $url, json_encode( $new_data, true ) );
+					return array( $url, wp_json_encode( $new_data, true ) );
 				}
 
 				return $tuple;

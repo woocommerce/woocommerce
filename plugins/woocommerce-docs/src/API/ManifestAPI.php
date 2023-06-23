@@ -69,7 +69,7 @@ class ManifestAPI {
 	public static function add_manifest( $request ) {
 		$manifest_url = $request->get_param( 'manifest' );
 		if ( ! $manifest_url ) {
-			return new \WP_Error( 'invalid_manifest_url', __( 'Invalid manifest url', 'woocommerce-docs' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'invalid_manifest_url', 'Invalid manifest url', array( 'status' => 400 ) );
 		}
 
 		\WooCommerceDocs\Data\ManifestStore::add_manifest( $manifest_url );
@@ -85,13 +85,13 @@ class ManifestAPI {
 	public static function delete_manifest( $request ) {
 		$manifest_url = $request->get_param( 'manifest' );
 		if ( ! $manifest_url ) {
-			return new \WP_Error( 'no_manifest_url', __( 'Manifest url not passed', 'woocommerce-docs' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'no_manifest_url', 'Manifest url not passed', array( 'status' => 400 ) );
 		}
 
 		$manifest = \WooCommerceDocs\Data\ManifestStore::get_manifest_by_url( $manifest_url );
 
 		if ( ! $manifest ) {
-			return new \WP_Error( 'invalid_manifest_url', __( 'Invalid manifest url', 'woocommerce-docs' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'invalid_manifest_url', 'Invalid manifest url', array( 'status' => 400 ) );
 		}
 
 		\WooCommerceDocs\Data\ManifestStore::remove_manifest( $manifest_url );
