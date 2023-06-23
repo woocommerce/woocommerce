@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix core profiler UI bugs [#38872](https://github.com/woocommerce/woocommerce/pull/38872)
 * Fix - Remove feature related query args after enabling/disabling it [#38852](https://github.com/woocommerce/woocommerce/pull/38852)
 * Fix - Add product_block_editor to legacy_feature_ids. [#38835](https://github.com/woocommerce/woocommerce/pull/38835)
 * Fix - Add "PrepareUrl" transformer to RIM rules processor [[#38312]](https://github.com/woocommerce/woocommerce/pull/38312)
