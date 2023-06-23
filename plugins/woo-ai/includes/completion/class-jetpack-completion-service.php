@@ -89,7 +89,7 @@ class Jetpack_Completion_Service implements Completion_Service_Interface {
 	 */
 	private function send_request_to_api( string $site_id, array $arguments ) {
 		return Client::wpcom_json_api_request_as_user(
-			"/sites/{$site_id}/jetpack-ai/completions",
+			'/text-completion/',
 			'2',
 			array(
 				'method'  => 'POST',
