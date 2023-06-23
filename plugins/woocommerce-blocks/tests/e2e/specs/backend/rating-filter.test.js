@@ -36,13 +36,13 @@ describe( `${ block.name } Block`, () => {
 		} );
 
 		it( 'product count can be toggled', async () => {
-			await expect( page ).toMatchElement(
+			await expect( page ).not.toMatchElement(
 				'.wc-block-components-product-rating-count'
 			);
 			await expect( page ).toClick( 'label', {
 				text: 'Display product count',
 			} );
-			await expect( page ).not.toMatchElement(
+			await expect( page ).toMatchElement(
 				'.wc-block-components-product-rating-count'
 			);
 			// reset
