@@ -80,6 +80,8 @@ jobs:
       ##
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
+        # 8.1 and 8.2 are temporarily disabled as docker-images for those cause the errors when pipeline is running
+        if: ${{ matrix.php == '7.4' || matrix.php == '8.0' }}
         with:
           php-version: '${{ matrix.php }}'
           ini-file: development
@@ -87,21 +89,29 @@ jobs:
       
       # Ensure that Composer installs the correct versions of packages.
       - name: Override PHP version in composer.json
+        # 8.1 and 8.2 are temporarily disabled as docker-images for those cause the errors when pipeline is running
+        if: ${{ matrix.php == '7.4' || matrix.php == '8.0' }}
         run: |
           composer config platform.php ${{ matrix.php }}
           composer update
 
       - name: Install npm dependencies
+        # 8.1 and 8.2 are temporarily disabled as docker-images for those cause the errors when pipeline is running
+        if: ${{ matrix.php == '7.4' || matrix.php == '8.0' }}
         run: |
           npm ci
           npm run build
           
       - name: Docker debug information
+        # 8.1 and 8.2 are temporarily disabled as docker-images for those cause the errors when pipeline is running
+        if: ${{ matrix.php == '7.4' || matrix.php == '8.0' }}
         run: |
           docker -v
           docker-compose -v
           
       - name: General debug information
+        # 8.1 and 8.2 are temporarily disabled as docker-images for those cause the errors when pipeline is running
+        if: ${{ matrix.php == '7.4' || matrix.php == '8.0' }}
         run: |
           npm --version
           node --version
@@ -111,12 +121,18 @@ jobs:
           locale -a
           
       - name: Start Docker environment
+        # 8.1 and 8.2 are temporarily disabled as docker-images for those cause the errors when pipeline is running
+        if: ${{ matrix.php == '7.4' || matrix.php == '8.0' }}
         run: npm run wp-env start --update
 
       - name: Log running Docker containers
+        # 8.1 and 8.2 are temporarily disabled as docker-images for those cause the errors when pipeline is running
+        if: ${{ matrix.php == '7.4' || matrix.php == '8.0' }}
         run: docker ps -a
 
       - name: Docker container debug information
+        # 8.1 and 8.2 are temporarily disabled as docker-images for those cause the errors when pipeline is running
+        if: ${{ matrix.php == '7.4' || matrix.php == '8.0' }}
         run: |
           npm run wp-env run tests-mysql mysql -- --version
           npm run wp-env run tests-wordpress "php --version"
@@ -125,4 +141,6 @@ jobs:
           npm run wp-env run tests-wordpress "locale -a"
           
       - name: Run PHPUnit tests
+        # 8.1 and 8.2 are temporarily disabled as docker-images for those cause the errors when pipeline is running
+        if: ${{ matrix.php == '7.4' || matrix.php == '8.0' }}
         run: npm run test:php
