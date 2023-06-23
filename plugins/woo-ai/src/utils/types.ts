@@ -4,7 +4,7 @@ export type Attribute = {
 };
 
 export type ProductData = {
-	product_id: number;
+	product_id: number | null;
 	name: string;
 	description: string;
 	categories: string[];

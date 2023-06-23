@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { Attribute, ProductData } from './types';
-import { getTinyContent } from './tiny-tools';
+import { getTinyContent, getPostId } from '.';
 
 const isElementVisible = ( element: HTMLElement ) =>
 	! ( window.getComputedStyle( element ).display === 'none' );
@@ -102,16 +102,9 @@ const getProductType = () => {
 	return productTypeEl ? productTypeEl.value : '';
 };
 
-const getProductId = (): number => {
-	const productIdEl: HTMLInputElement | null =
-		document.querySelector( '#post_ID' );
-
-	return productIdEl ? parseInt( productIdEl.value, 10 ) : 0;
-};
-
 export const productData = (): ProductData => {
 	return {
-		product_id: getProductId(),
+		product_id: getPostId(),
 		name: getProductName(),
 		categories: getCategories(),
 		tags: getTags(),
