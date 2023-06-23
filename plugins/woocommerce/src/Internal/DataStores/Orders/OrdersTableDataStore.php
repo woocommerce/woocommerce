@@ -1991,7 +1991,7 @@ FROM $order_meta_table
 					self::get_meta_table_name(),
 					array(
 						'order_id'   => $id,
-						'meta_key'   => 'deleted_from',
+						'meta_key'   => DataSynchronizer::DELETED_RECORD_META_KEY,
 						'meta_value' => self::get_orders_table_name(),
 					)
 				);

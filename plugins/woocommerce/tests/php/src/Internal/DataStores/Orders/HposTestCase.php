@@ -58,7 +58,7 @@ class HposTestCase extends WC_Unit_Test_Case {
 			$wpdb->prepare(
 				"SELECT meta_value FROM $meta_table_name WHERE order_id = %d AND meta_key = %s",
 				$order_id,
-				'deleted_from'
+				DataSynchronizer::DELETED_RECORD_META_KEY
 			),
 			ARRAY_A
 		);

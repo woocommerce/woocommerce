@@ -30,6 +30,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_initial_orders_pending_sync_count';
 	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION   = 'woocommerce_orders_sync_finished';
 	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
+	public const DELETED_RECORD_META_KEY                   = '_deleted_from';
 
 	private const ORDERS_SYNC_BATCH_SIZE = 250;
 	// Allowed values for $type in get_ids_of_orders_pending_sync method.
@@ -255,7 +256,7 @@ SELECT(
 		$deleted_count      = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT count(1) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s",
-				array( 'deleted_from', $deleted_from_table )
+				array( self::DELETED_RECORD_META_KEY, $deleted_from_table )
 			)
 		);
 		$pending_count     += $deleted_count;
@@ -370,7 +371,7 @@ ORDER BY orders.id ASC
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT DISTINCT(order_id) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s LIMIT {$limit}",
-				array( 'deleted_from', $deleted_from_table )
+				array( self::DELETED_RECORD_META_KEY, $deleted_from_table )
 			)
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
@@ -451,7 +452,7 @@ ORDER BY orders.id ASC
 		$deletion_data = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, order_id FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s AND order_id IN $order_ids_as_sql_list ORDER BY order_id DESC",
-				'deleted_from',
+				self::DELETED_RECORD_META_KEY,
 				$deleted_from_table_name
 			),
 			ARRAY_A
@@ -629,7 +630,7 @@ ORDER BY orders.id ASC
 						AND NOT EXISTS (SELECT order_id FROM {$this->data_store::get_meta_table_name()} WHERE order_id=%d AND meta_key=%s AND meta_value=%s)",
 				$postid,
 				$postid,
-				'deleted_from',
+				self::DELETED_RECORD_META_KEY,
 				$wpdb->posts
 			)
 		)
@@ -638,7 +639,7 @@ ORDER BY orders.id ASC
 				$this->data_store::get_meta_table_name(),
 				array(
 					'order_id'   => $postid,
-					'meta_key'   => 'deleted_from',
+					'meta_key'   => self::DELETED_RECORD_META_KEY,
 					'meta_value' => $wpdb->posts,
 				)
 			);
