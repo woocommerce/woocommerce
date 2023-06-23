@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { lazy, useState, useEffect } from '@wordpress/element';
+import { lazy, useState, useEffect, useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
 import { Icon, help as helpIcon, external } from '@wordpress/icons';
@@ -74,12 +74,25 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
 
+	const closePanel = useCallback( () => {
+		setIsPanelClosing( true );
+		setIsPanelOpen( false );
+	}, [] );
+
+	const clearPanel = useCallback( () => {
+		if ( ! isPanelOpen ) {
+			setIsPanelClosing( false );
+			setIsPanelSwitching( false );
+			setCurrentTab( '' );
+		}
+	}, [ isPanelOpen ] );
+
 	useEffect( () => {
 		return addHistoryListener( () => {
 			closePanel();
 			clearPanel();
 		} );
-	}, [] );
+	}, [ closePanel, clearPanel ] );
 
 	const updatedLayoutContext = useExtendLayout( 'activity-panel' );
 
@@ -216,19 +229,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		setCurrentTab( tabName );
 		setIsPanelOpen( isTabOpen );
 		setIsPanelSwitching( panelSwitching );
-	};
-
-	const closePanel = () => {
-		setIsPanelClosing( true );
-		setIsPanelOpen( false );
-	};
-
-	const clearPanel = () => {
-		if ( ! isPanelOpen ) {
-			setIsPanelClosing( false );
-			setIsPanelSwitching( false );
-			setCurrentTab( '' );
-		}
 	};
 
 	const isHomescreen = () => {
