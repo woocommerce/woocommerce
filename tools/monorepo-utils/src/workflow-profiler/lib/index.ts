@@ -230,3 +230,106 @@ export const getRunJobData = async ( runIds ) => {
 
 	return jobs.flat();
 };
+
+export const getCompiledJobData = ( jobData ) => {
+	const result = {};
+
+	jobData.forEach( ( job ) => {
+		const { name, started_at, completed_at } = job;
+		const time =
+			new Date( completed_at ).getTime() -
+			new Date( started_at ).getTime();
+
+		if ( ! result[ name ] ) {
+			result[ name ] = {
+				times: [],
+				steps: {},
+			};
+		}
+
+		result[ name ].times.push( time );
+
+		job.steps.forEach( ( step ) => {
+			const {
+				name: stepName,
+				started_at: stepStart,
+				completed_at: stepCompleted,
+			} = step;
+
+			if (
+				stepName === 'Set up job' ||
+				stepName === 'Complete job' ||
+				stepName.startsWith( 'Post ' )
+			) {
+				return;
+			}
+			const stepTime =
+				new Date( stepCompleted ).getTime() -
+				new Date( stepStart ).getTime();
+
+			if ( ! result[ name ].steps[ stepName ] ) {
+				result[ name ].steps[ stepName ] = [];
+			}
+
+			result[ name ].steps[ stepName ].push( stepTime );
+		} );
+	} );
+
+	return result;
+};
+
+export const logJobResults = ( data ) => {
+	const rows = Object.keys( data ).map( ( jobName ) => {
+		const job = data[ jobName ];
+
+		return [
+			jobName,
+			( calculateMean( job.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+			( calculateMedian( job.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+			( Math.max( ...job.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+			( Math.min( ...job.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+			( get90thPercentile( job.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+		];
+	} );
+	Logger.table(
+		[
+			'Job Name',
+			'average (min)',
+			'median (min)',
+			'longest (min)',
+			'shortest (min)',
+			'90th percentile (min)',
+		],
+		rows
+	);
+};
+
+export const logStepResults = ( data ) => {
+	const rows = Object.keys( data ).map( ( jobName ) => {
+		const job = data[ jobName ];
+
+		return Object.keys( job.steps ).map( ( stepName ) => {
+			const step = job.steps[ stepName ];
+
+			return [
+				stepName,
+				( calculateMean( step ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+				( calculateMedian( step ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+				( Math.max( ...step ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+				( Math.min( ...step ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+				( get90thPercentile( step ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+			];
+		} );
+	} );
+	Logger.table(
+		[
+			'Step Name',
+			'average (min)',
+			'median (min)',
+			'longest (min)',
+			'shortest (min)',
+			'90th percentile (min)',
+		],
+		rows.flat()
+	);
+};

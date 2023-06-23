@@ -11,6 +11,9 @@ import {
 	logWorkflowRunResults,
 	getWorkflowData,
 	getRunJobData,
+	getCompiledJobData,
+	logJobResults,
+	logStepResults,
 } from '../../lib';
 import { Logger } from '../../../core/logger';
 
@@ -35,27 +38,26 @@ const program = new Command( 'profile' )
 		'woocommerce'
 	)
 	.action( async ( start, end, id, { owner, name } ) => {
-		// const workflowData = await getWorkflowData( id );
-		// Logger.notice(
-		// 	`Processing workflow id ${ id }: "${ workflowData.name }" from ${ start } to ${ end }`
-		// );
-		// const workflowRunData = await getWorkflowRunData( {
-		// 	id,
-		// 	owner,
-		// 	name,
-		// 	start,
-		// 	end,
-		// } );
+		const workflowData = await getWorkflowData( id );
+		Logger.notice(
+			`Processing workflow id ${ id }: "${ workflowData.name }" from ${ start } to ${ end }`
+		);
+		const workflowRunData = await getWorkflowRunData( {
+			id,
+			owner,
+			name,
+			start,
+			end,
+		} );
 
-		// logWorkflowRunResults( workflowRunData );
+		logWorkflowRunResults( workflowRunData );
 
-		// const { runIds } = workflowRunData;
-		const runIds = [ 5339952646 ];
+		const { runIds } = workflowRunData;
 		const runJobData = await getRunJobData( runIds );
-		console.log( runJobData );
+		const compiledJobData = getCompiledJobData( runJobData );
 
-		// console.log( jobs.data );
-		// console.log( jobs.data.jobs[ 0 ].steps );
+		logJobResults( compiledJobData );
+		logStepResults( compiledJobData );
 	} );
 
 export default program;
