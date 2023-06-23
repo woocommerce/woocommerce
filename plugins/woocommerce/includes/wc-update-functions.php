@@ -2603,7 +2603,11 @@ function wc_update_790_delete_stray_order_records() {
 
 	// phpcs:disable WordPress.DB.PreparedSQL
 
-	if ( ! $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $orders_table_name ) ) ) ) {
+	$suppress            = $wpdb->suppress_errors();
+	$orders_table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $orders_table_name ) ) );
+	$wpdb->suppress_errors( $suppress );
+
+	if ( ! $orders_table_exists ) {
 		return;
 	};
 
