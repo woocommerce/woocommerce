@@ -36,7 +36,9 @@ class DocsStore {
 	 */
 	public static function get_post( $doc_id ) {
 		$args = array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_key'   => 'docs_id',
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			'meta_value' => $doc_id,
 			'tag'        => 'woocommerce_docs',
 		);
@@ -69,7 +71,9 @@ class DocsStore {
 	 */
 	public static function update_docs_post( $post, $doc_id ) {
 		$args = array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_key'   => 'docs_id',
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			'meta_value' => $doc_id,
 			'tag'        => 'woocommerce_docs',
 		);
