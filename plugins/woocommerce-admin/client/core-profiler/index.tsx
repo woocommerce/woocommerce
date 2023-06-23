@@ -1353,8 +1353,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					},
 					entry: actions.choose( [
 						{
-							cond: ( context ) =>
-								context.pluginsSelected.includes( 'jetpack' ),
+							cond: 'hasJetpackSelected',
 							actions: [
 								assign( {
 									loader: {
