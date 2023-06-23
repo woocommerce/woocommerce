@@ -28,8 +28,7 @@ declare global {
  *
  * @return {Promise<{token: string, blogId: string}>} The token and the blogId
  */
-async function requestToken() {
-	// Trying to pick the token from localStorage
+async function requestJetpackToken() {
 	const token = localStorage.getItem( JWT_TOKEN_ID );
 	let tokenData;
 
@@ -49,6 +48,7 @@ async function requestToken() {
 
 	const apiNonce = window.JP_CONNECTION_INITIAL_STATE?.apiNonce;
 	const siteSuffix = window.JP_CONNECTION_INITIAL_STATE?.siteSuffix;
+
 	try {
 		const data: { token: string; blog_id: string } = await apiFetch( {
 			path: '/jetpack/v4/jetpack-ai-jwt?_cacheBuster=' + Date.now(),
@@ -61,18 +61,14 @@ async function requestToken() {
 
 		const newTokenData = {
 			token: data.token,
-			/**
-			 * TODO: make sure we return id from the .com token acquisition endpoint too
-			 */
 			blogId: siteSuffix,
 
 			/**
-			 * Let's expire the token in 2 minutes
+			 * Let's expire the token in 5 minutes
 			 */
 			expire: Date.now() + JWT_TOKEN_EXPIRATION_TIME,
 		};
 
-		// Store the token in localStorage
 		debugToken( 'Storing new token' );
 		localStorage.setItem( JWT_TOKEN_ID, JSON.stringify( newTokenData ) );
 
@@ -88,20 +84,16 @@ async function requestToken() {
  * @param {string} question - The query to send to the API
  * @param {number} postId   - The post where this completion is being requested, if available
  */
-export async function askQuestion( question: string, postId = null ) {
-	const { token } = await requestToken();
+export async function getCompletion( question: string ) {
+	const { token } = await requestJetpackToken();
 
 	const url = new URL(
-		'https://public-api.wordpress.com/wpcom/v2/jetpack-ai-query'
+		'https://public-api.wordpress.com/wpcom/v2/text-completion/stream'
 	);
-	url.searchParams.append( 'question', question );
+
+	url.searchParams.append( 'prompt', question );
 	url.searchParams.append( 'token', token );
 	url.searchParams.append( 'feature', WOO_AI_PLUGIN_FEATURE_NAME );
 
-	if ( postId ) {
-		url.searchParams.append( 'post_id', postId );
-	}
-
-	const source = new EventSource( url.toString() );
-	return source;
+	return new EventSource( url.toString() );
 }

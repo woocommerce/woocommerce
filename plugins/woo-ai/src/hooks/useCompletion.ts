@@ -6,7 +6,7 @@ import { useRef, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { askQuestion } from '../utils';
+import { getCompletion } from '../utils';
 
 type StopReason = 'abort' | 'finished' | 'error' | 'interrupted';
 
@@ -65,7 +65,7 @@ export const useCompletion = ( {
 		let suggestionsSource;
 
 		try {
-			suggestionsSource = await askQuestion( question );
+			suggestionsSource = await getCompletion( question );
 		} catch ( e ) {
 			// eslint-disable-next-line no-console
 			console.debug( 'Completion connection error encountered', e );
