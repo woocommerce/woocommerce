@@ -44,6 +44,44 @@ class WC_Widget_Cart extends WC_Widget {
 	}
 
 	/**
+	 * Get list of Woo blocks that update the cart.
+	 *
+	 * @return array;
+	 */
+	public static function get_blocks() {
+		return array(
+			'woocommerce/handpicked-products',
+			'woocommerce/single-product',
+			'woocommerce/product-collection',
+			'woocommerce/add-to-cart-form',
+			'woocommerce/product-top-rated',
+			'woocommerce/product-tag',
+			'woocommerce/products-by-attribute',
+			'woocommerce/product-on-sale',
+			'woocommerce/product-new',
+			'woocommerce/product-category',
+			'woocommerce/product-best-sellers',
+			'woocommerce/all-products',
+		);
+	}
+
+	/**
+	 * array_contains
+	 * Check if string contains word from array.
+	 *
+	 * @since 1.0.0
+	 * @version 1.0.0
+	 **/
+	function array_contains( $str, array $arr ) {
+		foreach ( $arr as $a ) {
+			if ( stripos( $str, $a ) !== false ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Output widget.
 	 *
 	 * @see WP_Widget
@@ -56,7 +94,12 @@ class WC_Widget_Cart extends WC_Widget {
 			return;
 		}
 
-		wp_enqueue_script( 'wc-cart-fragments' );
+		global $post;
+		$is_cart_related_block = $this->array_contains( $post->post_content, self::get_blocks() );
+
+		if ( $is_cart_related_block || is_shop() || is_product() || is_product_category() ) {
+			wp_enqueue_script( 'wc-cart-fragments' );
+		}
 
 		$hide_if_empty = empty( $instance['hide_if_empty'] ) ? 0 : 1;
 
