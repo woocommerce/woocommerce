@@ -398,6 +398,8 @@ ORDER BY orders.id ASC
 			return;
 		}
 
+		$batch = array_map( 'absint', $batch );
+
 		$this->order_cache_controller->temporarily_disable_orders_cache_usage();
 
 		$custom_orders_table_is_authoritative = $this->custom_orders_table_is_authoritative();
