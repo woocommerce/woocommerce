@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Use window.location.href for page redirection to get the latest onboarding profile values on the Homescreen
