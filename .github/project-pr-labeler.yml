@@ -61,6 +61,12 @@
 'plugin: woocommerce':
 - plugins/woocommerce/**/*
 
+'plugin: woocommerce-beta-tester':
+- plugins/woocommerce-beta-tester/**/*
+
+'plugin: woo-ai':
+- plugins/woo-ai/**/*
+
 'focus: react admin [team:Ghidorah]':
 - plugins/woocommerce/src/Admin/**/*
 - plugins/woocommerce/src/Internal/Admin/**/*
