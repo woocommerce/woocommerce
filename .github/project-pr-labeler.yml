@@ -61,7 +61,7 @@
 'plugin: woocommerce':
 - plugins/woocommerce/**/*
 
-'plugin: woocommerce-beta-tester':
+'plugin: woocommerce beta tester':
 - plugins/woocommerce-beta-tester/**/*
 
 'plugin: woo-ai':
