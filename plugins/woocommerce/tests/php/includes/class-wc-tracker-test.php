@@ -5,6 +5,10 @@
  * @package WooCommerce\Tests\WC_Tracker.
  */
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Utilities\PluginUtil;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
+
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
  * Class WC_Tracker_Test
@@ -66,6 +70,96 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		// Test the default case of no filter for set for woocommerce_admin_disabled.
 		$this->assertArrayHasKey( 'wc_admin_disabled', $tracking_data );
 		$this->assertEquals( 'no', $tracking_data['wc_admin_disabled'] );
+	}
+
+	/**
+	 * @testDox Test the features compatibility data for plugin tracking data.
+	 */
+	public function test_get_tracking_data_plugin_feature_compatibility() {
+		$legacy_mocks = array(
+			'get_plugins' => function() {
+				return array(
+					'plugin1' => array(
+						'Name' => 'Plugin 1',
+					),
+					'plugin2' => array(
+						'Name' => 'Plugin 2',
+					),
+					'plugin3' => array(
+						'Name' => 'Plugin 3',
+					),
+				);
+			},
+		);
+		FunctionsMockerHack::add_function_mocks( $legacy_mocks );
+
+		update_option( 'active_plugins', array( 'plugin1', 'plugin2' ) );
+
+		$pluginutil_mock = new class() extends PluginUtil {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function is_woocommerce_aware_plugin( $plugin ): bool {
+				if ( 'plugin1' === $plugin ) {
+					return false;
+				}
+
+				return true;
+			}
+		};
+
+		$featurescontroller_mock = new class() extends FeaturesController {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false ): array {
+				$compat = array();
+				switch ( $plugin_name ) {
+					case 'plugin2':
+						$compat = array(
+							'compatible'   => array( 'feature1' ),
+							'incompatible' => array( 'feature2' ),
+							'uncertain'    => array( 'feature3' ),
+						);
+						break;
+					case 'plugin3':
+						$compat = array(
+							'compatible'   => array( 'feature2' ),
+							'incompatible' => array(),
+							'uncertain'    => array( 'feature1', 'feature3' ),
+						);
+						break;
+				}
+
+				return $compat;
+			}
+		};
+
+		$container = wc_get_container();
+		$container->get( PluginUtil::class ); // Ensure that the class is loaded.
+		$container->replace( PluginUtil::class, $pluginutil_mock );
+		$container->replace( FeaturesController::class, $featurescontroller_mock );
+
+		$tracking_data = WC_Tracker::get_tracking_data();
+
+		$this->assertEquals(
+			array(),
+			$tracking_data['active_plugins']['plugin1']['feature_compatibility']
+		);
+		$this->assertEquals(
+			array(
+				'compatible'   => array( 'feature1' ),
+				'incompatible' => array( 'feature2' ),
+				'uncertain'    => array( 'feature3' ),
+			),
+			$tracking_data['active_plugins']['plugin2']['feature_compatibility']
+		);
+		$this->assertEquals(
+			array(
+				'compatible' => array( 'feature2' ),
+				'uncertain'  => array( 'feature1', 'feature3' ),
+			),
+			$tracking_data['inactive_plugins']['plugin3']['feature_compatibility']
+		);
+
+		$this->reset_container_replacements();
+		$container->reset_all_resolved();
 	}
 
 	/**
