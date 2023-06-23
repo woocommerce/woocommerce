@@ -12,6 +12,7 @@ class ManifestProcessor {
 	 * Process manifest object into WordPress pages
 	 *
 	 * @param Object $manifest The manifest to process.
+	 * @param int    $logger_action_id The logger action ID.
 	 */
 	public static function process_manifest( $manifest, $logger_action_id ) {
 		self::process_categories( $manifest['categories'], $logger_action_id );
