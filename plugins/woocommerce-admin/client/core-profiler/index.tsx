@@ -455,6 +455,26 @@ const assignOptInDataSharing = assign( {
 		event.payload.optInDataSharing,
 } );
 
+const preFetchIsJetpackConnected = assign( {
+	isJetpackConnectedRef: () =>
+		spawn(
+			() => resolveSelect( PLUGINS_STORE_NAME ).isJetpackConnected(),
+			'core-profiler-prefetch-is-jetpack-connected'
+		),
+} );
+
+const preFetchJetpackAuthUrl = assign( {
+	jetpackAuthUrlRef: () =>
+		spawn(
+			() =>
+				resolveSelect( ONBOARDING_STORE_NAME ).getJetpackAuthUrl( {
+					redirectUrl: getAdminLink( 'admin.php?page=wc-admin' ),
+					from: 'woocommerce-core-profiler',
+				} ),
+			'core-profiler-prefetch-jetpack-auth-url'
+		),
+} );
+
 /**
  * Prefetch it so that @wp/data caches it and there won't be a loading delay when its used
  */
@@ -531,6 +551,8 @@ export const preFetchActions = {
 	preFetchGetCountries,
 	preFetchGeolocation,
 	preFetchOptions,
+	preFetchIsJetpackConnected,
+	preFetchJetpackAuthUrl,
 };
 
 const coreProfilerMachineActions = {
@@ -1329,14 +1351,32 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							],
 						},
 					},
-					entry: [
-						assign( {
-							loader: {
-								progress: 10,
-								useStages: 'plugins',
-							},
-						} ),
-					],
+					entry: actions.choose( [
+						{
+							cond: ( context ) =>
+								context.pluginsSelected.includes( 'jetpack' ),
+							actions: [
+								assign( {
+									loader: {
+										progress: 10,
+										useStages: 'plugins',
+									},
+								} ),
+								'preFetchIsJetpackConnected',
+								'preFetchJetpackAuthUrl',
+							],
+						},
+						{
+							actions: [
+								assign( {
+									loader: {
+										progress: 10,
+										useStages: 'plugins',
+									},
+								} ),
+							],
+						},
+					] ),
 					invoke: {
 						src: pluginInstallerMachine,
 						data: ( context ) => {
