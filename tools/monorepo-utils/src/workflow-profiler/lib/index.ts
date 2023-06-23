@@ -60,6 +60,7 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 	workflow_runs.forEach( ( run ) => {
 		totals[ run.conclusion ]++;
 		if ( run.conclusion === 'success' ) {
+			totals.runIds.push( run.id );
 			const time =
 				new Date( run.updated_at ).getTime() -
 				new Date( run.run_started_at ).getTime();
@@ -116,6 +117,7 @@ export const getWorkflowRunData = async ( options: {
 
 	const initialTotals = {
 		total_count: 0,
+		runIds: [],
 		times: [],
 		success: 0,
 		failure: 0,
@@ -170,15 +172,16 @@ export const getWorkflowRunData = async ( options: {
 			1000 /
 			60
 		).toFixed( 2 ),
+		runIds: totals.runIds,
 	};
 };
 
 /**
  * Print workflow run results to the console.
  *
- * @param {Array} results Workflow run results
+ * @param {Object} data Workflow run results
  */
-export const logWorkflowRunResults = ( results ) => {
+export const logWorkflowRunResults = ( data ) => {
 	Logger.table(
 		[
 			'Workflow Name',
@@ -192,17 +195,38 @@ export const logWorkflowRunResults = ( results ) => {
 			'shortest (min)',
 			'90th percentile (min)',
 		],
-		results.map( ( result ) => [
-			result.name,
-			result.total_count,
-			result.success,
-			result.failure,
-			result.cancelled,
-			result.average_time_in_minutes,
-			result.median_time_in_minutes,
-			result.longest_time_in_minutes,
-			result.shortest_time_in_minutes,
-			result[ '90th_percentile_in_minutes' ],
-		] )
+		[
+			[
+				data.name,
+				data.total_count,
+				data.success,
+				data.failure,
+				data.cancelled,
+				data.average_time_in_minutes,
+				data.median_time_in_minutes,
+				data.longest_time_in_minutes,
+				data.shortest_time_in_minutes,
+				data[ '90th_percentile_in_minutes' ],
+			],
+		]
 	);
+};
+
+export const getRunJobData = async ( runIds ) => {
+	const jobs = await Promise.all(
+		runIds.map( async ( id ) => {
+			const { data } = await octokitWithAuth().request(
+				'GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs',
+				{
+					owner: 'woocommerce',
+					repo: 'woocommerce',
+					run_id: id,
+				}
+			);
+
+			return data.jobs;
+		} )
+	);
+
+	return jobs.flat();
 };

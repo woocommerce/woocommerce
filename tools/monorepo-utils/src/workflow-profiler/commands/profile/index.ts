@@ -10,15 +10,20 @@ import {
 	getWorkflowRunData,
 	logWorkflowRunResults,
 	getWorkflowData,
+	getRunJobData,
 } from '../../lib';
 import { Logger } from '../../../core/logger';
-import config from '../../config';
+
+import { octokitWithAuth } from '../../../core/github/api';
 
 const program = new Command( 'profile' )
 	.description( 'Profile Github workflows' )
 	.argument( '<start>', 'Start date in YYYY-MM-DD format' )
 	.argument( '<end>', 'End date in YYYY-MM-DD format' )
-	.argument( '[ids...]', 'Workflow IDs. Defaults to required workflows' )
+	.argument(
+		'<id>',
+		'Workflow ID. The required workflow ids are 22745783, 5687250, 23271226, and 5461563. For the rest, use the `list` command.'
+	)
 	.option(
 		'-o --owner <owner>',
 		'Repository owner. Default: woocommerce',
@@ -29,26 +34,28 @@ const program = new Command( 'profile' )
 		'Repository name. Default: woocommerce',
 		'woocommerce'
 	)
-	.action( async ( start, end, ids, { owner, name } ) => {
-		const { requiredWorkflows } = config;
-		const workflowIds = ids.length ? ids : requiredWorkflows;
+	.action( async ( start, end, id, { owner, name } ) => {
+		// const workflowData = await getWorkflowData( id );
+		// Logger.notice(
+		// 	`Processing workflow id ${ id }: "${ workflowData.name }" from ${ start } to ${ end }`
+		// );
+		// const workflowRunData = await getWorkflowRunData( {
+		// 	id,
+		// 	owner,
+		// 	name,
+		// 	start,
+		// 	end,
+		// } );
 
-		Promise.all(
-			workflowIds.map( async ( id: number | string ) => {
-				const workflowData = await getWorkflowData( id );
-				Logger.notice(
-					`Processing workflow id ${ id }: "${ workflowData.name }" from ${ start } to ${ end }`
-				);
-				const result = await getWorkflowRunData( {
-					id,
-					owner,
-					name,
-					start,
-					end,
-				} );
-				return result;
-			} )
-		).then( ( results ) => logWorkflowRunResults( results ) );
+		// logWorkflowRunResults( workflowRunData );
+
+		// const { runIds } = workflowRunData;
+		const runIds = [ 5339952646 ];
+		const runJobData = await getRunJobData( runIds );
+		console.log( runJobData );
+
+		// console.log( jobs.data );
+		// console.log( jobs.data.jobs[ 0 ].steps );
 	} );
 
 export default program;
