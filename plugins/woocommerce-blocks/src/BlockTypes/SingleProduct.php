@@ -36,7 +36,32 @@ class SingleProduct extends AbstractBlock {
 	 */
 	protected function initialize() {
 		parent::initialize();
-		add_filter( 'render_block_context', array( $this, 'update_context' ), 10, 3 );
+		add_filter( 'render_block_context', [ $this, 'update_context' ], 10, 3 );
+		add_filter( 'render_block_core/post-excerpt', [ $this, 'restore_global_post' ], 10, 3 );
+		add_filter( 'render_block_core/post-title', [ $this, 'restore_global_post' ], 10, 3 );
+	}
+
+	/**
+	 * Restore the global post variable right before generating the render output for the post title and/or post excerpt blocks.
+	 *
+	 * This is required due to the changes made via the replace_post_for_single_product_inner_block method.
+	 * It is a temporary fix to ensure these blocks work as expected until Gutenberg versions 15.2 and 15.6 are part of the core of WordPress.
+	 *
+	 * @see https://github.com/WordPress/gutenberg/pull/48001
+	 * @see https://github.com/WordPress/gutenberg/pull/49495
+	 *
+	 * @param  string    $block_content  The block content.
+	 * @param  array     $parsed_block  The full block, including name and attributes.
+	 * @param  \WP_Block $block_instance  The block instance.
+	 *
+	 * @return mixed
+	 */
+	public function restore_global_post( $block_content, $parsed_block, $block_instance ) {
+		if ( isset( $block_instance->context['singleProduct'] ) && $block_instance->context['singleProduct'] ) {
+			wp_reset_postdata();
+		}
+
+		return $block_content;
 	}
 
 
@@ -125,12 +150,12 @@ class SingleProduct extends AbstractBlock {
 		if ( $this->single_product_inner_blocks_names ) {
 			$block_name = array_pop( $this->single_product_inner_blocks_names );
 
-			static $global_post_variable_changed;
-
 			if ( $block_name === $block['blockName'] ) {
 				/**
 				 * This is a temporary fix to ensure the Post Title and Excerpt blocks work as expected
 				 * until Gutenberg versions 15.2 and 15.6 are included in the core of WordPress.
+				 *
+				 * Important: the original post data is restored in the restore_global_post method.
 				 *
 				 * @see https://github.com/WordPress/gutenberg/pull/48001
 				 * @see https://github.com/WordPress/gutenberg/pull/49495
@@ -138,15 +163,15 @@ class SingleProduct extends AbstractBlock {
 				if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
 					global $post;
 					// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-					$post                         = get_post( $this->product_id );
-					$global_post_variable_changed = setup_postdata( $post );
-				}
-				$context['postId'] = $this->product_id;
-			}
+					$post = get_post( $this->product_id );
 
-			if ( ! $this->single_product_inner_blocks_names && $global_post_variable_changed ) {
-				wp_reset_postdata();
-				$global_post_variable_changed = false;
+					if ( $post instanceof \WP_Post ) {
+						setup_postdata( $post );
+					}
+				}
+
+				$context['postId']        = $this->product_id;
+				$context['singleProduct'] = true;
 			}
 		}
 	}
