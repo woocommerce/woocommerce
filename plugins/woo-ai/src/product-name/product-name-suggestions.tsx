@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import MagicIcon from '../../assets/images/icons/magic.svg';
 import AlertIcon from '../../assets/images/icons/alert.svg';
 import { productData } from '../utils';
-import { useProductDataSuggestions } from '../hooks/useProductDataSuggestions';
+import { useProductDataSuggestions, useProductSlug } from '../hooks';
 import {
 	ProductDataSuggestion,
 	ProductDataSuggestionRequest,
@@ -20,7 +20,6 @@ import { SuggestionItem, PoweredByLink, recordNameTracks } from './index';
 import { RandomLoadingMessage } from '../components';
 
 const MIN_TITLE_LENGTH = 10;
-import { useProductSlug } from '../hooks/useProductSlug';
 
 enum SuggestionsState {
 	Fetching = 'fetching',
