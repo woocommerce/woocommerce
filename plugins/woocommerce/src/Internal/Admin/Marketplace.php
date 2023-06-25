@@ -11,6 +11,10 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
  * Contains backend logic for the Marketplace feature.
  */
 class Marketplace {
+
+	/**
+	 * Class initialization, to be executed when the class is resolved by the container.
+	 */
 	final public function init() {
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 45 );
 	}
@@ -31,15 +35,13 @@ class Marketplace {
 	 * Get report pages.
 	 */
 	public static function get_marketplace_pages() {
-		$homepage = array(
-			'id'       => 'woocommerce-marketplace',
-			'parent'   => 'woocommerce',
-			'title'    => __( 'Marketplace', 'woocommerce' ),
-			'path'     => '/marketplace',
-		);
-
-		return array(
-			$homepage,
+		$marketplace_pages = array(
+			array(
+				'id'     => 'woocommerce-marketplace',
+				'parent' => 'woocommerce',
+				'title'  => __( 'Marketplace', 'woocommerce' ),
+				'path'   => '/marketplace',
+			),
 			array(
 				'id'       => 'woocommerce-marketplace-extensions',
 				'title'    => __( 'Extensions', 'woocommerce' ),
@@ -64,6 +66,8 @@ class Marketplace {
 
 		/**
 		 * The marketplace items used in the menu.
+		 *
+		 * @since 8.0
 		 */
 		return apply_filters( 'woocommerce_marketplace_menu_items', $marketplace_pages );
 	}
