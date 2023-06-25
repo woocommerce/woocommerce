@@ -93,10 +93,10 @@ class WC_Shipping_Flat_Rate_Test extends \WC_Unit_Test_Case {
 		$method_cost_4 = '78';
 
 		$map = array(
-			$shipping_class_1['term_id'] => array( $instance_id_1, $method_cost_1 ), // NY
-			$shipping_class_2['term_id'] => array( $instance_id_2, $method_cost_2 ), // FL
-			$shipping_class_3['term_id'] => array( $instance_id_3, $method_cost_3 ), // CA
-			$shipping_class_4['term_id'] => array( $instance_id_4, $method_cost_4 ), // IL
+			$shipping_class_1['term_id'] => array( $instance_id_1, $method_cost_1 ), // NY.
+			$shipping_class_2['term_id'] => array( $instance_id_2, $method_cost_2 ), // FL.
+			$shipping_class_3['term_id'] => array( $instance_id_3, $method_cost_3 ), // CA.
+			$shipping_class_4['term_id'] => array( $instance_id_4, $method_cost_4 ), // IL.
 		);
 
 		// 2 every flat rate add no cost by default and configure the cost for only one of the shipping classes. Different to each flat rate.
