@@ -35,7 +35,15 @@ class Marketplace {
 	 * Get report pages.
 	 */
 	public static function get_marketplace_pages() {
-		$marketplace_pages = array(
+		$homepage = array(
+			'id'       => 'woocommerce-marketplace',
+			'parent'   => 'woocommerce',
+			'title'    => __( 'Marketplace', 'woocommerce' ),
+			'path'     => '/marketplace',
+		);
+
+		return array(
+			$homepage,
 			array(
 				'id'     => 'woocommerce-marketplace',
 				'parent' => 'woocommerce',
