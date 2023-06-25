@@ -103,7 +103,13 @@ class WCAdminUser {
 	 * @return array Fields to expose over the WP user endpoint.
 	 */
 	public function get_user_data_fields() {
-		return apply_filters( 'woocommerce_admin_get_user_data_fields', array() );
+		/**
+		 * Filter user data fields exposed over the WordPress user endpoint.
+		 *
+		 * @since 4.0.0
+		 * @param array $fields Array of fields to expose over the WP user endpoint.
+		 */
+		return apply_filters( 'woocommerce_admin_get_user_data_fields', array( 'variable_product_tour_shown' ) );
 	}
 
 	/**
@@ -118,7 +124,7 @@ class WCAdminUser {
 	}
 
 	/**
-	 * Helper to retrive user data fields.
+	 * Helper to retrieve user data fields.
 	 *
 	 * Migrates old key prefixes as well.
 	 *

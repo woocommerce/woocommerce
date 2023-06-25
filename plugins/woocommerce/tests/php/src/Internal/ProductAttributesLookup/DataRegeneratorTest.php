@@ -81,7 +81,7 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 *
 	 * @param bool $previously_existing True to create a lookup table beforehand.
 	 */
-	public function test_initiate_regeneration_creates_looukp_table( $previously_existing ) {
+	public function test_initiate_regeneration_creates_lookup_table( $previously_existing ) {
 		global $wpdb;
 
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
@@ -96,7 +96,11 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		// Try to insert a row to verify that the table exists.
 		// We can't use the regular table existence detection mechanisms because PHPUnit creates all tables as temporary.
-		$wpdb->query( 'INSERT INTO ' . $this->lookup_table_name . " VALUES (1, 1, 'taxonomy', 1, 1, 1 )" );
+		$wpdb->query(
+			'INSERT INTO ' . $this->lookup_table_name .
+			'( product_id, product_or_parent_id, taxonomy, term_id, is_variation_attribute, in_stock)' .
+			" VALUES (1, 1, 'taxonomy', 1, 1, 1 )"
+		);
 		$value = $wpdb->get_var( 'SELECT product_id FROM ' . $this->lookup_table_name . ' LIMIT 1' );
 		$this->assertEquals( 1, $value );
 

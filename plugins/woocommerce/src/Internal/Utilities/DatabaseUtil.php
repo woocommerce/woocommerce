@@ -126,15 +126,14 @@ class DatabaseUtil {
 			$index_name = 'PRIMARY';
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL
-		return $wpdb->get_col(
-			"
-SELECT column_name FROM INFORMATION_SCHEMA.STATISTICS
-WHERE table_name='$table_name'
-AND table_schema='" . DB_NAME . "'
-AND index_name='$index_name'"
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$results = $wpdb->get_results( $wpdb->prepare( "SHOW INDEX FROM $table_name WHERE Key_name = %s", $index_name ) );
+
+		if ( empty( $results ) ) {
+			return array();
+		}
+
+		return array_column( $results, 'Column_name' );
 	}
 
 	/**

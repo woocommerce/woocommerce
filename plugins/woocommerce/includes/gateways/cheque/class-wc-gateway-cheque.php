@@ -22,6 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Gateway_Cheque extends WC_Payment_Gateway {
 
 	/**
+	 * Gateway instructions that will be added to the thank you page and emails.
+	 *
+	 * @var string
+	 */
+	public $instructions;
+
+	/**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {

@@ -1,15 +1,11 @@
 /**
  * External dependencies
  */
-import { getQuery } from '@woocommerce/navigation';
-
-/**
- * Internal dependencies
- */
 import {
 	addExitPage,
 	removeExitPage,
-} from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
+} from '@woocommerce/customer-effort-score';
+import { getQuery } from '@woocommerce/navigation';
 
 const ACTION_NAME = 'import_products';
 

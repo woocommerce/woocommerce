@@ -171,7 +171,7 @@ test.describe.serial( 'Import Products from a CSV file', () => {
 
 		// verify the error message if you go without providing CSV file
 		await page.click( 'button[value="Continue"]' );
-		await expect( page.locator( 'div.error' ) ).toContainText(
+		await expect( page.locator( 'div.error.inline' ) ).toContainText(
 			errorMessage
 		);
 	} );

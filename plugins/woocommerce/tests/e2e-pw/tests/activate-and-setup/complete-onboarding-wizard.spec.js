@@ -2,8 +2,12 @@ const { test, expect } = require( '@playwright/test' );
 const { onboarding } = require( '../../utils' );
 const { storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
+const { features } = require( '../../utils' );
 
-test.describe( 'Store owner can complete onboarding wizard', () => {
+// Skipping Onbaording tests when the core-profiler is enabled.
+const testRunner = features.is_enabled( 'core-profiler' ) ? test.describe.skip : test.describe;
+
+testRunner( 'Store owner can complete onboarding wizard', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async () => {
@@ -24,7 +28,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 		await page.click( 'button >> text=Continue' );
 		await expect( page ).toHaveURL( /.*step=product-types/ );
@@ -40,7 +44,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries2,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 
 		// Navigate back to "Store Details" section
@@ -63,7 +67,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 
 		// Navigate back to "Store Details" section
@@ -94,7 +98,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 		await page.click( 'button >> text=Continue' );
 
@@ -116,7 +120,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries,
-			storeDetails.us.expectedIndustries
+			storeDetails.us.expectedNumberOfIndustries
 		);
 		// Check to see if WC Payments is present
 		const wcPay = await page.locator(
@@ -131,37 +135,26 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		await onboarding.unselectBusinessFeatures( page );
 		await page.click( 'button >> text=Continue' );
 	} );
-
-	test( 'can complete the theme selection section', async ( { page } ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=theme'
-		);
-		const pageHeading = await page.textContent(
-			'div.woocommerce-profile-wizard__step-header > h2'
-		);
-		expect( pageHeading ).toContain( 'Choose a theme' );
-		// Just continue with the current theme
-		await page.click( 'button >> text=Continue with my active theme' );
-	} );
 } );
 
-// !Changed from Japanese to Malta store, as Japanese Yen does not use decimals
-test.describe(
-	'A Malta store can complete the selective bundle install but does not include WCPay.',
+// Skipping Onbaording tests as we're replacing StoreDetails with Core Profiler
+// !Changed from Japanese to Liberian store, as Japanese Yen does not use decimals
+testRunner(
+	'A Liberian store can complete the selective bundle install but does not include WCPay.',
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeEach( async () => {
 			// Complete "Store Details" step through the API to prevent flakiness when run on external sites.
-			await api.update.storeDetails( storeDetails.malta.store );
+			await api.update.storeDetails( storeDetails.liberia.store );
 		} );
 
 		// eslint-disable-next-line jest/expect-expect
 		test( 'can choose the "Other" industry', async ( { page } ) => {
 			await onboarding.completeIndustrySection(
 				page,
-				storeDetails.malta.industries,
-				storeDetails.malta.expectedIndustries
+				storeDetails.liberia.industries,
+				storeDetails.liberia.expectedNumberOfIndustries
 			);
 			await page.click( 'button >> text=Continue' );
 		} );
@@ -174,14 +167,14 @@ test.describe(
 
 			await onboarding.completeIndustrySection(
 				page,
-				storeDetails.malta.industries,
-				storeDetails.malta.expectedIndustries
+				storeDetails.liberia.industries,
+				storeDetails.liberia.expectedNumberOfIndustries
 			);
 			await page.click( 'button >> text=Continue' );
 
 			await onboarding.completeProductTypesSection(
 				page,
-				storeDetails.malta.products
+				storeDetails.liberia.products
 			);
 			// Make sure WC Payments is NOT present
 			await expect(
@@ -216,10 +209,12 @@ test.describe(
 				page.locator( '.woocommerce-input-toggle--disabled' )
 			).toHaveCount( 3 );
 			// Checklist shows when completing setup wizard
-			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard&step=theme'
-			);
-			await page.click( 'button >> text=Continue with my active theme' );
+			await onboarding.completeBusinessDetailsSection( page );
+			await page.click( 'button >> text=Continue' );
+
+			await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
+			await page.click( 'button >> text=Continue' );
+		
 			// Start test
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
@@ -237,7 +232,7 @@ test.describe(
 );
 
 // Skipping this test because it's very flaky.
-test.describe.skip( 'Store owner can go through setup Task List', () => {
+testRunner( 'Store owner can go through setup Task List', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {
@@ -268,7 +263,6 @@ test.describe.skip( 'Store owner can go through setup Task List', () => {
 			await page.click( '.components-checkbox-control__input' );
 		}
 		await page.click( 'button >> text=Continue' );
-		await page.click( 'button >> text=Continue with my active theme' );
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	} );
 

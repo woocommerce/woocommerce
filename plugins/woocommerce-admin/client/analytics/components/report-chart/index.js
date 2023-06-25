@@ -23,11 +23,11 @@ import {
 	getChartTypeForQuery,
 	getPreviousDate,
 } from '@woocommerce/date';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { CurrencyContext } from '../../../lib/currency-context';
 import ReportError from '../report-error';
 import { getChartMode, getSelectedFilter, createDateFormatter } from './utils';
 

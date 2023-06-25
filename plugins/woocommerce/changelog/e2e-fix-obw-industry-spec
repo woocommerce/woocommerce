@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix flakiness of the `can save industry changes when navigating back to "Store Details"` E2E test.

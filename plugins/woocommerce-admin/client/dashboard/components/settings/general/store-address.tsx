@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { COUNTRIES_STORE_NAME, Country, Locale } from '@woocommerce/data';
+import { COUNTRIES_STORE_NAME, Country } from '@woocommerce/data';
 import { decodeEntities } from '@wordpress/html-entities';
-import { escapeRegExp, has } from 'lodash';
+import { escapeRegExp } from 'lodash';
 import { useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import { SelectControl, TextControl } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
@@ -28,10 +28,10 @@ type Option = { key: string; label: string };
 /**
  * Form validation.
  *
- * @param {Object} locale The store locale.
  * @return {Function} Validator function.
  */
-export function getStoreAddressValidator( locale: Locale = {} ) {
+// Note: param was removed because its not used, callers still assume its needed. TODO: Fix this.
+export function getStoreAddressValidator(/* locale: Locale = {} */) {
 	/**
 	 * Form validator.
 	 *
@@ -39,7 +39,7 @@ export function getStoreAddressValidator( locale: Locale = {} ) {
 	 * @return {Object} Key value of fields and error messages, { myField: 'This field is required' }
 	 */
 	return (
-		values: Record< typeof storeAddressFields[ number ], string >
+		values: Record< ( typeof storeAddressFields )[ number ], string >
 	) => {
 		const errors: {
 			[ key: string ]: string;

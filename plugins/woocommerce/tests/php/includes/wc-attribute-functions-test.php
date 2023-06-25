@@ -5,7 +5,7 @@
  * @package WooCommerce\Tests\Functions.
  */
 
-use \PHPUnit\Framework\MockObject\Matcher\InvokedRecorder;
+use PHPUnit\Framework\MockObject\Matcher\InvokedRecorder;
 
 /**
  * Class WC_Formatting_Functions_Test

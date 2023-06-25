@@ -1,0 +1,54 @@
+.woocommerce-marketing-introduction-banner {
+	& > div {
+		display: flex;
+		flex-wrap: wrap;
+	}
+
+	.woocommerce-marketing-introduction-banner-content {
+		flex: 1 0;
+		margin: 32px 20px 32px 40px;
+
+		.woocommerce-marketing-introduction-banner-title {
+			font-size: 20px;
+			line-height: 28px;
+			margin-bottom: $gap-smaller;
+		}
+
+		.woocommerce-marketing-introduction-banner-features {
+			color: $gray-700;
+
+			svg {
+				fill: $studio-woocommerce-purple-50;
+			}
+		}
+
+		.woocommerce-marketing-introduction-banner-buttons {
+			margin-top: $gap;
+		}
+	}
+
+	.woocommerce-marketing-introduction-banner-illustration {
+		flex: 0 0 270px;
+		background: linear-gradient(90deg, rgba(247, 237, 247, 0) 5.31%, rgba(196, 152, 217, 0.12) 77.75%),
+			linear-gradient(90deg, rgba(247, 237, 247, 0) 22%, rgba(196, 152, 217, 0.12) 84.6%);
+
+		.woocommerce-marketing-introduction-banner-image-placeholder {
+			width: 100%;
+			height: 100%;
+			background: center / contain no-repeat;
+		}
+
+		.woocommerce-marketing-introduction-banner-close-button {
+			position: absolute;
+			top: $gap-small;
+			right: $gap;
+			padding: 0;
+		}
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+		}
+	}
+}

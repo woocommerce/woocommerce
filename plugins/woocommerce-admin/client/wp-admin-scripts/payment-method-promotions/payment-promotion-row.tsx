@@ -7,7 +7,6 @@ import { useState, useEffect } from '@wordpress/element';
 import {
 	PLUGINS_STORE_NAME,
 	PAYMENT_GATEWAYS_STORE_NAME,
-	PluginsStoreActions,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';

@@ -23,6 +23,7 @@ import { ordersFilter } from '../requests/merchant/orders-filter.js';
 import { addOrder } from '../requests/merchant/add-order.js';
 import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
 import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant.js';
+import { wpLogin } from '../requests/merchant/wp-login.js';
 import { ordersAPI } from '../requests/api/orders.js';
 import { admin_acc_login } from '../config.js';
 

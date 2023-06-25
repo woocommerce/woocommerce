@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { useSelect, select as WPSelect } from '@wordpress/data';
-import { createElement, useRef } from '@wordpress/element';
+import { useSelect, useDispatch, select as WPSelect } from '@wordpress/data';
+import { createElement, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -12,30 +12,35 @@ import { STORE_NAME } from './constants';
 import { Options } from './types';
 
 export const useOptionsHydration = ( data: Options ) => {
-	const dataRef = useRef( data );
+	const shouldHydrate = useSelect( ( select: typeof WPSelect ) => {
+		const { isResolving, hasFinishedResolution } = select( STORE_NAME );
 
-	// @ts-expect-error registry is not defined in the wp.data typings
-	useSelect( ( select: typeof WPSelect, registry ) => {
-		if ( ! dataRef.current ) {
-			return;
+		if ( ! data ) {
+			return {};
 		}
 
-		const { isResolving, hasFinishedResolution } = select( STORE_NAME );
-		const { startResolution, finishResolution, receiveOptions } =
-			registry.dispatch( STORE_NAME );
-		const names = Object.keys( dataRef.current );
+		return Object.fromEntries(
+			Object.keys( data ).map( ( name ) => {
+				const hydrate =
+					! isResolving( 'getOption', [ name ] ) &&
+					! hasFinishedResolution( 'getOption', [ name ] );
+				return [ name, hydrate ];
+			} )
+		);
+	}, [] );
 
-		names.forEach( ( name ) => {
-			if (
-				! isResolving( 'getOption', [ name ] ) &&
-				! hasFinishedResolution( 'getOption', [ name ] )
-			) {
+	const { startResolution, finishResolution, receiveOptions } =
+		useDispatch( STORE_NAME );
+
+	useEffect( () => {
+		Object.entries( shouldHydrate ).forEach( ( [ name, hydrate ] ) => {
+			if ( hydrate ) {
 				startResolution( 'getOption', [ name ] );
-				receiveOptions( { [ name ]: dataRef.current[ name ] } );
+				receiveOptions( { [ name ]: data[ name ] } );
 				finishResolution( 'getOption', [ name ] );
 			}
 		} );
-	}, [] );
+	}, [ shouldHydrate ] );
 };
 
 export const withOptionsHydration = ( data: Options ) =>

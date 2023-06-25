@@ -3,6 +3,11 @@
  */
 import { applyFilters } from '@wordpress/hooks';
 import { useEffect } from '@wordpress/element';
+import { triggerExitPageCesSurvey } from '@woocommerce/customer-effort-score';
+import {
+	LayoutContextProvider,
+	getLayoutContextValue,
+} from '@woocommerce/admin-layout';
 import QueryString, { parse } from 'qs';
 
 /**
@@ -13,7 +18,6 @@ import { ShippingRecommendations } from '../shipping';
 import { EmbeddedBodyProps } from './embedded-body-props';
 import { StoreAddressTour } from '../guided-tours/store-address-tour';
 import './style.scss';
-import { triggerExitPageCesSurvey } from '~/customer-effort-score-tracks/customer-effort-score-exit-page';
 
 type QueryParams = EmbeddedBodyProps;
 
@@ -59,13 +63,15 @@ export const EmbeddedBodyLayout = () => {
 	) as React.ElementType< EmbeddedBodyProps >[];
 
 	return (
-		<div
-			className="woocommerce-embedded-layout__primary"
-			id="woocommerce-embedded-layout__primary"
-		>
-			{ componentList.map( ( Comp, index ) => {
-				return <Comp key={ index } { ...queryParams } />;
-			} ) }
-		</div>
+		<LayoutContextProvider value={ getLayoutContextValue( [ 'page' ] ) }>
+			<div
+				className="woocommerce-embedded-layout__primary"
+				id="woocommerce-embedded-layout__primary"
+			>
+				{ componentList.map( ( Comp, index ) => {
+					return <Comp key={ index } { ...queryParams } />;
+				} ) }
+			</div>
+		</LayoutContextProvider>
 	);
 };

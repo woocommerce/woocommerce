@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Move CES-related components to @woocommerce/product-editor

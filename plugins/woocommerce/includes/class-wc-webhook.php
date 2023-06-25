@@ -274,21 +274,25 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	private function is_valid_resource( $arg ) {
 		$resource = $this->get_resource();
 
-		if ( in_array( $resource, array( 'order', 'product', 'coupon' ), true ) ) {
+		if ( in_array( $resource, array( 'product', 'coupon' ), true ) ) {
 			$status = get_post_status( absint( $arg ) );
 
 			// Ignore auto drafts for all resources.
 			if ( in_array( $status, array( 'auto-draft', 'new' ), true ) ) {
 				return false;
 			}
+		}
 
-			// Ignore standard drafts for orders.
-			if ( 'order' === $resource && 'draft' === $status ) {
+		if ( 'order' === $resource ) {
+			// Check registered order types for order types args.
+			if ( ! OrderUtil::is_order( absint( $arg ), wc_get_order_types( 'order-webhooks' ) ) ) {
 				return false;
 			}
 
-			// Check registered order types for order types args.
-			if ( 'order' === $resource && ! OrderUtil::is_order( absint( $arg ), wc_get_order_types( 'order-webhooks' ) ) ) {
+			$order = wc_get_order( absint( $arg ) );
+
+			// Ignore standard drafts for orders.
+			if ( in_array( $order->get_status(), array( 'draft', 'auto-draft', 'new' ), true ) ) {
 				return false;
 			}
 		}

@@ -67,6 +67,7 @@ class Loader {
 		Translations::get_instance();
 		WCAdminUser::get_instance();
 		Settings::get_instance();
+		SiteHealth::get_instance();
 		SystemStatusReport::get_instance();
 
 		wc_get_container()->get( Reviews::class );
@@ -301,7 +302,7 @@ class Loader {
 	}
 
 	/**
-	 * Hooks extra neccessary data into the component settings array already set in WooCommerce core.
+	 * Hooks extra necessary data into the component settings array already set in WooCommerce core.
 	 *
 	 * @param array $settings Array of component settings.
 	 * @return array Array of component settings.

@@ -5,8 +5,10 @@
 
 namespace Automattic\WooCommerce\Utilities;
 
+use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use WC_Order;
 use WP_Post;
@@ -33,6 +35,15 @@ final class OrderUtil {
 	 */
 	public static function custom_orders_table_usage_is_enabled() : bool {
 		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+	}
+
+	/**
+	 * Helper function to get whether the orders cache should be used or not.
+	 *
+	 * @return bool True if the orders cache should be used, false otherwise.
+	 */
+	public static function orders_cache_usage_is_enabled() : bool {
+		return wc_get_container()->get( OrderCacheController::class )->orders_cache_usage_is_enabled();
 	}
 
 	/**
@@ -122,5 +133,56 @@ final class OrderUtil {
 	 */
 	public static function get_order_admin_new_url() : string {
 		return wc_get_container()->get( PageController::class )->get_new_page_url();
+	}
+
+	/**
+	 * Check if the current admin screen is an order list table.
+	 *
+	 * @param string $order_type Optional. The order type to check for. Default shop_order.
+	 *
+	 * @return bool
+	 */
+	public static function is_order_list_table_screen( $order_type = 'shop_order' ) : bool {
+		return wc_get_container()->get( PageController::class )->is_order_screen( $order_type, 'list' );
+	}
+
+	/**
+	 * Check if the current admin screen is for editing an order.
+	 *
+	 * @param string $order_type Optional. The order type to check for. Default shop_order.
+	 *
+	 * @return bool
+	 */
+	public static function is_order_edit_screen( $order_type = 'shop_order' ) : bool {
+		return wc_get_container()->get( PageController::class )->is_order_screen( $order_type, 'edit' );
+	}
+
+	/**
+	 * Check if the current admin screen is adding a new order.
+	 *
+	 * @param string $order_type Optional. The order type to check for. Default shop_order.
+	 *
+	 * @return bool
+	 */
+	public static function is_new_order_screen( $order_type = 'shop_order' ) : bool {
+		return wc_get_container()->get( PageController::class )->is_order_screen( $order_type, 'new' );
+	}
+
+	/**
+	 * Get the name of the database table that's currently in use for orders.
+	 *
+	 * @return string
+	 */
+	public static function get_table_for_orders() {
+		return wc_get_container()->get( COTMigrationUtil::class )->get_table_for_orders();
+	}
+
+	/**
+	 * Get the name of the database table that's currently in use for orders.
+	 *
+	 * @return string
+	 */
+	public static function get_table_for_order_meta() {
+		return wc_get_container()->get( COTMigrationUtil::class )->get_table_for_order_meta();
 	}
 }

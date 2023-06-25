@@ -36,7 +36,7 @@ const onboarding = {
 		await page.waitForLoadState( 'networkidle' ); // not autowaiting for form submission
 	},
 
-	completeIndustrySection: async ( page, industries, expectedIndustries ) => {
+	completeIndustrySection: async ( page, industries, expectedNumberOfIndustries ) => {
 		await page.goto( INDUSTRY_DETAILS_URL );
 		const pageHeading = await page.textContent(
 			'div.woocommerce-profile-wizard__step-header > h2'
@@ -49,9 +49,9 @@ const onboarding = {
 		const numCheckboxes = await page.$$(
 			'.components-checkbox-control__input'
 		);
-		expect( numCheckboxes ).toHaveLength( expectedIndustries );
+		expect( numCheckboxes ).toHaveLength( expectedNumberOfIndustries );
 		// Uncheck any currently checked industries
-		for ( let i = 0; i < expectedIndustries; i++ ) {
+		for ( let i = 0; i < expectedNumberOfIndustries; i++ ) {
 			const currentCheck = `#inspector-checkbox-control-${ i }`;
 			await page.uncheck( currentCheck );
 		}

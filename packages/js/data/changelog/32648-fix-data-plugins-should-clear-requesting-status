@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Moved setIsRequesting(false) to the finally block so that it always runs even if an exception is thrown.

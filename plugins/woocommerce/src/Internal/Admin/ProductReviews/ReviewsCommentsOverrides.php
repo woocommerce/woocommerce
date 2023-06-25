@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Internal\Admin\ProductReviews;
 
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WP_Comment_Query;
+use WP_Screen;
 
 /**
  * Tweaks the WordPress comments page to exclude reviews.
@@ -116,6 +117,12 @@ class ReviewsCommentsOverrides {
 	 * @return array
 	 */
 	protected function exclude_reviews_from_comments( $args ) : array {
+		$screen = get_current_screen();
+
+		// We only wish to intervene if the edit comments screen has been requested.
+		if ( ! $screen instanceof WP_Screen || 'edit-comments' !== $screen->id ) {
+			return $args;
+		}
 
 		if ( ! empty( $args['post_type'] ) && $args['post_type'] !== 'any' ) {
 			$post_types = (array) $args['post_type'];

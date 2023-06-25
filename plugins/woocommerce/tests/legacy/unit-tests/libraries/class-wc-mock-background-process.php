@@ -60,7 +60,7 @@ class WC_Mock_Background_Process extends WC_Background_Process {
 	 * @return bool
 	 */
 	protected function task( $item ) {
-		// We sleep for 5 seconds to mimic a long running tast to complete some tests.
+		// We sleep for 5 seconds to mimic a long running task to complete some tests.
 		sleep( 5 );
 		update_option( $item['mock_key'], $item['mock_value'] );
 		return false;

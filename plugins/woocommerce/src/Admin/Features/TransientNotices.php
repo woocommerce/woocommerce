@@ -5,7 +5,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
-use \Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Loader;
 
 /**
  * Shows print shipping label banner on edit order page.

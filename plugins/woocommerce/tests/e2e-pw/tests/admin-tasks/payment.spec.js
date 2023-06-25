@@ -1,16 +1,30 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { features } = require( '../../utils' );
 
 test.describe( 'Payment setup task', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeEach( async ( { page } ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
-		);
-		await page.click( 'text=Skip setup store details' );
-		await page.click( 'text=No thanks' );
-		await page.waitForLoadState( 'networkidle' );
+	test.beforeEach( async ( { page, baseURL } ) => {
+		// Skip skipping the setup wizard if the core profiler is enabled.
+		// When the core-profiler is enabled, the following code won't work, causing the tests to fail.
+		if ( ! features.is_enabled( 'core-profiler' ) ) {
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
+			);
+			await page.click( 'text=Skip setup store details' );
+			await page.click( 'button >> text=No thanks' );
+			await page.waitForLoadState( 'networkidle' );
+		} else {
+			await new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc-admin',
+			} ).post( 'onboarding/profile', {
+				'skipped': true,
+			});
+		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -112,9 +126,6 @@ test.describe( 'Payment setup task', () => {
 			.click()
 			.catch( () => {} );
 		await page.waitForLoadState( 'networkidle' );
-
-		// purposely no await again
-		page.click( 'button.toggle-button' );
 
 		// enable COD payment option
 		await page.click(

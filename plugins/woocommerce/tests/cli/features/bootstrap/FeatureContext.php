@@ -5,8 +5,8 @@ use Behat\Behat\Context\ClosuredContextInterface,
     Behat\Behat\Context\BehatContext,
     Behat\Behat\Event\SuiteEvent;
 
-use \WP_CLI\Process;
-use \WP_CLI\Utils;
+use WP_CLI\Process;
+use WP_CLI\Utils;
 
 // Inside a community package
 if ( file_exists( __DIR__ . '/utils.php' ) ) {

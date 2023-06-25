@@ -27,7 +27,7 @@ export const PostTile: React.FC< PostTileProps > = ( { post } ) => {
 			} }
 		>
 			<div className="woocommerce-marketing-learn-marketing-card__post-img">
-				{ post.image && <img src={ post.image } alt="" /> }
+				{ !! post.image && <img src={ post.image } alt="" /> }
 			</div>
 			<div className="woocommerce-marketing-learn-marketing-card__post-title">
 				{ post.title }
@@ -37,7 +37,7 @@ export const PostTile: React.FC< PostTileProps > = ( { post } ) => {
 					// translators: %s: author's name.
 					sprintf( __( 'By %s', 'woocommerce' ), post.author_name )
 				}
-				{ post.author_avatar && (
+				{ !! post.author_avatar && (
 					<img
 						src={ post.author_avatar.replace( 's=96', 's=32' ) }
 						alt=""

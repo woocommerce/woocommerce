@@ -10,6 +10,9 @@
  * @package WooCommerce\Tests\API
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 /**
  * Trait for testing the date filtering on controllers that inherit from WC_REST_CRUD_Controller.
  */
@@ -34,18 +37,34 @@ trait DateFilteringForCrudControllers {
 	public function test_filter_by_creation_or_modification_date( $param_name, $filter_by_gmt, $expected_to_be_returned ) {
 		global $wpdb;
 
+		$timezone_string_option = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'Africa/Blantyre', true ); // +02:00
 		wp_set_current_user( $this->user );
-		$item_id = $this->get_item_for_date_filtering_tests()->get_id();
+		$item    = $this->get_item_for_date_filtering_tests();
+		$item_id = $item->get_id();
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$wpdb->query(
-			'UPDATE ' . $wpdb->prefix . "posts SET
+		if ( $item instanceof WC_Abstract_Order && OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update(
+				OrdersTableDataStore::get_orders_table_name(),
+				array(
+					'date_created_gmt' => '2000-01-01T10:00:00',
+					'date_updated_gmt' => '2000-02-01T10:00:00',
+				),
+				array(
+					'id' => $item->get_id(),
+				)
+			);
+		} else {
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query(
+				'UPDATE ' . $wpdb->prefix . "posts SET
 			post_date = '2000-01-01T12:00:00',
 			post_date_gmt = '2000-01-01T10:00:00',
 			post_modified = '2000-02-01T12:00:00',
 			post_modified_gmt = '2000-02-01T10:00:00'
 			WHERE ID = " . $item_id
-		);
+			);
+		}
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		$request = new WP_REST_Request( 'GET', $this->get_endpoint_for_date_filtering_tests() );
@@ -60,6 +79,7 @@ trait DateFilteringForCrudControllers {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( $expected_to_be_returned ? 1 : 0, count( $response_items ) );
+		update_option( 'timezone_string', $timezone_string_option );
 	}
 
 	/**
@@ -80,19 +100,35 @@ trait DateFilteringForCrudControllers {
 	public function test_can_filter_by_more_than_one_date( $first_param_name, $first_param_value, $second_param_name, $second_param_value, $filter_by_gmt, $expected_to_be_returned ) {
 		global $wpdb;
 
+		$timezone_string_option = get_option( 'timezone_string' );
+		update_option( 'timezone_string', 'Africa/Blantyre', true ); // +02:00
 		wp_set_current_user( $this->user );
-		$item_id = $this->get_item_for_date_filtering_tests()->get_id();
+		$item    = $this->get_item_for_date_filtering_tests();
+		$item_id = $item->get_id();
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$wpdb->query(
-			'UPDATE ' . $wpdb->prefix . "posts SET
+		if ( $item instanceof WC_Abstract_Order && OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update(
+				OrdersTableDataStore::get_orders_table_name(),
+				array(
+					'date_created_gmt' => '2000-01-01T10:00:00',
+					'date_updated_gmt' => '2000-02-01T10:00:00',
+				),
+				array(
+					'id' => $item->get_id(),
+				)
+			);
+		} else {
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query(
+				'UPDATE ' . $wpdb->prefix . "posts SET
 			post_date = '2000-01-01T12:00:00',
 			post_date_gmt = '2000-01-01T10:00:00',
 			post_modified = '2000-02-01T12:00:00',
 			post_modified_gmt = '2000-02-01T10:00:00'
 			WHERE ID = " . $item_id
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+		}
 
 		$request = new WP_REST_Request( 'GET', $this->get_endpoint_for_date_filtering_tests() );
 		$request->set_query_params(
@@ -107,5 +143,6 @@ trait DateFilteringForCrudControllers {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( $expected_to_be_returned ? 1 : 0, count( $response_items ) );
+		update_option( 'timezone_string', $timezone_string_option );
 	}
 }

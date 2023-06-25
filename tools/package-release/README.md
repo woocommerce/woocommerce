@@ -36,6 +36,8 @@ In order to prepare a package for release, a changelog will need to be compiled 
 ./tools/package-release/bin/dev prepare -a
 ```
 
+When making an initial release for a new package, pass the `--initialRelease` flag to signify a new release for a new package.
+
 2. Create a pull request with the resulting changes and merge it.
 
 See more about the prepare script using `./tools/package-release/bin/dev publish --help`.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update the "can manually add a variation" E2E test to prevent automatic creation of variations from all attributes.

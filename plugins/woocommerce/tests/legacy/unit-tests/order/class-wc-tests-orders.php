@@ -53,7 +53,7 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test shipping is added and rounded correctly when addedd to total.
+	 * Test shipping is added and rounded correctly when added to total.
 	 *
 	 * @throws WC_Data_Exception When lines cannot be added to order.
 	 */

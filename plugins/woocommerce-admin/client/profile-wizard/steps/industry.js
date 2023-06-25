@@ -96,6 +96,14 @@ class Industry extends Component {
 		return this.state.selected.map( ( industry ) => industry.slug );
 	}
 
+	componentDidMount() {
+		recordEvent( 'onboarding_site_heuristics', {
+			page_count: onboarding.pageCount,
+			post_count: onboarding.postCount,
+			is_block_theme: onboarding.isBlockTheme,
+		} );
+	}
+
 	componentDidUpdate() {
 		this.props.updateCurrentStepValues(
 			this.props.step.key,

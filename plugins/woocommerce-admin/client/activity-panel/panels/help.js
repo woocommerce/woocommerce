@@ -38,15 +38,15 @@ function getHomeItems() {
 		},
 		{
 			title: __( 'Inbox', 'woocommerce' ),
-			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-2',
-		},
-		{
-			title: __( 'Stats Overview', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-4',
 		},
 		{
-			title: __( 'Store Management', 'woocommerce' ),
+			title: __( 'Stats Overview', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-5',
+		},
+		{
+			title: __( 'Store Management', 'woocommerce' ),
+			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-10',
 		},
 		{
 			title: __( 'Store Setup Checklist', 'woocommerce' ),
@@ -145,7 +145,7 @@ function getPaymentGatewaySuggestions( props ) {
 			link: 'https://woocommerce.com/document/klarna-payments/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.payfast && {
-			title: __( 'PayFast Setup and Configuration', 'woocommerce' ),
+			title: __( 'Payfast Setup and Configuration', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/payfast-payment-gateway/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.eway && {

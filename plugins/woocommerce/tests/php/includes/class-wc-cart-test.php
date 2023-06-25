@@ -187,6 +187,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'error', $notices );
 		$this->assertCount( 1, $notices['error'] );
-		$this->assertRegExp( '/Please choose product options by visiting/', $notices['error'][0]['notice'] );
+		$this->assertMatchesRegularExpression( '/Please choose product options by visiting/', $notices['error'][0]['notice'] );
 	}
 }

@@ -78,7 +78,7 @@ test.describe( 'Shopper My Account Create Account', () => {
 		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
 			'My account'
 		);
-		await expect( page.locator( 'text=Logout' ) ).toBeVisible();
+		await expect( page.locator( 'text=Log out' ).first() ).toBeVisible();
 
 		await page.goto( 'my-account/edit-account/' );
 		await expect( page.locator( '#account_email' ) ).toHaveValue(

@@ -1,10 +1,16 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+/**
  * Internal dependencies
  */
 import { CardBody } from '~/marketing/components';
 import './PluginCardBody.scss';
 
 type PluginCardBodyProps = {
+	className?: string;
 	icon: JSX.Element;
 	name: string;
 
@@ -13,7 +19,7 @@ type PluginCardBodyProps = {
 	 */
 	pills?: Array< JSX.Element >;
 
-	description: string;
+	description: React.ReactNode;
 	button?: JSX.Element;
 };
 
@@ -21,6 +27,7 @@ type PluginCardBodyProps = {
  * Renders a CardBody layout component to display plugin info and button.
  */
 export const PluginCardBody: React.FC< PluginCardBodyProps > = ( {
+	className,
 	icon,
 	name,
 	pills,
@@ -28,7 +35,12 @@ export const PluginCardBody: React.FC< PluginCardBodyProps > = ( {
 	button,
 } ) => {
 	return (
-		<CardBody className="woocommerce_marketing_plugin_card_body">
+		<CardBody
+			className={ classnames(
+				'woocommerce_marketing_plugin_card_body',
+				className
+			) }
+		>
 			<div className="woocommerce_marketing_plugin_card_body__icon">
 				{ icon }
 			</div>

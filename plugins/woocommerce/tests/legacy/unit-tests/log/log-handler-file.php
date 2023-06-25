@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Tests_Log_Handler_File file.
+ *
+ * @package WooCommerce\Tests
+ */
 
 /**
  * Class WC_Tests_Log_Handler_File
@@ -7,6 +12,11 @@
  */
 class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 
+	/**
+	 * Runs after each test.
+	 *
+	 * @return void
+	 */
 	public function tearDown(): void {
 		$log_files = array(
 			'unit-tests',
@@ -35,7 +45,14 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		parent::tearDown();
 	}
 
+	/**
+	 * Get the entire contents of a file.
+	 *
+	 * @param string $handle File path.
+	 * @return false|string Contents of the file, or false on error.
+	 */
 	public function read_content( $handle ) {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions
 		return file_get_contents( WC_Log_Handler_File::get_log_file_path( $handle ) );
 	}
 
@@ -84,7 +101,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		$log_name = '_test_remove';
 		$handler->handle( time(), 'debug', 'debug', array( 'source' => $log_name ) );
 		$handler->remove( wc_get_log_file_name( $log_name ) );
-		$this->assertFileNotExists( WC_Log_Handler_File::get_log_file_path( $log_name ) );
+		$this->assertFileDoesNotExist( WC_Log_Handler_File::get_log_file_path( $log_name ) );
 	}
 
 	/**
@@ -165,20 +182,21 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_log_rotate() {
+		// phpcs:disable WordPress.WP.AlternativeFunctions
 
-		// Handler with log size limit of 5mb
+		// Handler with log size limit of 5mb.
 		$handler       = new WC_Log_Handler_File( 5 * 1024 * 1024 );
 		$time          = time();
 		$log_name      = '_test_log_rotate';
 		$base_log_file = WC_Log_Handler_File::get_log_file_path( $log_name );
 
-		// Create log file larger than 5mb to ensure log is rotated
+		// Create log file larger than 5mb to ensure log is rotated.
 		$handle = fopen( $base_log_file, 'w' );
 		fseek( $handle, 5 * 1024 * 1024 );
 		fwrite( $handle, '_base_log_file_contents_' );
 		fclose( $handle );
 
-		// Write some files to ensure they've rotated correctly
+		// Write some files to ensure they've rotated correctly.
 		for ( $i = 0; $i < 10; $i++ ) {
 			file_put_contents( WC_Log_Handler_File::get_log_file_path( $log_name . ".{$i}" ), $i ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_file_put_contents
 		}
@@ -188,14 +206,16 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 
 		$this->assertFileExists( WC_Log_Handler_File::get_log_file_path( $log_name ) );
 
-		// Ensure the handled log is correct
+		// Ensure the handled log is correct.
 		$this->assertStringEndsWith( 'EMERGENCY emergency' . PHP_EOL, $this->read_content( $log_name ) );
 
-		// Ensure other logs have rotated correctly
+		// Ensure other logs have rotated correctly.
 		$this->assertEquals( '_base_log_file_contents_', trim( $this->read_content( $log_name . '.0' ) ) );
 		for ( $i = 1; $i < 10; $i++ ) {
 			$this->assertEquals( $i - 1, $this->read_content( $log_name . ".{$i}" ) );
 		}
+
+		// phpcs:enable WordPress.WP.AlternativeFunctions
 	}
 
 	/**
@@ -205,7 +225,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 */
 	public function test_get_log_file_path() {
 		$log_dir     = trailingslashit( WC_LOG_DIR );
-		$date_suffix = date( 'Y-m-d', time() );
+		$date_suffix = gmdate( 'Y-m-d', time() );
 		$hash_name   = sanitize_file_name( wp_hash( 'unit-tests' ) );
 		$this->assertEquals( $log_dir . 'unit-tests-' . $date_suffix . '-' . $hash_name . '.log', WC_Log_Handler_File::get_log_file_path( 'unit-tests' ) );
 	}

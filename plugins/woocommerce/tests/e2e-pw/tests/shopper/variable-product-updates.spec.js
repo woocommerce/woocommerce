@@ -174,7 +174,7 @@ test.describe( 'Shopper > Update variable product', () => {
 		).toContainText( productPrice );
 	} );
 
-	test( 'Shopper can change attributes to combination with dimentions and weight', async ( {
+	test( 'Shopper can change attributes to combination with dimensions and weight', async ( {
 		page,
 	} ) => {
 		await page.goto( `product/${ slug }` );

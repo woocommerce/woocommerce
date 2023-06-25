@@ -8,6 +8,8 @@
  * @since   2.6.0
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -1663,9 +1665,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$weight_unit    = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
-		$schema         = array(
+		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
+		$schema               = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => $this->post_type,
 			'type'       => 'object',
@@ -1935,7 +1937,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'weight'                => array(
 					/* translators: %s: weight unit */
-					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), $weight_unit ),
+					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), $weight_unit_label ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1946,19 +1948,19 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					'properties'  => array(
 						'length' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'width'  => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'height' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),

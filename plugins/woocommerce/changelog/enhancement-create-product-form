@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Create ProductForm component to merge similar structures between AddProductPage and EditProductPage

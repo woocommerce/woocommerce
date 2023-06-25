@@ -44,7 +44,7 @@ function _wc_beta_tester_load_textdomain() {
 add_action( 'plugins_loaded', '_wc_beta_tester_load_textdomain' );
 
 /**
- * Boostrap plugin.
+ * Bootstrap plugin.
  */
 function _wc_beta_tester_bootstrap() {
 
@@ -78,6 +78,9 @@ add_action( 'plugins_loaded', '_wc_beta_tester_bootstrap' );
  * Register the JS.
  */
 function add_extension_register_script() {
+	if ( ! defined( 'WC_ADMIN_APP' ) ) {
+		return;
+	}
 	$script_path       = '/build/index.js';
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
 	$script_asset      = file_exists( $script_asset_path )
@@ -87,6 +90,8 @@ function add_extension_register_script() {
 			'version'      => filemtime( $script_path ),
 		);
 	$script_url        = plugins_url( $script_path, __FILE__ );
+
+	$script_asset['dependencies'][] = WC_ADMIN_APP; // Add WCA as a dependency to ensure it loads first.
 
 	wp_register_script(
 		'woocommerce-admin-test-helper',
@@ -120,3 +125,16 @@ function add_extension_register_script() {
 }
 
 add_action( 'admin_enqueue_scripts', 'add_extension_register_script' );
+
+add_action(
+	'before_woocommerce_init',
+	function() {
+		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'product_block_editor', __FILE__, true );
+		}
+	}
+);
+
+// Initialize the live branches feature.
+require_once dirname( __FILE__ ) . '/includes/class-wc-beta-tester-live-branches.php';

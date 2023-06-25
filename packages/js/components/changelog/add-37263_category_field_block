@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix issue where width of select control dropdown was not correctly calculated when rendering was delayed.

@@ -61,7 +61,7 @@ const storeDetails = {
 			country: 'United States (US) — California', // corresponding to the text value of the option,
 			countryCode: 'US:CA',
 		},
-		expectedIndustries: 8, // There are 8 checkboxes on the page (in the US), adjust this constant if we change that
+		expectedNumberOfIndustries: 8, // There are 8 checkboxes on the page (in the US), adjust this constant if we change that
 		industries: {
 			fashion: 'Fashion, apparel, and accessories',
 			health: 'Health and beauty',
@@ -86,7 +86,25 @@ const storeDetails = {
 			country: 'Malta', // corresponding to the text value of the option,
 			countryCode: 'MT',
 		},
-		expectedIndustries: 7, // There are 7 checkboxes on the page (in Malta), adjust this constant if we change that
+		expectedNumberOfIndustries: 7, // There are 7 checkboxes on the page (in Malta), adjust this constant if we change that
+		industries: {
+			other: 'Other',
+		},
+		products: {
+			physical: 'Physical products',
+			downloadable: 'Downloads',
+		},
+	},
+	liberia: {
+		store: {
+			address: 'addr1',
+			city: 'Kakata',
+			zip: 'Division 1',
+			email: admin.email,
+			country: 'Liberia — Margibi', // corresponding to the text value of the option,
+			countryCode: 'LR',
+		},
+		expectedNumberOfIndustries: 8, // There are 8 checkboxes on the page (in Liberia), adjust this constant if we change that
 		industries: {
 			other: 'Other',
 		},

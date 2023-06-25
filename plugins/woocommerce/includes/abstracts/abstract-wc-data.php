@@ -507,6 +507,26 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Delete meta data with a matching value.
+	 *
+	 * @since 7.7.0
+	 * @param string $key   Meta key.
+	 * @param mixed  $value Meta value. Entries will only be removed that match the value.
+	 */
+	public function delete_meta_data_value( $key, $value ) {
+		$this->maybe_read_meta_data();
+		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key, true );
+
+		if ( $array_keys ) {
+			foreach ( $array_keys as $array_key ) {
+				if ( $value === $this->meta_data[ $array_key ]->value ) {
+					$this->meta_data[ $array_key ]->value = null;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Delete meta data.
 	 *
 	 * @since 2.6.0

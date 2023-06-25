@@ -1,5 +1,6 @@
 module.exports = {
 	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
+	ignorePatterns: [ '**/jest.*' ],
 	env: {
 		'jest/globals': true,
 	},

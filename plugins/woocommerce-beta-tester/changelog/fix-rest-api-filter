@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix rest api filter to allow any strings in replacement

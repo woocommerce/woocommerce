@@ -10,7 +10,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name, can't change without breaking backward compat.
 /**
@@ -326,6 +328,29 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * With HPOS, few internal meta keys such as _billing_address_index, _shipping_address_index are not considered internal anymore (since most internal keys were flattened into dedicated columns).
+	 *
+	 * This function helps in filtering out any remaining internal meta keys with HPOS is enabled.
+	 *
+	 * @param array $meta_data Order meta data.
+	 *
+	 * @return array Filtered order meta data.
+	 */
+	private function filter_internal_meta_keys( $meta_data ) {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return $meta_data;
+		}
+		$cpt_hidden_keys = ( new \WC_Order_Data_Store_CPT() )->get_internal_meta_keys();
+		$meta_data       = array_filter(
+			$meta_data,
+			function ( $meta ) use ( $cpt_hidden_keys ) {
+				return ! in_array( $meta->key, $cpt_hidden_keys, true );
+			}
+		);
+		return array_values( $meta_data );
+	}
+
+	/**
 	 * Get formatted item data.
 	 *
 	 * @since 3.0.0
@@ -369,6 +394,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				case 'meta_data':
 					$meta_data         = $order->get_meta_data();
 					$data['meta_data'] = $this->get_meta_data_for_response( $this->request, $meta_data );
+					$data['meta_data'] = $this->filter_internal_meta_keys( $data['meta_data'] );
 					break;
 				case 'line_items':
 					$data['line_items'] = $order->get_items( 'line_item' );
@@ -742,6 +768,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			if ( $creating ) {
 				$object->set_created_via( 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+				$object->save();
 				$object->calculate_totals();
 			} else {
 				// If items have changed, recalculate order totals.
@@ -944,7 +971,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$item = is_null( $item ) ? new WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
-			if ( empty( $posted['code'] ) ) {
+			$coupon_code = ArrayUtil::get_value_or_default( $posted, 'code' );
+			if ( StringUtil::is_null_or_whitespace( $coupon_code ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 		}
@@ -1083,7 +1111,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'version'              => array(
 					'description' => __( 'Version of WooCommerce which last updated the order.', 'woocommerce' ),
-					'type'        => 'integer',
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),

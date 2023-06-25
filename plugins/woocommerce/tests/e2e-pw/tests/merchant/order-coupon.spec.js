@@ -95,7 +95,7 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		page.on( 'dialog', ( dialog ) => dialog.accept( couponCode ) );
 		await page.click( 'button.add-coupon' );
 
-		await expect( page.locator( `text=${ couponCode }` ) ).toBeVisible();
+		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
 		).toContainText( 'Coupon(s)' );
@@ -113,7 +113,7 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 	test( 'can remove a coupon', async ( { page } ) => {
 		await page.goto( `/wp-admin/post.php?post=${ orderId }&action=edit` );
 		// assert that there is a coupon on the order
-		await expect( page.locator( `text=${ couponCode }` ) ).toBeVisible();
+		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
 		).toContainText( 'Coupon(s)' );
@@ -130,9 +130,7 @@ test.describe( 'WooCommerce Orders > Apply Coupon', () => {
 		await page.dispatchEvent( 'a.remove-coupon', 'click' ); // have to use dispatchEvent because nothing visible to click on
 
 		// make sure the coupon was removed
-		await expect(
-			page.locator( `text=${ couponCode }` )
-		).not.toBeVisible();
+		await expect( page.locator( '.wc_coupon_list li',  { hasText: couponCode } ) ).not.toBeVisible();
 		await expect(
 			page.locator( '.wc-order-totals td.label >> nth=1' )
 		).toContainText( 'Order Total' );

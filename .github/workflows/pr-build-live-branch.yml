@@ -13,7 +13,7 @@ permissions: {}
 
 jobs:
     build:
-        if: github.repository_owner == 'woocommerce'
+        if: github.repository_owner == 'woocommerce' && github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-20.04
         permissions:
             contents: read

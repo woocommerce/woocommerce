@@ -3,7 +3,7 @@
 exports[`AbbreviatedCard it renders correctly 1`] = `
 <div>
   <div
-    class="components-surface components-card woocommerce-abbreviated-card css-1vyvcpq-View-Surface-getBorders-primary-Card-rounded em57xhy0"
+    class="components-surface components-card woocommerce-abbreviated-card css-nsno0f-View-Surface-getBorders-primary-Card-rounded em57xhy0"
     data-wp-c16t="true"
     data-wp-component="Card"
   >
@@ -11,7 +11,7 @@ exports[`AbbreviatedCard it renders correctly 1`] = `
       class="css-mgwsf4-View-Content em57xhy0"
     >
       <div
-        class="components-card__body components-card-body css-1sfrl79-View-Body-borderRadius em57xhy0"
+        class="components-card__body components-card-body css-1i4jx7i-View-Body-borderRadius em57xhy0"
         data-wp-c16t="true"
         data-wp-component="CardBody"
       >

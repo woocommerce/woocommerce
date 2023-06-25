@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\Notes
  */
 
-use \Automattic\WooCommerce\Internal\Admin\Notes\NewSalesRecord;
+use Automattic\WooCommerce\Internal\Admin\Notes\NewSalesRecord;
 
 /**
  * Class WC_Admin_New_Sales_Record

@@ -80,13 +80,20 @@ class ArrayUtil {
 	/**
 	 * Gets the value for a given key from an array, or a default value if the key doesn't exist in the array.
 	 *
+	 * This is equivalent to "$array[$key] ?? $default" except in one case:
+	 * when they key exists, has a null value, and a non-null default is supplied:
+	 *
+	 * $array = ['key' => null]
+	 * $array['key'] ?? 'default' => 'default'
+	 * ArrayUtil::get_value_or_default($array, 'key', 'default') => null
+	 *
 	 * @param array  $array The array to get the value from.
 	 * @param string $key The key to use to retrieve the value.
 	 * @param null   $default The default value to return if the key doesn't exist in the array.
 	 * @return mixed|null The value for the key, or the default value passed.
 	 */
 	public static function get_value_or_default( array $array, string $key, $default = null ) {
-		return isset( $array[ $key ] ) ? $array[ $key ] : $default;
+		return array_key_exists( $key, $array ) ? $array[ $key ] : $default;
 	}
 
 	/**

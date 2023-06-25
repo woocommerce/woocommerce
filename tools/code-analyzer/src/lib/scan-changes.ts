@@ -1,9 +1,12 @@
 /**
  * External dependencies
  */
-import { Logger } from 'cli-core/src/logger';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 import { join } from 'path';
-import { cloneRepo, generateDiff } from 'cli-core/src/git';
+import {
+	cloneRepo,
+	generateDiff,
+} from '@woocommerce/monorepo-utils/src/core/git';
 import { readFile } from 'fs/promises';
 import { execSync } from 'child_process';
 
@@ -15,6 +18,121 @@ import { scanForDBChanges } from './db-changes';
 import { scanForHookChanges } from './hook-changes';
 import { scanForTemplateChanges } from './template-changes';
 import { SchemaDiff, generateSchemaDiff } from '../git';
+import { scanForSchemaChanges } from './schema-changes';
+
+export type ScanType = 'schema' | 'db' | 'hooks' | 'templates' | string;
+
+const generateVersionDiff = async (
+	compareVersion: string,
+	base: string,
+	source: string,
+	clonedPath?: string
+) => {
+	Logger.startTask( `Making temporary clone of ${ source }...` );
+
+	const tmpRepoPath =
+		typeof clonedPath !== 'undefined'
+			? clonedPath
+			: await cloneRepo( source );
+
+	Logger.endTask();
+
+	Logger.notice(
+		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
+	);
+
+	Logger.notice(
+		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
+	);
+
+	const diff = await generateDiff(
+		tmpRepoPath,
+		base,
+		compareVersion,
+		Logger.error,
+		[ 'tools' ]
+	);
+
+	return { diff, tmpRepoPath };
+};
+
+export const scanChangesForDB = async (
+	compareVersion: string,
+	base: string,
+	source: string,
+	clonedPath?: string
+) => {
+	const { diff } = await generateVersionDiff(
+		compareVersion,
+		base,
+		source,
+		clonedPath
+	);
+
+	return scanForDBChanges( diff );
+};
+
+export const scanChangesForHooks = async (
+	compareVersion: string,
+	sinceVersion: string,
+	base: string,
+	source: string,
+	clonedPath?: string
+) => {
+	const { diff, tmpRepoPath } = await generateVersionDiff(
+		compareVersion,
+		base,
+		source,
+		clonedPath
+	);
+
+	const hookChanges = await scanForHookChanges(
+		diff,
+		sinceVersion,
+		tmpRepoPath
+	);
+
+	return Array.from( hookChanges.values() );
+};
+
+export const scanChangesForTemplates = async (
+	compareVersion: string,
+	sinceVersion: string,
+	base: string,
+	source: string,
+	clonedPath?: string
+) => {
+	const { diff, tmpRepoPath } = await generateVersionDiff(
+		compareVersion,
+		base,
+		source,
+		clonedPath
+	);
+
+	const templateChanges = await scanForTemplateChanges(
+		diff,
+		sinceVersion,
+		tmpRepoPath
+	);
+
+	return Array.from( templateChanges.values() );
+};
+
+export const scanChangesForSchema = async (
+	compareVersion: string,
+	base: string,
+	source: string,
+	clonedPath?: string
+) => {
+	const { tmpRepoPath } = await generateVersionDiff(
+		compareVersion,
+		base,
+		source,
+		clonedPath
+	);
+
+	return scanForSchemaChanges( compareVersion, base, tmpRepoPath );
+};
 
 export const scanForChanges = async (
 	compareVersion: string,
@@ -22,11 +140,21 @@ export const scanForChanges = async (
 	skipSchemaCheck: boolean,
 	source: string,
 	base: string,
-	outputStyle: string
+	outputStyle: string,
+	clonedPath?: string
 ) => {
 	Logger.startTask( `Making temporary clone of ${ source }...` );
-	const tmpRepoPath = await cloneRepo( source );
+
+	const tmpRepoPath =
+		typeof clonedPath !== 'undefined'
+			? clonedPath
+			: await cloneRepo( source );
+
 	Logger.endTask();
+
+	Logger.notice(
+		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
+	);
 
 	Logger.notice(
 		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
@@ -42,9 +170,12 @@ export const scanForChanges = async (
 
 	// Only checkout the compare version if we're in CLI mode.
 	if ( outputStyle === 'cli' ) {
-		execSync( `cd ${ tmpRepoPath } && git checkout ${ compareVersion }`, {
-			stdio: 'pipe',
-		} );
+		execSync(
+			`cd ${ tmpRepoPath } && git -c core.hooksPath=/dev/null checkout ${ compareVersion }`,
+			{
+				stdio: 'pipe',
+			}
+		);
 	}
 
 	const pluginPath = join( tmpRepoPath, 'plugins/woocommerce' );
@@ -58,7 +189,11 @@ export const scanForChanges = async (
 	Logger.endTask();
 
 	Logger.startTask( 'Detecting template changes...' );
-	const templateChanges = scanForTemplateChanges( diff, sinceVersion );
+	const templateChanges = await scanForTemplateChanges(
+		diff,
+		sinceVersion,
+		tmpRepoPath
+	);
 	Logger.endTask();
 
 	Logger.startTask( 'Detecting DB changes...' );

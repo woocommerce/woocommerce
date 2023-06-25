@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { Tasks } from '~/tasks';
+import { TaskLists } from '~/task-lists';
 
 type QueryTypeProps = {
 	query: {
@@ -12,7 +12,7 @@ type QueryTypeProps = {
 export const SetupTasksPanel = ( { query }: QueryTypeProps ) => {
 	return (
 		<div className="woocommerce-setup-panel">
-			<Tasks query={ query } />
+			<TaskLists query={ query } />
 		</div>
 	);
 };

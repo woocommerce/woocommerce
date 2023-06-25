@@ -70,7 +70,7 @@ To disconnect from WooCommerce.com, go to `WooCommerce > Extensions > WooCommerc
 
 ## Jetpack Connection
 
-Using Jetpack & WooCommerce Shipping & Tax allows us to offer additional features to new WooCommerce users as well as simplify parts of the setup process. For example, we can do automated tax calculations for certain countries, significantly simplifying the tax task. To make this work, the user needs to be connected to a WordPress.com account. This also means development and testing of these features needs to be done on a Jetpack connected site. Search the MGS & the Feld  Guide for additional resources on testing Jetpack with local setups.
+Using Jetpack & WooCommerce Shipping & Tax allows us to offer additional features to new WooCommerce users as well as simplify parts of the setup process. For example, we can do automated tax calculations for certain countries, significantly simplifying the tax task. To make this work, the user needs to be connected to a WordPress.com account. This also means development and testing of these features needs to be done on a Jetpack connected site. Search the MGS & the Field Guide for additional resources on testing Jetpack with local setups.
 
 We have a special Jetpack connection flow designed specifically for WooCommerce onboarding, so that the user feels that they are connecting as part of a cohesive experience. To access this flow, we have a custom Jetpack connection endpoint [/wc-admin/plugins/connect-jetpack](https://github.com/woocommerce/woocommerce/blob/feba6a8dcd55d4f5c7edc05478369c76df082293/plugins/woocommerce/src/Admin/API/Plugins.php#L395-L417).
 

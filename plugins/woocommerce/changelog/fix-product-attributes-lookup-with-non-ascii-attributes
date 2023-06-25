@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix handling of non-ASCII product attributes when the attributes lookup table is in use

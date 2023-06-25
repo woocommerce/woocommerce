@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { RadioControl, SelectControl } from '@wordpress/components';
+import { SelectControl } from '@wordpress/components';
 
 /**
  * Internal dependencies

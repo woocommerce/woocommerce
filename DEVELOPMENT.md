@@ -23,26 +23,26 @@ Here are some examples of the ways you can use Turborepo / pnpm commands:
 ```bash
 # Lint and build all plugins, packages, and tools. Note the use of `-r` for lint,
 # turbo does not run the lint at this time.
-pnpm run -r lint && pnpm run build 
+pnpm run -r lint && pnpm run build
 
 # Build WooCommerce Core and all of its dependencies
-pnpm run --filter='woocommerce' build 
+pnpm run --filter='woocommerce' build
 
 # Lint the @woocommerce/components package - note the different argument order, turbo scripts
 # are not running lints at this point in time.
-pnpm run -r --filter='@woocommerce/components' lint 
+pnpm run -r --filter='@woocommerce/components' lint
 
 # Test all of the @woocommerce scoped packages
-pnpm run --filter='@woocommerce/*' test 
+pnpm run --filter='@woocommerce/*' test
 
 # Build all of the JavaScript packages
-pnpm run --filter='./packages/js/*' build 
+pnpm run --filter='./packages/js/*' build
 
 # Build everything except WooCommerce Core
-pnpm run --filter='!woocommerce' build 
+pnpm run --filter='!woocommerce' build
 
 # Build everything that has changed since the last commit
-pnpm run --filter='[HEAD^1]' build 
+pnpm run --filter='[HEAD^1]' build
 ```
 
 ### Cache busting Turbo
@@ -90,3 +90,25 @@ pnpm -- wp-env destroy
 Each of the [plugins in our repository](plugins) support using this tool to spin up a development environment. Note that rather than having a single top-level environment, each plugin has its own. This is done in order to prevent conflicts between them.
 
 Please check out [the official documentation](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) if you would like to learn more about this tool.
+
+## Troubleshooting
+
+### Installing PHP in Unix (e.g. Ubuntu)
+
+Many unix systems such as Ubuntu will have PHP already installed. Sometimes without the extra packages you need to run WordPress and this will cause you to run into troubles.
+
+Use your package manager to add the extra PHP packages you'll need.
+e.g. in Ubuntu you can run:
+
+```
+sudo apt update
+sudo apt install php-bcmath \
+                 php-curl \
+                 php-imagick \
+                 php-intl \
+                 php-json \
+                 php-mbstring \
+                 php-mysql \
+                 php-xml \
+                 php-zip
+```

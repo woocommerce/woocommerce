@@ -19,7 +19,7 @@ const Item = ( { item } ) => {
 	// and should not be a tabbable element.
 	/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 
-	// Only render a slot if a coresponding Fill exists and the item is not a category
+	// Only render a slot if a corresponding Fill exists and the item is not a category
 	if ( hasFills && ! item.isCategory ) {
 		return (
 			<NavigationItem key={ item.id } item={ item.id }>

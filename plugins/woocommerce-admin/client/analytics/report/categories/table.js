@@ -10,13 +10,13 @@ import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import CategoryBreacrumbs from './breadcrumbs';
 import ReportTable from '../../components/report-table';
-import { CurrencyContext } from '../../../lib/currency-context';
 
 class CategoriesReportTable extends Component {
 	constructor( props ) {

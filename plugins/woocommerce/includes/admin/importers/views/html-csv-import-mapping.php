@@ -60,6 +60,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<input type="hidden" name="file" value="<?php echo esc_attr( $this->file ); ?>" />
 		<input type="hidden" name="delimiter" value="<?php echo esc_attr( $this->delimiter ); ?>" />
 		<input type="hidden" name="update_existing" value="<?php echo (int) $this->update_existing; ?>" />
+		<?php if ( $args['character_encoding'] ) { ?>
+			<input type="hidden" name="character_encoding" value="<?php echo esc_html( $args['character_encoding'] ); ?>" />
+		<?php } ?>
 		<?php wp_nonce_field( 'woocommerce-csv-importer' ); ?>
 	</div>
 </form>

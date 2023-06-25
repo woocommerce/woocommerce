@@ -35,7 +35,7 @@ jQuery( function( $ ) {
 			$tabs_wrapper.find( '.wc-tab, .panel:not(.panel .panel)' ).hide();
 
 			$tab.closest( 'li' ).addClass( 'active' );
-			$tabs_wrapper.find( $tab.attr( 'href' ) ).show();
+			$tabs_wrapper.find( '#' + $tab.attr( 'href' ).split( '#' )[1] ).show();
 		} )
 		// Review link
 		.on( 'click', 'a.woocommerce-review-link', function() {

@@ -6,10 +6,12 @@
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Exception;
+use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
 
@@ -60,7 +62,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_shipping_phone',
 		'_completed_date',
 		'_paid_date',
-		'_edit_lock',
 		'_edit_last',
 		'_cart_discount',
 		'_cart_discount_tax',
@@ -117,6 +118,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	private $error_logger;
 
 	/**
+	 * The instance of the LegacyProxy object to use.
+	 *
+	 * @var LegacyProxy
+	 */
+	private $legacy_proxy;
+
+	/**
 	 * Initialize the object.
 	 *
 	 * @internal
@@ -129,6 +137,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	final public function init( OrdersTableDataStoreMeta $data_store_meta, DatabaseUtil $database_util, LegacyProxy $legacy_proxy ) {
 		$this->data_store_meta    = $data_store_meta;
 		$this->database_util      = $database_util;
+		$this->legacy_proxy       = $legacy_proxy;
 		$this->error_logger       = $legacy_proxy->call_function( 'wc_get_logger' );
 		$this->internal_meta_keys = $this->get_internal_meta_keys();
 	}
@@ -180,6 +189,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Get the names of all the tables involved in the custom orders table feature.
 	 *
+	 * See also : get_all_table_names_with_id.
+	 *
 	 * @return string[]
 	 */
 	public function get_all_table_names() {
@@ -188,6 +199,22 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			$this->get_addresses_table_name(),
 			$this->get_operational_data_table_name(),
 			$this->get_meta_table_name(),
+		);
+	}
+
+	/**
+	 * Similar to get_all_table_names, but also returns the table name along with the items table.
+	 *
+	 * @return array Names of the tables.
+	 */
+	public static function get_all_table_names_with_id() {
+		global $wpdb;
+		return array(
+			'orders'           => self::get_orders_table_name(),
+			'addresses'        => self::get_addresses_table_name(),
+			'operational_data' => self::get_operational_data_table_name(),
+			'meta'             => self::get_meta_table_name(),
+			'items'            => $wpdb->prefix . 'woocommerce_order_items',
 		);
 	}
 
@@ -554,7 +581,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether permissions are granted.
 	 */
 	public function get_download_permissions_granted( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		$order_id = is_int( $order ) ? $order : $order->get_id();
+		$order    = wc_get_order( $order_id );
 		return $order->get_download_permissions_granted();
 	}
 
@@ -580,7 +608,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether sales are recorded.
 	 */
 	public function get_recorded_sales( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		$order_id = is_int( $order ) ? $order : $order->get_id();
+		$order    = wc_get_order( $order_id );
 		return $order->get_recorded_sales();
 	}
 
@@ -606,7 +635,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether coupon counts were updated.
 	 */
 	public function get_recorded_coupon_usage_counts( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		$order_id = is_int( $order ) ? $order : $order->get_id();
+		$order    = wc_get_order( $order_id );
 		return $order->get_recorded_coupon_usage_counts();
 	}
 
@@ -632,7 +662,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether email is sent.
 	 */
 	public function get_email_sent( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		$order_id = is_int( $order ) ? $order : $order->get_id();
+		$order    = wc_get_order( $order_id );
 		return $order->get_new_order_email_sent();
 	}
 
@@ -658,8 +689,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether email was sent.
 	 */
 	public function get_new_order_email_sent( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
-		return $order->get_new_order_email_sent();
+		return $this->get_email_sent( $order );
 	}
 
 	/**
@@ -684,7 +714,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether stock was reduced.
 	 */
 	public function get_stock_reduced( $order ) {
-		$order = is_int( $order ) ? wc_get_order( $order ) : $order;
+		$order_id = is_int( $order ) ? $order : $order->get_id();
+		$order    = wc_get_order( $order_id );
 		return $order->get_order_stock_reduced();
 	}
 
@@ -823,7 +854,7 @@ WHERE
 			$wpdb->prepare(
 				"SELECT {$orders_table}.id FROM {$orders_table}
 				INNER JOIN {$op_table} ON {$op_table}.order_id = {$orders_table}.id
-				WHERE {$op_table}.order_key = %s",
+				WHERE {$op_table}.order_key = %s AND {$op_table}.order_key != ''",
 				$order_key
 			)
 		);
@@ -1277,8 +1308,7 @@ WHERE
 	 * @return void
 	 */
 	private function log_diff( array $diff ): void {
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a log function.
-		$this->error_logger->notice( 'Diff found: ' . print_r( $diff, true ) );
+		$this->error_logger->notice( 'Diff found: ' . wp_json_encode( $diff, JSON_PRETTY_PRINT ) );
 	}
 
 	/**
@@ -1610,6 +1640,84 @@ FROM $order_meta_table
 
 		$changes = $order->get_changes();
 		$this->update_address_index_meta( $order, $changes );
+		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
+		$this->set_custom_taxonomies( $order, $default_taxonomies );
+	}
+
+	/**
+	 * Set default taxonomies for the order.
+	 *
+	 * Note: This is re-implementation of part of WP core's `wp_insert_post` function. Since the code block that set default taxonomies is not filterable, we have to re-implement it.
+	 *
+	 * @param \WC_Abstract_Order $order               Order object.
+	 * @param array              $sanitized_tax_input Sanitized taxonomy input.
+	 *
+	 * @return array Sanitized tax input with default taxonomies.
+	 */
+	public function init_default_taxonomies( \WC_Abstract_Order $order, array $sanitized_tax_input ) {
+		if ( 'auto-draft' === $order->get_status() ) {
+			return $sanitized_tax_input;
+		}
+
+		foreach ( get_object_taxonomies( $order->get_type(), 'object' ) as $taxonomy => $tax_object ) {
+			if ( empty( $tax_object->default_term ) ) {
+				return $sanitized_tax_input;
+			}
+
+			// Filter out empty terms.
+			if ( isset( $sanitized_tax_input[ $taxonomy ] ) && is_array( $sanitized_tax_input[ $taxonomy ] ) ) {
+				$sanitized_tax_input[ $taxonomy ] = array_filter( $sanitized_tax_input[ $taxonomy ] );
+			}
+
+			// Passed custom taxonomy list overwrites the existing list if not empty.
+			$terms = wp_get_object_terms( $order->get_id(), $taxonomy, array( 'fields' => 'ids' ) );
+			if ( ! empty( $terms ) && empty( $sanitized_tax_input[ $taxonomy ] ) ) {
+				$sanitized_tax_input[ $taxonomy ] = $terms;
+			}
+
+			if ( empty( $sanitized_tax_input[ $taxonomy ] ) ) {
+				$default_term_id = get_option( 'default_term_' . $taxonomy );
+				if ( ! empty( $default_term_id ) ) {
+					$sanitized_tax_input[ $taxonomy ] = array( (int) $default_term_id );
+				}
+			}
+		}
+		return $sanitized_tax_input;
+	}
+
+	/**
+	 * Set custom taxonomies for the order.
+	 *
+	 * Note: This is re-implementation of part of WP core's `wp_insert_post` function. Since the code block that set custom taxonomies is not filterable, we have to re-implement it.
+	 *
+	 * @param \WC_Abstract_Order $order               Order object.
+	 * @param array              $sanitized_tax_input Sanitized taxonomy input.
+	 *
+	 * @return void
+	 */
+	public function set_custom_taxonomies( \WC_Abstract_Order $order, array $sanitized_tax_input ) {
+		if ( empty( $sanitized_tax_input ) ) {
+			return;
+		}
+
+		foreach ( $sanitized_tax_input as $taxonomy => $tags ) {
+			$taxonomy_obj = get_taxonomy( $taxonomy );
+
+			if ( ! $taxonomy_obj ) {
+				/* translators: %s: Taxonomy name. */
+				_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Invalid taxonomy: %s.', 'woocommerce' ), $taxonomy ) ), '7.9.0' );
+				continue;
+			}
+
+			// array = hierarchical, string = non-hierarchical.
+			if ( is_array( $tags ) ) {
+				$tags = array_filter( $tags );
+			}
+
+			if ( current_user_can( $taxonomy_obj->cap->assign_terms ) ) {
+				wp_set_post_terms( $order->get_id(), $tags, $taxonomy );
+			}
+		}
 	}
 
 	/**
@@ -1707,8 +1815,8 @@ FROM $order_meta_table
 
 		$changes['type'] = $order->get_type();
 
-		// Make sure 'status' is correct.
-		if ( array_key_exists( 'status', $column_mapping ) ) {
+		// Make sure 'status' is correctly prefixed.
+		if ( array_key_exists( 'status', $column_mapping ) && array_key_exists( 'status', $changes ) ) {
 			$changes['status'] = $this->get_post_status( $order );
 		}
 
@@ -1761,19 +1869,24 @@ FROM $order_meta_table
 			 */
 			do_action( 'woocommerce_before_delete_order', $order_id, $order );
 
-			$this->upshift_child_orders( $order );
+			$this->upshift_or_delete_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
+			$this->delete_items( $order );
 
 			$order->set_id( 0 );
 
-			// If this datastore method is called while the posts table is authoritative, refrain from deleting post data.
-			if ( $order->get_data_store()->get_current_class_name() !== self::class ) {
-				return;
+			/** We can delete the post data if:
+			 * 1. The HPOS table is authoritative and synchronization is enabled.
+			 * 2. The post record is of type `shop_order_placehold`, since this is created by the HPOS in the first place.
+			 *
+			 * In other words, we do not delete the post record when HPOS table is authoritative and synchronization is disabled but post record is a full record and not just a placeholder, because it implies that the order was created before HPOS was enabled.
+			 */
+			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+			if ( $data_synchronizer->data_sync_is_enabled() || get_post_type( $order_id ) === 'shop_order_placehold' ) {
+				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+				// Once we stop creating posts for orders, we should do the cleanup here instead.
+				wp_delete_post( $order_id );
 			}
-
-			// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-			// Once we stop creating posts for orders, we should do the cleanup here instead.
-			wp_delete_post( $order_id );
 
 			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		} else {
@@ -1794,23 +1907,44 @@ FROM $order_meta_table
 	}
 
 	/**
-	 * Helper method to set child orders to the parent order's parent.
+	 * Set the parent id of child orders to the parent order's parent if the post type
+	 * for the order is hierarchical, just delete the child orders otherwise.
 	 *
 	 * @param \WC_Abstract_Order $order Order object.
 	 *
 	 * @return void
 	 */
-	private function upshift_child_orders( $order ) {
+	private function upshift_or_delete_child_orders( $order ) {
 		global $wpdb;
-		$order_table  = self::get_orders_table_name();
-		$order_parent = $order->get_parent_id();
-		$wpdb->update(
-			$order_table,
-			array( 'parent_order_id' => $order_parent ),
-			array( 'parent_order_id' => $order->get_id() ),
-			array( '%d' ),
-			array( '%d' )
-		);
+
+		$order_table     = self::get_orders_table_name();
+		$order_parent_id = $order->get_parent_id();
+
+		if ( $this->legacy_proxy->call_function( 'is_post_type_hierarchical', $order->get_type() ) ) {
+			$wpdb->update(
+				$order_table,
+				array( 'parent_order_id' => $order_parent_id ),
+				array( 'parent_order_id' => $order->get_id() ),
+				array( '%d' ),
+				array( '%d' )
+			);
+		} else {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$child_order_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT id FROM $order_table WHERE parent_order_id=%d",
+					$order->get_id()
+				)
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+			foreach ( $child_order_ids as $child_order_id ) {
+				$child_order = wc_get_order( $child_order_id );
+				if ( $child_order ) {
+					$child_order->delete( true );
+				}
+			}
+		}
 	}
 
 	/**
@@ -1935,21 +2069,6 @@ FROM $order_meta_table
 			$order->delete_meta_data( '_wp_trash_meta_comments_status' );
 			$order->save_meta_data();
 
-			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-			if ( $data_synchronizer->data_sync_is_enabled() ) {
-				// The previous $order->save() will have forced a sync to the posts table,
-				// this implies that the post status is not "trash" anymore, and thus
-				// wp_untrash_post would do nothing.
-				wp_update_post(
-					array(
-						'ID'          => $id,
-						'post_status' => 'trash',
-					)
-				);
-
-				wp_untrash_post( $id );
-			}
-
 			return true;
 		}
 
@@ -1974,6 +2093,7 @@ FROM $order_meta_table
 	 */
 	public function delete_order_data_from_custom_order_tables( $order_id ) {
 		global $wpdb;
+		$order_cache = wc_get_container()->get( OrderCache::class );
 
 		// Delete COT-specific data.
 		foreach ( $this->get_all_table_names() as $table ) {
@@ -1984,6 +2104,7 @@ FROM $order_meta_table
 					: array( 'order_id' => $order_id ),
 				array( '%d' )
 			);
+			$order_cache->remove( $order_id );
 		}
 	}
 
@@ -2396,7 +2517,7 @@ CREATE TABLE $operational_data_table_name (
 	discount_total_amount decimal(26, 8) NULL,
 	recorded_sales tinyint(1) NULL,
 	UNIQUE KEY order_id (order_id),
-	UNIQUE KEY order_key (order_key)
+	KEY order_key (order_key)
 ) $collate;
 CREATE TABLE $meta_table (
 	id bigint(20) unsigned auto_increment primary key,
@@ -2427,9 +2548,17 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing at least ->id).
+	 *
+	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
-		return $this->data_store_meta->delete_meta( $object, $meta );
+		$delete_meta = $this->data_store_meta->delete_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $delete_meta;
 	}
 
 	/**
@@ -2437,10 +2566,17 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->key and ->value).
-	 * @return int meta ID
+	 *
+	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) {
-		return $this->data_store_meta->add_meta( $object, $meta );
+		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $add_meta;
 	}
 
 	/**
@@ -2448,8 +2584,16 @@ CREATE TABLE $meta_table (
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 *
+	 * @return bool
 	 */
 	public function update_meta( &$object, $meta ) {
-		return $this->data_store_meta->update_meta( $object, $meta );
+		$update_meta = $this->data_store_meta->update_meta( $object, $meta );
+
+		if ( $object instanceof WC_Abstract_Order ) {
+			$this->maybe_backfill_post_record( $object );
+		}
+
+		return $update_meta;
 	}
 }

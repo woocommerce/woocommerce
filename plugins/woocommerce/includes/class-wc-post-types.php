@@ -308,7 +308,7 @@ class WC_Post_Types {
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		$theme_support =  wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
+		$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
 		if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
@@ -598,13 +598,13 @@ class WC_Post_Types {
 					'label_count'               => _n_noop( 'Completed <span class="count">(%s)</span>', 'Completed <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 				'wc-cancelled'  => array(
-					'label'                     => _x( 'Canceled', 'Order status', 'woocommerce' ),
+					'label'                     => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 					'public'                    => false,
 					'exclude_from_search'       => false,
 					'show_in_admin_all_list'    => true,
 					'show_in_admin_status_list' => true,
 					/* translators: %s: number of orders */
-					'label_count'               => _n_noop( 'Canceled <span class="count">(%s)</span>', 'Canceled <span class="count">(%s)</span>', 'woocommerce' ),
+					'label_count'               => _n_noop( 'Cancelled <span class="count">(%s)</span>', 'Cancelled <span class="count">(%s)</span>', 'woocommerce' ),
 				),
 				'wc-refunded'   => array(
 					'label'                     => _x( 'Refunded', 'Order status', 'woocommerce' ),

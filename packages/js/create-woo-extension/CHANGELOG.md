@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2](https://www.npmjs.com/package/@woocommerce/create-woo-extension/v/1.0.2) - 2023-02-13 
+
+-   Patch - Add examples of Woo components package [#36732]
+-   Patch - bump WooCommerce version [#36732]
+-   Patch - Update readme [#36732]
+
 ## [1.0.1](https://www.npmjs.com/package/@woocommerce/create-woo-extension/v/1.0.1) - 2022-12-20 
 
 -   Patch - Fix install scripts [#34385]

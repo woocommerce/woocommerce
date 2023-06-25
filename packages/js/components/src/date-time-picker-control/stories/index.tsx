@@ -8,7 +8,7 @@ import { createElement, useCallback, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { DateTimePickerControl, defaultDateFormat } from '../';
+import { DateTimePickerControl } from '../';
 
 export default {
 	title: 'WooCommerce Admin/components/DateTimePickerControl',

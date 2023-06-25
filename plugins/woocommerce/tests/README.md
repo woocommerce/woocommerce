@@ -25,7 +25,7 @@ To run the tests, you need to create a test database. You can:
 - Access a database on a server
 - Connect to your local database on your machine
 - Use a solution like VVV - if you are using VVV you might need to `vagrant ssh` first
-- Run a throwaway database in docker with this one-liner: `docker run --rm --name woocommerce_test_db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:5.7.33`. ( Use `tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0` in next step)
+- Run a throwaway database in docker with this one-liner: `docker run --rm --name woocommerce_test_db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:8.0.32`. ( Use `tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0` in next step)
 
 ### Setup instructions
 
@@ -96,32 +96,6 @@ $ tests/bin/install.sh woocommerce_tests_1 root root
 ```
 
 Note that `woocommerce_tests` changed to `woocommerce_tests_1` as the `woocommerce_tests` database already exists due to the prior command.
-
-### Running tests in PHP 8
-
-WooCommerce currently supports PHP versions from 7.0 up to 8.0, and this poses an issue with PHPUnit:
-
-* The latest PHPUnit version that supports PHP 7.0 is 6.5.14
-* The latest PHPUnit version that WordPress (and thus WooCommerce) supports is 7.5.20, but that version doesn't work on PHP 8
-
-To workaround this, the testing strategy used by WooCommerce is as follows:
-
-* We normally use PHPUnit 6.5.14
-* For PHP 8 we use [a custom fork of PHPUnit 7.5.20 with support for PHP 8](https://github.com/woocommerce/phpunit/pull/1). WooCommerce's GitHub Actions CI workflow is configured to use this fork instead of the old version 6 when running in PHP 8.
-
-If you want to run the tests locally under PHP 8 you'll need to temporarily modify `composer.json` to use the custom PHPUnit fork in the same way that the GitHub Actions CI workflow file does. These are the commands that you'll need (run them after a regular `composer install` from within the `plugins/woocommerce` directory):
-
-```shell
-curl -L https://github.com/woocommerce/phpunit/archive/add-compatibility-with-php8-to-phpunit-7.zip -o /tmp/phpunit-7.5-fork.zip
-unzip -d /tmp/phpunit-7.5-fork /tmp/phpunit-7.5-fork.zip
-composer bin phpunit config --unset platform
-composer bin phpunit config repositories.0 '{"type": "path", "url": "/tmp/phpunit-7.5-fork/phpunit-add-compatibility-with-php8-to-phpunit-7", "options": {"symlink": false}}'
-composer bin phpunit require --dev -W phpunit/phpunit:@dev --ignore-platform-reqs
-rm -rf ./vendor/phpunit/
-composer dump-autoload
-```
-
-Just remember that you can't include the modified `composer.json` in any commit!
 
 ## Writing Tests
 

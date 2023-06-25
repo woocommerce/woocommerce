@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
+import { WC_FOOTER_SLOT_NAME, WooFooterItem } from '@woocommerce/admin-layout';
 import { useSlot } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
  */
 import './footer.scss';
-import { WC_FOOTER_SLOT_NAME, WooFooterItem } from './utils';
 
 export const Footer: React.FC = () => {
 	const slot = useSlot( WC_FOOTER_SLOT_NAME );

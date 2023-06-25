@@ -2,6 +2,12 @@
 	"compilerOptions": {		
     // Target latest version of ECMAScript.
 		"target": "esnext",
+
+	// Make sure we're not pulling types from external projects.
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		],
 		
     // Search under node_modules for non-relative imports.
 		"moduleResolution": "node",

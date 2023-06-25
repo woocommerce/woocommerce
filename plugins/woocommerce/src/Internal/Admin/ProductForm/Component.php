@@ -111,4 +111,28 @@ abstract class Component {
 		}
 		return $val;
 	}
+
+	/**
+	 * Array of required arguments.
+	 *
+	 * @var array
+	 */
+	protected $required_arguments = array();
+
+	/**
+	 * Get missing arguments of args array.
+	 *
+	 * @param array $args field arguments.
+	 * @return array
+	 */
+	public function get_missing_arguments( $args ) {
+		return array_values(
+			array_filter(
+				$this->required_arguments,
+				function( $arg_key ) use ( $args ) {
+					return null === self::get_argument_from_path( $args, $arg_key );
+				}
+			)
+		);
+	}
 }

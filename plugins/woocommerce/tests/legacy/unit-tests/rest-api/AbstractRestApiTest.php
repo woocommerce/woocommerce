@@ -21,7 +21,7 @@ namespace Automattic\WooCommerce\RestApi\UnitTests;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
+use WC_REST_Unit_Test_Case;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;

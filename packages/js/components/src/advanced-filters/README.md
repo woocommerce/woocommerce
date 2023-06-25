@@ -4,14 +4,14 @@ Displays a configurable set of filters which can modify query parameters. Displa
 
 ## Usage
 
-Below is a config example complete with translation strings. Advanced filters makes use of [interpolateComponents](https://github.com/Automattic/interpolate-components#readme) to organize sentence structure, resulting in a filter visually represented as a sentence fragment in any language.
+Below is a config example complete with translation strings. Advanced filters makes use of [createInterpolateElement](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-element/#createinterpolateelement) to organize sentence structure, resulting in a filter visually represented as a sentence fragment in any language.
 
 ```js
 const config = {
 	title: __(
 		// A sentence describing filters for Orders
 		// See screen shot for context: https://cloudup.com/cSsUY9VeCVJ
-		'Orders Match {{select /}} Filters',
+		'Orders Match <select/> Filters',
 		'woocommerce'
 	),
 	filters: {
@@ -25,10 +25,7 @@ const config = {
 				),
 				// A sentence describing an Order Status filter
 				// See screen shot for context: https://cloudup.com/cSsUY9VeCVJ
-				title: __(
-					'Order Status {{rule /}} {{filter /}}',
-					'woocommerce'
-				),
+				title: __( 'Order Status <rule/> <filter/>', 'woocommerce' ),
 				filter: __( 'Select an order status', 'woocommerce' ),
 			},
 			rules: [

@@ -153,7 +153,7 @@ describe( 'buildTermsTree', () => {
 		] );
 	} );
 
-	test( 'should return a tree of items, with orphan categories appended to the end, with children of thier own', () => {
+	test( 'should return a tree of items, with orphan categories appended to the end, with children of their own', () => {
 		const filteredList = [
 			{ id: 1, name: 'Apricots', parent: 0 },
 			{ id: 3, name: 'Elderberry', parent: 2 },

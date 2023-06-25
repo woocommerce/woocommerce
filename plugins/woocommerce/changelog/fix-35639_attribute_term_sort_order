@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix issue where attribute term dropdown was not adhering to sort order setting.

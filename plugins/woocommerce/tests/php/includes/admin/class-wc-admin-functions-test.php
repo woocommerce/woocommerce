@@ -283,7 +283,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$product = wc_get_product( $product->get_id() );
 
-		// Stocks should have been increased to orignal amount minus the partially refunded stock.
+		// Stocks should have been increased to original amount minus the partially refunded stock.
 		$this->assertEquals( 95, $product->get_stock_quantity() );
 	}
 

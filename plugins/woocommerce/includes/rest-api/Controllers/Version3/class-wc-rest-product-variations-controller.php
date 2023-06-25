@@ -8,6 +8,8 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Constants;
@@ -62,7 +64,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$data = array(
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = array(
 			'id'                    => $object->get_id(),
 			'date_created'          => wc_rest_prepare_date_response( $object->get_date_created(), false ),
 			'date_created_gmt'      => wc_rest_prepare_date_response( $object->get_date_created() ),
@@ -103,13 +106,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			),
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id(),
-			'image'                 => $this->get_image( $object ),
+			'image'                 => $this->get_image( $object, $context ),
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
 		);
 
-		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
 		$response = rest_ensure_response( $data );
@@ -350,10 +352,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * Get the image for a product variation.
 	 *
 	 * @param WC_Product_Variation $variation Variation data.
+	 * @param string               $context   Context of the request: 'view' or 'edit'.
 	 * @return array
 	 */
-	protected function get_image( $variation ) {
-		if ( ! $variation->get_image_id() ) {
+	protected function get_image( $variation, $context = 'view' ) {
+		if ( ! $variation->get_image_id( $context ) ) {
 			return;
 		}
 
@@ -441,9 +444,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$weight_unit    = get_option( 'woocommerce_weight_unit' );
-		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
-		$schema         = array(
+		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
+		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
+		$schema               = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => $this->post_type,
 			'type'       => 'object',
@@ -643,7 +646,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				),
 				'weight'                => array(
 					/* translators: %s: weight unit */
-					'description' => sprintf( __( 'Variation weight (%s).', 'woocommerce' ), $weight_unit ),
+					'description' => sprintf( __( 'Variation weight (%s).', 'woocommerce' ), $weight_unit_label ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -654,19 +657,19 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'properties'  => array(
 						'length' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Variation length (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Variation length (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'width'  => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Variation width (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Variation width (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'height' => array(
 							/* translators: %s: dimension unit */
-							'description' => sprintf( __( 'Variation height (%s).', 'woocommerce' ), $dimension_unit ),
+							'description' => sprintf( __( 'Variation height (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),

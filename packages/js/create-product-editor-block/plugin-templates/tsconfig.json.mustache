@@ -1,0 +1,34 @@
+{
+	"compilerOptions": {
+		"target": "es2019",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"allowJs": true,
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"jsx": "react",
+		"jsxFactory": "createElement",
+		"jsxFragmentFactory": "Fragment",
+		"rootDir": "src",
+		"outDir": "build-module",
+		"declaration": true,
+		"declarationMap": true,
+		"declarationDir": "./build-types",
+		"resolveJsonModule": true,
+		"typeRoots": ["./typings", "./node_modules/@types"]
+	},
+	"exclude": [
+		"node_modules",
+		"**/stories",
+		"**/build",
+		"**/build-module",
+		"**/build-types",
+		"**/test/*",
+		"**/jest.config.js",
+		"**/jest-preset.js",
+		"**/webpack.*.js",
+		"**/babel.config.js"
+	],
+	"include": ["**/*.d.ts", "src/**/*", "src/**/*.json"]
+}

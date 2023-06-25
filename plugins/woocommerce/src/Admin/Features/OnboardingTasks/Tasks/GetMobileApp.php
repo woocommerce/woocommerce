@@ -90,7 +90,7 @@ class GetMobileApp extends Task {
 	private static function is_current_user_connected() {
 		if ( class_exists( '\Automattic\Jetpack\Connection\Manager' ) && method_exists( '\Automattic\Jetpack\Connection\Manager', 'is_user_connected' ) ) {
 			$connection = new Manager();
-			return $connection->is_user_connected();
+			return $connection->is_connection_owner();
 		}
 		return false;
 	}

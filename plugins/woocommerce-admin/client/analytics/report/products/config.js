@@ -4,6 +4,7 @@
 import { __, _x } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { dispatch } from '@wordpress/data';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 
 /**
  * Internal dependencies
@@ -12,7 +13,6 @@ import {
 	getProductLabels,
 	getVariationLabels,
 } from '../../../lib/async-requests';
-import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 
 const PRODUCTS_REPORT_CHARTS_FILTER =
 	'woocommerce_admin_products_report_charts';
@@ -189,7 +189,7 @@ export const advancedFilters = applyFilters(
 	{
 		filters: {},
 		title: _x(
-			'Products Match {{select /}} Filters',
+			'Products Match <select/> Filters',
 			'A sentence describing filters for Products. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
 			'woocommerce'
 		),

@@ -31,6 +31,7 @@ function woocommerce_wp_text_input( $field, WC_Data $data = null ) {
 	$field['name']          = isset( $field['name'] ) ? $field['name'] : $field['id'];
 	$field['type']          = isset( $field['type'] ) ? $field['type'] : 'text';
 	$field['desc_tip']      = isset( $field['desc_tip'] ) ? $field['desc_tip'] : false;
+	$field['label_class']   = isset( $field['label_class'] ) ? $field['label_class'] : '';
 	$data_type              = empty( $field['data_type'] ) ? '' : $field['data_type'];
 
 	switch ( $data_type ) {
@@ -65,8 +66,10 @@ function woocommerce_wp_text_input( $field, WC_Data $data = null ) {
 		}
 	}
 
+	$label_class = ! empty( $field['label_class'] ) ? 'class="' . esc_attr( $field['label_class'] ) . '" ' : '';
+
 	echo '<p class="form-field ' . esc_attr( $field['id'] ) . '_field ' . esc_attr( $field['wrapper_class'] ) . '">
-		<label for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
+		<label ' . esc_attr( $label_class ) . ' for="' . esc_attr( $field['id'] ) . '">' . wp_kses_post( $field['label'] ) . '</label>';
 
 	if ( ! empty( $field['description'] ) && false !== $field['desc_tip'] ) {
 		echo wc_help_tip( $field['description'] );
@@ -284,4 +287,24 @@ function woocommerce_wp_radio( $field, WC_Data $data = null ) {
 	}
 
 	echo '</fieldset>';
+}
+
+/**
+ * Output a note.
+ *
+ * @param array $field Field data.
+ */
+function woocommerce_wp_note( $field ) {
+	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
+
+	echo '<p class="form-field ' . esc_attr( $field['wrapper_class'] ) . '">';
+	echo '<label for="' . esc_attr( $field['id'] ) . '" ';
+
+	if ( ! empty( $field['label-aria-label'] ) ) {
+		echo 'aria-label="' . esc_attr( $field['label-aria-label'] ) . '"';
+	}
+
+	echo '>' . esc_attr( $field['label'] ) . '</label>';
+	echo '<output name="' . esc_attr( $field['id'] ) . '" id="' . esc_attr( $field['id'] ) . '" aria-live="off">' . wp_kses_post( $field['message'] ) . '</output>';
+	echo '</p>';
 }

@@ -12,11 +12,6 @@ import { useState } from '@wordpress/element';
 import { MediaUploader } from '../';
 import { File } from '../types';
 
-declare let Blob: {
-	prototype: Blob;
-	new (): Blob;
-};
-
 const MockMediaUpload = ( { onSelect, render } ) => {
 	const [ isOpen, setOpen ] = useState( false );
 

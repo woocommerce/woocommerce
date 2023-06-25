@@ -12,7 +12,7 @@ import {
 	OnboardingState,
 	ExtensionList,
 	ProfileItems,
-	OnboardingProductType,
+	GetJetpackAuthUrlResponse,
 } from './types';
 import { WPDataSelectors } from '../types';
 import { Plugin } from '../plugins/types';
@@ -92,10 +92,18 @@ export const getEmailPrefill = ( state: OnboardingState ): string => {
 	return state.emailPrefill || '';
 };
 
-export const getProductTypes = (
-	state: OnboardingState
-): OnboardingProductType[] => {
-	return state.productTypes || [];
+export const getProductTypes = ( state: OnboardingState ) => {
+	return state.productTypes || {};
+};
+
+export const getJetpackAuthUrl = (
+	state: OnboardingState,
+	query: {
+		redirectUrl: string;
+		from?: string;
+	}
+): GetJetpackAuthUrlResponse => {
+	return state.jetpackAuthUrls[ query.redirectUrl ] || '';
 };
 
 export type OnboardingSelectors = {

@@ -115,7 +115,7 @@ test.describe( 'Single Product Page', () => {
 		await page.goto( 'cart/' );
 		await page.click( 'a.remove' );
 
-		await expect( page.locator( 'p.cart-empty' ) ).toContainText(
+		await expect( page.locator( '.cart-empty' ) ).toContainText(
 			'Your cart is currently empty.'
 		);
 	} );
@@ -205,7 +205,7 @@ test.describe( 'Variable Product Page', () => {
 		await page.goto( 'cart/' );
 		await page.click( 'a.remove' );
 
-		await expect( page.locator( 'p.cart-empty' ) ).toContainText(
+		await expect( page.locator( '.cart-empty' ) ).toContainText(
 			'Your cart is currently empty.'
 		);
 	} );
@@ -317,7 +317,7 @@ test.describe( 'Grouped Product Page', () => {
 		await page.click( 'a.remove >> nth=1' );
 		await page.click( 'a.remove >> nth=0' );
 
-		await expect( page.locator( 'p.cart-empty' ) ).toContainText(
+		await expect( page.locator( '.cart-empty' ) ).toContainText(
 			'Your cart is currently empty.'
 		);
 	} );

@@ -4,8 +4,8 @@
 	"description": "API tests for WooCommerce",
 	"main": "index.js",
 	"engines": {
-		"node": "^16.13.1",
-		"pnpm": "^7.13.3"
+		"node": "^16.14.1",
+		"pnpm": "^8.3.1"
 	},
 	"scripts": {
 		"e2e": "jest",
@@ -36,7 +36,7 @@
 	},
 	"devDependencies": {
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^8.12.0"
+		"eslint": "^8.32.0"
 	},
 	"publishConfig": {
 		"access": "public"

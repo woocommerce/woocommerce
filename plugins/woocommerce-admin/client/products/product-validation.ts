@@ -11,10 +11,28 @@ import {
 import type { FormErrors } from '@woocommerce/components';
 import moment from 'moment';
 
-/**
- * Internal dependencies
- */
-import { validate as validateInventory } from './sections/product-inventory-section';
+const validateInventory = (
+	values: Partial< Product< ProductStatus, ProductType > >,
+	errors: FormErrors< typeof values >
+) => {
+	const nextErrors = { ...errors };
+
+	if ( values.stock_quantity && values.stock_quantity < 0 ) {
+		nextErrors.stock_quantity = __(
+			'Stock quantity must be a positive number.',
+			'woocommerce'
+		);
+	}
+
+	if ( values.low_stock_amount && values.low_stock_amount < 0 ) {
+		nextErrors.low_stock_amount = __(
+			'Stock quantity must be a positive number.',
+			'woocommerce'
+		);
+	}
+
+	return nextErrors;
+};
 
 function validateScheduledSaleFields(
 	values: Partial< Product< ProductStatus, ProductType > >

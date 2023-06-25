@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Introduces action `woocommerce_order_list_table_restrict_manage_orders` as an equivalent of the legacy `restrict_manage_posts` hook.

@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { registerPlugin } from '@wordpress/plugins';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
  */
 import ActivityPanel from './activity-panel';
-import { WooHeaderItem } from '~/header/utils';
 
 const ActivityPanelHeaderItem = () => (
 	<WooHeaderItem order={ 20 }>

@@ -14,10 +14,10 @@ import { flatMapDeep, uniqBy } from 'lodash';
  * Internal dependencies
  */
 import { CardDivider, PluginCardBody } from '~/marketing/components';
-import { useInstalledPlugins } from '~/marketing/hooks';
+import { useInstalledPluginsWithoutChannels } from '~/marketing/hooks';
+import { RecommendedPlugin } from '~/marketing/types';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 import { createNoticesFromResponse } from '~/lib/notices';
-import { Plugin } from './types';
 import './DiscoverTools.scss';
 
 /**
@@ -30,7 +30,7 @@ import './DiscoverTools.scss';
  * 1. Get an array of unique subcategories from the list of plugins.
  * 2. Map the subcategories schema into tabs schema.
  */
-const getTabs = ( plugins: Plugin[] ) => {
+const getTabs = ( plugins: RecommendedPlugin[] ) => {
 	const pluginSubcategories = uniqBy(
 		flatMapDeep( plugins, ( p ) => p.subcategories ),
 		( subcategory ) => subcategory.slug
@@ -44,7 +44,7 @@ const getTabs = ( plugins: Plugin[] ) => {
 
 type PluginsTabPanelType = {
 	isLoading: boolean;
-	plugins: Plugin[];
+	plugins: RecommendedPlugin[];
 	onInstallAndActivate: ( pluginSlug: string ) => void;
 };
 
@@ -60,7 +60,8 @@ export const PluginsTabPanel = ( {
 		null
 	);
 	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
-	const { loadInstalledPluginsAfterActivation } = useInstalledPlugins();
+	const { loadInstalledPluginsAfterActivation } =
+		useInstalledPluginsWithoutChannels();
 
 	/**
 	 * Install and activate a plugin.
@@ -72,7 +73,7 @@ export const PluginsTabPanel = ( {
 	 *
 	 * @param  plugin Plugin to be installed and activated.
 	 */
-	const installAndActivate = async ( plugin: Plugin ) => {
+	const installAndActivate = async ( plugin: RecommendedPlugin ) => {
 		setCurrentPlugin( plugin.product );
 
 		try {
@@ -103,7 +104,7 @@ export const PluginsTabPanel = ( {
 					)
 				);
 
-				const renderButton = ( plugin: Plugin ) => {
+				const renderButton = ( plugin: RecommendedPlugin ) => {
 					const buttonDisabled = !! currentPlugin || isLoading;
 
 					if ( plugin.direct_install ) {

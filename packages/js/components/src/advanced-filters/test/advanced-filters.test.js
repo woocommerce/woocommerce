@@ -34,14 +34,14 @@ const CURRENCY = {
 };
 
 const advancedFiltersConfig = {
-	title: 'Orders Match {{select /}} Filters',
+	title: 'Orders Match <select/> Filters',
 	filters: {
 		status: {
 			labels: {
 				add: 'Order Status',
 				remove: 'Remove order status filter',
 				rule: 'Select an order status filter match',
-				title: '{{title}}Order Status{{/title}} {{rule /}} {{filter /}}',
+				title: '<title>Order Status</title> <rule/> <filter/>',
 				filter: 'Select an order status',
 			},
 			rules: [
@@ -68,7 +68,7 @@ const advancedFiltersConfig = {
 				placeholder: 'Search products',
 				remove: 'Remove products filter',
 				rule: 'Select a product filter match',
-				title: '{{title}}Product{{/title}} {{rule /}} {{filter /}}',
+				title: '<title>Product</title> <rule/> <filter/>',
 				filter: 'Select products',
 			},
 			rules: [
@@ -92,7 +92,7 @@ const advancedFiltersConfig = {
 				add: 'Customer Type',
 				remove: 'Remove customer filter',
 				rule: 'Select a customer filter match',
-				title: '{{title}}Customer is{{/title}} {{filter /}}',
+				title: '<title>Customer is</title> <filter/>',
 				filter: 'Select a customer type',
 			},
 			input: {
@@ -109,7 +109,7 @@ const advancedFiltersConfig = {
 				add: 'Item Quantity',
 				remove: 'Remove item quantity filter',
 				rule: 'Select an item quantity filter match',
-				title: '{{title}}Item Quantity is{{/title}} {{rule /}} {{filter /}}',
+				title: '<title>Item Quantity is</title> <rule/> <filter/>',
 			},
 			rules: [
 				{
@@ -134,7 +134,7 @@ const advancedFiltersConfig = {
 				add: 'Subtotal',
 				remove: 'Remove subtotal filter',
 				rule: 'Select a subtotal filter match',
-				title: '{{title}}Subtotal is{{/title}} {{rule /}} {{filter /}}',
+				title: '<title>Subtotal is</title> <rule/> <filter/>',
 			},
 			rules: [
 				{
@@ -160,7 +160,7 @@ const advancedFiltersConfig = {
 				add: 'Date',
 				remove: 'Remove date filter',
 				rule: 'Select a date filter match',
-				title: '{{title}}Date{{/title}} {{rule /}} {{filter /}}',
+				title: '<title>Date</title> <rule/> <filter/>',
 				filter: 'Select a transaction date',
 			},
 			rules: [

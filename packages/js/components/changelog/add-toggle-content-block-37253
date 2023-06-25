@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adding simple DisplayState wrapper and modifying Collapsible component to allow rendering hidden content.

@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\Orders;
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 use Exception;
 
 /**
@@ -29,6 +31,11 @@ class CouponsController {
 			ob_start();
 			include __DIR__ . '/../../../includes/admin/meta-boxes/views/html-order-items.php';
 			$response['html'] = ob_get_clean();
+
+			ob_start();
+			$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+			include __DIR__ . '/../../../includes/admin/meta-boxes/views/html-order-notes.php';
+			$response['notes_html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
@@ -58,7 +65,8 @@ class CouponsController {
 			throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 		}
 
-		if ( empty( $post_variables['coupon'] ) ) {
+		$coupon = ArrayUtil::get_value_or_default( $post_variables, 'coupon' );
+		if ( StringUtil::is_null_or_whitespace( $coupon ) ) {
 			throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
 		}
 
@@ -76,11 +84,15 @@ class CouponsController {
 		$order->calculate_taxes( $calculate_tax_args );
 		$order->calculate_totals( false );
 
-		$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $post_variables['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$code   = wc_format_coupon_code( wp_unslash( $coupon ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$result = $order->apply_coupon( $code );
 
 		if ( is_wp_error( $result ) ) {
 			throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );
 		}
+
+		// translators: %s coupon code.
+		$order->add_order_note( esc_html( sprintf( __( 'Coupon applied: "%s".', 'woocommerce' ), $code ) ), 0, true );
 
 		return $order;
 	}

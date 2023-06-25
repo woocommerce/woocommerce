@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { registerPlugin } from '@wordpress/plugins';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
 import { useUserPreferences } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { Banner } from './banner';
-import { WooHeaderItem } from '~/header/utils';
 
 export const MobileAppBanner = () => {
 	const { updateUserPreferences, ...userData } = useUserPreferences();

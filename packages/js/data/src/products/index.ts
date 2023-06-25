@@ -19,7 +19,6 @@ registerStore< State >( STORE_NAME, {
 	reducer: reducer as Reducer< ProductState >,
 	actions,
 	controls,
-	// @ts-expect-error as the registerStore type is not allowing the createRegistrySelector selector.
 	selectors,
 	resolvers,
 } );

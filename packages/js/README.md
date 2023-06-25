@@ -62,4 +62,12 @@ To create a new package, add a new folder to `/packages`, containing…
     - Usage example
 4. A `src` directory for the source of your module, which will be built by default using the `pnpm run turbo:build` command. Note that you'll want an `index.js` file that exports the package contents, see other packages for examples.
 
-5. Add the new package name to `packages/js/dependency-extraction-webpack-plugin/assets/packages.js` so that users of that plugin will also be able to use the new package without enqueuing it.
+5. A blank Changelog file, `changelog.md`.
+
+```
+# Changelog
+
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+```
+
+6. Add the new package name to `packages/js/dependency-extraction-webpack-plugin/assets/packages.js` so that users of that plugin will also be able to use the new package without enqueuing it.

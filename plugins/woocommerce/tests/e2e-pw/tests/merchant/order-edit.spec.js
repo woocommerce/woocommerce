@@ -77,9 +77,11 @@ test.describe( 'Edit order', () => {
 		await page.click( 'button.save_order' );
 
 		// verify changes
-		await expect( page.locator( 'div.notice-success' ) ).toContainText(
-			'Order updated.'
-		);
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Order updated.' } )
+		).toBeVisible();
 		await expect( page.locator( 'input[name=order_date]' ) ).toHaveValue(
 			'2018-12-14'
 		);

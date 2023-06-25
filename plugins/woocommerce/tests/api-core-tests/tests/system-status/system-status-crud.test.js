@@ -550,7 +550,7 @@ test.describe('System Status API tests', () => {
 	test('can retrieve a system status tool', async ({
 		request
 	}) => {
-		// call API to retrieve a system staus tool
+		// call API to retrieve a system status tool
 		const response = await request.get('/wp-json/wc/v3/system_status/tools/clear_transients');
 		const responseJSON = await response.json();
 		expect(response.status()).toEqual(200);

@@ -8,21 +8,21 @@
 use Automattic\WooCommerce\Internal\Admin\ProductForm\Field;
 
 /**
- * class WC_Admin_Tests_ProductFrom_Field
+ * class WC_Admin_Tests_ProductForm_Field
  */
 class WC_Admin_Tests_ProductForm_Field extends WC_Unit_Test_Case {
 
 	/**
-	 * Test that get_missing_arguments returns the correct keys.
+	 * Test that instantiating a Field without the required arguments throws an exception.
 	 */
-	public function test_get_missing_arguments() {
-		$missing_args = Field::get_missing_arguments(
-			array(
-				'section' => 'product_details',
-			)
+	public function test_no_required_arguments() {
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'You are missing required arguments of WooCommerce ProductForm Field: type, section, properties.name, properties.label' );
+		new Field(
+			'id',
+			'woocommerce',
+			array()
 		);
-
-		$this->assertEquals( array( 'type', 'properties.name', 'properties.label' ), $missing_args );
 	}
 }
 

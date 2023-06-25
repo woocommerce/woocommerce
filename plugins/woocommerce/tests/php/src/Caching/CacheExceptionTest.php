@@ -26,6 +26,15 @@ class CacheExceptionTest extends \WC_Unit_Test_Case {
 			public function get_object_type(): string {
 				return 'the_type';
 			}
+
+			protected function get_object_id( $object ) {
+			}
+
+			protected function validate( $object ): ?array {
+			}
+
+			protected function get_from_datastore( $id ) {
+			}
 		};
 		// phpcs:enable Squiz.Commenting
 	}

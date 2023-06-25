@@ -1,11 +1,15 @@
 /**
  * External dependencies
  */
-import { createElement, Component, Fragment } from '@wordpress/element';
+import {
+	createElement,
+	createInterpolateElement,
+	Component,
+	Fragment,
+} from '@wordpress/element';
 import { SelectControl, Spinner } from '@wordpress/components';
 import { find } from 'lodash';
 import PropTypes from 'prop-types';
-import interpolateComponents from '@automattic/interpolate-components';
 import classnames from 'classnames';
 import { getDefaultOptionValue } from '@woocommerce/navigation';
 
@@ -54,13 +58,10 @@ class SelectFilter extends Component {
 			find( config.input.options, { value: filter.value } ) || {};
 
 		return textContent(
-			interpolateComponents( {
-				mixedString: config.labels.title,
-				components: {
-					filter: <Fragment>{ value.label }</Fragment>,
-					rule: <Fragment>{ rule.label }</Fragment>,
-					title: <Fragment />,
-				},
+			createInterpolateElement( config.labels.title, {
+				filter: <Fragment>{ value.label }</Fragment>,
+				rule: <Fragment>{ rule.label }</Fragment>,
+				title: <Fragment />,
 			} )
 		);
 	}
@@ -71,47 +72,44 @@ class SelectFilter extends Component {
 		const { options } = this.state;
 		const { rule, value } = filter;
 		const { labels, rules } = config;
-		const children = interpolateComponents( {
-			mixedString: labels.title,
-			components: {
-				title: <span className={ className } />,
-				rule: (
-					<SelectControl
-						className={ classnames(
-							className,
-							'woocommerce-filters-advanced__rule'
-						) }
-						options={ rules }
-						value={ rule }
-						onChange={ ( selectedValue ) =>
-							onFilterChange( {
-								property: 'rule',
-								value: selectedValue,
-							} )
-						}
-						aria-label={ labels.rule }
-					/>
-				),
-				filter: options ? (
-					<SelectControl
-						className={ classnames(
-							className,
-							'woocommerce-filters-advanced__input'
-						) }
-						options={ options }
-						value={ value }
-						onChange={ ( selectedValue ) =>
-							onFilterChange( {
-								property: 'value',
-								value: selectedValue,
-							} )
-						}
-						aria-label={ labels.filter }
-					/>
-				) : (
-					<Spinner />
-				),
-			},
+		const children = createInterpolateElement( labels.title, {
+			title: <span className={ className } />,
+			rule: (
+				<SelectControl
+					className={ classnames(
+						className,
+						'woocommerce-filters-advanced__rule'
+					) }
+					options={ rules }
+					value={ rule }
+					onChange={ ( selectedValue ) =>
+						onFilterChange( {
+							property: 'rule',
+							value: selectedValue,
+						} )
+					}
+					aria-label={ labels.rule }
+				/>
+			),
+			filter: options ? (
+				<SelectControl
+					className={ classnames(
+						className,
+						'woocommerce-filters-advanced__input'
+					) }
+					options={ options }
+					value={ value }
+					onChange={ ( selectedValue ) =>
+						onFilterChange( {
+							property: 'value',
+							value: selectedValue,
+						} )
+					}
+					aria-label={ labels.filter }
+				/>
+			) : (
+				<Spinner />
+			),
 		} );
 
 		const screenReaderText = this.getScreenReaderText( filter, config );

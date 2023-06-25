@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Adds support for a 'required' argument when invoking `wc_dropdown_variation_attribute_options()`.

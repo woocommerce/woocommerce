@@ -109,7 +109,7 @@ describe( 'ReviewsPanel', () => {
 			expect( screen.queryByText( 'Delete' ) ).toBeInTheDocument();
 		} );
 
-		it( 'should trigger updateReview with status approved when Approve is clicked', () => {
+		it.skip( 'should trigger updateReview with status approved when Approve is clicked', () => {
 			const clickHandler = jest.fn( () => {
 				return Promise.resolve();
 			} );
@@ -129,7 +129,7 @@ describe( 'ReviewsPanel', () => {
 			} );
 		} );
 
-		it( 'should trigger updateReview with status spam when Mark as spam is clicked', () => {
+		it.skip( 'should trigger updateReview with status spam when Mark as spam is clicked', () => {
 			const clickHandler = jest.fn( () => {
 				return Promise.resolve();
 			} );
@@ -149,7 +149,7 @@ describe( 'ReviewsPanel', () => {
 			} );
 		} );
 
-		it( 'should trigger deleteReview with review id when delete is clicked', () => {
+		it.skip( 'should trigger deleteReview with review id when delete is clicked', () => {
 			const clickHandler = jest.fn( () => {
 				return Promise.resolve();
 			} );

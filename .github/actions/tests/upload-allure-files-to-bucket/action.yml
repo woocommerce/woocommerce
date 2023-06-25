@@ -1,0 +1,37 @@
+name: Upload Allure files to bucket
+description: Upload Allure files to bucket.
+permissions: {}
+
+inputs:
+    artifact-name:
+        description: Name of the artifact that contains the allure-report and/or allure-results folders.
+        required: true
+    aws-region:
+        required: true
+    aws-access-key-id:
+        required: true
+    aws-secret-access-key:
+        required: true
+    s3-bucket:
+        required: true
+    include-allure-results:
+        dafault: false
+
+runs:
+    using: composite
+    steps:
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v1-node16
+          with:
+              aws-region: ${{ inputs.aws-region }}
+              aws-access-key-id: ${{ inputs.aws-access-key-id }}
+              aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+
+        - name: Upload Allure artifact
+          env:
+              ARTIFACT_NAME: ${{ inputs.artifact-name }}
+              S3_BUCKET: ${{ inputs.s3-bucket }}
+              INCLUDE_ALLURE_RESULTS: ${{ inputs.include-allure-results }}
+          shell: bash
+          working-directory: .github/actions/tests/upload-allure-files-to-bucket/scripts
+          run: bash upload-allure-artifact.sh

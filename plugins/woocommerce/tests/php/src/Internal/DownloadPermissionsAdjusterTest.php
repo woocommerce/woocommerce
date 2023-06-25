@@ -102,7 +102,7 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$product = ProductHelper::create_variation_product();
+		$product = $this->create_downloadable_variation_product();
 		$this->sut->maybe_schedule_adjust_download_permissions( $product );
 
 		$expected_get_scheduled_actions_args = array(
@@ -135,7 +135,7 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$product = ProductHelper::create_variation_product();
+		$product = $this->create_downloadable_variation_product();
 		$this->sut->maybe_schedule_adjust_download_permissions( $product );
 
 		$expected_get_scheduled_actions_args = array(
@@ -168,6 +168,7 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 		$parent_download_id = current( $product->get_downloads() )->get_id();
 
 		$child = wc_get_product( current( $product->get_children() ) );
+		$child->set_downloadable( true );
 		$child->set_downloads( array( $download ) );
 		$child->save();
 		$child_download_id = current( $child->get_downloads() )->get_id();
@@ -222,6 +223,7 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 		$parent_download_id = current( $product->get_downloads() )->get_id();
 
 		$child = wc_get_product( current( $product->get_children() ) );
+		$child->set_downloadable( true );
 		$child->set_downloads( array( $download ) );
 		$child->save();
 		$child_download_id = current( $child->get_downloads() )->get_id();
@@ -278,6 +280,7 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 		$parent_download_id = current( $product->get_downloads() )->get_id();
 
 		$child = wc_get_product( current( $product->get_children() ) );
+		$child->set_downloadable( true );
 		$child->set_downloads( array( $download ) );
 		$child->save();
 		$child_download_id = current( $child->get_downloads() )->get_id();
@@ -359,4 +362,20 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 		return $data_store;
 	}
+
+	/**
+	 * Creates a variable product with a downloadable variation. No downloads are added.
+	 *
+	 * @return \WC_Product A product.
+	 */
+	private function create_downloadable_variation_product() {
+		$product = ProductHelper::create_variation_product();
+
+		$child = wc_get_product( current( $product->get_children() ) );
+		$child->set_downloadable( true );
+		$child->save();
+
+		return $product;
+	}
+
 }

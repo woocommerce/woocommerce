@@ -30,7 +30,8 @@ $product-form-tabs-height: 56px;
 		left: $admin-menu-width;
 		width: calc(100% - $admin-menu-width);
 		background: $white;
-		z-index: 1001;
+		// This z-index is directly below the header of 1001.
+		z-index: 1000;
 		border-bottom: 1px solid $gray-400;
 		border-top: 1px solid $gray-400;
 		padding: 0 var(--large-gap) 0 var(--large-gap);
@@ -81,6 +82,16 @@ $product-form-tabs-height: 56px;
 	}
 }
 
-.woocommerce-admin-product-layout .woocommerce-layout__header {
-	min-height: $header-height + $product-form-tabs-height;
+.woocommerce-admin-product-layout {
+	.woocommerce-layout__primary {
+		padding-top: $product-form-tabs-height;
+	}
+
+	.woocommerce-layout__header.is-scrolled {
+		box-shadow: none;
+
+		~.woocommerce-layout__primary .product-form-layout .components-tab-panel__tabs {
+			box-shadow: $header-scroll-shadow;
+		}
+	}
 }

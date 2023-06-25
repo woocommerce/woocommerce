@@ -39,7 +39,7 @@ describe( 'Activity Panels', () => {
 				},
 				{
 					id: 'payfast',
-					text: 'PayFast',
+					text: 'Payfast',
 				},
 				{
 					id: 'eway',

@@ -5,9 +5,9 @@
  * @package WooCommerce\Admin\Tests\Notes
  */
 
-use \Automattic\WooCommerce\Admin\Notes\Notes;
-use \Automattic\WooCommerce\Admin\Notes\Note;
-use \Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
+use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
 
 /**
  * Class WC_Admin_Tests_Marketing_Notes

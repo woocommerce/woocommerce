@@ -60,6 +60,8 @@ module.exports = async ( config ) => {
 			await adminPage.fill( 'input[name="pwd"]', admin.password );
 			await adminPage.click( 'text=Log In' );
 			await adminPage.waitForLoadState( 'networkidle' );
+			await adminPage.goto( `/wp-admin` );
+			await adminPage.waitForLoadState( 'domcontentloaded' );
 
 			await expect( adminPage.locator( 'div.wrap > h1' ) ).toHaveText(
 				'Dashboard'

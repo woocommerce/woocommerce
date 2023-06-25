@@ -4,6 +4,7 @@
 import { __, _x } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { dispatch } from '@wordpress/data';
+import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 
 /**
  * Internal dependencies
@@ -13,7 +14,6 @@ import {
 	getProductLabels,
 	getVariationLabels,
 } from '../../../lib/async-requests';
-import { STORE_KEY as CES_STORE_KEY } from '../../../customer-effort-score-tracks/data/constants';
 
 const VARIATIONS_REPORT_CHARTS_FILTER =
 	'woocommerce_admin_variations_report_charts';
@@ -146,7 +146,7 @@ export const advancedFilters = applyFilters(
 	VARIATIONS_REPORT_ADVANCED_FILTERS_FILTER,
 	{
 		title: _x(
-			'Variations match {{select /}} filters',
+			'Variations match <select/> filters',
 			'A sentence describing filters for Variations. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
 			'woocommerce'
 		),
@@ -163,7 +163,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'{{title}}Attribute{{/title}} {{rule /}} {{filter /}}',
+						'<title>Attribute</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select attributes', 'woocommerce' ),
@@ -196,7 +196,7 @@ export const advancedFilters = applyFilters(
 					rule: __( 'Select a category filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Category filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'{{title}}Category{{/title}} {{rule /}} {{filter /}}',
+						'<title>Category</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select categories', 'woocommerce' ),
@@ -227,7 +227,7 @@ export const advancedFilters = applyFilters(
 					rule: __( 'Select a product filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'{{title}}Product{{/title}} {{rule /}} {{filter /}}',
+						'<title>Product</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select products', 'woocommerce' ),

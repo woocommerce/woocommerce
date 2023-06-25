@@ -6,9 +6,9 @@
  * @todo Finish up unit testing to verify bug-free product reports.
  */
 
-use \Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\Products\Query as ProductsQuery;
-use \Automattic\WooCommerce\Admin\ReportCSVExporter;
+use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Products\Query as ProductsQuery;
+use Automattic\WooCommerce\Admin\ReportCSVExporter;
 
 /**
  * Reports product stats tests class

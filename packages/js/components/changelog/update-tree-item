@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+TreeControl: Fix a bug where items with children were not selected in single mode and fix a bug where navigation between items with tab was not working properly.

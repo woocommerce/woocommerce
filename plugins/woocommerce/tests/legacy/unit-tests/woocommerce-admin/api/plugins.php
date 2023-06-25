@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\API
  */
 
-use \Automattic\WooCommerce\Admin\API\Plugins;
+use Automattic\WooCommerce\Admin\API\Plugins;
 
 /**
  * WC Tests API Plugins

@@ -558,7 +558,7 @@ test.describe('Products API tests: CRUD', () => {
 			const response = await request.post('wp-json/wc/v3/products/reviews', {
 				data: {
 					product_id: 999,
-					review: "A non existant product!",
+					review: "A non existent product!",
 					reviewer: "John Do Not",
 					reviewer_email: "john.do.not@example.com",
 					rating: 5
@@ -929,7 +929,7 @@ test.describe('Products API tests: CRUD', () => {
 			productTagId = responseJSON.id;
 
 			expect(response.status()).toEqual(201);
-			expect(typeof productId).toEqual('number');
+			expect(typeof productTagId).toEqual('number');
 			expect(responseJSON.name).toEqual('Leather Shoes');
 			expect(responseJSON.slug).toEqual('leather-shoes');
 		});

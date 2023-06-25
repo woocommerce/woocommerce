@@ -64,6 +64,13 @@ class WC_WCCOM_Site_Installer {
 	);
 
 	/**
+	 * An instance of the WP_Upgrader class to be used for installation.
+	 *
+	 * @var \WP_Upgrader $wp_upgrader
+	 */
+	private static $wp_upgrader;
+
+	/**
 	 * Get the product install state.
 	 *
 	 * @since 3.7.0
@@ -150,15 +157,7 @@ class WC_WCCOM_Site_Installer {
 	 *                        element is install args.
 	 */
 	public static function install( $products ) {
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
-		WP_Filesystem();
-		$upgrader = new WP_Upgrader( new Automatic_Upgrader_Skin() );
-		$upgrader->init();
-		wp_clean_plugins_cache();
+		$upgrader = self::get_wp_upgrader();
 
 		foreach ( $products as $product_id => $install_args ) {
 			self::install_product( $product_id, $install_args, $upgrader );
@@ -424,7 +423,7 @@ class WC_WCCOM_Site_Installer {
 	 * @param int $product_id Product ID.
 	 * @return \WP_Error|null
 	 */
-	private static function activate_plugin( $product_id ) {
+	public static function activate_plugin( $product_id ) {
 		// Clear plugins cache used in `WC_Helper::get_local_woo_plugins`.
 		wp_clean_plugins_cache();
 		$filename = false;
@@ -520,7 +519,7 @@ class WC_WCCOM_Site_Installer {
 	 * @param string $dir Directory name of the plugin.
 	 * @return bool|string
 	 */
-	private static function get_wporg_plugin_main_file( $dir ) {
+	public static function get_wporg_plugin_main_file( $dir ) {
 		// Ensure that exact dir name is used.
 		$dir = trailingslashit( $dir );
 
@@ -546,7 +545,7 @@ class WC_WCCOM_Site_Installer {
 	 * @param string $dir Directory name of the plugin.
 	 * @return bool|array
 	 */
-	private static function get_plugin_info( $dir ) {
+	public static function get_plugin_info( $dir ) {
 		$plugin_folder = basename( $dir );
 
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -573,5 +572,28 @@ class WC_WCCOM_Site_Installer {
 			);
 		}
 		return false;
+	}
+
+	/**
+	 * Get an instance of WP_Upgrader to use for installing plugins.
+	 *
+	 * @return WP_Upgrader
+	 */
+	public static function get_wp_upgrader() {
+		if ( ! empty( self::$wp_upgrader ) ) {
+			return self::$wp_upgrader;
+		}
+
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		WP_Filesystem();
+		self::$wp_upgrader = new WP_Upgrader( new Automatic_Upgrader_Skin() );
+		self::$wp_upgrader->init();
+		wp_clean_plugins_cache();
+
+		return self::$wp_upgrader;
 	}
 }

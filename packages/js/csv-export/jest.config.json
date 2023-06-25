@@ -1,4 +1,4 @@
 {
 	"rootDir": "./src",
-	"preset": "../../internal-js-tests/jest.config.js"
+	"preset": "../node_modules/@woocommerce/internal-js-tests/jest-preset.js"
 }

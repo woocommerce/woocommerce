@@ -6,7 +6,7 @@
 class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test that woo plugins are loaded correctly even if incorrect cache is intially set.
+	 * Test that woo plugins are loaded correctly even if incorrect cache is initially set.
 	 */
 	public function test_get_local_woo_plugins_without_woo_header_cache() {
 		$woocommerce_key = 'sample-woo-plugin.php';

@@ -8,7 +8,9 @@
  * @since    2.6.0
  */
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -58,11 +60,12 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 				throw new WC_REST_Exception( 'woocommerce_rest_coupon_item_id_readonly', __( 'Coupon item ID is readonly.', 'woocommerce' ), 400 );
 			}
 
-			if ( empty( $item['code'] ) ) {
+			$coupon_code = ArrayUtil::get_value_or_default( $item, 'code' );
+			if ( StringUtil::is_null_or_whitespace( $coupon_code ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 
-			$coupon_code = wc_format_coupon_code( wc_clean( $item['code'] ) );
+			$coupon_code = wc_format_coupon_code( wc_clean( $coupon_code ) );
 			$coupon      = new WC_Coupon( $coupon_code );
 
 			// Skip check if the coupon is already applied to the order, as this could wrongly throw an error for single-use coupons.
@@ -202,6 +205,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			if ( $creating ) {
 				$object->set_created_via( 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+				$object->save();
 				$object->calculate_totals();
 			} else {
 				// If items have changed, recalculate order totals.
@@ -233,33 +237,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		} catch ( WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
-	}
-
-	/**
-	 * Get formatted item data.
-	 *
-	 * @param WC_Order $order WC_Data instance.
-	 * @return array
-	 */
-	protected function get_formatted_item_data( $order ) {
-		$item_data       = parent::get_formatted_item_data( $order );
-		$cpt_hidden_keys = array();
-
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$cpt_hidden_keys = ( new \WC_Order_Data_Store_CPT() )->get_internal_meta_keys();
-		}
-
-		// XXX: This might be removed once we finalize the design for internal keys vs meta vs props in COT.
-		if ( ! empty( $item_data['meta_data'] ) ) {
-			$item_data['meta_data'] = array_filter(
-				$item_data['meta_data'],
-				function( $meta ) use ( $cpt_hidden_keys ) {
-					return ! in_array( $meta->key, $cpt_hidden_keys, true );
-				}
-			);
-		}
-
-		return $item_data;
 	}
 
 	/**

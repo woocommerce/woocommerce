@@ -59,27 +59,15 @@ class Translations {
 	}
 
 	/**
-	 * Find and combine translation chunk files.
+	 * Combines data from translation chunk files based on officially downloaded file format.
 	 *
-	 * Only targets files that aren't represented by a registered script (e.g. not passed to wp_register_script()).
-	 *
-	 * @param string $lang_dir Path to language files.
-	 * @param string $domain Text domain.
-	 * @param string $locale Locale being retrieved.
+	 * @param array $json_i18n_filenames List of JSON chunk files.
 	 * @return array Combined translation chunk data.
 	 */
-	private function get_translation_chunk_data( $lang_dir, $domain, $locale ) {
-		// So long as this function is called during the 'upgrader_process_complete' action,
+	private function combine_official_translation_chunks( $json_i18n_filenames ) {
 		// the filesystem object should be hooked up.
 		global $wp_filesystem;
-
-		// Grab all JSON files in the current language pack.
-		$json_i18n_filenames       = glob( $lang_dir . $domain . '-' . $locale . '-*.json' );
 		$combined_translation_data = array();
-
-		if ( false === $json_i18n_filenames ) {
-			return $combined_translation_data;
-		}
 
 		foreach ( $json_i18n_filenames as $json_filename ) {
 			if ( ! $wp_filesystem->is_readable( $json_filename ) ) {
@@ -90,10 +78,6 @@ class Translations {
 			$chunk_data    = \json_decode( $file_contents, true );
 
 			if ( empty( $chunk_data ) ) {
-				continue;
-			}
-
-			if ( ! isset( $chunk_data['comment']['reference'] ) ) {
 				continue;
 			}
 
@@ -121,8 +105,105 @@ class Translations {
 
 		// Remove inaccurate reference comment.
 		unset( $combined_translation_data['comment'] );
-
 		return $combined_translation_data;
+	}
+
+	/**
+	 * Combines data from translation chunk files based on user-generated file formats,
+	 * such as wp-cli tool or Loco Translate plugin.
+	 *
+	 * @param array $json_i18n_filenames List of JSON chunk files.
+	 * @return array Combined translation chunk data.
+	 */
+	private function combine_user_translation_chunks( $json_i18n_filenames ) {
+		// the filesystem object should be hooked up.
+		global $wp_filesystem;
+		$combined_translation_data = array();
+
+		foreach ( $json_i18n_filenames as $json_filename ) {
+			if ( ! $wp_filesystem->is_readable( $json_filename ) ) {
+				continue;
+			}
+
+			$file_contents = $wp_filesystem->get_contents( $json_filename );
+			$chunk_data    = \json_decode( $file_contents, true );
+
+			if ( empty( $chunk_data ) ) {
+				continue;
+			}
+
+			$reference_file = $chunk_data['source'];
+
+			// Only combine "app" files (not scripts registered with WP).
+			if (
+				false === strpos( $reference_file, WC_ADMIN_DIST_JS_FOLDER . 'app/index.js' ) &&
+				false === strpos( $reference_file, WC_ADMIN_DIST_JS_FOLDER . 'chunks/' )
+			) {
+				continue;
+			}
+
+			if ( empty( $combined_translation_data ) ) {
+				// Use the first translation file as the base structure.
+				$combined_translation_data = $chunk_data;
+			} else {
+				// Combine all messages from all chunk files.
+				$combined_translation_data['locale_data']['woocommerce'] = array_merge(
+					$combined_translation_data['locale_data']['woocommerce'],
+					$chunk_data['locale_data']['woocommerce']
+				);
+			}
+		}
+
+		// Remove inaccurate reference comment.
+		unset( $combined_translation_data['source'] );
+		return $combined_translation_data;
+	}
+
+	/**
+	 * Find and combine translation chunk files.
+	 *
+	 * Only targets files that aren't represented by a registered script (e.g. not passed to wp_register_script()).
+	 *
+	 * @param string $lang_dir Path to language files.
+	 * @param string $domain Text domain.
+	 * @param string $locale Locale being retrieved.
+	 * @return array Combined translation chunk data.
+	 */
+	private function get_translation_chunk_data( $lang_dir, $domain, $locale ) {
+		// So long as this function is called during the 'upgrader_process_complete' action,
+		// the filesystem object should be hooked up.
+		global $wp_filesystem;
+
+		// Grab all JSON files in the current language pack.
+		$json_i18n_filenames       = glob( $lang_dir . $domain . '-' . $locale . '-*.json' );
+		$combined_translation_data = array();
+
+		if ( false === $json_i18n_filenames ) {
+			return $combined_translation_data;
+		}
+
+		// Use first JSON file to determine file format. This check is required due to
+		// file format difference between official language files and user translated files.
+		$format_determine_file = reset( $json_i18n_filenames );
+
+		if ( ! $wp_filesystem->is_readable( $format_determine_file ) ) {
+			return $combined_translation_data;
+		}
+
+		$file_contents         = $wp_filesystem->get_contents( $format_determine_file );
+		$format_determine_data = \json_decode( $file_contents, true );
+
+		if ( empty( $format_determine_data ) ) {
+			return $combined_translation_data;
+		}
+
+		if ( isset( $format_determine_data['comment'] ) ) {
+			return $this->combine_official_translation_chunks( $json_i18n_filenames );
+		} elseif ( isset( $format_determine_data['source'] ) ) {
+			return $this->combine_user_translation_chunks( $json_i18n_filenames );
+		} else {
+			return $combined_translation_data;
+		}
 	}
 
 	/**

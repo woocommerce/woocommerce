@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Makes it possible to use an `add_meta_boxes_<SCREEN_ID>` style hook in the HPOS editor, for parity with the traditional post editor.

@@ -6,8 +6,7 @@ import { render, screen } from '@testing-library/react';
 /**
  * Internal dependencies
  */
-import { useInstalledPlugins } from '../../hooks';
-import { useRecommendedPlugins } from './useRecommendedPlugins';
+import { useRecommendedPluginsWithoutChannels } from './useRecommendedPluginsWithoutChannels';
 import { DiscoverTools } from './DiscoverTools';
 
 jest.mock( '@woocommerce/components', () => {
@@ -20,23 +19,20 @@ jest.mock( '@woocommerce/components', () => {
 	};
 } );
 
-jest.mock( './useRecommendedPlugins', () => ( {
-	useRecommendedPlugins: jest.fn(),
+jest.mock( './useRecommendedPluginsWithoutChannels', () => ( {
+	useRecommendedPluginsWithoutChannels: jest.fn(),
 } ) );
 
-jest.mock( '../../hooks', () => ( {
-	useInstalledPlugins: jest.fn(),
+jest.mock( '~/marketing/hooks', () => ( {
+	useInstalledPluginsWithoutChannels: jest.fn( () => ( {} ) ),
 } ) );
 
 describe( 'DiscoverTools component', () => {
 	it( 'should render a Spinner when loading is in progress', () => {
-		( useRecommendedPlugins as jest.Mock ).mockReturnValue( {
+		( useRecommendedPluginsWithoutChannels as jest.Mock ).mockReturnValue( {
 			isInitializing: true,
 			isLoading: true,
-			plugins: [],
-		} );
-		( useInstalledPlugins as jest.Mock ).mockReturnValue( {
-			loadInstalledPluginsAfterActivation: jest.fn(),
+			data: [],
 		} );
 		render( <DiscoverTools /> );
 
@@ -44,13 +40,10 @@ describe( 'DiscoverTools component', () => {
 	} );
 
 	it( 'should render message and link when loading is finish and there are no plugins', () => {
-		( useRecommendedPlugins as jest.Mock ).mockReturnValue( {
+		( useRecommendedPluginsWithoutChannels as jest.Mock ).mockReturnValue( {
 			isInitializing: false,
 			isLoading: false,
-			plugins: [],
-		} );
-		( useInstalledPlugins as jest.Mock ).mockReturnValue( {
-			loadInstalledPluginsAfterActivation: jest.fn(),
+			data: [],
 		} );
 		render( <DiscoverTools /> );
 
@@ -66,10 +59,12 @@ describe( 'DiscoverTools component', () => {
 
 	describe( 'With plugins loaded', () => {
 		it( 'should render `direct_install: true` plugins with "Install plugin" button', () => {
-			( useRecommendedPlugins as jest.Mock ).mockReturnValue( {
+			(
+				useRecommendedPluginsWithoutChannels as jest.Mock
+			 ).mockReturnValue( {
 				isInitializing: false,
 				isLoading: false,
-				plugins: [
+				data: [
 					{
 						title: 'Google Listings and Ads',
 						description:
@@ -95,9 +90,6 @@ describe( 'DiscoverTools component', () => {
 					},
 				],
 			} );
-			( useInstalledPlugins as jest.Mock ).mockReturnValue( {
-				loadInstalledPluginsAfterActivation: jest.fn(),
-			} );
 			render( <DiscoverTools /> );
 
 			// Assert that we have the "Sales channels" tab, the plugin name, the "Built by WooCommerce" pill, and the "Install plugin" button.
@@ -112,10 +104,12 @@ describe( 'DiscoverTools component', () => {
 		} );
 
 		it( 'should render `direct_install: false` plugins with "View details" button', () => {
-			( useRecommendedPlugins as jest.Mock ).mockReturnValue( {
+			(
+				useRecommendedPluginsWithoutChannels as jest.Mock
+			 ).mockReturnValue( {
 				isInitializing: false,
 				isLoading: false,
-				plugins: [
+				data: [
 					{
 						title: 'WooCommerce Zapier',
 						description:
@@ -135,9 +129,6 @@ describe( 'DiscoverTools component', () => {
 						tags: [],
 					},
 				],
-			} );
-			( useInstalledPlugins as jest.Mock ).mockReturnValue( {
-				loadInstalledPluginsAfterActivation: jest.fn(),
 			} );
 			render( <DiscoverTools /> );
 

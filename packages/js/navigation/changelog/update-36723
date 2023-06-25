@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add hook to check unsaved form changes before page navigation

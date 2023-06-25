@@ -7,8 +7,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Customers\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
-use \Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 
 /**
  * API\Reports\Customers\Stats\DataStore.

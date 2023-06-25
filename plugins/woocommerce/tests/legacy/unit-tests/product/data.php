@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Product
  */
 
+use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+
 /**
  * Data Functions.
  *
@@ -12,6 +14,8 @@
  * @since 3.0.0
  */
 class WC_Tests_Product_Data extends WC_Unit_Test_Case {
+
+	use ArraySubsetAsserts;
 
 	/**
 	 * Test product setters and getters
@@ -79,16 +83,15 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
 		}
 		$this->assertCount( 1, $product->get_attributes() );
-		$this->assertContains(
-			current( $product->get_attributes() )->get_data(),
+		$this->assertArraySubset(
 			array(
-				'attribute_id' => 0,
-				'name'         => 'Test Attribute',
-				'options'      => array( 'Fish', 'Fingers' ),
-				'position'     => 0,
-				'visible'      => true,
-				'variation'    => false,
-			)
+				'name'      => 'Test Attribute',
+				'options'   => array( 'Fish', 'Fingers' ),
+				'position'  => 0,
+				'visible'   => true,
+				'variation' => false,
+			),
+			current( $product->get_attributes() )->get_data()
 		);
 		$this->assertEquals( $product->get_date_on_sale_from()->getTimestamp(), 1475798400 );
 		$this->assertEquals( $product->get_date_on_sale_to()->getTimestamp(), 1477267200 );

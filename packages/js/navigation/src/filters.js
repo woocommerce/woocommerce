@@ -4,6 +4,20 @@
 import { find, get, omit } from 'lodash';
 
 /**
+ * Get the url query key from the filter key and rule.
+ *
+ * @param {string} key  - filter key.
+ * @param {string} rule - filter rule.
+ * @return {string} - url query key.
+ */
+export function getUrlKey( key, rule ) {
+	if ( rule && rule.length ) {
+		return `${ key }_${ rule }`;
+	}
+	return key;
+}
+
+/**
  * Collapse an array of filter values with subFilters into a 1-dimensional array.
  *
  * @param {Array} filters Set of filters with possible subfilters.
@@ -165,18 +179,4 @@ export function getQueryFromActiveFilters( activeFilters, query, config ) {
 	}, {} );
 
 	return { ...previousData, ...nextData };
-}
-
-/**
- * Get the url query key from the filter key and rule.
- *
- * @param {string} key  - filter key.
- * @param {string} rule - filter rule.
- * @return {string} - url query key.
- */
-export function getUrlKey( key, rule ) {
-	if ( rule && rule.length ) {
-		return `${ key }_${ rule }`;
-	}
-	return key;
 }

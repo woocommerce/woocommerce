@@ -78,6 +78,8 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing at least ->id).
+	 *
+	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) {
 		global $wpdb;
@@ -127,6 +129,8 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @param  WC_Data  $object WC_Data object.
 	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 *
+	 * @return bool
 	 */
 	public function update_meta( &$object, $meta ) {
 		global $wpdb;

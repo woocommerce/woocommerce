@@ -108,21 +108,27 @@ class TaskLists {
 	 * Initialize default lists.
 	 */
 	public static function init_default_lists() {
+		$tasks = array(
+			'StoreDetails',
+			'Purchase',
+			'Products',
+			'WooCommercePayments',
+			'Payments',
+			'Tax',
+			'Shipping',
+			'Marketing',
+			'Appearance',
+		);
+
+		if ( Features::is_enabled( 'core-profiler' ) ) {
+			array_shift( $tasks );
+		}
+
 		self::add_list(
 			array(
 				'id'                      => 'setup',
 				'title'                   => __( 'Get ready to start selling', 'woocommerce' ),
-				'tasks'                   => array(
-					'StoreDetails',
-					'Purchase',
-					'Products',
-					'WooCommercePayments',
-					'Payments',
-					'Tax',
-					'Shipping',
-					'Marketing',
-					'Appearance',
-				),
+				'tasks'                   => $tasks,
 				'display_progress_header' => true,
 				'event_prefix'            => 'tasklist_',
 				'options'                 => array(
@@ -152,58 +158,12 @@ class TaskLists {
 				),
 			)
 		);
-		self::add_list(
-			array(
-				'id'           => 'setup_two_column',
-				'hidden_id'    => 'setup',
-				'title'        => __( 'Get ready to start selling', 'woocommerce' ),
-				'tasks'        => array(
-					'Products',
-					'WooCommercePayments',
-					'Payments',
-					'Tax',
-					'Shipping',
-					'Marketing',
-					'Appearance',
-				),
-				'event_prefix' => 'tasklist_',
-			)
-		);
-		self::add_list(
-			array(
-				'id'           => 'extended_two_column',
-				'hidden_id'    => 'extended',
-				'title'        => __( 'Things to do next', 'woocommerce' ),
-				'sort_by'      => array(
-					array(
-						'key'   => 'is_complete',
-						'order' => 'asc',
-					),
-					array(
-						'key'   => 'level',
-						'order' => 'asc',
-					),
-				),
-				'tasks'        => array(
-					'AdditionalPayments',
-					'GetMobileApp',
-				),
-				'event_prefix' => 'extended_tasklist_',
-			)
-		);
 
 		if ( Features::is_enabled( 'shipping-smart-defaults' ) ) {
 			self::add_task(
 				'extended',
 				new ReviewShippingOptions(
 					self::get_list( 'extended' )
-				)
-			);
-
-			self::add_task(
-				'extended_two_column',
-				new ReviewShippingOptions(
-					self::get_list( 'extended_two_column' )
 				)
 			);
 
@@ -225,7 +185,16 @@ class TaskLists {
 		if ( ! wp_is_mobile() ) { // Permit In-App Marketplace Tour on desktops only.
 			$tour_task = new TourInAppMarketplace();
 			self::add_task( 'extended', $tour_task );
-			self::add_task( 'extended_two_column', $tour_task );
+		}
+
+		if ( has_filter( 'woocommerce_admin_experimental_onboarding_tasklists' ) ) {
+			/**
+			 * Filter to override default task lists.
+			 *
+			 * @since 7.4
+			 * @param array     $lists Array of tasklists.
+			 */
+			self::$lists = apply_filters( 'woocommerce_admin_experimental_onboarding_tasklists', self::$lists );
 		}
 	}
 
@@ -243,7 +212,7 @@ class TaskLists {
 	}
 
 	/**
-	 * Temporarily store the active task to persist across page loads when neccessary.
+	 * Temporarily store the active task to persist across page loads when necessary.
 	 * Most tasks do not need this.
 	 */
 	public static function set_active_task() {

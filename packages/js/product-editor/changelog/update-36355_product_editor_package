@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Copy over the product slot fill components from @woocommerce/components

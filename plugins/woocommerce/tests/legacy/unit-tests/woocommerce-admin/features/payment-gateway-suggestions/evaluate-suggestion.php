@@ -1,6 +1,6 @@
 <?php
 /**
- * Test the class that evalutes payment gateway suggestion visibility.
+ * Test the class that evaluates payment gateway suggestion visibility.
  *
  * @package WooCommerce\Admin\Tests\PaymentGatewaySuggestions
  */

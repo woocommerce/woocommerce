@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Remove default WooCommerce button styles if using a block theme which adds button styles in theme.json

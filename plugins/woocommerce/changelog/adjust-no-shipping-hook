@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Make the formatted shipping address available via the `woocommerce_cart_no_shipping_available_html` hook.

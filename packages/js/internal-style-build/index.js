@@ -11,6 +11,11 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 module.exports = {
 	webpackConfig: {
+		parser: {
+			javascript: {
+				exportsPresence: 'error',
+			},
+		},
 		rules: [
 			{
 				test: /\.s?css$/,
@@ -21,8 +26,9 @@ module.exports = {
 					{
 						loader: 'postcss-loader',
 						options: {
-							ident: 'postcss',
-							plugins: postcssPlugins,
+							postcssOptions: {
+								plugins: postcssPlugins,
+							},
 						},
 					},
 					{

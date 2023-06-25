@@ -207,7 +207,17 @@ class WC_Customer extends WC_Legacy_Customer {
 			$city     = $this->get_shipping_city();
 		}
 
-		return apply_filters( 'woocommerce_customer_taxable_address', array( $country, $state, $postcode, $city ) );
+		/**
+		 * Filters the taxable address for a given customer.
+		 *
+		 * @since 3.0.0
+		 *
+		 * @param array  $taxable_address An array of country, state, postcode, and city for the customer's taxable address.
+		 * @param object $customer        The customer object for which the taxable address is being requested.
+		 *
+		 * @return array The filtered taxable address for the customer.
+		 */
+		return apply_filters( 'woocommerce_customer_taxable_address', array( $country, $state, $postcode, $city ), $this );
 	}
 
 	/**

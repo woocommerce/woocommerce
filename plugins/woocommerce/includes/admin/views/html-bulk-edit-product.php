@@ -3,6 +3,8 @@
  * Admin View: Bulk Edit Products
  */
 
+use Automattic\WooCommerce\Utilities\I18nUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -131,7 +133,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_weight" class="text weight" placeholder="<?php printf( esc_attr__( '%1$s (%2$s)', 'woocommerce' ), wc_format_localized_decimal( 0 ), get_option( 'woocommerce_weight_unit' ) ); ?>" value="">
+					<?php
+					$placeholder = sprintf(
+						/* translators: 1. Weight number; 2. Weight unit; E.g. 2 kg */
+						__( '%1$s (%2$s)', 'woocommerce' ),
+						wc_format_localized_decimal( 0 ),
+						I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) )
+					);
+					?>
+					<input
+						type="text"
+						name="_weight"
+						class="text weight"
+						placeholder="<?php echo esc_attr( $placeholder ); ?>"
+						value=""
+					>
 				</label>
 			</div>
 		<?php endif; ?>
@@ -155,9 +171,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</span>
 				</label>
 				<label class="change-input">
-					<input type="text" name="_length" class="text length" placeholder="<?php printf( esc_attr__( 'Length (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
-					<input type="text" name="_width" class="text width" placeholder="<?php printf( esc_attr__( 'Width (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
-					<input type="text" name="_height" class="text height" placeholder="<?php printf( esc_attr__( 'Height (%s)', 'woocommerce' ), get_option( 'woocommerce_dimension_unit' ) ); ?>" value="">
+					<?php
+					$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
+					?>
+					<input
+						type="text"
+						name="_length"
+						class="text length"
+						<?php /* translators: %s is dimension unit label */ ?>
+						placeholder="<?php printf( esc_attr__( 'Length (%s)', 'woocommerce' ), esc_html( $dimension_unit_label ) ); ?>"
+						value=""
+					>
+					<input
+						type="text"
+						name="_width"
+						class="text width"
+						<?php /* translators: %s is dimension unit label */ ?>
+						placeholder="<?php printf( esc_attr__( 'Width (%s)', 'woocommerce' ), esc_html( $dimension_unit_label ) ); ?>"
+						value=""
+					>
+					<input
+						type="text"
+						name="_height"
+						class="text height"
+						<?php /* translators: %s is dimension unit label */ ?>
+						placeholder="<?php printf( esc_attr__( 'Height (%s)', 'woocommerce' ), esc_html( $dimension_unit_label ) ); ?>"
+						value=""
+					>
 				</label>
 			</div>
 		<?php endif; ?>

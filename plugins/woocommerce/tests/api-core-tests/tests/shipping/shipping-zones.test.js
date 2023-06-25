@@ -78,7 +78,7 @@ test.describe( 'Shipping zones API tests', () => {
 	} );
 
 	test( 'can retrieve a shipping zone', async ({request}) => {
-		//call API to retrive the created shipping zone
+		//call API to retrieve the created shipping zone
 		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}`);
 		const responseJSON = await response.json();
 
@@ -88,7 +88,7 @@ test.describe( 'Shipping zones API tests', () => {
 	} );
 	
 	test( 'can list all shipping zones', async ({request}) => {
-		//call API to retrive all the shipping zones
+		//call API to retrieve all the shipping zones
 		const response = await request.get( 'wp-json/wc/v3/shipping/zones');
 		const responseJSON = await response.json();
 
@@ -119,7 +119,7 @@ test.describe( 'Shipping zones API tests', () => {
 
 	test( 'can add a shipping region to a shipping zone', async ({request}) => {
 
-		//call API to retrive the locations of the last created shipping zone
+		//call API to retrieve the locations of the last created shipping zone
 		const response = await request.get( `/wp-json/wc/v3/shipping/zones/${shippingZone.id}/locations`);
 		expect( response.status() ).toEqual( 200 );
 		

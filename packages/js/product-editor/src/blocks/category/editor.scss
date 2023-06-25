@@ -1,0 +1,11 @@
+.wp-block-woocommerce-product-category-field {
+	.woocommerce-experimental-select-tree-control__menu {
+		.experimental-woocommerce-tree-item {
+			font-size: 13px;
+			.components-checkbox-control__input-container, input[type='checkbox'], .components-checkbox-control__checked {
+				width: 20px;
+				height: 20px;
+			}
+		}
+	}
+}

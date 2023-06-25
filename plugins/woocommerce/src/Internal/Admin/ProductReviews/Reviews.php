@@ -168,6 +168,11 @@ class Reviews {
 	 * @return void
 	 */
 	private function handle_edit_review(): void {
+		// Don't interfere with comment functionality relating to the reviews meta box within the product editor.
+		if ( sanitize_text_field( wp_unslash( $_POST['mode'] ?? '' ) ) === 'single' ) {
+			return;
+		}
+
 		check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' );
 
 		$comment_id = isset( $_POST['comment_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_ID'] ) ) : 0;
@@ -235,6 +240,11 @@ class Reviews {
 	 * @return void
 	 */
 	private function handle_reply_to_review() : void {
+		// Don't interfere with comment functionality relating to the reviews meta box within the product editor.
+		if ( sanitize_text_field( wp_unslash( $_POST['mode'] ?? '' ) ) === 'single' ) {
+			return;
+		}
+
 		check_ajax_referer( 'replyto-comment', '_ajax_nonce-replyto-comment' );
 
 		$comment_post_ID = isset( $_POST['comment_post_ID'] ) ? (int) sanitize_text_field( wp_unslash( $_POST['comment_post_ID'] ) ) : 0; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
@@ -533,12 +543,7 @@ class Reviews {
 			$comment    = get_comment( $comment_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
-		$is_reply = false;
-
-		if ( isset( $comment->comment_parent ) && $comment->comment_parent > 0 ) {
-			$is_reply = true;
-			$comment  = get_comment( $comment->comment_parent ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
+		$is_reply = isset( $comment->comment_parent ) && $comment->comment_parent > 0;
 
 		// Only replace the translated text if we are editing a comment left on a product (ie. a review).
 		if ( isset( $comment->comment_post_ID ) && get_post_type( $comment->comment_post_ID ) === 'product' ) {

@@ -16,6 +16,7 @@ const reducer: Reducer< CountriesState, Action > = (
 		errors: {},
 		locales: {},
 		countries: [],
+		geolocation: undefined,
 	},
 	action
 ) => {
@@ -47,6 +48,21 @@ const reducer: Reducer< CountriesState, Action > = (
 				errors: {
 					...state.errors,
 					countries: action.error,
+				},
+			};
+			break;
+		case TYPES.GEOLOCATION_SUCCESS:
+			state = {
+				...state,
+				geolocation: action.geolocation,
+			};
+			break;
+		case TYPES.GEOLOCATION_ERROR:
+			state = {
+				...state,
+				errors: {
+					...state.errors,
+					geolocation: action.error,
 				},
 			};
 			break;

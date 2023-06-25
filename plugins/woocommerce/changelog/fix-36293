@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Remove persisted query on return to parent product from variation

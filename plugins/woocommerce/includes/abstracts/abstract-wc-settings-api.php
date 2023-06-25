@@ -212,6 +212,21 @@ abstract class WC_Settings_API {
 			if ( 'title' !== $this->get_field_type( $field ) ) {
 				try {
 					$this->settings[ $key ] = $this->get_field_value( $key, $field, $post_data );
+					if ( 'select' === $field['type'] || 'checkbox' === $field['type'] ) {
+						/**
+						 * Notify that a non-option setting has been updated.
+						 *
+						 * @since 7.8.0
+						 */
+						do_action(
+							'woocommerce_update_non_option_setting',
+							array(
+								'id'    => $key,
+								'type'  => $field['type'],
+								'value' => $this->settings[ $key ],
+							)
+						);
+					}
 				} catch ( Exception $e ) {
 					$this->add_error( $e->getMessage() );
 				}
@@ -219,8 +234,8 @@ abstract class WC_Settings_API {
 		}
 
 		$option_key = $this->get_option_key();
-        do_action( 'woocommerce_update_option', array( 'id' => $option_key ) );
-        return update_option( $option_key, apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' );
+		do_action( 'woocommerce_update_option', array( 'id' => $option_key ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		return update_option( $option_key, apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
 
 	/**
@@ -456,6 +471,20 @@ abstract class WC_Settings_API {
 		<?php
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Generates HTML for the 'safe_text' input type (mostly used for gateway-related settings).
+	 *
+	 * @param string $key Field key.
+	 * @param array  $data Field data.
+	 * @return string
+	 *
+	 * @since 7.6.0
+	 */
+	public function generate_safe_text_html( $key, $data ) {
+		$data['type'] = 'text';
+		return $this->generate_text_html( $key, $data );
 	}
 
 	/**
@@ -715,7 +744,7 @@ abstract class WC_Settings_API {
 			'options'           => array(),
 		);
 
-		$data = wp_parse_args( $data, $defaults );
+		$data  = wp_parse_args( $data, $defaults );
 		$value = $this->get_option( $key );
 
 		ob_start();

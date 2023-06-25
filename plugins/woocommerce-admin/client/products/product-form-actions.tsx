@@ -11,10 +11,18 @@ import {
 } from '@wordpress/components';
 import { chevronDown, check, Icon } from '@wordpress/icons';
 import { registerPlugin } from '@wordpress/plugins';
+import { WooHeaderItem } from '@woocommerce/admin-layout';
 import { useFormContext } from '@woocommerce/components';
+import { useCustomerEffortScoreExitPageTracker } from '@woocommerce/customer-effort-score';
+import {
+	preventLeavingProductForm,
+	__experimentalUseProductHelper as useProductHelper,
+	__experimentalUseFeedbackBar as useFeedbackBar,
+	TRACKS_SOURCE,
+} from '@woocommerce/product-editor';
 import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { navigateTo } from '@woocommerce/navigation';
+import { navigateTo, useConfirmUnsavedChanges } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -24,13 +32,7 @@ import { store } from '@wordpress/viewport';
 /**
  * Internal dependencies
  */
-import { preventLeavingProductForm } from './utils/prevent-leaving-product-form';
-import usePreventLeavingPage from '~/hooks/usePreventLeavingPage';
-import { WooHeaderItem } from '~/header/utils';
-import { useProductHelper } from './use-product-helper';
 import './product-form-actions.scss';
-import { useProductMVPCESFooter } from '~/customer-effort-score-tracks/use-product-mvp-ces-footer';
-import { useCustomerEffortScoreExitPageTracker } from '~/customer-effort-score-tracks/use-customer-effort-score-exit-page-tracker';
 
 export const ProductFormActions: React.FC = () => {
 	const {
@@ -43,12 +45,11 @@ export const ProductFormActions: React.FC = () => {
 		isDeleting,
 	} = useProductHelper();
 
-	const { onPublish: triggerPublishCES, onSaveDraft: triggerDraftCES } =
-		useProductMVPCESFooter();
+	const { maybeShowFeedbackBar } = useFeedbackBar();
 	const { isDirty, isValidForm, values, resetForm } =
 		useFormContext< Product >();
 
-	usePreventLeavingPage( isDirty, preventLeavingProductForm );
+	useConfirmUnsavedChanges( isDirty, preventLeavingProductForm );
 
 	useCustomerEffortScoreExitPageTracker(
 		! values.id ? 'new_product' : 'editing_new_product',
@@ -75,7 +76,7 @@ export const ProductFormActions: React.FC = () => {
 
 	const onSaveDraft = async () => {
 		recordEvent( 'product_edit', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
@@ -96,12 +97,12 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
-		await triggerDraftCES();
+		await maybeShowFeedbackBar();
 	};
 
 	const onPublish = async () => {
 		recordEvent( 'product_update', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 			...getProductDataForTracks(),
 		} );
 		if ( ! values.id ) {
@@ -122,12 +123,12 @@ export const ProductFormActions: React.FC = () => {
 				resetForm( product );
 			}
 		}
-		await triggerPublishCES();
+		await maybeShowFeedbackBar();
 	};
 
 	const onPublishAndDuplicate = async () => {
 		recordEvent( 'product_publish_and_copy', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
@@ -140,7 +141,7 @@ export const ProductFormActions: React.FC = () => {
 
 	const onCopyToNewDraft = async () => {
 		recordEvent( 'product_copy', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
@@ -155,7 +156,7 @@ export const ProductFormActions: React.FC = () => {
 
 	const onTrash = async () => {
 		recordEvent( 'product_delete', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 			...getProductDataForTracks(),
 		} );
 		if ( values.id ) {
@@ -205,7 +206,7 @@ export const ProductFormActions: React.FC = () => {
 			<SecondaryActionsComponent
 				onClick={ () =>
 					recordEvent( 'product_preview_changes', {
-						new_product_page: true,
+						source: TRACKS_SOURCE,
 						...getProductDataForTracks(),
 					} )
 				}

@@ -2,7 +2,9 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useSelect } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -83,5 +85,16 @@ describe( 'ActivityPanel', () => {
 		render( <ActivityPanel /> );
 		expect( screen.queryByText( 'custom-panel-1' ) ).toBeNull();
 		expect( screen.queryByText( 'custom-panel-2' ) ).toBeNull();
+	} );
+
+	it( 'should record activity_panel_open Tracks event when panel is opened', () => {
+		useSelect.mockReturnValue( {
+			isTaskListHidden: false,
+		} );
+		const { getByText } = render( <ActivityPanel /> );
+		userEvent.click( getByText( 'custom-panel-2' ) );
+		expect( recordEvent ).toHaveBeenCalledWith( 'activity_panel_open', {
+			tab: 'custom-panel-2',
+		} );
 	} );
 } );

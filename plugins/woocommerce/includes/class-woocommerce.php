@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
+use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -32,7 +33,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '7.4.0';
+	public $version = '8.0.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -64,6 +65,13 @@ final class WooCommerce {
 	 * @var WC_Query
 	 */
 	public $query = null;
+
+	/**
+	 * API instance
+	 *
+	 * @var WC_API
+	 */
+	public $api;
 
 	/**
 	 * Product factory instance.
@@ -197,6 +205,22 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Initiali Jetpack Connection Config.
+	 *
+	 * @return void
+	 */
+	public function init_jetpack_connection_config() {
+		$config = new Automattic\Jetpack\Config();
+		$config->ensure(
+			'connection',
+			array(
+				'slug' => 'woocommerce',
+				'name' => __( 'WooCommerce', 'woocommerce' ),
+			)
+		);
+	}
+
+	/**
 	 * Hook into actions and filters.
 	 *
 	 * @since 2.3
@@ -206,6 +230,7 @@ final class WooCommerce {
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
+		add_action( 'plugins_loaded', array( $this, 'init_jetpack_connection_config' ), 1 );
 		add_action( 'admin_notices', array( $this, 'build_dependencies_notice' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
@@ -214,6 +239,7 @@ final class WooCommerce {
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'init', array( $this, 'load_rest_api' ) );
+		add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
@@ -232,6 +258,7 @@ final class WooCommerce {
 		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
+		$container->get( WebhookUtil::class );
 	}
 
 	/**
@@ -524,6 +551,15 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-rest-exception.php';
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
+
+		/**
+		 * Tracks.
+		 */
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
 
 		/**
 		 * WCCOM Site.

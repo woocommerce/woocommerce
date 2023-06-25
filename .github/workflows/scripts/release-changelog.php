@@ -10,8 +10,8 @@ if ( getenv( 'TIME_OVERRIDE' ) ) {
 
 $base_dir = dirname( dirname( dirname( __DIR__ ) ) );
 
-// The release date is 26 days after the code freeze.
-$release_time = strtotime( '+26 days', $now );
+// The release date is 22 days after the code freeze.
+$release_time = strtotime( '+22 days', $now );
 $release_date = date( 'Y-m-d', $release_time );
 
 $readme_file    = $base_dir . '/plugins/woocommerce/readme.txt';

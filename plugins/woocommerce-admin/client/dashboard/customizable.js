@@ -18,6 +18,10 @@ import {
 	isoDateFormat,
 } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
+import {
+	CurrencyContext,
+	getFilteredCurrencyInstance,
+} from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -26,10 +30,6 @@ import './style.scss';
 import defaultSections from './default-sections';
 import Section from './section';
 import ReportFilters from '../analytics/components/report-filters';
-import {
-	CurrencyContext,
-	getFilteredCurrencyInstance,
-} from '../lib/currency-context';
 
 const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
 

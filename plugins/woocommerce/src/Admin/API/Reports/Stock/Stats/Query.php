@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Stock\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
+use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
  * API\Reports\Stock\Stats\Query

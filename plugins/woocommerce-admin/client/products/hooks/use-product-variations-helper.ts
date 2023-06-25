@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { AUTO_DRAFT_NAME } from '@woocommerce/product-editor';
 import { useDispatch } from '@wordpress/data';
 import { useCallback, useState } from '@wordpress/element';
 import {
@@ -9,11 +10,6 @@ import {
 	PRODUCTS_STORE_NAME,
 } from '@woocommerce/data';
 import { useFormContext } from '@woocommerce/components';
-
-/**
- * Internal dependencies
- */
-import { AUTO_DRAFT_NAME } from '../utils/get-product-title';
 
 export function useProductVariationsHelper() {
 	const {

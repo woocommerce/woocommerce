@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Address HPOS synchronization issues relating to the deletion of orders.

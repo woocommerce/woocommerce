@@ -9,8 +9,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Downloads;
 
 defined( 'ABSPATH' ) || exit;
 
-use \Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
-use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
+use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 
 /**
  * REST API Reports downloads controller class.
@@ -19,12 +19,6 @@ use \Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
  * @extends Automattic\WooCommerce\Admin\API\Reports\Controller
  */
 class Controller extends ReportsController implements ExportableInterface {
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.
@@ -58,29 +52,13 @@ class Controller extends ReportsController implements ExportableInterface {
 			$data[] = $this->prepare_response_for_collection( $item );
 		}
 
-		$response = rest_ensure_response( $data );
-
-		$response->header( 'X-WP-Total', (int) $downloads_data->total );
-		$response->header( 'X-WP-TotalPages', (int) $downloads_data->pages );
-
-		$page      = $downloads_data->page_no;
-		$max_pages = $downloads_data->pages;
-		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-		if ( $page > 1 ) {
-			$prev_page = $page - 1;
-			if ( $prev_page > $max_pages ) {
-				$prev_page = $max_pages;
-			}
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
-		}
-		if ( $max_pages > $page ) {
-			$next_page = $page + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
-			$response->link_header( 'next', $next_link );
-		}
-
-		return $response;
+		return $this->add_pagination_headers(
+			$request,
+			$data,
+			(int) $downloads_data->total,
+			(int) $downloads_data->page_no,
+			(int) $downloads_data->pages
+		);
 	}
 
 	/**

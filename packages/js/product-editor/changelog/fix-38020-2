@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Wait for editor changes to be debounced before closing modal

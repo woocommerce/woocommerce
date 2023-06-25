@@ -9,10 +9,15 @@ if ( global.window ) {
 	};
 	global.window.requestAnimationFrame = setTimeout;
 	global.window.cancelAnimationFrame = clearTimeout;
-	global.window.matchMedia = () => ( {
+	global.window.matchMedia = ( query ) => ( {
 		matches: false,
-		addListener: () => {},
-		removeListener: () => {},
+		media: query,
+		onchange: null,
+		addListener: () => {}, // Deprecated
+		removeListener: () => {}, // Deprecated
+		addEventListener: () => {},
+		removeEventListener: () => {},
+		dispatchEvent: () => true,
 	} );
 
 	// Setup fake localStorage

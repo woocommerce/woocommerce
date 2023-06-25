@@ -48,7 +48,7 @@ const DEFAULT_SECTIONS_FILTER = 'woocommerce_dashboard_default_sections';
  * @property {string}         key          Unique identifying string.
  * @property {Node}           component    React component to render.
  * @property {string}         title        Title.
- * @property {boolean}        isVisible    The default visibilty.
+ * @property {boolean}        isVisible    The default visibility.
  * @property {Node}           icon         Section icon.
  * @property {Array.<string>} hiddenBlocks Blocks that are hidden by default.
  */

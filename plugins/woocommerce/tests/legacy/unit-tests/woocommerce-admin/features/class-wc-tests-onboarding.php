@@ -5,7 +5,7 @@
  * @package WooCommerce\Internal\Admin\Tests\OnboardingThemes
  */
 
-use \Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes;
 
 /**
  * Class WC_Admin_Tests_Onboarding

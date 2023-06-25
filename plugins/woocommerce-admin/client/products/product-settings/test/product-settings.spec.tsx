@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
  */
 import { ProductSettings } from '../';
 
-jest.mock( '~/header/utils', () => ( {
+jest.mock( '@woocommerce/admin-layout', () => ( {
 	WooHeaderItem: ( props: { children: () => React.ReactElement } ) => (
 		<Fragment { ...props }>{ props.children }</Fragment>
 	),

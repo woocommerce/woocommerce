@@ -9,6 +9,7 @@ import {
 	__experimentalNavigationItem,
 	__experimentalText,
 	__experimentalUseSlot,
+	__experimentalUseSlotFills as useSlotFillsHook,
 	Navigation as NavigationComponent,
 	NavigationBackButton as NavigationBackButtonComponent,
 	NavigationGroup as NavigationGroupComponent,
@@ -31,7 +32,28 @@ export const NavigationMenu =
 export const NavigationItem =
 	NavigationItemComponent || __experimentalNavigationItem;
 export const Text = TextComponent || __experimentalText;
-export const useSlot = useSlotHook || __experimentalUseSlot;
+
+// Add a fallback for useSlotFills hook to not break in older versions of wp.components.
+// This hook was introduced in wp.components@21.2.0.
+const useSlotFills = useSlotFillsHook || ( () => null );
+
+export const useSlot = ( name ) => {
+	const _useSlot = useSlotHook || __experimentalUseSlot;
+	const slot = _useSlot( name );
+	const fills = useSlotFills( name );
+
+	/*
+	 * Since wp.components@21.2.0, the slot object no longer contains the fills prop.
+	 * Add fills prop to the slot object for backward compatibility.
+	 */
+	if ( typeof useSlotFillsHook === 'function' ) {
+		return {
+			...slot,
+			fills,
+		};
+	}
+	return slot;
+};
 
 export { ExperimentalListItem as ListItem } from './experimental-list/experimental-list-item';
 export { ExperimentalList as List } from './experimental-list/experimental-list';
