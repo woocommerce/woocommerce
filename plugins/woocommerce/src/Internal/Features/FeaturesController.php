@@ -99,7 +99,10 @@ class FeaturesController {
 			),
 			'new_navigation'       => array(
 				'name'            => __( 'Navigation', 'woocommerce' ),
-				'description'     => __( 'Adds the new WooCommerce navigation experience to the dashboard', 'woocommerce' ),
+				'description'     => __(
+					'Adds the new WooCommerce navigation experience to the dashboard',
+					'woocommerce'
+				),
 				'is_experimental' => false,
 				'disable_ui'      => false,
 			),
@@ -121,12 +124,15 @@ class FeaturesController {
 				'is_experimental' => false,
 				'disable_ui'      => true,
 			),
-			'marketplace' => array(
-				'name'            => __( 'Marketplace', 'woocommerce' ),
-				'description'     => __( 'New, faster way to find extensions and themes for your WooCommerce store', 'woocommerce' ),
-				'is_experimental' => false,
+			'marketplace'          => array(
+				'name'               => __( 'Marketplace', 'woocommerce' ),
+				'description'        => __(
+					'New, faster way to find extensions and themes for your WooCommerce store',
+					'woocommerce'
+				),
+				'is_experimental'    => false,
 				'enabled_by_default' => true,
-				'disable_ui'      => false,
+				'disable_ui'         => false,
 			),
 		);
 
