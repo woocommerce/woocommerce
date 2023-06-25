@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
  */
 class Marketplace {
 	final public function init() {
-		add_action( 'admin_menu', array( $this, 'register_pages' ) );
+		add_action( 'admin_menu', array( $this, 'register_pages' ), 45 );
 	}
 
 	/**
@@ -31,16 +31,15 @@ class Marketplace {
 	 * Get report pages.
 	 */
 	public static function get_marketplace_pages() {
-		$discover_page = array(
+		$homepage = array(
 			'id'       => 'woocommerce-marketplace',
-			'title'    => __( 'Extensions', 'woocommerce' ),
-			'path'     => '/marketplace/discover',
-			'icon'     => 'dashicons-store',
-			'position' => 57, // After WooCommerce & Product menu items.
+			'parent'   => 'woocommerce',
+			'title'    => __( 'Marketplace', 'woocommerce' ),
+			'path'     => '/marketplace',
 		);
 
-		$marketplace_pages = array(
-			$discover_page,
+		return array(
+			$homepage,
 			array(
 				'id'       => 'woocommerce-marketplace-extensions',
 				'title'    => __( 'Extensions', 'woocommerce' ),
