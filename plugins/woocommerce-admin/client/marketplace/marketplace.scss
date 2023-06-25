@@ -1,1 +1,9 @@
-/* This is for Stylelint. Delete this comment when we add styles here! */
+.woocommerce-marketplace__nav {
+	display: flex;
+
+	a,
+	span {
+		display: inline-block;
+		margin-right: 16px;
+	}
+}
