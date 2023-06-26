@@ -538,7 +538,6 @@ class Controller extends GenericController implements ExportableInterface {
 					'postcode',
 				),
 			),
-			),
 		);
 
 		return $params;
