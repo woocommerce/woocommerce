@@ -117,5 +117,8 @@ export const productData = (): ProductData => {
 		is_virtual: (
 			document.querySelector( '#_virtual' ) as HTMLInputElement
 		 )?.checked,
+		publishing_status: (
+			document.querySelector( '#post_status' ) as HTMLInputElement
+		 )?.value,
 	};
 };

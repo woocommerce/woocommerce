@@ -13,6 +13,7 @@ export type ProductData = {
 	product_type: string;
 	is_downloadable: boolean;
 	is_virtual: boolean;
+	publishing_status: string;
 };
 
 export type ProductDataSuggestion = {

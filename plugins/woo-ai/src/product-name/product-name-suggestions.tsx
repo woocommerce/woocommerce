@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
 import AlertIcon from '../../assets/images/icons/alert.svg';
-import { productData, getPostId } from '../utils';
+import { productData } from '../utils';
 import { useProductDataSuggestions, useProductSlug } from '../hooks';
 import {
 	ProductDataSuggestion,
@@ -150,11 +150,17 @@ export const ProductNameSuggestions = () => {
 		updateProductName( suggestion.content );
 		setSuggestions( [] );
 
-		// Update product slug.
-		const productId = getPostId();
-		if ( productId !== null ) {
+		// Update product slug if product is a draft.
+		const currentProductData = productData();
+		if (
+			currentProductData.product_id !== null &&
+			currentProductData.publishing_status === 'draft'
+		) {
 			try {
-				updateProductSlug( suggestion.content, productId );
+				updateProductSlug(
+					suggestion.content,
+					currentProductData.product_id
+				);
 			} catch ( e ) {
 				// Log silently if slug update fails.
 				/* eslint-disable-next-line no-console */
