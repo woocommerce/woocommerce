@@ -10,31 +10,39 @@ test.describe( 'Analytics pages', () => {
 		);
 
 		// Grab all of the section headings
-		const sections = await page.$$(
-			'h2.woocommerce-section-header__title'
-		);
-		if ( sections.length < 3 ) {
+		const sections = await page
+			.locator( 'h2.woocommerce-section-header__title' )
+			.count();
+		if ( sections < 3 ) {
 			// performance section is hidden
-			await page.click( '//button[@title="Add more sections"]' );
-			await page.click( '//button[@title="Add Performance section"]' );
-			await page.waitForSelector( 'h2:has-text("Performance")', {
-				state: 'visible',
-			} );
+			await page
+				.locator( '//button[@title="Add more sections"]' )
+				.click();
+			await page
+				.locator( '//button[@title="Add Performance section"]' )
+				.click();
+			await expect(
+				page.locator( 'h2:has-text("Performance")' )
+			).toBeVisible();
 			await page.waitForLoadState( 'networkidle' );
 		}
-		const lastSection = await page.textContent(
-			'h2.woocommerce-section-header__title >> nth=2'
-		);
+		const lastSection = await page
+			.locator( 'h2.woocommerce-section-header__title >> nth=2' )
+			.textContent();
 		if ( lastSection === 'Performance' ) {
 			// sections are in the wrong order
-			await page.click(
-				'//button[@title="Choose which analytics to display and the section name"]'
-			);
-			await page.click( 'text=Move up' );
-			await page.click(
-				'//button[@title="Choose which analytics to display and the section name"]'
-			);
-			await page.click( 'text=Move up' );
+			await page
+				.locator(
+					'//button[@title="Choose which analytics to display and the section name"]'
+				)
+				.click();
+			await page.locator( 'text=Move up' ).click();
+			await page
+				.locator(
+					'//button[@title="Choose which analytics to display and the section name"]'
+				)
+				.click();
+			await page.locator( 'text=Move up' ).click();
 
 			// wait for the changes to be saved
 			await page.waitForResponse(
@@ -55,16 +63,13 @@ test.describe( 'Analytics pages', () => {
 		);
 
 		for ( const expectedSection of arrExpectedSections ) {
-			await test.step(
-				`Assert that the "${ expectedSection }" section is visible`,
-				async () => {
-					await expect(
-						page.locator( 'h2.woocommerce-section-header__title', {
-							hasText: expectedSection,
-						} )
-					).toBeVisible();
-				}
-			);
+			await test.step( `Assert that the "${ expectedSection }" section is visible`, async () => {
+				await expect(
+					page.locator( 'h2.woocommerce-section-header__title', {
+						hasText: expectedSection,
+					} )
+				).toBeVisible();
+			} );
 		}
 	} );
 
@@ -109,10 +114,12 @@ test.describe( 'Analytics pages', () => {
 				.locator( 'h2.woocommerce-section-header__title >> nth=1' )
 				.innerText();
 
-			await page.click(
-				'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=0'
-			);
-			await page.click( 'text=Move down' );
+			await page
+				.locator(
+					'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=0'
+				)
+				.click();
+			await page.locator( 'text=Move down' ).click();
 
 			// second section becomes first section, first becomes second
 			await expect(
@@ -136,10 +143,12 @@ test.describe( 'Analytics pages', () => {
 				.locator( 'h2.woocommerce-section-header__title >> nth=1' )
 				.innerText();
 
-			await page.click(
-				'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=1'
-			);
-			await page.click( 'text=Move up' );
+			await page
+				.locator(
+					'button.components-button.woocommerce-ellipsis-menu__toggle >> nth=1'
+				)
+				.click();
+			await page.locator( 'text=Move up' ).click();
 
 			// second section becomes first section, first becomes second
 			await expect(
@@ -156,14 +165,14 @@ test.describe( 'Analytics pages', () => {
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
 		// clicks the first button to the right of the Performance heading
-		await page.click( 'button:right-of(:text("Performance")) >> nth=0' );
-		await page.click( 'text=Remove section' );
+		await page
+			.locator( 'button:right-of(:text("Performance")) >> nth=0' )
+			.click();
+		await page.locator( 'text=Remove section' ).click();
 		// Grab all of the section headings
 		await page.waitForLoadState( 'networkidle' );
-		const sections = await page.$$(
-			'h2.woocommerce-section-header__title'
-		);
-		await expect( sections.length ).toEqual( 2 );
+		const sections = page.locator( 'h2.woocommerce-section-header__title' );
+		await expect( sections ).toHaveCount( 2 );
 	} );
 
 	test( 'should allow a user to add a section back in', async ( {
@@ -173,12 +182,16 @@ test.describe( 'Analytics pages', () => {
 			'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
 		);
 		// button only shows when not all sections visible, so remove a section
-		await page.click( 'button:right-of(:text("Performance")) >> nth=0' );
-		await page.click( 'text=Remove section' );
+		await page
+			.locator( 'button:right-of(:text("Performance")) >> nth=0' )
+			.click();
+		await page.locator( 'text=Remove section' ).click();
 
 		// add section
-		await page.click( '//button[@title="Add more sections"]' );
-		await page.click( '//button[@title="Add Performance section"]' );
+		await page.locator( '//button[@title="Add more sections"]' ).click();
+		await page
+			.locator( '//button[@title="Add Performance section"]' )
+			.click();
 		await expect(
 			page.locator( 'h2.woocommerce-section-header__title >> nth=2' )
 		).toContainText( 'Performance' );
