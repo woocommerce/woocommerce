@@ -528,18 +528,16 @@ class Controller extends GenericController implements ExportableInterface {
 			'type'              => 'array',
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
-				'type' => array(
-					'description' => __( 'Fields that required to be not empty', 'woocommerce' ),
-					'type'        => 'string',
-					'enum'        => array(
-						'email',
-						'name',
-						'country',
-						'city',
-						'state',
-						'postcode',
-					),
+				'type' => 'string',
+				'enum' => array(
+					'email',
+					'name',
+					'country',
+					'city',
+					'state',
+					'postcode',
 				),
+			),
 			),
 		);
 
