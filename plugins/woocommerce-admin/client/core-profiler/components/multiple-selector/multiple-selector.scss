@@ -106,6 +106,12 @@
 						top: -1px;
 						width: 22px;
 					}
+
+					@include breakpoint( '<782px' ) {
+						svg {
+							width: 18px;
+						}
+					}
 				}
 			}
 		}

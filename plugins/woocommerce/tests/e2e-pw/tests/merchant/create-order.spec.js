@@ -215,22 +215,18 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		await page.waitForLoadState( 'networkidle' );
 		// get order ID from the page
-		const orderHtmlElement = await page.$(
-			'h2.woocommerce-order-data__heading'
-		);
-		const orderText = await page.evaluate(
-			( element ) => element.textContent,
-			orderHtmlElement
-		);
+		const orderText = await page
+			.locator( 'h2.woocommerce-order-data__heading' )
+			.textContent();
 		orderId = orderText.match( /([0-9])\w+/ );
 		orderId = orderId[ 0 ].toString();
 
-		await page.selectOption( '#order_status', 'wc-processing' );
-		await page.fill( 'input[name=order_date]', '2018-12-13' );
-		await page.fill( 'input[name=order_date_hour]', '18' );
-		await page.fill( 'input[name=order_date_minute]', '55' );
+		await page.locator( '#order_status' ).selectOption( 'wc-processing' );
+		await page.locator( 'input[name=order_date]' ).fill( '2018-12-13' );
+		await page.locator( 'input[name=order_date_hour]' ).fill( '18' );
+		await page.locator( 'input[name=order_date_minute]' ).fill( '55' );
 
-		await page.click( 'button.save_order' );
+		await page.locator( 'button.save_order' ).click();
 
 		await expect(
 			page.locator( 'div.updated.notice.notice-success.is-dismissible', {
@@ -251,47 +247,55 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
 
 		// open modal for adding line items
-		await page.click( 'button.add-line-item' );
-		await page.click( 'button.add-order-item' );
+		await page.locator( 'button.add-line-item' ).click();
+		await page.locator( 'button.add-order-item' ).click();
 
 		// search for each product to add
-		await page.click( 'text=Search for a product…' );
-		await page.type(
-			'input:below(:text("Search for a product…"))',
-			simpleProductName
-		);
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
+		await page.locator( 'text=Search for a product…' ).click();
+		await page
+			.locator( '.select2-search--dropdown' )
+			.getByRole( 'combobox' )
+			.type( simpleProductName );
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
 
-		await page.click( 'text=Search for a product…' );
-		await page.type(
-			'input:below(:text("Search for a product…"))',
-			variableProductName
-		);
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
+		await page.locator( 'text=Search for a product…' ).click();
+		await page
+			.locator( '.select2-search--dropdown' )
+			.getByRole( 'combobox' )
+			.type( variableProductName );
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
 
-		await page.click( 'text=Search for a product…' );
-		await page.type(
-			'input:below(:text("Search for a product…"))',
-			groupedProductName
-		);
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
+		await page.locator( 'text=Search for a product…' ).click();
+		await page
+			.locator( '.select2-search--dropdown' )
+			.getByRole( 'combobox' )
+			.type( groupedProductName );
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
 
-		await page.click( 'text=Search for a product…' );
-		await page.type(
-			'input:below(:text("Search for a product…"))',
-			externalProductName
-		);
-		await page.click(
-			'li.select2-results__option.select2-results__option--highlighted'
-		);
+		await page.locator( 'text=Search for a product…' ).click();
+		await page
+			.locator( '.select2-search--dropdown' )
+			.getByRole( 'combobox' )
+			.type( externalProductName );
+		await page
+			.locator(
+				'li.select2-results__option.select2-results__option--highlighted'
+			)
+			.click();
 
-		await page.click( 'button#btn-ok' );
+		await page.locator( 'button#btn-ok' ).click();
 
 		// assert that products added
 		await expect( page.locator( 'td.name > a >> nth=0' ) ).toContainText(
@@ -309,7 +313,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		// Recalculate taxes
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
-		await page.click( 'text=Recalculate' );
+		await page.locator( 'text=Recalculate' ).click();
 
 		// verify tax names
 		let i = 0;

@@ -17,15 +17,20 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		).toContainText( 'Downloadable products' );
 
 		// Set download options
-		await page.selectOption(
-			'#woocommerce_file_download_method',
-			'redirect'
-		);
-		await page.check( '#woocommerce_downloads_require_login' );
-		await page.check( '#woocommerce_downloads_grant_access_after_payment' );
-		await page.check( '#woocommerce_downloads_redirect_fallback_allowed' );
-		await page.uncheck( '#woocommerce_downloads_add_hash_to_filename' );
-		await page.click( 'text=Save changes' );
+		await page
+			.locator( '#woocommerce_file_download_method' )
+			.selectOption( 'redirect' );
+		await page.locator( '#woocommerce_downloads_require_login' ).check();
+		await page
+			.locator( '#woocommerce_downloads_grant_access_after_payment' )
+			.check();
+		await page
+			.locator( '#woocommerce_downloads_redirect_fallback_allowed' )
+			.check();
+		await page
+			.locator( '#woocommerce_downloads_add_hash_to_filename' )
+			.uncheck();
+		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
@@ -49,19 +54,20 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 
 		// Try setting different options
 		await page.reload();
-		await page.selectOption(
-			'#woocommerce_file_download_method',
-			'xsendfile'
-		);
-		await page.uncheck( '#woocommerce_downloads_require_login' );
-		await page.uncheck(
-			'#woocommerce_downloads_grant_access_after_payment'
-		);
-		await page.uncheck(
-			'#woocommerce_downloads_redirect_fallback_allowed'
-		);
-		await page.check( '#woocommerce_downloads_add_hash_to_filename' );
-		await page.click( 'text=Save changes' );
+		await page
+			.locator( '#woocommerce_file_download_method' )
+			.selectOption( 'xsendfile' );
+		await page.locator( '#woocommerce_downloads_require_login' ).uncheck();
+		await page
+			.locator( '#woocommerce_downloads_grant_access_after_payment' )
+			.uncheck();
+		await page
+			.locator( '#woocommerce_downloads_redirect_fallback_allowed' )
+			.uncheck();
+		await page
+			.locator( '#woocommerce_downloads_add_hash_to_filename' )
+			.check();
+		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
@@ -85,8 +91,10 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 
 		// Try the final option
 		await page.reload();
-		await page.selectOption( '#woocommerce_file_download_method', 'force' );
-		await page.click( 'text=Save changes' );
+		await page
+			.locator( '#woocommerce_file_download_method' )
+			.selectOption( 'force' );
+		await page.locator( 'text=Save changes' ).click();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(

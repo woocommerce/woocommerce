@@ -247,57 +247,6 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 100, $reports[0]['total_spend'] );
 		$this->assert_report_item_schema( $reports[0] );
 
-		// Test name parameter (case with no matches).
-		$request->set_query_params(
-			array(
-				'search' => 'Nota Customername',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$reports  = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 0, $reports );
-
-		// Test name parameter (partial match).
-		$request->set_query_params(
-			array(
-				'search' => 're',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$reports  = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 2, $reports );
-
-		// Test email search.
-		$request->set_query_params(
-			array(
-				'search'   => 'customer+justin',
-				'searchby' => 'email',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$reports  = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 1, $reports );
-
-		// Test username search.
-		$request->set_query_params(
-			array(
-				'search'   => 'customer1',
-				'searchby' => 'username',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$reports  = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		// customer1 and customer10.
-		$this->assertCount( 2, $reports );
-
 		// Test name and last_order parameters.
 		$request->set_query_params(
 			array(
@@ -334,6 +283,92 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 1, $reports );
 		$this->assertEquals( $test_customers[0]->get_id(), $reports[0]['user_id'] );
+	}
+
+	/**
+	 * @testdox Test the search and searchby parameters.
+	 */
+	public function test_customer_search() {
+		wp_set_current_user( $this->user );
+
+		$customer = WC_Helper_Customer::create_customer( 'onlyatest', 'password', 'onlyatest@example.com' );
+		$customer->set_first_name( 'Jay' );
+		$customer->set_last_name( 'Ramathorn' );
+		$customer->save();
+
+		$customer = WC_Helper_Customer::create_customer( 'jaytest', 'password', 'justatest@example.com' );
+		$customer->set_first_name( 'Jason' );
+		$customer->set_last_name( 'Roto' );
+		$customer->save();
+
+		$customer = WC_Helper_Customer::create_customer( 'womack2001', 'password', 'mac@jaybird.local' );
+		$customer->set_first_name( 'Steve' );
+		$customer->set_last_name( 'Letme' );
+		$customer->save();
+
+		$customer = WC_Helper_Customer::create_customer( 'sotero', 'password', 'bananas@example.com' );
+		$customer->set_first_name( 'Carl' );
+		$customer->set_last_name( 'Foster' );
+		$customer->save();
+
+		$order = WC_Helper_Order::create_order( 0 ); // Order with guest customer (no account).
+		$order->set_billing_email( 'rjayfarva@ramrod.local' );
+		$order->set_billing_last_name( 'Arjay' );
+		$order->save();
+
+		// Ensure order customer data is synced to lookup table.
+		WC_Helper_Queue::run_all_pending();
+
+		$query_params = array(
+			'force_cache_refresh' => true,
+			'order'               => 'asc',
+			'orderby'             => 'name',
+			'order_before'        => '',
+			'order_after'         => '',
+		);
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 5, $reports ); // No search string, so all customers should return.
+
+		$query_params['search']   = 'Jay';
+		$query_params['searchby'] = 'name';
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports );
+
+		$query_params['searchby'] = 'username';
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+
+		$query_params['searchby'] = 'email';
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports );
+
+		$query_params['searchby'] = 'all';
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 4, $reports );
+
+		$query_params['search'] = 'Not A Customer';
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 0, $reports );
 	}
 
 	/**
