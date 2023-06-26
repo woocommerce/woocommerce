@@ -3696,7 +3696,7 @@ function wc_logout_url( $redirect = '' ) {
  * @since 3.1.0
  */
 function wc_empty_cart_message() {
-	$notice  = wc_print_notice(
+	$notice = wc_print_notice(
 		wp_kses_post(
 			/**
 			 * Filter empty cart message text.
@@ -3713,7 +3713,7 @@ function wc_empty_cart_message() {
 	);
 
 	// This adds the cart-empty classname to the notice to preserve backwards compatibility (for styling purposes etc).
-	$notice  = str_replace( 'class="woocommerce-info"', 'class="cart-empty woocommerce-info"', $notice );
+	$notice = str_replace( 'class="woocommerce-info"', 'class="cart-empty woocommerce-info"', $notice );
 
 	// Return the notice within a consistent wrapper element. This is targetted by some scripts such as cart.js.
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
