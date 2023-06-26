@@ -386,7 +386,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $reports );
 
-		// Test filter_empty param.
+		// Test filter_empty param by name.
 		$request->set_query_params(
 			array(
 				'filter_empty' => array( 'name' ),
