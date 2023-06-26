@@ -404,21 +404,21 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 
 		$request->set_query_params(
 			array(
-				'filter_empty' => array( 'name' ),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$reports  = $response->get_data();
-		$this->assertCount( 1, $reports );
-
-		$request->set_query_params(
-			array(
-				'filter_empty' => array( 'name', 'postcode' ),
+				'filter_empty' => array( 'city', 'postcode' ),
 			)
 		);
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 		$this->assertCount( 0, $reports );
+
+		$request->set_query_params(
+			array(
+				'filter_empty' => array( 'email' ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$this->assertCount( 1, $reports );
 
 		// Test filter_empty param by email and search.
 		$request->set_query_params(
