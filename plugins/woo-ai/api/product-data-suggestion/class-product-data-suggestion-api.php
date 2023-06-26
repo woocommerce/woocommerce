@@ -82,6 +82,12 @@ class Product_Data_Suggestion_API extends WC_REST_Data_Controller {
 					'callback'            => array( $this, 'get_response' ),
 					'permission_callback' => array( $this, 'get_response_permission_check' ),
 					'args'                => array(
+						'token'          => array(
+							'type'              => 'string',
+							'validate_callback' => 'rest_validate_request_arg',
+							'sanitize_callback' => 'sanitize_text_field',
+							'default'           => '',
+						),
 						'requested_data' => array(
 							'type'              => 'string',
 							'validate_callback' => 'rest_validate_request_arg',
@@ -171,6 +177,7 @@ class Product_Data_Suggestion_API extends WC_REST_Data_Controller {
 		$categories     = $request->get_param( 'categories' );
 		$tags           = $request->get_param( 'tags' );
 		$attributes     = $request->get_param( 'attributes' );
+		$token          = $request->get_param( 'token' );
 
 		// Strip HTML tags from the description.
 		if ( ! empty( $description ) ) {
@@ -183,7 +190,7 @@ class Product_Data_Suggestion_API extends WC_REST_Data_Controller {
 		}
 
 		try {
-			$product_data_request = new Product_Data_Suggestion_Request( $requested_data, $name, $description, $tags, $categories, $attributes );
+			$product_data_request = new Product_Data_Suggestion_Request( $requested_data, $name, $description, $tags, $categories, $attributes, $token );
 			$suggestions          = $this->product_data_suggestion_service->get_suggestions( $product_data_request );
 		} catch ( Product_Data_Suggestion_Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => $e->getCode() ) );

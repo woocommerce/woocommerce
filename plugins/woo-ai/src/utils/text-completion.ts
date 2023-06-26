@@ -28,7 +28,7 @@ declare global {
  *
  * @return {Promise<{token: string, blogId: string}>} The token and the blogId
  */
-async function requestJetpackToken() {
+export async function requestJetpackToken() {
 	const token = localStorage.getItem( JWT_TOKEN_ID );
 	let tokenData;
 

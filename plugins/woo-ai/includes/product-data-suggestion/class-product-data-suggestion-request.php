@@ -71,10 +71,11 @@ class Product_Data_Suggestion_Request {
 	 * @param string[]  $tags           The product tags.
 	 * @param integer[] $categories     Category IDs of the product as an associative array.
 	 * @param array[]   $attributes     Other attributes of the product as an associative array.
+	 * @param string    $token          Request token.
 	 *
 	 * @throws Product_Data_Suggestion_Exception If the requested attribute is invalid.
 	 */
-	public function __construct( string $requested_data, string $name, string $description, array $tags = array(), array $categories = array(), array $attributes = array() ) {
+	public function __construct( string $requested_data, string $name, string $description, array $tags = array(), array $categories = array(), array $attributes = array(), string $token ) {
 		$this->validate_requested_data( $requested_data );
 
 		$this->requested_data = $requested_data;
@@ -83,6 +84,7 @@ class Product_Data_Suggestion_Request {
 		$this->tags           = $tags;
 		$this->categories     = $categories;
 		$this->attributes     = $attributes;
+		$this->token          = $token;
 	}
 
 	/**

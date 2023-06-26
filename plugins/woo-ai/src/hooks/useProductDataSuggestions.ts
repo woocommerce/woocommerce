@@ -12,9 +12,10 @@ import {
 	ProductDataSuggestionRequest,
 	ApiErrorResponse,
 } from '../utils/types';
+import { requestJetpackToken } from '../utils';
 
 type ProductDataSuggestionSuccessResponse = {
-	suggestions: ProductDataSuggestion[];
+	completion: string;
 };
 
 type ProductDataSuggestionErrorResponse = ApiErrorResponse;
@@ -24,14 +25,15 @@ export const useProductDataSuggestions = () => {
 		request: ProductDataSuggestionRequest
 	): Promise< ProductDataSuggestion[] > => {
 		try {
-			const response =
-				await apiFetch< ProductDataSuggestionSuccessResponse >( {
+			const response = await requestJetpackToken().then( ( { token } ) =>
+				apiFetch< ProductDataSuggestionSuccessResponse >( {
 					path: '/wooai/product-data-suggestions',
 					method: 'POST',
-					data: request,
-				} );
+					data: { ...request, token },
+				} )
+			);
 
-			return response.suggestions;
+			return JSON.parse( response.completion ).suggestions;
 		} catch ( error ) {
 			/* eslint-disable-next-line no-console */
 			console.error( error );
