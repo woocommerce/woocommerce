@@ -31,7 +31,7 @@ declare global {
 					id: string;
 					description: string;
 					cta_label: string;
-					tos_url: string;
+					tc_url: string;
 				};
 			};
 		};
@@ -55,7 +55,9 @@ const ConnectAccountPage = () => {
 			isJetpackConnected:
 				select( 'wc/admin/plugins' ).isJetpackConnected(),
 			connectUrl:
-				'admin.php?wcpay-connect=1&_wpnonce=' +
+				'admin.php?wcpay-connect=1&promo=' +
+				encodeURIComponent( incentive.id ) +
+				'&_wpnonce=' +
 				getAdminSetting( 'wcpay_welcome_page_connect_nonce' ),
 		};
 	} );
@@ -90,8 +92,8 @@ const ConnectAccountPage = () => {
 	const handleSetup = async () => {
 		setSubmitted( true );
 		recordEvent( 'wcpay_connect_account_clicked', {
-			// eslint-disable-next-line camelcase
 			wpcom_connection: isJetpackConnected ? 'Yes' : 'No',
+			incentive_id: incentive.id,
 		} );
 
 		const pluginsToInstall = [ ...enabledApms ].map(
@@ -107,6 +109,7 @@ const ConnectAccountPage = () => {
 					extensions: [ ...enabledApms ]
 						.map( ( apm ) => apm.id )
 						.join( ', ' ),
+					incentive_id: incentive.id,
 				} );
 				await activatePromo();
 			} else {

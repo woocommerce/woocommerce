@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "7.9.0",
+	"version": "8.0.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
@@ -23,7 +23,7 @@
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
 		"woocommerce/action-scheduler": "3.6.1",
-		"woocommerce/woocommerce-blocks": "10.4.2"
+		"woocommerce/woocommerce-blocks": "10.4.4"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",

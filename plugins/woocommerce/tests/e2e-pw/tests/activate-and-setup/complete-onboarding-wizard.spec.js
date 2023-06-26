@@ -2,8 +2,14 @@ const { test, expect } = require( '@playwright/test' );
 const { onboarding } = require( '../../utils' );
 const { storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
+const { features } = require( '../../utils' );
 
-test.describe( 'Store owner can complete onboarding wizard', () => {
+// Skipping Onbaording tests when the core-profiler is enabled.
+const testRunner = features.is_enabled( 'core-profiler' )
+	? test.describe.skip
+	: test.describe;
+
+testRunner( 'Store owner can complete onboarding wizard', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async () => {
@@ -131,92 +137,104 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 	} );
 } );
 
+// Skipping Onbaording tests as we're replacing StoreDetails with Core Profiler
 // !Changed from Japanese to Liberian store, as Japanese Yen does not use decimals
-test.describe( 'A Liberian store can complete the selective bundle install but does not include WCPay.', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+testRunner(
+	'A Liberian store can complete the selective bundle install but does not include WCPay.',
+	() => {
+		test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeEach( async () => {
-		// Complete "Store Details" step through the API to prevent flakiness when run on external sites.
-		await api.update.storeDetails( storeDetails.liberia.store );
-	} );
+		test.beforeEach( async () => {
+			// Complete "Store Details" step through the API to prevent flakiness when run on external sites.
+			await api.update.storeDetails( storeDetails.liberia.store );
+		} );
 
-	// eslint-disable-next-line jest/expect-expect
-	test( 'can choose the "Other" industry', async ( { page } ) => {
-		await onboarding.completeIndustrySection(
+		// eslint-disable-next-line jest/expect-expect
+		test( 'can choose the "Other" industry', async ( { page } ) => {
+			await onboarding.completeIndustrySection(
+				page,
+				storeDetails.liberia.industries,
+				storeDetails.liberia.expectedNumberOfIndustries
+			);
+			await page.locator( 'button >> text=Continue' ).click();
+		} );
+
+		// eslint-disable-next-line jest/expect-expect
+		test( 'can choose not to install any extensions', async ( {
 			page,
-			storeDetails.liberia.industries,
-			storeDetails.liberia.expectedNumberOfIndustries
-		);
-		await page.locator( 'button >> text=Continue' ).click();
-	} );
+		} ) => {
+			const expect_wp_pay = false;
 
-	// eslint-disable-next-line jest/expect-expect
-	test( 'can choose not to install any extensions', async ( { page } ) => {
-		const expect_wp_pay = false;
+			await onboarding.completeIndustrySection(
+				page,
+				storeDetails.liberia.industries,
+				storeDetails.liberia.expectedNumberOfIndustries
+			);
+			await page.locator( 'button >> text=Continue' ).click();
 
-		await onboarding.completeIndustrySection(
+			await onboarding.completeProductTypesSection(
+				page,
+				storeDetails.liberia.products
+			);
+			// Make sure WC Payments is NOT present
+			await expect(
+				page.locator(
+					'.woocommerce-admin__business-details__selective-extensions-bundle__description a[href*=woocommerce-payments]'
+				)
+			).not.toBeVisible();
+
+			await page.locator( 'button >> text=Continue' ).click();
+
+			await onboarding.completeBusinessDetailsSection( page );
+			await page.locator( 'button >> text=Continue' ).click();
+
+			await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
+
+			await page.locator( 'button >> text=Continue' ).click();
+
+			await expect( page ).not.toHaveURL( /.*step=business-details/ );
+		} );
+
+		// Skipping this test because it's very flaky.  Onboarding checklist changed so that the text
+		// changes when a task is completed.
+		// eslint-disable-next-line jest/no-disabled-tests
+		test.skip( 'should display the choose payments task, and not the WC Pay task', async ( {
 			page,
-			storeDetails.liberia.industries,
-			storeDetails.liberia.expectedNumberOfIndustries
-		);
-		await page.locator( 'button >> text=Continue' ).click();
+		} ) => {
+			// If payment has previously been setup, the setup checklist will show something different
+			// This step resets it
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=checkout'
+			);
+			// Ensure that all payment methods are disabled
+			await expect(
+				page.locator( '.woocommerce-input-toggle--disabled' )
+			).toHaveCount( 3 );
+			// Checklist shows when completing setup wizard
+			await onboarding.completeBusinessDetailsSection( page );
+			await page.locator( 'button >> text=Continue' ).click();
 
-		await onboarding.completeProductTypesSection(
-			page,
-			storeDetails.liberia.products
-		);
-		// Make sure WC Payments is NOT present
-		await expect(
-			page.locator(
-				'.woocommerce-admin__business-details__selective-extensions-bundle__description a[href*=woocommerce-payments]'
-			)
-		).not.toBeVisible();
+			await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
+			await page.locator( 'button >> text=Continue' ).click();
 
-		await page.locator( 'button >> text=Continue' ).click();
-
-		await onboarding.completeBusinessDetailsSection( page );
-		await page.locator( 'button >> text=Continue' ).click();
-
-		await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
-
-		await page.locator( 'button >> text=Continue' ).click();
-
-		await expect( page ).not.toHaveURL( /.*step=business-details/ );
-	} );
-
-	// Skipping this test because it's very flaky.  Onboarding checklist changed so that the text
-	// changes when a task is completed.
-	// eslint-disable-next-line jest/no-disabled-tests
-	test.skip( 'should display the choose payments task, and not the WC Pay task', async ( {
-		page,
-	} ) => {
-		// If payment has previously been setup, the setup checklist will show something different
-		// This step resets it
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
-		// Ensure that all payment methods are disabled
-		await expect(
-			page.locator( '.woocommerce-input-toggle--disabled' )
-		).toHaveCount( 3 );
-		// Checklist shows when completing setup wizard
-		await onboarding.completeBusinessDetailsSection( page );
-		await page.locator( 'button >> text=Continue' ).click();
-
-		await onboarding.unselectBusinessFeatures( page, expect_wp_pay );
-		await page.locator( 'button >> text=Continue' ).click();
-
-		// Start test
-		await page.waitForLoadState( 'networkidle' );
-		await expect(
-			page.locator( ':nth-match(.woocommerce-task-list__item-title, 3)' )
-		).toContainText( 'Set up payments' );
-		await expect(
-			page.locator( ':nth-match(.woocommerce-task-list__item-title, 3)' )
-		).not.toContainText( 'Set up WooCommerce Payments' );
-	} );
-} );
+			// Start test
+			await page.waitForLoadState( 'networkidle' );
+			await expect(
+				page.locator(
+					':nth-match(.woocommerce-task-list__item-title, 3)'
+				)
+			).toContainText( 'Set up payments' );
+			await expect(
+				page.locator(
+					':nth-match(.woocommerce-task-list__item-title, 3)'
+				)
+			).not.toContainText( 'Set up WooCommerce Payments' );
+		} );
+	}
+);
 
 // Skipping this test because it's very flaky.
-test.describe.skip( 'Store owner can go through setup Task List', () => {
+testRunner( 'Store owner can go through setup Task List', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { page } ) => {

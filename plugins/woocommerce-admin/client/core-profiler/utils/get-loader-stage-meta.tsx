@@ -9,6 +9,8 @@ import { __ } from '@wordpress/i18n';
 import LightBulbImage from '../assets/images/loader-lightbulb.svg';
 import DevelopingImage from '../assets/images/loader-developing.svg';
 import LayoutImage from '../assets/images/loader-layout.svg';
+import OpeningTheDoorsImage from '../assets/images/loader-openingthedoors.svg';
+import Hearticon from '../assets/images/loader-hearticon.svg';
 
 import { Stages } from '../pages/Loader';
 
@@ -32,7 +34,7 @@ const LayoutStage = {
 		{
 			label: __( '#FunWooFact: ', 'woocommerce' ),
 			text: __(
-				'#FunWooFact: Did you know that Woo powers almost 4 million stores worldwide? You’re in good company.',
+				'Did you know that Woo powers almost 4 million stores worldwide? You’re in good company.',
 				'woocommerce'
 			),
 		},
@@ -53,10 +55,30 @@ const DevelopingStage = {
 	],
 };
 
+const OpeningTheDoorsStage = {
+	title: __( 'Opening the doors', 'woocommerce' ),
+	image: <img src={ OpeningTheDoorsImage } alt="loader-opening-the-doors" />,
+	paragraphs: [
+		{
+			label: __( '#FunWooFact: ', 'woocommerce' ),
+			text: __( 'Our favorite color is purple ', 'woocommerce' ),
+			element: (
+				<img
+					src={ Hearticon }
+					alt="loader-hearticon"
+					className="loader-hearticon"
+				/>
+			),
+		},
+	],
+};
+
 export const getLoaderStageMeta = ( key: string ): Stages => {
 	switch ( key ) {
 		case 'plugins':
 			return [ DevelopingStage, LayoutStage, LightbulbStage ];
+		case 'skippedGuidedSetup':
+			return [ LightbulbStage, OpeningTheDoorsStage ];
 		case 'default':
 		default:
 			return [ LightbulbStage ];

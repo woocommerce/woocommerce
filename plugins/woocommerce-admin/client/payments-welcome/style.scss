@@ -2,6 +2,10 @@
 	max-width: 680px;
 	margin: 0 auto;
 
+	.components-card {
+		margin-bottom: $gap-large;
+	}
+
 	.components-notice.is-error {
 		margin: 0 0 $gap-large 0;
 	}
@@ -160,14 +164,6 @@
 	}
 
 	&__survey {
-		.components-modal__content {
-			padding: 0 $gap-larger $gap-larger;
-
-			p {
-				text-transform: none;
-			}
-		}
-
 		p {
 			margin-bottom: 1em;
 		}

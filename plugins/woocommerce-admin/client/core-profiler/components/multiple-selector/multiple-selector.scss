@@ -1,3 +1,4 @@
+@import '../../shared.scss';
 
 .woocommerce-experimental-select-control {
 	&:hover,
@@ -70,7 +71,6 @@
 
 			ul li {
 				&:hover {
-					background-color: #eff2fd !important;
 					cursor: pointer;
 				}
 
@@ -105,6 +105,12 @@
 						height: 20px;
 						top: -1px;
 						width: 22px;
+					}
+
+					@include breakpoint( '<782px' ) {
+						svg {
+							width: 18px;
+						}
 					}
 				}
 			}
