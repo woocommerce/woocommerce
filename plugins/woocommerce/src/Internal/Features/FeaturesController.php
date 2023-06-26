@@ -565,10 +565,8 @@ class FeaturesController {
 				 *
 				 * @param bool $disabled False.
 				 */
-				$additional_features = apply_filters( 'woocommerce_settings_features', $features );
+				$feature_settings = apply_filters( 'woocommerce_settings_features', $feature_settings );
 				// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
-
-				$feature_settings = array_merge( $feature_settings, $additional_features );
 
 				if ( ! empty( $experimental_feature_ids ) ) {
 					$feature_settings[] = array(
