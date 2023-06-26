@@ -248,15 +248,6 @@
 			z-index: 1;
 		}
 
-		// How price gets displayed
-		.entry-summary {
-			.woocommerce-Price-amount,
-			del,
-			.price {
-				font-size: var(--wp--preset--font-size--large);
-			}
-		}
-
 		div.woocommerce-product-gallery {
 			position: relative;
 
