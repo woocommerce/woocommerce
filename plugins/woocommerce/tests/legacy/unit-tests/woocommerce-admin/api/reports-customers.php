@@ -396,15 +396,15 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$reports  = $response->get_data();
 		$this->assertCount( 0, $reports );
 
-		$customer = WC_Helper_Customer::create_customer( 'customer_1', 'password', 'customer@example.com' );
-		$customer->set_postcode( null );
+		$customer = WC_Helper_Customer::create_customer( 'customer_1', 'password', 'customer_1@example.com' );
+		$customer->set_billing_city( '' );
 		$customer->set_first_name( 'customer_andrei_1' );
 		$customer->save();
 		WC_Helper_Queue::run_all_pending();
 
 		$request->set_query_params(
 			array(
-				'filter_empty' => array( 'city', 'postcode' ),
+				'filter_empty' => array( 'city', 'email' ),
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -432,8 +432,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $reports );
 
 		// Test filter_empty param by state and postcode non empty.
-		$customer = WC_Helper_Customer::create_customer( 'customer_2', 'password', 'customer@example.com' );
-		$customer->save();
+		$customer = WC_Helper_Customer::create_customer( 'customer_2', 'password', 'customer_2@example.com' );
 		WC_Helper_Queue::run_all_pending();
 
 		$request->set_query_params(
@@ -463,7 +462,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		);
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
-		$this->assertCount( 2, $reports );
+		$this->assertCount( 1, $reports );
 
 		// Test filter_empty param by state.
 		$request->set_query_params(
