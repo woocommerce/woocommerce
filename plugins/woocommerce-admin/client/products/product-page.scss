@@ -26,8 +26,8 @@
 	.interface-interface-skeleton__header,
 	.interface-interface-skeleton__footer {
 		background-color: $white;
-		width: calc(100% - $admin-menu-width);
-		left: $admin-menu-width;
+		width: calc(100% - $admin-menu-width-collapsed);
+		left: $admin-menu-width-collapsed;
 		position: fixed;
 		@include breakpoint( '<960px' ) {
 			left: $admin-menu-width-collapsed;
@@ -59,4 +59,8 @@ html.interface-interface-skeleton__html-container {
 	@include breakpoint( '<782px' ) {
 		position: inherit;
 	}
+}
+
+div#wpwrap {
+	background-color: $white;
 }
