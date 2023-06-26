@@ -70,7 +70,7 @@ test.describe( 'Store owner can complete onboarding wizard', () => {
 		);
 
 		// Navigate to "Store Details" section to show Save Changes modal prompt
-		await page.click( 'button >> text=Store Details' );
+		await page.locator( 'button >> text=Store Details' ).click();
 
 		// handle save changes modal if displayed
 		const saveChangesModalVisible = await page
