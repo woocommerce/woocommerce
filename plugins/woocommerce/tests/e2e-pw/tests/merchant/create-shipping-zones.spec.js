@@ -64,40 +64,32 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				{ waitUntil: 'networkidle' }
 			);
 			await page
-				.locator( '#zone_name' )
+				.getByPlaceholder( 'Zone name' )
 				.fill( shippingZoneNameLocalPickup );
 
-			await page.locator( '.select2-search__field' ).click();
+			await page.getByPlaceholder( 'Select regions within this zone' ).click();
 			await page
-				.locator( '.select2-search__field' )
+				.getByPlaceholder( 'Select regions within this zone' )
 				.type( 'British Columbia, Canada' );
 			await page
-				.locator(
-					'.select2-results__option.select2-results__option--highlighted'
-				)
+				.getByText( 'British Columbia, Canada' ).last()
 				.click();
 
-			await page.locator( '.wc-shipping-zone-postcodes-toggle' ).click();
-			await page.locator( '#zone_postcodes' ).fill( maynePostal );
+			await page.getByRole( 'link', { name: 'Limit to specific ZIP/postcodes' } ).click();
+			await page.getByPlaceholder( 'List 1 postcode per line' ).fill( maynePostal );
 
-			await page.locator( 'text=Add shipping method' ).click();
+			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
 
 			await page
-				.locator( 'select[name=add_method_id]' )
-				.selectOption( 'local_pickup' );
-			await page.locator( '#btn-ok' ).click();
+				.getByRole( 'combobox' )
+				.selectOption( { label: 'Local pickup' } );
+			await page.getByRole('button', { name: 'Add shipping method' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
 				page
 					.locator( '.wc-shipping-zone-method-title' )
 					.filter( { hasText: 'Local pickup' } )
 			).toBeVisible();
-
-			await page.locator( '#submit' ).click();
-			await page.waitForFunction( () => {
-				const button = document.querySelector( '#submit' );
-				return button && button.disabled;
-			} );
 
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -131,24 +123,22 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 				'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
 				{ waitUntil: 'networkidle' }
 			);
-			await page.locator( '#zone_name' ).fill( shippingZoneNameFreeShip );
+			await page.getByPlaceholder( 'Zone name' ).fill( shippingZoneNameFreeShip );
 
-			await page.locator( '.select2-search__field' ).click();
+			await page.getByPlaceholder( 'Select regions within this zone' ).click();
 			await page
-				.locator( '.select2-search__field' )
+				.getByPlaceholder( 'Select regions within this zone' )
 				.type( 'British Columbia, Canada' );
 			await page
-				.locator(
-					'.select2-results__option.select2-results__option--highlighted'
-				)
+				.getByText( 'British Columbia, Canada' ).last()
 				.click();
 
-			await page.locator( 'text=Add shipping method' ).click();
+			await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
 
 			await page
-				.locator( 'select[name=add_method_id]' )
-				.selectOption( 'free_shipping' );
-			await page.locator( '#btn-ok' ).click();
+				.getByRole( 'combobox' )
+				.selectOption( { label: 'Free shipping' } );
+			await page.getByRole('button', { name: 'Add shipping method' } ).last().click();
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
 				page
@@ -156,11 +146,6 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 					.filter( { hasText: 'Free shipping' } )
 			).toBeVisible();
 
-			await page.locator( '#submit' ).click();
-			await page.waitForFunction( () => {
-				const button = document.querySelector( '#submit' );
-				return button && button.disabled;
-			} );
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
 			);
