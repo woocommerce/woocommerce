@@ -26,9 +26,9 @@
 	.interface-interface-skeleton__header,
 	.interface-interface-skeleton__footer {
 		background-color: $white;
-		width: calc(100% - $admin-menu-width-collapsed);
-		left: $admin-menu-width-collapsed;
 		position: fixed;
+		width: calc(100% - $admin-menu-width);
+		left: $admin-menu-width;
 		@include breakpoint( '<960px' ) {
 			left: $admin-menu-width-collapsed;
 			width: calc(100% - $admin-menu-width-collapsed);
@@ -39,6 +39,11 @@
 		}
 		// Higher than the sidebar which has a z-index of 90.
 		z-index: 100;
+	}
+
+	&.folded .interface-interface-skeleton__header, &.folded .interface-interface-skeleton__footer  {
+		width: calc(100% - $admin-menu-width-collapsed);
+		left: $admin-menu-width-collapsed;
 	}
 
 	.interface-interface-skeleton__header {
