@@ -53,12 +53,14 @@ class ManifestJob {
 
 				if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
 					\ActionScheduler_Logger::instance()->log( $action_id, 'Error retrieving manifest: ' . $response->get_error_message() );
+					continue;
 				}
 
 				$json = json_decode( wp_remote_retrieve_body( $response ), true );
 
 				if ( json_last_error() !== JSON_ERROR_NONE ) {
 					\ActionScheduler_Logger::instance()->log( $action_id, 'Error decoding manifest: ' . json_last_error_msg() );
+					continue;
 				}
 
 				// first check if the manifest has changed.
