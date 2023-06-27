@@ -64,7 +64,6 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 	workflow_runs.forEach( ( run ) => {
 		totals[ run.conclusion ]++;
 		if ( run.conclusion === 'success' ) {
-			totals.runIds.push( run.id );
 			totals.nodeIds.push( run.node_id );
 			const time =
 				new Date( run.updated_at ).getTime() -
@@ -126,7 +125,6 @@ export const getWorkflowRunData = async ( options: {
 
 	const initialTotals = {
 		total_count: 0,
-		runIds: [],
 		nodeIds: [],
 		times: [],
 		success: 0,
@@ -182,7 +180,6 @@ export const getWorkflowRunData = async ( options: {
 			1000 /
 			60
 		).toFixed( 2 ),
-		runIds: totals.runIds,
 		nodeIds: totals.nodeIds,
 	};
 };
