@@ -409,7 +409,7 @@ class WC_Form_Handler {
 				WC()->customer->save();
 
 				if ( ! empty( $_POST['terms-field'] ) && empty( $_POST['terms'] ) ) {
-					wc_add_notice( __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ), 'error', array( 'id' => 'terms-field' ) );
+					wc_add_notice( __( 'Please read and accept the terms and conditions to proceed with your order.', 'woocommerce' ), 'error', array( 'id' => 'terms_field' ) );
 					return;
 				}
 
