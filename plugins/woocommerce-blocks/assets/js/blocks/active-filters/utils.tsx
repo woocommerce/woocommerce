@@ -248,7 +248,7 @@ export const maybeUrlContainsFilters = (): boolean => {
 	return maybeHasFilter;
 };
 
-interface StoreAttributes {
+export interface StoreAttributes {
 	attribute_id: string;
 	attribute_label: string;
 	attribute_name: string;

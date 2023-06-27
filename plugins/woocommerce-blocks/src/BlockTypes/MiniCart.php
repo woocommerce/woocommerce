@@ -428,7 +428,7 @@ class MiniCart extends AbstractBlock {
 		}
 		$wrapper_styles = $classes_styles['styles'];
 
-		$icon_color = array_key_exists( 'iconColorValue', $attributes ) ? $attributes['iconColorValue'] : 'currentColor';
+		$icon_color          = array_key_exists( 'iconColorValue', $attributes ) ? $attributes['iconColorValue'] : 'currentColor';
 		$product_count_color = array_key_exists( 'productCountColorValue', $attributes ) ? $attributes['productCountColorValue'] : '';
 
 		// Default "Cart" icon.

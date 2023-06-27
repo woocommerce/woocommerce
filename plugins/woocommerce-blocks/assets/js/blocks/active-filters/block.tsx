@@ -31,6 +31,7 @@ import {
 	cleanFilterUrl,
 	maybeUrlContainsFilters,
 	urlContainsAttributeFilter,
+	StoreAttributes,
 } from './utils';
 import ActiveAttributeFilters from './active-attribute-filters';
 import FilterPlaceholders from './filter-placeholders';
@@ -84,7 +85,7 @@ const ActiveFiltersBlock = ( {
 		useQueryStateByKey( 'rating' );
 
 	const STOCK_STATUS_OPTIONS = getSetting( 'stockStatusOptions', [] );
-	const STORE_ATTRIBUTES = getSetting( 'attributes', [] );
+	const STORE_ATTRIBUTES: StoreAttributes[] = getSetting( 'attributes', [] );
 	const activeStockStatusFilters = useMemo( () => {
 		if (
 			shouldShowLoadingPlaceholders ||
