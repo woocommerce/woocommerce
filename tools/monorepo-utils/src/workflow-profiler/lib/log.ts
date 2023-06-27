@@ -31,7 +31,7 @@ export const logWorkflowRunResults = ( name, data ) => {
 		[
 			[
 				name,
-				data.total_count.toString(),
+				data.count_items_available.toString(),
 				data.success.toString(),
 				data.failure.toString(),
 				data.cancelled.toString(),

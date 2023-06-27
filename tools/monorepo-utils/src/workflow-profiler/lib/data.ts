@@ -14,8 +14,8 @@ import config from '../config';
  */
 export const getAllWorkflows = async ( owner: string, name: string ) => {
 	const initialTotals = {
-		count: 0,
-		total_count: 0,
+		count_items_processed: 0,
+		count_items_available: 0,
 		workflows: [],
 	};
 	const requestOptions = {
@@ -26,8 +26,8 @@ export const getAllWorkflows = async ( owner: string, name: string ) => {
 
 	const processPage = ( data, totals: PaginatedDataTotals ) => {
 		const { total_count, workflows } = data;
-		totals.total_count = total_count;
-		totals.count += workflows.length;
+		totals.count_items_available = total_count;
+		totals.count_items_processed += workflows.length;
 		totals.workflows = totals.workflows.concat( workflows );
 		return totals;
 	};
@@ -51,8 +51,8 @@ export const getAllWorkflows = async ( owner: string, name: string ) => {
  */
 const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 	const { workflow_runs, total_count } = data;
-	totals.total_count = total_count;
-	totals.count += workflow_runs.length;
+	totals.count_items_available = total_count;
+	totals.count_items_processed += workflow_runs.length;
 	const { WORKFLOW_DURATION_CUTOFF_MINUTES } = config;
 
 	workflow_runs.forEach( ( run ) => {
@@ -116,13 +116,13 @@ export const getWorkflowRunData = async ( options: {
 } ) => {
 	const { id, start, end, owner, name } = options;
 	const initialTotals = {
-		total_count: 0,
+		count_items_available: 0,
 		nodeIds: [],
 		times: [],
 		success: 0,
 		failure: 0,
 		cancelled: 0,
-		count: 0,
+		count_items_processed: 0,
 	};
 	const requestOptions = {
 		owner,

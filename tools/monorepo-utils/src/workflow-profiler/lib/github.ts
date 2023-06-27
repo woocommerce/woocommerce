@@ -5,9 +5,9 @@ import { octokitWithAuth } from '../../core/github/api';
 
 export type PaginatedDataTotals = {
 	// count is the running total of items processed
-	count: number;
-	// total_count is the total number of items available
-	total_count: number;
+	count_items_processed: number;
+	// count_items_available is the total number of items available to be processed
+	count_items_available: number;
 	// Any other data that needs to be tracked
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	[ key: string ]: any;
@@ -46,8 +46,8 @@ export const requestPaginatedData = async (
 
 	let resultingTotals = processPage( data, totals );
 
-	const { total_count } = data;
-	if ( total_count > resultingTotals.count ) {
+	const { count_items_available } = data;
+	if ( count_items_available > resultingTotals.count_items_processed ) {
 		resultingTotals = await requestPaginatedData(
 			resultingTotals,
 			endpoint,
