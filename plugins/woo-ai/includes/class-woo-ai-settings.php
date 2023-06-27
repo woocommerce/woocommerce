@@ -105,11 +105,11 @@ class Woo_AI_Settings {
 			),
 
 			array(
-				'id'    => 'ai_describe_store_sell',
-				'type'  => 'text',
-				'title' => __( 'What does your store sell?', 'woocommerce' ),
-				'desc'  => __( 'e.g. organic fruit and vegetables', 'woocommerce' ),
-				'css'   => 'min-width:300px;',
+				'id'          => 'ai_describe_store_sell',
+				'type'        => 'text',
+				'title'       => __( 'What does your store sell?', 'woocommerce' ),
+				'placeholder' => __( 'e.g. organic fruit and vegetables', 'woocommerce' ),
+				'css'         => 'min-width:300px;',
 			),
 
 			array(
