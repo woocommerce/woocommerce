@@ -40,17 +40,18 @@ class Woo_AI_Settings {
 	 */
 	public function __construct() {
 		add_action( 'woocommerce_settings_save_advanced', array( $this, 'action_save_woo_ai_settings_tab' ) );
-		add_action( 'woocommerce_settings_page_init', array( $this, 'add_tabs' ) );
+		add_action( 'woocommerce_settings_page_init', array( $this, 'add_ui' ) );
+
+		$this->add_sanitization_hooks();
 	}
 
 	/**
-	 * Initialize hooks.
+	 * Add UI related hooks.
 	 */
-	public function add_tabs() {
+	public function add_ui() {
 		add_filter( 'woocommerce_get_sections_advanced', array( $this, 'add_ai_section' ), 10, 1 );
 		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'get_woo_ai_settings' ), 10, 2 );
 	}
-
 
 	/**
 	 * Save settings.
@@ -59,6 +60,28 @@ class Woo_AI_Settings {
 		WC_Admin_Settings::save_fields(
 			$this->get_woo_ai_settings()
 		);
+	}
+
+	/**
+	 * Add sanitization hooks.
+	 */
+	public function add_sanitization_hooks() {
+		$settings = $this->get_woo_ai_settings();
+
+		foreach ( $settings as $setting ) {
+			if ( in_array( $setting['type'], array( 'text', 'textarea' ), true ) ) {
+				add_filter( 'woocommerce_admin_settings_sanitize_option_' . $setting['id'], array( $this, 'esc_html_field' ) );
+			}
+		}
+	}
+
+	/**
+	 * Sanitize field value.
+	 *
+	 * @param string $raw_value The current section.
+	 */
+	public function esc_html_field( $raw_value ) {
+		return esc_html( $raw_value ?? '' );
 	}
 
 	/**
