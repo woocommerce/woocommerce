@@ -382,10 +382,10 @@ export const logJobResults = ( data ) => {
 };
 
 export const logStepResults = ( data ) => {
-	const rows = Object.keys( data ).map( ( jobName ) => {
+	Object.keys( data ).forEach( ( jobName ) => {
 		const job = data[ jobName ];
 
-		return Object.keys( job.steps ).map( ( stepName ) => {
+		const rows = Object.keys( job.steps ).map( ( stepName ) => {
 			const step = job.steps[ stepName ];
 
 			return [
@@ -397,16 +397,17 @@ export const logStepResults = ( data ) => {
 				( get90thPercentile( step ) / 1000 / 60 ).toFixed( 2 ), // in minutes
 			];
 		} );
+
+		Logger.table(
+			[
+				`Steps for job: ${ jobName }`,
+				'average (min)',
+				'median (min)',
+				'longest (min)',
+				'shortest (min)',
+				'90th percentile (min)',
+			],
+			rows
+		);
 	} );
-	Logger.table(
-		[
-			'Step Name',
-			'average (min)',
-			'median (min)',
-			'longest (min)',
-			'shortest (min)',
-			'90th percentile (min)',
-		],
-		rows.flat()
-	);
 };
