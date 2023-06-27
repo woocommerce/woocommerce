@@ -123,12 +123,13 @@ class Jetpack_Completion_Service implements Completion_Service_Interface {
 
 		try {
 			// Extract the string from the response. Response might be wrapped in quotes and escaped. E.g. "{ \n \"foo\": \"bar\" \n }".
-			$decoded = json_decode( $response_body, true, 512, JSON_THROW_ON_ERROR );
+			$decoded_body = json_decode( $response_body, true, 512, JSON_THROW_ON_ERROR );
+			$decoded      = json_decode( $decoded_body['completion'], true, 512, JSON_THROW_ON_ERROR );
 		} catch ( JsonException $e ) {
 			$this->handle_json_exception( $e );
 		}
 
-		return $this->get_completion_string_from_decoded_response( $decoded, $response_body );
+		return $this->get_completion_string_from_decoded_response( $decoded, $decoded_body['completion'] );
 	}
 
 	/**
