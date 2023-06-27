@@ -85,6 +85,12 @@ export function isWCPaySupported( countryCode ) {
 		'MT',
 		'SI',
 		'SK',
+		'BG',
+		'CZ',
+		'HR',
+		'HU',
+		'RO',
+		'SE',
 	];
 
 	return supportedCountries.includes( countryCode );
