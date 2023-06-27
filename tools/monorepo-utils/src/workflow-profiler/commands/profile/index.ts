@@ -25,7 +25,7 @@ const program = new Command( 'profile' )
 	.argument( '<end>', 'End date in YYYY-MM-DD format' )
 	.argument(
 		'<id>',
-		'Workflow ID. The required workflow ids are 22745783, 5687250, 23271226, and 5461563. For the rest, use the `list` command.'
+		'Workflow ID. The required workflow ids are 22745783, 5687250, 23271226, and 5461563. For the rest, use the `list` command to see workflow names and ids.'
 	)
 	.option(
 		'-o --owner <owner>',
@@ -50,12 +50,11 @@ const program = new Command( 'profile' )
 			end,
 		} );
 
-		logWorkflowRunResults( workflowData.name, workflowRunData );
-
 		const { nodeIds } = workflowRunData;
 		const runJobData = await getRunJobData( nodeIds );
 		const compiledJobData = getCompiledJobData( runJobData );
 
+		logWorkflowRunResults( workflowData.name, workflowRunData );
 		logJobResults( compiledJobData );
 		logStepResults( compiledJobData );
 	} );
