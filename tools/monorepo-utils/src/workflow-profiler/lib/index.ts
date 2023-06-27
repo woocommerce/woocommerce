@@ -1,7 +1,12 @@
 /**
+ * External dependencies
+ */
+import {} from '@octokit/graphql-schema';
+
+/**
  * Internal dependencies
  */
-import { octokitWithAuth } from '../../core/github/api';
+import { octokitWithAuth, graphqlWithAuth } from '../../core/github/api';
 import { Logger } from '../../core/logger';
 import { requestPaginatedData, PaginatedDataTotals } from './github';
 import { calculateMean, calculateMedian, get90thPercentile } from './math';
@@ -61,6 +66,7 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 		totals[ run.conclusion ]++;
 		if ( run.conclusion === 'success' ) {
 			totals.runIds.push( run.id );
+			totals.nodeIds.push( run.node_id );
 			const time =
 				new Date( run.updated_at ).getTime() -
 				new Date( run.run_started_at ).getTime();
@@ -118,6 +124,7 @@ export const getWorkflowRunData = async ( options: {
 	const initialTotals = {
 		total_count: 0,
 		runIds: [],
+		nodeIds: [],
 		times: [],
 		success: 0,
 		failure: 0,
@@ -173,6 +180,7 @@ export const getWorkflowRunData = async ( options: {
 			60
 		).toFixed( 2 ),
 		runIds: totals.runIds,
+		nodeIds: totals.nodeIds,
 	};
 };
 
@@ -212,26 +220,95 @@ export const logWorkflowRunResults = ( data ) => {
 	);
 };
 
-export const getRunJobData = async ( runIds ) => {
-	const jobs = await Promise.all(
-		runIds.map( async ( id ) => {
-			const { data } = await octokitWithAuth().request(
-				'GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs',
-				{
-					owner: 'woocommerce',
-					repo: 'woocommerce',
-					run_id: id,
+export const getRunJobData = async ( nodeIds ) => {
+	const gql = graphqlWithAuth();
+	const str = nodeIds.map( ( id ) => `"${ id }"` ).join( ', ' );
+	return await gql( `
+			{ 
+				nodes ( ids: [ ${ str } ] ) {
+				... on WorkflowRun {
+					id
+					workflow {
+						id
+						name
+					}
+					checkSuite {
+						checkRuns ( first: 20, filterBy: { status: COMPLETED } ) {
+								nodes {
+									name
+									id
+									startedAt
+									completedAt
+									steps ( first: 50 ) {
+										nodes {
+											name
+											startedAt
+											completedAt
+										}
+									}
+								}
+							}
+						}
+					}
 				}
-			);
-
-			return data.jobs;
-		} )
-	);
-
-	return jobs.flat();
+			}
+		` );
 };
 
 export const getCompiledJobData = ( jobData ) => {
+	const { nodes } = jobData;
+	const result = {};
+
+	nodes.forEach( ( node ) => {
+		const jobs = node.checkSuite.checkRuns.nodes;
+		jobs.forEach( ( job ) => {
+			const { name, startedAt, completedAt } = job;
+
+			const time =
+				new Date( completedAt ).getTime() -
+				new Date( startedAt ).getTime();
+
+			if ( ! result[ name ] ) {
+				result[ name ] = {
+					times: [],
+					steps: {},
+				};
+			}
+
+			result[ name ].times.push( time );
+
+			const steps = job.steps.nodes;
+			steps.forEach( ( step ) => {
+				const {
+					name: stepName,
+					startedAt: stepStart,
+					completedAt: stepCompleted,
+				} = step;
+
+				if (
+					stepName === 'Set up job' ||
+					stepName === 'Complete job' ||
+					stepName.startsWith( 'Post ' )
+				) {
+					return;
+				}
+				const stepTime =
+					new Date( stepCompleted ).getTime() -
+					new Date( stepStart ).getTime();
+
+				if ( ! result[ name ].steps[ stepName ] ) {
+					result[ name ].steps[ stepName ] = [];
+				}
+
+				result[ name ].steps[ stepName ].push( stepTime );
+			} );
+		} );
+	} );
+
+	return result;
+};
+
+export const _getCompiledJobData = ( jobData ) => {
 	const result = {};
 
 	jobData.forEach( ( job ) => {

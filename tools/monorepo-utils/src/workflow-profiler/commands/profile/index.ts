@@ -52,9 +52,10 @@ const program = new Command( 'profile' )
 
 		logWorkflowRunResults( workflowRunData );
 
-		const { runIds } = workflowRunData;
-		const runJobData = await getRunJobData( runIds );
+		const { nodeIds } = workflowRunData;
+		const runJobData = await getRunJobData( nodeIds );
 		const compiledJobData = getCompiledJobData( runJobData );
+		// console.log( compiledJobData );
 
 		logJobResults( compiledJobData );
 		logStepResults( compiledJobData );
