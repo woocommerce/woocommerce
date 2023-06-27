@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Prefetch Jetpack connection and auth info when Jetpack is selected
