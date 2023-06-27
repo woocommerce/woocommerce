@@ -13,22 +13,38 @@ type JobLog = {
 };
 
 export const useJobLog = () => {
-	const [ jobLog, setJobLog ] = useState< JobLog[] >( [] );
+	const [ jobLogs, setJobLogs ] = useState< JobLog[] >( [] );
 	const [ loading, setLoading ] = useState< boolean >( true );
+	const [ error, setError ] = useState< string | null >( null );
 
 	useEffect( () => {
 		const getJobLog = async () => {
-			const res = await apiFetch< JobLog[] >( {
-				path: `${ API_NAMESPACE }/job_log`,
-				method: 'GET',
-			} );
+			try {
+				const res = await apiFetch< JobLog[] >( {
+					path: `${ API_NAMESPACE }/job_log`,
+					method: 'GET',
+				} );
 
-			setJobLog( res );
-			setLoading( false );
+				setJobLogs( res );
+				setLoading( false );
+			} catch ( err: unknown ) {
+				if (
+					err &&
+					typeof err === 'object' &&
+					'message' in err &&
+					typeof err.message === 'string'
+				) {
+					setError( `Error occurred: ${ err.message }` );
+					setLoading( false );
+				} else {
+					setError( 'An unknown error occurred.' );
+					setLoading( false );
+				}
+			}
 		};
 
 		getJobLog();
 	}, [] );
 
-	return { jobs: jobLog, isLoading: loading };
+	return { jobLogs, isLoading: loading, error };
 };

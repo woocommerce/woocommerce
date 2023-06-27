@@ -3176,9 +3176,6 @@ importers:
 
   plugins/woocommerce-docs:
     dependencies:
-      '@types/wordpress__components':
-        specifier: ^19.10.3
-        version: 19.10.5(react-dom@17.0.2)(react@17.0.2)
       '@wordpress/api-fetch':
         specifier: wp-6.0
         version: 6.3.1
@@ -4336,7 +4333,7 @@ packages:
     dependencies:
       '@babel/compat-data': 7.21.0
       '@babel/core': 7.17.8
-      '@babel/helper-validator-option': 7.21.0
+      '@babel/helper-validator-option': 7.18.6
       browserslist: 4.21.4
       lru-cache: 5.1.1
       semver: 6.3.0
@@ -4350,7 +4347,7 @@ packages:
     dependencies:
       '@babel/compat-data': 7.21.0
       '@babel/core': 7.21.3
-      '@babel/helper-validator-option': 7.21.0
+      '@babel/helper-validator-option': 7.18.6
       browserslist: 4.21.4
       lru-cache: 5.1.1
       semver: 6.3.0
@@ -5726,7 +5723,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
       '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3(@babel/core@7.17.8)
     dev: true
 
@@ -5737,7 +5734,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
       '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3(@babel/core@7.21.3)
 
   /@babel/plugin-proposal-numeric-separator@7.16.0(@babel/core@7.12.9):
@@ -5903,7 +5900,7 @@ packages:
       '@babel/compat-data': 7.21.0
       '@babel/core': 7.17.8
       '@babel/helper-compilation-targets': 7.20.7(@babel/core@7.17.8)
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
       '@babel/plugin-syntax-object-rest-spread': 7.8.3(@babel/core@7.17.8)
       '@babel/plugin-transform-parameters': 7.21.3(@babel/core@7.17.8)
     dev: true
@@ -5917,7 +5914,7 @@ packages:
       '@babel/compat-data': 7.21.0
       '@babel/core': 7.21.3
       '@babel/helper-compilation-targets': 7.20.7(@babel/core@7.21.3)
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
       '@babel/plugin-syntax-object-rest-spread': 7.8.3(@babel/core@7.21.3)
       '@babel/plugin-transform-parameters': 7.21.3(@babel/core@7.21.3)
 
@@ -6999,7 +6996,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
   /@babel/plugin-transform-arrow-functions@7.18.6(@babel/core@7.21.3):
@@ -7009,7 +7006,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
 
   /@babel/plugin-transform-async-to-generator@7.16.0(@babel/core@7.12.9):
     resolution: {integrity: sha512-PbIr7G9kR8tdH6g8Wouir5uVjklETk91GMVSUq+VaOgiinbCkBP6Q7NN/suM/QutZkMJMvcyAriogcYAdhg8Gw==}
@@ -7228,7 +7225,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
   /@babel/plugin-transform-block-scoping@7.21.0(@babel/core@7.21.3):
@@ -7238,7 +7235,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
 
   /@babel/plugin-transform-classes@7.16.0(@babel/core@7.12.9):
     resolution: {integrity: sha512-HUxMvy6GtAdd+GKBNYDWCIA776byUQH8zjnfjxwT1P1ARv/wFu8eBDpmXQcLS/IwRtrxIReGiplOwMeyO7nsDQ==}
@@ -7494,7 +7491,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
   /@babel/plugin-transform-destructuring@7.21.3(@babel/core@7.21.3):
@@ -7504,7 +7501,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
 
   /@babel/plugin-transform-dotall-regex@7.16.0(@babel/core@7.12.9):
     resolution: {integrity: sha512-FXlDZfQeLILfJlC6I1qyEwcHK5UpRCFkaoVyA1nk9A1L1Yu583YO4un2KsLBsu3IJb4CUbctZks8tD9xPQubLw==}
@@ -7546,7 +7543,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-create-regexp-features-plugin': 7.19.0(@babel/core@7.21.3)
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
     dev: true
 
   /@babel/plugin-transform-dotall-regex@7.18.6(@babel/core@7.12.9):
@@ -7807,7 +7804,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
   /@babel/plugin-transform-for-of@7.18.8(@babel/core@7.21.3):
@@ -7817,7 +7814,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
 
   /@babel/plugin-transform-function-name@7.16.0(@babel/core@7.12.9):
     resolution: {integrity: sha512-lBzMle9jcOXtSOXUpc7tvvTpENu/NuekNJVova5lCCWCV9/U1ho2HH2y0p6mBg8fPm/syEAbfaaemYGOHCY3mg==}
@@ -8603,7 +8600,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/helper-replace-supers': 7.19.1
     transitivePeerDependencies:
       - supports-color
@@ -9292,7 +9289,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
   /@babel/plugin-transform-shorthand-properties@7.18.6(@babel/core@7.21.3):
@@ -9302,7 +9299,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
 
   /@babel/plugin-transform-spread@7.16.0(@babel/core@7.12.9):
     resolution: {integrity: sha512-Ao4MSYRaLAQczZVp9/7E7QHsCuK92yHRrmVNRe/SlEJjhzivq0BSn8mEraimL8wizHZ3fuaHxKH0iwzI13GyGg==}
@@ -9601,7 +9598,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-create-class-features-plugin': 7.19.0(@babel/core@7.21.3)
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
       '@babel/plugin-syntax-typescript': 7.16.7(@babel/core@7.21.3)
     transitivePeerDependencies:
       - supports-color
@@ -9740,7 +9737,7 @@ packages:
     dependencies:
       '@babel/core': 7.21.3
       '@babel/helper-create-regexp-features-plugin': 7.19.0(@babel/core@7.21.3)
-      '@babel/helper-plugin-utils': 7.20.2
+      '@babel/helper-plugin-utils': 7.21.5
     dev: true
 
   /@babel/plugin-transform-unicode-regex@7.18.6(@babel/core@7.12.9):
@@ -10494,8 +10491,8 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.20.2
-      '@babel/helper-validator-option': 7.18.6
+      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-validator-option': 7.21.0
       '@babel/plugin-transform-typescript': 7.16.8(@babel/core@7.21.3)
     transitivePeerDependencies:
       - supports-color
@@ -18052,7 +18049,7 @@ packages:
       '@wordpress/style-engine': 0.15.0
       '@wordpress/token-list': 2.19.0
       '@wordpress/url': 3.29.0
-      '@wordpress/warning': 2.19.0
+      '@wordpress/warning': 2.34.0
       '@wordpress/wordcount': 3.19.0
       change-case: 4.1.2
       classnames: 2.3.1
@@ -38966,7 +38963,7 @@ packages:
       is-touch-device: 1.0.1
       lodash: 4.17.21
       moment: 2.29.4
-      object.assign: 4.1.2
+      object.assign: 4.1.4
       object.values: 1.1.5
       prop-types: 15.8.1
       raf: 3.4.1

@@ -14,7 +14,6 @@
 	"author": "",
 	"license": "GPL-3.0+",
 	"dependencies": {
-		"@types/wordpress__components": "^19.10.3",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/components": "wp-6.0",
 		"directory-tree": "^3.5.1",
