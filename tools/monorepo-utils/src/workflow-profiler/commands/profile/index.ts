@@ -17,10 +17,8 @@ import {
 } from '../../lib';
 import { Logger } from '../../../core/logger';
 
-import { octokitWithAuth } from '../../../core/github/api';
-
 const program = new Command( 'profile' )
-	.description( 'Profile Github workflows' )
+	.description( 'Profile GitHub workflows' )
 	.argument( '<start>', 'Start date in YYYY-MM-DD format' )
 	.argument( '<end>', 'End date in YYYY-MM-DD format' )
 	.argument(
@@ -38,7 +36,7 @@ const program = new Command( 'profile' )
 		'woocommerce'
 	)
 	.action( async ( start, end, id, { owner, name } ) => {
-		const workflowData = await getWorkflowData( id );
+		const workflowData = await getWorkflowData( id, owner, name );
 		Logger.notice(
 			`Processing workflow id ${ id }: "${ workflowData.name }" from ${ start } to ${ end }`
 		);

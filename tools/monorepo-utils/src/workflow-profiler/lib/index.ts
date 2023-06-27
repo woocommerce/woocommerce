@@ -1,15 +1,14 @@
 /**
- * External dependencies
- */
-import {} from '@octokit/graphql-schema';
-
-/**
  * Internal dependencies
  */
 import { octokitWithAuth, graphqlWithAuth } from '../../core/github/api';
 import { Logger } from '../../core/logger';
 import { requestPaginatedData, PaginatedDataTotals } from './github';
-import { calculateMean, calculateMedian, get90thPercentile } from './math';
+import {
+	calculateMean,
+	calculateMedian,
+	calculate90thPercentile,
+} from './math';
 import config from '../config';
 
 /**
@@ -60,7 +59,7 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 	const { workflow_runs, total_count } = data;
 	totals.total_count = total_count;
 	totals.count += workflow_runs.length;
-	const { MAXIMUM_WORKFLOW_MINUTES } = config;
+	const { WORKFLOW_DURATION_CUTOFF_MINUTES } = config;
 
 	workflow_runs.forEach( ( run ) => {
 		totals[ run.conclusion ]++;
@@ -71,7 +70,7 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 				new Date( run.updated_at ).getTime() -
 				new Date( run.run_started_at ).getTime();
 
-			const maxDuration = 1000 * 60 * MAXIMUM_WORKFLOW_MINUTES;
+			const maxDuration = 1000 * 60 * WORKFLOW_DURATION_CUTOFF_MINUTES;
 			if ( time < maxDuration ) {
 				totals.times.push( time );
 			}
@@ -87,12 +86,16 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
  * @param {number} id Workflow id
  * @return {Object} Workflow data
  */
-export const getWorkflowData = async ( id: number | string ) => {
+export const getWorkflowData = async (
+	id: number | string,
+	owner: string,
+	name: string
+) => {
 	const { data } = await octokitWithAuth().request(
 		'GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}',
 		{
-			owner: 'woocommerce',
-			repo: 'woocommerce',
+			owner,
+			repo: name,
 			workflow_id: id,
 		}
 	);
@@ -119,7 +122,7 @@ export const getWorkflowRunData = async ( options: {
 	end: string;
 } ) => {
 	const { id, start, end, owner, name } = options;
-	const workflowData = await getWorkflowData( id );
+	const workflowData = await getWorkflowData( id, owner, name );
 
 	const initialTotals = {
 		total_count: 0,
@@ -175,7 +178,7 @@ export const getWorkflowRunData = async ( options: {
 			60
 		).toFixed( 2 ), // in minutes
 		'90th_percentile_in_minutes': (
-			get90thPercentile( totals.times ) /
+			calculate90thPercentile( totals.times ) /
 			1000 /
 			60
 		).toFixed( 2 ),
@@ -308,53 +311,6 @@ export const getCompiledJobData = ( jobData ) => {
 	return result;
 };
 
-export const _getCompiledJobData = ( jobData ) => {
-	const result = {};
-
-	jobData.forEach( ( job ) => {
-		const { name, started_at, completed_at } = job;
-		const time =
-			new Date( completed_at ).getTime() -
-			new Date( started_at ).getTime();
-
-		if ( ! result[ name ] ) {
-			result[ name ] = {
-				times: [],
-				steps: {},
-			};
-		}
-
-		result[ name ].times.push( time );
-
-		job.steps.forEach( ( step ) => {
-			const {
-				name: stepName,
-				started_at: stepStart,
-				completed_at: stepCompleted,
-			} = step;
-
-			if (
-				stepName === 'Set up job' ||
-				stepName === 'Complete job' ||
-				stepName.startsWith( 'Post ' )
-			) {
-				return;
-			}
-			const stepTime =
-				new Date( stepCompleted ).getTime() -
-				new Date( stepStart ).getTime();
-
-			if ( ! result[ name ].steps[ stepName ] ) {
-				result[ name ].steps[ stepName ] = [];
-			}
-
-			result[ name ].steps[ stepName ].push( stepTime );
-		} );
-	} );
-
-	return result;
-};
-
 export const logJobResults = ( data ) => {
 	const rows = Object.keys( data ).map( ( jobName ) => {
 		const job = data[ jobName ];
@@ -365,7 +321,7 @@ export const logJobResults = ( data ) => {
 			( calculateMedian( job.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
 			( Math.max( ...job.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
 			( Math.min( ...job.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
-			( get90thPercentile( job.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+			( calculate90thPercentile( job.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
 		];
 	} );
 	Logger.table(
@@ -394,7 +350,7 @@ export const logStepResults = ( data ) => {
 				( calculateMedian( step ) / 1000 / 60 ).toFixed( 2 ), // in minutes
 				( Math.max( ...step ) / 1000 / 60 ).toFixed( 2 ), // in minutes
 				( Math.min( ...step ) / 1000 / 60 ).toFixed( 2 ), // in minutes
-				( get90thPercentile( step ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+				( calculate90thPercentile( step ) / 1000 / 60 ).toFixed( 2 ), // in minutes
 			];
 		} );
 

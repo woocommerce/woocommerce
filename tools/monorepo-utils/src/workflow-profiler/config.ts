@@ -1,5 +1,5 @@
 const config = {
-	MAXIMUM_WORKFLOW_MINUTES: 60,
+	WORKFLOW_DURATION_CUTOFF_MINUTES: 60,
 };
 
 export default config;

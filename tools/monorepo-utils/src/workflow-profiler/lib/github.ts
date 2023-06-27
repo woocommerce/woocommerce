@@ -11,7 +11,7 @@ export type PaginatedDataTotals = {
 };
 
 /**
- * Helper method for getting data from Github REST api in paginated format.
+ * Helper method for getting data from GitHub REST API in paginated format.
  *
  * @param {Object}   totals         An object for keeping track of the total data.
  * @param {string}   endpoint       API endpoint
