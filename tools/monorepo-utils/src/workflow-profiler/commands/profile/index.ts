@@ -48,7 +48,7 @@ const program = new Command( 'profile' )
 			end,
 		} );
 
-		logWorkflowRunResults( workflowRunData );
+		logWorkflowRunResults( workflowData.name, workflowRunData );
 
 		const { nodeIds } = workflowRunData;
 		const runJobData = await getRunJobData( nodeIds );

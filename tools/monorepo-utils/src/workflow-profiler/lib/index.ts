@@ -148,48 +148,16 @@ export const getWorkflowRunData = async ( options: {
 		processWorkflowRunPage
 	);
 
-	return {
-		name: workflowData.name,
-		id,
-		total_count: totals.total_count.toString(),
-		success: totals.success.toString(),
-		failure: totals.failure.toString(),
-		cancelled: totals.cancelled.toString(),
-		average_time_in_minutes: (
-			calculateMean( totals.times ) /
-			1000 /
-			60
-		).toFixed( 2 ), // in minutes
-		median_time_in_minutes: (
-			calculateMedian( totals.times ) /
-			1000 /
-			60
-		).toFixed( 2 ), // in minutes
-		longest_time_in_minutes: (
-			Math.max( ...totals.times ) /
-			1000 /
-			60
-		).toFixed( 2 ), // in minutes
-		shortest_time_in_minutes: (
-			Math.min( ...totals.times ) /
-			1000 /
-			60
-		).toFixed( 2 ), // in minutes
-		'90th_percentile_in_minutes': (
-			calculate90thPercentile( totals.times ) /
-			1000 /
-			60
-		).toFixed( 2 ),
-		nodeIds: totals.nodeIds,
-	};
+	return totals;
 };
 
 /**
  * Print workflow run results to the console.
  *
+ * @param {string} name Workflow name
  * @param {Object} data Workflow run results
  */
-export const logWorkflowRunResults = ( data ) => {
+export const logWorkflowRunResults = ( name, data ) => {
 	Logger.table(
 		[
 			'Workflow Name',
@@ -205,16 +173,18 @@ export const logWorkflowRunResults = ( data ) => {
 		],
 		[
 			[
-				data.name,
-				data.total_count,
-				data.success,
-				data.failure,
-				data.cancelled,
-				data.average_time_in_minutes,
-				data.median_time_in_minutes,
-				data.longest_time_in_minutes,
-				data.shortest_time_in_minutes,
-				data[ '90th_percentile_in_minutes' ],
+				name,
+				data.total_count.toString(),
+				data.success.toString(),
+				data.failure.toString(),
+				data.cancelled.toString(),
+				( calculateMean( data.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes,
+				( calculateMedian( data.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+				( Math.max( ...data.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+				( Math.min( ...data.times ) / 1000 / 60 ).toFixed( 2 ), // in minutes
+				( calculate90thPercentile( data.times ) / 1000 / 60 ).toFixed(
+					2
+				), // in minutes
 			],
 		]
 	);
