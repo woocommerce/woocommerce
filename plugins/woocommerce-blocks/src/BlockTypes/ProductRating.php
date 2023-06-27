@@ -64,6 +64,7 @@ class ProductRating extends AbstractBlock {
 			'isDescendentOfQueryLoop'          => false,
 			'textAlign'                        => '',
 			'isDescendentOfSingleProductBlock' => false,
+			'isDescendentOfSingleProductTemplate' => false,
 		);
 
 		return wp_parse_args( $attributes, $defaults );
@@ -109,6 +110,7 @@ class ProductRating extends AbstractBlock {
 			$product_rating                        = $product->get_average_rating();
 			$parsed_attributes                     = $this->parse_attributes( $attributes );
 			$is_descendent_of_single_product_block = $parsed_attributes['isDescendentOfSingleProductBlock'];
+			$is_descendent_of_single_product_template = $parsed_attributes['isDescendentOfSingleProductTemplate'];
 
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
@@ -121,7 +123,7 @@ class ProductRating extends AbstractBlock {
 			 * @param int    $count  Total number of ratings.
 			 * @return string
 			 */
-			$filter_rating_html = function( $html, $rating, $count ) use ( $product_rating, $product_reviews_count, $is_descendent_of_single_product_block ) {
+			$filter_rating_html = function( $html, $rating, $count ) use ( $product_rating, $product_reviews_count, $is_descendent_of_single_product_block, $is_descendent_of_single_product_template ) {
 				$product_permalink = get_permalink();
 				$reviews_count     = $count;
 				$average_rating    = $rating;
@@ -163,7 +165,7 @@ class ProductRating extends AbstractBlock {
 						',
 						esc_attr( $label ),
 						wc_get_star_rating_html( $average_rating, $reviews_count ),
-						$is_descendent_of_single_product_block ? $reviews_count_html : ''
+						$is_descendent_of_single_product_block || $is_descendent_of_single_product_template ? $reviews_count_html : ''
 					);
 				} else {
 					$html = '';
