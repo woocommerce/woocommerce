@@ -70,9 +70,9 @@ class ProductSKU extends AbstractBlock {
 		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 
 		return sprintf(
-			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku %1$s" style="%2$s">
+			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta %1$s" style="%2$s">
 				SKU:
-				<strong>%3$s</strong>
+				<strong class="sku">%3$s</strong>
 			</div>',
 			esc_attr( $styles_and_classes['classes'] ),
 			esc_attr( $styles_and_classes['styles'] ?? '' ),
