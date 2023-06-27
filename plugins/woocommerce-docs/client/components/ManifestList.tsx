@@ -50,19 +50,6 @@ export const ManifestList = () => {
 		);
 	}
 
-	if ( ! manifests.length ) {
-		return (
-			<Card elevation={ 3 }>
-				<CardHeader>
-					<h2>Manifests</h2>
-				</CardHeader>
-				<CardBody>
-					<p>No manifests found.</p>
-				</CardBody>
-			</Card>
-		);
-	}
-
 	return (
 		<Card elevation={ 3 }>
 			<CardHeader>
@@ -70,6 +57,9 @@ export const ManifestList = () => {
 			</CardHeader>
 			<CardBody>
 				<ItemGroup>
+					{ ! manifests.length && ! isLoading && (
+						<p>No manifests found.</p>
+					) }
 					{ manifests.map( ( [ manifestUrl ] ) => (
 						<Item key={ manifestUrl }>
 							{ manifestUrl }
