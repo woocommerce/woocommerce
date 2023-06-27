@@ -6,9 +6,10 @@ import { csnMetaTagItemprop, directivePrefix } from './constants';
 // The root to render the vdom (document.body).
 let rootFragment;
 
-// The cache of visited and prefetched pages and stylesheets.
+// The cache of visited and prefetched pages, stylesheets and scripts.
 const pages = new Map();
 const stylesheets = new Map();
+const scripts = new Map();
 
 // Helper to remove domain and hash from the URL. We are only interesting in
 // caching the path and the query.
@@ -23,30 +24,77 @@ export const canDoClientSideNavigation = ( dom ) =>
 		.querySelector( `meta[itemprop='${ csnMetaTagItemprop }']` )
 		?.getAttribute( 'content' ) === 'active';
 
-// Fetch styles of a new page.
-const fetchHead = async ( head ) => {
-	const sheets = await Promise.all(
-		[].map.call(
-			head.querySelectorAll( "link[rel='stylesheet']" ),
-			( link ) => {
-				const href = link.getAttribute( 'href' );
-				if ( ! stylesheets.has( href ) )
-					stylesheets.set(
-						href,
-						fetch( href ).then( ( r ) => r.text() )
-					);
-				return stylesheets.get( href );
-			}
-		)
+/**
+ * Finds the elements in the document that match the selector and fetch them.
+ * For each element found, fetch the content and store it in the cache.
+ * Returns an array of elements to add to the document.
+ *
+ * @param {Document}         document
+ * @param {string}           selector        - CSS selector used to find the elements.
+ * @param {'href'|'src'}     attribute       - Attribute that determines where to fetch
+ *                                           the styles or scripts from. Also used as the key for the cache.
+ * @param {Map}              cache           - Cache to use for the elements. Can be `stylesheets` or `scripts`.
+ * @param {'style'|'script'} elementToCreate - Element to create for each fetched
+ *                                           item. Can be 'style' or 'script'.
+ * @return {Promise<Array<HTMLElement>>} - Array of elements to add to the document.
+ */
+const fetchScriptOrStyle = async (
+	document,
+	selector,
+	attribute,
+	cache,
+	elementToCreate
+) => {
+	const fetchedItems = await Promise.all(
+		[].map.call( document.querySelectorAll( selector ), ( el ) => {
+			const attributeValue = el.getAttribute( attribute );
+			if ( ! cache.has( attributeValue ) )
+				cache.set(
+					attributeValue,
+					fetch( attributeValue ).then( ( r ) => r.text() )
+				);
+			return cache.get( attributeValue );
+		} )
 	);
-	const stylesFromSheets = sheets.map( ( sheet ) => {
-		const style = document.createElement( 'style' );
-		style.textContent = sheet;
-		return style;
+
+	return fetchedItems.map( ( item ) => {
+		const element = document.createElement( elementToCreate );
+		element.textContent = item;
+		return element;
 	} );
+};
+
+// Fetch styles of a new page.
+const fetchAssets = async ( document ) => {
+	const stylesFromSheets = await fetchScriptOrStyle(
+		document,
+		'link[rel=stylesheet]',
+		'href',
+		stylesheets,
+		'style'
+	);
+	const scriptTags = await fetchScriptOrStyle(
+		document,
+		'script[src]',
+		'src',
+		scripts,
+		'script'
+	);
+	const moduleScripts = await fetchScriptOrStyle(
+		document,
+		'script[type=module]',
+		'src',
+		scripts,
+		'script'
+	);
+	moduleScripts.forEach( ( script ) =>
+		script.setAttribute( 'type', 'module' )
+	);
+
 	return [
-		head.querySelector( 'title' ),
-		...head.querySelectorAll( 'style' ),
+		...scriptTags,
+		document.querySelector( 'title' ),
+		...document.querySelectorAll( 'style' ),
 		...stylesFromSheets,
 	];
 };
@@ -56,7 +104,7 @@ const fetchPage = async ( url ) => {
 	const html = await window.fetch( url ).then( ( r ) => r.text() );
 	const dom = new window.DOMParser().parseFromString( html, 'text/html' );
 	if ( ! canDoClientSideNavigation( dom.head ) ) return false;
-	const head = await fetchHead( dom.head );
+	const head = await fetchAssets( dom );
 	return { head, body: toVdom( dom.body ) };
 };
 
@@ -70,14 +118,18 @@ export const prefetch = ( url ) => {
 };
 
 // Navigate to a new page.
-export const navigate = async ( href ) => {
+export const navigate = async ( href, { replace = false } = {} ) => {
 	const url = cleanUrl( href );
 	prefetch( url );
 	const page = await pages.get( url );
 	if ( page ) {
 		document.head.replaceChildren( ...page.head );
 		render( page.body, rootFragment );
-		window.history.pushState( {}, '', href );
+		window.history[ replace ? 'replaceState' : 'pushState' ](
+			{},
+			'',
+			href
+		);
 	} else {
 		window.location.assign( href );
 	}
@@ -104,18 +156,22 @@ export const init = async () => {
 			document.documentElement,
 			document.body
 		);
-
 		const body = toVdom( document.body );
 		hydrate( body, rootFragment );
 
-		const head = await fetchHead( document.head );
+		// Cache the scripts. Has to be called before fetching the assets.
+		[].map.call( document.querySelectorAll( 'script[src]' ), ( script ) => {
+			scripts.set( script.getAttribute( 'src' ), script.textContent );
+		} );
+
+		const head = await fetchAssets( document );
 		pages.set(
 			cleanUrl( window.location ),
 			Promise.resolve( { body, head } )
 		);
 	} else {
 		document
-			.querySelectorAll( `[${ directivePrefix }island]` )
+			.querySelectorAll( `[data-${ directivePrefix }-interactive]` )
 			.forEach( ( node ) => {
 				if ( ! hydratedIslands.has( node ) ) {
 					const fragment = createRootFragment(

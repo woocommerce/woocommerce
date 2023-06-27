@@ -785,11 +785,17 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 	return {
 		entry: {
-			runtime: './assets/js/interactivity',
+			'wc-interactivity': './assets/js/interactivity',
 		},
 		output: {
-			filename: 'woo-directives-[name].js',
+			filename: '[name].js',
 			path: path.resolve( __dirname, '../build/' ),
+			library: [ 'wc', '__experimentalInteractivity' ],
+			libraryTarget: 'this',
+			// This fixes an issue with multiple webpack projects using chunking
+			// overwriting each other's chunk loader function.
+			// See https://webpack.js.org/configuration/output/#outputjsonpfunction
+			jsonpFunction: 'webpackWcBlocksJsonp',
 		},
 		resolve: {
 			alias,
@@ -804,21 +810,6 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 				getProgressBarPluginConfig( 'WP directives' )
 			),
 		],
-		optimization: {
-			runtimeChunk: {
-				name: 'vendors',
-			},
-			splitChunks: {
-				cacheGroups: {
-					vendors: {
-						test: /[\\/]node_modules[\\/]/,
-						name: 'vendors',
-						minSize: 0,
-						chunks: 'all',
-					},
-				},
-			},
-		},
 		module: {
 			rules: [
 				{
@@ -841,6 +832,7 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 										},
 									],
 								],
+								// Required until Webpack is updated to ^5.0.0
 								plugins: [
 									'@babel/plugin-proposal-optional-chaining',
 								],
