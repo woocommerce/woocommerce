@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import MagicIcon from '../../assets/images/icons/magic.svg';
 import AlertIcon from '../../assets/images/icons/alert.svg';
 import { productData } from '../utils';
-import { useProductDataSuggestions } from '../hooks/useProductDataSuggestions';
+import { useProductDataSuggestions, useProductSlug } from '../hooks';
 import {
 	ProductDataSuggestion,
 	ProductDataSuggestionRequest,
@@ -56,6 +56,7 @@ export const ProductNameSuggestions = () => {
 		[]
 	);
 	const { fetchSuggestions } = useProductDataSuggestions();
+	const { updateProductSlug } = useProductSlug();
 	const nameInputRef = useRef< HTMLInputElement >(
 		document.querySelector( '#title' )
 	);
@@ -148,6 +149,24 @@ export const ProductNameSuggestions = () => {
 
 		updateProductName( suggestion.content );
 		setSuggestions( [] );
+
+		// Update product slug if product is a draft.
+		const currentProductData = productData();
+		if (
+			currentProductData.product_id !== null &&
+			currentProductData.publishing_status === 'draft'
+		) {
+			try {
+				updateProductSlug(
+					suggestion.content,
+					currentProductData.product_id
+				);
+			} catch ( e ) {
+				// Log silently if slug update fails.
+				/* eslint-disable-next-line no-console */
+				console.error( e );
+			}
+		}
 	};
 
 	const fetchProductSuggestions = async (
