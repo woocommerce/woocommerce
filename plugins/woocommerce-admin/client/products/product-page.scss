@@ -37,8 +37,8 @@
 			left: 0;
 			width: 100%;
 		}
-		// Higher than the sidebar which has a z-index of 90.
-		z-index: 100;
+		// Lower than the sidebar which has a z-index of 90.
+		z-index: 80;
 	}
 
 	&.folded .interface-interface-skeleton__header, &.folded .interface-interface-skeleton__footer  {
@@ -68,8 +68,4 @@ html.interface-interface-skeleton__html-container {
 
 div#wpwrap {
 	background-color: $white;
-}
-
-div#adminmenuback {
-	z-index: 101;
 }
