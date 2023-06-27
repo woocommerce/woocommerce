@@ -50,7 +50,7 @@ class Woo_AI_Settings {
 	 */
 	public function add_ui() {
 		add_filter( 'woocommerce_get_sections_advanced', array( $this, 'add_ai_section' ), 10, 1 );
-		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'get_woo_ai_settings' ), 10, 2 );
+		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_woo_ai_settings' ), 10, 2 );
 	}
 
 	/**
@@ -99,25 +99,23 @@ class Woo_AI_Settings {
 	}
 
 	/**
-	 * Include any classes we need within admin.
-	 */
-	public function action_woocommerce_settings_ai_tab() {
-		$settings = $this->get_woo_ai_settings();
-
-		WC_Admin_Settings::output_fields( $settings );
-	}
-
-	/**
-	 * Include any classes we need within admin.
+	 * Add settings to the AI section.
 	 *
 	 * @param array  $settings The original settings array.
 	 * @param string $current_section The current section.
 	 */
-	public function get_woo_ai_settings( $settings = array(), $current_section = null ) {
-
-		if ( $current_section && 'ai' !== $current_section ) {
+	public function add_woo_ai_settings( $settings = array(), $current_section = null ) {
+		if ( 'ai' !== $current_section ) {
 			return $settings;
 		}
+
+		return $this->get_woo_ai_settings();
+	}
+
+	/**
+	 * Return array describing new settings.
+	 */
+	public function get_woo_ai_settings() {
 
 		return array(
 			array(
