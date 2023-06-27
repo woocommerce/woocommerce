@@ -121,8 +121,6 @@ export const getWorkflowRunData = async ( options: {
 	end: string;
 } ) => {
 	const { id, start, end, owner, name } = options;
-	const workflowData = await getWorkflowData( id, owner, name );
-
 	const initialTotals = {
 		total_count: 0,
 		nodeIds: [],
@@ -190,6 +188,12 @@ export const logWorkflowRunResults = ( name, data ) => {
 	);
 };
 
+/**
+ * Get data on individual workflow runs.
+ *
+ * @param {Array} nodeIds Workflow node ids
+ * @return {Object} Workflow run data
+ */
 export const getRunJobData = async ( nodeIds ) => {
 	const gql = graphqlWithAuth();
 	const str = nodeIds.map( ( id ) => `"${ id }"` ).join( ', ' );
@@ -225,6 +229,12 @@ export const getRunJobData = async ( nodeIds ) => {
 		` );
 };
 
+/**
+ * Get compiled job data for a given workflow run.
+ *
+ * @param {Object} jobData Workflow run data
+ * @return {Object} Compiled job data
+ */
 export const getCompiledJobData = ( jobData ) => {
 	const { nodes } = jobData;
 	const result = {};
@@ -278,6 +288,11 @@ export const getCompiledJobData = ( jobData ) => {
 	return result;
 };
 
+/**
+ * Log job data from a workflow run.
+ *
+ * @param {Object} data compiled job data
+ */
 export const logJobResults = ( data ) => {
 	const rows = Object.keys( data ).map( ( jobName ) => {
 		const job = data[ jobName ];
@@ -304,6 +319,11 @@ export const logJobResults = ( data ) => {
 	);
 };
 
+/**
+ * Log job steps from a workflow run.
+ *
+ * @param {Object} data compiled job data
+ */
 export const logStepResults = ( data ) => {
 	Object.keys( data ).forEach( ( jobName ) => {
 		const job = data[ jobName ];

@@ -53,7 +53,6 @@ const program = new Command( 'profile' )
 		const { nodeIds } = workflowRunData;
 		const runJobData = await getRunJobData( nodeIds );
 		const compiledJobData = getCompiledJobData( runJobData );
-		// console.log( compiledJobData );
 
 		logJobResults( compiledJobData );
 		logStepResults( compiledJobData );
