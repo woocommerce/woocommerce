@@ -26,11 +26,13 @@ const templates = {
 		templateTitle: 'Product Attribute',
 		slug: 'taxonomy-product_attribute',
 		frontendPage: '/product-attribute/color/',
+		legacyBlockName: 'woocommerce/legacy-template',
 	},
 	'taxonomy-product_cat': {
 		templateTitle: 'Product Category',
 		slug: 'taxonomy-product_cat',
 		frontendPage: '/product-category/music/',
+		legacyBlockName: 'woocommerce/legacy-template',
 	},
 	// We don't have products with tags in the test site. Uncomment this when we have products with tags.
 	// 'taxonomy-product_tag': {
@@ -42,11 +44,13 @@ const templates = {
 		templateTitle: 'Product Catalog',
 		slug: 'archive-product',
 		frontendPage: '/shop/',
+		legacyBlockName: 'woocommerce/legacy-template',
 	},
 	'product-search-results': {
 		templateTitle: 'Product Search Results',
 		slug: 'product-search-results',
 		frontendPage: '/?s=shirt&post_type=product',
+		legacyBlockName: 'woocommerce/legacy-template',
 	},
 };
 
@@ -110,14 +114,18 @@ test.describe( `${ blockData.name } Block `, () => {
 		await expect( inheritQueryFromTemplateOption ).toBeVisible();
 	} );
 } );
-for ( const { templateTitle, slug, frontendPage } of Object.values(
-	templates
-) ) {
-	test.afterAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
-	} );
-	test.describe( `${ templateTitle } template`, () =>
+
+for ( const {
+	templateTitle,
+	slug,
+	frontendPage,
+	legacyBlockName,
+} of Object.values( templates ) ) {
+	test.describe( `${ templateTitle } template`, () => {
+		test.afterAll( async ( { requestUtils } ) => {
+			await requestUtils.deleteAllTemplates( 'wp_template' );
+			await requestUtils.deleteAllTemplates( 'wp_template_part' );
+		} );
 		test( 'Products block matches with classic template block', async ( {
 			admin,
 			editor,
@@ -132,17 +140,34 @@ for ( const { templateTitle, slug, frontendPage } of Object.values(
 			await editor.canvas.click( 'body' );
 			await editor.canvas.waitForLoadState( 'networkidle' );
 			const block = await editorUtils.getBlockByName( blockData.name );
+			const clientId = ( await block.getAttribute( 'data-block' ) ) ?? '';
+			const parentClientId =
+				( await editorUtils.getBlockRootClientId( clientId ) ) ?? '';
 			await editor.selectBlocks( block );
-			await editor.insertBlock( {
-				name: 'woocommerce/legacy-template',
-				attributes: {
-					template: slug,
-				},
-			} );
+			await editorUtils.insertBlock(
+				{ name: legacyBlockName },
+				undefined,
+				parentClientId
+			);
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( frontendPage );
+			await page.waitForResponse( ( response ) =>
+				response.url().includes( 'wp-json/wp/v2/templates/' )
+			);
+
+			// @todo This is a workaround to wait for the save button to be enabled. It works only without Gutenberg enabled. We have to refactor this.
+			await page
+				.locator(
+					"button.edit-site-save-button__button[aria-label='Save'][aria-disabled='true']"
+				)
+				.waitFor( {
+					state: 'visible',
+				} );
+
+			await page.goto( frontendPage, {
+				waitUntil: 'load',
+			} );
 
 			const classicProducts = await getProductsNameFromClassicTemplate(
 				page
@@ -152,6 +177,6 @@ for ( const { templateTitle, slug, frontendPage } of Object.values(
 			);
 
 			expect( classicProducts ).toEqual( productQueryProducts );
-		} )
-	);
+		} );
+	} );
 }
