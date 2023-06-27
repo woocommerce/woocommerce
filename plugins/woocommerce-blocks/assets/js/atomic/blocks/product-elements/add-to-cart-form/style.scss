@@ -1,10 +1,5 @@
 .wp-block-add-to-cart-form {
-	.woocommerce-Price-amount.amount,
-	.woocommerce-grouped-product-list-item__price del {
-		font-size: var(--wp--preset--font-size--large);
-	}
 	width: unset;
-
 	/**
 	* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
 	*
