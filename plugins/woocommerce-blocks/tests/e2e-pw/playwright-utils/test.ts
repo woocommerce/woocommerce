@@ -134,8 +134,8 @@ const test = base.extend<
 	},
 	templateApiUtils: async ( {}, use ) =>
 		await use( new TemplateApiUtils( request ) ),
-	editorUtils: async ( { editor }, use ) => {
-		await use( new EditorUtils( editor ) );
+	editorUtils: async ( { editor, page }, use ) => {
+		await use( new EditorUtils( editor, page ) );
 	},
 	requestUtils: [
 		async ( {}, use, workerInfo ) => {
