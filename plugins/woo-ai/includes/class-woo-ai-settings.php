@@ -101,7 +101,7 @@ class Woo_AI_Settings {
 				'id'    => 'ai_describe_store',
 				'type'  => 'title',
 				'title' => __( 'About your store', 'woocommerce' ),
-				'desc'  => __( "Tell us a bit more about your business, and our AI will get to work on generating your content, images, and look and feel of your store. And if it's not quite right you can always customize it later.", 'woocommerce' ),
+				'desc'  => __( "This is the core of the Woo AI plugin where your inputs help shape your WooCommerce experience. Share details about your business and your brand's unique style, and our advanced AI can use this to generate cohesive content and visuals that align with your brand's identity. The information you provide here helps to craft a unified and tailored experience for your customers. And remember, you always have full control to refine and adjust the settings as per your evolving needs.", 'woocommerce' ),
 			),
 
 			array(
