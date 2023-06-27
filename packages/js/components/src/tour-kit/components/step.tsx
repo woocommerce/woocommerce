@@ -65,8 +65,7 @@ const Step: React.FunctionComponent<
 	const focusElementSelector =
 		steps[ currentStepIndex ].focusElement?.[
 			isViewportMobile ? 'mobile' : 'desktop'
-		] ||
-		'.woocommerce-tour-kit .woocommerce-tour-kit-step-navigation__next-bt';
+		] || null;
 
 	const iframeSelector =
 		steps[ currentStepIndex ].focusElement?.iframe || null;
