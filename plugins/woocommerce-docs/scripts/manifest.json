@@ -2,7 +2,7 @@
   "categories": [
     {
       "title": "Getting Started with WooCommerce",
-      "pages": [
+      "posts": [
         {
           "title": "Local Development",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/add/wc-docs-manifest/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
@@ -12,7 +12,7 @@
       "categories": [
         {
           "title": "Troubleshooting Problems",
-          "pages": [
+          "posts": [
             {
               "title": "What Went Wrong?",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/add/wc-docs-manifest/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
@@ -25,7 +25,7 @@
     },
     {
       "title": "Testing WooCommerce",
-      "pages": [
+      "posts": [
         {
           "title": "Unit Testing",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/add/wc-docs-manifest/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
@@ -35,5 +35,5 @@
       "categories": []
     }
   ],
-  "hash": "ff7e14fe3b9e6b720dae23a88f139278fd55c10025f2158ecb5408516879d9d0"
+  "hash": "7c6cdf9772ccf1f9327a35c0ef8e45413085225e20b1df503e2a19a444c106fb"
 }

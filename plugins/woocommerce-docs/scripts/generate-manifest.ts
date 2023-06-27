@@ -14,7 +14,7 @@ interface Category {
 	[ key: string ]: unknown;
 }
 
-interface Page {
+interface Post {
 	[ key: string ]: unknown;
 }
 
@@ -52,7 +52,7 @@ async function processDirectory(
 		const readmeContent = fs.readFileSync( readmePath, 'utf-8' );
 		const readmeFrontmatter = matter( readmeContent ).data;
 		category = { ...readmeFrontmatter };
-		category.pages = [];
+		category.posts = [];
 	}
 
 	const markdownFiles = glob.sync( path.join( directory, '*.md' ) );
@@ -61,10 +61,10 @@ async function processDirectory(
 			// Skip README.md which we have already processed.
 			const fileContent = fs.readFileSync( filePath, 'utf-8' );
 			const fileFrontmatter = matter( fileContent ).data;
-			const page: Page = { ...fileFrontmatter };
+			const post: Post = { ...fileFrontmatter };
 			// @ts-ignore
-			category.pages.push( {
-				...page,
+			category.posts.push( {
+				...post,
 				url: generateRawGithubFileUrl(
 					'woocommerce',
 					'woocommerce',
