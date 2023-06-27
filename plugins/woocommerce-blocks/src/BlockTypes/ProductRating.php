@@ -60,10 +60,10 @@ class ProductRating extends AbstractBlock {
 	private function parse_attributes( $attributes ) {
 		// These should match what's set in JS `registerBlockType`.
 		$defaults = array(
-			'productId'                        => 0,
-			'isDescendentOfQueryLoop'          => false,
-			'textAlign'                        => '',
-			'isDescendentOfSingleProductBlock' => false,
+			'productId'                           => 0,
+			'isDescendentOfQueryLoop'             => false,
+			'textAlign'                           => '',
+			'isDescendentOfSingleProductBlock'    => false,
 			'isDescendentOfSingleProductTemplate' => false,
 		);
 
@@ -106,10 +106,10 @@ class ProductRating extends AbstractBlock {
 		$product = wc_get_product( $post_id );
 
 		if ( $product ) {
-			$product_reviews_count                 = $product->get_review_count();
-			$product_rating                        = $product->get_average_rating();
-			$parsed_attributes                     = $this->parse_attributes( $attributes );
-			$is_descendent_of_single_product_block = $parsed_attributes['isDescendentOfSingleProductBlock'];
+			$product_reviews_count                    = $product->get_review_count();
+			$product_rating                           = $product->get_average_rating();
+			$parsed_attributes                        = $this->parse_attributes( $attributes );
+			$is_descendent_of_single_product_block    = $parsed_attributes['isDescendentOfSingleProductBlock'];
 			$is_descendent_of_single_product_template = $parsed_attributes['isDescendentOfSingleProductTemplate'];
 
 			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
@@ -123,8 +123,8 @@ class ProductRating extends AbstractBlock {
 			 * @param int    $count  Total number of ratings.
 			 * @return string
 			 */
-			$filter_rating_html = function( $html, $rating, $count ) use ( $product_rating, $product_reviews_count, $is_descendent_of_single_product_block, $is_descendent_of_single_product_template ) {
-				$product_permalink = get_permalink();
+			$filter_rating_html = function( $html, $rating, $count ) use ( $post_id, $product_rating, $product_reviews_count, $is_descendent_of_single_product_block, $is_descendent_of_single_product_template ) {
+				$product_permalink = get_permalink( $post_id );
 				$reviews_count     = $count;
 				$average_rating    = $rating;
 
@@ -149,12 +149,15 @@ class ProductRating extends AbstractBlock {
 						),
 						esc_html( $reviews_count )
 					);
-					$reviews_count_html = sprintf(
-						'<span class="wc-block-components-product-rating__reviews_count">
-							%1$s
-						</span>',
-						$customer_reviews_count
-					);
+
+					if ( $is_descendent_of_single_product_block ) {
+						$customer_reviews_count = '<a href="' . esc_url( $product_permalink ) . '">' . $customer_reviews_count . '</a>';
+					} elseif ( $is_descendent_of_single_product_template ) {
+						$product_permalink      = untrailingslashit( $product_permalink );
+						$customer_reviews_count = '<a href="' . esc_url( $product_permalink ) . '#reviews">' . $customer_reviews_count . '</a>';
+					}
+
+					$reviews_count_html = sprintf( '<span class="wc-block-components-product-rating__reviews_count">%1$s</span>', $customer_reviews_count );
 					$html               = sprintf(
 						'<div class="wc-block-components-product-rating__container">
 							<div class="wc-block-components-product-rating__stars wc-block-grid__product-rating__stars" role="img" aria-label="%1$s">
