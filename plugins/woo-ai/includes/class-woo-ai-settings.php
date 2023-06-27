@@ -39,7 +39,7 @@ class Woo_AI_Settings {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'action_save_woo_ai_settings_tab' ) );
+		add_action( 'woocommerce_settings_save_advanced', array( $this, 'action_save_woo_ai_settings_tab' ) );
 		add_action( 'woocommerce_settings_page_init', array( $this, 'add_tabs' ) );
 	}
 
@@ -47,8 +47,8 @@ class Woo_AI_Settings {
 	 * Initialize hooks.
 	 */
 	public function add_tabs() {
-		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_woo_ai_settings_tab' ), 20 );
-		add_action( 'woocommerce_settings_' . $this->id, array( $this, 'action_woocommerce_settings_ai_tab' ), 10 );
+		add_filter( 'woocommerce_get_sections_advanced', array( $this, 'add_ai_section' ), 10, 1 );
+		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'get_woo_ai_settings' ), 10, 2 );
 	}
 
 
@@ -62,6 +62,20 @@ class Woo_AI_Settings {
 	}
 
 	/**
+	 * Handler for the 'woocommerce_get_sections_advanced' hook,
+	 * it adds the "AI" section to the advanced settings page.
+	 *
+	 * @param array $sections The original sections array.
+	 * @return array The updated sections array.
+	 */
+	public function add_ai_section( $sections ) {
+		if ( ! isset( $sections['ai'] ) ) {
+			$sections['ai'] = __( 'AI', 'woocommerce' );
+		}
+		return $sections;
+	}
+
+	/**
 	 * Include any classes we need within admin.
 	 */
 	public function action_woocommerce_settings_ai_tab() {
@@ -72,8 +86,16 @@ class Woo_AI_Settings {
 
 	/**
 	 * Include any classes we need within admin.
+	 *
+	 * @param array  $settings The original settings array.
+	 * @param string $current_section The current section.
 	 */
-	public function get_woo_ai_settings() {
+	public function get_woo_ai_settings( $settings = array(), $current_section = null ) {
+
+		if ( $current_section && 'ai' !== $current_section ) {
+			return $settings;
+		}
+
 		return array(
 			array(
 				'id'    => 'ai_describe_store',
@@ -165,17 +187,4 @@ class Woo_AI_Settings {
 			),
 		);
 	}
-
-	/**
-	 * Add this page to settings.
-	 *
-	 * @param array $settings_tabs Existing pages.
-	 * @return array|mixed
-	 */
-	public function add_woo_ai_settings_tab( $settings_tabs ) {
-		$settings_tabs[ $this->id ] = __( 'AI', 'woocommerce' );
-
-		return $settings_tabs;
-	}
-
 }
