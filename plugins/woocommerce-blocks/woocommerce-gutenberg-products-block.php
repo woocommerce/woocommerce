@@ -314,7 +314,7 @@ function woocommerce_blocks_interactivity_setup() {
 	);
 
 	if ( $is_enabled ) {
-		require_once __DIR__ . '/src/Interactivity/woo-directives.php';
+		require_once __DIR__ . '/src/Interactivity/load.php';
 	}
 }
 add_action( 'plugins_loaded', 'woocommerce_blocks_interactivity_setup' );
