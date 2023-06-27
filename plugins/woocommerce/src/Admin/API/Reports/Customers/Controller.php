@@ -525,7 +525,7 @@ class Controller extends GenericController implements ExportableInterface {
 			),
 		);
 		$params['filter_empty']            = array(
-			'description'       => __( 'Filter out results where all passed fields are empty', 'woocommerce' ),
+			'description'       => __( 'Filter out results where any of the passed fields are empty', 'woocommerce' ),
 			'type'              => 'array',
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
