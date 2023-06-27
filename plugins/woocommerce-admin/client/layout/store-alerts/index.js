@@ -44,7 +44,7 @@ export class StoreAlerts extends Component {
 	}
 
 	previousAlert( event ) {
-		event.stopPropagation();
+		event?.stopPropagation();
 		const { currentIndex } = this.state;
 
 		if ( currentIndex > 0 ) {
@@ -78,6 +78,10 @@ export class StoreAlerts extends Component {
 					onClick={ async ( event ) => {
 						const url = event.currentTarget.getAttribute( 'href' );
 						event.preventDefault();
+
+						// navigate to previous alert to avoid an out of bounds error in case it's the last alert from the array
+						this.previousAlert();
+
 						await triggerNoteAction( alert.id, action.id );
 						if (
 							url &&
