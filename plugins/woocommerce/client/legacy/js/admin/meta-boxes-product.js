@@ -539,7 +539,6 @@ jQuery( function ( $ ) {
 
 			toggle_expansion_of_attribute_list_item( $attributeListItem );
 
-			disable_or_enable_fields();
 			jQuery.maybe_disable_save_button();
 		} catch ( error ) {
 			if ( isPageUnloading ) {
