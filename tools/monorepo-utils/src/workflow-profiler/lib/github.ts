@@ -4,14 +4,20 @@
 import { octokitWithAuth } from '../../core/github/api';
 
 export type PaginatedDataTotals = {
+	// count is the running total of items processed
 	count: number;
+	// total_count is the total number of items available
 	total_count: number;
+	// Any other data that needs to be tracked
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	[ key: string ]: any;
 };
 
 /**
  * Helper method for getting data from GitHub REST API in paginated format.
+ *
+ * This function is used to process multiple pages of GitHub data by keeping track of running totals.
+ * The requirements `totals` are properties `count` and `total_number`. A processing function `processPage` is also passed to handle each page's data by updating the `totals` object.
  *
  * @param {Object}   totals         An object for keeping track of the total data.
  * @param {string}   endpoint       API endpoint
