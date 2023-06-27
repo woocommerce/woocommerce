@@ -689,6 +689,20 @@ class Init {
 					),
 				),
 			);
+			if ( Features::is_enabled( 'product-variation-management' ) ) {
+				array_push(
+					$args['template'],
+					array(
+						'woocommerce/product-tab',
+						array(
+							'id'    => 'variations',
+							'title' => __( 'Variations', 'woocommerce' ),
+							'order' => 40,
+						),
+						array(),
+					)
+				);
+			}
 		}
 		return $args;
 	}
