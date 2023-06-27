@@ -90,7 +90,7 @@ class ManifestAPI {
 
 		$manifest = \WooCommerceDocs\Data\ManifestStore::get_manifest_by_url( $manifest_url );
 
-		if ( ! $manifest ) {
+		if ( null === $manifest ) {
 			return new \WP_Error( 'invalid_manifest_url', 'Invalid manifest url', array( 'status' => 400 ) );
 		}
 
