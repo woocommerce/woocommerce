@@ -364,4 +364,43 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 
 		$this->assertEquals( $result_without_withespace, $expected_single_product_template_without_whitespace, '' );
 	}
+
+		/**
+		 *  @group failing
+		 * Test that the Single Product Template doesn't remove any blocks if those aren't grouped in a a core/group block
+		 */
+	public function test_add_compatibility_layer_if_contains_blocks_not_related_to_the_single_product_template_and_not_grouped() {
+		$default_single_product_template = '
+		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+		<!-- wp:paragraph -->
+		<p>hello</p>
+		<!-- /wp:paragraph -->
+		<!-- wp:paragraph -->
+		<p>hello1</p>
+		<!-- /wp:paragraph -->
+		<!-- wp:paragraph -->
+		<p>hello2</p>
+		<!-- /wp:paragraph -->
+		<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$expected_single_product_template = '
+		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+		<!-- wp:paragraph {"__wooCommerceIsFirstBlock":true} -->
+		<p>hello</p>
+		<!-- /wp:paragraph -->
+		<!-- wp:paragraph -->
+		<p>hello1</p>
+		<!-- /wp:paragraph -->
+		<!-- wp:paragraph {"__wooCommerceIsLastBlock":true} -->
+		<p>hello2</p>
+		<!-- /wp:paragraph -->
+		<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
+
+		$result_without_withespace                           = preg_replace( '/\s+/', '', $result );
+		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
+
+		$this->assertEquals( $result_without_withespace, $expected_single_product_template_without_whitespace, '' );
+	}
 }
