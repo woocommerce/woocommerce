@@ -171,4 +171,61 @@ class PluginUtil {
 		$this->woocommerce_aware_plugins        = null;
 		$this->woocommerce_aware_active_plugins = null;
 	}
+
+	/**
+	 * Util function to generate warning string for incompatible features based on active plugins.
+	 *
+	 * @param string $feature_id Feature id.
+	 * @param array  $plugin_feature_info Array of plugin feature info. See FeaturesControllers->get_compatible_plugins_for_feature() for details.
+	 *
+	 * @return string Warning string.
+	 */
+	public function generate_incompatible_plugin_feature_warning( string $feature_id, array $plugin_feature_info ) : string {
+		$feature_warning    = '';
+		$incompatibles      = array_merge( $plugin_feature_info['incompatible'], $plugin_feature_info['uncertain'] );
+		$incompatibles      = array_filter( $incompatibles, 'is_plugin_active' );
+		$incompatible_count = count( $incompatibles );
+		if ( $incompatible_count > 0 ) {
+			if ( 1 === $incompatible_count ) {
+				/* translators: %s = printable plugin name */
+				$feature_warning = sprintf( __( '⚠ 1 Incompatible plugin detected (%s).', 'woocommerce' ), $this->get_plugin_name( $incompatibles[0] ) );
+			} elseif ( 2 === $incompatible_count ) {
+				$feature_warning = sprintf(
+				/* translators: %1\$s, %2\$s = printable plugin names */
+					__( '⚠ 2 Incompatible plugins detected (%1$s and %2$s).', 'woocommerce' ),
+					$this->get_plugin_name( $incompatibles[0] ),
+					$this->get_plugin_name( $incompatibles[1] )
+				);
+			} else {
+
+				$feature_warning = sprintf(
+				/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
+					_n(
+						'⚠ Incompatible plugins detected (%1$s, %2$s and %3$d other).',
+						'⚠ Incompatible plugins detected (%1$s and %2$s plugins and %3$d others).',
+						$incompatible_count - 2,
+						'woocommerce'
+					),
+					$this->get_plugin_name( $incompatibles[0] ),
+					$this->get_plugin_name( $incompatibles[1] ),
+					$incompatible_count - 2
+				);
+			}
+
+			$incompatible_plugins_url = add_query_arg(
+				array(
+					'plugin_status' => 'incompatible_with_feature',
+					'feature_id'    => $feature_id,
+				),
+				admin_url( 'plugins.php' )
+			);
+			/* translators: %s = URL of the plugins page */
+			$extra_desc_tip = sprintf( __( "<br><a href='%s'>View and manage</a>", 'woocommerce' ), $incompatible_plugins_url );
+
+			$feature_warning .= $extra_desc_tip;
+
+		}
+
+		return $feature_warning;
+	}
 }

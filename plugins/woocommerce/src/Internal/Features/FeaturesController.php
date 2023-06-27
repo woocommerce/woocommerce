@@ -110,10 +110,11 @@ class FeaturesController {
 				'disable_ui'      => false,
 			),
 			'custom_order_tables'  => array(
-				'name'            => __( 'High-Performance order storage (COT)', 'woocommerce' ),
+				'name'            => __( 'Data Storage for Orders', 'woocommerce' ),
 				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
 				'is_experimental' => true,
 				'disable_ui'      => false,
+				'type'            => 'hpos_setting',
 			),
 			'cart_checkout_blocks' => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
@@ -611,7 +612,8 @@ class FeaturesController {
 		$description = $feature['description'];
 		$disabled    = false;
 		$desc_tip    = '';
-		$tooltip     = isset( $feature['tooltip'] ) ? $feature['tooltip'] : '';
+		$tooltip     = $feature['tooltip'] ?? '';
+		$type        = $feature['type'] ?? 'checkbox';
 
 		if ( ( 'analytics' === $feature_id || 'new_navigation' === $feature_id ) && $admin_features_disabled ) {
 			$disabled = true;
@@ -662,50 +664,9 @@ class FeaturesController {
 		}
 
 		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
+			$disabled                = ! $this->feature_is_enabled( $feature_id );
 			$plugin_info_for_feature = $this->get_compatible_plugins_for_feature( $feature_id, true );
-			$incompatibles           = array_merge( $plugin_info_for_feature['incompatible'], $plugin_info_for_feature['uncertain'] );
-			$incompatibles           = array_filter( $incompatibles, 'is_plugin_active' );
-			$incompatible_count      = count( $incompatibles );
-			if ( $incompatible_count > 0 ) {
-				if ( 1 === $incompatible_count ) {
-					/* translators: %s = printable plugin name */
-					$desc_tip = sprintf( __( "⚠ This feature shouldn't be enabled, the %s plugin is active and isn't compatible with it.", 'woocommerce' ), $this->plugin_util->get_plugin_name( $incompatibles[0] ) );
-				} elseif ( 2 === $incompatible_count ) {
-					/* translators: %1\$s, %2\$s = printable plugin names */
-					$desc_tip = sprintf(
-						__( "⚠ This feature shouldn't be enabled: the %1\$s and %2\$s plugins are active and aren't compatible with it.", 'woocommerce' ),
-						$this->plugin_util->get_plugin_name( $incompatibles[0] ),
-						$this->plugin_util->get_plugin_name( $incompatibles[1] )
-					);
-				} else {
-					/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
-					$desc_tip = sprintf(
-						_n(
-							"⚠ This feature shouldn't be enabled: %1\$s, %2\$s and %3\$d more active plugin isn't compatible with it",
-							"⚠ This feature shouldn't be enabled: the %1\$s and %2\$s plugins are active and aren't compatible with it. There are %3\$d other incompatible plugins.",
-							$incompatible_count - 2,
-							'woocommerce'
-						),
-						$this->plugin_util->get_plugin_name( $incompatibles[0] ),
-						$this->plugin_util->get_plugin_name( $incompatibles[1] ),
-						$incompatible_count - 2
-					);
-				}
-
-				$incompatible_plugins_url = add_query_arg(
-					array(
-						'plugin_status' => 'incompatible_with_feature',
-						'feature_id'    => $feature_id,
-					),
-					admin_url( 'plugins.php' )
-				);
-				/* translators: %s = URL of the plugins page */
-				$extra_desc_tip = sprintf( __( " <a href='%s'>Manage incompatible plugins</a>", 'woocommerce' ), $incompatible_plugins_url );
-
-				$desc_tip .= $extra_desc_tip;
-
-				$disabled = ! $this->feature_is_enabled( $feature_id );
-			}
+			$desc_tip                = $this->plugin_util->generate_incompatible_plugin_feature_warning( $feature_id, $plugin_info_for_feature );
 		}
 
 		/**
@@ -723,7 +684,7 @@ class FeaturesController {
 		return array(
 			'title'    => $feature['name'],
 			'desc'     => $description,
-			'type'     => 'checkbox',
+			'type'     => $type,
 			'id'       => $this->feature_enable_option_name( $feature_id ),
 			'disabled' => $disabled && ! $this->force_allow_enabling_features,
 			'desc_tip' => $desc_tip,

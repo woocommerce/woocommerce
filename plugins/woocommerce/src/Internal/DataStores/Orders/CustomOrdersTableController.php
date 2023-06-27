@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\PluginUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -99,6 +100,13 @@ class CustomOrdersTableController {
 	private $order_cache_controller;
 
 	/**
+	 * The plugin util object to use.
+	 *
+	 * @var PluginUtil
+	 */
+	private $plugin_util;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -120,6 +128,7 @@ class CustomOrdersTableController {
 		self::add_action( 'woocommerce_update_options_advanced_custom_data_stores', array( $this, 'process_options_updated' ), 10, 0 );
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enabled_changed' ), 10, 2 );
+		self::add_action( 'woocommerce_admin_field_hpos_setting', array( $this, 'render_hpos_setting' ), 10, 2 );
 	}
 
 	/**
@@ -133,6 +142,7 @@ class CustomOrdersTableController {
 	 * @param FeaturesController         $features_controller The features controller instance to use.
 	 * @param OrderCache                 $order_cache The order cache engine to use.
 	 * @param OrderCacheController       $order_cache_controller The order cache controller to use.
+	 * @param PluginUtil                 $plugin_util The plugin util to use.
 	 */
 	final public function init(
 		OrdersTableDataStore $data_store,
@@ -141,7 +151,9 @@ class CustomOrdersTableController {
 		BatchProcessingController $batch_processing_controller,
 		FeaturesController $features_controller,
 		OrderCache $order_cache,
-		OrderCacheController $order_cache_controller ) {
+		OrderCacheController $order_cache_controller,
+		PluginUtil $plugin_util
+	) {
 		$this->data_store                  = $data_store;
 		$this->data_synchronizer           = $data_synchronizer;
 		$this->batch_processing_controller = $batch_processing_controller;
@@ -149,6 +161,7 @@ class CustomOrdersTableController {
 		$this->features_controller         = $features_controller;
 		$this->order_cache                 = $order_cache;
 		$this->order_cache_controller      = $order_cache_controller;
+		$this->plugin_util                 = $plugin_util;
 	}
 
 	/**
@@ -606,5 +619,82 @@ class CustomOrdersTableController {
 		);
 	}
 
+	/**
+	 * Renders the HPOS setting in Features section of the settings page.
+	 *
+	 * @param array $value HPOS feature value as defined in the feature controller.
+	 */
+	private function render_hpos_setting( array $value ) {
+		$hpos_enabled            = $this->custom_orders_table_usage_is_enabled();
+		$sync_status             = $this->data_synchronizer->get_sync_status();
+		$sync_is_pending         = 0 !== $sync_status['current_pending_count'];
+		$sync_in_progress        = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
+		$sync_enabled            = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		$plugin_info             = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables' );
+		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
+		$can_hpos_enabled        = count( array_merge( $plugin_info['compatible'], $plugin_info['incompatible'] ) ) === 0;
+
+		?>
+		<fieldset>
+			<tr>
+				<th scope="row" class="titledesc">
+					<?php echo esc_html( $value['title'] ); ?><br>
+				</th>
+				<td class="forminp">
+					<ul>
+						<li>
+							<label>
+								<input
+									type="radio"
+									name="<?php echo esc_attr( $value['field_name'] ); ?>"
+									value="post"
+									<?php checked( ! $hpos_enabled ); ?>
+									<?php disabled( $sync_is_pending ); ?>
+									class="<?php echo esc_attr( $value['class'] ); ?>"
+								/>
+								<?php echo esc_html( __( 'Posts table', 'woocommerce' ) ); ?>
+							</label>
+						</li>
+						<li>
+							<label>
+								<input
+									type="radio"
+									name="<?php echo esc_attr( $value['field_name'] ); ?>"
+									value="hpos"
+									<?php checked( $hpos_enabled ); ?>
+									<?php disabled( $sync_is_pending || ( ! $can_hpos_enabled ) ); ?>
+									class="<?php echo esc_attr( $value['class'] ); ?>"
+								/>
+								<?php echo esc_html( __( 'High Performance Order Storage (COT)', 'woocommerce' ) ); ?>
+								<br>
+								<p class="description description-thin" style="margin-top: 0.5rem;"><?php echo wp_kses_post( $plugin_incompat_warning ); ?></p>
+							</label>
+						</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td class="forminp" style="padding-top: 0px;">
+					<label for="<?php echo esc_attr( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ); ?>">
+						<input
+							name="<?php echo esc_attr( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ); ?>"
+							id="<?php echo esc_attr( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ); ?>"
+							type="checkbox"
+							value="yes"
+							<?php checked( 'yes', $sync_enabled ); ?>
+						><?php echo esc_html( __( 'Keep posts and orders table in sync', 'woocommerce' ) ); ?>
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td class="forminp">
+
+				</td>
+			</tr>
+		</fieldset>
+		<?php
+	}
 
 }
