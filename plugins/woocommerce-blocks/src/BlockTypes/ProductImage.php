@@ -145,20 +145,21 @@ class ProductImage extends AbstractBlock {
 	 * @return string
 	 */
 	private function render_image( $product, $attributes ) {
-		$image_type = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
-		$image_info = wp_get_attachment_image_src( get_post_thumbnail_id( $product->get_id() ), $image_type );
+		$image_size = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
 
-		if ( ! isset( $image_info[0] ) ) {
+		if ( ! $product->get_image_id() ) {
 			// The alt text is left empty on purpose, as it's considered a decorative image.
 			// More can be found here: https://www.w3.org/WAI/tutorials/images/decorative/.
 			// Github discussion for a context: https://github.com/woocommerce/woocommerce-blocks/pull/7651#discussion_r1019560494.
-			return sprintf( '<img src="%s" alt="" />', wc_placeholder_img_src( $image_type ) );
+			return wc_placeholder_img( $image_size, array( 'alt' => '' ) );
 		}
 
-		return sprintf(
-			'<img data-testid="product-image" alt="%s" src="%s">',
-			$product->get_title(),
-			$image_info[0]
+		return $product->get_image(
+			$image_size,
+			array(
+				'alt'         => $product->get_title(),
+				'data-testid' => 'product-image',
+			)
 		);
 	}
 
