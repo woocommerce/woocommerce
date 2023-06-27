@@ -18,7 +18,7 @@ export const deepMerge = ( target, source ) => {
 
 const getSerializedState = () => {
 	const storeTag = document.querySelector(
-		`script[type="application/json"]#store`
+		`script[type="application/json"]#wc-interactivity-store-data`
 	);
 	if ( ! storeTag ) return {};
 	try {
@@ -26,6 +26,7 @@ const getSerializedState = () => {
 		if ( isObject( state ) ) return state;
 		throw Error( 'Parsed state is not an object' );
 	} catch ( e ) {
+		// eslint-disable-next-line no-console
 		console.log( e );
 	}
 	return {};

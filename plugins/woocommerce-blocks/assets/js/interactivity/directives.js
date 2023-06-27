@@ -1,13 +1,8 @@
 import { useContext, useMemo, useEffect } from 'preact/hooks';
-import { useSignalEffect } from '@preact/signals';
 import { deepSignal, peek } from 'deepsignal';
+import { useSignalEffect } from './utils';
 import { directive } from './hooks';
 import { prefetch, navigate, canDoClientSideNavigation } from './router';
-
-// Until useSignalEffects is fixed:
-// https://github.com/preactjs/signals/issues/228
-const raf = window.requestAnimationFrame;
-const tick = () => new Promise( ( r ) => raf( () => raf( r ) ) );
 
 // Check if current page can do client-side navigation.
 const clientSideNavigation = canDoClientSideNavigation( document.head );
@@ -32,7 +27,7 @@ const mergeDeepSignals = ( target, source ) => {
 };
 
 export default () => {
-	// wp-context
+	// data-wc-context
 	directive(
 		'context',
 		( {
@@ -51,20 +46,21 @@ export default () => {
 			}, [ context, inheritedValue ] );
 
 			return <Provider value={ value }>{ children }</Provider>;
-		}
+		},
+		{ priority: 5 }
 	);
 
-	// wp-effect:[name]
+	// data-wc-effect--[name]
 	directive( 'effect', ( { directives: { effect }, context, evaluate } ) => {
 		const contextValue = useContext( context );
 		Object.values( effect ).forEach( ( path ) => {
 			useSignalEffect( () => {
-				evaluate( path, { context: contextValue } );
+				return evaluate( path, { context: contextValue } );
 			} );
 		} );
 	} );
 
-	// wp-on:[event]
+	// data-wc-on--[event]
 	directive( 'on', ( { directives: { on }, element, evaluate, context } ) => {
 		const contextValue = useContext( context );
 		Object.entries( on ).forEach( ( [ name, path ] ) => {
@@ -74,7 +70,7 @@ export default () => {
 		} );
 	} );
 
-	// wp-class:[classname]
+	// data-wc-class--[classname]
 	directive(
 		'class',
 		( {
@@ -119,7 +115,7 @@ export default () => {
 		}
 	);
 
-	// wp-bind:[attribute]
+	// data-wc-bind--[attribute]
 	directive(
 		'bind',
 		( { directives: { bind }, element, context, evaluate } ) => {
@@ -127,14 +123,35 @@ export default () => {
 			Object.entries( bind )
 				.filter( ( n ) => n !== 'default' )
 				.forEach( ( [ attribute, path ] ) => {
-					element.props[ attribute ] = evaluate( path, {
+					const result = evaluate( path, {
 						context: contextValue,
 					} );
+					element.props[ attribute ] = result;
+
+					// This seems necessary because Preact doesn't change the attributes
+					// on the hydration, so we have to do it manually. It doesn't need
+					// deps because it only needs to do it the first time.
+					useEffect( () => {
+						// aria- and data- attributes have no boolean representation.
+						// A `false` value is different from the attribute not being
+						// present, so we can't remove it.
+						// We follow Preact's logic: https://github.com/preactjs/preact/blob/ea49f7a0f9d1ff2c98c0bdd66aa0cbc583055246/src/diff/props.js#L131C24-L136
+						if ( result === false && attribute[ 4 ] !== '-' ) {
+							element.ref.current.removeAttribute( attribute );
+						} else {
+							element.ref.current.setAttribute(
+								attribute,
+								result === true && attribute[ 4 ] !== '-'
+									? ''
+									: result
+							);
+						}
+					}, [] );
 				} );
 		}
 	);
 
-	// wp-link
+	// data-wc-link
 	directive(
 		'link',
 		( {
@@ -171,6 +188,64 @@ export default () => {
 					}
 				};
 			}
+		}
+	);
+
+	// data-wc-show
+	directive(
+		'show',
+		( {
+			directives: {
+				show: { default: show },
+			},
+			element,
+			evaluate,
+			context,
+		} ) => {
+			const contextValue = useContext( context );
+
+			if ( ! evaluate( show, { context: contextValue } ) )
+				element.props.children = (
+					<template>{ element.props.children }</template>
+				);
+		}
+	);
+
+	// data-wc-ignore
+	directive(
+		'ignore',
+		( {
+			element: {
+				type: Type,
+				props: { innerHTML, ...rest },
+			},
+		} ) => {
+			// Preserve the initial inner HTML.
+			const cached = useMemo( () => innerHTML, [] );
+			return (
+				<Type
+					dangerouslySetInnerHTML={ { __html: cached } }
+					{ ...rest }
+				/>
+			);
+		}
+	);
+
+	// data-wc-text
+	directive(
+		'text',
+		( {
+			directives: {
+				text: { default: text },
+			},
+			element,
+			evaluate,
+			context,
+		} ) => {
+			const contextValue = useContext( context );
+			element.props.children = evaluate( text, {
+				context: contextValue,
+			} );
 		}
 	);
 };
