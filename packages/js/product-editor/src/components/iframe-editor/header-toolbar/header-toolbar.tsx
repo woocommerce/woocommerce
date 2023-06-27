@@ -31,6 +31,7 @@ import { Button, ToolbarItem } from '@wordpress/components';
 import { EditorContext } from '../context';
 import EditorHistoryRedo from './editor-history-redo';
 import EditorHistoryUndo from './editor-history-undo';
+import { DocumentOverview } from './document-overview';
 
 export function HeaderToolbar() {
 	const { isInserterOpened, setIsInserterOpened } =
@@ -114,6 +115,7 @@ export function HeaderToolbar() {
 						) }
 						<ToolbarItem as={ EditorHistoryUndo } />
 						<ToolbarItem as={ EditorHistoryRedo } />
+						<ToolbarItem as={ DocumentOverview } />
 					</>
 				) }
 			</div>
