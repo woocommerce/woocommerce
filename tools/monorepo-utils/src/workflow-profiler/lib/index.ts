@@ -196,10 +196,10 @@ export const logWorkflowRunResults = ( name, data ) => {
  */
 export const getRunJobData = async ( nodeIds ) => {
 	const gql = graphqlWithAuth();
-	const str = nodeIds.map( ( id ) => `"${ id }"` ).join( ', ' );
-	return await gql( `
-			{ 
-				nodes ( ids: [ ${ str } ] ) {
+	return await gql(
+		`
+			query($nodeIds: [ID!]!){ 
+				nodes ( ids: $nodeIds ) {
 				... on WorkflowRun {
 					id
 					workflow {
@@ -226,7 +226,11 @@ export const getRunJobData = async ( nodeIds ) => {
 					}
 				}
 			}
-		` );
+		`,
+		{
+			nodeIds,
+		}
+	);
 };
 
 /**
