@@ -41,7 +41,8 @@
 		z-index: 80;
 	}
 
-	&.folded .interface-interface-skeleton__header, &.folded .interface-interface-skeleton__footer  {
+	&.folded .interface-interface-skeleton__header,
+	&.folded .interface-interface-skeleton__footer {
 		width: calc(100% - $admin-menu-width-collapsed);
 		left: $admin-menu-width-collapsed;
 	}
