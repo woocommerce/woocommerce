@@ -6,7 +6,7 @@ import { Command } from '@commander-js/extra-typings';
 /**
  * Internal dependencies
  */
-import { getAllWorkflows } from '../../lib';
+import { getAllWorkflows } from '../../lib/data';
 import { Logger } from '../../../core/logger';
 
 const program = new Command( 'list' )

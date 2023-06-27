@@ -8,13 +8,15 @@ import { Command } from '@commander-js/extra-typings';
  */
 import {
 	getWorkflowRunData,
-	logWorkflowRunResults,
 	getWorkflowData,
 	getRunJobData,
 	getCompiledJobData,
+} from '../../lib/data';
+import {
+	logWorkflowRunResults,
 	logJobResults,
 	logStepResults,
-} from '../../lib';
+} from '../../lib/log';
 import { Logger } from '../../../core/logger';
 
 const program = new Command( 'profile' )
