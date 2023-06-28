@@ -78,7 +78,7 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
             contents: read
-        needs: [api-tests]
+
         env:
             ADMIN_PASSWORD: ${{ secrets.SMOKE_TEST_ADMIN_PASSWORD }}
             ADMIN_USER: ${{ secrets.SMOKE_TEST_ADMIN_USER }}
