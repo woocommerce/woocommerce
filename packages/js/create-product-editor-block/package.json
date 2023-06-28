@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/create-product-editor-block",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"description": "A template to be used with `@wordpress/create-block` to create a Product Editor block.",
 	"main": "index.js",
 	"engines": {
