@@ -59,7 +59,7 @@ export default class PackageRelease extends Command {
 			description: 'Skip pnpm install',
 			default: false,
 		} ),
-		initialRelease: Flags.boolean( {
+		'initial-release': Flags.boolean( {
 			default: false,
 			description: "Create a package's first release to NPM",
 		} ),
@@ -119,8 +119,8 @@ export default class PackageRelease extends Command {
 		{
 			'dry-run': dryRun,
 			branch,
-			initialRelease,
-		}: { 'dry-run': boolean; branch: string; initialRelease: boolean }
+			'initial-release': initialRelease,
+		}: { 'dry-run': boolean; branch: string; 'initial-release': boolean }
 	) {
 		packages.forEach( ( name ) => {
 			try {

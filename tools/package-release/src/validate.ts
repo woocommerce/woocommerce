@@ -131,7 +131,7 @@ export const validatePackage = (
  * Determine if an update is valid by comparing version numbers.
  *
  * @param {string}  name           package name.
- * @param {boolean} initialRelease is package has not been released yet.
+ * @param {boolean} initialRelease if package has not been released yet.
  * @return {boolean} If an update is valid.
  */
 export const isValidUpdate = (
