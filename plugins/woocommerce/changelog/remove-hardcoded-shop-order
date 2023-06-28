@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow to add custom metabox to custom order edit page by setting the correct screen id.
