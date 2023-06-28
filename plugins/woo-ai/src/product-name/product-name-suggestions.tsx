@@ -11,11 +11,8 @@ import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import MagicIcon from '../../assets/images/icons/magic.svg';
 import AlertIcon from '../../assets/images/icons/alert.svg';
 import { productData } from '../utils';
-import { useProductDataSuggestions, useProductSlug } from '../hooks';
-import {
-	ProductDataSuggestion,
-	ProductDataSuggestionRequest,
-} from '../utils/types';
+import { useCompletion, useProductSlug } from '../hooks';
+import { ProductDataSuggestion, ProductData } from '../utils/types';
 import { SuggestionItem, PoweredByLink, recordNameTracks } from './index';
 import { RandomLoadingMessage } from '../components';
 
@@ -56,8 +53,35 @@ export const ProductNameSuggestions = () => {
 	const [ suggestions, setSuggestions ] = useState< ProductDataSuggestion[] >(
 		[]
 	);
-	const { fetchSuggestions } = useProductDataSuggestions();
 	const { updateProductSlug } = useProductSlug();
+	const { requestCompletion } = useCompletion( {
+		onStreamError: ( error ) => {
+			// eslint-disable-next-line no-console
+			console.debug( 'Streaming error encountered', error );
+			recordNameTracks( 'stop', {
+				reason: 'error',
+				error: ( error as { message?: string } )?.message || '',
+			} );
+			setSuggestionsState( SuggestionsState.Failed );
+		},
+		onCompletionFinished: ( reason, content ) => {
+			try {
+				const parsed = JSON.parse( content );
+				setSuggestions( parsed.suggestions );
+				setSuggestionsState( SuggestionsState.None );
+
+				recordNameTracks( 'stop', {
+					reason: 'finished',
+					suggestions: parsed.suggestions,
+				} );
+
+				setSuggestions( parsed.suggestions );
+				setIsFirstLoad( false );
+			} catch ( e ) {
+				throw new Error( 'Unable to parse suggetsions' );
+			}
+		},
+	} );
 	const nameInputRef = useRef< HTMLInputElement >(
 		document.querySelector( '#title' )
 	);
@@ -177,42 +201,51 @@ export const ProductNameSuggestions = () => {
 		}
 	};
 
+	const buildPrompt = ( currentProductData: ProductData ) => {
+		const validProductData = Object.entries( currentProductData )
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			.filter( ( [ key, value ] ) =>
+				value instanceof Array ? Boolean( value.length ) : value
+			)
+			.reduce( ( acc, [ key, value ] ) => {
+				acc = `${ acc }${ key }: ${ JSON.stringify( value ) }\n`;
+				return acc;
+			}, '' );
+
+		const instructions = [
+			'You are a WooCommerce SEO and marketing expert.',
+			"Using the product's name, description, tags, categories, and other attributes, provide three optimized alternatives to the product's title to enhance the store's SEO performance and sales.",
+			"Provide the best option for the product's title based on the product properties.",
+			'Identify the language used in the given title and use the same language in your response.',
+			'Return only the alternative value for product\'s title in the "content" part of your response.',
+			'Product titles should contain at least 20 characters.',
+			'Return a short and concise reason for each suggestion in seven words in the "reason" part of your response.',
+			"The product's properties are:",
+			`${ validProductData }`,
+			'Here is an example of a valid response:',
+			'{"suggestions": [{"content": "An improved alternative to the product\'s title", "reason": "Reason for the suggestion"}, {"content": "Another improved alternative to the product title", "reason": "Reason for this suggestion"}]}',
+		];
+
+		return instructions.join( '\n' );
+	};
+
 	const fetchProductSuggestions = async (
 		event: React.MouseEvent< HTMLElement >
 	) => {
 		if ( ( event.target as Element )?.closest( 'a' ) ) {
 			return;
 		}
+
 		setSuggestions( [] );
 		setSuggestionsState( SuggestionsState.Fetching );
-		try {
-			const currentProductData = productData();
 
-			recordNameTracks( 'start', {
-				current_title: currentProductData.name,
-			} );
+		const currentProductData = productData();
 
-			const request: ProductDataSuggestionRequest = {
-				requested_data: 'name',
-				...currentProductData,
-			};
+		recordNameTracks( 'start', {
+			current_title: currentProductData.name,
+		} );
 
-			const suggestionResults = await fetchSuggestions( request );
-
-			recordNameTracks( 'stop', {
-				reason: 'finished',
-				suggestions: suggestionResults,
-			} );
-			setSuggestions( suggestionResults );
-			setSuggestionsState( SuggestionsState.None );
-			setIsFirstLoad( false );
-		} catch ( e ) {
-			recordNameTracks( 'stop', {
-				reason: 'error',
-				error: ( e as { message?: string } )?.message || '',
-			} );
-			setSuggestionsState( SuggestionsState.Failed );
-		}
+		requestCompletion( buildPrompt( currentProductData ) );
 	};
 
 	const shouldRenderSuggestionsButton = useCallback( () => {

@@ -11,7 +11,7 @@ import { getCompletion } from '../utils';
 type StopReason = 'abort' | 'finished' | 'error' | 'interrupted';
 
 type UseCompletionProps = {
-	onStreamMessage: ( message: string, chunk: string ) => void;
+	onStreamMessage?: ( message: string, chunk: string ) => void;
 	onCompletionFinished?: (
 		reason: StopReason,
 		previousContent: string
@@ -20,7 +20,7 @@ type UseCompletionProps = {
 };
 
 export const useCompletion = ( {
-	onStreamMessage,
+	onStreamMessage = () => {},
 	onCompletionFinished = () => {},
 	onStreamError = () => {},
 }: UseCompletionProps ) => {

@@ -7,6 +7,7 @@ import { getTinyContent, getPostId } from '.';
 const isElementVisible = ( element: HTMLElement ) =>
 	! ( window.getComputedStyle( element ).display === 'none' );
 
+// TODO: This appears to be returning category IDs instead of names?
 const getCategories = (): string[] => {
 	const categoryCheckboxEls: NodeListOf< HTMLInputElement > =
 		document.querySelectorAll(
@@ -36,6 +37,7 @@ const getTags = (): string[] => {
 	return tags.filter( ( tag ) => tag !== '' );
 };
 
+// TODO: Not working in my testing when manually adding attributes.
 const getAttributes = (): Attribute[] => {
 	const attributeSelectEls: NodeListOf< HTMLSelectElement > =
 		document.querySelectorAll(
