@@ -112,7 +112,9 @@ class FeaturesController {
 				'disable_ui'      => false,
 			),
 			// Options HPOS features are added in CustomOrdersTableController to keep the logic in same place.
-			'custom_order_tables'  => array(),
+			'custom_order_tables'  => array(
+				'name' => __( 'High performance order storage', 'woocommerce' ),
+			),
 			$hpos_enable_sync      => array(),
 			'cart_checkout_blocks' => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
