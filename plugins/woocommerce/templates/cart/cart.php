@@ -12,7 +12,7 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 7.8.0
+ * @version 7.8.2
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -93,7 +93,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 							 * @param array $cart_item The product in the cart.
 							 * @param string $cart_item_key Key for the product in the cart.
 							 */
-							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $product_name, $cart_item, $cart_item_key ) . '&nbsp;' );
+							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key ) . '&nbsp;' );
 						} else {
 							/**
 							 * Filter the product name.
@@ -101,7 +101,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 							 * @since 7.8.0
 							 * @param string $product_url URL the product in the cart.
 							 */
-							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', esc_url( $product_permalink ), $product_name ), $cart_item, $cart_item_key ) );
+							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', esc_url( $product_permalink ), $_product->get_name() ), $cart_item, $cart_item_key ) );
 						}
 
 						do_action( 'woocommerce_after_cart_item_name', $cart_item, $cart_item_key );
