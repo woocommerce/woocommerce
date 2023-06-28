@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Adding error handling for a bad token request.
