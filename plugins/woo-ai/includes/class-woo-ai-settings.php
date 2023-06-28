@@ -70,7 +70,7 @@ class Woo_AI_Settings {
 
 		foreach ( $settings as $setting ) {
 			if ( in_array( $setting['type'], array( 'text', 'textarea' ), true ) ) {
-				add_filter( 'woocommerce_admin_settings_sanitize_option_' . $setting['id'], array( $this, 'esc_html_field' ) );
+				add_filter( 'woocommerce_admin_settings_sanitize_option_' . $setting['id'], array( $this, 'strip_tags_field_value' ) );
 			}
 		}
 	}
@@ -80,8 +80,8 @@ class Woo_AI_Settings {
 	 *
 	 * @param string $raw_value The current section.
 	 */
-	public function esc_html_field( $raw_value ) {
-		return esc_html( $raw_value ?? '' );
+	public function strip_tags_field_value( $raw_value ) {
+		return wp_strip_all_tags( $raw_value ?? '' );
 	}
 
 	/**
