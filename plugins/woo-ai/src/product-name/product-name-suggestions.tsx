@@ -52,6 +52,7 @@ export const ProductNameSuggestions = () => {
 		useState< SuggestionsState >( SuggestionsState.None );
 	const [ isFirstLoad, setIsFirstLoad ] = useState< boolean >( true );
 	const [ visible, setVisible ] = useState< boolean >( false );
+	const [ viewed, setViewed ] = useState< boolean >( false );
 	const [ suggestions, setSuggestions ] = useState< ProductDataSuggestion[] >(
 		[]
 	);
@@ -63,6 +64,13 @@ export const ProductNameSuggestions = () => {
 	const [ productName, setProductName ] = useState< string >(
 		nameInputRef.current?.value || ''
 	);
+
+	useEffect( () => {
+		if ( visible === true && viewed === false ) {
+			setViewed( true );
+			recordNameTracks( 'view_ui' );
+		}
+	}, [ visible, viewed ] );
 
 	useEffect( () => {
 		const nameInput = nameInputRef.current;

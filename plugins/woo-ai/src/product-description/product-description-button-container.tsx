@@ -113,6 +113,10 @@ export function WriteItForMeButtonContainer() {
 		};
 	}, [ titleEl ] );
 
+	useEffect( () => {
+		recordDescriptionTracks( 'view_button' );
+	}, [] );
+
 	const writeItForMeEnabled =
 		! fetching && productTitle.length >= MIN_TITLE_LENGTH_FOR_DESCRIPTION;
 
