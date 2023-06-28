@@ -66,9 +66,14 @@ class ManifestJob {
 				// first check if the manifest has changed.
 				$existing_manifest = Data\ManifestStore::get_manifest_by_url( $manifest_url );
 				$hash              = array_key_exists( 'hash', $json ) ? $json['hash'] : null;
+				$hash_changed      = array_key_exists( 'hash', $existing_manifest ) && $existing_manifest['hash'] !== $hash;
 
-				if ( array_key_exists( 'hash', $existing_manifest ) && $existing_manifest['hash'] !== $hash ) {
-					\ActionScheduler_Logger::instance()->log( $action_id, "Manifest hash changed: `$hash`, processing manifest." );
+				if ( ! array_key_exists( 'hash', $existing_manifest ) || $hash_changed ) {
+					if ( $hash_changed ) {
+						\ActionScheduler_Logger::instance()->log( $action_id, "Manifest hash changed: `$hash`, processing manifest." );
+					} else {
+						\ActionScheduler_Logger::instance()->log( $action_id, "No previous manifest found, processing manifest." );
+					}
 					Manifest\ManifestProcessor::process_manifest( $json, $action_id );
 					Data\ManifestStore::update_manifest( $manifest_url, $json );
 				} else {
