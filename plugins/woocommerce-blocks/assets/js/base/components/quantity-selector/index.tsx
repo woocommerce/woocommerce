@@ -6,7 +6,6 @@ import { speak } from '@wordpress/a11y';
 import classNames from 'classnames';
 import { useCallback, useLayoutEffect, useRef } from '@wordpress/element';
 import { DOWN, UP } from '@wordpress/keycodes';
-import { usePrevious } from '@woocommerce/base-hooks';
 import { useDebouncedCallback } from 'use-debounce';
 
 /**
@@ -75,45 +74,6 @@ const QuantitySelector = ( {
 	const canDecrease = ! disabled && quantity - step >= minimum;
 	const canIncrease =
 		! disabled && ( ! hasMaximum || quantity + step <= maximum );
-	const previousCanDecrease = usePrevious( canDecrease );
-	const previousCanIncrease = usePrevious( canIncrease );
-
-	// When the increase or decrease buttons get disabled, the focus
-	// gets moved to the `<body>` element. This was causing weird
-	// issues in the Mini-Cart block, as the drawer expects focus to be
-	// inside.
-	// To fix this, we move the focus to the text input after the
-	// increase or decrease buttons get disabled. We only do that if
-	// the focus is on the button or the body element.
-	// See https://github.com/woocommerce/woocommerce-blocks/pull/9345
-	useLayoutEffect( () => {
-		// Refs are not available yet, so abort.
-		if (
-			! inputRef.current ||
-			! decreaseButtonRef.current ||
-			! increaseButtonRef.current
-		) {
-			return;
-		}
-
-		const currentDocument = inputRef.current.ownerDocument;
-		if (
-			previousCanDecrease &&
-			! canDecrease &&
-			( currentDocument.activeElement === decreaseButtonRef.current ||
-				currentDocument.activeElement === currentDocument.body )
-		) {
-			inputRef.current.focus();
-		}
-		if (
-			previousCanIncrease &&
-			! canIncrease &&
-			( currentDocument.activeElement === increaseButtonRef.current ||
-				currentDocument.activeElement === currentDocument.body )
-		) {
-			inputRef.current.focus();
-		}
-	}, [ previousCanDecrease, previousCanIncrease, canDecrease, canIncrease ] );
 
 	/**
 	 * The goal of this function is to normalize what was inserted,
