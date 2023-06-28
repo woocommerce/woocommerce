@@ -12,19 +12,25 @@ import {
 import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
+import { isNull } from '@woocommerce/types';
+import { RadioControlOption } from '@woocommerce/base-components/radio-control/types';
 
 /**
- * @typedef {import('@woocommerce/type-defs/contexts').CustomerPaymentMethod} CustomerPaymentMethod
- * @typedef {import('@woocommerce/type-defs/contexts').PaymentStatusDispatch} PaymentStatusDispatch
+ * Internal dependencies
  */
+import { getCanMakePaymentArg } from '../../../data/payment/utils/check-payment-methods';
+import { CustomerPaymentMethodConfiguration } from '../../../data/payment/types';
 
 /**
  * Returns the option object for a cc or echeck saved payment method token.
- *
- * @param {CustomerPaymentMethod} savedPaymentMethod
- * @return {string} label
  */
-const getCcOrEcheckLabel = ( { method, expires } ) => {
+const getCcOrEcheckLabel = ( {
+	method,
+	expires,
+}: {
+	method: CustomerPaymentMethodConfiguration;
+	expires: string;
+} ): string => {
 	return sprintf(
 		/* translators: %1$s is referring to the payment method brand, %2$s is referring to the last 4 digits of the payment card, %3$s is referring to the expiry date.  */
 		__(
@@ -39,11 +45,12 @@ const getCcOrEcheckLabel = ( { method, expires } ) => {
 
 /**
  * Returns the option object for any non specific saved payment method.
- *
- * @param {CustomerPaymentMethod} savedPaymentMethod
- * @return {string} label
  */
-const getDefaultLabel = ( { method } ) => {
+const getDefaultLabel = ( {
+	method,
+}: {
+	method: CustomerPaymentMethodConfiguration;
+} ): string => {
 	/* For saved payment methods with brand & last 4 */
 	if ( method.brand && method.last4 ) {
 		return sprintf(
@@ -74,63 +81,89 @@ const SavedPaymentMethodOptions = () => {
 		} );
 	const { __internalSetActivePaymentMethod } =
 		useDispatch( PAYMENT_STORE_KEY );
+	const canMakePaymentArg = getCanMakePaymentArg();
 	const paymentMethods = getPaymentMethods();
 	const paymentMethodInterface = usePaymentMethodInterface();
 	const { removeNotice } = useDispatch( 'core/notices' );
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
-	const options = useMemo( () => {
+	const options = useMemo< RadioControlOption[] >( () => {
 		const types = Object.keys( savedPaymentMethods );
-		return types
-			.flatMap( ( type ) => {
-				const typeMethods = savedPaymentMethods[ type ];
-				return typeMethods.map( ( paymentMethod ) => {
-					const isCC = type === 'cc' || type === 'echeck';
-					const paymentMethodSlug = paymentMethod.method.gateway;
-					return {
-						name: `wc-saved-payment-method-token-${ paymentMethodSlug }`,
-						label: isCC
-							? getCcOrEcheckLabel( paymentMethod )
-							: getDefaultLabel( paymentMethod ),
-						value: paymentMethod.tokenId.toString(),
-						onChange: ( token ) => {
-							const savedTokenKey = `wc-${ paymentMethodSlug }-payment-token`;
-							__internalSetActivePaymentMethod(
-								paymentMethodSlug,
-								{
-									token,
-									payment_method: paymentMethodSlug,
-									[ savedTokenKey ]: token.toString(),
-									isSavedToken: true,
-								}
-							);
-							removeNotice(
-								'wc-payment-error',
-								noticeContexts.PAYMENTS
-							);
-							dispatchCheckoutEvent(
-								'set-active-payment-method',
-								{
-									paymentMethodSlug,
-								}
-							);
-						},
-					};
-				} );
-			} )
-			.filter( Boolean );
+
+		// Get individual payment methods from saved payment methods and put them into a unique array.
+		const individualPaymentGateways = new Set(
+			types.flatMap( ( type ) =>
+				savedPaymentMethods[ type ].map(
+					( paymentMethod ) => paymentMethod.method.gateway
+				)
+			)
+		);
+
+		const gatewaysThatCanMakePayment = Array.from(
+			individualPaymentGateways
+		).filter( ( method ) => {
+			return paymentMethods[ method ]?.canMakePayment(
+				canMakePaymentArg
+			);
+		} );
+
+		const mappedOptions = types.flatMap( ( type ) => {
+			const typeMethods = savedPaymentMethods[ type ];
+			return typeMethods.map( ( paymentMethod ) => {
+				const canMakePayment = gatewaysThatCanMakePayment.includes(
+					paymentMethod.method.gateway
+				);
+				if ( ! canMakePayment ) {
+					return void 0;
+				}
+				const isCC = type === 'cc' || type === 'echeck';
+				const paymentMethodSlug = paymentMethod.method.gateway;
+				return {
+					name: `wc-saved-payment-method-token-${ paymentMethodSlug }`,
+					label: isCC
+						? getCcOrEcheckLabel( paymentMethod )
+						: getDefaultLabel( paymentMethod ),
+					value: paymentMethod.tokenId.toString(),
+					onChange: ( token: string ) => {
+						const savedTokenKey = `wc-${ paymentMethodSlug }-payment-token`;
+						__internalSetActivePaymentMethod( paymentMethodSlug, {
+							token,
+							payment_method: paymentMethodSlug,
+							[ savedTokenKey ]: token.toString(),
+							isSavedToken: true,
+						} );
+						removeNotice(
+							'wc-payment-error',
+							noticeContexts.PAYMENTS
+						);
+						dispatchCheckoutEvent( 'set-active-payment-method', {
+							paymentMethodSlug,
+						} );
+					},
+				};
+			} );
+		} );
+		return mappedOptions.filter(
+			( option ) => typeof option !== 'undefined'
+		) as RadioControlOption[];
 	}, [
 		savedPaymentMethods,
+		paymentMethods,
 		__internalSetActivePaymentMethod,
 		removeNotice,
 		dispatchCheckoutEvent,
+		canMakePaymentArg,
 	] );
 	const savedPaymentMethodHandler =
 		!! activeSavedToken &&
 		paymentMethods[ activePaymentMethod ] &&
-		paymentMethods[ activePaymentMethod ]?.savedTokenComponent
+		typeof paymentMethods[ activePaymentMethod ]?.savedTokenComponent !==
+			'undefined' &&
+		! isNull( paymentMethods[ activePaymentMethod ].savedTokenComponent )
 			? cloneElement(
-					paymentMethods[ activePaymentMethod ]?.savedTokenComponent,
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore - we know for sure that the savedTokenComponent is not null or undefined at this point.
+					paymentMethods[ activePaymentMethod ].savedTokenComponent,
 					{ token: activeSavedToken, ...paymentMethodInterface }
 			  )
 			: null;
