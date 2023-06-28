@@ -72,7 +72,7 @@ class ManifestJob {
 					if ( $hash_changed ) {
 						\ActionScheduler_Logger::instance()->log( $action_id, "Manifest hash changed: `$hash`, processing manifest." );
 					} else {
-						\ActionScheduler_Logger::instance()->log( $action_id, "No previous manifest found, processing manifest." );
+						\ActionScheduler_Logger::instance()->log( $action_id, 'No previous manifest found, processing manifest.' );
 					}
 					Manifest\ManifestProcessor::process_manifest( $json, $action_id );
 					Data\ManifestStore::update_manifest( $manifest_url, $json );
