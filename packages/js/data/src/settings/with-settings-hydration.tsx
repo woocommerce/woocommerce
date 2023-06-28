@@ -12,6 +12,7 @@ import { STORE_NAME } from './constants';
 import { Settings } from './types';
 
 export const withSettingsHydration = ( group: string, settings: Settings ) =>
+	// @ts-expect-error TODO: fix these types.
 	createHigherOrderComponent< Record< string, unknown > >(
 		( OriginalComponent ) => ( props ) => {
 			const settingsRef = useRef( settings );
@@ -27,9 +28,11 @@ export const withSettingsHydration = ( group: string, settings: Settings ) =>
 					const { isResolving, hasFinishedResolution } =
 						select( STORE_NAME );
 					return {
+						// @ts-expect-error TODO: fix these types.
 						isResolvingGroup: isResolving( 'getSettings', [
 							group,
 						] ),
+						// @ts-expect-error TODO: fix these types.
 						hasFinishedResolutionGroup: hasFinishedResolution(
 							'getSettings',
 							[ group ]
@@ -57,6 +60,7 @@ export const withSettingsHydration = ( group: string, settings: Settings ) =>
 				clearIsDirty,
 			] );
 
+			// @ts-expect-error TODO: fix these types.
 			return <OriginalComponent { ...props } />;
 		},
 		'withSettingsHydration'

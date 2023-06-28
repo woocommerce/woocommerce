@@ -118,26 +118,26 @@ export const useUserPreferences = () => {
 	// Get our dispatch methods now - this can't happen inside the callback below.
 	const dispatch = useDispatch( STORE_NAME );
 	const { addEntities, receiveCurrentUser, saveEntityRecord } = dispatch;
-	// @ts-expect-error WP 5.3.x doesn't have the User entity defined.
 	let { saveUser } = dispatch;
 
+	// @ts-expect-error TODO - pass deps to useSelect
 	const userData = useSelect( ( select ) => {
 		const {
 			getCurrentUser,
 			getEntity,
 			getEntityRecord,
-			// @ts-expect-error type definition is missing.
 			getLastEntitySaveError,
-			// @ts-expect-error type definition is missing.
 			hasStartedResolution,
-			// @ts-expect-error type definition is missing.
 			hasFinishedResolution,
 		} = select( STORE_NAME );
 
 		return {
 			isRequesting:
+				// @ts-expect-error TODO - fix the types returned by select
 				hasStartedResolution( 'getCurrentUser' ) &&
+				// @ts-expect-error TODO - fix the types returned by select
 				! hasFinishedResolution( 'getCurrentUser' ),
+			// @ts-expect-error TODO - fix the types returned by select
 			user: getCurrentUser() as WCUser,
 			getCurrentUser,
 			getEntity,

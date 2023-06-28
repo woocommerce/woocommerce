@@ -20,6 +20,7 @@ type PluginHydrationData = {
 	jetpackStatus?: { isActive: boolean };
 };
 export const withPluginsHydration = ( data: PluginHydrationData ) =>
+	// @ts-expect-error TODO: refactor this
 	createHigherOrderComponent< Record< string, unknown > >(
 		( OriginalComponent ) => ( props ) => {
 			const shouldHydrate = useSelect(
@@ -69,6 +70,7 @@ export const withPluginsHydration = ( data: PluginHydrationData ) =>
 				finishResolution( 'isJetpackConnected', [] );
 			}, [ shouldHydrate ] );
 
+			// @ts-expect-error TODO: fix types
 			return <OriginalComponent { ...props } />;
 		},
 		'withPluginsHydration'

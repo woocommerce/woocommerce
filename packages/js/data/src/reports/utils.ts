@@ -314,6 +314,7 @@ export function getSummaryNumbers< T extends ReportStatEndpoint >(
 
 	// Disable eslint rule requiring `getReportStats` to be defined below because the next two statements
 	// depend on `getReportStats` to have been called.
+	// @ts-expect-error TODO: fix these types.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const primary = getReportStats< T >( endpoint, primaryQuery );
 
@@ -333,6 +334,7 @@ export function getSummaryNumbers< T extends ReportStatEndpoint >(
 
 	// Disable eslint rule requiring `getReportStats` to be defined below because the next two statements
 	// depend on `getReportStats` to have been called.
+	// @ts-expect-error TODO: fix these types.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const secondary = getReportStats< T >( endpoint, secondaryQuery );
 

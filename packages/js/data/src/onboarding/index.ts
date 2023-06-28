@@ -18,6 +18,7 @@ import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
+// @ts-expect-error TODO: refactor this, registerStore is deprecated.
 registerStore< State >( STORE_NAME, {
 	reducer: reducer as Reducer< State, AnyAction >,
 	actions,
@@ -32,10 +33,13 @@ export type OnboardingSelector = SelectFromMap< typeof selectors > &
 	WPDataSelectors;
 
 declare module '@wordpress/data' {
+	// @ts-expect-error TODO: fix these types.
 	function dispatch(
 		key: typeof STORE_NAME
 	): DispatchFromMap< typeof actions & WPDataActions >;
+	// @ts-expect-error TODO: fix these types.
 	function select( key: typeof STORE_NAME ): OnboardingSelector;
+	// @ts-expect-error TODO: fix these types.
 	function resolveSelect(
 		key: typeof STORE_NAME
 	): PromiseifySelectors< OnboardingSelector >;

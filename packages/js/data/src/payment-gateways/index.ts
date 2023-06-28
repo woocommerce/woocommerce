@@ -27,13 +27,15 @@ registerStore( STORE_KEY, {
 } );
 
 declare module '@wordpress/data' {
-	// TODO: convert action.js to TS
+	// @ts-expect-error TODO: fix these types.
 	function dispatch(
 		key: typeof STORE_KEY
 	): DispatchFromMap< typeof actions >;
+	// @ts-expect-error TODO: fix these types.
 	function select(
 		key: typeof STORE_KEY
 	): SelectFromMap< typeof selectors > & WPDataActions;
+	// @ts-expect-error TODO: fix these types.
 	function resolveSelect(
 		key: typeof STORE_KEY
 	): PromiseifySelectors< SelectFromMap< typeof selectors > >;

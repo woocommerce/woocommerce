@@ -15,17 +15,19 @@ import { WCUser } from './types';
  * This is a wrapper around @wordpress/core-data's getCurrentUser().
  */
 export const useUser = () => {
+	// @ts-expect-error TODO - pass deps to useSelect
 	const userData = useSelect( ( select ) => {
-		// TODO: Update @types/wordpress__core-data to include the 'hasStartedResolution', 'hasFinishedResolution' method.
-		// @ts-expect-errors Property 'hasStartedResolution', 'hasFinishedResolution' does not exist on type @types/wordpress__core-data
 		const { getCurrentUser, hasStartedResolution, hasFinishedResolution } =
 			select( STORE_NAME );
 
 		return {
 			isRequesting:
+				// @ts-expect-error TODO - fix the types returned by select
 				hasStartedResolution( 'getCurrentUser' ) &&
+				// @ts-expect-error TODO - fix the types returned by select
 				! hasFinishedResolution( 'getCurrentUser' ),
 			// We register additional user data in backend so we need to use a type assertion here for WC user.
+			// @ts-expect-error TODO - fix the types returned by select
 			user: getCurrentUser() as WCUser< 'capabilities' >,
 			getCurrentUser,
 		};

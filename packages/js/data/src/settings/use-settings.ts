@@ -20,14 +20,18 @@ export const useSettings = ( group: string, settingsKeys: string[] = [] ) => {
 					isUpdateSettingsRequesting,
 				} = select( STORE_NAME );
 				return {
+					// @ts-expect-error TODO: fix these types.
 					requestedSettings: getSettingsForGroup(
 						group,
 						settingsKeys
 					),
 					settingsError: Boolean(
+						// @ts-expect-error TODO: fix these types.
 						getLastSettingsErrorForGroup( group )
 					),
+					// @ts-expect-error TODO: fix these types.
 					isRequesting: isUpdateSettingsRequesting( group ),
+					// @ts-expect-error TODO: fix these types.
 					isDirty: getIsDirty( group, settingsKeys ),
 				};
 			},

@@ -44,10 +44,12 @@ export const useOptionsHydration = ( data: Options ) => {
 };
 
 export const withOptionsHydration = ( data: Options ) =>
+	// @ts-expect-error TODO: fix these types.
 	createHigherOrderComponent< Record< string, unknown > >(
 		( OriginalComponent ) => ( props ) => {
 			useOptionsHydration( data );
 
+			// @ts-expect-error TODO: fix these types.
 			return <OriginalComponent { ...props } />;
 		},
 		'withOptionsHydration'

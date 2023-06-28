@@ -18,6 +18,7 @@ import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
 
+// @ts-expect-error - this needs refactoring now its deprecated.
 registerStore< State >( STORE_NAME, {
 	reducer: reducer as Reducer< State, AnyAction >,
 	actions,
@@ -29,13 +30,15 @@ registerStore< State >( STORE_NAME, {
 export const COUNTRIES_STORE_NAME = STORE_NAME;
 
 declare module '@wordpress/data' {
-	// TODO: convert action.js to TS
+	// @ts-expect-error TODO: fix types.
 	function dispatch(
 		key: typeof STORE_NAME
 	): DispatchFromMap< typeof actions >;
+	// @ts-expect-error TODO: fix types.
 	function select(
 		key: typeof STORE_NAME
 	): SelectFromMap< typeof selectors > & WPDataSelectors;
+	// @ts-expect-error TODO: fix types.
 	function resolveSelect(
 		key: typeof STORE_NAME
 	): PromiseifySelectors< SelectFromMap< typeof selectors > >;

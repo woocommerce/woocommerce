@@ -54,10 +54,13 @@ export type ReportsSelect = WPDataSelectors &
 	};
 
 declare module '@wordpress/data' {
+	// @ts-expect-error TODO: convert action.js to TS
 	function dispatch(
 		key: typeof STORE_NAME
 	): DispatchFromMap< typeof actions & WPDataActions >;
+	// @ts-expect-error TODO: convert action.js to TS
 	function select( key: typeof STORE_NAME ): ReportsSelect;
+	// @ts-expect-error TODO: convert action.js to TS
 	function resolveSelect(
 		key: typeof STORE_NAME
 	): PromiseifySelectors< ReportsSelect >;

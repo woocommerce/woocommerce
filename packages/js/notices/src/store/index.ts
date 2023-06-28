@@ -17,6 +17,7 @@ export * from './types';
 export const STORE_NAME = 'core/notices2';
 // NOTE: This uses core/notices2, if this file is copied back upstream
 // to Gutenberg this needs to be changed back to core/notices.
+// @ts-expect-error - this needs refactoring now its deprecated.
 export default registerStore< State >( STORE_NAME, {
 	reducer: reducer as Reducer< State, AnyAction >,
 	actions,
@@ -24,10 +25,11 @@ export default registerStore< State >( STORE_NAME, {
 } );
 
 declare module '@wordpress/data' {
-	// TODO: convert action.js to TS
+	// @ts-expect-error TODO: convert action.js to TS
 	function dispatch(
 		key: typeof STORE_NAME
 	): DispatchFromMap< typeof actions >;
+	// @ts-expect-error TODO: convert action.js to TS
 	function select(
 		key: typeof STORE_NAME
 	): SelectFromMap< typeof selectors >;

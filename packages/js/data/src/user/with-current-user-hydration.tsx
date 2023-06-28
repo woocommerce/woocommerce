@@ -17,30 +17,28 @@ import { WCUser } from './types';
  * @param {Object} currentUser Current user object in the same format as the WP REST API returns.
  */
 export const withCurrentUserHydration = ( currentUser: WCUser ) =>
+	// @ts-expect-error TODO: refactor this
 	createHigherOrderComponent< Record< string, unknown > >(
 		( OriginalComponent ) => ( props ) => {
 			// Use currentUser to hydrate calls to @wordpress/core-data's getCurrentUser().
 
+			// @ts-expect-error TODO: refactor this
 			const shouldHydrate = useSelect( ( select ) => {
 				if ( ! currentUser ) {
 					return;
 				}
-				// @ts-expect-error both functions are not defined in the wp.data typings
 				const { isResolving, hasFinishedResolution } =
 					select( STORE_NAME );
 				return (
+					// @ts-expect-error TODO: fix these types.
 					! isResolving( 'getCurrentUser' ) &&
+					// @ts-expect-error TODO: fix these types.
 					! hasFinishedResolution( 'getCurrentUser' )
 				);
 			} );
 
-			const {
-				// @ts-expect-error startResolution is not defined in the wp.data typings
-				startResolution,
-				// @ts-expect-error finishResolution is not defined in the wp.data typings
-				finishResolution,
-				receiveCurrentUser,
-			} = useDispatch( STORE_NAME );
+			const { startResolution, finishResolution, receiveCurrentUser } =
+				useDispatch( STORE_NAME );
 
 			if ( shouldHydrate ) {
 				startResolution( 'getCurrentUser', [] );
@@ -48,6 +46,7 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				finishResolution( 'getCurrentUser', [] );
 			}
 
+			// @ts-expect-error TODO: fix these types.
 			return <OriginalComponent { ...props } />;
 		},
 		'withCurrentUserHydration'

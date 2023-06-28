@@ -27,11 +27,11 @@
 	"react-native": "src/index",
 	"dependencies": {
 		"@woocommerce/number": "workspace:*",
-		"@wordpress/deprecated": "wp-6.0",
-		"@wordpress/element": "wp-6.0",
-		"@wordpress/hooks": "wp-6.0",
-		"@wordpress/html-entities": "wp-6.0",
-		"@wordpress/i18n": "wp-6.0"
+		"@wordpress/deprecated": "wp-6.1",
+		"@wordpress/element": "wp-6.1",
+		"@wordpress/hooks": "wp-6.1",
+		"@wordpress/html-entities": "wp-6.1",
+		"@wordpress/i18n": "wp-6.1"
 	},
 	"publishConfig": {
 		"access": "public"

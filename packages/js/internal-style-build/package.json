@@ -23,7 +23,7 @@
 	"main": "index.js",
 	"dependencies": {
 		"@automattic/color-studio": "^2.5.0",
-		"@wordpress/base-styles": "wp-6.0",
+		"@wordpress/base-styles": "wp-6.1",
 		"@wordpress/postcss-plugins-preset": "wp-6.0",
 		"css-loader": "^3.6.0",
 		"mini-css-extract-plugin": "^2.6.0",

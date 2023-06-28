@@ -16,16 +16,20 @@ export const withOnboardingHydration = ( data: {
 } ) => {
 	let hydratedProfileItems = false;
 
+	// @ts-expect-error TODO: fix types.
 	return createHigherOrderComponent< Record< string, unknown > >(
 		( OriginalComponent ) => ( props ) => {
 			const onboardingRef = useRef( data );
 
+			// @ts-expect-error TODO: fix types.
 			const { isResolvingGroup, hasFinishedResolutionGroup } = useSelect(
 				( select ) => {
 					const { isResolving, hasFinishedResolution } =
 						select( STORE_NAME );
 					return {
+						// @ts-expect-error TODO: fix types.
 						isResolvingGroup: isResolving( 'getProfileItems', [] ),
+						// @ts-expect-error TODO: fix types.
 						hasFinishedResolutionGroup: hasFinishedResolution(
 							'getProfileItems',
 							[]
@@ -68,6 +72,7 @@ export const withOnboardingHydration = ( data: {
 				hasFinishedResolutionGroup,
 			] );
 
+			// @ts-expect-error TODO: fix types.
 			return <OriginalComponent { ...props } />;
 		},
 		'withOnboardingHydration'
