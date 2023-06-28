@@ -94,7 +94,7 @@ const Step: React.FunctionComponent<
 		<Card
 			ref={ stepRef as React.LegacyRef< HTMLDivElement > }
 			className="woocommerce-tour-kit-step"
-			isElevated
+			elevation={ 2 }
 		>
 			<CardHeader isBorderless={ true } size="small">
 				<StepControls onDismiss={ onDismiss } />
