@@ -132,7 +132,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		 *
 		 * For more details, see https://github.com/woocommerce/woocommerce/issues/38979
 		 */
-		if ( Constants::get_constant( 'JETPACK__VERSION' ) === null ) {
+		if ( Constants::get_constant( 'JETPACK__VERSION' ) === null && wp_is_mobile() ) {
 			register_rest_route(
 				'jetpack/v4',
 				'/connection/data',
