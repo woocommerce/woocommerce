@@ -9,6 +9,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Admin\Features\NewProductManagementExperience;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -89,7 +90,8 @@ class FeaturesController {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		$features = array(
+		$hpos_enable_sync = DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
+		$features         = array(
 			'analytics'            => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
 				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
@@ -109,13 +111,9 @@ class FeaturesController {
 				'is_experimental' => true,
 				'disable_ui'      => false,
 			),
-			'custom_order_tables'  => array(
-				'name'            => __( 'Data Storage for Orders', 'woocommerce' ),
-				'description'     => __( 'Enable the high performance order storage feature.', 'woocommerce' ),
-				'is_experimental' => true,
-				'disable_ui'      => false,
-				'type'            => 'hpos_setting',
-			),
+			// Options HPOS features are added in CustomOrdersTableController to keep the logic in same place.
+			'custom_order_tables'  => array(),
+			$hpos_enable_sync      => array(),
 			'cart_checkout_blocks' => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
@@ -609,7 +607,7 @@ class FeaturesController {
 	 * @return array The parameters to add to the settings array.
 	 */
 	private function get_setting_for_feature( string $feature_id, array $feature, bool $admin_features_disabled ): array {
-		$description = $feature['description'];
+		$description = $feature['description'] ?? '';
 		$disabled    = false;
 		$desc_tip    = '';
 		$tooltip     = $feature['tooltip'] ?? '';
@@ -681,7 +679,7 @@ class FeaturesController {
 		 */
 		$desc_tip = apply_filters( 'woocommerce_feature_description_tip', $desc_tip, $feature_id, $disabled );
 
-		return array(
+		$feature_setting = array(
 			'title'    => $feature['name'],
 			'desc'     => $description,
 			'type'     => $type,
@@ -691,6 +689,13 @@ class FeaturesController {
 			'tooltip'  => $tooltip,
 			'default'  => $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no',
 		);
+
+		/**
+		 * Allows to modify feature setting that will be used to render in the feature page.
+		 *
+		 * @since 8.0.0
+		 */
+		return apply_filters( 'woocommerce_feature_setting', $feature_setting, $feature_id );
 	}
 
 	/**

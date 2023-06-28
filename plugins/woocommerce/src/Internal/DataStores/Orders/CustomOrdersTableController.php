@@ -128,7 +128,7 @@ class CustomOrdersTableController {
 		self::add_action( 'woocommerce_update_options_advanced_custom_data_stores', array( $this, 'process_options_updated' ), 10, 0 );
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enabled_changed' ), 10, 2 );
-		self::add_action( 'woocommerce_admin_field_hpos_setting', array( $this, 'render_hpos_setting' ), 10, 2 );
+		self::add_action( 'woocommerce_feature_setting', array( $this, 'get_hpos_feature_setting' ), 10, 2 );
 	}
 
 	/**
@@ -620,92 +620,79 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Renders the HPOS setting in Features section of the settings page.
+	 * Returns the HPOS setting for rendering in Features section of the settings page.
 	 *
-	 * @param array $value HPOS feature value as defined in the feature controller.
+	 * @param array  $feature_setting HPOS feature value as defined in the feature controller.
+	 * @param string $feature_id ID of the feature.
+	 *
+	 * @return array Feature setting object.
 	 */
-	private function render_hpos_setting( array $value ) {
-		$hpos_enabled            = $this->custom_orders_table_usage_is_enabled();
-		$sync_status             = $this->data_synchronizer->get_sync_status();
-		$sync_is_pending         = 0 !== $sync_status['current_pending_count'];
-		$sync_in_progress        = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
-		$sync_enabled            = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
-		$plugin_info             = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables' );
-		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
-		$can_hpos_enabled        = count( array_merge( $plugin_info['compatible'], $plugin_info['incompatible'] ) ) === 0;
-		?>
-		<fieldset>
-			<tr>
-				<th scope="row" class="titledesc">
-					<?php echo esc_html( $value['title'] ); ?><br>
-				</th>
-				<td class="forminp">
-					<ul>
-						<li>
-							<label>
-								<input
-									type="radio"
-									name="<?php echo esc_attr( $value['field_name'] ); ?>"
-									value="post"
-									<?php checked( ! $hpos_enabled ); ?>
-									<?php disabled( $sync_is_pending ); ?>
-									class="<?php echo esc_attr( $value['class'] ); ?>"
-								/>
-								<?php echo esc_html( __( 'Posts table', 'woocommerce' ) ); ?>
-							</label>
-						</li>
-						<li>
-							<label>
-								<input
-									type="radio"
-									name="<?php echo esc_attr( $value['field_name'] ); ?>"
-									value="hpos"
-									<?php checked( $hpos_enabled ); ?>
-									<?php disabled( $sync_is_pending || ( ! $can_hpos_enabled ) ); ?>
-									class="<?php echo esc_attr( $value['class'] ); ?>"
-								/>
-								<?php echo esc_html( __( 'High Performance Order Storage (COT)', 'woocommerce' ) ); ?>
-								<br>
-								<p class="description description-thin" style="margin-top: 0.5rem;"><?php echo wp_kses_post( $plugin_incompat_warning ); ?></p>
-							</label>
-						</li>
-					</ul>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td class="forminp" style="padding-top: 0px;">
-					<label for="<?php echo esc_attr( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ); ?>">
-						<input
-							name="<?php echo esc_attr( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ); ?>"
-							id="<?php echo esc_attr( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ); ?>"
-							type="checkbox"
-							value="yes"
-							<?php checked( 'yes', $sync_enabled ); ?>
-						><?php echo esc_html( __( 'Keep posts and orders table in sync (Compatibility mode).', 'woocommerce' ) ); ?>
-					</label>
-					<p class="description description-thin">
-					<?php
-					if ( $sync_in_progress ) {
-						echo esc_html(
-							sprintf(
-								__( 'Sync in progress... %d orders pending. ', 'woocommerce' ),
-								$sync_status['current_pending_count']
-							)
-						);
-					}
-					?>
-					</p>
-				</td>
-			</tr>
-			<tr>
-				<td></td>
-				<td class="forminp">
-
-				</td>
-			</tr>
-		</fieldset>
-		<?php
+	private function get_hpos_feature_setting( array $feature_setting, string $feature_id ) {
+		if ( ! in_array( $feature_id, array( 'custom_order_tables', DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ), true ) ) {
+			return $feature_setting;
+		}
+		$sync_status = $this->data_synchronizer->get_sync_status();
+		if ( 'custom_order_tables' === $feature_id ) {
+			return $this->get_hpos_enable_feature_setting( $sync_status );
+		}
+		return $this->get_hpos_sync_enable_feature_setting( $sync_status );
 	}
 
+	/**
+	 * Returns the HPOS setting for rendering HPOS vs Post setting block in Features section of the settings page.
+	 *
+	 * @param array $sync_status Details of sync status, includes pending count, and count when sync started.
+	 *
+	 * @return array Feature setting object.
+	 */
+	private function get_hpos_enable_feature_setting( $sync_status ) {
+		$hpos_enabled            = $this->custom_orders_table_usage_is_enabled();
+		$plugin_info             = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables' );
+		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
+		$sync_complete           = 0 === $sync_status['current_pending_count'];
+		$can_hpos_enabled        = count( array_merge( $plugin_info['compatible'], $plugin_info['incompatible'] ) ) === 0;
+
+		return array(
+			'id'          => 'woocommerce_feature_custom_order_tables_enabled',
+			'title'       => __( 'Data storage for orders', 'woocommerce' ),
+			'type'        => 'radio',
+			'options'     => array(
+				'post' => __( 'WordPress Post tables', 'woocommerce' ),
+				'hpos' => __( 'High performance order storage (new)', 'woocommerce' ),
+			),
+			'value'       => $hpos_enabled ? 'hpos' : 'post',
+			'disabled'    => $can_hpos_enabled && $sync_complete ? array() : array( 'hpos' ),
+			'desc'        => $plugin_incompat_warning,
+			'desc_at_end' => true,
+		);
+	}
+
+	/**
+	 * Returns the setting for rendering sync enabling setting block in Features section of the settings page.
+	 *
+	 * @param array $sync_status Details of sync status, includes pending count, and count when sync started.
+	 *
+	 * @return array Feature setting object.
+	 */
+	private function get_hpos_sync_enable_feature_setting( $sync_status ) {
+		$sync_in_progress = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
+		$sync_enabled     = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		$sync_message     = '';
+		if ( $sync_in_progress ) {
+			$sync_message = sprintf(
+				// translators: %d: number of pending orders.
+				__( 'Currently syncing orders... %d pending', 'woocommerce' ),
+				$sync_status['current_pending_count']
+			);
+		}
+
+		return array(
+			'id'       => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			'title'    => '',
+			'type'     => 'checkbox',
+			'desc'     => __( 'Keep posts and orders table in sync. (Compatibility mode)', 'woocommerce' ),
+			'value'    => $sync_enabled,
+			'desc_tip' => $sync_message,
+		);
+	}
 }
