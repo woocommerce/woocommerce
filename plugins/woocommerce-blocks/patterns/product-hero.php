@@ -4,43 +4,43 @@
  * Slug: woocommerce-blocks/product-hero
  * Categories: WooCommerce
  */
+
+$query = new \WC_Product_Query(
+	array(
+		'limit'  => 1,
+		'return' => 'ids',
+		'status' => array( 'publish' ),
+	)
+);
+
+$products   = $query->get_products();
+$product_id = $products ? $products[0] : null;
 ?>
-<!-- wp:group {"align":"wide","style":{"color":{"background":"#6b7ba8"},"spacing":{"blockGap":"0","padding":{"top":"1em","right":"1em","bottom":"1em","left":"1em"}}},"textColor":"background","layout":{"type":"constrained","contentSize":"100%","justifyContent":"left"}} -->
-<div class="wp-block-group alignwide has-background-color has-text-color has-background" style="background-color:#6b7ba8;padding-top:1em;padding-right:1em;padding-bottom:1em;padding-left:1em">
-	<!-- wp:columns -->
-	<div class="wp-block-columns">
-		<!-- wp:column {"width":"40%"} -->
-		<div class="wp-block-column" style="flex-basis:40%"><!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
-			<figure class="wp-block-image size-full"><img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/leather-guitar-typewriter-red-gadget-sofa.png', dirname( __FILE__ ) ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section.', 'woo-gutenberg-products-block' ); ?>" class="wp-image-1"/></figure>
-			<!-- /wp:image --></div>
-		<!-- /wp:column -->
 
-		<!-- wp:column {"width":"60%","style":{"spacing":{"padding":{"top":"3em","left":"0em","bottom":"3em"}}}} -->
-		<div class="wp-block-column" style="padding-top:3em;padding-bottom:3em;padding-left:0em;flex-basis:60%">
-			<!-- wp:heading {"style":{"typography":{"lineHeight":"0"},"color":{"text":"#ffffff"}},"fontSize":"large"} -->
-			<h2 class="wp-block-heading has-text-color has-large-font-size" style="color:#ffffff;line-height:0">Mini 5 Dreamer</h2>
-			<!-- /wp:heading -->
-
-			<!-- wp:paragraph {"style":{"typography":{"fontSize":"1em"},"color":{"text":"#ffffff"}}} -->
-			<p class="has-text-color" style="color:#ffffff;font-size:1em"><strong>$1,999</strong></p>
-			<!-- /wp:paragraph -->
-
-			<!-- wp:buttons -->
-			<div class="wp-block-buttons">
-				<!-- wp:button {"style":{"typography":{"fontSize":"0.8em"},"spacing":{"padding":{"left":"2em","right":"2em"}},"color":{"text":"#ffffff","background":"#000000"},"border":{"width":"0px","style":"none"}}} -->
-				<div class="wp-block-button has-custom-font-size" style="font-size:0.8em">
-					<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="wp-block-button__link has-text-color has-background wp-element-button" style="border-style:none;border-width:0px;color:#ffffff;background-color:#000000;padding-right:2em;padding-left:2em">Add to cart</a>
-				</div>
-				<!-- /wp:button -->
-			</div>
-			<!-- /wp:buttons -->
-
-			<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.8em"},"color":{"text":"#ffffff"}}} -->
-			<p class="has-text-color" style="color:#ffffff;font-size:0.8em">The Bluetooth keyboard, a striking homage to classic typewriters with its round, tactile keys and vintage aesthetic, merges nostalgia with modern connectivity for a unique typing experience.</p>
-			<!-- /wp:paragraph -->
+<!-- wp:woocommerce/single-product {"productId":<?php echo esc_attr( $product_id ); ?>,"align":"wide"} -->
+<div class="wp-block-woocommerce-single-product alignwide">
+	<!-- wp:columns {"style":{"color":{"background":"#6b7ba8"},"elements":{"link":{"color":{"text":"var:preset|color|base"}}},"spacing":{"padding":{"left":"20px"}}},"textColor":"base"} -->
+	<div class="wp-block-columns has-base-color has-text-color has-background has-link-color" style="background-color:#6b7ba8;padding-left:20px">
+		<!-- wp:column {"width":"40%","style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
+		<div class="wp-block-column" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0;flex-basis:40%">
+			<!-- wp:post-featured-image {"height":"300px"} /-->
 		</div>
 		<!-- /wp:column -->
+
+		<!-- wp:column {"style":{"spacing":{"padding":{"top":"1.5em","bottom":"1.5em"}}}} -->
+		<div class="wp-block-column" style="padding-top:1.5em;padding-bottom:1.5em">
+			<!-- wp:post-title {"textAlign":"","isLink":true,"style":{"typography":{"fontStyle":"normal","fontWeight":"400"},"spacing":{"margin":{"top":"0","right":"0","bottom":"0","left":"0"}}},"fontSize":"large","__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
+
+			<!-- wp:woocommerce/product-price {"isDescendentOfSingleProductBlock":true,"style":{"typography":{"fontStyle":"normal","fontWeight":"700","fontSize":"16px","lineHeight":"0.1"}}} /-->
+
+			<!-- wp:woocommerce/product-button {"style":{"color":{"background":"#000001","text":"#fffff1"},"spacing":{"padding":{"left":"30px","right":"30px"},"margin":{"top":"15px"}},"typography":{"fontSize":"15px"}}} -->
+			<div class="wp-block-woocommerce-product-button is-loading" style="font-size:15px"></div>
+			<!-- /wp:woocommerce/product-button -->
+
+			<!-- wp:post-excerpt {"style":{"typography":{"fontSize":"14px"}},"__woocommerceNamespace":"woocommerce/product-query/product-summary"} /-->
 		</div>
-	<!-- /wp:columns -->
+		<!-- /wp:column -->
 	</div>
-<!-- /wp:group -->
+	<!-- /wp:columns -->
+</div>
+<!-- /wp:woocommerce/single-product -->
