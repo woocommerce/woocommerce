@@ -2148,12 +2148,16 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testWith [true]
+	 *           [false]
 	 * @testDox An exception thrown while populating the properties of an order is captured and logged as a warning.
+	 *
+	 * @param bool $orders_authoritative Whether the orders table is authoritative or not.
 	 */
-	public function test_error_when_setting_order_property_is_captured_and_logged() {
+	public function test_error_when_setting_order_property_is_captured_and_logged( bool $orders_authoritative ) {
 		global $wpdb;
 
-		$this->toggle_cot( true );
+		$this->toggle_cot( $orders_authoritative );
 		$this->disable_cot_sync();
 
 		// phpcs:disable Squiz.Commenting
@@ -2199,13 +2203,23 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $order->get_id(), $refund->get_parent_id() );
 
-		$wpdb->update(
-			$this->sut::get_orders_table_name(),
-			array( 'parent_order_id' => 999999 ),
-			array( 'id' => $refund->get_id() ),
-			array( 'parent_order_id' => '%d' ),
-			array( 'id' => '%d' ),
-		);
+		if ( $orders_authoritative ) {
+			$wpdb->update(
+				$this->sut::get_orders_table_name(),
+				array( 'parent_order_id' => 999999 ),
+				array( 'id' => $refund->get_id() ),
+				array( 'parent_order_id' => '%d' ),
+				array( 'id' => '%d' ),
+			);
+		} else {
+			$wpdb->update(
+				$wpdb->posts,
+				array( 'post_parent' => 999999 ),
+				array( 'ID' => $refund->get_id() ),
+				array( 'post_parent' => '%d' ),
+				array( 'ID' => '%d' ),
+			);
+		}
 
 		$refund = wc_get_order( $refund->get_id() );
 
