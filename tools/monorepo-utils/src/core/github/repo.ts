@@ -95,7 +95,7 @@ export const getRefFromGithubBranch = async (
 			}
 		` );
 
-	// @ts-ignore: The graphql query is typed, but the response is not.
+	// @ts-expect-error: The graphql query is typed, but the response is not.
 	return repository.ref.target.history.edges.shift().node.oid;
 };
 
@@ -167,7 +167,7 @@ export const createPullRequest = async ( options: {
 		}
 	);
 
-	//@ts-ignore There is a type mismatch between the graphql schema and the response. pullRequest.data.head.repo.has_discussions is a boolean, but the graphql schema doesn't have that field.
+	//@ts-expect-error There is a type mismatch between the graphql schema and the response. pullRequest.data.head.repo.has_discussions is a boolean, but the graphql schema doesn't have that field.
 	return pullRequest.data;
 };
 
@@ -175,9 +175,9 @@ export const createPullRequest = async ( options: {
  * Get a pull request from GitHub.
  *
  * @param {Object} options
- * @param {string} options.owner repository owner.
- * @param {string} options.name  repository name.
- * @param          prNumber      pull request number.
+ * @param {string} options.owner    repository owner.
+ * @param {string} options.name     repository name.
+ * @param {string} options.prNumber pull request number.
  * @return {Promise<object>}     pull request data.
  */
 export const getPullRequest = async ( options: {
@@ -195,7 +195,7 @@ export const getPullRequest = async ( options: {
 		}
 	);
 
-	//@ts-ignore Not sure why this error comes up. All versions are up to date and the schema is correct.
+	//@ts-expect-error Not sure why this error comes up. All versions are up to date and the schema is correct.
 	return pr.data;
 };
 

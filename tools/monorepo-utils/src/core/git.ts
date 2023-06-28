@@ -156,7 +156,7 @@ export const cloneAuthenticatedRepo = async (
 /**
  * Do a minimal sparse checkout of a github repo.
  *
- * @param {string}        githubRepoUrl -     the URL to the repo to checkout.
+ * @param {string}        githubRepoUrl - the URL to the repo to checkout.
  * @param {string}        path          - the path to checkout to.
  * @param {Array<string>} directories   - the files or directories to checkout.
  * @param {string}        base          - the base branch to checkout from. Defaults to trunk.
@@ -193,7 +193,7 @@ export const sparseCheckoutRepo = async (
 /**
  * Do a minimal sparse checkout of a github repo without history.
  *
- * @param {string}        githubRepoUrl -     the URL to the repo to checkout.
+ * @param {string}        githubRepoUrl - the URL to the repo to checkout.
  * @param {string}        path          - the path to checkout to.
  * @param {Array<string>} directories   - the files or directories to checkout.
  * @return {Promise<string>}  the path to the cloned repo.
@@ -268,7 +268,7 @@ const refIsHash = ( ref: string ) => {
  * formed hash is provided it is returned unmodified.
  *
  * @param {string} baseDir - the dir of the git repo to get the hash from.
- * @param {string} ref     -    Either a commit hash or a branch name.
+ * @param {string} ref     - Either a commit hash or a branch name.
  * @return {string} - the commit hash of the ref.
  */
 export const getCommitHash = async ( baseDir: string, ref: string ) => {

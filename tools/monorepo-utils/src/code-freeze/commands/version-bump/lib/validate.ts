@@ -12,7 +12,7 @@ import { Logger } from '../../../../core/logger';
 /**
  * Get a plugin's current version.
  *
- * @param  tmpRepoPath cloned repo path
+ * @param tmpRepoPath cloned repo path
  */
 export const getCurrentVersion = async (
 	tmpRepoPath: string
@@ -44,11 +44,10 @@ export const stripPrereleaseParameters = (
 };
 
 /**
- * Validate inputs.
+ * Validate the arguments passed to the version bump command.
  *
- * @param  plugin          plugin
- * @param  options         options
- * @param  options.version version
+ * @param tmpRepoPath cloned repo path
+ * @param version     version to bump to
  */
 export const validateArgs = async (
 	tmpRepoPath: string,

@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import path from 'path';
-
-/**
  * Internal dependencies
  */
 import {
