@@ -633,7 +633,6 @@ class CustomOrdersTableController {
 		$plugin_info             = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables' );
 		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
 		$can_hpos_enabled        = count( array_merge( $plugin_info['compatible'], $plugin_info['incompatible'] ) ) === 0;
-
 		?>
 		<fieldset>
 			<tr>
@@ -683,8 +682,20 @@ class CustomOrdersTableController {
 							type="checkbox"
 							value="yes"
 							<?php checked( 'yes', $sync_enabled ); ?>
-						><?php echo esc_html( __( 'Keep posts and orders table in sync', 'woocommerce' ) ); ?>
+						><?php echo esc_html( __( 'Keep posts and orders table in sync (Compatibility mode).', 'woocommerce' ) ); ?>
 					</label>
+					<p class="description description-thin">
+					<?php
+					if ( $sync_in_progress ) {
+						echo esc_html(
+							sprintf(
+								__( 'Sync in progress... %d orders pending. ', 'woocommerce' ),
+								$sync_status['current_pending_count']
+							)
+						);
+					}
+					?>
+					</p>
 				</td>
 			</tr>
 			<tr>
