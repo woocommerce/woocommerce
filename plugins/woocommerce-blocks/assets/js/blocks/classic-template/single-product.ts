@@ -27,6 +27,7 @@ const getBlockifiedTemplate = () =>
 					{
 						type: 'constrained',
 						justifyContent: 'right',
+						width: '512px',
 					},
 					[ createBlock( 'woocommerce/product-image-gallery' ) ]
 				),
