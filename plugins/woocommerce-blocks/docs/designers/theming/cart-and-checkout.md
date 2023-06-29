@@ -2,9 +2,9 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Buttons](#buttons)
-- [Mobile submit container](#mobile-submit-container)
-- [Item quantity badge](#item-quantity-badge)
+-   [Buttons](#buttons)
+-   [Mobile submit container](#mobile-submit-container)
+-   [Item quantity badge](#item-quantity-badge)
 
 ## Buttons
 
@@ -87,4 +87,3 @@ By default, it uses a combination of black and white borders and shadows so it h
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/designers/theming/cart-and-checkout.md)
 
 <!-- /FEEDBACK -->
-

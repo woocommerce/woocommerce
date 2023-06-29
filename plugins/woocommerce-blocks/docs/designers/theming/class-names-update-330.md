@@ -26,4 +26,3 @@ In [WooCommerce Blocks 3.3.0](https://developer.woocommerce.com/2020/09/02/wooco
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/designers/theming/class-names-update-330.md)
 
 <!-- /FEEDBACK -->
-

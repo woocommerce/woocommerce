@@ -74,8 +74,8 @@ This only needs done if the patch release needs to be included in WooCommerce Co
 -   [ ] Create a pull request for updating the package in WooCommerce core (based off of the WooCommerce core release branch this is deployed for).
 
     -   [ ] Set the base branch (the branch that your PR will be merged into) to the correct one. It must be:
-        - `trunk` if the WC Blocks version you are releasing is higher than the one in core (you can find the current WC Blocks version in core in `plugins/woocommerce/composer.json`)
-        - `release/x.y` if the WC Blocks version in core is higher than the one you are releasing (`x.y` must be the version of WC core that will include the version of WC Blocks you are releasing)
+        -   `trunk` if the WC Blocks version you are releasing is higher than the one in core (you can find the current WC Blocks version in core in `plugins/woocommerce/composer.json`)
+        -   `release/x.y` if the WC Blocks version in core is higher than the one you are releasing (`x.y` must be the version of WC core that will include the version of WC Blocks you are releasing)
     -   The content for the pull release can follow [this example](https://github.com/woocommerce/woocommerce/pull/32627).
 
         -   [ ] Increase the version of `woocommerce/woocommerce-blocks` in the `plugins/woocommerce/composer.json` file

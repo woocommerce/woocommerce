@@ -4,9 +4,6 @@
 import { Page } from '@playwright/test';
 import { Editor } from '@wordpress/e2e-test-utils-playwright';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
-/**
- * Internal dependencies
- */
 
 export class EditorUtils {
 	editor: Editor;
@@ -65,5 +62,13 @@ export class EditorUtils {
 				.select( 'core/block-editor' )
 				.getBlockRootClientId( id );
 		}, clientId );
+	}
+
+	async enterEditMode() {
+		await this.editor.page.waitForSelector(
+			'.edit-site-visual-editor__editor-canvas[role="button"]',
+			{ timeout: 3000 }
+		);
+		await this.editor.canvas.click( 'body' );
 	}
 }

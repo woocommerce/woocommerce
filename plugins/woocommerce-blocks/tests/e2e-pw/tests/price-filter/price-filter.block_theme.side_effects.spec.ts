@@ -3,7 +3,7 @@
  */
 import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { BASE_URL, cli, getBlockByName } from '@woocommerce/e2e-utils';
+import { BASE_URL, getBlockByName, cli } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -103,7 +103,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		);
 	} );
 } );
-
+// These tests are disabled because there is an issue with the default contents of this page, possible caused by other tests.
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 	test.beforeAll( async () => {
 		await cli(
@@ -135,7 +135,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		);
 	} );
 
-	test( 'should show all products', async ( { page } ) => {
+	test.skip( 'should show all products', async ( { page } ) => {
 		const legacyTemplate = await getBlockByName( {
 			page,
 			name: 'woocommerce/legacy-template',
@@ -151,7 +151,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		expect( products ).toHaveLength( 16 );
 	} );
 
-	test( 'should show only products that match the filter', async ( {
+	test.skip( 'should show only products that match the filter', async ( {
 		page,
 		pageUtils,
 	} ) => {

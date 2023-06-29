@@ -114,10 +114,10 @@ const onClickCallback = ( {
 	}
 };
 
-export {
-	getBlockifiedTemplate,
-	isConversionPossible,
-	getDescription,
+const blockifyConfig = {
 	getButtonLabel,
 	onClickCallback,
+	getBlockifiedTemplate,
 };
+
+export { isConversionPossible, getDescription, blockifyConfig };

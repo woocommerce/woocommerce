@@ -145,4 +145,3 @@ The `checkPaymentMethodsCanPay()` [function](https://github.com/woocommerce/wooc
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/how-checkout-processes-an-order.md)
 
 <!-- /FEEDBACK -->
-

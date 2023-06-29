@@ -24,6 +24,52 @@ class Cart extends AbstractBlock {
 	protected $chunks_folder = 'cart-blocks';
 
 	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
+	protected function initialize() {
+		parent::initialize();
+		add_action( 'wp_loaded', array( $this, 'register_patterns' ) );
+	}
+
+	/**
+	 * Register block pattern for Empty Cart Message to make it translatable.
+	 */
+	public function register_patterns() {
+		$shop_permalink = wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : '';
+
+		register_block_pattern(
+			'woocommerce/cart-cross-sells-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"fontSize":"large"} --><h2 class="wp-block-heading has-large-font-size">' . esc_html__( 'You may be interested in…', 'woo-gutenberg-products-block' ) . '</h2><!-- /wp:heading -->',
+			)
+		);
+		register_block_pattern(
+			'woocommerce/cart-empty-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '
+					<!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} --><h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . esc_html__( 'Your cart is currently empty!', 'woo-gutenberg-products-block' ) . '</h2><!-- /wp:heading -->
+					<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><a href="' . esc_attr( esc_url( $shop_permalink ) ) . '">' . esc_html__( 'Browse store', 'woo-gutenberg-products-block' ) . '</a></p><!-- /wp:paragraph -->
+				',
+			)
+		);
+		register_block_pattern(
+			'woocommerce/cart-new-in-store-message',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . esc_html__( 'New in store', 'woo-gutenberg-products-block' ) . '</h2><!-- /wp:heading -->',
+			)
+		);
+	}
+
+	/**
 	 * Get the editor script handle for this block type.
 	 *
 	 * @param string $key Data to get, or default to everything.
@@ -169,6 +215,7 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled(), true );
 		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ), true );
 		$this->asset_data_registry->register_page_id( isset( $attributes['checkoutPageId'] ) ? $attributes['checkoutPageId'] : 0 );
+		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme(), true );
 
 		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', [] );
 		$this->asset_data_registry->add( 'localPickupEnabled', wc_string_to_bool( $pickup_location_settings['enabled'] ?? 'no' ), true );
