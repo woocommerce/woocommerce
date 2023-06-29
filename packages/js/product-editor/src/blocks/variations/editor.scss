@@ -1,6 +1,16 @@
 .wp-block-woocommerce-product-variations-fields {
 	margin-top: $grid-unit-80;
 
+	&--has-attributes {
+		.wp-block-woocommerce-product-variations-fields__heading {
+			display: none;
+		}
+
+		.wp-block-woocommerce-product-variations-fields__content {
+			display: block;
+		}
+	}
+
 	&__heading {
 		text-align: center;
 	}
@@ -13,5 +23,9 @@
 	&__heading-description {
 		margin: 0;
 		padding-bottom: $grid-unit-30;
+	}
+
+	&__content {
+		display: none;
 	}
 }
