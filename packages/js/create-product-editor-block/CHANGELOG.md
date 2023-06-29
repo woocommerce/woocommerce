@@ -10,5 +10,3 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 -   Minor - Initial version of @woocommerce/create-product-editor-block [#38263]
 -   Minor - Do not add script prop to generated block.json [#38496]
-
-[See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/create-product-editor-block/CHANGELOG.md).
