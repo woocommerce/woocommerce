@@ -7,6 +7,9 @@
 
 namespace WooCommerceDocs\App;
 
+use WooCommerceDocs\Data;
+use WooCommerceDocs\API;
+
 /**
  * A class to set up the plugin.
  */
@@ -16,9 +19,13 @@ class Bootstrap {
 	 * Bootstrap the plugin.
 	 */
 	public static function bootstrap() {
-		add_action( 'admin_menu', array( '\WooCommerceDocs\App\Bootstrap', 'add_admin_menu' ) );
-		add_action( 'admin_enqueue_scripts', array( '\WooCommerceDocs\App\Bootstrap', 'register_scripts' ) );
-		add_action( 'rest_api_init', array( '\WooCommerceDocs\App\Bootstrap', 'register_api_endpoints' ) );
+		add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'register_scripts' ) );
+		add_action( 'rest_api_init', array( __CLASS__, 'register_api_endpoints' ) );
+		add_action( 'init', array( __CLASS__, 'setup_stores' ) );
+
+		// Register the manifest job.
+		new \WooCommerceDocs\Job\ManifestJob();
 	}
 
 	/**
@@ -43,6 +50,7 @@ class Bootstrap {
 			true
 		);
 		wp_enqueue_script( 'wc_docs' );
+		wp_enqueue_style( 'wp-components' );
 	}
 
 	/**
@@ -55,7 +63,7 @@ class Bootstrap {
 			'WooCommerce Docs',
 			'manage_options',
 			'woocommerce-docs',
-			array( '\WooCommerceDocs\App\Bootstrap', 'render_admin_page' ),
+			array( __CLASS__, 'render_admin_page' ),
 			'dashicons-media-document',
 			6
 		);
@@ -73,7 +81,15 @@ class Bootstrap {
 	 * Register API endpoints
 	 */
 	public static function register_api_endpoints() {
-		\WooCommerceDocs\API\ManifestAPI::register_routes();
+		API\ManifestAPI::register_routes();
+		API\JobAPI::register_routes();
+	}
+
+	/**
+	 * Perform any setup for data stores
+	 */
+	public static function setup_stores() {
+		Data\DocsStore::setup();
 	}
 }
 
