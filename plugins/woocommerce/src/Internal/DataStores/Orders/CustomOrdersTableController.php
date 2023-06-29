@@ -34,11 +34,6 @@ class CustomOrdersTableController {
 	public const CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION = 'woocommerce_custom_orders_table_enabled';
 
 	/**
-	 * The name of the option that tells that the authoritative table must be flipped once sync finishes.
-	 */
-	private const AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION = 'woocommerce_auto_flip_authoritative_table_roles';
-
-	/**
 	 * The name of the option that tells whether database transactions are to be used or not for data synchronization.
 	 *
 	 * @deprecated We only use READ UNCOMMITTED isolation level, which provides us with correctness guarantee in new table, without locking post tables.
@@ -361,42 +356,10 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Handler for the synchronization finished hook.
-	 * Here we switch the authoritative table if needed.
-	 */
-	private function process_sync_finished() {
-		if ( ! $this->auto_flip_authoritative_table_enabled() ) {
-			return;
-		}
-
-		update_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
-
-		if ( $this->custom_orders_table_usage_is_enabled() ) {
-			update_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
-		} else {
-			update_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
-		}
-	}
-
-	/**
-	 * Is the automatic authoritative table switch setting set?
-	 *
-	 * @return bool
-	 */
-	private function auto_flip_authoritative_table_enabled(): bool {
-		return get_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION ) === 'yes';
-	}
-
-	/**
 	 * Handler for the all settings updated hook.
 	 */
 	private function process_options_updated() {
 		$data_sync_is_enabled = $this->data_synchronizer->data_sync_is_enabled();
-
-		// Disabling the sync implies disabling the automatic authoritative table switch too.
-		if ( ! $data_sync_is_enabled && $this->auto_flip_authoritative_table_enabled() ) {
-			update_option( self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION, 'no' );
-		}
 
 		// Enabling/disabling the sync implies starting/stopping it too, if needed.
 		// We do this check here, and not in process_pre_update_option, so that if for some reason
