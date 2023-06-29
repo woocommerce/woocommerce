@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, che
 Requires at least: 6.1
 Tested up to: 6.2
 Requires PHP: 7.3
-Stable tag: 7.8.0
+Stable tag: 7.8.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -240,7 +240,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Add descriptive document titles to HPOS order admin screens [[#38617]](https://github.com/woocommerce/woocommerce/pull/38617)
 * Update - Add obw/core-profiler to the free-extensions endpoint [[#38418]](https://github.com/woocommerce/woocommerce/pull/38418)
 * Update - Adds info about features and plugin compatibility to the data collected by WC Tracker [[#38613]](https://github.com/woocommerce/woocommerce/pull/38613)
-* Update - Always show pricing group fields, disable if not available for a product type [[#38531]](https://github.com/woocommerce/woocommerce/pull/38531)
 * Update - CSS change to change the hover color of select options [[#38724]](https://github.com/woocommerce/woocommerce/pull/38724)
 * Update - Disable 'Used for variations' checkbox when product type is not variable [[#38802]](https://github.com/woocommerce/woocommerce/pull/38802)
 * Update - Enable core-profiler flag to replace profile wizard with the new core profiler [[#38729]](https://github.com/woocommerce/woocommerce/pull/38729)
@@ -260,6 +259,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Visual changes for the core profiler pages -- intro, guided setup, and skipped guided setup pages [[#38709]](https://github.com/woocommerce/woocommerce/pull/38709)
 * Update - WCPay welcome incentive logic minor addition [[#38803]](https://github.com/woocommerce/woocommerce/pull/38803)
 * Update - WCPay welcome incentive logic [[#38797]](https://github.com/woocommerce/woocommerce/pull/38797)
+* Update - Track checkboxes and selects in Settings > Emails settings and fix XHR request error when updating shipping zone configurations. [[#38834]](https://github.com/woocommerce/woocommerce/pull/38834)
 * Dev - Add a composer script to run phpcs-changed against the current branch [[#38085]](https://github.com/woocommerce/woocommerce/pull/38085)
 * Dev - Added new hook `woocommerce_admin_order_data_after_payment_info` allowing extensions to render content in order details payment info metabox. [[#38443]](https://github.com/woocommerce/woocommerce/pull/38443)
 * Dev - Add HPOS compat queries for tracker. [[#38293]](https://github.com/woocommerce/woocommerce/pull/38293)
