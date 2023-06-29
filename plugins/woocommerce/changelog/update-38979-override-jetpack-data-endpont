@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Override /jetpack/v4/connection/data to return 404 to fix conflict with Android app flow
