@@ -336,7 +336,7 @@ jobs:
               uses: archive/github-actions-slack@v2.0.0
               with:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-                  slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
+                  slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
                   slack-text: |
                       :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
 
@@ -347,7 +347,7 @@ jobs:
               uses: archive/github-actions-slack@v2.0.0
               with:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-                  slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}
+                  slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
                   slack-text: |
                       :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
 

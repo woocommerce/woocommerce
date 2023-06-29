@@ -69,7 +69,7 @@ export const IntroOptIn = ( {
 
 				<div className="woocommerce-profiler-intro-opt-in__footer">
 					<CheckboxControl
-						className="woocommerce-profiler-intro-opt-in__checkbox"
+						className="core-profiler__checkbox"
 						label={ interpolateComponents( {
 							mixedString: __(
 								'I agree to share my data to tailor my store setup experience and get more relevant content. WooCommerce never rent or sell your data and you can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',

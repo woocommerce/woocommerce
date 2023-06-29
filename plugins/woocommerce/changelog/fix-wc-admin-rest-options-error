@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Address possible PHP warning in wc-admin/options REST endpoint.

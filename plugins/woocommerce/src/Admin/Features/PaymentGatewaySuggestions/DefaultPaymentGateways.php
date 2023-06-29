@@ -440,6 +440,7 @@ class DefaultPaymentGateways {
 							'SG',
 							'CN',
 							'ID',
+							'IN',
 						)
 					),
 					self::get_rules_for_cbd( false ),
@@ -595,7 +596,13 @@ class DefaultPaymentGateways {
 										'JP',
 									)
 								),
-								self::get_rules_for_selling_venues( array( 'brick-mortar', 'brick-mortar-other' ) ),
+								(object) array(
+									'type'     => 'or',
+									'operands' => (object) array(
+										self::get_rules_for_selling_venues( array( 'brick-mortar', 'brick-mortar-other' ) ),
+										self::get_rules_selling_offline(),
+									),
+								),
 							),
 						),
 					),
@@ -897,7 +904,7 @@ class DefaultPaymentGateways {
 	 * @return array Array of countries.
 	 */
 	public static function get_wcpay_countries() {
-		return array( 'US', 'PR', 'AU', 'CA', 'CY', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'IE', 'IT', 'LU', 'LT', 'LV', 'NO', 'NZ', 'MT', 'AT', 'BE', 'NL', 'PL', 'PT', 'CH', 'HK', 'SI', 'SK', 'SG' );
+		return array( 'US', 'PR', 'AU', 'CA', 'CY', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GB', 'GR', 'IE', 'IT', 'LU', 'LT', 'LV', 'NO', 'NZ', 'MT', 'AT', 'BE', 'NL', 'PL', 'PT', 'CH', 'HK', 'SI', 'SK', 'SG', 'BG', 'CZ', 'HR', 'HU', 'RO', 'SE' );
 	}
 
 	/**
@@ -953,6 +960,29 @@ class DefaultPaymentGateways {
 		return (object) array(
 			'type'     => 'or',
 			'operands' => $rules,
+		);
+	}
+
+	/**
+	 * Get rules for when selling offline for core profiler.
+	 *
+	 * @return object Rules to match.
+	 */
+	public static function get_rules_selling_offline() {
+		return (object) array(
+			'type'         => 'option',
+			'transformers' => array(
+				(object) array(
+					'use'       => 'dot_notation',
+					'arguments' => (object) array(
+						'path' => 'selling_online_answer',
+					),
+				),
+			),
+			'option_name'  => 'woocommerce_onboarding_profile',
+			'operation'    => 'contains',
+			'value'        => 'no_im_selling_offline',
+			'default'      => array(),
 		);
 	}
 

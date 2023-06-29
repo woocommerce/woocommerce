@@ -7,7 +7,7 @@
 		"url": "git://github.com/woocommerce/woo-ai.git"
 	},
 	"title": "Woo AI",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"homepage": "http://github.com/woocommerce/woo-ai",
 	"devDependencies": {
 		"@types/debug": "^4.1.7",
@@ -75,7 +75,7 @@
 	},
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.3.1"
+		"pnpm": "^8.6.5"
 	},
 	"lint-staged": {
 		"*.php": [

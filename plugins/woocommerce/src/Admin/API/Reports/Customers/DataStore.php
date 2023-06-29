@@ -297,6 +297,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'name',
 			'username',
 			'email',
+			'all',
 		);
 
 		if ( ! empty( $query_args['search'] ) ) {
@@ -304,11 +305,37 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			if ( empty( $query_args['searchby'] ) || 'name' === $query_args['searchby'] || ! in_array( $query_args['searchby'], $search_params, true ) ) {
 				$searchby = "CONCAT_WS( ' ', first_name, last_name )";
+			} elseif ( 'all' === $query_args['searchby'] ) {
+				$searchby = "CONCAT_WS( ' ', first_name, last_name, username, email )";
 			} else {
 				$searchby = $query_args['searchby'];
 			}
 
 			$where_clauses[] = $wpdb->prepare( "{$searchby} LIKE %s", $name_like ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
+
+		$filter_empty_params = array(
+			'email',
+			'name',
+			'country',
+			'city',
+			'state',
+			'postcode',
+		);
+
+		if ( ! empty( $query_args['filter_empty'] ) ) {
+			$fields_to_filter_by = array_intersect( $query_args['filter_empty'], $filter_empty_params );
+			if ( in_array( 'name', $fields_to_filter_by, true ) ) {
+				$fields_to_filter_by   = array_diff( $fields_to_filter_by, array( 'name' ) );
+				$fields_to_filter_by[] = "CONCAT_WS( ' ', first_name, last_name )";
+			}
+			$fields_with_not_condition = array_map(
+				function ( $field ) {
+					return $field . ' <> \'\'';
+				},
+				$fields_to_filter_by
+			);
+			$where_clauses[]           = '(' . implode( ' AND ', $fields_with_not_condition ) . ')';
 		}
 
 		// Allow a list of customer IDs to be specified.

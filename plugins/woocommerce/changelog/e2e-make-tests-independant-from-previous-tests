@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Ensure `can discard industry changes when navigating back to "Store Details"'` can run independent from previous tests

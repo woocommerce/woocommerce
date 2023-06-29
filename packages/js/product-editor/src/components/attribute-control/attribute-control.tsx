@@ -16,6 +16,7 @@ import {
 	Link,
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -182,7 +183,10 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			<Button
 				variant="secondary"
 				className="woocommerce-add-attribute-list-item__add-button"
-				onClick={ openNewModal }
+				onClick={ () => {
+					openNewModal();
+					recordEvent( 'product_add_attributes_click' );
+				} }
 			>
 				{ uiStrings.newAttributeListItemLabel }
 			</Button>

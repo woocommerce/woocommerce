@@ -42,7 +42,7 @@ export const WCPayBannerText: React.VFC< {
 				padding="0 20px 0 0"
 			>
 				{ __(
-					'Accept Payments and manage your business.',
+					'Accept payments and manage your business.',
 					'woocommerce'
 				) }
 			</Text>

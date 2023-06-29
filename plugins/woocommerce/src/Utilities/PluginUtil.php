@@ -65,6 +65,9 @@ class PluginUtil {
 	 */
 	public function get_woocommerce_aware_plugins( bool $active_only = false ): array {
 		if ( is_null( $this->woocommerce_aware_plugins ) ) {
+			// In case `get_plugins` was called much earlier in the request (before our headers could be injected), we
+			// invalidate the plugin cache list.
+			wp_cache_delete( 'plugins', 'plugins' );
 			$all_plugins = $this->proxy->call_function( 'get_plugins' );
 
 			$this->woocommerce_aware_plugins =

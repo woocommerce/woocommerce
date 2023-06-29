@@ -15,19 +15,15 @@ class WC_Beta_Tester_Live_Branches {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
-
-		// By the time this code runs it appears too late to hook into `admin_menu`.
-		$this->register_page();
+		add_action( 'admin_menu', array( $this, 'register_page' ) );
+		add_action( 'admin_init', array( $this, 'register_scripts' ) );
 	}
 
 	/**
 	 * Register live branches scripts.
 	 */
 	public function register_scripts() {
-		if ( ! method_exists( 'Automattic\WooCommerce\Admin\PageController', 'is_admin_or_embed_page' ) ||
-			! \Automattic\WooCommerce\Admin\PageController::is_admin_or_embed_page()
-		) {
+		if ( ! is_admin() ) {
 			return;
 		}
 

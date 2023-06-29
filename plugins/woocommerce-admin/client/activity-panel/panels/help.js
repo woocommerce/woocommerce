@@ -38,15 +38,15 @@ function getHomeItems() {
 		},
 		{
 			title: __( 'Inbox', 'woocommerce' ),
-			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-2',
-		},
-		{
-			title: __( 'Stats Overview', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-4',
 		},
 		{
-			title: __( 'Store Management', 'woocommerce' ),
+			title: __( 'Stats Overview', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-5',
+		},
+		{
+			title: __( 'Store Management', 'woocommerce' ),
+			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-10',
 		},
 		{
 			title: __( 'Store Setup Checklist', 'woocommerce' ),

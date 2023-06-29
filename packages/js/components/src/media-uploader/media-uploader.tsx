@@ -34,6 +34,7 @@ type MediaUploaderProps = {
 		message: string;
 		file: File;
 	} ) => void;
+	onMediaGalleryOpen?: () => void;
 	onUpload?: ( files: MediaItem[] ) => void;
 	onFileUploadChange?: ( files: MediaItem[] ) => void;
 	uploadMedia?: ( options: UploadMediaOptions ) => Promise< void >;
@@ -49,6 +50,7 @@ export const MediaUploader = ( {
 	multipleSelect = false,
 	onError = () => null,
 	onFileUploadChange = () => null,
+	onMediaGalleryOpen = () => null,
 	onUpload = () => null,
 	onSelect = () => null,
 	uploadMedia = wpUploadMedia,
@@ -96,7 +98,13 @@ export const MediaUploader = ( {
 							allowedTypes={ allowedMediaTypes }
 							multiple={ multipleSelect }
 							render={ ( { open } ) => (
-								<Button variant="secondary" onClick={ open }>
+								<Button
+									variant="secondary"
+									onClick={ () => {
+										onMediaGalleryOpen();
+										open();
+									} }
+								>
 									{ buttonText }
 								</Button>
 							) }
