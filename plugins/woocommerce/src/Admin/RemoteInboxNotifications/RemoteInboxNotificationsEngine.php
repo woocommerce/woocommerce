@@ -210,7 +210,7 @@ class RemoteInboxNotificationsEngine {
 			$note_from_db->set_content( $locale->content );
 
 			$localized_actions = SpecRunner::get_actions( $spec );
-			$actions_from_db    = $note_from_db->get_actions();
+			$actions_from_db   = $note_from_db->get_actions();
 			$actions_length    = count( $localized_actions );
 			// Manually copy the action id from the db to the localized action, since they were not being provided.
 			for ( $i = 0; $i < $actions_length; $i++ ) {
