@@ -45,6 +45,8 @@ do_action( 'woocommerce_before_cart' ); ?>
 				 *
 				 * @since 7.8.0
 				 * @param string $product_name Name of the product in the cart.
+				 * @param array $cart_item The product in the cart.
+				 * @param string $cart_item_key Key for the product in the cart.
 				 */
 				$product_name = apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key );
 
