@@ -115,7 +115,9 @@ class FeaturesController {
 			'custom_order_tables'  => array(
 				'name' => __( 'High performance order storage', 'woocommerce' ),
 			),
-			$hpos_enable_sync      => array(),
+			$hpos_enable_sync      => array(
+				'name' => '',
+			),
 			'cart_checkout_blocks' => array(
 				'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
@@ -552,7 +554,7 @@ class FeaturesController {
 		$experimental_feature_ids = array_filter(
 			$feature_ids,
 			function( $feature_id ) use ( $features ) {
-				return $features[ $feature_id ]['is_experimental'];
+				return $features[ $feature_id ]['is_experimental'] ?? false;
 			}
 		);
 		$mature_feature_ids       = array_diff( $feature_ids, $experimental_feature_ids );

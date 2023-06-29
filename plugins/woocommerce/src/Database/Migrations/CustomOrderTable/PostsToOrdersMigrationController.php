@@ -98,12 +98,6 @@ class PostsToOrdersMigrationController {
 	 * @return bool|null True if transaction started, false if transactions won't be used, null if transaction failed to start.
 	 */
 	private function maybe_start_transaction(): ?bool {
-		global $wpdb;
-		$transaction_isolation_level = get_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION );
-		if ( ! $transaction_isolation_level ) {
-			$table = $this->get_custom_orders_table_name();
-		}
-
 		$transaction_isolation_level = get_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, CustomOrdersTableController::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL );
 		$set_transaction_isolation_level_command = "SET TRANSACTION ISOLATION LEVEL $transaction_isolation_level";
 

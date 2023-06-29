@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
@@ -434,6 +435,11 @@ class CustomOrdersTableController {
 		if ( ! in_array( $feature_id, array( 'custom_order_tables', DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ), true ) ) {
 			return $feature_setting;
 		}
+
+		if ( Constants::get_constant( 'WC_INSTALLING', false ) ) {
+			return $feature_setting;
+		}
+
 		$sync_status = $this->data_synchronizer->get_sync_status();
 		if ( 'custom_order_tables' === $feature_id ) {
 			return $this->get_hpos_setting_for_feature( $sync_status );
@@ -485,6 +491,12 @@ class CustomOrdersTableController {
 			$sync_message = sprintf(
 				// translators: %d: number of pending orders.
 				__( 'Currently syncing orders... %d pending', 'woocommerce' ),
+				$sync_status['current_pending_count']
+			);
+		} elseif ( $sync_status['current_pending_count'] > 0 ) {
+			$sync_message = sprintf(
+				// translators: %d: number of pending orders.
+				__( 'Sync %d pending orders. You can switch data storage for orders only when posts and orders table are in sync.', 'woocommerce' ),
 				$sync_status['current_pending_count']
 			);
 		}
