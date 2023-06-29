@@ -2,11 +2,11 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [List Cart Coupons](#list-cart-coupons)
-- [Single Cart Coupon](#single-cart-coupon)
-- [Add Cart Coupon](#add-cart-coupon)
-- [Delete Single Cart Coupon](#delete-single-cart-coupon)
-- [Delete All Cart Coupons](#delete-all-cart-coupons)
+-   [List Cart Coupons](#list-cart-coupons)
+-   [Single Cart Coupon](#single-cart-coupon)
+-   [Add Cart Coupon](#add-cart-coupon)
+-   [Delete Single Cart Coupon](#delete-single-cart-coupon)
+-   [Delete All Cart Coupons](#delete-all-cart-coupons)
 
 ## List Cart Coupons
 
@@ -171,4 +171,3 @@ curl --request DELETE https://example-store.com/wp-json/wc/store/v1/cart/coupons
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/cart-coupons.md)
 
 <!-- /FEEDBACK -->
-

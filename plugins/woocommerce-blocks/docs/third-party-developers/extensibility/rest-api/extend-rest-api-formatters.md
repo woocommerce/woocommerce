@@ -2,16 +2,16 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [How to use them](#how-to-use-them)
-- [MoneyFormatter](#moneyformatter)
-    - [Arguments](#arguments)
-    - [Example use and returned value](#example-use-and-returned-value)
-- [CurrencyFormatter](#currencyformatter)
-    - [Arguments](#arguments-1)
-    - [Example use and returned value](#example-use-and-returned-value-1)
-- [HtmlFormatter](#htmlformatter)
-    - [Arguments](#arguments-2)
-    - [Example use and returned value](#example-use-and-returned-value-2)
+-   [How to use them](#how-to-use-them)
+-   [MoneyFormatter](#moneyformatter)
+    -   [Arguments](#arguments)
+    -   [Example use and returned value](#example-use-and-returned-value)
+-   [CurrencyFormatter](#currencyformatter)
+    -   [Arguments](#arguments-1)
+    -   [Example use and returned value](#example-use-and-returned-value-1)
+-   [HtmlFormatter](#htmlformatter)
+    -   [Arguments](#arguments-2)
+    -   [Example use and returned value](#example-use-and-returned-value-2)
 
 `Formatters` are utility classes that allow you to format values to so that they are compatible with the StoreAPI, values such as money, currency, or HTML.
 
@@ -142,4 +142,3 @@ alert('bad script!') This &#8220;coffee&#8221; is <strong>very strong</strong>.
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/rest-api/extend-rest-api-formatters.md)
 
 <!-- /FEEDBACK -->
-

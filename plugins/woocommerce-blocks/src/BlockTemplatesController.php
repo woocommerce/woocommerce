@@ -2,10 +2,15 @@
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
+use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
+use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
+use Automattic\WooCommerce\Blocks\Utils\SettingsUtils;
+use \WP_Post;
 
 /**
  * BlockTypesController class.
@@ -71,6 +76,44 @@ class BlockTemplatesController {
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
 		add_filter( 'post_type_archive_title', array( $this, 'update_product_archive_title' ), 10, 2 );
 		add_action( 'after_switch_theme', array( $this, 'check_should_use_blockified_product_grid_templates' ), 10, 2 );
+
+		if ( wc_current_theme_is_fse_theme() ) {
+			add_action( 'init', array( $this, 'maybe_migrate_content' ) );
+			add_filter( 'woocommerce_settings_pages', array( $this, 'template_permalink_settings' ) );
+			add_filter( 'pre_update_option', array( $this, 'update_template_permalink' ), 10, 2 );
+			add_action( 'woocommerce_admin_field_permalink', array( SettingsUtils::class, 'permalink_input_field' ) );
+
+			// By default, the Template Part Block only supports template parts that are in the current theme directory.
+			// This render_callback wrapper allows us to add support for plugin-housed template parts.
+			add_filter(
+				'block_type_metadata_settings',
+				function( $settings, $metadata ) {
+					if ( isset( $metadata['name'], $settings['render_callback'] ) && 'core/template-part' === $metadata['name'] && 'render_block_core_template_part' === $settings['render_callback'] ) {
+						$settings['render_callback'] = [ $this, 'render_woocommerce_template_part' ];
+					}
+					return $settings;
+				},
+				10,
+				2
+			);
+		}
+	}
+
+	/**
+	 * Renders the `core/template-part` block on the server.
+	 *
+	 * @param array $attributes The block attributes.
+	 * @return string The render.
+	 */
+	public function render_woocommerce_template_part( $attributes ) {
+		if ( 'woocommerce/woocommerce' === $attributes['theme'] ) {
+			$template_part = BlockTemplateUtils::get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
+
+			if ( $template_part && ! empty( $template_part->content ) ) {
+				return do_blocks( $template_part->content );
+			}
+		}
+		return \render_block_core_template_part( $attributes );
 	}
 
 	/**
@@ -340,7 +383,6 @@ class BlockTemplatesController {
 				if ( ! $template->description ) {
 					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
 				}
-
 				return $template;
 			},
 			$query_result
@@ -572,6 +614,22 @@ class BlockTemplatesController {
 			if ( ! BlockTemplateUtils::theme_has_template( 'archive-product' ) ) {
 				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 			}
+		} elseif (
+			is_cart() &&
+			! BlockTemplateUtils::theme_has_template( CartTemplate::get_slug() ) && $this->block_template_is_available( CartTemplate::get_slug() )
+		) {
+			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+		} elseif (
+			is_checkout() &&
+			! BlockTemplateUtils::theme_has_template( CheckoutTemplate::get_slug() ) && $this->block_template_is_available( CheckoutTemplate::get_slug() )
+		) {
+			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+		} elseif (
+			is_wc_endpoint_url( 'order-received' )
+			&& ! BlockTemplateUtils::theme_has_template( OrderConfirmationTemplate::get_slug() )
+			&& $this->block_template_is_available( OrderConfirmationTemplate::get_slug() )
+		) {
+			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		} else {
 			$queried_object = get_queried_object();
 			if ( is_null( $queried_object ) ) {
@@ -637,5 +695,172 @@ class BlockTemplatesController {
 		}
 
 		return $post_type_name;
+	}
+
+	/**
+	 * Migrates page content to templates if needed.
+	 */
+	public function maybe_migrate_content() {
+		if ( ! $this->has_migrated_page( 'cart' ) ) {
+			$this->migrate_page( 'cart', CartTemplate::get_placeholder_page() );
+		}
+		if ( ! $this->has_migrated_page( 'checkout' ) ) {
+			$this->migrate_page( 'checkout', CheckoutTemplate::get_placeholder_page() );
+		}
+	}
+
+	/**
+	 * Check if a page has been migrated to a template.
+	 *
+	 * @param string $page_id Page ID.
+	 * @return boolean
+	 */
+	protected function has_migrated_page( $page_id ) {
+		return (bool) get_option( 'has_migrated_' . $page_id, false );
+	}
+
+	/**
+	 * Migrates a page to a template if needed.
+	 *
+	 * @param string   $page_id Page ID.
+	 * @param \WP_Post $page Page object.
+	 */
+	protected function migrate_page( $page_id, $page ) {
+		if ( ! $page || empty( $page->post_content ) ) {
+			update_option( 'has_migrated_' . $page_id, '1' );
+			return;
+		}
+
+		$request = new \WP_REST_Request( 'POST', '/wp/v2/templates/woocommerce/woocommerce//' . $page_id );
+		$request->set_body_params(
+			[
+				'id'      => 'woocommerce/woocommerce//' . $page_id,
+				'content' => $this->get_block_template_part( 'header' ) .
+					'<!-- wp:group {"layout":{"inherit":true}} -->
+					<div class="wp-block-group">
+						<!-- wp:heading {"level":1} -->
+						<h1 class="wp-block-heading">' . wp_kses_post( $page->post_title ) . '</h1>
+						<!-- /wp:heading -->
+						' . wp_kses_post( $page->post_content ) . '
+					</div>
+					<!-- /wp:group -->' .
+					$this->get_block_template_part( 'footer' ),
+			]
+		);
+		rest_get_server()->dispatch( $request );
+		update_option( 'has_migrated_' . $page_id, '1' );
+	}
+
+	/**
+	 * Returns the requested template part.
+	 *
+	 * @param string $part The part to return.
+	 *
+	 * @return string
+	 */
+	protected function get_block_template_part( $part ) {
+		$template_part = get_block_template( get_stylesheet() . '//' . $part, 'wp_template_part' );
+		if ( ! $template_part || empty( $template_part->content ) ) {
+			return '';
+		}
+		return $template_part->content;
+	}
+
+	/**
+	 * Replaces page settings in WooCommerce with text based permalinks which point to a template.
+	 *
+	 * @param array $settings Settings pages.
+	 * @return array
+	 */
+	public function template_permalink_settings( $settings ) {
+		foreach ( $settings as $key => $setting ) {
+			if ( 'woocommerce_checkout_page_id' === $setting['id'] ) {
+				$checkout_page    = CheckoutTemplate::get_placeholder_page();
+				$settings[ $key ] = [
+					'title'    => __( 'Checkout page', 'woo-gutenberg-products-block' ),
+					'desc'     => sprintf(
+						// translators: %1$s: opening anchor tag, %2$s: closing anchor tag.
+						__( 'The checkout template can be %1$s edited here%2$s.', 'woo-gutenberg-products-block' ),
+						'<a href="' . esc_url( admin_url( 'site-editor.php?postType=wp_template&postId=woocommerce%2Fwoocommerce%2F%2F' . CheckoutTemplate::get_slug() ) ) . '" target="_blank">',
+						'</a>'
+					),
+					'desc_tip' => __( 'This is the URL to the checkout page.', 'woo-gutenberg-products-block' ),
+					'id'       => 'woocommerce_checkout_page_endpoint',
+					'type'     => 'permalink',
+					'default'  => $checkout_page ? $checkout_page->post_name : CheckoutTemplate::get_slug(),
+					'autoload' => false,
+				];
+			}
+			if ( 'woocommerce_cart_page_id' === $setting['id'] ) {
+				$cart_page        = CartTemplate::get_placeholder_page();
+				$settings[ $key ] = [
+					'title'    => __( 'Cart page', 'woo-gutenberg-products-block' ),
+					'desc'     => sprintf(
+						// translators: %1$s: opening anchor tag, %2$s: closing anchor tag.
+						__( 'The cart template can be %1$s edited here%2$s.', 'woo-gutenberg-products-block' ),
+						'<a href="' . esc_url( admin_url( 'site-editor.php?postType=wp_template&postId=woocommerce%2Fwoocommerce%2F%2F' . CartTemplate::get_slug() ) ) . '" target="_blank">',
+						'</a>'
+					),
+					'desc_tip' => __( 'This is the URL to the cart page.', 'woo-gutenberg-products-block' ),
+					'id'       => 'woocommerce_cart_page_endpoint',
+					'type'     => 'permalink',
+					'default'  => $cart_page ? $cart_page->post_name : CartTemplate::get_slug(),
+					'autoload' => false,
+				];
+			}
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * Syncs entered permalink with the pages and returns the correct value.
+	 *
+	 * @param string $value     Value of the option.
+	 * @param string $option    Name of the option.
+	 * @return string
+	 */
+	public function update_template_permalink( $value, $option ) {
+		if ( 'woocommerce_checkout_page_endpoint' === $option ) {
+			return $this->sync_endpoint_with_page( CheckoutTemplate::get_placeholder_page(), 'checkout', $value );
+		}
+		if ( 'woocommerce_cart_page_endpoint' === $option ) {
+			return $this->sync_endpoint_with_page( CartTemplate::get_placeholder_page(), 'cart', $value );
+		}
+		return $value;
+	}
+
+	/**
+	 * Syncs the provided permalink with the actual WP page.
+	 *
+	 * @param WP_Post|null $page The page object, or null if it does not exist.
+	 * @param string       $page_slug The identifier for the page e.g. cart, checkout.
+	 * @param string       $permalink The new permalink to use.
+	 * @return string THe actual permalink assigned to the page. May differ from $permalink if it was already taken.
+	 */
+	protected function sync_endpoint_with_page( $page, $page_slug, $permalink ) {
+		if ( ! $page ) {
+			$updated_page_id = wc_create_page(
+				esc_sql( $permalink ),
+				'woocommerce_' . $page_slug . '_page_id',
+				$page_slug,
+				'',
+				'',
+				'publish'
+			);
+		} else {
+			$updated_page_id = wp_update_post(
+				[
+					'ID'        => $page->ID,
+					'post_name' => esc_sql( $permalink ),
+				]
+			);
+		}
+
+		// Get post again in case slug was updated with a suffix.
+		if ( $updated_page_id && ! is_wp_error( $updated_page_id ) ) {
+			return get_post( $updated_page_id )->post_name;
+		}
+		return $permalink;
 	}
 }

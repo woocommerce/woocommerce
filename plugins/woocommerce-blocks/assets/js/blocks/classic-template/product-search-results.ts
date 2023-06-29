@@ -169,10 +169,10 @@ const onClickCallback = ( {
 const getButtonLabel = () =>
 	__( 'Transform into blocks', 'woo-gutenberg-products-block' );
 
-export {
-	getBlockifiedTemplate,
-	isConversionPossible,
-	getDescription,
+const blockifyConfig = {
 	getButtonLabel,
 	onClickCallback,
+	getBlockifiedTemplate,
 };
+
+export { isConversionPossible, getDescription, blockifyConfig };

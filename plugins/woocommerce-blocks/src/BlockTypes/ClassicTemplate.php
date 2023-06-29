@@ -3,8 +3,9 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
+use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-use WC_Query;
+use WC_Shortcode_Checkout;
 
 /**
  * Classic Single Product class
@@ -35,7 +36,23 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		parent::initialize();
 		add_filter( 'render_block', array( $this, 'add_alignment_class_to_wrapper' ), 10, 2 );
 		add_filter( 'woocommerce_product_query_meta_query', array( $this, 'filter_products_by_stock' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_block_assets' ) );
+	}
 
+	/**
+	 * Enqueue assets used for rendering the block in editor context.
+	 *
+	 * This is needed if a block is not yet within the post content--`render` and `enqueue_assets` may not have ran.
+	 */
+	public function enqueue_block_assets() {
+		// Ensures frontend styles for blocks exist in the site editor iframe.
+		if ( class_exists( 'WC_Frontend_Scripts' ) && is_admin() ) {
+			$frontend_scripts = new \WC_Frontend_Scripts();
+			$styles           = $frontend_scripts::get_styles();
+			foreach ( $styles as $handle => $style ) {
+				wp_enqueue_style( $handle, $style['src'], $style['deps'], $style['version'], $style['media'] );
+			}
+		}
 	}
 
 	/**
@@ -62,11 +79,23 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			$frontend_scripts::load_scripts();
 		}
 
-		$archive_templates = array( 'archive-product', 'taxonomy-product_cat', 'taxonomy-product_tag', ProductAttributeTemplate::SLUG, ProductSearchResultsTemplate::SLUG );
+		if ( OrderConfirmationTemplate::get_slug() === $attributes['template'] ) {
+			return $this->render_order_received();
+		}
 
 		if ( 'single-product' === $attributes['template'] ) {
 			return $this->render_single_product();
-		} elseif ( in_array( $attributes['template'], $archive_templates, true ) ) {
+		}
+
+		$archive_templates = array(
+			'archive-product',
+			'taxonomy-product_cat',
+			'taxonomy-product_tag',
+			ProductAttributeTemplate::SLUG,
+			ProductSearchResultsTemplate::SLUG,
+		);
+
+		if ( in_array( $attributes['template'], $archive_templates, true ) ) {
 			// Set this so that our product filters can detect if it's a PHP template.
 			$this->asset_data_registry->add( 'is_rendering_php_template', true, true );
 
@@ -80,14 +109,39 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			);
 
 			return $this->render_archive_product();
-		} else {
-			ob_start();
-
-			echo "You're using the ClassicTemplate block";
-
-			wp_reset_postdata();
-			return ob_get_clean();
 		}
+
+		ob_start();
+
+		echo "You're using the ClassicTemplate block";
+
+		wp_reset_postdata();
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Render method for rendering the order confirmation template.
+	 *
+	 * @return string Rendered block type output.
+	 */
+	protected function render_order_received() {
+		ob_start();
+
+		echo '<div class="wp-block-group">';
+
+		echo sprintf(
+			'<%1$s %2$s>%3$s</%1$s>',
+			'h1',
+			get_block_wrapper_attributes(), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			esc_html__( 'Order confirmation', 'woo-gutenberg-products-block' )
+		);
+
+		WC_Shortcode_Checkout::output( array() );
+
+		echo '</div>';
+
+		return ob_get_clean();
 	}
 
 	/**
