@@ -232,7 +232,6 @@ class WC_Products_Tracking {
 	 * @return array
 	 */
 	private static function get_possible_product_type_options_ids() {
-		$default_product_type_options = wc_get_default_product_type_options();
 		$product_type_options_ids =
 			array_values(
 				array_map(
@@ -242,7 +241,7 @@ class WC_Products_Tracking {
 					/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 					apply_filters(
 						'product_type_options',
-						$default_product_type_options,
+						wc_get_default_product_type_options(),
 					)
 					/* phpcs: enable */
 				)
