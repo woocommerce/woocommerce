@@ -456,15 +456,15 @@ class CustomOrdersTableController {
 		$can_hpos_enabled        = count( array_merge( $plugin_info['compatible'], $plugin_info['incompatible'] ) ) === 0;
 
 		return array(
-			'id'          => 'woocommerce_feature_custom_order_tables_enabled',
+			'id'          => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 			'title'       => __( 'Data storage for orders', 'woocommerce' ),
 			'type'        => 'radio',
 			'options'     => array(
-				'post' => __( 'WordPress Post tables', 'woocommerce' ),
-				'hpos' => __( 'High performance order storage (new)', 'woocommerce' ),
+				'no' => __( 'WordPress Post tables', 'woocommerce' ),
+				'yes' => __( 'High performance order storage (new)', 'woocommerce' ),
 			),
-			'value'       => $hpos_enabled ? 'hpos' : 'post',
-			'disabled'    => $can_hpos_enabled && $sync_complete ? array() : array( 'hpos' ),
+			'value'       => $hpos_enabled ? 'yes' : 'no',
+			'disabled'    => $can_hpos_enabled && $sync_complete ? array() : array( 'yes' ),
 			'desc'        => $plugin_incompat_warning,
 			'desc_at_end' => true,
 		);
