@@ -48,7 +48,7 @@ class Init {
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_product_template' ) );
 
-			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
+			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ), 999 );
 
 			$block_registry = new BlockRegistry();
 			$block_registry->init();
@@ -720,6 +720,11 @@ class Init {
 		// not be the product edit page (it mostly likely isn't).
 		if ( PageController::is_admin_page() ) {
 			$screen->is_block_editor( true );
+
+			wp_add_inline_script(
+				'wp-blocks',
+				'wp.blocks.unstable__bootstrapServerSideBlockDefinitions(' . wp_json_encode( get_block_editor_server_block_settings() ) . ');'
+			);
 		}
 	}
 }
