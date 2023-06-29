@@ -398,7 +398,7 @@ class InstalledExtensions {
 		}
 
 		$data         = self::get_extension_base_data( $slug );
-		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/klaviyo.png';
+		$data['icon'] = plugins_url( 'assets/images/marketing/klaviyo.png', WC_PLUGIN_FILE );
 
 		if ( 'activated' === $data['status'] ) {
 			$klaviyo_options = get_option( 'klaviyo_settings' );
