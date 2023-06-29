@@ -124,7 +124,6 @@ class CustomOrdersTableController {
 		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_initiate_regeneration_entry_to_tools_array' ), 999, 1 );
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'pre_update_option', array( $this, 'process_pre_update_option' ), 999, 3 );
-		self::add_filter( DataSynchronizer::PENDING_SYNCHRONIZATION_FINISHED_ACTION, array( $this, 'process_sync_finished' ), 10, 0 );
 		self::add_action( 'woocommerce_update_options_advanced_custom_data_stores', array( $this, 'process_options_updated' ), 10, 0 );
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enabled_changed' ), 10, 2 );
@@ -170,7 +169,7 @@ class CustomOrdersTableController {
 	 * @return bool True if the feature is visible.
 	 */
 	public function is_feature_visible(): bool {
-		return $this->features_controller->feature_is_enabled( 'custom_order_tables' );
+		return true;
 	}
 
 	/**
@@ -179,24 +178,6 @@ class CustomOrdersTableController {
 	 * This method shouldn't be used anymore, see the FeaturesController class.
 	 */
 	public function show_feature() {
-		$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . __FUNCTION__;
-		wc_doing_it_wrong(
-			$class_and_method,
-			sprintf(
-				// translators: %1$s the name of the class and method used.
-				__( '%1$s: The visibility of the custom orders table feature is now handled by the WooCommerce features engine. See the FeaturesController class, or go to WooCommerce - Settings - Advanced - Features.', 'woocommerce' ),
-				$class_and_method
-			),
-			'7.0'
-		);
-	}
-
-	/**
-	 * Hides the feature, so that no entries will be added to the debug tools page.
-	 *
-	 * This method shouldn't be used anymore, see the FeaturesController class.
-	 */
-	public function hide_feature() {
 		$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . __FUNCTION__;
 		wc_doing_it_wrong(
 			$class_and_method,
@@ -326,7 +307,7 @@ class CustomOrdersTableController {
 	 */
 	private function delete_custom_orders_tables() {
 		if ( $this->custom_orders_table_usage_is_enabled() ) {
-			throw new \Exception( "Can't delete the custom orders tables: they are currently in use (via Settings > Advanced > Custom data stores)." );
+			throw new \Exception( "Can't delete the custom orders tables: they are currently in use (via Settings > Advanced > Features)." );
 		}
 
 		delete_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
