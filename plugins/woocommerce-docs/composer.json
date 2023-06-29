@@ -4,7 +4,7 @@
 	"type": "wordpress-plugin",
 	"require": {
 		"woocommerce/action-scheduler": "^3.6",
-		"erusev/parsedown": "^1.7"
+		"league/commonmark": "^2.4"
 	},
 	"autoload": {
 		"psr-4": {
