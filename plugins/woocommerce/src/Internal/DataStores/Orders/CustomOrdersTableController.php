@@ -40,6 +40,8 @@ class CustomOrdersTableController {
 
 	/**
 	 * The name of the option that tells whether database transactions are to be used or not for data synchronization.
+	 *
+	 * @deprecated We only use READ UNCOMMITTED isolation level, which provides us with correctness guarantee in new table, without locking post tables.
 	 */
 	public const USE_DB_TRANSACTIONS_OPTION = 'woocommerce_use_db_transactions_for_custom_orders_table_data_sync';
 
@@ -48,7 +50,7 @@ class CustomOrdersTableController {
 	 */
 	public const DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION = 'woocommerce_db_transactions_isolation_level_for_custom_orders_table_data_sync';
 
-	public const DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL = 'REPEATABLE READ';
+	public const DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL = 'READ UNCOMMITTED';
 
 	/**
 	 * The data store object to use.
@@ -120,8 +122,6 @@ class CustomOrdersTableController {
 		self::add_filter( 'woocommerce_order_data_store', array( $this, 'get_orders_data_store' ), 999, 1 );
 		self::add_filter( 'woocommerce_order-refund_data_store', array( $this, 'get_refunds_data_store' ), 999, 1 );
 		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_initiate_regeneration_entry_to_tools_array' ), 999, 1 );
-		self::add_filter( 'woocommerce_get_sections_advanced', array( $this, 'get_settings_sections' ), 999, 1 );
-		self::add_filter( 'woocommerce_get_settings_advanced', array( $this, 'get_settings' ), 999, 2 );
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'pre_update_option', array( $this, 'process_pre_update_option' ), 999, 3 );
 		self::add_filter( DataSynchronizer::PENDING_SYNCHRONIZATION_FINISHED_ACTION, array( $this, 'process_sync_finished' ), 10, 0 );
@@ -331,147 +331,6 @@ class CustomOrdersTableController {
 
 		delete_option( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
 		$this->data_synchronizer->delete_database_tables();
-	}
-
-	/**
-	 * Get the settings sections for the "Advanced" tab, with a "Custom data stores" section added if appropriate.
-	 *
-	 * @param array $sections The original settings sections array.
-	 * @return array The updated settings sections array.
-	 */
-	private function get_settings_sections( array $sections ): array {
-		if ( ! $this->is_feature_visible() ) {
-			return $sections;
-		}
-
-		$sections['custom_data_stores'] = __( 'Custom data stores', 'woocommerce' );
-
-		return $sections;
-	}
-
-	/**
-	 * Get the settings for the "Custom data stores" section in the "Advanced" tab,
-	 * with entries for managing the custom orders tables if appropriate.
-	 *
-	 * @param array  $settings The original settings array.
-	 * @param string $section_id The settings section to get the settings for.
-	 * @return array The updated settings array.
-	 */
-	private function get_settings( array $settings, string $section_id ): array {
-		if ( ! $this->is_feature_visible() || 'custom_data_stores' !== $section_id ) {
-			return $settings;
-		}
-
-		$settings[] = array(
-			'title' => __( 'Custom orders tables', 'woocommerce' ),
-			'type'  => 'title',
-			'id'    => 'cot-title',
-			'desc'  => sprintf(
-				/* translators: %1$s = <strong> tag, %2$s = </strong> tag. */
-				__( '%1$sWARNING:%2$s This feature is currently under development and may cause database instability. For contributors only.', 'woocommerce' ),
-				'<strong>',
-				'</strong>'
-			),
-		);
-
-		$sync_status     = $this->data_synchronizer->get_sync_status();
-		$sync_is_pending = 0 !== $sync_status['current_pending_count'];
-
-		$settings[] = array(
-			'title'         => __( 'Data store for orders', 'woocommerce' ),
-			'id'            => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-			'default'       => 'no',
-			'type'          => 'radio',
-			'options'       => array(
-				'yes' => __( 'Use the WooCommerce orders tables', 'woocommerce' ),
-				'no'  => __( 'Use the WordPress posts table', 'woocommerce' ),
-			),
-			'checkboxgroup' => 'start',
-			'disabled'      => $sync_is_pending ? array( 'yes', 'no' ) : array(),
-		);
-
-		if ( $sync_is_pending ) {
-			$initial_pending_count = $sync_status['initial_pending_count'];
-			$current_pending_count = $sync_status['current_pending_count'];
-			if ( $initial_pending_count ) {
-				$text =
-					sprintf(
-						/* translators: %1$s=current number of orders pending sync, %2$s=initial number of orders pending sync */
-						_n( 'There\'s %1$s order (out of a total of %2$s) pending sync!', 'There are %1$s orders (out of a total of %2$s) pending sync!', $current_pending_count, 'woocommerce' ),
-						$current_pending_count,
-						$initial_pending_count
-					);
-			} else {
-				$text =
-					/* translators: %s=initial number of orders pending sync */
-					sprintf( _n( 'There\'s %s order pending sync!', 'There are %s orders pending sync!', $current_pending_count, 'woocommerce' ), $current_pending_count, 'woocommerce' );
-			}
-
-			if ( $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) ) ) {
-				$text .= __( "<br/>Synchronization for these orders is currently in progress.<br/>The authoritative table can't be changed until sync completes.", 'woocommerce' );
-			} else {
-				$text .= __( "<br/>The authoritative table can't be changed until these orders are synchronized.", 'woocommerce' );
-			}
-
-			$settings[] = array(
-				'type' => 'info',
-				'id'   => 'cot-out-of-sync-warning',
-				'css'  => 'color: #C00000',
-				'text' => $text,
-			);
-		}
-
-		$settings[] = array(
-			'desc' => __( 'Keep the posts table and the orders tables synchronized', 'woocommerce' ),
-			'id'   => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
-			'type' => 'checkbox',
-		);
-
-		if ( $sync_is_pending ) {
-			if ( $this->data_synchronizer->data_sync_is_enabled() ) {
-				$message    = $this->custom_orders_table_usage_is_enabled() ?
-					__( 'Switch to using the posts table as the authoritative data store for orders when sync finishes', 'woocommerce' ) :
-					__( 'Switch to using the orders table as the authoritative data store for orders when sync finishes', 'woocommerce' );
-				$settings[] = array(
-					'desc' => $message,
-					'id'   => self::AUTO_FLIP_AUTHORITATIVE_TABLE_ROLES_OPTION,
-					'type' => 'checkbox',
-				);
-			}
-		}
-
-		$settings[] = array(
-			'desc' => __( 'Use database transactions for the orders data synchronization', 'woocommerce' ),
-			'id'   => self::USE_DB_TRANSACTIONS_OPTION,
-			'type' => 'checkbox',
-		);
-
-		$isolation_level_names = self::get_valid_transaction_isolation_levels();
-		$settings[]            = array(
-			'desc'    => __( 'Database transaction isolation level to use', 'woocommerce' ),
-			'id'      => self::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION,
-			'type'    => 'select',
-			'options' => array_combine( $isolation_level_names, $isolation_level_names ),
-			'default' => self::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL,
-		);
-
-		$settings[] = array( 'type' => 'sectionend' );
-
-		return $settings;
-	}
-
-	/**
-	 * Get the valid database transaction isolation level names.
-	 *
-	 * @return string[]
-	 */
-	public static function get_valid_transaction_isolation_levels() {
-		return array(
-			'REPEATABLE READ',
-			'READ COMMITTED',
-			'READ UNCOMMITTED',
-			'SERIALIZABLE',
-		);
 	}
 
 	/**
