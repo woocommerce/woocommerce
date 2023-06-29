@@ -54,8 +54,8 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		await api.delete( `orders/${ orderId }`, { force: true } );
-		await api.delete( `orders/${ newOrderId }`, { force: true } );
+
+		await api.post( `orders/batch`, { delete: [ orderId, newOrderId ] } );
 	} );
 
 	test( 'can receive new order email', async ( { page, baseURL } ) => {
