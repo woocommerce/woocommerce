@@ -436,9 +436,9 @@ class CustomOrdersTableController {
 		}
 		$sync_status = $this->data_synchronizer->get_sync_status();
 		if ( 'custom_order_tables' === $feature_id ) {
-			return $this->get_hpos_enable_feature_setting( $sync_status );
+			return $this->get_hpos_setting_for_feature( $sync_status );
 		}
-		return $this->get_hpos_sync_enable_feature_setting( $sync_status );
+		return $this->get_hpos_setting_for_sync( $sync_status );
 	}
 
 	/**
@@ -448,7 +448,7 @@ class CustomOrdersTableController {
 	 *
 	 * @return array Feature setting object.
 	 */
-	private function get_hpos_enable_feature_setting( $sync_status ) {
+	private function get_hpos_setting_for_feature( $sync_status ) {
 		$hpos_enabled            = $this->custom_orders_table_usage_is_enabled();
 		$plugin_info             = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables' );
 		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
@@ -477,7 +477,7 @@ class CustomOrdersTableController {
 	 *
 	 * @return array Feature setting object.
 	 */
-	private function get_hpos_sync_enable_feature_setting( $sync_status ) {
+	private function get_hpos_setting_for_sync( $sync_status ) {
 		$sync_in_progress = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
 		$sync_enabled     = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		$sync_message     = '';
