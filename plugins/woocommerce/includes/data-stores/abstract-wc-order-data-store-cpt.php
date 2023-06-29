@@ -120,7 +120,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			throw new Exception( __( 'Invalid order.', 'woocommerce' ) );
 		}
 
-		$order->set_props(
+		$this->set_order_props(
+			$order,
 			array(
 				'parent_id'     => $post_object->post_parent,
 				'date_created'  => $this->string_to_timestamp( $post_object->post_date_gmt ),
@@ -140,6 +141,43 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		 */
 		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
 			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+		}
+	}
+
+	/**
+	 * Set the properties of an object and log the first error found while doing so.
+	 *
+	 * @param $order WC_Order $order Order object.
+	 * @param array          $props The properties to set.
+	 */
+	private function set_order_props( &$order, array $props ) {
+		$errors = $order->set_props( $props );
+
+		if ( ! $errors instanceof WP_Error ) {
+			return;
+		}
+
+		$order_id = $order->get_id();
+		$logger   = WC()->call_function( 'wc_get_logger' );
+
+		foreach ( $errors->get_error_codes() as $error_code ) {
+			$property_name = $errors->get_error_data( $error_code )['property_name'] ?? '';
+			$error_message = $errors->get_error_message( $error_code );
+			$logger->warning(
+				sprintf(
+				/* translators: %1$s = order ID, %2$s = order id, %3$s = error message. */
+					__( 'Error when setting property \'%1$s\' for order %2$d: %3$s', 'woocommerce' ),
+					$property_name,
+					$order_id,
+					$error_message
+				),
+				array(
+					'error_code'    => $error_code,
+					'error_message' => $error_message,
+					'order_id'      => $order_id,
+					'property_name' => $property_name,
+				)
+			);
 		}
 	}
 
@@ -302,7 +340,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function read_order_data( &$order, $post_object ) {
 		$id = $order->get_id();
 
-		$order->set_props(
+		$this->set_order_props(
+			$order,
 			array(
 				'currency'           => get_post_meta( $id, '_order_currency', true ),
 				'discount_total'     => get_post_meta( $id, '_cart_discount', true ),
