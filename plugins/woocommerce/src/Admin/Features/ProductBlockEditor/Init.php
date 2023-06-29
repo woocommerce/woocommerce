@@ -48,7 +48,7 @@ class Init {
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product', array( $this, 'add_product_template' ) );
 
-			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ), 999 );
+			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
 			$block_registry = new BlockRegistry();
 			$block_registry->init();
