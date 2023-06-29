@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update the call to marketing extensions recommendations API from version 1.2 to version 1.3 with new recommendation Klaviyo.
