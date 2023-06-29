@@ -401,8 +401,8 @@ class InstalledExtensions {
 		$data['icon'] = WC_ADMIN_IMAGES_FOLDER_URL . '/marketing/klaviyo.png';
 
 		if ( 'activated' === $data['status'] ) {
-			$klaviyo_options = get_option('klaviyo_settings');
-			if (isset($klaviyo_options['klaviyo_public_api_key'])) {
+			$klaviyo_options = get_option( 'klaviyo_settings' );
+			if ( isset( $klaviyo_options['klaviyo_public_api_key'] ) ) {
 				$data['status'] = 'configured';
 			}
 
