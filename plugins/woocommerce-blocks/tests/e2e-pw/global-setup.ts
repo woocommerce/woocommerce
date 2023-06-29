@@ -43,12 +43,16 @@ const loginAsCustomer = async ( config: FullConfig ) => {
 	const customerRetries = 5;
 	for ( let i = 0; i < customerRetries; i++ ) {
 		try {
-			await customerPage.goto( `/wp-admin` );
+			await customerPage.goto( `/wp-admin`, {
+				waitUntil: 'networkidle',
+			} );
 			await customerPage.fill( 'input[name="log"]', customer.username );
 			await customerPage.fill( 'input[name="pwd"]', customer.password );
 			await customerPage.click( 'text=Log In' );
 
-			await customerPage.goto( `/my-account` );
+			await customerPage.goto( `/my-account`, {
+				waitUntil: 'networkidle',
+			} );
 
 			await customerPage
 				.context()
@@ -86,7 +90,7 @@ const prepareAttributes = async ( config: FullConfig ) => {
 	const context = await browser.newContext( contextOptions );
 	const page = await context.newPage();
 
-	await page.goto( `/wp-admin` );
+	await page.goto( `/wp-admin`, { waitUntil: 'networkidle' } );
 	await page.fill( 'input[name="log"]', admin.username );
 	await page.fill( 'input[name="pwd"]', admin.password );
 	await page.click( 'text=Log In' );
@@ -100,7 +104,9 @@ const prepareAttributes = async ( config: FullConfig ) => {
 		await dialog.accept();
 	} );
 
-	await page.goto( '/wp-admin/admin.php?page=wc-status&tab=tools' );
+	await page.goto( '/wp-admin/admin.php?page=wc-status&tab=tools', {
+		waitUntil: 'networkidle',
+	} );
 
 	await page.click( '.regenerate_product_attributes_lookup_table input' );
 

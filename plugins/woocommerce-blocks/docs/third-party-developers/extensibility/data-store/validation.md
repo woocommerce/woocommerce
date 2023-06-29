@@ -46,7 +46,7 @@ Returns the validation error.
 
 #### _Parameters_
 
-- _errorId_ `string` - The error ID to get validation errors for.
+-   _errorId_ `string` - The error ID to get validation errors for.
 
 #### Example
 
@@ -54,7 +54,6 @@ Returns the validation error.
 const store = select( 'wc/store/validation' );
 const billingFirstNameError = store.getValidationError( 'billing-first-name' );
 ```
-
 
 #### _Returns_
 
@@ -66,7 +65,7 @@ Gets a validation error ID for use in HTML which can be used as a CSS selector, 
 
 #### _Parameters_
 
-- _errorId_ `string` - The error ID to get the validation error ID for.
+-   _errorId_ `string` - The error ID to get the validation error ID for.
 
 #### _Returns_
 
@@ -88,7 +87,7 @@ Clears a validation error.
 
 #### _Parameters_
 
-- _errorId_ `string` - The error ID to clear validation errors for.
+-   _errorId_ `string` - The error ID to clear validation errors for.
 
 #### Example
 
@@ -103,7 +102,7 @@ Clears multiple validation errors at once. If no error IDs are passed, all valid
 
 #### _Parameters_
 
-- _errors_ `string[] | undefined` - The error IDs to clear validation errors for. This can be undefined, and if it is, all validation errors will be cleared.
+-   _errors_ `string[] | undefined` - The error IDs to clear validation errors for. This can be undefined, and if it is, all validation errors will be cleared.
 
 #### Example
 
@@ -111,7 +110,11 @@ Clears multiple validation errors at once. If no error IDs are passed, all valid
 
 ```js
 const store = dispatch( 'wc/store/validation' );
-store.clearValidationErrors( [ 'billing-first-name', 'billing-last-name', 'terms-and-conditions' ] );
+store.clearValidationErrors( [
+	'billing-first-name',
+	'billing-last-name',
+	'terms-and-conditions',
+] );
 ```
 
 2. This will clear all validation errors.
@@ -136,14 +139,14 @@ const { dispatch } = wp.data;
 const { setValidationErrors } = dispatch( 'wc/store/validation' );
 
 setValidationErrors( {
-    'billing-first-name': {
-        message: 'First name is required.',
-        hidden: false,
-    },
-    'billing-last-name': {
-        message: 'Last name is required.',
-        hidden: false,
-    },
+	'billing-first-name': {
+		message: 'First name is required.',
+		hidden: false,
+	},
+	'billing-last-name': {
+		message: 'Last name is required.',
+		hidden: false,
+	},
 } );
 ```
 
@@ -203,4 +206,3 @@ showAllValidationErrors();
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/data-store/validation.md)
 
 <!-- /FEEDBACK -->
-

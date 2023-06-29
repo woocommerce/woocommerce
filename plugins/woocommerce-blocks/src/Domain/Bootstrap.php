@@ -22,7 +22,11 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Registry\Container;
+use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
+use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
+use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ClassicTemplatesCompatibility;
+use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\StoreApi\RoutesController;
@@ -132,6 +136,10 @@ class Bootstrap {
 		$this->container->get( BlockTemplatesController::class );
 		$this->container->get( ProductSearchResultsTemplate::class );
 		$this->container->get( ProductAttributeTemplate::class );
+		$this->container->get( CartTemplate::class );
+		$this->container->get( CheckoutTemplate::class );
+		$this->container->get( CheckoutHeaderTemplate::class );
+		$this->container->get( OrderConfirmationTemplate::class );
 		$this->container->get( ClassicTemplatesCompatibility::class );
 		$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
 		$this->container->get( SingleProductTemplateCompatibility::class )->init();
@@ -271,6 +279,30 @@ class Bootstrap {
 			ProductAttributeTemplate::class,
 			function () {
 				return new ProductAttributeTemplate();
+			}
+		);
+		$this->container->register(
+			CartTemplate::class,
+			function () {
+				return new CartTemplate();
+			}
+		);
+		$this->container->register(
+			CheckoutTemplate::class,
+			function () {
+				return new CheckoutTemplate();
+			}
+		);
+		$this->container->register(
+			CheckoutHeaderTemplate::class,
+			function () {
+				return new CheckoutHeaderTemplate();
+			}
+		);
+		$this->container->register(
+			OrderConfirmationTemplate::class,
+			function () {
+				return new OrderConfirmationTemplate();
 			}
 		);
 		$this->container->register(

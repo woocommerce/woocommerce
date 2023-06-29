@@ -147,18 +147,26 @@ const onClickCallbackWithTermDescription = ( {
 	}
 };
 
-export const blockifiedProductCatalogConfig = {
-	getBlockifiedTemplate,
-	isConversionPossible,
-	getDescription,
+const productCatalogBlockifyConfig = {
 	getButtonLabel,
 	onClickCallback,
+	getBlockifiedTemplate,
+};
+
+const productTaxonomyBlockifyConfig = {
+	getButtonLabel,
+	onClickCallback: onClickCallbackWithTermDescription,
+	getBlockifiedTemplate: getBlockifiedTemplateWithTermDescription,
+};
+
+export const blockifiedProductCatalogConfig = {
+	isConversionPossible,
+	getDescription,
+	blockifyConfig: productCatalogBlockifyConfig,
 };
 
 export const blockifiedProductTaxonomyConfig = {
-	getBlockifiedTemplate: getBlockifiedTemplateWithTermDescription,
-	onClickCallback: onClickCallbackWithTermDescription,
 	isConversionPossible,
 	getDescription,
-	getButtonLabel,
+	blockifyConfig: productTaxonomyBlockifyConfig,
 };

@@ -47,7 +47,7 @@ type CheckoutFilterFunction = < T >(
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 
 // Global import
- const { registerCheckoutFilters } = wc.blocksCheckout;
+const { registerCheckoutFilters } = wc.blocksCheckout;
 
 const callback = ( value ) => {
 	return value;
@@ -85,7 +85,7 @@ This function applies a filter, and all registered callbacks, to a given value.
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 // Global import
- const { applyCheckoutFilter } = wc.blocksCheckout;
+const { applyCheckoutFilter } = wc.blocksCheckout;
 
 const options = {
 	filterName: 'my-filter',
@@ -132,4 +132,3 @@ Filters are implemented throughout the Mini-Cart, Cart and Checkout Blocks, as w
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./packages/checkout/filter-registry/README.md)
 
 <!-- /FEEDBACK -->
-

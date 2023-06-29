@@ -2,16 +2,16 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [The problem](#the-problem)
-- [The solution](#the-solution)
-- [`IntegrationInterface` methods](#integrationinterface-methods)
-    - [`get_name()`](#get_name)
-    - [`initialize()`](#initialize)
-    - [`get_script_handles()`](#get_script_handles)
-    - [`get_editor_script_handles()`](#get_editor_script_handles)
-    - [`get_script_data()`](#get_script_data)
-- [Usage example](#usage-example)
-    - [Getting data added in `get_script_data`](#getting-data-added-in-get_script_data)
+-   [The problem](#the-problem)
+-   [The solution](#the-solution)
+-   [`IntegrationInterface` methods](#integrationinterface-methods)
+    -   [`get_name()`](#get_name)
+    -   [`initialize()`](#initialize)
+    -   [`get_script_handles()`](#get_script_handles)
+    -   [`get_editor_script_handles()`](#get_editor_script_handles)
+    -   [`get_script_data()`](#get_script_data)
+-   [Usage example](#usage-example)
+    -   [Getting data added in `get_script_data`](#getting-data-added-in-get_script_data)
 
 ## The problem
 
@@ -213,4 +213,3 @@ The value returned here is a plain old JavaScript object, keyed by the keys of t
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/integration-interface.md)
 
 <!-- /FEEDBACK -->
-

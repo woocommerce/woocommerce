@@ -2,8 +2,8 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [List Products](#list-products)
-- [Single Product](#single-product)
+-   [List Products](#list-products)
+-   [Single Product](#single-product)
 
 The store products API provides public product data so it can be rendered on the client side.
 
@@ -39,37 +39,37 @@ GET /products?return_attribute_counts=pa_size,pa_color
 GET /products?return_rating_counts=true
 ```
 
-| Attribute                                   | Type    | Required | Description                                                                                                                                                                |
-|:--------------------------------------------|:--------| :------: |:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `search`                                    | integer |    no    | Limit results to those matching a string.                                                                                                                                  |
-| `slug`                                      | string  |    no    | Limit result set to products with specific slug(s). Use commas to separate.                                                                                                |
-| `after`                                     | string  |    no    | Limit response to resources created after a given ISO8601 compliant date.                                                                                                  |
-| `before`                                    | string  |    no    | Limit response to resources created before a given ISO8601 compliant date.                                                                                                 |
-| `date_column`                               | string  |    no    | When limiting response using after/before, which date column to compare against. Allowed values: `date`, `date_gmt`, `modified`, `modified_gmt`                            |
-| `exclude`                                   | array   |    no    | Ensure result set excludes specific IDs.                                                                                                                                   |
-| `include`                                   | array   |    no    | Limit result set to specific ids.                                                                                                                                          |
-| `offset`                                    | integer |    no    | Offset the result set by a specific number of items.                                                                                                                       |
-| `order`                                     | string  |    no    | Order sort attribute ascending or descending. Allowed values: `asc`, `desc`                                                                                                |
-| `orderby`                                   | string  |    no    | Sort collection by object attribute. Allowed values : `date`, `modified`, `id`, `include`, `title`, `slug`, `price`, `popularity`, `rating`, `menu_order`, `comment_count` |
-| `parent`                                    | array   |    no    | Limit result set to those of particular parent IDs.                                                                                                                        |
-| `parent_exclude`                            | array   |    no    | Limit result set to all items except those of a particular parent ID.                                                                                                      |
-| `type`                                      | string  |    no    | Limit result set to products assigned a specific type.                                                                                                                     |
-| `sku`                                       | string  |    no    | Limit result set to products with specific SKU(s). Use commas to separate.                                                                                                 |
-| `featured`                                  | boolean |    no    | Limit result set to featured products.                                                                                                                                     |
-| `category`                                  | string  |    no    | Limit result set to products assigned a specific category ID.                                                                                                              |
-| `category_operator`                         | string  |    no    | Operator to compare product category terms. Allowed values: `in`, `not_in`, `and`                                                                                          |
-| `_unstable_tax_[product-taxonomy]`          | string  |    no    | Limit result set to products assigned to the term ID of that custom product taxonomy. `[product-taxonomy]` should be the key of the custom product taxonomy registered.    |
-| `_unstable_tax_[product-taxonomy]_operator` | string  |    no    | Operator to compare custom product taxonomy terms. Allowed values: `in`, `not_in`, `and`                                                                                   |
-| `tag`                                       | string  |    no    | Limit result set to products assigned a specific tag ID.                                                                                                                   |
-| `tag_operator`                              | string  |    no    | Operator to compare product tags. Allowed values: `in`, `not_in`, `and`                                                                                                    |
-| `on_sale`                                   | boolean |    no    | Limit result set to products on sale.                                                                                                                                      |
+| Attribute                                   | Type    | Required | Description                                                                                                                                                                                                                           |
+| :------------------------------------------ | :------ | :------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `search`                                    | integer |    no    | Limit results to those matching a string.                                                                                                                                                                                             |
+| `slug`                                      | string  |    no    | Limit result set to products with specific slug(s). Use commas to separate.                                                                                                                                                           |
+| `after`                                     | string  |    no    | Limit response to resources created after a given ISO8601 compliant date.                                                                                                                                                             |
+| `before`                                    | string  |    no    | Limit response to resources created before a given ISO8601 compliant date.                                                                                                                                                            |
+| `date_column`                               | string  |    no    | When limiting response using after/before, which date column to compare against. Allowed values: `date`, `date_gmt`, `modified`, `modified_gmt`                                                                                       |
+| `exclude`                                   | array   |    no    | Ensure result set excludes specific IDs.                                                                                                                                                                                              |
+| `include`                                   | array   |    no    | Limit result set to specific ids.                                                                                                                                                                                                     |
+| `offset`                                    | integer |    no    | Offset the result set by a specific number of items.                                                                                                                                                                                  |
+| `order`                                     | string  |    no    | Order sort attribute ascending or descending. Allowed values: `asc`, `desc`                                                                                                                                                           |
+| `orderby`                                   | string  |    no    | Sort collection by object attribute. Allowed values : `date`, `modified`, `id`, `include`, `title`, `slug`, `price`, `popularity`, `rating`, `menu_order`, `comment_count`                                                            |
+| `parent`                                    | array   |    no    | Limit result set to those of particular parent IDs.                                                                                                                                                                                   |
+| `parent_exclude`                            | array   |    no    | Limit result set to all items except those of a particular parent ID.                                                                                                                                                                 |
+| `type`                                      | string  |    no    | Limit result set to products assigned a specific type.                                                                                                                                                                                |
+| `sku`                                       | string  |    no    | Limit result set to products with specific SKU(s). Use commas to separate.                                                                                                                                                            |
+| `featured`                                  | boolean |    no    | Limit result set to featured products.                                                                                                                                                                                                |
+| `category`                                  | string  |    no    | Limit result set to products assigned a specific category ID.                                                                                                                                                                         |
+| `category_operator`                         | string  |    no    | Operator to compare product category terms. Allowed values: `in`, `not_in`, `and`                                                                                                                                                     |
+| `_unstable_tax_[product-taxonomy]`          | string  |    no    | Limit result set to products assigned to the term ID of that custom product taxonomy. `[product-taxonomy]` should be the key of the custom product taxonomy registered.                                                               |
+| `_unstable_tax_[product-taxonomy]_operator` | string  |    no    | Operator to compare custom product taxonomy terms. Allowed values: `in`, `not_in`, `and`                                                                                                                                              |
+| `tag`                                       | string  |    no    | Limit result set to products assigned a specific tag ID.                                                                                                                                                                              |
+| `tag_operator`                              | string  |    no    | Operator to compare product tags. Allowed values: `in`, `not_in`, `and`                                                                                                                                                               |
+| `on_sale`                                   | boolean |    no    | Limit result set to products on sale.                                                                                                                                                                                                 |
 | `min_price`                                 | string  |    no    | Limit result set to products based on a minimum price, provided using the smallest unit of the currency. E.g. provide 10025 for 100.25 USD, which is a two-decimal currency, and 1025 for 1025 JPY, which is a zero-decimal currency. |
 | `max_price`                                 | string  |    no    | Limit result set to products based on a maximum price, provided using the smallest unit of the currency. E.g. provide 10025 for 100.25 USD, which is a two-decimal currency, and 1025 for 1025 JPY, which is a zero-decimal currency. |
-| `stock_status`                              | array   |    no    | Limit result set to products with specified stock statuses. Expects an array of strings containing 'instock', 'outofstock' or 'onbackorder'.                               |
-| `attributes`                                | array   |    no    | Limit result set to specific attribute terms. Expects an array of objects containing `attribute` (taxonomy), `term_id` or `slug`, and optional `operator` for comparison.  |
-| `attribute_relation`                        | string  |    no    | The logical relationship between attributes when filtering across multiple at once.                                                                                        |
-| `catalog_visibility`                        | string  |    no    | Determines if hidden or visible catalog products are shown. Allowed values: `any`, `visible`, `catalog`, `search`, `hidden`                                                |
-| `rating`                                    | boolean |    no    | Limit result set to products with a certain average rating.                                                                                                                |
+| `stock_status`                              | array   |    no    | Limit result set to products with specified stock statuses. Expects an array of strings containing 'instock', 'outofstock' or 'onbackorder'.                                                                                          |
+| `attributes`                                | array   |    no    | Limit result set to specific attribute terms. Expects an array of objects containing `attribute` (taxonomy), `term_id` or `slug`, and optional `operator` for comparison.                                                             |
+| `attribute_relation`                        | string  |    no    | The logical relationship between attributes when filtering across multiple at once.                                                                                                                                                   |
+| `catalog_visibility`                        | string  |    no    | Determines if hidden or visible catalog products are shown. Allowed values: `any`, `visible`, `catalog`, `search`, `hidden`                                                                                                           |
+| `rating`                                    | boolean |    no    | Limit result set to products with a certain average rating.                                                                                                                                                                           |
 
 ```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products"
@@ -204,7 +204,7 @@ GET /products/:slug
 ```
 
 | Attribute | Type   | Required | Description                          |
-|:----------|:-------| :------: |:-------------------------------------|
+| :-------- | :----- | :------: | :----------------------------------- |
 | `slug`    | string |   Yes    | The slug of the product to retrieve. |
 
 ```sh
@@ -279,4 +279,3 @@ curl "https://example-store.com/wp-json/wc/store/v1/products?type=variation"
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/products.md)
 
 <!-- /FEEDBACK -->
-

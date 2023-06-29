@@ -63,7 +63,6 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 		if ( ! $this->is_archive_template() ) {
 			return $block_content;
 		}
-
 		/**
 		 * If the block is not inherited, we don't need to inject hooks.
 		 */

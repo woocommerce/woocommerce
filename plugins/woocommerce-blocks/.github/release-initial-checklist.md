@@ -107,13 +107,13 @@ This only needs to be done if this release is the last release of the feature pl
         -   It lists all the WooCommerce Blocks versions that are being included since the last version that you edited in `plugins/woocommerce/composer.json`. Each version should have a link for the `Release PR`, `Testing instructions` and `Release post` (if available).
         -   The changelog should be aggregated from all the releases included in the package bump and grouped per type: `Enhancements`, `Bug Fixes`, `Various` etc. This changelog will be used in the release notes for the WooCommerce release. That's why it should only list the PRs that have WooCoomerce Core in the WooCommerce Visibility section of their description. Don't include changes available in the feature plugin or development builds.
 
-
 -   [ ] Build WC core from that branch with `pnpm run --filter='woocommerce' build ` (you might need to [install the dependencies first](https://github.com/woocommerce/woocommerce#prerequisites)) and:
 
     -   [ ] Make sure the correct version of WC Blocks is being loaded. This can be done testing at least one of the testing steps from the release.
     -   [ ] Complete the [Smoke testing checklist](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/docs/internal-developers/testing/smoke-testing.md).
 
 -   [ ] Verify and make any additional edits to the pull request description for things like: Changelog to be included with WooCommerce core, additional communication that might be needed elsewhere, additional marketing communication notes that may be needed, etc.
+
     -   [ ] Assign the corresponding WC version milestone to the PR
     -   [ ] After the checklist is complete and the testing is done, select the porter of your team to review the PR. Once approved, make sure you merge the PR.
 

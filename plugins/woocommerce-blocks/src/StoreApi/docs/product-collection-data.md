@@ -11,9 +11,9 @@ GET /products/collection-data?calculate_rating_counts=true
 
 | Attribute                    | Type   | Required | Description                                                                                                                                                                                                |
 | :--------------------------- | :----- | :------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `calculate_price_range`      | bool   |    No    | Returns the min and max price for the product collection. If false, only `null` will be returned. |
+| `calculate_price_range`      | bool   |    No    | Returns the min and max price for the product collection. If false, only `null` will be returned.                                                                                                          |
 | `calculate_attribute_counts` | object |    No    | Returns attribute counts for a list of attribute taxonomies you pass in via this parameter. Each should be provided as an object with keys "taxonomy" and "query_type". If empty, `null` will be returned. |
-| `calculate_rating_counts`    | bool   |    No    | Returns the counts of products with a certain average rating, 1-5. If false, only `null` will be returned. |
+| `calculate_rating_counts`    | bool   |    No    | Returns the counts of products with a certain average rating, 1-5. If false, only `null` will be returned.                                                                                                 |
 
 **In addition to the above attributes**, all product list attributes are supported. This allows you to get data for a certain subset of products. See [the products API list products section](products.md#list-products) for the full list.
 
@@ -73,4 +73,3 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?cal
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/product-collection-data.md)
 
 <!-- /FEEDBACK -->
-

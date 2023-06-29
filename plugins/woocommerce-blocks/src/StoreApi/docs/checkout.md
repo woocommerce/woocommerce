@@ -2,15 +2,15 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Get Checkout Data](#get-checkout-data)
-- [Process Order and Payment](#process-order-and-payment)
+-   [Get Checkout Data](#get-checkout-data)
+-   [Process Order and Payment](#process-order-and-payment)
 
 The checkout API facilitates the creation of orders (from the current cart) and handling payments for payment methods.
 
 All checkout endpoints require [Nonce Tokens](nonce-tokens.md).
 
-- [Get Checkout Data](#get-checkout-data)
-- [Process Order and Payment](#process-order-and-payment)
+-   [Get Checkout Data](#get-checkout-data)
+-   [Process Order and Payment](#process-order-and-payment)
 
 ## Get Checkout Data
 
@@ -121,15 +121,15 @@ curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc
 		"postcode": "10023",
 		"country": "US"
 	},
-  "customer_note": "Test notes on order.",
-  "create_account": false,
-  "payment_method": "cheque",
-  "payment_data": [],
-  "extensions": {
-    "some-extension-name": {
-      "some-data-key": "some data value"
-    }
-  }
+	"customer_note": "Test notes on order.",
+	"create_account": false,
+	"payment_method": "cheque",
+	"payment_data": [],
+	"extensions": {
+		"some-extension-name": {
+			"some-data-key": "some data value"
+		}
+	}
 }
 ```
 
@@ -185,36 +185,36 @@ For further information on generating a `stripe_source` please check [the Stripe
 
 ```json
 {
-  "payment_data": [
-    {
-      "key": "stripe_source",
-      "value": "src_xxxxxxxxxxxxx"
-    },
-    {
-      "key": "billing_email",
-      "value": "myemail@email.com"
-    },
-    {
-      "key": "billing_first_name",
-      "value": "Jane"
-    },
-    {
-      "key": "billing_last_name",
-      "value": "Doe"
-    },
-    {
-      "key": "paymentMethod",
-      "value": "stripe"
-    },
-    {
-      "key": "paymentRequestType",
-      "value": "cc"
-    },
-    {
-      "key": "wc-stripe-new-payment-method",
-      "value": true
-    }
-  ]
+	"payment_data": [
+		{
+			"key": "stripe_source",
+			"value": "src_xxxxxxxxxxxxx"
+		},
+		{
+			"key": "billing_email",
+			"value": "myemail@email.com"
+		},
+		{
+			"key": "billing_first_name",
+			"value": "Jane"
+		},
+		{
+			"key": "billing_last_name",
+			"value": "Doe"
+		},
+		{
+			"key": "paymentMethod",
+			"value": "stripe"
+		},
+		{
+			"key": "paymentRequestType",
+			"value": "cc"
+		},
+		{
+			"key": "wc-stripe-new-payment-method",
+			"value": true
+		}
+	]
 }
 ```
 
@@ -227,4 +227,3 @@ For further information on generating a `stripe_source` please check [the Stripe
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./src/StoreApi/docs/checkout.md)
 
 <!-- /FEEDBACK -->
-

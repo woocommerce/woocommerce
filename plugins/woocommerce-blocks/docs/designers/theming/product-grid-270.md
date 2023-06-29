@@ -2,8 +2,8 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Product images](#product-images)
-- [All Products prices](#all-products-prices)
+-   [Product images](#product-images)
+-   [All Products prices](#all-products-prices)
 
 In WC Blocks 2.7.0, some of the styles of the product grid blocks were updated to make the experience more consistent. Below, there are CSS code snippets that can undo those changes.
 
@@ -52,4 +52,3 @@ _All Products_ block was updated so prices follow the same layout as the other p
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/designers/theming/product-grid-270.md)
 
 <!-- /FEEDBACK -->
-

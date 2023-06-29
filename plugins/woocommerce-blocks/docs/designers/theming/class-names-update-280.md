@@ -2,8 +2,8 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Replaced classes](#replaced-classes)
-- [Deprecated classes](#deprecated-classes)
+-   [Replaced classes](#replaced-classes)
+-   [Deprecated classes](#deprecated-classes)
 
 In [WooCommerce Blocks 2.8.0](https://developer.woocommerce.com/2020/06/24/woocommerce-blocks-2-8-release-notes/), we replaced and deprecated some some class names to simplify them, fix inconsistencies, and make it easier to differentiate frontend components from editor components.
 
@@ -97,4 +97,3 @@ For example, given that `wc-block-error` changed to `wc-block-components-error`
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/designers/theming/class-names-update-280.md)
 
 <!-- /FEEDBACK -->
-
