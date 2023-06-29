@@ -78,7 +78,7 @@ export const ProductNameSuggestions = () => {
 				setSuggestions( parsed.suggestions );
 				setIsFirstLoad( false );
 			} catch ( e ) {
-				throw new Error( 'Unable to parse suggetsions' );
+				throw new Error( 'Unable to parse suggestions' );
 			}
 		},
 	} );

@@ -25,14 +25,13 @@ export const useProductDataSuggestions = () => {
 		request: ProductDataSuggestionRequest
 	): Promise< ProductDataSuggestion[] > => {
 		try {
-			const { suggestions } = await requestJetpackToken().then(
-				( { token } ) =>
-					apiFetch< ProductDataSuggestionSuccessResponse >( {
-						path: '/wooai/product-data-suggestions',
-						method: 'POST',
-						data: { ...request, token },
-					} )
-			);
+			const token = await requestJetpackToken();
+			const { suggestions } =
+				await apiFetch< ProductDataSuggestionSuccessResponse >( {
+					path: '/wooai/product-data-suggestions',
+					method: 'POST',
+					data: { ...request, token },
+				} );
 
 			return suggestions;
 		} catch ( error ) {
