@@ -201,38 +201,40 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 		<>
 			{ shouldShowFeedbackBar && (
 				<div className="woocommerce-product-mvp-ces-footer">
-					<Pill>Beta</Pill>
-					<div className="woocommerce-product-mvp-ces-footer__message">
-						{ createInterpolateElement(
-							__(
-								'How is your experience with the new product form? <span><shareButton>Share feedback</shareButton> or <turnOffButton>turn it off</turnOffButton></span>',
-								'woocommerce'
-							),
-							{
-								span: (
-									<span className="woocommerce-product-mvp-ces-footer__message-buttons" />
+					<div className="woocommerce-product-mvp-ces-footer__body">
+						<Pill>Beta</Pill>
+						<div className="woocommerce-product-mvp-ces-footer__message">
+							{ createInterpolateElement(
+								__(
+									'How is your experience with the new product form? <span><shareButton>Share feedback</shareButton> or <turnOffButton>turn it off</turnOffButton></span>',
+									'woocommerce'
 								),
-								shareButton: (
-									<Button
-										variant="link"
-										onClick={ onShareFeedbackClick }
-									/>
-								),
-								turnOffButton: (
-									<Button
-										onClick={ onTurnOffEditorClick }
-										variant="link"
-									/>
-								),
-							}
-						) }
+								{
+									span: (
+										<span className="woocommerce-product-mvp-ces-footer__message-buttons" />
+									),
+									shareButton: (
+										<Button
+											variant="link"
+											onClick={ onShareFeedbackClick }
+										/>
+									),
+									turnOffButton: (
+										<Button
+											onClick={ onTurnOffEditorClick }
+											variant="link"
+										/>
+									),
+								}
+							) }
+						</div>
+						<Button
+							className="woocommerce-product-mvp-ces-footer__close-button"
+							icon={ closeSmall }
+							label={ __( 'Hide this message', 'woocommerce' ) }
+							onClick={ onHideFeedbackBarClick }
+						></Button>
 					</div>
-					<Button
-						className="woocommerce-product-mvp-ces-footer__close-button"
-						icon={ closeSmall }
-						label={ __( 'Hide this message', 'woocommerce' ) }
-						onClick={ onHideFeedbackBarClick }
-					></Button>
 				</div>
 			) }
 		</>
