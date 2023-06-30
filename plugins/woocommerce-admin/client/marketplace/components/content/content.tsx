@@ -24,5 +24,5 @@ const renderContent = ( selectedTab?: string ): JSX.Element => {
 
 export default function Content( props: ContentProps ): JSX.Element {
 	const { selectedTab } = props;
-	return ( <>{ renderContent( selectedTab ) }</> );
+	return <>{ renderContent( selectedTab ) }</>;
 }
