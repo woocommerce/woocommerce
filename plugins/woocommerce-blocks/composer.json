@@ -3,7 +3,7 @@
 	"description": "WooCommerce blocks for the Gutenberg editor.",
 	"homepage": "https://woocommerce.com/",
 	"type": "wordpress-plugin",
-	"version": "10.4.4",
+	"version": "10.4.5",
 	"keywords": [
 		"gutenberg",
 		"woocommerce",

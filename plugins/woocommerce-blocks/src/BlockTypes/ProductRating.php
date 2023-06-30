@@ -105,7 +105,7 @@ class ProductRating extends AbstractBlock {
 		$post_id = $block->context['postId'];
 		$product = wc_get_product( $post_id );
 
-		if ( $product && $product->get_review_count() > 0 ) {
+		if ( $product ) {
 			$product_reviews_count                    = $product->get_review_count();
 			$product_rating                           = $product->get_average_rating();
 			$parsed_attributes                        = $this->parse_attributes( $attributes );
@@ -123,8 +123,8 @@ class ProductRating extends AbstractBlock {
 			 * @param int    $count  Total number of ratings.
 			 * @return string
 			 */
-			$filter_rating_html = function( $html, $rating, $count ) use ( $post_id, $product_rating, $product_reviews_count, $is_descendent_of_single_product_block, $is_descendent_of_single_product_template ) {
-				$product_permalink = get_permalink( $post_id );
+			$filter_rating_html = function( $html, $rating, $count ) use ( $product_rating, $product_reviews_count, $is_descendent_of_single_product_block, $is_descendent_of_single_product_template ) {
+				$product_permalink = get_permalink();
 				$reviews_count     = $count;
 				$average_rating    = $rating;
 
