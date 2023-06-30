@@ -30,4 +30,5 @@ registerBlockSingleProductTemplate( {
 	blockName: 'woocommerce/product-rating',
 	blockMetadata: metadata,
 	blockSettings: blockConfig,
+	isAvailableOnPostEditor: true,
 } );

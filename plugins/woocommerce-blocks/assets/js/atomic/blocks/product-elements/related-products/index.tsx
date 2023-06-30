@@ -19,6 +19,6 @@ registerBlockSingleProductTemplate( {
 		icon,
 		edit,
 		save,
-		ancestor: [ 'woocommerce/single-product' ],
 	},
+	isAvailableOnPostEditor: false,
 } );

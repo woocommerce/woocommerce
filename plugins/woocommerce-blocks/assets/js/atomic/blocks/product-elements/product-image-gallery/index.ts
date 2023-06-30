@@ -19,6 +19,6 @@ registerBlockSingleProductTemplate( {
 		icon,
 		// @ts-expect-error `edit` can be extended to include other attributes
 		edit,
-		ancestor: [ 'woocommerce/single-product' ],
 	},
+	isAvailableOnPostEditor: false,
 } );
