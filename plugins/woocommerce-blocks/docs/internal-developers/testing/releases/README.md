@@ -153,6 +153,8 @@ Every release includes specific testing instructions for new features and bug fi
     -   [10.4.2](./1042.md)
     -   [10.4.3](./1043.md)
     -   [10.4.4](./1044.md)
+    -   [10.4.5](./1045.md)
+
 
 <!-- FEEDBACK -->
 
