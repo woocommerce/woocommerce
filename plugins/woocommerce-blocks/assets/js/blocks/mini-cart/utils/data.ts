@@ -6,11 +6,14 @@ import {
 	getCurrencyFromPriceResponse,
 	formatPrice,
 } from '@woocommerce/price-format';
-import { CartResponse, isBoolean } from '@woocommerce/types';
+import {
+	CartResponse,
+	CartResponseTotals,
+	isBoolean,
+} from '@woocommerce/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 
-const getPrice = ( cartResponse: CartResponse, showIncludingTax: boolean ) => {
-	const { totals } = cartResponse;
+const getPrice = ( totals: CartResponseTotals, showIncludingTax: boolean ) => {
 	const currency = getCurrencyFromPriceResponse( totals );
 
 	const subTotal = showIncludingTax
@@ -21,11 +24,19 @@ const getPrice = ( cartResponse: CartResponse, showIncludingTax: boolean ) => {
 	return formatPrice( subTotal, currency );
 };
 
-export const updateTotals = ( totals: [ string, number ] | undefined ) => {
-	if ( ! totals ) {
+export const updateTotals = (
+	cartData: [ CartResponseTotals, number ] | undefined
+) => {
+	if ( ! cartData ) {
 		return;
 	}
-	const [ amount, quantity ] = totals;
+	const [ totals, quantity ] = cartData;
+	const showIncludingTax = getSettingWithCoercion(
+		'displayCartPricesIncludingTax',
+		false,
+		isBoolean
+	);
+	const amount = getPrice( totals, showIncludingTax );
 	const miniCartBlocks = document.querySelectorAll( '.wc-block-mini-cart' );
 	const miniCartQuantities = document.querySelectorAll(
 		'.wc-block-mini-cart__badge'
@@ -68,6 +79,9 @@ export const updateTotals = ( totals: [ string, number ] | undefined ) => {
 						amount
 				  )
 		);
+
+		miniCartBlock.dataset.cartTotals = JSON.stringify( totals );
+		miniCartBlock.dataset.cartItemsCount = quantity.toString();
 	} );
 	miniCartQuantities.forEach( ( miniCartQuantity ) => {
 		if ( quantity > 0 || miniCartQuantity.textContent !== '' ) {
@@ -90,7 +104,7 @@ export const updateTotals = ( totals: [ string, number ] | undefined ) => {
 };
 
 export const getMiniCartTotalsFromLocalStorage = ():
-	| [ string, number ]
+	| [ CartResponseTotals, number ]
 	| undefined => {
 	const rawMiniCartTotals = localStorage.getItem(
 		'wc-blocks_mini_cart_totals'
@@ -98,18 +112,15 @@ export const getMiniCartTotalsFromLocalStorage = ():
 	if ( ! rawMiniCartTotals ) {
 		return undefined;
 	}
-	const miniCartTotals = JSON.parse( rawMiniCartTotals );
-	const showIncludingTax = getSettingWithCoercion(
-		'displayCartPricesIncludingTax',
-		false,
-		isBoolean
-	);
-	const formattedPrice = getPrice( miniCartTotals, showIncludingTax );
-	return [ formattedPrice, miniCartTotals.itemsCount ] as [ string, number ];
+	const cartData = JSON.parse( rawMiniCartTotals );
+	return [ cartData.totals, cartData.itemsCount ] as [
+		CartResponseTotals,
+		number
+	];
 };
 
 export const getMiniCartTotalsFromServer = async (): Promise<
-	[ string, number ] | undefined
+	[ CartResponseTotals, number ] | undefined
 > => {
 	return fetch( '/wp-json/wc/store/v1/cart/' )
 		.then( ( response ) => {
@@ -121,12 +132,6 @@ export const getMiniCartTotalsFromServer = async (): Promise<
 			return response.json();
 		} )
 		.then( ( data: CartResponse ) => {
-			const showIncludingTax = getSettingWithCoercion(
-				'displayCartPricesIncludingTax',
-				false,
-				isBoolean
-			);
-			const formattedPrice = getPrice( data, showIncludingTax );
 			// Save server data to local storage, so we can re-fetch it faster
 			// on the next page load.
 			localStorage.setItem(
@@ -136,7 +141,10 @@ export const getMiniCartTotalsFromServer = async (): Promise<
 					itemsCount: data.items_count,
 				} )
 			);
-			return [ formattedPrice, data.items_count ] as [ string, number ];
+			return [ data.totals, data.items_count ] as [
+				CartResponseTotals,
+				number
+			];
 		} )
 		.catch( ( error ) => {
 			// eslint-disable-next-line no-console

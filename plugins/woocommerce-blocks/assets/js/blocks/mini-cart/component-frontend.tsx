@@ -31,13 +31,19 @@ const renderMiniCartFrontend = () => {
 		getProps: ( el ) => {
 			let colorClassNames = '';
 			const button = el.querySelector( '.wc-block-mini-cart__button' );
-			if ( button !== null ) {
+
+			if ( button instanceof HTMLButtonElement ) {
 				colorClassNames = button.classList
 					.toString()
 					.replace( 'wc-block-mini-cart__button', '' );
 			}
 			return {
-				isDataOutdated: el.dataset.isDataOutdated,
+				initialCartTotals: el.dataset.cartTotals
+					? JSON.parse( el.dataset.cartTotals )
+					: null,
+				initialCartItemsCount: el.dataset.cartItemsCount
+					? parseInt( el.dataset.cartItemsCount, 10 )
+					: 0,
 				isInitiallyOpen: el.dataset.isInitiallyOpen === 'true',
 				colorClassNames,
 				style: el.dataset.style ? JSON.parse( el.dataset.style ) : {},
