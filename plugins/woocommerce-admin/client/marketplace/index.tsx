@@ -15,7 +15,9 @@ export default function Marketplace() {
 
 	return (
 		<>
-			<Tabs selectedTab={ selectedTab } setSelectedTab={ setSelectedTab } />
+			<Tabs selectedTab={ selectedTab }
+				setSelectedTab={ setSelectedTab }
+			/>
 			<Content selectedTab={ selectedTab } />
 		</>
 	);
