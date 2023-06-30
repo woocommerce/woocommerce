@@ -57,8 +57,8 @@ const renderTabs = ( props: TabsProps ) => {
 		tabContent.push(
 			<Button
 				className={ classNames( 'woocommerce-marketplace__tab-button', {
-					'is-active': tabKey === selectedTab } )
-				}
+					'is-active': tabKey === selectedTab,
+				} )	}
 				onClick={ () => {
 					setSelectedTab( tabKey );
 					setUrlTabParam( tabKey );
