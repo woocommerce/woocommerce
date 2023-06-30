@@ -98,7 +98,7 @@ function ProductMVPFeedbackModal( {
 			onSubmit={ onSendFeedback }
 			onModalClose={ onCloseModal }
 			isSubmitButtonDisabled={ ! checked.length }
-			submitButtonLabel={ __( 'Send feedback', 'woocommerce' ) }
+			submitButtonLabel={ __( 'Send', 'woocommerce' ) }
 			cancelButtonLabel={ __( 'Skip', 'woocommerce' ) }
 			className="woocommerce-product-mvp-feedback-modal"
 		>
