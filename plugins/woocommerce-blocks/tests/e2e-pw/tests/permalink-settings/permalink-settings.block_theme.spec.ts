@@ -4,11 +4,6 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { cli } from '@woocommerce/e2e-utils';
 
-/**
- * Internal dependencies
- */
-import { goToShop, addToCart } from '../../utils';
-
 test.describe(
 	'Tests permalink settings for the cart and checkout templates',
 	async () => {
@@ -48,9 +43,9 @@ test.describe(
 		} );
 
 		test.describe( 'Frontend templates are updated', () => {
-			test.beforeEach( async ( { page } ) => {
-				await goToShop( page );
-				await addToCart( page );
+			test.beforeEach( async ( { frontendUtils } ) => {
+				await frontendUtils.goToShop();
+				await frontendUtils.addToCart();
 			} );
 
 			test( 'Changing cart permalink works', async ( { page } ) => {

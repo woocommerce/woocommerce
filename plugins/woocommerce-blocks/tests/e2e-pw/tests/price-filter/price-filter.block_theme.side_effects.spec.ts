@@ -3,7 +3,7 @@
  */
 import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { BASE_URL, getBlockByName, cli } from '@woocommerce/e2e-utils';
+import { BASE_URL, cli } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -44,11 +44,10 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await page.goto( `/?p=${ postId }`, { waitUntil: 'networkidle' } );
 	} );
 
-	test( 'should show all products', async ( { page } ) => {
-		const allProductsBlock = await getBlockByName( {
-			page,
-			name: 'woocommerce/all-products',
-		} );
+	test( 'should show all products', async ( { page, frontendUtils } ) => {
+		const allProductsBlock = await frontendUtils.getBlockByName(
+			'woocommerce/all-products'
+		);
 
 		await page.waitForLoadState( 'networkidle' );
 
@@ -67,11 +66,14 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 	test( 'should show only products that match the filter', async ( {
 		page,
 		pageUtils,
+		frontendUtils,
 	} ) => {
-		const { maxPriceInput } = await getMinMaxPriceInputs( {
-			page,
-			blockName: 'woocommerce/filter-wrapper',
-		} );
+		const priceFilterBlockLocator = await frontendUtils.getBlockByName(
+			'woocommerce/filter-wrapper'
+		);
+		const { maxPriceInput } = await getMinMaxPriceInputs(
+			priceFilterBlockLocator
+		);
 
 		await maxPriceInput.selectText();
 		await maxPriceInput.type( '10' );
@@ -82,10 +84,9 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 
 		await page.waitForLoadState( 'networkidle' );
 
-		const allProductsBlock = await getBlockByName( {
-			page,
-			name: 'woocommerce/all-products',
-		} );
+		const allProductsBlock = await frontendUtils.getBlockByName(
+			'woocommerce/all-products'
+		);
 
 		await page.waitForLoadState( 'networkidle' );
 		const img = await allProductsBlock.locator( 'img' ).first();
@@ -135,11 +136,10 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		);
 	} );
 
-	test.skip( 'should show all products', async ( { page } ) => {
-		const legacyTemplate = await getBlockByName( {
-			page,
-			name: 'woocommerce/legacy-template',
-		} );
+	test( 'should show all products', async ( { page, frontendUtils } ) => {
+		const legacyTemplate = await frontendUtils.getBlockByName(
+			'woocommerce/legacy-template'
+		);
 
 		await page.waitForLoadState( 'networkidle' );
 
@@ -154,11 +154,14 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 	test.skip( 'should show only products that match the filter', async ( {
 		page,
 		pageUtils,
+		frontendUtils,
 	} ) => {
-		const { maxPriceInput } = await getMinMaxPriceInputs( {
-			page,
-			blockName: 'woocommerce/filter-wrapper',
-		} );
+		const priceFilterBlockLocator = await frontendUtils.getBlockByName(
+			'woocommerce/filter-wrapper'
+		);
+		const { maxPriceInput } = await getMinMaxPriceInputs(
+			priceFilterBlockLocator
+		);
 
 		await maxPriceInput.selectText();
 		await maxPriceInput.type( '10' );
@@ -171,10 +174,9 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 				.includes( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
-		const legacyTemplate = await getBlockByName( {
-			page,
-			name: 'woocommerce/legacy-template',
-		} );
+		const legacyTemplate = await frontendUtils.getBlockByName(
+			'woocommerce/legacy-template'
+		);
 
 		const products = await legacyTemplate
 			.getByRole( 'list' )
