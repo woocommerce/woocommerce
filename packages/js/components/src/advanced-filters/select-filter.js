@@ -16,7 +16,7 @@ import { getDefaultOptionValue } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { textContent } from './utils';
+import { getInterpolatedString, textContent } from './utils';
 
 class SelectFilter extends Component {
 	constructor( { filter, config, onFilterChange } ) {
@@ -58,11 +58,14 @@ class SelectFilter extends Component {
 			find( config.input.options, { value: filter.value } ) || {};
 
 		return textContent(
-			createInterpolateElement( config.labels.title, {
-				filter: <Fragment>{ value.label }</Fragment>,
-				rule: <Fragment>{ rule.label }</Fragment>,
-				title: <Fragment />,
-			} )
+			createInterpolateElement(
+				getInterpolatedString( config.labels.title ),
+				{
+					filter: <Fragment>{ value.label }</Fragment>,
+					rule: <Fragment>{ rule.label }</Fragment>,
+					title: <Fragment />,
+				}
+			)
 		);
 	}
 
@@ -72,45 +75,48 @@ class SelectFilter extends Component {
 		const { options } = this.state;
 		const { rule, value } = filter;
 		const { labels, rules } = config;
-		const children = createInterpolateElement( labels.title, {
-			title: <span className={ className } />,
-			rule: (
-				<SelectControl
-					className={ classnames(
-						className,
-						'woocommerce-filters-advanced__rule'
-					) }
-					options={ rules }
-					value={ rule }
-					onChange={ ( selectedValue ) =>
-						onFilterChange( {
-							property: 'rule',
-							value: selectedValue,
-						} )
-					}
-					aria-label={ labels.rule }
-				/>
-			),
-			filter: options ? (
-				<SelectControl
-					className={ classnames(
-						className,
-						'woocommerce-filters-advanced__input'
-					) }
-					options={ options }
-					value={ value }
-					onChange={ ( selectedValue ) =>
-						onFilterChange( {
-							property: 'value',
-							value: selectedValue,
-						} )
-					}
-					aria-label={ labels.filter }
-				/>
-			) : (
-				<Spinner />
-			),
-		} );
+		const children = createInterpolateElement(
+			getInterpolatedString( labels.title ),
+			{
+				title: <span className={ className } />,
+				rule: (
+					<SelectControl
+						className={ classnames(
+							className,
+							'woocommerce-filters-advanced__rule'
+						) }
+						options={ rules }
+						value={ rule }
+						onChange={ ( selectedValue ) =>
+							onFilterChange( {
+								property: 'rule',
+								value: selectedValue,
+							} )
+						}
+						aria-label={ labels.rule }
+					/>
+				),
+				filter: options ? (
+					<SelectControl
+						className={ classnames(
+							className,
+							'woocommerce-filters-advanced__input'
+						) }
+						options={ options }
+						value={ value }
+						onChange={ ( selectedValue ) =>
+							onFilterChange( {
+								property: 'value',
+								value: selectedValue,
+							} )
+						}
+						aria-label={ labels.filter }
+					/>
+				) : (
+					<Spinner />
+				),
+			}
+		);
 
 		const screenReaderText = this.getScreenReaderText( filter, config );
 

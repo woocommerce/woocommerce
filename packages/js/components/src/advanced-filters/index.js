@@ -34,6 +34,7 @@ import {
 import Link from '../link';
 import AdvancedFilterItem from './item';
 import { Text } from '../experimental';
+import { getInterpolatedString } from './utils';
 
 const matches = [
 	{ value: 'all', label: __( 'All', 'woocommerce' ) },
@@ -147,20 +148,24 @@ class AdvancedFilters extends Component {
 	getTitle() {
 		const { match } = this.state;
 		const { config } = this.props;
-		return createInterpolateElement( config.title, {
-			select: (
-				<SelectControl
-					className="woocommerce-filters-advanced__title-select"
-					options={ matches }
-					value={ match }
-					onChange={ this.onMatchChange }
-					aria-label={ __(
-						'Choose to apply any or all filters',
-						'woocommerce'
-					) }
-				/>
-			),
-		} );
+
+		return createInterpolateElement(
+			getInterpolatedString( config.title ),
+			{
+				select: (
+					<SelectControl
+						className="woocommerce-filters-advanced__title-select"
+						options={ matches }
+						value={ match }
+						onChange={ this.onMatchChange }
+						aria-label={ __(
+							'Choose to apply any or all filters',
+							'woocommerce'
+						) }
+					/>
+				),
+			}
+		);
 	}
 
 	getAvailableFilterKeys() {
