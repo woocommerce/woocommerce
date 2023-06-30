@@ -57,19 +57,9 @@ const MarketingOverviewMultichannel = lazy( () =>
 		/* webpackChunkName: "multichannel-marketing" */ '../marketing/overview-multichannel'
 	)
 );
-const MarketplaceDiscover = lazy( () =>
+const Marketplace = lazy( () =>
 	import(
-		/* webpackChunkName: "multichannel-marketing" */ '../marketplace/discover'
-	)
-);
-const MarketplaceExtensions = lazy( () =>
-	import(
-		/* webpackChunkName: "multichannel-marketing" */ '../marketplace/extensions'
-	)
-);
-const MarketplaceThemes = lazy( () =>
-	import(
-		/* webpackChunkName: "multichannel-marketing" */ '../marketplace/themes'
+		/* webpackChunkName: "marketplace" */ '../marketplace'
 	)
 );
 const ProfileWizard = lazy( () =>
@@ -190,44 +180,19 @@ export const getPages = () => {
 
 	if ( isFeatureEnabled( 'marketplace' ) ) {
 		pages.push( {
-			container: MarketplaceDiscover,
+			container: Marketplace,
+			layout: {
+				header: false,
+			},
 			path: '/marketplace',
 			breadcrumbs: [
-				...initialBreadcrumbs,
 				[ '/marketplace', __( 'Marketplace', 'woocommerce' ) ],
-				[ __( 'Discover', 'woocommerce' ) ],
+				__( 'Marketplace', 'woocommerce' ),
 			],
 			wpOpenMenu: 'toplevel_page_woocommerce',
+			capability: 'manage_woocommerce',
 			navArgs: {
-				id: 'woocommerce-marketplace-discover',
-			},
-		} );
-
-		pages.push( {
-			container: MarketplaceExtensions,
-			path: '/marketplace/extensions',
-			breadcrumbs: [
-				...initialBreadcrumbs,
-				[ '/marketplace', __( 'Marketplace', 'woocommerce' ) ],
-				[ __( 'Extensions', 'woocommerce' ) ],
-			],
-			wpOpenMenu: 'toplevel_page_woocommerce',
-			navArgs: {
-				id: 'woocommerce-marketplace-extensions',
-			},
-		} );
-
-		pages.push( {
-			container: MarketplaceThemes,
-			path: '/marketplace/themes',
-			breadcrumbs: [
-				...initialBreadcrumbs,
-				[ '/marketplace', __( 'Marketplace', 'woocommerce' ) ],
-				[ __( 'Themes', 'woocommerce' ) ],
-			],
-			wpOpenMenu: 'toplevel_page_woocommerce',
-			navArgs: {
-				id: 'woocommerce-marketplace-themes',
+				id: 'woocommerce-marketplace',
 			},
 		} );
 	}
@@ -540,21 +505,14 @@ window.wpNavMenuClassChange = function ( page, url ) {
 		element.classList.add( 'menu-top' );
 	} );
 
-	let pageUrl = 'admin.php?page=wc-admin',
-		currentItemsSelector = `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`;
-
-	if ( url !== '/' ) {
-		pageUrl = 'admin.php?page=wc-admin&path=' + encodeURIComponent( url );
-		const splitUrl = url.split( '/' );
-		if ( splitUrl[ 0 ] === '' ) {
-			splitUrl.splice( 0, 1 );
-		}
-		currentItemsSelector =
-			splitUrl.length > 1
-				? `li > a[href*="${ encodeURIComponent( splitUrl[ 0 ] ) }"]`
-				: `li > a[href*="${ pageUrl }"]`;
-	}
-
+	const pageUrl =
+		url === '/'
+			? 'admin.php?page=wc-admin'
+			: 'admin.php?page=wc-admin&path=' + encodeURIComponent( url );
+	const currentItemsSelector =
+		url === '/'
+			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
+			: `li > a[href*="${ pageUrl }"]`;
 	const currentItems = wpNavMenu.querySelectorAll( currentItemsSelector );
 
 	Array.from( currentItems ).forEach( function ( item ) {

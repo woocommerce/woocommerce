@@ -11,7 +11,7 @@ import { getQuery, getNewPath, navigateTo } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './tabs.scss';
-import { DEFAULT_TAB_KEY, MARKETPLACE_PATH } from '../constants';
+import { MARKETPLACE_PATH } from '../constants';
 
 export interface TabsProps {
 	selectedTab?: string | undefined;
@@ -19,8 +19,8 @@ export interface TabsProps {
 }
 
 interface Tab {
-	name: string;
-	title: string;
+	name: string,
+	title: string,
 }
 
 interface Tabs {
@@ -39,7 +39,7 @@ const tabs: Tabs = {
 };
 
 const setUrlTabParam = ( tabKey: string ) => {
-	if ( tabKey === DEFAULT_TAB_KEY ) {
+	if ( 'discover' === tabKey ) {
 		navigateTo( {
 			url: getNewPath( {}, MARKETPLACE_PATH, {} ),
 		} );
@@ -52,13 +52,16 @@ const setUrlTabParam = ( tabKey: string ) => {
 
 const renderTabs = ( props: TabsProps ) => {
 	const { selectedTab, setSelectedTab } = props;
-	const tabContent = [];
+	let tabContent = [];
 	for ( const tabKey in tabs ) {
 		tabContent.push(
 			<Button
-				className={ classNames( 'woocommerce-marketplace__tab-button', {
-					'is-active': tabKey === selectedTab,
-				} ) }
+				className={ classNames(
+					'woocommerce-marketplace__tab-button',
+					{
+						'is-active': tabKey === selectedTab
+					}
+				) }
 				onClick={ () => {
 					setSelectedTab( tabKey );
 					setUrlTabParam( tabKey );
@@ -76,20 +79,19 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	const { setSelectedTab } = props;
 
 	interface Query {
-		path?: string;
-		tab?: string;
+		path?: string,
+		tab?: string,
 	}
 
 	useEffect( () => {
 		const query: Query = getQuery();
-
-		if ( query?.tab && tabs[ query.tab ] ) {
+		if (
+			query?.path === MARKETPLACE_PATH &&
+			query?.tab
+		) {
 			setSelectedTab( query.tab );
-			return;
 		}
-
-		setSelectedTab( DEFAULT_TAB_KEY );
-	}, [ setSelectedTab ] );
+	}, [] );
 
 	return (
 		<nav className="woocommerce-marketplace__tabs">
