@@ -58,9 +58,7 @@ const MarketingOverviewMultichannel = lazy( () =>
 	)
 );
 const Marketplace = lazy( () =>
-	import(
-		/* webpackChunkName: "marketplace" */ '../marketplace'
-	)
+	import( /* webpackChunkName: "marketplace" */ '../marketplace' )
 );
 const ProfileWizard = lazy( () =>
 	import( /* webpackChunkName: "profile-wizard" */ '../profile-wizard' )
