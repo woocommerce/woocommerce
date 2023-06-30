@@ -56,7 +56,7 @@ const BlockEditorGuide = ( {
 				: __( 'Refreshed, streamlined interface', 'woocommerce' ),
 			text: isNewUser
 				? __(
-						'Using the product form means less clicking around. Product details are neatly grouped by tabs, so you always know where to go.',
+						'Everything you need to create and sell your products, all in one place. From photos and descriptions to pricing and inventory, all of your product settings can be found here.',
 						'woocommerce'
 				  )
 				: __(
