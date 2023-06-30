@@ -88,7 +88,7 @@ const BlockEditorGuide = ( {
 		{
 			heading: __( 'More features are on the way', 'woocommerce' ),
 			text: __(
-				'While we currently support physical products, exciting updates are coming to accommodate more types, like digital products, variations, and more. Stay tuned!',
+				"We're actively working on adding more features to the product form, including the ability to add digital products, variations, and more. Watch this space!",
 				'woocommerce'
 			),
 		},
