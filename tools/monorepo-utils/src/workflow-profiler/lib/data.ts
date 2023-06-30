@@ -52,13 +52,14 @@ export const getAllWorkflows = async ( owner: string, name: string ) => {
  */
 const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 	const { workflow_runs, total_count } = data;
-	totals.count_items_available = total_count;
-	totals.count_items_processed += workflow_runs.length;
-	const { WORKFLOW_DURATION_CUTOFF_MINUTES } = config;
 
 	if ( total_count === 0 ) {
 		return totals;
 	}
+
+	totals.count_items_available = total_count;
+	totals.count_items_processed += workflow_runs.length;
+	const { WORKFLOW_DURATION_CUTOFF_MINUTES } = config;
 
 	workflow_runs.forEach( ( run ) => {
 		totals[ run.conclusion ]++;
@@ -76,7 +77,7 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 	} );
 
 	Logger.notice(
-		`Processed ${ totals.count_items_processed } items of ${ totals.count_items_available } available.`
+		`Processed ${ totals.count_items_processed } workflow runs of ${ totals.count_items_available } available`
 	);
 
 	return totals;
@@ -160,7 +161,9 @@ export const getWorkflowRunData = async ( options: {
  * @return {Object} Workflow run data
  */
 export const getRunJobData = async ( nodeIds ) => {
-	console.log( nodeIds.length );
+	Logger.notice(
+		`Fetching individual data for the ${ nodeIds.length } successful workflow run(s)`
+	);
 	const gql = graphqlWithAuth();
 	return await gql(
 		`

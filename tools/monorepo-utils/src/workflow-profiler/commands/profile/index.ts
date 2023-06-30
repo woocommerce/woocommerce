@@ -37,7 +37,8 @@ const program = new Command( 'profile' )
 		'Repository name. Default: woocommerce',
 		'woocommerce'
 	)
-	.action( async ( start, end, id, { owner, name } ) => {
+	.option( '-s --show-steps' )
+	.action( async ( start, end, id, { owner, name, showSteps } ) => {
 		const workflowData = await getWorkflowData( id, owner, name );
 		Logger.notice(
 			`Processing workflow id ${ id }: "${ workflowData.name }" from ${ start } to ${ end }`
@@ -50,14 +51,20 @@ const program = new Command( 'profile' )
 			end,
 		} );
 
-		const { nodeIds } = workflowRunData;
-		Logger.notice( `Processing ${ nodeIds.length } workflow runs` );
-		const runJobData = await getRunJobData( nodeIds );
-		const compiledJobData = getCompiledJobData( runJobData );
+		let compiledJobData = {};
+
+		if ( showSteps ) {
+			const { nodeIds } = workflowRunData;
+			const runJobData = await getRunJobData( nodeIds );
+			compiledJobData = getCompiledJobData( runJobData );
+		}
 
 		logWorkflowRunResults( workflowData.name, workflowRunData );
-		logJobResults( compiledJobData );
-		logStepResults( compiledJobData );
+
+		if ( showSteps ) {
+			logJobResults( compiledJobData );
+			logStepResults( compiledJobData );
+		}
 	} );
 
 export default program;
