@@ -46,6 +46,10 @@ export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 							"The product editing screen's functionality meets my needs",
 							'woocommerce'
 						),
+						onsubmitLabel: __(
+							"Thanks for the feedback — we'll put it to good use!",
+							'woocommerce'
+						),
 						getExtraFieldsToBeShown: (
 							values: {
 								email?: string;
@@ -161,7 +165,6 @@ export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 					},
 					{
 						type: 'snackbar',
-						icon: <span>🌟</span>,
 					},
 					{
 						block_editor: isDescendantOf( 'product-block-editor' ),

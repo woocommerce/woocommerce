@@ -65,7 +65,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 					'woocommerce'
 				),
 				onsubmitLabel: __(
-					"Thanks for the feedback. We'll put it to good use!",
+					"Thanks for the feedback — we'll put it to good use!",
 					'woocommerce'
 				),
 				shouldShowComments: () => false,
@@ -174,7 +174,6 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 			{},
 			{
 				type: 'snackbar',
-				icon: <span>🌟</span>,
 			}
 		);
 	};
