@@ -2,6 +2,8 @@
 
 namespace WooCommerceDocs\Manifest;
 
+use WooCommerceDocs\Markdown\MarkdownParser;
+
 /**
  * Class ManifestProcessor
  *
@@ -24,7 +26,7 @@ class ManifestProcessor {
 	private static function get_parser() {
 		static $parser = null;
 		if ( null === $parser ) {
-			$parser = new \Parsedown();
+			$parser = new MarkdownParser();
 		}
 		return $parser;
 	}
@@ -78,14 +80,14 @@ class ManifestProcessor {
 				$content = preg_replace( '/^---[\s\S]*?---/', '', $content );
 
 				// Parse markdown.
-				$markdown_content = self::get_parser()->text( $content );
+				$markdown_content = self::get_parser()->convert( $content );
 
 				// If the post doesn't exist, create it.
 				if ( ! $existing_post ) {
 					$post_id = \WooCommerceDocs\Data\DocsStore::insert_docs_post(
 						array(
 							'post_title'   => $post['title'],
-							'post_content' => $markdown_content,
+							'post_content' => $markdown_content->__toString(),
 							'post_status'  => 'publish',
 						),
 						$post['id']
@@ -99,7 +101,7 @@ class ManifestProcessor {
 						array(
 							'ID'           => $existing_post->ID,
 							'post_title'   => $post['title'],
-							'post_content' => $markdown_content,
+							'post_content' => $markdown_content->__toString(),
 						),
 						$post['id']
 					);
