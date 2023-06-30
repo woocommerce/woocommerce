@@ -73,11 +73,11 @@ const BlockEditorGuide = ( {
 		},
 		{
 			heading: isNewUser
-				? __( 'Speed & performance', 'woocommerce' )
+				? __( 'Lightning fast performance', 'woocommerce' )
 				: __( 'Improved speed & performance', 'woocommerce' ),
 			text: isNewUser
 				? __(
-						'Create a product from start to finish without page reloads. Our modern technology ensures reliability and lightning-fast performance.',
+						'Get your products listed and available for purchase in no time! Our modern technology ensures a reliable and streamlined experience.',
 						'woocommerce'
 				  )
 				: __(
