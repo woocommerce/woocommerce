@@ -67,7 +67,7 @@ const BlockEditorGuide = ( {
 		{
 			heading: __( 'Content-rich product descriptions', 'woocommerce' ),
 			text: __(
-				'Create compelling product pages with blocks, media, images, videos, and any content you desire to engage customers.',
+				"Show off what's great about your products and engage your customers with content-rich product descriptions. Add images, videos, and any other content they might need to make a purchase.",
 				'woocommerce'
 			),
 		},
