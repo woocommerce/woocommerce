@@ -72,6 +72,13 @@ module.exports = ( storybookConfig ) => {
 					),
 					to: `./experimental-css/[name][ext]`,
 				},
+				{
+					from: path.resolve(
+						__dirname,
+						`../../plugins/woocommerce/build/woocommerce/assets/client/admin/app/*.css`
+					),
+					to: `./app-css/[name][ext]`,
+				},
 			],
 		} )
 	);
