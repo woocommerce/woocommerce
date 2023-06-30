@@ -51,19 +51,18 @@ const program = new Command( 'profile' )
 			end,
 		} );
 
-		let compiledJobData = {};
+		let runJobData = {};
 
 		if ( showSteps ) {
 			const { nodeIds } = workflowRunData;
-			const runJobData = await getRunJobData( nodeIds );
-			compiledJobData = getCompiledJobData( runJobData );
+			runJobData = await getRunJobData( nodeIds );
 		}
 
 		logWorkflowRunResults( workflowData.name, workflowRunData );
 
 		if ( showSteps ) {
-			logJobResults( compiledJobData );
-			logStepResults( compiledJobData );
+			logJobResults( runJobData );
+			logStepResults( runJobData );
 		}
 	} );
 

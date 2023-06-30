@@ -5,6 +5,7 @@ import { octokitWithAuth, graphqlWithAuth } from '../../core/github/api';
 import { Logger } from '../../core/logger';
 import { requestPaginatedData, PaginatedDataTotals } from './github';
 import config from '../config';
+import { get } from 'http';
 
 /**
  * Get all workflows from the WooCommerce repository.
@@ -59,6 +60,11 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 
 	totals.count_items_available = total_count;
 	totals.count_items_processed += workflow_runs.length;
+
+	Logger.notice(
+		`Fetched workflows ${ totals.count_items_processed } / ${ totals.count_items_available }`
+	);
+
 	const { WORKFLOW_DURATION_CUTOFF_MINUTES } = config;
 
 	workflow_runs.forEach( ( run ) => {
@@ -75,10 +81,6 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 			}
 		}
 	} );
-
-	Logger.notice(
-		`Processed ${ totals.count_items_processed } workflow runs of ${ totals.count_items_available } available`
-	);
 
 	return totals;
 };
@@ -154,53 +156,14 @@ export const getWorkflowRunData = async ( options: {
 	return totals;
 };
 
-/**
- * Get data on individual workflow runs.
- *
- * @param {Array} nodeIds Workflow node ids
- * @return {Object} Workflow run data
- */
-export const getRunJobData = async ( nodeIds ) => {
-	Logger.notice(
-		`Fetching individual data for the ${ nodeIds.length } successful workflow run(s)`
-	);
-	const gql = graphqlWithAuth();
-	return await gql(
-		`
-			query($nodeIds: [ID!]!){ 
-				nodes ( ids: $nodeIds ) {
-				... on WorkflowRun {
-					id
-					workflow {
-						id
-						name
-					}
-					checkSuite {
-						checkRuns ( first: 20, filterBy: { status: COMPLETED } ) {
-								nodes {
-									name
-									id
-									startedAt
-									completedAt
-									steps ( first: 50 ) {
-										nodes {
-											name
-											startedAt
-											completedAt
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		`,
-		{
-			nodeIds,
-		}
-	);
-};
+function splitArrayIntoChunks( array, n ) {
+	const chunks = [];
+	for ( let i = 0; i < array.length; i += n ) {
+		const chunk = array.slice( i, i + n );
+		chunks.push( chunk );
+	}
+	return chunks;
+}
 
 /**
  * Get compiled job data for a given workflow run.
@@ -208,9 +171,8 @@ export const getRunJobData = async ( nodeIds ) => {
  * @param {Object} jobData Workflow run data
  * @return {Object} Compiled job data
  */
-export const getCompiledJobData = ( jobData ) => {
+export const getCompiledJobData = ( jobData, result = {} ) => {
 	const { nodes } = jobData;
-	const result = {};
 
 	nodes.forEach( ( node ) => {
 		const jobs = node.checkSuite.checkRuns.nodes;
@@ -259,4 +221,73 @@ export const getCompiledJobData = ( jobData ) => {
 	} );
 
 	return result;
+};
+
+/**
+ * Get data on individual workflow runs.
+ *
+ * @param {Array} nodeIds Workflow node ids
+ * @return {Object} Workflow run data
+ */
+export const getRunJobData = async ( nodeIds ) => {
+	Logger.notice(
+		`Processing individual data for the ${ nodeIds.length } successful workflow run(s)`
+	);
+
+	let compiledJobData = {};
+	const perPage = 50;
+	const gql = graphqlWithAuth();
+
+	await Promise.all(
+		splitArrayIntoChunks( nodeIds, perPage ).map(
+			async ( pageOfNodeIds, index ) => {
+				Logger.notice(
+					`Fetched runs ${
+						pageOfNodeIds.length === perPage
+							? ( index + 1 ) * perPage
+							: index * perPage + pageOfNodeIds.length
+					} / ${ nodeIds.length }`
+				);
+				const data = await gql(
+					`
+				query($nodeIds: [ID!]!){ 
+					nodes ( ids: $nodeIds ) {
+					... on WorkflowRun {
+						id
+						workflow {
+							id
+							name
+						}
+						checkSuite {
+							checkRuns ( first: 20, filterBy: { status: COMPLETED } ) {
+									nodes {
+										name
+										id
+										startedAt
+										completedAt
+										steps ( first: 50 ) {
+											nodes {
+												name
+												startedAt
+												completedAt
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			`,
+					{
+						nodeIds: pageOfNodeIds,
+					}
+				);
+
+				compiledJobData = getCompiledJobData( data, compiledJobData );
+			}
+		)
+	);
+
+	return compiledJobData;
 };
