@@ -58,13 +58,10 @@ final class GutenbergComment implements \Stringable {
 
 	public function __toString(): string {
 		$attributes = empty( $this->attributes ) ? '' : wp_json_encode( $this->attributes );
-
 		$block_name = $this->block_name;
+		$result     = "<!-- wp:$block_name $attributes -->";
 
-		$result = "<!-- wp:$block_name $attributes -->";
-		// $result = '<!-- wp:' . $this->block_name . ' -->';
-
-		if ( $this->contents !== '' ) {
+		if ( '' !== $this->contents ) {
 			$result .= $this->getContentsAsString() . '<!-- /wp:' . $this->block_name . ' -->';
 		}
 
