@@ -1,26 +1,16 @@
 /**
  * External dependencies
  */
-import { Page } from '@playwright/test';
-import { getBlockByName } from '@woocommerce/e2e-utils';
+import { Locator } from '@playwright/test';
 
-export const getMinMaxPriceInputs = async ( {
-	page,
-	blockName,
-}: {
-	page: Page;
-	blockName: string;
-} ) => {
-	const priceFilterBlock = await getBlockByName( {
-		page,
-		name: blockName,
-	} );
-
-	const maxPriceInput = await priceFilterBlock.locator(
+export const getMinMaxPriceInputs = async (
+	priceFilterBlockLocator: Locator
+) => {
+	const maxPriceInput = await priceFilterBlockLocator.locator(
 		'.wc-block-price-filter__amount--max'
 	);
 
-	const minPriceInput = await priceFilterBlock.locator(
+	const minPriceInput = await priceFilterBlockLocator.locator(
 		'.wc-block-price-filter__amount--min'
 	);
 

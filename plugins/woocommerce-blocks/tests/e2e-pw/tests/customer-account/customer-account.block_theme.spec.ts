@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { expect, test } from '@woocommerce/e2e-playwright-utils';
-import { getBlockByName } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'woocommerce/customer-account',
@@ -55,6 +54,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		admin,
 		editor,
 		page,
+		frontendUtils,
 	} ) => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.name } );
@@ -63,7 +63,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await publishAndVisitPost( { page, editor } );
 
-		const block = await getBlockByName( { page, name: blockData.name } );
+		const block = await frontendUtils.getBlockByName( blockData.name );
 
 		await expect(
 			block.locator( blockData.selectors.frontend.label )
@@ -77,6 +77,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		admin,
 		editor,
 		page,
+		frontendUtils,
 	} ) => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.name } );
@@ -85,7 +86,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await publishAndVisitPost( { page, editor } );
 
-		const block = await getBlockByName( { page, name: blockData.name } );
+		const block = await frontendUtils.getBlockByName( blockData.name );
 
 		await expect(
 			block.locator( blockData.selectors.frontend.label )
@@ -99,6 +100,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		admin,
 		editor,
 		page,
+		frontendUtils,
 	} ) => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.name } );
@@ -107,7 +109,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await publishAndVisitPost( { page, editor } );
 
-		const block = await getBlockByName( { page, name: blockData.name } );
+		const block = await frontendUtils.getBlockByName( blockData.name );
 
 		await expect(
 			block.locator( blockData.selectors.frontend.label )

@@ -14,6 +14,7 @@ import {
 	TemplateApiUtils,
 	STORAGE_STATE_PATH,
 	EditorUtils,
+	FrontendUtils,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -105,6 +106,7 @@ const test = base.extend<
 		pageUtils: PageUtils;
 		templateApiUtils: TemplateApiUtils;
 		editorUtils: EditorUtils;
+		frontendUtils: FrontendUtils;
 		snapshotConfig: void;
 	},
 	{
@@ -136,6 +138,9 @@ const test = base.extend<
 		await use( new TemplateApiUtils( request ) ),
 	editorUtils: async ( { editor, page }, use ) => {
 		await use( new EditorUtils( editor, page ) );
+	},
+	frontendUtils: async ( { page }, use ) => {
+		await use( new FrontendUtils( page ) );
 	},
 	requestUtils: [
 		async ( {}, use, workerInfo ) => {
