@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Add missing require for a wc-admin helper function.
