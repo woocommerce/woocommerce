@@ -16,6 +16,9 @@ final class GutenbergComment implements \Stringable {
 	 */
 	private $block_name;
 
+
+	private $attributes;
+
 	/**
 	 * @var \Stringable|\Stringable[]|string
 	 *
@@ -26,8 +29,9 @@ final class GutenbergComment implements \Stringable {
 	/**
 	 * GutenbergComment constructor.
 	 */
-	public function __construct( string $block_name, $contents = '' ) {
+	public function __construct( string $block_name, $contents = '', $attributes = array() ) {
 		$this->block_name = $block_name;
+		$this->attributes = $attributes;
 		$this->setContents( $contents ?? '' );
 	}
 
@@ -53,7 +57,12 @@ final class GutenbergComment implements \Stringable {
 	}
 
 	public function __toString(): string {
-		$result = '<!-- wp:' . $this->block_name . ' -->';
+		$attributes = empty( $this->attributes ) ? '' : wp_json_encode( $this->attributes );
+
+		$block_name = $this->block_name;
+
+		$result = "<!-- wp:$block_name $attributes -->";
+		// $result = '<!-- wp:' . $this->block_name . ' -->';
 
 		if ( $this->contents !== '' ) {
 			$result .= $this->getContentsAsString() . '<!-- /wp:' . $this->block_name . ' -->';
