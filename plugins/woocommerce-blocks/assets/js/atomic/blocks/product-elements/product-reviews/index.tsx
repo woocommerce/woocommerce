@@ -15,6 +15,6 @@ registerBlockSingleProductTemplate( {
 	blockMetadata: metadata,
 	blockSettings: {
 		edit,
-		ancestor: [ 'woocommerce/single-product' ],
 	},
+	isAvailableOnPostEditor: false,
 } );

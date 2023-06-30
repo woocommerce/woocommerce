@@ -29,4 +29,5 @@ registerBlockSingleProductTemplate( {
 		},
 		ancestor: [ 'woocommerce/single-product' ],
 	},
+	isAvailableOnPostEditor: true,
 } );
