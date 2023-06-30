@@ -45,7 +45,7 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 				: __( 'A new way to edit your products', 'woocommerce' ),
 			description: isNewUser
 				? __(
-						"Discover the form's unique features designed to help you make this product stand out.",
+						"Discover the product form's unique features with a quick overview of what's included.",
 						'woocommerce'
 				  )
 				: __(
