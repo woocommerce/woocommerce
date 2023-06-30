@@ -28,8 +28,12 @@ const program = new Command( 'list' )
 			`There are ${ allWorkflows.length } workflows in the repository.`
 		);
 		Logger.table(
-			[ 'Workflow Name', 'Id' ],
-			allWorkflows.map( ( workflow ) => [ workflow.name, workflow.id ] )
+			[ 'Workflow Name', 'configuration file', 'Id' ],
+			allWorkflows.map( ( workflow ) => [
+				workflow.name,
+				workflow.path.replace( '.github/workflows/', '' ),
+				workflow.id,
+			] )
 		);
 		Logger.endTask();
 	} );
