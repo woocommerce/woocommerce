@@ -137,20 +137,6 @@ class MiniCart extends AbstractBlock {
 				$this->tax_label,
 				''
 			);
-
-			$cart_payload = $this->get_cart_payload();
-
-			$this->asset_data_registry->add(
-				'cartTotals',
-				isset( $cart_payload['totals'] ) ? $cart_payload['totals'] : null,
-				null
-			);
-
-			$this->asset_data_registry->add(
-				'cartItemsCount',
-				isset( $cart_payload['items_count'] ) ? $cart_payload['items_count'] : null,
-				null
-			);
 		}
 
 		$this->asset_data_registry->add(
@@ -560,22 +546,6 @@ class MiniCart extends AbstractBlock {
 			'tax_label'                         => '',
 			'display_cart_prices_including_tax' => false,
 		);
-	}
-
-	/**
-	 * Get Cart Payload.
-	 *
-	 * @return object;
-	 */
-	protected function get_cart_payload() {
-		$notices = wc_get_notices(); // Backup the notices because StoreAPI will remove them.
-		$payload = WC()->api->get_endpoint_data( '/wc/store/cart' );
-
-		if ( ! empty( $notices ) ) {
-			wc_set_notices( $notices ); // Restore the notices.
-		}
-
-		return $payload;
 	}
 
 	/**

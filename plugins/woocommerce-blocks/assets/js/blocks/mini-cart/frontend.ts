@@ -150,12 +150,10 @@ window.addEventListener( 'load', () => {
 		};
 
 		const openDrawerWithRefresh = () => {
-			miniCartBlock.dataset.isDataOutdated = 'true';
 			openDrawer();
 		};
 
 		const loadContentsWithRefresh = () => {
-			miniCartBlock.dataset.isDataOutdated = 'true';
 			miniCartBlock.dataset.isInitiallyOpen = 'false';
 			loadContents();
 		};
