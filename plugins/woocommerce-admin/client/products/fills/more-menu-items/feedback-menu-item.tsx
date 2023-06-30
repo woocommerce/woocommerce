@@ -35,7 +35,7 @@ export const FeedbackMenuItem = ( { onClick }: { onClick: () => void } ) => {
 						action: 'new_product',
 						showDescription: false,
 						title: __(
-							"How's your experience with the new product form?",
+							'What do you think of the new product form?',
 							'woocommerce'
 						),
 						firstQuestion: __(

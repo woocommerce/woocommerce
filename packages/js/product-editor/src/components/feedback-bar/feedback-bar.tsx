@@ -53,7 +53,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 				action: PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
 				showDescription: false,
 				title: __(
-					"How's your experience with the new product form?",
+					'What do you think of the new product form?',
 					'woocommerce'
 				),
 				firstQuestion: __(
