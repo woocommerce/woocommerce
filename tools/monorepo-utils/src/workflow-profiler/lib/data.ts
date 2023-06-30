@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { octokitWithAuth, graphqlWithAuth } from '../../core/github/api';
+import { Logger } from '../../core/logger';
 import { requestPaginatedData, PaginatedDataTotals } from './github';
 import config from '../config';
 
@@ -55,6 +56,10 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 	totals.count_items_processed += workflow_runs.length;
 	const { WORKFLOW_DURATION_CUTOFF_MINUTES } = config;
 
+	if ( total_count === 0 ) {
+		return totals;
+	}
+
 	workflow_runs.forEach( ( run ) => {
 		totals[ run.conclusion ]++;
 		if ( run.conclusion === 'success' ) {
@@ -69,6 +74,10 @@ const processWorkflowRunPage = ( data, totals: PaginatedDataTotals ) => {
 			}
 		}
 	} );
+
+	Logger.notice(
+		`Processed ${ totals.count_items_processed } items of ${ totals.count_items_available } available.`
+	);
 
 	return totals;
 };
@@ -122,6 +131,7 @@ export const getWorkflowRunData = async ( options: {
 		success: 0,
 		failure: 0,
 		cancelled: 0,
+		skipped: 0,
 		count_items_processed: 0,
 	};
 	const requestOptions = {
@@ -150,6 +160,7 @@ export const getWorkflowRunData = async ( options: {
  * @return {Object} Workflow run data
  */
 export const getRunJobData = async ( nodeIds ) => {
+	console.log( nodeIds.length );
 	const gql = graphqlWithAuth();
 	return await gql(
 		`

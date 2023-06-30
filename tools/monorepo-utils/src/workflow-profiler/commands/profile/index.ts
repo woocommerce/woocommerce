@@ -51,6 +51,7 @@ const program = new Command( 'profile' )
 		} );
 
 		const { nodeIds } = workflowRunData;
+		Logger.notice( `Processing ${ nodeIds.length } workflow runs` );
 		const runJobData = await getRunJobData( nodeIds );
 		const compiledJobData = getCompiledJobData( runJobData );
 

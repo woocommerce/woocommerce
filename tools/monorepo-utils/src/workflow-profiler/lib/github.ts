@@ -46,8 +46,8 @@ export const requestPaginatedData = async (
 
 	let resultingTotals = processPage( data, totals );
 
-	const { count_items_available } = data;
-	if ( count_items_available > resultingTotals.count_items_processed ) {
+	const { total_count } = data;
+	if ( total_count > resultingTotals.count_items_processed ) {
 		resultingTotals = await requestPaginatedData(
 			resultingTotals,
 			endpoint,
