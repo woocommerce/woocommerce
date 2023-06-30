@@ -56,13 +56,13 @@ function ProductMVPFeedbackModal( {
 		},
 		{
 			key: 'difficult-to-use',
-			label: __( 'It is difficult to use', 'woocommerce' ),
+			label: __( "It's difficult to use", 'woocommerce' ),
 			checked: difficultToUse,
 			onChange: setDifficultToUse,
 		},
 		{
 			key: 'slow-buggy-or-broken',
-			label: __( 'It is slow, buggy, or broken', 'woocommerce' ),
+			label: __( "It's slow, buggy, or broken", 'woocommerce' ),
 			checked: slowBuggyOrBroken,
 			onChange: setSlowBuggyOrBroken,
 		},
