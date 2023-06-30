@@ -206,16 +206,18 @@ class RemoteInboxNotificationsEngine {
 				break;
 			}
 
+			$localized_actions = SpecRunner::get_actions( $spec );
+
+			// Manually copy the action id from the db to the localized action, since they were not being provided.
+			foreach ( $localized_actions as $localized_action ) {
+				$action = $note_from_db->get_action( $localized_action->name );
+				if ( $action ) {
+					$localized_action->id = $action->id;
+				}
+			}
+
 			$note_from_db->set_title( $locale->title );
 			$note_from_db->set_content( $locale->content );
-
-			$localized_actions = SpecRunner::get_actions( $spec );
-			$actions_from_db   = $note_from_db->get_actions();
-			$actions_length    = count( $localized_actions );
-			// Manually copy the action id from the db to the localized action, since they were not being provided.
-			for ( $i = 0; $i < $actions_length; $i++ ) {
-				$localized_actions[ $i ]->id = $actions_from_db[ $i ]->id;
-			}
 			$note_from_db->set_actions( $localized_actions );
 		}
 
