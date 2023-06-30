@@ -16,6 +16,7 @@ import {
 import { FeedbackModal } from '@woocommerce/customer-effort-score';
 import { Text } from '@woocommerce/experimental';
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Provides a modal requesting customer feedback.
@@ -79,8 +80,16 @@ function ProductMVPFeedbackModal( {
 		.filter( ( checkbox ) => checkbox.checked )
 		.map( ( checkbox ) => checkbox.key );
 
+	const { createSuccessNotice } = useDispatch( 'core/notices' );
+
 	const onSendFeedback = () => {
 		recordScoreCallback( checked, comments, email );
+		createSuccessNotice(
+			__(
+				"Thanks for the feedback — we'll put it to good use!",
+				'woocommerce'
+			)
+		);
 	};
 
 	const optionalElement = (
