@@ -23,10 +23,7 @@ const program = new Command( 'profile' )
 	.description( 'Profile GitHub workflows' )
 	.argument( '<start>', 'Start date in YYYY-MM-DD format' )
 	.argument( '<end>', 'End date in YYYY-MM-DD format' )
-	.argument(
-		'<id>',
-		'Workflow ID. The required workflow ids are 22745783, 5687250, 23271226, and 5461563. For the rest, use the `list` command to see workflow names and ids.'
-	)
+	.argument( '<id>', 'Workflow Id or filename.' )
 	.option(
 		'-o --owner <owner>',
 		'Repository owner. Default: woocommerce',
