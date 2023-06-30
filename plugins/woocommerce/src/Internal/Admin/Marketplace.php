@@ -23,25 +23,15 @@ class Marketplace {
 	 * Registers report pages.
 	 */
 	public function register_pages() {
-		$marketplace_pages = self::get_marketplace_pages();
-		foreach ( $marketplace_pages as $marketplace_page ) {
-			if ( ! is_null( $marketplace_page ) ) {
-				wc_admin_register_page( $marketplace_page );
-			}
-		}
+		$marketplace_page = self::get_marketplace_page();
+		wc_admin_register_page( $marketplace_page );
 	}
 
 	/**
 	 * Get report pages.
 	 */
-	public static function get_marketplace_pages() {
-		$marketplace_pages = array(
-			array(
-				'id'     => 'woocommerce-marketplace',
-				'parent' => 'woocommerce',
-				'title'  => __( 'Marketplace', 'woocommerce' ),
-				'path'   => '/marketplace',
-			),
+	public static function get_marketplace_page() {
+		$marketplace_page = array(
 			array(
 				'id'     => 'woocommerce-marketplace',
 				'parent' => 'woocommerce',
@@ -55,6 +45,6 @@ class Marketplace {
 		 *
 		 * @since 8.0
 		 */
-		return apply_filters( 'woocommerce_marketplace_menu_items', $marketplace_pages );
+		return apply_filters( 'woocommerce_marketplace_menu_items', $marketplace_page );
 	}
 }
