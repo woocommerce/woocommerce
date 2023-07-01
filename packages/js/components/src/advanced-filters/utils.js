@@ -51,9 +51,8 @@ export function getInterpolatedString( interpolatedString ) {
 
 	if ( regex.exec( interpolatedString ) !== null ) {
 		deprecated(
-			'The interpolation string format `{{element}}...{{/element}}` or `{{element/}}` is deprecated.',
+			'The interpolation string format `{{element}}...{{/element}}` or `{{element/}}`',
 			{
-				version: '7.8.0',
 				hint: 'Please update your code to use the new format: `<element>...</element>` or `<element/>`.',
 			}
 		);
