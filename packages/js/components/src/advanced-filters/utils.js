@@ -49,15 +49,9 @@ export function textContent( components ) {
 export function getInterpolatedString( interpolatedString ) {
 	const regex = /(\{\{)(\/?\s*\w+\s*\/?)(\}\})/g;
 
-	if ( regex.exec( interpolatedString ) !== null ) {
-		deprecated(
-			'The interpolation string format `{{element}}...{{/element}}` or `{{element/}}`',
-			{
-				hint: 'Please update your code to use the new format: `<element>...</element>` or `<element/>`.',
-			}
-		);
-
-		return interpolatedString.replaceAll( regex, ( match, p1, p2 ) => {
+	const replacedString = interpolatedString.replaceAll(
+		regex,
+		( match, p1, p2 ) => {
 			const inner = p2.trim();
 			let replacement;
 			if ( inner.startsWith( '/' ) ) {
@@ -72,8 +66,17 @@ export function getInterpolatedString( interpolatedString ) {
 			}
 
 			return replacement;
-		} );
+		}
+	);
+
+	if ( replacedString !== interpolatedString ) {
+		deprecated(
+			'The interpolation string format `{{element}}...{{/element}}` or `{{element/}}`',
+			{
+				hint: 'Please update your code to use the new format: `<element>...</element>` or `<element/>`.',
+			}
+		);
 	}
 
-	return interpolatedString;
+	return replacedString;
 }
