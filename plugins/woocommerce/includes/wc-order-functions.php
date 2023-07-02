@@ -877,7 +877,7 @@ function wc_update_total_sales_counts( $order_id ) {
 	}
 
 	$recorded_sales  = $order->get_data_store()->get_recorded_sales( $order );
-	$reflected_order = in_array( $order->get_status(), array( 'cancelled', 'trash' ) );
+	$reflected_order = in_array( $order->get_status(), array( 'cancelled', 'trash' ), true );
 
 	if ( ! $reflected_order && 'before_delete_post' === current_action() ) {
 		$reflected_order = true;
