@@ -64,9 +64,9 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_update_total_sales_counts() {
 
-		$product = WC_Helper_Product::create_simple_product();
+		$product_id = WC_Helper_Product::create_simple_product()->get_id();
 
-		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->add_to_cart( $product_id );
 
 		$order_id = WC_Checkout::instance()->create_order(
 			array(
@@ -75,40 +75,39 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEquals( 0, $product->get_total_sales() );
+		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
 
 		$order = new WC_Order( $order_id );
 
 		$order->update_status( 'processing' );
-		$this->assertEquals( 1, $product->get_total_sales() );
+		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
 		$order->update_status( 'cancelled' );
-		$this->assertEquals( 0, $product->get_total_sales() );
+		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
 
 		$order->update_status( 'processing' );
-		$this->assertEquals( 1, $product->get_total_sales() );
+		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
 		$order->update_status( 'completed' );
-		$this->assertEquals( 1, $product->get_total_sales() );
+		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
 		$order->update_status( 'refunded' );
-		$this->assertEquals( 1, $product->get_total_sales() );
+		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
 		$order->update_status( 'processing' );
-		$this->assertEquals( 1, $product->get_total_sales() );
+		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
-		// Test order trash / un-trash.
-		if ( $order->delete( false ) ) {
-			$this->assertEquals( 0, $product->get_total_sales() );
+		// Test trashing the order.
+		$order->delete( false );
+		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
 
-			$order->untrash();
-			$this->assertEquals( 1, $product->get_total_sales() );
-		}
+		// To successfully untrash, we need to grab a new instance of the order.
+		wc_get_order( $order_id )->untrash();
+		$this->assertEquals( 1, wc_get_product( $product_id )->get_total_sales() );
 
-		// Test force delete.
-		if ( $order->delete( true ) ) {
-			$this->assertEquals( 0, $product->get_total_sales() );
-		}
+		// Test full deletion of the order (again, we need to grab a new instance of the order).
+		wc_get_order( $order_id )->delete( true );
+		$this->assertEquals( 0, wc_get_product( $product_id )->get_total_sales() );
 	}
 
 }
