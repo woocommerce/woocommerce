@@ -2,6 +2,7 @@
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Base class for HPOS related unit test suites.
@@ -83,5 +84,40 @@ class HposTestCase extends WC_Unit_Test_Case {
 		$sync  = wc_get_container()->get( DataSynchronizer::class );
 		$batch = $sync->get_next_batch_to_process( 100 );
 		$sync->process_batch( $batch );
+	}
+
+	/**
+	 * Sets an order as updated by directly modifying its "last updated gmt" field in the database.
+	 *
+	 * @param \WC_Order|int $order_or_id An order or an order id.
+	 * @param string|null   $update_date The new value for the "last updated gmt" in the database, defaults to the current date and time.
+	 * @param bool|null     $cot_is_authoritative Whether the orders table is authoritative or not. If null, it will be determined using OrderUtil.
+	 * @return void
+	 */
+	protected function set_order_as_updated( $order_or_id, ?string $update_date = null, ?bool $cot_is_authoritative = null ) {
+		global $wpdb;
+
+		$order_id = $order_or_id instanceof \WC_Order ? $order_or_id->get_id() : $order_or_id;
+
+		$update_date = $update_date ?? current_time( 'mysql' );
+		$cot_is_authoritative = $cot_is_authoritative ?? OrderUtil::custom_orders_table_usage_is_enabled();
+
+		if ( $cot_is_authoritative ) {
+			$wpdb->update(
+				OrdersTableDataStore::get_orders_table_name(),
+				array(
+					'date_updated_gmt' => $update_date,
+				),
+				array( 'id' => $order_id )
+			);
+		} else {
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_modified_gmt' => $update_date,
+				),
+				array( 'id' => $order_id )
+			);
+		}
 	}
 }

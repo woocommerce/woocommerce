@@ -272,20 +272,15 @@ class DataSynchronizerTests extends HposTestCase {
 	}
 
 	/**
-	 * @testdox 'get_next_batch_to_process' returns ids of deleted orders, unless there are orders pending to be created or updated.
+	 * @testdox 'get_next_batch_to_process' returns ids of deleted orders, together with orders pending to be created or updated.
 	 *
-	 * @testWith [false, false]
-	 *           [false, true]
-	 *           [true, false]
-	 *           [true, true]
+	 * @testWith [true]
+	 *           [false]
 	 *
 	 * @param bool $cot_is_authoritative True to test with the orders table as authoritative, false to test with the posts table as authoritative.
-	 * @param bool $new_records_exist True to test with a new order pending sync.
 	 */
-	public function test_get_next_batch_to_process_returns_orders_deleted_from_current_authoritative_table( bool $cot_is_authoritative, bool $new_records_exist ) {
+	public function test_get_next_batch_to_process_returns_orders_deleted_from_current_authoritative_table( bool $cot_is_authoritative ) {
 		global $wpdb;
-
-		$meta_table_name = OrdersTableDataStore::get_meta_table_name();
 
 		$this->toggle_cot_authoritative( $cot_is_authoritative );
 
@@ -296,9 +291,11 @@ class DataSynchronizerTests extends HposTestCase {
 		$order_4 = OrderHelper::create_order();
 
 		$this->disable_cot_sync();
-		if ( $new_records_exist ) {
-			$order_5 = OrderHelper::create_order();
-		}
+
+		$order_5 = OrderHelper::create_order();
+
+		$this->set_order_as_updated( $order_1, '2999-12-31 23:59:59', $cot_is_authoritative );
+
 		$order_3_id = $order_3->get_id();
 		$order_3->delete( true );
 		$order_4_id = $order_4->get_id();
@@ -308,11 +305,8 @@ class DataSynchronizerTests extends HposTestCase {
 		$this->assert_deletion_record_existence( $order_4_id, $cot_is_authoritative );
 
 		$batch = $this->sut->get_next_batch_to_process( 100 );
-		if ( $new_records_exist ) {
-			$this->assertEquals( array( $order_5->get_id() ), $batch );
-		} else {
-			$this->assertEquals( array( $order_3_id, $order_4_id ), $batch );
-		}
+
+		$this->assertEquals( array( $order_5->get_id(), $order_1->get_id(), $order_3_id, $order_4_id ), $batch );
 	}
 
 	/**

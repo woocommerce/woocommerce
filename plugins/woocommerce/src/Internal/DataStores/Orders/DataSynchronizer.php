@@ -371,12 +371,13 @@ ORDER BY orders.id ASC
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT DISTINCT(order_id) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s LIMIT {$limit}",
-				array( self::DELETED_RECORD_META_KEY, $deleted_from_table )
+				self::DELETED_RECORD_META_KEY,
+				$deleted_from_table
 			)
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 
-		return $order_ids;
+		return array_map( 'absint', $order_ids );
 	}
 
 	/**
@@ -541,21 +542,19 @@ ORDER BY orders.id ASC
 			return $order_ids;
 		}
 
-		$order_ids = $order_ids + $this->get_ids_of_orders_pending_sync( self::ID_TYPE_DIFFERENT_UPDATE_DATE, $size - count( $order_ids ) );
-		if ( count( $order_ids ) > 0 ) {
+		$updated_order_ids = $this->get_ids_of_orders_pending_sync( self::ID_TYPE_DIFFERENT_UPDATE_DATE, $size - count( $order_ids ) );
+		$order_ids         = array_merge( $order_ids, $updated_order_ids );
+		if ( count( $order_ids ) >= $size ) {
 			return $order_ids;
 		}
 
-		// Deleted orders pending sync have the lowest priority, and additionally,
-		// if such orders exist then we return just those, even if they don't fill a batch.
-		// Returning "missing orders that are to be deleted" and "missing orders that are to be created"
-		// in the same batch is confusing and potentially dangerous.
 		$deleted_order_ids = $this->get_ids_of_orders_pending_sync(
 			$orders_table_is_authoritative ? self::ID_TYPE_DELETED_FROM_ORDERS_TABLE : self::ID_TYPE_DELETED_FROM_POSTS_TABLE,
-			$size
+			$size - count( $order_ids )
 		);
+		$order_ids         = array_merge( $order_ids, $deleted_order_ids );
 
-		return $deleted_order_ids;
+		return array_map( 'absint', $order_ids );
 	}
 
 	/**
