@@ -10,7 +10,7 @@ import { isPackageRateCollectable } from '@woocommerce/base-utils';
  * Shows a formatted pickup location.
  */
 const PickupLocation = (): JSX.Element | null => {
-	const { pickupAddress, pickupMethod } = useSelect( ( select ) => {
+	const { pickupAddress } = useSelect( ( select ) => {
 		const cartShippingRates = select( 'wc/store/cart' ).getShippingRates();
 
 		const flattenedRates = cartShippingRates.flatMap(
@@ -36,7 +36,6 @@ const PickupLocation = (): JSX.Element | null => {
 				const selectedRatePickupAddress = selectedRateMetaData.value;
 				return {
 					pickupAddress: selectedRatePickupAddress,
-					pickupMethod: selectedCollectableRate.name,
 				};
 			}
 		}
@@ -44,20 +43,15 @@ const PickupLocation = (): JSX.Element | null => {
 		if ( isObject( selectedCollectableRate ) ) {
 			return {
 				pickupAddress: undefined,
-				pickupMethod: selectedCollectableRate.name,
 			};
 		}
 		return {
 			pickupAddress: undefined,
-			pickupMethod: undefined,
 		};
 	} );
 
 	// If the method does not contain an address, or the method supporting collection was not found, return early.
-	if (
-		typeof pickupAddress === 'undefined' &&
-		typeof pickupMethod === 'undefined'
-	) {
+	if ( typeof pickupAddress === 'undefined' ) {
 		return null;
 	}
 
@@ -67,9 +61,7 @@ const PickupLocation = (): JSX.Element | null => {
 			{ sprintf(
 				/* translators: %s: shipping method name, e.g. "Amazon Locker" */
 				__( 'Collection from %s', 'woo-gutenberg-products-block' ),
-				typeof pickupAddress === 'undefined'
-					? pickupMethod
-					: pickupAddress
+				pickupAddress
 			) + ' ' }
 		</span>
 	);
