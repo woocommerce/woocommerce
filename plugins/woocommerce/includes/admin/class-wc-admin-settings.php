@@ -429,8 +429,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 					// Radio inputs.
 					case 'radio':
-						$option_value = $value['value'];
-						$disabled_values = $value['disabled'] ?? array();
+						$option_value     = $value['value'];
+						$disabled_values  = $value['disabled'] ?? array();
 						$show_desc_at_end = $value['desc_at_end'] ?? false;
 
 						?>
