@@ -68,5 +68,7 @@ html.interface-interface-skeleton__html-container {
 }
 
 div#wpwrap {
-	background-color: $white;
+	.woocommerce-product-block-editor {
+		background-color: $white;
+	}
 }
