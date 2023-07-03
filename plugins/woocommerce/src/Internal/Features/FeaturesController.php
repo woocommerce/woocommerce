@@ -1153,7 +1153,7 @@ class FeaturesController {
 			}
 		}
 		if ( count( $query_params_to_remove ) > 1 ) {
-			wp_safe_redirect( remove_query_arg( $query_params_to_remove, wp_get_referer() ) );
+			wp_safe_redirect( remove_query_arg( $query_params_to_remove, $_SERVER['REQUEST_URI'] ) );
 		}
 	}
 }
