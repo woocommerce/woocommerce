@@ -46,6 +46,15 @@ registerBlockComponent( {
 } );
 
 registerBlockComponent( {
+	blockName: 'woocommerce/product-rating-stars',
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "product-rating-stars" */ './product-elements/rating-stars/block'
+		)
+	),
+} );
+
+registerBlockComponent( {
 	blockName: 'woocommerce/product-button',
 	component: lazy( () =>
 		import(
