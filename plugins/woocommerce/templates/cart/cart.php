@@ -131,7 +131,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 								'input_value'  => $cart_item['quantity'],
 								'max_value'    => $max_quantity,
 								'min_value'    => $min_quantity,
-								'product_name' => wp_strip_all_tags( $product_name ),
+								'product_name' => $product_name,
 							),
 							$_product,
 							false
