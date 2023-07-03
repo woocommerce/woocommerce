@@ -1,8 +1,10 @@
 /**
  * External dependencies
  */
-import { Template } from '@wordpress/blocks';
-import { createElement, useMemo } from '@wordpress/element';
+import {
+	Template,
+} from '@wordpress/blocks';
+import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
 import { useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
@@ -19,9 +21,6 @@ import {
 	EditorSettings,
 	EditorBlockListSettings,
 	ObserveTyping,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	__unstableEditorStyles as EditorStyles,
 } from '@wordpress/block-editor';
 // It doesn't seem to notice the External dependency block whn @ts-ignore is added.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -95,24 +94,21 @@ export function BlockEditor( {
 	return (
 		<div className="woocommerce-product-block-editor">
 			<BlockContextProvider value={ context }>
+				<BlocksTemplate />
 				<BlockEditorProvider
 					value={ blocks }
 					onInput={ onInput }
 					onChange={ onChange }
 					settings={ settings }
 				>
-					<BlocksTemplate />
-					<EditorStyles styles={ settings?.styles } />
-					<div className="editor-styles-wrapper">
-						{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-						{ /* @ts-ignore No types for this exist yet. */ }
-						<BlockEditorKeyboardShortcuts.Register />
-						<BlockTools>
-							<ObserveTyping>
-								<BlockList className="woocommerce-product-block-editor__block-list" />
-							</ObserveTyping>
-						</BlockTools>
-					</div>
+					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+					{ /* @ts-ignore No types for this exist yet. */ }
+					<BlockEditorKeyboardShortcuts.Register />
+					<BlockTools>
+						<ObserveTyping>
+							<BlockList className="woocommerce-product-block-editor__block-list" />
+						</ObserveTyping>
+					</BlockTools>
 				</BlockEditorProvider>
 			</BlockContextProvider>
 		</div>
