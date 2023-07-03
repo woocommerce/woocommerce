@@ -43,7 +43,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 				/**
 				 * Filter the product name.
 				 *
-				 * @since 7.8.0
+				 * @since 2.1.0
 				 * @param string $product_name Name of the product in the cart.
 				 * @param array $cart_item The product in the cart.
 				 * @param string $cart_item_key Key for the product in the cart.
@@ -63,7 +63,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 										'<a href="%s" class="remove" aria-label="%s" data-product_id="%s" data-product_sku="%s">&times;</a>',
 										esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
 										/* translators: %s is the product name */
-										esc_attr( sprintf( __( 'Remove %s from cart', 'woocommerce' ), $product_name ) ),
+										esc_attr( sprintf( __( 'Remove %s from cart', 'woocommerce' ), wp_strip_all_tags( $product_name ) ) ),
 										esc_attr( $product_id ),
 										esc_attr( $_product->get_sku() )
 									),
@@ -89,6 +89,11 @@ do_action( 'woocommerce_before_cart' ); ?>
 						if ( ! $product_permalink ) {
 							echo wp_kses_post( $product_name . '&nbsp;' );
 						} else {
+							/**
+							 * This filter is documented above.
+							 *
+							 * @since 2.1.0
+							 */
 							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', esc_url( $product_permalink ), $_product->get_name() ), $cart_item, $cart_item_key ) );
 						}
 
@@ -126,7 +131,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 								'input_value'  => $cart_item['quantity'],
 								'max_value'    => $max_quantity,
 								'min_value'    => $min_quantity,
-								'product_name' => $product_name,
+								'product_name' => wp_strip_all_tags( $product_name ),
 							),
 							$_product,
 							false
