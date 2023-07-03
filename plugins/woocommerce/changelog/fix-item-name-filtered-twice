@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent possible duplication of product name in 'woocommerce_item_name' filter.
