@@ -2337,7 +2337,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	public function test_error_when_setting_order_property_is_captured_and_logged( bool $orders_authoritative ) {
 		global $wpdb;
 
-		$this->toggle_cot( $orders_authoritative );
+		$this->toggle_cot_feature_and_usage( $orders_authoritative );
 		$this->disable_cot_sync();
 
 		// phpcs:disable Squiz.Commenting
@@ -2405,5 +2405,67 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		$this->assertEquals( 0, $refund->get_parent_id() );
 		$this->assertEquals( "Error when setting property 'parent_id' for order {$refund->get_id()}: Invalid parent ID", current( $fake_logger->warnings )['message'] );
+	}
+
+	/**
+	 * @testDox A 'suppress_filters' argument can be passed to 'delete', if true no 'woocommerce_(before_)trash/delete_order' actions will be fired.
+	 *
+	 * @testWith [null, true]
+	 *           [true, true]
+	 *           [false, true]
+	 *           [null, false]
+	 *           [true, false]
+	 *           [false, false]
+	 *
+	 * @param bool|null $suppress True or false to use a 'suppress_filters' argument with that value, null to not use it.
+	 * @param bool      $force_delete True to delete the order, false to trash it.
+	 * @return void
+	 */
+	public function test_filters_can_be_suppressed_when_trashing_or_deleting_an_order( ?bool $suppress, bool $force_delete ) {
+		$order_id_from_before_delete = null;
+		$order_id_from_after_delete  = null;
+		$order_from_before_delete    = null;
+
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+
+		$trash_or_delete = $force_delete ? 'delete' : 'trash';
+
+		add_action(
+			"woocommerce_before_{$trash_or_delete}_order",
+			function ( $order_id, $order ) use ( &$order_id_from_before_delete, &$order_from_before_delete ) {
+				$order_id_from_before_delete = $order_id;
+				$order_from_before_delete    = $order;
+			},
+			10,
+			2
+		);
+
+		add_action(
+			"woocommerce_{$trash_or_delete}_order",
+			function ( $order_id ) use ( &$order_id_from_after_delete ) {
+				$order_id_from_after_delete = $order_id;
+			}
+		);
+
+		$args = array( 'force_delete' => $force_delete );
+		if ( null !== $suppress ) {
+			$args['suppress_filters'] = $suppress;
+		}
+
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+
+		$this->sut->delete( $order, $args );
+
+		if ( true === $suppress ) {
+			$this->assertNull( $order_id_from_before_delete );
+			$this->assertNull( $order_id_from_after_delete );
+			$this->assertNull( $order_from_before_delete );
+		} else {
+			$this->assertEquals( $order_id, $order_id_from_before_delete );
+			$this->assertEquals( $order_id, $order_id_from_after_delete );
+			$this->assertSame( $order, $order_from_before_delete );
+		}
 	}
 }

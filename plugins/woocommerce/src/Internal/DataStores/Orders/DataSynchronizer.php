@@ -487,7 +487,13 @@ ORDER BY orders.id ASC
 				$order->set_id( $order_id );
 				$data_store_for_deletion->read( $order );
 
-				$data_store_for_deletion->delete( $order, array( 'force_delete' => true ) );
+				$data_store_for_deletion->delete(
+					$order,
+					array(
+						'force_delete'     => true,
+						'suppress_filters' => true,
+					)
+				);
 			} catch ( \Exception $ex ) {
 				$this->error_logger->error( "Couldn't delete order {$order_id} from the backup table: {$ex->getMessage()}" );
 				continue;

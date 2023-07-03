@@ -1910,17 +1910,29 @@ FROM $order_meta_table
 			return;
 		}
 
-		if ( ! empty( $args['force_delete'] ) ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'force_delete'     => false,
+				'suppress_filters' => false,
+			)
+		);
 
-			/**
-			 * Fires immediately before an order is deleted from the database.
-			 *
-			 * @since 7.1.0
-			 *
-			 * @param int      $order_id ID of the order about to be deleted.
-			 * @param WC_Order $order    Instance of the order that is about to be deleted.
-			 */
-			do_action( 'woocommerce_before_delete_order', $order_id, $order );
+		$do_filters = ! $args['suppress_filters'];
+
+		if ( $args['force_delete'] ) {
+
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is deleted from the database.
+				 *
+				 * @since 7.1.0
+				 *
+				 * @param int      $order_id ID of the order about to be deleted.
+				 * @param WC_Order $order    Instance of the order that is about to be deleted.
+				 */
+				do_action( 'woocommerce_before_delete_order', $order_id, $order );
+			}
 
 			$deleted_child_order_ids = $this->upshift_or_delete_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
@@ -1947,21 +1959,41 @@ FROM $order_meta_table
 				}
 			}
 
-			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is deleted.
+				 *
+				 * @since
+				 *
+				 * @param int $order_id ID of the order that has been deleted.
+				 */
+				do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			}
 		} else {
-			/**
-			 * Fires immediately before an order is trashed.
-			 *
-			 * @since 7.1.0
-			 *
-			 * @param int      $order_id ID of the order about to be deleted.
-			 * @param WC_Order $order    Instance of the order that is about to be deleted.
-			 */
-			do_action( 'woocommerce_before_trash_order', $order_id, $order );
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is trashed.
+				 *
+				 * @since 7.1.0
+				 *
+				 * @param int      $order_id ID of the order about to be trashed.
+				 * @param WC_Order $order    Instance of the order that is about to be trashed.
+				 */
+				do_action( 'woocommerce_before_trash_order', $order_id, $order );
+			}
 
 			$this->trash_order( $order );
 
-			do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is trashed.
+				 *
+				 * @since
+				 *
+				 * @param int $order_id ID of the order that has been trashed.
+				 */
+				do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			}
 		}
 	}
 
