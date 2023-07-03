@@ -21,7 +21,7 @@ export type StyleProps = {
 	style: CSSProperties;
 };
 
-type BlockAttributes = {
+type BlockAttributes = Record< string, unknown > & {
 	style?: StyleEngineProperties | string | undefined;
 };
 
