@@ -21,7 +21,7 @@ export const CartCheckoutSidebarCompatibilityNotice = ( {
 
 	const noticeText = createInterpolateElement(
 		__(
-			'The Cart & Checkout Blocks are a beta feature to optimize for faster checkout. To make sure this feature is right for your store, <a>review the list of compatible extensions</a>.',
+			'The Cart & Checkout Blocks are built to optimize for faster checkout. To make sure this feature is right for your store, <a>review the list of compatible extensions</a>.',
 			'woo-gutenberg-products-block'
 		),
 		{
