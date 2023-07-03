@@ -9,13 +9,14 @@
 
 	.woocommerce-profiler-heading__title {
 		font-style: normal;
-		font-weight: 500;
 		font-size: 32px;
 		line-height: 40px;
 		text-align: center;
 		color: $gray-900;
 		margin-bottom: 12px;
+		letter-spacing: normal;
 		padding-top: 0;
+		font-weight: 500;
 
 		@include breakpoint( '<782px' ) {
 			font-size: 28px;
