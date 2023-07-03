@@ -484,15 +484,6 @@ ORDER BY orders.id ASC
 
 			try {
 				$order = new \WC_Order();
-
-				// We need to turn parent order verification off to avoid an exception for child orders (e.g. refunds).
-				// The 'read' method in the order class invokes 'set_parent_id', which by default verifies
-				// if the order the parent id refers to actually exists, and throws an exception if not.
-				// To check if the order exists 'wc_get_order' is used, but this function searches the order
-				// using the authoritative data store, and at this point the order doesn't exist anymore in the
-				// authoritative table ('read' below is being invoked in the backup data store).
-				$order->set_verify_parent_id( false );
-
 				$order->set_id( $order_id );
 				$data_store_for_deletion->read( $order );
 
