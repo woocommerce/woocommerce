@@ -1,12 +1,12 @@
 {
 	"name": "@woocommerce/onboarding",
-	"version": "3.3.0",
+	"version": "3.4.0",
 	"description": "Onboarding utilities.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.3.1"
+		"pnpm": "^8.6.5"
 	},
 	"keywords": [
 		"wordpress",

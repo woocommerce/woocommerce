@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Provide a data-store agnostic way of untrashing orders.

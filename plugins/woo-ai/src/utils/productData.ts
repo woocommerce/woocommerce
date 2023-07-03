@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { Attribute, ProductData } from './types';
-import { getTinyContent } from '../utils/tiny-tools';
+import { getTinyContent, getPostId } from '.';
 
 const isElementVisible = ( element: HTMLElement ) =>
 	! ( window.getComputedStyle( element ).display === 'none' );
@@ -104,6 +104,7 @@ const getProductType = () => {
 
 export const productData = (): ProductData => {
 	return {
+		product_id: getPostId(),
 		name: getProductName(),
 		categories: getCategories(),
 		tags: getTags(),
@@ -112,13 +113,12 @@ export const productData = (): ProductData => {
 		product_type: getProductType(),
 		is_downloadable: (
 			document.querySelector( '#_downloadable' ) as HTMLInputElement
-		 )?.checked
-			? 'Yes'
-			: 'No',
+		 )?.checked,
 		is_virtual: (
 			document.querySelector( '#_virtual' ) as HTMLInputElement
-		 )?.checked
-			? 'Yes'
-			: 'No',
+		 )?.checked,
+		publishing_status: (
+			document.querySelector( '#post_status' ) as HTMLInputElement
+		 )?.value,
 	};
 };

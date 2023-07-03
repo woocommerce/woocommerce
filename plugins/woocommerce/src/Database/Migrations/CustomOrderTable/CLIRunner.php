@@ -407,8 +407,7 @@ class CLIRunner {
 			$total_time += $batch_total_time;
 
 			if ( $verbose && count( $failed_ids_in_current_batch ) > 0 ) {
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a CLI command and debugging code is intended.
-				$errors = print_r( $failed_ids_in_current_batch, true );
+				$errors = wp_json_encode( $failed_ids_in_current_batch, JSON_PRETTY_PRINT );
 				WP_CLI::warning(
 					sprintf(
 					/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
@@ -433,8 +432,7 @@ class CLIRunner {
 					$errors_in_remigrate_batch = $this->post_to_cot_migrator->verify_migrated_orders( $failed_ids );
 					$errors_in_remigrate_batch = $this->verify_meta_data( $failed_ids, $errors_in_remigrate_batch );
 					if ( count( $errors_in_remigrate_batch ) > 0 ) {
-						// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a CLI command and debugging code is intended.
-						$formatted_errors = print_r( $errors_in_remigrate_batch, true );
+						$formatted_errors = wp_json_encode( $errors_in_remigrate_batch, JSON_PRETTY_PRINT );
 						WP_CLI::warning(
 							sprintf(
 							/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
@@ -496,8 +494,7 @@ class CLIRunner {
 				)
 			);
 		} else {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- This is a CLI command and debugging code is intended.
-			$errors = print_r( $failed_ids, true );
+			$errors = wp_json_encode( $failed_ids, JSON_PRETTY_PRINT );
 
 			return WP_CLI::error(
 				sprintf(

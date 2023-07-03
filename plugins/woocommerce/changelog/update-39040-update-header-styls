@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Remove letter-spacing from the core profiler headers; Use 500 for font-weight.

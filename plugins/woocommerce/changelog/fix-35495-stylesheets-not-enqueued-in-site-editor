@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix frontend styles not loading in the site editor.
