@@ -36,11 +36,25 @@ interface ProductTemplateInterface {
 	public function __construct();
 
 	/**
-	 * Get the name of the template.
+	 * Get the slug of the template.
 	 *
-	 * @return string Template name
+	 * @return string Template slug
 	 */
-	public function get_name();
+	public function get_slug();
+
+	/**
+	 * Get the title of the template.
+	 *
+	 * @return string Template title
+	 */
+	public function get_title();
+
+	/**
+	 * Get the description for the template.
+	 *
+	 * @return string Template description
+	 */
+	public function get_description();
 
 	/**
 	 * Get the template layout.

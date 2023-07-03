@@ -41,6 +41,7 @@ class Init {
 			$block_registry->init();
 			$this->template_registry = ProductTemplateRegistry::get_instance();
 			$this->template_registry->register_core_templates();
+			add_filter( 'get_block_templates', array( $this->template_registry, 'add_block_templates' ), 10, 3 );
 		}
 	}
 

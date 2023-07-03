@@ -21,6 +21,20 @@ final class ProductTemplateRegistry {
     protected $templates = array();
 
     /**
+	 * WooCommerce plugin slug
+	 *
+	 * @var string
+	 */
+	const PLUGIN_SLUG = 'woocommerce/woocommerce';
+
+    /**
+	 * Template typ.
+	 *
+	 * @var string
+	 */
+	const TEMPLATE_TYPE = 'woocommerce_product_editor_template';
+
+    /**
 	 * Get the instance of the class.
 	 *
 	 * @return ProductTemplateRegistry The main instance.
@@ -43,7 +57,7 @@ final class ProductTemplateRegistry {
         );
 
         foreach ( $template_instances as $instance ) {
-            $this->register( $instance->get_name(), $instance );
+            $this->register( $instance->get_slug(), $instance );
         }
     }
 
@@ -75,5 +89,48 @@ final class ProductTemplateRegistry {
     public function get_registered( $name ) {
         return isset( $this->templates[ $name ] ) ? $this->templates[ $name ] : null;
     }
+
+    /**
+     * Add the templates to the Gutenberg registry.
+     */
+    public function add_block_templates( $query_result, $query, $template_type ) {
+        if ( ! isset( $query['post_type'] ) || $query['post_type'] !== self::TEMPLATE_TYPE ) {
+            return $query_result;
+        }
+
+        foreach( $this->templates as $template ) {
+            $block_template = $this->get_block_template( $template );
+            $query_result[] = $block_template;
+        }
+
+        return $query_result;
+    }
+
+    /**
+	 * Get the WP block template from a product template.
+	 *
+	 * @param object $product_template The product template.
+	 *
+	 * @return \WP_Block_Template Template.
+	 */
+	protected function get_block_template( $product_template ) {
+		$template                 = new \WP_Block_Template();
+		$template->id             = self::PLUGIN_SLUG . '//product-editor_' . $product_template->get_slug();
+		$template->theme          = self::PLUGIN_SLUG;
+		$template->content        = $product_template->get_template();
+		$template->source         = 'plugin';
+		$template->slug           = $product_template->get_slug();
+		$template->type           = self::TEMPLATE_TYPE;
+		$template->title          = $product_template->get_title();
+		$template->description    = $product_template->get_description();
+		$template->status         = 'publish';
+		$template->has_theme_file = true;
+		$template->origin         = 'plugin';
+		$template->is_custom      = false; // Templates loaded from the filesystem aren't custom, ones that have been edited and loaded from the DB are.
+		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
+		$template->area           = 'uncategorized';
+
+		return $template;
+	}
 
 }

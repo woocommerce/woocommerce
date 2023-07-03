@@ -13,12 +13,30 @@ class VariableProductTemplate implements ProductTemplateInterface {
     public function __construct() {}
 
 	/**
-	 * Get the name of the template.
+	 * Get the slug of the template.
 	 *
-	 * @return string Template name
+	 * @return string Template slug
 	 */
-    public function get_name() {
+    public function get_slug() {
         return 'variable';
+    }
+
+    /**
+	 * Get the title of the template.
+	 *
+	 * @return string Template title
+	 */
+    public function get_title() {
+        return __( 'Variable product editor template.', 'woocommerce' );
+    }
+
+    /**
+	 * Get the description for the template.
+	 *
+	 * @return string Template description
+	 */
+    public function get_description() {
+        return __( 'Product template for editing variable product types.', 'woocommerce' );
     }
 
     /**

@@ -38,8 +38,8 @@ trait BaseProductTemplate {
             array(
                 'parent' => self::GENERAL_GROUP,
                 'block'  => array(
-                    'woocommerce/product-name-field',
-                    array(
+                    'blockName' => 'woocommerce/product-name-field',
+                    'attrs'     => array(
                         'name' => 'Product name',
                     ),
                 ),
@@ -49,7 +49,7 @@ trait BaseProductTemplate {
             array(
                 'parent' => self::GENERAL_GROUP,
                 'block'  => array(
-                    'woocommerce/product-summary-field',
+                    'blockName' => 'woocommerce/product-summary-field',
                 ),
             ),
         );

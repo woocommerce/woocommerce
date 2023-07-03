@@ -15,12 +15,17 @@ abstract class AbstractProductTemplate {
     /**
      * Index for the block properties.
      */
-    const BLOCK_PROPERTIES_INDEX = 1;
+    const BLOCK_PROPERTIES_INDEX = 'attrs';
 
     /**
      * Index for the child blocks.
      */
-    const BLOCK_CHILDREN_INDEX = 2;
+    const INNER_BLOCKS_INDEX = 'innerBlocks';
+
+    /**
+     * Index for the child blocks.
+     */
+    const INNER_CONTENT_INDEX = 'innerContent';
 
     /**
      * Property for the internal order.
@@ -56,17 +61,27 @@ abstract class AbstractProductTemplate {
      * Insert a block into the template tree.
      */
     private function insert_block( $parent, $block, $id ) {
+        $block = wp_parse_args(
+            $block,
+            array(
+                'innerBlocks'  => array(),
+                'innerContent' => array(),
+            )
+        );
+
         if ( $parent === self::ROOT ) {
-            $blocks = &$this->template;
+            $inner_blocks = &$this->template;
         } else {
-            $blocks = &$this->cache[ $parent ][ self::BLOCK_CHILDREN_INDEX ];
+            $inner_blocks = &$this->cache[ $parent ][ self::INNER_BLOCKS_INDEX ];
+            $inner_content = &$this->cache[ $parent ][ self::INNER_CONTENT_INDEX ];
         }
 
-        $blocks[] = $block;
+        $inner_blocks[] = $block;
+        $inner_content  = array_map( 'serialize_block', $inner_blocks );
 
         if ( $id ) {
-            $index = count( $blocks ) - 1;
-            $this->cache[ $id ] = &$blocks[ $index ];
+            $index = count( $inner_blocks ) - 1;
+            $this->cache[ $id ] = &$inner_blocks[ $index ];
         }
     }
 
@@ -77,13 +92,14 @@ abstract class AbstractProductTemplate {
         $args = wp_parse_args( $args, array( 'order' => 10 ) );
 
         $group = array(
-            'woocommerce/product-tab',
-            array(
+            'blockName'  => 'woocommerce/product-tab',
+            'attrs'      => array(
                 'id'    => $args['id'],
                 'title' => $args['title'],
                 'order' => $args['order'],
             ),
-            array(),
+            'innerBlocks' => array(),
+            'innerContent' => array(),
         );
 
         $this->add_field(
@@ -101,13 +117,14 @@ abstract class AbstractProductTemplate {
      */
     public function add_section( $args = array() ) {
         $section = array(
-            'woocommerce/product-section',
-            array(
+            'blockName'   => 'woocommerce/product-section',
+            'attrs'       => array(
                 'id'          => $args['id'],
                 'title'       => $args['title'],
                 'description' => $args['description'],
             ),
-            array(),
+            'innerBlocks' => array(),
+            'innerContent' => array(),
         );
 
         $this->add_field(
@@ -125,11 +142,12 @@ abstract class AbstractProductTemplate {
      */
     private function sort_by_order( $blocks ) {
         usort( $blocks, function( $a, $b ) {
-            return $a[ self::BLOCK_PROPERTIES_INDEX ][ self::ORDER_PROPERTY ] > $b[ self::BLOCK_PROPERTIES_INDEX ][ self::ORDER_PROPERTY ] ? 1 : -1;
+            return isset( $a[ self::BLOCK_PROPERTIES_INDEX ][ self::ORDER_PROPERTY ] ) && isset( $b[ self::BLOCK_PROPERTIES_INDEX ][ self::ORDER_PROPERTY ] ) &&
+                $a[ self::BLOCK_PROPERTIES_INDEX ][ self::ORDER_PROPERTY ] > $b[ self::BLOCK_PROPERTIES_INDEX ][ self::ORDER_PROPERTY ] ? 1 : -1;
         } );
         foreach( $blocks as $index => $block ) {
-            if ( isset( $block[ self::BLOCK_CHILDREN_INDEX ] ) ) {
-                $blocks[ $index ][ self::BLOCK_CHILDREN_INDEX ] = $this->sort_by_order( $block[ self::BLOCK_CHILDREN_INDEX ] );
+            if ( isset( $block[ self::INNER_BLOCKS_INDEX ] ) ) {
+                $blocks[ $index ][ self::INNER_BLOCKS_INDEX ] = $this->sort_by_order( $block[ self::INNER_BLOCKS_INDEX ] );
             }
         }
         return $blocks;
@@ -139,7 +157,10 @@ abstract class AbstractProductTemplate {
      * Get the template.
      */
     public function get_template() {
-        return $this->sort_by_order( $this->template );
+        $template = $this->template;
+        $template = $this->sort_by_order( $this->template );
+        $serialized = serialize_blocks( $template );
+        return $serialized;
     }
 
 }
