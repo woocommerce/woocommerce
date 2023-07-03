@@ -36,6 +36,10 @@ abstract class TableMigrator {
 	 * @return void
 	 */
 	protected function add_error( string $error ): void {
+		if ( is_null( $this->errors ) ) {
+			$this->errors = array();
+		}
+
 		if ( ! in_array( $error, $this->errors, true ) ) {
 			$this->errors[] = $error;
 		}

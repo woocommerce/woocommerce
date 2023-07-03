@@ -73,12 +73,17 @@ class PostsToOrdersMigrationController {
 		$this->error_logger = WC()->call_function( 'wc_get_logger' );
 
 		$data = array();
-		foreach ( $this->all_migrators as $name => $migrator ) {
-			$data[ $name ] = $migrator->fetch_sanitized_migration_data( $order_post_ids );
-			if ( ! empty( $data['errors'] ) ) {
-				$this->handle_migration_error( $order_post_ids, $data['errors'], null, null, $name );
-				return;
+		try {
+			foreach ( $this->all_migrators as $name => $migrator ) {
+				$data[ $name ] = $migrator->fetch_sanitized_migration_data( $order_post_ids );
+				if ( ! empty( $data[ $name ]['errors'] ) ) {
+					$this->handle_migration_error( $order_post_ids, $data[ $name ]['errors'], null, null, $name );
+					return;
+				}
 			}
+		} catch ( \Exception $e ) {
+			$this->handle_migration_error( $order_post_ids, $data, $e, null, 'Fetching data' );
+			return;
 		}
 
 		$using_transactions = $this->maybe_start_transaction();
@@ -93,7 +98,7 @@ class PostsToOrdersMigrationController {
 			}
 
 			$this->handle_migration_error( $order_post_ids, $errors, $exception, $using_transactions, $name );
-			break;
+			return;
 		}
 
 		$this->commit_transaction();
@@ -146,6 +151,12 @@ class PostsToOrdersMigrationController {
 	 * @return bool|null True if transaction started, false if transactions won't be used, null if transaction failed to start.
 	 */
 	private function maybe_start_transaction(): ?bool {
+
+		$use_transactions = get_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
+		if ( 'yes' !== $use_transactions ) {
+			return null;
+		}
+
 		$transaction_isolation_level             = get_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, CustomOrdersTableController::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL );
 		$set_transaction_isolation_level_command = "SET TRANSACTION ISOLATION LEVEL $transaction_isolation_level";
 

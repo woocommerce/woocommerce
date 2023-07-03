@@ -225,6 +225,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	 * @return array[] Data to be migrated. Would be of the form: array( 'data' => array( ... ), 'errors' => array( ... ) ).
 	 */
 	public function fetch_sanitized_migration_data( $entity_ids ) {
+		$this->clear_errors();
 		$data = $this->fetch_data_for_migration_for_ids( $entity_ids );
 
 		foreach ( $data['errors'] as $entity_id => $errors ) {
@@ -232,7 +233,10 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 				$this->add_error( "Error importing data for post with id $entity_id: column $column_name: $error_message" );
 			}
 		}
-		return $data;
+		return array(
+			'data'   => $data['data'],
+			'errors' => $this->get_errors(),
+		);
 	}
 
 	/**

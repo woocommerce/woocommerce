@@ -68,6 +68,7 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 	 * @return array[] Data to be migrated. Would be of the form: array( 'data' => array( ... ), 'errors' => array( ... ) ).
 	 */
 	public function fetch_sanitized_migration_data( $entity_ids ) {
+		$this->clear_errors();
 		$to_migrate = $this->fetch_data_for_migration_for_ids( $entity_ids );
 		if ( empty( $to_migrate ) ) {
 			return array(
@@ -78,7 +79,10 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 
 		$already_migrated = $this->get_already_migrated_records( array_keys( $to_migrate ) );
 
-		return $this->classify_update_insert_records( $to_migrate, $already_migrated );
+		return array(
+			'data'   => $this->classify_update_insert_records( $to_migrate, $already_migrated ),
+			'errors' => $this->get_errors(),
+		);
 	}
 
 	/**
@@ -99,6 +103,9 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 	 * @return array Array of errors and exception if any.
 	 */
 	public function process_migration_data( array $data ) {
+		if ( isset( $data['data'] ) ) {
+			$data = $data['data'];
+		}
 		$this->clear_errors();
 		$exception = null;
 

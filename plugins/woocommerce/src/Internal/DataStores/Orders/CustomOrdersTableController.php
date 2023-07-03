@@ -36,8 +36,6 @@ class CustomOrdersTableController {
 
 	/**
 	 * The name of the option that tells whether database transactions are to be used or not for data synchronization.
-	 *
-	 * @deprecated We only use READ UNCOMMITTED isolation level, which provides us with correctness guarantee in new table, without locking post tables.
 	 */
 	public const USE_DB_TRANSACTIONS_OPTION = 'woocommerce_use_db_transactions_for_custom_orders_table_data_sync';
 
