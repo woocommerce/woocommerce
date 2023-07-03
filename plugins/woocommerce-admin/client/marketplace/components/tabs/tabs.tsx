@@ -11,7 +11,7 @@ import { getQuery, getNewPath, navigateTo } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import './tabs.scss';
-import { MARKETPLACE_PATH } from '../constants';
+import { DEFAULT_TAB_KEY, MARKETPLACE_PATH } from '../constants';
 
 export interface TabsProps {
 	selectedTab?: string | undefined;
@@ -39,7 +39,7 @@ const tabs: Tabs = {
 };
 
 const setUrlTabParam = ( tabKey: string ) => {
-	if ( tabKey === 'discover' ) {
+	if ( tabKey === DEFAULT_TAB_KEY ) {
 		navigateTo( {
 			url: getNewPath( {}, MARKETPLACE_PATH, {} ),
 		} );
@@ -82,12 +82,14 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 
 	useEffect( () => {
 		const query: Query = getQuery();
-		if ( query?.path === MARKETPLACE_PATH && query?.tab ) {
+
+		if ( query?.tab && tabs[ query.tab ] ) {
 			setSelectedTab( query.tab );
+			return;
 		}
-		// Only run once
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
+
+		setSelectedTab( DEFAULT_TAB_KEY );
+	}, [ setSelectedTab ] );
 
 	return (
 		<nav className="woocommerce-marketplace__tabs">
