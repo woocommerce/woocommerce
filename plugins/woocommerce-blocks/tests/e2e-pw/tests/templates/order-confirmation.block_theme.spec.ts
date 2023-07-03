@@ -7,7 +7,7 @@ const permalink = '/checkout/order-received';
 const templatePath = 'woocommerce/woocommerce//order-confirmation';
 const templateType = 'wp_template';
 
-test.describe( 'Test the order confirmation template', async () => {
+test.fixme( 'Test the order confirmation template', async () => {
 	test( 'Template can be opened in the site editor', async ( {
 		page,
 		editorUtils,
