@@ -58,6 +58,9 @@ const blocks = {
 	'product-top-rated': {},
 	'products-by-attribute': {},
 	'rating-filter': {},
+	'product-rating-stars': {
+		isExperimental: true,
+	},
 	'reviews-by-category': {
 		customDir: 'reviews/reviews-by-category',
 	},
