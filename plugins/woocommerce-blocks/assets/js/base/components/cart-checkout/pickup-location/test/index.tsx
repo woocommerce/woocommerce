@@ -26,7 +26,7 @@ jest.mock( '@woocommerce/settings', () => {
 	};
 } );
 describe( 'PickupLocation', () => {
-	it( `renders an address if one is set in the method's metadata`, async () => {
+	it( `renders an address if one is set in the methods metadata`, async () => {
 		dispatch( CHECKOUT_STORE_KEY ).setPrefersCollection( true );
 
 		// Deselect the default selected rate and select pickup_location:1 rate.
@@ -54,7 +54,7 @@ describe( 'PickupLocation', () => {
 			)
 		).toBeInTheDocument();
 	} );
-	it( 'renders the method name if address is not in metadata', async () => {
+	it( 'renders no address if one is not set in the methods metadata', async () => {
 		dispatch( CHECKOUT_STORE_KEY ).setPrefersCollection( true );
 
 		// Deselect the default selected rate and select pickup_location:1 rate.
@@ -87,7 +87,7 @@ describe( 'PickupLocation', () => {
 
 		render( <PickupLocation /> );
 		expect(
-			screen.getByText( /Collection from Local pickup/ )
-		).toBeInTheDocument();
+			screen.queryByText( /Collection from / )
+		).not.toBeInTheDocument();
 	} );
 } );

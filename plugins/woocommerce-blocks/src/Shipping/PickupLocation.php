@@ -9,6 +9,20 @@ use WC_Shipping_Method;
 class PickupLocation extends WC_Shipping_Method {
 
 	/**
+	 * Pickup locations.
+	 *
+	 * @var array
+	 */
+	protected $pickup_locations = [];
+
+	/**
+	 * Cost
+	 *
+	 * @var string
+	 */
+	protected $cost = '';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -32,6 +46,48 @@ class PickupLocation extends WC_Shipping_Method {
 	}
 
 	/**
+	 * Checks if a given address is complete.
+	 *
+	 * @param array $address Address.
+	 * @return bool
+	 */
+	protected function has_valid_pickup_location( $address ) {
+		// Normalize address.
+		$address_fields = wp_parse_args(
+			(array) $address,
+			array(
+				'city'     => '',
+				'postcode' => '',
+				'state'    => '',
+				'country'  => '',
+			)
+		);
+
+		// Country is always required.
+		if ( empty( $address_fields['country'] ) ) {
+			return false;
+		}
+
+		// If all fields are provided, we can skip further checks.
+		if ( ! empty( $address_fields['city'] ) && ! empty( $address_fields['postcode'] ) && ! empty( $address_fields['state'] ) ) {
+			return true;
+		}
+
+		// Check validity based on requirements for the country.
+		$country_address_fields = wc()->countries->get_address_fields( $address_fields['country'], 'shipping_' );
+
+		foreach ( $country_address_fields as $field_name => $field ) {
+			$key = str_replace( 'shipping_', '', $field_name );
+
+			if ( isset( $address_fields[ $key ] ) && true === $field['required'] && empty( $address_fields[ $key ] ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Calculate shipping.
 	 *
 	 * @param array $package Package information.
@@ -51,7 +107,7 @@ class PickupLocation extends WC_Shipping_Method {
 						'cost'      => $this->cost,
 						'meta_data' => array(
 							'pickup_location' => wp_kses_post( $location['name'] ),
-							'pickup_address'  => wc()->countries->get_formatted_address( $location['address'], ', ' ),
+							'pickup_address'  => $this->has_valid_pickup_location( $location['address'] ) ? wc()->countries->get_formatted_address( $location['address'], ', ' ) : '',
 							'pickup_details'  => wp_kses_post( $location['details'] ),
 						),
 					)
