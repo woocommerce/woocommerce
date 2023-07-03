@@ -18,4 +18,10 @@ export interface BlockAttributes {
 	imageSizing: ImageSizing;
 	// Whether or not be a children of Query Loop Block.
 	isDescendentOfQueryLoop: boolean;
+	// Height of the image.
+	height?: string;
+	// Width of the image.
+	width?: string;
+	// Image scaling method.
+	scale: 'cover' | 'contain' | 'fill';
 }

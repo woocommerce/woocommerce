@@ -23,7 +23,7 @@ $product_id = $products ? $products[0] : null;
 	<div class="wp-block-columns has-base-color has-text-color has-background has-link-color" style="background-color:#6b7ba8;padding-left:20px">
 		<!-- wp:column {"width":"40%","style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
 		<div class="wp-block-column" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0;flex-basis:40%">
-			<!-- wp:post-featured-image {"height":"300px"} /-->
+			<!-- wp:woocommerce/product-image {"showSaleBadge":false,"isDescendentOfSingleProductBlock":true,"height":"300px"} /-->
 		</div>
 		<!-- /wp:column -->
 
