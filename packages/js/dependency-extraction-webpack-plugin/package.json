@@ -40,8 +40,7 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"scripts": {
-		"prepare": "composer install",
-		"changelog": "composer exec -- changelogger",
+		"changelog": "node ../../../tools/monorepo-utils/dist/changelogger.js",
 		"lint": "eslint src",
 		"lint:fix": "eslint src --fix"
 	},
