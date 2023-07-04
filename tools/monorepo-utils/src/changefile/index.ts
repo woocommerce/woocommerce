@@ -156,7 +156,7 @@ const program = new Command( 'changefile' )
 					);
 					const messageExpression = message
 						? `-e "${ message }"`
-						: '';
+						: '--entry=""';
 					const commentExpression = comment
 						? `-c "${ comment }"`
 						: '';
