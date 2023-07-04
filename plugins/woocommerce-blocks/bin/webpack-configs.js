@@ -660,62 +660,32 @@ const getStylingConfig = ( options = {} ) => {
 						chunks: 'all',
 						priority: 10,
 					},
-					vendorsStyle: {
-						test: /[\/\\]node_modules[\/\\].*?style\.s?css$/,
-						name: 'wc-blocks-vendors-style',
-						chunks: 'all',
-						priority: 7,
-					},
-					blocksStyle: {
-						// Capture all stylesheets with name `style` or name that starts with underscore (abstracts).
-						test: /(style|_.*)\.scss$/,
-						name: 'wc-blocks-style',
-						chunks: 'all',
-						priority: 5,
-					},
 				},
 			},
 		},
 		module: {
 			rules: [
 				{
-					test: /[\/\\]node_modules[\/\\].*?style\.s?css$/,
-					use: [
-						MiniCssExtractPlugin.loader,
-						{ loader: 'css-loader', options: { importLoaders: 1 } },
-						'postcss-loader',
-						{
-							loader: 'sass-loader',
-							options: {
-								sassOptions: {
-									includePaths: [ 'node_modules' ],
-								},
-								additionalData: ( content ) => {
-									const styleImports = [
-										'colors',
-										'breakpoints',
-										'variables',
-										'mixins',
-										'animations',
-										'z-index',
-									]
-										.map(
-											( imported ) =>
-												`@import "~@wordpress/base-styles/${ imported }";`
-										)
-										.join( ' ' );
-									return styleImports + content;
-								},
-							},
+					test: /\.(j|t)sx?$/,
+					use: {
+						loader: 'babel-loader?cacheDirectory',
+						options: {
+							presets: [ '@wordpress/babel-preset-default' ],
+							plugins: [
+								isProduction
+									? require.resolve(
+											'babel-plugin-transform-react-remove-prop-types'
+									  )
+									: false,
+							].filter( Boolean ),
 						},
-					],
+					},
 				},
 				{
 					test: /\.s?css$/,
-					exclude: /node_modules/,
 					use: [
 						MiniCssExtractPlugin.loader,
-						{ loader: 'css-loader', options: { importLoaders: 1 } },
+						'css-loader',
 						'postcss-loader',
 						{
 							loader: 'sass-loader',
@@ -761,6 +731,7 @@ const getStylingConfig = ( options = {} ) => {
 			],
 		},
 		plugins: [
+			...getSharedPlugins( { bundleAnalyzerReportTitle: 'Styles' } ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Styles' ) ),
 			new WebpackRTLPlugin( {
 				filename: `[name]${ fileSuffix }-rtl.css`,
@@ -776,7 +747,7 @@ const getStylingConfig = ( options = {} ) => {
 		],
 		resolve: {
 			...resolve,
-			extensions: [ '.js', '.ts', '.tsx' ],
+			extensions: [ '.js', '.jsx', '.ts', '.tsx' ],
 		},
 	};
 };

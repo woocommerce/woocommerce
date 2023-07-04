@@ -686,4 +686,14 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		$this->asset_data_registry->add( 'default_rows', wc_get_theme_support( 'product_blocks::default_rows', 3 ), true );
 		$this->asset_data_registry->add( 'stock_status_options', wc_get_product_stock_status_options(), true );
 	}
+
+	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return string[]
+	 */
+	protected function get_block_type_style() {
+		// Currently these blocks rely on the styles from the All Products block.
+		return [ 'wc-blocks-style', 'wc-blocks-style-all-products' ];
+	}
 }

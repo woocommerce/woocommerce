@@ -56,6 +56,15 @@ class Checkout extends AbstractBlock {
 	}
 
 	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return string[]
+	 */
+	protected function get_block_type_style() {
+		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
+	}
+
+	/**
 	 * Enqueue frontend assets for this block, just in time for rendering.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.

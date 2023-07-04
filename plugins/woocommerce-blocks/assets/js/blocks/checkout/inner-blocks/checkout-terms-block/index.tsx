@@ -3,10 +3,12 @@
  */
 import { Icon, customPostType } from '@wordpress/icons';
 import { registerBlockType } from '@wordpress/blocks';
+
 /**
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
+import './style.scss';
 
 registerBlockType( 'woocommerce/checkout-terms-block', {
 	icon: {

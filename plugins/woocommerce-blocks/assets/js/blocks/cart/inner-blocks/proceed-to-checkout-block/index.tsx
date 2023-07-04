@@ -9,6 +9,7 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import attributes from './attributes';
 import { Edit, Save } from './edit';
+import './style.scss';
 
 registerBlockType( 'woocommerce/proceed-to-checkout-block', {
 	icon: {

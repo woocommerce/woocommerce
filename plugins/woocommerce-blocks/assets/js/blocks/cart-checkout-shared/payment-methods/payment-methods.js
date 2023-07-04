@@ -12,6 +12,7 @@ import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import NoPaymentMethods from './no-payment-methods';
 import PaymentMethodOptions from './payment-method-options';
 import SavedPaymentMethodOptions from './saved-payment-method-options';
+import './style.scss';
 
 /**
  * PaymentMethods component.

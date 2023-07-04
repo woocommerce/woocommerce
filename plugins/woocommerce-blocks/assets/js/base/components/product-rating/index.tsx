@@ -7,6 +7,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import './style.scss';
 
 const Rating = ( {
 	className,
