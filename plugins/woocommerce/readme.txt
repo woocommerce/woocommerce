@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Eliminate woocommerce_cart_item_name filter running twice on cart.php template [#38999](https://github.com/woocommerce/woocommerce/pull/38999)
 * Fix - Override /jetpack/v4/connection/data to return 404 to fix conflict with Android app flow [#38987](https://github.com/woocommerce/woocommerce/pull/38987)
 * Fix - Use window.location.href for page redirection to get the latest onboarding profile values on the Homescreen [#38861](https://github.com/woocommerce/woocommerce/pull/38861)
 * Fix - Fix core profiler UI bugs [#38872](https://github.com/woocommerce/woocommerce/pull/38872)
