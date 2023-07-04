@@ -90,15 +90,8 @@ class BlockConverter {
 				return $this->create_block( 'list', $node_name, $node_content, array( 'ordered' => true ) );
 			case 'li':
 				return $this->create_block( 'list-item', $node_name, $node_content );
-			case 'img':
-				return $this->create_block(
-					'image',
-					null,
-					array(
-						'url' => $node->getAttribute( 'src' ),
-						'alt' => $node->getAttribute( 'alt' ),
-					)
-				);
+			case 'hr':
+				return $this->create_block( 'separator', $node_name );
 			default:
 				return $this->create_block( 'paragraph', $node_value );
 		}
@@ -146,6 +139,11 @@ class BlockConverter {
 				} elseif ( 'em' === $node_name || 'strong' === $node_name ) {
 					$inline_content = $this->convert_child_nodes_to_blocks( $child_node );
 					$content       .= "<{$node_name}>{$inline_content}</{$node_name}>";
+				} elseif ( 'img' === $node_name ) {
+					// Only handle images as inline content for now due to how Markdown is processed by CommonMark.
+					$src      = esc_url( $child_node->getAttribute( 'src' ) );
+					$alt      = esc_attr( $child_node->getAttribute( 'alt' ) );
+					$content .= "<img src=\"{$src}\" alt=\"{$alt}\" />";
 				} else {
 					$content .= $this->convert_node_to_block( $child_node );
 				}
