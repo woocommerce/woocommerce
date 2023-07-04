@@ -40,7 +40,7 @@ class WC_Admin_Addons {
 				'https://woocommerce.com/wp-json/wccom-extensions/1.0/featured',
 				array(
 					'headers'    => $headers,
-					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+					'user-agent' => 'WooCommerceBIG CHANGE/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 				)
 			);
 

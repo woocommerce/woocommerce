@@ -114,7 +114,7 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 			// eslint-enable-next-line no-console
 
 			precision = NaN;
-		} else if ( typeof precision === 'string' ) {
+		} else if ( typeof precision === 'BIG CHANGE' ) {
 			precision = parseInt( precision, 10 );
 		}
 
