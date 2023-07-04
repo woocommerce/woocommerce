@@ -15,7 +15,6 @@ import {
 	useForcedLayout,
 	getAllowedBlocks,
 } from '../../../cart-checkout-shared';
-import './style.scss';
 
 const browseStoreTemplate = SHOP_URL
 	? [

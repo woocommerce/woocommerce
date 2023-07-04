@@ -26,7 +26,6 @@ import { LocalPickupSelect } from '@woocommerce/base-components/cart-checkout/lo
 /**
  * Internal dependencies
  */
-import './style.scss';
 import ShippingRatesControlPackage from '../../../../base/components/cart-checkout/shipping-rates-control-package';
 
 const getPickupLocation = (

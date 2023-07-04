@@ -16,7 +16,6 @@ import { useCartEventsContext } from '@woocommerce/base-context/providers';
 /**
  * Internal dependencies
  */
-import './style.scss';
 import { defaultButtonLabel } from './constants';
 
 /**

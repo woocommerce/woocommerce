@@ -26,11 +26,6 @@ import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import type { ReactElement } from 'react';
 
 /**
- * Internal dependencies
- */
-import './style.scss';
-
-/**
  * Renders a shipping rate control option.
  *
  * @param {Object} option Shipping Rate.

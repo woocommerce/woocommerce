@@ -13,6 +13,18 @@
 }
 /*rtl:end:ignore*/
 
+.wc-block-components-product-price {
+	display: block;
+
+	.wc-block-all-products .wc-block-components-product-price {
+		margin-bottom: $gap-small;
+	}
+
+	ins {
+		text-decoration: none;
+	}
+}
+
 .wc-block-components-product-price__value {
 	&.is-discounted {
 		margin-left: 0.5em;

@@ -47,6 +47,15 @@ class ProductPrice extends AbstractBlock {
 	}
 
 	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
+	}
+
+	/**
 	 * Overwrite parent method to prevent script registration.
 	 *
 	 * It is necessary to register and enqueues assets during the render

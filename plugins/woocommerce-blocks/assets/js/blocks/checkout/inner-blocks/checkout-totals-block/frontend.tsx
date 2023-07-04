@@ -5,11 +5,6 @@ import classnames from 'classnames';
 import { Sidebar } from '@woocommerce/base-components/sidebar-layout';
 import { StoreNoticesContainer } from '@woocommerce/blocks-checkout';
 
-/**
- * Internal dependencies
- */
-import './style.scss';
-
 const FrontendBlock = ( {
 	children,
 	className,

@@ -17,7 +17,6 @@ import { isPackageRateCollectable } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
-import './style.scss';
 import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
 import type { minMaxPrices } from './shared';
 import { defaultLocalPickupText, defaultShippingText } from './constants';

@@ -300,11 +300,12 @@ abstract class AbstractBlock {
 	/**
 	 * Get the frontend style handle for this block type.
 	 *
-	 * @see $this->register_block_type()
-	 * @return string|null
+	 * @return string[]|null
 	 */
 	protected function get_block_type_style() {
-		return 'wc-blocks-style';
+		$this->asset_api->register_style( 'wc-blocks-style-' . $this->block_name, $this->asset_api->get_block_asset_build_path( $this->block_name, 'css' ), [], 'all', true );
+
+		return [ 'wc-blocks-style', 'wc-blocks-style-' . $this->block_name ];
 	}
 
 	/**

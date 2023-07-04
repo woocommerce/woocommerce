@@ -8,6 +8,7 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
+import './style.scss';
 
 registerBlockType( 'woocommerce/cart-totals-block', {
 	icon: {

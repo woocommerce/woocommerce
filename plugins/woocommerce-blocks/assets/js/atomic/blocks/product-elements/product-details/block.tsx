@@ -5,10 +5,6 @@ import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 
-/**
- * Internal dependencies
- */
-
 interface SingleProductTab {
 	id: string;
 	title: string;
