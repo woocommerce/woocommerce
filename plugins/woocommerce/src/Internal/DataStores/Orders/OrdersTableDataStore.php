@@ -1934,7 +1934,7 @@ FROM $order_meta_table
 				do_action( 'woocommerce_before_delete_order', $order_id, $order );
 			}
 
-			$deleted_child_order_ids = $this->upshift_or_delete_child_orders( $order );
+			$this->upshift_or_delete_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
 			$this->delete_items( $order );
 
@@ -1955,7 +1955,7 @@ FROM $order_meta_table
 					// Once we stop creating posts for orders, we should do the cleanup here instead.
 					wp_delete_post( $order_id );
 				} else {
-					$this->handle_order_deletion_with_sync_disabled( $order_id, $deleted_child_order_ids );
+					$this->handle_order_deletion_with_sync_disabled( $order_id );
 				}
 			}
 
@@ -2004,11 +2004,10 @@ FROM $order_meta_table
 	 * it's just deleted; otherwise a "deleted_from" record is created in the meta table
 	 * and the sync process will detect these and take care of deleting the appropriate post records.
 	 *
-	 * @param int   $order_id Th id of the order that has been deleted from the orders table.
-	 * @param array $already_deleted_child_order_ids The ids of the child orders that have been already deleted and thus have a deletion record in place already.
+	 * @param int $order_id Th id of the order that has been deleted from the orders table.
 	 * @return void
 	 */
-	protected function handle_order_deletion_with_sync_disabled( $order_id, $already_deleted_child_order_ids = array() ): void {
+	protected function handle_order_deletion_with_sync_disabled( $order_id ): void {
 		global $wpdb;
 
 		$post_type = $wpdb->get_var(
@@ -2024,30 +2023,21 @@ FROM $order_meta_table
 				)
 			);
 		} else {
-			$related_order_ids = $wpdb->get_col(
-				$wpdb->prepare(
-					"SELECT id FROM {$wpdb->posts} WHERE post_parent = %d",
-					$order_id
+			// phpcs:disable WordPress.DB.SlowDBQuery
+			$wpdb->insert(
+				self::get_meta_table_name(),
+				array(
+					'order_id'   => $order_id,
+					'meta_key'   => DataSynchronizer::DELETED_RECORD_META_KEY,
+					'meta_value' => self::get_orders_table_name(),
 				)
 			);
-			$related_order_ids = array_map( 'absint', $related_order_ids );
-
-			$related_order_ids[] = $order_id;
-
-			$related_order_ids = array_diff( $related_order_ids, $already_deleted_child_order_ids );
-
-			// phpcs:disable WordPress.DB.SlowDBQuery
-			foreach ( $related_order_ids as $id ) {
-				$wpdb->insert(
-					self::get_meta_table_name(),
-					array(
-						'order_id'   => $id,
-						'meta_key'   => DataSynchronizer::DELETED_RECORD_META_KEY,
-						'meta_value' => self::get_orders_table_name(),
-					)
-				);
-			}
 			// phpcs:enable WordPress.DB.SlowDBQuery
+
+			// Note that at this point upshift_or_delete_child_orders will already have been invoked,
+			// thus all the child orders either still exist but have a different parent id,
+			// or have been deleted and got their own deletion record already.
+			// So there's no need to do anything about them.
 		}
 	}
 
@@ -2057,14 +2047,13 @@ FROM $order_meta_table
 	 *
 	 * @param \WC_Abstract_Order $order Order object.
 	 *
-	 * @return array The ids of the orders that have been actually deleted.
+	 * @return void
 	 */
-	private function upshift_or_delete_child_orders( $order ) : array {
+	private function upshift_or_delete_child_orders( $order ) : void {
 		global $wpdb;
 
-		$order_table       = self::get_orders_table_name();
-		$order_parent_id   = $order->get_parent_id();
-		$deleted_order_ids = array();
+		$order_table     = self::get_orders_table_name();
+		$order_parent_id = $order->get_parent_id();
 
 		if ( $this->legacy_proxy->call_function( 'is_post_type_hierarchical', $order->get_type() ) ) {
 			$wpdb->update(
@@ -2088,12 +2077,9 @@ FROM $order_meta_table
 				$child_order = wc_get_order( $child_order_id );
 				if ( $child_order ) {
 					$child_order->delete( true );
-					$deleted_order_ids[] = absint( $child_order_id );
 				}
 			}
 		}
-
-		return $deleted_order_ids;
 	}
 
 	/**

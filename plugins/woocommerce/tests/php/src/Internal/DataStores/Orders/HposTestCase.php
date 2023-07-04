@@ -99,7 +99,7 @@ class HposTestCase extends WC_Unit_Test_Case {
 
 		$order_id = $order_or_id instanceof \WC_Order ? $order_or_id->get_id() : $order_or_id;
 
-		$update_date = $update_date ?? current_time( 'mysql' );
+		$update_date          = $update_date ?? current_time( 'mysql' );
 		$cot_is_authoritative = $cot_is_authoritative ?? OrderUtil::custom_orders_table_usage_is_enabled();
 
 		if ( $cot_is_authoritative ) {
