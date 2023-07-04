@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Eliminate woocommerce_cart_item_name filter running twice on cart.php template
