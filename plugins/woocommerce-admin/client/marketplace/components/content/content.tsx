@@ -8,6 +8,7 @@
 import './content.scss';
 import Discover from '../discover/discover';
 import Extensions from '../extensions/extensions';
+import Footer from '../footer/footer';
 
 export interface ContentProps {
 	selectedTab?: string | undefined;
@@ -24,5 +25,12 @@ const renderContent = ( selectedTab?: string ): JSX.Element => {
 
 export default function Content( props: ContentProps ): JSX.Element {
 	const { selectedTab } = props;
-	return <>{ renderContent( selectedTab ) }</>;
+	return (
+		<>
+			<div className="woocommerce-marketplace__content">
+				{ renderContent( selectedTab ) }
+			</div>
+			<Footer />
+		</>
+	);
 }
