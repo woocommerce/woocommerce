@@ -284,6 +284,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Fixed race condition in core profiler's plugin list fetching and also minor spinner fixes [[#38732]](https://github.com/woocommerce/woocommerce/pull/38732)
 * Tweak - Improve compatibility between GTM and the single product page.
 * Tweak - Swap out deprecated jQuery ready handlers [[#37320]](https://github.com/woocommerce/woocommerce/pull/37320)
+* Tweak - Update CSS styles for the core profiler header [[#37320]](https://github.com/woocommerce/woocommerce/pull/39059)
 * Enhancement - Additional changes for the core profiler plugins page [[#38616]](https://github.com/woocommerce/woocommerce/pull/38616)
 * Enhancement - Fixed visibility and tax values convert to lowercase as issue facing in importing. [[#33820]](https://github.com/woocommerce/woocommerce/pull/33820)
 * Enhancement - Loader design changes for the core profiler [[#38750]](https://github.com/woocommerce/woocommerce/pull/38750)
