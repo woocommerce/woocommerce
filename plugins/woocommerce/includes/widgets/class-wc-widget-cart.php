@@ -82,25 +82,10 @@ class WC_Widget_Cart extends WC_Widget {
 	}
 
 	/**
-	 * Output widget.
-	 *
-	 * @see WP_Widget
-	 *
-	 * @param array $args     Arguments.
-	 * @param array $instance Widget instance.
+	 * Get refreshed cart fragment on page load.
 	 */
-	public function widget( $args, $instance ) {
-		if ( apply_filters( 'woocommerce_widget_cart_is_hidden', is_cart() || is_checkout() ) ) {
-			return;
-		}
-
-		global $post;
-		$is_cart_related_block = $this->array_contains( $post->post_content, self::get_blocks() );
-
-		if ( $is_cart_related_block || is_shop() || is_product() || is_product_category() ) {
-			wp_enqueue_script( 'wc-cart-fragments' );
-		} elseif ( ! wp_script_is( 'wc-cart-fragments-data', 'registered' ) ) {
-			ob_start();
+	public static function get_refreshed_cart_fragment_on_page_load() {
+		ob_start();
 
 			woocommerce_mini_cart();
 
@@ -127,6 +112,28 @@ class WC_Widget_Cart extends WC_Widget {
 				 } )
 				'
 			);
+	}
+
+	/**
+	 * Output widget.
+	 *
+	 * @see WP_Widget
+	 *
+	 * @param array $args     Arguments.
+	 * @param array $instance Widget instance.
+	 */
+	public function widget( $args, $instance ) {
+		if ( apply_filters( 'woocommerce_widget_cart_is_hidden', is_cart() || is_checkout() ) ) {
+			return;
+		}
+
+		global $post;
+		$is_cart_related_block = $this->array_contains( $post->post_content, self::get_blocks() );
+
+		if ( $is_cart_related_block || is_shop() || is_product() || is_product_category() ) {
+			wp_enqueue_script( 'wc-cart-fragments' );
+		} elseif ( ! wp_script_is( 'wc-cart-fragments-data', 'registered' ) ) {
+			self::get_refreshed_cart_fragment_on_page_load();
 		}
 
 		$hide_if_empty = empty( $instance['hide_if_empty'] ) ? 0 : 1;
