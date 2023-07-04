@@ -1,6 +1,20 @@
+@import '../../stylesheets/_variables.scss';
+
 .woocommerce-marketplace__tabs {
+	margin: auto;
+	padding: 0 $content-spacing-small;
+	box-sizing: content-box;
+
 	.woocommerce-marketplace__tab-button {
-		border-bottom: 3.5px solid transparent;
+		border-bottom: 1.5px solid transparent;
+		border-radius: 0;
+		padding: 1.5rem 0;
+		margin: 0 1.5rem 0 0;
+		color: $mauve-light-12;
+		font-size: 13px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 16px;
 
 		&:focus:not(:disabled) {
 			box-shadow: none;
@@ -9,5 +23,11 @@
 		&.is-active {
 			border-color: var(--wp-admin-theme-color);
 		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-medium) {
+	.woocommerce-marketplace__tabs {
+		padding: 0 $content-spacing-large;
 	}
 }

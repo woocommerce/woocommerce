@@ -1,3 +1,26 @@
+@import '../../stylesheets/_variables.scss';
+
 .woocommerce-marketplace__content {
-	padding: 16px;
+	box-sizing: content-box;
+	margin: auto;
+	max-width: $content-max-width;
+	padding: 0 $content-spacing-small;
+
+	.product-list__header {
+		color: $gutenberg-gray-900;
+
+		h2 {
+			font-size: 20px;
+			font-style: normal;
+			font-weight: 500;
+			line-height: 28px;
+			margin-top: 0;
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-medium) {
+	.woocommerce-marketplace__content {
+		padding: $content-spacing-large;
+	}
 }

@@ -1,0 +1,27 @@
+@import '../../stylesheets/_variables.scss';
+
+.icon-group {
+	flex: 1;
+	max-width: 382px;
+
+	&__headline {
+		display: flex;
+		gap: $small-gap;
+	}
+
+	&__title {
+		color: #101517;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 20px;
+		margin: 0 0 8px;
+	}
+
+	&__description {
+		color: $wp-gray-gray-50;
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 20px;
+		margin: 0;
+	}
+}

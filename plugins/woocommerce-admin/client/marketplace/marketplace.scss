@@ -1,1 +1,18 @@
-/* This is for Stylelint. Delete this comment when we add styles here! */
+@import './stylesheets/_variables.scss';
+
+.woocommerce-admin-page__marketplace {
+	background: #fff;
+
+	.woocommerce-layout__primary {
+		margin: 0;
+	}
+
+	.woocommerce-layout__main {
+		padding: 0;
+	}
+
+	.woocommerce-marketplace__header {
+		border-bottom: 1px solid $gutenberg-gray-300;
+	}
+}
+
