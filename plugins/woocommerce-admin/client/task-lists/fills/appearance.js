@@ -330,7 +330,7 @@ class Appearance extends Component {
 							isBusy={ isUpdatingLogo }
 							isPrimary
 						>
-							{ __( 'Proceed', 'woocommerce' ) }
+							{ __( 'Continue', 'woocommerce' ) }
 						</Button>
 						<Button
 							isTertiary

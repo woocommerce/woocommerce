@@ -285,7 +285,7 @@ export class Shipping extends Component {
 						buttonText={
 							pluginsToActivate.length ||
 							requiresJetpackConnection
-								? __( 'Proceed', 'woocommerce' )
+								? __( 'Continue', 'woocommerce' )
 								: __( 'Complete task', 'woocommerce' )
 						}
 						shippingZones={ this.state.shippingZones }

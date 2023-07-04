@@ -97,7 +97,7 @@ export const Configure = ( { markConfigured, paymentGateway } ) => {
 			fields={ fields }
 			isBusy={ isUpdating }
 			onSubmit={ handleSubmit }
-			submitLabel={ __( 'Proceed', 'woocommerce' ) }
+			submitLabel={ __( 'Continue', 'woocommerce' ) }
 			validate={ ( values ) => validateFields( values, fields ) }
 		/>
 	);
