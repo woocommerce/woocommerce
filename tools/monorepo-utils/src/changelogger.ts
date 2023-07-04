@@ -14,13 +14,10 @@ const CHANGELOGGER_PATH = join(
 	'bin',
 	'changelogger'
 );
-// const COMPOSER_PATH = join( MONOREPO_UTILS_ROOT, 'composer.json' );
 
 const cwd = process.cwd();
 const args = process.argv.slice( 2 );
 const argString = args.map( ( value ) => `"${ value }"` ).join( ' ' );
-
-// const command = `COMPOSER=${ COMPOSER_PATH } ${ CHANGELOGGER_PATH } ${ argString }`;
 const command = `${ CHANGELOGGER_PATH } ${ argString }`;
 
 execSync( command, {
