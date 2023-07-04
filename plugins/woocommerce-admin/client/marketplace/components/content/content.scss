@@ -1,3 +1,14 @@
+@import '../../stylesheets/_variables.scss';
+
 .woocommerce-marketplace__content {
-	padding: 16px;
+	box-sizing: content-box;
+	margin: auto;
+	max-width: $content-max-width;
+	padding: 0 $content-spacing-small;
+}
+
+@media screen and (min-width: $breakpoint-medium) {
+	.woocommerce-marketplace__content {
+		padding: $content-spacing-large;
+	}
 }

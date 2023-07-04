@@ -1,0 +1,40 @@
+@import '../../stylesheets/_variables.scss';
+
+.woocommerce-marketplace {
+
+	&__product-list-content {
+		display: grid;
+		gap: $medium-gap;
+	}
+
+	&__extension-card {
+		background-color: #3c3c3c;
+		height: 270px;
+	}
+}
+
+@media screen and (min-width: $breakpoint-medium) {
+	.woocommerce-marketplace {
+		&__product-list-content {
+			gap: $large-gap;
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-large) {
+	.woocommerce-marketplace {
+		&__product-list-content {
+			gap: $large-gap;
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-xlarge) {
+	.woocommerce-marketplace {
+		&__product-list-content {
+			grid-template-columns: repeat(4, 1fr);
+		}
+	}
+}
