@@ -998,7 +998,7 @@ WHERE
 	/**
 	 * Check if an order exists by id.
 	 *
-	 * @since 7.7.0
+	 * @since 8.0.0
 	 *
 	 * @param int $order_id The order id to check.
 	 * @return bool True if an order exists with the given name.

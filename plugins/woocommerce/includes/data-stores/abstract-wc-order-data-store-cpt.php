@@ -109,7 +109,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Check if an order exists by id.
 	 *
-	 * @since 7.9.0
+	 * @since 8.0.0
 	 *
 	 * @param int $order_id The order id to check.
 	 * @return bool True if an order exists with the given name.
@@ -301,7 +301,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				/**
 				 * Fires immediately before an order is trashed.
 				 *
-				 * @since 7.1.0
+				 * @since 8.0.0
 				 *
 				 * @param int      $order_id ID of the order about to be trashed.
 				 * @param WC_Order $order    Instance of the order that is about to be trashed.
