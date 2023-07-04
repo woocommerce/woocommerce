@@ -1152,7 +1152,7 @@ class FeaturesController {
 				$query_params_to_remove[] = $feature_id;
 			}
 		}
-		if ( count( $query_params_to_remove ) > 1 && ! empty( $_SERVER['REQUEST_URI'] ) ) {
+		if ( count( $query_params_to_remove ) > 1 && isset( $_SERVER['REQUEST_URI'] ) ) {
 			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			wp_safe_redirect( remove_query_arg( $query_params_to_remove, $_SERVER['REQUEST_URI'] ) );
 		}
