@@ -136,7 +136,7 @@ Check out [Frequently Asked Questions](https://docs.woocommerce.com/document/fre
 
 = Minimum Requirements =
 
-* PHP 7.2 or greater is recommended
+* PHP 7.3 or greater is recommended
 * MySQL 5.6 or greater is recommended
 
 Visit the [WooCommerce server requirements documentation](https://docs.woocommerce.com/document/server-requirements/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) for a detailed list of server requirements.
