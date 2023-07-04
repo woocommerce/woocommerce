@@ -1,33 +1,25 @@
 /**
  * Internal dependencies
  */
-import { Attribute, ProductData } from './types';
-import { getTinyContent, getPostId } from '.';
+import { Attribute } from './types';
+import { getTinyContent } from '.';
+
+export const getCategories = () =>
+	Array.from(
+		document.querySelectorAll(
+			'#taxonomy-product_cat input[name="tax_input[product_cat][]"]'
+		)
+	)
+		.filter(
+			( item ) =>
+				window.getComputedStyle( item, ':before' ).content !== 'none'
+		)
+		.map( ( item ) => item?.nextSibling?.nodeValue?.trim() );
 
 const isElementVisible = ( element: HTMLElement ) =>
 	! ( window.getComputedStyle( element ).display === 'none' );
 
-// TODO: This appears to be returning category IDs instead of names?
-const getCategories = (): string[] => {
-	const categoryCheckboxEls: NodeListOf< HTMLInputElement > =
-		document.querySelectorAll(
-			'#taxonomy-product_cat input[name="tax_input[product_cat][]"]:checked'
-		);
-
-	const tempCategories: string[] = [];
-
-	categoryCheckboxEls.forEach( ( el ) => {
-		if ( ! el.value.length ) {
-			return;
-		}
-
-		tempCategories.push( el.value );
-	} );
-
-	return tempCategories;
-};
-
-const getTags = (): string[] => {
+export const getTags = (): string[] => {
 	const tagsEl: HTMLTextAreaElement | null = document.querySelector(
 		'textarea[name="tax_input[product_tag]"]'
 	);
@@ -38,7 +30,7 @@ const getTags = (): string[] => {
 };
 
 // TODO: Not working in my testing when manually adding attributes.
-const getAttributes = (): Attribute[] => {
+export const getAttributes = (): Attribute[] => {
 	const attributeSelectEls: NodeListOf< HTMLSelectElement > =
 		document.querySelectorAll(
 			"#product_attributes select[name^='attribute_values']"
@@ -67,7 +59,7 @@ const getAttributes = (): Attribute[] => {
 	return tempAttributes;
 };
 
-const getDescription = (): string => {
+export const getDescription = (): string => {
 	const isBlockEditor =
 		document.querySelectorAll( '.block-editor' ).length > 0;
 
@@ -90,37 +82,25 @@ const getDescription = (): string => {
 	 )?.value;
 };
 
-const getProductName = (): string => {
+export const getProductName = (): string => {
 	const productNameEl: HTMLInputElement | null =
 		document.querySelector( '#title' );
 
 	return productNameEl ? productNameEl.value : '';
 };
 
-const getProductType = () => {
+export const getProductType = () => {
 	const productTypeEl: HTMLInputElement | null =
 		document.querySelector( '#product-type' );
 
 	return productTypeEl ? productTypeEl.value : '';
 };
 
-export const productData = (): ProductData => {
-	return {
-		product_id: getPostId(),
-		name: getProductName(),
-		categories: getCategories(),
-		tags: getTags(),
-		attributes: getAttributes(),
-		description: getDescription(),
-		product_type: getProductType(),
-		is_downloadable: (
-			document.querySelector( '#_downloadable' ) as HTMLInputElement
-		 )?.checked,
-		is_virtual: (
-			document.querySelector( '#_virtual' ) as HTMLInputElement
-		 )?.checked,
-		publishing_status: (
-			document.querySelector( '#post_status' ) as HTMLInputElement
-		 )?.value,
-	};
-};
+export const getPublishingStatus = () =>
+	( document.querySelector( '#post_status' ) as HTMLInputElement )?.value;
+
+export const isProductVirtual = () =>
+	( document.querySelector( '#_virtual' ) as HTMLInputElement )?.checked;
+
+export const isProductDownloadable = () =>
+	( document.querySelector( '#_downloadable' ) as HTMLInputElement )?.checked;

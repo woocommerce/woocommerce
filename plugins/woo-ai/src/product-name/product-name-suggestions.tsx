@@ -10,9 +10,19 @@ import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
  */
 import MagicIcon from '../../assets/images/icons/magic.svg';
 import AlertIcon from '../../assets/images/icons/alert.svg';
-import { productData } from '../utils';
+import {
+	getProductName,
+	getPostId,
+	getPublishingStatus,
+	isProductDownloadable,
+	isProductVirtual,
+	getProductType,
+	getCategories,
+	getTags,
+	getAttributes,
+} from '../utils';
 import { useCompletion, useProductSlug } from '../hooks';
-import { ProductDataSuggestion, ProductData } from '../utils/types';
+import { ProductDataSuggestion } from '../utils/types';
 import { SuggestionItem, PoweredByLink, recordNameTracks } from './index';
 import { RandomLoadingMessage } from '../components';
 
@@ -182,17 +192,12 @@ export const ProductNameSuggestions = () => {
 		updateProductName( suggestion.content );
 		setSuggestions( [] );
 
+		const productId = getPostId();
+		const publishingStatus = getPublishingStatus();
 		// Update product slug if product is a draft.
-		const currentProductData = productData();
-		if (
-			currentProductData.product_id !== null &&
-			currentProductData.publishing_status === 'draft'
-		) {
+		if ( productId !== null && publishingStatus === 'draft' ) {
 			try {
-				updateProductSlug(
-					suggestion.content,
-					currentProductData.product_id
-				);
+				updateProductSlug( suggestion.content, productId );
 			} catch ( e ) {
 				// Log silently if slug update fails.
 				/* eslint-disable-next-line no-console */
@@ -201,16 +206,31 @@ export const ProductNameSuggestions = () => {
 		}
 	};
 
-	const buildPrompt = ( currentProductData: ProductData ) => {
-		const validProductData = Object.entries( currentProductData )
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			.filter( ( [ key, value ] ) =>
-				value instanceof Array ? Boolean( value.length ) : value
-			)
-			.reduce( ( acc, [ key, value ] ) => {
-				acc = `${ acc }${ key }: ${ JSON.stringify( value ) }\n`;
+	const buildPrompt = () => {
+		const productData = {
+			name: getProductName(),
+			categories: getCategories(),
+			tags: getTags(),
+			attributes: getAttributes(),
+			product_type: getProductType(),
+			is_downloadable: isProductDownloadable(),
+			is_virtual: isProductVirtual(),
+		};
+		const validProductData = Object.entries( productData ).reduce(
+			( acc: Partial< typeof productData >, [ key, value ] ) => {
+				if (
+					value instanceof Array
+						? Boolean( value.length )
+						: Boolean( value )
+				) {
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore
+					acc[ key ] = value;
+				}
 				return acc;
-			}, '' );
+			},
+			{}
+		);
 
 		const instructions = [
 			'You are a WooCommerce SEO and marketing expert.',
@@ -221,7 +241,7 @@ export const ProductNameSuggestions = () => {
 			'Product titles should contain at least 20 characters.',
 			'Return a short and concise reason for each suggestion in seven words in the "reason" part of your response.',
 			"The product's properties are:",
-			`${ validProductData }`,
+			`${ JSON.stringify( validProductData ) }`,
 			'Here is an example of a valid response:',
 			'{"suggestions": [{"content": "An improved alternative to the product\'s title", "reason": "Reason for the suggestion"}, {"content": "Another improved alternative to the product title", "reason": "Reason for this suggestion"}]}',
 		];
@@ -239,13 +259,11 @@ export const ProductNameSuggestions = () => {
 		setSuggestions( [] );
 		setSuggestionsState( SuggestionsState.Fetching );
 
-		const currentProductData = productData();
-
 		recordNameTracks( 'start', {
-			current_title: currentProductData.name,
+			current_title: getProductName(),
 		} );
 
-		requestCompletion( buildPrompt( currentProductData ) );
+		requestCompletion( buildPrompt() );
 	};
 
 	const shouldRenderSuggestionsButton = useCallback( () => {
@@ -280,18 +298,16 @@ export const ProductNameSuggestions = () => {
 				) }
 			{ productName.length < MIN_TITLE_LENGTH &&
 				suggestionsState === SuggestionsState.None && (
-					<>
-						<div className="wc-product-name-suggestions__tip-message">
-							<div>
-								<MagicImage />
-								{ __(
-									'Enter a few descriptive words to generate product name.',
-									'woocommerce'
-								) }
-							</div>
-							<PoweredByLink />
+					<div className="wc-product-name-suggestions__tip-message">
+						<div>
+							<MagicImage />
+							{ __(
+								'Enter a few descriptive words to generate product name.',
+								'woocommerce'
+							) }
 						</div>
-					</>
+						<PoweredByLink />
+					</div>
 				) }
 			{ suggestionsState !== SuggestionsState.Failed && (
 				<button
