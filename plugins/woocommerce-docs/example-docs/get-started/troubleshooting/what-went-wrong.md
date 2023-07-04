@@ -7,3 +7,5 @@ title: What Went Wrong?
 1. Restart?
 2. Refresh?
 3. Profit!
+
+Try some different things. _Broken?_ Try something else. **Unresponsive?** Try again.

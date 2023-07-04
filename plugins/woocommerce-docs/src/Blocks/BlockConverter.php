@@ -68,6 +68,7 @@ class BlockConverter {
 		$node_name    = $node->nodeName; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$node_value   = $node->nodeValue; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$node_content = $this->convert_child_nodes_to_blocks( $node );
+
 		switch ( $node_name ) {
 			case 'p':
 				return $this->create_block( 'paragraph', $node_name, $node_content );
@@ -135,9 +136,18 @@ class BlockConverter {
 
 		foreach ( $node->childNodes as $child_node ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			if ( XML_ELEMENT_NODE === $child_node->nodeType ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				$content .= $this->convert_node_to_block( $child_node );
+				if ( $child_node->nodeName === 'a' ) {
+					$href         = esc_url( $child_node->getAttribute( 'href' ) );
+					$link_content = $this->convert_child_nodes_to_blocks( $child_node );
+					$content     .= "<a href=\"{$href}\">{$link_content}</a>";
+				} elseif ( 'em' === $child_node->nodeName || 'strong' === $child_node->nodeName ) {// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+					$inline_content = $this->convert_child_nodes_to_blocks( $child_node );
+					$content       .= "<{$child_node->nodeName}>{$inline_content}</{$child_node->nodeName}>";
+				} else {
+					$content .= $this->convert_node_to_block( $child_node );
+				}
 			} elseif ( XML_TEXT_NODE === $child_node->nodeType ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				$content .= $child_node->nodeValue; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				$content .= esc_html( $child_node->nodeValue ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			}
 		}
 
