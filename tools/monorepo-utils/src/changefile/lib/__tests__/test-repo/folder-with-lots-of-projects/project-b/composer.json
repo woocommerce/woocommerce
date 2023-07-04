@@ -1,5 +1,5 @@
 {
-    "require-dev": {
-        "automattic/jetpack-changelogger": "99.99"
-    }
+	"extra": {
+		"changelogger": {}
+	}
 }
