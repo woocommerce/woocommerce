@@ -99,6 +99,34 @@ class WC_Widget_Cart extends WC_Widget {
 
 		if ( $is_cart_related_block || is_shop() || is_product() || is_product_category() ) {
 			wp_enqueue_script( 'wc-cart-fragments' );
+		} elseif ( ! wp_script_is( 'wc-cart-fragments-data', 'registered' ) ) {
+			ob_start();
+
+			woocommerce_mini_cart();
+
+			$mini_cart = ob_get_clean();
+
+			$data = array(
+				'fragments' => apply_filters(
+					'woocommerce_add_to_cart_fragments',
+					array(
+						'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
+					)
+				),
+				'cart_hash' => WC()->cart->get_cart_hash(),
+			);
+
+			wp_register_script( 'wc-cart-fragments-data', false );
+			wp_enqueue_script( 'wc-cart-fragments-data' );
+			wp_add_inline_script(
+				'wc-cart-fragments-data',
+				'jQuery( function( $ ) {
+					$.each( ' . wp_json_encode( $data['fragments'] ) . ', function( key, value ) {
+						$( key ).replaceWith( value );
+					});
+				 } )
+				'
+			);
 		}
 
 		$hide_if_empty = empty( $instance['hide_if_empty'] ) ? 0 : 1;
