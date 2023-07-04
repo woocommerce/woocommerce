@@ -36,7 +36,7 @@ class CheckoutTemplate extends AbstractPageTemplate {
 	}
 
 	/**
-	 * True when viewing the cart page or cart endpoint.
+	 * True when viewing the checkout page or checkout endpoint.
 	 *
 	 * @return boolean
 	 */

@@ -26,7 +26,7 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	}
 
 	/**
-	 * True when viewing the cart page or cart endpoint.
+	 * True when viewing the Order Received endpoint.
 	 *
 	 * @return boolean
 	 */
