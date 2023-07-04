@@ -233,6 +233,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Show feedback bar for product editor. [[#38599]](https://github.com/woocommerce/woocommerce/pull/38599)
 * Add - Show spotlight for first time visitors of block product editor [[#38590]](https://github.com/woocommerce/woocommerce/pull/38590)
 * Add - Updated payment gateway suggestions for 2023 Q3 [[#38646]](https://github.com/woocommerce/woocommerce/pull/38646)
+* Update - Update WooCommerce Blocks to 10.4.5 [#39048](https://github.com/woocommerce/woocommerce/pull/39048)
 * Update - Update WooCommerce Blocks to 10.4.4 [#38918](https://github.com/woocommerce/woocommerce/pull/38918)
 * Update - Redirect to the old editor when attempting to edit a non-supported product type [#38745](https://github.com/woocommerce/woocommerce/pull/38745)
 * Update - Update WooCommerce Blocks to 10.4.3 [#38839](https://github.com/woocommerce/woocommerce/pull/38839)
