@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Consolidate Jetpack Changelogger dependency into single tool.
