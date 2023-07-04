@@ -101,7 +101,9 @@ class PostsToOrdersMigrationController {
 			return;
 		}
 
-		$this->commit_transaction();
+		if ( $using_transactions ) {
+			$this->commit_transaction();
+		}
 
 	}
 
@@ -149,6 +151,8 @@ class PostsToOrdersMigrationController {
 	 * Start a database transaction if the configuration mandates so.
 	 *
 	 * @return bool|null True if transaction started, false if transactions won't be used, null if transaction failed to start.
+	 *
+	 * @throws \Exception If the transaction isolation level is invalid.
 	 */
 	private function maybe_start_transaction(): ?bool {
 
@@ -157,7 +161,12 @@ class PostsToOrdersMigrationController {
 			return null;
 		}
 
-		$transaction_isolation_level             = get_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, CustomOrdersTableController::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL );
+		$transaction_isolation_level        = get_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, CustomOrdersTableController::DEFAULT_DB_TRANSACTIONS_ISOLATION_LEVEL );
+		$valid_transaction_isolation_levels = array( 'READ UNCOMMITTED', 'READ COMMITTED', 'REPEATABLE READ', 'SERIALIZABLE' );
+		if ( ! in_array( $transaction_isolation_level, $valid_transaction_isolation_levels, true ) ) {
+			throw new \Exception( "Invalid database transaction isolation level name $transaction_isolation_level" );
+		}
+
 		$set_transaction_isolation_level_command = "SET TRANSACTION ISOLATION LEVEL $transaction_isolation_level";
 
 		// We suppress errors in transaction isolation level setting because it's not supported by all DB engines, additionally, this might be executing in context of another transaction with a different isolation level.

@@ -136,27 +136,6 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	}
 
 	/**
-	 * Test that when an order is partially migrated, it can still be resumed as expected.
-	 */
-	public function test_interrupted_migration() {
-		$this->markTestSkipped();
-	}
-
-	/**
-	 * Test that invalid order data is not migrated but logged.
-	 */
-	public function test_migrating_invalid_order_data() {
-		$this->markTestSkipped();
-	}
-
-	/**
-	 * Test when one order is invalid but other one is valid in a migration batch.
-	 */
-	public function test_migrating_invalid_valid_order_combo() {
-		$this->markTestSkipped();
-	}
-
-	/**
 	 * Helper method to get order object from COT.
 	 *
 	 * @param WP_Post $post_order Post object for order.
@@ -576,22 +555,28 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	 */
 	public function test_db_transaction_is_rolled_back_on_db_error() {
 		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
-		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'READ UNCOMMITTED' );
 
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
-			'get_results',
-			function( ...$args ) {
-				$wpdb_decorator                               = $args[0];
-				$wpdb_decorator->decorated_object->last_error = 'Something failed!';
-				return false;
+			'query',
+			function( $wpdb_decorator, $query ) {
+				$result = $this->fake_query_transaction_logger( $wpdb_decorator, $query, false );
+				if ( str_contains( $query, 'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() ) ) {
+					$wpdb_decorator->decorated_object->last_error = 'Something failed!';
+				}
+				if ( str_contains( $query, 'SET TRANSACTION ISOLATION LEVEL' ) ) {
+					$wpdb_decorator->decorated_object->last_error = '';
+					return true;
+				}
+				return $result;
 			}
 		);
 
 		$this->create_and_migrate_order();
 
 		$expected = array(
-			'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE',
+			'SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED',
 			'START TRANSACTION',
 			'ROLLBACK',
 		);
@@ -715,7 +700,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	 *
 	 * @return bool
 	 */
-	private function fake_query_transaction_logger( $wpdb_decorator, $query, $transaction_fails ) {
+	private function fake_query_transaction_logger( DynamicDecorator $wpdb_decorator, $query, $transaction_fails ) {
 		$is_transaction_related_query =
 			StringUtil::contains( $query, 'TRANSACTION' ) ||
 			StringUtil::contains( $query, 'COMMIT' ) ||
@@ -732,7 +717,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 				return true;
 			}
 		} else {
-			return $wpdb_decorator->call_original_method( 'query', $query );
+			return $wpdb_decorator->decorated_object->query( $query );
 		}
 	}
 
