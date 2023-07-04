@@ -33,10 +33,6 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'features',
 		);
 
-		if ( wc_get_container()->get( CustomOrdersTableController::class )->is_feature_visible() ) {
-			$expected[] = 'custom_data_stores';
-		}
-
 		$this->assertEquals( $expected, $section_names );
 	}
 
