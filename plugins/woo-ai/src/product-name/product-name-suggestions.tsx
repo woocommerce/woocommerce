@@ -207,7 +207,7 @@ export const ProductNameSuggestions = () => {
 	};
 
 	const buildPrompt = () => {
-		const productData = {
+		const validProductData = Object.entries( {
 			name: getProductName(),
 			categories: getCategories(),
 			tags: getTags(),
@@ -215,22 +215,19 @@ export const ProductNameSuggestions = () => {
 			product_type: getProductType(),
 			is_downloadable: isProductDownloadable(),
 			is_virtual: isProductVirtual(),
-		};
-		const validProductData = Object.entries( productData ).reduce(
-			( acc: Partial< typeof productData >, [ key, value ] ) => {
-				if (
-					value instanceof Array
-						? Boolean( value.length )
-						: Boolean( value )
-				) {
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					acc[ key ] = value;
-				}
-				return acc;
-			},
-			{}
-		);
+		} ).reduce( ( acc, [ key, value ] ) => {
+			if (
+				typeof value === 'boolean' ||
+				( value instanceof Array
+					? Boolean( value.length )
+					: Boolean( value ) )
+			) {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore
+				acc[ key ] = value;
+			}
+			return acc;
+		}, {} );
 
 		const instructions = [
 			'You are a WooCommerce SEO and marketing expert.',
