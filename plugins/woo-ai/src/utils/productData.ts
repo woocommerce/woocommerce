@@ -14,7 +14,7 @@ export const getCategories = () =>
 			( item ) =>
 				window.getComputedStyle( item, ':before' ).content !== 'none'
 		)
-		.map( ( item ) => item?.nextSibling?.nodeValue?.trim() );
+		.map( ( item ) => item.nextSibling?.nodeValue?.trim() );
 
 const isElementVisible = ( element: HTMLElement ) =>
 	! ( window.getComputedStyle( element ).display === 'none' );
@@ -29,34 +29,21 @@ export const getTags = (): string[] => {
 	return tags.filter( ( tag ) => tag !== '' );
 };
 
-// TODO: Not working in my testing when manually adding attributes.
 export const getAttributes = (): Attribute[] => {
-	const attributeSelectEls: NodeListOf< HTMLSelectElement > =
-		document.querySelectorAll(
-			"#product_attributes select[name^='attribute_values']"
-		);
+	const attributeContainerEls = Array.from(
+		document.querySelectorAll( '.woocommerce_attribute_data' )
+	);
 
-	const tempAttributes: Attribute[] = [];
-
-	attributeSelectEls.forEach( ( el: HTMLSelectElement ) => {
-		const attributeName =
-			el.getAttribute( 'data-taxonomy' )?.replace( 'pa_', '' ) || '';
-
-		const attributeValues = Array.from( el.selectedOptions )
-			.map( ( option ) => option.text )
-			.join( ',' );
-
-		if ( ! attributeValues || ! attributeName ) {
-			return;
+	return attributeContainerEls.reduce( ( acc, item ) => {
+		const name = (
+			item.querySelector( 'input.attribute_name' ) as HTMLInputElement
+		 )?.value;
+		const value = item.querySelector( 'textarea' )?.textContent;
+		if ( name && value ) {
+			acc.push( { name, value } );
 		}
-
-		tempAttributes.push( {
-			name: attributeName,
-			value: attributeValues,
-		} );
-	} );
-
-	return tempAttributes;
+		return acc;
+	}, [] as Attribute[] );
 };
 
 export const getDescription = (): string => {
