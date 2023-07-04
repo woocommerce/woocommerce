@@ -26,7 +26,6 @@
 		"woocommerce/woocommerce-blocks": "10.6.0" 
 	},
 	"require-dev": {
-		"automattic/jetpack-changelogger": "^3.3.0",
 		"bamarni/composer-bin-plugin": "^1.4",
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
 		"phpunit/phpunit": "^9.0",
