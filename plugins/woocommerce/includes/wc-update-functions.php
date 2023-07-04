@@ -2602,9 +2602,9 @@ function wc_update_800_delete_stray_order_records() {
 
 	// phpcs:disable WordPress.DB.PreparedSQL
 
-	$last_processed_order_id = get_option( 'woocommerce_update_800_delete_stray_order_records_last_processed_id', 0 );
+	$old_max_id = get_option( 'woocommerce_update_800_delete_stray_order_records_last_processed_id', 0 );
 
-	if ( ! $last_processed_order_id ) {
+	if ( 0 === $old_max_id ) {
 		$suppress            = $wpdb->suppress_errors();
 		$orders_table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $orders_table_name ) ) );
 		$wpdb->suppress_errors( $suppress );
@@ -2614,31 +2614,32 @@ function wc_update_800_delete_stray_order_records() {
 		};
 	}
 
-	$next_order_ids_batch = $wpdb->get_col(
+	$new_max_id = $wpdb->get_var(
 		$wpdb->prepare(
-			"SELECT id FROM $orders_table_name WHERE id > %d ORDER BY id LIMIT 1000",
-			$last_processed_order_id
+			"SELECT MAX(id) FROM (SELECT id FROM $orders_table_name WHERE id > %d ORDER BY id LIMIT 10000) x",
+			$old_max_id
 		)
 	);
 
-	if ( empty( $next_order_ids_batch ) ) {
+	if ( null === $new_max_id ) {
 		delete_option( 'woocommerce_update_800_delete_stray_order_records_last_processed_id' );
 		return false;
 	}
 
-	$order_ids_batch_sql = StringUtil::to_sql_list( $next_order_ids_batch );
-
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE FROM {$wpdb->posts} WHERE post_type = %s AND ID NOT IN $order_ids_batch_sql",
-			'shop_order_placehold'
+			"DELETE FROM {$wpdb->posts} WHERE post_type = %s AND ID > %d AND ID <= %d AND ID NOT IN (SELECT id FROM $orders_table_name WHERE id > %d AND id <= %d)",
+			'shop_order_placehold',
+			$old_max_id,
+			$new_max_id,
+			$old_max_id,
+			$new_max_id,
 		)
 	);
 
 	// phpcs:enable WordPress.DB.PreparedSQL
 
-	$last_processed_order_id = end( $next_order_ids_batch );
-	update_option( 'woocommerce_update_800_delete_stray_order_records_last_processed_id', $last_processed_order_id );
+	update_option( 'woocommerce_update_800_delete_stray_order_records_last_processed_id', $new_max_id );
 
 	return true;
 }
