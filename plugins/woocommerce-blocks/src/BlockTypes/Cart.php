@@ -237,7 +237,14 @@ class Cart extends AbstractBlock {
 	 * Hydrate the cart block with data from the API.
 	 */
 	protected function hydrate_from_api() {
+		// Cache existing notices now, otherwise they are caught by the Cart Controller and converted to exceptions.
+		$old_notices = WC()->session->get( 'wc_notices', array() );
+		wc_clear_notices();
+
 		$this->asset_data_registry->hydrate_api_request( '/wc/store/v1/cart' );
+
+		// Restore notices.
+		WC()->session->set( 'wc_notices', $old_notices );
 	}
 	/**
 	 * Register script and style assets for the block type before it is registered.
