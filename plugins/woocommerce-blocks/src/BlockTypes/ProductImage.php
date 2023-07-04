@@ -148,7 +148,16 @@ class ProductImage extends AbstractBlock {
 	private function render_image( $product, $attributes ) {
 		$image_size = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
 
-		$image_style = sprintf( 'max-width:none; height:%s; width:%s; object-fit:%s;', $attributes['height'] ?? '', $attributes['width'] ?? '', $attributes['scale'] ?? '' );
+		$image_style = 'max-width:none;';
+		if ( ! empty( $attributes['height'] ) ) {
+			$image_style .= sprintf( 'height:%s;', $attributes['height'] );
+		}
+		if ( ! empty( $attributes['width'] ) ) {
+			$image_style .= sprintf( 'width:%s;', $attributes['width'] );
+		}
+		if ( ! empty( $attributes['scale'] ) ) {
+			$image_style .= sprintf( 'object-fit:%s;', $attributes['scale'] );
+		}
 
 		if ( ! $product->get_image_id() ) {
 			// The alt text is left empty on purpose, as it's considered a decorative image.
