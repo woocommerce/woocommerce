@@ -135,19 +135,22 @@ class BlockConverter {
 		$content = '';
 
 		foreach ( $node->childNodes as $child_node ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-			if ( XML_ELEMENT_NODE === $child_node->nodeType ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				if ( $child_node->nodeName === 'a' ) {
+			$node_type = $child_node->nodeType; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			$node_name = $child_node->nodeName; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
+			if ( XML_ELEMENT_NODE === $node_type ) {
+				if ( 'a' === $node_name ) {
 					$href         = esc_url( $child_node->getAttribute( 'href' ) );
 					$link_content = $this->convert_child_nodes_to_blocks( $child_node );
 					$content     .= "<a href=\"{$href}\">{$link_content}</a>";
-				} elseif ( 'em' === $child_node->nodeName || 'strong' === $child_node->nodeName ) {// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				} elseif ( 'em' === $node_name || 'strong' === $node_name ) {
 					$inline_content = $this->convert_child_nodes_to_blocks( $child_node );
-					$content       .= "<{$child_node->nodeName}>{$inline_content}</{$child_node->nodeName}>";
+					$content       .= "<{$node_name}>{$inline_content}</{$node_name}>";
 				} else {
 					$content .= $this->convert_node_to_block( $child_node );
 				}
-			} elseif ( XML_TEXT_NODE === $child_node->nodeType ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				$content .= esc_html( $child_node->nodeValue ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			} elseif ( XML_TEXT_NODE === $node_type ) {
+				$content .= $child_node->nodeValue; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			}
 		}
 
