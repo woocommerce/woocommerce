@@ -8,9 +8,9 @@ import { Icon, tag } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import './editor.scss';
 import metadata from './block.json';
 import { Edit } from './edit';
+import './editor.scss';
 
 /**
  * Register and run the "Products by Tag" block.

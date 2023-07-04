@@ -4,11 +4,6 @@
 import classnames from 'classnames';
 import { Main } from '@woocommerce/base-components/sidebar-layout';
 
-/**
- * Internal dependencies
- */
-import './style.scss';
-
 const FrontendBlock = ( {
 	children,
 	className,
