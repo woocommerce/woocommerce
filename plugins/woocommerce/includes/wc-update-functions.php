@@ -26,6 +26,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
  * Update file paths for 2.0
@@ -2593,31 +2594,51 @@ function wc_update_770_remove_multichannel_marketing_feature_options() {
 
 /**
  * Delete posts of type "shop_order_placeholder" with no matching order in the orders table.
- *
- * @return void
  */
-function wc_update_790_delete_stray_order_records() {
+function wc_update_800_delete_stray_order_records() {
 	global $wpdb;
 
 	$orders_table_name = OrdersTableDataStore::get_orders_table_name();
 
 	// phpcs:disable WordPress.DB.PreparedSQL
 
-	$suppress            = $wpdb->suppress_errors();
-	$orders_table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $orders_table_name ) ) );
-	$wpdb->suppress_errors( $suppress );
+	$last_processed_order_id = get_option( 'woocommerce_update_800_delete_stray_order_records_last_processed_id', 0 );
 
-	if ( ! $orders_table_exists ) {
-		return;
-	};
+	if ( ! $last_processed_order_id ) {
+		$suppress            = $wpdb->suppress_errors();
+		$orders_table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $orders_table_name ) ) );
+		$wpdb->suppress_errors( $suppress );
+
+		if ( ! $orders_table_exists ) {
+			return false;
+		};
+	}
+
+	$next_order_ids_batch = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT id FROM $orders_table_name WHERE id > %d ORDER BY id LIMIT 1000",
+			$last_processed_order_id
+		)
+	);
+
+	if ( empty( $next_order_ids_batch ) ) {
+		delete_option( 'woocommerce_update_800_delete_stray_order_records_last_processed_id' );
+		return false;
+	}
+
+	$order_ids_batch_sql = StringUtil::to_sql_list( $next_order_ids_batch );
 
 	$wpdb->query(
 		$wpdb->prepare(
-			"DELETE FROM {$wpdb->posts} WHERE post_type = %s AND ID NOT IN (SELECT id FROM $orders_table_name)",
+			"DELETE FROM {$wpdb->posts} WHERE post_type = %s AND ID NOT IN $order_ids_batch_sql",
 			'shop_order_placehold'
 		)
 	);
 
 	// phpcs:enable WordPress.DB.PreparedSQL
-}
 
+	$last_processed_order_id = end( $next_order_ids_batch );
+	update_option( 'woocommerce_update_800_delete_stray_order_records_last_processed_id', $last_processed_order_id );
+
+	return true;
+}
