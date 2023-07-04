@@ -164,6 +164,7 @@ class OrderHelper {
 		$features_controller->change_feature_enable( 'custom_order_tables', $enabled );
 
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, wc_bool_to_string( $enabled ) );
+		wp_cache_flush();
 
 		// Confirm things are really correct.
 		$wc_data_store = WC_Data_Store::load( 'order' );
