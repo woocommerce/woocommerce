@@ -1,1 +1,4 @@
-/* This is for Stylelint. Delete this comment when we add styles here! */
+.woocommerce-marketplace {
+	// TODO: Works on desktop, on mobile this isn't correct. Seems to need to be -8px instead of -16px.
+	margin: 0 calc(-1 * var(--large-gap)); // remove margin added by <div class="woocommerce-layout__primary">
+}
