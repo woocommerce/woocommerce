@@ -91,7 +91,7 @@ class BlockConverter {
 			case 'li':
 				return $this->create_block( 'list-item', $node_name, $node_content );
 			case 'hr':
-				return $this->create_block( 'separator', $node_name );
+				return $this->create_block( 'separator', $node_name, null );
 			default:
 				return $this->create_block( 'paragraph', $node_value );
 		}
@@ -110,7 +110,10 @@ class BlockConverter {
 
 		$block_html = "<!-- wp:{$block_name}{$json_attrs} -->\n";
 
-		if ( null !== $content ) {
+		// Special case for hr, at some point we could support other self-closing tags if needed.
+		if ( 'hr' === $node_name ) {
+			$block_html .= "<{$node_name} class=\"wp-block-separator has-alpha-channel-opacity\" />\n";
+		} elseif ( null !== $content ) {
 			$block_html .= "<{$node_name}>{$content}</{$node_name}>\n";
 		}
 
