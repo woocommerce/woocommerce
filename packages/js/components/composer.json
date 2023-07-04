@@ -4,9 +4,6 @@
 	"type": "library",
 	"license": "GPL-3.0-or-later",
 	"minimum-stability": "dev",
-	"require-dev": {
-		"automattic/jetpack-changelogger": "3.3.0"
-	},
 	"config": {
 		"platform": {
 			"php": "7.2"

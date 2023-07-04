@@ -10,8 +10,7 @@
 		"pnpm": "^8.6.5"
 	},
 	"scripts": {
-		"postinstall": "composer install",
-		"changelog": "composer exec -- changelogger"
+		"changelog": "node ../../../tools/monorepo-utils/dist/changelogger.js"
 	},
 	"repository": {
 		"type": "git",
