@@ -43,7 +43,7 @@
 		}
 
 		// Legacy notice compatibility.
-		.wc-forward.wp-element-button {
+		.wc-forward {
 			float: right;
 			color: $gray-800 !important;
 			background: transparent;
@@ -52,6 +52,8 @@
 			border: 0;
 			appearance: none;
 			opacity: 0.6;
+			text-decoration-line: underline;
+			text-underline-position: under;
 
 			&:hover,
 			&:focus,
