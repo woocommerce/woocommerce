@@ -1,0 +1,19 @@
+.woocommerce-marketplace__footer {
+	display: flex;
+	width: 100%;
+	padding: 48px 0 120px 0;
+	align-items: center;
+	justify-content: center;
+	background: #f6f7f7;
+
+	&-columns {
+		display: flex;
+		align-items: center;
+	}
+
+	span {
+		font-size: 14px;
+		line-height: 20px;
+		color: #969696;
+	}
+}

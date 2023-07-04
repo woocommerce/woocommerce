@@ -15,12 +15,12 @@ export default function Marketplace() {
 	const [ selectedTab, setSelectedTab ] = useState( DEFAULT_TAB_KEY );
 
 	return (
-		<>
+		<div className="woocommerce-marketplace">
 			<Tabs
 				selectedTab={ selectedTab }
 				setSelectedTab={ setSelectedTab }
 			/>
 			<Content selectedTab={ selectedTab } />
-		</>
+		</div>
 	);
 }

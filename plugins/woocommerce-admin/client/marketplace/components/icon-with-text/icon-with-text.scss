@@ -1,0 +1,12 @@
+.icon-group {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+
+	.icon {
+		border-radius: 50%;
+		background: var(--woo-color-primary-woo-purple-50, #7f54b3);
+		width: 32px;
+		height: 32px;
+	}
+}
