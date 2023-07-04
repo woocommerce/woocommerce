@@ -2,7 +2,7 @@
 
 namespace WooCommerceDocs\Manifest;
 
-use WooCommerceDocs\Markdown\MarkdownParser;
+use WooCommerceDocs\Blocks\BlockConverter;
 
 /**
  * Class ManifestProcessor
@@ -21,14 +21,14 @@ class ManifestProcessor {
 	}
 
 	/**
-	 * Get the parsedown parser
+	 * Get the Markdown converter.
 	 */
-	private static function get_parser() {
-		static $parser = null;
-		if ( null === $parser ) {
-			$parser = new MarkdownParser();
+	private static function get_converter() {
+		static $converter = null;
+		if ( null === $converter ) {
+			$converter = new BlockConverter();
 		}
-		return $parser;
+		return $converter;
 	}
 
 	/**
@@ -80,14 +80,14 @@ class ManifestProcessor {
 				$content = preg_replace( '/^---[\s\S]*?---/', '', $content );
 
 				// Parse markdown.
-				$markdown_content = self::get_parser()->convert( $content );
+				$blocks = self::get_converter()->convert( $content );
 
 				// If the post doesn't exist, create it.
 				if ( ! $existing_post ) {
 					$post_id = \WooCommerceDocs\Data\DocsStore::insert_docs_post(
 						array(
 							'post_title'   => $post['title'],
-							'post_content' => $markdown_content->__toString(),
+							'post_content' => $blocks,
 							'post_status'  => 'publish',
 						),
 						$post['id']
@@ -101,7 +101,7 @@ class ManifestProcessor {
 						array(
 							'ID'           => $existing_post->ID,
 							'post_title'   => $post['title'],
-							'post_content' => $markdown_content->__toString(),
+							'post_content' => $blocks,
 						),
 						$post['id']
 					);
