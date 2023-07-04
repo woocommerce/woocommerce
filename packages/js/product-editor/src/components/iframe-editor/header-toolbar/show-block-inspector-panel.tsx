@@ -3,7 +3,6 @@
  */
 import { Button } from '@wordpress/components';
 import { createElement, forwardRef, useContext } from '@wordpress/element';
-import { column } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { Ref } from 'react';
 
@@ -11,6 +10,7 @@ import { Ref } from 'react';
  * Internal dependencies
  */
 import { EditorContext } from '../context';
+import drawerRight from './drawer-right';
 
 export const ShowBlockInspectorPanel = forwardRef(
 	function ForwardedRefSidebarOpened(
@@ -28,7 +28,7 @@ export const ShowBlockInspectorPanel = forwardRef(
 			<Button
 				{ ...props }
 				ref={ ref }
-				icon={ column }
+				icon={ drawerRight }
 				isPressed={ isSidebarOpened }
 				label={ __( 'Show/hide block inspector', 'woocommerce' ) }
 				onClick={ handleClick }
