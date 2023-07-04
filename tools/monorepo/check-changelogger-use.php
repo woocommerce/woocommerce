@@ -29,22 +29,22 @@ EOH;
 
 // Options followed by a single colon have a required value.
 $short_options = 'vhp:';
-$long_options = array(
+$long_options  = array(
 	'debug',
 	'list',
 	'help',
 	'path:',
 );
-$options = getopt( $short_options, $long_options, $remain_index );
-$arg_count = count( $argv ) - $remain_index;
+$options       = getopt( $short_options, $long_options, $remain_index );
+$arg_count     = count( $argv ) - $remain_index;
 
 if ( isset( $options['h'] ) || isset( $options['help'] ) ) {
 	usage();
 }
 
-$list = isset( $options['l'] ) || isset( $options['list'] );
+$list    = isset( $options['l'] ) || isset( $options['list'] );
 $verbose = isset( $options['v'] ) || isset( $options['debug'] );
-$path = false;
+$path    = false;
 if ( isset( $options['p'] ) || isset( $options['path'] ) ) {
 	$path = isset( $options['path'] ) ? $options['path'] : $options['p'];
 }
@@ -87,18 +87,21 @@ if ( $verbose ) {
 $base_path = dirname( dirname( __DIR__ ) );
 
 $workspace_paths = array();
-$workspace_yaml = file_get_contents( $base_path . '/pnpm-workspace.yaml' );
+$workspace_yaml  = file_get_contents( $base_path . '/pnpm-workspace.yaml' );
 if ( preg_match( '/^packages:((\n\s+.+)+)/', $workspace_yaml, $matches ) ) {
-        $packages_config = $matches[1];
-        if ( preg_match_all( "/^\s+-\s?'([^']+)'/m", $packages_config, $matches ) ) {
-                $workspace_paths = $matches[1];
-        }
+		$packages_config = $matches[1];
+	if ( preg_match_all( "/^\s+-\s?'([^']+)'/m", $packages_config, $matches ) ) {
+			$workspace_paths = $matches[1];
+	}
 }
 
-$composer_files = array_map( function( $path ) {
-        return glob( $path . '/composer.json' );
-}, $workspace_paths );
-$composer_files = array_merge( ...$composer_files );
+$composer_files    = array_map(
+	function( $path ) {
+		return glob( $path . '/composer.json' );
+	},
+	$workspace_paths
+);
+$composer_files    = array_merge( ...$composer_files );
 $composer_projects = array_map( 'dirname', $composer_files );
 
 if ( $path && ! count( $composer_projects ) ) {
@@ -112,16 +115,15 @@ foreach ( $composer_projects as $project_path ) {
 	try {
 		$data = json_decode( file_get_contents( $base_path . '/' . $project_path . '/composer.json' ), true, 512, JSON_THROW_ON_ERROR );
 		if (
-			! isset( $data['require']['automattic/jetpack-changelogger'] ) &&
-			! isset( $data['require-dev']['automattic/jetpack-changelogger'] )
+			! isset( $data['extra']['changelogger'] )
 		) {
 			continue;
 		}
 	} catch ( Exception $e ) {
 		continue;
 	}
-	$data  = isset( $data['extra']['changelogger'] ) ? $data['extra']['changelogger'] : array();
-	$data += array(
+	$data                                   = isset( $data['extra']['changelogger'] ) ? $data['extra']['changelogger'] : array();
+	$data                                  += array(
 		'changelog'   => $project_path . '/CHANGELOG.md',
 		'changes-dir' => $project_path . '/changelog',
 	);
@@ -150,10 +152,10 @@ $ok_projects      = array();
 $touched_projects = array();
 // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 while ( ( $line = fgets( $pipes[1] ) ) ) {
-	$line  = trim( $line );
+	$line = trim( $line );
 
 	$project_match = false;
-	foreach( $composer_projects as $path ) {
+	foreach ( $composer_projects as $path ) {
 		if ( substr( $line, 0, strlen( $path ) + 1 ) === $path . '/' ) {
 			$project_match = $path;
 			break;
