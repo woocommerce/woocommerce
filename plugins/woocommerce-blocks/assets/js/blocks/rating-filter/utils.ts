@@ -38,7 +38,7 @@ export const formatSlug = ( slug: string ) =>
 export const parseAttributes = ( data: Record< string, unknown > ) => {
 	return {
 		showFilterButton: data?.showFilterButton === 'true',
-		showCounts: data?.showCounts !== 'false',
+		showCounts: data?.showCounts === 'true',
 		isPreview: false,
 		displayStyle:
 			( isString( data?.displayStyle ) && data.displayStyle ) ||

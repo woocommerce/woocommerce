@@ -36,12 +36,7 @@ registerBlockType( metadata, {
 				{ ...useBlockProps.save( {
 					className: classNames( 'is-loading', className ),
 				} ) }
-			>
-				<span
-					aria-hidden
-					className="wc-block-product-rating-filter__placeholder"
-				/>
-			</div>
+			/>
 		);
 	},
 	deprecated,
