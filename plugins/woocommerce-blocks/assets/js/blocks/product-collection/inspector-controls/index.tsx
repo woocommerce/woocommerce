@@ -5,6 +5,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
+import { ProductCollectionFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -97,6 +98,7 @@ const ProductCollectionInspectorControls = (
 					/>
 				</ToolsPanel>
 			) : null }
+			<ProductCollectionFeedbackPrompt />
 		</InspectorControls>
 	);
 };

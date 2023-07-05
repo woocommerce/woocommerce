@@ -95,3 +95,14 @@ export const ProductQueryFeedbackPrompt = () => (
 		url={ 'https://airtable.com/shrFX5FAqmCY6hVYI' }
 	/>
 );
+
+export const ProductCollectionFeedbackPrompt = () => (
+	<FeedbackPrompt
+		text={ __(
+			'Thanks for trying out the Product Collection block! Help us make it better by sharing your feedback.',
+			'woo-gutenberg-products-block'
+		) }
+		title={ __( 'Share your feedback!', 'woo-gutenberg-products-block' ) }
+		url={ 'https://airtable.com/shrqsMSDPvAKoY99u' }
+	/>
+);
