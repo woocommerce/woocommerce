@@ -42,14 +42,14 @@ const BlockEditorTour = ( { shouldTourBeShown, dismissModal }: Props ) => {
 		return {
 			heading: isNewUser
 				? __( 'Meet the product editing form', 'woocommerce' )
-				: __( 'A new way to edit your products', 'woocommerce' ),
+				: __( 'Welcome to the new product form!', 'woocommerce' ),
 			description: isNewUser
 				? __(
 						"Discover the product form's unique features with a quick overview of what's included.",
 						'woocommerce'
 				  )
 				: __(
-						'Introducing the upgraded experience designed to help you create and edit products easier.',
+						"Discover its new features and improvements with a quick overview of what's included.",
 						'woocommerce'
 				  ),
 		};
