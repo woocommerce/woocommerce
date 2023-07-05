@@ -57,39 +57,45 @@ class WooCommerceBlockTemplate {
      * @param array $block Block to add.
      */
     public function add_block( $block ) {
-        $args   = wp_parse_args(
+        $block = wp_parse_args(
             $block,
             array(
-                'order' => 10,
-                'parent' => null,
+                'attrs'        => array(),
+                'id'           => $this->generate_block_id( $block ),
+                'innerBlocks'  => array(),
+                'innerContent' => array(),
+                'order'        => 10,
+                'parent'       => null,
             )
         );
-        // @todo Create ID if one is not passed.
-        $id     = $args[ self::ID_KEY ] ?? null;
-        $parent = $args[ self::PARENT_KEY ];
-        $order  = $args[ self::ORDER_KEY ];
 
-        $block[ self::ATTRS_KEY ][ self::ORDER_KEY ] = $order;
+        $this->insert_block( $block );
+    }
 
-        $this->insert_block( $parent, $args, $id );
+    /**
+     * Generate a block ID based on the block name.
+     *
+     * @param array $block Block.
+     * @return string
+     */
+    private function generate_block_id( $block ) {
+        $id = $block[ 'blockName' ] . '-1';
+
+        while( isset( $this->cache[ $id ] ) ) {
+            $id++;
+        }
+
+        return $id;
     }
 
     /**
      * Insert a block into the template tree.
      *
-     * @param integer|null $parent_id Parent ID.
      * @param array        $block Block.
-     * @param integer      $id Block ID.
      */
-    private function insert_block( $parent_id, $block, $id ) {
-        $block = wp_parse_args(
-            $block,
-            array(
-                'attrs'        => array(),
-                'innerBlocks'  => array(),
-                'innerContent' => array(),
-            )
-        );
+    private function insert_block( $block ) {
+        $id        = $block[ self::ID_KEY ];
+        $parent_id = $block[ self::PARENT_KEY ];
 
         if ( ! $parent_id ) {
             $inner_blocks = &$this->template;
@@ -100,11 +106,8 @@ class WooCommerceBlockTemplate {
 
         $inner_blocks[] = $block;
         $inner_content  = array_map( 'serialize_block', $inner_blocks );
-
-        if ( $id ) {
-            $index = count( $inner_blocks ) - 1;
-            $this->cache[ $id ] = &$inner_blocks[ $index ];
-        }
+        $index          = count( $inner_blocks ) - 1;
+        $this->cache[ $id ] = &$inner_blocks[ $index ];
     }
 
     /**
