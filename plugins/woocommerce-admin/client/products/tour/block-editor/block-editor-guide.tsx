@@ -51,18 +51,11 @@ const BlockEditorGuide = ( {
 }: BlockEditorGuideProps ) => {
 	const pagesConfig = [
 		{
-			heading: isNewUser
-				? __( 'Fresh and modern interface', 'woocommerce' )
-				: __( 'Refreshed, streamlined interface', 'woocommerce' ),
-			text: isNewUser
-				? __(
-						'Everything you need to create and sell your products, all in one place. From photos and descriptions to pricing and inventory, all of your product settings can be found here.',
-						'woocommerce'
-				  )
-				: __(
-						'Experience a simpler, more focused interface with a modern design that enhances usability.',
-						'woocommerce'
-				  ),
+			heading: __( 'Fresh and modern interface', 'woocommerce' ),
+			text: __(
+				'Everything you need to create and sell your products, all in one place. From photos and descriptions to pricing and inventory, all of your product settings can be found here.',
+				'woocommerce'
+			),
 		},
 		{
 			heading: __( 'Content-rich product descriptions', 'woocommerce' ),
