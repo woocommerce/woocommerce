@@ -127,7 +127,7 @@ export const parseAttributes = ( data: Record< string, unknown > ) => {
 			isString( data?.attributeId ) ? data.attributeId : '0',
 			10
 		),
-		showCounts: data?.showCounts !== 'false',
+		showCounts: data?.showCounts === 'true',
 		queryType:
 			( isString( data?.queryType ) && data.queryType ) ||
 			metadata.attributes.queryType.default,
