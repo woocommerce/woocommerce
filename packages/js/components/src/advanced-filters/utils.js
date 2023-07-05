@@ -3,6 +3,7 @@
  */
 import { isArray, isNumber, isString } from 'lodash';
 import deprecated from '@wordpress/deprecated';
+import { createInterpolateElement } from '@wordpress/element';
 
 /**
  * DOM Node.textContent for React components
@@ -79,4 +80,22 @@ export function getInterpolatedString( interpolatedString ) {
 	}
 
 	return replacedString;
+}
+
+/**
+ * This function creates an interpolation element that is backwards compatible.
+ *
+ * @param {string} interpolatedString The interpolation string to be parsed and transformed.
+ * @param {Object} conversionMap      The map used for the conversion to create the interpolate element.
+ *
+ * @return {Element} A React element that is the result of applying the transformation.
+ */
+export function backwardsCompatibleCreateInterpolateElement(
+	interpolatedString,
+	conversionMap
+) {
+	return createInterpolateElement(
+		getInterpolatedString( interpolatedString ),
+		conversionMap
+	);
 }
