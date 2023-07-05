@@ -48,7 +48,7 @@ export const parseAttributes = ( data: Record< string, unknown > ) => {
 				parseInt( data.headingLevel, 10 ) ) ||
 			metadata.attributes.headingLevel.default,
 		showFilterButton: data?.showFilterButton === 'true',
-		showCounts: data?.showCounts !== 'false',
+		showCounts: data?.showCounts === 'true',
 		isPreview: false,
 		displayStyle:
 			( isString( data?.displayStyle ) && data.displayStyle ) ||
