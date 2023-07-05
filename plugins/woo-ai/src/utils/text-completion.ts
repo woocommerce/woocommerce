@@ -81,17 +81,16 @@ export async function requestJetpackToken() {
 /**
  * Leaving this here to make it easier to debug the streaming API calls for now
  *
- * @param {string} question - The query to send to the API
- * @param {number} postId   - The post where this completion is being requested, if available
+ * @param {string} prompt - The query to send to the API
  */
-export async function getCompletion( question: string ) {
+export async function getCompletion( prompt: string ) {
 	const { token } = await requestJetpackToken();
 
 	const url = new URL(
 		'https://public-api.wordpress.com/wpcom/v2/text-completion/stream'
 	);
 
-	url.searchParams.append( 'prompt', question );
+	url.searchParams.append( 'prompt', prompt );
 	url.searchParams.append( 'token', token );
 	url.searchParams.append( 'feature', WOO_AI_PLUGIN_FEATURE_NAME );
 
