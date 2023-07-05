@@ -209,7 +209,6 @@ export const ProductNameSuggestions = () => {
 	const buildPrompt = () => {
 		const validProductData = Object.entries( {
 			name: getProductName(),
-			categories: getCategories(),
 			tags: getTags(),
 			attributes: getAttributes(),
 			product_type: getProductType(),
