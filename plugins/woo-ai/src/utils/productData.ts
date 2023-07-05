@@ -5,20 +5,15 @@ import { Attribute } from './types';
 import { getTinyContent } from '.';
 
 export const getCategories = () => {
-	const categoryEls = Array.from(
+	return Array.from(
 		document.querySelectorAll(
 			'#taxonomy-product_cat input[name="tax_input[product_cat][]"]'
 		)
-	).filter(
-		( item ) =>
-			window.getComputedStyle( item, ':before' ).content !== 'none'
-	);
-
-	if ( ! categoryEls.length ) {
-		return [];
-	}
-
-	return categoryEls
+	)
+		.filter(
+			( item ) =>
+				window.getComputedStyle( item, ':before' ).content !== 'none'
+		)
 		.map( ( item ) => item.nextSibling?.nodeValue?.trim() )
 		.filter( Boolean );
 };
