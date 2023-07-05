@@ -50,7 +50,6 @@
 		<exclude-pattern>tests/</exclude-pattern>
 	</rule>
 
-	<!-- ignore wp_remote_get in test -->
 	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
 		<exclude-pattern>tests/src</exclude-pattern>
 	</rule>
