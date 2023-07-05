@@ -45,10 +45,7 @@ interface BlockEditorGuideProps {
 	onCloseGuide: ( currentPage: number, origin: 'close' | 'finish' ) => void;
 }
 
-const BlockEditorGuide = ( {
-	isNewUser = false,
-	onCloseGuide,
-}: BlockEditorGuideProps ) => {
+const BlockEditorGuide = ( { onCloseGuide }: BlockEditorGuideProps ) => {
 	const pagesConfig = [
 		{
 			heading: __( 'Fresh and modern interface', 'woocommerce' ),
@@ -65,18 +62,11 @@ const BlockEditorGuide = ( {
 			),
 		},
 		{
-			heading: isNewUser
-				? __( 'Lightning fast performance', 'woocommerce' )
-				: __( 'Improved speed & performance', 'woocommerce' ),
-			text: isNewUser
-				? __(
-						'Get your products listed and available for purchase in no time! Our modern technology ensures a reliable and streamlined experience.',
-						'woocommerce'
-				  )
-				: __(
-						'Enjoy a seamless experience without page reloads. Our modern technology ensures reliability and lightning-fast performance.',
-						'woocommerce'
-				  ),
+			heading: __( 'Lightning fast performance ', 'woocommerce' ),
+			text: __(
+				'Get your products listed and available for purchase in no time! Our modern technology ensures a reliable and streamlined experience.',
+				'woocommerce'
+			),
 		},
 		{
 			heading: __( 'More features are on the way', 'woocommerce' ),
