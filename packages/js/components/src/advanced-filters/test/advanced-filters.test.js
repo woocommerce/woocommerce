@@ -181,6 +181,23 @@ const advancedFiltersConfig = {
 				component: 'Date',
 			},
 		},
+		test: {
+			labels: {
+				add: 'Test',
+				remove: 'Remove test filter',
+				rule: 'Select a test filter match',
+				title: '{{title}}Test title{{/title}} {{filter/}}',
+				filter: 'Select a test type',
+			},
+			input: {
+				component: 'SelectControl',
+				options: [
+					{ value: 'new', label: 'New' },
+					{ value: 'old', label: 'Old' },
+				],
+				defaultOption: 'new',
+			},
+		},
 	},
 };
 
@@ -267,5 +284,20 @@ describe( 'AdvancedFilters', () => {
 		// The previous value should be reset when switching to/from the "Between" rule.
 		expect( dateFields[ 0 ] ).not.toHaveValue();
 		expect( dateFields[ 1 ] ).not.toHaveValue();
+	} );
+
+	test( 'should render the Test option component set in the old way', () => {
+		render( <AdvancedFiltersComponent /> );
+
+		// Add a new filter.
+		userEvent.click(
+			screen.getByRole( 'button', { name: 'Add a Filter' } )
+		);
+
+		// Select Test filter.
+		userEvent.click( screen.getByRole( 'button', { name: 'Test' } ) );
+		expect(
+			screen.getByRole( 'combobox', { name: 'Select a test type' } )
+		).toHaveValue();
 	} );
 } );
