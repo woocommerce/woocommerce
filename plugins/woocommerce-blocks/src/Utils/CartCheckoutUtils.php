@@ -12,6 +12,21 @@ class CartCheckoutUtils {
 	 * @return bool true if the WC cart page is using the Cart block.
 	 */
 	public static function is_cart_block_default() {
+		if ( wc_current_theme_is_fse_theme() ) {
+			// Ignore the pages and check the templates.
+			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'cart' ), 'wp_template' );
+
+			// If there is no template file, we're using default which does use the block.
+			if ( empty( $templates_from_db ) ) {
+				return true;
+			}
+
+			foreach ( $templates_from_db as $template ) {
+				if ( has_block( 'woocommerce/cart', $template->content ) ) {
+					return true;
+				}
+			}
+		}
 		$cart_page_id = wc_get_page_id( 'cart' );
 		return $cart_page_id && has_block( 'woocommerce/cart', $cart_page_id );
 	}
@@ -22,6 +37,21 @@ class CartCheckoutUtils {
 	 * @return bool true if the WC checkout page is using the Checkout block.
 	 */
 	public static function is_checkout_block_default() {
+		if ( wc_current_theme_is_fse_theme() ) {
+			// Ignore the pages and check the templates.
+			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'checkout' ), 'wp_template' );
+
+			// If there is no template file, we're using default which does use the block.
+			if ( empty( $templates_from_db ) ) {
+				return true;
+			}
+
+			foreach ( $templates_from_db as $template ) {
+				if ( has_block( 'woocommerce/checkout', $template->content ) ) {
+					return true;
+				}
+			}
+		}
 		$checkout_page_id = wc_get_page_id( 'checkout' );
 		return $checkout_page_id && has_block( 'woocommerce/checkout', $checkout_page_id );
 	}
