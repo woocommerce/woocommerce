@@ -82,39 +82,6 @@ class WC_Widget_Cart extends WC_Widget {
 	}
 
 	/**
-	 * Get refreshed cart fragment on page load.
-	 */
-	public static function get_refreshed_cart_fragment_on_page_load() {
-		ob_start();
-
-			woocommerce_mini_cart();
-
-			$mini_cart = ob_get_clean();
-
-			$data = array(
-				'fragments' => apply_filters(
-					'woocommerce_add_to_cart_fragments',
-					array(
-						'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
-					)
-				),
-				'cart_hash' => WC()->cart->get_cart_hash(),
-			);
-
-			wp_register_script( 'wc-cart-fragments-data', false );
-			wp_enqueue_script( 'wc-cart-fragments-data' );
-			wp_add_inline_script(
-				'wc-cart-fragments-data',
-				'jQuery( function( $ ) {
-					$.each( ' . wp_json_encode( $data['fragments'] ) . ', function( key, value ) {
-						$( key ).replaceWith( value );
-					});
-				 } )
-				'
-			);
-	}
-
-	/**
 	 * Output widget.
 	 *
 	 * @see WP_Widget
@@ -125,15 +92,6 @@ class WC_Widget_Cart extends WC_Widget {
 	public function widget( $args, $instance ) {
 		if ( apply_filters( 'woocommerce_widget_cart_is_hidden', is_cart() || is_checkout() ) ) {
 			return;
-		}
-
-		global $post;
-		$is_cart_related_block = $this->array_contains( $post->post_content, self::get_blocks() );
-
-		if ( $is_cart_related_block || is_shop() || is_product() || is_product_category() ) {
-			wp_enqueue_script( 'wc-cart-fragments' );
-		} elseif ( ! wp_script_is( 'wc-cart-fragments-data', 'registered' ) ) {
-			self::get_refreshed_cart_fragment_on_page_load();
 		}
 
 		$hide_if_empty = empty( $instance['hide_if_empty'] ) ? 0 : 1;
@@ -148,8 +106,17 @@ class WC_Widget_Cart extends WC_Widget {
 			echo '<div class="hide_cart_widget_if_empty">';
 		}
 
-		// Insert cart widget placeholder - code in woocommerce.js will update this on page load.
-		echo '<div class="widget_shopping_cart_content"></div>';
+		global $post;
+		$is_cart_related_block = $this->array_contains( $post->post_content, self::get_blocks() );
+
+		if ( $is_cart_related_block || is_shop() || is_product() || is_product_category() ) {
+			wp_enqueue_script( 'wc-cart-fragments' );
+			// Insert cart widget placeholder - code in woocommerce.js will update this on page load.
+			echo '<div class="widget_shopping_cart_content"></div>';
+		} else {
+			// Insert cart widget with the Mini-cart content.
+			echo '<div class="widget_shopping_cart_content">' . woocommerce_mini_cart() . '</div>';
+		}
 
 		if ( $hide_if_empty ) {
 			echo '</div>';
