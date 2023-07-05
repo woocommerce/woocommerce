@@ -72,9 +72,12 @@ export function getInterpolatedString( interpolatedString ) {
 
 	if ( replacedString !== interpolatedString ) {
 		deprecated(
-			'The interpolation string format `{{element}}...{{/element}}` or `{{element/}}`',
+			'Old interpolation string format `{{element}}...{{/element}}` or `{{element/}}`',
 			{
-				hint: 'Please update your code to use the new format: `<element>...</element>` or `<element/>`.',
+				since: '7.8',
+				alternative:
+					'new interpolation string format `<element>...</element>` or `<element/>`',
+				link: 'https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/components/src/advanced-filters/README.md',
 			}
 		);
 	}
