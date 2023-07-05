@@ -4,17 +4,24 @@
 import { Attribute } from './types';
 import { getTinyContent } from '.';
 
-export const getCategories = () =>
-	Array.from(
+export const getCategories = () => {
+	const categoryEls = Array.from(
 		document.querySelectorAll(
 			'#taxonomy-product_cat input[name="tax_input[product_cat][]"]'
 		)
-	)
-		.filter(
-			( item ) =>
-				window.getComputedStyle( item, ':before' ).content !== 'none'
-		)
-		.map( ( item ) => item.nextSibling?.nodeValue?.trim() );
+	).filter(
+		( item ) =>
+			window.getComputedStyle( item, ':before' ).content !== 'none'
+	);
+
+	if ( ! categoryEls.length ) {
+		return [];
+	}
+
+	return categoryEls
+		.map( ( item ) => item.nextSibling?.nodeValue?.trim() )
+		.filter( Boolean );
+};
 
 const isElementVisible = ( element: HTMLElement ) =>
 	! ( window.getComputedStyle( element ).display === 'none' );
