@@ -11,12 +11,7 @@ import {
 	Dropdown,
 	SelectControl,
 } from '@wordpress/components';
-import {
-	createElement,
-	createInterpolateElement,
-	Component,
-	createRef,
-} from '@wordpress/element';
+import { createElement, Component, createRef } from '@wordpress/element';
 import { partial, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import AddOutlineIcon from 'gridicons/dist/add-outline';
@@ -34,7 +29,7 @@ import {
 import Link from '../link';
 import AdvancedFilterItem from './item';
 import { Text } from '../experimental';
-import { getInterpolatedString } from './utils';
+import { backwardsCompatibleCreateInterpolateElement as createInterpolateElement } from './utils';
 
 const matches = [
 	{ value: 'all', label: __( 'All', 'woocommerce' ) },
@@ -149,23 +144,20 @@ class AdvancedFilters extends Component {
 		const { match } = this.state;
 		const { config } = this.props;
 
-		return createInterpolateElement(
-			getInterpolatedString( config.title ),
-			{
-				select: (
-					<SelectControl
-						className="woocommerce-filters-advanced__title-select"
-						options={ matches }
-						value={ match }
-						onChange={ this.onMatchChange }
-						aria-label={ __(
-							'Choose to apply any or all filters',
-							'woocommerce'
-						) }
-					/>
-				),
-			}
-		);
+		return createInterpolateElement( config.title, {
+			select: (
+				<SelectControl
+					className="woocommerce-filters-advanced__title-select"
+					options={ matches }
+					value={ match }
+					onChange={ this.onMatchChange }
+					aria-label={ __(
+						'Choose to apply any or all filters',
+						'woocommerce'
+					) }
+				/>
+			),
+		} );
 	}
 
 	getAvailableFilterKeys() {

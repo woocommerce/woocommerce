@@ -6,7 +6,6 @@ import { SelectControl as Select, Spinner } from '@wordpress/components';
 import classnames from 'classnames';
 import {
 	createElement,
-	createInterpolateElement,
 	Fragment,
 	useEffect,
 	useState,
@@ -19,7 +18,10 @@ import { __ } from '@wordpress/i18n';
  */
 import Search from '../search';
 import SelectControl from '../select-control';
-import { getInterpolatedString, textContent } from './utils';
+import {
+	backwardsCompatibleCreateInterpolateElement as createInterpolateElement,
+	textContent,
+} from './utils';
 
 const getScreenReaderText = ( {
 	attributeTerms,
@@ -55,11 +57,9 @@ const getScreenReaderText = ( {
 	}
 
 	const filterStr = createInterpolateElement(
-		getInterpolatedString(
-			/* eslint-disable-next-line max-len */
-			/* translators: Sentence fragment describing a product attribute match. Example: "Color Is Not Blue" - attribute = Color, equals = Is Not, value = Blue */
-			__( '<attribute/> <equals/> <value/>', 'woocommerce' )
-		),
+		/* eslint-disable-next-line max-len */
+		/* translators: Sentence fragment describing a product attribute match. Example: "Color Is Not Blue" - attribute = Color, equals = Is Not, value = Blue */
+		__( '<attribute/> <equals/> <value/>', 'woocommerce' ),
 		{
 			attribute: <Fragment>{ attributeName }</Fragment>,
 			equals: <Fragment>{ rule.label }</Fragment>,
@@ -68,14 +68,11 @@ const getScreenReaderText = ( {
 	);
 
 	return textContent(
-		createInterpolateElement(
-			getInterpolatedString( config.labels.title ),
-			{
-				filter: <Fragment>{ filterStr }</Fragment>,
-				rule: <Fragment />,
-				title: <Fragment />,
-			}
-		)
+		createInterpolateElement( config.labels.title, {
+			filter: <Fragment>{ filterStr }</Fragment>,
+			rule: <Fragment />,
+			title: <Fragment />,
+		} )
 	);
 };
 
@@ -153,115 +150,110 @@ const AttributeFilter = ( props ) => {
 					}
 				) }
 			>
-				{ createInterpolateElement(
-					getInterpolatedString( labels.title ),
-					{
-						title: <span className={ className } />,
-						rule: (
-							<Select
-								className={ classnames(
-									className,
-									'woocommerce-filters-advanced__rule'
-								) }
-								options={ rules }
-								value={ rule }
-								onChange={ ( selectedValue ) =>
-									onFilterChange( {
-										property: 'rule',
-										value: selectedValue,
-									} )
-								}
-								aria-label={ labels.rule }
-							/>
-						),
-						filter: (
-							<div
-								className={ classnames(
-									className,
-									'woocommerce-filters-advanced__attribute-fieldset'
-								) }
-							>
-								{ ! Array.isArray( value ) ||
-								! value.length ||
-								selectedAttribute.length ? (
-									<Search
-										className="woocommerce-filters-advanced__input woocommerce-search"
-										onChange={ ( [ attr ] ) => {
-											setSelectedAttribute(
-												attr ? [ attr ] : []
-											);
-											setSelectedAttributeTerm( '' );
-											onFilterChange( {
-												property: 'value',
-												value: [
-													attr && attr.key,
-												].filter( Boolean ),
-											} );
-										} }
-										type="attributes"
-										placeholder={ __(
-											'Attribute name',
-											'woocommerce'
-										) }
-										multiple={ false }
-										selected={ selectedAttribute }
-										inlineTags
-										aria-label={ __(
-											'Attribute name',
-											'woocommerce'
-										) }
-									/>
+				{ createInterpolateElement( labels.title, {
+					title: <span className={ className } />,
+					rule: (
+						<Select
+							className={ classnames(
+								className,
+								'woocommerce-filters-advanced__rule'
+							) }
+							options={ rules }
+							value={ rule }
+							onChange={ ( selectedValue ) =>
+								onFilterChange( {
+									property: 'rule',
+									value: selectedValue,
+								} )
+							}
+							aria-label={ labels.rule }
+						/>
+					),
+					filter: (
+						<div
+							className={ classnames(
+								className,
+								'woocommerce-filters-advanced__attribute-fieldset'
+							) }
+						>
+							{ ! Array.isArray( value ) ||
+							! value.length ||
+							selectedAttribute.length ? (
+								<Search
+									className="woocommerce-filters-advanced__input woocommerce-search"
+									onChange={ ( [ attr ] ) => {
+										setSelectedAttribute(
+											attr ? [ attr ] : []
+										);
+										setSelectedAttributeTerm( '' );
+										onFilterChange( {
+											property: 'value',
+											value: [ attr && attr.key ].filter(
+												Boolean
+											),
+										} );
+									} }
+									type="attributes"
+									placeholder={ __(
+										'Attribute name',
+										'woocommerce'
+									) }
+									multiple={ false }
+									selected={ selectedAttribute }
+									inlineTags
+									aria-label={ __(
+										'Attribute name',
+										'woocommerce'
+									) }
+								/>
+							) : (
+								<Spinner />
+							) }
+							{ selectedAttribute.length > 0 &&
+								( attributeTerms.length ? (
+									<Fragment>
+										<span className="woocommerce-filters-advanced__attribute-field-separator">
+											=
+										</span>
+										<SelectControl
+											className="woocommerce-filters-advanced__input woocommerce-search"
+											placeholder={ __(
+												'Attribute value',
+												'woocommerce'
+											) }
+											inlineTags
+											isSearchable
+											multiple={ false }
+											showAllOnFocus
+											options={ attributeTerms }
+											selected={ selectedAttributeTerm }
+											onChange={ ( term ) => {
+												// Clearing the input using delete/backspace causes an empty array to be passed here.
+												if (
+													typeof term !== 'string'
+												) {
+													term = '';
+												}
+												setSelectedAttributeTerm(
+													term
+												);
+												onFilterChange( {
+													property: 'value',
+													value: [
+														selectedAttribute[ 0 ]
+															.key,
+														term,
+													].filter( Boolean ),
+												} );
+											} }
+										/>
+									</Fragment>
 								) : (
 									<Spinner />
-								) }
-								{ selectedAttribute.length > 0 &&
-									( attributeTerms.length ? (
-										<Fragment>
-											<span className="woocommerce-filters-advanced__attribute-field-separator">
-												=
-											</span>
-											<SelectControl
-												className="woocommerce-filters-advanced__input woocommerce-search"
-												placeholder={ __(
-													'Attribute value',
-													'woocommerce'
-												) }
-												inlineTags
-												isSearchable
-												multiple={ false }
-												showAllOnFocus
-												options={ attributeTerms }
-												selected={
-													selectedAttributeTerm
-												}
-												onChange={ ( term ) => {
-													// Clearing the input using delete/backspace causes an empty array to be passed here.
-													if (
-														typeof term !== 'string'
-													) {
-														term = '';
-													}
-													setSelectedAttributeTerm(
-														term
-													);
-													onFilterChange( {
-														property: 'value',
-														value: [
-															selectedAttribute[ 0 ]
-																.key,
-															term,
-														].filter( Boolean ),
-													} );
-												} }
-											/>
-										</Fragment>
-									) : (
-										<Spinner />
-									) ) }
-							</div>
-						),
-					}
-				) }
+								) ) }
+						</div>
+					),
+				} ) }
 			</div>
 			{ screenReaderText && (
 				<span className="screen-reader-text">{ screenReaderText }</span>
