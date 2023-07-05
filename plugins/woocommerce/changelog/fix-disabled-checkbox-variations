@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+
+Comment:
+Fix "Used for variations" checkbox being disabled on Variable products
