@@ -171,9 +171,9 @@ class DefaultFreeExtensions {
 				'manage_url'     => 'admin.php?page=mailchimp-woocommerce',
 				'is_built_by_wc' => false,
 			),
-			'klaviyo'         => array(
+			'klaviyo'                           => array(
 				'name'           => __( 'Klaviyo', 'woocommerce' ),
-				'description'    => __('Grow and retain customers with intelligent, impactful email and SMS marketing automation and a consolidated view of customer interactions.', 'woocommerce' ),
+				'description'    => __( 'Grow and retain customers with intelligent, impactful email and SMS marketing automation and a consolidated view of customer interactions.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/klaviyo.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=klaviyo_settings',
 				'is_built_by_wc' => false,
