@@ -135,31 +135,51 @@ class WooCommerceBlockTemplate {
     }
 
     /**
-     * Sort blocks recursively by the internal block attribute order property.
+     * Handling sorting and cleaning block properties recursively.
      *
      * @param array $blocks Blocks to sort recursively.
      * @return array Sorted blocks.
      */
-    private function sort_by_order( $blocks ) {
+    private function parse_blocks( $blocks ) {
         usort( $blocks, function( $a, $b ) {
             return isset( $a[ self::ATTRS_KEY ][ self::ORDER_KEY ] ) && isset( $b[ self::ATTRS_KEY ][ self::ORDER_KEY ] ) &&
                 $a[ self::ATTRS_KEY ][ self::ORDER_KEY ] > $b[ self::ATTRS_KEY ][ self::ORDER_KEY ] ? 1 : -1;
         } );
-        foreach( $blocks as $index => $block ) {
+
+        foreach( $blocks as $index => &$block ) {
+            $block = $this->clean_block_properties( $block );
             if ( isset( $block[ self::INNER_BLOCKS_KEY ] ) ) {
-                $blocks[ $index ][ self::INNER_BLOCKS_KEY ] = $this->sort_by_order( $block[ self::INNER_BLOCKS_KEY ] );
+                $blocks[ $index ][ self::INNER_BLOCKS_KEY ] = $this->parse_blocks( $block[ self::INNER_BLOCKS_KEY ] );
             }
         }
         return $blocks;
     }
 
     /**
-     * Get the template.
+     * Remove block attributes that are unnecessary in the parsed block.
+     *
+     * @param array $block Block.
+     * @return array
+     */
+    private function clean_block_properties( $block ) {
+        $properties_to_remove = array(
+            self::ID_KEY,
+            self::ORDER_KEY,
+            self::PARENT_KEY,
+        );
+        foreach ( $properties_to_remove as $property ) {
+            unset( $block[ $property ] );
+        }
+        return $block;
+    }
+
+    /**
+     * Get the parsed template.
      *
      * @return array Parsed template.
      */
-    public function get_template() {
-        return $this->sort_by_order( $this->template );
+    public function get_parsed_template() {
+        return $this->parse_blocks( $this->template );
     }
 
 }
