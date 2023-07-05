@@ -37,7 +37,7 @@
 		"@babel/runtime": "^7.21.0",
 		"@types/node": "^16.18.18",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/data": "wp-6.0",
+		"@wordpress/data": "wp-6.1",
 		"@wordpress/eslint-plugin": "14.7.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"babel-loader": "^8.3.0",
