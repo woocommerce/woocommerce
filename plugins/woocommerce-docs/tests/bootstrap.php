@@ -1,0 +1,14 @@
+<?php
+/**
+ * PHPUnit bootstrap file
+ *
+ * @package WooCommerceDocs
+ */
+require_once __DIR__ . '/../vendor/autoload.php';
+
+require_once __DIR__ . '/../vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php';
+
+$tests_dir = getenv( 'WP_TESTS_DIR' );
+
+require_once $tests_dir . '/includes/functions.php';
+require_once $tests_dir . '/includes/bootstrap.php';

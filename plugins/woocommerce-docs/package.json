@@ -8,7 +8,9 @@
 		"build": "wp-scripts build",
 		"start": "wp-scripts start",
 		"postinstall": "composer install",
-		"generate-manifest": "ts-node ./scripts/generate-manifest.ts"
+		"generate-manifest": "ts-node ./scripts/generate-manifest.ts",
+		"test:env-setup": "wp-env start && wp-env run cli --env-cwd=wp-content/plugins/woocommerce-docs composer install",
+		"test:unit": "pnpm run test:env-setup && wp-env run tests-cli vendor/bin/phpunit --env-cwd=wp-content/plugins/woocommerce-docs"
 	},
 	"keywords": [],
 	"author": "",
@@ -27,6 +29,7 @@
 		"@types/react-dom": "^17.0.2",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/env": "^8.0.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^26.4.0",
 		"eslint": "^8.32.0",
