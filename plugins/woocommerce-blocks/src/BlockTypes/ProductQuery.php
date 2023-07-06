@@ -71,6 +71,12 @@ class ProductQuery extends AbstractBlock {
 			10,
 			2
 		);
+		add_filter(
+			'render_block',
+			array( $this, 'enqueue_styles' ),
+			10,
+			2
+		);
 		add_filter( 'rest_product_query', array( $this, 'update_rest_query' ), 10, 2 );
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 	}
@@ -116,6 +122,22 @@ class ProductQuery extends AbstractBlock {
 	public static function is_woocommerce_variation( $parsed_block ) {
 		return isset( $parsed_block['attrs']['namespace'] )
 		&& substr( $parsed_block['attrs']['namespace'], 0, 11 ) === 'woocommerce';
+	}
+
+	/**
+	 * Enqueues the variation styles when rendering the Product Query variation.
+	 *
+	 * @param string $block_content The block content.
+	 * @param array  $block         The full block, including name and attributes.
+	 *
+	 * @return string The block content.
+	 */
+	public function enqueue_styles( string $block_content, array $block ) {
+		if ( 'core/query' === $block['blockName'] && self::is_woocommerce_variation( $block ) ) {
+			wp_enqueue_style( 'wc-blocks-style-product-query' );
+		}
+
+		return $block_content;
 	}
 
 	/**
