@@ -51,7 +51,14 @@ export const findCountryOption = (
 			countryCode === location.country_short &&
 			option.label.includes( '—' )
 		) {
-			const wcRegion = option.label.split( '—' )[ 1 ].trim();
+			// WP GEO API Returns regions without accents.
+			// Remove accents from the region to compare.
+			// Málaga -> Malaga
+			const wcRegion = option.label
+				.split( '—' )[ 1 ]
+				.trim()
+				.normalize( 'NFKD' )
+				.replace( /[\u0300-\u036f]/g, '' );
 
 			// Region matches exactly with mapping.
 			if ( mappingRegion === wcRegion ) {
@@ -81,7 +88,7 @@ export const findCountryOption = (
 /**
  * Returns just the country portion of a country:state string that is delimited with a colon.
  *
- * @param  countryPossiblyWithState Country string that may or may not have a state. e.g 'US:CA', 'UG:UG312'
+ * @param countryPossiblyWithState Country string that may or may not have a state. e.g 'US:CA', 'UG:UG312'
  * @return Just the country portion of the string, or undefined if input is undefined. e.g 'US', 'UG'
  */
 export const getCountry = ( countryPossiblyWithState: string ) =>
