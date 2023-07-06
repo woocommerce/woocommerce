@@ -66,18 +66,34 @@ class WC_Widget_Cart extends WC_Widget {
 	}
 
 	/**
-	 * array_contains
-	 * Check if string contains word from array.
+	 * Check if post has a block from the provided list of blocks.
+	 *
+	 * @param string[]                $blocks     Blocks to check for.
+	 * @param int|string|WP_Post|null $post       Post to check.
 	 *
 	 * @since 1.0.0
 	 * @version 1.0.0
 	 **/
-	function array_contains( $str, array $arr ) {
-		foreach ( $arr as $a ) {
-			if ( stripos( $str, $a ) !== false ) {
-				return true;
-			}
+	function has_block_from_list( $blocks, $post = null ) {
+		if ( ! $post ) {
+			$post = get_post();
 		}
+
+		if ( ! $post ) {
+			return false;
+		}
+
+		if ( ! function_exists( 'parse_blocks' ) ) {
+			return false;
+		}
+
+		$block_from_page = parse_blocks( $post->post_content );
+		$block_name      = $block_from_page[0]['blockName'];
+
+		if ( in_array( $block_name, $blocks, true ) ) {
+			return true;
+		}
+
 		return false;
 	}
 
@@ -107,7 +123,7 @@ class WC_Widget_Cart extends WC_Widget {
 		}
 
 		global $post;
-		$is_cart_related_block = $this->array_contains( $post->post_content, self::get_blocks() );
+		$is_cart_related_block = $this->has_block_from_list( self::get_blocks(), $post );
 
 		if ( $is_cart_related_block || is_shop() || is_product() || is_product_category() ) {
 			wp_enqueue_script( 'wc-cart-fragments' );
