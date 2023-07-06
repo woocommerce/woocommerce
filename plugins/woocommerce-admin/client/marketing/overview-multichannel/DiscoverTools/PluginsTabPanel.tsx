@@ -117,7 +117,7 @@ export const PluginsTabPanel = ( {
 									installAndActivate( plugin );
 								} }
 							>
-								{ __( 'Install plugin', 'woocommerce' ) }
+								{ __( 'Install extension', 'woocommerce' ) }
 							</Button>
 						);
 					}
