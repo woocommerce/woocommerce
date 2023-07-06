@@ -131,7 +131,7 @@ class WC_Widget_Cart extends WC_Widget {
 			echo '<div class="widget_shopping_cart_content"></div>';
 		} else {
 			// Insert cart widget with the Mini-cart content.
-			echo '<div class="widget_shopping_cart_content">' . woocommerce_mini_cart() . '</div>';
+			echo '<div class="widget_shopping_cart_content">' . esc_html( woocommerce_mini_cart() ) . '</div>';
 		}
 
 		if ( $hide_if_empty ) {
