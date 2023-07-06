@@ -8,7 +8,6 @@
 		"build": "wp-scripts build",
 		"start": "wp-scripts start",
 		"postinstall": "composer install",
-		"generate-manifest": "ts-node ./scripts/generate-manifest.ts",
 		"test:env-setup": "wp-env start && wp-env run cli --env-cwd=wp-content/plugins/woocommerce-docs composer install",
 		"test:unit": "pnpm run test:env-setup && wp-env run tests-cli vendor/bin/phpunit --env-cwd=wp-content/plugins/woocommerce-docs"
 	},
