@@ -52,13 +52,3 @@ export type ReportsSelect = WPDataSelectors &
 			query: ReportStatQueryParams
 		) => ReportStatObjectInfer< T >;
 	};
-
-declare module '@wordpress/data' {
-	function dispatch(
-		key: typeof STORE_NAME
-	): DispatchFromMap< typeof actions & WPDataActions >;
-	function select( key: typeof STORE_NAME ): ReportsSelect;
-	function resolveSelect(
-		key: typeof STORE_NAME
-	): PromiseifySelectors< ReportsSelect >;
-}

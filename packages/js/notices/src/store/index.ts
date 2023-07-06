@@ -22,13 +22,3 @@ export default registerStore< State >( STORE_NAME, {
 	actions,
 	selectors,
 } );
-
-declare module '@wordpress/data' {
-	// TODO: convert action.js to TS
-	function dispatch(
-		key: typeof STORE_NAME
-	): DispatchFromMap< typeof actions >;
-	function select(
-		key: typeof STORE_NAME
-	): SelectFromMap< typeof selectors >;
-}

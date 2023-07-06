@@ -26,15 +26,3 @@ registerStore< State >( STORE_NAME, {
 } );
 
 export const PLUGINS_STORE_NAME = STORE_NAME;
-declare module '@wordpress/data' {
-	// TODO: convert action.js to TS
-	function dispatch(
-		key: typeof STORE_NAME
-	): DispatchFromMap< typeof actions & WPDataActions >;
-	function select(
-		key: typeof STORE_NAME
-	): SelectFromMap< typeof selectors > & WPDataSelectors;
-	function resolveSelect(
-		key: typeof STORE_NAME
-	): PromiseifySelectors< SelectFromMap< typeof selectors > >;
-}

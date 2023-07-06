@@ -25,16 +25,3 @@ registerStore( STORE_KEY, {
 	controls,
 	reducer,
 } );
-
-declare module '@wordpress/data' {
-	// TODO: convert action.js to TS
-	function dispatch(
-		key: typeof STORE_KEY
-	): DispatchFromMap< typeof actions >;
-	function select(
-		key: typeof STORE_KEY
-	): SelectFromMap< typeof selectors > & WPDataActions;
-	function resolveSelect(
-		key: typeof STORE_KEY
-	): PromiseifySelectors< SelectFromMap< typeof selectors > >;
-}

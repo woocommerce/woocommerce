@@ -35,13 +35,3 @@ export type ItemsSelector = Omit<
 > & {
 	getItems: getItemsType;
 } & WPDataSelectors;
-
-declare module '@wordpress/data' {
-	function dispatch(
-		key: typeof STORE_NAME
-	): DispatchFromMap< typeof actions & WPDataActions >;
-	function select( key: typeof STORE_NAME ): ItemsSelector;
-	function resolveSelect(
-		key: typeof STORE_NAME
-	): PromiseifySelectors< ItemsSelector >;
-}

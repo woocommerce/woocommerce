@@ -30,15 +30,3 @@ registerStore< State >( STORE_NAME, {
 } );
 
 export const SETTINGS_STORE_NAME = STORE_NAME;
-
-declare module '@wordpress/data' {
-	function dispatch(
-		key: typeof STORE_NAME
-	): DispatchFromMap< typeof actions > & WPDataActions;
-	function select(
-		key: typeof STORE_NAME
-	): SelectFromMap< typeof selectors > & WPDataSelectors;
-	function resolveSelect(
-		key: typeof STORE_NAME
-	): PromiseifySelectors< SelectFromMap< typeof selectors > >;
-}

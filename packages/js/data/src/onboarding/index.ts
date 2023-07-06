@@ -30,13 +30,3 @@ export const ONBOARDING_STORE_NAME = STORE_NAME;
 
 export type OnboardingSelector = SelectFromMap< typeof selectors > &
 	WPDataSelectors;
-
-declare module '@wordpress/data' {
-	function dispatch(
-		key: typeof STORE_NAME
-	): DispatchFromMap< typeof actions & WPDataActions >;
-	function select( key: typeof STORE_NAME ): OnboardingSelector;
-	function resolveSelect(
-		key: typeof STORE_NAME
-	): PromiseifySelectors< OnboardingSelector >;
-}
