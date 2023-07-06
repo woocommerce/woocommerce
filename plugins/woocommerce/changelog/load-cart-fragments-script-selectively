@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Load the "cart-fragments" JS script only on pages that would update the cart
