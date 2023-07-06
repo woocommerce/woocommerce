@@ -20,6 +20,7 @@
 		"@wordpress/env": "^8.2.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^19.2.4",
+		"copy-webpack-plugin": "^10.2.4",
 		"eslint": "^8.32.0",
 		"prettier": "npm:wp-prettier@^2.6.2",
 		"ts-loader": "^9.4.1",
@@ -45,9 +46,9 @@
 	"peerDependencies": {
 		"@types/react": "^17.0.2",
 		"@types/react-dom": "^17.0.2",
+		"@wordpress/data": "wp-6.0",
 		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
-		"@wordpress/data": "wp-6.0"
+		"react-dom": "^17.0.2"
 	},
 	"scripts": {
 		"postinstall": "composer install",
