@@ -11,6 +11,11 @@ import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { isNumber, ProductResponseItem } from '@woocommerce/types';
 
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
 type RatingProps = {
 	reviews: number;
 	rating: number;

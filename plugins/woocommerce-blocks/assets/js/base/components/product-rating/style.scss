@@ -54,9 +54,13 @@
 	}
 
 	&__container {
-		display: flex;
-		align-items: center;
-		column-gap: $gap-smaller;
+		> * {
+			vertical-align: middle;
+		}
+	}
+
+	&__reviews_count {
+		margin-left: $gap-smaller;
 	}
 
 	&__norating-container {
