@@ -3,11 +3,11 @@
  */
 import './settings.scss';
 
-interface FieldMap {
+type FieldMap = {
 	enabled: HTMLInputElement | null;
 	tone: HTMLSelectElement | null;
 	describeBusiness: HTMLInputElement | null;
-}
+};
 
 const fieldMap: FieldMap = {
 	enabled: document.getElementById(
