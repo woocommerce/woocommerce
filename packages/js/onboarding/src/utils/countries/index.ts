@@ -54,14 +54,21 @@ export const findCountryOption = (
 			// WP GEO API Returns regions without accents.
 			// Remove accents from the region to compare.
 			// Málaga -> Malaga
-			const wcRegion = option.label
-				.split( '—' )[ 1 ]
-				.trim()
-				.normalize( 'NFKD' )
-				.replace( /[\u0300-\u036f]/g, '' );
+			const wcRegion = option.label.split( '—' )[ 1 ].trim();
 
 			// Region matches exactly with mapping.
 			if ( mappingRegion === wcRegion ) {
+				return option;
+			}
+
+			if (
+				wcRegion.localeCompare( location.region || '', 'en', {
+					sensitivity: 'base',
+				} ) === 0 ||
+				wcRegion.localeCompare( location.city || '', 'en', {
+					sensitivity: 'base',
+				} ) === 0
+			) {
 				return option;
 			}
 
