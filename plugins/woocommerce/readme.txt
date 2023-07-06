@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix frontend styles not loading in the site editor. [#38769](https://github.com/woocommerce/woocommerce/pull/38769)
 * Fix - Perform feature flag change and redirection in the same request and remove feature related query args after enabling/disabling it [#38833](https://github.com/woocommerce/woocommerce/pull/38833)
 * Fix - Eliminate woocommerce_cart_item_name filter running twice on cart.php template [#38999](https://github.com/woocommerce/woocommerce/pull/38999)
 * Fix - Override /jetpack/v4/connection/data to return 404 to fix conflict with Android app flow [#38987](https://github.com/woocommerce/woocommerce/pull/38987)
