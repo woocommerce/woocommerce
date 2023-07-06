@@ -3,13 +3,7 @@
  */
 import './settings.scss';
 
-type FieldMap = {
-	enabled: HTMLInputElement | null;
-	tone: HTMLSelectElement | null;
-	describeBusiness: HTMLInputElement | null;
-};
-
-const fieldMap: FieldMap = {
+const fieldMap = {
 	enabled: document.getElementById(
 		'woo_ai_enable_checkbox'
 	) as HTMLInputElement,
