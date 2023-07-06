@@ -74,7 +74,7 @@ class WC_Widget_Cart extends WC_Widget {
 	 * @since 1.0.0
 	 * @version 1.0.0
 	 **/
-	function has_block_from_list( $blocks, $post = null ) {
+	private function has_block_from_list( $blocks, $post = null ) {
 		if ( ! $post ) {
 			$post = get_post();
 		}
