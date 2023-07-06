@@ -184,13 +184,13 @@ const program = new Command( 'changefile' )
 					'config',
 					'--global',
 					'user.email',
-					'github-actions@github.com'
+					'github-actions[bot]@users.noreply.github.com'
 				);
 				await git.raw(
 					'config',
 					'--global',
 					'user.name',
-					'github-actions'
+					'github-actions[bot]'
 				);
 			}
 
