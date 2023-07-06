@@ -1,11 +1,11 @@
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
-const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 
 module.exports = {
 	...defaultConfig,
 	entry: {
 		...defaultConfig.entry,
+		settings: './src/settings.js',
 	},
 	module: {
 		...defaultConfig.module,
@@ -31,13 +31,5 @@ module.exports = {
 				plugin.constructor.name !== 'DependencyExtractionWebpackPlugin'
 		),
 		new WooCommerceDependencyExtractionWebpackPlugin(),
-		new CopyWebpackPlugin( {
-			patterns: [
-				{
-					from: './src/settings.js',
-					to: 'settings.js',
-				},
-			],
-		} ),
 	],
 };

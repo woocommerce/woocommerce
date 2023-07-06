@@ -2394,9 +2394,6 @@ importers:
       '@wordpress/scripts':
         specifier: ^19.2.4
         version: 19.2.4(@babel/core@7.21.3)(acorn@8.8.1)(debug@4.3.4)(react-dom@17.0.2)(react@17.0.2)(typescript@4.9.5)(uglify-js@3.14.5)
-      copy-webpack-plugin:
-        specifier: ^10.2.4
-        version: 10.2.4(webpack@5.76.3)
       eslint:
         specifier: ^8.32.0
         version: 8.32.0
@@ -6368,7 +6365,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
   /@babel/plugin-syntax-class-properties@7.12.13(@babel/core@7.21.3):
@@ -6377,7 +6374,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
 
   /@babel/plugin-syntax-class-static-block@7.14.5(@babel/core@7.12.9):
     resolution: {integrity: sha512-b+YyPmr6ldyNnM6sqYeMWE+bgJcJpO6yS4QD7ymxgH34GBPNDM/THBh8iunyvKIZztiwLH4CJZ0RxTk9emgpjw==}
@@ -6862,7 +6859,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.17.8
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
     dev: true
 
   /@babel/plugin-syntax-top-level-await@7.14.5(@babel/core@7.21.3):
@@ -6872,7 +6869,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.21.3
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
 
   /@babel/plugin-syntax-typescript@7.16.7(@babel/core@7.17.8):
     resolution: {integrity: sha512-YhUIJHHGkqPgEcMYkPCKTyGUdoGKWtopIycQyjJH8OjvRgOYsXsaKehLVPScKJWAULPxMa4N1vCe6szREFlZ7A==}
@@ -19804,7 +19801,7 @@ packages:
       cosmiconfig: 7.0.1
       eslint: 8.32.0
       eslint-config-prettier: 8.5.0(eslint@8.32.0)
-      eslint-plugin-import: 2.25.4(@typescript-eslint/parser@5.54.0)(eslint@8.32.0)
+      eslint-plugin-import: 2.25.4(@typescript-eslint/parser@5.54.0)(eslint-import-resolver-typescript@2.5.0)(eslint-import-resolver-webpack@0.13.2)(eslint@8.32.0)
       eslint-plugin-jest: 27.2.1(@typescript-eslint/eslint-plugin@5.54.0)(eslint@8.32.0)(jest@27.5.1)(typescript@4.9.5)
       eslint-plugin-jsdoc: 39.9.1(eslint@8.32.0)
       eslint-plugin-jsx-a11y: 6.5.1(eslint@8.32.0)
@@ -19845,7 +19842,7 @@ packages:
       cosmiconfig: 7.0.1
       eslint: 8.32.0
       eslint-config-prettier: 8.5.0(eslint@8.32.0)
-      eslint-plugin-import: 2.25.4(@typescript-eslint/parser@5.54.0)(eslint@8.32.0)
+      eslint-plugin-import: 2.25.4(@typescript-eslint/parser@5.54.0)(eslint-import-resolver-typescript@2.5.0)(eslint-import-resolver-webpack@0.13.2)(eslint@8.32.0)
       eslint-plugin-jest: 27.2.1(@typescript-eslint/eslint-plugin@5.54.0)(eslint@8.32.0)(jest@27.5.1)(typescript@4.9.5)
       eslint-plugin-jsdoc: 39.9.1(eslint@8.32.0)
       eslint-plugin-jsx-a11y: 6.5.1(eslint@8.32.0)
@@ -19886,7 +19883,7 @@ packages:
       cosmiconfig: 7.0.1
       eslint: 8.32.0
       eslint-config-prettier: 8.5.0(eslint@8.32.0)
-      eslint-plugin-import: 2.25.4(@typescript-eslint/parser@5.54.0)(eslint@8.32.0)
+      eslint-plugin-import: 2.25.4(@typescript-eslint/parser@5.54.0)(eslint-import-resolver-typescript@2.5.0)(eslint-import-resolver-webpack@0.13.2)(eslint@8.32.0)
       eslint-plugin-jest: 27.2.1(@typescript-eslint/eslint-plugin@5.54.0)(eslint@8.32.0)(jest@29.5.0)(typescript@4.9.5)
       eslint-plugin-jsdoc: 39.9.1(eslint@8.32.0)
       eslint-plugin-jsx-a11y: 6.5.1(eslint@8.32.0)
@@ -25069,7 +25066,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.0.0
       serialize-javascript: 6.0.0
-      webpack: 5.76.3(uglify-js@3.14.5)(webpack-cli@4.9.2)
+      webpack: 5.76.3(webpack-cli@4.9.2)
     dev: true
 
   /copy-webpack-plugin@9.1.0(webpack@5.70.0):
@@ -27102,11 +27099,11 @@ packages:
       eslint-import-resolver-node: 0.3.6
       eslint-module-utils: 2.7.3(@typescript-eslint/parser@4.33.0)(eslint-import-resolver-node@0.3.6)
       has: 1.0.3
-      is-core-module: 2.10.0
+      is-core-module: 2.8.0
       is-glob: 4.0.3
-      minimatch: 3.1.2
+      minimatch: 3.0.4
       object.values: 1.1.5
-      resolve: 1.22.1
+      resolve: 1.20.0
       tsconfig-paths: 3.14.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -27138,36 +27135,6 @@ packages:
       minimatch: 3.0.4
       object.values: 1.1.5
       resolve: 1.20.0
-      tsconfig-paths: 3.14.0
-    transitivePeerDependencies:
-      - eslint-import-resolver-typescript
-      - eslint-import-resolver-webpack
-      - supports-color
-
-  /eslint-plugin-import@2.25.4(@typescript-eslint/parser@5.54.0)(eslint@8.32.0):
-    resolution: {integrity: sha512-/KJBASVFxpu0xg1kIBn9AUa8hQVnszpwgE7Ld0lKAlx7Ie87yzEzCgSkekt+le/YVhiaosO4Y14GDAOc41nfxA==}
-    engines: {node: '>=4'}
-    peerDependencies:
-      '@typescript-eslint/parser': '*'
-      eslint: ^2 || ^3 || ^4 || ^5 || ^6 || ^7.2.0 || ^8
-    peerDependenciesMeta:
-      '@typescript-eslint/parser':
-        optional: true
-    dependencies:
-      '@typescript-eslint/parser': 5.54.0(eslint@8.32.0)(typescript@4.9.5)
-      array-includes: 3.1.4
-      array.prototype.flat: 1.2.5
-      debug: 2.6.9(supports-color@6.1.0)
-      doctrine: 2.1.0
-      eslint: 8.32.0
-      eslint-import-resolver-node: 0.3.6
-      eslint-module-utils: 2.7.3(@typescript-eslint/parser@5.54.0)(eslint-import-resolver-node@0.3.6)(eslint-import-resolver-typescript@2.5.0)(eslint-import-resolver-webpack@0.13.2)
-      has: 1.0.3
-      is-core-module: 2.10.0
-      is-glob: 4.0.3
-      minimatch: 3.1.2
-      object.values: 1.1.5
-      resolve: 1.22.1
       tsconfig-paths: 3.14.0
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -28840,7 +28807,7 @@ packages:
       vue-template-compiler:
         optional: true
     dependencies:
-      '@babel/code-frame': 7.18.6
+      '@babel/code-frame': 7.16.7
       '@types/json-schema': 7.0.9
       chalk: 4.1.2
       chokidar: 3.5.3
@@ -28852,7 +28819,7 @@ packages:
       memfs: 3.3.0
       minimatch: 3.1.2
       schema-utils: 2.7.0
-      semver: 7.5.0
+      semver: 7.3.8
       tapable: 1.1.3
       typescript: 4.9.5
       webpack: 4.46.0(webpack-cli@3.3.12)
