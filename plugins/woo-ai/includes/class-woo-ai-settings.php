@@ -110,11 +110,11 @@ class Woo_AI_Settings {
 
 		$tone_desc = array(
 			'informal'     => __( 'Relaxed and friendly, as if you were having a conversation with a friend.', 'woocommerce' ),
-			'humorous'     => __( 'Humorous, with a touch of irony.', 'woocommerce' ),
-			'neutral'      => __( 'Neutral, with no particular tone of voice.', 'woocommerce' ),
-			'youthful'     => __( 'Youthful, with a touch of playfulness.', 'woocommerce' ),
-			'formal'       => __( 'Formal, with a touch of elegance.', 'woocommerce' ),
-			'motivational' => __( 'Motivational, with a touch of inspiration.', 'woocommerce' ),
+			'humorous'     => __( 'Engage customers with a light-hearted and fun communication style.', 'woocommerce' ),
+			'neutral'      => __( 'A balanced and impartial tone that uses casual expressions without slang.', 'woocommerce' ),
+			'youthful'     => __( 'Bring energy and enthusiasm to your store with a friendly and cheeky tone.', 'woocommerce' ),
+			'formal'       => __( 'Direct yet respectful, a formal tone sounds serious and professional.', 'woocommerce' ),
+			'motivational' => __( 'Passionate and inspiring, engage users with this upbeat tone.', 'woocommerce' ),
 		);
 
 		$markup_str = array_reduce(
