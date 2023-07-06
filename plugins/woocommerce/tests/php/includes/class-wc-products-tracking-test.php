@@ -54,6 +54,7 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_products_view(): void {
 		$_GET['post_type'] = 'product';
+		// phpcs:disable WordPress.NamingConventions.ValidHookName.UseUnderscores
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'load-edit.php' );
 		$this->assertRecordedTracksEvent( 'wcadmin_products_view' );
@@ -65,7 +66,7 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 	public function test_products_search(): void {
 		$_GET['post_type'] = 'product';
 		$_GET['s']         = 'test';
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		/* phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		do_action( 'load-edit.php' );
 		$this->assertRecordedTracksEvent( 'wcadmin_products_search' );
 	}
