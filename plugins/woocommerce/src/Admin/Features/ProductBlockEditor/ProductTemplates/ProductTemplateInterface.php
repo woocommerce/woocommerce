@@ -56,11 +56,4 @@ interface ProductTemplateInterface {
 	 */
 	public function get_description();
 
-	/**
-	 * Get the template layout.
-	 *
-	 * @return array Array of blocks
-	 */
-	public function get_template();
-
 }

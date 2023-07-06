@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTempla
 /**
  * Variable product template.
  */
-class VariableProductTemplate implements ProductTemplateInterface {
+class VariableProductTemplate extends AbstractProductTemplate implements ProductTemplateInterface {
 
     /**
      * Setup the template.

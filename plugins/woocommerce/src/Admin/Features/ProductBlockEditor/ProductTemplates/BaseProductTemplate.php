@@ -37,20 +37,16 @@ trait BaseProductTemplate {
         $this->add_field(
             array(
                 'parent' => self::GENERAL_GROUP,
-                'block'  => array(
-                    'blockName' => 'woocommerce/product-name-field',
-                    'attrs'     => array(
-                        'name' => 'Product name',
-                    ),
+                'blockName' => 'woocommerce/product-name-field',
+                'attrs'     => array(
+                    'name' => 'Product name',
                 ),
             ),
         );
         $this->add_field(
             array(
                 'parent' => self::GENERAL_GROUP,
-                'block'  => array(
-                    'blockName' => 'woocommerce/product-summary-field',
-                ),
+                'blockName' => 'woocommerce/product-summary-field',
             ),
         );
     }

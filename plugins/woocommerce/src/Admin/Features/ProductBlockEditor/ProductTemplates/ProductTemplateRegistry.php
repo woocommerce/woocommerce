@@ -117,7 +117,7 @@ final class ProductTemplateRegistry {
 		$template                 = new \WP_Block_Template();
 		$template->id             = self::PLUGIN_SLUG . '//product-editor_' . $product_template->get_slug();
 		$template->theme          = self::PLUGIN_SLUG;
-		$template->content        = $product_template->get_template();
+		$template->content        = $product_template->get_parsed_template();
 		$template->source         = 'plugin';
 		$template->slug           = $product_template->get_slug();
 		$template->type           = self::TEMPLATE_TYPE;
