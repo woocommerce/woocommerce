@@ -117,6 +117,6 @@
 		"ie 9"
 	],
 	"dependencies": {
-		"@wordpress/browserslist-config": "wp-6.0"
+		"@wordpress/browserslist-config": "wp-6.2"
 	}
 }
