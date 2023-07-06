@@ -87,13 +87,13 @@ describe( `${ block.name } Block`, () => {
 		} );
 
 		it( 'can hide product count', async () => {
-			await expect( page ).toMatchElement(
+			await expect( page ).not.toMatchElement(
 				'.wc-filter-element-label-list-count'
 			);
 			await expect( page ).toClick( 'label', {
 				text: 'Display product count',
 			} );
-			await expect( page ).not.toMatchElement(
+			await expect( page ).toMatchElement(
 				'.wc-filter-element-label-list-count'
 			);
 			// reset
