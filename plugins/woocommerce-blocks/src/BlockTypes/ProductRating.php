@@ -86,7 +86,7 @@ class ProductRating extends AbstractBlock {
 	 * @return null
 	 */
 	protected function get_block_type_style() {
-		return null;
+		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
 	}
 
 	/**
