@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * PHPUnit bootstrap file.
+ *
+ * @package WooCommerceDocs
+ */
+
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php';
 
