@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class WC_Tracks_Test.
+ * Class WC_Orders_Tracking_Test.
  */
 class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 
