@@ -21,22 +21,26 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 		if ( isset( $GLOBALS['current_screen'] ) ) {
 			$this->current_screen_backup = $GLOBALS['current_screen'];
 		}
-		$GLOBALS['current_screen'] = new CurrentScreenMock();
+		$GLOBALS['current_screen'] = new CurrentScreenMock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$orders_tracking           = new WC_Orders_Tracking();
 		$orders_tracking->init();
 		parent::setUp();
 	}
-
+	/**
+	 * Teardown test
+	 *
+	 * @return void
+	 */
 	public function tearDown(): void {
 		update_option( 'woocommerce_allow_tracking', 'no' );
 		if ( $this->current_screen_backup ) {
-			$GLOBALS['current_screen'] = $this->current_screen_backup;
+			$GLOBALS['current_screen'] = $this->current_screen_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 		parent::tearDown();
 	}
 
 	/**
-	 * Test if wcadmin_orders_view is called on load-edit.php
+	 * Test wcadmin_orders_edit_status_change Tracks event
 	 */
 	public function test_orders_view_search() {
 		$order = wc_create_order();
@@ -47,7 +51,7 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test if wcadmin_orders_view is called on load-edit.php
+	 * Test wcadmin_orders_view Tracks event
 	 */
 	public function test_orders_view() {
 		$_GET['post_type'] = 'shop_order';
@@ -57,7 +61,7 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test if wcadmin_orders_view_search is called on woocommerce_shop_order_search_results
+	 * Test wcadmin_orders_view_search Tracks event
 	 */
 	public function test_orders_search() {
 		$GLOBALS['current_screen']->id = 'edit-shop_order';
