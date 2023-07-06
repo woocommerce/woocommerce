@@ -5,7 +5,6 @@ import { octokitWithAuth, graphqlWithAuth } from '../../core/github/api';
 import { Logger } from '../../core/logger';
 import { requestPaginatedData, PaginatedDataTotals } from './github';
 import config from '../config';
-import { get } from 'http';
 
 /**
  * Get all workflows from the WooCommerce repository.

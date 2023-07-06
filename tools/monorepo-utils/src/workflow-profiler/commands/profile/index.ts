@@ -10,7 +10,6 @@ import {
 	getWorkflowRunData,
 	getWorkflowData,
 	getRunJobData,
-	getCompiledJobData,
 } from '../../lib/data';
 import {
 	logWorkflowRunResults,
