@@ -606,7 +606,7 @@
 
 // Override WP Core style where it applies padding-top: 46px
 // This style fixes devices with width between 601px and 782px (iPad and iPad Mini)
-@media screen and (min-width: 601px) and (max-width: 782px)  {
+@media screen and (min-width: 601px) and (max-width: 782px) {
 	html.wp-toolbar {
 		padding-top: 32px !important;
 	}
