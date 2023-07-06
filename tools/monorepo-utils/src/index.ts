@@ -10,6 +10,7 @@ import chalk from 'chalk';
  */
 import CodeFreeze from './code-freeze/commands';
 import Slack from './slack/commands/slack';
+import Manifest from './md-docs/commands/manifest';
 import Changefile from './changefile';
 import WorkflowProfiler from './workflow-profiler/commands';
 import { Logger } from './core/logger';
@@ -29,7 +30,8 @@ const program = new Command()
 	.addCommand( CodeFreeze )
 	.addCommand( Slack )
 	.addCommand( Changefile )
-	.addCommand( WorkflowProfiler );
+	.addCommand( WorkflowProfiler )
+	.addCommand( Manifest );
 
 program.exitOverride();
 
