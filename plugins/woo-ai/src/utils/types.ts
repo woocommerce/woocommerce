@@ -3,19 +3,6 @@ export type Attribute = {
 	value: string;
 };
 
-export type ProductData = {
-	product_id: number | null;
-	name: string;
-	description: string;
-	categories: string[];
-	tags: string[];
-	attributes: Attribute[];
-	product_type: string;
-	is_downloadable: boolean;
-	is_virtual: boolean;
-	publishing_status: string;
-};
-
 export type ProductDataSuggestion = {
 	reason: string;
 	content: string;

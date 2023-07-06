@@ -6,12 +6,12 @@ import { useRef, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { askQuestion } from '../utils';
+import { getCompletion } from '../utils';
 
 type StopReason = 'abort' | 'finished' | 'error' | 'interrupted';
 
 type UseCompletionProps = {
-	onStreamMessage: ( message: string, chunk: string ) => void;
+	onStreamMessage?: ( message: string, chunk: string ) => void;
 	onCompletionFinished?: (
 		reason: StopReason,
 		previousContent: string
@@ -20,7 +20,7 @@ type UseCompletionProps = {
 };
 
 export const useCompletion = ( {
-	onStreamMessage,
+	onStreamMessage = () => {},
 	onCompletionFinished = () => {},
 	onStreamError = () => {},
 }: UseCompletionProps ) => {
@@ -56,7 +56,7 @@ export const useCompletion = ( {
 		onStreamError( error );
 	};
 
-	const requestCompletion = async ( question: string ) => {
+	const requestCompletion = async ( prompt: string ) => {
 		if ( completionSource.current ) {
 			stopCompletion( 'interrupted' );
 		}
@@ -65,7 +65,7 @@ export const useCompletion = ( {
 		let suggestionsSource;
 
 		try {
-			suggestionsSource = await askQuestion( question );
+			suggestionsSource = await getCompletion( prompt );
 		} catch ( e ) {
 			// eslint-disable-next-line no-console
 			console.debug( 'Completion connection error encountered', e );
