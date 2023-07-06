@@ -108,6 +108,7 @@ class Woo_AI_Settings {
 	 */
 	public function get_woo_ai_settings() {
 
+		// These are made available in the DOM and actually toggled client-side.
 		$tone_desc = array(
 			'informal'     => __( 'Relaxed and friendly, as if you were having a conversation with a friend.', 'woocommerce' ),
 			'humorous'     => __( 'Engage customers with a light-hearted and fun communication style.', 'woocommerce' ),
