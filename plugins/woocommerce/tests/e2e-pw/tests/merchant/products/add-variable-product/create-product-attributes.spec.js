@@ -9,6 +9,20 @@ const {
 
 let productId;
 
+/**
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+const step_goToAttributesTab = async ( page ) => {
+	await test.step( 'Go to the "Attributes" tab.', async () => {
+		const attributesTab = page
+			.locator( '.attribute_tab' )
+			.getByRole( 'link', { name: 'Attributes' } );
+
+		await attributesTab.click();
+	} );
+};
+
 test.describe( 'Add product attributes', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -23,109 +37,130 @@ test.describe( 'Add product attributes', () => {
 	} );
 
 	test( 'can add custom product attributes', async ( { page } ) => {
-		await test.step(
-			`Open "Edit product" page of product id ${ productId }`,
-			async () => {
-				await page.goto(
-					`/wp-admin/post.php?post=${ productId }&action=edit`
-				);
-			}
+		const textbox_attributeName =
+			page.getByPlaceholder( 'f.e. size or color' );
+		const textbox_attributeValues = page.getByPlaceholder(
+			'Enter options for customers to choose from'
 		);
+		const checkbox_visible = page
+			.getByText( 'Visible on the product page' )
+			.getByRole( 'checkbox' );
+		const checkbox_variations = page
+			.getByText( 'Used for variations' )
+			.getByRole( 'checkbox' );
 
-		await test.step( 'Go to the "Attributes" tab.', async () => {
-			const attributesTab = page
-				.locator( '.attribute_tab' )
-				.getByRole( 'link', { name: 'Attributes' } );
-
-			await attributesTab.click();
+		await test.step( `Open "Edit product" page of product id ${ productId }`, async () => {
+			await page.goto(
+				`/wp-admin/post.php?post=${ productId }&action=edit`
+			);
 		} );
 
-		await test.step(
-			`Add ${ productAttributes.length } attributes.`,
-			async () => {
-				for ( let i = 0; i < productAttributes.length; i++ ) {
-					const attributeName = productAttributes[ i ].name;
-					const attributeValues = productAttributes[ i ].options.join(
-						'|'
-					);
+		await step_goToAttributesTab( page );
 
-					if ( i > 0 ) {
-						await test.step( "Click 'Add new'.", async () => {
-							await page
-								.locator( '#product_attributes .toolbar-top' )
-								.getByRole( 'button', { name: 'Add new' } )
-								.click();
-						} );
-					}
+		for ( let i = 0; i < productAttributes.length; i++ ) {
+			const attribute = productAttributes[ i ];
+			const attributeName = attribute.name;
+			const attributeValues = attribute.options.join( ' | ' );
 
-					await test.step(
-						`Add the attribute "${ attributeName }" with values "${ attributeValues }"`,
-						async () => {
-							await test.step(
-								`Type "${ attributeName }" in the "Attribute name" input field.`,
-								async () => {
-									await page
-										.getByPlaceholder(
-											'f.e. size or color'
-										)
-										.nth( i )
-										.type( attributeName );
-								}
-							);
+			if ( i > 0 ) {
+				await test.step( "Click 'Add new'.", async () => {
+					await page
+						.getByRole( 'button', { name: 'Add new' } )
+						.click();
 
-							await test.step(
-								`Type the attribute values "${ attributeValues }".`,
-								async () => {
-									await page
-										.getByPlaceholder(
-											'Enter options for customers to choose from'
-										)
-										.nth( i )
-										.type( attributeValues );
-								}
-							);
-
-							await test.step(
-								'Click "Save attributes".',
-								async () => {
-									await page
-										.getByRole( 'button', {
-											name: 'Save attributes',
-										} )
-										.click( { clickCount: 3 } );
-								}
-							);
-
-							await test.step(
-								"Wait for the tour's dismissal to be saved",
-								async () => {
-									await page.waitForResponse(
-										( response ) =>
-											response
-												.url()
-												.includes( '/post.php' ) &&
-											response.status() === 200
-									);
-								}
-							);
-
-							await test.step(
-								`Expect the attribute "${ attributeName }" to be saved`,
-								async () => {
-									const savedAttributeHeading = page.getByRole(
-										'heading',
-										{ name: attributeName }
-									);
-
-									await expect(
-										savedAttributeHeading
-									).toBeVisible();
-								}
-							);
-						}
-					);
-				}
+					await page
+						.getByRole( 'heading', {
+							name: 'New attribute',
+						} )
+						.waitFor();
+				} );
 			}
-		);
+
+			await test.step( `Add the attribute "${ attributeName }" with values "${ attributeValues }"`, async () => {
+				await test.step( `Type "${ attributeName }" in the "Attribute name" input field.`, async () => {
+					await textbox_attributeName.last().type( attributeName );
+				} );
+
+				await test.step( `Type the attribute values "${ attributeValues }".`, async () => {
+					await textbox_attributeValues
+						.last()
+						.type( attributeValues );
+				} );
+
+				await test.step( `Expect "Visible on the product page" checkbox to be checked by default`, async () => {
+					await expect( checkbox_visible.last() ).toBeChecked();
+				} );
+
+				await test.step( `Expect "Used for variations" checkbox to be checked by default`, async () => {
+					await expect( checkbox_variations.last() ).toBeChecked();
+				} );
+
+				await test.step( 'Click "Save attributes".', async () => {
+					await page
+						.getByRole( 'button', {
+							name: 'Save attributes',
+						} )
+						.click();
+				} );
+
+				await test.step( "Wait for the tour's dismissal to be saved", async () => {
+					await page.waitForResponse(
+						( response ) =>
+							response.url().includes( '/post.php' ) &&
+							response.status() === 200
+					);
+				} );
+
+				await test.step( `Wait for the loading overlay to disappear.`, async () => {
+					await expect(
+						page.locator( '.blockOverlay' )
+					).not.toBeVisible();
+				} );
+			} );
+		}
+
+		await test.step( `Click "Update".`, async () => {
+			// "Update" triggers a lot of requests. Wait for the final one to complete before proceeding.
+			// Otherwise, succeeding steps would be flaky.
+			const finalRequestResolution = page.waitForResponse( ( response ) =>
+				response
+					.url()
+					.includes(
+						'options=woocommerce_task_list_reminder_bar_hidden'
+					)
+			);
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+
+			const response = await finalRequestResolution;
+			expect( response.ok() ).toBeTruthy();
+		} );
+
+		await step_goToAttributesTab( page );
+
+		for ( let j = 0; j < productAttributes.length; j++ ) {
+			const attribute = productAttributes[ j ];
+			const attributeName = attribute.name;
+			const attributeValues = attribute.options.join( ' | ' );
+
+			await test.step( `Expect "${ attributeName }" to appear on the list of saved attributes, and expand it.`, async () => {
+				const heading_attributeName = page.getByRole( 'heading', {
+					name: attributeName,
+				} );
+
+				await expect( heading_attributeName ).toBeVisible();
+				await heading_attributeName.click();
+			} );
+
+			await test.step( `Expect its details to be saved correctly`, async () => {
+				await expect( textbox_attributeName.nth( j ) ).toHaveValue(
+					attributeName
+				);
+				await expect( textbox_attributeValues.nth( j ) ).toHaveValue(
+					attributeValues
+				);
+				await expect( checkbox_visible.nth( j ) ).toBeChecked();
+				await expect( checkbox_variations.nth( j ) ).toBeChecked();
+			} );
+		}
 	} );
 } );
