@@ -136,7 +136,7 @@ class FeaturesController {
 			),
 		);
 
-		$this->legacy_feature_ids = array( 'analytics', 'new_navigation', 'product_block_editor' );
+		$this->legacy_feature_ids = array( 'analytics', 'marketplace', 'new_navigation', 'product_block_editor' );
 
 		$this->init_features( $features );
 
