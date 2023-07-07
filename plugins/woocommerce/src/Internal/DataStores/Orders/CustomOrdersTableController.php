@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
-use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -118,7 +117,7 @@ class CustomOrdersTableController {
 		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_initiate_regeneration_entry_to_tools_array' ), 999, 1 );
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'pre_update_option', array( $this, 'process_pre_update_option' ), 999, 3 );
-		self::add_action( 'woocommerce_update_options_advanced_custom_data_stores', array( $this, 'process_options_updated' ), 10, 0 );
+		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'process_options_updated' ), 10, 1 );
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
 		self::add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_enabled_changed' ), 10, 2 );
 		self::add_action( 'woocommerce_feature_setting', array( $this, 'get_hpos_feature_setting' ), 10, 2 );
@@ -356,8 +355,13 @@ class CustomOrdersTableController {
 
 	/**
 	 * Handler for the all settings updated hook.
+	 *
+	 * @param string $feature_id Feature ID.
 	 */
-	private function process_options_updated() {
+	private function process_options_updated( string $feature_id ) {
+		if ( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION !== $feature_id ) {
+			return;
+		}
 		$data_sync_is_enabled = $this->data_synchronizer->data_sync_is_enabled();
 
 		// Enabling/disabling the sync implies starting/stopping it too, if needed.
@@ -454,10 +458,10 @@ class CustomOrdersTableController {
 	 */
 	private function get_hpos_setting_for_feature( $sync_status ) {
 		$hpos_enabled            = $this->custom_orders_table_usage_is_enabled();
-		$plugin_info             = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables' );
+		$plugin_info             = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
 		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
 		$sync_complete           = 0 === $sync_status['current_pending_count'];
-		$can_hpos_enabled        = count( array_merge( $plugin_info['compatible'], $plugin_info['incompatible'] ) ) === 0;
+		$can_hpos_enabled        = count( array_merge( $plugin_info['uncertain'], $plugin_info['incompatible'] ) ) === 0;
 
 		return array(
 			'id'          => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
@@ -468,7 +472,7 @@ class CustomOrdersTableController {
 				'yes' => __( 'High performance order storage (new)', 'woocommerce' ),
 			),
 			'value'       => $hpos_enabled ? 'yes' : 'no',
-			'disabled'    => $can_hpos_enabled && $sync_complete ? array() : array( 'yes' ),
+			'disabled'    => $can_hpos_enabled && $sync_complete ? array() : array( 'yes', 'no' ),
 			'desc'        => $plugin_incompat_warning,
 			'desc_at_end' => true,
 		);

@@ -28,7 +28,6 @@ class DataSynchronizer implements BatchProcessorInterface {
 
 	public const ORDERS_DATA_SYNC_ENABLED_OPTION           = 'woocommerce_custom_orders_table_data_sync_enabled';
 	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_initial_orders_pending_sync_count';
-	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION   = 'woocommerce_orders_sync_finished';
 	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
 
 	public const DELETED_RECORD_META_KEY        = '_deleted_from';

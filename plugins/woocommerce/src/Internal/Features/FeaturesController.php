@@ -9,6 +9,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Admin\Features\NewProductManagementExperience;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -472,7 +473,15 @@ class FeaturesController {
 		$matches = array();
 		$success = preg_match( '/^woocommerce_feature_([a-zA-Z0-9_]+)_enabled$/', $option, $matches );
 
-		if ( ! $success && Analytics::TOGGLE_OPTION_NAME !== $option && Init::TOGGLE_OPTION_NAME !== $option && NewProductManagementExperience::TOGGLE_OPTION_NAME !== $option ) {
+		$known_features = array(
+			Analytics::TOGGLE_OPTION_NAME,
+			Init::TOGGLE_OPTION_NAME,
+			NewProductManagementExperience::TOGGLE_OPTION_NAME,
+			DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+		);
+
+		if ( ! $success && ! in_array( $option, $known_features, true ) ) {
 			return;
 		}
 
@@ -484,6 +493,8 @@ class FeaturesController {
 			$feature_id = 'analytics';
 		} elseif ( Init::TOGGLE_OPTION_NAME === $option ) {
 			$feature_id = 'new_navigation';
+		} elseif ( in_array( $option, $known_features, true ) ) {
+			$feature_id = $option;
 		} else {
 			$feature_id = $matches[1];
 		}
