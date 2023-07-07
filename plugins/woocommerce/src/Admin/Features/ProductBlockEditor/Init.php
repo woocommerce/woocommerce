@@ -720,6 +720,11 @@ class Init {
 		// not be the product edit page (it mostly likely isn't).
 		if ( PageController::is_admin_page() ) {
 			$screen->is_block_editor( true );
+
+			wp_add_inline_script(
+				'wp-blocks',
+				'wp.blocks && wp.blocks.unstable__bootstrapServerSideBlockDefinitions && wp.blocks.unstable__bootstrapServerSideBlockDefinitions(' . wp_json_encode( get_block_editor_server_block_settings() ) . ');'
+			);
 		}
 	}
 }

@@ -11,12 +11,7 @@ import {
 	Dropdown,
 	SelectControl,
 } from '@wordpress/components';
-import {
-	createElement,
-	createInterpolateElement,
-	Component,
-	createRef,
-} from '@wordpress/element';
+import { createElement, Component, createRef } from '@wordpress/element';
 import { partial, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import AddOutlineIcon from 'gridicons/dist/add-outline';
@@ -34,6 +29,7 @@ import {
 import Link from '../link';
 import AdvancedFilterItem from './item';
 import { Text } from '../experimental';
+import { backwardsCompatibleCreateInterpolateElement as createInterpolateElement } from './utils';
 
 const matches = [
 	{ value: 'all', label: __( 'All', 'woocommerce' ) },
@@ -147,6 +143,7 @@ class AdvancedFilters extends Component {
 	getTitle() {
 		const { match } = this.state;
 		const { config } = this.props;
+
 		return createInterpolateElement( config.title, {
 			select: (
 				<SelectControl
