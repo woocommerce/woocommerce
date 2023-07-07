@@ -4,7 +4,7 @@
 import { Attribute } from './types';
 import { getTinyContent } from '.';
 
-export const getCategories = () => {
+export const getCategories = (): string[] => {
 	return Array.from(
 		document.querySelectorAll(
 			'#taxonomy-product_cat input[name="tax_input[product_cat][]"]'
@@ -14,7 +14,7 @@ export const getCategories = () => {
 			( item ) =>
 				window.getComputedStyle( item, ':before' ).content !== 'none'
 		)
-		.map( ( item ) => item.nextSibling?.nodeValue?.trim() )
+		.map( ( item ) => item.nextSibling?.nodeValue?.trim() || '' )
 		.filter( Boolean );
 };
 
@@ -33,17 +33,26 @@ export const getTags = (): string[] => {
 
 export const getAttributes = (): Attribute[] => {
 	const attributeContainerEls = Array.from(
-		document.querySelectorAll( '.woocommerce_attribute_data' )
+		document.querySelectorAll( '.woocommerce_attribute' )
 	);
 
-	return attributeContainerEls.reduce( ( acc, item ) => {
+	return attributeContainerEls.reduce( ( acc, container ) => {
 		const name = (
-			item.querySelector( 'input.attribute_name' ) as HTMLInputElement
-		 )?.value;
-		const value = item.querySelector( 'textarea' )?.textContent;
+			container.querySelector( 'h3 > .attribute_name' ) as HTMLElement
+		 )?.textContent?.trim();
+
+		const valueSelectElement = container.querySelector(
+			'.woocommerce_attribute_data select.attribute_values'
+		) as HTMLSelectElement;
+		const value = Array.from( valueSelectElement.selectedOptions )
+			.map( ( option ) => option.text.trim() )
+			.filter( Boolean )
+			.join( ', ' );
+
 		if ( name && value ) {
 			acc.push( { name, value } );
 		}
+
 		return acc;
 	}, [] as Attribute[] );
 };
