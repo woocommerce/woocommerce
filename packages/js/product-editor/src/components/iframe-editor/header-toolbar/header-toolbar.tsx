@@ -32,6 +32,7 @@ import { EditorContext } from '../context';
 import EditorHistoryRedo from './editor-history-redo';
 import EditorHistoryUndo from './editor-history-undo';
 import { DocumentOverview } from './document-overview';
+import { ShowBlockInspectorPanel } from './show-block-inspector-panel';
 
 export function HeaderToolbar() {
 	const { isInserterOpened, setIsInserterOpened } =
@@ -118,6 +119,9 @@ export function HeaderToolbar() {
 						<ToolbarItem as={ DocumentOverview } />
 					</>
 				) }
+			</div>
+			<div className="woocommerce-iframe-editor__header-toolbar-right">
+				<ToolbarItem as={ ShowBlockInspectorPanel } />
 			</div>
 		</NavigableToolbar>
 	);

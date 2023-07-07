@@ -54,8 +54,8 @@ test.describe( 'Merchant > Order Action emails received', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		await api.delete( `orders/${ orderId }`, { force: true } );
-		await api.delete( `orders/${ newOrderId }`, { force: true } );
+
+		await api.post( `orders/batch`, { delete: [ orderId, newOrderId ] } );
 	} );
 
 	test( 'can receive new order email', async ( { page, baseURL } ) => {
@@ -104,12 +104,16 @@ test.describe( 'Merchant > Order Action emails received', () => {
 				customerBilling.email
 			) }`
 		);
-		await expect( page.locator( 'td.column-receiver' ) ).toContainText(
-			admin.email
-		);
-		await expect( page.locator( 'td.column-subject' ) ).toContainText(
-			`[${ storeName }]: New order #${ orderId }`
-		);
+
+		// Expect row containing the admin email and the correct subject to be listed.
+		await expect(
+			page
+				.getByRole( 'row' )
+				.filter( { hasText: admin.email } )
+				.filter( {
+					hasText: `[${ storeName }]: New order #${ orderId }`,
+				} )
+		).toBeVisible();
 	} );
 
 	test( 'can email invoice/order details to customer', async ( { page } ) => {
@@ -127,11 +131,15 @@ test.describe( 'Merchant > Order Action emails received', () => {
 				customerBilling.email
 			) }`
 		);
-		await expect( page.locator( 'td.column-receiver' ) ).toContainText(
-			customerBilling.email
-		);
-		await expect( page.locator( 'td.column-subject' ) ).toContainText(
-			`Invoice for order #${ orderId } on ${ storeName }`
-		);
+
+		// Expect row containing the billing email and the correct subject to be listed.
+		await expect(
+			page
+				.getByRole( 'row' )
+				.filter( { hasText: customerBilling.email } )
+				.filter( {
+					hasText: `Invoice for order #${ orderId } on ${ storeName }`,
+				} )
+		).toBeVisible();
 	} );
 } );

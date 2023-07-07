@@ -72,6 +72,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						if ( ! isset( $args['has_rtl'] ) ) {
 							wp_style_add_data( $handle, 'rtl', 'replace' );
 						}
+
+						wp_enqueue_style( $handle );
 					}
 				}
 			}

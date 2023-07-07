@@ -4,6 +4,7 @@
 import { Command } from '@commander-js/extra-typings';
 import figlet from 'figlet';
 import chalk from 'chalk';
+import dotenv from 'dotenv';
 
 /**
  * Internal dependencies
@@ -14,6 +15,8 @@ import Changefile from './changefile';
 import WorkflowProfiler from './workflow-profiler/commands';
 import { Logger } from './core/logger';
 import { isGithubCI } from './core/environment';
+
+dotenv.config();
 
 if ( ! isGithubCI() ) {
 	Logger.notice(

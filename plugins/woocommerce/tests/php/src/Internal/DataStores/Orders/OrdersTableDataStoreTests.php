@@ -2146,4 +2146,84 @@ class OrdersTableDataStoreTests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 'wc-completed', $db_row['data']['status'] );
 	}
+
+	/**
+	 * @testWith [true]
+	 *           [false]
+	 * @testDox An exception thrown while populating the properties of an order is captured and logged as a warning.
+	 *
+	 * @param bool $orders_authoritative Whether the orders table is authoritative or not.
+	 */
+	public function test_error_when_setting_order_property_is_captured_and_logged( bool $orders_authoritative ) {
+		global $wpdb;
+
+		$this->toggle_cot( $orders_authoritative );
+		$this->disable_cot_sync();
+
+		// phpcs:disable Squiz.Commenting
+		$fake_logger = new class() {
+			public $warnings = array();
+
+			public function warning( $message, $data ) {
+				$this->warnings[] = array(
+					'message' => $message,
+					'data'    => $data,
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_logger' => function() use ( $fake_logger ) {
+					return $fake_logger;
+				},
+			)
+		);
+
+		$order = new WC_Order();
+		$order->save();
+		$product_id = $order->add_product( WC_Helper_Product::create_simple_product(), 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$product_id => array(
+						'id'           => $product_id,
+						'qty'          => 1,
+						'refund_total' => 1,
+					),
+				),
+			)
+		);
+		$refund->save();
+
+		$this->assertEquals( $order->get_id(), $refund->get_parent_id() );
+
+		if ( $orders_authoritative ) {
+			$wpdb->update(
+				$this->sut::get_orders_table_name(),
+				array( 'parent_order_id' => 999999 ),
+				array( 'id' => $refund->get_id() ),
+				array( 'parent_order_id' => '%d' ),
+				array( 'id' => '%d' ),
+			);
+		} else {
+			$wpdb->update(
+				$wpdb->posts,
+				array( 'post_parent' => 999999 ),
+				array( 'ID' => $refund->get_id() ),
+				array( 'post_parent' => '%d' ),
+				array( 'ID' => '%d' ),
+			);
+		}
+
+		$refund = wc_get_order( $refund->get_id() );
+
+		$this->assertEquals( 0, $refund->get_parent_id() );
+		$this->assertEquals( "Error when setting property 'parent_id' for order {$refund->get_id()}: Invalid parent ID", current( $fake_logger->warnings )['message'] );
+	}
 }

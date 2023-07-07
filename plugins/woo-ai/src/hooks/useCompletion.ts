@@ -56,7 +56,7 @@ export const useCompletion = ( {
 		onStreamError( error );
 	};
 
-	const requestCompletion = async ( question: string ) => {
+	const requestCompletion = async ( prompt: string ) => {
 		if ( completionSource.current ) {
 			stopCompletion( 'interrupted' );
 		}
@@ -65,7 +65,7 @@ export const useCompletion = ( {
 		let suggestionsSource;
 
 		try {
-			suggestionsSource = await getCompletion( question );
+			suggestionsSource = await getCompletion( prompt );
 		} catch ( e ) {
 			// eslint-disable-next-line no-console
 			console.debug( 'Completion connection error encountered', e );
