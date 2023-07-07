@@ -18,5 +18,6 @@ export { init as initShippingDimensions } from './shipping-dimensions';
 export { init as initSummary } from './summary';
 export { init as initTab } from './tab';
 export { init as initInventoryQuantity } from './inventory-quantity';
+export { init as initTitle } from './title';
 export { init as initToggle } from './toggle';
 export { init as attributesInit } from './attributes';

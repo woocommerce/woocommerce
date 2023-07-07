@@ -257,6 +257,9 @@ class Init {
 							),
 							array(
 								array(
+									'woocommerce/product-title-contextual',
+								),
+								array(
 									'woocommerce/product-name-field',
 									array(
 										'name' => 'Product name',

@@ -77,6 +77,7 @@ export function Editor( { product, settings }: EditorProps ) {
 												settings={ settings }
 												product={ product }
 												context={ {
+													area: 'product-editor',
 													selectedTab,
 													postType: 'product',
 													postId: product.id,
