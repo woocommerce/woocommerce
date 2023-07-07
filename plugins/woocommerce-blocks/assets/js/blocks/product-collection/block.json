@@ -6,7 +6,7 @@
     "title": "Product Collection",
     "description": "Display a collection of products from your store.",
     "category": "woocommerce",
-    "keywords": [ "WooCommerce" ],
+    "keywords": [ "WooCommerce", "Products (Beta)" ],
     "textdomain": "woo-gutenberg-products-block",
 	"attributes": {
 		"queryId": {
