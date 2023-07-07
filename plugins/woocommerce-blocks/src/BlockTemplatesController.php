@@ -373,6 +373,15 @@ class BlockTemplatesController {
 							}
 						);
 
+						global $product;
+
+						if ( ! $product instanceof \WC_Product ) {
+							$product_id = get_the_ID();
+							if ( $product_id ) {
+								wc_setup_product_data( $product_id );
+							}
+						}
+
 						$new_content       = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
 						$template->content = $new_content;
 					}
