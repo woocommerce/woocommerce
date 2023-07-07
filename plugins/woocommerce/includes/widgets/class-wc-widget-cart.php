@@ -83,15 +83,10 @@ class WC_Widget_Cart extends WC_Widget {
 			return false;
 		}
 
-		if ( ! function_exists( 'parse_blocks' ) ) {
-			return false;
-		}
-
-		$block_from_page = parse_blocks( $post->post_content );
-		$block_name      = $block_from_page[0]['blockName'];
-
-		if ( in_array( $block_name, $blocks, true ) ) {
-			return true;
+		foreach ( $blocks as $block_name ) {
+			if ( stripos( $post->post_content, $block_name ) !== false ) {
+				return true;
+			}
 		}
 
 		return false;
