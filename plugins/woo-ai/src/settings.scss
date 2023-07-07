@@ -5,3 +5,7 @@
 
 	display: none;
 }
+
+#ai_describe_store_description:disabled::placeholder {
+	color: #ccc;
+}
