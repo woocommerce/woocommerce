@@ -1,8 +1,8 @@
 <p align="center"><a href="https://woocommerce.com/"><img src="https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png" alt="WooCommerce"></a></p>
 
-Welcome to the WooCommerce Monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
+Welcome to the WooCommerce monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at [open issues](https://github.com/woocommerce/woocommerce/issues), contribute code, and keep track of ongoing development.
 
-We recommend all developers to follow the [WooCommerce development blog](https://woocommerce.wordpress.com/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
+We recommend all developers follow the [WooCommerce development blog](https://woocommerce.wordpress.com/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
 
 ## Getting Started
 
@@ -55,8 +55,12 @@ NOTE: Unfortunately, we are unable to honor support requests in issues on this r
 
 ## Community
 
-For peer to peer support, real-time announcements, and office hours, please [join our slack community](https://woocommerce.com/community-slack/)!
+For peer to peer support, real-time announcements, and office hours, please [join our Slack community](https://woocommerce.com/community-slack/)!
 
 ## Contributing to WooCommerce
 
 If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) for more information on how you can do this.
+
+## Roadmap
+
+If you'd like a better understanding of upcoming initiatives planned for future versions of WooCommerce, check out [our roadmap available on the developer site](https://developer.woocommerce.com/roadmap/).
