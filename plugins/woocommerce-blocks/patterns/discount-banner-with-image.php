@@ -38,9 +38,9 @@
 
 	<!-- wp:column {"verticalAlignment":"center"} -->
 	<div class="wp-block-column is-vertically-aligned-center">
-		<!-- wp:image {"align":"center","width":318,"height":300,"sizeSlug":"full","linkDestination":"none","style":{"border":{"radius":{"topLeft":"100px","topRight":"10px","bottomLeft":"10px","bottomRight":"100px"}}}} -->
-		<figure class="wp-block-image aligncenter size-full is-resized has-custom-border">
-			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png', dirname( __FILE__ ) ) ); ?>" alt="" style="border-top-left-radius:100px;border-top-right-radius:10px;border-bottom-left-radius:10px;border-bottom-right-radius:100px" width="318" height="300" />
+		<!-- wp:image {"align":"center","sizeSlug":"full","linkDestination":"none","style":{"border":{"radius":{"topLeft":"100px","topRight":"10px","bottomLeft":"10px","bottomRight":"100px"}}}} -->
+		<figure class="wp-block-image aligncenter size-full has-custom-border">
+			<img src="<?php echo esc_url( plugins_url( 'images/pattern-placeholders/table-floor-interior-atmosphere-living-room-furniture-square-lg.png', dirname( __FILE__ ) ) ); ?>" alt="" style="border-top-left-radius:100px;border-top-right-radius:10px;border-bottom-left-radius:10px;border-bottom-right-radius:100px"/>
 		</figure>
 		<!-- /wp:image -->
 	</div>
