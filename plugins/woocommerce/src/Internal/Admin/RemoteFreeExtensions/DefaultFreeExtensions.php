@@ -41,7 +41,6 @@ class DefaultFreeExtensions {
 					self::get_plugin( 'google-listings-and-ads' ),
 					self::get_plugin( 'pinterest-for-woocommerce' ),
 					self::get_plugin( 'facebook-for-woocommerce' ),
-					self::get_plugin( 'tiktok-for-business:alt' ),
 				),
 			),
 			array(
@@ -75,7 +74,6 @@ class DefaultFreeExtensions {
 						self::get_plugin( 'jetpack' ),
 						self::get_plugin( 'pinterest-for-woocommerce' ),
 						self::get_plugin( 'mailpoet' ),
-						self::get_plugin( 'tiktok-for-business' ),
 						self::get_plugin( 'google-listings-and-ads' ),
 						self::get_plugin( 'woocommerce-services:tax' ),
 					)
