@@ -1049,6 +1049,10 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wc_load_cart() {
+		$original_cart     = $this->wc->cart;
+		$original_customer = $this->wc->customer;
+		$original_session  = $this->wc->session;
+
 		$this->assertInstanceOf( 'WC_Cart', $this->wc->cart );
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
 		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
@@ -1065,6 +1069,12 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
 		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
 
+		// Restore original cart, customer and session instances. Important since global state (including filters and
+		// actions) is reset between tests, and we want to avoid a scenario in which wc()->cart and cart-related
+		// callbacks are separate instances of the same class - which can lead to strange effects.
+		$this->wc->cart     = $original_cart;
+		$this->wc->customer = $original_customer;
+		$this->wc->session  = $original_session;
 	}
 
 	/**
