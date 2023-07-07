@@ -17,7 +17,6 @@ import {
 	isProductDownloadable,
 	isProductVirtual,
 	getProductType,
-	getCategories,
 	getTags,
 	getAttributes,
 } from '../utils';
