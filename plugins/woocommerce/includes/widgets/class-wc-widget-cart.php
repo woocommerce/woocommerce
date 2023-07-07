@@ -44,11 +44,12 @@ class WC_Widget_Cart extends WC_Widget {
 	}
 
 	/**
-	 * Get list of Woo blocks that update the cart.
+	 * Get the list of Woo blocks that update the cart.
+	 * The cart widget isn't loaded on the Cart and Checkout Blocks, so they don't need to be included here.
 	 *
 	 * @return array;
 	 */
-	public static function get_blocks() {
+	public static function get_blocks_that_update_the_cart() {
 		return array(
 			'woocommerce/handpicked-products',
 			'woocommerce/single-product',
@@ -118,7 +119,7 @@ class WC_Widget_Cart extends WC_Widget {
 		}
 
 		global $post;
-		$is_cart_related_block = $this->has_block_from_list( self::get_blocks(), $post );
+		$is_cart_related_block = $this->has_block_from_list( self::get_blocks_that_update_the_cart(), $post );
 
 		if ( $is_cart_related_block || is_shop() || is_product() || is_product_category() ) {
 			wp_enqueue_script( 'wc-cart-fragments' );
