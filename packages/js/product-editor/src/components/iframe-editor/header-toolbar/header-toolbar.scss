@@ -31,6 +31,10 @@
         padding-left: $gap-small;
     }
 	&-right {
+		margin-left: auto;
         padding-right: $gap-small;
+		button {
+			margin-left: $gap-small;
+		}
     }
 }
