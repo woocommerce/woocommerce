@@ -591,6 +591,58 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse dates from a CSV.
+	 * Dates requires the format YYYY-MM-DD.
+	 * Any time included will be ignored.
+	 * Time will always be set to 00:00:00.
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return string|null
+	 * 
+	 * @see plugins/woocommerce/includes/admin/meta-boxes/class-wc-meta-box-product-data.php::save()
+	 */
+	public function parse_date_field_from( $value ) {
+		if ( empty( $value ) ) {
+			return null;
+		}
+
+		if ( preg_match( '/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])([ 01-9:]*)$/', $value ) ) {
+			// Don't include the time if the field had time in it.
+			$date_field_from_value = current( explode( ' ', $value ) );
+			return date( 'Y-m-d 00:00:00', strtotime( $date_field_from_value ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+		}
+
+		return null;
+	}
+
+	/**
+	 * Parse dates from a CSV.
+	 * Dates requires the format YYYY-MM-DD.
+	 * Any time included will be ignored.
+	 * Time will always be set to 23:59:59.
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return string|null
+	 * 
+	 * @see plugins/woocommerce/includes/admin/meta-boxes/class-wc-meta-box-product-data.php::save()
+	 */
+	public function parse_date_field_to( $value ) {
+		if ( empty( $value ) ) {
+			return null;
+		}
+
+		if ( preg_match( '/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])([ 01-9:]*)$/', $value ) ) {
+			// Don't include the time if the field had time in it.
+			$date_field_to_value = current( explode( ' ', $value ) );
+			return date( 'Y-m-d 23:59:59', strtotime( $date_field_to_value ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+		}
+
+		return null;
+	}
+
+	/**
 	 * Parse backorders from a CSV.
 	 *
 	 * @param string $value Field value.
@@ -725,8 +777,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'type'              => array( $this, 'parse_comma_field' ),
 			'published'         => array( $this, 'parse_published_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
-			'date_on_sale_from' => array( $this, 'parse_date_field' ),
-			'date_on_sale_to'   => array( $this, 'parse_date_field' ),
+			'date_on_sale_from' => array( $this, 'parse_date_field_from' ),
+			'date_on_sale_to'   => array( $this, 'parse_date_field_to' ),
 			'name'              => array( $this, 'parse_skip_field' ),
 			'short_description' => array( $this, 'parse_description_field' ),
 			'description'       => array( $this, 'parse_description_field' ),
