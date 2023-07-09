@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Allow registered React-powered page to specify 'parent path' in navArgs.
+Allow registered React-powered page to specify 'parent path' in .
