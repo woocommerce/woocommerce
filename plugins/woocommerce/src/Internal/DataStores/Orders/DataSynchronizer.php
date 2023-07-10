@@ -30,9 +30,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_initial_orders_pending_sync_count';
 	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION   = 'woocommerce_orders_sync_finished';
 	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
-	public const DELETED_RECORD_META_KEY                   = '_deleted_from';
+
+	public const DELETED_RECORD_META_KEY        = '_deleted_from';
+	public const DELETED_FROM_POSTS_META_VALUE  = 'posts_table';
+	public const DELETED_FROM_ORDERS_META_VALUE = 'orders_table';
 
 	private const ORDERS_SYNC_BATCH_SIZE = 250;
+
 	// Allowed values for $type in get_ids_of_orders_pending_sync method.
 	public const ID_TYPE_MISSING_IN_ORDERS_TABLE   = 0;
 	public const ID_TYPE_MISSING_IN_POSTS_TABLE    = 1;
@@ -252,17 +256,29 @@ SELECT(
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$pending_count = (int) $wpdb->get_var( $sql );
 
-		$deleted_from_table = $this->custom_orders_table_is_authoritative() ? $orders_table : $wpdb->posts;
-		$deleted_count      = $wpdb->get_var(
+		$deleted_from_table = $this->get_current_deletion_record_meta_value();
+
+		$deleted_count  = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT count(1) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s",
 				array( self::DELETED_RECORD_META_KEY, $deleted_from_table )
 			)
 		);
-		$pending_count     += $deleted_count;
+		$pending_count += $deleted_count;
 
 		wp_cache_set( 'woocommerce_hpos_pending_sync_count', $pending_count );
 		return $pending_count;
+	}
+
+	/**
+	 * Get the meta value for order deletion records based on which table is currently authoritative.
+	 *
+	 * @return string self::DELETED_FROM_ORDERS_META_VALUE if the orders table is authoritative, self::DELETED_FROM_POSTS_META_VALUE otherwise.
+	 */
+	private function get_current_deletion_record_meta_value() {
+		return $this->custom_orders_table_is_authoritative() ?
+				self::DELETED_FROM_ORDERS_META_VALUE :
+				self::DELETED_FROM_POSTS_META_VALUE;
 	}
 
 	/**
@@ -366,8 +382,9 @@ ORDER BY orders.id ASC
 	private function get_deleted_order_ids( bool $deleted_from_orders_table, int $limit ) {
 		global $wpdb;
 
-		$deleted_from_table = $deleted_from_orders_table ? $this->data_store::get_orders_table_name() : $wpdb->posts;
-		$order_ids          = $wpdb->get_col(
+		$deleted_from_table = $this->get_current_deletion_record_meta_value();
+
+		$order_ids = $wpdb->get_col(
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"SELECT DISTINCT(order_id) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s LIMIT {$limit}",
@@ -440,7 +457,8 @@ ORDER BY orders.id ASC
 	private function process_deleted_orders( array $batch, bool $custom_orders_table_is_authoritative ): array {
 		global $wpdb;
 
-		$deleted_from_table_name = $custom_orders_table_is_authoritative ? $this->data_store::get_orders_table_name() : $wpdb->posts;
+		$deleted_from_table_name = $this->get_current_deletion_record_meta_value();
+
 		$data_store_for_deletion =
 			$custom_orders_table_is_authoritative ?
 			new \WC_Order_Data_Store_CPT() :
@@ -630,7 +648,7 @@ ORDER BY orders.id ASC
 				$postid,
 				$postid,
 				self::DELETED_RECORD_META_KEY,
-				$wpdb->posts
+				self::DELETED_FROM_POSTS_META_VALUE
 			)
 		)
 		) {
@@ -639,7 +657,7 @@ ORDER BY orders.id ASC
 				array(
 					'order_id'   => $postid,
 					'meta_key'   => self::DELETED_RECORD_META_KEY,
-					'meta_value' => $wpdb->posts,
+					'meta_value' => self::DELETED_FROM_POSTS_META_VALUE,
 				)
 			);
 		}

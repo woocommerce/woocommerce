@@ -2029,7 +2029,7 @@ FROM $order_meta_table
 				array(
 					'order_id'   => $order_id,
 					'meta_key'   => DataSynchronizer::DELETED_RECORD_META_KEY,
-					'meta_value' => self::get_orders_table_name(),
+					'meta_value' => DataSynchronizer::DELETED_FROM_ORDERS_META_VALUE,
 				)
 			);
 			// phpcs:enable WordPress.DB.SlowDBQuery

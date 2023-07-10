@@ -72,7 +72,9 @@ class HposTestCase extends WC_Unit_Test_Case {
 			return;
 		}
 
-		$deleted_from = $deleted_from_cot ? OrdersTableDataStore::get_orders_table_name() : $wpdb->posts;
+		$deleted_from = $deleted_from_cot ?
+			DataSynchronizer::DELETED_FROM_ORDERS_META_VALUE :
+			DataSynchronizer::DELETED_FROM_POSTS_META_VALUE;
 
 		$this->assertEquals( $deleted_from, $record['meta_value'], "Deletion record for order {$order_id} has a value of {$record['meta_value']}, expected {$deleted_from}" );
 	}
