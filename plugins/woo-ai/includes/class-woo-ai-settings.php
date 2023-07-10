@@ -93,14 +93,14 @@ class Woo_AI_Settings {
 	 * @param string $current_section The current section.
 	 */
 	public function add_woo_ai_settings( $settings = array(), $current_section = null ) {
-		if ( 'features' !== $current_section ) {
-			return $settings;
+		if ( 'features' === $current_section ) {
+			$settings = array_merge(
+				$this->get_woo_ai_settings(),
+				$settings
+			);
 		}
 
-		return array_merge(
-			$this->get_woo_ai_settings(),
-			$settings
-		);
+		return $settings;
 	}
 
 	/**
