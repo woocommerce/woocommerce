@@ -1,6 +1,6 @@
 export type Attribute = {
 	name: string;
-	value: string;
+	values: Array< string >;
 };
 
 export type ProductDataSuggestion = {
