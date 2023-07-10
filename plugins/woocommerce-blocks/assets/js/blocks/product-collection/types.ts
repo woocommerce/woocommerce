@@ -17,7 +17,7 @@ export interface ProductCollectionAttributes {
 }
 
 export interface ProductCollectionDisplayLayout {
-	type: string;
+	type: 'flex' | 'list';
 	columns: number;
 }
 
