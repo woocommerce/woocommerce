@@ -126,10 +126,10 @@ export function WriteItForMeButtonContainer() {
 				0,
 				MAX_TITLE_LENGTH
 			) }."`,
-			'Identify the language used in this product title and use the same language in your response.',
 			'Use a 9th grade reading level.',
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
 			'Structure the description into paragraphs using standard HTML <p> tags.',
+			'Identify the language used in this product title and use the same language in your response.',
 			'Only if appropriate, use <ul> and <li> tags to list product features.',
 			'When appropriate, use <strong> and <em> tags to emphasize text.',
 			'Do not include a top-level heading at the beginning description.',

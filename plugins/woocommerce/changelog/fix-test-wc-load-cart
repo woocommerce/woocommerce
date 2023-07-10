@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Cleanup global state after testing `wc_load_cart()`.

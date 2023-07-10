@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 7.8.2 2023-07-04 =
+
+**WooCommerce**
+
+* Fix - Add missing require for a wc-admin helper function. [#39030](https://github.com/woocommerce/woocommerce/pull/39030)
+
+
 = 7.8.1 2023-06-27 =
 
 **WooCommerce**

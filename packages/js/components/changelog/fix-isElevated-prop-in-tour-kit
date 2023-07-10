@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Replace isElevated prop with elevation for tour-kit step component
