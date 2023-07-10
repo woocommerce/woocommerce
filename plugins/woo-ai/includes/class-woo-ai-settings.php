@@ -1,6 +1,6 @@
 <?php
 /**
- * Woo AI plugin main class
+ * Woo AI settings page module.
  *
  * @package Woo_AI
  */
@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\Jetpack\Constants;
 
 /**
- * Woo_AI Main Class.
+ * Woo_AI_Settings Class.
  */
 class Woo_AI_Settings {
 
