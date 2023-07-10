@@ -150,8 +150,10 @@ export function WriteItForMeButtonContainer() {
 			);
 			includedProps.push( 'categories' );
 		}
-		productAttributes.forEach( ( { name, value } ) => {
-			productPropsInstructions.push( `${ name }: ${ value }.` );
+		productAttributes.forEach( ( { name, values } ) => {
+			productPropsInstructions.push(
+				`${ name }: ${ values.join( ', ' ) }.`
+			);
 			includedProps.push( name );
 		} );
 

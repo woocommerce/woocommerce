@@ -36,23 +36,46 @@ export const getAttributes = (): Attribute[] => {
 		document.querySelectorAll( '.woocommerce_attribute' )
 	);
 
-	return attributeContainerEls.reduce( ( acc, container ) => {
-		const name = (
-			container.querySelector( 'h3 > .attribute_name' ) as HTMLElement
-		 )?.textContent?.trim();
+	return attributeContainerEls.reduce( ( acc, item ) => {
+		const attributeGetters = {
+			local: {
+				name: () =>
+					(
+						item.querySelector(
+							'.woocommerce_attribute_data input.attribute_name'
+						) as HTMLInputElement | null
+					 )?.value,
+				values: () =>
+					item
+						.querySelector( '.woocommerce_attribute_data textarea' )
+						?.textContent?.split( '|' )
+						.map( ( attrName ) => attrName.trim() ),
+			},
+			global: {
+				name: () =>
+					(
+						item.querySelector(
+							'.attribute_name > strong'
+						) as Element | null
+					 )?.textContent,
+				values: () =>
+					Array.from(
+						item.querySelectorAll(
+							'select.attribute_values option'
+						) ?? []
+					).map( ( option ) => option.textContent?.trim() ?? '' ),
+			},
+		};
 
-		const valueSelectElement = container.querySelector(
-			'.woocommerce_attribute_data select.attribute_values'
-		) as HTMLSelectElement;
-		const value = Array.from( valueSelectElement.selectedOptions )
-			.map( ( option ) => option.text.trim() )
-			.filter( Boolean )
-			.join( ', ' );
+		const type = Boolean( attributeGetters.global.name() )
+			? 'global'
+			: 'local';
 
-		if ( name && value ) {
-			acc.push( { name, value } );
+		const name = attributeGetters[ type ].name();
+		const values = attributeGetters[ type ].values()?.filter( Boolean );
+		if ( name && values ) {
+			acc.push( { name, values } );
 		}
-
 		return acc;
 	}, [] as Attribute[] );
 };
