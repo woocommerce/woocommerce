@@ -187,6 +187,7 @@ class Woo_AI_Settings {
 	public function add_woo_ai_settings_script() {
 		global $pagenow;
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( 'admin.php' !== $pagenow || ( isset( $_GET['page'] ) && 'wc-settings' !== $_GET['page'] ) ) {
 			return;
 		}
