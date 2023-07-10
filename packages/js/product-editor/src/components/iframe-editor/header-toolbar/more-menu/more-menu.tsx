@@ -8,6 +8,11 @@ import { createElement, forwardRef, Fragment } from '@wordpress/element';
 // eslint-disable-next-line @woocommerce/dependency-group
 import { MoreMenuDropdown } from '@wordpress/interface';
 
+/**
+ * Internal dependencies
+ */
+import { ToolsMenuGroup } from './tools-menu-group';
+
 export const MoreMenu = forwardRef( function ForwardedRefMoreMenu(
 	ref: Ref< HTMLButtonElement >
 ) {
@@ -15,7 +20,7 @@ export const MoreMenu = forwardRef( function ForwardedRefMoreMenu(
 		<MoreMenuDropdown ref={ ref }>
 			{ ( { onClose }: { onClose: () => void } ) => (
 				<>
-					<div>Hi there</div>
+					<ToolsMenuGroup />
 				</>
 			) }
 		</MoreMenuDropdown>
