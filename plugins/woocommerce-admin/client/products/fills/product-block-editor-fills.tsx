@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import { MenuGroup } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import {
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
@@ -46,27 +48,31 @@ const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
 
 	return (
 		<>
-			<FeedbackMenuItem
-				onClick={ () => {
-					recordClick( 'feedback' );
-					onClose();
-				} }
-			/>
-			<ClassicEditorMenuItem
-				productId={ id }
-				onClick={ () => {
-					recordClick( 'classic_editor' );
-					onClose();
-				} }
-			/>
-			<AboutTheEditorMenuItem
-				onClick={ () => {
-					recordClick( 'about' );
-				} }
-				onCloseGuide={ () => {
-					onClose();
-				} }
-			/>
+			<MenuGroup label={ __( 'New product form (Beta)', 'woocommerce' ) }>
+				<AboutTheEditorMenuItem
+					onClick={ () => {
+						recordClick( 'about' );
+					} }
+					onCloseGuide={ () => {
+						onClose();
+					} }
+				/>
+				<FeedbackMenuItem
+					onClick={ () => {
+						recordClick( 'feedback' );
+						onClose();
+					} }
+				/>
+			</MenuGroup>
+			<MenuGroup>
+				<ClassicEditorMenuItem
+					productId={ id }
+					onClick={ () => {
+						recordClick( 'classic_editor' );
+						onClose();
+					} }
+				/>
+			</MenuGroup>
 		</>
 	);
 };

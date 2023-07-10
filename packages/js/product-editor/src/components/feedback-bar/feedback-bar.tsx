@@ -53,7 +53,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 				action: PRODUCT_EDITOR_FEEDBACK_CES_ACTION,
 				showDescription: false,
 				title: __(
-					"How's your experience with the new product form?",
+					'What do you think of the new product form?',
 					'woocommerce'
 				),
 				firstQuestion: __(
@@ -65,7 +65,7 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 					'woocommerce'
 				),
 				onsubmitLabel: __(
-					"Thanks for the feedback. We'll put it to good use!",
+					"Thanks for the feedback — we'll put it to good use!",
 					'woocommerce'
 				),
 				shouldShowComments: () => false,
@@ -174,7 +174,6 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 			{},
 			{
 				type: 'snackbar',
-				icon: <span>🌟</span>,
 			}
 		);
 	};
@@ -201,38 +200,40 @@ export function FeedbackBar( { product }: FeedbackBarProps ) {
 		<>
 			{ shouldShowFeedbackBar && (
 				<div className="woocommerce-product-mvp-ces-footer">
-					<Pill>Beta</Pill>
-					<div className="woocommerce-product-mvp-ces-footer__message">
-						{ createInterpolateElement(
-							__(
-								'How is your experience with the new product form? <span><shareButton>Share feedback</shareButton> or <turnOffButton>turn it off</turnOffButton></span>',
-								'woocommerce'
-							),
-							{
-								span: (
-									<span className="woocommerce-product-mvp-ces-footer__message-buttons" />
+					<div className="woocommerce-product-mvp-ces-footer__body">
+						<Pill>Beta</Pill>
+						<div className="woocommerce-product-mvp-ces-footer__message">
+							{ createInterpolateElement(
+								__(
+									'How is your experience with the new product form? <span><shareButton>Share feedback</shareButton> or <turnOffButton>turn it off</turnOffButton></span>',
+									'woocommerce'
 								),
-								shareButton: (
-									<Button
-										variant="link"
-										onClick={ onShareFeedbackClick }
-									/>
-								),
-								turnOffButton: (
-									<Button
-										onClick={ onTurnOffEditorClick }
-										variant="link"
-									/>
-								),
-							}
-						) }
+								{
+									span: (
+										<span className="woocommerce-product-mvp-ces-footer__message-buttons" />
+									),
+									shareButton: (
+										<Button
+											variant="link"
+											onClick={ onShareFeedbackClick }
+										/>
+									),
+									turnOffButton: (
+										<Button
+											onClick={ onTurnOffEditorClick }
+											variant="link"
+										/>
+									),
+								}
+							) }
+						</div>
+						<Button
+							className="woocommerce-product-mvp-ces-footer__close-button"
+							icon={ closeSmall }
+							label={ __( 'Hide this message', 'woocommerce' ) }
+							onClick={ onHideFeedbackBarClick }
+						></Button>
 					</div>
-					<Button
-						className="woocommerce-product-mvp-ces-footer__close-button"
-						icon={ closeSmall }
-						label={ __( 'Hide this message', 'woocommerce' ) }
-						onClick={ onHideFeedbackBarClick }
-					></Button>
 				</div>
 			) }
 		</>
