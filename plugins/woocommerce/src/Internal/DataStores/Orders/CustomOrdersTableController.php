@@ -265,7 +265,7 @@ class CustomOrdersTableController {
 			),
 			'requires_refresh' => true,
 			'callback'         => function () {
-				$this->features_controller->change_feature_enable( 'custom_order_tables', false );
+				$this->features_controller->change_feature_enable( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, false );
 				$this->delete_custom_orders_tables();
 				return __( 'Custom orders tables have been deleted.', 'woocommerce' );
 			},
@@ -364,6 +364,10 @@ class CustomOrdersTableController {
 		}
 		$data_sync_is_enabled = $this->data_synchronizer->data_sync_is_enabled();
 
+		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
+			$this->data_synchronizer->create_database_tables();
+		}
+
 		// Enabling/disabling the sync implies starting/stopping it too, if needed.
 		// We do this check here, and not in process_pre_update_option, so that if for some reason
 		// the setting is enabled but no sync is in process, sync will start by just saving the
@@ -384,12 +388,11 @@ class CustomOrdersTableController {
 	 * @param bool   $is_enabled True if the feature is being enabled, false if it's being disabled.
 	 */
 	private function handle_feature_enabled_changed( $feature_id, $is_enabled ): void {
-		if ( 'custom_order_tables' !== $feature_id || ! $is_enabled ) {
+		if ( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION !== $feature_id || ! $is_enabled ) {
 			return;
 		}
 
 		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
-			update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
 			$this->create_custom_orders_tables( false );
 		}
 	}
@@ -434,7 +437,7 @@ class CustomOrdersTableController {
 	 * @return array Feature setting object.
 	 */
 	private function get_hpos_feature_setting( array $feature_setting, string $feature_id ) {
-		if ( ! in_array( $feature_id, array( 'custom_order_tables', DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION ), true ) ) {
+		if ( ! in_array( $feature_id, array( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'custom_order_tables' ), true ) ) {
 			return $feature_setting;
 		}
 
@@ -443,10 +446,14 @@ class CustomOrdersTableController {
 		}
 
 		$sync_status = $this->data_synchronizer->get_sync_status();
-		if ( 'custom_order_tables' === $feature_id ) {
-			return $this->get_hpos_setting_for_feature( $sync_status );
+		switch ( $feature_id ) {
+			case self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION:
+				return $this->get_hpos_setting_for_feature( $sync_status );
+			case DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION:
+				return $this->get_hpos_setting_for_sync( $sync_status );
+			case 'custom_order_tables':
+				return array();
 		}
-		return $this->get_hpos_setting_for_sync( $sync_status );
 	}
 
 	/**
@@ -461,7 +468,13 @@ class CustomOrdersTableController {
 		$plugin_info             = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
 		$plugin_incompat_warning = $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_info );
 		$sync_complete           = 0 === $sync_status['current_pending_count'];
-		$can_hpos_enabled        = count( array_merge( $plugin_info['uncertain'], $plugin_info['incompatible'] ) ) === 0;
+		$disabled_option         = array();
+		if ( count( array_merge( $plugin_info['uncertain'], $plugin_info['incompatible'] ) ) > 0 ) {
+			$disabled_option = array( 'yes' );
+		}
+		if ( ! $sync_complete ) {
+			$disabled_option = array( 'yes', 'no' );
+		}
 
 		return array(
 			'id'          => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
@@ -472,7 +485,7 @@ class CustomOrdersTableController {
 				'yes' => __( 'High performance order storage (new)', 'woocommerce' ),
 			),
 			'value'       => $hpos_enabled ? 'yes' : 'no',
-			'disabled'    => $can_hpos_enabled && $sync_complete ? array() : array( 'yes', 'no' ),
+			'disabled'    => $disabled_option,
 			'desc'        => $plugin_incompat_warning,
 			'desc_at_end' => true,
 		);
@@ -489,7 +502,7 @@ class CustomOrdersTableController {
 		$sync_in_progress = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
 		$sync_enabled     = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		$sync_message     = '';
-		if ( $sync_in_progress ) {
+		if ( $sync_in_progress && $sync_status['current_pending_count'] > 0 ) {
 			$sync_message = sprintf(
 				// translators: %d: number of pending orders.
 				__( 'Currently syncing orders... %d pending', 'woocommerce' ),

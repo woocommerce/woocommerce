@@ -91,7 +91,8 @@ class FeaturesController {
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
-		$hpos_enable_sync = DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
+		$hpos_enable_sync   = DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
+		$hpos_authoritative = CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION;
 		$features         = array(
 			'analytics'            => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
@@ -112,8 +113,12 @@ class FeaturesController {
 				'is_experimental' => true,
 				'disable_ui'      => false,
 			),
-			// Options HPOS features are added in CustomOrdersTableController to keep the logic in same place.
-			'custom_order_tables'  => array(
+			// Options for HPOS features are added in CustomOrdersTableController to keep the logic in same place.
+			'custom_order_tables'  => array( // This exists for back-compat, otherwise is always enabled and hidden from WC 8.0.
+				'name'               => '',
+				'enabled_by_default' => true,
+			),
+			$hpos_authoritative    => array(
 				'name' => __( 'High performance order storage', 'woocommerce' ),
 			),
 			$hpos_enable_sync      => array(
