@@ -105,6 +105,8 @@ class Woo_AI_Settings {
 
 	/**
 	 * Return array describing new settings.
+	 *
+	 * @return array Describing new AI settings.
 	 */
 	public function get_woo_ai_settings() {
 
