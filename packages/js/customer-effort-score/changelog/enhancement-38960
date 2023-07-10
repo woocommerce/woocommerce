@@ -1,4 +1,4 @@
-Significance: minor
-Type: enhancement
+Significance: patch
+Type: fix
 
-New product block editor modal text enhancements
+Fixing the onsubmit_label prop from SHOW_CES_MODAL action incorreclty named as onSubmitLabel
