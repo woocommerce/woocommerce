@@ -605,7 +605,8 @@ ORDER BY orders.id ASC
 	private function handle_deleted_post( $postid, $post ): void {
 		global $wpdb;
 
-		if ( 'shop_order' !== $post->post_type && 'shop_order_refund' !== $post->post_type ) {
+		$order_post_types = wc_get_order_types( 'cot-migration' );
+		if ( ! in_array( $post->post_type, $order_post_types, true ) ) {
 			return;
 		}
 
