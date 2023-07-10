@@ -7,12 +7,11 @@ import {
 	Fragment,
 	createInterpolateElement,
 	useState,
-	useEffect,
-	useRef,
 } from '@wordpress/element';
 
 import { useBlockProps } from '@wordpress/block-editor';
-import { useInstanceId, useMergeRefs } from '@wordpress/compose';
+import { BlockEditProps } from '@wordpress/blocks';
+import { useInstanceId } from '@wordpress/compose';
 import { cleanForSlug } from '@wordpress/url';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
@@ -38,8 +37,9 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
 import { AUTO_DRAFT_NAME } from '../../utils';
 import { EditProductLinkModal } from '../../components/edit-product-link-modal';
 import { useValidation } from '../../contexts/validation-context';
+import { NameBlockAttributes } from './types';
 
-export function Edit() {
+export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useBlockProps();
 
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
@@ -138,16 +138,6 @@ export function Edit() {
 		'product_name'
 	) as string;
 
-	const inputRef = useRef< HTMLInputElement >( null );
-
-	useEffect( () => {
-		if ( inputRef.current ) {
-			inputRef.current.focus();
-		}
-	}, [] );
-
-	const refs = useMergeRefs( [ nameRef, inputRef ] );
-
 	return (
 		<>
 			<div { ...blockProps }>
@@ -170,8 +160,10 @@ export function Edit() {
 				>
 					<InputControl
 						id={ nameControlId }
-						ref={ refs }
+						ref={ nameRef }
 						name="name"
+						// eslint-disable-next-line jsx-a11y/no-autofocus
+						autoFocus={ attributes.autoFocus }
 						placeholder={ __(
 							'e.g. 12 oz Coffee Mug',
 							'woocommerce'
