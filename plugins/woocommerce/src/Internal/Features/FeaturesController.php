@@ -93,7 +93,7 @@ class FeaturesController {
 	public function __construct() {
 		$hpos_enable_sync   = DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
 		$hpos_authoritative = CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION;
-		$features         = array(
+		$features           = array(
 			'analytics'            => array(
 				'name'               => __( 'Analytics', 'woocommerce' ),
 				'description'        => __( 'Enables WooCommerce Analytics', 'woocommerce' ),
