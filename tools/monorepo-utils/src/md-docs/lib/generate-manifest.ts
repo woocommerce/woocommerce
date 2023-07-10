@@ -21,7 +21,7 @@ function generatePageId( filePath: string, prefix = '' ) {
 	return hash.digest( 'hex' );
 }
 
-const generateFileUrl = (
+export const generateFileUrl = (
 	baseUrl: string,
 	rootDirectory: string,
 	directory: string,
