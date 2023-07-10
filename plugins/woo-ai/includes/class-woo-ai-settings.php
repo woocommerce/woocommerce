@@ -132,7 +132,7 @@ class Woo_AI_Settings {
 				'id'    => 'woo_ai_title',
 				'type'  => 'title',
 				'title' => __( 'Artificial Intelligence', 'woocommerce' ),
-				'desc'  => __( "Save time by automating mundane parts of store management. This information will make AI-generated content, visuals, and setting smore aligned with your store's goals and identity.", 'woocommerce' ),
+				'desc'  => __( "Save time by automating mundane parts of store management. This information will make AI-generated content, visuals, and setting more aligned with your store's goals and identity.", 'woocommerce' ),
 			),
 
 			array(
