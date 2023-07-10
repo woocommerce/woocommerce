@@ -124,7 +124,6 @@ export function IframeEditor( {
 					useSubRegistry={ true }
 				>
 					<HeaderToolbar
-						isModalActionsBarVisible={ true }
 						onSave={ () => {
 							appendEdit( temporalBlocks );
 							setBlocks( temporalBlocks );
