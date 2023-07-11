@@ -28,8 +28,9 @@ export default function Content( props: ContentProps ): JSX.Element {
 	const { selectedTab } = props;
 	return (
 		<>
-			<Search />
-			{ renderContent( selectedTab ) }
+			<div className="woocommerce-marketplace__content">
+				{ renderContent( selectedTab ) }
+			</div>
 			<Footer />
 		</>
 	);

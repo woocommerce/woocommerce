@@ -7,9 +7,9 @@
  */
 import './discover.scss';
 
-export default function Discover() {
+export default function Discover(): JSX.Element {
 	return (
-		<div className="woocommerce-marketplace__content">
+		<div className="woocommerce-marketplace__discover">
 			<h1>Discover Our Favorites</h1>
 			<div className="woocommerce-marketplace__content__placeholder"></div>
 		</div>
