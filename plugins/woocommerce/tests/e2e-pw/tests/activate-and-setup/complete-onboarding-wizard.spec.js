@@ -66,8 +66,8 @@ testRunner( 'Store owner can complete onboarding wizard', () => {
 		page,
 	} ) => {
 
-		// set up pre-condition to ensure Industries stored in 
-		// storeDetails.us.industries2 have been set 
+		// set up pre-condition to ensure Industries stored in
+		// storeDetails.us.industries2 have been set
 		await onboarding.completeIndustrySection(
 			page,
 			storeDetails.us.industries2,
@@ -251,7 +251,7 @@ testRunner(
 				page.locator(
 					':nth-match(.woocommerce-task-list__item-title, 3)'
 				)
-			).not.toContainText( 'Set up WooCommerce Payments' );
+			).not.toContainText( 'Set up WooPayments' );
 		} );
 	}
 );

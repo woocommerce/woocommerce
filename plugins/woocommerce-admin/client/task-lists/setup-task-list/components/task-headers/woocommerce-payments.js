@@ -18,7 +18,7 @@ import { WC_ASSET_URL } from '~/utils/admin-settings';
 
 const connect = ( createNotice, setIsBusy ) => {
 	const errorMessage = __(
-		'There was an error connecting to WooCommerce Payments. Please try again or connect later in store settings.',
+		'There was an error connecting to WooPayments. Please try again or connect later in store settings.',
 		'woocommerce'
 	);
 	setIsBusy( true );
