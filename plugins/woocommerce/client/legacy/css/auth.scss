@@ -7,9 +7,10 @@ body {
 
 #wc-logo {
 	border: 0;
-	margin: 0 0 24px;
+	margin: 24px 0;
 	padding: 0;
 	text-align: center;
+	font-size: 0;
 
 	img {
 		max-width: 50%;
@@ -43,9 +44,9 @@ body {
 	}
 
 	a {
-		color: #a16696;
+		color: #7F54B3;
 		&:hover, &:focus {
-			color: #111;
+			color: #3C2861;
 		}
 	}
 
@@ -126,16 +127,16 @@ body {
 		}
 	}
 	.button-primary {
-		background: #ad6ea1;
-		border-color: #a16696;
-		box-shadow: inset 0 1px 0 rgba( 255, 255, 255, 0.2 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
+		background: #7F54B3;
+		border-color: #7F54B3;
+		box-shadow: 0 0 0;
 		color: #fff;
 		float: right;
 		opacity: 1;
-		text-shadow: 0 -1px 1px #8a4f7f, 1px 0 1px #8a4f7f, 0 1px 1px #8a4f7f, -1px 0 1px #8a4f7f;
+		text-shadow: none;
 
 		&:hover, &:focus {
-			background: #b472a8;
+			background: #9a69c7;
 			color: #fff;
 		}
 	}
