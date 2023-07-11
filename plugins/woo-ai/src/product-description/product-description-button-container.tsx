@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { useCompletion } from '@woocommerce/ai';
+import { __experimentalUseCompletion as useCompletion } from '@woocommerce/ai';
 
 /**
  * Internal dependencies

@@ -6,7 +6,7 @@ import { useRef, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { getCompletion } from '../utils';
+import { getCompletion } from '../utils/text-completion';
 
 type StopReason = 'abort' | 'finished' | 'error' | 'interrupted';
 

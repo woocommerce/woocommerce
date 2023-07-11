@@ -1,1 +1,1 @@
-export * from './useCompletion';
+export { useCompletion as __experimentalUseCompletion } from './useCompletion';

@@ -3,7 +3,7 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
-import { requestJetpackToken } from '@woocommerce/ai';
+import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 
 /**
  * Internal dependencies
