@@ -4340,7 +4340,7 @@ img.help_tip {
 
 .status-enabled::before {
 	@include icon("\e015");
-	color: $woocommerce;
+	color: var(--wp-admin-theme-color);
 }
 
 .status-disabled::before {
