@@ -199,7 +199,7 @@ class PluginUtil {
 			} else {
 
 				$feature_warning = sprintf(
-				/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
+					/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
 					_n(
 						'⚠ Incompatible plugins detected (%1$s, %2$s and %3$d other).',
 						'⚠ Incompatible plugins detected (%1$s and %2$s plugins and %3$d others).',
