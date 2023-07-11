@@ -16,10 +16,12 @@ export default function Marketplace() {
 
 	return (
 		<div className="woocommerce-marketplace">
-			<Tabs
-				selectedTab={ selectedTab }
-				setSelectedTab={ setSelectedTab }
-			/>
+			<div className="woocommerce-marketplace__header">
+				<Tabs
+					selectedTab={ selectedTab }
+					setSelectedTab={ setSelectedTab }
+				/>
+			</div>
 			<Content selectedTab={ selectedTab } />
 		</div>
 	);
