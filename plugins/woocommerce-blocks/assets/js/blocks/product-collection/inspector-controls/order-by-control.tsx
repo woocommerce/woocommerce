@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BlockEditProps } from '@wordpress/blocks';
 import {
 	SelectControl,
 	// @ts-expect-error Using experimental features
@@ -14,11 +13,11 @@ import {
  * Internal dependencies
  */
 import {
-	ProductCollectionAttributes,
 	TProductCollectionOrder,
 	TProductCollectionOrderBy,
+	QueryControlProps,
 } from '../types';
-import { getDefaultSettings } from '../constants';
+import { getDefaultQuery } from '../constants';
 
 const orderOptions = [
 	{
@@ -47,27 +46,21 @@ const orderOptions = [
 	},
 ];
 
-const OrderByControl = (
-	props: BlockEditProps< ProductCollectionAttributes >
-) => {
-	const { order, orderBy } = props.attributes.query;
-	const defaultSettings = getDefaultSettings( props.attributes );
+const OrderByControl = ( props: QueryControlProps ) => {
+	const { query, setQueryAttribute } = props;
+	const { order, orderBy } = query;
+	const defaultQuery = getDefaultQuery( query );
 
 	return (
 		<ToolsPanelItem
 			label={ __( 'Order by', 'woo-gutenberg-products-block' ) }
 			hasValue={ () =>
-				order !== defaultSettings.query?.order ||
-				orderBy !== defaultSettings.query?.orderBy
+				order !== defaultQuery?.order ||
+				orderBy !== defaultQuery?.orderBy
 			}
 			isShownByDefault
 			onDeselect={ () => {
-				props.setAttributes( {
-					query: {
-						...props.attributes.query,
-						...defaultSettings.query,
-					},
-				} );
+				setQueryAttribute( defaultQuery );
 			} }
 		>
 			<SelectControl
@@ -76,12 +69,9 @@ const OrderByControl = (
 				label={ __( 'Order by', 'woo-gutenberg-products-block' ) }
 				onChange={ ( value ) => {
 					const [ newOrderBy, newOrder ] = value.split( '/' );
-					props.setAttributes( {
-						query: {
-							...props.attributes.query,
-							order: newOrder as TProductCollectionOrder,
-							orderBy: newOrderBy as TProductCollectionOrderBy,
-						},
+					setQueryAttribute( {
+						order: newOrder as TProductCollectionOrder,
+						orderBy: newOrderBy as TProductCollectionOrderBy,
 					} );
 				} }
 			/>
