@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { useCompletion } from '@woocommerce/ai';
@@ -12,6 +11,7 @@ import { useCompletion } from '@woocommerce/ai';
 import {
 	MAX_TITLE_LENGTH,
 	MIN_TITLE_LENGTH_FOR_DESCRIPTION,
+	WOO_AI_PLUGIN_FEATURE_NAME,
 } from '../constants';
 import { StopCompletionBtn, WriteItForMeBtn } from '../components';
 import { useFeedbackSnackbar, useTinyEditor } from '../hooks';
@@ -61,6 +61,7 @@ export function WriteItForMeButtonContainer() {
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
+			feature: WOO_AI_PLUGIN_FEATURE_NAME,
 			onStreamMessage: ( content ) => {
 				// This prevents printing out incomplete HTML tags.
 				const ignoreRegex = new RegExp( /<\/?\w*[^>]*$/g );

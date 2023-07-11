@@ -17,12 +17,14 @@ type UseCompletionProps = {
 		previousContent: string
 	) => void;
 	onStreamError?: ( error: string ) => void;
+	feature?: string;
 };
 
 export const useCompletion = ( {
 	onStreamMessage = () => {},
 	onCompletionFinished = () => {},
 	onStreamError = () => {},
+	feature,
 }: UseCompletionProps ) => {
 	const completionSource = useRef< EventSource | null >( null );
 	const previousContent = useRef< string >( '' );
@@ -56,7 +58,11 @@ export const useCompletion = ( {
 		onStreamError( error );
 	};
 
-	const requestCompletion = async ( prompt: string ) => {
+	const requestCompletion = async (
+		prompt: string,
+		featureOverride?: string
+	) => {
+		const completionFeature = featureOverride ?? feature;
 		if ( completionSource.current ) {
 			stopCompletion( 'interrupted' );
 		}
@@ -64,8 +70,17 @@ export const useCompletion = ( {
 
 		let suggestionsSource;
 
+		if ( typeof completionFeature !== 'string' ) {
+			throw new Error(
+				'You must provide a feature when requesting a completion'
+			);
+		}
+
 		try {
-			suggestionsSource = await getCompletion( prompt );
+			suggestionsSource = await getCompletion(
+				prompt,
+				completionFeature
+			);
 		} catch ( e ) {
 			// eslint-disable-next-line no-console
 			console.debug( 'Completion connection error encountered', e );

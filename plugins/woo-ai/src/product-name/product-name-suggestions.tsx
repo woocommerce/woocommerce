@@ -25,6 +25,7 @@ import { useProductSlug } from '../hooks';
 import { ProductDataSuggestion } from '../utils/types';
 import { SuggestionItem, PoweredByLink, recordNameTracks } from './index';
 import { RandomLoadingMessage } from '../components';
+import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
 
 const MIN_TITLE_LENGTH = 10;
 
@@ -65,6 +66,7 @@ export const ProductNameSuggestions = () => {
 	);
 	const { updateProductSlug } = useProductSlug();
 	const { requestCompletion } = useCompletion( {
+		feature: WOO_AI_PLUGIN_FEATURE_NAME,
 		onStreamError: ( error ) => {
 			// eslint-disable-next-line no-console
 			console.debug( 'Streaming error encountered', error );

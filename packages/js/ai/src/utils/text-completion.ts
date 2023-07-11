@@ -4,12 +4,6 @@
 import apiFetch from '@wordpress/api-fetch';
 import debugFactory from 'debug';
 
-/**
- * Internal dependencies
- */
-//import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
-const WOO_AI_PLUGIN_FEATURE_NAME = 'woo_ai_plugin';
-
 const debugToken = debugFactory( 'jetpack-ai-assistant:token' );
 
 const JWT_TOKEN_ID = 'jetpack-ai-jwt-token';
@@ -84,7 +78,7 @@ export async function requestJetpackToken() {
  *
  * @param {string} prompt - The query to send to the API
  */
-export async function getCompletion( prompt: string ) {
+export async function getCompletion( prompt: string, feature: string ) {
 	const { token } = await requestJetpackToken();
 
 	const url = new URL(
@@ -93,7 +87,7 @@ export async function getCompletion( prompt: string ) {
 
 	url.searchParams.append( 'prompt', prompt );
 	url.searchParams.append( 'token', token );
-	url.searchParams.append( 'feature', WOO_AI_PLUGIN_FEATURE_NAME );
+	url.searchParams.append( 'feature', feature );
 
 	return new EventSource( url.toString() );
 }
