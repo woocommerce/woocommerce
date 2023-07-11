@@ -247,7 +247,7 @@ test.describe( 'Checkout page', () => {
 		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
 
-		// Let's simular a new browser context (by dropping all cookies), and reload the page. This approximates a
+		// Let's simulate a new browser context (by dropping all cookies), and reload the page. This approximates a
 		// scenario where the server can no longer identify the shopper. However, so long as we are within the 10 minute
 		// grace period following initial order placement, the 'order received' page should still be rendered.
 		await page.context().clearCookies();

@@ -394,10 +394,9 @@ class WC_Shortcode_Checkout {
 		 * Controls the grace period within which we do not require any sort of email verification step before rendering
 		 * the 'order received' or 'order pay' pages.
 		 *
-		 * To eliminate the grace period, set to zero (or to a negative value). However, note that by itself this will
-		 * not cause email verification to be required in all cases, but only those where verification is potentially
-		 * useful. In other words, if the current user is logged in and the order is associated with them, this filter
-		 * will not be invoked.
+		 * To eliminate the grace period, set to zero (or to a negative value). Note that this filter is not invoked
+		 * at all if email verification is deemed to be unnecessary (in other words, it cannot be used to force
+		 * verification in *all* cases).
 		 *
 		 * @since 8.0.0
 		 *
