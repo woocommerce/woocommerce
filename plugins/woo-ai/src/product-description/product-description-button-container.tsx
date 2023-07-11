@@ -4,6 +4,7 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
+import { useCompletion } from '@woocommerce/ai';
 
 /**
  * Internal dependencies
@@ -13,7 +14,7 @@ import {
 	MIN_TITLE_LENGTH_FOR_DESCRIPTION,
 } from '../constants';
 import { StopCompletionBtn, WriteItForMeBtn } from '../components';
-import { useCompletion, useFeedbackSnackbar, useTinyEditor } from '../hooks';
+import { useFeedbackSnackbar, useTinyEditor } from '../hooks';
 import {
 	getProductName,
 	getPostId,

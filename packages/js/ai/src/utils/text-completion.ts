@@ -7,7 +7,8 @@ import debugFactory from 'debug';
 /**
  * Internal dependencies
  */
-import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
+//import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
+const WOO_AI_PLUGIN_FEATURE_NAME = 'woo_ai_plugin';
 
 const debugToken = debugFactory( 'jetpack-ai-assistant:token' );
 
@@ -64,7 +65,7 @@ export async function requestJetpackToken() {
 			blogId: siteSuffix,
 
 			/**
-			 * Let's expire the token in 5 minutes
+			 * Let's expire the token in 2 minutes
 			 */
 			expire: Date.now() + JWT_TOKEN_EXPIRATION_TIME,
 		};

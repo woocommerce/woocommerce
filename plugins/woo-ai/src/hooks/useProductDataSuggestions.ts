@@ -3,6 +3,7 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
+import { requestJetpackToken } from '@woocommerce/ai';
 
 /**
  * Internal dependencies
@@ -12,7 +13,6 @@ import {
 	ProductDataSuggestionRequest,
 	ApiErrorResponse,
 } from '../utils/types';
-import { requestJetpackToken } from '../utils';
 
 type ProductDataSuggestionSuccessResponse = {
 	suggestions: ProductDataSuggestion[];

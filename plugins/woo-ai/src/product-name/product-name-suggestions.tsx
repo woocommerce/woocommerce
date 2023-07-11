@@ -4,6 +4,7 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { useCompletion } from '@woocommerce/ai';
 
 /**
  * Internal dependencies
@@ -20,7 +21,7 @@ import {
 	getTags,
 	getAttributes,
 } from '../utils';
-import { useCompletion, useProductSlug } from '../hooks';
+import { useProductSlug } from '../hooks';
 import { ProductDataSuggestion } from '../utils/types';
 import { SuggestionItem, PoweredByLink, recordNameTracks } from './index';
 import { RandomLoadingMessage } from '../components';
