@@ -390,6 +390,32 @@ class WC_Shortcode_Checkout {
 			return true;
 		}
 
+		/**
+		 * Controls the grace period within which we do not require any sort of email verification step before rendering
+		 * the 'order received' or 'order pay' pages.
+		 *
+		 * To eliminate the grace period, set to zero (or to a negative value). However, note that by itself this will
+		 * not cause email verification to be required in all cases, but only those where verification is potentially
+		 * useful. In other words, if the current user is logged in and the order is associated with them, this filter
+		 * will not be invoked.
+		 *
+		 * @since 8.0.0
+		 *
+		 * @param int      $grace_period Time in seconds after an order is placed before email verification may be required.
+		 * @param WC_Order $order        The order for which this grace period is being assessed.
+		 * @param string   $context      Indicates the context in which we might verify the email address. Typically 'order-pay' or 'order-received'.
+		 */
+		$verification_grace_period = (int) apply_filters( 'woocommerce_order_email_verification_grace_period', 10 * MINUTE_IN_SECONDS, $order, $context );
+		$date_created              = $order->get_date_created();
+
+		// We do not need to verify the email address if we are within the grace period immediately following order creation.
+		if (
+			is_a( $date_created, WC_DateTime::class )
+			&& time() - $date_created->getTimestamp() <= $verification_grace_period
+		) {
+			return false;
+		}
+
 		$session       = wc()->session;
 		$session_email = '';
 
