@@ -1,11 +1,11 @@
-# Product Editor
+# Artificial Intelligence tools
 
-A collection of WooCommerce Admin product editor components and utilities.
+A collection of WooCommerce tools and utilities to implement ai features.
 
 ## Installation
 
 Install the module
 
 ```bash
-pnpm install @woocommerce/product-editor --save
+pnpm install @woocommerce/ai --save
 ```
