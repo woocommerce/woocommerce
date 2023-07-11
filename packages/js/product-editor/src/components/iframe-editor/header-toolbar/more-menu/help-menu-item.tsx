@@ -5,8 +5,13 @@ import { MenuItem, VisuallyHidden } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { external } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 
 export const HelpMenuItem = () => {
+	const recordClick = () => {
+		recordEvent( 'product_iframe_editor_help_menu_item_click' );
+	};
+
 	return (
 		<MenuItem
 			role="menuitem"
@@ -17,6 +22,7 @@ export const HelpMenuItem = () => {
 				'https://wordpress.org/documentation/article/wordpress-block-editor/',
 				'woocommerce'
 			) }
+			onClick={ recordClick }
 			target="_blank"
 			rel="noopener noreferrer"
 		>
