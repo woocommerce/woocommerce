@@ -25,10 +25,11 @@ class Products extends ControllerTestCase {
 		$this->products = array(
 			$fixtures->get_simple_product(
 				array(
-					'name'          => 'Test Product 1',
-					'stock_status'  => 'instock',
-					'regular_price' => 10,
-					'image_id'      => $fixtures->sideload_image(),
+					'name'              => 'Test Product 1',
+					'stock_status'      => 'instock',
+					'regular_price'     => 10,
+					'image_id'          => $fixtures->sideload_image(),
+					'gallery_image_ids' => array(),
 				)
 			),
 			$fixtures->get_simple_product(
@@ -64,6 +65,10 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( $this->products[0]->add_to_cart_text(), $data['add_to_cart']->text );
 		$this->assertEquals( $this->products[0]->add_to_cart_description(), $data['add_to_cart']->description );
 		$this->assertEquals( $this->products[0]->is_on_sale(), $data['on_sale'] );
+
+		$this->assertCount( 1, $data['images'] );
+		$this->assertIsObject( $data['images'][0] );
+		$this->assertEquals( $this->products[0]->get_image_id(), $data['images'][0]->id );
 	}
 
 	/**
@@ -94,7 +99,7 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
-	 * Test searching by SKU
+	 * Test searching by SKU.
 	 */
 	public function test_search_by_sku() {
 		$product = new \WC_Product_Simple();
@@ -190,6 +195,70 @@ class Products extends ControllerTestCase {
 		$validate   = new ValidateSchema( $schema );
 
 		$diff = $validate->get_diff_from_object( $response->get_data() );
-		$this->assertEmpty( $diff, print_r( $diff, true ) );
+		$this->assertEmpty( $diff, print_r( $diff, true ) ); // @phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+	}
+
+	/**
+	 * Test return types when no image is available.
+	 */
+	public function test_without_image() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Test Product 1',
+				'stock_status'      => 'instock',
+				'regular_price'     => 10,
+				'image_id'          => '',
+				'gallery_image_ids' => array(),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertIsArray( $data['images'] );
+		$this->assertCount( 0, $data['images'] );
+
+		$image_id = $fixtures->sideload_image();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Test Product 1',
+				'stock_status'      => 'instock',
+				'regular_price'     => 10,
+				'image_id'          => $image_id,
+				'gallery_image_ids' => array(),
+			)
+		);
+		wp_delete_attachment( $image_id, true );
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertIsArray( $data['images'] );
+		$this->assertCount( 0, $data['images'] );
+	}
+
+	/**
+	 * Test product category image return types.
+	 */
+	public function test_product_category_image_return_types() {
+		$fixtures = new FixtureData();
+		$image_id = $fixtures->sideload_image();
+		$term     = wp_insert_term( 'Test Category', 'product_cat' );
+
+		update_term_meta( $term['term_id'], 'thumbnail_id', $image_id );
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/categories/' . $term['term_id'] ) );
+		$data     = $response->get_data();
+
+		$this->assertIsObject( $data['image'] );
+		$this->assertEquals( $data['image']->id, $image_id );
+
+		delete_term_meta( $term['term_id'], 'thumbnail_id' );
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/categories/' . $term['term_id'] ) );
+		$data     = $response->get_data();
+
+		$this->assertNull( $data['image'] );
 	}
 }
