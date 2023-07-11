@@ -8,6 +8,7 @@
 import './content.scss';
 import Discover from '../discover/discover';
 import Extensions from '../extensions/extensions';
+import Search from '../search/search';
 import Footer from '../footer/footer';
 
 export interface ContentProps {
@@ -27,6 +28,7 @@ export default function Content( props: ContentProps ): JSX.Element {
 	const { selectedTab } = props;
 	return (
 		<>
+			<Search />
 			{ renderContent( selectedTab ) }
 			<Footer />
 		</>
