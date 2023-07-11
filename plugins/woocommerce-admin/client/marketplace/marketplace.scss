@@ -1,4 +1,10 @@
-.woocommerce-marketplace {
-	// TODO: Works on desktop, on mobile this isn't correct. Seems to need to be -8px instead of -16px.
-	margin: 0 calc(-1 * var(--large-gap)); // remove margin added by <div class="woocommerce-layout__primary">
+.woocommerce-admin-page__marketplace {
+	.woocommerce-layout__primary {
+		margin: 0;
+	}
+
+	.woocommerce-layout__main {
+		padding: 0;
+	}
 }
+
