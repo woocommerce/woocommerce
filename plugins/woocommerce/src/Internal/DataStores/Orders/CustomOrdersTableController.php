@@ -481,7 +481,7 @@ class CustomOrdersTableController {
 			'title'       => __( 'Data storage for orders', 'woocommerce' ),
 			'type'        => 'radio',
 			'options'     => array(
-				'no'  => __( 'WordPress Post tables', 'woocommerce' ),
+				'no'  => __( 'WordPress post tables', 'woocommerce' ),
 				'yes' => __( 'High performance order storage (new)', 'woocommerce' ),
 			),
 			'value'       => $hpos_enabled ? 'yes' : 'no',
