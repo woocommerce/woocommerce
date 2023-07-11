@@ -514,10 +514,10 @@ class CustomOrdersTableController {
 				_n(
 					'Sync %d pending order. You can switch data storage for orders only when posts and orders table are in sync.',
 					'Sync %d pending orders. You can switch data storage for orders only when posts and orders table are in sync.',
+					$sync_status['current_pending_count'],
 					'woocommerce'
 				),
 				$sync_status['current_pending_count'],
-				'woocommerce'
 			);
 		}
 
