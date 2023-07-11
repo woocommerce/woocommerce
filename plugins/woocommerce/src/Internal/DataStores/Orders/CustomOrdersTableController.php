@@ -525,7 +525,7 @@ class CustomOrdersTableController {
 			'id'       => DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
 			'title'    => '',
 			'type'     => 'checkbox',
-			'desc'     => __( 'Keep posts and orders table in sync. (Compatibility mode)', 'woocommerce' ),
+			'desc'     => __( 'Keep the posts and orders tables in sync (compatibility mode).', 'woocommerce' ),
 			'value'    => $sync_enabled,
 			'desc_tip' => $sync_message,
 		);
