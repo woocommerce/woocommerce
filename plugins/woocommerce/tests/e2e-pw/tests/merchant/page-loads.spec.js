@@ -40,9 +40,31 @@ for ( const currentPage of wcPages ) {
 	test.describe( `WooCommerce Page Load > Load ${ currentPage.name } sub pages`, () => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
-		const coreProfilerEnabled = features.is_enabled( 'core-profiler' );
+		test.beforeAll( async ( { baseURL } ) => {
+			const coreProfilerEnabled = features.is_enabled( 'core-profiler' );
 
-		test.beforeEach( async ( { page, baseURL } ) => {
+			if ( coreProfilerEnabled ) {
+				const response = await new wcApi( {
+					url: baseURL,
+					consumerKey: process.env.CONSUMER_KEY,
+					consumerSecret: process.env.CONSUMER_SECRET,
+					version: 'wc-admin',
+				} ).post( 'onboarding/profile', {
+					skipped: true,
+				} );
+
+				const httpStatus = response.status;
+				const { status, message } = response.data;
+
+				expect( httpStatus ).toEqual( 200 );
+				expect( status ).toEqual( 'success' );
+				expect( message ).toEqual(
+					'Onboarding profile data has been updated.'
+				);
+			}
+		} );
+
+		test.beforeEach( async ( { page } ) => {
 			if ( currentPage.name === 'WooCommerce' ) {
 				await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 			} else if ( currentPage.name === 'Products' ) {
@@ -51,16 +73,6 @@ for ( const currentPage of wcPages ) {
 				await page.goto(
 					'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing'
 				);
-			} else if ( currentPage.name === 'Home' && coreProfilerEnabled ) {
-				await new wcApi( {
-					url: baseURL,
-					consumerKey: process.env.CONSUMER_KEY,
-					consumerSecret: process.env.CONSUMER_SECRET,
-					version: 'wc-admin',
-				} ).post( 'onboarding/profile', {
-					skipped: true,
-				} );
-				await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 			}
 		} );
 
@@ -68,23 +80,6 @@ for ( const currentPage of wcPages ) {
 			test( `Can load ${ currentPage.subpages[ i ].name }`, async ( {
 				page,
 			} ) => {
-				// deal with the onboarding wizard
-				if ( currentPage.subpages[ i ].name === 'Home' ) {
-					if ( ! coreProfilerEnabled ) {
-						await page.goto(
-							'wp-admin/admin.php?page=wc-admin&path=/setup-wizard'
-						);
-						await page
-							.locator( 'text=Skip setup store details' )
-							.click();
-						await page
-							.locator( 'button >> text=No thanks' )
-							.click();
-						await page.waitForLoadState( 'networkidle' );
-						await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-					}
-				}
-
 				// deal with cases where the 'Coupons' legacy menu had already been removed.
 				if ( currentPage.subpages[ i ].name === 'Coupons' ) {
 					const couponsMenuVisible = await page

@@ -104,4 +104,33 @@ final class StringUtil {
 	public static function is_null_or_whitespace( ?string $value ) {
 		return is_null( $value ) || '' === $value || ctype_space( $value );
 	}
+
+	/**
+	 * Convert an array of values to a list suitable for a SQL "IN" statement
+	 * (so comma separated and delimited by parenthesis).
+	 * e.g.: [1,2,3] --> (1,2,3)
+	 *
+	 * @param array $values The values to convert.
+	 * @return string A parenthesized and comma-separated string generated from the values.
+	 * @throws \InvalidArgumentException Empty values array passed.
+	 */
+	public static function to_sql_list( array $values ) {
+		if ( empty( $values ) ) {
+			throw new \InvalidArgumentException( self::class_name_without_namespace( __CLASS__ ) . '::' . __FUNCTION__ . ': the values array is empty' );
+		}
+
+		return '(' . implode( ',', $values ) . ')';
+	}
+
+	/**
+	 * Get the name of a class without the namespace.
+	 *
+	 * @param string $class_name The full class name.
+	 * @return string The class name without the namespace.
+	 */
+	public static function class_name_without_namespace( string $class_name ) {
+		// A '?:' would convert this to a one-liner, but WP coding standards disallow these :shrug:.
+		$result = substr( strrchr( $class_name, '\\' ), 1 );
+		return $result ? $result : $class_name;
+	}
 }

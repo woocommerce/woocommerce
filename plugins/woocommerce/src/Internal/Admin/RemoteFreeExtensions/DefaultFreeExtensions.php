@@ -41,7 +41,6 @@ class DefaultFreeExtensions {
 					self::get_plugin( 'google-listings-and-ads' ),
 					self::get_plugin( 'pinterest-for-woocommerce' ),
 					self::get_plugin( 'facebook-for-woocommerce' ),
-					self::get_plugin( 'tiktok-for-business:alt' ),
 				),
 			),
 			array(
@@ -50,6 +49,7 @@ class DefaultFreeExtensions {
 				'plugins' => array(
 					self::get_plugin( 'mailpoet:alt' ),
 					self::get_plugin( 'mailchimp-for-woocommerce' ),
+					self::get_plugin( 'klaviyo' ),
 					self::get_plugin( 'creative-mail-by-constant-contact' ),
 				),
 			),
@@ -74,7 +74,6 @@ class DefaultFreeExtensions {
 						self::get_plugin( 'jetpack' ),
 						self::get_plugin( 'pinterest-for-woocommerce' ),
 						self::get_plugin( 'mailpoet' ),
-						self::get_plugin( 'tiktok-for-business' ),
 						self::get_plugin( 'google-listings-and-ads' ),
 						self::get_plugin( 'woocommerce-services:tax' ),
 					)
@@ -168,6 +167,13 @@ class DefaultFreeExtensions {
 				'description'    => __( 'Send targeted campaigns, recover abandoned carts and much more with Mailchimp.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/mailchimp-for-woocommerce.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=mailchimp-woocommerce',
+				'is_built_by_wc' => false,
+			),
+			'klaviyo'                           => array(
+				'name'           => __( 'Klaviyo', 'woocommerce' ),
+				'description'    => __( 'Grow and retain customers with intelligent, impactful email and SMS marketing automation and a consolidated view of customer interactions.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/onboarding/klaviyo.png', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=klaviyo_settings',
 				'is_built_by_wc' => false,
 			),
 			'creative-mail-by-constant-contact' => array(

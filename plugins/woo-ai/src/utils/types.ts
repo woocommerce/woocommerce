@@ -1,19 +1,6 @@
 export type Attribute = {
 	name: string;
-	value: string;
-};
-
-export type ProductData = {
-	product_id: number | null;
-	name: string;
-	description: string;
-	categories: string[];
-	tags: string[];
-	attributes: Attribute[];
-	product_type: string;
-	is_downloadable: boolean;
-	is_virtual: boolean;
-	publishing_status: string;
+	values: Array< string >;
 };
 
 export type ProductDataSuggestion = {
