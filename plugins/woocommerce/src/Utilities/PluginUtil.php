@@ -219,8 +219,12 @@ class PluginUtil {
 				),
 				admin_url( 'plugins.php' )
 			);
-			/* translators: %s = URL of the plugins page */
-			$extra_desc_tip = sprintf( __( "<br><a href='%s'>View and manage</a>", 'woocommerce' ), $incompatible_plugins_url );
+			/* translators: %1$s opening link tag %2$s closing link tag. */
+			$extra_desc_tip = '<br>' . sprintf( 
+				__( '%1$sView and manage%2$s', 'woocommerce' ), 
+				'<a href="' . esc_url( $incompatible_plugins_url ) . '">',
+				'</a>'
+			);
 
 			$feature_warning .= $extra_desc_tip;
 
