@@ -169,7 +169,6 @@
 	width: 100%;
 	height: 0;
 	display: block;
-	position: relative;
 	pointer-events: none;
 	outline: none !important;
 	position: absolute;
@@ -366,7 +365,6 @@
 	@include ie11() {
 		.wc-block-components-price-slider__range-input-wrapper {
 			border: 0;
-			height: auto;
 			position: relative;
 			height: 50px;
 		}
