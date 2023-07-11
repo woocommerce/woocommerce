@@ -16,12 +16,12 @@ import {
  * Internal dependencies
  */
 import { ProductCollectionAttributes } from '../types';
+import { setQueryAttribute } from '../utils';
+import { DEFAULT_FILTERS, getDefaultSettings } from '../constants';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';
 import OrderByControl from './order-by-control';
 import OnSaleControl from './on-sale-control';
-import { setQueryAttribute } from '../utils';
-import { DEFAULT_FILTERS, getDefaultSettings } from '../constants';
 import StockStatusControl from './stock-status-control';
 import KeywordControl from './keyword-control';
 import AttributesControl from './attributes-control';
@@ -42,13 +42,20 @@ const ProductCollectionInspectorControls = (
 		[ props ]
 	);
 
+	const displayControlProps = {
+		setAttributes: props.setAttributes,
+		displayLayout: props.attributes.displayLayout,
+	};
+
+	const queryControlProps = {
+		setQueryAttribute: setQueryAttributeBind,
+		query,
+	};
+
 	return (
 		<InspectorControls>
 			<BlockControls>
-				<DisplayLayoutControl
-					displayLayout={ props.attributes.displayLayout }
-					setAttributes={ props.setAttributes }
-				/>
+				<DisplayLayoutControl { ...displayControlProps } />
 			</BlockControls>
 			<ToolsPanel
 				label={ __( 'Settings', 'woo-gutenberg-products-block' ) }
@@ -59,13 +66,10 @@ const ProductCollectionInspectorControls = (
 					props.setAttributes( defaultSettings );
 				} }
 			>
-				<ColumnsControl { ...props } />
-				<InheritQueryControl
-					setQueryAttribute={ setQueryAttributeBind }
-					query={ query }
-				/>
+				<ColumnsControl { ...displayControlProps } />
+				<InheritQueryControl { ...queryControlProps } />
 				{ displayQueryControls ? (
-					<OrderByControl { ...props } />
+					<OrderByControl { ...queryControlProps } />
 				) : null }
 			</ToolsPanel>
 
@@ -80,29 +84,13 @@ const ProductCollectionInspectorControls = (
 					} }
 					className="wc-block-editor-product-collection-inspector-toolspanel__filters"
 				>
-					<OnSaleControl { ...props } />
-					<StockStatusControl { ...props } />
-					<HandPickedProductsControl
-						setQueryAttribute={ setQueryAttributeBind }
-						selectedProductIds={
-							query.woocommerceHandPickedProducts
-						}
-					/>
-					<KeywordControl { ...props } />
-					<AttributesControl
-						woocommerceAttributes={
-							query.woocommerceAttributes || []
-						}
-						setQueryAttribute={ setQueryAttributeBind }
-					/>
-					<TaxonomyControls
-						setQueryAttribute={ setQueryAttributeBind }
-						query={ query }
-					/>
-					<AuthorControl
-						value={ query.author }
-						setQueryAttribute={ setQueryAttributeBind }
-					/>
+					<OnSaleControl { ...queryControlProps } />
+					<StockStatusControl { ...queryControlProps } />
+					<HandPickedProductsControl { ...queryControlProps } />
+					<KeywordControl { ...queryControlProps } />
+					<AttributesControl { ...queryControlProps } />
+					<TaxonomyControls { ...queryControlProps } />
+					<AuthorControl { ...queryControlProps } />
 				</ToolsPanel>
 			) : null }
 			<ProductCollectionFeedbackPrompt />

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BlockEditProps } from '@wordpress/blocks';
 import fastDeepEqual from 'fast-deep-equal/es6';
 import {
 	FormTokenField,
@@ -14,8 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { ProductCollectionAttributes } from '../types';
-import { setQueryAttribute } from '../utils';
+import { QueryControlProps } from '../types';
 import { STOCK_STATUS_OPTIONS, getDefaultStockStatuses } from '../constants';
 
 /**
@@ -35,10 +33,9 @@ function getStockStatusIdByLabel( statusLabel: FormTokenField.Value ) {
 	)?.[ 0 ];
 }
 
-const StockStatusControl = (
-	props: BlockEditProps< ProductCollectionAttributes >
-) => {
-	const { query } = props.attributes;
+const StockStatusControl = ( props: QueryControlProps ) => {
+	const { query, setQueryAttribute } = props;
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Stock status', 'woo-gutenberg-products-block' ) }
@@ -49,7 +46,7 @@ const StockStatusControl = (
 				)
 			}
 			onDeselect={ () => {
-				setQueryAttribute( props, {
+				setQueryAttribute( {
 					woocommerceStockStatus: getDefaultStockStatuses(),
 				} );
 			} }
@@ -62,7 +59,7 @@ const StockStatusControl = (
 						.map( getStockStatusIdByLabel )
 						.filter( Boolean ) as string[];
 
-					setQueryAttribute( props, {
+					setQueryAttribute( {
 						woocommerceStockStatus,
 					} );
 				} }

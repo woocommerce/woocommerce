@@ -15,12 +15,7 @@ import {
 /**
  * Internal dependencies
  */
-import { ProductCollectionQuery } from '../types';
-
-interface HandPickedProductsControlProps {
-	setQueryAttribute: ( value: Partial< ProductCollectionQuery > ) => void;
-	selectedProductIds?: string[] | undefined;
-}
+import { QueryControlProps } from '../types';
 
 /**
  * Returns:
@@ -55,9 +50,10 @@ function useProducts() {
 }
 
 const HandPickedProductsControl = ( {
-	selectedProductIds,
+	query,
 	setQueryAttribute,
-}: HandPickedProductsControlProps ) => {
+}: QueryControlProps ) => {
+	const selectedProductIds = query.woocommerceHandPickedProducts;
 	const { productsMap, productsList } = useProducts();
 
 	const onTokenChange = useCallback(

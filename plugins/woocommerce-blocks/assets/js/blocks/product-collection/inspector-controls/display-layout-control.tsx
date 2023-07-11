@@ -8,15 +8,10 @@ import { list, grid } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { ProductCollectionDisplayLayout } from '../types';
-
-type DisplayLayoutObject = {
-	displayLayout: ProductCollectionDisplayLayout;
-};
-
-type DisplayLayoutControlProps = DisplayLayoutObject & {
-	setAttributes: ( attrs: DisplayLayoutObject ) => void;
-};
+import {
+	DisplayLayoutControlProps,
+	ProductCollectionDisplayLayout,
+} from '../types';
 
 const DisplayLayoutControl = ( props: DisplayLayoutControlProps ) => {
 	const { type, columns } = props.displayLayout;
