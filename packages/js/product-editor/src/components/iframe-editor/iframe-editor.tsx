@@ -79,6 +79,7 @@ export function IframeEditor( {
 		<div className="woocommerce-iframe-editor">
 			<EditorContext.Provider
 				value={ {
+					blocks,
 					hasRedo,
 					hasUndo,
 					isInserterOpened,
