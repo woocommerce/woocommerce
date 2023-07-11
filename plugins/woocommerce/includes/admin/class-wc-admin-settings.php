@@ -464,7 +464,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 										<?php
 									}
 									if ( $show_desc_at_end ) {
-										echo wp_kses_post( "<p class='description description-thin'>{$value['desc']}</p>" );
+										echo wp_kses_post( "<p class='description description-thin'>{$description}</p>" );
 									}
 									?>
 									</ul>
