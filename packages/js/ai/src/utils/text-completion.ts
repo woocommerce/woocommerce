@@ -14,6 +14,7 @@ declare global {
 		JP_CONNECTION_INITIAL_STATE: {
 			apiNonce: string;
 			siteSuffix: string;
+			connectionStatus: { isActive: boolean };
 		};
 	}
 }

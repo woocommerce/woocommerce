@@ -56,12 +56,23 @@ export const useCompletion = ( {
 	const onCompletionError = ( error: string ) => {
 		stopCompletion( 'error' );
 		onStreamError( error );
+		// eslint-disable-next-line no-console
+		console.error( `UseCompletion error | ${ error }` );
 	};
 
 	const requestCompletion = async (
 		prompt: string,
 		featureOverride?: string
 	) => {
+		if (
+			! window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive
+		) {
+			onCompletionError(
+				'You must be connected to Jetpack for text completion'
+			);
+			return;
+		}
+
 		const completionFeature = featureOverride ?? feature;
 		if ( completionSource.current ) {
 			stopCompletion( 'interrupted' );
@@ -71,9 +82,10 @@ export const useCompletion = ( {
 		let suggestionsSource;
 
 		if ( typeof completionFeature !== 'string' ) {
-			throw new Error(
+			onCompletionError(
 				'You must provide a feature when requesting a completion'
 			);
+			return;
 		}
 
 		try {
@@ -83,7 +95,6 @@ export const useCompletion = ( {
 			);
 		} catch ( e ) {
 			// eslint-disable-next-line no-console
-			console.debug( 'Completion connection error encountered', e );
 			onCompletionError( 'connection_error' );
 			return;
 		}
