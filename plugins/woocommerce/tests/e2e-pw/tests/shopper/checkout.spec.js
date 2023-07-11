@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin, customer } = require( '../../test-data/data' );
+const { setFilterValue, clearFilters } = require( '../../utils/filters' );
 
 const guestEmail = 'checkout-guest@example.com';
 
@@ -245,9 +246,19 @@ test.describe( 'Checkout page', () => {
 			.textContent();
 		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
-		// If we simulate a new browser context by dropping all cookies, and reload the page, the shopper should be
-		// prompted to complete an email validation step before they can proceed.
+
+		// Let's simular a new browser context (by dropping all cookies), and reload the page. This approximates a
+		// scenario where the server can no longer identify the shopper. However, so long as we are within the 10 minute
+		// grace period following initial order placement, the 'order received' page should still be rendered.
 		await page.context().clearCookies();
+		await page.reload();
+		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			'Order received'
+		);
+
+		// Let's simulate a scenario where the 10 minute grace period has expired. This time, we expect the shopper to
+		// be presented with a request to verify their email address.
+		await setFilterValue( page, 'woocommerce_order_email_verification_grace_period', 0 );
 		await page.reload();
 		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(3)' ) ).toContainText(
 			/verify the email address associated with the order/
@@ -296,6 +307,7 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'td.line_cost >> nth=0' ) ).toContainText(
 			twoProductPrice
 		);
+		clearFilters( page );
 	} );
 
 	test( 'allows existing customer to place order', async ( { page } ) => {
