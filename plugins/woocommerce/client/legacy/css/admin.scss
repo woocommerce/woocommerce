@@ -4204,8 +4204,8 @@ table.wc-shipping-classes {
 .woocommerce-input-toggle {
 	height: 16px;
 	width: 32px;
-	border: 2px solid #935687;
-	background-color: #935687;
+	border: 2px solid var(--wp-admin-theme-color);
+	background-color: var(--wp-admin-theme-color);
 	display: inline-block;
 	text-indent: -9999px;
 	border-radius: 10em;
