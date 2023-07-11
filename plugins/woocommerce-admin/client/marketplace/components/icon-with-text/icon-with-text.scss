@@ -3,10 +3,18 @@
 	align-items: center;
 	gap: 8px;
 
-	.icon {
-		border-radius: 50%;
-		background: var(--woo-color-primary-woo-purple-50, #7f54b3);
+	&__icon-background {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		width: 32px;
 		height: 32px;
+		background: var(--woo-color-primary-woo-purple-50, #7f54b3);
+		border-radius: 50%;
+	}
+
+	.icon {
+		width: 24px;
+		height: 24px;
 	}
 }
