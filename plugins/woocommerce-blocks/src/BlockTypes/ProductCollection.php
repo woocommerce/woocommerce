@@ -173,6 +173,9 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$block_context_query = $block->context['query'];
+		// phpcs:ignore WordPress.DB.SlowDBQuery
+		$block_context_query['tax_query'] = $query['tax_query'];
+
 		return $this->get_final_frontend_query( $block_context_query, $page );
 	}
 

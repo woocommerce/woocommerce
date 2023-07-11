@@ -25,6 +25,7 @@ test.describe( 'Product Collection', () => {
 		pageObject,
 	} ) => {
 		expect( pageObject.productTemplate ).not.toBeNull();
+		expect( pageObject.products ).toHaveCount( 9 );
 		expect( pageObject.productImages ).toHaveCount( 9 );
 		expect( pageObject.productTitles ).toHaveCount( 9 );
 		expect( pageObject.productPrices ).toHaveCount( 9 );
@@ -33,6 +34,7 @@ test.describe( 'Product Collection', () => {
 		await pageObject.publishAndGoToFrontend();
 
 		expect( pageObject.productTemplate ).not.toBeNull();
+		expect( pageObject.products ).toHaveCount( 9 );
 		expect( pageObject.productImages ).toHaveCount( 9 );
 		expect( pageObject.productTitles ).toHaveCount( 9 );
 		expect( pageObject.productPrices ).toHaveCount( 9 );
@@ -81,7 +83,7 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 		} ) => {
 			// On each page we show 9 products.
-			await expect( pageObject.productImages ).toHaveCount( 9 );
+			await expect( pageObject.products ).toHaveCount( 9 );
 			// All products should not be on sale.
 			await expect(
 				await pageObject.productImages.filter( {
@@ -92,7 +94,7 @@ test.describe( 'Product Collection', () => {
 			await pageObject.setShowOnlyProductsOnSale( true );
 
 			// In test data we have only 6 products on sale
-			await expect( pageObject.productImages ).toHaveCount( 6 );
+			await expect( pageObject.products ).toHaveCount( 6 );
 
 			// Expect all shown products to be on sale.
 			await expect(
@@ -102,53 +104,171 @@ test.describe( 'Product Collection', () => {
 			).toHaveCount( await pageObject.productImages.count() );
 
 			await pageObject.publishAndGoToFrontend();
-			await expect( pageObject.productImages ).toHaveCount( 6 );
+			await expect( pageObject.products ).toHaveCount( 6 );
 			await expect(
 				await pageObject.productImages.filter( {
 					hasText: 'Product on sale',
 				} )
 			).toHaveCount( await pageObject.productImages.count() );
 		} );
+
+		test( 'Products can be filtered based on selection in handpicked products option', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.addFilter( 'Show Hand-picked Products' );
+
+			const filterName = 'Pick some products';
+			await pageObject.setFilterComboboxValue( filterName, [ 'Album' ] );
+			await expect( pageObject.products ).toHaveCount( 1 );
+
+			const productNames = [ 'Album', 'Cap' ];
+			await pageObject.setFilterComboboxValue( filterName, productNames );
+			await expect( pageObject.products ).toHaveCount( 2 );
+			await expect( pageObject.productTitles ).toHaveText( productNames );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.products ).toHaveCount( 2 );
+			await expect( pageObject.productTitles ).toHaveText( productNames );
+		} );
+
+		test( 'Products can be filtered based on keyword.', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+			await pageObject.addFilter( 'Keyword' );
+
+			await pageObject.setKeyword( 'Album' );
+			await expect( pageObject.productTitles ).toHaveText( [ 'Album' ] );
+
+			await pageObject.setKeyword( 'Cap' );
+			await expect( pageObject.productTitles ).toHaveText( [ 'Cap' ] );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.productTitles ).toHaveText( [ 'Cap' ] );
+		} );
+
+		test( 'Products can be filtered based on category.', async ( {
+			pageObject,
+		} ) => {
+			const filterName = 'Product categories';
+			await pageObject.addFilter( 'Show Taxonomies' );
+			await pageObject.setFilterComboboxValue( filterName, [
+				'Clothing',
+			] );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'Logo Collection',
+			] );
+
+			await pageObject.setFilterComboboxValue( filterName, [
+				'Accessories',
+			] );
+			const accessoriesProductNames = [
+				'Beanie',
+				'Beanie with Logo',
+				'Belt',
+				'Cap',
+				'Sunglasses',
+			];
+			await expect( pageObject.productTitles ).toHaveText(
+				accessoriesProductNames
+			);
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.productTitles ).toHaveText(
+				accessoriesProductNames
+			);
+		} );
+
+		test( 'Products can be filtered based on product attributes like color, size etc.', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.addFilter( 'Show Product Attributes' );
+			await pageObject.setProductAttribute( 'Color', 'Green' );
+
+			await expect( pageObject.products ).toHaveCount( 3 );
+
+			await pageObject.setProductAttribute( 'Size', 'Large' );
+
+			await expect( pageObject.products ).toHaveCount( 1 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 1 );
+		} );
+
+		// TODO There are no products with stock status 'Out of stock' in test data.
+		test.skip( 'Products can be filtered based on stock status (in stock, out of stock, or backorder).', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.setFilterComboboxValue( 'Stock status', [
+				'Out of stock',
+			] );
+
+			await expect( pageObject.products ).toHaveCount( 1 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 1 );
+		} );
 	} );
 
-	test( 'Products can be filtered based on selection in handpicked products option', async ( {
+	test.describe( 'Toolbar settings', () => {
+		test( 'Toolbar -> Items per page, offset & max page to show', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.setDisplaySettings( {
+				itemsPerPage: 3,
+				offset: 0,
+				maxPageToShow: 2,
+			} );
+
+			expect( await pageObject.products ).toHaveCount( 3 );
+
+			await pageObject.setDisplaySettings( {
+				itemsPerPage: 2,
+				offset: 0,
+				maxPageToShow: 2,
+			} );
+			expect( await pageObject.products ).toHaveCount( 2 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			expect( await pageObject.products ).toHaveCount( 2 );
+
+			const paginationNumbers =
+				pageObject.pagination.locator( '.page-numbers' );
+			await expect( paginationNumbers ).toHaveCount( 2 );
+		} );
+	} );
+
+	test( 'Responsive -> Block correctly adjusts number of columns on smaller screens', async ( {
 		pageObject,
 	} ) => {
-		await pageObject.addFilter( 'Show Hand-picked Products' );
-
-		await pageObject.setHandpickedProducts( [ 'Album' ] );
-		expect( pageObject.productTitles ).toHaveCount( 1 );
-
-		const productNames = [ 'Album', 'Cap' ];
-		await pageObject.setHandpickedProducts( productNames );
-		expect( pageObject.productTitles ).toHaveCount( 2 );
-		expect( pageObject.productTitles ).toHaveText( productNames );
-
 		await pageObject.publishAndGoToFrontend();
-		expect( pageObject.productTitles ).toHaveCount( 2 );
-		expect( pageObject.productTitles ).toHaveText( productNames );
-	} );
 
-	test( 'Products can be filtered based on keyword.', async ( {
-		page,
-		admin,
-		editor,
-	} ) => {
-		const pageObject = new ProductCollectionPage( {
-			page,
-			admin,
-			editor,
+		const firstProduct = pageObject.products.first();
+
+		// In the original viewport size, we expect the product width to be less than the parent width
+		// because we will have more than 1 column
+		let productSize = await firstProduct.boundingBox();
+		let parentSize = await (
+			await firstProduct.locator( 'xpath=..' )
+		 ).boundingBox();
+		expect( productSize?.width ).toBeLessThan(
+			parentSize?.width as number
+		);
+
+		await pageObject.setViewportSize( {
+			height: 667,
+			width: 375,
 		} );
-		await pageObject.createNewPostAndInsertBlock();
-		await pageObject.addFilter( 'Keyword' );
 
-		await pageObject.setKeyword( 'Album' );
-		expect( pageObject.productTitles ).toHaveText( [ 'Album' ] );
-
-		await pageObject.setKeyword( 'Cap' );
-		expect( pageObject.productTitles ).toHaveText( [ 'Cap' ] );
-
-		await pageObject.publishAndGoToFrontend();
-		expect( pageObject.productTitles ).toHaveText( [ 'Cap' ] );
+		// In the smaller viewport size, we expect the product width to be (approximately) the same as the parent width
+		// because we will have only 1 column
+		productSize = await firstProduct.boundingBox();
+		parentSize = await (
+			await firstProduct.locator( 'xpath=..' )
+		 ).boundingBox();
+		expect( productSize?.width ).toBeCloseTo( parentSize?.width as number );
 	} );
 } );
