@@ -70,9 +70,6 @@ export function WriteItForMeButtonContainer() {
 				}
 			},
 			onStreamError: ( error ) => {
-				// eslint-disable-next-line no-console
-				console.debug( 'Streaming error encountered', error );
-
 				tinyEditor.setContent( getApiError( error ) );
 			},
 			onCompletionFinished: ( reason, content ) => {
