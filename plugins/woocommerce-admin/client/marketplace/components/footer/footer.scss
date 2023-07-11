@@ -1,3 +1,9 @@
+.woocommerce-admin-page__marketplace .woocommerce-layout__footer {
+	// Undo default fixed footer style used in WC Admin
+	position: unset;
+	width: 100%;
+}
+
 .woocommerce-marketplace__footer {
 	display: flex;
 	width: 100%;
@@ -8,12 +14,20 @@
 
 	&-columns {
 		display: flex;
-		align-items: center;
+		flex-direction: column;
+		gap: 44px;
 	}
 
 	span {
 		font-size: 14px;
 		line-height: 20px;
 		color: #969696;
+	}
+}
+
+@media screen and (min-width: 850px) {
+	.woocommerce-marketplace__footer-columns {
+		flex-direction: row;
+		align-items: center;
 	}
 }
