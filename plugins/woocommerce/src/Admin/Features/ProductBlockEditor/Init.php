@@ -259,7 +259,8 @@ class Init {
 								array(
 									'woocommerce/product-name-field',
 									array(
-										'name' => 'Product name',
+										'name'      => 'Product name',
+										'autoFocus' => true,
 									),
 								),
 								array(
