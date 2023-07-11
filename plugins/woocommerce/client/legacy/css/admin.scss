@@ -924,7 +924,7 @@
 	overflow: hidden;
 
 	&.updated {
-		border-left-color: #cc99c2 !important;
+		border-left-color: var(--wp-admin-theme-color) !important;
 	}
 
 	a.skip,
