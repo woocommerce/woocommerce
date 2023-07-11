@@ -340,7 +340,7 @@ class WC_Admin_Addons {
 			$url
 		);
 
-		echo '<a href="' . esc_url( $url ) . '" class="add-new-h2">' . esc_html( $text ) . '</a>' . "\n";
+		echo '<a href="' . esc_url( $url ) . '" class="page-title-action">' . esc_html( $text ) . '</a>' . "\n";
 	}
 
 	/**
