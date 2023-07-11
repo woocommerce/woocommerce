@@ -171,6 +171,11 @@ export function WriteItForMeButtonContainer() {
 				', '
 			) }) directly in the description, but utilize them to create an engaging and enticing portrayal of the product.`,
 			'Do not include a top-level heading at the beginning description.',
+			`For SEO benefits, determine the main keyword (2 to 3 words) contained within "${ productName }".`,
+			'For example, if the product name is "Premium Italian Espresso Machine with Milk Frother", the main keyword could be "Italian Espresso Machine".',
+			'Utilize this keyword within the description content within the first 10% of the content.',
+			'To avoid keyword stuffing, do not write the keyword more than 3 times in the description.',
+			'Do not explicitly state what the keyword is in the description.',
 		].join( ' ' );
 	};
 
