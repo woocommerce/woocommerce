@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BlockEditProps } from '@wordpress/blocks';
 import {
 	RangeControl,
 	// @ts-expect-error Using experimental features
@@ -13,32 +12,26 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	ProductCollectionAttributes,
-	ProductCollectionDisplayLayout,
-} from '../types';
-import { getDefaultSettings } from '../constants';
+import { DisplayLayoutControlProps } from '../types';
+import { getDefaultDisplayLayout } from '../constants';
 
-const ColumnsControl = (
-	props: BlockEditProps< ProductCollectionAttributes >
-) => {
-	const { type, columns } = props.attributes.displayLayout;
+const ColumnsControl = ( props: DisplayLayoutControlProps ) => {
+	const { type, columns } = props.displayLayout;
 	const showColumnsControl = type === 'flex';
 
-	const defaultSettings = getDefaultSettings( props.attributes );
+	const defaultLayout = getDefaultDisplayLayout();
 
 	return showColumnsControl ? (
 		<ToolsPanelItem
 			label={ __( 'Columns', 'woo-gutenberg-products-block' ) }
 			hasValue={ () =>
-				defaultSettings.displayLayout?.columns !== columns ||
-				defaultSettings.displayLayout?.type !== type
+				defaultLayout?.columns !== columns ||
+				defaultLayout?.type !== type
 			}
 			isShownByDefault
 			onDeselect={ () => {
 				props.setAttributes( {
-					displayLayout:
-						defaultSettings.displayLayout as ProductCollectionDisplayLayout,
+					displayLayout: defaultLayout,
 				} );
 			} }
 		>
@@ -48,7 +41,7 @@ const ColumnsControl = (
 				onChange={ ( value: number ) =>
 					props.setAttributes( {
 						displayLayout: {
-							...props.attributes.displayLayout,
+							...props.displayLayout,
 							columns: value,
 						},
 					} )

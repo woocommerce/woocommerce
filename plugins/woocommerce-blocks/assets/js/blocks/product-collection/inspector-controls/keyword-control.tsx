@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BlockEditProps } from '@wordpress/blocks';
 import { useEffect, useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import {
@@ -15,18 +14,17 @@ import {
 /**
  * Internal dependencies
  */
-import { ProductCollectionAttributes } from '../types';
-import { setQueryAttribute } from '../utils';
+import { QueryControlProps } from '../types';
 
-const KeywordControl = (
-	props: BlockEditProps< ProductCollectionAttributes >
-) => {
-	const { query } = props.attributes;
+const KeywordControl = ( props: QueryControlProps ) => {
+	const { query, setQueryAttribute } = props;
 	const [ querySearch, setQuerySearch ] = useState( query.search );
 
 	const onChangeDebounced = useDebounce( () => {
 		if ( query.search !== querySearch ) {
-			setQueryAttribute( props, { search: querySearch } );
+			setQueryAttribute( {
+				search: querySearch,
+			} );
 		}
 	}, 250 );
 
