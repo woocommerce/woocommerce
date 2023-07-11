@@ -79,11 +79,11 @@ body {
 	}
 
 	a {
-		color: #a16696;
+		color: #7F54B3;
 
 		&:hover,
 		&:focus {
-			color: #111;
+			color: #3C2861;
 		}
 	}
 
@@ -355,18 +355,18 @@ body {
 
 				a.button-primary {
 					color: #fff;
-					background-color: #bb77ae;
-					border-color: #a36597;
-					box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-					text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
+					background-color: #7F54B3;
+					border-color: #7F54B3;
+					box-shadow: 0 0 0;
+					text-shadow: none;
 
 					&:hover,
 					&:focus,
 					&:active {
 						color: #fff;
-						background: #a36597;
-						border-color: #a36597;
-						box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+						background: #674399;
+						border-color: #674399;
+						box-shadow: none;
 					}
 				}
 			}
@@ -470,8 +470,8 @@ body {
 		}
 
 		input[type="checkbox"]:checked + label::before {
-			background: #935687;
-			border-color: #935687;
+			background: #7F54B3;
+			border-color: #7F54B3;
 		}
 	}
 }
@@ -533,7 +533,7 @@ body {
 		line-height: 1.4;
 
 		a {
-			color: #a16696;
+			color: #7F54B3;
 			text-decoration: none;
 			padding: 1.5em;
 			margin: -1.5em;
@@ -563,22 +563,22 @@ body {
 	}
 
 	li.active {
-		border-color: #a16696;
-		color: #a16696;
+		border-color: #7F54B3;
+		color: #7F54B3;
 		font-weight: 700;
 
 		&::before {
-			border-color: #a16696;
+			border-color: #7F54B3;
 		}
 	}
 
 	li.done {
-		border-color: #a16696;
-		color: #a16696;
+		border-color: #7F54B3;
+		color: #7F54B3;
 
 		&::before {
-			border-color: #a16696;
-			background: #a16696;
+			border-color: #7F54B3;
+			background: #7F54B3;
 		}
 	}
 }
@@ -591,19 +591,19 @@ body {
 
 .wc-setup .wc-setup-actions .button-primary,
 .woocommerce-tracker .button-primary {
-	background-color: #bb77ae;
-	border-color: #a36597;
-	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
-	text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
+	background-color: #7F54B3;
+	border-color: #7F54B3;
+	box-shadow: 0 0 0;
+	text-shadow: none;
 	margin: 0;
 	opacity: 1;
 
 	&:hover,
 	&:focus,
 	&:active {
-		background: #a36597;
-		border-color: #a36597;
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
+		background: #674399;
+		border-color: #674399;
+		box-shadow: 0 0 0;
 	}
 }
 
@@ -805,8 +805,8 @@ body {
 	.wc-wizard-service-toggle {
 		height: 16px;
 		width: 32px;
-		border: 2px solid #935687;
-		background-color: #935687;
+		border: 2px solid #7F54B3;
+		background-color: #7F54B3;
 		display: inline-block;
 		text-indent: -9999px;
 		border-radius: 10em;
@@ -1151,7 +1151,7 @@ h3.jetpack-reasons {
 }
 
 .plugin-install-source {
-	$background: rgba(#bb77ae, 0.15);
+	$background: rgba(#7F54B3, 0.15);
 	background: $background;
 
 	&:not(.wc-wizard-service-item) {
