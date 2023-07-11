@@ -1,10 +1,16 @@
 .woocommerce-admin-page__marketplace {
+	background: #fff;
+
 	.woocommerce-layout__primary {
 		margin: 0;
 	}
 
 	.woocommerce-layout__main {
 		padding: 0;
+	}
+
+	.woocommerce-marketplace__header {
+		border-bottom: 1px solid var(--gutenberg-gray-300, #ddd);
 	}
 }
 
