@@ -32,6 +32,35 @@ class ManifestProcessor {
 	}
 
 	/**
+	 * Generate post args
+	 *
+	 * @param mixed $post
+	 * @param mixed $post_content
+	 * @return array
+	 */
+	private static function generate_post_args( $post, $post_content ) {
+		$possible_attributes = array(
+			'post_title',
+			'post_author',
+			'post_date',
+			'comment_status',
+		);
+
+		$args = array();
+
+		foreach ( $possible_attributes as $attribute ) {
+			if ( isset( $post[ $attribute ] ) ) {
+				$args[ $attribute ] = $post[ $attribute ];
+			}
+		}
+
+		$args['post_content'] = $post_content;
+		$args['post_status']  = 'publish';
+
+		return $args;
+	}
+
+	/**
 	 * Process categories
 	 *
 	 * @param array $categories The categories to process.
@@ -40,15 +69,16 @@ class ManifestProcessor {
 	 */
 	private static function process_categories( $categories, $logger_action_id, $parent_id = 0 ) {
 		foreach ( $categories as $category ) {
-			$term = term_exists( $category['title'], 'category' );
+			$term = term_exists( $category['category_title'], 'category' );
 
 			// If the category doesn't exist, create it.
 			if ( 0 === $term || null === $term ) {
 				$term = wp_insert_term(
-					$category['title'],
+					$category['category_title'],
 					'category',
 					array(
 						'parent' => $parent_id,
+						'slug'   => $category['category_slug'],
 					)
 				);
 			} else {
@@ -58,6 +88,7 @@ class ManifestProcessor {
 					'category',
 					array(
 						'parent' => $parent_id,
+						'slug'   => $category['category_slug'],
 					)
 				);
 			}
@@ -85,24 +116,20 @@ class ManifestProcessor {
 				// If the post doesn't exist, create it.
 				if ( ! $existing_post ) {
 					$post_id = \WooCommerceDocs\Data\DocsStore::insert_docs_post(
-						array(
-							'post_title'   => $post['title'],
-							'post_content' => $blocks,
-							'post_status'  => 'publish',
-						),
+						self::generate_post_args( $post, $blocks ),
 						$post['id']
 					);
 
 					\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Created post with id: ' . $post_id );
 
 				} else {
+
+					$post_update = self::generate_post_args( $post, $blocks );
+					$post_update = array_merge( $post_update, array( 'ID' => $existing_post->ID ) );
+
 					// if the post exists, update it .
 					$post_id = \WoocommerceDocs\Data\DocsStore::update_docs_post(
-						array(
-							'ID'           => $existing_post->ID,
-							'post_title'   => $post['title'],
-							'post_content' => $blocks,
-						),
+						$post_update,
 						$post['id']
 					);
 
