@@ -1,6 +1,8 @@
 .woocommerce-marketplace__tabs {
 	max-width: 1216px;
 	margin: auto;
+	padding: 0 16px;
+	box-sizing: content-box;
 
 	.woocommerce-marketplace__tab-button {
 		border-bottom: 1.5px solid transparent;
@@ -22,5 +24,11 @@
 		&.is-active {
 			border-color: var(--upcoming-blueberry, #3858e9);
 		}
+	}
+}
+
+@media screen and (min-width: 782px) {
+	.woocommerce-marketplace__tabs {
+		padding: 0 32px;
 	}
 }

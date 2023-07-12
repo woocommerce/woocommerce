@@ -6,7 +6,7 @@
  * Internal dependencies
  */
 import ProductListContent from '../product-list-content/product-list-content';
-import ProductListTitle from '../product-list-title/product-list-title';
+import ProductListHeader from '../product-list-header/product-list-header';
 
 interface ProductListProps {
 	title: string;
@@ -17,7 +17,7 @@ export default function ProductList( props: ProductListProps ): JSX.Element {
 
 	return (
 		<div className="product-list">
-			<ProductListTitle title={ title } />
+			<ProductListHeader title={ title } />
 			<ProductListContent />
 		</div>
 	);

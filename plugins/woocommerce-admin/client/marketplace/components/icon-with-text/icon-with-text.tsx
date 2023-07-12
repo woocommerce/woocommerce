@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { Icon } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -9,26 +9,20 @@ import { __, sprintf } from '@wordpress/i18n';
 import './icon-with-text.scss';
 
 export interface IconWithTextProps {
-	icon: string;
-	text: string;
+	icon: JSX.Element;
+	title: string;
+	description: string;
 }
 
 export default function IconWithText( props: IconWithTextProps ): JSX.Element {
-	const { icon, text } = props;
+	const { icon, title, description } = props;
 	return (
-		<span className="icon-group">
-			<span className="icon-group__icon-background">
-				<img
-					className="icon"
-					src={ icon }
-					alt={ sprintf(
-						// translators: %s is the screen reader text for the icon
-						__( '%s icon', 'woocommerce' ),
-						icon
-					) }
-				/>
-			</span>
-			<p>{ text }</p>
-		</span>
+		<div className="icon-group">
+			<div className="icon-group__headline">
+				<Icon icon={ icon } size={ 20 } className="icon-group__icon" />
+				<h3 className="icon-group__title">{ title }</h3>
+			</div>
+			<p className="icon-group__description">{ description }</p>
+		</div>
 	);
 }
