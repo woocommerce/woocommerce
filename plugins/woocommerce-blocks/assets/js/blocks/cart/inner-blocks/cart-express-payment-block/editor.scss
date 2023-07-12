@@ -13,6 +13,11 @@
 	}
 }
 
+.wp-block-woocommerce-proceed-to-checkout-block {
+	margin-bottom: 28px;
+	margin-top: 28px;
+}
+
 .wp-block-woocommerce-checkout-express-payment-block-placeholder {
 	* {
 		pointer-events: all; // Overrides parent disabled component in editor context
