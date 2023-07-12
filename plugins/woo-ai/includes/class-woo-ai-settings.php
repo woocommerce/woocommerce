@@ -149,7 +149,7 @@ class Woo_AI_Settings {
 				'title'             => __( 'Tone of voice', 'woocommerce' ),
 				'id'                => 'woo_ai_tone_of_voice_select',
 				'css'               => 'min-width:300px;',
-				'default'           => 'informal',
+				'default'           => 'neutral',
 				'type'              => 'select',
 				'desc'              => $markup_str,
 				'desc_tip'          => __( 'Choose the language style that best resonates with your customers. It\'ll be used in text-based content, like product descriptions.', 'woocommerce' ),
@@ -165,7 +165,7 @@ class Woo_AI_Settings {
 			),
 
 			array(
-				'id'                => 'ai_describe_store_description',
+				'id'                => 'woo_ai_describe_store_description',
 				'type'              => 'textarea',
 				'custom_attributes' => array( 'disabled' => 'true' ),
 				'title'             => __( 'Describe your business', 'woocommerce' ),

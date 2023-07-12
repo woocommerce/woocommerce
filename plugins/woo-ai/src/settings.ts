@@ -11,7 +11,7 @@ const fieldMap = {
 		'woo_ai_tone_of_voice_select'
 	) as HTMLSelectElement,
 	describeBusiness: document.getElementById(
-		'ai_describe_store_description'
+		'woo_ai_describe_store_description'
 	) as HTMLInputElement,
 };
 
