@@ -51,7 +51,7 @@ class WcPayWelcomePage {
 	 *
 	 * @return boolean
 	 */
-	public function must_be_visible() {
+	public function must_be_visible(): bool {
 		// Suggestions not disabled via a setting.
 		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
 			return false;
@@ -148,7 +148,7 @@ class WcPayWelcomePage {
 	 * @param array $settings Shared settings.
 	 * @return array
 	 */
-	public function shared_settings( $settings ) {
+	public function shared_settings( $settings ): array {
 		// Return early if not on a wc-admin powered page.
 		if ( ! PageController::is_admin_page() ) {
 			return $settings;
@@ -242,8 +242,8 @@ class WcPayWelcomePage {
 	 *
 	 * @return array|null Array of eligible incentive or null.
 	 */
-	private function get_incentive() {
-		// Return local cached incentive if it exists.
+	private function get_incentive(): ?array {
+		// Return in-memory cached incentive if it is set.
 		if ( isset( $this->incentive ) ) {
 			return $this->incentive;
 		}
