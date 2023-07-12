@@ -1,20 +1,24 @@
 .icon-group {
-	display: flex;
-	align-items: center;
-	gap: 8px;
+	flex: 1;
 
-	&__icon-background {
+	&__headline {
 		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 32px;
-		height: 32px;
-		background: var(--woo-color-primary-woo-purple-50, #7f54b3);
-		border-radius: 50%;
+		gap: 8px;
 	}
 
-	.icon {
-		width: 24px;
-		height: 24px;
+	&__title {
+		color: #101517;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 20px;
+		margin: 0 0 8px;
+	}
+
+	&__description {
+		color: var(--wp-gray-gray-50, #646970);
+		font-size: 13px;
+		font-weight: 400;
+		line-height: 20px;
+		margin: 0;
 	}
 }

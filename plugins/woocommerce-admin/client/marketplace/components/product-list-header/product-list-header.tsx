@@ -6,17 +6,17 @@
  * Internal dependencies
  */
 
-interface ProductListTitleProps {
+interface ProductListHeaderProps {
 	title: string;
 }
 
-export default function ProductListTitle(
-	props: ProductListTitleProps
+export default function ProductListHeader(
+	props: ProductListHeaderProps
 ): JSX.Element {
 	const { title } = props;
 
 	return (
-		<div className="product-list__title">
+		<div className="product-list__header">
 			<h2>{ title }</h2>
 		</div>
 	);

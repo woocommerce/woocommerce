@@ -1,27 +1,40 @@
 .woocommerce-admin-page__marketplace .woocommerce-layout__footer {
 	// Undo default fixed footer style used in WC Admin
+	background: #f6f7f7;
 	position: unset;
 	width: 100%;
 }
 
 .woocommerce-marketplace__footer {
-	display: flex;
-	width: 100%;
-	padding: 48px 0 120px 0;
-	align-items: center;
-	justify-content: center;
-	background: #f6f7f7;
+	box-sizing: content-box;
+	max-width: 1216px;
+	margin: auto;
+	padding: 48px 32px;
+
+	&-title {
+		color: var(--gutenberg-gray-900, #1e1e1e);
+		font-size: 20px;
+		font-style: normal;
+		font-weight: 500;
+		line-height: 28px;
+		max-width: 389px;
+		margin: 0 0 32px;
+	}
 
 	&-columns {
 		display: flex;
 		flex-direction: column;
-		gap: 44px;
+		gap: 24px;
 	}
 
-	span {
+	&-logo {
+		color: var(--woo-color-primary-woo-purple-50, #7f54b3);
+		display: flex;
 		font-size: 14px;
+		font-weight: 600;
 		line-height: 20px;
-		color: #969696;
+		gap: 8px;
+		margin: 48px 0 0;
 	}
 }
 

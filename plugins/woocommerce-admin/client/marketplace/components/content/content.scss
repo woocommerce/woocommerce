@@ -8,6 +8,17 @@
 		gap: 24px;
 	}
 
+	.product-list__header {
+		color: var(--gutenberg-gray-900, #1e1e1e);
+		h2 {
+			font-size: 20px;
+			font-style: normal;
+			font-weight: 500;
+			line-height: 28px;
+			margin-top: 0;
+		}
+	}
+
 	.extension-card {
 		background-color: #3c3c3c;
 		height: 270px;
@@ -17,7 +28,7 @@
 
 @media screen and (min-width: 782px) {
 	.woocommerce-marketplace__content {
-		padding: 40px 16px 72px;
+		padding: 32px;
 
 		.product-list__content {
 			display: flex;
