@@ -137,7 +137,7 @@ export function IframeEditor( {
 								enableResizing={ true }
 								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 								// @ts-ignore This accepts numbers or strings.
-								height={ sizes.height ?? '100%' }
+								height="100%"
 							>
 								<EditorCanvas
 									enableResizing={ true }
