@@ -1,20 +1,20 @@
 {
   "categories": [
     {
-      "title": "Getting Started with WooCommerce",
       "posts": [
         {
-          "title": "Local Development",
+          "post_title": "Local Development",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
           "id": "c068ce54044fa44c760a69bd71ef21274f2a5a37"
         }
       ],
       "categories": [
         {
-          "title": "Troubleshooting Problems",
           "posts": [
             {
-              "title": "What Went Wrong?",
+              "post_title": "What Went Wrong?",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
               "id": "1f88c4d039e72c059c928ab475ad1ea0a02c8abb"
             }
@@ -24,10 +24,10 @@
       ]
     },
     {
-      "title": "Testing WooCommerce",
       "posts": [
         {
-          "title": "Unit Testing",
+          "post_title": "Unit Testing",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
           "id": "120770c899215a889246b47ac883e4dda1f97b8b"
         }
@@ -35,5 +35,5 @@
       "categories": []
     }
   ],
-  "hash": "180a6ce0bebb8e84072fda451758ef6326490a99e7b3a349b9e45baa8c7c54ac"
+  "hash": "8d7e43a1a5d1a60e0fc3dcc50179f8f74ae7087eda02c217effa84f8d367dfad"
 }

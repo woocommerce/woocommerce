@@ -18,7 +18,8 @@ describe( 'generateManifest', () => {
 			rootDir,
 			dir,
 			'example-docs',
-			'https://example.com'
+			'https://example.com',
+			'https://example.com/edit'
 		);
 
 		const topLevelCategories = manifest.categories;
@@ -42,7 +43,8 @@ describe( 'generateManifest', () => {
 			rootDir,
 			dir,
 			'example-docs',
-			'https://example.com'
+			'https://example.com',
+			'https://example.com/edit'
 		);
 
 		expect( manifest.categories[ 0 ].posts[ 0 ].url ).toEqual(
@@ -61,7 +63,8 @@ describe( 'generateManifest', () => {
 			rootDir,
 			dir,
 			'example-docs',
-			'https://example.com'
+			'https://example.com',
+			'https://example.com/edit'
 		);
 
 		expect( manifest.hash ).not.toBeUndefined();

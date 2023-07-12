@@ -38,8 +38,13 @@ export const generateManifestCommand = new Command( 'create' )
 		'Root directory of the markdown files, used to generate URLs.',
 		process.cwd()
 	)
+	.option(
+		'-be --baseEditUrl <baseEditUrl>',
+		'Base url to provide edit links to.',
+		'https://github.com/woocommerce/woocommerce/edit/trunk'
+	)
 	.action( async ( dir, projectName, options ) => {
-		const { outputFilePath, baseUrl, rootDir } = options;
+		const { outputFilePath, baseUrl, rootDir, baseEditUrl } = options;
 
 		// determine if the rootDir is absolute or relative
 		const absoluteRootDir = path.isAbsolute( rootDir )
@@ -60,7 +65,8 @@ export const generateManifestCommand = new Command( 'create' )
 			absoluteRootDir,
 			absoluteSubDir,
 			projectName,
-			baseUrl
+			baseUrl,
+			baseEditUrl
 		);
 
 		Logger.endTask();
