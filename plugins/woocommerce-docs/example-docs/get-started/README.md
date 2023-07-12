@@ -1,3 +1,3 @@
 ---
-title: Getting Started with WooCommerce
+category_title: Getting Started with WooCommerce
 ---

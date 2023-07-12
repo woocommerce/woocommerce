@@ -24,16 +24,16 @@ describe( 'generateManifest', () => {
 
 		const topLevelCategories = manifest.categories;
 
-		expect( topLevelCategories[ 0 ].title ).toEqual(
+		expect( topLevelCategories[ 0 ].category_title ).toEqual(
 			'Getting Started with WooCommerce'
 		);
-		expect( topLevelCategories[ 1 ].title ).toEqual(
+		expect( topLevelCategories[ 1 ].category_title ).toEqual(
 			'Testing WooCommerce'
 		);
 
 		const subCategories = topLevelCategories[ 0 ].categories;
 
-		expect( subCategories[ 0 ].title ).toEqual(
+		expect( subCategories[ 0 ].category_title ).toEqual(
 			'Troubleshooting Problems'
 		);
 	} );

@@ -1,6 +1,7 @@
 {
   "categories": [
     {
+      "category_title": "Getting Started with WooCommerce",
       "posts": [
         {
           "post_title": "Local Development",
@@ -11,6 +12,7 @@
       ],
       "categories": [
         {
+          "category_title": "Troubleshooting Problems",
           "posts": [
             {
               "post_title": "What Went Wrong?",
@@ -24,6 +26,7 @@
       ]
     },
     {
+      "category_title": "Testing WooCommerce",
       "posts": [
         {
           "post_title": "Unit Testing",
@@ -35,5 +38,5 @@
       "categories": []
     }
   ],
-  "hash": "8d7e43a1a5d1a60e0fc3dcc50179f8f74ae7087eda02c217effa84f8d367dfad"
+  "hash": "d129d3cf8b3df25d9dcb819c1d16fa42da612fb3cd7f2d2c114f5a94c97d88db"
 }

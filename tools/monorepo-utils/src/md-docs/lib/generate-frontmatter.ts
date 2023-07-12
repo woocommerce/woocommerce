@@ -2,6 +2,7 @@
  * External dependencies
  */
 import matter from 'gray-matter';
+import yaml from 'js-yaml';
 
 /**
  * Generate front-matter for supported post attributes.
@@ -19,11 +20,16 @@ export const generatePostFrontMatter = (
 		'page_template',
 		'post_author',
 		'post_name',
+		'category_title',
+		'category_slug',
 	];
 
-	const frontMatter = matter( fileContents ).data;
-
-	console.log( 'frontm', frontMatter );
+	const frontMatter = matter( fileContents, {
+		engines: {
+			// Disable date parsing so that we can get the raw date string.
+			yaml: ( s ) => yaml.load( s, { schema: yaml.JSON_SCHEMA } ),
+		},
+	} ).data;
 
 	return Object.keys( frontMatter )
 		.filter( ( key ) => allowList.includes( key ) )
