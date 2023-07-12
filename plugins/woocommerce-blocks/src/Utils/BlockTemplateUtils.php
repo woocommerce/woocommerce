@@ -440,25 +440,25 @@ class BlockTemplateUtils {
 	/**
 	 * Checks to see if they are using a compatible version of WP, or if not they have a compatible version of the Gutenberg plugin installed.
 	 *
+	 * @param string $template_type Optional. Template type: `wp_template` or `wp_template_part`.
+	 *                              Default `wp_template`.
 	 * @return boolean
 	 */
-	public static function supports_block_templates() {
-		if (
-			! wc_current_theme_is_fse_theme() &&
-			( ! function_exists( 'gutenberg_supports_block_templates' ) || ! gutenberg_supports_block_templates() )
-		) {
-			return false;
+	public static function supports_block_templates( $template_type = 'wp_template' ) {
+		if ( 'wp_template_part' === $template_type && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
+			return true;
+		} elseif ( 'wp_template' === $template_type && wc_current_theme_is_fse_theme() ) {
+			return true;
 		}
-
-		return true;
+		return false;
 	}
 
 	/**
 	 * Retrieves a single unified template object using its id.
 	 *
 	 * @param string $id            Template unique identifier (example: theme_slug//template_slug).
-	 * @param string $template_type Optional. Template type: `'wp_template'` or '`wp_template_part'`.
-	 *                             Default `'wp_template'`.
+	 * @param string $template_type Optional. Template type: `wp_template` or 'wp_template_part`.
+	 *                              Default `wp_template`.
 	 *
 	 * @return WP_Block_Template|null Template.
 	 */
