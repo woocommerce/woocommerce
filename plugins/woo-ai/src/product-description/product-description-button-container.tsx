@@ -158,7 +158,7 @@ export function WriteItForMeButtonContainer() {
 		} );
 
 		return [
-			`Compose an engaging product description for a product named "${ productName.slice(
+			`You are a WooCommerce and SEO expert. Compose an engaging product description for a product named "${ productName.slice(
 				0,
 				MAX_TITLE_LENGTH
 			) }".`,
