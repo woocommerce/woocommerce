@@ -6,7 +6,7 @@ This manifest is currently designed to be consumed by the [WooCommerce Docs](htt
 
 ## Usage
 
-This command is built on postinstall and can be run from the root of the project.
+This command is built on postinstall and can be run from monorepo root.
 
 To create a manifest:
 
