@@ -185,23 +185,17 @@ class WcPayWelcomePage {
 	 * @return boolean
 	 */
 	private function has_wcpay(): bool {
-		// Installed.
-		if ( class_exists( '\WC_Payments' ) ) {
-			return true;
+		$has_wcpay_setup = false;
+
+		// We consider the store to have WooPayments if:
+		// - the WooPayments plugin is active
+		// - and the WooPayments payment gateway is connected
+		// - and there is meaningful account data in the WooPayments account cache.
+		if ( $this->is_wcpay_active() && $this->is_wcpay_connected() && $this->has_wcpay_account_data() ) {
+			$has_wcpay_setup = true;
 		}
 
-		// Currently connected.
-		if ( WooCommercePayments::is_connected() ) {
-			return true;
-		}
-
-		// Account data in cache.
-		$account_data = get_option( 'wcpay_account_data' );
-		if ( isset( $account_data['data'] ) && is_array( $account_data['data'] ) && ! empty( $account_data['data'] ) ) {
-			return true;
-		}
-
-		// Orders processed with it.
+		// If there is at least one order processed with WooPayments, we consider the store to have WooPayments.
 		if ( ! empty(
 			wc_get_orders(
 				[
@@ -211,7 +205,12 @@ class WcPayWelcomePage {
 				]
 			)
 		) ) {
-			return true;
+			$has_wcpay_setup = true;
+		}
+
+		return $has_wcpay_setup;
+	}
+
 	/**
 	 * Check if the WooPayments plugin is active.
 	 *
@@ -220,6 +219,20 @@ class WcPayWelcomePage {
 	private function is_wcpay_active(): bool {
 		return class_exists( '\WC_Payments' );
 	}
+
+	/**
+	 * Check if the WooPayments payment gateway has a connected account.
+	 *
+	 * @see WC_Payment_Gateway_WCPay::is_connected()
+	 *
+	 * @return boolean
+	 */
+	private function is_wcpay_connected(): bool {
+		if ( class_exists( '\WC_Payments' ) ) {
+			$wc_payments_gateway = \WC_Payments::get_gateway();
+			return method_exists( $wc_payments_gateway, 'is_connected' )
+				? $wc_payments_gateway->is_connected()
+				: false;
 		}
 
 		return false;
@@ -230,8 +243,21 @@ class WcPayWelcomePage {
 	 *
 	 * @return boolean
 	 */
-	private function is_incentive_dismissed() {
+	private function has_wcpay_account_data(): bool {
+		$account_data = get_option( 'wcpay_account_data', [] );
+		if ( ! empty( $account_data['data']['account_id'] ) ) {
+			return true;
+		}
 
+		return false;
+	}
+
+	/**
+	 * Check if the current incentive has been manually dismissed.
+	 *
+	 * @return boolean
+	 */
+	private function is_incentive_dismissed(): bool {
 		// Return early if there is no eligible incentive.
 		if ( empty( $this->get_incentive() ) ) {
 			return true;
