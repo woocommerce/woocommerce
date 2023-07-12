@@ -46,6 +46,7 @@ export const CopyAllContentMenuItem = () => {
 			ref={ ref }
 			role="menuitem"
 			onClick={ recordClick }
+			disabled={ ! blocks.length }
 		>
 			{ __( 'Copy all content', 'woocommerce' ) }
 		</MenuItem>
