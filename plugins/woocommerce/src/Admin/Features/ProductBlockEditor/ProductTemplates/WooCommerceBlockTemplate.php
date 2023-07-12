@@ -185,4 +185,14 @@ class WooCommerceBlockTemplate {
         return $this->parse_blocks( $this->template );
     }
 
+    /**
+     * Get the serialized template.
+     *
+     * @return array Serialized template.
+     */
+    public function get_serialized_template() {
+        $parsed = $this->get_parsed_template();
+        return serialize_blocks( $parsed );
+    }
+
 }

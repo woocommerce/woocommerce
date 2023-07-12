@@ -18,18 +18,11 @@ import {
 } from '@wordpress/core-data';
 
 export function BlocksTemplate() {
-	const blockEditorSettings = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		return select( blockEditorStore ).getSettings();
-	}, [] );
-
 	const productId = useEntityId( 'postType', 'product' );
 
 	const [ , , onChange ] = useEntityBlockEditor( 'postType', 'product', {
 		id: productId,
 	} );
-
 
 	const { records: templates, isResolving: isLoading } = useEntityRecords(
 		'postType',
@@ -49,10 +42,7 @@ export function BlocksTemplate() {
 			( t ) => t.id === 'woocommerce/woocommerce//product-editor_simple'
 		);
 		const parsed = parse( template.content.raw );
-		onChange(
-			synchronizeBlocksWithTemplate( parsed ),
-			{}
-		);
+		onChange( parsed, {} );
 	}, [ templates, isLoading ] );
 
 	return null;

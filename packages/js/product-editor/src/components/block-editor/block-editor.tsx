@@ -1,10 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	Template,
-} from '@wordpress/blocks';
-import { createElement, useMemo, useLayoutEffect } from '@wordpress/element';
+import { Template } from '@wordpress/blocks';
+import { createElement, useMemo } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
 import { useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
