@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+[HPOS] Backfill to post table only after order has persisted in orders table.

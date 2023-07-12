@@ -2373,12 +2373,12 @@ FROM $order_meta_table
 			$order->set_date_modified( time() );
 		}
 
+		$this->persist_order_to_db( $order );
+		$order->save_meta_data();
+
 		if ( $backfill ) {
 			$this->maybe_backfill_post_record( $order );
 		}
-
-		$this->persist_order_to_db( $order );
-		$order->save_meta_data();
 
 		return $changes;
 	}
