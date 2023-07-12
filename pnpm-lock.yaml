@@ -3471,6 +3471,9 @@ importers:
       graphql:
         specifier: ^16.6.0
         version: 16.6.0
+      gray-matter:
+        specifier: ^4.0.3
+        version: 4.0.3
       octokit:
         specifier: ^2.0.14
         version: 2.0.14
@@ -5200,7 +5203,7 @@ packages:
     dependencies:
       '@babel/core': 7.12.9
       '@babel/helper-create-class-features-plugin': 7.19.0(@babel/core@7.12.9)
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
     transitivePeerDependencies:
       - supports-color
 
@@ -5212,7 +5215,7 @@ packages:
     dependencies:
       '@babel/core': 7.17.8
       '@babel/helper-create-class-features-plugin': 7.19.0(@babel/core@7.17.8)
-      '@babel/helper-plugin-utils': 7.21.5
+      '@babel/helper-plugin-utils': 7.20.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -29697,7 +29700,6 @@ packages:
       kind-of: 6.0.3
       section-matter: 1.0.0
       strip-bom-string: 1.0.0
-    dev: true
 
   /gridicons@3.4.0(react@17.0.2):
     resolution: {integrity: sha512-GikyCOcfhwHSN8tfsZvcWwWSaRLebVZCvDzfFg0X50E+dIAnG2phfFUTNa06dXA09kqRYCdnu8sPO8pSYO3UVA==}
@@ -41677,7 +41679,6 @@ packages:
     dependencies:
       extend-shallow: 2.0.1
       kind-of: 6.0.3
-    dev: true
 
   /seed-random@2.2.0:
     resolution: {integrity: sha512-34EQV6AAHQGhoc0tn/96a9Fsi6v2xdqe/dMUwljGRaFOzR3EgRmECvD0O8vi8X+/uQ50LGHfkNu/Eue5TPKZkQ==}
@@ -42652,7 +42653,6 @@ packages:
   /strip-bom-string@1.0.0:
     resolution: {integrity: sha512-uCC2VHvQRYu+lMh4My/sFNmF2klFymLX1wHJeXnbEJERpV/ZsVuonzerjfrGpIGF7LBVa1O7i9kjiWvJiFck8g==}
     engines: {node: '>=0.10.0'}
-    dev: true
 
   /strip-bom@2.0.0:
     resolution: {integrity: sha512-kwrX1y7czp1E69n2ajbG65mIo9dqvJ+8aBQXOGVxqwvNbsXdFM6Lq37dLAY3mknUwru8CfcCbfOLL/gMo+fi3g==}
