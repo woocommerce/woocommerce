@@ -28,7 +28,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				action: action.surveyProps.action,
 				showDescription: action.surveyProps.showDescription,
 				title: action.surveyProps.title,
-				onSubmitLabel: action.onSubmitLabel,
+				onSubmitLabel: action.onsubmit_label,
 				firstQuestion: action.surveyProps.firstQuestion,
 				secondQuestion: action.surveyProps.secondQuestion,
 				onSubmitNoticeProps: action.onSubmitNoticeProps || {},

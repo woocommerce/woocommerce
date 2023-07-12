@@ -116,6 +116,24 @@ export const cloneRepoShallow = async ( repoPath: string ) => {
 };
 
 /**
+ * Add a remote using the authenticated token `GITHUB_TOKEN`
+ *
+ * @param {Object} options       CLI options
+ * @param {string} options.owner repo owner
+ * @param {string} options.name  repo name
+ * @return {string} remote
+ */
+export const getAuthenticatedRemote = ( options: {
+	owner: string;
+	name: string;
+} ) => {
+	const { owner, name } = options;
+	const source = `github.com/${ owner }/${ name }`;
+	const token = getEnvVar( 'GITHUB_TOKEN', true );
+	return `https://${ owner }:${ token }@${ source }`;
+};
+
+/**
  * Clone a repo using the authenticated token `GITHUB_TOKEN`. This allows the script to push branches to origin.
  *
  * @param {Object}  options       CLI options
@@ -128,10 +146,7 @@ export const cloneAuthenticatedRepo = async (
 	options: { owner: string; name: string },
 	isShallow = true
 ): Promise< string > => {
-	const { owner, name } = options;
-	const source = `github.com/${ owner }/${ name }`;
-	const token = getEnvVar( 'GITHUB_TOKEN' );
-	const remote = `https://${ owner }:${ token }@${ source }`;
+	const remote = getAuthenticatedRemote( options );
 
 	return isShallow
 		? await cloneRepoShallow( remote )
@@ -141,7 +156,7 @@ export const cloneAuthenticatedRepo = async (
 /**
  * Do a minimal sparse checkout of a github repo.
  *
- * @param {string}        githubRepoUrl -     the URL to the repo to checkout.
+ * @param {string}        githubRepoUrl - the URL to the repo to checkout.
  * @param {string}        path          - the path to checkout to.
  * @param {Array<string>} directories   - the files or directories to checkout.
  * @param {string}        base          - the base branch to checkout from. Defaults to trunk.
@@ -178,7 +193,7 @@ export const sparseCheckoutRepo = async (
 /**
  * Do a minimal sparse checkout of a github repo without history.
  *
- * @param {string}        githubRepoUrl -     the URL to the repo to checkout.
+ * @param {string}        githubRepoUrl - the URL to the repo to checkout.
  * @param {string}        path          - the path to checkout to.
  * @param {Array<string>} directories   - the files or directories to checkout.
  * @return {Promise<string>}  the path to the cloned repo.
@@ -253,7 +268,7 @@ const refIsHash = ( ref: string ) => {
  * formed hash is provided it is returned unmodified.
  *
  * @param {string} baseDir - the dir of the git repo to get the hash from.
- * @param {string} ref     -    Either a commit hash or a branch name.
+ * @param {string} ref     - Either a commit hash or a branch name.
  * @return {string} - the commit hash of the ref.
  */
 export const getCommitHash = async ( baseDir: string, ref: string ) => {

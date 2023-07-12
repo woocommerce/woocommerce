@@ -26,7 +26,8 @@ wp-env run tests-cli sudo cp /var/www/html/wp-content/plugins/woocommerce/tests/
 
 if [ $ENABLE_HPOS == 1 ]; then
 	echo -e 'Enable High-Performance Order Tables\n'
-	wp-env run tests-cli wp plugin install https://gist.github.com/vedanshujain/564afec8f5e9235a1257994ed39b1449/archive/b031465052fc3e04b17624acbeeb2569ef4d5301.zip --activate
+	wp-env run tests-cli wp option update woocommerce_feature_custom_order_tables_enabled 'yes'
+	wp-env run tests-cli wp option update woocommerce_custom_orders_table_enabled 'yes'
 fi
 
 if [ $ENABLE_NEW_PRODUCT_EDITOR == 1 ]; then

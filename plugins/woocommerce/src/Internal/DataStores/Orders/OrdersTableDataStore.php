@@ -118,6 +118,13 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	private $error_logger;
 
 	/**
+	 * The name of the main orders table.
+	 *
+	 * @var string
+	 */
+	private $orders_table_name;
+
+	/**
 	 * The instance of the LegacyProxy object to use.
 	 *
 	 * @var LegacyProxy
@@ -140,6 +147,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		$this->legacy_proxy       = $legacy_proxy;
 		$this->error_logger       = $legacy_proxy->call_function( 'wc_get_logger' );
 		$this->internal_meta_keys = $this->get_internal_meta_keys();
+
+		$this->orders_table_name = self::get_orders_table_name();
 	}
 
 	/**
@@ -987,6 +996,29 @@ WHERE
 	}
 
 	/**
+	 * Check if an order exists by id.
+	 *
+	 * @since 8.0.0
+	 *
+	 * @param int $order_id The order id to check.
+	 * @return bool True if an order exists with the given name.
+	 */
+	public function order_exists( $order_id ) : bool {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$exists = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT EXISTS (SELECT id FROM {$this->orders_table_name} WHERE id=%d)",
+				$order_id
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return (bool) $exists;
+	}
+
+	/**
 	 * Method to read an order from custom tables.
 	 *
 	 * @param \WC_Order $order Order object.
@@ -1345,11 +1377,31 @@ WHERE
 					continue;
 				}
 
-				if ( 'date' === $prop_details['type'] ) {
-					$prop_value = $this->string_to_timestamp( $prop_value );
-				}
+				try {
+					if ( 'date' === $prop_details['type'] ) {
+						$prop_value = $this->string_to_timestamp( $prop_value );
+					}
 
-				$this->set_order_prop( $order, $prop_details['name'], $prop_value );
+					$this->set_order_prop( $order, $prop_details['name'], $prop_value );
+				} catch ( \Exception $e ) {
+					$order_id = $order->get_id();
+					$this->error_logger->warning(
+						sprintf(
+						/* translators: %1$d = peoperty name, %2$d = order ID, %3$s = error message. */
+							__( 'Error when setting property \'%1$s\' for order %2$d: %3$s', 'woocommerce' ),
+							$prop_details['name'],
+							$order_id,
+							$e->getMessage()
+						),
+						array(
+							'exception_code' => $e->getCode(),
+							'exception_msg'  => $e->getMessage(),
+							'origin'         => __METHOD__,
+							'order_id'       => $order_id,
+							'property_name'  => $prop_details['name'],
+						)
+					);
+				}
 			}
 		}
 	}
@@ -1606,6 +1658,7 @@ FROM $order_meta_table
 				array(
 					'post_type'   => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
 					'post_status' => 'draft',
+					'post_parent' => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
 				)
 			);
 
@@ -1857,17 +1910,29 @@ FROM $order_meta_table
 			return;
 		}
 
-		if ( ! empty( $args['force_delete'] ) ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'force_delete'     => false,
+				'suppress_filters' => false,
+			)
+		);
 
-			/**
-			 * Fires immediately before an order is deleted from the database.
-			 *
-			 * @since 7.1.0
-			 *
-			 * @param int      $order_id ID of the order about to be deleted.
-			 * @param WC_Order $order    Instance of the order that is about to be deleted.
-			 */
-			do_action( 'woocommerce_before_delete_order', $order_id, $order );
+		$do_filters = ! $args['suppress_filters'];
+
+		if ( $args['force_delete'] ) {
+
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is deleted from the database.
+				 *
+				 * @since 7.1.0
+				 *
+				 * @param int      $order_id ID of the order about to be deleted.
+				 * @param WC_Order $order    Instance of the order that is about to be deleted.
+				 */
+				do_action( 'woocommerce_before_delete_order', $order_id, $order );
+			}
 
 			$this->upshift_or_delete_child_orders( $order );
 			$this->delete_order_data_from_custom_order_tables( $order_id );
@@ -1881,28 +1946,98 @@ FROM $order_meta_table
 			 *
 			 * In other words, we do not delete the post record when HPOS table is authoritative and synchronization is disabled but post record is a full record and not just a placeholder, because it implies that the order was created before HPOS was enabled.
 			 */
-			$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-			if ( $data_synchronizer->data_sync_is_enabled() || get_post_type( $order_id ) === 'shop_order_placehold' ) {
-				// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-				// Once we stop creating posts for orders, we should do the cleanup here instead.
-				wp_delete_post( $order_id );
+			$orders_table_is_authoritative = $order->get_data_store()->get_current_class_name() === self::class;
+
+			if ( $orders_table_is_authoritative ) {
+				$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+				if ( $data_synchronizer->data_sync_is_enabled() ) {
+					// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+					// Once we stop creating posts for orders, we should do the cleanup here instead.
+					wp_delete_post( $order_id );
+				} else {
+					$this->handle_order_deletion_with_sync_disabled( $order_id );
+				}
 			}
 
-			do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is deleted.
+				 *
+				 * @since
+				 *
+				 * @param int $order_id ID of the order that has been deleted.
+				 */
+				do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			}
 		} else {
-			/**
-			 * Fires immediately before an order is trashed.
-			 *
-			 * @since 7.1.0
-			 *
-			 * @param int      $order_id ID of the order about to be deleted.
-			 * @param WC_Order $order    Instance of the order that is about to be deleted.
-			 */
-			do_action( 'woocommerce_before_trash_order', $order_id, $order );
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately before an order is trashed.
+				 *
+				 * @since 7.1.0
+				 *
+				 * @param int      $order_id ID of the order about to be trashed.
+				 * @param WC_Order $order    Instance of the order that is about to be trashed.
+				 */
+				do_action( 'woocommerce_before_trash_order', $order_id, $order );
+			}
 
 			$this->trash_order( $order );
 
-			do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			if ( $do_filters ) {
+				/**
+				 * Fires immediately after an order is trashed.
+				 *
+				 * @since
+				 *
+				 * @param int $order_id ID of the order that has been trashed.
+				 */
+				do_action( 'woocommerce_trash_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			}
+		}
+	}
+
+	/**
+	 * Handles the deletion of an order from the orders table when sync is disabled:
+	 *
+	 * If the corresponding row in the posts table is of placeholder type,
+	 * it's just deleted; otherwise a "deleted_from" record is created in the meta table
+	 * and the sync process will detect these and take care of deleting the appropriate post records.
+	 *
+	 * @param int $order_id Th id of the order that has been deleted from the orders table.
+	 * @return void
+	 */
+	protected function handle_order_deletion_with_sync_disabled( $order_id ): void {
+		global $wpdb;
+
+		$post_type = $wpdb->get_var(
+			$wpdb->prepare( "SELECT post_type FROM {$wpdb->posts} WHERE ID=%d", $order_id )
+		);
+
+		if ( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post_type ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->posts} WHERE ID=%d OR post_parent=%d",
+					$order_id,
+					$order_id
+				)
+			);
+		} else {
+			// phpcs:disable WordPress.DB.SlowDBQuery
+			$wpdb->insert(
+				self::get_meta_table_name(),
+				array(
+					'order_id'   => $order_id,
+					'meta_key'   => DataSynchronizer::DELETED_RECORD_META_KEY,
+					'meta_value' => DataSynchronizer::DELETED_FROM_ORDERS_META_VALUE,
+				)
+			);
+			// phpcs:enable WordPress.DB.SlowDBQuery
+
+			// Note that at this point upshift_or_delete_child_orders will already have been invoked,
+			// thus all the child orders either still exist but have a different parent id,
+			// or have been deleted and got their own deletion record already.
+			// So there's no need to do anything about them.
 		}
 	}
 
@@ -1914,7 +2049,7 @@ FROM $order_meta_table
 	 *
 	 * @return void
 	 */
-	private function upshift_or_delete_child_orders( $order ) {
+	private function upshift_or_delete_child_orders( $order ) : void {
 		global $wpdb;
 
 		$order_table     = self::get_orders_table_name();

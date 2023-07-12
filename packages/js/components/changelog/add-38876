@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Expose registerBlocks as registerRichTextEditorBlocks from the rich text editor package

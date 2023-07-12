@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Use existing table instead of 'DUAL' to support hosts which do not support 'DUAL'.

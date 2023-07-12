@@ -12,6 +12,7 @@ import {
 	ProductDataSuggestionRequest,
 	ApiErrorResponse,
 } from '../utils/types';
+import { requestJetpackToken } from '../utils';
 
 type ProductDataSuggestionSuccessResponse = {
 	suggestions: ProductDataSuggestion[];
@@ -24,14 +25,15 @@ export const useProductDataSuggestions = () => {
 		request: ProductDataSuggestionRequest
 	): Promise< ProductDataSuggestion[] > => {
 		try {
-			const response =
+			const token = await requestJetpackToken();
+			const { suggestions } =
 				await apiFetch< ProductDataSuggestionSuccessResponse >( {
 					path: '/wooai/product-data-suggestions',
 					method: 'POST',
-					data: request,
+					data: { ...request, token },
 				} );
 
-			return response.suggestions;
+			return suggestions;
 		} catch ( error ) {
 			/* eslint-disable-next-line no-console */
 			console.error( error );

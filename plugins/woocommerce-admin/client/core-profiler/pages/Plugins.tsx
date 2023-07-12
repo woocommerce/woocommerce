@@ -48,7 +48,13 @@ export const Plugins = ( {
 } ) => {
 	const [ selectedPlugins, setSelectedPlugins ] = useState<
 		ExtensionList[ 'plugins' ]
-	>( context.pluginsAvailable.filter( ( plugin ) => ! plugin.is_activated ) );
+	>(
+		context.pluginsAvailable.filter(
+			context.pluginsInstallationErrors.length
+				? ( plugin ) => context.pluginsSelected.includes( plugin.key )
+				: ( plugin ) => ! plugin.is_activated
+		)
+	);
 
 	const setSelectedPlugin = ( plugin: Extension ) => {
 		setSelectedPlugins(

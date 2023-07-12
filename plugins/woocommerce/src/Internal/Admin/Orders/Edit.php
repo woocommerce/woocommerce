@@ -111,7 +111,6 @@ class Edit {
 	 */
 	public function setup( \WC_Order $order ) {
 		$this->order    = $order;
-		$wc_screen_id   = wc_get_page_screen_id( 'shop-order' );
 		$current_screen = get_current_screen();
 		$current_screen->is_block_editor( false );
 		$this->screen_id = $current_screen->id;
@@ -136,7 +135,7 @@ class Edit {
 		 *
 		 * @since 3.8.0.
 		 */
-		do_action( 'add_meta_boxes', $wc_screen_id, $this->order );
+		do_action( 'add_meta_boxes', $this->screen_id, $this->order );
 
 		/**
 		 * Provides an opportunity to inject custom meta boxes into the order editor screen. This
@@ -146,7 +145,7 @@ class Edit {
 		 *
 		 * @oaram WC_Order $order The order being edited.
 		 */
-		do_action( 'add_meta_boxes_' . $wc_screen_id, $this->order );
+		do_action( 'add_meta_boxes_' . $this->screen_id, $this->order );
 
 		$this->enqueue_scripts();
 	}
@@ -325,6 +324,16 @@ class Edit {
 		?>
 		>
 		<?php wp_nonce_field( $this->get_order_edit_nonce_action() ); ?>
+		<?php
+		/**
+		 * Fires at the top of the order edit form. Can be used as a replacement for edit_form_top hook for HPOS.
+		 *
+		 * @param \WC_Order $order Order object.
+		 *
+		 * @since 8.0.0
+		 */
+		do_action( 'order_edit_form_top', $this->order );
+		?>
 		<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr( $form_action ); ?>"/>
 		<input type="hidden" id="original_order_status" name="original_order_status" value="<?php echo esc_attr( $this->order->get_status() ); ?>"/>
 		<input type="hidden" id="referredby" name="referredby" value="<?php echo $referer ? esc_url( $referer ) : ''; ?>"/>

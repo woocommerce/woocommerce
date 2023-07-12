@@ -53,6 +53,8 @@ export function IframeEditor( {
 		setBlocks,
 	} );
 	const [ isInserterOpened, setIsInserterOpened ] = useState( false );
+	const [ isListViewOpened, setIsListViewOpened ] = useState( false );
+	const [ isSidebarOpened, setIsSidebarOpened ] = useState( true );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock, updateSettings } =
@@ -80,9 +82,13 @@ export function IframeEditor( {
 					hasRedo,
 					hasUndo,
 					isInserterOpened,
+					isDocumentOverviewOpened: isListViewOpened,
 					redo,
 					setIsInserterOpened,
+					setIsDocumentOverviewOpened: setIsListViewOpened,
 					undo,
+					isSidebarOpened,
+					setIsSidebarOpened,
 				} }
 			>
 				<BlockEditorProvider
@@ -143,9 +149,11 @@ export function IframeEditor( {
 								<Popover.Slot />
 							</ResizableEditor>
 						</BlockTools>
-						<div className="woocommerce-iframe-editor__sidebar">
-							<BlockInspector />
-						</div>
+						{ isSidebarOpened && (
+							<div className="woocommerce-iframe-editor__sidebar">
+								<BlockInspector />
+							</div>
+						) }
 					</div>
 				</BlockEditorProvider>
 			</EditorContext.Provider>

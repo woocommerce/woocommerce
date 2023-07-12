@@ -21,3 +21,6 @@
 		width: 100%;
 	}
 }
+.folded .woocommerce-layout__footer {
+	width: calc(100% - $admin-menu-width-collapsed);
+}

@@ -147,6 +147,7 @@ class FeaturesController {
 		self::add_filter( 'deactivated_plugin', array( $this, 'handle_plugin_deactivation' ), 10, 1 );
 		self::add_filter( 'all_plugins', array( $this, 'filter_plugins_list' ), 10, 1 );
 		self::add_action( 'admin_notices', array( $this, 'display_notices_in_plugins_page' ), 10, 0 );
+		self::add_action( 'load-plugins.php', array( $this, 'maybe_invalidate_cached_plugin_data' ) );
 		self::add_action( 'after_plugin_row', array( $this, 'handle_plugin_list_rows' ), 10, 2 );
 		self::add_action( 'current_screen', array( $this, 'enqueue_script_to_fix_plugin_list_html' ), 10, 1 );
 		self::add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
@@ -925,6 +926,24 @@ class FeaturesController {
 	}
 
 	/**
+	 * If the 'incompatible with features' plugin list is being rendered, invalidate existing cached plugin data.
+	 *
+	 * This heads off a problem in which WordPress's `get_plugins()` function may be called much earlier in the request
+	 * (by third party code, for example), the results of which are cached, and before WooCommerce can modify the list
+	 * to inject useful information of its own.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/37343
+	 *
+	 * @return void
+	 */
+	private function maybe_invalidate_cached_plugin_data(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( ( $_GET['plugin_status'] ?? '' ) === 'incompatible_with_feature' ) {
+			wp_cache_delete( 'plugins', 'plugins' );
+		}
+	}
+
+	/**
 	 * Handler for the 'after_plugin_row' action.
 	 * Displays a "This plugin is incompatible with X features" notice if necessary.
 	 *
@@ -1146,8 +1165,9 @@ class FeaturesController {
 				$query_params_to_remove[] = $feature_id;
 			}
 		}
-		if ( count( $query_params_to_remove ) > 1 ) {
-			wp_safe_redirect( remove_query_arg( $query_params_to_remove, wp_get_referer() ) );
+		if ( count( $query_params_to_remove ) > 1 && isset( $_SERVER['REQUEST_URI'] ) ) {
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			wp_safe_redirect( remove_query_arg( $query_params_to_remove, $_SERVER['REQUEST_URI'] ) );
 		}
 	}
 }

@@ -1,17 +1,6 @@
 export type Attribute = {
 	name: string;
-	value: string;
-};
-
-export type ProductData = {
-	name: string;
-	description: string;
-	categories: string[];
-	tags: string[];
-	attributes: Attribute[];
-	product_type: string;
-	is_downloadable: string;
-	is_virtual: string;
+	values: Array< string >;
 };
 
 export type ProductDataSuggestion = {
