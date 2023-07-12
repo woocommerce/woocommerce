@@ -32,9 +32,11 @@
     }
 	&-right {
 		margin-left: auto;
-        padding-right: $gap-small;
-		button {
+		button.woocommerce-modal-actions__done-button,
+		button.woocommerce-modal-actions__cancel-button {
 			margin-left: $gap-small;
+			bottom: calc($gap-small / 2);
+			height: $gap-larger - $gap-smallest;
 		}
     }
 }
