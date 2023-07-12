@@ -68,8 +68,8 @@ class WcPayWelcomePage {
 			return false;
 		}
 
-		// WCPay must not be in use or previously used.
-		if ( $this->has_wcpay() ) {
+		// The WooPayments plugin must not be active.
+		if ( $this->is_wcpay_active() ) {
 			return false;
 		}
 
@@ -212,6 +212,14 @@ class WcPayWelcomePage {
 			)
 		) ) {
 			return true;
+	/**
+	 * Check if the WooPayments plugin is active.
+	 *
+	 * @return boolean
+	 */
+	private function is_wcpay_active(): bool {
+		return class_exists( '\WC_Payments' );
+	}
 		}
 
 		return false;
