@@ -10,7 +10,7 @@ import chalk from 'chalk';
  */
 import CodeFreeze from './code-freeze/commands';
 import Slack from './slack/commands/slack';
-import Manifest from './md-docs/commands/manifest';
+import Manifest from './md-docs/commands';
 import Changefile from './changefile';
 import WorkflowProfiler from './workflow-profiler/commands';
 import { Logger } from './core/logger';

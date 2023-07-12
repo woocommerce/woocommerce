@@ -1,19 +1,80 @@
 /**
  * External dependencies
  */
+import { writeFile } from 'fs';
 import { Command } from '@commander-js/extra-typings';
+import path from 'path';
 
 /**
  * Internal dependencies
  */
-import { generateManifestCommand } from './create';
+import { generateManifestFromDirectory } from '../../lib/generate-manifest';
+import { Logger } from '../../../core/logger';
 
-/**
- * Internal dependencies
- */
+export const generateManifestCommand = new Command( 'create' )
+	.description( 'Create a new manifest from a markdown directory.' )
+	.argument(
+		'<directory>',
+		'Path to directory of Markdown files to generate the manifest from.'
+	)
+	.argument(
+		'<projectName>',
+		'Name of the project to generate the manifest for, used to uniquely identify manifest entries.'
+	)
+	.option(
+		'-o --outputFilePath <outputFilePath>',
+		'Full path and filename of where to output the manifest.',
+		`${ process.cwd() }/manifest.json`
+	)
+	.option(
+		'-b --baseUrl <baseUrl>',
+		'Base url to resolve markdown file URLs to in the manifest.',
+		'https://raw.githubusercontent.com/woocommerce/woocommerce/trunk'
+	)
+	.option(
+		'-r --rootDir <rootDir>',
+		'Root directory of the markdown files, used to generate URLs.',
+		process.cwd()
+	)
+	.action( async ( dir, projectName, options ) => {
+		const { outputFilePath, baseUrl, rootDir } = options;
 
-const program = new Command( 'md-docs' )
-	.description( 'Utilities for generating markdown doc manifests.' )
-	.addCommand( generateManifestCommand, { isDefault: true } );
+		// determine if the rootDir is absolute or relative
+		const absoluteRootDir = path.isAbsolute( rootDir )
+			? rootDir
+			: path.join( process.cwd(), rootDir );
 
-export default program;
+		const absoluteDir = path.isAbsolute( dir )
+			? dir
+			: path.join( process.cwd(), dir );
+
+		const absoluteOutputFilePath = path.isAbsolute( outputFilePath )
+			? outputFilePath
+			: path.join( process.cwd(), outputFilePath );
+
+		Logger.startTask( 'Generating manifest' );
+
+		const manifest = await generateManifestFromDirectory(
+			absoluteDir,
+			absoluteRootDir,
+			projectName,
+			baseUrl
+		);
+
+		Logger.endTask();
+
+		Logger.startTask( 'Writing manifest' );
+
+		await writeFile(
+			absoluteOutputFilePath,
+			JSON.stringify( manifest, null, 2 ),
+			( err ) => {
+				if ( err ) {
+					Logger.error( err );
+				}
+			}
+		);
+
+		Logger.endTask();
+		Logger.notice( `Manifest output at ${ outputFilePath }` );
+	} );
