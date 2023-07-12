@@ -1,10 +1,13 @@
 /**
  * External dependencies
  */
+import type { ElementType } from 'react';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { InspectorControls, BlockControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
+import { EditorBlock } from '@woocommerce/types';
+import { addFilter } from '@wordpress/hooks';
 import { ProductCollectionFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import {
 	// @ts-expect-error Using experimental features
@@ -18,6 +21,7 @@ import {
 import { ProductCollectionAttributes } from '../types';
 import { setQueryAttribute } from '../utils';
 import { DEFAULT_FILTERS, getDefaultSettings } from '../constants';
+import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';
 import OrderByControl from './order-by-control';
@@ -99,3 +103,23 @@ const ProductCollectionInspectorControls = (
 };
 
 export default ProductCollectionInspectorControls;
+
+export const withUpgradeNoticeControls =
+	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
+	( props: BlockEditProps< ProductCollectionAttributes > ) => {
+		const { displayUpgradeNotice } = props.attributes;
+		return (
+			<>
+				<InspectorControls>
+					{ displayUpgradeNotice && <UpgradeNotice { ...props } /> }
+				</InspectorControls>
+				<BlockEdit { ...props } />
+			</>
+		);
+	};
+
+addFilter(
+	'editor.BlockEdit',
+	'woocommerce/product-collection',
+	withUpgradeNoticeControls
+);
