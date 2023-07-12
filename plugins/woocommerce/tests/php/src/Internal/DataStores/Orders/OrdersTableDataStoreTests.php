@@ -2486,12 +2486,12 @@ class OrdersTableDataStoreTests extends HposTestCase {
 
 		$this->assertEquals( 0, $product->get_total_sales() );
 
-		$order->set_status('processing');
+		$order->set_status( 'processing' );
 		$order->save();
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 1, $product->get_total_sales() ); // Sale is increased when status is changed to processing.
 
-		$order->set_status('completed');
+		$order->set_status( 'completed' );
 		$order->save();
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 1, $product->get_total_sales() ); // Sale is not increased when status is changed to completed (from processing).
