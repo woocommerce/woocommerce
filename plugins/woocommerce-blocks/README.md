@@ -50,7 +50,7 @@ We release a new version of WooCommerce Blocks onto WordPress.org every few week
 
 1. Make sure you have the latest versions of WordPress and WooCommerce on your site.
 2. Get a copy of this plugin using the green "Clone or download" button on the right.
-3. Make sure you're using Node.js v16.
+3. Make sure you're using Node.js v16.15. If you use a Node version management tool such as `nvm` or `n`, you can do so by running `nvm use` or `n auto`, respectively.
 4. `npm install` to install the dependencies.
 5. `composer install` to install core dependencies.
 6. To compile the code, run any of the following commands
