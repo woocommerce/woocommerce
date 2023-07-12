@@ -287,37 +287,59 @@ class WcPayWelcomePage {
 			return $this->incentive;
 		}
 
-		// Return transient cached incentive if it exists.
-		if ( false !== get_transient( self::TRANSIENT_NAME ) ) {
-			$this->incentive = get_transient( self::TRANSIENT_NAME );
-			return $this->incentive;
+		$store_context = [
+			// Store ISO-2 country code, e.g. `US`.
+			'country'      => WC()->countries->get_base_country(),
+			// Store locale, e.g. `en_US`.
+			'locale'       => get_locale(),
+			// WooCommerce active for duration in seconds.
+			'active_for'   => WCAdminHelper::get_wcadmin_active_for_in_seconds(),
+			// Whether the store has paid orders in the last 90 days.
+			'has_orders'   => ! empty(
+				wc_get_orders(
+					[
+						'status'       => [ 'wc-completed', 'wc-processing' ],
+						'date_created' => '>=' . strtotime( '-90 days' ),
+						'return'       => 'ids',
+						'limit'        => 1,
+					]
+				)
+			),
+			// Whether the store has at least one payment gateway enabled.
+			'has_payments' => ! empty( WC()->payment_gateways()->get_available_payment_gateways() ),
+			'has_wcpay'    => $this->has_wcpay(),
+		];
+
+		// Fingerprint the store context through a hash of certain entries.
+		$store_context_hash = $this->generate_context_hash( $store_context );
+
+		// Use the transient cached incentive if it exists, it is not expired,
+		// and the store context hasn't changed since we last requested from the WooPayments API (based on context hash).
+		$transient_cache = get_transient( self::TRANSIENT_NAME );
+		if ( false !== $transient_cache ) {
+			if ( is_null( $transient_cache ) ) {
+				// This means there was an error and we shouldn't retry just yet.
+				// Initialize the in-memory cache.
+				$this->incentive = [];
+			} elseif ( ! empty( $transient_cache['context_hash'] ) && is_string( $transient_cache['context_hash'] )
+				&& hash_equals( $store_context_hash, $transient_cache['context_hash'] ) ) {
+
+				// We have a store context hash and it matches with the current context one.
+				// We can use the cached incentive data.
+				// Store the incentive in the in-memory cache.
+				$this->incentive = $transient_cache['incentive'] ?? [];
+			}
+
+			// If the in-memory cache has been set, return it.
+			if ( isset( $this->incentive ) ) {
+				return $this->incentive;
+			}
 		}
 
-		// Request incentive from WCPAY API.
+		// By this point, we have an expired transient or the store context has changed.
+		// Query for incentives by calling the WooPayments API.
 		$url = add_query_arg(
-			[
-				// Store ISO-2 country code, e.g. `US`.
-				'country'      => WC()->countries->get_base_country(),
-				// Store locale, e.g. `en_US`.
-				'locale'       => get_locale(),
-				// WooCommerce active for duration in seconds.
-				'active_for'   => WCAdminHelper::get_wcadmin_active_for_in_seconds(),
-				// Whether the store has paid orders in the last 90 days.
-				'has_orders'   => ! empty(
-					wc_get_orders(
-						[
-							'status'       => [ 'wc-completed', 'wc-processing' ],
-							'date_created' => '>=' . strtotime( '-90 days' ),
-							'return'       => 'ids',
-							'limit'        => 1,
-						]
-					)
-				),
-				// Whether the store has at least one payment gateway enabled.
-				'has_payments' => ! empty( WC()->payment_gateways()->get_available_payment_gateways() ),
-				// Whether the store has WooPayments active, connected, and a WooPayments account.
-				'has_wcpay'    => $this->has_wcpay(),
-			],
+			$store_context,
 			'https://public-api.wordpress.com/wpcom/v2/wcpay/incentives',
 		);
 
@@ -328,45 +350,81 @@ class WcPayWelcomePage {
 			)
 		);
 
-		// Return early if there is an error, waiting 6h before the next attempt.
+		// Return early if there is an error, waiting 6 hours before the next attempt.
 		if ( is_wp_error( $response ) ) {
+			// Store a null value in the transient so we know this is due to an API error.
 			set_transient( self::TRANSIENT_NAME, null, HOUR_IN_SECONDS * 6 );
+			// Initialize the in-memory cache.
+			$this->incentive = [];
 
-			return null;
+			return $this->incentive;
 		}
 
 		$cache_for = wp_remote_retrieve_header( $response, 'cache-for' );
-		$incentive = null;
+		// Initialize the in-memory cache.
+		$this->incentive = [];
 
 		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 			// Decode the results, falling back to an empty array.
 			$results = json_decode( wp_remote_retrieve_body( $response ), true ) ?? [];
 
-			// Find a `welcome_page` incentive.
-			$incentive = current(
-				array_filter(
-					$results,
-					function( $incentive ) {
-						return 'welcome_page' === $incentive['type'];
-					}
-				)
+			// Find all `welcome_page` incentives.
+			$incentives = array_filter(
+				$results,
+				function( $incentive ) {
+					return 'welcome_page' === $incentive['type'];
+				}
 			);
 
-			// Set incentive to null if it's empty.
-			$incentive = empty( $incentive ) ? null : $incentive;
+			// Use the first found matching incentive or empty array if none was found.
+			// Store incentive in the in-memory cache.
+			$this->incentive = empty( $incentives ) ? [] : reset( $incentives );
 		}
-
-		// Store incentive in local cache.
-		$this->incentive = $incentive;
 
 		// Skip transient cache if `cache-for` header equals zero.
 		if ( '0' === $cache_for ) {
-			return $incentive;
+			// If we have a transient cache that is not expired, delete it so there are no leftovers.
+			if ( false !== $transient_cache ) {
+				delete_transient( self::TRANSIENT_NAME );
+			}
+
+			return $this->incentive;
 		}
 
-		// Store incentive in transient cache for the given seconds or 24h.
-		set_transient( self::TRANSIENT_NAME, $incentive, ! empty( $cache_for ) ? (int) $cache_for : DAY_IN_SECONDS );
+		// Store incentive in transient cache (together with the context hash) for the given number of seconds or 24h.
+		set_transient(
+			self::TRANSIENT_NAME,
+			[
+				'incentive'    => $this->incentive,
+				'context_hash' => $store_context_hash,
+			],
+			! empty( $cache_for ) ? (int) $cache_for : DAY_IN_SECONDS
+		);
 
-		return $incentive;
+		return $this->incentive;
+	}
+
+	/**
+	 * Generate a hash from the store context data.
+	 *
+	 * @param array $context The store context data.
+	 *
+	 * @return string The context hash.
+	 */
+	private function generate_context_hash( array $context ): string {
+		// Include only certain entries in the context hash.
+		// We need only discrete, user-interaction dependent data.
+		// Entries like `active_for` have no place in the hash generation since they change automatically.
+		return md5(
+			wp_json_encode(
+				[
+					'country'      => $context['country'] ?? '',
+					'locale'       => $context['locale'] ?? '',
+					'has_orders'   => $context['has_orders'] ?? false,
+					'has_payments' => $context['has_payments'] ?? false,
+					'has_wcpay'    => $context['has_wcpay'] ?? false,
+				]
+			)
+		);
 	}
 }
