@@ -4,7 +4,6 @@
 import { writeFile } from 'fs';
 import { Command } from '@commander-js/extra-typings';
 import path from 'path';
-import crypto from 'crypto';
 
 /**
  * Internal dependencies

@@ -86,7 +86,7 @@ async function processDirectory(
 			const fileContent = fs.readFileSync( filePath, 'utf-8' );
 			const fileFrontmatter = matter( fileContent ).data;
 			const post: Post = { ...fileFrontmatter };
-			// @ts-ignore
+
 			category.posts.push( {
 				...post,
 				url: generateFileUrl(
@@ -113,7 +113,7 @@ async function processDirectory(
 			projectName,
 			baseUrl
 		);
-		//  @ts-ignore
+
 		category.categories.push( subcategory );
 	}
 
