@@ -1,11 +1,9 @@
 /**
  * External dependencies
  */
-import { BlockInstance } from '@wordpress/blocks';
 import { createContext } from '@wordpress/element';
 
 type EditorContextType = {
-	blocks: BlockInstance[];
 	hasRedo: boolean;
 	hasUndo: boolean;
 	isDocumentOverviewOpened: boolean;
@@ -19,7 +17,6 @@ type EditorContextType = {
 };
 
 export const EditorContext = createContext< EditorContextType >( {
-	blocks: [],
 	hasRedo: false,
 	hasUndo: false,
 	isDocumentOverviewOpened: false,
