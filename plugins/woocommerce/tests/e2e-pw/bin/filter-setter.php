@@ -1,6 +1,7 @@
 <?php
 /**
- * Makes it possible to set filters from within E2E tests.
+ * Plugin name: Filter Setter
+ * Description: Utility intended to be used during E2E testing, to make it easy to setup WordPress filters.
  *
  * Intended to function as a (mu-)plugin while tests are running, this code works by inspecting the current cookie
  * for an entry called 'e2e-filters', which is expected to be a JSON description of filter hooks and the values we want
@@ -36,6 +37,8 @@
  *             "priority": 20
  *         }
  *     }
+ *
+ * It hopefully goes without saying, this should not be used in a production environment.
  */
 
 
