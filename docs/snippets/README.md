@@ -3,3 +3,4 @@
 Various code snippets you can add to your site to enable various custom functionality.
 
 -   [Add a message above the login / register form](./before-login--register-form.md)
+-   [Change number of related products output](./number-of-products-per-row.md)
