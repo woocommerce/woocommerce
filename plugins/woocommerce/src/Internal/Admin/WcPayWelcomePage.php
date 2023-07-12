@@ -47,7 +47,7 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Whether the WooPayments welcome page is visible.
+	 * Whether the WooPayments welcome page should be visible.
 	 *
 	 * @return boolean
 	 */
@@ -60,7 +60,7 @@ class WcPayWelcomePage {
 		/**
 		 * Filter allow marketplace suggestions.
 		 *
-		 * User can disabled all suggestions via filter.
+		 * User can disable all suggestions via filter.
 		 *
 		 * @since 3.6.0
 		 */
@@ -143,7 +143,7 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Adds shared settings for WCPay incentive.
+	 * Adds shared settings for the WooPayments incentive.
 	 *
 	 * @param array $settings Shared settings.
 	 * @return array
@@ -165,7 +165,7 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Adds allowed promo notes from WCPay incentive.
+	 * Adds allowed promo notes from the WooPayments incentive.
 	 *
 	 * @param array $promo_notes Allowed promo notes.
 	 * @return array
@@ -179,7 +179,8 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Whether WCPay is installed, connected, an account exists, or there are orders processed with it.
+	 * Check if the WooPayments payment gateway is active and set up,
+	 * or there are orders processed with it, at some moment.
 	 *
 	 * @return boolean
 	 */
@@ -217,7 +218,7 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Whether the current incentive has been manually dismissed.
+	 * Check if there is meaningful data in the WooPayments account cache.
 	 *
 	 * @return boolean
 	 */
@@ -238,7 +239,7 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Fetches and cache eligible incentive from WCPay API.
+	 * Fetches and caches eligible incentive from the WooPayments API.
 	 *
 	 * @return array|null Array of eligible incentive or null.
 	 */
