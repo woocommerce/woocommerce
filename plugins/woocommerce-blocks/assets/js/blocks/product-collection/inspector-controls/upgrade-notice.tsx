@@ -25,7 +25,7 @@ const FormattedNotice = ( { notice }: { notice: string } ) => {
 
 const UpgradeNotice = (
 	props: BlockEditProps< ProductCollectionAttributes > & {
-		revertMigration?: () => void;
+		revertMigration: () => void;
 	}
 ) => {
 	const { displayUpgradeNotice } = props.attributes;
@@ -48,8 +48,7 @@ const UpgradeNotice = (
 	};
 
 	const handleClick = () => {
-		// @todo: Provide logic to revert blocks migration
-		// props.revertMigration();
+		props.revertMigration();
 	};
 
 	return displayUpgradeNotice ? (
