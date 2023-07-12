@@ -20,11 +20,21 @@ $modal-editor-height: 60px;
     }
 
     .components-modal__content {
-        margin-top: $modal-editor-height;
+		display: flex;
+		margin-top: $modal-editor-height;
         padding: 0;
+
+		& > div {
+			width: 100%;
+		}
     }
 
     .woocommerce-iframe-editor {
         box-sizing: border-box;
+
+		&__content {
+			box-sizing: border-box;
+			overflow: scroll;
+		}
     }
 }
