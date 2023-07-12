@@ -25,7 +25,7 @@ class Init {
 	 *
 	 * @var array
 	 */
-	private $supported_post_types = array( 'simple' );
+	private $supported_post_types = array( 'simple', 'variable' );
 
 	/**
 	 * Redirection controller.
