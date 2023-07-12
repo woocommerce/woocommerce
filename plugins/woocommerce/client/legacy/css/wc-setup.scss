@@ -1,5 +1,7 @@
 /* stylelint-disable no-descending-specificity */
 
+@import "variables";
+
 /* @deprecated 4.6.0 */
 body {
 	margin: 65px auto 24px;
@@ -79,11 +81,11 @@ body {
 	}
 
 	a {
-		color: #7F54B3;
+		color: $primary;
 
 		&:hover,
 		&:focus {
-			color: #3C2861;
+			color: darken($primary, 40%);
 		}
 	}
 
@@ -355,8 +357,8 @@ body {
 
 				a.button-primary {
 					color: #fff;
-					background-color: #7F54B3;
-					border-color: #7F54B3;
+					background-color: $primary;
+					border-color: $primary;
 					box-shadow: 0 0 0;
 					text-shadow: none;
 
@@ -364,8 +366,8 @@ body {
 					&:focus,
 					&:active {
 						color: #fff;
-						background: #674399;
-						border-color: #674399;
+						background: lighten($primary, 5%);
+						border-color: lighten($primary, 5%);
 						box-shadow: none;
 					}
 				}
@@ -470,8 +472,8 @@ body {
 		}
 
 		input[type="checkbox"]:checked + label::before {
-			background: #7F54B3;
-			border-color: #7F54B3;
+			background: $primary;
+			border-color: $primary;
 		}
 	}
 }
@@ -533,7 +535,7 @@ body {
 		line-height: 1.4;
 
 		a {
-			color: #7F54B3;
+			color: $primary;
 			text-decoration: none;
 			padding: 1.5em;
 			margin: -1.5em;
@@ -563,22 +565,22 @@ body {
 	}
 
 	li.active {
-		border-color: #7F54B3;
-		color: #7F54B3;
+		border-color: $primary;
+		color: $primary;
 		font-weight: 700;
 
 		&::before {
-			border-color: #7F54B3;
+			border-color: $primary;
 		}
 	}
 
 	li.done {
-		border-color: #7F54B3;
-		color: #7F54B3;
+		border-color: $primary;
+		color: $primary;
 
 		&::before {
-			border-color: #7F54B3;
-			background: #7F54B3;
+			border-color: $primary;
+			background: $primary;
 		}
 	}
 }
@@ -591,8 +593,8 @@ body {
 
 .wc-setup .wc-setup-actions .button-primary,
 .woocommerce-tracker .button-primary {
-	background-color: #7F54B3;
-	border-color: #7F54B3;
+	background-color: $primary;
+	border-color: $primary;
 	box-shadow: 0 0 0;
 	text-shadow: none;
 	margin: 0;
@@ -601,8 +603,8 @@ body {
 	&:hover,
 	&:focus,
 	&:active {
-		background: #674399;
-		border-color: #674399;
+		background: lighten($primary, 5%);
+		border-color: lighten($primary, 5%);
 		box-shadow: 0 0 0;
 	}
 }
@@ -805,8 +807,8 @@ body {
 	.wc-wizard-service-toggle {
 		height: 16px;
 		width: 32px;
-		border: 2px solid #7F54B3;
-		background-color: #7F54B3;
+		border: 2px solid $primary;
+		background-color: $primary;
 		display: inline-block;
 		text-indent: -9999px;
 		border-radius: 10em;
@@ -1151,7 +1153,7 @@ h3.jetpack-reasons {
 }
 
 .plugin-install-source {
-	$background: rgba(#7F54B3, 0.15);
+	$background: rgba($primary, 0.15);
 	background: $background;
 
 	&:not(.wc-wizard-service-item) {
@@ -1489,7 +1491,7 @@ p.jetpack-terms {
 		margin-left: 4px;
 
 		&.recommended-item-icon-wc_admin {
-			background-color: #7f54b3;
+			background-color: $primary;
 			padding: 0.5em;
 			height: 2em;
 		}

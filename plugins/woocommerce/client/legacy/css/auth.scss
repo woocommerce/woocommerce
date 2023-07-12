@@ -1,3 +1,5 @@
+@import "variables";
+
 body {
 	background: #f1f1f1;
 	box-shadow: none;
@@ -7,7 +9,7 @@ body {
 
 #wc-logo {
 	border: 0;
-	margin: 24px 0;
+	margin: 33px 24px;
 	padding: 0;
 	text-align: center;
 	font-size: 0;
@@ -44,9 +46,9 @@ body {
 	}
 
 	a {
-		color: #7F54B3;
+		color: $primary;
 		&:hover, &:focus {
-			color: #3C2861;
+			color: darken($primary, 40%);
 		}
 	}
 
@@ -127,8 +129,8 @@ body {
 		}
 	}
 	.button-primary {
-		background: #7F54B3;
-		border-color: #7F54B3;
+		background: $primary;
+		border-color: $primary;
 		box-shadow: 0 0 0;
 		color: #fff;
 		float: right;
@@ -136,7 +138,7 @@ body {
 		text-shadow: none;
 
 		&:hover, &:focus {
-			background: #9a69c7;
+			background: lighten($primary, 5%);
 			color: #fff;
 		}
 	}
