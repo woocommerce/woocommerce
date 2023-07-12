@@ -1,22 +1,29 @@
 /**
  * External dependencies
  */
+import { store as blockEditorStore } from '@wordpress/block-editor';
 import { serialize } from '@wordpress/blocks';
 import { MenuItem } from '@wordpress/components';
 import { useCopyToClipboard } from '@wordpress/compose';
-import { useDispatch } from '@wordpress/data';
-import { createElement, useContext } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
-/**
- * Internal dependencies
- */
-import { EditorContext } from '../../context';
-
 export const CopyAllContentMenuItem = () => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { blocks } = useContext( EditorContext );
+
+	const { blocks } = useSelect( ( select ) => {
+		const {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore These selectors are available in the block data store.
+			getBlocks,
+		} = select( blockEditorStore );
+
+		return {
+			blocks: getBlocks(),
+		};
+	}, [] );
 
 	const getText = () => {
 		return serialize( blocks );
