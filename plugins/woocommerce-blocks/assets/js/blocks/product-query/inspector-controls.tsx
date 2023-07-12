@@ -4,11 +4,12 @@
 import type { ElementType } from 'react';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
-import { useSelect } from '@wordpress/data';
+import { useSelect, subscribe } from '@wordpress/data';
 import { addFilter } from '@wordpress/hooks';
 import { ProductQueryFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import { EditorBlock } from '@woocommerce/types';
 import { usePrevious } from '@woocommerce/base-hooks';
+import { isWpVersion } from '@woocommerce/settings';
 import {
 	FormTokenField,
 	ToggleControl,
@@ -37,10 +38,12 @@ import {
 	QUERY_DEFAULT_ATTRIBUTES,
 	QUERY_LOOP_ID,
 	STOCK_STATUS_OPTIONS,
+	REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION,
 } from './constants';
 import { AttributesFilter } from './inspector-controls/attributes-filter';
 import { PopularPresets } from './inspector-controls/popular-presets';
 import { ProductSelector } from './inspector-controls/product-selector';
+import { replaceProductsWithProductCollection } from '../shared/scripts';
 
 import './editor.scss';
 
@@ -266,3 +269,20 @@ export const withProductQueryControls =
 	};
 
 addFilter( 'editor.BlockEdit', QUERY_LOOP_ID, withProductQueryControls );
+
+if ( isWpVersion( '6.1', '>=' ) ) {
+	let unsubscribe: ( () => void ) | undefined;
+	if ( REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION && ! unsubscribe ) {
+		// console.info( 'Subscribed to allow Products block migration' );
+		unsubscribe = subscribe( () => {
+			replaceProductsWithProductCollection( () => {
+				// console.info(
+				// 	'Unsubscribed and disallow further Products block migration'
+				// );
+				if ( unsubscribe ) {
+					unsubscribe();
+				}
+			} );
+		}, 'core/block-editor' );
+	}
+}
