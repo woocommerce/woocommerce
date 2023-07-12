@@ -20,15 +20,19 @@ jobs:
         run: |
           sla_timestamp=$(date -d "${{ github.event.label.created_at }} + 5 hours" -u +%s)
           echo "sla_timestamp=$sla_timestamp" >> $GITHUB_OUTPUT
-      - name: Notify Slack
-        uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
-        id: notify
-        with:
-            slack-bot-user-oauth-access-token: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
-            slack-channel: ${{ secrets.WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL }}
-            slack-text: |
-                <!subteam^${{ secrets.WOO_PR_TESTING_ANALYSIS_TEAM_ID }}>, there is a new *${{ steps.get_pr_status.outputs.pr_status }}* PR to analyze.
-                <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}> :thread:
-                *SLA:* <!date^${{ steps.calculate_sla.outputs.sla_timestamp }}^{date_short_pretty} at {time}|5 hours from now>
-            slack-optional-unfurl_links: false
-            slack-optional-unfurl_media: false
+      - name: Inspect
+        env:
+            JSON: ${{ toJson(github.event.label) }}
+        run: echo "${{ env.JSON }}"
+      # - name: Notify Slack
+      #   uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
+      #   id: notify
+      #   with:
+      #       slack-bot-user-oauth-access-token: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
+      #       slack-channel: ${{ secrets.WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL }}
+      #       slack-text: |
+      #           <!subteam^${{ secrets.WOO_PR_TESTING_ANALYSIS_TEAM_ID }}>, there is a new *${{ steps.get_pr_status.outputs.pr_status }}* PR to analyze.
+      #           <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}> :thread:
+      #           *SLA:* <!date^${{ steps.calculate_sla.outputs.sla_timestamp }}^{date_short_pretty} at {time}|5 hours from now>
+      #       slack-optional-unfurl_links: false
+      #       slack-optional-unfurl_media: false
