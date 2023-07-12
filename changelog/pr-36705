@@ -1,4 +1,4 @@
 Significance: minor
-Type: add
+Type: fix
 
-Added `woocommerce_widget_layered_nav_filters_start/end` hooks around layered nav filters widget
+Use admin theme color instead of old pink. Update old pink to the new brand color.
