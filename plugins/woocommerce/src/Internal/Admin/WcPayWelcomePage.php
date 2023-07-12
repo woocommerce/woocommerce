@@ -170,10 +170,14 @@ class WcPayWelcomePage {
 	 * @param array $promo_notes Allowed promo notes.
 	 * @return array
 	 */
-	public function allowed_promo_notes( $promo_notes = [] ) {
-		if ( $this->get_incentive() ) {
-			$promo_notes[] = $this->get_incentive()['id'];
+	public function allowed_promo_notes( $promo_notes = [] ): array {
+		// Return early if there is no eligible incentive.
+		if ( empty( $this->get_incentive() ) ) {
+			return $promo_notes;
 		}
+
+		// Add our incentive ID to the promo notes.
+		$promo_notes[] = $this->get_incentive()['id'];
 
 		return $promo_notes;
 	}
