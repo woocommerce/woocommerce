@@ -4,15 +4,18 @@
 import { writeFile } from 'fs';
 import { Command } from '@commander-js/extra-typings';
 import path from 'path';
+import crypto from 'crypto';
 
 /**
  * Internal dependencies
  */
-import { generateManifestFromDirectory } from '../../lib/generate-manifest';
-import { Logger } from '../../../core/logger';
+import { generateManifestFromDirectory } from '../../../lib/generate-manifest';
+import { Logger } from '../../../../core/logger';
 
 export const generateManifestCommand = new Command( 'create' )
-	.description( 'Create a new manifest from a markdown directory.' )
+	.description(
+		'Create a manifest file representing the contents of a markdown directory.'
+	)
 	.argument(
 		'<directory>',
 		'Path to directory of Markdown files to generate the manifest from.'
@@ -44,7 +47,7 @@ export const generateManifestCommand = new Command( 'create' )
 			? rootDir
 			: path.join( process.cwd(), rootDir );
 
-		const absoluteDir = path.isAbsolute( dir )
+		const absoluteSubDir = path.isAbsolute( dir )
 			? dir
 			: path.join( process.cwd(), dir );
 
@@ -55,8 +58,8 @@ export const generateManifestCommand = new Command( 'create' )
 		Logger.startTask( 'Generating manifest' );
 
 		const manifest = await generateManifestFromDirectory(
-			absoluteDir,
 			absoluteRootDir,
+			absoluteSubDir,
 			projectName,
 			baseUrl
 		);

@@ -9,6 +9,8 @@ import crypto from 'crypto';
 
 interface Category {
 	[ key: string ]: unknown;
+	posts?: Post[];
+	categories?: Category[];
 }
 
 interface Post {
@@ -21,21 +23,45 @@ function generatePageId( filePath: string, prefix = '' ) {
 	return hash.digest( 'hex' );
 }
 
+/**
+ *	Generates a file url relative to the root directory provided.
+ *
+ * @param baseUrl          The base url to use for the file url.
+ * @param rootDirectory    The root directory where the file resides.
+ * @param subDirectory     The sub-directory where the file resides.
+ * @param absoluteFilePath The absolute path to the file.
+ * @return The file url.
+ */
 export const generateFileUrl = (
 	baseUrl: string,
 	rootDirectory: string,
-	directory: string,
-	filePath: string
+	subDirectory: string,
+	absoluteFilePath: string
 ) => {
-	const absoluteFilePath = path.resolve( directory, filePath );
-	const relativePath = path.relative( rootDirectory, absoluteFilePath );
+	// check paths are absolute
+	for ( const filePath of [
+		rootDirectory,
+		subDirectory,
+		absoluteFilePath,
+	] ) {
+		if ( ! path.isAbsolute( filePath ) ) {
+			throw new Error(
+				`File URLs cannot be generated without absolute paths. ${ filePath } is not absolute.`
+			);
+		}
+	}
+	// Generate a path from the subdirectory to the file path.
+	const relativeFilePath = path.resolve( subDirectory, absoluteFilePath );
+
+	// Determine the relative path from the rootDirectory to the filePath.
+	const relativePath = path.relative( rootDirectory, relativeFilePath );
 
 	return `${ baseUrl }/${ relativePath }`;
 };
 
 async function processDirectory(
-	directory: string,
 	rootDirectory: string,
+	subDirectory: string,
 	projectName: string,
 	baseUrl: string,
 	checkReadme = true
@@ -43,7 +69,7 @@ async function processDirectory(
 	let category: Category = {};
 
 	// Process README.md (if exists) for the category definition.
-	const readmePath = path.join( directory, 'README.md' );
+	const readmePath = path.join( subDirectory, 'README.md' );
 
 	if ( checkReadme && fs.existsSync( readmePath ) ) {
 		const readmeContent = fs.readFileSync( readmePath, 'utf-8' );
@@ -52,7 +78,7 @@ async function processDirectory(
 		category.posts = [];
 	}
 
-	const markdownFiles = glob.sync( path.join( directory, '*.md' ) );
+	const markdownFiles = glob.sync( path.join( subDirectory, '*.md' ) );
 
 	markdownFiles.forEach( ( filePath ) => {
 		if ( filePath !== readmePath || ! checkReadme ) {
@@ -66,7 +92,7 @@ async function processDirectory(
 				url: generateFileUrl(
 					baseUrl,
 					rootDirectory,
-					directory,
+					subDirectory,
 					filePath
 				),
 				id: generatePageId( filePath, projectName ),
@@ -77,13 +103,13 @@ async function processDirectory(
 	// Recursively process subdirectories.
 	category.categories = [];
 	const subdirectories = fs
-		.readdirSync( directory, { withFileTypes: true } )
+		.readdirSync( subDirectory, { withFileTypes: true } )
 		.filter( ( dirent ) => dirent.isDirectory() )
-		.map( ( dirent ) => path.join( directory, dirent.name ) );
+		.map( ( dirent ) => path.join( subDirectory, dirent.name ) );
 	for ( const subdirectory of subdirectories ) {
 		const subcategory = await processDirectory(
-			subdirectory,
 			rootDirectory,
+			subdirectory,
 			projectName,
 			baseUrl
 		);
@@ -95,16 +121,24 @@ async function processDirectory(
 }
 
 export async function generateManifestFromDirectory(
-	directory: string,
 	rootDirectory: string,
+	subDirectory: string,
 	projectName: string,
 	baseUrl: string
 ) {
-	return processDirectory(
-		directory,
+	const manifest = await processDirectory(
 		rootDirectory,
+		subDirectory,
 		projectName,
 		baseUrl,
 		false
 	);
+
+	// Generate hash of the manifest contents.
+	const hash = crypto
+		.createHash( 'sha256' )
+		.update( JSON.stringify( manifest ) )
+		.digest( 'hex' );
+
+	return { ...manifest, hash };
 }

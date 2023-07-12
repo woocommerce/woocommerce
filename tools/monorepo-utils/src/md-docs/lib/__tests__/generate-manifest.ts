@@ -15,8 +15,8 @@ describe( 'generateManifest', () => {
 	it( 'should generate a manifest with the correct category structure', async () => {
 		// generate the manifest from fixture directory
 		const manifest = await generateManifestFromDirectory(
-			dir,
 			rootDir,
+			dir,
 			'example-docs',
 			'https://example.com'
 		);
@@ -39,8 +39,8 @@ describe( 'generateManifest', () => {
 
 	it( 'should create post urls with the correct url', async () => {
 		const manifest = await generateManifestFromDirectory(
-			dir,
 			rootDir,
+			dir,
 			'example-docs',
 			'https://example.com'
 		);
@@ -54,5 +54,16 @@ describe( 'generateManifest', () => {
 		).toEqual(
 			'https://example.com/example-docs/get-started/troubleshooting/what-went-wrong.md'
 		);
+	} );
+
+	it( 'should create a hash for each manifest', async () => {
+		const manifest = await generateManifestFromDirectory(
+			rootDir,
+			dir,
+			'example-docs',
+			'https://example.com'
+		);
+
+		expect( manifest.hash ).not.toBeUndefined();
 	} );
 } );
