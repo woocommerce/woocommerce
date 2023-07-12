@@ -727,7 +727,9 @@ class Init {
 										'</strong>'
 									),
 								),
-								array(),
+								array(
+									array( 'woocommerce/product-variations-options' )
+								),
 							),
 						),
 					)
