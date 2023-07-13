@@ -197,8 +197,12 @@ class DataSynchronizer implements BatchProcessorInterface {
 				return (int) $pending_count;
 			}
 		}
-		$orders_table     = $this->data_store::get_orders_table_name();
+
 		$order_post_types = wc_get_order_types( 'cot-migration' );
+
+		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
+
+		$orders_table = $this->data_store::get_orders_table_name();
 
 		if ( empty( $order_post_types ) ) {
 			$this->error_logger->debug(
@@ -212,7 +216,17 @@ class DataSynchronizer implements BatchProcessorInterface {
 			return 0;
 		}
 
-		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
+		if ( 'yes' !== get_option( self::ORDERS_TABLE_CREATED ) ) {
+			$count = $wpdb->get_var(
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholder is prepared.
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM $wpdb->posts where post_type in ( $order_post_type_placeholder )",
+					$order_post_types
+				)
+				// phpcs:enable
+			);
+			return $count;
+		}
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			$missing_orders_count_sql = "

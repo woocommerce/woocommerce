@@ -248,9 +248,9 @@ class CustomOrdersTableController {
 			return $tools_array;
 		}
 
-		if ( $this->is_feature_visible() ) {
+		if ( $this->custom_orders_table_usage_is_enabled() || $this->data_synchronizer->data_sync_is_enabled() ) {
 			$disabled = true;
-			$message  = __( 'This will delete the custom orders tables. The tables can be deleted only if the "High-Performance order storage" feature is disabled (via Settings > Advanced > Features).', 'woocommerce' );
+			$message  = __( 'This will delete the custom orders tables. The tables can be deleted only if the "High-Performance order storage" is not authoritative and sync is disabled (via Settings > Advanced > Features).', 'woocommerce' );
 		} else {
 			$disabled = false;
 			$message  = __( 'This will delete the custom orders tables. To create them again enable the "High-Performance order storage" feature (via Settings > Advanced > Features).', 'woocommerce' );

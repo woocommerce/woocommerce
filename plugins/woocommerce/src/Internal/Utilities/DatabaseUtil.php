@@ -33,8 +33,11 @@ class DatabaseUtil {
 	 * @return array An array containing the names of the tables that currently don't exist in the database.
 	 */
 	public function get_missing_tables( string $creation_queries ): array {
-		$dbdelta_output = $this->dbdelta( $creation_queries, false );
-		$parsed_output  = $this->parse_dbdelta_output( $dbdelta_output );
+		global $wpdb;
+		$suppress_errors = $wpdb->suppress_errors( true );
+		$dbdelta_output  = $this->dbdelta( $creation_queries, false );
+		$wpdb->suppress_errors( $suppress_errors );
+		$parsed_output = $this->parse_dbdelta_output( $dbdelta_output );
 		return $parsed_output['created_tables'];
 	}
 

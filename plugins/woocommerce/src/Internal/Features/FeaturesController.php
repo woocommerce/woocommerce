@@ -114,9 +114,9 @@ class FeaturesController {
 				'disable_ui'      => false,
 			),
 			// Options for HPOS features are added in CustomOrdersTableController to keep the logic in same place.
-			'custom_order_tables'  => array( // This exists for back-compat, otherwise is always enabled and hidden from WC 8.0.
+			'custom_order_tables'  => array( // This exists for back-compat only, otherwise it's value is superseded by $hpos_authoritative option.
 				'name'               => __( 'High-Performance order storage (COT)', 'woocommerce' ),
-				'enabled_by_default' => true,
+				'enabled_by_default' => false,
 			),
 			$hpos_authoritative    => array(
 				'name' => __( 'High performance order storage', 'woocommerce' ),
@@ -232,7 +232,8 @@ class FeaturesController {
 		}
 
 		$default_value = $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no';
-		return 'yes' === get_option( $this->feature_enable_option_name( $feature_id ), $default_value );
+		$value         = 'yes' === get_option( $this->feature_enable_option_name( $feature_id ), $default_value );
+		return $value;
 	}
 
 	/**
