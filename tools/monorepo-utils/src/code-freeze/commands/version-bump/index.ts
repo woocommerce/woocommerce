@@ -19,13 +19,6 @@ import { bumpFiles } from './bump';
 import { validateArgs } from './lib/validate';
 import { Options } from './types';
 
-const genericErrorFunction = ( err ) => {
-	if ( err.git ) {
-		return err.git;
-	}
-	throw err;
-};
-
 export const versionBumpCommand = new Command( 'version-bump' )
 	.description( 'Bump versions ahead of new development cycle' )
 	.argument( '<version>', 'Version to bump to' )
@@ -88,49 +81,47 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		const majorMinor = getMajorMinor( version );
 		const branch = `prep/${ base }-for-next-dev-cycle-${ majorMinor }`;
 
-		if ( commitDirectToBase ) {
-			Logger.notice( `Checking out ${ base }` );
-			await checkoutRemoteBranch( tmpRepoPath, base );
-		} else {
-			const exists = await git.raw( 'ls-remote', 'origin', branch );
+		try {
+			if ( commitDirectToBase ) {
+				Logger.notice( `Checking out ${ base }` );
+				await checkoutRemoteBranch( tmpRepoPath, base );
+			} else {
+				const exists = await git.raw( 'ls-remote', 'origin', branch );
 
-			if ( ! dryRun && exists.trim().length > 0 ) {
-				Logger.error(
-					`Branch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
-				);
+				if ( ! dryRun && exists.trim().length > 0 ) {
+					Logger.error(
+						`Branch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
+					);
+				}
+				Logger.notice( `Checking out ${ branch }` );
+				await git.checkoutBranch( branch, base );
 			}
-			Logger.notice( `Checking out ${ branch }` );
-			await git.checkoutBranch( branch, base );
-		}
 
-		Logger.notice( 'Validating arguments' );
-		await validateArgs( tmpRepoPath, version, options );
+			Logger.notice( 'Validating arguments' );
+			await validateArgs( tmpRepoPath, version, options );
 
-		const workingBranch = commitDirectToBase ? base : branch;
+			const workingBranch = commitDirectToBase ? base : branch;
 
-		Logger.notice(
-			`Bumping versions in ${ owner }/${ name } on ${ workingBranch } branch`
-		);
-		bumpFiles( tmpRepoPath, version );
+			Logger.notice(
+				`Bumping versions in ${ owner }/${ name } on ${ workingBranch } branch`
+			);
+			bumpFiles( tmpRepoPath, version );
 
-		if ( dryRun ) {
-			Logger.notice( 'Dry run complete. Exiting.' );
-			const diff = await git.diff();
-			console.log( diff );
-			return;
-		}
+			if ( dryRun ) {
+				Logger.notice( 'Dry run complete. Exiting.' );
+				const diff = await git.diff();
+				console.log( diff );
+				return;
+			}
 
-		Logger.notice( 'Adding and committing changes' );
-		await git.add( '.' ).catch( genericErrorFunction );
-		await git
-			.commit( `Prep ${ base } for ${ majorMinor } cycle` )
-			.catch( genericErrorFunction );
+			Logger.notice( 'Adding and committing changes' );
+			await git.add( '.' );
+			await git.commit( `Prep ${ base } for ${ majorMinor } cycle` );
 
-		Logger.notice( `Pushing ${ workingBranch } branch to Github` );
-		await git.push( 'origin', workingBranch );
+			Logger.notice( `Pushing ${ workingBranch } branch to Github` );
+			await git.push( 'origin', workingBranch );
 
-		if ( ! commitDirectToBase ) {
-			try {
+			if ( ! commitDirectToBase ) {
 				Logger.startTask( 'Creating a pull request' );
 
 				const pullRequest = await createPullRequest( {
@@ -145,8 +136,8 @@ export const versionBumpCommand = new Command( 'version-bump' )
 					`Pull request created: ${ pullRequest.html_url }`
 				);
 				Logger.endTask();
-			} catch ( e ) {
-				Logger.error( e );
 			}
+		} catch ( error ) {
+			Logger.error( error );
 		}
 	} );
