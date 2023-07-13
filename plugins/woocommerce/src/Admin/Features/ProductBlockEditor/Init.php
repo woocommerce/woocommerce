@@ -728,7 +728,13 @@ class Init {
 									),
 								),
 								array(
-									array( 'woocommerce/product-variations-options' )
+									array(
+										'woocommerce/product-section',
+										array(
+											'title' => __( 'Variation options', 'woocommerce' ),
+										),
+										array( array( 'woocommerce/product-variations-options' ) ),
+									),
 								),
 							),
 						),
