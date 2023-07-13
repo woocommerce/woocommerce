@@ -1,3 +1,7 @@
+---
+post_title: Install the Plugin
+---
+
 ## Install the plugin
 
 1. Download the plugin from the [GitHub repository](https://example.com).
