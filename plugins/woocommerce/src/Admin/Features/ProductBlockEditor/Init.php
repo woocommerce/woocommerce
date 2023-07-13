@@ -402,7 +402,7 @@ class Init {
 						array(
 							'woocommerce/product-section',
 							array(
-								'title'    => __( 'Attributes', 'woocommerce' ),
+								'title' => __( 'Attributes', 'woocommerce' ),
 							),
 							array(
 								array(
