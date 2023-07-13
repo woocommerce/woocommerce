@@ -20,6 +20,26 @@ interface ProductTemplateInterface {
      */
     const BASIC_DETAILS_SECTION = 'section/basic-details';
 
+	/**
+     * Description section ID.
+     */
+    const DESCRIPTION_SECTION = 'section/description';
+
+	/**
+     * Images section ID.
+     */
+    const IMAGES_SECTION = 'section/images';
+
+	/**
+     * Organization section ID.
+     */
+    const ORGANIZATION_SECTION = 'section/organization';
+
+	/**
+     * Attributes section ID.
+     */
+    const ATTRIBUTES_SECTION = 'section/attributes';
+
     /**
      * Pricing group ID.
      */
