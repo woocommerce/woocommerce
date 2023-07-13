@@ -403,9 +403,12 @@ class Init {
 							'woocommerce/product-section',
 							array(
 								'title'    => __( 'Attributes', 'woocommerce' ),
-								'blockGap' => 'unit-40',
 							),
-							array(),
+							array(
+								array(
+									'woocommerce/product-attributes-field',
+								),
+							),
 						),
 					),
 				),
