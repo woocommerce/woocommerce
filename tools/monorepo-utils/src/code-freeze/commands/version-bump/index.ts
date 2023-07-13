@@ -8,7 +8,10 @@ import simpleGit from 'simple-git';
  * Internal dependencies
  */
 import { Logger } from '../../../core/logger';
-import { sparseCheckoutRepoShallow } from '../../../core/git';
+import {
+	sparseCheckoutRepoShallow,
+	checkoutRemoteBranch,
+} from '../../../core/git';
 import { createPullRequest } from '../../../core/github/repo';
 import { getEnvVar } from '../../../core/environment';
 import { getMajorMinor } from '../../../core/version';
@@ -41,8 +44,12 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		'Base branch to create the PR against. Default: trunk',
 		'trunk'
 	)
+	.option(
+		'-d --dryRun',
+		'Prepare the version bump and log a diff. Do not create a PR or push to branch'
+	)
 	.action( async ( options: Options ) => {
-		const { owner, name, version, base } = options;
+		const { owner, name, version, base, dryRun } = options;
 		Logger.startTask(
 			`Making a temporary clone of '${ owner }/${ name }'`
 		);
@@ -67,31 +74,44 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			`Temporary clone of '${ owner }/${ name }' created at ${ tmpRepoPath }`
 		);
 
-		await validateArgs( tmpRepoPath, version );
-
 		const git = simpleGit( {
 			baseDir: tmpRepoPath,
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 		const majorMinor = getMajorMinor( version );
-		const branch = `prep/trunk-for-next-dev-cycle-${ majorMinor }`;
+		const branch = `prep/${ base }-for-next-dev-cycle-${ majorMinor }`;
 		const exists = await git.raw( 'ls-remote', 'origin', branch );
 
-		if ( exists.trim().length > 0 ) {
+		if ( ! dryRun && exists.trim().length > 0 ) {
 			Logger.error(
 				`Branch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
 			);
 		}
 
-		await git.checkoutBranch( branch, base ).catch( genericErrorFunction );
+		Logger.notice( `Checking out ${ base }` );
+		if ( base === 'trunk' ) {
+			await git.checkoutBranch( branch, base );
+		} else {
+			await checkoutRemoteBranch( tmpRepoPath, base );
+		}
+
+		Logger.notice( 'Validating arguments' );
+		await validateArgs( tmpRepoPath, base, version );
 
 		Logger.notice( `Bumping versions in ${ owner }/${ name }` );
 		bumpFiles( tmpRepoPath, version );
 
+		if ( dryRun ) {
+			Logger.notice( 'Dry run complete. Exiting.' );
+			const diff = await git.diff();
+			console.log( diff );
+			return;
+		}
+
 		Logger.notice( 'Adding and committing changes' );
 		await git.add( '.' ).catch( genericErrorFunction );
 		await git
-			.commit( `Prep trunk for ${ majorMinor } cycle` )
+			.commit( `Prep ${ base } for ${ majorMinor } cycle` )
 			.catch( genericErrorFunction );
 
 		Logger.notice( 'Pushing to Github' );
@@ -105,8 +125,8 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			const pullRequest = await createPullRequest( {
 				owner,
 				name,
-				title: `Prep trunk for ${ majorMinor } cycle`,
-				body: `This PR updates the versions in trunk to ${ version } for next development cycle.`,
+				title: `Prep ${ base } for ${ majorMinor } cycle`,
+				body: `This PR updates the versions in ${ base } to ${ version } for next development cycle.`,
 				head: branch,
 				base,
 			} );

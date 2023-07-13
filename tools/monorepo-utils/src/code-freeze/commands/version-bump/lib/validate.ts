@@ -51,6 +51,7 @@ export const stripPrereleaseParameters = (
  */
 export const validateArgs = async (
 	tmpRepoPath: string,
+	base: string,
 	version: string
 ): Promise< void > => {
 	const nextVersion = version;
@@ -65,9 +66,9 @@ export const validateArgs = async (
 	const isDevVersionBump =
 		prereleaseParameters && prereleaseParameters[ 0 ] === 'dev';
 
-	if ( ! isDevVersionBump ) {
+	if ( ! isDevVersionBump && base === 'trunk' ) {
 		Logger.error(
-			`Version ${ nextVersion } is not a development version bump. This tool is only intended to bump development versions for the preparation of the next development cycle.`
+			`Version ${ nextVersion } is not a development version bump and cannot be applied to trunk, which only accepts development version bumps.`
 		);
 	}
 

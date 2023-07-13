@@ -3,4 +3,5 @@ export type Options = {
 	name?: string;
 	version?: string;
 	base?: string;
+	dryRun?: boolean;
 };
