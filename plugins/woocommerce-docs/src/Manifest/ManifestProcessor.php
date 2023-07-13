@@ -34,8 +34,8 @@ class ManifestProcessor {
 	/**
 	 * Generate post args
 	 *
-	 * @param mixed $post
-	 * @param mixed $post_content
+	 * @param mixed $post The post to generate args for.
+	 * @param mixed $post_content The post content.
 	 * @return array
 	 */
 	private static function generate_post_args( $post, $post_content ) {
