@@ -227,7 +227,7 @@ class Init {
 	public function add_product_template( $args ) {
 		if ( ! isset( $args['template'] ) ) {
 			$args['template_lock'] = 'all';
-			$args['template']      = $this->template_registry->get_registered( 'simple' )->get_serialized_template();
+			$args['template']      = $this->template_registry->get_registered( 'simple' )->get_parsed_template();
 		}
 		return $args;
 	}

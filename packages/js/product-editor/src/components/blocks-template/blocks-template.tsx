@@ -1,9 +1,7 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
-import { parse, synchronizeBlocksWithTemplate } from '@wordpress/blocks';
-import { store as blockEditorStore } from '@wordpress/block-editor';
+import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import { useLayoutEffect } from '@wordpress/element';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -20,9 +18,13 @@ import {
 export function BlocksTemplate() {
 	const productId = useEntityId( 'postType', 'product' );
 
-	const [ , , onChange ] = useEntityBlockEditor( 'postType', 'product', {
-		id: productId,
-	} );
+	const [ blocks, , onChange ] = useEntityBlockEditor(
+		'postType',
+		'product',
+		{
+			id: productId,
+		}
+	);
 
 	const { records: templates, isResolving: isLoading } = useEntityRecords(
 		'postType',
@@ -41,8 +43,10 @@ export function BlocksTemplate() {
 			// @ts-ignore
 			( t ) => t.id === 'woocommerce/woocommerce//product-editor_simple'
 		);
-		const parsed = parse( template.content.raw );
-		onChange( parsed, {} );
+		onChange(
+			synchronizeBlocksWithTemplate( blocks, template.content.raw ),
+			{}
+		);
 	}, [ templates, isLoading ] );
 
 	return null;

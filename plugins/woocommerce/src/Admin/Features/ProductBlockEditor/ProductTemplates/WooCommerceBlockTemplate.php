@@ -10,7 +10,12 @@ class WooCommerceBlockTemplate {
     /**
      * Index for the block properties.
      */
-    const ATTRS_KEY = 'attrs';
+    const BLOCK_ATTRS_KEY = 'attrs';
+
+    /**
+     * Index for the block name.
+     */
+    const BLOCK_NAME_KEY = 'blockName';
 
     /**
      * Index for the child blocks.
@@ -143,36 +148,36 @@ class WooCommerceBlockTemplate {
      */
     private function parse_blocks( $blocks ) {
         usort( $blocks, function( $a, $b ) {
-            return isset( $a[ self::ATTRS_KEY ][ self::ORDER_KEY ] ) && isset( $b[ self::ATTRS_KEY ][ self::ORDER_KEY ] ) &&
-                $a[ self::ATTRS_KEY ][ self::ORDER_KEY ] > $b[ self::ATTRS_KEY ][ self::ORDER_KEY ] ? 1 : -1;
+            return isset( $a[ self::BLOCK_ATTRS_KEY ][ self::ORDER_KEY ] ) && isset( $b[ self::BLOCK_ATTRS_KEY ][ self::ORDER_KEY ] ) &&
+                $a[ self::BLOCK_ATTRS_KEY ][ self::ORDER_KEY ] > $b[ self::BLOCK_ATTRS_KEY ][ self::ORDER_KEY ] ? 1 : -1;
         } );
 
-        foreach( $blocks as $index => &$block ) {
-            $block = $this->clean_block_properties( $block );
-            if ( isset( $block[ self::INNER_BLOCKS_KEY ] ) ) {
-                // $blocks[ $index ][ self::INNER_CONTENT_KEY ] = array_map( 'serialize_block', $block[ self::INNER_BLOCKS_KEY ] );
-                $blocks[ $index ][ self::INNER_BLOCKS_KEY ]  = $this->parse_blocks( $block[ self::INNER_BLOCKS_KEY ] );
-            }
+        foreach( $blocks as $index => $block ) {
+            $blocks[ $index ] = $this->get_comma_delimited_template_block( $block );
         }
+
         return $blocks;
     }
 
     /**
-     * Remove block attributes that are unnecessary in the parsed block.
+     * Get the comma delimited template format.
      *
      * @param array $block Block.
      * @return array
      */
-    private function clean_block_properties( $block ) {
-        $properties_to_remove = array(
-            self::ID_KEY,
-            self::ORDER_KEY,
-            self::PARENT_KEY,
+    private function get_comma_delimited_template_block( $block ) {
+        $formatted = array(
+            $block[ self::BLOCK_NAME_KEY ],
+            array_merge(
+                $block[ self::BLOCK_ATTRS_KEY ],
+                array(
+                    'parsed' => true,
+                )
+            ),
+            isset( $block[ self::INNER_BLOCKS_KEY ] ) ? $this->parse_blocks( $block[ self::INNER_BLOCKS_KEY ] ) : array()
         );
-        foreach ( $properties_to_remove as $property ) {
-            unset( $block[ $property ] );
-        }
-        return $block;
+
+        return $formatted;
     }
 
     /**
@@ -181,7 +186,9 @@ class WooCommerceBlockTemplate {
      * @return array Parsed template.
      */
     public function get_parsed_template() {
-        return $this->parse_blocks( $this->template );
+        // Break internal pointers to avoid overwriting the stored template.
+        $template = json_decode( json_encode( $this->template ), true );
+        return $this->parse_blocks( $template );
     }
 
     public function get_comment_delimited_block_content( $block ) {

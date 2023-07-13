@@ -53,7 +53,7 @@ final class ProductTemplateRegistry {
     public function register_core_templates() {
         $template_instances = array(
             new SimpleProductTemplate(),
-            new VariableProductTemplate(),
+            // new VariableProductTemplate(),
         );
 
         foreach ( $template_instances as $instance ) {
@@ -117,7 +117,7 @@ final class ProductTemplateRegistry {
 		$template                 = new \WP_Block_Template();
 		$template->id             = self::PLUGIN_SLUG . '//product-editor_' . $product_template->get_slug();
 		$template->theme          = self::PLUGIN_SLUG;
-		$template->content        = $product_template->get_serialized_template();
+		$template->content        = $product_template->get_parsed_template();
 		$template->source         = 'plugin';
 		$template->slug           = $product_template->get_slug();
 		$template->type           = self::TEMPLATE_TYPE;
