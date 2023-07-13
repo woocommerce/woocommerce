@@ -51,7 +51,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 	)
 	.option(
 		'-c --commit-direct-to-base',
-		'Prepare the version bump and log a diff. Do not create a PR or push to branch',
+		'Commit directly to the base branch. Do not create a PR just push directly to base branch',
 		false
 	)
 	.action( async ( options: Options ) => {
