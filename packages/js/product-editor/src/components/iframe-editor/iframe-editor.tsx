@@ -148,6 +148,7 @@ export function IframeEditor( {
 								</EditorCanvas>
 								<Popover.Slot />
 							</ResizableEditor>
+							<div className="woocommerce-iframe-editor__content-inserter-clipper" />
 						</BlockTools>
 						{ isSidebarOpened && (
 							<div className="woocommerce-iframe-editor__sidebar">

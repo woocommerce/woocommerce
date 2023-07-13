@@ -29,6 +29,16 @@
 		position: relative;
 	}
 
+	&__content-inserter-clipper {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 40px;
+		background-color: inherit;
+		z-index: 100;
+	}
+
 	&__sidebar {
 		flex-shrink: 0;
 		width: 280px;
