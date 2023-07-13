@@ -110,12 +110,9 @@ export function WriteItForMeButtonContainer() {
 
 	const { requestCompletion: requestShortCompletion } = useCompletion( {
 		feature: WOO_AI_PLUGIN_FEATURE_NAME,
-		onStreamMessage: ( content ) => {
-			shortTinyEditor.setContent( content );
-		},
-		onStreamError: ( error ) => {
-			tinyEditor.setContent( getApiError( error ) );
-		},
+		onStreamMessage: ( content ) => shortTinyEditor.setContent( content ),
+		onStreamError: ( error ) =>
+			shortTinyEditor.setContent( getApiError( error ) ),
 		onCompletionFinished: ( reason, content ) => {
 			if ( reason === 'finished' ) {
 				shortTinyEditor.setContent( content );
