@@ -377,7 +377,24 @@ class Init {
 						'title' => __( 'Organization', 'woocommerce' ),
 						'order' => 15,
 					),
-					array(),
+					array(
+						array(
+							'woocommerce/product-section',
+							array(
+								'title'    => __( 'Product catalog', 'woocommerce' ),
+								'blockGap' => 'unit-40',
+							),
+							array(),
+						),
+						array(
+							'woocommerce/product-section',
+							array(
+								'title'    => __( 'Attributes', 'woocommerce' ),
+								'blockGap' => 'unit-40',
+							),
+							array(),
+						),
+					),
 				),
 				array(
 					'woocommerce/product-tab',
