@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Icon } from '@wordpress/icons';
+import { ReactElement } from 'react';
 
 /**
  * Internal dependencies
@@ -10,7 +11,7 @@ import './icon-with-text.scss';
 
 export interface IconWithTextProps {
 	icon: JSX.Element;
-	title: string;
+	title: ReactElement | JSX.Element | string;
 	description: string;
 }
 

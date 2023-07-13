@@ -4,6 +4,7 @@
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { __ } from '@wordpress/i18n';
 import { check, commentContent as comment, lock } from '@wordpress/icons';
+import { createInterpolateElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -11,6 +12,30 @@ import { check, commentContent as comment, lock } from '@wordpress/icons';
 import './footer.scss';
 import IconWithText from '../icon-with-text/icon-with-text';
 import WooIcon from '../../assets/images/woo-icon.svg';
+
+const refundPolicyTitle = createInterpolateElement(
+	__( '30 day <a>money back guarantee</a>', 'woocommerce' ),
+	{
+		// eslint-disable-next-line jsx-a11y/anchor-has-content
+		a: <a href="https://woocommerce.com/refund-policy/" />,
+	}
+);
+
+const supportTitle = createInterpolateElement(
+	__( '<a>Support</a> teams across the world', 'woocommerce' ),
+	{
+		// eslint-disable-next-line jsx-a11y/anchor-has-content
+		a: <a href="https://woocommerce.com/docs/" />,
+	}
+);
+
+const paymentTitle = createInterpolateElement(
+	__( '<a>Safe & Secure</a> online payment', 'woocommerce' ),
+	{
+		// eslint-disable-next-line jsx-a11y/anchor-has-content
+		a: <a href="https://woocommerce.com/products/woocommerce-payments/" />,
+	}
+);
 
 function FooterContent(): JSX.Element {
 	return (
@@ -21,11 +46,7 @@ function FooterContent(): JSX.Element {
 			<div className="woocommerce-marketplace__footer-columns">
 				<IconWithText
 					icon={ check }
-					// eslint-disable-next-line prettier/prettier
-					title={ __(
-						'30 day money back guarantee',
-						'woocommerce'
-					) }
+					title={ refundPolicyTitle }
 					description={ __(
 						'For extensions and themes purchased from our Marketplace, we offer a full refund within 30 days of your date of purchase.',
 						'woocommerce'
@@ -33,10 +54,7 @@ function FooterContent(): JSX.Element {
 				/>
 				<IconWithText
 					icon={ comment }
-					title={ __(
-						'Support teams across the world',
-						'woocommerce'
-					) }
+					title={ supportTitle }
 					description={ __(
 						'We have happiness engineers around round the globe to help you at any given time.',
 						'woocommerce'
@@ -44,10 +62,7 @@ function FooterContent(): JSX.Element {
 				/>
 				<IconWithText
 					icon={ lock }
-					title={ __(
-						'Safe & Secure online payment',
-						'woocommerce'
-					) }
+					title={ paymentTitle }
 					description={ __(
 						'Safety pay with WooCommerce payments, The only payment solution fully integrated to Woo.',
 						'woocommerce'
