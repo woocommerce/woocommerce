@@ -50,6 +50,16 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	);
 
 	/**
+	 * We do not have and use all the getters and setters from OrderTableDataStore, so we only select the props we actually need.
+	 */
+	protected $internal_meta_keys = array(
+		'_refund_amount',
+		'_refund_reason',
+		'_refunded_payment',
+		'_refunded_by',
+	);
+
+	/**
 	 * Delete a refund order from database.
 	 *
 	 * @param \WC_Order $refund Refund object to delete.
@@ -93,31 +103,28 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	}
 
 	/**
-	 * Read multiple refund objects from custom tables.
-	 *
-	 * @param \WC_Order $refunds Refund objects.
-	 */
-	public function read_multiple( &$refunds ) {
-		parent::read_multiple( $refunds );
-		foreach ( $refunds as $refund ) {
-			$this->set_refund_props( $refund );
-		}
-	}
-
-	/**
 	 * Helper method to set refund props.
 	 *
-	 * @param \WC_Order $refund Refund object.
+	 * @param \WC_Order_Refund $refund Refund object.
 	 */
-	private function set_refund_props( $refund ) {
-		$refund->set_props(
-			array(
-				'amount'           => $refund->get_meta( '_refund_amount', true ),
-				'refunded_by'      => $refund->get_meta( '_refunded_by', true ),
-				'refunded_payment' => wc_string_to_bool( $refund->get_meta( '_refunded_payment', true ) ),
-				'reason'           => $refund->get_meta( '_refund_reason', true ),
-			)
-		);
+	protected function set_order_props_from_data( &$refund, $data ) {
+		parent::set_order_props_from_data( $refund, $data );
+		foreach ( $data->meta_data as $meta ) {
+			switch ( $meta->meta_key ) {
+				case '_refund_amount':
+					$refund->set_amount( $meta->meta_value );
+					break;
+				case '_refunded_by':
+					$refund->set_refunded_by( $meta->meta_value );
+					break;
+				case '_refunded_payment':
+					$refund->set_refunded_payment( wc_string_to_bool( $meta->meta_value ) );
+					break;
+				case '_refund_reason':
+					$refund->set_reason( $meta->meta_value );
+					break;
+			}
+		}
 	}
 
 	/**
