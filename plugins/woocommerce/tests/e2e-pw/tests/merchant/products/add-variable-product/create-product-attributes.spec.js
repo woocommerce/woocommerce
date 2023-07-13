@@ -68,11 +68,11 @@ test.describe( 'Add product attributes', () => {
 						.getByRole( 'button', { name: 'Add new' } )
 						.click();
 
-					await page
-						.getByRole( 'heading', {
+					await expect(
+						page.getByRole( 'heading', {
 							name: 'New attribute',
 						} )
-						.waitFor();
+					).toBeVisible();
 				} );
 			}
 
