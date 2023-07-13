@@ -10,7 +10,7 @@ $gutenberg-blue: var(--wp-admin-theme-color);
 }
 
 .woocommerce-product-mvp-ces-footer {
-	position: fixed;
+	position: absolute;
 	animation: slide-up 0.5s forwards;
 	width: 100%;
 	border-top: 1px solid var(--gutenberg-gray-100, #f0f0f0);
