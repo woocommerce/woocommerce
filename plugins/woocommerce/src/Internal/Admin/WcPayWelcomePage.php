@@ -189,14 +189,10 @@ class WcPayWelcomePage {
 	 * @return boolean
 	 */
 	private function has_wcpay(): bool {
-		$has_wcpay_setup = false;
-
-		// We consider the store to have WooPayments if:
-		// - the WooPayments plugin is active
-		// - and the WooPayments payment gateway is connected
-		// - and there is meaningful account data in the WooPayments account cache.
-		if ( $this->is_wcpay_active() && $this->is_wcpay_connected() && $this->has_wcpay_account_data() ) {
-			$has_wcpay_setup = true;
+		// We consider the store to have WooPayments if there is meaningful account data in the WooPayments account cache.
+		// This implies that WooPayments is or was active at some point and that it was connected.
+		if ( $this->has_wcpay_account_data() ) {
+			return true;
 		}
 
 		// If there is at least one order processed with WooPayments, we consider the store to have WooPayments.
@@ -209,10 +205,10 @@ class WcPayWelcomePage {
 				]
 			)
 		) ) {
-			$has_wcpay_setup = true;
+			return true;
 		}
 
-		return $has_wcpay_setup;
+		return false;
 	}
 
 	/**
@@ -222,24 +218,6 @@ class WcPayWelcomePage {
 	 */
 	private function is_wcpay_active(): bool {
 		return class_exists( '\WC_Payments' );
-	}
-
-	/**
-	 * Check if the WooPayments payment gateway has a connected account.
-	 *
-	 * @see WC_Payment_Gateway_WCPay::is_connected()
-	 *
-	 * @return boolean
-	 */
-	private function is_wcpay_connected(): bool {
-		if ( class_exists( '\WC_Payments' ) ) {
-			$wc_payments_gateway = \WC_Payments::get_gateway();
-			return method_exists( $wc_payments_gateway, 'is_connected' )
-				? $wc_payments_gateway->is_connected()
-				: false;
-		}
-
-		return false;
 	}
 
 	/**
