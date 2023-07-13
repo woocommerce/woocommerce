@@ -1,6 +1,6 @@
 .woocommerce-marketplace__content {
 	box-sizing: content-box;
-	max-width: 1216px;
+	max-width: 1600px;
 	margin: auto;
 	padding: 0 16px;
 
@@ -22,7 +22,8 @@
 	.extension-card {
 		background-color: #3c3c3c;
 		height: 270px;
-		min-width: 389px;
+		flex: 1;
+		max-width: 389px;
 	}
 }
 

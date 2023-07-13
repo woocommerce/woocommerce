@@ -7,7 +7,7 @@
 
 .woocommerce-marketplace__footer {
 	box-sizing: content-box;
-	max-width: 1216px;
+	max-width: 1600px;
 	margin: auto;
 	padding: 48px 32px;
 
@@ -19,6 +19,11 @@
 		line-height: 28px;
 		max-width: 389px;
 		margin: 0 0 32px;
+	}
+
+	a {
+		color: var(--gutenberg-blue, #007cba);
+		text-decoration: none;
 	}
 
 	&-columns {
