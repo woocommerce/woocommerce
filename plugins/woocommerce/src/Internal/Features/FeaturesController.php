@@ -417,13 +417,16 @@ class FeaturesController {
 	 * @return string The option that enables or disables the feature.
 	 */
 	public function feature_enable_option_name( string $feature_id ): string {
-		if ( 'analytics' === $feature_id ) {
-			return Analytics::TOGGLE_OPTION_NAME;
-		} elseif ( 'new_navigation' === $feature_id ) {
-			return Init::TOGGLE_OPTION_NAME;
+		switch ( $feature_id ) {
+			case 'analytics':
+				return Analytics::TOGGLE_OPTION_NAME;
+			case 'new_navigation':
+				return Init::TOGGLE_OPTION_NAME;
+			case 'custom_order_tables':
+				return CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION;
+			default:
+				return "woocommerce_feature_{$feature_id}_enabled";
 		}
-
-		return "woocommerce_feature_{$feature_id}_enabled";
 	}
 
 	/**
