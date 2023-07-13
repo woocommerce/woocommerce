@@ -79,7 +79,7 @@ class OrdersTableRefundDataStoreTests extends WC_Unit_Test_Case {
 	 */
 	public function test_refunds_backfill() {
 		$this->enable_cot_sync();
-		$this->toggle_cot( true );
+		$this->toggle_cot_feature_and_usage( true );
 		$order  = OrderHelper::create_complex_data_store_order( $this->order_data_store );
 		$refund = wc_create_refund(
 			array(

@@ -87,6 +87,7 @@ export const ProductNameSuggestions = () => {
 				setSuggestions( parsed.suggestions );
 				setIsFirstLoad( false );
 			} catch ( e ) {
+				setSuggestionsState( SuggestionsState.Failed );
 				throw new Error( 'Unable to parse suggestions' );
 			}
 		},
@@ -99,7 +100,7 @@ export const ProductNameSuggestions = () => {
 	);
 
 	useEffect( () => {
-		if ( visible === true && viewed === false ) {
+		if ( visible && ! viewed ) {
 			setViewed( true );
 			recordNameTracks( 'view_ui' );
 		}

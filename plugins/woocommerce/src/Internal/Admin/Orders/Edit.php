@@ -324,6 +324,16 @@ class Edit {
 		?>
 		>
 		<?php wp_nonce_field( $this->get_order_edit_nonce_action() ); ?>
+		<?php
+		/**
+		 * Fires at the top of the order edit form. Can be used as a replacement for edit_form_top hook for HPOS.
+		 *
+		 * @param \WC_Order $order Order object.
+		 *
+		 * @since 8.0.0
+		 */
+		do_action( 'order_edit_form_top', $this->order );
+		?>
 		<input type="hidden" id="hiddenaction" name="action" value="<?php echo esc_attr( $form_action ); ?>"/>
 		<input type="hidden" id="original_order_status" name="original_order_status" value="<?php echo esc_attr( $this->order->get_status() ); ?>"/>
 		<input type="hidden" id="referredby" name="referredby" value="<?php echo $referer ? esc_url( $referer ) : ''; ?>"/>

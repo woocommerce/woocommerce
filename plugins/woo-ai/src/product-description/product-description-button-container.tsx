@@ -12,9 +12,17 @@ import {
 	MAX_TITLE_LENGTH,
 	MIN_TITLE_LENGTH_FOR_DESCRIPTION,
 } from '../constants';
-import { WriteItForMeBtn, StopCompletionBtn } from '../components';
-import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
-import { recordTracksFactory, getPostId } from '../utils';
+import { StopCompletionBtn, WriteItForMeBtn } from '../components';
+import { useCompletion, useFeedbackSnackbar, useTinyEditor } from '../hooks';
+import {
+	getProductName,
+	getPostId,
+	getCategories,
+	getTags,
+	getAttributes,
+	recordTracksFactory,
+} from '../utils';
+import { Attribute } from '../utils/types';
 import { getBusinessDescription, getToneOfVoice } from '../utils/branding';
 
 const DESCRIPTION_MAX_LENGTH = 300;
@@ -149,9 +157,37 @@ export function WriteItForMeButtonContainer() {
 	const writeItForMeEnabled =
 		! fetching && productTitle.length >= MIN_TITLE_LENGTH_FOR_DESCRIPTION;
 
-	const buildPrompt = () => {
+	const buildPrompt = (): string => {
+		const productName: string = getProductName();
+		const productCategories: string[] = getCategories();
+		const productTags: string[] = getTags();
+		const productAttributes: Attribute[] = getAttributes();
+
+		const includedProps: string[] = [];
+		const productPropsInstructions: string[] = [];
+		if ( productCategories.length > 0 ) {
+			productPropsInstructions.push(
+				`Falling into the categories: ${ productCategories.join(
+					', '
+				) }.`
+			);
+			includedProps.push( 'categories' );
+		}
+		if ( productTags.length > 0 ) {
+			productPropsInstructions.push(
+				`Tagged with: ${ productTags.join( ', ' ) }.`
+			);
+			includedProps.push( 'categories' );
+		}
+		productAttributes.forEach( ( { name, values } ) => {
+			productPropsInstructions.push(
+				`${ name }: ${ values.join( ', ' ) }.`
+			);
+			includedProps.push( name );
+		} );
+
 		const instructions = [
-			`Write a product description with the following product title: "${ productTitle.slice(
+			`Compose an engaging product description for a product named "${ productName.slice(
 				0,
 				MAX_TITLE_LENGTH
 			) }."`,

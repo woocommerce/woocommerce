@@ -245,6 +245,32 @@ test.describe( 'Checkout page', () => {
 			.textContent();
 		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
+		// If we simulate a new browser context by dropping all cookies, and reload the page, the shopper should be
+		// prompted to complete an email validation step before they can proceed.
+		await page.context().clearCookies();
+		await page.reload();
+		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(3)' ) ).toContainText(
+			/verify the email address associated with the order/
+		);
+
+		// Supplying an email address other than the actual order billing email address will take them back to the same
+		// page with an error message.
+		await page.fill( '#email', 'incorrect@email.address' );
+		await page.locator( 'form.woocommerce-verify-email button' ).click();
+		await expect( page.locator( 'form.woocommerce-verify-email p:nth-child(4)' ) ).toContainText(
+			/verify the email address associated with the order/
+		);
+		await expect( page.locator( 'ul.woocommerce-error li' ) ).toContainText(
+			/We were unable to verify the email address you provided/
+		);
+
+		// However if they supply the *correct* billing email address, they should see the order received page again.
+		await page.fill( '#email', guestEmail );
+		await page.locator( 'form.woocommerce-verify-email button' ).click();
+		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			'Order received'
+		);
+
 		await page.goto( 'wp-login.php' );
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
@@ -273,9 +299,9 @@ test.describe( 'Checkout page', () => {
 	} );
 
 	test( 'allows existing customer to place order', async ( { page } ) => {
-		await page.goto( 'wp-admin/' );
-		await page.locator( 'input[name="log"]' ).fill( customer.username );
-		await page.locator( 'input[name="pwd"]' ).fill( customer.password );
+		await page.goto( 'my-account/' );
+		await page.locator( 'input[name="username"]' ).fill( customer.username );
+		await page.locator( 'input[name="password"]' ).fill( customer.password );
 		await page.locator( 'text=Log In' ).click();
 		await page.waitForLoadState( 'networkidle' );
 		for ( let i = 1; i < 3; i++ ) {
@@ -320,9 +346,17 @@ test.describe( 'Checkout page', () => {
 			.split( /(\s+)/ )[ 6 ]
 			.toString();
 
-		await page.goto( 'wp-login.php?loggedout=true' );
-		await page.waitForLoadState( 'networkidle' );
+		// Effect a log out/simulate a new browsing session by dropping all cookies.
+		await page.context().clearCookies();
+		await page.reload();
 
+		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
+		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
+			/Please log in to your account to view this order/
+		);
+
+		// Switch to admin user.
+		await page.goto( 'wp-login.php?loggedout=true' );
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
 		await page.locator( 'text=Log In' ).click();

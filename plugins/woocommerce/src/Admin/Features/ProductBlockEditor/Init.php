@@ -259,7 +259,8 @@ class Init {
 								array(
 									'woocommerce/product-name-field',
 									array(
-										'name' => 'Product name',
+										'name'      => 'Product name',
+										'autoFocus' => true,
 									),
 								),
 								array(
@@ -699,7 +700,20 @@ class Init {
 							'title' => __( 'Variations', 'woocommerce' ),
 							'order' => 40,
 						),
-						array(),
+						array(
+							array(
+								'woocommerce/product-variations-fields',
+								array(
+									'description' => sprintf(
+										/* translators: %1$s: Sell your product in multiple variations like size or color. strong opening tag. %2$s: Sell your product in multiple variations like size or color. strong closing tag.*/
+										__( '%1$sSell your product in multiple variations like size or color.%2$s Get started by adding options for the buyers to choose on the product page.', 'woocommerce' ),
+										'<strong>',
+										'</strong>'
+									),
+								),
+								array(),
+							),
+						),
 					)
 				);
 			}
