@@ -99,6 +99,77 @@ trait BaseProductTemplate {
                 ),
             ),
         );
+        $this->add_section(
+            array(
+                'id'          => self::BASIC_DETAILS_SECTION . '/description',
+                'title'       => __( 'Description', 'woocommerce' ),
+                'description' => __( 'What makes this product unique? What are its most important features? Enrich the product page by adding rich content using blocks.', 'woocommerce' ),
+                'parent'      => self::GENERAL_GROUP,
+            )
+        );
+        $this->add_field(
+            array(
+                'blockName' => 'woocommerce/product-description-field',
+                'parent'    => self::BASIC_DETAILS_SECTION . '/description',
+            ),
+        );
+        $this->add_section(
+            array(
+                'id'          => self::BASIC_DETAILS_SECTION . '/images',
+                'title'       => __( 'Images', 'woocommerce' ),
+                'description' => sprintf(
+                    /* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
+                    __( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s', 'woocommerce' ),
+                    '<a href="http://woocommerce.com/#" target="_blank" rel="noreferrer">',
+                    '</a>'
+                ),
+                'parent'      => self::GENERAL_GROUP,
+            )
+        );
+        $this->add_field(
+            array(
+                'blockName' => 'woocommerce/product-images-field',
+                'parent'    => self::BASIC_DETAILS_SECTION . '/images',
+            ),
+        );
+        $this->add_section(
+            array(
+                'id'          => self::BASIC_DETAILS_SECTION . '/organization',
+                'title'       => __( 'Organization & visibility', 'woocommerce' ),
+                'description' => __( 'Help customers find this product by assigning it to categories or featuring it across your sales channels.', 'woocommerce' ),
+                'parent'      => self::GENERAL_GROUP,
+            )
+        );
+        $this->add_field(
+            array(
+                'blockName' => 'woocommerce/product-category-field',
+                'parent'    => self::BASIC_DETAILS_SECTION . '/organization',
+                'attrs'     => array(
+                    'name' => 'categories',
+                ),
+            ),
+        );
+
+        $this->add_section(
+            array(
+                'id'          => self::BASIC_DETAILS_SECTION . '/attributes',
+                'title'       => __( 'Attributes', 'woocommerce' ),
+                'description' => sprintf(
+                    /* translators: %1$s: Attributes guide link opening tag. %2$s: Attributes guide link closing tag.*/
+                    __( 'Add descriptive pieces of information that customers can use to filter and search for this product. %1$sLearn more%2$s', 'woocommerce' ),
+                    '<a href="https://woocommerce.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">',
+                    '</a>'
+                ),
+                'parent'      => self::GENERAL_GROUP,
+            )
+        );
+        $this->add_field(
+            array(
+                'blockName' => 'woocommerce/product-attributes-field',
+                'parent'    => self::BASIC_DETAILS_SECTION . '/attributes',
+            ),
+        );
+
     }
 
     /**
