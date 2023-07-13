@@ -3089,7 +3089,7 @@
 * Fix - Missed DB version number updates causing unnecessary upgrades. #6818
 * Fix - Parsing bad JSON string data from user WooCommerce meta. #6819
 * Fix - Remove PayPal for India #6828
-* Fix - Address an issue with OBW when installing only WooCommerce Payments and Jetpack. #6957
+* Fix - Address an issue with OBW when installing only WooCommerce payments and Jetpack. #6957
 * Fix - Calling of get_script_asset_filename with extra parameter #6955
 * Fix - Show Google Listing and Ads in installed marketing extensions section. #7029
 * Performance - Avoid updating customer info synchronously from the front end. #6765
@@ -3256,7 +3256,7 @@
 * Fix - Add gross sales column to CSV export #6567
 * Fix - Disable the continue btn on OBW when requested are being made #6838
 * Fix - Calling of get_script_asset_filename with extra parameter #6955
-* Fix - Address an issue with OBW when installing only WooCommerce Payments and Jetpack. #6957
+* Fix - Address an issue with OBW when installing only WooCommerce payments and Jetpack. #6957
 * Tweak - Add default value for contains op #6622
 * Tweak - Adjust targeting store age for the Add First Product note #6554
 * Tweak - Improve WC Shipping & Tax logic #6547
