@@ -65,6 +65,7 @@ export function WriteItForMeButtonContainer() {
 	const handleCompletionError = ( error: UseCompletionError ) =>
 		tinyEditor.setContent( getApiError( error.code ?? '' ) );
 
+	const shortTinyEditor = useTinyEditor( 'excerpt' );
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
@@ -106,6 +107,21 @@ export function WriteItForMeButtonContainer() {
 				}
 			},
 		} );
+
+	const { requestCompletion: requestShortCompletion } = useCompletion( {
+		feature: WOO_AI_PLUGIN_FEATURE_NAME,
+		onStreamMessage: ( content ) => {
+			shortTinyEditor.setContent( content );
+		},
+		onStreamError: ( error ) => {
+			tinyEditor.setContent( getApiError( error ) );
+		},
+		onCompletionFinished: ( reason, content ) => {
+			if ( reason === 'finished' ) {
+				shortTinyEditor.setContent( content );
+			}
+		},
+	} );
 
 	useEffect( () => {
 		const title = titleEl.current;
@@ -189,6 +205,9 @@ export function WriteItForMeButtonContainer() {
 
 		try {
 			await requestCompletion( prompt );
+			await requestShortCompletion(
+				`Please provide a 1-2 sentence summary of the following product description:\n ${ tinyEditor.getContent() }`
+			);
 		} catch ( err ) {
 			handleCompletionError( err as UseCompletionError );
 		}
