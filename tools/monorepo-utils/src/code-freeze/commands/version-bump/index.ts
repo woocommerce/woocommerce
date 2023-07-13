@@ -48,8 +48,13 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		'-d --dryRun',
 		'Prepare the version bump and log a diff. Do not create a PR or push to branch'
 	)
+	.option(
+		'-c --commitDirectToBase',
+		'Prepare the version bump and log a diff. Do not create a PR or push to branch'
+	)
 	.action( async ( options: Options ) => {
-		const { owner, name, version, base, dryRun } = options;
+		const { owner, name, version, base, dryRun, commitDirectToBase } =
+			options;
 		Logger.startTask(
 			`Making a temporary clone of '${ owner }/${ name }'`
 		);
@@ -80,19 +85,20 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		} );
 		const majorMinor = getMajorMinor( version );
 		const branch = `prep/${ base }-for-next-dev-cycle-${ majorMinor }`;
-		const exists = await git.raw( 'ls-remote', 'origin', branch );
 
-		if ( ! dryRun && exists.trim().length > 0 ) {
-			Logger.error(
-				`Branch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
-			);
-		}
-
-		Logger.notice( `Checking out ${ base }` );
-		if ( base === 'trunk' ) {
-			await git.checkoutBranch( branch, base );
-		} else {
+		if ( commitDirectToBase ) {
+			Logger.notice( `Checking out ${ base }` );
 			await checkoutRemoteBranch( tmpRepoPath, base );
+		} else {
+			const exists = await git.raw( 'ls-remote', 'origin', branch );
+
+			if ( ! dryRun && exists.trim().length > 0 ) {
+				Logger.error(
+					`Branch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
+				);
+			}
+			Logger.notice( `Checking out ${ branch }` );
+			await git.checkoutBranch( branch, base );
 		}
 
 		Logger.notice( 'Validating arguments' );
@@ -114,25 +120,32 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			.commit( `Prep ${ base } for ${ majorMinor } cycle` )
 			.catch( genericErrorFunction );
 
-		Logger.notice( 'Pushing to Github' );
-		await git.push( 'origin', branch ).catch( ( e ) => {
-			Logger.error( e );
-		} );
-
-		try {
-			Logger.startTask( 'Creating a pull request' );
-
-			const pullRequest = await createPullRequest( {
-				owner,
-				name,
-				title: `Prep ${ base } for ${ majorMinor } cycle`,
-				body: `This PR updates the versions in ${ base } to ${ version } for next development cycle.`,
-				head: branch,
-				base,
+		if ( commitDirectToBase ) {
+			Logger.notice( `Pushing ${ base } to Github` );
+			await git.push( 'origin', base );
+		} else {
+			Logger.notice( `Pushing ${ branch } to Github` );
+			await git.push( 'origin', branch ).catch( ( e ) => {
+				Logger.error( e );
 			} );
-			Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
-			Logger.endTask();
-		} catch ( e ) {
-			Logger.error( e );
+
+			try {
+				Logger.startTask( 'Creating a pull request' );
+
+				const pullRequest = await createPullRequest( {
+					owner,
+					name,
+					title: `Prep ${ base } for ${ majorMinor } cycle`,
+					body: `This PR updates the versions in ${ base } to ${ version } for next development cycle.`,
+					head: branch,
+					base,
+				} );
+				Logger.notice(
+					`Pull request created: ${ pullRequest.html_url }`
+				);
+				Logger.endTask();
+			} catch ( e ) {
+				Logger.error( e );
+			}
 		}
 	} );

@@ -4,4 +4,5 @@ export type Options = {
 	version?: string;
 	base?: string;
 	dryRun?: boolean;
+	commitDirectToBase?: boolean;
 };
