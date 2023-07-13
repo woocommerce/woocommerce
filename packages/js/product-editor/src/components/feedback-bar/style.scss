@@ -117,3 +117,7 @@ $gutenberg-blue: var(--wp-admin-theme-color);
 		}
 	}
 }
+
+.woocommerce-transient-notices:has(+ .woocommerce-product-mvp-ces-footer) {
+	bottom: 68px;
+}
