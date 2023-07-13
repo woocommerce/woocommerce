@@ -49,12 +49,14 @@ export const stripPrereleaseParameters = (
  *
  * @param tmpRepoPath cloned repo path
  * @param version     version to bump to
+ * @param options     options passed to the command
  */
 export const validateArgs = async (
 	tmpRepoPath: string,
+	version: string,
 	options: Options
 ): Promise< void > => {
-	const { base, version, commitDirectToBase } = options;
+	const { base, commitDirectToBase } = options;
 	const nextVersion = version;
 
 	if ( ! valid( nextVersion ) ) {

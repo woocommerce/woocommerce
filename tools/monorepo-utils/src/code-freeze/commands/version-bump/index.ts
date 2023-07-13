@@ -28,7 +28,7 @@ const genericErrorFunction = ( err ) => {
 
 export const versionBumpCommand = new Command( 'version-bump' )
 	.description( 'Bump versions ahead of new development cycle' )
-	.requiredOption( '-v, --version <version>', 'Version to bump to' )
+	.argument( '<version>', 'Version to bump to' )
 	.option(
 		'-o --owner <owner>',
 		'Repository owner. Default: woocommerce',
@@ -54,9 +54,8 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		'Commit directly to the base branch. Do not create a PR just push directly to base branch',
 		false
 	)
-	.action( async ( options: Options ) => {
-		const { owner, name, version, base, dryRun, commitDirectToBase } =
-			options;
+	.action( async ( version, options: Options ) => {
+		const { owner, name, base, dryRun, commitDirectToBase } = options;
 
 		Logger.startTask(
 			`Making a temporary clone of '${ owner }/${ name }'`
@@ -105,7 +104,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		}
 
 		Logger.notice( 'Validating arguments' );
-		await validateArgs( tmpRepoPath, options );
+		await validateArgs( tmpRepoPath, version, options );
 
 		const workingBranch = commitDirectToBase ? base : branch;
 
