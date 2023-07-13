@@ -101,11 +101,9 @@ class WooCommerceBlockTemplate {
             $inner_blocks = &$this->template;
         } else {
             $inner_blocks = &$this->cache[ $parent_id ][ self::INNER_BLOCKS_KEY ];
-            $inner_content = &$this->cache[ $parent_id ][ self::INNER_CONTENT_KEY ];
         }
 
         $inner_blocks[] = $block;
-        $inner_content  = array_map( 'serialize_block', $inner_blocks );
         $index          = count( $inner_blocks ) - 1;
         $this->cache[ $id ] = &$inner_blocks[ $index ];
     }
@@ -152,7 +150,8 @@ class WooCommerceBlockTemplate {
         foreach( $blocks as $index => &$block ) {
             $block = $this->clean_block_properties( $block );
             if ( isset( $block[ self::INNER_BLOCKS_KEY ] ) ) {
-                $blocks[ $index ][ self::INNER_BLOCKS_KEY ] = $this->parse_blocks( $block[ self::INNER_BLOCKS_KEY ] );
+                // $blocks[ $index ][ self::INNER_CONTENT_KEY ] = array_map( 'serialize_block', $block[ self::INNER_BLOCKS_KEY ] );
+                $blocks[ $index ][ self::INNER_BLOCKS_KEY ]  = $this->parse_blocks( $block[ self::INNER_BLOCKS_KEY ] );
             }
         }
         return $blocks;
@@ -185,6 +184,19 @@ class WooCommerceBlockTemplate {
         return $this->parse_blocks( $this->template );
     }
 
+    public function get_comment_delimited_block_content( $block ) {
+        $inner_blocks = array();
+        if ( ! empty( $block['innerBlocks'] ) ) {
+            $inner_blocks = join( "", array_map( array( $this, 'get_comment_delimited_block_content' ), $block['innerBlocks'] ) );
+        }
+
+        return get_comment_delimited_block_content(
+            $block['blockName'],
+            $block['attrs'],
+            $inner_blocks
+        );
+    }
+
     /**
      * Get the serialized template.
      *
@@ -192,7 +204,7 @@ class WooCommerceBlockTemplate {
      */
     public function get_serialized_template() {
         $parsed = $this->get_parsed_template();
-        return serialize_blocks( $parsed );
+        return join( "", array_map( array( $this, 'get_comment_delimited_block_content' ), $parsed ) );
     }
 
 }

@@ -36,17 +36,67 @@ trait BaseProductTemplate {
         );
         $this->add_field(
             array(
-                'parent' => self::GENERAL_GROUP,
+                'parent'    => self::BASIC_DETAILS_SECTION,
                 'blockName' => 'woocommerce/product-name-field',
                 'attrs'     => array(
-                    'name' => 'Product name',
+                    'name'  => 'Product name',
                 ),
             ),
         );
         $this->add_field(
             array(
-                'parent' => self::GENERAL_GROUP,
+                'parent'    => self::BASIC_DETAILS_SECTION,
                 'blockName' => 'woocommerce/product-summary-field',
+            ),
+        );
+        $this->add_field(
+            array(
+                'id'        => 'pricing-columns',
+                'parent'    => self::BASIC_DETAILS_SECTION,
+                'blockName' => 'core/columns',
+                'attrs'     => array(
+                    'columns' => 2,
+                ),
+            ),
+        );
+        $this->add_field(
+            array(
+                'id'        => 'pricing-column-1',
+                'parent'    => 'pricing-columns',
+                'blockName' => 'core/column',
+                'attrs'     => array(
+                    'templateLock' => 'all',
+                ),
+            ),
+        );
+        $this->add_field(
+            array(
+                'blockName' => 'woocommerce/product-regular-price-field',
+                'parent'    => 'pricing-column-1',
+                'attrs'     => array(
+                    'name'  => 'regular_price',
+                    'label' => __( 'List price', 'woocommerce' ),
+                    'help'  => __( 'Manage more settings in <PricingTab>Pricing.</PricingTab>', 'woocommerce' ),
+                ),
+            ),
+        );
+        $this->add_field(
+            array(
+                'id'        => 'pricing-column-2',
+                'parent'    => 'pricing-columns',
+                'blockName' => 'core/column',
+                'attrs'     => array(
+                    'templateLock' => 'all',
+                ),
+            ),
+        );
+        $this->add_field(
+            array(
+                'blockName' => 'woocommerce/product-sale-price-field',
+                'parent'    => 'pricing-column-2',
+                'attrs'     => array(
+                    'label' => __( 'Sale price', 'woocommerce' ),
+                ),
             ),
         );
     }

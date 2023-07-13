@@ -13,7 +13,7 @@ interface ProductTemplateInterface {
 	/**
      * General group ID.
      */
-    const GENERAL_GROUP = 'group/general';
+    const GENERAL_GROUP = 'general';
 
 	/**
      * Basic details ID.
@@ -23,7 +23,7 @@ interface ProductTemplateInterface {
     /**
      * Pricing group ID.
      */
-    const PRICING_GROUP = 'group/pricing';
+    const PRICING_GROUP = 'pricing';
 
 	/**
      * Pricing section ID.

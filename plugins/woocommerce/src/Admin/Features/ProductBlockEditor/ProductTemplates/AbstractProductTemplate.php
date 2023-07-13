@@ -27,7 +27,9 @@ abstract class AbstractProductTemplate extends WooCommerceBlockTemplate {
             array(
                 'blockName'    => 'woocommerce/product-tab',
                 'attrs'        => array(
+                    'id'    => $args['id'],
                     'title' => $args['title'],
+                    'order' => $args['order'] ?? 10,
                 ),
             )
         );
