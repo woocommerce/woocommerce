@@ -381,10 +381,23 @@ class Init {
 						array(
 							'woocommerce/product-section',
 							array(
-								'title'    => __( 'Product catalog', 'woocommerce' ),
-								'blockGap' => 'unit-40',
+								'title' => __( 'Product catalog', 'woocommerce' ),
 							),
-							array(),
+							array(
+								array(
+									'woocommerce/product-category-field',
+									array(
+										'name' => 'categories',
+									),
+								),
+								array(
+									'woocommerce/product-checkbox-field',
+									array(
+										'label'    => __( 'Disable product reviews', 'woocommerce' ),
+										'property' => 'reviews_allowed',
+									),
+								),
+							),
 						),
 						array(
 							'woocommerce/product-section',
