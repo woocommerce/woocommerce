@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix `TypeError` in `WC_Discounts->apply_coupons()` when being called a second time.
