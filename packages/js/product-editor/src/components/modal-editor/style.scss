@@ -28,17 +28,4 @@ $modal-editor-height: 60px;
 			width: 100%;
 		}
     }
-
-    .woocommerce-iframe-editor {
-        box-sizing: border-box;
-
-		&__content {
-			box-sizing: border-box;
-		}
-
-		&__sidebar {
-			height: 100%;
-			overflow: scroll;
-		}
-    }
 }
