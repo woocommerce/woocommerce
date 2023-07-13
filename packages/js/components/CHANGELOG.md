@@ -1,13 +1,11 @@
-# Changelog 
+# Changelog
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [13.0.0](https://www.npmjs.com/package/@woocommerce/components/v/13.0.0) - 2023-07-13 
+## [12.1.0](https://www.npmjs.com/package/@woocommerce/components/v/12.1.0) - 2023-07-13
 
 -   Patch - Altering styles to correctly target fields within slot fills on product editor. [#36500]
--   Minor - Fix AdvancedFilters backward compatibility [#39049]
 -   Patch - Fix collapsible content heading alignment [#38325]
--   Patch - Fix issue were Options tab was not showing up anymore in new product management screen. [#36831]
 -   Minor - Fix issue where single item can not be cleared and text can not be selected upon click. [#36869]
 -   Minor - Fix issue where width of select control dropdown was not correctly calculated when rendering was delayed. [#37295]
 -   Patch - Fix SelectControl and TreeControl styles. [#36718]
@@ -24,7 +22,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Add callback for the media uploader component when gallery is opened [#38728]
 -   Minor - Added LearnMore option as well as made it possible to use this button multiple instances on the page [#36873]
 -   Minor - Adding experimental component SlotContext [#36333]
--   Minor - Adding ProductSectionLayout component and changing default order for WooProductSectionItem component. [#36368]
 -   Minor - Adding simple DisplayState wrapper and modifying Collapsible component to allow rendering hidden content. [#37305]
 -   Minor - Adding the WooProductSectionItem slotfill component. [#36331]
 -   Minor - Adding WooProductFieldItem slotfill. [#36315]
@@ -42,19 +39,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Add deprecated message to product slot fill components [#36830]
 -   Minor - Apply wccom experimental select control changes [#36521]
 -   Minor - Export TreeSelectControl component and add additional props: onInputChange, alwaysShowPlaceholder, includeParent. [#36932]
--   Minor - Move experimental product section components to @woocommerce/product-editor package. [#36600]
 -   Patch - Opt out of Reset and Help buttons in DateTimePickerControl, as these will be removed in a future @wordpress/components version. [#38480]
 -   Minor - Show comma separated list in ready only mode of select tree control [#38052]
--   Major [ **BREAKING CHANGE** ] - Updated AdvancedFilter to use createInterpolateElement instead of interpolateComponents. [#37967]
+-   Minor - Updated AdvancedFilter to use createInterpolateElement instead of interpolateComponents. [#37967]
 -   Minor - Update select tree control dropdown menu for custom slot fill support for display within Modals [#37574]
 -   Minor - Updating the product editor fill components to support multiple targets. [#36592]
 -   Minor - Updating WooProductFieldItem to uniquely generate IDs with different sections. [#36646]
 -   Minor - Add a11y support for the Tree component [#36459]
 -   Minor - Add custom rendering logic to the item label [#36476]
--   Minor - Add highlighter to the tree control [#36480]
 -   Patch - Add instructions on how to run the tests when using @woocommerce/components [#38821]
--   Minor - Add selection logic to tree control component [#36435]
--   Minor - Add TreeControl expand/collapse functionality. [#36434]
 -   Minor - Adjust eslintrc for changes to eslint plugin. [#36988]
 -   Minor - Create tree-control component [#36432]
 -   Patch - Lint fixes [#38523]
@@ -78,7 +71,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Patch - Update positioning of DateTimePickerControl's dropdown. [#38466]
 -   Minor - Use BaseControl in the SelectTree label [#38261]
 
-## [12.0.0](https://www.npmjs.com/package/@woocommerce/components/v/12.0.0) - 2022-12-28 
+## [12.0.0](https://www.npmjs.com/package/@woocommerce/components/v/12.0.0) - 2022-12-28
 
 -   Patch - Add name to exported popover slot used to display SelectControl Menu, so it is only used for SelectControl menus. [#36124]
 -   Patch - Close DateTimePickerControl's dropdown when blurring from input. [#36124]
@@ -113,11 +106,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Add noDataLabel property into table.js component to allow No Data label customization. [#36124]
 -   Major [ **BREAKING CHANGE** ] - Switch DateTimePickerControl formatting to PHP style, for WP compatibility. [#36124]
 
-## [11.1.0](https://www.npmjs.com/package/@woocommerce/components/v/11.1.0) - 2022-10-24 
+## [11.1.0](https://www.npmjs.com/package/@woocommerce/components/v/11.1.0) - 2022-10-24
 
 -   Minor - Allow passing of additional props to form inputs [#35160]
 
-## [11.0.0](https://www.npmjs.com/package/@woocommerce/components/v/11.0.0) - 2022-10-20 
+## [11.0.0](https://www.npmjs.com/package/@woocommerce/components/v/11.0.0) - 2022-10-20
 
 -   Patch - Export StepperProps for external usage [#35140]
 -   Patch - Fixed the initial setting of DateTimePickerControl's input field. [#35140]
@@ -164,9 +157,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Fix DateTimePickerControl's onChange date arg to only be a string (TypeScript). [#35140]
 -   Minor - Improve experimental SelectControl accessibility [#35140]
 -   Minor - Improve Sortable component acessibility [#35140]
--    - Create new experimental SelectControl component [#35140]
+-   -   Create new experimental SelectControl component [#35140]
 
-## [10.3.0](https://www.npmjs.com/package/@woocommerce/components/v/10.3.0) - 2022-08-12 
+## [10.3.0](https://www.npmjs.com/package/@woocommerce/components/v/10.3.0) - 2022-08-12
 
 -   Patch - Added in missing TS definitions in package.json [#34279]
 -   Patch - fixed button rendering for 1 step tour which was not showing completion button due to bug in logic [#34279]
@@ -175,11 +168,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Update types for Form component and allow Form state to be reset. [#34279]
 -   Minor - Removed Step 1 of 1 step description for 1 step tours [#34279]
 
-## [10.2.1](https://www.npmjs.com/package/@woocommerce/components/v/10.2.1) - 2022-07-19 
+## [10.2.1](https://www.npmjs.com/package/@woocommerce/components/v/10.2.1) - 2022-07-19
 
 -   Patch - Fix missing text domain
 
-## [10.2.0](https://www.npmjs.com/package/@woocommerce/components/v/10.2.0) - 2022-07-08 
+## [10.2.0](https://www.npmjs.com/package/@woocommerce/components/v/10.2.0) - 2022-07-08
 
 -   Minor - Add step name to tour kit step type and export CloseHandler type to be reused elsewhere
 -   Minor - Tree Select Control Component
@@ -188,7 +181,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Remove PHP and Composer dependencies for packaged JS packages
 -   Patch - Tweak tour kit gap between content and controls
 
-## [10.1.0](https://www.npmjs.com/package/@woocommerce/components/v/10.1.0) - 2022-06-09 
+## [10.1.0](https://www.npmjs.com/package/@woocommerce/components/v/10.1.0) - 2022-06-09
 
 -   Minor - Add tour kit component
 -   Minor - Update dependency `memoize-one` to ^6.0.0. #32936
