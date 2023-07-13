@@ -278,6 +278,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Tidied up core profiler's tracks actions [[#38603]](https://github.com/woocommerce/woocommerce/pull/38603)
 * Dev - Update Codisto extension description and fix WooCommerce name typo in test. [[#38302]](https://github.com/woocommerce/woocommerce/pull/38302)
 * Dev - Update woocommerce_suggest_jetpack filter description [[#38501]](https://github.com/woocommerce/woocommerce/pull/38501)
+* Tweak - Address edge-cases around Incentives eligibility and display. [#39207](https://github.com/woocommerce/woocommerce/pull/39207)
 * Tweak - Prefetch Jetpack connection and auth info when Jetpack is selected [#38929](https://github.com/woocommerce/woocommerce/pull/38929)
 * Tweak - Always pass default product type options to product_type_options filter [#38854](https://github.com/woocommerce/woocommerce/pull/38854)
 * Tweak - Decode HTML entities for the store name [[#38791]](https://github.com/woocommerce/woocommerce/pull/38791)
