@@ -15,6 +15,7 @@ import {
 import { WriteItForMeBtn, StopCompletionBtn } from '../components';
 import { useTinyEditor, useCompletion, useFeedbackSnackbar } from '../hooks';
 import { recordTracksFactory, getPostId } from '../utils';
+import { getBusinessDescription, getToneOfVoice } from '../utils/branding';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
@@ -40,6 +41,18 @@ const recordDescriptionTracks = recordTracksFactory(
 	} )
 );
 
+const fetchBrandingData = async () => {
+	const toneOfVoice = await getToneOfVoice();
+	
+	try {
+	  const businessDescription = await getBusinessDescription();
+	  console.log(toneOfVoice, businessDescription);
+	} catch (error) {
+	  console.error("Failed to fetch business description", error);
+	  // handle error, possibly by setting some error state or showing an error message to the user
+	}
+  }
+
 export function WriteItForMeButtonContainer() {
 	const titleEl = useRef< HTMLInputElement >(
 		document.querySelector( '#title' )
@@ -48,6 +61,9 @@ export function WriteItForMeButtonContainer() {
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
+	const [ toneOfVoice, setToneOfVoice ] = useState<string>( 'neutral' );
+	const [ businessDescription, setBusinessDescription ] = useState<string>( '' );
+
 	const tinyEditor = useTinyEditor();
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
 	const { requestCompletion, completionActive, stopCompletion } =
@@ -117,6 +133,19 @@ export function WriteItForMeButtonContainer() {
 		recordDescriptionTracks( 'view_button' );
 	}, [] );
 
+	// Fetch the branding data when the component mounts.
+	useEffect( () => {
+		async function fetchBrandingData() {
+		  const fetchedToneOfVoice = await getToneOfVoice();
+		  const fetchedBusinessDescription = await getBusinessDescription();
+		  
+		  setToneOfVoice( fetchedToneOfVoice );
+		  setBusinessDescription( fetchedBusinessDescription );
+		}
+		
+		fetchBrandingData();
+	  }, [] );
+
 	const writeItForMeEnabled =
 		! fetching && productTitle.length >= MIN_TITLE_LENGTH_FOR_DESCRIPTION;
 
@@ -126,7 +155,7 @@ export function WriteItForMeButtonContainer() {
 				0,
 				MAX_TITLE_LENGTH
 			) }."`,
-			'Use a 9th grade reading level.',
+			`Use a 9th grade reading level with a ${toneOfVoice} tone of voice.`,
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
 			'Structure the description into paragraphs using standard HTML <p> tags.',
 			'Identify the language used in this product title and use the same language in your response.',
@@ -134,6 +163,10 @@ export function WriteItForMeButtonContainer() {
 			'When appropriate, use <strong> and <em> tags to emphasize text.',
 			'Do not include a top-level heading at the beginning description.',
 		];
+
+		if ( businessDescription ) {
+			instructions.push( `For more context on the business, refer to the following business description: "${ businessDescription }."` );
+		}
 
 		return instructions.join( '\n' );
 	};
