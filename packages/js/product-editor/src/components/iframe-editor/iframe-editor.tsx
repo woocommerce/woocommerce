@@ -148,6 +148,11 @@ export function IframeEditor( {
 								</EditorCanvas>
 								<Popover.Slot />
 							</ResizableEditor>
+							{ /* This is a hack, but I couldn't find another (easy) way to not
+							     have the inserter render in the content's padding. I believe
+								 that is happening because the inserter is positioned using a transforms,
+								 which take it outside of the normal layout, thus ignoring the parent's
+								 bounds. */ }
 							<div className="woocommerce-iframe-editor__content-inserter-clipper" />
 						</BlockTools>
 						{ isSidebarOpened && (
