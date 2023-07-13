@@ -373,6 +373,15 @@ class Init {
 				array(
 					'woocommerce/product-tab',
 					array(
+						'id'    => 'organization',
+						'title' => __( 'Organization', 'woocommerce' ),
+						'order' => 15,
+					),
+					array(),
+				),
+				array(
+					'woocommerce/product-tab',
+					array(
 						'id'    => 'pricing',
 						'title' => __( 'Pricing', 'woocommerce' ),
 						'order' => 20,
