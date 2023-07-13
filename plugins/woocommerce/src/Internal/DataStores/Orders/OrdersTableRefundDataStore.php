@@ -12,6 +12,18 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 class OrdersTableRefundDataStore extends OrdersTableDataStore {
 
 	/**
+	 * Data stored in meta keys, but not considered "meta" for refund.
+	 *
+	 * @var string[]
+	 */
+	protected $internal_meta_keys = array(
+		'_refund_amount',
+		'_refund_reason',
+		'_refunded_by',
+		'_refunded_payment',
+	);
+
+	/**
 	 * We do not have and use all the getters and setters from OrderTableDataStore, so we only select the props we actually need.
 	 *
 	 * @var \string[][]
