@@ -166,12 +166,6 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 					! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
 					woocommerceTaxCountries.includes( countryCode ),
 			},
-			{
-				id: 'avalara',
-				card: AvalaraCard,
-				component: null,
-				isVisible: supportsAvalara( countryCode ),
-			},
 		];
 
 		return partners.filter( ( partner ) => partner.isVisible );
@@ -205,18 +199,6 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 			partners.find( ( partner ) => partner.id === query.partner ) || null
 		);
 	};
-
-	useEffect( () => {
-		if ( partners.length > 1 || query.partner ) {
-			return;
-		}
-
-		if ( partners.length === 1 && partners[ 0 ].component ) {
-			updateQueryString( {
-				partner: partners[ 0 ].id,
-			} );
-		}
-	}, [ partners ] );
 
 	const childProps = {
 		isPending,
