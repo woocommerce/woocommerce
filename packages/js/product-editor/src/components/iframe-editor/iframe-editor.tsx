@@ -47,7 +47,7 @@ export function IframeEditor( {
 	onInput,
 	settings: __settings,
 }: IframeEditorProps ) {
-	const [ resizeObserver, sizes ] = useResizeObserver();
+	const [ resizeObserver ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
 	const { appendEdit, hasRedo, hasUndo, redo, undo } = useEditorHistory( {
 		setBlocks,
