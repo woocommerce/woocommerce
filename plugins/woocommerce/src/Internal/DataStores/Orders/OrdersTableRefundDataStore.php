@@ -50,16 +50,6 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	);
 
 	/**
-	 * We do not have and use all the getters and setters from OrderTableDataStore, so we only select the props we actually need.
-	 */
-	protected $internal_meta_keys = array(
-		'_refund_amount',
-		'_refund_reason',
-		'_refunded_payment',
-		'_refunded_by',
-	);
-
-	/**
 	 * Delete a refund order from database.
 	 *
 	 * @param \WC_Order $refund Refund object to delete.
@@ -91,21 +81,10 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	}
 
 	/**
-	 * Read a refund object from custom tables.
-	 *
-	 * @param \WC_Abstract_Order $refund Refund object.
-	 *
-	 * @return void
-	 */
-	public function read( &$refund ) {
-		parent::read( $refund );
-		$this->set_refund_props( $refund );
-	}
-
-	/**
 	 * Helper method to set refund props.
 	 *
 	 * @param \WC_Order_Refund $refund Refund object.
+	 * @param object           $data   DB data object.
 	 */
 	protected function set_order_props_from_data( &$refund, $data ) {
 		parent::set_order_props_from_data( $refund, $data );
