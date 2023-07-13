@@ -45,6 +45,11 @@ async function processDirectory(
 		const readmeContent = fs.readFileSync( readmePath, 'utf-8' );
 		const frontMatter = generatePostFrontMatter( readmeContent );
 		Object.assign( category, frontMatter );
+	} else if ( checkReadme ) {
+		// derive the category title from the directory name, capitalize first letter
+		const categoryTitle = path.basename( subDirectory );
+		category.category_title =
+			categoryTitle.charAt( 0 ).toUpperCase() + categoryTitle.slice( 1 );
 	}
 
 	const markdownFiles = glob.sync( path.join( subDirectory, '*.md' ) );

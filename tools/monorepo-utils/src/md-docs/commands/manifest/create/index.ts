@@ -40,7 +40,7 @@ export const generateManifestCommand = new Command( 'create' )
 	)
 	.option(
 		'-be --baseEditUrl <baseEditUrl>',
-		'Base url to provide edit links to.',
+		'Base url to provide edit links to. This option will be ignored if your baseUrl is not a GitHub URL.',
 		'https://github.com/woocommerce/woocommerce/edit/trunk'
 	)
 	.action( async ( dir, projectName, options ) => {

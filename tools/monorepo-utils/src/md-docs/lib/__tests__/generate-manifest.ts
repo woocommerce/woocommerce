@@ -33,9 +33,23 @@ describe( 'generateManifest', () => {
 
 		const subCategories = topLevelCategories[ 0 ].categories;
 
-		expect( subCategories[ 0 ].category_title ).toEqual(
+		expect( subCategories[ 1 ].category_title ).toEqual(
 			'Troubleshooting Problems'
 		);
+	} );
+
+	it( 'should create categories with titles where there is no index README', async () => {
+		const manifest = await generateManifestFromDirectory(
+			rootDir,
+			dir,
+			'example-docs',
+			'https://example.com',
+			'https://example.com/edit'
+		);
+
+		expect(
+			manifest.categories[ 0 ].categories[ 0 ].category_title
+		).toEqual( 'Installation' );
 	} );
 
 	it( 'should create post urls with the correct url', async () => {
@@ -54,7 +68,7 @@ describe( 'generateManifest', () => {
 		expect(
 			manifest.categories[ 0 ].categories[ 0 ].posts[ 0 ].url
 		).toEqual(
-			'https://example.com/example-docs/get-started/troubleshooting/what-went-wrong.md'
+			'https://example.com/example-docs/get-started/installation/install-plugin.md'
 		);
 	} );
 
@@ -68,5 +82,19 @@ describe( 'generateManifest', () => {
 		);
 
 		expect( manifest.hash ).not.toBeUndefined();
+	} );
+
+	it( 'should generate edit_url when github is in the base url', async () => {
+		const manifest = await generateManifestFromDirectory(
+			rootDir,
+			dir,
+			'example-docs',
+			'https://github.com',
+			'https://github.com/edit'
+		);
+
+		expect( manifest.categories[ 0 ].posts[ 0 ].edit_url ).toEqual(
+			'https://github.com/edit/example-docs/get-started/local-development.md'
+		);
 	} );
 } );
