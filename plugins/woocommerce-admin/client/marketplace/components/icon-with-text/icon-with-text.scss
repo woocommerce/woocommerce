@@ -1,10 +1,12 @@
+@import '../../stylesheets/_variables.scss';
+
 .icon-group {
 	flex: 1;
 	max-width: 382px;
 
 	&__headline {
 		display: flex;
-		gap: 8px;
+		gap: $small-gap;
 	}
 
 	&__title {
@@ -16,7 +18,7 @@
 	}
 
 	&__description {
-		color: var(--wp-gray-gray-50, #646970);
+		color: $wp-gray-gray-50;
 		font-size: 13px;
 		font-weight: 400;
 		line-height: 20px;

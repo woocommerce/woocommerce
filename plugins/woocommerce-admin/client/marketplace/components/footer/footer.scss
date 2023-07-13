@@ -1,44 +1,45 @@
+@import '../../stylesheets/_variables.scss';
+
 .woocommerce-admin-page__marketplace .woocommerce-layout__footer {
-	// Undo default fixed footer style used in WC Admin
 	background: #f6f7f7;
+	// Undo default fixed footer style used in WC Admin
 	position: unset;
 	width: 100%;
 }
 
 .woocommerce-marketplace__footer {
 	box-sizing: content-box;
-	max-width: 1600px;
+	max-width: $content-max-width;
 	margin: auto;
-	padding: 48px 32px;
+	padding: 48px $content-spacing-large;
 
 	&-title {
-		color: var(--gutenberg-gray-900, #1e1e1e);
+		color: $gutenberg-gray-900;
 		font-size: 20px;
 		font-style: normal;
 		font-weight: 500;
 		line-height: 28px;
 		max-width: 389px;
-		margin: 0 0 32px;
+		margin: 0 0 $content-spacing-large;
 	}
 
 	a {
-		color: var(--gutenberg-blue, #007cba);
 		text-decoration: none;
 	}
 
 	&-columns {
 		display: flex;
 		flex-direction: column;
-		gap: 24px;
+		gap: $large-gap;
 	}
 
 	&-logo {
-		color: var(--woo-color-primary-woo-purple-50, #7f54b3);
+		color: $woo-color-primary-woo-purple-50;
 		display: flex;
 		font-size: 14px;
 		font-weight: 600;
 		line-height: 20px;
-		gap: 8px;
+		gap: $small-gap;
 		margin: 48px 0 0;
 	}
 }

@@ -5,6 +5,7 @@
 /**
  * Internal dependencies
  */
+import './product-list-content.scss';
 
 export default function ProductListContent(): JSX.Element {
 	return (

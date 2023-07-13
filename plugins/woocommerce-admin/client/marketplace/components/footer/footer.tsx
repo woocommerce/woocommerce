@@ -3,7 +3,7 @@
  */
 import { WooFooterItem } from '@woocommerce/admin-layout';
 import { __ } from '@wordpress/i18n';
-import { check, commentContent as comment, lock } from '@wordpress/icons';
+import { check, commentContent, lock } from '@wordpress/icons';
 import { createInterpolateElement } from '@wordpress/element';
 
 /**
@@ -53,7 +53,7 @@ function FooterContent(): JSX.Element {
 					) }
 				/>
 				<IconWithText
-					icon={ comment }
+					icon={ commentContent }
 					title={ supportTitle }
 					description={ __(
 						'We have happiness engineers around round the globe to help you at any given time.',
