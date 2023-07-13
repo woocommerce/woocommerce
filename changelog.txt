@@ -843,7 +843,7 @@
 * Add - Add product state badge to product form header [#35460](https://github.com/woocommerce/woocommerce/pull/35460)
 * Add - Add product title to header when available [#35431](https://github.com/woocommerce/woocommerce/pull/35431)
 * Add - Add scheduled sale support to new product edit page. [#34538](https://github.com/woocommerce/woocommerce/pull/34538)
-* Add - Adds new Inbox Note to provide more information about WooPayments to users who dismiss the WCPay promo but say that they want more information in the exit survey. [#35581](https://github.com/woocommerce/woocommerce/pull/35581)
+* Add - Adds new Inbox Note to provide more information about WooCoomerce Payments to users who dismiss the WCPay promo but say that they want more information in the exit survey. [#35581](https://github.com/woocommerce/woocommerce/pull/35581)
 * Add - Add summary to new product page experience [#35201](https://github.com/woocommerce/woocommerce/pull/35201)
 * Add - Include order datastore information in status report. [#35487](https://github.com/woocommerce/woocommerce/pull/35487)
 * Add - Make it possible to add custom bulk action handling to the admin order list screen (when HPOS is enabled). [#35442](https://github.com/woocommerce/woocommerce/pull/35442)
@@ -964,7 +964,7 @@
 * Add - Add product state badge to product form header [#35460](https://github.com/woocommerce/woocommerce/pull/35460)
 * Add - Add product title to header when available [#35431](https://github.com/woocommerce/woocommerce/pull/35431)
 * Add - Add scheduled sale support to new product edit page. [#34538](https://github.com/woocommerce/woocommerce/pull/34538)
-* Add - Adds new Inbox Note to provide more information about WooPayments to users who dismiss the WCPay promo but say that they want more information in the exit survey. [#35581](https://github.com/woocommerce/woocommerce/pull/35581)
+* Add - Adds new Inbox Note to provide more information about WooCoomerce Payments to users who dismiss the WCPay promo but say that they want more information in the exit survey. [#35581](https://github.com/woocommerce/woocommerce/pull/35581)
 * Add - Add summary to new product page experience [#35201](https://github.com/woocommerce/woocommerce/pull/35201)
 * Add - Include order datastore information in status report. [#35487](https://github.com/woocommerce/woocommerce/pull/35487)
 * Add - Make it possible to add custom bulk action handling to the admin order list screen (when HPOS is enabled). [#35442](https://github.com/woocommerce/woocommerce/pull/35442)
@@ -1830,7 +1830,7 @@
 * Fix - Ensure that an existing order with auto-draft status won't be interpreted as pending when determining if the status has changed. ([#32571](https://github.com/woocommerce/woocommerce/pull/32571))
 * Fix - bug in which tasks reminder bar was displayed on product screens. ([#32526](https://github.com/woocommerce/woocommerce/pull/32526))
 * Fix - issue where some tasks where not being tracked as completed, when tracking is enabled. ([#32493](https://github.com/woocommerce/woocommerce/pull/32493))
-* Fix - WooPayments task not showing up in some supported countries. ([#32496](https://github.com/woocommerce/woocommerce/pull/32496))
+* Fix - WooCoomerce Payments task not showing up in some supported countries. ([#32496](https://github.com/woocommerce/woocommerce/pull/32496))
 * Fix - Avoid unsupported operand type errors from within `WC_Admin_Post_Types::set_new_price()`.
 * Fix - Correct parameter type for the `ContainerException` class (Dependency Management). ([#30764](https://github.com/woocommerce/woocommerce/pull/30764))
 * Fix - Prevent 'Search' field from overflowing container on the 'Downloadable product permissions' widget when in the sidebar. ([#30856](https://github.com/woocommerce/woocommerce/pull/30856))
@@ -1943,7 +1943,7 @@
 * Update - Implement MailChimp API request threshold for MailchimpScheduler. ([#8342](https://github.com/woocommerce/woocommerce-admin/pull/8342))
 * Update - Reintroduce CES on product add, product update, and order update. ([#8238](https://github.com/woocommerce/woocommerce-admin/pull/8238))
 * Update - Replace mysql image with mariadb ([#8220](https://github.com/woocommerce/woocommerce-admin/pull/8220))
-* Update - Update country support list for WooPayments Task. ([#8517](https://github.com/woocommerce/woocommerce-admin/pull/8517))
+* Update - Update country support list for WooCoomerce Payments Task. ([#8517](https://github.com/woocommerce/woocommerce-admin/pull/8517))
 * Fix - Fix handling of paid themes in purchase task. ([#8493](https://github.com/woocommerce/woocommerce-admin/pull/8493))
 * Fix - Make sure the paid extension task is also shown for themes. ([#8412](https://github.com/woocommerce/woocommerce-admin/pull/8412))
 * Fix - Reintroduce emphasis on inbox note action button. ([#8411](https://github.com/woocommerce/woocommerce-admin/pull/8411))
@@ -2065,7 +2065,7 @@
 * Fix - Fix undefined derived_currency value for the track 'wcadmin_storeprofiler_store_details_continue'. ([#8193](https://github.com/woocommerce/woocommerce-admin/pull/8193))
 * Fix - Fix variations table product filter query. ([#8120](https://github.com/woocommerce/woocommerce-admin/pull/8120))
 * Fix - Make sure free subscriptions does not show when cbd industry is selected. ([#8323](https://github.com/woocommerce/woocommerce-admin/pull/8323))
-* Fix - Make sure WooPayments tasklist_payment_setup is triggered again. ([#8146](https://github.com/woocommerce/woocommerce-admin/pull/8146))
+* Fix - Make sure WooCoomerce Payments tasklist_payment_setup is triggered again. ([#8146](https://github.com/woocommerce/woocommerce-admin/pull/8146))
 * Fix - Preserve HTML markup in server-side error messages received from sample product import request. ([#8173](https://github.com/woocommerce/woocommerce-admin/pull/8173))
 * Fix - Remove border between email input and newsletter checkbox in OBW store details. ([#8148](https://github.com/woocommerce/woocommerce-admin/pull/8148))
 * Fix - Reset "install_timestamp" if it's not numeric to avoid TypeError. ([#8100](https://github.com/woocommerce/woocommerce-admin/pull/8100))
@@ -2294,10 +2294,10 @@
 * Fix - Fix shipping task completion status. ( [#8031](https://github.com/woocommerce/woocommerce-admin/pull/8031) )
 * Fix - Do not initialize WC Pay promotion if spec is empty. ( [#8087](https://github.com/woocommerce/woocommerce-admin/pull/8087) )
 * Fix - Render the activity panel when the experimental tasklist is hidden. ( [#8111](https://github.com/woocommerce/woocommerce-admin/pull/8111) )
-* Fix - Fix blank payment gateway method in table when WooPayments is not supported. ( [#8122](https://github.com/woocommerce/woocommerce-admin/pull/8122) )
+* Fix - Fix blank payment gateway method in table when WooCoomerce Payments is not supported. ( [#8122](https://github.com/woocommerce/woocommerce-admin/pull/8122) )
 * Add - Add option to dismiss promotional payment gateway. ( [#7965](https://github.com/woocommerce/woocommerce-admin/pull/7965) )
 * Add - OBW - Add number of employees field. ( [#7963](https://github.com/woocommerce/woocommerce-admin/pull/7963) )
-* Add - Add `woocommerce_allow_marketplace_suggestions` filter to WooPayments payment method promotion. ( [#8117](https://github.com/woocommerce/woocommerce-admin/pull/8117) )
+* Add - Add `woocommerce_allow_marketplace_suggestions` filter to WooCoomerce Payments payment method promotion. ( [#8117](https://github.com/woocommerce/woocommerce-admin/pull/8117) )
 * Update - Ending wcpay promotion experiment and always displaying in payment methods table.
 * Update - Hide InboxPanel header when it is rendered in the sidebar. ( [#7952](https://github.com/woocommerce/woocommerce-admin/pull/7952) )
 * Update - Introduce a 320 character limit for inbox note contents. ( [#7958](https://github.com/woocommerce/woocommerce-admin/pull/7958) )
@@ -2372,7 +2372,7 @@
 **WooCommerce Admin - 2.9.0 & 2.9.1 & 2.9.2 **
 
 * Dev - Remove task status endpoint ( [#7841](https://github.com/woocommerce/woocommerce-admin/issues/7841) )
-* Fix - Fix ordering and styling issue with WooPayments payment method promotion. ( [#7943](https://github.com/woocommerce/woocommerce-admin/issues/7943) )
+* Fix - Fix ordering and styling issue with WooCoomerce Payments payment method promotion. ( [#7943](https://github.com/woocommerce/woocommerce-admin/issues/7943) )
 * Fix - Fix ExPlat PHP client ( [#7926](https://github.com/woocommerce/woocommerce-admin/issues/7926) )
 * Fix - Fix marketing extensions tracks ( [#7908](https://github.com/woocommerce/woocommerce-admin/issues/7908) )
 * Fix - Fix shipping task completion status ( [#8031](https://github.com/woocommerce/woocommerce-admin/issues/8031) )
@@ -2491,7 +2491,7 @@
 * Update - Update Eway payment gateway capitalization (was eWAY). #7678
 * Update - Enable Square in France. #7679
 * Enhancement - Only load tasks during rest api requests. #7856
-* Enhancement - Add experiment for promoting WooPayments in payment methods table. #7666
+* Enhancement - Add experiment for promoting WooCoomerce Payments in payment methods table. #7666
 
 **WooCommerce Blocks - 6.0.0 & 6.0.1 & 6.0.2 & 6.1.0**
 
@@ -3043,7 +3043,7 @@
 **WooCommerce**
 
 * Localization - Added Venezuelan states. #29477
-* Add - Feature WooPayments in the extensions store for stores in the US, Canada, UK, Ireland, Australia and New Zealand. #29843
+* Add - Feature WooCoomerce Payments in the extensions store for stores in the US, Canada, UK, Ireland, Australia and New Zealand. #29843
 * Add - Product attributes lookup table and debug tools to manually fill or delete it. #29778
 * Add - dates_are_gmt parameters in REST API to searched posts using the post_date_gmt column.
 * Add - labels and searching terms in WooCommerce Navigation link block variations. #29772
@@ -3089,7 +3089,7 @@
 * Fix - Missed DB version number updates causing unnecessary upgrades. #6818
 * Fix - Parsing bad JSON string data from user WooCommerce meta. #6819
 * Fix - Remove PayPal for India #6828
-* Fix - Address an issue with OBW when installing only WooPayments and Jetpack. #6957
+* Fix - Address an issue with OBW when installing only WooCoomerce Payments and Jetpack. #6957
 * Fix - Calling of get_script_asset_filename with extra parameter #6955
 * Fix - Show Google Listing and Ads in installed marketing extensions section. #7029
 * Performance - Avoid updating customer info synchronously from the front end. #6765
@@ -3256,7 +3256,7 @@
 * Fix - Add gross sales column to CSV export #6567
 * Fix - Disable the continue btn on OBW when requested are being made #6838
 * Fix - Calling of get_script_asset_filename with extra parameter #6955
-* Fix - Address an issue with OBW when installing only WooPayments and Jetpack. #6957
+* Fix - Address an issue with OBW when installing only WooCoomerce Payments and Jetpack. #6957
 * Tweak - Add default value for contains op #6622
 * Tweak - Adjust targeting store age for the Add First Product note #6554
 * Tweak - Improve WC Shipping & Tax logic #6547
@@ -3306,7 +3306,7 @@
 * Dev - Fix usage of docker-compose (wc-e2e) commands in e2e tests when running them within WSL2. #29207
 * Dev - Fixes to documentation of WC_Shipping_Rate. #29117
 * Dev - Add tracks event when a user clicks on the links of the WooCommerce Status widget. #29109
-* Dev - Track the number of installations of WooPayments via that extensions banner for stores that have opted in to tracking. #29052
+* Dev - Track the number of installations of WooCoomerce Payments via that extensions banner for stores that have opted in to tracking. #29052
 * Dev - Added woocommerce_ajax_order_items_removed hook. #28936
 * Dev - Add tracking of woocommerce_admin_disabled usage. #28535
 * Enhancement - Add support for the low stock threshold for variations. #29345
@@ -4419,7 +4419,7 @@
 * Enhancement - New Home Screen #4303
 * Enhancement - Use WordPress Core colors for styling accents. #4558
 * Tweak - make revenue report total sales column optional #4397
-* Tweak - Adjustments to WooPayments setup task #4373
+* Tweak - Adjustments to WooCoomerce Payments setup task #4373
 * Tweak - Handling of plugin installs in OBW #4411
 * Tweak - Update design of Setup Checklist #4434
 * Tweak - Add scrollable styling to left side of Table, and keep updated #4179
@@ -4598,7 +4598,7 @@
 * Tweak - Adjust "demo products" verbiage to "Sample Products" #4184
 * Tweak - Don't reschedule imports on failed imports #4263
 * Tweak - Remove obsolete inbox messages #4182
-* Tweak - Updates to WooPayments in Setup Checklist #4293
+* Tweak - Updates to WooCoomerce Payments in Setup Checklist #4293
 * Dev - Make query selector for admin alerts more specific #4289
 * Dev - Guard against null themes in OBW #4244
 * Dev - Update wcadmin db version after db callback #4323
