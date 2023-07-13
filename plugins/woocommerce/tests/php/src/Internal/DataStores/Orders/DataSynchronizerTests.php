@@ -33,9 +33,7 @@ class DataSynchronizerTests extends HposTestCase {
 		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
 		OrderHelper::create_order_custom_table_if_not_exist();
 		OrderHelper::toggle_cot_feature_and_usage( false );
-		$this->sut           = wc_get_container()->get( DataSynchronizer::class );
-		$features_controller = wc_get_container()->get( Featurescontroller::class );
-		$features_controller->change_feature_enable( 'custom_order_tables', true );
+		$this->sut = wc_get_container()->get( DataSynchronizer::class );
 	}
 
 	/**
