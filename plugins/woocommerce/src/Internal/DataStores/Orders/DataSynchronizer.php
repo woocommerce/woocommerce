@@ -34,6 +34,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public const DELETED_FROM_POSTS_META_VALUE  = 'posts_table';
 	public const DELETED_FROM_ORDERS_META_VALUE = 'orders_table';
 
+	public const ORDERS_TABLE_CREATED = 'no';
+
 	private const ORDERS_SYNC_BATCH_SIZE = 250;
 
 	// Allowed values for $type in get_ids_of_orders_pending_sync method.
@@ -131,6 +133,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 */
 	public function create_database_tables() {
 		$this->database_util->dbdelta( $this->data_store->get_database_schema() );
+		update_option( self::ORDERS_TABLE_CREATED, 'yes' );
 	}
 
 	/**
@@ -142,6 +145,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 		foreach ( $table_names as $table_name ) {
 			$this->database_util->drop_database_table( $table_name );
 		}
+		delete_option( self::ORDERS_TABLE_CREATED );
 	}
 
 	/**
@@ -627,9 +631,7 @@ ORDER BY orders.id ASC
 			return;
 		}
 
-		$features_controller = wc_get_container()->get( FeaturesController::class );
-		$feature_is_enabled  = $features_controller->feature_is_enabled( 'custom_order_tables' );
-		if ( ! $feature_is_enabled ) {
+		if ( 'yes' !== get_option( self::ORDERS_TABLE_CREATED ) ) {
 			return;
 		}
 
