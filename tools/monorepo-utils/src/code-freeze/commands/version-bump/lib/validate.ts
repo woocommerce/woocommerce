@@ -9,6 +9,7 @@ import { readFile } from 'fs/promises';
  * Internal dependencies
  */
 import { Logger } from '../../../../core/logger';
+import { Options } from '../types';
 /**
  * Get a plugin's current version.
  *
@@ -51,9 +52,9 @@ export const stripPrereleaseParameters = (
  */
 export const validateArgs = async (
 	tmpRepoPath: string,
-	base: string,
-	version: string
+	options: Options
 ): Promise< void > => {
+	const { base, version, commitDirectToBase } = options;
 	const nextVersion = version;
 
 	if ( ! valid( nextVersion ) ) {
@@ -69,6 +70,12 @@ export const validateArgs = async (
 	if ( ! isDevVersionBump && base === 'trunk' ) {
 		Logger.error(
 			`Version ${ nextVersion } is not a development version bump and cannot be applied to trunk, which only accepts development version bumps.`
+		);
+	}
+
+	if ( commitDirectToBase && base === 'trunk' ) {
+		Logger.error(
+			`The --commit-direct-to-base option cannot be used with the trunk branch as a base. A pull request must be created instead.`
 		);
 	}
 

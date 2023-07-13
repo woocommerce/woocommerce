@@ -46,15 +46,18 @@ export const versionBumpCommand = new Command( 'version-bump' )
 	)
 	.option(
 		'-d --dryRun',
-		'Prepare the version bump and log a diff. Do not create a PR or push to branch'
+		'Prepare the version bump and log a diff. Do not create a PR or push to branch',
+		false
 	)
 	.option(
-		'-c --commitDirectToBase',
-		'Prepare the version bump and log a diff. Do not create a PR or push to branch'
+		'-c --commit-direct-to-base',
+		'Prepare the version bump and log a diff. Do not create a PR or push to branch',
+		false
 	)
 	.action( async ( options: Options ) => {
 		const { owner, name, version, base, dryRun, commitDirectToBase } =
 			options;
+
 		Logger.startTask(
 			`Making a temporary clone of '${ owner }/${ name }'`
 		);
@@ -102,7 +105,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		}
 
 		Logger.notice( 'Validating arguments' );
-		await validateArgs( tmpRepoPath, base, version );
+		await validateArgs( tmpRepoPath, options );
 
 		Logger.notice( `Bumping versions in ${ owner }/${ name }` );
 		bumpFiles( tmpRepoPath, version );
