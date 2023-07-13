@@ -47,7 +47,7 @@ export function IframeEditor( {
 	onInput,
 	settings: __settings,
 }: IframeEditorProps ) {
-	const [ resizeObserver, sizes ] = useResizeObserver();
+	const [ resizeObserver ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
 	const { appendEdit, hasRedo, hasUndo, redo, undo } = useEditorHistory( {
 		setBlocks,
@@ -137,7 +137,7 @@ export function IframeEditor( {
 								enableResizing={ true }
 								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 								// @ts-ignore This accepts numbers or strings.
-								height={ sizes.height ?? '100%' }
+								height="100%"
 							>
 								<EditorCanvas
 									enableResizing={ true }
@@ -148,6 +148,12 @@ export function IframeEditor( {
 								</EditorCanvas>
 								<Popover.Slot />
 							</ResizableEditor>
+							{ /* This is a hack, but I couldn't find another (easy) way to not
+							     have the inserter render in the content's padding. I believe
+								 that is happening because the inserter is positioned using a transforms,
+								 which take it outside of the normal layout, thus ignoring the parent's
+								 bounds. */ }
+							<div className="woocommerce-iframe-editor__content-inserter-clipper" />
 						</BlockTools>
 						{ isSidebarOpened && (
 							<div className="woocommerce-iframe-editor__sidebar">
