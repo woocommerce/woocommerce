@@ -107,7 +107,11 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		Logger.notice( 'Validating arguments' );
 		await validateArgs( tmpRepoPath, options );
 
-		Logger.notice( `Bumping versions in ${ owner }/${ name }` );
+		const workingBranch = commitDirectToBase ? base : branch;
+
+		Logger.notice(
+			`Bumping versions in ${ owner }/${ name } on ${ workingBranch } branch`
+		);
 		bumpFiles( tmpRepoPath, version );
 
 		if ( dryRun ) {
@@ -123,15 +127,10 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			.commit( `Prep ${ base } for ${ majorMinor } cycle` )
 			.catch( genericErrorFunction );
 
-		if ( commitDirectToBase ) {
-			Logger.notice( `Pushing ${ base } to Github` );
-			await git.push( 'origin', base );
-		} else {
-			Logger.notice( `Pushing ${ branch } to Github` );
-			await git.push( 'origin', branch ).catch( ( e ) => {
-				Logger.error( e );
-			} );
+		Logger.notice( `Pushing ${ workingBranch } branch to Github` );
+		await git.push( 'origin', workingBranch );
 
+		if ( ! commitDirectToBase ) {
 			try {
 				Logger.startTask( 'Creating a pull request' );
 
