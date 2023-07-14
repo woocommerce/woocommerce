@@ -30,5 +30,6 @@ export {
 } from './shipping-dimensions-image';
 
 export { AttributeControl as __experimentalAttributeControl } from './attribute-control';
+export { VariationOptionsControl as __experimentalVariationOptionsControl } from './variation-options-control';
 export { Attributes as __experimentalAttributes } from './attributes';
 export * from './add-new-shipping-class-modal';

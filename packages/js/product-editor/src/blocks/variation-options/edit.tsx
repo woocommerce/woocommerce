@@ -13,8 +13,8 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { AttributeControl } from '../../components/attribute-control';
 import { useProductAttributes } from '../../hooks/use-product-attributes';
+import { VariationOptionsControl } from '../../components/variation-options-control';
 
 export function Edit() {
 	const blockProps = useBlockProps();
@@ -32,7 +32,10 @@ export function Edit() {
 
 	return (
 		<div { ...blockProps }>
-			<AttributeControl value={ attributes } onChange={ handleChange } />
+			<VariationOptionsControl
+				value={ attributes }
+				onChange={ handleChange }
+			/>
 		</div>
 	);
 }
