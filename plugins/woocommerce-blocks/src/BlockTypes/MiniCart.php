@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Utils\Utils;
 
 /**
  * Mini-Cart class.
@@ -322,11 +323,19 @@ class MiniCart extends AbstractBlock {
 
 		$site_url = site_url() ?? wp_guess_url();
 
+		if ( Utils::wp_version_compare( '6.3', '>=' ) ) {
+			$script_before = $wp_scripts->get_inline_script_data( $script->handle, 'before' );
+			$script_after  = $wp_scripts->get_inline_script_data( $script->handle, 'after' );
+		} else {
+			$script_before = $wp_scripts->print_inline_script( $script->handle, 'before', false );
+			$script_after  = $wp_scripts->print_inline_script( $script->handle, 'after', false );
+		}
+
 		$this->scripts_to_lazy_load[ $script->handle ] = array(
 			'src'          => preg_match( '|^(https?:)?//|', $script->src ) ? $script->src : $site_url . $script->src,
 			'version'      => $script->ver,
-			'before'       => $wp_scripts->print_inline_script( $script->handle, 'before', false ),
-			'after'        => $wp_scripts->print_inline_script( $script->handle, 'after', false ),
+			'before'       => $script_before,
+			'after'        => $script_after,
 			'translations' => $wp_scripts->print_translations( $script->handle, false ),
 		);
 	}
