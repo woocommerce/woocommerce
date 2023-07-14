@@ -477,7 +477,7 @@
 
 		.addon-product-group-see-more,
 		.addon-product-group-see-more:visited {
-			color: #007cba;
+			color: var(--wp-admin-theme-color);
 			/* Primary / Blue */
 			display: block;
 			font-size: 13px;
@@ -582,7 +582,7 @@
 
 				h2,
 				h3 {
-					color: #007cba;
+					color: var(--wp-admin-theme-color);
 					font-size: 20px;
 					font-weight: 400;
 					letter-spacing: -0.32px;
@@ -620,7 +620,7 @@
 					}
 
 					h2 {
-						color: #2c3338;
+						color: var(--wp-admin-theme-color);
 					}
 				}
 
@@ -718,8 +718,8 @@
 
 				.button {
 					background-color: #fff;
-					border-color: #007cba;
-					color: #007cba;
+					border-color: var(--wp-admin-theme-color);
+					color: var(--wp-admin-theme-color);
 					float: right;
 					font-size: 13px;
 					height: 36px;
@@ -857,7 +857,7 @@
 	max-width: 1200px;
 
 	.update-plugins .update-count {
-		background-color: #d54e21;
+		background-color: var(--wp-admin-theme-color);
 		border-radius: 10px;
 		color: #fff;
 		display: inline-block;
@@ -7874,8 +7874,8 @@ table.bar_chart {
 					margin: 12px 12px 0 0;
 
 					&.current {
-						background: #007cba;
-						border: 1px solid #007cba;
+						background: var(--wp-admin-theme-color);
+						border: 1px solid var(--wp-admin-theme-color);
 
 						a {
 							color: #fff;
