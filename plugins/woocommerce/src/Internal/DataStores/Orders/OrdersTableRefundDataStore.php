@@ -97,6 +97,8 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 	 *
 	 * @param \WC_Order_Refund $refund Refund object.
 	 * @param object           $data   DB data object.
+	 *
+	 * @since 8.0.0
 	 */
 	protected function set_order_props_from_data( &$refund, $data ) {
 		parent::set_order_props_from_data( $refund, $data );
