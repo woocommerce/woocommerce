@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
+import { createElement, useLayoutEffect, useState } from '@wordpress/element';
+import { SelectControl } from '@wordpress/components';
 import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
-import { useLayoutEffect } from '@wordpress/element';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -15,7 +16,18 @@ import {
 	useEntityRecords,
 } from '@wordpress/core-data';
 
+type Template = {
+	id: string;
+	title: {
+		raw: string;
+		rendered: string;
+	};
+};
+
 export function BlocksTemplate() {
+	const [ selectedTemplateId, setSelectedTemplateId ] = useState(
+		'woocommerce/woocommerce//product-editor_simple'
+	);
 	const productId = useEntityId( 'postType', 'product' );
 
 	const [ blocks, , onChange ] = useEntityBlockEditor(
@@ -41,13 +53,27 @@ export function BlocksTemplate() {
 		}
 		const template = templates.find(
 			// @ts-ignore
-			( t ) => t.id === 'woocommerce/woocommerce//product-editor_simple'
+			( t ) => t.id === selectedTemplateId
 		);
 		onChange(
 			synchronizeBlocksWithTemplate( blocks, template.content.raw ),
 			{}
 		);
-	}, [ templates, isLoading ] );
+	}, [ templates, isLoading, selectedTemplateId ] );
 
-	return null;
+	if ( ! templates ) {
+		return null;
+	}
+
+	return (
+		<SelectControl
+			options={ templates.map( ( template: Template ) => ( {
+				label: template.title.rendered,
+				value: template.id,
+			} ) ) }
+			onChange={ ( templateId ) =>
+				setSelectedTemplateId( templateId as string )
+			}
+		/>
+	);
 }
