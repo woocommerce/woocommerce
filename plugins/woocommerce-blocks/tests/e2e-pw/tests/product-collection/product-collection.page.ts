@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { Locator, Page } from '@playwright/test';
+import { TemplateApiUtils } from '@woocommerce/e2e-utils';
 import { Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
 
-const SELECTORS = {
+export const SELECTORS = {
 	productTemplate: '.wc-block-product-template',
 	product: '.wc-block-product-template .wc-block-product',
 	productImage: {
@@ -24,6 +25,9 @@ const SELECTORS = {
 		inEditor: '[data-type="core/query-pagination"]',
 		onFrontend: '.wp-block-query-pagination',
 	},
+	onSaleControlLabel: 'Show only products on sale',
+	inheritQueryFromTemplateControl:
+		'.wc-block-product-collection__inherit-query-control',
 };
 
 class ProductCollectionPage {
@@ -31,6 +35,7 @@ class ProductCollectionPage {
 	private page: Page;
 	private admin: Admin;
 	private editor: Editor;
+	private templateApiUtils: TemplateApiUtils;
 	productTemplate!: Locator;
 	products!: Locator;
 	productImages!: Locator;
@@ -43,14 +48,17 @@ class ProductCollectionPage {
 		page,
 		admin,
 		editor,
+		templateApiUtils,
 	}: {
 		page: Page;
 		admin: Admin;
 		editor: Editor;
+		templateApiUtils: TemplateApiUtils;
 	} ) {
 		this.page = page;
 		this.admin = admin;
 		this.editor = editor;
+		this.templateApiUtils = templateApiUtils;
 	}
 
 	async createNewPostAndInsertBlock() {
@@ -67,6 +75,24 @@ class ProductCollectionPage {
 		const postId = url.searchParams.get( 'post' );
 		await this.page.goto( `/?p=${ postId }`, { waitUntil: 'networkidle' } );
 		await this.refreshLocators( 'frontend' );
+	}
+
+	async goToProductCatalogAndInsertBlock() {
+		await this.templateApiUtils.revertTemplate(
+			'woocommerce/woocommerce//archive-product'
+		);
+
+		await this.admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//archive-product',
+			postType: 'wp_template',
+		} );
+
+		await this.editor.canvas.click( 'body' );
+
+		await this.editor.insertBlock( {
+			name: this.BLOCK_NAME,
+		} );
+		await this.editor.openDocumentSettingsSidebar();
 	}
 
 	async addFilter(
@@ -115,17 +141,29 @@ class ProductCollectionPage {
 		await this.refreshLocators( 'editor' );
 	}
 
-	async setShowOnlyProductsOnSale( onSale: boolean ) {
+	async setShowOnlyProductsOnSale(
+		{
+			onSale,
+			isLocatorsRefreshNeeded,
+		}: {
+			onSale: boolean;
+			isLocatorsRefreshNeeded?: boolean;
+		} = {
+			isLocatorsRefreshNeeded: true,
+			onSale: true,
+		}
+	) {
 		const sidebarSettings = await this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel(
-			'Show only products on sale'
+			SELECTORS.onSaleControlLabel
 		);
 		if ( onSale ) {
 			await input.check();
 		} else {
 			await input.uncheck();
 		}
-		await this.refreshLocators( 'editor' );
+
+		if ( isLocatorsRefreshNeeded ) await this.refreshLocators( 'editor' );
 	}
 
 	async setFilterComboboxValue( filterName: string, filterValue: string[] ) {
@@ -237,6 +275,18 @@ class ProductCollectionPage {
 		// Now, check the value.
 		await productAttributesContainer.getByLabel( value ).check();
 		await this.refreshLocators( 'editor' );
+	}
+
+	async setInheritQueryFromTemplate( inheritQueryFromTemplate: boolean ) {
+		const sidebarSettings = await this.locateSidebarSettings();
+		const input = sidebarSettings.locator(
+			`${ SELECTORS.inheritQueryFromTemplateControl } input`
+		);
+		if ( inheritQueryFromTemplate ) {
+			await input.check();
+		} else {
+			await input.uncheck();
+		}
 	}
 
 	async setViewportSize( {
