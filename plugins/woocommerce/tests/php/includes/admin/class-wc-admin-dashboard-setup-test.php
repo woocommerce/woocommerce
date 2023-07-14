@@ -7,6 +7,9 @@
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 
+// just a quick hack, create a proper singleton later if this approach actually helps.
+$instance = include_once __DIR__ . '/../../../../includes/admin/class-wc-admin-dashboard-setup.php';
+
 /**
  * Class WC_Admin_Dashboard_Setup_Test
  */
@@ -48,7 +51,9 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	 * @return WC_Admin_Dashboard_Setup
 	 */
 	public function get_widget() {
-		return include __DIR__ . '/../../../../includes/admin/class-wc-admin-dashboard-setup.php';
+		global $instance;
+		$instance->reset();
+		return $instance;
 	}
 
 	/**
