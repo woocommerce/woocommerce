@@ -47,7 +47,7 @@ class ProductRatingStars extends AbstractBlock {
 				'padding'                         => true,
 				'__experimentalSkipSerialization' => true,
 			),
-			'__experimentalSelector' => '.wc-block-components-product-rating',
+			'__experimentalSelector' => '.wc-block-components-product-rating-stars',
 		);
 	}
 

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
+import { Icon, starFilled } from '@wordpress/icons';
 import { isExperimentalBuild } from '@woocommerce/block-settings';
 
 /**
@@ -9,20 +10,18 @@ import { isExperimentalBuild } from '@woocommerce/block-settings';
  */
 import metadata from './block.json';
 import edit from './edit';
-import sharedConfig from '../shared/config';
 import { supports } from './support';
-import { BLOCK_ICON } from './constants';
 
 if ( isExperimentalBuild() ) {
 	registerBlockType( metadata, {
-		...sharedConfig,
-		ancestor: [
-			'woocommerce/all-products',
-			'woocommerce/single-product',
-			'core/post-template',
-			'woocommerce/product-template',
-		],
-		icon: { src: BLOCK_ICON },
+		icon: {
+			src: (
+				<Icon
+					icon={ starFilled }
+					className="wc-block-editor-components-block-icon"
+				/>
+			),
+		},
 		supports,
 		edit,
 	} );
