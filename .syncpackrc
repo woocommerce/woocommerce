@@ -1,6 +1,6 @@
 {
 	"dev": true,
-	"filter": "^(?:config|react|react-dom|eslint|typescript|@typescript-eslint|@types/react|@wordpress|@types/wordpress__components|postcss|@types/node).*$",
+	"filter": "^(?:postcss|postcss-loader|pnpm|node|config|react|react-dom|eslint|typescript|@types/react|@types/wordpress__components|@types/node|@(?:typescript-eslint|wordpress)/.*)$",
 	"indent": "\t",
 	"overrides": true,
 	"peer": true,
@@ -8,15 +8,30 @@
 	"prod": true,
 	"semverRange": "^",
 	"workspace": true,
+	"customTypes": {
+		"engines": {
+			"path": "engines",
+			"strategy": "versionsByName"
+		}
+	},
 	"versionGroups": [
 		{
 			"dependencies": [
-				"@typescript-eslint/**"
+				"pnpm"
+			],
+			"pinVersion": "^8.6.7",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"node"
 			],
 			"dependencyTypes": [
-				"devDependencies"
+				"engines"
 			],
-			"pinVersion": "^5.43.0",
+			"pinVersion": "^16.14.1",
 			"packages": [
 				"**"
 			]
