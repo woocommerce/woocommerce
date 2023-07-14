@@ -19,7 +19,17 @@ import { ModalEditor } from '../../components/modal-editor';
  * Internal dependencies
  */
 
-function clearDescription( blocks: BlockInstance[] ) {
+/**
+ * By default the blocks variable always contains one paragraph
+ * block with empty content, that causes the desciption to never
+ * be empty. This function removes the default block to keep
+ * the description empty.
+ *
+ * @param blocks The block list
+ * @return Empty array if there is only one block with empty content
+ * in the list. The same block list otherwise.
+ */
+function clearDescriptionIfEmpty( blocks: BlockInstance[] ) {
 	if ( blocks.length === 1 ) {
 		const { content } = blocks[ 0 ].attributes;
 		if ( ! content || ! content.trim() ) {
@@ -55,11 +65,9 @@ export function Edit() {
 				<ModalEditor
 					initialBlocks={ parse( description ) }
 					onChange={ ( blocks ) => {
-						// By default the blocks variable always contains one paragraph
-						// block with empty content, that causes the desciption to never
-						// be empty. The next line removes the default block to keep
-						// the description empty.
-						const html = serialize( clearDescription( blocks ) );
+						const html = serialize(
+							clearDescriptionIfEmpty( blocks )
+						);
 						setDescription( html );
 					} }
 					onClose={ () => setIsModalOpen( false ) }
