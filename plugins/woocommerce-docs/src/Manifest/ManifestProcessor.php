@@ -3,6 +3,7 @@
 namespace WooCommerceDocs\Manifest;
 
 use WooCommerceDocs\Blocks\BlockConverter;
+use WooCommerceDocs\Data\DocsStore;
 
 /**
  * Class ManifestProcessor
@@ -95,7 +96,7 @@ class ManifestProcessor {
 
 			// Now, process the posts for this category.
 			foreach ( $category['posts'] as $post ) {
-				$existing_post = \WooCommerceDocs\Data\DocsStore::get_post( $post['id'] );
+				$existing_post = DocsStore::get_post( $post['id'] );
 				$response      = wp_remote_get( $post['url'] );
 				$content       = wp_remote_retrieve_body( $response );
 
@@ -115,15 +116,18 @@ class ManifestProcessor {
 
 				// If the post doesn't exist, create it.
 				if ( ! $existing_post ) {
-					$post_id = \WooCommerceDocs\Data\DocsStore::insert_docs_post(
+					$post_id = DocsStore::insert_docs_post(
 						self::generate_post_args( $post, $blocks ),
 						$post['id']
 					);
 
+					if ( isset( $post['edit_url'] ) ) {
+						DocsStore::add_edit_url_to_docs_post( $post_id, $post['edit_url'] );
+					}
+
 					\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Created post with id: ' . $post_id );
 
 				} else {
-
 					$post_update = self::generate_post_args( $post, $blocks );
 					$post_update = array_merge( $post_update, array( 'ID' => $existing_post->ID ) );
 
@@ -132,6 +136,10 @@ class ManifestProcessor {
 						$post_update,
 						$post['id']
 					);
+
+					if ( isset( $post['edit_url'] ) ) {
+						DocsStore::add_edit_url_to_docs_post( $post_id, $post['edit_url'] );
+					}
 
 					\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Updated post with id: ' . $post_id );
 				}
