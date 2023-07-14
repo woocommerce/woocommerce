@@ -2,21 +2,112 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.1.0](https://www.npmjs.com/package/@woocommerce/packages/js/data/v/4.1.0) - 2022-07-08 
+## [5.0.0](https://www.npmjs.com/package/@woocommerce/data/v/5.0.0) - 2023-07-14 
+
+-   Patch - Added in missing TS definitions in package.json [#34154]
+-   Patch - Add is_plugins_page_skipped parameter to onboarding API [#38764]
+-   Minor - Fix IdQuery selector for getItem selector in CRUD data stores [#36033]
+-   Patch - Fix incorrect usage of dispatch, useSelect, and setState calls in homescreen along with settings and onboarding package [#37641]
+-   Minor - Fix linter errors [#37196]
+-   Patch - Fix missing resolver import in data/import [#34054]
+-   Minor - Fix up updateItem query in CRUD data store [#36155]
+-   Minor - Moved setIsRequesting(false) to the finally block so that it always runs even if an exception is thrown. [#36873]
+-   Patch - Redirect users to WooCommerce Home when Jetpack auth endpoint returns an invalid URL [#38760]
+-   Patch - Removing unused code from ProductForm data store. [#36592]
+-   Patch - Rewrite withCurrentUserHydration to work with Gutenberg 15.5+ [#37908]
+-   Patch - Rewrite withNavigationHydration to work Gutenberg 15.5+ [#37901]
+-   Patch - Rewrote withOptionsHydration to not use dispatch-within-useselect pattern that is broken after gutenberg 15.5 update [#37882]
+-   Minor - Add ability to check CRUD dispatch action status [#36297]
+-   Minor - Add ability to make geolocation call to WPCOM API [#38412]
+-   Minor - Add an attribute to an onboarding task to indicate whether to track a task view. [#35278]
+-   Minor - Add batchUpdate to product variations datastore [#36109]
+-   Minor - Added code to retrieve jetpack connection data [#34637]
+-   Minor - Add getItemsTotalCount selector to the crud data store. [#34400]
+-   Minor - Add getItemsTotalCount selector to the crud data store. [#34613]
+-   Minor - Add getProduct selector and deleteProduct action to products data store. [#34211]
+-   Minor - Add image to product variation and export types [#36133]
+-   Minor - Adding Product Form data store. [#36430]
+-   Minor - Add is_read query option for notes data store [#35396]
+-   Patch - Add is_store_country_set field to profileItems [#34484]
+-   Minor - Add Jetpack Connection Auth endpoint. [#38674]
+-   Minor - Add manage_stock parent value to product variation type definition [#36234]
+-   Patch - Add missing low_stock_amount to product type [#34984]
+-   Minor - Add new data store for shipping zones. #33830 [#33830]
+-   Minor - Add product attribute terms data store [#33721]
+-   Minor - Add product tags data store [#33682]
+-   Minor - Add product variations data store [#35838]
+-   Patch - Add size properties to product type #34329 [#34856]
+-   Minor - Add Skip button to OBW steps [#34176]
+-   Minor - Add tax classes datastore [#36299]
+-   Patch - Add tiktok plugin to plugins name mapping [#34953]
+-   Minor - Add variable_product_tour_shown to UserPreferences type. [#37413]
+-   Minor - Create product categories data store. #33984 [#33984]
+-   Patch - Enhanced jetpack connection data [#34653]
+-   Patch - Export ProductShippingClass type [#34684]
+-   Minor - Extend product variations data store with generate variations actions [#36058]
+-   Minor - Support force_default_suggestions argument. [#34083]
+-   Minor - Update shipping partner suggestions to use data from API, fix default partners data, replaced hardcoded JS components and added relevant types [#38457]
+-   Minor - Update type definition for ProductForm [#36583]
+-   Minor - Add product attribute types to the Product type. [#34751]
+-   Patch - Removed old inbox notes warning [#37392]
+-   Major [ **BREAKING CHANGE** ] - Remove `Product` `date_on_sale_from` and `date_on_sale_to` properties. Use `date_on_sale_from_gmt` and `date_on_sale_to_gmt` instead. [#35096]
+-   Patch - Update Payfast title [#38090]
+-   Minor - Update product attribute type name and export the product attribute types. [#34999]
+-   Patch - Use products data store for getPermalinkParts selector. [#36706]
+-   Minor - Add auto draft status to product status type [#37770]
+-   Patch - Add codistoconnect to pluginNames [#36766]
+-   Minor - Added install-and-activate-async to Onboarding and updated related types [#38616]
+-   Patch - Added types for resolveSelect where applicable. [#38241]
+-   Patch - Add is_installed and plugins_page_skipped type and added async option for installPlugins. [#38405]
+-   Minor - Add missing reviews property to product data [#35592]
+-   Patch - Add missing shipping class property [#35034]
+-   Minor - Add new shippping class modal to a shipping class section in product page [#34937]
+-   Minor - Add type definitions for @woocommerce/data reviews [#34844]
+-   Patch - Add types to plugin response data [#34787]
+-   Minor - Adjust build/test scripts to remove -- -- that was required for pnpm 6. [#34661]
+-   Minor - Deprecate "theme" prop from profileItem type [#37671]
+-   Patch - Dev dependency bump [#35651]
+-   Minor - Fix lint issues [#36988]
+-   Minor - Fix node and pnpm versions via engines [#34773]
+-   Minor - Fix onboarding productTypes TS define type [#37725]
+-   Patch - Lint fixes [#38523]
+-   Patch - Merging trunk with local [#34322]
+-   Patch - Migrate navigation store to TS [#34239]
+-   Patch - Migrate notes store to TS [#34220]
+-   Patch - Migrate reports to TS [#35048]
+-   Patch - Migrate setting store to TS [#34184]
+-   Patch - Rewrite usePluginsHydration hook to not dispatch inside useSelect [#37896]
+-   Minor - Sync @wordpress package versions via syncpack. [#37034]
+-   Patch - Update @wordpress/data to ^6.15.0 [#34428]
+-   Minor - Update attributes type for product variations data store [#35889]
+-   Patch - Update eslint to 8.32.0 across the monorepo. [#36700]
+-   Minor - Update IdQuery type on get item selectors [#36085]
+-   Minor - Update pnpm monorepo-wide to 8.6.5 [#38990]
+-   Minor - Update pnpm to version 8. [#37915]
+-   Minor - Update pnpm version constraint to 7.13.3 to avoid auto-install-peers issues [#35007]
+-   Minor - Update task list types and getVisibleTasks logic [#35450]
+-   Patch - Correct spelling errors [#37887]
+-   Patch - Retrieve product information using edit context [#34961]
+-   Patch - Tweak the product form types and exports. [#36414]
+-   Patch - Update types for update and create product. [#34313]
+-   Patch - Use createSelector for getPermalinkParts selector, to cache result. [#36848]
+-   Minor - Add tracks for plugin actions and handle plugin error properly [#37261]
+
+## [4.1.0](https://www.npmjs.com/package/@woocommerce/data/v/4.1.0) - 2022-07-08 
 
 -   Minor - Fix 'Cannot read properties of undefined' error when clicking Export button on Analytic pages.
 -   Minor - Add CRUD data store utilities
 -   Minor - Add product deletion via datastore API #33285
 -   Minor - Add product shipping class data store. #33765
+-   Minor - Migrate onboarding data store to TS
+-   Minor - Remove PHP and Composer dependencies for packaged JS packages
 -   Patch - Fix product type
 -   Patch - Migrate @woocommerce/data user and use-select-with-refresh to TS
 -   Patch - Migrate item store to TS
--   Minor - Migrate onboarding data store to TS
--   Minor - Remove PHP and Composer dependencies for packaged JS packages
 
-## [4.0.0](https://www.npmjs.com/package/@woocommerce/packages/js/data/v/4.0.0) - 2022-06-14 
+## [4.0.0](https://www.npmjs.com/package/@woocommerce/data/v/4.0.0) - 2022-06-14 
 
--   Major [ **BREAKING CHANGE** ] - Remove `PaymentMethodsState` type. Use `Plugin` instead. #32683
+-    - Remove `PaymentMethodsState` type. Use `Plugin` instead. #32683
 -   Minor - Add create product actions in products data store #33278
 -   Minor - Add new orders data store, for retrieving orders data. #33063
 -   Minor - Add update product actions to product data store #33282

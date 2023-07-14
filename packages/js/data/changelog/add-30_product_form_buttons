@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add getProduct selector and deleteProduct action to products data store.
