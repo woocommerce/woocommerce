@@ -2602,8 +2602,8 @@ FROM $order_meta_table
 		 *
 		 * @since 8.0.0
 		 */
-		$max_index_length                  = apply_filters( 'woocommerce_database_max_index_length', 191 );
-		$composite_meta_value_index_length = max( $max_index_length - 8 - 100 - 1, 20 ); // 8 for order_id, 100 for meta_key, 10 minimum for meta_value.
+		$max_index_length                   = apply_filters( 'woocommerce_database_max_index_length', 191 );
+		$composite_meta_value_index_length  = max( $max_index_length - 8 - 100 - 1, 20 ); // 8 for order_id, 100 for meta_key, 10 minimum for meta_value.
 		$composite_customer_id_email_length = max( $max_index_length - 20, 20 ); // 8 for customer_id, 20 minimum for email.
 
 		$sql = "

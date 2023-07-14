@@ -493,7 +493,7 @@ class WC_Install {
 		if (
 			$feature_controller->feature_is_enabled( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION )
 			|| $feature_controller->feature_is_enabled( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION )
-		)  {
+		) {
 			$schema .= wc_get_container()
 				->get( OrdersTableDataStore::class )
 				->get_database_schema();
