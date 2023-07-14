@@ -108,9 +108,14 @@ export const versionBumpCommand = new Command( 'version-bump' )
 			bumpFiles( tmpRepoPath, version );
 
 			if ( dryRun ) {
-				Logger.notice( 'Dry run complete. Exiting.' );
-				const diff = await git.diff();
-				console.log( diff );
+				const diff = await git.diffSummary();
+				Logger.notice(
+					`The version has been bumped to ${ version } in the following files:`
+				);
+				Logger.warn( diff.files.map( ( f ) => f.file ).join( '\n' ) );
+				Logger.notice(
+					'Dry run complete. No pull was request created nor was a commit made.'
+				);
 				return;
 			}
 
