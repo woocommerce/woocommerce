@@ -38,7 +38,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 		'trunk'
 	)
 	.option(
-		'-d --dryRun',
+		'-d --dry-run',
 		'Prepare the version bump and log a diff. Do not create a PR or push to branch',
 		false
 	)
@@ -83,6 +83,11 @@ export const versionBumpCommand = new Command( 'version-bump' )
 
 		try {
 			if ( commitDirectToBase ) {
+				if ( base === 'trunk' ) {
+					Logger.error(
+						`The --commit-direct-to-base option cannot be used with the trunk branch as a base. A pull request must be created instead.`
+					);
+				}
 				Logger.notice( `Checking out ${ base }` );
 				await checkoutRemoteBranch( tmpRepoPath, base );
 			} else {
@@ -93,7 +98,13 @@ export const versionBumpCommand = new Command( 'version-bump' )
 						`Branch ${ branch } already exists. Run \`git push <remote> --delete ${ branch }\` and rerun this command.`
 					);
 				}
-				Logger.notice( `Checking out ${ branch }` );
+
+				if ( base !== 'trunk' ) {
+					// if the base is not trunk, we need to checkout the base branch first before creating a new branch.
+					Logger.notice( `Checking out ${ base }` );
+					await checkoutRemoteBranch( tmpRepoPath, base );
+				}
+				Logger.notice( `Creating new branch ${ branch }` );
 				await git.checkoutBranch( branch, base );
 			}
 

@@ -56,7 +56,7 @@ export const validateArgs = async (
 	version: string,
 	options: Options
 ): Promise< void > => {
-	const { base, commitDirectToBase } = options;
+	const { base } = options;
 	const nextVersion = version;
 
 	if ( ! valid( nextVersion ) ) {
@@ -72,12 +72,6 @@ export const validateArgs = async (
 	if ( ! isDevVersionBump && base === 'trunk' ) {
 		Logger.error(
 			`Version ${ nextVersion } is not a development version bump and cannot be applied to trunk, which only accepts development version bumps.`
-		);
-	}
-
-	if ( commitDirectToBase && base === 'trunk' ) {
-		Logger.error(
-			`The --commit-direct-to-base option cannot be used with the trunk branch as a base. A pull request must be created instead.`
 		);
 	}
 
