@@ -24,6 +24,7 @@ import {
 } from '../utils';
 import { Attribute } from '../utils/types';
 import { getBusinessDescription, getToneOfVoice } from '../utils/branding';
+import { useStoreBranding } from '../contexts/storeBrandingContext';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
@@ -49,18 +50,6 @@ const recordDescriptionTracks = recordTracksFactory(
 	} )
 );
 
-const fetchBrandingData = async () => {
-	const toneOfVoice = await getToneOfVoice();
-	
-	try {
-	  const businessDescription = await getBusinessDescription();
-	  console.log(toneOfVoice, businessDescription);
-	} catch (error) {
-	  console.error("Failed to fetch business description", error);
-	  // handle error, possibly by setting some error state or showing an error message to the user
-	}
-  }
-
 export function WriteItForMeButtonContainer() {
 	const titleEl = useRef< HTMLInputElement >(
 		document.querySelector( '#title' )
@@ -69,8 +58,7 @@ export function WriteItForMeButtonContainer() {
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
-	const [ toneOfVoice, setToneOfVoice ] = useState<string>( 'neutral' );
-	const [ businessDescription, setBusinessDescription ] = useState<string>( '' );
+	const { toneOfVoice, businessDescription } = useStoreBranding();
 
 	const tinyEditor = useTinyEditor();
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();

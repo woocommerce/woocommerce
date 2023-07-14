@@ -207,7 +207,7 @@ class Woo_AI_Settings {
 				'title'             => __( 'Tone of voice', 'woocommerce' ),
 				'id'                => self::TONE_OF_VOICE_OPTION_KEY,
 				'css'               => 'min-width:300px;',
-				'default'           => 'informal',
+				'default'           => 'neutral',
 				'type'              => 'select',
 				'desc'              => $markup_str,
 				'desc_tip'          => __( 'Choose the language style that best resonates with your customers. It\'ll be used in text-based content, like product descriptions.', 'woocommerce' ),

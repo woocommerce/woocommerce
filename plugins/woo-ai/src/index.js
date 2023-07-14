@@ -8,6 +8,7 @@ import { render, createRoot } from '@wordpress/element';
  */
 import { WriteItForMeButtonContainer } from './product-description';
 import { ProductNameSuggestions } from './product-name';
+import { BrandingProvider } from './context/storeBrandingContext'; // replace with the correct path to your file
 
 import './index.scss';
 
@@ -16,10 +17,16 @@ const renderComponent = ( Component, rootElement ) => {
 		return;
 	}
 
+	const WrappedComponent = () => (
+		<BrandingProvider>
+			<Component />
+		</BrandingProvider>
+	);
+
 	if ( createRoot ) {
-		createRoot( rootElement ).render( <Component /> );
+		createRoot( rootElement ).render(<WrappedComponent />);
 	} else {
-		render( <Component />, rootElement );
+		render(<WrappedComponent />, rootElement);
 	}
 };
 
@@ -31,6 +38,10 @@ const nameSuggestionsRoot = document.getElementById(
 );
 
 if ( window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
-	renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
-	renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
+	if (descriptionButtonRoot) {
+		renderComponent(WriteItForMeButtonContainer, descriptionButtonRoot);
+	}
+	if (nameSuggestionsRoot) {
+		renderComponent(ProductNameSuggestions, nameSuggestionsRoot);
+	}
 }
