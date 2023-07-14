@@ -38,6 +38,15 @@
 		},
 		{
 			"dependencies": [
+				"@typescript-eslint/**"
+			],
+			"pinVersion": "^5.54.0",
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"dependencies": [
 				"@types/react"
 			],
 			"dependencyTypes": [
