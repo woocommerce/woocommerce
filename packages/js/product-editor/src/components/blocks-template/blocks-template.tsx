@@ -30,13 +30,9 @@ export function BlocksTemplate() {
 	);
 	const productId = useEntityId( 'postType', 'product' );
 
-	const [ blocks, , onChange ] = useEntityBlockEditor(
-		'postType',
-		'product',
-		{
-			id: productId,
-		}
-	);
+	const [ , , onChange ] = useEntityBlockEditor( 'postType', 'product', {
+		id: productId,
+	} );
 
 	const { records: templates, isResolving: isLoading } = useEntityRecords(
 		'postType',
@@ -67,6 +63,7 @@ export function BlocksTemplate() {
 
 	return (
 		<SelectControl
+			className="woocommerce-template-switcher"
 			options={ templates.map( ( template: Template ) => ( {
 				label: template.title.rendered,
 				value: template.id,
