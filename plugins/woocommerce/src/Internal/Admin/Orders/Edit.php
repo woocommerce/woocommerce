@@ -114,6 +114,8 @@ class Edit {
 	/**
 	 * Returns the PageController for this edit form. This method is protected to allow child classes to overwrite the PageController object and return custom links.
 	 *
+	 * @since 8.0.0
+	 *
 	 * @return PageController PageController object.
 	 */
 	protected function get_page_controller() {
@@ -239,6 +241,8 @@ class Edit {
 
 	/**
 	 * Helper method to redirect to order edit page.
+	 *
+	 * @since 8.0.0
 	 *
 	 * @param \WC_Order $order Order object.
 	 */
