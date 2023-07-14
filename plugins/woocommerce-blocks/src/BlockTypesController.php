@@ -190,7 +190,6 @@ final class BlockTypesController {
 			'ProductButton',
 			'ProductCategories',
 			'ProductCategory',
-			'ProductGalleryLargeImage',
 			'ProductImage',
 			'ProductImageGallery',
 			'ProductNew',
@@ -231,6 +230,7 @@ final class BlockTypesController {
 			$block_types[] = 'ProductRatingStars';
 			$block_types[] = 'ProductTemplate';
 			$block_types[] = 'ProductGallery';
+			$block_types[] = 'ProductGalleryLargeImage';
 		}
 
 		/**
