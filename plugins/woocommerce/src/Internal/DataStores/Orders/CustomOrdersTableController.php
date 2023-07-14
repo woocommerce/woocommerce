@@ -366,6 +366,7 @@ class CustomOrdersTableController {
 
 		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
 			$this->data_synchronizer->create_database_tables();
+
 		}
 
 		// Enabling/disabling the sync implies starting/stopping it too, if needed.
