@@ -56,7 +56,7 @@ export function BlocksTemplate() {
 			( t ) => t.id === selectedTemplateId
 		);
 		onChange(
-			synchronizeBlocksWithTemplate( blocks, template.content.raw ),
+			synchronizeBlocksWithTemplate( [], template.content.raw ),
 			{}
 		);
 	}, [ templates, isLoading, selectedTemplateId ] );
