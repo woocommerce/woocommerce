@@ -132,7 +132,9 @@ export const versionBumpCommand = new Command( 'version-bump' )
 
 			Logger.notice( 'Adding and committing changes' );
 			await git.add( '.' );
-			await git.commit( `Prep ${ base } for ${ majorMinor } cycle` );
+			await git.commit(
+				`Prep ${ base } for ${ majorMinor } cycle with version bump to ${ version }`
+			);
 
 			Logger.notice( `Pushing ${ workingBranch } branch to Github` );
 			await git.push( 'origin', workingBranch );
@@ -144,7 +146,7 @@ export const versionBumpCommand = new Command( 'version-bump' )
 					owner,
 					name,
 					title: `Prep ${ base } for ${ majorMinor } cycle`,
-					body: `This PR updates the versions in ${ base } to ${ version } for next development cycle.`,
+					body: `This PR updates the versions in ${ base } to ${ version }.`,
 					head: branch,
 					base,
 				} );
