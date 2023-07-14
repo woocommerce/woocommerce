@@ -39,20 +39,22 @@
  *     }
  *
  * It hopefully goes without saying, this should not be used in a production environment.
+ *
+ * @package Automattic\WooCommerce\E2EPlaywright
  */
-
 
 if ( ! isset( $_COOKIE ) || ! isset( $_COOKIE['e2e-filters'] ) ) {
 	return;
 }
 
-$filters = json_decode( $_COOKIE['e2e-filters' ], true );
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+$filters = json_decode( $_COOKIE['e2e-filters'], true );
 
 if ( ! is_array( $filters ) ) {
 	return;
 }
 
-foreach ($filters as $hook => $spec ) {
+foreach ( $filters as $hook => $spec ) {
 	// A priority may be specified as part of the spec, else use the default priority (10).
 	$priority = isset( $spec['priority'] ) && is_int( $spec['priority'] )
 		? $spec['priority']
