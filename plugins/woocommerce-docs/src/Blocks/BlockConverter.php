@@ -5,6 +5,7 @@ namespace WooCommerceDocs\Blocks;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\MarkdownConverter;
+use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
 
 /**
  * Class MarkdownParser
@@ -23,6 +24,7 @@ class BlockConverter {
 	public function __construct() {
 		$environment = new Environment();
 		$environment->addExtension( new CommonMarkCoreExtension() );
+		$environment->addExtension( new GithubFlavoredMarkdownExtension() );
 		$this->parser = new MarkdownConverter( $environment );
 	}
 
@@ -36,6 +38,8 @@ class BlockConverter {
 	 */
 	public function convert( $content ) {
 		$html = $this->parser->convert( $content )->__toString();
+		error_log( 'CONVERSION: ' );
+		error_log( $html );
 		return $this->convert_html_to_blocks( $html );
 	}
 
@@ -65,11 +69,18 @@ class BlockConverter {
 	 * @param \DOMNode $node The DOM node.
 	 */
 	private function convert_node_to_block( $node ) {
-		$node_name    = $node->nodeName; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		$node_value   = $node->nodeValue; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		$node_content = $this->convert_child_nodes_to_blocks( $node );
+		$node_name  = $node->nodeName; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$node_value = $node->nodeValue; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
+		$node_content = $this->convert_child_nodes_to_blocks_or_html( $node );
 
 		switch ( $node_name ) {
+			case 'blockquote':
+				return $this->create_block( 'quote', $node_name, $node_content );
+			case 'table':
+				return $this->create_block( 'table', $node_name, $node_content );
+			case 'code':
+				return $this->create_block( 'code', $node_name, $node_content );
 			case 'p':
 				return $this->create_block( 'paragraph', $node_name, $node_content );
 			case 'h1':
@@ -93,7 +104,10 @@ class BlockConverter {
 			case 'hr':
 				return $this->create_block( 'separator', $node_name, null );
 			default:
-				return $this->create_block( 'paragraph', $node_value );
+				// text node
+				if ( '#text' === $node_name ) {
+					return $node_value;
+				}
 		}
 	}
 
@@ -122,12 +136,13 @@ class BlockConverter {
 		return $block_html;
 	}
 
+
 	/**
-	 * Convert child nodes to blocks.
+	 * Convert child nodes to blocks or HTML.
 	 *
 	 * @param \DOMNode $node The DOM node.
 	 */
-	private function convert_child_nodes_to_blocks( $node ) {
+	private function convert_child_nodes_to_blocks_or_html( $node ) {
 		$content = '';
 
 		foreach ( $node->childNodes as $child_node ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -135,12 +150,15 @@ class BlockConverter {
 			$node_name = $child_node->nodeName; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 			if ( XML_ELEMENT_NODE === $node_type ) {
-				if ( 'a' === $node_name ) {
+				if ( 'td' === $node_name || 'thead' === $node_name || 'tbody' === $node_name || 'tr' === $node_name || 'th' === $node_name ) {
+					$inline_content = $this->convert_child_nodes_to_blocks_or_html( $child_node );
+					$content       .= "<{$node_name}>{$inline_content}</{$node_name}>";
+				} elseif ( 'a' === $node_name ) {
 					$href         = esc_url( $child_node->getAttribute( 'href' ) );
-					$link_content = $this->convert_child_nodes_to_blocks( $child_node );
+					$link_content = $this->convert_child_nodes_to_blocks_or_html( $child_node );
 					$content     .= "<a href=\"{$href}\">{$link_content}</a>";
 				} elseif ( 'em' === $node_name || 'strong' === $node_name ) {
-					$inline_content = $this->convert_child_nodes_to_blocks( $child_node );
+					$inline_content = $this->convert_child_nodes_to_blocks_or_html( $child_node );
 					$content       .= "<{$node_name}>{$inline_content}</{$node_name}>";
 				} elseif ( 'img' === $node_name ) {
 					// Only handle images as inline content for now due to how Markdown is processed by CommonMark.
