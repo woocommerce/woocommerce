@@ -2,6 +2,9 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Templates\SimpleProductTemplate;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Templates\VariableProductTemplate;
+
 /**
  * Product template registry.
  */

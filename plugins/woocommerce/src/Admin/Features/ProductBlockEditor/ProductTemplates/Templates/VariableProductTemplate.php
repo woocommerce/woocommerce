@@ -1,6 +1,10 @@
 <?php
 
-namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
+namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Templates;
+
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\AbstractProductTemplate;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\BaseProductTemplate;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductTemplateInterface;
 
 /**
  * Variable product template.
