@@ -47,18 +47,7 @@ const Edit = ( {
 }: Props ): ReactElement => {
 	const { currentView, width } = attributes;
 
-	const blockProps = useBlockProps( {
-		/**
-		 * This is a workaround for the Site Editor to calculate the
-		 * correct height of the Mini-Cart template part on the first load.
-		 *
-		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5825
-		 */
-		style: {
-			minHeight: '100vh',
-			width,
-		},
-	} );
+	const blockProps = useBlockProps();
 
 	const defaultTemplate = [
 		[ 'woocommerce/filled-mini-cart-contents-block', {}, [] ],
