@@ -12,7 +12,6 @@ import {
 } from '@woocommerce/data';
 import { queueRecordEvent, recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
-import { updateQueryString } from '@woocommerce/navigation';
 import {
 	useCallback,
 	useEffect,
@@ -24,8 +23,7 @@ import { WooOnboardingTask } from '@woocommerce/onboarding';
 /**
  * Internal dependencies
  */
-import { redirectToTaxSettings, supportsAvalara } from './utils';
-import { Card as AvalaraCard } from './avalara/card';
+import { redirectToTaxSettings } from './utils';
 import { Card as WooCommerceTaxCard } from './woocommerce-tax/card';
 import { createNoticesFromResponse } from '../../../lib/notices';
 import { getCountryCode } from '~/dashboard/utils';
