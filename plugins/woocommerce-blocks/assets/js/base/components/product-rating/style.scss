@@ -59,7 +59,7 @@
 		}
 	}
 
-	&__reviews_count {
+	&__stars + &__reviews_count {
 		margin-left: $gap-smaller;
 	}
 

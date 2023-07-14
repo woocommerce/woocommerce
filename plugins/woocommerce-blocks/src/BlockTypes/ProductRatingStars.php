@@ -3,7 +3,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 /**
- * ProductRating class.
+ * ProductRatingStars class.
  */
 class ProductRatingStars extends AbstractBlock {
 
