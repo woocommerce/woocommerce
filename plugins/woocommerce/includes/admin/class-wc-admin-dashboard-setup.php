@@ -47,6 +47,13 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		 * WC_Admin_Dashboard_Setup constructor.
 		 */
 		public function __construct() {
+			$this->maybe_add_meta_box();
+		}
+
+		/**
+		 * Maybe add meta box.
+		 */
+		private function maybe_add_meta_box() {
 			if ( $this->should_display_widget() ) {
 				add_meta_box(
 					'wc_admin_dashboard_setup',
@@ -115,6 +122,14 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 			$this->set_task_list( TaskLists::get_list( 'setup' ) );
 			$this->initalized = true;
 			return $this->task_list;
+		}
+
+		public function reset() {
+			$this->task_list = null;
+			$this->initalized = false;
+			$this->completed_tasks_count = 0;
+			$this->tasks     = null;
+			$this->maybe_add_meta_box();
 		}
 
 		/**
