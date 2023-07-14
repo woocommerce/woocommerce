@@ -6,9 +6,11 @@ import { useRef, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { getCompletion } from '../utils/text-completion';
+import { getCompletion, createExtendedError } from '../utils/';
 
 type StopReason = 'abort' | 'finished' | 'error' | 'interrupted';
+
+export type UseCompletionError = Error & { code?: string; cause?: Error };
 
 type UseCompletionProps = {
 	onStreamMessage?: ( message: string, chunk: string ) => void;
@@ -16,7 +18,7 @@ type UseCompletionProps = {
 		reason: StopReason,
 		previousContent: string
 	) => void;
-	onStreamError?: ( error: string ) => void;
+	onStreamError?: ( error: UseCompletionError ) => void;
 	feature?: string;
 };
 
@@ -53,11 +55,9 @@ export const useCompletion = ( {
 		}
 	};
 
-	const onCompletionError = ( error: string ) => {
+	const onCompletionError = ( error: string | Error ) => {
 		stopCompletion( 'error' );
-		onStreamError( error );
-		// eslint-disable-next-line no-console
-		console.error( `UseCompletion error | ${ error }` );
+		onStreamError( typeof error === 'object' ? error : new Error( error ) );
 	};
 
 	const requestCompletion = async (
@@ -67,10 +67,10 @@ export const useCompletion = ( {
 		if (
 			! window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive
 		) {
-			onCompletionError(
-				'You must be connected to Jetpack for text completion'
+			throw createExtendedError(
+				'You must be connected to Jetpack for text completion',
+				'no_jetpack_connection'
 			);
-			return;
 		}
 
 		const completionFeature = featureOverride ?? feature;
@@ -79,45 +79,44 @@ export const useCompletion = ( {
 		}
 		previousContent.current = '';
 
-		let suggestionsSource;
-
 		if ( typeof completionFeature !== 'string' ) {
-			onCompletionError(
-				'You must provide a feature when requesting a completion'
+			throw createExtendedError(
+				'You must provide a feature when requesting a completion',
+				'missing_feature'
 			);
-			return;
 		}
 
 		try {
-			suggestionsSource = await getCompletion(
+			const suggestionsSource = await getCompletion(
 				prompt,
 				completionFeature
 			);
+
+			setCompletionActive( true );
+
+			suggestionsSource.addEventListener( 'message', ( e ) => {
+				onMessage( e );
+			} );
+
+			suggestionsSource.addEventListener(
+				'error',
+				( event: MessageEvent ) => {
+					onCompletionError(
+						typeof event === 'string' ? event : event.data
+					);
+				}
+			);
+
+			completionSource.current = suggestionsSource;
+
+			return suggestionsSource;
 		} catch ( e ) {
-			// eslint-disable-next-line no-console
-			onCompletionError( 'connection_error' );
-			return;
+			throw createExtendedError(
+				'An error occurred while connecting to the completion service',
+				'connection_error',
+				e as Error
+			);
 		}
-
-		setCompletionActive( true );
-
-		suggestionsSource.addEventListener( 'message', ( e ) => {
-			onMessage( e );
-		} );
-		suggestionsSource.addEventListener(
-			'error',
-			( event: MessageEvent ) => {
-				// eslint-disable-next-line no-console
-				console.debug( 'Streaming error encountered', event );
-				onCompletionError(
-					typeof event === 'string' ? event : event.data
-				);
-			}
-		);
-
-		completionSource.current = suggestionsSource;
-
-		return suggestionsSource;
 	};
 
 	return {

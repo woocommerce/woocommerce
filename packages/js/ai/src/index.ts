@@ -1,9 +1,16 @@
 /**
  * Hooks
  */
-export * from './hooks';
+export {
+	useCompletion as __experimentalUseCompletion,
+	UseCompletionError,
+} from './hooks';
 
 /**
  * Utils
  */
-export * from './utils';
+export {
+	requestJetpackToken as __experimentalRequestJetpackToken,
+	getCompletion as __experimentalgetCompletion,
+	createExtendedError,
+} from './utils';

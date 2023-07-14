@@ -4,6 +4,11 @@
 import apiFetch from '@wordpress/api-fetch';
 import debugFactory from 'debug';
 
+/**
+ * Internal dependencies
+ */
+import { createExtendedError } from './create-extended-error';
+
 const debugToken = debugFactory( 'jetpack-ai-assistant:token' );
 
 const JWT_TOKEN_ID = 'jetpack-ai-jwt-token';
@@ -33,7 +38,10 @@ export async function requestJetpackToken() {
 			tokenData = JSON.parse( token );
 		} catch ( err ) {
 			debugToken( 'Error parsing token', err );
-			throw new Error( 'Error parsing cached token' );
+			throw createExtendedError(
+				'Error parsing cached token',
+				'token_parse_error'
+			);
 		}
 	}
 
@@ -70,7 +78,10 @@ export async function requestJetpackToken() {
 
 		return newTokenData;
 	} catch ( e ) {
-		throw new Error( 'Error fetching new token' );
+		throw createExtendedError(
+			'Error fetching new token',
+			'token_fetch_error'
+		);
 	}
 }
 

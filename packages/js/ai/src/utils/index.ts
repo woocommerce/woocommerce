@@ -1,1 +1,2 @@
-export { requestJetpackToken as __experimentalRequestJetpackToken } from './text-completion';
+export * from './text-completion';
+export * from './create-extended-error';

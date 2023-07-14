@@ -3,7 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { __experimentalUseCompletion as useCompletion } from '@woocommerce/ai';
+import {
+	__experimentalUseCompletion as useCompletion,
+	UseCompletionError,
+} from '@woocommerce/ai';
 
 /**
  * Internal dependencies
@@ -58,6 +61,10 @@ export function WriteItForMeButtonContainer() {
 		titleEl.current?.value || ''
 	);
 	const tinyEditor = useTinyEditor();
+
+	const handleCompletionError = ( error: UseCompletionError ) =>
+		tinyEditor.setContent( getApiError( error.code ?? '' ) );
+
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
@@ -69,9 +76,7 @@ export function WriteItForMeButtonContainer() {
 					tinyEditor.setContent( content );
 				}
 			},
-			onStreamError: ( error ) => {
-				tinyEditor.setContent( getApiError( error ) );
-			},
+			onStreamError: handleCompletionError,
 			onCompletionFinished: ( reason, content ) => {
 				recordDescriptionTracks( 'stop', {
 					reason,
@@ -173,7 +178,7 @@ export function WriteItForMeButtonContainer() {
 		].join( ' ' );
 	};
 
-	const onWriteItForMeClick = () => {
+	const onWriteItForMeClick = async () => {
 		setFetching( true );
 		removeSnackbar();
 
@@ -181,7 +186,12 @@ export function WriteItForMeButtonContainer() {
 		recordDescriptionTracks( 'start', {
 			prompt,
 		} );
-		requestCompletion( prompt );
+
+		try {
+			await requestCompletion( prompt );
+		} catch ( err ) {
+			handleCompletionError( err as UseCompletionError );
+		}
 	};
 
 	return completionActive ? (

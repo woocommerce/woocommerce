@@ -72,7 +72,7 @@ export const ProductNameSuggestions = () => {
 			console.debug( 'Streaming error encountered', error );
 			recordNameTracks( 'stop', {
 				reason: 'error',
-				error: ( error as { message?: string } )?.message || '',
+				error: error.code ?? error.message,
 			} );
 			setSuggestionsState( SuggestionsState.Failed );
 		},
@@ -130,14 +130,13 @@ export const ProductNameSuggestions = () => {
 
 		const onBodyClick = ( e: MouseEvent ) => {
 			const target = e.target as HTMLElement;
-
 			if (
 				! (
 					nameInput?.ownerDocument.activeElement === nameInput ||
 					// Need to capture errant handlediv click that happens on load as well
 					Boolean( target.querySelector( ':scope > .handlediv' ) ) ||
 					target?.matches(
-						'#woocommerce-ai-app-product-name-suggestions *, #title'
+						'#woocommerce-ai-app-product-name-suggestions *, #title, .woo-ai-get-suggestions-btn__content'
 					)
 				)
 			) {
@@ -262,7 +261,11 @@ export const ProductNameSuggestions = () => {
 			current_title: getProductName(),
 		} );
 
-		requestCompletion( buildPrompt() );
+		try {
+			await requestCompletion( buildPrompt() );
+		} catch ( e ) {
+			setSuggestionsState( SuggestionsState.Failed );
+		}
 	};
 
 	const shouldRenderSuggestionsButton = useCallback( () => {
