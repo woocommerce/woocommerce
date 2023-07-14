@@ -154,7 +154,7 @@ describe( 'NewVariationOptionModal', () => {
 		).toEqual( 1 );
 	} );
 
-	it( 'should allow us to add multiple new rows with the attribute fields', () => {
+	it( 'should allow us to add multiple new rows with the variation option fields', () => {
 		const { queryAllByText, queryByRole } = render(
 			<NewVariationOptionModal
 				onCancel={ () => {} }
@@ -162,12 +162,16 @@ describe( 'NewVariationOptionModal', () => {
 				selectedAttributeIds={ [] }
 			/>
 		);
-		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
+		queryByRole( 'button', {
+			name: 'Add another variation option',
+		} )?.click();
 		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 2 );
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
 		).toEqual( 2 );
-		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
+		queryByRole( 'button', {
+			name: 'Add another variation option',
+		} )?.click();
 		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 3 );
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
@@ -183,8 +187,12 @@ describe( 'NewVariationOptionModal', () => {
 			/>
 		);
 
-		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
-		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
+		queryByRole( 'button', {
+			name: 'Add another variation option',
+		} )?.click();
+		queryByRole( 'button', {
+			name: 'Add another variation option',
+		} )?.click();
 		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 3 );
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
@@ -230,7 +238,7 @@ describe( 'NewVariationOptionModal', () => {
 			);
 
 			const addAnotherButton = queryByLabelText(
-				'Add another attribute'
+				'Add another variation option'
 			);
 			addAnotherButton?.click();
 			addAnotherButton?.click();
@@ -241,7 +249,7 @@ describe( 'NewVariationOptionModal', () => {
 				queryAllByText( 'attribute_term_input_field: disabled:true' )
 					.length
 			).toEqual( 3 );
-			queryByRole( 'button', { name: 'Add attributes' } )?.click();
+			queryByRole( 'button', { name: 'Add variation options' } )?.click();
 			expect( onAddMock ).toHaveBeenCalledWith( [] );
 		} );
 
@@ -259,7 +267,7 @@ describe( 'NewVariationOptionModal', () => {
 				...attributeList[ 0 ],
 				options: [],
 			} );
-			queryByRole( 'button', { name: 'Add attributes' } )?.click();
+			queryByRole( 'button', { name: 'Add variation options' } )?.click();
 			expect( onAddMock ).toHaveBeenCalledWith( [] );
 		} );
 
@@ -278,7 +286,7 @@ describe( 'NewVariationOptionModal', () => {
 				attributeTermList[ 0 ],
 				attributeTermList[ 1 ],
 			] );
-			queryByRole( 'button', { name: 'Add attributes' } )?.click();
+			queryByRole( 'button', { name: 'Add variation options' } )?.click();
 
 			const onAddMockCalls = onAddMock.mock.calls[ 0 ][ 0 ];
 

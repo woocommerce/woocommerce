@@ -113,11 +113,11 @@ describe( 'VariationOptionsControl', () => {
 	} );
 
 	describe( 'empty state', () => {
-		it( 'should show subtitle and "Add attributes" button', () => {
+		it( 'should show subtitle and "Add new" button', () => {
 			const { queryByText } = render(
 				<VariationOptionsControl value={ [] } onChange={ () => {} } />
 			);
-			expect( queryByText( 'Add attributes' ) ).toBeInTheDocument();
+			expect( queryByText( 'Add new' ) ).toBeInTheDocument();
 		} );
 	} );
 
