@@ -141,19 +141,6 @@ class ProductCollection extends AbstractBlock {
 		 * which is a server-side rendered (SSR) block, retrieves the products that match the filters.
 		 */
 		$this->asset_data_registry->add( 'is_rendering_php_template', true, true );
-
-		$frontend_query = $this->get_final_frontend_query( $parsed_block['attrs']['query'], null, true );
-		// Override the query to get all products.
-		$fields_to_override = [
-			'posts_per_page' => -1,
-			'paged'          => null,
-		];
-		$new_array          = array_merge( $frontend_query, $fields_to_override );
-
-		$products    = new \WP_Query( $new_array );
-		$product_ids = wp_list_pluck( $products->posts, 'ID' );
-		// Add the product ids to the asset data registry, so that filter blocks can use it.
-		$this->asset_data_registry->add( 'product_ids', $product_ids, true );
 	}
 
 	/**
