@@ -146,7 +146,10 @@ export function HeaderToolbar( {
 				>
 					{ __( 'Done', 'woocommerce' ) }
 				</ToolbarItem>
-				<ToolbarItem as={ ShowBlockInspectorPanel } />
+				<ToolbarItem
+					as={ ShowBlockInspectorPanel }
+					className="woocommerce-show-block-inspector-panel"
+				/>
 				<ToolbarItem as={ MoreMenu } />
 			</div>
 		</NavigableToolbar>
