@@ -34,7 +34,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	public const DELETED_FROM_POSTS_META_VALUE  = 'posts_table';
 	public const DELETED_FROM_ORDERS_META_VALUE = 'orders_table';
 
-	public const ORDERS_TABLE_CREATED = 'no';
+	public const ORDERS_TABLE_CREATED = 'woocommerce_custom_orders_table_created';
 
 	private const ORDERS_SYNC_BATCH_SIZE = 250;
 
@@ -133,6 +133,9 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 */
 	public function create_database_tables() {
 		$this->database_util->dbdelta( $this->data_store->get_database_schema() );
+		if ( ! $this->check_orders_table_exists() ) {
+			return;
+		}
 		update_option( self::ORDERS_TABLE_CREATED, 'yes' );
 	}
 
