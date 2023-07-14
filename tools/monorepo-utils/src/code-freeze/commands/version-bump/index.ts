@@ -3,6 +3,7 @@
  */
 import { Command } from '@commander-js/extra-typings';
 import simpleGit from 'simple-git';
+import { valid, lt as versionLessThan, parse, prerelease } from 'semver';
 
 /**
  * Internal dependencies

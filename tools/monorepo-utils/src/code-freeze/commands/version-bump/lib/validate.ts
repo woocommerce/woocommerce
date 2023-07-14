@@ -18,10 +18,11 @@ import { Options } from '../types';
 export const getCurrentVersion = async (
 	tmpRepoPath: string
 ): Promise< string | void > => {
-	const filePath = join( tmpRepoPath, `plugins/woocommerce/composer.json` );
+	const filePath = join( tmpRepoPath, `plugins/woocommerce/woocommerce.php` );
 	try {
-		const composerJSON = JSON.parse( await readFile( filePath, 'utf8' ) );
-		return composerJSON.version;
+		const data = await readFile( filePath, 'utf8' );
+		const matches = data.match( /Version:\s*(.*)/ );
+		return matches ? matches[ 1 ] : undefined;
 	} catch ( e ) {
 		Logger.error( e );
 	}
@@ -80,6 +81,13 @@ export const validateArgs = async (
 	if ( ! currentVersion ) {
 		Logger.error( 'Unable to determine current version' );
 	} else if ( versionLessThan( nextVersion, currentVersion ) ) {
+		// Semver thinks -a.1 is less than -dev, but -a.1 from -dev will be a valid version bump.
+		if (
+			nextVersion.includes( 'a.' ) &&
+			currentVersion.includes( 'dev' )
+		) {
+			return;
+		}
 		Logger.error(
 			'The version supplied is less than the current version, please supply a valid version.'
 		);
