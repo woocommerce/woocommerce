@@ -717,6 +717,16 @@ class FeaturesController {
 		/**
 		 * Allows to modify feature setting that will be used to render in the feature page.
 		 *
+		 * @param array $feature_setting The feature setting. Describes the feature:
+		 * 		- title: The title of the feature.
+		 * 		- desc: The description of the feature. Will be displayed under the title.
+		 * 		- type: The type of the feature. Could be any of supported settings types from `WC_Admin_Settings::output_fields`, but if it's anything other than checkbox or radio, it will need custom handling.
+		 * 		- id: The id of the feature. Will be used as the name of the setting.
+		 * 		- disabled: Whether the feature is disabled or not.
+		 * 		- desc_tip: The description tip of the feature. Will be displayed as a tooltip next to the description.
+		 * 		- tooltip: The tooltip of the feature. Will be displayed as a tooltip next to the name.
+		 * 		- default: The default value of the feature.
+		 * @param string $feature_id The id of the feature.
 		 * @since 8.0.0
 		 */
 		return apply_filters( 'woocommerce_feature_setting', $feature_setting, $feature_id );

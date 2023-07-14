@@ -191,7 +191,7 @@ class PluginUtil {
 				$feature_warning = sprintf( __( '⚠ 1 Incompatible plugin detected (%s).', 'woocommerce' ), $this->get_plugin_name( $incompatibles[0] ) );
 			} elseif ( 2 === $incompatible_count ) {
 				$feature_warning = sprintf(
-				/* translators: %1\$s, %2\$s = printable plugin names */
+					/* translators: %1\$s, %2\$s = printable plugin names */
 					__( '⚠ 2 Incompatible plugins detected (%1$s and %2$s).', 'woocommerce' ),
 					$this->get_plugin_name( $incompatibles[0] ),
 					$this->get_plugin_name( $incompatibles[1] )

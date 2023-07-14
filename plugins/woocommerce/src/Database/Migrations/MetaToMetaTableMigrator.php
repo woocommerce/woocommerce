@@ -72,8 +72,8 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 		$to_migrate = $this->fetch_data_for_migration_for_ids( $entity_ids );
 		if ( empty( $to_migrate ) ) {
 			return array(
-				array(),
-				array(),
+				'data'   => array(),
+				'errors' => array(),
 			);
 		}
 
