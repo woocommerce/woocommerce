@@ -29,6 +29,7 @@ const Block = ( {
 			<Button
 				className={ classNames(
 					className,
+					'wp-block-button__link',
 					'wc-block-mini-cart__shopping-button'
 				) }
 				variant={ getVariant( className, 'contained' ) }
