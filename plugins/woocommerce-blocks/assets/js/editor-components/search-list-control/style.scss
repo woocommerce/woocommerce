@@ -186,7 +186,7 @@
 			}
 		}
 
-		.woocommerce-search-list__item-input {
+		.woocommerce-search-list__item-input[type="radio"] {
 			margin: 0 $gap-smaller 0 0;
 		}
 

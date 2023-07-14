@@ -128,7 +128,10 @@ export const SearchListItem = ( {
 						)
 							? { indeterminate: true }
 							: {} ) }
-						label={ getHighlightedName( item.name, search ) }
+						label={ getHighlightedName(
+							decodeEntities( item.name ),
+							search
+						) }
 						onChange={ () => {
 							if ( isSelected ) {
 								onSelect(
@@ -160,30 +163,35 @@ export const SearchListItem = ( {
 	) : (
 		<label htmlFor={ id } className={ classes }>
 			{ isSingle ? (
-				<input
-					type="radio"
-					id={ id }
-					name={ name }
-					value={ item.value }
-					onChange={ onSelect( item ) }
-					checked={ isSelected }
-					className="woocommerce-search-list__item-input"
-					{ ...props }
-				></input>
-			) : (
-				<input
-					type="checkbox"
-					id={ id }
-					name={ name }
-					value={ item.value }
-					onChange={ onSelect( item ) }
-					checked={ isSelected }
-					className="woocommerce-search-list__item-input"
-					{ ...props }
-				></input>
-			) }
+				<>
+					<input
+						type="radio"
+						id={ id }
+						name={ name }
+						value={ item.value }
+						onChange={ onSelect( item ) }
+						checked={ isSelected }
+						className="woocommerce-search-list__item-input"
+						{ ...props }
+					></input>
 
-			<ItemLabel item={ item } search={ search } />
+					<ItemLabel item={ item } search={ search } />
+				</>
+			) : (
+				<CheckboxControl
+					id={ id }
+					name={ name }
+					className="woocommerce-search-list__item-input"
+					value={ decodeEntities( item.value ) }
+					label={ getHighlightedName(
+						decodeEntities( item.name ),
+						search
+					) }
+					onChange={ onSelect( item ) }
+					checked={ isSelected }
+					{ ...props }
+				/>
+			) }
 
 			{ showCount ? <Count label={ countLabel || item.count } /> : null }
 		</label>

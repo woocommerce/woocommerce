@@ -87,14 +87,14 @@ Object {
                   >
                     <input
                       class="components-checkbox-control__input"
-                      id="inspector-checkbox-control-0"
+                      id="inspector-checkbox-control-54"
                       type="checkbox"
                       value="1"
                     />
                   </span>
                   <label
                     class="components-checkbox-control__label"
-                    for="inspector-checkbox-control-0"
+                    for="inspector-checkbox-control-54"
                   >
                     Apricots
                   </label>
@@ -107,22 +107,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-11-5"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-11-5"
-                name="search-list-item-11"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Lychee
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-11-5"
+                      name="search-list-item-11"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-55"
+                  >
+                    Lychee
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -130,22 +139,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-11-6"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-11-6"
-                name="search-list-item-11"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Mulberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-11-6"
+                      name="search-list-item-11"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-56"
+                  >
+                    Mulberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
         </ul>
@@ -211,14 +229,14 @@ Object {
                 >
                   <input
                     class="components-checkbox-control__input"
-                    id="inspector-checkbox-control-0"
+                    id="inspector-checkbox-control-54"
                     type="checkbox"
                     value="1"
                   />
                 </span>
                 <label
                   class="components-checkbox-control__label"
-                  for="inspector-checkbox-control-0"
+                  for="inspector-checkbox-control-54"
                 >
                   Apricots
                 </label>
@@ -231,22 +249,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-11-5"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-11-5"
-              name="search-list-item-11"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Lychee
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-11-5"
+                    name="search-list-item-11"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-55"
+                >
+                  Lychee
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -254,22 +281,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-11-6"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-11-6"
-              name="search-list-item-11"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Mulberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-11-6"
+                    name="search-list-item-11"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-56"
+                >
+                  Mulberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
       </ul>
@@ -404,22 +440,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-1"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-0-1"
-                name="search-list-item-0"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Apricots
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-0-1"
+                      name="search-list-item-0"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-0"
+                  >
+                    Apricots
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -427,22 +472,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-2"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-0-2"
-                name="search-list-item-0"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Clementine
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-0-2"
+                      name="search-list-item-0"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-1"
+                  >
+                    Clementine
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -450,22 +504,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-3"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-0-3"
-                name="search-list-item-0"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Elderberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-0-3"
+                      name="search-list-item-0"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-2"
+                  >
+                    Elderberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -473,22 +536,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-4"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-0-4"
-                name="search-list-item-0"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Guava
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-0-4"
+                      name="search-list-item-0"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-3"
+                  >
+                    Guava
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -496,22 +568,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-5"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-0-5"
-                name="search-list-item-0"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Lychee
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-0-5"
+                      name="search-list-item-0"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-4"
+                  >
+                    Lychee
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -519,22 +600,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-0-6"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-0-6"
-                name="search-list-item-0"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Mulberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-0-6"
+                      name="search-list-item-0"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-5"
+                  >
+                    Mulberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
         </ul>
@@ -588,22 +678,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-1"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-0-1"
-              name="search-list-item-0"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Apricots
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-0-1"
+                    name="search-list-item-0"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-0"
+                >
+                  Apricots
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -611,22 +710,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-2"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-0-2"
-              name="search-list-item-0"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Clementine
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-0-2"
+                    name="search-list-item-0"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-1"
+                >
+                  Clementine
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -634,22 +742,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-3"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-0-3"
-              name="search-list-item-0"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Elderberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-0-3"
+                    name="search-list-item-0"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-2"
+                >
+                  Elderberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -657,22 +774,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-4"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-0-4"
-              name="search-list-item-0"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Guava
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-0-4"
+                    name="search-list-item-0"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-3"
+                >
+                  Guava
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -680,22 +806,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-5"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-0-5"
-              name="search-list-item-0"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Lychee
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-0-5"
+                    name="search-list-item-0"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-4"
+                >
+                  Lychee
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -703,22 +838,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-0-6"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-0-6"
-              name="search-list-item-0"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Mulberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-0-6"
+                    name="search-list-item-0"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-5"
+                >
+                  Mulberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
       </ul>
@@ -853,22 +997,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-1"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-1-1"
-                name="search-list-item-1"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Apricots
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-1-1"
+                      name="search-list-item-1"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-6"
+                  >
+                    Apricots
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -876,22 +1029,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-2"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-1-2"
-                name="search-list-item-1"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Clementine
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-1-2"
+                      name="search-list-item-1"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-7"
+                  >
+                    Clementine
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -899,22 +1061,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-3"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-1-3"
-                name="search-list-item-1"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Elderberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-1-3"
+                      name="search-list-item-1"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-8"
+                  >
+                    Elderberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -922,22 +1093,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-4"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-1-4"
-                name="search-list-item-1"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Guava
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-1-4"
+                      name="search-list-item-1"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-9"
+                  >
+                    Guava
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -945,22 +1125,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-5"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-1-5"
-                name="search-list-item-1"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Lychee
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-1-5"
+                      name="search-list-item-1"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-10"
+                  >
+                    Lychee
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -968,22 +1157,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-1-6"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-1-6"
-                name="search-list-item-1"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Mulberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-1-6"
+                      name="search-list-item-1"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-11"
+                  >
+                    Mulberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
         </ul>
@@ -1037,22 +1235,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-1"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-1-1"
-              name="search-list-item-1"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Apricots
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-1-1"
+                    name="search-list-item-1"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-6"
+                >
+                  Apricots
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -1060,22 +1267,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-2"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-1-2"
-              name="search-list-item-1"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Clementine
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-1-2"
+                    name="search-list-item-1"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-7"
+                >
+                  Clementine
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -1083,22 +1299,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-3"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-1-3"
-              name="search-list-item-1"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Elderberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-1-3"
+                    name="search-list-item-1"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-8"
+                >
+                  Elderberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -1106,22 +1331,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-4"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-1-4"
-              name="search-list-item-1"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Guava
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-1-4"
+                    name="search-list-item-1"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-9"
+                >
+                  Guava
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -1129,22 +1363,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-5"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-1-5"
-              name="search-list-item-1"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Lychee
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-1-5"
+                    name="search-list-item-1"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-10"
+                >
+                  Lychee
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -1152,22 +1395,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-1-6"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-1-6"
-              name="search-list-item-1"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Mulberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-1-6"
+                    name="search-list-item-1"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-11"
+                >
+                  Mulberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
       </ul>
@@ -1547,22 +1799,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-1"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-9-1"
-                name="search-list-item-9"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Apricots
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-9-1"
+                      name="search-list-item-9"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-48"
+                  >
+                    Apricots
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -1570,22 +1831,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-2"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-9-2"
-                name="search-list-item-9"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Clementine
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-9-2"
+                      name="search-list-item-9"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-49"
+                  >
+                    Clementine
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -1593,22 +1863,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-3"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-9-3"
-                name="search-list-item-9"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Elderberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-9-3"
+                      name="search-list-item-9"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-50"
+                  >
+                    Elderberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -1616,22 +1895,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-4"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-9-4"
-                name="search-list-item-9"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Guava
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-9-4"
+                      name="search-list-item-9"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-51"
+                  >
+                    Guava
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -1639,22 +1927,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-5"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-9-5"
-                name="search-list-item-9"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Lychee
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-9-5"
+                      name="search-list-item-9"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-52"
+                  >
+                    Lychee
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -1662,22 +1959,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-9-6"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-9-6"
-                name="search-list-item-9"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Mulberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-9-6"
+                      name="search-list-item-9"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-53"
+                  >
+                    Mulberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
         </ul>
@@ -1731,22 +2037,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-1"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-9-1"
-              name="search-list-item-9"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Apricots
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-9-1"
+                    name="search-list-item-9"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-48"
+                >
+                  Apricots
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -1754,22 +2069,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-2"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-9-2"
-              name="search-list-item-9"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Clementine
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-9-2"
+                    name="search-list-item-9"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-49"
+                >
+                  Clementine
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -1777,22 +2101,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-3"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-9-3"
-              name="search-list-item-9"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Elderberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-9-3"
+                    name="search-list-item-9"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-50"
+                >
+                  Elderberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -1800,22 +2133,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-4"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-9-4"
-              name="search-list-item-9"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Guava
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-9-4"
+                    name="search-list-item-9"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-51"
+                >
+                  Guava
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -1823,22 +2165,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-5"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-9-5"
-              name="search-list-item-9"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Lychee
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-9-5"
+                    name="search-list-item-9"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-52"
+                >
+                  Lychee
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -1846,22 +2197,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-9-6"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-9-6"
-              name="search-list-item-9"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Mulberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-9-6"
+                    name="search-list-item-9"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-53"
+                >
+                  Mulberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
       </ul>
@@ -2213,22 +2573,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-1"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-8-1"
-                name="search-list-item-8"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Apricots
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-8-1"
+                      name="search-list-item-8"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-42"
+                  >
+                    Apricots
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -2236,22 +2605,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-2"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-8-2"
-                name="search-list-item-8"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Clementine
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-8-2"
+                      name="search-list-item-8"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-43"
+                  >
+                    Clementine
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -2259,22 +2637,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-3"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-8-3"
-                name="search-list-item-8"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Elderberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-8-3"
+                      name="search-list-item-8"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-44"
+                  >
+                    Elderberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -2282,22 +2669,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-4"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-8-4"
-                name="search-list-item-8"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Guava
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-8-4"
+                      name="search-list-item-8"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-45"
+                  >
+                    Guava
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -2305,22 +2701,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-5"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-8-5"
-                name="search-list-item-8"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Lychee
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-8-5"
+                      name="search-list-item-8"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-46"
+                  >
+                    Lychee
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -2328,22 +2733,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-8-6"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-8-6"
-                name="search-list-item-8"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Mulberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-8-6"
+                      name="search-list-item-8"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-47"
+                  >
+                    Mulberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
         </ul>
@@ -2397,22 +2811,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-1"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-8-1"
-              name="search-list-item-8"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Apricots
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-8-1"
+                    name="search-list-item-8"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-42"
+                >
+                  Apricots
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -2420,22 +2843,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-2"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-8-2"
-              name="search-list-item-8"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Clementine
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-8-2"
+                    name="search-list-item-8"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-43"
+                >
+                  Clementine
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -2443,22 +2875,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-3"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-8-3"
-              name="search-list-item-8"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Elderberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-8-3"
+                    name="search-list-item-8"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-44"
+                >
+                  Elderberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -2466,22 +2907,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-4"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-8-4"
-              name="search-list-item-8"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Guava
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-8-4"
+                    name="search-list-item-8"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-45"
+                >
+                  Guava
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -2489,22 +2939,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-5"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-8-5"
-              name="search-list-item-8"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Lychee
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-8-5"
+                    name="search-list-item-8"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-46"
+                >
+                  Lychee
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -2512,22 +2971,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-8-6"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-8-6"
-              name="search-list-item-8"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Mulberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-8-6"
+                    name="search-list-item-8"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-47"
+                >
+                  Mulberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
       </ul>
@@ -2662,22 +3130,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-1"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-5-1"
-                name="search-list-item-5"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Apricots
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-5-1"
+                      name="search-list-item-5"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-24"
+                  >
+                    Apricots
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -2685,22 +3162,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-2"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-5-2"
-                name="search-list-item-5"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Clementine
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-5-2"
+                      name="search-list-item-5"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-25"
+                  >
+                    Clementine
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -2708,22 +3194,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-3"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-5-3"
-                name="search-list-item-5"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Elderberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-5-3"
+                      name="search-list-item-5"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-26"
+                  >
+                    Elderberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -2731,22 +3226,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-4"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-5-4"
-                name="search-list-item-5"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Guava
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-5-4"
+                      name="search-list-item-5"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-27"
+                  >
+                    Guava
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -2754,22 +3258,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-5"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-5-5"
-                name="search-list-item-5"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Lychee
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-5-5"
+                      name="search-list-item-5"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-28"
+                  >
+                    Lychee
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -2777,22 +3290,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-5-6"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-5-6"
-                name="search-list-item-5"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Mulberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-5-6"
+                      name="search-list-item-5"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-29"
+                  >
+                    Mulberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
         </ul>
@@ -2846,22 +3368,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-1"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-5-1"
-              name="search-list-item-5"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Apricots
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-5-1"
+                    name="search-list-item-5"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-24"
+                >
+                  Apricots
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -2869,22 +3400,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-2"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-5-2"
-              name="search-list-item-5"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Clementine
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-5-2"
+                    name="search-list-item-5"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-25"
+                >
+                  Clementine
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -2892,22 +3432,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-3"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-5-3"
-              name="search-list-item-5"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Elderberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-5-3"
+                    name="search-list-item-5"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-26"
+                >
+                  Elderberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -2915,22 +3464,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-4"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-5-4"
-              name="search-list-item-5"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Guava
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-5-4"
+                    name="search-list-item-5"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-27"
+                >
+                  Guava
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -2938,22 +3496,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-5"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-5-5"
-              name="search-list-item-5"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Lychee
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-5-5"
+                    name="search-list-item-5"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-28"
+                >
+                  Lychee
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -2961,22 +3528,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-5-6"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-5-6"
-              name="search-list-item-5"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Mulberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-5-6"
+                    name="search-list-item-5"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-29"
+                >
+                  Mulberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
       </ul>
@@ -3111,26 +3687,35 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-6-3"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-6-3"
-                name="search-list-item-6"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Elder
-                  <strong>
-                    berry
-                  </strong>
-                  
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-6-3"
+                      name="search-list-item-6"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-32"
+                  >
+                    Elder
+                    <strong>
+                      berry
+                    </strong>
+                    
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -3138,26 +3723,35 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-6-6"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-6-6"
-                name="search-list-item-6"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Mul
-                  <strong>
-                    berry
-                  </strong>
-                  
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-6-6"
+                      name="search-list-item-6"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-35"
+                  >
+                    Mul
+                    <strong>
+                      berry
+                    </strong>
+                    
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
         </ul>
@@ -3211,26 +3805,35 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-6-3"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-6-3"
-              name="search-list-item-6"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Elder
-                <strong>
-                  berry
-                </strong>
-                
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-6-3"
+                    name="search-list-item-6"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-32"
+                >
+                  Elder
+                  <strong>
+                    berry
+                  </strong>
+                  
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -3238,26 +3841,35 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-6-6"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-6-6"
-              name="search-list-item-6"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Mul
-                <strong>
-                  berry
-                </strong>
-                
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-6-6"
+                    name="search-list-item-6"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-35"
+                >
+                  Mul
+                  <strong>
+                    berry
+                  </strong>
+                  
+                </label>
+              </div>
+            </div>
           </label>
         </li>
       </ul>
@@ -3443,22 +4055,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-1"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-2-1"
-                name="search-list-item-2"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Apricots
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-2-1"
+                      name="search-list-item-2"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-12"
+                  >
+                    Apricots
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -3466,23 +4087,46 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-2"
             >
-              <input
-                checked=""
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-2-2"
-                name="search-list-item-2"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Clementine
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      checked=""
+                      class="components-checkbox-control__input"
+                      id="search-list-item-2-2"
+                      name="search-list-item-2"
+                      type="checkbox"
+                      value=""
+                    />
+                    <svg
+                      aria-hidden="true"
+                      class="components-checkbox-control__checked"
+                      focusable="false"
+                      height="24"
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                      />
+                    </svg>
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-13"
+                  >
+                    Clementine
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -3490,22 +4134,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-3"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-2-3"
-                name="search-list-item-2"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Elderberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-2-3"
+                      name="search-list-item-2"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-14"
+                  >
+                    Elderberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -3513,22 +4166,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-4"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-2-4"
-                name="search-list-item-2"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Guava
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-2-4"
+                      name="search-list-item-2"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-15"
+                  >
+                    Guava
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -3536,22 +4198,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-5"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-2-5"
-                name="search-list-item-2"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Lychee
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-2-5"
+                      name="search-list-item-2"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-16"
+                  >
+                    Lychee
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -3559,22 +4230,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-2-6"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-2-6"
-                name="search-list-item-2"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Mulberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-2-6"
+                      name="search-list-item-2"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-17"
+                  >
+                    Mulberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
         </ul>
@@ -3679,22 +4359,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-1"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-2-1"
-              name="search-list-item-2"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Apricots
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-2-1"
+                    name="search-list-item-2"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-12"
+                >
+                  Apricots
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -3702,23 +4391,46 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-2"
           >
-            <input
-              checked=""
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-2-2"
-              name="search-list-item-2"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Clementine
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    checked=""
+                    class="components-checkbox-control__input"
+                    id="search-list-item-2-2"
+                    name="search-list-item-2"
+                    type="checkbox"
+                    value=""
+                  />
+                  <svg
+                    aria-hidden="true"
+                    class="components-checkbox-control__checked"
+                    focusable="false"
+                    height="24"
+                    role="img"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                    />
+                  </svg>
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-13"
+                >
+                  Clementine
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -3726,22 +4438,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-3"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-2-3"
-              name="search-list-item-2"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Elderberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-2-3"
+                    name="search-list-item-2"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-14"
+                >
+                  Elderberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -3749,22 +4470,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-4"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-2-4"
-              name="search-list-item-2"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Guava
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-2-4"
+                    name="search-list-item-2"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-15"
+                >
+                  Guava
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -3772,22 +4502,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-5"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-2-5"
-              name="search-list-item-2"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Lychee
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-2-5"
+                    name="search-list-item-2"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-16"
+                >
+                  Lychee
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -3795,22 +4534,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-2-6"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-2-6"
-              name="search-list-item-2"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Mulberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-2-6"
+                    name="search-list-item-2"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-17"
+                >
+                  Mulberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
       </ul>
@@ -4038,22 +4786,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-1"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-3-1"
-                name="search-list-item-3"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Apricots
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-3-1"
+                      name="search-list-item-3"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-18"
+                  >
+                    Apricots
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -4061,23 +4818,46 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-2"
             >
-              <input
-                checked=""
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-3-2"
-                name="search-list-item-3"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Clementine
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      checked=""
+                      class="components-checkbox-control__input"
+                      id="search-list-item-3-2"
+                      name="search-list-item-3"
+                      type="checkbox"
+                      value=""
+                    />
+                    <svg
+                      aria-hidden="true"
+                      class="components-checkbox-control__checked"
+                      focusable="false"
+                      height="24"
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                      />
+                    </svg>
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-19"
+                  >
+                    Clementine
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -4085,22 +4865,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-3"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-3-3"
-                name="search-list-item-3"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Elderberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-3-3"
+                      name="search-list-item-3"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-20"
+                  >
+                    Elderberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -4108,23 +4897,46 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-4"
             >
-              <input
-                checked=""
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-3-4"
-                name="search-list-item-3"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Guava
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      checked=""
+                      class="components-checkbox-control__input"
+                      id="search-list-item-3-4"
+                      name="search-list-item-3"
+                      type="checkbox"
+                      value=""
+                    />
+                    <svg
+                      aria-hidden="true"
+                      class="components-checkbox-control__checked"
+                      focusable="false"
+                      height="24"
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                      />
+                    </svg>
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-21"
+                  >
+                    Guava
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -4132,22 +4944,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-5"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-3-5"
-                name="search-list-item-3"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Lychee
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-3-5"
+                      name="search-list-item-3"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-22"
+                  >
+                    Lychee
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
           <li>
@@ -4155,22 +4976,31 @@ Object {
               class="woocommerce-search-list__item depth-0"
               for="search-list-item-3-6"
             >
-              <input
-                class="woocommerce-search-list__item-input"
-                id="search-list-item-3-6"
-                name="search-list-item-3"
-                type="checkbox"
-                value=""
-              />
-              <span
-                class="woocommerce-search-list__item-label"
+              <div
+                class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
               >
-                <span
-                  class="woocommerce-search-list__item-name"
+                <div
+                  class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
                 >
-                  Mulberry
-                </span>
-              </span>
+                  <span
+                    class="components-checkbox-control__input-container"
+                  >
+                    <input
+                      class="components-checkbox-control__input"
+                      id="search-list-item-3-6"
+                      name="search-list-item-3"
+                      type="checkbox"
+                      value=""
+                    />
+                  </span>
+                  <label
+                    class="components-checkbox-control__label"
+                    for="inspector-checkbox-control-23"
+                  >
+                    Mulberry
+                  </label>
+                </div>
+              </div>
             </label>
           </li>
         </ul>
@@ -4317,22 +5147,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-1"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-3-1"
-              name="search-list-item-3"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Apricots
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-3-1"
+                    name="search-list-item-3"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-18"
+                >
+                  Apricots
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -4340,23 +5179,46 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-2"
           >
-            <input
-              checked=""
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-3-2"
-              name="search-list-item-3"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Clementine
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    checked=""
+                    class="components-checkbox-control__input"
+                    id="search-list-item-3-2"
+                    name="search-list-item-3"
+                    type="checkbox"
+                    value=""
+                  />
+                  <svg
+                    aria-hidden="true"
+                    class="components-checkbox-control__checked"
+                    focusable="false"
+                    height="24"
+                    role="img"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                    />
+                  </svg>
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-19"
+                >
+                  Clementine
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -4364,22 +5226,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-3"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-3-3"
-              name="search-list-item-3"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Elderberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-3-3"
+                    name="search-list-item-3"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-20"
+                >
+                  Elderberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -4387,23 +5258,46 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-4"
           >
-            <input
-              checked=""
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-3-4"
-              name="search-list-item-3"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Guava
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    checked=""
+                    class="components-checkbox-control__input"
+                    id="search-list-item-3-4"
+                    name="search-list-item-3"
+                    type="checkbox"
+                    value=""
+                  />
+                  <svg
+                    aria-hidden="true"
+                    class="components-checkbox-control__checked"
+                    focusable="false"
+                    height="24"
+                    role="img"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"
+                    />
+                  </svg>
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-21"
+                >
+                  Guava
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -4411,22 +5305,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-5"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-3-5"
-              name="search-list-item-3"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Lychee
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-3-5"
+                    name="search-list-item-3"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-22"
+                >
+                  Lychee
+                </label>
+              </div>
+            </div>
           </label>
         </li>
         <li>
@@ -4434,22 +5337,31 @@ Object {
             class="woocommerce-search-list__item depth-0"
             for="search-list-item-3-6"
           >
-            <input
-              class="woocommerce-search-list__item-input"
-              id="search-list-item-3-6"
-              name="search-list-item-3"
-              type="checkbox"
-              value=""
-            />
-            <span
-              class="woocommerce-search-list__item-label"
+            <div
+              class="components-base-control components-checkbox-control woocommerce-search-list__item-input css-wdf2ti-Wrapper e1puf3u3"
             >
-              <span
-                class="woocommerce-search-list__item-name"
+              <div
+                class="components-base-control__field css-igk9ll-StyledField e1puf3u2"
               >
-                Mulberry
-              </span>
-            </span>
+                <span
+                  class="components-checkbox-control__input-container"
+                >
+                  <input
+                    class="components-checkbox-control__input"
+                    id="search-list-item-3-6"
+                    name="search-list-item-3"
+                    type="checkbox"
+                    value=""
+                  />
+                </span>
+                <label
+                  class="components-checkbox-control__label"
+                  for="inspector-checkbox-control-23"
+                >
+                  Mulberry
+                </label>
+              </div>
+            </div>
           </label>
         </li>
       </ul>
