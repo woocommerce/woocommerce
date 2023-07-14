@@ -51,6 +51,11 @@ interface ProductTemplateInterface {
     const PRICING_SECTION = 'section/pricing';
 
 	/**
+     * Basic pricing section ID.
+     */
+    const BASIC_PRICING_SECTION = 'section/pricing/basic';
+
+	/**
 	 * Set up the template.
 	 */
 	public function __construct();

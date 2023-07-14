@@ -46,8 +46,8 @@ abstract class AbstractProductTemplate extends WooCommerceBlockTemplate {
             array(
                 'blockName'    => 'woocommerce/product-section',
                 'attrs'        => array(
-                    'title'       => $args['title'],
-                    'description' => $args['description'],
+                    'title'       => $args['title'] ?? null,
+                    'description' => $args['description'] ?? null,
                 ),
             )
         );

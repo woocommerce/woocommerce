@@ -3,14 +3,14 @@
  * Product Block Editor template "General" group
  */
 
-namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Groups;
+namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Patterns;
 
-trait GeneralGroup {
+trait General {
 
     /**
      * Add general group and fields.
      */
-    protected function add_general_group() {
+    protected function add_general_pattern() {
         $this->add_group(
             array(
                 'id'    => self::GENERAL_GROUP,

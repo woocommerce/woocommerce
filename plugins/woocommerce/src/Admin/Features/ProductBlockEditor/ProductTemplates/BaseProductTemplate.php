@@ -5,18 +5,20 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates;
 
-use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Groups\GeneralGroup;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Patterns\General;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Patterns\Pricing;
 
 trait BaseProductTemplate {
 
-    use GeneralGroup;
+    use General;
+    use Pricing;
 
     /**
-     * Add all base template groups.
+     * Add all base template patterns.
      */
     protected function add_base_template() {
-        $this->add_general_group();
-        $this->add_pricing_group();
+        $this->add_general_pattern();
+        $this->add_pricing_pattern();
     }
 
     /**
