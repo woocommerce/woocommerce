@@ -26,7 +26,7 @@ class PostsToOrdersMigrationController {
 	/**
 	 * Array of objects used to perform the migration.
 	 *
-	 * @var array[TableMigrator]
+	 * @var TableMigrator[]
 	 */
 	private $all_migrators;
 
