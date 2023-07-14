@@ -68,7 +68,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	uiStrings = {
 		newAttributeModalTitle: undefined,
 		emptyStateSubtitle: undefined,
-		newAttributeListItemLabel: __( 'Add attributes', 'woocommerce' ),
+		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
 		globalAttributeHelperMessage: __(
 			`You can change the attribute's name in <link>Attributes</link>.`,
 			'woocommerce'
