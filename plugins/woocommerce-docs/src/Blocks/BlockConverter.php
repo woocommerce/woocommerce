@@ -77,7 +77,7 @@ class BlockConverter {
 				return $this->create_block( 'quote', $node_name, $node_content );
 			case 'table':
 				return $this->create_block( 'table', $node_name, $node_content );
-			case 'code':
+			case 'pre':
 				return $this->create_block( 'code', $node_name, $node_content );
 			case 'p':
 				return $this->create_block( 'paragraph', $node_name, $node_content );
@@ -123,14 +123,20 @@ class BlockConverter {
 		if ( 'hr' === $node_name ) {
 			$block_html .= "<{$node_name} class=\"wp-block-separator has-alpha-channel-opacity\" />\n";
 		} elseif ( null !== $content ) {
-			$block_html .= "<{$node_name}>{$content}</{$node_name}>\n";
+			// Gutenberg seems to require class name to avoid block recovery error on some blocks.
+			if ( 'pre' === $node_name ) {
+				$block_html .= "<pre class=\"wp-block-code\">{$content}</pre>\n";
+			} elseif ( 'blockquote' === $node_name ) {
+				$block_html .= "<blockquote class=\"wp-block-quote\">{$content}</blockquote>\n";
+			} elseif ( 'table' === $node_name ) {
+				$block_html .= "<figure class=\"wp-block-table\"><table>{$content}</table></figure>\n";
+			} else {
+				$block_html .= "<{$node_name}>{$content}</{$node_name}>\n";
+			}
 		}
-
 		$block_html .= "<!-- /wp:{$block_name} -->\n";
-
 		return $block_html;
 	}
-
 
 	/**
 	 * Convert child nodes to blocks or HTML.
@@ -160,9 +166,11 @@ class BlockConverter {
 					$src      = esc_url( $child_node->getAttribute( 'src' ) );
 					$alt      = esc_attr( $child_node->getAttribute( 'alt' ) );
 					$content .= "<img src=\"{$src}\" alt=\"{$alt}\" />";
-				} else {
+				} elseif ( 'code' === $node_name ) {
 					$inline_content = $this->convert_child_nodes_to_blocks_or_html( $child_node );
-					$content       .= "<$node_name>$inline_content</$node_name>";
+					$content       .= "<code>{$inline_content}</code>";
+				} else {
+					$content .= $this->convert_node_to_block( $child_node );
 				}
 			} elseif ( XML_TEXT_NODE === $node_type ) {
 				$content .= $child_node->nodeValue; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
