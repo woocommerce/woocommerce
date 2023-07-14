@@ -23,7 +23,6 @@ import {
 	recordTracksFactory,
 } from '../utils';
 import { Attribute } from '../utils/types';
-import { getBusinessDescription, getToneOfVoice } from '../utils/branding';
 import { useStoreBranding } from '../contexts/storeBrandingContext';
 
 const DESCRIPTION_MAX_LENGTH = 300;
@@ -129,19 +128,6 @@ export function WriteItForMeButtonContainer() {
 		recordDescriptionTracks( 'view_button' );
 	}, [] );
 
-	// Fetch the branding data when the component mounts.
-	useEffect( () => {
-		async function fetchBrandingData() {
-		  const fetchedToneOfVoice = await getToneOfVoice();
-		  const fetchedBusinessDescription = await getBusinessDescription();
-		  
-		  setToneOfVoice( fetchedToneOfVoice );
-		  setBusinessDescription( fetchedBusinessDescription );
-		}
-		
-		fetchBrandingData();
-	  }, [] );
-
 	const writeItForMeEnabled =
 		! fetching && productTitle.length >= MIN_TITLE_LENGTH_FOR_DESCRIPTION;
 
@@ -179,7 +165,7 @@ export function WriteItForMeButtonContainer() {
 				0,
 				MAX_TITLE_LENGTH
 			) }."`,
-			`Use a 9th grade reading level with a ${toneOfVoice} tone of voice.`,
+			`Use a 9th grade reading level with a ${ toneOfVoice } tone of voice.`,
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
 			'Structure the description into paragraphs using standard HTML <p> tags.',
 			'Identify the language used in this product title and use the same language in your response.',
@@ -189,7 +175,9 @@ export function WriteItForMeButtonContainer() {
 		];
 
 		if ( businessDescription ) {
-			instructions.push( `For more context on the business, refer to the following business description: "${ businessDescription }."` );
+			instructions.push(
+				`For more context on the business, refer to the following business description: "${ businessDescription }."`
+			);
 		}
 
 		return instructions.join( '\n' );

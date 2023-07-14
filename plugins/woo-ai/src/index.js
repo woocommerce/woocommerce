@@ -6,11 +6,10 @@ import { render, createRoot } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import './index.scss';
 import { WriteItForMeButtonContainer } from './product-description';
 import { ProductNameSuggestions } from './product-name';
-import { BrandingProvider } from './context/storeBrandingContext'; // replace with the correct path to your file
-
-import './index.scss';
+import { BrandingProvider } from './contexts/storeBrandingContext'; // replace with the correct path to your file
 
 const renderComponent = ( Component, rootElement ) => {
 	if ( ! rootElement ) {
@@ -24,9 +23,9 @@ const renderComponent = ( Component, rootElement ) => {
 	);
 
 	if ( createRoot ) {
-		createRoot( rootElement ).render(<WrappedComponent />);
+		createRoot( rootElement ).render( <WrappedComponent /> );
 	} else {
-		render(<WrappedComponent />, rootElement);
+		render( <WrappedComponent />, rootElement );
 	}
 };
 
@@ -38,10 +37,10 @@ const nameSuggestionsRoot = document.getElementById(
 );
 
 if ( window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
-	if (descriptionButtonRoot) {
-		renderComponent(WriteItForMeButtonContainer, descriptionButtonRoot);
+	if ( descriptionButtonRoot ) {
+		renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
 	}
-	if (nameSuggestionsRoot) {
-		renderComponent(ProductNameSuggestions, nameSuggestionsRoot);
+	if ( nameSuggestionsRoot ) {
+		renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
 	}
 }
