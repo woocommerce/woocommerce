@@ -33,6 +33,7 @@ import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
 
 type IframeEditorProps = {
+	closeModal?: () => void;
 	initialBlocks?: BlockInstance[];
 	onChange?: ( blocks: BlockInstance[] ) => void;
 	onClose?: () => void;
@@ -41,16 +42,28 @@ type IframeEditorProps = {
 };
 
 export function IframeEditor( {
+	closeModal = () => {},
 	initialBlocks = [],
 	onChange = () => {},
 	onClose,
-	onInput,
+	onInput = () => {},
 	settings: __settings,
 }: IframeEditorProps ) {
 	const [ resizeObserver ] = useResizeObserver();
 	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
-	const { appendEdit, hasRedo, hasUndo, redo, undo } = useEditorHistory( {
+	const [ temporalBlocks, setTemporalBlocks ] =
+		useState< BlockInstance[] >( initialBlocks );
+	const { appendEdit } = useEditorHistory( {
 		setBlocks,
+	} );
+	const {
+		appendEdit: tempAppendEdit,
+		hasRedo,
+		hasUndo,
+		redo,
+		undo,
+	} = useEditorHistory( {
+		setBlocks: setTemporalBlocks,
 	} );
 	const [ isInserterOpened, setIsInserterOpened ] = useState( false );
 	const [ isListViewOpened, setIsListViewOpened ] = useState( false );
@@ -99,14 +112,32 @@ export function IframeEditor( {
 					} }
 					value={ blocks }
 					onChange={ ( updatedBlocks: BlockInstance[] ) => {
-						appendEdit( updatedBlocks );
-						setBlocks( updatedBlocks );
+						tempAppendEdit( updatedBlocks );
+						setTemporalBlocks( updatedBlocks );
 						onChange( updatedBlocks );
 					} }
-					onInput={ onInput }
+					onInput={ ( updatedBlocks: BlockInstance[] ) => {
+						tempAppendEdit( updatedBlocks );
+						setTemporalBlocks( updatedBlocks );
+						onInput( updatedBlocks );
+					} }
 					useSubRegistry={ true }
 				>
-					<HeaderToolbar />
+					<HeaderToolbar
+						onSave={ () => {
+							appendEdit( temporalBlocks );
+							setBlocks( temporalBlocks );
+							onChange( temporalBlocks );
+							closeModal();
+						} }
+						onCancel={ () => {
+							appendEdit( blocks );
+							setBlocks( blocks );
+							onChange( blocks );
+							setTemporalBlocks( blocks );
+							closeModal();
+						} }
+					/>
 					<div className="woocommerce-iframe-editor__main">
 						<SecondarySidebar />
 						<BlockTools
