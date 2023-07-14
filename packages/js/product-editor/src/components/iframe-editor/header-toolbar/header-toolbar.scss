@@ -31,11 +31,20 @@
         padding-left: $gap-small;
     }
 	&-right {
-		margin-left: auto;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		> .components-dropdown-menu {
+			margin-right: $gap-small;
+			> button.components-dropdown-menu__toggle {
+				min-width: 32px !important;
+				padding-left: 0 !important;
+				padding-right: 0 !important;
+			}
+		}
 		button.woocommerce-modal-actions__done-button,
 		button.woocommerce-modal-actions__cancel-button {
-			margin-left: $gap-small;
-			bottom: calc($gap-small / 2);
+			margin-left: $gap-smaller;
 			height: $gap-larger - $gap-smallest;
 		}
     }
