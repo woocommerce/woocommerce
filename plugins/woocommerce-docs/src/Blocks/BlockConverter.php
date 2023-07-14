@@ -38,8 +38,6 @@ class BlockConverter {
 	 */
 	public function convert( $content ) {
 		$html = $this->parser->convert( $content )->__toString();
-		error_log( 'CONVERSION: ' );
-		error_log( $html );
 		return $this->convert_html_to_blocks( $html );
 	}
 
@@ -104,10 +102,7 @@ class BlockConverter {
 			case 'hr':
 				return $this->create_block( 'separator', $node_name, null );
 			default:
-				// text node
-				if ( '#text' === $node_name ) {
-					return $node_value;
-				}
+				return $node_value;
 		}
 	}
 
@@ -166,7 +161,8 @@ class BlockConverter {
 					$alt      = esc_attr( $child_node->getAttribute( 'alt' ) );
 					$content .= "<img src=\"{$src}\" alt=\"{$alt}\" />";
 				} else {
-					$content .= $this->convert_node_to_block( $child_node );
+					$inline_content = $this->convert_child_nodes_to_blocks_or_html( $child_node );
+					$content       .= "<$node_name>$inline_content</$node_name>";
 				}
 			} elseif ( XML_TEXT_NODE === $node_type ) {
 				$content .= $child_node->nodeValue; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
