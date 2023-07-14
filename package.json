@@ -5,7 +5,7 @@
 	"homepage": "https://woocommerce.com/",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.5"
+		"pnpm": "^8.6.7"
 	},
 	"private": true,
 	"repository": {
