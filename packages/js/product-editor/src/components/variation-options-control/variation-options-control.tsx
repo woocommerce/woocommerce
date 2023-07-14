@@ -93,8 +93,8 @@ export const VariationOptionsControl: React.FC< AttributeControlProps > = ( {
 	};
 
 	const handleRemove = ( attribute: ProductAttribute ) => {
-		// eslint-disable-next-line no-alert
 		if (
+			// eslint-disable-next-line no-alert
 			window.confirm(
 				__( 'Remove this variation option?', 'woocommerce' )
 			)
