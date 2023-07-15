@@ -12,6 +12,7 @@ import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
 import { SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
+
 /**
  * Internal dependencies
  */
@@ -52,6 +53,11 @@ const ViewControlButton: React.FC< {
 
 export const Products = () => {
 	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
+
+	// State to track whether the task list item is clicked and show a spinner
+	const [ isTaskListItemclicked, setIsTaskListItemclicked ] =
+		useState< boolean >( false );
+
 	const [
 		isConfirmingLoadSampleProducts,
 		setIsConfirmingLoadSampleProducts,
@@ -91,6 +97,7 @@ export const Products = () => {
 				onClick: () => {
 					productType.onClick();
 					recordCompletionTime();
+					setIsTaskListItemclicked( true );
 				},
 			} ) ),
 		[ recordCompletionTime, productTypes ]
@@ -136,6 +143,7 @@ export const Products = () => {
 						setIsConfirmingLoadSampleProducts( true )
 					}
 					showOtherOptions={ isExpanded }
+					isTaskListItemclicked={ isTaskListItemclicked }
 				/>
 				<ViewControlButton
 					isExpanded={ isExpanded }

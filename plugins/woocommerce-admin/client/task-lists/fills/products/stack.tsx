@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { List, Link } from '@woocommerce/components';
+import { List, Link, Spinner } from '@woocommerce/components';
 import { Text } from '@woocommerce/experimental';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getAdminLink } from '@woocommerce/settings';
@@ -21,17 +21,24 @@ type StackProps = {
 	} )[];
 	onClickLoadSampleProduct: () => void;
 	showOtherOptions?: boolean;
+	isTaskListItemclicked?: boolean;
 };
 
 const Stack: React.FC< StackProps > = ( {
 	items,
 	onClickLoadSampleProduct,
 	showOtherOptions = true,
+	isTaskListItemclicked = false,
 } ) => {
 	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
 
 	return (
 		<div className="woocommerce-products-stack">
+			{ isTaskListItemclicked && (
+				<div className="woocommerce-stack__overlay-spinner">
+					<Spinner className="list-overlay" />
+				</div>
+			) }
 			<List items={ items } />
 			{ showOtherOptions && (
 				<Text className="woocommerce-stack__other-options">
