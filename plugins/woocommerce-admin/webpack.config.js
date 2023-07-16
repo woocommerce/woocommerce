@@ -71,6 +71,7 @@ const wpAdminScripts = [
 	'variable-product-tour',
 	'product-category-metabox',
 	'shipping-settings-region-picker',
+	'command-palette',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
