@@ -27,6 +27,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		public function __construct() {
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
+			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 		}
 
 		/**
@@ -550,6 +551,15 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'marketplace-suggestions' );
 			}
 
+		}
+
+		/**
+		 * Enqueue block editor assets.
+		 *
+		 * @return void
+		 */
+		public function enqueue_block_editor_assets() {
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'command-palette' );
 		}
 
 		/**
