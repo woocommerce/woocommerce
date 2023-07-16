@@ -571,23 +571,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Parse dates from a CSV.
-	 * Dates requires the format YYYY-MM-DD and time is optional.
+	 * Dates can be Unix timestamps or in any format supported by strtotime().
 	 *
 	 * @param string $value Field value.
 	 *
 	 * @return string|null
 	 */
 	public function parse_date_field( $value ) {
-		if ( empty( $value ) ) {
-			return null;
-		}
-
-		if ( preg_match( '/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])([ 01-9:]*)$/', $value ) ) {
-			// Don't include the time if the field had time in it.
-			return current( explode( ' ', $value ) );
-		}
-
-		return null;
+		return $value;
 	}
 
 	/**
