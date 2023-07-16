@@ -15,7 +15,9 @@ import { ProductTypeKey } from './constants';
 import { createNoticesFromResponse } from '../../../lib/notices';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-export const useCreateProductByType = () => {
+export const useCreateProductByType = (
+	setIsTaskListItemclicked: ( value: boolean ) => void
+) => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
 	const isNewExperienceEnabled =
@@ -69,6 +71,8 @@ export const useCreateProductByType = () => {
 				throw new Error( 'Unexpected empty data response from server' );
 			}
 		} catch ( error ) {
+			// Set the value of the state isTaskListItemclicked to false and remove the Spinner from product task list
+			setIsTaskListItemclicked( false );
 			createNoticesFromResponse( error );
 		}
 		setIsRequesting( false );

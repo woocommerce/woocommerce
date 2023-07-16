@@ -86,7 +86,11 @@ export const Products = () => {
 		getProductTypes( {
 			exclude: isStoreInUS ? [] : [ 'subscription' ],
 		} ),
-		surfacedProductTypeKeys
+		surfacedProductTypeKeys,
+		{
+			// Reset the value of state to false in case of an error
+			setIsTaskListItemclicked,
+		}
 	);
 	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
 

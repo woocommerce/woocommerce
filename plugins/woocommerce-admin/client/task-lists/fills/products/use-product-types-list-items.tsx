@@ -15,11 +15,15 @@ const useProductTypeListItems = (
 	suggestedProductTypes: ProductTypeKey[] = [],
 	{
 		onClick,
+		setIsTaskListItemclicked,
 	}: {
 		onClick?: () => void;
+		setIsTaskListItemclicked?: ( value: boolean ) => void;
 	} = {}
 ) => {
-	const { createProductByType } = useCreateProductByType();
+	const { createProductByType } = useCreateProductByType(
+		setIsTaskListItemclicked || ( () => undefined )
+	);
 
 	const productTypes = useMemo(
 		() =>
