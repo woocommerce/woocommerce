@@ -19,6 +19,8 @@ use Mockery\Adapter\Phpunit\MockeryTestCase;
 
 /**
  * Checkout Controller Tests.
+ *
+ * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
  */
 class Checkout extends MockeryTestCase {
 	/**
@@ -384,5 +386,51 @@ class Checkout extends MockeryTestCase {
 
 		$customer = get_user_by( 'id', $data['customer_id'] );
 		$this->assertEquals( $customer->user_email, 'testaccount@test.com' );
+	}
+
+	/**
+	 * Test account creation options.
+	 */
+	public function test_checkout_invalid_address_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => array(
+						'invalid' => 'invalid_data',
+					),
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$status   = $response->get_status();
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $status, print_r( $data, true ) );
 	}
 }
