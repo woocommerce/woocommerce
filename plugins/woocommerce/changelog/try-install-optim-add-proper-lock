@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Improve installation routine by fixing a race condition.
