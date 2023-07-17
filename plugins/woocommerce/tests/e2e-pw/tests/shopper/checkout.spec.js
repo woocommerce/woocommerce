@@ -236,9 +236,9 @@ test.describe( 'Checkout page', () => {
 
 		await page.locator( 'text=Place order' ).click();
 
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+		await expect(
+			page.getByRole( 'heading', { name: 'Order received' } )
+		).toBeVisible();
 
 		// get order ID from the page
 		const orderReceivedText = await page
@@ -252,9 +252,9 @@ test.describe( 'Checkout page', () => {
 		// grace period following initial order placement, the 'order received' page should still be rendered.
 		await page.context().clearCookies();
 		await page.reload();
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+		await expect(
+			page.getByRole( 'heading', { name: 'Order received' } )
+		).toBeVisible();
 
 		// Let's simulate a scenario where the 10 minute grace period has expired. This time, we expect the shopper to
 		// be presented with a request to verify their email address.
@@ -278,9 +278,9 @@ test.describe( 'Checkout page', () => {
 		// However if they supply the *correct* billing email address, they should see the order received page again.
 		await page.fill( '#email', guestEmail );
 		await page.locator( 'form.woocommerce-verify-email button' ).click();
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+		await expect(
+			page.getByRole( 'heading', { name: 'Order received' } )
+		).toBeVisible();
 
 		await page.goto( 'wp-login.php' );
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
@@ -293,8 +293,8 @@ test.describe( 'Checkout page', () => {
 		);
 
 		await expect(
-			page.locator( 'h2.woocommerce-order-data__heading' )
-		).toContainText( `Order #${ guestOrderId } details` );
+			page.getByRole( 'heading', { name: `Order #${ guestOrderId } details` } )
+		).toBeVisible();
 		await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
 			simpleProductName
 		);
@@ -307,7 +307,7 @@ test.describe( 'Checkout page', () => {
 		await expect( page.locator( 'td.line_cost >> nth=0' ) ).toContainText(
 			twoProductPrice
 		);
-		clearFilters( page );
+		await clearFilters( page );
 	} );
 
 	test( 'allows existing customer to place order', async ( { page } ) => {
