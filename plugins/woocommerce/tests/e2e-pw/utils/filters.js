@@ -1,3 +1,5 @@
+const defaultConfig = require( '../playwright.config' );
+const testURL    = new URL( defaultConfig.use.baseURL );
 
 /**
  * Request that a WordPress filter be established for the specified hook and returning the specified value.
@@ -32,7 +34,7 @@ export async function setFilterValue( page, hook, value, priority = 10 ) {
 		name:  'e2e-filters',
 		value:  JSON.stringify( filterSpecs ),
 		path:   '/',
-		domain: 'localhost'
+		domain: testURL.hostname
 	} ] );
 }
 
@@ -49,6 +51,6 @@ export async function clearFilters( page ) {
 		name:  'e2e-filters',
 		value:  '',
 		path:   '/',
-		domain: 'localhost'
+		domain: testURL.hostname
 	} ] );
 }
