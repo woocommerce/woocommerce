@@ -61,11 +61,8 @@ export function WriteItForMeButtonContainer() {
 		titleEl.current?.value || ''
 	);
 	const tinyEditor = useTinyEditor();
-
-	const handleCompletionError = ( error: UseCompletionError ) =>
-		tinyEditor.setContent( getApiError( error.code ?? '' ) );
-
 	const shortTinyEditor = useTinyEditor( 'excerpt' );
+
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
@@ -77,7 +74,8 @@ export function WriteItForMeButtonContainer() {
 					tinyEditor.setContent( content );
 				}
 			},
-			onStreamError: handleCompletionError,
+			onStreamError: ( error ) =>
+				tinyEditor.setContent( getApiError( error.code ?? '' ) ),
 			onCompletionFinished: ( reason, content ) => {
 				recordDescriptionTracks( 'stop', {
 					reason,
@@ -112,7 +110,7 @@ export function WriteItForMeButtonContainer() {
 		feature: WOO_AI_PLUGIN_FEATURE_NAME,
 		onStreamMessage: ( content ) => shortTinyEditor.setContent( content ),
 		onStreamError: ( error ) =>
-			shortTinyEditor.setContent( getApiError( error ) ),
+			shortTinyEditor.setContent( getApiError( error.code ?? '' ) ),
 		onCompletionFinished: ( reason, content ) => {
 			if ( reason === 'finished' ) {
 				shortTinyEditor.setContent( content );
@@ -206,7 +204,9 @@ export function WriteItForMeButtonContainer() {
 				`Please provide a 1-2 sentence summary of the following product description:\n ${ tinyEditor.getContent() }`
 			);
 		} catch ( err ) {
-			handleCompletionError( err as UseCompletionError );
+			tinyEditor.setContent(
+				getApiError( ( err as UseCompletionError ).code ?? '' )
+			);
 		}
 	};
 
