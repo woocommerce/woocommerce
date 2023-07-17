@@ -44,6 +44,7 @@ class ManifestProcessor {
 			'post_author',
 			'post_date',
 			'comment_status',
+			'post_status',
 		);
 
 		$args = array();
@@ -55,7 +56,10 @@ class ManifestProcessor {
 		}
 
 		$args['post_content'] = $post_content;
-		$args['post_status']  = 'publish';
+
+		if ( ! isset( $args['post_status'] ) ) {
+			$args['post_status'] = 'publish';
+		}
 
 		return $args;
 	}
@@ -71,25 +75,25 @@ class ManifestProcessor {
 		foreach ( $categories as $category ) {
 			$term = term_exists( $category['category_title'], 'category' );
 
+			$category_args = array( 'parent' => $parent_id );
+
+			if ( isset( $category['category_slug'] ) ) {
+				$category_args['slug'] = $category['category_slug'];
+			}
+
 			// If the category doesn't exist, create it.
 			if ( 0 === $term || null === $term ) {
 				$term = wp_insert_term(
 					$category['category_title'],
 					'category',
-					array(
-						'parent' => $parent_id,
-						'slug'   => $category['category_slug'],
-					)
+					$category_args
 				);
 			} else {
 				// If the category exists, update it.
 				$term = wp_update_term(
 					$term['term_id'],
 					'category',
-					array(
-						'parent' => $parent_id,
-						'slug'   => $category['category_slug'],
-					)
+					$category_args
 				);
 			}
 
@@ -136,7 +140,7 @@ class ManifestProcessor {
 					\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Updated post with id: ' . $post_id );
 				}
 
-				wp_set_post_categories( $post_id, array( $term['term_id'] ), $parent_id );
+				wp_set_post_categories( $post_id, array( $term['term_id'] ) );
 			}
 
 			// Process any sub-categories.
