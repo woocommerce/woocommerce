@@ -327,7 +327,7 @@ registerPlugin( 'my-task-plugin', {
 
 ### Task list item
 
-The items shown in the list can be customized beyond the default task list item. This can allow for custom appearance or specific `onClick` behavior for your task. For example, we're using this to install and activate WooCommerce Payments when clicking on the WooCommerce Payment task
+The items shown in the list can be customized beyond the default task list item. This can allow for custom appearance or specific `onClick` behavior for your task. For example, we're using this to install and activate WooPayments when clicking on the WooPayments task
 
 ```js
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';

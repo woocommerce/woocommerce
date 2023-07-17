@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow registered React-powered pages to specify a parent navigation menu item to highlight when active.

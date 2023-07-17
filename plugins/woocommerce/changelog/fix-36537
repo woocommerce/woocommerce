@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add filter `woocommerce_redirect_order_location` for consistency with posts and HPOS.

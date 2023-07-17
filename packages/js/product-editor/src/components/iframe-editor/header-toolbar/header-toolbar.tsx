@@ -35,7 +35,15 @@ import { DocumentOverview } from './document-overview';
 import { ShowBlockInspectorPanel } from './show-block-inspector-panel';
 import { MoreMenu } from './more-menu';
 
-export function HeaderToolbar() {
+type HeaderToolbarProps = {
+	onSave?: () => void;
+	onCancel?: () => void;
+};
+
+export function HeaderToolbar( {
+	onSave = () => {},
+	onCancel = () => {},
+}: HeaderToolbarProps ) {
 	const { isInserterOpened, setIsInserterOpened } =
 		useContext( EditorContext );
 	const isWideViewport = useViewportMatch( 'wide' );
@@ -122,7 +130,26 @@ export function HeaderToolbar() {
 				) }
 			</div>
 			<div className="woocommerce-iframe-editor__header-toolbar-right">
-				<ToolbarItem as={ ShowBlockInspectorPanel } />
+				<ToolbarItem
+					as={ Button }
+					variant="tertiary"
+					className="woocommerce-modal-actions__cancel-button"
+					onClick={ onCancel }
+				>
+					{ __( 'Cancel', 'woocommerce' ) }
+				</ToolbarItem>
+				<ToolbarItem
+					as={ Button }
+					variant="primary"
+					className="woocommerce-modal-actions__done-button"
+					onClick={ onSave }
+				>
+					{ __( 'Done', 'woocommerce' ) }
+				</ToolbarItem>
+				<ToolbarItem
+					as={ ShowBlockInspectorPanel }
+					className="woocommerce-show-block-inspector-panel"
+				/>
 				<ToolbarItem as={ MoreMenu } />
 			</div>
 		</NavigableToolbar>

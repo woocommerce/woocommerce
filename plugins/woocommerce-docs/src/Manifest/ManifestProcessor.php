@@ -130,7 +130,6 @@ class ManifestProcessor {
 					}
 
 					\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Created post with id: ' . $post_id );
-
 				} else {
 					$post_update = self::generate_post_args( $post, $blocks );
 					$post_update = array_merge( $post_update, array( 'ID' => $existing_post->ID ) );

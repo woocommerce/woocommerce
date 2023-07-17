@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Support dynamic prop setting to use in refunds for setting correct props.
