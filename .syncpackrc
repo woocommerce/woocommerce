@@ -1,13 +1,6 @@
 {
-	"dev": true,
-	"filter": "^(?:postcss|postcss-loader|pnpm|node|config|react|react-dom|eslint|typescript|@types/react|@types/wordpress__components|@types/node|@(?:typescript-eslint|wordpress)/.*)$",
 	"indent": "\t",
-	"overrides": true,
-	"peer": true,
-	"pnpmOverrides": true,
-	"prod": true,
 	"semverRange": "^",
-	"workspace": true,
 	"customTypes": {
 		"engines": {
 			"path": "engines",
@@ -211,6 +204,38 @@
 				"**"
 			],
 			"pinVersion": "^16.18.18"
+		},
+		{
+			"label": "Only manage versions for these dependencies",
+			"dependencies": [
+				"@types/node",
+				"@types/react",
+				"@types/wordpress__components",
+				"@typescript-eslint/**",
+				"@wordpress/**",
+				"config",
+				"eslint",
+				"node",
+				"pnpm",
+				"postcss",
+				"postcss-loader",
+				"react",
+				"react-dom",
+				"typescript"
+			],
+			"packages": [
+				"**"
+			]
+		},
+		{
+			"label": "Ignore versions for everything else",
+			"dependencies": [
+				"**"
+			],
+			"packages": [
+				"**"
+			],
+			"isIgnored": true
 		}
 	]
 }
