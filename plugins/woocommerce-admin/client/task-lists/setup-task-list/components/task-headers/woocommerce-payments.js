@@ -18,7 +18,7 @@ import { WC_ASSET_URL } from '~/utils/admin-settings';
 
 const connect = ( createNotice, setIsBusy ) => {
 	const errorMessage = __(
-		'There was an error connecting to WooCommerce Payments. Please try again or connect later in store settings.',
+		'There was an error connecting to WooPayments. Please try again or connect later in store settings.',
 		'woocommerce'
 	);
 	setIsBusy( true );
@@ -56,7 +56,7 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 				<h1>{ __( "It's time to get paid", 'woocommerce' ) }</h1>
 				<p>
 					{ __(
-						"You're only one step away from getting paid. Verify your business details to start managing transactions with WooCommerce Payments.",
+						"You're only one step away from getting paid. Verify your business details to start managing transactions with WooPayments.",
 						'woocommerce'
 					) }
 				</p>

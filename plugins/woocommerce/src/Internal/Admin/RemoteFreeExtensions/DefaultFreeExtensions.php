@@ -203,11 +203,11 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => true,
 			),
 			'woocommerce-payments'              => array(
-				'name'           => __( 'WooCommerce Payments', 'woocommerce' ),
+				'name'           => __( 'WooPayments', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/wcpay.svg', WC_PLUGIN_FILE ),
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'Accept credit cards and other popular payment methods with %1$sWooCommerce Payments%2$s', 'woocommerce' ),
+					__( 'Accept credit cards and other popular payment methods with %1$sWooPayments%2$s', 'woocommerce' ),
 					'<a href="https://woocommerce.com/products/woocommerce-payments" target="_blank">',
 					'</a>'
 				),
@@ -861,7 +861,7 @@ class DefaultFreeExtensions {
 	public static function with_core_profiler_fields( array $plugins ) {
 		$_plugins = array(
 			'woocommerce-payments'          => array(
-				'label'            => __( 'Get paid with WooCommerce Payments', 'woocommerce' ),
+				'label'            => __( 'Get paid with WooPayments', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-woo.svg', WC_PLUGIN_FILE ),
 				'description'      => __( "Securely accept payments and manage payment activity straight from your store's dashboard", 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/woocommerce-payments',

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add more assertions to `can add custom product attributes` E2E test.
