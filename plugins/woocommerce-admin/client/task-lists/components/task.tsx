@@ -33,7 +33,7 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 
 	const updateBadge = useCallback( () => {
 		const badgeElement: HTMLElement | null = document.querySelector(
-			'.toplevel_page_woocommerce .remaining-tasks-badge'
+			'#adminmenu .woocommerce-task-list-remaining-tasks-badge'
 		);
 
 		if ( ! badgeElement ) {
