@@ -2,17 +2,112 @@
 namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\WooCommerce\StoreApi\Utilities\RateLimits;
+use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 
 /**
  * Authentication class.
  */
 class Authentication {
 	/**
-	 * Hook into WP lifecycle events.
+	 * Hook into WP lifecycle events. This is hooked by the StoreAPI class on `rest_api_init`.
 	 */
 	public function init() {
+		if ( ! $this->is_request_to_store_api() ) {
+			return;
+		}
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication' ) );
 		add_action( 'set_logged_in_cookie', array( $this, 'set_logged_in_cookie' ) );
+		add_filter( 'rest_pre_serve_request', array( $this, 'send_cors_headers' ), 10, 3 );
+		add_filter( 'rest_allowed_cors_headers', array( $this, 'allowed_cors_headers' ) );
+
+		// Remove the default CORS headers--we will add our own.
+		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+	}
+
+	/**
+	 * Add allowed cors headers for store API headers.
+	 *
+	 * @param array $allowed_headers Allowed headers.
+	 * @return array
+	 */
+	public function allowed_cors_headers( $allowed_headers ) {
+		$allowed_headers[] = 'Cart-Token';
+		$allowed_headers[] = 'Nonce';
+		$allowed_headers[] = 'X-WC-Store-API-Nonce';
+		return $allowed_headers;
+	}
+
+	/**
+	 * Add CORS headers to a response object.
+	 *
+	 * These checks prevent access to the Store API from non-allowed origins. By default, the WordPress REST API allows
+	 * access from any origin. Because some Store API routes return PII, we need to add our own CORS headers.
+	 *
+	 * Allowed origins can be changed using the WordPress `allowed_http_origins` or `allowed_http_origin` filters if
+	 * access needs to be granted to other domains.
+	 *
+	 * Users of valid Cart Tokens are also allowed access from any origin.
+	 *
+	 * @param bool              $value  Whether the request has already been served.
+	 * @param \WP_HTTP_Response $result  Result to send to the client. Usually a `WP_REST_Response`.
+	 * @param \WP_REST_Request  $request Request used to generate the response.
+	 * @return bool
+	 */
+	public function send_cors_headers( $value, $result, $request ) {
+		$origin = get_http_origin();
+
+		if ( 'null' !== $origin ) {
+			$origin = esc_url_raw( $origin );
+		}
+
+		// Send standard CORS headers.
+		header( 'Access-Control-Allow-Methods: OPTIONS, GET, POST, PUT, PATCH, DELETE' );
+		header( 'Access-Control-Allow-Credentials: true' );
+		header( 'Vary: Origin', false );
+
+		// Allow preflight requests, certain http origins, and any origin if a cart token is present. Preflight requests
+		// are allowed because we'll be unable to validate cart token headers at that point.
+		if ( $this->is_preflight() || $this->has_valid_cart_token( $request ) || is_allowed_http_origin( $origin ) ) {
+			header( 'Access-Control-Allow-Origin: ' . $origin );
+		}
+
+		// Exit early during preflight requests. This is so someone cannot access API data by sending an OPTIONS request
+		// with preflight headers and a _GET property to override the method.
+		if ( $this->is_preflight() ) {
+			exit;
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Is the request a preflight request? Checks the request method
+	 *
+	 * @return boolean
+	 */
+	protected function is_preflight() {
+		return isset( $_SERVER['REQUEST_METHOD'], $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'], $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'], $_SERVER['HTTP_ORIGIN'] ) && 'OPTIONS' === $_SERVER['REQUEST_METHOD'];
+	}
+
+	/**
+	 * Checks if we're using a cart token to access the Store API.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return boolean
+	 */
+	protected function has_valid_cart_token( \WP_REST_Request $request ) {
+		$cart_token = $request->get_header( 'Cart-Token' );
+
+		return $cart_token && JsonWebToken::validate( $cart_token, $this->get_cart_token_secret() );
+	}
+
+	/**
+	 * Gets the secret for the cart token using wp_salt.
+	 *
+	 * @return string
+	 */
+	protected function get_cart_token_secret() {
+		return '@' . wp_salt();
 	}
 
 	/**
@@ -22,10 +117,6 @@ class Authentication {
 	 * @return \WP_Error|null|bool
 	 */
 	public function check_authentication( $result ) {
-		if ( ! $this->is_request_to_store_api() ) {
-			return $result;
-		}
-
 		// Enable Rate Limiting for logged-in users without 'edit posts' capability.
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			$result = $this->apply_rate_limiting( $result );
@@ -42,7 +133,7 @@ class Authentication {
 	 * @param string $logged_in_cookie The value for the logged in cookie.
 	 */
 	public function set_logged_in_cookie( $logged_in_cookie ) {
-		if ( ! defined( 'LOGGED_IN_COOKIE' ) || ! $this->is_request_to_store_api() ) {
+		if ( ! defined( 'LOGGED_IN_COOKIE' ) ) {
 			return;
 		}
 		$_COOKIE[ LOGGED_IN_COOKIE ] = $logged_in_cookie;
