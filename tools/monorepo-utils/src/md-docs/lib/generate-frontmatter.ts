@@ -26,7 +26,8 @@ export const generatePostFrontMatter = (
 
 	const frontMatter = matter( fileContents, {
 		engines: {
-			// Disable date parsing so that we can get the raw date string.
+			// By passing yaml.JSON_SCHEMA we disable date parsing that changes date format.
+			// See https://github.com/jonschlinkert/gray-matter/issues/62#issuecomment-577628177 for more details.
 			yaml: ( s ) => yaml.load( s, { schema: yaml.JSON_SCHEMA } ),
 		},
 	} ).data;
