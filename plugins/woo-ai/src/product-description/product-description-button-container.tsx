@@ -201,7 +201,7 @@ export function WriteItForMeButtonContainer() {
 		try {
 			await requestCompletion( prompt );
 			await requestShortCompletion(
-				`Please provide a 1-2 sentence summary of the following product description:\n ${ tinyEditor.getContent() }`
+				`Please provide a brief, 1-2 sentence summary of the following product description in fewer than 50 words:\n ${ tinyEditor.getContent() }`
 			);
 		} catch ( err ) {
 			tinyEditor.setContent(
