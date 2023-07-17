@@ -163,7 +163,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 7.9.0 2023-07-11 =
+= 7.9.0 2023-07-17 =
 
 **WooCommerce**
 
@@ -259,6 +259,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update WooCommerce Blocks to 10.2.2 [[#38545]](https://github.com/woocommerce/woocommerce/pull/38545)
 * Update - Update WooCommerce Blocks to 10.4.0 [[#38656]](https://github.com/woocommerce/woocommerce/pull/38656)
 * Update - Update WooCommerce Blocks to 10.4.2 [[#38656]](https://github.com/woocommerce/woocommerce/pull/38656)
+* Update - Update WooCommerce Blocks to 10.4.6 [[#39278]](https://github.com/woocommerce/woocommerce/pull/39278)
 * Update - Use coreprofiler_ prefix for core profiler track names [[#38710]](https://github.com/woocommerce/woocommerce/pull/38710)
 * Update - Visual changes for the core profiler pages -- intro, guided setup, and skipped guided setup pages [[#38709]](https://github.com/woocommerce/woocommerce/pull/38709)
 * Update - WCPay welcome incentive logic minor addition [[#38803]](https://github.com/woocommerce/woocommerce/pull/38803)
