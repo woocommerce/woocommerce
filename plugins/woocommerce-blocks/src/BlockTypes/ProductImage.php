@@ -210,8 +210,6 @@ class ProductImage extends AbstractBlock {
 		}
 		$parsed_attributes = $this->parse_attributes( $attributes );
 
-		$border_radius      = StyleAttributesUtils::get_border_radius_class_and_style( $attributes );
-		$margin             = StyleAttributesUtils::get_margin_class_and_style( $attributes );
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 
 		$post_id = $block->context['postId'];
