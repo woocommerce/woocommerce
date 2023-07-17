@@ -92,16 +92,16 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$validation_util = new ValidationUtils();
 
 		$address               = array_merge( array_fill_keys( array_keys( $this->get_properties() ), '' ), (array) $address );
-		$address['country']    = wc_strtoupper( wc_clean( wp_unslash( $address['country'] ) ) );
-		$address['first_name'] = wc_clean( wp_unslash( $address['first_name'] ) );
-		$address['last_name']  = wc_clean( wp_unslash( $address['last_name'] ) );
-		$address['company']    = wc_clean( wp_unslash( $address['company'] ) );
-		$address['address_1']  = wc_clean( wp_unslash( $address['address_1'] ) );
-		$address['address_2']  = wc_clean( wp_unslash( $address['address_2'] ) );
-		$address['city']       = wc_clean( wp_unslash( $address['city'] ) );
-		$address['state']      = $validation_util->format_state( wc_clean( wp_unslash( $address['state'] ) ), $address['country'] );
-		$address['postcode']   = $address['postcode'] ? wc_format_postcode( wc_clean( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
-		$address['phone']      = wc_clean( wp_unslash( $address['phone'] ) );
+		$address['country']    = wc_strtoupper( sanitize_text_field( wp_unslash( $address['country'] ) ) );
+		$address['first_name'] = sanitize_text_field( wp_unslash( $address['first_name'] ) );
+		$address['last_name']  = sanitize_text_field( wp_unslash( $address['last_name'] ) );
+		$address['company']    = sanitize_text_field( wp_unslash( $address['company'] ) );
+		$address['address_1']  = sanitize_text_field( wp_unslash( $address['address_1'] ) );
+		$address['address_2']  = sanitize_text_field( wp_unslash( $address['address_2'] ) );
+		$address['city']       = sanitize_text_field( wp_unslash( $address['city'] ) );
+		$address['state']      = $validation_util->format_state( sanitize_text_field( wp_unslash( $address['state'] ) ), $address['country'] );
+		$address['postcode']   = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
+		$address['phone']      = sanitize_text_field( wp_unslash( $address['phone'] ) );
 		return $address;
 	}
 
