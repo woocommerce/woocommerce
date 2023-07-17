@@ -61,14 +61,15 @@ class Authentication {
 		}
 
 		// Send standard CORS headers.
-		header( 'Access-Control-Allow-Methods: OPTIONS, GET, POST, PUT, PATCH, DELETE' );
-		header( 'Access-Control-Allow-Credentials: true' );
-		header( 'Vary: Origin', false );
+		$server = rest_get_server();
+		$server->send_header( 'Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE' );
+		$server->send_header( 'Access-Control-Allow-Credentials', 'true' );
+		$server->send_header( 'Vary', 'Origin', false );
 
 		// Allow preflight requests, certain http origins, and any origin if a cart token is present. Preflight requests
 		// are allowed because we'll be unable to validate cart token headers at that point.
 		if ( $this->is_preflight() || $this->has_valid_cart_token( $request ) || is_allowed_http_origin( $origin ) ) {
-			header( 'Access-Control-Allow-Origin: ' . $origin );
+			$server->send_header( 'Access-Control-Allow-Origin', $origin );
 		}
 
 		// Exit early during preflight requests. This is so someone cannot access API data by sending an OPTIONS request
