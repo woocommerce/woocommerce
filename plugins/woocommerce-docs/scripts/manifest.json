@@ -7,7 +7,6 @@
           "post_title": "Local Development",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
-          "file_path": "/Users/samseay/Code/automattic/woo/woocommerce/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
           "id": "c068ce54044fa44c760a69bd71ef21274f2a5a37",
           "links": {
             "./installation/install-plugin.md": "fb59bd01dda7b090e5b0a557948e155a6b679d6a"
@@ -22,7 +21,6 @@
               "post_title": "Install the Plugin",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
-              "file_path": "/Users/samseay/Code/automattic/woo/woocommerce/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
               "id": "fb59bd01dda7b090e5b0a557948e155a6b679d6a"
             }
           ],
@@ -35,7 +33,6 @@
               "post_title": "What Went Wrong?",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
-              "file_path": "/Users/samseay/Code/automattic/woo/woocommerce/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
               "id": "1f88c4d039e72c059c928ab475ad1ea0a02c8abb",
               "links": {
                 "../../testing/unit-tests.md": "120770c899215a889246b47ac883e4dda1f97b8b"
@@ -53,7 +50,6 @@
           "post_title": "Unit Testing",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
-          "file_path": "/Users/samseay/Code/automattic/woo/woocommerce/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
           "id": "120770c899215a889246b47ac883e4dda1f97b8b"
         }
       ],

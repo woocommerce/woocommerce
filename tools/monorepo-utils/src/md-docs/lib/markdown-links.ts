@@ -51,6 +51,8 @@ export const processMarkdownLinks = (
 				}
 			}
 
+			// dont expose file_path on updated posts
+			delete updatedPost.file_path;
 			return updatedPost;
 		} );
 	}
