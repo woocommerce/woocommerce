@@ -7,6 +7,11 @@ import {
 	__experimentalUseCompletion as useCompletion,
 	UseCompletionError,
 } from '@woocommerce/ai';
+// TODO: Re-add "@types/wordpress__data" package to resolve this, causing other issues until pnpm 8.6.0 is usable
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line @woocommerce/dependency-group
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -30,7 +35,7 @@ import { Attribute } from '../utils/types';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
-const getApiError = ( error: string ) => {
+const getApiError = ( error?: string ) => {
 	switch ( error ) {
 		case 'connection_error':
 			return __(
@@ -39,7 +44,7 @@ const getApiError = ( error: string ) => {
 			);
 		default:
 			return __(
-				`❗ We're currently experiencing high demand for our experimental feature. Please check back in shortly.`,
+				`❗ We encountered an issue with this experimental feature. Please check back in shortly.`,
 				'woocommerce'
 			);
 	}
@@ -53,6 +58,8 @@ const recordDescriptionTracks = recordTracksFactory(
 );
 
 export function WriteItForMeButtonContainer() {
+	const { createWarningNotice } = useDispatch( 'core/notices' );
+
 	const titleEl = useRef< HTMLInputElement >(
 		document.querySelector( '#title' )
 	);
@@ -75,7 +82,7 @@ export function WriteItForMeButtonContainer() {
 				}
 			},
 			onStreamError: ( error ) =>
-				tinyEditor.setContent( getApiError( error.code ?? '' ) ),
+				createWarningNotice( getApiError( error.code ?? '' ) ),
 			onCompletionFinished: ( reason, content ) => {
 				recordDescriptionTracks( 'stop', {
 					reason,
@@ -110,7 +117,7 @@ export function WriteItForMeButtonContainer() {
 		feature: WOO_AI_PLUGIN_FEATURE_NAME,
 		onStreamMessage: ( content ) => shortTinyEditor.setContent( content ),
 		onStreamError: ( error ) =>
-			shortTinyEditor.setContent( getApiError( error.code ?? '' ) ),
+			createWarningNotice( getApiError( error.code ?? '' ) ),
 		onCompletionFinished: ( reason, content ) => {
 			if ( reason === 'finished' ) {
 				shortTinyEditor.setContent( content );
@@ -204,9 +211,10 @@ export function WriteItForMeButtonContainer() {
 				`Please provide a brief, 1-2 sentence summary of the following product description in fewer than 50 words:\n ${ tinyEditor.getContent() }`
 			);
 		} catch ( err ) {
-			tinyEditor.setContent(
+			createWarningNotice(
 				getApiError( ( err as UseCompletionError ).code ?? '' )
 			);
+			throw err;
 		}
 	};
 
