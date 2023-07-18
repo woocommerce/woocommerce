@@ -12,7 +12,7 @@ import crypto from 'crypto';
 import { generatePostFrontMatter } from './generate-frontmatter';
 import { generateFileUrl } from './generate-urls';
 
-interface Category {
+export interface Category {
 	[ key: string ]: unknown;
 	posts?: Post[];
 	categories?: Category[];
@@ -22,7 +22,7 @@ interface Post {
 	[ key: string ]: unknown;
 }
 
-function generatePageId( filePath: string, prefix = '' ) {
+export function generatePageId( filePath: string, prefix = '' ) {
 	const hash = crypto.createHash( 'sha1' );
 	hash.update( prefix + filePath );
 	return hash.digest( 'hex' );
