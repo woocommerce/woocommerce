@@ -32,8 +32,16 @@ jobs:
                 include:
                     - wp: nightly
                       php: '7.4'
+                      unittests: 'shard1'
+                    - wp: nightly
+                      php: '7.4'
+                      unittests: 'shard2'
                     - wp: '6.1'
                       php: 7.4
+                      unittests: 'shard1'
+                    - wp: '6.1'
+                      php: 7.4
+                      unittests: 'shard2'
         services:
             database:
                 image: mysql:5.6
