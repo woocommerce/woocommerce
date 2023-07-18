@@ -4,6 +4,8 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
+import { store as noticesStore } from '@wordpress/notices';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -23,7 +25,7 @@ import {
 	recordTracksFactory,
 } from '../utils';
 import { Attribute } from '../utils/types';
-import { useStoreBranding } from '../contexts/storeBrandingContext';
+import { useStoreBranding } from '../hooks/useStoreBranding';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
@@ -57,7 +59,24 @@ export function WriteItForMeButtonContainer() {
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
-	const { toneOfVoice, businessDescription } = useStoreBranding();
+	const { data: brandingData, isError: isBrandingError } = useStoreBranding();
+	const { createErrorNotice } = useDispatch( noticesStore );
+	const [ brandingErrorDismissed, setBrandingErrorDismissed ] =
+		useState< boolean >( false );
+	if ( isBrandingError && ! brandingErrorDismissed ) {
+		createErrorNotice(
+			__(
+				'Error fetching branding data, content generation may be degraded.',
+				'woocommerce'
+			),
+			{
+				id: 'woo-ai-branding-error',
+				isDismissible: true,
+				type: 'snackbar',
+				onDismiss: () => setBrandingErrorDismissed( true ),
+			}
+		);
+	}
 
 	const tinyEditor = useTinyEditor();
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
@@ -165,7 +184,7 @@ export function WriteItForMeButtonContainer() {
 				0,
 				MAX_TITLE_LENGTH
 			) }."`,
-			`Use a 9th grade reading level with a ${ toneOfVoice } tone of voice.`,
+			`Use a 9th grade reading level.`,
 			`Make the description ${ DESCRIPTION_MAX_LENGTH } words or less.`,
 			'Structure the description into paragraphs using standard HTML <p> tags.',
 			'Identify the language used in this product title and use the same language in your response.',
@@ -174,9 +193,15 @@ export function WriteItForMeButtonContainer() {
 			'Do not include a top-level heading at the beginning description.',
 		];
 
-		if ( businessDescription ) {
+		if ( brandingData?.toneOfVoice ) {
 			instructions.push(
-				`For more context on the business, refer to the following business description: "${ businessDescription }."`
+				`Use a ${ brandingData.toneOfVoice } tone of voice.`
+			);
+		}
+
+		if ( brandingData?.businessDescription ) {
+			instructions.push(
+				`For more context on the business, refer to the following business description: "${ brandingData.businessDescription }."`
 			);
 		}
 

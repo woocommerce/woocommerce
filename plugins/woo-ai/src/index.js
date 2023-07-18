@@ -2,14 +2,17 @@
  * External dependencies
  */
 import { render, createRoot } from '@wordpress/element';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 /**
  * Internal dependencies
  */
-import './index.scss';
 import { WriteItForMeButtonContainer } from './product-description';
 import { ProductNameSuggestions } from './product-name';
-import { BrandingProvider } from './contexts/storeBrandingContext'; // replace with the correct path to your file
+
+import './index.scss';
+
+const queryClient = new QueryClient();
 
 const renderComponent = ( Component, rootElement ) => {
 	if ( ! rootElement ) {
@@ -17,9 +20,9 @@ const renderComponent = ( Component, rootElement ) => {
 	}
 
 	const WrappedComponent = () => (
-		<BrandingProvider>
+		<QueryClientProvider client={ queryClient }>
 			<Component />
-		</BrandingProvider>
+		</QueryClientProvider>
 	);
 
 	if ( createRoot ) {
@@ -37,10 +40,6 @@ const nameSuggestionsRoot = document.getElementById(
 );
 
 if ( window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive ) {
-	if ( descriptionButtonRoot ) {
-		renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
-	}
-	if ( nameSuggestionsRoot ) {
-		renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
-	}
+	renderComponent( WriteItForMeButtonContainer, descriptionButtonRoot );
+	renderComponent( ProductNameSuggestions, nameSuggestionsRoot );
 }
