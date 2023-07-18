@@ -199,7 +199,7 @@
 	}
 
 	.update-plugins .update-count {
-		background-color: #d54e21;
+		background-color: var(--wp-admin-theme-color);
 		border-radius: 10px;
 		color: #fff;
 		display: inline-block;
