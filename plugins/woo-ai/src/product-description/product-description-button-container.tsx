@@ -71,6 +71,14 @@ export function WriteItForMeButtonContainer() {
 	const shortTinyEditor = useTinyEditor( 'excerpt' );
 
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
+
+	const handleUseCompletionError = ( err: UseCompletionError ) => {
+		createWarningNotice( getApiError( err.code ?? '' ) );
+		setFetching( false );
+		// eslint-disable-next-line no-console
+		console.error( err );
+	};
+
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
 			feature: WOO_AI_PLUGIN_FEATURE_NAME,
@@ -81,8 +89,7 @@ export function WriteItForMeButtonContainer() {
 					tinyEditor.setContent( content );
 				}
 			},
-			onStreamError: ( error ) =>
-				createWarningNotice( getApiError( error.code ?? '' ) ),
+			onStreamError: handleUseCompletionError,
 			onCompletionFinished: ( reason, content ) => {
 				recordDescriptionTracks( 'stop', {
 					reason,
@@ -116,8 +123,7 @@ export function WriteItForMeButtonContainer() {
 	const { requestCompletion: requestShortCompletion } = useCompletion( {
 		feature: WOO_AI_PLUGIN_FEATURE_NAME,
 		onStreamMessage: ( content ) => shortTinyEditor.setContent( content ),
-		onStreamError: ( error ) =>
-			createWarningNotice( getApiError( error.code ?? '' ) ),
+		onStreamError: handleUseCompletionError,
 		onCompletionFinished: ( reason, content ) => {
 			if ( reason === 'finished' ) {
 				shortTinyEditor.setContent( content );
@@ -213,10 +219,7 @@ export function WriteItForMeButtonContainer() {
 				);
 			}
 		} catch ( err ) {
-			createWarningNotice(
-				getApiError( ( err as UseCompletionError ).code ?? '' )
-			);
-			throw err;
+			handleUseCompletionError( err as UseCompletionError );
 		}
 	};
 
