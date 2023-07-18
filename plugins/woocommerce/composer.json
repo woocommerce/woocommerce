@@ -47,7 +47,8 @@
 			"automattic/jetpack-autoloader": true,
 			"composer/installers": true,
 			"bamarni/composer-bin-plugin": true
-		}
+		},
+		"changelog": "true"
 	},
 	"autoload": {
 		"exclude-from-classmap": [
