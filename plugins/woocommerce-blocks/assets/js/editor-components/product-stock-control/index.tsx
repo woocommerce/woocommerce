@@ -38,9 +38,14 @@ const ProductStockControl = ( {
 	const displayOptions = Object.entries( stockStatusOptions )
 		.map( ( [ slug, name ] ) => ( { value: slug, label: name } ) )
 		.filter( ( status ) => !! status.label );
+	const defaultCheckedOptions = Object.keys( stockStatusOptions ).filter(
+		( key: string ) => !! key
+	);
 
 	// Set the initial state to the default or saved value.
-	const [ checkedOptions, setChecked ] = useState( value );
+	const [ checkedOptions, setChecked ] = useState(
+		value || defaultCheckedOptions
+	);
 
 	/**
 	 * Set attributes when checked items change.
