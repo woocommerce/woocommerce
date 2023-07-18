@@ -63,6 +63,10 @@ class DocsStore {
 		return $post_id;
 	}
 
+	public static function get_doc_id_by_post_id( $post_id ) {
+		return get_post_meta( $post_id, 'docs_id', true );
+	}
+
 	/**
 	 * Add an edit URL to a docs post
 	 *
