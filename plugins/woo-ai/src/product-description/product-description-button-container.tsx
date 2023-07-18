@@ -207,9 +207,11 @@ export function WriteItForMeButtonContainer() {
 
 		try {
 			await requestCompletion( prompt );
-			await requestShortCompletion(
-				`Please provide a brief, 1-2 sentence summary of the following product description in fewer than 50 words:\n ${ tinyEditor.getContent() }`
-			);
+			if ( ! shortTinyEditor.getContent() ) {
+				await requestShortCompletion(
+					`Please provide a brief, 1-2 sentence summary of the following product description in fewer than 50 words:\n ${ tinyEditor.getContent() }`
+				);
+			}
 		} catch ( err ) {
 			createWarningNotice(
 				getApiError( ( err as UseCompletionError ).code ?? '' )
