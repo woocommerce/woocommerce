@@ -115,14 +115,14 @@ foreach ( $composer_projects as $project_path ) {
 	try {
 		$data = json_decode( file_get_contents( $base_path . '/' . $project_path . '/composer.json' ), true, 512, JSON_THROW_ON_ERROR );
 		if (
-			! isset( $data['extra']['changelogger'] )
+			! isset( $data['config']['changelog'] )
 		) {
 			continue;
 		}
 	} catch ( Exception $e ) {
 		continue;
 	}
-	$data                                   = $data['extra']['changelogger'];
+	$data                                   = $data['config']['changelog'];
 	$data                                  += array(
 		'changelog'   => $project_path . '/CHANGELOG.md',
 		'changes-dir' => $project_path . '/changelog',

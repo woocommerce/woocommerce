@@ -61,7 +61,7 @@ export const getChangeloggerProjectPaths = async (
 				'utf8'
 			)
 		);
-		return composer.extra && composer.extra.changelogger;
+		return composer.config && composer.config.changelog;
 	} );
 };
 
