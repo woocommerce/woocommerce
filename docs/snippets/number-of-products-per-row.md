@@ -15,11 +15,13 @@ if ( ! function_exists( 'YOUR_PREFIX_related_products_args' ) ) {
 	 * @return array The modified related products args.
 	 */
 	function YOUR_PREFIX_related_products_args( $args ) {
-        If ( ! is_array( $args ) ) {
-            $args = array();
-        }
+		if ( ! is_array( $args ) ) {
+			$args = array();
+		}
+
 		$args['posts_per_page'] = 4; // 4 related products.
 		$args['columns']        = 2; // Arranged in 2 columns.
+
 		return $args;
 	}
 }
