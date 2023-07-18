@@ -70,8 +70,8 @@ class PostCreator {
 			}
 
 			\ActionScheduler_Logger::instance()->log( $logger_action_id, 'Updated post with id: ' . $post_id );
-
-			return $post_id;
 		}
+
+		return $post_id;
 	}
 }
