@@ -1,5 +1,5 @@
 {
-	"extra": {
-		"changelogger": {}
+	"config": {
+		"changelog": "true"
 	}
 }
