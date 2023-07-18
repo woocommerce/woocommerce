@@ -144,7 +144,7 @@ const program = new Command( 'changefile' )
 					Logger.notice(
 						`Installing dependencies in ${ tmpRepoPath }`
 					);
-					execSync( 'pnpm install', {
+					execSync( 'pnpm install --filter monorepo-utils', {
 						cwd: tmpRepoPath,
 						stdio: 'inherit',
 					} );
