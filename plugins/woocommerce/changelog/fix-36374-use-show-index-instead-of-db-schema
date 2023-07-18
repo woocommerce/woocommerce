@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Convert DatabaseUtil::get_index_columns() to use SHOW INDEX FROM instead of INFORMATION_SCHEMA query

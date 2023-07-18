@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Make `WC_Order::get_item_subtotal()` always return a float.
