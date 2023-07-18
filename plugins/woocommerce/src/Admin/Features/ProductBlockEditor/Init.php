@@ -336,38 +336,6 @@ class Init {
 								),
 							),
 						),
-						array(
-							'woocommerce/product-section',
-							array(
-								'title'       => __( 'Organization & visibility', 'woocommerce' ),
-								'description' => __( 'Help customers find this product by assigning it to categories or featuring it across your sales channels.', 'woocommerce' ),
-							),
-							array(
-								array(
-									'woocommerce/product-category-field',
-									array(
-										'name' => 'categories',
-									),
-								),
-							),
-						),
-						array(
-							'woocommerce/product-section',
-							array(
-								'title'       => __( 'Attributes', 'woocommerce' ),
-								'description' => sprintf(
-									/* translators: %1$s: Attributes guide link opening tag. %2$s: Attributes guide link closing tag.*/
-									__( 'Add descriptive pieces of information that customers can use to filter and search for this product. %1$sLearn more%2$s', 'woocommerce' ),
-									'<a href="https://woocommerce.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">',
-									'</a>'
-								),
-							),
-							array(
-								array(
-									'woocommerce/product-attributes-field',
-								),
-							),
-						),
 					),
 				),
 				array(
