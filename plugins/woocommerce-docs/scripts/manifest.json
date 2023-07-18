@@ -7,7 +7,10 @@
           "post_title": "Local Development",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
-          "id": "c068ce54044fa44c760a69bd71ef21274f2a5a37"
+          "id": "c068ce54044fa44c760a69bd71ef21274f2a5a37",
+          "links": {
+            "./installation/install-plugin.md": "fb59bd01dda7b090e5b0a557948e155a6b679d6a"
+          }
         }
       ],
       "categories": [
@@ -30,7 +33,10 @@
               "post_title": "What Went Wrong?",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
-              "id": "1f88c4d039e72c059c928ab475ad1ea0a02c8abb"
+              "id": "1f88c4d039e72c059c928ab475ad1ea0a02c8abb",
+              "links": {
+                "../../testing/unit-tests.md": "120770c899215a889246b47ac883e4dda1f97b8b"
+              }
             }
           ],
           "categories": []
@@ -50,5 +56,5 @@
       "categories": []
     }
   ],
-  "hash": "7f0f6f0c39187a5ee2f939d7a0af56538aaeb7f040f56e6dd62458e34a0491bd"
+  "hash": "926a7683cd701311dc1861f0a0653d9f630bc57b64e5ac4b55c833668a9a18d9"
 }
