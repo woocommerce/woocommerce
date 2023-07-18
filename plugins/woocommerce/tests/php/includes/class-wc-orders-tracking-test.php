@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
+
 if ( ! class_exists( 'CurrentScreenMock' ) ) {
 	/**
 	 * Class CurrentScreenMock
