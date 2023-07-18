@@ -30,7 +30,7 @@ class PostCreator {
 	 * @param mixed  $manifest_post The manifest representation of the post.
 	 * @param string $post_content The post content as a string.
 	 * @param int    $logger_action_id The logger action ID.
-	 * @return void
+	 * @return int The post ID.
 	 */
 	public static function create_post_from_manifest_entry( $manifest_post, $post_content, $logger_action_id ) {
 		$existing_post = DocsStore::get_post( $manifest_post['id'] );
