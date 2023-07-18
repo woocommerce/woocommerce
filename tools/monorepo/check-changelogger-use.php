@@ -122,7 +122,7 @@ foreach ( $composer_projects as $project_path ) {
 	} catch ( Exception $e ) {
 		continue;
 	}
-	$data                                   = $data['config']['changelog'];
+	$data                                   = isset( $data['extra']['changelogger'] ) ? $data['extra']['changelogger'] : array();
 	$data                                  += array(
 		'changelog'   => $project_path . '/CHANGELOG.md',
 		'changes-dir' => $project_path . '/changelog',
