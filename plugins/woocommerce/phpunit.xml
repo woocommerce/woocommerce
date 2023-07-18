@@ -23,6 +23,11 @@
 			<directory suffix=".php">./tests/php</directory>
 			<directory suffix=".php">./tests/legacy/unit-tests/woocommerce-admin</directory>
 		</testsuite>
+		<testsuite name="wc-unittests-all-excluding-woocommerce-admin-ex">
+			<directory suffix=".php">./tests/legacy/unit-tests</directory>
+			<directory suffix=".php">./tests/php</directory>
+			<exclude>./tests/legacy/unit-tests/woocommerce-admin</exclude>
+		</testsuite>
 		<testsuite name="wc-unittests-all-excluding-woocommerce-admin">
 			<directory suffix=".php">./tests/legacy/unit-tests/account</directory>
 			<directory suffix=".php">./tests/legacy/unit-tests/admin</directory>
