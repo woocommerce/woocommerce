@@ -13,7 +13,7 @@ class CategoryCreator {
 	 *
 	 * @param mixed $manifest_category The manifest category.
 	 * @param mixed $parent_id The parent ID.
-	 * @return void
+	 * @return array The term.
 	 */
 	public static function create_category_from_manifest_entry( $manifest_category, $parent_id ) {
 		$term          = term_exists( $manifest_category['category_title'], 'category' );
