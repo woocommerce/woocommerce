@@ -1,11 +1,14 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 import { useDispatch } from '@wordpress/data';
+import {
+	__experimentalUseCompletion as useCompletion,
+	UseCompletionError,
+} from '@woocommerce/ai';
 
 /**
  * Internal dependencies
@@ -13,9 +16,10 @@ import { useDispatch } from '@wordpress/data';
 import {
 	MAX_TITLE_LENGTH,
 	MIN_TITLE_LENGTH_FOR_DESCRIPTION,
+	WOO_AI_PLUGIN_FEATURE_NAME,
 } from '../constants';
 import { StopCompletionBtn, WriteItForMeBtn } from '../components';
-import { useCompletion, useFeedbackSnackbar, useTinyEditor } from '../hooks';
+import { useFeedbackSnackbar, useTinyEditor } from '../hooks';
 import {
 	getProductName,
 	getPostId,
@@ -79,9 +83,14 @@ export function WriteItForMeButtonContainer() {
 	}
 
 	const tinyEditor = useTinyEditor();
+
+	const handleCompletionError = ( error: UseCompletionError ) =>
+		tinyEditor.setContent( getApiError( error.code ?? '' ) );
+
 	const { showSnackbar, removeSnackbar } = useFeedbackSnackbar();
 	const { requestCompletion, completionActive, stopCompletion } =
 		useCompletion( {
+			feature: WOO_AI_PLUGIN_FEATURE_NAME,
 			onStreamMessage: ( content ) => {
 				// This prevents printing out incomplete HTML tags.
 				const ignoreRegex = new RegExp( /<\/?\w*[^>]*$/g );
@@ -89,12 +98,7 @@ export function WriteItForMeButtonContainer() {
 					tinyEditor.setContent( content );
 				}
 			},
-			onStreamError: ( error ) => {
-				// eslint-disable-next-line no-console
-				console.debug( 'Streaming error encountered', error );
-
-				tinyEditor.setContent( getApiError( error ) );
-			},
+			onStreamError: handleCompletionError,
 			onCompletionFinished: ( reason, content ) => {
 				recordDescriptionTracks( 'stop', {
 					reason,
@@ -208,7 +212,7 @@ export function WriteItForMeButtonContainer() {
 		return instructions.join( '\n' );
 	};
 
-	const onWriteItForMeClick = () => {
+	const onWriteItForMeClick = async () => {
 		setFetching( true );
 		removeSnackbar();
 
@@ -216,7 +220,12 @@ export function WriteItForMeButtonContainer() {
 		recordDescriptionTracks( 'start', {
 			prompt,
 		} );
-		requestCompletion( prompt );
+
+		try {
+			await requestCompletion( prompt );
+		} catch ( err ) {
+			handleCompletionError( err as UseCompletionError );
+		}
 	};
 
 	return completionActive ? (

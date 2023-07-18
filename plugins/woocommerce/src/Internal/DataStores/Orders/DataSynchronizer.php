@@ -28,12 +28,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 
 	public const ORDERS_DATA_SYNC_ENABLED_OPTION           = 'woocommerce_custom_orders_table_data_sync_enabled';
 	private const INITIAL_ORDERS_PENDING_SYNC_COUNT_OPTION = 'woocommerce_initial_orders_pending_sync_count';
-	public const PENDING_SYNCHRONIZATION_FINISHED_ACTION   = 'woocommerce_orders_sync_finished';
 	public const PLACEHOLDER_ORDER_POST_TYPE               = 'shop_order_placehold';
 
 	public const DELETED_RECORD_META_KEY        = '_deleted_from';
 	public const DELETED_FROM_POSTS_META_VALUE  = 'posts_table';
 	public const DELETED_FROM_ORDERS_META_VALUE = 'orders_table';
+
+	public const ORDERS_TABLE_CREATED = 'woocommerce_custom_orders_table_created';
 
 	private const ORDERS_SYNC_BATCH_SIZE = 250;
 
@@ -132,6 +133,10 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 */
 	public function create_database_tables() {
 		$this->database_util->dbdelta( $this->data_store->get_database_schema() );
+		if ( ! $this->check_orders_table_exists() ) {
+			return;
+		}
+		update_option( self::ORDERS_TABLE_CREATED, 'yes' );
 	}
 
 	/**
@@ -143,6 +148,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 		foreach ( $table_names as $table_name ) {
 			$this->database_util->drop_database_table( $table_name );
 		}
+		delete_option( self::ORDERS_TABLE_CREATED );
 	}
 
 	/**
@@ -194,8 +200,12 @@ class DataSynchronizer implements BatchProcessorInterface {
 				return (int) $pending_count;
 			}
 		}
-		$orders_table     = $this->data_store::get_orders_table_name();
+
 		$order_post_types = wc_get_order_types( 'cot-migration' );
+
+		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
+
+		$orders_table = $this->data_store::get_orders_table_name();
 
 		if ( empty( $order_post_types ) ) {
 			$this->error_logger->debug(
@@ -209,7 +219,17 @@ class DataSynchronizer implements BatchProcessorInterface {
 			return 0;
 		}
 
-		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
+		if ( 'yes' !== get_option( self::ORDERS_TABLE_CREATED ) ) {
+			$count = $wpdb->get_var(
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholder is prepared.
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM $wpdb->posts where post_type in ( $order_post_type_placeholder )",
+					$order_post_types
+				)
+				// phpcs:enable
+			);
+			return $count;
+		}
 
 		if ( $this->custom_orders_table_is_authoritative() ) {
 			$missing_orders_count_sql = "
@@ -628,9 +648,7 @@ ORDER BY orders.id ASC
 			return;
 		}
 
-		$features_controller = wc_get_container()->get( FeaturesController::class );
-		$feature_is_enabled  = $features_controller->feature_is_enabled( 'custom_order_tables' );
-		if ( ! $feature_is_enabled ) {
+		if ( 'yes' !== get_option( self::ORDERS_TABLE_CREATED ) ) {
 			return;
 		}
 
