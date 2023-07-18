@@ -9,10 +9,149 @@
 	verbose="true"
 	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
 	<testsuites>
-		<testsuite name="WooCommerce Test Suite">
+		<testsuite name="wc-unittests-all">
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
 			<directory suffix=".php">./tests/php</directory>
 		</testsuite>
+		<testsuite name="wc-unittests-legacy">
+			<directory suffix=".php">./tests/legacy/unit-tests</directory>
+		</testsuite>
+		<testsuite name="wc-unittests-nonlegacy">
+			<directory suffix=".php">./tests/php</directory>
+		</testsuite>
+		<testsuite name="wc-unittests-nonlegacy-with-admin">
+			<directory suffix=".php">./tests/php</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/woocommerce-admin</directory>
+		</testsuite>
+		<testsuite name="wc-unittests-all-excluding-woocommerce-admin">
+			<directory suffix=".php">./tests/legacy/unit-tests/account</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/admin</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/attributes</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/blocks</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/cart</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/checkout</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/core</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/countries</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/coupon</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/crud</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/customer</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/discounts</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/email</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/exporter</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/formatting</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/gateways</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/geolocation</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/importer</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/integrations</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/libraries</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/log</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/order</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/order-items</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/packages</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/page-functions</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/payment-gateways</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/payment-tokens</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/privacy</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/product</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/queue</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/rest-api</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/session</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/settings</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/shipping</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/shortcodes</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/tax</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/templates</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/totals</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/util</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/webhooks</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/widgets</directory>
+			<directory suffix=".php">./tests/php</directory>
+		</testsuite>
+		<testsuite name="wc-unittests-legacy-excluding-woocommerce-admin">
+			<directory suffix=".php">./tests/legacy/unit-tests/account</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/admin</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/attributes</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/blocks</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/cart</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/checkout</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/core</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/countries</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/coupon</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/crud</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/customer</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/discounts</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/email</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/exporter</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/formatting</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/gateways</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/geolocation</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/importer</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/integrations</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/libraries</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/log</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/order</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/order-items</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/packages</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/page-functions</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/payment-gateways</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/payment-tokens</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/privacy</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/product</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/queue</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/rest-api</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/session</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/settings</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/shipping</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/shortcodes</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/tax</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/templates</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/totals</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/util</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/webhooks</directory>
+			<directory suffix=".php">./tests/legacy/unit-tests/widgets</directory>
+		</testsuite>
+		<testsuite name="wc-unittests-legacy-account"><directory suffix=".php">./tests/legacy/unit-tests/account</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-admin"><directory suffix=".php">./tests/legacy/unit-tests/admin</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-attributes"><directory suffix=".php">./tests/legacy/unit-tests/attributes</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-blocks"><directory suffix=".php">./tests/legacy/unit-tests/blocks</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-cart"><directory suffix=".php">./tests/legacy/unit-tests/cart</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-checkout"><directory suffix=".php">./tests/legacy/unit-tests/checkout</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-core"><directory suffix=".php">./tests/legacy/unit-tests/core</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-countries"><directory suffix=".php">./tests/legacy/unit-tests/countries</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-coupon"><directory suffix=".php">./tests/legacy/unit-tests/coupon</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-crud"><directory suffix=".php">./tests/legacy/unit-tests/crud</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-customer"><directory suffix=".php">./tests/legacy/unit-tests/customer</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-discounts"><directory suffix=".php">./tests/legacy/unit-tests/discounts</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-email"><directory suffix=".php">./tests/legacy/unit-tests/email</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-exporter"><directory suffix=".php">./tests/legacy/unit-tests/exporter</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-formatting"><directory suffix=".php">./tests/legacy/unit-tests/formatting</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-gateways"><directory suffix=".php">./tests/legacy/unit-tests/gateways</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-geolocation"><directory suffix=".php">./tests/legacy/unit-tests/geolocation</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-importer"><directory suffix=".php">./tests/legacy/unit-tests/importer</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-integrations"><directory suffix=".php">./tests/legacy/unit-tests/integrations</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-libraries"><directory suffix=".php">./tests/legacy/unit-tests/libraries</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-log"><directory suffix=".php">./tests/legacy/unit-tests/log</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-order"><directory suffix=".php">./tests/legacy/unit-tests/order</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-order-items"><directory suffix=".php">./tests/legacy/unit-tests/order-items</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-packages"><directory suffix=".php">./tests/legacy/unit-tests/packages</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-page-functions"><directory suffix=".php">./tests/legacy/unit-tests/page-functions</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-payment-gateways"><directory suffix=".php">./tests/legacy/unit-tests/payment-gateways</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-payment-tokens"><directory suffix=".php">./tests/legacy/unit-tests/payment-tokens</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-privacy"><directory suffix=".php">./tests/legacy/unit-tests/privacy</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-product"><directory suffix=".php">./tests/legacy/unit-tests/product</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-queue"><directory suffix=".php">./tests/legacy/unit-tests/queue</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-rest-api"><directory suffix=".php">./tests/legacy/unit-tests/rest-api</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-session"><directory suffix=".php">./tests/legacy/unit-tests/session</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-settings"><directory suffix=".php">./tests/legacy/unit-tests/settings</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-shipping"><directory suffix=".php">./tests/legacy/unit-tests/shipping</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-shortcodes"><directory suffix=".php">./tests/legacy/unit-tests/shortcodes</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-tax"><directory suffix=".php">./tests/legacy/unit-tests/tax</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-templates"><directory suffix=".php">./tests/legacy/unit-tests/templates</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-totals"><directory suffix=".php">./tests/legacy/unit-tests/totals</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-util"><directory suffix=".php">./tests/legacy/unit-tests/util</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-webhooks"><directory suffix=".php">./tests/legacy/unit-tests/webhooks</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-widgets"><directory suffix=".php">./tests/legacy/unit-tests/widgets</directory></testsuite>
+		<testsuite name="wc-unittests-legacy-woocommerce-admin"><directory suffix=".php">./tests/legacy/unit-tests/woocommerce-admin</directory></testsuite>
 	</testsuites>
 	<coverage includeUncoveredFiles="true">
 		<include>
