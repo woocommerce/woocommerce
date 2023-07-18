@@ -219,6 +219,11 @@ class BlockTemplateUtils {
 		$template->is_custom      = false; // Templates loaded from the filesystem aren't custom, ones that have been edited and loaded from the DB are.
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
 		$template->area           = 'uncategorized';
+
+		// Force the Mini-Cart template part to be in the Mini-Cart template part area.
+		if ( 'wp_template_part' === $template_type && 'mini-cart' === $template_file->slug ) {
+			$template->area = 'mini-cart';
+		}
 		return $template;
 	}
 
