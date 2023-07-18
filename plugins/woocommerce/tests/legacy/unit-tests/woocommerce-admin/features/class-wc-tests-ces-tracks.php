@@ -7,11 +7,16 @@
 
 use Automattic\WooCommerce\Internal\Admin\CustomerEffortScoreTracks;
 
-// CustomerEffortScoreTracks only works in wp-admin, so let's fake it.
 if ( ! class_exists( 'CurrentScreenMock' ) ) {
+	/**
+	 * Class CurrentScreenMock
+	 */
 	class CurrentScreenMock {
+		/**
+		 * CustomerEffortScoreTracks only works in wp-admin, so let's fake it.
+		 */
 		public function in_admin() {
-		    return true;
+			return true;
 		}
 	}
 }
@@ -44,7 +49,7 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 	}
 
 	public function tearDown(): void {
-	    parent::tearDown();
+		parent::tearDown();
 		if ( $this->current_screen_backup ) {
 			$GLOBALS['current_screen'] = $this->current_screen_backup;
 		}
