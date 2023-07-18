@@ -103,10 +103,10 @@ class DocsStore {
 			'tag'        => 'woocommerce_docs',
 		);
 
-		$existing_page = get_posts( $args );
+		$existing_doc = get_posts( $args );
 
-		if ( ! empty( $existing_page ) ) {
-			$post['ID'] = $existing_page[0]->ID;
+		if ( ! empty( $existing_doc ) ) {
+			// $post['ID'] = $existing_doc[0]->ID;
 			return wp_update_post( $post );
 		}
 	}

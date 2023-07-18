@@ -122,6 +122,12 @@ class BlockConverter {
 		return $block_html;
 	}
 
+	private static function escape_full_url( $url ) {
+		// Check if the URL is a relative link, relative URLs will be replaced later.
+		$is_relative_link = ( strpos( $url, '://' ) === false );
+		return $is_relative_link ? $url : esc_url( $url );
+	}
+
 	/**
 	 * Convert child nodes to blocks.
 	 *
@@ -136,9 +142,13 @@ class BlockConverter {
 
 			if ( XML_ELEMENT_NODE === $node_type ) {
 				if ( 'a' === $node_name ) {
-					$href         = esc_url( $child_node->getAttribute( 'href' ) );
+					$href = self::escape_full_url( $child_node->getAttribute( 'href' ) );
+					error_log( 'raw url: ' . $child_node->getAttribute( 'href' ) . ' escaped url: ' . $href );
 					$link_content = $this->convert_child_nodes_to_blocks( $child_node );
-					$content     .= "<a href=\"{$href}\">{$link_content}</a>";
+
+					error_log( 'The link href is: ' . $href );
+					error_log( 'the raw url: ' . $child_node->getAttribute( 'href' ) );
+					$content .= "<a href=\"{$href}\">{$link_content}</a>";
 				} elseif ( 'em' === $node_name || 'strong' === $node_name ) {
 					$inline_content = $this->convert_child_nodes_to_blocks( $child_node );
 					$content       .= "<{$node_name}>{$inline_content}</{$node_name}>";

@@ -30,7 +30,7 @@ class ManifestProcessor {
 	 * @param array $doc_ids An array to maintain a list of created/updated post IDs.
 	 * @param int   $parent_id The parent ID.
 	 */
-	private static function process_categories( $categories, $logger_action_id, $doc_ids, $parent_id = 0 ) {
+	private static function process_categories( $categories, $logger_action_id, &$doc_ids, $parent_id = 0 ) {
 		foreach ( $categories as $category ) {
 			$term = CategoryCreator::create_category_from_manifest_entry( $category, $parent_id );
 

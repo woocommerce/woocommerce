@@ -72,14 +72,14 @@ class RelativeLinkParser {
 		foreach ( $anchors as $anchor ) {
 			$href = $anchor->getAttribute( 'href' );
 
-			// Ignore full URLs.
-			if ( ! filter_var( $href, FILTER_VALIDATE_URL ) ) {
-				$relative_path = trim( $href, '/' );
+			error_log( 'SHould i replace this link? ' . $href );
 
-				if ( isset( $link_lookup[ $relative_path ] ) ) {
-					$permalink = get_permalink( $link_lookup[ $relative_path ] );
-
-					$anchor->setAttribute( 'href', $permalink );
+			// Check if its a url or relative path.
+			if ( ! preg_match( ' / ^ https ?: \ / \// ', $href ) ) {
+				error_log( 'Replacing relative link: ' . $href . ' with ' . $link_lookup[ $href ] );
+				// Check if the link exists in the lookup object.
+				if ( isset( $link_lookup[ $href ] ) ) {
+					$anchor->setAttribute( 'href', $link_lookup[ $href ] );
 				}
 			}
 		}
