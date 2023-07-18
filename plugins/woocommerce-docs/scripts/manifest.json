@@ -1,53 +1,64 @@
 {
-	"categories": [
-		{
-			"category_title": "Getting Started with WooCommerce",
-			"posts": [
-				{
-					"post_title": "Local Development",
-					"edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
-					"url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
-					"id": "c068ce54044fa44c760a69bd71ef21274f2a5a37"
-				}
-			],
-			"categories": [
-				{
-					"category_title": "Installation",
-					"posts": [
-						{
-							"edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
-							"url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
-							"id": "fb59bd01dda7b090e5b0a557948e155a6b679d6a"
-						}
-					],
-					"categories": []
-				},
-				{
-					"category_title": "Troubleshooting Problems",
-					"posts": [
-						{
-							"post_title": "What Went Wrong?",
-							"edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
-							"url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
-							"id": "1f88c4d039e72c059c928ab475ad1ea0a02c8abb"
-						}
-					],
-					"categories": []
-				}
-			]
-		},
-		{
-			"category_title": "Testing WooCommerce",
-			"posts": [
-				{
-					"post_title": "Unit Testing",
-					"edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
-					"url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
-					"id": "120770c899215a889246b47ac883e4dda1f97b8b"
-				}
-			],
-			"categories": []
-		}
-	],
-	"hash": "db0047299d7dd99bd9a657d59be9e6e4f113710a253c27417427965f7a5ebc8c"
+  "categories": [
+    {
+      "category_title": "Getting Started with WooCommerce",
+      "posts": [
+        {
+          "post_title": "Local Development",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
+          "file_path": "/Users/samseay/Code/automattic/woo/woocommerce/plugins/woocommerce-docs/example-docs/get-started/local-development.md",
+          "id": "c068ce54044fa44c760a69bd71ef21274f2a5a37",
+          "links": {
+            "./installation/install-plugin.md": "fb59bd01dda7b090e5b0a557948e155a6b679d6a"
+          }
+        }
+      ],
+      "categories": [
+        {
+          "category_title": "Installation",
+          "posts": [
+            {
+              "post_title": "Install the Plugin",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
+              "file_path": "/Users/samseay/Code/automattic/woo/woocommerce/plugins/woocommerce-docs/example-docs/get-started/installation/install-plugin.md",
+              "id": "fb59bd01dda7b090e5b0a557948e155a6b679d6a"
+            }
+          ],
+          "categories": []
+        },
+        {
+          "category_title": "Troubleshooting Problems",
+          "posts": [
+            {
+              "post_title": "What Went Wrong?",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
+              "file_path": "/Users/samseay/Code/automattic/woo/woocommerce/plugins/woocommerce-docs/example-docs/get-started/troubleshooting/what-went-wrong.md",
+              "id": "1f88c4d039e72c059c928ab475ad1ea0a02c8abb",
+              "links": {
+                "../../testing/unit-tests.md": "120770c899215a889246b47ac883e4dda1f97b8b"
+              }
+            }
+          ],
+          "categories": []
+        }
+      ]
+    },
+    {
+      "category_title": "Testing WooCommerce",
+      "posts": [
+        {
+          "post_title": "Unit Testing",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
+          "file_path": "/Users/samseay/Code/automattic/woo/woocommerce/plugins/woocommerce-docs/example-docs/testing/unit-tests.md",
+          "id": "120770c899215a889246b47ac883e4dda1f97b8b"
+        }
+      ],
+      "categories": []
+    }
+  ],
+  "hash": "926a7683cd701311dc1861f0a0653d9f630bc57b64e5ac4b55c833668a9a18d9"
 }

@@ -7,48 +7,60 @@ import fs from 'fs';
 /**
  * Internal dependencies
  */
-import { Category, generatePageId } from './generate-manifest';
+import { Category, Post, generatePageId } from './generate-manifest';
 
 /**
- * Process markdown links in the manifest.
+ * Process relative markdown links in the manifest.
  *
- * @param manifestEntry Category or Post
+ * @param manifest      Category or Post
  * @param rootDirectory Root directory of the project
  * @param projectName   Name of the project
  */
-export const processMarkdownLinks = async (
-	manifestEntry: Category,
+export const processMarkdownLinks = (
+	manifest: Category,
 	rootDirectory: string,
 	projectName: string
 ) => {
-	for ( const post of manifestEntry.posts || [] ) {
-		const filePath = path.resolve(
-			rootDirectory,
-			post.file_path as string
-		);
-		const fileContent = fs.readFileSync( filePath, 'utf-8' );
-		const linkRegex = /\[(.*?)\]\((.*?)\)/g;
+	const updatedManifest: Category = { ...manifest };
 
-		let match;
-		while ( ( match = linkRegex.exec( fileContent ) ) ) {
-			// const linkText = match[ 1 ];
-			const relativePath = match[ 2 ];
-			const linkedFilePath = path.resolve(
-				path.dirname( filePath ),
-				relativePath
+	if ( updatedManifest.posts ) {
+		updatedManifest.posts = updatedManifest.posts.map( ( post ) => {
+			const updatedPost: Post = { ...post };
+			const filePath = path.resolve(
+				rootDirectory,
+				updatedPost.file_path as string
 			);
+			const fileContent = fs.readFileSync( filePath, 'utf-8' );
+			const linkRegex = /\[(?:.*?)\]\((.*?)\)/g;
 
-			if ( fs.existsSync( linkedFilePath ) ) {
-				const linkedId = generatePageId( linkedFilePath, projectName );
-				post.links = post.links || {};
-				post.links[ relativePath ] = linkedId;
+			let match;
+			while ( ( match = linkRegex.exec( fileContent ) ) ) {
+				const relativePath = match[ 1 ];
+				const linkedFilePath = path.resolve(
+					path.dirname( filePath ),
+					relativePath
+				);
+
+				if ( fs.existsSync( linkedFilePath ) ) {
+					const linkedId = generatePageId(
+						linkedFilePath,
+						projectName
+					);
+					updatedPost.links = updatedPost.links || {};
+					updatedPost.links[ relativePath ] = linkedId;
+				}
 			}
-		}
+
+			return updatedPost;
+		} );
 	}
 
-	for ( const category of manifestEntry.categories || [] ) {
-		await processMarkdownLinks( category, rootDirectory, projectName );
+	if ( updatedManifest.categories ) {
+		updatedManifest.categories = updatedManifest.categories.map(
+			( category ) =>
+				processMarkdownLinks( category, rootDirectory, projectName )
+		);
 	}
 
-	return manifestEntry;
+	return updatedManifest;
 };

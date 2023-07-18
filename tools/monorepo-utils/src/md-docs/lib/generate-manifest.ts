@@ -18,7 +18,7 @@ export interface Category {
 	categories?: Category[];
 }
 
-interface Post {
+export interface Post {
 	[ key: string ]: unknown;
 }
 
@@ -80,6 +80,7 @@ async function processDirectory(
 					subDirectory,
 					filePath
 				),
+				file_path: filePath,
 				id: generatePageId( filePath, projectName ),
 			} );
 		}
