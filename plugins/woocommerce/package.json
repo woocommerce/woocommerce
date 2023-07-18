@@ -60,7 +60,7 @@
 		"@babel/register": "7.12.1",
 		"@playwright/test": "^1.33.0",
 		"@typescript-eslint/eslint-plugin": "^5.54.0",
-		"@typescript-eslint/experimental-utils": "^5.43.0",
+		"@typescript-eslint/experimental-utils": "^5.54.0",
 		"@typescript-eslint/parser": "^5.54.0",
 		"@woocommerce/admin-e2e-tests": "workspace:*",
 		"@woocommerce/api": "workspace:*",
@@ -109,7 +109,7 @@
 	},
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.5"
+		"pnpm": "^8.6.7"
 	},
 	"browserslist": [
 		"> 0.1%",
