@@ -361,7 +361,7 @@ class Init {
 								array(
 									'woocommerce/product-checkbox-field',
 									array(
-										'label'    => __( 'Disable product reviews', 'woocommerce' ),
+										'label'    => __( 'Enable product reviews', 'woocommerce' ),
 										'property' => 'reviews_allowed',
 									),
 								),
