@@ -8,9 +8,11 @@
 use Automattic\WooCommerce\Internal\Admin\CustomerEffortScoreTracks;
 
 // CustomerEffortScoreTracks only works in wp-admin, so let's fake it.
-class CurrentScreenMock {
-	public function in_admin() {
-	    return true;
+if ( ! class_exists( 'CurrentScreenMock' ) ) {
+	class CurrentScreenMock {
+		public function in_admin() {
+		    return true;
+		}
 	}
 }
 

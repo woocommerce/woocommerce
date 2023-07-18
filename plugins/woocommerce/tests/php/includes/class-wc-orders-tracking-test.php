@@ -1,5 +1,14 @@
 <?php
 
+// CustomerEffortScoreTracks only works in wp-admin, so let's fake it.
+if ( ! class_exists( 'CurrentScreenMock' ) ) {
+	class CurrentScreenMock {
+		public function in_admin() {
+		    return true;
+		}
+	}
+}
+
 /**
  * Class WC_Orders_Tracking_Test.
  */
