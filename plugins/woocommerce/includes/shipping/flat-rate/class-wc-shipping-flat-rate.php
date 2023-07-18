@@ -192,19 +192,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
 				$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
 
-				$no_class_cost = 0 === strlen( $class_cost_string );
-
-				if ( $no_class_cost && 'class' === $this->type ) {
-					// If we are calculating per each individual shipping class, but one of the products belongs to a
-					// class for which a cost has not been defined, then we cannot supply a shipping rate.
-					$has_costs = false;
-					break;
-				} elseif ( $no_class_cost ) {
-					// Otherwise, if we do not have a class cost but we are intending to use the highest available
-					// rate, we should simply skip this product.
-					continue;
-				}
-
 				if ( '' === $class_cost_string ) {
 					continue;
 				}

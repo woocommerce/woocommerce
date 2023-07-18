@@ -7,7 +7,7 @@ import debugFactory from 'debug';
 /**
  * Internal dependencies
  */
-import { WOO_AI_PLUGIN_FEATURE_NAME } from '../constants';
+import { createExtendedError } from './create-extended-error';
 
 const debugToken = debugFactory( 'jetpack-ai-assistant:token' );
 
@@ -19,6 +19,7 @@ declare global {
 		JP_CONNECTION_INITIAL_STATE: {
 			apiNonce: string;
 			siteSuffix: string;
+			connectionStatus: { isActive: boolean };
 		};
 	}
 }
@@ -37,7 +38,10 @@ export async function requestJetpackToken() {
 			tokenData = JSON.parse( token );
 		} catch ( err ) {
 			debugToken( 'Error parsing token', err );
-			throw new Error( 'Error parsing cached token' );
+			throw createExtendedError(
+				'Error parsing cached token',
+				'token_parse_error'
+			);
 		}
 	}
 
@@ -64,7 +68,7 @@ export async function requestJetpackToken() {
 			blogId: siteSuffix,
 
 			/**
-			 * Let's expire the token in 5 minutes
+			 * Let's expire the token in 2 minutes
 			 */
 			expire: Date.now() + JWT_TOKEN_EXPIRATION_TIME,
 		};
@@ -74,7 +78,10 @@ export async function requestJetpackToken() {
 
 		return newTokenData;
 	} catch ( e ) {
-		throw new Error( 'Error fetching new token' );
+		throw createExtendedError(
+			'Error fetching new token',
+			'token_fetch_error'
+		);
 	}
 }
 
@@ -83,7 +90,7 @@ export async function requestJetpackToken() {
  *
  * @param {string} prompt - The query to send to the API
  */
-export async function getCompletion( prompt: string ) {
+export async function getCompletion( prompt: string, feature: string ) {
 	const { token } = await requestJetpackToken();
 
 	const url = new URL(
@@ -92,7 +99,7 @@ export async function getCompletion( prompt: string ) {
 
 	url.searchParams.append( 'prompt', prompt );
 	url.searchParams.append( 'token', token );
-	url.searchParams.append( 'feature', WOO_AI_PLUGIN_FEATURE_NAME );
+	url.searchParams.append( 'feature', feature );
 
 	return new EventSource( url.toString() );
 }
