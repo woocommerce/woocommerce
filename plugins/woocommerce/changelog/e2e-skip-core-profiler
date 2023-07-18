@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix skipping of core profiler in page-loads.spec.js.
