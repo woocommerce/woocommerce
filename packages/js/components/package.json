@@ -1,12 +1,12 @@
 {
 	"name": "@woocommerce/components",
-	"version": "12.0.0",
+	"version": "12.1.0",
 	"description": "UI components for WooCommerce.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"engines": {
 		"node": "^16.14.1",
-		"pnpm": "^8.6.5"
+		"pnpm": "^8.6.7"
 	},
 	"keywords": [
 		"wordpress",

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Do not show "Adding new attribute failed" error message when loading of product screens is interrupted by page unload.

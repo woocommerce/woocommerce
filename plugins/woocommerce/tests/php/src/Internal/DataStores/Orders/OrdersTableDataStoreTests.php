@@ -2468,4 +2468,32 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			$this->assertSame( $order, $order_from_before_delete );
 		}
 	}
+
+	/**
+	 * @testDox Bacfilling posts doesn't read stale data.
+	 */
+	public function test_backfill_posts_dont_read_stale_data() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		$product = new WC_Product();
+		$product->set_price( 10 );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product );
+		$order->save();
+
+		$this->assertEquals( 0, $product->get_total_sales() );
+
+		$order->set_status( 'processing' );
+		$order->save();
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 1, $product->get_total_sales() ); // Sale is increased when status is changed to processing.
+
+		$order->set_status( 'completed' );
+		$order->save();
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 1, $product->get_total_sales() ); // Sale is not increased when status is changed to completed (from processing).
+	}
 }

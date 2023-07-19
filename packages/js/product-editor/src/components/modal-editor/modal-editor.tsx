@@ -52,6 +52,7 @@ export function ModalEditor( {
 				initialBlocks={ initialBlocks }
 				onInput={ debouncedOnChange }
 				onChange={ debouncedOnChange }
+				closeModal={ handleClose }
 			/>
 		</Modal>
 	);

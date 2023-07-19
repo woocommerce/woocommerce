@@ -1,4 +1,5 @@
 .woocommerce-iframe-editor {
+	box-sizing: border-box;
 	display: flex;
     flex-direction: column;
     height: 100%;
@@ -20,6 +21,7 @@
 	}
 
 	&__content {
+		box-sizing: border-box;
 		flex-grow: 1;
 		background-color: #2f2f2f;
 		padding: 90px 48px 40px;
@@ -29,9 +31,21 @@
 		position: relative;
 	}
 
+	&__content-inserter-clipper {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 40px;
+		background-color: inherit;
+		z-index: 100;
+	}
+
 	&__sidebar {
 		flex-shrink: 0;
+		height: 100%;
 		width: 280px;
+		overflow: scroll;
 	}
 
 	.block-editor-block-contextual-toolbar.is-fixed {

@@ -1,5 +1,5 @@
 ---
-title: What Went Wrong?
+post_title: What Went Wrong?
 ---
 
 ## Try some troubleshooting

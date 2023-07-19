@@ -170,6 +170,8 @@ export function Edit( { attributes }: BlockEditProps< NameBlockAttributes > ) {
 						) }
 						onChange={ setName }
 						value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
+						autoComplete="off"
+						data-1p-ignore
 						onBlur={ () => {
 							setSkuIfEmpty();
 							validateName();
