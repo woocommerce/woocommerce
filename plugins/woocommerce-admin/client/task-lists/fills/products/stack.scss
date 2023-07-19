@@ -40,6 +40,9 @@
 				display: none;
 			}
 		}
+		&:first-child {
+			margin-top: 0;
+		}
 	}
 
 	.woocommerce-list__item-inner {

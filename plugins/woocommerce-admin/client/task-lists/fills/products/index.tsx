@@ -54,10 +54,6 @@ const ViewControlButton: React.FC< {
 export const Products = () => {
 	const [ isExpanded, setIsExpanded ] = useState< boolean >( false );
 
-	// State to track whether the task list item is clicked and show a spinner
-	const [ isTaskListItemclicked, setIsTaskListItemclicked ] =
-		useState< boolean >( false );
-
 	const [
 		isConfirmingLoadSampleProducts,
 		setIsConfirmingLoadSampleProducts,
@@ -81,16 +77,12 @@ export const Products = () => {
 		getOnboardingProductType()
 	);
 
-	const productTypes = useProductTypeListItems(
+	const { productTypes, isRequesting } = useProductTypeListItems(
 		// Subscriptions only in the US
 		getProductTypes( {
 			exclude: isStoreInUS ? [] : [ 'subscription' ],
 		} ),
-		surfacedProductTypeKeys,
-		{
-			// Reset the value of state to false in case of an error
-			setIsTaskListItemclicked,
-		}
+		surfacedProductTypeKeys
 	);
 	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
 
@@ -101,7 +93,6 @@ export const Products = () => {
 				onClick: () => {
 					productType.onClick();
 					recordCompletionTime();
-					setIsTaskListItemclicked( true );
 				},
 			} ) ),
 		[ recordCompletionTime, productTypes ]
@@ -147,7 +138,7 @@ export const Products = () => {
 						setIsConfirmingLoadSampleProducts( true )
 					}
 					showOtherOptions={ isExpanded }
-					isTaskListItemclicked={ isTaskListItemclicked }
+					isTaskListItemclicked={ isRequesting }
 				/>
 				<ViewControlButton
 					isExpanded={ isExpanded }
