@@ -225,6 +225,7 @@ final class BlockTypesController {
 		);
 
 		if ( Package::feature()->is_experimental_build() ) {
+			$block_types[] = 'ProductAverageRating';
 			$block_types[] = 'ProductCollection';
 			$block_types[] = 'ProductRatingCounter';
 			$block_types[] = 'ProductRatingStars';
