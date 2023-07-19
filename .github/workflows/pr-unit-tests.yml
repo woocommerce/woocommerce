@@ -76,7 +76,6 @@ jobs:
             - name: Install Node
               shell: bash
               run: |
-                  pnpm -w install turbo
                   pnpm install --ignore-scripts
 
             - name: Install PHP Dependencies
