@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+include post_ID in HPOS order edit screen
