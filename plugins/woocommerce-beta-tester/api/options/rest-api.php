@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable
 
 register_woocommerce_admin_test_helper_rest_route(
 	'/options',
