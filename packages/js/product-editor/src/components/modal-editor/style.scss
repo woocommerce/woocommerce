@@ -20,11 +20,12 @@ $modal-editor-height: 60px;
     }
 
     .components-modal__content {
-        margin-top: $modal-editor-height;
+		display: flex;
+		margin-top: $modal-editor-height;
         padding: 0;
-    }
 
-    .woocommerce-iframe-editor {
-        box-sizing: border-box;
+		& > div {
+			width: 100%;
+		}
     }
 }

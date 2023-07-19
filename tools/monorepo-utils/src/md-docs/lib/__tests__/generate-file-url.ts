@@ -6,7 +6,7 @@ import path from 'path';
 /**
  * Internal dependencies
  */
-import { generateFileUrl } from '../generate-manifest';
+import { generateFileUrl } from '../generate-urls';
 
 describe( 'generateFileUrl', () => {
 	it( 'should generate a file url relative to the root directory provided', () => {

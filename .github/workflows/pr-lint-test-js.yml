@@ -26,4 +26,4 @@ jobs:
               run: pnpm run -r --filter='release-posts' --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color lint
 
             - name: Test
-              run: pnpm run test --filter='woocommerce/client/admin...' --filter='!@woocommerce/e2e*' --filter='!@woocommerce/api' --color
+              run: pnpm run test --filter='woocommerce/client/admin...' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/e2e*' --filter='@woocommerce/monorepo-utils' --filter='!@woocommerce/api' --color

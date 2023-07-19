@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Revert "Always show pricing group fields, disable if not available for a product type"
