@@ -47,7 +47,7 @@ class ErrorSchema extends AbstractSchema {
 	 * @param \WP_Error $error Error object.
 	 * @return array
 	 */
-	public function get_item_response( \WP_Error $error ) {
+	public function get_item_response( $error ) {
 		return [
 			'code'    => $this->prepare_html_response( $error->get_error_code() ),
 			'message' => $this->prepare_html_response( $error->get_error_message() ),

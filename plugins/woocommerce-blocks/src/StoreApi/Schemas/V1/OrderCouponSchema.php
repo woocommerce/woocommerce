@@ -26,13 +26,19 @@ class OrderCouponSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return [
-			'code'   => [
+			'code'          => [
 				'description' => __( 'The coupons unique code.', 'woo-gutenberg-products-block' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			'totals' => [
+			'discount_type' => [
+				'description' => __( 'The discount type for the coupon (e.g. percentage or fixed amount)', 'woo-gutenberg-products-block' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
+			'totals'        => [
 				'description' => __( 'Total amounts provided using the smallest unit of the currency.', 'woo-gutenberg-products-block' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
@@ -61,13 +67,15 @@ class OrderCouponSchema extends AbstractSchema {
 	/**
 	 * Convert an order coupon to an object suitable for the response.
 	 *
-	 * @param \WC_Order_Item_Coupon $coupon Order coupon array.
+	 * @param \WC_Order_Item_Coupon $coupon Order coupon object.
 	 * @return array
 	 */
-	public function get_item_response( \WC_Order_Item_Coupon $coupon ) {
+	public function get_item_response( $coupon ) {
+		$coupon_object = new \WC_Coupon( $coupon->get_code() );
 		return [
-			'code'   => $coupon->get_code(),
-			'totals' => (object) $this->prepare_currency_response(
+			'code'          => $coupon->get_code(),
+			'discount_type' => $coupon_object ? $coupon_object->get_discount_type() : '',
+			'totals'        => (object) $this->prepare_currency_response(
 				[
 					'total_discount'     => $this->prepare_money_response( $coupon->get_discount(), wc_get_price_decimals() ),
 					'total_discount_tax' => $this->prepare_money_response( $coupon->get_discount_tax(), wc_get_price_decimals(), PHP_ROUND_HALF_DOWN ),

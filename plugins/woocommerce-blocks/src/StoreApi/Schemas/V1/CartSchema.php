@@ -349,39 +349,48 @@ class CartSchema extends AbstractSchema {
 		$cross_sells = array_filter( array_map( 'wc_get_product', $cart->get_cross_sells() ), 'wc_products_array_filter_visible' );
 
 		return [
-			'coupons'                 => $this->get_item_responses_from_schema( $this->coupon_schema, $cart->get_applied_coupons() ),
-			'shipping_rates'          => $this->get_item_responses_from_schema( $this->shipping_rate_schema, $shipping_packages ),
-			'shipping_address'        => $this->shipping_address_schema->get_item_response( wc()->customer ),
-			'billing_address'         => $this->billing_address_schema->get_item_response( wc()->customer ),
 			'items'                   => $this->get_item_responses_from_schema( $this->item_schema, $cart->get_cart() ),
+			'coupons'                 => $this->get_item_responses_from_schema( $this->coupon_schema, $cart->get_applied_coupons() ),
+			'fees'                    => $this->get_item_responses_from_schema( $this->fee_schema, $cart->get_fees() ),
+			'totals'                  => (object) $this->prepare_currency_response( $this->get_totals( $cart ) ),
+			'shipping_address'        => (object) $this->shipping_address_schema->get_item_response( wc()->customer ),
+			'billing_address'         => (object) $this->billing_address_schema->get_item_response( wc()->customer ),
+			'needs_payment'           => $cart->needs_payment(),
+			'needs_shipping'          => $cart->needs_shipping(),
+			'payment_requirements'    => $this->extend->get_payment_requirements(),
+			'has_calculated_shipping' => $has_calculated_shipping,
+			'shipping_rates'          => $this->get_item_responses_from_schema( $this->shipping_rate_schema, $shipping_packages ),
 			'items_count'             => $cart->get_cart_contents_count(),
 			'items_weight'            => wc_get_weight( $cart->get_cart_contents_weight(), 'g' ),
 			'cross_sells'             => $this->get_item_responses_from_schema( $this->cross_sells_item_schema, $cross_sells ),
-			'needs_payment'           => $cart->needs_payment(),
-			'needs_shipping'          => $cart->needs_shipping(),
-			'has_calculated_shipping' => $has_calculated_shipping,
-			'fees'                    => $this->get_item_responses_from_schema( $this->fee_schema, $cart->get_fees() ),
-			'totals'                  => (object) $this->prepare_currency_response(
-				[
-					'total_items'        => $this->prepare_money_response( $cart->get_subtotal(), wc_get_price_decimals() ),
-					'total_items_tax'    => $this->prepare_money_response( $cart->get_subtotal_tax(), wc_get_price_decimals() ),
-					'total_fees'         => $this->prepare_money_response( $cart->get_fee_total(), wc_get_price_decimals() ),
-					'total_fees_tax'     => $this->prepare_money_response( $cart->get_fee_tax(), wc_get_price_decimals() ),
-					'total_discount'     => $this->prepare_money_response( $cart->get_discount_total(), wc_get_price_decimals() ),
-					'total_discount_tax' => $this->prepare_money_response( $cart->get_discount_tax(), wc_get_price_decimals() ),
-					'total_shipping'     => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_total(), wc_get_price_decimals() ) : null,
-					'total_shipping_tax' => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_tax(), wc_get_price_decimals() ) : null,
-
-					// Explicitly request context='edit'; default ('view') will render total as markup.
-					'total_price'        => $this->prepare_money_response( $cart->get_total( 'edit' ), wc_get_price_decimals() ),
-					'total_tax'          => $this->prepare_money_response( $cart->get_total_tax(), wc_get_price_decimals() ),
-					'tax_lines'          => $this->get_tax_lines( $cart ),
-				]
-			),
 			'errors'                  => $cart_errors,
 			'payment_methods'         => array_values( wp_list_pluck( WC()->payment_gateways->get_available_payment_gateways(), 'id' ) ),
-			'payment_requirements'    => $this->extend->get_payment_requirements(),
 			self::EXTENDING_KEY       => $this->get_extended_data( self::IDENTIFIER ),
+		];
+	}
+
+	/**
+	 * Get total data.
+	 *
+	 * @param \WC_Cart $cart Cart class instance.
+	 * @return array
+	 */
+	protected function get_totals( $cart ) {
+		$has_calculated_shipping = $cart->show_shipping();
+
+		return [
+			'total_items'        => $this->prepare_money_response( $cart->get_subtotal(), wc_get_price_decimals() ),
+			'total_items_tax'    => $this->prepare_money_response( $cart->get_subtotal_tax(), wc_get_price_decimals() ),
+			'total_fees'         => $this->prepare_money_response( $cart->get_fee_total(), wc_get_price_decimals() ),
+			'total_fees_tax'     => $this->prepare_money_response( $cart->get_fee_tax(), wc_get_price_decimals() ),
+			'total_discount'     => $this->prepare_money_response( $cart->get_discount_total(), wc_get_price_decimals() ),
+			'total_discount_tax' => $this->prepare_money_response( $cart->get_discount_tax(), wc_get_price_decimals() ),
+			'total_shipping'     => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_total(), wc_get_price_decimals() ) : null,
+			'total_shipping_tax' => $has_calculated_shipping ? $this->prepare_money_response( $cart->get_shipping_tax(), wc_get_price_decimals() ) : null,
+			// Explicitly request context='edit'; default ('view') will render total as markup.
+			'total_price'        => $this->prepare_money_response( $cart->get_total( 'edit' ), wc_get_price_decimals() ),
+			'total_tax'          => $this->prepare_money_response( $cart->get_total_tax(), wc_get_price_decimals() ),
+			'tax_lines'          => $this->get_tax_lines( $cart ),
 		];
 	}
 

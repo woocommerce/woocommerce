@@ -42,6 +42,7 @@ The majority of our feature flagging is blocks, this is a list of them:
 -   Product Rating Stars ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/src/BlockTypesController.php#L230) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/bin/webpack-entries.js#L68-L70))
 -   Product Rating Counter ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/src/BlockTypesController.php#L229) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/bin/webpack-entries.js#L71-L73))
 -   ⚛️ Add to cart ([JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/dfd2902bd8a247b5d048577db6753c5e901fc60f/assets/js/atomic/blocks/product-elements/add-to-cart/index.ts#L26-L29)).
+-   Order Route ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/b4a9dc9334f82c09f533b0f88c947b5c34e4e546/src/StoreApi/RoutesController.php#L65-L67))
 
 ## Features behind flags
 

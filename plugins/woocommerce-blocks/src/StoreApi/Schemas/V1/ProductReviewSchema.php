@@ -158,7 +158,7 @@ class ProductReviewSchema extends AbstractSchema {
 	 * @param \WP_Comment $review Product review object.
 	 * @return array
 	 */
-	public function get_item_response( \WP_Comment $review ) {
+	public function get_item_response( $review ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$rating  = get_comment_meta( $review->comment_ID, 'rating', true ) === '' ? null : (int) get_comment_meta( $review->comment_ID, 'rating', true );
 		$data    = [
