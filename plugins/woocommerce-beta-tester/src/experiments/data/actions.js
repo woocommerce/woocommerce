@@ -7,11 +7,7 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import TYPES from './action-types';
-import {
-	EXPERIMENT_NAME_PREFIX,
-	TRANSIENT_NAME_PREFIX,
-	TRANSIENT_TIMEOUT_NAME_PREFIX,
-} from './constants';
+import { EXPERIMENT_NAME_PREFIX, TRANSIENT_NAME_PREFIX } from './constants';
 
 function toggleFrontendExperiment( experimentName, newVariation ) {
 	let storageItem = JSON.parse(
@@ -38,13 +34,14 @@ function toggleFrontendExperiment( experimentName, newVariation ) {
 function* toggleBackendExperiment( experimentName, newVariation ) {
 	try {
 		const payload = {};
-		payload[ TRANSIENT_NAME_PREFIX + experimentName ] = newVariation;
-		payload[ TRANSIENT_TIMEOUT_NAME_PREFIX + experimentName ] =
-			Math.round( Date.now() / 1000 ) + 3600;
+		payload[ TRANSIENT_NAME_PREFIX + experimentName ] = [
+			newVariation,
+			3600,
+		];
 
 		yield apiFetch( {
 			method: 'POST',
-			path: '/wc-admin/options',
+			path: '/wc-admin-test-helper/transients/',
 			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify( payload ),
 		} );
@@ -88,14 +85,11 @@ export function* addExperiment( experimentName, variation ) {
 export function* deleteExperiment( experimentName ) {
 	window.localStorage.removeItem( EXPERIMENT_NAME_PREFIX + experimentName );
 
-	const optionNames = [
-		TRANSIENT_NAME_PREFIX + experimentName,
-		TRANSIENT_TIMEOUT_NAME_PREFIX + experimentName,
-	];
+	const optionNames = [ TRANSIENT_NAME_PREFIX + experimentName ];
 
 	yield apiFetch( {
 		method: 'DELETE',
-		path: '/wc-admin-test-helper/options/' + optionNames.join( ',' ),
+		path: '/wc-admin-test-helper/transients/' + optionNames.join( ',' ),
 	} );
 
 	return {

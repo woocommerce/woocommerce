@@ -33,13 +33,14 @@ function getExperimentsFromFrontend() {
 export function* getExperiments() {
 	try {
 		const response = yield apiFetch( {
-			path: `${ API_NAMESPACE }/options?search=_transient_abtest_variation_`,
+			path:
+				`${ API_NAMESPACE }/transients?search=` + TRANSIENT_NAME_PREFIX,
 		} );
 
 		const experimentsFromBackend = response.map( ( experiment ) => {
 			return {
 				name: experiment.option_name.replace(
-					TRANSIENT_NAME_PREFIX,
+					'_transient_' + TRANSIENT_NAME_PREFIX,
 					''
 				),
 				variation:
