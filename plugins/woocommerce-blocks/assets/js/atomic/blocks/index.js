@@ -7,6 +7,7 @@ import './product-elements/image';
 import './product-elements/rating';
 import './product-elements/rating-stars';
 import './product-elements/rating-counter';
+import './product-elements/average-rating';
 import './product-elements/button';
 import './product-elements/summary';
 import './product-elements/sale-badge';
