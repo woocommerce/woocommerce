@@ -64,13 +64,13 @@ When getting the full statement the clause arrays are passed through two filters
 
 The filters are:
 
-- `apply_filters( "wc_admin_clauses_{$type}", $clauses, $context );`
-- `apply_filters( "wc_admin_clauses_{$type}_{$context}", $clauses );`
+- `apply_filters( "woocommerce_analytics_clauses_{$type}", $clauses, $context );`
+- `apply_filters( "woocommerce_analytics_clauses_{$type}_{$context}", $clauses );`
 
 Example usage
 
 ```
-add_filter( 'wc_admin_clauses_product_stats_select_total', 'my_custom_product_stats' );
+add_filter( 'woocommerce_analytics_clauses_product_stats_select_total', 'my_custom_product_stats' );
 /**
  * Add sample data to product stats totals.
  *
