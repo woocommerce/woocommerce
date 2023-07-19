@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi;
 
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Exception;
 use Routes\AbstractRoute;
@@ -60,6 +61,10 @@ class RoutesController {
 				Routes\V1\ProductsBySlug::IDENTIFIER     => Routes\V1\ProductsBySlug::class,
 			],
 		];
+
+		if ( Package::is_experimental_build() ) {
+			$this->routes['v1'][ Routes\V1\Order::IDENTIFIER ] = Routes\V1\Order::class;
+		}
 	}
 
 	/**
