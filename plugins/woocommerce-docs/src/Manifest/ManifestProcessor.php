@@ -27,7 +27,7 @@ class ManifestProcessor {
 	 */
 	private static function process_categories( $categories, $logger_action_id, $parent_id = 0 ) {
 		foreach ( $categories as $category ) {
-			$term = CategoryCreator::create_category_from_manifest_entry( $category, $parent_id );
+			$term = CategoryCreator::create_or_update_category_from_manifest_entry( $category, $parent_id );
 
 			// Now, process the posts for this category.
 			foreach ( $category['posts'] as $post ) {

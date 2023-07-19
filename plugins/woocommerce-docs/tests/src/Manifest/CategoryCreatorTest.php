@@ -22,7 +22,7 @@ class CategoryCreatorTest extends WP_UnitTestCase {
 			'category_slug'  => 'test-category',
 		);
 
-		$term = CategoryCreator::create_category_from_manifest_entry( $manifest_category, null );
+		$term = CategoryCreator::create_or_update_category_from_manifest_entry( $manifest_category, null );
 		$id   = $term['term_id'];
 
 		$category = get_category( $id );
@@ -40,14 +40,14 @@ class CategoryCreatorTest extends WP_UnitTestCase {
 			'category_slug'  => 'test-category',
 		);
 
-		$category_id = CategoryCreator::create_category_from_manifest_entry( $manifest_category, null );
+		$category_id = CategoryCreator::create_or_update_category_from_manifest_entry( $manifest_category, null );
 
 		$manifest_category = array(
 			'category_title' => 'Test Category 2',
 			'category_slug'  => 'test-category-2',
 		);
 
-		$term = CategoryCreator::create_category_from_manifest_entry( $manifest_category, null );
+		$term = CategoryCreator::create_or_update_category_from_manifest_entry( $manifest_category, null );
 		$id   = $term['term_id'];
 
 		$category = get_category( $id );

@@ -15,7 +15,7 @@ class CategoryCreator {
 	 * @param mixed $parent_id The parent ID.
 	 * @return array The term.
 	 */
-	public static function create_category_from_manifest_entry( $manifest_category, $parent_id ) {
+	public static function create_or_update_category_from_manifest_entry( $manifest_category, $parent_id ) {
 		$term          = term_exists( $manifest_category['category_title'], 'category' );
 		$category_args = array( 'parent' => $parent_id );
 
