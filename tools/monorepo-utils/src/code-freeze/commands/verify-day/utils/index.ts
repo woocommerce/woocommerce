@@ -1,17 +1,21 @@
-const MILLIS_IN_A_DAY = 24 * 60 * 60 * 1000;
+/**
+ * External dependencies
+ */
+import { DateTime } from 'luxon';
+
 export const DAYS_BETWEEN_CODE_FREEZE_AND_RELEASE = 22;
 
 /**
  * Get a Date object of now or the override time when specified.
  *
- * @param {string} now The time to use in checking if today is the day of the code freeze. Default to now.
- * @return {Date} The Date object of now or the override time when specified.
+ * @param {string} now The time to use in checking if today is the day of the code freeze. Default to now. Supports ISO formatted dates or 'now'.
+ * @return {DateTime} The DateTime object of now or the override time when specified.
  */
-export const getToday = ( now = 'now' ): Date => {
-	const today = now === 'now' ? new Date() : new Date( now );
-	if ( isNaN( today.getTime() ) ) {
+export const getToday = ( now = 'now' ): DateTime => {
+	const today = now === 'now' ? DateTime.now() : DateTime.fromISO( now, { zone: 'utc' } );
+	if ( isNaN( today.toMillis() ) ) {
 		throw new Error(
-			'Invalid date: Check the override parameter (-o, --override) is a correct Date string'
+			'Invalid date: Check the override parameter (-o, --override) is a correct ISO formatted string or "now"'
 		);
 	}
 	return today;
@@ -20,13 +24,11 @@ export const getToday = ( now = 'now' ): Date => {
 /**
  * Get a future date from today to see if its the release day.
  *
- * @param {string} today The time to use in checking if today is the day of the code freeze. Default to now.
- * @return {Date} The Date object of the future date.
+ * @param {DateTime} today The time to use in checking if today is the day of the code freeze.
+ * @return {DateTime} The Date object of the future date.
  */
-export const getFutureDate = ( today: Date ) => {
-	return new Date(
-		today.getTime() + DAYS_BETWEEN_CODE_FREEZE_AND_RELEASE * MILLIS_IN_A_DAY
-	);
+export const getFutureDate = ( today: DateTime ) => {
+	return today.plus( { days: DAYS_BETWEEN_CODE_FREEZE_AND_RELEASE } );
 };
 /**
  * Determines if today is the day of the code freeze.
@@ -37,10 +39,10 @@ export const getFutureDate = ( today: Date ) => {
 export const isTodayCodeFreezeDay = ( now: string ) => {
 	const today = getToday( now );
 	const futureDate = getFutureDate( today );
-	const month = futureDate.getUTCMonth();
-	const year = futureDate.getUTCFullYear();
-	const firstDayOfMonth = new Date( Date.UTC( year, month, 1 ) );
-	const dayOfWeek = firstDayOfMonth.getUTCDay();
+	const month = futureDate.get( 'month' );
+	const year = futureDate.get( 'year' );
+	const firstDayOfMonth = DateTime.utc( year, month, 1 );
+	const dayOfWeek = firstDayOfMonth.get( 'weekday' );
 	const secondTuesday = dayOfWeek <= 2 ? 10 - dayOfWeek : 17 - dayOfWeek;
-	return futureDate.getUTCDate() === secondTuesday;
+	return futureDate.get( 'day' ) === secondTuesday;
 };

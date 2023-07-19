@@ -24,6 +24,7 @@
 		"graphql": "^16.6.0",
 		"gray-matter": "^4.0.3",
 		"js-yaml": "^4.1.0",
+		"luxon": "^3.3.0",
 		"octokit": "^2.0.14",
 		"ora": "^5.4.1",
 		"promptly": "^3.2.0",
@@ -33,6 +34,7 @@
 	},
 	"devDependencies": {
 		"@types/jest": "^27.4.1",
+		"@types/luxon": "^3.3.0",
 		"@types/node": "^16.18.18",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.32.0",
