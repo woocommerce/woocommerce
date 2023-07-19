@@ -91,8 +91,11 @@ const program = new Command( 'changefile' )
 				`Temporary clone of '${ headOwner }/${ name }' created at ${ tmpRepoPath }`
 			);
 
-			Logger.notice( `Checking out remote branch ${ branch }` );
-			await checkoutRemoteBranch( tmpRepoPath, branch );
+			// If a pull request is coming from a contributor's fork's trunk branch, we need to checkout the remote branch.
+			if ( branch !== 'trunk' ) {
+				Logger.notice( `Checking out remote branch ${ branch }` );
+				await checkoutRemoteBranch( tmpRepoPath, branch );
+			}
 
 			Logger.notice(
 				`Getting all touched projects requiring a changelog`
