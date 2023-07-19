@@ -12,10 +12,10 @@
 	<!-- wp:site-title /--></div>
 	<!-- /wp:group -->
 
-	<!-- wp:group {"style":{"spacing":{"blockGap":"8px"},"typography":{"fontSize":"13px"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
-	<div class="wp-block-group" style="font-size:13px"><!-- wp:woocommerce/mini-cart {"hasHiddenPrice":true,"style":{"typography":{"fontSize":"14px"}}} /-->
+	<!-- wp:group {"style":{"spacing":{"blockGap":"8px"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"right"}} -->
+	<div class="wp-block-group"><!-- wp:woocommerce/mini-cart {"hasHiddenPrice":true} /-->
 		<!-- wp:group {"style":{"spacing":{"blockGap":"16px"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-		<div class="wp-block-group"><!-- wp:navigation {"overlayMenu":"always","layout":{"type":"flex","justifyContent":"left"},"style":{"typography":{"fontSize":"24px"}}} /-->
+		<div class="wp-block-group"><!-- wp:navigation {"overlayMenu":"always","layout":{"type":"flex","justifyContent":"left"}} /-->
 			<!-- wp:separator {"className":"is-style-wide"} -->
 			<hr class="wp-block-separator has-alpha-channel-opacity is-style-wide"/>
 			<!-- /wp:separator --></div>
