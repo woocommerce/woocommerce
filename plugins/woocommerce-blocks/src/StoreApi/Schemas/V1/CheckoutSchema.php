@@ -197,8 +197,8 @@ class CheckoutSchema extends AbstractSchema {
 			'order_number'      => $order->get_order_number(),
 			'customer_note'     => $order->get_customer_note(),
 			'customer_id'       => $order->get_customer_id(),
-			'billing_address'   => $this->billing_address_schema->get_item_response( $order ),
-			'shipping_address'  => $this->shipping_address_schema->get_item_response( $order ),
+			'billing_address'   => (object) $this->billing_address_schema->get_item_response( $order ),
+			'shipping_address'  => (object) $this->shipping_address_schema->get_item_response( $order ),
 			'payment_method'    => $order->get_payment_method(),
 			'payment_result'    => [
 				'payment_status'  => $payment_result->status,

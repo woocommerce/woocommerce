@@ -87,7 +87,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 	 * @param \WC_Order|\WC_Customer $address An object with billing address.
 	 *
 	 * @throws RouteException When the invalid object types are provided.
-	 * @return stdClass
+	 * @return array
 	 */
 	public function get_item_response( $address ) {
 		$validation_util = new ValidationUtils();
@@ -99,7 +99,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 				$billing_state = '';
 			}
 
-			return (object) $this->prepare_html_response(
+			return $this->prepare_html_response(
 				[
 					'first_name' => $address->get_billing_first_name(),
 					'last_name'  => $address->get_billing_last_name(),
