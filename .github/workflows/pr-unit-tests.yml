@@ -73,11 +73,16 @@ jobs:
                   key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
                   restore-keys: ${{ runner.os }}-php-${{ matrix.php }}-composer-
     
-            - name: Install Node and PHP Dependencies
+            - name: Install Node
               shell: bash
               run: |
                   pnpm -w install turbo
-                  pnpm install
+                  pnpm install --ignore-scripts
+
+            - name: Install PHP Dependencies
+              shell: bash
+              run: |
+                  pnpm -r run postinstall
     
             - name: Get branch name
               id: get_branch
