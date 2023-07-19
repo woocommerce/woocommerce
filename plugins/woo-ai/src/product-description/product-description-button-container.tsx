@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
+import { useDispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { store as noticesStore } from '@wordpress/notices';
-import { useDispatch } from '@wordpress/data';
 import {
 	__experimentalUseCompletion as useCompletion,
 	UseCompletionError,
@@ -19,7 +19,7 @@ import {
 	WOO_AI_PLUGIN_FEATURE_NAME,
 } from '../constants';
 import { StopCompletionBtn, WriteItForMeBtn } from '../components';
-import { useFeedbackSnackbar, useTinyEditor } from '../hooks';
+import { useFeedbackSnackbar, useStoreBranding, useTinyEditor } from '../hooks';
 import {
 	getProductName,
 	getPostId,
@@ -29,7 +29,6 @@ import {
 	recordTracksFactory,
 } from '../utils';
 import { Attribute } from '../utils/types';
-import { useStoreBranding } from '../hooks/useStoreBranding';
 
 const DESCRIPTION_MAX_LENGTH = 300;
 
@@ -63,24 +62,27 @@ export function WriteItForMeButtonContainer() {
 	const [ productTitle, setProductTitle ] = useState< string >(
 		titleEl.current?.value || ''
 	);
-	const { data: brandingData, isError: isBrandingError } = useStoreBranding();
+
 	const { createErrorNotice } = useDispatch( noticesStore );
-	const [ brandingErrorDismissed, setBrandingErrorDismissed ] =
-		useState< boolean >( false );
-	if ( isBrandingError && ! brandingErrorDismissed ) {
-		createErrorNotice(
-			__(
-				'Error fetching branding data, content generation may be degraded.',
-				'woocommerce'
-			),
-			{
-				id: 'woo-ai-branding-error',
-				isDismissible: true,
-				type: 'snackbar',
-				onDismiss: () => setBrandingErrorDismissed( true ),
+	const [ errorNoticeDismissed, setErrorNoticeDismissed ] = useState( false );
+	const { data: brandingData } = useStoreBranding( {
+		onError: () => {
+			if ( ! errorNoticeDismissed ) {
+				createErrorNotice(
+					__(
+						'Error fetching branding data, content generation may be degraded.',
+						'woocommerce'
+					),
+					{
+						id: 'woo-ai-branding-error',
+						type: 'snackbar',
+						isDismissible: true,
+						onDismiss: () => setErrorNoticeDismissed( true ),
+					}
+				);
 			}
-		);
-	}
+		},
+	} );
 
 	const tinyEditor = useTinyEditor();
 

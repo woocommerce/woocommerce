@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { useQuery } from 'react-query';
+import { useEffect } from 'react';
+import { useQuery, UseQueryResult } from 'react-query';
 
 /**
  * Internal dependencies
@@ -19,6 +20,10 @@ interface BrandingError {
 	message: string;
 }
 
+type UseStoreBrandingOptions = {
+	onError?: ( error: BrandingError ) => void;
+};
+
 // Async function to fetch branding data
 async function fetchBrandingData(): Promise< BrandingData > {
 	const toneOfVoice = await getToneOfVoice();
@@ -27,12 +32,25 @@ async function fetchBrandingData(): Promise< BrandingData > {
 	return { toneOfVoice, businessDescription };
 }
 
-export function useStoreBranding() {
-	return useQuery< BrandingData, BrandingError >(
+export function useStoreBranding( {
+	onError,
+}: UseStoreBrandingOptions = {} ): UseQueryResult<
+	BrandingData,
+	BrandingError
+> {
+	const result = useQuery< BrandingData, BrandingError >(
 		'storeBranding',
 		fetchBrandingData,
 		{
 			refetchOnWindowFocus: false, // Do not refetch when window gains focus
 		}
 	);
+
+	useEffect( () => {
+		if ( result.isError && onError ) {
+			onError( result.error as BrandingError );
+		}
+	}, [ result.isError, result.error, onError ] );
+
+	return result;
 }

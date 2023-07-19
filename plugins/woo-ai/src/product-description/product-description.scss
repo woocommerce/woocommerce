@@ -24,6 +24,9 @@
 	.components-snackbar__action:has( .woo-ai-feedback-snackbar-action) {
 		text-decoration: none;
 	}
+	div.woocommerce-layout__footer .woocommerce-transient-notices {
+		position: absolute !important;
+	}
 }
 
 .wp-media-buttons {
