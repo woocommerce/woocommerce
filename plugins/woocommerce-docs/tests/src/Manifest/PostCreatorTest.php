@@ -26,7 +26,7 @@ class PostCreatorTest extends WP_UnitTestCase {
 
 		$actual_content = 'Hello World';
 
-		$post_id = PostCreator::create_post_from_manifest_entry( $manifest_post, $actual_content, 123 );
+		$post_id = PostCreator::create_or_update_post_from_manifest_entry( $manifest_post, $actual_content, 123 );
 
 		$post = get_post( $post_id );
 
@@ -52,7 +52,7 @@ class PostCreatorTest extends WP_UnitTestCase {
 		);
 
 		$actual_content = 'Hello World';
-		$post_id        = PostCreator::create_post_from_manifest_entry( $manifest_post, $actual_content, 123 );
+		$post_id        = PostCreator::create_or_update_post_from_manifest_entry( $manifest_post, $actual_content, 123 );
 		$post           = get_post( $post_id );
 
 		$manifest_post = array(
@@ -64,7 +64,7 @@ class PostCreatorTest extends WP_UnitTestCase {
 
 		$actual_content = 'Hello World 2';
 
-		$post_id = PostCreator::create_post_from_manifest_entry( $manifest_post, $actual_content, 123 );
+		$post_id = PostCreator::create_or_update_post_from_manifest_entry( $manifest_post, $actual_content, 123 );
 
 		$post = get_post( $post_id );
 
@@ -92,7 +92,7 @@ class PostCreatorTest extends WP_UnitTestCase {
 
 		$actual_content = 'Hello World';
 
-		$post_id = PostCreator::create_post_from_manifest_entry( $manifest_post, $actual_content, 123 );
+		$post_id = PostCreator::create_or_update_post_from_manifest_entry( $manifest_post, $actual_content, 123 );
 
 		$this->assertEquals( 'https://example.com/edit', get_post_meta( $post_id, 'edit_url', true ) );
 	}

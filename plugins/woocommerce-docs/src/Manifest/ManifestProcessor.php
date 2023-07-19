@@ -41,7 +41,7 @@ class ManifestProcessor {
 				}
 
 				$content = wp_remote_retrieve_body( $response );
-				$post_id = PostCreator::create_post_from_manifest_entry( $post, $content, $category['category_title'], $logger_action_id );
+				$post_id = PostCreator::create_or_update_post_from_manifest_entry( $post, $content, $category['category_title'], $logger_action_id );
 
 				wp_set_post_categories( $post_id, array( $term['term_id'] ) );
 			}
