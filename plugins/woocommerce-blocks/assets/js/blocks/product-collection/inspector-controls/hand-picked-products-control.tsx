@@ -134,6 +134,7 @@ const HandPickedProductsControl = ( {
 						? [ __( 'Loading…', 'woo-gutenberg-products-block' ) ]
 						: selectedProductIds || []
 				}
+				__experimentalExpandOnFocus={ true }
 			/>
 		</ToolsPanelItem>
 	);
