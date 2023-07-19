@@ -9,7 +9,7 @@ namespace WooCommerceDocs\Manifest;
  */
 class ManifestProcessor {
 	/**
-	 * Process manifest object into WordPress pages
+	 * Process manifest object into WordPress posts and categories.
 	 *
 	 * @param Object $manifest The manifest to process.
 	 * @param int    $logger_action_id The logger action ID.
