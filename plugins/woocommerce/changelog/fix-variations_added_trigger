@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore woocommerce_variations_added jQuery trigger.
