@@ -64,6 +64,15 @@ registerBlockComponent( {
 } );
 
 registerBlockComponent( {
+	blockName: 'woocommerce/product-average-rating',
+	component: lazy( () =>
+		import(
+			/* webpackChunkName: "product-average-rating" */ './product-elements/average-rating/block'
+		)
+	),
+} );
+
+registerBlockComponent( {
 	blockName: 'woocommerce/product-button',
 	component: lazy( () =>
 		import(

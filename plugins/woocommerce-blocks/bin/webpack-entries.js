@@ -65,6 +65,9 @@ const blocks = {
 	'product-top-rated': {},
 	'products-by-attribute': {},
 	'rating-filter': {},
+	'product-average-rating': {
+		isExperimental: true,
+	},
 	'product-rating-stars': {
 		isExperimental: true,
 	},
