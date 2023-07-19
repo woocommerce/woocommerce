@@ -17,12 +17,21 @@
 	.woocommerce-marketplace__content {
 		.product-list__content {
 			gap: $large-gap;
-			grid-template-columns: repeat(3, 1fr);
+			grid-template-columns: repeat(2, 1fr);
 		}
 	}
 }
 
 @media screen and (min-width: $breakpoint-large) {
+	.woocommerce-marketplace__content {
+		.product-list__content {
+			gap: $large-gap;
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+}
+
+@media screen and (min-width: $breakpoint-xlarge) {
 	.woocommerce-marketplace__content {
 		.product-list__content {
 			grid-template-columns: repeat(4, 1fr);
