@@ -2584,20 +2584,7 @@ FROM $order_meta_table
 		$operational_data_table_name = $this->get_operational_data_table_name();
 		$meta_table                  = $this->get_meta_table_name();
 
-		/**
-		 * Filters the maximum index length in the database.
-		 *
-		 *  Indexes have a maximum size of 767 bytes. Historically, we haven't need to be concerned about that.
-		 * As of WP 4.2, however, they moved to utf8mb4, which uses 4 bytes per character. This means that an index which
-		 * used to have room for floor(767/3) = 255 characters, now only has room for floor(767/4) = 191 characters.
-		 *
-		 * Additionally, MyISAM engine also limits the index size to 1000 bytes. We add this filter so that interested folks on InnoDB engine can increase the size till allowed 3600 bytes.
-		 *
-		 * @param int $max_index_length Maximum index length. Default 191.
-		 *
-		 * @since 8.0.0
-		 */
-		$max_index_length                   = apply_filters( 'woocommerce_database_max_index_length', 191 );
+		$max_index_length                   = $this->database_util->get_max_index_length();
 		$composite_meta_value_index_length  = max( $max_index_length - 8 - 100 - 1, 20 ); // 8 for order_id, 100 for meta_key, 10 minimum for meta_value.
 		$composite_customer_id_email_length = max( $max_index_length - 20, 20 ); // 8 for customer_id, 20 minimum for email.
 
