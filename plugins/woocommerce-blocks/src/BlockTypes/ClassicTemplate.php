@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use WC_Shortcode_Checkout;
+use WC_Frontend_Scripts;
 
 /**
  * Classic Single Product class
@@ -47,10 +48,17 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	public function enqueue_block_assets() {
 		// Ensures frontend styles for blocks exist in the site editor iframe.
 		if ( class_exists( 'WC_Frontend_Scripts' ) && is_admin() ) {
-			$frontend_scripts = new \WC_Frontend_Scripts();
+			$frontend_scripts = new WC_Frontend_Scripts();
 			$styles           = $frontend_scripts::get_styles();
+
 			foreach ( $styles as $handle => $style ) {
-				wp_enqueue_style( $handle, $style['src'], $style['deps'], $style['version'], $style['media'] );
+				wp_enqueue_style(
+					$handle,
+					set_url_scheme( $style['src'] ),
+					$style['deps'],
+					$style['version'],
+					$style['media']
+				);
 			}
 		}
 	}
@@ -75,7 +83,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5328#issuecomment-989013447
 		 */
 		if ( class_exists( 'WC_Frontend_Scripts' ) ) {
-			$frontend_scripts = new \WC_Frontend_Scripts();
+			$frontend_scripts = new WC_Frontend_Scripts();
 			$frontend_scripts::load_scripts();
 		}
 
