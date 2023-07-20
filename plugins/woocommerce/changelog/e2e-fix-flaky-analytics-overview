@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix flaky E2E tests in analytics-overview.spec.js.
