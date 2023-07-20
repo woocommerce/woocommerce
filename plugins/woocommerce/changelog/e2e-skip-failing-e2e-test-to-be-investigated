@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-
-Skip failing e2e test preventing PRs being merged. GH fails but local works
-

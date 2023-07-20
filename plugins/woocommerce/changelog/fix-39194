@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-When displaying partial consumer keys in the REST API settings, replace ellipses with asterisks.

@@ -666,7 +666,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$orders[] = $order;
 		}
 
+		$this->assertEquals( 15, count( WC_Helper_Queue::get_all_pending() ) );
+
 		WC_Helper_Queue::run_all_pending();
+
+		$this->assertEquals( 0, count( WC_Helper_Queue::get_all_pending() ) );
 
 		$data_store = new OrdersStatsDataStore();
 
