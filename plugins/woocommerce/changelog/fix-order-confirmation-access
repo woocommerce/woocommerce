@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Adds a grace period during which email verification will not be needed before the order confirmation (or payment) page is rendered.
