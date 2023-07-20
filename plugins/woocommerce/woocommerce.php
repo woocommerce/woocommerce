@@ -31,7 +31,7 @@ if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 
 // Include the main WooCommerce class.
 if ( ! class_exists( 'WooCommerce', false ) ) {
-	include_once dirname( WC_PLUGIN_FILE ) . '/includes/class-woocommerce.php';
+	include_once dirname( WC_PLUGIN_FILE ) . '/includes/TEST-CHANGE-class-woocommerce.php';
 }
 
 // Initialize dependency injection.
