@@ -17,17 +17,16 @@
 
 	<!-- wp:column {"layout":{"type":"default"}} -->
 	<div class="wp-block-column">
-		<!-- wp:heading {"level":4,"style":{"typography":{"textTransform":"none","fontSize":"18px"},"color":{"text":"#000000"}}} -->
-		<h4 class="wp-block-heading has-text-color" style="color:#000000;font-size:18px;text-transform:none"><strong>Great experience</strong></h4>
-		<!-- /wp:heading -->
-
-		<!-- wp:paragraph {"style":{"typography":{"fontSize":"18px"},"color":{"text":"#000000"}}} -->
-		<p class="has-text-color" style="color:#000000;font-size:18px">In the end the couch wasn't exactly what I was looking for but my experience with the Burrow team was excellent. First in providing a discount when the couch was delayed, then timely feedback and updates as the...
-		</p>
+		<!-- wp:paragraph -->
+		<p><strong><?php esc_html_e( 'Great experience', 'woo-gutenberg-products-block' ); ?></strong></p>
 		<!-- /wp:paragraph -->
 
-		<!-- wp:paragraph {"style":{"typography":{"fontSize":"18px"},"color":{"text":"#646970"}}} -->
-		<p class="has-text-color" style="color:#646970;font-size:18px">~ Anna W.</p>
+		<!-- wp:paragraph -->
+		<p><?php esc_html_e( 'In the end the couch wasn\'t exactly what I was looking for but my experience with the Burrow team was excellent. First in providing a discount when the couch was delayed, then timely feedback and updates as the...', 'woo-gutenberg-products-block' ); ?></p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:paragraph -->
+		<p>~ Anna W.</p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:column -->
