@@ -1,21 +1,5 @@
 <?php
 
-// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
-
-if ( ! class_exists( 'CurrentScreenMock' ) ) {
-	/**
-	 * Class CurrentScreenMock
-	 */
-	class CurrentScreenMock {
-		/**
-		 * CustomerEffortScoreTracks only works in wp-admin, so let's fake it.
-		 */
-		public function in_admin() {
-			return true;
-		}
-	}
-}
-
 /**
  * Class WC_Orders_Tracking_Test.
  */
