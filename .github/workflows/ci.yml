@@ -28,11 +28,20 @@ jobs:
             matrix:
                 php: ['7.4', '8.0']
                 wp: ['latest']
+                unittests: ['shard1', 'shard2']
                 include:
                     - wp: nightly
                       php: '7.4'
+                      unittests: 'shard1'
+                    - wp: nightly
+                      php: '7.4'
+                      unittests: 'shard2'
                     - wp: '6.1'
                       php: 7.4
+                      unittests: 'shard1'
+                    - wp: '6.1'
+                      php: 7.4
+                      unittests: 'shard2'
         services:
             database:
                 image: mysql:5.6
@@ -78,4 +87,4 @@ jobs:
               env:
                 WP_ENV_CORE: ${{ steps.parseMatrix.outputs.wpVersion }}
                 WP_ENV_PHP_VERSION: ${{ matrix.php }}
-              run: pnpm --filter=woocommerce test:unit:env
+              run: pnpm --filter=woocommerce test:unit:env --testsuite ${{ matrix.unittests }}
