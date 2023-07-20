@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Analytics API: A new filter_empty parameter that allows to remove from result customers with given empty fields

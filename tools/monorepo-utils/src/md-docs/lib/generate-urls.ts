@@ -4,7 +4,7 @@
 import path from 'path';
 
 /**
- *	Generates a file url relative to the root directory provided.
+ * Generates a file url relative to the root directory provided.
  *
  * @param baseUrl          The base url to use for the file url.
  * @param rootDirectory    The root directory where the file resides.

@@ -485,10 +485,21 @@ window.wpNavMenuClassChange = function ( page, url ) {
 		url === '/'
 			? 'admin.php?page=wc-admin'
 			: 'admin.php?page=wc-admin&path=' + encodeURIComponent( url );
-	const currentItemsSelector =
+	let currentItemsSelector =
 		url === '/'
 			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
 			: `li > a[href*="${ pageUrl }"]`;
+
+	const parentPath = page.navArgs?.parentPath;
+	if ( parentPath ) {
+		const parentPageUrl =
+			parentPath === '/'
+				? 'admin.php?page=wc-admin'
+				: 'admin.php?page=wc-admin&path=' +
+				  encodeURIComponent( parentPath );
+		currentItemsSelector += `, li > a[href*="${ parentPageUrl }"]`;
+	}
+
 	const currentItems = wpNavMenu.querySelectorAll( currentItemsSelector );
 
 	Array.from( currentItems ).forEach( function ( item ) {

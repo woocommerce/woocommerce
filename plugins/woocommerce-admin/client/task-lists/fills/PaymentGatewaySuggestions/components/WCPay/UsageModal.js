@@ -27,12 +27,12 @@ export const UsageModal = () => {
 	};
 
 	const title = __(
-		'Help us build a better WooCommerce Payments experience',
+		'Help us build a better WooPayments experience',
 		'woocommerce'
 	);
 	const trackingMessage = interpolateComponents( {
 		mixedString: __(
-			'By agreeing to share non-sensitive {{link}}usage data{{/link}}, you’ll help us improve features and optimize the WooCommerce Payments experience. You can opt out at any time.',
+			'By agreeing to share non-sensitive {{link}}usage data{{/link}}, you’ll help us improve features and optimize the WooPayments experience. You can opt out at any time.',
 			'woocommerce'
 		),
 		components: {
