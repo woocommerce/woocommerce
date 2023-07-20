@@ -1,0 +1,13 @@
+.woocommerce-marketplace__tabs {
+	.woocommerce-marketplace__tab-button {
+		border-bottom: 3.5px solid transparent;
+
+		&:focus:not(:disabled) {
+			box-shadow: none;
+		}
+
+		&.is-active {
+			border-color: var(--wp-admin-theme-color);
+		}
+	}
+}
