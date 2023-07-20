@@ -91,7 +91,7 @@ const program = new Command( 'changefile' )
 				`Temporary clone of '${ headOwner }/${ name }' created at ${ tmpRepoPath }`
 			);
 
-			// If a pull request is coming from a contributor's fork's trunk branch, we need to checkout the remote branch.
+			// If a pull request is coming from a contributor's fork's trunk branch, we don't nee to checkout the remote branch because its already available as part of the clone.
 			if ( branch !== 'trunk' ) {
 				Logger.notice( `Checking out remote branch ${ branch }` );
 				await checkoutRemoteBranch( tmpRepoPath, branch );
