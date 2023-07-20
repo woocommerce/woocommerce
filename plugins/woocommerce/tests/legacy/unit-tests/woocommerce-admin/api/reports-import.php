@@ -90,7 +90,10 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 	public function test_import_params() {
 		global $wpdb;
 		wp_set_current_user( $this->user );
-		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		$woocommerce_analytics_disable_action_scheduling_true = function() {
+			return true;
+		};
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', $woocommerce_analytics_disable_action_scheduling_true );
 		WC_Helper_Queue::cancel_all_pending();
 		$this->assertEquals( 0, count( WC_Helper_Queue::get_all_pending() ) );
 
@@ -181,6 +184,8 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 1, $reports );
 		$this->assertEquals( 'Steve User', $reports[0]['name'] );
+
+		remove_filter( 'woocommerce_analytics_disable_action_scheduling', $woocommerce_analytics_disable_action_scheduling_true, 99 );
 
 		$request = new WP_REST_Request( 'GET', '/wc-analytics/reports/orders' );
 		$request->set_query_params( array( 'per_page' => 5 ) );
