@@ -90,6 +90,8 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 	public function test_import_params() {
 		global $wpdb;
 		wp_set_current_user( $this->user );
+		WC_Helper_Queue::cancel_all_pending();
+		$this->assertEquals( 0, count( WC_Helper_Queue::get_all_pending() ) );
 
 		// Populate all of the data.
 		$product = new WC_Product_Simple();
@@ -107,8 +109,10 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$order_2->save();
 
 		// Delete order stats so we can test import API.
+		$this->assertEquals( 2, count( WC_Helper_Queue::get_all_pending() ) );
 		WC_Helper_Queue::cancel_all_pending();
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_stats" );
+		$this->assertEquals( 0, count( WC_Helper_Queue::get_all_pending() ) );
 
 		// Use the days param to only process orders in the last day.
 		$request = new WP_REST_Request( 'POST', $this->endpoint );
@@ -119,7 +123,9 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
+		$this->assertEquals( 2, count( WC_Helper_Queue::get_all_pending() ) );
 		WC_Helper_Queue::run_all_pending();
+		$this->assertEquals( 0, count( WC_Helper_Queue::get_all_pending() ) );
 
 		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
 		$response = $this->server->dispatch( $request );
