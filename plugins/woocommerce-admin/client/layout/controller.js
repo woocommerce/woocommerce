@@ -186,10 +186,10 @@ export const getPages = () => {
 			layout: {
 				header: false,
 			},
-			path: '/marketplace',
+			path: '/extensions',
 			breadcrumbs: [
-				[ '/marketplace', __( 'Marketplace', 'woocommerce' ) ],
-				__( 'Marketplace', 'woocommerce' ),
+				[ '/extensions', __( 'Extensions', 'woocommerce' ) ],
+				__( 'Extensions', 'woocommerce' ),
 			],
 			wpOpenMenu: 'toplevel_page_woocommerce',
 			capability: 'manage_woocommerce',

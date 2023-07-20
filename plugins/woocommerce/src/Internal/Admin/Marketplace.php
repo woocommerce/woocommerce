@@ -16,7 +16,7 @@ class Marketplace {
 	 * Class initialization, to be executed when the class is resolved by the container.
 	 */
 	final public function init() {
-		add_action( 'admin_menu', array( $this, 'register_pages' ), 45 );
+		add_action( 'admin_menu', array( $this, 'register_pages' ), 70 );
 	}
 
 	/**
@@ -39,8 +39,8 @@ class Marketplace {
 			array(
 				'id'     => 'woocommerce-marketplace',
 				'parent' => 'woocommerce',
-				'title'  => __( 'Marketplace', 'woocommerce' ),
-				'path'   => '/marketplace',
+				'title'  => __( 'Extensions', 'woocommerce' ),
+				'path'   => '/extensions',
 			),
 		);
 
